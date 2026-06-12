@@ -42,6 +42,20 @@ describe("toPascalCase", () => {
 		expect(result).toBe("AlreadySplit");
 	});
 
+	it("should return an empty string when separators contain no words", () => {
+		expect.assertions(1);
+
+		// Arrange
+		const separator = String.fromCodePoint(0);
+		const value = separator.repeat(2);
+
+		// Act
+		const result = toPascalCase(value);
+
+		// Assert
+		expect(result).toBe("");
+	});
+
 	it("should separate words that start with digits", () => {
 		expect.assertions(1);
 
