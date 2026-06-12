@@ -78,6 +78,26 @@ describe("no-constant-condition-with-break", () => {
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
+				code: "if ((value, true)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (``) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (void value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (false && value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (true || value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
 				code: "if ([]) { doThing(); }",
 				errors: [{ messageId: "unexpected" }],
 			},
@@ -151,6 +171,10 @@ describe("no-constant-condition-with-break", () => {
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{
+				code: "for (task.wait(); true; index += 1) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
 				code: "do { doThing(); } while (task.wait());",
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
@@ -160,6 +184,14 @@ describe("no-constant-condition-with-break", () => {
 			},
 			{
 				code: "for (let index = 0; index < task.wait(); index += 1) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: "for (let index = 0; true; index += task.wait()) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: "for (const key in task.wait()) { doThing(); }",
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{
@@ -307,6 +339,18 @@ while (true) {
 			{
 				code: `
 while (true) {
+    if (done) {
+        doThing();
+    } else {
+        task.wait();
+    }
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
     const values = [first, ...rest];
     target = first;
     const binary = first + second;
@@ -388,6 +432,18 @@ while (true) {
         recover();
     } finally {
         cleanup();
+    }
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    try {
+        doThing();
+    } catch (error) {
+        task.wait();
     }
 }
 `,
