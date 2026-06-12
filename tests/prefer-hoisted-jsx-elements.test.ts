@@ -97,6 +97,13 @@ function View() {
 			},
 			{
 				code: `
+function View() {
+	return <svg:path />;
+}
+`,
+			},
+			{
+				code: `
 function View({ visible }: { readonly visible: boolean }) {
 	return <layoutframe visible={visible} />;
 }

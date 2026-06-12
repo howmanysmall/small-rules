@@ -31,6 +31,37 @@ const value = useMemo(() => {
 				code: `
 import { useMemo } from "react";
 
+const count = 5;
+
+const value = useMemo(() => count % 2, [count]);
+`,
+				errors: [{ messageId: "simpleMemo" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const width = 5;
+const height = 4;
+
+const value = useMemo(() => width * height, [width, height]);
+`,
+				errors: [{ messageId: "simpleMemo" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const base = 2;
+
+const value = useMemo(() => base ** 3, [base]);
+`,
+				errors: [{ messageId: "simpleMemo" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
 const theme = { colors: { primary: "blue" } };
 
 const value = useMemo(() => theme.colors.primary, []);
@@ -93,6 +124,13 @@ import { useMemo } from "react";
 const count = 1;
 
 const value = useMemo(() => count === 1, [count]);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const value = useMemo(() => ({ enabled: true }), []);
 `,
 			},
 			{
