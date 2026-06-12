@@ -96,6 +96,7 @@ describe("no-useless-default comparison helpers", () => {
 			{
 				invalid: [
 					{ code: "check(math.huge);", errors: [{ messageId: "match" }] },
+					{ code: "check(+math.huge);", errors: [{ messageId: "match" }] },
 					{ code: "check(-math.huge);", errors: [{ messageId: "mismatch" }] },
 				],
 				valid: [],
@@ -109,6 +110,7 @@ describe("no-useless-default comparison helpers", () => {
 			{
 				invalid: [
 					{ code: "check(-math.huge);", errors: [{ messageId: "match" }] },
+					{ code: "check(-math['huge']);", errors: [{ messageId: "mismatch" }] },
 					{ code: "check(math.huge);", errors: [{ messageId: "mismatch" }] },
 				],
 				valid: [],
@@ -237,6 +239,7 @@ describe("no-useless-default comparison helpers", () => {
 			{
 				invalid: [
 					{ code: "check(new CFrame());", errors: [{ messageId: "match" }] },
+					{ code: "check(new CFrame(0, 0, 0));", errors: [{ messageId: "match" }] },
 					{ code: "check(new CFrame(1, 0, 0));", errors: [{ messageId: "mismatch" }] },
 					{ code: "check(new CFrame(0, value, 0));", errors: [{ messageId: "mismatch" }] },
 					{ code: "check(new Vector3());", errors: [{ messageId: "mismatch" }] },
@@ -340,10 +343,32 @@ describe("no-useless-default JSX detection", () => {
 				],
 				output: JSON.parse("null"),
 			},
+			{
+				code: "const view = <frame BackgroundTransparency={0} /* keep */ />;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: "const view = <frame\n\tBackgroundTransparency={0}\n\tSize={size}\n/>;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: "const view = <frame\n\tSize={size}\n/>;",
+			},
 		],
 		valid: [
 			{ code: 'const view = <uiaspectratioconstraint key="my-key" />;' },
 			{ code: "const view = <uiaspectratioconstraint AspectRatio={2} />;" },
+			{ code: "const view = <uiaspectratioconstraint AspectRatio />;" },
+			{ code: "const view = <uiaspectratioconstraint AspectRatio={} />;" },
 			{ code: 'const view = <frame Name="MyFrame" />;' },
 			{ code: "const view = <frame Parent={someParent} />;" },
 			{ code: "const view = <frame BackgroundTransparency={getValue()} />;" },
@@ -462,8 +487,12 @@ describe("no-useless-default imperative detection", () => {
 			{ code: 'const c = new Instance("UISizeConstraint"); register(other, c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register([c]); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register(...args, c); c.MinSize = new Vector2();' },
+			{ code: 'const c = new Instance("UISizeConstraint"); register(other); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); cache.values.push(c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); let alias; alias = c; c.MinSize = new Vector2();' },
+			{
+				code: 'const c = new Instance("UISizeConstraint"); let alias; alias = other; c.MinSize = new Vector2();',
+			},
 			{
 				code: 'function createConstraint() { const c = new Instance("UISizeConstraint"); return c; c.MinSize = new Vector2(); }',
 			},

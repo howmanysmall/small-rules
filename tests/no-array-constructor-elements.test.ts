@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/no-array-constructor-elements";
 
-import { tsx } from "./rule-testers";
+import { ts, tsx } from "./rule-testers";
 
 describe("no-array-constructor-elements", () => {
 	// @ts-expect-error -- Shut up.
@@ -199,6 +199,16 @@ const array = ["a", "b"];
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
 			},
+			{
+				code: "consume(new Array());",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+			{
+				code: "const value = new Array() as unknown;",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
 		],
 		valid: [
 			"const value = new Set();",
@@ -276,5 +286,17 @@ doSomething(array);
 array.push("b");
 `,
 		],
+	});
+
+	// @ts-expect-error -- Shut up.
+	ts.run("no-array-constructor-elements-ts", rule, {
+		invalid: [
+			{
+				code: "const value = <unknown>new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+		],
+		valid: ["const value = <Array<string>>new Array();"],
 	});
 });

@@ -656,6 +656,200 @@ function test() {
 				],
 			},
 
+			// Duplicate closer candidates are de-duplicated in expected-closer messages
+			{
+				code: `
+function test() {
+    cache.open();
+    ui.close();
+}
+`,
+				errors: [
+					{
+						data: { closer: "cache.close' or 'cache.abort", opener: "cache.open", paths: "function exit" },
+						messageId: "unpairedOpener",
+					},
+					{
+						data: { closer: "ui.close", expected: "cache.close' or 'cache.abort" },
+						messageId: "unexpectedCloser",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								alternatives: ["cache.abort"],
+								closer: "cache.close",
+								opener: "cache.open",
+								requireSync: false,
+							},
+							{
+								alternatives: ["cache.close"],
+								closer: "cache.abort",
+								opener: "cache.open",
+								requireSync: false,
+							},
+							{
+								closer: "ui.close",
+								opener: "ui.open",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
+			// Unpaired openers report all configured closer names
+			{
+				code: `
+function test() {
+    lock.acquire();
+}
+`,
+				errors: [
+					{
+						data: { closer: "lock.release' or 'lock.free", opener: "lock.acquire", paths: "function exit" },
+						messageId: "unpairedOpener",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								closer: ["lock.release", "lock.free"],
+								opener: "lock.acquire",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
+			// Multiple closer labels are shown for async violations
+			{
+				code: `
+async function test() {
+    lock.acquire();
+    await acquirePermit();
+    lock.release();
+}
+`,
+				errors: [
+					{
+						data: { asyncType: "await", closer: "lock.release' or 'lock.free", opener: "lock.acquire" },
+						messageId: "asyncViolation",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								closer: ["lock.release", "lock.free"],
+								opener: "lock.acquire",
+								requireSync: true,
+							},
+						],
+					},
+				],
+			},
+
+			// Multiple closer labels are shown when a yielding Roblox call auto-closes profiles
+			{
+				code: `
+function test() {
+    Span.start();
+    task.wait();
+    Span.stop();
+}
+`,
+				errors: [
+					{
+						data: { closer: "Span.stop' or 'Span.abort", yieldingFunction: "task.wait" },
+						messageId: "robloxYieldViolation",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								alternatives: ["Span.abort"],
+								closer: "Span.stop",
+								opener: "Span.start",
+								platform: "roblox",
+								requireSync: true,
+								yieldingFunctions: ["task.wait"],
+							},
+						],
+					},
+				],
+			},
+
+			// Early exits report all configured closer names
+			{
+				code: `
+function test() {
+    lock.acquire();
+    if (failed) return;
+    lock.release();
+}
+`,
+				errors: [
+					{
+						data: {
+							closer: "lock.release' or 'lock.free",
+							opener: "lock.acquire",
+							paths: "return at line 4",
+						},
+						messageId: "unpairedOpener",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								closer: ["lock.release", "lock.free"],
+								opener: "lock.acquire",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
+			// Loop exits report all configured closer names
+			{
+				code: `
+function test(items) {
+    for (const item of items) {
+        lock.acquire();
+        if (item.done) break;
+        lock.release();
+    }
+}
+`,
+				errors: [
+					{
+						data: {
+							closer: "lock.release' or 'lock.free",
+							opener: "lock.acquire",
+							paths: "break at line 5",
+						},
+						messageId: "unpairedOpener",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								closer: ["lock.release", "lock.free"],
+								opener: "lock.acquire",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
 			// Closing an older opener before the top opener is out of order
 			{
 				code: `
@@ -685,6 +879,40 @@ function test() {
 				],
 			},
 
+			// Closing an older opener before the top opener reports the actual still-open pair
+			{
+				code: `
+function test() {
+    outer.begin();
+    inner.begin();
+    outer.end();
+    inner.end();
+}
+`,
+				errors: [
+					{
+						data: { actual: "inner.begin", closer: "outer.end", expected: "outer.begin" },
+						messageId: "wrongOrder",
+					},
+				],
+				options: [
+					{
+						pairs: [
+							{
+								closer: "outer.end",
+								opener: "outer.begin",
+								requireSync: false,
+							},
+							{
+								closer: "inner.end",
+								opener: "inner.begin",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
 			// Complete switch branches must all close an opener that predates the switch
 			{
 				code: `
@@ -700,6 +928,38 @@ function test(kind) {
 }
 `,
 				errors: [{ messageId: "unpairedOpener" }],
+			},
+
+			// Complete if branches must all close every opener that predates the branch
+			{
+				code: `
+function test(kind) {
+    outer.begin();
+    inner.begin();
+    if (kind === "inner") {
+        inner.end();
+    } else {
+        outer.end();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }, { messageId: "wrongOrder" }],
+				options: [
+					{
+						pairs: [
+							{
+								closer: "outer.end",
+								opener: "outer.begin",
+								requireSync: false,
+							},
+							{
+								closer: "inner.end",
+								opener: "inner.begin",
+								requireSync: false,
+							},
+						],
+					},
+				],
 			},
 		],
 		valid: [
@@ -975,6 +1235,64 @@ function test() {
     return 42;
 }
 `,
+			},
+
+			// Member calls with non-identifier objects or properties are ignored
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    getProfiler().profilebegin("nested");
+    debug[getEndName()]();
+    debug.profileend();
+}
+`,
+			},
+
+			// Await is allowed while a non-sync pair is open
+			{
+				code: `
+async function test() {
+    db.transaction();
+    await db.users.insert({ name: "Ada" });
+    db.commit();
+}
+`,
+				options: [
+					{
+						pairs: [
+							{
+								closer: "db.commit",
+								opener: "db.transaction",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
+			// For-await loops are allowed while a non-sync pair is open
+			{
+				code: `
+async function test(items) {
+    db.transaction();
+    for await (const item of items) {
+        await process(item);
+    }
+    db.commit();
+}
+`,
+				options: [
+					{
+						pairs: [
+							{
+								closer: "db.commit",
+								opener: "db.transaction",
+								requireSync: false,
+							},
+						],
+					},
+				],
 			},
 
 			// Custom pair configuration
