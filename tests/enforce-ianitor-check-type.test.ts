@@ -107,6 +107,55 @@ interface MethodValidator {
 				],
 				options: [{ baseThreshold: 1, interfacePenalty: 1 }],
 			},
+			{
+				code: `
+const isItems = Ianitor.array(Ianitor.string);
+const isPart = Ianitor.instanceIsA("Part");
+const isBuffer = Ianitor.instanceOf(buffer);
+const isCombined = Ianitor.intersection(Ianitor.string, Ianitor.literal("ready"));
+const isMap = Ianitor.map(Ianitor.string, Ianitor.number);
+	`,
+				errors: [
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+				],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+type PrimitiveValidator = bigint;
+type TupleValidator = [string, number?, ...boolean[]];
+type UnionValidator = "ready" | "pending" | "failed";
+	`,
+				errors: [
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+				],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+type DeepValidator = {
+	first: {
+		second: {
+			third: {
+				fourth: Array<{ id: string; value: number }>;
+			};
+		};
+	};
+};
+	`,
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1, errorThreshold: 1, performanceMode: false }],
+			},
 		],
 		valid: [
 			{ code: "type Simple = string;" },
@@ -170,7 +219,28 @@ const isSpinOptions = Ianitor.strictInterface({
 	random: Ianitor.optional(Ianitor.Random),
 });
 type SpinOptions = Readonly<Ianitor.Static<typeof isSpinOptions>>;
-`,
+	`,
+			},
+			{
+				code: `
+const schema = { name: Ianitor.string };
+const isUser = Ianitor.interface(schema);
+const isDynamic = Ianitor["string"]();
+	`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+type NotIanitorStatic = Library.Static<typeof isUser>;
+type WrongStaticMember = Ianitor.Shape<typeof isUser>;
+type MissingStaticArgument = Ianitor.Static;
+type NonQueryStaticArgument = Ianitor.Static<string>;
+type NamespacedStaticArgument = Ianitor.Static<typeof Validators.isUser>;
+type BareReadonly = Readonly;
+	`,
+				options: [{ baseThreshold: 100 }],
 			},
 		],
 	});

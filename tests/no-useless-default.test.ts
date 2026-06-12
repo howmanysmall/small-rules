@@ -45,6 +45,7 @@ describe("no-useless-default comparison helpers", () => {
 				{ code: "check(0);", errors: [{ messageId: "match" }] },
 				{ code: "check(+0);", errors: [{ messageId: "match" }] },
 				{ code: "check(1);", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(-1);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(!0);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(+value);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(math.huge);", errors: [{ messageId: "mismatch" }] },
@@ -121,6 +122,7 @@ describe("no-useless-default comparison helpers", () => {
 			invalid: [
 				{ code: "check(new Vector2());", errors: [{ messageId: "match" }] },
 				{ code: "check(new Vector2(0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector2(0, ...rest));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(Vector2.zero);", errors: [{ messageId: "match" }] },
 				{ code: "check(Vector2.one);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Vector2(0, 1));", errors: [{ messageId: "mismatch" }] },
@@ -149,6 +151,7 @@ describe("no-useless-default comparison helpers", () => {
 			invalid: [
 				{ code: "check(new UDim2());", errors: [{ messageId: "match" }] },
 				{ code: "check(new UDim2(0, 0, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new UDim2(0, ...rest, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new UDim2(foo, 0, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(UDim2.fromScale(0, 0));", errors: [{ messageId: "match" }] },
 				{ code: "check(UDim2.fromScale(value, 0));", errors: [{ messageId: "mismatch" }] },
@@ -391,6 +394,26 @@ describe("no-useless-default imperative detection", () => {
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(); /* keep */ c.Name = "x";',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); /* keep */ c.MinSize = new Vector2();',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint") /* keep */\nc.MinSize = new Vector2();',
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },

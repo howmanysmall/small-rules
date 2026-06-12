@@ -259,6 +259,27 @@ function EnemyList(enemies) {
     return useMemo(renderEnemy, [enemies]);
 }
 `,
+				errors: 2,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Array.from named fragment callback without key
+			{
+				code: `
+const renderEnemy = (enemy) => (
+    <>
+        <billboardgui key={enemy.id} />
+    </>
+);
+
+function EnemyList(enemies) {
+    return Array.from(enemies, renderEnemy);
+}
+`,
 				errors: 1,
 				languageOptions: {
 					parser,
@@ -287,6 +308,27 @@ function FromList(iterable) {
 				code: `
 function CallMapped(items) {
     return Array.prototype.map.call(items, (item) => <span />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Array.prototype.map.call named fragment callback without key
+			{
+				code: `
+const renderEnemy = (enemy) => (
+    <>
+        <billboardgui key={enemy.id} />
+    </>
+);
+
+function EnemyList(enemies) {
+    return Array.prototype.map.call(enemies, renderEnemy);
 }
 `,
 				errors: 1,
@@ -796,6 +838,36 @@ function EnemyList(enemies) {
 					},
 				},
 			},
+			// Function-valued object property return is not an iteration callback
+			{
+				code: `
+const renderers = {
+    renderEnemy: (enemy) => <billboardgui />,
+};
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Direct callback invocation is not an iteration callback
+			{
+				code: `
+const renderEnemy = (enemy) => <billboardgui />;
+
+function EnemyList(enemy) {
+    return renderEnemy(enemy);
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Array.from callback with keyed element
 			{
 				code: `
@@ -1005,6 +1077,31 @@ function Good10() {
 function GoodHolderChildren() {
     return <Frame holderChildren={<Child key="child" />} />;
 }
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// JSX assigned through a type assertion
+			{
+				code: `
+const cached = (<Child /> as React.ReactNode);
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// JSX assigned after declaration
+			{
+				code: `
+let cached;
+cached = <Child />;
 `,
 				languageOptions: {
 					parser,

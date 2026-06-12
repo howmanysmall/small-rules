@@ -139,11 +139,8 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 		case "ObjectExpression":
 			return hasOnlyRelocatableObjectProperties(node, staticGlobalFactories);
 
-		case "SequenceExpression": {
-			return (
-				node.expressions.length > 0 && hasOnlyRelocatableExpressions(node.expressions, staticGlobalFactories)
-			);
-		}
+		case "SequenceExpression":
+			return false;
 
 		case "SpreadElement":
 			return false;
@@ -401,9 +398,15 @@ const noUselessConstants = defineRule({
 				const candidate = getUselessConstantCandidate(scope, scopeVariable);
 				if (candidate === undefined) continue;
 
+				const isAdjacent = areAdjacentStatements(candidate.declarationNode, candidate.enclosingDeclaration);
+				const isSafeStaticInitializer = isAutoInlineSafeInitializer(sourceCode, candidate.initializer);
+				const hasSafeInlineSyntax = hasOnlyRelocatableCalls(
+					candidate.initializer,
+					STATIC_OPTIONS.staticGlobalFactories,
+				);
 				const canFix =
-					(areAdjacentStatements(candidate.declarationNode, candidate.enclosingDeclaration) ||
-						isAutoInlineSafeInitializer(sourceCode, candidate.initializer)) &&
+					(isAdjacent || isSafeStaticInitializer) &&
+					hasSafeInlineSyntax &&
 					!hasAttachedComments(candidate.declarationNode);
 
 				if (!canFix) {

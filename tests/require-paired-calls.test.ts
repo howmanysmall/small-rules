@@ -623,6 +623,84 @@ function test() {
 					},
 				],
 			},
+
+			// Repeated wrong closers reuse the expected-closer cache
+			{
+				code: `
+function test() {
+    db.transaction();
+    Iris.End();
+    Iris.End();
+}
+`,
+				errors: [
+					{ messageId: "unpairedOpener" },
+					{ data: { closer: "Iris.End", expected: "db.commit" }, messageId: "unexpectedCloser" },
+					{ data: { closer: "Iris.End", expected: "db.commit" }, messageId: "unexpectedCloser" },
+				],
+				options: [
+					{
+						pairs: [
+							{
+								closer: "db.commit",
+								opener: "db.transaction",
+								requireSync: false,
+							},
+							{
+								closer: "Iris.End",
+								opener: "Iris.Window",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
+			// Closing an older opener before the top opener is out of order
+			{
+				code: `
+function test() {
+    db.transaction();
+    lock.acquire();
+    db.commit();
+    lock.release();
+}
+`,
+				errors: [{ messageId: "wrongOrder" }],
+				options: [
+					{
+						pairs: [
+							{
+								closer: "db.commit",
+								opener: "db.transaction",
+								requireSync: false,
+							},
+							{
+								closer: "lock.release",
+								opener: "lock.acquire",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+
+			// Complete switch branches must all close an opener that predates the switch
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("switch");
+    switch (kind) {
+        case "ready":
+            debug.profileend();
+            break;
+        default:
+            doWork();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
 		],
 		valid: [
 			// Basic pairing - valid
@@ -985,6 +1063,57 @@ function test() {
     debug[end]();
 }
 `,
+			},
+
+			// Literal computed members are also ignored because static names are required
+			{
+				code: `
+function test() {
+    debug["profilebegin"]("task");
+    debug["profileend"]();
+}
+`,
+			},
+
+			// Labeled breaks to non-loop blocks should not be treated as loop exits
+			{
+				code: `
+function test(ready) {
+    debug.profilebegin("task");
+    done: {
+        if (ready) break done;
+        doWork();
+    }
+    debug.profileend();
+}
+`,
+			},
+
+			// Conditional closers can be intentionally optional in try/catch branches
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        debug.profileend();
+    } catch (error) {
+        recover(error);
+    }
+}
+`,
+				options: [
+					{
+						allowConditionalClosers: true,
+						pairs: [
+							{
+								closer: "debug.profileend",
+								opener: "debug.profilebegin",
+								platform: "roblox",
+								requireSync: true,
+							},
+						],
+					},
+				],
 			},
 		],
 	});

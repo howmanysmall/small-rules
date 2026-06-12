@@ -136,9 +136,8 @@ function getCallbackUsageFromCallExpression(
 
 		if (
 			name === "from" &&
-			callee.object.type === "MemberExpression" &&
-			callee.object.object.type === "Identifier" &&
-			callee.object.object.name === "Array" &&
+			callee.object.type === "Identifier" &&
+			callee.object.name === "Array" &&
 			callExpression.arguments.length >= 2
 		) {
 			return { ...usage, iteration: true };
@@ -147,9 +146,8 @@ function getCallbackUsageFromCallExpression(
 		if (
 			name === "call" &&
 			callee.object.type === "MemberExpression" &&
-			callee.object.object.type === "MemberExpression" &&
-			callee.object.object.property.type === "Identifier" &&
-			iterationMethods.has(callee.object.object.property.name)
+			callee.object.property.type === "Identifier" &&
+			iterationMethods.has(callee.object.property.name)
 		) {
 			return { ...usage, iteration: true };
 		}
