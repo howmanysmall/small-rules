@@ -948,6 +948,44 @@ function test() {
 					},
 				],
 			},
+			// Conditional closers can be intentionally optional
+			{
+				code: `
+function test() {
+    debug.profilebegin("maybe");
+    if (condition) {
+        debug.profileend();
+    } else {
+        doWork();
+    }
+}
+`,
+				options: [
+					{
+						allowConditionalClosers: true,
+						pairs: [
+							{
+								closer: "debug.profileend",
+								opener: "debug.profilebegin",
+								platform: "roblox",
+								requireSync: true,
+							},
+						],
+					},
+				],
+			},
+
+			// Computed member calls are ignored because static names are required
+			{
+				code: `
+function test() {
+    const begin = "profilebegin";
+    const end = "profileend";
+    debug[begin]("task");
+    debug[end]();
+}
+`,
+			},
 		],
 	});
 });
