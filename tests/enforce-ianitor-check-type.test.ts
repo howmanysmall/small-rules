@@ -22,6 +22,23 @@ const isUser = Ianitor.strictInterface({
 			},
 			{
 				code: `
+const isMaybeName = Ianitor.optional(Ianitor.string);
+const isFlag = Ianitor.boolean();
+const isUnion = Ianitor.union(Ianitor.string, Ianitor.number);
+const isRecord = Ianitor.record(Ianitor.string, Ianitor.number);
+const isCustom = Ianitor.literal("ready");
+`,
+				errors: [
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+				],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
 const validator = Ianitor.string;
 
 type ComplexAlias = {
