@@ -54,7 +54,7 @@ function isSafeName(name: string, scopes: ReadonlyArray<Scope>): boolean {
 export function getAvailableVariableName(
 	name: string,
 	scopes: ReadonlyArray<Scope>,
-	isSafe: IsSafe = () => true,
+	isSafe: IsSafe,
 ): string | undefined {
 	let candidate = name;
 	if (!isValidIdentifier(candidate)) {

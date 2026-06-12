@@ -20,6 +20,58 @@ const isUser = Ianitor.strictInterface({
 `,
 				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type ComplexAlias = {
+	id: string;
+	values: Array<number>;
+	metadata: {
+		label: string;
+		flag: boolean;
+	};
+};
+`,
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+interface ComplexService extends BaseService {
+	config: {
+		mode: string;
+		values: Array<number>;
+	};
+}
+`,
+				errors: [{ messageId: "complexInterfaceNeedsCheck" }],
+				options: [{ interfacePenalty: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+type ConditionalValidator<T> = T extends string ? string[] : number[];
+type FunctionValidator = (value: string[]) => number[];
+type MappedValidator<T extends string> = { [Key in T]: number[] };
+type IntersectionValidator = { name: string } & { age: number };
+
+interface MethodValidator {
+	getName(value: string[]): number[];
+}
+`,
+				errors: [
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "missingIanitorCheckType" },
+					{ messageId: "complexInterfaceNeedsCheck" },
+				],
+				options: [{ baseThreshold: 1, interfacePenalty: 1 }],
+			},
 		],
 		valid: [
 			{ code: "type Simple = string;" },
@@ -39,34 +91,6 @@ interface ChainableGetter<U extends Instance> {
 				options: [{ baseThreshold: 1, interfacePenalty: 1 }],
 			},
 			{ code: "const validator: Ianitor.Check<User> = Ianitor.interface({ name: Ianitor.string });" },
-			{
-				code: `
-const validator = Ianitor.string;
-
-type ComplexAlias = {
-	id: string;
-	values: Array<number>;
-	metadata: {
-		label: string;
-		flag: boolean;
-	};
-};
-`,
-				options: [{ baseThreshold: 1 }],
-			},
-			{
-				code: `
-const validator = Ianitor.string;
-
-interface ComplexService extends BaseService {
-	config: {
-		mode: string;
-		values: Array<number>;
-	};
-}
-`,
-				options: [{ interfacePenalty: 1 }],
-			},
 			{
 				code: "const validator = Ianitor.strictInterface({ name: Ianitor.string });",
 				options: [{ baseThreshold: 20 }],

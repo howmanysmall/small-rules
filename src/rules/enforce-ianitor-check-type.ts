@@ -194,7 +194,7 @@ function addNestedTypeAnnotationScores(
 function getDepthMultiplier(depth: number, cache: Map<number, number>): number {
 	const cached = cache.get(depth);
 	if (cached !== undefined) return cached;
-	const computed = Math.log2(depth + 1);
+	const computed = Math.max(1, Math.log2(depth + 1));
 	cache.set(depth, computed);
 	return computed;
 }
