@@ -179,7 +179,12 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 		return parent.id.name;
 	}
 
-	if (!("computed" in parent) && "key" in parent && isNode(parent.key) && parent.key.type === "Identifier") {
+	if (
+		"key" in parent &&
+		!("computed" in parent && parent.computed) &&
+		isNode(parent.key) &&
+		parent.key.type === "Identifier"
+	) {
 		return parent.key.name;
 	}
 

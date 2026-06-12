@@ -284,6 +284,23 @@ function Component() {
 `,
 				errors: [{ messageId: "eventFlag" }],
 			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) {
+            return;
+        }
+        sendForm();
+        setSubmitted(false);
+    }, [submitted]);
+}
+`,
+				errors: [{ messageId: "eventFlag" }],
+			},
 
 			// ========== NEW: NAMED FUNCTION RESOLUTION ==========
 
@@ -310,6 +327,21 @@ function Component(properties) {
     const [count, setCount] = useState(0);
 
     const initEffect = () => {
+        setCount(properties.initialValue);
+    };
+    useEffect(initEffect, [properties.initialValue]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+
+    const initEffect = function syncInitialCount(): void {
         setCount(properties.initialValue);
     };
     useEffect(initEffect, [properties.initialValue]);
@@ -352,6 +384,16 @@ function Component() {
 			// Note: Empty arrow function bodies like `() => {}` may have subtle parsing
 			// Differences. The following tests check for effects with truly empty bodies.
 
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {}, []);
+}
+`,
+				errors: [{ messageId: "emptyEffect" }],
+			},
 			{
 				code: `
 import { useEffect } from "@rbxts/react";
@@ -405,6 +447,71 @@ function Component() {
 }
 `,
 				errors: [{ messageId: "initializeState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [items, setItems] = useState<string[]>([]);
+    useEffect(() => {
+        setItems([properties.item]);
+    }, [properties.item]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [config, setConfig] = useState({});
+    useEffect(() => {
+        setConfig({ value: properties.value });
+    }, [properties.value]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [label, setLabel] = useState("");
+    useEffect(() => {
+        setLabel(\`\${properties.prefix}-\${properties.suffix}\`);
+    }, [properties.prefix, properties.suffix]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [name, setName] = useState("");
+    useEffect(() => {
+        setName(properties.primary?.name);
+    }, [properties.primary]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [status, setStatus] = useState("");
+    useEffect(() => {
+        setStatus(properties.ready ? "ready" : properties.fallback);
+    }, [properties.ready, properties.fallback]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
 			},
 
 			// ========== NEW: resetState ==========
@@ -496,7 +603,6 @@ function Component({ user }) {
 `,
 				errors: [{ messageId: "adjustState" }],
 			},
-
 			// ========== NEW: eventSpecificLogic ==========
 			// Note: This detection is intentionally conservative to avoid false positives
 			// On legitimate synchronization patterns like "fetch data, then process it"
@@ -563,6 +669,20 @@ function Component({ count, analytics, method }) {
         setLocalCount(count);
         analytics[method](count);
     }, [count, analytics, method]);
+}
+`,
+				errors: [{ messageId: "mixedDerivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        calculate(count);
+    }, [count]);
 }
 `,
 				errors: [{ messageId: "mixedDerivedState" }],
@@ -907,6 +1027,22 @@ function Component({ count, onReady }) {
 }
 `,
 			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ items, selected }) {
+    const [selection, setSelection] = useState<string | undefined>(selected);
+    useEffect(() => {
+        if (selection !== undefined) {
+            keepSelection(selection);
+        } else if (items.length > 0) {
+            setSelection(items[0]);
+        }
+    }, [items, selection]);
+}
+`,
+			},
 
 			{
 				code: `
@@ -1090,6 +1226,8 @@ function Component() {
     useEffect(() => {
         try {
             start();
+        } catch (error) {
+            return () => report(error);
         } finally {
             return () => stop();
         }
@@ -1500,6 +1638,48 @@ export function useReadySignal({ ready, onReady }: ReadySignalInput): void {
 }
 `,
 				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useEffect } from "react";
+
+export const hooks = {
+    useReadySignal({ ready, onReady }: ReadySignalInput): void {
+        useEffect(() => {
+            if (!ready) return;
+            onReady?.();
+        }, [ready, onReady]);
+    },
+};
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useEffect } from "react";
+
+export class ReadySignal {
+    useReadySignal({ ready, onReady }: ReadySignalInput): void {
+        useEffect(() => {
+            if (!ready) return;
+            onReady?.();
+        }, [ready, onReady]);
+    }
+}
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        while (shouldContinue())
+            return () => stop();
+    }, []);
+}
+`,
 			},
 
 			// InitializeState disabled via options

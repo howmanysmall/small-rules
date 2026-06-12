@@ -4,6 +4,9 @@ import rule from "$oxc-rules/prevent-abbreviations";
 import { ts, tsx } from "./rule-testers";
 
 const TEST_IGNORE_PATTERN = /^test/u;
+const MANY_REPLACEMENTS = Object.fromEntries(
+	Array.from({ length: 104 }, (_, index) => [`replacement${index.toString().padStart(3, "0")}`, true]),
+);
 
 describe("prevent-abbreviations", () => {
 	// @ts-expect-error -- this thing is dumb.
@@ -134,6 +137,21 @@ describe("prevent-abbreviations", () => {
 				options: [{ replacements: { res: { resource: true, response: true, result: true } } }],
 			},
 			{
+				code: "const abbr = value;",
+				errors: [
+					{
+						data: {
+							discouragedName: "abbr",
+							nameTypeText: "variable",
+							replacementsText:
+								"`replacement000`, `replacement001`, `replacement002`, ... (99+ more omitted)",
+						},
+						messageId: "suggestion",
+					},
+				],
+				options: [{ replacements: { abbr: MANY_REPLACEMENTS } }],
+			},
+			{
 				code: "const Res = value;",
 				errors: [
 					{
@@ -241,6 +259,84 @@ describe("prevent-abbreviations", () => {
 				options: [{ shorthands: { "/^str(.*)$/": "string$1" } }],
 				output: "const stringName = '';",
 			},
+			{
+				code: "const first = 1; const second = 2;",
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
+				options: [
+					{
+						replacements: {
+							first: { value: true },
+							second: { value: true },
+						},
+					},
+				],
+				output: "const value = 1; const value_ = 2;",
+			},
+			{
+				code: "const target = 1; const source = 2;",
+				errors: [
+					{
+						data: { discouragedName: "target", nameTypeText: "variable", replacement: "destination" },
+						messageId: "replace",
+					},
+					{
+						data: {
+							discouragedName: "source",
+							nameTypeText: "variable",
+							replacementsText: "`target`",
+						},
+						messageId: "suggestion",
+					},
+				],
+				options: [
+					{
+						extendDefaultReplacements: false,
+						replacements: {
+							source: { target: true },
+							target: { destination: true },
+						},
+					},
+				],
+				output: "const destination = 1; const source = 2;",
+			},
+			{
+				code: "let param;",
+				errors: [
+					{
+						data: {
+							discouragedName: "param",
+							nameTypeText: "variable",
+							replacementsText: "`arguments_`, `parameter`",
+						},
+						messageId: "suggestion",
+					},
+				],
+				options: [{ replacements: { param: { arguments: true } } }],
+			},
+			{
+				code: "const handler = (param) => param;",
+				errors: [
+					{
+						data: {
+							discouragedName: "param",
+							nameTypeText: "variable",
+							replacementsText: "`arguments_`, `parameter`",
+						},
+						messageId: "suggestion",
+					},
+				],
+				options: [{ replacements: { param: { arguments: true } } }],
+			},
+			{
+				code: "const { err = fallback } = payload;",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				output: "const { err: error = fallback } = payload;",
+			},
 			// CamelCase word splitting
 			{
 				code: "const myErr = new Error();",
@@ -295,6 +391,75 @@ describe("prevent-abbreviations", () => {
 				],
 				options: [{ checkShorthandImports: true }],
 				output: 'import { err as error } from "./module";',
+			},
+			{
+				code: "const err = 1; export { err };",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				output: "const error = 1; export { error as err };",
+			},
+			{
+				code: "export function err() {}",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+			},
+			{
+				code: "export class Err {}",
+				errors: [
+					{
+						data: { discouragedName: "Err", nameTypeText: "variable", replacement: "Error_" },
+						messageId: "replace",
+					},
+				],
+				options: [{ replacements: { err: { error: true } } }],
+			},
+			{
+				code: "export type Err = string;",
+				errors: [
+					{
+						data: { discouragedName: "Err", nameTypeText: "variable", replacement: "Error_" },
+						messageId: "replace",
+					},
+				],
+				options: [{ replacements: { err: { error: true } } }],
+			},
+			{
+				code: "interface Shape { err: string }",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "class Shape { err = 1 }",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "const payload = { err: 1 };",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkProperties: true }],
 			},
 		],
 		valid: [
@@ -371,8 +536,16 @@ describe("prevent-abbreviations", () => {
 				options: [{ ignoreShorthands: ["Props"], shorthands: { "*Props": "*Properties" } }],
 			},
 			{
+				code: "const ButtonProps = {};",
+				options: [{ ignoreShorthands: ["*Props"], shorthands: { "*Props": "*Properties" } }],
+			},
+			{
 				code: "type X = React.PropsWithoutRef<P>;",
 				options: [{ allowPropertyAccess: ["PropsWithoutRef"], shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: "type X = React.PropsWithoutRef<P>;",
+				options: [{ allowPropertyAccess: ["Props"], shorthands: { "*Props": "*Properties" } }],
 			},
 			{
 				code: 'import { InstanceProps } from "@rbxts/react";',
