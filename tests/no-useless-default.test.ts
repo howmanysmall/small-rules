@@ -127,6 +127,7 @@ describe("no-useless-default comparison helpers", () => {
 			invalid: [
 				{ code: "check(new Vector3());", errors: [{ messageId: "match" }] },
 				{ code: "check(new Vector3(0, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector3(0, ...rest, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(Vector3.zero);", errors: [{ messageId: "match" }] },
 				{ code: "check(new Vector3(0, 0, 1));", errors: [{ messageId: "mismatch" }] },
 			],
@@ -218,6 +219,18 @@ describe("no-useless-default comparison helpers", () => {
 			},
 		);
 	});
+
+	describe("unsupported canonical values", () => {
+		ts.run(
+			"no-useless-default unsupported defaults",
+			// @ts-expect-error Deliberately exercises the runtime fallback for unknown canonical types.
+			createComparisonRule({ type: "unsupported", value: "x" }),
+			{
+				invalid: [{ code: "check('x');", errors: [{ messageId: "mismatch" }] }],
+				valid: [],
+			},
+		);
+	});
 });
 
 describe("no-useless-default JSX detection", () => {
@@ -291,6 +304,16 @@ describe("no-useless-default JSX detection", () => {
 				errors: [{ data: { className: "BillboardGui", propertyName: "Enabled" }, messageId: "uselessDefault" }],
 				output: "const view = <billboardgui />;",
 			},
+			{
+				code: "const view = <frame /* keep */ BackgroundTransparency={0} />;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
 		],
 		valid: [
 			{ code: 'const view = <uiaspectratioconstraint key="my-key" />;' },
@@ -358,6 +381,16 @@ describe("no-useless-default imperative detection", () => {
 					},
 				],
 				output: 'const f = new Instance("Frame"); f.Size = new UDim2(0, 100, 0, 200);',
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); [alias] = [c]; c.MinSize = new Vector2();',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: 'const c = new Instance("UISizeConstraint"); [alias] = [c];',
 			},
 		],
 		valid: [
