@@ -8,7 +8,166 @@ on:
       - "tests/**/*.{ts,tsx}"
       - "package.json"
       - "aube-lock.yaml"
-      - "knip.ts"
+      - "*.config.ts"
       - "tsconfig*.json"
-      - ".oxlintrc.json"
+      - ".ox*trc.json"
       - "biome.jsonc"
+  pull_request:
+    paths:
+      - "src/**/*.{ts,tsx,json}"
+      - "tests/**/*.{ts,tsx}"
+      - "package.json"
+      - "aube-lock.yaml"
+      - "*.config.ts"
+      - "tsconfig*.json"
+      - ".ox*trc.json"
+      - "biome.jsonc"
+
+env:
+  TEST_SHARDS: 8
+  HEAVY_TEST_SHARDS: 4
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+
+      - name: Cache Aube store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/aube/store
+            ~/.cache/aube
+          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-v3-
+
+      - name: Install
+        run: |
+          for attempt in 1 2 3; do
+            if aube ci --enable-global-virtual-store --fetch-retries 5 --fetch-timeout 60000 --fetch-retry-maxtimeout 20000; then
+              exit 0
+            fi
+            if [ "$attempt" = "3" ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+
+      - name: Biome CI
+        run: nr biome ci
+
+      - name: Lint
+        run: nr oxlint .
+
+      - name: Type Checking
+        run: nr type-check
+
+      - name: Knip
+        run: nr knip
+
+      - name: Build
+        run: nr build
+
+  test:
+    runs-on: ubuntu-latest
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+
+      - name: Cache Aube store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/aube/store
+            ~/.cache/aube
+          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-v3-
+
+      - name: Install
+        run: |
+          for attempt in 1 2 3; do
+            if aube ci --enable-global-virtual-store --fetch-retries 5 --fetch-timeout 60000 --fetch-retry-maxtimeout 20000; then
+              exit 0
+            fi
+            if [ "$attempt" = "3" ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+
+      - name: Get shard test files
+        id: shard
+        run: |
+          ALL_FILES=$(./scripts/shard-tests.ts ${{ matrix.shard }} ${{ env.TEST_SHARDS }})
+          # Exclude heavy test files (handled by test-heavy job)
+          SHARD_FILES=$(echo "$ALL_FILES" | tr ' ' '\n' | grep -v -E '(prevent-abbreviations|naming-convention\.test)' | tr '\n' ' ')
+          echo "files=$SHARD_FILES" >> $GITHUB_OUTPUT
+          echo "Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }} files: $SHARD_FILES"
+
+      - name: Run tests for shard
+        if: steps.shard.outputs.files != ''
+        env:
+          AGENT: 1
+        run: |
+          nr test:agent ${{ steps.shard.outputs.files }}
+
+  test-heavy:
+    runs-on: ubuntu-latest
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        file:
+          - tests/upstream/prevent-abbreviations.test.ts
+        case_shard: [1, 2, 3, 4]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+
+      - name: Cache Aube store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/aube/store
+            ~/.cache/aube
+          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-aube-v3-
+
+      - name: Install
+        run: |
+          for attempt in 1 2 3; do
+            if aube ci --enable-global-virtual-store --fetch-retries 5 --fetch-timeout 60000 --fetch-retry-maxtimeout 20000; then
+              exit 0
+            fi
+            if [ "$attempt" = "3" ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+
+      - name: Run heavy test file with case sharding
+        env:
+          AGENT: 1
+          TEST_CASE_SHARD: ${{ matrix.case_shard }}/${{ env.HEAVY_TEST_SHARDS }}
+        run: |
+          echo "Running ${{ matrix.file }} with case shard ${{ matrix.case_shard }}/${{ env.HEAVY_TEST_SHARDS }}"
+          nr test:agent ${{ matrix.file }}

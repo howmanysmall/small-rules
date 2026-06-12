@@ -31,7 +31,7 @@
 	},
 	"overrides": [
 		{
-			"files": ["scripts/**/*.{ts,tsx}"],
+			"files": ["scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
 			"rules": { "no-console": "off" }
 		},
 		{

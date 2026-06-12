@@ -9,7 +9,7 @@ import type { Octokit } from "@octokit/rest";
 
 const DATABASE_URL = "https://github.com/rojo-rbx/rbx-dom/raw/master/rbx_reflection_database/database.msgpack";
 
-export enum RobloxDataType {
+enum RobloxDataType {
 	Attributes = "Attributes",
 	Axes = "Axes",
 	BinaryString = "BinaryString",
@@ -53,18 +53,18 @@ export enum RobloxDataType {
 	Vector3 = "Vector3",
 	Vector3int16 = "Vector3int16",
 }
-export const isRobloxDataType = type.enumerated(...Object.values(RobloxDataType));
+const isRobloxDataType = type.enumerated(...Object.values(RobloxDataType));
 
-export enum DatabaseScriptability {
+enum DatabaseScriptability {
 	Custom = "Custom",
 	None = "None",
 	Read = "Read",
 	ReadWrite = "ReadWrite",
 	Write = "Write",
 }
-export const isDatabaseScriptability = type.enumerated(...Object.values(DatabaseScriptability));
+const isDatabaseScriptability = type.enumerated(...Object.values(DatabaseScriptability));
 
-export enum DatabasePropertyTag {
+enum DatabasePropertyTag {
 	Deprecated = "Deprecated",
 	Hidden = "Hidden",
 	NotBrowsable = "NotBrowsable",
@@ -73,19 +73,7 @@ export enum DatabasePropertyTag {
 	ReadOnly = "ReadOnly",
 	WriteOnly = "WriteOnly",
 }
-export const isDatabasePropertyTag = type.enumerated(...Object.values(DatabasePropertyTag));
-
-export enum DatabaseClassTag {
-	Deprecated = "Deprecated",
-	NotBrowsable = "NotBrowsable",
-	NotCreatable = "NotCreatable",
-	NotReplicated = "NotReplicated",
-	PlayerReplicated = "PlayerReplicated",
-	Service = "Service",
-	Settings = "Settings",
-	UserSettings = "UserSettings",
-}
-export const isDatabaseClassTag = type.enumerated(...Object.values(DatabaseClassTag));
+const isDatabasePropertyTag = type.enumerated(...Object.values(DatabasePropertyTag));
 
 export async function downloadDatabaseAsync(octokit: Octokit, existingFilePath?: string): Promise<Uint8Array> {
 	if (existingFilePath !== undefined) {
@@ -120,23 +108,23 @@ export async function downloadDatabaseAsync(octokit: Octokit, existingFilePath?:
 const isEnumType = type("/^Enum\\.\\w+$/");
 const isDataType = isEnumType.or(isRobloxDataType);
 
-export const isDatabaseProperty = type({
+const isDatabaseProperty = type({
 	"+": "reject",
 	dataType: isDataType,
 	name: "string",
 	scriptability: isDatabaseScriptability,
 	tags: isDatabasePropertyTag.array().readonly(),
 }).readonly();
-export type DatabaseProperty = typeof isDatabaseProperty.infer;
+type DatabaseProperty = typeof isDatabaseProperty.infer;
 
-export const isDatabaseClass = type({
+const isDatabaseClass = type({
 	"+": "reject",
 	defaultProperties: type("Record<string, unknown>").readonly(),
 	name: "string",
 	properties: type.Record("string", isDatabaseProperty).readonly(),
 	superclass: "string | null",
 }).readonly();
-export type DatabaseClass = typeof isDatabaseClass.infer;
+type DatabaseClass = typeof isDatabaseClass.infer;
 
 const isRawPropertyTuple = type([
 	"string",
@@ -279,7 +267,7 @@ function normalizeProperty(propertyTuple: unknown): NormalizedPropertyDefault | 
 	return [resolvedType, propertyName, scriptability, tags];
 }
 
-export function mergeSuperclassImplementation(
+function mergeSuperclassImplementation(
 	className: string,
 	allClasses: ReadonlyMap<string, ReadonlyArray<unknown>>,
 ): {
