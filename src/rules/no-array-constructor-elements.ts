@@ -25,7 +25,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 import type { BindingName } from "$oxc-types/missing-types";
 import type { FixReturn } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface NoArrayConstructorElementsOptions {
 	readonly environment?: Environment;
@@ -33,6 +33,30 @@ interface NoArrayConstructorElementsOptions {
 }
 
 type ProgramStatement = ESTree.ModuleDeclaration | ESTree.Statement;
+
+interface PushCollapseCandidate {
+	readonly arrayIdentifierName: string;
+	readonly declarator: ESTree.VariableDeclarator;
+	readonly hasUnsafeArgument: boolean;
+	readonly literalText: string;
+	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+	readonly statement: ESTree.VariableDeclaration;
+}
+
+type NoArrayConstructorElementsMessageId =
+	| "avoidConstructorEnumeration"
+	| "avoidLengthConstructorInStandard"
+	| "avoidSingleArgumentConstructor"
+	| "collapseArrayPushInitialization"
+	| "requireExplicitGenericOnNewArray"
+	| "suggestArrayFromLength"
+	| "suggestArrayLiteral"
+	| "suggestCollapseArrayPushInitialization";
+
+interface NoArrayConstructorElementsContext {
+	readonly report: (diagnostic: Diagnostic<NoArrayConstructorElementsMessageId>) => void;
+	readonly sourceCode: SourceCode;
+}
 
 const DEFAULT_OPTIONS: Required<NoArrayConstructorElementsOptions> = {
 	environment: "roblox-ts",
@@ -211,6 +235,244 @@ function createCollapseFixes(
 	];
 }
 
+function reportArrayConstructor(
+	context: NoArrayConstructorElementsContext,
+	node: ESTree.NewExpression,
+	options: Required<NoArrayConstructorElementsOptions>,
+): void {
+	const { sourceCode } = context;
+
+	if (node.arguments.length === 0) {
+		reportEmptyArrayConstructor(context, node, options);
+		return;
+	}
+
+	if (node.arguments.length > 1) {
+		reportMultiArgumentArrayConstructor(context, node, options);
+		return;
+	}
+
+	reportSingleArgumentArrayConstructor(context, node, options, sourceCode);
+}
+
+function reportEmptyArrayConstructor(
+	context: NoArrayConstructorElementsContext,
+	node: ESTree.NewExpression,
+	options: Required<NoArrayConstructorElementsOptions>,
+): void {
+	if (!options.requireExplicitGenericOnNewArray) return;
+
+	const hasTypeArguments =
+		node.typeArguments !== undefined && node.typeArguments !== null && node.typeArguments.params.length > 0;
+	if (hasTypeArguments || hasContextualArrayAnnotation(node, context.sourceCode)) return;
+
+	context.report({
+		messageId: "requireExplicitGenericOnNewArray",
+		node,
+	});
+}
+
+function reportMultiArgumentArrayConstructor(
+	context: NoArrayConstructorElementsContext,
+	node: ESTree.NewExpression,
+	options: Required<NoArrayConstructorElementsOptions>,
+): void {
+	const [firstArgument] = node.arguments;
+	if (firstArgument === undefined) return;
+	if (
+		firstArgument.type !== "SpreadElement" &&
+		options.environment === "roblox-ts" &&
+		!isDefinitelyNonNumericExpression(firstArgument)
+	) {
+		return;
+	}
+
+	const literalText = buildArrayLiteralFromArguments(node.arguments, context.sourceCode);
+	const hasSpread = node.arguments.some((argument) => argument.type === "SpreadElement");
+
+	if (!hasSpread) {
+		context.report({
+			fix(fixer) {
+				return fixer.replaceText(node, literalText);
+			},
+			messageId: "avoidConstructorEnumeration",
+			node,
+		});
+		return;
+	}
+
+	context.report({
+		messageId: "avoidConstructorEnumeration",
+		node,
+		suggest: [
+			{
+				fix(fixer): FixReturn {
+					return fixer.replaceText(node, literalText);
+				},
+				messageId: "suggestArrayLiteral",
+			},
+		],
+	});
+}
+
+function reportSingleArgumentArrayConstructor(
+	context: NoArrayConstructorElementsContext,
+	node: ESTree.NewExpression,
+	options: Required<NoArrayConstructorElementsOptions>,
+	sourceCode: SourceCode,
+): void {
+	const [firstArgument] = node.arguments;
+	if (firstArgument === undefined) return;
+
+	if (firstArgument.type === "SpreadElement") {
+		reportSpreadArrayConstructor(context, node, sourceCode.getText(firstArgument.argument));
+		return;
+	}
+
+	if (!isDefinitelyNonNumericExpression(firstArgument)) {
+		reportLengthArrayConstructor(context, node, options, sourceCode.getText(firstArgument));
+		return;
+	}
+
+	const singleElementLiteral = `[${sourceCode.getText(firstArgument)}]`;
+	context.report({
+		fix(fixer) {
+			return fixer.replaceText(node, singleElementLiteral);
+		},
+		messageId: "avoidSingleArgumentConstructor",
+		node,
+	});
+}
+
+function reportSpreadArrayConstructor(
+	context: NoArrayConstructorElementsContext,
+	node: ESTree.NewExpression,
+	argumentText: string,
+): void {
+	context.report({
+		messageId: "avoidSingleArgumentConstructor",
+		node,
+		suggest: [
+			{
+				fix(fixer): FixReturn {
+					return fixer.replaceText(node, `[...${argumentText}]`);
+				},
+				messageId: "suggestArrayLiteral",
+			},
+		],
+	});
+}
+
+function reportLengthArrayConstructor(
+	context: NoArrayConstructorElementsContext,
+	node: ESTree.NewExpression,
+	options: Required<NoArrayConstructorElementsOptions>,
+	lengthExpressionText: string,
+): void {
+	if (options.environment === "roblox-ts") return;
+
+	context.report({
+		messageId: "avoidLengthConstructorInStandard",
+		node,
+		suggest: [
+			{
+				fix(fixer): FixReturn {
+					return fixer.replaceText(node, `Array.from({ length: ${lengthExpressionText} })`);
+				},
+				messageId: "suggestArrayFromLength",
+			},
+		],
+	});
+}
+
+function getPushCollapseCandidate(
+	sourceCode: SourceCode,
+	statements: ReadonlyArray<ProgramStatement>,
+	index: number,
+): PushCollapseCandidate | undefined {
+	const statement = statements[index];
+	if (statement === undefined || !isVariableDeclaration(statement)) return undefined;
+	if (statement.kind !== "const" && statement.kind !== "let") return undefined;
+	if (statement.declarations.length !== 1) return undefined;
+
+	const [declarator] = statement.declarations;
+	if (declarator === undefined || !isIdentifier(declarator.id)) return undefined;
+	if (declarator.init === null || !isNewExpression(declarator.init)) return undefined;
+	if (!isGlobalArrayConstructor(sourceCode, declarator.init)) return undefined;
+	if (declarator.init.arguments.length > 0) return undefined;
+	if (isReadonlyArrayAnnotation(getBindingTypeAnnotation(declarator.id))) return undefined;
+
+	const arrayIdentifierName = declarator.id.name;
+	const scan = scanPushStatements(sourceCode, statements, index + 1, arrayIdentifierName);
+	if (scan.pushStatements.length === 0) return undefined;
+	if (containsLaterPushCall(statements, scan.nextIndex, arrayIdentifierName)) return undefined;
+
+	return {
+		arrayIdentifierName,
+		declarator,
+		hasUnsafeArgument: scan.hasUnsafeArgument,
+		literalText: `[${scan.argumentParts.join(", ")}]`,
+		pushStatements: scan.pushStatements,
+		statement,
+	};
+}
+
+function scanPushStatements(
+	sourceCode: SourceCode,
+	statements: ReadonlyArray<ProgramStatement>,
+	startIndex: number,
+	arrayIdentifierName: string,
+): {
+	readonly argumentParts: ReadonlyArray<string>;
+	readonly hasUnsafeArgument: boolean;
+	readonly nextIndex: number;
+	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+} {
+	const pushStatements = new Array<ESTree.ExpressionStatement>();
+	const argumentParts = new Array<string>();
+	let hasUnsafeArgument = false;
+	let scanIndex = startIndex;
+
+	while (scanIndex < statements.length) {
+		const nextStatement = statements[scanIndex];
+		if (nextStatement === undefined || !isExpressionStatement(nextStatement)) break;
+
+		const pushCall = getPushCallForIdentifier(nextStatement.expression, arrayIdentifierName);
+		if (pushCall === undefined || pushCall.arguments.length === 0) break;
+
+		pushStatements.push(nextStatement);
+		hasUnsafeArgument = appendPushArguments(sourceCode, pushCall, argumentParts) || hasUnsafeArgument;
+		scanIndex += 1;
+	}
+
+	return {
+		argumentParts,
+		hasUnsafeArgument,
+		nextIndex: scanIndex,
+		pushStatements,
+	};
+}
+
+function appendPushArguments(
+	sourceCode: SourceCode,
+	pushCall: ESTree.CallExpression,
+	argumentParts: Array<string>,
+): boolean {
+	let hasUnsafeArgument = false;
+	for (const argument of pushCall.arguments) {
+		if (argument.type === "SpreadElement") {
+			hasUnsafeArgument = true;
+			argumentParts.push(`...${sourceCode.getText(argument.argument)}`);
+			continue;
+		}
+
+		if (!isExpressionSideEffectSafe(argument)) hasUnsafeArgument = true;
+		argumentParts.push(sourceCode.getText(argument));
+	}
+
+	return hasUnsafeArgument;
+}
+
 const noArrayConstructorElements = defineRule({
 	create(context): Visitor {
 		const rawOptions = context.options?.[0];
@@ -222,82 +484,39 @@ const noArrayConstructorElements = defineRule({
 
 		function inspectPushCollapse(statements: ReadonlyArray<ProgramStatement>): void {
 			for (let index = 0; index < statements.length; index += 1) {
-				const statement = statements[index];
-				if (statement === undefined || !isVariableDeclaration(statement)) continue;
-				if (statement.kind !== "const" && statement.kind !== "let") continue;
-				if (statement.declarations.length !== 1) continue;
+				const candidate = getPushCollapseCandidate(sourceCode, statements, index);
+				if (candidate === undefined) continue;
 
-				const [declarator] = statement.declarations;
-				if (declarator === undefined || !isIdentifier(declarator.id)) continue;
-				if (declarator.init === null || !isNewExpression(declarator.init)) continue;
-				if (!isGlobalArrayConstructor(sourceCode, declarator.init)) continue;
-				if (declarator.init.arguments.length > 0) continue;
-				if (isReadonlyArrayAnnotation(getBindingTypeAnnotation(declarator.id))) continue;
-				const arrayIdentifierName = declarator.id.name;
-
-				const pushStatements = new Array<ESTree.ExpressionStatement>();
-				const collapsedArgumentParts = new Array<string>();
-				let hasSpreadArgument = false;
-				let scanIndex = index + 1;
-
-				while (scanIndex < statements.length) {
-					const nextStatement = statements[scanIndex];
-					if (nextStatement === undefined || !isExpressionStatement(nextStatement)) break;
-
-					const pushCall = getPushCallForIdentifier(nextStatement.expression, arrayIdentifierName);
-					if (pushCall === undefined || pushCall.arguments.length === 0) break;
-
-					pushStatements.push(nextStatement);
-					for (const argument of pushCall.arguments) {
-						if (argument.type === "SpreadElement") {
-							hasSpreadArgument = true;
-							collapsedArgumentParts.push(`...${sourceCode.getText(argument.argument)}`);
-							continue;
-						}
-
-						collapsedArgumentParts.push(sourceCode.getText(argument));
-					}
-
-					scanIndex += 1;
-				}
-
-				if (pushStatements.length === 0 || containsLaterPushCall(statements, scanIndex, arrayIdentifierName)) {
-					continue;
-				}
-
-				const literalText = `[${collapsedArgumentParts.join(", ")}]`;
-
-				const hasUnsafeArgument =
-					hasSpreadArgument ||
-					pushStatements.some((pushStatement) => {
-						const callExpression = getPushCallForIdentifier(pushStatement.expression, arrayIdentifierName);
-						if (callExpression === undefined) return true;
-
-						for (const argument of callExpression.arguments) {
-							if (argument.type === "SpreadElement" || !isExpressionSideEffectSafe(argument)) return true;
-						}
-
-						return false;
-					});
-
-				if (!hasUnsafeArgument) {
+				if (!candidate.hasUnsafeArgument) {
 					context.report({
 						fix(fixer) {
-							return createCollapseFixes(fixer, sourceCode, declarator, pushStatements, literalText);
+							return createCollapseFixes(
+								fixer,
+								sourceCode,
+								candidate.declarator,
+								candidate.pushStatements,
+								candidate.literalText,
+							);
 						},
 						messageId: "collapseArrayPushInitialization",
-						node: statement,
+						node: candidate.statement,
 					});
 					continue;
 				}
 
 				context.report({
 					messageId: "collapseArrayPushInitialization",
-					node: statement,
+					node: candidate.statement,
 					suggest: [
 						{
 							fix(fixer): FixReturn {
-								return createCollapseFixes(fixer, sourceCode, declarator, pushStatements, literalText);
+								return createCollapseFixes(
+									fixer,
+									sourceCode,
+									candidate.declarator,
+									candidate.pushStatements,
+									candidate.literalText,
+								);
 							},
 							messageId: "suggestCollapseArrayPushInitialization",
 						},
@@ -313,114 +532,7 @@ const noArrayConstructorElements = defineRule({
 
 			NewExpression(node): void {
 				if (!isGlobalArrayConstructor(sourceCode, node)) return;
-
-				if (node.arguments.length === 0) {
-					if (!options.requireExplicitGenericOnNewArray) return;
-
-					const hasTypeArguments =
-						node.typeArguments !== undefined &&
-						node.typeArguments !== null &&
-						node.typeArguments.params.length > 0;
-					if (hasTypeArguments || hasContextualArrayAnnotation(node, sourceCode)) return;
-
-					context.report({
-						messageId: "requireExplicitGenericOnNewArray",
-						node,
-					});
-					return;
-				}
-
-				if (node.arguments.length > 1) {
-					const [firstArgument] = node.arguments;
-					if (
-						firstArgument !== undefined &&
-						firstArgument.type !== "SpreadElement" &&
-						options.environment === "roblox-ts" &&
-						!isDefinitelyNonNumericExpression(firstArgument)
-					) {
-						return;
-					}
-
-					if (firstArgument === undefined) return;
-
-					const literalText = buildArrayLiteralFromArguments(node.arguments, sourceCode);
-					const hasSpread = node.arguments.some((argument) => argument.type === "SpreadElement");
-
-					if (!hasSpread) {
-						context.report({
-							fix(fixer) {
-								return fixer.replaceText(node, literalText);
-							},
-							messageId: "avoidConstructorEnumeration",
-							node,
-						});
-						return;
-					}
-
-					context.report({
-						messageId: "avoidConstructorEnumeration",
-						node,
-						suggest: [
-							{
-								fix(fixer): FixReturn {
-									return fixer.replaceText(node, literalText);
-								},
-								messageId: "suggestArrayLiteral",
-							},
-						],
-					});
-					return;
-				}
-
-				const [firstArgument] = node.arguments;
-				if (firstArgument === undefined) return;
-
-				if (firstArgument.type === "SpreadElement") {
-					context.report({
-						messageId: "avoidSingleArgumentConstructor",
-						node,
-						suggest: [
-							{
-								fix(fixer): FixReturn {
-									return fixer.replaceText(
-										node,
-										`[...${sourceCode.getText(firstArgument.argument)}]`,
-									);
-								},
-								messageId: "suggestArrayLiteral",
-							},
-						],
-					});
-					return;
-				}
-
-				if (!isDefinitelyNonNumericExpression(firstArgument)) {
-					if (options.environment === "roblox-ts") return;
-
-					const lengthExpressionText = sourceCode.getText(firstArgument);
-					context.report({
-						messageId: "avoidLengthConstructorInStandard",
-						node,
-						suggest: [
-							{
-								fix(fixer): FixReturn {
-									return fixer.replaceText(node, `Array.from({ length: ${lengthExpressionText} })`);
-								},
-								messageId: "suggestArrayFromLength",
-							},
-						],
-					});
-					return;
-				}
-
-				const singleElementLiteral = `[${sourceCode.getText(firstArgument)}]`;
-				context.report({
-					fix(fixer) {
-						return fixer.replaceText(node, singleElementLiteral);
-					},
-					messageId: "avoidSingleArgumentConstructor",
-					node,
-				});
+				reportArrayConstructor(context, node, options);
 			},
 
 			Program(node): void {

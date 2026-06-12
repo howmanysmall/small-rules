@@ -24,6 +24,64 @@ function getKeypointValue(node: ESTree.Expression, keypointName: string, time: n
 	return isNumericLiteralValue(timeArgument, time) ? valueArgument : undefined;
 }
 
+interface SequenceReplacement {
+	readonly messageId: "preferSingleOverload" | "preferTwoPointOverload";
+	readonly replacement: string;
+}
+
+function getDirectArgumentReplacement(
+	context: { sourceCode: { getText: (node: ESTree.Node) => string } },
+	node: ESTree.NewExpression,
+	sequenceName: string,
+): SequenceReplacement | undefined {
+	if (node.arguments.length !== 2) return undefined;
+
+	const [firstArgument, secondArgument] = node.arguments;
+	if (firstArgument === undefined || firstArgument.type === "SpreadElement") return undefined;
+	if (secondArgument === undefined || secondArgument.type === "SpreadElement") return undefined;
+
+	const firstText = context.sourceCode.getText(firstArgument);
+	const secondText = context.sourceCode.getText(secondArgument);
+	if (firstText !== secondText) return undefined;
+
+	return {
+		messageId: "preferSingleOverload",
+		replacement: `new ${sequenceName}(${firstText})`,
+	};
+}
+
+function getKeypointArrayReplacement(
+	context: { sourceCode: { getText: (node: ESTree.Node) => string } },
+	node: ESTree.NewExpression,
+	sequenceName: string,
+	keypointName: string,
+): SequenceReplacement | undefined {
+	if (node.arguments.length !== 1) return undefined;
+
+	const [onlyArgument] = node.arguments;
+	if (onlyArgument === undefined || onlyArgument.type === "SpreadElement") return undefined;
+	if (onlyArgument.type !== "ArrayExpression" || onlyArgument.elements.length !== 2) return undefined;
+
+	const [firstElement, secondElement] = onlyArgument.elements;
+	if (firstElement === undefined || secondElement === undefined) return undefined;
+	if (firstElement === null || secondElement === null) return undefined;
+	if (firstElement.type === "SpreadElement" || secondElement.type === "SpreadElement") return undefined;
+
+	const firstValue = getKeypointValue(firstElement, keypointName, 0);
+	const secondValue = getKeypointValue(secondElement, keypointName, 1);
+	if (firstValue === undefined || secondValue === undefined) return undefined;
+
+	const firstText = context.sourceCode.getText(firstValue);
+	const secondText = context.sourceCode.getText(secondValue);
+	return {
+		messageId: firstText === secondText ? "preferSingleOverload" : "preferTwoPointOverload",
+		replacement:
+			firstText === secondText
+				? `new ${sequenceName}(${firstText})`
+				: `new ${sequenceName}(${firstText}, ${secondText})`,
+	};
+}
+
 const preferSequenceOverloads = defineRule({
 	create(context): Visitor {
 		return {
@@ -34,48 +92,14 @@ const preferSequenceOverloads = defineRule({
 				const keypointName = getSequenceKeypointName(sequenceName);
 				if (keypointName === undefined) return;
 
-				if (node.arguments.length === 2) {
-					const [firstArgument, secondArgument] = node.arguments;
-					if (firstArgument === undefined || firstArgument.type === "SpreadElement") return;
-					if (secondArgument === undefined || secondArgument.type === "SpreadElement") return;
-
-					const firstText = context.sourceCode.getText(firstArgument);
-					const secondText = context.sourceCode.getText(secondArgument);
-					if (firstText !== secondText) return;
-
-					context.report({
-						fix: (fixer) => fixer.replaceText(node, `new ${sequenceName}(${firstText})`),
-						messageId: "preferSingleOverload",
-						node,
-					});
-					return;
-				}
-
-				if (node.arguments.length !== 1) return;
-
-				const [onlyArgument] = node.arguments;
-				if (onlyArgument === undefined || onlyArgument.type === "SpreadElement") return;
-				if (onlyArgument.type !== "ArrayExpression" || onlyArgument.elements.length !== 2) return;
-
-				const [firstElement, secondElement] = onlyArgument.elements;
-				if (firstElement === undefined || secondElement === undefined) return;
-				if (firstElement === null || secondElement === null) return;
-				if (firstElement.type === "SpreadElement" || secondElement.type === "SpreadElement") return;
-
-				const firstValue = getKeypointValue(firstElement, keypointName, 0);
-				const secondValue = getKeypointValue(secondElement, keypointName, 1);
-				if (firstValue === undefined || secondValue === undefined) return;
-
-				const firstText = context.sourceCode.getText(firstValue);
-				const secondText = context.sourceCode.getText(secondValue);
 				const replacement =
-					firstText === secondText
-						? `new ${sequenceName}(${firstText})`
-						: `new ${sequenceName}(${firstText}, ${secondText})`;
+					getDirectArgumentReplacement(context, node, sequenceName) ??
+					getKeypointArrayReplacement(context, node, sequenceName, keypointName);
+				if (replacement === undefined) return;
 
 				context.report({
-					fix: (fixer) => fixer.replaceText(node, replacement),
-					messageId: firstText === secondText ? "preferSingleOverload" : "preferTwoPointOverload",
+					fix: (fixer) => fixer.replaceText(node, replacement.replacement),
+					messageId: replacement.messageId,
 					node,
 				});
 			},

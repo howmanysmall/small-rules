@@ -1,9 +1,48 @@
 import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
-import type { Fix, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
 
 const RECORD_TYPE_NAMES = new Set(["ReadonlyRecord", "Record"]);
+
+function isRecordTypeReference(typeRef: ESTree.TSType): typeRef is ESTree.TSTypeReference {
+	return (
+		typeRef.type === "TSTypeReference" &&
+		typeRef.typeName.type === "Identifier" &&
+		RECORD_TYPE_NAMES.has(typeRef.typeName.name)
+	);
+}
+
+function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TSType | undefined {
+	if (node.id.type !== "Identifier") return undefined;
+
+	const bindingAnnotation = getTypeAnnotationFromBinding(node.id);
+	if (bindingAnnotation === undefined) return undefined;
+
+	const { typeAnnotation: typeRef } = bindingAnnotation;
+	if (!isRecordTypeReference(typeRef)) return undefined;
+
+	const { typeArguments } = typeRef;
+	if (typeArguments?.params.length !== 2) return undefined;
+
+	const [enumType, secondParameter] = typeArguments.params;
+	if (enumType === undefined || secondParameter === undefined) return undefined;
+	if (secondParameter.type !== "TSLiteralType") return undefined;
+	if (secondParameter.literal.type !== "Literal" || secondParameter.literal.value !== true) return undefined;
+
+	return enumType;
+}
+
+function isTrueObjectExpression(node: ESTree.Expression | null | undefined): boolean {
+	if (node?.type !== "ObjectExpression") return false;
+
+	for (const property of node.properties) {
+		if (property.type !== "Property") return false;
+		if (property.value.type !== "Literal" || property.value.value !== true) return false;
+	}
+
+	return true;
+}
 
 const preferModdingInspect = defineRule({
 	create(context): Visitor {
@@ -12,36 +51,13 @@ const preferModdingInspect = defineRule({
 		return {
 			VariableDeclarator(node): void {
 				if (node.id.type !== "Identifier") return;
-				if (node.init === undefined || node.init === null) return;
 				const idName = node.id.name;
+				if (!isTrueObjectExpression(node.init)) return;
 
-				const bindingAnnotation = getTypeAnnotationFromBinding(node.id);
-				if (!bindingAnnotation) return;
+				const enumType = getRecordEnumTypeParameter(node);
+				if (enumType === undefined) return;
 
-				const typeRef = bindingAnnotation.typeAnnotation;
-				if (typeRef.type !== "TSTypeReference") return;
-				if (typeRef.typeName.type !== "Identifier") return;
-				if (!RECORD_TYPE_NAMES.has(typeRef.typeName.name)) return;
-
-				if (typeRef.typeArguments === undefined || typeRef.typeArguments === null) return;
-				const { typeArguments } = typeRef;
-				if (typeArguments.params.length !== 2) return;
-
-				// biome-ignore lint/nursery/useDestructuring: produces ugly
-				const secondParameter = typeArguments.params[1];
-				if (secondParameter === undefined) return;
-				if (secondParameter.type !== "TSLiteralType") return;
-				if (secondParameter.literal.type !== "Literal" || secondParameter.literal.value !== true) return;
-
-				if (node.init.type !== "ObjectExpression") return;
-
-				const { properties } = node.init;
-				for (const property of properties) {
-					if (property.type !== "Property") return;
-					if (property.value.type !== "Literal" || property.value.value !== true) return;
-				}
-
-				const enumTypeText = sourceCode.getText(typeArguments.params[0]);
+				const enumTypeText = sourceCode.getText(enumType);
 
 				context.report({
 					data: { enumType: enumTypeText },

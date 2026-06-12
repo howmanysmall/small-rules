@@ -18,6 +18,8 @@ const tester = new RuleTester({
 	languageOptions: { ecmaVersion: 2022, sourceType: "module" },
 });
 
+const isStaticArray: IsStaticArrayExpression<object> = () => true;
+
 describe("getHookName utility", () => {
 	const hookNameMessages: Record<string, string> = {
 		none: "none",
@@ -257,8 +259,6 @@ describe("classifyDependencies utility", () => {
 		missing: "missing",
 		spread: "spread",
 	};
-
-	const isStaticArray: IsStaticArrayExpression<object> = () => true;
 
 	const classifyRule = defineRule({
 		create(context): Visitor {

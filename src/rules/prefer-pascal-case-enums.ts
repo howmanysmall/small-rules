@@ -3,7 +3,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 const WORD_PATTERN = /[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+/gu;
-// oxlint-disable-next-line sonar/slow-regex
+// oxlint-disable-next-line sonar/slow-regex -- Anchored trim pattern only runs on enum identifiers.
 const NORMALIZE_0 = /^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/gu;
 const NORMALIZE_1 = /(?<first>[a-z0-9])(?<second>[A-Z])/gu;
 const NORMALIZE_2 = /[_\-\s]+/gu;

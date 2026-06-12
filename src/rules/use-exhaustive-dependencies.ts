@@ -46,6 +46,8 @@ interface VariableLike {
 	readonly defs: ReadonlyArray<VariableDefinitionLike>;
 }
 
+type ScopeVariable = Scope["set"]["get"] extends (key: string) => infer TReturn ? TReturn : never;
+
 interface DependencyInfo {
 	readonly depth: number;
 	readonly name: string;
@@ -269,6 +271,67 @@ function isStableHookValue(
 	return stableResult === true ? true : isStableArrayIndex(stableResult, node, identifierName);
 }
 
+function isReactJoinBindingsCall(init: ESTree.Expression | null): boolean {
+	if (init?.type !== "CallExpression") return false;
+
+	const { callee } = init;
+	return (
+		callee.type === "MemberExpression" &&
+		callee.object.type === "Identifier" &&
+		callee.object.name === "React" &&
+		callee.property.type === "Identifier" &&
+		callee.property.name === "joinBindings"
+	);
+}
+
+function isMapMethodCall(init: ESTree.Expression | null): boolean {
+	if (init?.type !== "CallExpression") return false;
+
+	const { callee } = init;
+	return (
+		callee.type === "MemberExpression" && callee.property.type === "Identifier" && callee.property.name === "map"
+	);
+}
+
+function isLiteralInitializer(init: ESTree.Expression | null): boolean {
+	return (
+		init?.type === "Literal" ||
+		init?.type === "TemplateLiteral" ||
+		(init?.type === "UnaryExpression" && init.argument.type === "Literal")
+	);
+}
+
+function isModuleLevelVariable(variable: VariableLike, node: ESTree.Node): boolean {
+	const variableDefinition = variable.defs.find((matchedDefinition) => matchedDefinition.node === node);
+	if (variableDefinition?.node.type !== "VariableDeclarator") return false;
+
+	const declarationParent = variableDefinition.node.parent.parent;
+	return declarationParent?.type === "Program" || declarationParent?.type === "ExportNamedDeclaration";
+}
+
+function isStableVariableDefinition(
+	variable: VariableLike,
+	definition: VariableDefinitionLike,
+	identifierName: string,
+	stableHooks: Map<string, StableResult>,
+): boolean {
+	const { node, type } = definition;
+	if (STABLE_VALUE_TYPES.has(type)) return true;
+	if (type !== "Variable" || node.type !== "VariableDeclarator") return false;
+
+	const { parent } = node;
+	if (parent.type !== "VariableDeclaration" || parent.kind !== "const") return false;
+
+	const { init } = node;
+	return (
+		isStableHookValue(init, node, identifierName, stableHooks) ||
+		isReactJoinBindingsCall(init) ||
+		isMapMethodCall(init) ||
+		isLiteralInitializer(init) ||
+		isModuleLevelVariable(variable, node)
+	);
+}
+
 function isStableValue(
 	variable: undefined | VariableLike,
 	identifierName: string,
@@ -280,61 +343,7 @@ function isStableValue(
 	if (definitions.length === 0) return false;
 
 	for (const definition of definitions) {
-		const { node, type } = definition;
-
-		if (STABLE_VALUE_TYPES.has(type)) return true;
-
-		if (type === "Variable" && node.type === "VariableDeclarator") {
-			const declarator = node;
-			const { parent } = declarator;
-			if (parent.type !== "VariableDeclaration" || parent.kind !== "const") continue;
-
-			const { init } = declarator;
-			if (init && isStableHookValue(init, node, identifierName, stableHooks)) return true;
-
-			if (init?.type === "CallExpression") {
-				const { callee } = init;
-
-				if (
-					callee.type === "MemberExpression" &&
-					callee.object.type === "Identifier" &&
-					callee.object.name === "React" &&
-					callee.property.type === "Identifier" &&
-					callee.property.name === "joinBindings"
-				) {
-					return true;
-				}
-
-				if (
-					callee.type === "MemberExpression" &&
-					callee.property.type === "Identifier" &&
-					callee.property.name === "map"
-				) {
-					return true;
-				}
-			}
-
-			if (
-				init &&
-				(init.type === "Literal" ||
-					init.type === "TemplateLiteral" ||
-					(init.type === "UnaryExpression" && init.argument.type === "Literal"))
-			) {
-				return true;
-			}
-
-			const variableDefinition = variable.defs.find((matchedDefinition) => matchedDefinition.node === node);
-			if (variableDefinition?.node.type === "VariableDeclarator") {
-				const declarationNode = variableDefinition.node;
-				const declarationParent = declarationNode.parent.parent;
-				if (
-					declarationParent &&
-					(declarationParent.type === "Program" || declarationParent.type === "ExportNamedDeclaration")
-				) {
-					return true;
-				}
-			}
-		}
+		if (isStableVariableDefinition(variable, definition, identifierName, stableHooks)) return true;
 	}
 
 	return false;
@@ -435,7 +444,7 @@ function isDeclaredInComponentBody(variable: VariableLike, closureNode: ESTree.N
 function resolveFunctionReference(identifier: ESTree.Node, scope: Scope): ESTree.Node | undefined {
 	if (identifier.type !== "Identifier") return undefined;
 
-	let variable: Scope["set"]["get"] extends (key: string) => infer TReturn ? TReturn : never;
+	let variable: ScopeVariable;
 	let currentScope: null | Scope = scope;
 
 	while (currentScope) {
@@ -466,65 +475,96 @@ function resolveFunctionReference(identifier: ESTree.Node, scope: Scope): ESTree
 	return undefined;
 }
 
+function resolveVariableInScope(name: string, scope: Scope): ScopeVariable {
+	let currentScope: null | Scope = scope;
+
+	while (currentScope) {
+		const variable = currentScope.set.get(name);
+		if (variable) return variable;
+		currentScope = currentScope.upper;
+	}
+
+	return undefined;
+}
+
+function isDefinitionInsideNode(definition: VariableDefinitionLike, node: ESTree.Node): boolean {
+	let definitionNode: ESTree.Node | undefined = definition.node;
+	while (definitionNode) {
+		if (definitionNode === node) return true;
+		definitionNode = definitionNode.parent ?? undefined;
+	}
+	return false;
+}
+
+function shouldCaptureVariable(variable: ScopeVariable, node: ESTree.Node): boolean {
+	return variable !== undefined && !variable.defs.some((definition) => isDefinitionInsideNode(definition, node));
+}
+
+function getCaptureInfo(
+	current: ESTree.Node,
+	name: string,
+	variable: VariableLike,
+	sourceCode: SourceCode,
+): CaptureInfo {
+	const depthNode = findTopmostMemberExpression(current, current.parent ?? undefined);
+	return {
+		depth: getMemberExpressionDepth(depthNode),
+		forceDependency: isComputedPropertyIdentifier(current),
+		name,
+		node: depthNode,
+		usagePath: nodeToSafeDependencyPath(depthNode, sourceCode),
+		variable,
+	};
+}
+
+function isTransparentExpressionNode(
+	node: ESTree.Node,
+): node is ESTree.TSAsExpression | ESTree.TSNonNullExpression | ESTree.TSSatisfiesExpression | ESTree.TSTypeAssertion {
+	return (
+		node.type === "TSSatisfiesExpression" ||
+		node.type === "TSAsExpression" ||
+		node.type === "TSTypeAssertion" ||
+		node.type === "TSNonNullExpression"
+	);
+}
+
+function visitChildNodes(current: ESTree.Node, sourceCode: SourceCode, visit: (node: ESTree.Node) => void): void {
+	const keys = sourceCode.visitorKeys[current.type] ?? [];
+	for (const key of keys) {
+		if (!isRecord(current)) break;
+		const value = current[key];
+		if (Array.isArray(value)) {
+			for (const item of value) if (isNode(item)) visit(item);
+		} else if (isNode(value)) {
+			visit(value);
+		}
+	}
+}
+
 function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArray<CaptureInfo> {
 	const captures = new Array<CaptureInfo>();
 	const captureSet = new Set<string>();
 
+	function visitIdentifier(current: ESTree.Node): void {
+		if (current.type !== "Identifier") return;
+
+		const { name } = current;
+		if (captureSet.has(name) || GLOBAL_BUILTINS.has(name) || isInTypePosition(current)) return;
+
+		const variable = resolveVariableInScope(name, sourceCode.getScope(current));
+		if (!shouldCaptureVariable(variable, node)) return;
+		if (variable === undefined) return;
+
+		if (!isDeclaredInComponentBody(variable, node)) return;
+
+		captureSet.add(name);
+		captures.push(getCaptureInfo(current, name, variable, sourceCode));
+	}
+
 	function visit(current: ESTree.Node): void {
-		if (current.type === "Identifier") {
-			const { name } = current;
+		if (current.type === "Identifier") visitIdentifier(current);
 
-			if (captureSet.has(name) || GLOBAL_BUILTINS.has(name) || isInTypePosition(current)) return;
-
-			let variable: Scope["set"]["get"] extends (key: string) => infer TReturn ? TReturn : never;
-			let currentScope: null | Scope = sourceCode.getScope(current);
-
-			while (currentScope) {
-				const currentVariable = currentScope.set.get(name);
-				if (currentVariable) {
-					variable = currentVariable;
-					break;
-				}
-				currentScope = currentScope.upper;
-			}
-
-			if (variable) {
-				const isDefinedInClosure = variable.defs.some((definition) => {
-					let definitionNode: ESTree.Node | undefined = definition.node;
-					while (definitionNode) {
-						if (definitionNode === node) return true;
-						definitionNode = definitionNode.parent ?? undefined;
-					}
-					return false;
-				});
-
-				if (!isDefinedInClosure) {
-					if (!isDeclaredInComponentBody(variable as VariableLike, node)) {
-						return;
-					}
-
-					captureSet.add(name);
-					const depthNode = findTopmostMemberExpression(current, current.parent);
-					const usagePath = nodeToSafeDependencyPath(depthNode, sourceCode);
-					const depth = getMemberExpressionDepth(depthNode);
-					captures.push({
-						depth,
-						forceDependency: isComputedPropertyIdentifier(current),
-						name,
-						node: depthNode,
-						usagePath,
-						variable: variable as VariableLike,
-					});
-				}
-			}
-		}
-
-		if (
-			current.type === "TSSatisfiesExpression" ||
-			current.type === "TSAsExpression" ||
-			current.type === "TSTypeAssertion" ||
-			current.type === "TSNonNullExpression"
-		) {
+		if (isTransparentExpressionNode(current)) {
 			visit(current.expression);
 			return;
 		}
@@ -546,14 +586,7 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 			return;
 		}
 
-		const keys = sourceCode.visitorKeys[current.type] ?? [];
-		for (const key of keys) {
-			if (!isRecord(current)) break;
-			const value = current[key];
-			if (Array.isArray(value)) {
-				for (const item of value) if (isNode(item)) visit(item);
-			} else if (isNode(value)) visit(value);
-		}
+		visitChildNodes(current, sourceCode, visit);
 	}
 
 	visit(node);
@@ -660,6 +693,235 @@ type MessageIds =
 	| "unnecessaryDependency"
 	| "unstableDependency";
 
+type RuleContext = Context<readonly [Partial<UseExhaustiveDependenciesOptions>], MessageIds>;
+
+function isCallbackFunctionNode(node: ESTree.Node | undefined): node is CallbackFunction {
+	return (
+		node?.type === "ArrowFunctionExpression" ||
+		node?.type === "FunctionExpression" ||
+		node?.type === "FunctionDeclaration"
+	);
+}
+
+function getRequiredCaptures(
+	captures: ReadonlyArray<CaptureInfo>,
+	stableHooks: Map<string, StableResult>,
+): ReadonlyArray<CaptureInfo> {
+	return captures.filter(
+		(capture) => capture.forceDependency || !isStableValue(capture.variable, capture.name, stableHooks),
+	);
+}
+
+function reportMissingDependenciesArray(
+	context: RuleContext,
+	node: ESTree.CallExpression,
+	closureArgument: ESTree.Node,
+	requiredCaptures: ReadonlyArray<CaptureInfo>,
+): void {
+	if (requiredCaptures.length === 0) return;
+
+	const missingNames = [...new Set(requiredCaptures.map(returnName))].join(", ");
+	const uniqueDependencies = [...new Set(requiredCaptures.map(({ usagePath }) => usagePath))].toSorted();
+	const dependenciesString = `[${uniqueDependencies.join(", ")}]`;
+
+	context.report({
+		data: { deps: missingNames },
+		fix(fixer): Fix {
+			return fixer.insertTextAfter(closureArgument, `, ${dependenciesString}`);
+		},
+		messageId: "missingDependenciesArray",
+		node,
+		suggest: [
+			{
+				data: { dependencies: dependenciesString },
+				fix(fixer): Fix {
+					return fixer.insertTextAfter(closureArgument, `, ${dependenciesString}`);
+				},
+				messageId: "addDependenciesArraySuggestion",
+			},
+		],
+	});
+}
+
+function getRootIdentifierName(node: ESTree.Node): string | undefined {
+	const rootIdentifier = getRootIdentifier(node);
+	return rootIdentifier?.type === "Identifier" ? rootIdentifier.name : undefined;
+}
+
+function getMatchingCaptures(
+	captures: ReadonlyArray<CaptureInfo>,
+	dependency: DependencyInfo,
+): ReadonlyArray<CaptureInfo> {
+	const dependencyName = getRootIdentifierName(dependency.node);
+	if (dependencyName === undefined) return [];
+
+	return captures.filter((capture) => getRootIdentifierName(capture.node) === dependencyName);
+}
+
+function isStableDependency(
+	matchingCaptures: ReadonlyArray<CaptureInfo>,
+	stableHooks: Map<string, StableResult>,
+): boolean {
+	return (
+		matchingCaptures.length > 0 &&
+		matchingCaptures.every(
+			(capture) => !capture.forceDependency && isStableValue(capture.variable, capture.name, stableHooks),
+		)
+	);
+}
+
+function reportUnnecessaryDependencies(
+	context: RuleContext,
+	dependencies: ReadonlyArray<DependencyInfo>,
+	captures: ReadonlyArray<CaptureInfo>,
+	dependenciesArray: ESTree.ArrayExpression,
+	stableHooks: Map<string, StableResult>,
+	reportUnnecessary: boolean,
+	reportStableDependencies: boolean,
+): void {
+	for (const dependency of dependencies) {
+		const matchingCaptures = getMatchingCaptures(captures, dependency);
+		if (matchingCaptures.length === 0) {
+			if (reportUnnecessary) reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
+			continue;
+		}
+
+		if (reportStableDependencies && isStableDependency(matchingCaptures, stableHooks)) {
+			reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
+			continue;
+		}
+
+		const maxCaptureDepth = Math.max(...matchingCaptures.map(({ depth }) => depth));
+		if (reportUnnecessary && dependency.depth > maxCaptureDepth) {
+			reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
+		}
+	}
+}
+
+function dependencyCoversCapture(
+	dependency: DependencyInfo,
+	capture: CaptureInfo,
+	resolveExpressionDependencies: boolean,
+): boolean {
+	const dependencyRootIdentifier = getRootIdentifier(dependency.node);
+	if (dependencyRootIdentifier?.type === "Identifier" && dependency.depth <= capture.depth) {
+		return dependencyRootIdentifier.name === getRootIdentifierName(capture.node);
+	}
+
+	return (
+		resolveExpressionDependencies &&
+		collectIdentifierNames(dependency.node).includes(getRootIdentifierName(capture.node) ?? "")
+	);
+}
+
+function collectMissingCaptures(
+	captures: ReadonlyArray<CaptureInfo>,
+	dependencies: ReadonlyArray<DependencyInfo>,
+	stableHooks: Map<string, StableResult>,
+	resolveExpressionDependencies: boolean,
+): ReadonlyArray<CaptureInfo> {
+	const missingCaptures = new Array<CaptureInfo>();
+	for (const capture of getRequiredCaptures(captures, stableHooks)) {
+		if (getRootIdentifierName(capture.node) === undefined) continue;
+		if (
+			dependencies.some((dependency) =>
+				dependencyCoversCapture(dependency, capture, resolveExpressionDependencies),
+			)
+		) {
+			continue;
+		}
+		missingCaptures.push(capture);
+	}
+	return missingCaptures;
+}
+
+function reportMissingCaptures(
+	context: RuleContext,
+	dependenciesArray: ESTree.ArrayExpression,
+	dependencies: ReadonlyArray<DependencyInfo>,
+	missingCaptures: ReadonlyArray<CaptureInfo>,
+): void {
+	if (missingCaptures.length === 0) return;
+
+	const dependencyNames = dependencies.map(({ name }) => name);
+	const missingPaths = missingCaptures.map(({ usagePath }) => usagePath);
+	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted().join(", ")}]`;
+	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
+	const firstMissing = missingCaptures.at(0);
+
+	if (missingCaptures.length === 1 && firstMissing !== undefined) {
+		context.report({
+			data: { name: firstMissing.usagePath },
+			fix(fixer): Fix {
+				return fixer.replaceText(dependenciesArray, newDependenciesString);
+			},
+			messageId: "missingDependency",
+			node: reportNode,
+			suggest: [
+				{
+					data: { name: firstMissing.usagePath },
+					fix(fixer): Fix {
+						return fixer.replaceText(dependenciesArray, newDependenciesString);
+					},
+					messageId: "addDependencySuggestion",
+				},
+			],
+		});
+		return;
+	}
+
+	context.report({
+		data: { names: missingPaths.join(", ") },
+		fix(fixer): Fix {
+			return fixer.replaceText(dependenciesArray, newDependenciesString);
+		},
+		messageId: "missingDependencies",
+		node: reportNode,
+		suggest: [
+			{
+				fix(fixer): Fix {
+					return fixer.replaceText(dependenciesArray, newDependenciesString);
+				},
+				messageId: "addMissingDependenciesSuggestion",
+			},
+		],
+	});
+}
+
+function getInitialNode(capture: CaptureInfo): ESTree.Node | undefined {
+	const variableDefinition = capture.variable?.defs[0];
+	return variableDefinition?.node.type === "VariableDeclarator"
+		? (variableDefinition.node.init ?? undefined)
+		: undefined;
+}
+
+function reportUnstableDependencies(
+	context: RuleContext,
+	captures: ReadonlyArray<CaptureInfo>,
+	dependencies: ReadonlyArray<DependencyInfo>,
+	stableHooks: Map<string, StableResult>,
+): void {
+	for (const capture of getRequiredCaptures(captures, stableHooks)) {
+		const captureName = getRootIdentifierName(capture.node);
+		if (captureName === undefined) continue;
+
+		for (const dependency of dependencies) {
+			const dependencyName = getRootIdentifierName(dependency.node);
+			const isMatch = dependencyName === captureName && dependency.depth === capture.depth;
+			if (!isMatch) continue;
+
+			if (dependency.depth === 0 && isUnstableValue(getInitialNode(capture))) {
+				context.report({
+					data: { name: capture.usagePath },
+					messageId: "unstableDependency",
+					node: dependency.node,
+				});
+			}
+			break;
+		}
+	}
+}
+
 const useExhaustiveDependencies = defineRule({
 	create(context): Visitor {
 		const [options] = context.options;
@@ -697,6 +959,20 @@ const useExhaustiveDependencies = defineRule({
 			return scope;
 		}
 
+		function resolveClosureFunction(
+			closureArgument: ESTree.Node,
+			callExpression: ESTree.CallExpression,
+		): CallbackFunction | undefined {
+			if (closureArgument.type === "ArrowFunctionExpression") return closureArgument;
+
+			const canResolveClosure =
+				FUNCTION_DECLARATIONS.has(closureArgument.type) || closureArgument.type === "Identifier";
+			if (!canResolveClosure) return undefined;
+
+			const resolved = resolveFunctionReference(closureArgument, getScope(callExpression));
+			return isCallbackFunctionNode(resolved) ? resolved : undefined;
+		}
+
 		return {
 			CallExpression(node): void {
 				const hookName = getHookName(node);
@@ -711,26 +987,7 @@ const useExhaustiveDependencies = defineRule({
 				const closureArgument = parameters[closureIndex];
 				if (closureArgument === undefined) return;
 
-				let closureFunction: CallbackFunction | undefined;
-
-				if (closureArgument.type === "ArrowFunctionExpression") closureFunction = closureArgument;
-				else if (
-					closureArgument.type === "FunctionExpression" ||
-					closureArgument.type === "FunctionDeclaration" ||
-					closureArgument.type === "Identifier"
-				) {
-					const scope = getScope(node);
-					const resolved = resolveFunctionReference(closureArgument, scope);
-					if (
-						resolved &&
-						(resolved.type === "ArrowFunctionExpression" ||
-							resolved.type === "FunctionExpression" ||
-							resolved.type === "FunctionDeclaration")
-					) {
-						closureFunction = resolved;
-					}
-				}
-
+				const closureFunction = resolveClosureFunction(closureArgument, node);
 				if (!closureFunction) return;
 
 				const dependenciesArgument = parameters[dependenciesIndex];
@@ -738,37 +995,9 @@ const useExhaustiveDependencies = defineRule({
 					const captures = collectCaptures(closureFunction, context.sourceCode).filter(
 						(capture) => !isSelfReferenceCapture(capture, node),
 					);
+					const requiredCaptures = getRequiredCaptures(captures, stableHooks);
 
-					const requiredCaptures = captures.filter(
-						(capture) =>
-							capture.forceDependency || !isStableValue(capture.variable, capture.name, stableHooks),
-					);
-
-					if (requiredCaptures.length > 0) {
-						const missingNames = [...new Set(requiredCaptures.map(returnName))].join(", ");
-
-						const usagePaths = requiredCaptures.map(({ usagePath }) => usagePath);
-						const uniqueDependencies = [...new Set(usagePaths)].toSorted();
-						const dependenciesString = `[${uniqueDependencies.join(", ")}]`;
-
-						context.report({
-							data: { deps: missingNames },
-							fix(fixer): Fix {
-								return fixer.insertTextAfter(closureArgument, `, ${dependenciesString}`);
-							},
-							messageId: "missingDependenciesArray",
-							node,
-							suggest: [
-								{
-									data: { dependencies: dependenciesString },
-									fix(fixer): Fix {
-										return fixer.insertTextAfter(closureArgument, `, ${dependenciesString}`);
-									},
-									messageId: "addDependenciesArraySuggestion",
-								},
-							],
-						});
-					}
+					reportMissingDependenciesArray(context, node, closureArgument, requiredCaptures);
 					return;
 				}
 
@@ -781,165 +1010,29 @@ const useExhaustiveDependencies = defineRule({
 
 				const dependencies = parseDependencies(dependenciesArray, context.sourceCode);
 
-				for (const dependency of dependencies) {
-					const dependencyRootIdentifier = getRootIdentifier(dependency.node);
-					if (!dependencyRootIdentifier) continue;
-					if (dependencyRootIdentifier.type !== "Identifier") continue;
-
-					const dependencyName = dependencyRootIdentifier.name;
-
-					const matchingCaptures = captures.filter((capture) => {
-						const captureNode = getRootIdentifier(capture.node);
-						return (
-							getRootIdentifier(capture.node)?.type === "Identifier" &&
-							captureNode !== undefined &&
-							"name" in captureNode &&
-							captureNode.name === dependencyName
-						);
-					});
-
-					const isStableDep =
-						matchingCaptures.length > 0 &&
-						matchingCaptures.every(
-							(capture) =>
-								!capture.forceDependency && isStableValue(capture.variable, capture.name, stableHooks),
-						);
-
-					if (matchingCaptures.length === 0) {
-						if (resolvedOptions.reportUnnecessaryDependencies) {
-							reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
-						}
-						continue;
-					}
-
-					if (isStableDep && resolvedOptions.reportUnnecessaryStableDependencies) {
-						reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
-						continue;
-					}
-
-					const maxCaptureDepth = Math.max(...matchingCaptures.map(({ depth }) => depth));
-					if (dependency.depth > maxCaptureDepth && resolvedOptions.reportUnnecessaryDependencies) {
-						reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
-					}
+				if (
+					resolvedOptions.reportUnnecessaryDependencies ||
+					resolvedOptions.reportUnnecessaryStableDependencies
+				) {
+					reportUnnecessaryDependencies(
+						context,
+						dependencies,
+						captures,
+						dependenciesArray,
+						stableHooks,
+						resolvedOptions.reportUnnecessaryDependencies,
+						resolvedOptions.reportUnnecessaryStableDependencies,
+					);
 				}
 
-				const missingCaptures = new Array<CaptureInfo>();
-				for (const capture of captures) {
-					if (!capture.forceDependency && isStableValue(capture.variable, capture.name, stableHooks)) {
-						continue;
-					}
-
-					const rootIdentifier = getRootIdentifier(capture.node);
-					if (rootIdentifier?.type !== "Identifier") continue;
-
-					const captureName = rootIdentifier.name;
-					let isInDependencies = false;
-
-					for (const dependency of dependencies) {
-						const dependencyRootIdentifier = getRootIdentifier(dependency.node);
-
-						if (dependencyRootIdentifier?.type === "Identifier" && dependency.depth <= capture.depth) {
-							const dependencyName = dependencyRootIdentifier.name;
-							if (dependencyName === captureName) {
-								isInDependencies = true;
-								break;
-							}
-						} else if (resolvedOptions.resolveExpressionDependencies) {
-							const identifierNames = collectIdentifierNames(dependency.node);
-							if (identifierNames.includes(captureName)) {
-								isInDependencies = true;
-								break;
-							}
-						}
-					}
-
-					if (!isInDependencies) missingCaptures.push(capture);
-				}
-
-				if (missingCaptures.length > 0) {
-					const dependencyNames = dependencies.map(({ name }) => name);
-					const missingPaths = missingCaptures.map(({ usagePath }) => usagePath);
-					const newDependencies = [...dependencyNames, ...missingPaths].toSorted();
-					const newDependenciesString = `[${newDependencies.join(", ")}]`;
-					const lastDependency = dependencies.at(-1);
-					const firstMissing = missingCaptures.at(0);
-
-					if (missingCaptures.length === 1 && firstMissing) {
-						context.report({
-							data: { name: firstMissing.usagePath },
-							fix(fixer): Fix {
-								return fixer.replaceText(dependenciesArray, newDependenciesString);
-							},
-							messageId: "missingDependency",
-							node: lastDependency?.node ?? dependenciesArray,
-							suggest: [
-								{
-									data: { name: firstMissing.usagePath },
-									fix(fixer): Fix {
-										return fixer.replaceText(dependenciesArray, newDependenciesString);
-									},
-									messageId: "addDependencySuggestion",
-								},
-							],
-						});
-					} else {
-						const missingNames = missingPaths.join(", ");
-						context.report({
-							data: { names: missingNames },
-							fix(fixer): Fix {
-								return fixer.replaceText(dependenciesArray, newDependenciesString);
-							},
-							messageId: "missingDependencies",
-							node: lastDependency?.node ?? dependenciesArray,
-							suggest: [
-								{
-									fix(fixer): Fix {
-										return fixer.replaceText(dependenciesArray, newDependenciesString);
-									},
-									messageId: "addMissingDependenciesSuggestion",
-								},
-							],
-						});
-					}
-				}
-
-				for (const capture of captures) {
-					if (!capture.forceDependency && isStableValue(capture.variable, capture.name, stableHooks)) {
-						continue;
-					}
-
-					const rootIdentifier = getRootIdentifier(capture.node);
-					if (rootIdentifier?.type !== "Identifier") continue;
-
-					const captureName = rootIdentifier.name;
-
-					for (const dependency of dependencies) {
-						const dependencyRootIdentifier = getRootIdentifier(dependency.node);
-						if (dependencyRootIdentifier?.type !== "Identifier") continue;
-
-						const dependencyName = dependencyRootIdentifier.name;
-						const isMatch = dependencyName === captureName && dependency.depth === capture.depth;
-						const isDirectIdentifier = dependency.depth === 0;
-
-						if (isMatch && isDirectIdentifier) {
-							const variableDefinition = capture.variable?.defs[0];
-							let initialNode: ESTree.Node | undefined;
-							if (variableDefinition?.node.type === "VariableDeclarator") {
-								initialNode = variableDefinition.node.init ?? undefined;
-							}
-
-							if (isUnstableValue(initialNode)) {
-								context.report({
-									data: { name: capture.usagePath },
-									messageId: "unstableDependency",
-									node: dependency.node,
-								});
-							}
-							break;
-						}
-						if (isMatch) break;
-					}
-				}
+				const missingCaptures = collectMissingCaptures(
+					captures,
+					dependencies,
+					stableHooks,
+					resolvedOptions.resolveExpressionDependencies,
+				);
+				reportMissingCaptures(context, dependenciesArray, dependencies, missingCaptures);
+				reportUnstableDependencies(context, captures, dependencies, stableHooks);
 			},
 		};
 	},

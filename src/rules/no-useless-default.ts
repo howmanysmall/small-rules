@@ -810,44 +810,57 @@ const noUselessDefault = defineRule({
 			const trackedInstances = new Map<string, TrackedInstance>();
 
 			for (const statementNode of statementNodes) {
-				switch (statementNode.type) {
-					case "ExpressionStatement": {
-						const expression = unwrapExpression(statementNode.expression);
+				inspectStatementNode(statementNode, trackedInstances);
+			}
+		}
 
-						if (expression.type === "AssignmentExpression") {
-							reportUselessDefaultAssignment(statementNode, expression, trackedInstances);
-							clearTrackedInstancesForEscapeAssignment(expression, trackedInstances);
-							break;
-						}
+		function inspectStatementNode(
+			statementNode: ESTree.Node,
+			trackedInstances: Map<string, TrackedInstance>,
+		): void {
+			if (statementNode.type === "ExpressionStatement") {
+				inspectExpressionStatement(statementNode, trackedInstances);
+				return;
+			}
 
-						if (expression.type === "CallExpression") {
-							clearTrackedInstancesForCallExpression(expression, trackedInstances);
-						}
-						break;
-					}
+			if (statementNode.type === "ReturnStatement") {
+				clearTrackedInstancesForReturnStatement(statementNode, trackedInstances);
+				return;
+			}
 
-					case "ReturnStatement": {
-						clearTrackedInstancesForReturnStatement(statementNode, trackedInstances);
-						break;
-					}
+			if (statementNode.type === "VariableDeclaration") trackConstInstances(statementNode, trackedInstances);
+		}
 
-					case "VariableDeclaration": {
-						if (statementNode.kind !== "const") break;
+		function inspectExpressionStatement(
+			statementNode: ESTree.ExpressionStatement,
+			trackedInstances: Map<string, TrackedInstance>,
+		): void {
+			const expression = unwrapExpression(statementNode.expression);
 
-						for (const declaration of statementNode.declarations) {
-							if (declaration.id.type !== "Identifier" || declaration.init === null) continue;
+			if (expression.type === "AssignmentExpression") {
+				reportUselessDefaultAssignment(statementNode, expression, trackedInstances);
+				clearTrackedInstancesForEscapeAssignment(expression, trackedInstances);
+				return;
+			}
 
-							const className = getTrackedInstanceClassName(declaration.init);
-							if (className === undefined) continue;
+			if (expression.type === "CallExpression") {
+				clearTrackedInstancesForCallExpression(expression, trackedInstances);
+			}
+		}
 
-							trackedInstances.set(declaration.id.name, { className });
-						}
-						break;
-					}
+		function trackConstInstances(
+			statementNode: ESTree.VariableDeclaration,
+			trackedInstances: Map<string, TrackedInstance>,
+		): void {
+			if (statementNode.kind !== "const") return;
 
-					default:
-						break;
-				}
+			for (const declaration of statementNode.declarations) {
+				if (declaration.id.type !== "Identifier" || declaration.init === null) continue;
+
+				const className = getTrackedInstanceClassName(declaration.init);
+				if (className === undefined) continue;
+
+				trackedInstances.set(declaration.id.name, { className });
 			}
 		}
 

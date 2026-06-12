@@ -27,57 +27,59 @@ export function isExpressionSideEffectSafe(expression: ESTree.Expression): boole
 	if (unwrapped.type === "Identifier") return true;
 	if (isThisExpression(unwrapped)) return true;
 
-	if (isMemberExpression(unwrapped)) {
-		if (unwrapped.optional || unwrapped.object.type === "Super") return false;
-		if (!isExpressionSideEffectSafe(unwrapped.object)) return false;
-		if (!unwrapped.computed) return true;
-		return isExpressionSideEffectSafe(unwrapped.property);
-	}
-
+	if (isMemberExpression(unwrapped)) return isMemberSideEffectSafe(unwrapped);
 	if (isUnaryExpression(unwrapped)) {
-		if (unwrapped.operator === "delete") return false;
-		return isExpressionSideEffectSafe(unwrapped.argument);
+		return unwrapped.operator !== "delete" && isExpressionSideEffectSafe(unwrapped.argument);
 	}
-
-	if (isBinaryExpression(unwrapped) || isLogicalExpression(unwrapped)) {
-		return isExpressionSideEffectSafe(unwrapped.left) && isExpressionSideEffectSafe(unwrapped.right);
-	}
-
-	if (isConditionalExpression(unwrapped)) {
-		return (
-			isExpressionSideEffectSafe(unwrapped.test) &&
-			isExpressionSideEffectSafe(unwrapped.consequent) &&
-			isExpressionSideEffectSafe(unwrapped.alternate)
-		);
-	}
-
-	if (isTemplateLiteral(unwrapped)) {
-		for (const part of unwrapped.expressions) if (!isExpressionSideEffectSafe(part)) return false;
-		return true;
-	}
-
-	if (isArrayExpression(unwrapped)) {
-		for (const element of unwrapped.elements) {
-			if (element === null) continue;
-			if (element.type === "SpreadElement") return false;
-			if (!isExpressionSideEffectSafe(element)) return false;
-		}
-		return true;
-	}
-
-	if (isObjectExpression(unwrapped)) {
-		for (const property of unwrapped.properties) {
-			if (property.type === "SpreadElement" || property.kind !== "init" || property.method) return false;
-			if (property.computed && !isComputedPropertyKeySafe(property.key)) return false;
-			if (!isExpressionSideEffectSafe(property.value)) return false;
-		}
-		return true;
-	}
-
-	if (isSequenceExpression(unwrapped)) {
-		for (const value of unwrapped.expressions) if (!isExpressionSideEffectSafe(value)) return false;
-		return true;
-	}
+	if (isBinaryExpression(unwrapped) || isLogicalExpression(unwrapped)) return arePairExpressionsSafe(unwrapped);
+	if (isConditionalExpression(unwrapped)) return isConditionalSideEffectSafe(unwrapped);
+	if (isTemplateLiteral(unwrapped)) return areExpressionsSafe(unwrapped.expressions);
+	if (isArrayExpression(unwrapped)) return isArraySideEffectSafe(unwrapped);
+	if (isObjectExpression(unwrapped)) return isObjectSideEffectSafe(unwrapped);
+	if (isSequenceExpression(unwrapped)) return areExpressionsSafe(unwrapped.expressions);
 
 	return isLiteral(unwrapped);
+}
+
+function isMemberSideEffectSafe(expression: ESTree.MemberExpression): boolean {
+	if (expression.optional || expression.object.type === "Super") return false;
+	if (!isExpressionSideEffectSafe(expression.object)) return false;
+	return !expression.computed || isExpressionSideEffectSafe(expression.property);
+}
+
+function arePairExpressionsSafe(expression: ESTree.BinaryExpression | ESTree.LogicalExpression): boolean {
+	return isExpressionSideEffectSafe(expression.left) && isExpressionSideEffectSafe(expression.right);
+}
+
+function isConditionalSideEffectSafe(expression: ESTree.ConditionalExpression): boolean {
+	return (
+		isExpressionSideEffectSafe(expression.test) &&
+		isExpressionSideEffectSafe(expression.consequent) &&
+		isExpressionSideEffectSafe(expression.alternate)
+	);
+}
+
+function isArraySideEffectSafe(expression: ESTree.ArrayExpression): boolean {
+	for (const element of expression.elements) {
+		if (element === null) continue;
+		if (element.type === "SpreadElement") return false;
+		if (!isExpressionSideEffectSafe(element)) return false;
+	}
+
+	return true;
+}
+
+function isObjectSideEffectSafe(expression: ESTree.ObjectExpression): boolean {
+	for (const property of expression.properties) {
+		if (property.type === "SpreadElement" || property.kind !== "init" || property.method) return false;
+		if (property.computed && !isComputedPropertyKeySafe(property.key)) return false;
+		if (!isExpressionSideEffectSafe(property.value)) return false;
+	}
+
+	return true;
+}
+
+function areExpressionsSafe(expressions: ReadonlyArray<ESTree.Expression>): boolean {
+	for (const expression of expressions) if (!isExpressionSideEffectSafe(expression)) return false;
+	return true;
 }

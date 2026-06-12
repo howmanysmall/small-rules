@@ -26,6 +26,17 @@ interface FixableConstant {
 	readonly reportNode: ESTree.BindingIdentifier;
 }
 
+interface UselessConstantCandidate {
+	readonly declarationNode: ESTree.VariableDeclaration;
+	readonly enclosingDeclaration: ESTree.VariableDeclaration;
+	readonly initializer: ESTree.Expression;
+	readonly name: string;
+	readonly referenceIdentifier: ESTree.BindingIdentifier;
+	readonly reportNode: ESTree.BindingIdentifier;
+}
+
+type ScopeVariable = Scope["variables"][number];
+
 function collectAllScopes(root: Scope): Array<Scope> {
 	const scopes: Array<Scope> = [];
 	let size = 0;
@@ -98,32 +109,16 @@ function getCallRootIdentifierName(node: ESTree.Node): string | undefined {
 
 function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: ReadonlySet<string>): boolean {
 	switch (node.type) {
-		case "ArrayExpression": {
-			for (const element of node.elements) {
-				if (element === null || !hasOnlyRelocatableCalls(element, staticGlobalFactories)) return false;
-			}
-			return true;
-		}
+		case "ArrayExpression":
+			return hasOnlyRelocatableArrayElements(node, staticGlobalFactories);
 
 		case "BinaryExpression":
-		case "LogicalExpression": {
-			return (
-				hasOnlyRelocatableCalls(node.left, staticGlobalFactories) &&
-				hasOnlyRelocatableCalls(node.right, staticGlobalFactories)
-			);
-		}
+		case "LogicalExpression":
+			return hasOnlyRelocatablePair(node, staticGlobalFactories);
 
 		case "CallExpression":
-		case "NewExpression": {
-			const rootName = getCallRootIdentifierName(node.callee);
-			if (rootName === undefined || !staticGlobalFactories.has(rootName)) return false;
-			if (!hasOnlyRelocatableCalls(node.callee, staticGlobalFactories)) return false;
-
-			for (const argument of node.arguments) {
-				if (!hasOnlyRelocatableCalls(argument, staticGlobalFactories)) return false;
-			}
-			return true;
-		}
+		case "NewExpression":
+			return hasOnlyRelocatableCall(node, staticGlobalFactories);
 
 		case "ChainExpression":
 		case "ParenthesizedExpression":
@@ -135,46 +130,26 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 			return hasOnlyRelocatableCalls(node.expression, staticGlobalFactories);
 		}
 
-		case "ConditionalExpression": {
-			return (
-				hasOnlyRelocatableCalls(node.test, staticGlobalFactories) &&
-				hasOnlyRelocatableCalls(node.consequent, staticGlobalFactories) &&
-				hasOnlyRelocatableCalls(node.alternate, staticGlobalFactories)
-			);
-		}
+		case "ConditionalExpression":
+			return hasOnlyRelocatableConditional(node, staticGlobalFactories);
 
-		case "MemberExpression": {
-			return (
-				hasOnlyRelocatableCalls(node.object, staticGlobalFactories) &&
-				(!node.computed || hasOnlyRelocatableCalls(node.property, staticGlobalFactories))
-			);
-		}
+		case "MemberExpression":
+			return hasOnlyRelocatableMember(node, staticGlobalFactories);
 
-		case "ObjectExpression": {
-			for (const property of node.properties) {
-				if (property.type !== "Property") return false;
-				if (property.computed && !hasOnlyRelocatableCalls(property.key, staticGlobalFactories)) return false;
-				if (!hasOnlyRelocatableCalls(property.value, staticGlobalFactories)) return false;
-			}
-			return true;
-		}
+		case "ObjectExpression":
+			return hasOnlyRelocatableObjectProperties(node, staticGlobalFactories);
 
 		case "SequenceExpression": {
-			for (const expression of node.expressions) {
-				if (!hasOnlyRelocatableCalls(expression, staticGlobalFactories)) return false;
-			}
-			return node.expressions.length > 0;
+			return (
+				node.expressions.length > 0 && hasOnlyRelocatableExpressions(node.expressions, staticGlobalFactories)
+			);
 		}
 
 		case "SpreadElement":
 			return false;
 
-		case "TemplateLiteral": {
-			for (const expression of node.expressions) {
-				if (!hasOnlyRelocatableCalls(expression, staticGlobalFactories)) return false;
-			}
-			return true;
-		}
+		case "TemplateLiteral":
+			return hasOnlyRelocatableExpressions(node.expressions, staticGlobalFactories);
 
 		case "UnaryExpression":
 			return hasOnlyRelocatableCalls(node.argument, staticGlobalFactories);
@@ -182,6 +157,79 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 		default:
 			return true;
 	}
+}
+
+function hasOnlyRelocatableArrayElements(
+	node: ESTree.ArrayExpression,
+	staticGlobalFactories: ReadonlySet<string>,
+): boolean {
+	for (const element of node.elements) {
+		if (element === null || !hasOnlyRelocatableCalls(element, staticGlobalFactories)) return false;
+	}
+
+	return true;
+}
+
+function hasOnlyRelocatablePair(
+	node: ESTree.BinaryExpression | ESTree.LogicalExpression | ESTree.PrivateInExpression,
+	staticGlobalFactories: ReadonlySet<string>,
+): boolean {
+	return (
+		hasOnlyRelocatableCalls(node.left, staticGlobalFactories) &&
+		hasOnlyRelocatableCalls(node.right, staticGlobalFactories)
+	);
+}
+
+function hasOnlyRelocatableCall(
+	node: ESTree.CallExpression | ESTree.NewExpression,
+	staticGlobalFactories: ReadonlySet<string>,
+): boolean {
+	const rootName = getCallRootIdentifierName(node.callee);
+	if (rootName === undefined || !staticGlobalFactories.has(rootName)) return false;
+	if (!hasOnlyRelocatableCalls(node.callee, staticGlobalFactories)) return false;
+	return hasOnlyRelocatableExpressions(node.arguments, staticGlobalFactories);
+}
+
+function hasOnlyRelocatableConditional(
+	node: ESTree.ConditionalExpression,
+	staticGlobalFactories: ReadonlySet<string>,
+): boolean {
+	return (
+		hasOnlyRelocatableCalls(node.test, staticGlobalFactories) &&
+		hasOnlyRelocatableCalls(node.consequent, staticGlobalFactories) &&
+		hasOnlyRelocatableCalls(node.alternate, staticGlobalFactories)
+	);
+}
+
+function hasOnlyRelocatableMember(node: ESTree.MemberExpression, staticGlobalFactories: ReadonlySet<string>): boolean {
+	return (
+		hasOnlyRelocatableCalls(node.object, staticGlobalFactories) &&
+		(!node.computed || hasOnlyRelocatableCalls(node.property, staticGlobalFactories))
+	);
+}
+
+function hasOnlyRelocatableObjectProperties(
+	node: ESTree.ObjectExpression,
+	staticGlobalFactories: ReadonlySet<string>,
+): boolean {
+	for (const property of node.properties) {
+		if (property.type !== "Property") return false;
+		if (property.computed && !hasOnlyRelocatableCalls(property.key, staticGlobalFactories)) return false;
+		if (!hasOnlyRelocatableCalls(property.value, staticGlobalFactories)) return false;
+	}
+
+	return true;
+}
+
+function hasOnlyRelocatableExpressions(
+	expressions: ReadonlyArray<ESTree.Node>,
+	staticGlobalFactories: ReadonlySet<string>,
+): boolean {
+	for (const expression of expressions) {
+		if (!hasOnlyRelocatableCalls(expression, staticGlobalFactories)) return false;
+	}
+
+	return true;
 }
 
 function isAutoInlineSafeInitializer(sourceCode: SourceCode, node: ESTree.Expression): boolean {
@@ -224,8 +272,8 @@ function getDeclarationRemovalRange(
 		break;
 	}
 
-	// biome-ignore lint/nursery/useDestructuring: produces ugly
-	let end = declarationNode.range[1];
+	const [, declarationEnd] = declarationNode.range;
+	let end = declarationEnd;
 	while (end < sourceText.length) {
 		const nextCharacter = sourceText[end];
 		if (nextCharacter === "\n" || nextCharacter === "\r") {
@@ -279,119 +327,143 @@ const noUselessConstants = defineRule({
 			return false;
 		}
 
+		function getSingleReadOnlyReference(
+			scope: Scope,
+			scopeVariable: ScopeVariable,
+		): Scope["references"][number] | undefined {
+			let readOnlyReference: Scope["references"][number] | undefined;
+			let readOnlyCount = 0;
+			for (const scopeReference of scopeVariable.references) {
+				if (!scopeReference.isReadOnly()) continue;
+				readOnlyCount += 1;
+				readOnlyReference = scopeReference;
+			}
+
+			if (
+				readOnlyCount !== 1 ||
+				readOnlyReference === undefined ||
+				readOnlyReference.from !== scope ||
+				sourceCode.getScope(readOnlyReference.identifier) !== scope
+			) {
+				return undefined;
+			}
+
+			return readOnlyReference;
+		}
+
+		function getUselessConstantCandidate(
+			scope: Scope,
+			scopeVariable: ScopeVariable,
+		): UselessConstantCandidate | undefined {
+			const { name } = scopeVariable;
+			if (!SCREAMING_SNAKE_CASE.test(name)) return undefined;
+
+			const [variableDefinition] = scopeVariable.defs;
+			if (variableDefinition?.type !== "Variable") return undefined;
+
+			const declaratorNode = variableDefinition.node;
+			if (!(isVariableDeclarator(declaratorNode) && isBindingIdentifier(declaratorNode.id))) return undefined;
+			if (declaratorNode.init === null) return undefined;
+
+			const declarationNode = variableDefinition.parent;
+			if (declarationNode === null || !isVariableDeclaration(declarationNode)) return undefined;
+			if (declarationNode.kind !== "const" || declarationNode.declarations.length !== 1) return undefined;
+			if (isExportNamedDeclaration(declarationNode.parent)) return undefined;
+
+			const initializer = declaratorNode.init;
+			if (isFunctionLikeInitializer(initializer)) return undefined;
+			if (isObjectLikeInitializer(initializer, ignoredCallPatternMatchers, sourceCode)) return undefined;
+
+			const readOnlyReference = getSingleReadOnlyReference(scope, scopeVariable);
+			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) return undefined;
+
+			const enclosingDeclarator = findEnclosingConstDeclarator(readOnlyReference.identifier);
+			if (enclosingDeclarator === undefined) return undefined;
+
+			const enclosingDeclaration = enclosingDeclarator.parent;
+			if (!isVariableDeclaration(enclosingDeclaration) || enclosingDeclaration.kind !== "const") return undefined;
+
+			return {
+				declarationNode,
+				enclosingDeclaration,
+				initializer,
+				name,
+				referenceIdentifier: readOnlyReference.identifier,
+				reportNode: declaratorNode.id,
+			};
+		}
+
+		function inspectScope(scope: Scope): void {
+			if (scope.type === "global") return;
+
+			const fixableConstants = new Array<FixableConstant>();
+			for (const scopeVariable of scope.variables) {
+				const candidate = getUselessConstantCandidate(scope, scopeVariable);
+				if (candidate === undefined) continue;
+
+				const canFix =
+					(areAdjacentStatements(candidate.declarationNode, candidate.enclosingDeclaration) ||
+						isAutoInlineSafeInitializer(sourceCode, candidate.initializer)) &&
+					!hasAttachedComments(candidate.declarationNode);
+
+				if (!canFix) {
+					context.report({
+						data: { name: candidate.name },
+						messageId: "uselessConstantNoFix",
+						node: candidate.reportNode,
+					});
+					continue;
+				}
+
+				fixableConstants.push({
+					declarationNode: candidate.declarationNode,
+					initializerText: sourceCode.getText(candidate.initializer),
+					name: candidate.name,
+					referenceIdentifier: candidate.referenceIdentifier,
+					reportNode: candidate.reportNode,
+				});
+			}
+
+			reportFixableConstants(fixableConstants);
+		}
+
+		function reportFixableConstants(fixableConstants: ReadonlyArray<FixableConstant>): void {
+			const [firstFixableConstant] = fixableConstants;
+			if (firstFixableConstant === undefined) return;
+
+			context.report({
+				data: {
+					name: firstFixableConstant.name,
+					names: fixableConstants.map((constant) => constant.name).join(", "),
+				},
+				fix(fixer): Array<Fix> {
+					const fixes: Array<Fix> = [];
+					let size = 0;
+
+					for (const constant of fixableConstants) {
+						fixes[size++] = fixer.replaceText(constant.referenceIdentifier, constant.initializerText);
+					}
+
+					for (const constant of fixableConstants) {
+						fixes[size++] = fixer.removeRange(
+							getDeclarationRemovalRange(sourceCode.text, constant.declarationNode),
+						);
+					}
+
+					return fixes;
+				},
+				messageId: fixableConstants.length === 1 ? "uselessConstant" : "uselessConstants",
+				node: firstFixableConstant.reportNode,
+			});
+		}
+
 		return {
 			"Program:exit"(programNode): void {
 				const programScope = sourceCode.getScope(programNode);
 				const allScopes = collectAllScopes(programScope);
 
 				for (const scope of allScopes) {
-					if (scope.type === "global") continue;
-
-					const fixableConstants = new Array<FixableConstant>();
-					for (const scopeVariable of scope.variables) {
-						const { name } = scopeVariable;
-						if (!SCREAMING_SNAKE_CASE.test(name)) continue;
-
-						const [variableDefinition] = scopeVariable.defs;
-						if (variableDefinition?.type !== "Variable") continue;
-
-						const declaratorNode = variableDefinition.node;
-						if (!(isVariableDeclarator(declaratorNode) && isBindingIdentifier(declaratorNode.id))) continue;
-						if (declaratorNode.init === null) continue;
-
-						const declarationNode = variableDefinition.parent;
-						if (declarationNode === null || !isVariableDeclaration(declarationNode)) continue;
-						if (declarationNode.kind !== "const" || declarationNode.declarations.length !== 1) continue;
-
-						const declarationParentNode = declarationNode.parent;
-						if (declarationParentNode !== undefined && isExportNamedDeclaration(declarationParentNode)) {
-							continue;
-						}
-
-						const initializer = declaratorNode.init;
-						if (isFunctionLikeInitializer(initializer)) continue;
-						if (isObjectLikeInitializer(initializer, ignoredCallPatternMatchers, sourceCode)) continue;
-
-						let readOnlyReference: Scope["references"][number] | undefined;
-						let readOnlyCount = 0;
-						for (const scopeReference of scopeVariable.references) {
-							if (!scopeReference.isReadOnly()) continue;
-							readOnlyCount += 1;
-							readOnlyReference = scopeReference;
-						}
-						if (
-							readOnlyCount !== 1 ||
-							readOnlyReference === undefined ||
-							readOnlyReference.from !== scope ||
-							sourceCode.getScope(readOnlyReference.identifier) !== scope
-						) {
-							continue;
-						}
-
-						const referenceIdentifier = readOnlyReference.identifier;
-						if (!isBindingIdentifier(referenceIdentifier)) continue;
-
-						const enclosingDeclarator = findEnclosingConstDeclarator(referenceIdentifier);
-						if (enclosingDeclarator === undefined) continue;
-
-						const enclosingDeclaration = enclosingDeclarator.parent;
-						if (!isVariableDeclaration(enclosingDeclaration) || enclosingDeclaration.kind !== "const") {
-							continue;
-						}
-
-						const canFix =
-							(areAdjacentStatements(declarationNode, enclosingDeclaration) ||
-								isAutoInlineSafeInitializer(sourceCode, initializer)) &&
-							!hasAttachedComments(declarationNode);
-
-						if (!canFix) {
-							context.report({
-								data: { name },
-								messageId: "uselessConstantNoFix",
-								node: declaratorNode.id,
-							});
-							continue;
-						}
-
-						fixableConstants.push({
-							declarationNode,
-							initializerText: sourceCode.getText(initializer),
-							name,
-							referenceIdentifier,
-							reportNode: declaratorNode.id,
-						});
-					}
-
-					const [firstFixableConstant] = fixableConstants;
-					if (firstFixableConstant !== undefined) {
-						context.report({
-							data: {
-								name: firstFixableConstant.name,
-								names: fixableConstants.map((constant) => constant.name).join(", "),
-							},
-							fix(fixer): Array<Fix> {
-								const fixes: Array<Fix> = [];
-								let size = 0;
-
-								for (const constant of fixableConstants) {
-									fixes[size++] = fixer.replaceText(
-										constant.referenceIdentifier,
-										constant.initializerText,
-									);
-								}
-
-								for (const constant of fixableConstants) {
-									fixes[size++] = fixer.removeRange(
-										getDeclarationRemovalRange(sourceCode.text, constant.declarationNode),
-									);
-								}
-
-								return fixes;
-							},
-							messageId: fixableConstants.length === 1 ? "uselessConstant" : "uselessConstants",
-							node: firstFixableConstant.reportNode,
-						});
-					}
+					inspectScope(scope);
 				}
 			},
 		} satisfies Visitor;

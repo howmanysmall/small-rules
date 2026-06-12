@@ -49,19 +49,21 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	// biome-ignore lint/nursery/noForIn: needed for AST traversal
 	for (const key in currentNode) {
 		if (!Object.hasOwn(currentNode, key)) continue;
-
-		const childValue = currentNode[key];
-		if (childValue === undefined) continue;
-
-		if (Array.isArray(childValue)) {
-			for (const item of childValue) if (isNode(item) && traverseForThis(item, visited)) return true;
-			continue;
-		}
-
-		if (isNode(childValue) && traverseForThis(childValue, visited)) return true;
+		if (childUsesThis(currentNode[key], visited)) return true;
 	}
 
 	return false;
+}
+
+function childUsesThis(childValue: unknown, visited: WeakSet<ESTree.Node>): boolean {
+	if (childValue === undefined) return false;
+
+	if (Array.isArray(childValue)) {
+		for (const item of childValue) if (isNode(item) && traverseForThis(item, visited)) return true;
+		return false;
+	}
+
+	return isNode(childValue) && traverseForThis(childValue, visited);
 }
 
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {

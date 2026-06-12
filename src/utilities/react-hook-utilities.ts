@@ -29,27 +29,7 @@ export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => voi
 		const current = stack.pop();
 		if (current === undefined) break;
 		callback(current);
-
-		// biome-ignore lint/nursery/noForIn: required for AST traversal
-		for (const key in current) {
-			if (isKeyOfNode(key)) continue;
-
-			const value: unknown = Reflect.get(current, key);
-			if (typeof value !== "object" || value === null) continue;
-
-			if (value === current.parent) continue;
-
-			if (Array.isArray(value)) {
-				for (let index = value.length - 1; index >= 0; index -= 1) {
-					const item = value[index];
-					// oxlint-disable-next-line max-depth
-					if (isNode(item)) stack.push(item);
-				}
-				continue;
-			}
-
-			if (isNode(value)) stack.push(value);
-		}
+		pushChildNodes(current, stack);
 	}
 }
 
@@ -57,18 +37,45 @@ export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) =>
 	callback(node);
 
 	for (const child of Object.values(node)) {
-		if (Array.isArray(child)) {
-			for (const item of child) {
-				if (item === node.parent) continue;
-				if (isNode(item)) walkAstSlop(item, callback);
-			}
-
-			continue;
-		}
-
-		if (child === node.parent) continue;
-		if (isNode(child)) walkAstSlop(child, callback);
+		walkChildSlop(child, node, callback);
 	}
+}
+
+function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
+	// biome-ignore lint/nursery/noForIn: required for AST traversal
+	for (const key in node) {
+		if (isKeyOfNode(key)) continue;
+		pushChildValue(Reflect.get(node, key), node, stack);
+	}
+}
+
+function pushChildValue(value: unknown, parent: ESTree.Node, stack: Array<ESTree.Node>): void {
+	if (typeof value !== "object" || value === null || value === parent.parent) return;
+
+	if (Array.isArray(value)) {
+		pushChildArray(value, parent, stack);
+		return;
+	}
+
+	if (isNode(value)) stack.push(value);
+}
+
+function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, stack: Array<ESTree.Node>): void {
+	for (let index = values.length - 1; index >= 0; index -= 1) {
+		const value = values[index];
+		if (value === parent.parent) continue;
+		if (isNode(value)) stack.push(value);
+	}
+}
+
+function walkChildSlop(value: unknown, parent: ESTree.Node, callback: (child: ESTree.Node) => void): void {
+	if (Array.isArray(value)) {
+		for (const item of value) walkChildSlop(item, parent, callback);
+		return;
+	}
+
+	if (value === parent.parent || !isNode(value)) return;
+	walkAstSlop(value, callback);
 }
 
 export function countSetStateCalls(node: ESTree.Node): number {

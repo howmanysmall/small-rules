@@ -118,6 +118,36 @@ function getIdentifierNameFromExpression(node: ESTree.Expression): string | unde
 	return isIdentifierName(node) ? node.name : undefined;
 }
 
+function shouldIgnoreHookImportSource(
+	hookName: string,
+	node: ESTree.CallExpression,
+	importSources: Record<string, boolean> | undefined,
+	importSourceMap: ReadonlyMap<string, string>,
+): boolean {
+	if (importSources === undefined || Object.keys(importSources).length === 0) return false;
+
+	const memberSourceDecision = getMemberHookSourceDecision(node, importSources);
+	if (memberSourceDecision !== undefined) return memberSourceDecision;
+
+	const importSource = node.callee.type === "Identifier" ? importSourceMap.get(hookName) : undefined;
+	if (importSource !== undefined && importSources[importSource] === false) return true;
+	if (importSource !== undefined && importSources[importSource] === true) return false;
+
+	return false;
+}
+
+function getMemberHookSourceDecision(
+	node: ESTree.CallExpression,
+	importSources: Record<string, boolean>,
+): boolean | undefined {
+	if (node.callee.type !== "MemberExpression") return undefined;
+
+	const objectName = getIdentifierNameFromExpression(node.callee.object);
+	if (objectName !== undefined && importSources[objectName] === false) return true;
+	if (objectName !== undefined && importSources[objectName] === true) return false;
+	return undefined;
+}
+
 const useHookAtTopLevel = defineRule({
 	create(context): Visitor {
 		const configuration = getOptions(context.options[0]);
@@ -150,22 +180,7 @@ const useHookAtTopLevel = defineRule({
 			if (onlyHooks !== undefined && onlyHooks.length > 0) return !onlyHooks.includes(hookName);
 			if (ignoreHooks?.includes(hookName) === true) return true;
 
-			if (importSources !== undefined && Object.keys(importSources).length > 0) {
-				if (node.callee.type === "MemberExpression") {
-					const objectName = getIdentifierNameFromExpression(node.callee.object);
-
-					if (objectName !== undefined && importSources[objectName] === false) return true;
-					if (objectName !== undefined && importSources[objectName] === true) return false;
-				}
-
-				if (node.callee.type === "Identifier") {
-					const importSource = importSourceMap.get(hookName);
-					if (importSource !== undefined && importSources[importSource] === false) return true;
-					if (importSource !== undefined && importSources[importSource] === true) return false;
-				}
-			}
-
-			return false;
+			return shouldIgnoreHookImportSource(hookName, node, importSources, importSourceMap);
 		}
 
 		function handleFunctionEnter(node: CallbackFunction): void {

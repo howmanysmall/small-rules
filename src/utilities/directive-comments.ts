@@ -1,9 +1,25 @@
 import type { Comment, SourceCode } from "oxlint-plugin-utilities";
 
-const DIRECTIVE_PATTERN =
-	/^(?<directive>(?:eslint|oxlint)(?:-(?:env|enable|disable(?:-(?:next-)?line)?))?|exported|globals?)(?:\s|$)/u;
 const LINE_COMMENT_PATTERN = /^(?:eslint|oxlint)-disable-(?:next-)?line$/u;
 const DELIMITER = /[\s,]+/gu;
+const DIRECTIVE_VALUE_SEPARATOR = /\s/u;
+const DIRECTIVE_KINDS = new Set([
+	"eslint",
+	"eslint-disable",
+	"eslint-disable-line",
+	"eslint-disable-next-line",
+	"eslint-enable",
+	"eslint-env",
+	"exported",
+	"global",
+	"globals",
+	"oxlint",
+	"oxlint-disable",
+	"oxlint-disable-line",
+	"oxlint-disable-next-line",
+	"oxlint-enable",
+	"oxlint-env",
+]);
 
 export interface DirectiveComment {
 	readonly comment: Comment;
@@ -75,16 +91,14 @@ function parseDirectiveText(
 	textToParse: string,
 ): undefined | { description: string | undefined; kind: string; value: string } {
 	const { description, text } = divideDirectiveComment(textToParse);
-	const match = DIRECTIVE_PATTERN.exec(text);
-	if (match === null) return undefined;
-
-	const directiveText = match.groups?.directive;
-	if (directiveText === undefined) return undefined;
+	const valueStart = text.search(DIRECTIVE_VALUE_SEPARATOR);
+	const directiveText = valueStart === -1 ? text : text.slice(0, valueStart);
+	if (!DIRECTIVE_KINDS.has(directiveText)) return undefined;
 
 	return {
 		description,
 		kind: directiveText,
-		value: text.slice(match.index + directiveText.length).trim(),
+		value: valueStart === -1 ? "" : text.slice(valueStart).trim(),
 	};
 }
 
@@ -140,8 +154,7 @@ export function toRuleIdLocation(
 	const commentStart = comment.loc.start;
 	const firstMatch = ruleIdPattern.exec(firstLine);
 	if (firstMatch !== null) {
-		// biome-ignore lint/nursery/useDestructuring: will produce ugly
-		const leadingBoundary = firstMatch[1];
+		const [, leadingBoundary] = firstMatch;
 		if (leadingBoundary === undefined) return comment.loc;
 
 		return {
@@ -162,8 +175,7 @@ export function toRuleIdLocation(
 
 		const lineMatch = ruleIdPattern.exec(line);
 		if (lineMatch !== null) {
-			// biome-ignore lint/nursery/useDestructuring: will produce ugly
-			const leadingBoundary = lineMatch[1];
+			const [, leadingBoundary] = lineMatch;
 			if (leadingBoundary === undefined) continue;
 
 			return {
@@ -302,48 +314,55 @@ function enable(
 	const relatedDisableDirectives = new Set<Comment>();
 
 	if (ruleIds === undefined) {
-		let used = false;
-		for (let index = collection.areas.length - 1; index >= 0; index -= 1) {
-			const area = collection.areas[index];
-			if (area === undefined) continue;
-
-			if (area.end === undefined && area.kind === kind) {
-				relatedDisableDirectives.add(area.comment);
-				area.end = location;
-				used = true;
-			}
-		}
-		if (!used) {
-			collection.unusedEnableDirectives.push({
-				comment,
-				ruleId: undefined,
-			});
-		}
+		const used = closeMatchingAreas(collection.areas, location, kind, undefined, relatedDisableDirectives);
+		if (!used) addUnusedEnableDirective(collection, comment, undefined);
 		collection.numberOfRelatedDisableDirectives.set(comment, relatedDisableDirectives.size);
 		return;
 	}
 
 	for (const ruleId of ruleIds) {
-		let used = false;
-		for (let index = collection.areas.length - 1; index >= 0; index -= 1) {
-			const area = collection.areas[index];
-			if (area === undefined) continue;
-
-			if (area.end === undefined && area.kind === kind && area.ruleId === ruleId) {
-				relatedDisableDirectives.add(area.comment);
-				area.end = location;
-				used = true;
-			}
-		}
-		if (!used) {
-			collection.unusedEnableDirectives.push({
-				comment,
-				ruleId,
-			});
-		}
+		const used = closeMatchingAreas(collection.areas, location, kind, ruleId, relatedDisableDirectives);
+		if (!used) addUnusedEnableDirective(collection, comment, ruleId);
 	}
 
 	collection.numberOfRelatedDisableDirectives.set(comment, relatedDisableDirectives.size);
+}
+
+function closeMatchingAreas(
+	areas: ReadonlyArray<DisabledArea>,
+	location: { column: number; line: number },
+	kind: "block" | "line",
+	ruleId: string | undefined,
+	relatedDisableDirectives: Set<Comment>,
+): boolean {
+	let used = false;
+	for (let index = areas.length - 1; index >= 0; index -= 1) {
+		const area = areas[index];
+		if (area === undefined) continue;
+		if (!isOpenMatchingArea(area, kind, ruleId)) continue;
+
+		relatedDisableDirectives.add(area.comment);
+		area.end = location;
+		used = true;
+	}
+
+	return used;
+}
+
+function isOpenMatchingArea(area: DisabledArea, kind: "block" | "line", ruleId: string | undefined): boolean {
+	if (area.end !== undefined || area.kind !== kind) return false;
+	return ruleId === undefined || area.ruleId === ruleId;
+}
+
+function addUnusedEnableDirective(
+	collection: DisabledAreaCollection,
+	comment: Comment,
+	ruleId: string | undefined,
+): void {
+	collection.unusedEnableDirectives.push({
+		comment,
+		ruleId,
+	});
 }
 
 function getArea(

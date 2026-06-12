@@ -38,12 +38,7 @@ function areStructurallyEqual(left: unknown, right: unknown): boolean {
 	if (Object.is(left, right)) return true;
 
 	if (Array.isArray(left)) {
-		if (!Array.isArray(right)) return false;
-		if (left.length !== right.length) return false;
-
-		let index = 0;
-		for (const value of left) if (!areStructurallyEqual(value, right[index++])) return false;
-		return true;
+		return Array.isArray(right) && areArraysStructurallyEqual(left, right);
 	}
 
 	if (Array.isArray(right)) return false;
@@ -53,6 +48,18 @@ function areStructurallyEqual(left: unknown, right: unknown): boolean {
 
 	if (!(isRecord(left) && isRecord(right))) return false;
 
+	return areRecordsStructurallyEqual(left, right);
+}
+
+function areArraysStructurallyEqual(left: ReadonlyArray<unknown>, right: ReadonlyArray<unknown>): boolean {
+	if (left.length !== right.length) return false;
+
+	let index = 0;
+	for (const value of left) if (!areStructurallyEqual(value, right[index++])) return false;
+	return true;
+}
+
+function areRecordsStructurallyEqual(left: Record<string, unknown>, right: Record<string, unknown>): boolean {
 	const leftEntries = Object.entries(left).filter(([key]) => !IGNORED_COMPARISON_KEYS.has(key));
 	const rightEntries = Object.entries(right).filter(([key]) => !IGNORED_COMPARISON_KEYS.has(key));
 	if (leftEntries.length !== rightEntries.length) return false;
@@ -154,6 +161,22 @@ function getPaddingReplacement(
 	return `<${componentName} horizontal=${topValue} vertical=${leftValue} />`;
 }
 
+function getPaddingMessageId(attributes: PaddingAttributes): MessageIds | undefined {
+	const bottom = getComparableAttributeNode(attributes.paddingBottom);
+	const left = getComparableAttributeNode(attributes.paddingLeft);
+	const right = getComparableAttributeNode(attributes.paddingRight);
+	const top = getComparableAttributeNode(attributes.paddingTop);
+	if (bottom === undefined || left === undefined || right === undefined || top === undefined) return undefined;
+
+	const allEqual =
+		areStructurallyEqual(top, bottom) && areStructurallyEqual(top, left) && areStructurallyEqual(top, right);
+	if (allEqual) return "preferEqualPadding";
+
+	const horizontalEqual = areStructurallyEqual(top, bottom);
+	const verticalEqual = areStructurallyEqual(left, right);
+	return horizontalEqual && verticalEqual ? "preferDirectionalPadding" : undefined;
+}
+
 function isJsxIdentifier(node: ESTree.JSXElementName): node is ESTree.JSXIdentifier {
 	return node.type === "JSXIdentifier";
 }
@@ -200,32 +223,12 @@ const preferPaddingComponents = defineRule({
 				const attributes = collectPaddingAttributes(openingElement);
 				if (attributes === undefined) return;
 
-				const bottom = getComparableAttributeNode(attributes.paddingBottom);
-				const left = getComparableAttributeNode(attributes.paddingLeft);
-				const right = getComparableAttributeNode(attributes.paddingRight);
-				const top = getComparableAttributeNode(attributes.paddingTop);
-				if (bottom === undefined || left === undefined || right === undefined || top === undefined) return;
-
-				const allEqual =
-					areStructurallyEqual(top, bottom) &&
-					areStructurallyEqual(top, left) &&
-					areStructurallyEqual(top, right);
-				const horizontalEqual = areStructurallyEqual(top, bottom);
-				const verticalEqual = areStructurallyEqual(left, right);
-
-				let componentIdentifiers: ReadonlySet<string>;
-				let discoveredComponent: { readonly found: boolean };
-				let messageId: MessageIds;
-
-				if (allEqual) {
-					componentIdentifiers = equalPaddingIdentifiers;
-					discoveredComponent = discoveredEqualPadding;
-					messageId = "preferEqualPadding";
-				} else if (horizontalEqual && verticalEqual) {
-					componentIdentifiers = directionalPaddingIdentifiers;
-					discoveredComponent = discoveredDirectionalPadding;
-					messageId = "preferDirectionalPadding";
-				} else return;
+				const messageId = getPaddingMessageId(attributes);
+				if (messageId === undefined) return;
+				const componentIdentifiers =
+					messageId === "preferEqualPadding" ? equalPaddingIdentifiers : directionalPaddingIdentifiers;
+				const discoveredComponent =
+					messageId === "preferEqualPadding" ? discoveredEqualPadding : discoveredDirectionalPadding;
 
 				if (componentIdentifiers.size === 0 && !discoveredComponent.found) return;
 

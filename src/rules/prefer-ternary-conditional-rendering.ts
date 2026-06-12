@@ -67,29 +67,15 @@ function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expressi
 		case "BinaryExpression": {
 			return (
 				normalizedRight.type === "BinaryExpression" &&
-				normalizedLeft.operator === normalizedRight.operator &&
-				areEquivalentOperand(normalizedLeft.left, normalizedRight.left, sourceCode) &&
-				areEquivalentOperand(normalizedLeft.right, normalizedRight.right, sourceCode)
+				areEquivalentBinary(normalizedLeft, normalizedRight, sourceCode)
 			);
 		}
 
 		case "CallExpression": {
-			if (normalizedRight.type !== "CallExpression") return false;
-			if (normalizedLeft.optional !== normalizedRight.optional) return false;
-			if (!areEquivalentExpressionOrSuper(normalizedLeft.callee, normalizedRight.callee, sourceCode)) {
-				return false;
-			}
-
-			if (normalizedLeft.arguments.length !== normalizedRight.arguments.length) return false;
-
-			for (let index = 0; index < normalizedLeft.arguments.length; index += 1) {
-				const leftArgument = normalizedLeft.arguments[index];
-				const rightArgument = normalizedRight.arguments[index];
-				if (!(leftArgument && rightArgument)) return false;
-				if (!areEquivalentArgument(leftArgument, rightArgument, sourceCode)) return false;
-			}
-
-			return true;
+			return (
+				normalizedRight.type === "CallExpression" &&
+				areEquivalentCall(normalizedLeft, normalizedRight, sourceCode)
+			);
 		}
 
 		case "Identifier":
@@ -101,34 +87,14 @@ function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expressi
 		case "LogicalExpression": {
 			return (
 				normalizedRight.type === "LogicalExpression" &&
-				normalizedLeft.operator === normalizedRight.operator &&
-				areEquivalentExpression(normalizedLeft.left, normalizedRight.left, sourceCode) &&
-				areEquivalentExpression(normalizedLeft.right, normalizedRight.right, sourceCode)
+				areEquivalentLogical(normalizedLeft, normalizedRight, sourceCode)
 			);
 		}
 
 		case "MemberExpression": {
-			if (
-				normalizedRight.type !== "MemberExpression" ||
-				normalizedLeft.computed !== normalizedRight.computed ||
-				normalizedLeft.optional !== normalizedRight.optional ||
-				!areEquivalentExpressionOrSuper(normalizedLeft.object, normalizedRight.object, sourceCode)
-			) {
-				return false;
-			}
-
-			if (normalizedLeft.computed) {
-				return areEquivalentOperand(normalizedLeft.property, normalizedRight.property, sourceCode);
-			}
-
-			if (normalizedLeft.property.type === "Identifier" && normalizedRight.property.type === "Identifier") {
-				return normalizedLeft.property.name === normalizedRight.property.name;
-			}
-
 			return (
-				normalizedLeft.property.type === "PrivateIdentifier" &&
-				normalizedRight.property.type === "PrivateIdentifier" &&
-				normalizedLeft.property.name === normalizedRight.property.name
+				normalizedRight.type === "MemberExpression" &&
+				areEquivalentMember(normalizedLeft, normalizedRight, sourceCode)
 			);
 		}
 
@@ -146,6 +112,62 @@ function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expressi
 		default:
 			return sourceCode.getText(normalizedLeft) === sourceCode.getText(normalizedRight);
 	}
+}
+
+function areEquivalentBinary(
+	left: ESTree.BinaryExpression | ESTree.PrivateInExpression,
+	right: ESTree.BinaryExpression | ESTree.PrivateInExpression,
+	sourceCode: SourceCode,
+): boolean {
+	return (
+		left.operator === right.operator &&
+		areEquivalentOperand(left.left, right.left, sourceCode) &&
+		areEquivalentOperand(left.right, right.right, sourceCode)
+	);
+}
+
+function areEquivalentCall(left: ESTree.CallExpression, right: ESTree.CallExpression, sourceCode: SourceCode): boolean {
+	if (left.optional !== right.optional) return false;
+	if (!areEquivalentExpressionOrSuper(left.callee, right.callee, sourceCode)) return false;
+	if (left.arguments.length !== right.arguments.length) return false;
+
+	for (let index = 0; index < left.arguments.length; index += 1) {
+		const leftArgument = left.arguments[index];
+		const rightArgument = right.arguments[index];
+		if (leftArgument === undefined || rightArgument === undefined) return false;
+		if (!areEquivalentArgument(leftArgument, rightArgument, sourceCode)) return false;
+	}
+
+	return true;
+}
+
+function areEquivalentLogical(
+	left: ESTree.LogicalExpression,
+	right: ESTree.LogicalExpression,
+	sourceCode: SourceCode,
+): boolean {
+	return (
+		left.operator === right.operator &&
+		areEquivalentExpression(left.left, right.left, sourceCode) &&
+		areEquivalentExpression(left.right, right.right, sourceCode)
+	);
+}
+
+function areEquivalentMember(
+	left: ESTree.MemberExpression,
+	right: ESTree.MemberExpression,
+	sourceCode: SourceCode,
+): boolean {
+	if (left.computed !== right.computed || left.optional !== right.optional) return false;
+	if (!areEquivalentExpressionOrSuper(left.object, right.object, sourceCode)) return false;
+	return left.computed
+		? areEquivalentOperand(left.property, right.property, sourceCode)
+		: areEquivalentStaticMemberProperty(left.property, right.property);
+}
+
+function areEquivalentStaticMemberProperty(left: BinaryOperand, right: BinaryOperand): boolean {
+	if (left.type === "Identifier" && right.type === "Identifier") return left.name === right.name;
+	return left.type === "PrivateIdentifier" && right.type === "PrivateIdentifier" && left.name === right.name;
 }
 
 function getNegatedExpression(expression: ESTree.Expression): ESTree.Expression | undefined {
@@ -240,54 +262,60 @@ const preferTernaryConditionalRendering = defineRule({
 	create(context): Visitor {
 		const { sourceCode } = context;
 
+		function getNextBranchCandidate(
+			children: ReadonlyArray<ESTree.JSXChild>,
+			startIndex: number,
+		): BranchCandidate | undefined {
+			let nextIndex = startIndex;
+			while (nextIndex < children.length) {
+				const whitespaceCandidate = children[nextIndex];
+				if (whitespaceCandidate === undefined || !isWhitespaceText(whitespaceCandidate)) break;
+				nextIndex += 1;
+			}
+
+			const child = children[nextIndex];
+			return child === undefined ? undefined : getBranchCandidate(child);
+		}
+
+		function reportComplementaryBranches(firstBranch: BranchCandidate, secondBranch: BranchCandidate): void {
+			const complement = getComplementMatch(firstBranch.condition, secondBranch.condition, sourceCode);
+			if (complement === undefined) return;
+
+			if (complement.isFixSafe) {
+				context.report({
+					fix(fixer) {
+						const firstConditionText = sourceCode.getText(firstBranch.condition);
+						const firstBranchText = sourceCode.getText(firstBranch.renderBranch);
+						const secondBranchText = sourceCode.getText(secondBranch.renderBranch);
+						const replacement = `{${firstConditionText} ? ${firstBranchText} : ${secondBranchText}}`;
+
+						return fixer.replaceTextRange(
+							[firstBranch.node.range[0], secondBranch.node.range[1]],
+							replacement,
+						);
+					},
+					messageId: "preferTernaryConditionalRendering",
+					node: firstBranch.logical,
+				});
+				return;
+			}
+
+			context.report({
+				messageId: "preferTernaryConditionalRendering",
+				node: firstBranch.logical,
+			});
+		}
+
 		function inspectChildren(children: ReadonlyArray<ESTree.JSXChild>): void {
 			for (let index = 0; index < children.length; index += 1) {
 				const firstChild = children[index];
-				if (!firstChild) continue;
+				if (firstChild === undefined) continue;
 
 				const firstBranch = getBranchCandidate(firstChild);
-				if (!firstBranch) continue;
+				if (firstBranch === undefined) continue;
 
-				let nextIndex = index + 1;
-				while (nextIndex < children.length) {
-					const whitespaceCandidate = children[nextIndex];
-					if (!(whitespaceCandidate && isWhitespaceText(whitespaceCandidate))) break;
-					nextIndex += 1;
-				}
-
-				if (nextIndex >= children.length) continue;
-
-				const secondChild = children[nextIndex];
-				if (!secondChild) continue;
-
-				const secondBranch = getBranchCandidate(secondChild);
-				if (!secondBranch) continue;
-
-				const complement = getComplementMatch(firstBranch.condition, secondBranch.condition, sourceCode);
-				if (!complement) continue;
-
-				if (complement.isFixSafe) {
-					context.report({
-						fix(fixer) {
-							const firstConditionText = sourceCode.getText(firstBranch.condition);
-							const firstBranchText = sourceCode.getText(firstBranch.renderBranch);
-							const secondBranchText = sourceCode.getText(secondBranch.renderBranch);
-							const replacement = `{${firstConditionText} ? ${firstBranchText} : ${secondBranchText}}`;
-
-							return fixer.replaceTextRange(
-								[firstBranch.node.range[0], secondBranch.node.range[1]],
-								replacement,
-							);
-						},
-						messageId: "preferTernaryConditionalRendering",
-						node: firstBranch.logical,
-					});
-				} else {
-					context.report({
-						messageId: "preferTernaryConditionalRendering",
-						node: firstBranch.logical,
-					});
-				}
+				const secondBranch = getNextBranchCandidate(children, index + 1);
+				if (secondBranch !== undefined) reportComplementaryBranches(firstBranch, secondBranch);
 			}
 		}
 

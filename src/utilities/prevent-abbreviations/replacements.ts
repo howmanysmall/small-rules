@@ -69,15 +69,22 @@ function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
 			continue;
 		}
 
-		for (const digitPart of part.split(DIGIT_BOUNDARY_REGEX)) {
-			if (digitPart.length === 0) continue;
-			for (const word of digitPart.split(CAMELCASE_BOUNDARY_REGEX)) {
-				if (word.length > 0) words[size++] = word;
-			}
-		}
+		size = appendAlphabeticWords(part, words, size);
 	}
 
 	return words;
+}
+
+function appendAlphabeticWords(part: string, words: Array<string>, size: number): number {
+	let nextSize = size;
+	for (const digitPart of part.split(DIGIT_BOUNDARY_REGEX)) {
+		if (digitPart.length === 0) continue;
+		for (const word of digitPart.split(CAMELCASE_BOUNDARY_REGEX)) {
+			if (word.length > 0) words[nextSize++] = word;
+		}
+	}
+
+	return nextSize;
 }
 
 const DOLLAR_NUMBER_REGEX = /\$\d+/gu;
@@ -493,6 +500,19 @@ export function getNameReplacements(name: string, options: PreparedOptions, limi
 	if (!hasReplacements) return { total: 0 };
 
 	const total = combinations.reduce((count, entries) => count * entries.length, 1);
+	const samples = getReplacementSamples(combinations, total, limit);
+
+	return {
+		samples: samples.map((parts) => parts.join("")),
+		total,
+	};
+}
+
+function getReplacementSamples(
+	combinations: ReadonlyArray<ReadonlyArray<string>>,
+	total: number,
+	limit: number,
+): Array<Array<string>> {
 	const sampleCount = Math.min(total, limit);
 	const samples = Array.from({ length: sampleCount }, (_, sampleIndex) => {
 		let indexRemaining = sampleIndex;
@@ -514,10 +534,7 @@ export function getNameReplacements(name: string, options: PreparedOptions, limi
 		}
 	}
 
-	return {
-		samples: samples.map((parts) => parts.join("")),
-		total,
-	};
+	return samples;
 }
 
 export function isDiscouragedReplacementName(name: string, options: PreparedOptions): boolean {

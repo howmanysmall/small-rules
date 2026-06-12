@@ -4,7 +4,7 @@ import rule from "$oxc-rules/no-giant-component";
 import { tsx } from "./rule-testers";
 
 function buildComponentBody(innerLineCount: number): string {
-	const lines = new Array<string>(innerLineCount);
+	const lines = Array.from<string>({ length: innerLineCount });
 	for (let index = 0; index < innerLineCount; index += 1) {
 		lines[index] = `  call${index}();`;
 	}
