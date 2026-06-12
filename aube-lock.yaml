@@ -93,7 +93,7 @@ importers:
         specifier: 2.5.0
         version: 2.5.0
       '@cliffy/command':
-        specifier: jsr:1.2.1
+        specifier: npm:@jsr/cliffy__command@1.2.1
         version: 1.2.1
       '@commitlint/config-conventional':
         specifier: 21.0.2
@@ -108,7 +108,7 @@ importers:
         specifier: 22.0.1
         version: 22.0.1(@octokit/core@7.0.6)
       '@std/msgpack':
-        specifier: jsr:1.0.3
+        specifier: npm:@jsr/std__msgpack@1.0.3
         version: 1.0.3
       '@stryker-mutator/api':
         specifier: 9.6.1
