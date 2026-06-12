@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
+	"$schema": "https://biomejs.dev/schemas/latest/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -30,12 +30,11 @@
 			"quoteStyle": "double"
 		},
 		"globals": [],
-		"linter": { "enabled": true },
-		"parser": {}
+		"linter": { "enabled": true }
 	},
 
 	"files": {
-		"includes": ["**", "!**/*.js", "!**/*-lock.{json,yaml}"]
+		"includes": ["**", "!package.json", "!**/*.js", "!**/*-lock.{json,yaml}"]
 	},
 
 	"formatter": {
@@ -332,6 +331,7 @@
 						"ignoreTypeValueShadow": false
 					}
 				},
+				"noTemplateCurlyInString": "off",
 				"noUndeclaredEnvVars": "error",
 				"noUnnecessaryConditions": "off",
 				"preset": "recommended",
@@ -341,27 +341,9 @@
 	},
 
 	"overrides": [
-		{
-			"assist": {
-				"actions": {
-					"source": {
-						"useSortedKeys": {
-							"level": "on",
-							"options": {
-								"groupByNesting": true,
-								"sortOrder": "lexicographic"
-							}
-						}
-					}
-				},
-				"enabled": true
-			},
-			"includes": []
-		},
-
 		// JSONC Files
 		{
-			"includes": [],
+			"includes": ["**/*.jsonc", "!**/biome.jsonc"],
 			"json": {
 				"formatter": {
 					"enabled": true,
@@ -426,19 +408,30 @@
 			}
 		},
 
-		// package.json exception
 		{
-			"assist": {
-				"actions": {
-					"source": {
-						"useSortedKeys": "off",
-						"useSortedPackageJson": "on"
+			"includes": ["*.config.{ts,mjs}"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noProcessEnv": "off"
 					}
 				}
-			},
-			"formatter": { "enabled": false },
-			"includes": ["package.json"]
+			}
 		}
+
+		// package.json exception
+		// {
+		// 	"assist": {
+		// 		"actions": {
+		// 			"source": {
+		// 				"useSortedKeys": "off",
+		// 				"useSortedPackageJson": "on"
+		// 			}
+		// 		}
+		// 	},
+		// 	"formatter": { "enabled": false },
+		// 	"includes": ["package.json"]
+		// }
 	],
 
 	"vcs": {

@@ -46,7 +46,7 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	if (currentNode.type === "ThisExpression" || currentNode.type === "Super") return true;
 	if (!isRecord(currentNode)) return false;
 
-	// biome-ignore lint/nursery/noForIn: needed for AST traversal
+	// biome-ignore lint/suspicious/noForIn: required for AST traversal
 	for (const key in currentNode) {
 		if (!Object.hasOwn(currentNode, key)) continue;
 		if (childUsesThis(currentNode[key], visited)) return true;

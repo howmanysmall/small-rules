@@ -15,6 +15,11 @@ coverage
 .vitiate/
 .swc/
 
+# jscpd reports
+/report/
+jscpd-report/
+jscpd-report.html
+
 # logs
 logs
 _.log
@@ -39,12 +44,11 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Finder (MacOS) folder config
 .DS_Store
 
-# opensrc - source code for packages
-opensrc/
-
 # hk — local developer overrides (do not commit)
 hk.local.pkl
+
 .agents/skills/clean-code/
+.agents/skills/dry-refactoring/
 .agents/skills/improve-codebase-architecture/
 .agents/skills/mutation-testing/
 .agents/skills/pnpm/

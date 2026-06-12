@@ -27,8 +27,8 @@
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
 		},
 		"./package.json": "./package.json"
 	},
@@ -46,6 +46,7 @@
 		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched --fix $a && nr oxfmt --no-error-on-unmatched-pattern $a' _",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
+		"jscpd": "jscpd",
 		"knip": "knip-bun",
 		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint $a && nr biome check $a' _",
 		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format agent $a && nr biome check --reporter json $a' _",
@@ -100,6 +101,7 @@
 		"sfw": "^2.0.6",
 		"skills": "^1.5.11",
 		"tsdown": "0.22.2",
+		"type-fest": "^5.7.0",
 		"vitest": "4.1.8",
 		"vitiate": "^0.3.0"
 	},

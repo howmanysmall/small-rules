@@ -6,7 +6,13 @@
 	"embeddedLanguageFormatting": "auto",
 	"endOfLine": "lf",
 	"htmlWhitespaceSensitivity": "css",
-	"ignorePatterns": ["**/*.{md,toml,js}", "**/do-not-sync-ever/**", ".tsbuildinfo*", "**/*-lock.{json,yaml}"],
+	"ignorePatterns": [
+		"**/*.{md,toml,js}",
+		"**/do-not-sync-ever/**",
+		".tsbuildinfo*",
+		"**/*-lock.{json,yaml}",
+		"**/ses_*.json"
+	],
 	"insertFinalNewline": true,
 	"jsdoc": {
 		"addDefaultToDescription": true,

@@ -42,7 +42,7 @@ export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) =>
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
-	// biome-ignore lint/nursery/noForIn: required for AST traversal
+	// biome-ignore lint/suspicious/noForIn: required for AST traversal
 	for (const key in node) {
 		if (isKeyOfNode(key)) continue;
 		pushChildValue(Reflect.get(node, key), node, stack);
