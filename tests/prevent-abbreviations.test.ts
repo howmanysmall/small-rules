@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/prevent-abbreviations";
 
-import { ts } from "./rule-testers";
+import { ts, tsx } from "./rule-testers";
 
 const TEST_IGNORE_PATTERN = /^test/u;
 
@@ -397,6 +397,28 @@ describe("prevent-abbreviations", () => {
 			{
 				code: 'const err = require("node_modules/package");',
 				options: [{ checkDefaultAndNamespaceImports: "internal" }],
+			},
+		],
+	});
+
+	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+	tsx.run("prevent-abbreviations JSX", rule, {
+		invalid: [
+			{
+				code: "<Btn />;",
+				errors: [
+					{
+						data: { discouragedName: "Btn", nameTypeText: "variable", replacement: "Button" },
+						messageId: "replace",
+					},
+				],
+				options: [{ shorthands: { Btn: "Button" } }],
+			},
+		],
+		valid: [
+			{
+				code: "<btn />;",
+				options: [{ shorthands: { Btn: "Button" } }],
 			},
 		],
 	});
