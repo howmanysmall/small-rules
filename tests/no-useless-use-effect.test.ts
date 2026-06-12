@@ -25,6 +25,33 @@ function Component(properties) {
 import { useEffect, useState } from "@rbxts/react";
 
 function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(Math.max(properties.initialCount, 0));
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(function syncInitialCount() {
+        ;
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
     const [fullName, setFullName] = useState("");
     useEffect(() => {
         setFullName(properties.firstName + properties.lastName);
