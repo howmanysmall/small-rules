@@ -71,6 +71,24 @@ interface ComplexService extends BaseService {
 				code: `
 const marker: Ianitor.Check<string> = Ianitor.string;
 
+type NamedValidator = ValidatorShape;
+`,
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+type GenericValidator = Result<ReadonlyArray<string>, Error>;
+`,
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
 type ConditionalValidator<T> = T extends string ? string[] : number[];
 type FunctionValidator = (value: string[]) => number[];
 type MappedValidator<T extends string> = { [Key in T]: number[] };
@@ -93,6 +111,30 @@ interface MethodValidator {
 		valid: [
 			{ code: "type Simple = string;" },
 			{ code: "type BasicObject = { id: string; name: string };" },
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+const validator = createValidator();
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+type Anything = any;
+type Impossible = never;
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const marker: Ianitor.Check<string> = Ianitor.string;
+
+interface MarkerOnly {}
+`,
+				options: [{ errorThreshold: 1, interfacePenalty: 20 }],
+			},
 			{
 				code: `
 type SearchTuple<T extends Instance> =
