@@ -70,6 +70,42 @@ describe("no-useless-constants", () => {
 		});
 
 		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes non-adjacent static factory with binary argument", rule, {
+			invalid: [
+				{
+					code: "const TITLE_PADDING = new UDim(0, 1 + 2);\nconst MIDDLE = 42;\nconst STYLE = { padding: TITLE_PADDING };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const MIDDLE = 42;\nconst STYLE = { padding: new UDim(0, 1 + 2) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes non-adjacent static factory with conditional argument", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(true ? 255 : 128, 120, 255);\nconst MIDDLE = 42;\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const MIDDLE = 42;\nconst STYLE = { color: Color3.fromRGB(true ? 255 : 128, 120, 255) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes non-adjacent static factory with object argument", rule, {
+			invalid: [
+				{
+					code: "const TWEEN_INFO = new TweenInfo({ Time: 1, DelayTime: 0 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ Time: 1, DelayTime: 0 }) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes multiple same-scope constants in one pass", rule, {
 			invalid: [
 				{
