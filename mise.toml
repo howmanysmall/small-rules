@@ -10,6 +10,7 @@ experimental = true
 lockfile = true
 
 [tools]
+aube = "1.18.1"
 bun = "latest"
 gitleaks = "latest"
 hk = "latest"
