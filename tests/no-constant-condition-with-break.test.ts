@@ -62,6 +62,10 @@ describe("no-constant-condition-with-break", () => {
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
+				code: "if (!(true && false)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
 				code: "while ((false ? true : false)) { doThing(); }",
 				errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }],
 			},
@@ -351,6 +355,28 @@ while (true) {
     break;
 }
 `,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    with (task.wait()) {
+        doThing();
+    }
+}
+`,
+				languageOptions: { sourceType: "script" },
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    with (context) {
+        task.wait();
+    }
+}
+`,
+				languageOptions: { sourceType: "script" },
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{
