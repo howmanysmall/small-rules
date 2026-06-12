@@ -65,6 +65,20 @@ function Component(properties) {
 import { useEffect, useState } from "@rbxts/react";
 
 function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+				options: [{}],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
     const [selection, setSelection] = useState("");
     useEffect(() => {
         if (!properties.initialSelection) return;
@@ -487,6 +501,41 @@ function Component({ user }) {
 			// Note: This detection is intentionally conservative to avoid false positives
 			// On legitimate synchronization patterns like "fetch data, then process it"
 			// The eventFlag pattern handles the common "toggle flag -> run side effect" case
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            analytics.track("submitted");
+        }
+    }, [submitted]);
+}
+`,
+				errors: [{ messageId: "eventSpecificLogic" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [ready, setReady] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (ready) {
+            setReady(false);
+        } else {
+            if (submitted) {
+                sendForm();
+            }
+        }
+    }, [ready, submitted]);
+}
+`,
+				errors: [{ messageId: "eventSpecificLogic" }, { messageId: "effectChain" }],
+			},
 
 			// ========== NEW: mixedDerivedState ==========
 
