@@ -1,7 +1,7 @@
 import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
 
-const LINE_COMMENT_PATTERN = /^(?:eslint-disable-(?:next-)?line|oxlint(?:-disable(?:-(?:next-)?line)?|-enable))$/u;
+const LINE_COMMENT_PATTERN = /^(?:eslint|oxlint)-disable-(?:next-)?line$/u;
 const DELIMITER = /[\s,]+/gu;
 const DIRECTIVE_VALUE_SEPARATOR = /\s/u;
 const DISABLE_DIRECTIVE_KINDS = new Set([

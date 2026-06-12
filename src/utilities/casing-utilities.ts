@@ -1,4 +1,4 @@
-// oxlint-disable unicorn/prefer-code-point
+// oxlint-disable unicorn/prefer-code-point -- Performance
 
 const SPLIT_LOWER_TO_UPPER = /(?<first>[\p{Ll}\d])(?<second>\p{Lu})/gu;
 const SPLIT_UPPER_TO_UPPER = /(?<first>\p{Lu})(?<second>\p{Lu}\p{Ll})/gu;
