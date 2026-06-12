@@ -250,7 +250,7 @@ function EnemyList(enemies) {
 				code: `
 const renderEnemy = (enemy) => (
     <>
-        <billboardgui key={enemy.id} />
+        <billboardgui />
     </>
 );
 
