@@ -188,10 +188,6 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 		return parent.key.name;
 	}
 
-	if (parent.type === "MethodDefinition" && parent.key.type === "Identifier") {
-		return parent.key.name;
-	}
-
 	return undefined;
 }
 
@@ -344,12 +340,12 @@ function isEmptyObjectExpression(node: ESTree.Node): boolean {
 }
 
 function isResetValue(node: ESTree.Node): boolean {
-	if (isConstantLiteral(node)) return true;
 	if (node.type === "Literal") {
 		const { value } = node;
-		return value === "" || value === 0 || value === false;
+		return value === "" || value === 0 || value === false || value === null;
 	}
 
+	if (isConstantLiteral(node)) return true;
 	return isEmptyArrayExpression(node) || isEmptyObjectExpression(node);
 }
 

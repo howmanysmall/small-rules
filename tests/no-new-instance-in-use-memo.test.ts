@@ -94,6 +94,27 @@ const part = useMemo(createPart, []);
 				code: `
 import { useMemo } from "@rbxts/react";
 
+const createPart = () => new Instance("Part");
+const aliasPart = createPart;
+const part = useMemo(aliasPart, []);
+`,
+				errors: [{ data: { constructorName: "Instance" }, messageId: "noNewInUseMemo" }],
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
+const createPart = () => new Instance("Part");
+const aliasPart = createPart;
+const first = useMemo(aliasPart, []);
+const second = useMemo(aliasPart, []);
+`,
+				errors: [{ data: { constructorName: "Instance" }, messageId: "noNewInUseMemo" }],
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
 function makeLeaf() {
     return new Instance("Part");
 }
@@ -124,6 +145,42 @@ function useMemo(factory) {
 }
 
 const model = useMemo(() => new Instance("Model"), []);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
+useMemo();
+`,
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
+const model = useMemo("not a callback", []);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
+const model = useMemo(missingCallback, []);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
+const createPart = condition ? () => new Instance("Part") : () => new Instance("Model");
+const model = useMemo(createPart, []);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "@rbxts/react";
+
+const model = useMemo(() => new constructors.Instance("Model"), []);
 `,
 			},
 			{

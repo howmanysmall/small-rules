@@ -880,6 +880,42 @@ function Component() {
 }
 `,
 			},
+			{
+				code: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, [count]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, [count]);
+}
+`,
+			},
 		],
 		valid: [
 			// Coverage: TSSatisfiesExpression and other TS nodes
@@ -1846,11 +1882,31 @@ function Component() {
 			},
 			{
 				code: `
-function Component() {
-    const value = 1;
+function Component({ value }) {
     useEffect(() => {
         console.log(value);
     }, [+value, \`\${value}\`]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [(value as number)!]);
+}
+`,
+				languageOptions: { parser },
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [condition ? value : fallback]);
 }
 `,
 				options: [{ reportUnnecessaryDependencies: false }],
@@ -1868,8 +1924,7 @@ function Component() {
 			},
 			{
 				code: `
-function Component() {
-    const value = 1;
+function Component({ value }) {
     useEffect(() => {
         console.log(value);
     }, [value as number]);
@@ -1880,8 +1935,7 @@ function Component() {
 			},
 			{
 				code: `
-function Component() {
-    const value = 1;
+function Component({ value }) {
     useEffect(() => {
         console.log(value);
     }, [value + 1]);
@@ -1935,6 +1989,16 @@ function Component() {
 			`
 function Component() {
     const handler = useCallback(() => {}, []);
+    useEffect(handler, []);
+}
+`,
+			`
+const count = 0;
+const handler = () => {
+    console.log(count);
+};
+
+function Component() {
     useEffect(handler, []);
 }
 `,

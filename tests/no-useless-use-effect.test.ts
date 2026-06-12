@@ -982,6 +982,18 @@ function Component({ count }) {
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
+function Component({ mode }) {
+    const [status, setStatus] = useState("idle");
+    useEffect(() => {
+        setStatus("ready");
+    }, [mode]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
 function Component() {
     const [card, setCard] = useState(null);
     const [goldCardCount, setGoldCardCount] = useState(0);
@@ -1120,6 +1132,17 @@ function Component({ onChange, value }) {
         if (!value) return;
         logChange(value);
         onChange(value);
+    }, [onChange, value]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component({ onChange, value }) {
+    useEffect(() => {
+        getNotifier(onChange)(value);
     }, [onChange, value]);
 }
 `,
