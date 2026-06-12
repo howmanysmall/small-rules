@@ -328,4 +328,323 @@ function Component() {
 			],
 		});
 	});
+
+	describe("coverage behavior lock", () => {
+		// @ts-expect-error -- Shut up
+		ts.run("memoized-effect-dependencies - dependency array shapes", rule, {
+			invalid: [
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    useEffect(() => {}, [dep, dep]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }, { messageId: "unmemoizedDependency" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {}, [buildDependency()]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "moderate" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component(props: { value: number }) {
+    useEffect(() => {}, [props.value]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "aggressive" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    useEffect(() => {}, [, dep]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+				},
+			],
+			valid: [
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dependencies = getDependencies();
+    useEffect(() => {}, [...dependencies]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    useEffect(() => {}, deps);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {}, [value + 1]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {}, [missingDependency]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+import { stableDependency } from "shared";
+
+function Component() {
+    useEffect(() => {}, [stableDependency]);
+}
+`,
+				},
+			],
+		});
+
+		// @ts-expect-error -- Shut up
+		ts.run("memoized-effect-dependencies - member hook forms", rule, {
+			invalid: [
+				{
+					code: `
+import React from "@rbxts/react";
+
+function Component() {
+    function buildDependency() {
+        return {};
+    }
+
+    class Dependency {}
+
+    React.useEffect(() => {}, [buildDependency, Dependency]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }, { messageId: "unmemoizedDependency" }],
+				},
+			],
+			valid: [
+				{
+					code: `
+import React from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    React["useEffect"](() => {}, [dep]);
+}
+`,
+				},
+				{
+					code: `
+import React from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    getReact().useEffect(() => {}, [dep]);
+}
+`,
+				},
+				{
+					code: `
+import Other from "other";
+import React from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    Other.useEffect(() => {}, [dep]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "other";
+
+function Component() {
+    const dep = {};
+    useEffect(() => {}, [dep]);
+}
+`,
+				},
+			],
+		});
+
+		// @ts-expect-error -- Shut up
+		ts.run("memoized-effect-dependencies - stable hook destructuring", rule, {
+			invalid: [
+				{
+					code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [count] = useState(0);
+    useEffect(() => {}, [count]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "aggressive" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+import { useDependency } from "dependencies";
+
+function Component() {
+    const dependency = useDependency();
+    useEffect(() => {}, [dependency]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "moderate" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+import Other from "other";
+
+function Component() {
+    const dependency = Other.useRef({});
+    useEffect(() => {}, [dependency]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "moderate" }],
+				},
+			],
+			valid: [
+				{
+					code: `
+import { useEffect, useReducer } from "@rbxts/react";
+
+function reducer(state: number) {
+    return state;
+}
+
+function Component() {
+    const [, dispatch] = useReducer(reducer, 0);
+    useEffect(() => {}, [dispatch]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const fallback = () => {};
+    const [count, setCount = fallback] = useState(0);
+    useEffect(() => {}, [setCount]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect, useTransition } from "@rbxts/react";
+
+function Component() {
+    const [, ...transitionControls] = useTransition();
+    useEffect(() => {}, [transitionControls]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [count] = useState(0);
+    useEffect(() => {}, [count]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    let dependency = {};
+    useEffect(() => {}, [dependency]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dependency: unknown = undefined;
+    useEffect(() => {}, [dependency]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dependency = 1;
+    useEffect(() => {}, [dependency]);
+}
+`,
+				},
+			],
+		});
+
+		// @ts-expect-error -- Shut up
+		ts.run("memoized-effect-dependencies - custom dependency index", rule, {
+			invalid: [
+				{
+					code: `
+import { useIndexedEffect } from "@rbxts/react";
+
+function Component() {
+    const dep = {};
+    useIndexedEffect([dep], () => {});
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ hooks: [{ dependenciesIndex: 0, name: "useIndexedEffect" }] }],
+				},
+			],
+			valid: [
+				{
+					code: `
+import { useIndexedEffect, useMemo } from "@rbxts/react";
+
+function Component() {
+    const dep = useMemo(() => ({}), []);
+    useIndexedEffect([dep], () => {});
+}
+`,
+					options: [{ hooks: [{ dependenciesIndex: 0, name: "useIndexedEffect" }] }],
+				},
+			],
+		});
+	});
 });
