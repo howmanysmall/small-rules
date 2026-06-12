@@ -132,6 +132,36 @@ function Bad7(items) {
 					},
 				},
 			},
+			// Dynamic callee callback missing key
+			{
+				code: `
+function DynamicMapped(items, getMapper) {
+    return getMapper()((item) => <div />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Computed member callback missing key
+			{
+				code: `
+function ComputedMapped(items) {
+    return items["map"]((item) => <div />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Map callback with block body missing key
 			{
 				code: `
@@ -197,6 +227,46 @@ function EnemyList(enemies) {
 					},
 				},
 			},
+			// Named callback reused by iteration and memoization without keys
+			{
+				code: `
+const renderEnemy = (enemy) => <billboardgui />;
+
+function EnemyList(enemies) {
+    enemies.map(renderEnemy);
+    return useMemo(renderEnemy, [enemies]);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Array.from named fragment callback reused by memoization
+			{
+				code: `
+const renderEnemy = (enemy) => (
+    <>
+        <billboardgui key={enemy.id} />
+    </>
+);
+
+function EnemyList(enemies) {
+    Array.from(enemies, renderEnemy);
+    return useMemo(renderEnemy, [enemies]);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Array.from without key in mapping callback
 			{
 				code: `
@@ -217,6 +287,21 @@ function FromList(iterable) {
 				code: `
 function CallMapped(items) {
     return Array.prototype.map.call(items, (item) => <span />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Spread inline callback without key
+			{
+				code: `
+function SpreadMapped(items) {
+    return items.map(...((item) => <span />));
 }
 `,
 				errors: 1,
