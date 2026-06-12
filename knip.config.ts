@@ -38,7 +38,7 @@ const paths = await getPathsAsync();
 const configuration: KnipConfig = {
 	bun: true,
 	entry: ["commitlint.config.ts", "vitest.mutation.config.ts", "vitest.vitiate.config.ts"],
-	ignoreBinaries: ["hk", "jscpd"],
+	ignoreBinaries: ["hk"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
