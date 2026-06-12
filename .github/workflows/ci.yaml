@@ -1,0 +1,14 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**/*.{ts,tsx,json}"
+      - "tests/**/*.{ts,tsx}"
+      - "package.json"
+      - "aube-lock.yaml"
+      - "knip.ts"
+      - "tsconfig*.json"
+      - ".oxlintrc.json"
+      - "biome.jsonc"

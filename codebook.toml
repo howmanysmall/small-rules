@@ -62,9 +62,5 @@ words = [
 	"zshenv",
 ]
 ignore_paths = [
-	"tests/small-rules/**/*.test.ts",
-	"skills-lock.json",
-	"plugins/oxc/small-rules.js",
-	"plugins/oxc/small-rules/utilities/prevent-abbreviations/constants.ts",
-	"plugins/oxc/small-rules/rules/prefer-singular-enums.ts",
+	"scripts/generate-default-properties.ts",
 ]

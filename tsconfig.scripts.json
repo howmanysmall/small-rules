@@ -2,8 +2,8 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"paths": {
-			"$build-types/*": ["./scripts/types/*"],
-			"$build-utilities/*": ["./scripts/utilities/*"]
+			"$script-types/*": ["./scripts/types/*"],
+			"$script-utilities/*": ["./scripts/utilities/*"]
 		},
 		"rootDir": ".",
 		"sourceMap": false,
