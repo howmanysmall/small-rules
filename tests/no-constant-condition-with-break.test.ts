@@ -142,6 +142,46 @@ describe("no-constant-condition-with-break", () => {
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
+				code: 'if (!((0, ""))) { doThing(); }',
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(false && value)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(false || true)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(true || value)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(0 ?? value)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(undefined ?? true)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (false || true) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (undefined ?? true) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (0 ?? value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (false ? value : true) { doThing(); }",
+				errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }],
+			},
+			{
 				code: "const value = true ? one : two;",
 				errors: [{ messageId: "unexpected" }],
 			},
@@ -198,6 +238,15 @@ describe("no-constant-condition-with-break", () => {
 				code: `
 while (true) {
     const value = [task.wait()];
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    const value = [, task.wait()];
     doThing();
 }
 `,
@@ -281,6 +330,138 @@ while (true) {
 				code: `
 while (true) {
     new Factory(...task.wait());
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task.wait()();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task[method]();
+    task.wait();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    getFactory().wait();
+    task.wait();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task.wait().ready;
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    new (task.wait())();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task.wait()\`value\`;
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+function* run() {
+    while (true) {
+        yield;
+        task.wait();
+        doThing();
+    }
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+do {
+    task.wait();
+    doThing();
+} while (true);
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    while (task.wait()) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (const item of task.wait()) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (task.wait(); true;) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (; task.wait();) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (; true; task.wait()) {
+        doThing();
+    }
     doThing();
 }
 `,
@@ -401,6 +582,13 @@ while (true) {
 `,
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
+			"if (true && value) { doThing(); }",
+			"if (value || true) { doThing(); }",
+			"if (undefined ?? value) { doThing(); }",
+			"if (!(value && true)) { doThing(); }",
+			'if (+"1") { doThing(); }',
+			"if (condition ? true : false) { doThing(); }",
+			["if (`", "{value}`) { doThing(); }"].join("$"),
 			{
 				code: `
 while (true) {
