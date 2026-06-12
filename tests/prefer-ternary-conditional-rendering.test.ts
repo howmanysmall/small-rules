@@ -66,6 +66,11 @@ function Component({ gradient, gradientToUse, rarityStyle }) {
 				output: null,
 			},
 			{
+				code: "function Component({ value, offset }) { return <>{!(value + offset) && <A />}{value + offset && <B />}</>; }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+				output: null,
+			},
+			{
 				code: "function Component() { return <>{this === target && <A />}{this !== target && <B />}</>; }",
 				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: "function Component() { return <>{this === target ? <A /> : <B />}</>; }",
