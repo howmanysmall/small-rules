@@ -21,3 +21,53 @@ tombi = "latest"
 
 [deps.aube]
 auto = true
+
+[tasks]
+[tasks.install]
+description = "Install dependencies using the locked Aube dependency graph. Use before local CI or release checks."
+run = "aube install"
+
+[tasks.lint]
+description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."
+run = "nr lint"
+
+[tasks.type-check]
+description = "Run TypeScript type checking with tsgo without emitting files."
+run = "nr type-check"
+
+[tasks.knip]
+description = "Detect unused files, exports, and dependencies with Knip."
+run = "nr knip"
+
+[tasks.build]
+description = "Build the package into dist using tsdown."
+run = "nr build"
+
+[tasks.test]
+description = "Run the Vitest unit test suite once without sharding."
+run = "nr test"
+
+[tasks.check]
+description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
+depends = ["lint", "type-check", "knip", "build", "test"]
+
+[tasks.ci]
+description = "Run install plus the full local validation suite. Use before opening or merging PRs."
+depends = ["install", "check"]
+
+[tasks.release]
+description = "Run local validation, then bump version, commit, tag, and push via bumpp. Run from an up-to-date main branch."
+depends = ["check"]
+interactive = true
+confirm = "This will run bumpp, create a release commit/tag, and push. Continue?"
+run = "nr release"
+
+[tasks.dry-release]
+alias = "dr"
+description = "Trigger the GitHub release workflow on main with dry_run=true. Validates release CI without publishing."
+interactive = true
+run = "gh workflow run release.yaml --ref main -f dry_run=true"
+
+[tasks.release-status]
+description = "Show recent Publish Package workflow runs in GitHub Actions."
+run = "gh run list --workflow release.yaml --limit 5"
