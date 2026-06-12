@@ -1,19 +1,23 @@
 {
-	"$schema": "https://biomejs.dev/schemas/latest/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
 				"noDuplicateClasses": "on",
 				"organizeImports": "off",
-				"recommended": true,
+				"preset": "recommended",
 				"useSortedAttributes": "on",
+				"useSortedEnumMembers": "on",
 				"useSortedInterfaceMembers": "on",
 				"useSortedKeys": "on",
-				"useSortedProperties": "on"
+				"useSortedPackageJson": "off",
+				"useSortedProperties": "on",
+				"useSortedSelectionSet": "on",
+				"useSortedTypeFields": "on"
 			}
 		},
 		"enabled": true,
-		"includes": ["**", "!**/*.js", "!package.json", "!**/*-lock.{json,yaml}"]
+		"includes": ["**", "!**/*.js", "!**/*-lock.{json,yaml}"]
 	},
 
 	"css": {
@@ -31,7 +35,7 @@
 	},
 
 	"files": {
-		"includes": ["**", "!**/*.js", "!package.json", "!**/*-lock.{json,yaml}"]
+		"includes": ["**", "!**/*.js", "!**/*-lock.{json,yaml}"]
 	},
 
 	"formatter": {
@@ -127,18 +131,22 @@
 
 	"linter": {
 		"enabled": true,
-		"includes": ["**", "!**/{dist,do-not-sync-ever,garbage,node_modules}/**", "!**/*.code-workspace"],
+		"includes": ["**", "!**/{dist,do-not-sync-ever,garbage,node_modules}/**"],
 		"rules": {
-			"a11y": { "recommended": true },
+			"a11y": { "preset": "none" },
 
 			"complexity": {
+				"noDivRegex": "error",
 				"noExcessiveNestedTestSuites": "error",
 				"noForEach": "error",
 				"noImplicitCoercions": "error",
+				"noRedundantDefaultExport": "error",
 				"noUselessCatchBinding": "error",
+				"noUselessReturn": "error",
 				"noUselessStringConcat": "error",
 				"noUselessSwitchCase": "off",
-				"recommended": false,
+				"preset": "none",
+				"useArrayFind": "error",
 				"useArrowFunction": "off",
 				"useDateNow": "error",
 				"useFlatMap": "error",
@@ -166,9 +174,11 @@
 				},
 				"noUnresolvedImports": "off",
 				"noUnusedImports": "error",
+				"noUnusedInstantiation": "error",
 				"noUnusedPrivateClassMembers": "error",
 				"noUnusedVariables": "error",
-				"recommended": true,
+				"preset": "recommended",
+				"useInlineScriptId": "error",
 				"useJsonImportAttributes": "off",
 				"useSingleJsDocAsterisk": "error"
 			},
@@ -176,75 +186,32 @@
 			"nursery": {
 				"noBaseToString": "error",
 				"noConditionalExpect": "error",
-				"noDivRegex": "error",
-				"noDuplicateEnumValues": "error",
-				"noEqualsToNull": "error",
-				"noExcessiveClassesPerFile": {
-					"level": "error",
-					"options": { "maxClasses": 3 }
-				},
-				"noExcessiveLinesPerFile": {
-					"level": "off",
-					"options": {
-						"maxLines": 200,
-						"skipBlankLines": true
-					}
-				},
 				"noExcessiveNestedCallbacks": {
 					// temporarily disabled
 					"level": "off",
 					"options": { "max": 5 }
 				},
-				"noFloatingClasses": "error",
 				"noFloatingPromises": "error",
-				"noForIn": "error",
 				"noIdenticalTestTitle": "error",
 				"noImpliedEval": "error",
 				"noLoopFunc": "error",
 				"noMisleadingReturnType": "off",
 				"noMisusedPromises": "error",
-				"noMultiAssign": "error",
-				"noMultiStr": "error",
-				"noNestedPromises": "error",
-				"noParametersOnlyUsedInRecursion": "error",
-				"noProto": "error",
-				"noRedundantDefaultExport": "error",
-				"noReturnAssign": "error",
-				"noScriptUrl": "error",
-				"noShadow": {
-					"level": "off",
-					"options": {
-						"ignoreFunctionTypeParameterNameValueShadow": false,
-						"ignoreTypeValueShadow": false
-					}
-				},
-				"noSyncScripts": "error",
-				"noUndeclaredEnvVars": "error",
-				"noUnnecessaryConditions": "off",
 				"noUnsafePlusOperands": "error",
-				"noUselessReturn": "error",
 				"noUselessTypeConversion": "off",
-				"recommended": true,
+				"preset": "recommended",
 				"useArraySome": "error",
-				"useArraySortCompare": "error",
 				"useAwaitThenable": "error",
-				"useConsistentEnumValueType": "error",
-				"useConsistentMethodSignatures": "error",
 				"useConsistentTestIt": "error",
-				"useDestructuring": "off",
 				"useDisposables": "error",
 				"useDomNodeTextContent": "error",
 				"useDomQuerySelector": "error",
-				"useErrorCause": "error",
 				"useExhaustiveSwitchCases": "error",
 				"useExpect": "error",
 				"useExplicitReturnType": "error",
 				"useExplicitType": "off",
-				"useFind": "error",
-				"useGlobalThis": "error",
 				"useIframeSandbox": "error",
 				"useImportsFirst": "error",
-				"useInlineScriptId": "error",
 				"useMathMinMax": "error",
 				"useNamedCaptureGroup": "error",
 				"useNullishCoalescing": "error",
@@ -252,7 +219,6 @@
 				"useRegexpExec": "error",
 				"useRegexpTest": "error",
 				"useSortedClasses": "error",
-				"useSpread": "error",
 				"useStringStartsEndsWith": "error",
 				"useTestHooksInOrder": "error",
 				"useTestHooksOnTop": "error",
@@ -265,14 +231,16 @@
 				"noAccumulatingSpread": "error",
 				"noAwaitInLoops": "off",
 				"noDelete": "error",
-				"recommended": true,
+				"noSyncScripts": "error",
+				"preset": "recommended",
 				"useSolidForComponent": "error",
 				"useTopLevelRegex": "error"
 			},
 
 			"security": {
 				"noDangerouslySetInnerHtml": "off",
-				"recommended": true
+				"noScriptUrl": "error",
+				"preset": "recommended"
 			},
 
 			"style": {
@@ -281,12 +249,25 @@
 				"noDescendingSpecificity": "error",
 				"noDoneCallback": "error",
 				"noEnum": "off",
+				"noExcessiveClassesPerFile": {
+					"level": "error",
+					"options": { "maxClasses": 3 }
+				},
+				"noExcessiveLinesPerFile": {
+					"level": "off",
+					"options": {
+						"maxLines": 200,
+						"skipBlankLines": true
+					}
+				},
 				"noExportedImports": "error",
 				"noHeadElement": "error",
 				"noImplicitBoolean": "error",
 				"noInferrableTypes": "error",
 				"noJsxLiterals": "error",
 				"noMagicNumbers": "off",
+				"noMultiAssign": "error",
+				"noMultilineString": "error",
 				"noNamespace": "error",
 				"noNegationElse": "error",
 				"noNestedTernary": "error",
@@ -307,22 +288,28 @@
 						}
 					}
 				},
-				"recommended": true,
+				"preset": "recommended",
 				"useArrayLiterals": "off",
 				"useBlockStatements": "off",
+				"useConsistentEnumValueType": "error",
 				"useConsistentMemberAccessibility": "off",
+				"useConsistentMethodSignatures": "error",
 				"useConst": {
 					"fix": "safe",
 					"level": "error"
 				},
 				"useDefaultParameterLast": "error",
+				"useDestructuring": "off",
+				"useErrorCause": "error",
 				"useFilenamingConvention": {
 					"level": "error",
 					"options": {
 						"filenameCases": ["kebab-case"],
 						"requireAscii": true
 					}
-				}
+				},
+				"useGlobalThis": "error",
+				"useSpreadOverApply": "error"
 			},
 
 			"suspicious": {
@@ -330,8 +317,25 @@
 				"noApproximativeNumericConstant": "error",
 				"noArrayIndexKey": "error",
 				"noConstEnum": "off",
+				"noDuplicateEnumValues": "error",
 				"noEmptyBlockStatements": "error",
-				"recommended": true
+				"noEqualsToNull": "error",
+				"noForIn": "error",
+				"noNestedPromises": "error",
+				"noParametersOnlyUsedInRecursion": "error",
+				"noProto": "error",
+				"noReturnAssign": "error",
+				"noShadow": {
+					"level": "off",
+					"options": {
+						"ignoreFunctionTypeParameterNameValueShadow": false,
+						"ignoreTypeValueShadow": false
+					}
+				},
+				"noUndeclaredEnvVars": "error",
+				"noUnnecessaryConditions": "off",
+				"preset": "recommended",
+				"useArraySortCompare": "error"
 			}
 		}
 	},
@@ -355,8 +359,9 @@
 			"includes": []
 		},
 
+		// JSONC Files
 		{
-			"includes": [".vscode/**", ".vscode/*.code-snippets", "**/*.code-workspace"],
+			"includes": [],
 			"json": {
 				"formatter": {
 					"enabled": true,
@@ -373,6 +378,7 @@
 			}
 		},
 
+		// JSON Files
 		{
 			"includes": [],
 			"json": {
@@ -395,11 +401,12 @@
 			"includes": ["tests/**/*.test.ts"],
 			"linter": {
 				"rules": {
-					"nursery": {
-						"noExcessiveLinesPerFile": "off"
-					},
+					"nursery": {},
 					"performance": {
 						"useTopLevelRegex": "off"
+					},
+					"style": {
+						"noExcessiveLinesPerFile": "off"
 					}
 				}
 			}
@@ -417,6 +424,20 @@
 					}
 				}
 			}
+		},
+
+		// package.json exception
+		{
+			"assist": {
+				"actions": {
+					"source": {
+						"useSortedKeys": "off",
+						"useSortedPackageJson": "on"
+					}
+				}
+			},
+			"formatter": { "enabled": false },
+			"includes": ["package.json"]
 		}
 	],
 
