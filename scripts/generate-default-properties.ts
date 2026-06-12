@@ -484,8 +484,8 @@ const command = new Command()
 				auth: githubToken || githubPat || githubPersonalAccessToken,
 			});
 
-			const datbaseUtilities = await import("$script-utilities/database-utilities");
-			const { downloadDatabaseAsync, extractDefaults, parseDatabase } = datbaseUtilities;
+			const databaseUtilities = await import("$script-utilities/database-utilities");
+			const { downloadDatabaseAsync, extractDefaults, parseDatabase } = databaseUtilities;
 
 			const databaseBuffer = await downloadDatabaseAsync(octokit, forceLatest === true ? undefined : filePath);
 			const filterSet = await getLoadedClassesAsync(classes, loadClassesFrom);
