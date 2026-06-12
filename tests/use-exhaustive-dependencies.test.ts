@@ -751,6 +751,43 @@ function Component() {
 }
 `,
 			},
+			// Sparse dependency arrays ignore empty slots while fixing missing dependencies
+			{
+				code: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [,]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
+			},
 		],
 		valid: [
 			// Coverage: TSSatisfiesExpression and other TS nodes
@@ -1455,6 +1492,53 @@ function Component() {
 }
 `,
 			},
+			// Unlisted object properties from a stable custom hook are still required
+			{
+				code: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'value' to dependencies array",
+								output: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, [value]);
+}
+`,
+							},
+						],
+					},
+				],
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, [value]);
+}
+`,
+			},
 		],
 		valid: [
 			// Disable reportUnnecessaryDependencies
@@ -1617,6 +1701,26 @@ function Component() {
 					},
 				],
 			},
+			{
+				code: `
+function Component() {
+    const { setter, ...rest } = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+			},
 
 			// Coverage: React.useEffect
 			`
@@ -1698,6 +1802,45 @@ function Component() {
     useEffect(handler, []);
 }
 `,
+			// Non-array dependency argument is ignored
+			`
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, getDependencies());
+}
+`,
+			// Computed member hook names are ignored
+			`
+function Component() {
+    const count = props.count;
+    React["useEffect"](() => {
+        console.log(count);
+    }, []);
+}
+`,
+			// Sparse stable result destructuring still counts concrete indexes
+			{
+				code: `
+function Component() {
+    const [, , setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: [2],
+							},
+						],
+					},
+				],
+			},
 		],
 	});
 
