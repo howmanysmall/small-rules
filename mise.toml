@@ -11,8 +11,6 @@ lockfile = true
 
 [tools]
 bun = "latest"
-"cargo:jscpd" = "latest"
-deno = "latest"
 gitleaks = "latest"
 hk = "latest"
 node = "24"
