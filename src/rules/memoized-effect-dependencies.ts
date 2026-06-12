@@ -68,6 +68,20 @@ function isModuleScope(variable: Variable): boolean {
 	return variable.scope.type === "module" || variable.scope.type === "global";
 }
 
+function registerConfiguredEffectHooks(
+	rawOptions: Record<PropertyKey, unknown>,
+	effectHooks: Map<string, number>,
+): void {
+	if (!("hooks" in rawOptions && Array.isArray(rawOptions.hooks))) return;
+
+	for (const hook of rawOptions.hooks) {
+		if (!(isRecord(hook) && "name" in hook) || typeof hook.name !== "string") continue;
+		const dependenciesIndex =
+			"dependenciesIndex" in hook && typeof hook.dependenciesIndex === "number" ? hook.dependenciesIndex : 1;
+		effectHooks.set(hook.name, dependenciesIndex);
+	}
+}
+
 const memoizedEffectDependencies = defineRule({
 	create(context): Visitor {
 		const [rawOptions] = context.options;
@@ -77,16 +91,7 @@ const memoizedEffectDependencies = defineRule({
 			"environment" in options && isEnvironment(options.environment) ? options.environment : "roblox-ts";
 
 		const effectHookNameToIndex = new Map(DEFAULT_EFFECT_HOOKS);
-		if ("hooks" in options && Array.isArray(options.hooks)) {
-			for (const hook of options.hooks) {
-				if (!(isRecord(hook) && "name" in hook) || typeof hook.name !== "string") continue;
-				const dependenciesIndex =
-					"dependenciesIndex" in hook && typeof hook.dependenciesIndex === "number"
-						? hook.dependenciesIndex
-						: 1;
-				effectHookNameToIndex.set(hook.name, dependenciesIndex);
-			}
-		}
+		registerConfiguredEffectHooks(options, effectHookNameToIndex);
 
 		const reactSources = getReactSources(environment);
 		const reactNamespaces = new Set<string>();
@@ -176,23 +181,29 @@ const memoizedEffectDependencies = defineRule({
 			if (init === undefined) return "unknown";
 			if (isUnmemoizedInline(init)) return "unmemoized";
 
-			if (init.type === "CallExpression") {
-				if (isMemoHookCall(init)) return "memoized";
-
-				const stableKind = getStableHookKind(init);
-				if (stableKind === "whole") return "memoized";
-
-				if (
-					stableKind === "index1" &&
-					node.id.type === "ArrayPattern" &&
-					isIdentifierAtArrayIndex(node.id, variableName, 1)
-				) {
-					return "memoized";
-				}
-				return mode === "definite" ? "unknown" : "unmemoized";
-			}
+			if (init.type === "CallExpression") return getCallInitializerStability(init, node.id, variableName);
 
 			return "unknown";
+		}
+
+		function getCallInitializerStability(
+			init: ESTree.CallExpression,
+			id: ESTree.VariableDeclarator["id"],
+			variableName: string,
+		): Stability {
+			if (isMemoHookCall(init)) return "memoized";
+
+			const stableKind = getStableHookKind(init);
+			if (stableKind === "whole") return "memoized";
+			if (
+				stableKind === "index1" &&
+				id.type === "ArrayPattern" &&
+				isIdentifierAtArrayIndex(id, variableName, 1)
+			) {
+				return "memoized";
+			}
+
+			return mode === "definite" ? "unknown" : "unmemoized";
 		}
 
 		function getVariableStability(variable: Variable): Stability {

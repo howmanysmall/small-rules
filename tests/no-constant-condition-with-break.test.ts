@@ -62,6 +62,10 @@ describe("no-constant-condition-with-break", () => {
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
+				code: "if (!(true && false)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
 				code: "while ((false ? true : false)) { doThing(); }",
 				errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }],
 			},
@@ -71,6 +75,26 @@ describe("no-constant-condition-with-break", () => {
 			},
 			{
 				code: "while ((0, `value`)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if ((value, true)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (``) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (void value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (false && value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (true || value) { doThing(); }",
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
@@ -118,6 +142,46 @@ describe("no-constant-condition-with-break", () => {
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
+				code: 'if (!((0, ""))) { doThing(); }',
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(false && value)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(false || true)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(true || value)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(0 ?? value)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (!(undefined ?? true)) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (false || true) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (undefined ?? true) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (0 ?? value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }],
+			},
+			{
+				code: "if (false ? value : true) { doThing(); }",
+				errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }],
+			},
+			{
 				code: "const value = true ? one : two;",
 				errors: [{ messageId: "unexpected" }],
 			},
@@ -147,6 +211,10 @@ describe("no-constant-condition-with-break", () => {
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{
+				code: "for (task.wait(); true; index += 1) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
 				code: "do { doThing(); } while (task.wait());",
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
@@ -159,9 +227,26 @@ describe("no-constant-condition-with-break", () => {
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{
+				code: "for (let index = 0; true; index += task.wait()) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: "for (const key in task.wait()) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
 				code: `
 while (true) {
     const value = [task.wait()];
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    const value = [, task.wait()];
     doThing();
 }
 `,
@@ -253,6 +338,138 @@ while (true) {
 			{
 				code: `
 while (true) {
+    task.wait()();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task[method]();
+    task.wait();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    getFactory().wait();
+    task.wait();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task.wait().ready;
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    new (task.wait())();
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    task.wait()\`value\`;
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+function* run() {
+    while (true) {
+        yield;
+        task.wait();
+        doThing();
+    }
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+do {
+    task.wait();
+    doThing();
+} while (true);
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    while (task.wait()) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (const item of task.wait()) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (task.wait(); true;) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (; task.wait();) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    for (; true; task.wait()) {
+        doThing();
+    }
+    doThing();
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
     first, task.wait();
     doThing();
 }
@@ -295,6 +512,18 @@ while (true) {
         task.wait();
     } else {
         doThing();
+    }
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    if (done) {
+        doThing();
+    } else {
+        task.wait();
     }
 }
 `,
@@ -353,6 +582,35 @@ while (true) {
 `,
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
+			"if (true && value) { doThing(); }",
+			"if (value || true) { doThing(); }",
+			"if (undefined ?? value) { doThing(); }",
+			"if (!(value && true)) { doThing(); }",
+			'if (+"1") { doThing(); }',
+			"if (condition ? true : false) { doThing(); }",
+			["if (`", "{value}`) { doThing(); }"].join("$"),
+			{
+				code: `
+while (true) {
+    with (task.wait()) {
+        doThing();
+    }
+}
+`,
+				languageOptions: { sourceType: "script" },
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    with (context) {
+        task.wait();
+    }
+}
+`,
+				languageOptions: { sourceType: "script" },
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
 			{
 				code: `
 while (true) {
@@ -362,6 +620,18 @@ while (true) {
         recover();
     } finally {
         cleanup();
+    }
+}
+`,
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: `
+while (true) {
+    try {
+        doThing();
+    } catch (error) {
+        task.wait();
     }
 }
 `,

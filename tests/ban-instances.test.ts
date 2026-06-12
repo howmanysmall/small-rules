@@ -145,6 +145,16 @@ describe("ban-instances", () => {
 					{ bannedProperties: { UIAspectRatioConstraint: { AspectRatio: "Use a different approach" } } },
 				],
 			},
+			{
+				code: '{ const c = new Instance("UISizeConstraint"); c.MaxSize = new Vector2(100, 100); }',
+				errors: [{ messageId: "bannedPropertyCustom" }],
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			{
+				code: "<uisizeconstraint native:MaxSize={new Vector2(100, 100)} />;",
+				errors: [{ messageId: "bannedPropertyCustom" }],
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
 			// bannedProperties: default message (empty custom message)
 			{
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
@@ -174,10 +184,17 @@ describe("ban-instances", () => {
 			},
 		],
 		valid: [
+			// No options
+			'new Instance("Part");',
 			// No config (empty bannedInstances)
 			{
 				code: 'new Instance("Part");',
 				options: [{ bannedInstances: [] }],
+			},
+			// Empty object config
+			{
+				code: 'new Instance("Part");',
+				options: [{ bannedInstances: {} }],
 			},
 			// Non-banned classes - new Instance()
 			{
@@ -241,6 +258,10 @@ describe("ban-instances", () => {
 				code: "<uisizeconstraint MinSize={new Vector2(10, 10)} />;",
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
 			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(10, 10);',
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
 			// bannedProperties: wrong class
 			{
 				code: "<frame MaxSize={new Vector2(100, 100)} />;",
@@ -265,9 +286,39 @@ describe("ban-instances", () => {
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
 				options: [{ bannedInstances: ["Part"] }],
 			},
+			// bannedProperties: empty class property config
+			{
+				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
+				options: [{ bannedProperties: { UISizeConstraint: {} } }],
+			},
 			// bannedProperties: JSX spread attribute
 			{
 				code: "<uisizeconstraint {...props} />;",
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			// bannedProperties: assignment to a tracked variable itself
+			{
+				code: 'let c = new Instance("UISizeConstraint"); c = new Instance("Frame");',
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			// bannedProperties: computed non-literal property assignment
+			{
+				code: 'const c = new Instance("UISizeConstraint"); c[propertyName] = new Vector2(100, 100);',
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			// bannedProperties: assignment on a non-identifier expression
+			{
+				code: 'const c = new Instance("UISizeConstraint"); getConstraint().MaxSize = new Vector2(100, 100);',
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			// bannedProperties: initializer is not a new expression
+			{
+				code: "const c = getConstraint(); c.MaxSize = new Vector2(100, 100);",
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			// bannedProperties: Instance class name is dynamic
+			{
+				code: "const c = new Instance(className); c.MaxSize = new Vector2(100, 100);",
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
 			},
 		],

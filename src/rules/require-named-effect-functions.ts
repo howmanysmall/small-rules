@@ -4,7 +4,6 @@ import { isEnvironment } from "$oxc-utilities/react-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -44,11 +43,38 @@ function parseOptions(rawOptions: unknown): EffectFunctionOptions {
 	return { environment, hooks };
 }
 
-interface ResolvedFunction {
+interface ResolvedArrowFunction {
 	readonly isAsync: boolean;
-	readonly node: CallbackFunction;
-	readonly type: "arrow" | "function-declaration" | "function-expression";
+	readonly node: ESTree.ArrowFunctionExpression;
+	readonly type: "arrow";
 }
+
+interface ResolvedFunctionDeclaration {
+	readonly isAsync: boolean;
+	readonly node: ESTree.Function;
+	readonly type: "function-declaration";
+}
+
+interface ResolvedFunctionExpression {
+	readonly isAsync: boolean;
+	readonly node: ESTree.Function;
+	readonly type: "function-expression";
+}
+
+type ResolvedFunction = ResolvedArrowFunction | ResolvedFunctionDeclaration | ResolvedFunctionExpression;
+
+type RequireNamedEffectFunctionsMessageId =
+	| "anonymousFunction"
+	| "arrowFunction"
+	| "asyncAnonymousFunction"
+	| "asyncArrowFunction"
+	| "asyncFunctionDeclaration"
+	| "asyncFunctionExpression"
+	| "functionExpression"
+	| "identifierReferencesArrow"
+	| "identifierReferencesAsyncArrow"
+	| "identifierReferencesAsyncFunction"
+	| "identifierReferencesCallback";
 
 function resolveFunctionFromVariable(variable: ScopeVariable): ResolvedFunction | undefined {
 	for (const definition of variable.defs) {
@@ -113,6 +139,99 @@ const requireNamedEffectFunctions = defineRule({
 			return typeof result === "boolean" ? result : false;
 		}
 
+		function reportHookIssue(
+			hookName: string,
+			node: ESTree.CallExpression,
+			messageId: RequireNamedEffectFunctionsMessageId,
+		): void {
+			context.report({
+				data: { hook: hookName },
+				messageId,
+				node,
+			});
+		}
+
+		function reportCallbackIdentifier(
+			hookName: string,
+			node: ESTree.CallExpression,
+			identifier: ESTree.IdentifierReference,
+		): void {
+			const scope = context.sourceCode.getScope(identifier);
+			const variable = getVariableByName(scope, identifier.name);
+
+			if (variable === undefined) {
+				if (isCallbackHookResult(context.sourceCode, identifier)) {
+					reportHookIssue(hookName, node, "identifierReferencesCallback");
+				}
+				return;
+			}
+
+			const resolved = resolveFunctionFromVariable(variable);
+
+			if (resolved === undefined) {
+				if (isCallbackHookResult(context.sourceCode, identifier)) {
+					reportHookIssue(hookName, node, "identifierReferencesCallback");
+				}
+				return;
+			}
+
+			reportResolvedIdentifier(hookName, node, resolved);
+		}
+
+		function reportResolvedIdentifier(
+			hookName: string,
+			node: ESTree.CallExpression,
+			resolved: ResolvedFunction,
+		): void {
+			if (resolved.type === "arrow") {
+				if (resolved.isAsync && !isAsyncAllowed(hookName)) {
+					reportHookIssue(hookName, node, "identifierReferencesAsyncArrow");
+				} else if (!resolved.isAsync) {
+					reportHookIssue(hookName, node, "identifierReferencesArrow");
+				}
+				return;
+			}
+
+			if (resolved.type === "function-expression") {
+				reportResolvedFunctionExpression(hookName, node, resolved.node);
+				return;
+			}
+
+			if (resolved.isAsync && !isAsyncAllowed(hookName)) {
+				reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
+			}
+		}
+
+		function reportResolvedFunctionExpression(
+			hookName: string,
+			node: ESTree.CallExpression,
+			functionExpression: ESTree.Function,
+		): void {
+			if (functionExpression.id === null) {
+				reportHookIssue(hookName, node, "anonymousFunction");
+			} else if (isRobloxTsMode) {
+				reportHookIssue(hookName, node, "functionExpression");
+			}
+		}
+
+		function reportInlineFunctionExpression(
+			hookName: string,
+			node: ESTree.CallExpression,
+			functionExpression: ESTree.Function,
+		): void {
+			const functionHasId = functionExpression.id !== null;
+
+			if (functionHasId && functionExpression.async) {
+				reportHookIssue(hookName, node, "asyncFunctionExpression");
+			} else if (functionHasId && isRobloxTsMode) {
+				reportHookIssue(hookName, node, "functionExpression");
+			} else if (!functionHasId && functionExpression.async) {
+				reportHookIssue(hookName, node, "asyncAnonymousFunction");
+			} else if (!functionHasId) {
+				reportHookIssue(hookName, node, "anonymousFunction");
+			}
+		}
+
 		return {
 			CallExpression(node): void {
 				const hookName = getHookName(node);
@@ -122,118 +241,21 @@ const requireNamedEffectFunctions = defineRule({
 				if (firstArgument === undefined) return;
 
 				if (firstArgument.type === "Identifier") {
-					const scope = context.sourceCode.getScope(firstArgument);
-					const variable = getVariableByName(scope, firstArgument.name);
-
-					if (variable === undefined) {
-						if (isCallbackHookResult(context.sourceCode, firstArgument)) {
-							context.report({
-								data: { hook: hookName },
-								messageId: "identifierReferencesCallback",
-								node,
-							});
-						}
-						return;
-					}
-
-					const resolved = resolveFunctionFromVariable(variable);
-
-					if (resolved === undefined) {
-						if (isCallbackHookResult(context.sourceCode, firstArgument)) {
-							context.report({
-								data: { hook: hookName },
-								messageId: "identifierReferencesCallback",
-								node,
-							});
-						}
-						return;
-					}
-
-					if (resolved.type === "arrow") {
-						if (resolved.isAsync) {
-							if (!isAsyncAllowed(hookName)) {
-								context.report({
-									data: { hook: hookName },
-									messageId: "identifierReferencesAsyncArrow",
-									node,
-								});
-							}
-						} else {
-							context.report({
-								data: { hook: hookName },
-								messageId: "identifierReferencesArrow",
-								node,
-							});
-						}
-					} else if (resolved.type === "function-expression") {
-						if (resolved.node.id === null) {
-							context.report({
-								data: { hook: hookName },
-								messageId: "anonymousFunction",
-								node,
-							});
-						} else if (isRobloxTsMode) {
-							context.report({
-								data: { hook: hookName },
-								messageId: "functionExpression",
-								node,
-							});
-						}
-					} else if (resolved.isAsync && !isAsyncAllowed(hookName)) {
-						context.report({
-							data: { hook: hookName },
-							messageId: "identifierReferencesAsyncFunction",
-							node,
-						});
-					}
+					reportCallbackIdentifier(hookName, node, firstArgument);
 					return;
 				}
 
 				if (firstArgument.type === "ArrowFunctionExpression") {
 					if (firstArgument.async) {
-						context.report({
-							data: { hook: hookName },
-							messageId: "asyncArrowFunction",
-							node,
-						});
+						reportHookIssue(hookName, node, "asyncArrowFunction");
 					} else {
-						context.report({
-							data: { hook: hookName },
-							messageId: "arrowFunction",
-							node,
-						});
+						reportHookIssue(hookName, node, "arrowFunction");
 					}
 					return;
 				}
 
 				if (firstArgument.type === "FunctionExpression") {
-					const functionHasId = firstArgument.id !== null;
-
-					if (functionHasId && firstArgument.async) {
-						context.report({
-							data: { hook: hookName },
-							messageId: "asyncFunctionExpression",
-							node,
-						});
-					} else if (functionHasId && isRobloxTsMode) {
-						context.report({
-							data: { hook: hookName },
-							messageId: "functionExpression",
-							node,
-						});
-					} else if (!functionHasId && firstArgument.async) {
-						context.report({
-							data: { hook: hookName },
-							messageId: "asyncAnonymousFunction",
-							node,
-						});
-					} else if (!functionHasId) {
-						context.report({
-							data: { hook: hookName },
-							messageId: "anonymousFunction",
-							node,
-						});
-					}
+					reportInlineFunctionExpression(hookName, node, firstArgument);
 				}
 			},
 		} satisfies Visitor;

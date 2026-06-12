@@ -84,19 +84,8 @@ function expressionContainsConfiguredLoopExit(
 	const unwrapped = unwrapExpression(expression);
 
 	switch (unwrapped.type) {
-		case "ArrayExpression": {
-			for (const element of unwrapped.elements) {
-				if (!element) continue;
-				if (element.type === "SpreadElement") {
-					if (expressionContainsConfiguredLoopExit(element.argument, loopExitCalls)) return true;
-					continue;
-				}
-
-				if (expressionContainsConfiguredLoopExit(element, loopExitCalls)) return true;
-			}
-
-			return false;
-		}
+		case "ArrayExpression":
+			return arrayExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
 
 		case "ArrowFunctionExpression":
 		case "ClassExpression":
@@ -109,69 +98,29 @@ function expressionContainsConfiguredLoopExit(
 		case "AwaitExpression":
 			return expressionContainsConfiguredLoopExit(unwrapped.argument, loopExitCalls);
 
-		case "BinaryExpression": {
-			const { left } = unwrapped;
-			if (left.type !== "PrivateIdentifier" && expressionContainsConfiguredLoopExit(left, loopExitCalls)) {
-				return true;
-			}
-			return expressionContainsConfiguredLoopExit(unwrapped.right, loopExitCalls);
-		}
+		case "BinaryExpression":
+			return binaryExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
 
-		case "CallExpression": {
-			if (
-				isConfiguredLoopExitCall(unwrapped, loopExitCalls) ||
-				expressionContainsConfiguredLoopExit(unwrapped.callee, loopExitCalls)
-			) {
-				return true;
-			}
+		case "CallExpression":
+			return callExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
 
-			return unwrapped.arguments.some((argument) =>
-				expressionOrSpreadContainsConfiguredLoopExit(argument, loopExitCalls),
-			);
-		}
+		case "ConditionalExpression":
+			return conditionalContainsLoopExit(unwrapped, loopExitCalls);
 
-		case "ConditionalExpression": {
-			return (
-				expressionContainsConfiguredLoopExit(unwrapped.test, loopExitCalls) ||
-				expressionContainsConfiguredLoopExit(unwrapped.consequent, loopExitCalls) ||
-				expressionContainsConfiguredLoopExit(unwrapped.alternate, loopExitCalls)
-			);
-		}
+		case "LogicalExpression":
+			return logicalExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
 
-		case "LogicalExpression": {
-			return (
-				expressionContainsConfiguredLoopExit(unwrapped.left, loopExitCalls) ||
-				expressionContainsConfiguredLoopExit(unwrapped.right, loopExitCalls)
-			);
-		}
+		case "MemberExpression":
+			return memberExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
 
-		case "MemberExpression": {
-			if (expressionContainsConfiguredLoopExit(unwrapped.object, loopExitCalls)) return true;
-
-			if (unwrapped.computed) {
-				return expressionContainsConfiguredLoopExit(unwrapped.property, loopExitCalls);
-			}
-
-			return false;
-		}
-
-		case "NewExpression": {
-			if (expressionContainsConfiguredLoopExit(unwrapped.callee, loopExitCalls)) return true;
-
-			return unwrapped.arguments.some((argument) =>
-				expressionOrSpreadContainsConfiguredLoopExit(argument, loopExitCalls),
-			);
-		}
+		case "NewExpression":
+			return newExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
 
 		case "SequenceExpression":
 			return unwrapped.expressions.some((part) => expressionContainsConfiguredLoopExit(part, loopExitCalls));
 
-		case "TaggedTemplateExpression": {
-			if (expressionContainsConfiguredLoopExit(unwrapped.tag, loopExitCalls)) return true;
-			return unwrapped.quasi.expressions.some((part) =>
-				expressionContainsConfiguredLoopExit(part, loopExitCalls),
-			);
-		}
+		case "TaggedTemplateExpression":
+			return taggedTemplateContainsLoopExit(unwrapped, loopExitCalls);
 
 		case "TemplateLiteral":
 			return unwrapped.expressions.some((part) => expressionContainsConfiguredLoopExit(part, loopExitCalls));
@@ -186,6 +135,85 @@ function expressionContainsConfiguredLoopExit(
 		default:
 			return false;
 	}
+}
+
+function arrayExpressionContainsConfiguredLoopExit(
+	expression: ESTree.ArrayExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	for (const element of expression.elements) {
+		if (element === null) continue;
+		if (expressionOrSpreadContainsConfiguredLoopExit(element, loopExitCalls)) return true;
+	}
+
+	return false;
+}
+
+function binaryExpressionContainsConfiguredLoopExit(
+	expression: ESTree.BinaryExpression | ESTree.PrivateInExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	const { left } = expression;
+	if (left.type !== "PrivateIdentifier" && expressionContainsConfiguredLoopExit(left, loopExitCalls)) return true;
+	return expressionContainsConfiguredLoopExit(expression.right, loopExitCalls);
+}
+
+function callExpressionContainsConfiguredLoopExit(
+	expression: ESTree.CallExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (isConfiguredLoopExitCall(expression, loopExitCalls)) return true;
+	if (expressionContainsConfiguredLoopExit(expression.callee, loopExitCalls)) return true;
+	return expression.arguments.some((argument) =>
+		expressionOrSpreadContainsConfiguredLoopExit(argument, loopExitCalls),
+	);
+}
+
+function conditionalContainsLoopExit(
+	expression: ESTree.ConditionalExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	return (
+		expressionContainsConfiguredLoopExit(expression.test, loopExitCalls) ||
+		expressionContainsConfiguredLoopExit(expression.consequent, loopExitCalls) ||
+		expressionContainsConfiguredLoopExit(expression.alternate, loopExitCalls)
+	);
+}
+
+function logicalExpressionContainsConfiguredLoopExit(
+	expression: ESTree.LogicalExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	return (
+		expressionContainsConfiguredLoopExit(expression.left, loopExitCalls) ||
+		expressionContainsConfiguredLoopExit(expression.right, loopExitCalls)
+	);
+}
+
+function memberExpressionContainsConfiguredLoopExit(
+	expression: ESTree.MemberExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (expressionContainsConfiguredLoopExit(expression.object, loopExitCalls)) return true;
+	return expression.computed && expressionContainsConfiguredLoopExit(expression.property, loopExitCalls);
+}
+
+function newExpressionContainsConfiguredLoopExit(
+	expression: ESTree.NewExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (expressionContainsConfiguredLoopExit(expression.callee, loopExitCalls)) return true;
+	return expression.arguments.some((argument) =>
+		expressionOrSpreadContainsConfiguredLoopExit(argument, loopExitCalls),
+	);
+}
+
+function taggedTemplateContainsLoopExit(
+	expression: ESTree.TaggedTemplateExpression,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (expressionContainsConfiguredLoopExit(expression.tag, loopExitCalls)) return true;
+	return expression.quasi.expressions.some((part) => expressionContainsConfiguredLoopExit(part, loopExitCalls));
 }
 
 function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
@@ -210,23 +238,8 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 		case "Literal":
 			return toConstantValue(unwrapped.value);
 
-		case "LogicalExpression": {
-			const left = getConstantValue(unwrapped.left);
-			if (!left.constant) return toNonConstantValue();
-
-			if (unwrapped.operator === "&&") {
-				if (left.value !== true) return toConstantValue(left.value);
-				return getConstantValue(unwrapped.right);
-			}
-
-			if (unwrapped.operator === "||") {
-				if (left.value === true) return toConstantValue(left.value);
-				return getConstantValue(unwrapped.right);
-			}
-
-			if (left.value !== undefined) return toConstantValue(left.value);
-			return getConstantValue(unwrapped.right);
-		}
+		case "LogicalExpression":
+			return getLogicalConstantValue(unwrapped);
 
 		case "ObjectExpression":
 			return toConstantValue({});
@@ -243,73 +256,56 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			return toConstantValue(unwrapped.quasis[0]?.value.cooked ?? "");
 		}
 
-		case "UnaryExpression": {
-			if (unwrapped.operator === "typeof") return toConstantValue("string");
-			if (unwrapped.operator === "void") return toConstantValue(undefined);
-
-			const argument = getConstantValue(unwrapped.argument);
-			if (!argument.constant) return toNonConstantValue();
-
-			// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
-			if (unwrapped.operator === "!") return toConstantValue(!argument.value);
-			if (unwrapped.operator === "+" && typeof argument.value === "number") {
-				return toConstantValue(argument.value);
-			}
-
-			if (unwrapped.operator === "-" && typeof argument.value === "number") {
-				return toConstantValue(-argument.value);
-			}
-
-			if (unwrapped.operator === "~" && typeof argument.value === "number") {
-				return toConstantValue(~argument.value);
-			}
-
-			return toNonConstantValue();
-		}
+		case "UnaryExpression":
+			return getUnaryConstantValue(unwrapped);
 
 		default:
 			return toNonConstantValue();
 	}
 }
 
+function getLogicalConstantValue(expression: ESTree.LogicalExpression): ConstantValueResult {
+	const left = getConstantValue(expression.left);
+	if (!left.constant) return toNonConstantValue();
+
+	if (expression.operator === "&&") {
+		if (left.value !== true) return toConstantValue(left.value);
+		return getConstantValue(expression.right);
+	}
+
+	if (expression.operator === "||") {
+		if (left.value === true) return toConstantValue(left.value);
+		return getConstantValue(expression.right);
+	}
+
+	if (left.value !== undefined) return toConstantValue(left.value);
+	return getConstantValue(expression.right);
+}
+
+function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValueResult {
+	if (expression.operator === "typeof") return toConstantValue("string");
+	if (expression.operator === "void") return toConstantValue(undefined);
+
+	const argument = getConstantValue(expression.argument);
+	if (!argument.constant) return toNonConstantValue();
+
+	// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
+	if (expression.operator === "!") return toConstantValue(!argument.value);
+	if (expression.operator === "+" && typeof argument.value === "number") return toConstantValue(argument.value);
+	if (expression.operator === "-" && typeof argument.value === "number") return toConstantValue(-argument.value);
+	if (expression.operator === "~" && typeof argument.value === "number") return toConstantValue(~argument.value);
+	return toNonConstantValue();
+}
+
 function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResult {
 	const unwrapped = unwrapExpression(expression);
 
 	if (unwrapped.type === "ConditionalExpression") {
-		const test = getConstantBoolean(unwrapped.test);
-		if (test.constant) {
-			return getConstantBoolean(test.value === true ? unwrapped.consequent : unwrapped.alternate);
-		}
-
-		const consequent = getConstantBoolean(unwrapped.consequent);
-		const alternate = getConstantBoolean(unwrapped.alternate);
-		if (consequent.constant && alternate.constant && consequent.value === alternate.value) return consequent;
-
-		return toNonConstantBoolean();
+		return getConditionalConstantBoolean(unwrapped);
 	}
 
 	if (unwrapped.type === "LogicalExpression") {
-		const left = getConstantBoolean(unwrapped.left);
-		if (!left.constant) return toNonConstantBoolean();
-
-		if (unwrapped.operator === "&&") {
-			// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
-			if (!left.value) return toConstantBoolean(false);
-			return getConstantBoolean(unwrapped.right);
-		}
-
-		if (unwrapped.operator === "||") {
-			if (left.value === true) return toConstantBoolean(true);
-			return getConstantBoolean(unwrapped.right);
-		}
-
-		const leftValue = getConstantValue(unwrapped.left);
-		if (!leftValue.constant) return toNonConstantBoolean();
-		if (leftValue.value !== undefined) {
-			return toConstantBoolean(Boolean(leftValue.value));
-		}
-
-		return getConstantBoolean(unwrapped.right);
+		return getLogicalConstantBoolean(unwrapped);
 	}
 
 	if (unwrapped.type === "SequenceExpression") {
@@ -321,6 +317,37 @@ function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResul
 	const value = getConstantValue(unwrapped);
 	if (!value.constant) return toNonConstantBoolean();
 	return toConstantBoolean(Boolean(value.value));
+}
+
+function getConditionalConstantBoolean(expression: ESTree.ConditionalExpression): ConstantBooleanResult {
+	const test = getConstantBoolean(expression.test);
+	if (test.constant) return getConstantBoolean(test.value === true ? expression.consequent : expression.alternate);
+
+	const consequent = getConstantBoolean(expression.consequent);
+	const alternate = getConstantBoolean(expression.alternate);
+	if (consequent.constant && alternate.constant && consequent.value === alternate.value) return consequent;
+	return toNonConstantBoolean();
+}
+
+function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): ConstantBooleanResult {
+	const left = getConstantBoolean(expression.left);
+	if (!left.constant) return toNonConstantBoolean();
+
+	if (expression.operator === "&&") {
+		// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
+		if (!left.value) return toConstantBoolean(false);
+		return getConstantBoolean(expression.right);
+	}
+
+	if (expression.operator === "||") {
+		if (left.value === true) return toConstantBoolean(true);
+		return getConstantBoolean(expression.right);
+	}
+
+	const leftValue = getConstantValue(expression.left);
+	if (!leftValue.constant) return toNonConstantBoolean();
+	if (leftValue.value !== undefined) return toConstantBoolean(Boolean(leftValue.value));
+	return getConstantBoolean(expression.right);
 }
 
 type LoopNode =
@@ -424,33 +451,21 @@ function statementContainsLoopExit(
 			return breaksTargetLoop(statement, loopNode);
 
 		case "DoWhileStatement":
-		case "WhileStatement": {
-			if (expressionContainsConfiguredLoopExit(statement.test, loopExitCalls)) return true;
-			return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
-		}
+		case "WhileStatement":
+			return loopStatementContainsLoopExit(statement, loopNode, loopExitCalls);
 
 		case "ExpressionStatement":
 			return expressionContainsConfiguredLoopExit(statement.expression, loopExitCalls);
 
 		case "ForInStatement":
-		case "ForOfStatement": {
-			if (expressionContainsConfiguredLoopExit(statement.right, loopExitCalls)) return true;
-			return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
-		}
+		case "ForOfStatement":
+			return forEachStatementContainsLoopExit(statement, loopNode, loopExitCalls);
 
-		case "ForStatement": {
-			if (forStatementInitContainsConfiguredLoopExit(statement.init, loopExitCalls)) return true;
-			if (statement.test && expressionContainsConfiguredLoopExit(statement.test, loopExitCalls)) return true;
-			if (statement.update && expressionContainsConfiguredLoopExit(statement.update, loopExitCalls)) return true;
-			return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
-		}
+		case "ForStatement":
+			return forStatementContainsLoopExit(statement, loopNode, loopExitCalls);
 
-		case "IfStatement": {
-			if (statementContainsLoopExit(statement.consequent, loopNode, loopExitCalls)) return true;
-			return statement.alternate
-				? statementContainsLoopExit(statement.alternate, loopNode, loopExitCalls)
-				: false;
-		}
+		case "IfStatement":
+			return ifStatementContainsLoopExit(statement, loopNode, loopExitCalls);
 
 		case "LabeledStatement":
 			return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
@@ -466,16 +481,8 @@ function statementContainsLoopExit(
 			);
 		}
 
-		case "TryStatement": {
-			if (statementContainsLoopExit(statement.block, loopNode, loopExitCalls)) return true;
-			if (statement.handler && statementContainsLoopExit(statement.handler.body, loopNode, loopExitCalls)) {
-				return true;
-			}
-			if (statement.finalizer && statementContainsLoopExit(statement.finalizer, loopNode, loopExitCalls)) {
-				return true;
-			}
-			return false;
-		}
+		case "TryStatement":
+			return tryStatementContainsLoopExit(statement, loopNode, loopExitCalls);
 
 		case "VariableDeclaration": {
 			return statement.declarations.some((declaration) =>
@@ -483,14 +490,70 @@ function statementContainsLoopExit(
 			);
 		}
 
-		case "WithStatement": {
-			if (expressionContainsConfiguredLoopExit(statement.object, loopExitCalls)) return true;
-			return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
-		}
+		case "WithStatement":
+			return withStatementContainsLoopExit(statement, loopNode, loopExitCalls);
 
 		default:
 			return false;
 	}
+}
+
+function loopStatementContainsLoopExit(
+	statement: ESTree.DoWhileStatement | ESTree.WhileStatement,
+	loopNode: LoopNode,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (expressionContainsConfiguredLoopExit(statement.test, loopExitCalls)) return true;
+	return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
+}
+
+function forEachStatementContainsLoopExit(
+	statement: ESTree.ForInStatement | ESTree.ForOfStatement,
+	loopNode: LoopNode,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (expressionContainsConfiguredLoopExit(statement.right, loopExitCalls)) return true;
+	return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
+}
+
+function forStatementContainsLoopExit(
+	statement: ESTree.ForStatement,
+	loopNode: LoopNode,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (forStatementInitContainsConfiguredLoopExit(statement.init, loopExitCalls)) return true;
+	if (statement.test && expressionContainsConfiguredLoopExit(statement.test, loopExitCalls)) return true;
+	if (statement.update && expressionContainsConfiguredLoopExit(statement.update, loopExitCalls)) return true;
+	return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
+}
+
+function ifStatementContainsLoopExit(
+	statement: ESTree.IfStatement,
+	loopNode: LoopNode,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (statementContainsLoopExit(statement.consequent, loopNode, loopExitCalls)) return true;
+	return statement.alternate ? statementContainsLoopExit(statement.alternate, loopNode, loopExitCalls) : false;
+}
+
+function tryStatementContainsLoopExit(
+	statement: ESTree.TryStatement,
+	loopNode: LoopNode,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (statementContainsLoopExit(statement.block, loopNode, loopExitCalls)) return true;
+	if (statement.handler && statementContainsLoopExit(statement.handler.body, loopNode, loopExitCalls)) return true;
+	if (statement.finalizer && statementContainsLoopExit(statement.finalizer, loopNode, loopExitCalls)) return true;
+	return false;
+}
+
+function withStatementContainsLoopExit(
+	statement: ESTree.WithStatement,
+	loopNode: LoopNode,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	if (expressionContainsConfiguredLoopExit(statement.object, loopExitCalls)) return true;
+	return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
 }
 
 function shouldReportLoop(

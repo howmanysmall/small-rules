@@ -136,9 +136,8 @@ function getCallbackUsageFromCallExpression(
 
 		if (
 			name === "from" &&
-			callee.object.type === "MemberExpression" &&
-			callee.object.object.type === "Identifier" &&
-			callee.object.object.name === "Array" &&
+			callee.object.type === "Identifier" &&
+			callee.object.name === "Array" &&
 			callExpression.arguments.length >= 2
 		) {
 			return { ...usage, iteration: true };
@@ -147,9 +146,8 @@ function getCallbackUsageFromCallExpression(
 		if (
 			name === "call" &&
 			callee.object.type === "MemberExpression" &&
-			callee.object.object.type === "MemberExpression" &&
-			callee.object.object.property.type === "Identifier" &&
-			iterationMethods.has(callee.object.object.property.name)
+			callee.object.property.type === "Identifier" &&
+			iterationMethods.has(callee.object.property.name)
 		) {
 			return { ...usage, iteration: true };
 		}
@@ -250,36 +248,40 @@ function getFunctionCallbackUsage(
 }
 
 function isTopLevelFunctionReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	let parent = ascendPastWrappers(getParent(node));
+	const parent = getTopLevelReturnParent(node);
 	if (parent === undefined) return false;
 
-	if (parent.type === "JSXExpressionContainer") {
-		parent = ascendPastWrappers(getParent(parent));
-		if (parent === undefined) return false;
+	if (parent.type === "ReturnStatement") {
+		return isFunctionReturnStatement(parent);
 	}
+
+	return parent.type === "ArrowFunctionExpression";
+}
+
+function getTopLevelReturnParent(node: ESTree.JSXElement | ESTree.JSXFragment): ESTree.Node | undefined {
+	let parent = ascendPastExpressionContainer(ascendPastWrappers(getParent(node)));
 
 	while (parent !== undefined && SHOULD_ASCEND_TYPES.has(parent.type)) {
 		parent = ascendPastWrappers(getParent(parent));
 	}
-	if (parent === undefined) return false;
 
-	if (parent.type === "JSXExpressionContainer") {
-		parent = ascendPastWrappers(getParent(parent));
-		if (parent === undefined) return false;
+	return ascendPastExpressionContainer(parent);
+}
+
+function ascendPastExpressionContainer(parent: ESTree.Node | undefined): ESTree.Node | undefined {
+	if (parent?.type !== "JSXExpressionContainer") return parent;
+	return ascendPastWrappers(getParent(parent));
+}
+
+function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
+	let currentNode: ESTree.Node | undefined = ascendPastWrappers(getParent(parent));
+
+	while (currentNode !== undefined && CONTROL_FLOW_TYPES.has(currentNode.type)) {
+		currentNode = ascendPastWrappers(getParent(currentNode));
 	}
 
-	if (parent.type === "ReturnStatement") {
-		let currentNode: ESTree.Node | undefined = ascendPastWrappers(getParent(parent));
-
-		while (currentNode !== undefined && CONTROL_FLOW_TYPES.has(currentNode.type)) {
-			currentNode = ascendPastWrappers(getParent(currentNode));
-		}
-
-		if (currentNode === undefined) return false;
-		return IS_FUNCTION_EXPRESSION.has(currentNode.type) || currentNode.type === "FunctionDeclaration";
-	}
-
-	return parent.type === "ArrowFunctionExpression";
+	if (currentNode === undefined) return false;
+	return IS_FUNCTION_EXPRESSION.has(currentNode.type) || currentNode.type === "FunctionDeclaration";
 }
 
 function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {

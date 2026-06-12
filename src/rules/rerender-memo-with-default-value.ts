@@ -6,6 +6,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type Context = InferContextFromRule<typeof rerenderMemoWithDefaultValue>;
+type ObjectPatternProperty = ESTree.ObjectPattern["properties"][number];
 
 function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): void {
 	if (defaultValue.type === "ObjectExpression" && defaultValue.properties.length === 0) {
@@ -27,27 +28,26 @@ function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTr
 	for (const parameter of parameters) {
 		if (parameter.type === "AssignmentPattern" && parameter.left.type === "ObjectPattern") {
 			if (isNode(parameter.right)) reportEmptyDefaultValue(context, parameter.right);
-
-			for (const property of parameter.left.properties) {
-				if (property.type !== "Property" || property.value.type !== "AssignmentPattern") continue;
-
-				const defaultValue = property.value.right;
-				if (isNode(defaultValue)) reportEmptyDefaultValue(context, defaultValue);
-			}
-
+			checkObjectPatternDefaults(context, parameter.left);
 			continue;
 		}
 
 		if (parameter.type !== "ObjectPattern") continue;
-		for (const property of parameter.properties) {
-			if (property.type !== "Property" || property.value.type !== "AssignmentPattern") continue;
-
-			const defaultValue = property.value.right;
-			if (!isNode(defaultValue)) continue;
-
-			reportEmptyDefaultValue(context, defaultValue);
-		}
+		checkObjectPatternDefaults(context, parameter);
 	}
+}
+
+function checkObjectPatternDefaults(context: Context, pattern: ESTree.ObjectPattern): void {
+	for (const property of pattern.properties) {
+		const defaultValue = getPropertyDefaultValue(property);
+		if (defaultValue !== undefined) reportEmptyDefaultValue(context, defaultValue);
+	}
+}
+
+function getPropertyDefaultValue(property: ObjectPatternProperty): ESTree.Node | undefined {
+	if (property.type !== "Property" || property.value.type !== "AssignmentPattern") return undefined;
+	const defaultValue = property.value.right;
+	return isNode(defaultValue) ? defaultValue : undefined;
 }
 
 function getComponentDeclarationParameters(node: ESTree.Node): ReadonlyArray<ESTree.ParamPattern> | undefined {

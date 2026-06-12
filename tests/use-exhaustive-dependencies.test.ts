@@ -751,6 +751,171 @@ function Component() {
 }
 `,
 			},
+			// Sparse dependency arrays ignore empty slots while fixing missing dependencies
+			{
+				code: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [,]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(count + 1);
+    }, [setCount]);
+}
+`,
+				errors: [
+					{
+						messageId: "unnecessaryDependency",
+						suggestions: [
+							{
+								desc: "Remove 'setCount' from dependencies array",
+								output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(count + 1);
+    }, []);
+}
+`,
+							},
+						],
+					},
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(count + 1);
+    }, [count, setCount]);
+}
+`,
+							},
+						],
+					},
+				],
+				options: [{ reportUnnecessaryStableDependencies: true }],
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(count + 1);
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const count = props.count;
+    function handler() {
+        console.log(count);
+    }
+    useEffect(handler, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component() {
+    const count = props.count;
+    function handler() {
+        console.log(count);
+    }
+    useEffect(handler, [count]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const count = props.count;
+    function handler() {
+        console.log(count);
+    }
+    useEffect(handler, [count]);
+}
+`,
+			},
+			{
+				code: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, [count]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, [count]);
+}
+`,
+			},
 		],
 		valid: [
 			// Coverage: TSSatisfiesExpression and other TS nodes
@@ -1455,6 +1620,53 @@ function Component() {
 }
 `,
 			},
+			// Unlisted object properties from a stable custom hook are still required
+			{
+				code: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'value' to dependencies array",
+								output: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, [value]);
+}
+`,
+							},
+						],
+					},
+				],
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, [value]);
+}
+`,
+			},
 		],
 		valid: [
 			// Disable reportUnnecessaryDependencies
@@ -1556,6 +1768,88 @@ function Component() {
 				],
 			},
 
+			// Custom hook with stable object property
+			{
+				code: `
+function Component() {
+    const { setter } = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const { setter: setValue = () => {} } = useCustomState();
+    useEffect(() => {
+        setValue(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const { "set-value": setValue } = useCustomState();
+    useEffect(() => {
+        setValue(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["set-value"],
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const { setter, ...rest } = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+			},
+
 			// Coverage: React.useEffect
 			`
 function Component() {
@@ -1570,6 +1864,116 @@ function Component() {
     useEffect(() => {
         console.log(obj[key]);
     }, [obj[key]]);
+}
+`,
+			{
+				code: `
+function Component() {
+    const a = 1;
+    const b = 2;
+    const c = true;
+    const d = 4;
+    useEffect(() => {
+        console.log(a, b, c, d);
+    }, [a && b, c ? d : a]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [+value, \`\${value}\`]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [(value as number)!]);
+}
+`,
+				languageOptions: { parser },
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [condition ? value : fallback]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component() {
+    const obj = { prop: 1 };
+    useEffect(() => {
+        console.log(obj);
+    }, [obj?.prop]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [value as number]);
+}
+`,
+				languageOptions: { parser },
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [value + 1]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component() {
+    const value = 1;
+    const fallback = 0;
+    useEffect(() => {
+        console.log(value, fallback);
+    }, [value ?? fallback]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component() {
+    const value = 1;
+    useEffect(() => {
+        type Value = typeof value;
+        const local: Value = 1;
+        console.log(local);
+    }, []);
+}
+`,
+				languageOptions: { parser },
+			},
+			`
+function Component() {
+    function helper() {}
+    useEffect(() => {
+        helper();
+    }, []);
 }
 `,
 			// Coverage: Stable unary expression
@@ -1588,6 +1992,87 @@ function Component() {
     useEffect(handler, []);
 }
 `,
+			`
+const count = 0;
+const handler = () => {
+    console.log(count);
+};
+
+function Component() {
+    useEffect(handler, []);
+}
+`,
+			// Non-callback hook arguments are ignored
+			`
+function Component() {
+    const handler = 1;
+    useEffect(handler, []);
+}
+`,
+			`
+function Component() {
+    useEffect(createHandler(), []);
+}
+`,
+			// Non-array dependency argument is ignored
+			`
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, getDependencies());
+}
+`,
+			// Computed member hook names are ignored
+			`
+function Component() {
+    const count = props.count;
+    React["useEffect"](() => {
+        console.log(count);
+    }, []);
+}
+`,
+			// Sparse stable result destructuring still counts concrete indexes
+			{
+				code: `
+function Component() {
+    const [, , setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: [2],
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const [setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: [0],
+							},
+						],
+					},
+				],
+			},
 		],
 	});
 

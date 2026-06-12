@@ -125,6 +125,10 @@ describe("isStaticExpression checking", () => {
 			invalid: [
 				{ code: "check(Color3.fromRGB(255, 0, 0));", errors: [{ messageId: "static" }] },
 				{ code: "import { fn } from 'mod'; check(fn(1, 2));", errors: [{ messageId: "static" }] },
+				{
+					code: "const factories = { make: Color3.fromRGB }; check(factories['make'](255, 0, 0));",
+					errors: [{ messageId: "static" }],
+				},
 			],
 			valid: [],
 		});
@@ -244,6 +248,7 @@ describe("negative cases — dynamic expressions", () => {
 					errors: [{ messageId: "dynamic" }],
 				},
 				{ code: "const args = [1, 2]; check(fn(...args));", errors: [{ messageId: "dynamic" }] },
+				{ code: "check((function make() { return 1; })());", errors: [{ messageId: "dynamic" }] },
 			],
 			valid: [],
 		});
@@ -286,10 +291,10 @@ check(\`hello \${name}\`);
 });
 
 describe("circular reference safety (seen set)", () => {
-	describe("self-referencing const returns true due to seen set", () => {
+	describe("self-referencing const is not static", () => {
 		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
-			invalid: [{ code: "const a = a; check(a);", errors: [{ messageId: "static" }] }],
+			invalid: [{ code: "const a = a; check(a);", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
 		});
 	});
@@ -445,6 +450,14 @@ describe("object expression edge cases", () => {
 					errors: [{ messageId: "static" }],
 				},
 			],
+			valid: [],
+		});
+	});
+
+	describe("object with accessor properties", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("static-expression", testRule, {
+			invalid: [{ code: "check({ get value() { return 1; } });", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
 		});
 	});

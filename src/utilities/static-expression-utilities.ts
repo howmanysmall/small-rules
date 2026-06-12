@@ -208,7 +208,7 @@ export function isStaticExpression(
 	options: StaticExpressionOptions,
 ): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (seen.has(unwrapped)) return true;
+	if (seen.has(unwrapped)) return false;
 	seen.add(unwrapped);
 
 	switch (unwrapped.type) {

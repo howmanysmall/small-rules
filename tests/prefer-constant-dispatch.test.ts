@@ -136,6 +136,66 @@ function Component() {
 `,
 				errors: preferConstantDispatchError,
 			},
+			{
+				code: `
+import { ActionType } from "./actions";
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: ActionType.Open });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+import { ActionType } from "./actions";
+
+const PREFER_CONSTANT_ACTION_0 = { type: ActionType.Open };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: \`OPEN\`, priority: -1 });
+
+    return state;
+}
+`,
+				errors: preferConstantDispatchError,
+			},
+			{
+				code: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: ("OPEN" as const) });
+
+    return state;
+}
+`,
+				errors: preferConstantDispatchError,
+			},
 		],
 		valid: [
 			{
@@ -269,6 +329,97 @@ function Component() {
     dispatch(constantAction);
 
     return state;
+}
+`,
+			},
+			{
+				code: `
+let ACTION_TYPE = "OPEN";
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: ACTION_TYPE });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+function ACTION_TYPE() {
+    return "OPEN";
+}
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: ACTION_TYPE });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: UNKNOWN_ACTION_TYPE });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: ActionType.Open });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+const ActionType = {
+    Open: "open",
+};
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: ActionType["Open"] });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+function Component(actions) {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch();
+    dispatch(...actions);
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const [state] = useReducer(reducer, initialState);
+    const [value, dispatch] = useState(initialState);
+    const [otherState, , otherDispatch] = useReducer(otherReducer, otherInitialState);
+
+    dispatch({ type: "OPEN" });
+    otherDispatch({ type: "CLOSE" });
+
+    return state ?? value ?? otherState;
 }
 `,
 			},

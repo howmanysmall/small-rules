@@ -194,9 +194,221 @@ function addNestedTypeAnnotationScores(
 function getDepthMultiplier(depth: number, cache: Map<number, number>): number {
 	const cached = cache.get(depth);
 	if (cached !== undefined) return cached;
-	const computed = Math.log2(depth + 1);
+	const computed = Math.max(1, Math.log2(depth + 1));
 	cache.set(depth, computed);
 	return computed;
+}
+
+function calculateChildComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	return calculateStructuralComplexity(node, depth, config, cache, depthMultiplierCache, ceiling);
+}
+
+function addChildComplexity(
+	score: number,
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	return addScore(
+		score,
+		calculateChildComplexity(node, depth, config, cache, depthMultiplierCache, ceiling),
+		config,
+		ceiling,
+	);
+}
+
+function getDefinedNodes(nodes: ReadonlyArray<ESTree.Node | undefined>): ReadonlyArray<ESTree.Node> {
+	return nodes.filter((node): node is ESTree.Node => node !== undefined);
+}
+
+function addChildComplexities(
+	score: number,
+	nodes: ReadonlyArray<ESTree.Node>,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	let nextScore = score;
+	for (const child of nodes) {
+		nextScore = addChildComplexity(nextScore, child, depth, config, cache, depthMultiplierCache, ceiling);
+	}
+	return nextScore;
+}
+
+function calculateArrayTypeComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 1;
+
+	const elementType = getNodeValue(node, "elementType");
+	if (elementType === undefined) return 1;
+
+	return addScore(
+		calculateChildComplexity(elementType, depth, config, cache, depthMultiplierCache, ceiling),
+		1,
+		config,
+		ceiling,
+	);
+}
+
+function calculateConditionalTypeComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 3;
+
+	const childTypes = getDefinedNodes([
+		getNodeValue(node, "checkType"),
+		getNodeValue(node, "extendsType"),
+		getNodeValue(node, "trueType"),
+		getNodeValue(node, "falseType"),
+	]);
+	return addChildComplexities(3, childTypes, depth, config, cache, depthMultiplierCache, ceiling);
+}
+
+function calculateFunctionTypeComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 2;
+
+	const parameterTypes = getNodeArrayValue(node, "params")?.map(getNestedTypeAnnotation) ?? [];
+	const childTypes = getDefinedNodes([...parameterTypes, getReturnTypeAnnotation(node)]);
+	return addChildComplexities(2, childTypes, depth, config, cache, depthMultiplierCache, ceiling);
+}
+
+function calculateInterfaceComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return config.interfacePenalty;
+
+	const extendsLength = getNodeArrayValue(node, "extends")?.length ?? 0;
+	const body = getNodeValue(node, "body");
+	const members = body !== undefined && isRecord(body) ? (getNodeArrayValue(body, "body") ?? []) : [];
+	let score = config.interfacePenalty;
+	if (extendsLength > 0) score = addScore(score, extendsLength * 5, config, ceiling);
+	score = addScore(score, members.length * 2, config, ceiling);
+	return addNestedTypeAnnotationScores(score, members, depth, config, cache, depthMultiplierCache, ceiling);
+}
+
+function calculateTypeListComplexity(
+	node: ESTree.Node,
+	depth: number,
+	typePenalty: (typeCount: number) => number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 0;
+
+	const types = getNodeArrayValue(node, "types") ?? [];
+	const score = addChildComplexities(0, types, depth, config, cache, depthMultiplierCache, ceiling);
+	return addScore(score, typePenalty(types.length), config, ceiling);
+}
+
+function calculateMappedTypeComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 5;
+
+	const childTypes = getDefinedNodes([getNodeValue(node, "constraint"), getNodeValue(node, "typeAnnotation")]);
+	return addChildComplexities(5, childTypes, depth, config, cache, depthMultiplierCache, ceiling);
+}
+
+function calculateTupleTypeComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 0;
+
+	const elementTypes = getNodeArrayValue(node, "elementTypes") ?? [];
+	const requiredElements = elementTypes.filter(
+		(element) => element.type !== "TSRestType" && element.type !== "TSOptionalType",
+	);
+	const score = addChildComplexities(1, requiredElements, depth, config, cache, depthMultiplierCache, ceiling);
+	return addScore(score, 1.5 * elementTypes.length, config, ceiling);
+}
+
+function calculateTypeLiteralComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 0;
+
+	const members = getNodeArrayValue(node, "members") ?? [];
+	const score = 2 + members.length * 0.5;
+	return addNestedTypeAnnotationScores(score, members, depth, config, cache, depthMultiplierCache, ceiling);
+}
+
+function calculateTypeReferenceComplexity(
+	node: ESTree.Node,
+	depth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+): number {
+	if (!isRecord(node)) return 2;
+
+	const typeArguments = getNodeValue(node, "typeArguments");
+	const parameters =
+		typeArguments !== undefined && isRecord(typeArguments)
+			? (getNodeArrayValue(typeArguments, "params") ?? [])
+			: [];
+	let score = 2;
+	for (const parameter of parameters) {
+		score = addScore(
+			score,
+			calculateChildComplexity(parameter, depth, config, cache, depthMultiplierCache, ceiling) + 2,
+			config,
+			ceiling,
+		);
+	}
+	return score;
 }
 
 function calculateStructuralComplexity(
@@ -223,26 +435,7 @@ function calculateStructuralComplexity(
 			break;
 
 		case "TSArrayType": {
-			if (isRecord(node)) {
-				const elementType = getNodeValue(node, "elementType");
-				if (elementType !== undefined) {
-					score = addScore(
-						calculateStructuralComplexity(
-							elementType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						1,
-						config,
-						ceiling,
-					);
-					break;
-				}
-			}
-			score = 1;
+			score = calculateArrayTypeComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSBigIntKeyword":
@@ -257,264 +450,56 @@ function calculateStructuralComplexity(
 			break;
 		}
 		case "TSConditionalType": {
-			score = 3;
-			if (isRecord(node)) {
-				const checkType = getNodeValue(node, "checkType");
-				const extendsType = getNodeValue(node, "extendsType");
-				const trueType = getNodeValue(node, "trueType");
-				const falseType = getNodeValue(node, "falseType");
-				if (checkType !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							checkType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-				if (extendsType !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							extendsType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-				if (trueType !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							trueType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-				if (falseType !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							falseType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-			}
+			score = calculateConditionalTypeComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSFunctionType":
 		case "TSMethodSignature": {
-			score = 2;
-			if (isRecord(node)) {
-				const parameters = getNodeArrayValue(node, "params") ?? [];
-				for (const parameter of parameters) {
-					const typeAnnotation = getNestedTypeAnnotation(parameter);
-					if (typeAnnotation === undefined) continue;
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							typeAnnotation,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-				const returnType = getReturnTypeAnnotation(node);
-				if (returnType !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							returnType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-			}
+			score = calculateFunctionTypeComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSInterfaceDeclaration": {
-			score = config.interfacePenalty;
-			if (isRecord(node)) {
-				const extendsLength = getNodeArrayValue(node, "extends")?.length;
-				if (extendsLength !== undefined && extendsLength > 0) {
-					score = addScore(score, extendsLength * 5, config, ceiling);
-				}
-
-				const body = getNodeValue(node, "body");
-				const members = body !== undefined && isRecord(body) ? (getNodeArrayValue(body, "body") ?? []) : [];
-				score = addScore(score, members.length * 2, config, ceiling);
-				score = addNestedTypeAnnotationScores(
-					score,
-					members,
-					nextDepth,
-					config,
-					cache,
-					depthMultiplierCache,
-					ceiling,
-				);
-			}
+			score = calculateInterfaceComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSIntersectionType": {
-			if (isRecord(node)) {
-				const types = getNodeArrayValue(node, "types") ?? [];
-				for (const type of types) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(type, nextDepth, config, cache, depthMultiplierCache, ceiling),
-						config,
-						ceiling,
-					);
-				}
-				score = addScore(score, 3 * types.length, config, ceiling);
-			}
+			score = calculateTypeListComplexity(
+				node,
+				nextDepth,
+				(typeCount) => 3 * typeCount,
+				config,
+				cache,
+				depthMultiplierCache,
+				ceiling,
+			);
 			break;
 		}
 		case "TSMappedType": {
-			score = 5;
-			if (isRecord(node)) {
-				const constraint = getNodeValue(node, "constraint");
-				if (constraint !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							constraint,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-				const typeAnnotation = getNodeValue(node, "typeAnnotation");
-				if (typeAnnotation !== undefined) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							typeAnnotation,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-			}
+			score = calculateMappedTypeComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSTupleType": {
-			if (isRecord(node)) {
-				const elementTypes = getNodeArrayValue(node, "elementTypes") ?? [];
-				score = 1;
-				for (const element of elementTypes) {
-					if (element.type === "TSRestType" || element.type === "TSOptionalType") continue;
-					score = addScore(
-						score,
-						calculateStructuralComplexity(element, nextDepth, config, cache, depthMultiplierCache, ceiling),
-						config,
-						ceiling,
-					);
-				}
-				score = addScore(score, 1.5 * elementTypes.length, config, ceiling);
-			}
+			score = calculateTupleTypeComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSTypeLiteral": {
-			if (isRecord(node)) {
-				const members = getNodeArrayValue(node, "members") ?? [];
-				score = 2 + members.length * 0.5;
-				score = addNestedTypeAnnotationScores(
-					score,
-					members,
-					nextDepth,
-					config,
-					cache,
-					depthMultiplierCache,
-					ceiling,
-				);
-			}
+			score = calculateTypeLiteralComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSTypeReference": {
-			score = 2;
-			if (isRecord(node)) {
-				const typeArguments = getNodeValue(node, "typeArguments");
-				const parameters =
-					typeArguments !== undefined && isRecord(typeArguments)
-						? (getNodeArrayValue(typeArguments, "params") ?? [])
-						: [];
-				for (const parameter of parameters) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							parameter,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						) + 2,
-						config,
-						ceiling,
-					);
-				}
-			}
+			score = calculateTypeReferenceComplexity(node, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			break;
 		}
 		case "TSUnionType": {
-			if (isRecord(node)) {
-				const types = getNodeArrayValue(node, "types") ?? [];
-				for (const type of types) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(type, nextDepth, config, cache, depthMultiplierCache, ceiling),
-						config,
-						ceiling,
-					);
-				}
-				score = addScore(score, 2 * (types.length - 1), config, ceiling);
-			}
+			score = calculateTypeListComplexity(
+				node,
+				nextDepth,
+				(typeCount) => 2 * (typeCount - 1),
+				config,
+				cache,
+				depthMultiplierCache,
+				ceiling,
+			);
 			break;
 		}
 		default:

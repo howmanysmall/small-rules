@@ -47,7 +47,6 @@ const banTypes = defineRule({
 		const [rawOptions] = context.options;
 
 		const bannedTypes = normalizeBannedTypes(rawOptions);
-		if (bannedTypes.size === 0) return {} satisfies Visitor;
 
 		return {
 			TSTypeReference(node): void {

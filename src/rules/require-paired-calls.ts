@@ -76,6 +76,13 @@ function isOpenerInAllBranches(
 	return true;
 }
 
+function getBranchesWithOpener(
+	opener: OpenerStackEntry,
+	branches: ReadonlyArray<ReadonlyArray<OpenerStackEntry>>,
+): ReadonlyArray<ReadonlyArray<OpenerStackEntry>> {
+	return branches.filter((branchStack) => branchStack.some((branch) => branch.index === opener.index));
+}
+
 function getCallName({ callee }: ESTree.CallExpression): string | undefined {
 	if (callee.type === "Identifier") return callee.name;
 
@@ -225,25 +232,7 @@ const requirePairedCalls = defineRule({
 		const contextStack = new Array<ControlFlowContext>();
 		const stackSnapshots = new Map<ESTree.Node, Array<OpenerStackEntry>>();
 		const branchStacks = new Map<ESTree.Node, Array<Array<OpenerStackEntry>>>();
-		const closerToOpenersCache = new Map<string, ReadonlyArray<string>>();
 		const openerToClosersCache = new Map<string, ReadonlyArray<string>>();
-
-		function getConfiguredOpenersForCloser(closer: string): ReadonlyArray<string> {
-			if (closerToOpenersCache.has(closer)) return closerToOpenersCache.get(closer) ?? [];
-
-			const names = new Array<string>();
-			let size = 0;
-			for (const pair of resolvedOptions.pairs) {
-				if (!getValidClosers(pair).includes(closer)) continue;
-
-				for (const openerName of getAllOpeners(pair)) {
-					if (!names.includes(openerName)) names[size++] = openerName;
-				}
-			}
-
-			closerToOpenersCache.set(closer, names);
-			return names;
-		}
 
 		function getExpectedClosersForOpener(opener: string): ReadonlyArray<string> {
 			if (openerToClosersCache.has(opener)) return openerToClosersCache.get(opener) ?? [];
@@ -320,6 +309,41 @@ const requirePairedCalls = defineRule({
 			});
 		}
 
+		function getCloserLabel(config: PairConfiguration): string {
+			const validClosers = getValidClosers(config);
+			return validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
+		}
+
+		function reportUnpairedEntry(entry: OpenerStackEntry, paths: string): void {
+			context.report({
+				data: {
+					closer: getCloserLabel(entry.config),
+					opener: entry.opener,
+					paths,
+				},
+				messageId: "unpairedOpener",
+				node: entry.node,
+			});
+		}
+
+		function restoreOpenerStack(entries: ReadonlyArray<OpenerStackEntry>): void {
+			openerStack.length = 0;
+			for (const entry of entries) openerStack.push({ ...entry });
+		}
+
+		function reportPartiallyClosedOpeners(
+			openers: ReadonlyArray<OpenerStackEntry>,
+			branches: ReadonlyArray<ReadonlyArray<OpenerStackEntry>>,
+			paths: string,
+		): void {
+			for (const opener of openers) {
+				const branchesWithOpener = getBranchesWithOpener(opener, branches);
+				if (branchesWithOpener.length <= 0 || branchesWithOpener.length >= branches.length) continue;
+				if (resolvedOptions.allowConditionalClosers !== false) continue;
+				reportUnpairedEntry(opener, paths);
+			}
+		}
+
 		function onFunctionEnter(node: ESTree.Node): void {
 			if (
 				node.type !== "FunctionDeclaration" &&
@@ -350,19 +374,7 @@ const requirePairedCalls = defineRule({
 		function onFunctionExit(): void {
 			if (openerStack.length > 0) {
 				for (const entry of openerStack) {
-					const validClosers = getValidClosers(entry.config);
-					const closer =
-						validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
-
-					context.report({
-						data: {
-							closer,
-							opener: entry.opener,
-							paths: "function exit",
-						},
-						messageId: "unpairedOpener",
-						node: entry.node,
-					});
+					reportUnpairedEntry(entry, "function exit");
 				}
 			}
 
@@ -394,55 +406,19 @@ const requirePairedCalls = defineRule({
 				for (const branchStack of branches) {
 					for (const entry of branchStack) {
 						const wasInOriginal = originalStack.some(({ index }) => index === entry.index);
-						if (!wasInOriginal) {
-							const validClosers = getValidClosers(entry.config);
-							const closer =
-								validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
-
-							context.report({
-								data: {
-									closer,
-									opener: entry.opener,
-									paths: "conditional branch",
-								},
-								messageId: "unpairedOpener",
-								node: entry.node,
-							});
-						}
+						if (!wasInOriginal) reportUnpairedEntry(entry, "conditional branch");
 					}
 				}
 
 				if (hasCompleteElse) {
-					for (const { config, index, opener } of originalStack) {
-						const branchesWithOpener = branches.filter((branchStack) =>
-							branchStack.some((branch) => branch.index === index),
-						);
-
-						if (branchesWithOpener.length <= 0 || branchesWithOpener.length >= branches.length) continue;
-						if (resolvedOptions.allowConditionalClosers !== false) continue;
-
-						const validClosers = getValidClosers(config);
-						const closer =
-							validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
-
-						context.report({
-							data: {
-								closer,
-								opener,
-								paths: "not all execution paths",
-							},
-							messageId: "unpairedOpener",
-							node,
-						});
-					}
+					reportPartiallyClosedOpeners(originalStack, branches, "not all execution paths");
 
 					const commonOpeners = originalStack.filter((opener) => isOpenerInAllBranches(opener, branches));
 
 					openerStack.length = 0;
 					openerStack.push(...commonOpeners);
 				} else {
-					openerStack.length = 0;
-					for (const entry of originalStack) openerStack.push({ ...entry });
+					restoreOpenerStack(originalStack);
 				}
 			}
 
@@ -598,31 +574,7 @@ const requirePairedCalls = defineRule({
 				const hasDefault = node.cases.some((caseNode) => caseNode.test === null);
 
 				if (hasDefault && branches.length === node.cases.length) {
-					for (const opener of originalStack) {
-						const branchesWithOpener = branches.filter((branchStack) =>
-							branchStack.some((entry) => entry.index === opener.index),
-						);
-
-						if (
-							branchesWithOpener.length > 0 &&
-							branchesWithOpener.length < branches.length &&
-							resolvedOptions.allowConditionalClosers === false
-						) {
-							const validClosers = getValidClosers(opener.config);
-							const closer =
-								validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
-
-							context.report({
-								data: {
-									closer,
-									opener: opener.opener,
-									paths: "not all execution paths",
-								},
-								messageId: "unpairedOpener",
-								node: opener.node,
-							});
-						}
-					}
+					reportPartiallyClosedOpeners(originalStack, branches, "not all execution paths");
 
 					const commonOpeners = originalStack.filter((openerEntry) =>
 						isOpenerInAllBranches(openerEntry, branches),
@@ -631,8 +583,7 @@ const requirePairedCalls = defineRule({
 					openerStack.length = 0;
 					openerStack.push(...commonOpeners);
 				} else {
-					openerStack.length = 0;
-					for (const entry of originalStack) openerStack.push({ ...entry });
+					restoreOpenerStack(originalStack);
 				}
 			}
 
@@ -775,32 +726,19 @@ const requirePairedCalls = defineRule({
 					return;
 				}
 
-				const topEntry = openerStack.at(-1);
-				if (topEntry) {
-					const expectedClosers = getExpectedClosersForOpener(topEntry.opener);
-					const closerDescription = formatOpenerList(expectedClosers);
+				// oxlint-disable-next-line typescript/no-non-null-assertion -- openerStack length was checked above.
+				const topEntry = openerStack.at(-1)!;
+				const expectedClosers = getExpectedClosersForOpener(topEntry.opener);
+				const closerDescription = formatOpenerList(expectedClosers);
 
-					context.report({
-						data: {
-							closer,
-							expected: closerDescription,
-						},
-						messageId: "unexpectedCloser",
-						node,
-					});
-				} else {
-					const openerCandidates = getConfiguredOpenersForCloser(closer);
-					const openerDescription = formatOpenerList(openerCandidates);
-
-					context.report({
-						data: {
-							closer,
-							opener: openerDescription,
-						},
-						messageId: "unpairedCloser",
-						node,
-					});
-				}
+				context.report({
+					data: {
+						closer,
+						expected: closerDescription,
+					},
+					messageId: "unexpectedCloser",
+					node,
+				});
 
 				return;
 			}

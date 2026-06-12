@@ -98,42 +98,52 @@ function resolveVariableToFunctionIds(
 	const functionIds = new Set<number>();
 
 	for (const definition of variable.defs) {
-		if (definition.type === "FunctionName") {
-			const { node } = definition;
-			if (node.type !== "FunctionDeclaration") continue;
-
-			const functionId = functionInfosByNode.get(node)?.id;
-			if (functionId !== undefined) functionIds.add(functionId);
-			continue;
-		}
-
-		if (definition.type !== "Variable") continue;
-
-		const { node } = definition;
-		if (node.type !== "VariableDeclarator") continue;
-
-		const init = node.init ?? undefined;
-		if (init === undefined) continue;
-
-		const initializer = unwrapExpression(init);
-		if (isCallbackFunction(initializer)) {
-			const functionId = functionInfosByNode.get(initializer)?.id;
-			if (functionId !== undefined) functionIds.add(functionId);
-			continue;
-		}
-
-		if (initializer.type !== "Identifier") continue;
-
-		const aliasVariable = getVariableByName(sourceCode.getScope(initializer), initializer.name);
-		if (aliasVariable === undefined) continue;
-
-		const resolved = resolveVariableToFunctionIds(aliasVariable, sourceCode, functionInfosByNode, cache, visited);
+		const resolved = resolveDefinitionToFunctionIds(definition, sourceCode, functionInfosByNode, cache, visited);
 		for (const id of resolved) functionIds.add(id);
 	}
 
 	visited.delete(variable);
 	cache.set(variable, functionIds);
 	return functionIds;
+}
+
+function resolveDefinitionToFunctionIds(
+	definition: ScopeVariable["defs"][number],
+	sourceCode: SourceCode,
+	functionInfosByNode: ReadonlyMap<CallbackFunction, FunctionInfo>,
+	cache: Map<ScopeVariable, ReadonlySet<number>>,
+	visited: Set<ScopeVariable>,
+): ReadonlySet<number> {
+	if (definition.type === "FunctionName") return resolveFunctionNameDefinition(definition, functionInfosByNode);
+	if (definition.type !== "Variable") return new Set<number>();
+
+	const { node } = definition;
+	if (node.type !== "VariableDeclarator" || node.init === null) return new Set<number>();
+
+	const initializer = unwrapExpression(node.init);
+	if (isCallbackFunction(initializer)) return getFunctionIdSet(initializer, functionInfosByNode);
+	if (initializer.type !== "Identifier") return new Set<number>();
+
+	const aliasVariable = getVariableByName(sourceCode.getScope(initializer), initializer.name);
+	if (aliasVariable === undefined) return new Set<number>();
+	return resolveVariableToFunctionIds(aliasVariable, sourceCode, functionInfosByNode, cache, visited);
+}
+
+function resolveFunctionNameDefinition(
+	definition: ScopeVariable["defs"][number],
+	functionInfosByNode: ReadonlyMap<CallbackFunction, FunctionInfo>,
+): ReadonlySet<number> {
+	const { node } = definition;
+	if (node.type !== "FunctionDeclaration") return new Set<number>();
+	return getFunctionIdSet(node, functionInfosByNode);
+}
+
+function getFunctionIdSet(
+	node: CallbackFunction,
+	functionInfosByNode: ReadonlyMap<CallbackFunction, FunctionInfo>,
+): ReadonlySet<number> {
+	const functionId = functionInfosByNode.get(node)?.id;
+	return functionId === undefined ? new Set<number>() : new Set([functionId]);
 }
 
 function resolveIdentifierToFunctionIds(

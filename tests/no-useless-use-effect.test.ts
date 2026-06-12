@@ -25,6 +25,33 @@ function Component(properties) {
 import { useEffect, useState } from "@rbxts/react";
 
 function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(Math.max(properties.initialCount, 0));
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(function syncInitialCount() {
+        ;
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
     const [fullName, setFullName] = useState("");
     useEffect(() => {
         setFullName(properties.firstName + properties.lastName);
@@ -32,6 +59,20 @@ function Component(properties) {
 }
 `,
 				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+				options: [{}],
 			},
 			{
 				code: `
@@ -243,6 +284,23 @@ function Component() {
 `,
 				errors: [{ messageId: "eventFlag" }],
 			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) {
+            return;
+        }
+        sendForm();
+        setSubmitted(false);
+    }, [submitted]);
+}
+`,
+				errors: [{ messageId: "eventFlag" }],
+			},
 
 			// ========== NEW: NAMED FUNCTION RESOLUTION ==========
 
@@ -269,6 +327,21 @@ function Component(properties) {
     const [count, setCount] = useState(0);
 
     const initEffect = () => {
+        setCount(properties.initialValue);
+    };
+    useEffect(initEffect, [properties.initialValue]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+
+    const initEffect = function syncInitialCount(): void {
         setCount(properties.initialValue);
     };
     useEffect(initEffect, [properties.initialValue]);
@@ -311,6 +384,16 @@ function Component() {
 			// Note: Empty arrow function bodies like `() => {}` may have subtle parsing
 			// Differences. The following tests check for effects with truly empty bodies.
 
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {}, []);
+}
+`,
+				errors: [{ messageId: "emptyEffect" }],
+			},
 			{
 				code: `
 import { useEffect } from "@rbxts/react";
@@ -364,6 +447,71 @@ function Component() {
 }
 `,
 				errors: [{ messageId: "initializeState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [items, setItems] = useState<string[]>([]);
+    useEffect(() => {
+        setItems([properties.item]);
+    }, [properties.item]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [config, setConfig] = useState({});
+    useEffect(() => {
+        setConfig({ value: properties.value });
+    }, [properties.value]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [label, setLabel] = useState("");
+    useEffect(() => {
+        setLabel(\`\${properties.prefix}-\${properties.suffix}\`);
+    }, [properties.prefix, properties.suffix]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [name, setName] = useState("");
+    useEffect(() => {
+        setName(properties.primary?.name);
+    }, [properties.primary]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [status, setStatus] = useState("");
+    useEffect(() => {
+        setStatus(properties.ready ? "ready" : properties.fallback);
+    }, [properties.ready, properties.fallback]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
 			},
 
 			// ========== NEW: resetState ==========
@@ -455,11 +603,45 @@ function Component({ user }) {
 `,
 				errors: [{ messageId: "adjustState" }],
 			},
-
 			// ========== NEW: eventSpecificLogic ==========
 			// Note: This detection is intentionally conservative to avoid false positives
 			// On legitimate synchronization patterns like "fetch data, then process it"
 			// The eventFlag pattern handles the common "toggle flag -> run side effect" case
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            analytics.track("submitted");
+        }
+    }, [submitted]);
+}
+`,
+				errors: [{ messageId: "eventSpecificLogic" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [ready, setReady] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (ready) {
+            setReady(false);
+        } else {
+            if (submitted) {
+                sendForm();
+            }
+        }
+    }, [ready, submitted]);
+}
+`,
+				errors: [{ messageId: "eventSpecificLogic" }, { messageId: "effectChain" }],
+			},
 
 			// ========== NEW: mixedDerivedState ==========
 
@@ -473,6 +655,34 @@ function Component({ count, logger }) {
         setLocalCount(count);
         logger.log(count);
     }, [count, logger]);
+}
+`,
+				errors: [{ messageId: "mixedDerivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, analytics, method }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        analytics[method](count);
+    }, [count, analytics, method]);
+}
+`,
+				errors: [{ messageId: "mixedDerivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        calculate(count);
+    }, [count]);
 }
 `,
 				errors: [{ messageId: "mixedDerivedState" }],
@@ -681,6 +891,170 @@ function Component() {
 		],
 		valid: [
 			// ========== EXISTING VALID TESTS ==========
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect();
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(createEffect(), []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const sync = async () => {
+        await fetchData();
+    };
+    useEffect(sync, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const sync = () => fetchData();
+    useEffect(sync, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useRef, useState } from "@rbxts/react";
+
+function Component({ count, onReady }) {
+    const [localCount, setLocalCount] = useState(0);
+    const ref = useRef();
+    useEffect(() => {
+        setLocalCount(count);
+        onReady(ref.current);
+        console.log(count);
+    }, [count, onReady, ref]);
+}
+`,
+				options: [
+					{
+						reportDerivedState: false,
+						reportLogOnly: false,
+						reportMixedDerivedState: false,
+						reportPassRefToParent: false,
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [localCount] = useState(0);
+    useEffect(() => {
+        sendAnalytics(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [localCount, , resetCount] = useState(0);
+    useEffect(() => {
+        sendAnalytics(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ mode }) {
+    const [status, setStatus] = useState("idle");
+    useEffect(() => {
+        setStatus("ready");
+    }, [mode]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [card, setCard] = useState(null);
+    const [goldCardCount, setGoldCardCount] = useState(0);
+
+    useEffect(() => {
+        if (card !== null && card.gold) {
+            setGoldCardCount(c => c + 1);
+        }
+    }, [card]);
+
+    useEffect(() => {
+        if (goldCardCount > 3) {
+            setCard(null);
+        }
+    }, [goldCardCount]);
+}
+`,
+				options: [{ reportEffectChain: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, analytics }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        analytics.trackEvent(count);
+    }, [count, analytics]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, onReady }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        onReady();
+    }, [count, onReady]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ items, selected }) {
+    const [selection, setSelection] = useState<string | undefined>(selected);
+    useEffect(() => {
+        if (selection !== undefined) {
+            keepSelection(selection);
+        } else if (items.length > 0) {
+            setSelection(items[0]);
+        }
+    }, [items, selection]);
+}
+`,
+			},
 
 			{
 				code: `
@@ -758,6 +1132,17 @@ function Component({ onChange, value }) {
         if (!value) return;
         logChange(value);
         onChange(value);
+    }, [onChange, value]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component({ onChange, value }) {
+    useEffect(() => {
+        getNotifier(onChange)(value);
     }, [onChange, value]);
 }
 `,
@@ -864,6 +1249,8 @@ function Component() {
     useEffect(() => {
         try {
             start();
+        } catch (error) {
+            return () => report(error);
         } finally {
             return () => stop();
         }
@@ -1274,6 +1661,48 @@ export function useReadySignal({ ready, onReady }: ReadySignalInput): void {
 }
 `,
 				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useEffect } from "react";
+
+export const hooks = {
+    useReadySignal({ ready, onReady }: ReadySignalInput): void {
+        useEffect(() => {
+            if (!ready) return;
+            onReady?.();
+        }, [ready, onReady]);
+    },
+};
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useEffect } from "react";
+
+export class ReadySignal {
+    useReadySignal({ ready, onReady }: ReadySignalInput): void {
+        useEffect(() => {
+            if (!ready) return;
+            onReady?.();
+        }, [ready, onReady]);
+    }
+}
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        while (shouldContinue())
+            return () => stop();
+    }, []);
+}
+`,
 			},
 
 			// InitializeState disabled via options

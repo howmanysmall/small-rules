@@ -30,7 +30,7 @@ export function toPascalCase(value: string): string {
 			const firstByte = word.charCodeAt(0);
 
 			if (result.length > 0 && firstByte >= 48 && firstByte <= 57) result += "_";
-			result += word[0]!.toUpperCase() + word.slice(1).toLowerCase();
+			result += word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 		}
 		wordStart = index + 1;
 	}

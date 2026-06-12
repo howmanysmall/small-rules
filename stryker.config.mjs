@@ -6,12 +6,7 @@ const configuration = {
 	coverageAnalysis: "perTest",
 	ignorePatterns: ["/coverage"],
 	incremental: true,
-	mutate: [
-		"src/**/*.ts",
-		"!src/**/*.d.ts",
-		"!src/index.ts",
-		"!src/types/**/*.ts",
-	],
+	mutate: ["src/**/*.ts", "!src/**/*.d.ts", "!src/index.ts", "!src/types/**/*.ts"],
 	plugins: ["@stryker-mutator/vitest-runner"],
 	reporters: ["clear-text", "progress", "html"],
 	testRunner: "vitest",

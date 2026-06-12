@@ -132,6 +132,36 @@ function Bad7(items) {
 					},
 				},
 			},
+			// Dynamic callee callback missing key
+			{
+				code: `
+function DynamicMapped(items, getMapper) {
+    return getMapper()((item) => <div />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Computed member callback missing key
+			{
+				code: `
+function ComputedMapped(items) {
+    return items["map"]((item) => <div />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Map callback with block body missing key
 			{
 				code: `
@@ -197,6 +227,67 @@ function EnemyList(enemies) {
 					},
 				},
 			},
+			// Named callback reused by iteration and memoization without keys
+			{
+				code: `
+const renderEnemy = (enemy) => <billboardgui />;
+
+function EnemyList(enemies) {
+    enemies.map(renderEnemy);
+    return useMemo(renderEnemy, [enemies]);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Array.from named fragment callback reused by memoization
+			{
+				code: `
+const renderEnemy = (enemy) => (
+    <>
+        <billboardgui />
+    </>
+);
+
+function EnemyList(enemies) {
+    Array.from(enemies, renderEnemy);
+    return useMemo(renderEnemy, [enemies]);
+}
+`,
+				errors: 2,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Array.from named fragment callback without key
+			{
+				code: `
+const renderEnemy = (enemy) => (
+    <>
+        <billboardgui key={enemy.id} />
+    </>
+);
+
+function EnemyList(enemies) {
+    return Array.from(enemies, renderEnemy);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Array.from without key in mapping callback
 			{
 				code: `
@@ -217,6 +308,42 @@ function FromList(iterable) {
 				code: `
 function CallMapped(items) {
     return Array.prototype.map.call(items, (item) => <span />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Array.prototype.map.call named fragment callback without key
+			{
+				code: `
+const renderEnemy = (enemy) => (
+    <>
+        <billboardgui key={enemy.id} />
+    </>
+);
+
+function EnemyList(enemies) {
+    return Array.prototype.map.call(enemies, renderEnemy);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Spread inline callback without key
+			{
+				code: `
+function SpreadMapped(items) {
+    return items.map(...((item) => <span />));
 }
 `,
 				errors: 1,
@@ -711,6 +838,36 @@ function EnemyList(enemies) {
 					},
 				},
 			},
+			// Function-valued object property return is not an iteration callback
+			{
+				code: `
+const renderers = {
+    renderEnemy: (enemy) => <billboardgui />,
+};
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Direct callback invocation is not an iteration callback
+			{
+				code: `
+const renderEnemy = (enemy) => <billboardgui />;
+
+function EnemyList(enemy) {
+    return renderEnemy(enemy);
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Array.from callback with keyed element
 			{
 				code: `
@@ -920,6 +1077,31 @@ function Good10() {
 function GoodHolderChildren() {
     return <Frame holderChildren={<Child key="child" />} />;
 }
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// JSX assigned through a type assertion
+			{
+				code: `
+const cached = (<Child /> as React.ReactNode);
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// JSX assigned after declaration
+			{
+				code: `
+let cached;
+cached = <Child />;
 `,
 				languageOptions: {
 					parser,

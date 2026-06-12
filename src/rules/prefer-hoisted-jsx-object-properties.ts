@@ -26,37 +26,40 @@ function isJsxElementAssignedToModuleConst(context: Context, node: ESTree.JSXEle
 	let current: WalkableParent = node;
 
 	while (true) {
-		// oxlint-disable-next-line eslint/prefer-destructuring -- incorrect lol
-		const parent: ESTree.Node = current.parent;
+		const { parent } = current;
+		if (parent.type === "VariableDeclarator") return isModuleConstDeclaration(context, node, parent, current);
 
-		if (parent.type === "VariableDeclarator") {
-			if (parent.id.type !== "Identifier") return false;
-			if (parent.init !== current) return false;
-
-			const scope = context.sourceCode.getScope(node);
-			const variable = getVariableByName(scope, parent.id.name);
-			if (variable === undefined) return false;
-
-			return isModuleLevelScope(variable.scope);
-		}
-
-		if (parent.type === "JSXElement" || parent.type === "JSXFragment") {
-			current = parent;
-			continue;
-		}
-
-		if (parent.type === "JSXExpressionContainer") {
-			current = parent;
-			continue;
-		}
-
-		if (parent.type === "ArrayExpression") {
-			current = parent;
-			continue;
-		}
-
-		return false;
+		const nextParent = getWalkableJsxParent(parent);
+		if (nextParent === undefined) return false;
+		current = nextParent;
 	}
+}
+
+function getWalkableJsxParent(parent: ESTree.Node): WalkableParent | undefined {
+	if (
+		parent.type === "JSXElement" ||
+		parent.type === "JSXFragment" ||
+		parent.type === "JSXExpressionContainer" ||
+		parent.type === "ArrayExpression"
+	) {
+		return parent;
+	}
+
+	return undefined;
+}
+
+function isModuleConstDeclaration(
+	context: Context,
+	node: ESTree.JSXElement | ESTree.JSXFragment,
+	parent: ESTree.VariableDeclarator,
+	current: WalkableParent,
+): boolean {
+	if (parent.id.type !== "Identifier") return false;
+	if (parent.init !== current) return false;
+
+	const scope = context.sourceCode.getScope(node);
+	const variable = getVariableByName(scope, parent.id.name);
+	return variable !== undefined && isModuleLevelScope(variable.scope);
 }
 
 function reportHoistableObject(context: Context, objectExpression: ESTree.ObjectExpression): void {

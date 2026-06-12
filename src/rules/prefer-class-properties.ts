@@ -58,6 +58,25 @@ function isConstructor(node: ESTree.ClassElement): node is ESTree.MethodDefiniti
 	);
 }
 
+function isConstructorLiteralAssignment(statement: ESTree.Statement): statement is ESTree.ExpressionStatement & {
+	readonly expression: ESTree.AssignmentExpression;
+} {
+	if (statement.type !== "ExpressionStatement") return false;
+
+	const { expression } = statement;
+	if (expression.type !== "AssignmentExpression") return false;
+
+	const { left } = expression;
+	if (left.type !== "MemberExpression" || left.object.type !== "ThisExpression") return false;
+
+	const { property } = left;
+	return (
+		(property.type === "Identifier" || isLiteral(property)) &&
+		isSimpleLiteral(expression.right) &&
+		isStaticMemberExpression(left)
+	);
+}
+
 const preferClassProperties = defineRule({
 	create(context): Visitor {
 		// eslint-disable-next-line ts/no-useless-default-assignment -- wrong.
@@ -81,23 +100,10 @@ const preferClassProperties = defineRule({
 				if (!isConstructor(member) || member.value.body === null) continue;
 
 				for (const statement of member.value.body.body) {
-					if (statement.type !== "ExpressionStatement") continue;
-
-					const { expression } = statement;
-					if (expression.type !== "AssignmentExpression") continue;
-
-					const { left } = expression;
-					if (left.type !== "MemberExpression" || left.object.type !== "ThisExpression") continue;
-
-					const { property } = left;
-					if (
-						(property.type === "Identifier" || isLiteral(property)) &&
-						isSimpleLiteral(expression.right) &&
-						isStaticMemberExpression(left)
-					) {
+					if (isConstructorLiteralAssignment(statement)) {
 						context.report({
 							messageId: "unexpectedAssignment",
-							node: expression,
+							node: statement.expression,
 						});
 					}
 				}

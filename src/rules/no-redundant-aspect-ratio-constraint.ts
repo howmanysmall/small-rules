@@ -102,6 +102,25 @@ function isRedundantAspectRatioChild(node: ESTree.JSXChild): boolean {
 	return false;
 }
 
+function isProtectedComponentUsage(
+	componentName: string,
+	protectedComponents: ReadonlySet<string>,
+	moduleScope: Scope | undefined,
+	filename: string,
+): boolean {
+	if (protectedComponents.has(componentName)) return true;
+	if (moduleScope === undefined) return false;
+
+	const variable = moduleScope.set.get(componentName);
+	if (variable === undefined || !isImportBindingVariable(variable)) return false;
+
+	const importSource = getImportSourceFromVariable(variable);
+	return (
+		importSource !== undefined &&
+		(importedFileHasConstraint(importSource, filename) || KNOWN_COMPONENTS.has(componentName))
+	);
+}
+
 const noRedundantAspectRatioConstraint = defineRule({
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
@@ -144,23 +163,13 @@ const noRedundantAspectRatioConstraint = defineRule({
 					const componentName = getJSXElementName(usage);
 					if (componentName === undefined) continue;
 
-					let isProtected = protectedComponents.has(componentName);
-
-					if (!isProtected && moduleScope !== undefined) {
-						const variable = moduleScope.set.get(componentName);
-						if (variable !== undefined && isImportBindingVariable(variable)) {
-							const importSource = getImportSourceFromVariable(variable);
-							if (
-								importSource !== undefined &&
-								(importedFileHasConstraint(importSource, filename) ||
-									KNOWN_COMPONENTS.has(componentName))
-							) {
-								isProtected = true;
-							}
-						}
-					}
-
-					if (!isProtected || hasScaledFalseAttribute(usage)) continue;
+					const protectedUsage = isProtectedComponentUsage(
+						componentName,
+						protectedComponents,
+						moduleScope,
+						filename,
+					);
+					if (!protectedUsage || hasScaledFalseAttribute(usage)) continue;
 
 					for (const child of usage.children) {
 						if (isRedundantAspectRatioChild(child)) {

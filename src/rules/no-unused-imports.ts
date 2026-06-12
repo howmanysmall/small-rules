@@ -12,19 +12,11 @@ interface ImportInfo {
 	readonly specifier: AnyImportSpecifier;
 }
 
-const JSDOC_PATTERN = new RegExp(
-	String.raw`(?:@(?:link|linkcode|linkplain|see)\s+\{?\w+\b\}?)|` +
-		String.raw`(?:\{@(?:link|linkcode|linkplain|see)\s+\w+\b\})|` +
-		String.raw`(?:[@{](?:type|typedef|param|returns?|template|augments|extends|implements)\s+[^}]*\b\w+\b)`,
-	"u",
-);
-
-const JSDOC_IDENTIFIER_PATTERN = new RegExp(
-	String.raw`(?:@(?:link|linkcode|linkplain|see)\s+\{?(\w+)\b\}?)|` +
-		String.raw`(?:\{@(?:link|linkcode|linkplain|see)\s+(\w+)\b\})|` +
-		String.raw`(?:[@{](?:type|typedef|param|returns?|template|augments|extends|implements)\s+[^}]*\b(\w+)\b)`,
-	"gu",
-);
+const JSDOC_LINK_IDENTIFIER_PATTERN = /@(?:link|linkcode|linkplain|see)\s+\{?(?<identifier>\w+)/gu;
+const JSDOC_INLINE_LINK_IDENTIFIER_PATTERN = /\{@(?:link|linkcode|linkplain|see)\s+(?<identifier>\w+)/gu;
+const JSDOC_TYPE_IDENTIFIER_PATTERN =
+	/[@{](?:type|typedef|param|returns?|template|augments|extends|implements)\s+(?<annotation>[^}]*)/gu;
+const JSDOC_ANNOTATION_IDENTIFIER_PATTERN = /\b(?<identifier>\w+)\b/gu;
 
 function isImportSpecifier(node: ESTree.Node): node is AnyImportSpecifier {
 	return (
@@ -37,14 +29,32 @@ function isImportSpecifier(node: ESTree.Node): node is AnyImportSpecifier {
 function collectJsDocIdentifiers(comments: ReadonlyArray<Comment>): Set<string> {
 	const identifiers = new Set<string>();
 	for (const comment of comments) {
-		if (comment.type !== "Block" || !JSDOC_PATTERN.test(comment.value)) continue;
-		JSDOC_IDENTIFIER_PATTERN.lastIndex = 0;
-		for (const match of comment.value.matchAll(JSDOC_IDENTIFIER_PATTERN)) {
-			const identifier = match[1] ?? match[2] ?? match[3];
+		if (comment.type !== "Block") continue;
+		collectJsDocLinkIdentifiers(comment.value, identifiers);
+		collectJsDocTypeIdentifiers(comment.value, identifiers);
+	}
+	return identifiers;
+}
+
+function collectJsDocLinkIdentifiers(value: string, identifiers: Set<string>): void {
+	for (const pattern of [JSDOC_LINK_IDENTIFIER_PATTERN, JSDOC_INLINE_LINK_IDENTIFIER_PATTERN]) {
+		for (const match of value.matchAll(pattern)) {
+			const identifier = match.groups?.identifier;
 			if (identifier !== undefined) identifiers.add(identifier);
 		}
 	}
-	return identifiers;
+}
+
+function collectJsDocTypeIdentifiers(value: string, identifiers: Set<string>): void {
+	for (const match of value.matchAll(JSDOC_TYPE_IDENTIFIER_PATTERN)) {
+		const annotation = match.groups?.annotation;
+		if (annotation === undefined) continue;
+
+		for (const annotationMatch of annotation.matchAll(JSDOC_ANNOTATION_IDENTIFIER_PATTERN)) {
+			const identifier = annotationMatch.groups?.identifier;
+			if (identifier !== undefined) identifiers.add(identifier);
+		}
+	}
 }
 
 function removeImportSpecifier(

@@ -26,14 +26,16 @@ function isBlockReturningIdentity({ body }: ESTree.FunctionBody, parameterName: 
 	return statement.argument.name === parameterName;
 }
 
+function getSingleParameterName(callback: { readonly params: ReadonlyArray<ESTree.ParamPattern> }): string | undefined {
+	if (callback.params.length !== 1) return undefined;
+
+	const [parameter] = callback.params;
+	return parameter === undefined ? undefined : getParameterName(parameter);
+}
+
 function isIdentityCallback(callback: ESTree.Expression): boolean {
 	if (callback.type === "ArrowFunctionExpression") {
-		if (callback.params.length !== 1) return false;
-
-		const [parameter] = callback.params;
-		if (parameter === undefined) return false;
-
-		const name = getParameterName(parameter);
+		const name = getSingleParameterName(callback);
 		if (name === undefined) return false;
 
 		const { body } = callback;
@@ -50,12 +52,7 @@ function isIdentityCallback(callback: ESTree.Expression): boolean {
 	}
 
 	if (callback.type === "FunctionExpression") {
-		if (callback.params.length !== 1) return false;
-
-		const [parameter] = callback.params;
-		if (parameter === undefined) return false;
-
-		const name = getParameterName(parameter);
+		const name = getSingleParameterName(callback);
 		if (name === undefined || callback.body === null) return false;
 		return isBlockReturningIdentity(callback.body, name);
 	}

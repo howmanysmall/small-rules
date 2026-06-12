@@ -28,7 +28,6 @@ export function isVariableDeclarator(node: ESTree.Node): node is ESTree.Variable
 }
 
 export function getTypeAnnotationFromBinding(binding: ESTree.BindingPattern): ESTree.TSTypeAnnotation | undefined {
-	if (!("typeAnnotation" in binding)) return undefined;
 	return isTsTypeAnnotation(binding.typeAnnotation) ? binding.typeAnnotation : undefined;
 }
 

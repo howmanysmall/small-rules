@@ -70,6 +70,114 @@ describe("no-useless-constants", () => {
 		});
 
 		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes non-adjacent static factory with binary argument", rule, {
+			invalid: [
+				{
+					code: "const TITLE_PADDING = new UDim(0, 1 + 2);\nconst MIDDLE = 42;\nconst STYLE = { padding: TITLE_PADDING };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const MIDDLE = 42;\nconst STYLE = { padding: new UDim(0, 1 + 2) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes non-adjacent static factory with conditional argument", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(true ? 255 : 128, 120, 255);\nconst MIDDLE = 42;\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const MIDDLE = 42;\nconst STYLE = { color: Color3.fromRGB(true ? 255 : 128, 120, 255) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes non-adjacent static factory with object argument", rule, {
+			invalid: [
+				{
+					code: "const TWEEN_INFO = new TweenInfo({ Time: 1, DelayTime: 0 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ Time: 1, DelayTime: 0 }) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes wrapped static factory initializers", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80));\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) };",
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) as Color3;\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) as Color3 };",
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80)!;\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80)! };",
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) satisfies Color3;\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) satisfies Color3 };",
+				},
+			],
+			valid: [],
+		});
+
+		{
+			const templateExpression = String.raw({ raw: ["`", "{Color3.fromRGB(255, 120, 80)}`"] }, "$");
+
+			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+			ts.run("auto-fixes static factory expression containers", rule, {
+				invalid: [
+					{
+						code: `const TITLE_TEXT = ${templateExpression};\nconst STYLE = { text: TITLE_TEXT };`,
+						errors: [{ messageId: "uselessConstant" }],
+						output: `const STYLE = { text: ${templateExpression} };`,
+					},
+					{
+						code: "const TITLE_SIZE = +UDim2.fromOffset(1, 2).X.Offset;\nconst STYLE = { size: TITLE_SIZE };",
+						errors: [{ messageId: "uselessConstant" }],
+						output: "const STYLE = { size: +UDim2.fromOffset(1, 2).X.Offset };",
+					},
+				],
+				valid: [],
+			});
+		}
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("auto-fixes static factory arrays with safe elements", rule, {
+			invalid: [
+				{
+					code: "const COLOR_SEQUENCE = new ColorSequence([ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0))]);\nconst STYLE = { color: COLOR_SEQUENCE };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: new ColorSequence([ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0))]) };",
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("reports unsafe inline expression shapes without autofix", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80), Color3.fromRGB(90, 90, 90));\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
+			],
+			valid: [],
+		});
+
+		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes multiple same-scope constants in one pass", rule, {
 			invalid: [
 				{
@@ -110,6 +218,11 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "// important note\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
+				{
+					code: "const TITLE_OFFSET = 225;\n// keep with offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: JSON.parse("null"),
 				},

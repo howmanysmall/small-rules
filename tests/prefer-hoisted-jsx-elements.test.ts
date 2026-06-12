@@ -97,6 +97,13 @@ function View() {
 			},
 			{
 				code: `
+function View() {
+	return <svg:path />;
+}
+`,
+			},
+			{
+				code: `
 function View({ visible }: { readonly visible: boolean }) {
 	return <layoutframe visible={visible} />;
 }
@@ -161,7 +168,23 @@ function View() {
 			},
 			{
 				code: `
+function View() {
+	return <borderstroke color={MISSING_COLOR} />;
+}
+`,
+			},
+			{
+				code: `
 const EMPTY_COLOR = void 0;
+
+function View() {
+	return <borderstroke color={EMPTY_COLOR} />;
+}
+`,
+			},
+			{
+				code: `
+const EMPTY_COLOR = EMPTY_COLOR;
 
 function View() {
 	return <borderstroke color={EMPTY_COLOR} />;

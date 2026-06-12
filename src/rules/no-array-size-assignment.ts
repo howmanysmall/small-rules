@@ -23,26 +23,8 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 		case "Literal":
 			return right.type === "Literal" && left.value === right.value && left.raw === right.raw;
 
-		case "MemberExpression": {
-			if (right.type !== "MemberExpression") return false;
-			if (left.computed !== right.computed || left.optional !== right.optional) return false;
-			if (!areEquivalentTargets(left.object, right.object, sourceCode)) return false;
-
-			if (left.computed) {
-				if (!(isExpressionNode(left.property) && isExpressionNode(right.property))) return false;
-				return areEquivalentTargets(left.property, right.property, sourceCode);
-			}
-
-			if (left.property.type === "PrivateIdentifier" || right.property.type === "PrivateIdentifier") {
-				return (
-					left.property.type === "PrivateIdentifier" &&
-					right.property.type === "PrivateIdentifier" &&
-					left.property.name === right.property.name
-				);
-			}
-
-			return right.property.type === "Identifier" && left.property.name === right.property.name;
-		}
+		case "MemberExpression":
+			return right.type === "MemberExpression" && areEquivalentMembers(left, right, sourceCode);
 
 		case "Super":
 			return right.type === "Super";
@@ -53,6 +35,37 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 		default:
 			return false;
 	}
+}
+
+function areEquivalentMembers(
+	left: ESTree.MemberExpression,
+	right: ESTree.MemberExpression,
+	sourceCode: SourceCode,
+): boolean {
+	if (left.computed !== right.computed || left.optional !== right.optional) return false;
+	if (!areEquivalentTargets(left.object, right.object, sourceCode)) return false;
+	return left.computed
+		? areEquivalentComputedProperties(left.property, right.property, sourceCode)
+		: areEquivalentStaticProperties(left.property, right.property);
+}
+
+function areEquivalentComputedProperties(
+	left: ESTree.Expression | ESTree.PrivateIdentifier,
+	right: ESTree.Expression | ESTree.PrivateIdentifier,
+	sourceCode: SourceCode,
+): boolean {
+	return isExpressionNode(left) && isExpressionNode(right) && areEquivalentTargets(left, right, sourceCode);
+}
+
+function areEquivalentStaticProperties(
+	left: ESTree.Expression | ESTree.PrivateIdentifier,
+	right: ESTree.Expression | ESTree.PrivateIdentifier,
+): boolean {
+	if (left.type === "PrivateIdentifier" || right.type === "PrivateIdentifier") {
+		return left.type === "PrivateIdentifier" && right.type === "PrivateIdentifier" && left.name === right.name;
+	}
+
+	return right.type === "Identifier" && left.type === "Identifier" && left.name === right.name;
 }
 
 function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean): boolean {
@@ -99,6 +112,15 @@ function isAllowAutofixOption(value: unknown): value is { readonly allowAutofix?
 	return value.allowAutofix === undefined || typeof value.allowAutofix === "boolean";
 }
 
+function getSizeAppendTarget(
+	node: ESTree.AssignmentExpression,
+	sourceCode: SourceCode,
+): ESTree.MemberExpression | undefined {
+	if (node.operator !== "=" || node.left.type !== "MemberExpression" || !node.left.computed) return undefined;
+	if (!isSizeCall(node.left.property)) return undefined;
+	return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode) ? node.left : undefined;
+}
+
 const noArraySizeAssignment = defineRule({
 	create(context): Visitor {
 		const [options] = context.options;
@@ -107,15 +129,12 @@ const noArraySizeAssignment = defineRule({
 
 		return {
 			AssignmentExpression(node): void {
-				if (node.operator !== "=" || node.left.type !== "MemberExpression" || !node.left.computed) return;
-				if (!isSizeCall(node.left.property)) return;
-				if (!areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode)) {
-					return;
-				}
+				const target = getSizeAppendTarget(node, sourceCode);
+				if (target === undefined) return;
 
 				const expressionStatement = node.parent.type === "ExpressionStatement" ? node.parent : undefined;
 				const shouldAutofix =
-					allowAutofix && expressionStatement !== undefined && isSafeFixTarget(node.left.object);
+					allowAutofix && expressionStatement !== undefined && isSafeFixTarget(target.object);
 
 				if (!shouldAutofix) {
 					context.report({
@@ -125,7 +144,7 @@ const noArraySizeAssignment = defineRule({
 					return;
 				}
 
-				const targetText = sourceCode.getText(node.left.object);
+				const targetText = sourceCode.getText(target.object);
 				const rightText = sourceCode.getText(node.right);
 
 				context.report({

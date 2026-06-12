@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/no-array-constructor-elements";
 
-import { tsx } from "./rule-testers";
+import { ts, tsx } from "./rule-testers";
 
 describe("no-array-constructor-elements", () => {
 	// @ts-expect-error -- Shut up.
@@ -162,13 +162,67 @@ const array = [getValue(), "b"];
 				],
 				output: null,
 			},
+			{
+				code: `
+const array = new Array<string>();
+array.push(...items);
+array.push("b");
+`,
+				errors: [
+					{
+						messageId: "collapseArrayPushInitialization",
+						suggestions: [
+							{
+								messageId: "suggestCollapseArrayPushInitialization",
+								output: `
+const array = [...items, "b"];
+`,
+							},
+						],
+					},
+				],
+				output: null,
+			},
+			{
+				code: `
+const array = new Array<string>();
+	array.push("a");
+	array.push("b");
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+				output: `
+const array = ["a", "b"];
+`,
+			},
+			{
+				code: "const { values }: { values: string } = new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+			{
+				code: "consume(new Array());",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+			{
+				code: "const value = new Array() as unknown;",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
 		],
 		valid: [
+			"const value = new Set();",
 			"const value = new Array<string>();",
 			"const value: Array<string> = new Array();",
+			"const value: ReadonlyArray<string> = new Array();",
 			`
 class Store {
 	public values: Array<string> = new Array();
+}
+`,
+			`
+function collect(values: Array<string> = new Array()): Array<string> {
+	return values;
 }
 `,
 			"const value = new Array() as Array<string>;",
@@ -200,6 +254,26 @@ function multiplyByTwo(array: ReadonlyArray<number>): ReadonlyArray<number> {
 				options: [{ requireExplicitGenericOnNewArray: false }],
 			},
 			`
+const values: ReadonlyArray<string> = new Array();
+values.push("a");
+`,
+			`
+var array = new Array<string>();
+array.push("a");
+`,
+			`
+const first = new Array<string>(), second = new Array<string>();
+first.push("a");
+`,
+			`
+const array = new Array<string>();
+array.push();
+`,
+			`
+const array = new Array<string>();
+other.push("a");
+`,
+			`
 class Array<TValue> {
     constructor(..._arguments: Array<TValue>) {}
 }
@@ -212,5 +286,17 @@ doSomething(array);
 array.push("b");
 `,
 		],
+	});
+
+	// @ts-expect-error -- Shut up.
+	ts.run("no-array-constructor-elements-ts", rule, {
+		invalid: [
+			{
+				code: "const value = <unknown>new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+		],
+		valid: ["const value = <Array<string>>new Array();"],
 	});
 });

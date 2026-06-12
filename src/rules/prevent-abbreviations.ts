@@ -270,6 +270,83 @@ function checkScope(scope: Scope, variableChecker: (variable: VariableLike) => v
 	}
 }
 
+function checkPropertyIdentifier(
+	node: ESTree.IdentifierName,
+	options: PreparedOptions,
+	report: (diagnostic: Diagnostic<MessageIds>) => void,
+): void {
+	const propertyLike = shouldReportIdentifierAsProperty(node);
+	const propertyAccess = isShorthandPropertyAccess(node);
+
+	if (checkShorthandIdentifier(node, propertyLike, propertyAccess, options, report)) return;
+	if (!(options.checkProperties && propertyLike)) return;
+
+	reportPropertyIdentifier(node, options, report);
+}
+
+function checkShorthandIdentifier(
+	node: ESTree.IdentifierName,
+	propertyLike: boolean,
+	propertyAccess: boolean,
+	options: PreparedOptions,
+	report: (diagnostic: Diagnostic<MessageIds>) => void,
+): boolean {
+	const shorthandReplacement = getShorthandReplacement(node.name, options.shorthandConfiguration);
+	if (shorthandReplacement === undefined || !(propertyLike || propertyAccess)) return false;
+	if (isShorthandIgnored(node.name, options.shorthandConfiguration)) return true;
+	if (!options.checkShorthandProperties) return true;
+	if (propertyAccess && isPropertyAccessAllowed(node.name, shorthandReplacement, options.allowPropertyAccess)) {
+		return true;
+	}
+
+	reportShorthandReplacement(node, shorthandReplacement.replaced, true, report);
+	return true;
+}
+
+function reportPropertyIdentifier(
+	node: ESTree.IdentifierName,
+	options: PreparedOptions,
+	report: (diagnostic: Diagnostic<MessageIds>) => void,
+): void {
+	const replacements = getNameReplacements(node.name, options);
+	if (replacements.total === 0) return;
+
+	const message = getMessage(node.name, replacements, "property");
+	const fixableReplacement = getFixablePropertyReplacement(node, replacements.samples);
+	if (fixableReplacement !== undefined) {
+		report({
+			...message,
+			fix(fixer: Fixer): Fix {
+				return fixer.replaceText(node, fixableReplacement);
+			},
+			node,
+		});
+		return;
+	}
+
+	report({ ...message, node });
+}
+
+function getFixablePropertyReplacement(
+	node: ESTree.IdentifierName,
+	samples: ReadonlyArray<string> | undefined,
+): string | undefined {
+	if (samples?.length !== 1 || !isObjectPropertyKey(node)) return undefined;
+
+	const [replacement] = samples;
+	const { parent } = node;
+	if (
+		replacement !== undefined &&
+		isProperty(parent) &&
+		isStringLiteral(parent.value) &&
+		isValidIdentifier(replacement)
+	) {
+		return replacement;
+	}
+
+	return undefined;
+}
+
 const preventAbbreviations = defineRule({
 	create(context): Visitor {
 		const options = prepareOptions(context.options[0]);
@@ -285,53 +362,7 @@ const preventAbbreviations = defineRule({
 		return {
 			Identifier(node): void {
 				if (!hasName(node) || node.name === "__proto__") return;
-
-				const shorthandReplacement = getShorthandReplacement(node.name, options.shorthandConfiguration);
-				const propertyLike = shouldReportIdentifierAsProperty(node);
-				const propertyAccess = isShorthandPropertyAccess(node);
-
-				if (shorthandReplacement !== undefined && (propertyLike || propertyAccess)) {
-					if (isShorthandIgnored(node.name, options.shorthandConfiguration)) return;
-					if (!options.checkShorthandProperties) return;
-					if (
-						propertyAccess &&
-						isPropertyAccessAllowed(node.name, shorthandReplacement, options.allowPropertyAccess)
-					) {
-						return;
-					}
-
-					reportShorthandReplacement(node, shorthandReplacement.replaced, true, context.report);
-					return;
-				}
-
-				if (!options.checkProperties) return;
-
-				const replacements = getNameReplacements(node.name, options);
-				if (replacements.total === 0 || !propertyLike) return;
-
-				const message = getMessage(node.name, replacements, "property");
-
-				if (replacements.total === 1 && replacements.samples && isObjectPropertyKey(node)) {
-					const [replacement] = replacements.samples;
-					const { parent } = node;
-					if (
-						replacement !== undefined &&
-						isProperty(parent) &&
-						isStringLiteral(parent.value) &&
-						isValidIdentifier(replacement)
-					) {
-						context.report({
-							...message,
-							fix(fixer: Fixer): Fix {
-								return fixer.replaceText(node, replacement);
-							},
-							node,
-						});
-						return;
-					}
-				}
-
-				context.report({ ...message, node });
+				checkPropertyIdentifier(node, options, context.report);
 			},
 			JSXOpeningElement({ name }): void {
 				if (!(options.checkVariables && isJsxIdentifier(name) && isUpperFirst(name.name))) return;

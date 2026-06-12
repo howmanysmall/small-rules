@@ -43,8 +43,13 @@ describe("no-useless-default comparison helpers", () => {
 		ts.run("no-useless-default number defaults", createComparisonRule({ type: "number", value: 0 }), {
 			invalid: [
 				{ code: "check(0);", errors: [{ messageId: "match" }] },
+				{ code: "check(+0);", errors: [{ messageId: "match" }] },
 				{ code: "check(1);", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(-1);", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(!0);", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(+value);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(math.huge);", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(math['huge']);", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
 		});
@@ -78,6 +83,7 @@ describe("no-useless-default comparison helpers", () => {
 					{ code: "check(Enum.FrameStyle.Custom);", errors: [{ messageId: "match" }] },
 					{ code: "check(Enum.FrameStyle.RobloxRound);", errors: [{ messageId: "mismatch" }] },
 					{ code: "check(FrameStyle.Custom);", errors: [{ messageId: "mismatch" }] },
+					{ code: "check(Enum['FrameStyle'].Custom);", errors: [{ messageId: "mismatch" }] },
 				],
 				valid: [],
 			},
@@ -90,6 +96,7 @@ describe("no-useless-default comparison helpers", () => {
 			{
 				invalid: [
 					{ code: "check(math.huge);", errors: [{ messageId: "match" }] },
+					{ code: "check(+math.huge);", errors: [{ messageId: "match" }] },
 					{ code: "check(-math.huge);", errors: [{ messageId: "mismatch" }] },
 				],
 				valid: [],
@@ -103,6 +110,7 @@ describe("no-useless-default comparison helpers", () => {
 			{
 				invalid: [
 					{ code: "check(-math.huge);", errors: [{ messageId: "match" }] },
+					{ code: "check(-math['huge']);", errors: [{ messageId: "mismatch" }] },
 					{ code: "check(math.huge);", errors: [{ messageId: "mismatch" }] },
 				],
 				valid: [],
@@ -116,8 +124,12 @@ describe("no-useless-default comparison helpers", () => {
 			invalid: [
 				{ code: "check(new Vector2());", errors: [{ messageId: "match" }] },
 				{ code: "check(new Vector2(0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector2(0, ...rest));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(Vector2.zero);", errors: [{ messageId: "match" }] },
+				{ code: "check(Vector2.one);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Vector2(0, 1));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector2(0, value));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new UDim());", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
 		});
@@ -127,8 +139,11 @@ describe("no-useless-default comparison helpers", () => {
 			invalid: [
 				{ code: "check(new Vector3());", errors: [{ messageId: "match" }] },
 				{ code: "check(new Vector3(0, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector3(0, ...rest, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(Vector3.zero);", errors: [{ messageId: "match" }] },
+				{ code: "check(Vector3.one);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Vector3(0, 0, 1));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector3(0, value, 0));", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
 		});
@@ -138,8 +153,12 @@ describe("no-useless-default comparison helpers", () => {
 			invalid: [
 				{ code: "check(new UDim2());", errors: [{ messageId: "match" }] },
 				{ code: "check(new UDim2(0, 0, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new UDim2(0, ...rest, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new UDim2(foo, 0, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(UDim2.fromScale(0, 0));", errors: [{ messageId: "match" }] },
+				{ code: "check(UDim2.fromScale(value, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(UDim2.fromScale(0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(UDim2.identity(0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(UDim2.fromOffset(0, 50));", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
@@ -162,8 +181,11 @@ describe("no-useless-default comparison helpers", () => {
 		ts.run("no-useless-default udim defaults", createComparisonRule({ type: "UDim", value: [0, 0] }), {
 			invalid: [
 				{ code: "check(new UDim(0, 0));", errors: [{ messageId: "match" }] },
+				{ code: "check(new UDim());", errors: [{ messageId: "match" }] },
 				{ code: "check(new UDim(0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new UDim(0, value));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new UDim(1, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector2());", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
 		});
@@ -174,8 +196,12 @@ describe("no-useless-default comparison helpers", () => {
 		ts.run("no-useless-default color3 defaults", createComparisonRule({ type: "Color3", value: [0, 0, 0] }), {
 			invalid: [
 				{ code: "check(new Color3());", errors: [{ messageId: "match" }] },
+				{ code: "check(new Color3(0, 0, 0));", errors: [{ messageId: "match" }] },
 				{ code: "check(Color3.fromRGB(255, 128));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(Color3.fromRGB(value, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Color3(foo, 0, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Color3(0, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector3());", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(Color3.fromRGB(255, 128, 0));", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
@@ -201,6 +227,7 @@ describe("no-useless-default comparison helpers", () => {
 				{ code: "check(new Rect(0, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Rect(foo, 0, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Rect(0, 0, 1, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector2());", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
 		});
@@ -212,8 +239,23 @@ describe("no-useless-default comparison helpers", () => {
 			{
 				invalid: [
 					{ code: "check(new CFrame());", errors: [{ messageId: "match" }] },
+					{ code: "check(new CFrame(0, 0, 0));", errors: [{ messageId: "match" }] },
 					{ code: "check(new CFrame(1, 0, 0));", errors: [{ messageId: "mismatch" }] },
+					{ code: "check(new CFrame(0, value, 0));", errors: [{ messageId: "mismatch" }] },
+					{ code: "check(new Vector3());", errors: [{ messageId: "mismatch" }] },
 				],
+				valid: [],
+			},
+		);
+	});
+
+	describe("unsupported canonical values", () => {
+		ts.run(
+			"no-useless-default unsupported defaults",
+			// @ts-expect-error Deliberately exercises the runtime fallback for unknown canonical types.
+			createComparisonRule({ type: "unsupported", value: "x" }),
+			{
+				invalid: [{ code: "check('x');", errors: [{ messageId: "mismatch" }] }],
 				valid: [],
 			},
 		);
@@ -291,16 +333,52 @@ describe("no-useless-default JSX detection", () => {
 				errors: [{ data: { className: "BillboardGui", propertyName: "Enabled" }, messageId: "uselessDefault" }],
 				output: "const view = <billboardgui />;",
 			},
+			{
+				code: "const view = <frame /* keep */ BackgroundTransparency={0} />;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: "const view = <frame BackgroundTransparency={0} /* keep */ />;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: "const view = <frame\n\tBackgroundTransparency={0}\n\tSize={size}\n/>;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: "const view = <frame\n\tSize={size}\n/>;",
+			},
 		],
 		valid: [
 			{ code: 'const view = <uiaspectratioconstraint key="my-key" />;' },
 			{ code: "const view = <uiaspectratioconstraint AspectRatio={2} />;" },
+			{ code: "const view = <uiaspectratioconstraint AspectRatio />;" },
+			{ code: "const view = <uiaspectratioconstraint AspectRatio={} />;" },
 			{ code: 'const view = <frame Name="MyFrame" />;' },
 			{ code: "const view = <frame Parent={someParent} />;" },
 			{ code: "const view = <frame BackgroundTransparency={getValue()} />;" },
 			{ code: "const view = <frame {...spreadProps} />;" },
 			{ code: "const view = <Frame BackgroundTransparency={0} />;" },
 			{ code: "const view = <billboardgui Enabled={false} />;" },
+			{ code: "const view = <frame:slot BackgroundTransparency={0} />;" },
+			{ code: "const view = <Root.frame BackgroundTransparency={0} />;" },
+			{ code: "const view = <frame roblox:BackgroundTransparency={0} />;" },
+			{ code: "const view = <frame>{/* empty */}</frame>;" },
 		],
 	});
 });
@@ -340,6 +418,36 @@ describe("no-useless-default imperative detection", () => {
 				output: JSON.parse("null"),
 			},
 			{
+				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(); /* keep */ c.Name = "x";',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); /* keep */ c.MinSize = new Vector2();',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint") /* keep */\nc.MinSize = new Vector2();',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: JSON.parse("null"),
+			},
+			{
 				code: 'const f = new Instance("Frame"); f.BackgroundTransparency = 0; f.Size = new UDim2(0, 100, 0, 200);',
 				errors: [
 					{
@@ -359,6 +467,16 @@ describe("no-useless-default imperative detection", () => {
 				],
 				output: 'const f = new Instance("Frame"); f.Size = new UDim2(0, 100, 0, 200);',
 			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); [alias] = [c]; c.MinSize = new Vector2();',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: 'const c = new Instance("UISizeConstraint"); [alias] = [c];',
+			},
 		],
 		valid: [
 			{ code: 'const frame = new Instance("Frame"); frame.Name = "Container";' },
@@ -366,10 +484,20 @@ describe("no-useless-default imperative detection", () => {
 			{ code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(10, 0);' },
 			{ code: 'const c = new Instance("UISizeConstraint"); c["MinSize"] = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register(c); c.MinSize = new Vector2();' },
+			{ code: 'const c = new Instance("UISizeConstraint"); register(other, c); c.MinSize = new Vector2();' },
+			{ code: 'const c = new Instance("UISizeConstraint"); register([c]); c.MinSize = new Vector2();' },
+			{ code: 'const c = new Instance("UISizeConstraint"); register(...args, c); c.MinSize = new Vector2();' },
+			{ code: 'const c = new Instance("UISizeConstraint"); register(other); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); cache.values.push(c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); let alias; alias = c; c.MinSize = new Vector2();' },
 			{
+				code: 'const c = new Instance("UISizeConstraint"); let alias; alias = other; c.MinSize = new Vector2();',
+			},
+			{
 				code: 'function createConstraint() { const c = new Instance("UISizeConstraint"); return c; c.MinSize = new Vector2(); }',
+			},
+			{
+				code: 'function createConstraint() { const c = new Instance("UISizeConstraint"); return; }',
 			},
 			{ code: 'const part = new Instance("Part"); part.Size = new Vector3(4, 5, 6);' },
 			{

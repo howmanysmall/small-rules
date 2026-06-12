@@ -52,6 +52,15 @@ const element = React.createElement(Components.Button);
 			{
 				code: `
 import React from "@rbxts/react";
+import * as Components from "./components";
+
+const element = React.createElement(Components.Button.Icon);
+`,
+				errors: [{ messageId: "useJsx" }],
+			},
+			{
+				code: `
+import React from "@rbxts/react";
 
 function Button() {
 	return <frame />;
@@ -164,6 +173,44 @@ function renderComponent(React: { readonly createElement: (component: string) =>
 import React from "@rbxts/react";
 
 const element = React.createElement(components[name]);
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const element = React.createElement();
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const element = React.createElement(...args);
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const Button = getButton();
+
+const element = React.createElement(Button);
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const element = React.createElement(getComponents().Button);
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+import * as Components from "./components";
+
+const element = React.createElement(Components[group].Button);
 `,
 			},
 		],
