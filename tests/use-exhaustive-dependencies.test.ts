@@ -1634,6 +1634,54 @@ function Component() {
     }, [obj[key]]);
 }
 `,
+			{
+				code: `
+function Component() {
+    const a = 1;
+    const b = 2;
+    const c = true;
+    const d = 4;
+    useEffect(() => {
+        console.log(a, b, c, d);
+    }, [a && b, c ? d : a]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component() {
+    const value = 1;
+    useEffect(() => {
+        console.log(value);
+    }, [+value, \`\${value}\`]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component() {
+    const obj = { prop: 1 };
+    useEffect(() => {
+        console.log(obj);
+    }, [obj?.prop]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component() {
+    const value = 1;
+    useEffect(() => {
+        console.log(value);
+    }, [value as number]);
+}
+`,
+				languageOptions: { parser },
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
 			// Coverage: Stable unary expression
 			`
 function Component() {
