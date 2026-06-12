@@ -1556,6 +1556,68 @@ function Component() {
 				],
 			},
 
+			// Custom hook with stable object property
+			{
+				code: `
+function Component() {
+    const { setter } = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const { setter: setValue = () => {} } = useCustomState();
+    useEffect(() => {
+        setValue(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const { "set-value": setValue } = useCustomState();
+    useEffect(() => {
+        setValue(1);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["set-value"],
+							},
+						],
+					},
+				],
+			},
+
 			// Coverage: React.useEffect
 			`
 function Component() {

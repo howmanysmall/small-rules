@@ -256,6 +256,43 @@ function isStableArrayIndex(
 	return false;
 }
 
+function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
+	const { key } = property;
+	if (key.type === "Identifier") return key.name;
+	if (key.type === "Literal" && typeof key.value === "string") return key.value;
+	return undefined;
+}
+
+function getBindingPropertyValueIdentifier(property: ESTree.BindingProperty): ESTree.BindingIdentifier | undefined {
+	const { value } = property;
+	if (value.type === "Identifier") return value;
+	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
+	return undefined;
+}
+
+function isStableObjectProperty(
+	stableResult: StableResult | undefined,
+	node: ESTree.Node,
+	identifierName: string,
+): boolean {
+	if (stableResult === undefined) return false;
+	if (!(stableResult instanceof Set) || node.type !== "VariableDeclarator" || node.id.type !== "ObjectPattern") {
+		return false;
+	}
+
+	for (const property of node.id.properties) {
+		if (property.type !== "Property") continue;
+
+		const valueIdentifier = getBindingPropertyValueIdentifier(property);
+		if (valueIdentifier?.name !== identifierName) continue;
+
+		const propertyName = getBindingPropertyKeyName(property);
+		return propertyName !== undefined && stableResult.has(propertyName);
+	}
+
+	return false;
+}
+
 function isStableHookValue(
 	init: ESTree.Expression | null,
 	node: ESTree.Node,
@@ -268,7 +305,11 @@ function isStableHookValue(
 	if (hookName === undefined) return false;
 
 	const stableResult = stableHooks.get(hookName);
-	return stableResult === true ? true : isStableArrayIndex(stableResult, node, identifierName);
+	return (
+		stableResult === true ||
+		isStableArrayIndex(stableResult, node, identifierName) ||
+		isStableObjectProperty(stableResult, node, identifierName)
+	);
 }
 
 function isReactJoinBindingsCall(init: ESTree.Expression | null): boolean {
