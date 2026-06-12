@@ -12,8 +12,6 @@ function getBannedTypeName(typeName: ESTree.Node): string | undefined {
 }
 
 function getTypeAnnotationFromId(node: ESTree.VariableDeclarator): ESTree.TSTypeAnnotation | undefined {
-	if (!("typeAnnotation" in node.id)) return undefined;
-
 	const { typeAnnotation } = node.id;
 	return isTsTypeAnnotation(typeAnnotation) ? typeAnnotation : undefined;
 }
