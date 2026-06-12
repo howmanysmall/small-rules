@@ -1,7 +1,7 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
+import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 export interface StaticExpressionOptions {
 	readonly staticGlobalFactories: ReadonlySet<string>;
@@ -80,18 +80,18 @@ export function isModuleLevelScope(scope: Scope): boolean {
 	return scope.type === "module" || scope.type === "global";
 }
 
-export function isImportBinding(variable: ScopeVariable): boolean {
-	for (const definition of variable.defs) {
+export function isImportBinding(scopeVariable: ScopeVariable): boolean {
+	for (const definition of scopeVariable.defs) {
 		if (definition.type === "ImportBinding") return true;
 	}
 	return false;
 }
 
-function isVariableDefinition(definition: ScopeVariable["defs"][number]): boolean {
+function isVariableDefinition(definition: Definition): boolean {
 	return definition.type === "Variable";
 }
 
-export function getConstInitializer(definition: ScopeVariable["defs"][number]): ESTree.Expression | undefined {
+export function getConstInitializer(definition: Definition): ESTree.Expression | undefined {
 	if (!isVariableDefinition(definition)) return undefined;
 
 	const declarator = definition.node;
@@ -172,18 +172,10 @@ function isStaticCallCallee(
 	options: StaticExpressionOptions,
 ): boolean {
 	const unwrapped = unwrapExpression(callee);
-
-	if (unwrapped.type === "Identifier") {
-		return isStaticIdentifier(sourceCode, unwrapped, seen, options);
-	}
-
+	if (unwrapped.type === "Identifier") return isStaticIdentifier(sourceCode, unwrapped, seen, options);
 	if (unwrapped.type !== "MemberExpression") return false;
 	if (!isStaticExpression(sourceCode, unwrapped.object, seen, options)) return false;
-
-	if (unwrapped.computed) {
-		return isStaticExpression(sourceCode, unwrapped.property, seen, options);
-	}
-
+	if (unwrapped.computed) return isStaticExpression(sourceCode, unwrapped.property, seen, options);
 	return unwrapped.property.type === "Identifier";
 }
 

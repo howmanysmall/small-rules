@@ -1,4 +1,5 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -30,14 +31,6 @@ function getVariableInitializer(definition: ScopeVariable["defs"][number]): ESTr
 
 function isModuleLevelScope(scope: Scope): boolean {
 	return scope.type === "module" || scope.type === "global";
-}
-
-function isImportBinding(variable: ScopeVariable): boolean {
-	for (const definition of variable.defs) {
-		if (definition.type === "ImportBinding") return true;
-	}
-
-	return false;
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {

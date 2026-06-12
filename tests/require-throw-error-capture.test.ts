@@ -97,19 +97,49 @@ describe("require-throw-error-capture", () => {
 					"}",
 				].join("\n"),
 			},
-			// Top-level throw — no fix (no enclosing function name)
+			// Single-line if body must be wrapped in braces
 			{
-				code: "throw new Error('top level');",
+				// oxlint-disable-next-line no-template-curly-in-string -- this is fine.
+				code: "function fetchModels() { if (!response.ok) throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`); }",
 				errors: [error],
+				// oxlint-disable-next-line no-template-curly-in-string -- this is fine.
+				output: "function fetchModels() { if (!response.ok) {\nconst error = new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);\nError.captureStackTrace(error, fetchModels);\nthrow error;\n} }",
 			},
-			// Anonymous callback — no fix
+			// Non-allowed error still reports when allow option is present
 			{
-				code: "setTimeout(function() { throw new Error('async'); }, 100);",
+				code: ["function foo() {", "\tthrow new Error('bad');", "}"].join("\n"),
 				errors: [error],
+				options: [{ allow: ["ValidationError"] }],
+				output: [
+					"function foo() {",
+					"\tconst error = new Error('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
+			},
+			// Package-aware specifier does not match a different import source
+			{
+				code: [
+					"import { ValidationError } from 'other-package';",
+					"function foo() {",
+					"\tthrow new ValidationError('bad');",
+					"}",
+				].join("\n"),
+				errors: [error],
+				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
+				output: [
+					"import { ValidationError } from 'other-package';",
+					"function foo() {",
+					"\tconst error = new ValidationError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
 			},
 		],
 		valid: [
-			// Already using captureStackTrace pattern
+			// Already using `captureStackTrace` pattern
 			[
 				"function good() {",
 				"	const err = new Error('msg');",
@@ -117,7 +147,7 @@ describe("require-throw-error-capture", () => {
 				"	throw err;",
 				"}",
 			].join("\n"),
-			// Throw with identifier (not a NewExpression)
+			// Throw with identifier (not a `NewExpression`)
 			["function rethrow(e: Error) {", "	throw e;", "}"].join("\n"),
 			// Throw with non-Error new expression
 			["function other() {", "	throw new Foo();", "}"].join("\n"),
@@ -125,6 +155,49 @@ describe("require-throw-error-capture", () => {
 			["function factory() {", "	throw createError();", "}"].join("\n"),
 			// Throw with string (not new Error)
 			["function legacy() {", "	throw 'bad';", "}"].join("\n"),
+			// Top-level throw has no enclosing function to capture
+			"throw new Error('top level');",
+			// Top-level throw in a script with a shebang
+			["#!/usr/bin/env bun", 'if (!Bun.which("opencode")) throw new Error("opencode is not installed");'].join(
+				"\n",
+			),
+			// Anonymous callback has no name to capture
+			"setTimeout(function() { throw new Error('async'); }, 100);",
+			// String allowlist skips matching errors
+			{
+				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
+				options: [{ allow: ["ValidationError"] }],
+			},
+			// Package-aware allowlist skips matching imports
+			{
+				code: [
+					"import { ValidationError } from '@cliffy/command';",
+					"function foo() {",
+					"\tthrow new ValidationError('bad');",
+					"}",
+				].join("\n"),
+				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
+			},
+			// File-local allowlist skips locally declared errors
+			{
+				code: [
+					"class ValidationError extends Error {}",
+					"function foo() {",
+					"\tthrow new ValidationError('bad');",
+					"}",
+				].join("\n"),
+				options: [{ allow: [{ from: "file", name: "ValidationError" }] }],
+			},
+			// Lib allowlist skips global errors
+			{
+				code: ["function foo() {", "\tthrow new TypeError('bad');", "}"].join("\n"),
+				options: [{ allow: [{ from: "lib", name: "TypeError" }] }],
+			},
+			// Array of names in a single specifier
+			{
+				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
+				options: [{ allow: [{ name: ["ValidationError", "CommandError"] }] }],
+			},
 		],
 	});
 });
