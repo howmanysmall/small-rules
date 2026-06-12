@@ -553,6 +553,20 @@ function Component({ count, logger }) {
 `,
 				errors: [{ messageId: "mixedDerivedState" }],
 			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, analytics, method }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        analytics[method](count);
+    }, [count, analytics, method]);
+}
+`,
+				errors: [{ messageId: "mixedDerivedState" }],
+			},
 
 			// ========== NEW: passRefToParent ==========
 
@@ -757,6 +771,142 @@ function Component() {
 		],
 		valid: [
 			// ========== EXISTING VALID TESTS ==========
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect();
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(createEffect(), []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const sync = async () => {
+        await fetchData();
+    };
+    useEffect(sync, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const sync = () => fetchData();
+    useEffect(sync, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useRef, useState } from "@rbxts/react";
+
+function Component({ count, onReady }) {
+    const [localCount, setLocalCount] = useState(0);
+    const ref = useRef();
+    useEffect(() => {
+        setLocalCount(count);
+        onReady(ref.current);
+        console.log(count);
+    }, [count, onReady, ref]);
+}
+`,
+				options: [
+					{
+						reportDerivedState: false,
+						reportLogOnly: false,
+						reportMixedDerivedState: false,
+						reportPassRefToParent: false,
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [localCount] = useState(0);
+    useEffect(() => {
+        sendAnalytics(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [localCount, , resetCount] = useState(0);
+    useEffect(() => {
+        sendAnalytics(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [card, setCard] = useState(null);
+    const [goldCardCount, setGoldCardCount] = useState(0);
+
+    useEffect(() => {
+        if (card !== null && card.gold) {
+            setGoldCardCount(c => c + 1);
+        }
+    }, [card]);
+
+    useEffect(() => {
+        if (goldCardCount > 3) {
+            setCard(null);
+        }
+    }, [goldCardCount]);
+}
+`,
+				options: [{ reportEffectChain: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, analytics }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        analytics.trackEvent(count);
+    }, [count, analytics]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, onReady }) {
+    const [localCount, setLocalCount] = useState(0);
+    useEffect(() => {
+        setLocalCount(count);
+        onReady();
+    }, [count, onReady]);
+}
+`,
+			},
 
 			{
 				code: `
