@@ -2,7 +2,8 @@ allowBuilds:
   "@swc/core": true
 
 enableGlobalVirtualStore: true
-packages: []
+packages:
+  - documentation
 fetchRetries: 5
 fetchRetryMintimeout: 1000
 fetchRetryMaxtimeout: 30000

@@ -1,5 +1,5 @@
 {
-	"name": "small-rules",
+	"name": "@pobammer-ts/small-rules",
 	"version": "0.1.0",
 	"description": "Various Oxlint-native rules for linting roblox-ts projects.",
 	"keywords": [
