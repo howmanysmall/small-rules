@@ -162,10 +162,49 @@ const array = [getValue(), "b"];
 				],
 				output: null,
 			},
+			{
+				code: `
+const array = new Array<string>();
+array.push(...items);
+array.push("b");
+`,
+				errors: [
+					{
+						messageId: "collapseArrayPushInitialization",
+						suggestions: [
+							{
+								messageId: "suggestCollapseArrayPushInitialization",
+								output: `
+const array = [...items, "b"];
+`,
+							},
+						],
+					},
+				],
+				output: null,
+			},
+			{
+				code: `
+const array = new Array<string>();
+	array.push("a");
+	array.push("b");
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+				output: `
+const array = ["a", "b"];
+`,
+			},
+			{
+				code: "const { values }: { values: string } = new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
 		],
 		valid: [
+			"const value = new Set();",
 			"const value = new Array<string>();",
 			"const value: Array<string> = new Array();",
+			"const value: ReadonlyArray<string> = new Array();",
 			`
 class Store {
 	public values: Array<string> = new Array();
@@ -204,6 +243,26 @@ function multiplyByTwo(array: ReadonlyArray<number>): ReadonlyArray<number> {
 				code: "const value = new Array();",
 				options: [{ requireExplicitGenericOnNewArray: false }],
 			},
+			`
+const values: ReadonlyArray<string> = new Array();
+values.push("a");
+`,
+			`
+var array = new Array<string>();
+array.push("a");
+`,
+			`
+const first = new Array<string>(), second = new Array<string>();
+first.push("a");
+`,
+			`
+const array = new Array<string>();
+array.push();
+`,
+			`
+const array = new Array<string>();
+other.push("a");
+`,
 			`
 class Array<TValue> {
     constructor(..._arguments: Array<TValue>) {}
