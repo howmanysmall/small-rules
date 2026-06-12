@@ -102,6 +102,13 @@ const value = useMemo(() => !enabled, [enabled]);
 				code: `
 import { useMemo } from "react";
 
+const value = useMemo(1, []);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
 const values = [1, 2, 3];
 const index = 1;
 
@@ -142,6 +149,17 @@ const count = 1;
 const value = useMemo(() => {
 	const next = count + 1;
 	return next;
+}, [count]);
+`,
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const count = 1;
+
+const value = useMemo(() => {
+	count;
 }, [count]);
 `,
 			},

@@ -86,6 +86,7 @@ describe("ban-react-fc", () => {
 			"const Component = function() {};",
 			"const x: React.FC = null;",
 			"let isFC: React.FC = null;",
+			"const { Component } = registry;",
 			"const mapper = { Component: React.FC };",
 			"const Component: SomeOtherType = () => {};",
 		],
