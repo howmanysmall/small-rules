@@ -55,3 +55,4 @@ hk.local.pkl
 .agents/skills/tdd/
 .agents/skills/tsdown/
 .agents/skills/vitest/
+.agents/skills/migrate-pullhook-install/

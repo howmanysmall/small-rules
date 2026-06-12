@@ -19,6 +19,12 @@
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "ef32aea0a8fab9b365ff9e08a95f8d353e20ca21ea46ec2e73587c86dd341351"
     },
+    "migrate-pullhook-install": {
+      "source": "howmanysmall/pullhook",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/migrate-pullhook-install/SKILL.md",
+      "computedHash": "5671dbda6e9d162d1a2d1daa5c061b3ab48bb95ee0852ee9701379c86d8b9dbe"
+    },
     "mutation-testing": {
       "source": "secondsky/claude-skills",
       "sourceType": "github",

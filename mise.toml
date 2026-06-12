@@ -10,6 +10,8 @@ experimental = true
 lockfile = true
 
 [tools]
+"github:howmanysmall/pullhook" = "latest"
+actionlint = "latest"
 aube = "1.18.1"
 bun = "latest"
 gitleaks = "latest"
@@ -17,7 +19,10 @@ hk = "latest"
 node = "24"
 pkl = "latest"
 rumdl = "latest"
+shellcheck = "latest"
+shfmt = "latest"
 tombi = "latest"
+zizmor = "latest"
 
 [deps.aube]
 auto = true
