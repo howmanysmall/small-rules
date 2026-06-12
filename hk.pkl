@@ -1,0 +1,274 @@
+// hk configuration - https://hk.jdx.dev/
+amends "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Builtins.pkl"
+
+exclude = List("node_modules", "dist", ".git", ".repos")
+terminal_progress = false
+
+local binary_excludes =
+  List(
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.webp",
+    "*.ico",
+    "*.woff",
+    "*.woff2",
+    "*.ttf",
+    "*.eot",
+    "*.pdf",
+    "*.zip",
+  )
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps {
+      // Tier 1 — Universal checks
+      ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
+        exclude = binary_excludes
+      }
+      ["newlines"] = (Builtins.newlines) {
+        exclude = binary_excludes
+      }
+      ["check-merge-conflict"] = (Builtins.check_merge_conflict) {}
+      ["check-case-conflict"] = (Builtins.check_case_conflict) {}
+      ["check-symlinks"] = (Builtins.check_symlinks) {}
+      ["mixed-line-ending"] = (Builtins.mixed_line_ending) {}
+      ["detect-private-key"] = (Builtins.detect_private_key) {
+        exclude = binary_excludes
+      }
+
+      // JS/TS pipeline — oxlint + biome + oxfmt
+      ["oxlint"] = (Builtins.ox_lint) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
+        fix = "nr oxlint --no-error-on-unmatched-pattern --fix {{files}}"
+        check_first = true
+        batch = false
+      }
+      ["biome-js"] = (Builtins.biome) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr biome lint --no-errors-on-unmatched {{files}}"
+        fix = "nr biome lint --write --no-errors-on-unmatched {{files}}"
+        check_first = true
+        batch = false
+      }
+      ["oxfmt-js"] = (Builtins.oxfmt) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
+        fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+        check_first = true
+      }
+
+      // Biome non-JS — css, html, grit
+      ["biome-non-js"] = (Builtins.biome) {
+        glob = List("*.css", "*.html", "*.grit")
+        check = "nr biome check --no-errors-on-unmatched {{files}}"
+        fix = "nr biome check --write --no-errors-on-unmatched {{files}}"
+        check_first = true
+        batch = false
+      }
+
+      // oxfmt for json, jsonc, json5, code-workspace, and mdx
+      ["oxfmt-json-mdx"] = (Builtins.oxfmt) {
+        glob = List("*.json", "*.jsonc", "*.json5", "*.code-workspace", "*.mdx")
+        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
+        fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+        check_first = true
+      }
+
+      // Markdown — rumdl lint + fmt
+      ["rumdl"] = (Builtins.rumdl) {
+        glob = List("*.md")
+        exclude = List(".agents/skills/**/SKILL.md")
+        check = "mise x -- rumdl check {{files}}"
+        fix =
+          """
+          mise x -- rumdl check --fix {{files}}
+          mise x -- rumdl fmt {{files}}
+          """
+        check_first = true
+        batch = true
+      }
+
+      // TOML — tombi lint + format
+      ["tombi"] = (Builtins.tombi) {
+        glob = List("*.toml")
+        check = "mise x -- tombi lint {{files}} && mise x -- tombi format --check {{files}}"
+        fix =
+          """
+          mise x -- tombi lint {{files}}
+          mise x -- tombi format {{files}}
+          """
+        check_first = true
+        batch = true
+      }
+    }
+  }
+
+  ["commit-msg"] {
+    steps {
+      ["commitlint"] {
+        check = "nr commitlint --strict --config commitlint.config.ts --edit {{commit_msg_file}}"
+      }
+    }
+  }
+
+  ["pre-push"] {
+    steps {
+      ["lint"] {
+        check = "scripts/quiet-on-success.sh nr lint"
+      }
+      ["type-check"] {
+        check = "scripts/quiet-on-success.sh nr type-check"
+      }
+    }
+  }
+
+  ["post-merge"] {
+    steps {
+      ["package-install"] {
+        check = "mise x -- pullhook --install"
+      }
+    }
+  }
+
+  // Manual check/fix hooks for CI or local use
+  ["check"] {
+    steps {
+      ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
+        exclude = binary_excludes
+      }
+      ["newlines"] = (Builtins.newlines) {
+        exclude = binary_excludes
+      }
+      ["check-merge-conflict"] = (Builtins.check_merge_conflict) {}
+      ["check-case-conflict"] = (Builtins.check_case_conflict) {}
+      ["check-symlinks"] = (Builtins.check_symlinks) {}
+      ["mixed-line-ending"] = (Builtins.mixed_line_ending) {}
+      ["detect-private-key"] = (Builtins.detect_private_key) {
+        exclude = binary_excludes
+      }
+      ["oxlint"] = (Builtins.ox_lint) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
+        batch = true
+      }
+      ["biome-js"] = (Builtins.biome) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr biome lint --no-errors-on-unmatched {{files}}"
+        batch = true
+      }
+      ["biome-non-js"] = (Builtins.biome) {
+        glob = List("*.css", "*.html", "*.grit")
+        check = "nr biome check --no-errors-on-unmatched {{files}}"
+        batch = true
+      }
+      ["oxfmt"] = (Builtins.oxfmt) {
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.json",
+            "*.jsonc",
+            "*.json5",
+            "*.code-workspace",
+            "*.mdx",
+          )
+        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
+      }
+      ["rumdl"] = (Builtins.rumdl) {
+        glob = List("*.md")
+        exclude = List(".agents/skills/**/SKILL.md")
+        check = "mise x -- rumdl check {{files}}"
+      }
+      ["tombi"] = (Builtins.tombi) {
+        glob = List("*.toml")
+        check = "mise x -- tombi lint {{files}} && mise x -- tombi format --check {{files}}"
+      }
+    }
+  }
+
+  ["fix"] {
+    fix = true
+    stash = "git"
+    steps {
+      ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
+        exclude = binary_excludes
+      }
+      ["newlines"] = (Builtins.newlines) {
+        exclude = binary_excludes
+      }
+      ["check-case-conflict"] = (Builtins.check_case_conflict) {}
+      ["check-symlinks"] = (Builtins.check_symlinks) {}
+      ["mixed-line-ending"] = (Builtins.mixed_line_ending) {}
+      ["detect-private-key"] = (Builtins.detect_private_key) {
+        exclude = binary_excludes
+      }
+      ["oxlint"] = (Builtins.ox_lint) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
+        fix = "nr oxlint --no-error-on-unmatched-pattern --fix {{files}}"
+        batch = true
+      }
+      ["biome-js"] = (Builtins.biome) {
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        check = "nr biome lint --no-errors-on-unmatched {{files}}"
+        fix = "nr biome lint --write --no-errors-on-unmatched {{files}}"
+        batch = true
+      }
+      ["biome-non-js"] = (Builtins.biome) {
+        glob = List("*.css", "*.html", "*.grit")
+        check = "nr biome check --no-errors-on-unmatched {{files}}"
+        fix = "nr biome check --write --no-errors-on-unmatched {{files}}"
+        batch = true
+      }
+      ["oxfmt"] = (Builtins.oxfmt) {
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.json",
+            "*.jsonc",
+            "*.json5",
+            "*.code-workspace",
+            "*.mdx",
+          )
+        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
+        fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+      }
+      ["rumdl"] = (Builtins.rumdl) {
+        glob = List("*.md")
+        exclude = List(".agents/skills/**/SKILL.md")
+        fix =
+          """
+          mise x -- rumdl check --fix {{files}}
+          mise x -- rumdl fmt {{files}}
+          """
+      }
+      ["tombi"] = (Builtins.tombi) {
+        glob = List("*.toml")
+        fix =
+          """
+          mise x -- tombi lint {{files}}
+          mise x -- tombi format {{files}}
+          """
+      }
+    }
+  }
+}

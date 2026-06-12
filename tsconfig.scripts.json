@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"noEmit": true,
+		"paths": {
+			"$build-types/*": ["./scripts/types/*"],
+			"$build-utilities/*": ["./scripts/utilities/*"]
+		},
+		"rootDir": ".",
+		"sourceMap": false,
+		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-scripts"
+	},
+	"extends": "./tsconfig.base.json",
+	"include": ["scripts/**/*.ts"]
+}

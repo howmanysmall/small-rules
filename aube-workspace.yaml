@@ -1,0 +1,76 @@
+allowBuilds:
+  "@swc/core": true
+
+enableGlobalVirtualStore: false
+packages: []
+fetchRetries: 5
+fetchRetryMintimeout: 1000
+fetchRetryMaxtimeout: 30000
+fetchTimeout: 60000
+trustPolicyExclude:
+  - skills
+
+patchedDependencies:
+  package-manager-detector@1.6.0: patches/package-manager-detector@1.6.0.patch
+
+blockExoticSubdeps: true
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - "@oxc-parser/binding-android-arm-eabi"
+  - "@oxc-parser/binding-android-arm64"
+  - "@oxc-parser/binding-darwin-arm64"
+  - "@oxc-parser/binding-darwin-x64"
+  - "@oxc-parser/binding-freebsd-x64"
+  - "@oxc-parser/binding-linux-arm-gnueabihf"
+  - "@oxc-parser/binding-linux-arm-musleabihf"
+  - "@oxc-parser/binding-linux-arm64-gnu"
+  - "@oxc-parser/binding-linux-arm64-musl"
+  - "@oxc-parser/binding-linux-ppc64-gnu"
+  - "@oxc-parser/binding-linux-riscv64-gnu"
+  - "@oxc-parser/binding-linux-riscv64-musl"
+  - "@oxc-parser/binding-linux-s390x-gnu"
+  - "@oxc-parser/binding-linux-x64-gnu"
+  - "@oxc-parser/binding-linux-x64-musl"
+  - "@oxc-parser/binding-openharmony-arm64"
+  - "@oxc-parser/binding-wasm32-wasi"
+  - "@oxc-parser/binding-win32-arm64-msvc"
+  - "@oxc-parser/binding-win32-ia32-msvc"
+  - "@oxc-parser/binding-win32-x64-msvc"
+  - "@oxfmt/binding-android-arm-eabi"
+  - "@oxfmt/binding-android-arm64"
+  - "@oxfmt/binding-darwin-arm64"
+  - "@oxfmt/binding-darwin-x64"
+  - "@oxfmt/binding-freebsd-x64"
+  - "@oxfmt/binding-linux-arm-gnueabihf"
+  - "@oxfmt/binding-linux-arm-musleabihf"
+  - "@oxfmt/binding-linux-arm64-gnu"
+  - "@oxfmt/binding-linux-arm64-musl"
+  - "@oxfmt/binding-linux-ppc64-gnu"
+  - "@oxfmt/binding-linux-riscv64-gnu"
+  - "@oxfmt/binding-linux-riscv64-musl"
+  - "@oxfmt/binding-linux-s390x-gnu"
+  - "@oxfmt/binding-linux-x64-gnu"
+  - "@oxfmt/binding-linux-x64-musl"
+  - "@oxfmt/binding-openharmony-arm64"
+  - "@oxfmt/binding-win32-arm64-msvc"
+  - "@oxfmt/binding-win32-ia32-msvc"
+  - "@oxfmt/binding-win32-x64-msvc"
+  - "@typescript/native-preview"
+  - "@typescript/native-preview-darwin-arm64"
+  - "@typescript/native-preview-darwin-x64"
+  - "@typescript/native-preview-linux-arm"
+  - "@typescript/native-preview-linux-arm64"
+  - "@typescript/native-preview-linux-x64"
+  - "@typescript/native-preview-win32-arm64"
+  - "@typescript/native-preview-win32-x64"
+  - oxfmt
+
+minimumReleaseAgeStrict: true
+resolutionMode: time-based
+strictStorePkgContentCheck: true
+strictDepBuilds: true
+strictPeerDependencies: true
+strictSsl: true
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
+verifyStoreIntegrity: true

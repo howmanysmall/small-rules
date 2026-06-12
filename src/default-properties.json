@@ -1,0 +1,2000 @@
+{
+	"classes": {
+		"BillboardGui": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"Brightness": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"DistanceLowerLimit": {
+				"type": "number",
+				"value": 0
+			},
+			"DistanceUpperLimit": {
+				"type": "number",
+				"value": -1
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"ExtentsOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ExtentsOffsetWorldSpace": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"LightInfluence": {
+				"type": "number",
+				"value": 0
+			},
+			"MaxDistance": {
+				"type": "number",
+				"value": "inf"
+			},
+			"ResetOnSpawn": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeOffset": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"StudsOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"StudsOffsetWorldSpace": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ZIndexBehavior": {
+				"enumType": "ZIndexBehavior",
+				"type": "Enum",
+				"value": "Global"
+			}
+		},
+		"CanvasGroup": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": true
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"GroupColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"GroupTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"Folder": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			}
+		},
+		"Frame": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Style": {
+				"enumType": "FrameStyle",
+				"type": "Enum",
+				"value": "Custom"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"ImageButton": {
+			"Active": {
+				"type": "bool",
+				"value": true
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoButtonColor": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"ImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ImageRectOffset": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"ImageRectSize": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"ImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Modal": {
+				"type": "bool",
+				"value": false
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"ResampleMode": {
+				"enumType": "ResamplerMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"ScaleType": {
+				"enumType": "ScaleType",
+				"type": "Enum",
+				"value": "Stretch"
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"Selected": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"SliceCenter": {
+				"type": "Rect",
+				"value": [0, 0, 0, 0]
+			},
+			"SliceScale": {
+				"type": "number",
+				"value": 1
+			},
+			"Style": {
+				"enumType": "ButtonStyle",
+				"type": "Enum",
+				"value": "Custom"
+			},
+			"TileSize": {
+				"type": "UDim2",
+				"value": [1, 0, 1, 0]
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"ImageLabel": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"ImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ImageRectOffset": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"ImageRectSize": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"ImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"ResampleMode": {
+				"enumType": "ResamplerMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"ScaleType": {
+				"enumType": "ScaleType",
+				"type": "Enum",
+				"value": "Stretch"
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"SliceCenter": {
+				"type": "Rect",
+				"value": [0, 0, 0, 0]
+			},
+			"SliceScale": {
+				"type": "number",
+				"value": 1
+			},
+			"TileSize": {
+				"type": "UDim2",
+				"value": [1, 0, 1, 0]
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"Path2D": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Closed": {
+				"type": "bool",
+				"value": false
+			},
+			"Color3": {
+				"type": "Color3",
+				"value": [0, 0, 0]
+			},
+			"Thickness": {
+				"type": "number",
+				"value": 1
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"ScreenGui": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"ClipToDeviceSafeArea": {
+				"type": "bool",
+				"value": true
+			},
+			"DisplayOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"ResetOnSpawn": {
+				"type": "bool",
+				"value": true
+			},
+			"SafeAreaCompatibility": {
+				"enumType": "SafeAreaCompatibility",
+				"type": "Enum",
+				"value": "FullscreenExtension"
+			},
+			"ScreenInsets": {
+				"enumType": "ScreenInsets",
+				"type": "Enum",
+				"value": "CoreUISafeInsets"
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"ZIndexBehavior": {
+				"enumType": "ZIndexBehavior",
+				"type": "Enum",
+				"value": "Global"
+			}
+		},
+		"ScrollingFrame": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticCanvasSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"CanvasPosition": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"CanvasSize": {
+				"type": "UDim2",
+				"value": [0, 0, 2, 0]
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": true
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"ElasticBehavior": {
+				"enumType": "ElasticBehavior",
+				"type": "Enum",
+				"value": "WhenScrollable"
+			},
+			"HorizontalScrollBarInset": {
+				"enumType": "ScrollBarInset",
+				"type": "Enum",
+				"value": "None"
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"ScrollBarImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ScrollBarImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"ScrollBarThickness": {
+				"type": "number",
+				"value": 12
+			},
+			"ScrollingDirection": {
+				"enumType": "ScrollingDirection",
+				"type": "Enum",
+				"value": "XY"
+			},
+			"ScrollingEnabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"VerticalScrollBarInset": {
+				"enumType": "ScrollBarInset",
+				"type": "Enum",
+				"value": "None"
+			},
+			"VerticalScrollBarPosition": {
+				"enumType": "VerticalScrollBarPosition",
+				"type": "Enum",
+				"value": "Right"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"TextBox": {
+			"Active": {
+				"type": "bool",
+				"value": true
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClearTextOnFocus": {
+				"type": "bool",
+				"value": true
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"LineHeight": {
+				"type": "number",
+				"value": 1
+			},
+			"MaxVisibleGraphemes": {
+				"type": "number",
+				"value": -1
+			},
+			"MultiLine": {
+				"type": "bool",
+				"value": false
+			},
+			"OpenTypeFeatures": {
+				"type": "string",
+				"value": ""
+			},
+			"PlaceholderColor3": {
+				"type": "Color3",
+				"value": [0.5, 0.5, 0.5]
+			},
+			"PlaceholderText": {
+				"type": "string",
+				"value": ""
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"RichText": {
+				"type": "bool",
+				"value": false
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"ShowNativeInput": {
+				"type": "bool",
+				"value": true
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Text": {
+				"type": "string",
+				"value": "TextBox"
+			},
+			"TextColor3": {
+				"type": "Color3",
+				"value": [0.10588236153125763, 0.16470588743686676, 0.20784315466880798]
+			},
+			"TextDirection": {
+				"enumType": "TextDirection",
+				"type": "Enum",
+				"value": "Auto"
+			},
+			"TextEditable": {
+				"type": "bool",
+				"value": true
+			},
+			"TextScaled": {
+				"type": "bool",
+				"value": false
+			},
+			"TextSize": {
+				"type": "number",
+				"value": 8
+			},
+			"TextStrokeColor3": {
+				"type": "Color3",
+				"value": [0, 0, 0]
+			},
+			"TextStrokeTransparency": {
+				"type": "number",
+				"value": 1
+			},
+			"TextTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"TextTruncate": {
+				"enumType": "TextTruncate",
+				"type": "Enum",
+				"value": "None"
+			},
+			"TextWrapped": {
+				"type": "bool",
+				"value": false
+			},
+			"TextXAlignment": {
+				"enumType": "TextXAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"TextYAlignment": {
+				"enumType": "TextYAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"TextButton": {
+			"Active": {
+				"type": "bool",
+				"value": true
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoButtonColor": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"LineHeight": {
+				"type": "number",
+				"value": 1
+			},
+			"MaxVisibleGraphemes": {
+				"type": "number",
+				"value": -1
+			},
+			"Modal": {
+				"type": "bool",
+				"value": false
+			},
+			"OpenTypeFeatures": {
+				"type": "string",
+				"value": ""
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"RichText": {
+				"type": "bool",
+				"value": false
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"Selected": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Style": {
+				"enumType": "ButtonStyle",
+				"type": "Enum",
+				"value": "Custom"
+			},
+			"Text": {
+				"type": "string",
+				"value": "Button"
+			},
+			"TextColor3": {
+				"type": "Color3",
+				"value": [0.10588236153125763, 0.16470588743686676, 0.20784315466880798]
+			},
+			"TextDirection": {
+				"enumType": "TextDirection",
+				"type": "Enum",
+				"value": "Auto"
+			},
+			"TextScaled": {
+				"type": "bool",
+				"value": false
+			},
+			"TextSize": {
+				"type": "number",
+				"value": 8
+			},
+			"TextStrokeColor3": {
+				"type": "Color3",
+				"value": [0, 0, 0]
+			},
+			"TextStrokeTransparency": {
+				"type": "number",
+				"value": 1
+			},
+			"TextTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"TextTruncate": {
+				"enumType": "TextTruncate",
+				"type": "Enum",
+				"value": "None"
+			},
+			"TextWrapped": {
+				"type": "bool",
+				"value": false
+			},
+			"TextXAlignment": {
+				"enumType": "TextXAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"TextYAlignment": {
+				"enumType": "TextYAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"TextLabel": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"LineHeight": {
+				"type": "number",
+				"value": 1
+			},
+			"MaxVisibleGraphemes": {
+				"type": "number",
+				"value": -1
+			},
+			"OpenTypeFeatures": {
+				"type": "string",
+				"value": ""
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"RichText": {
+				"type": "bool",
+				"value": false
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Text": {
+				"type": "string",
+				"value": "Label"
+			},
+			"TextColor3": {
+				"type": "Color3",
+				"value": [0.10588236153125763, 0.16470588743686676, 0.20784315466880798]
+			},
+			"TextDirection": {
+				"enumType": "TextDirection",
+				"type": "Enum",
+				"value": "Auto"
+			},
+			"TextScaled": {
+				"type": "bool",
+				"value": false
+			},
+			"TextSize": {
+				"type": "number",
+				"value": 8
+			},
+			"TextStrokeColor3": {
+				"type": "Color3",
+				"value": [0, 0, 0]
+			},
+			"TextStrokeTransparency": {
+				"type": "number",
+				"value": 1
+			},
+			"TextTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"TextTruncate": {
+				"enumType": "TextTruncate",
+				"type": "Enum",
+				"value": "None"
+			},
+			"TextWrapped": {
+				"type": "bool",
+				"value": false
+			},
+			"TextXAlignment": {
+				"enumType": "TextXAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"TextYAlignment": {
+				"enumType": "TextYAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"UIAspectRatioConstraint": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AspectRatio": {
+				"type": "number",
+				"value": 1
+			},
+			"AspectType": {
+				"enumType": "AspectType",
+				"type": "Enum",
+				"value": "FitWithinMaxSize"
+			},
+			"DominantAxis": {
+				"enumType": "DominantAxis",
+				"type": "Enum",
+				"value": "Width"
+			}
+		},
+		"UICorner": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"BottomLeftRadius": {
+				"type": "UDim",
+				"value": [0, 8]
+			},
+			"BottomRightRadius": {
+				"type": "UDim",
+				"value": [0, 8]
+			},
+			"TopLeftRadius": {
+				"type": "UDim",
+				"value": [0, 8]
+			},
+			"TopRightRadius": {
+				"type": "UDim",
+				"value": [0, 8]
+			}
+		},
+		"UIFlexItem": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"FlexMode": {
+				"enumType": "UIFlexMode",
+				"type": "Enum",
+				"value": "None"
+			},
+			"GrowRatio": {
+				"type": "number",
+				"value": 0
+			},
+			"ItemLineAlignment": {
+				"enumType": "ItemLineAlignment",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"ShrinkRatio": {
+				"type": "number",
+				"value": 0
+			}
+		},
+		"UIGradient": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Offset": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			}
+		},
+		"UIGridLayout": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"CellPadding": {
+				"type": "UDim2",
+				"value": [0, 5, 0, 5]
+			},
+			"CellSize": {
+				"type": "UDim2",
+				"value": [0, 100, 0, 100]
+			},
+			"FillDirection": {
+				"enumType": "FillDirection",
+				"type": "Enum",
+				"value": "Horizontal"
+			},
+			"FillDirectionMaxCells": {
+				"type": "number",
+				"value": 0
+			},
+			"HorizontalAlignment": {
+				"enumType": "HorizontalAlignment",
+				"type": "Enum",
+				"value": "Left"
+			},
+			"SortOrder": {
+				"enumType": "SortOrder",
+				"type": "Enum",
+				"value": "Name"
+			},
+			"StartCorner": {
+				"enumType": "StartCorner",
+				"type": "Enum",
+				"value": "TopLeft"
+			},
+			"VerticalAlignment": {
+				"enumType": "VerticalAlignment",
+				"type": "Enum",
+				"value": "Top"
+			}
+		},
+		"UIListLayout": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"FillDirection": {
+				"enumType": "FillDirection",
+				"type": "Enum",
+				"value": "Vertical"
+			},
+			"HorizontalAlignment": {
+				"enumType": "HorizontalAlignment",
+				"type": "Enum",
+				"value": "Left"
+			},
+			"HorizontalFlex": {
+				"enumType": "UIFlexAlignment",
+				"type": "Enum",
+				"value": "None"
+			},
+			"ItemLineAlignment": {
+				"enumType": "ItemLineAlignment",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"Padding": {
+				"type": "UDim",
+				"value": [0, 0]
+			},
+			"SortOrder": {
+				"enumType": "SortOrder",
+				"type": "Enum",
+				"value": "Name"
+			},
+			"VerticalAlignment": {
+				"enumType": "VerticalAlignment",
+				"type": "Enum",
+				"value": "Top"
+			},
+			"VerticalFlex": {
+				"enumType": "UIFlexAlignment",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Wraps": {
+				"type": "bool",
+				"value": false
+			}
+		},
+		"UIPadding": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"PaddingBottom": {
+				"type": "UDim",
+				"value": [0, 0]
+			},
+			"PaddingLeft": {
+				"type": "UDim",
+				"value": [0, 0]
+			},
+			"PaddingRight": {
+				"type": "UDim",
+				"value": [0, 0]
+			},
+			"PaddingTop": {
+				"type": "UDim",
+				"value": [0, 0]
+			}
+		},
+		"UIScale": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Scale": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"UISizeConstraint": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"MaxSize": {
+				"type": "Vector2",
+				"value": ["inf", "inf"]
+			},
+			"MinSize": {
+				"type": "Vector2",
+				"value": [0, 0]
+			}
+		},
+		"UIStroke": {
+			"ApplyStrokeMode": {
+				"enumType": "ApplyStrokeMode",
+				"type": "Enum",
+				"value": "Contextual"
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"BorderOffset": {
+				"type": "UDim",
+				"value": [0, 0]
+			},
+			"BorderStrokePosition": {
+				"enumType": "BorderStrokePosition",
+				"type": "Enum",
+				"value": "Outer"
+			},
+			"Color": {
+				"type": "Color3",
+				"value": [0, 0, 0]
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"LineJoinMode": {
+				"enumType": "LineJoinMode",
+				"type": "Enum",
+				"value": "Round"
+			},
+			"StrokeSizingMode": {
+				"enumType": "StrokeSizingMode",
+				"type": "Enum",
+				"value": "FixedSize"
+			},
+			"Thickness": {
+				"type": "number",
+				"value": 1
+			},
+			"Transparency": {
+				"type": "number",
+				"value": 0
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		},
+		"ViewportFrame": {
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"Ambient": {
+				"type": "Color3",
+				"value": [0.7843137383460999, 0.7843137383460999, 0.7843137383460999]
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"ImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"InputSink": {
+				"enumType": "InputSink",
+				"type": "Enum",
+				"value": "None"
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"LightColor": {
+				"type": "Color3",
+				"value": [0.5490196347236633, 0.5490196347236633, 0.5490196347236633]
+			},
+			"LightDirection": {
+				"type": "Vector3",
+				"value": [-1, -1, -1]
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			}
+		}
+	},
+	"version": 1
+}

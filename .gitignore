@@ -1,0 +1,53 @@
+# Ignore node.js for the future
+**/node_modules/**
+.pnpm-store/
+
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+/reports/
+.stryker-tmp/
+.vitiate/
+.swc/
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+.envrc
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS) folder config
+.DS_Store
+
+# opensrc - source code for packages
+opensrc/
+
+# hk — local developer overrides (do not commit)
+hk.local.pkl
+.agents/skills/clean-code/
+.agents/skills/improve-codebase-architecture/
+.agents/skills/mutation-testing/
+.agents/skills/pnpm/
+.agents/skills/tdd/
+.agents/skills/tsdown/
+.agents/skills/vitest/

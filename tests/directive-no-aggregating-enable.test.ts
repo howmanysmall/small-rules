@@ -1,0 +1,24 @@
+import { describe } from "vitest";
+import rule from "$oxc-rules/directive-no-aggregating-enable";
+
+import { js } from "./rule-testers";
+
+describe("directive-no-aggregating-enable", () => {
+	// @ts-expect-error -- Shut up
+	js.run("directive-no-aggregating-enable", rule, {
+		invalid: [
+			{
+				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-disable no-alert */\nconst y = 2;\n/* oxlint-enable no-console, no-alert */",
+				errors: [{ messageId: "aggregatingEnable" }],
+			},
+		],
+		valid: [
+			{
+				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
+			},
+			{
+				code: "/* oxlint-disable */\nconst x = 1;\n/* oxlint-enable */",
+			},
+		],
+	});
+});

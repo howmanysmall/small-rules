@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"incremental": true,
+		"paths": {
+			"$oxc-rules/*": ["./src/rules/*"],
+			"$oxc-types/*": ["./src/types/*"],
+			"$oxc-utilities/*": ["./src/utilities/*"],
+			"$small-rules": ["./src/index.ts"]
+		},
+		"tsBuildInfoFile": "./node_modules/.tsbuildinfo"
+	},
+	"exclude": ["**/{do-not-sync-ever,node_modules}/**", "{coverage,dist,plugins}/**"],
+	"extends": "./tsconfig.base.json",
+	"include": ["commitlint.config.ts", "vitest.config.ts", "src/**/*.ts", "tests/**/*.ts"]
+}

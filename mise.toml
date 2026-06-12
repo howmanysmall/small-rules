@@ -1,0 +1,23 @@
+[env]
+_.file = { path = ".env" }
+_.path = ["{{config_root}}/node_modules/.bin", "{{cwd}}/node_modules/.bin"]
+
+HK_MISE = 1
+
+[settings]
+auto_install = false
+experimental = true
+lockfile = true
+
+[tools]
+bun = "latest"
+deno = "latest"
+gitleaks = "latest"
+hk = "latest"
+node = "24"
+pkl = "latest"
+rumdl = "latest"
+tombi = "latest"
+
+[deps.aube]
+auto = true
