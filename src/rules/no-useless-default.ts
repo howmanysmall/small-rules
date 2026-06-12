@@ -527,6 +527,18 @@ function extractRectValue(
 	return [minimumX, minimumY, maximumX, maximumY];
 }
 
+function extractRGBFromComponents(
+	components: readonly [ESTree.Expression, ESTree.Expression, ESTree.Expression],
+): readonly [red: number, green: number, blue: number] | undefined {
+	const [redNode, greenNode, blueNode] = components;
+	const red = extractNumberValue(redNode);
+	const green = extractNumberValue(greenNode);
+	const blue = extractNumberValue(blueNode);
+	if (red === undefined || green === undefined || blue === undefined) return undefined;
+
+	return [red, green, blue];
+}
+
 function extractColor3Value(node: ESTree.Expression): readonly [red: number, green: number, blue: number] | undefined {
 	if (node.type === "CallExpression") {
 		const path = getMemberPath(node.callee);
@@ -535,12 +547,10 @@ function extractColor3Value(node: ESTree.Expression): readonly [red: number, gre
 			return undefined;
 		}
 
-		const [redNode, greenNode, blueNode] = components;
-		const red = extractNumberValue(redNode);
-		const green = extractNumberValue(greenNode);
-		const blue = extractNumberValue(blueNode);
-		if (red === undefined || green === undefined || blue === undefined) return undefined;
+		const rgb = extractRGBFromComponents(components);
+		if (rgb === undefined) return undefined;
 
+		const [red, green, blue] = rgb;
 		return [Math.fround(red / 255), Math.fround(green / 255), Math.fround(blue / 255)];
 	}
 
@@ -550,13 +560,7 @@ function extractColor3Value(node: ESTree.Expression): readonly [red: number, gre
 	const components = extractTriple(node.arguments);
 	if (components === undefined) return undefined;
 
-	const [redNode, greenNode, blueNode] = components;
-	const red = extractNumberValue(redNode);
-	const green = extractNumberValue(greenNode);
-	const blue = extractNumberValue(blueNode);
-	if (red === undefined || green === undefined || blue === undefined) return undefined;
-
-	return [red, green, blue];
+	return extractRGBFromComponents(components);
 }
 
 function extractCFrameValue(

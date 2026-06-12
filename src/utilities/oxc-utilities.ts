@@ -39,14 +39,23 @@ export function isIdentifierNamed(node: ESTree.Node, name: string): node is ESTr
 	return node.type === "Identifier" && node.name === name;
 }
 
+export function isReactNamedCall(
+	node: ESTree.CallExpression,
+	identifiers: ReadonlySet<string>,
+	reactNamespaces: ReadonlySet<string>,
+	name: string,
+): boolean {
+	if (node.callee.type === "Identifier") return identifiers.has(node.callee.name);
+	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return false;
+	return reactNamespaces.has(node.callee.object.name) && getMemberPropertyName(node.callee) === name;
+}
+
 export function isUseMemoCall(
 	node: ESTree.CallExpression,
 	memoIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 ): boolean {
-	if (node.callee.type === "Identifier") return memoIdentifiers.has(node.callee.name);
-	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return false;
-	return reactNamespaces.has(node.callee.object.name) && getMemberPropertyName(node.callee) === "useMemo";
+	return isReactNamedCall(node, memoIdentifiers, reactNamespaces, "useMemo");
 }
 
 export function getImportedName({ imported }: ESTree.ImportSpecifier): string | undefined {

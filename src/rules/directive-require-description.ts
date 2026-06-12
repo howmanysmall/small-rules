@@ -1,6 +1,10 @@
 import { defineRule } from "oxlint-plugin-utilities";
 
-import { getOptionalStringArrayProperty, parseDirectiveComment } from "../utilities/directive-comments";
+import {
+	getOptionalStringArrayProperty,
+	isDisableOrEnableDirectiveKind,
+	parseDirectiveComment,
+} from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -13,16 +17,7 @@ const directiveRequireDescription = defineRule({
 			if (directive === undefined) continue;
 
 			const { kind } = directive;
-			if (
-				kind !== "eslint-disable" &&
-				kind !== "eslint-enable" &&
-				kind !== "eslint-disable-line" &&
-				kind !== "eslint-disable-next-line" &&
-				kind !== "oxlint-disable" &&
-				kind !== "oxlint-enable" &&
-				kind !== "oxlint-disable-line" &&
-				kind !== "oxlint-disable-next-line"
-			) {
+			if (!isDisableOrEnableDirectiveKind(kind)) {
 				continue;
 			}
 

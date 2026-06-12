@@ -136,15 +136,24 @@ function shouldAllowIdentifierReturn(sourceCode: SourceCode, node: ESTree.Node &
 	return hasObjectInitializer(variable);
 }
 
+function getArrayInitializer(
+	node: ESTree.VariableDeclarator,
+): { init: ESTree.ArrayExpression; name: string } | undefined {
+	const name = getVariableDeclaratorName(node);
+	if (name === undefined || node.init?.type !== "ArrayExpression") return undefined;
+	return { init: node.init, name };
+}
+
 function pushArrayInitializer(
 	node: ESTree.VariableDeclarator,
 	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
 ): void {
-	const name = getVariableDeclaratorName(node);
-	if (name === undefined || node.init?.type !== "ArrayExpression") return;
+	const initializer = getArrayInitializer(node);
+	if (initializer === undefined) return;
 
+	const { init, name } = initializer;
 	const initializers = arrayInitializersByName.get(name) ?? new Array<ESTree.ArrayExpression>();
-	initializers.push(node.init);
+	initializers.push(init);
 	arrayInitializersByName.set(name, initializers);
 }
 
@@ -152,9 +161,10 @@ function popArrayInitializer(
 	node: ESTree.VariableDeclarator,
 	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
 ): void {
-	const name = getVariableDeclaratorName(node);
-	if (name === undefined || node.init?.type !== "ArrayExpression") return;
+	const initializer = getArrayInitializer(node);
+	if (initializer === undefined) return;
 
+	const { name } = initializer;
 	const initializers = arrayInitializersByName.get(name);
 	if (initializers === undefined || initializers.length === 0) return;
 

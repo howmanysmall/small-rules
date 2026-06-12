@@ -1,9 +1,18 @@
 import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
 
-const LINE_COMMENT_PATTERN = /^(?:eslint|oxlint)-disable-(?:next-)?line$/u;
+const LINE_COMMENT_PATTERN = /^(?:eslint-disable-(?:next-)?line|oxlint(?:-disable(?:-(?:next-)?line)?|-enable))$/u;
 const DELIMITER = /[\s,]+/gu;
 const DIRECTIVE_VALUE_SEPARATOR = /\s/u;
+const DISABLE_DIRECTIVE_KINDS = new Set([
+	"eslint-disable",
+	"eslint-disable-line",
+	"eslint-disable-next-line",
+	"oxlint-disable",
+	"oxlint-disable-line",
+	"oxlint-disable-next-line",
+]);
+const DISABLE_OR_ENABLE_DIRECTIVE_KINDS = new Set([...DISABLE_DIRECTIVE_KINDS, "eslint-enable", "oxlint-enable"]);
 const DIRECTIVE_KINDS = new Set([
 	"eslint",
 	"eslint-disable",
@@ -52,6 +61,14 @@ export interface DisabledAreaCollection {
 	readonly duplicateDisableDirectives: Array<Directive>;
 	readonly numberOfRelatedDisableDirectives: Map<Comment, number>;
 	readonly unusedEnableDirectives: Array<Directive>;
+}
+
+export function isDisableDirectiveKind(kind: string): boolean {
+	return DISABLE_DIRECTIVE_KINDS.has(kind);
+}
+
+export function isDisableOrEnableDirectiveKind(kind: string): boolean {
+	return DISABLE_OR_ENABLE_DIRECTIVE_KINDS.has(kind);
 }
 
 export function getOptionalStringArrayProperty(
@@ -220,16 +237,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 		if (directive === undefined) continue;
 
 		const { kind } = directive;
-		if (
-			kind !== "eslint-disable" &&
-			kind !== "eslint-enable" &&
-			kind !== "eslint-disable-line" &&
-			kind !== "eslint-disable-next-line" &&
-			kind !== "oxlint-disable" &&
-			kind !== "oxlint-enable" &&
-			kind !== "oxlint-disable-line" &&
-			kind !== "oxlint-disable-next-line"
-		) {
+		if (!isDisableOrEnableDirectiveKind(kind)) {
 			continue;
 		}
 

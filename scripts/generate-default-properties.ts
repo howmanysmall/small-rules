@@ -2,6 +2,7 @@
 
 import { argv } from "node:process";
 import { Command } from "@cliffy/command";
+import { write } from "bun";
 
 const allCreatableInstances = [
 	"accessory",
@@ -408,8 +409,32 @@ const excludedClassNames = new Set([
 	"workspaceannotation",
 ] as const);
 
+function toLowerCase<TString extends string>(value: TString): Lowercase<TString> {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- wrong!
+	return value.toLowerCase() as Lowercase<TString>;
+}
+
 function getRbxTsReactInstances(): ReadonlyArray<string> {
 	return allCreatableInstances.filter((value) => !excludedClassNames.has(value));
+}
+
+async function getLoadedClassesAsync(
+	classes?: ReadonlyArray<string>,
+	loadClassesFrom?: string,
+): Promise<ReadonlySet<string>> {
+	if (classes !== undefined && classes.length > 0) return new Set(classes.map(toLowerCase));
+
+	if (loadClassesFrom !== undefined && loadClassesFrom.length > 0) {
+		const { existsAsync } = await import("$script-utilities/file-system-utilities");
+		const directoryExists = await existsAsync(loadClassesFrom);
+		if (directoryExists) {
+			const { scanDirectoryAsync, ScanType } = await import("$script-utilities/instance-utilities");
+			const instances = await scanDirectoryAsync(loadClassesFrom, ScanType.Both);
+			return new Set(instances.map(toLowerCase));
+		}
+	}
+
+	return new Set(getRbxTsReactInstances());
 }
 
 const command = new Command()
@@ -425,7 +450,9 @@ const command = new Command()
 	})
 	.option("-o, --output <output-path:string>", "Write JSON output to a file instead of stdout.")
 	.option("-p, --pretty", "Pretty-print JSON with indentation.")
-	.option("--force-latest", "Force use of the latest database version.")
+	.option("--force-latest", "Force use of the latest database version.", {
+		conflicts: ["file-path"],
+	})
 	.option("-q, --quiet", "Suppress warning output for unmapped property types.")
 	.option("-c, --classes <class-names:string...>", "Only include the specified class. Can be used multiple times.", {
 		conflicts: ["load-classes-from"],
@@ -435,11 +462,15 @@ const command = new Command()
 		"Load the classes automatically in a way akin to what scan-roblox-instances does.",
 		{ conflicts: ["classes"] },
 	)
+	.option("--file-path <file-path:file>", "The path to the msgpack database.", {
+		conflicts: ["force-latest"],
+	})
 	.action(
 		async ({
 			classes,
-			loadClassesFrom,
+			filePath,
 			forceLatest,
+			loadClassesFrom,
 			output,
 			pretty,
 			quiet,
@@ -452,9 +483,29 @@ const command = new Command()
 				// oxlint-disable-next-line typescript/strict-boolean-expressions typescript/prefer-nullish-coalescing -- no?
 				auth: githubToken || githubPat || githubPersonalAccessToken,
 			});
-			const allowedInstances = new Set(getRbxTsReactInstances());
 
-			console.log({ allowedInstances, classes, forceLatest, loadClassesFrom, octokit, output, pretty, quiet });
+			const datbaseUtilities = await import("$script-utilities/database-utilities");
+			const { downloadDatabaseAsync, extractDefaults, parseDatabase } = datbaseUtilities;
+
+			const databaseBuffer = await downloadDatabaseAsync(octokit, forceLatest === true ? undefined : filePath);
+			const filterSet = await getLoadedClassesAsync(classes, loadClassesFrom);
+
+			const { decode } = await import("@std/msgpack");
+
+			const outputData = {
+				classes: extractDefaults(parseDatabase(decode(databaseBuffer), filterSet), {
+					filterClasses: [...filterSet],
+					quiet,
+				}),
+				version: 1,
+			};
+
+			const json = JSON.stringify(outputData, undefined, pretty ? 2 : undefined);
+			if (output === undefined) console.log(json);
+			else {
+				await write(output, json, { createPath: true });
+				console.log(`Wrote ${json.length} bytes to ${output}`);
+			}
 		},
 	);
 

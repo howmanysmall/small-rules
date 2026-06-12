@@ -1,6 +1,6 @@
 import { defineRule } from "oxlint-plugin-utilities";
 
-import { parseDirectiveComment, toForceLocation } from "../utilities/directive-comments";
+import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -11,14 +11,7 @@ const directiveNoUnlimitedDisable = defineRule({
 			if (directive === undefined) continue;
 
 			const { kind } = directive;
-			if (
-				kind !== "eslint-disable" &&
-				kind !== "eslint-disable-line" &&
-				kind !== "eslint-disable-next-line" &&
-				kind !== "oxlint-disable" &&
-				kind !== "oxlint-disable-line" &&
-				kind !== "oxlint-disable-next-line"
-			) {
+			if (!isDisableDirectiveKind(kind)) {
 				continue;
 			}
 			if (directive.value === undefined || directive.value === "") {

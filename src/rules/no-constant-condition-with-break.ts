@@ -587,40 +587,31 @@ const noConstantConditionWithBreak = defineRule({
 			});
 		}
 
+		function reportLoopIfConstant(loopNode: LoopNode, testExpression: ESTree.Expression): void {
+			const testResult = getConstantBoolean(testExpression);
+			if (!shouldReportLoop(testResult, loopNode, loopExitCalls)) return;
+
+			context.report({
+				messageId: "unexpected",
+				node: testExpression,
+			});
+		}
+
 		return {
 			ConditionalExpression(node): void {
 				reportConstantCondition(node.test);
 			},
 			DoWhileStatement(node): void {
-				const testResult = getConstantBoolean(node.test);
-				if (!shouldReportLoop(testResult, node, loopExitCalls)) return;
-
-				context.report({
-					messageId: "unexpected",
-					node: node.test,
-				});
+				reportLoopIfConstant(node, node.test);
 			},
 			ForStatement(node): void {
-				if (!node.test) return;
-				const testResult = getConstantBoolean(node.test);
-				if (!shouldReportLoop(testResult, node, loopExitCalls)) return;
-
-				context.report({
-					messageId: "unexpected",
-					node: node.test,
-				});
+				if (node.test) reportLoopIfConstant(node, node.test);
 			},
 			IfStatement(node): void {
 				reportConstantCondition(node.test);
 			},
 			WhileStatement(node): void {
-				const testResult = getConstantBoolean(node.test);
-				if (!shouldReportLoop(testResult, node, loopExitCalls)) return;
-
-				context.report({
-					messageId: "unexpected",
-					node: node.test,
-				});
+				reportLoopIfConstant(node, node.test);
 			},
 		} satisfies Visitor;
 	},

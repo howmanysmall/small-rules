@@ -78,6 +78,22 @@ function walkChildSlop(value: unknown, parent: ESTree.Node, callback: (child: ES
 	walkAstSlop(value, callback);
 }
 
+export function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
+	const { key } = property;
+	if (key.type === "Identifier") return key.name;
+	if (key.type === "Literal" && typeof key.value === "string") return key.value;
+	return undefined;
+}
+
+export function getBindingPropertyValueIdentifier(
+	property: ESTree.BindingProperty,
+): ESTree.BindingIdentifier | undefined {
+	const { value } = property;
+	if (value.type === "Identifier") return value;
+	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
+	return undefined;
+}
+
 export function countSetStateCalls(node: ESTree.Node): number {
 	let count = 0;
 

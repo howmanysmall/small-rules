@@ -1,4 +1,4 @@
-// oxlint-disable small-rules/prevent-abbreviations
+// oxlint-disable small-rules/prevent-abbreviations -- `jsdoc` is valid.
 
 import { defineRule } from "oxlint-plugin-utilities";
 

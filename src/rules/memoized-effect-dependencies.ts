@@ -1,6 +1,5 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { getImportedName } from "$oxc-utilities/oxc-utilities";
-import { getReactSources, isEnvironment, isReactImport } from "$oxc-utilities/react-utilities";
+import { getReactSources, forEachReactNamedImport, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -289,24 +288,14 @@ const memoizedEffectDependencies = defineRule({
 				}
 			},
 			ImportDeclaration(node): void {
-				if (!isReactImport(node, reactSources)) return;
-
-				for (const specifier of node.specifiers) {
-					if (specifier.type === "ImportDefaultSpecifier" || specifier.type === "ImportNamespaceSpecifier") {
-						reactNamespaces.add(specifier.local.name);
-						continue;
-					}
-
-					const importedName = getImportedName(specifier);
-					if (importedName === undefined) continue;
-
+				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
 					if (effectHookNameToIndex.has(importedName)) {
 						const fallbackIndex = effectHookNameToIndex.get(importedName);
-						effectHookIdentifiers.set(specifier.local.name, fallbackIndex ?? 1);
+						effectHookIdentifiers.set(localName, fallbackIndex ?? 1);
 					}
-					if (MEMO_HOOKS.has(importedName)) memoHookIdentifiers.add(specifier.local.name);
-					if (STABLE_HOOKS.has(importedName)) stableHookIdentifiers.set(specifier.local.name, importedName);
-				}
+					if (MEMO_HOOKS.has(importedName)) memoHookIdentifiers.add(localName);
+					if (STABLE_HOOKS.has(importedName)) stableHookIdentifiers.set(localName, importedName);
+				});
 			},
 		} satisfies Visitor;
 	},

@@ -18,14 +18,21 @@ function isAllowedBinaryOperator(operator: ESTree.BinaryOperator): boolean {
 	return operator === "+" || operator === "-" || operator === "*" || operator === "/" || operator === "%";
 }
 
+function isValidBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpression {
+	return (
+		node.type === "BinaryExpression" &&
+		isAllowedBinaryOperator(node.operator) &&
+		!isPrivateIdentifier(node.left) &&
+		!isPrivateIdentifier(node.right)
+	);
+}
+
 function reconstructText(node: ESTree.Expression): string | undefined {
 	switch (node.type) {
 		case "BinaryExpression": {
-			if (!isAllowedBinaryOperator(node.operator)) return undefined;
+			if (!isValidBinaryExpression(node)) return undefined;
 
 			const { left, right } = node;
-			if (isPrivateIdentifier(left) || isPrivateIdentifier(right)) return undefined;
-
 			const leftText = reconstructText(left);
 			const rightText = reconstructText(right);
 			if (leftText === undefined || rightText === undefined) return undefined;
@@ -76,10 +83,9 @@ function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, 
 function evaluateExpression(node: ESTree.Expression): number | undefined {
 	switch (node.type) {
 		case "BinaryExpression": {
-			if (!isAllowedBinaryOperator(node.operator)) return undefined;
-			const { left, right } = node;
-			if (isPrivateIdentifier(left) || isPrivateIdentifier(right)) return undefined;
+			if (!isValidBinaryExpression(node)) return undefined;
 
+			const { left, right } = node;
 			const leftValue = evaluateExpression(left);
 			const rightValue = evaluateExpression(right);
 			if (leftValue === undefined || rightValue === undefined) return undefined;
