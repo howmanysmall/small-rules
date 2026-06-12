@@ -171,6 +171,11 @@ class Store {
 	public values: Array<string> = new Array();
 }
 `,
+			`
+function collect(values: Array<string> = new Array()): Array<string> {
+	return values;
+}
+`,
 			"const value = new Array() as Array<string>;",
 			"const sized = new Array(10);",
 			{
