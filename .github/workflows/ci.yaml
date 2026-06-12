@@ -63,7 +63,7 @@ jobs:
       - name: Install
         run: |
           for attempt in 1 2 3; do
-            if aube ci --enable-global-virtual-store --fetch-retries 5 --fetch-timeout 60000 --fetch-retry-maxtimeout 20000; then
+            if aube install --frozen-lockfile; then
               exit 0
             fi
             if [ "$attempt" = "3" ]; then
