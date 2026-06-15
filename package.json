@@ -88,7 +88,7 @@
 		"@types/bun": "1.3.14",
 		"@types/node": "25",
 		"@typescript-eslint/parser": "8.61.0",
-		"@typescript/native-preview": "latest",
+		"@typescript/native-preview": "7.0.0-dev.20260612.1",
 		"@vitest/coverage-v8": "4.1.8",
 		"@vitiate/core": "0.3.0",
 		"@vitiate/fuzzed-data-provider": "0.3.0",

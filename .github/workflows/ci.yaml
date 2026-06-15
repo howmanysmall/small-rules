@@ -73,7 +73,7 @@ jobs:
       - name: Install
         run: |
           for attempt in 1 2 3; do
-            if aube install --no-frozen-lockfile; then
+            if aube install --fix-lockfile; then
               break
             fi
             if [ "$attempt" = "3" ]; then

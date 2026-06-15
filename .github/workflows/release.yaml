@@ -63,14 +63,15 @@ jobs:
       - name: Install dependencies
         run: |
           for attempt in 1 2 3; do
-            if aube install --frozen-lockfile; then
-              exit 0
+            if aube install --fix-lockfile; then
+              break
             fi
             if [ "$attempt" = "3" ]; then
               exit 1
             fi
             sleep $((attempt * 10))
           done
+          git diff --exit-code package.json aube-lock.yaml
 
       - name: Validate tag matches package.json version
         id: version_check
@@ -167,14 +168,15 @@ jobs:
       - name: Install dependencies
         run: |
           for attempt in 1 2 3; do
-            if aube install --frozen-lockfile; then
-              exit 0
+            if aube install --fix-lockfile; then
+              break
             fi
             if [ "$attempt" = "3" ]; then
               exit 1
             fi
             sleep $((attempt * 10))
           done
+          git diff --exit-code package.json aube-lock.yaml
 
       - name: Download build artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
