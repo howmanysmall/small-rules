@@ -86,13 +86,14 @@ jobs:
       - name: Build
         run: nr build
 
+      - name: Archive workspace
+        run: tar -czf workspace.tar.gz node_modules dist
+
       - name: Upload workspace
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: workspace
-          path: |
-            node_modules
-            dist
+          path: workspace.tar.gz
           retention-days: 1
 
   biome:
@@ -115,6 +116,9 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: workspace
+
+      - name: Extract workspace
+        run: tar -xzf workspace.tar.gz
 
       - name: Biome CI
         run: nr biome ci
@@ -140,6 +144,9 @@ jobs:
         with:
           name: workspace
 
+      - name: Extract workspace
+        run: tar -xzf workspace.tar.gz
+
       - name: Lint
         run: nr oxlint .
 
@@ -163,6 +170,9 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: workspace
+
+      - name: Extract workspace
+        run: tar -xzf workspace.tar.gz
 
       - name: Type Checking
         run: nr type-check
@@ -188,6 +198,9 @@ jobs:
         with:
           name: workspace
 
+      - name: Extract workspace
+        run: tar -xzf workspace.tar.gz
+
       - name: Knip
         run: nr knip
 
@@ -211,6 +224,9 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: workspace
+
+      - name: Extract workspace
+        run: tar -xzf workspace.tar.gz
 
       - name: Test
         run: nr test
