@@ -157,13 +157,11 @@ jobs:
           cache: false
 
       - name: Setup Node.js for NPM publishing
-        # zizmor: ignore[cache-poisoning]
-        # Caching is explicitly disabled below; this step is only here to configure the NPM registry URL.
+        # This step is only here to configure the NPM registry URL.
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
-          package-manager-cache: false
 
       - name: Install dependencies
         run: |
@@ -184,15 +182,15 @@ jobs:
           name: dist
           path: dist/
 
+      - name: Publish to NPM (Trusted Publishing)
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: npm publish --provenance --access public
+
       - name: Generate changelog & GitHub release
         if: ${{ env.DRY_RUN != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: nr changelogithub
-
-      - name: Publish to NPM (Trusted Publishing)
-        if: ${{ env.DRY_RUN != 'true' }}
-        run: npm publish --provenance --access public
 
       - name: Upload npm debug log on failure
         if: failure()
