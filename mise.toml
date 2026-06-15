@@ -7,12 +7,13 @@ HK_MISE = 1
 [settings]
 auto_install = false
 experimental = true
+github_attestations = false
 lockfile = true
 
 [tools]
 "github:howmanysmall/pullhook" = "latest"
 actionlint = "latest"
-aube = "1.18.1"
+aube = "latest"
 bun = "latest"
 gitleaks = "latest"
 hk = "latest"
