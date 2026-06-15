@@ -1,0 +1,35 @@
+# `@pobammer-ts/small-rules`
+
+A collection of [Oxlint](https://oxc.rs)-native rules for linting [roblox-ts](https://roblox-ts.com/) projects.
+
+## Installation
+
+```bash
+ni -D @pobammer-ts/small-rules
+```
+
+This package is an [Oxlint plugin](https://oxc.rs/docs/guide/usage/plugins) and must be used with [Oxlint](https://oxc.rs) v1.69.0 or later. It also requires TypeScript 6 and Node.js `^20.19.0` / `>=22.12.0`.
+
+## Configuration
+
+Register the plugin in your `.oxlintrc.json` and enable the rules you want:
+
+```json
+{
+  "plugins": ["@pobammer-ts/small-rules"],
+  "rules": {
+    "small-rules/no-print": "error",
+    "small-rules/no-warn": "error"
+  }
+}
+```
+
+All rules are namespaced under the `small-rules/` prefix. Pick the subset that fits your project — there is no bulk opt-in.
+
+## Rules
+
+Full rule documentation is forthcoming alongside the project docs site.
+
+## License
+
+MIT © HowManySmall
