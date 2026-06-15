@@ -1,5 +1,6 @@
-import { getImportedName, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
-import { getReactSources, isEnvironment, isReactImport } from "$oxc-utilities/react-utilities";
+import { isFunction, isNode } from "$oxc-utilities/oxc-utilities";
+import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
+import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -557,9 +558,9 @@ function expressionContainsIdentifier(node: ESTree.Expression): boolean {
 	return false;
 }
 
-function countSetterCalls(
+function countMatchingCalls(
 	statements: ReadonlyArray<ESTree.Statement>,
-	stateSetterIdentifiers: ReadonlySet<string>,
+	isMatch: (callExpression: ESTree.CallExpression) => boolean,
 ): number | undefined {
 	let count = 0;
 
@@ -568,7 +569,7 @@ function countSetterCalls(
 			if (statement.alternate !== null) return undefined;
 
 			const innerStatements = getStatementsFromConsequent(statement.consequent);
-			const innerCount = countSetterCalls(innerStatements, stateSetterIdentifiers);
+			const innerCount = countMatchingCalls(innerStatements, isMatch);
 			if (innerCount === undefined || innerCount === 0) return undefined;
 
 			count += innerCount;
@@ -576,19 +577,26 @@ function countSetterCalls(
 		}
 
 		const callExpression = getCallExpressionFromStatement(statement);
-		if (callExpression === undefined || !isStateSetterCall(callExpression, stateSetterIdentifiers)) {
-			return undefined;
-		}
+		if (callExpression === undefined || !isMatch(callExpression)) return undefined;
+		count += 1;
+	}
+
+	return count > 0 ? count : undefined;
+}
+
+function countSetterCalls(
+	statements: ReadonlyArray<ESTree.Statement>,
+	stateSetterIdentifiers: ReadonlySet<string>,
+): number | undefined {
+	return countMatchingCalls(statements, (callExpression) => {
+		if (!isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
 
 		const hasDerivedArgument = callExpression.arguments.some((argument) =>
 			argument.type === "SpreadElement" ? false : expressionContainsIdentifier(argument),
 		);
 
-		if (!hasDerivedArgument) return undefined;
-		count += 1;
-	}
-
-	return count > 0 ? count : undefined;
+		return hasDerivedArgument;
+	});
 }
 
 function countPropertyCallbackCalls(
@@ -596,46 +604,14 @@ function countPropertyCallbackCalls(
 	functionContext: FunctionContext,
 	propertyCallbackPrefixes: ReadonlySet<string>,
 ): number | undefined {
-	let count = 0;
-
-	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
-			if (statement.alternate !== null) return undefined;
-
-			const innerStatements = getStatementsFromConsequent(statement.consequent);
-			const innerCount = countPropertyCallbackCalls(innerStatements, functionContext, propertyCallbackPrefixes);
-			if (innerCount === undefined || innerCount === 0) return undefined;
-
-			count += innerCount;
-			continue;
-		}
-
-		const callExpression = getCallExpressionFromStatement(statement);
-		if (callExpression === undefined) return undefined;
-		if (!isPropertyCallbackCall(callExpression, functionContext, propertyCallbackPrefixes)) return undefined;
-		count += 1;
-	}
-
-	return count > 0 ? count : undefined;
+	return countMatchingCalls(statements, (callExpression) =>
+		isPropertyCallbackCall(callExpression, functionContext, propertyCallbackPrefixes),
+	);
 }
 
 function hasPrefix(value: string, prefixes: ReadonlySet<string>): boolean {
 	for (const prefix of prefixes) if (value.startsWith(prefix)) return true;
 	return false;
-}
-
-function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
-	const { key } = property;
-	if (key.type === "Identifier") return key.name;
-	if (key.type === "Literal" && typeof key.value === "string") return key.value;
-	return undefined;
-}
-
-function getBindingPropertyValueIdentifier(property: ESTree.BindingProperty): ESTree.BindingIdentifier | undefined {
-	const { value } = property;
-	if (value.type === "Identifier") return value;
-	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
-	return undefined;
 }
 
 function unwrapParameter(parameter: ESTree.ParamPattern): ESTree.ParamPattern {
@@ -821,9 +797,10 @@ function hasNonSetterSideEffect(
 	return false;
 }
 
-function hasOnlyResetValueSetterCalls(
+function hasOnlySetterCallsWithArgument(
 	statements: ReadonlyArray<ESTree.Statement>,
 	stateSetterIdentifiers: ReadonlySet<string>,
+	isArgumentMatch: (argument: ESTree.Node) => boolean,
 ): boolean {
 	return hasOnlyNestedStatementsMatching(statements, (statement) => {
 		const callExpression = getCallExpressionFromStatement(statement);
@@ -831,28 +808,30 @@ function hasOnlyResetValueSetterCalls(
 		if (callExpression.arguments.length !== 1) return false;
 
 		const [argument] = callExpression.arguments;
-		return argument !== undefined && isResetValue(argument);
+		return argument !== undefined && isArgumentMatch(argument);
 	});
+}
+
+function isConstantValue(node: ESTree.Node): boolean {
+	return (
+		(node.type === "Literal" && typeof node.value !== "object") ||
+		isEmptyArrayExpression(node) ||
+		isEmptyObjectExpression(node)
+	);
+}
+
+function hasOnlyResetValueSetterCalls(
+	statements: ReadonlyArray<ESTree.Statement>,
+	stateSetterIdentifiers: ReadonlySet<string>,
+): boolean {
+	return hasOnlySetterCallsWithArgument(statements, stateSetterIdentifiers, isResetValue);
 }
 
 function hasOnlyConstantSetterCalls(
 	statements: ReadonlyArray<ESTree.Statement>,
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): boolean {
-	return hasOnlyNestedStatementsMatching(statements, (statement) => {
-		const callExpression = getCallExpressionFromStatement(statement);
-		if (callExpression === undefined || !isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
-		if (callExpression.arguments.length !== 1) return false;
-
-		const [argument] = callExpression.arguments;
-		if (argument === undefined) return false;
-
-		return (
-			(argument.type === "Literal" && typeof argument.value !== "object") ||
-			isEmptyArrayExpression(argument) ||
-			isEmptyObjectExpression(argument)
-		);
-	});
+	return hasOnlySetterCallsWithArgument(statements, stateSetterIdentifiers, isConstantValue);
 }
 
 function hasOnlyLogCalls(statements: ReadonlyArray<ESTree.Statement>): boolean {
@@ -1618,21 +1597,11 @@ const noUselessUseEffect = defineRule({
 			FunctionExpression: enterFunction,
 			"FunctionExpression:exit": exitFunction,
 			ImportDeclaration(node): void {
-				if (!isReactImport(node, reactSources)) return;
-
-				for (const specifier of node.specifiers) {
-					if (specifier.type === "ImportDefaultSpecifier" || specifier.type === "ImportNamespaceSpecifier") {
-						reactNamespaces.add(specifier.local.name);
-						continue;
-					}
-
-					const importedName = getImportedName(specifier);
-					if (importedName === undefined) continue;
-
-					if (options.hooks.has(importedName)) effectIdentifiers.add(specifier.local.name);
-					if (options.stateHooks.has(importedName)) stateHookIdentifiers.add(specifier.local.name);
-					if (options.refHooks.has(importedName)) refHookIdentifiers.add(specifier.local.name);
-				}
+				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
+					if (options.hooks.has(importedName)) effectIdentifiers.add(localName);
+					if (options.stateHooks.has(importedName)) stateHookIdentifiers.add(localName);
+					if (options.refHooks.has(importedName)) refHookIdentifiers.add(localName);
+				});
 			},
 			"Program:exit"(): void {
 				analyzeEffectChains();

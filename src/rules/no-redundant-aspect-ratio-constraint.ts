@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
+import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -35,11 +36,6 @@ function getFunctionComponentName(node: ESTree.Node): string | undefined {
 	}
 
 	return undefined;
-}
-
-function isImportBindingVariable({ defs }: ScopeVariable): boolean {
-	for (const definition of defs) if (definition.type === "ImportBinding") return true;
-	return false;
 }
 
 function getImportSourceFromVariable(variable: ScopeVariable): string | undefined {
@@ -112,7 +108,7 @@ function isProtectedComponentUsage(
 	if (moduleScope === undefined) return false;
 
 	const variable = moduleScope.set.get(componentName);
-	if (variable === undefined || !isImportBindingVariable(variable)) return false;
+	if (variable === undefined || !isImportBinding(variable)) return false;
 
 	const importSource = getImportSourceFromVariable(variable);
 	return (

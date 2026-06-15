@@ -1,40 +1,62 @@
 import { defineRule } from "oxlint-plugin-utilities";
 
-import { getOptionalStringArrayProperty, parseDirectiveComment } from "../utilities/directive-comments";
+import {
+	getOptionalStringArrayProperty,
+	isDisableOrEnableDirectiveKind,
+	parseDirectiveComment,
+} from "../utilities/directive-comments";
 
-import type { Visitor } from "oxlint-plugin-utilities";
+import type { Comment, Visitor } from "oxlint-plugin-utilities";
+
+const DESCRIPTION_SEPARATOR = /\s-{2,}\s/u;
+const OXLINT_LINE_DIRECTIVE = /^(?<kind>oxlint-disable|oxlint-enable)(?:\s|$)/u;
 
 const directiveRequireDescription = defineRule({
 	create(context): Visitor {
 		const ignoreKinds: ReadonlySet<string> = new Set(getOptionalStringArrayProperty(context.options[0], "ignore"));
 
-		for (const comment of context.sourceCode.getAllComments()) {
+		function checkComment(comment: Comment): void {
 			const directive = parseDirectiveComment(comment);
-			if (directive === undefined) continue;
 
-			const { kind } = directive;
-			if (
-				kind !== "eslint-disable" &&
-				kind !== "eslint-enable" &&
-				kind !== "eslint-disable-line" &&
-				kind !== "eslint-disable-next-line" &&
-				kind !== "oxlint-disable" &&
-				kind !== "oxlint-enable" &&
-				kind !== "oxlint-disable-line" &&
-				kind !== "oxlint-disable-next-line"
-			) {
-				continue;
-			}
+			if (directive !== undefined) {
+				const { kind } = directive;
+				if (!isDisableOrEnableDirectiveKind(kind)) return;
+				if (ignoreKinds.has(kind)) return;
+				if (directive.description !== undefined) return;
 
-			if (ignoreKinds.has(kind)) continue;
-
-			if (directive.description === undefined) {
 				context.report({
 					data: { kind: directive.kind },
 					loc: directive.comment.loc,
 					messageId: "missingDescription",
 				});
+				return;
 			}
+
+			// parseDirectiveComment rejects line comments with block-style directives
+			// (eslint-disable, oxlint-disable, etc.) because ESLint requires block
+			// comments for those. But oxlint supports // oxlint-disable and
+			// // oxlint-enable in line comments, so check those directly.
+			if (comment.type !== "Line") return;
+
+			const text = comment.value.trim();
+			const match = OXLINT_LINE_DIRECTIVE.exec(text);
+			if (match === null) return;
+
+			const kind = match.groups?.kind;
+			if (kind === undefined) return;
+			if (!isDisableOrEnableDirectiveKind(kind)) return;
+			if (ignoreKinds.has(kind)) return;
+			if (DESCRIPTION_SEPARATOR.test(text)) return;
+
+			context.report({
+				data: { kind },
+				loc: comment.loc,
+				messageId: "missingDescription",
+			});
+		}
+
+		for (const comment of context.sourceCode.getAllComments()) {
+			checkComment(comment);
 		}
 
 		return {};

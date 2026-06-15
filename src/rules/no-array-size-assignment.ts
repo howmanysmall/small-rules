@@ -1,3 +1,4 @@
+import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -104,12 +105,6 @@ function isSizeCall(node: ESTree.Expression): node is SizeCallExpression {
 	if (node.callee.computed) return false;
 	if (node.callee.property.type !== "Identifier") return false;
 	return node.callee.property.name === "size";
-}
-
-function isAllowAutofixOption(value: unknown): value is { readonly allowAutofix?: boolean } {
-	if (typeof value !== "object" || value === null) return false;
-	if (!("allowAutofix" in value)) return true;
-	return value.allowAutofix === undefined || typeof value.allowAutofix === "boolean";
 }
 
 function getSizeAppendTarget(

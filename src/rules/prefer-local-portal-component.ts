@@ -8,7 +8,7 @@ import {
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const PORTAL_COMPONENT = {
 	componentName: "Portal",
@@ -18,7 +18,7 @@ const PORTAL_COMPONENT = {
 const PORTAL_SOURCES = new Set(["@rbxts/react-roblox", "react-dom"]);
 const JSX_EXTENSIONS = new Set([".jsx", ".tsx"]);
 
-function isImportBindingDefinition(definition: ScopeVariable["defs"][number]): boolean {
+function isImportBindingDefinition(definition: Definition): boolean {
 	return definition.type === "ImportBinding";
 }
 

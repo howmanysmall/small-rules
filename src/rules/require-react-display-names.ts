@@ -1,4 +1,4 @@
-import { getImportedName } from "$oxc-utilities/oxc-utilities";
+import { getImportedName, isReactNamedCall } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactImport } from "$oxc-utilities/react-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -30,12 +30,7 @@ function isMemoCall(
 	memoIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 ): boolean {
-	if (node.callee.type === "Identifier") return memoIdentifiers.has(node.callee.name);
-	if (node.callee.type !== "MemberExpression") return false;
-	if (node.callee.property.type !== "Identifier") return false;
-	if (node.callee.property.name !== "memo") return false;
-	if (node.callee.object.type !== "Identifier") return false;
-	return reactNamespaces.has(node.callee.object.name);
+	return isReactNamedCall(node, memoIdentifiers, reactNamespaces, "memo");
 }
 
 function isCreateContextCall(

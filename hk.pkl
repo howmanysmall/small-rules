@@ -2,7 +2,18 @@
 amends "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Config.pkl"
 import "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Builtins.pkl"
 
-exclude = List("node_modules", "dist", ".git", ".repos")
+exclude =
+  List(
+    "node_modules",
+    "dist",
+    "coverage",
+    "report",
+    ".git",
+    ".repos",
+    ".stryker-tmp",
+    "do-not-sync-ever",
+  )
+display_skip_reasons = List()
 terminal_progress = false
 
 local binary_excludes =
@@ -19,6 +30,10 @@ local binary_excludes =
     "*.eot",
     "*.pdf",
     "*.zip",
+    "*.tar",
+    "*.gz",
+    "*.mp4",
+    "*.mov",
   )
 
 hooks {
@@ -40,6 +55,7 @@ hooks {
       ["detect-private-key"] = (Builtins.detect_private_key) {
         exclude = binary_excludes
       }
+      ["gitleaks"] = (Builtins.gitleaks) {}
 
       // JS/TS pipeline — oxlint + biome + oxfmt
       ["oxlint"] = (Builtins.ox_lint) {
@@ -78,6 +94,28 @@ hooks {
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
         fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
         check_first = true
+      }
+      // Pkl — hk and other typed config files
+      ["pkl-format"] = (Builtins.pkl_format) {
+        glob = List("*.pkl")
+        check_first = true
+      }
+
+      // Shell scripts
+      ["shfmt"] = (Builtins.shfmt) {
+        glob = List("*.sh")
+        check_first = true
+      }
+      ["shellcheck"] = (Builtins.shellcheck) {
+        glob = List("*.sh")
+      }
+
+      // GitHub Actions workflows
+      ["actionlint"] = (Builtins.actionlint) {
+        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+      }
+      ["zizmor"] = (Builtins.zizmor) {
+        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
       }
 
       // Markdown — rumdl lint + fmt
@@ -119,19 +157,32 @@ hooks {
 
   ["pre-push"] {
     steps {
-      ["lint"] {
-        check = "scripts/quiet-on-success.sh nr lint"
-      }
-      ["type-check"] {
-        check = "scripts/quiet-on-success.sh nr type-check"
+      ["check"] {
+        check = "scripts/quiet-on-success.sh mise run check"
       }
     }
   }
 
   ["post-merge"] {
     steps {
-      ["package-install"] {
-        check = "mise x -- pullhook --install"
+      ["pullhook"] {
+        check = "pullhook run"
+      }
+    }
+  }
+
+  ["post-checkout"] {
+    steps {
+      ["pullhook"] {
+        check = "pullhook run"
+      }
+    }
+  }
+
+  ["post-rewrite"] {
+    steps {
+      ["pullhook"] {
+        check = "pullhook run"
       }
     }
   }
@@ -152,6 +203,7 @@ hooks {
       ["detect-private-key"] = (Builtins.detect_private_key) {
         exclude = binary_excludes
       }
+      ["gitleaks"] = (Builtins.gitleaks) {}
       ["oxlint"] = (Builtins.ox_lint) {
         glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
         check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
@@ -186,6 +238,21 @@ hooks {
           )
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
       }
+      ["pkl-format"] = (Builtins.pkl_format) {
+        glob = List("*.pkl")
+      }
+      ["shfmt"] = (Builtins.shfmt) {
+        glob = List("*.sh")
+      }
+      ["shellcheck"] = (Builtins.shellcheck) {
+        glob = List("*.sh")
+      }
+      ["actionlint"] = (Builtins.actionlint) {
+        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+      }
+      ["zizmor"] = (Builtins.zizmor) {
+        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+      }
       ["rumdl"] = (Builtins.rumdl) {
         glob = List("*.md")
         exclude = List(".agents/skills/**/SKILL.md")
@@ -214,6 +281,7 @@ hooks {
       ["detect-private-key"] = (Builtins.detect_private_key) {
         exclude = binary_excludes
       }
+      ["gitleaks"] = (Builtins.gitleaks) {}
       ["oxlint"] = (Builtins.ox_lint) {
         glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
         check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
@@ -251,6 +319,21 @@ hooks {
           )
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
         fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+      }
+      ["pkl-format"] = (Builtins.pkl_format) {
+        glob = List("*.pkl")
+      }
+      ["shfmt"] = (Builtins.shfmt) {
+        glob = List("*.sh")
+      }
+      ["shellcheck"] = (Builtins.shellcheck) {
+        glob = List("*.sh")
+      }
+      ["actionlint"] = (Builtins.actionlint) {
+        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+      }
+      ["zizmor"] = (Builtins.zizmor) {
+        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
       }
       ["rumdl"] = (Builtins.rumdl) {
         glob = List("*.md")

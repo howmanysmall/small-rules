@@ -21,3 +21,9 @@ export function isStringRecord(value: unknown): value is Record<string, string> 
 export function isNumber(value: unknown): value is number {
 	return typeof value === "number" && !Number.isNaN(value);
 }
+
+export function isAllowAutofixOption(value: unknown): value is { readonly allowAutofix?: boolean } {
+	if (typeof value !== "object" || value === null) return false;
+	if (!("allowAutofix" in value)) return true;
+	return value.allowAutofix === undefined || typeof value.allowAutofix === "boolean";
+}

@@ -1,0 +1,31 @@
+{
+	"$schema": "https://raw.githubusercontent.com/howmanysmall/pullhook/main/schema.json",
+	"onFailure": "stop",
+	"rules": [
+		{
+			"changed": ["mise.toml", "mise.lock"],
+			"name": "install mise tools",
+			"run": "mise install"
+		},
+		{
+			"changed": ["package.json", "aube-lock.yaml", "aube-workspace.yaml", "patches/**"],
+			"name": "install JS dependencies",
+			"run": "mise run install"
+		},
+		{
+			"changed": "hk.pkl",
+			"name": "validate hk config",
+			"run": "hk validate"
+		},
+		{
+			"changed": "pullhook.json",
+			"name": "validate pullhook config",
+			"run": "pullhook validate"
+		},
+		{
+			"changed": [".github/workflows/*.yaml", ".github/workflows/*.yml"],
+			"name": "validate GitHub workflows",
+			"run": "actionlint"
+		}
+	]
+}

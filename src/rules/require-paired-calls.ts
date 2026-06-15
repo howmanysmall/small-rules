@@ -139,7 +139,10 @@ function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node
 	return undefined;
 }
 
-function resolveBreakTargetLoop(statement: ESTree.BreakStatement): LoopLikeStatement | undefined {
+function resolveTargetLoop(
+	statement: ESTree.BreakStatement | ESTree.ContinueStatement,
+	allowSwitchTermination: boolean,
+): LoopLikeStatement | undefined {
 	const labeledBody = statement.label ? findLabeledStatementBody(statement.label, statement.parent) : undefined;
 
 	if (labeledBody) return isLoopLikeStatement(labeledBody) ? labeledBody : undefined;
@@ -147,25 +150,19 @@ function resolveBreakTargetLoop(statement: ESTree.BreakStatement): LoopLikeState
 	let current: ESTree.Node | undefined = statement.parent;
 	while (current) {
 		if (isLoopLikeStatement(current)) return current;
-		if (isSwitchStatement(current)) return undefined;
+		if (allowSwitchTermination && isSwitchStatement(current)) return undefined;
 		current = current.parent ?? undefined;
 	}
 
 	return undefined;
 }
 
+function resolveBreakTargetLoop(statement: ESTree.BreakStatement): LoopLikeStatement | undefined {
+	return resolveTargetLoop(statement, true);
+}
+
 function resolveContinueTargetLoop(statement: ESTree.ContinueStatement): LoopLikeStatement | undefined {
-	const labeledBody = statement.label ? findLabeledStatementBody(statement.label, statement.parent) : undefined;
-
-	if (labeledBody) return isLoopLikeStatement(labeledBody) ? labeledBody : undefined;
-
-	let current: ESTree.Node | undefined = statement.parent;
-	while (current) {
-		if (isLoopLikeStatement(current)) return current;
-		current = current.parent ?? undefined;
-	}
-
-	return undefined;
+	return resolveTargetLoop(statement, false);
 }
 
 function cloneEntry(value: OpenerStackEntry): OpenerStackEntry {
@@ -331,6 +328,12 @@ const requirePairedCalls = defineRule({
 			for (const entry of entries) openerStack.push({ ...entry });
 		}
 
+		function recordBranchSnapshot(node: ESTree.Node): void {
+			const branches = branchStacks.get(node) ?? [];
+			branches.push(cloneStack());
+			branchStacks.set(node, branches);
+		}
+
 		function reportPartiallyClosedOpeners(
 			openers: ReadonlyArray<OpenerStackEntry>,
 			branches: ReadonlyArray<ReadonlyArray<OpenerStackEntry>>,
@@ -431,15 +434,12 @@ const requirePairedCalls = defineRule({
 			const { parent } = consequentNode;
 
 			if (parent?.type === "IfStatement") {
-				const branches = branchStacks.get(parent) ?? [];
-				branches.push(cloneStack());
-				branchStacks.set(parent, branches);
+				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
 				if (!originalStack) return;
 
-				openerStack.length = 0;
-				for (const entry of originalStack) openerStack.push({ ...entry });
+				restoreOpenerStack(originalStack);
 			}
 		}
 
@@ -448,9 +448,7 @@ const requirePairedCalls = defineRule({
 			const { parent } = alternateNode;
 
 			if (parent?.type === "IfStatement") {
-				const branches = branchStacks.get(parent) ?? [];
-				branches.push(cloneStack());
-				branchStacks.set(parent, branches);
+				recordBranchSnapshot(parent);
 			}
 		}
 
@@ -511,23 +509,22 @@ const requirePairedCalls = defineRule({
 			pushContext({ inTry: true });
 		}
 
-		function onTryBlockExit(node: ESTree.Node): void {
-			if (node.type !== "BlockStatement") return;
+		function onTryBranchExit(node: ESTree.Node, nodeType: "BlockStatement" | "CatchClause"): void {
+			if (node.type !== nodeType) return;
 			const { parent } = node;
 
 			if (parent.type === "TryStatement") {
-				const branches = branchStacks.get(parent) ?? [];
-				branches.push(cloneStack());
-				branchStacks.set(parent, branches);
+				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
-				if (originalStack) {
-					openerStack.length = 0;
-					for (const entry of originalStack) openerStack.push({ ...entry });
-				}
+				if (originalStack) restoreOpenerStack(originalStack);
 			}
 
 			popContext();
+		}
+
+		function onTryBlockExit(node: ESTree.Node): void {
+			onTryBranchExit(node, "BlockStatement");
 		}
 
 		function onCatchClauseEnter(): void {
@@ -535,22 +532,7 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onCatchClauseExit(node: ESTree.Node): void {
-			if (node.type !== "CatchClause") return;
-			const { parent } = node;
-
-			if (parent.type === "TryStatement") {
-				const branches = branchStacks.get(parent) ?? [];
-				branches.push(cloneStack());
-				branchStacks.set(parent, branches);
-
-				const originalStack = stackSnapshots.get(parent);
-				if (originalStack) {
-					openerStack.length = 0;
-					for (const entry of originalStack) openerStack.push({ ...entry });
-				}
-			}
-
-			popContext();
+			onTryBranchExit(node, "CatchClause");
 		}
 
 		function onFinallyBlockEnter(): void {
@@ -596,15 +578,12 @@ const requirePairedCalls = defineRule({
 			const { parent } = node;
 
 			if (parent.type === "SwitchStatement") {
-				const branches = branchStacks.get(parent) ?? [];
-				branches.push(cloneStack());
-				branchStacks.set(parent, branches);
+				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
 				if (!originalStack) return;
 
-				openerStack.length = 0;
-				for (const entry of originalStack) openerStack.push({ ...entry });
+				restoreOpenerStack(originalStack);
 			}
 		}
 

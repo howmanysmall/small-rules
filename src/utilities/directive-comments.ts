@@ -1,8 +1,18 @@
-import type { Comment, SourceCode } from "oxlint-plugin-utilities";
+import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
+import type { Writable } from "type-fest";
 
 const LINE_COMMENT_PATTERN = /^(?:eslint|oxlint)-disable-(?:next-)?line$/u;
 const DELIMITER = /[\s,]+/gu;
 const DIRECTIVE_VALUE_SEPARATOR = /\s/u;
+const DISABLE_DIRECTIVE_KINDS = new Set([
+	"eslint-disable",
+	"eslint-disable-line",
+	"eslint-disable-next-line",
+	"oxlint-disable",
+	"oxlint-disable-line",
+	"oxlint-disable-next-line",
+]);
+const DISABLE_OR_ENABLE_DIRECTIVE_KINDS = new Set([...DISABLE_DIRECTIVE_KINDS, "eslint-enable", "oxlint-enable"]);
 const DIRECTIVE_KINDS = new Set([
 	"eslint",
 	"eslint-disable",
@@ -21,35 +31,50 @@ const DIRECTIVE_KINDS = new Set([
 	"oxlint-env",
 ]);
 
+interface Directive {
+	readonly comment: Comment;
+	readonly ruleId: string | undefined;
+}
+
 export interface DirectiveComment {
 	readonly comment: Comment;
-	readonly description: string | undefined;
+	readonly description?: string | undefined;
 	readonly kind: string;
-	readonly value: string | undefined;
+	readonly value?: string | undefined;
+}
+
+interface ColumnLine {
+	readonly column: number;
+	readonly line: number;
 }
 
 interface DisabledArea {
 	readonly comment: Comment;
-	end: undefined | { column: number; line: number };
+	readonly end: undefined | ColumnLine;
 	readonly kind: "block" | "line";
 	readonly ruleId: string | undefined;
-	readonly start: { column: number; line: number };
+	readonly start: ColumnLine;
 }
 
 export interface DisabledAreaCollection {
 	readonly areas: Array<DisabledArea>;
-	readonly duplicateDisableDirectives: Array<{
-		comment: Comment;
-		ruleId: string | undefined;
-	}>;
+	readonly duplicateDisableDirectives: Array<Directive>;
 	readonly numberOfRelatedDisableDirectives: Map<Comment, number>;
-	readonly unusedEnableDirectives: Array<{
-		comment: Comment;
-		ruleId: string | undefined;
-	}>;
+	readonly unusedEnableDirectives: Array<Directive>;
 }
 
-export function getOptionalStringArrayProperty(value: unknown, propertyName: string): Array<string> | undefined {
+export function isDisableDirectiveKind(kind: string): boolean {
+	return DISABLE_DIRECTIVE_KINDS.has(kind);
+}
+
+export function isDisableOrEnableDirectiveKind(kind: string): boolean {
+	return DISABLE_OR_ENABLE_DIRECTIVE_KINDS.has(kind);
+}
+
+export function getOptionalStringArrayProperty(
+	value: unknown,
+	propertyName: string,
+): ReadonlyArray<string> | undefined {
 	if (typeof value !== "object" || value === undefined || value === null) return undefined;
 
 	const property: unknown = Reflect.get(value, propertyName);
@@ -70,11 +95,10 @@ export function parseDirectiveComment(comment: Comment): DirectiveComment | unde
 	if (parsed === undefined) return undefined;
 
 	const lineCommentSupported = LINE_COMMENT_PATTERN.test(parsed.kind);
-	if (comment.type === "Line" && !lineCommentSupported) return undefined;
-
 	if (
-		(parsed.kind === "eslint-disable-line" || parsed.kind === "oxlint-disable-line") &&
-		comment.loc.start.line !== comment.loc.end.line
+		(comment.type === "Line" && !lineCommentSupported) ||
+		((parsed.kind === "eslint-disable-line" || parsed.kind === "oxlint-disable-line") &&
+			comment.loc.start.line !== comment.loc.end.line)
 	) {
 		return undefined;
 	}
@@ -89,7 +113,7 @@ export function parseDirectiveComment(comment: Comment): DirectiveComment | unde
 
 function parseDirectiveText(
 	textToParse: string,
-): undefined | { description: string | undefined; kind: string; value: string } {
+): undefined | Readonly<{ description: string | undefined; kind: string; value: string }> {
 	const { description, text } = divideDirectiveComment(textToParse);
 	const valueStart = text.search(DIRECTIVE_VALUE_SEPARATOR);
 	const directiveText = valueStart === -1 ? text : text.slice(0, valueStart);
@@ -105,8 +129,8 @@ function parseDirectiveText(
 const DIRECTIVE_REGEXP = /\s-{2,}\s/u;
 
 function divideDirectiveComment(value: string): {
-	description: string | undefined;
-	text: string;
+	readonly description: string | undefined;
+	readonly text: string;
 } {
 	const divided = value.split(DIRECTIVE_REGEXP);
 	const [text, description] = divided;
@@ -123,14 +147,17 @@ function divideDirectiveComment(value: string): {
 	};
 }
 
-export function lte(a: { column: number; line: number }, b: { column: number; line: number }): boolean {
-	return a.line < b.line || (a.line === b.line && a.column <= b.column);
+export function lte(firstLine: ColumnLine, secondLine: ColumnLine): boolean {
+	return (
+		firstLine.line < secondLine.line ||
+		(firstLine.line === secondLine.line && firstLine.column <= secondLine.column)
+	);
 }
 
-export function toForceLocation(location: {
-	end: { column: number; line: number };
-	start: { column: number; line: number };
-}): { end: { column: number; line: number }; start: { column: number; line: number } } {
+export function toForceLocation(location: Location): {
+	readonly end: ColumnLine;
+	readonly start: ColumnLine;
+} {
 	return {
 		end: location.end,
 		start: { column: 0, line: location.start.line },
@@ -139,10 +166,7 @@ export function toForceLocation(location: {
 
 const LINES_REGEXP = /\r\n|[\r\n\u2028\u2029]/u;
 
-export function toRuleIdLocation(
-	comment: Comment,
-	ruleId: string | undefined,
-): { end: { column: number; line: number }; start: { column: number; line: number } } {
+export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 	if (ruleId === undefined) return toForceLocation(comment.loc);
 
 	const lines = comment.value.split(LINES_REGEXP);
@@ -195,8 +219,9 @@ export function toRuleIdLocation(
 }
 
 const REGEXP_REGEXP = /[|\\{}()[\]^$+*?.]/gu;
+const ESCAPE_FOR_REGEXP = String.raw`\$&`;
 function escapeStringRegexp(string: string): string {
-	return string.replaceAll(REGEXP_REGEXP, String.raw`\$&`);
+	return string.replaceAll(REGEXP_REGEXP, ESCAPE_FOR_REGEXP);
 }
 
 export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollection {
@@ -212,16 +237,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 		if (directive === undefined) continue;
 
 		const { kind } = directive;
-		if (
-			kind !== "eslint-disable" &&
-			kind !== "eslint-enable" &&
-			kind !== "eslint-disable-line" &&
-			kind !== "eslint-disable-next-line" &&
-			kind !== "oxlint-disable" &&
-			kind !== "oxlint-enable" &&
-			kind !== "oxlint-disable-line" &&
-			kind !== "oxlint-disable-next-line"
-		) {
+		if (!isDisableOrEnableDirectiveKind(kind)) {
 			continue;
 		}
 
@@ -256,7 +272,6 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 				enable(collection, comment, comment.loc.start, ruleIds, "block");
 				break;
 			}
-			// No default
 		}
 	}
 
@@ -266,7 +281,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 function disable(
 	collection: DisabledAreaCollection,
 	comment: Comment,
-	location: { column: number; line: number },
+	location: ColumnLine,
 	ruleIds: Array<string> | undefined,
 	kind: "block" | "line",
 ): void {
@@ -307,8 +322,8 @@ function disable(
 function enable(
 	collection: DisabledAreaCollection,
 	comment: Comment,
-	location: { column: number; line: number },
-	ruleIds: Array<string> | undefined,
+	location: ColumnLine,
+	ruleIds: ReadonlyArray<string> | undefined,
 	kind: "block" | "line",
 ): void {
 	const relatedDisableDirectives = new Set<Comment>();
@@ -329,8 +344,8 @@ function enable(
 }
 
 function closeMatchingAreas(
-	areas: ReadonlyArray<DisabledArea>,
-	location: { column: number; line: number },
+	areas: ReadonlyArray<Writable<DisabledArea>>,
+	location: ColumnLine,
 	kind: "block" | "line",
 	ruleId: string | undefined,
 	relatedDisableDirectives: Set<Comment>,
@@ -338,8 +353,7 @@ function closeMatchingAreas(
 	let used = false;
 	for (let index = areas.length - 1; index >= 0; index -= 1) {
 		const area = areas[index];
-		if (area === undefined) continue;
-		if (!isOpenMatchingArea(area, kind, ruleId)) continue;
+		if (area === undefined || !isOpenMatchingArea(area, kind, ruleId)) continue;
 
 		relatedDisableDirectives.add(area.comment);
 		area.end = location;
@@ -349,16 +363,12 @@ function closeMatchingAreas(
 	return used;
 }
 
-function isOpenMatchingArea(area: DisabledArea, kind: "block" | "line", ruleId: string | undefined): boolean {
+function isOpenMatchingArea(area: DisabledArea, kind: "block" | "line", ruleId?: string): boolean {
 	if (area.end !== undefined || area.kind !== kind) return false;
 	return ruleId === undefined || area.ruleId === ruleId;
 }
 
-function addUnusedEnableDirective(
-	collection: DisabledAreaCollection,
-	comment: Comment,
-	ruleId: string | undefined,
-): void {
+function addUnusedEnableDirective(collection: DisabledAreaCollection, comment: Comment, ruleId?: string): void {
 	collection.unusedEnableDirectives.push({
 		comment,
 		ruleId,
@@ -366,9 +376,9 @@ function addUnusedEnableDirective(
 }
 
 function getArea(
-	areas: Array<DisabledArea>,
+	areas: ReadonlyArray<DisabledArea>,
 	ruleId: string | undefined,
-	location: { column: number; line: number },
+	location: ColumnLine,
 ): DisabledArea | undefined {
 	for (let index = areas.length - 1; index >= 0; index -= 1) {
 		const area = areas[index];

@@ -1,0 +1,207 @@
+name: Publish Package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip publish & release creation"
+        type: boolean
+        required: false
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
+    outputs:
+      dry_run: ${{ steps.set_dry_run.outputs.dry_run }}
+      package_version: ${{ steps.version_check.outputs.package_version }}
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
+        with:
+          install_args: "aube bun node"
+          cache: false
+
+      - name: Determine dry run flag
+        id: set_dry_run
+        run: |
+          DRY_RUN="false"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            VALUE=$(jq -r '.inputs.dry_run // "true"' "$GITHUB_EVENT_PATH")
+            if [ "$VALUE" != "false" ]; then
+              DRY_RUN="true"
+            fi
+          fi
+          echo "DRY_RUN=$DRY_RUN" >> "$GITHUB_ENV"
+          echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+
+      - name: Require tag for real release
+        if: ${{ env.DRY_RUN != 'true' && !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "::error title=Refusing non-tag publish::Run this workflow from a v*.*.* tag, or enable dry_run." >&2
+          exit 1
+
+      - name: Install dependencies
+        run: |
+          for attempt in 1 2 3; do
+            if aube install --fix-lockfile; then
+              break
+            fi
+            if [ "$attempt" = "3" ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+          git diff --exit-code package.json aube-lock.yaml
+
+      - name: Validate tag matches package.json version
+        id: version_check
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PACKAGE_VERSION=$(node -p 'JSON.parse(require("node:fs").readFileSync("package.json", "utf8")).version')
+          echo "Tag version: $TAG_VERSION"
+          echo "Package version: $PACKAGE_VERSION"
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error title=Version mismatch::Tag $TAG_VERSION does not match package.json $PACKAGE_VERSION" >&2
+            exit 1
+          fi
+          echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag commit reachable from main
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git fetch origin main
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Tag commit is on main lineage"
+          else
+            echo "::error title=Tag not on main::Tag commit $GITHUB_SHA not reachable from main" >&2
+            exit 1
+          fi
+
+      - name: Lint
+        run: nr lint
+
+      - name: Type Checking
+        run: nr type-check
+
+      - name: Knip
+        run: nr knip
+
+      - name: Build
+        run: nr build
+
+      - name: Test
+        run: nr test
+
+      - name: Assert build artifacts exist
+        run: |
+          if [ ! -d dist ]; then
+            echo "::error title=Missing output::dist directory not found" >&2
+            exit 1
+          fi
+          if [ ! -f dist/index.js ]; then
+            echo "::error title=Missing artifact::dist/index.js not found" >&2
+            ls -R dist || true
+            exit 1
+          fi
+          echo "Build artifacts OK"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: validate-and-build
+    permissions:
+      contents: write # For creating GitHub releases
+      id-token: write # Required for NPM Trusted Publishing (OIDC)
+    if: startsWith(github.ref, 'refs/tags/') || needs.validate-and-build.outputs.dry_run == 'true'
+    env:
+      DRY_RUN: ${{ needs.validate-and-build.outputs.dry_run }}
+      AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
+        with:
+          install_args: "aube bun node"
+          cache: false
+
+      - name: Setup Node.js for NPM publishing
+        # zizmor: ignore[cache-poisoning]
+        # Caching is explicitly disabled below; this step is only here to configure the NPM registry URL.
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: false
+
+      - name: Install dependencies
+        run: |
+          for attempt in 1 2 3; do
+            if aube install --fix-lockfile; then
+              break
+            fi
+            if [ "$attempt" = "3" ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+          git diff --exit-code package.json aube-lock.yaml
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Generate changelog & GitHub release
+        if: ${{ env.DRY_RUN != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: nr changelogithub
+
+      - name: Publish to NPM (Trusted Publishing)
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: npm publish --provenance --access public
+
+      - name: Upload npm debug log on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-debug-log
+          path: /home/runner/.npm/_logs/*.log
+
+      - name: Dry-run summary
+        if: ${{ env.DRY_RUN == 'true' }}
+        run: |
+          echo "Dry run: skipped changelog + publish. Validation completed."

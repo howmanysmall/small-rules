@@ -1,0 +1,18 @@
+{
+	"mcpServers": {
+		"chrome-devtools": {
+			"args": ["./scripts/get-chrome-path.sh", "--serve"],
+			"command": "bash"
+		},
+		"context7": {
+			"headers": { "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}" },
+			"serverUrl": "https://mcp.context7.com/mcp"
+		},
+		"gh-grep": {
+			"serverUrl": "https://mcp.grep.app"
+		},
+		"npm-registry": {
+			"command": "npm-registry-mcp"
+		}
+	}
+}

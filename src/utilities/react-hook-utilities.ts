@@ -42,7 +42,7 @@ export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) =>
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
-	// biome-ignore lint/nursery/noForIn: required for AST traversal
+	// biome-ignore lint/suspicious/noForIn: required for AST traversal
 	for (const key in node) {
 		if (isKeyOfNode(key)) continue;
 		pushChildValue(Reflect.get(node, key), node, stack);
@@ -76,6 +76,22 @@ function walkChildSlop(value: unknown, parent: ESTree.Node, callback: (child: ES
 
 	if (value === parent.parent || !isNode(value)) return;
 	walkAstSlop(value, callback);
+}
+
+export function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
+	const { key } = property;
+	if (key.type === "Identifier") return key.name;
+	if (key.type === "Literal" && typeof key.value === "string") return key.value;
+	return undefined;
+}
+
+export function getBindingPropertyValueIdentifier(
+	property: ESTree.BindingProperty,
+): ESTree.BindingIdentifier | undefined {
+	const { value } = property;
+	if (value.type === "Identifier") return value;
+	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
+	return undefined;
 }
 
 export function countSetStateCalls(node: ESTree.Node): number {

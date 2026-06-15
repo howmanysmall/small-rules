@@ -1,12 +1,7 @@
+import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
-
-function isAllowAutofixOption(value: unknown): value is { readonly allowAutofix?: boolean } {
-	if (typeof value !== "object" || value === null) return false;
-	if (!("allowAutofix" in value)) return true;
-	return value.allowAutofix === undefined || typeof value.allowAutofix === "boolean";
-}
 
 function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 	const { parent } = node;

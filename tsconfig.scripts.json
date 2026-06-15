@@ -2,12 +2,13 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"paths": {
-			"$build-types/*": ["./scripts/types/*"],
-			"$build-utilities/*": ["./scripts/utilities/*"]
+			"$script-types/*": ["./scripts/types/*"],
+			"$script-utilities/*": ["./scripts/utilities/*"]
 		},
 		"rootDir": ".",
 		"sourceMap": false,
-		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-scripts"
+		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-scripts",
+		"types": ["bun", "node"]
 	},
 	"extends": "./tsconfig.base.json",
 	"include": ["scripts/**/*.ts"]

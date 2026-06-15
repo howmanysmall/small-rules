@@ -29,6 +29,10 @@ describe("directive-require-description", () => {
 				errors: [{ data: { kind: "oxlint-disable" }, messageId: "missingDescription" }],
 			},
 			{
+				code: "// oxlint-disable small-rules/prefer-pascal-case-enums\nconst x = 1;",
+				errors: [{ data: { kind: "oxlint-disable" }, messageId: "missingDescription" }],
+			},
+			{
 				code: "// oxlint-disable-next-line no-console\nconsole.log('x');",
 				errors: [{ data: { kind: "oxlint-disable-next-line" }, messageId: "missingDescription" }],
 			},
