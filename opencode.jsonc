@@ -211,6 +211,7 @@
 	"mcp": {
 		"chrome-devtools": {
 			"command": ["bash", "./scripts/get-chrome-path.sh", "--serve"],
+			"enabled": true,
 			"type": "local",
 		},
 		"context7": {
@@ -220,7 +221,7 @@
 			"url": "https://mcp.context7.com/mcp",
 		},
 		"gh-grep": {
-			"enabled": true,
+			"enabled": false,
 			"type": "remote",
 			"url": "https://mcp.grep.app",
 		},
@@ -237,7 +238,7 @@
 		},
 		"npm-registry": {
 			"command": ["mise", "x", "--", "npm-registry-mcp"],
-			"enabled": true,
+			"enabled": false,
 			"type": "local",
 		},
 	},
