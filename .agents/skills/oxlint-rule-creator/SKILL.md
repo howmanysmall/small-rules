@@ -17,6 +17,10 @@ When this skill is active, you MUST follow this order:
 
 **Hard rule: never write the rule implementation before the test file exists. ALWAYS use TDD.**
 
+## READ ME NOW
+
+YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS.
+
 If you catch yourself drafting `src/rules/{rule-name}.ts` before drafting
 `tests/{rule-name}.test.ts`, STOP at once. That is the wrong workflow for this
 skill.
