@@ -31,6 +31,21 @@
 	},
 	"overrides": [
 		{
+			"env": {
+				"astro": true,
+				"node": false
+			},
+			"files": ["documentation/**/*"]
+		},
+		{
+			"files": ["documentation/**/*.astro"],
+			"plugins": [],
+			"rules": {
+				"import/unambiguous": "off",
+				"small-rules/prevent-abbreviations": "off"
+			}
+		},
+		{
 			"files": ["scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
 			"rules": { "no-console": "off" }
 		},

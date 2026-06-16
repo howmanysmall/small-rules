@@ -77,6 +77,8 @@
 	},
 
 	"html": {
+		"assist": { "enabled": true },
+		"experimentalFullSupportEnabled": true,
 		"formatter": {
 			"attributePosition": "auto",
 			"bracketSameLine": true,
@@ -88,6 +90,11 @@
 			"lineWidth": 120,
 			"selfCloseVoidElements": "always",
 			"whitespaceSensitivity": "strict"
+		},
+		"linter": { "enabled": true },
+		"parser": {
+			"interpolation": true,
+			"vue": false
 		}
 	},
 
