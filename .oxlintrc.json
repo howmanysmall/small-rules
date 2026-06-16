@@ -45,13 +45,8 @@
 				"small-rules/prefer-expect-assertions": [
 					"error",
 					{
+						"additionalAssertionFunctions": ["expectRecord", "expectArray", "expectPresent"],
 						"additionalExpectCallNames": ["expectRecord", "expectArray", "expectPresent"]
-					}
-				],
-				"small-rules/prefer-expect-assertions-count": [
-					"error",
-					{
-						"additionalAssertionFunctions": ["expectRecord", "expectArray", "expectPresent"]
 					}
 				],
 				"small-rules/prevent-abbreviations": "off",
@@ -445,7 +440,6 @@
 		"small-rules/prefer-context-stack": "off",
 		"small-rules/prefer-early-return": "error",
 		"small-rules/prefer-expect-assertions": "off",
-		"small-rules/prefer-expect-assertions-count": "off",
 		"small-rules/prefer-hoisted-jsx-elements": "off",
 		"small-rules/prefer-hoisted-jsx-object-properties": "off",
 		"small-rules/prefer-idiv": "off",
