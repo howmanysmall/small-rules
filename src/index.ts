@@ -54,7 +54,6 @@ import preferConstantDispatch from "$oxc-rules/prefer-constant-dispatch";
 import preferContextStack from "$oxc-rules/prefer-context-stack";
 import preferEarlyReturn from "$oxc-rules/prefer-early-return";
 import preferExpectAssertions from "$oxc-rules/prefer-expect-assertions";
-import preferExpectAssertionsCount from "$oxc-rules/prefer-expect-assertions-count";
 import preferHoistedJsxElements from "$oxc-rules/prefer-hoisted-jsx-elements";
 import preferHoistedJsxObjectProperties from "$oxc-rules/prefer-hoisted-jsx-object-properties";
 import preferIdiv from "$oxc-rules/prefer-idiv";
@@ -146,7 +145,6 @@ const smallRules = definePlugin({
 		"prefer-context-stack": preferContextStack,
 		"prefer-early-return": preferEarlyReturn,
 		"prefer-expect-assertions": preferExpectAssertions,
-		"prefer-expect-assertions-count": preferExpectAssertionsCount,
 		"prefer-hoisted-jsx-elements": preferHoistedJsxElements,
 		"prefer-hoisted-jsx-object-properties": preferHoistedJsxObjectProperties,
 		"prefer-idiv": preferIdiv,

@@ -80,7 +80,7 @@ function getExpectContext(currentParent: ESTree.Node, root: ESTree.Node): Expect
 			currentParent.type === "ConditionalExpression" ||
 			currentParent.type === "IfStatement" ||
 			currentParent.type === "SwitchCase" ||
-			currentParent.type === "TryStatement",
+			(currentParent.type === "TryStatement" && currentParent.handler !== null),
 		hasLoop: isIndeterminateLoopNode(currentParent),
 	};
 
