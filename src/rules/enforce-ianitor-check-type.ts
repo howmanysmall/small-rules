@@ -618,8 +618,8 @@ const enforceIanitorCheckType = defineRule({
 
 			VariableDeclarator(node): void {
 				const { init } = node;
-				if (init?.type !== "CallExpression") return;
-				if (!isIanitorValidator(init)) return;
+				if (init?.type !== "CallExpression" || !isIanitorValidator(init)) return;
+
 				hasIanitorReference = true;
 				if (hasTypeAnnotation(node)) return;
 
