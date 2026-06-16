@@ -6,7 +6,7 @@
 	"gitignore": true,
 	"ignore": ["**/{node_modules,dist,out,coverage,.stryker-tmp,.vitiate}/**"],
 	"minLines": 5,
-	"minTokens": 50,
+	"minTokens": 60,
 	"noSymlinks": false,
 	"path": ["src"],
 	"reporters": ["html", "consoleFull", "json", "markdown"],

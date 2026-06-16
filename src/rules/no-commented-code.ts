@@ -209,8 +209,7 @@ function countLines(value: string): number {
 
 const noCommentedCode = defineRule({
 	create(context): Visitor {
-		// oxlint-disable-next-line prefer-destructuring -- what do you expect?
-		const { maxLines = 0 } = context.options[0];
+		const { maxLines = 0 } = context.options[0] ?? {};
 
 		return {
 			"Program:exit"(): void {

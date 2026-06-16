@@ -1,4 +1,5 @@
 import { isNode } from "$oxc-utilities/oxc-utilities";
+import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -234,15 +235,25 @@ function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): st
 	return sourceCode.getText(node);
 }
 
+function isStableBindingPattern(
+	node: ESTree.Node,
+	patternType: "ArrayPattern",
+): node is ESTree.VariableDeclarator & { readonly id: ESTree.ArrayPattern };
+function isStableBindingPattern(
+	node: ESTree.Node,
+	patternType: "ObjectPattern",
+): node is ESTree.VariableDeclarator & { readonly id: ESTree.ObjectPattern };
+function isStableBindingPattern(node: ESTree.Node, patternType: "ArrayPattern" | "ObjectPattern"): boolean {
+	return node.type === "VariableDeclarator" && node.id.type === patternType;
+}
+
 function isStableArrayIndex(
 	stableResult: StableResult | undefined,
 	node: ESTree.Node,
 	identifierName: string,
 ): boolean {
 	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set) || node.type !== "VariableDeclarator" || node.id.type !== "ArrayPattern") {
-		return false;
-	}
+	if (!(stableResult instanceof Set && isStableBindingPattern(node, "ArrayPattern"))) return false;
 
 	const { elements } = node.id;
 	let index = 0;
@@ -256,29 +267,13 @@ function isStableArrayIndex(
 	return false;
 }
 
-function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
-	const { key } = property;
-	if (key.type === "Identifier") return key.name;
-	if (key.type === "Literal" && typeof key.value === "string") return key.value;
-	return undefined;
-}
-
-function getBindingPropertyValueIdentifier(property: ESTree.BindingProperty): ESTree.BindingIdentifier | undefined {
-	const { value } = property;
-	if (value.type === "Identifier") return value;
-	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
-	return undefined;
-}
-
 function isStableObjectProperty(
 	stableResult: StableResult | undefined,
 	node: ESTree.Node,
 	identifierName: string,
 ): boolean {
 	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set) || node.type !== "VariableDeclarator" || node.id.type !== "ObjectPattern") {
-		return false;
-	}
+	if (!(stableResult instanceof Set && isStableBindingPattern(node, "ObjectPattern"))) return false;
 
 	for (const property of node.id.properties) {
 		if (property.type !== "Property") continue;

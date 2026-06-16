@@ -206,9 +206,42 @@ function addNestedTypeAnnotationScores(
 	return score;
 }
 
+// biome-ignore lint/complexity/useMaxParams: do not care.
+function addTypeUnionScores(
+	score: number,
+	node: ESTree.Node,
+	nextDepth: number,
+	config: ComplexityConfiguration,
+	cache: ComplexityCache,
+	depthMultiplierCache: Map<number, number>,
+	ceiling: number,
+	multiplier: number,
+	offset: number,
+): number {
+	if ("types" in node) {
+		let currentScore = score;
+		const { types } = node;
+		for (const type of types) {
+			currentScore = addStructuralScore(
+				currentScore,
+				type,
+				nextDepth,
+				config,
+				cache,
+				depthMultiplierCache,
+				ceiling,
+			);
+		}
+		return addScore(currentScore, multiplier * (types.length + offset), config, ceiling);
+	}
+
+	return score;
+}
+
 function getDepthMultiplier(depth: number, cache: Map<number, number>): number {
 	const cached = cache.get(depth);
 	if (cached !== undefined) return cached;
+
 	const computed = Math.log2(depth + 1);
 	cache.set(depth, computed);
 	return computed;
@@ -407,13 +440,7 @@ function calculateStructuralComplexity(
 			break;
 		}
 		case "TSIntersectionType": {
-			if (isRecord(node)) {
-				const types = getNodeArrayValue(node, "types") ?? [];
-				for (const type of types) {
-					score = addStructuralScore(score, type, nextDepth, config, cache, depthMultiplierCache, ceiling);
-				}
-				score = addScore(score, 3 * types.length, config, ceiling);
-			}
+			score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 3, 0);
 			break;
 		}
 		case "TSMappedType": {
@@ -498,13 +525,7 @@ function calculateStructuralComplexity(
 			break;
 		}
 		case "TSUnionType": {
-			if (isRecord(node)) {
-				const types = getNodeArrayValue(node, "types") ?? [];
-				for (const type of types) {
-					score = addStructuralScore(score, type, nextDepth, config, cache, depthMultiplierCache, ceiling);
-				}
-				score = addScore(score, 2 * (types.length - 1), config, ceiling);
-			}
+			score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 2, -1);
 			break;
 		}
 		default:
