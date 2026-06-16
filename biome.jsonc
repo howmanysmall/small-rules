@@ -34,7 +34,7 @@
 	},
 
 	"files": {
-		"includes": ["**", "!package.json", "!**/*.js", "!**/*-lock.{json,yaml}"]
+		"includes": ["**", "!**/package.json", "!**/*.js", "!**/*-lock.{json,yaml}"]
 	},
 
 	"formatter": {
