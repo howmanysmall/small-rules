@@ -6,6 +6,10 @@ This file provides guidance to agents when working with code in this repository.
 
 An oxlint-native lint plugin (`@pobammer-ts/small-rules`) providing 87 custom rules for roblox-ts (Roblox TypeScript) projects. Rules target Roblox-specific patterns: React Luau components, Ianitor life cycle, `useReducer` patterns, Roblox UI element conventions, and general TypeScript quality.
 
+## Rules
+
+You are NEVER to cast. This codebase is strongly typed. The `defineRule` function can infer options without manual type annotations. Do NOT do it.
+
 ## Commands
 
 | Command | What it does |
