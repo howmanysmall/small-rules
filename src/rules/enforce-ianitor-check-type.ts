@@ -272,25 +272,17 @@ function calculateStructuralComplexity(
 			break;
 
 		case "TSArrayType": {
-			if (isRecord(node)) {
-				const elementType = getNodeValue(node, "elementType");
-				if (elementType !== undefined) {
-					score = addScore(
-						calculateStructuralComplexity(
-							elementType,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						1,
-						config,
-						ceiling,
-					);
-					break;
-				}
+			if ("elementType" in node) {
+				const { elementType } = node;
+				score = addScore(
+					calculateStructuralComplexity(elementType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+					1,
+					config,
+					ceiling,
+				);
+				break;
 			}
+
 			score = 1;
 			break;
 		}
