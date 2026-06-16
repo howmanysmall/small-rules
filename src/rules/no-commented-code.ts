@@ -74,10 +74,7 @@ function groupComments(comments: ReadonlyArray<Comment>, sourceCode: SourceCode)
 		}
 	}
 
-	if (size > 0) {
-		groups[groupsSize] = createCommentGroup(currentLineComments);
-	}
-
+	if (size > 0) groups[groupsSize] = createCommentGroup(currentLineComments);
 	return groups;
 }
 
@@ -204,8 +201,17 @@ function containsCode(value: string, filename: string): boolean {
 	return !isExclusion(statements, value);
 }
 
+function countLines(value: string): number {
+	let count = 1;
+	for (const character of value) if (character === "\n") count += 1;
+	return count;
+}
+
 const noCommentedCode = defineRule({
 	create(context): Visitor {
+		// oxlint-disable-next-line prefer-destructuring -- what do you expect?
+		const { maxLines = 0 } = context.options[0];
+
 		return {
 			"Program:exit"(): void {
 				const allComments = context.sourceCode.getAllComments();
@@ -214,6 +220,9 @@ const noCommentedCode = defineRule({
 				for (const group of groups) {
 					const trimmedValue = group.value.trim();
 					if (trimmedValue === "}") continue;
+
+					const lineCount = countLines(group.value);
+					if (lineCount <= maxLines) continue;
 
 					const balanced = injectMissingBraces(trimmedValue);
 					if (!containsCode(balanced, context.filename)) continue;
@@ -251,7 +260,20 @@ const noCommentedCode = defineRule({
 			commentedCode:
 				"Commented-out code creates confusion about intent and clutters the codebase. Version control preserves history, making dead code comments unnecessary. Delete the commented code entirely. If needed later, retrieve it from git history.",
 		},
-		schema: [],
+		schema: [
+			{
+				additionalProperties: false,
+				properties: {
+					maxLines: {
+						default: 0,
+						description:
+							"Maximum number of lines of commented code allowed without reporting. Default 0 means any commented code triggers an error.",
+						type: "number",
+					},
+				},
+				type: "object",
+			},
+		],
 		type: "suggestion",
 	},
 });

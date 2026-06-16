@@ -181,8 +181,65 @@ let x = 0;`,
 					},
 				],
 			},
+			// Custom maxLines: three-line code block errors when maxLines is 2
+			{
+				code: `// foo();
+// bar();
+// baz();`,
+				errors: [
+					{
+						messageId: "commentedCode",
+						suggestions: [{ desc: "Remove this commented out code", output: "" }],
+					},
+				],
+				options: [{ maxLines: 2 }],
+			},
+			// Custom maxLines: two-line code block errors when maxLines is 1
+			{
+				code: `// foo();
+// bar();`,
+				errors: [
+					{
+						messageId: "commentedCode",
+						suggestions: [{ desc: "Remove this commented out code", output: "" }],
+					},
+				],
+				options: [{ maxLines: 1 }],
+			},
+			// Custom maxLines: four-line block comment errors when maxLines is 3
+			{
+				code: `/* foo();
+bar();
+baz();
+qux(); */`,
+				errors: [
+					{
+						messageId: "commentedCode",
+						suggestions: [{ desc: "Remove this commented out code", output: "" }],
+					},
+				],
+				options: [{ maxLines: 3 }],
+			},
 		],
 		valid: [
+			// Custom maxLines: single-line code is OK when maxLines >= 1
+			{
+				code: "// if (something) {}",
+				options: [{ maxLines: 1 }],
+			},
+			// Custom maxLines: two-line code block is OK when maxLines >= 2
+			{
+				code: `// foo();
+// bar();`,
+				options: [{ maxLines: 2 }],
+			},
+			// Custom maxLines: three-line block comment is OK when maxLines >= 3
+			{
+				code: `/* foo();
+bar();
+baz(); */`,
+				options: [{ maxLines: 3 }],
+			},
 			// Empty and whitespace comments
 			{
 				code: `
