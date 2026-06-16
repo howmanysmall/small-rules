@@ -51,10 +51,12 @@ function getNodeArrayValue(
 }
 
 function getNestedTypeAnnotation(node: ESTree.Node): ESTree.Node | undefined {
-	if (!isRecord(node)) return undefined;
-	const typeAnnotation = getNodeValue(node, "typeAnnotation");
-	if (typeAnnotation === undefined || !isRecord(typeAnnotation)) return undefined;
-	return getNodeValue(typeAnnotation, "typeAnnotation");
+	if ("typeAnnotation" in node) {
+		const { typeAnnotation } = node;
+		if (!typeAnnotation) return undefined;
+		return "typeAnnotation" in typeAnnotation ? (typeAnnotation.typeAnnotation ?? undefined) : undefined;
+	}
+	return undefined;
 }
 
 function getReturnTypeAnnotation(node: ESTree.Node): ESTree.Node | undefined {
