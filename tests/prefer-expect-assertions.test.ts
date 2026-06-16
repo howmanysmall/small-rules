@@ -188,6 +188,27 @@ describe("prefer-expect-assertions", () => {
 				],
 				options: [{ onlyFunctionsWithExpectInCallback: true }],
 			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); });",
+				errors: [{ messageId: "preferAssertionsCount" }],
+				output: "test('works', () => { expect.assertions(1); expect(value).toBe(1); });",
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); expect(other).toBe(2); expect(third).toBe(3); });",
+				errors: [{ messageId: "preferAssertionsCount" }],
+				output: "test('works', () => { expect.assertions(3); expect(value).toBe(1); expect(other).toBe(2); expect(third).toBe(3); });",
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); expectRecord(value, 'x'); expectArray(items, 'x'); expectPresent(result, 'x'); });",
+				errors: [{ messageId: "preferAssertionsCount" }],
+				options: [{ additionalAssertionFunctions: ["expectRecord", "expectArray", "expectPresent"] }],
+				output: "test('works', () => { expect.assertions(3); expectRecord(value, 'x'); expectArray(items, 'x'); expectPresent(result, 'x'); });",
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); try { expect(value).toBe(1); } finally { restore(); } });",
+				errors: [{ messageId: "preferAssertionsCount" }],
+				output: "test('works', () => { expect.assertions(1); try { expect(value).toBe(1); } finally { restore(); } });",
+			},
 		],
 		valid: [
 			{
@@ -195,9 +216,6 @@ describe("prefer-expect-assertions", () => {
 			},
 			{
 				code: "test('works', () => { expect.assertions(2); expect(first).toBe(1); expect(second).toBe(2); });",
-			},
-			{
-				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); });",
 			},
 			{
 				code: "test('works', () => { expect.assertions(2); for (const value of values) { expect(value).toBe(1); } });",
@@ -222,6 +240,15 @@ describe("prefer-expect-assertions", () => {
 			},
 			{
 				code: "describe('suite', () => { expect(value).toBe(1); });",
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); for (const value of values) { expect(value).toBe(1); } });",
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); try { expect(value).toBe(1); } catch { /* noop */ } });",
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); values.forEach(() => { expect(value).toBe(1); }); });",
 			},
 			// Vitest-style expectTypeOf not counted by default
 			{

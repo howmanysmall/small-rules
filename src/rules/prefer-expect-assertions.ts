@@ -17,11 +17,13 @@ type RuleMessageId =
 	| "assertionsRequiresOneArgument"
 	| "hasAssertionsTakesNoArguments"
 	| "haveExpectAssertions"
+	| "preferAssertionsCount"
 	| "suggestAddingAssertions"
 	| "suggestAddingHasAssertions"
 	| "wrongAssertionCount";
 
 interface RuleOptions {
+	readonly additionalAssertionFunctions: ReadonlyArray<string>;
 	readonly additionalExpectCallNames: ReadonlyArray<string>;
 	readonly onlyFunctionsWithAsyncKeyword: boolean;
 	readonly onlyFunctionsWithExpectInCallback: boolean;
@@ -30,9 +32,15 @@ interface RuleOptions {
 
 type RuleContext = Context<readonly [Partial<RuleOptions>?], RuleMessageId>;
 
+function parseStringArray(value: unknown): ReadonlyArray<string> {
+	if (!Array.isArray(value)) return [];
+	return value.filter((item): item is string => typeof item === "string");
+}
+
 function parseOptions(rawOptions: unknown): RuleOptions {
 	if (!isRecord(rawOptions)) {
 		return {
+			additionalAssertionFunctions: [],
 			additionalExpectCallNames: [],
 			onlyFunctionsWithAsyncKeyword: false,
 			onlyFunctionsWithExpectInCallback: false,
@@ -41,13 +49,16 @@ function parseOptions(rawOptions: unknown): RuleOptions {
 	}
 
 	return {
-		additionalExpectCallNames: Array.isArray(rawOptions.additionalExpectCallNames)
-			? rawOptions.additionalExpectCallNames.filter((name: unknown): name is string => typeof name === "string")
-			: [],
+		additionalAssertionFunctions: parseStringArray(rawOptions.additionalAssertionFunctions),
+		additionalExpectCallNames: parseStringArray(rawOptions.additionalExpectCallNames),
 		onlyFunctionsWithAsyncKeyword: rawOptions.onlyFunctionsWithAsyncKeyword === true,
 		onlyFunctionsWithExpectInCallback: rawOptions.onlyFunctionsWithExpectInCallback === true,
 		onlyFunctionsWithExpectInLoop: rawOptions.onlyFunctionsWithExpectInLoop === true,
 	};
+}
+
+function getAdditionalExpectCallNames(options: RuleOptions): ReadonlyArray<string> {
+	return [...new Set([...options.additionalExpectCallNames, ...options.additionalAssertionFunctions])];
 }
 
 function hasEnabledFilter(options: RuleOptions): boolean {
@@ -214,7 +225,7 @@ const preferExpectAssertions = defineRule({
 				if (body === undefined) return;
 
 				const { deterministic, indeterminate, hasIndeterminate, hasExpectInCallback, hasExpectInLoop } =
-					countExpectCalls(body, options.additionalExpectCallNames);
+					countExpectCalls(body, getAdditionalExpectCallNames(options));
 				if (
 					!shouldCheckTest(
 						callback,
@@ -234,6 +245,27 @@ const preferExpectAssertions = defineRule({
 					(isExpectAssertionsCall(assertionCall) || isExpectHasAssertionsCall(assertionCall))
 				) {
 					validateAssertionCall(context, assertionCall, deterministic, hasIndeterminate);
+
+					if (
+						isExpectHasAssertionsCall(assertionCall) &&
+						assertionCall.arguments.length === 0 &&
+						deterministic > 0 &&
+						!hasIndeterminate
+					) {
+						const blockBody = getCallbackBlockBody(callback);
+						const [firstStatement] = blockBody?.body ?? [];
+						if (firstStatement !== undefined) {
+							context.report({
+								data: { count: String(deterministic) },
+								fix(fixer): Fix {
+									return fixer.replaceText(firstStatement, `expect.assertions(${deterministic});`);
+								},
+								messageId: "preferAssertionsCount",
+								node: assertionCall,
+							});
+						}
+					}
+
 					return;
 				}
 
@@ -243,9 +275,11 @@ const preferExpectAssertions = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Enforce expect assertion guards in Jest tests.",
+			description:
+				"Enforce expect assertion guards in Jest tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known.",
 			recommended: true,
 		},
+		fixable: "code",
 		hasSuggestions: true,
 		messages: {
 			assertionsRequiresNumberArgument: "This argument should be a number",
@@ -253,6 +287,8 @@ const preferExpectAssertions = defineRule({
 			hasAssertionsTakesNoArguments: "`expect.hasAssertions` expects no arguments",
 			haveExpectAssertions:
 				"Every test should have either `expect.assertions(<number of assertions>)` or `expect.hasAssertions()` as its first expression",
+			preferAssertionsCount:
+				"Use `expect.assertions({{count}})` instead of `expect.hasAssertions()` when the count is known",
 			suggestAddingAssertions: "Add `expect.assertions({{count}})`",
 			suggestAddingHasAssertions: "Add `expect.hasAssertions()`",
 			wrongAssertionCount: "Expected {{expected}} assertions, but test has {{actual}} expect calls",
@@ -261,6 +297,10 @@ const preferExpectAssertions = defineRule({
 			{
 				additionalProperties: false,
 				properties: {
+					additionalAssertionFunctions: {
+						items: { type: "string" },
+						type: "array",
+					},
 					additionalExpectCallNames: {
 						items: { type: "string" },
 						type: "array",
