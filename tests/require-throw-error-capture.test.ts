@@ -177,6 +177,30 @@ describe("require-throw-error-capture", () => {
 					"}",
 				].join("\n"),
 			},
+			// Throw in catch block doesn't collide with catch param name
+			{
+				code: [
+					"async function runJsonAsync() {",
+					"\ttry {",
+					"\t\treturn JSON.parse(raw);",
+					"\t} catch (error) {",
+					'\t\tthrow new Error("failed: " + error);',
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+				output: [
+					"async function runJsonAsync() {",
+					"\ttry {",
+					"\t\treturn JSON.parse(raw);",
+					"\t} catch (error) {",
+					'\t\tconst error2 = new Error("failed: " + error);',
+					"Error.captureStackTrace(error2, runJsonAsync);",
+					"throw error2;",
+					"\t}",
+					"}",
+				].join("\n"),
+			},
 			// Package-aware specifier does not match a different import source
 			{
 				code: [

@@ -80,6 +80,14 @@ function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: 
 	try {
 		const scope = sourceCode.getScope(node);
 		const names = new Set(scope.variables.map((variable) => variable.name));
+
+		// Catch clause parameters may not appear in scope.variables, so walk ancestors
+		let current: ESTree.Node | null = node.parent;
+		while (current !== null) {
+			if (current.type === "CatchClause" && current.param?.type === "Identifier") names.add(current.param.name);
+			current = current.parent;
+		}
+
 		if (!names.has(base)) return base;
 		for (let index = 2; index < 100; index += 1) {
 			const candidate = `${base}${index}`;
@@ -98,11 +106,8 @@ function resolveImportSource(sourceCode: SourceCode, node: ESTree.IdentifierRefe
 		while (scope !== null) {
 			const variable = scope.set.get(node.name);
 			if (variable !== undefined) {
-				const importBindingDefinition = variable.defs.find((definition) => definition.type === "ImportBinding");
-				if (importBindingDefinition?.parent?.type === "ImportDeclaration") {
-					return importBindingDefinition.parent.source.value;
-				}
-
+				const importBinding = variable.defs.find((definition) => definition.type === "ImportBinding");
+				if (importBinding?.parent?.type === "ImportDeclaration") return importBinding.parent.source.value;
 				return undefined;
 			}
 
