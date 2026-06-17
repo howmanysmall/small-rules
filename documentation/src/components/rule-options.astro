@@ -24,32 +24,39 @@ const tableLabels = {
 <p>{documentation.schemaSummary}</p>
 
 {documentation.options.length > 0 && (
-	<div class="rule-options-table">
-		<table>
+	<div class="rule-options-table not-content">
+		<table class="rule-options-table__table">
+			<colgroup>
+				<col class="rule-options-table__option-column" />
+				<col class="rule-options-table__type-column" />
+				<col class="rule-options-table__required-column" />
+				<col class="rule-options-table__default-column" />
+				<col class="rule-options-table__description-column" />
+			</colgroup>
 			<thead>
 				<tr>
-					<th>{tableLabels.option}</th>
-					<th>{tableLabels.type}</th>
-					<th>{tableLabels.required}</th>
-					<th>{tableLabels.defaultValue}</th>
-					<th>{tableLabels.description}</th>
+					<th class="rule-options-table__cell rule-options-table__heading" scope="col">{tableLabels.option}</th>
+					<th class="rule-options-table__cell rule-options-table__heading" scope="col">{tableLabels.type}</th>
+					<th class="rule-options-table__cell rule-options-table__heading" scope="col">{tableLabels.required}</th>
+					<th class="rule-options-table__cell rule-options-table__heading" scope="col">{tableLabels.defaultValue}</th>
+					<th class="rule-options-table__cell rule-options-table__heading" scope="col">{tableLabels.description}</th>
 				</tr>
 			</thead>
 			<tbody>
 				{
 					documentation.options.map((option) => (
 						<tr>
-							<td>
-								<code>{option.name}</code>
+							<td class="rule-options-table__cell">
+								<code class="rule-options-table__code">{option.name}</code>
 							</td>
-							<td>
-								<code>{option.type}</code>
+							<td class="rule-options-table__cell rule-options-table__type">
+								<code class="rule-options-table__code">{option.type}</code>
 							</td>
-							<td>{option.required ? tableLabels.yes : tableLabels.no}</td>
-							<td>
-								<code>{option.defaultValue}</code>
+							<td class="rule-options-table__cell">{option.required ? tableLabels.yes : tableLabels.no}</td>
+							<td class="rule-options-table__cell">
+								<code class="rule-options-table__code">{option.defaultValue}</code>
 							</td>
-							<td>{option.description ?? tableLabels.unknown}</td>
+							<td class="rule-options-table__cell">{option.description ?? tableLabels.unknown}</td>
 						</tr>
 					))
 				}

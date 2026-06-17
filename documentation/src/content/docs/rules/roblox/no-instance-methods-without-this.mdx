@@ -28,8 +28,15 @@ This rule is configured as `small-rules/no-instance-methods-without-this` and re
 
 ```ts
 class MyClass {
+	public value = 0;
+	public incrementBy(amount: number): void {
+		const value = this.value + amount;
+		this.value = value;
+		this.notifyChanges(value);
+	}
+
 	private notifyChanges(value: number): void {
-		console.log(value);
+		console.log(`Value changed to ${value}`);
 	}
 }
 ```
@@ -39,9 +46,16 @@ class MyClass {
 <RuleExample type="pass" title="Passes">
 
 ```ts
+function notifyChanges(value: number): void {
+	console.log(`Value changed to ${value}`);
+}
+
 class MyClass {
-	static helper(): void {
-		console.log("static");
+	public value = 0;
+	public incrementBy(amount: number): void {
+		const value = this.value + amount;
+		this.value = value;
+		notifyChanges(value);
 	}
 }
 ```
