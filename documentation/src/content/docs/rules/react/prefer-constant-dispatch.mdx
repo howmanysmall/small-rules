@@ -4,38 +4,22 @@ description: "Disallow inline useReducer action objects that could be module-lev
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
-<Badge variant="fixable" />
 
-`small-rules/prefer-constant-dispatch` reports code described by its source metadata: `disallow inline useReducer action objects that could be module-level constants`. It reports with the message `Move this inline useReducer action object to a module-level constant.`.
+<RuleSummary rule="prefer-constant-dispatch" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-constant-dispatch` and reports the concrete syntax covered by its implementation in `src/rules/prefer-constant-dispatch.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferConstantDispatch: Move this inline useReducer action object to a module-level constant.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-constant-dispatch": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-constant-dispatch" />
 
 ## Examples
 

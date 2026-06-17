@@ -4,37 +4,22 @@ description: "Disallow useMemo for expressions that are already trivial to compu
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-use-memo-simple-expression` reports code described by its source metadata: `disallow useMemo for expressions that are already trivial to compute`. It reports with the message `useMemo wrapping a trivially cheap expression - memo overhead exceeds the computation`.
+<RuleSummary rule="no-use-memo-simple-expression" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-use-memo-simple-expression` and reports the concrete syntax covered by its implementation in `src/rules/no-use-memo-simple-expression.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-simpleMemo: useMemo wrapping a trivially cheap expression - memo overhead exceeds the computation
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-use-memo-simple-expression": "error"
-	}
-}
-```
+<RuleOptions rule="no-use-memo-simple-expression" />
 
 ## Examples
 

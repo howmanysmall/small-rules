@@ -190,7 +190,7 @@ const requirePairedCalls = defineRule({
 		const options: RequirePairedCallsOptions = {
 			allowConditionalClosers: rawOptions?.allowConditionalClosers ?? false,
 			allowMultipleOpeners: rawOptions?.allowMultipleOpeners ?? true,
-			maxNestingDepth: rawOptions?.maxNestingDepth ?? Infinity,
+			maxNestingDepth: rawOptions?.maxNestingDepth ?? 0,
 			pairs: rawOptions?.pairs ?? [],
 		};
 
@@ -858,7 +858,6 @@ const requirePairedCalls = defineRule({
 			description: "Enforces balanced opener/closer function calls across all execution paths",
 			recommended: false,
 		},
-		fixable: "code",
 		messages,
 		schema: [
 			{
@@ -866,18 +865,31 @@ const requirePairedCalls = defineRule({
 				properties: {
 					allowConditionalClosers: {
 						default: false,
+						description: "Allow closer calls that appear only on some conditional paths.",
 						type: "boolean",
 					},
 					allowMultipleOpeners: {
 						default: true,
+						description: "Allow repeated opener calls before matching closer calls.",
 						type: "boolean",
 					},
 					maxNestingDepth: {
 						default: 0,
+						description: "Maximum opener nesting depth before reporting; 0 disables the limit.",
 						minimum: 0,
 						type: "number",
 					},
 					pairs: {
+						default: [
+							{
+								closer: "debug.profileend",
+								opener: "debug.profilebegin",
+								platform: "roblox",
+								requireSync: true,
+								yieldingFunctions: [...DEFAULT_ROBLOX_YIELDING_FUNCTIONS],
+							},
+						],
+						description: "Opener and closer call pairs that must stay balanced.",
 						items: {
 							additionalProperties: false,
 							properties: {
@@ -923,7 +935,6 @@ const requirePairedCalls = defineRule({
 						type: "array",
 					},
 				},
-				required: ["pairs"],
 				type: "object",
 			},
 		],

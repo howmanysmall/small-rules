@@ -1,8 +1,8 @@
 ---
 interface Props {
-	hint?: string;
-	label: string;
-	value: string | number;
+	readonly hint?: string;
+	readonly label: string;
+	readonly value: string | number;
 }
 
 const { value, label, hint } = Astro.props;

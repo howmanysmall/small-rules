@@ -1,47 +1,26 @@
 ---
 title: "No Increment Decrement"
-description: "Disallow standalone `++` and `--` statements."
+description: "Disallow standalone `++` and `--` statements and for-loop update clauses."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 
-`small-rules/no-increment-decrement` reports code described by its source metadata: `disallow standalone '++' and '--' statements`. It reports with the message `Do not use standalone '--'. Use '-= 1' instead.`.
+<RuleSummary rule="no-increment-decrement" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-increment-decrement` and reports the concrete syntax covered by its implementation in `src/rules/no-increment-decrement.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-noDecrement: Do not use standalone `--`. Use `-= 1` instead.
-noIncrement: Do not use standalone `++`. Use `+= 1` instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-increment-decrement": [
-			"error",
-			{
-				"allowAutofix": false
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-increment-decrement" />
 
 ## Examples
 
@@ -53,7 +32,7 @@ size++;
 
 </RuleExample>
 
-When auto-fixed, this becomes:
+With `"allowAutofix": true`, this becomes:
 
 ```ts
 size += 1;

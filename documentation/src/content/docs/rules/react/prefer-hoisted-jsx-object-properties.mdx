@@ -4,60 +4,41 @@ description: "Prefer extracting inline JSX object props to module-level constant
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/prefer-hoisted-jsx-object-properties` reports code described by its source metadata: `prefer extracting inline JSX object props to module-level constants when the entire object is statically hoistable`. It reports with the message `Extract '{{objectText}}' to a module-level const — this inline JSX prop object is fully static and causes unnecessary reference churn on every render.`.
+<RuleSummary rule="prefer-hoisted-jsx-object-properties" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-hoisted-jsx-object-properties` and reports the concrete syntax covered by its implementation in `src/rules/prefer-hoisted-jsx-object-properties.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-hoistableObjectProp: Extract `{{objectText}}` to a module-level const — this inline JSX prop object is fully static and causes unnecessary reference churn on every render.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-hoisted-jsx-object-properties": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-hoisted-jsx-object-properties" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-
+```tsx
 function View() {
 	return <Component options={{ enabled: true, count: 5 }} />;
 }
-
 ```
 
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-
+```tsx
 const PROPS = { enabled: true };
 
 const view = <Component options={PROPS} />;
-
 ```
 
 </RuleExample>

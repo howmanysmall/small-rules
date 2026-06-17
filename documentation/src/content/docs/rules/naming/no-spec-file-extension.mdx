@@ -4,41 +4,28 @@ description: "Disallow the .spec.{ts,tsx} file extension for test files. Use .te
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-spec-file-extension` reports code described by its source metadata: `disallow the .spec.{ts,tsx} file extension for test files. Use .test.{ts,tsx} instead`. It reports with the message `Test files must use .test.ts or .test.tsx instead of .spec.ts or .spec.tsx. Rename this file to use the .test extension.`.
+<RuleSummary rule="no-spec-file-extension" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-spec-file-extension` and reports the concrete syntax covered by its implementation in `src/rules/no-spec-file-extension.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-noSpecFileExtension: Test files must use .test.ts or .test.tsx instead of .spec.ts or .spec.tsx. Rename this file to use the .test extension.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-spec-file-extension": "error"
-	}
-}
-```
+<RuleOptions rule="no-spec-file-extension" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
+
+Filename: `component.spec.ts`
 
 ```ts
 export const x = 1;
@@ -48,8 +35,10 @@ export const x = 1;
 
 <RuleExample type="pass" title="Passes">
 
+Filename: `component.test.ts`
+
 ```ts
-export const x = 1;
+export const y = 1;
 ```
 
 </RuleExample>

@@ -4,37 +4,22 @@ description: "Require all imports to be type-only imports. Benchmarks cannot imp
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/only-type-imports` reports code described by its source metadata: `require all imports to be type-only imports. Benchmarks cannot import non-types because the benchmarker plugin will throw an error`. It reports with the message `Benchmarks must use 'import type' to avoid runtime imports that break the benchmarker plugin.`.
+<RuleSummary rule="only-type-imports" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/only-type-imports` and reports the concrete syntax covered by its implementation in `src/rules/only-type-imports.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-onlyTypeImports: Benchmarks must use `import type` to avoid runtime imports that break the benchmarker plugin.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/only-type-imports": "error"
-	}
-}
-```
+<RuleOptions rule="only-type-imports" />
 
 ## Examples
 

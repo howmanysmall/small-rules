@@ -4,37 +4,22 @@ description: "Disallow constant conditions, but allow constant loops that includ
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-constant-condition-with-break` reports code described by its source metadata: `disallow constant conditions, but allow constant loops that include loop exits such as break, return, or configured calls`. It reports with the message `Unexpected constant condition.`.
+<RuleSummary rule="no-constant-condition-with-break" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-constant-condition-with-break` and reports the concrete syntax covered by its implementation in `src/rules/no-constant-condition-with-break.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-unexpected: Unexpected constant condition.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-constant-condition-with-break": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="no-constant-condition-with-break" />
 
 ## Examples
 

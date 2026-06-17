@@ -4,49 +4,35 @@ description: "Prefer local EqualPadding and DirectionalPadding components over m
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 
-`small-rules/prefer-padding-components` reports code described by its source metadata: `prefer local EqualPadding and DirectionalPadding components over matching <uipadding /> declarations`. It reports with the message `Use the local 'DirectionalPadding' component when horizontal and vertical padding already match.`.
+<RuleSummary rule="prefer-padding-components" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-padding-components` and reports the concrete syntax covered by its implementation in `src/rules/prefer-padding-components.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-preferDirectionalPadding: Use the local `DirectionalPadding` component when horizontal and vertical padding already match.
-preferEqualPadding: Use the local `EqualPadding` component when all four padding values already match.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-padding-components": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-padding-components" />
 
 ## Examples
 
+The failing example assumes the file is in a project that has a resolvable local `EqualPadding` component.
+
 <RuleExample type="fail" title="Fails">
 
-```ts
+```tsx
 import { EqualPadding } from "../ui/equal-padding";
 
 export function Example(padding: UDim) {
-    return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
+	return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
 }
 ```
 
@@ -54,21 +40,21 @@ export function Example(padding: UDim) {
 
 When auto-fixed, this becomes:
 
-```ts
+```tsx
 import { EqualPadding } from "../ui/equal-padding";
 
 export function Example(padding: UDim) {
-    return <EqualPadding padding={padding} />;
+	return <EqualPadding padding={padding} />;
 }
 ```
 
 <RuleExample type="pass" title="Passes">
 
-```ts
+```tsx
 import { EqualPadding } from "../ui/equal-padding";
 
 export function Example(padding: UDim) {
-    return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
+	return <EqualPadding padding={padding} />;
 }
 ```
 

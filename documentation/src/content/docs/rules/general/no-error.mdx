@@ -4,37 +4,22 @@ description: "Use throw instead of error()."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-error` reports code described by its source metadata: `use throw instead of error()`. It reports with the message `Replace error(...) with throw.`.
+<RuleSummary rule="no-error" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-error` and reports the concrete syntax covered by its implementation in `src/rules/no-error.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-noError: Replace error(...) with throw.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-error": "error"
-	}
-}
-```
+<RuleOptions rule="no-error" />
 
 ## Examples
 

@@ -107,7 +107,8 @@ const preferSequenceOverloads = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Prefer direct ColorSequence and NumberSequence overloads over two-keypoint arrays.",
+			description:
+				"Prefer direct ColorSequence and NumberSequence overloads over identical direct arguments and two-keypoint arrays.",
 			recommended: true,
 		},
 		fixable: "code",

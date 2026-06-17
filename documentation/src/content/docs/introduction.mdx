@@ -5,7 +5,7 @@ description: "What is small-rules and why should you use it?"
 
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
-import PageHeader from "@/components/PageHeader.astro";
+import PageHeader from "@/components/page-header.astro";
 
 <PageHeader
 	title="Introduction"
@@ -13,7 +13,7 @@ import PageHeader from "@/components/PageHeader.astro";
 	kicker="Getting started"
 />
 
-`@pobammer-ts/small-rules` is an oxlint-native lint plugin for roblox-ts projects. It provides 86 custom rules that catch common mistakes, enforce consistent patterns, and improve code quality across TypeScript, React Luau, and Roblox-specific APIs.
+`@pobammer-ts/small-rules` is an oxlint-native lint plugin for TypeScript projects. It provides 86 custom rules that catch common mistakes, enforce consistent patterns, and improve code quality across TypeScript, React Luau, and Roblox-specific APIs.
 
 ## Why oxlint?
 
@@ -49,7 +49,7 @@ The rules are organized into four categories:
 ## Design Principles
 
 1. **Oxlint-native** — Rules use the oxlint rule API, not ESLint compatibility layers. This means faster execution and better integration with oxlint's diagnostic output.
-2. ** roblox-ts aware** — Rules understand roblox-ts idioms like `Ianitor`, `Color3`, `UDim2`, `task.wait()`, and React Luau components.
+2. **roblox-ts aware** — Rules understand roblox-ts idioms like `Ianitor`, `Color3`, `UDim2`, `task.wait()`, and React Luau components.
 3. **Minimal configuration** — Most rules work with zero configuration. Options are available for rules that need them, but sensible defaults cover the common cases.
 4. **Auto-fixable where safe** — Many rules provide automatic fixes that can be applied with `oxlint --fix`.
 
@@ -60,4 +60,4 @@ The rules are organized into four categories:
 - `oxlint` 1.x (developed and tested against 1.69.0)
 - TypeScript `>=5 <8` (for roblox-ts projects)
 - Node.js `^20.19.0 || >=22.12.0`
-- An oxlint configuration file (`.oxlintrc.json`, or `oxlint.json`)
+- An oxlint configuration file (`.oxlintrc.json` or `oxlint.config.ts`)

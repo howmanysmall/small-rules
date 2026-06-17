@@ -4,44 +4,31 @@ description: "Prefer a local Portal component over direct createPortal calls whe
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 
-`small-rules/prefer-local-portal-component` reports code described by its source metadata: `prefer a local Portal component over direct createPortal calls when the project already defines one`. It reports with the message `Use the local 'Portal' component instead of calling 'createPortal' directly.`.
+<RuleSummary rule="prefer-local-portal-component" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-local-portal-component` and reports the concrete syntax covered by its implementation in `src/rules/prefer-local-portal-component.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferPortalComponent: Use the local `Portal` component instead of calling `createPortal` directly.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-local-portal-component": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-local-portal-component" />
 
 ## Examples
 
+The failing example assumes the project has a resolvable local `Portal` component.
+
 <RuleExample type="fail" title="Fails">
 
-```ts
+```tsx
 import Portal from "../components/portal";
 import { createPortal } from "@rbxts/react-roblox";
 
@@ -54,7 +41,7 @@ export function Example(target: Instance) {
 
 When auto-fixed, this becomes:
 
-```ts
+```tsx
 import Portal from "../components/portal";
 import { createPortal } from "@rbxts/react-roblox";
 
@@ -65,11 +52,11 @@ export function Example(target: Instance) {
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-import { createPortal } from "@rbxts/react-roblox";
+```tsx
+import Portal from "../components/portal";
 
 export function Example(target: Instance) {
-    return createPortal(<frame />, target);
+    return <Portal target={target}><frame /></Portal>;
 }
 ```
 

@@ -4,39 +4,23 @@ description: "Prevent abbreviations."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 
-`small-rules/prevent-abbreviations` reports code described by its source metadata: `prevent abbreviations`. It reports with the message `The {{nameTypeText}} '{{discouragedName}}' should be named '{{replacement}}'. A more descriptive name will do too.`.
+<RuleSummary rule="prevent-abbreviations" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prevent-abbreviations` and reports the concrete syntax covered by its implementation in `src/rules/prevent-abbreviations.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-replace: The {{nameTypeText}} `{{discouragedName}}` should be named `{{replacement}}`. A more descriptive name will do too.
-suggestion: Please rename the {{nameTypeText}} `{{discouragedName}}`. Suggested names are: {{replacementsText}}. A more descriptive name will do too.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prevent-abbreviations": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="prevent-abbreviations" />
 
 ## Examples
 

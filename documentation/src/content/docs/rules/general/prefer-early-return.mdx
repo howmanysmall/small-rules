@@ -4,42 +4,22 @@ description: "Prefer early returns over full-body conditional wrapping."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/prefer-early-return` reports code described by its source metadata: `prefer early returns over full-body conditional wrapping`. It reports with the message `Function body is wrapped in a single conditional without an else branch. This increases nesting depth and cognitive load. Invert the condition and return early: if (!condition) return; then place the main logic at the top level.`.
+<RuleSummary rule="prefer-early-return" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-early-return` and reports the concrete syntax covered by its implementation in `src/rules/prefer-early-return.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferEarlyReturn: Function body is wrapped in a single conditional without an else branch. This increases nesting depth and cognitive load. Invert the condition and return early: if (!condition) return; then place the main logic at the top level.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-early-return": [
-			"error",
-			{
-				"maximumStatements": 1
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="prefer-early-return" />
 
 ## Examples
 

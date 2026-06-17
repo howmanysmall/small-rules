@@ -1,88 +1,51 @@
 ---
 title: "Require React Component Keys"
-description: "Require keys on React components when used in lists or iteration."
+description: "Require keys on nested React JSX children, fragments, and configured iteration or memoization contexts."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/require-react-component-keys` reports code described by its source metadata: `require keys on React components when used in lists or iteration`. It reports with the message `JSX element in list/callback lacks key prop. React Luau warns about missing keys in _G.__DEV__ mode. Add a unique 'key' prop using a stable identifier (not array index).`.
+<RuleSummary rule="require-react-component-keys" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/require-react-component-keys` and reports the concrete syntax covered by its implementation in `src/rules/require-react-component-keys.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-missingKey: JSX element in list/callback lacks key prop. React Luau warns about missing keys in _G.__DEV__ mode. Add a unique `key` prop using a stable identifier (not array index).
-rootComponentWithKey: Root return has unnecessary key prop. The key gets overwritten by the parent anyway. Remove the `key` prop.
-```
-
-</Aside>
+By default, the rule also reports root component `key` props because `allowRootKeys` is `false`.
 
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/require-react-component-keys": [
-			"error",
-			{
-				"allowRootKeys": false,
-				"ignoreCallExpressions": ["ReactTree.mount"],
-				"iterationMethods": [
-					"map",
-					"filter",
-					"forEach",
-					"flatMap",
-					"reduce",
-					"reduceRight",
-					"some",
-					"every",
-					"find",
-					"findIndex"
-				],
-				"memoizationHooks": ["useCallback", "useMemo"]
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="require-react-component-keys" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-
+```tsx
 function Bad1() {
-    return (
-        <>
-            <div />
-            <span />
-        </>
-    );
+	return (
+		<>
+			<div />
+			<span />
+		</>
+	);
 }
-
 ```
 
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-
+```tsx
 function Good1() {
-    return <div />;
+	return <div />;
 }
-
 ```
 
 </RuleExample>

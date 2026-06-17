@@ -1,42 +1,27 @@
 ---
-title: "Prefer Modding Inspect"
+title: "Prefer Modding.inspect"
 description: "Prefer Modding.inspect over manually enumerating every enum member in a Record<Enum, true>."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/prefer-modding-inspect` reports code described by its source metadata: `prefer Modding.inspect over manually enumerating every enum member in a Record<Enum, true>`. It reports with the message `Replace manual {{enumType}} enumeration with Modding.inspect<Record<{{enumType}}, true>>().`.
+<RuleSummary rule="prefer-modding-inspect" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-modding-inspect` and reports the concrete syntax covered by its implementation in `src/rules/prefer-modding-inspect.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferModdingInspect: Replace manual {{enumType}} enumeration with Modding.inspect<Record<{{enumType}}, true>>().
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-modding-inspect": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-modding-inspect" />
 
 ## Examples
 
@@ -87,5 +72,5 @@ const x = { a: true, b: true };
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

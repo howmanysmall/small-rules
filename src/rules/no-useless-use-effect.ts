@@ -1617,7 +1617,7 @@ const noUselessUseEffect = defineRule({
 	meta: {
 		docs: {
 			description:
-				"Disallow effects that only derive state, notify parent callbacks, reset state on prop changes, or route event side effects through state.",
+				"Disallow empty effects, duplicate dependencies, effect chains, log-only effects, derived state, external-store state sync, state initialization, reset effects, parent notifications, parent ref callbacks, and event side effects routed through state.",
 		},
 		messages: {
 			adjustState:
@@ -1660,11 +1660,13 @@ const noUselessUseEffect = defineRule({
 					},
 					hooks: {
 						default: [...DEFAULT_HOOKS],
+						description: "Effect hook names checked for avoidable effect patterns.",
 						items: { type: "string" },
 						type: "array",
 					},
 					propertyCallbackPrefixes: {
 						default: [...DEFAULT_PROPERTY_CALLBACK_PREFIXES],
+						description: "Property name prefixes treated as event callback props.",
 						items: { type: "string" },
 						type: "array",
 					},
@@ -1676,58 +1678,72 @@ const noUselessUseEffect = defineRule({
 					},
 					reportAdjustState: {
 						default: true,
+						description: "Report effects that only adjust state after render.",
 						type: "boolean",
 					},
 					reportDerivedState: {
 						default: true,
+						description: "Report effects that copy derived values into state.",
 						type: "boolean",
 					},
 					reportDuplicateDeps: {
 						default: true,
+						description: "Report duplicate entries in effect dependency arrays.",
 						type: "boolean",
 					},
 					reportEffectChain: {
 						default: true,
+						description: "Report effects that only trigger another effect through state.",
 						type: "boolean",
 					},
 					reportEmptyEffect: {
 						default: true,
+						description: "Report effects whose callback body is empty.",
 						type: "boolean",
 					},
 					reportEventFlag: {
 						default: true,
+						description: "Report effects that react to event flags stored in state.",
 						type: "boolean",
 					},
 					reportEventSpecificLogic: {
 						default: true,
+						description: "Report effects that move event-specific logic out of the event callback.",
 						type: "boolean",
 					},
 					reportExternalStore: {
 						default: true,
+						description: "Report effects that mirror external store values into local state.",
 						type: "boolean",
 					},
 					reportInitializeState: {
 						default: true,
+						description: "Report effects that only initialize state after mount.",
 						type: "boolean",
 					},
 					reportLogOnly: {
 						default: true,
+						description: "Report effects that only log values.",
 						type: "boolean",
 					},
 					reportMixedDerivedState: {
 						default: true,
+						description: "Report effects that mix derived-state updates with other work.",
 						type: "boolean",
 					},
 					reportNotifyParent: {
 						default: true,
+						description: "Report effects that only notify a parent through a callback prop.",
 						type: "boolean",
 					},
 					reportPassRefToParent: {
 						default: true,
+						description: "Report effects that only pass a ref value to a parent callback.",
 						type: "boolean",
 					},
 					reportResetState: {
 						default: true,
+						description: "Report effects that reset local state when inputs change.",
 						type: "boolean",
 					},
 					stateHooks: {

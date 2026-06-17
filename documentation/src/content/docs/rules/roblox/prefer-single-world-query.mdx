@@ -4,40 +4,26 @@ description: "Enforce combining multiple world.get() or world.has() calls into a
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/prefer-single-world-query` reports code described by its source metadata: `enforce combining multiple world.get() or world.has() calls into a single call for better Jecs performance`. It reports with the message `Multiple world.get() calls on the same entity should be combined into a single call for better performance. Suggested fix: {{fixedCode}}`.
+<RuleSummary rule="prefer-single-world-query" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-single-world-query` and reports the concrete syntax covered by its implementation in `src/rules/prefer-single-world-query.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-preferSingleGet: Multiple world.get() calls on the same entity should be combined into a single call for better performance. Suggested fix: {{fixedCode}}
-preferSingleHas: Multiple world.has() calls on the same entity should be combined into a single call for better performance. Suggested fix: {{fixedCode}}
-```
-
-</Aside>
+The rule only groups consecutive `const` declarations that query the same world/entity pair. `world.has()` groups report when every result variable is read together in an `&&` expression.
 
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-single-world-query": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-single-world-query" />
 
 ## Examples
 
@@ -46,6 +32,15 @@ preferSingleHas: Multiple world.has() calls on the same entity should be combine
 ```ts
 const componentA = world.get(entity, ComponentA);
 const componentB = world.get(entity, ComponentB);
+```
+
+```ts
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+
+if (hasA && hasB) {
+	doWork();
+}
 ```
 
 </RuleExample>
@@ -60,6 +55,15 @@ const [componentA, componentB] = world.get(entity, ComponentA, ComponentB);
 
 ```ts
 const componentA = world.get(entity, ComponentA);
+```
+
+```ts
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+
+if (hasA || hasB) {
+	doWork();
+}
 ```
 
 </RuleExample>
@@ -89,5 +93,5 @@ const componentA = world.get(entity, ComponentA);
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

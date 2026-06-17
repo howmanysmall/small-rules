@@ -4,61 +4,42 @@ description: "Prefer extracting static Roblox JSX intrinsic elements to module-l
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="roblox" />
 
-`small-rules/prefer-hoisted-jsx-elements` reports code described by its source metadata: `prefer extracting static Roblox JSX intrinsic elements to module-level constants`. It reports with the message `Extract '{{elementText}}' to a shared module-level const — this Roblox JSX element is fully static and identical elements should reuse the same const.`.
+<RuleSummary rule="prefer-hoisted-jsx-elements" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-hoisted-jsx-elements` and reports the concrete syntax covered by its implementation in `src/rules/prefer-hoisted-jsx-elements.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-hoistableJsxElement: Extract `{{elementText}}` to a shared module-level const — this Roblox JSX element is fully static and identical elements should reuse the same const.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-hoisted-jsx-elements": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="prefer-hoisted-jsx-elements" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-
+```tsx
 function View() {
 	return <staticbadge />;
 }
-
 ```
 
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-
+```tsx
 function View() {
 	return <Component enabled={true} />;
 }
-
 ```
 
 </RuleExample>

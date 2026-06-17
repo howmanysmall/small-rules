@@ -4,54 +4,23 @@ description: "Enforce exhaustive and correct dependency specification in React h
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 
-`small-rules/use-exhaustive-dependencies` reports code described by its source metadata: `enforce exhaustive and correct dependency specification in React hooks to prevent stale closures and unnecessary re-renders`. It reports with the message `Add dependencies array: {{dependencies}}`.
+<RuleSummary rule="use-exhaustive-dependencies" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/use-exhaustive-dependencies` and reports the concrete syntax covered by its implementation in `src/rules/use-exhaustive-dependencies.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-addDependenciesArraySuggestion: Add dependencies array: {{dependencies}}
-addDependencySuggestion: Add '{{name}}' to dependencies array
-addMissingDependenciesSuggestion: Add missing dependencies to array
-missingDependencies: This hook does not specify all its dependencies. Missing: {{names}}
-missingDependenciesArray: This hook does not specify its dependencies array. Missing: {{deps}}
-missingDependency: This hook does not specify its dependency on {{name}}.
-removeDependencySuggestion: Remove '{{name}}' from dependencies array
-unnecessaryDependency: This dependency {{name}} can be removed from the list.
-unstableDependency: {{name}} changes on every re-render. Wrap the definition in useCallback() or useMemo() to stabilize it.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/use-exhaustive-dependencies": [
-			"error",
-			{
-				"reportMissingDependenciesArray": true,
-				"reportUnnecessaryDependencies": true,
-				"reportUnnecessaryStableDependencies": false,
-				"resolveExpressionDependencies": true
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="use-exhaustive-dependencies" />
 
 ## Examples
 

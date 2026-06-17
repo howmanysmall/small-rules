@@ -1,40 +1,25 @@
 ---
 title: "Require Unicode Regex"
-description: "Require the 'u' or 'v' unicode flag on arktype regex() calls."
+description: "Require the 'u' or 'v' unicode flag on calls named regex()."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/require-unicode-regex` reports code described by its source metadata: `require the 'u' or 'v' unicode flag on arktype regex() calls`. It reports with the message `Missing the 'u' or 'v' unicode flag on this regex() call. Use the unicode flag to avoid silently creating invalid regex patterns.`.
+<RuleSummary rule="require-unicode-regex" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/require-unicode-regex` and reports the concrete syntax covered by its implementation in `src/rules/require-unicode-regex.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-requireUnicodeFlag: Missing the 'u' or 'v' unicode flag on this regex() call. Use the unicode flag to avoid silently creating invalid regex patterns.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/require-unicode-regex": "error"
-	}
-}
-```
+<RuleOptions rule="require-unicode-regex" />
 
 ## Examples
 

@@ -4,38 +4,22 @@ description: "Ban configured TypeScript utility types, defaulting to Omit in fav
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/ban-types` reports code described by its source metadata: `ban configured TypeScript utility types, defaulting to Omit in favor of Except`. It reports with the message `Type '{{typeName}}' is banned by project configuration. Use the project-preferred alternative for this type.`.
+<RuleSummary rule="ban-types" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/ban-types` and reports the concrete syntax covered by its implementation in `src/rules/ban-types.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-bannedType: Type '{{typeName}}' is banned by project configuration. Use the project-preferred alternative for this type.
-bannedTypeWithReplacement: Type '{{typeName}}' is banned. Use '{{replacementName}}' instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/ban-types": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="ban-types" />
 
 ## Examples
 

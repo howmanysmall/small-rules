@@ -1,57 +1,42 @@
 ---
 title: "Directive Require Description"
-description: "require description for `eslint-disable` and `eslint-enable` directives"
+description: "Require descriptions for `oxlint` and `eslint` disable/enable directives."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/directive-require-description` reports code described by its source metadata: `require description for 'eslint-disable' and 'eslint-enable' directives`. It reports with the message `Missing description for '{{kind}}' comment.`.
+<RuleSummary rule="directive-require-description" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/directive-require-description` and reports the concrete syntax covered by its implementation in `src/rules/directive-require-description.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-missingDescription: Missing description for '{{kind}}' comment.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/directive-require-description": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="directive-require-description" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-/* oxlint-disable typescript/no-explicit-any */
-export type Value = any;
+```js
+/* eslint-disable no-console */
+console.log("debug");
 ```
 
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-/* oxlint-disable typescript/no-explicit-any -- legacy API surface */
-export type Value = any;
+```js
+/* eslint-disable no-console -- temporary debug output */
+console.log("debug");
 ```
 
 </RuleExample>

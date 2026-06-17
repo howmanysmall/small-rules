@@ -4,52 +4,22 @@ description: "Enforce named effect functions for better debuggability. Prevents 
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/require-named-effect-functions` reports code described by its source metadata: `enforce named effect functions for better debuggability. Prevents inline arrow functions in useEffect and similar hooks`. It reports with the message `Anonymous function passed to {{hook}}. debug.info returns empty string for anonymous functions, making stack traces useless for debugging. Extract to: function effectName() { ... } then pass effectName.`.
+<RuleSummary rule="require-named-effect-functions" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/require-named-effect-functions` and reports the concrete syntax covered by its implementation in `src/rules/require-named-effect-functions.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-anonymousFunction: Anonymous function passed to {{hook}}. debug.info returns empty string for anonymous functions, making stack traces useless for debugging. Extract to: function effectName() { ... } then pass effectName.
-arrowFunction: Arrow function passed to {{hook}}. Arrow functions have no debug name and create new instances each render. Extract to: function effectName() { ... } then pass effectName.
-asyncAnonymousFunction: Async anonymous function in {{hook}}. Two issues: (1) no debug name makes stack traces useless, (2) async effects require cancellation logic for unmount. Extract to: async function effectName() { ... } with cleanup.
-asyncArrowFunction: Async arrow function in {{hook}}. Two issues: (1) arrow functions have no debug name, (2) async effects require cancellation logic. Extract to: async function effectName() { ... } with cleanup.
-asyncFunctionDeclaration: Async function declaration passed to {{hook}}. Async effects require cancellation logic to handle component unmount. Implement cleanup or set allowAsync: true if cancellation is handled.
-asyncFunctionExpression: Async function expression in {{hook}}. Async effects require cancellation logic for unmount. Extract to a named async function declaration with cleanup, then pass the reference.
-functionExpression: Function expression passed to {{hook}}. Function expressions create new instances each render, breaking referential equality. Extract to: function effectName() { ... } at module or component top-level.
-identifierReferencesArrow: {{hook}} receives identifier pointing to arrow function. Arrow functions have no debug name and lack referential stability. Convert to: function effectName() { ... } then pass effectName.
-identifierReferencesAsyncArrow: {{hook}} receives identifier pointing to async arrow function. Two issues: (1) no debug name, (2) async effects require cancellation logic. Convert to: async function effectName() { ... } with cleanup.
-identifierReferencesAsyncFunction: {{hook}} receives identifier pointing to async function. Async effects require cancellation logic for unmount. Implement cleanup or set allowAsync: true if cancellation is handled.
-identifierReferencesCallback: {{hook}} receives identifier from useCallback/useMemo. These hooks return new references when dependencies change, causing unexpected effect re-runs. Use a stable function declaration: function effectName() { ... }
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/require-named-effect-functions": [
-			"error",
-			{
-				"environment": "roblox-ts"
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="require-named-effect-functions" />
 
 ## Examples
 

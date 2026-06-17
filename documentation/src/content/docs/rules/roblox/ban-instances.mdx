@@ -1,44 +1,28 @@
 ---
 title: "Ban Instances"
-description: "Ban specified Roblox Instance classes in new Instance() calls and JSX elements."
+description: "Ban specified Roblox Instance classes and configured Instance properties."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/ban-instances` reports code described by its source metadata: `ban specified Roblox Instance classes in new Instance() calls and JSX elements`. It reports with the message `Instance class '{{className}}' is banned by project configuration. This class may cause performance issues, is deprecated, or has a better alternative. Check project guidelines for the recommended replacement.`.
+<RuleSummary rule="ban-instances" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/ban-instances` and reports the concrete syntax covered by its implementation in `src/rules/ban-instances.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-bannedInstance: Instance class '{{className}}' is banned by project configuration. This class may cause performance issues, is deprecated, or has a better alternative. Check project guidelines for the recommended replacement.
-bannedInstanceCustom: {{customMessage}}
-bannedProperty: Property '{{propertyName}}' on Instance class '{{className}}' is banned by project configuration. This property may cause performance issues, is deprecated, or has a better alternative. Check project guidelines for the recommended replacement.
-bannedPropertyCustom: {{customMessage}}
-```
-
-</Aside>
+It can ban Instance classes and configured properties on JSX elements or imperative assignments.
 
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/ban-instances": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="ban-instances" />
 
 ## Examples
 
@@ -48,12 +32,16 @@ bannedPropertyCustom: {{customMessage}}
 new Instance("Part");
 ```
 
+```tsx
+const view = <uisizeconstraint MaxSize={new Vector2(100, 100)} />;
+```
+
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
 ```ts
-new Instance("Part");
+new Instance("Folder");
 ```
 
 </RuleExample>
@@ -82,6 +70,6 @@ new Instance("Part");
 
 <CardGrid>
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 	<LinkCard title="No Array Constructor Elements" href="/small-rules/rules/roblox/no-array-constructor-elements/" />
 </CardGrid>

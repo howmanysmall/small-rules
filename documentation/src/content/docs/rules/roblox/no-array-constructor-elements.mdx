@@ -4,52 +4,26 @@ description: "Disallow array constructor element forms and enforce roblox-ts-awa
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/no-array-constructor-elements` reports code described by its source metadata: `disallow array constructor element forms and enforce roblox-ts-aware constructor patterns`. It reports with the message `Do not use Array constructor enumeration arguments. Use an array literal instead.`.
+<RuleSummary rule="no-array-constructor-elements" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-array-constructor-elements` and reports the concrete syntax covered by its implementation in `src/rules/no-array-constructor-elements.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-avoidConstructorEnumeration: Do not use Array constructor enumeration arguments. Use an array literal instead.
-avoidLengthConstructorInStandard: Length-based Array constructor is not allowed in standard mode. Prefer Array.from({ length: n }).
-avoidSingleArgumentConstructor: Single-argument Array constructor form is not allowed here. Use an array literal instead.
-collapseArrayPushInitialization: Collapse new Array<T>() + consecutive .push(...) calls into a single array literal initializer.
-requireExplicitGenericOnNewArray: new Array() must use an explicit generic argument or a contextual Array<T>/ReadonlyArray<T> annotation.
-suggestArrayFromLength: Replace with Array.from({ length: value }).
-suggestArrayLiteral: Replace constructor form with an array literal.
-suggestCollapseArrayPushInitialization: Collapse constructor + push sequence into a single array literal initializer.
-```
-
-</Aside>
+In `roblox-ts` mode, this rule rejects `new Array()` without an explicit generic, element constructor forms like `new Array("a", "b")`, and `new Array<T>(); array.push(...)` patterns that can collapse into an array literal. In `standard` mode, length constructors such as `new Array(5)` are also reported.
 
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-array-constructor-elements": [
-			"error",
-			{
-				"environment": "roblox-ts",
-				"requireExplicitGenericOnNewArray": true
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-array-constructor-elements" />
 
 ## Examples
 
@@ -57,6 +31,15 @@ suggestCollapseArrayPushInitialization: Collapse constructor + push sequence int
 
 ```ts
 const values = new Array("a", "b");
+```
+
+```ts
+const value = new Array();
+```
+
+```ts
+const array = new Array<string>();
+array.push("a");
 ```
 
 </RuleExample>

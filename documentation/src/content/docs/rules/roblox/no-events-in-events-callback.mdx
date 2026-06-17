@@ -4,43 +4,23 @@ description: "Disallow sending Events back to the same player inside an Events.c
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/no-events-in-events-callback` reports code described by its source metadata: `disallow sending Events back to the same player inside an Events.connect callback; use Functions for request/response`. It reports with the message `Do not call Events for the same player inside an Events.connect callback. Use a Functions callback instead.`.
+<RuleSummary rule="no-events-in-events-callback" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-events-in-events-callback` and reports the concrete syntax covered by its implementation in `src/rules/no-events-in-events-callback.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferFunctions: Do not call Events for the same player inside an Events.connect callback. Use a Functions callback instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-events-in-events-callback": [
-			"error",
-			{
-				"eventsImportPaths": []
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-events-in-events-callback" />
 
 ## Examples
 
@@ -95,5 +75,5 @@ Events.units.unequipUnit.connect((player: Player, otherPlayer: Player): void => 
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

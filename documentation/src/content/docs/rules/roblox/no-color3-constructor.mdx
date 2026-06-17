@@ -4,52 +4,31 @@ description: "Ban new Color3(...) except new Color3() or new Color3(0, 0, 0). Us
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/no-color3-constructor` reports code described by its source metadata: `ban new Color3(...) except new Color3() or new Color3(0, 0, 0). Use Color3.fromRGB() instead`. It reports with the message `Use Color3.fromRGB() instead of new Color3(). new Color3() uses floats [0-1] and performs worse than Color3.fromRGB() which uses [0-255]. Only 'new Color3()' or 'new Color3(0, 0, 0)' are allowed.`.
+<RuleSummary rule="no-color3-constructor" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-color3-constructor` and reports the concrete syntax covered by its implementation in `src/rules/no-color3-constructor.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-onlyZeroArgs: Use Color3.fromRGB() instead of new Color3(). new Color3() uses floats [0-1] and performs worse than Color3.fromRGB() which uses [0-255]. Only 'new Color3()' or 'new Color3(0, 0, 0)' are allowed.
-useFromRGB: Use Color3.fromRGB() instead of new Color3(). new Color3() uses floats [0-1] and performs worse than Color3.fromRGB() which uses [0-255].
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-color3-constructor": [
-			"error",
-			{
-				"reportUnknownComponents": true
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-color3-constructor" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-new Color3(value);
+new Color3(1, 0, 0);
 ```
 
 </RuleExample>
@@ -94,5 +73,5 @@ new Color3();
 	<LinkCard title="No Array Constructor Elements" href="/small-rules/rules/roblox/no-array-constructor-elements/" />
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

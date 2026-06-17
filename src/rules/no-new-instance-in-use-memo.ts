@@ -374,6 +374,7 @@ const noNewInstanceInUseMemo = defineRule({
 				additionalProperties: false,
 				properties: {
 					constructors: {
+						default: [...DEFAULT_CONSTRUCTORS],
 						description: "Constructor identifiers that should be disallowed inside useMemo callbacks.",
 						items: { type: "string" },
 						type: "array",

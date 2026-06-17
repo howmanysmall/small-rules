@@ -276,7 +276,7 @@ const preferExpectAssertions = defineRule({
 	meta: {
 		docs: {
 			description:
-				"Enforce expect assertion guards in Jest tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known.",
+				"Enforce expect assertion guards in tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known.",
 			recommended: true,
 		},
 		fixable: "code",
@@ -298,16 +298,32 @@ const preferExpectAssertions = defineRule({
 				additionalProperties: false,
 				properties: {
 					additionalAssertionFunctions: {
+						default: [],
+						description: "Additional assertion function names counted as test assertions.",
 						items: { type: "string" },
 						type: "array",
 					},
 					additionalExpectCallNames: {
+						default: [],
+						description: "Additional expect-like call names counted when checking assertion counts.",
 						items: { type: "string" },
 						type: "array",
 					},
-					onlyFunctionsWithAsyncKeyword: { type: "boolean" },
-					onlyFunctionsWithExpectInCallback: { type: "boolean" },
-					onlyFunctionsWithExpectInLoop: { type: "boolean" },
+					onlyFunctionsWithAsyncKeyword: {
+						default: false,
+						description: "Only require assertion guards for test callbacks marked async.",
+						type: "boolean",
+					},
+					onlyFunctionsWithExpectInCallback: {
+						default: false,
+						description: "Only require assertion guards when expect is called inside a nested callback.",
+						type: "boolean",
+					},
+					onlyFunctionsWithExpectInLoop: {
+						default: false,
+						description: "Only require assertion guards when expect is called inside a loop.",
+						type: "boolean",
+					},
 				},
 				type: "object",
 			},

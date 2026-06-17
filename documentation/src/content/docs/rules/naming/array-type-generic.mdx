@@ -4,38 +4,23 @@ description: "Disallow bracket array type syntax and require Array<T> / Readonly
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 
-`small-rules/array-type-generic` reports code described by its source metadata: `disallow bracket array type syntax and require Array<T> / ReadonlyArray<T>`. It reports with the message `Bracket array type syntax is not allowed. Use Array<T> or ReadonlyArray<T> generic syntax.`.
+<RuleSummary rule="array-type-generic" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/array-type-generic` and reports the concrete syntax covered by its implementation in `src/rules/array-type-generic.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-useGenericArrayType: Bracket array type syntax is not allowed. Use Array<T> or ReadonlyArray<T> generic syntax.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/array-type-generic": "error"
-	}
-}
-```
+<RuleOptions rule="array-type-generic" />
 
 ## Examples
 

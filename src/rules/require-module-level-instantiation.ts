@@ -120,6 +120,8 @@ const requireModuleLevelInstantiation = defineRule({
 				properties: {
 					classes: {
 						additionalProperties: { type: "string" },
+						description:
+							"Class names mapped to the import source that must be instantiated at module scope.",
 						type: "object",
 					},
 				},

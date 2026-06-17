@@ -48,7 +48,10 @@ const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
 </div>
 
 <script>
-	document.addEventListener("click", (event) => {
+	// oxlint-disable eslint/no-undef -- Astro client scripts run in the browser.
+	document.addEventListener("click", async (event) => {
+		if (!(event.target instanceof Element)) return;
+
 		const button = event.target.closest("[data-copy-example]");
 		if (!(button instanceof HTMLButtonElement)) return;
 
@@ -56,9 +59,10 @@ const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
 		const code = card?.querySelector("pre code, code");
 		if (!code) return;
 
-		navigator.clipboard.writeText(code.textContent ?? "").then(() => {
-			button.setAttribute("data-copied", "");
-			setTimeout(() => button.removeAttribute("data-copied"), 1500);
-		});
+		await navigator.clipboard.writeText(code.textContent ?? "");
+		button.dataset.copied = "";
+		setTimeout(() => {
+			delete button.dataset.copied;
+		}, 1500);
 	});
 </script>

@@ -167,6 +167,7 @@ const noArraySizeAssignment = defineRule({
 				properties: {
 					allowAutofix: {
 						default: false,
+						description: "Allow the fixer to replace safe append assignments with array.push(value).",
 						type: "boolean",
 					},
 				},

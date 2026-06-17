@@ -4,44 +4,29 @@ description: "Ban React property names that begin with an underscore in JSX."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-underscore-react-props` reports JSX attributes whose name begins with an underscore. Its source metadata describes it as: `Ban React property names that begin with an underscore in JSX`.
+<RuleSummary rule="no-underscore-react-props" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-underscore-react-props` and reports the concrete syntax covered by its implementation in `src/rules/no-underscore-react-properties.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-React prop '{{propName}}' starts with '_'. Remove the leading underscore from the prop name.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-underscore-react-props": "error"
-	}
-}
-```
+<RuleOptions rule="no-underscore-react-props" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```tsx
-<Component _foo={bar} />;
+<Component _foo={bar} />
 ```
 
 </RuleExample>
@@ -49,7 +34,7 @@ React prop '{{propName}}' starts with '_'. Remove the leading underscore from th
 <RuleExample type="pass" title="Passes">
 
 ```tsx
-<Component foo={bar} />;
+<Component foo={bar} />
 ```
 
 </RuleExample>

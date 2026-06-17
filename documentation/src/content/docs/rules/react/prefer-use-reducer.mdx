@@ -4,37 +4,22 @@ description: "Suggest using useReducer for related state updates instead of mult
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/prefer-use-reducer` reports code described by its source metadata: `suggest using useReducer for related state updates instead of multiple useState calls`. It reports with the message `Component "{{componentName}}" has {{useStateCount}} useState calls — consider useReducer for related state`.
+<RuleSummary rule="prefer-use-reducer" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-use-reducer` and reports the concrete syntax covered by its implementation in `src/rules/prefer-use-reducer.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-excessiveUseState: Component "{{componentName}}" has {{useStateCount}} useState calls — consider useReducer for related state
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-use-reducer": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-use-reducer" />
 
 ## Examples
 

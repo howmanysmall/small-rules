@@ -4,38 +4,23 @@ description: "Use Log instead of print()."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/no-print` reports code described by its source metadata: `use Log instead of print()`. It reports with the message `print() is a raw output function lacking log levels, timestamps, and filtering. Production systems require structured logging for debugging and monitoring. Replace print(...) with Log.`.
+<RuleSummary rule="no-print" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-print` and reports the concrete syntax covered by its implementation in `src/rules/no-print.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-noPrint: print() is a raw output function lacking log levels, timestamps, and filtering. Production systems require structured logging for debugging and monitoring. Replace print(...) with Log.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-print": "error"
-	}
-}
-```
+<RuleOptions rule="no-print" />
 
 ## Examples
 
@@ -80,5 +65,5 @@ Log.info("Hello");
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

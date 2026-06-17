@@ -55,7 +55,6 @@ export type CanonicalValue =
 	| { readonly type: "Vector2"; readonly value: Vector2CanonicalValue }
 	| { readonly type: "Vector3"; readonly value: Vector3CanonicalValue };
 
-const defaultPropertyClassCount = Object.keys(defaultProperties.classes).length;
 const ignoredJsxPropertyNames = new Set(["Name", "Parent"]);
 const ignoredJsxPropertyNamesLowercase = new Set(
 	Array.from(ignoredJsxPropertyNames, (propertyName) => propertyName.toLowerCase()),
@@ -920,7 +919,7 @@ const noUselessDefault = defineRule({
 	},
 	meta: {
 		docs: {
-			description: `Scaffold for detecting useless default values across ${defaultPropertyClassCount} default-property classes.`,
+			description: "Disallow Roblox JSX properties whose values already match the class defaults.",
 		},
 		fixable: "code",
 		messages: {

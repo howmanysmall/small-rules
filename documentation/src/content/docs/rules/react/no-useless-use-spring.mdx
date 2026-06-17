@@ -4,69 +4,22 @@ description: "Disallow useSpring hooks whose config and dependencies are entirel
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/no-useless-use-spring` reports code described by its source metadata: `disallow useSpring hooks whose config and dependencies are entirely static`. It reports with the message `useSpring call has only static inputs and non-updating dependencies; replace it with a constant or remove the hook.`.
+<RuleSummary rule="no-useless-use-spring" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-useless-use-spring` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-use-spring.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-uselessSpring: useSpring call has only static inputs and non-updating dependencies; replace it with a constant or remove the hook.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-useless-use-spring": [
-			"error",
-			{
-				"staticGlobalFactories": [
-					"Axes",
-					"BrickColor",
-					"CFrame",
-					"Color3",
-					"ColorSequence",
-					"ColorSequenceKeypoint",
-					"DateTime",
-					"Enum",
-					"Faces",
-					"NumberRange",
-					"NumberSequence",
-					"NumberSequenceKeypoint",
-					"PathWaypoint",
-					"PhysicalProperties",
-					"Ray",
-					"Rect",
-					"Region3",
-					"Region3int16",
-					"TweenInfo",
-					"UDim",
-					"UDim2",
-					"Vector2",
-					"Vector3",
-					"Vector3int16",
-					"Vector3int32"
-				],
-				"treatEmptyDepsAsViolation": true
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-useless-use-spring" />
 
 ## Examples
 

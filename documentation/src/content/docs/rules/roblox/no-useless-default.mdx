@@ -1,62 +1,50 @@
 ---
 title: "No Useless Default"
-description: "Scaffold for detecting useless default values across 236 default-property classes."
+description: "Disallow Roblox JSX properties whose values already match the class defaults."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
+<Badge variant="roblox" />
 
-`small-rules/no-useless-default` reports code described by its source metadata: `scaffold for detecting useless default values across 236 default-property classes`. It reports with the message `Remove "{{propertyName}}" from {{className}}. It already matches the default value.`.
+<RuleSummary rule="no-useless-default" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-useless-default` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-default.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-uselessDefault: Remove "{{propertyName}}" from {{className}}. It already matches the default value.
-```
-
-</Aside>
+This rule is Roblox-specific: it compares JSX intrinsic properties against known Roblox Instance defaults.
 
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-useless-default": "error"
-	}
-}
-```
+<RuleOptions rule="no-useless-default" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-check(0);
+```tsx
+const view = <uiaspectratioconstraint AspectRatio={1} />;
 ```
 
 </RuleExample>
 
 When auto-fixed, this becomes:
 
-```ts
+```tsx
 const view = <uiaspectratioconstraint />;
 ```
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-const view = <uiaspectratioconstraint key="my-key" />;
+```tsx
+const view = <uiaspectratioconstraint AspectRatio={2} />;
 ```
 
 </RuleExample>
@@ -67,7 +55,7 @@ const view = <uiaspectratioconstraint key="my-key" />;
 	<LinkCard
 		title="Keep intent obvious"
 		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
-		href="/small-rules/rules/general/no-useless-default/"
+		href="/small-rules/rules/roblox/no-useless-default/"
 	/>
 	<LinkCard
 		title="Guide consistent style"
@@ -85,13 +73,10 @@ const view = <uiaspectratioconstraint key="my-key" />;
 
 <CardGrid>
 	<LinkCard title="No Useless Constants" href="/small-rules/rules/general/no-useless-constants/" />
-	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard
-		title="Directive No Aggregating Enable"
-		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+		title="No Redundant Aspect Ratio Constraint"
+		href="/small-rules/rules/roblox/no-redundant-aspect-ratio-constraint/"
 	/>
-	<LinkCard
-		title="Directive No Duplicate Disable"
-		href="/small-rules/rules/general/directive-no-duplicate-disable/"
-	/>
+	<LinkCard title="Prefer Udim2 Shorthand" href="/small-rules/rules/roblox/prefer-udim2-shorthand/" />
 </CardGrid>

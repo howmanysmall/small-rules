@@ -4,38 +4,22 @@ description: "Prefer class properties to assignment of literals in constructors.
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/prefer-class-properties` reports code described by its source metadata: `prefer class properties to assignment of literals in constructors`. It reports with the message `Constructor assigns a literal value to this.property. Literals are static and known at class definition time. Move to a class property declaration: propertyName = value; at class level. This clarifies intent and reduces constructor complexity.`.
+<RuleSummary rule="prefer-class-properties" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-class-properties` and reports the concrete syntax covered by its implementation in `src/rules/prefer-class-properties.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-unexpectedAssignment: Constructor assigns a literal value to this.property. Literals are static and known at class definition time. Move to a class property declaration: propertyName = value; at class level. This clarifies intent and reduces constructor complexity.
-unexpectedClassProperty: Class property declarations are disabled by rule configuration (mode: 'never'). Move initialization into the constructor: this.propertyName = value; inside constructor().
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-class-properties": ["error", "always"]
-	}
-}
-```
+<RuleOptions rule="prefer-class-properties" />
 
 ## Examples
 
@@ -43,7 +27,9 @@ unexpectedClassProperty: Class property declarations are disabled by rule config
 
 ```ts
 class Foo {
-	foo = "bar";
+	constructor() {
+		this.foo = "bar";
+	}
 }
 ```
 

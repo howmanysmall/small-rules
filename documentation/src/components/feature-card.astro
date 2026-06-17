@@ -1,12 +1,12 @@
 ---
-import Icon from "./Icon.astro";
+import Icon from "./icon.astro";
 
 type IconName = "bolt" | "wand" | "shield" | "puzzle" | "sparkles" | "rocket" | "search";
 
 interface Props {
-	description: string;
-	icon: IconName;
-	title: string;
+	readonly description: string;
+	readonly icon: IconName;
+	readonly title: string;
 }
 
 const { icon, title, description } = Astro.props;

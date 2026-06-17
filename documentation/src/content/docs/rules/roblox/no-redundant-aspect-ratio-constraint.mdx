@@ -4,45 +4,29 @@ description: "Disallow redundant uiaspectratioconstraint children inside compone
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/no-redundant-aspect-ratio-constraint` reports code described by its source metadata: `disallow redundant uiaspectratioconstraint children inside components that already manage their own aspect ratio internally`. It reports with the message `This component already renders a uiaspectratioconstraint internally. Passing one as a child is redundant and will cause layout issues.`.
+<RuleSummary rule="no-redundant-aspect-ratio-constraint" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-redundant-aspect-ratio-constraint` and reports the concrete syntax covered by its implementation in `src/rules/no-redundant-aspect-ratio-constraint.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-redundantAspectRatioConstraint: This component already renders a uiaspectratioconstraint internally. Passing one as a child is redundant and will cause layout issues.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-redundant-aspect-ratio-constraint": "error"
-	}
-}
-```
+<RuleOptions rule="no-redundant-aspect-ratio-constraint" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-
+```tsx
 const UI_ASPECT_RATIO_CONSTRAINT = <uiaspectratioconstraint AspectRatio={1.5} />;
 
 function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
@@ -59,15 +43,13 @@ const view = (
 		{UI_ASPECT_RATIO_CONSTRAINT}
 	</LabelSpritesheet>
 );
-
 ```
 
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-
+```tsx
 function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
 	return (
 		<imagelabel>
@@ -83,7 +65,6 @@ const view = (
 		<textlabel Text="hello" />
 	</LabelSpritesheet>
 );
-
 ```
 
 </RuleExample>
@@ -113,5 +94,5 @@ const view = (
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

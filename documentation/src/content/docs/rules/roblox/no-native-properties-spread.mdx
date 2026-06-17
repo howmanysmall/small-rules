@@ -4,45 +4,29 @@ description: "Disallow spreading static property bags into nativeProperties/*Nat
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/no-native-properties-spread` reports code described by its source metadata: `disallow spreading static property bags into nativeProperties/*NativeProperties props and onto JSX elements via intermediate objects, because the spread creates a new copied table every render`. It reports with the message `Spreading static property bag {{source}} through an intermediate object creates a new table every render. Inline the full object properties directly on the JSX element.`.
+<RuleSummary rule="no-native-properties-spread" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-native-properties-spread` and reports the concrete syntax covered by its implementation in `src/rules/no-native-properties-spread.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-noElementSpread: Spreading static property bag {{source}} through an intermediate object creates a new table every render. Inline the full object properties directly on the JSX element.
-noNativePropertiesSpread: Spreading static property bag {{source}} into {{prop}} creates a new table every render. Pass it directly or inline the full object instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-native-properties-spread": "error"
-	}
-}
-```
+<RuleOptions rule="no-native-properties-spread" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
+```tsx
 const SOME_CONSTANT = {}; const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;
 ```
 
@@ -50,7 +34,7 @@ const SOME_CONSTANT = {}; const view = <Frame nativeProperties={{ ...SOME_CONSTA
 
 <RuleExample type="pass" title="Passes">
 
-```ts
+```tsx
 const view = <Frame nativeProperties={SOME_CONSTANT} />;
 ```
 
@@ -81,5 +65,5 @@ const view = <Frame nativeProperties={SOME_CONSTANT} />;
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

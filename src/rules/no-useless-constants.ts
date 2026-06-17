@@ -491,6 +491,7 @@ const noUselessConstants = defineRule({
 				properties: {
 					ignoreCallPatterns: {
 						default: [...OBJECT_CONSTRUCTOR_PATTERNS],
+						description: "Regular expression patterns for call expressions that should be ignored.",
 						items: { type: "string" },
 						type: "array",
 					},

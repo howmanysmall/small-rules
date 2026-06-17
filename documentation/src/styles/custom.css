@@ -436,6 +436,12 @@ div:has(> table) {
 	border-radius: 0.5rem;
 }
 
+.rule-options-table {
+	overflow-x: auto;
+	border: 0;
+	border-radius: 0;
+}
+
 table {
 	width: 100%;
 	border-collapse: collapse;
@@ -460,6 +466,24 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
 	background: var(--violet-glow-border);
+}
+
+.rule-options-table table {
+	min-width: 42rem;
+}
+
+.rule-options-table th:first-child,
+.rule-options-table td:first-child {
+	padding-left: 0;
+}
+
+.rule-options-table th:last-child,
+.rule-options-table td:last-child {
+	padding-right: 0;
+}
+
+.rule-options-table tbody tr:last-child td {
+	border-bottom: 0;
 }
 
 .category-grid {
@@ -590,6 +614,21 @@ tbody tr:hover {
 
 .expressive-code .frame {
 	border: none !important;
+}
+
+.rule-options-config .expressive-code {
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none;
+}
+
+.rule-options-config .expressive-code:hover {
+	border-color: transparent;
+}
+
+.rule-options-config .expressive-code .frame {
+	border: 0 !important;
+	border-radius: 0 !important;
 }
 
 /* The RuleExample header already provides a copy button, so hide Expressive

@@ -4,49 +4,29 @@ description: "Disallow standalone useMemo calls that ignore the memoized value."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-unused-use-memo` reports code described by its source metadata: `disallow standalone useMemo calls that ignore the memoized value`. It reports with the message `useMemo results must be used. Standalone useMemo calls add overhead without preserving a value.`.
+<RuleSummary rule="no-unused-use-memo" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-unused-use-memo` and reports the concrete syntax covered by its implementation in `src/rules/no-unused-use-memo.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-unusedUseMemo: useMemo results must be used. Standalone useMemo calls add overhead without preserving a value.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-unused-use-memo": [
-			"error",
-			{
-				"environment": "roblox-ts"
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-unused-use-memo" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 useMemo(() => 1, []);
 ```
@@ -56,7 +36,7 @@ useMemo(() => 1, []);
 <RuleExample type="pass" title="Passes">
 
 ```ts
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 const value = useMemo(() => 1, []);
 ```

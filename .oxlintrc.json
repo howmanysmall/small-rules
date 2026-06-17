@@ -42,7 +42,10 @@
 			"plugins": [],
 			"rules": {
 				"import/unambiguous": "off",
-				"small-rules/prevent-abbreviations": "off"
+				"small-rules/no-unused-imports": "off",
+				"small-rules/prevent-abbreviations": "off",
+				"sonar/unused-import": "off",
+				"unused-imports/no-unused-imports": "off"
 			}
 		},
 		{

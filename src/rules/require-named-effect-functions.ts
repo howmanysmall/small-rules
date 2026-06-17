@@ -302,7 +302,8 @@ const requireNamedEffectFunctions = defineRule({
 						type: "string",
 					},
 					hooks: {
-						description: "Array of hook configuration objects with name and allowAsync settings",
+						default: [...DEFAULT_HOOKS],
+						description: "Hook configuration objects with name and allowAsync settings.",
 						items: {
 							additionalProperties: false,
 							properties: {

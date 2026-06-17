@@ -313,6 +313,7 @@ const noGodComponents = defineRule({
 						type: "boolean",
 					},
 					ignoreComponents: {
+						default: [],
 						description: "Component names to ignore.",
 						items: { type: "string" },
 						type: "array",

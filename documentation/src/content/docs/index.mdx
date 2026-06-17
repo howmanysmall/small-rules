@@ -4,10 +4,10 @@ description: "Oxlint-native rules for TypeScript, React, and roblox-ts"
 tableOfContents: false
 ---
 
-import HeroSplash from "@/components/HeroSplash.astro";
-import CategoryCard from "@/components/CategoryCard.astro";
-import FeatureCard from "@/components/FeatureCard.astro";
-import Icon from "@/components/Icon.astro";
+import HeroSplash from "@/components/hero-splash.astro";
+import CategoryCard from "@/components/category-card.astro";
+import FeatureCard from "@/components/feature-card.astro";
+import Icon from "@/components/icon.astro";
 import { homeFacts } from "@/data/home-facts";
 
 <HeroSplash
@@ -17,7 +17,9 @@ import { homeFacts } from "@/data/home-facts";
 />
 
 <div class="home-proof reveal">
-	<p class="home-proof-copy">Native oxlint speed, roblox-ts-specific checks, and fixes where repetitive cleanup should be automatic.</p>
+	<p class="home-proof-copy">
+		Native oxlint speed, roblox-ts-specific checks, and fixes where repetitive cleanup should be automatic.
+	</p>
 	<ul class="home-proof-grid">
 		<li class="home-proof-item">
 			<span class="home-proof-value">{homeFacts.totalRules}</span>
@@ -59,7 +61,9 @@ import { homeFacts } from "@/data/home-facts";
 		<span class="home-start-index">2</span>
 		<span class="home-start-body">
 			<span class="home-start-title">Configuration</span>
-			<span class="home-start-desc">Set severities and define what should block CI versus what should stay advisory.</span>
+			<span class="home-start-desc">
+				Set severities and define what should block CI versus what should stay advisory.
+			</span>
 		</span>
 		<span class="home-start-arrow">→</span>
 	</a>
@@ -134,6 +138,6 @@ import { homeFacts } from "@/data/home-facts";
 	<FeatureCard
 		icon="wand"
 		title="Fixes where they help"
-		description={`${homeFacts.fixableRules} rules currently expose code fixes, so you can use oxlint --fix for the repetitive cleanup.`}
+		description={`${homeFacts.fixableRules} rules currently expose code fixes or fixer suggestions for repetitive cleanup.`}
 	/>
 </div>

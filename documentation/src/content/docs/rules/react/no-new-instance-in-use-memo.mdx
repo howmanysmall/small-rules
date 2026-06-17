@@ -4,44 +4,23 @@ description: "Disallow configured constructor calls (default: new Instance) insi
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/no-new-instance-in-use-memo` reports code described by its source metadata: `disallow configured constructor calls (default: new Instance) inside React useMemo callbacks`. It reports with the message `Avoid creating '{{constructorName}}' with 'new' inside useMemo. Create it outside the memo callback or use an effect/ref pattern.`.
+<RuleSummary rule="no-new-instance-in-use-memo" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-new-instance-in-use-memo` and reports the concrete syntax covered by its implementation in `src/rules/no-new-instance-in-use-memo.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-noNewInUseMemo: Avoid creating '{{constructorName}}' with `new` inside useMemo. Create it outside the memo callback or use an effect/ref pattern.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-new-instance-in-use-memo": [
-			"error",
-			{
-				"environment": "roblox-ts",
-				"maxHelperTraceDepth": 4
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-new-instance-in-use-memo" />
 
 ## Examples
 
@@ -50,8 +29,9 @@ noNewInUseMemo: Avoid creating '{{constructorName}}' with `new` inside useMemo. 
 ```ts
 import { useMemo } from "@rbxts/react";
 
-const model = useMemo(() => {
-	return new Instance("Model");
+const memoized = useMemo(() => {
+	const model = new Instance("Model");
+	return model;
 }, []);
 ```
 
@@ -60,11 +40,12 @@ const model = useMemo(() => {
 <RuleExample type="pass" title="Passes">
 
 ```ts
-function useMemo(factory) {
-	return factory();
-}
+import { useMemo } from "@rbxts/react";
 
-const model = useMemo(() => new Instance("Model"), []);
+const model = new Instance("Model");
+const memoized = useMemo(() => {
+	return model;
+}, []);
 ```
 
 </RuleExample>

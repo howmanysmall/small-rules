@@ -1,53 +1,37 @@
 ---
 title: "Require Switch Case Braces"
-description: "Require braces around switch case bodies that span multiple lines."
+description: "Require braces around switch case bodies selected by line span or statement count."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 
-`small-rules/require-switch-case-braces` reports code described by its source metadata: `require braces around switch case bodies that span multiple lines`. It reports with the message `Wrap this switch case body in braces.`.
+<RuleSummary rule="require-switch-case-braces" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/require-switch-case-braces` and reports the concrete syntax covered by its implementation in `src/rules/require-switch-case-braces.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-wrapCaseBody: Wrap this switch case body in braces.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/require-switch-case-braces": [
-			"error",
-			{
-				"metric": "lines"
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="require-switch-case-braces" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-// No invalid example was found in tests/require-switch-case-braces.test.ts.
+switch (value) {
+	case 1:
+		doFirst();
+		break;
+}
 ```
 
 </RuleExample>

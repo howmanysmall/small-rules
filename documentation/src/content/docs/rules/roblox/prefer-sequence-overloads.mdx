@@ -1,43 +1,27 @@
 ---
 title: "Prefer Sequence Overloads"
-description: "Prefer direct ColorSequence and NumberSequence overloads over two-keypoint arrays."
+description: "Prefer direct ColorSequence and NumberSequence overloads over identical direct arguments and two-keypoint arrays."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/prefer-sequence-overloads` reports code described by its source metadata: `prefer direct ColorSequence and NumberSequence overloads over two-keypoint arrays`. It reports with the message `Use the single-value sequence overload instead of two identical keypoints.`.
+<RuleSummary rule="prefer-sequence-overloads" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-sequence-overloads` and reports the concrete syntax covered by its implementation in `src/rules/prefer-sequence-overloads.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-preferSingleOverload: Use the single-value sequence overload instead of two identical keypoints.
-preferTwoPointOverload: Use the two-value sequence overload instead of constructing a two-keypoint array.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-sequence-overloads": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-sequence-overloads" />
 
 ## Examples
 
@@ -92,5 +76,5 @@ new ColorSequence([
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

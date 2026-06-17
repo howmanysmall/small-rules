@@ -4,44 +4,22 @@ description: "Flags effect dependencies that are not memoized. Unmemoized depend
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
-<Badge variant="roblox" />
 
-`small-rules/memoized-effect-dependencies` reports code described by its source metadata: `flags effect dependencies that are not memoized. Unmemoized dependencies can cause unnecessary re-renders or infinite loops`. It reports with the message `{{name}} is not memoized. Wrap it in useMemo/useCallback or move it to module scope.`.
+<RuleSummary rule="memoized-effect-dependencies" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/memoized-effect-dependencies` and reports the concrete syntax covered by its implementation in `src/rules/memoized-effect-dependencies.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-unmemoizedDependency: {{name}} is not memoized. Wrap it in useMemo/useCallback or move it to module scope.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/memoized-effect-dependencies": [
-			"error",
-			{
-				"environment": "roblox-ts",
-				"mode": "definite"
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="memoized-effect-dependencies" />
 
 ## Examples
 
@@ -76,9 +54,9 @@ function Component() {
 
 <CardGrid>
 	<LinkCard
-		title="Respect Roblox semantics"
-		description="Roblox and Luau APIs have runtime costs and conventions that generic JavaScript rules do not catch."
-		href="/small-rules/rules/roblox/memoized-effect-dependencies/"
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/memoized-effect-dependencies/"
 	/>
 	<LinkCard
 		title="Fail risky patterns early"
@@ -95,7 +73,7 @@ function Component() {
 ## Related Rules
 
 <CardGrid>
-	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
-	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="No Array Constructor Elements" href="/small-rules/rules/roblox/no-array-constructor-elements/" />
+	<LinkCard title="Use Exhaustive Dependencies" href="/small-rules/rules/react/use-exhaustive-dependencies/" />
+	<LinkCard title="No Useless Use Effect" href="/small-rules/rules/react/no-useless-use-effect/" />
+	<LinkCard title="Require Named Effect Functions" href="/small-rules/rules/react/require-named-effect-functions/" />
 </CardGrid>

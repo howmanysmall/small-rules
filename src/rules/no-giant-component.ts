@@ -69,7 +69,7 @@ const noGiantComponent = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Report React components whose bodies exceed the configured size threshold.",
+			description: "Report React components whose bodies exceed 300 lines.",
 			recommended: true,
 		},
 		messages: {

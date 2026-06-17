@@ -4,43 +4,28 @@ description: "Disallow non-component functions that return JSX or React elements
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/no-render-helper-functions` reports code described by its source metadata: `disallow non-component functions that return JSX or React elements`. It reports with the message `Convert render helper '{{functionName}}' to a React component. Functions that return JSX should be PascalCase components, not camelCase helpers.`.
+<RuleSummary rule="no-render-helper-functions" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-render-helper-functions` and reports the concrete syntax covered by its implementation in `src/rules/no-render-helper-functions.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-noRenderHelper: Convert render helper '{{functionName}}' to a React component. Functions that return JSX should be PascalCase components, not camelCase helpers.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-render-helper-functions": "error"
-	}
-}
-```
+<RuleOptions rule="no-render-helper-functions" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
+```tsx
 function createLabel() { return <div />; }
 ```
 
@@ -48,7 +33,7 @@ function createLabel() { return <div />; }
 
 <RuleExample type="pass" title="Passes">
 
-```ts
+```tsx
 function Component() { return <div />; }
 ```
 

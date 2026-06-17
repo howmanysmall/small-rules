@@ -4,54 +4,22 @@ description: "Enforces balanced opener/closer function calls across all executio
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
-<Badge variant="fixable" />
 
-`small-rules/require-paired-calls` reports code described by its source metadata: `enforces balanced opener/closer function calls across all execution paths`. It reports with the message `Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)`.
+<RuleSummary rule="require-paired-calls" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/require-paired-calls` and reports the concrete syntax covered by its implementation in `src/rules/require-paired-calls.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-asyncViolation: Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)
-conditionalOpener: Conditional opener '{{opener}}' at {{location}} may not have matching closer on all paths
-maxNestingExceeded: Maximum nesting depth of {{max}} exceeded for paired calls
-multipleOpeners: Multiple consecutive calls to '{{opener}}' without matching closers (allowMultipleOpeners: false)
-robloxYieldViolation: Yielding function '{{yieldingFunction}}' auto-closes all profiles - subsequent '{{closer}}' will error
-unexpectedCloser: Unexpected call to '{{closer}}' - expected one of: {{expected}}
-unpairedCloser: Unexpected call to '{{closer}}' - no matching opener on stack
-unpairedOpener: Unpaired call to '{{opener}}' - missing '{{closer}}' on {{paths}}
-wrongOrder: Closer '{{closer}}' called out of order - expected to close '{{expected}}' but '{{actual}}' is still open
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/require-paired-calls": [
-			"error",
-			{
-				"allowConditionalClosers": false,
-				"allowMultipleOpeners": true,
-				"maxNestingDepth": 0,
-				"pairs": []
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="require-paired-calls" />
 
 ## Examples
 
@@ -59,7 +27,7 @@ wrongOrder: Closer '{{closer}}' called out of order - expected to close '{{expec
 
 ```ts
 function test() {
-	debug.profilebegin("task");
+	setup();
 	doWork();
 }
 ```
@@ -70,9 +38,9 @@ function test() {
 
 ```ts
 function test() {
-	debug.profilebegin("task");
+	setup();
 	doWork();
-	debug.profileend();
+	cleanup();
 }
 ```
 
@@ -92,8 +60,8 @@ function test() {
 		href="/small-rules/configuration/"
 	/>
 	<LinkCard
-		title="Automate the safe edit"
-		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
 		href="/small-rules/configuration/"
 	/>
 </CardGrid>

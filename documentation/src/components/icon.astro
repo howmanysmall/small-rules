@@ -18,9 +18,9 @@ type IconName =
 	| "copy";
 
 interface Props {
-	class?: string;
-	name: IconName;
-	size?: number;
+	readonly class?: string;
+	readonly name: IconName;
+	readonly size?: number;
 }
 
 const { name, size = 24, class: className } = Astro.props;

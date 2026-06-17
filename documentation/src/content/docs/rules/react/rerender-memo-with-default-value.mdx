@@ -4,38 +4,22 @@ description: "Prevent inline empty object and array defaults in component prop d
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/rerender-memo-with-default-value` reports code described by its source metadata: `prevent inline empty object and array defaults in component prop destructuring`. It reports with the message `Default prop value [] creates a new array reference every render — extract to a module-level constant`.
+<RuleSummary rule="rerender-memo-with-default-value" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/rerender-memo-with-default-value` and reports the concrete syntax covered by its implementation in `src/rules/rerender-memo-with-default-value.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-emptyArrayDefault: Default prop value [] creates a new array reference every render — extract to a module-level constant
-emptyObjectDefault: Default prop value {} creates a new object reference every render — extract to a module-level constant
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/rerender-memo-with-default-value": "error"
-	}
-}
-```
+<RuleOptions rule="rerender-memo-with-default-value" />
 
 ## Examples
 

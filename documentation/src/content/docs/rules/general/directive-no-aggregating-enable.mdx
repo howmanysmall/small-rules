@@ -1,40 +1,25 @@
 ---
 title: "Directive No Aggregating Enable"
-description: "disallow `eslint-enable` comments for multiple `eslint-disable` directives"
+description: "Disallow aggregating `oxlint-enable` or `eslint-enable` comments across multiple disable directives."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/directive-no-aggregating-enable` reports code described by its source metadata: `disallow 'eslint-enable' comments for multiple 'eslint-disable' directives`. It reports with the message `'{{kind}}' comment enables rules for multiple disable directives. Please move '{{kind}}' after each disable directive.`.
+<RuleSummary rule="directive-no-aggregating-enable" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/directive-no-aggregating-enable` and reports the concrete syntax covered by its implementation in `src/rules/directive-no-aggregating-enable.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-aggregatingEnable: '{{kind}}' comment enables rules for multiple disable directives. Please move '{{kind}}' after each disable directive.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/directive-no-aggregating-enable": "error"
-	}
-}
-```
+<RuleOptions rule="directive-no-aggregating-enable" />
 
 ## Examples
 

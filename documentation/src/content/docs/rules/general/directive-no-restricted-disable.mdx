@@ -1,40 +1,25 @@
 ---
 title: "Directive No Restricted Disable"
-description: "disallow `eslint-disable` comments about specific rules"
+description: "Disallow `oxlint-disable` or `eslint-disable` comments for configured rules."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/directive-no-restricted-disable` reports code described by its source metadata: `disallow 'eslint-disable' comments about specific rules`. It reports with the message `Disabling '{{ruleId}}' is not allowed.`.
+<RuleSummary rule="directive-no-restricted-disable" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/directive-no-restricted-disable` and reports the concrete syntax covered by its implementation in `src/rules/directive-no-restricted-disable.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-disallow: Disabling '{{ruleId}}' is not allowed.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/directive-no-restricted-disable": "error"
-	}
-}
-```
+<RuleOptions rule="directive-no-restricted-disable" />
 
 ## Examples
 
@@ -50,9 +35,9 @@ const x = 1;
 <RuleExample type="pass" title="Passes">
 
 ```ts
-/* oxlint-disable no-console */
+/* oxlint-disable no-alert */
 const x = 1;
-/* oxlint-enable no-console */
+/* oxlint-enable no-alert */
 ```
 
 </RuleExample>

@@ -63,7 +63,7 @@ const directiveRequireDescription = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "require description for `eslint-disable` and `eslint-enable` directives",
+			description: "Require descriptions for `oxlint` and `eslint` disable/enable directives.",
 		},
 		messages: {
 			missingDescription: "Missing description for '{{kind}}' comment.",
@@ -73,6 +73,7 @@ const directiveRequireDescription = defineRule({
 				additionalProperties: false,
 				properties: {
 					ignore: {
+						description: "Directive kinds that do not require a description.",
 						items: { type: "string" as const },
 						type: "array" as const,
 						uniqueItems: true,

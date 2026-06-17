@@ -4,81 +4,43 @@ description: "Enforce React component size and complexity limits inspired by the
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-god-components` reports code described by its source metadata: `enforce React component size and complexity limits inspired by the 'Refactor God Component' checklist`. It reports with the message `Component '{{name}}' is {{lines}} lines; max allowed is {{max}}. Split into smaller components/hooks.`.
+<RuleSummary rule="no-god-components" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-god-components` and reports the concrete syntax covered by its implementation in `src/rules/no-god-components.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-exceedsMaxLines: Component '{{name}}' is {{lines}} lines; max allowed is {{max}}. Split into smaller components/hooks.
-exceedsTargetLines: Component '{{name}}' is {{lines}} lines; target is {{target}} (max {{max}}). Consider extracting hooks/components.
-nullLiteral: Avoid `null` in components; use `undefined` instead.
-tooManyProps: Component '{{name}}' destructures {{count}} props; max allowed is {{max}}. Group props or split the component.
-tooManyStateHooks: Component '{{name}}' has {{count}} state hooks ({{hooks}}); max allowed is {{max}}. Extract cohesive state into a custom hook.
-tsxNestingTooDeep: Component '{{name}}' has TSX nesting depth {{depth}}; max allowed is {{max}}. Extract child components.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-god-components": [
-			"error",
-			{
-				"enforceTargetLines": true,
-				"maxDestructuredProps": 5,
-				"maxLines": 200,
-				"maxStateHooks": 5,
-				"maxTsxNesting": 3,
-				"stateHooks": ["useState", "useReducer", "useBinding"],
-				"targetLines": 120
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-god-components" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
-```ts
-
-function Big() {
-    const a = 1;
-    const b = 2;
-    const c = 3;
-    return <div />;
+```tsx
+function Big({ a, b, c, d, e, f }) {
+	return <div>{a}{b}{c}{d}{e}{f}</div>;
 }
-
 ```
 
 </RuleExample>
 
 <RuleExample type="pass" title="Passes">
 
-```ts
-
+```tsx
 function Small({ a, b }) {
-    const [count, setCount] = useState(0);
-    if (count > 0) setCount(count - 1);
-    return <div><span>{a}{b}</span></div>;
+	const [count, setCount] = useState(0);
+	if (count > 0) setCount(count - 1);
+	return <div><span>{a}{b}</span></div>;
 }
-
 ```
 
 </RuleExample>

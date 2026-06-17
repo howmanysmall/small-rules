@@ -90,6 +90,7 @@ const banTypes = defineRule({
 				additionalProperties: false,
 				properties: {
 					bannedTypes: {
+						default: { Omit: "Except" },
 						description:
 							"Array of banned type names or an object mapping banned type names to preferred replacement names.",
 						oneOf: [

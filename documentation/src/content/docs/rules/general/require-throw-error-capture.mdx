@@ -1,41 +1,26 @@
 ---
 title: "Require Throw Error Capture"
-description: "Require 'Error.captureStackTrace' before throwing errors to produce accurate stack traces."
+description: "Require 'Error.captureStackTrace' before directly throwing new Error instances in named functions."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 
-`small-rules/require-throw-error-capture` reports code described by its source metadata: `require 'Error.captureStackTrace' before throwing errors to produce accurate stack traces`. It reports with the message `Call 'Error.captureStackTrace' on this error before throwing it so the stack trace points to the throw site.`.
+<RuleSummary rule="require-throw-error-capture" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/require-throw-error-capture` and reports the concrete syntax covered by its implementation in `src/rules/require-throw-error-capture.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-missingCaptureStackTrace: Call 'Error.captureStackTrace' on this error before throwing it so the stack trace points to the throw site.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/require-throw-error-capture": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="require-throw-error-capture" />
 
 ## Examples
 

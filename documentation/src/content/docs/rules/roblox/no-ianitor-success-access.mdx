@@ -4,38 +4,23 @@ description: "Disallow accessing `.success` on Ianitor check results when the fu
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="roblox" />
 
-`small-rules/no-ianitor-success-access` reports code described by its source metadata: `disallow accessing '.success' on Ianitor check results when the full result object is not needed`. It reports with the message `Replace with Flamework.createGuard<T>(). Ianitor check results allocate a table on every call; Flamework.createGuard returns a plain boolean at runtime with zero allocation.`.
+<RuleSummary rule="no-ianitor-success-access" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-ianitor-success-access` and reports the concrete syntax covered by its implementation in `src/rules/no-ianitor-success-access.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferCreateGuard: Replace with Flamework.createGuard<T>(). Ianitor check results allocate a table on every call; Flamework.createGuard returns a plain boolean at runtime with zero allocation.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-ianitor-success-access": "error"
-	}
-}
-```
+<RuleOptions rule="no-ianitor-success-access" />
 
 ## Examples
 
@@ -88,5 +73,5 @@ const validator = Ianitor.keyOf(ids);
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
 	<LinkCard title="No Ianitor In Function Body" href="/small-rules/rules/roblox/no-ianitor-in-function-body/" />
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

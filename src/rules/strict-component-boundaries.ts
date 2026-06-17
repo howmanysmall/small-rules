@@ -87,7 +87,7 @@ const strictComponentBoundaries = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Prevent module imports between components.",
+			description: "Prevent imports that reach into another component's nested modules.",
 		},
 		messages: {
 			noReachingIntoComponent:
@@ -98,10 +98,14 @@ const strictComponentBoundaries = defineRule({
 				additionalProperties: false,
 				properties: {
 					allow: {
+						default: [],
+						description: "Regular expression patterns for imports allowed to cross component boundaries.",
 						items: { type: "string" },
 						type: "array",
 					},
 					maxDepth: {
+						default: 1,
+						description: "Maximum path depth allowed inside another component before reporting.",
 						type: "integer",
 					},
 				},

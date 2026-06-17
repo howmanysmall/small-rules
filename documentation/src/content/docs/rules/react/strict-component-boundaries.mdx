@@ -1,42 +1,29 @@
 ---
 title: "Strict Component Boundaries"
-description: "Prevent module imports between components."
+description: "Prevent imports that reach into another component's nested modules."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/strict-component-boundaries` reports code described by its source metadata: `prevent module imports between components`. It reports with the message `Do not reach into an individual component's folder for nested modules. Import from the closest shared components folder instead.`.
+<RuleSummary rule="strict-component-boundaries" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/strict-component-boundaries` and reports the concrete syntax covered by its implementation in `src/rules/strict-component-boundaries.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-noReachingIntoComponent: Do not reach into an individual component's folder for nested modules. Import from the closest shared components folder instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/strict-component-boundaries": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="strict-component-boundaries" />
 
 ## Examples
+
+The failing example assumes the source file is inside `components/Foo/` and the relative import resolves into another component's nested module.
 
 <RuleExample type="fail" title="Fails">
 

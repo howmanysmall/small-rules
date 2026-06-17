@@ -1,83 +1,32 @@
 ---
 title: "No Useless Use Effect"
-description: "Disallow effects that only derive state, notify parent callbacks, reset state on prop changes, or route event side effects through state."
+description: "Disallow empty effects, duplicate dependencies, effect chains, log-only effects, derived state, external-store state sync, state initialization, reset effects, parent notifications, parent ref callbacks, and event side effects routed through state."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/no-useless-use-effect` reports code described by its source metadata: `disallow effects that only derive state, notify parent callbacks, reset state on prop changes, or route event side effects through state`. It reports with the message `This effect adjusts state when a prop changes. Adjust the state directly during rendering or restructure to avoid this need.`.
+<RuleSummary rule="no-useless-use-effect" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-useless-use-effect` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-use-effect.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-adjustState: This effect adjusts state when a prop changes. Adjust the state directly during rendering or restructure to avoid this need.
-derivedState: This effect only derives state from properties or state. Compute the value during rendering instead of useEffect.
-duplicateDeps: Multiple effects have identical dependency arrays. Combine them into a single effect for better performance.
-effectChain: This effect is part of a chain of effects that only derive state from other effects. Consolidate the logic into event handlers or compute during rendering.
-emptyEffect: This effect has an empty body and should be removed.
-eventFlag: This effect only reacts to a state flag. Call the side effect directly in the event handler instead of toggling state.
-eventSpecificLogic: This effect runs event-specific logic based on state. Move this logic to the event handler that triggers the state change.
-externalStore: This effect subscribes to an external store and syncs to state. Use `useSyncExternalStore` instead.
-initializeState: This effect initializes state with a constant value. Pass the value as the useState initializer instead.
-logOnly: This effect only contains console.log calls. Remove it (debug leftover) or move the logging to an event handler.
-mixedDerivedState: This effect contains state setter calls that derive values from props or state mixed with other operations. Extract the setter calls and compute values during rendering.
-notifyParent: This effect only notifies a parent via a property callback. Call the callback in the event handler instead of useEffect.
-passRefToParent: This effect passes a ref to a parent callback. Use `forwardRef` or `useImperativeHandle` instead.
-resetState: This effect resets state when a prop changes. Pass a `key` prop to the component instead to reset all state automatically.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-useless-use-effect": [
-			"error",
-			{
-				"environment": "roblox-ts",
-				"hooks": ["useEffect", "useLayoutEffect", "useInsertionEffect"],
-				"propertyCallbackPrefixes": ["on"],
-				"refHooks": ["useRef"],
-				"reportAdjustState": true,
-				"reportDerivedState": true,
-				"reportDuplicateDeps": true,
-				"reportEffectChain": true,
-				"reportEmptyEffect": true,
-				"reportEventFlag": true,
-				"reportEventSpecificLogic": true,
-				"reportExternalStore": true,
-				"reportInitializeState": true,
-				"reportLogOnly": true,
-				"reportMixedDerivedState": true,
-				"reportNotifyParent": true,
-				"reportPassRefToParent": true,
-				"reportResetState": true,
-				"stateHooks": ["useState", "useReducer"]
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-useless-use-effect" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-import { "useEffect" as useEffectAlias, useState } from "@rbxts/react";
+import { useEffect as useEffectAlias, useState } from "@rbxts/react";
 
 function Component(properties) {
 	const [count, setCount] = useState(0);

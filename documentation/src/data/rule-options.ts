@@ -56,6 +56,11 @@ function formatInline(value: unknown): string {
 	return JSON.stringify(value);
 }
 
+function formatDefaultValue(schema: SchemaRecord): string {
+	if (isString(schema.defaultLabel)) return schema.defaultLabel;
+	return formatInline(schema.default);
+}
+
 function getSchemaTypeNames(schema: SchemaRecord): ReadonlyArray<string> {
 	if (isString(schema.type)) return [schema.type];
 	if (Array.isArray(schema.type)) return schema.type.filter(isString);
@@ -66,6 +71,142 @@ function getSchemaTypeNames(schema: SchemaRecord): ReadonlyArray<string> {
 
 function joinTypes(types: ReadonlyArray<string>): string {
 	return [...new Set(types)].join(" | ");
+}
+
+const exactStringPlaceholders = new Map([
+	["additionalAssertionFunctions", "expectPresent"],
+	["additionalExpectCallNames", "expect"],
+	["additionalHoistableComponents", "IconSprite"],
+	["additionalStaticFactories", "Vector3"],
+	["allow", "oxlint-disable"],
+	["allowPropertyAccess", "Roact"],
+	["alternatives", "begin"],
+	["bannedInstances", "Part"],
+	["bannedTypes", "Readonly"],
+	["closer", "cleanup"],
+	["constructors", "Instance"],
+	["directive-no-restricted-disable", "no-console"],
+	["ignore", "oxlint-disable"],
+	["ignoreComponents", "LegacyPanel"],
+	["ignoreHooks", "useEntity"],
+	["ignoreShorthands", "props"],
+	["eventsImportPaths", "server/networking"],
+	["loopExitCalls", "task.wait"],
+	["name", "useCustomEffect"],
+	["onlyHooks", "useState"],
+	["opener", "setup"],
+	["openerAlternatives", "begin"],
+	["staticGlobalFactories", "Vector3"],
+	["yieldingFunctions", "task.wait"],
+]);
+
+const partialStringPlaceholders = [
+	{ match: "class", value: "Part" },
+	{ match: "factory", value: "useMemo" },
+	{ match: "importpath", value: "@rbxts/react" },
+	{ match: "rule", value: "no-console" },
+];
+
+const objectPlaceholders = new Map<string, JsonValue>([
+	["allow", { name: "ValidationError" }],
+	["bannedProperties", { UISizeConstraint: { MaxSize: "Use a different constraint shape." } }],
+	["classes", { Log: "@rbxts/rbxts-sleitnick-log" }],
+]);
+
+function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
+	switch (ruleName) {
+		case "prevent-abbreviations": {
+			return "error";
+		}
+
+		case "require-named-effect-functions": {
+			return [
+				"error",
+				{
+					environment: "roblox-ts",
+					hooks: [
+						{ allowAsync: false, name: "useEffect" },
+						{ allowAsync: false, name: "useLayoutEffect" },
+						{ allowAsync: false, name: "useInsertionEffect" },
+					],
+				},
+			];
+		}
+
+		case "require-paired-calls": {
+			return [
+				"error",
+				{
+					allowConditionalClosers: false,
+					allowMultipleOpeners: true,
+					maxNestingDepth: 0,
+					pairs: [
+						{
+							alternatives: ["finish"],
+							closer: "cleanup",
+							opener: "setup",
+							openerAlternatives: ["begin"],
+							platform: "roblox",
+							requireSync: false,
+							yieldingFunctions: ["task.wait"],
+						},
+					],
+				},
+			];
+		}
+
+		case "require-react-component-keys": {
+			return [
+				"error",
+				{
+					allowRootKeys: false,
+					ignoreCallExpressions: [
+						"ReactTree.mount",
+						"CreateReactStory",
+						"createReactStory",
+						"createPlatformStory",
+					],
+					iterationMethods: [
+						"map",
+						"filter",
+						"forEach",
+						"flatMap",
+						"reduce",
+						"reduceRight",
+						"some",
+						"every",
+						"find",
+						"findIndex",
+					],
+					memoizationHooks: ["useCallback", "useMemo"],
+				},
+			];
+		}
+
+		case "use-exhaustive-dependencies": {
+			return [
+				"error",
+				{
+					hooks: [
+						{
+							closureIndex: 0,
+							dependenciesIndex: 1,
+							name: "useCustomEffect",
+							stableResult: false,
+						},
+					],
+					reportMissingDependenciesArray: true,
+					reportUnnecessaryDependencies: true,
+					reportUnnecessaryStableDependencies: false,
+					resolveExpressionDependencies: true,
+				},
+			];
+		}
+
+		default: {
+			return undefined;
+		}
+	}
 }
 
 function getObjectSchemaType(schema: SchemaRecord): string {
@@ -114,12 +255,12 @@ function getSchemaType(schema: SchemaRecord): string {
 }
 
 function createStringPlaceholder(hint: string | undefined): string {
-	if (hint === "constructors") return "Instance";
-	if (hint === "bannedInstances" || hint?.toLowerCase().includes("class") === true) return "Part";
-	if (hint?.toLowerCase().includes("factory") === true) return "useMemo";
-	if (hint?.toLowerCase().includes("importpath") === true) return "@rbxts/react";
-	if (hint?.toLowerCase().includes("rule") === true) return "no-console";
-	return "value";
+	const exactPlaceholder = hint === undefined ? undefined : exactStringPlaceholders.get(hint);
+	if (exactPlaceholder !== undefined) return exactPlaceholder;
+
+	const normalizedHint = hint?.toLowerCase();
+	const partialPlaceholder = partialStringPlaceholders.find(({ match }) => normalizedHint?.includes(match) === true);
+	return partialPlaceholder?.value ?? "value";
 }
 
 function getExplicitPlaceholder(schema: SchemaRecord, hint: string | undefined): JsonValue | undefined {
@@ -127,6 +268,16 @@ function getExplicitPlaceholder(schema: SchemaRecord, hint: string | undefined):
 	if (Array.isArray(schema.enum) && schema.enum.length > 0) {
 		const [firstEnumValue] = schema.enum;
 		if (isJsonValue(firstEnumValue)) return firstEnumValue;
+	}
+	if (Array.isArray(schema.anyOf)) {
+		const matchingSchema = schema.anyOf.find(
+			(entry) =>
+				isSchemaRecord.allows(entry) &&
+				getSchemaTypeNames(entry).includes("object") &&
+				hint !== undefined &&
+				objectPlaceholders.has(hint),
+		);
+		return createPlaceholder(matchingSchema ?? schema.anyOf[0], hint);
 	}
 	if (Array.isArray(schema.oneOf)) {
 		const [firstSchema] = schema.oneOf;
@@ -136,7 +287,15 @@ function getExplicitPlaceholder(schema: SchemaRecord, hint: string | undefined):
 	return undefined;
 }
 
-function createObjectPlaceholder(schema: SchemaRecord): JsonValue {
+function createNumberPlaceholder(schema: SchemaRecord): number {
+	if (typeof schema.default === "number") return schema.default;
+	if (typeof schema.minimum === "number") return schema.minimum;
+	return 0;
+}
+
+function createObjectPlaceholder(schema: SchemaRecord, hint: string | undefined): JsonValue {
+	const knownPlaceholder = hint === undefined ? undefined : objectPlaceholders.get(hint);
+	if (knownPlaceholder !== undefined) return knownPlaceholder;
 	if (!isSchemaRecord.allows(schema.properties)) return {};
 
 	const placeholder: Record<string, JsonValue> = {};
@@ -154,8 +313,8 @@ function createPlaceholder(schema: unknown, hint?: string): JsonValue {
 	const typeNames = getSchemaTypeNames(schema);
 	if (typeNames.includes("array")) return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
 	if (typeNames.includes("boolean")) return false;
-	if (typeNames.includes("integer") || typeNames.includes("number")) return 0;
-	if (typeNames.includes("object")) return createObjectPlaceholder(schema);
+	if (typeNames.includes("integer") || typeNames.includes("number")) return createNumberPlaceholder(schema);
+	if (typeNames.includes("object")) return createObjectPlaceholder(schema, hint);
 	if (typeNames.includes("string")) return createStringPlaceholder(hint);
 	return {};
 }
@@ -168,7 +327,7 @@ function createObjectOptions(schema: SchemaRecord): ReadonlyArray<ObjectOption> 
 	return Object.entries(schema.properties).map(([name, optionSchema]) => {
 		const option = isSchemaRecord.allows(optionSchema) ? optionSchema : {};
 		return {
-			defaultValue: formatInline(option.default),
+			defaultValue: formatDefaultValue(option),
 			description: isString(option.description) ? option.description : undefined,
 			name,
 			required: required.has(name),
@@ -184,15 +343,24 @@ function createOptionsValue(schema: unknown): JsonValue | undefined {
 		return createPlaceholder(firstOptionSchema);
 	}
 
+	if (schema === undefined) return undefined;
 	return createPlaceholder(schema);
 }
 
 function createConfiguration(ruleName: RuleName, schema: unknown): string {
+	const override = getRuleConfigOverride(ruleName);
+	if (override !== undefined) {
+		return formatJson({
+			jsPlugins: ["@pobammer-ts/small-rules"],
+			rules: { [`small-rules/${ruleName}`]: override },
+		});
+	}
+
 	const optionsValue = createOptionsValue(schema);
 	let ruleConfig: JsonValue = optionsValue === undefined ? "error" : ["error", optionsValue];
 
 	if (isSchemaRecord.allows(schema) && schema.type === "array") {
-		ruleConfig = ["error", createPlaceholder(schema.items)];
+		ruleConfig = ["error", createPlaceholder(schema.items, ruleName)];
 	}
 
 	return formatJson({
@@ -202,6 +370,7 @@ function createConfiguration(ruleName: RuleName, schema: unknown): string {
 }
 
 function getSchemaSummary(schema: unknown): string {
+	if (schema === undefined) return "This rule does not accept options.";
 	if (Array.isArray(schema)) {
 		if (schema.length === 0) return "This rule does not accept options.";
 		return "This rule accepts one options object after the severity.";

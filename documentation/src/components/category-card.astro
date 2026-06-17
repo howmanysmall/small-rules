@@ -1,14 +1,14 @@
 ---
-import Icon from "./Icon.astro";
+import Icon from "./icon.astro";
 
 type CategoryKey = "react" | "roblox" | "naming" | "general";
 
 interface Props {
-	category: CategoryKey;
-	count: number;
-	description: string;
-	label: string;
-	slug: string;
+	readonly category: CategoryKey;
+	readonly count: number;
+	readonly description: string;
+	readonly label: string;
+	readonly slug: string;
 }
 
 const { slug, label, count, description, category } = Astro.props;

@@ -4,37 +4,22 @@ description: "Require JSX for static React.createElement calls."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-static-react-create-element` reports code described by its source metadata: `require JSX for static React.createElement calls`. It reports with the message `Use JSX instead of static React.createElement calls.`.
+<RuleSummary rule="no-static-react-create-element" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-static-react-create-element` and reports the concrete syntax covered by its implementation in `src/rules/no-static-react-create-element.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-useJsx: Use JSX instead of static React.createElement calls.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-static-react-create-element": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="no-static-react-create-element" />
 
 ## Examples
 

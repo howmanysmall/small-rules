@@ -1,41 +1,25 @@
 ---
 title: "Directive No Duplicate Disable"
-description: "disallow duplicate `eslint-disable` comments"
+description: "Disallow duplicate `oxlint-disable` or `eslint-disable` comments."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/directive-no-duplicate-disable` reports code described by its source metadata: `disallow duplicate 'eslint-disable' comments`. It reports with the message `ESLint rules have been disabled already.`.
+<RuleSummary rule="directive-no-duplicate-disable" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/directive-no-duplicate-disable` and reports the concrete syntax covered by its implementation in `src/rules/directive-no-duplicate-disable.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-duplicate: ESLint rules have been disabled already.
-duplicateRule: '{{ruleId}}' rule has been disabled already.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/directive-no-duplicate-disable": "error"
-	}
-}
-```
+<RuleOptions rule="directive-no-duplicate-disable" />
 
 ## Examples
 

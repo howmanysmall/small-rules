@@ -483,7 +483,8 @@ const requireReactComponentKeys = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Require keys on React components when used in lists or iteration.",
+			description:
+				"Require keys on nested React JSX children, fragments, and configured iteration or memoization contexts.",
 		},
 		messages: {
 			missingKey:
@@ -501,7 +502,7 @@ const requireReactComponentKeys = defineRule({
 						type: "boolean",
 					},
 					ignoreCallExpressions: {
-						default: ["ReactTree.mount"],
+						default: DEFAULT_OPTIONS.ignoreCallExpressions,
 						description: "Function calls where JSX arguments don't need keys",
 						items: { type: "string" },
 						type: "array",

@@ -4,37 +4,22 @@ description: "Disallow effect hooks with many cascading state updates."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/no-cascading-set-state` reports code described by its source metadata: `disallow effect hooks with many cascading state updates`. It reports with the message `{{count}} setState calls in a single useEffect — consider using useReducer or deriving state`.
+<RuleSummary rule="no-cascading-set-state" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-cascading-set-state` and reports the concrete syntax covered by its implementation in `src/rules/no-cascading-set-state.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-cascadingSetState: {{count}} setState calls in a single useEffect — consider using useReducer or deriving state
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-cascading-set-state": "error"
-	}
-}
-```
+<RuleOptions rule="no-cascading-set-state" />
 
 ## Examples
 

@@ -1,41 +1,26 @@
 ---
-title: "No Table Create Map"
+title: "No table.create()/new Array().map()"
 description: "Disallow map(...) directly on table.create(...) and new Array(...) constructor patterns in roblox-ts."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="roblox" />
 
-`small-rules/no-table-create-map` reports code described by its source metadata: `disallow map(...) directly on table.create(...) and new Array(...) constructor patterns in roblox-ts`. It reports with the message `Do not map directly on table.create(...) or new Array(...). Allocate first, then write by index in a loop.`.
+<RuleSummary rule="no-table-create-map" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-table-create-map` and reports the concrete syntax covered by its implementation in `src/rules/no-table-create-map.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-avoidConstructThenMap: Do not map directly on table.create(...) or new Array(...). Allocate first, then write by index in a loop.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-table-create-map": "error"
-	}
-}
-```
+<RuleOptions rule="no-table-create-map" />
 
 ## Examples
 
@@ -43,6 +28,10 @@ avoidConstructThenMap: Do not map directly on table.create(...) or new Array(...
 
 ```ts
 const mapped = table.create(total).map((_, index) => index);
+```
+
+```ts
+const mapped = new Array<Reward>(size).map(() => makeReward());
 ```
 
 </RuleExample>
@@ -83,5 +72,5 @@ for (const index of $range(1, entries)) {
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

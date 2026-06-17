@@ -152,15 +152,19 @@ const noUselessUseMemo = defineRule({
 				properties: {
 					dependencyMode: {
 						default: "non-updating",
+						description: "Dependency-array mode used to decide whether a memoized value is static.",
 						enum: ["empty-or-omitted", "non-updating", "aggressive"],
 						type: "string",
 					},
 					environment: {
 						default: "roblox-ts",
+						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
 						enum: ["roblox-ts", "standard"],
 						type: "string",
 					},
 					staticGlobalFactories: {
+						default: DEFAULT_STATIC_GLOBAL_FACTORIES,
+						description: "Global constructors and factories whose calls are treated as static values.",
 						items: { type: "string" },
 						type: "array",
 					},

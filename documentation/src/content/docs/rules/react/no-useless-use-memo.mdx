@@ -4,50 +4,29 @@ description: "Disallow useMemo calls that only wrap values static enough to live
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/no-useless-use-memo` reports code described by its source metadata: `disallow useMemo calls that only wrap values static enough to live at module scope`. It reports with the message `useMemo is wrapping a static value. Move the value to module scope instead of paying hook overhead for no runtime benefit.`.
+<RuleSummary rule="no-useless-use-memo" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-useless-use-memo` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-use-memo.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-uselessUseMemo: useMemo is wrapping a static value. Move the value to module scope instead of paying hook overhead for no runtime benefit.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-useless-use-memo": [
-			"error",
-			{
-				"dependencyMode": "non-updating",
-				"environment": "roblox-ts"
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-useless-use-memo" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from "./animation-config";
 
 const rotationConfiguration = useMemo(
@@ -61,7 +40,7 @@ const rotationConfiguration = useMemo(
 <RuleExample type="pass" title="Passes">
 
 ```ts
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from "./animation-config";
 
 function Component({ theme }) {

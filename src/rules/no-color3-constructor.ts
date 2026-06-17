@@ -101,6 +101,8 @@ const noColor3Constructor = defineRule({
 				properties: {
 					reportUnknownComponents: {
 						default: true,
+						description:
+							"Report new Color3(...) calls when one or more components are not numeric literals.",
 						type: "boolean",
 					},
 				},

@@ -1,47 +1,32 @@
 ---
 title: "Directive No Use"
-description: "disallow ESLint directive-comments"
+description: "Disallow block ESLint/Oxlint directive comments."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/directive-no-use` reports code described by its source metadata: `disallow ESLint directive-comments`. It reports with the message `Unexpected ESLint directive comment.`.
+<RuleSummary rule="directive-no-use" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/directive-no-use` and reports the concrete syntax covered by its implementation in `src/rules/directive-no-use.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-disallow: Unexpected ESLint directive comment.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/directive-no-use": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="directive-no-use" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-/* oxlint-disable no-console */
+/* eslint-disable no-console */
 const x = 1;
 ```
 
@@ -50,7 +35,6 @@ const x = 1;
 <RuleExample type="pass" title="Passes">
 
 ```ts
-/* oxlint-disable no-console */
 const x = 1;
 ```
 

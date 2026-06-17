@@ -1,0 +1,63 @@
+---
+import { getRuleOptionsDocumentation } from "@/data/rule-options";
+import type { RuleName } from "@/data/rule-options";
+import { Code } from "@astrojs/starlight/components";
+
+interface Props {
+	readonly rule: RuleName;
+}
+
+const { rule } = Astro.props;
+const documentation = getRuleOptionsDocumentation(rule);
+const tableLabels = {
+	defaultValue: "Default",
+	description: "Description",
+	no: "No",
+	option: "Option",
+	required: "Required",
+	type: "Type",
+	unknown: "-",
+	yes: "Yes",
+};
+---
+
+<p>{documentation.schemaSummary}</p>
+
+{documentation.options.length > 0 && (
+	<div class="rule-options-table">
+		<table>
+			<thead>
+				<tr>
+					<th>{tableLabels.option}</th>
+					<th>{tableLabels.type}</th>
+					<th>{tableLabels.required}</th>
+					<th>{tableLabels.defaultValue}</th>
+					<th>{tableLabels.description}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					documentation.options.map((option) => (
+						<tr>
+							<td>
+								<code>{option.name}</code>
+							</td>
+							<td>
+								<code>{option.type}</code>
+							</td>
+							<td>{option.required ? tableLabels.yes : tableLabels.no}</td>
+							<td>
+								<code>{option.defaultValue}</code>
+							</td>
+							<td>{option.description ?? tableLabels.unknown}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+)}
+
+<div class="rule-options-config">
+	<Code code={documentation.config} lang="json" meta='frame="none"' />
+</div>

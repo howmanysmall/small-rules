@@ -4,39 +4,23 @@ description: "Enforce Ianitor.Check<T> type annotations on complex TypeScript ty
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/enforce-ianitor-check-type` reports code described by its source metadata: `enforce Ianitor.Check<T> type annotations on complex TypeScript types`. It reports with the message `Interface '{{name}}' requires Ianitor.Check<T> annotation (interfaces always need explicit checking)`.
+<RuleSummary rule="enforce-ianitor-check-type" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/enforce-ianitor-check-type` and reports the concrete syntax covered by its implementation in `src/rules/enforce-ianitor-check-type.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-complexInterfaceNeedsCheck: Interface '{{name}}' requires Ianitor.Check<T> annotation (interfaces always need explicit checking)
-missingIanitorCheckType: Complex type (score: {{score}}) requires Ianitor.Check<T> annotation for type safety
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/enforce-ianitor-check-type": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="enforce-ianitor-check-type" />
 
 ## Examples
 

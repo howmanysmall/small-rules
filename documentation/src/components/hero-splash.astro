@@ -1,5 +1,5 @@
 ---
-import Icon from "./Icon.astro";
+import Icon from "./icon.astro";
 
 interface Props {
 	readonly kicker?: string;
@@ -43,16 +43,16 @@ const { title, subtitle, kicker = "Oxlint plugin for roblox-ts" } = Astro.props;
 				<span class="hero-preview-dot hero-preview-dot--r"></span>
 				<span class="hero-preview-dot hero-preview-dot--y"></span>
 				<span class="hero-preview-dot hero-preview-dot--g"></span>
-				<span class="hero-preview-name">oxlint.json</span>
+				<span class="hero-preview-name">.oxlintrc.json</span>
 			</div>
-			<pre class="hero-preview-code"><code><span class="t-k">{</span>
-	<span class="t-s">"plugins"</span><span class="t-k">:</span> <span class="t-a">[</span><span class="t-s">"@pobammer-ts/small-rules"</span><span class="t-a">]</span><span class="t-k">,</span>
-	<span class="t-s">"rules"</span><span class="t-k">:</span> <span class="t-k">{</span>
+			<pre class="hero-preview-code"><code><span class="t-k">{"{"}</span>
+	<span class="t-s">"jsPlugins"</span><span class="t-k">:</span> <span class="t-a">[</span><span class="t-s">"@pobammer-ts/small-rules"</span><span class="t-a">]</span><span class="t-k">,</span>
+	<span class="t-s">"rules"</span><span class="t-k">:</span> <span class="t-k">{"{"}</span>
 		<span class="t-s">"small-rules/ban-react-fc"</span><span class="t-k">:</span> <span class="t-s">"error"</span><span class="t-k">,</span>
 		<span class="t-s">"small-rules/no-print"</span><span class="t-k">:</span> <span class="t-s">"error"</span><span class="t-k">,</span>
 		<span class="t-s">"small-rules/prefer-early-return"</span><span class="t-k">:</span> <span class="t-s">"warn"</span>
-	<span class="t-k">}</span>
-<span class="t-k">}</span></code></pre>
+	<span class="t-k">{"}"}</span>
+<span class="t-k">{"}"}</span></code></pre>
 		</div>
 	</div>
 </section>

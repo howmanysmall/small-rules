@@ -4,42 +4,22 @@ description: "Enforce that React hooks are only called at the top level of compo
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 
-`small-rules/use-hook-at-top-level` reports code described by its source metadata: `enforce that React hooks are only called at the top level of components or custom hooks, never conditionally or in nested functions`. It reports with the message `This hook is being called after an early return. Hooks must be called unconditionally and in the same order every render.`.
+<RuleSummary rule="use-hook-at-top-level" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/use-hook-at-top-level` and reports the concrete syntax covered by its implementation in `src/rules/use-hook-at-top-level.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-afterEarlyReturn: This hook is being called after an early return. Hooks must be called unconditionally and in the same order every render.
-conditionalHook: This hook is being called conditionally. All hooks must be called in the exact same order in every component render.
-loopHook: This hook is being called inside a loop. All hooks must be called in the exact same order in every component render.
-nestedFunction: This hook is being called from a nested function. All hooks must be called unconditionally from the top-level component.
-recursiveHookCall: This hook is being called recursively. Recursive calls require a condition to terminate, which violates hook rules.
-tryBlockHook: This hook is being called inside a try block. Hooks must be called unconditionally at the top level.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/use-hook-at-top-level": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="use-hook-at-top-level" />
 
 ## Examples
 
@@ -48,7 +28,7 @@ tryBlockHook: This hook is being called inside a try block. Hooks must be called
 ```ts
 function Component() {
 	if (condition) {
-		useEffect(() => {});
+		useState(0);
 	}
 }
 ```
@@ -59,7 +39,7 @@ function Component() {
 
 ```ts
 function Component() {
-	useEffect(() => {});
+	useState(0);
 }
 ```
 

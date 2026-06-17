@@ -148,11 +148,13 @@ const noUselessUseSpring = defineRule({
 			{
 				additionalProperties: false,
 				default: {
+					springHooks: [...DEFAULT_SPRING_HOOKS],
 					staticGlobalFactories: [...DEFAULT_STATIC_GLOBAL_FACTORIES],
 					treatEmptyDepsAsViolation: true,
 				},
 				properties: {
 					springHooks: {
+						default: [...DEFAULT_SPRING_HOOKS],
 						description: "Hook identifiers that should be treated as spring hooks",
 						items: { type: "string" },
 						type: "array",

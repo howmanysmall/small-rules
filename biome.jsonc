@@ -424,6 +424,35 @@
 					}
 				}
 			}
+		},
+
+		{
+			"assist": {
+				"actions": {
+					"source": {
+						"useSortedAttributes": "off"
+					}
+				}
+			},
+			"includes": [
+				"documentation/src/components/badge.astro",
+				"documentation/src/components/icon.astro",
+				"documentation/src/components/rule-example.astro"
+			]
+		},
+
+		{
+			"includes": ["documentation/src/components/rule-options.astro"],
+			"linter": {
+				"rules": {
+					"performance": {
+						"useSolidForComponent": "off"
+					},
+					"style": {
+						"noJsxLiterals": "off"
+					}
+				}
+			}
 		}
 
 		// package.json exception

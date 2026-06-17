@@ -4,50 +4,32 @@ description: "Disallow unused imports"
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 
-`small-rules/no-unused-imports` reports code described by its source metadata: `disallow unused imports`. It reports with the message `Import '{{identifierName}}' is defined but never used.`.
+<RuleSummary rule="no-unused-imports" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-unused-imports` and reports the concrete syntax covered by its implementation in `src/rules/no-unused-imports.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-unusedImport: Import '{{identifierName}}' is defined but never used.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-unused-imports": [
-			"error",
-			{
-				"checkJSDoc": true
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-unused-imports" />
 
 ## Examples
 
 <RuleExample type="fail" title="Fails">
 
 ```ts
-import UnusedDefault from "./module";
+import { used, unused } from "./module";
+
+used();
 ```
 
 </RuleExample>
@@ -55,14 +37,17 @@ import UnusedDefault from "./module";
 When auto-fixed, this becomes:
 
 ```ts
-import { unused2 } from "./module";
+import { used } from "./module";
+
+used();
 ```
 
 <RuleExample type="pass" title="Passes">
 
 ```ts
-import UsedDefault from "./module";
-UsedDefault();
+import { used } from "./module";
+
+used();
 ```
 
 </RuleExample>

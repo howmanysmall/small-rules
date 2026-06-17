@@ -63,7 +63,7 @@ const preferPascalCaseEnums = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Enforce Pascal case when naming enums.",
+			description: "Enforce PascalCase names for enums and enum members.",
 			recommended: true,
 		},
 		messages: {

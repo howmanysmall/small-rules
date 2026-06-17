@@ -1,41 +1,25 @@
 ---
 title: "Prefer Module Scope Constants"
-description: "Prefer that screaming snake case variables always be defined using `const`, and always appear at module scope."
+description: "Prefer screaming snake case constants at module scope or the allowed top-level wrapper scope."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/prefer-module-scope-constants` reports code described by its source metadata: `prefer that screaming snake case variables always be defined using 'const', and always appear at module scope`. It reports with the message `You must place screaming snake case at module scope. If this is not meant to be a module-scoped variable, use camelcase instead.`.
+<RuleSummary rule="prefer-module-scope-constants" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-module-scope-constants` and reports the concrete syntax covered by its implementation in `src/rules/prefer-module-scope-constants.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-mustBeModuleScope: You must place screaming snake case at module scope. If this is not meant to be a module-scoped variable, use camelcase instead.
-mustUseConst: You must use `const` when defining screaming snake case variables. If this is not a constant, use camelcase instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-module-scope-constants": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-module-scope-constants" />
 
 ## Examples
 

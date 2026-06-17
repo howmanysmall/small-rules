@@ -69,6 +69,7 @@ const preferEarlyReturn = defineRule({
 				properties: {
 					maximumStatements: {
 						default: 1,
+						description: "Maximum allowed statement count inside the guarded branch before reporting.",
 						minimum: 0,
 						type: "number",
 					},

@@ -1,42 +1,27 @@
 ---
-title: "Prefer Math Min Max"
+title: "Prefer math.min() + math.max()"
 description: "Prefer math.min() and math.max() over simple clamp-like ternaries."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/prefer-math-min-max` reports code described by its source metadata: `prefer math.min() and math.max() over simple clamp-like ternaries`. It reports with the message `Use 'math.min()' or 'math.max()' instead of this ternary comparison.`.
+<RuleSummary rule="prefer-math-min-max" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/prefer-math-min-max` and reports the concrete syntax covered by its implementation in `src/rules/prefer-math-min-max.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-preferMathMethod: Use `math.min()` or `math.max()` instead of this ternary comparison.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/prefer-math-min-max": "error"
-	}
-}
-```
+<RuleOptions rule="prefer-math-min-max" />
 
 ## Examples
 
@@ -87,5 +72,5 @@ math.min(height, 50);
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

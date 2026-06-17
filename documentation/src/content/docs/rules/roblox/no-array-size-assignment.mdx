@@ -4,44 +4,24 @@ description: "Disallow array append assignments using array[array.size()] = valu
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="fixable" />
 <Badge variant="roblox" />
 
-`small-rules/no-array-size-assignment` reports code described by its source metadata: `disallow array append assignments using array[array.size()] = value and prefer push-based appends`. It reports with the message `Do not append with array[array.size()] = value. Use array.push(value) instead.`.
+<RuleSummary rule="no-array-size-assignment" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-array-size-assignment` and reports the concrete syntax covered by its implementation in `src/rules/no-array-size-assignment.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-usePush: Do not append with array[array.size()] = value. Use array.push(value) instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-array-size-assignment": [
-			"error",
-			{
-				"allowAutofix": false
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-array-size-assignment" />
 
 ## Examples
 
@@ -53,7 +33,7 @@ array[array.size()] = value;
 
 </RuleExample>
 
-When auto-fixed, this becomes:
+When `allowAutofix` is enabled, this becomes:
 
 ```ts
 array.push(value);
@@ -93,5 +73,5 @@ array.push(value);
 	<LinkCard title="No Array Constructor Elements" href="/small-rules/rules/roblox/no-array-constructor-elements/" />
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>

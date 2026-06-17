@@ -28,7 +28,6 @@ export const ruleCategoryDefinitions: Record<RuleCategoryKey, RuleCategoryDefini
 			"no-increment-decrement",
 			"no-unused-imports",
 			"no-useless-constants",
-			"no-useless-default",
 			"only-type-imports",
 			"prefer-class-properties",
 			"prefer-early-return",
@@ -58,6 +57,7 @@ export const ruleCategoryDefinitions: Record<RuleCategoryKey, RuleCategoryDefini
 		label: "React Rules",
 		rules: [
 			"ban-react-fc",
+			"memoized-effect-dependencies",
 			"no-cascading-set-state",
 			"no-giant-component",
 			"no-god-components",
@@ -95,7 +95,6 @@ export const ruleCategoryDefinitions: Record<RuleCategoryKey, RuleCategoryDefini
 		rules: [
 			"ban-instances",
 			"enforce-ianitor-check-type",
-			"memoized-effect-dependencies",
 			"no-array-constructor-elements",
 			"no-array-size-assignment",
 			"no-color3-constructor",
@@ -108,6 +107,7 @@ export const ruleCategoryDefinitions: Record<RuleCategoryKey, RuleCategoryDefini
 			"no-redundant-aspect-ratio-constraint",
 			"no-table-create-map",
 			"no-task-wait",
+			"no-useless-default",
 			"no-warn",
 			"prefer-idiv",
 			"prefer-math-min-max",

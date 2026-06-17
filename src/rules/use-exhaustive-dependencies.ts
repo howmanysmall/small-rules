@@ -1096,6 +1096,7 @@ const useExhaustiveDependencies = defineRule({
 				additionalProperties: false,
 				properties: {
 					hooks: {
+						default: [],
 						description: "Array of custom hook entries to check for exhaustive dependencies",
 						items: {
 							additionalProperties: false,

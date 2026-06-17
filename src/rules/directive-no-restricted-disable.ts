@@ -29,7 +29,7 @@ const directiveNoRestrictedDisable = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "disallow `eslint-disable` comments about specific rules",
+			description: "Disallow `oxlint-disable` or `eslint-disable` comments for configured rules.",
 		},
 		messages: {
 			disallow: "Disabling '{{ruleId}}' is not allowed.",

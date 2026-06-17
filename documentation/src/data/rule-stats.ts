@@ -10,8 +10,8 @@ interface RuleCategoryStats {
 	readonly slug: string;
 }
 
-function createRuleCategoryStats(def: RuleCategoryDefinition): RuleCategoryStats {
-	return { count: def.rules.length, label: def.label, slug: def.slug };
+function createRuleCategoryStats(definition: RuleCategoryDefinition): RuleCategoryStats {
+	return { count: definition.rules.length, label: definition.label, slug: definition.slug };
 }
 
 export const ruleCategories: Record<RuleCategoryKey, RuleCategoryStats> = {

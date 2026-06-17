@@ -4,43 +4,22 @@ description: "Disallow commented-out code"
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
-<Badge variant="fixable" />
 
-`small-rules/no-commented-code` reports code described by its source metadata: `disallow commented-out code`. It reports with the message `Commented-out code creates confusion about intent and clutters the codebase. Version control preserves history, making dead code comments unnecessary. Delete the commented code entirely. If needed later, retrieve it from git history.`.
+<RuleSummary rule="no-commented-code" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-commented-code` and reports the concrete syntax covered by its implementation in `src/rules/no-commented-code.ts`.
 
-<Aside type="note">
-
-Rule message:
-
-```text
-commentedCode: Commented-out code creates confusion about intent and clutters the codebase. Version control preserves history, making dead code comments unnecessary. Delete the commented code entirely. If needed later, retrieve it from git history.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-commented-code": [
-			"error",
-			{
-				"maxLines": 0
-			}
-		]
-	}
-}
-```
+<RuleOptions rule="no-commented-code" />
 
 ## Examples
 
@@ -55,7 +34,9 @@ commentedCode: Commented-out code creates confusion about intent and clutters th
 <RuleExample type="pass" title="Passes">
 
 ```ts
-// if (something) {}
+// This comment explains the next branch.
+if (something) {
+}
 ```
 
 </RuleExample>

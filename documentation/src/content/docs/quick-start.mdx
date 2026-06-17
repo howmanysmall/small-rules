@@ -5,11 +5,11 @@ description: "Get small-rules running in your project in minutes."
 
 import { Aside, CardGrid, LinkCard, TabItem, Tabs } from "@astrojs/starlight/components";
 
-import PageHeader from "@/components/PageHeader.astro";
+import PageHeader from "@/components/page-header.astro";
 
 <PageHeader
 	title="Quick Start"
-	subtitle="Install the plugin, add a few rules to oxlint.json, and run your first lint in under two minutes."
+	subtitle="Install the plugin, add a few rules to .oxlintrc.json, and run your first lint in under two minutes."
 	kicker="Getting started"
 />
 
@@ -95,11 +95,11 @@ ni -D @pobammer-ts/small-rules oxlint
 
 ## Configure
 
-Create or update your `oxlint.json` to register the plugin and enable rules:
+Create or update your `.oxlintrc.json` to register the plugin and enable rules:
 
 ```json
 {
-	"plugins": ["@pobammer-ts/small-rules"],
+	"jsPlugins": ["@pobammer-ts/small-rules"],
 	"rules": {
 		"small-rules/no-print": "error",
 		"small-rules/no-warn": "error",

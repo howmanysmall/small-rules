@@ -1,41 +1,25 @@
 ---
 title: "Directive Disable Enable Pair"
-description: "require a `eslint-enable` comment for every `eslint-disable` comment"
+description: "Require a matching enable comment for every `oxlint-disable` or `eslint-disable` block directive."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="suggestion" />
 
-`small-rules/directive-disable-enable-pair` reports code described by its source metadata: `require a 'eslint-enable' comment for every 'eslint-disable' comment`. It reports with the message `Requires 'eslint-enable' directive.`.
+<RuleSummary rule="directive-disable-enable-pair" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/directive-disable-enable-pair` and reports the concrete syntax covered by its implementation in `src/rules/directive-disable-enable-pair.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-missingPair: Requires 'eslint-enable' directive.
-missingRulePair: Requires 'eslint-enable' directive for '{{ruleId}}'.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/directive-disable-enable-pair": ["error", {}]
-	}
-}
-```
+<RuleOptions rule="directive-disable-enable-pair" />
 
 ## Examples
 
@@ -52,8 +36,9 @@ const x = 1;
 <RuleExample type="pass" title="Passes">
 
 ```ts
-// oxlint-disable no-console
+/* oxlint-disable no-console */
 const x = 1;
+/* oxlint-enable no-console */
 ```
 
 </RuleExample>

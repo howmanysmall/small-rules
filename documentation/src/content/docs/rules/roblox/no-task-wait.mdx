@@ -1,42 +1,26 @@
 ---
-title: "No Task Wait"
-description: "Disallow task.wait() calls."
+title: "No task.wait()"
+description: "Disallow task.wait() and Promise.delay(...).await() calls."
 ---
 
 import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
 import RuleExample from "@/components/rule-example.astro";
-import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 <Badge variant="error" />
 <Badge variant="roblox" />
 
-`small-rules/no-task-wait` reports code described by its source metadata: `disallow task.wait() calls`. It reports with the message `Do not use Promise.delay(...).await() in tests. Advance deterministic schedulers or wait for the actual condition instead.`.
+<RuleSummary rule="no-task-wait" />
 
 ## Rule Details
 
 This rule is configured as `small-rules/no-task-wait` and reports the concrete syntax covered by its implementation in `src/rules/no-task-wait.ts`.
 
-<Aside type="note">
-
-Rule messages:
-
-```text
-noPromiseDelayAwait: Do not use Promise.delay(...).await() in tests. Advance deterministic schedulers or wait for the actual condition instead.
-noTaskWait: Do not use task.wait() in tests. Advance deterministic schedulers or wait for the actual condition instead.
-```
-
-</Aside>
-
 ## Configuration
 
-```json
-{
-	"plugins": ["@pobammer-ts/small-rules"],
-	"rules": {
-		"small-rules/no-task-wait": "error"
-	}
-}
-```
+<RuleOptions rule="no-task-wait" />
 
 ## Examples
 
@@ -44,6 +28,10 @@ noTaskWait: Do not use task.wait() in tests. Advance deterministic schedulers or
 
 ```ts
 task.wait();
+```
+
+```ts
+Promise.delay(0).await();
 ```
 
 </RuleExample>
@@ -81,5 +69,5 @@ callback();
 <CardGrid>
 	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
 	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
-	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/react/memoized-effect-dependencies/" />
 </CardGrid>
