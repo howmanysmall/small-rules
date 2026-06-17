@@ -1,0 +1,78 @@
+---
+title: "No Underscore React Props"
+description: "Ban React property names that begin with an underscore in JSX."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-underscore-react-props` reports JSX attributes whose name begins with an underscore. Its source metadata describes it as: `Ban React property names that begin with an underscore in JSX`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-underscore-react-props` and reports the concrete syntax covered by its implementation in `src/rules/no-underscore-react-properties.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+React prop '{{propName}}' starts with '_'. Remove the leading underscore from the prop name.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-underscore-react-props": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```tsx
+<Component _foo={bar} />;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```tsx
+<Component foo={bar} />;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep prop names conventional"
+		description="Leading underscores signal private members in many languages, which is misleading for public React props."
+		href="/small-rules/rules/react/ban-react-fc/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+</CardGrid>

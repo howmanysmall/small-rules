@@ -8,7 +8,6 @@ import HeroSplash from "@/components/HeroSplash.astro";
 import CategoryCard from "@/components/CategoryCard.astro";
 import FeatureCard from "@/components/FeatureCard.astro";
 import Icon from "@/components/Icon.astro";
-import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 import { homeFacts } from "@/data/home-facts";
 
 <HeroSplash
@@ -18,31 +17,25 @@ import { homeFacts } from "@/data/home-facts";
 />
 
 <div class="home-proof reveal">
-	<p class="home-proof-copy">
-		Built for teams that want native oxlint speed without giving up roblox-ts-specific checks.
-	</p>
-	<div class="home-proof-grid">
-		<div class="home-proof-item">
-			<div class="home-proof-value">{homeFacts.totalRules}</div>
-			<div class="home-proof-label">Current rules</div>
-			<div class="home-proof-hint">verified from the plugin source</div>
-		</div>
-		<div class="home-proof-item">
-			<div class="home-proof-value">{homeFacts.fixableRules}</div>
-			<div class="home-proof-label">Auto-fixable</div>
-			<div class="home-proof-hint">rules that currently advertise code fixes</div>
-		</div>
-		<div class="home-proof-item">
-			<div class="home-proof-value">{homeFacts.totalCategories}</div>
-			<div class="home-proof-label">Categories</div>
-			<div class="home-proof-hint">react, roblox, naming, general</div>
-		</div>
-		<div class="home-proof-item">
-			<div class="home-proof-value">Oxlint</div>
-			<div class="home-proof-label">Native plugin</div>
-			<div class="home-proof-hint">no ESLint compatibility layer</div>
-		</div>
-	</div>
+	<p class="home-proof-copy">Native oxlint speed, roblox-ts-specific checks, and fixes where repetitive cleanup should be automatic.</p>
+	<ul class="home-proof-grid">
+		<li class="home-proof-item">
+			<span class="home-proof-value">{homeFacts.totalRules}</span>
+			<span class="home-proof-label">rules</span>
+		</li>
+		<li class="home-proof-item">
+			<span class="home-proof-value">{homeFacts.fixableRules}</span>
+			<span class="home-proof-label">fixable</span>
+		</li>
+		<li class="home-proof-item">
+			<span class="home-proof-value">{homeFacts.totalCategories}</span>
+			<span class="home-proof-label">categories</span>
+		</li>
+		<li class="home-proof-item">
+			<span class="home-proof-value">native</span>
+			<span class="home-proof-label">oxlint plugin</span>
+		</li>
+	</ul>
 </div>
 
 <div class="section-header reveal">
@@ -53,23 +46,32 @@ import { homeFacts } from "@/data/home-facts";
 	<p>Start with installation, copy a minimal config, then browse rules by category as you tighten the codebase.</p>
 </div>
 
-<CardGrid class="home-start-grid reveal">
-	<LinkCard
-		title="Quick Start"
-		href="/small-rules/quick-start/"
-		description="Install the plugin, register it in oxlint, and run the first pass."
-	/>
-	<LinkCard
-		title="Configuration"
-		href="/small-rules/configuration/"
-		description="See plugin registration, rule severity setup, and practical defaults."
-	/>
-	<LinkCard
-		title="Changelog"
-		href="/small-rules/changelog/"
-		description="Track new rules, renamed behavior, and release-level changes."
-	/>
-</CardGrid>
+<div class="home-start-links reveal">
+	<a class="home-start-link" href="/small-rules/quick-start/">
+		<span class="home-start-index">1</span>
+		<span class="home-start-body">
+			<span class="home-start-title">Quick Start</span>
+			<span class="home-start-desc">Install the plugin, register it in oxlint, and run the first pass.</span>
+		</span>
+		<span class="home-start-arrow">→</span>
+	</a>
+	<a class="home-start-link" href="/small-rules/configuration/">
+		<span class="home-start-index">2</span>
+		<span class="home-start-body">
+			<span class="home-start-title">Configuration</span>
+			<span class="home-start-desc">Set severities and define what should block CI versus what should stay advisory.</span>
+		</span>
+		<span class="home-start-arrow">→</span>
+	</a>
+	<a class="home-start-link" href="/small-rules/changelog/">
+		<span class="home-start-index">3</span>
+		<span class="home-start-body">
+			<span class="home-start-title">Changelog</span>
+			<span class="home-start-desc">Track rule additions and behavior changes before you upgrade.</span>
+		</span>
+		<span class="home-start-arrow">→</span>
+	</a>
+</div>
 
 <div class="section-header reveal">
 	<span class="section-eyebrow">

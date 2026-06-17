@@ -1,11 +1,16 @@
+import { ruleCategories, totalCategories, totalRules } from "./rule-stats";
+
+// Counts are derived from the rule sidebar definitions (the source of truth for
+// documented rules) so they cannot drift out of sync with the rule list.
+// `fixableRules` counts rules in `src/rules` that expose an oxlint code fix.
 export const homeFacts = {
 	categories: {
-		general: 26,
-		naming: 7,
-		react: 30,
-		roblox: 23,
+		general: ruleCategories.general.count,
+		naming: ruleCategories.naming.count,
+		react: ruleCategories.react.count,
+		roblox: ruleCategories.roblox.count,
 	},
-	fixableRules: 25,
-	totalCategories: 4,
-	totalRules: 86,
+	fixableRules: 27,
+	totalCategories,
+	totalRules,
 } as const;

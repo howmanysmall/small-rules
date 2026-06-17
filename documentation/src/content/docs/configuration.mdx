@@ -82,18 +82,20 @@ Use oxlint's `overrides` field to apply different rules to different file patter
 You can disable rules for specific lines using directive comments:
 
 ```ts
-// eslint-disable-next-line small-rules/no-print
+// oxlint-disable-next-line small-rules/no-print
 print("Debug output");
 ```
 
-Use `eslint-enable` to re-enable:
+Use `oxlint-enable` to re-enable:
 
 ```ts
-/* eslint-disable small-rules/no-print */
+/* oxlint-disable small-rules/no-print */
 print("Debug 1");
 print("Debug 2");
-/* eslint-enable small-rules/no-print */
+/* oxlint-enable small-rules/no-print */
 ```
+
+<Aside type="note">oxlint also recognizes the equivalent `eslint-disable` / `eslint-enable` directives.</Aside>
 
 ## Recommended Configuration
 

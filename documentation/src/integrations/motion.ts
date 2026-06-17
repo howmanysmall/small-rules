@@ -3,33 +3,49 @@ import type { AstroIntegration } from "astro";
 function injectMotionScript(): string {
 	return `
 (function () {
+  function reveal(el) {
+    el.classList.add("is-visible");
+  }
+
   function setup() {
+    var nodes = document.querySelectorAll(".reveal");
+
     if (!("IntersectionObserver" in window)) {
-      document.querySelectorAll(".reveal").forEach(function (el) {
-        el.classList.add("is-visible");
+      nodes.forEach(reveal);
+    } else {
+      var revealObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              reveal(entry.target);
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { rootMargin: "0px 0px -10% 0px", threshold: 0.05 }
+      );
+
+      nodes.forEach(function (el, i) {
+        if (!el.dataset.revealDelay) {
+          el.dataset.revealDelay = String(Math.min(6, (i % 6) + 1));
+        }
+        // Show anything already at or above the fold immediately so fast
+        // scrolls and anchor jumps never leave a section stuck invisible.
+        if (el.getBoundingClientRect().top < window.innerHeight) {
+          reveal(el);
+        } else {
+          revealObserver.observe(el);
+        }
       });
-      return;
+
+      // Safety net: never let content stay hidden if the observer misses it.
+      window.setTimeout(function () {
+        nodes.forEach(reveal);
+      }, 1500);
     }
 
-    var revealObserver = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            revealObserver.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.05 }
-    );
-
-    document.querySelectorAll(".reveal").forEach(function (el, i) {
-      if (!el.dataset.revealDelay) {
-        el.dataset.revealDelay = String(Math.min(6, (i % 6) + 1));
-      }
-      revealObserver.observe(el);
-    });
-
+    // Only one progress bar, even if setup runs more than once.
+    if (document.querySelector(".scroll-progress")) return;
     var progress = document.createElement("div");
     progress.className = "scroll-progress";
     document.body.appendChild(progress);

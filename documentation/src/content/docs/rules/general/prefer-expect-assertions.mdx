@@ -1,0 +1,85 @@
+---
+title: "Prefer Expect Assertions"
+description: "Enforce expect assertion guards in tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="fixable" />
+
+`small-rules/prefer-expect-assertions` reports tests that omit an assertion guard. Its source metadata describes it as: `Enforce expect assertion guards in Jest tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-expect-assertions` and reports the concrete syntax covered by its implementation in `src/rules/prefer-expect-assertions.ts`. It requires each test to begin with `expect.assertions(<number>)` or `expect.hasAssertions()`, and prefers `expect.assertions(n)` when the number of assertions is statically known.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+Every test should have either `expect.assertions(<number of assertions>)` or `expect.hasAssertions()` as its first expression
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-expect-assertions": "error"
+	}
+}
+```
+
+This rule accepts options including `additionalAssertionFunctions`, `additionalExpectCallNames`, `onlyFunctionsWithAsyncKeyword`, and `onlyFunctionsWithExpectInCallback`.
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+it("adds numbers", () => {
+	expect(add(1, 2)).toBe(3);
+});
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+it("adds numbers", () => {
+	expect.assertions(1);
+	expect(add(1, 2)).toBe(3);
+});
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Catch silently skipped assertions"
+		description="An assertion guard fails the test when asynchronous expectations never run, instead of passing by accident."
+		href="/small-rules/rules/general/prefer-early-return/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="Fixable: oxlint --fix can insert the assertion guard for you when the count is known."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Spec File Extension" href="/small-rules/rules/naming/no-spec-file-extension/" />
+	<LinkCard title="Require Async Suffix" href="/small-rules/rules/naming/require-async-suffix/" />
+</CardGrid>
