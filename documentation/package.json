@@ -13,6 +13,7 @@
 		"@astrojs/mdx": "^6.0.3",
 		"@astrojs/react": "^5.0.7",
 		"@astrojs/starlight": "^0.40.0",
+		"arktype": "catalog:",
 		"astro": "^6.4.6",
 		"react": "^19",
 		"react-dom": "^19",
@@ -23,7 +24,7 @@
 		"@fontsource/bricolage-grotesque": "^5.2.10",
 		"@fontsource/jetbrains-mono": "^5.2.8",
 		"@fontsource/karla": "^5.2.8",
-		"@total-typescript/ts-reset": "^0.6.1",
+		"@total-typescript/ts-reset": "catalog:",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"typescript": "^5.7.3"

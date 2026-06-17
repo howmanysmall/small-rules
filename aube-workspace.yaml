@@ -1,3 +1,7 @@
+catalog:
+  arktype: 2.2.0
+  "@total-typescript/ts-reset": 0.6.1
+
 allowBuilds:
   "@swc/core": true
   esbuild: true

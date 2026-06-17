@@ -3,7 +3,13 @@
 		"incremental": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
-		"paths": { "@/*": ["./src/*"] },
+		"paths": {
+			"@/*": ["./src/*"],
+			"$oxc-rules/*": ["../src/rules/*"],
+			"$oxc-types/*": ["../src/types/*"],
+			"$oxc-utilities/*": ["../src/utilities/*"],
+			"$small-rules": ["../src/index.ts"]
+		},
 		"plugins": [{ "name": "@astrojs/ts-plugin" }],
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo"
 	},

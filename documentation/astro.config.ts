@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
@@ -8,7 +9,13 @@ import { ruleSidebarGroups } from "./src/data/rule-sidebar";
 import contextualMenu from "./src/integrations/contextual-menu";
 import motion from "./src/integrations/motion";
 
-function ensureAstroIntegration<T extends { name: unknown; hooks: unknown }>(integration: T): T {
+function fromRepositoryRoot(path: string): string {
+	return fileURLToPath(new URL(`../${path}`, import.meta.url));
+}
+
+function ensureAstroIntegration<TIntegration extends { name: unknown; hooks: unknown }>(
+	integration: TIntegration,
+): TIntegration {
 	if (typeof integration.name !== "string" || integration.name.length === 0) {
 		const error = new Error(
 			`Expected Astro integration to have a non-empty string "name" property, received: ${String(integration.name)}`,
@@ -89,6 +96,14 @@ export default defineConfig({
 		},
 		css: {
 			transformer: "lightningcss",
+		},
+		resolve: {
+			alias: {
+				"$oxc-rules": fromRepositoryRoot("src/rules"),
+				"$oxc-types": fromRepositoryRoot("src/types"),
+				"$oxc-utilities": fromRepositoryRoot("src/utilities"),
+				"$small-rules": fromRepositoryRoot("src/index.ts"),
+			},
 		},
 	},
 });

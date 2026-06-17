@@ -68,7 +68,7 @@
 		"docs:dev": "nr -F docs dev"
 	},
 	"dependencies": {
-		"arktype": "2.2.0",
+		"arktype": "catalog:",
 		"ignore": "7.0.5",
 		"oxc-parser": "0.135.0",
 		"oxc-resolver": "11.20.0",
