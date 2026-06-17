@@ -59,21 +59,45 @@ hooks {
 
       // JS/TS pipeline — oxlint + biome + oxfmt
       ["oxlint"] = (Builtins.ox_lint) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.mdx",
+          )
         check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
         fix = "nr oxlint --no-error-on-unmatched-pattern --fix {{files}}"
         check_first = true
         batch = false
       }
       ["biome-js"] = (Builtins.biome) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.mdx",
+          )
         check = "nr biome lint --no-errors-on-unmatched {{files}}"
         fix = "nr biome lint --write --no-errors-on-unmatched {{files}}"
         check_first = true
         batch = false
       }
       ["oxfmt-js"] = (Builtins.oxfmt) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts", "*.astro")
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
         fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
         check_first = true
@@ -205,12 +229,36 @@ hooks {
       }
       ["gitleaks"] = (Builtins.gitleaks) {}
       ["oxlint"] = (Builtins.ox_lint) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.mdx",
+          )
         check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
         batch = true
       }
       ["biome-js"] = (Builtins.biome) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.mdx",
+          )
         check = "nr biome lint --no-errors-on-unmatched {{files}}"
         batch = true
       }
@@ -230,6 +278,7 @@ hooks {
             "*.cjs",
             "*.mts",
             "*.cts",
+            "*.astro",
             "*.json",
             "*.jsonc",
             "*.json5",
@@ -283,13 +332,37 @@ hooks {
       }
       ["gitleaks"] = (Builtins.gitleaks) {}
       ["oxlint"] = (Builtins.ox_lint) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.mdx",
+          )
         check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
         fix = "nr oxlint --no-error-on-unmatched-pattern --fix {{files}}"
         batch = true
       }
       ["biome-js"] = (Builtins.biome) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.mdx",
+          )
         check = "nr biome lint --no-errors-on-unmatched {{files}}"
         fix = "nr biome lint --write --no-errors-on-unmatched {{files}}"
         batch = true
@@ -311,6 +384,7 @@ hooks {
             "*.cjs",
             "*.mts",
             "*.cts",
+            "*.astro",
             "*.json",
             "*.jsonc",
             "*.json5",
