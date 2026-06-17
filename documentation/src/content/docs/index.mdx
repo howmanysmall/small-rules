@@ -6,110 +6,131 @@ description: "Oxlint-native rules for TypeScript, React, and roblox-ts"
 import HeroSplash from "@/components/HeroSplash.astro";
 import CategoryCard from "@/components/CategoryCard.astro";
 import FeatureCard from "@/components/FeatureCard.astro";
-import Stat from "@/components/Stat.astro";
 import Icon from "@/components/Icon.astro";
-import { ruleCategories, totalRules, totalCategories } from "@/data/rule-stats";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { homeFacts } from "@/data/home-facts";
 
 <HeroSplash
-	title="Lint roblox-ts the way it should be."
-	subtitle="Hand-crafted oxlint rules for React Luau components, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality. Fast by design, no Babel required."
+	kicker="Oxlint-native linting for roblox-ts"
+	title="small-rules"
+	subtitle={`${homeFacts.totalRules} source-backed rules for React Luau, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality.`}
 />
 
-<div class="stats-bar reveal">
-	<Stat value={totalRules} label="Rules" hint="across all categories" />
-	<Stat value={totalCategories} label="Categories" hint="react, roblox, naming, general" />
-	<Stat value="0" label="Dependencies" hint="pure oxlint plugin" />
-	<Stat value="100%" label="Auto-fixable" hint="where it makes sense" />
+<div class="home-proof reveal">
+	<p class="home-proof-copy">
+		Built for teams that want native oxlint speed without giving up roblox-ts-specific checks.
+	</p>
+	<div class="home-proof-grid">
+		<div class="home-proof-item">
+			<div class="home-proof-value">{homeFacts.totalRules}</div>
+			<div class="home-proof-label">Current rules</div>
+			<div class="home-proof-hint">verified from the plugin source</div>
+		</div>
+		<div class="home-proof-item">
+			<div class="home-proof-value">{homeFacts.fixableRules}</div>
+			<div class="home-proof-label">Auto-fixable</div>
+			<div class="home-proof-hint">rules that currently advertise code fixes</div>
+		</div>
+		<div class="home-proof-item">
+			<div class="home-proof-value">{homeFacts.totalCategories}</div>
+			<div class="home-proof-label">Categories</div>
+			<div class="home-proof-hint">react, roblox, naming, general</div>
+		</div>
+		<div class="home-proof-item">
+			<div class="home-proof-value">Oxlint</div>
+			<div class="home-proof-label">Native plugin</div>
+			<div class="home-proof-hint">no ESLint compatibility layer</div>
+		</div>
+	</div>
 </div>
 
 <div class="section-header reveal">
 	<span class="section-eyebrow">
-		<Icon name="sparkles" size={12} /> Why small-rules
+		<Icon name="rocket" size={12} /> Start here
 	</span>
-	<h2>Built for the roblox-ts ecosystem</h2>
-	<p>Every rule targets a real failure mode in React Luau projects, from lifecycle misuse to unsafe global calls.</p>
+	<h2>Use the docs like a reference, not a landing page</h2>
+	<p>Start with installation, copy a minimal config, then browse rules by category as you tighten the codebase.</p>
 </div>
 
-<div class="feature-grid reveal">
-	<FeatureCard
-		icon="bolt"
-		title="Native speed"
-		description="Runs on oxlint's Rust core — orders of magnitude faster than ESLint for the same checks."
+<CardGrid class="home-start-grid reveal">
+	<LinkCard
+		title="Quick Start"
+		href="/small-rules/quick-start/"
+		description="Install the plugin, register it in oxlint, and run the first pass."
 	/>
-	<FeatureCard
-		icon="puzzle"
-		title="Roblox-aware"
-		description="Understands React Luau patterns: Ianitor lifecycle, Ianitor.Check, useReducer rules, and Roblox UI element conventions."
+	<LinkCard
+		title="Configuration"
+		href="/small-rules/configuration/"
+		description="See plugin registration, rule severity setup, and practical defaults."
 	/>
-	<FeatureCard
-		icon="wand"
-		title="Auto-fixable"
-		description="Many rules ship safe fixes. Run oxlint --fix and let the plugin rewrite your code for you."
+	<LinkCard
+		title="Changelog"
+		href="/small-rules/changelog/"
+		description="Track new rules, renamed behavior, and release-level changes."
 	/>
-	<FeatureCard
-		icon="shield"
-		title="Zero config"
-		description="Sensible defaults out of the box. Add the plugin to oxlint.json and you are catching issues immediately."
-	/>
-</div>
+</CardGrid>
 
 <div class="section-header reveal">
 	<span class="section-eyebrow">
 		<Icon name="search" size={12} /> Browse
 	</span>
-	<h2>Pick a category</h2>
-	<p>
-		{totalRules} rules organized into {totalCategories} focused categories. Each rule page documents options,
-		examples, and rationale.
-	</p>
+	<h2>Pick the part of the codebase you want to harden</h2>
+	<p>These category counts reflect the current plugin, not stale marketing numbers.</p>
 </div>
 
 <div class="category-grid reveal">
 	<CategoryCard
 		slug="ban-react-fc"
 		label="React & React Luau"
-		count={ruleCategories.react.count}
-		description="Patterns for React components, hooks, and React Luau specifics."
+		count={homeFacts.categories.react}
+		description="Component patterns, hooks, memoization, and React Luau-specific checks."
 		category="react"
 	/>
 	<CategoryCard
 		slug="ban-instances"
 		label="Roblox & Luau"
-		count={ruleCategories.roblox.count}
-		description="Roblox-specific patterns: instances, lifecycle, UI elements, modding."
+		count={homeFacts.categories.roblox}
+		description="Instances, Ianitor lifecycle, UI constraints, modding helpers, and unsafe globals."
 		category="roblox"
 	/>
 	<CategoryCard
 		slug="array-type-generic"
 		label="Naming & Conventions"
-		count={ruleCategories.naming.count}
-		description="Naming conventions, type style, and file naming rules."
+		count={homeFacts.categories.naming}
+		description="Naming rules, enum style, async suffixes, and abbreviation cleanup."
 		category="naming"
 	/>
 	<CategoryCard
 		slug="prefer-early-return"
 		label="General Logic & Style"
-		count={ruleCategories.general.count}
-		description="Code quality, common pitfalls, and general TypeScript hygiene."
+		count={homeFacts.categories.general}
+		description="Control flow, imports, directives, and TypeScript hygiene that cuts across the repo."
 		category="general"
 	/>
 </div>
 
-<div class="bottom-cta reveal">
-	<h2>Ready to ship cleaner code?</h2>
-	<p>Install the plugin, add a single line to oxlint.json, and start catching real issues on your next commit.</p>
-	<div class="bottom-cta-actions">
-		<a class="hero-cta hero-cta--primary" href="/small-rules/quick-start/">
-			<Icon name="rocket" size={16} />
-			<span>Get started in 2 minutes</span>
-		</a>
-		<a
-			class="hero-cta hero-cta--ghost"
-			href="https://github.com/howmanysmall/small-rules"
-			rel="noopener"
-			target="_blank">
-			<Icon name="github" size={16} />
-			<span>Star on GitHub</span>
-		</a>
-	</div>
+<div class="section-header reveal">
+	<span class="section-eyebrow">
+		<Icon name="sparkles" size={12} /> Why it exists
+	</span>
+	<h2>Focused rules for the failures oxlint does not catch by itself</h2>
+	<p>The plugin is strongest where roblox-ts teams hit ecosystem-specific footguns and repeated review churn.</p>
+</div>
+
+<div class="feature-grid reveal">
+	<FeatureCard
+		icon="bolt"
+		title="Oxlint-native"
+		description="Ships as a real oxlint plugin, so you keep the native execution model instead of routing through ESLint."
+	/>
+	<FeatureCard
+		icon="puzzle"
+		title="Roblox-aware"
+		description="Targets React Luau patterns, Ianitor lifecycle rules, UI conventions, and Roblox-specific APIs that generic linters miss."
+	/>
+	<FeatureCard
+		icon="wand"
+		title="Fixes where they help"
+		description={`${homeFacts.fixableRules} rules currently expose code fixes, so you can use oxlint --fix for the repetitive cleanup.`}
+	/>
 </div>

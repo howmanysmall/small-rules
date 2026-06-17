@@ -7,23 +7,16 @@ interface Props {
 	readonly title: string;
 }
 
-const { title, subtitle, kicker = "oxlint plugin · v1" } = Astro.props;
+const { title, subtitle, kicker = "Oxlint plugin for roblox-ts" } = Astro.props;
 ---
 
 <section class="hero-splash">
-	<div aria-hidden="true" class="hero-orbs">
-		<span class="hero-orb hero-orb--1"></span>
-		<span class="hero-orb hero-orb--2"></span>
-		<span class="hero-orb hero-orb--3"></span>
-	</div>
-
 	<div class="hero-grid">
 		<div class="hero-copy">
-			<a class="hero-kicker" href="/small-rules/changelog/">
+			<span class="hero-kicker hero-kicker--static">
 				<Icon name="sparkles" size={14} />
 				<span>{kicker}</span>
-				<Icon name="arrow-right" size={12} />
-			</a>
+			</span>
 
 			<h1 class="hero-title">{title}</h1>
 
@@ -57,7 +50,7 @@ const { title, subtitle, kicker = "oxlint plugin · v1" } = Astro.props;
 	<span class="t-s">"rules"</span><span class="t-k">:</span> <span class="t-k">{</span>
 		<span class="t-s">"small-rules/ban-react-fc"</span><span class="t-k">:</span> <span class="t-s">"error"</span><span class="t-k">,</span>
 		<span class="t-s">"small-rules/no-print"</span><span class="t-k">:</span> <span class="t-s">"error"</span><span class="t-k">,</span>
-		<span class="t-s">"small-rules/ban-instances"</span><span class="t-k">:</span> <span class="t-s">"error"</span>
+		<span class="t-s">"small-rules/prefer-early-return"</span><span class="t-k">:</span> <span class="t-s">"warn"</span>
 	<span class="t-k">}</span>
 <span class="t-k">}</span></code></pre>
 		</div>
