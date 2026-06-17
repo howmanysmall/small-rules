@@ -43,6 +43,7 @@
 		"build:local:dev": "nr build && cp dist/index.js plugins/small-rules.js",
 		"changelogithub": "changelogithub",
 		"commitlint": "commitlint",
+		"docs:build": "nr -F docs build",
 		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --fix $a && nr oxfmt $a' _",
 		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched $a && nr oxfmt --no-error-on-unmatched-pattern --check $a' _",
 		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched --fix $a && nr oxfmt --no-error-on-unmatched-pattern $a' _",
@@ -63,7 +64,8 @@
 		"test:fuzz:run": "vitiate fuzz --fuzz-time 10 --config vitest.vitiate.config.ts",
 		"test:mutation": "stryker run",
 		"tsgo": "tsgo",
-		"type-check": "tsgo --noEmit"
+		"type-check": "tsgo --noEmit",
+		"docs:dev": "nr -F docs dev"
 	},
 	"dependencies": {
 		"arktype": "2.2.0",

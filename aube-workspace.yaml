@@ -3,11 +3,10 @@ allowBuilds:
   esbuild: true
   sharp: true
 
-
-
 enableGlobalVirtualStore: true
 packages:
   - documentation
+
 fetchRetries: 5
 fetchRetryMintimeout: 1000
 fetchRetryMaxtimeout: 30000
@@ -79,6 +78,9 @@ minimumReleaseAgeExclude:
   - "@typescript/native-preview-win32-arm64"
   - "@typescript/native-preview-win32-x64"
   - oxfmt
+
+overrides:
+  vite: ^7
 
 minimumReleaseAgeStrict: true
 resolutionMode: time-based

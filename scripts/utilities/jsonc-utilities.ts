@@ -1,5 +1,5 @@
 import { regex } from "arktype";
-import { applyEdits, modify, parse } from "jsonc-parser";
+import { applyEdits, findNodeAtLocation, modify, parse, parseTree } from "jsonc-parser";
 import { diff } from "just-diff";
 
 // oxlint-disable-next-line unicorn/prefer-string-raw -- this is for `regex`
@@ -15,6 +15,29 @@ function detectIndentation(content: string): string {
 }
 
 const MISSING_SPACE_AFTER_COLON_REGEXP = /":(?!\s)/gv;
+
+function isInlineArrayNode(updatedContent: string, parentPath: ReadonlyArray<string | number>): boolean {
+	if (parentPath.length === 0) return false;
+
+	try {
+		const root = parseTree(updatedContent);
+		if (root === undefined) return false;
+
+		const parentNode = findNodeAtLocation(root, [...parentPath]);
+		if (parentNode?.type !== "array") return false;
+
+		return !updatedContent.slice(parentNode.offset, parentNode.offset + parentNode.length).includes("\n");
+	} catch {
+		return false;
+	}
+}
+
+function formatInsertionEdit(edit: { content: string; length: number }, indent: string, inlineSpace: boolean): void {
+	if (edit.content.startsWith(",")) edit.content = `,${indent}${edit.content.slice(1)}`;
+	else if (edit.content.length > 0 && !inlineSpace) edit.content = `${indent}${edit.content}`;
+
+	edit.content = edit.content.replaceAll(MISSING_SPACE_AFTER_COLON_REGEXP, '": ');
+}
 
 /**
  * Edits a JSONC string while preserving comments.
@@ -37,17 +60,16 @@ export function editJsonc<TIn extends object>(
 
 	let updatedContent = content;
 	for (const change of changes) {
-		const edits = modify(updatedContent, change.path, change.value, {});
+		const options = change.op === "add" ? { isArrayInsertion: true } : {};
+		const edits = modify(updatedContent, change.path, change.value, options);
 
 		for (const edit of edits) {
-			if (edit.length === 0) {
-				const indentString = `\n${indentation.repeat(change.path.length)}`;
+			if (edit.length > 0) continue;
 
-				if (edit.content.startsWith(",")) edit.content = `,${indentString}${edit.content.slice(1)}`;
-				else if (edit.content.length > 0) edit.content = `${indentString}${edit.content}`;
+			const inlineSpace = isInlineArrayNode(updatedContent, change.path.slice(0, -1));
+			const indent = inlineSpace ? " " : `\n${indentation.repeat(change.path.length)}`;
 
-				edit.content = edit.content.replaceAll(MISSING_SPACE_AFTER_COLON_REGEXP, '": ');
-			}
+			formatInsertionEdit(edit, indent, inlineSpace);
 		}
 
 		updatedContent = applyEdits(updatedContent, edits);
@@ -73,17 +95,16 @@ export function editJsoncNoValidate(content: string, mutate: (draft: object) => 
 
 	let updatedContent = content;
 	for (const change of changes) {
-		const edits = modify(updatedContent, change.path, change.value, {});
+		const options = change.op === "add" ? { isArrayInsertion: true } : {};
+		const edits = modify(updatedContent, change.path, change.value, options);
 
 		for (const edit of edits) {
-			if (edit.length === 0) {
-				const indentString = `\n${indentation.repeat(change.path.length)}`;
+			if (edit.length > 0) continue;
 
-				if (edit.content.startsWith(",")) edit.content = `,${indentString}${edit.content.slice(1)}`;
-				else if (edit.content.length > 0) edit.content = `${indentString}${edit.content}`;
+			const inlineSpace = isInlineArrayNode(updatedContent, change.path.slice(0, -1));
+			const indent = inlineSpace ? " " : `\n${indentation.repeat(change.path.length)}`;
 
-				edit.content = edit.content.replaceAll(MISSING_SPACE_AFTER_COLON_REGEXP, '": ');
-			}
+			formatInsertionEdit(edit, indent, inlineSpace);
 		}
 
 		updatedContent = applyEdits(updatedContent, edits);

@@ -1,6 +1,7 @@
 # Ignore node.js for the future
 **/node_modules/**
 .pnpm-store/
+**/.astro/**
 
 # output
 out
