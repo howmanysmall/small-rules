@@ -1,12 +1,14 @@
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
+import { isStringRaw } from "./type-utilities";
+
 import type { ESTree } from "oxlint-plugin-utilities";
 
 export function isHookCall(node: ESTree.Node | null, hookName: ReadonlySet<string> | string): boolean {
 	return (
 		node?.type === "CallExpression" &&
 		node.callee.type === "Identifier" &&
-		(typeof hookName === "string" ? node.callee.name === hookName : hookName.has(node.callee.name))
+		(isStringRaw(hookName) ? node.callee.name === hookName : hookName.has(node.callee.name))
 	);
 }
 

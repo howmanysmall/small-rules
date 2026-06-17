@@ -1,3 +1,5 @@
+import { isStringRaw } from "$oxc-utilities/type-utilities";
+
 import type { Detector } from "./detector";
 
 const WHITESPACE_GLOBAL_REGEX = /\s+/gu;
@@ -41,7 +43,7 @@ type CompiledPattern = RegExpPattern | StringPattern;
  */
 export function createContainsDetector(probability: number, patterns: ReadonlyArray<RegExp | string>): Detector {
 	const compiledPatterns: ReadonlyArray<CompiledPattern> = patterns.map((pattern) =>
-		typeof pattern === "string"
+		isStringRaw(pattern)
 			? { pattern, type: "string" }
 			: { pattern: new RegExp(pattern.source, "gu"), type: "regexp" },
 	);

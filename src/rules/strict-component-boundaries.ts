@@ -1,6 +1,7 @@
 import path from "node:path";
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
@@ -44,7 +45,7 @@ const strictComponentBoundaries = defineRule({
 		return {
 			ImportDeclaration(node): void {
 				const importSource = node.source.value;
-				if (typeof importSource !== "string" || !importSource.startsWith(".")) return;
+				if (!(isStringRaw(importSource) && importSource.startsWith("."))) return;
 				if (allowPatterns.some((regexp) => regexp.test(importSource))) return;
 
 				const { filename } = context;

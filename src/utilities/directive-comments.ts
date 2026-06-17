@@ -1,3 +1,5 @@
+import { isStringRaw } from "./type-utilities";
+
 import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
 
@@ -83,7 +85,7 @@ export function getOptionalStringArrayProperty(
 	const strings = new Array<string>();
 	let size = 0;
 	for (const item of property) {
-		if (typeof item !== "string") return undefined;
+		if (!isStringRaw(item)) return undefined;
 		strings[size++] = item;
 	}
 

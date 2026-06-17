@@ -1,5 +1,5 @@
 import { evilTernary } from "$oxc-utilities/evil-ternary-utilities";
-import { isRecord, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import {
 	DEFAULT_ALLOW_LIST,
@@ -310,7 +310,7 @@ function normalizeIgnorePatterns(options: unknown): ReadonlyArray<RegExp> {
 
 	if (Array.isArray(normalizedOptions?.ignore)) {
 		for (const pattern of normalizedOptions.ignore) {
-			if (typeof pattern === "string" || pattern instanceof RegExp) ignorePatterns.push(pattern);
+			if (isStringRaw(pattern) || pattern instanceof RegExp) ignorePatterns.push(pattern);
 		}
 	}
 

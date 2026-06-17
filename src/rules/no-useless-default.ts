@@ -1,3 +1,4 @@
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import defaultProperties from "../default-properties.json";
@@ -116,10 +117,6 @@ interface DefaultPropertyMatch {
 	readonly value: CanonicalValue;
 }
 
-function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
-	return typeof value === "object" && value !== null;
-}
-
 function isIdentifierNamed(
 	node: ESTree.Node,
 	name: string,
@@ -136,7 +133,7 @@ function isNumericLiteral(node: ESTree.Expression): node is ESTree.NumericLitera
 }
 
 function isStringLiteral(node: ESTree.Expression): node is ESTree.StringLiteral {
-	return node.type === "Literal" && typeof node.value === "string";
+	return node.type === "Literal" && isStringRaw(node.value);
 }
 
 function getIntrinsicClassName(node: ESTree.JSXElementName): string | undefined {
@@ -182,7 +179,7 @@ function isCanonicalNumericComponent(value: unknown): value is CanonicalNumericC
 }
 
 function isCanonicalValue(value: unknown): value is CanonicalValue {
-	if (!isRecord(value) || typeof value.type !== "string" || !("value" in value)) return false;
+	if (!(isRecord(value) && isStringRaw(value.type) && "value" in value)) return false;
 
 	switch (value.type) {
 		case "bool":
@@ -205,7 +202,7 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 		}
 
 		case "Enum":
-			return typeof value.enumType === "string" && typeof value.value === "string";
+			return isStringRaw(value.enumType) && isStringRaw(value.value);
 
 		case "number":
 			return isCanonicalNumericComponent(value.value);
@@ -218,7 +215,7 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 		}
 
 		case "string":
-			return typeof value.value === "string";
+			return isStringRaw(value.value);
 
 		case "UDim":
 		case "Vector2": {
@@ -260,8 +257,8 @@ function containsIdentifierReference(
 		return false;
 	}
 
-	if (!isRecord(value)) return false;
-	if (visitedValues.has(value)) return false;
+	if (!isRecord(value) || visitedValues.has(value)) return false;
+
 	visitedValues.add(value);
 	if (value.type === "Identifier" && value.name === identifierName) return true;
 

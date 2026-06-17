@@ -1,6 +1,6 @@
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
@@ -668,7 +668,7 @@ function isNumericArray(array: ReadonlyArray<unknown>): array is Array<number> {
 	return array.length > 0 && typeof array[0] === "number";
 }
 function isStringArray(array: ReadonlyArray<unknown>): array is Array<string> {
-	return array.length > 0 && typeof array[0] === "string";
+	return array.length > 0 && isStringRaw(array[0]);
 }
 
 function convertStableResult(

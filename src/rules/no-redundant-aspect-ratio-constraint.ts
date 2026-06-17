@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -42,7 +43,7 @@ function getImportSourceFromVariable(variable: ScopeVariable): string | undefine
 	for (const definition of variable.defs) {
 		if (definition.type !== "ImportBinding") continue;
 		const { parent } = definition.node;
-		if (parent?.type === "ImportDeclaration" && typeof parent.source.value === "string") return parent.source.value;
+		if (parent?.type === "ImportDeclaration" && isStringRaw(parent.source.value)) return parent.source.value;
 	}
 	return undefined;
 }
