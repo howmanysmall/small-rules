@@ -1,0 +1,95 @@
+---
+title: "Directive Require Description"
+description: "require description for `eslint-disable` and `eslint-enable` directives"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/directive-require-description` reports code described by its source metadata: `require description for 'eslint-disable' and 'eslint-enable' directives`. It reports with the message `Missing description for '{{kind}}' comment.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/directive-require-description` and reports the concrete syntax covered by its implementation in `src/rules/directive-require-description.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+missingDescription: Missing description for '{{kind}}' comment.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/directive-require-description": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+/* oxlint-disable typescript/no-explicit-any */
+export type Value = any;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+/* oxlint-disable typescript/no-explicit-any -- legacy API surface */
+export type Value = any;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/directive-require-description/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+</CardGrid>

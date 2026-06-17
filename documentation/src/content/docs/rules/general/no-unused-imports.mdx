@@ -1,0 +1,100 @@
+---
+title: "No Unused Imports"
+description: "Disallow unused imports"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="fixable" />
+
+`small-rules/no-unused-imports` reports code described by its source metadata: `disallow unused imports`. It reports with the message `Import '{{identifierName}}' is defined but never used.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-unused-imports` and reports the concrete syntax covered by its implementation in `src/rules/no-unused-imports.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+unusedImport: Import '{{identifierName}}' is defined but never used.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-unused-imports": [
+			"error",
+			{
+				"checkJSDoc": true
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import UnusedDefault from "./module";
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+import { unused2 } from "./module";
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import UsedDefault from "./module";
+UsedDefault();
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/no-unused-imports/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive No Unused Enable" href="/small-rules/rules/general/directive-no-unused-enable/" />
+	<LinkCard title="Only Type Imports" href="/small-rules/rules/general/only-type-imports/" />
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+</CardGrid>

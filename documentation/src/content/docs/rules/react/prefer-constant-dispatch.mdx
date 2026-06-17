@@ -1,0 +1,98 @@
+---
+title: "Prefer Constant Dispatch"
+description: "Disallow inline useReducer action objects that could be module-level constants."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/prefer-constant-dispatch` reports code described by its source metadata: `disallow inline useReducer action objects that could be module-level constants`. It reports with the message `Move this inline useReducer action object to a module-level constant.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-constant-dispatch` and reports the concrete syntax covered by its implementation in `src/rules/prefer-constant-dispatch.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+preferConstantDispatch: Move this inline useReducer action object to a module-level constant.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-constant-dispatch": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+const type = "OPEN";
+
+function Component() {
+	const [state, dispatch] = useReducer(reducer, initialState);
+
+	dispatch({ type });
+
+	return state;
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+function Component(type) {
+	const [state, dispatch] = useReducer(reducer, initialState);
+
+	dispatch({ type });
+
+	return state;
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/prefer-constant-dispatch/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+	<LinkCard title="No God Components" href="/small-rules/rules/react/no-god-components/" />
+</CardGrid>

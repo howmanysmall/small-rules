@@ -144,6 +144,7 @@
 		"sortSideEffects": false
 	},
 	"sortPackageJson": true,
+	"sortTailwindcss": true,
 	"tabWidth": 4,
 	"trailingComma": "all",
 	"useTabs": true

@@ -1,0 +1,87 @@
+---
+title: "Strict Component Boundaries"
+description: "Prevent module imports between components."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/strict-component-boundaries` reports code described by its source metadata: `prevent module imports between components`. It reports with the message `Do not reach into an individual component's folder for nested modules. Import from the closest shared components folder instead.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/strict-component-boundaries` and reports the concrete syntax covered by its implementation in `src/rules/strict-component-boundaries.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+noReachingIntoComponent: Do not reach into an individual component's folder for nested modules. Import from the closest shared components folder instead.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/strict-component-boundaries": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import someThing from "../Bar/any-path";
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import { someThing } from "./components";
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/strict-component-boundaries/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+	<LinkCard
+		title="No Inline Property On Memo Component"
+		href="/small-rules/rules/react/no-inline-property-on-memo-component/"
+	/>
+	<LinkCard title="Prefer Local Portal Component" href="/small-rules/rules/react/prefer-local-portal-component/" />
+	<LinkCard title="React Hooks Strict Return" href="/small-rules/rules/react/react-hooks-strict-return/" />
+</CardGrid>

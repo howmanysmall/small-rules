@@ -1,0 +1,97 @@
+---
+title: "Prefer Sequence Overloads"
+description: "Prefer direct ColorSequence and NumberSequence overloads over two-keypoint arrays."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+<Badge variant="roblox" />
+
+`small-rules/prefer-sequence-overloads` reports code described by its source metadata: `prefer direct ColorSequence and NumberSequence overloads over two-keypoint arrays`. It reports with the message `Use the single-value sequence overload instead of two identical keypoints.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-sequence-overloads` and reports the concrete syntax covered by its implementation in `src/rules/prefer-sequence-overloads.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+preferSingleOverload: Use the single-value sequence overload instead of two identical keypoints.
+preferTwoPointOverload: Use the two-value sequence overload instead of constructing a two-keypoint array.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-sequence-overloads": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+const gradient = new ColorSequence(new Color3(), new Color3());
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+const gradient = new ColorSequence(new Color3());
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+new ColorSequence([
+	new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+	new ColorSequenceKeypoint(0.5, Color3.fromRGB(128, 128, 128)),
+	new ColorSequenceKeypoint(1, Color3.fromRGB(0, 0, 0)),
+]);
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Respect Roblox semantics"
+		description="Roblox and Luau APIs have runtime costs and conventions that generic JavaScript rules do not catch."
+		href="/small-rules/rules/roblox/prefer-sequence-overloads/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
+	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Misleading Lua Tuple Checks" href="/small-rules/rules/roblox/misleading-lua-tuple-checks/" />
+</CardGrid>

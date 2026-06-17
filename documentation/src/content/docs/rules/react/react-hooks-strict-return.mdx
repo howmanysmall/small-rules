@@ -1,0 +1,88 @@
+---
+title: "React Hooks Strict Return"
+description: "Restrict React hooks to object returns or short tuples."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/react-hooks-strict-return` reports code described by its source metadata: `restrict React hooks to object returns or short tuples`. It reports with the message `Hook returns more than {{count}} values. Return an object with named properties instead.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/react-hooks-strict-return` and reports the concrete syntax covered by its implementation in `src/rules/react-hooks-strict-return.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+tooManyReturnValues: Hook returns more than {{count}} values. Return an object with named properties instead.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/react-hooks-strict-return": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+function useFoo() {
+	return [1, 2, 3];
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+function useFoo() {
+	return [1];
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/react-hooks-strict-return/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Strict Component Boundaries" href="/small-rules/rules/react/strict-component-boundaries/" />
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+</CardGrid>

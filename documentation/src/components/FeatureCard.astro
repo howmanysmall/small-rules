@@ -1,0 +1,21 @@
+---
+import Icon from "./Icon.astro";
+
+type IconName = "bolt" | "wand" | "shield" | "puzzle" | "sparkles" | "rocket" | "search";
+
+interface Props {
+	description: string;
+	icon: IconName;
+	title: string;
+}
+
+const { icon, title, description } = Astro.props;
+---
+
+<div class="feature-card">
+	<div class="feature-card-icon">
+		<Icon name={icon} size={20} />
+	</div>
+	<h3 class="feature-card-title">{title}</h3>
+	<p class="feature-card-desc">{description}</p>
+</div>

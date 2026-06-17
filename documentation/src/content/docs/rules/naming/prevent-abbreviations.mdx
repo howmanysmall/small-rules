@@ -1,0 +1,92 @@
+---
+title: "Prevent Abbreviations"
+description: "Prevent abbreviations."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+
+`small-rules/prevent-abbreviations` reports code described by its source metadata: `prevent abbreviations`. It reports with the message `The {{nameTypeText}} '{{discouragedName}}' should be named '{{replacement}}'. A more descriptive name will do too.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prevent-abbreviations` and reports the concrete syntax covered by its implementation in `src/rules/prevent-abbreviations.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+replace: The {{nameTypeText}} `{{discouragedName}}` should be named `{{replacement}}`. A more descriptive name will do too.
+suggestion: Please rename the {{nameTypeText}} `{{discouragedName}}`. Suggested names are: {{replacementsText}}. A more descriptive name will do too.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prevent-abbreviations": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+const err = new Error();
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+const error = new Error();
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+const ERR = "error";
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep names consistent"
+		description="Consistent naming makes APIs easier to scan and reduces review churn."
+		href="/small-rules/rules/naming/prevent-abbreviations/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Array Type Generic" href="/small-rules/rules/naming/array-type-generic/" />
+	<LinkCard title="Ban Types" href="/small-rules/rules/naming/ban-types/" />
+	<LinkCard title="No Empty Array Literal" href="/small-rules/rules/naming/no-empty-array-literal/" />
+	<LinkCard title="No Shorthand Names" href="/small-rules/rules/naming/no-shorthand-names/" />
+</CardGrid>

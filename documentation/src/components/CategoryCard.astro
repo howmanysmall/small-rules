@@ -1,0 +1,35 @@
+---
+import Icon from "./Icon.astro";
+
+type CategoryKey = "react" | "roblox" | "naming" | "general";
+
+interface Props {
+	category: CategoryKey;
+	count: number;
+	description: string;
+	label: string;
+	slug: string;
+}
+
+const { slug, label, count, description, category } = Astro.props;
+const iconName = category;
+const slugPrefix = "/small-rules/rules/";
+---
+
+<a class="category-card" data-category={category} href={`${slugPrefix}${category}/${slug}/`}>
+	<span aria-hidden="true" class="category-card-glow"></span>
+	<div class="category-card-icon">
+		<Icon name={iconName} size={22} />
+	</div>
+	<div class="category-card-body">
+		<div class="category-card-head">
+			<h3 class="category-card-title">{label}</h3>
+			<span class="category-card-count">{count}</span>
+		</div>
+		<p class="category-card-desc">{description}</p>
+		<span class="category-card-cta">
+			Browse rules
+			<Icon name="arrow-right" size={14} />
+		</span>
+	</div>
+</a>

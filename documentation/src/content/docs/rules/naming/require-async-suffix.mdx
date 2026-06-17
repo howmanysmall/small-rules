@@ -1,0 +1,88 @@
+---
+title: "Require Async Suffix"
+description: "Require async function names to end with Async."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/require-async-suffix` reports code described by its source metadata: `require async function names to end with Async`. It reports with the message `Async functions must have names that end with Async.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/require-async-suffix` and reports the concrete syntax covered by its implementation in `src/rules/require-async-suffix.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+missingAsyncSuffix: Async functions must have names that end with Async.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/require-async-suffix": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+async function getAll(): Promise<string> {
+	return "value";
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+async function getAllAsync(): Promise<string> {
+	return "value";
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep names consistent"
+		description="Consistent naming makes APIs easier to scan and reduces review churn."
+		href="/small-rules/rules/naming/require-async-suffix/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Array Type Generic" href="/small-rules/rules/naming/array-type-generic/" />
+	<LinkCard title="Ban Types" href="/small-rules/rules/naming/ban-types/" />
+	<LinkCard title="No Empty Array Literal" href="/small-rules/rules/naming/no-empty-array-literal/" />
+	<LinkCard title="No Shorthand Names" href="/small-rules/rules/naming/no-shorthand-names/" />
+</CardGrid>

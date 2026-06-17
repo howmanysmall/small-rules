@@ -1,0 +1,115 @@
+---
+title: "small-rules"
+description: "Oxlint-native rules for TypeScript, React, and roblox-ts"
+---
+
+import HeroSplash from "@/components/HeroSplash.astro";
+import CategoryCard from "@/components/CategoryCard.astro";
+import FeatureCard from "@/components/FeatureCard.astro";
+import Stat from "@/components/Stat.astro";
+import Icon from "@/components/Icon.astro";
+import { ruleCategories, totalRules, totalCategories } from "@/data/rule-stats";
+
+<HeroSplash
+	title="Lint roblox-ts the way it should be."
+	subtitle="Hand-crafted oxlint rules for React Luau components, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality. Fast by design, no Babel required."
+/>
+
+<div class="stats-bar reveal">
+	<Stat value={totalRules} label="Rules" hint="across all categories" />
+	<Stat value={totalCategories} label="Categories" hint="react, roblox, naming, general" />
+	<Stat value="0" label="Dependencies" hint="pure oxlint plugin" />
+	<Stat value="100%" label="Auto-fixable" hint="where it makes sense" />
+</div>
+
+<div class="section-header reveal">
+	<span class="section-eyebrow">
+		<Icon name="sparkles" size={12} /> Why small-rules
+	</span>
+	<h2>Built for the roblox-ts ecosystem</h2>
+	<p>Every rule targets a real failure mode in React Luau projects, from lifecycle misuse to unsafe global calls.</p>
+</div>
+
+<div class="feature-grid reveal">
+	<FeatureCard
+		icon="bolt"
+		title="Native speed"
+		description="Runs on oxlint's Rust core — orders of magnitude faster than ESLint for the same checks."
+	/>
+	<FeatureCard
+		icon="puzzle"
+		title="Roblox-aware"
+		description="Understands React Luau patterns: Ianitor lifecycle, Ianitor.Check, useReducer rules, and Roblox UI element conventions."
+	/>
+	<FeatureCard
+		icon="wand"
+		title="Auto-fixable"
+		description="Many rules ship safe fixes. Run oxlint --fix and let the plugin rewrite your code for you."
+	/>
+	<FeatureCard
+		icon="shield"
+		title="Zero config"
+		description="Sensible defaults out of the box. Add the plugin to oxlint.json and you are catching issues immediately."
+	/>
+</div>
+
+<div class="section-header reveal">
+	<span class="section-eyebrow">
+		<Icon name="search" size={12} /> Browse
+	</span>
+	<h2>Pick a category</h2>
+	<p>
+		{totalRules} rules organized into {totalCategories} focused categories. Each rule page documents options,
+		examples, and rationale.
+	</p>
+</div>
+
+<div class="category-grid reveal">
+	<CategoryCard
+		slug="ban-react-fc"
+		label="React & React Luau"
+		count={ruleCategories.react.count}
+		description="Patterns for React components, hooks, and React Luau specifics."
+		category="react"
+	/>
+	<CategoryCard
+		slug="ban-instances"
+		label="Roblox & Luau"
+		count={ruleCategories.roblox.count}
+		description="Roblox-specific patterns: instances, lifecycle, UI elements, modding."
+		category="roblox"
+	/>
+	<CategoryCard
+		slug="array-type-generic"
+		label="Naming & Conventions"
+		count={ruleCategories.naming.count}
+		description="Naming conventions, type style, and file naming rules."
+		category="naming"
+	/>
+	<CategoryCard
+		slug="prefer-early-return"
+		label="General Logic & Style"
+		count={ruleCategories.general.count}
+		description="Code quality, common pitfalls, and general TypeScript hygiene."
+		category="general"
+	/>
+</div>
+
+<div class="bottom-cta reveal">
+	<h2>Ready to ship cleaner code?</h2>
+	<p>Install the plugin, add a single line to oxlint.json, and start catching real issues on your next commit.</p>
+	<div class="bottom-cta-actions">
+		<a class="hero-cta hero-cta--primary" href="/small-rules/quick-start/">
+			<Icon name="rocket" size={16} />
+			<span>Get started in 2 minutes</span>
+		</a>
+		<a
+			class="hero-cta hero-cta--ghost"
+			href="https://github.com/howmanysmall/small-rules"
+			rel="noopener"
+			target="_blank">
+			<Icon name="github" size={16} />
+			<span>Star on GitHub</span>
+		</a>
+	</div>
+</div>

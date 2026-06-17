@@ -1,0 +1,131 @@
+---
+title: "No Useless Use Effect"
+description: "Disallow effects that only derive state, notify parent callbacks, reset state on prop changes, or route event side effects through state."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/no-useless-use-effect` reports code described by its source metadata: `disallow effects that only derive state, notify parent callbacks, reset state on prop changes, or route event side effects through state`. It reports with the message `This effect adjusts state when a prop changes. Adjust the state directly during rendering or restructure to avoid this need.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-useless-use-effect` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-use-effect.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+adjustState: This effect adjusts state when a prop changes. Adjust the state directly during rendering or restructure to avoid this need.
+derivedState: This effect only derives state from properties or state. Compute the value during rendering instead of useEffect.
+duplicateDeps: Multiple effects have identical dependency arrays. Combine them into a single effect for better performance.
+effectChain: This effect is part of a chain of effects that only derive state from other effects. Consolidate the logic into event handlers or compute during rendering.
+emptyEffect: This effect has an empty body and should be removed.
+eventFlag: This effect only reacts to a state flag. Call the side effect directly in the event handler instead of toggling state.
+eventSpecificLogic: This effect runs event-specific logic based on state. Move this logic to the event handler that triggers the state change.
+externalStore: This effect subscribes to an external store and syncs to state. Use `useSyncExternalStore` instead.
+initializeState: This effect initializes state with a constant value. Pass the value as the useState initializer instead.
+logOnly: This effect only contains console.log calls. Remove it (debug leftover) or move the logging to an event handler.
+mixedDerivedState: This effect contains state setter calls that derive values from props or state mixed with other operations. Extract the setter calls and compute values during rendering.
+notifyParent: This effect only notifies a parent via a property callback. Call the callback in the event handler instead of useEffect.
+passRefToParent: This effect passes a ref to a parent callback. Use `forwardRef` or `useImperativeHandle` instead.
+resetState: This effect resets state when a prop changes. Pass a `key` prop to the component instead to reset all state automatically.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-useless-use-effect": [
+			"error",
+			{
+				"environment": "roblox-ts",
+				"hooks": ["useEffect", "useLayoutEffect", "useInsertionEffect"],
+				"propertyCallbackPrefixes": ["on"],
+				"refHooks": ["useRef"],
+				"reportAdjustState": true,
+				"reportDerivedState": true,
+				"reportDuplicateDeps": true,
+				"reportEffectChain": true,
+				"reportEmptyEffect": true,
+				"reportEventFlag": true,
+				"reportEventSpecificLogic": true,
+				"reportExternalStore": true,
+				"reportInitializeState": true,
+				"reportLogOnly": true,
+				"reportMixedDerivedState": true,
+				"reportNotifyParent": true,
+				"reportPassRefToParent": true,
+				"reportResetState": true,
+				"stateHooks": ["useState", "useReducer"]
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import { "useEffect" as useEffectAlias, useState } from "@rbxts/react";
+
+function Component(properties) {
+	const [count, setCount] = useState(0);
+	useEffectAlias(() => {
+		setCount(properties.initialCount);
+	}, [properties.initialCount]);
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+	useEffect();
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-useless-use-effect/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Useless Use Memo" href="/small-rules/rules/react/no-useless-use-memo/" />
+	<LinkCard title="No Useless Use Spring" href="/small-rules/rules/react/no-useless-use-spring/" />
+	<LinkCard title="Require Named Effect Functions" href="/small-rules/rules/react/require-named-effect-functions/" />
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+</CardGrid>

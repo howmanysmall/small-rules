@@ -1,0 +1,94 @@
+---
+title: "Prefer Singular Enums"
+description: "Prefer singular naming for enums."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/prefer-singular-enums` reports code described by its source metadata: `prefer singular naming for enums`. It reports with the message `Enum name "{{name}}" should be singular.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-singular-enums` and reports the concrete syntax covered by its implementation in `src/rules/prefer-singular-enums.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+notSingular: Enum name "{{name}}" should be singular.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-singular-enums": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+enum SortOrders {
+	MostRecent,
+	LeastRecent,
+	Newest,
+	Oldest,
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+enum SortOrder {
+	MostRecent,
+	LeastRecent,
+	Newest,
+	Oldest,
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep names consistent"
+		description="Consistent naming makes APIs easier to scan and reduces review churn."
+		href="/small-rules/rules/naming/prefer-singular-enums/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Prefer Pascal Case Enums" href="/small-rules/rules/naming/prefer-pascal-case-enums/" />
+	<LinkCard title="Array Type Generic" href="/small-rules/rules/naming/array-type-generic/" />
+	<LinkCard title="Ban Types" href="/small-rules/rules/naming/ban-types/" />
+	<LinkCard title="No Empty Array Literal" href="/small-rules/rules/naming/no-empty-array-literal/" />
+</CardGrid>

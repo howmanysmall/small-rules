@@ -1,0 +1,106 @@
+---
+title: "No Identity Map"
+description: "Disallow pointless identity `.map()` calls that return the parameter unchanged"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+
+`small-rules/no-identity-map` reports code described by its source metadata: `disallow pointless identity '.map()' calls that return the parameter unchanged`. It reports with the message `Pointless identity '.map()' call on Array. Use 'table.clone(array)' or '[...array]' instead.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-identity-map` and reports the concrete syntax covered by its implementation in `src/rules/no-identity-map.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+identityArrayMap: Pointless identity `.map()` call on Array. Use `table.clone(array)` or `[...array]` instead.
+identityBindingMap: Pointless identity `.map()` call on Binding. Use the original binding directly.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-identity-map": [
+			"error",
+			{
+				"bindingPatterns": ["binding"]
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+scaleBinding.map((v) => v);
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+scaleBinding;
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+binding.map((v) => v + 1);
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/no-identity-map/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+</CardGrid>

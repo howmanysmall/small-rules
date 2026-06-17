@@ -1,0 +1,95 @@
+---
+title: "Directive No Use"
+description: "disallow ESLint directive-comments"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/directive-no-use` reports code described by its source metadata: `disallow ESLint directive-comments`. It reports with the message `Unexpected ESLint directive comment.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/directive-no-use` and reports the concrete syntax covered by its implementation in `src/rules/directive-no-use.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+disallow: Unexpected ESLint directive comment.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/directive-no-use": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+/* oxlint-disable no-console */
+const x = 1;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+/* oxlint-disable no-console */
+const x = 1;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/directive-no-use/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+</CardGrid>

@@ -1,0 +1,90 @@
+---
+title: "No Error"
+description: "Use throw instead of error()."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-error` reports code described by its source metadata: `use throw instead of error()`. It reports with the message `Replace error(...) with throw.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-error` and reports the concrete syntax covered by its implementation in `src/rules/no-error.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+noError: Replace error(...) with throw.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-error": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+error("Hello");
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+Log.error("Hello");
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/no-error/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Require Throw Error Capture" href="/small-rules/rules/general/require-throw-error-capture/" />
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+</CardGrid>

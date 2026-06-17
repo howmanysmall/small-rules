@@ -1,0 +1,73 @@
+---
+title: "No Memo Children"
+description: "Documentation placeholder for small-rules/no-memo-children; rule source could not be located."
+---
+
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+This page is reserved for `small-rules/no-memo-children`, but no matching source file was found at `src/rules/no-memo-children.ts` in the current repository checkout. The rule is documented as unavailable instead of inventing behavior that is not backed by source or tests.
+
+## Rule Details
+
+<Aside type="caution">
+
+The rule source could not be located. Check the [small-rules GitHub repository](https://github.com/howmanysmall/small-rules) for the latest implementation status before enabling this rule.
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-memo-children": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+// No failing example is published because src/rules/no-memo-children.ts is missing.
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+// No passing example is published because tests/no-memo-children.test.ts is missing.
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Avoid undocumented behavior"
+		description="The page tells you the rule is unavailable rather than guessing at semantics."
+		href="https://github.com/howmanysmall/small-rules"
+	/>
+	<LinkCard
+		title="Check the source"
+		description="Use the repository as the source of truth for rules that are not present in this checkout."
+		href="https://github.com/howmanysmall/small-rules/tree/main/src/rules"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard
+		title="No Inline Property On Memo Component"
+		href="/small-rules/rules/react/no-inline-property-on-memo-component/"
+	/>
+	<LinkCard title="No New Instance In Use Memo" href="/small-rules/rules/react/no-new-instance-in-use-memo/" />
+	<LinkCard title="No Unused Use Memo" href="/small-rules/rules/react/no-unused-use-memo/" />
+	<LinkCard title="No Use Memo Simple Expression" href="/small-rules/rules/react/no-use-memo-simple-expression/" />
+</CardGrid>

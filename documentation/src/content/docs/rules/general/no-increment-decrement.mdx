@@ -1,0 +1,106 @@
+---
+title: "No Increment Decrement"
+description: "Disallow standalone `++` and `--` statements."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+
+`small-rules/no-increment-decrement` reports code described by its source metadata: `disallow standalone '++' and '--' statements`. It reports with the message `Do not use standalone '--'. Use '-= 1' instead.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-increment-decrement` and reports the concrete syntax covered by its implementation in `src/rules/no-increment-decrement.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+noDecrement: Do not use standalone `--`. Use `-= 1` instead.
+noIncrement: Do not use standalone `++`. Use `+= 1` instead.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-increment-decrement": [
+			"error",
+			{
+				"allowAutofix": false
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+size++;
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+size += 1;
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+array[size++] = value;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/no-increment-decrement/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+</CardGrid>

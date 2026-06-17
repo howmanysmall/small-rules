@@ -1,0 +1,64 @@
+---
+interface Props {
+	readonly title?: string;
+	readonly type: "pass" | "fail";
+}
+
+const { type, title } = Astro.props;
+const isPass = type === "pass";
+const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
+---
+
+<div class={`RuleExample RuleExample--${type}`} data-rule-example>
+	<div class="RuleExample-header">
+		<span aria-hidden="true" class="RuleExample-status">
+			{isPass ? (
+					<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M3 8.5 L6.5 12 L13 4.5" />
+					</svg>
+				) : (
+					<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="8" cy="8" r="6.5" />
+						<path d="M5.5 5.5 L10.5 10.5 M10.5 5.5 L5.5 10.5" />
+					</svg>
+				)}
+		</span>
+		<span class="RuleExample-title">{displayTitle}</span>
+
+		<button aria-label="Copy example" class="RuleExample-copy" data-copy-example type="button">
+			<svg
+				aria-hidden="true"
+				fill="none"
+				height="14"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				viewBox="0 0 24 24"
+				width="14">
+				<rect height="13" rx="2" ry="2" width="13" x="9" y="9" />
+				<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+			</svg>
+		</button>
+	</div>
+
+	<div class="RuleExample-content">
+		<slot />
+	</div>
+</div>
+
+<script>
+	document.addEventListener("click", (event) => {
+		const button = event.target.closest("[data-copy-example]");
+		if (!(button instanceof HTMLButtonElement)) return;
+
+		const card = button.closest("[data-rule-example]");
+		const code = card?.querySelector("pre code, code");
+		if (!code) return;
+
+		navigator.clipboard.writeText(code.textContent ?? "").then(() => {
+			button.setAttribute("data-copied", "");
+			setTimeout(() => button.removeAttribute("data-copied"), 1500);
+		});
+	});
+</script>

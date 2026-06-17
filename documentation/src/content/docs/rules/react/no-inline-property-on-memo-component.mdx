@@ -1,0 +1,98 @@
+---
+title: "No Inline Property On Memo Component"
+description: "Prevent inline properties from being passed to memoized components."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-inline-property-on-memo-component` reports code described by its source metadata: `prevent inline properties from being passed to memoized components`. It reports with the message `Inline {{type}} passed to memoized component "{{name}}" — new references cause unnecessary re-renders`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-inline-property-on-memo-component` and reports the concrete syntax covered by its implementation in `src/rules/no-inline-property-on-memo-component.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+inlineProperty: Inline {{type}} passed to memoized component "{{name}}" — new references cause unnecessary re-renders
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-inline-property-on-memo-component": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+
+import { memo } from "@rbxts/react";
+
+const MemoCard = memo(() => <div />);
+
+const view = <MemoCard options={{ enabled: true }} />;
+
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+
+import { memo } from "@rbxts/react";
+
+function Card() {
+	return <div />;
+}
+
+const view = <Card options={{ enabled: true }} />;
+
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-inline-property-on-memo-component/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+	<LinkCard title="No Memo Children" href="/small-rules/rules/react/no-memo-children/" />
+	<LinkCard title="No New Instance In Use Memo" href="/small-rules/rules/react/no-new-instance-in-use-memo/" />
+	<LinkCard title="No Unused Use Memo" href="/small-rules/rules/react/no-unused-use-memo/" />
+</CardGrid>

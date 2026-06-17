@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"incremental": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
+		"paths": { "@/*": ["./src/*"] },
+		"plugins": [{ "name": "@astrojs/ts-plugin" }],
+		"tsBuildInfoFile": "node_modules/.tsbuildinfo"
+	},
+	"extends": "astro/tsconfigs/strictest"
+}

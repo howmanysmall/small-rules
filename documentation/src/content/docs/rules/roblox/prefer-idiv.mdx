@@ -1,0 +1,92 @@
+---
+title: "Prefer IDiv"
+description: "Prefer .idiv() for integer division instead of math.floor(x / y)."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+<Badge variant="roblox" />
+
+`small-rules/prefer-idiv` reports code described by its source metadata: `prefer .idiv() for integer division instead of math.floor(x / y)`. It reports with the message `Use .idiv() instead of math.floor(x / y) for integer division.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-idiv` and reports the concrete syntax covered by its implementation in `src/rules/prefer-idiv.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+useIdiv: Use .idiv() instead of math.floor(x / y) for integer division.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-idiv": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+math.floor(x / y);
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+x.idiv(y);
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+x.idiv(y);
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Respect Roblox semantics"
+		description="Roblox and Luau APIs have runtime costs and conventions that generic JavaScript rules do not catch."
+		href="/small-rules/rules/roblox/prefer-idiv/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
+	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Misleading Lua Tuple Checks" href="/small-rules/rules/roblox/misleading-lua-tuple-checks/" />
+</CardGrid>

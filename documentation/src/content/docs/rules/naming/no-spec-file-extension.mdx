@@ -1,0 +1,84 @@
+---
+title: "No Spec File Extension"
+description: "Disallow the .spec.{ts,tsx} file extension for test files. Use .test.{ts,tsx} instead."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-spec-file-extension` reports code described by its source metadata: `disallow the .spec.{ts,tsx} file extension for test files. Use .test.{ts,tsx} instead`. It reports with the message `Test files must use .test.ts or .test.tsx instead of .spec.ts or .spec.tsx. Rename this file to use the .test extension.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-spec-file-extension` and reports the concrete syntax covered by its implementation in `src/rules/no-spec-file-extension.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+noSpecFileExtension: Test files must use .test.ts or .test.tsx instead of .spec.ts or .spec.tsx. Rename this file to use the .test extension.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-spec-file-extension": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+export const x = 1;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+export const x = 1;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep names consistent"
+		description="Consistent naming makes APIs easier to scan and reduces review churn."
+		href="/small-rules/rules/naming/no-spec-file-extension/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Array Type Generic" href="/small-rules/rules/naming/array-type-generic/" />
+	<LinkCard title="Ban Types" href="/small-rules/rules/naming/ban-types/" />
+	<LinkCard title="No Empty Array Literal" href="/small-rules/rules/naming/no-empty-array-literal/" />
+	<LinkCard title="No Shorthand Names" href="/small-rules/rules/naming/no-shorthand-names/" />
+</CardGrid>

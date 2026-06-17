@@ -1,0 +1,117 @@
+---
+title: "Require Paired Calls"
+description: "Enforces balanced opener/closer function calls across all execution paths"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="fixable" />
+
+`small-rules/require-paired-calls` reports code described by its source metadata: `enforces balanced opener/closer function calls across all execution paths`. It reports with the message `Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)`.
+
+## Rule Details
+
+This rule is configured as `small-rules/require-paired-calls` and reports the concrete syntax covered by its implementation in `src/rules/require-paired-calls.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+asyncViolation: Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)
+conditionalOpener: Conditional opener '{{opener}}' at {{location}} may not have matching closer on all paths
+maxNestingExceeded: Maximum nesting depth of {{max}} exceeded for paired calls
+multipleOpeners: Multiple consecutive calls to '{{opener}}' without matching closers (allowMultipleOpeners: false)
+robloxYieldViolation: Yielding function '{{yieldingFunction}}' auto-closes all profiles - subsequent '{{closer}}' will error
+unexpectedCloser: Unexpected call to '{{closer}}' - expected one of: {{expected}}
+unpairedCloser: Unexpected call to '{{closer}}' - no matching opener on stack
+unpairedOpener: Unpaired call to '{{opener}}' - missing '{{closer}}' on {{paths}}
+wrongOrder: Closer '{{closer}}' called out of order - expected to close '{{expected}}' but '{{actual}}' is still open
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/require-paired-calls": [
+			"error",
+			{
+				"allowConditionalClosers": false,
+				"allowMultipleOpeners": true,
+				"maxNestingDepth": 0,
+				"pairs": []
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+function test() {
+	debug.profilebegin("task");
+	doWork();
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+function test() {
+	debug.profilebegin("task");
+	doWork();
+	debug.profileend();
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/require-paired-calls/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+</CardGrid>

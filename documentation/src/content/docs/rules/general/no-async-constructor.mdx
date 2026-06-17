@@ -1,0 +1,108 @@
+---
+title: "No Async Constructor"
+description: "Disallow asynchronous operations inside class constructors. Constructors return immediately, so async work causes race conditions, unhandled rejections, and incomplete object states."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-async-constructor` reports code described by its source metadata: `disallow asynchronous operations inside class constructors. Constructors return immediately, so async work causes race conditions, unhandled rejections, and incomplete object states`. It reports with the message `Refactor this asynchronous operation outside of the constructor. Async IIFEs create unhandled promises and incomplete object state.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-async-constructor` and reports the concrete syntax covered by its implementation in `src/rules/no-async-constructor.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+asyncIifeInConstructor: Refactor this asynchronous operation outside of the constructor. Async IIFEs create unhandled promises and incomplete object state.
+awaitInConstructor: Refactor this asynchronous operation outside of the constructor. Using 'await' in a constructor causes the class to be instantiated before the async operation completes.
+orphanedPromise: Refactor this asynchronous operation outside of the constructor. Promise assigned to '{{variableName}}' is never consumed - errors will be silently swallowed.
+promiseChainInConstructor: Refactor this asynchronous operation outside of the constructor. Promise chains (.then/.catch/.finally) in constructors lead to race conditions.
+unhandledAsyncCall: Refactor this asynchronous operation outside of the constructor. Calling async method '{{methodName}}' without handling its result creates uncontrolled async behavior.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-async-constructor": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+class BadAwait {
+	constructor() {
+		await this.init();
+	}
+	async init() {}
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+class GoodFactory {
+	private constructor(private data: string) {}
+	static async create(): Promise<GoodFactory> {
+		const data = await fetchData();
+		return new GoodFactory(data);
+	}
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/no-async-constructor/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+</CardGrid>

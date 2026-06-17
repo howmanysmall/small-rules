@@ -1,0 +1,98 @@
+---
+title: "Directive No Duplicate Disable"
+description: "disallow duplicate `eslint-disable` comments"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/directive-no-duplicate-disable` reports code described by its source metadata: `disallow duplicate 'eslint-disable' comments`. It reports with the message `ESLint rules have been disabled already.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/directive-no-duplicate-disable` and reports the concrete syntax covered by its implementation in `src/rules/directive-no-duplicate-disable.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+duplicate: ESLint rules have been disabled already.
+duplicateRule: '{{ruleId}}' rule has been disabled already.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/directive-no-duplicate-disable": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+/* oxlint-disable no-console */
+const x = 1;
+/* oxlint-disable no-console */
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+/* oxlint-disable no-console */
+const x = 1;
+/* oxlint-enable no-console */
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+	<LinkCard
+		title="Directive No Unlimited Disable"
+		href="/small-rules/rules/general/directive-no-unlimited-disable/"
+	/>
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+</CardGrid>

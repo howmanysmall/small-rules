@@ -1,0 +1,96 @@
+---
+title: "Prefer Hoisted JSX Elements"
+description: "Prefer extracting static Roblox JSX intrinsic elements to module-level constants."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="roblox" />
+
+`small-rules/prefer-hoisted-jsx-elements` reports code described by its source metadata: `prefer extracting static Roblox JSX intrinsic elements to module-level constants`. It reports with the message `Extract '{{elementText}}' to a shared module-level const — this Roblox JSX element is fully static and identical elements should reuse the same const.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-hoisted-jsx-elements` and reports the concrete syntax covered by its implementation in `src/rules/prefer-hoisted-jsx-elements.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+hoistableJsxElement: Extract `{{elementText}}` to a shared module-level const — this Roblox JSX element is fully static and identical elements should reuse the same const.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-hoisted-jsx-elements": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+
+function View() {
+	return <staticbadge />;
+}
+
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+
+function View() {
+	return <Component enabled={true} />;
+}
+
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/prefer-hoisted-jsx-elements/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard
+		title="Prefer Hoisted JSX Object Properties"
+		href="/small-rules/rules/react/prefer-hoisted-jsx-object-properties/"
+	/>
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+</CardGrid>

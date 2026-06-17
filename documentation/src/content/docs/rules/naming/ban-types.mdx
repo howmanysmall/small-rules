@@ -1,0 +1,94 @@
+---
+title: "Ban Types"
+description: "Ban configured TypeScript utility types, defaulting to Omit in favor of Except."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/ban-types` reports code described by its source metadata: `ban configured TypeScript utility types, defaulting to Omit in favor of Except`. It reports with the message `Type '{{typeName}}' is banned by project configuration. Use the project-preferred alternative for this type.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/ban-types` and reports the concrete syntax covered by its implementation in `src/rules/ban-types.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+bannedType: Type '{{typeName}}' is banned by project configuration. Use the project-preferred alternative for this type.
+bannedTypeWithReplacement: Type '{{typeName}}' is banned. Use '{{replacementName}}' instead.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/ban-types": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+type User = {
+	readonly name: string;
+	readonly password: string;
+};
+
+type HiddenUser = Omit<User, "password">;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+type User = {
+	readonly name: string;
+};
+
+type ActiveUser = Pick<User, "name">;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep names consistent"
+		description="Consistent naming makes APIs easier to scan and reduces review churn."
+		href="/small-rules/rules/naming/ban-types/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Array Type Generic" href="/small-rules/rules/naming/array-type-generic/" />
+	<LinkCard title="No Empty Array Literal" href="/small-rules/rules/naming/no-empty-array-literal/" />
+	<LinkCard title="No Shorthand Names" href="/small-rules/rules/naming/no-shorthand-names/" />
+	<LinkCard title="No Spec File Extension" href="/small-rules/rules/naming/no-spec-file-extension/" />
+</CardGrid>

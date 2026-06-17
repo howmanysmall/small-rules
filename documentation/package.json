@@ -1,0 +1,31 @@
+{
+	"name": "docs",
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"astro": "astro",
+		"build": "astro build",
+		"dev": "astro dev",
+		"preview": "astro preview",
+		"start": "astro dev"
+	},
+	"dependencies": {
+		"@astrojs/mdx": "^6.0.3",
+		"@astrojs/react": "^5.0.7",
+		"@astrojs/starlight": "^0.40.0",
+		"astro": "^6.4.6",
+		"react": "^19",
+		"react-dom": "^19",
+		"sharp": "^0.34.5",
+		"starlight-links-validator": "^0.24.1"
+	},
+	"devDependencies": {
+		"@fontsource/bricolage-grotesque": "^5.2.10",
+		"@fontsource/jetbrains-mono": "^5.2.8",
+		"@fontsource/karla": "^5.2.8",
+		"@total-typescript/ts-reset": "^0.6.1",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"typescript": "^5.7.3"
+	}
+}

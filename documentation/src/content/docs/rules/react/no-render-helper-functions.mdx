@@ -1,0 +1,84 @@
+---
+title: "No Render Helper Functions"
+description: "Disallow non-component functions that return JSX or React elements."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/no-render-helper-functions` reports code described by its source metadata: `disallow non-component functions that return JSX or React elements`. It reports with the message `Convert render helper '{{functionName}}' to a React component. Functions that return JSX should be PascalCase components, not camelCase helpers.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-render-helper-functions` and reports the concrete syntax covered by its implementation in `src/rules/no-render-helper-functions.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+noRenderHelper: Convert render helper '{{functionName}}' to a React component. Functions that return JSX should be PascalCase components, not camelCase helpers.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-render-helper-functions": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+function createLabel() { return <div />; }
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+function Component() { return <div />; }
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-render-helper-functions/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Require Named Effect Functions" href="/small-rules/rules/react/require-named-effect-functions/" />
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+</CardGrid>

@@ -1,0 +1,91 @@
+---
+title: "Array Type Generic"
+description: "Disallow bracket array type syntax and require Array<T> / ReadonlyArray<T>."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="fixable" />
+
+`small-rules/array-type-generic` reports code described by its source metadata: `disallow bracket array type syntax and require Array<T> / ReadonlyArray<T>`. It reports with the message `Bracket array type syntax is not allowed. Use Array<T> or ReadonlyArray<T> generic syntax.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/array-type-generic` and reports the concrete syntax covered by its implementation in `src/rules/array-type-generic.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+useGenericArrayType: Bracket array type syntax is not allowed. Use Array<T> or ReadonlyArray<T> generic syntax.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/array-type-generic": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+type A = string[];
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+type A = Array<string>;
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+type Point = [x: number, y: number];
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep names consistent"
+		description="Consistent naming makes APIs easier to scan and reduces review churn."
+		href="/small-rules/rules/naming/array-type-generic/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Empty Array Literal" href="/small-rules/rules/naming/no-empty-array-literal/" />
+	<LinkCard title="Ban Types" href="/small-rules/rules/naming/ban-types/" />
+	<LinkCard title="No Shorthand Names" href="/small-rules/rules/naming/no-shorthand-names/" />
+	<LinkCard title="No Spec File Extension" href="/small-rules/rules/naming/no-spec-file-extension/" />
+</CardGrid>

@@ -1,0 +1,88 @@
+---
+title: "No Static React Create Element"
+description: "Require JSX for static React.createElement calls."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-static-react-create-element` reports code described by its source metadata: `require JSX for static React.createElement calls`. It reports with the message `Use JSX instead of static React.createElement calls.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-static-react-create-element` and reports the concrete syntax covered by its implementation in `src/rules/no-static-react-create-element.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+useJsx: Use JSX instead of static React.createElement calls.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-static-react-create-element": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import React from "@rbxts/react";
+
+const element = React.createElement("frame");
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import React from "@rbxts/react";
+
+const element = React.createElement(config.component);
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-static-react-create-element/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+	<LinkCard title="No God Components" href="/small-rules/rules/react/no-god-components/" />
+</CardGrid>

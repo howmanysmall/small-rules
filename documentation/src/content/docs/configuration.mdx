@@ -1,0 +1,115 @@
+---
+title: "Configuration"
+description: "Configure small-rules in your oxlint setup."
+---
+import { Aside } from "@astrojs/starlight/components";
+
+## Plugin Registration
+
+Register the plugin in your `oxlint.json`:
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"]
+}
+```
+
+## Rule Severity
+
+Each rule can be set to one of three severity levels:
+
+| Severity  | Behavior                          |
+| --------- | --------------------------------- |
+| `"error"` | Fails the lint check              |
+| `"warn"`  | Shows a warning but does not fail |
+| `"off"`   | Disables the rule                 |
+
+```json
+{
+	"rules": {
+		"small-rules/no-print": "error",
+		"small-rules/prefer-early-return": "warn",
+		"small-rules/no-useless-constants": "off"
+	}
+}
+```
+
+## Rule Options
+
+Some rules accept options for customization. Pass them as an array where the first element is the severity and the second is an options object:
+
+```json
+{
+	"rules": {
+		"small-rules/ban-instances": [
+			"error",
+			{
+				"ban": ["ScreenGui", "Frame"]
+			}
+		],
+		"small-rules/no-god-components": [
+			"error",
+			{
+				"maxLines": 200,
+				"maxProps": 8
+			}
+		]
+	}
+}
+```
+
+<Aside type="note">Not all rules accept options. Check the individual rule pages for available configuration.</Aside>
+
+## File-level Overrides
+
+Use oxlint's `overrides` field to apply different rules to different file patterns:
+
+```json
+{
+	"overrides": [
+		{
+			"files": ["**/*.test.ts"],
+			"rules": {
+				"small-rules/no-print": "off"
+			}
+		}
+	]
+}
+```
+
+## Disabling Rules Inline
+
+You can disable rules for specific lines using directive comments:
+
+```ts
+// eslint-disable-next-line small-rules/no-print
+print("Debug output");
+```
+
+Use `eslint-enable` to re-enable:
+
+```ts
+/* eslint-disable small-rules/no-print */
+print("Debug 1");
+print("Debug 2");
+/* eslint-enable small-rules/no-print */
+```
+
+## Recommended Configuration
+
+For most roblox-ts projects, start with this baseline:
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-print": "error",
+		"small-rules/no-warn": "error",
+		"small-rules/no-error": "error",
+		"small-rules/no-task-wait": "error",
+		"small-rules/ban-react-fc": "error",
+		"small-rules/no-unused-imports": "error",
+		"small-rules/prefer-early-return": "warn"
+	}
+}
+```

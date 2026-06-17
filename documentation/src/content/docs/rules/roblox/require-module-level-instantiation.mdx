@@ -1,0 +1,96 @@
+---
+title: "Require Module Level Instantiation"
+description: "Require configured classes to be instantiated at module level only."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="roblox" />
+
+`small-rules/require-module-level-instantiation` reports code described by its source metadata: `require configured classes to be instantiated at module level only`. It reports with the message `'{{className}}' from '{{importSource}}' must be instantiated at module level only.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/require-module-level-instantiation` and reports the concrete syntax covered by its implementation in `src/rules/require-module-level-instantiation.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+mustBeModuleLevel: '{{className}}' from '{{importSource}}' must be instantiated at module level only.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/require-module-level-instantiation": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import Log from "@rbxts/rbxts-sleitnick-log";
+
+function useStoryModesState() {
+	const log = new Log();
+	log.Info("test");
+}
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import Log from "@rbxts/rbxts-sleitnick-log";
+
+const log = new Log();
+
+function useStoryModesState() {
+	log.Info("test");
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Respect Roblox semantics"
+		description="Roblox and Luau APIs have runtime costs and conventions that generic JavaScript rules do not catch."
+		href="/small-rules/rules/roblox/require-module-level-instantiation/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
+	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Misleading Lua Tuple Checks" href="/small-rules/rules/roblox/misleading-lua-tuple-checks/" />
+</CardGrid>

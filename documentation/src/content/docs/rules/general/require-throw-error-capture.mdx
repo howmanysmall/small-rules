@@ -1,0 +1,105 @@
+---
+title: "Require Throw Error Capture"
+description: "Require 'Error.captureStackTrace' before throwing errors to produce accurate stack traces."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+
+`small-rules/require-throw-error-capture` reports code described by its source metadata: `require 'Error.captureStackTrace' before throwing errors to produce accurate stack traces`. It reports with the message `Call 'Error.captureStackTrace' on this error before throwing it so the stack trace points to the throw site.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/require-throw-error-capture` and reports the concrete syntax covered by its implementation in `src/rules/require-throw-error-capture.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+missingCaptureStackTrace: Call 'Error.captureStackTrace' on this error before throwing it so the stack trace points to the throw site.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/require-throw-error-capture": ["error", {}]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+function fetchModels() {
+	if (!response.ok) throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+}
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+function fetchModels() {
+	if (!response.ok) {
+		const error = new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+		Error.captureStackTrace(error, fetchModels);
+		throw error;
+	}
+}
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+throw new Error("top level");
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/require-throw-error-capture/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Error" href="/small-rules/rules/general/no-error/" />
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+</CardGrid>

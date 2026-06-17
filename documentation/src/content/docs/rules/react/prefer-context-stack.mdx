@@ -1,0 +1,103 @@
+---
+title: "Prefer Context Stack"
+description: "Prefer a local ContextStack component over directly nesting multiple context providers."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+<Badge variant="fixable" />
+
+`small-rules/prefer-context-stack` reports code described by its source metadata: `prefer a local ContextStack component over directly nesting multiple context providers`. It reports with the message `Use the local 'ContextStack' component instead of nesting multiple context providers directly.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-context-stack` and reports the concrete syntax covered by its implementation in `src/rules/prefer-context-stack.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+preferContextStack: Use the local `ContextStack` component instead of nesting multiple context providers directly.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-context-stack": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import ContextStack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
+}
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+import ContextStack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ContextStack providers={[<ThemeContext.Provider value={theme} />, <LocaleContext.Provider value={locale} />]}><App /></ContextStack>;
+}
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import ContextStack from "../providers/context-stack";
+
+export function Example(theme: string) {
+    return <ThemeContext.Provider value={theme}><App /></ThemeContext.Provider>;
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/prefer-context-stack/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+	<LinkCard title="No Giant Component" href="/small-rules/rules/react/no-giant-component/" />
+	<LinkCard title="No God Components" href="/small-rules/rules/react/no-god-components/" />
+</CardGrid>

@@ -1,0 +1,91 @@
+---
+title: "Prefer Module Scope Constants"
+description: "Prefer that screaming snake case variables always be defined using `const`, and always appear at module scope."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/prefer-module-scope-constants` reports code described by its source metadata: `prefer that screaming snake case variables always be defined using 'const', and always appear at module scope`. It reports with the message `You must place screaming snake case at module scope. If this is not meant to be a module-scoped variable, use camelcase instead.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/prefer-module-scope-constants` and reports the concrete syntax covered by its implementation in `src/rules/prefer-module-scope-constants.ts`.
+
+<Aside type="note">
+
+Rule messages:
+
+```text
+mustBeModuleScope: You must place screaming snake case at module scope. If this is not meant to be a module-scoped variable, use camelcase instead.
+mustUseConst: You must use `const` when defining screaming snake case variables. If this is not a constant, use camelcase instead.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-module-scope-constants": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+let FOO = true;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+const FOO = true;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep intent obvious"
+		description="The rule removes patterns that hide control flow, dead code, or redundant abstractions."
+		href="/small-rules/rules/general/prefer-module-scope-constants/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Useless Constants" href="/small-rules/rules/general/no-useless-constants/" />
+	<LinkCard title="Directive Disable Enable Pair" href="/small-rules/rules/general/directive-disable-enable-pair/" />
+	<LinkCard
+		title="Directive No Aggregating Enable"
+		href="/small-rules/rules/general/directive-no-aggregating-enable/"
+	/>
+	<LinkCard
+		title="Directive No Duplicate Disable"
+		href="/small-rules/rules/general/directive-no-duplicate-disable/"
+	/>
+</CardGrid>

@@ -1,0 +1,105 @@
+---
+title: "No Useless Use Memo"
+description: "Disallow useMemo calls that only wrap values static enough to live at module scope."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/no-useless-use-memo` reports code described by its source metadata: `disallow useMemo calls that only wrap values static enough to live at module scope`. It reports with the message `useMemo is wrapping a static value. Move the value to module scope instead of paying hook overhead for no runtime benefit.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-useless-use-memo` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-use-memo.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+uselessUseMemo: useMemo is wrapping a static value. Move the value to module scope instead of paying hook overhead for no runtime benefit.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-useless-use-memo": [
+			"error",
+			{
+				"dependencyMode": "non-updating",
+				"environment": "roblox-ts"
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import { useMemo } from "react";
+import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from "./animation-config";
+
+const rotationConfiguration = useMemo(
+	() => getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring),
+	[],
+);
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import { useMemo } from "react";
+import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from "./animation-config";
+
+function Component({ theme }) {
+	const value = useMemo(() => getAnimationConfiguration(theme, AnimationLibrary.ReactSpring), [theme]);
+	return value;
+}
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-useless-use-memo/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard
+		title="No Inline Property On Memo Component"
+		href="/small-rules/rules/react/no-inline-property-on-memo-component/"
+	/>
+	<LinkCard title="No Memo Children" href="/small-rules/rules/react/no-memo-children/" />
+	<LinkCard title="No New Instance In Use Memo" href="/small-rules/rules/react/no-new-instance-in-use-memo/" />
+	<LinkCard title="No Unused Use Memo" href="/small-rules/rules/react/no-unused-use-memo/" />
+</CardGrid>

@@ -33,7 +33,7 @@
 		{
 			"env": {
 				"astro": true,
-				"node": false
+				"node": true
 			},
 			"files": ["documentation/**/*"]
 		},

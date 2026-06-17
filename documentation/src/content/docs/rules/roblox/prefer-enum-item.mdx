@@ -1,0 +1,70 @@
+---
+title: "Prefer Enum Item"
+description: "Documentation placeholder for small-rules/prefer-enum-item; rule source could not be located."
+---
+
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+This page is reserved for `small-rules/prefer-enum-item`, but no matching source file was found at `src/rules/prefer-enum-item.ts` in the current repository checkout. The rule is documented as unavailable instead of inventing behavior that is not backed by source or tests.
+
+## Rule Details
+
+<Aside type="caution">
+
+The rule source could not be located. Check the [small-rules GitHub repository](https://github.com/howmanysmall/small-rules) for the latest implementation status before enabling this rule.
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/prefer-enum-item": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+// No failing example is published because src/rules/prefer-enum-item.ts is missing.
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+// No passing example is published because tests/prefer-enum-item.test.ts is missing.
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Avoid undocumented behavior"
+		description="The page tells you the rule is unavailable rather than guessing at semantics."
+		href="https://github.com/howmanysmall/small-rules"
+	/>
+	<LinkCard
+		title="Check the source"
+		description="Use the repository as the source of truth for rules that are not present in this checkout."
+		href="https://github.com/howmanysmall/small-rules/tree/main/src/rules"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
+	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Misleading Lua Tuple Checks" href="/small-rules/rules/roblox/misleading-lua-tuple-checks/" />
+</CardGrid>

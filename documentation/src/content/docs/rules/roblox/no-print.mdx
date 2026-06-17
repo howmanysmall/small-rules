@@ -1,0 +1,85 @@
+---
+title: "No Print"
+description: "Use Log instead of print()."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="roblox" />
+
+`small-rules/no-print` reports code described by its source metadata: `use Log instead of print()`. It reports with the message `print() is a raw output function lacking log levels, timestamps, and filtering. Production systems require structured logging for debugging and monitoring. Replace print(...) with Log.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-print` and reports the concrete syntax covered by its implementation in `src/rules/no-print.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+noPrint: print() is a raw output function lacking log levels, timestamps, and filtering. Production systems require structured logging for debugging and monitoring. Replace print(...) with Log.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-print": "error"
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+print("Hello");
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+Log.info("Hello");
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Respect Roblox semantics"
+		description="Roblox and Luau APIs have runtime costs and conventions that generic JavaScript rules do not catch."
+		href="/small-rules/rules/roblox/no-print/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
+	<LinkCard title="Enforce Ianitor Check Type" href="/small-rules/rules/roblox/enforce-ianitor-check-type/" />
+	<LinkCard title="Memoized Effect Dependencies" href="/small-rules/rules/roblox/memoized-effect-dependencies/" />
+	<LinkCard title="Misleading Lua Tuple Checks" href="/small-rules/rules/roblox/misleading-lua-tuple-checks/" />
+</CardGrid>

@@ -1,0 +1,96 @@
+---
+title: "No Unused Use Memo"
+description: "Disallow standalone useMemo calls that ignore the memoized value."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+`small-rules/no-unused-use-memo` reports code described by its source metadata: `disallow standalone useMemo calls that ignore the memoized value`. It reports with the message `useMemo results must be used. Standalone useMemo calls add overhead without preserving a value.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-unused-use-memo` and reports the concrete syntax covered by its implementation in `src/rules/no-unused-use-memo.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+unusedUseMemo: useMemo results must be used. Standalone useMemo calls add overhead without preserving a value.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-unused-use-memo": [
+			"error",
+			{
+				"environment": "roblox-ts"
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import { useMemo } from "react";
+
+useMemo(() => 1, []);
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import { useMemo } from "react";
+
+const value = useMemo(() => 1, []);
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-unused-use-memo/"
+	/>
+	<LinkCard
+		title="Fail risky patterns early"
+		description="Problem rules turn subtle mistakes into clear lint failures before they reach runtime."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard
+		title="No Inline Property On Memo Component"
+		href="/small-rules/rules/react/no-inline-property-on-memo-component/"
+	/>
+	<LinkCard title="No Memo Children" href="/small-rules/rules/react/no-memo-children/" />
+	<LinkCard title="No New Instance In Use Memo" href="/small-rules/rules/react/no-new-instance-in-use-memo/" />
+	<LinkCard title="No Use Memo Simple Expression" href="/small-rules/rules/react/no-use-memo-simple-expression/" />
+</CardGrid>

@@ -1,0 +1,121 @@
+---
+title: "No Useless Use Spring"
+description: "Disallow useSpring hooks whose config and dependencies are entirely static"
+---
+
+import Badge from "@/components/badge.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="suggestion" />
+
+`small-rules/no-useless-use-spring` reports code described by its source metadata: `disallow useSpring hooks whose config and dependencies are entirely static`. It reports with the message `useSpring call has only static inputs and non-updating dependencies; replace it with a constant or remove the hook.`.
+
+## Rule Details
+
+This rule is configured as `small-rules/no-useless-use-spring` and reports the concrete syntax covered by its implementation in `src/rules/no-useless-use-spring.ts`.
+
+<Aside type="note">
+
+Rule message:
+
+```text
+uselessSpring: useSpring call has only static inputs and non-updating dependencies; replace it with a constant or remove the hook.
+```
+
+</Aside>
+
+## Configuration
+
+```json
+{
+	"plugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-useless-use-spring": [
+			"error",
+			{
+				"staticGlobalFactories": [
+					"Axes",
+					"BrickColor",
+					"CFrame",
+					"Color3",
+					"ColorSequence",
+					"ColorSequenceKeypoint",
+					"DateTime",
+					"Enum",
+					"Faces",
+					"NumberRange",
+					"NumberSequence",
+					"NumberSequenceKeypoint",
+					"PathWaypoint",
+					"PhysicalProperties",
+					"Ray",
+					"Rect",
+					"Region3",
+					"Region3int16",
+					"TweenInfo",
+					"UDim",
+					"UDim2",
+					"Vector2",
+					"Vector3",
+					"Vector3int16",
+					"Vector3int32"
+				],
+				"treatEmptyDepsAsViolation": true
+			}
+		]
+	}
+}
+```
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+const springs = useSpring({
+	from: { x: 0 },
+});
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+const springs = useSpring({
+	from: { x: 0 },
+	to: { x: 1 },
+});
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect render behavior"
+		description="React components stay easier to profile when hooks, memoization, and JSX boundaries are explicit."
+		href="/small-rules/rules/react/no-useless-use-spring/"
+	/>
+	<LinkCard
+		title="Guide consistent style"
+		description="Suggestions document a preferred shape without treating every occurrence as a correctness bug."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Useless Use Effect" href="/small-rules/rules/react/no-useless-use-effect/" />
+	<LinkCard title="No Useless Use Memo" href="/small-rules/rules/react/no-useless-use-memo/" />
+	<LinkCard title="Ban React FC" href="/small-rules/rules/react/ban-react-fc/" />
+	<LinkCard title="No Cascading Set State" href="/small-rules/rules/react/no-cascading-set-state/" />
+</CardGrid>
