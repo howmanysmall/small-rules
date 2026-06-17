@@ -1,3 +1,4 @@
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -32,7 +33,7 @@ const IS_INTEGER = /^\d/u;
 
 function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
 	if (node.id.type === "Identifier") return node.id.name;
-	if (node.id.type !== "Literal" || typeof node.id.value !== "string") return undefined;
+	if (node.id.type !== "Literal" || !isStringRaw(node.id.value)) return undefined;
 	return IS_INTEGER.test(node.id.value) ? undefined : node.id.value;
 }
 

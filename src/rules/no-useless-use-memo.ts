@@ -7,7 +7,7 @@ import {
 	isStaticArrayExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
@@ -23,22 +23,16 @@ interface NormalizedOptions {
 }
 
 function getDependencyMode(value: unknown): DependencyMode {
-	if (!isRecord(value) || typeof value.dependencyMode !== "string") return "non-updating";
+	if (!(isRecord(value) && isStringRaw(value.dependencyMode))) return "non-updating";
 	if (value.dependencyMode === "empty-or-omitted" || value.dependencyMode === "aggressive") {
 		return value.dependencyMode;
 	}
 	return "non-updating";
 }
 
-function isStaticGlobalFactories(value: unknown): value is ReadonlyArray<string> {
-	if (!Array.isArray(value)) return false;
-	for (const item of value) if (typeof item !== "string") return false;
-	return true;
-}
-
 function normalizeOptions(raw: unknown): NormalizedOptions {
 	const factories =
-		isRecord(raw) && isStaticGlobalFactories(raw.staticGlobalFactories)
+		isRecord(raw) && isStringArray(raw.staticGlobalFactories)
 			? raw.staticGlobalFactories
 			: DEFAULT_STATIC_GLOBAL_FACTORIES;
 

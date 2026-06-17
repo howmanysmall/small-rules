@@ -1,7 +1,7 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -25,7 +25,7 @@ const DEFAULT_HOOKS = [
 ] as const;
 
 function isHookConfiguration(value: unknown): value is HookConfiguration {
-	return isRecord(value) && typeof value.name === "string" && typeof value.allowAsync === "boolean";
+	return isRecord(value) && isStringRaw(value.name) && typeof value.allowAsync === "boolean";
 }
 
 function parseOptions(rawOptions: unknown): EffectFunctionOptions {

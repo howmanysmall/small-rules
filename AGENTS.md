@@ -8,20 +8,24 @@ An oxlint-native lint plugin (`@pobammer-ts/small-rules`) providing 87 custom ru
 
 ## Rules
 
-You are NEVER to cast. This codebase is strongly typed. The `defineRule` function can infer options without manual type annotations. Do NOT do it.
+You **MUST** follow these guidelines. There is NO exception.
+
+- You are NEVER to cast. This codebase is strongly typed. The `defineRule` function can infer options without manual type annotations. Do NOT do it.
+- You MUST use `nr lint:agent [files...]` to run the linter. There is no exception to failing lint checks.
+- You MUST use `nr test:agent` to run Vitest unit tests. There is no exception to failing tests.
+- You MUST use `nr type-check:agent` to run type checking. There is no exception to failing type checks.
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
-| `aube install` | Install dependencies (Aube is the package manager, not `pnpm`/bun) |
+| `aube install` | Install dependencies (Aube is the package manager, not `pnpm`/`bun`) |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
-| `nr test` | Run all Vitest unit tests |
-| `nr test -- tests/no-print.test.ts` | Run a single test file |
-| `nr test -t "no-print"` | Run tests matching a pattern |
-| `nr lint` | Run oxlint then biome check |
-| `nr oxlint .` | Run only oxlint |
-| `nr type-check` | Run `tsgo` for type checking |
+| `nr test:agent` | Run all Vitest unit tests |
+| `nr test:agent -- tests/no-print.test.ts` | Run a single test file |
+| `nr test:agent -t "no-print"` | Run tests matching a pattern |
+| `nr lint:agent` | Run oxlint then biome check |
+| `nr type-check:agent` | Run `tsgo` for type checking |
 | `nr format` | Format with `biome check --fix` + `oxfmt` |
 | `nr format:check` | Check formatting without modifying |
 | `nr knip` | Detect unused files, exports, dependencies |

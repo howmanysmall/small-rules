@@ -1,5 +1,5 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, FixFunction } from "oxlint-plugin-utilities";
@@ -10,7 +10,7 @@ const COMPONENT_NAME_PATTERN = /^[A-Z]/v;
 const KEY_OF_NODE = new Set(["end", "loc", "parent", "range", "start", "type"]);
 
 export function isNode(value: unknown): value is ESTree.Node {
-	return isRecord(value) && typeof value.type === "string";
+	return isRecord(value) && isStringRaw(value.type);
 }
 
 export type KeyOfNode = "end" | "loc" | "parent" | "range" | "start" | "type";
@@ -65,7 +65,7 @@ export function getImportedName({ imported }: ESTree.ImportSpecifier): string | 
 export function hasName(
 	node: ESTree.Node,
 ): node is ESTree.BindingIdentifier | ESTree.IdentifierName | ESTree.IdentifierReference {
-	return node.type === "Identifier" && typeof node.name === "string";
+	return node.type === "Identifier" && isStringRaw(node.name);
 }
 
 export function isIdentifierName(node: ESTree.Node): node is ESTree.IdentifierName {
@@ -85,7 +85,7 @@ export function isImportDeclaration(node: ESTree.Node): node is ESTree.ImportDec
 }
 
 export function isStringLiteral(node: ESTree.Node): node is ESTree.StringLiteral {
-	return node.type === "Literal" && typeof node.value === "string";
+	return node.type === "Literal" && isStringRaw(node.value);
 }
 
 export function isCallExpression(node: ESTree.Node): node is ESTree.CallExpression {
@@ -193,7 +193,7 @@ export function isTsQualifiedName(node: ESTree.Node): node is ESTree.TSQualified
 }
 
 export function isNumericLiteral(node: ESTree.Node): node is ESTree.NumericLiteral {
-	return node.type === "Literal" && typeof node.value === "number";
+	return node.type === "Literal" && isNumberRaw(node.value);
 }
 
 export function isNewExpression(node: ESTree.Node): node is ESTree.NewExpression {

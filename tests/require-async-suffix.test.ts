@@ -51,6 +51,14 @@ describe("require-async-suffix", () => {
 };`,
 				errors: missingAsyncSuffixErrors,
 			},
+			{
+				code: `const obj = {
+	async fetch(request: Request): Promise<Response> {
+		return new Response("ok");
+	},
+};`,
+				errors: missingAsyncSuffixErrors,
+			},
 		],
 		valid: [
 			`async function getAllAsync(): Promise<string> {
@@ -94,6 +102,18 @@ describe("require-async-suffix", () => {
 			`void (async () => {
 	await getAllAsync();
 })();`,
+			// Object literal method shorthand passed as call argument — name is API-required
+			`Bun.serve({
+	async fetch(request: Request): Promise<Response> {
+		return new Response("ok");
+	},
+});`,
+			// Object literal method shorthand passed as new expression argument
+			`new SomeServer({
+	async fetch(request: Request): Promise<Response> {
+		return new Response("ok");
+	},
+});`,
 		],
 	});
 });

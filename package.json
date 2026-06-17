@@ -44,6 +44,7 @@
 		"changelogithub": "changelogithub",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F docs build",
+		"docs:dev": "nr -F docs dev",
 		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --fix $a && nr oxfmt $a' _",
 		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched $a && nr oxfmt --no-error-on-unmatched-pattern --check $a' _",
 		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched --fix $a && nr oxfmt --no-error-on-unmatched-pattern $a' _",
@@ -53,6 +54,7 @@
 		"knip": "knip-bun",
 		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint $a && nr biome check $a' _",
 		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format agent $a && nr biome check --reporter concise $a' _",
+		"lint:json": "bun run scripts/lint-json.ts",
 		"oxfmt": "oxfmt",
 		"oxlint": "oxlint",
 		"prepublish": "tsdown --minify",
@@ -65,7 +67,7 @@
 		"test:mutation": "stryker run",
 		"tsgo": "tsgo",
 		"type-check": "tsgo --noEmit",
-		"docs:dev": "nr -F docs dev"
+		"type-check:agent": "tsgo --noEmit --pretty false"
 	},
 	"dependencies": {
 		"arktype": "catalog:",

@@ -1,3 +1,5 @@
+import { isStringRaw } from "./type-utilities";
+
 import type { ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 export type ScopeVariable = Scope["set"] extends Map<string, infer VariableType> ? VariableType : never;
@@ -26,9 +28,7 @@ export function unwrapExpression(expression: ESTree.Expression): ESTree.Expressi
 
 export function getMemberPropertyName(node: ESTree.MemberExpression): string | undefined {
 	if (node.computed) {
-		return node.property.type === "Literal" && typeof node.property.value === "string"
-			? node.property.value
-			: undefined;
+		return node.property.type === "Literal" && isStringRaw(node.property.value) ? node.property.value : undefined;
 	}
 
 	return node.property.type === "Identifier" ? node.property.name : undefined;

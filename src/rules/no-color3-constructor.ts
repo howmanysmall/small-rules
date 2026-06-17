@@ -1,9 +1,10 @@
+import { isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isNumericLiteral(node: ESTree.Node): node is ESTree.NumericLiteral {
-	return node.type === "Literal" && typeof node.value === "number";
+	return node.type === "Literal" && isNumberRaw(node.value);
 }
 function mapComponentToRgbRange(value: number): number {
 	return Math.round(value > 1 ? value : value * 255);

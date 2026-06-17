@@ -1,5 +1,6 @@
 import { getVariableByName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import { isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -23,7 +24,7 @@ function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier)
 
 function isKnownNonNumberLiteral(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	return unwrapped.type === "Literal" && typeof unwrapped.value !== "number";
+	return unwrapped.type === "Literal" && !isNumberRaw(unwrapped.value);
 }
 
 function isKnownNonNumberDefinition(definition: ScopeVariable["defs"][number]): boolean {

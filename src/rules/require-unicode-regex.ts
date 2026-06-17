@@ -1,3 +1,4 @@
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -14,7 +15,7 @@ function isIdentifierWithName(node: ESTree.Expression, name: string): node is ES
 }
 
 function getFlagsString(node: ESTree.Node): string | undefined {
-	if (node.type !== "Literal" || typeof node.value !== "string") return undefined;
+	if (node.type !== "Literal" || !isStringRaw(node.value)) return undefined;
 	return node.value;
 }
 

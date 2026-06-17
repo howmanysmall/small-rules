@@ -2,6 +2,7 @@ import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-uti
 import { getImportedName, isComponentName } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -75,7 +76,7 @@ function isReactCreateElementCall(
 }
 
 function isStringElementName(node: ESTree.Expression): boolean {
-	return node.type === "Literal" && typeof node.value === "string";
+	return node.type === "Literal" && isStringRaw(node.value);
 }
 
 function isStaticComponentVariable(variable: ScopeVariable, name: string): boolean {

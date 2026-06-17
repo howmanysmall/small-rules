@@ -1,7 +1,7 @@
 import { extname } from "node:path";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { parseSync } from "oxc-parser";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -104,13 +104,11 @@ function isUnaryPlusMinus(expression: ESTree.Expression): boolean {
 }
 
 function isExcludedLiteral(expression: { type: string; value?: unknown }): boolean {
-	return (
-		expression.type === "Literal" && (typeof expression.value === "string" || typeof expression.value === "number")
-	);
+	return expression.type === "Literal" && (isStringRaw(expression.value) || isNumberRaw(expression.value));
 }
 
 function isParsedStatement(value: unknown): value is ESTree.Statement {
-	return isRecord(value) && typeof value.type === "string";
+	return isRecord(value) && isStringRaw(value.type);
 }
 
 function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.Statement> {

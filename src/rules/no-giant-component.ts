@@ -1,6 +1,7 @@
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
 import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 import { isNode } from "$oxc-utilities/oxc-utilities";
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -26,19 +27,19 @@ function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | u
 		return undefined;
 	}
 
-	if (!(isNode(node.id) && "name" in node.id) || typeof node.id.name !== "string") return undefined;
+	if (!(isNode(node.id) && "name" in node.id && isStringRaw(node.id.name))) return undefined;
 
 	return { body: node.body, name: node.id.name, nameNode: node.id };
 }
 
 function getComponentAssignmentDetails(node: ESTree.Node): ComponentDetails | undefined {
 	if (node.type !== "VariableDeclarator" || !isComponentAssignment(node) || node.init === null) return undefined;
-	if (!("name" in node.id) || typeof node.id.name !== "string") return undefined;
+	if (!("name" in node.id && isStringRaw(node.id.name))) return undefined;
 	if (node.init.type !== "ArrowFunctionExpression" && node.init.type !== "FunctionExpression") return undefined;
 	if (!isNode(node.init.body)) return undefined;
 
 	const { name } = node.id;
-	return typeof name === "string" ? { body: node.init.body, name, nameNode: node.id } : undefined;
+	return { body: node.init.body, name, nameNode: node.id };
 }
 
 const noGiantComponent = defineRule({
