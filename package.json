@@ -52,6 +52,7 @@
 		"knip": "knip-bun",
 		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint $a && nr biome check $a' _",
 		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format agent $a && nr biome check --reporter concise $a' _",
+		"lint:json": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format json $a && nr biome check --reporter json $a' _",
 		"oxfmt": "oxfmt",
 		"oxlint": "oxlint",
 		"prepublish": "tsdown --minify",
