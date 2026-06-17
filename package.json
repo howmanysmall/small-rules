@@ -123,6 +123,7 @@
 		"skills": "1.5.11",
 		"tsdown": "0.22.2",
 		"type-fest": "5.7.0",
+		"vite-tsconfig-paths": "6.1.1",
 		"vitest": "4.1.8",
 		"vitiate": "0.3.0"
 	},

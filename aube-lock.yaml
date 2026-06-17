@@ -84,6 +84,7 @@ time:
   tsdown@0.22.2: 2026-06-04T10:37:42.799Z
   type-fest@5.7.0: 2026-05-31T19:28:39.290Z
   typescript@5.9.3: 2025-09-30T21:19:38.784Z
+  vite-tsconfig-paths@6.1.1: 2026-02-11T23:26:08.179Z
   vite@7.3.5: 2026-06-01T10:19:28.642Z
   vitest@4.1.8: 2026-06-01T08:14:50.474Z
   vitiate@0.3.0: 2026-03-20T23:58:04.857Z
@@ -255,6 +256,9 @@ importers:
       type-fest:
         specifier: 5.7.0
         version: 5.7.0
+      vite-tsconfig-paths:
+        specifier: 6.1.1
+        version: 6.1.1(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(yaml@2.9.0))
       vitest:
         specifier: 4.1.8
         version: 4.1.8(@types/node@25.9.3)(@vitest/coverage-v8@4.1.8)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(yaml@2.9.0))
@@ -3064,6 +3068,9 @@ packages:
     resolution: {integrity: sha512-sepffkT8stwnIYbsMBpoCHJuJM5l98FUF2AnE07hfvE0m/qp3R586hw4jF4uadbhvg1ooIdzuu7CsfD2jzCaNA==}
     engines: {node: '>=18'}
 
+  globrex@0.1.2:
+    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
+
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -4319,6 +4326,16 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  tsconfck@3.1.6:
+    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    peerDependencies:
+      typescript: ^5.0.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   tsdown@0.22.2:
     resolution: {integrity: sha512-VX9gsyKXsTnBZjnIM4jsHl9aRv+GfgkE/k1hQslilaBfZMlaw3JuGR+6yhiU0QxWBtOCDnTjwOSoXzgB7Rr50g==}
     engines: {node: ^22.18.0 || >=24.0.0}
@@ -4542,6 +4559,11 @@ packages:
 
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
+
+  vite-tsconfig-paths@6.1.1:
+    resolution: {integrity: sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg==}
+    peerDependencies:
+      vite: '*'
 
   vite@7.3.5:
     resolution: {integrity: sha512-KuOaNhcnGFN2zIPGA7wRmzF+lJA1sea7rHq17aiJ++9lzY1WWG6Jpwqwe1KNbRVPIqHmr8GLYx7jbrQcN/7/ww==}
@@ -7063,6 +7085,8 @@ snapshots:
 
   globals@17.6.0: {}
 
+  globrex@0.1.2: {}
+
   gopd@1.2.0: {}
 
   h3@1.15.11:
@@ -8745,6 +8769,10 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
+  tsconfck@3.1.6(typescript@5.9.3):
+    dependencies:
+      typescript: 5.9.3
+
   tsdown@0.22.2(typescript@5.9.3):
     dependencies:
       ansis: 4.3.1
@@ -8922,6 +8950,13 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
+
+  vite-tsconfig-paths@6.1.1(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(yaml@2.9.0)):
+    dependencies:
+      debug: 4.4.3
+      globrex: 0.1.2
+      tsconfck: 3.1.6(typescript@5.9.3)
+      vite: 7.3.5(@types/node@25.9.3)(jiti@2.7.0)(yaml@2.9.0)
 
   vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
