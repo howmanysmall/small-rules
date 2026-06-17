@@ -1,5 +1,5 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, FixFunction } from "oxlint-plugin-utilities";
@@ -193,7 +193,7 @@ export function isTsQualifiedName(node: ESTree.Node): node is ESTree.TSQualified
 }
 
 export function isNumericLiteral(node: ESTree.Node): node is ESTree.NumericLiteral {
-	return node.type === "Literal" && typeof node.value === "number";
+	return node.type === "Literal" && isNumberRaw(node.value);
 }
 
 export function isNewExpression(node: ESTree.Node): node is ESTree.NewExpression {

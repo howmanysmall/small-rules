@@ -1,6 +1,6 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { getReactSources, forEachReactNamedImport, isEnvironment } from "$oxc-utilities/react-utilities";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -76,7 +76,7 @@ function registerConfiguredEffectHooks(
 	for (const hook of rawOptions.hooks) {
 		if (!(isRecord(hook) && "name" in hook && isStringRaw(hook.name))) continue;
 		const dependenciesIndex =
-			"dependenciesIndex" in hook && typeof hook.dependenciesIndex === "number" ? hook.dependenciesIndex : 1;
+			"dependenciesIndex" in hook && isNumberRaw(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
 		effectHooks.set(hook.name, dependenciesIndex);
 	}
 }

@@ -1,4 +1,5 @@
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import defaultProperties from "../default-properties.json";
@@ -128,10 +129,6 @@ function isBooleanLiteral(node: ESTree.Expression): node is ESTree.BooleanLitera
 	return node.type === "Literal" && typeof node.value === "boolean";
 }
 
-function isNumericLiteral(node: ESTree.Expression): node is ESTree.NumericLiteral {
-	return node.type === "Literal" && typeof node.value === "number";
-}
-
 function isStringLiteral(node: ESTree.Expression): node is ESTree.StringLiteral {
 	return node.type === "Literal" && isStringRaw(node.value);
 }
@@ -175,7 +172,7 @@ function isIgnoredPropertyName(propertyName: string): boolean {
 }
 
 function isCanonicalNumericComponent(value: unknown): value is CanonicalNumericComponent {
-	return typeof value === "number" || value === "inf" || value === "-inf";
+	return isNumberRaw(value) || value === "inf" || value === "-inf";
 }
 
 function isCanonicalValue(value: unknown): value is CanonicalValue {
@@ -194,11 +191,7 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 		}
 
 		case "Color3": {
-			return (
-				Array.isArray(value.value) &&
-				value.value.length === 3 &&
-				value.value.every((component) => typeof component === "number")
-			);
+			return Array.isArray(value.value) && value.value.length === 3 && value.value.every(isNumberRaw);
 		}
 
 		case "Enum":

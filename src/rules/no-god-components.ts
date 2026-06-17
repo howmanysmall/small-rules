@@ -2,6 +2,7 @@
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
+import { isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -165,13 +166,14 @@ function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
 		enforceTargetLines:
 			typeof cast.enforceTargetLines === "boolean" ? cast.enforceTargetLines : defaults.enforceTargetLines,
 		ignoreComponents: Array.isArray(cast.ignoreComponents) ? cast.ignoreComponents : defaults.ignoreComponents,
-		maxDestructuredProps:
-			typeof cast.maxDestructuredProps === "number" ? cast.maxDestructuredProps : defaults.maxDestructuredProps,
-		maxLines: typeof cast.maxLines === "number" ? cast.maxLines : defaults.maxLines,
-		maxStateHooks: typeof cast.maxStateHooks === "number" ? cast.maxStateHooks : defaults.maxStateHooks,
-		maxTsxNesting: typeof cast.maxTsxNesting === "number" ? cast.maxTsxNesting : defaults.maxTsxNesting,
+		maxDestructuredProps: isNumberRaw(cast.maxDestructuredProps)
+			? cast.maxDestructuredProps
+			: defaults.maxDestructuredProps,
+		maxLines: isNumberRaw(cast.maxLines) ? cast.maxLines : defaults.maxLines,
+		maxStateHooks: isNumberRaw(cast.maxStateHooks) ? cast.maxStateHooks : defaults.maxStateHooks,
+		maxTsxNesting: isNumberRaw(cast.maxTsxNesting) ? cast.maxTsxNesting : defaults.maxTsxNesting,
 		stateHooks: Array.isArray(cast.stateHooks) ? cast.stateHooks : defaults.stateHooks,
-		targetLines: typeof cast.targetLines === "number" ? cast.targetLines : defaults.targetLines,
+		targetLines: isNumberRaw(cast.targetLines) ? cast.targetLines : defaults.targetLines,
 	};
 }
 
@@ -213,7 +215,7 @@ const noGodComponents = defineRule({
 			}
 
 			const propertiesCount = countDestructuredProperties(node);
-			if (typeof propertiesCount === "number" && propertiesCount > configuration.maxDestructuredProps) {
+			if (isNumberRaw(propertiesCount) && propertiesCount > configuration.maxDestructuredProps) {
 				context.report({
 					data: { count: String(propertiesCount), max: String(configuration.maxDestructuredProps), name },
 					messageId: "tooManyProps",
