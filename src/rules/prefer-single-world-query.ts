@@ -1,5 +1,5 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -86,11 +86,11 @@ function isNodeWithParent(value: unknown): value is { readonly parent: unknown }
 }
 
 function getNodeType(value: unknown): string | undefined {
-	return isRecord(value) && typeof value.type === "string" ? value.type : undefined;
+	return isRecord(value) && isStringRaw(value.type) ? value.type : undefined;
 }
 
 function getOperator(value: unknown): string | undefined {
-	return isRecord(value) && typeof value.operator === "string" ? value.operator : undefined;
+	return isRecord(value) && isStringRaw(value.operator) ? value.operator : undefined;
 }
 
 function isLogicalAndExpression(value: unknown): boolean {
@@ -98,7 +98,7 @@ function isLogicalAndExpression(value: unknown): boolean {
 }
 
 function isIdentifierReference(value: unknown): value is ESTree.IdentifierReference {
-	return isRecord(value) && value.type === "Identifier" && typeof value.name === "string";
+	return isRecord(value) && value.type === "Identifier" && isStringRaw(value.name);
 }
 
 function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierReference): boolean {

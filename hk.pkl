@@ -122,11 +122,11 @@ hooks {
       ["rumdl"] = (Builtins.rumdl) {
         glob = List("*.md")
         exclude = List(".agents/skills/**/SKILL.md")
-        check = "mise x -- rumdl check {{files}}"
+        check = "rumdl check {{files}}"
         fix =
           """
-          mise x -- rumdl check --fix {{files}}
-          mise x -- rumdl fmt {{files}}
+          rumdl check --fix {{files}}
+          rumdl fmt {{files}}
           """
         check_first = true
         batch = true
@@ -135,11 +135,11 @@ hooks {
       // TOML — tombi lint + format
       ["tombi"] = (Builtins.tombi) {
         glob = List("*.toml")
-        check = "mise x -- tombi lint {{files}} && mise x -- tombi format --check {{files}}"
+        check = "tombi lint {{files}} && tombi format --check {{files}}"
         fix =
           """
-          mise x -- tombi lint {{files}}
-          mise x -- tombi format {{files}}
+          tombi lint {{files}}
+          tombi format {{files}}
           """
         check_first = true
         batch = true
@@ -256,11 +256,11 @@ hooks {
       ["rumdl"] = (Builtins.rumdl) {
         glob = List("*.md")
         exclude = List(".agents/skills/**/SKILL.md")
-        check = "mise x -- rumdl check {{files}}"
+        check = "rumdl check {{files}}"
       }
       ["tombi"] = (Builtins.tombi) {
         glob = List("*.toml")
-        check = "mise x -- tombi lint {{files}} && mise x -- tombi format --check {{files}}"
+        check = "tombi lint {{files}} && tombi format --check {{files}}"
       }
     }
   }
@@ -340,16 +340,16 @@ hooks {
         exclude = List(".agents/skills/**/SKILL.md")
         fix =
           """
-          mise x -- rumdl check --fix {{files}}
-          mise x -- rumdl fmt {{files}}
+          rumdl check --fix {{files}}
+          rumdl fmt {{files}}
           """
       }
       ["tombi"] = (Builtins.tombi) {
         glob = List("*.toml")
         fix =
           """
-          mise x -- tombi lint {{files}}
-          mise x -- tombi format {{files}}
+          tombi lint {{files}}
+          tombi format {{files}}
           """
       }
     }

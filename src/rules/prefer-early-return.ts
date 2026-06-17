@@ -1,4 +1,4 @@
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -6,7 +6,7 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 const DEFAULT_MAXIMUM_STATEMENTS = 1;
 
 function getMaximumStatements(value: unknown): number {
-	if (!isRecord(value) || typeof value.maximumStatements !== "number") return DEFAULT_MAXIMUM_STATEMENTS;
+	if (!(isRecord(value) && isNumberRaw(value.maximumStatements))) return DEFAULT_MAXIMUM_STATEMENTS;
 	return value.maximumStatements;
 }
 

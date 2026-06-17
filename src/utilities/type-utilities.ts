@@ -1,25 +1,33 @@
+export function isStringRaw(value: unknown): value is string {
+	return typeof value === "string";
+}
+
+export function isNumberRaw(value: unknown): value is number {
+	return typeof value === "number";
+}
+
 export function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function isNonEmptyString(value: unknown): value is string {
-	return typeof value === "string" && value.length > 0;
+	return isStringRaw(value) && value.length > 0;
 }
 
-export function isStringArray(value: unknown): value is ReadonlyArray<string> {
-	if (!Array.isArray(value)) return false;
-	for (const item of value) if (typeof item !== "string") return false;
+export function isStringArray(object: unknown): object is ReadonlyArray<string> {
+	if (!Array.isArray(object)) return false;
+	for (const item of object) if (!isStringRaw(item)) return false;
 	return true;
 }
 
-export function isStringRecord(value: unknown): value is Record<string, string> {
-	if (!isRecord(value)) return false;
-	for (const entry of Object.values(value)) if (typeof entry !== "string") return false;
+export function isStringRecord(object: unknown): object is Record<string, string> {
+	if (!isRecord(object)) return false;
+	for (const entry of Object.values(object)) if (!isStringRaw(entry)) return false;
 	return true;
 }
 
 export function isNumber(value: unknown): value is number {
-	return typeof value === "number" && !Number.isNaN(value);
+	return isNumberRaw(value) && !Number.isNaN(value);
 }
 
 export function isAllowAutofixOption(value: unknown): value is { readonly allowAutofix?: boolean } {

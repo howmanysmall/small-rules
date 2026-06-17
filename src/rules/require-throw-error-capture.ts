@@ -1,3 +1,4 @@
+import { isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -5,14 +6,11 @@ import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-util
 type ErrorSpecifier =
 	| string
 	| {
-			readonly from?: "file" | "lib" | "package";
-			readonly package?: string;
+			readonly from?: "file" | "library" | "package";
 			readonly name: string | ReadonlyArray<string>;
+			readonly package?: string;
+			readonly path?: string;
 	  };
-
-interface RequireThrowErrorCaptureOptions {
-	readonly allow?: ReadonlyArray<ErrorSpecifier>;
-}
 
 function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 	let current: ESTree.Node | null = node.parent;
@@ -42,17 +40,54 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 
 function getAssignedName({ parent }: ESTree.Node): string | undefined {
 	if (parent?.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
-	if ((parent?.type === "Property" || parent?.type === "MethodDefinition") && parent.key.type === "Identifier") {
-		return parent.key.name;
+	if (parent?.type === "PropertyDefinition" || parent?.type === "Property" || parent?.type === "MethodDefinition") {
+		if (parent.key.type === "PrivateIdentifier") return `#${parent.key.name}`;
+		if (parent.key.type === "Identifier") return parent.key.name;
 	}
 
 	return undefined;
+}
+
+function isClassMethodContext(node: ESTree.Node): boolean {
+	let current: ESTree.Node | null = node.parent;
+	while (current !== null) {
+		switch (current.type) {
+			case "FunctionDeclaration":
+				return false;
+
+			case "FunctionExpression": {
+				return (
+					(current.parent?.type === "MethodDefinition" || current.parent?.type === "PropertyDefinition") &&
+					current.parent.parent?.type === "ClassBody"
+				);
+			}
+
+			case "ArrowFunctionExpression": {
+				return current.parent?.type === "PropertyDefinition" && current.parent.parent?.type === "ClassBody";
+			}
+
+			default:
+				break;
+		}
+
+		current = current.parent;
+	}
+
+	return false;
 }
 
 function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: string): string {
 	try {
 		const scope = sourceCode.getScope(node);
 		const names = new Set(scope.variables.map((variable) => variable.name));
+
+		// Catch clause parameters may not appear in scope.variables, so walk ancestors
+		let current: ESTree.Node | null = node.parent;
+		while (current !== null) {
+			if (current.type === "CatchClause" && current.param?.type === "Identifier") names.add(current.param.name);
+			current = current.parent;
+		}
+
 		if (!names.has(base)) return base;
 		for (let index = 2; index < 100; index += 1) {
 			const candidate = `${base}${index}`;
@@ -71,11 +106,8 @@ function resolveImportSource(sourceCode: SourceCode, node: ESTree.IdentifierRefe
 		while (scope !== null) {
 			const variable = scope.set.get(node.name);
 			if (variable !== undefined) {
-				const importBindingDefinition = variable.defs.find((definition) => definition.type === "ImportBinding");
-				if (importBindingDefinition?.parent?.type === "ImportDeclaration") {
-					return importBindingDefinition.parent.source.value;
-				}
-
+				const importBinding = variable.defs.find((definition) => definition.type === "ImportBinding");
+				if (importBinding?.parent?.type === "ImportDeclaration") return importBinding.parent.source.value;
 				return undefined;
 			}
 
@@ -103,7 +135,7 @@ function isDeclaredLocally(sourceCode: SourceCode, node: ESTree.IdentifierRefere
 }
 
 function nameMatches(specifier: ErrorSpecifier, calleeName: string): boolean {
-	if (typeof specifier === "string") return calleeName === specifier;
+	if (isStringRaw(specifier)) return calleeName === specifier;
 
 	const names = Array.isArray(specifier.name) ? specifier.name : [specifier.name];
 	return names.includes(calleeName);
@@ -111,11 +143,12 @@ function nameMatches(specifier: ErrorSpecifier, calleeName: string): boolean {
 
 function matchesSpecifier(
 	sourceCode: SourceCode,
+	physicalFilename: string,
 	node: ESTree.IdentifierReference,
 	specifier: ErrorSpecifier,
 ): boolean {
 	if (!nameMatches(specifier, node.name)) return false;
-	if (typeof specifier === "string") return true;
+	if (isStringRaw(specifier)) return true;
 
 	switch (specifier.from) {
 		case undefined:
@@ -124,10 +157,15 @@ function matchesSpecifier(
 		case "package":
 			return resolveImportSource(sourceCode, node) === specifier.package;
 
-		case "file":
-			return isDeclaredLocally(sourceCode, node) && resolveImportSource(sourceCode, node) === undefined;
+		case "file": {
+			const isLocal = isDeclaredLocally(sourceCode, node) && resolveImportSource(sourceCode, node) === undefined;
+			if (!isLocal) return false;
+			if (specifier.path === undefined) return true;
+			if (physicalFilename === "<input>" || physicalFilename === "<text>") return false;
+			return physicalFilename.endsWith(specifier.path);
+		}
 
-		case "lib":
+		case "library":
 			return sourceCode.isGlobalReference(node);
 
 		default:
@@ -137,18 +175,18 @@ function matchesSpecifier(
 
 function isAllowedError(
 	sourceCode: SourceCode,
+	physicalFilename: string,
 	node: ESTree.IdentifierReference,
 	allowList: ReadonlyArray<ErrorSpecifier>,
 ): boolean {
-	return allowList.some((specifier) => matchesSpecifier(sourceCode, node, specifier));
+	return allowList.some((specifier) => matchesSpecifier(sourceCode, physicalFilename, node, specifier));
 }
 
 const requireThrowErrorCapture = defineRule({
 	create(context): Visitor {
 		const { sourceCode } = context;
-		const [rawOptions] = context.options;
-		const options: RequireThrowErrorCaptureOptions = (rawOptions ?? {}) as RequireThrowErrorCaptureOptions;
-		const allowList = options.allow ?? [];
+		const allowList = context.options[0]?.allow ?? [];
+		const physicalFilename = context.physicalFilename ?? "<input>";
 
 		return {
 			ThrowStatement(node): void {
@@ -158,10 +196,13 @@ const requireThrowErrorCapture = defineRule({
 				const { callee } = argument;
 				if (callee.type !== "Identifier" || !callee.name.endsWith("Error")) return;
 
-				if (isAllowedError(sourceCode, callee, allowList)) return;
+				if (isAllowedError(sourceCode, physicalFilename, callee, allowList)) return;
 
 				const functionName = getEnclosingFunctionName(node);
 				if (functionName === undefined) return;
+
+				const isMethod = isClassMethodContext(node);
+				const capturedName = isMethod ? `this.${functionName}` : functionName;
 
 				context.report({
 					fix(fixer): Fix {
@@ -169,7 +210,7 @@ const requireThrowErrorCapture = defineRule({
 
 						const replacement = [
 							`const ${variableName} = ${sourceCode.getText(argument)};`,
-							`Error.captureStackTrace(${variableName}, ${functionName});`,
+							`Error.captureStackTrace(${variableName}, ${capturedName});`,
 							`throw ${variableName};`,
 						].join(`\n`);
 
@@ -206,7 +247,7 @@ const requireThrowErrorCapture = defineRule({
 									properties: {
 										from: {
 											description: "Where the error class is declared",
-											enum: ["file", "lib", "package"],
+											enum: ["file", "library", "package"],
 											type: "string",
 										},
 										name: {
@@ -216,6 +257,11 @@ const requireThrowErrorCapture = defineRule({
 										package: {
 											description:
 												"Package the error class is imported from (required when from is 'package')",
+											type: "string",
+										},
+										path: {
+											description:
+												"Optional file path filter for file specifiers (matched against the end of the file path)",
 											type: "string",
 										},
 									},

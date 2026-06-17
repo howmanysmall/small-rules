@@ -51,7 +51,8 @@
 		"jscpd": "jscpd",
 		"knip": "knip-bun",
 		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint $a && nr biome check $a' _",
-		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format agent $a && nr biome check --reporter json $a' _",
+		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format agent $a && nr biome check --reporter concise $a' _",
+		"lint:json": "bun run --bun scripts/lint-json.ts",
 		"oxfmt": "oxfmt",
 		"oxlint": "oxlint",
 		"prepublish": "tsdown --minify",
@@ -63,7 +64,8 @@
 		"test:fuzz:run": "vitiate fuzz --fuzz-time 10 --config vitest.vitiate.config.ts",
 		"test:mutation": "stryker run",
 		"tsgo": "tsgo",
-		"type-check": "tsgo --noEmit"
+		"type-check": "tsgo --noEmit",
+		"type-check:agent": "tsgo --noEmit --pretty false"
 	},
 	"dependencies": {
 		"arktype": "2.2.0",

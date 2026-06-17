@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, dirname, extname, join, relative } from "node:path";
 
 import { resolveRelativeImport } from "./resolve-import";
+import { isStringRaw } from "./type-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
@@ -232,7 +233,7 @@ export function inspectRelativeLocalComponentImport(
 	definition: LocalComponentDefinition,
 ): LocalComponentInspection {
 	const importSource = node.source.value;
-	if (typeof importSource !== "string" || !importSource.startsWith(".") || filename === "") {
+	if (!(isStringRaw(importSource) && importSource.startsWith(".")) || filename === "") {
 		return { importStyle: undefined, matches: false };
 	}
 

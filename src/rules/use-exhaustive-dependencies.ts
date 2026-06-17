@@ -1,6 +1,6 @@
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
@@ -665,17 +665,17 @@ function isSelfReferenceCapture(capture: CaptureInfo, { parent }: ESTree.CallExp
 }
 
 function isNumericArray(array: ReadonlyArray<unknown>): array is Array<number> {
-	return array.length > 0 && typeof array[0] === "number";
+	return array.length > 0 && isNumberRaw(array[0]);
 }
 function isStringArray(array: ReadonlyArray<unknown>): array is Array<string> {
-	return array.length > 0 && typeof array[0] === "string";
+	return array.length > 0 && isStringRaw(array[0]);
 }
 
 function convertStableResult(
 	stableResult: boolean | number | ReadonlyArray<number> | ReadonlyArray<string>,
 ): StableResult {
 	if (typeof stableResult === "boolean") return stableResult;
-	if (typeof stableResult === "number") return new Set([stableResult]);
+	if (isNumberRaw(stableResult)) return new Set([stableResult]);
 
 	if (Array.isArray(stableResult)) {
 		if (isNumericArray(stableResult)) return new Set(stableResult);

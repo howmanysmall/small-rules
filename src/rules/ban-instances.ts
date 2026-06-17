@@ -1,5 +1,5 @@
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { isRecord, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -61,8 +61,7 @@ function normalizePropertyConfiguration(
 
 		const bannedPropertiesForClass = new Map<string, BannedPropertyEntry>();
 		for (const [propertyName, message] of Object.entries(propertyConfiguration)) {
-			if (typeof message !== "string") continue;
-
+			if (!isStringRaw(message)) continue;
 			bannedPropertiesForClass.set(propertyName.toLowerCase(), { message, propertyName });
 		}
 
@@ -93,7 +92,7 @@ function getInstanceClassName(node: ESTree.NewExpression): string | undefined {
 	if (node.callee.type !== "Identifier" || node.callee.name !== "Instance") return undefined;
 
 	const [firstArgument] = node.arguments;
-	if (firstArgument?.type !== "Literal" || typeof firstArgument.value !== "string") return undefined;
+	if (firstArgument?.type !== "Literal" || !isStringRaw(firstArgument.value)) return undefined;
 
 	return firstArgument.value;
 }

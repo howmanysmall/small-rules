@@ -20,6 +20,7 @@ import {
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
+import { isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { BindingName } from "$oxc-types/missing-types";
@@ -140,7 +141,7 @@ function isReadonlyArrayAnnotation(typeAnnotation: ESTree.TSTypeAnnotation | und
 
 function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (isLiteral(unwrapped) && "value" in unwrapped) return typeof unwrapped.value !== "number";
+	if (isLiteral(unwrapped) && "value" in unwrapped) return !isNumberRaw(unwrapped.value);
 
 	if (
 		isArrayExpression(unwrapped) ||

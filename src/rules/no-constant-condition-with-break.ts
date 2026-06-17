@@ -1,5 +1,5 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { isNonEmptyString } from "$oxc-utilities/type-utilities";
+import { isNonEmptyString, isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -291,9 +291,9 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 
 	// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
 	if (expression.operator === "!") return toConstantValue(!argument.value);
-	if (expression.operator === "+" && typeof argument.value === "number") return toConstantValue(argument.value);
-	if (expression.operator === "-" && typeof argument.value === "number") return toConstantValue(-argument.value);
-	if (expression.operator === "~" && typeof argument.value === "number") return toConstantValue(~argument.value);
+	if (expression.operator === "+" && isNumberRaw(argument.value)) return toConstantValue(argument.value);
+	if (expression.operator === "-" && isNumberRaw(argument.value)) return toConstantValue(-argument.value);
+	if (expression.operator === "~" && isNumberRaw(argument.value)) return toConstantValue(~argument.value);
 	return toNonConstantValue();
 }
 

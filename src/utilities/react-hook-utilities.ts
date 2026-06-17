@@ -1,6 +1,8 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { isKeyOfNode, isNode } from "$oxc-utilities/oxc-utilities";
 
+import { isStringRaw } from "./type-utilities";
+
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -81,7 +83,7 @@ function walkChildSlop(value: unknown, parent: ESTree.Node, callback: (child: ES
 export function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
 	const { key } = property;
 	if (key.type === "Identifier") return key.name;
-	if (key.type === "Literal" && typeof key.value === "string") return key.value;
+	if (key.type === "Literal" && isStringRaw(key.value)) return key.value;
 	return undefined;
 }
 

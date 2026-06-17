@@ -1,4 +1,4 @@
-import { isStringArray } from "$oxc-utilities/type-utilities";
+import { isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -99,7 +99,7 @@ function getValidClosers(configuration: PairConfiguration): Array<string> {
 	const result = new Array<string>();
 
 	if (isStringArray(configuration.closer)) result.push(...configuration.closer);
-	else if (typeof configuration.closer === "string") result.push(configuration.closer);
+	else if (isStringRaw(configuration.closer)) result.push(configuration.closer);
 
 	if (configuration.alternatives) for (const alternative of configuration.alternatives) result.push(alternative);
 

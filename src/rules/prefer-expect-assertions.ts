@@ -6,7 +6,7 @@ import {
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
 import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
@@ -33,8 +33,7 @@ interface RuleOptions {
 type RuleContext = Context<readonly [Partial<RuleOptions>?], RuleMessageId>;
 
 function parseStringArray(value: unknown): ReadonlyArray<string> {
-	if (!Array.isArray(value)) return [];
-	return value.filter((item): item is string => typeof item === "string");
+	return Array.isArray(value) ? value.filter(isStringRaw) : [];
 }
 
 function parseOptions(rawOptions: unknown): RuleOptions {

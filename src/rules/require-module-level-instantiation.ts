@@ -1,4 +1,4 @@
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -13,7 +13,7 @@ function normalizeConfig(options: unknown): ReadonlyMap<string, string> {
 	const { classes } = options;
 	const result = new Map<string, string>();
 	for (const [key, value] of Object.entries(classes)) {
-		if (typeof value !== "string") continue;
+		if (!isStringRaw(value)) continue;
 		result.set(key, value);
 	}
 	return result;
@@ -28,7 +28,7 @@ function getImportedClassName(specifier: ESTree.ImportDeclaration["specifiers"][
 
 	if (specifier.type !== "ImportSpecifier") return undefined;
 	if (specifier.imported.type === "Identifier") return specifier.imported.name;
-	if (typeof specifier.imported.value === "string") return specifier.imported.value;
+	if (isStringRaw(specifier.imported.value)) return specifier.imported.value;
 	return undefined;
 }
 
@@ -63,7 +63,7 @@ function collectTrackedBindings(
 	trackedClasses: ReadonlyMap<string, string>,
 	localBindings: Map<string, string>,
 ): void {
-	if (typeof node.source.value !== "string") return;
+	if (!isStringRaw(node.source.value)) return;
 
 	const importSource = node.source.value;
 

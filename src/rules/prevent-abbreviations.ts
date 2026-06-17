@@ -37,6 +37,7 @@ import {
 	shouldFix,
 	shouldReportIdentifierAsProperty,
 } from "$oxc-utilities/prevent-abbreviations/scope";
+import { isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
@@ -220,7 +221,7 @@ function checkVariable(
 
 	const baseSamples = safeSamples.length > 0 ? safeSamples : variableReplacements.samples;
 	const hasCompleteSamples =
-		typeof variableReplacements.samples.length === "number" &&
+		isNumberRaw(variableReplacements.samples.length) &&
 		variableReplacements.samples.length === variableReplacements.total;
 	const effectiveTotal = hasCompleteSamples
 		? Math.max(0, variableReplacements.total - droppedDiscouraged)

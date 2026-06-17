@@ -1,5 +1,7 @@
 dictionaries = ["en_us"]
 words = [
+	"changelogithub",
+	"bumpp",
 	"bexport",
 	"billboardgui",
 	"bruh",
@@ -60,6 +62,7 @@ words = [
 	"vtsls",
 	"zprofile",
 	"zshenv",
+	"stryker",
 ]
 ignore_paths = [
 	"scripts/generate-default-properties.ts",

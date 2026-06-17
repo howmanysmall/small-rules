@@ -7,6 +7,9 @@
 	},
 	"colorize_brackets": true,
 	"context_servers": {
+		"bun-docs": {
+			"url": "https://bun.com/docs/mcp"
+		},
 		"jsr": {
 			"args": ["x", "--", "jsr-cli", "mcp"],
 			"command": "mise"
