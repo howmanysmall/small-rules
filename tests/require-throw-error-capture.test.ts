@@ -55,7 +55,53 @@ describe("require-throw-error-capture", () => {
 					"class Foo {",
 					"	doThing() {",
 					"		const error = new Error('oops');",
-					"Error.captureStackTrace(error, doThing);",
+					"Error.captureStackTrace(error, this.doThing);",
+					"throw error;",
+					"	}",
+					"}",
+				].join("\n"),
+			},
+			// Private method in a class
+			{
+				code: ["class Foo {", "	#doThing() {", "		throw new Error('oops');", "	}", "}"].join("\n"),
+				errors: [error],
+				output: [
+					"class Foo {",
+					"	#doThing() {",
+					"		const error = new Error('oops');",
+					"Error.captureStackTrace(error, this.#doThing);",
+					"throw error;",
+					"	}",
+					"}",
+				].join("\n"),
+			},
+			// Arrow function assigned to class property
+			{
+				code: ["class Foo {", "	doThing = () => {", "		throw new Error('oops');", "	}", "}"].join(
+					"\n",
+				),
+				errors: [error],
+				output: [
+					"class Foo {",
+					"	doThing = () => {",
+					"		const error = new Error('oops');",
+					"Error.captureStackTrace(error, this.doThing);",
+					"throw error;",
+					"	}",
+					"}",
+				].join("\n"),
+			},
+			// Static method in a class
+			{
+				code: ["class Foo {", "	static doThing() {", "		throw new Error('oops');", "	}", "}"].join(
+					"\n",
+				),
+				errors: [error],
+				output: [
+					"class Foo {",
+					"	static doThing() {",
+					"		const error = new Error('oops');",
+					"Error.captureStackTrace(error, this.doThing);",
 					"throw error;",
 					"	}",
 					"}",
@@ -104,6 +150,19 @@ describe("require-throw-error-capture", () => {
 				errors: [error],
 				// oxlint-disable-next-line no-template-curly-in-string -- this is fine.
 				output: "function fetchModels() { if (!response.ok) {\nconst error = new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);\nError.captureStackTrace(error, fetchModels);\nthrow error;\n} }",
+			},
+			// File specifier with path that does not match <input> still reports
+			{
+				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
+				errors: [error],
+				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				output: [
+					"function foo() {",
+					"\tconst error = new ValidationError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
 			},
 			// Non-allowed error still reports when allow option is present
 			{
@@ -188,10 +247,10 @@ describe("require-throw-error-capture", () => {
 				].join("\n"),
 				options: [{ allow: [{ from: "file", name: "ValidationError" }] }],
 			},
-			// Lib allowlist skips global errors
+			// Library allowlist skips global errors
 			{
 				code: ["function foo() {", "\tthrow new TypeError('bad');", "}"].join("\n"),
-				options: [{ allow: [{ from: "lib", name: "TypeError" }] }],
+				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
 			},
 			// Array of names in a single specifier
 			{
