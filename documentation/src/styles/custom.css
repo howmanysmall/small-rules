@@ -312,12 +312,12 @@ nav.sidebar a[aria-current="page"]::before {
 	transform: translateY(-4px);
 }
 
-.card:hover .card-icon {
-	transform: scale(1.1);
-}
-
 .card-icon {
 	transition: transform 0.4s var(--spring);
+}
+
+.card:hover .card-icon {
+	transform: scale(1.1);
 }
 
 starlight-link-card {
@@ -329,6 +329,36 @@ starlight-link-card {
 starlight-link-card:hover {
 	box-shadow: 0 8px 28px var(--violet-glow-shadow);
 	transform: translateY(-2px);
+}
+
+.rule-summary {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	margin: 1rem 0 1.25rem;
+}
+
+.rule-summary-id {
+	align-self: flex-start;
+	padding: 0.25rem 0.55rem;
+	font-family: var(--sl-font-mono);
+	font-size: 0.8rem;
+	color: var(--sl-color-text);
+	background: transparent;
+	border: 1px solid var(--glass-border);
+	border-radius: 6px;
+}
+
+.rule-summary-text p {
+	margin: 0;
+	font-size: 1.2rem;
+	font-weight: 400;
+	line-height: 1.55;
+	color: var(--sl-color-text);
+}
+
+.rule-summary-text code {
+	font-size: 0.92em;
 }
 
 .badge {
@@ -384,12 +414,19 @@ starlight-link-card:hover {
 	border-color: rgba(139, 92, 246, 0.25);
 }
 
-:not(pre) > code {
-	padding: 0.15em 0.4em;
+.sl-markdown-content :not(pre) > code,
+.rule-summary-text :not(pre) > code {
+	padding: 0;
+	font-size: 0.92em;
 	font-weight: 500;
-	background: var(--violet-glow-bg);
-	border: 1px solid var(--violet-glow-border);
-	border-radius: 6px;
+	color: var(--sl-color-accent-high);
+	background: none;
+	border: none;
+}
+
+:root[data-theme="dark"] .sl-markdown-content :not(pre) > code,
+:root[data-theme="dark"] .rule-summary-text :not(pre) > code {
+	color: var(--violet-300);
 }
 
 .table-container,
@@ -402,6 +439,12 @@ div:has(> table) {
 table {
 	width: 100%;
 	border-collapse: collapse;
+}
+
+th,
+td {
+	padding: 0.6rem 1rem;
+	border-bottom: 1px solid var(--glass-border);
 }
 
 thead th {
@@ -417,12 +460,6 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
 	background: var(--violet-glow-border);
-}
-
-th,
-td {
-	padding: 0.6rem 1rem;
-	border-bottom: 1px solid var(--glass-border);
 }
 
 .category-grid {
@@ -534,6 +571,25 @@ td {
 
 .RuleExample-copy[data-copied] {
 	color: var(--success-400);
+}
+
+/* Base Expressive Code frame styling. Declared before the more specific
+   `.RuleExample-content .expressive-code` rules to keep specificity ascending. */
+.expressive-code {
+	margin: 1.5rem 0 !important;
+	overflow: hidden;
+	border: 1px solid var(--glass-border) !important;
+	border-radius: 0.625rem !important;
+	box-shadow: var(--shadow-sm);
+	transition: border-color 0.3s var(--spring);
+}
+
+.expressive-code:hover {
+	border-color: var(--glass-border-strong);
+}
+
+.expressive-code .frame {
+	border: none !important;
 }
 
 /* The RuleExample header already provides a copy button, so hide Expressive
@@ -695,20 +751,16 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-contain
 
 .hero-splash {
 	position: relative;
-	padding: 1.5rem 0 0.75rem;
-	margin: 0 0 1.5rem;
-	overflow: hidden;
-	background:
-		radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 28%),
-		radial-gradient(circle at 10% 0%, rgba(45, 212, 191, 0.05), transparent 26%);
-	isolation: isolate;
+	padding: 2.25rem 0 2rem;
+	margin: 0 0 2rem;
+	border-bottom: 1px solid var(--glass-border);
 }
 
 .hero-grid {
 	display: grid;
-	grid-template-columns: minmax(0, 1.05fr) minmax(24rem, 0.95fr);
-	gap: 1.5rem 2.25rem;
-	align-items: end;
+	grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.9fr);
+	gap: 1.5rem 2.5rem;
+	align-items: center;
 }
 
 @media (max-width: 900px) {
@@ -730,16 +782,18 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-contain
 	display: inline-flex;
 	gap: 0.4rem;
 	align-items: center;
-	padding: 0.32rem 0.72rem;
+	padding: 0.3rem 0.7rem;
 	margin-bottom: 1.25rem;
-	font-size: 0.8rem;
-	font-weight: 500;
+	font-size: 0.72rem;
+	font-weight: 600;
+	line-height: 1;
 	color: var(--violet-700);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
 	text-decoration: none;
-	background: var(--card-bg);
-	border: 1px solid var(--glass-border);
-	border-radius: 999px;
-	backdrop-filter: blur(8px);
+	background: var(--violet-glow-bg);
+	border: 1px solid var(--violet-glow-border);
+	border-radius: 7px;
 	transition: all 0.3s var(--spring);
 }
 
@@ -812,31 +866,30 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-contain
 
 .hero-cta--primary {
 	color: #fff;
-	background: linear-gradient(135deg, #0f766e, #0f766e 22%, #0ea5a4 100%);
+	background: var(--sl-color-accent);
 	border: 1px solid transparent;
-	box-shadow: 0 8px 24px rgba(6, 95, 70, 0.28);
+	box-shadow: var(--shadow-sm);
 }
 
 .hero-cta--primary:hover {
-	background: linear-gradient(135deg, #115e59, #0f766e 30%, #0891b2 100%);
-	box-shadow: 0 12px 28px rgba(8, 145, 178, 0.28);
-	transform: translateY(-2px);
+	background: color-mix(in oklab, var(--sl-color-accent) 88%, black);
+	box-shadow: var(--shadow-md);
+	transform: translateY(-1px);
 }
 
 :root[data-theme="dark"] .hero-cta--primary {
-	background: linear-gradient(135deg, #0f766e, #0ea5a4 55%, #06b6d4 100%);
-	box-shadow: 0 10px 24px rgba(8, 145, 178, 0.3);
+	color: #04201a;
+	background: var(--sl-color-accent);
 }
 
 :root[data-theme="dark"] .hero-cta--primary:hover {
-	background: linear-gradient(135deg, #14b8a6, #06b6d4 100%);
+	background: color-mix(in oklab, var(--sl-color-accent) 88%, white);
 }
 
 .hero-cta--ghost {
 	color: var(--violet-700);
 	background: var(--card-bg);
 	border: 1px solid var(--glass-border);
-	backdrop-filter: blur(8px);
 }
 
 :root[data-theme="dark"] .hero-cta--ghost {
@@ -861,12 +914,10 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-contain
 	width: 100%;
 	max-width: 34rem;
 	overflow: hidden;
-	background: linear-gradient(180deg, rgba(10, 14, 22, 0.96), rgba(12, 18, 28, 0.96));
-	border: 1px solid rgba(45, 212, 191, 0.18);
+	background: linear-gradient(180deg, rgba(13, 17, 23, 0.98), rgba(15, 20, 28, 0.98));
+	border: 1px solid var(--glass-border);
 	border-radius: 0.875rem;
-	box-shadow:
-		0 0 0 1px rgba(45, 212, 191, 0.08),
-		0 24px 60px -24px rgba(8, 145, 178, 0.24);
+	box-shadow: var(--shadow-md);
 	transition: border-color 0.3s var(--spring);
 }
 
@@ -1006,7 +1057,9 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-contain
 	color: var(--sl-color-text);
 	text-decoration: none;
 	border-top: 1px solid var(--glass-border);
-	transition: border-color 0.25s var(--spring), transform 0.25s var(--spring);
+	transition:
+		border-color 0.25s var(--spring),
+		transform 0.25s var(--spring);
 }
 
 .home-start-link:hover {
@@ -1091,22 +1144,6 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-contain
 
 .section-header {
 	margin: 2.5rem 0 1.25rem;
-}
-
-.section-header h2 {
-	margin: 0 0 0.5rem;
-	font-family: var(--font-display);
-	font-size: 2.25rem;
-	font-weight: 600;
-	line-height: 1.15;
-	letter-spacing: -0.025em;
-}
-
-.section-header p {
-	max-width: 50ch;
-	margin: 0;
-	font-size: 1.05rem;
-	opacity: 0.75;
 }
 
 .category-grid {
@@ -1458,23 +1495,6 @@ a.sl-link-card .description {
 	letter-spacing: 0.08em;
 }
 
-.expressive-code {
-	margin: 1.5rem 0 !important;
-	overflow: hidden;
-	border: 1px solid var(--glass-border) !important;
-	border-radius: 0.625rem !important;
-	box-shadow: var(--shadow-sm);
-	transition: border-color 0.3s var(--spring);
-}
-
-.expressive-code:hover {
-	border-color: var(--glass-border-strong);
-}
-
-.expressive-code .frame {
-	border: none !important;
-}
-
 /*
  * Reveal-on-load: content is never hidden by default. Each section animates
  * itself in via a CSS keyframe (ending fully visible) so a missing/slow JS
@@ -1583,8 +1603,8 @@ main h1 {
 }
 
 main h2 {
-	margin-top: 2.5rem !important;
-	margin-bottom: 1rem !important;
+	margin-top: 1.75rem !important;
+	margin-bottom: 0.75rem !important;
 	font-family: var(--font-display) !important;
 	font-size: 1.875rem !important;
 	font-weight: 600 !important;
@@ -1614,9 +1634,27 @@ main h3 {
 	letter-spacing: -0.01em !important;
 }
 
+/* biome-ignore lint/style/noDescendingSpecificity: intentional low-specificity base paragraph rule; class-scoped paragraph rules above are meant to win. */
 main p {
 	font-size: 1.0625rem;
 	line-height: 1.75;
+}
+
+/* Declared after `main h2`/`main p` to keep selector specificity ascending. */
+.section-header h2 {
+	margin: 0 0 0.5rem;
+	font-family: var(--font-display);
+	font-size: 2.25rem;
+	font-weight: 600;
+	line-height: 1.15;
+	letter-spacing: -0.025em;
+}
+
+.section-header p {
+	max-width: 50ch;
+	margin: 0;
+	font-size: 1.05rem;
+	opacity: 0.75;
 }
 
 nav.sidebar {
