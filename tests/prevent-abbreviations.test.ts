@@ -3,7 +3,6 @@ import rule from "$oxc-rules/prevent-abbreviations";
 
 import { ts, tsx } from "./rule-testers";
 
-const TEST_IGNORE_PATTERN = /^test/u;
 const MANY_REPLACEMENTS = Object.fromEntries(
 	Array.from({ length: 104 }, (_, index) => [`replacement${index.toString().padStart(3, "0")}`, true]),
 );
@@ -479,7 +478,7 @@ describe("prevent-abbreviations", () => {
 			// Ignore patterns (regex)
 			{
 				code: "const testErr = new Error();",
-				options: [{ ignore: [TEST_IGNORE_PATTERN] }],
+				options: [{ ignore: ["^test"] }],
 			},
 			// Ignore patterns (string)
 			{
