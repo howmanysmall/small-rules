@@ -14,7 +14,7 @@ describe("no-underscore-react-props", () => {
     _tooltipGradient={tooltipGradient}
 />;
 `,
-				errors: [{ data: { propName: "_tooltipGradient" }, messageId: "noUnderscoreReactProp" }],
+				errors: [{ data: { propName: "_tooltipGradient" }, messageId: "noUnderscoreReactProperty" }],
 			},
 			{
 				code: `
@@ -23,15 +23,15 @@ function Component() {
 }
 `,
 				errors: [
-					{ data: { propName: "_private" }, messageId: "noUnderscoreReactProp" },
-					{ data: { propName: "_version" }, messageId: "noUnderscoreReactProp" },
+					{ data: { propName: "_private" }, messageId: "noUnderscoreReactProperty" },
+					{ data: { propName: "_version" }, messageId: "noUnderscoreReactProperty" },
 				],
 			},
 			{
 				code: `
 const view = <panel _ />;
 `,
-				errors: [{ data: { propName: "_" }, messageId: "noUnderscoreReactProp" }],
+				errors: [{ data: { propName: "_" }, messageId: "noUnderscoreReactProperty" }],
 			},
 		],
 		valid: [
