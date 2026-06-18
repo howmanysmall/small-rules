@@ -13,5 +13,7 @@
 		"plugins": [{ "name": "@astrojs/ts-plugin" }],
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo"
 	},
-	"extends": "astro/tsconfigs/strictest"
+	"exclude": ["dist", "node_modules"],
+	"extends": "astro/tsconfigs/strictest",
+	"include": [".astro/types.d.ts", "astro.config.ts", "reset.d.ts", "src/**/*"]
 }

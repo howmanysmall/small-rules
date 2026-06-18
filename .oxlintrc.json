@@ -50,6 +50,14 @@
 			}
 		},
 		{
+			"files": ["documentation/src/types/satteri-optional-peers.d.ts"],
+			"rules": {
+				"import/unambiguous": "off",
+				"small-rules/no-unused-imports": "off",
+				"typescript/no-redundant-type-constituents": "off"
+			}
+		},
+		{
 			"files": ["scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
 			"rules": { "no-console": "off" }
 		},

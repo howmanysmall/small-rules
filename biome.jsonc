@@ -453,6 +453,17 @@
 					}
 				}
 			}
+		},
+
+		{
+			"includes": ["documentation/src/types/satteri-optional-peers.d.ts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUndeclaredDependencies": "off"
+					}
+				}
+			}
 		}
 
 		// package.json exception

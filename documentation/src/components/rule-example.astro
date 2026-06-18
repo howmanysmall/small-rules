@@ -48,7 +48,6 @@ const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
 </div>
 
 <script>
-	// oxlint-disable eslint/no-undef -- Astro client scripts run in the browser.
 	document.addEventListener("click", async (event) => {
 		if (!(event.target instanceof Element)) return;
 
