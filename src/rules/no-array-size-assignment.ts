@@ -1,11 +1,25 @@
+import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
+import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type SizeCallExpression = ESTree.CallExpression & {
 	readonly callee: ESTree.StaticMemberExpression;
 };
+
+interface NoArraySizeAssignmentOptions {
+	readonly allowAutofix?: boolean;
+	readonly environment?: Environment;
+}
+
+const DEFAULT_OPTIONS: Required<NoArraySizeAssignmentOptions> = {
+	allowAutofix: false,
+	environment: "roblox-ts",
+};
+
+type NoArraySizeAssignmentMessageId = "usePush" | "useLengthPush";
 
 function isExpressionNode(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
 	return node.type !== "PrivateIdentifier";
@@ -107,46 +121,74 @@ function isSizeCall(node: ESTree.Expression): node is SizeCallExpression {
 	return node.callee.property.name === "size";
 }
 
-function getSizeAppendTarget(
+function getAppendTarget(
 	node: ESTree.AssignmentExpression,
 	sourceCode: SourceCode,
-): ESTree.MemberExpression | undefined {
+	environment: Environment,
+): { left: ESTree.MemberExpression; messageId: NoArraySizeAssignmentMessageId } | undefined {
 	if (node.operator !== "=" || node.left.type !== "MemberExpression" || !node.left.computed) return undefined;
-	if (!isSizeCall(node.left.property)) return undefined;
-	return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode) ? node.left : undefined;
+
+	// roblox-ts: array[array.size()] = value
+	if (environment === "roblox-ts" && isSizeCall(node.left.property)) {
+		return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode)
+			? { left: node.left, messageId: "usePush" }
+			: undefined;
+	}
+
+	// standard: array[array.length] = value
+	if (environment === "standard") {
+		const { property } = node.left;
+		if (
+			property.type === "MemberExpression" &&
+			!property.optional &&
+			!property.computed &&
+			property.property.type === "Identifier" &&
+			property.property.name === "length"
+		) {
+			return areEquivalentTargets(node.left.object, property.object, sourceCode)
+				? { left: node.left, messageId: "useLengthPush" }
+				: undefined;
+		}
+	}
+
+	return undefined;
 }
 
 const noArraySizeAssignment = defineRule({
 	create(context): Visitor {
-		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix === true;
+		const rawOptions = context.options?.[0];
+		const options: Required<NoArraySizeAssignmentOptions> =
+			typeof rawOptions === "object" && rawOptions !== null
+				? { ...DEFAULT_OPTIONS, ...(rawOptions as Partial<NoArraySizeAssignmentOptions>) }
+				: { ...DEFAULT_OPTIONS };
+		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
 		const { sourceCode } = context;
 
 		return {
 			AssignmentExpression(node): void {
-				const target = getSizeAppendTarget(node, sourceCode);
-				if (target === undefined) return;
+				const result = getAppendTarget(node, sourceCode, options.environment);
+				if (result === undefined) return;
 
 				const expressionStatement = node.parent.type === "ExpressionStatement" ? node.parent : undefined;
 				const shouldAutofix =
-					allowAutofix && expressionStatement !== undefined && isSafeFixTarget(target.object);
+					allowAutofix && expressionStatement !== undefined && isSafeFixTarget(result.left.object);
 
 				if (!shouldAutofix) {
 					context.report({
-						messageId: "usePush",
+						messageId: result.messageId,
 						node,
 					});
 					return;
 				}
 
-				const targetText = sourceCode.getText(target.object);
+				const targetText = sourceCode.getText(result.left.object);
 				const rightText = sourceCode.getText(node.right);
 
 				context.report({
 					fix(fixer) {
 						return fixer.replaceText(expressionStatement, `${targetText}.push(${rightText});`);
 					},
-					messageId: "usePush",
+					messageId: result.messageId,
 					node,
 				});
 			},
@@ -155,10 +197,11 @@ const noArraySizeAssignment = defineRule({
 	meta: {
 		docs: {
 			description:
-				"Disallow array append assignments using array[array.size()] = value and prefer push-based appends.",
+				"Disallow array append assignments using array[array.size()] = value (roblox-ts) or array[array.length] = value (standard) and prefer push-based appends.",
 		},
 		fixable: "code",
 		messages: {
+			useLengthPush: "Do not append with array[array.length] = value. Use array.push(value) instead.",
 			usePush: "Do not append with array[array.size()] = value. Use array.push(value) instead.",
 		},
 		schema: [
@@ -169,6 +212,7 @@ const noArraySizeAssignment = defineRule({
 						default: false,
 						type: "boolean",
 					},
+					environment: ENVIRONMENT_SCHEMA,
 				},
 				type: "object",
 			},

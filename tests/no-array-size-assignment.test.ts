@@ -7,6 +7,7 @@ describe("no-array-size-assignment", () => {
 	// @ts-expect-error -- Stupid.
 	js.run("no-array-size-assignment", rule, {
 		invalid: [
+			// roblox-ts: .size() pattern
 			{
 				code: "array[array.size()] = value;",
 				errors: [{ messageId: "usePush" }],
@@ -79,8 +80,82 @@ describe("no-array-size-assignment", () => {
 				options: [{ allowAutofix: true }],
 				output: null,
 			},
+			// standard: .length pattern
+			{
+				code: "array[array.length] = value;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: "array.push(value);",
+			},
+			{
+				code: "state.items[state.items.length] = item;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: "state.items.push(item);",
+			},
+			{
+				code: 'store["items"][store["items"].length] = item;',
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: 'store["items"].push(item);',
+			},
+			{
+				code: "registry[keyRef.value][registry[keyRef.value].length] = item;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: "registry[keyRef.value].push(item);",
+			},
+			{
+				code: "registry[keys[index]][registry[keys[index]].length] = item;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: "registry[keys[index]].push(item);",
+			},
+			{
+				code: "class Store { items = []; add(item) { this.items[this.items.length] = item; } }",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: "class Store { items = []; add(item) { this.items.push(item); } }",
+			},
+			{
+				code: "class Store { #items = []; add(item) { this.#items[this.#items.length] = item; } }",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: "class Store { #items = []; add(item) { this.#items.push(item); } }",
+			},
+			{
+				code: "array[array.length] = value;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: false, environment: "standard" }],
+				output: null,
+			},
+			{
+				code: "const x = (array[array.length] = value);",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: null,
+			},
+			{
+				code: "getArray()[getArray().length] = value;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: null,
+			},
+			{
+				code: "registry[getKey().value][registry[getKey().value].length] = item;",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: null,
+			},
+			{
+				code: "class Base { items = []; } class Child extends Base { add(item) { super.items[super.items.length] = item; } }",
+				errors: [{ messageId: "useLengthPush" }],
+				options: [{ allowAutofix: true, environment: "standard" }],
+				output: null,
+			},
 		],
 		valid: [
+			// roblox-ts valid
 			"array.push(value);",
 			"array[array.size() - 1] = value;",
 			"array[other.size()] = value;",
@@ -88,6 +163,33 @@ describe("no-array-size-assignment", () => {
 			'array[array["size"]()] = value;',
 			"[item][[item].size()] = item;",
 			"store[\"items\"][store['items'].size()] = item;",
+			// standard: .length should NOT trigger in roblox-ts mode
+			"array[array.length] = value;",
+			// standard: should NOT trigger when environment is standard
+			{
+				code: "array[array.length - 1] = value;",
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: "array[other.length] = value;",
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: 'array[array["length"]] = value;',
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: "array[array.length] += value;",
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: "[item][[item].length] = item;",
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: "store[\"items\"][store['items'].length] = item;",
+				options: [{ environment: "standard" }],
+			},
 		],
 	});
 });
