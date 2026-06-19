@@ -1,5 +1,5 @@
+import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
-import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
