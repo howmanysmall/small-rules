@@ -20,7 +20,10 @@ You **MUST** follow these guidelines. There is NO exception.
 
 | Command | What it does |
 |---------|-------------|
-| `aube install` | Install dependencies (Aube is the package manager, not `pnpm`/`bun`) |
+| `aube install` | Fresh install dependencies (Aube is the package manager, not `pnpm`/`bun`) |
+| `ni` | Install dependencies when `node_modules` exists |
+| `ni cowsay` | Add a dependency |
+| `ni -D cowsay` | Add a dev dependency |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
 | `nr test:agent` | Run all Vitest unit tests |
 | `nr test:agent -- tests/no-print.test.ts` | Run a single test file |
@@ -33,9 +36,6 @@ You **MUST** follow these guidelines. There is NO exception.
 | `nr test:mutation` | Run Stryker mutation testing (thresholds: break at 70%) |
 | `nr test:fuzz` | Run vitiate regression from stored corpus |
 | `nr test:fuzz:run` | Run vitiate fuzz testing (10 second default) |
-| `mise run check` | Full local validation: lint → type-check → `knip` → build → test |
-| `mise run ci` | install + check |
-| `mise run release` | bump, tag, push via `bumpp` (interactive, asks confirmation) |
 
 Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined in `mise.toml`.
 
