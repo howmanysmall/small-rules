@@ -1,6 +1,8 @@
+import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
+import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type SizeCallExpression = ESTree.CallExpression & {
@@ -110,7 +112,7 @@ function isSizeCall(node: ESTree.Expression): node is SizeCallExpression {
 function getAppendTarget(
 	node: ESTree.AssignmentExpression,
 	sourceCode: SourceCode,
-	environment: string,
+	environment: Environment,
 ): ESTree.MemberExpression | undefined {
 	if (node.operator !== "=" || node.left.type !== "MemberExpression" || !node.left.computed) return undefined;
 
@@ -192,11 +194,10 @@ const noArraySizeAssignment = defineRule({
 						type: "boolean",
 					},
 					environment: {
+						...ENVIRONMENT_SCHEMA,
 						default: "roblox-ts",
 						description:
 							"Array environment mode: 'roblox-ts' checks array[array.size()]; 'standard' checks array[array.length].",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
 					},
 				},
 				type: "object",
