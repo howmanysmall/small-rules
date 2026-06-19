@@ -571,6 +571,22 @@ describe("prevent-abbreviations", () => {
 				code: 'const err = require("node_modules/package");',
 				options: [{ checkDefaultAndNamespaceImports: "internal" }],
 			},
+			{
+				code: 'import { Button } from "library"; type T = Button.Props;',
+				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import * as Button from "library"; type T = Button.Props;',
+				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import Button from "library"; type T = Button.Props;',
+				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import type { Button } from "library"; type T = Button.Props;',
+				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
 		],
 	});
 
