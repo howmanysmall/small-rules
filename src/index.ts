@@ -13,6 +13,7 @@ import directiveRequireDescription from "$oxc-rules/directive-require-descriptio
 import enforceIanitorCheckType from "$oxc-rules/enforce-ianitor-check-type";
 import memoizedEffectDependencies from "$oxc-rules/memoized-effect-dependencies";
 import noArrayConstructorElements from "$oxc-rules/no-array-constructor-elements";
+import noArrayConstructorIndexAssignment from "$oxc-rules/no-array-constructor-index-assignment";
 import noArraySizeAssignment from "$oxc-rules/no-array-size-assignment";
 import noAsyncConstructor from "$oxc-rules/no-async-constructor";
 import noCascadingSetState from "$oxc-rules/no-cascading-set-state";
@@ -104,6 +105,7 @@ const smallRules = definePlugin({
 		"enforce-ianitor-check-type": enforceIanitorCheckType,
 		"memoized-effect-dependencies": memoizedEffectDependencies,
 		"no-array-constructor-elements": noArrayConstructorElements,
+		"no-array-constructor-index-assignment": noArrayConstructorIndexAssignment,
 		"no-array-size-assignment": noArraySizeAssignment,
 		"no-async-constructor": noAsyncConstructor,
 		"no-cascading-set-state": noCascadingSetState,
