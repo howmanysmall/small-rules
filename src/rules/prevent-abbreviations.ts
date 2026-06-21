@@ -75,6 +75,7 @@ function isObjectIdentifierImported(node: ESTree.IdentifierName, sourceCode: Sou
 	const { parent } = node;
 
 	let objectNode: ESTree.Node | undefined;
+	/* v8 ignore else -- isShorthandPropertyAccess limits callers to member or TS-qualified property access. @preserve */
 	if (isMemberExpression(parent) && parent.property === node && !parent.computed) {
 		objectNode = parent.object;
 	} else if (isTsQualifiedName(parent) && parent.right === node) objectNode = parent.left;
@@ -91,6 +92,7 @@ function reportShorthandReplacement(
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
 ): void {
 	report({
+		/* v8 ignore next -- shorthand reports are only emitted for property-like identifiers today. @preserve */
 		...getMessage(node.name, { samples: [replacement], total: 1 }, isPropertyLike ? "property" : "variable"),
 		node,
 	});
@@ -157,6 +159,7 @@ function computeSafeSamples(
 			droppedDiscouraged += 1;
 			continue;
 		}
+		/* v8 ignore else -- generated safe names are non-empty valid identifiers. @preserve */
 		if (safeName.length > 0) safeSamples[safeSamplesSize++] = safeName;
 	}
 
@@ -219,6 +222,7 @@ function checkVariable(
 	if (definition === undefined) return;
 
 	const definitionName = definition.name;
+	/* v8 ignore next -- parser variable definitions in this rule expose identifier names. @preserve */
 	if (!isIdentifierName(definitionName)) return;
 	if (shouldSkipVariable(definition, definitionName, options)) return;
 
@@ -257,6 +261,7 @@ function checkVariable(
 
 	if (effectiveTotal === 1 && safeSamples.length === 1 && shouldFix(variable)) {
 		const [replacement] = safeSamples;
+		/* v8 ignore next -- safeSamples.length === 1 guarantees a replacement entry. @preserve */
 		if (replacement !== undefined) {
 			tryReportFix(report, message, variable, replacement, scopes, scopeToNamesGeneratedByFixer, definitionName);
 			return;
@@ -274,11 +279,13 @@ function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (v
 
 	if (variable.scope.type === "class") {
 		const [definition] = variable.defs;
+		/* v8 ignore next -- class variables classified by isClassVariable have exactly one definition. @preserve */
 		if (definition === undefined) {
 			variableChecker(variable);
 			return;
 		}
 		const definitionName = definition.name;
+		/* v8 ignore next -- parser class-name definitions expose identifier names. @preserve */
 		if (!isIdentifierName(definitionName)) {
 			variableChecker(variable);
 			return;

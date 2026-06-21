@@ -2,7 +2,7 @@ import { describe } from "vitest";
 import rule from "$oxc-rules/use-exhaustive-dependencies";
 import parser from "@typescript-eslint/parser";
 
-import { jsx } from "./rule-testers";
+import { jsx, ts } from "./rule-testers";
 
 describe("use-exhaustive-dependencies", () => {
 	// @ts-expect-error - RuleTester types are incorrect for suggestions
@@ -916,6 +916,179 @@ function Component({ count }) {
 }
 `,
 			},
+			{
+				code: `
+function Component() {
+    const obj = { value: 1 };
+    useMemo(() => obj["value"], []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'obj[\"value\"]' to dependencies array",
+								output: `
+function Component() {
+    const obj = { value: 1 };
+    useMemo(() => obj["value"], [obj["value"]]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const obj = { value: 1 };
+    useMemo(() => obj["value"], [obj["value"]]);
+}
+`,
+			},
+			{
+				code: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, [value + 1]);
+}
+`,
+				errors: [
+					{
+						messageId: "unnecessaryDependency",
+						suggestions: [
+							{
+								desc: "Remove 'value + 1' from dependencies array",
+								output: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, []);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const value = Math["random"]();
+    useEffect(() => {
+        console.log(value);
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'value' to dependencies array",
+								output: `
+function Component() {
+    const value = Math["random"]();
+    useEffect(() => {
+        console.log(value);
+    }, [value]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component() {
+    const value = Math["random"]();
+    useEffect(() => {
+        console.log(value);
+    }, [value]);
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const { stable, ...rest } = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'rest' to dependencies array",
+								output: `
+function Component() {
+    const { stable, ...rest } = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, [rest]);
+}
+`,
+							},
+						],
+					},
+				],
+				options: [{ hooks: [{ name: "useCustomState", stableResult: ["stable"] }] }],
+				output: `
+function Component() {
+    const { stable, ...rest } = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, [rest]);
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const [stable, ...rest] = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'rest' to dependencies array",
+								output: `
+function Component() {
+    const [stable, ...rest] = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, [rest]);
+}
+`,
+							},
+						],
+					},
+				],
+				options: [{ hooks: [{ name: "useCustomState", stableResult: [0] }] }],
+				output: `
+function Component() {
+    const [stable, ...rest] = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, [rest]);
+}
+`,
+			},
 		],
 		valid: [
 			// Coverage: TSSatisfiesExpression and other TS nodes
@@ -946,6 +1119,66 @@ function Component() {
 						hooks: [{ name: "useCustomState", stableResult: 1 }],
 					},
 				],
+			},
+			// Coverage: Stable result as object property names
+			{
+				code: `
+function Component() {
+    const { stable } = useCustomObject();
+    useEffect(() => {
+        stable();
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [{ name: "useCustomObject", stableResult: ["stable"] }],
+					},
+				],
+			},
+			// Custom hook entries without closure indices only contribute stable results
+			{
+				code: `
+function Component() {
+    const count = props.count;
+    useIgnoredEffect(() => {
+        console.log(count);
+    }, []);
+}
+`,
+				options: [
+					{
+						hooks: [{ name: "useIgnoredEffect" }],
+					},
+				],
+			},
+			{
+				code: `
+function Component() {
+    const value = 1;
+    useEffect(() => {
+        console.log("ok");
+    }, [value]);
+}
+`,
+				options: [{ reportUnnecessaryDependencies: false, reportUnnecessaryStableDependencies: true }],
+			},
+			{
+				code: `
+function Component() {
+    useCustomHook(() => {
+        console.log("closure exists");
+    });
+}
+`,
+				options: [{ hooks: [{ closureIndex: 1, dependenciesIndex: 2, name: "useCustomHook" }] }],
+			},
+			{
+				code: `
+function Component() {
+    useEffect(missingCallback, []);
+}
+`,
 			},
 			// Correct dependencies
 			`
@@ -2151,7 +2384,42 @@ function Component() {
 
 		// @ts-expect-error - RuleTester types are incorrect for suggestions
 		jsx.run("use-exhaustive-dependencies - resolveExpressionDependencies false", rule, {
-			invalid: [],
+			invalid: [
+				{
+					code: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(count);
+    }, [count + 1]);
+}
+`,
+					errors: [
+						{
+							messageId: "missingDependency",
+							suggestions: [
+								{
+									desc: "Add 'count' to dependencies array",
+									output: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(count);
+    }, [count, count + 1]);
+}
+`,
+								},
+							],
+						},
+					],
+					options: [{ reportUnnecessaryDependencies: false, resolveExpressionDependencies: false }],
+					output: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(count);
+    }, [count, count + 1]);
+}
+`,
+				},
+			],
 			valid: [
 				{
 					code: `
@@ -2167,5 +2435,115 @@ function Component() {
 				},
 			],
 		});
+	});
+});
+
+describe("use-exhaustive-dependencies - coverage locks", () => {
+	// @ts-expect-error - RuleTester types are incorrect for suggestions
+	jsx.run("use-exhaustive-dependencies - coverage locks", rule, {
+		invalid: [
+			{
+				code: `
+function Component() {
+    const [setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'setter' to dependencies array",
+								output: `
+function Component() {
+    const [setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, [setter]);
+}
+`,
+							},
+						],
+					},
+				],
+				options: [{ hooks: [{ name: "useCustomState", stableResult: [1] }] }],
+				output: `
+function Component() {
+    const [setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, [setter]);
+}
+`,
+			},
+		],
+		valid: [
+			{
+				code: `
+const tracker = createTracker();
+
+function Component() {
+    useEffect(() => {
+        tracker.flush();
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+const DEFAULT_TITLE = "Home";
+
+function Component({ count }) {
+    const deps = [count];
+    useEffect(() => {
+        console.log(DEFAULT_TITLE, count);
+    }, deps);
+}
+`,
+			},
+		],
+	});
+
+	// @ts-expect-error - RuleTester types are incorrect for suggestions
+	ts.run("use-exhaustive-dependencies - type assertion coverage locks", rule, {
+		invalid: [
+			{
+				code: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(<number>count);
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'count' to dependencies array",
+								output: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(<number>count);
+    }, [count]);
+}
+`,
+							},
+						],
+					},
+				],
+				output: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(<number>count);
+    }, [count]);
+}
+`,
+			},
+		],
+		valid: [],
 	});
 });

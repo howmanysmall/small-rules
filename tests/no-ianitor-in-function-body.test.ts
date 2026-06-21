@@ -110,6 +110,14 @@ function validate(value: unknown) {
 	ianitorAssert(Ianitor.keyOf(ids), value);
 }
 `,
+			// Nested call where the inner callee is not an Ianitor member expression
+			`
+import { Ianitor } from "@packages/ianitor";
+
+function validate(value: unknown) {
+	return Ianitor(value)(input).success;
+}
+`,
 		],
 	});
 });

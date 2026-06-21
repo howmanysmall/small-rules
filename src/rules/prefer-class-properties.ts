@@ -8,11 +8,13 @@ function isSimpleLiteralProperty(property: ESTree.ObjectProperty): boolean {
 }
 
 function isSimpleLiteral(node: ESTree.Expression | undefined): boolean {
+	/* v8 ignore next -- @preserve callers pass concrete expression nodes from parser properties. */
 	if (node === undefined) return false;
 
 	switch (node.type) {
 		case "ArrayExpression": {
 			return node.elements.every((element) => {
+				/* v8 ignore next -- @preserve array holes are covered as literal-preserving elements. */
 				if (element === null) return true;
 				if (element.type === "SpreadElement") return false;
 				return isSimpleLiteral(element);

@@ -154,6 +154,82 @@ const view = (
 			},
 			{
 				code: `
+const LabelSpritesheet = ({ children }: { children?: React.ReactNode }) => {
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+};
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	const ratio = 1.5;
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={ratio} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return;
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet() {
+	return null;
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+const LabelSpritesheet = ({ children }: { children?: React.ReactNode }) => (
+	<imagelabel>{children}</imagelabel>
+);
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
 function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
 	return <imagelabel>{children}</imagelabel>;
 }
@@ -204,12 +280,33 @@ const view = (
 			},
 			{
 				code: `
+import { MissingSpritesheet } from "../components/missing-spritesheet";
+
+const view = (
+	<MissingSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</MissingSpritesheet>
+);
+`,
+				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+			},
+			{
+				code: `
 const UI_ASPECT_RATIO_CONSTRAINT = <uiaspectratioconstraint AspectRatio={1.5} />;
 
 const view = (
 	<SomeOtherComponent>
 		{UI_ASPECT_RATIO_CONSTRAINT}
 	</SomeOtherComponent>
+);
+`,
+			},
+			{
+				code: `
+const view = (
+	<Layout.LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</Layout.LabelSpritesheet>
 );
 `,
 			},

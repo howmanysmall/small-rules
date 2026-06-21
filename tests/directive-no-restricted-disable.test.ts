@@ -17,6 +17,11 @@ describe("directive-no-restricted-disable", () => {
 				errors: [{ messageId: "disallow" }],
 				options: ["no-*"],
 			},
+			{
+				code: "/* oxlint-disable */\nconst x = 1;",
+				errors: [{ messageId: "disallow" }],
+				options: ["no-console"],
+			},
 		],
 		valid: [
 			{

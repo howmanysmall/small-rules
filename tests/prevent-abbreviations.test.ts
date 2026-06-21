@@ -1,5 +1,15 @@
-import { describe } from "vitest";
+import assert from "node:assert/strict";
+import { describe, expect, it } from "vitest";
 import rule from "$oxc-rules/prevent-abbreviations";
+import {
+	getMessage,
+	getNameReplacements,
+	getShorthandReplacement,
+	isDiscouragedReplacementName,
+	isPropertyAccessAllowed,
+	isShorthandIgnored,
+	prepareOptions,
+} from "$oxc-utilities/prevent-abbreviations/replacements";
 
 import { ts, tsx } from "./rule-testers";
 
@@ -85,6 +95,16 @@ describe("prevent-abbreviations", () => {
 					},
 				],
 				output: "function foo(error) { return error; }",
+			},
+			{
+				code: "function foo(err = fallback) { return err; }",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				output: "function foo(error = fallback) { return error; }",
 			},
 			{
 				code: "function foo(plr) { return plr; }",
@@ -180,6 +200,16 @@ describe("prevent-abbreviations", () => {
 			// Custom shorthand replacement
 			{
 				code: "const result = obj.fr;",
+				errors: [
+					{
+						data: { discouragedName: "fr", nameTypeText: "property", replacement: "fullResult" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkShorthandProperties: true, shorthands: { fr: "fullResult" } }],
+			},
+			{
+				code: "getThing().fr;",
 				errors: [
 					{
 						data: { discouragedName: "fr", nameTypeText: "property", replacement: "fullResult" },
@@ -461,6 +491,77 @@ describe("prevent-abbreviations", () => {
 				],
 				options: [{ checkProperties: true }],
 			},
+			{
+				code: "const err = value;",
+				errors: [
+					{
+						messageId: "suggestion",
+					},
+				],
+				options: [{ replacements: { err: { "bad-name": true } } }],
+			},
+			{
+				code: 'import { default as err } from "./module";',
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkDefaultAndNamespaceImports: true }],
+				output: 'import { default as error } from "./module";',
+			},
+			{
+				code: 'const err = require("./module");',
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				output: 'const error = require("./module");',
+			},
+			{
+				code: "target.err = 1;",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "const value = 1;",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "filename", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				filename: "src/err",
+				options: [{ checkFilenames: true }],
+			},
+			{
+				code: "class Shape { err() {} }",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "const { err: value } = payload;",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+				options: [{ checkProperties: true }],
+			},
 		],
 		valid: [
 			// CONSTANTS (all caps) should be ignored
@@ -513,6 +614,11 @@ describe("prevent-abbreviations", () => {
 			{
 				code: "const distance = 10;",
 			},
+			{
+				code: "const value = 1;",
+				filename: "src/value.ts",
+				options: [{ checkFilenames: true }],
+			},
 			// Function with valid parameter name
 			{
 				code: "function foo(error) { return error; }",
@@ -520,6 +626,10 @@ describe("prevent-abbreviations", () => {
 			// Property with valid name when checkProperties: true
 			{
 				code: "const obj = { error: 'value' };",
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "const obj = { __proto__: value };",
 				options: [{ checkProperties: true }],
 			},
 			// Default shorthand property access remains allowed
@@ -560,8 +670,16 @@ describe("prevent-abbreviations", () => {
 				options: [{ checkShorthandProperties: false, shorthands: { fr: "fullResult" } }],
 			},
 			{
+				code: "const result = obj.fr;",
+				options: [{ ignoreShorthands: ["fr"], shorthands: { fr: "fullResult" } }],
+			},
+			{
 				code: 'import err from "node_modules/package";',
 				options: [{ checkDefaultAndNamespaceImports: "internal" }],
+			},
+			{
+				code: 'import err from "./module";',
+				options: [{ checkDefaultAndNamespaceImports: false }],
 			},
 			{
 				code: 'import { err } from "node_modules/package";',
@@ -587,7 +705,90 @@ describe("prevent-abbreviations", () => {
 				code: 'import type { Button } from "library"; type T = Button.Props;',
 				options: [{ shorthands: { "*Props": "*Properties" } }],
 			},
+			{
+				code: "const err = value;",
+				options: [{ replacements: { err: false } }],
+			},
+			{
+				code: "const err = value;",
+				options: [{ extendDefaultReplacements: false, replacements: { err: { error: false } } }],
+			},
 		],
+	});
+
+	describe("replacement utilities", () => {
+		it("normalizes disabled and malformed replacement overrides", () => {
+			expect.assertions(5);
+
+			const options = prepareOptions({
+				extendDefaultReplacements: false,
+				replacements: {
+					err: false,
+					fn: "function",
+					res: { response: true, result: "yes" },
+				},
+			});
+
+			expect(getNameReplacements("err", options)).toStrictEqual({ total: 0 });
+			expect(getNameReplacements("fn", options)).toStrictEqual({ total: 0 });
+			expect(getNameReplacements("res", options)).toStrictEqual({ samples: ["response"], total: 1 });
+			expect(isDiscouragedReplacementName("res", options)).toBe(true);
+			expect(isDiscouragedReplacementName("missing", options)).toBe(false);
+		});
+
+		it("supports shorthand fallbacks, ignored shorthand matches, and property access allow lists", () => {
+			expect.assertions(7);
+
+			const options = prepareOptions({
+				allowPropertyAccess: ["Txt"],
+				ignoreShorthands: ["Btn", "*Props"],
+				shorthands: {
+					"*Props": "*Properties",
+					"/^Txt(.*)$/": "Text$1",
+					"/not-a-pattern": "literalPattern",
+					Btn: "Button",
+				},
+			});
+
+			const textReplacement = getShorthandReplacement("TxtLabel", options.shorthandConfiguration);
+			const literalReplacement = getShorthandReplacement("/not-a-pattern", options.shorthandConfiguration);
+			const propsReplacement = getShorthandReplacement("PanelProps", options.shorthandConfiguration);
+
+			expect(textReplacement?.replaced).toBe("TextLabel");
+			assert.ok(textReplacement !== undefined);
+			expect(literalReplacement).toBeUndefined();
+			expect(propsReplacement?.replaced).toBe("PanelProperties");
+			expect(isShorthandIgnored("Btn", options.shorthandConfiguration)).toBe(true);
+			expect(isShorthandIgnored("PanelProps", options.shorthandConfiguration)).toBe(true);
+			expect(isShorthandIgnored("TxtLabel", options.shorthandConfiguration)).toBe(false);
+			expect(isPropertyAccessAllowed("Title", textReplacement, new Set(["Txt"]))).toBe(true);
+		});
+
+		it("formats replacement suggestions without omitted counts when all samples are shown", () => {
+			expect.assertions(8);
+
+			const options = prepareOptions({
+				allowList: { ignored: "yes", kept: true },
+				ignore: [123, "test"],
+			});
+			const shorthandOptions = prepareOptions({
+				shorthands: {
+					"/^([A-Z])([A-Z]+)$/u": "$2$1",
+					"/^Btn$/": "$1",
+				},
+			});
+
+			expect(
+				getMessage("res", { samples: ["response", "result"], total: 2 }, "variable").data.replacementsText,
+			).toBe("`response`, `result`");
+			expect(getMessage("res", { total: 1 }, "variable").data.replacement).toBe("");
+			expect(getNameReplacements("ERRValue", options)).toStrictEqual({ total: 0 });
+			expect(getShorthandReplacement("", shorthandOptions.shorthandConfiguration)).toBeUndefined();
+			expect(getShorthandReplacement("ABC", shorthandOptions.shorthandConfiguration)?.replaced).toBe("BCA");
+			expect(getShorthandReplacement("Btn", shorthandOptions.shorthandConfiguration)?.replaced).toBe("");
+			expect(getNameReplacements("kept", options)).toStrictEqual({ total: 0 });
+			expect(getNameReplacements("testName", options)).toStrictEqual({ total: 0 });
+		});
 	});
 
 	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
@@ -605,6 +806,9 @@ describe("prevent-abbreviations", () => {
 			},
 		],
 		valid: [
+			{
+				code: "<Button />;",
+			},
 			{
 				code: "<btn />;",
 				options: [{ shorthands: { Btn: "Button" } }],

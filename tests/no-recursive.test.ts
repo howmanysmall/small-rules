@@ -54,6 +54,10 @@ describe("no-recursive", () => {
 				code: `class Calculator { factorial(n) { if (n <= 1) return 1; return n * this.factorial(n - 1); } }`,
 				errors: [{ messageId: "noRecursive" }],
 			},
+			{
+				code: `const factorial = function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); };`,
+				errors: [{ messageId: "noRecursive" }],
+			},
 		],
 		valid: [
 			// Non-recursive function
@@ -64,6 +68,7 @@ describe("no-recursive", () => {
 			`const add = (a, b) => a + b;`,
 			// Callback to external function is not flagged
 			`const result = [1, 2, 3].map(x => x * x);`,
+			`function foo() { return external(); }`,
 			// Function named after a global that doesn't recurse
 			`function Array() { return [1, 2, 3]; }`,
 			// Shadowing — inner function shadows outer, inner doesn't call itself
@@ -76,6 +81,8 @@ describe("no-recursive", () => {
 			`async function noop() { return null; }`,
 			// Non-recursive generator
 			`function* range() { yield 1; }`,
+			// Anonymous class expressions should not be treated as local this-recursion
+			`const Greeter = class { sayHi() { return this.sayHiOutside(); } sayHiOutside() { return "hi"; } };`,
 		],
 	});
 });

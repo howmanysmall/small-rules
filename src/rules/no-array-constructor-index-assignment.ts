@@ -116,6 +116,7 @@ function getCandidate(
 	}
 
 	const [declarator] = declaration.declarations;
+	/* v8 ignore next -- guarded by declarations.length === 1; undefined is a parser invariant. @preserve */
 	if (declarator === undefined || !isVariableDeclarator(declarator) || declarator.init === null) {
 		return undefined;
 	}
@@ -134,6 +135,7 @@ function getCandidate(
 
 	while (scanIndex < statements.length) {
 		const statement = statements[scanIndex];
+		/* v8 ignore next -- scanIndex is bounded by statements.length. @preserve */
 		if (statement === undefined) break;
 
 		const assignment = getArrayIndexAssignment(statement, arrayIdentifierName, expectedIndex);
@@ -153,6 +155,7 @@ function getCandidate(
 
 	const [firstFound] = foundAssignments;
 	const lastFound = foundAssignments.at(-1);
+	/* v8 ignore next -- foundAssignments.length > 0 guarantees both ends exist. @preserve */
 	if (firstFound === undefined || lastFound === undefined) return undefined;
 
 	return {
@@ -174,6 +177,7 @@ function createFix(
 ): Array<ReturnType<Fixer["replaceText"] | Fixer["removeRange"]>> {
 	const { declaration, declarator, assignments, firstAssignmentStatement, lastAssignmentStatement } = candidate;
 	const { init } = declarator;
+	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
 	if (init === null) return [];
 
 	const literalText = `[${assignments.map((assignment) => assignment.valueText).join(", ")}]`;
@@ -201,6 +205,7 @@ function createFix(
 		const declarationText = sourceCode.getText(declaration);
 		const initText = sourceCode.getText(init);
 		const initOffset = declarationText.indexOf(initText);
+		/* v8 ignore next -- source text for an initializer must be inside its own declaration. @preserve */
 		const newDeclarationText =
 			initOffset === -1
 				? declarationText

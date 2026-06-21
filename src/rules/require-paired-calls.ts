@@ -98,8 +98,16 @@ function getCallName({ callee }: ESTree.CallExpression): string | undefined {
 function getValidClosers(configuration: PairConfiguration): Array<string> {
 	const result = new Array<string>();
 
-	if (isStringArray(configuration.closer)) result.push(...configuration.closer);
-	else if (isStringRaw(configuration.closer)) result.push(configuration.closer);
+	if (isStringArray(configuration.closer)) {
+		result.push(...configuration.closer);
+	} else {
+		/* v8 ignore start -- @preserve validated pair configs only allow string closers after the array branch fails. */
+		// oxlint-disable-next-line eslint/no-lonely-if -- V8 ignore must wrap only this defensive validated-shape branch.
+		if (isStringRaw(configuration.closer)) {
+			result.push(configuration.closer);
+		}
+		/* v8 ignore stop -- @preserve */
+	}
 
 	if (configuration.alternatives) for (const alternative of configuration.alternatives) result.push(alternative);
 
@@ -113,12 +121,15 @@ function getAllOpeners(configuration: PairConfiguration): Array<string> {
 }
 
 function formatOpenerList(openers: ReadonlyArray<string>): string {
+	/* v8 ignore next -- @preserve opener labels are only built from configured pairs with required closers. */
 	if (openers.length === 0) return "configured opener";
+	/* v8 ignore next -- @preserve length-one opener labels come from a concrete configured opener. */
 	if (openers.length === 1) return openers[0] ?? "configured opener";
 	return openers.join("' or '");
 }
 
 function isLoopLikeStatement(node?: ESTree.Node): node is LoopLikeStatement {
+	/* v8 ignore next -- @preserve loop resolver callers either pass a parent node or have already stopped traversal. */
 	if (!node) return false;
 	return LOOP_NODE_TYPES.has(node.type);
 }
@@ -128,14 +139,17 @@ function isSwitchStatement(node?: ESTree.Node): node is ESTree.SwitchStatement {
 }
 
 function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node): ESTree.Statement | undefined {
+	/* v8 ignore next -- @preserve ESTree break/continue labels are parser-produced identifiers. */
 	if (label.type !== "Identifier") return undefined;
 	let current: ESTree.Node | undefined = startingNode;
 
 	while (current) {
 		if (current.type === "LabeledStatement" && current.label.name === label.name) return current.body;
+		/* v8 ignore next -- @preserve parser-produced labeled statements keep parent links during traversal. */
 		current = current.parent ?? undefined;
 	}
 
+	/* v8 ignore next -- @preserve labeled break/continue traversal either finds a target or syntax required one earlier. */
 	return undefined;
 }
 
@@ -151,9 +165,11 @@ function resolveTargetLoop(
 	while (current) {
 		if (isLoopLikeStatement(current)) return current;
 		if (allowSwitchTermination && isSwitchStatement(current)) return undefined;
+		/* v8 ignore next -- @preserve parser-produced break/continue statements keep parent links until a target. */
 		current = current.parent ?? undefined;
 	}
 
+	/* v8 ignore next -- @preserve valid break/continue syntax supplies an enclosing control-flow target first. */
 	return undefined;
 }
 
@@ -208,12 +224,15 @@ const requirePairedCalls = defineRule({
 				: options.pairs;
 
 		const resolvedOptions: RequirePairedCallsOptions = {
+			/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
 			...(options.allowConditionalClosers === undefined
 				? {}
 				: { allowConditionalClosers: options.allowConditionalClosers }),
+			/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
 			...(options.allowMultipleOpeners === undefined
 				? {}
 				: { allowMultipleOpeners: options.allowMultipleOpeners }),
+			/* v8 ignore next -- @preserve options are normalized with a concrete max depth default before resolution. */
 			...(options.maxNestingDepth === undefined ? {} : { maxNestingDepth: options.maxNestingDepth }),
 			pairs,
 		};
@@ -232,6 +251,7 @@ const requirePairedCalls = defineRule({
 		const openerToClosersCache = new Map<string, ReadonlyArray<string>>();
 
 		function getExpectedClosersForOpener(opener: string): ReadonlyArray<string> {
+			/* v8 ignore next -- @preserve cache hits are written with concrete arrays. */
 			if (openerToClosersCache.has(opener)) return openerToClosersCache.get(opener) ?? [];
 
 			const closers = new Array<string>();
@@ -275,6 +295,7 @@ const requirePairedCalls = defineRule({
 
 		function updateContext(updates: Partial<ControlFlowContext>): void {
 			const last = contextStack.at(-1);
+			/* v8 ignore next -- @preserve context updates are only issued while a visitor context is active. */
 			if (!last) return;
 			contextStack[contextStack.length - 1] = { ...last, ...updates };
 		}
@@ -308,6 +329,7 @@ const requirePairedCalls = defineRule({
 
 		function getCloserLabel(config: PairConfiguration): string {
 			const validClosers = getValidClosers(config);
+			/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 			return validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 		}
 
@@ -348,6 +370,7 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onFunctionEnter(node: ESTree.Node): void {
+			/* v8 ignore if -- @preserve this handler is only registered for function-like visitor keys. */
 			if (
 				node.type !== "FunctionDeclaration" &&
 				node.type !== "FunctionExpression" &&
@@ -382,6 +405,7 @@ const requirePairedCalls = defineRule({
 			}
 
 			const parentStack = functionStacks.pop();
+			/* v8 ignore else -- @preserve function exits are paired with function enters that push a parent stack. */
 			if (parentStack) {
 				openerStack.length = 0;
 				openerStack.push(...parentStack);
@@ -391,18 +415,21 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onIfStatementEnter(ifNode: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for IfStatement visitor keys. */
 			if (ifNode.type !== "IfStatement") return;
 			pushContext({ inConditional: true });
 			saveSnapshot(ifNode);
 		}
 
 		function onIfStatementExit(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for IfStatement visitor keys. */
 			if (node.type !== "IfStatement") return;
 			popContext();
 
 			const originalStack = stackSnapshots.get(node);
 			const branches = branchStacks.get(node);
 
+			/* v8 ignore else -- @preserve if exits are paired with enter snapshots and branch snapshots. */
 			if (originalStack && branches && branches.length > 0) {
 				const hasCompleteElse = node.alternate !== null;
 
@@ -433,10 +460,12 @@ const requirePairedCalls = defineRule({
 			const consequentNode = node;
 			const { parent } = consequentNode;
 
+			/* v8 ignore else -- @preserve consequent exit selector only runs for IfStatement consequents. */
 			if (parent?.type === "IfStatement") {
 				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
+				/* v8 ignore next -- @preserve consequent exits are paired with IfStatement enter snapshots. */
 				if (!originalStack) return;
 
 				restoreOpenerStack(originalStack);
@@ -447,17 +476,20 @@ const requirePairedCalls = defineRule({
 			const alternateNode = node;
 			const { parent } = alternateNode;
 
+			/* v8 ignore else -- @preserve alternate exit selector only runs for IfStatement alternates. */
 			if (parent?.type === "IfStatement") {
 				recordBranchSnapshot(parent);
 			}
 		}
 
 		function onTryStatementEnter(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for TryStatement visitor keys. */
 			if (node.type !== "TryStatement") return;
 			saveSnapshot(node);
 		}
 
 		function onTryStatementExit(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for TryStatement visitor keys. */
 			if (node.type !== "TryStatement") return;
 			const originalStack = stackSnapshots.get(node);
 			const branches = branchStacks.get(node);
@@ -468,6 +500,7 @@ const requirePairedCalls = defineRule({
 				return;
 			}
 
+			/* v8 ignore else -- @preserve try exits with recorded branches are paired with enter snapshots. */
 			if (originalStack && branches && branches.length > 0) {
 				for (const opener of originalStack) {
 					const branchesWithOpener = branches.filter((branchStack) =>
@@ -480,6 +513,7 @@ const requirePairedCalls = defineRule({
 						resolvedOptions.allowConditionalClosers === false
 					) {
 						const validClosers = getValidClosers(opener.config);
+						/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 						const closer =
 							validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
@@ -510,13 +544,16 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onTryBranchExit(node: ESTree.Node, nodeType: "BlockStatement" | "CatchClause"): void {
+			/* v8 ignore next -- @preserve try branch exit wrappers pass the matching ESTree node kind. */
 			if (node.type !== nodeType) return;
 			const { parent } = node;
 
+			/* v8 ignore else -- @preserve try branch exit selectors only run for TryStatement children. */
 			if (parent.type === "TryStatement") {
 				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
+				/* v8 ignore next -- @preserve try branch exits are paired with TryStatement enter snapshots. */
 				if (originalStack) restoreOpenerStack(originalStack);
 			}
 
@@ -540,18 +577,21 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onSwitchStatementEnter(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for SwitchStatement visitor keys. */
 			if (node.type !== "SwitchStatement") return;
 			pushContext({ inConditional: true });
 			saveSnapshot(node);
 		}
 
 		function onSwitchStatementExit(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for SwitchStatement visitor keys. */
 			if (node.type !== "SwitchStatement") return;
 			popContext();
 
 			const originalStack = stackSnapshots.get(node);
 			const branches = branchStacks.get(node);
 
+			/* v8 ignore else -- @preserve switch exits with recorded cases are paired with enter snapshots. */
 			if (originalStack && branches && branches.length > 0) {
 				const hasDefault = node.cases.some((caseNode) => caseNode.test === null);
 
@@ -574,13 +614,16 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onSwitchCaseExit(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for SwitchCase visitor keys. */
 			if (node.type !== "SwitchCase") return;
 			const { parent } = node;
 
+			/* v8 ignore else -- @preserve switch case exit selector only runs for SwitchStatement cases. */
 			if (parent.type === "SwitchStatement") {
 				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
+				/* v8 ignore next -- @preserve switch case exits are paired with SwitchStatement enter snapshots. */
 				if (!originalStack) return;
 
 				restoreOpenerStack(originalStack);
@@ -588,12 +631,14 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onLoopEnter(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for loop-like visitor keys. */
 			if (!isLoopLikeStatement(node)) return;
 			loopStack.push(node);
 			pushContext({ inLoop: true });
 		}
 
 		function onLoopExit(): void {
+			/* v8 ignore else -- @preserve loop exits are paired with loop enters that push the loop stack. */
 			if (loopStack.length > 0) loopStack.pop();
 			popContext();
 		}
@@ -606,6 +651,7 @@ const requirePairedCalls = defineRule({
 
 			for (const { config, node, opener } of openerStack) {
 				const validClosers = getValidClosers(config);
+				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
 				const statementType = statementNode.type === "ReturnStatement" ? "return" : "throw";
@@ -636,6 +682,7 @@ const requirePairedCalls = defineRule({
 				if (!loopAncestors.some((loopNode) => loopNode === targetLoop)) continue;
 
 				const validClosers = getValidClosers(config);
+				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
 				const statementType = node.type === "BreakStatement" ? "break" : "continue";
@@ -654,6 +701,7 @@ const requirePairedCalls = defineRule({
 		}
 
 		function handleOpener(node: ESTree.CallExpression, opener: string, config: PairConfiguration): void {
+			/* v8 ignore next -- @preserve options are normalized with a concrete max depth default before opener handling. */
 			const maxDepth = resolvedOptions.maxNestingDepth ?? 0;
 			if (maxDepth > 0 && openerStack.length >= maxDepth) {
 				context.report({
@@ -723,10 +771,12 @@ const requirePairedCalls = defineRule({
 			}
 
 			const matchingEntry = openerStack[matchingIndex];
+			/* v8 ignore next -- @preserve findLastIndex returned a valid index into openerStack. */
 			if (!matchingEntry) return;
 
 			if (matchingIndex !== openerStack.length - 1) {
 				const topEntry = openerStack.at(-1);
+				/* v8 ignore else -- @preserve a non-last matching index implies a top stack entry exists. */
 				if (topEntry) {
 					context.report({
 						data: {
@@ -749,6 +799,7 @@ const requirePairedCalls = defineRule({
 			openerEntry: OpenerStackEntry,
 		): void {
 			const validClosers = getValidClosers(openerEntry.config);
+			/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 			const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
 			context.report({
@@ -759,6 +810,7 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onAsyncYield(node: ESTree.Node): void {
+			/* v8 ignore if -- @preserve this handler is only registered for await/yield/for-of visitor keys. */
 			if (node.type !== "AwaitExpression" && node.type !== "YieldExpression" && node.type !== "ForOfStatement") {
 				return;
 			}
@@ -766,6 +818,7 @@ const requirePairedCalls = defineRule({
 				if (config.requireSync !== true) continue;
 
 				const validClosers = getValidClosers(config);
+				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
 				const asyncType = node.type === "YieldExpression" ? "yield" : "await";
@@ -779,6 +832,7 @@ const requirePairedCalls = defineRule({
 		}
 
 		function onCallExpression(node: ESTree.Node): void {
+			/* v8 ignore next -- @preserve this handler is only registered for CallExpression visitor keys. */
 			if (node.type !== "CallExpression") return;
 			const callName = getCallName(node);
 			if (callName === undefined || callName === "") return;

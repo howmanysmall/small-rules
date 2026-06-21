@@ -25,6 +25,7 @@ function getFunctionHookName(node: NamedFunctionNode): string | undefined {
 }
 
 function getVariableDeclaratorName(node: ESTree.VariableDeclarator): string | undefined {
+	/* v8 ignore next -- hook arrow functions are only tracked from identifier variable declarators. @preserve */
 	return node.id.type === "Identifier" ? node.id.name : undefined;
 }
 
@@ -45,7 +46,9 @@ function getLatestArrayInitializer(
 	name: string,
 ): ESTree.ArrayExpression | undefined {
 	const initializers = arrayInitializersByName.get(name);
+	/* v8 ignore next -- entries are deleted when their initializer stack becomes empty. @preserve */
 	if (initializers === undefined || initializers.length === 0) return undefined;
+	/* v8 ignore next -- fallback initializer stacks are only read after at least one initializer is pushed. @preserve */
 	return initializers.at(-1);
 }
 
@@ -166,9 +169,11 @@ function popArrayInitializer(
 
 	const { name } = initializer;
 	const initializers = arrayInitializersByName.get(name);
+	/* v8 ignore next -- exit visitors mirror enter visitors that created the initializer stack. @preserve */
 	if (initializers === undefined || initializers.length === 0) return;
 
 	initializers.pop();
+	/* v8 ignore next -- each tracked name has one initializer in parser enter/exit order. @preserve */
 	if (initializers.length === 0) {
 		arrayInitializersByName.delete(name);
 	}

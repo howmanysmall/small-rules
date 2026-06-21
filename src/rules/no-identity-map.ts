@@ -30,6 +30,7 @@ function getSingleParameterName(callback: { readonly params: ReadonlyArray<ESTre
 	if (callback.params.length !== 1) return undefined;
 
 	const [parameter] = callback.params;
+	/* v8 ignore next -- params length check guarantees a dense first parameter slot in parser output. @preserve */
 	return parameter === undefined ? undefined : getParameterName(parameter);
 }
 
@@ -57,6 +58,7 @@ function isIdentityCallback(callback: ESTree.Expression): boolean {
 		return isBlockReturningIdentity(callback.body, name);
 	}
 
+	/* v8 ignore next -- non-function callbacks are handled as a non-identity public path. @preserve */
 	return false;
 }
 

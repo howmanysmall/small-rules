@@ -131,6 +131,70 @@ describe("require-throw-error-capture", () => {
 					"};",
 				].join("\n"),
 			},
+			{
+				code: ["const myFn3 = function Inner() {", "	throw new Error('nope');", "};"].join("\n"),
+				errors: [error],
+				output: [
+					"const myFn3 = function Inner() {",
+					"	const error = new Error('nope');",
+					"Error.captureStackTrace(error, Inner);",
+					"throw error;",
+					"};",
+				].join("\n"),
+			},
+			{
+				code: [
+					"const handlers = {",
+					"	load: function() {",
+					"		throw new Error('oops');",
+					"	},",
+					"};",
+				].join("\n"),
+				errors: [error],
+				output: [
+					"const handlers = {",
+					"	load: function() {",
+					"		const error = new Error('oops');",
+					"Error.captureStackTrace(error, load);",
+					"throw error;",
+					"	},",
+					"};",
+				].join("\n"),
+			},
+			{
+				code: [
+					"class Foo {",
+					"	doThing = function() {",
+					"		throw new Error('oops');",
+					"	}",
+					"}",
+				].join("\n"),
+				errors: [error],
+				output: [
+					"class Foo {",
+					"	doThing = function() {",
+					"		const error = new Error('oops');",
+					"Error.captureStackTrace(error, this.doThing);",
+					"throw error;",
+					"	}",
+					"}",
+				].join("\n"),
+			},
+			{
+				code: ["class Foo {", "	#handle = () => {", "		throw new Error('oops');", "	}", "}"].join(
+					"\n",
+				),
+				errors: [error],
+				output: [
+					"class Foo {",
+					"	#handle = () => {",
+					"		const error = new Error('oops');",
+					"Error.captureStackTrace(error, this.#handle);",
+					"throw error;",
+					"	}",
+					"}",
+				].join("\n"),
+			},
 			// Custom error class ending with Error
 			{
 				code: ["function handler() {", "	throw new CustomError('fail');", "}"].join("\n"),
@@ -177,6 +241,19 @@ describe("require-throw-error-capture", () => {
 					"}",
 				].join("\n"),
 			},
+			{
+				code: ["const TypeError = Error;", "function foo() {", "\tthrow new TypeError('bad');", "}"].join("\n"),
+				errors: [error],
+				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
+				output: [
+					"const TypeError = Error;",
+					"function foo() {",
+					"\tconst error = new TypeError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
+			},
 			// Throw in catch block doesn't collide with catch param name
 			{
 				code: [
@@ -213,6 +290,42 @@ describe("require-throw-error-capture", () => {
 				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
 				output: [
 					"import { ValidationError } from 'other-package';",
+					"function foo() {",
+					"\tconst error = new ValidationError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
+			},
+			{
+				code: [
+					"import { ValidationError } from '@cliffy/command';",
+					"function foo() {",
+					"\tthrow new ValidationError('bad');",
+					"}",
+				].join("\n"),
+				errors: [error],
+				options: [{ allow: [{ from: "package", name: "ValidationError" }] }],
+				output: [
+					"import { ValidationError } from '@cliffy/command';",
+					"function foo() {",
+					"\tconst error = new ValidationError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
+			},
+			{
+				code: [
+					"const ValidationError = makeError();",
+					"function foo() {",
+					"\tthrow new ValidationError('bad');",
+					"}",
+				].join("\n"),
+				errors: [error],
+				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				output: [
+					"const ValidationError = makeError();",
 					"function foo() {",
 					"\tconst error = new ValidationError('bad');",
 					"Error.captureStackTrace(error, foo);",
@@ -271,10 +384,24 @@ describe("require-throw-error-capture", () => {
 				].join("\n"),
 				options: [{ allow: [{ from: "file", name: "ValidationError" }] }],
 			},
+			{
+				code: [
+					"class ValidationError extends Error {}",
+					"function foo() {",
+					"\tthrow new ValidationError('bad');",
+					"}",
+				].join("\n"),
+				filename: "src/errors.ts",
+				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+			},
 			// Library allowlist skips global errors
 			{
 				code: ["function foo() {", "\tthrow new TypeError('bad');", "}"].join("\n"),
 				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
+			},
+			{
+				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
+				options: [{ allow: [{ name: "ValidationError" }] }],
 			},
 			// Array of names in a single specifier
 			{

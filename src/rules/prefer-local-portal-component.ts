@@ -23,7 +23,9 @@ function isImportBindingDefinition(definition: Definition): boolean {
 }
 
 function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
+	/* v8 ignore start -- @preserve import specifier parents are ImportDeclaration nodes in parser output. */
 	return node.parent?.type === "ImportDeclaration" ? node.parent : undefined;
+	/* v8 ignore stop -- @preserve */
 }
 
 function isCreatePortalImport(variable: ScopeVariable | undefined): boolean {
@@ -36,6 +38,7 @@ function isCreatePortalImport(variable: ScopeVariable | undefined): boolean {
 		if (importDeclaration === undefined || !PORTAL_SOURCES.has(importDeclaration.source.value)) continue;
 
 		const { imported } = definition.node;
+		/* v8 ignore next -- @preserve createPortal imports are represented as identifier import specifiers by the parser. */
 		if (imported.type === "Identifier" && imported.name === "createPortal") return true;
 	}
 
@@ -49,7 +52,9 @@ function isPortalNamespaceImport(variable: ScopeVariable | undefined): boolean {
 		if (!isImportBindingDefinition(definition) || definition.node.type !== "ImportNamespaceSpecifier") continue;
 
 		const importDeclaration = getImportDeclarationParent(definition.node);
+		/* v8 ignore start -- @preserve namespace import specifier parents are ImportDeclaration nodes in parser output. */
 		if (importDeclaration === undefined) continue;
+		/* v8 ignore stop -- @preserve */
 		if (PORTAL_SOURCES.has(importDeclaration.source.value)) return true;
 	}
 
@@ -85,10 +90,14 @@ function getPortalReplacement(
 	node: ESTree.CallExpression,
 	sourceCode: SourceCode,
 ): string | undefined {
+	/* v8 ignore start -- @preserve caller already requires exactly two arguments before requesting a fix. */
 	if (node.arguments.length !== 2) return undefined;
+	/* v8 ignore stop -- @preserve */
 
 	const [childrenArgument, targetArgument] = node.arguments;
+	/* v8 ignore start -- @preserve two-element argument arrays produce both destructured nodes. */
 	if (childrenArgument === undefined || targetArgument === undefined) return undefined;
+	/* v8 ignore stop -- @preserve */
 
 	const children = renderPortalChild(childrenArgument, sourceCode);
 	return `<${componentName} target={${sourceCode.getText(targetArgument)}}>${children}</${componentName}>`;
@@ -97,8 +106,10 @@ function getPortalReplacement(
 const preferLocalPortalComponent = defineRule({
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
+		/* v8 ignore start -- @preserve RuleTester/runtime filenames are present; empty filename is a defensive host guard. */
 		const discoveredPortal =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, PORTAL_COMPONENT);
+		/* v8 ignore stop -- @preserve */
 		const availablePortalIdentifiers = new Set<string>();
 
 		return {

@@ -81,6 +81,12 @@ const opacitySpring = useSpring(
 			},
 			{
 				code: `
+const spring = useSpring({ ["from"]: {}, to: {} }, []);
+`,
+				errors: [{ messageId: "uselessSpring" }],
+			},
+			{
+				code: `
 const opacitySpring = useSpring({ opacity: 1 });
 `,
 				errors: [{ messageId: "uselessSpring" }],
@@ -363,6 +369,46 @@ const spring = useSpring(
   { value: CustomFactory.make(1) },
   [],
 );
+`,
+			},
+			{
+				code: `
+const spring = animated["useSpring"]({ opacity: 1 }, []);
+`,
+			},
+			{
+				code: `
+const spring = useSpring(1, []);
+`,
+			},
+			{
+				code: `
+const CONFIG: unknown;
+const spring = useSpring(CONFIG, []);
+`,
+			},
+			{
+				code: `
+const CONFIG = 1;
+const spring = useSpring(CONFIG, []);
+`,
+			},
+			{
+				code: `
+const spring = animated.useMotion({ opacity: 1 }, []);
+`,
+			},
+			{
+				code: `
+const SPRING_ARGS = [{ opacity: 1 }, []] as const;
+const spring = useSpring(...SPRING_ARGS);
+`,
+			},
+			{
+				code: `
+import { CONFIG } from "./config";
+
+const spring = useSpring(CONFIG, []);
 `,
 			},
 		],

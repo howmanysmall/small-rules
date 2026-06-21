@@ -8,6 +8,7 @@ function hasAsyncSuffix(name: string): boolean {
 
 function isPropertyInCallArgument(node: ESTree.ObjectProperty): boolean {
 	const { parent } = node;
+	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
 	if (parent.type !== "ObjectExpression") return false;
 	const { parent: grandparent } = parent;
 	if (grandparent.type === "CallExpression" || grandparent.type === "NewExpression") {

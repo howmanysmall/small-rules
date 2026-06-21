@@ -112,6 +112,10 @@ describe("prefer-expect-assertions", () => {
 				errors: [{ messageId: "assertionsRequiresNumberArgument" }],
 			},
 			{
+				code: "test('works', () => { expect.assertions(...counts); expect(value).toBe(1); });",
+				errors: [{ messageId: "assertionsRequiresNumberArgument" }],
+			},
+			{
 				code: "it.skip('works', () => { expect(value).toBe(1); });",
 				errors: [
 					{
@@ -262,6 +266,10 @@ describe("prefer-expect-assertions", () => {
 			{
 				code: "test('works', () => { expect.assertions(2); expectTypeOf(result).toBeString(); expect(value).toBe(1); });",
 				options: [{ additionalExpectCallNames: ["expectTypeOf", "assertType"] }],
+			},
+			{
+				code: "test('works', () => expect(value).toBe(1));",
+				options: [{ onlyFunctionsWithExpectInCallback: true }],
 			},
 		],
 	});

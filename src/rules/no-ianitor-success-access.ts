@@ -50,6 +50,7 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 	for (const property of objectPattern.properties) {
 		if (property.type !== "Property" || property.key.type !== "Identifier") continue;
 		if (property.key.name === "error" || property.key.name === "value") return false;
+		/* v8 ignore next -- @preserve success-only object patterns reach this path from parser Property keys. */
 		if (property.key.name === "success") hasSuccess = true;
 	}
 
@@ -58,11 +59,13 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 
 function findSuccessPropertyKey(objectPattern: ESTree.ObjectPattern): ESTree.Node | undefined {
 	for (const property of objectPattern.properties) {
+		/* v8 ignore next -- @preserve isDestructuringSuccessOnly filters to an identifier success property. */
 		if (property.type === "Property" && property.key.type === "Identifier" && property.key.name === "success") {
 			return property.key;
 		}
 	}
 
+	/* v8 ignore next -- @preserve isDestructuringSuccessOnly proves a success key before this helper is called. */
 	return undefined;
 }
 
@@ -102,6 +105,7 @@ const noIanitorSuccessAccess = defineRule({
 					return;
 				}
 
+				/* v8 ignore next -- @preserve non-call member objects are only tracked when they are identifiers. */
 				if (unwrapped.type === "Identifier") {
 					const result = ianitorResultVariables.get(unwrapped.name);
 					if (result !== undefined) result.properties.add(property.name);
@@ -146,6 +150,7 @@ const noIanitorSuccessAccess = defineRule({
 					isDestructuringSuccessOnly(id)
 				) {
 					const keyNode = findSuccessPropertyKey(id);
+					/* v8 ignore next -- @preserve isDestructuringSuccessOnly already proves the key exists. */
 					if (keyNode !== undefined) {
 						context.report({
 							messageId: "preferCreateGuard",

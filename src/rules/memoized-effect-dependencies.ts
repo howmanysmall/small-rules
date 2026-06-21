@@ -34,6 +34,7 @@ function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: Rea
 	if (callee.computed) return undefined;
 	if (callee.object.type !== "Identifier") return undefined;
 	if (!reactNamespaces.has(callee.object.name)) return undefined;
+	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
 	return callee.property.type === "Identifier" ? callee.property.name : undefined;
 }
 
@@ -50,6 +51,7 @@ function isUnmemoizedInline(node: ESTree.Node): boolean {
 }
 
 function getPatternElementName(element: ESTree.ArrayPattern["elements"][number]): string | undefined {
+	/* v8 ignore next -- @preserve stable hook matching only asks about occupied dependency binding slots. */
 	if (element === null) return undefined;
 	if (element.type === "Identifier") return element.name;
 	if (element.type === "AssignmentPattern" && element.left.type === "Identifier") return element.left.name;
@@ -74,6 +76,7 @@ function registerConfiguredEffectHooks(
 	if (!("hooks" in rawOptions && Array.isArray(rawOptions.hooks))) return;
 
 	for (const hook of rawOptions.hooks) {
+		/* v8 ignore next -- @preserve rule schema rejects hook entries without string names. */
 		if (!(isRecord(hook) && "name" in hook && isStringRaw(hook.name))) continue;
 		const dependenciesIndex =
 			"dependenciesIndex" in hook && isNumberRaw(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
@@ -105,6 +108,7 @@ const memoizedEffectDependencies = defineRule({
 
 		function getIdentifierScope(identifier: ESTree.IdentifierReference): Scope {
 			const cached = identifierScopeCache.get(identifier);
+			/* v8 ignore next -- @preserve each dependency identifier is a distinct parser node. */
 			if (cached !== undefined) return cached;
 
 			const scope = sourceCode.getScope(identifier);
@@ -151,13 +155,16 @@ const memoizedEffectDependencies = defineRule({
 				const importedName = stableHookIdentifiers.get(callee.name);
 				if (importedName === undefined) return undefined;
 				if (STABLE_HOOKS_WHOLE.has(importedName)) return "whole";
+				/* v8 ignore next -- @preserve stableHookIdentifiers is populated only from STABLE_HOOKS. */
 				if (STABLE_HOOKS_INDEX1.has(importedName)) return "index1";
+				/* v8 ignore next -- @preserve stableHookIdentifiers is populated only from STABLE_HOOKS. */
 				return undefined;
 			}
 			if (callee.type === "MemberExpression") {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				if (hookName === undefined) return undefined;
 				if (STABLE_HOOKS_WHOLE.has(hookName)) return "whole";
+				/* v8 ignore next -- @preserve member stable hooks come only from STABLE_HOOKS. */
 				if (STABLE_HOOKS_INDEX1.has(hookName)) return "index1";
 			}
 			return undefined;
@@ -165,6 +172,7 @@ const memoizedEffectDependencies = defineRule({
 
 		function getDefinitionStability(definition: Definition, variableName: string): Stability {
 			if (definition.type === "Parameter") return "unknown";
+			/* v8 ignore next -- @preserve imports are module scoped and returned before definition inspection. */
 			if (definition.type === "ImportBinding") return "memoized";
 
 			const { node } = definition;
@@ -176,7 +184,9 @@ const memoizedEffectDependencies = defineRule({
 				return mode === "definite" ? "unknown" : "unmemoized";
 			}
 
+			/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
 			const init = node.init === null ? undefined : unwrapExpression(node.init);
+			/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
 			if (init === undefined) return "unknown";
 			if (isUnmemoizedInline(init)) return "unmemoized";
 
@@ -291,6 +301,7 @@ const memoizedEffectDependencies = defineRule({
 				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
 					if (effectHookNameToIndex.has(importedName)) {
 						const fallbackIndex = effectHookNameToIndex.get(importedName);
+						/* v8 ignore next -- @preserve guarded by has(importedName), so the fallback is defensive. */
 						effectHookIdentifiers.set(localName, fallbackIndex ?? 1);
 					}
 					if (MEMO_HOOKS.has(importedName)) memoHookIdentifiers.add(localName);

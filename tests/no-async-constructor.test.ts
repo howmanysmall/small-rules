@@ -399,6 +399,28 @@ class GoodComputedMethod {
 }
 `,
 			},
+			{
+				code: `
+class GoodComputedAsyncMethod {
+    constructor() {
+        this.dynamicMethod();
+    }
+    async ["dynamicMethod"]() {}
+}
+`,
+			},
+			{
+				code: `
+class GoodDestructuredPromise {
+    constructor() {
+        const { promise } = this.load();
+    }
+    async load() {
+        return { promise: 1 };
+    }
+}
+`,
+			},
 
 			// Getter/setter (not async methods)
 			{

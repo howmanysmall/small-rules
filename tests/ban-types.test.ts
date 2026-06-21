@@ -116,6 +116,16 @@ type FrozenUser = Readonly<User>;
 `,
 				options: [{ bannedTypes: { Partial: "DeepPartial" } }],
 			},
+			{
+				code: `
+type User = {
+		readonly name: string;
+};
+
+type PickedUser = Pick<User, "name">;
+`,
+				options: [{ bannedTypes: undefined }],
+			},
 		],
 	});
 });

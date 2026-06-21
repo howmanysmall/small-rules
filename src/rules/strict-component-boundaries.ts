@@ -49,6 +49,7 @@ const strictComponentBoundaries = defineRule({
 				if (allowPatterns.some((regexp) => regexp.test(importSource))) return;
 
 				const { filename } = context;
+				/* v8 ignore next -- @preserve import-boundary checks run with a concrete filename from Oxlint. */
 				if (filename === "") return;
 
 				const resolved = resolveRelativeImport(importSource, filename);

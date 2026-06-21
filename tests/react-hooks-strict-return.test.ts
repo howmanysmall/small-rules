@@ -45,7 +45,10 @@ describe("react-hooks-strict-return", () => {
 			{ code: "function useFoo() { return [1, 2] }" },
 			{ code: "function useFoo() { const bar = [1, 2]; return bar; }" },
 			{ code: "function useFoo() { const bar = [1, 2]; return [...bar]; }" },
+			{ code: "function useFoo(rest) { return [...rest]; }" },
+			{ code: "function useFoo() { return [...getValues()]; }" },
 			{ code: "function useFoo() { return ['bar', () => {}] }" },
+			{ code: "function useFoo() { return [1, [1, 2, 3].map(() => 1)] }" },
 			{ code: "function useFoo() { const bar = [1]; const baz = [2]; return [...bar, ...baz]; }" },
 
 			// Objects are always fine regardless of size
@@ -82,6 +85,7 @@ describe("react-hooks-strict-return", () => {
 
 			// Anonymous default export
 			{ code: "export default function() { return; }" },
+			{ code: "const useFoo = ({ value }) => [1, 2, 3];" },
 		],
 	});
 });

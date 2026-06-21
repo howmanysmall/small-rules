@@ -20,6 +20,51 @@ const isUser = Ianitor.strictInterface({
 `,
 				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
+			{
+				code: "const validator = Ianitor.array(Ianitor.string);",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: "const validator = Ianitor.instanceOf(Folder);",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: "const validator = Ianitor.boolean();",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: "const validator = Ianitor.union(Ianitor.string, Ianitor.number);",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: "const validator = Ianitor.map(Ianitor.string, Ianitor.number);",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: "const validator = Ianitor.custom((value): value is string => typeIs(value, 'string'));",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: "const validator = Ianitor.intersection(Ianitor.string, Ianitor.number);",
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.interface({
+	name: Ianitor.string,
+	flags: Ianitor.array(Ianitor.string),
+});
+`,
+				errors: [{ messageId: "missingIanitorCheckType" }],
+				options: [{ baseThreshold: 1 }],
+			},
 		],
 		valid: [
 			{ code: "type Simple = string;" },
@@ -88,6 +133,210 @@ const isSpinOptions = Ianitor.strictInterface({
 });
 type SpinOptions = Readonly<Ianitor.Static<typeof isSpinOptions>>;
 `,
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type ComplexResult<T> = T extends string
+	? { value: T; nested: Array<{ id: number }> }
+	: ReadonlyArray<{ fallback: boolean }>;
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type ComplexMap<T extends string> = {
+	[K in T]: { key: K; values: [number, string, boolean] };
+};
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type ComplexFunction = (input: { id: string; tags: string[] }) => Promise<{ ok: boolean }>;
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+interface ComplexService extends BaseService, Disposable {
+	readonly run: (payload: { id: string; count: number }) => void;
+}
+`,
+				options: [{ interfacePenalty: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+const ignored = createValidator();
+`,
+			},
+			{
+				code: `
+const validator = Ianitor["string"]();
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type NotStatic = Ianitor.Check<typeof validator>;
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type NotIanitorStatic = Validator.Static<typeof validator>;
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type NotStaticMember = Ianitor.Check<typeof validator>;
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type StaticWithoutQuery = Ianitor.Static<string>;
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+type UnqualifiedStatic = Static<typeof validator>;
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+		],
+	});
+});
+
+describe("enforce-ianitor-check-type - coverage locks", () => {
+	// @ts-expect-error RuleTester types are stricter than the runtime shape.
+	ts.run("enforce-ianitor-check-type - coverage locks", rule, {
+		invalid: [],
+		valid: [
+			{
+				code: `
+const validator: Ianitor.Check<string> = Ianitor.string();
+
+interface ApiPayload extends BasePayload {
+	result: [id: string, count: number];
+}
+`,
+				options: [{ interfacePenalty: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type Label = string;
+`,
+				options: [{ baseThreshold: 2 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+interface ComplexService extends BaseService, Disposable {
+	readonly run: (payload: { id: string; tags: string[] }) => Promise<{ ok: boolean }>;
+}
+`,
+				options: [{ interfacePenalty: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type ComplexRegistry<T extends string> = {
+	[K in T]: { key: K; values: [number, string, boolean] };
+};
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type TupleWithOptionalAndRest = [id?: string, ...values: number[]];
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+interface CallableService {
+	run();
+}
+`,
+				options: [{ interfacePenalty: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type ValidatedEntity = Ianitor.Static<typeof validator> & {
+	id: string;
+	profile: {
+		name: string;
+		tags: Array<string>;
+	};
+};
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type ReadonlyWithoutArguments = Readonly;
+type QualifiedStatic = Ianitor.Static<typeof Validators.user>;
+`,
+				options: [{ baseThreshold: 1, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.interface(schema);
+`,
+				options: [{ baseThreshold: 1 }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type PrimitiveCoverage =
+	| any
+	| never
+	| unknown
+	| bigint
+	| boolean
+	| null
+	| number
+	| string
+	| symbol
+	| undefined
+	| void;
+`,
+				options: [{ baseThreshold: 100, performanceMode: false }],
+			},
+			{
+				code: `
+const validator = Ianitor.string;
+
+type FlagMap<T extends string> = {
+	[K in T];
+};
+`,
+				options: [{ baseThreshold: 100, performanceMode: false }],
 			},
 		],
 	});

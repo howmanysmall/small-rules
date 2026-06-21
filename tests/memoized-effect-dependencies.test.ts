@@ -176,6 +176,17 @@ function Component() {
 			},
 			{
 				code: `
+import React from "@rbxts/react";
+
+function Component() {
+    const memo = React.useMemo(() => ({}), []);
+    const ref = React.useRef({});
+    React.useEffect(() => {}, [memo, ref]);
+}
+`,
+			},
+			{
+				code: `
 import { useEffect, useTransition } from "@rbxts/react";
 
 function Component() {
@@ -202,6 +213,27 @@ function Component() {
     useEffect(() => {}, [buildDependency()]);
 }
 `,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [, setCount] = useState(0);
+    useEffect(() => {}, [setCount]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useMemo } from "react";
+
+function Component() {
+    const memo = useMemo(() => ({}), []);
+    useEffect(() => {}, [memo]);
+}
+`,
+				options: [{ environment: "standard" }],
 			},
 		],
 	});
@@ -377,6 +409,66 @@ function Component() {
 `,
 					errors: [{ messageId: "unmemoizedDependency" }],
 				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    let dependency;
+    useEffect(() => {}, [dependency]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "moderate" }],
+				},
+				{
+					code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [count, , resetCount] = useState(0);
+    useEffect(() => {}, [resetCount]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "aggressive" }],
+				},
+				{
+					code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [count, { resetCount }] = useState(0);
+    useEffect(() => {}, [resetCount]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "aggressive" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dependency = getFactory()();
+    useEffect(() => {}, [dependency]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }],
+					options: [{ mode: "moderate" }],
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dependency = {};
+    useEffect(() => {}, [dependency, dependency]);
+}
+`,
+					errors: [{ messageId: "unmemoizedDependency" }, { messageId: "unmemoizedDependency" }],
+					options: [{ mode: "moderate" }],
+				},
 			],
 			valid: [
 				{
@@ -414,6 +506,29 @@ import { useEffect } from "@rbxts/react";
 
 function Component() {
     useEffect(() => {}, [missingDependency]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    const dependency = {};
+    getEffect()(() => {}, [dependency]);
+}
+`,
+				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    try {
+        run();
+    } catch (dependency) {
+        useEffect(() => {}, [dependency]);
+    }
 }
 `,
 				},

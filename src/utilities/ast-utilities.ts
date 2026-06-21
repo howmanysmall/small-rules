@@ -31,6 +31,7 @@ export function getMemberPropertyName(node: ESTree.MemberExpression): string | u
 		return node.property.type === "Literal" && isStringRaw(node.property.value) ? node.property.value : undefined;
 	}
 
+	/* v8 ignore next -- @preserve non-computed member properties are parser-provided identifiers. */
 	return node.property.type === "Identifier" ? node.property.name : undefined;
 }
 

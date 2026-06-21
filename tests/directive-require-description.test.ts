@@ -44,8 +44,18 @@ describe("directive-require-description", () => {
 				code: "/* eslint-enable no-console */\nconst x = 1;",
 				errors: [{ data: { kind: "eslint-enable" }, messageId: "missingDescription" }],
 			},
+			{
+				code: "// oxlint-enable no-console\nconst x = 1;",
+				errors: [{ data: { kind: "oxlint-enable" }, messageId: "missingDescription" }],
+			},
 		],
 		valid: [
+			{
+				code: "// regular comment",
+			},
+			{
+				code: "/* regular block comment */",
+			},
 			{
 				code: "/* oxlint-disable no-console -- need for debugging */\nconst x = 1;",
 			},
@@ -53,11 +63,21 @@ describe("directive-require-description", () => {
 				code: "const x = 1;\n// oxlint-disable-line no-console -- temp",
 			},
 			{
+				code: "// oxlint-enable no-console -- finished migration\nconst x = 1;",
+			},
+			{
 				code: "// oxlint-disable-next-line no-console -- temporary bridge\nconsole.log('x');",
 			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
 				options: [{ ignore: ["oxlint-disable"] }],
+			},
+			{
+				code: "// oxlint-enable no-console\nconst x = 1;",
+				options: [{ ignore: ["oxlint-enable"] }],
+			},
+			{
+				code: "// eslint-disable no-console\nconst x = 1;",
 			},
 			{
 				code: "/* global process */\nconsole.log(process.pid);",

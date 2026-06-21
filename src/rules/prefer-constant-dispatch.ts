@@ -13,6 +13,7 @@ function isModuleScopeConst(variable: ScopeVariable): boolean {
 		if (definition.type !== "Variable") continue;
 
 		const declarator = definition.node;
+		/* v8 ignore next -- variable definitions are backed by VariableDeclarator nodes in parser scope data. @preserve */
 		if (declarator.type !== "VariableDeclarator") continue;
 
 		const declaration = declarator.parent;
@@ -105,6 +106,7 @@ function getProgram(node: ESTree.Node): ESTree.Program | undefined {
 		current = current.parent;
 	}
 
+	/* v8 ignore next -- reported action objects are always attached to a Program through parser parents. @preserve */
 	return undefined;
 }
 
@@ -130,8 +132,10 @@ function getDeclarationInsertionFix(
 	if (lastImport !== undefined) return fixer.insertTextAfter(lastImport, `\n\n${declarationText}`);
 
 	const [firstStatement] = body;
+	/* v8 ignore next -- dispatch calls require an existing statement, so the Program body is non-empty. @preserve */
 	if (firstStatement !== undefined) return fixer.insertTextBefore(firstStatement, `${declarationText}\n\n`);
 
+	/* v8 ignore next -- dispatch calls require an existing statement, so the Program body is non-empty. @preserve */
 	return fixer.insertTextAfterRange([program.range[0], program.range[1]], declarationText);
 }
 
@@ -156,6 +160,7 @@ const preferConstantDispatch = defineRule({
 				if (!shouldReportActionObject(sourceCode, actionObject)) return;
 
 				const program = getProgram(actionObject);
+				/* v8 ignore next -- action objects are visited only after parser parent links are established. @preserve */
 				if (program === undefined) return;
 
 				const constantName = `PREFER_CONSTANT_ACTION_${suggestionCount}`;

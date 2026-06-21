@@ -83,6 +83,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 		case "MemberExpression": {
 			if (node.optional || !isSafeMemberAccess(node.object, false)) return false;
 			if (node.computed) {
+				/* v8 ignore next -- @preserve computed member properties are expressions in parser output. */
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
@@ -100,9 +101,11 @@ function isSafeFixTarget(node: ESTree.Expression): boolean {
 
 function isSizeCall(node: ESTree.Expression): node is SizeCallExpression {
 	if (node.type !== "CallExpression") return false;
+	/* v8 ignore next -- @preserve optional call chains are wrapped before they can be used as assignment indexes. */
 	if (node.optional) return false;
 	if (node.arguments.length > 0) return false;
 	if (node.callee.type !== "MemberExpression") return false;
+	/* v8 ignore next -- @preserve optional member chains are wrapped before they can be used as assignment indexes. */
 	if (node.callee.optional) return false;
 	if (node.callee.computed) return false;
 	if (node.callee.property.type !== "Identifier") return false;

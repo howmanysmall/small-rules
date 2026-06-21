@@ -127,6 +127,8 @@ describe("prefer-idiv", () => {
 			"math.floor(x ** y);",
 			// No arguments
 			"math.floor();",
+			// Spread arguments
+			"math.floor(...values);",
 			// Multiple arguments (not a single division)
 			"math.floor(x / y, z);",
 			// Shadowed math identifier

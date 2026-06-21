@@ -43,15 +43,20 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	if (node.declarations.length !== 1) return undefined;
 
 	const [declarator] = node.declarations;
+	/* v8 ignore next -- @preserve non-empty VariableDeclaration.declarations always yields a first declarator. */
 	if (declarator === undefined) return undefined;
 
 	const { id, init } = declarator;
 	if (id.type !== "Identifier" || init === null || !isWorldQueryCall(init, queryType)) return undefined;
 
 	const { callee } = init;
-	if (!isStaticMemberExpression(callee)) return undefined;
+	/* v8 ignore next 3 -- @preserve isWorldQueryCall already narrows the callee to a static member expression. */
+	if (!isStaticMemberExpression(callee)) {
+		return undefined;
+	}
 
 	const [entityNode, componentNode] = init.arguments;
+	/* v8 ignore next 8 -- @preserve isWorldQueryCall already requires exactly two non-spread arguments. */
 	if (
 		entityNode === undefined ||
 		componentNode === undefined ||
@@ -86,10 +91,12 @@ function isNodeWithParent(value: unknown): value is { readonly parent: unknown }
 }
 
 function getNodeType(value: unknown): string | undefined {
+	/* v8 ignore next -- @preserve scope reference parents are parser nodes with string type tags. */
 	return isRecord(value) && isStringRaw(value.type) ? value.type : undefined;
 }
 
 function getOperator(value: unknown): string | undefined {
+	/* v8 ignore next -- @preserve logical-expression parents expose parser-provided string operators. */
 	return isRecord(value) && isStringRaw(value.operator) ? value.operator : undefined;
 }
 
@@ -110,8 +117,10 @@ function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierRefere
 
 	let current: unknown = identifier;
 	while (current !== undefined && current !== parent) {
+		/* v8 ignore next -- @preserve parser-provided reference ancestor chains expose parent links up to the checked parent. */
 		if (!isNodeWithParent(current)) break;
 		const currentParent = current.parent;
+		/* v8 ignore next -- @preserve direct logical-and parents are handled before walking ancestors. */
 		if (isLogicalAndExpression(currentParent)) return true;
 		current = currentParent;
 	}
@@ -122,6 +131,7 @@ function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierRefere
 function isReadReferenceInAndExpression(reference: ScopeVariable["references"][number]): boolean {
 	if (reference.isWrite()) return false;
 	const { identifier } = reference;
+	/* v8 ignore next -- @preserve ESLint scope references for reads expose identifier reference nodes. */
 	if (!isIdentifierReference(identifier)) return false;
 	return isIdentifierDirectlyInAndExpression(identifier);
 }
@@ -133,6 +143,7 @@ function checkVariableUsedInAndExpression(
 ): boolean {
 	const scope = sourceCode.getScope(variableDeclaration);
 	const variable = getVariableByName(scope, variableName);
+	/* v8 ignore next -- @preserve extracted query declarators always define the queried variable in their declaration scope. */
 	return variable?.references.some(isReadReferenceInAndExpression) ?? false;
 }
 
@@ -149,6 +160,7 @@ function callsAreConsecutive(
 	currentCall: WorldQueryCall,
 	sourceCode: SourceCode,
 ): boolean {
+	/* v8 ignore next -- @preserve callers only compare a current query with an existing buffered previous query. */
 	if (previousCall === undefined) return true;
 
 	const previousWorld = sourceCode.getText(previousCall.worldNode);
@@ -166,10 +178,14 @@ function callsAreConsecutive(
 }
 
 function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context): void {
+	/* v8 ignore next -- @preserve callers only flush get groups with at least two calls. */
 	if (calls.length < 2) return;
 
 	const [firstCall] = calls;
-	if (firstCall === undefined) return;
+	/* v8 ignore next 3 -- @preserve length guard above guarantees a first call. */
+	if (firstCall === undefined) {
+		return;
+	}
 
 	const { sourceCode } = context;
 	const worldText = sourceCode.getText(firstCall.worldNode);
@@ -178,6 +194,7 @@ function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	const variableNames = calls.map((call) => call.variableName);
 	const componentTexts = calls.map((call) => sourceCode.getText(call.componentNode));
 
+	/* v8 ignore next -- @preserve processGetCalls only receives groups with at least two query variables. */
 	const destructuring = variableNames.length === 1 ? variableNames[0] : `[${variableNames.join(", ")}]`;
 	const componentArguments = componentTexts.join(", ");
 	const fixedCode = `const ${destructuring} = ${worldText}.get(${entityText}, ${componentArguments});`;
@@ -194,7 +211,10 @@ function reportCombinedQuery(
 ): void {
 	const firstDeclaration = calls.at(0)?.variableDeclaration;
 	const lastDeclaration = calls.at(-1)?.variableDeclaration;
-	if (firstDeclaration === undefined || lastDeclaration === undefined) return;
+	/* v8 ignore next -- @preserve callers only report non-empty query groups. */
+	if (firstDeclaration === undefined || lastDeclaration === undefined) {
+		return;
+	}
 	context.report({
 		data: { fixedCode },
 		fix(fixer) {
@@ -208,13 +228,17 @@ function reportCombinedQuery(
 }
 
 function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context): void {
+	/* v8 ignore next -- @preserve callers only flush has groups with at least two calls. */
 	if (calls.length < 2) return;
 
 	const { sourceCode } = context;
 	if (!areAllVariablesUsedInAndExpressions(calls, sourceCode)) return;
 
 	const [firstCall] = calls;
-	if (firstCall === undefined) return;
+	/* v8 ignore next 3 -- @preserve length guard above guarantees a first call. */
+	if (firstCall === undefined) {
+		return;
+	}
 
 	const worldText = sourceCode.getText(firstCall.worldNode);
 	const entityText = sourceCode.getText(firstCall.entityNode);

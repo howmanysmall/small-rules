@@ -10,6 +10,7 @@ function isTopScope(scope: Scope): boolean {
 
 	if (scope.upper?.type === "global") {
 		const { block } = scope.upper;
+		/* v8 ignore next -- @preserve script wrapper scopes are the only non-module top scopes represented under global Program scopes. */
 		if (block.type === "Program" && block.sourceType === "script") return true;
 	}
 

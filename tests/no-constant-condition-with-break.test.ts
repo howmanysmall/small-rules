@@ -182,6 +182,10 @@ describe("no-constant-condition-with-break", () => {
 				errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }],
 			},
 			{
+				code: "if (true ? false : value) { doThing(); }",
+				errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }],
+			},
+			{
 				code: "const value = true ? one : two;",
 				errors: [{ messageId: "unexpected" }],
 			},
@@ -190,6 +194,8 @@ describe("no-constant-condition-with-break", () => {
 			"if (condition) { doThing(); }",
 			"while (true) { if (done) break; doThing(); }",
 			"for (; true;) { if (done) break; doThing(); }",
+			"for (;;) { break; }",
+			"for (let value; true;) { break; }",
 			"outer: while (true) { if (done) break outer; doThing(); }",
 			"function run() { while (true) { if (done) return; doThing(); } }",
 			"function run() { while (true) { switch (value) { case 1: return; default: doThing(); } } }",
@@ -228,6 +234,10 @@ describe("no-constant-condition-with-break", () => {
 			},
 			{
 				code: "for (let index = 0; true; index += task.wait()) { doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: "for (; true || task.wait();) { doThing(); }",
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{
@@ -588,7 +598,16 @@ while (true) {
 			"if (!(value && true)) { doThing(); }",
 			'if (+"1") { doThing(); }',
 			"if (condition ? true : false) { doThing(); }",
+			"if ((condition ? true : true) ?? value) { doThing(); }",
 			["if (`", "{value}`) { doThing(); }"].join("$"),
+			{
+				code: `
+while (true) {
+    let value;
+    break;
+}
+`,
+			},
 			{
 				code: `
 while (true) {

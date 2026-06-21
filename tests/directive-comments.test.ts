@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	computeDisabledArea,
 	getOptionalStringArrayProperty,
+	isDisableDirectiveKind,
 	lte,
 	parseDirectiveComment,
 	toForceLocation,
@@ -56,6 +57,15 @@ describe("getOptionalStringArrayProperty", () => {
 	});
 });
 
+describe("isDisableDirectiveKind", () => {
+	it("should distinguish disable directives from enable directives", () => {
+		expect.assertions(2);
+
+		expect(isDisableDirectiveKind("oxlint-disable")).toBe(true);
+		expect(isDisableDirectiveKind("oxlint-enable")).toBe(false);
+	});
+});
+
 describe("parseDirectiveComment", () => {
 	it("should parse directive kind, value, and description", () => {
 		expect.assertions(1);
@@ -66,6 +76,18 @@ describe("parseDirectiveComment", () => {
 			description: "intentional debug log",
 			kind: "oxlint-disable",
 			value: "no-console",
+		});
+	});
+
+	it("should parse directives without values and preserve descriptions", () => {
+		expect.assertions(1);
+
+		const result = parseDirectiveComment(comment("eslint-enable -- restore defaults"));
+
+		expect(result).toMatchObject({
+			description: "restore defaults",
+			kind: "eslint-enable",
+			value: "",
 		});
 	});
 
@@ -81,6 +103,18 @@ describe("parseDirectiveComment", () => {
 				}),
 			),
 		).toBeUndefined();
+	});
+
+	it("should parse non-disable directive kinds", () => {
+		expect.assertions(1);
+
+		const result = parseDirectiveComment(comment("eslint-env node -- test runtime"));
+
+		expect(result).toMatchObject({
+			description: "test runtime",
+			kind: "eslint-env",
+			value: "node",
+		});
 	});
 });
 
@@ -140,6 +174,19 @@ describe("directive locations", () => {
 
 		expect(toRuleIdLocation(directive, undefined)).toStrictEqual(toForceLocation(directive.loc));
 		expect(toRuleIdLocation(directive, "no-alert")).toStrictEqual(directive.loc);
+	});
+
+	it("should locate rule identifiers that contain regexp syntax", () => {
+		expect.assertions(1);
+
+		const directive = comment("oxlint-disable @scope/rule-name, react-hooks/exhaustive-deps", {
+			loc: { end: lineColumn(8, 64), start: lineColumn(8, 4) },
+		});
+
+		expect(toRuleIdLocation(directive, "react-hooks/exhaustive-deps")).toStrictEqual({
+			end: lineColumn(8, 66),
+			start: lineColumn(8, 39),
+		});
 	});
 });
 
@@ -214,6 +261,17 @@ describe("computeDisabledArea", () => {
 		]);
 	});
 
+	it("should record duplicate whole-file eslint disables", () => {
+		expect.assertions(1);
+
+		const first = comment("eslint-disable", { loc: { end: lineColumn(1, 16), start: lineColumn(1, 0) } });
+		const second = comment("eslint-disable", { loc: { end: lineColumn(2, 16), start: lineColumn(2, 0) } });
+
+		expect(computeDisabledArea(sourceCodeWithComments([first, second])).duplicateDisableDirectives).toStrictEqual([
+			{ comment: second, ruleId: undefined },
+		]);
+	});
+
 	it("should record unused enable directives", () => {
 		expect.assertions(1);
 
@@ -248,5 +306,93 @@ describe("computeDisabledArea", () => {
 				sourceCodeWithComments([firstDisable, secondDisable, enable]),
 			).numberOfRelatedDisableDirectives.get(enable),
 		).toBe(2);
+	});
+
+	it("should support eslint line and next-line directives", () => {
+		expect.assertions(2);
+
+		const disableLine = comment("eslint-disable-line no-console", {
+			loc: { end: lineColumn(2, 35), start: lineColumn(2, 12) },
+			type: "Line",
+		});
+		const disableNextLine = comment("eslint-disable-next-line no-alert", {
+			loc: { end: lineColumn(4, 33), start: lineColumn(4, 0) },
+			type: "Line",
+		});
+
+		const result = computeDisabledArea(sourceCodeWithComments([disableLine, disableNextLine]));
+
+		expect(result.areas).toStrictEqual([
+			{
+				comment: disableLine,
+				end: lineColumn(3, -1),
+				kind: "line",
+				ruleId: "no-console",
+				start: lineColumn(2, 0),
+			},
+			{
+				comment: disableNextLine,
+				end: lineColumn(6, -1),
+				kind: "line",
+				ruleId: "no-alert",
+				start: lineColumn(5, 0),
+			},
+		]);
+		expect(result.numberOfRelatedDisableDirectives.size).toBe(2);
+	});
+
+	it("should close matching eslint block directives and ignore mismatched enables", () => {
+		expect.assertions(2);
+
+		const disableAll = comment("eslint-disable", { loc: { end: lineColumn(1, 16), start: lineColumn(1, 0) } });
+		const disableRule = comment("eslint-disable no-console", {
+			loc: { end: lineColumn(2, 24), start: lineColumn(2, 0) },
+		});
+		const enableRule = comment("eslint-enable no-alert", {
+			loc: { end: lineColumn(3, 23), start: lineColumn(3, 0) },
+		});
+		const enableAll = comment("eslint-enable", { loc: { end: lineColumn(4, 15), start: lineColumn(4, 0) } });
+
+		const result = computeDisabledArea(sourceCodeWithComments([disableAll, disableRule, enableRule, enableAll]));
+
+		expect(result.unusedEnableDirectives).toStrictEqual([{ comment: enableRule, ruleId: "no-alert" }]);
+		expect(result.areas).toStrictEqual([
+			{
+				comment: disableAll,
+				end: lineColumn(4, 0),
+				kind: "block",
+				ruleId: undefined,
+				start: lineColumn(1, 0),
+			},
+			{
+				comment: disableRule,
+				end: lineColumn(4, 0),
+				kind: "block",
+				ruleId: "no-console",
+				start: lineColumn(2, 0),
+			},
+		]);
+	});
+
+	it("should ignore directive comments that do not disable or enable rules", () => {
+		expect.assertions(1);
+
+		const unsupported = comment("istanbul ignore next", {
+			loc: { end: lineColumn(1, 21), start: lineColumn(1, 0) },
+		});
+		const env = comment("eslint-env node", { loc: { end: lineColumn(1, 15), start: lineColumn(1, 0) } });
+		const disable = comment("oxlint-disable no-console", {
+			loc: { end: lineColumn(2, 29), start: lineColumn(2, 0) },
+		});
+
+		expect(computeDisabledArea(sourceCodeWithComments([unsupported, env, disable])).areas).toStrictEqual([
+			{
+				comment: disable,
+				end: undefined,
+				kind: "block",
+				ruleId: "no-console",
+				start: lineColumn(2, 0),
+			},
+		]);
 	});
 });

@@ -43,6 +43,16 @@ import React from "@rbxts/react";
 
 const MemoPanel = React.memo(() => <div />);
 
+const view = <MemoPanel fallback={<div />} />;
+`,
+				errors: [{ data: { name: "MemoPanel", type: "JSX" }, messageId: "inlineProperty" }],
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const MemoPanel = React.memo(() => <div />);
+
 const view = <MemoPanel fallback={<></>} />;
 `,
 				errors: [{ data: { name: "MemoPanel", type: "JSX" }, messageId: "inlineProperty" }],
@@ -97,6 +107,24 @@ const MemoPanel = React.memo(() => <div />);
 const fallback = <></>;
 
 const view = <MemoPanel fallback={fallback} />;
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const MemoPanel = React.memo(() => <div />);
+
+const view = <MemoPanel title="stable" empty={} />;
+`,
+			},
+			{
+				code: `
+import React from "@rbxts/react";
+
+const MemoPanel = React.memo(() => <div />);
+
+const view = <UI.MemoPanel options={{ enabled: true }} />;
 `,
 			},
 		],

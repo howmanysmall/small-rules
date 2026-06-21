@@ -28,6 +28,10 @@ describe("no-render-helper-functions", () => {
 				errors: [{ messageId: "noRenderHelper" }],
 			},
 			{
+				code: "const createLabel: React.ReactNode = () => <div />;",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
 				code: "const createLabel = (): ReactNode => <div />;",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
@@ -57,6 +61,14 @@ describe("no-render-helper-functions", () => {
 			},
 			{
 				code: "function createButton(): React.ReactElement { return <button />; }",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function createButton(): React.ReactNode { return <button />; }",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function createButton(): Foo.Bar { return <button />; }",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
 			{
@@ -93,6 +105,7 @@ describe("no-render-helper-functions", () => {
 			"function MyComponent(props: Props) { return <div>{props.children}</div>; }",
 			"const Component = () => <div />;",
 			"const Component = (): JSX.Element => <div />;",
+			"const Component = function() { return <div />; };",
 			"export function HeaderComponent() { return <header />; }",
 			"function useCustomHook() { return <div />; }",
 			"function useFetchData(): React.ReactNode { return <div />; }",
@@ -114,6 +127,9 @@ describe("no-render-helper-functions", () => {
 			{
 				code: "<Button onClick={() => <Modal />} />",
 			},
+			{
+				code: "foo(function helper() { return <div />; });",
+			},
 			"class MyClass { render() { return <div />; } }",
 			"class MyClass { renderItem() { return <div />; } }",
 			{
@@ -124,6 +140,27 @@ describe("no-render-helper-functions", () => {
 			},
 			{
 				code: "function renderEmpty(): React.ReactNode { return <div />; } const value = { autoFill: { renderEmpty } };",
+			},
+			{
+				code: "const renderEmpty = () => <div />; const value = { autoFill: { renderEmpty: (renderEmpty) } };",
+			},
+			{
+				code: "const value = { renderEmpty: function(): React.ReactNode { return <div />; } };",
+			},
+			{
+				code: "const [renderEmpty = () => <div />] = values;",
+			},
+			{
+				code: "const value = { renderEmpty: (function renderEmpty(): React.ReactNode { return <div />; }) };",
+			},
+			{
+				code: "function createPortal(): React.ReactPortal { return portal; }",
+			},
+			{
+				code: "declare function createNode(): React.ReactNode;",
+			},
+			{
+				code: "export default function(): JSX.Element { return <div />; }",
 			},
 		],
 	});
