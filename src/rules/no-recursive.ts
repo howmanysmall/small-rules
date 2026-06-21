@@ -17,37 +17,38 @@ function isResolvedInScope(name: string, scope: Scope): boolean {
 	return false;
 }
 
-// Find all nodes in cycles using DFS with coloring
+const enum Color {
+	White = 0,
+	Gray = 1,
+	Black = 2,
+}
+
 function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet<string> {
-	const WHITE = 0;
-	const GRAY = 1;
-	const BLACK = 2;
-	const color = new Map<string, number>();
+	const color = new Map<string, Color>();
 	const inCycle = new Set<string>();
 
-	for (const name of callGraph.keys()) color.set(name, WHITE);
+	for (const name of callGraph.keys()) color.set(name, Color.White);
 
 	function dfs(node: string, path: Array<string>): void {
-		color.set(node, GRAY);
+		color.set(node, Color.Gray);
 		path.push(node);
 
 		for (const neighbor of callGraph.get(node) ?? []) {
 			const neighborColor = color.get(neighbor);
-			if (neighborColor === GRAY) {
-				// Back edge found — all nodes from neighbor to current node form a cycle
+			if (neighborColor === Color.Gray) {
 				const cycleStart = path.lastIndexOf(neighbor);
 				for (let index = cycleStart; index < path.length; index += 1) {
 					const cycleNode = path[index];
 					if (cycleNode !== undefined) inCycle.add(cycleNode);
 				}
-			} else if (neighborColor === WHITE) dfs(neighbor, path);
+			} else if (neighborColor === Color.White) dfs(neighbor, path);
 		}
 
 		path.pop();
-		color.set(node, BLACK);
+		color.set(node, Color.Black);
 	}
 
-	for (const name of callGraph.keys()) if (color.get(name) === WHITE) dfs(name, []);
+	for (const name of callGraph.keys()) if (color.get(name) === Color.White) dfs(name, []);
 
 	return inCycle;
 }
@@ -56,15 +57,11 @@ const noRecursive = defineRule({
 	create(context): Visitor {
 		const { sourceCode } = context;
 
-		// Call graph adjacency: caller → set of callees
 		const callGraph = new Map<string, Set<string>>();
-		// Stack of function names we're currently visiting
-		const functionStack: Array<string | undefined> = [];
-		// All call sites that might involve local functions
-		const callSites: Array<CallSite> = [];
+		const functionStack = new Array<string | undefined>();
+		const callSites = new Array<CallSite>();
 
-		// Class tracking for this.method() detection
-		const classStack: Array<string | undefined> = [];
+		const classStack = new Array<string | undefined>();
 		const classMethods = new Map<string, Set<string>>();
 
 		function pushFunction(name: string | undefined): void {
@@ -84,9 +81,7 @@ const noRecursive = defineRule({
 		}
 
 		function registerFunction(name: string): void {
-			if (!callGraph.has(name)) {
-				callGraph.set(name, new Set());
-			}
+			if (!callGraph.has(name)) callGraph.set(name, new Set());
 		}
 
 		function findEnclosingClassName(): string | undefined {
@@ -100,23 +95,16 @@ const noRecursive = defineRule({
 			ArrowFunctionExpression(): void {
 				pushFunction(undefined);
 			},
-			"ArrowFunctionExpression:exit"(): void {
-				popFunction();
-			},
-
-			// ---- Call expression analysis ----
-
+			"ArrowFunctionExpression:exit": popFunction,
 			CallExpression(node): void {
 				const caller = getEnclosingFunctionName();
-				// Not inside a tracked function
 				if (caller === undefined) return;
 
 				let calleeName: string | undefined;
 				let isThisMethodCall = false;
 
-				if (node.callee.type === "Identifier") {
-					calleeName = node.callee.name;
-				} else if (
+				if (node.callee.type === "Identifier") calleeName = node.callee.name;
+				else if (
 					node.callee.type === "MemberExpression" &&
 					node.callee.object.type === "ThisExpression" &&
 					node.callee.property.type === "Identifier"
@@ -133,9 +121,7 @@ const noRecursive = defineRule({
 					const className = findEnclosingClassName();
 					if (className !== undefined) {
 						const methods = classMethods.get(className);
-						if (methods?.has(calleeName) === true) {
-							isLocal = true;
-						}
+						if (methods?.has(calleeName) === true) isLocal = true;
 					}
 				} else {
 					const scope = sourceCode.getScope(node);
@@ -148,61 +134,38 @@ const noRecursive = defineRule({
 				}
 			},
 
-			// ---- Class tracking ----
-
 			ClassDeclaration(node): void {
 				const className = node.id?.name;
-				if (className !== undefined && !classMethods.has(className)) {
-					classMethods.set(className, new Set());
-				}
+				if (className !== undefined && !classMethods.has(className)) classMethods.set(className, new Set());
 				classStack.push(className);
 			},
 			"ClassDeclaration:exit"(): void {
 				classStack.pop();
 			},
 
-			// ---- Enter/exit function scopes ----
-
 			FunctionDeclaration(node): void {
 				const name = node.id?.name;
-				if (name !== undefined && name !== "") {
-					registerFunction(name);
-				}
+				if (name !== undefined && name.length > 0) registerFunction(name);
 				pushFunction(name);
 			},
-			"FunctionDeclaration:exit"(): void {
-				popFunction();
-			},
-
+			"FunctionDeclaration:exit": popFunction,
 			FunctionExpression(node): void {
-				// Named function expressions
-				if (node.id) {
-					registerFunction(node.id.name);
-				}
-				// Check if this is a method body — the parent might be a MethodDefinition
+				if (node.id) registerFunction(node.id.name);
 				const { parent } = node;
 				if (parent?.type === "MethodDefinition" && parent.key.type === "Identifier") {
 					pushFunction(parent.key.name);
-				} else {
-					pushFunction(undefined);
-				}
+				} else pushFunction(undefined);
 			},
-			"FunctionExpression:exit"(): void {
-				popFunction();
-			},
+			"FunctionExpression:exit": popFunction,
 
 			MethodDefinition(node): void {
 				const className = findEnclosingClassName();
 				if (node.key.type === "Identifier" && className !== undefined) {
 					const methods = classMethods.get(className);
-					if (methods) {
-						methods.add(node.key.name);
-					}
+					methods?.add(node.key.name);
 					registerFunction(node.key.name);
 				}
 			},
-
-			// ---- Post-traversal analysis ----
 
 			"Program:exit"(): void {
 				const inCycle = findCycleParticipants(callGraph);
@@ -217,8 +180,6 @@ const noRecursive = defineRule({
 					}
 				}
 			},
-
-			// ---- Variable assignments (const foo = () => ...) ----
 
 			VariableDeclarator(node): void {
 				if (
