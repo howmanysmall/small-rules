@@ -33,6 +33,7 @@ import noInstanceMethodsWithoutThis from "$oxc-rules/no-instance-methods-without
 import noNativePropertiesSpread from "$oxc-rules/no-native-properties-spread";
 import noNewInstanceInUseMemo from "$oxc-rules/no-new-instance-in-use-memo";
 import noPrint from "$oxc-rules/no-print";
+import noRecursive from "$oxc-rules/no-recursive";
 import noRedundantAspectRatioConstraint from "$oxc-rules/no-redundant-aspect-ratio-constraint";
 import noRenderHelperFunctions from "$oxc-rules/no-render-helper-functions";
 import noSpecFileExtension from "$oxc-rules/no-spec-file-extension";
@@ -125,6 +126,7 @@ const smallRules = definePlugin({
 		"no-native-properties-spread": noNativePropertiesSpread,
 		"no-new-instance-in-use-memo": noNewInstanceInUseMemo,
 		"no-print": noPrint,
+		"no-recursive": noRecursive,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
 		"no-render-helper-functions": noRenderHelperFunctions,
 		"no-spec-file-extension": noSpecFileExtension,
