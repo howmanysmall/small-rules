@@ -82,6 +82,7 @@
 		"@commitlint/types": "21.0.1",
 		"@fast-check/vitest": "0.4.1",
 		"@octokit/rest": "22.0.1",
+		"@oxlint/plugins": "^1.70.0",
 		"@std/msgpack": "npm:@jsr/std__msgpack@1.0.3",
 		"@stryker-mutator/api": "9.6.1",
 		"@stryker-mutator/core": "9.6.1",
