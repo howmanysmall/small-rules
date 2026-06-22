@@ -878,6 +878,33 @@ function test() {
 					},
 				],
 			},
+			{
+				code: `
+function test() {
+    a.open();
+    b.open();
+    a.close();
+    b.close();
+}
+`,
+				errors: [{ messageId: "wrongOrder" }],
+				options: [
+					{
+						pairs: [
+							{
+								closer: "a.close",
+								opener: "a.open",
+								requireSync: false,
+							},
+							{
+								closer: "b.close",
+								opener: "b.open",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
 
 			// Closing an older opener before the top opener reports the actual still-open pair
 			{
@@ -961,6 +988,65 @@ function test(kind) {
 					},
 				],
 			},
+			// Complete switch branches with a default must all close an opener that predates the switch
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("switch");
+    switch (kind) {
+        case "ready":
+            debug.profileend();
+            break;
+        default:
+            debug.profilebegin("nested");
+            debug.profileend();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			// Try/catch branches must all preserve an opener that predates the try
+			{
+				code: `
+function test(enabled) {
+    db.transaction();
+    try {
+        if (enabled) {
+            db.commit();
+        }
+    } catch (error) {
+        recover(error);
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+				options: [
+					{
+						pairs: [
+							{
+								closer: "db.commit",
+								opener: "db.transaction",
+								requireSync: false,
+							},
+						],
+					},
+				],
+			},
+			// Do-while loop exits can bypass an opener created inside the loop
+			{
+				code: `
+function test(items) {
+    let index = 0;
+    do {
+        debug.profilebegin("item");
+        if (items[index].done) break;
+        debug.profileend();
+        index++;
+    } while (index < items.length);
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
 		],
 		valid: [
 			// Basic pairing - valid
@@ -970,6 +1056,14 @@ function test() {
     debug.profilebegin("task");
     doWork();
     debug.profileend();
+}
+	`,
+			},
+			// Dynamic callee calls are not paired-call names
+			{
+				code: `
+function test(makeCall) {
+    makeCall()();
 }
 `,
 			},
@@ -995,6 +1089,34 @@ function test() {
         riskyOperation();
     } finally {
         debug.profileend();
+    }
+}
+`,
+			},
+			// Do-while loops are valid when the closer is reached before loop control exits
+			{
+				code: `
+function test(items) {
+    let index = 0;
+    do {
+        debug.profilebegin("item");
+        process(items[index]);
+        debug.profileend();
+        index++;
+    } while (index < items.length);
+}
+`,
+			},
+			// Finally blocks may return after closing the active opener
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        doWork();
+    } finally {
+        debug.profileend();
+        return;
     }
 }
 `,
@@ -1432,6 +1554,31 @@ function test() {
 						],
 					},
 				],
+			},
+		],
+	});
+});
+
+describe("require-paired-calls - coverage locks", () => {
+	// @ts-expect-error - This is dumb
+	js.run("require-paired-calls - nested function stack isolation", rule, {
+		invalid: [],
+		valid: [
+			{
+				code: `
+function test() {
+    debug.profilebegin("outer");
+
+    function inner() {
+        debug.profilebegin("inner");
+        doWork();
+        debug.profileend();
+    }
+
+    inner();
+    debug.profileend();
+}
+`,
 			},
 		],
 	});

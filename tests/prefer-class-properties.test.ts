@@ -51,6 +51,7 @@ describe("prefer-class-properties", () => {
 				options: ["always"],
 			},
 			{ code: "class Foo { constructor() { this.foo = []; } }", errors: assignErrors, options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = [, 123]; } }", errors: assignErrors, options: ["always"] },
 			{ code: "class Foo { constructor() { this.foo = {}; } }", errors: assignErrors, options: ["always"] },
 			{
 				code: "class Foo { constructor() { this.foo = [123, 456, 789]; } }",
@@ -87,12 +88,18 @@ describe("prefer-class-properties", () => {
 
 			// 'always' mode - computed properties are fine (can't be class properties)
 			{ code: "class Foo { constructor() { this[foo] = 123; } }", options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo[bar] = 123; } }", options: ["always"] },
 
 			// 'always' mode - nested member expressions are fine
 			{ code: "class Foo { constructor() { this.foo[bar].baz = 123; } }", options: ["always"] },
 
 			// 'always' mode - non-literal assignments are fine
+			{ code: "class Foo { constructor() { initialize(); } }", options: ["always"] },
 			{ code: "class Foo { constructor() { this.foo = foo(); } }", options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = this.defaults.theme; } }", options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = { ...defaults }; } }", options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = [123, ...values]; } }", options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = factory.create(); } }", options: ["always"] },
 
 			// 'always' mode - conditional assignments are fine (not top-level in constructor)
 			{ code: "class Foo { constructor() { if (something) { this.foo = 123; } } }", options: ["always"] },

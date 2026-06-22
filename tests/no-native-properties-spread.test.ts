@@ -52,10 +52,40 @@ describe("no-native-properties-spread", () => {
 					},
 				],
 			},
+			{
+				code: 'import { DEFAULT } from "./styles"; function Component(props) { return <frame {...{ ...DEFAULT, ...props }} />; }',
+				errors: [
+					{
+						data: { source: "DEFAULT" },
+						messageId: "noElementSpread",
+					},
+				],
+			},
+			{
+				code: 'const BASE_NATIVE_PROPERTIES = {}; function Component() { const mergedNativeProperties = { ...BASE_NATIVE_PROPERTIES, Text: "hello" }; const aliasNativeProperties = mergedNativeProperties; return <Frame nativeProperties={aliasNativeProperties} />; }',
+				errors: [
+					{
+						data: { prop: "nativeProperties", source: "BASE_NATIVE_PROPERTIES" },
+						messageId: "noNativePropertiesSpread",
+					},
+				],
+			},
 		],
 		valid: [
 			{
 				code: "const view = <Frame nativeProperties={SOME_CONSTANT} />;",
+			},
+			{
+				code: "const view = <Frame nativeProperties />;",
+			},
+			{
+				code: 'const view = <Frame nativeProperties="enabled" />;',
+			},
+			{
+				code: "const view = <Frame roblox:nativeProperties={{ ...SOME_CONSTANT }} />;",
+			},
+			{
+				code: "const view = <Frame nativeProperties={} />;",
 			},
 			{
 				code: "const view = <Frame nativeProperties={{ Size: UDim2.fromScale(1, 1) }} />;",
@@ -82,6 +112,12 @@ describe("no-native-properties-spread", () => {
 				code: "const nativeProperties = SOME_CONSTANT; const view = <Frame nativeProperties={nativeProperties} />;",
 			},
 			{
+				code: "function Component() { let nativeProperties; return <Frame nativeProperties={nativeProperties} />; }",
+			},
+			{
+				code: "function Component() { return <Frame nativeProperties={{ ...getStyles().nativeProperties }} />; }",
+			},
+			{
 				code: 'const BASE_NATIVE_PROPERTIES = {}; const MERGED_NATIVE_PROPERTIES = { ...BASE_NATIVE_PROPERTIES, Text: "hello" }; const view = <Frame nativeProperties={MERGED_NATIVE_PROPERTIES} />;',
 			},
 			{
@@ -91,10 +127,16 @@ describe("no-native-properties-spread", () => {
 				code: "function Component(nativeProperties) { return <Frame nativeProperties={{ ...nativeProperties }} />; }",
 			},
 			{
+				code: "function Component(localDefaults, props) { const merged = { ...localDefaults, ...props }; return <frame {...merged} />; }",
+			},
+			{
 				code: "const DEFAULT = {}; const view = <frame {...DEFAULT} />;",
 			},
 			{
 				code: "function Component(props) { return <frame {...{ ...props, extra: true }} />; }",
+			},
+			{
+				code: "function Component() { const nativeProperties = nativeProperties; return <Frame nativeProperties={nativeProperties} />; }",
 			},
 		],
 	});

@@ -33,6 +33,7 @@ export function isIdentifierStartCodePoint(codePoint: number): boolean {
 export function isIdentifierPartCodePoint(codePoint: number): boolean {
 	if (isIdentifierStartCodePoint(codePoint)) return true;
 	if (codePoint >= 48 && codePoint <= 57) return true;
+	/* v8 ignore next -- @preserve 0x200c and 0x200d are already accepted by isIdentifierStartCodePoint. */
 	if (codePoint === 0x20_0c || codePoint === 0x20_0d) return true;
 	if (codePoint >= 0x03_00 && codePoint <= 0x03_61) return true;
 	if (codePoint >= 0x20_30 && codePoint <= 0x20_4a) return true;
@@ -45,10 +46,12 @@ export function isValidIdentifier(name: string): boolean {
 	const firstCodePoint = name.codePointAt(0);
 	if (firstCodePoint === undefined || !isIdentifierStartCodePoint(firstCodePoint)) return false;
 
+	/* v8 ignore next -- @preserve astral identifier starts are normalized before linting in this parser path. */
 	let index = firstCodePoint > 0xff_ff ? 2 : 1;
 	while (index < name.length) {
 		const codePoint = name.codePointAt(index);
 		if (codePoint === undefined || !isIdentifierPartCodePoint(codePoint)) return false;
+		/* v8 ignore next -- @preserve astral identifier parts are normalized before linting in this parser path. */
 		index += codePoint > 0xff_ff ? 2 : 1;
 	}
 

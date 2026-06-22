@@ -35,6 +35,20 @@ export function Example(locale: string, theme: string) {
 				filename: join(WITH_CONTEXT_STACK, "src", "screens", "report-only.tsx"),
 			},
 			{
+				code: `import Stack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
+}`,
+				errors: [{ messageId: "preferContextStack" }],
+				filename: join(WITH_CONTEXT_STACK, "src", "screens", "alias-report-only.tsx"),
+				output: `import Stack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <Stack providers={[<ThemeContext.Provider value={theme} />, <LocaleContext.Provider value={locale} />]}><App /></Stack>;
+}`,
+			},
+			{
 				code: `import ContextStack from "../providers/context-stack";
 
 export function Example(locale: string, theme: string) {
@@ -42,6 +56,30 @@ export function Example(locale: string, theme: string) {
 }`,
 				errors: [{ messageId: "preferContextStack" }],
 				filename: join(WITH_CONTEXT_STACK, "src", "screens", "comment.tsx"),
+			},
+			{
+				code: `import ContextStack from "../providers/context-stack";
+import { ContextStack as LocalContextStack } from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
+}`,
+				errors: [{ messageId: "preferContextStack" }],
+				filename: join(WITH_CONTEXT_STACK, "src", "screens", "multiple-identifiers.tsx"),
+			},
+			{
+				code: `import ContextStack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}></LocaleContext.Provider></ThemeContext.Provider>;
+}`,
+				errors: [{ messageId: "preferContextStack" }],
+				filename: join(WITH_CONTEXT_STACK, "src", "screens", "empty-inner.tsx"),
+				output: `import ContextStack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ContextStack providers={[<ThemeContext.Provider value={theme} />, <LocaleContext.Provider value={locale} />]}></ContextStack>;
+}`,
 			},
 		],
 		valid: [
@@ -72,6 +110,26 @@ export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
 				filename: join(FIXTURE_ONLY_CONTEXT_STACK, "src", "screens", "fixture.tsx"),
+			},
+			{
+				code: `import ContextStack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ThemeContext.Provider value={theme}>
+        <>
+            <LocaleContext.Provider value={locale}><App /></LocaleContext.Provider>
+        </>
+    </ThemeContext.Provider>;
+}`,
+				filename: join(WITH_CONTEXT_STACK, "src", "screens", "fragment-wrapper.tsx"),
+			},
+			{
+				code: `import ContextStack from "../providers/context-stack";
+
+export function Example(locale: string, theme: string) {
+    return <ThemeContext.Provider value={theme}>{maybeLocale && <LocaleContext.Provider value={locale}><App /></LocaleContext.Provider>}</ThemeContext.Provider>;
+}`,
+				filename: join(WITH_CONTEXT_STACK, "src", "screens", "conditional-child.tsx"),
 			},
 		],
 	});

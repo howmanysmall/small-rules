@@ -159,6 +159,31 @@ import { Events } from "server/networking";
 				code: `
 	import { Events } from "server/networking";
 
+	Events.units.unequipUnit.connect((player: Player): void => {
+	    let targetPlayer: Player | undefined;
+	    [targetPlayer = fallbackPlayer] = [player];
+	    Events.promptNotification.fire(targetPlayer, "error");
+	});
+	`,
+				errors: [{ messageId: "preferFunctions" }],
+				options,
+			},
+			{
+				code: `
+	import { Events } from "server/networking";
+
+	Events.units.unequipUnit.connect((player: Player): void => {
+	    const targetPlayer = condition ? player : player;
+	    Events.promptNotification.fire(targetPlayer, "error");
+	});
+	`,
+				errors: [{ messageId: "preferFunctions" }],
+				options,
+			},
+			{
+				code: `
+	import { Events } from "server/networking";
+
 	Events.units.unequipUnit.connect?.((player: Player): void => {
 	    Events.promptNotification.fire?.(player, "error");
 	});
@@ -237,7 +262,29 @@ import { Events } from "server/networking";
 	    targetPayload = payload;
 	    Events.promptNotification.fire(targetPayload.player, "error");
 	});
-	`,
+`,
+				errors: [{ messageId: "preferFunctions" }],
+				options,
+			},
+			{
+				code: `
+import { Events } from "server/networking";
+
+Events.units.unequipUnit.connect(function(player: Player): void {
+    Events.promptNotification.fire(player, "error");
+});
+`,
+				errors: [{ messageId: "preferFunctions" }],
+				options,
+			},
+			{
+				code: `
+import { Events } from "server/networking";
+
+Events?.units.unequipUnit.connect((player: Player): void => {
+    Events?.promptNotification.fire(player, "error");
+});
+`,
 				errors: [{ messageId: "preferFunctions" }],
 				options,
 			},

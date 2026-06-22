@@ -105,6 +105,11 @@ describe("no-array-constructor-elements", () => {
 				output: "const value = [() => value];",
 			},
 			{
+				code: "const value = new Array({ value });",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
+				output: "const value = [{ value }];",
+			},
+			{
 				code: "const value = new Array(class Value {});",
 				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: "const value = [class Value {}];",
@@ -209,12 +214,33 @@ const array = ["a", "b"];
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
 			},
+			{
+				code: "const value: Promise<string> = new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+			{
+				code: "const value: readonly string[] = new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+			{
+				code: "const value: Array = new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
+			{
+				code: "const value: Collections.Array<string> = new Array();",
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+				output: null,
+			},
 		],
 		valid: [
 			"const value = new Set();",
 			"const value = new Array<string>();",
 			"const value: Array<string> = new Array();",
 			"const value: ReadonlyArray<string> = new Array();",
+			"const [first]: Array<string> = new Array();",
 			`
 class Store {
 	public values: Array<string> = new Array();
@@ -274,10 +300,32 @@ const array = new Array<string>();
 other.push("a");
 `,
 			`
+const array = new Array<string>();
+array?.push("a");
+`,
+			`
+const array = new Array<string>();
+array.push?.("a");
+`,
+			`
+const array = new Array<string>();
+array.pop();
+`,
+			`
+const array = new Array<string>();
+if (ready) array.push("a");
+`,
+			`
 class Array<TValue> {
     constructor(..._arguments: Array<TValue>) {}
 }
 const value = new Array("a");
+`,
+			`
+const array = new Array<string>();
+array.push("a");
+const separator = true;
+array.push("b");
 `,
 			`
 const array = new Array<string>();

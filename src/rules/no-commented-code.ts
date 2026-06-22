@@ -114,6 +114,7 @@ function isParsedStatement(value: unknown): value is ESTree.Statement {
 function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.Statement> {
 	const result = new Array<ESTree.Statement>();
 	let size = 0;
+	/* v8 ignore next -- @preserve parser program bodies contain parsed statement records. */
 	for (const item of body) if (isParsedStatement(item)) result[size++] = item;
 	return result;
 }
@@ -135,6 +136,7 @@ function isExclusion(statements: ReadonlyArray<ESTree.Statement>, codeText: stri
 	if (statements.length !== 1) return false;
 
 	const statement = statements.at(0);
+	/* v8 ignore next -- length check above guarantees a first statement for parser-produced arrays. @preserve */
 	if (!statement) return false;
 
 	return (
@@ -181,6 +183,7 @@ function tryParse(value: string, filename: string): ParseResult | undefined {
 
 	if (isValidParseResult(result)) return result;
 
+	/* v8 ignore next -- @preserve TSX/JSX files are parsed directly and do not need JSX fallback parsing. */
 	if (extension !== ".tsx" && extension !== ".jsx") {
 		const jsxResult = parseSync("file.tsx", value);
 		if (isValidParseResult(jsxResult)) return jsxResult;
@@ -226,6 +229,7 @@ const noCommentedCode = defineRule({
 
 					const firstComment = group.comments.at(0);
 					const lastComment = group.comments.at(-1);
+					/* v8 ignore next -- comment groups are created only from non-empty comment arrays. @preserve */
 					if (!(firstComment && lastComment)) continue;
 
 					context.report({

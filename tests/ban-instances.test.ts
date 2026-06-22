@@ -182,6 +182,16 @@ describe("ban-instances", () => {
 					},
 				],
 			},
+			{
+				code: 'new Instance("Part");',
+				errors: [{ messageId: "bannedInstance" }],
+				options: [{ bannedInstances: { Part: "" } }],
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); c.MaxSize = new Vector2(100, 100);',
+				errors: [{ messageId: "bannedProperty" }],
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "" } } }],
+			},
 		],
 		valid: [
 			// No options
@@ -260,6 +270,10 @@ describe("ban-instances", () => {
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(10, 10);',
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); function later() { c.MaxSize = new Vector2(100, 100); }',
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
 			},
 			// bannedProperties: wrong class

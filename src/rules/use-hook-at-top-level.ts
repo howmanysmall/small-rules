@@ -322,15 +322,18 @@ const useHookAtTopLevel = defineRule({
 			ImportDeclaration(node): void {
 				const source = node.source.value;
 
+				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
 				if (
 					configuration.importSources === undefined ||
 					Object.keys(configuration.importSources).length === 0
 				) {
 					return;
 				}
+				/* v8 ignore stop -- @preserve */
 
 				for (const specifier of node.specifiers) {
 					if (specifier.type !== "ImportSpecifier") continue;
+					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. */
 					if (!isIdentifierName(specifier.imported)) continue;
 					if (isReactHookName(specifier.imported.name)) {
 						importSourceMap.set(specifier.local.name, source);

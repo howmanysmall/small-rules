@@ -14,6 +14,7 @@ function isRecordTypeReference(typeRef: ESTree.TSType): typeRef is ESTree.TSType
 }
 
 function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TSType | undefined {
+	/* v8 ignore next -- @preserve VariableDeclarator visitor checks Identifier before calling this helper. */
 	if (node.id.type !== "Identifier") return undefined;
 
 	const bindingAnnotation = getTypeAnnotationFromBinding(node.id);
@@ -26,6 +27,7 @@ function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TST
 	if (typeArguments?.params.length !== 2) return undefined;
 
 	const [enumType, secondParameter] = typeArguments.params;
+	/* v8 ignore next -- @preserve the length check above guarantees both Record parameters exist. */
 	if (enumType === undefined || secondParameter === undefined) return undefined;
 	if (secondParameter.type !== "TSLiteralType") return undefined;
 	if (secondParameter.literal.type !== "Literal" || secondParameter.literal.value !== true) return undefined;

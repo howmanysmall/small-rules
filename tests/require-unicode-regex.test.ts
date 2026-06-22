@@ -61,6 +61,9 @@ describe("require-unicode-regex", () => {
 				code: 'const x = regex("foo", flagsVariable);',
 			},
 			{
+				code: 'const x = regex("foo", ...flags);',
+			},
+			{
 				code: "const x = someOtherFunc();",
 			},
 			{

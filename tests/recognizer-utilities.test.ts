@@ -47,6 +47,14 @@ describe("createContainsDetector utility", () => {
 
 			expect(detector.scan("const x = 1")).toBe(0);
 		}, 5000);
+
+		it("counts empty pattern positions", () => {
+			expect.assertions(1);
+
+			const detector = createContainsDetector(0.5, [""]);
+
+			expect(detector.scan("foo")).toBe(4);
+		}, 5000);
 	});
 
 	describe("regex patterns", () => {

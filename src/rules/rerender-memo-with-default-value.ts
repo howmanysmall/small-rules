@@ -27,6 +27,7 @@ function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): v
 function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTree.ParamPattern>): void {
 	for (const parameter of parameters) {
 		if (parameter.type === "AssignmentPattern" && parameter.left.type === "ObjectPattern") {
+			/* v8 ignore next -- @preserve assignment pattern defaults are parser expression nodes. */
 			if (isNode(parameter.right)) reportEmptyDefaultValue(context, parameter.right);
 			checkObjectPatternDefaults(context, parameter.left);
 			continue;
@@ -47,6 +48,7 @@ function checkObjectPatternDefaults(context: Context, pattern: ESTree.ObjectPatt
 function getPropertyDefaultValue(property: ObjectPatternProperty): ESTree.Node | undefined {
 	if (property.type !== "Property" || property.value.type !== "AssignmentPattern") return undefined;
 	const defaultValue = property.value.right;
+	/* v8 ignore next -- @preserve object pattern defaults are parser expression nodes. */
 	return isNode(defaultValue) ? defaultValue : undefined;
 }
 
@@ -55,7 +57,9 @@ function getComponentDeclarationParameters(node: ESTree.Node): ReadonlyArray<EST
 	return [...node.params];
 }
 function getComponentAssignmentParameters(node: ESTree.Node): ReadonlyArray<ESTree.ParamPattern> | undefined {
+	/* v8 ignore next -- @preserve isComponentAssignment already proves a function initializer. */
 	if (node.type !== "VariableDeclarator" || !isComponentAssignment(node) || node.init === null) return undefined;
+	/* v8 ignore next -- @preserve isComponentAssignment already proves a function initializer. */
 	if (node.init.type !== "ArrowFunctionExpression" && node.init.type !== "FunctionExpression") return undefined;
 	return [...node.init.params];
 }

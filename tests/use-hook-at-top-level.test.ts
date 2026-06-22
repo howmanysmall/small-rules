@@ -308,6 +308,19 @@ function Component() {
 				errors: [{ messageId: "conditionalHook" }],
 				options: [{ importSources: { "my-ecs": false, react: true } }],
 			},
+			{
+				code: `
+import React from "react";
+
+function Component() {
+    if (condition) {
+        Namespace.React.useEffect(() => {});
+    }
+}
+`,
+				errors: [{ messageId: "conditionalHook" }],
+				options: [{ importSources: { React: true } }],
+			},
 		],
 		valid: [
 			// Basic top-level call
@@ -497,6 +510,20 @@ const Component = () => {
         }
     }
     `,
+			`
+    class Foo {
+        useCustom() {
+            useState(0);
+        }
+    }
+    `,
+			`
+    const hooks = {
+        useCustom() {
+            useState(0);
+        }
+    };
+    `,
 
 			// All React Lua hooks
 			`
@@ -514,6 +541,28 @@ const Component = () => {
         useState(0);
     }
     `,
+				options: [{ importSources: { react: true } }],
+			},
+			{
+				code: `
+import React from "react";
+
+function Component() {
+    if (condition) {
+        React.useEffect(() => {});
+    }
+}
+`,
+				options: [{ importSources: { React: false } }],
+			},
+			{
+				code: `
+import { memo, useState } from "react";
+
+function Component() {
+    useState(0);
+}
+`,
 				options: [{ importSources: { react: true } }],
 			},
 

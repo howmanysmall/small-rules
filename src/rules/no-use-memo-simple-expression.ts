@@ -7,6 +7,7 @@ import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function getReturnExpression(callback: CallbackFunction): ESTree.Expression | undefined {
+	/* v8 ignore next -- @preserve callback functions supplied to useMemo have bodies in parsed source. */
 	if (callback.body === null) return undefined;
 	if (callback.body.type !== "BlockStatement") return callback.body;
 	if (callback.body.body.length !== 1) return undefined;

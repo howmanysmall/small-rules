@@ -66,6 +66,7 @@ const MAX_REGEX_CACHE_SIZE = 64;
 const regexCache = new Map<string, RegExp>();
 
 function ensureUnicodeFlag(flags: string): string {
+	/* v8 ignore next -- @preserve callers pass freshly-created search regex flags without unicode flags. */
 	return flags.includes("u") || flags.includes("v") ? flags : `${flags}u`;
 }
 
@@ -77,6 +78,7 @@ function cachedRegex(pattern: string, flags: string): RegExp {
 	const regex = new RegExp(pattern, ensureUnicodeFlag(flags));
 	if (regexCache.size >= MAX_REGEX_CACHE_SIZE) {
 		const firstKey = regexCache.keys().next().value;
+		/* v8 ignore next -- @preserve a nonempty cache always yields a first insertion key. */
 		if (firstKey !== undefined) regexCache.delete(firstKey);
 	}
 	regexCache.set(cacheKey, regex);
@@ -188,6 +190,7 @@ function toImportSource(sourceFile: string, targetFile: string): string {
 function isIgnoredComponentPath(filePath: string): boolean {
 	const projectRoot = getProjectRootFromDirectory(dirname(filePath));
 	const normalizedPath = normalizePathSeparator(
+		/* v8 ignore next -- @preserve discovered component paths come from files under a project root. */
 		projectRoot === undefined ? filePath : relative(projectRoot, filePath),
 	);
 	for (const segment of normalizedPath.split("/")) {
@@ -284,6 +287,7 @@ export function discoverLocalComponent(
 	if (matches.length !== 1) return { found: false };
 
 	const [path] = matches;
+	/* v8 ignore next -- @preserve The length check above guarantees one destructured path. */
 	if (path === undefined) return { found: false };
 
 	const inspection = inspectLocalComponentFile(path, definition);

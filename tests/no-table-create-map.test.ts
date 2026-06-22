@@ -68,6 +68,10 @@ const mapped = new Array<number>(5, 0).map((value) => value);
 			"table.create(entries);",
 			"new Array<number>(entries);",
 			"new Array<number>(a, b, c).map((value) => value);",
+			"const mapped = table.create?.(entries, 0).map((value) => value);",
+			"const mapped = table.make(entries, 0).map((value) => value);",
+			"const mapped = services.table.create(entries, 0).map((value) => value);",
+			"const mapped = new Set<number>(entries).map((value) => value);",
 		],
 	});
 });

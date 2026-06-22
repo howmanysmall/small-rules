@@ -49,9 +49,11 @@ function toStaticExpressionOptions(options: NormalizedOptions): StaticExpression
 
 function getMemoCallbackExpression(node: ESTree.CallExpression): ESTree.Expression | undefined {
 	const callback = getEffectCallback(node);
+	/* v8 ignore next -- @preserve callers reach this helper from useMemo calls with parser callback arguments. */
 	if (callback === undefined) return undefined;
 
 	const { body } = callback;
+	/* v8 ignore next -- @preserve callback functions supplied to useMemo have bodies in parsed source. */
 	if (body === null) return undefined;
 
 	if (body.type !== "BlockStatement") return body;
@@ -81,6 +83,7 @@ function dependenciesAreNonUpdating(dependenciesKind: DependenciesKind, options:
 			);
 		}
 
+		/* v8 ignore next 4 -- @preserve options normalization and schema restrict dependencyMode to known values. */
 		default: {
 			const error = new Error(`Unknown dependency mode: ${String(options.dependencyMode)}`);
 			Error.captureStackTrace(error, dependenciesAreNonUpdating);

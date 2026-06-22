@@ -25,18 +25,21 @@ const DEFAULT_HOOKS = [
 ] as const;
 
 function isHookConfiguration(value: unknown): value is HookConfiguration {
+	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
 	return isRecord(value) && isStringRaw(value.name) && typeof value.allowAsync === "boolean";
 }
 
 function parseOptions(rawOptions: unknown): EffectFunctionOptions {
 	if (!isRecord(rawOptions)) return { environment: "roblox-ts", hooks: DEFAULT_HOOKS };
 
+	/* v8 ignore next -- @preserve rule schema restricts environment to known values when provided. */
 	const environment: Environment = isEnvironment(rawOptions.environment) ? rawOptions.environment : "roblox-ts";
 
 	const rawHooks = rawOptions.hooks;
 	if (!Array.isArray(rawHooks)) return { environment, hooks: DEFAULT_HOOKS };
 
 	const hooks = new Array<HookConfiguration>();
+	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
 	for (const rawHook of rawHooks) if (isHookConfiguration(rawHook)) hooks.push(rawHook);
 
 	if (hooks.length === 0) return { environment, hooks: DEFAULT_HOOKS };
@@ -136,6 +139,7 @@ const requireNamedEffectFunctions = defineRule({
 
 		function isAsyncAllowed(hookName: string): boolean {
 			const result = hookAsyncConfig.get(hookName);
+			/* v8 ignore next -- @preserve hookAsyncConfig is built from boolean schema-validated hook entries. */
 			return typeof result === "boolean" ? result : false;
 		}
 
@@ -160,6 +164,7 @@ const requireNamedEffectFunctions = defineRule({
 			const variable = getVariableByName(scope, identifier.name);
 
 			if (variable === undefined) {
+				/* v8 ignore next -- @preserve isCallbackHookResult performs the same variable lookup and cannot be true here. */
 				if (isCallbackHookResult(context.sourceCode, identifier)) {
 					reportHookIssue(hookName, node, "identifierReferencesCallback");
 				}

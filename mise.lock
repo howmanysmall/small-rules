@@ -56,44 +56,53 @@ checksum = "sha256:6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f
 url = "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"
 
 [[tools.aube]]
-version = "1.21.0"
+version = "1.22.0"
 backend = "aqua:endevco/aube"
 
 [tools.aube."platforms.linux-arm64"]
-checksum = "sha256:15f6f4c402f0d3da0c15c09f9d5237515ec1b903001a15e9bbf523352a8e2328"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-aarch64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:3fd1b1cf26fefc5617e5aaba634b73af0e9aa6b574cb98928b863216f16a217f"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449838739"
 
 [tools.aube."platforms.linux-arm64-musl"]
-checksum = "sha256:07da9245c5ac2ef540ed59f795aeee6986d8a9ed5127d4d9c97cbfd1cc05c308"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:0462f2b0a01042b5288bcc85dd5ee0225d8c2e6e50ccc75272ae901e638706e6"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449818941"
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:f56cb4db3b47e47b51ca8f05677dad7ddef25079e5a81f0ec6afaa0d54201bbe"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:bb8eeed5226d38fdc1f9e1665c071347c07b08a31675371a9062ea742253401a"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449823790"
 
 [tools.aube."platforms.linux-x64-baseline"]
-checksum = "sha256:f56cb4db3b47e47b51ca8f05677dad7ddef25079e5a81f0ec6afaa0d54201bbe"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:bb8eeed5226d38fdc1f9e1665c071347c07b08a31675371a9062ea742253401a"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449823790"
 
 [tools.aube."platforms.linux-x64-musl"]
-checksum = "sha256:6761c69514475a87b375d02a3782ebbab1dfdf181a584ee6b6c91814a882cb37"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:5e954780c6ff60be86f3e6ea76e3ec68e1458fa475ae67c48057b813bf30c5f5"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449822530"
 
 [tools.aube."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:6761c69514475a87b375d02a3782ebbab1dfdf181a584ee6b6c91814a882cb37"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:5e954780c6ff60be86f3e6ea76e3ec68e1458fa475ae67c48057b813bf30c5f5"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449822530"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:dfc28bd63757e4454d09e0f952c8cabfb24a9afa81f1b423ead69eeaf099ea11"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:1ca59b6c9e338dc0bf4df850a2a314bec8fd82a618532c6dfc6878812fa89326"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449850819"
 
 [tools.aube."platforms.windows-x64"]
-checksum = "sha256:14ab972b4e21df08d8954fbe7cff6e2fcf26315b606046e603ff2d68849bf2c8"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:b41850c94db54a470f1e486ea637cf0ebffd87d9b904c144e5c78657ad6101f2"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449830919"
 
 [tools.aube."platforms.windows-x64-baseline"]
-checksum = "sha256:14ab972b4e21df08d8954fbe7cff6e2fcf26315b606046e603ff2d68849bf2c8"
-url = "https://github.com/jdx/aube/releases/download/v1.21.0/aube-v1.21.0-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:b41850c94db54a470f1e486ea637cf0ebffd87d9b904c144e5c78657ad6101f2"
+url = "https://github.com/jdx/aube/releases/download/v1.22.0/aube-v1.22.0-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/449830919"
 
 [[tools.bun]]
 version = "1.3.14"
@@ -291,52 +300,52 @@ checksum = "sha256:6349ab27cd7a9c07e68edc7c2af0859c8a540482e97a5b7306e9e88460a5c
 url = "https://github.com/jdx/hk/releases/download/v1.48.0/hk-x86_64-pc-windows-msvc.zip"
 
 [[tools.node]]
-version = "24.16.0"
+version = "24.17.0"
 backend = "core:node"
 
 [tools.node."platforms.linux-arm64"]
-checksum = "sha256:589f5b6dd4fcfee4dfda73013903c966abaa8abd93dbc9d436544e472b4f0e74"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-linux-arm64.tar.gz"
+checksum = "sha256:faa0d59ba7fe7045c950ed09b190578fb8eee73e4358686d38fcc99ca58c1480"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-linux-arm64.tar.gz"
 
 [tools.node."platforms.linux-arm64-musl"]
-checksum = "sha256:85dde27aa73503b03dadfa0410a800067b4e3f702fb7fcaa3beaf284dfcc69e9"
-url = "https://unofficial-builds.nodejs.org/download/release/v24.16.0/node-v24.16.0-linux-arm64-musl.tar.gz"
+checksum = "sha256:cc54f73a1a4108d9e325eb201d90b25eeab60edc92b2a13240b2877a74c596da"
+url = "https://unofficial-builds.nodejs.org/download/release/v24.17.0/node-v24.17.0-linux-arm64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:2faf6a387e9b62b888e21c54f01249fb27537ffecf1842f29f4c919d0a59a0ff"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-linux-x64.tar.gz"
+checksum = "sha256:e0472427aa791ad80bdc426ff7cc73cdd28ed0f616d1ff9689a23a7f47f1265f"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-baseline"]
-checksum = "sha256:2faf6a387e9b62b888e21c54f01249fb27537ffecf1842f29f4c919d0a59a0ff"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-linux-x64.tar.gz"
+checksum = "sha256:e0472427aa791ad80bdc426ff7cc73cdd28ed0f616d1ff9689a23a7f47f1265f"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-musl"]
-checksum = "sha256:50df5d8d474892d4f7b906167df36f77f5b93908f63dc532dc568219cab65841"
-url = "https://unofficial-builds.nodejs.org/download/release/v24.16.0/node-v24.16.0-linux-x64-musl.tar.gz"
+checksum = "sha256:f884c958c0652f7cd0ea43fdc39dddd1a98456ea9b1adeca85964847e2e39fb0"
+url = "https://unofficial-builds.nodejs.org/download/release/v24.17.0/node-v24.17.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:50df5d8d474892d4f7b906167df36f77f5b93908f63dc532dc568219cab65841"
-url = "https://unofficial-builds.nodejs.org/download/release/v24.16.0/node-v24.16.0-linux-x64-musl.tar.gz"
+checksum = "sha256:f884c958c0652f7cd0ea43fdc39dddd1a98456ea9b1adeca85964847e2e39fb0"
+url = "https://unofficial-builds.nodejs.org/download/release/v24.17.0/node-v24.17.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:39189dab4eeb15706c424af0ac08a3044c9e48f7db12a7d77f6b7aafc7dd5df6"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-darwin-arm64.tar.gz"
+checksum = "sha256:4fc3266a3702eebc39cc37661cf4eeceeade307e242ab64e4d7ce7949197e11f"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-darwin-arm64.tar.gz"
 
 [tools.node."platforms.macos-x64"]
-checksum = "sha256:298b4c7b3cb80765c8703e42b90324a4ece3b6634947b89e769c3c980ab55185"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-darwin-x64.tar.gz"
+checksum = "sha256:80da552fe037290cb130e9dea590f5eeeb7aa450636f0c89ab41415511c1ec27"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-darwin-x64.tar.gz"
 
 [tools.node."platforms.macos-x64-baseline"]
-checksum = "sha256:298b4c7b3cb80765c8703e42b90324a4ece3b6634947b89e769c3c980ab55185"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-darwin-x64.tar.gz"
+checksum = "sha256:80da552fe037290cb130e9dea590f5eeeb7aa450636f0c89ab41415511c1ec27"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-darwin-x64.tar.gz"
 
 [tools.node."platforms.windows-x64"]
-checksum = "sha256:edaca9bd58ec8e92037dac4e877d52f6b8f430b81c18b57e264b4e2fb111cd56"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-win-x64.zip"
+checksum = "sha256:f2aa33b35b75aca5f3f7b85675a6f6423201053e9381911e64961f3bda2528ab"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-win-x64.zip"
 
 [tools.node."platforms.windows-x64-baseline"]
-checksum = "sha256:edaca9bd58ec8e92037dac4e877d52f6b8f430b81c18b57e264b4e2fb111cd56"
-url = "https://nodejs.org/dist/v24.16.0/node-v24.16.0-win-x64.zip"
+checksum = "sha256:f2aa33b35b75aca5f3f7b85675a6f6423201053e9381911e64961f3bda2528ab"
+url = "https://nodejs.org/dist/v24.17.0/node-v24.17.0-win-x64.zip"
 
 [[tools.pkl]]
 version = "0.31.1"
@@ -387,59 +396,52 @@ checksum = "sha256:a8834481667325b44c539dbb758d7365a16389070f343c04b639bbe525ede
 url = "https://github.com/apple/pkl/releases/download/0.31.1/pkl-windows-amd64.exe"
 
 [[tools.rumdl]]
-version = "0.2.16"
+version = "0.2.19"
 backend = "aqua:rvben/rumdl"
 
 [tools.rumdl."platforms.linux-arm64"]
-checksum = "sha256:2cb6b59ac7bad391d6da04e961587784a9d1d41220c5d42878794fe606499e9f"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-aarch64-unknown-linux-musl.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:68a37aa32e4500fdd847b401ac022109b466ae184e0450f2f12db6a97c0e6871"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-aarch64-unknown-linux-musl.tar.gz"
 
 [tools.rumdl."platforms.linux-arm64-musl"]
-checksum = "sha256:2cb6b59ac7bad391d6da04e961587784a9d1d41220c5d42878794fe606499e9f"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-aarch64-unknown-linux-musl.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:68a37aa32e4500fdd847b401ac022109b466ae184e0450f2f12db6a97c0e6871"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-aarch64-unknown-linux-musl.tar.gz"
 
 [tools.rumdl."platforms.linux-x64"]
-checksum = "sha256:1cd2328d17c773387ccbf39068fb4a3689d4a4fa68c75406ba42f66d3a6db0f9"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-unknown-linux-musl.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:477eeca1a5b4b2c8f17886a2acf58d7deaf435b7fb206fc655735cc3eca2ce41"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-unknown-linux-musl.tar.gz"
 
 [tools.rumdl."platforms.linux-x64-baseline"]
-checksum = "sha256:1cd2328d17c773387ccbf39068fb4a3689d4a4fa68c75406ba42f66d3a6db0f9"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:477eeca1a5b4b2c8f17886a2acf58d7deaf435b7fb206fc655735cc3eca2ce41"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-unknown-linux-musl.tar.gz"
 
 [tools.rumdl."platforms.linux-x64-musl"]
-checksum = "sha256:1cd2328d17c773387ccbf39068fb4a3689d4a4fa68c75406ba42f66d3a6db0f9"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-unknown-linux-musl.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:477eeca1a5b4b2c8f17886a2acf58d7deaf435b7fb206fc655735cc3eca2ce41"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-unknown-linux-musl.tar.gz"
 
 [tools.rumdl."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:1cd2328d17c773387ccbf39068fb4a3689d4a4fa68c75406ba42f66d3a6db0f9"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:477eeca1a5b4b2c8f17886a2acf58d7deaf435b7fb206fc655735cc3eca2ce41"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-unknown-linux-musl.tar.gz"
 
 [tools.rumdl."platforms.macos-arm64"]
-checksum = "sha256:ccd18de0460e549beff672b8ef99f6a083e961aebd779138b460b32ae2de1946"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-aarch64-apple-darwin.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:f7c9773725b1c8d848d492d34d307442ba3bba3c0a89c2dbcb39a4b4a642f073"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-aarch64-apple-darwin.tar.gz"
 
 [tools.rumdl."platforms.macos-x64"]
-checksum = "sha256:f1b7cef39fb4880ed8bef3993a9b2dc247722808b8a0309653a4d080520a64da"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-apple-darwin.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:81adf15498e3b6f5dd0251df57eecfe9c807225cd7028e0d03a05aaac7244421"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-apple-darwin.tar.gz"
 
 [tools.rumdl."platforms.macos-x64-baseline"]
-checksum = "sha256:f1b7cef39fb4880ed8bef3993a9b2dc247722808b8a0309653a4d080520a64da"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-apple-darwin.tar.gz"
+checksum = "sha256:81adf15498e3b6f5dd0251df57eecfe9c807225cd7028e0d03a05aaac7244421"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-apple-darwin.tar.gz"
 
 [tools.rumdl."platforms.windows-x64"]
-checksum = "sha256:fc410d18272e1465ffe0ff6f441223d0ae49034e1afc51286f1700d51a818085"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-pc-windows-msvc.zip"
-provenance = "github-attestations"
+checksum = "sha256:219feef94bfa09e0f5a7346b52f13a014e6ce034f0565ce3bf322cebd2675cbd"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-pc-windows-msvc.zip"
 
 [tools.rumdl."platforms.windows-x64-baseline"]
-checksum = "sha256:fc410d18272e1465ffe0ff6f441223d0ae49034e1afc51286f1700d51a818085"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.16/rumdl-v0.2.16-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:219feef94bfa09e0f5a7346b52f13a014e6ce034f0565ce3bf322cebd2675cbd"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.19/rumdl-v0.2.19-x86_64-pc-windows-msvc.zip"
 
 [[tools.shellcheck]]
 version = "0.11.0"

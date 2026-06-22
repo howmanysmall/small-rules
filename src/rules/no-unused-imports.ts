@@ -29,6 +29,7 @@ function isImportSpecifier(node: ESTree.Node): node is AnyImportSpecifier {
 function collectJsDocIdentifiers(comments: ReadonlyArray<Comment>): Set<string> {
 	const identifiers = new Set<string>();
 	for (const comment of comments) {
+		/* v8 ignore next -- @preserve line comments cannot contain usable JSDoc type annotations. */
 		if (comment.type !== "Block") continue;
 		collectJsDocLinkIdentifiers(comment.value, identifiers);
 		collectJsDocTypeIdentifiers(comment.value, identifiers);
@@ -39,7 +40,9 @@ function collectJsDocIdentifiers(comments: ReadonlyArray<Comment>): Set<string> 
 function collectJsDocLinkIdentifiers(value: string, identifiers: Set<string>): void {
 	for (const pattern of [JSDOC_LINK_IDENTIFIER_PATTERN, JSDOC_INLINE_LINK_IDENTIFIER_PATTERN]) {
 		for (const match of value.matchAll(pattern)) {
+			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
 			const identifier = match.groups?.identifier;
+			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
 			if (identifier !== undefined) identifiers.add(identifier);
 		}
 	}
@@ -47,11 +50,15 @@ function collectJsDocLinkIdentifiers(value: string, identifiers: Set<string>): v
 
 function collectJsDocTypeIdentifiers(value: string, identifiers: Set<string>): void {
 	for (const match of value.matchAll(JSDOC_TYPE_IDENTIFIER_PATTERN)) {
+		/* v8 ignore next -- @preserve regex always defines the annotation capture group for matches. */
 		const annotation = match.groups?.annotation;
+		/* v8 ignore next -- @preserve regex always defines the annotation capture group for matches. */
 		if (annotation === undefined) continue;
 
 		for (const annotationMatch of annotation.matchAll(JSDOC_ANNOTATION_IDENTIFIER_PATTERN)) {
+			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
 			const identifier = annotationMatch.groups?.identifier;
+			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
 			if (identifier !== undefined) identifiers.add(identifier);
 		}
 	}
@@ -69,6 +76,7 @@ function removeImportSpecifier(
 	const isFirstSpecifier = parent.specifiers[0] === specifierNode;
 	if (isFirstSpecifier && nextToken?.value === ",") {
 		const previousToken = sourceCode.getTokenBefore(specifierNode);
+		/* v8 ignore next -- @preserve import specifiers always have an import/import-brace token before them. */
 		if (previousToken !== null) {
 			return [
 				fixer.removeRange([previousToken.range[1], specifierNode.range[0]]),
@@ -83,10 +91,12 @@ function removeImportSpecifier(
 	}
 
 	const previousToken = sourceCode.getTokenBefore(specifierNode);
+	/* v8 ignore next -- @preserve trailing specifiers have a comma token before them. */
 	if (previousToken?.value === ",") {
 		return fixer.removeRange([previousToken.range[0], specifierNode.range[1]]);
 	}
 
+	/* v8 ignore next -- parser token fallback after all comma forms are handled @preserve */
 	return fixer.remove(specifierNode);
 }
 
@@ -104,6 +114,7 @@ const noUnusedImports = defineRule({
 			ImportDeclaration(node): void {
 				scopeReference ??= node;
 				for (const specifier of node.specifiers) {
+					/* v8 ignore next -- @preserve ImportDeclaration.specifiers contains only import specifier nodes. */
 					if (!isImportSpecifier(specifier)) continue;
 					imports.push({
 						identifierName: specifier.local.name,

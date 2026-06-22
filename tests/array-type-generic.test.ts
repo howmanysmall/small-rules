@@ -33,6 +33,11 @@ describe("array-type-generic", () => {
 				output: "type E = ReadonlyArray<Array<string>>;",
 			},
 			{
+				code: "type Nested = (readonly number[])[];",
+				errors: [{ messageId: "useGenericArrayType" }],
+				output: "type Nested = Array<ReadonlyArray<number>>;",
+			},
+			{
 				code: "type F = (string | number)[];",
 				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type F = Array<string | number>;",

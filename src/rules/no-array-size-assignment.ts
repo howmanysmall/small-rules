@@ -1,6 +1,8 @@
-import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
+import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
+import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
+import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type SizeCallExpression = ESTree.CallExpression & {
@@ -81,6 +83,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 		case "MemberExpression": {
 			if (node.optional || !isSafeMemberAccess(node.object, false)) return false;
 			if (node.computed) {
+				/* v8 ignore next -- @preserve computed member properties are expressions in parser output. */
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
@@ -98,33 +101,56 @@ function isSafeFixTarget(node: ESTree.Expression): boolean {
 
 function isSizeCall(node: ESTree.Expression): node is SizeCallExpression {
 	if (node.type !== "CallExpression") return false;
+	/* v8 ignore next -- @preserve optional call chains are wrapped before they can be used as assignment indexes. */
 	if (node.optional) return false;
 	if (node.arguments.length > 0) return false;
 	if (node.callee.type !== "MemberExpression") return false;
+	/* v8 ignore next -- @preserve optional member chains are wrapped before they can be used as assignment indexes. */
 	if (node.callee.optional) return false;
 	if (node.callee.computed) return false;
 	if (node.callee.property.type !== "Identifier") return false;
 	return node.callee.property.name === "size";
 }
 
-function getSizeAppendTarget(
+function getAppendTarget(
 	node: ESTree.AssignmentExpression,
 	sourceCode: SourceCode,
+	environment: Environment,
 ): ESTree.MemberExpression | undefined {
 	if (node.operator !== "=" || node.left.type !== "MemberExpression" || !node.left.computed) return undefined;
-	if (!isSizeCall(node.left.property)) return undefined;
-	return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode) ? node.left : undefined;
+
+	if (environment === "roblox-ts" && isSizeCall(node.left.property)) {
+		return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode)
+			? node.left
+			: undefined;
+	}
+
+	if (environment === "standard") {
+		const { property } = node.left;
+		if (
+			property.type === "MemberExpression" &&
+			!property.optional &&
+			!property.computed &&
+			property.property.type === "Identifier" &&
+			property.property.name === "length"
+		) {
+			return areEquivalentTargets(node.left.object, property.object, sourceCode) ? node.left : undefined;
+		}
+	}
+
+	return undefined;
 }
 
 const noArraySizeAssignment = defineRule({
 	create(context): Visitor {
 		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix === true;
+		const allowAutofix = isAllowAutofixOption(options) && options?.allowAutofix === true;
+		const environment = options?.environment === "standard" ? "standard" : "roblox-ts";
 		const { sourceCode } = context;
 
 		return {
 			AssignmentExpression(node): void {
-				const target = getSizeAppendTarget(node, sourceCode);
+				const target = getAppendTarget(node, sourceCode, environment);
 				if (target === undefined) return;
 
 				const expressionStatement = node.parent.type === "ExpressionStatement" ? node.parent : undefined;
@@ -155,11 +181,12 @@ const noArraySizeAssignment = defineRule({
 	meta: {
 		docs: {
 			description:
-				"Disallow array append assignments using array[array.size()] = value and prefer push-based appends.",
+				"Disallow array append assignments using array[array.size()] = value (roblox-ts) or array[array.length] = value (standard) and prefer push-based appends.",
 		},
 		fixable: "code",
 		messages: {
-			usePush: "Do not append with array[array.size()] = value. Use array.push(value) instead.",
+			usePush:
+				"Do not append with array[array.size()] = value or array[array.length] = value. Use array.push(value) instead.",
 		},
 		schema: [
 			{
@@ -168,6 +195,12 @@ const noArraySizeAssignment = defineRule({
 					allowAutofix: {
 						default: false,
 						type: "boolean",
+					},
+					environment: {
+						...ENVIRONMENT_SCHEMA,
+						default: "roblox-ts",
+						description:
+							"Array environment mode: 'roblox-ts' checks array[array.size()]; 'standard' checks array[array.length].",
 					},
 				},
 				type: "object",

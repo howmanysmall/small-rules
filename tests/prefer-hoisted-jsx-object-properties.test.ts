@@ -75,6 +75,22 @@ function View() {
 			},
 			{
 				code: `
+function View() {
+	return <Component options={/* stable */ { enabled: true }} />;
+}
+`,
+				errors: [{ messageId: "hoistableObjectProp" }],
+			},
+			{
+				code: `
+function View() {
+	return <Component config={{ nested: { items: [{ value: 1 }] } }} />;
+}
+`,
+				errors: [{ messageId: "hoistableObjectProp" }],
+			},
+			{
+				code: `
 const ANCHOR = { x: 0.5, y: 0.5 };
 
 function View() {
@@ -125,6 +141,12 @@ function View({ isOpen }: { readonly isOpen: boolean }) {
 					{ messageId: "hoistableObjectProp" },
 					{ messageId: "hoistableObjectProp" },
 				],
+			},
+			{
+				code: `
+const [view] = [<Component options={{ enabled: true }} />];
+`,
+				errors: [{ messageId: "hoistableObjectProp" }],
 			},
 		],
 		valid: [
@@ -214,12 +236,36 @@ const view = <Component name="hello" />;
 			},
 			{
 				code: `
+const view = <Component options />;
+`,
+			},
+			{
+				code: `
+const view = <Component options={} />;
+`,
+			},
+			{
+				code: `
 const view = <Component count={5} />;
 `,
 			},
 			{
 				code: `
 const view = <Component items={[1, 2, 3]} />;
+`,
+			},
+			{
+				code: `
+const ELEMENTS = [<Component options={{ enabled: true }} />];
+`,
+			},
+			{
+				code: `
+const VIEW = (
+	<>
+		<Component options={{ enabled: true }} />
+	</>
+);
 `,
 			},
 		],

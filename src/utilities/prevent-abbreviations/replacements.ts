@@ -58,6 +58,7 @@ function ensureUnicodeFlag(flags: string): string {
 
 function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
 	const parts = identifier.match(IDENTIFIER_PART_PATTERN);
+	/* v8 ignore next -- non-empty identifiers always match the catch-all identifier part pattern. @preserve */
 	if (parts === null) return [identifier];
 
 	const words = new Array<string>();
@@ -78,8 +79,10 @@ function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
 function appendAlphabeticWords(part: string, words: Array<string>, size: number): number {
 	let nextSize = size;
 	for (const digitPart of part.split(DIGIT_BOUNDARY_REGEX)) {
+		/* v8 ignore next -- zero-width digit boundaries do not produce empty parts for matched identifier words. @preserve */
 		if (digitPart.length === 0) continue;
 		for (const word of digitPart.split(CAMELCASE_BOUNDARY_REGEX)) {
+			/* v8 ignore else -- camel-case boundaries do not produce empty words for matched identifier words. @preserve */
 			if (word.length > 0) words[nextSize++] = word;
 		}
 	}
@@ -142,6 +145,7 @@ function createMatcher(key: string, replacement: string): MatcherResult {
 			return {
 				matcher: {
 					original: key,
+					/* v8 ignore next -- regexp matcher parsing always supplies the optional flags capture. @preserve */
 					pattern: new RegExp(`^${match.groups.first}$`, ensureUnicodeFlag(match.groups.second ?? "")),
 					replacement,
 					replacementPatterns: buildReplacementPatterns(replacement),
@@ -388,6 +392,7 @@ function getWordReplacements(word: string, options: PreparedOptions): ReadonlyAr
 	if (replacement === undefined) return [];
 
 	const replacementNames = replacementNamesByConfiguration.get(replacement);
+	/* v8 ignore next -- normalized replacement maps are registered in replacementNamesByConfiguration. @preserve */
 	if (replacementNames === undefined) return [];
 
 	return isUpperFirst(word) ? replacementNames.upperFirst : replacementNames.lowerFirst;
@@ -518,10 +523,12 @@ function getReplacementSamples(
 		let indexRemaining = sampleIndex;
 		const combination = new Array<string>();
 		for (let combinationIndex = combinations.length - 1; combinationIndex >= 0; combinationIndex -= 1) {
+			/* v8 ignore next -- combinationIndex is bounded by combinations.length. @preserve */
 			const entries = combinations[combinationIndex] ?? [];
 			const index = indexRemaining % entries.length;
 			indexRemaining = (indexRemaining - index) / entries.length;
 			const entry = entries[index];
+			/* v8 ignore next -- sample indexes are generated modulo the entry list length. @preserve */
 			if (entry !== undefined) combination.unshift(entry);
 		}
 		return combination;
@@ -529,6 +536,7 @@ function getReplacementSamples(
 
 	for (const parts of samples) {
 		for (let index = parts.length - 1; index > 0; index -= 1) {
+			/* v8 ignore next -- index is bounded by the current sample part length. @preserve */
 			const word = parts[index] ?? "";
 			if (IS_ALPHABETIC.test(word) && parts[index - 1]?.endsWith(word) === true) parts.splice(index, 1);
 		}

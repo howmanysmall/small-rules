@@ -618,6 +618,82 @@ function BadHolderChildren() {
 					},
 				},
 			},
+			// Parenthesized JSX child is still not a ternary child
+			{
+				code: `
+function WrappedChild() {
+    return (
+        <div>
+            {(<span />)}
+        </div>
+    );
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Type-asserted JSX child is still not a ternary child
+			{
+				code: `
+function AssertedChild() {
+    return (
+        <div>
+            {(<span /> as React.ReactNode)}
+        </div>
+    );
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Parenthesized fragment child still needs a key context
+			{
+				code: `
+function WrappedFragmentChild() {
+    return (
+        <div>
+            {(
+                <>
+                    <span key="first" />
+                </>
+            )}
+        </div>
+    );
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Spread arguments before an inline callback still leave the callback JSX needing a key
+			{
+				code: `
+function CallWithSpread(items, render) {
+    render(...items, (item) => <span />);
+}
+`,
+				errors: 1,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 		],
 		valid: [
 			// Top-level return
@@ -882,6 +958,23 @@ function FromList(iterable) {
 					},
 				},
 			},
+			// Callback assigned to an existing binding is not treated as a declared iterator callback
+			{
+				code: `
+let renderEnemy;
+renderEnemy = (enemy) => <billboardgui />;
+
+function EnemyList(enemy) {
+    return renderEnemy(enemy);
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Array.prototype.map.call with keyed element
 			{
 				code: `
@@ -1085,6 +1178,20 @@ function GoodHolderChildren() {
 					},
 				},
 			},
+			// Namespaced JSX attributes are still prop values
+			{
+				code: `
+function GoodNamespacedAttribute() {
+    return <Frame rbxts:child={<Child />}><Content key="content" /></Frame>;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// JSX assigned through a type assertion
 			{
 				code: `
@@ -1102,6 +1209,42 @@ const cached = (<Child /> as React.ReactNode);
 				code: `
 let cached;
 cached = <Child />;
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Parenthesized keyed JSX child
+			{
+				code: `
+function GoodWrappedChild() {
+    return (
+        <div>
+            {(<span key="child" />)}
+        </div>
+    );
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Type-asserted keyed JSX child
+			{
+				code: `
+function GoodAssertedChild() {
+    return (
+        <div>
+            {(<span key="child" /> as React.ReactNode)}
+        </div>
+    );
+}
 `,
 				languageOptions: {
 					parser,
@@ -1129,6 +1272,92 @@ function Good11({ placeholder }) {
 				code: `
 function Good12({ a, b }) {
     return a ? <div /> : b ? <span /> : <p />;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Ternary JSX children are alternative single-child render paths
+			{
+				code: `
+function GoodTernaryChild({ show }) {
+    return <Frame>{show ? <Primary /> : <Fallback />}</Frame>;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Ternary JSX children are also allowed inside shorthand fragments
+			{
+				code: `
+function GoodTernaryChildInFragment({ show }) {
+    return <>{show ? <Primary /> : <Fallback />}</>;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Type-asserted logical JSX children still need keys when rendered
+			{
+				code: `
+function GoodAssertedLogicalChild({ show }) {
+    return (
+        <Frame>
+            {(show && <Primary key="primary" />) as React.ReactNode}
+        </Frame>
+    );
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Logical JSX children may wrap the rendered element before the logical parent
+			{
+				code: `
+function GoodWrappedLogicalOperand({ show }) {
+    return (
+        <Frame>
+            {show && (<Primary key="primary" /> as React.ReactNode)}
+        </Frame>
+    );
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			// Logical fragment children are allowed inside shorthand fragments too
+			{
+				code: `
+function GoodLogicalFragmentInFragment({ show }) {
+    return (
+        <>
+            {show && (
+                <>
+                    <span key="first" />
+                </>
+            )}
+        </>
+    );
 }
 `,
 				languageOptions: {

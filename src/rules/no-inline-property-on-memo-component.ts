@@ -49,6 +49,7 @@ const noInlinePropertyOnMemoComponent = defineRule({
 				}
 
 				const openingElement = node.parent;
+				/* v8 ignore next -- JSXAttribute visitors are reached with JSXOpeningElement parents. @preserve */
 				if (!isJsxOpeningExpression(openingElement)) return;
 
 				const componentName = getOpeningElementName(openingElement);

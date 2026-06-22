@@ -71,6 +71,22 @@ class MyClass {
 `,
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 			},
+			// Computed method names fall back to an unknown method name in diagnostics
+			{
+				code: `
+class MyClass {
+    ["notifyChanges"](value: number): void {
+        console.log(value);
+    }
+}
+`,
+				errors: [
+					{
+						data: { methodName: "unknown" },
+						messageId: "noInstanceMethodWithoutThis",
+					},
+				],
+			},
 			// Method calling utility function but no this
 			{
 				code: `

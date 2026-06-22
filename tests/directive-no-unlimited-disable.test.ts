@@ -22,6 +22,9 @@ describe("directive-no-unlimited-disable", () => {
 		],
 		valid: [
 			{
+				code: "// regular comment\nconst x = 1;",
+			},
+			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
 			},
 			{

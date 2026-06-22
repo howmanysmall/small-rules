@@ -19,7 +19,9 @@ function getKeypointValue(node: ESTree.Expression, keypointName: string, time: n
 	if (node.arguments.length !== 2) return undefined;
 
 	const [timeArgument, valueArgument] = node.arguments;
+	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (timeArgument === undefined || timeArgument.type === "SpreadElement") return undefined;
+	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (valueArgument === undefined || valueArgument.type === "SpreadElement") return undefined;
 	return isNumericLiteralValue(timeArgument, time) ? valueArgument : undefined;
 }
@@ -37,7 +39,9 @@ function getDirectArgumentReplacement(
 	if (node.arguments.length !== 2) return undefined;
 
 	const [firstArgument, secondArgument] = node.arguments;
+	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (firstArgument === undefined || firstArgument.type === "SpreadElement") return undefined;
+	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (secondArgument === undefined || secondArgument.type === "SpreadElement") return undefined;
 
 	const firstText = context.sourceCode.getText(firstArgument);
@@ -63,6 +67,7 @@ function getKeypointArrayReplacement(
 	if (onlyArgument.type !== "ArrayExpression" || onlyArgument.elements.length !== 2) return undefined;
 
 	const [firstElement, secondElement] = onlyArgument.elements;
+	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (firstElement === undefined || secondElement === undefined) return undefined;
 	if (firstElement === null || secondElement === null) return undefined;
 	if (firstElement.type === "SpreadElement" || secondElement.type === "SpreadElement") return undefined;

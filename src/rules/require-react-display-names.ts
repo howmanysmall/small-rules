@@ -58,6 +58,7 @@ function isNodeInExport(node: ESTree.Node): boolean {
 }
 
 function isVariableDeclarationExported(node: ESTree.VariableDeclarator): boolean {
+	/* v8 ignore next -- @preserve VariableDeclarator nodes always have VariableDeclaration parents in parser output. */
 	if (node.parent.type !== "VariableDeclaration") return false;
 	return (
 		node.parent.parent.type === "ExportNamedDeclaration" || node.parent.parent.type === "ExportDefaultDeclaration"
@@ -66,11 +67,13 @@ function isVariableDeclarationExported(node: ESTree.VariableDeclarator): boolean
 
 function hasExportReference(sourceCode: SourceCode, node: ESTree.VariableDeclarator, variableName: string): boolean {
 	for (const variable of sourceCode.getDeclaredVariables(node)) {
+		/* v8 ignore next -- @preserve declared variables for an identifier declarator match the declarator name. */
 		if (variable.name !== variableName) continue;
 		for (const { identifier } of variable.references) if (isNodeInExport(identifier)) return true;
 		return false;
 	}
 
+	/* v8 ignore next -- @preserve identifier variable declarators always declare one variable. */
 	return false;
 }
 
@@ -109,6 +112,7 @@ const requireReactDisplayNames = defineRule({
 		return {
 			'AssignmentExpression[left.type="MemberExpression"]'(node: ESTree.AssignmentExpression): void {
 				const { left } = node;
+				/* v8 ignore next -- @preserve visitor selector restricts left to MemberExpression. */
 				if (left.type !== "MemberExpression") return;
 				if (left.property.type !== "Identifier") return;
 				if (left.property.name !== "displayName") return;

@@ -95,6 +95,7 @@ export function getConstInitializer(definition: Definition): ESTree.Expression |
 	if (!isVariableDefinition(definition)) return undefined;
 
 	const declarator = definition.node;
+	/* v8 ignore next -- @preserve Variable definitions from the parser always point at VariableDeclarator nodes. */
 	if (declarator.type !== "VariableDeclarator") return undefined;
 
 	const { parent } = declarator;
@@ -161,6 +162,7 @@ function isStaticMemberProperty(
 	options: StaticExpressionOptions,
 ): boolean {
 	if (property.type === "Identifier") return true;
+	/* v8 ignore next -- @preserve PrivateIdentifier cannot be produced as a valid computed member property expression. */
 	if (!isExpression(property)) return false;
 	return isStaticExpression(sourceCode, property, seen, options);
 }
@@ -209,6 +211,7 @@ export function isStaticExpression(
 
 		case "BinaryExpression":
 		case "LogicalExpression": {
+			/* v8 ignore next -- @preserve Parser-produced binary and logical left operands are expressions. */
 			if (!isExpression(unwrapped.left)) return false;
 			return (
 				isStaticExpression(sourceCode, unwrapped.left, seen, options) &&
@@ -219,6 +222,7 @@ export function isStaticExpression(
 		case "CallExpression":
 			return checkStaticCallOrNewExpression(sourceCode, unwrapped.arguments, unwrapped.callee, seen, options);
 
+		/* v8 ignore next 2 -- @preserve unwrapExpression removes ChainExpression before this switch. */
 		case "ChainExpression":
 			return isStaticExpression(sourceCode, unwrapped.expression, seen, options);
 

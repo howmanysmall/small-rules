@@ -116,6 +116,49 @@ export { ThemeContext };
 				errors: [{ messageId: "missingContextDisplayName" }],
 			},
 
+			// Missing displayName on memo - export via specifier
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+function Comp() {
+    return <div />;
+}
+
+const MemoComp = memo(Comp);
+export { MemoComp };
+`,
+				errors: [{ messageId: "missingMemoDisplayName" }],
+			},
+
+			// Missing displayName when another property is assigned
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+function Comp() {
+    return <div />;
+}
+
+const MemoComp = memo(Comp);
+MemoComp.title = "MemoComp";
+export default MemoComp;
+`,
+				errors: [{ messageId: "missingMemoDisplayName" }],
+			},
+
+			// Missing displayName when using computed property access
+			{
+				code: `
+import React from "@rbxts/react";
+
+const Ctx = React.createContext(0);
+Ctx["displayName"] = "Ctx";
+export default Ctx;
+`,
+				errors: [{ messageId: "missingContextDisplayName" }],
+			},
+
 			// Standard React environment - memo
 			{
 				code: `
@@ -317,6 +360,11 @@ export default MyComponent;
 `,
 			},
 
+			// Anonymous class default export is ignored
+			{
+				code: "export default class {}",
+			},
+
 			// Class component export
 			{
 				code: `
@@ -435,6 +483,24 @@ export default node;
 `,
 			},
 
+			// Computed default createContext call is ignored
+			{
+				code: `
+import React from "@rbxts/react";
+
+export default React["createContext"](0);
+`,
+			},
+
+			// Direct createContext export with unsupported namespace object is ignored
+			{
+				code: `
+import React from "@rbxts/react";
+
+export default getReact().createContext<number>(0);
+`,
+			},
+
 			// Computed property access on React (not a MemberExpression with Identifier property)
 			{
 				code: `
@@ -483,6 +549,38 @@ import React from "@rbxts/react";
 const key = "createContext";
 const Ctx = React[key](undefined);
 export default Ctx;
+`,
+			},
+
+			// Display name assignment on an untracked identifier is ignored
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+function Comp() {
+    return <div />;
+}
+
+const MemoComp = memo(Comp);
+Other.displayName = "Other";
+MemoComp.displayName = "MemoComp";
+export default MemoComp;
+`,
+			},
+
+			// Display name assignment on a member expression object is ignored
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+function Comp() {
+    return <div />;
+}
+
+const MemoComp = memo(Comp);
+Namespace.MemoComp.displayName = "MemoComp";
+MemoComp.displayName = "MemoComp";
+export default MemoComp;
 `,
 			},
 		],

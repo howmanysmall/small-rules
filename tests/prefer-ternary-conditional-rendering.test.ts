@@ -147,6 +147,11 @@ function Component({ flag }) {
 				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
 			},
+			{
+				code: "class Base { value; } class Component extends Base { render() { return <>{super.value === target && <A />}{super.value !== target && <B />}</>; } }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+				output: null,
+			},
 		],
 		valid: [
 			"function Component({ flag }) { return <>{flag ? <A /> : <B />}</>; }",
@@ -161,9 +166,14 @@ function Component({ flag }) {
 			"function Component({ flag }) { return <>{flag && <A />}{/* comment */}{!flag && <B />}</>; }",
 			"function Component({ isReady, value, other }) { return <>{isReady(value) && <A />}{!isReady(value, other) && <B />}</>; }",
 			"function Component({ isReady }) { return <>{isReady?.() && <A />}{!isReady() && <B />}</>; }",
+			"function Component({ isReady }) { return <>{isReady?.() === true && <A />}{isReady() !== true && <B />}</>; }",
+			"function Component({ isReady, isDone }) { return <>{isReady() === true && <A />}{isDone() !== true && <B />}</>; }",
 			"function Component({ isReady, left, right }) { return <>{isReady(...left) && <A />}{!isReady(...right) && <B />}</>; }",
+			"function Component({ isReady, items }) { return <>{isReady(...items) && <A />}{!isReady(items) && <B />}</>; }",
 			"function Component({ state, mode }) { return <>{state[mode] === 1 && <A />}{state.other !== 1 && <B />}</>; }",
 			"function Component({ first, second }) { return <>{first.value === 1 && <A />}{second.value !== 1 && <B />}</>; }",
+			"function Component({ service, target }) { return <>{service?.state === target && <A />}{service.state !== target && <B />}</>; }",
+			'function Component({ state }) { return <>{state.value === 1 && <A />}{state["value"] !== 1 && <B />}</>; }',
 			'function Component({ mode }) { return <>{mode === "x" && <A />}{mode === "x" && <B />}</>; }',
 		],
 	});

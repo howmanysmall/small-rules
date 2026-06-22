@@ -198,6 +198,16 @@ joined;
 />
 `,
 			},
+			{
+				code: "function store() {} store.map(v => v)",
+				errors: [{ messageId: "identityArrayMap" }],
+				output: "function store() {} store",
+			},
+			{
+				code: "const store = 1; store.map(v => v)",
+				errors: [{ messageId: "identityArrayMap" }],
+				output: "const store = 1; store",
+			},
 		],
 		valid: [
 			"binding.map(v => v + 1)",
@@ -251,6 +261,8 @@ joined;
 			"array.map(v => v, thisArg)",
 
 			"array.map(...callbacks)",
+			"items.map(identity)",
+			"items.map((value = 0) => value + 1)",
 		],
 	});
 });

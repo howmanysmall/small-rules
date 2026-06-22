@@ -39,6 +39,14 @@ const Component = ({ items = [] }) => {
 `,
 				errors: [{ messageId: "emptyArrayDefault" }],
 			},
+			{
+				code: `
+function Component({ items = [], ...props }) {
+    return props;
+}
+`,
+				errors: [{ messageId: "emptyArrayDefault" }],
+			},
 		],
 		valid: [
 			{
@@ -69,6 +77,32 @@ const EMPTY_OPTIONS = {};
 
 const Component = ({ items = EMPTY_ITEMS } = EMPTY_OPTIONS) => {
     return items;
+};
+`,
+			},
+			{
+				code: `
+function Component({ options }) {
+    return options;
+}
+`,
+			},
+			{
+				code: `
+function Component(props) {
+    return props;
+}
+`,
+			},
+			{
+				code: `
+const Component = notAComponentFactory();
+`,
+			},
+			{
+				code: `
+const Component = function ({ options = { enabled: true } }) {
+    return options;
 };
 `,
 			},

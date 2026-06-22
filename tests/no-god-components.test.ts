@@ -330,6 +330,19 @@ function Small({ a, b }) {
 					},
 				},
 			},
+			{
+				code: `
+function PlainProps(props) {
+    return <div>{props.label}</div>;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
 			// Export default HOC with named function expression (covers getComponentNameFromCallParent export default case)
 			{
 				code: `
@@ -366,6 +379,30 @@ function Wrapper() {
 function DefaultProps({ a, b } = {}) {
     return <div>{a}{b}</div>;
 }
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			{
+				code: `
+function RestProps({ a, ...rest }) {
+    return <div>{a}{rest.label}</div>;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			{
+				code: `
+declare function DeclaredComponent(): JSX.Element;
 `,
 				languageOptions: {
 					parser,
@@ -463,6 +500,38 @@ function Ignored() {
 function helper() {
     const value = null;
     return value;
+}
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			{
+				code: `
+const helpers = {
+    helper: function () {
+        const value = null;
+        return value;
+    },
+};
+`,
+				languageOptions: {
+					parser,
+					parserOptions: {
+						ecmaFeatures: { jsx: true },
+					},
+				},
+			},
+			{
+				code: `
+class View {
+    helper() {
+        const value = null;
+        return value;
+    }
 }
 `,
 				languageOptions: {

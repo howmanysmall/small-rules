@@ -334,6 +334,34 @@ import { handleEffect } from './effects';
 useEffect(handleEffect, []);
 `,
 			},
+			// Unresolved function reference (can't resolve, assume valid)
+			{
+				code: `
+useEffect(handleEffect, []);
+`,
+			},
+			// Declared variable without function initializer
+			{
+				code: `
+let handleEffect;
+useEffect(handleEffect, []);
+`,
+			},
+			// Non-callback call result referenced via identifier
+			{
+				code: `
+const handleEffect = createEffect();
+useEffect(handleEffect, []);
+`,
+			},
+			// Effect hook without a callback argument
+			{
+				code: "useEffect();",
+			},
+			// Non-function effect callback argument
+			{
+				code: "useEffect(123, []);",
+			},
 			// Async arrow via identifier with per-hook allowAsync enabled
 			{
 				code: `
@@ -456,6 +484,16 @@ useCustomHook(() => {
 				},
 			],
 			valid: [
+				// Empty hook option entries fall back to the default hooks
+				{
+					code: `
+function handleEffect() {
+    console.log("effect");
+}
+useEffect(handleEffect, []);
+`,
+					options: [{ hooks: [] }],
+				},
 				// Custom hook with named function
 				{
 					code: `

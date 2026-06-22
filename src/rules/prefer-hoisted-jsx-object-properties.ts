@@ -54,7 +54,9 @@ function isModuleConstDeclaration(
 	parent: ESTree.VariableDeclarator,
 	current: WalkableParent,
 ): boolean {
+	/* v8 ignore next -- @preserve non-identifier module bindings cannot be referenced as JSX constants. */
 	if (parent.id.type !== "Identifier") return false;
+	/* v8 ignore next -- @preserve walkable JSX parents are followed only through initializer positions. */
 	if (parent.init !== current) return false;
 
 	const scope = context.sourceCode.getScope(node);
@@ -72,6 +74,7 @@ function reportHoistableObject(context: Context, objectExpression: ESTree.Object
 }
 
 function reportHoistableObjectProperties(context: Context, objectExpression: ESTree.ObjectExpression): void {
+	/* v8 ignore next -- @preserve computed keys are explicitly treated as dynamic object props. */
 	if (objectExpression.properties.some((property) => property.type === "Property" && property.computed)) return;
 
 	const seen = new Set<ESTree.Node>();
@@ -81,6 +84,7 @@ function reportHoistableObjectProperties(context: Context, objectExpression: EST
 	}
 
 	for (const property of objectExpression.properties) {
+		/* v8 ignore next -- @preserve spread props are dynamic and already make the containing object non-static. */
 		if (property.type !== "Property") continue;
 		const value = unwrapExpression(property.value);
 		if (value.type === "ObjectExpression") reportHoistableObjectProperties(context, value);
@@ -98,7 +102,9 @@ const preferHoistedJsxObjectProperties = defineRule({
 				if (unwrapped.type !== "ObjectExpression") return;
 
 				const openingElement = node.parent;
+				/* v8 ignore start -- @preserve JSXAttribute parents are JSXOpeningElement nodes in parser output. */
 				if (openingElement.type !== "JSXOpeningElement") return;
+				/* v8 ignore stop -- @preserve */
 
 				const jsxElement = openingElement.parent;
 				if (jsxElement.type === "JSXElement" && isJsxElementAssignedToModuleConst(context, jsxElement)) {

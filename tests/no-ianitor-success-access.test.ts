@@ -103,6 +103,16 @@ result.success;
 `,
 				errors: [{ messageId: "preferCreateGuard" }],
 			},
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+const { success: isValid } = validator("a");
+return isValid;
+`,
+				errors: [{ messageId: "preferCreateGuard" }],
+			},
 		],
 		valid: [
 			// Ianitor check stored, no .success access
@@ -115,6 +125,24 @@ const validator = Ianitor.keyOf(ids);
 			`
 import { Ianitor } from "@packages/ianitor";
 const isString: Ianitor.Check<string> = Ianitor.string();
+`,
+			`
+import { Ianitor } from "@packages/ianitor";
+const validator = Ianitor.keyOf;
+validator("a").success;
+`,
+			`
+function validator(value: unknown) {
+	return { success: true };
+}
+validator("a").success;
+`,
+			`
+const result = undefined;
+result.success;
+`,
+			`
+const result;
 `,
 			// Non-Ianitor .success
 			`
@@ -175,6 +203,34 @@ const validator = Ianitor.keyOf(ids);
 const { success, error } = validator("a");
 if (!success) throw new Error(error);
 `,
+			`
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+const { error } = validator("a");
+return error;
+`,
+			`
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+const result = validator("a");
+const { success } = result;
+`,
+			`
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+const { ...result } = validator("a");
+return result;
+`,
+			`
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+const result = validator("a");
+result["success"];
+`,
 			// Stored result, .success checked, then variable returned (full result forwarded)
 			`
 import { Ianitor } from "@packages/ianitor";
@@ -199,6 +255,12 @@ function validate(v: unknown) {
 	return result.value;
 }
 function logError(r: unknown) { console.log(r); }
+`,
+			`
+import { Ianitor } from "@packages/ianitor";
+function validate(input: unknown) {
+	return Ianitor["string"]()(input).success;
+}
 `,
 		],
 	});

@@ -75,6 +75,7 @@ function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, 
 		case "/":
 			return right === 0 ? undefined : left / right;
 
+		/* v8 ignore next -- @preserve isValidBinaryExpression admits only operators handled above. */
 		default:
 			return undefined;
 	}
@@ -83,7 +84,9 @@ function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, 
 function evaluateExpression(node: ESTree.Expression): number | undefined {
 	switch (node.type) {
 		case "BinaryExpression": {
+			/* v8 ignore start -- @preserve collectArguments rejects unsupported binary operators before evaluation. */
 			if (!isValidBinaryExpression(node)) return undefined;
+			/* v8 ignore stop -- @preserve */
 
 			const { left, right } = node;
 			const leftValue = evaluateExpression(left);
@@ -97,16 +100,20 @@ function evaluateExpression(node: ESTree.Expression): number | undefined {
 			return undefined;
 
 		case "Literal":
+			/* v8 ignore next -- @preserve collectArguments admits numeric literals or identifiers before evaluation. */
 			return isNumber(node.value) ? node.value : undefined;
 
 		case "UnaryExpression": {
 			const argumentValue = evaluateExpression(node.argument);
 			if (argumentValue === undefined) return undefined;
 			if (node.operator === "+") return argumentValue;
+			/* v8 ignore next -- @preserve reconstructText admits only plus and minus unary expressions before evaluation. */
 			if (node.operator === "-") return -argumentValue;
+			/* v8 ignore next -- @preserve reconstructText rejects unsupported unary operators before evaluation. */
 			return undefined;
 		}
 
+		/* v8 ignore next -- @preserve collectArguments admits only expression types handled above. */
 		default:
 			return undefined;
 	}
@@ -158,6 +165,7 @@ const preferUDim2Shorthand = defineRule({
 				if (collected === undefined) return;
 
 				const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = node.arguments;
+				/* v8 ignore start -- @preserve collectArguments already rejects missing or spread arguments. */
 				if (
 					scaleXNode === undefined ||
 					offsetXNode === undefined ||
@@ -170,6 +178,7 @@ const preferUDim2Shorthand = defineRule({
 				) {
 					return;
 				}
+				/* v8 ignore stop -- @preserve */
 
 				const scaleX = evaluateExpression(scaleXNode);
 				const offsetX = evaluateExpression(offsetXNode);

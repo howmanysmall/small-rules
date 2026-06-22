@@ -26,6 +26,14 @@ describe("directive-disable-enable-pair", () => {
 		],
 		valid: [
 			{
+				code: "",
+				options: [{ allowWholeFile: true }],
+			},
+			{
+				code: "/* oxlint-disable no-console */\nconst x = 1;",
+				options: [{ allowWholeFile: true }],
+			},
+			{
 				code: "// oxlint-disable no-console\nconst x = 1;",
 				options: [{ allowWholeFile: true }],
 			},

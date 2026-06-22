@@ -128,6 +128,21 @@ describe("no-useless-constants", () => {
 					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) satisfies Color3 };",
 				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB<number>(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: Color3.fromRGB<number>(255, 120, 80) };",
+				},
+				{
+					code: "const TITLE_COLOR = Color3?.fromRGB(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: Color3?.fromRGB(255, 120, 80) };",
+				},
+				{
+					code: "const TITLE_COLOR = <Color3>Color3.fromRGB(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const STYLE = { color: <Color3>Color3.fromRGB(255, 120, 80) };",
+				},
 			],
 			valid: [],
 		});
@@ -147,6 +162,16 @@ describe("no-useless-constants", () => {
 						code: "const TITLE_SIZE = +UDim2.fromOffset(1, 2).X.Offset;\nconst STYLE = { size: TITLE_SIZE };",
 						errors: [{ messageId: "uselessConstant" }],
 						output: "const STYLE = { size: +UDim2.fromOffset(1, 2).X.Offset };",
+					},
+					{
+						code: 'const TITLE_ANCHOR = Vector2["yAxis"];\nconst STYLE = { anchor: TITLE_ANCHOR };',
+						errors: [{ messageId: "uselessConstant" }],
+						output: 'const STYLE = { anchor: Vector2["yAxis"] };',
+					},
+					{
+						code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) ?? Color3.fromRGB(90, 90, 90);\nconst STYLE = { color: TITLE_COLOR };",
+						errors: [{ messageId: "uselessConstant" }],
+						output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) ?? Color3.fromRGB(90, 90, 90) };",
 					},
 				],
 				valid: [],
@@ -170,6 +195,11 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80), Color3.fromRGB(90, 90, 90));\nconst STYLE = { color: TITLE_COLOR };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
+				{
+					code: "const TITLE_COLOR = new ColorSequence([, ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 90, 90))]);\nconst STYLE = { color: TITLE_COLOR };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: JSON.parse("null"),
 				},
@@ -209,6 +239,16 @@ describe("no-useless-constants", () => {
 					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: JSON.parse("null"),
 				},
+				{
+					code: "const TWEEN_INFO = new TweenInfo({ ...defaults });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
+				{
+					code: "const TWEEN_INFO = new TweenInfo(...defaults);\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
 			],
 			valid: [],
 		});
@@ -225,6 +265,31 @@ describe("no-useless-constants", () => {
 					code: "const TITLE_OFFSET = 225;\n// keep with offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: JSON.parse("null"),
+				},
+				{
+					code: "const TITLE_OFFSET = /* keep */ 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
+				{
+					code: "const TITLE_OFFSET = 225; // keep offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					errors: [{ messageId: "uselessConstantNoFix" }],
+					output: JSON.parse("null"),
+				},
+				{
+					code: "// file note\n\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "// file note\n\nconst TEXT_NATIVE = { Offset: 225 };",
+				},
+				{
+					code: "const TITLE_OFFSET = 225;\n\n// detached note\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "// detached note\nconst TEXT_NATIVE = { Offset: 225 };",
+				},
+				{
+					code: "const TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };\n\n// file note",
+					errors: [{ messageId: "uselessConstant" }],
+					output: "const TEXT_NATIVE = { Offset: 225 };\n\n// file note",
 				},
 			],
 			valid: [],
@@ -247,7 +312,11 @@ describe("no-useless-constants", () => {
 		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips local ALL_CAPS constant referenced outside const initializer", rule, {
 			invalid: [],
-			valid: ["function render() {\n  const OFFSET_X = 42;\n  console.log(OFFSET_X);\n}"],
+			valid: [
+				"function render(OFFSET_X) {\n  const CONFIG = { x: OFFSET_X };\n  return CONFIG;\n}",
+				"function render() {\n  const OFFSET_X = 42;\n  console.log(OFFSET_X);\n}",
+				"const TITLE_OFFSET = 225;\nlet textNative = { Offset: TITLE_OFFSET };",
+			],
 		});
 	});
 

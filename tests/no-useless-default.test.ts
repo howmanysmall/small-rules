@@ -144,6 +144,7 @@ describe("no-useless-default comparison helpers", () => {
 				{ code: "check(Vector3.one);", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Vector3(0, 0, 1));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new Vector3(0, value, 0));", errors: [{ messageId: "mismatch" }] },
+				{ code: "check(new Vector2());", errors: [{ messageId: "mismatch" }] },
 			],
 			valid: [],
 		});
@@ -285,6 +286,16 @@ describe("no-useless-default JSX detection", () => {
 					},
 				],
 				output: "const view = <frame Size={size} />;",
+			},
+			{
+				code: "const view = <frame BackgroundTransparency={0} enabled={true} />;",
+				errors: [
+					{
+						data: { className: "Frame", propertyName: "BackgroundTransparency" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: "const view = <frame enabled={true} />;",
 			},
 			{
 				code: "const view = <frame {...spreadProps} BackgroundTransparency={0} />;",
@@ -477,6 +488,16 @@ describe("no-useless-default imperative detection", () => {
 				],
 				output: 'const c = new Instance("UISizeConstraint"); [alias] = [c];',
 			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); c; c.MinSize = new Vector2();',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+				output: 'const c = new Instance("UISizeConstraint"); c;',
+			},
 		],
 		valid: [
 			{ code: 'const frame = new Instance("Frame"); frame.Name = "Container";' },
@@ -488,10 +509,17 @@ describe("no-useless-default imperative detection", () => {
 			{ code: 'const c = new Instance("UISizeConstraint"); register([c]); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register(...args, c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register(other); c.MinSize = new Vector2();' },
+			{ code: 'const c = new Instance("UISizeConstraint"); register(factory(c)); c.MinSize = new Vector2();' },
+			{
+				code: 'const a = new Instance("UISizeConstraint"); const b = new Instance("UISizeConstraint"); register(b); b.MinSize = new Vector2();',
+			},
 			{ code: 'const c = new Instance("UISizeConstraint"); cache.values.push(c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); let alias; alias = c; c.MinSize = new Vector2();' },
 			{
 				code: 'const c = new Instance("UISizeConstraint"); let alias; alias = other; c.MinSize = new Vector2();',
+			},
+			{
+				code: 'const a = new Instance("UISizeConstraint"); const b = new Instance("UISizeConstraint"); let alias; alias = b; b.MinSize = new Vector2();',
 			},
 			{
 				code: 'function createConstraint() { const c = new Instance("UISizeConstraint"); return c; c.MinSize = new Vector2(); }',
@@ -499,7 +527,16 @@ describe("no-useless-default imperative detection", () => {
 			{
 				code: 'function createConstraint() { const c = new Instance("UISizeConstraint"); return; }',
 			},
+			{
+				code: 'function createConstraint() { const c = new Instance("UISizeConstraint"); return other; c.MinSize = new Vector2(); }',
+			},
+			{
+				code: 'function createConstraint() { const a = new Instance("UISizeConstraint"); const b = new Instance("UISizeConstraint"); return b; b.MinSize = new Vector2(); }',
+			},
 			{ code: 'const part = new Instance("Part"); part.Size = new Vector3(4, 5, 6);' },
+			{ code: 'const mystery = new Instance("UnknownClass"); mystery.Enabled = true;' },
+			{ code: "const { c } = createConstraint(); c.MinSize = new Vector2();" },
+			{ code: "const c = null; c.MinSize = new Vector2();" },
 			{
 				code: 'const className = "UISizeConstraint"; const c = new Instance(className); c.MinSize = new Vector2();',
 			},
