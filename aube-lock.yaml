@@ -79,7 +79,7 @@ importers:
         specifier: 8.61.1
         version: 8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@5.9.3)
       '@typescript/native-preview':
-        specifier: latest
+        specifier: 7.0.0-dev.20260620.1
         version: 7.0.0-dev.20260620.1
       '@vitest/coverage-v8':
         specifier: 4.1.9
