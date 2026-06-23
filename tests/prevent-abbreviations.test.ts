@@ -788,6 +788,19 @@ describe("prevent-abbreviations", () => {
 			expect(getNameReplacements("kept", options)).toStrictEqual({ total: 0 });
 			expect(getNameReplacements("testName", options)).toStrictEqual({ total: 0 });
 		});
+
+		it("normalizes ignore patterns with RegExp instances", () => {
+			expect.assertions(4);
+
+			const options = prepareOptions({
+				ignore: [/^test/u, "regexString"],
+			});
+
+			// RegExp instances pass through directly; strings get converted
+			for (const pattern of options.ignore) {
+				expect(pattern instanceof RegExp).toBe(true);
+			}
+		});
 	});
 
 	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape

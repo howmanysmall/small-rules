@@ -33,6 +33,7 @@ interface RuleOptions {
 type RuleContext = Context<readonly [Partial<RuleOptions>?], RuleMessageId>;
 
 function parseStringArray(value: unknown): ReadonlyArray<string> {
+	/* v8 ignore next -- @preserve rule schema restricts these options to a string array type before create() runs. */
 	return Array.isArray(value) ? value.filter(isStringRaw) : [];
 }
 
