@@ -209,6 +209,10 @@
 		},
 	},
 	"mcp": {
+		"astro-docs": {
+			"type": "remote",
+			"url": "https://mcp.docs.astro.build/mcp",
+		},
 		"chrome-devtools": {
 			"command": ["bash", "./scripts/get-chrome-path.sh", "--serve"],
 			"enabled": true,
