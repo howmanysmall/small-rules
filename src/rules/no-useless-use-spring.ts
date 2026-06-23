@@ -89,6 +89,7 @@ function isSpringHookCall({ callee }: ESTree.CallExpression, options: Normalized
 
 	if (callee.type === "MemberExpression" && !callee.computed) {
 		const { property } = callee;
+		/* v8 ignore next -- non-computed member calls have identifier properties in supported parser output. @preserve */
 		if (property.type === "Identifier") return options.springHooks.has(property.name);
 	}
 

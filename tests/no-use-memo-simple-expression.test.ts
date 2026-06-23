@@ -165,6 +165,15 @@ const value = useMemo(() => {
 			},
 			{
 				code: `
+import { useMemo } from "react";
+
+const value = useMemo(() => {
+	return;
+}, []);
+`,
+			},
+			{
+				code: `
 import React from "react";
 
 const value = React.useMemo(() => 1, []);

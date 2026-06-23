@@ -78,7 +78,7 @@ new NumberSequence([
     new NumberSequenceKeypoint(0, 10, 0.2),
     new NumberSequenceKeypoint(1, 90, 0.8),
 ]);
-`,
+			`,
 
 			// Already optimized constructors
 			"new ColorSequence(Color3.fromRGB(100, 200, 255));",
@@ -89,6 +89,20 @@ new NumberSequence([
 			// Different two-argument constructors should be untouched
 			"new ColorSequence(new Color3(1, 0, 0), new Color3(0, 1, 0));",
 			"new NumberSequence(10, 20);",
+			"new ColorSequence(...parts);",
+			"new ColorSequence(value, ...moreParts);",
+			"new ColorSequence(...parts, ...moreParts);",
+			"new Roblox.ColorSequence(value, value);",
+			"new NumberSequence([new NumberSequenceKeypoint(0, 1), new NumberSequenceKeypoint(1, 2), new NumberSequenceKeypoint(2, 3)]);",
+			"new NumberSequence([0, new NumberSequenceKeypoint(1, 2)]);",
+			"new NumberSequence([new NumberSequenceKeypoint(...timeAndValue), new NumberSequenceKeypoint(1, 2)]);",
+			"new NumberSequence([new NumberSequenceKeypoint(0, ...values), new NumberSequenceKeypoint(1, 2)]);",
+			"new NumberSequence([, new NumberSequenceKeypoint(1, 2)]);",
+			"new NumberSequence([new NumberSequenceKeypoint(0, 1),]);",
+			"new NumberSequence([new NumberSequenceKeypoint(0, 1), ...keypoints]);",
+			"new ColorSequence([new SomethingElse(0, Color3.fromRGB(0, 0, 0)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))]);",
+			"new ColorSequence([new React.ColorSequenceKeypoint(0, Color3.fromRGB(0, 0, 0)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))]);",
+			"new NumberSequence([new NumberSequenceKeypoint(0, 1), new NumberSequenceKeypoint(0.5, 2)]);",
 
 			// Additional arguments or different constructors
 			"new SomethingElse([new ColorSequenceKeypoint(0, Color3.fromRGB(0, 0, 0)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))]);",

@@ -131,6 +131,62 @@ const hasAll = world.has(entity, ComponentA, ComponentB);
 const result = hasA && hasB ? "yes" : "no";
 `,
 			},
+			// Has() in for loop condition
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+for (; hasA && hasB;) { doSomething(); }
+`,
+				errors: [{ messageId: "preferSingleHas" }],
+				output: `
+const hasAll = world.has(entity, ComponentA, ComponentB);
+for (; hasA && hasB;) { doSomething(); }
+`,
+			},
+			// Has() in do/while condition
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+do { doSomething(); } while (hasA && hasB);
+`,
+				errors: [{ messageId: "preferSingleHas" }],
+				output: `
+const hasAll = world.has(entity, ComponentA, ComponentB);
+do { doSomething(); } while (hasA && hasB);
+`,
+			},
+			// Has() in nested if condition
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+if ((hasA && hasB) === true) { doSomething(); }
+`,
+				errors: [{ messageId: "preferSingleHas" }],
+				output: `
+const hasAll = world.has(entity, ComponentA, ComponentB);
+if ((hasA && hasB) === true) { doSomething(); }
+`,
+			},
+			// Flushes a has() group when the next consecutive query changes entity
+			{
+				code: `
+const hasA = world.has(entityA, ComponentA);
+const hasB = world.has(entityA, ComponentB);
+const hasC = world.has(entityB, ComponentC);
+if (hasA && hasB) { doSomething(); }
+if (hasC) { doSomethingElse(); }
+`,
+				errors: [{ messageId: "preferSingleHas" }],
+				output: `
+const hasAll = world.has(entityA, ComponentA, ComponentB);
+const hasC = world.has(entityB, ComponentC);
+if (hasA && hasB) { doSomething(); }
+if (hasC) { doSomethingElse(); }
+`,
+			},
 		],
 		valid: [
 			// Single world.get call (nothing to optimize)
@@ -161,6 +217,18 @@ const componentB = world.get(entityB, ComponentB);
 			},
 			{
 				code: "const componentA = world.get(entity, ComponentA, extraArg);",
+			},
+			// Multiple declarators are left alone because the fixer replaces whole declarations
+			{
+				code: "const componentA = world.get(entity, ComponentA), componentB = world.get(entity, ComponentB);",
+			},
+			// Declarations without initializers are not query calls
+			{
+				code: `
+const componentA = world.get(entity, ComponentA);
+const componentB: ComponentB | undefined;
+const componentC = world.get(entity, ComponentC);
+`,
 			},
 			// Computed property access
 			{

@@ -16,6 +16,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"enforce-ianitor-check-type",
 	"memoized-effect-dependencies",
 	"no-array-constructor-elements",
+	"no-array-constructor-index-assignment",
 	"no-array-size-assignment",
 	"no-async-constructor",
 	"no-cascading-set-state",
@@ -35,6 +36,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-native-properties-spread",
 	"no-new-instance-in-use-memo",
 	"no-print",
+	"no-recursive",
 	"no-redundant-aspect-ratio-constraint",
 	"no-render-helper-functions",
 	"no-spec-file-extension",
@@ -106,7 +108,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(86);
+			expect(ruleNames).toHaveLength(88);
 		}, 5000);
 	});
 });

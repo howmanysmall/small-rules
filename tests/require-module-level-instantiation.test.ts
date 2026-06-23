@@ -64,6 +64,16 @@ function init() {
 				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Logger: "@company/logging" } }],
 			},
+			{
+				code: `
+import { "Logger" as Log } from "@company/logging";
+
+function init() {
+    const log = new Log();
+}`,
+				errors: [{ messageId: "mustBeModuleLevel" }],
+				options: [{ classes: { Logger: "@company/logging" } }],
+			},
 
 			{
 				code: `
@@ -205,6 +215,15 @@ function init() {
 }`,
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
 			},
+			{
+				code: `
+import * as Logging from "@rbxts/rbxts-sleitnick-log";
+
+function init() {
+    const log = new Logging.NotTracked();
+}`,
+				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+			},
 
 			{
 				code: `
@@ -235,6 +254,15 @@ const log = new Log();
 				languageOptions: {
 					sourceType: "script",
 				},
+				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+			},
+			{
+				code: `
+import * as Logging from "@rbxts/rbxts-sleitnick-log";
+
+function init() {
+    const log = new Logging["Log"]();
+}`,
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
 			},
 		],

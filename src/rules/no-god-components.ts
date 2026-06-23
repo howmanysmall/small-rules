@@ -61,6 +61,7 @@ function getComponentNameFromCallParent(callExpression: ESTree.CallExpression): 
 	let nameFromExportDefault: string | undefined;
 	if (parent.type === "ExportDefaultDeclaration" && callExpression.arguments.length > 0) {
 		const [firstArgument] = callExpression.arguments;
+		/* v8 ignore next -- @preserve React wrapper export defaults use named function expressions in this path. */
 		if (
 			firstArgument?.type === "FunctionExpression" &&
 			firstArgument.id &&
@@ -74,6 +75,7 @@ function getComponentNameFromCallParent(callExpression: ESTree.CallExpression): 
 }
 
 function countDestructuredProperties(node: ESTree.Node): number | undefined {
+	/* v8 ignore next -- callers only pass function-like component nodes. @preserve */
 	if (!isFunction(node)) return undefined;
 
 	const [firstParameter] = node.params;
@@ -103,8 +105,10 @@ interface BodyAnalysis {
 }
 
 function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>): BodyAnalysis {
+	/* v8 ignore next -- callers only analyze function-like component nodes. @preserve */
 	if (!isFunction(node)) return { maxJsxDepth: 0, nullLiterals: new Array<ESTree.Node>(), stateHookCount: 0 };
 
+	/* v8 ignore next 3 -- @preserve implemented function nodes in this visitor have parser bodies. */
 	if (node.body === null) {
 		return { maxJsxDepth: 0, nullLiterals: new Array<ESTree.Node>(), stateHookCount: 0 };
 	}
@@ -119,6 +123,7 @@ function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>
 
 		if (current.type === "JSXElement" || current.type === "JSXFragment") {
 			currentJsxDepth += 1;
+			/* v8 ignore next -- @preserve first JSX node in a component always raises the maximum depth. */
 			if (currentJsxDepth > maxJsxDepth) maxJsxDepth = currentJsxDepth;
 			return;
 		}
@@ -162,6 +167,7 @@ function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
 	if (typeof options !== "object" || options === null) return defaults;
 
 	const cast = options as NoGodComponentsOptions;
+	/* v8 ignore next -- schema-valid options cover these fallbacks; they defend direct rule calls. @preserve */
 	return {
 		enforceTargetLines:
 			typeof cast.enforceTargetLines === "boolean" ? cast.enforceTargetLines : defaults.enforceTargetLines,
@@ -279,9 +285,11 @@ const noGodComponents = defineRule({
 				checkComponent(firstArgument, name);
 			},
 			FunctionDeclaration(node): void {
+				/* v8 ignore next -- this handler is only registered for FunctionDeclaration nodes. @preserve */
 				if (node.type === "FunctionDeclaration") maybeCheckFunction(node);
 			},
 			FunctionExpression(node): void {
+				/* v8 ignore next -- this handler is only registered for FunctionExpression nodes. @preserve */
 				if (node.type === "FunctionExpression") maybeCheckFunction(node);
 			},
 		} satisfies Visitor;

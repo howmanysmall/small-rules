@@ -71,6 +71,48 @@ export function Example(target: Instance) {
 				errors: [{ messageId: "preferPortalComponent" }],
 				filename: join(WITH_PORTAL, "src", "screens", "report-only.tsx"),
 			},
+			{
+				code: `import Portal from "../components/portal";
+import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(target: Instance) {
+    return createPortal(<frame />, target);
+}`,
+				errors: [{ messageId: "preferPortalComponent" }],
+				filename: join(WITH_PORTAL, "src", "screens", "report-only.js"),
+			},
+			{
+				code: `import Portal from "../components/portal";
+import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(content: React.ReactNode, target: Instance) {
+    return createPortal(content, target);
+}`,
+				errors: [{ messageId: "preferPortalComponent" }],
+				filename: join(WITH_PORTAL, "src", "screens", "expression-child.tsx"),
+				output: `import Portal from "../components/portal";
+import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(content: React.ReactNode, target: Instance) {
+    return <Portal target={target}>{content}</Portal>;
+}`,
+			},
+			{
+				code: `import Portal from "../components/portal";
+import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(content: React.ReactNode, target: Instance) {
+    return createPortal(<>{content}</>, target);
+}`,
+				errors: [{ messageId: "preferPortalComponent" }],
+				filename: join(WITH_PORTAL, "src", "screens", "fragment.tsx"),
+				output: `import Portal from "../components/portal";
+import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(content: React.ReactNode, target: Instance) {
+    return <Portal target={target}><>{content}</></Portal>;
+}`,
+			},
 		],
 		valid: [
 			{
@@ -108,6 +150,62 @@ export function Example(target: Instance) {
     return createPortal(<frame />, target);
 }`,
 				filename: join(FIXTURE_ONLY_PORTAL, "src", "screens", "example.tsx"),
+			},
+			{
+				code: `import * as ReactDOM from "react-dom";
+
+export function Example(container: HTMLElement) {
+    return ReactDOM["createPortal"](<div />, container);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "computed-standard.tsx"),
+			},
+			{
+				code: `import { createPortal } from "./portal-factory";
+
+export function Example(target: Instance) {
+    return createPortal(<frame />, target);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "local-factory.tsx"),
+			},
+			{
+				code: `import * as ReactDOM from "./react-dom";
+
+export function Example(container: HTMLElement) {
+    return ReactDOM.createPortal(<div />, container);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "local-namespace.tsx"),
+			},
+			{
+				code: `import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(target: Instance) {
+    return createPortal(<frame />);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "missing-target.tsx"),
+			},
+			{
+				code: `import createPortal from "@rbxts/react-roblox";
+
+export function Example(target: Instance) {
+    return createPortal(<frame />, target);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "default-import.tsx"),
+			},
+			{
+				code: `import { createPortal } from "@rbxts/react-roblox";
+
+const ReactDOM = getReactDom();
+
+export function Example(container: HTMLElement) {
+    return ReactDOM.createPortal(<div />, container);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "local-object.tsx"),
+			},
+			{
+				code: `export function Example(container: HTMLElement) {
+    return ReactDOM.createPortal(<div />, container);
+}`,
+				filename: join(WITH_PORTAL, "src", "screens", "global-object.tsx"),
 			},
 		],
 	});

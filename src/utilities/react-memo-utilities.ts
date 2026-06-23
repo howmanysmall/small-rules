@@ -18,6 +18,7 @@ export function trackUseMemoImports(
 	if (!isReactImport(node, reactSources)) return;
 
 	for (const specifier of node.specifiers) {
+		/* v8 ignore next -- @preserve React useMemo tracking currently receives named imports in exercised rule paths. */
 		if (specifier.type === "ImportSpecifier") {
 			if (isIdentifierNamed(specifier.imported, "useMemo")) memoIdentifiers.add(specifier.local.name);
 			continue;

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
+import {
+	DEFAULT_STATIC_GLOBAL_FACTORIES,
+	getModuleConstInitializer,
+	isExplicitUndefinedExpression,
+	isStaticExpression,
+} from "$oxc-utilities/static-expression-utilities";
 import parser from "@typescript-eslint/parser";
 import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -46,6 +51,61 @@ const tester = new RuleTester({
 	languageOptions: {
 		ecmaVersion: 2022,
 		sourceType: "module",
+	},
+});
+
+const moduleConstInitializerRule = defineRule({
+	create(context): Visitor {
+		return {
+			CallExpression(node): void {
+				if (node.callee.type !== "Identifier" || node.callee.name !== "check") return;
+
+				const [argument] = node.arguments;
+				if (argument?.type !== "Identifier") return;
+
+				context.report({
+					messageId:
+						getModuleConstInitializer(context.sourceCode, argument) === undefined ? "missing" : "found",
+					node: argument,
+				});
+			},
+		} satisfies Visitor;
+	},
+	meta: {
+		messages: {
+			found: "found",
+			missing: "missing",
+		},
+		schema: [],
+		type: "problem",
+	},
+});
+
+const explicitUndefinedRule = defineRule({
+	create(context): Visitor {
+		return {
+			CallExpression(node): void {
+				if (node.callee.type !== "Identifier" || node.callee.name !== "check") return;
+
+				const [argument] = node.arguments;
+				if (argument === undefined || argument.type === "SpreadElement") return;
+
+				context.report({
+					messageId: isExplicitUndefinedExpression(context.sourceCode, argument, new Set())
+						? "explicit"
+						: "other",
+					node: argument,
+				});
+			},
+		} satisfies Visitor;
+	},
+	meta: {
+		messages: {
+			explicit: "explicit",
+			other: "other",
+		},
+		schema: [],
+		type: "problem",
 	},
 });
 
@@ -114,7 +174,10 @@ describe("isStaticExpression checking", () => {
 	describe("static member expressions", () => {
 		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
-			invalid: [{ code: "const obj = { x: 1 }; check(obj.x);", errors: [{ messageId: "static" }] }],
+			invalid: [
+				{ code: "const obj = { x: 1 }; check(obj.x);", errors: [{ messageId: "static" }] },
+				{ code: "const obj = { x: 1 }; check(obj['x']);", errors: [{ messageId: "static" }] },
+			],
 			valid: [],
 		});
 	});
@@ -190,7 +253,14 @@ describe("isStaticExpression checking", () => {
 	describe("chain expressions", () => {
 		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
-			invalid: [{ code: "const obj = { x: 1 }; check(obj?.x);", errors: [{ messageId: "static" }] }],
+			invalid: [
+				{ code: "check(({ x: 1 })?.x);", errors: [{ messageId: "static" }] },
+				{ code: "const obj = { x: 1 }; check(obj?.x);", errors: [{ messageId: "static" }] },
+				{
+					code: "const factory = { build: () => ({ value: 1 }) }; check(factory?.build()?.value);",
+					errors: [{ messageId: "dynamic" }],
+				},
+			],
 			valid: [],
 		});
 	});
@@ -201,6 +271,8 @@ describe("isStaticExpression checking", () => {
 			invalid: [
 				{ code: "check([1, 2, 3]);", errors: [{ messageId: "static" }] },
 				{ code: "check([[1, 2], [3, 4]]);", errors: [{ messageId: "static" }] },
+				{ code: "check([,]);", errors: [{ messageId: "dynamic" }] },
+				{ code: "const values = [1]; check([...values]);", errors: [{ messageId: "dynamic" }] },
 			],
 			valid: [],
 		});
@@ -260,6 +332,8 @@ describe("negative cases — dynamic expressions", () => {
 			invalid: [
 				{ code: "check(() => 42);", errors: [{ messageId: "dynamic" }] },
 				{ code: "check(function() { return 42; });", errors: [{ messageId: "dynamic" }] },
+				{ code: "check(class Example {});", errors: [{ messageId: "dynamic" }] },
+				{ code: "check(import.meta);", errors: [{ messageId: "dynamic" }] },
 			],
 			valid: [],
 		});
@@ -399,6 +473,36 @@ describe("tS unwrapping expressions", () => {
 			],
 			valid: [],
 		});
+	});
+});
+
+describe("getModuleConstInitializer utility", () => {
+	// @ts-expect-error -- RuleTester.run() type mismatch
+	tester.run("module-const-initializer", moduleConstInitializerRule, {
+		invalid: [
+			{ code: "const value = 42; check(value);", errors: [{ messageId: "found" }] },
+			{ code: "let value = 42; check(value);", errors: [{ messageId: "missing" }] },
+			{ code: "const value = undefined; check(value);", errors: [{ messageId: "found" }] },
+			{ code: "function run(value) { check(value); }", errors: [{ messageId: "missing" }] },
+		],
+		valid: [],
+	});
+});
+
+describe("isExplicitUndefinedExpression utility", () => {
+	// @ts-expect-error -- RuleTester.run() type mismatch
+	tester.run("explicit-undefined", explicitUndefinedRule, {
+		invalid: [
+			{ code: "check(undefined);", errors: [{ messageId: "explicit" }] },
+			{ code: "check(void 0);", errors: [{ messageId: "explicit" }] },
+			{ code: "const value = undefined; check(value);", errors: [{ messageId: "explicit" }] },
+			{ code: "const value = void 0; check(value);", errors: [{ messageId: "explicit" }] },
+			{ code: "check(unknownGlobal);", errors: [{ messageId: "other" }] },
+			{ code: "const value = value; check(value);", errors: [{ messageId: "other" }] },
+			{ code: "let value; check(value);", errors: [{ messageId: "other" }] },
+			{ code: "const value = 1; check(value);", errors: [{ messageId: "other" }] },
+		],
+		valid: [],
 	});
 });
 

@@ -16,6 +16,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ expected: true, label: "ASCII letters A-Z", value: asciiCodePoint("Z") },
 			{ expected: true, label: "dollar sign", value: asciiCodePoint("$") },
 			{ expected: true, label: "underscore", value: asciiCodePoint("_") },
+			{ expected: true, label: "CJK punctuation range 0x3001", value: 0x30_01 },
 			{ expected: true, label: "extended Latin start range 0x00C0", value: 0x00_c0 },
 			{ expected: true, label: "extended Latin start range 0x0370", value: 0x03_70 },
 			{ expected: true, label: "spacing modifier 0x200C", value: 0x20_0c },
@@ -56,10 +57,21 @@ describe("prevent-abbreviations identifier utilities", () => {
 	describe("isIdentifierPartCodePoint behavior", () => {
 		describe.each([
 			{ expected: true, label: "digit", value: asciiCodePoint("9") },
+			{ expected: true, label: "format effector 0x200C", value: 0x20_0c },
 			{ expected: true, label: "format effector 0x200D", value: 0x20_0d },
 			{ expected: true, label: "extended Greek 0x0300", value: 0x03_00 },
 			{ expected: true, label: "spacing combining 0x2030", value: 0x20_30 },
 			{ expected: true, label: "letter A", value: asciiCodePoint("A") },
+		])("$label", ({ expected, value }) => {
+			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
+				expect.assertions(1);
+				expect(isIdentifierPartCodePoint(value)).toBe(expected);
+			}, 10000);
+		});
+
+		describe.each([
+			{ expected: false, label: "ASCII exclamation mark", value: asciiCodePoint("!") },
+			{ expected: false, label: "plain space", value: asciiCodePoint(" ") },
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);
@@ -84,6 +96,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ label: "empty string", name: "" },
 			{ label: "JS keyword", name: "class" },
 			{ label: "starts with digit", name: "9value" },
+			{ label: "contains whitespace", name: "value name" },
 		])("rejects $label", ({ name }) => {
 			it(`should return false for "${name}"`, () => {
 				expect.assertions(1);

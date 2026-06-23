@@ -66,6 +66,26 @@ const value = useMemo(() => [1, 2, 3], []);
 				code: `
 import { useMemo } from "react";
 
+const value = useMemo(() => makeStatic(1), []);
+`,
+				errors: [{ messageId: "uselessUseMemo" }],
+				options: [{ environment: "standard", staticGlobalFactories: ["makeStatic"] }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const value = useMemo(() => {
+	return 1;
+}, []);
+`,
+				errors: [{ messageId: "uselessUseMemo" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
 const value = useMemo(() => \`ready\`, []);
 `,
 				errors: [{ messageId: "uselessUseMemo" }],
@@ -252,6 +272,20 @@ const value = useMemo(() => ({
 				code: `
 import { useMemo } from "react";
 
+function Component() {
+	const value = useMemo(() => {
+		doSomething();
+		return 1;
+	}, []);
+	return value;
+}
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
 const value = useMemo(() => [1, ...items], []);
 `,
 				options: [{ environment: "standard" }],
@@ -261,6 +295,42 @@ const value = useMemo(() => [1, ...items], []);
 import { useMemo } from "react";
 
 const value = useMemo(() => [1, , 2], []);
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+useMemo();
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+useMemo("not a callback", []);
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const value = useMemo(() => {
+	1;
+}, []);
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { useMemo } from "react";
+
+const value = useMemo(() => {
+	return;
+}, []);
 `,
 				options: [{ environment: "standard" }],
 			},

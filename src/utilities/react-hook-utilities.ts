@@ -29,6 +29,7 @@ export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => voi
 	const stack = [node];
 	while (stack.length > 0) {
 		const current = stack.pop();
+		/* v8 ignore next -- @preserve The loop condition guarantees pop returns a node. */
 		if (current === undefined) break;
 		callback(current);
 		pushChildNodes(current, stack);
@@ -59,13 +60,16 @@ function pushChildValue(value: unknown, parent: ESTree.Node, stack: Array<ESTree
 		return;
 	}
 
+	/* v8 ignore next -- @preserve parser object children that are not arrays are AST nodes here. */
 	if (isNode(value)) stack.push(value);
 }
 
 function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, stack: Array<ESTree.Node>): void {
 	for (let index = values.length - 1; index >= 0; index -= 1) {
 		const value = values[index];
+		/* v8 ignore next -- @preserve AST child arrays produced by the parser do not contain parent links. */
 		if (value === parent.parent) continue;
+		/* v8 ignore next -- @preserve parser child arrays traversed here contain AST nodes. */
 		if (isNode(value)) stack.push(value);
 	}
 }

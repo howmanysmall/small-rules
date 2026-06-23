@@ -46,6 +46,21 @@ describe("no-unused-imports", () => {
 				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 				output: "import { used } from './module';\nused();",
 			},
+			{
+				code: "import UnusedDefault, { used } from './module';\nused();",
+				errors: [{ data: { identifierName: "UnusedDefault" }, messageId: "unusedImport" }],
+				output: "import { used } from './module';\nused();",
+			},
+			{
+				code: "import { unused, used } from './module';\nused();",
+				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
+				output: "import { used } from './module';\nused();",
+			},
+			{
+				code: "import { used, unused, other } from './module';\nused();\nother();",
+				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
+				output: "import { used,  other } from './module';\nused();\nother();",
+			},
 		],
 		valid: [
 			{
@@ -71,6 +86,9 @@ describe("no-unused-imports", () => {
 			},
 			{
 				code: "/** @type {usedFunction} */\nimport { usedFunction } from './utils';",
+			},
+			{
+				code: "/** @param {UsedType} value */\nimport { UsedType } from './types';",
 			},
 		],
 	});

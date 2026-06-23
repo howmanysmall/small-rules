@@ -27,6 +27,7 @@ function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | u
 		return undefined;
 	}
 
+	/* v8 ignore next -- FunctionDeclaration ids are parser-produced identifiers after the null guard. @preserve */
 	if (!(isNode(node.id) && "name" in node.id && isStringRaw(node.id.name))) return undefined;
 
 	return { body: node.body, name: node.id.name, nameNode: node.id };
@@ -34,8 +35,11 @@ function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | u
 
 function getComponentAssignmentDetails(node: ESTree.Node): ComponentDetails | undefined {
 	if (node.type !== "VariableDeclarator" || !isComponentAssignment(node) || node.init === null) return undefined;
+	/* v8 ignore next -- component assignments require identifier declarators. @preserve */
 	if (!("name" in node.id && isStringRaw(node.id.name))) return undefined;
+	/* v8 ignore next -- component assignments require function initializers. @preserve */
 	if (node.init.type !== "ArrowFunctionExpression" && node.init.type !== "FunctionExpression") return undefined;
+	/* v8 ignore next -- function initializers have parser-produced node bodies. @preserve */
 	if (!isNode(node.init.body)) return undefined;
 
 	const { name } = node.id;

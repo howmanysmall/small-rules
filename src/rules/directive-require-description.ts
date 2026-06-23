@@ -43,7 +43,9 @@ const directiveRequireDescription = defineRule({
 			if (match === null) return;
 
 			const kind = match.groups?.kind;
+			/* v8 ignore next -- the named regex group is present whenever this regex matches. @preserve */
 			if (kind === undefined) return;
+			/* v8 ignore next -- OXLINT_LINE_DIRECTIVE only matches disable/enable directive kinds. @preserve */
 			if (!isDisableOrEnableDirectiveKind(kind)) return;
 			if (ignoreKinds.has(kind)) return;
 			if (DESCRIPTION_SEPARATOR.test(text)) return;

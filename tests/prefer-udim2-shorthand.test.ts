@@ -139,6 +139,13 @@ describe("prefer-udim2-shorthand", () => {
 			"new UDim2(1, 2, 3, 4);",
 			"new UDim2(1, 0, 2, 3);",
 			"new UDim2(1, 2, 0, 0);",
+			"new UDim2(1 + (value && 2), 0, 3, 0);",
+			"new UDim2(!flag, 0, 1, 0);",
+			"new UDim2(0, -offset, 1, 2);",
+			"new UDim2(0, -getOffset(), 1, 2);",
+			"new UDim2(1 % 0, 0, 1, 2);",
+			"new UDim2(1 / 0, 0, 1, 2);",
+			"new UDim2(1, ...offsets, 1, 0);",
 
 			// All zeros - explicitly allowed
 			"new UDim2(0, 0, 0, 0);",

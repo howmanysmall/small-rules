@@ -75,6 +75,7 @@ function isInsideSkippedFunction(node: ESTree.Node, constructorBody: ESTree.Bloc
 
 	while (current !== constructorBody) {
 		const { parent } = current;
+		/* v8 ignore next -- walked constructor descendants always retain a parent chain to the constructor body. @preserve */
 		if (parent === null) return false;
 		if (isNonIifeFunction(parent)) return true;
 		current = parent;
@@ -148,6 +149,7 @@ const noAsyncConstructor = defineRule({
 
 		return {
 			"MethodDefinition[kind='constructor']"(node: ESTree.MethodDefinition): void {
+				/* v8 ignore next -- parser-produced constructor methods are function expressions with block bodies inside class bodies. @preserve */
 				if (
 					node.value.type !== "FunctionExpression" ||
 					node.value.body?.type !== "BlockStatement" ||

@@ -427,6 +427,32 @@ function Component() {
 import { useEffect, useState } from "@rbxts/react";
 
 function Component() {
+    const [name, setName] = useState<string | undefined>();
+    useEffect(() => {
+        setName("Hello");
+    });
+}
+`,
+				errors: [{ messageId: "initializeState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ userId }) {
+    const [value, setValue] = useState<string | undefined>();
+    useEffect(() => {
+        setValue(void 0);
+    }, [userId]);
+}
+`,
+				errors: [{ messageId: "resetState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
     const [count, setCount] = useState(0);
     useEffect(() => {
         setCount(42);
@@ -893,10 +919,80 @@ function Component() {
 			// ========== EXISTING VALID TESTS ==========
 			{
 				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				options: [
+					{
+						reportAdjustState: false,
+						reportDerivedState: false,
+						reportDuplicateDeps: false,
+						reportEffectChain: false,
+						reportEmptyEffect: false,
+						reportEventFlag: false,
+						reportEventSpecificLogic: false,
+						reportExternalStore: false,
+						reportInitializeState: false,
+						reportLogOnly: false,
+						reportMixedDerivedState: false,
+						reportNotifyParent: false,
+						reportPassRefToParent: false,
+						reportResetState: false,
+					},
+				],
+			},
+			{
+				code: `
 import { useEffect } from "@rbxts/react";
 
 function Component() {
     useEffect();
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    async function sync() {
+        setCount(properties.initialCount);
+    }
+    useEffect(sync, [properties.initialCount]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    useEffect(() => setCount(properties.initialCount), [properties.initialCount]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        try {
+            return () => {};
+        } catch (_error) {
+            return () => {};
+        } finally {
+            return () => {};
+        }
+    }, []);
 }
 `,
 			},
@@ -1751,5 +1847,819 @@ function Component() {
 				options: [{ reportExternalStore: false }],
 			},
 		],
+	});
+});
+
+describe("no-useless-use-effect - coverage locks", () => {
+	// @ts-expect-error -- Shut up
+	ts.run("no-useless-use-effect - coverage locks", rule, {
+		invalid: [
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ first, second }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(first);
+    }, [first]);
+    useEffect(() => {
+        setValue(second);
+    }, [second]);
+    useEffect(() => {
+        setValue(first);
+    }, [first]);
+    useEffect(() => {
+        setValue(second);
+    }, [second]);
+}
+`,
+				errors: [
+					{ messageId: "derivedState" },
+					{ messageId: "duplicateDeps" },
+					{ messageId: "derivedState" },
+					{ messageId: "duplicateDeps" },
+					{ messageId: "derivedState" },
+					{ messageId: "duplicateDeps" },
+					{ messageId: "derivedState" },
+					{ messageId: "duplicateDeps" },
+				],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ submitted }) {
+    const [flag, setFlag] = useState(false);
+    useEffect(() => {
+        if (!flag) return;
+        sendForm();
+        setFlag(false);
+    }, [flag]);
+}
+`,
+				errors: [{ messageId: "eventFlag" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ submitted }) {
+    const [flag, setFlag] = useState(false);
+    useEffect(() => {
+        if (flag) {
+            setFlag(false);
+            sendForm();
+        }
+    }, [flag]);
+}
+`,
+				errors: [{ messageId: "eventFlag" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ submitted }) {
+    const [flag, setFlag] = useState(false);
+    useEffect(() => {
+        if (flag) {
+            sendForm();
+            setFlag(false);
+        }
+    }, [flag]);
+}
+`,
+				errors: [{ messageId: "eventFlag" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ value }) {
+    const [, setValue] = useState(0);
+    useEffect(() => {
+        setValue(value);
+    }, [value]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ deps, value }) {
+    const [state, setState] = useState(0);
+    useEffect(() => {
+        setState(value);
+    }, deps);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component({ value }) {
+    useEffect(() => {
+        console.warn(value);
+        console.error(value);
+        console.info(value);
+        console.debug(value);
+    }, [value]);
+}
+`,
+				errors: [{ messageId: "logOnly" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [config, setConfig] = useState();
+    useEffect(() => {
+        setConfig({});
+    }, []);
+}
+`,
+				errors: [{ messageId: "initializeState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ args, nextValue, value }) {
+    const [state, setState] = useState(0);
+    useEffect(() => {
+        setState(compute(...args, nextValue));
+    }, [args, nextValue]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ config, value }) {
+    const [state, setState] = useState({});
+    useEffect(() => {
+        setState({ ...config, value });
+    }, [config, value]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ item }) {
+    const [items, setItems] = useState([]);
+    useEffect(() => {
+        setItems([, item]);
+    }, [item]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+			},
+		],
+		valid: [
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component({ onReady, ...rest }) {
+    useEffect(() => {
+        rest.onReady?.();
+    }, [rest]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function useReadySignal({ onReady, ...rest }) {
+    useEffect(() => {
+        rest.onReady?.();
+    }, [rest]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    const [other, setOther] = useState(false);
+    useEffect(() => {
+        if (!submitted) return;
+        setOther(false);
+        setSubmitted(false);
+    }, [submitted]);
+}
+`,
+				options: [{ reportEffectChain: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    const [other, setOther] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            setSubmitted(false);
+            setOther(false);
+        }
+    }, [submitted]);
+}
+`,
+				options: [{ reportEffectChain: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    const [other, setOther] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            setOther(false);
+            setSubmitted(false);
+        }
+    }, [submitted]);
+}
+`,
+				options: [{ reportEffectChain: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) return;
+        sendForm();
+        setSubmitted(false);
+    }, [properties.submitted]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) return;
+        setSubmitted(false);
+        sendForm();
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) return;
+        sendForm();
+        setSubmitted(false);
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) {
+            setSubmitted(false);
+            sendForm();
+        }
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) {
+            sendForm();
+            setSubmitted(false);
+        }
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        try {
+            return () => cleanup();
+        } catch (error) {
+            return () => report(error);
+        }
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        try {
+            return () => cleanup();
+        } finally {
+            stop();
+        }
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        do {
+            return () => stop();
+        } while (shouldContinue());
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        for (const key in items) {
+            return () => cleanup(key);
+        }
+    }, [items]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component() {
+    useEffect(() => {
+        const cleanup = () => {
+            return () => stop();
+        };
+        return cleanup();
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+class Component {
+    #track(): void {}
+
+    render() {
+        const [submitted, setSubmitted] = useState(false);
+        useEffect(() => {
+            if (submitted) {
+                this.#track();
+            }
+        }, [submitted]);
+    }
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ deps }) {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) return;
+        sendForm();
+        setSubmitted(false);
+    }, deps);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ analytics }) {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            analytics["track"]();
+        }
+    }, [submitted, analytics]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ analytics }) {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            analytics[getMethod()]();
+        }
+    }, [submitted, analytics]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        console.warn(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        console.error(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        console.info(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        console.debug(count);
+    }, [count]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, onNotify }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        onNotify(count);
+        sendAnalytics(count);
+    }, [count, onNotify]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, onNotify }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        onNotify.send(count);
+        sendAnalytics(count);
+    }, [count, onNotify]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ args }) {
+    const [state, setState] = useState(0);
+    useEffect(() => {
+        setState(...args);
+    }, [args]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [, setValue] = useState(0);
+    useEffect(() => {
+        subscribe(setValue);
+        return () => unsubscribe(setValue);
+    }, []);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ value }) {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) return;
+        setSubmitted(false);
+        const ignored = value;
+    }, [submitted, value]);
+}
+`,
+				options: [{ reportEffectChain: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) return;
+        sendForm();
+        setSubmitted(true);
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            setSubmitted(true);
+            sendForm();
+        }
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (submitted) {
+            sendForm();
+            setSubmitted(true);
+        }
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ deps }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(1);
+    }, deps);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ value }) {
+    const [state, setState] = useState(0);
+    useEffect(() => {
+        setState();
+    }, [value]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ submitted, analytics }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        if (submitted) {
+            analytics["track"]();
+            setValue(1);
+        }
+    }, [submitted, analytics]);
+}
+`,
+				options: [{ reportMixedDerivedState: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ submitted, analytics }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        if (submitted) {
+            analytics[getMethod()]();
+            setValue(1);
+        }
+    }, [submitted, analytics]);
+}
+`,
+				options: [{ reportMixedDerivedState: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ first, second }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(first);
+    }, [first]);
+    useEffect(() => {
+        setValue(second);
+    }, [first, second]);
+}
+`,
+				options: [{ reportDerivedState: false }],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, onNotify }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        onNotify.send(count);
+    }, [count, onNotify]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component({ count, onNotify }) {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        setValue(count);
+        onNotify(count);
+    }, [count, onNotify]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component(...properties) {
+    useEffect(() => {
+        properties.onReady?.();
+    }, [properties]);
+}
+`,
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+function Component() {
+    const [submitted, setSubmitted] = useState(false);
+    useEffect(() => {
+        if (!submitted) return;
+        setSubmitted(true);
+        sendForm();
+    }, [submitted]);
+}
+`,
+				options: [{ reportEventSpecificLogic: false }],
+			},
+		],
+	});
+});
+
+describe("no-useless-use-effect - custom hook configuration", () => {
+	// @ts-expect-error -- Shut up
+	ts.run("no-useless-use-effect - custom hook configuration", rule, {
+		invalid: [
+			{
+				code: `
+import { useMountEffect, useState } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useState(0);
+    useMountEffect(() => {
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+				options: [{ hooks: ["useEffect", "useLayoutEffect", "useInsertionEffect", "useMountEffect"] }],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+function Component({ handleChange, value }) {
+    useEffect(() => {
+        handleChange(value);
+    }, [handleChange, value]);
+}
+`,
+				errors: [{ messageId: "notifyParent" }],
+				options: [{ propertyCallbackPrefixes: ["on", "handle"] }],
+			},
+			{
+				code: `
+import { useEffect, useLatestRef } from "@rbxts/react";
+
+function Component({ onReady }) {
+    const ref = useLatestRef(undefined);
+    useEffect(() => {
+        onReady(ref.current);
+    }, [onReady, ref]);
+}
+`,
+				errors: [{ messageId: "passRefToParent" }],
+				options: [{ refHooks: ["useRef", "useLatestRef"] }],
+			},
+			{
+				code: `
+import { useAtom, useEffect } from "@rbxts/react";
+
+function Component(properties) {
+    const [count, setCount] = useAtom(0);
+    useEffect(() => {
+        setCount(properties.initialCount);
+    }, [properties.initialCount]);
+}
+`,
+				errors: [{ messageId: "derivedState" }],
+				options: [{ stateHooks: ["useState", "useReducer", "useAtom"] }],
+			},
+		],
+		valid: [],
 	});
 });

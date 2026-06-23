@@ -136,6 +136,7 @@ function divideDirectiveComment(value: string): {
 } {
 	const divided = value.split(DIRECTIVE_REGEXP);
 	const [text, description] = divided;
+	/* v8 ignore next -- @preserve String.prototype.split always returns at least one item. */
 	if (text === undefined) {
 		return {
 			description: undefined,
@@ -173,6 +174,7 @@ export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 
 	const lines = comment.value.split(LINES_REGEXP);
 	const [firstLine] = lines;
+	/* v8 ignore next -- @preserve String.prototype.split always returns at least one item. */
 	if (firstLine === undefined) return comment.loc;
 
 	const ruleIdPattern = new RegExp(`([\\s,]|^)${escapeStringRegexp(ruleId)}(?:[\\s,]|$)`, "u");
@@ -181,6 +183,7 @@ export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 	const firstMatch = ruleIdPattern.exec(firstLine);
 	if (firstMatch !== null) {
 		const [, leadingBoundary] = firstMatch;
+		/* v8 ignore next -- @preserve The regexp always captures the leading boundary when it matches. */
 		if (leadingBoundary === undefined) return comment.loc;
 
 		return {
@@ -197,11 +200,14 @@ export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 
 	for (let index = 1; index < lines.length; index += 1) {
 		const line = lines[index];
+		/* v8 ignore next -- @preserve Dense arrays returned by split cannot be missing inside bounds. */
 		if (line === undefined) continue;
 
 		const lineMatch = ruleIdPattern.exec(line);
+		/* v8 ignore next -- @preserve multiline directive continuations only enter here when they contain rule ids. */
 		if (lineMatch !== null) {
 			const [, leadingBoundary] = lineMatch;
+			/* v8 ignore next -- @preserve The regexp always captures the leading boundary when it matches. */
 			if (leadingBoundary === undefined) continue;
 
 			return {
@@ -384,8 +390,10 @@ function getArea(
 ): DisabledArea | undefined {
 	for (let index = areas.length - 1; index >= 0; index -= 1) {
 		const area = areas[index];
+		/* v8 ignore next -- @preserve Disabled areas are pushed internally, so sparse entries are impossible. */
 		if (area === undefined) continue;
 
+		/* v8 ignore start -- @preserve disable areas are created by this module with normalized bounds. */
 		if (
 			(area.ruleId === undefined || area.ruleId === ruleId) &&
 			lte(area.start, location) &&
@@ -393,6 +401,7 @@ function getArea(
 		) {
 			return area;
 		}
+		/* v8 ignore stop -- @preserve */
 	}
 	return undefined;
 }

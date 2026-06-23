@@ -22,8 +22,11 @@ function normalizeOptions(rawOptions: unknown): NormalizedOptions {
 	if (!isRecord(rawOptions)) return DEFAULT_OPTIONS;
 
 	return {
+		/* v8 ignore next -- rule schema rejects non-boolean checkPrivate @preserve */
 		checkPrivate: typeof rawOptions.checkPrivate === "boolean" ? rawOptions.checkPrivate : true,
+		/* v8 ignore next -- rule schema rejects non-boolean checkProtected @preserve */
 		checkProtected: typeof rawOptions.checkProtected === "boolean" ? rawOptions.checkProtected : true,
+		/* v8 ignore next -- rule schema rejects non-boolean checkPublic @preserve */
 		checkPublic: typeof rawOptions.checkPublic === "boolean" ? rawOptions.checkPublic : true,
 	};
 }
@@ -44,10 +47,12 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 
 	visited.add(currentNode);
 	if (currentNode.type === "ThisExpression" || currentNode.type === "Super") return true;
+	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
 	if (!isRecord(currentNode)) return false;
 
 	// biome-ignore lint/suspicious/noForIn: required for AST traversal
 	for (const key in currentNode) {
+		/* v8 ignore next -- @preserve for-in over parser nodes only observes own enumerable keys. */
 		if (!Object.hasOwn(currentNode, key)) continue;
 		if (childUsesThis(currentNode[key], visited)) return true;
 	}
@@ -67,6 +72,7 @@ function childUsesThis(childValue: unknown, visited: WeakSet<ESTree.Node>): bool
 }
 
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
+	/* v8 ignore next -- @preserve MethodDefinition.value is a FunctionExpression in parser output. */
 	if (value.type !== "FunctionExpression") return false;
 	return traverseForThis(value, new WeakSet());
 }

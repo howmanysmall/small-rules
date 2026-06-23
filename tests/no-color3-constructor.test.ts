@@ -77,6 +77,10 @@ describe("no-color3-constructor", () => {
 			"new Color();",
 			"new Color2(1, 2);",
 			"const c = someOtherConstructor(1, 2, 3);",
+			{
+				code: "new Color3(red, green, blue);",
+				options: [{ reportUnknownComponents: false }],
+			},
 		],
 	});
 });

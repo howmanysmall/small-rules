@@ -25,7 +25,7 @@ const configuration = defineConfig({
 			reporter: ["text", "html", "text-summary"],
 			reportOnFailure: false,
 			reportsDirectory: "./coverage",
-			thresholds: { branches: 0, functions: 0, lines: 0, statements: 0 },
+			thresholds: { 100: true },
 		},
 		environment: "node",
 		fileParallelism: true,

@@ -14,6 +14,7 @@ function splitIntoWords(value: string): ReadonlyArray<string> {
 		.replaceAll(NORMALIZE_0, "")
 		.replaceAll(NORMALIZE_1, "$<first> $<second>")
 		.replaceAll(NORMALIZE_2, " ");
+	/* v8 ignore next -- @preserve TypeScript enum identifiers and member names contain at least one word token. */
 	return normalized.match(WORD_PATTERN) ?? [];
 }
 
@@ -22,6 +23,7 @@ function toPascalCase(value: string): string {
 	let result = "";
 
 	for (const word of words) {
+		/* v8 ignore next -- @preserve splitIntoWords uses a non-empty word regexp. */
 		if (word.length === 0) continue;
 		result += `${word.slice(0, 1).toUpperCase()}${word.slice(1).toLowerCase()}`;
 	}
@@ -33,6 +35,7 @@ const IS_INTEGER = /^\d/u;
 
 function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
 	if (node.id.type === "Identifier") return node.id.name;
+	/* v8 ignore next -- @preserve TypeScript enum literal member names are parser string literals here. */
 	if (node.id.type !== "Literal" || !isStringRaw(node.id.value)) return undefined;
 	return IS_INTEGER.test(node.id.value) ? undefined : node.id.value;
 }

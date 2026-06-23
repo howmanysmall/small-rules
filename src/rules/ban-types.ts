@@ -27,6 +27,7 @@ function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTy
 		return bannedTypes;
 	}
 
+	/* v8 ignore next -- schema allows only arrays or string records for configured banned types. @preserve */
 	if (isStringRecord(configuredBannedTypes)) {
 		for (const [typeName, replacementName] of Object.entries(configuredBannedTypes)) {
 			bannedTypes.set(typeName.toLowerCase(), { originalName: typeName, replacementName });
@@ -38,7 +39,9 @@ function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTy
 
 function getReferencedTypeName(typeNameNode: ESTree.TSTypeName): string | undefined {
 	if (typeNameNode.type === "Identifier") return typeNameNode.name;
+	/* v8 ignore next -- TSQualifiedName is the only other parser-produced TSTypeName variant. @preserve */
 	if (typeNameNode.type === "TSQualifiedName") return typeNameNode.right.name;
+	/* v8 ignore next -- ESTree TSTypeName is currently only Identifier or TSQualifiedName. @preserve */
 	return undefined;
 }
 
@@ -51,6 +54,7 @@ const banTypes = defineRule({
 		return {
 			TSTypeReference(node): void {
 				const referencedTypeName = getReferencedTypeName(node.typeName);
+				/* v8 ignore next -- parser-produced TSTypeReference nodes always have a supported typeName. @preserve */
 				if (referencedTypeName === undefined) return;
 
 				const bannedTypeEntry = bannedTypes.get(referencedTypeName.toLowerCase());

@@ -44,6 +44,14 @@ describe("require-async-suffix", () => {
 				errors: missingAsyncSuffixErrors,
 			},
 			{
+				code: `class Bruh {
+	public getAll = async function (): Promise<string> {
+		return "value";
+	};
+}`,
+				errors: missingAsyncSuffixErrors,
+			},
+			{
 				code: `const handlers = {
 	async getAll(): Promise<string> {
 		return "value";
@@ -114,6 +122,33 @@ describe("require-async-suffix", () => {
 		return new Response("ok");
 	},
 });`,
+			`const handlers = {
+	async ["fetch"](request: Request): Promise<Response> {
+		return new Response("ok");
+	},
+};`,
+			`class Bruh {
+	public ["getAll"] = async (): Promise<string> => {
+		return "value";
+	};
+}`,
+			`const { getAll } = service;`,
+			`class Bruh {
+	public getAll = 1;
+}`,
+			`const handlers = {
+	getAll: async (): Promise<string> => {
+		return "value";
+	},
+};`,
+			{
+				code: `class Bruh {
+	public async getAll(): Promise<string> {
+		return "value";
+	}
+}`,
+				options: [{ except: ["getAll"] }],
+			},
 		],
 	});
 });

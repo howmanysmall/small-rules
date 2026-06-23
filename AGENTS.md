@@ -4,7 +4,7 @@ This file provides guidance to agents when working with code in this repository.
 
 ## What Is This?
 
-An oxlint-native lint plugin (`@pobammer-ts/small-rules`) providing 87 custom rules for roblox-ts (Roblox TypeScript) projects. Rules target Roblox-specific patterns: React Luau components, Ianitor life cycle, `useReducer` patterns, Roblox UI element conventions, and general TypeScript quality.
+An Oxlint-native lint plugin (`@pobammer-ts/small-rules`) providing many custom rules for TypeScript projects. The rules target both general and Roblox-specific patterns: React Luau components, Ianitor life cycle, `useReducer` patterns, Roblox UI element conventions, and general TypeScript quality.
 
 ## Rules
 
@@ -14,12 +14,16 @@ You **MUST** follow these guidelines. There is NO exception.
 - You MUST use `nr lint:agent [files...]` to run the linter. There is no exception to failing lint checks.
 - You MUST use `nr test:agent` to run Vitest unit tests. There is no exception to failing tests.
 - You MUST use `nr type-check:agent` to run type checking. There is no exception to failing type checks.
+- You MUST always use TDD.
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
-| `aube install` | Install dependencies (Aube is the package manager, not `pnpm`/`bun`) |
+| `aube install` | Fresh install dependencies (Aube is the package manager, not `pnpm`/`bun`) |
+| `ni` | Install dependencies when `node_modules` exists |
+| `ni cowsay` | Add a dependency |
+| `ni -D cowsay` | Add a dev dependency |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
 | `nr test:agent` | Run all Vitest unit tests |
 | `nr test:agent -- tests/no-print.test.ts` | Run a single test file |
@@ -32,9 +36,6 @@ You **MUST** follow these guidelines. There is NO exception.
 | `nr test:mutation` | Run Stryker mutation testing (thresholds: break at 70%) |
 | `nr test:fuzz` | Run vitiate regression from stored corpus |
 | `nr test:fuzz:run` | Run vitiate fuzz testing (10 second default) |
-| `mise run check` | Full local validation: lint → type-check → `knip` → build → test |
-| `mise run ci` | install + check |
-| `mise run release` | bump, tag, push via `bumpp` (interactive, asks confirmation) |
 
 Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined in `mise.toml`.
 

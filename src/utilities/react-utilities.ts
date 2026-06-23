@@ -47,6 +47,7 @@ export function forEachReactNamedImport(
 		}
 
 		const importedName = getImportedName(specifier);
+		/* v8 ignore next -- @preserve import specifiers in parser import declarations have supported names. */
 		if (importedName === undefined) continue;
 
 		onNamedImport(importedName, specifier.local.name);

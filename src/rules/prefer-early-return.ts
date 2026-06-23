@@ -47,9 +47,11 @@ const preferEarlyReturn = defineRule({
 				if (node.body.type === "BlockStatement") checkFunctionBody(node.body);
 			},
 			FunctionDeclaration(node): void {
+				/* v8 ignore next -- @preserve implemented function declarations have parser bodies. */
 				if (node.body !== null) checkFunctionBody(node.body);
 			},
 			FunctionExpression(node): void {
+				/* v8 ignore next -- @preserve implemented function expressions have parser bodies. */
 				if (node.body !== null) checkFunctionBody(node.body);
 			},
 		} satisfies Visitor;

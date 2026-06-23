@@ -39,6 +39,7 @@ function normalizeLoopExitCalls(options: NoConstantConditionWithBreakOptions | u
 	if (!options?.loopExitCalls) return loopExitCalls;
 
 	for (const loopExitCall of options.loopExitCalls) {
+		/* v8 ignore next -- @preserve rule schema rejects empty or non-string loopExitCalls entries. */
 		if (isNonEmptyString(loopExitCall)) loopExitCalls.add(loopExitCall);
 	}
 
@@ -61,6 +62,7 @@ function getNodePath(node: ESTree.Expression): string | undefined {
 }
 
 function isConfiguredLoopExitCall(callExpression: ESTree.CallExpression, loopExitCalls: ReadonlySet<string>): boolean {
+	/* v8 ignore next -- @preserve expressionContainsConfiguredLoopExit returns before calls when no exits are configured. */
 	if (loopExitCalls.size === 0) return false;
 
 	const calleePath = getNodePath(callExpression.callee);
@@ -246,13 +248,16 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 
 		case "SequenceExpression": {
 			const lastExpression = unwrapped.expressions.at(-1);
+			/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
 			if (!lastExpression) return toNonConstantValue();
 			return getConstantValue(lastExpression);
 		}
 
 		case "TemplateLiteral": {
 			if (unwrapped.expressions.length > 0) return toNonConstantValue();
+			/* v8 ignore next -- @preserve parsers keep at least one quasi for template literals. */
 			if (unwrapped.quasis.length === 0) return toConstantValue("");
+			/* v8 ignore next -- @preserve untagged template literal cooked values are strings in parser output. */
 			return toConstantValue(unwrapped.quasis[0]?.value.cooked ?? "");
 		}
 
@@ -310,6 +315,7 @@ function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResul
 
 	if (unwrapped.type === "SequenceExpression") {
 		const lastExpression = unwrapped.expressions.at(-1);
+		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
 		if (!lastExpression) return toNonConstantBoolean();
 		return getConstantBoolean(lastExpression);
 	}
@@ -372,10 +378,12 @@ function findLabeledStatementBody(labelName: string, startingNode: ESTree.Node):
 
 	while (current !== null) {
 		if (current.type === "LabeledStatement" && current.label.name === labelName) return current.body;
+		/* v8 ignore next -- @preserve valid break labels must resolve before Program is reached. */
 		if (current.type === "Program") return undefined;
 		current = current.parent;
 	}
 
+	/* v8 ignore next -- @preserve parent traversal reaches Program before null in parser-produced ASTs. */
 	return undefined;
 }
 
@@ -395,6 +403,7 @@ function breaksTargetLoop(statement: ESTree.BreakStatement, loopNode: LoopNode):
 		current = current.parent;
 	}
 
+	/* v8 ignore next -- @preserve parent traversal reaches Program before null in parser-produced ASTs. */
 	return false;
 }
 
@@ -414,14 +423,17 @@ function forStatementInitContainsConfiguredLoopExit(
 }
 
 function loopHeaderContainsConfiguredLoopExit(loopNode: LoopNode, loopExitCalls: ReadonlySet<string>): boolean {
+	/* v8 ignore next -- @preserve caller loop-node narrowing restricts this switch to handled loop types. */
 	switch (loopNode.type) {
 		case "DoWhileStatement":
 		case "WhileStatement":
 			return expressionContainsConfiguredLoopExit(loopNode.test, loopExitCalls);
 
+		/* v8 ignore start -- @preserve constant-condition visitors never pass for-in or for-of nodes here. */
 		case "ForInStatement":
 		case "ForOfStatement":
 			return expressionContainsConfiguredLoopExit(loopNode.right, loopExitCalls);
+		/* v8 ignore stop -- @preserve */
 
 		case "ForStatement": {
 			if (forStatementInitContainsConfiguredLoopExit(loopNode.init, loopExitCalls)) return true;
@@ -430,8 +442,10 @@ function loopHeaderContainsConfiguredLoopExit(loopNode: LoopNode, loopExitCalls:
 			return false;
 		}
 
+		/* v8 ignore start -- @preserve LoopNode is restricted to the handled loop statement types. */
 		default:
 			return false;
+		/* v8 ignore stop -- @preserve */
 	}
 }
 

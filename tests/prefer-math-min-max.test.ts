@@ -62,6 +62,21 @@ describe("prefer-math-min-max", () => {
 				errors: [{ messageId: "preferMathMethod" }],
 				output: "(math.min((first, second), limit));",
 			},
+			{
+				code: "(<number>height) > 50 ? 50 : (<number>height);",
+				errors: [{ messageId: "preferMathMethod" }],
+				output: "math.min(<number>height, 50);",
+			},
+			{
+				code: "function clamp(height: Number) { return height > 50 ? 50 : height; }",
+				errors: [{ messageId: "preferMathMethod" }],
+				output: "function clamp(height: Number) { return math.min(height, 50); }",
+			},
+			{
+				code: "function clamp(height) { return height > 50 ? 50 : height; }",
+				errors: [{ messageId: "preferMathMethod" }],
+				output: "function clamp(height) { return math.min(height, 50); }",
+			},
 		],
 		valid: [
 			"math.min(height, 50);",
@@ -74,6 +89,16 @@ describe("prefer-math-min-max", () => {
 			'const height: string = "100"; height > 50 ? 50 : height;',
 			'const height = "100"; height > 50 ? 50 : height;',
 			"function clamp(height: string) { return height > 50 ? 50 : height; }",
+			"function clamp(height: String) { return height > 50 ? 50 : height; }",
+			"function clamp(height = '100') { return height > 50 ? 50 : height; }",
+			"height === 50 ? 50 : height;",
+			"height > current() ? current() : height;",
+			"current() > height ? height : current();",
+			"height > 50 ? height : width;",
+			"function clamp(height: unknown) { return height > 50 ? 50 : height; }",
+			"const height: unknown = 100; height > 50 ? 50 : height;",
+			"const height: string | number = 100; height > 50 ? 50 : height;",
+			"(<string>height) > 50 ? 50 : (<string>height);",
 		],
 	});
 });

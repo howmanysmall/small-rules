@@ -84,6 +84,7 @@ function getExpectContext(currentParent: ESTree.Node, root: ESTree.Node): Expect
 		hasLoop: isIndeterminateLoopNode(currentParent),
 	};
 
+	/* v8 ignore next -- @preserve Parser traversal sets parent links before expect-call context is inspected. */
 	if (currentParent.parent === null) return ownContext;
 	return mergeExpectContext(ownContext, getExpectContext(currentParent.parent, root));
 }
@@ -96,6 +97,7 @@ export function isTestCaseCall(node: ESTree.CallExpression): boolean {
 }
 
 export function getTestCallback(node: ESTree.CallExpression): CallbackFunction | undefined {
+	/* v8 ignore next -- @preserve callers request callbacks only after identifying test case calls. */
 	return isTestCaseCall(node) ? getLastCallbackArgument(node) : undefined;
 }
 

@@ -1,4 +1,4 @@
-import { isAllowAutofixOption } from "$oxc-utilities/type-utilities";
+import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";

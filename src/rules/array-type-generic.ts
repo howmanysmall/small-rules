@@ -21,11 +21,12 @@ function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): st
 }
 
 function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
-	if (parent.type === "TSRestType" && parent.parent.type === "TSTupleType") return false;
-	if (parent.type === "TSTupleType") return false;
-	if (parent.type === "TSArrayType") return false;
-	if (parent.type === "TSTypeOperator" && parent.operator === "readonly") return false;
-	return true;
+	return !(
+		(parent.type === "TSRestType" && parent.parent.type === "TSTupleType") ||
+		parent.type === "TSTupleType" ||
+		parent.type === "TSArrayType" ||
+		(parent.type === "TSTypeOperator" && parent.operator === "readonly")
+	);
 }
 
 const arrayTypeGeneric = defineRule({

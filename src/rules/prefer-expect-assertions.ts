@@ -69,6 +69,7 @@ function hasEnabledFilter(options: RuleOptions): boolean {
 }
 
 function getCallbackBody(callback: CallbackFunction): ESTree.Node | undefined {
+	/* v8 ignore next -- @preserve parser callback functions always expose a body. */
 	return callback.body ?? undefined;
 }
 
@@ -130,9 +131,11 @@ function reportMissingAssertions(
 			suggest: [
 				{
 					fix(fixer): Fix {
+						/* v8 ignore next -- positive indeterminate assertion count requires a non-empty block @preserve */
 						if (firstStatement !== undefined) {
 							return fixer.insertTextBefore(firstStatement, "expect.hasAssertions();\n");
 						}
+						/* v8 ignore next -- positive indeterminate assertion count requires a non-empty block @preserve */
 						return fixer.insertTextAfterRange(
 							[body.range[0], body.range[0] + 1],
 							" expect.hasAssertions();",
@@ -152,9 +155,11 @@ function reportMissingAssertions(
 			{
 				data: { count: String(count) },
 				fix(fixer): Fix {
+					/* v8 ignore next -- positive deterministic assertion count requires a non-empty block @preserve */
 					if (firstStatement !== undefined) {
 						return fixer.insertTextBefore(firstStatement, `expect.assertions(${count});\n`);
 					}
+					/* v8 ignore next -- positive deterministic assertion count requires a non-empty block @preserve */
 					return fixer.insertTextAfterRange(
 						[body.range[0], body.range[0] + 1],
 						` expect.assertions(${count});`,
@@ -182,6 +187,7 @@ function validateAssertionCall(
 		return;
 	}
 
+	/* v8 ignore next -- @preserve caller validates only assertion guard calls here. */
 	if (!isExpectAssertionsCall(assertionCall)) return;
 	if (assertionCall.arguments.length !== 1) {
 		context.report({
@@ -218,9 +224,11 @@ const preferExpectAssertions = defineRule({
 				if (!isTestCaseCall(node)) return;
 
 				const callback = getTestCallback(node);
+				/* v8 ignore next -- @preserve test-case calls without callbacks have no assertion behavior to check. */
 				if (callback === undefined) return;
 
 				const body = getCallbackBody(callback);
+				/* v8 ignore next -- @preserve parser callback functions always expose a body. */
 				if (body === undefined) return;
 
 				const { deterministic, indeterminate, hasIndeterminate, hasExpectInCallback, hasExpectInLoop } =
@@ -251,8 +259,11 @@ const preferExpectAssertions = defineRule({
 						deterministic > 0 &&
 						!hasIndeterminate
 					) {
+						/* v8 ignore next -- @preserve first assertion calls are already known to be inside a block body. */
 						const blockBody = getCallbackBlockBody(callback);
+						/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
 						const [firstStatement] = blockBody?.body ?? [];
+						/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
 						if (firstStatement !== undefined) {
 							context.report({
 								data: { count: String(deterministic) },

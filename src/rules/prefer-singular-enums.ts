@@ -95,6 +95,7 @@ const IS_INTEGER_END = /^\d+$/u;
 function getLastAlphaToken(tokens: ReadonlyArray<string>): AlphaToken | undefined {
 	for (let index = tokens.length - 1; index >= 0; index -= 1) {
 		const token = tokens[index];
+		/* v8 ignore next -- @preserve tokenizeIdentifier builds dense arrays, so visited indices contain strings. */
 		if (token === undefined || IS_INTEGER_END.test(token)) continue;
 		return { lowercased: token.toLowerCase(), original: token };
 	}

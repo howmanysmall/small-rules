@@ -79,6 +79,22 @@ function View() {
 			},
 			{
 				code: `
+function View() {
+	return <roundedpanel>{/* stable */}</roundedpanel>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+function View() {
+	return <borderstroke color={null} />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
 const CORNER = <roundedpanel radius={8} />;
 function View() {
 	return <layoutframe opacity={0}>{CORNER}</layoutframe>;
@@ -175,6 +191,13 @@ function View() {
 			},
 			{
 				code: `
+function View() {
+	return <borderstroke>{...children}</borderstroke>;
+}
+`,
+			},
+			{
+				code: `
 const EMPTY_COLOR = void 0;
 
 function View() {
@@ -253,6 +276,15 @@ function View() {
 			},
 			{
 				code: `
+const CORNER = <roundedpanel radius={8} />;
+
+function View({ visible }: { readonly visible: boolean }) {
+	return <layoutframe visible={visible}>{CORNER}</layoutframe>;
+}
+`,
+			},
+			{
+				code: `
 const EXTRA_ICON_LAYERS = (
 	<>
 		<InlineIcon
@@ -306,6 +338,28 @@ function View() {
 						additionalStaticFactories: ["createIconToken"],
 					},
 				],
+			},
+			{
+				code: `
+const LABEL = "ready";
+
+function View({ visible }: { readonly visible: boolean }) {
+	return <layoutframe visible={visible}>{LABEL}</layoutframe>;
+}
+`,
+			},
+			{
+				code: `
+const FRAME = (
+	<>
+		{<roundedpanel radius={8} />}
+	</>
+);
+
+function View() {
+	return FRAME;
+}
+`,
 			},
 			{
 				code: `

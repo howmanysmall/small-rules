@@ -43,11 +43,13 @@ function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierRefe
 		currentExpression = objectExpression;
 	}
 
+	/* v8 ignore next -- @preserve unwrapExpression yields identifiers only for non-member roots here. */
 	return currentExpression.type === "Identifier" ? currentExpression : undefined;
 }
 
 function shouldReportSpreadArgument(sourceCode: SourceCode, argument: ESTree.Expression): boolean {
 	const unwrappedArgument = unwrapExpression(argument);
+	/* v8 ignore next -- @preserve parser spread arguments are identifiers or member expressions in targeted JSX cases. */
 	if (unwrappedArgument.type === "ObjectExpression") return true;
 
 	const rootIdentifier = getRootIdentifier(unwrappedArgument);

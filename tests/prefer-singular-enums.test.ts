@@ -51,6 +51,8 @@ describe("prefer-singular-enums", () => {
 			{ code: "enum USER_STATUSES {}", errors: [errorWithName("USER_STATUSES")] },
 		],
 		valid: [
+			{ code: "enum _ {Value}" },
+
 			// Singular forms
 			{ code: "enum SortOrder {MostRecent, LeastRecent, Newest, Oldest}" },
 			{ code: "enum Command {Up, Down}" },

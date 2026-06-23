@@ -8,6 +8,7 @@ const RELATED_USE_STATE_THRESHOLD = 5;
 type Context = InferContextFromRule<typeof preferUseReducer>;
 
 function reportExcessiveUseState(context: Context, esTreeNode: ESTree.Node, componentName: string): void {
+	/* v8 ignore next -- @preserve rule visitors call this helper only with function block bodies. */
 	if (esTreeNode.type !== "BlockStatement") return;
 	let useStateCount = 0;
 	for (const statement of esTreeNode.body) {
@@ -30,10 +31,12 @@ const preferUseReducer = defineRule({
 		return {
 			FunctionDeclaration(node) {
 				if (node.id === null || !isUppercaseName(node.id.name)) return;
+				/* v8 ignore next -- @preserve function declarations with component names have parser block bodies. */
 				if ("body" in node && node.body) reportExcessiveUseState(context, node.body, node.id.name);
 			},
 			VariableDeclarator(node) {
 				if (!(isComponentAssignment(node) && node.init)) return;
+				/* v8 ignore next -- @preserve component assignments matched here have function bodies and identifier names. */
 				if ("body" in node.init && node.init.body && "name" in node.id) {
 					reportExcessiveUseState(context, node.init.body, node.id.name);
 				}

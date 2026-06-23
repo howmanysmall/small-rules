@@ -37,6 +37,7 @@ function normalizeConfiguration(rawOptions: unknown): ReadonlyMap<string, Banned
 		return bannedClasses;
 	}
 
+	/* v8 ignore next -- rule schema rejects non-array/non-record bannedInstances @preserve */
 	if (isStringRecord(bannedInstances)) {
 		for (const [className, message] of Object.entries(bannedInstances)) {
 			bannedClasses.set(className.toLowerCase(), { message, originalName: className });
@@ -54,13 +55,16 @@ function normalizePropertyConfiguration(
 	const { bannedProperties } = rawOptions;
 	const bannedClasses = new Map<string, ReadonlyMap<string, BannedPropertyEntry>>();
 
+	/* v8 ignore next -- rule schema rejects non-record bannedProperties @preserve */
 	if (!isRecord(bannedProperties)) return bannedClasses;
 
 	for (const [className, propertyConfiguration] of Object.entries(bannedProperties)) {
+		/* v8 ignore next -- rule schema rejects non-record bannedProperties entries @preserve */
 		if (!isRecord(propertyConfiguration)) continue;
 
 		const bannedPropertiesForClass = new Map<string, BannedPropertyEntry>();
 		for (const [propertyName, message] of Object.entries(propertyConfiguration)) {
+			/* v8 ignore next -- rule schema rejects non-string banned property messages @preserve */
 			if (!isStringRaw(message)) continue;
 			bannedPropertiesForClass.set(propertyName.toLowerCase(), { message, propertyName });
 		}
@@ -164,6 +168,7 @@ const banInstances = defineRule({
 			if (className === undefined) return;
 
 			const variable = getVariableByName(sourceCode.getScope(node), node.id.name);
+			/* v8 ignore next -- @preserve identifier variable declarators have a scope variable in parser scopes. */
 			if (variable === undefined) return;
 
 			trackedVariables.set(variable, {
@@ -223,6 +228,7 @@ const banInstances = defineRule({
 					if (attribute.type !== "JSXAttribute") continue;
 
 					const propertyName = getJsxAttributeName(attribute.name);
+					/* v8 ignore next -- @preserve JSXAttribute names are JSXIdentifier names in this visitor branch. */
 					if (propertyName === undefined) continue;
 
 					const propertyEntry = bannedPropertiesForClass.get(propertyName.toLowerCase());

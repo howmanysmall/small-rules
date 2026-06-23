@@ -8,7 +8,9 @@ type SwitchCaseBraceMetric = "lines" | "statements";
 
 function normalizeMetric(rawOptions: unknown): SwitchCaseBraceMetric {
 	if (!isRecord(rawOptions)) return "lines";
+	/* v8 ignore next -- schema rejects non-statement metric values before rule execution. @preserve */
 	if (rawOptions.metric === "statements") return "statements";
+	/* v8 ignore next -- schema rejects non-statement metric values before rule execution. @preserve */
 	return "lines";
 }
 
@@ -24,6 +26,7 @@ function shouldReportSwitchCaseBraces(node: ESTree.SwitchCase, metric: SwitchCas
 	if (metric === "statements") return consequentCount > 1;
 
 	const lastStatement = node.consequent[consequentCount - 1];
+	/* v8 ignore next -- consequentCount guarantees the indexed last statement exists. @preserve */
 	if (lastStatement === undefined) return false;
 
 	return firstStatement.loc.start.line !== lastStatement.loc.end.line;
@@ -39,6 +42,7 @@ const requireSwitchCaseBraces = defineRule({
 
 				const [firstStatement] = node.consequent;
 				const lastStatement = node.consequent.at(-1);
+				/* v8 ignore next -- shouldReportSwitchCaseBraces guarantees both case-boundary statements exist. @preserve */
 				if (firstStatement === undefined || lastStatement === undefined) return;
 
 				context.report({

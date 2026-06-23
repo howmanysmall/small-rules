@@ -134,6 +134,7 @@ function areEquivalentCall(left: ESTree.CallExpression, right: ESTree.CallExpres
 	for (let index = 0; index < left.arguments.length; index += 1) {
 		const leftArgument = left.arguments[index];
 		const rightArgument = right.arguments[index];
+		/* v8 ignore next -- loop bounds ensure dense argument arrays on both parser-produced call nodes. @preserve */
 		if (leftArgument === undefined || rightArgument === undefined) return false;
 		if (!areEquivalentArgument(leftArgument, rightArgument, sourceCode)) return false;
 	}
@@ -309,6 +310,7 @@ const preferTernaryConditionalRendering = defineRule({
 		function inspectChildren(children: ReadonlyArray<ESTree.JSXChild>): void {
 			for (let index = 0; index < children.length; index += 1) {
 				const firstChild = children[index];
+				/* v8 ignore next -- JSX children arrays are dense under parser traversal. @preserve */
 				if (firstChild === undefined) continue;
 
 				const firstBranch = getBranchCandidate(firstChild);

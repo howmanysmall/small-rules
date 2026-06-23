@@ -187,10 +187,12 @@ function findEnclosingCallExpression(node: ESTree.Node): ESTree.CallExpression |
 function getVariableForFunction(sourceCode: SourceCode, functionLike: CallbackFunction): ScopeVariable | undefined {
 	if (functionLike.type === "FunctionDeclaration") {
 		const declared = sourceCode.getDeclaredVariables(functionLike);
+		/* v8 ignore next -- @preserve parser-backed function declarations always declare their own binding. */
 		return declared.length > 0 ? declared[0] : undefined;
 	}
 
 	const parent = getParent(functionLike);
+	/* v8 ignore next -- @preserve visited function expressions have a parent node in parser-produced ASTs. */
 	if (parent === undefined) return undefined;
 
 	if (parent.type === "VariableDeclarator" || parent.type === "AssignmentExpression") {
@@ -249,6 +251,7 @@ function getFunctionCallbackUsage(
 
 function isTopLevelFunctionReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
 	const parent = getTopLevelReturnParent(node);
+	/* v8 ignore next -- @preserve top-level return checks start from parser-attached JSX nodes. */
 	if (parent === undefined) return false;
 
 	if (parent.type === "ReturnStatement") {
@@ -280,6 +283,7 @@ function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
 		currentNode = ascendPastWrappers(getParent(currentNode));
 	}
 
+	/* v8 ignore next -- @preserve return statements that contain JSX are parser-nested inside a function body. */
 	if (currentNode === undefined) return false;
 	return IS_FUNCTION_EXPRESSION.has(currentNode.type) || currentNode.type === "FunctionDeclaration";
 }
@@ -288,6 +292,7 @@ function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean
 	if (!isTopLevelFunctionReturn(node)) return false;
 
 	const functionLike = getEnclosingFunctionLike(node);
+	/* v8 ignore next -- @preserve a top-level JSX function return implies an enclosing function-like node. */
 	if (functionLike === undefined) return false;
 
 	const functionParent = ascendPastWrappers(getParent(functionLike));
@@ -303,10 +308,12 @@ function isIgnoredCallExpression(
 	ignoreList: ReadonlyArray<string>,
 ): boolean {
 	let parent: ESTree.Node | undefined = getParent(node);
+	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (parent === undefined) return false;
 
 	if (parent.type === "JSXExpressionContainer") {
 		parent = getParent(parent);
+		/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
 		if (parent === undefined) return false;
 	}
 
@@ -339,22 +346,26 @@ function isChildrenAttributeName(attributeName: string): boolean {
 
 function isJsxPropertyValue(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
 	let parent: ESTree.Node | undefined = getParent(node);
+	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (parent === undefined) return false;
 
 	while (parent !== undefined && (parent.type === "ConditionalExpression" || parent.type === "LogicalExpression")) {
 		parent = getParent(parent);
 	}
 
+	/* v8 ignore next -- @preserve parser-produced conditional/logical JSX ancestors stay attached to a parent. */
 	if (parent === undefined) return false;
 
 	if (parent.type === "JSXExpressionContainer") {
 		parent = getParent(parent);
+		/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
 		if (parent === undefined) return false;
 	}
 
 	if (parent.type !== "JSXAttribute") return false;
 
 	const attributeName = getJSXAttributeName(parent);
+	/* v8 ignore next -- @preserve supported parser JSX attribute names resolve to a concrete name. */
 	if (attributeName === undefined) return true;
 
 	return !isChildrenAttributeName(attributeName);
@@ -369,6 +380,7 @@ function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 		parent = getParent(parent);
 	}
 
+	/* v8 ignore next -- @preserve visited JSX nodes remain attached while unwrapping parser-produced parents. */
 	if (parent === undefined) return false;
 	if (parent.type === "VariableDeclarator") return parent.init === current;
 	if (parent.type === "AssignmentExpression") return parent.right === current;
@@ -378,6 +390,7 @@ function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 
 function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
 	let current: ESTree.Node | undefined = getParent(node);
+	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (current === undefined) return false;
 
 	let foundTernary = false;
@@ -392,6 +405,7 @@ function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 	if (!foundTernary || current?.type !== "JSXExpressionContainer") return false;
 
 	const containerParent = getParent(current);
+	/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
 	if (containerParent === undefined) return false;
 
 	return containerParent.type === "JSXElement" || containerParent.type === "JSXFragment";
@@ -399,10 +413,12 @@ function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 
 function isLogicalJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
 	let current: ESTree.Node | undefined = getParent(node);
+	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (current === undefined) return false;
 
 	let foundLogical = false;
 	while (current !== undefined && (current.type === "LogicalExpression" || WRAPPER_PARENT_TYPES.has(current.type))) {
+		/* v8 ignore else -- @preserve current parser output keeps logical JSX operands attached directly to LogicalExpression here. */
 		if (current.type === "LogicalExpression") foundLogical = true;
 		current = getParent(current);
 	}
@@ -410,6 +426,7 @@ function isLogicalJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 	if (!foundLogical || current?.type !== "JSXExpressionContainer") return false;
 
 	const containerParent = getParent(current);
+	/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
 	if (containerParent === undefined) return false;
 
 	return containerParent.type === "JSXElement" || containerParent.type === "JSXFragment";

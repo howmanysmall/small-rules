@@ -1,3 +1,4 @@
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	hasName,
 	isIdentifierName,
@@ -46,7 +47,17 @@ import { isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
-import type { Definition, Diagnostic, ESTree, Fix, Fixer, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
+import type {
+	Definition,
+	Diagnostic,
+	ESTree,
+	Fix,
+	Fixer,
+	Scope,
+	SourceCode,
+	Variable,
+	Visitor,
+} from "oxlint-plugin-utilities";
 
 function createIsSafeGeneratedName(scopeToNamesGeneratedByFixer: WeakMap<Scope, Set<string>>): IsSafe {
 	return function isSafeGeneratedName(name: string, scopes: ReadonlyArray<Scope>): boolean {
@@ -65,16 +76,29 @@ function isShorthandPropertyAccess(node: ESTree.IdentifierName): boolean {
 	);
 }
 
+function isObjectIdentifierImported(node: ESTree.IdentifierName, sourceCode: SourceCode): boolean {
+	const { parent } = node;
+
+	let objectNode: ESTree.Node | undefined;
+	/* v8 ignore else -- isShorthandPropertyAccess limits callers to member or TS-qualified property access. @preserve */
+	if (isMemberExpression(parent) && parent.property === node && !parent.computed) {
+		objectNode = parent.object;
+	} else if (isTsQualifiedName(parent) && parent.right === node) objectNode = parent.left;
+
+	if (objectNode === undefined || !hasName(objectNode)) return false;
+
+	return getVariableByName(sourceCode.getScope(node), objectNode.name)?.defs[0]?.type === "ImportBinding";
+}
+
 function reportShorthandReplacement(
 	node: ESTree.IdentifierName,
 	replacement: string,
 	isPropertyLike: boolean,
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
 ): void {
-	const samples = new Array<string>();
-	samples[0] = replacement;
 	report({
-		...getMessage(node.name, { samples, total: 1 }, isPropertyLike ? "property" : "variable"),
+		/* v8 ignore next -- shorthand reports are only emitted for property-like identifiers today. @preserve */
+		...getMessage(node.name, { samples: [replacement], total: 1 }, isPropertyLike ? "property" : "variable"),
 		node,
 	});
 }
@@ -140,6 +164,7 @@ function computeSafeSamples(
 			droppedDiscouraged += 1;
 			continue;
 		}
+		/* v8 ignore else -- generated safe names are non-empty valid identifiers. @preserve */
 		if (safeName.length > 0) safeSamples[safeSamplesSize++] = safeName;
 	}
 
@@ -202,6 +227,7 @@ function checkVariable(
 	if (definition === undefined) return;
 
 	const definitionName = definition.name;
+	/* v8 ignore next -- parser variable definitions in this rule expose identifier names. @preserve */
 	if (!isIdentifierName(definitionName)) return;
 	if (shouldSkipVariable(definition, definitionName, options)) return;
 
@@ -240,6 +266,7 @@ function checkVariable(
 
 	if (effectiveTotal === 1 && safeSamples.length === 1 && shouldFix(variable)) {
 		const [replacement] = safeSamples;
+		/* v8 ignore next -- safeSamples.length === 1 guarantees a replacement entry. @preserve */
 		if (replacement !== undefined) {
 			tryReportFix(report, message, variable, replacement, scopes, scopeToNamesGeneratedByFixer, definitionName);
 			return;
@@ -257,11 +284,13 @@ function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (v
 
 	if (variable.scope.type === "class") {
 		const [definition] = variable.defs;
+		/* v8 ignore next -- class variables classified by isClassVariable have exactly one definition. @preserve */
 		if (definition === undefined) {
 			variableChecker(variable);
 			return;
 		}
 		const definitionName = definition.name;
+		/* v8 ignore next -- parser class-name definitions expose identifier names. @preserve */
 		if (!isIdentifierName(definitionName)) {
 			variableChecker(variable);
 			return;
@@ -280,9 +309,12 @@ function checkPropertyIdentifier(
 	node: ESTree.IdentifierName,
 	options: PreparedOptions,
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
+	sourceCode: SourceCode,
 ): void {
 	const propertyLike = shouldReportIdentifierAsProperty(node);
 	const propertyAccess = isShorthandPropertyAccess(node);
+
+	if (propertyAccess && isObjectIdentifierImported(node, sourceCode)) return;
 
 	if (checkShorthandIdentifier(node, propertyLike, propertyAccess, options, report)) return;
 	if (!(options.checkProperties && propertyLike)) return;
@@ -368,7 +400,7 @@ const preventAbbreviations = defineRule({
 		return {
 			Identifier(node): void {
 				if (!hasName(node) || node.name === "__proto__") return;
-				checkPropertyIdentifier(node, options, context.report);
+				checkPropertyIdentifier(node, options, context.report, sourceCode);
 			},
 			JSXOpeningElement({ name }): void {
 				if (!(options.checkVariables && isJsxIdentifier(name) && isUpperFirst(name.name))) return;

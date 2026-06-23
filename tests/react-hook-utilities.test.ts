@@ -3,10 +3,13 @@ import {
 	classifyDependencies,
 	countSetStateCalls,
 	DependenciesKind,
+	getBindingPropertyKeyName,
+	getBindingPropertyValueIdentifier,
 	getEffectCallback,
 	getHookName,
 	isSetterIdentifier,
 	walkAst,
+	walkAstSlop,
 } from "$oxc-utilities/react-hook-utilities";
 import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -69,6 +72,14 @@ describe("getHookName utility", () => {
 		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("hook-name", hookNameRule, {
 			invalid: [{ code: "getFactory()", errors: [{ messageId: "none" }] }],
+			valid: [],
+		});
+	});
+
+	describe("computed member expression call returns none", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("hook-name", hookNameRule, {
+			invalid: [{ code: "React['useState'](null)", errors: [{ messageId: "none" }] }],
 			valid: [],
 		});
 	});
@@ -217,7 +228,7 @@ describe("countSetStateCalls behavior", () => {
 });
 
 describe("walkAst utility", () => {
-	const walkerMessages: Record<string, string> = { "2": "2", "4": "4" };
+	const walkerMessages: Record<string, string> = { "2": "2", "4": "4", identifier: "identifier" };
 
 	const walkerTestRule = defineRule({
 		create(context): Visitor {
@@ -231,6 +242,13 @@ describe("walkAst utility", () => {
 					if (key in walkerMessages) {
 						context.report({ messageId: key, node });
 					}
+				},
+				FunctionDeclaration(node): void {
+					const types = new Set<string>();
+					walkAst(node, (child): void => {
+						types.add(child.type);
+					});
+					if (types.has("Identifier")) context.report({ messageId: "identifier", node });
 				},
 			} satisfies Visitor;
 		},
@@ -252,12 +270,113 @@ describe("walkAst utility", () => {
 			valid: [],
 		});
 	});
+
+	describe("function declaration identifier child", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("walk-ast", walkerTestRule, {
+			invalid: [{ code: "function useValue() { return value; }", errors: [{ messageId: "identifier" }] }],
+			valid: [],
+		});
+	});
+});
+
+describe("walkAstSlop utility", () => {
+	const slopMessages: Record<string, string> = { identifier: "identifier" };
+
+	const slopRule = defineRule({
+		create(context): Visitor {
+			return {
+				FunctionDeclaration(node): void {
+					const types = new Set<string>();
+					walkAstSlop(node, (child): void => {
+						types.add(child.type);
+					});
+					if (types.has("Identifier")) context.report({ messageId: "identifier", node });
+				},
+			} satisfies Visitor;
+		},
+		meta: { messages: slopMessages, schema: [], type: "problem" },
+	});
+
+	describe("function declaration identifier child", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("walk-ast-slop", slopRule, {
+			invalid: [{ code: "function useValue() { return value; }", errors: [{ messageId: "identifier" }] }],
+			valid: [],
+		});
+	});
+});
+
+describe("binding property utilities", () => {
+	const bindingMessages: Record<string, string> = {
+		assigned: "assigned",
+		identifier: "identifier",
+		literal: "literal",
+		missing: "missing",
+	};
+
+	const bindingRule = defineRule({
+		create(context): Visitor {
+			return {
+				VariableDeclarator(node): void {
+					if (node.id.type !== "ObjectPattern") return;
+
+					for (const property of node.id.properties) {
+						if (property.type !== "Property") continue;
+
+						const keyName = getBindingPropertyKeyName(property);
+						const valueIdentifier = getBindingPropertyValueIdentifier(property);
+						if (keyName === "renamed" && valueIdentifier?.name === "local") {
+							context.report({ messageId: "identifier", node: property });
+							continue;
+						}
+
+						if (keyName === "literal" && valueIdentifier?.name === "literal") {
+							context.report({ messageId: "literal", node: property });
+							continue;
+						}
+
+						if (keyName === "assigned" && valueIdentifier?.name === "assigned") {
+							context.report({ messageId: "assigned", node: property });
+							continue;
+						}
+
+						if (keyName === undefined || valueIdentifier === undefined) {
+							context.report({ messageId: "missing", node: property });
+						}
+					}
+				},
+			} satisfies Visitor;
+		},
+		meta: { messages: bindingMessages, schema: [], type: "problem" },
+	});
+
+	describe("identifier, literal, assignment, and unsupported keys", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("binding-property-utilities", bindingRule, {
+			invalid: [
+				{
+					code: "const { renamed: local, 'literal': literal, assigned = 1, 1: one, nested: { value } } = source;",
+					errors: [
+						{ messageId: "identifier" },
+						{ messageId: "literal" },
+						{ messageId: "assigned" },
+						{ messageId: "missing" },
+						{ messageId: "missing" },
+					],
+				},
+			],
+			valid: [],
+		});
+	});
 });
 
 describe("classifyDependencies utility", () => {
 	const classifyMessages: Record<string, string> = {
+		empty: "empty",
 		missing: "missing",
 		spread: "spread",
+		static: "static",
 	};
 
 	const classifyRule = defineRule({
@@ -269,16 +388,15 @@ describe("classifyDependencies utility", () => {
 
 					const kind = classifyDependencies(
 						context.sourceCode,
-						node.arguments[0],
+						node.arguments[1],
 						new Set(),
 						{},
 						isStaticArray,
 					);
-					if (kind === DependenciesKind.MissingOrOmitted) {
-						context.report({ messageId: "missing", node });
-					} else if (kind === DependenciesKind.DynamicOrUnknown) {
-						context.report({ messageId: "spread", node });
-					}
+					if (kind === DependenciesKind.MissingOrOmitted) context.report({ messageId: "missing", node });
+					if (kind === DependenciesKind.EmptyArray) context.report({ messageId: "empty", node });
+					if (kind === DependenciesKind.StaticArray) context.report({ messageId: "static", node });
+					if (kind === DependenciesKind.DynamicOrUnknown) context.report({ messageId: "spread", node });
 				},
 			} satisfies Visitor;
 		},
@@ -297,6 +415,59 @@ describe("classifyDependencies utility", () => {
 		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-deps", classifyRule, {
 			invalid: [{ code: "useEffect(() => {}, ...deps)", errors: [{ messageId: "spread" }] }],
+			valid: [],
+		});
+	});
+
+	describe("non-array dependency argument", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("classify-deps", classifyRule, {
+			invalid: [{ code: "useEffect(() => {}, deps)", errors: [{ messageId: "spread" }] }],
+			valid: [],
+		});
+	});
+
+	describe("empty dependency array", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("classify-deps", classifyRule, {
+			invalid: [{ code: "useEffect(() => {}, [])", errors: [{ messageId: "empty" }] }],
+			valid: [],
+		});
+	});
+
+	describe("static dependency array", () => {
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("classify-deps", classifyRule, {
+			invalid: [{ code: "useEffect(() => {}, [dependency])", errors: [{ messageId: "static" }] }],
+			valid: [],
+		});
+	});
+
+	describe("dynamic dependency array", () => {
+		const dynamicArrayRule = defineRule({
+			create(context): Visitor {
+				return {
+					CallExpression(node): void {
+						const name = getHookName(node);
+						if (name !== "useEffect") return;
+
+						const kind = classifyDependencies(
+							context.sourceCode,
+							node.arguments[1],
+							new Set(),
+							{},
+							() => false,
+						);
+						if (kind === DependenciesKind.DynamicOrUnknown) context.report({ messageId: "spread", node });
+					},
+				} satisfies Visitor;
+			},
+			meta: { messages: classifyMessages, schema: [], type: "problem" },
+		});
+
+		// @ts-expect-error -- RuleTester.run() type mismatch
+		tester.run("classify-dynamic-deps", dynamicArrayRule, {
+			invalid: [{ code: "useEffect(() => {}, [dependency])", errors: [{ messageId: "spread" }] }],
 			valid: [],
 		});
 	});

@@ -373,10 +373,32 @@ function Component() {
 			},
 			{
 				code: `
+function Component(tuple) {
+    const [state, dispatch] = tuple;
+
+    dispatch({ type: "OPEN" });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
 function Component() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     dispatch({ type: ActionType.Open });
+
+    return state;
+}
+`,
+			},
+			{
+				code: `
+function Component() {
+    const [state, dispatch = fallbackDispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: "OPEN" });
 
     return state;
 }
