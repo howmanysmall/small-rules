@@ -1,0 +1,10 @@
+[mcp_servers.astro-docs]
+url = "https://mcp.docs.astro.build/mcp"
+
+[mcp_servers.chrome-devtools]
+args = ["./scripts/get-chrome-path.sh", "--serve"]
+command = "bash"
+
+[mcp_servers.context7]
+env_http_headers = { CONTEXT7_API_KEY = "CONTEXT7_API_KEY" }
+url = "https://mcp.context7.com/mcp"
