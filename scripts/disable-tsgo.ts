@@ -20,7 +20,7 @@ const isZedSettingsJson = type({
 			"string",
 			type({
 				"[string]": "unknown",
-				"language_servers?": type("string[]").readonly().or("undefined"),
+				"language_servers?": "string[] | undefined",
 			}).readonly(),
 		)
 		.readonly()
@@ -197,8 +197,7 @@ function formatDiff(filePath: string, oldContent: string, newContent: string): s
 			}
 		}
 
-		out.push(dim(`@@ -${regionOldStart},${oldCount} +${regionNewStart},${newCount} @@`));
-		out.push(...hunkLines);
+		out.push(dim(`@@ -${regionOldStart},${oldCount} +${regionNewStart},${newCount} @@`), ...hunkLines);
 	}
 
 	return out.join("\n");
@@ -218,28 +217,21 @@ function insertVtsls(languageServers: Array<string>): void {
 	const ellipsisIndex = languageServers.indexOf("...");
 	if (ellipsisIndex === languageServers.length - 1) {
 		languageServers.pop();
-		languageServers.push("vtsls");
-		languageServers.push("...");
-	} else {
-		languageServers.push("vtsls");
-	}
+		languageServers.push("vtsls", "...");
+	} else languageServers.push("vtsls");
 }
 
 function flipAndAddVtsls(languageServers: ReadonlyArray<string>): Array<string> {
 	const addVtsls = needsVtsls(languageServers);
 	const result = languageServers.map(flip);
-	if (addVtsls && !result.includes("vtsls")) {
-		insertVtsls(result);
-	}
+	if (addVtsls && !result.includes("vtsls")) insertVtsls(result);
 	return result;
 }
 
 function disableTsgoInSettings(content: string): string {
 	return editJsonc(content, isZedSettingsJson.assert, (zedSettings) =>
 		create(zedSettings, (draft) => {
-			if (draft.language_servers !== undefined) {
-				draft.language_servers = flipAndAddVtsls(draft.language_servers);
-			}
+			if (draft.language_servers !== undefined) draft.language_servers = flipAndAddVtsls(draft.language_servers);
 
 			const { languages } = draft;
 			if (languages) {
@@ -291,9 +283,7 @@ function printSummary(changedCount: number, scannedCount: number, dryRun: boolea
 		console.log(`${dim("───")} ${bold("Summary")} ${dim("───")}`);
 		console.log(`${yellow(String(changedCount))} ${changedCount === 1 ? "file would" : "files would"} be modified`);
 		console.log(`${dim("No files were actually written")} ${yellow("(--dry-run)")}`);
-	} else {
-		console.log(`${green("✓")} ${bold(String(changedCount))} ${changedCount === 1 ? "file" : "files"} modified`);
-	}
+	} else console.log(`${green("✓")} ${bold(String(changedCount))} ${changedCount === 1 ? "file" : "files"} modified`);
 }
 
 const command = new Command()

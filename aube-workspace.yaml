@@ -1,27 +1,40 @@
+# Equivalent to pnpm-workspace.yaml `packages:`
+packages:
+  - documentation
+
+# Centralized version management, referenced via `catalog:` in package.json
 catalog:
   arktype: 2.2.0
   "@total-typescript/ts-reset": 0.6.1
 
+# Force specific versions of any dependency (including transitive)
+overrides:
+  vite: ^7
+
+# Apply local patches to third-party packages
+patchedDependencies:
+  package-manager-detector@1.6.0: patches/package-manager-detector@1.6.0.patch
+
+# Block exotic sub-dependencies (e.g. git, file: deps)
+blockExoticSubdeps: true
+strictSsl: true
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
+trustPolicyExclude:
+  - skills
+
+# Only allow specific packages to run install scripts
 allowBuilds:
   "@swc/core": true
   esbuild: true
   sharp: true
+strictDepBuilds: true
 
+strictPeerDependencies: true
+
+# Global virtual store (pnpm's node_modules/.pnpm equivalent)
 enableGlobalVirtualStore: true
-packages:
-  - documentation
 
-fetchRetries: 5
-fetchRetryMintimeout: 1000
-fetchRetryMaxtimeout: 30000
-fetchTimeout: 60000
-trustPolicyExclude:
-  - skills
-
-patchedDependencies:
-  package-manager-detector@1.6.0: patches/package-manager-detector@1.6.0.patch
-
-blockExoticSubdeps: true
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - "@biomejs/biome"
@@ -83,16 +96,17 @@ minimumReleaseAgeExclude:
   - "@typescript/native-preview-win32-x64"
   - oxfmt
   - oxlint
-
-overrides:
-  vite: ^7
+  - skills
 
 minimumReleaseAgeStrict: true
+
+# Use time-based resolution for reproducible installs
 resolutionMode: time-based
+
+fetchRetries: 5
+fetchRetryMintimeout: 1000
+fetchRetryMaxtimeout: 30000
+fetchTimeout: 60000
+
 strictStorePkgContentCheck: true
-strictDepBuilds: true
-strictPeerDependencies: true
-strictSsl: true
-trustPolicy: no-downgrade
-trustPolicyIgnoreAfter: 10080
 verifyStoreIntegrity: true
