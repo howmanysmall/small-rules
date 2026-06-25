@@ -144,25 +144,6 @@ describe("require-throw-error-capture", () => {
 			},
 			{
 				code: [
-					"const handlers = {",
-					"	load: function() {",
-					"		throw new Error('oops');",
-					"	},",
-					"};",
-				].join("\n"),
-				errors: [error],
-				output: [
-					"const handlers = {",
-					"	load: function() {",
-					"		const error = new Error('oops');",
-					"Error.captureStackTrace(error, load);",
-					"throw error;",
-					"	},",
-					"};",
-				].join("\n"),
-			},
-			{
-				code: [
 					"class Foo {",
 					"	doThing = function() {",
 					"		throw new Error('oops');",
@@ -359,6 +340,16 @@ describe("require-throw-error-capture", () => {
 			),
 			// Anonymous callback has no name to capture
 			"setTimeout(function() { throw new Error('async'); }, 100);",
+			// Anonymous function expression in object literal — property key is not a variable
+			["const handlers = {", "\tload: function() {", "\t\tthrow new Error('oops');", "\t},", "};"].join("\n"),
+			// Arrow function in object literal — same reason
+			[
+				"const x = {",
+				"\tvalidateAsync: async () => {",
+				"\t\tthrow new Error('schema mismatch');",
+				"\t},",
+				"};",
+			].join("\n"),
 			// String allowlist skips matching errors
 			{
 				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
