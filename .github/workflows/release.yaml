@@ -23,8 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
     outputs:
       dry_run: ${{ steps.set_dry_run.outputs.dry_run }}
       package_version: ${{ steps.version_check.outputs.package_version }}
@@ -35,11 +33,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Mise
-        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
+      - name: Install
+        uses: ./.github/actions/pnpm-install
         with:
-          install_args: "aube bun node"
-          cache: false
+          # Inherit the composite's default; pnpm is needed for the cache step,
+          # node for the `node -p` version check, and bun for repo scripts.
+          mise-install-args: "pnpm bun node"
 
       - name: Determine dry run flag
         id: set_dry_run
@@ -59,19 +58,6 @@ jobs:
         run: |
           echo "::error title=Refusing non-tag publish::Run this workflow from a v*.*.* tag, or enable dry_run." >&2
           exit 1
-
-      - name: Install dependencies
-        run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
 
       - name: Validate tag matches package.json version
         id: version_check
@@ -142,7 +128,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/') || needs.validate-and-build.outputs.dry_run == 'true'
     env:
       DRY_RUN: ${{ needs.validate-and-build.outputs.dry_run }}
-      AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -150,31 +135,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Mise
-        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
-        with:
-          install_args: "aube bun node"
-          cache: false
-
-      - name: Setup Node.js for NPM publishing
-        # This step is only here to configure the NPM registry URL.
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Install dependencies
-        run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+      - name: Configure NPM registry
+        # No install happens in this job: build artifacts arrive via the
+        # `actions/download-artifact` step above. Point npm at the public
+        # registry without pulling in `actions/setup-node` (which enables an
+        # implicit cache vulnerable to poisoning in publish jobs).
+        run: npm config set registry https://registry.npmjs.org
 
       - name: Download build artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4

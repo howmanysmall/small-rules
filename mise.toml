@@ -13,25 +13,25 @@ lockfile = true
 [tools]
 "github:howmanysmall/pullhook" = "latest"
 actionlint = "latest"
-aube = "latest"
 bun = "latest"
 gitleaks = "latest"
 hk = "latest"
 node = "24"
 pkl = "latest"
+pnpm = "latest"
 rumdl = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 tombi = "latest"
 zizmor = "latest"
 
-[deps.aube]
+[deps.pnpm]
 auto = true
 
 [tasks]
 [tasks.install]
-description = "Install dependencies using the locked Aube dependency graph. Use before local CI or release checks."
-run = "aube install"
+description = "Install dependencies using the locked pnpm dependency graph. Use before local CI or release checks."
+run = "pnpm install"
 
 [tasks.lint]
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."

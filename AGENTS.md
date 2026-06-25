@@ -20,8 +20,7 @@ You **MUST** follow these guidelines. There is NO exception.
 
 | Command | What it does |
 |---------|-------------|
-| `aube install` | Fresh install dependencies (Aube is the package manager, not `pnpm`/`bun`) |
-| `ni` | Install dependencies when `node_modules` exists |
+| `ni` | Install dependencies |
 | `ni cowsay` | Add a dependency |
 | `ni -D cowsay` | Add a dev dependency |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
@@ -116,7 +115,7 @@ describe("no-print", () => {
 - `tsconfig.json` - Extends base, adds path aliases (`$oxc-rules/*`, `$oxc-utilities/*`, `$oxc-types/*`, `$small-rules`)
 - `biome.jsonc` - Linting + formatting (tabs, 120 width, double quotes)
 - `mise.toml` - Tool versions and task definitions (ci, check, release)
-- `aube-workspace.yaml` - Package manager config (patches, trust policy, resolution mode)
+- `pnpm-workspace.yaml` - Package manager config (patches, trust policy, resolution mode)
 - `stryker.config.mjs` - Mutation testing config, mutates `src/` excluding types/index
 - `vitest.config.ts` - Test config (forks pool, 30s timeout, coverage via v8, tsgo typechecker)
 - `codebook.toml` - Custom dictionary with Roblox-specific terms

@@ -15,6 +15,12 @@ overrides:
 patchedDependencies:
   package-manager-detector@1.6.0: patches/package-manager-detector@1.6.0.patch
 
+packageExtensions:
+  "@astrojs/mdx@7.0.0":
+    dependencies:
+      satteri: 0.9.2
+      "@astrojs/starlight": 0.41.1
+
 # Block exotic sub-dependencies (e.g. git, file: deps)
 blockExoticSubdeps: true
 strictSsl: true
@@ -28,6 +34,7 @@ allowBuilds:
   "@swc/core": true
   esbuild: true
   sharp: true
+
 strictDepBuilds: true
 
 strictPeerDependencies: true
@@ -100,6 +107,13 @@ minimumReleaseAgeExclude:
   - oxfmt
   - oxlint
   - skills
+  - "@expressive-code/core"
+  - "@expressive-code/plugin-frames"
+  - "@expressive-code/plugin-shiki"
+  - "@expressive-code/plugin-text-markers"
+  - "astro-expressive-code"
+  - "expressive-code"
+  - "rehype-expressive-code"
 
 minimumReleaseAgeStrict: true
 

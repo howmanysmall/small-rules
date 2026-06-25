@@ -7,16 +7,25 @@
 	},
 	"colorize_brackets": true,
 	"context_servers": {
+		"astro-docs": {
+			"url": "https://mcp.docs.astro.build/mcp"
+		},
 		"bun-docs": {
 			"url": "https://bun.com/docs/mcp"
 		},
+		"chrome-devtools": {
+			"args": ["./scripts/get-chrome-path.sh", "--serve"],
+			"command": "bash"
+		},
 		"jsr": {
 			"args": ["x", "--", "jsr-cli", "mcp"],
-			"command": "mise"
+			"command": "mise",
+			"enabled": false
 		},
 		"npm": {
 			"args": ["x", "--", "npm-registry-mcp"],
-			"command": "mise"
+			"command": "mise",
+			"enabled": false
 		}
 	},
 	"edit_predictions": {
