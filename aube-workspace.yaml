@@ -9,7 +9,7 @@ catalog:
 
 # Force specific versions of any dependency (including transitive)
 overrides:
-  vite: ^7
+  vite: ^8
 
 # Apply local patches to third-party packages
 patchedDependencies:
@@ -37,6 +37,9 @@ enableGlobalVirtualStore: true
 
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
+  - "astro"
+  - "@astrojs/starlight"
+  - "@astrojs/markdown-satteri"
   - "@biomejs/biome"
   - "@biomejs/cli-darwin-arm64"
   - "@biomejs/cli-darwin-x64"

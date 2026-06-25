@@ -12,6 +12,7 @@ export const ruleCategoryDefinitions: Record<RuleCategoryKey, RuleCategoryDefini
 	general: {
 		label: "General Logic & Style",
 		rules: [
+			"no-recursive",
 			"directive-disable-enable-pair",
 			"directive-no-aggregating-enable",
 			"directive-no-duplicate-disable",
@@ -93,6 +94,7 @@ export const ruleCategoryDefinitions: Record<RuleCategoryKey, RuleCategoryDefini
 	roblox: {
 		label: "Roblox & Luau Rules",
 		rules: [
+			"no-array-constructor-index-assignment",
 			"ban-instances",
 			"enforce-ianitor-check-type",
 			"no-array-constructor-elements",

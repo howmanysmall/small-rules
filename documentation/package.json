@@ -10,20 +10,16 @@
 		"start": "astro dev"
 	},
 	"dependencies": {
-		"@astrojs/mdx": "^6.0.3",
+		"@astrojs/mdx": "^7.0.0",
 		"@astrojs/react": "^5.0.7",
-		"@astrojs/starlight": "^0.40.0",
+		"@astrojs/starlight": "^0.41.0",
 		"arktype": "catalog:",
-		"astro": "^6.4.6",
+		"astro": "^7.0.2",
 		"react": "^19",
 		"react-dom": "^19",
-		"sharp": "^0.34.5",
-		"starlight-links-validator": "^0.24.1"
+		"sharp": "^0.34.5"
 	},
 	"devDependencies": {
-		"@fontsource/bricolage-grotesque": "^5.2.10",
-		"@fontsource/jetbrains-mono": "^5.2.8",
-		"@fontsource/karla": "^5.2.8",
 		"@total-typescript/ts-reset": "catalog:",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",

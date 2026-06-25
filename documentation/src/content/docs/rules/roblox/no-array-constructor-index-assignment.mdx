@@ -1,0 +1,87 @@
+---
+title: "No Array Constructor Index Assignment"
+description: "Disallow new Array<T>() followed by contiguous index assignments."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="fixable" />
+<Badge variant="suggestion" />
+
+<RuleSummary rule="no-array-constructor-index-assignment" />
+
+## Rule Details
+
+This rule is configured as `small-rules/no-array-constructor-index-assignment` and reports the concrete syntax covered by its implementation in `src/rules/no-array-constructor-index-assignment.ts`.
+
+Detects `const values = new Array<T>()` followed by consecutive index assignments (`values[0] = a; values[1] = b; ...`) and suggests replacing them with an array literal. The rule includes an auto-fix that collapses the pattern into `const values = [a, b, ...]`.
+
+## Configuration
+
+<RuleOptions rule="no-array-constructor-index-assignment" />
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+const values = new Array<string>();
+values[0] = "a";
+values[1] = "b";
+```
+
+</RuleExample>
+
+When auto-fixed, this becomes:
+
+```ts
+const values = ["a", "b"];
+```
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+const values = ["a", "b"];
+```
+
+```ts
+const values = new Array<string>();
+// non-contiguous assignment
+values[0] = "a";
+values[5] = "b";
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Prefer array literals"
+		description="Array literals are clearer, shorter, and avoid the mental overhead of tracking indices."
+		href="/small-rules/rules/roblox/no-array-constructor-index-assignment/"
+	/>
+	<LinkCard
+		title="Automate the safe edit"
+		description="The rule includes a fixer so repeated cleanup can be delegated to Oxlint."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Review the intent"
+		description="Manual fixes keep the developer in control when the best rewrite depends on context."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Array Constructor Elements" href="/small-rules/rules/roblox/no-array-constructor-elements/" />
+	<LinkCard title="No Array Size Assignment" href="/small-rules/rules/roblox/no-array-size-assignment/" />
+	<LinkCard title="No Table Create Map" href="/small-rules/rules/roblox/no-table-create-map/" />
+</CardGrid>

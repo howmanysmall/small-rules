@@ -3,7 +3,6 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
-import starlightLinksValidator from "starlight-links-validator";
 
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
 import contextualMenu from "./src/integrations/contextual-menu";
@@ -42,6 +41,9 @@ export default defineConfig({
 			starlight({
 				customCss: ["./src/styles/custom.css"],
 				description: "Oxlint-native rules for TypeScript, React, and roblox-ts",
+				editLink: {
+					baseUrl: "https://github.com/howmanysmall/small-rules/edit/main/documentation/",
+				},
 				expressiveCode: {
 					styleOverrides: {
 						borderColor: "var(--glass-border)",
@@ -54,7 +56,7 @@ export default defineConfig({
 					replacesTitle: false,
 					src: "./src/assets/new-logo.svg",
 				},
-				plugins: [starlightLinksValidator()],
+				plugins: [],
 				sidebar: [
 					{
 						items: [
