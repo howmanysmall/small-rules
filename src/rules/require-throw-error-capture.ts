@@ -42,7 +42,7 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 
 function getAssignedName({ parent }: ESTree.Node): string | undefined {
 	if (parent?.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
-	if (parent?.type === "PropertyDefinition" || parent?.type === "Property" || parent?.type === "MethodDefinition") {
+	if (parent?.type === "PropertyDefinition" || parent?.type === "MethodDefinition") {
 		if (parent.key.type === "PrivateIdentifier") return `#${parent.key.name}`;
 		/* v8 ignore next -- @preserve class and object member keys are identifiers after private keys are handled. */
 		if (parent.key.type === "Identifier") return parent.key.name;
