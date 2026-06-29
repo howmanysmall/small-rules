@@ -98,7 +98,7 @@ function countCaptureGroups(replacement: string): number {
 
 	let maxGroup = 0;
 	for (const dollarReference of dollarReferences) {
-		const groupNumber = Number.parseInt(dollarReference.slice(1), 10);
+		const groupNumber = Math.trunc(Number(dollarReference.slice(1)));
 		if (groupNumber > maxGroup) maxGroup = groupNumber;
 	}
 

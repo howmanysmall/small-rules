@@ -96,13 +96,11 @@ describe("parseDirectiveComment", () => {
 
 		expect(parseDirectiveComment(comment("istanbul ignore next"))).toBeUndefined();
 		expect(parseDirectiveComment(comment("oxlint-disable no-console", { type: "Line" }))).toBeUndefined();
-		expect(
-			parseDirectiveComment(
-				comment("oxlint-disable-line no-console", {
-					loc: { end: lineColumn(2, 10), start: lineColumn(1, 0) },
-				}),
-			),
-		).toBeUndefined();
+
+		const tsComment = comment("oxlint-disable-line no-console", {
+			loc: { end: lineColumn(2, 10), start: lineColumn(1, 0) },
+		});
+		expect(parseDirectiveComment(tsComment)).toBeUndefined();
 	});
 
 	it("should parse non-disable directive kinds", () => {
