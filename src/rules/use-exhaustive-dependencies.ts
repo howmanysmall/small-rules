@@ -4,7 +4,7 @@ import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilitie
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { Context, ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const FUNCTION_DECLARATIONS = new Set<string>(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
 
@@ -716,7 +716,7 @@ function convertStableResult(
 }
 
 function reportUnnecessaryDependency(
-	context: Context<readonly [Partial<UseExhaustiveDependenciesOptions>], MessageIds>,
+	context: RuleContext,
 	dependencies: ReadonlyArray<DependencyInfo>,
 	dependency: DependencyInfo,
 	dependenciesArray: ESTree.ArrayExpression,
@@ -748,20 +748,8 @@ function reportUnnecessaryDependency(
 	});
 }
 
-type MessageIds =
-	| "addDependenciesArraySuggestion"
-	| "addDependencySuggestion"
-	| "addMissingDependenciesSuggestion"
-	| "missingDependencies"
-	| "missingDependenciesArray"
-	| "missingDependency"
-	| "removeDependencySuggestion"
-	| "unnecessaryDependency"
-	| "unstableDependency";
-
-type RuleContext = Context<readonly [Partial<UseExhaustiveDependenciesOptions>], MessageIds>;
-
-function isCallbackFunctionNode(node: ESTree.Node | undefined): node is CallbackFunction {
+type RuleContext = InferContextFromRule<typeof useExhaustiveDependencies>;
+function isCallbackFunctionNode(node?: ESTree.Node): node is CallbackFunction {
 	return (
 		node?.type === "ArrowFunctionExpression" ||
 		node?.type === "FunctionExpression" ||

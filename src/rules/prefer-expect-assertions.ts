@@ -10,17 +10,9 @@ import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { Context, ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-type RuleMessageId =
-	| "assertionsRequiresNumberArgument"
-	| "assertionsRequiresOneArgument"
-	| "hasAssertionsTakesNoArguments"
-	| "haveExpectAssertions"
-	| "preferAssertionsCount"
-	| "suggestAddingAssertions"
-	| "suggestAddingHasAssertions"
-	| "wrongAssertionCount";
+type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 
 interface RuleOptions {
 	readonly additionalAssertionFunctions: ReadonlyArray<string>;
@@ -29,8 +21,6 @@ interface RuleOptions {
 	readonly onlyFunctionsWithExpectInCallback: boolean;
 	readonly onlyFunctionsWithExpectInLoop: boolean;
 }
-
-type RuleContext = Context<readonly [Partial<RuleOptions>?], RuleMessageId>;
 
 function parseStringArray(value: unknown): ReadonlyArray<string> {
 	return Array.isArray(value) ? value.filter(isStringRaw) : [];
