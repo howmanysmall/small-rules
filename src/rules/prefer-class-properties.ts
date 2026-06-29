@@ -81,7 +81,6 @@ function isConstructorLiteralAssignment(statement: ESTree.Statement): statement 
 
 const preferClassProperties = defineRule({
 	create(context): Visitor {
-		// eslint-disable-next-line ts/no-useless-default-assignment -- wrong.
 		const [mode = "always"] = context.options;
 
 		if (mode === "never") {

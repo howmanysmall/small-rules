@@ -11,7 +11,7 @@ function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 const noIncrementDecrement = defineRule({
 	create(context): Visitor {
 		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix === true;
+		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
 		const { sourceCode } = context;
 
 		return {
