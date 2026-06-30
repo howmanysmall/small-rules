@@ -70,6 +70,7 @@
 	"dependencies": {
 		"arktype": "2.2.1",
 		"ignore": "7.0.5",
+		"minimatch": "10.2.5",
 		"oxc-parser": "0.138.0",
 		"oxc-resolver": "11.21.3",
 		"oxlint-plugin-utilities": "1.1.0"
