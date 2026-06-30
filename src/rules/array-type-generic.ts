@@ -33,7 +33,7 @@ function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
 }
 
 const arrayTypeGeneric = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		function reportArrayType(node: ESTree.TSArrayType | ESTree.TSTypeOperator): void {
 			context.report({
 				fix(fixer) {

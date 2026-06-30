@@ -20,7 +20,7 @@ function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Exp
 }
 
 const preferIdiv = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
 				if (node.optional) return;

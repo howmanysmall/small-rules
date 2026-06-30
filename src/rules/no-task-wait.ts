@@ -16,7 +16,7 @@ function isPromiseDelayAwaitCall(node: ESTree.CallExpression): boolean {
 }
 
 const noTaskWait = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
 				if (isPromiseDelayAwaitCall(node)) {

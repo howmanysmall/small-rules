@@ -40,7 +40,7 @@ function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
 }
 
 const preferPascalCaseEnums = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			TSEnumDeclaration(node): void {
 				const identifier = node.id.name;

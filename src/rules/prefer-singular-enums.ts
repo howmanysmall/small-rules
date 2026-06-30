@@ -127,7 +127,7 @@ function isPlural(identifier: string): boolean {
 }
 
 const preferSingularEnums = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			TSEnumDeclaration({ id }): void {
 				const { name } = id;

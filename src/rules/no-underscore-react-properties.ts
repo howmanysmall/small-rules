@@ -3,7 +3,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 import type { Visitor } from "oxlint-plugin-utilities";
 
 const noUnderscoreReactProperties = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			JSXAttribute(node): void {
 				if (node.name.type !== "JSXIdentifier" || !node.name.name.startsWith("_")) return;
