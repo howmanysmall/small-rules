@@ -1,7 +1,7 @@
 // oxlint-disable unicorn/no-null -- ESTree Program parents use null sentinels.
 import { visitorKeys } from "oxc-parser";
 
-import { throwHarnessError } from "./errors";
+import { HarnessError } from "./harness-error";
 import { locationForRange } from "./locations";
 import { isRecord } from "./object";
 
@@ -14,9 +14,17 @@ const ATTRIBUTE_SELECTOR_PATTERN = /\[(?<path>[\w.]+)=(?<quote>["'])(?<value>.*?
 const CHILD_FIELD_SELECTOR_PATTERN = /^(?<parentType>\w+)\s*>\s*\.(?<field>\w+)$/u;
 
 export function decorateAst(program: unknown, locationIndex: LocationIndex): HarnessNode {
-	if (!isParsedNode(program)) throwHarnessError("Oxc parser returned an invalid Program node.");
+	if (!isParsedNode(program)) {
+		const error = new HarnessError("Oxc parser returned an invalid Program node.");
+		Error.captureStackTrace(error, decorateAst);
+		throw error;
+	}
 	attachNodeMetadata(program, null, locationIndex);
-	if (!isHarnessNode(program)) throwHarnessError("Oxc parser Program node could not be decorated.");
+	if (!isHarnessNode(program)) {
+		const error = new HarnessError("Oxc parser Program node could not be decorated.");
+		Error.captureStackTrace(error, decorateAst);
+		throw error;
+	}
 	return program;
 }
 
@@ -25,7 +33,7 @@ export function traverseAst(root: HarnessNode, visitor: unknown): void {
 	traverseNode(root, entries);
 }
 
-export function isHarnessNode(value: unknown): value is HarnessNode {
+function isHarnessNode(value: unknown): value is HarnessNode {
 	if (!isRecord(value)) return false;
 	return typeof value.type === "string" && isRange(value.range) && isRecord(value.loc);
 }

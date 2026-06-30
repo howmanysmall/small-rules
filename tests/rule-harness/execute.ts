@@ -1,7 +1,7 @@
 // oxlint-disable unicorn/no-null -- The unset scope mirrors eslint-scope's null upper scope sentinel.
 import { traverseAst } from "./ast";
 import { createDiagnosticCollector } from "./diagnostics";
-import { throwHarnessError } from "./errors";
+import { HarnessError } from "./harness-error";
 import { getProperty, isRecord } from "./object";
 import { getRuleMeta, parseCase } from "./parse";
 
@@ -28,7 +28,11 @@ export function createRuleExecutor(ruleName: string, rule: unknown): (testCase: 
 	}
 
 	const create = getRuleFunction(rule, "create");
-	if (create === undefined) throwHarnessError(`Rule '${ruleName}' does not expose create() or createOnce().`);
+	if (create === undefined) {
+		const error = new HarnessError(`Rule '${ruleName}' does not expose create() or createOnce().`);
+		Error.captureStackTrace(error, createRuleExecutor);
+		throw error;
+	}
 
 	return (testCase) => {
 		const context = createMutableContext(ruleName);
@@ -134,7 +138,9 @@ function createUnsetSourceCode(): HarnessSourceCode {
 }
 
 function throwUnavailableSourceCode(): never {
-	throwHarnessError("sourceCode is unavailable before a test case starts.");
+	const error = new HarnessError("sourceCode is unavailable before a test case starts.");
+	Error.captureStackTrace(error, throwUnavailableSourceCode);
+	throw error;
 }
 
 function createUnsetNode(): HarnessNode {

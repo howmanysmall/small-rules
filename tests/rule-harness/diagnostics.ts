@@ -1,8 +1,8 @@
 import { deepEqual, equal } from "node:assert/strict";
 import { expect } from "vitest";
 
-import { throwHarnessError } from "./errors";
 import { applyFixes, fixer } from "./fixes";
+import { HarnessError } from "./harness-error";
 import { getArrayProperty, getObjectProperty, getProperty, getStringProperty, isRecord } from "./object";
 
 import type {
@@ -55,7 +55,11 @@ export function assertInvalidCase(
 }
 
 function normalizeDiagnostic(diagnostic: unknown, meta: Record<string, unknown>): RuntimeDiagnostic {
-	if (!isRecord(diagnostic)) throwHarnessError("context.report() received a non-object diagnostic.");
+	if (!isRecord(diagnostic)) {
+		const error = new HarnessError("context.report() received a non-object diagnostic.");
+		Error.captureStackTrace(error, normalizeDiagnostic);
+		throw error;
+	}
 
 	const messageId = getStringProperty(diagnostic, "messageId");
 	const data = getDiagnosticData(diagnostic);

@@ -1,7 +1,7 @@
 import { parseSync } from "oxc-parser";
 
 import { decorateAst } from "./ast";
-import { throwHarnessError } from "./errors";
+import { HarnessError } from "./harness-error";
 import { createLocationIndex } from "./locations";
 import { getObjectProperty, getProperty, isJsonSerializable, isRecord } from "./object";
 import { createSourceCode } from "./source-code";
@@ -49,8 +49,10 @@ export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
 	});
 
 	if (parseResult.errors.length > 0) {
-		const [error] = parseResult.errors;
-		throwHarnessError(error?.message ?? "Oxc parser failed to parse test case.");
+		const [error0] = parseResult.errors;
+		const error = new HarnessError(error0?.message ?? "Oxc parser failed to parse test case.", { cause: error0 });
+		Error.captureStackTrace(error, parseCase);
+		throw error;
 	}
 
 	const locationIndex = createLocationIndex(testCase.code);
@@ -60,10 +62,7 @@ export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
 
 function normalizeValidCase(input: string | ValidRuleCase, defaults: RuleRunnerDefaults): NormalizedValidCase {
 	const base = typeof input === "string" ? { code: input } : input;
-	return {
-		...normalizeBaseCase(base, defaults),
-		kind: "valid",
-	};
+	return { ...normalizeBaseCase(base, defaults), kind: "valid" };
 }
 
 function normalizeInvalidCase(input: InvalidRuleCase, defaults: RuleRunnerDefaults): NormalizedInvalidCase {
@@ -103,9 +102,15 @@ function rejectLegacyLanguageOptions(input: BaseRuleCase): void {
 	const legacyOptions = getObjectProperty(input, LEGACY_LANGUAGE_OPTIONS_KEY);
 	if (legacyOptions === undefined) return;
 	if (LEGACY_PARSER_KEY in legacyOptions) {
-		throwHarnessError("Legacy parser configuration is not supported by the Oxc-native rule tester.");
+		const error = new HarnessError("Legacy parser configuration is not supported by the Oxc-native rule tester.");
+		Error.captureStackTrace(error, rejectLegacyLanguageOptions);
+		throw error;
 	}
-	throwHarnessError("Legacy language options are not supported. Use top-level language and sourceType test fields.");
+	const error = new HarnessError(
+		"Legacy language options are not supported. Use top-level language and sourceType test fields.",
+	);
+	Error.captureStackTrace(error, rejectLegacyLanguageOptions);
+	throw error;
 }
 
 function resolveLanguage(input: BaseRuleCase, defaults: RuleRunnerDefaults): TestLanguage {
@@ -123,7 +128,9 @@ function languageFromFilename(filename = ""): TestLanguage {
 
 function assertJsonSerializable(name: string, value: unknown): void {
 	if (isJsonSerializable(value)) return;
-	throwHarnessError(`${name} must be JSON-serializable.`);
+	const error = new HarnessError(`${name} must be JSON-serializable.`);
+	Error.captureStackTrace(error, assertJsonSerializable);
+	throw error;
 }
 
 export function getRuleMeta(rule: unknown): Record<string, unknown> {
