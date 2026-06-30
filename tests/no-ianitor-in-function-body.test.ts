@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-ianitor-in-function-body";
 import { ts } from "./rule-testers";
 
 describe("no-ianitor-in-function-body", () => {
-	// @ts-expect-error -- shut up
 	ts.run("no-ianitor-in-function-body", rule, {
 		invalid: [
 			// Exact pattern from user's example: Ianitor.keyOf(ids)(value) inside function

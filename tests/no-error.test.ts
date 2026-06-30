@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-error";
 import { js } from "./rule-testers";
 
 describe("no-error", () => {
-	// @ts-expect-error -- Shut up
 	js.run("no-error", rule, {
 		invalid: [
 			{

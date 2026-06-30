@@ -18,7 +18,6 @@ function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTy
 	if (!(isRecord(rawOptions) && "bannedTypes" in rawOptions)) return bannedTypes;
 
 	const { bannedTypes: configuredBannedTypes } = rawOptions;
-	if (configuredBannedTypes === undefined) return bannedTypes;
 
 	if (isStringArray(configuredBannedTypes)) {
 		for (const typeName of configuredBannedTypes) {

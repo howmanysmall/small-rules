@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-ianitor-success-access";
 import { ts } from "./rule-testers";
 
 describe("no-ianitor-success-access", () => {
-	// @ts-expect-error -- The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("no-ianitor-success-access", rule, {
 		invalid: [
 			// Inline .success on Ianitor.keyOf call
@@ -86,9 +85,11 @@ const check = (value: unknown) => Ianitor.keyOf(ids)(value).success;
 				code: `
 import { Ianitor } from "@packages/ianitor";
 const ids = { a: "a" } as const;
-const validator = Ianitor.keyOf(ids);
-const { success } = validator("a");
-return success;
+function run() {
+	const validator = Ianitor.keyOf(ids);
+	const { success } = validator("a");
+	return success;
+}
 `,
 				errors: [{ messageId: "preferCreateGuard" }],
 			},
@@ -107,9 +108,11 @@ result.success;
 				code: `
 import { Ianitor } from "@packages/ianitor";
 const ids = { a: "a" } as const;
-const validator = Ianitor.keyOf(ids);
-const { success: isValid } = validator("a");
-return isValid;
+function run() {
+	const validator = Ianitor.keyOf(ids);
+	const { success: isValid } = validator("a");
+	return isValid;
+}
 `,
 				errors: [{ messageId: "preferCreateGuard" }],
 			},
@@ -142,7 +145,7 @@ const result = undefined;
 result.success;
 `,
 			`
-const result;
+let result;
 `,
 			// Non-Ianitor .success
 			`
@@ -206,9 +209,11 @@ if (!success) throw new Error(error);
 			`
 import { Ianitor } from "@packages/ianitor";
 const ids = { a: "a" } as const;
-const validator = Ianitor.keyOf(ids);
-const { error } = validator("a");
-return error;
+function run() {
+	const validator = Ianitor.keyOf(ids);
+	const { error } = validator("a");
+	return error;
+}
 `,
 			`
 import { Ianitor } from "@packages/ianitor";
@@ -220,9 +225,11 @@ const { success } = result;
 			`
 import { Ianitor } from "@packages/ianitor";
 const ids = { a: "a" } as const;
-const validator = Ianitor.keyOf(ids);
-const { ...result } = validator("a");
-return result;
+function run() {
+	const validator = Ianitor.keyOf(ids);
+	const { ...result } = validator("a");
+	return result;
+}
 `,
 			`
 import { Ianitor } from "@packages/ianitor";

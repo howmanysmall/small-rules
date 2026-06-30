@@ -9,7 +9,6 @@ const WITH_CONSTRAINT = join(FIXTURES, "with-constraint");
 const WITHOUT_CONSTRAINT = join(FIXTURES, "without-constraint");
 
 describe("no-redundant-aspect-ratio-constraint", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-redundant-aspect-ratio-constraint", rule, {
 		invalid: [
 			{
@@ -165,6 +164,17 @@ const LabelSpritesheet = ({ children }: { children?: React.ReactNode }) => {
 
 const view = (
 	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+const LabelSpritesheet = () => 1;
+
+const view = (
+	<LabelSpritesheet>
 		<uiaspectratioconstraint AspectRatio={1.5} />
 	</LabelSpritesheet>
 );

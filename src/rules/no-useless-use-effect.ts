@@ -152,6 +152,29 @@ function normalizeOptions(raw: NoUselessUseEffectOptions | undefined): Normalize
 	};
 }
 
+function getNamespacedCallNames(
+	callee: ESTree.CallExpression["callee"],
+): { readonly objectName: string; readonly propertyName: string } | undefined {
+	if (
+		callee.type !== "MemberExpression" ||
+		callee.computed ||
+		callee.object.type !== "Identifier" ||
+		callee.property.type !== "Identifier"
+	) {
+		return undefined;
+	}
+
+	return { objectName: callee.object.name, propertyName: callee.property.name };
+}
+
+function getNonComputedCalleePropertyName(callee: ESTree.CallExpression["callee"]): string | undefined {
+	if (callee.type !== "MemberExpression" || callee.computed || callee.property.type !== "Identifier") {
+		return undefined;
+	}
+
+	return callee.property.name;
+}
+
 function isHookCall(
 	node: ESTree.CallExpression,
 	hookIdentifiers: ReadonlySet<string>,
@@ -160,14 +183,12 @@ function isHookCall(
 ): boolean {
 	const { callee } = node;
 	if (callee.type === "Identifier") return hookIdentifiers.has(callee.name);
-	if (
-		callee.type === "MemberExpression" &&
-		!callee.computed &&
-		callee.object.type === "Identifier" &&
-		callee.property.type === "Identifier"
-	) {
-		return reactNamespaces.has(callee.object.name) && hookNames.has(callee.property.name);
+
+	const memberNames = getNamespacedCallNames(callee);
+	if (memberNames !== undefined) {
+		return reactNamespaces.has(memberNames.objectName) && hookNames.has(memberNames.propertyName);
 	}
+
 	return false;
 }
 
@@ -177,9 +198,7 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 	}
 
 	const { parent } = node;
-	if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") {
-		return parent.id.name;
-	}
+	if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
 
 	if (
 		"key" in parent &&
@@ -260,15 +279,13 @@ function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
 
 		switch (current.type) {
 			/* v8 ignore next -- statement-only traversal never pushes arrow expressions. @preserve */
-			case "ArrowFunctionExpression": {
+			case "ArrowFunctionExpression":
 				continue;
-			}
 			case "FunctionDeclaration":
 				continue;
 			/* v8 ignore next -- statement-only traversal never pushes function expressions. @preserve */
-			case "FunctionExpression": {
+			case "FunctionExpression":
 				continue;
-			}
 
 			case "ReturnStatement": {
 				if (current.argument !== null) return true;
@@ -679,16 +696,12 @@ function isPropertyCallbackCall(
 	const { callee } = callExpression;
 	if (callee.type === "Identifier") return functionContext.propertyCallbackIdentifiers.has(callee.name);
 
-	if (
-		callee.type === "MemberExpression" &&
-		!callee.computed &&
-		callee.object.type === "Identifier" &&
-		callee.property.type === "Identifier"
-	) {
+	const memberNames = getNamespacedCallNames(callee);
+	if (memberNames !== undefined) {
 		return (
 			functionContext.propertyObjectName !== undefined &&
-			callee.object.name === functionContext.propertyObjectName &&
-			hasPrefix(callee.property.name, propertyCallbackPrefixes)
+			memberNames.objectName === functionContext.propertyObjectName &&
+			hasPrefix(memberNames.propertyName, propertyCallbackPrefixes)
 		);
 	}
 
@@ -778,13 +791,9 @@ function isAllowedPropertyCallbackCall(
 ): boolean {
 	const { callee } = callExpression;
 	if (callee.type === "Identifier") return propertyCallbackIdentifiers.has(callee.name);
-	return (
-		callee.type === "MemberExpression" &&
-		!callee.computed &&
-		callee.object.type === "Identifier" &&
-		callee.property.type === "Identifier" &&
-		propertyCallbackIdentifiers.has(callee.object.name)
-	);
+
+	const memberNames = getNamespacedCallNames(callee);
+	return memberNames !== undefined && propertyCallbackIdentifiers.has(memberNames.objectName);
 }
 
 function hasNonSetterSideEffect(
@@ -855,17 +864,8 @@ function hasOnlyLogCalls(statements: ReadonlyArray<ESTree.Statement>): boolean {
 		const callExpression = getCallExpressionFromStatement(statement);
 		if (callExpression === undefined) return false;
 
-		if (
-			callExpression.callee.type === "MemberExpression" &&
-			!callExpression.callee.computed &&
-			callExpression.callee.object.type === "Identifier" &&
-			callExpression.callee.object.name === "console" &&
-			callExpression.callee.property.type === "Identifier"
-		) {
-			return true;
-		}
-
-		return false;
+		const memberNames = getNamespacedCallNames(callExpression.callee);
+		return memberNames?.objectName === "console";
 	});
 }
 
@@ -876,15 +876,8 @@ function hasExternalStorePattern(statements: ReadonlyArray<ESTree.Statement>): b
 		const callExpression = getCallExpressionFromStatement(statement);
 		if (callExpression === undefined) return false;
 
-		if (
-			callExpression.callee.type === "MemberExpression" &&
-			!callExpression.callee.computed &&
-			callExpression.callee.property.type === "Identifier"
-		) {
-			return SUBSCRIBE_METHODS.has(callExpression.callee.property.name);
-		}
-
-		return false;
+		const propertyName = getNonComputedCalleePropertyName(callExpression.callee);
+		return propertyName !== undefined && SUBSCRIBE_METHODS.has(propertyName);
 	});
 }
 

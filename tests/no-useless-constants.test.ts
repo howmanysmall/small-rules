@@ -5,7 +5,6 @@ import { ts, tsx } from "./rule-testers";
 
 describe("no-useless-constants", () => {
 	describe("autofix coverage", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("inlines an adjacent plain-expression constant", rule, {
 			invalid: [
 				{
@@ -17,13 +16,11 @@ describe("no-useless-constants", () => {
 			valid: ["const TEXT_NATIVE = { Offset: 225 };"],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("remains idempotent after autofix", rule, {
 			invalid: [],
 			valid: ["const TEXT_NATIVE = { Offset: 225 };"],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("remains idempotent after JSX autofix", rule, {
 			invalid: [],
 			valid: [
@@ -33,7 +30,6 @@ describe("no-useless-constants", () => {
 	});
 
 	describe("guards and report-only cases", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes non-adjacent primitive literal constant", rule, {
 			invalid: [
 				{
@@ -45,7 +41,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes non-adjacent primitive literal across function", rule, {
 			invalid: [
 				{
@@ -57,7 +52,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes non-adjacent static Roblox factory initializer", rule, {
 			invalid: [
 				{
@@ -69,7 +63,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes non-adjacent static factory with binary argument", rule, {
 			invalid: [
 				{
@@ -81,7 +74,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes non-adjacent static factory with conditional argument", rule, {
 			invalid: [
 				{
@@ -93,7 +85,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes non-adjacent static factory with object argument", rule, {
 			invalid: [
 				{
@@ -105,7 +96,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes wrapped static factory initializers", rule, {
 			invalid: [
 				{
@@ -150,7 +140,6 @@ describe("no-useless-constants", () => {
 		{
 			const templateExpression = String.raw({ raw: ["`", "{Color3.fromRGB(255, 120, 80)}`"] }, "$");
 
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			ts.run("auto-fixes static factory expression containers", rule, {
 				invalid: [
 					{
@@ -178,7 +167,6 @@ describe("no-useless-constants", () => {
 			});
 		}
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes static factory arrays with safe elements", rule, {
 			invalid: [
 				{
@@ -190,24 +178,22 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports unsafe inline expression shapes without autofix", rule, {
 			invalid: [
 				{
 					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80), Color3.fromRGB(90, 90, 90));\nconst STYLE = { color: TITLE_COLOR };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "const TITLE_COLOR = new ColorSequence([, ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 90, 90))]);\nconst STYLE = { color: TITLE_COLOR };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 			],
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("auto-fixes multiple same-scope constants in one pass", rule, {
 			invalid: [
 				{
@@ -219,62 +205,59 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports non-adjacent non-literal constant without autofix", rule, {
 			invalid: [
 				{
 					code: "const TITLE_OFFSET = getOffset();\nconst MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 			],
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports non-adjacent imported factory call without autofix", rule, {
 			invalid: [
 				{
 					code: 'import { makeGradient } from "styles";\nconst TITLE_GRADIENT = makeGradient(1);\nconst MIDDLE = 42;\nconst STYLE = { gradient: TITLE_GRADIENT };',
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "const TWEEN_INFO = new TweenInfo({ ...defaults });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "const TWEEN_INFO = new TweenInfo(...defaults);\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 			],
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports comment-attached constant without autofix", rule, {
 			invalid: [
 				{
 					code: "// important note\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "const TITLE_OFFSET = 225;\n// keep with offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "const TITLE_OFFSET = /* keep */ 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "const TITLE_OFFSET = 225; // keep offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 					errors: [{ messageId: "uselessConstantNoFix" }],
-					output: JSON.parse("null"),
+					output: null,
 				},
 				{
 					code: "// file note\n\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
@@ -297,7 +280,6 @@ describe("no-useless-constants", () => {
 	});
 
 	describe("local scope handling", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports local ALL_CAPS constant inside function body", rule, {
 			invalid: [
 				{
@@ -309,7 +291,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips local ALL_CAPS constant referenced outside const initializer", rule, {
 			invalid: [],
 			valid: [
@@ -321,7 +302,6 @@ describe("no-useless-constants", () => {
 	});
 
 	describe("cross-scope guard", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips module-level constant used inside function body", rule, {
 			invalid: [],
 			valid: [
@@ -329,7 +309,6 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("skips module-level spring config used inside React component body", rule, {
 			invalid: [],
 			valid: [
@@ -337,7 +316,6 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("skips module-level constant used inside React component", rule, {
 			invalid: [],
 			valid: [
@@ -347,7 +325,6 @@ describe("no-useless-constants", () => {
 	});
 
 	describe("no-false-positive guards", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips exported constants", rule, {
 			invalid: [],
 			valid: [
@@ -355,7 +332,6 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips constants referenced more than once", rule, {
 			invalid: [],
 			valid: [
@@ -363,7 +339,16 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
+		ts.run("skips constants with write references", rule, {
+			invalid: [],
+			valid: ["const TITLE_OFFSET = 225;\nTITLE_OFFSET = 128;"],
+		});
+
+		ts.run("skips script global constants", rule, {
+			invalid: [],
+			valid: [{ code: "const TITLE_OFFSET = 225;", sourceType: "script" }],
+		});
+
 		ts.run("skips non-ALL_CAPS names", rule, {
 			invalid: [],
 			valid: [
@@ -371,13 +356,11 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips destructuring patterns", rule, {
 			invalid: [],
 			valid: ["const { TITLE_GRADIENT } = getStyles();\nconst WRAPPER = { Color: TITLE_GRADIENT };"],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips multi-declarator declarations", rule, {
 			invalid: [],
 			valid: [
@@ -385,7 +368,6 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("skips reused JSX element constants", rule, {
 			invalid: [],
 			valid: [
@@ -393,19 +375,16 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips function initializer constants", rule, {
 			invalid: [],
 			valid: ["const HANDLER = () => {};\nconst WRAPPER = { callback: HANDLER };"],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips class initializer constants", rule, {
 			invalid: [],
 			valid: ["const HANDLER = class { render() {} };\nconst WRAPPER = { value: HANDLER };"],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips shadowed constants", rule, {
 			invalid: [],
 			valid: [
@@ -415,7 +394,6 @@ describe("no-useless-constants", () => {
 	});
 
 	describe("object allocation guard", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips object literal constant", rule, {
 			invalid: [],
 			valid: [
@@ -423,13 +401,11 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips array literal constant", rule, {
 			invalid: [],
 			valid: ["const EMPTY_MOB_IDS = [];\nconst HIDDEN = { mobIds: EMPTY_MOB_IDS };"],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips new Array constant", rule, {
 			invalid: [],
 			valid: [
@@ -437,7 +413,6 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports same-scope Roblox datatype constructor constant", rule, {
 			invalid: [
 				{
@@ -449,7 +424,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("reports same-scope Roblox datatype member constant", rule, {
 			invalid: [
 				{
@@ -461,7 +435,6 @@ describe("no-useless-constants", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("skips configured call pattern", rule, {
 			invalid: [],
 			valid: [
@@ -472,7 +445,6 @@ describe("no-useless-constants", () => {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("skips JSX element constant", rule, {
 			invalid: [],
 			valid: [

@@ -1,4 +1,5 @@
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
+import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -8,10 +9,6 @@ import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 type SizeCallExpression = ESTree.CallExpression & {
 	readonly callee: ESTree.StaticMemberExpression;
 };
-
-function isExpressionNode(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
-	return node.type !== "PrivateIdentifier";
-}
 
 function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression, sourceCode: SourceCode): boolean {
 	if (left.type !== right.type) return false;
@@ -144,7 +141,7 @@ function getAppendTarget(
 const noArraySizeAssignment = defineRule({
 	create(context): Visitor {
 		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options?.allowAutofix === true;
+		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
 		const environment = options?.environment === "standard" ? "standard" : "roblox-ts";
 		const { sourceCode } = context;
 

@@ -10,7 +10,6 @@ function errorWithName(name: string): { message: string } {
 }
 
 describe("prefer-pascal-case-enums", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("prefer-pascal-case-enums", rule, {
 		invalid: [
 			// All caps

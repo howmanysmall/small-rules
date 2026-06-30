@@ -4,7 +4,6 @@ import rule from "$oxc-rules/directive-no-duplicate-disable";
 import { js } from "./rule-testers";
 
 describe("directive-no-duplicate-disable", () => {
-	// @ts-expect-error -- Shut up
 	js.run("directive-no-duplicate-disable", rule, {
 		invalid: [
 			{

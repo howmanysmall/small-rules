@@ -88,7 +88,7 @@ function getKeypointArrayReplacement(
 }
 
 const preferSequenceOverloads = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			NewExpression(node): void {
 				if (node.callee.type !== "Identifier") return;

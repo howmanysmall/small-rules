@@ -1,11 +1,9 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/use-exhaustive-dependencies";
-import parser from "@typescript-eslint/parser";
 
 import { jsx, ts } from "./rule-testers";
 
 describe("use-exhaustive-dependencies", () => {
-	// @ts-expect-error - RuleTester types are incorrect for suggestions
 	jsx.run("use-exhaustive-dependencies", rule, {
 		invalid: [
 			// Missing dependency
@@ -153,6 +151,40 @@ function Component() {
 function Component() {
     const [count, setCount] = useState(0);
     useEffect(() => {}, []);
+}
+`,
+			},
+			{
+				code: `
+function Component({ keep, value }: { keep: number; value: number }) {
+    useEffect(() => {
+        console.log(keep);
+    }, [keep, (value as number)!]);
+}
+`,
+				errors: [
+					{
+						messageId: "unnecessaryDependency",
+						suggestions: [
+							{
+								desc: "Remove 'value' from dependencies array",
+								output: `
+function Component({ keep, value }: { keep: number; value: number }) {
+    useEffect(() => {
+        console.log(keep);
+    }, [keep]);
+}
+`,
+							},
+						],
+					},
+				],
+				language: "ts",
+				output: `
+function Component({ keep, value }: { keep: number; value: number }) {
+    useEffect(() => {
+        console.log(keep);
+    }, [keep]);
 }
 `,
 			},
@@ -639,7 +671,7 @@ function Component({ foo }) {
 						],
 					},
 				],
-				languageOptions: { parser },
+				language: "ts",
 				output: `
 function Component({ foo }) {
     useMemo(() => foo!.bar, [foo.bar]);
@@ -1102,7 +1134,7 @@ function Component() {
     }, [a, b]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 			},
 			// Coverage: Stable result as single number
 			{
@@ -1697,7 +1729,7 @@ function Component({ foo }) {
     useMemo(() => foo!.bar, [foo]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 			},
 
 			// Nested non-null assertions
@@ -1707,7 +1739,7 @@ function Component({ foo }) {
     useMemo(() => foo!.bar!.baz, [foo]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 			},
 
 			// Mixed optional chaining and non-null assertion
@@ -1717,7 +1749,7 @@ function Component({ foo }) {
     useMemo(() => foo?.bar!.baz, [foo]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 			},
 
 			// Non-null assertion with method call
@@ -1727,7 +1759,7 @@ function Component({ obj }) {
     useMemo(() => obj!.items.map(x => x * 2), [obj]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 			},
 
 			// Object literal with property name same as outer variable - only value is a capture
@@ -1802,7 +1834,6 @@ function Component() {
 		],
 	});
 
-	// @ts-expect-error - RuleTester types are incorrect for suggestions
 	jsx.run("use-exhaustive-dependencies", rule, {
 		invalid: [
 			// Custom hook with missing dependency
@@ -2131,7 +2162,7 @@ function Component({ value }) {
     }, [(value as number)!]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 				options: [{ reportUnnecessaryDependencies: false }],
 			},
 			{
@@ -2163,7 +2194,18 @@ function Component({ value }) {
     }, [value as number]);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
+				options: [{ reportUnnecessaryDependencies: false }],
+			},
+			{
+				code: `
+function Component({ value }: { value: number }) {
+    useEffect(() => {
+        console.log(value);
+    }, [(value + 1) as number]);
+}
+`,
+				language: "ts",
 				options: [{ reportUnnecessaryDependencies: false }],
 			},
 			{
@@ -2199,7 +2241,7 @@ function Component() {
     }, []);
 }
 `,
-				languageOptions: { parser },
+				language: "ts",
 			},
 			`
 function Component() {
@@ -2310,7 +2352,6 @@ function Component() {
 	});
 
 	describe("t4 behavior lock: option-sensitive and import-sensitive interactions", () => {
-		// @ts-expect-error - RuleTester types are incorrect for suggestions
 		jsx.run("use-exhaustive-dependencies - reportUnnecessaryStableDependencies", rule, {
 			invalid: [
 				{
@@ -2382,7 +2423,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error - RuleTester types are incorrect for suggestions
 		jsx.run("use-exhaustive-dependencies - resolveExpressionDependencies false", rule, {
 			invalid: [
 				{
@@ -2439,7 +2479,6 @@ function Component() {
 });
 
 describe("use-exhaustive-dependencies - coverage locks", () => {
-	// @ts-expect-error - RuleTester types are incorrect for suggestions
 	jsx.run("use-exhaustive-dependencies - coverage locks", rule, {
 		invalid: [
 			{
@@ -2507,7 +2546,6 @@ function Component({ count }) {
 		],
 	});
 
-	// @ts-expect-error - RuleTester types are incorrect for suggestions
 	ts.run("use-exhaustive-dependencies - type assertion coverage locks", rule, {
 		invalid: [
 			{

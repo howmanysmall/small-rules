@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-modding-inspect";
 import { ts } from "./rule-testers";
 
 describe("prefer-modding-inspect", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("prefer-modding-inspect", rule, {
 		invalid: [
 			{

@@ -24,7 +24,7 @@ function isNotSpread(node: ESTree.Argument): node is ESTree.Expression {
 }
 
 const requireUnicodeRegex = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
 				if (!isIdentifierWithName(node.callee, "regex")) return;

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-increment-decrement";
 import { js } from "./rule-testers";
 
 describe("no-increment-decrement", () => {
-	// @ts-expect-error -- Shut up
 	js.run("no-increment-decrement", rule, {
 		invalid: [
 			{

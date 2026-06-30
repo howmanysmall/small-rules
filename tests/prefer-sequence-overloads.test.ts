@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-sequence-overloads";
 import { js } from "./rule-testers";
 
 describe("prefer-sequence-overloads", () => {
-	// @ts-expect-error dumb piece of shit
 	js.run("prefer-sequence-overloads", rule, {
 		invalid: [
 			{

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/require-paired-calls";
 import { js } from "./rule-testers";
 
 describe("require-paired-calls", () => {
-	// @ts-expect-error - This is dumb
 	js.run("require-paired-calls", rule, {
 		invalid: [
 			// Basic unpaired opener
@@ -1560,7 +1559,6 @@ function test() {
 });
 
 describe("require-paired-calls - coverage locks", () => {
-	// @ts-expect-error - This is dumb
 	js.run("require-paired-calls - nested function stack isolation", rule, {
 		invalid: [],
 		valid: [

@@ -128,7 +128,7 @@ function getContextStackReplacement(
 const preferContextStack = defineRule({
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
-		/* v8 ignore start -- @preserve RuleTester/runtime filenames are present; empty filename is a defensive host guard. */
+		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const discoveredContextStack =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, CONTEXT_STACK_COMPONENT);
 		/* v8 ignore stop -- @preserve */

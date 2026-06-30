@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-instance-methods-without-this";
 import { tsx } from "./rule-testers";
 
 describe("no-instance-methods-without-this", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-instance-methods-without-this", rule, {
 		invalid: [
 			// Private methods without this
@@ -273,7 +272,6 @@ class MyClass {
 
 	// Configuration tests
 	describe("with configuration options", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("no-instance-methods-without-this (checkPrivate: false)", rule, {
 			invalid: [
 				{
@@ -302,7 +300,6 @@ class MyClass {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("no-instance-methods-without-this (checkProtected: false)", rule, {
 			invalid: [
 				{
@@ -331,7 +328,6 @@ class MyClass {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("no-instance-methods-without-this (checkPublic: false)", rule, {
 			invalid: [
 				{
@@ -360,7 +356,6 @@ class MyClass {
 			],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("no-instance-methods-without-this (checkPrivate: false, checkProtected: false)", rule, {
 			invalid: [
 				{

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
@@ -40,6 +41,11 @@ function getFunctionComponentName(node: ESTree.Node): string | undefined {
 
 	/* v8 ignore next -- @preserve only named function declarations and assigned arrow functions can reach this helper. */
 	return undefined;
+}
+
+function getArrowExpressionBody(node: ESTree.ArrowFunctionExpression): ESTree.Expression | undefined {
+	if (node.body.type === "BlockStatement") return undefined;
+	return unwrapExpression(node.body);
 }
 
 function getImportSourceFromVariable(variable: ScopeVariable): string | undefined {
@@ -138,8 +144,15 @@ const noRedundantAspectRatioConstraint = defineRule({
 		return {
 			ArrowFunctionExpression(node): void {
 				const name = getFunctionComponentName(node);
-				if (name === undefined || (node.body.type !== "JSXElement" && node.body.type !== "JSXFragment")) return;
-				if (!hasAspectRatioConstraintInSubtree(node.body)) return;
+				const body = getArrowExpressionBody(node);
+				if (
+					name === undefined ||
+					body === undefined ||
+					(body.type !== "JSXElement" && body.type !== "JSXFragment")
+				) {
+					return;
+				}
+				if (!hasAspectRatioConstraintInSubtree(body)) return;
 				protectedComponents.add(name);
 			},
 

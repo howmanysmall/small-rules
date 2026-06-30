@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-new-instance-in-use-memo";
 import { ts } from "./rule-testers";
 
 describe("no-new-instance-in-use-memo", () => {
-	// @ts-expect-error -- Shut up
 	ts.run("no-new-instance-in-use-memo", rule, {
 		invalid: [
 			{

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-hoisted-jsx-elements";
 import { tsx } from "./rule-testers";
 
 describe("prefer-hoisted-jsx-elements", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("prefer-hoisted-jsx-elements", rule, {
 		invalid: [
 			{

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/require-react-display-names";
 import { tsx } from "./rule-testers";
 
 describe("require-react-display-names", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("require-react-display-names", rule, {
 		invalid: [
 			// Direct memo export

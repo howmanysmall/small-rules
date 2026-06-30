@@ -4,7 +4,6 @@ import rule from "$oxc-rules/require-named-effect-functions";
 import { tsx } from "./rule-testers";
 
 describe("require-named-effect-functions", () => {
-	// @ts-expect-error -- shut up
 	tsx.run("require-named-effect-functions", rule, {
 		invalid: [
 			// Arrow functions
@@ -422,7 +421,6 @@ function makeComponent() {
 	});
 
 	describe("configuration options", () => {
-		// @ts-expect-error -- shut up
 		tsx.run("require-named-effect-functions-standard-mode", rule, {
 			invalid: [
 				// Arrow functions should still fail in standard mode
@@ -469,7 +467,6 @@ useEffect(effect, []);
 			],
 		});
 
-		// @ts-expect-error -- shut up
 		tsx.run("require-named-effect-functions-custom-hooks", rule, {
 			invalid: [
 				// Custom hook with arrow function
@@ -518,7 +515,6 @@ useEffect(() => {
 	});
 
 	describe("t4 behavior lock: import aliasing and getHookName interaction", () => {
-		// @ts-expect-error -- shut up
 		tsx.run("require-named-effect-functions - renamed hook import not detected", rule, {
 			invalid: [],
 			valid: [
@@ -534,7 +530,6 @@ myEffect(() => {
 			],
 		});
 
-		// @ts-expect-error -- shut up
 		tsx.run("require-named-effect-functions - namespace import", rule, {
 			invalid: [
 				{

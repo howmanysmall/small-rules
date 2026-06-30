@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-expect-assertions";
 import { ts } from "./rule-testers";
 
 describe("prefer-expect-assertions", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("prefer-expect-assertions", rule, {
 		invalid: [
 			{

@@ -1,6 +1,7 @@
 import { hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import {
 	isAssignmentExpression,
+	isBindingIdentifier,
 	isExpressionStatement,
 	isMemberExpression,
 	isNewExpression,
@@ -35,10 +36,6 @@ interface Candidate {
 const VISITOR_KEYS_TO_SKIP = new Set(["parent", "range", "loc", "tokens", "comments"]);
 
 function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {
-	return node.type === "Identifier";
-}
-
-function isBindingIdentifier(node: ESTree.Node): node is ESTree.BindingIdentifier {
 	return node.type === "Identifier";
 }
 
@@ -96,7 +93,7 @@ function getArrayIndexAssignment(
 	if (!isAssignmentExpression(expression) || expression.operator !== "=") return undefined;
 
 	const { left } = expression;
-	if (!isMemberExpression(left) || left.optional || !left.computed) return undefined;
+	if (!(isMemberExpression(left) && left.computed)) return undefined;
 
 	const { object, property } = left;
 	if (!isIdentifierReference(object) || object.name !== arrayIdentifierName) return undefined;

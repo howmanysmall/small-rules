@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-print";
 import { js } from "./rule-testers";
 
 describe("no-print", () => {
-	// @ts-expect-error -- Shut up
 	js.run("no-print", rule, {
 		invalid: [
 			{

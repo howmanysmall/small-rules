@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-static-react-create-element";
 import { tsx } from "./rule-testers";
 
 describe("no-static-react-create-element", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-static-react-create-element", rule, {
 		invalid: [
 			{

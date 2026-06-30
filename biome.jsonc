@@ -292,7 +292,7 @@
 				"useBlockStatements": "off",
 				"useConsistentEnumValueType": "error",
 				"useConsistentMemberAccessibility": "off",
-				"useConsistentMethodSignatures": "error",
+				"useConsistentMethodSignatures": "off",
 				"useConst": {
 					"fix": "safe",
 					"level": "error"
@@ -316,6 +316,7 @@
 				"noApproximativeNumericConstant": "error",
 				"noArrayIndexKey": "error",
 				"noConstEnum": "off",
+				"noControlCharactersInRegex": "off",
 				"noDuplicateEnumValues": "error",
 				"noEmptyBlockStatements": "error",
 				"noEqualsToNull": "error",

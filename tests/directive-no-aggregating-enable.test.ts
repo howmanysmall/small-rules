@@ -4,7 +4,6 @@ import rule from "$oxc-rules/directive-no-aggregating-enable";
 import { js } from "./rule-testers";
 
 describe("directive-no-aggregating-enable", () => {
-	// @ts-expect-error -- Shut up
 	js.run("directive-no-aggregating-enable", rule, {
 		invalid: [
 			{

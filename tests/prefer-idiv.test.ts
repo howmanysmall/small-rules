@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-idiv";
 import { ts } from "./rule-testers";
 
 describe("prefer-idiv", () => {
-	// @ts-expect-error -- this thing is dumb.
 	ts.run("prefer-idiv", rule, {
 		invalid: [
 			// Simple division - auto-fix cases

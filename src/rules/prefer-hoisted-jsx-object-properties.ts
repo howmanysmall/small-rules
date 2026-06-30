@@ -16,17 +16,20 @@ const STATIC_OPTIONS: StaticExpressionOptions = {
 function getAttributeExpression(node: ESTree.JSXAttribute): ESTree.Expression | undefined {
 	const { value } = node;
 	if (value?.type !== "JSXExpressionContainer") return undefined;
+	/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
 	if (value.expression.type === "JSXEmptyExpression") return undefined;
 	return value.expression;
 }
 
-type WalkableParent = ESTree.ArrayExpression | ESTree.JSXElement | ESTree.JSXExpressionContainer | ESTree.JSXFragment;
+type WalkableParent = ESTree.Node;
 
 function isJsxElementAssignedToModuleConst(context: Context, node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
 	let current: WalkableParent = node;
 
 	while (true) {
 		const { parent } = current;
+		/* v8 ignore next -- @preserve decorated parser ASTs keep JSX ancestors attached until traversal stops. */
+		if (parent === null) return false;
 		if (parent.type === "VariableDeclarator") return isModuleConstDeclaration(context, node, parent, current);
 
 		const nextParent = getWalkableJsxParent(parent);
@@ -40,6 +43,7 @@ function getWalkableJsxParent(parent: ESTree.Node): WalkableParent | undefined {
 		parent.type === "JSXElement" ||
 		parent.type === "JSXFragment" ||
 		parent.type === "JSXExpressionContainer" ||
+		parent.type === "ParenthesizedExpression" ||
 		parent.type === "ArrayExpression"
 	) {
 		return parent;

@@ -5,7 +5,7 @@ import type { Visitor } from "oxlint-plugin-utilities";
 const SPEC_EXTENSION_PATTERN = /\.spec\.(?:ts|tsx)$/u;
 
 const noSpecFileExtension = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			Program(node): void {
 				const { filename } = context;

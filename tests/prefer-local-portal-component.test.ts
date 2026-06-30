@@ -11,7 +11,6 @@ const AMBIGUOUS_PORTAL = join(FIXTURES, "ambiguous-portal");
 const FIXTURE_ONLY_PORTAL = join(FIXTURES, "fixture-only");
 
 describe("prefer-local-portal-component", () => {
-	// @ts-expect-error RuleTester types incompatible with runtime rule shape
 	tsx.run("prefer-local-portal-component", rule, {
 		invalid: [
 			{

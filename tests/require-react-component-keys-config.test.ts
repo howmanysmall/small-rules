@@ -1,11 +1,9 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/require-react-component-keys";
-import parser from "@typescript-eslint/parser";
 
 import { tsx } from "./rule-testers";
 
 describe("require-react-component-keys with custom configurations", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	// And this test file intentionally passes the rule as-is for runtime validation.
 	tsx.run("require-react-component-keys - custom iterationMethods", rule, {
 		invalid: [
@@ -17,12 +15,6 @@ function CustomIteration(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ iterationMethods: ["customMap"] }],
 			},
 		],
@@ -34,12 +26,6 @@ function CustomIteration(items) {
     return items.customMap((item) => <div key={item.id}>{item}</div>);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ iterationMethods: ["customMap"] }],
 			},
 			// Custom iteration method 'each' not in list - should not be treated as iteration (no keys needed elsewhere)
@@ -51,12 +37,6 @@ function CustomEach(items) {
     return <div>No keys needed here since it's top-level</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ iterationMethods: ["map", "filter"] }],
 			},
 			// Default iterations with custom key requirement
@@ -66,18 +46,11 @@ function DefaultIteration(items) {
     return items.map((item) => <div key={item.id}>{item}</div>);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ iterationMethods: ["map"] }],
 			},
 		],
 	});
 
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	// And this test file intentionally passes the rule as-is for runtime validation.
 	tsx.run("require-react-component-keys - custom memoizationHooks", rule, {
 		invalid: [
@@ -92,12 +65,6 @@ function CustomNamedHooks() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ memoizationHooks: ["useCallback"] }],
 			},
 			// Custom hook in list but missing key - should error
@@ -111,12 +78,6 @@ function CustomMemoizedBad() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ memoizationHooks: ["useCustomMemo"] }],
 			},
 		],
@@ -132,12 +93,6 @@ function WithoutKeys() {
     return <div>No keys needed here since it's top-level</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ memoizationHooks: [] }],
 			},
 			// Custom hook in list - should require keys when key is present
@@ -150,12 +105,6 @@ function CustomMemoized() {
     return <div>{renderLayout()}</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ memoizationHooks: ["useCustomMemo"] }],
 			},
 		],

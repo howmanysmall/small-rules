@@ -40,12 +40,18 @@ function normalizeAdditionalStaticFactories(rawOptions: unknown): ReadonlySet<st
 }
 
 function isJavaScriptXmlElementAssignedToModuleConst(context: Context, node: ESTree.JSXElement): boolean {
-	const { parent } = node;
-	if (parent.type !== "VariableDeclarator" || parent.id.type !== "Identifier" || parent.init !== node) {
+	let current: ESTree.Node = node;
+	let { parent } = current;
+	while (parent.type === "ParenthesizedExpression") {
+		current = parent;
+		({ parent } = current);
+	}
+
+	if (parent.type !== "VariableDeclarator" || parent.id.type !== "Identifier" || parent.init !== current) {
 		return false;
 	}
 
-	const variable = getVariableByName(context.sourceCode.getScope(node), parent.id.name);
+	const variable = getVariableByName(context.sourceCode.getScope(current), parent.id.name);
 	/* v8 ignore start -- @preserve module const declarators have a matching scope variable. */
 	return variable === undefined ? false : isModuleLevelScope(variable.scope);
 	/* v8 ignore stop -- @preserve */
@@ -179,7 +185,11 @@ function isInsideHoistedJsxElement(context: Context, node: ESTree.JSXElement): b
 				return true;
 			}
 		}
-		if (parent.type === "JSXElement" || parent.type === "JSXFragment") {
+		if (
+			parent.type === "JSXElement" ||
+			parent.type === "JSXFragment" ||
+			parent.type === "ParenthesizedExpression"
+		) {
 			current = parent;
 		}
 		({ parent } = parent);

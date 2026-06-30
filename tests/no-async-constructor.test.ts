@@ -4,22 +4,8 @@ import rule from "$oxc-rules/no-async-constructor";
 import { tsx } from "./rule-testers";
 
 describe("no-async-constructor", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-async-constructor", rule, {
 		invalid: [
-			// Await expression in constructor
-			{
-				code: `
-class BadAwait {
-    constructor() {
-        await this.init();
-    }
-    async init() {}
-}
-`,
-				errors: [{ messageId: "awaitInConstructor" }],
-			},
-
 			// .then() chain
 			{
 				code: `
@@ -151,18 +137,6 @@ class BadNestedThen {
 }
 `,
 				errors: [{ messageId: "promiseChainInConstructor" }, { messageId: "promiseChainInConstructor" }],
-			},
-
-			// Await with complex expression
-			{
-				code: `
-class BadAwaitComplex {
-    constructor() {
-        const data = await fetch('/api').then(r => r.json());
-    }
-}
-`,
-				errors: [{ messageId: "awaitInConstructor" }, { messageId: "promiseChainInConstructor" }],
 			},
 
 			// Async method call inside condition

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/memoized-effect-dependencies";
 import { ts } from "./rule-testers";
 
 describe("memoized-effect-dependencies", () => {
-	// @ts-expect-error -- Shut up
 	ts.run("memoized-effect-dependencies", rule, {
 		invalid: [
 			{
@@ -239,7 +238,6 @@ function Component() {
 	});
 
 	describe("t4 behavior lock: import aliasing and scope resolution", () => {
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - renamed imports", rule, {
 			invalid: [
 				{
@@ -269,7 +267,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - namespace import", rule, {
 			invalid: [
 				{
@@ -298,7 +295,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - aggressive let reassignment", rule, {
 			invalid: [
 				{
@@ -329,7 +325,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - custom hooks option", rule, {
 			invalid: [
 				{
@@ -362,7 +357,6 @@ function Component() {
 	});
 
 	describe("coverage behavior lock", () => {
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - dependency array shapes", rule, {
 			invalid: [
 				{
@@ -545,7 +539,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - member hook forms", rule, {
 			invalid: [
 				{
@@ -610,7 +603,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - stable hook destructuring", rule, {
 			invalid: [
 				{
@@ -731,7 +723,6 @@ function Component() {
 			],
 		});
 
-		// @ts-expect-error -- Shut up
 		ts.run("memoized-effect-dependencies - custom dependency index", rule, {
 			invalid: [
 				{

@@ -11,6 +11,7 @@ github_attestations = false
 lockfile = true
 
 [tools]
+"cargo:similarity-ts" = "latest"
 "github:howmanysmall/pullhook" = "latest"
 actionlint = "latest"
 aube = "latest"
@@ -44,6 +45,11 @@ run = "nr type-check"
 [tasks.knip]
 description = "Detect unused files, exports, and dependencies with Knip."
 run = "nr knip"
+
+[tasks.duplicates]
+alias = "dupes"
+description = "Detect duplicated/structurally-similar code in src with similarity-ts (AST-based jscpd replacement)."
+run = "similarity-ts --threshold 0.85 --min-lines 5 --print src"
 
 [tasks.build]
 description = "Build the package into dist using tsdown."

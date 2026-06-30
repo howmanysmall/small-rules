@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-math-min-max";
 import { ts } from "./rule-testers";
 
 describe("prefer-math-min-max", () => {
-	// @ts-expect-error -- RuleTester types are still awkward here.
 	ts.run("prefer-math-min-max", rule, {
 		invalid: [
 			{

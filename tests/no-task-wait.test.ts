@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-task-wait";
 import { js } from "./rule-testers";
 
 describe("no-task-wait", () => {
-	// @ts-expect-error -- RuleTester types do not match oxlint plugin utilities exactly.
 	js.run("no-task-wait", rule, {
 		invalid: [
 			{

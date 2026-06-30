@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-constant-condition-with-break";
 import { js } from "./rule-testers";
 
 describe("no-constant-condition-with-break", () => {
-	// @ts-expect-error - RuleTester doesn't support the new format of rules
 	js.run("no-constant-condition-with-break", rule, {
 		invalid: [
 			{
@@ -616,8 +615,8 @@ while (true) {
     }
 }
 `,
-				languageOptions: { sourceType: "script" },
 				options: [{ loopExitCalls: ["task.wait"] }],
+				sourceType: "script",
 			},
 			{
 				code: `
@@ -627,8 +626,8 @@ while (true) {
     }
 }
 `,
-				languageOptions: { sourceType: "script" },
 				options: [{ loopExitCalls: ["task.wait"] }],
+				sourceType: "script",
 			},
 			{
 				code: `

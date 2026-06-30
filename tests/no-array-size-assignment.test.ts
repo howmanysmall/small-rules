@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-array-size-assignment";
 import { js } from "./rule-testers";
 
 describe("no-array-size-assignment", () => {
-	// @ts-expect-error -- Stupid.
 	js.run("no-array-size-assignment", rule, {
 		invalid: [
 			// .size() pattern (default roblox-ts)
