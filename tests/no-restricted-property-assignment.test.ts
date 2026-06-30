@@ -72,6 +72,14 @@ describe("no-restricted-property-assignment", () => {
 				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
+			{
+				code: "_G.__DEV__ = true; // allowFiles should not suppress on non-matching files",
+				errors: [{ messageId: "restricted" }],
+				filename: "some/other/file.ts",
+				options: [
+					{ allowFiles: ["main.server.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
 		],
 		valid: [
 			"const x = _G.__DEV__;",
@@ -119,6 +127,74 @@ describe("no-restricted-property-assignment", () => {
 			{
 				code: "_G.__DEV__ = true; // malformed-options-top-level",
 				options: [{ restrictions: { object: "_G" } }],
+			},
+			{
+				code: "_G.__DEV__ = true; // malformed-checkComputed",
+				options: [{ checkComputed: "yes", restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+			},
+			{
+				code: "_G.__DEV__ = true; // malformed-allowFiles-not-array",
+				options: [{ allowFiles: "main.server.ts", restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+			},
+			{
+				code: "_G.__DEV__ = true; // malformed-allowFiles-not-strings",
+				options: [{ allowFiles: [42], restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+			},
+			// allowFiles: should suppress reports on matching files
+			{
+				code: "_G.__DEV__ = true;",
+				filename: "main.server.ts",
+				options: [
+					{ allowFiles: ["main.server.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				filename: "src/main.client.ts",
+				options: [
+					{ allowFiles: ["main.client.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				filename: "stories/button.story.ts",
+				options: [
+					{ allowFiles: ["*.story.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				filename: "stories/button.story.tsx",
+				options: [
+					{ allowFiles: ["*.story.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true; // multiple allow patterns",
+				filename: "main.server.ts",
+				options: [
+					{
+						allowFiles: ["main.server.ts", "main.client.ts"],
+						restrictions: [{ object: "_G", properties: ["__DEV__"] }],
+					},
+				],
+			},
+			{
+				code: "_G.__DEV__ = true; // multiple allow patterns - second match",
+				filename: "main.client.ts",
+				options: [
+					{
+						allowFiles: ["main.server.ts", "main.client.ts"],
+						restrictions: [{ object: "_G", properties: ["__DEV__"] }],
+					},
+				],
+			},
+			{
+				code: "_G.__DEV__++; // allowFiles should work on update expressions too",
+				filename: "main.server.ts",
+				options: [
+					{ allowFiles: ["main.server.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
 			},
 		],
 	});
