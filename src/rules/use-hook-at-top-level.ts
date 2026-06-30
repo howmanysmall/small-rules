@@ -1,4 +1,4 @@
-import { isComponentName } from "$oxc-utilities/oxc-utilities";
+import { isComponentName, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -30,10 +30,6 @@ function isReactHookName(name: string): boolean {
 
 function getOptions(value: unknown): UseHookAtTopLevelOptions {
 	return isRecord(value) ? value : {};
-}
-
-function isIdentifierName(node: ESTree.Node): node is ESTree.IdentifierName {
-	return node.type === "Identifier";
 }
 
 function isComponentOrHook(node: CallbackFunction): boolean {

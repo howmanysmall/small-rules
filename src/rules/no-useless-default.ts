@@ -1,4 +1,4 @@
-import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -129,10 +129,6 @@ function isIdentifierNamed(
 
 function isBooleanLiteral(node: ESTree.Expression): node is ESTree.BooleanLiteral {
 	return node.type === "Literal" && typeof node.value === "boolean";
-}
-
-function isStringLiteral(node: ESTree.Expression): node is ESTree.StringLiteral {
-	return node.type === "Literal" && isStringRaw(node.value);
 }
 
 function getIntrinsicClassName(node: ESTree.JSXElementName): string | undefined {

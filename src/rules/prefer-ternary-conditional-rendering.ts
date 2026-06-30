@@ -1,4 +1,5 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -25,10 +26,6 @@ interface ComplementMatch {
 
 function canRender(node: ESTree.Node): node is JSXRenderable {
 	return node.type === "JSXElement" || node.type === "JSXFragment";
-}
-
-function isExpressionNode(node: BinaryOperand): node is ESTree.Expression {
-	return node.type !== "PrivateIdentifier";
 }
 
 function areEquivalentExpressionOrSuper(

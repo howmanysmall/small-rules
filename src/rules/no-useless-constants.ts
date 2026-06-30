@@ -1,4 +1,10 @@
-import { isCallbackFunction, isExportNamedDeclaration } from "$oxc-utilities/oxc-utilities";
+import {
+	isBindingIdentifier,
+	isCallbackFunction,
+	isExportNamedDeclaration,
+	isVariableDeclaration,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -51,18 +57,6 @@ function collectAllScopes(root: Scope): Array<Scope> {
 	}
 
 	return scopes;
-}
-
-function isBindingIdentifier(node: ESTree.Node): node is ESTree.BindingIdentifier {
-	return node.type === "Identifier";
-}
-
-function isVariableDeclarator(node: ESTree.Node): node is ESTree.VariableDeclarator {
-	return node.type === "VariableDeclarator";
-}
-
-function isVariableDeclaration(node: ESTree.Node): node is ESTree.VariableDeclaration {
-	return node.type === "VariableDeclaration";
 }
 
 function isFunctionLikeInitializer(node: ESTree.Node): boolean {
