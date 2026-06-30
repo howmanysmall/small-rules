@@ -1,9 +1,9 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
+import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { ESTree, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const NATIVE_PROPERTIES_SUFFIX = "NativeProperties";
 
@@ -27,10 +27,6 @@ function isNativePropertiesPropertyName(name: string): boolean {
 function getVariableInitializer(definition: ScopeVariable["defs"][number]): ESTree.Expression | undefined {
 	if (definition.type !== "Variable" || definition.node.type !== "VariableDeclarator") return undefined;
 	return definition.node.init ?? undefined;
-}
-
-function isModuleLevelScope(scope: Scope): boolean {
-	return scope.type === "module" || scope.type === "global";
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
