@@ -1,56 +1,39 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
-import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import { type } from "arktype";
 import { minimatch } from "minimatch";
 import { defineRule } from "oxlint-plugin-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+import type { Except, Simplify } from "type-fest";
 
-interface Restriction {
-	message?: string;
-	object: string;
-	properties: ReadonlyArray<string>;
-}
+const isRestriction = type({
+	"message?": "string | undefined",
+	object: "string",
+	properties: type("string[]").readonly(),
+}).readonly();
+const isRuleOptions = type({
+	"allowFiles?": type("string[]").readonly().or("undefined"),
+	"checkComputed?": "boolean | undefined",
+	restrictions: isRestriction.array().readonly(),
+}).readonly();
 
-interface RuleOptions {
-	allowFiles?: ReadonlyArray<string>;
-	checkComputed?: boolean;
-	restrictions: ReadonlyArray<Restriction>;
-}
-
-function isRestriction(value: unknown): value is Restriction {
-	if (!isRecord(value)) return false;
-	if (!isStringRaw(value.object)) return false;
-	if (!Array.isArray(value.properties)) return false;
-	if (!value.properties.every((property) => isStringRaw(property))) return false;
-	return value.message === undefined || isStringRaw(value.message);
-}
-
-function isRuleOptions(value: unknown): value is RuleOptions {
-	if (!isRecord(value)) return false;
-	if (!Array.isArray(value.restrictions)) return false;
-	if (!value.restrictions.every(isRestriction)) return false;
-	if (!(value.checkComputed === undefined || typeof value.checkComputed === "boolean")) return false;
-	if (!(value.allowFiles === undefined || isStringArray(value.allowFiles))) return false;
-	return true;
-}
-
-function isMemberExpressionTarget(node: ESTree.Node): node is ESTree.MemberExpression {
-	return node.type === "MemberExpression";
-}
-
-function getEffectiveOptions(context: { filename: string; options: ReadonlyArray<unknown> }): {
-	checkComputed: boolean;
-	isAllowedFile: boolean;
-	restrictions: ReadonlyArray<Restriction>;
-} {
-	const [options] = context.options;
-	if (!isRuleOptions(options)) {
-		return { checkComputed: true, isAllowedFile: false, restrictions: [] };
+type Context = InferContextFromRule<typeof noRestrictedPropertyAssignment>;
+type EffectiveOptions = Simplify<
+	Except<typeof isRuleOptions.infer, "allowFiles"> & {
+		readonly isAllowedFile: boolean;
+		readonly checkComputed: boolean;
 	}
+>;
+
+const MATCH_BASE = { matchBase: true };
+
+function getEffectiveOptions(context: Context): EffectiveOptions {
+	const [options] = context.options;
+	if (!isRuleOptions.allows(options)) return { checkComputed: true, isAllowedFile: false, restrictions: [] };
 
 	const { allowFiles, checkComputed, restrictions } = options;
-	const isAllowedFile =
-		allowFiles?.some((pattern) => minimatch(context.filename, pattern, { matchBase: true })) ?? false;
+	const isAllowedFile = allowFiles?.some((pattern) => minimatch(context.filename, pattern, MATCH_BASE)) ?? false;
 
 	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions };
 }
@@ -60,10 +43,8 @@ const noRestrictedPropertyAssignment = defineRule({
 		const { checkComputed, isAllowedFile, restrictions } = getEffectiveOptions(context);
 
 		function reportIfRestricted(node: ESTree.Node, reportNode: ESTree.Node): void {
-			if (isAllowedFile) return;
-			if (!isMemberExpressionTarget(node)) return;
-			if (node.computed && !checkComputed) return;
-			if (node.object.type !== "Identifier") return;
+			if (isAllowedFile || !isMemberExpression(node)) return;
+			if ((node.computed && !checkComputed) || node.object.type !== "Identifier") return;
 
 			const property = getMemberPropertyName(node);
 			if (property === undefined) return;
