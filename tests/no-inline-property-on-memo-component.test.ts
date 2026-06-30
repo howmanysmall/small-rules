@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-inline-property-on-memo-component";
 import { tsx } from "./rule-testers";
 
 describe("no-inline-property-on-memo-component", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-inline-property-on-memo-component", rule, {
 		invalid: [
 			{
@@ -115,7 +114,7 @@ import React from "@rbxts/react";
 
 const MemoPanel = React.memo(() => <div />);
 
-const view = <MemoPanel title="stable" empty={} />;
+const view = <MemoPanel title="stable" disabled />;
 `,
 			},
 			{

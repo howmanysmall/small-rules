@@ -1,11 +1,9 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/no-god-components";
-import parser from "@typescript-eslint/parser";
 
 import { tsx } from "./rule-testers";
 
 describe("no-god-components", () => {
-	// @ts-expect-error -- Shut up
 	tsx.run("no-god-components", rule, {
 		invalid: [
 			{
@@ -18,12 +16,6 @@ function Big() {
 }
 `,
 				errors: [{ messageId: "exceedsMaxLines" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ enforceTargetLines: false, maxLines: 5, targetLines: 5 }],
 			},
 			{
@@ -35,12 +27,6 @@ function OverTarget() {
 }
 `,
 				errors: [{ messageId: "exceedsTargetLines" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ enforceTargetLines: true, maxLines: 10, targetLines: 3 }],
 			},
 			{
@@ -56,12 +42,6 @@ function Deep() {
 }
 `,
 				errors: [{ messageId: "tsxNestingTooDeep" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -81,12 +61,6 @@ function Statey() {
 }
 `,
 				errors: [{ messageId: "tooManyStateHooks" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -104,12 +78,6 @@ function Propsy({ a, b, c }) {
 }
 `,
 				errors: [{ messageId: "tooManyProps" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -127,12 +95,6 @@ function Nullish() {
 }
 `,
 				errors: [{ messageId: "nullLiteral" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -152,12 +114,6 @@ const MemberState = () => {
 };
 `,
 				errors: [{ messageId: "tooManyStateHooks" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -179,12 +135,6 @@ const BadMemo = memo(() => {
 });
 `,
 				errors: [{ messageId: "tooManyStateHooks" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -205,12 +155,6 @@ const ReactBad = React.memo(function ReactBad() {
 });
 `,
 				errors: [{ messageId: "nullLiteral" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -232,12 +176,6 @@ export default memo(function DefaultBad() {
 });
 `,
 				errors: [{ messageId: "exceedsMaxLines" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ enforceTargetLines: false, maxLines: 3, targetLines: 3 }],
 			},
 			{
@@ -250,12 +188,6 @@ const Components = {
 };
 `,
 				errors: [{ messageId: "nullLiteral" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -277,12 +209,6 @@ class View {
 }
 `,
 				errors: [{ messageId: "nullLiteral" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -305,12 +231,6 @@ Assigned = memo(function Assigned() {
 });
 `,
 				errors: [{ messageId: "exceedsMaxLines" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ enforceTargetLines: false, maxLines: 3, targetLines: 3 }],
 			},
 		],
@@ -323,12 +243,6 @@ function Small({ a, b }) {
     return <div><span>{a}{b}</span></div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
@@ -336,12 +250,6 @@ function PlainProps(props) {
     return <div>{props.label}</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Export default HOC with named function expression (covers getComponentNameFromCallParent export default case)
 			{
@@ -350,12 +258,6 @@ export default memo(function DefaultMemo() {
     return <div />;
 });
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// HOC call with non-function argument (covers CallExpression early-return)
 			{
@@ -366,12 +268,6 @@ function Wrapper() {
     return <div />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Assignment pattern destructuring (covers countDestructuredProps assignment pattern)
 			{
@@ -380,12 +276,6 @@ function DefaultProps({ a, b } = {}) {
     return <div>{a}{b}</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
@@ -393,23 +283,11 @@ function RestProps({ a, ...rest }) {
     return <div>{a}{rest.label}</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
 declare function DeclaredComponent(): JSX.Element;
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Member-expression hook + computed hook access (covers getHookName member/undefined branches)
 			{
@@ -420,12 +298,6 @@ function Hooks() {
     return <div />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Non-React member call should not be treated as a React HOC (covers isReactComponentHOC fallback)
 			{
@@ -435,12 +307,6 @@ function NotReact() {
     return <div />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Direct HOC call expression without assignment (covers getComponentNameFromCallParent undefined path)
 			{
@@ -449,12 +315,6 @@ memo(function DirectMemo() {
     return <div />;
 });
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
@@ -463,12 +323,6 @@ function TypeNull() {
     return <div />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
@@ -477,12 +331,6 @@ function Ignored() {
     return <div>{value}</div>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [
 					{
 						enforceTargetLines: false,
@@ -502,12 +350,6 @@ function helper() {
     return value;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
@@ -518,12 +360,6 @@ const helpers = {
     },
 };
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			{
 				code: `
@@ -534,12 +370,6 @@ class View {
     }
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 		],
 	});

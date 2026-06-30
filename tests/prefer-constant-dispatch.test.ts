@@ -6,7 +6,6 @@ import { tsx } from "./rule-testers";
 const preferConstantDispatchError = [{ messageId: "preferConstantDispatch", suggestions: 1 }];
 
 describe("prefer-constant-dispatch", () => {
-	// @ts-expect-error -- RuleTester types are incorrect for suggestions
 	tsx.run("prefer-constant-dispatch", rule, {
 		invalid: [
 			{

@@ -3,6 +3,8 @@ import { defineRule } from "oxlint-plugin-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): string {
+	if (typeNode.type === "TSParenthesizedType") return toGenericArrayType(typeNode.typeAnnotation, sourceCode);
+
 	if (typeNode.type === "TSArrayType") {
 		const elementText = toGenericArrayType(typeNode.elementType, sourceCode);
 		return `Array<${elementText}>`;
@@ -21,11 +23,12 @@ function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): st
 }
 
 function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
+	const meaningfulParent = parent.type === "TSParenthesizedType" ? parent.parent : parent;
 	return !(
-		(parent.type === "TSRestType" && parent.parent.type === "TSTupleType") ||
-		parent.type === "TSTupleType" ||
-		parent.type === "TSArrayType" ||
-		(parent.type === "TSTypeOperator" && parent.operator === "readonly")
+		(meaningfulParent.type === "TSRestType" && meaningfulParent.parent.type === "TSTupleType") ||
+		meaningfulParent.type === "TSTupleType" ||
+		meaningfulParent.type === "TSArrayType" ||
+		(meaningfulParent.type === "TSTypeOperator" && meaningfulParent.operator === "readonly")
 	);
 }
 

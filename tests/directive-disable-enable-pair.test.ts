@@ -4,7 +4,6 @@ import rule from "$oxc-rules/directive-disable-enable-pair";
 import { js } from "./rule-testers";
 
 describe("directive-disable-enable-pair", () => {
-	// @ts-expect-error -- Shut up
 	js.run("directive-disable-enable-pair", rule, {
 		invalid: [
 			{

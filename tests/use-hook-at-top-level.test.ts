@@ -4,7 +4,6 @@ import rule from "$oxc-rules/use-hook-at-top-level";
 import { jsx } from "./rule-testers";
 
 describe("use-hook-at-top-level", () => {
-	// @ts-expect-error -- shut up
 	jsx.run("use-hook-at-top-level", rule, {
 		invalid: [
 			// Conditional execution - if statement

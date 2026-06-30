@@ -6,14 +6,13 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { createRuleTester } from "./rule-testers";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const tester = new RuleTester({
-	languageOptions: { ecmaVersion: 2022, sourceType: "module" },
-});
+const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 describe("jest utilities", () => {
 	const testCaseMessages = {
@@ -52,7 +51,6 @@ describe("jest utilities", () => {
 	});
 
 	describe("test case call detection", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("jest-utilities-test-cases", testCaseRule, {
 			invalid: [
 				{ code: "it('works', () => {});", errors: [{ messageId: "callback" }] },
@@ -112,7 +110,6 @@ describe("jest utilities", () => {
 	});
 
 	describe("expect call counting", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("jest-utilities-expect-count", countRule, {
 			invalid: [
 				{

@@ -5,7 +5,6 @@ import { js, tsx } from "./rule-testers";
 
 describe("directive-no-use", () => {
 	describe("block directives", () => {
-		// @ts-expect-error -- Shut up
 		js.run("directive-no-use", rule, {
 			invalid: [
 				{
@@ -23,7 +22,6 @@ describe("directive-no-use", () => {
 	});
 
 	describe("line directives", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		tsx.run("directive-no-use line directives", rule, {
 			invalid: [],
 			valid: [

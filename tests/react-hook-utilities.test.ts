@@ -11,15 +11,14 @@ import {
 	walkAst,
 	walkAstSlop,
 } from "$oxc-utilities/react-hook-utilities";
-import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { createRuleTester } from "./rule-testers";
 
 import type { IsStaticArrayExpression } from "$oxc-utilities/react-hook-utilities";
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const tester = new RuleTester({
-	languageOptions: { ecmaVersion: 2022, sourceType: "module" },
-});
+const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 const isStaticArray: IsStaticArrayExpression<object> = () => true;
 
@@ -49,7 +48,6 @@ describe("getHookName utility", () => {
 	});
 
 	describe("direct identifier call", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("hook-name", hookNameRule, {
 			invalid: [
 				{ code: "useState(null)", errors: [{ messageId: "useState" }] },
@@ -61,7 +59,6 @@ describe("getHookName utility", () => {
 	});
 
 	describe("member expression call (React.useState)", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("hook-name", hookNameRule, {
 			invalid: [{ code: "React.useState(null)", errors: [{ messageId: "useState" }] }],
 			valid: [],
@@ -69,7 +66,6 @@ describe("getHookName utility", () => {
 	});
 
 	describe("nested call expression callee returns none", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("hook-name", hookNameRule, {
 			invalid: [{ code: "getFactory()", errors: [{ messageId: "none" }] }],
 			valid: [],
@@ -77,7 +73,6 @@ describe("getHookName utility", () => {
 	});
 
 	describe("computed member expression call returns none", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("hook-name", hookNameRule, {
 			invalid: [{ code: "React['useState'](null)", errors: [{ messageId: "none" }] }],
 			valid: [],
@@ -139,7 +134,6 @@ describe("getEffectCallback utility", () => {
 	});
 
 	describe("arrow function argument is found", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("effect-callback", callbackRule, {
 			invalid: [{ code: "useEffect(() => { doWork(); })", errors: [{ messageId: "found" }] }],
 			valid: [],
@@ -147,7 +141,6 @@ describe("getEffectCallback utility", () => {
 	});
 
 	describe("function expression argument is found", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("effect-callback", callbackRule, {
 			invalid: [{ code: "useEffect(function cleanup() { doWork(); })", errors: [{ messageId: "found" }] }],
 			valid: [],
@@ -155,7 +148,6 @@ describe("getEffectCallback utility", () => {
 	});
 
 	describe("no arguments returns none", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("effect-callback", callbackRule, {
 			invalid: [{ code: "useEffect()", errors: [{ messageId: "none" }] }],
 			valid: [],
@@ -163,7 +155,6 @@ describe("getEffectCallback utility", () => {
 	});
 
 	describe("non-function first argument returns none", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("effect-callback", callbackRule, {
 			invalid: [{ code: "useEffect(myRef)", errors: [{ messageId: "none" }] }],
 			valid: [],
@@ -195,7 +186,6 @@ describe("countSetStateCalls behavior", () => {
 	});
 
 	describe("setter calls inside arrow function body", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("count-set-state", hookTestRule, {
 			invalid: [{ code: "() => { setState(1); setCount(2); doSomething(); }", errors: [{ messageId: "2" }] }],
 			valid: [],
@@ -203,7 +193,6 @@ describe("countSetStateCalls behavior", () => {
 	});
 
 	describe("no setter calls", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("count-set-state", hookTestRule, {
 			invalid: [{ code: "() => { doSomething(); }", errors: [{ messageId: "0" }] }],
 			valid: [],
@@ -211,7 +200,6 @@ describe("countSetStateCalls behavior", () => {
 	});
 
 	describe("nested setter calls", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("count-set-state", hookTestRule, {
 			invalid: [{ code: "() => { setOuter(setInner(true)); }", errors: [{ messageId: "2" }] }],
 			valid: [],
@@ -219,7 +207,6 @@ describe("countSetStateCalls behavior", () => {
 	});
 
 	describe("lowercase-after-set identifiers not counted", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("count-set-state", hookTestRule, {
 			invalid: [{ code: "() => { setup(); settings(); }", errors: [{ messageId: "0" }] }],
 			valid: [],
@@ -256,7 +243,6 @@ describe("walkAst utility", () => {
 	});
 
 	describe("arrow function with expression body", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("walk-ast", walkerTestRule, {
 			invalid: [{ code: "() => 42", errors: [{ messageId: "2" }] }],
 			valid: [],
@@ -264,7 +250,6 @@ describe("walkAst utility", () => {
 	});
 
 	describe("arrow function with block statement body", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("walk-ast", walkerTestRule, {
 			invalid: [{ code: "() => { return x; }", errors: [{ messageId: "4" }] }],
 			valid: [],
@@ -272,7 +257,6 @@ describe("walkAst utility", () => {
 	});
 
 	describe("function declaration identifier child", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("walk-ast", walkerTestRule, {
 			invalid: [{ code: "function useValue() { return value; }", errors: [{ messageId: "identifier" }] }],
 			valid: [],
@@ -299,7 +283,6 @@ describe("walkAstSlop utility", () => {
 	});
 
 	describe("function declaration identifier child", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("walk-ast-slop", slopRule, {
 			invalid: [{ code: "function useValue() { return value; }", errors: [{ messageId: "identifier" }] }],
 			valid: [],
@@ -352,7 +335,6 @@ describe("binding property utilities", () => {
 	});
 
 	describe("identifier, literal, assignment, and unsupported keys", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("binding-property-utilities", bindingRule, {
 			invalid: [
 				{
@@ -404,7 +386,6 @@ describe("classifyDependencies utility", () => {
 	});
 
 	describe("undefined argument (no deps)", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-deps", classifyRule, {
 			invalid: [{ code: "useEffect()", errors: [{ messageId: "missing" }] }],
 			valid: [],
@@ -412,7 +393,6 @@ describe("classifyDependencies utility", () => {
 	});
 
 	describe("spread element argument", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-deps", classifyRule, {
 			invalid: [{ code: "useEffect(() => {}, ...deps)", errors: [{ messageId: "spread" }] }],
 			valid: [],
@@ -420,7 +400,6 @@ describe("classifyDependencies utility", () => {
 	});
 
 	describe("non-array dependency argument", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-deps", classifyRule, {
 			invalid: [{ code: "useEffect(() => {}, deps)", errors: [{ messageId: "spread" }] }],
 			valid: [],
@@ -428,7 +407,6 @@ describe("classifyDependencies utility", () => {
 	});
 
 	describe("empty dependency array", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-deps", classifyRule, {
 			invalid: [{ code: "useEffect(() => {}, [])", errors: [{ messageId: "empty" }] }],
 			valid: [],
@@ -436,7 +414,6 @@ describe("classifyDependencies utility", () => {
 	});
 
 	describe("static dependency array", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-deps", classifyRule, {
 			invalid: [{ code: "useEffect(() => {}, [dependency])", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -465,7 +442,6 @@ describe("classifyDependencies utility", () => {
 			meta: { messages: classifyMessages, schema: [], type: "problem" },
 		});
 
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("classify-dynamic-deps", dynamicArrayRule, {
 			invalid: [{ code: "useEffect(() => {}, [dependency])", errors: [{ messageId: "spread" }] }],
 			valid: [],

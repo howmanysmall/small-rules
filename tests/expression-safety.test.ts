@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
-import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { createRuleTester } from "./rule-testers";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -31,12 +32,7 @@ const testRule = defineRule({
 	},
 });
 
-const tester = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		sourceType: "module",
-	},
-});
+const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 const templateExpressionCode = `check(\`${String.fromCodePoint(36)}{value}\`);`;
 
@@ -67,7 +63,6 @@ describe("isExpressionSideEffectSafe", () => {
 		expect(result).toBe(true);
 	});
 
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	tester.run("expression-safety", testRule, {
 		invalid: [
 			{ code: "check(a + b);", errors: [{ messageId: "safe" }] },

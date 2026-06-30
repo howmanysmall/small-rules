@@ -68,6 +68,10 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 }
 
 function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
+	if (expression.type === "ParenthesizedExpression") {
+		return isKnownNonNumberExpression(sourceCode, expression.expression);
+	}
+
 	if (expression.type === "TSAsExpression" || expression.type === "TSTypeAssertion") {
 		return !isNumberTypeAnnotation(expression.typeAnnotation);
 	}
@@ -83,9 +87,16 @@ function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression
 	return sourceCode.getText(unwrapExpression(expression));
 }
 
+function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Expression {
+	let current = expression;
+	while (current.type === "ParenthesizedExpression") current = current.expression;
+	return current;
+}
+
 function getMathArgumentText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	if (expression.type === "SequenceExpression") return `(${sourceCode.getText(expression)})`;
-	return sourceCode.getText(expression);
+	const unwrapped = stripParenthesizedExpression(expression);
+	if (unwrapped.type === "SequenceExpression") return `(${sourceCode.getText(unwrapped)})`;
+	return sourceCode.getText(unwrapped);
 }
 
 type MathMethod = "max" | "min";

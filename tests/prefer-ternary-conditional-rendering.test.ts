@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-ternary-conditional-rendering";
 import { jsx } from "./rule-testers";
 
 describe("prefer-ternary-conditional-rendering", () => {
-	// @ts-expect-error - This is dumb
 	jsx.run("prefer-ternary-conditional-rendering", rule, {
 		invalid: [
 			{

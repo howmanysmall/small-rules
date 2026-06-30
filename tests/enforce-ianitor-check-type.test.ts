@@ -4,7 +4,6 @@ import rule from "$oxc-rules/enforce-ianitor-check-type";
 import { ts } from "./rule-testers";
 
 describe("enforce-ianitor-check-type", () => {
-	// @ts-expect-error RuleTester types are stricter than the runtime shape.
 	ts.run("enforce-ianitor-check-type", rule, {
 		invalid: [
 			{
@@ -220,7 +219,6 @@ type UnqualifiedStatic = Static<typeof validator>;
 });
 
 describe("enforce-ianitor-check-type - coverage locks", () => {
-	// @ts-expect-error RuleTester types are stricter than the runtime shape.
 	ts.run("enforce-ianitor-check-type - coverage locks", rule, {
 		invalid: [],
 		valid: [

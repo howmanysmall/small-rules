@@ -96,7 +96,7 @@ function getArrayIndexAssignment(
 	if (!isAssignmentExpression(expression) || expression.operator !== "=") return undefined;
 
 	const { left } = expression;
-	if (!isMemberExpression(left) || left.optional || !left.computed) return undefined;
+	if (!(isMemberExpression(left) && left.computed)) return undefined;
 
 	const { object, property } = left;
 	if (!isIdentifierReference(object) || object.name !== arrayIdentifierName) return undefined;

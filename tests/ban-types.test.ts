@@ -4,7 +4,6 @@ import rule from "$oxc-rules/ban-types";
 import { ts } from "./rule-testers";
 
 describe("ban-types", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("ban-types", rule, {
 		invalid: [
 			{
@@ -124,7 +123,7 @@ type User = {
 
 type PickedUser = Pick<User, "name">;
 `,
-				options: [{ bannedTypes: undefined }],
+				options: [{}],
 			},
 		],
 	});

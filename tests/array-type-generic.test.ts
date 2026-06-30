@@ -4,7 +4,6 @@ import rule from "$oxc-rules/array-type-generic";
 import { tsx } from "./rule-testers";
 
 describe("array-type-generic", () => {
-	// @ts-expect-error -- Shut up
 	tsx.run("array-type-generic", rule, {
 		invalid: [
 			{

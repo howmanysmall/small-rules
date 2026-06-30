@@ -4,7 +4,6 @@ import rule from "$oxc-rules/directive-no-unused-enable";
 import { js } from "./rule-testers";
 
 describe("directive-no-unused-enable", () => {
-	// @ts-expect-error -- Shut up
 	js.run("directive-no-unused-enable", rule, {
 		invalid: [
 			{

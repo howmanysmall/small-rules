@@ -40,6 +40,7 @@ function unwrapNode(node: ESTree.Node): ESTree.Node {
 	/* v8 ignore next -- @preserve wrapper variants are parser-shape defensive cases. */
 	switch (node.type) {
 		case "ChainExpression":
+		case "ParenthesizedExpression":
 		case "TSAsExpression":
 		case "TSInstantiationExpression":
 		case "TSNonNullExpression":

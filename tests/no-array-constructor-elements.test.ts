@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-array-constructor-elements";
 import { ts, tsx } from "./rule-testers";
 
 describe("no-array-constructor-elements", () => {
-	// @ts-expect-error -- Shut up.
 	tsx.run("no-array-constructor-elements", rule, {
 		invalid: [
 			{
@@ -143,7 +142,7 @@ array.push(this.value, item.value, item[key], +value, value ? first : second, \`
 `,
 				errors: [{ messageId: "collapseArrayPushInitialization" }],
 				output: `
-const array = [this.value, item.value, item[key], +value, value ? first : second, \`\${value}\`, [value], { value }, first, second];
+const array = [this.value, item.value, item[key], +value, value ? first : second, \`\${value}\`, [value], { value }, (first, second)];
 `,
 			},
 			{
@@ -336,7 +335,6 @@ array.push("b");
 		],
 	});
 
-	// @ts-expect-error -- Shut up.
 	ts.run("no-array-constructor-elements-ts", rule, {
 		invalid: [
 			{

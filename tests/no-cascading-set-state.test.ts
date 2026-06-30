@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-cascading-set-state";
 import { ts } from "./rule-testers";
 
 describe("no-cascading-set-state", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("no-cascading-set-state", rule, {
 		invalid: [
 			{

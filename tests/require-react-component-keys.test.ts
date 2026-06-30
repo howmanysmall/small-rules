@@ -1,11 +1,9 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/require-react-component-keys";
-import parser from "@typescript-eslint/parser";
 
 import { tsx } from "./rule-testers";
 
 describe("require-react-component-keys", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	// And this test file intentionally passes the rule as-is for runtime validation.
 	tsx.run("require-react-component-keys", rule, {
 		invalid: [
@@ -22,12 +20,6 @@ function Bad1() {
 }
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Single element in fragment
 			{
@@ -41,12 +33,6 @@ function Bad2() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Nested elements
 			{
@@ -61,12 +47,6 @@ function Bad3() {
 }
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Nested fragments
 			{
@@ -82,12 +62,6 @@ function Bad4() {
 }
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Root component with key
 			{
@@ -97,12 +71,6 @@ function Bad5() {
 }
 `,
 				errors: [{ messageId: "rootComponentWithKey" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Arrow function root component with key
 			{
@@ -110,12 +78,6 @@ function Bad5() {
 const Bad6 = () => <span key="bad" />;
 `,
 				errors: [{ messageId: "rootComponentWithKey" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map callback missing key
 			{
@@ -125,12 +87,6 @@ function Bad7(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Dynamic callee callback missing key
 			{
@@ -140,12 +96,6 @@ function DynamicMapped(items, getMapper) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Computed member callback missing key
 			{
@@ -155,12 +105,6 @@ function ComputedMapped(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map callback with block body missing key
 			{
@@ -174,12 +118,6 @@ function Bad7Block(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map with spread operator missing key
 			{
@@ -203,12 +141,6 @@ function HealthBar() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Named callback passed to map without keys
 			{
@@ -220,12 +152,6 @@ function EnemyList(enemies) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Named callback reused by iteration and memoization without keys
 			{
@@ -238,12 +164,6 @@ function EnemyList(enemies) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.from named fragment callback reused by memoization
 			{
@@ -260,12 +180,6 @@ function EnemyList(enemies) {
 }
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.from named fragment callback without key
 			{
@@ -281,12 +195,6 @@ function EnemyList(enemies) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.from without key in mapping callback
 			{
@@ -296,12 +204,6 @@ function FromList(iterable) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.prototype.map.call without key
 			{
@@ -311,12 +213,6 @@ function CallMapped(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.prototype.map.call named fragment callback without key
 			{
@@ -332,12 +228,6 @@ function EnemyList(enemies) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Spread inline callback without key
 			{
@@ -347,12 +237,6 @@ function SpreadMapped(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// UseCallback missing key
 			{
@@ -364,12 +248,6 @@ function Bad10() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// UseMemo missing key
 			{
@@ -379,12 +257,6 @@ function Bad11() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Expression container map missing key
 			{
@@ -398,12 +270,6 @@ function Bad8(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array literal with single element without key
 			{
@@ -411,12 +277,6 @@ function Bad8(items) {
 const elements = [<div />];
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array literal without keys
 			{
@@ -424,12 +284,6 @@ const elements = [<div />];
 const elements = [<div />, <span />];
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Expression container siblings without key
 			{
@@ -444,12 +298,6 @@ function Bad9() {
 }
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// ForwardRef children still need keys
 			{
@@ -462,12 +310,6 @@ const Component = React.forwardRef((props, ref) => (
 ));
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Memo children still need keys
 			{
@@ -479,12 +321,6 @@ const Component = React.memo(() => (
 ));
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// ForwardRef root element should not have key
 			{
@@ -494,12 +330,6 @@ const Component = React.forwardRef((props, ref) => (
 ));
 `,
 				errors: [{ messageId: "rootComponentWithKey" }],
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Conditional element with siblings - needs key (user's original issue)
 			{
@@ -517,12 +347,6 @@ function Page({ navigation, title, children }) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Multiple conditional siblings without keys
 			{
@@ -538,12 +362,6 @@ function MultipleConditionals({ showA, showB }) {
 }
 `,
 				errors: 2,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Logical expression as only child - needs key
 			{
@@ -557,12 +375,6 @@ function OnlyChild({ show }) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Logical expression (user's case) - needs key
 			{
@@ -576,12 +388,6 @@ function Fade({ aspectRatio }) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map callback with logical fragment still needs key
 			{
@@ -596,12 +402,6 @@ function BadLogicalFragment(items) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// JSX element passed via holder children prop needs key
 			{
@@ -611,12 +411,6 @@ function BadHolderChildren() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Parenthesized JSX child is still not a ternary child
 			{
@@ -630,12 +424,6 @@ function WrappedChild() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Type-asserted JSX child is still not a ternary child
 			{
@@ -649,12 +437,6 @@ function AssertedChild() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Parenthesized fragment child still needs a key context
 			{
@@ -672,12 +454,6 @@ function WrappedFragmentChild() {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Spread arguments before an inline callback still leave the callback JSX needing a key
 			{
@@ -687,12 +463,6 @@ function CallWithSpread(items, render) {
 }
 `,
 				errors: 1,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 		],
 		valid: [
@@ -703,24 +473,12 @@ function Good1() {
     return <div />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Arrow function top-level return
 			{
 				code: `
 const Good2 = () => <span />;
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Arrow function with block body top-level return
 			{
@@ -729,12 +487,6 @@ const Good2Block = () => {
     return <div />;
 };
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Proper keys
 			{
@@ -748,12 +500,6 @@ function Good3() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Nested with keys
 			{
@@ -767,12 +513,6 @@ function Good4() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// ReactTree.mount doesn't require key
 			{
@@ -780,24 +520,12 @@ function Good4() {
 const screenGui = screenGuiProvider.Get("ACTION_BAR");
 ReactTree.mount(<ActionBarApp />, screenGui, "action-bar");
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Custom ignored call expression
 			{
 				code: `
 Portal.render(<CustomComponent />);
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ ignoreCallExpressions: ["Portal.render"] }],
 			},
 			// CreateReactStory with function argument (default ignore)
@@ -816,12 +544,6 @@ export = CreateReactStory(
     ),
 );
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Allow root keys when configured
 			{
@@ -830,12 +552,6 @@ function Component() {
     return <div key="allowed" />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 				options: [{ allowRootKeys: true }],
 			},
 			// Map callback with keyed element
@@ -845,12 +561,6 @@ function Good5(items) {
     return items.map((item) => <span key={item.id} />);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map callback with block body and keyed element
 			{
@@ -863,12 +573,6 @@ function Good5Block(items) {
     });
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map with spread operator and keyed element (user's scenario)
 			{
@@ -891,12 +595,6 @@ function HealthBar() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Named callback passed to map with keyed element
 			{
@@ -907,12 +605,6 @@ function EnemyList(enemies) {
     return enemies.map(renderEnemy);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Function-valued object property return is not an iteration callback
 			{
@@ -921,12 +613,6 @@ const renderers = {
     renderEnemy: (enemy) => <billboardgui />,
 };
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Direct callback invocation is not an iteration callback
 			{
@@ -937,12 +623,6 @@ function EnemyList(enemy) {
     return renderEnemy(enemy);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.from callback with keyed element
 			{
@@ -951,12 +631,6 @@ function FromList(iterable) {
     return Array.from(iterable, (item) => <frame key={item} />);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Callback assigned to an existing binding is not treated as a declared iterator callback
 			{
@@ -968,12 +642,6 @@ function EnemyList(enemy) {
     return renderEnemy(enemy);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Array.prototype.map.call with keyed element
 			{
@@ -982,12 +650,6 @@ function CallMapped(items) {
     return Array.prototype.map.call(items, (item) => <span key={item} />);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Map callback wrapped in a type assertion with keyed element
 			{
@@ -1007,12 +669,6 @@ function HealthBarWithAssertion() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// UseCallback with keyed elements
 			{
@@ -1023,12 +679,6 @@ function Component() {
     }, []);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// UseMemo with keyed elements
 			{
@@ -1037,12 +687,6 @@ function Component() {
     const element = useMemo(() => <span key="memoized" />, []);
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// React.useMemo root shorthand fragment cannot be keyed
 			{
@@ -1059,12 +703,6 @@ function Component() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Expression container sibling with keys
 			{
@@ -1078,12 +716,6 @@ function Good6() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Ternary conditional return (both branches are root)
 			{
@@ -1092,12 +724,6 @@ function Good7({ condition }) {
     return condition ? <div /> : <span />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Logical expression return
 			{
@@ -1106,12 +732,6 @@ function Good8({ show }) {
     return show && <Component />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Logical expression JSX child with fragment
 			{
@@ -1129,12 +749,6 @@ function GoodLogicalFragment({ show }) {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// JSX fragment as prop value
 			{
@@ -1143,12 +757,6 @@ function Good9() {
     return <Suspense fallback={<></>}><Content key="content" /></Suspense>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// JSX element as prop value
 			{
@@ -1157,12 +765,6 @@ function Good10() {
     return <ErrorBoundary fallback={<div>Error</div>}><App key="app" /></ErrorBoundary>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// JSX element passed via holder children prop with key
 			{
@@ -1171,12 +773,6 @@ function GoodHolderChildren() {
     return <Frame holderChildren={<Child key="child" />} />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Namespaced JSX attributes are still prop values
 			{
@@ -1185,24 +781,12 @@ function GoodNamespacedAttribute() {
     return <Frame rbxts:child={<Child />}><Content key="content" /></Frame>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// JSX assigned through a type assertion
 			{
 				code: `
 const cached = (<Child /> as React.ReactNode);
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// JSX assigned after declaration
 			{
@@ -1210,12 +794,6 @@ const cached = (<Child /> as React.ReactNode);
 let cached;
 cached = <Child />;
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Parenthesized keyed JSX child
 			{
@@ -1228,12 +806,6 @@ function GoodWrappedChild() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Type-asserted keyed JSX child
 			{
@@ -1246,12 +818,6 @@ function GoodAssertedChild() {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Ternary with fragment in prop
 			{
@@ -1260,12 +826,6 @@ function Good11({ placeholder }) {
     return <Suspense fallback={placeholder ?? <></>}><Content key="content" /></Suspense>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Nested ternary return
 			{
@@ -1274,12 +834,6 @@ function Good12({ a, b }) {
     return a ? <div /> : b ? <span /> : <p />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Ternary JSX children are alternative single-child render paths
 			{
@@ -1288,12 +842,6 @@ function GoodTernaryChild({ show }) {
     return <Frame>{show ? <Primary /> : <Fallback />}</Frame>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Ternary JSX children are also allowed inside shorthand fragments
 			{
@@ -1302,12 +850,6 @@ function GoodTernaryChildInFragment({ show }) {
     return <>{show ? <Primary /> : <Fallback />}</>;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Type-asserted logical JSX children still need keys when rendered
 			{
@@ -1320,12 +862,6 @@ function GoodAssertedLogicalChild({ show }) {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Logical JSX children may wrap the rendered element before the logical parent
 			{
@@ -1338,12 +874,6 @@ function GoodWrappedLogicalOperand({ show }) {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Logical fragment children are allowed inside shorthand fragments too
 			{
@@ -1360,12 +890,6 @@ function GoodLogicalFragmentInFragment({ show }) {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// React.forwardRef - root return doesn't need key
 			{
@@ -1374,24 +898,12 @@ const Component = React.forwardRef((props, ref) => {
     return <div ref={ref} />;
 });
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// ForwardRef without React namespace
 			{
 				code: `
 const Component = forwardRef((props, ref) => <span ref={ref} />);
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// React.memo - root return doesn't need key
 			{
@@ -1400,24 +912,12 @@ const Component = React.memo(() => {
     return <div />;
 });
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Memo without React namespace
 			{
 				code: `
 const Component = memo(() => <span />);
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// ForwardRef with wrapper and children
 			{
@@ -1428,12 +928,6 @@ const Component = React.forwardRef((props, ref) => (
     </ErrorBoundary>
 ));
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Memo with wrapper and children
 			{
@@ -1444,12 +938,6 @@ const Component = React.memo(() => (
     </Wrapper>
 ));
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// HOC pattern with forwardRef (user's case)
 			{
@@ -1462,12 +950,6 @@ function withErrorBoundary(Component) {
     ));
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Component registration with manager - top-level returns should not need keys
 			{
@@ -1513,12 +995,6 @@ const dialog = manager.registerWindow("BasicDialog", SimpleDialog, {
     modal: true,
 });
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Return inside if block should be recognized as root return
 			{
@@ -1530,12 +1006,6 @@ function ItemImage({ imageType }) {
     return <ImageLabel />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Return inside else block
 			{
@@ -1548,12 +1018,6 @@ function Component({ condition }) {
     }
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Nested if statements
 			{
@@ -1568,12 +1032,6 @@ function Component({ a, b }) {
     return <p />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Return inside switch case
 			{
@@ -1589,12 +1047,6 @@ function Component({ type }) {
     }
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Return inside try block
 			{
@@ -1607,12 +1059,6 @@ function Component() {
     }
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Return inside for loop
 			{
@@ -1626,12 +1072,6 @@ function Component({ items }) {
     return <NoMatch />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Early return pattern
 			{
@@ -1646,12 +1086,6 @@ function Component({ error, data }) {
     return <DataDisplay data={data} />;
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Fragments inside ternary as JSX child (mutually exclusive alternatives)
 			{
@@ -1673,12 +1107,6 @@ function Frame({ hasGlow, children }) {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Elements inside ternary as JSX child
 			{
@@ -1691,12 +1119,6 @@ function Component({ condition }) {
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
 			},
 			// Exact frame.tsx pattern with spreads and extraChildren
 			{
@@ -1724,12 +1146,12 @@ function Frame({ hasGlow, effectiveProperties, extraChildren, visualElements, ch
     );
 }
 `,
-				languageOptions: {
-					parser,
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
+			},
+			{
+				code: `
+let renderEnemy = (enemy) => <billboardgui />;
+renderEnemy = otherRenderer;
+`,
 			},
 		],
 	});

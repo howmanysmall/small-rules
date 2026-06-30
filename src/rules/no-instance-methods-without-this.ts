@@ -61,8 +61,6 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 }
 
 function childUsesThis(childValue: unknown, visited: WeakSet<ESTree.Node>): boolean {
-	if (childValue === undefined) return false;
-
 	if (Array.isArray(childValue)) {
 		for (const item of childValue) if (isNode(item) && traverseForThis(item, visited)) return true;
 		return false;

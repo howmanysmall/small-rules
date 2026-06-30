@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-unused-imports";
 import { ts } from "./rule-testers";
 
 describe("no-unused-imports", () => {
-	// @ts-expect-error -- this thing is dumb.
 	ts.run("no-unused-imports", rule, {
 		invalid: [
 			{

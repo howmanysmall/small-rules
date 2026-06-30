@@ -4,7 +4,6 @@ import noRecursive from "$oxc-rules/no-recursive";
 import { js } from "./rule-testers";
 
 describe("no-recursive", () => {
-	// @ts-expect-error -- RuleTester types are permissive
 	js.run("no-recursive", noRecursive, {
 		invalid: [
 			// Direct recursion — factorial

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/ban-instances";
 import { tsx } from "./rule-testers";
 
 describe("ban-instances", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("ban-instances", rule, {
 		invalid: [
 			// Array config - new Instance()

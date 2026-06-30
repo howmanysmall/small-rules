@@ -1,34 +1,18 @@
-import parser from "@typescript-eslint/parser";
-import { RuleTester } from "eslint";
+import { createRuleTester } from "./rule-harness/runner";
 
-export const js = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		sourceType: "module",
-	},
-});
+export { createRuleTester, runRuleTests } from "./rule-harness/runner";
 
-export const jsx = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		parserOptions: { ecmaFeatures: { jsx: true } },
-		sourceType: "module",
-	},
-});
+export type {
+	InvalidRuleCase,
+	RuleTestCases,
+	RuleTestError,
+	RuleTestRunner,
+	RuleTestSuggestion,
+	TestLanguage,
+	ValidRuleCase,
+} from "./rule-harness/types";
 
-export const ts = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		parser,
-		sourceType: "module",
-	},
-});
-
-export const tsx = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		parser,
-		parserOptions: { ecmaFeatures: { jsx: true } },
-		sourceType: "module",
-	},
-});
+export const js = createRuleTester({ language: "js", sourceType: "module" });
+export const jsx = createRuleTester({ language: "jsx", sourceType: "module" });
+export const ts = createRuleTester({ language: "ts", sourceType: "module" });
+export const tsx = createRuleTester({ language: "tsx", sourceType: "module" });

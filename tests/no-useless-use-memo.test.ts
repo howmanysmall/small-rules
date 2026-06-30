@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-useless-use-memo";
 import { ts } from "./rule-testers";
 
 describe("no-useless-use-memo", () => {
-	// @ts-expect-error -- This is a dumb problem.
 	ts.run("no-useless-use-memo", rule, {
 		invalid: [
 			{

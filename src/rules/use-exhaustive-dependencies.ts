@@ -160,9 +160,19 @@ function getMemberExpressionDepth(node: ESTree.Node): number {
 	let depth = 0;
 	let current: ESTree.Node = node;
 
-	if (current.type === "ChainExpression") current = current.expression;
-
-	while (current.type === "MemberExpression") {
+	while (true) {
+		if (
+			current.type === "ChainExpression" ||
+			current.type === "ParenthesizedExpression" ||
+			current.type === "TSAsExpression" ||
+			current.type === "TSNonNullExpression" ||
+			current.type === "TSSatisfiesExpression" ||
+			current.type === "TSTypeAssertion"
+		) {
+			current = current.expression;
+			continue;
+		}
+		if (current.type !== "MemberExpression") break;
 		depth += 1;
 		current = current.object;
 	}
@@ -173,10 +183,20 @@ function getMemberExpressionDepth(node: ESTree.Node): number {
 function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 	let current: ESTree.Node = node;
 
-	if (current.type === "ChainExpression") current = current.expression;
-
-	while (current.type === "MemberExpression" || current.type === "TSNonNullExpression") {
-		current = current.type === "MemberExpression" ? current.object : current.expression;
+	while (true) {
+		if (
+			current.type === "ChainExpression" ||
+			current.type === "ParenthesizedExpression" ||
+			current.type === "TSAsExpression" ||
+			current.type === "TSNonNullExpression" ||
+			current.type === "TSSatisfiesExpression" ||
+			current.type === "TSTypeAssertion"
+		) {
+			current = current.expression;
+			continue;
+		}
+		if (current.type !== "MemberExpression") break;
+		current = current.object;
 	}
 
 	return current.type === "Identifier" ? current : undefined;
@@ -187,6 +207,7 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 	if (node.type === "MemberExpression") return collectIdentifierNames(node.object);
 	if (node.type === "ChainExpression") return collectIdentifierNames(node.expression);
 	if (
+		node.type === "ParenthesizedExpression" ||
 		node.type === "TSNonNullExpression" ||
 		node.type === "TSAsExpression" ||
 		node.type === "TSSatisfiesExpression" ||
@@ -211,13 +232,13 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 
 function isExpression(
 	node: ESTree.Node,
-): node is ESTree.TSAsExpression | ESTree.TSNonNullExpression | ESTree.TSSatisfiesExpression {
+): node is ESTree.TSAsExpression | ESTree.TSNonNullExpression | ESTree.TSSatisfiesExpression | ESTree.TSTypeAssertion {
 	return TS_RUNTIME_EXPRESSIONS.has(node.type);
 }
 
 function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
 	if (node.type === "Identifier") return node.name;
-	if (node.type === "ChainExpression" || isExpression(node)) {
+	if (node.type === "ChainExpression" || node.type === "ParenthesizedExpression" || isExpression(node)) {
 		return nodeToSafeDependencyPath(node.expression, sourceCode);
 	}
 
@@ -576,8 +597,14 @@ function getCaptureInfo(
 
 function isTransparentExpressionNode(
 	node: ESTree.Node,
-): node is ESTree.TSAsExpression | ESTree.TSNonNullExpression | ESTree.TSSatisfiesExpression | ESTree.TSTypeAssertion {
+): node is
+	| ESTree.ParenthesizedExpression
+	| ESTree.TSAsExpression
+	| ESTree.TSNonNullExpression
+	| ESTree.TSSatisfiesExpression
+	| ESTree.TSTypeAssertion {
 	return (
+		node.type === "ParenthesizedExpression" ||
 		node.type === "TSSatisfiesExpression" ||
 		node.type === "TSAsExpression" ||
 		node.type === "TSTypeAssertion" ||
@@ -663,7 +690,7 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 
 		const actualNode = element.type === "SpreadElement" ? element.argument : element;
 
-		const name = sourceCode.getText(actualNode);
+		const name = nodeToSafeDependencyPath(actualNode, sourceCode);
 		const depth = getMemberExpressionDepth(actualNode);
 
 		dependencies.push({

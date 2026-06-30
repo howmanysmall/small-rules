@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-commented-code";
 import { jsx } from "./rule-testers";
 
 describe("no-commented-code", () => {
-	// @ts-expect-error -- Shut up
 	jsx.run("no-commented-code", rule, {
 		invalid: [
 			{
@@ -20,6 +19,16 @@ describe("no-commented-code", () => {
 						suggestions: [{ desc: "Remove this commented out code", output: "" }],
 					},
 				],
+			},
+			{
+				code: "// const value = 1;",
+				errors: [
+					{
+						messageId: "commentedCode",
+						suggestions: [{ desc: "Remove this commented out code", output: "" }],
+					},
+				],
+				filename: "source",
 			},
 			{
 				code: `// // nested comment

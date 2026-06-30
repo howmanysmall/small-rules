@@ -118,7 +118,6 @@ const fallthroughOutput = [
 ].join("\n");
 
 describe("require-switch-case-braces", () => {
-	// @ts-expect-error - RuleTester types are stricter than the runtime rule shape
 	js.run("require-switch-case-braces", rule, {
 		invalid: [
 			{

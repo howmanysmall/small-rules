@@ -13,6 +13,12 @@ function isSimpleReceiver({ type }: ESTree.Expression): boolean {
 	);
 }
 
+function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Expression {
+	let current = expression;
+	while (current.type === "ParenthesizedExpression") current = current.expression;
+	return current;
+}
+
 const preferIdiv = defineRule({
 	create(context): Visitor {
 		return {
@@ -45,9 +51,9 @@ const preferIdiv = defineRule({
 				if (expression.type !== "BinaryExpression" || expression.operator !== "/") return;
 
 				const left = unwrapExpression(expression.left);
-				const leftText = context.sourceCode.getText(expression.left);
+				const leftText = context.sourceCode.getText(stripParenthesizedExpression(expression.left));
 				const receiverText = isSimpleReceiver(left) ? leftText : `(${leftText})`;
-				const rightText = context.sourceCode.getText(expression.right);
+				const rightText = context.sourceCode.getText(stripParenthesizedExpression(expression.right));
 
 				context.report({
 					fix: (fixer) => fixer.replaceText(node, `${receiverText}.idiv(${rightText})`),

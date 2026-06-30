@@ -4,7 +4,6 @@ import rule from "$oxc-rules/rerender-memo-with-default-value";
 import { ts } from "./rule-testers";
 
 describe("rerender-memo-with-default-value", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("rerender-memo-with-default-value", rule, {
 		invalid: [
 			{

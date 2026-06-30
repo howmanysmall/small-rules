@@ -17,7 +17,6 @@ const assignErrors = [
 ];
 
 describe("prefer-class-properties", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	js.run("prefer-class-properties", rule, {
 		invalid: [
 			// 'never' mode - class properties are not allowed

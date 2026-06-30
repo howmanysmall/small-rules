@@ -1,15 +1,9 @@
 import { describe } from "vitest";
 import rule from "$oxc-rules/prefer-module-scope-constants";
-import { RuleTester } from "eslint";
 
-import { js } from "./rule-testers";
+import { createRuleTester, js } from "./rule-testers";
 
-const ruleTester = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		sourceType: "script",
-	},
-});
+const script = createRuleTester({ language: "js", sourceType: "script" });
 
 const moduleScopeErrors = [
 	{
@@ -26,7 +20,6 @@ const nonConstErrors = [
 ];
 
 describe("prefer-module-scope-constants", () => {
-	// @ts-expect-error - This is dumb
 	js.run("prefer-module-scope-constants", rule, {
 		invalid: [
 			// Not using const
@@ -68,8 +61,7 @@ describe("prefer-module-scope-constants", () => {
 		],
 	});
 
-	// @ts-expect-error - This is dumb
-	ruleTester.run("prefer-module-scope-constants (script)", rule, {
+	script.run("prefer-module-scope-constants (script)", rule, {
 		invalid: [
 			// Deeply nested in script mode - not at module scope
 			{ code: "function foo() { function bar() { const FOO = true; } }", errors: moduleScopeErrors },

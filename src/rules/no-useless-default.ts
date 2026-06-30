@@ -153,6 +153,7 @@ function getJsxAttributeExpression(node: ESTree.JSXAttribute): ESTree.Expression
 	const { value } = node;
 	if (value === null) return undefined;
 	if (value.type === "Literal") return value;
+	/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
 	if (value.type !== "JSXExpressionContainer" || value.expression.type === "JSXEmptyExpression") return undefined;
 	return value.expression;
 }

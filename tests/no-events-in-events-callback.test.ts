@@ -6,7 +6,6 @@ import { ts } from "./rule-testers";
 const options = [{ eventsImportPaths: ["server/networking"] }];
 
 describe("no-events-in-events-callback", () => {
-	// @ts-expect-error - RuleTester doesn't support the new format of rules
 	ts.run("no-events-in-events-callback", rule, {
 		invalid: [
 			{

@@ -3,14 +3,13 @@ import rule from "$oxc-rules/prefer-singular-enums";
 
 import { ts } from "./rule-testers";
 
-import type { RuleTester } from "eslint";
+import type { RuleTestError } from "./rule-testers";
 
-function errorWithName(name: string): RuleTester.TestCaseError {
+function errorWithName(name: string): RuleTestError {
 	return { message: `Enum name "${name}" should be singular.` };
 }
 
 describe("prefer-singular-enums", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("prefer-singular-enums", rule, {
 		invalid: [
 			// Regular plural -s

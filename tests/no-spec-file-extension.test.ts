@@ -7,7 +7,6 @@ import { ts } from "./rule-testers";
 const FIXTURES = join(import.meta.dirname, "fixtures", "no-spec-file-extension");
 
 describe("no-spec-file-extension", () => {
-	// @ts-expect-error RuleTester types incompatible with runtime rule shape
 	ts.run("no-spec-file-extension", rule, {
 		invalid: [
 			{

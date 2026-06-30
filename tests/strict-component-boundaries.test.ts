@@ -15,7 +15,6 @@ const errors = [
 ];
 
 describe("strict-component-boundaries", () => {
-	// @ts-expect-error RuleTester types incompatible
 	js.run("strict-component-boundaries", rule, {
 		invalid: [
 			// Reaching into another component and going deeper

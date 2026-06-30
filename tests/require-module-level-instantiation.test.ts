@@ -4,7 +4,6 @@ import rule from "$oxc-rules/require-module-level-instantiation";
 import { tsx } from "./rule-testers";
 
 describe("require-module-level-instantiation", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("require-module-level-instantiation", rule, {
 		invalid: [
 			{
@@ -251,10 +250,8 @@ function setup() {
 				code: `
 const log = new Log();
 `,
-				languageOptions: {
-					sourceType: "script",
-				},
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				sourceType: "script",
 			},
 			{
 				code: `

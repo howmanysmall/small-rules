@@ -6,7 +6,6 @@ import { ts } from "./rule-testers";
 const missingAsyncSuffixErrors = [{ messageId: "missingAsyncSuffix" }];
 
 describe("require-async-suffix", () => {
-	// @ts-expect-error -- RuleTester types do not match oxlint plugin utilities exactly.
 	ts.run("require-async-suffix", rule, {
 		invalid: [
 			{

@@ -114,6 +114,7 @@ const noNativePropertiesSpread = defineRule({
 				if (value?.type !== "JSXExpressionContainer") return;
 
 				const { expression } = value;
+				/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
 				if (expression.type === "JSXEmptyExpression") return;
 
 				const objectExpression = resolveObjectExpression(sourceCode, expression, new Set<ESTree.Node>());

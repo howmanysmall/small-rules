@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-single-world-query";
 import { ts } from "./rule-testers";
 
 describe("prefer-single-world-query", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("prefer-single-world-query", rule, {
 		invalid: [
 			// Basic get case: two world.get calls on same world and entity
@@ -88,6 +87,20 @@ if (hasA && hasB) { doSomething(); }
 				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
+if (hasA && hasB) { doSomething(); }
+`,
+			},
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+hasA = false;
+if (hasA && hasB) { doSomething(); }
+`,
+				errors: [{ messageId: "preferSingleHas" }],
+				output: `
+const hasAll = world.has(entity, ComponentA, ComponentB);
+hasA = false;
 if (hasA && hasB) { doSomething(); }
 `,
 			},
@@ -226,7 +239,7 @@ const componentB = world.get(entityB, ComponentB);
 			{
 				code: `
 const componentA = world.get(entity, ComponentA);
-const componentB: ComponentB | undefined;
+let componentB: ComponentB | undefined;
 const componentC = world.get(entity, ComponentC);
 `,
 			},
