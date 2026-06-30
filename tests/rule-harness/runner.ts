@@ -24,19 +24,12 @@ export function createRuleTester(defaults: RuleRunnerDefaults = {}): RuleTestRun
 	};
 }
 
-export function runRuleTests(
-	ruleName: string,
-	rule: unknown,
-	cases: RuleTestCases,
-	defaults: RuleRunnerDefaults = {},
-): void {
+function runRuleTests(ruleName: string, rule: unknown, cases: RuleTestCases, defaults: RuleRunnerDefaults = {}): void {
 	const normalizedCases = normalizeCases(cases, defaults);
 	const execute = createRuleExecutor(ruleName, rule);
 
 	describe(ruleName, () => {
-		for (const testCase of normalizedCases) {
-			registerCase(testCase, execute);
-		}
+		for (const testCase of normalizedCases) registerCase(testCase, execute);
 	});
 }
 

@@ -1,5 +1,6 @@
+type TestSourceType = "commonjs" | "module" | "script" | "unambiguous";
+
 export type TestLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
-export type TestSourceType = "commonjs" | "module" | "script" | "unambiguous";
 export type Range = [number, number];
 
 export interface Position {

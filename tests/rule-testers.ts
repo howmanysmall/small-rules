@@ -1,16 +1,8 @@
 import { createRuleTester } from "./rule-harness/runner";
 
-export { createRuleTester, runRuleTests } from "./rule-harness/runner";
+export { createRuleTester } from "./rule-harness/runner";
 
-export type {
-	InvalidRuleCase,
-	RuleTestCases,
-	RuleTestError,
-	RuleTestRunner,
-	RuleTestSuggestion,
-	TestLanguage,
-	ValidRuleCase,
-} from "./rule-harness/types";
+export type { RuleTestError } from "./rule-harness/types";
 
 export const js = createRuleTester({ language: "js", sourceType: "module" });
 export const jsx = createRuleTester({ language: "jsx", sourceType: "module" });

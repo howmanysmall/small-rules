@@ -24,7 +24,7 @@ export function locationForRange(index: LocationIndex, range: Range): SourceLoca
 	};
 }
 
-export function positionForIndex(index: LocationIndex, offset: number): Position {
+function positionForIndex(index: LocationIndex, offset: number): Position {
 	let low = 0;
 	let high = index.lineStarts.length - 1;
 

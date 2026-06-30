@@ -12,11 +12,6 @@ export function getStringProperty(value: unknown, key: string): string | undefin
 	return typeof property === "string" ? property : undefined;
 }
 
-export function getBooleanProperty(value: unknown, key: string): boolean | undefined {
-	const property = getProperty(value, key);
-	return typeof property === "boolean" ? property : undefined;
-}
-
 export function getArrayProperty(value: unknown, key: string): ReadonlyArray<unknown> | undefined {
 	const property = getProperty(value, key);
 	return Array.isArray(property) ? property : undefined;
@@ -25,14 +20,6 @@ export function getArrayProperty(value: unknown, key: string): ReadonlyArray<unk
 export function getObjectProperty(value: unknown, key: string): Record<string, unknown> | undefined {
 	const property = getProperty(value, key);
 	return isRecord(property) ? property : undefined;
-}
-
-export function hasProperty(value: unknown, key: string): boolean {
-	return isRecord(value) && key in value;
-}
-
-export function isFunction(value: unknown): value is (...parameters: Array<unknown>) => unknown {
-	return typeof value === "function";
 }
 
 export function isJsonSerializable(value: unknown): boolean {

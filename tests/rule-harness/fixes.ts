@@ -1,4 +1,4 @@
-import type { Fix, Fixer, Range, RangeLike } from "./types";
+import type { Fix, Fixer, Range } from "./types";
 
 export const fixer: Fixer = {
 	insertTextAfter(node, text): Fix {
@@ -56,10 +56,6 @@ function collectFixes(fixResult: Fix | ReadonlyArray<Fix>): Array<Fix> {
 	}
 	if (isFix(fixResult)) fixes.push(fixResult);
 	return fixes;
-}
-
-export function toRangeLike(range: Range): RangeLike {
-	return { range };
 }
 
 function createCollapsedRange(position: number): Range {
