@@ -164,6 +164,18 @@ export function isCallbackFunction(node: ESTree.Node): node is CallbackFunction 
 	return node.type === "ArrowFunctionExpression" || node.type === "FunctionExpression";
 }
 
+export function isAnyFunction(node: ESTree.Node): node is CallbackFunction {
+	return (
+		node.type === "ArrowFunctionExpression" ||
+		node.type === "FunctionDeclaration" ||
+		node.type === "FunctionExpression"
+	);
+}
+
+export function isNamedGlobalCall(node: ESTree.CallExpression | ESTree.NewExpression, name: string): boolean {
+	return isIdentifierNamed(node.callee, name);
+}
+
 export function isClass(node: ESTree.Node): node is ESTree.Class {
 	return node.type === "ClassDeclaration" || node.type === "ClassExpression";
 }

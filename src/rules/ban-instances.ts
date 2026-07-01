@@ -1,4 +1,5 @@
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringRaw, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -93,7 +94,7 @@ function getEnclosingFunctionScope(scope: Scope): Scope {
 }
 
 function getInstanceClassName(node: ESTree.NewExpression): string | undefined {
-	if (node.callee.type !== "Identifier" || node.callee.name !== "Instance") return undefined;
+	if (!isNamedGlobalCall(node, "Instance")) return undefined;
 
 	const [firstArgument] = node.arguments;
 	if (firstArgument?.type !== "Literal" || !isStringRaw(firstArgument.value)) return undefined;

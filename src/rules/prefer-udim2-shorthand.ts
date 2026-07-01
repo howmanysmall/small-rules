@@ -1,3 +1,4 @@
+import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isNumber } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -159,7 +160,7 @@ const preferUDim2Shorthand = defineRule({
 	create(context): Visitor {
 		return {
 			NewExpression(node): void {
-				if (node.callee.type !== "Identifier" || node.callee.name !== "UDim2") return;
+				if (!isNamedGlobalCall(node, "UDim2")) return;
 
 				const collected = collectArguments(node.arguments);
 				if (collected === undefined) return;

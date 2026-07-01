@@ -3,6 +3,7 @@ import {
 	hasJSXIdentifierAttribute,
 	isReactComponentHigherOrderCall,
 } from "$oxc-utilities/component-utilities";
+import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
@@ -65,7 +66,6 @@ const EMPTY_CALLBACK_USAGE: CallbackUsage = {
 };
 
 const SHOULD_ASCEND_TYPES = new Set(["ConditionalExpression", "LogicalExpression"]);
-const IS_FUNCTION_EXPRESSION = new Set(["ArrowFunctionExpression", "FunctionExpression"]);
 const CONTROL_FLOW_TYPES = new Set([
 	"BlockStatement",
 	"CatchClause",
@@ -94,19 +94,11 @@ function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	return current;
 }
 
-function isFunctionLikeNode(node: ESTree.Node): node is CallbackFunction {
-	return (
-		node.type === "ArrowFunctionExpression" ||
-		node.type === "FunctionExpression" ||
-		node.type === "FunctionDeclaration"
-	);
-}
-
 function getEnclosingFunctionLike(node: ESTree.Node): CallbackFunction | undefined {
 	let current: ESTree.Node | undefined = getParent(node);
 
 	while (current !== undefined) {
-		if (isFunctionLikeNode(current)) return current;
+		if (isAnyFunction(current)) return current;
 		current = getParent(current);
 	}
 
@@ -285,7 +277,7 @@ function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
 
 	/* v8 ignore next -- @preserve return statements that contain JSX are parser-nested inside a function body. */
 	if (currentNode === undefined) return false;
-	return IS_FUNCTION_EXPRESSION.has(currentNode.type) || currentNode.type === "FunctionDeclaration";
+	return isAnyFunction(currentNode);
 }
 
 function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {

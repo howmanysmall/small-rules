@@ -1,5 +1,5 @@
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
-import { getImportedName, isComponentName } from "$oxc-utilities/oxc-utilities";
+import { getImportedName, isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
@@ -97,11 +97,7 @@ function isStaticComponentVariable(variable: ScopeVariable, name: string): boole
 
 		const initializer = definition.node.init ?? undefined;
 		if (initializer === undefined) continue;
-		if (
-			initializer.type === "ArrowFunctionExpression" ||
-			initializer.type === "FunctionExpression" ||
-			initializer.type === "ClassExpression"
-		) {
+		if (isCallbackFunction(initializer) || initializer.type === "ClassExpression") {
 			return true;
 		}
 	}

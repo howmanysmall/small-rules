@@ -1,12 +1,10 @@
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-const FUNCTION_DECLARATIONS = new Set<string>(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
 
 const UNSTABLE_VALUES = new Set<string>([
 	"ArrayExpression",
@@ -488,7 +486,7 @@ function isDeclaredInComponentBody(variable: VariableLike, closureNode: ESTree.N
 	let parent: ESTree.Node | undefined = closureNode.parent ?? undefined;
 
 	while (parent) {
-		const isFunction = FUNCTION_DECLARATIONS.has(parent.type);
+		const isFunction = isAnyFunction(parent);
 
 		if (isFunction) {
 			const functionParent = parent;
@@ -777,11 +775,7 @@ function reportUnnecessaryDependency(
 
 type RuleContext = InferContextFromRule<typeof useExhaustiveDependencies>;
 function isCallbackFunctionNode(node?: ESTree.Node): node is CallbackFunction {
-	return (
-		node?.type === "ArrowFunctionExpression" ||
-		node?.type === "FunctionExpression" ||
-		node?.type === "FunctionDeclaration"
-	);
+	return node !== undefined && isAnyFunction(node);
 }
 
 function getRequiredCaptures(
@@ -1054,8 +1048,7 @@ const useExhaustiveDependencies = defineRule({
 		): CallbackFunction | undefined {
 			if (closureArgument.type === "ArrowFunctionExpression") return closureArgument;
 
-			const canResolveClosure =
-				FUNCTION_DECLARATIONS.has(closureArgument.type) || closureArgument.type === "Identifier";
+			const canResolveClosure = isAnyFunction(closureArgument) || closureArgument.type === "Identifier";
 			if (!canResolveClosure) return undefined;
 
 			const resolved = resolveFunctionReference(closureArgument, getScope(callExpression));
