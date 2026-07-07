@@ -63,13 +63,19 @@ function isFunctionLikeInitializer(node: ESTree.Node): boolean {
 	return isCallbackFunction(node) || node.type === "ClassExpression";
 }
 
+const OBJECT_LIKE_INITIALIZER_TYPES: ReadonlySet<ESTree.Node["type"]> = new Set([
+	"ArrayExpression",
+	"ObjectExpression",
+	"JSXElement",
+	"JSXFragment",
+] as const);
+
 function isObjectLikeInitializer(
 	initializer: ESTree.Expression,
 	patterns: ReadonlyArray<RegExp>,
 	sourceCode: SourceCode,
 ): boolean {
-	if (initializer.type === "ArrayExpression" || initializer.type === "ObjectExpression") return true;
-	if (initializer.type === "JSXElement" || initializer.type === "JSXFragment") return true;
+	if (OBJECT_LIKE_INITIALIZER_TYPES.has(initializer.type)) return true;
 	if (initializer.type !== "CallExpression" && initializer.type !== "NewExpression") return false;
 
 	const candidateText = sourceCode.getText(initializer.callee);

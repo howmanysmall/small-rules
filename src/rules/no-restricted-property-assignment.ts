@@ -1,9 +1,10 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import { type } from "arktype";
-import { minimatch } from "minimatch";
+import { minimatch, Minimatch } from "minimatch";
 import { defineRule } from "oxlint-plugin-utilities";
 
+import type { MinimatchOptions } from "minimatch";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 import type { Except, Simplify } from "type-fest";
 
@@ -19,23 +20,70 @@ const isRuleOptions = type({
 }).readonly();
 
 type Context = InferContextFromRule<typeof noRestrictedPropertyAssignment>;
+type Matcher = (value: string) => boolean;
+type Restriction = typeof isRestriction.infer;
+interface CompiledMatcher {
+	readonly hasMagic: boolean;
+	readonly matches: Matcher;
+}
+interface CompiledRestriction {
+	readonly matchesObject: Matcher;
+	readonly matchesProperty: Matcher;
+	readonly message: Restriction["message"];
+}
 type EffectiveOptions = Simplify<
-	Except<typeof isRuleOptions.infer, "allowFiles"> & {
+	Except<typeof isRuleOptions.infer, "allowFiles" | "restrictions"> & {
 		readonly isAllowedFile: boolean;
 		readonly checkComputed: boolean;
+		readonly restrictions: ReadonlyArray<CompiledRestriction>;
 	}
 >;
 
-const MATCH_BASE = { matchBase: true };
+const FILE_MATCH_OPTIONS = { matchBase: true } satisfies MinimatchOptions;
+const NAME_MATCH_OPTIONS = { dot: true, magicalBraces: true } satisfies MinimatchOptions;
+
+function compileMatcher(pattern: string, options: MinimatchOptions): CompiledMatcher {
+	const matcher = new Minimatch(pattern, options);
+	const hasMagic = matcher.hasMagic();
+	return {
+		hasMagic,
+		matches: hasMagic ? (value): boolean => matcher.match(value) : (value): boolean => value === pattern,
+	};
+}
+
+function createPropertyMatcher(patterns: ReadonlyArray<string>): Matcher {
+	const literalPatterns = new Set<string>();
+	const globMatchers: Array<Matcher> = [];
+
+	for (const pattern of patterns) {
+		const matcher = compileMatcher(pattern, NAME_MATCH_OPTIONS);
+		if (matcher.hasMagic) {
+			globMatchers.push(matcher.matches);
+		} else {
+			literalPatterns.add(pattern);
+		}
+	}
+
+	return (property) => literalPatterns.has(property) || globMatchers.some((matcher) => matcher(property));
+}
+
+function compileRestriction(restriction: Restriction): CompiledRestriction {
+	return {
+		matchesObject: compileMatcher(restriction.object, NAME_MATCH_OPTIONS).matches,
+		matchesProperty: createPropertyMatcher(restriction.properties),
+		message: restriction.message,
+	};
+}
 
 function getEffectiveOptions(context: Context): EffectiveOptions {
 	const [options] = context.options;
 	if (!isRuleOptions.allows(options)) return { checkComputed: true, isAllowedFile: false, restrictions: [] };
 
 	const { allowFiles, checkComputed, restrictions } = options;
-	const isAllowedFile = allowFiles?.some((pattern) => minimatch(context.filename, pattern, MATCH_BASE)) ?? false;
+	const isAllowedFile =
+		allowFiles?.some((pattern) => minimatch(context.filename, pattern, FILE_MATCH_OPTIONS)) ?? false;
 
-	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions };
+	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions: restrictions.map(compileRestriction) };
 }
 
 const noRestrictedPropertyAssignment = defineRule({
@@ -50,8 +98,8 @@ const noRestrictedPropertyAssignment = defineRule({
 			if (property === undefined) return;
 
 			for (const restriction of restrictions) {
-				if (restriction.object !== node.object.name) continue;
-				if (restriction.properties.includes("*") || restriction.properties.includes(property)) {
+				if (!restriction.matchesObject(node.object.name)) continue;
+				if (restriction.matchesProperty(property)) {
 					if (restriction.message === undefined) {
 						context.report({
 							data: { object: node.object.name, property },
