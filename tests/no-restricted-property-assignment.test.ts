@@ -12,6 +12,21 @@ describe("no-restricted-property-assignment", () => {
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
 			{
+				code: "_G.__DEV__ = true;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+			},
+			{
+				code: "_G.__PROD__ = true;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+			},
+			{
+				code: "_G_other.__DEV__ = true;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G*", properties: ["__DEV__"] }] }],
+			},
+			{
 				code: '_G["__DEV__"] = false;',
 				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
@@ -91,6 +106,14 @@ describe("no-restricted-property-assignment", () => {
 			{
 				code: "other.__DEV__ = true;",
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+			},
+			{
+				code: "_G.something = true; // glob property pattern should not match non-matching names",
+				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+			},
+			{
+				code: "other.__DEV__ = true; // glob object pattern should not match non-matching names",
+				options: [{ restrictions: [{ object: "_G*", properties: ["__DEV__"] }] }],
 			},
 			{
 				code: "a.b.__DEV__ = true;",

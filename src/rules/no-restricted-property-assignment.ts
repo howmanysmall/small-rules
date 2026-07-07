@@ -50,8 +50,8 @@ const noRestrictedPropertyAssignment = defineRule({
 			if (property === undefined) return;
 
 			for (const restriction of restrictions) {
-				if (restriction.object !== node.object.name) continue;
-				if (restriction.properties.includes("*") || restriction.properties.includes(property)) {
+				if (!minimatch(node.object.name, restriction.object, MATCH_BASE)) continue;
+				if (restriction.properties.some((pattern) => minimatch(property, pattern, MATCH_BASE))) {
 					if (restriction.message === undefined) {
 						context.report({
 							data: { object: node.object.name, property },
