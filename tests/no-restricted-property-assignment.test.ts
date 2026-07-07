@@ -37,6 +37,11 @@ describe("no-restricted-property-assignment", () => {
 				options: [{ restrictions: [{ object: "_G", properties: ["*"] }] }],
 			},
 			{
+				code: '_G[".secret"] = 1;',
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G", properties: ["*"] }] }],
+			},
+			{
 				code: "_G.__DEV__ = 1;",
 				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__", "__PROD__"] }] }],
@@ -114,6 +119,10 @@ describe("no-restricted-property-assignment", () => {
 			{
 				code: "other.__DEV__ = true; // glob object pattern should not match non-matching names",
 				options: [{ restrictions: [{ object: "_G*", properties: ["__DEV__"] }] }],
+			},
+			{
+				code: '_G["foo/bar"] = true; // property matching should not use basename semantics',
+				options: [{ restrictions: [{ object: "_G", properties: ["bar"] }] }],
 			},
 			{
 				code: "a.b.__DEV__ = true;",
