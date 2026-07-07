@@ -4,7 +4,6 @@ import rule from "$oxc-rules/directive-require-description";
 import { js, ts } from "./rule-testers";
 
 describe("directive-require-description", () => {
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	ts.run("directive-require-description (typescript)", rule, {
 		invalid: [
 			{
@@ -21,7 +20,6 @@ describe("directive-require-description", () => {
 		],
 	});
 
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	js.run("directive-require-description (javascript)", rule, {
 		invalid: [
 			{

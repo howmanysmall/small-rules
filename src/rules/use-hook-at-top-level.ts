@@ -1,4 +1,4 @@
-import { isComponentName } from "$oxc-utilities/oxc-utilities";
+import { isAnyFunction, isComponentName, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -32,10 +32,6 @@ function getOptions(value: unknown): UseHookAtTopLevelOptions {
 	return isRecord(value) ? value : {};
 }
 
-function isIdentifierName(node: ESTree.Node): node is ESTree.IdentifierName {
-	return node.type === "Identifier";
-}
-
 function isComponentOrHook(node: CallbackFunction): boolean {
 	if ((node.type === "FunctionDeclaration" || node.type === "FunctionExpression") && node.id !== null) {
 		return isComponentName(node.id.name) || isReactHookName(node.id.name);
@@ -63,15 +59,13 @@ function isHookCall(node: ESTree.CallExpression): boolean {
 	return hookName !== undefined && isReactHookName(hookName);
 }
 
-const FUNCTION_BOUNDARIES = new Set<string>(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
-
 function isInFinallyBlock(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null = node.parent;
 	const maxDepth = 20;
 	let inFinallyBlock = false;
 
 	for (let depth = 0; depth < maxDepth && current !== null; depth += 1) {
-		if (FUNCTION_BOUNDARIES.has(current.type)) break;
+		if (isAnyFunction(current)) break;
 
 		if (current.type === "TryStatement") {
 			let checkNode: ESTree.Node | null = node;

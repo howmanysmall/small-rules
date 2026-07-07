@@ -10,7 +10,6 @@ const WITHOUT_CONTEXT_STACK = join(FIXTURES, "without-context-stack");
 const FIXTURE_ONLY_CONTEXT_STACK = join(FIXTURES, "fixture-only");
 
 describe("prefer-context-stack", () => {
-	// @ts-expect-error RuleTester types incompatible with runtime rule shape
 	tsx.run("prefer-context-stack", rule, {
 		invalid: [
 			{

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-warn";
 import { js } from "./rule-testers";
 
 describe("no-warn", () => {
-	// @ts-expect-error -- Shut up
 	js.run("no-warn", rule, {
 		invalid: [
 			{

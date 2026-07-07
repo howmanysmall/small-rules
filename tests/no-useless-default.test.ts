@@ -39,7 +39,6 @@ function createComparisonRule(
 
 describe("no-useless-default comparison helpers", () => {
 	describe("primitive literal matching", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default number defaults", createComparisonRule({ type: "number", value: 0 }), {
 			invalid: [
 				{ code: "check(0);", errors: [{ messageId: "match" }] },
@@ -54,7 +53,6 @@ describe("no-useless-default comparison helpers", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default bool defaults", createComparisonRule({ type: "bool", value: true }), {
 			invalid: [
 				{ code: "check(true);", errors: [{ messageId: "match" }] },
@@ -63,7 +61,6 @@ describe("no-useless-default comparison helpers", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default string defaults", createComparisonRule({ type: "string", value: "Hello" }), {
 			invalid: [
 				{ code: "check('Hello');", errors: [{ messageId: "match" }] },
@@ -76,7 +73,6 @@ describe("no-useless-default comparison helpers", () => {
 	describe("enum and infinity matching", () => {
 		ts.run(
 			"no-useless-default enum defaults",
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			createComparisonRule({ enumType: "FrameStyle", type: "Enum", value: "Custom" }),
 			{
 				invalid: [
@@ -91,7 +87,6 @@ describe("no-useless-default comparison helpers", () => {
 
 		ts.run(
 			"no-useless-default positive infinity defaults",
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			createComparisonRule({ type: "number", value: "inf" }),
 			{
 				invalid: [
@@ -105,7 +100,6 @@ describe("no-useless-default comparison helpers", () => {
 
 		ts.run(
 			"no-useless-default negative infinity defaults",
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			createComparisonRule({ type: "number", value: "-inf" }),
 			{
 				invalid: [
@@ -119,7 +113,6 @@ describe("no-useless-default comparison helpers", () => {
 	});
 
 	describe("vector and dimension constructor matching", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default vector2 defaults", createComparisonRule({ type: "Vector2", value: [0, 0] }), {
 			invalid: [
 				{ code: "check(new Vector2());", errors: [{ messageId: "match" }] },
@@ -134,7 +127,6 @@ describe("no-useless-default comparison helpers", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default vector3 defaults", createComparisonRule({ type: "Vector3", value: [0, 0, 0] }), {
 			invalid: [
 				{ code: "check(new Vector3());", errors: [{ messageId: "match" }] },
@@ -149,10 +141,10 @@ describe("no-useless-default comparison helpers", () => {
 			valid: [],
 		});
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default udim2 defaults", createComparisonRule({ type: "UDim2", value: [0, 0, 0, 0] }), {
 			invalid: [
 				{ code: "check(new UDim2());", errors: [{ messageId: "match" }] },
+				{ code: "check(new UDim2(0, 0, 0, 0));", errors: [{ messageId: "match" }] },
 				{ code: "check(new UDim2(0, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new UDim2(0, ...rest, 0, 0));", errors: [{ messageId: "mismatch" }] },
 				{ code: "check(new UDim2(foo, 0, 0, 0));", errors: [{ messageId: "mismatch" }] },
@@ -167,7 +159,6 @@ describe("no-useless-default comparison helpers", () => {
 
 		ts.run(
 			"no-useless-default udim2 offset defaults",
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			createComparisonRule({ type: "UDim2", value: [0, 0, 0, 50] }),
 			{
 				invalid: [
@@ -178,7 +169,6 @@ describe("no-useless-default comparison helpers", () => {
 			},
 		);
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default udim defaults", createComparisonRule({ type: "UDim", value: [0, 0] }), {
 			invalid: [
 				{ code: "check(new UDim(0, 0));", errors: [{ messageId: "match" }] },
@@ -193,7 +183,6 @@ describe("no-useless-default comparison helpers", () => {
 	});
 
 	describe("roblox value object matching", () => {
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default color3 defaults", createComparisonRule({ type: "Color3", value: [0, 0, 0] }), {
 			invalid: [
 				{ code: "check(new Color3());", errors: [{ messageId: "match" }] },
@@ -210,7 +199,6 @@ describe("no-useless-default comparison helpers", () => {
 
 		ts.run(
 			"no-useless-default color3 normalized defaults",
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			createComparisonRule({ type: "Color3", value: [1, Math.fround(128 / 255), 0] }),
 			{
 				invalid: [
@@ -221,7 +209,6 @@ describe("no-useless-default comparison helpers", () => {
 			},
 		);
 
-		// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 		ts.run("no-useless-default rect defaults", createComparisonRule({ type: "Rect", value: [0, 0, 0, 0] }), {
 			invalid: [
 				{ code: "check(new Rect());", errors: [{ messageId: "match" }] },
@@ -235,7 +222,6 @@ describe("no-useless-default comparison helpers", () => {
 
 		ts.run(
 			"no-useless-default cframe defaults",
-			// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 			createComparisonRule({ type: "CFrame", value: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1] }),
 			{
 				invalid: [
@@ -264,7 +250,6 @@ describe("no-useless-default comparison helpers", () => {
 });
 
 describe("no-useless-default JSX detection", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-useless-default JSX defaults", rule, {
 		invalid: [
 			{
@@ -305,7 +290,7 @@ describe("no-useless-default JSX detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: 'const view = <textlabel Text="" />;',
@@ -352,7 +337,7 @@ describe("no-useless-default JSX detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: "const view = <frame BackgroundTransparency={0} /* keep */ />;",
@@ -362,7 +347,7 @@ describe("no-useless-default JSX detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: "const view = <frame\n\tBackgroundTransparency={0}\n\tSize={size}\n/>;",
@@ -379,7 +364,7 @@ describe("no-useless-default JSX detection", () => {
 			{ code: 'const view = <uiaspectratioconstraint key="my-key" />;' },
 			{ code: "const view = <uiaspectratioconstraint AspectRatio={2} />;" },
 			{ code: "const view = <uiaspectratioconstraint AspectRatio />;" },
-			{ code: "const view = <uiaspectratioconstraint AspectRatio={} />;" },
+			{ code: "const view = <uiaspectratioconstraint AspectRatio={undefined} />;" },
 			{ code: 'const view = <frame Name="MyFrame" />;' },
 			{ code: "const view = <frame Parent={someParent} />;" },
 			{ code: "const view = <frame BackgroundTransparency={getValue()} />;" },
@@ -395,7 +380,6 @@ describe("no-useless-default JSX detection", () => {
 });
 
 describe("no-useless-default imperative detection", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("no-useless-default imperative defaults", rule, {
 		invalid: [
 			{
@@ -426,7 +410,7 @@ describe("no-useless-default imperative detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(); /* keep */ c.Name = "x";',
@@ -436,7 +420,7 @@ describe("no-useless-default imperative detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); /* keep */ c.MinSize = new Vector2();',
@@ -446,7 +430,7 @@ describe("no-useless-default imperative detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint") /* keep */\nc.MinSize = new Vector2();',
@@ -456,7 +440,7 @@ describe("no-useless-default imperative detection", () => {
 						messageId: "uselessDefault",
 					},
 				],
-				output: JSON.parse("null"),
+				output: null,
 			},
 			{
 				code: 'const f = new Instance("Frame"); f.BackgroundTransparency = 0; f.Size = new UDim2(0, 100, 0, 200);',

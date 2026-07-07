@@ -6,6 +6,7 @@
 		"astro": "astro",
 		"build": "astro build",
 		"dev": "astro dev",
+		"postinstall": "astro sync",
 		"preview": "astro preview",
 		"start": "astro dev"
 	},

@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-hoisted-jsx-object-properties";
 import { tsx } from "./rule-testers";
 
 describe("prefer-hoisted-jsx-object-properties", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("prefer-hoisted-jsx-object-properties", rule, {
 		invalid: [
 			{
@@ -241,7 +240,7 @@ const view = <Component options />;
 			},
 			{
 				code: `
-const view = <Component options={} />;
+const view = <Component options={undefined} />;
 `,
 			},
 			{

@@ -1,4 +1,4 @@
-import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -15,7 +15,7 @@ function getSequenceKeypointName(sequenceName: string): string | undefined {
 
 function getKeypointValue(node: ESTree.Expression, keypointName: string, time: number): ESTree.Expression | undefined {
 	if (node.type !== "NewExpression") return undefined;
-	if (node.callee.type !== "Identifier" || node.callee.name !== keypointName) return undefined;
+	if (!isNamedGlobalCall(node, keypointName)) return undefined;
 	if (node.arguments.length !== 2) return undefined;
 
 	const [timeArgument, valueArgument] = node.arguments;
@@ -88,7 +88,7 @@ function getKeypointArrayReplacement(
 }
 
 const preferSequenceOverloads = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			NewExpression(node): void {
 				if (node.callee.type !== "Identifier") return;

@@ -17,7 +17,7 @@ function getTypeAnnotationFromId(node: ESTree.VariableDeclarator): ESTree.TSType
 }
 
 const banReactFc = defineRule({
-	create(context): Visitor {
+	createOnce(context): Visitor {
 		return {
 			VariableDeclarator(node): void {
 				const typeAnnotation = getTypeAnnotationFromId(node);

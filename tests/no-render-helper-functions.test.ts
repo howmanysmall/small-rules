@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-render-helper-functions";
 import { tsx } from "./rule-testers";
 
 describe("no-render-helper-functions", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-render-helper-functions", rule, {
 		invalid: [
 			{
@@ -143,6 +142,12 @@ describe("no-render-helper-functions", () => {
 			},
 			{
 				code: "const renderEmpty = () => <div />; const value = { autoFill: { renderEmpty: (renderEmpty) } };",
+			},
+			{
+				code: "const renderEmpty = () => <div />; const value = { autoFill: { renderEmpty: renderEmpty as () => React.ReactNode } };",
+			},
+			{
+				code: "let renderEmpty = () => <div />; renderEmpty = otherRenderer; const value = { autoFill: { renderEmpty } };",
 			},
 			{
 				code: "const value = { renderEmpty: function(): React.ReactNode { return <div />; } };",

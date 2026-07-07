@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-color3-constructor";
 import { js } from "./rule-testers";
 
 describe("no-color3-constructor", () => {
-	// @ts-expect-error -- Shut up
 	js.run("no-color3-constructor", rule, {
 		invalid: [
 			{

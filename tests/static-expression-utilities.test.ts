@@ -5,9 +5,9 @@ import {
 	isExplicitUndefinedExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import parser from "@typescript-eslint/parser";
-import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { createRuleTester } from "./rule-testers";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -47,12 +47,7 @@ const testRule = defineRule({
 	},
 });
 
-const tester = new RuleTester({
-	languageOptions: {
-		ecmaVersion: 2022,
-		sourceType: "module",
-	},
-});
+const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 const moduleConstInitializerRule = defineRule({
 	create(context): Visitor {
@@ -111,7 +106,6 @@ const explicitUndefinedRule = defineRule({
 
 describe("isStaticExpression checking", () => {
 	describe("literals", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(42);", errors: [{ messageId: "static" }] },
@@ -125,7 +119,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("imported identifiers", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "import { value } from 'mod'; check(value);", errors: [{ messageId: "static" }] },
@@ -137,7 +130,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("module-scope const variables", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "const value = 42; check(value);", errors: [{ messageId: "static" }] },
@@ -149,7 +141,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("global factory identifiers", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(Color3);", errors: [{ messageId: "static" }] },
@@ -161,7 +152,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("nested static objects", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check({ a: { b: 1 } });", errors: [{ messageId: "static" }] },
@@ -172,7 +162,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("static member expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "const obj = { x: 1 }; check(obj.x);", errors: [{ messageId: "static" }] },
@@ -183,7 +172,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("static call expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(Color3.fromRGB(255, 0, 0));", errors: [{ messageId: "static" }] },
@@ -198,7 +186,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("static new expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(new NumberSequence(0));", errors: [{ messageId: "static" }] },
@@ -209,7 +196,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("unary expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(!true);", errors: [{ messageId: "static" }] },
@@ -224,7 +210,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("binary expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(1 + 2);", errors: [{ messageId: "static" }] },
@@ -235,7 +220,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("conditional expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check(true ? 1 : 2);", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -243,7 +227,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("sequence expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check((1, 2, 3));", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -251,7 +234,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("chain expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(({ x: 1 })?.x);", errors: [{ messageId: "static" }] },
@@ -266,7 +248,6 @@ describe("isStaticExpression checking", () => {
 	});
 
 	describe("arrays", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check([1, 2, 3]);", errors: [{ messageId: "static" }] },
@@ -281,7 +262,6 @@ describe("isStaticExpression checking", () => {
 
 describe("negative cases — dynamic expressions", () => {
 	describe("non-module-scope identifiers", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "function run() { const value = 42; check(value); }", errors: [{ messageId: "dynamic" }] },
@@ -294,7 +274,6 @@ describe("negative cases — dynamic expressions", () => {
 	});
 
 	describe("objects with spread elements", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "const obj = { a: 1 }; check({ ...obj });", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
@@ -302,7 +281,6 @@ describe("negative cases — dynamic expressions", () => {
 	});
 
 	describe("objects with dynamic computed keys", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "function run() { const key = 'a'; check({ [key]: 1 }); }", errors: [{ messageId: "static" }] },
@@ -312,7 +290,6 @@ describe("negative cases — dynamic expressions", () => {
 	});
 
 	describe("call expressions with non-static arguments", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -327,7 +304,6 @@ describe("negative cases — dynamic expressions", () => {
 	});
 
 	describe("arrow functions and function expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "check(() => 42);", errors: [{ messageId: "dynamic" }] },
@@ -340,7 +316,6 @@ describe("negative cases — dynamic expressions", () => {
 	});
 
 	describe("template literals with expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -356,7 +331,6 @@ check(\`hello \${name}\`);
 	});
 
 	describe("update expressions", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "let x = 1; check(x++);", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
@@ -366,7 +340,6 @@ check(\`hello \${name}\`);
 
 describe("circular reference safety (seen set)", () => {
 	describe("self-referencing const is not static", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "const a = a; check(a);", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
@@ -376,7 +349,6 @@ describe("circular reference safety (seen set)", () => {
 
 describe("logical expressions", () => {
 	describe("static logical OR", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check(true || false);", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -384,7 +356,6 @@ describe("logical expressions", () => {
 	});
 
 	describe("static nullish coalescing", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check(null ?? 'default');", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -392,7 +363,6 @@ describe("logical expressions", () => {
 	});
 
 	describe("dynamic logical expression left operand", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "function f() { const x = 1; check(x || false); }", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
@@ -402,7 +372,6 @@ describe("logical expressions", () => {
 
 describe("nested module-scope const chains", () => {
 	describe("two-level const chain", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -415,7 +384,6 @@ describe("nested module-scope const chains", () => {
 	});
 
 	describe("const referencing a dynamic value is not static", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -428,7 +396,6 @@ describe("nested module-scope const chains", () => {
 	});
 
 	describe("const referencing a function-scoped variable is not static", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -442,12 +409,9 @@ describe("nested module-scope const chains", () => {
 });
 
 describe("tS unwrapping expressions", () => {
-	const tsTester = new RuleTester({
-		languageOptions: { ecmaVersion: 2022, parser, sourceType: "module" },
-	});
+	const tsTester = createRuleTester({ language: "ts", sourceType: "module" });
 
 	describe("as-expression wrapping static value", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tsTester.run("static-expression", testRule, {
 			invalid: [{ code: "check(42 as const);", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -455,7 +419,6 @@ describe("tS unwrapping expressions", () => {
 	});
 
 	describe("nested as-expressions wrapping static value", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tsTester.run("static-expression", testRule, {
 			invalid: [{ code: "check((42 as const) as number);", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -463,7 +426,6 @@ describe("tS unwrapping expressions", () => {
 	});
 
 	describe("satisfies-expression wrapping static value", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tsTester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -477,7 +439,6 @@ describe("tS unwrapping expressions", () => {
 });
 
 describe("getModuleConstInitializer utility", () => {
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	tester.run("module-const-initializer", moduleConstInitializerRule, {
 		invalid: [
 			{ code: "const value = 42; check(value);", errors: [{ messageId: "found" }] },
@@ -490,7 +451,6 @@ describe("getModuleConstInitializer utility", () => {
 });
 
 describe("isExplicitUndefinedExpression utility", () => {
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	tester.run("explicit-undefined", explicitUndefinedRule, {
 		invalid: [
 			{ code: "check(undefined);", errors: [{ messageId: "explicit" }] },
@@ -508,7 +468,6 @@ describe("isExplicitUndefinedExpression utility", () => {
 
 describe("member expression edge cases", () => {
 	describe("computed property with static key", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -521,7 +480,6 @@ describe("member expression edge cases", () => {
 	});
 
 	describe("deep memberExpression chain", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{ code: "const obj = { a: { b: { c: 1 } } }; check(obj.a.b.c);", errors: [{ messageId: "static" }] },
@@ -533,7 +491,6 @@ describe("member expression edge cases", () => {
 
 describe("object expression edge cases", () => {
 	describe("object with static computed keys", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -546,7 +503,6 @@ describe("object expression edge cases", () => {
 	});
 
 	describe("object with shorthand properties", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [
 				{
@@ -559,7 +515,6 @@ describe("object expression edge cases", () => {
 	});
 
 	describe("object with accessor properties", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check({ get value() { return 1; } });", errors: [{ messageId: "dynamic" }] }],
 			valid: [],
@@ -569,7 +524,6 @@ describe("object expression edge cases", () => {
 
 describe("new expression edge cases", () => {
 	describe("new with no arguments", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check(new TweenInfo());", errors: [{ messageId: "static" }] }],
 			valid: [],
@@ -577,7 +531,6 @@ describe("new expression edge cases", () => {
 	});
 
 	describe("new with static member expression callee", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("static-expression", testRule, {
 			invalid: [{ code: "check(new Color3.fromRGB(255, 0, 0));", errors: [{ messageId: "static" }] }],
 			valid: [],

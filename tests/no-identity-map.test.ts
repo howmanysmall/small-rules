@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-identity-map";
 import { ts } from "./rule-testers";
 
 describe("no-identity-map", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("no-identity-map", rule, {
 		invalid: [
 			{
@@ -167,11 +166,7 @@ joined;
 />
 `,
 				errors: [{ messageId: "identityArrayMap" }],
-				languageOptions: {
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
+				language: "tsx",
 				output: `
 <frame
     BackgroundTransparency={shadowTransparency}
@@ -187,11 +182,7 @@ joined;
 />
 `,
 				errors: [{ messageId: "identityBindingMap" }],
-				languageOptions: {
-					parserOptions: {
-						ecmaFeatures: { jsx: true },
-					},
-				},
+				language: "tsx",
 				output: `
 <component
     gap={glowWidthBinding}

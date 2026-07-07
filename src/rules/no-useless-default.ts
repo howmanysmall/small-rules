@@ -1,4 +1,4 @@
-import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -130,10 +130,6 @@ function isBooleanLiteral(node: ESTree.Expression): node is ESTree.BooleanLitera
 	return node.type === "Literal" && typeof node.value === "boolean";
 }
 
-function isStringLiteral(node: ESTree.Expression): node is ESTree.StringLiteral {
-	return node.type === "Literal" && isStringRaw(node.value);
-}
-
 function getIntrinsicClassName(node: ESTree.JSXElementName): string | undefined {
 	if (node.type !== "JSXIdentifier") return undefined;
 
@@ -152,6 +148,7 @@ function getJsxAttributeExpression(node: ESTree.JSXAttribute): ESTree.Expression
 	const { value } = node;
 	if (value === null) return undefined;
 	if (value.type === "Literal") return value;
+	/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
 	if (value.type !== "JSXExpressionContainer" || value.expression.type === "JSXEmptyExpression") return undefined;
 	return value.expression;
 }
@@ -412,15 +409,21 @@ function extractVector2Value(node: ESTree.Expression): readonly [x: number, y: n
 	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Vector2")) return undefined;
 	if (node.arguments.length === 0) return [0, 0];
 
-	const components = extractPair(node.arguments);
+	return extractNumberPair(node.arguments);
+}
+
+function extractNumberPair(
+	argumentsList: ESTree.NewExpression["arguments"],
+): readonly [first: number, second: number] | undefined {
+	const components = extractPair(argumentsList);
 	if (components === undefined) return undefined;
 
-	const [xNode, yNode] = components;
-	const x = extractNumberValue(xNode);
-	const y = extractNumberValue(yNode);
-	if (x === undefined || y === undefined) return undefined;
+	const [firstNode, secondNode] = components;
+	const first = extractNumberValue(firstNode);
+	const second = extractNumberValue(secondNode);
+	if (first === undefined || second === undefined) return undefined;
 
-	return [x, y];
+	return [first, second];
 }
 
 function extractNumberTriple(
@@ -455,15 +458,25 @@ function extractUDimValue(node: ESTree.Expression): readonly [scale: number, off
 	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "UDim")) return undefined;
 	if (node.arguments.length === 0) return [0, 0];
 
-	const components = extractPair(node.arguments);
+	return extractNumberPair(node.arguments);
+}
+
+function extractNumberQuadruple(
+	argumentsList: ESTree.NewExpression["arguments"],
+): readonly [first: number, second: number, third: number, fourth: number] | undefined {
+	const components = extractQuadruple(argumentsList);
 	if (components === undefined) return undefined;
 
-	const [scaleNode, offsetNode] = components;
-	const scale = extractNumberValue(scaleNode);
-	const offset = extractNumberValue(offsetNode);
-	if (scale === undefined || offset === undefined) return undefined;
+	const [firstNode, secondNode, thirdNode, fourthNode] = components;
+	const first = extractNumberValue(firstNode);
+	const second = extractNumberValue(secondNode);
+	const third = extractNumberValue(thirdNode);
+	const fourth = extractNumberValue(fourthNode);
+	if (first === undefined || second === undefined || third === undefined || fourth === undefined) {
+		return undefined;
+	}
 
-	return [scale, offset];
+	return [first, second, third, fourth];
 }
 
 function extractUDim2Value(
@@ -471,14 +484,10 @@ function extractUDim2Value(
 ): readonly [scaleX: number, offsetX: number, scaleY: number, offsetY: number] | undefined {
 	if (node.type === "CallExpression") {
 		const path = getMemberPath(node.callee);
-		const components = extractPair(node.arguments);
+		const components = extractNumberPair(node.arguments);
 		if (path === undefined || components === undefined) return undefined;
 
-		const [firstNode, secondNode] = components;
-		const first = extractNumberValue(firstNode);
-		const second = extractNumberValue(secondNode);
-		if (first === undefined || second === undefined) return undefined;
-
+		const [first, second] = components;
 		if (path.length === 2 && path[0] === "UDim2" && path[1] === "fromOffset") return [0, first, 0, second];
 		if (path.length === 2 && path[0] === "UDim2" && path[1] === "fromScale") return [first, 0, second, 0];
 		return undefined;
@@ -487,19 +496,7 @@ function extractUDim2Value(
 	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "UDim2")) return undefined;
 	if (node.arguments.length === 0) return [0, 0, 0, 0];
 
-	const components = extractQuadruple(node.arguments);
-	if (components === undefined) return undefined;
-
-	const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = components;
-	const scaleX = extractNumberValue(scaleXNode);
-	const offsetX = extractNumberValue(offsetXNode);
-	const scaleY = extractNumberValue(scaleYNode);
-	const offsetY = extractNumberValue(offsetYNode);
-	if (scaleX === undefined || offsetX === undefined || scaleY === undefined || offsetY === undefined) {
-		return undefined;
-	}
-
-	return [scaleX, offsetX, scaleY, offsetY];
+	return extractNumberQuadruple(node.arguments);
 }
 
 function extractRectValue(
@@ -508,19 +505,7 @@ function extractRectValue(
 	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Rect")) return undefined;
 	if (node.arguments.length === 0) return [0, 0, 0, 0];
 
-	const components = extractQuadruple(node.arguments);
-	if (components === undefined) return undefined;
-
-	const [minimumXNode, minimumYNode, maximumXNode, maximumYNode] = components;
-	const minimumX = extractNumberValue(minimumXNode);
-	const minimumY = extractNumberValue(minimumYNode);
-	const maximumX = extractNumberValue(maximumXNode);
-	const maximumY = extractNumberValue(maximumYNode);
-	if (minimumX === undefined || minimumY === undefined || maximumX === undefined || maximumY === undefined) {
-		return undefined;
-	}
-
-	return [minimumX, minimumY, maximumX, maximumY];
+	return extractNumberQuadruple(node.arguments);
 }
 
 function extractRGBFromComponents(

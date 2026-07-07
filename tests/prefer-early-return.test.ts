@@ -9,7 +9,6 @@ const error = {
 };
 
 describe("prefer-early-return", () => {
-	// @ts-expect-error -- Shut up
 	js.run("prefer-early-return", rule, {
 		invalid: [
 			// Default maximumStatements = 1, so 2+ statements triggers

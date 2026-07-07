@@ -27,9 +27,9 @@ function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): v
 function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTree.ParamPattern>): void {
 	for (const parameter of parameters) {
 		if (parameter.type === "AssignmentPattern" && parameter.left.type === "ObjectPattern") {
+			checkObjectPatternDefaults(context, parameter.left);
 			/* v8 ignore next -- @preserve assignment pattern defaults are parser expression nodes. */
 			if (isNode(parameter.right)) reportEmptyDefaultValue(context, parameter.right);
-			checkObjectPatternDefaults(context, parameter.left);
 			continue;
 		}
 

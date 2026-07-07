@@ -4,7 +4,6 @@ import rule from "$oxc-rules/directive-no-unlimited-disable";
 import { js } from "./rule-testers";
 
 describe("directive-no-unlimited-disable", () => {
-	// @ts-expect-error -- Shut up
 	js.run("directive-no-unlimited-disable", rule, {
 		invalid: [
 			{

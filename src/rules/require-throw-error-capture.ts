@@ -198,7 +198,7 @@ const requireThrowErrorCapture = defineRule({
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const allowList = context.options[0]?.allow ?? [];
-		/* v8 ignore next -- @preserve RuleTester and Oxlint provide a physical filename for rule execution. */
+		/* v8 ignore next -- @preserve the rule harness and Oxlint provide a physical filename for rule execution. */
 		const physicalFilename = context.physicalFilename ?? "<input>";
 
 		return {

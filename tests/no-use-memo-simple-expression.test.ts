@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-use-memo-simple-expression";
 import { ts } from "./rule-testers";
 
 describe("no-use-memo-simple-expression", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("no-use-memo-simple-expression", rule, {
 		invalid: [
 			{

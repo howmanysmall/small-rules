@@ -173,6 +173,9 @@ catalogs:
     ignore:
       specifier: 7.0.5
       version: 7.0.5
+    minimatch:
+      specifier: 10.2.5
+      version: 10.2.5
     oxc-parser:
       specifier: 0.137.0
       version: 0.137.0
@@ -233,6 +236,9 @@ importers:
       ignore:
         specifier: catalog:prod
         version: 7.0.5
+      minimatch:
+        specifier: catalog:prod
+        version: 10.2.5
       oxc-parser:
         specifier: catalog:prod
         version: 0.137.0
@@ -10612,6 +10618,7 @@ time:
   jsonc-parser@3.3.1: '2024-06-24T21:12:45.445Z'
   just-diff@6.0.2: '2023-03-26T00:59:36.579Z'
   knip@6.18.0: '2026-06-22T16:56:49.045Z'
+  minimatch@10.2.5: '2026-03-30T18:08:07.247Z'
   mutative@1.3.0: '2025-09-21T16:02:59.572Z'
   oxc-parser@0.137.0: '2026-06-18T09:42:35.844Z'
   oxc-resolver@11.21.3: '2026-06-18T00:52:52.035Z'

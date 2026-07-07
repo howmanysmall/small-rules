@@ -39,9 +39,8 @@ enableGlobalVirtualStore: true
 
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-  - "astro"
-  - "@astrojs/starlight"
   - "@astrojs/markdown-satteri"
+  - "@astrojs/starlight"
   - "@biomejs/biome"
   - "@biomejs/cli-darwin-arm64"
   - "@biomejs/cli-darwin-x64"
@@ -52,6 +51,10 @@ minimumReleaseAgeExclude:
   - "@biomejs/cli-linux-x64-musl"
   - "@biomejs/cli-win32-arm64"
   - "@biomejs/cli-win32-x64"
+  - "@expressive-code/core"
+  - "@expressive-code/plugin-frames"
+  - "@expressive-code/plugin-shiki"
+  - "@expressive-code/plugin-text-markers"
   - "@oxc-parser/binding-android-arm-eabi"
   - "@oxc-parser/binding-android-arm64"
   - "@oxc-parser/binding-darwin-arm64"
@@ -99,16 +102,14 @@ minimumReleaseAgeExclude:
   - "@typescript/native-preview-linux-x64"
   - "@typescript/native-preview-win32-arm64"
   - "@typescript/native-preview-win32-x64"
-  - oxfmt
-  - oxlint
-  - skills
-  - "@expressive-code/core"
-  - "@expressive-code/plugin-frames"
-  - "@expressive-code/plugin-shiki"
-  - "@expressive-code/plugin-text-markers"
+  - "astro"
   - "astro-expressive-code"
   - "expressive-code"
   - "rehype-expressive-code"
+  - oxfmt
+  - oxlint
+  - oxlint-plugin-utilities
+  - skills
 
 minimumReleaseAgeStrict: true
 
@@ -179,6 +180,7 @@ catalogs:
     "@astrojs/starlight": 0.41.1
     astro: 7.0.3
     ignore: 7.0.5
+    minimatch: 10.2.5
     oxc-parser: 0.137.0
     oxc-resolver: 11.21.3
     oxlint-plugin-utilities: 1.0.0

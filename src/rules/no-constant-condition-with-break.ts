@@ -1,4 +1,5 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString, isNumberRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -368,11 +369,6 @@ function isLoopNode(node: ESTree.Node): node is LoopNode {
 	return LOOP_TYPES.has(node.type);
 }
 
-const FUNCTION_BOUNDARY_TYPES = new Set(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
-function isFunctionBoundary(node: ESTree.Node): boolean {
-	return FUNCTION_BOUNDARY_TYPES.has(node.type);
-}
-
 function findLabeledStatementBody(labelName: string, startingNode: ESTree.Node): ESTree.Statement | undefined {
 	let current: ESTree.Node | null = startingNode;
 
@@ -396,7 +392,7 @@ function breaksTargetLoop(statement: ESTree.BreakStatement, loopNode: LoopNode):
 	let current: ESTree.Node | null = statement.parent;
 
 	while (current !== null) {
-		if (current.type === "Program" || isFunctionBoundary(current) || current.type === "SwitchStatement") {
+		if (current.type === "Program" || isAnyFunction(current) || current.type === "SwitchStatement") {
 			return false;
 		}
 		if (isLoopNode(current)) return current === loopNode;

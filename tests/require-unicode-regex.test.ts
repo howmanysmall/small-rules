@@ -4,7 +4,6 @@ import rule from "$oxc-rules/require-unicode-regex";
 import { ts } from "./rule-testers";
 
 describe("require-unicode-regex", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("require-unicode-regex", rule, {
 		invalid: [
 			{

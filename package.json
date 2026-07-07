@@ -1,6 +1,6 @@
 {
 	"name": "@pobammer-ts/small-rules",
-	"version": "2.1.0",
+	"version": "2.3.0",
 	"description": "Various Oxlint-native rules for linting roblox-ts projects.",
 	"keywords": [
 		"lint",
@@ -72,6 +72,7 @@
 	"dependencies": {
 		"arktype": "catalog:",
 		"ignore": "catalog:prod",
+		"minimatch": "catalog:prod",
 		"oxc-parser": "catalog:prod",
 		"oxc-resolver": "catalog:prod",
 		"oxlint-plugin-utilities": "catalog:prod"

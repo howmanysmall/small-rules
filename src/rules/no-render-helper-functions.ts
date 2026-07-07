@@ -20,6 +20,14 @@ const WRAPPER_PARENT_TYPES = new Set([
 const HOOK_PATTERN = /^use[A-Z]/u;
 
 type ScopeVariable = ReturnType<SourceCode["getDeclaredVariables"]>[number];
+type WrapperParent =
+	| ESTree.ChainExpression
+	| ESTree.ParenthesizedExpression
+	| ESTree.TSAsExpression
+	| ESTree.TSInstantiationExpression
+	| ESTree.TSNonNullExpression
+	| ESTree.TSSatisfiesExpression
+	| ESTree.TSTypeAssertion;
 
 function isHookName(name: string): boolean {
 	return HOOK_PATTERN.test(name);
@@ -94,7 +102,19 @@ function isPropertyValueReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
 	const parent = ascendPastWrappers(node.parent ?? undefined);
 	/* v8 ignore next -- @preserve scope references always have parents in parser-produced ASTs. */
-	return parent?.type === "Property" && parent.value === node;
+	return parent?.type === "Property" && unwrapPropertyValue(parent.value) === node;
+}
+
+function unwrapPropertyValue(node: ESTree.Node): ESTree.Node {
+	let current = node;
+
+	while (isWrapperParent(current)) current = current.expression;
+
+	return current;
+}
+
+function isWrapperParent(node: ESTree.Node): node is WrapperParent {
+	return WRAPPER_PARENT_TYPES.has(node.type);
 }
 
 function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunction): ScopeVariable | undefined {

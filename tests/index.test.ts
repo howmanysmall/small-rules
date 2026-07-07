@@ -39,6 +39,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-recursive",
 	"no-redundant-aspect-ratio-constraint",
 	"no-render-helper-functions",
+	"no-restricted-property-assignment",
 	"no-spec-file-extension",
 	"no-static-react-create-element",
 	"no-table-create-map",
@@ -108,7 +109,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(88);
+			expect(ruleNames).toHaveLength(89);
 		}, 5000);
 	});
 });

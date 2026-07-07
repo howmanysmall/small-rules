@@ -7,8 +7,9 @@ import {
 	discoverLocalComponent,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { createRuleTester } from "./rule-testers";
 
 import type { LocalComponentDefinition, LocalComponentInspection } from "$oxc-utilities/local-component-discovery";
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
@@ -36,16 +37,13 @@ function createCollectorRule(inspection: LocalComponentInspection): CreateRule<r
 	});
 }
 
-describe("addLocalComponentImportIdentifiers via RuleTester", () => {
-	const tester = new RuleTester({
-		languageOptions: { ecmaVersion: 2022, sourceType: "module" },
-	});
+describe("addLocalComponentImportIdentifiers via local rule runner", () => {
+	const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 	const matchingRule = createCollectorRule(MATCHING_INSPECTION);
 	const nonMatchingRule = createCollectorRule(NON_MATCHING_INSPECTION);
 
 	describe("matching inspection - default import", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("adds identifier for default import", matchingRule, {
 			invalid: [{ code: "import MyButton from './button';", errors: [{ messageId: "found" }] }],
 			valid: [],
@@ -53,7 +51,6 @@ describe("addLocalComponentImportIdentifiers via RuleTester", () => {
 	});
 
 	describe("non-matching inspection", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("does not add identifier", nonMatchingRule, {
 			invalid: [],
 			valid: [{ code: "import MyButton from './button';" }],
@@ -61,7 +58,6 @@ describe("addLocalComponentImportIdentifiers via RuleTester", () => {
 	});
 
 	describe("non-matching named import", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("named import with different name adds nothing", matchingRule, {
 			invalid: [],
 			valid: [{ code: "import { Card } from './components';" }],
@@ -69,7 +65,6 @@ describe("addLocalComponentImportIdentifiers via RuleTester", () => {
 	});
 
 	describe("string literal imported name", () => {
-		// @ts-expect-error -- RuleTester.run() type mismatch
 		tester.run("string literal imported name adds identifier", matchingRule, {
 			invalid: [
 				{ code: 'import { "Button" as MyButton } from "./components";', errors: [{ messageId: "found" }] },
@@ -101,9 +96,8 @@ describe("addLocalComponentImportIdentifiers accumulation", () => {
 		meta: { messages: { accumulated: "accumulated" }, schema: [], type: "problem" },
 	});
 
-	const accumulationTester = new RuleTester({ languageOptions: { ecmaVersion: 2022, sourceType: "module" } });
+	const accumulationTester = createRuleTester({ language: "js", sourceType: "module" });
 
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	accumulationTester.run("adds to existing set without clearing", accumulatorRule, {
 		invalid: [{ code: "import NewButton from './button';", errors: [{ messageId: "accumulated" }] }],
 		valid: [],

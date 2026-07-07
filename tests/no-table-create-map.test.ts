@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-table-create-map";
 import { ts } from "./rule-testers";
 
 describe("no-table-create-map", () => {
-	// @ts-expect-error -- RuleTester runtime accepts this rule shape.
 	ts.run("no-table-create-map", rule, {
 		invalid: [
 			{

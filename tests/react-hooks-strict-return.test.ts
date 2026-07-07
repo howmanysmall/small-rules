@@ -6,7 +6,6 @@ import { js } from "./rule-testers";
 const errors = [{ messageId: "tooManyReturnValues" }];
 
 describe("react-hooks-strict-return", () => {
-	// @ts-expect-error - This is dumb
 	js.run("react-hooks-strict-return", rule, {
 		invalid: [
 			// Direct array with 3+ elements

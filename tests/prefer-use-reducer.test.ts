@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-use-reducer";
 import { ts } from "./rule-testers";
 
 describe("prefer-use-reducer", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("prefer-use-reducer", rule, {
 		invalid: [
 			{

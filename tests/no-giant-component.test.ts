@@ -17,7 +17,6 @@ const arrowOverThreshold = `const GiantArrow = () => {\n${buildComponentBody(299
 const functionExpressionOverThreshold = `const GiantExpr = function() {\n${buildComponentBody(299)}\n};`;
 
 describe("no-giant-component", () => {
-	// @ts-expect-error - RuleTester types are stricter than the runtime rule shape
 	tsx.run("no-giant-component", rule, {
 		invalid: [
 			{

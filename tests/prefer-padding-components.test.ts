@@ -10,7 +10,6 @@ const WITHOUT_COMPONENTS = join(FIXTURES, "without-components");
 const FIXTURE_ONLY_COMPONENTS = join(FIXTURES, "fixture-only");
 
 describe("prefer-padding-components", () => {
-	// @ts-expect-error RuleTester types incompatible with runtime rule shape
 	tsx.run("prefer-padding-components", rule, {
 		invalid: [
 			{
@@ -307,7 +306,7 @@ export function Example() {
 				code: `import { EqualPadding } from "../ui/equal-padding";
 
 export function Example() {
-    return <uipadding PaddingBottom="large" PaddingLeft="large" PaddingRight="large" PaddingTop={} />;
+    return <uipadding PaddingBottom="large" PaddingLeft="large" PaddingRight="large" PaddingTop={undefined} />;
 }`,
 				filename: join(WITH_COMPONENTS, "src", "screens", "empty-expression-value.tsx"),
 			},

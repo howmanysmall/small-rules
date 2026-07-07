@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-useless-use-effect";
 import { ts } from "./rule-testers";
 
 describe("no-useless-use-effect", () => {
-	// @ts-expect-error -- Shut up
 	ts.run("no-useless-use-effect", rule, {
 		invalid: [
 			{
@@ -1851,7 +1850,6 @@ function Component() {
 });
 
 describe("no-useless-use-effect - coverage locks", () => {
-	// @ts-expect-error -- Shut up
 	ts.run("no-useless-use-effect - coverage locks", rule, {
 		invalid: [
 			{
@@ -2601,7 +2599,6 @@ function Component() {
 });
 
 describe("no-useless-use-effect - custom hook configuration", () => {
-	// @ts-expect-error -- Shut up
 	ts.run("no-useless-use-effect - custom hook configuration", rule, {
 		invalid: [
 			{

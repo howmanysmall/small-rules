@@ -4,7 +4,6 @@ import rule from "$oxc-rules/only-type-imports";
 import { ts } from "./rule-testers";
 
 describe("only-type-imports", () => {
-	// @ts-expect-error -- RuleTester types do not match oxlint plugin utilities exactly.
 	ts.run("only-type-imports", rule, {
 		invalid: [
 			{

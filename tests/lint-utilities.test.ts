@@ -1,13 +1,12 @@
 import { describe } from "vitest";
 import { isHookCall } from "$oxc-utilities/lint-utilities";
-import { RuleTester } from "eslint";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { createRuleTester } from "./rule-testers";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const tester = new RuleTester({
-	languageOptions: { ecmaVersion: 2022, sourceType: "module" },
-});
+const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 describe("lint utilities", () => {
 	const messages = {
@@ -27,7 +26,6 @@ describe("lint utilities", () => {
 		meta: { messages, schema: [], type: "problem" },
 	});
 
-	// @ts-expect-error -- RuleTester.run() type mismatch
 	tester.run("lint-utilities", rule, {
 		invalid: [{ code: "useEffect();", errors: [{ messageId: "hook" }] }],
 		valid: ["useReducer();"],

@@ -1,11 +1,8 @@
-import { isNumberRaw } from "$oxc-utilities/type-utilities";
+import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-function isNumericLiteral(node: ESTree.Node): node is ESTree.NumericLiteral {
-	return node.type === "Literal" && isNumberRaw(node.value);
-}
 function mapComponentToRgbRange(value: number): number {
 	return Math.round(value > 1 ? value : value * 255);
 }
@@ -47,7 +44,7 @@ const noColor3Constructor = defineRule({
 
 		return {
 			NewExpression(node): void {
-				if (node.callee.type !== "Identifier" || node.callee.name !== "Color3") return;
+				if (!isNamedGlobalCall(node, "Color3")) return;
 
 				const parameters = node.arguments;
 				if (parameters.length === 0) return;

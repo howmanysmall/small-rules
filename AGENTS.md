@@ -82,12 +82,14 @@ Shared type definitions, reexports from `oxlint-plugin-utilities`, and missing E
 
 Tests live in `tests/*.test.ts`, one per rule plus `index.test.ts` for plugin metadata.
 
-Tests use ESLint's `RuleTester` (not a Vitest-native runner). Preconfigured instances in `tests/rule-testers.ts`:
+Tests use the repo-owned Oxc/Vitest rule harness in `tests/rule-testers.ts`. Preconfigured runners:
 
 - `js` - plain JavaScript
 - `jsx` - JSX
-- `ts` - TypeScript (using `@typescript-eslint/parser`)
+- `ts` - TypeScript
 - `tsx` - TypeScript + JSX
+
+The harness parses with `oxc-parser`, runs rules directly in Vitest, and supports both `create` and `createOnce`. It does not support the legacy rule tester, `languageOptions.parser`, parser objects, or non-JSON options/settings.
 
 Test pattern:
 
@@ -97,7 +99,6 @@ import rule from "$oxc-rules/no-print";
 import { js } from "./rule-testers";
 
 describe("no-print", () => {
-  // @ts-expect-error -- Shut up
   js.run("no-print", rule, {
     invalid: [
       { code: "print('Hello');", errors: [{ messageId: "noPrint" }] },

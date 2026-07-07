@@ -4,7 +4,6 @@ import rule from "$oxc-rules/ban-react-fc";
 import { tsx } from "./rule-testers";
 
 describe("ban-react-fc", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("ban-react-fc", rule, {
 		invalid: [
 			{

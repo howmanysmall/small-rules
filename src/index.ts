@@ -36,6 +36,7 @@ import noPrint from "$oxc-rules/no-print";
 import noRecursive from "$oxc-rules/no-recursive";
 import noRedundantAspectRatioConstraint from "$oxc-rules/no-redundant-aspect-ratio-constraint";
 import noRenderHelperFunctions from "$oxc-rules/no-render-helper-functions";
+import noRestrictedPropertyAssignment from "$oxc-rules/no-restricted-property-assignment";
 import noSpecFileExtension from "$oxc-rules/no-spec-file-extension";
 import noStaticReactCreateElement from "$oxc-rules/no-static-react-create-element";
 import noTableCreateMap from "$oxc-rules/no-table-create-map";
@@ -129,6 +130,7 @@ const smallRules = definePlugin({
 		"no-recursive": noRecursive,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
 		"no-render-helper-functions": noRenderHelperFunctions,
+		"no-restricted-property-assignment": noRestrictedPropertyAssignment,
 		"no-spec-file-extension": noSpecFileExtension,
 		"no-static-react-create-element": noStaticReactCreateElement,
 		"no-table-create-map": noTableCreateMap,

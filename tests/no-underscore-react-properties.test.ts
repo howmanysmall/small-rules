@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-underscore-react-properties";
 import { tsx } from "./rule-testers";
 
 describe("no-underscore-react-props", () => {
-	// @ts-expect-error -- Shut up
 	tsx.run("no-underscore-react-props", rule, {
 		invalid: [
 			{

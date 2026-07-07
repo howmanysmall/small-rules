@@ -8,14 +8,17 @@
 	"colorize_brackets": true,
 	"context_servers": {
 		"astro-docs": {
+			"enabled": true,
 			"url": "https://mcp.docs.astro.build/mcp"
 		},
 		"bun-docs": {
+			"enabled": true,
 			"url": "https://bun.com/docs/mcp"
 		},
 		"chrome-devtools": {
 			"args": ["./scripts/get-chrome-path.sh", "--serve"],
-			"command": "bash"
+			"command": "bash",
+			"enabled": true
 		},
 		"jsr": {
 			"args": ["x", "--", "jsr-cli", "mcp"],
@@ -202,13 +205,15 @@
 			"hard_tabs": true,
 			"language_servers": [
 				"biome",
+				"codebook",
 				"dependi",
 				"deputy",
+				"oxfmt",
+				"oxlint",
+				"harper-ls",
 				"json-language-server",
 				"package-version-server",
-				"wakatime",
-				"harper-ls",
-				"codebook"
+				"wakatime"
 			],
 			"prettier": { "allowed": false },
 			"tab_size": 4
@@ -414,6 +419,11 @@
 			}
 		},
 		"oxfmt": {
+			"binary": {
+				"arguments": ["--run", "oxfmt", "--", "--lsp"],
+				"ignore_system_version": true,
+				"path": "node"
+			},
 			"initialization_options": {
 				"settings": {
 					"configPath": "./.oxfmtrc.json",
@@ -422,6 +432,10 @@
 			}
 		},
 		"oxlint": {
+			"binary": {
+				"arguments": ["--run", "oxlint", "--", "--lsp"],
+				"path": "node"
+			},
 			"initialization_options": {
 				"settings": {
 					"disableNestedConfig": false,

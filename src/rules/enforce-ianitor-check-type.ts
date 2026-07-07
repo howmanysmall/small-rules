@@ -552,7 +552,7 @@ const enforceIanitorCheckType = defineRule({
 				if (init?.type !== "CallExpression" || !isIanitorValidator(init)) return;
 
 				hasIanitorReference = true;
-				if (id.type === "Identifier" && id.typeAnnotation !== undefined) return;
+				if (id.type === "Identifier" && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
 
 				const complexity = calculateIanitorComplexity(init);
 				if (complexity < config.baseThreshold) return;

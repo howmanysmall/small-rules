@@ -1,3 +1,5 @@
+import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -36,7 +38,8 @@ function isPromiseChainCall(node: ESTree.CallExpression): boolean {
 }
 
 function isAsyncIife({ callee }: ESTree.CallExpression): boolean {
-	return (callee.type === "ArrowFunctionExpression" || callee.type === "FunctionExpression") && callee.async;
+	const unwrapped = unwrapExpression(callee);
+	return isCallbackFunction(unwrapped) && unwrapped.async;
 }
 
 function getThisAsyncMethodName(
@@ -66,7 +69,14 @@ function getLocalVariableAssignment(node: ESTree.Node): string | undefined {
 }
 
 function isNonIifeFunction(node: ESTree.Node): boolean {
-	if (node.type !== "ArrowFunctionExpression" && node.type !== "FunctionExpression") return false;
+	if (!isCallbackFunction(node)) return false;
+	if (
+		node.parent.type === "ParenthesizedExpression" &&
+		node.parent.parent.type === "CallExpression" &&
+		node.parent.parent.callee === node.parent
+	) {
+		return false;
+	}
 	return node.parent.type !== "CallExpression" || node.parent.callee !== node;
 }
 

@@ -18,7 +18,6 @@ const MANY_REPLACEMENTS = Object.fromEntries(
 );
 
 describe("prevent-abbreviations", () => {
-	// @ts-expect-error -- this thing is dumb.
 	ts.run("prevent-abbreviations", rule, {
 		invalid: [
 			// Variable declaration with abbreviation (const)
@@ -712,6 +711,11 @@ describe("prevent-abbreviations", () => {
 				code: "const err = value;",
 				options: [{ extendDefaultReplacements: false, replacements: { err: { error: false } } }],
 			},
+			{
+				code: "const value = 1;",
+				filename: "<input>",
+				options: [{ checkFilenames: true }],
+			},
 		],
 	});
 
@@ -764,11 +768,17 @@ describe("prevent-abbreviations", () => {
 		});
 
 		it("formats replacement suggestions without omitted counts when all samples are shown", () => {
-			expect.assertions(8);
+			expect.assertions(9);
 
 			const options = prepareOptions({
 				allowList: { ignored: "yes", kept: true },
 				ignore: [123, "test"],
+			});
+			const overlapOptions = prepareOptions({
+				extendDefaultReplacements: false,
+				replacements: {
+					txt: { textName: true },
+				},
 			});
 			const shorthandOptions = prepareOptions({
 				shorthands: {
@@ -785,6 +795,7 @@ describe("prevent-abbreviations", () => {
 			expect(getShorthandReplacement("", shorthandOptions.shorthandConfiguration)).toBeUndefined();
 			expect(getShorthandReplacement("ABC", shorthandOptions.shorthandConfiguration)?.replaced).toBe("BCA");
 			expect(getShorthandReplacement("Btn", shorthandOptions.shorthandConfiguration)?.replaced).toBe("");
+			expect(getNameReplacements("txtName", overlapOptions)).toStrictEqual({ samples: ["textName"], total: 1 });
 			expect(getNameReplacements("kept", options)).toStrictEqual({ total: 0 });
 			expect(getNameReplacements("testName", options)).toStrictEqual({ total: 0 });
 		});
@@ -803,7 +814,6 @@ describe("prevent-abbreviations", () => {
 		});
 	});
 
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("prevent-abbreviations JSX", rule, {
 		invalid: [
 			{

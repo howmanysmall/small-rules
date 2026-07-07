@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-array-constructor-index-assignment";
 import { ts } from "./rule-testers";
 
 describe("no-array-constructor-index-assignment", () => {
-	// @ts-expect-error -- Shut up.
 	ts.run("no-array-constructor-index-assignment", rule, {
 		invalid: [
 			{
@@ -83,7 +82,7 @@ describe("no-array-constructor-index-assignment", () => {
 			"const [values] = new Array<number>();\nvalues[0] = 1;",
 			"const values = new Array<number>();\nvalues[1] = 1;",
 			"const values = new Array<number>();\nvalues[index] = 1;",
-			"const values = new Array<number>();\nvalues?.[0] = 1;",
+			"const values = new Array<number>();\nvalues = [];",
 			"const values = new Array<number>();\nvalues[0] += 1;",
 			"const values = new Array<number>();\nconsole.log(values);\nvalues[0] = 1;",
 			"const values = new Array<number>();\nvalues.push(1);",

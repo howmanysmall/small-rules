@@ -8,30 +8,41 @@ import { ruleSidebarGroups } from "./src/data/rule-sidebar";
 import contextualMenu from "./src/integrations/contextual-menu";
 import motion from "./src/integrations/motion";
 
+import type { AstroIntegration } from "astro";
+
 function fromRepositoryRoot(path: string): string {
 	return fileURLToPath(new URL(`../${path}`, import.meta.url));
 }
 
-function ensureAstroIntegration<TIntegration extends { name: unknown; hooks: unknown }>(
-	integration: TIntegration,
-): TIntegration {
-	if (typeof integration.name !== "string" || integration.name.length === 0) {
+function ensureAstroIntegration(integration: unknown): AstroIntegration {
+	if (typeof integration !== "object" || integration === null) {
+		const error = new Error(`Expected Astro integration to be an object, received: ${String(integration)}`);
+		Error.captureStackTrace(error, ensureAstroIntegration);
+		throw error;
+	}
+
+	const name = "name" in integration ? integration.name : undefined;
+	if (typeof name !== "string" || name.length === 0) {
 		const error = new Error(
-			`Expected Astro integration to have a non-empty string "name" property, received: ${String(integration.name)}`,
+			`Expected Astro integration to have a non-empty string "name" property, received: ${String(name)}`,
 		);
 		Error.captureStackTrace(error, ensureAstroIntegration);
 		throw error;
 	}
 
-	if (typeof integration.hooks !== "object" || integration.hooks === null) {
+	const hooks = "hooks" in integration ? integration.hooks : undefined;
+	if (typeof hooks !== "object" || hooks === null) {
 		const error = new Error(
-			`Expected Astro integration "${integration.name}" to have a "hooks" object, received: ${String(integration.hooks)}`,
+			`Expected Astro integration "${name}" to have a "hooks" object, received: ${String(hooks)}`,
 		);
 		Error.captureStackTrace(error, ensureAstroIntegration);
 		throw error;
 	}
 
-	return integration;
+	return {
+		hooks,
+		name,
+	};
 }
 
 export default defineConfig({

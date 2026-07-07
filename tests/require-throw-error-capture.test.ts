@@ -8,7 +8,6 @@ const error = {
 };
 
 describe("require-throw-error-capture", () => {
-	// @ts-expect-error - RuleTester types are stricter than the runtime rule shape
 	ts.run("require-throw-error-capture", rule, {
 		invalid: [
 			// Named function declaration

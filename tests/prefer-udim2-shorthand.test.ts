@@ -4,7 +4,6 @@ import rule from "$oxc-rules/prefer-udim2-shorthand";
 import { js } from "./rule-testers";
 
 describe("prefer-udim2-shorthand", () => {
-	// @ts-expect-error -- Shut up
 	js.run("prefer-udim2-shorthand", rule, {
 		invalid: [
 			// FromScale pattern tests

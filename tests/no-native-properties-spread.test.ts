@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-native-properties-spread";
 import { tsx } from "./rule-testers";
 
 describe("no-native-properties-spread", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	tsx.run("no-native-properties-spread", rule, {
 		invalid: [
 			{
@@ -85,7 +84,7 @@ describe("no-native-properties-spread", () => {
 				code: "const view = <Frame roblox:nativeProperties={{ ...SOME_CONSTANT }} />;",
 			},
 			{
-				code: "const view = <Frame nativeProperties={} />;",
+				code: "const view = <Frame nativeProperties={nativeProperties} />;",
 			},
 			{
 				code: "const view = <Frame nativeProperties={{ Size: UDim2.fromScale(1, 1) }} />;",

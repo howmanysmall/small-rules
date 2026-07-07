@@ -3,6 +3,7 @@ import {
 	hasJSXIdentifierAttribute,
 	isReactComponentHigherOrderCall,
 } from "$oxc-utilities/component-utilities";
+import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
@@ -65,7 +66,6 @@ const EMPTY_CALLBACK_USAGE: CallbackUsage = {
 };
 
 const SHOULD_ASCEND_TYPES = new Set(["ConditionalExpression", "LogicalExpression"]);
-const IS_FUNCTION_EXPRESSION = new Set(["ArrowFunctionExpression", "FunctionExpression"]);
 const CONTROL_FLOW_TYPES = new Set([
 	"BlockStatement",
 	"CatchClause",
@@ -94,19 +94,11 @@ function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	return current;
 }
 
-function isFunctionLikeNode(node: ESTree.Node): node is CallbackFunction {
-	return (
-		node.type === "ArrowFunctionExpression" ||
-		node.type === "FunctionExpression" ||
-		node.type === "FunctionDeclaration"
-	);
-}
-
 function getEnclosingFunctionLike(node: ESTree.Node): CallbackFunction | undefined {
 	let current: ESTree.Node | undefined = getParent(node);
 
 	while (current !== undefined) {
-		if (isFunctionLikeNode(current)) return current;
+		if (isAnyFunction(current)) return current;
 		current = getParent(current);
 	}
 
@@ -285,7 +277,7 @@ function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
 
 	/* v8 ignore next -- @preserve return statements that contain JSX are parser-nested inside a function body. */
 	if (currentNode === undefined) return false;
-	return IS_FUNCTION_EXPRESSION.has(currentNode.type) || currentNode.type === "FunctionDeclaration";
+	return isAnyFunction(currentNode);
 }
 
 function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
@@ -388,21 +380,19 @@ function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 	return false;
 }
 
-function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
+function isJSXChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapperType: ESTree.Node["type"]): boolean {
 	let current: ESTree.Node | undefined = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (current === undefined) return false;
 
-	let foundTernary = false;
-	while (
-		current !== undefined &&
-		(current.type === "ConditionalExpression" || WRAPPER_PARENT_TYPES.has(current.type))
-	) {
-		if (current.type === "ConditionalExpression") foundTernary = true;
+	let foundWrapper = false;
+	while (current !== undefined && (current.type === wrapperType || WRAPPER_PARENT_TYPES.has(current.type))) {
+		/* v8 ignore else -- @preserve current parser output keeps wrapped JSX operands attached directly to the wrapper here. */
+		if (current.type === wrapperType) foundWrapper = true;
 		current = getParent(current);
 	}
 
-	if (!foundTernary || current?.type !== "JSXExpressionContainer") return false;
+	if (!foundWrapper || current?.type !== "JSXExpressionContainer") return false;
 
 	const containerParent = getParent(current);
 	/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
@@ -411,25 +401,12 @@ function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 	return containerParent.type === "JSXElement" || containerParent.type === "JSXFragment";
 }
 
+function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
+	return isJSXChildWrappedBy(node, "ConditionalExpression");
+}
+
 function isLogicalJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	let current: ESTree.Node | undefined = getParent(node);
-	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
-	if (current === undefined) return false;
-
-	let foundLogical = false;
-	while (current !== undefined && (current.type === "LogicalExpression" || WRAPPER_PARENT_TYPES.has(current.type))) {
-		/* v8 ignore else -- @preserve current parser output keeps logical JSX operands attached directly to LogicalExpression here. */
-		if (current.type === "LogicalExpression") foundLogical = true;
-		current = getParent(current);
-	}
-
-	if (!foundLogical || current?.type !== "JSXExpressionContainer") return false;
-
-	const containerParent = getParent(current);
-	/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
-	if (containerParent === undefined) return false;
-
-	return containerParent.type === "JSXElement" || containerParent.type === "JSXFragment";
+	return isJSXChildWrappedBy(node, "LogicalExpression");
 }
 
 const requireReactComponentKeys = defineRule({

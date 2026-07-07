@@ -106,7 +106,7 @@ function getPortalReplacement(
 const preferLocalPortalComponent = defineRule({
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
-		/* v8 ignore start -- @preserve RuleTester/runtime filenames are present; empty filename is a defensive host guard. */
+		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const discoveredPortal =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, PORTAL_COMPONENT);
 		/* v8 ignore stop -- @preserve */

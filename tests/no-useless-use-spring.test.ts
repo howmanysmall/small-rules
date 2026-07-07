@@ -4,7 +4,6 @@ import rule from "$oxc-rules/no-useless-use-spring";
 import { ts } from "./rule-testers";
 
 describe("no-useless-use-spring", () => {
-	// @ts-expect-error The RuleTester types from @types/eslint are stricter than our rule's runtime shape
 	ts.run("no-useless-use-spring", rule, {
 		invalid: [
 			// Only `from` without `to` is still useless
@@ -383,7 +382,7 @@ const spring = useSpring(1, []);
 			},
 			{
 				code: `
-const CONFIG: unknown;
+declare const CONFIG: unknown;
 const spring = useSpring(CONFIG, []);
 `,
 			},

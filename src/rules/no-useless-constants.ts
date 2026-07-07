@@ -1,4 +1,10 @@
-import { isCallbackFunction, isExportNamedDeclaration } from "$oxc-utilities/oxc-utilities";
+import {
+	isBindingIdentifier,
+	isCallbackFunction,
+	isExportNamedDeclaration,
+	isVariableDeclaration,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -46,23 +52,11 @@ function collectAllScopes(root: Scope): Array<Scope> {
 		const current = stack.pop();
 		/* v8 ignore next -- @preserve non-empty traversal stack always yields a scope from pop. */
 		if (current === undefined) break;
-		scopes[size++] = current;
+		if (current.type !== "global") scopes[size++] = current;
 		for (const childScope of current.childScopes) stack.push(childScope);
 	}
 
 	return scopes;
-}
-
-function isBindingIdentifier(node: ESTree.Node): node is ESTree.BindingIdentifier {
-	return node.type === "Identifier";
-}
-
-function isVariableDeclarator(node: ESTree.Node): node is ESTree.VariableDeclarator {
-	return node.type === "VariableDeclarator";
-}
-
-function isVariableDeclaration(node: ESTree.Node): node is ESTree.VariableDeclaration {
-	return node.type === "VariableDeclaration";
 }
 
 function isFunctionLikeInitializer(node: ESTree.Node): boolean {
@@ -79,7 +73,8 @@ function isObjectLikeInitializer(
 	if (initializer.type !== "CallExpression" && initializer.type !== "NewExpression") return false;
 
 	const candidateText = sourceCode.getText(initializer.callee);
-	return patterns.some((pattern) => pattern.test(candidateText));
+	for (const pattern of patterns) if (pattern.test(candidateText)) return true;
+	return false;
 }
 
 function isStatementContainer(node: ESTree.Node): node is ESTree.BlockStatement | ESTree.Program {
@@ -250,6 +245,12 @@ function isAutoInlineSafeInitializer(sourceCode: SourceCode, node: ESTree.Expres
 	);
 }
 
+function getInlineInitializerText(sourceCode: SourceCode, initializer: ESTree.Expression): string {
+	let current = initializer;
+	while (current.type === "ParenthesizedExpression") current = current.expression;
+	return sourceCode.getText(current);
+}
+
 function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree.VariableDeclaration): boolean {
 	const { parent } = first;
 	/* v8 ignore next -- @preserve VariableDeclaration parents visited by this rule are Program or BlockStatement containers. */
@@ -410,8 +411,6 @@ const noUselessConstants = defineRule({
 		}
 
 		function inspectScope(scope: Scope): void {
-			if (scope.type === "global") return;
-
 			const fixableConstants = new Array<FixableConstant>();
 			for (const scopeVariable of scope.variables) {
 				const candidate = getUselessConstantCandidate(scope, scopeVariable);
@@ -439,7 +438,7 @@ const noUselessConstants = defineRule({
 
 				fixableConstants.push({
 					declarationNode: candidate.declarationNode,
-					initializerText: sourceCode.getText(candidate.initializer),
+					initializerText: getInlineInitializerText(sourceCode, candidate.initializer),
 					name: candidate.name,
 					referenceIdentifier: candidate.referenceIdentifier,
 					reportNode: candidate.reportNode,
