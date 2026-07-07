@@ -1,3 +1,4 @@
+import { isAbsolute, relative } from "node:path";
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import { type } from "arktype";
@@ -42,6 +43,20 @@ type EffectiveOptions = Simplify<
 const FILE_MATCH_OPTIONS = { matchBase: true } satisfies MinimatchOptions;
 const NAME_MATCH_OPTIONS = { dot: true, magicalBraces: true } satisfies MinimatchOptions;
 
+function normalizePath(value: string): string {
+	return value.replaceAll("\\", "/");
+}
+
+function createFileCandidates(filename: string): ReadonlyArray<string> {
+	const normalizedFilename = normalizePath(filename);
+	if (!isAbsolute(filename)) return [normalizedFilename];
+
+	const relativeFilename = normalizePath(relative(process.cwd(), filename));
+	if (relativeFilename === "" || relativeFilename.startsWith("..")) return [normalizedFilename];
+
+	return [normalizedFilename, relativeFilename];
+}
+
 function compileMatcher(pattern: string, options: MinimatchOptions): CompiledMatcher {
 	const matcher = new Minimatch(pattern, options);
 	const hasMagic = matcher.hasMagic();
@@ -80,8 +95,11 @@ function getEffectiveOptions(context: Context): EffectiveOptions {
 	if (!isRuleOptions.allows(options)) return { checkComputed: true, isAllowedFile: false, restrictions: [] };
 
 	const { allowFiles, checkComputed, restrictions } = options;
+	const fileCandidates = createFileCandidates(context.filename);
 	const isAllowedFile =
-		allowFiles?.some((pattern) => minimatch(context.filename, pattern, FILE_MATCH_OPTIONS)) ?? false;
+		allowFiles?.some((pattern) =>
+			fileCandidates.some((filename) => minimatch(filename, pattern, FILE_MATCH_OPTIONS)),
+		) ?? false;
 
 	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions: restrictions.map(compileRestriction) };
 }
@@ -141,9 +159,7 @@ const noRestrictedPropertyAssignment = defineRule({
 				additionalProperties: false,
 				properties: {
 					allowFiles: {
-						items: {
-							type: "string",
-						},
+						items: { type: "string" },
 						type: "array",
 					},
 					checkComputed: {
@@ -154,16 +170,10 @@ const noRestrictedPropertyAssignment = defineRule({
 						items: {
 							additionalProperties: false,
 							properties: {
-								message: {
-									type: "string",
-								},
-								object: {
-									type: "string",
-								},
+								message: { type: "string" },
+								object: { type: "string" },
 								properties: {
-									items: {
-										type: "string",
-									},
+									items: { type: "string" },
 									minItems: 1,
 									type: "array",
 								},

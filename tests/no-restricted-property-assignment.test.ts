@@ -202,6 +202,28 @@ describe("no-restricted-property-assignment", () => {
 				],
 			},
 			{
+				code: "_G.__DEV__ = true;",
+				filename: `${process.cwd()}/test/utils/development-flag.ts`,
+				options: [
+					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				filename: `${process.cwd()}/test/utils/development-flag.tsx`,
+				options: [
+					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				// oxlint-disable-next-line sonar/publicly-writable-directories -- slop rule
+				filename: "/tmp/development-flag.ts",
+				options: [
+					{ allowFiles: ["development-flag.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
 				code: "_G.__DEV__ = true; // multiple allow patterns",
 				filename: "main.server.ts",
 				options: [
