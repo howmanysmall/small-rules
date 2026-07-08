@@ -26,6 +26,7 @@ shellcheck = "latest"
 shfmt = "latest"
 tombi = "latest"
 zizmor = "latest"
+nub = "latest"
 
 [deps.aube]
 auto = true
