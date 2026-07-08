@@ -339,6 +339,10 @@
 			}
 		},
 		"biome": {
+			"binary": {
+				"arguments": ["--run", "biome", "--", "lsp-proxy"],
+				"path": "node"
+			},
 			"settings": {
 				"biome": {
 					"configurationPath": "./biome.jsonc",
@@ -365,6 +369,10 @@
 			}
 		},
 		"oxfmt": {
+			"binary": {
+				"arguments": ["--run", "oxfmt", "--", "--lsp"],
+				"path": "node"
+			},
 			"initialization_options": {
 				"settings": {
 					"configPath": "./.oxfmtrc.json",
