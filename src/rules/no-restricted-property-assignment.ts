@@ -52,7 +52,7 @@ function createFileCandidates(filename: string): ReadonlyArray<string> {
 	if (!isAbsolute(filename)) return [normalizedFilename];
 
 	const relativeFilename = normalizePath(relative(process.cwd(), filename));
-	if (relativeFilename === "" || relativeFilename.startsWith("..")) return [normalizedFilename];
+	if (relativeFilename.length === 0 || relativeFilename.startsWith("..")) return [normalizedFilename];
 
 	return [normalizedFilename, relativeFilename];
 }
@@ -68,15 +68,13 @@ function compileMatcher(pattern: string, options: MinimatchOptions): CompiledMat
 
 function createPropertyMatcher(patterns: ReadonlyArray<string>): Matcher {
 	const literalPatterns = new Set<string>();
-	const globMatchers: Array<Matcher> = [];
+	const globMatchers = new Array<Matcher>();
+	let size = 0;
 
 	for (const pattern of patterns) {
 		const matcher = compileMatcher(pattern, NAME_MATCH_OPTIONS);
-		if (matcher.hasMagic) {
-			globMatchers.push(matcher.matches);
-		} else {
-			literalPatterns.add(pattern);
-		}
+		if (matcher.hasMagic) globMatchers[size++] = matcher.matches;
+		else literalPatterns.add(pattern);
 	}
 
 	return (property) => literalPatterns.has(property) || globMatchers.some((matcher) => matcher(property));

@@ -582,9 +582,7 @@ const noConstantConditionWithBreak = defineRule({
 	create(context): Visitor {
 		const rawOptions = context.options?.[0];
 		const loopExitCalls = normalizeLoopExitCalls(
-			typeof rawOptions === "object" && rawOptions !== null
-				? (rawOptions as NoConstantConditionWithBreakOptions)
-				: undefined,
+			typeof rawOptions === "object" && rawOptions !== null ? rawOptions : undefined,
 		);
 
 		function reportConstantCondition(testExpression: ESTree.Expression): void {
