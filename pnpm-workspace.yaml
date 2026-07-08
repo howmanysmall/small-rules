@@ -86,3 +86,59 @@ strictSsl: true
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 10080
 verifyStoreIntegrity: true
+catalogs:
+  build:
+    tsdown: 0.22.3
+  dev:
+    "@antfu/ni": 30.2.0
+    "@cliffy/command": npm:@jsr/cliffy__command@1.2.1
+    "@commitlint/config-conventional": 21.1.0
+    "@commitlint/types": 21.1.0
+    "@octokit/rest": 22.0.1
+    "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
+    "@stryker-mutator/api": 9.6.1
+    "@stryker-mutator/core": 9.6.1
+    "@total-typescript/ts-reset": 0.6.1
+    "@typescript/native-preview": 7.0.0-dev.20260629.1
+    "@vitiate/core": 0.3.1
+    "@vitiate/fuzzed-data-provider": 0.3.1
+    bumpp: 11.1.0
+    changelogithub: 14.0.0
+    commitlint: 21.1.0
+    fast-check: 4.8.0
+    fdir: 6.5.0
+    get-tsconfig: 4.14.0
+    jiti: 2.7.0
+    jscpd: 5.0.11
+    oxfmt: 0.57.0
+    oxlint: 1.72.0
+    oxlint-tsgolint: 0.23.0
+    package-manager-detector: 1.6.0
+    pncat: 0.12.0
+    sfw: 2.0.6
+    skills: 1.5.14
+    type-fest: 5.7.0
+    vitiate: 0.3.1
+  lint:
+    "@biomejs/biome": 2.5.1
+    eslint: 10.6.0
+    eslint-plugin-antfu: 3.2.3
+    eslint-plugin-regexp: 3.1.1
+    eslint-plugin-sonarjs: 4.1.0
+    eslint-plugin-unused-imports: 4.4.1
+    knip: 6.23.0
+  prod:
+    arktype: 2.2.1
+    ignore: 7.0.5
+    minimatch: 10.2.5
+    oxc-parser: 0.138.0
+    oxc-resolver: 11.21.3
+    oxlint-plugin-utilities: 1.1.0
+  test:
+    "@fast-check/vitest": 0.4.1
+    "@stryker-mutator/vitest-runner": 9.6.1
+    "@vitest/coverage-v8": 4.1.9
+    vitest: 4.1.9
+  types:
+    "@types/bun": 1.3.14
+    "@types/node": "25"
