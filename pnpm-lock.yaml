@@ -76,9 +76,6 @@ catalogs:
     oxlint-tsgolint:
       specifier: 0.24.0
       version: 0.24.0
-    package-manager-detector:
-      specifier: 1.6.0
-      version: 1.6.0
     pncat:
       specifier: 0.12.0
       version: 0.12.0
@@ -158,9 +155,6 @@ catalogs:
     '@types/node':
       specifier: '25'
       version: 25.9.4
-
-patchedDependencies:
-  package-manager-detector@1.6.0: 588a8433bf4110ff974d9938c44bbf88e0b0fd41a7e44df60929e72313d65757
 
 importers:
 
@@ -290,9 +284,6 @@ importers:
       oxlint-tsgolint:
         specifier: catalog:dev
         version: 0.24.0
-      package-manager-detector:
-        specifier: catalog:dev
-        version: 1.6.0(patch_hash=588a8433bf4110ff974d9938c44bbf88e0b0fd41a7e44df60929e72313d65757)
       pncat:
         specifier: catalog:dev
         version: 0.12.0
@@ -5466,7 +5457,7 @@ snapshots:
       args-tokenizer: 0.3.0
       cac: 7.0.0
       jsonc-parser: 3.3.1
-      package-manager-detector: 1.6.0(patch_hash=588a8433bf4110ff974d9938c44bbf88e0b0fd41a7e44df60929e72313d65757)
+      package-manager-detector: 1.6.0
       semver: 7.8.5
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
@@ -6550,7 +6541,7 @@ snapshots:
     dependencies:
       p-limit: 4.0.0
 
-  package-manager-detector@1.6.0(patch_hash=588a8433bf4110ff974d9938c44bbf88e0b0fd41a7e44df60929e72313d65757): {}
+  package-manager-detector@1.6.0: {}
 
   parent-module@1.0.1:
     dependencies:
@@ -6605,7 +6596,7 @@ snapshots:
       ansis: 4.3.1
       cac: 7.0.0
       find-up: 8.0.0
-      package-manager-detector: 1.6.0(patch_hash=588a8433bf4110ff974d9938c44bbf88e0b0fd41a7e44df60929e72313d65757)
+      package-manager-detector: 1.6.0
       pathe: 2.0.3
       pnpm-workspace-yaml: 1.6.1
       tinyexec: 1.2.4
@@ -7082,7 +7073,6 @@ time:
   oxlint-plugin-utilities@1.1.0: '2026-06-29T22:19:53.396Z'
   oxlint-tsgolint@0.24.0: '2026-06-30T12:13:34.520Z'
   oxlint@1.73.0: '2026-07-06T23:07:23.441Z'
-  package-manager-detector@1.6.0: '2025-11-27T06:51:36.973Z'
   pncat@0.12.0: '2026-04-29T15:35:33.918Z'
   sfw@2.0.6: '2026-05-22T16:42:22.828Z'
   skills@1.5.15: '2026-07-07T00:36:48.448Z'

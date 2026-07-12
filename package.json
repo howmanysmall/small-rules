@@ -110,7 +110,6 @@
 		"oxfmt": "catalog:dev",
 		"oxlint": "catalog:dev",
 		"oxlint-tsgolint": "catalog:dev",
-		"package-manager-detector": "catalog:dev",
 		"pncat": "catalog:dev",
 		"sfw": "catalog:dev",
 		"skills": "catalog:dev",

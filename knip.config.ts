@@ -44,7 +44,6 @@ const configuration: KnipConfig = {
 		"@fast-check/vitest",
 		"@vitiate/fuzzed-data-provider",
 		"fast-check",
-		"package-manager-detector",
 		"sfw",
 	],
 	ignoreFiles: ["tests/fixtures/**", "scripts/reset.d.ts"],
