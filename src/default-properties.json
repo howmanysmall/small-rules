@@ -453,6 +453,26 @@
 				"type": "string",
 				"value": ""
 			},
+			"DiffractionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"OcclusionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"PositionType": {
+				"enumType": "EmitterPositionType",
+				"type": "Enum",
+				"value": "Parent"
+			},
+			"ReverbEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
 			"SimulationFidelity": {
 				"enumType": "AudioSimulationFidelity",
 				"type": "Enum",
@@ -592,6 +612,26 @@
 			"AudioInteractionGroup": {
 				"type": "string",
 				"value": ""
+			},
+			"DiffractionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"OcclusionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"PositionType": {
+				"enumType": "ListenerPositionType",
+				"type": "Enum",
+				"value": "Parent"
+			},
+			"ReverbEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
 			},
 			"SimulationFidelity": {
 				"enumType": "AudioSimulationFidelity",
@@ -1531,18 +1571,10 @@
 				"type": "bool",
 				"value": true
 			},
-			"BaseTextureId": {
-				"type": "number",
-				"value": 0
-			},
 			"BodyPart": {
 				"enumType": "BodyPart",
 				"type": "Enum",
 				"value": "Head"
-			},
-			"MeshId": {
-				"type": "number",
-				"value": 0
 			},
 			"OverlayTextureId": {
 				"type": "number",
@@ -2179,6 +2211,10 @@
 		},
 		"Decal": {
 			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
 				"type": "bool",
 				"value": true
 			},
@@ -4020,6 +4056,11 @@
 				"enumType": "KeyCode",
 				"type": "Enum",
 				"value": "Unknown"
+			},
+			"Type": {
+				"enumType": "InputBindingType",
+				"type": "Enum",
+				"value": "Automatic"
 			},
 			"Up": {
 				"enumType": "KeyCode",
@@ -7354,6 +7395,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
 			"Color3": {
 				"type": "Color3",
 				"value": [1, 1, 1]
@@ -7947,6 +7992,20 @@
 			"Rotation": {
 				"type": "number",
 				"value": 0
+			},
+			"Scale": {
+				"type": "number",
+				"value": 1
+			},
+			"TileMode": {
+				"enumType": "GradientTileMode",
+				"type": "Enum",
+				"value": "Clamp"
+			},
+			"Type": {
+				"enumType": "GradientType",
+				"type": "Enum",
+				"value": "Linear"
 			}
 		},
 		"UIGridLayout": {
@@ -8149,6 +8208,10 @@
 			"Color": {
 				"type": "Color3",
 				"value": [0, 0, 0]
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
 			},
 			"Offset": {
 				"type": "UDim2",
@@ -8848,6 +8911,11 @@
 				"type": "bool",
 				"value": true
 			},
+			"InternalVideoUsage": {
+				"enumType": "InternalVideoUsage",
+				"type": "Enum",
+				"value": "Default"
+			},
 			"LayoutOrder": {
 				"type": "number",
 				"value": 0
@@ -8948,6 +9016,11 @@
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"InternalVideoUsage": {
+				"enumType": "InternalVideoUsage",
+				"type": "Enum",
+				"value": "Default"
 			},
 			"Looping": {
 				"type": "bool",

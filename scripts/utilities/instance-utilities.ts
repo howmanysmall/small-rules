@@ -1,4 +1,4 @@
-import { file } from "bun";
+import { readFile } from "node:fs/promises";
 import { fdir } from "fdir";
 import { parseSync, Visitor } from "oxc-parser";
 
@@ -88,7 +88,7 @@ async function readAllFilesAsync(paths: ReadonlyArray<string>): Promise<Readonly
 	const results = await Promise.all(
 		paths.map(async (path) => {
 			try {
-				const sourceText = await file(path).text();
+				const sourceText = await readFile(path, "utf8");
 				return { path, sourceText };
 			} catch {
 				return undefined;
