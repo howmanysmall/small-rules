@@ -40,7 +40,6 @@ const configuration: KnipConfig = {
 	entry: ["commitlint.config.ts", "pncat.config.ts", "scripts/lint-json.ts", "vitest*.config.ts"],
 	ignoreBinaries: ["hk"],
 	ignoreDependencies: [
-		"@antfu/ni",
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
 		"@vitiate/fuzzed-data-provider",

@@ -76,7 +76,6 @@
 		"oxlint-plugin-utilities": "catalog:prod"
 	},
 	"devDependencies": {
-		"@antfu/ni": "catalog:dev",
 		"@biomejs/biome": "catalog:lint",
 		"@cliffy/command": "catalog:dev",
 		"@commitlint/config-conventional": "catalog:dev",

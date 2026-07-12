@@ -27,6 +27,7 @@ shfmt = "latest"
 tombi = "latest"
 zizmor = "latest"
 nub = "latest"
+ni = "latest"
 
 [deps.aube]
 auto = true
@@ -34,7 +35,7 @@ auto = true
 [tasks]
 [tasks.install]
 description = "Install dependencies using the locked Aube dependency graph. Use before local CI or release checks."
-run = "aube install"
+run = "ni"
 
 [tasks.lint]
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."

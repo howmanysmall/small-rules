@@ -90,7 +90,6 @@ catalogs:
   build:
     tsdown: 0.22.3
   dev:
-    "@antfu/ni": 30.2.0
     "@cliffy/command": npm:@jsr/cliffy__command@1.2.1
     "@commitlint/config-conventional": 21.2.0
     "@commitlint/types": 21.2.0

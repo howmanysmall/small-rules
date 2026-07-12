@@ -294,6 +294,10 @@ url = "https://github.com/jdx/hk/releases/download/v1.48.0/hk-x86_64-pc-windows-
 checksum = "sha256:6349ab27cd7a9c07e68edc7c2af0859c8a540482e97a5b7306e9e88460a5ca43"
 url = "https://github.com/jdx/hk/releases/download/v1.48.0/hk-x86_64-pc-windows-msvc.zip"
 
+[[tools.ni]]
+version = "30.2.0"
+backend = "npm:@antfu/ni"
+
 [[tools.node]]
 version = "24.18.0"
 backend = "core:node"
