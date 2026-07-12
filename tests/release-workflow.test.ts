@@ -59,7 +59,7 @@ describe("release workflow", () => {
 			({ name }) => name === "Publish to NPM (Trusted Publishing)",
 		);
 
-		expect(publishStep?.run).toBe("pnpm publish --provenance --access public");
+		expect(publishStep?.run).toBe("pnpm publish --provenance --access public --no-git-checks");
 	});
 
 	it("resolves catalog dependencies to registry-compatible versions", async () => {

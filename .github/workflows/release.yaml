@@ -121,7 +121,7 @@ jobs:
 
       - name: Publish to NPM (Trusted Publishing)
         if: ${{ env.DRY_RUN != 'true' }}
-        run: pnpm publish --provenance --access public
+        run: pnpm publish --provenance --access public --no-git-checks
 
       - name: Generate changelog & GitHub release
         if: ${{ env.DRY_RUN != 'true' }}
