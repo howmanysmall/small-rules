@@ -39,17 +39,17 @@ jobs:
       matrix:
         include:
           - name: Build
-            command: nr build
+            command: node --run build -- --minify
           - name: Biome
-            command: nr biome ci
+            command: node --run biome -- ci
           - name: Lint
-            command: nr oxlint .
+            command: node --run oxlint
           - name: Type Check
-            command: nr type-check
+            command: node --run type-check
           - name: Knip
-            command: nr knip
+            command: node --run knip
           - name: Test
-            command: nr test
+            command: node --run test
     steps:
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
