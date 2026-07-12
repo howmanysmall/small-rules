@@ -1,6 +1,6 @@
 {
 	"name": "@pobammer-ts/small-rules",
-	"version": "2.5.1",
+	"version": "2.5.2",
 	"description": "Various Oxlint-native rules for linting roblox-ts projects.",
 	"keywords": [
 		"lint",
