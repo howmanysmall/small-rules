@@ -4,7 +4,7 @@ const configuration = {
 	cleanTempDir: true,
 	concurrency: "50%",
 	coverageAnalysis: "perTest",
-	ignorePatterns: ["/coverage"],
+	ignorePatterns: ["/.codegraph", "/coverage", "/documentation/dist"],
 	incremental: true,
 	mutate: ["src/**/*.ts", "!src/**/*.d.ts", "!src/index.ts", "!src/types/**/*.ts"],
 	plugins: ["@stryker-mutator/vitest-runner"],
