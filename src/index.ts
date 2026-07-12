@@ -16,6 +16,7 @@ import noArrayConstructorElements from "$oxc-rules/no-array-constructor-elements
 import noArrayConstructorIndexAssignment from "$oxc-rules/no-array-constructor-index-assignment";
 import noArraySizeAssignment from "$oxc-rules/no-array-size-assignment";
 import noAsyncConstructor from "$oxc-rules/no-async-constructor";
+import noAsyncInSystem from "$oxc-rules/no-async-in-system";
 import noCascadingSetState from "$oxc-rules/no-cascading-set-state";
 import noColor3Constructor from "$oxc-rules/no-color3-constructor";
 import noCommentedCode from "$oxc-rules/no-commented-code";
@@ -110,6 +111,7 @@ const smallRules = definePlugin({
 		"no-array-constructor-index-assignment": noArrayConstructorIndexAssignment,
 		"no-array-size-assignment": noArraySizeAssignment,
 		"no-async-constructor": noAsyncConstructor,
+		"no-async-in-system": noAsyncInSystem,
 		"no-cascading-set-state": noCascadingSetState,
 		"no-color3-constructor": noColor3Constructor,
 		"no-commented-code": noCommentedCode,
