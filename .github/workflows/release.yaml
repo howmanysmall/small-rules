@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate-and-build:
+  validate-release:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,11 +31,6 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Setup toolchain
-        uses: ./.github/actions/setup
-        with:
-          cache: false
 
       - name: Determine dry run flag
         id: set_dry_run
@@ -55,9 +50,6 @@ jobs:
         run: |
           echo "::error title=Refusing non-tag publish::Run this workflow from a v*.*.* tag, or enable dry_run." >&2
           exit 1
-
-      - name: Install dependencies
-        uses: ./.github/actions/install
 
       - name: Validate tag matches package.json version
         id: version_check
@@ -84,43 +76,23 @@ jobs:
             exit 1
           fi
 
-      - name: Lint
-        run: node --run lint
-
-      - name: Type Checking
-        run: node --run type-check
-
-      - name: Knip
-        run: node --run knip
-
-      - name: Build
-        run: node --run build -- --minify
-
-      - name: Test
-        run: node --run test
-
-      - name: Assert build artifacts exist
-        run: |
-          if [ ! -d dist ]; then
-            echo "::error title=Missing output::dist directory not found" >&2
-            exit 1
-          fi
-          if [ ! -f dist/index.js ]; then
-            echo "::error title=Missing artifact::dist/index.js not found" >&2
-            ls -R dist || true
-            exit 1
-          fi
-          echo "Build artifacts OK"
+  checks:
+    needs: validate-release
+    uses: ./.github/workflows/checks.yaml
+    permissions:
+      contents: read
 
   publish:
     runs-on: ubuntu-latest
-    needs: validate-and-build
+    needs:
+      - validate-release
+      - checks
     permissions:
       contents: write # For creating GitHub releases
       id-token: write # Required for NPM Trusted Publishing (OIDC)
-    if: startsWith(github.ref, 'refs/tags/') || needs.validate-and-build.outputs.dry_run == 'true'
+    if: startsWith(github.ref, 'refs/tags/') || needs.validate-release.outputs.dry_run == 'true'
     env:
-      DRY_RUN: ${{ needs.validate-and-build.outputs.dry_run }}
+      DRY_RUN: ${{ needs.validate-release.outputs.dry_run }}
     steps:
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
