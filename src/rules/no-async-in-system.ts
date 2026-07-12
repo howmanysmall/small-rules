@@ -1,11 +1,17 @@
-import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+import {
+	getMemberPropertyName,
+	getVariableByName,
+	hasShadowedBinding,
+	unwrapExpression,
+} from "$oxc-utilities/ast-utilities";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const DEFAULT_SYSTEM_TYPE_NAMES = ["PlanckSystem", "System", "SystemFunction", "SystemReturn", "SystemTableLike"];
+const ROBLOX_GLOBAL_ROOT_NAMES = new Set(["game", "Instance", "workspace"]);
 const KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
 
 function getTypeName(typeNode: ESTree.Node): string | undefined {
@@ -74,24 +80,89 @@ function addSystemPropertyFunction(
 	}
 }
 
-function getCallName(node: ESTree.CallExpression): string | undefined {
-	if (node.callee.type === "Identifier") return node.callee.name;
-	if (node.callee.type === "MemberExpression") return getMemberPropertyName(node.callee);
-	return undefined;
+function getConstInitializer(
+	identifier: ESTree.IdentifierReference,
+	sourceCode: SourceCode,
+): ESTree.Expression | undefined {
+	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
+	if (variable?.defs.length !== 1) return undefined;
+
+	const [definition] = variable.defs;
+	if (definition?.node.type !== "VariableDeclarator") return undefined;
+	const declaration = definition.node.parent;
+	/* v8 ignore next -- @preserve variable declarator definitions always have variable declaration parents. */
+	if (declaration.type !== "VariableDeclaration" || declaration.kind !== "const") return undefined;
+	return definition.node.init ?? undefined;
 }
 
-function reportAsyncCalls(systemFunction: CallbackFunction, report: (node: ESTree.CallExpression) => void): void {
+function isRobloxDerivedExpression(
+	expression: ESTree.Expression,
+	sourceCode: SourceCode,
+	additionalRobloxRootNames: ReadonlySet<string>,
+	visitedInitializers: Set<ESTree.Expression>,
+): boolean {
+	const current = unwrapExpression(expression);
+
+	if (current.type === "Identifier") {
+		if (additionalRobloxRootNames.has(current.name)) return true;
+		if (ROBLOX_GLOBAL_ROOT_NAMES.has(current.name) && !hasShadowedBinding(sourceCode, current, current.name)) {
+			return true;
+		}
+
+		const initializer = getConstInitializer(current, sourceCode);
+		if (initializer === undefined || visitedInitializers.has(initializer)) return false;
+		visitedInitializers.add(initializer);
+		return isRobloxDerivedExpression(initializer, sourceCode, additionalRobloxRootNames, visitedInitializers);
+	}
+
+	if (current.type === "MemberExpression") {
+		return isRobloxDerivedExpression(current.object, sourceCode, additionalRobloxRootNames, visitedInitializers);
+	}
+
+	return (
+		current.type === "CallExpression" &&
+		current.callee.type === "MemberExpression" &&
+		isRobloxDerivedExpression(current.callee.object, sourceCode, additionalRobloxRootNames, visitedInitializers)
+	);
+}
+
+function isRobloxYieldingAsyncCall(
+	node: ESTree.CallExpression,
+	sourceCode: SourceCode,
+	additionalRobloxRootNames: ReadonlySet<string>,
+): boolean {
+	if (node.callee.type !== "MemberExpression") return false;
+	const methodName = getMemberPropertyName(node.callee);
+	if (methodName === undefined || !methodName.endsWith("Async")) return false;
+	const firstCharacter = methodName.codePointAt(0);
+	return (
+		firstCharacter !== undefined &&
+		firstCharacter >= 0x41 &&
+		firstCharacter <= 0x5a &&
+		isRobloxDerivedExpression(node.callee.object, sourceCode, additionalRobloxRootNames, new Set())
+	);
+}
+
+function reportAsyncCalls(
+	systemFunction: CallbackFunction,
+	sourceCode: SourceCode,
+	additionalRobloxRootNames: ReadonlySet<string>,
+	report: (node: ESTree.CallExpression) => void,
+): void {
 	if (systemFunction.async || systemFunction.body === null) return;
 
 	forEachNode(systemFunction.body, (node) => {
 		if (isAnyFunction(node) && node !== systemFunction && node.async) return false;
-		if (node.type === "CallExpression" && getCallName(node)?.endsWith("Async") === true) report(node);
+		if (node.type === "CallExpression" && isRobloxYieldingAsyncCall(node, sourceCode, additionalRobloxRootNames)) {
+			report(node);
+		}
 		return true;
 	});
 }
 
 const noAsyncInSystem = defineRule({
 	create(context): Visitor {
+		const additionalRobloxRootNames = new Set(context.options[0]?.additionalRobloxRootNames);
 		const additionalSystemTypeNames = context.options[0]?.additionalSystemTypeNames ?? [];
 		const systemTypeNames = new Set([...DEFAULT_SYSTEM_TYPE_NAMES, ...additionalSystemTypeNames]);
 
@@ -129,7 +200,7 @@ const noAsyncInSystem = defineRule({
 				}
 
 				for (const systemFunction of systemFunctions) {
-					reportAsyncCalls(systemFunction, (node) => {
+					reportAsyncCalls(systemFunction, context.sourceCode, additionalRobloxRootNames, (node) => {
 						context.report({ messageId: "noAsyncInSystem", node });
 					});
 				}
@@ -138,16 +209,21 @@ const noAsyncInSystem = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Disallow Async-suffixed calls in synchronous Planck system execution.",
+			description: "Disallow yielding Roblox Async API calls in synchronous Planck system execution.",
 			recommended: true,
 		},
 		messages: {
-			noAsyncInSystem: "Do not call an Async-suffixed function from a synchronous Planck system.",
+			noAsyncInSystem: "Do not call a yielding Roblox Async API from a synchronous Planck system.",
 		},
 		schema: [
 			{
 				additionalProperties: false,
 				properties: {
+					additionalRobloxRootNames: {
+						items: { type: "string" },
+						type: "array",
+						uniqueItems: true,
+					},
 					additionalSystemTypeNames: {
 						items: { type: "string" },
 						type: "array",
