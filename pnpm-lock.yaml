@@ -94,6 +94,9 @@ catalogs:
     vitiate:
       specifier: 0.3.1
       version: 0.3.1
+    zx:
+      specifier: ^8.8.5
+      version: 8.8.5
   lint:
     '@biomejs/biome':
       specifier: 2.5.3
@@ -311,6 +314,9 @@ importers:
       vitiate:
         specifier: catalog:dev
         version: 0.3.1(typescript@6.0.3)(vite@8.1.0(@types/node@25.9.4)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10)
+      zx:
+        specifier: catalog:dev
+        version: 8.8.5
 
 packages:
 
@@ -3850,6 +3856,11 @@ packages:
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
+  zx@8.8.5:
+    resolution: {integrity: sha512-SNgDF5L0gfN7FwVOdEFguY3orU5AkfFZm9B5YSHog/UDHv+lvmd82ZAsOenOkQixigwH2+yyH198AwNdKhj+RA==}
+    engines: {node: '>= 12.17.0'}
+    hasBin: true
+
 snapshots:
 
   '@ark/schema@0.56.2':
@@ -7028,6 +7039,8 @@ snapshots:
 
   zod@4.4.3: {}
 
+  zx@8.8.5: {}
+
 time:
   '@biomejs/biome@2.5.3': '2026-07-08T08:13:37.631Z'
   '@commitlint/config-conventional@21.2.0': '2026-06-30T09:53:56.373Z'
@@ -7075,5 +7088,7 @@ time:
   skills@1.5.15: '2026-07-07T00:36:48.448Z'
   tsdown@0.22.3: '2026-06-16T17:44:00.088Z'
   type-fest@5.8.0: '2026-07-04T22:51:13.318Z'
+  typescript@6.0.3: '2026-04-16T23:38:27.905Z'
   vitest@4.1.10: '2026-07-06T06:44:42.684Z'
   vitiate@0.3.1: '2026-06-22T02:01:18.701Z'
+  zx@8.8.5: '2025-10-19T13:48:42.492Z'

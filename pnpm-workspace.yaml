@@ -118,6 +118,7 @@ catalogs:
     skills: 1.5.15
     type-fest: 5.8.0
     vitiate: 0.3.1
+    zx: ^8.8.5
   lint:
     "@biomejs/biome": 2.5.3
     eslint: 10.6.0

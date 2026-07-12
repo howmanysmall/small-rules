@@ -117,7 +117,8 @@
 		"tsdown": "catalog:build",
 		"type-fest": "catalog:dev",
 		"vitest": "catalog:test",
-		"vitiate": "catalog:dev"
+		"vitiate": "catalog:dev",
+		"zx": "catalog:dev"
 	},
 	"peerDependencies": {
 		"typescript": ">=5 <8"
