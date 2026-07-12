@@ -18,6 +18,8 @@ on:
       - "tsconfig*.json"
       - ".ox*trc.json"
       - "biome.jsonc"
+      - ".github/actions/**"
+      - ".github/workflows/checks.yaml"
       - ".github/workflows/ci.yaml"
   pull_request:
     paths: *ci-paths
@@ -29,40 +31,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  check:
-    name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
+  checks:
+    uses: ./.github/workflows/checks.yaml
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Build
-            command: node --run build -- --minify
-          - name: Biome
-            command: node --run biome -- ci
-          - name: Lint
-            command: node --run oxlint
-          - name: Type Check
-            command: node --run type-check
-          - name: Knip
-            command: node --run knip
-          - name: Test
-            command: node --run test
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Setup Mise
-        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
-        with:
-          install_args: "bun node pnpm"
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: ${{ matrix.name }}
-        run: ${{ matrix.command }}
