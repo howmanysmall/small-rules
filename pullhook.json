@@ -8,7 +8,7 @@
 			"run": "mise install"
 		},
 		{
-			"changed": ["package.json", "aube-lock.yaml", "aube-workspace.yaml", "patches/**"],
+			"changed": ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "patches/**"],
 			"name": "install JS dependencies",
 			"run": "mise run install"
 		},

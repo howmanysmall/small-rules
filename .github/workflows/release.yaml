@@ -23,8 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
     outputs:
       dry_run: ${{ steps.set_dry_run.outputs.dry_run }}
     steps:
@@ -37,7 +35,7 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
+          install_args: "bun node pnpm"
           cache: false
 
       - name: Determine dry run flag
@@ -61,16 +59,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Validate tag matches package.json version
         id: version_check
@@ -134,7 +124,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/') || needs.validate-and-build.outputs.dry_run == 'true'
     env:
       DRY_RUN: ${{ needs.validate-and-build.outputs.dry_run }}
-      AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -145,7 +134,7 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
+          install_args: "bun node pnpm"
           cache: false
 
       - name: Setup Node.js for NPM publishing
@@ -158,16 +147,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Build
         run: nr build

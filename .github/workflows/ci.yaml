@@ -10,8 +10,8 @@ on:
       - "scripts/**"
       - "patches/**"
       - "package.json"
-      - "aube-lock.yaml"
-      - "aube-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "mise.toml"
       - "mise.lock"
       - "*.config.ts"
@@ -26,8 +26,8 @@ on:
       - "scripts/**"
       - "patches/**"
       - "package.json"
-      - "aube-lock.yaml"
-      - "aube-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "mise.toml"
       - "mise.lock"
       - "*.config.ts"
@@ -41,9 +41,6 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
-
-env:
-  AUBE_STRICT_STORE_PKG_CONTENT_CHECK: "false"
 
 jobs:
   install:
@@ -59,30 +56,12 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
-
-      - name: Cache Aube store
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            ~/.local/share/aube/store
-            ~/.cache/aube
-          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-aube-v3-
+          install_args: "bun node pnpm"
 
       - name: Install
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Build
         run: nr build
@@ -101,30 +80,12 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
-
-      - name: Cache Aube store
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            ~/.local/share/aube/store
-            ~/.cache/aube
-          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-aube-v3-
+          install_args: "bun node pnpm"
 
       - name: Install
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Biome CI
         run: nr biome ci
@@ -143,30 +104,12 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
-
-      - name: Cache Aube store
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            ~/.local/share/aube/store
-            ~/.cache/aube
-          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-aube-v3-
+          install_args: "bun node pnpm"
 
       - name: Install
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Lint
         run: nr oxlint .
@@ -185,30 +128,12 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
-
-      - name: Cache Aube store
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            ~/.local/share/aube/store
-            ~/.cache/aube
-          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-aube-v3-
+          install_args: "bun node pnpm"
 
       - name: Install
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Type Checking
         run: nr type-check
@@ -227,30 +152,12 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
-
-      - name: Cache Aube store
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            ~/.local/share/aube/store
-            ~/.cache/aube
-          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-aube-v3-
+          install_args: "bun node pnpm"
 
       - name: Install
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Knip
         run: nr knip
@@ -269,30 +176,12 @@ jobs:
       - name: Setup Mise
         uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4
         with:
-          install_args: "aube bun node"
-
-      - name: Cache Aube store
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            ~/.local/share/aube/store
-            ~/.cache/aube
-          key: ${{ runner.os }}-aube-v3-${{ hashFiles('aube-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-aube-v3-
+          install_args: "bun node pnpm"
 
       - name: Install
         run: |
-          for attempt in 1 2 3; do
-            if aube install --fix-lockfile; then
-              break
-            fi
-            if [ "$attempt" = "3" ]; then
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          git diff --exit-code package.json aube-lock.yaml
+          pnpm install
+          git diff --exit-code package.json pnpm-lock.yaml
 
       - name: Test
         run: nr test

@@ -14,7 +14,6 @@ lockfile = true
 "cargo:similarity-ts" = "latest"
 "github:howmanysmall/pullhook" = "latest"
 actionlint = "latest"
-aube = "latest"
 bun = "latest"
 gitleaks = "latest"
 hk = "latest"
@@ -29,13 +28,10 @@ zizmor = "latest"
 nub = "latest"
 ni = "latest"
 
-[deps.aube]
-auto = true
-
 [tasks]
 [tasks.install]
-description = "Install dependencies using the locked Aube dependency graph. Use before local CI or release checks."
-run = "ni"
+description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
+run = "pnpm install"
 
 [tasks.lint]
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."

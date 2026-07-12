@@ -85,7 +85,7 @@ trustPolicyIgnoreAfter: 10080
 verifyStoreIntegrity: true
 catalogs:
   build:
-    tsdown: 0.22.3
+    tsdown: 0.22.5
   dev:
     "@cliffy/command": npm:@jsr/cliffy__command@1.2.1
     "@commitlint/config-conventional": 21.2.0
@@ -100,32 +100,32 @@ catalogs:
     "@vitiate/fuzzed-data-provider": 0.3.1
     bumpp: 11.1.0
     changelogithub: 14.0.0
-    commitlint: 21.2.0
-    fast-check: 4.8.0
+    commitlint: 21.2.1
+    fast-check: 4.9.0
     fdir: 6.5.0
     get-tsconfig: 4.14.0
     jiti: 2.7.0
-    jscpd: 5.0.11
+    jscpd: 5.0.12
     oxfmt: 0.58.0
     oxlint: 1.73.0
     oxlint-tsgolint: 0.24.0
     pncat: 0.12.0
     sfw: 2.0.6
-    skills: 1.5.15
+    skills: 1.5.16
     type-fest: 5.8.0
     vitiate: 0.3.1
     zx: ^8.8.5
   lint:
     "@biomejs/biome": 2.5.3
-    eslint: 10.6.0
+    eslint: 10.7.0
     eslint-plugin-antfu: 3.2.3
     eslint-plugin-regexp: 3.1.1
     eslint-plugin-sonarjs: 4.1.0
     eslint-plugin-unused-imports: 4.4.1
-    knip: 6.25.0
+    knip: 6.26.0
   prod:
     arktype: 2.2.3
-    ignore: 7.0.5
+    ignore: 7.0.6
     minimatch: 10.2.5
     oxc-parser: 0.139.0
     oxc-resolver: 11.23.0
