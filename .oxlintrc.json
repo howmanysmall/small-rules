@@ -770,7 +770,7 @@
 			"asc",
 			{
 				"allowLineSeparatedGroups": true,
-				"caseSensitive": false,
+				"caseSensitive": true,
 				"minKeys": 2,
 				"natural": true
 			}
