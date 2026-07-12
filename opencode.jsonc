@@ -48,7 +48,7 @@
 	},
 	"formatter": {
 		"biome": {
-			"command": ["mise", "x", "--", "aube", "run", "biome", "format", "--write", "$FILE"],
+			"command": ["mise", "x", "--", "node", "--run", "biome", "--", "format", "--write", "$FILE"],
 			"extensions": [
 				".astro",
 				".cjs",
@@ -73,7 +73,7 @@
 			],
 		},
 		"oxfmt": {
-			"command": ["mise", "x", "--", "aube", "run", "oxfmt", "$FILE"],
+			"command": ["mise", "x", "--", "node", "--run", "oxfmt", "--", "$FILE"],
 			"extensions": [
 				".cjs",
 				".css",
@@ -125,7 +125,7 @@
 	"instructions": ["./AGENTS.md"],
 	"lsp": {
 		"biome": {
-			"command": ["mise", "x", "--", "aube", "run", "biome", "lsp-proxy"],
+			"command": ["mise", "x", "--", "node", "--run", "biome", "--", "lsp-proxy"],
 			"extensions": [
 				".astro",
 				".cjs",
@@ -151,7 +151,7 @@
 		},
 		"eslint": { "disabled": true },
 		"oxfmt": {
-			"command": ["mise", "x", "--", "aube", "run", "oxfmt", "--lsp"],
+			"command": ["mise", "x", "--", "node", "--run", "oxfmt", "--", "--lsp"],
 			"extensions": [
 				".cjs",
 				".css",
@@ -181,7 +181,7 @@
 			],
 		},
 		"oxlint": {
-			"command": ["mise", "x", "--", "aube", "run", "oxlint", "--lsp"],
+			"command": ["mise", "x", "--", "node", "--run", "oxlint", "--", "--lsp"],
 			"extensions": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
 		},
 		"rumdl": {
@@ -204,7 +204,7 @@
 			"extensions": [".toml"],
 		},
 		"typescript": {
-			"command": ["mise", "x", "--", "aube", "run", "tsgo", "--lsp", "--stdio"],
+			"command": ["mise", "x", "--", "node", "--run", "tsgo", "--", "--lsp", "--stdio"],
 			"extensions": [".ts", ".tsx"],
 		},
 	},
