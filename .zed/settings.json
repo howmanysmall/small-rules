@@ -92,26 +92,6 @@
 			"prettier": { "allowed": false },
 			"tab_size": 4
 		},
-		"JavaScript": {
-			"code_actions_on_format": {
-				"source.fixAll.biome": true,
-				"source.fixAll.oxc": true,
-				"source.organizeImports.biome": false
-			},
-			"format_on_save": "on",
-			"formatter": [
-				{
-					"language_server": { "name": "biome" }
-				},
-				{
-					"language_server": { "name": "oxfmt" }
-				}
-			],
-			"hard_tabs": true,
-			"language_servers": ["biome", "oxfmt", "oxlint", "!tsgo", "vtsls", "harper-ls", "codebook", "wakatime"],
-			"prettier": { "allowed": false },
-			"tab_size": 4
-		},
 		"JSON": {
 			"code_actions_on_format": {
 				"source.fixAll.biome": true,
@@ -184,11 +164,39 @@
 			"prettier": { "allowed": false },
 			"tab_size": 4
 		},
+		"JavaScript": {
+			"code_actions_on_format": {
+				"source.fixAll.biome": true,
+				"source.fixAll.oxc": true,
+				"source.organizeImports.biome": false
+			},
+			"format_on_save": "on",
+			"formatter": [
+				{
+					"language_server": { "name": "biome" }
+				},
+				{
+					"language_server": { "name": "oxfmt" }
+				}
+			],
+			"hard_tabs": true,
+			"language_servers": ["biome", "oxfmt", "oxlint", "!tsgo", "vtsls", "harper-ls", "codebook", "wakatime"],
+			"prettier": { "allowed": false },
+			"tab_size": 4
+		},
 		"LESS": {
 			"format_on_save": "on",
 			"formatter": {
 				"language_server": { "name": "oxfmt" }
 			},
+			"prettier": { "allowed": false }
+		},
+		"MDX": {
+			"format_on_save": "on",
+			"formatter": {
+				"language_server": { "name": "oxfmt" }
+			},
+			"language_servers": ["codebook", "harper-ls", "oxfmt", "rumdl", "wakatime"],
 			"prettier": { "allowed": false }
 		},
 		"Markdown": {
@@ -202,14 +210,6 @@
 			"show_whitespaces": "none",
 			"soft_wrap": "editor_width",
 			"tab_size": 4
-		},
-		"MDX": {
-			"format_on_save": "on",
-			"formatter": {
-				"language_server": { "name": "oxfmt" }
-			},
-			"language_servers": ["codebook", "harper-ls", "oxfmt", "rumdl", "wakatime"],
-			"prettier": { "allowed": false }
 		},
 		"Pkl": {
 			"format_on_save": "on",

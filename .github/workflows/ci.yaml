@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths: &ci-paths
-      - "src/**/*.{ts,tsx,json}"
+      - "src/**/*.ts"
+      - "src/**/*.tsx"
+      - "src/**/*.json"
       - "tests/**"
       - "scripts/**"
       - "patches/**"

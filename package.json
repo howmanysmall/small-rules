@@ -96,6 +96,7 @@
 		"bumpp": "catalog:dev",
 		"changelogithub": "catalog:dev",
 		"commitlint": "catalog:dev",
+		"confbox": "catalog:test",
 		"eslint": "catalog:lint",
 		"eslint-plugin-antfu": "catalog:lint",
 		"eslint-plugin-regexp": "catalog:lint",
