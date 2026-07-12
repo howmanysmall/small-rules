@@ -1,6 +1,6 @@
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import nodePath from "node:path";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { type } from "arktype";
@@ -32,7 +32,8 @@ const isWorkflow = type({
 function readPackageManifest(archivePath: string): string {
 	const archive = gunzipSync(readFileSync(archivePath));
 
-	for (let offset = 0; offset < archive.length;) {
+	let offset = 0;
+	while (offset < archive.length) {
 		const header = archive.subarray(offset, offset + TAR_BLOCK_SIZE);
 		const path = header.subarray(0, 100).toString("utf8").replaceAll("\0", "");
 		const size = Number.parseInt(header.subarray(124, 136).toString("utf8"), 8);
@@ -63,12 +64,12 @@ describe("release workflow", () => {
 
 	it("resolves catalog dependencies to registry-compatible versions", async () => {
 		expect.assertions(1);
-		const destination = mkdtempSync(join(tmpdir(), "small-rules-pack-"));
+		const destination = mkdtempSync(nodePath.join(tmpdir(), "small-rules-pack-"));
 
 		try {
 			await $({ stdio: "ignore" })`pnpm pack --pack-destination ${destination}`;
 			const archive = readdirSync(destination).join("");
-			const manifest = readPackageManifest(join(destination, archive));
+			const manifest = readPackageManifest(nodePath.join(destination, archive));
 			expect(manifest).not.toContain("catalog:");
 		} finally {
 			rmSync(destination, { force: true, recursive: true });
