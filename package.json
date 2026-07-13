@@ -38,7 +38,6 @@
 	"scripts": {
 		"biome": "biome",
 		"build": "tsdown",
-		"build-json": "bun run scripts/generate-default-properties.ts",
 		"build:local": "node --run build -- --minify && cp dist/index.js plugins/small-rules.js",
 		"build:local:dev": "node --run build && cp dist/index.js plugins/small-rules.js",
 		"changelogithub": "changelogithub",
@@ -46,7 +45,8 @@
 		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --fix $a && node --run oxfmt -- $a' _",
 		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched $a && node --run oxfmt -- --no-error-on-unmatched-pattern --check $a' _",
 		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched --fix $a && node --run oxfmt -- --no-error-on-unmatched-pattern $a' _",
-		"generate:roblox-yielding-members": "bash -c 'bun run scripts/generate-roblox-yielding-members.ts \"$@\" && node --run format:safe -- src/generated/roblox-yielding-members.ts' _",
+		"generate:default-properties": "nub scripts/generate-default-properties.ts",
+		"generate:roblox-yielding-members": "nub scripts/generate-roblox-yielding-members.ts",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
 		"jscpd": "jscpd",

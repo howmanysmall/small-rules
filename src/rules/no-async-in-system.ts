@@ -7,7 +7,7 @@ import {
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
-import { ROBLOX_YIELDING_MEMBERS } from "../generated/roblox-yielding-members";
+import { classHasYieldingMember } from "../generated/roblox-yielding-members";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -304,12 +304,6 @@ function getIdentifierClass(
 	if (initializer === undefined || visited.has(initializer)) return undefined;
 	visited.add(initializer);
 	return getExpressionClass(initializer, sourceCode, imports, types, visited);
-}
-
-function classHasYieldingMember(className: string, memberName: string): boolean {
-	if (!Object.hasOwn(ROBLOX_YIELDING_MEMBERS, className)) return false;
-	const members: unknown = Reflect.get(ROBLOX_YIELDING_MEMBERS, className);
-	return Array.isArray(members) && members.includes(memberName);
 }
 
 function isRobloxYieldingCall(
