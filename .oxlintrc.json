@@ -230,7 +230,6 @@
 		"prefer-named-capture-group": "off",
 		"promise/prefer-await-to-callbacks": "off",
 		"regexp-js/confusing-quantifier": "warn",
-
 		"regexp-js/control-character-escape": "error",
 		"regexp-js/match-any": "error",
 		"regexp-js/negation": "error",

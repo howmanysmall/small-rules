@@ -46,6 +46,7 @@
 		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --fix $a && node --run oxfmt -- $a' _",
 		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched $a && node --run oxfmt -- --no-error-on-unmatched-pattern --check $a' _",
 		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched --fix $a && node --run oxfmt -- --no-error-on-unmatched-pattern $a' _",
+		"generate:roblox-yielding-members": "bash -c 'bun run scripts/generate-roblox-yielding-members.ts \"$@\" && node --run format:safe -- src/generated/roblox-yielding-members.ts' _",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
 		"jscpd": "jscpd",
