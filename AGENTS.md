@@ -90,7 +90,7 @@ Tests use the repo-owned Oxc/Vitest rule harness in `tests/rule-testers.ts`. Pre
 - `ts` - TypeScript
 - `tsx` - TypeScript + JSX
 
-The harness parses with `oxc-parser`, runs rules directly in Vitest, and supports both `create` and `createOnce`. It does not support the legacy rule tester, `languageOptions.parser`, parser objects, or non-JSON options/settings.
+|The harness parses with `yuku-parser`, runs rules directly in Vitest, and supports both `create` and `createOnce`. It does not support the legacy rule tester, `languageOptions.parser`, parser objects, or non-JSON options/settings.
 
 Test pattern:
 
