@@ -46,7 +46,7 @@
 		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched $a && node --run oxfmt -- --no-error-on-unmatched-pattern --check $a' _",
 		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched --fix $a && node --run oxfmt -- --no-error-on-unmatched-pattern $a' _",
 		"generate:default-properties": "nub scripts/generate-default-properties.ts",
-		"generate:roblox-yielding-members": "nub scripts/generate-roblox-yielding-members.ts",
+		"generate:roblox-yielding-members": "nub scripts/generate-roblox-yielding-members.ts && node --run format:safe -- src/generated/roblox-yielding-members.ts",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
 		"jscpd": "jscpd",
