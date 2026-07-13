@@ -1,5 +1,5 @@
 // oxlint-disable unicorn/no-null -- ESTree Program parents use null sentinels.
-import { visitorKeys } from "oxc-parser";
+import { CHILD_KEYS } from "yuku-parser/decode.js";
 
 import { HarnessError } from "./harness-error";
 import { locationForRange } from "./locations";
@@ -8,20 +8,20 @@ import { isRecord } from "./object";
 import type { LocationIndex } from "./locations";
 import type { HarnessNode, Range } from "./types";
 
-export const harnessVisitorKeys: Record<string, ReadonlyArray<string>> = visitorKeys;
+export const harnessVisitorKeys: Record<string, ReadonlyArray<string>> = CHILD_KEYS;
 
 const ATTRIBUTE_SELECTOR_PATTERN = /\[(?<path>[\w.]+)=(?<quote>["'])(?<value>.*?)\k<quote>\]/gu;
 const CHILD_FIELD_SELECTOR_PATTERN = /^(?<parentType>\w+)\s*>\s*\.(?<field>\w+)$/u;
 
 export function decorateAst(program: unknown, locationIndex: LocationIndex): HarnessNode {
 	if (!isParsedNode(program)) {
-		const error = new HarnessError("Oxc parser returned an invalid Program node.");
+		const error = new HarnessError("Yuku parser returned an invalid Program node.");
 		Error.captureStackTrace(error, decorateAst);
 		throw error;
 	}
 	attachNodeMetadata(program, null, locationIndex);
 	if (!isHarnessNode(program)) {
-		const error = new HarnessError("Oxc parser Program node could not be decorated.");
+		const error = new HarnessError("Yuku parser Program node could not be decorated.");
 		Error.captureStackTrace(error, decorateAst);
 		throw error;
 	}

@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { fdir } from "fdir";
-import { parseSync, Visitor } from "oxc-parser";
+import { parse, walk } from "yuku-parser";
 
-import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement, ParseResult } from "oxc-parser";
+import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement } from "yuku-parser";
 
 export const enum ScanType {
 	Both = "both",
@@ -98,8 +98,6 @@ async function readAllFilesAsync(paths: ReadonlyArray<string>): Promise<Readonly
 	return results.filter((result): result is FileWithSource => result !== undefined);
 }
 
-const TSX = { lang: "tsx" } as const;
-
 export async function scanDirectoryAsync(directory: string, scanType: ScanType): Promise<ReadonlyArray<string>> {
 	const files = await GATHER_TO_SCAN_TYPE[scanType].crawl(directory).withPromise();
 	const instances = new Set<string>();
@@ -107,14 +105,9 @@ export async function scanDirectoryAsync(directory: string, scanType: ScanType):
 	const fileResults = await readAllFilesAsync(files);
 
 	for (const { sourceText } of fileResults) {
-		let parseResult: ParseResult;
-		try {
-			parseResult = parseSync("file.tsx", sourceText, TSX);
-		} catch {
-			continue;
-		}
+		const { program } = parse(sourceText, { lang: "tsx" });
 
-		const visitor = new Visitor({
+		walk(program, {
 			CallExpression(node: CallExpression): void {
 				if (!isCreateElementCall(node.callee)) return;
 				const tag = getFirstStringArgument(node.arguments);
@@ -125,8 +118,6 @@ export async function scanDirectoryAsync(directory: string, scanType: ScanType):
 				if (isAllLowerCase(name)) instances.add(name);
 			},
 		});
-
-		visitor.visit(parseResult.program);
 	}
 
 	return [...instances].toSorted();
