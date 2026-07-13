@@ -287,6 +287,87 @@ describe("no-async-in-system", () => {
 			`function customSystem(): CustomSystemResult {
 				return () => loadCharacterAsync();
 			}`,
+			// Cover getCalleePath with non-Identifier, non-MemberExpression callee (line 155)
+			{
+				code: `const system: SystemFunction = () => {
+					(function() {})();
+				};`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
+			// Cover getReferencedFunction: function declaration ref (line 284 true)
+			{
+				code: `function callback() {}
+				const system: SystemFunction = () => queue(callback);`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
+			// Cover getReferencedFunction: parameter def is not VariableDeclarator (line 285)
+			`function socialSystem(param: () => void): SystemReturn {
+				return param;
+			}`,
+			// Cover getReturnedFunctions: return identifier that doesn't resolve to function (line 366)
+			`const result = {};
+			function socialSystem(): SystemReturn {
+				return result;
+			}`,
+			// Cover getReferencedFunction: variable with 0 defs (line 281 true branch)
+			{
+				code: `const system: SystemFunction = () => queue(undefinedVar);`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
+			// Cover getReferencedFunction: VariableDeclarator with null init (line 285)
+			{
+				code: `let callback;
+				const system: SystemFunction = () => queue(callback);`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
+			// Cover getSynchronousCallbacks: missing argument (line 384)
+			{
+				code: `const system: SystemFunction = () => {
+					queue();
+				};`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
+			// Cover getSynchronousCallbacks: spread element argument (line 384)
+			{
+				code: `const system: SystemFunction = () => {
+					queue(...[]);
+				};`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
+			// Cover getSynchronousCallbacks: callback doesn't resolve to function (line 386)
+			{
+				code: `const notAFunction = 42;
+				const system: SystemFunction = () => queue(notAFunction);`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
 		],
 	});
 });

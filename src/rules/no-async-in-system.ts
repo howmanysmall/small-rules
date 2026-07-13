@@ -280,6 +280,7 @@ function getReferencedFunction(
 	const variable = getIdentifierVariable(sourceCode, identifier);
 	if (variable?.defs.length !== 1) return undefined;
 	const [definition] = variable.defs;
+	/* v8 ignore next -- @preserve guarded by length check above */
 	if (definition === undefined) return undefined;
 	if (isAnyFunction(definition.node)) return definition.node;
 	if (definition.node.type !== "VariableDeclarator" || definition.node.init === null) return undefined;
@@ -353,6 +354,7 @@ function isRobloxYieldingCall(
 
 function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: SourceCode): ReadonlySet<CallbackFunction> {
 	const returnedFunctions = new Set<CallbackFunction>();
+	/* v8 ignore next -- @preserve system functions always have a body with the current parser */
 	if (systemFunction.body === null) return returnedFunctions;
 	if (systemFunction.body.type !== "BlockStatement") {
 		const returnedFunction = getReferencedCallback(systemFunction.body, sourceCode);
