@@ -3,7 +3,7 @@
 import { argv } from "node:process";
 import { textDecoder } from "$script-constants/reused-classes";
 import { parseClasses, renderCatalog } from "$script-utilities/roblox-yielding-members";
-import { Command } from "@cliffy/command";
+import { Command, ValidationError } from "@cliffy/command";
 
 const command = new Command()
 	.name("generate-roblox-yielding-members")
@@ -22,13 +22,14 @@ const command = new Command()
 		let bytes: Uint8Array;
 		if (filePath === undefined) {
 			const { Octokit } = await import("@octokit/rest");
-			const { downloadGitHubFileAsync } = await import("$script-utilities/github-utilities");
 			const octokit = new Octokit({ auth: githubToken ?? githubPat ?? githubPersonalAccessToken });
-			bytes = await downloadGitHubFileAsync(octokit, {
-				owner: "MaximumADHD",
-				path: "API-Dump.json",
-				repository: "Roblox-Client-Tracker",
-			});
+			const repository = await octokit.rest.repos.get({ owner: "MaximumADHD", repo: "Roblox-Client-Tracker" });
+			const branch = encodeURIComponent(repository.data.default_branch);
+			const response = await fetch(
+				`https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/${branch}/API-Dump.json`,
+			);
+			if (!response.ok) throw new ValidationError(`Failed to download Roblox API dump: ${response.statusText}`);
+			bytes = new Uint8Array(await response.arrayBuffer());
 		} else {
 			const { readFile } = await import("node:fs/promises");
 			bytes = await readFile(filePath);
