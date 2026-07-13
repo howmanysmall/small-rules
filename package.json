@@ -73,9 +73,9 @@
 		"arktype": "catalog:prod",
 		"ignore": "catalog:prod",
 		"minimatch": "catalog:prod",
-		"oxc-parser": "catalog:prod",
 		"oxc-resolver": "catalog:prod",
-		"oxlint-plugin-utilities": "catalog:prod"
+		"oxlint-plugin-utilities": "catalog:prod",
+		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:lint",

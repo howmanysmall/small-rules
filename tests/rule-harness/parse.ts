@@ -1,4 +1,4 @@
-import { parseSync } from "oxc-parser";
+import { parse, walk } from "yuku-parser";
 
 import { decorateAst } from "./ast";
 import { HarnessError } from "./harness-error";
@@ -42,17 +42,34 @@ export function normalizeCases(cases: RuleTestCases, defaults: RuleRunnerDefault
 }
 
 export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
-	const parseResult = parseSync(testCase.filename, testCase.code, {
+	const SOURCE_TYPE_MAP: Record<string, "module" | "script"> = {
+		commonjs: "script",
+		module: "module",
+		script: "script",
+		unambiguous: "module",
+	};
+	const sourceType = SOURCE_TYPE_MAP[testCase.sourceType] ?? "module";
+	const parseResult = parse(testCase.code, {
 		lang: testCase.language,
-		range: true,
-		sourceType: testCase.sourceType,
+		sourceType,
 	});
 
-	if (parseResult.errors.length > 0) {
-		const [error0] = parseResult.errors;
-		const error = new HarnessError(error0?.message ?? "Oxc parser failed to parse test case.", { cause: error0 });
+	if (parseResult.diagnostics.length > 0) {
+		const [error0] = parseResult.diagnostics;
+		const error = new HarnessError(error0?.message ?? "Yuku parser failed to parse test case.", { cause: error0 });
 		Error.captureStackTrace(error, parseCase);
 		throw error;
+	}
+
+	// Yuku nodes have start/end (byte offsets) instead of range/loc.
+	// Normalize by adding range: [start, end] to every node and comment.
+	walk(parseResult.program, {
+		enter(node) {
+			Object.assign(node, { range: [node.start, node.end] });
+		},
+	});
+	for (const comment of parseResult.comments) {
+		Object.assign(comment, { range: [comment.start, comment.end] });
 	}
 
 	const locationIndex = createLocationIndex(testCase.code);

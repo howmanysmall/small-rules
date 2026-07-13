@@ -109,9 +109,11 @@
 		},
 		{
 			"files": ["tests/fixtures/**/*.{ts,tsx}"],
-			"rules": {
-				"typescript/ban-ts-comment": "off"
-			}
+			"rules": { "typescript/ban-ts-comment": "off" }
+		},
+		{
+			"files": ["**/*.d.ts"],
+			"rules": { "import/unambiguous": "off" }
 		}
 	],
 	"plugins": ["eslint", "import", "jsdoc", "node", "oxc", "promise", "typescript", "unicorn"],
