@@ -9,6 +9,11 @@ import { $ } from "zx";
 
 const TAR_BLOCK_SIZE = 512;
 
+const CHECKS_YAML = readFileSync(".github/workflows/checks.yaml", "utf8");
+const CI_YAML = readFileSync(".github/workflows/ci.yaml", "utf8");
+const RELEASE_YAML = readFileSync(".github/workflows/release.yaml", "utf8");
+const PACKAGE_JSON = readFileSync("package.json", "utf8");
+
 const isSteps = type({
 	"name?": "string | undefined",
 	"run?": "string | undefined",
@@ -51,15 +56,56 @@ function readPackageManifest(archivePath: string): string {
 	throw error;
 }
 
+describe("checks workflow", () => {
+	it("runs repository validation in one job", () => {
+		expect.assertions(1);
+		expect(CHECKS_YAML).not.toContain("matrix.name");
+	});
+
+	it("uses compact Vitest reporting in CI", () => {
+		expect.assertions(1);
+		expect(CHECKS_YAML).toContain("--reporter github-actions --reporter dot");
+	});
+});
+
+describe("ci workflow", () => {
+	it("delegates checks to the reusable checks workflow", () => {
+		expect.assertions(1);
+		expect(CI_YAML).toContain("uses: ./.github/workflows/checks.yaml");
+	});
+});
+
 describe("release workflow", () => {
 	it("publishes through pnpm so catalog versions are resolved", () => {
 		expect.assertions(1);
-		const workflow = isWorkflow.assert(parseYAML(readFileSync(".github/workflows/release.yaml", "utf8")));
+		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
 		const publishStep = workflow.jobs?.publish?.steps?.find(
 			({ name }) => name === "Publish to NPM (Trusted Publishing)",
 		);
 
 		expect(publishStep?.run).toBe("pnpm publish --provenance --access public --no-git-checks");
+	});
+
+	it("does not rerun CI checks for a tag already validated on main", () => {
+		expect.assertions(1);
+		expect(RELEASE_YAML).not.toContain("uses: ./.github/workflows/checks.yaml");
+	});
+
+	it("waits for the matching main-branch CI run before publishing", () => {
+		expect.assertions(2);
+		expect(RELEASE_YAML).toContain('gh run list --workflow ci.yaml --commit "$GITHUB_SHA"');
+		expect(RELEASE_YAML).toContain('gh run watch "$CI_RUN_ID" --exit-status');
+	});
+
+	it("does not explicitly build before pnpm runs prepublishOnly", () => {
+		expect.assertions(1);
+		expect(RELEASE_YAML).not.toContain("name: Build");
+	});
+
+	it("uses prepublishOnly as the single real-release build", () => {
+		expect.assertions(2);
+		expect(PACKAGE_JSON).toContain('"prepublishOnly": "node --run build -- --minify"');
+		expect(PACKAGE_JSON).not.toContain('"prepublish":');
 	});
 
 	it("resolves catalog dependencies to registry-compatible versions", async () => {

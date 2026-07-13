@@ -57,7 +57,7 @@
 		"lint:json": "bun run --bun scripts/lint-json.ts",
 		"oxfmt": "oxfmt",
 		"oxlint": "oxlint",
-		"prepublish": "tsdown --minify",
+		"prepublishOnly": "node --run build -- --minify",
 		"release": "bumpp",
 		"skills": "skills",
 		"test": "vitest run",
