@@ -27,6 +27,11 @@ interface MemberChain {
 	readonly root: ESTree.IdentifierReference;
 }
 
+interface SynchronousCallbackConfiguration {
+	readonly callbackArgumentIndexes: ReadonlyArray<number>;
+	readonly calleePath: ReadonlyArray<string>;
+}
+
 function getTypeName(typeNode: ESTree.Node, allowQualified: boolean): string | undefined {
 	if (typeNode.type === "Identifier") return typeNode.name;
 	if (allowQualified && typeNode.type === "TSQualifiedName") return getTypeName(typeNode.right, allowQualified);
@@ -145,6 +150,13 @@ function pathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>): 
 	return left.length === right.length && left.every((part, index) => part === right[index]);
 }
 
+function getCalleePath(callee: ESTree.CallExpression["callee"]): ReadonlyArray<string> | undefined {
+	if (callee.type === "Identifier") return [callee.name];
+	if (callee.type !== "MemberExpression") return undefined;
+	const chain = getMemberChain(callee);
+	return chain === undefined ? undefined : [chain.root.name, ...chain.path];
+}
+
 function getIdentifierVariable(
 	sourceCode: SourceCode,
 	identifier: ESTree.IdentifierReference,
@@ -261,6 +273,26 @@ function getConstInitializer(
 	return definition.node.init ?? undefined;
 }
 
+function getReferencedFunction(
+	identifier: ESTree.IdentifierReference,
+	sourceCode: SourceCode,
+): CallbackFunction | undefined {
+	const variable = getIdentifierVariable(sourceCode, identifier);
+	if (variable?.defs.length !== 1) return undefined;
+	const [definition] = variable.defs;
+	if (definition === undefined) return undefined;
+	if (isAnyFunction(definition.node)) return definition.node;
+	if (definition.node.type !== "VariableDeclarator" || definition.node.init === null) return undefined;
+	const initializer = unwrapExpression(definition.node.init);
+	return isAnyFunction(initializer) ? initializer : undefined;
+}
+
+function getReferencedCallback(expression: ESTree.Expression, sourceCode: SourceCode): CallbackFunction | undefined {
+	const current = unwrapExpression(expression);
+	if (isAnyFunction(current)) return current;
+	return current.type === "Identifier" ? getReferencedFunction(current, sourceCode) : undefined;
+}
+
 function getExpressionClass(
 	expression: ESTree.Expression,
 	sourceCode: SourceCode,
@@ -319,25 +351,79 @@ function isRobloxYieldingCall(
 	return className !== undefined && classHasYieldingMember(className, memberName);
 }
 
+function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: SourceCode): ReadonlySet<CallbackFunction> {
+	const returnedFunctions = new Set<CallbackFunction>();
+	if (systemFunction.body === null) return returnedFunctions;
+	if (systemFunction.body.type !== "BlockStatement") {
+		const returnedFunction = getReferencedCallback(systemFunction.body, sourceCode);
+		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
+		return returnedFunctions;
+	}
+	forEachNode(systemFunction.body, (node) => {
+		if (isAnyFunction(node)) return false;
+		if (node.type !== "ReturnStatement" || node.argument === null) return true;
+		const returnedFunction = getReferencedCallback(node.argument, sourceCode);
+		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
+		return false;
+	});
+	return returnedFunctions;
+}
+
+function getSynchronousCallbacks(
+	call: ESTree.CallExpression,
+	sourceCode: SourceCode,
+	configurations: ReadonlyArray<SynchronousCallbackConfiguration>,
+): ReadonlySet<CallbackFunction> {
+	const callbacks = new Set<CallbackFunction>();
+	const calleePath = getCalleePath(call.callee);
+	if (calleePath === undefined) return callbacks;
+	for (const configuration of configurations) {
+		if (!pathsEqual(calleePath, configuration.calleePath)) continue;
+		for (const argumentIndex of configuration.callbackArgumentIndexes) {
+			const argument = call.arguments[argumentIndex];
+			if (argument === undefined || argument.type === "SpreadElement") continue;
+			const callback = getReferencedCallback(argument, sourceCode);
+			if (callback !== undefined) callbacks.add(callback);
+		}
+	}
+	return callbacks;
+}
+
 function reportYieldingCalls(
 	systemFunction: CallbackFunction,
 	sourceCode: SourceCode,
 	imports: ReadonlyMap<ScopeVariable, ImportBinding>,
 	types: ReadonlyMap<ScopeVariable, string>,
+	synchronousCallbacks: ReadonlyArray<SynchronousCallbackConfiguration>,
 	report: (node: ESTree.CallExpression) => void,
 ): void {
-	if (systemFunction.async || systemFunction.body === null) return;
-	forEachNode(systemFunction.body, (node) => {
-		if (isAnyFunction(node) && node !== systemFunction && node.async) return false;
-		if (node.type === "CallExpression" && isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
-		return true;
-	});
+	if (systemFunction.async) return;
+
+	const visitedFunctions = new Set<CallbackFunction>();
+	function inspectActiveFunction(activeFunction: CallbackFunction): void {
+		if (activeFunction.async || activeFunction.body === null || visitedFunctions.has(activeFunction)) return;
+		visitedFunctions.add(activeFunction);
+		forEachNode(activeFunction.body, (node) => {
+			if (isAnyFunction(node) && node !== activeFunction) return false;
+			if (node.type !== "CallExpression") return true;
+			if (isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
+			for (const callback of getSynchronousCallbacks(node, sourceCode, synchronousCallbacks)) {
+				inspectActiveFunction(callback);
+			}
+			return true;
+		});
+	}
+
+	const returnedFunctions = getReturnedFunctions(systemFunction, sourceCode);
+	const activeFunctions = returnedFunctions.size === 0 ? [systemFunction] : returnedFunctions;
+	for (const activeFunction of activeFunctions) inspectActiveFunction(activeFunction);
 }
 
 const noAsyncInSystem = defineRule({
 	create(context): Visitor {
 		const additionalSystemTypeNames = context.options[0]?.additionalSystemTypeNames ?? [];
 		const callbackParameterTypes = context.options[0]?.callbackParameterTypes ?? [];
+		const synchronousCallbacks = context.options[0]?.synchronousCallbacks ?? [];
 		const systemTypeNames = new Set([...DEFAULT_SYSTEM_TYPE_NAMES, ...additionalSystemTypeNames]);
 
 		return {
@@ -381,9 +467,16 @@ const noAsyncInSystem = defineRule({
 					addSystemPropertyFunction(object, namedFunctions, systemFunctions);
 				}
 				for (const systemFunction of systemFunctions) {
-					reportYieldingCalls(systemFunction, context.sourceCode, imports, receiverTypes, (node) => {
-						context.report({ messageId: "noAsyncInSystem", node });
-					});
+					reportYieldingCalls(
+						systemFunction,
+						context.sourceCode,
+						imports,
+						receiverTypes,
+						synchronousCallbacks,
+						(node) => {
+							context.report({ messageId: "noAsyncInSystem", node });
+						},
+					);
 				}
 			},
 		} satisfies Visitor;
@@ -424,6 +517,27 @@ const noAsyncInSystem = defineRule({
 								"parameterIndex",
 								"source",
 							],
+							type: "object",
+						},
+						type: "array",
+					},
+					synchronousCallbacks: {
+						items: {
+							additionalProperties: false,
+							properties: {
+								callbackArgumentIndexes: {
+									items: { minimum: 0, type: "integer" },
+									minItems: 1,
+									type: "array",
+									uniqueItems: true,
+								},
+								calleePath: {
+									items: { type: "string" },
+									minItems: 1,
+									type: "array",
+								},
+							},
+							required: ["callbackArgumentIndexes", "calleePath"],
 							type: "object",
 						},
 						type: "array",

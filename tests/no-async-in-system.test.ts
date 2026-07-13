@@ -24,7 +24,8 @@ describe("no-async-in-system", () => {
 			{
 				code: `import { Players, UserService } from "@rbxts/services";
 				import { Events } from "server/network";
-				function friendUpdatesSystem(): SystemReturn {
+				const friendUpdatesSystem: SystemFunction = () => {
+					Players.GetFriendsAsync(userId);
 					world.added(PlayerComponent, () => {
 						Players.GetFriendsAsync(userId);
 					});
@@ -32,18 +33,58 @@ describe("no-async-in-system", () => {
 						player.IsFriendsWithAsync(otherUserId);
 						UserService.GetUserInfosByUserIdsAsync([otherUserId]);
 					});
-				}`,
-				errors: [
-					{ messageId: "noAsyncInSystem" },
-					{ messageId: "noAsyncInSystem" },
-					{ messageId: "noAsyncInSystem" },
-				],
+				};`,
+				errors: [{ messageId: "noAsyncInSystem" }],
 				options: inferredPlayerOptions,
 			},
 			{
 				code: `import { Players as RobloxPlayers } from "@rbxts/services";
 				const socialSystem: SystemFunction = () => RobloxPlayers.GetFriendsAsync(userId);`,
 				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				function socialSystem(): SystemReturn {
+					initialize();
+					return () => Players.GetFriendsAsync(userId);
+				}`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				function socialSystem(): SystemReturn {
+					const update = () => Players.GetFriendsAsync(userId);
+					return update;
+				}`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				const socialSystem: SystemFunction = () => () => Players.GetFriendsAsync(userId);`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				const system: SystemFunction = () => {
+					world.added(PlayerComponent, () => Players.GetFriendsAsync(userId));
+				};`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [1], calleePath: ["world", "added"] }],
+					},
+				],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				const callback = () => Players.GetFriendsAsync(userId);
+				const system: SystemFunction = () => queue(callback);`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
 			},
 			{
 				code: `function socialSystem(): Planck.SystemReturn {
@@ -122,9 +163,32 @@ describe("no-async-in-system", () => {
 				}
 				export = { system: collectUpdates } satisfies System<Context>;`,
 				errors: [{ messageId: "noAsyncInSystem" }],
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
 			},
 		],
 		valid: [
+			`import { Players } from "@rbxts/services";
+			const system: SystemFunction = () => {
+				world.added(PlayerComponent, () => Players.GetFriendsAsync(userId));
+			};`,
+			`import { Players } from "@rbxts/services";
+			function system(): SystemReturn {
+				Players.GetFriendsAsync(userId);
+				return () => updateWorld();
+			}`,
+			{
+				code: `const callback = () => queue(callback);
+				const system: SystemFunction = () => queue(callback);`,
+				options: [
+					{
+						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
+					},
+				],
+			},
 			`declare function declaredSystem(): SystemReturn;`,
 			`function helper() { Players.GetFriendsAsync(userId); }`,
 			`import { Players } from "external-library";
