@@ -124,12 +124,17 @@ describe("no-print", () => {
 
 ## CI Pipeline
 
-`.github/workflows/ci.yaml` runs on push/PR to main (filtered to src/tests/scripts/patches paths). Jobs: install → biome → lint (oxlint) → type-check (`tsgo`) → knip → test (`vitest run`).
+`.github/workflows/ci.yaml` runs on push/PR to main (path-filtered) and calls the reusable `checks.yaml` workflow.
 
-`.github/workflows/release.yaml` - Triggered by `v*.*.*` tags or manually with dry_run. Validates lint, type-check, knip, build, test, then publishes to NPM via Trusted Publishing (OIDC) and creates a GitHub release via `changelogithub`.
+`checks.yaml` runs two jobs:
+
+- **Validate** — sequential Biome, Oxlint, type-check (`tsgo`), Knip, and minified build on one runner
+- **Test** — Vitest with compact `--reporter github-actions --reporter dot` output
+
+`.github/workflows/release.yaml` — Triggered by `v*.*.*` tags or manually with `dry_run`. Does **not** re-run CI: it waits for the matching main-branch CI run for the tag SHA, then publishes via NPM Trusted Publishing (OIDC). The real publish build is `prepublishOnly` only; dry runs still build explicitly. Creates a GitHub release via `changelogithub`.
 
 ## Release Flow
 
 1. `mise run release` - runs local check, then `nr release` (`bumpp` bumps version, commits, tags, pushes)
-2. Push triggers tag → `release.yaml` workflows
+2. Tag push triggers `release.yaml`, which waits for the existing successful CI run for that commit
 3. Or `mise run dr` to trigger a dry run on GitHub Actions for validation
