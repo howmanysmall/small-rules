@@ -24,26 +24,15 @@ minimumReleaseAgeExclude:
   - "@biomejs/cli-linux-x64-musl"
   - "@biomejs/cli-win32-arm64"
   - "@biomejs/cli-win32-x64"
-  - "@oxc-parser/binding-android-arm-eabi"
-  - "@oxc-parser/binding-android-arm64"
-  - "@oxc-parser/binding-darwin-arm64"
-  - "@oxc-parser/binding-darwin-x64"
-  - "@oxc-parser/binding-freebsd-x64"
-  - "@oxc-parser/binding-linux-arm-gnueabihf"
-  - "@oxc-parser/binding-linux-arm-musleabihf"
-  - "@oxc-parser/binding-linux-arm64-gnu"
-  - "@oxc-parser/binding-linux-arm64-musl"
-  - "@oxc-parser/binding-linux-ppc64-gnu"
-  - "@oxc-parser/binding-linux-riscv64-gnu"
-  - "@oxc-parser/binding-linux-riscv64-musl"
-  - "@oxc-parser/binding-linux-s390x-gnu"
-  - "@oxc-parser/binding-linux-x64-gnu"
-  - "@oxc-parser/binding-linux-x64-musl"
-  - "@oxc-parser/binding-openharmony-arm64"
-  - "@oxc-parser/binding-wasm32-wasi"
-  - "@oxc-parser/binding-win32-arm64-msvc"
-  - "@oxc-parser/binding-win32-ia32-msvc"
-  - "@oxc-parser/binding-win32-x64-msvc"
+  - "@yuku-parser/binding-darwin-arm64"
+  - "@yuku-parser/binding-darwin-x64"
+  - "@yuku-parser/binding-linux-x64-gnu"
+  - "@yuku-parser/binding-linux-arm64-gnu"
+  - "@yuku-parser/binding-linux-x64-musl"
+  - "@yuku-parser/binding-linux-arm64-musl"
+  - "@yuku-parser/binding-freebsd-x64"
+  - "@yuku-parser/binding-win32-x64"
+  - "@yuku-parser/binding-win32-arm64"
   - "@oxfmt/binding-android-arm-eabi"
   - "@oxfmt/binding-android-arm64"
   - "@oxfmt/binding-darwin-arm64"
@@ -73,6 +62,9 @@ minimumReleaseAgeExclude:
   - "@typescript/native-preview-win32-x64"
   - oxfmt
   - oxlint-plugin-utilities
+  - "@yuku-parser/binding-linux-arm-gnu@0.6.1"
+  - "@yuku-parser/binding-linux-arm-musl@0.6.1"
+  - yuku-parser@0.6.1
 
 minimumReleaseAgeStrict: true
 resolutionMode: time-based
@@ -127,9 +119,9 @@ catalogs:
     arktype: 2.2.3
     ignore: 7.0.6
     minimatch: 10.2.5
-    oxc-parser: 0.139.0
     oxc-resolver: 11.23.0
     oxlint-plugin-utilities: 1.1.0
+    yuku-parser: 0.6.1
   test:
     "@fast-check/vitest": 0.4.1
     "@stryker-mutator/vitest-runner": 9.6.1
