@@ -1,0 +1,84 @@
+---
+title: "No Async In System"
+description: "Disallow yielding Roblox API calls while a synchronous Planck system is running."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+<Badge variant="roblox" />
+
+<RuleSummary rule="no-async-in-system" />
+
+## Rule Details
+
+Planck systems run synchronously. A yielding Roblox API call can pause the system in the middle of a world update, so this rule reports those calls from the active system function.
+
+The rule recognizes functions typed as `PlanckSystem`, `System`, `SystemFunction`, `SystemReturn`, or `SystemTableLike`. It also checks the function returned by a system factory and the `system` property of an object typed with, or satisfying, one of those system types.
+
+Yielding members come from the Roblox API catalog included with the plugin. The rule resolves services imported from `@rbxts/services`, services returned by `game.GetService()`, and Roblox class names supplied by type annotations.
+
+## Configuration
+
+<RuleOptions rule="no-async-in-system" />
+
+Use `additionalSystemTypeNames` if your project wraps Planck with its own system type. `synchronousCallbacks` marks callback arguments that run before the surrounding call returns, which lets the rule follow calls such as a project-specific query helper. `callbackParameterTypes` describes types supplied to callbacks by an imported API when TypeScript syntax does not include the parameter type.
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+import { Players } from "@rbxts/services";
+
+const socialSystem: SystemFunction = () => {
+	Players.GetFriendsAsync(userId);
+};
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+import { Players } from "@rbxts/services";
+
+const playerCountSystem: SystemFunction = () => {
+	const playerCount = Players.GetPlayers().size();
+	world.set(resource, playerCount);
+};
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Keep systems synchronous"
+		description="A system finishes its world update without pausing for a Roblox API response."
+		href="/small-rules/rules/roblox/no-async-in-system/"
+	/>
+	<LinkCard
+		title="Catch indirect calls"
+		description="The rule follows returned system functions, known synchronous callbacks, and typed Roblox receivers."
+		href="/small-rules/rules/roblox/no-async-in-system/"
+	/>
+	<LinkCard
+		title="Configure project wrappers"
+		description="Name project-specific system types and callback APIs in the rule options."
+		href="/small-rules/configuration/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard title="No Task Wait" href="/small-rules/rules/roblox/no-task-wait/" />
+	<LinkCard title="No Events In Events Callback" href="/small-rules/rules/roblox/no-events-in-events-callback/" />
+	<LinkCard title="No Async Constructor" href="/small-rules/rules/general/no-async-constructor/" />
+</CardGrid>

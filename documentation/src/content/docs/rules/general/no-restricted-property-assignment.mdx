@@ -1,0 +1,79 @@
+---
+title: "No Restricted Property Assignment"
+description: "Disallow assignments and updates to configured object properties."
+---
+
+import Badge from "@/components/badge.astro";
+import RuleOptions from "@/components/rule-options.astro";
+import RuleSummary from "@/components/rule-summary.astro";
+import RuleExample from "@/components/rule-example.astro";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+<Badge variant="error" />
+
+<RuleSummary rule="no-restricted-property-assignment" />
+
+## Rule Details
+
+This rule blocks writes to selected properties on selected objects. It reports direct assignments, compound assignments, and update expressions such as `++` or `--`. Reading the same property is allowed.
+
+Each restriction pairs an object pattern with one or more property patterns. Literal names and glob patterns are supported, so one entry can cover a family of globals or properties. The object must be a direct identifier such as `_G`; the rule does not match a nested expression such as `container._G.__DEV__`.
+
+Computed string properties are checked by default. Set `checkComputed` to `false` if code such as `_G["__DEV__"] = true` should remain outside the rule. Dynamic keys cannot be matched because their property name is unknown during linting.
+
+## Configuration
+
+<RuleOptions rule="no-restricted-property-assignment" />
+
+The `restrictions` array is required. A restriction may include its own diagnostic `message`; otherwise, the rule reports the matched object and property names. `allowFiles` accepts filenames and glob patterns for files that may perform these writes, including basename matches such as `main.server.ts` and paths such as `test/**/*.ts`.
+
+## Examples
+
+<RuleExample type="fail" title="Fails">
+
+```ts
+_G.__DEV__ = true;
+_G.__DEV__++;
+```
+
+</RuleExample>
+
+<RuleExample type="pass" title="Passes">
+
+```ts
+const developmentMode = _G.__DEV__;
+_G.__PROD__ = true;
+```
+
+</RuleExample>
+
+## Why?
+
+<CardGrid>
+	<LinkCard
+		title="Protect shared state"
+		description="Only approved files can write to globals or other project-owned property bags."
+		href="/small-rules/rules/general/no-restricted-property-assignment/"
+	/>
+	<LinkCard
+		title="Match related names"
+		description="Glob patterns can cover related object and property names in one restriction."
+		href="/small-rules/configuration/"
+	/>
+	<LinkCard
+		title="Allow reads"
+		description="A restricted property remains readable; the rule controls only writes."
+		href="/small-rules/rules/general/no-restricted-property-assignment/"
+	/>
+</CardGrid>
+
+## Related Rules
+
+<CardGrid>
+	<LinkCard
+		title="Directive No Restricted Disable"
+		href="/small-rules/rules/general/directive-no-restricted-disable/"
+	/>
+	<LinkCard title="No Increment Decrement" href="/small-rules/rules/general/no-increment-decrement/" />
+	<LinkCard title="Ban Instances" href="/small-rules/rules/roblox/ban-instances/" />
+</CardGrid>
