@@ -1,3 +1,8 @@
+model = "gpt-5.6-sol"
+model_context_window = 372000
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "xhigh"
+
 [mcp_servers.astro-docs]
 url = "https://mcp.docs.astro.build/mcp"
 
@@ -8,3 +13,6 @@ command = "bash"
 [mcp_servers.context7]
 env_http_headers = { CONTEXT7_API_KEY = "CONTEXT7_API_KEY" }
 url = "https://mcp.context7.com/mcp"
+
+[features.multi_agent_v2]
+max_concurrent_threads_per_session = 1000
