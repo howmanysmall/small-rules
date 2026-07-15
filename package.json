@@ -1,6 +1,6 @@
 {
 	"name": "@pobammer-ts/small-rules",
-	"version": "2.3.0",
+	"version": "2.7.0",
 	"description": "Various Oxlint-native rules for linting roblox-ts projects.",
 	"keywords": [
 		"lint",
@@ -27,8 +27,8 @@
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
+			"default": "./dist/index.js",
+			"types": "./dist/index.d.ts"
 		},
 		"./package.json": "./package.json"
 	},
@@ -38,26 +38,28 @@
 	"scripts": {
 		"biome": "biome",
 		"build": "tsdown",
-		"build-json": "bun run scripts/generate-default-properties.ts",
-		"build:local": "nr build --minify && cp dist/index.js plugins/small-rules.js",
-		"build:local:dev": "nr build && cp dist/index.js plugins/small-rules.js",
+		"build:local": "node --run build -- --minify && cp dist/index.js plugins/small-rules.js",
+		"build:local:dev": "node --run build && cp dist/index.js plugins/small-rules.js",
 		"changelogithub": "changelogithub",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F docs build",
 		"docs:dev": "nr -F docs dev",
-		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --fix $a && nr oxfmt $a' _",
-		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched $a && nr oxfmt --no-error-on-unmatched-pattern --check $a' _",
-		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr biome check --no-errors-on-unmatched --fix $a && nr oxfmt --no-error-on-unmatched-pattern $a' _",
+		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --fix $a && node --run oxfmt -- $a' _",
+		"format:check": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched $a && node --run oxfmt -- --no-error-on-unmatched-pattern --check $a' _",
+		"format:safe": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --no-errors-on-unmatched --fix $a && node --run oxfmt -- --no-error-on-unmatched-pattern $a' _",
+		"generate:compact-default-properties": "nub scripts/generate-compact-default-properties.ts",
+		"generate:default-properties": "nub scripts/generate-default-properties.ts",
+		"generate:roblox-yielding-members": "nub scripts/generate-roblox-yielding-members.ts && node --run format:safe -- src/generated/roblox-yielding-members.ts",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
 		"jscpd": "jscpd",
 		"knip": "knip-bun",
-		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint $a && nr biome check $a' _",
-		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); nr oxlint --format agent $a && nr biome check --reporter concise $a' _",
-		"lint:json": "bun run scripts/lint-json.ts",
+		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run oxlint -- --no-error-on-unmatched-pattern $a && node --run biome -- check --no-errors-on-unmatched $a' _",
+		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run oxlint -- --no-error-on-unmatched-pattern --format agent $a && node --run biome -- check --no-errors-on-unmatched --reporter concise $a' _",
+		"lint:json": "bun run --bun scripts/lint-json.ts",
 		"oxfmt": "oxfmt",
 		"oxlint": "oxlint",
-		"prepublish": "tsdown --minify",
+		"prepublishOnly": "node --run build -- --minify",
 		"release": "bumpp",
 		"skills": "skills",
 		"test": "vitest run",
@@ -73,12 +75,11 @@
 		"arktype": "catalog:",
 		"ignore": "catalog:prod",
 		"minimatch": "catalog:prod",
-		"oxc-parser": "catalog:prod",
 		"oxc-resolver": "catalog:prod",
-		"oxlint-plugin-utilities": "catalog:prod"
+		"oxlint-plugin-utilities": "catalog:prod",
+		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
-		"@antfu/ni": "catalog:dev",
 		"@biomejs/biome": "catalog:lint",
 		"@cliffy/command": "catalog:dev",
 		"@commitlint/config-conventional": "catalog:dev",
@@ -92,7 +93,6 @@
 		"@total-typescript/ts-reset": "catalog:",
 		"@types/bun": "catalog:types",
 		"@types/node": "catalog:types",
-		"@typescript-eslint/parser": "catalog:lint",
 		"@typescript/native-preview": "catalog:dev",
 		"@vitest/coverage-v8": "catalog:test",
 		"@vitiate/core": "catalog:dev",
@@ -100,6 +100,7 @@
 		"bumpp": "catalog:dev",
 		"changelogithub": "catalog:dev",
 		"commitlint": "catalog:dev",
+		"confbox": "catalog:test",
 		"eslint": "catalog:lint",
 		"eslint-plugin-antfu": "catalog:lint",
 		"eslint-plugin-regexp": "catalog:lint",
@@ -117,17 +118,17 @@
 		"oxfmt": "catalog:dev",
 		"oxlint": "catalog:dev",
 		"oxlint-tsgolint": "catalog:dev",
-		"package-manager-detector": "catalog:dev",
 		"picocolors": "catalog:dev",
 		"pncat": "catalog:",
-		"pretty-ms": "catalog:dev",
 		"sfw": "catalog:dev",
 		"skills": "catalog:dev",
 		"tsdown": "catalog:build",
 		"type-fest": "catalog:dev",
+		"typescript": "catalog:dev",
 		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:test",
-		"vitiate": "catalog:dev"
+		"vitiate": "catalog:dev",
+		"zx": "catalog:dev"
 	},
 	"peerDependencies": {
 		"typescript": ">=5 <8"
@@ -135,5 +136,5 @@
 	"engines": {
 		"node": "^20.19.0 || >=22.12.0"
 	},
-	"packageManager": "pnpm@11.8.0"
+	"packageManager": "pnpm@11.10.0"
 }

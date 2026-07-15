@@ -2,8 +2,8 @@ import { extname } from "node:path";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { parseSync } from "oxc-parser";
 import { defineRule } from "oxlint-plugin-utilities";
+import { parse } from "yuku-parser";
 
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -146,7 +146,7 @@ function isExclusion(statements: ReadonlyArray<ESTree.Statement>, codeText: stri
 	);
 }
 
-const ALLOWED_PARSE_ERROR_PATTERNS = [/A 'return' statement can only be used within a function body/u] as const;
+const ALLOWED_PARSE_ERROR_PATTERNS = [/'return' statement is only valid inside a function/u] as const;
 type Errors = ReadonlyArray<{ readonly message: string }>;
 function hasOnlyAllowedErrors(errors: Errors): boolean {
 	for (const error of errors) {
@@ -167,25 +167,26 @@ interface Body {
 }
 
 interface ParseResult {
-	readonly errors: Errors;
+	readonly diagnostics: Errors;
 	readonly program: Body;
 }
 
 function isValidParseResult(result: ParseResult): boolean {
-	const hasValidErrors = result.errors.length === 0 || hasOnlyAllowedErrors(result.errors);
+	const hasValidErrors = result.diagnostics.length === 0 || hasOnlyAllowedErrors(result.diagnostics);
 	return hasValidErrors && result.program.body.length > 0;
 }
 
 function tryParse(value: string, filename: string): ParseResult | undefined {
 	const extension = extname(filename);
-	const parseFilename = `file${extension || ".js"}`;
-	const result = parseSync(parseFilename, value);
+	const LANG_BY_EXTENSION: Partial<Record<string, "js" | "jsx" | "tsx">> = { ".jsx": "jsx", ".tsx": "tsx" };
+	const lang = LANG_BY_EXTENSION[extension] ?? "js";
+	const result = parse(value, { lang, sourceType: "module" });
 
 	if (isValidParseResult(result)) return result;
 
 	/* v8 ignore next -- @preserve TSX/JSX files are parsed directly and do not need JSX fallback parsing. */
 	if (extension !== ".tsx" && extension !== ".jsx") {
-		const jsxResult = parseSync("file.tsx", value);
+		const jsxResult = parse(value, { lang: "tsx", sourceType: "module" });
 		if (isValidParseResult(jsxResult)) return jsxResult;
 	}
 

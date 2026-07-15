@@ -19,13 +19,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate-and-build:
+  publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-    outputs:
-      dry_run: ${{ steps.set_dry_run.outputs.dry_run }}
-      package_version: ${{ steps.version_check.outputs.package_version }}
+      actions: read # For waiting on the matching main-branch CI run
+      contents: write # For creating GitHub releases
+      id-token: write # Required for NPM Trusted Publishing (OIDC)
     steps:
       - name: Checkout (full history)
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -33,15 +32,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-        with:
-          # Inherit the composite's default; pnpm is needed for the cache step,
-          # node for the `node -p` version check, and bun for repo scripts.
-          mise-install-args: "pnpm bun node"
-
       - name: Determine dry run flag
-        id: set_dry_run
         run: |
           DRY_RUN="false"
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
@@ -51,7 +42,6 @@ jobs:
             fi
           fi
           echo "DRY_RUN=$DRY_RUN" >> "$GITHUB_ENV"
-          echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
 
       - name: Require tag for real release
         if: ${{ env.DRY_RUN != 'true' && !startsWith(github.ref, 'refs/tags/') }}
@@ -60,7 +50,6 @@ jobs:
           exit 1
 
       - name: Validate tag matches package.json version
-        id: version_check
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
@@ -71,7 +60,6 @@ jobs:
             echo "::error title=Version mismatch::Tag $TAG_VERSION does not match package.json $PACKAGE_VERSION" >&2
             exit 1
           fi
-          echo "package_version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Verify tag commit reachable from main
         if: startsWith(github.ref, 'refs/tags/')
@@ -84,79 +72,55 @@ jobs:
             exit 1
           fi
 
-      - name: Lint
-        run: nr lint
+      - name: Setup toolchain
+        uses: ./.github/actions/setup
+        with:
+          cache: false
 
-      - name: Type Checking
-        run: nr type-check
+      - name: Setup Node.js for NPM publishing
+        if: ${{ env.DRY_RUN != 'true' }}
+        # This step is only here to configure the NPM registry URL.
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "24"
+          package-manager-cache: false
+          registry-url: "https://registry.npmjs.org"
 
-      - name: Knip
-        run: nr knip
+      - name: Install dependencies
+        uses: ./.github/actions/install
 
-      - name: Build
-        run: nr build
-
-      - name: Test
-        run: nr test
-
-      - name: Assert build artifacts exist
+      - name: Wait for CI
+        if: ${{ env.DRY_RUN != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ ! -d dist ]; then
-            echo "::error title=Missing output::dist directory not found" >&2
+          CI_RUN_ID=""
+          for _ in $(seq 1 60); do
+            CI_RUN_ID=$(gh run list --workflow ci.yaml --commit "$GITHUB_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+            if [ -n "$CI_RUN_ID" ]; then
+              break
+            fi
+            sleep 5
+          done
+          if [ -z "$CI_RUN_ID" ]; then
+            echo "::error title=CI run not found::No main-branch CI run found for $GITHUB_SHA" >&2
             exit 1
           fi
-          if [ ! -f dist/index.js ]; then
-            echo "::error title=Missing artifact::dist/index.js not found" >&2
-            ls -R dist || true
-            exit 1
-          fi
-          echo "Build artifacts OK"
+          gh run watch "$CI_RUN_ID" --exit-status
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 1
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: validate-and-build
-    permissions:
-      contents: write # For creating GitHub releases
-      id-token: write # Required for NPM Trusted Publishing (OIDC)
-    if: startsWith(github.ref, 'refs/tags/') || needs.validate-and-build.outputs.dry_run == 'true'
-    env:
-      DRY_RUN: ${{ needs.validate-and-build.outputs.dry_run }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Configure NPM registry
-        # No install happens in this job: build artifacts arrive via the
-        # `actions/download-artifact` step above. Point npm at the public
-        # registry without pulling in `actions/setup-node` (which enables an
-        # implicit cache vulnerable to poisoning in publish jobs).
-        run: npm config set registry https://registry.npmjs.org
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: dist
-          path: dist/
+      - name: Dry-run package build
+        if: ${{ env.DRY_RUN == 'true' }}
+        run: node --run build -- --minify
 
       - name: Publish to NPM (Trusted Publishing)
         if: ${{ env.DRY_RUN != 'true' }}
-        run: npm publish --provenance --access public
+        run: pnpm publish --provenance --access public --no-git-checks
 
       - name: Generate changelog & GitHub release
         if: ${{ env.DRY_RUN != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: nr changelogithub
+        run: node --run changelogithub
 
       - name: Upload npm debug log on failure
         if: failure()

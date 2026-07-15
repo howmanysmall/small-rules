@@ -453,6 +453,26 @@
 				"type": "string",
 				"value": ""
 			},
+			"DiffractionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"OcclusionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"PositionType": {
+				"enumType": "EmitterPositionType",
+				"type": "Enum",
+				"value": "Parent"
+			},
+			"ReverbEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
 			"SimulationFidelity": {
 				"enumType": "AudioSimulationFidelity",
 				"type": "Enum",
@@ -592,6 +612,26 @@
 			"AudioInteractionGroup": {
 				"type": "string",
 				"value": ""
+			},
+			"DiffractionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"OcclusionEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"PositionType": {
+				"enumType": "ListenerPositionType",
+				"type": "Enum",
+				"value": "Parent"
+			},
+			"ReverbEnabled": {
+				"enumType": "SimulationMode",
+				"type": "Enum",
+				"value": "Default"
 			},
 			"SimulationFidelity": {
 				"enumType": "AudioSimulationFidelity",
@@ -1343,15 +1383,20 @@
 				"value": true
 			}
 		},
-		"Camera": {
+		"CFrameValue": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"CameraType": {
-				"enumType": "CameraType",
-				"type": "Enum",
-				"value": "Fixed"
+			"Value": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			}
+		},
+		"Camera": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
 			},
 			"CFrame": {
 				"type": "CFrame",
@@ -1359,6 +1404,11 @@
 					0, 20, 20, 1, 0, 0, 0, 0.7071068286895752, 0.7071068286895752, 0, -0.7071068286895752,
 					0.7071068286895752
 				]
+			},
+			"CameraType": {
+				"enumType": "CameraType",
+				"type": "Enum",
+				"value": "Fixed"
 			},
 			"FieldOfView": {
 				"type": "number",
@@ -1516,33 +1566,15 @@
 				"value": 1
 			}
 		},
-		"CFrameValue": {
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"Value": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			}
-		},
 		"CharacterMesh": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"BaseTextureId": {
-				"type": "number",
-				"value": 0
-			},
 			"BodyPart": {
 				"enumType": "BodyPart",
 				"type": "Enum",
 				"value": "Head"
-			},
-			"MeshId": {
-				"type": "number",
-				"value": 0
 			},
 			"OverlayTextureId": {
 				"type": "number",
@@ -1792,6 +1824,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -1807,10 +1843,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",
@@ -2179,6 +2211,10 @@
 		},
 		"Decal": {
 			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
 				"type": "bool",
 				"value": true
 			},
@@ -2986,11 +3022,11 @@
 				"type": "bool",
 				"value": true
 			},
-			"AutomaticScalingEnabled": {
+			"AutoRotate": {
 				"type": "bool",
 				"value": true
 			},
-			"AutoRotate": {
+			"AutomaticScalingEnabled": {
 				"type": "bool",
 				"value": true
 			},
@@ -4021,6 +4057,11 @@
 				"type": "Enum",
 				"value": "Unknown"
 			},
+			"Type": {
+				"enumType": "InputBindingType",
+				"type": "Enum",
+				"value": "Automatic"
+			},
 			"Up": {
 				"enumType": "KeyCode",
 				"type": "Enum",
@@ -4075,79 +4116,6 @@
 			"Value": {
 				"type": "number",
 				"value": 0
-			}
-		},
-		"LinearVelocity": {
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
-			"ForceLimitMode": {
-				"enumType": "ForceLimitMode",
-				"type": "Enum",
-				"value": "Magnitude"
-			},
-			"ForceLimitsEnabled": {
-				"type": "bool",
-				"value": true
-			},
-			"LineDirection": {
-				"type": "Vector3",
-				"value": [1, 0, 0]
-			},
-			"LineVelocity": {
-				"type": "number",
-				"value": 0
-			},
-			"MaxAxesForce": {
-				"type": "Vector3",
-				"value": [1000, 1000, 1000]
-			},
-			"MaxForce": {
-				"type": "number",
-				"value": 1000
-			},
-			"MaxPlanarAxesForce": {
-				"type": "Vector2",
-				"value": [1000, 1000]
-			},
-			"PlaneVelocity": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
-			"PrimaryTangentAxis": {
-				"type": "Vector3",
-				"value": [1, 0, 0]
-			},
-			"ReactionForceEnabled": {
-				"type": "bool",
-				"value": true
-			},
-			"RelativeTo": {
-				"enumType": "ActuatorRelativeTo",
-				"type": "Enum",
-				"value": "World"
-			},
-			"SecondaryTangentAxis": {
-				"type": "Vector3",
-				"value": [0, 1, 0]
-			},
-			"VectorVelocity": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"VelocityConstraintMode": {
-				"enumType": "VelocityConstraintMode",
-				"type": "Enum",
-				"value": "Vector"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"LineForce": {
@@ -4229,6 +4197,79 @@
 			"ZIndex": {
 				"type": "number",
 				"value": -1
+			}
+		},
+		"LinearVelocity": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"ForceLimitMode": {
+				"enumType": "ForceLimitMode",
+				"type": "Enum",
+				"value": "Magnitude"
+			},
+			"ForceLimitsEnabled": {
+				"type": "bool",
+				"value": true
+			},
+			"LineDirection": {
+				"type": "Vector3",
+				"value": [1, 0, 0]
+			},
+			"LineVelocity": {
+				"type": "number",
+				"value": 0
+			},
+			"MaxAxesForce": {
+				"type": "Vector3",
+				"value": [1000, 1000, 1000]
+			},
+			"MaxForce": {
+				"type": "number",
+				"value": 1000
+			},
+			"MaxPlanarAxesForce": {
+				"type": "Vector2",
+				"value": [1000, 1000]
+			},
+			"PlaneVelocity": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"PrimaryTangentAxis": {
+				"type": "Vector3",
+				"value": [1, 0, 0]
+			},
+			"ReactionForceEnabled": {
+				"type": "bool",
+				"value": true
+			},
+			"RelativeTo": {
+				"enumType": "ActuatorRelativeTo",
+				"type": "Enum",
+				"value": "World"
+			},
+			"SecondaryTangentAxis": {
+				"type": "Vector3",
+				"value": [0, 1, 0]
+			},
+			"VectorVelocity": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"VelocityConstraintMode": {
+				"enumType": "VelocityConstraintMode",
+				"type": "Enum",
+				"value": "Vector"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
 			}
 		},
 		"LocalizationTable": {
@@ -4342,6 +4383,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -4357,10 +4402,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",
@@ -4714,6 +4755,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -4729,10 +4774,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",
@@ -5907,6 +5948,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -5922,10 +5967,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",
@@ -6260,6 +6301,10 @@
 				"type": "bool",
 				"value": false
 			},
+			"PlayOnRemove": {
+				"type": "bool",
+				"value": false
+			},
 			"PlaybackRegionsEnabled": {
 				"type": "bool",
 				"value": false
@@ -6269,10 +6314,6 @@
 				"value": 1
 			},
 			"Playing": {
-				"type": "bool",
-				"value": false
-			},
-			"PlayOnRemove": {
 				"type": "bool",
 				"value": false
 			},
@@ -7354,6 +7395,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
 			"Color3": {
 				"type": "Color3",
 				"value": [1, 1, 1]
@@ -7635,6 +7680,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -7650,10 +7699,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",
@@ -7947,6 +7992,20 @@
 			"Rotation": {
 				"type": "number",
 				"value": 0
+			},
+			"Scale": {
+				"type": "number",
+				"value": 1
+			},
+			"TileMode": {
+				"enumType": "GradientTileMode",
+				"type": "Enum",
+				"value": "Clamp"
+			},
+			"Type": {
+				"enumType": "GradientType",
+				"type": "Enum",
+				"value": "Linear"
 			}
 		},
 		"UIGridLayout": {
@@ -8149,6 +8208,10 @@
 			"Color": {
 				"type": "Color3",
 				"value": [0, 0, 0]
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
 			},
 			"Offset": {
 				"type": "UDim2",
@@ -8416,6 +8479,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -8431,10 +8498,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",
@@ -8848,6 +8911,11 @@
 				"type": "bool",
 				"value": true
 			},
+			"InternalVideoUsage": {
+				"enumType": "InternalVideoUsage",
+				"type": "Enum",
+				"value": "Default"
+			},
 			"LayoutOrder": {
 				"type": "number",
 				"value": 0
@@ -8948,6 +9016,11 @@
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"InternalVideoUsage": {
+				"enumType": "InternalVideoUsage",
+				"type": "Enum",
+				"value": "Default"
 			},
 			"Looping": {
 				"type": "bool",
@@ -9162,6 +9235,10 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"CanCollide": {
 				"type": "bool",
 				"value": true
@@ -9177,10 +9254,6 @@
 			"CastShadow": {
 				"type": "bool",
 				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"CollisionGroup": {
 				"type": "string",

@@ -15,6 +15,7 @@ type ErrorSpecifier =
 function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 	let current: ESTree.Node | null = node.parent;
 
+	// oxlint-disable-next-line no-unreachable-loop -- switch statement bug
 	while (current !== null) {
 		switch (current.type) {
 			case "FunctionDeclaration":
@@ -53,6 +54,7 @@ function getAssignedName({ parent }: ESTree.Node): string | undefined {
 
 function isClassMethodContext(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null = node.parent;
+	// oxlint-disable-next-line no-unreachable-loop -- switch statement bug
 	while (current !== null) {
 		switch (current.type) {
 			case "FunctionDeclaration":

@@ -1,7 +1,7 @@
 // oxlint-disable small-rules/prefer-pascal-case-enums -- Roblox data types are weird.
 
+import { readFile } from "node:fs/promises";
 import { type } from "arktype";
-import { file } from "bun";
 
 import { downloadGitHubFileAsync } from "./github-utilities";
 
@@ -78,7 +78,7 @@ const isDatabasePropertyTag = type.enumerated(...Object.values(DatabasePropertyT
 export async function downloadDatabaseAsync(octokit: Octokit, existingFilePath?: string): Promise<Uint8Array> {
 	if (existingFilePath !== undefined) {
 		try {
-			return new Uint8Array(await file(existingFilePath).arrayBuffer());
+			return new Uint8Array(await readFile(existingFilePath));
 		} catch {
 			// Fall back to download if file doesn't exist or can't be read
 		}

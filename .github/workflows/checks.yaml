@@ -1,0 +1,59 @@
+name: Checks
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  check:
+    name: Validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Biome
+        run: node --run biome -- ci
+
+      - name: Lint
+        run: node --run oxlint
+
+      - name: Type Check
+        run: node --run type-check
+
+      - name: Knip
+        run: node --run knip
+
+      - name: Build
+        run: node --run build -- --minify && test -f dist/index.js
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Run tests
+        run: node --run test -- --reporter github-actions --reporter dot

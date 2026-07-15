@@ -263,8 +263,8 @@ const noNewInstanceInUseMemo = defineRule({
 			if (existing !== undefined) return existing;
 
 			const created: FunctionInfo = {
-				callees: new Set<number>(),
 				callIdentifiers: [],
+				callees: new Set<number>(),
 				id: functionCounter,
 			};
 

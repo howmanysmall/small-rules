@@ -1,8 +1,7 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { argv } from "node:process";
 import { Command } from "@cliffy/command";
-import { write } from "bun";
 
 const allCreatableInstances = [
 	"accessory",
@@ -503,7 +502,10 @@ const command = new Command()
 			const json = JSON.stringify(outputData, undefined, pretty ? 2 : undefined);
 			if (output === undefined) console.log(json);
 			else {
-				await write(output, json, { createPath: true });
+				const { mkdir, writeFile } = await import("node:fs/promises");
+				const { dirname } = await import("node:path");
+				await mkdir(dirname(output), { recursive: true });
+				await writeFile(output, json, "utf8");
 				console.log(`Wrote ${json.length} bytes to ${output}`);
 			}
 		},

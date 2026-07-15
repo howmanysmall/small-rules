@@ -184,14 +184,14 @@ const createOnceRule = defineRule({
 	createOnce(context) {
 		let programs = 0;
 		return {
+			Program(): void {
+				// nobody gaf
+			},
 			after(): void {
 				if (programs === 2) context.report({ messageId: "afterSecondCase", node: context.sourceCode.ast });
 			},
 			before(): void {
 				programs += 1;
-			},
-			Program(): void {
-				// nobody gaf
 			},
 		};
 	},

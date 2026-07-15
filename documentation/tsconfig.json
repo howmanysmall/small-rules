@@ -4,11 +4,11 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"paths": {
-			"@/*": ["./src/*"],
 			"$oxc-rules/*": ["../src/rules/*"],
 			"$oxc-types/*": ["../src/types/*"],
 			"$oxc-utilities/*": ["../src/utilities/*"],
-			"$small-rules": ["../src/index.ts"]
+			"$small-rules": ["../src/index.ts"],
+			"@/*": ["./src/*"]
 		},
 		"plugins": [{ "name": "@astrojs/ts-plugin" }],
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo"

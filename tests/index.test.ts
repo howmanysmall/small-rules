@@ -19,6 +19,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-array-constructor-index-assignment",
 	"no-array-size-assignment",
 	"no-async-constructor",
+	"no-async-in-system",
 	"no-cascading-set-state",
 	"no-color3-constructor",
 	"no-commented-code",
@@ -109,7 +110,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(89);
+			expect(ruleNames).toHaveLength(90);
 		}, 5000);
 	});
 });

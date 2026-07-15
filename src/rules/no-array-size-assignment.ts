@@ -141,7 +141,7 @@ function getAppendTarget(
 const noArraySizeAssignment = defineRule({
 	create(context): Visitor {
 		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix === true;
+		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
 		const environment = options?.environment === "standard" ? "standard" : "roblox-ts";
 		const { sourceCode } = context;
 

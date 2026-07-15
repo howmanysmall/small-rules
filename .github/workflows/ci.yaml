@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "src/**/*.{ts,tsx,json}"
+    paths: &ci-paths
+      - "src/**/*.ts"
+      - "src/**/*.tsx"
+      - "src/**/*.json"
       - "tests/**"
       - "scripts/**"
       - "patches/**"
@@ -18,25 +20,11 @@ on:
       - "tsconfig*.json"
       - ".ox*trc.json"
       - "biome.jsonc"
-      - ".github/workflows/ci.yaml"
       - ".github/actions/**"
+      - ".github/workflows/checks.yaml"
+      - ".github/workflows/ci.yaml"
   pull_request:
-    paths:
-      - "src/**/*.{ts,tsx,json}"
-      - "tests/**"
-      - "scripts/**"
-      - "patches/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "mise.toml"
-      - "mise.lock"
-      - "*.config.ts"
-      - "tsconfig*.json"
-      - ".ox*trc.json"
-      - "biome.jsonc"
-      - ".github/workflows/ci.yaml"
-      - ".github/actions/**"
+    paths: *ci-paths
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -45,103 +33,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  checks:
+    uses: ./.github/workflows/checks.yaml
     permissions:
       contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-
-      - name: Build
-        run: nr build
-
-  biome:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-
-      - name: Biome CI
-        run: nr biome ci
-
-  lint:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-
-      - name: Lint
-        run: nr oxlint .
-
-  type-check:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-
-      - name: Type Checking
-        run: nr type-check
-
-  knip:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-
-      - name: Knip
-        run: nr knip
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Install
-        uses: ./.github/actions/pnpm-install
-
-      - name: Test
-        run: nr test
