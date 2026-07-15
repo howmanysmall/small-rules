@@ -12,12 +12,32 @@ describe("no-restricted-property-assignment", () => {
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
 			{
+				code: "_G.__DEV__ = true;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+			},
+			{
+				code: "_G.__PROD__ = true;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+			},
+			{
+				code: "_G_other.__DEV__ = true;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G*", properties: ["__DEV__"] }] }],
+			},
+			{
 				code: '_G["__DEV__"] = false;',
 				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
 			{
 				code: "_G.anything = 1;",
+				errors: [{ messageId: "restricted" }],
+				options: [{ restrictions: [{ object: "_G", properties: ["*"] }] }],
+			},
+			{
+				code: '_G[".secret"] = 1;',
 				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["*"] }] }],
 			},
@@ -91,6 +111,18 @@ describe("no-restricted-property-assignment", () => {
 			{
 				code: "other.__DEV__ = true;",
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+			},
+			{
+				code: "_G.something = true; // glob property pattern should not match non-matching names",
+				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+			},
+			{
+				code: "other.__DEV__ = true; // glob object pattern should not match non-matching names",
+				options: [{ restrictions: [{ object: "_G*", properties: ["__DEV__"] }] }],
+			},
+			{
+				code: '_G["foo/bar"] = true; // property matching should not use basename semantics',
+				options: [{ restrictions: [{ object: "_G", properties: ["bar"] }] }],
 			},
 			{
 				code: "a.b.__DEV__ = true;",
@@ -167,6 +199,28 @@ describe("no-restricted-property-assignment", () => {
 				filename: "stories/button.story.tsx",
 				options: [
 					{ allowFiles: ["*.story.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				filename: `${process.cwd()}/test/utils/development-flag.ts`,
+				options: [
+					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				filename: `${process.cwd()}/test/utils/development-flag.tsx`,
+				options: [
+					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
+				],
+			},
+			{
+				code: "_G.__DEV__ = true;",
+				// oxlint-disable-next-line sonar/publicly-writable-directories -- slop rule
+				filename: "/tmp/development-flag.ts",
+				options: [
+					{ allowFiles: ["development-flag.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{

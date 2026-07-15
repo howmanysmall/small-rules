@@ -1,8 +1,8 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { resolve } from "node:path";
-import { exit } from "node:process";
-import { $, argv } from "bun";
+import { exit, argv } from "node:process";
+import { $ } from "zx";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
 
@@ -25,9 +25,9 @@ interface JsonResult {
 
 async function runJsonAsync(command: string, parameters: ReadonlyArray<string>): Promise<JsonResult> {
 	try {
-		const { stdout, exitCode } = await $`${[command, ...parameters]}`.cwd(repositoryRoot).nothrow().quiet();
+		const { stdout, exitCode } = await $({ cwd: repositoryRoot })`${[command, ...parameters]}`.nothrow().quiet();
 
-		const output = stdout.toString().trim();
+		const output = stdout.trim();
 		if (output.length === 0) {
 			const error = new Error(`${command} did not print JSON output`);
 			Error.captureStackTrace(error, runJsonAsync);
@@ -36,7 +36,7 @@ async function runJsonAsync(command: string, parameters: ReadonlyArray<string>):
 
 		try {
 			return {
-				exitCode,
+				exitCode: exitCode ?? 0,
 				output: JSON.parse(output),
 			};
 		} catch (error) {

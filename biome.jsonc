@@ -9,7 +9,13 @@
 				"useSortedAttributes": "on",
 				"useSortedEnumMembers": "on",
 				"useSortedInterfaceMembers": "on",
-				"useSortedKeys": "on",
+				"useSortedKeys": {
+					"level": "on",
+					"options": {
+						"groupByNesting": false,
+						"sortOrder": "lexicographic"
+					}
+				},
 				"useSortedPackageJson": "off",
 				"useSortedProperties": "on",
 				"useSortedSelectionSet": "on",

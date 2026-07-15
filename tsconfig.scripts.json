@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"paths": {
+			"$script-constants/*": ["./scripts/constants/*"],
 			"$script-types/*": ["./scripts/types/*"],
 			"$script-utilities/*": ["./scripts/utilities/*"]
 		},

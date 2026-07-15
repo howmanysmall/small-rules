@@ -2,7 +2,7 @@ import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities"
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
-import defaultProperties from "../default-properties.json";
+import defaultProperties from "../generated/default-properties.json";
 import { unwrapExpression } from "../utilities/ast-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
@@ -88,6 +88,35 @@ function createDefaultPropertyLookupEntries(
 	return propertyLookupEntries;
 }
 
+const canonicalValueTypes = [
+	"Enum",
+	"bool",
+	"CFrame",
+	"Color3",
+	"number",
+	"Rect",
+	"string",
+	"UDim2",
+	"UDim",
+	"Vector2",
+	"Vector3",
+] as const;
+
+function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalValue | undefined {
+	const [valueTypeIndex] = encodedValue;
+	/* v8 ignore next -- @preserve generated compact values always start with a numeric type index. */
+	if (typeof valueTypeIndex !== "number") return undefined;
+	const valueType = canonicalValueTypes[valueTypeIndex];
+	/* v8 ignore next -- @preserve the generator only emits indexes from canonicalValueTypes. */
+	if (valueType === undefined) return undefined;
+	const candidate =
+		valueType === "Enum"
+			? { enumType: encodedValue[1], type: valueType, value: encodedValue[2] }
+			: { type: valueType, value: encodedValue[1] };
+	/* v8 ignore next -- @preserve generated compact values originate from validated canonical values. */
+	return isCanonicalValue(candidate) ? candidate : undefined;
+}
+
 const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>([
 	[
 		"TextLabel",
@@ -103,12 +132,28 @@ const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, Default
 	],
 ]);
 
-const classDefaultPropertyLookups = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>(
-	Object.entries(defaultProperties.classes).map(([className, properties]) => [
-		className,
-		createDefaultPropertyLookupEntries(properties),
-	]),
-);
+function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<string, DefaultPropertyLookupEntry>> {
+	const lookups = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>();
+	for (const [className, entries] of Object.entries(defaultProperties.classes)) {
+		const properties: Record<string, unknown> = {};
+		for (let index = 0; index < entries.length; index += 2) {
+			const propertyIndex = entries[index];
+			const valueIndex = entries[index + 1];
+			/* v8 ignore next -- @preserve the generator emits complete property/value index pairs. */
+			if (propertyIndex === undefined || valueIndex === undefined) continue;
+			const propertyName = defaultProperties.properties[propertyIndex];
+			const encodedValue = defaultProperties.values[valueIndex];
+			/* v8 ignore next -- @preserve generated indexes always reference existing dictionary entries. */
+			const value = encodedValue === undefined ? undefined : decodeCanonicalValue(encodedValue);
+			/* v8 ignore next -- @preserve generated indexes and values are validated during generation. */
+			if (propertyName !== undefined && value !== undefined) properties[propertyName] = value;
+		}
+		lookups.set(className, createDefaultPropertyLookupEntries(properties));
+	}
+	return lookups;
+}
+
+const classDefaultPropertyLookups = createClassDefaultPropertyLookups();
 
 interface TrackedInstance {
 	readonly className: string;

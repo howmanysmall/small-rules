@@ -137,7 +137,7 @@
 		"partitionByNewline": false,
 		"sortSideEffects": false
 	},
-	"sortPackageJson": true,
+	"sortPackageJson": { "sortScripts": true },
 	"sortTailwindcss": true,
 	"tabWidth": 4,
 	"trailingComma": "all",

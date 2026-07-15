@@ -99,7 +99,7 @@ export default defineConfig({
 	site: "https://howmanysmall.github.io",
 	vite: {
 		build: {
-			rollupOptions: {
+			rolldownOptions: {
 				output: {
 					assetFileNames: "_astro/[name].[hash][extname]",
 					chunkFileNames: "_astro/[name].[hash].js",

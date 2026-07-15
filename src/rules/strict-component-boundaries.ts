@@ -6,11 +6,6 @@ import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-interface Options {
-	readonly allow?: ReadonlyArray<string>;
-	readonly maxDepth?: number;
-}
-
 function pathSegmentsFromSource(source: string): ReadonlyArray<string> {
 	return source.split("/").filter((part) => !part.startsWith("."));
 }
@@ -36,9 +31,7 @@ const strictComponentBoundaries = defineRule({
 	create(context): Visitor {
 		const rawOptions = context.options?.[0];
 		const { allow = [], maxDepth = 1 } =
-			typeof rawOptions === "object" && rawOptions !== null
-				? (rawOptions as Options)
-				: { allow: [], maxDepth: 1 };
+			typeof rawOptions === "object" && rawOptions !== null ? rawOptions : { allow: [], maxDepth: 1 };
 
 		const allowPatterns = allow.map((pattern) => new RegExp(pattern, "u"));
 
