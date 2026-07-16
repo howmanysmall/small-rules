@@ -7,8 +7,22 @@ export type RuleName = keyof typeof smallRules.rules;
 const isSchemaRecord = type("Record<string, unknown>").readonly();
 type SchemaRecord = typeof isSchemaRecord.infer;
 
-interface ObjectOption {
-	readonly defaultValue: string;
+interface ComplexDefaultValueDocumentation {
+	readonly copyValue: string;
+	readonly displayValue: string;
+	readonly kind: "complex";
+	readonly summary: string;
+}
+
+interface InlineDefaultValueDocumentation {
+	readonly displayValue: string;
+	readonly kind: "inline";
+}
+
+export type DefaultValueDocumentation = ComplexDefaultValueDocumentation | InlineDefaultValueDocumentation;
+
+export interface ObjectOption {
+	readonly defaultValue: DefaultValueDocumentation;
 	readonly description: string | undefined;
 	readonly name: string;
 	readonly required: boolean;
@@ -59,9 +73,36 @@ function formatInline(value: unknown): string {
 	return JSON.stringify(value);
 }
 
-function formatDefaultValue(schema: SchemaRecord): string {
-	if (isString(schema.defaultLabel)) return schema.defaultLabel;
-	return formatInline(schema.default);
+function isComplexJsonValue(value: JsonValue): value is ReadonlyArray<JsonValue> | Readonly<Record<string, JsonValue>> {
+	return typeof value === "object" && value !== null;
+}
+
+const camelCaseBoundary = /(?<lowercase>[a-z\d])(?<uppercase>[A-Z])/gu;
+
+function summarizeComplexDefault(name: string, value: ReadonlyArray<JsonValue> | object): string {
+	if (!Array.isArray(value)) return `${Object.keys(value).length} fields`;
+	if (value.length === 1) return "1 item";
+
+	const itemLabel = name.endsWith("s") ? name.replace(camelCaseBoundary, "$<lowercase> $<uppercase>") : "items";
+	return `${value.length} ${itemLabel.toLowerCase()}`;
+}
+
+function formatDefaultValue(name: string, schema: SchemaRecord): DefaultValueDocumentation {
+	if (isJsonValue(schema.default) && isComplexJsonValue(schema.default)) {
+		return {
+			copyValue: JSON.stringify(schema.default),
+			displayValue: formatJson(schema.default),
+			kind: "complex",
+			summary: isString(schema.defaultLabel)
+				? schema.defaultLabel
+				: summarizeComplexDefault(name, schema.default),
+		};
+	}
+
+	return {
+		displayValue: isString(schema.defaultLabel) ? schema.defaultLabel : formatInline(schema.default),
+		kind: "inline",
+	};
 }
 
 function getSchemaTypeNames(schema: SchemaRecord): ReadonlyArray<string> {
@@ -330,7 +371,7 @@ function createObjectOptions(schema: SchemaRecord): ReadonlyArray<ObjectOption> 
 	return Object.entries(schema.properties).map(([name, optionSchema]) => {
 		const option = isSchemaRecord.allows(optionSchema) ? optionSchema : {};
 		return {
-			defaultValue: formatDefaultValue(option),
+			defaultValue: formatDefaultValue(name, option),
 			description: isString(option.description) ? option.description : undefined,
 			name,
 			required: required.has(name),

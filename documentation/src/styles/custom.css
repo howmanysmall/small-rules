@@ -323,113 +323,231 @@ starlight-link-card:hover {
 	border-radius: 0.5rem;
 }
 
-.rule-options-table {
-	display: block;
-	max-width: 100%;
-	overflow-x: auto;
-	border: 0 !important;
-	border-radius: 0 !important;
-}
-
-.sl-markdown-content table:not(:where(.not-content *)) {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
-	padding: 0.6rem 1rem;
+.rule-options-list {
+	margin: 1.5rem 0;
+	border-top: 1px solid var(--glass-border);
 	border-bottom: 1px solid var(--glass-border);
 }
 
-.sl-markdown-content thead th:not(:where(.not-content *)) {
+.rule-option {
+	padding: 1.25rem 0;
+	border-bottom: 1px solid var(--glass-border);
+}
+
+.rule-option:last-child {
+	border-bottom: 0;
+}
+
+.rule-option__header {
+	display: flex;
+	gap: 1rem;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.rule-option__name {
+	font-family: var(--sl-font-mono);
+	font-size: 1rem;
 	font-weight: 600;
-	text-align: left;
-	background: var(--violet-glow-bg);
-	border-bottom: 1px solid var(--violet-glow-border);
-}
-
-.sl-markdown-content tbody tr:nth-child(even):not(:where(.not-content *)) {
-	background: var(--violet-glow-bg);
-}
-
-.sl-markdown-content tbody tr:hover:not(:where(.not-content *)) {
-	background: var(--violet-glow-border);
-}
-
-.rule-options-table__table {
-	display: table !important;
-	width: 100%;
-	min-width: 0;
-	margin: 0;
-	table-layout: fixed !important;
-	border-collapse: collapse;
-}
-
-.rule-options-table__option-column {
-	width: 24%;
-}
-
-.rule-options-table__type-column {
-	width: 16%;
-}
-
-.rule-options-table__required-column {
-	width: 10%;
-}
-
-.rule-options-table__default-column {
-	width: 16%;
-}
-
-.rule-options-table__description-column {
-	width: 34%;
-}
-
-.rule-options-table__cell {
-	padding: 1rem 0.875rem !important;
-	line-height: 1.5 !important;
-	vertical-align: top !important;
-	hyphens: manual;
-	word-break: normal;
-	overflow-wrap: break-word;
-	border-bottom: 1px solid var(--glass-border) !important;
-}
-
-.rule-options-table__heading {
-	padding-block: 0.9rem !important;
-	font-weight: 600;
-	line-height: 1.25 !important;
-	text-align: left;
-	background: var(--violet-glow-bg);
-	border-bottom-color: var(--violet-glow-border) !important;
-}
-
-.rule-options-table__code {
-	font-size: 0.92em;
-	font-weight: 500;
-	line-height: inherit;
 	color: var(--sl-color-accent-high);
-	hyphens: manual;
-	word-break: normal;
-	overflow-wrap: break-word;
 	background: none;
-	border: none;
+	border: 0;
 }
 
-.rule-options-table tbody tr:nth-child(even) {
+.rule-option__requirement {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--sl-color-text-muted);
+	letter-spacing: 0.02em;
+}
+
+.rule-option__description {
+	max-width: 62ch;
+	margin: 0.45rem 0 0;
+	font-size: 0.95rem;
+	line-height: 1.55;
+	color: var(--sl-color-text);
+}
+
+.rule-option__metadata {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(10rem, 0.45fr);
+	gap: 1.5rem;
+	margin: 1rem 0 0;
+}
+
+.rule-option__field {
+	min-width: 0;
+}
+
+.rule-option__field dt {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--sl-color-text-muted);
+	letter-spacing: 0.04em;
+}
+
+.rule-option__field dd {
+	margin: 0.25rem 0 0;
+	line-height: 1.5;
+}
+
+.rule-option__field code {
+	padding: 0;
+	font-family: var(--sl-font-mono);
+	font-size: 0.86rem;
+	font-weight: 500;
+	color: var(--sl-color-accent-high);
+	overflow-wrap: anywhere;
+	background: none;
+	border: 0;
+}
+
+.rule-option__field--default dd > code {
+	white-space: nowrap;
+}
+
+.rule-option__default-actions {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.rule-option__summary,
+.rule-option__copy {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	color: var(--sl-color-accent-high);
+	cursor: pointer;
+	background: transparent;
+	border: 0;
+}
+
+.rule-option__summary {
+	gap: 0.3rem;
+	font-family: var(--sl-font-mono);
+	font-size: 0.86rem;
+	font-weight: 600;
+}
+
+.rule-option__summary:hover span {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.rule-option__summary svg,
+.rule-option__copy svg {
+	width: 1rem;
+	height: 1rem;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.rule-option__summary svg {
+	transition: transform 0.2s var(--spring);
+}
+
+.rule-option__summary[aria-expanded="true"] svg {
+	transform: rotate(180deg);
+}
+
+.rule-option__copy {
+	width: 2rem;
+	height: 2rem;
+	color: var(--sl-color-text-muted);
+	border-radius: 0.375rem;
+	transition:
+		color 0.2s var(--spring),
+		background-color 0.2s var(--spring);
+}
+
+.rule-option__copy:hover {
+	color: var(--sl-color-accent-high);
 	background: var(--violet-glow-bg);
 }
 
-.rule-options-table tbody tr:hover {
-	background: var(--violet-glow-border);
+.rule-option__copy[data-state="copied"] {
+	color: var(--code-pass);
 }
 
-.rule-options-table tbody tr:last-child .rule-options-table__cell {
-	border-bottom: 0 !important;
+.rule-option__copy[data-state="failed"] {
+	color: var(--code-fail);
 }
 
-:root[data-theme="dark"] .rule-options-table__code {
+.rule-option__status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	white-space: nowrap;
+	border: 0;
+	clip-path: inset(50%);
+}
+
+.rule-option__detail {
+	padding: 0.875rem 1rem 1rem;
+	margin-top: 1rem;
+	background: var(--violet-glow-bg);
+	border: 1px solid var(--violet-glow-border);
+	border-radius: 0.5rem;
+}
+
+.rule-option__detail[hidden] {
+	display: none;
+}
+
+.rule-option__detail-label {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--sl-color-text-muted);
+	letter-spacing: 0.04em;
+}
+
+.rule-option__detail pre {
+	padding: 0;
+	margin: 0.625rem 0 0;
+	font-family: var(--sl-font-mono);
+	font-size: 0.82rem;
+	line-height: 1.6;
+	color: var(--sl-color-accent-high);
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+	background: transparent;
+	border: 0;
+}
+
+.rule-option__detail code {
+	font-family: inherit;
+	color: inherit;
+}
+
+:root[data-theme="dark"] .rule-option__name,
+:root[data-theme="dark"] .rule-option__field code,
+:root[data-theme="dark"] .rule-option__summary,
+:root[data-theme="dark"] .rule-option__detail pre {
 	color: var(--violet-300);
+}
+
+@media (max-width: 700px) {
+	.rule-option__metadata {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0.875rem;
+	}
+
+	.rule-option__summary,
+	.rule-option__copy {
+		min-height: 2.75rem;
+	}
+
+	.rule-option__copy {
+		width: 2.75rem;
+	}
 }
 
 .RuleExample {
