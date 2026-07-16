@@ -13,20 +13,24 @@ lockfile = true
 [tools]
 "cargo:similarity-ts" = "latest"
 "github:howmanysmall/pullhook" = "latest"
+"npm:sherif" = "latest"
 actionlint = "latest"
+betterleaks = "latest"
 bun = "latest"
 gitleaks = "latest"
 hk = "latest"
+ni = "latest"
 node = "24"
+nub = "latest"
+pinact = "latest"
 pkl = "latest"
 pnpm = "11.10.0"
 rumdl = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 tombi = "latest"
+vale = "latest"
 zizmor = "latest"
-nub = "latest"
-ni = "latest"
 
 [tasks]
 [tasks.install]
