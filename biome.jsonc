@@ -455,7 +455,10 @@
 		},
 
 		{
-			"includes": ["documentation/src/components/rule-options.astro"],
+			"includes": [
+				"documentation/src/components/rule-options.astro",
+				"documentation/src/components/rule-options-table.tsx"
+			],
 			"linter": {
 				"rules": {
 					"performance": {
