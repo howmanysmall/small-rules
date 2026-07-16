@@ -55,23 +55,21 @@ Or add it to your `package.json` scripts:
 ```json
 {
 	"scripts": {
-		"lint": "oxlint ."
+		"lint": "oxlint"
 	}
 }
 ```
 
 Then run:
 
-```bash
-aube run lint
-```
+<PackageManagerTabs preset="run" />
 
 ## Auto-fix
 
 Many rules provide automatic fixes. Apply them with:
 
 ```bash
-oxlint --fix .
+oxlint --fix
 ```
 
 <Aside type="caution">
