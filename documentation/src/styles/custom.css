@@ -87,7 +87,7 @@
 	--sl-color-accent-low: #ecfdf5;
 	--sl-color-accent: #059669;
 	--sl-color-accent-high: #065f46;
-	--sl-content-width: 50rem;
+	--sl-content-width: 65rem;
 
 	--violet-50: #ecfdf5;
 	--violet-100: #d1fae5;
@@ -1832,5 +1832,13 @@ nav.sidebar .top-level li:not(:has(summary)) > details {
 
 	.bottom-cta-action:hover {
 		transform: none;
+	}
+}
+
+/* Fix right sidebar stretching to infinity on wide screens */
+@media (min-width: 72rem) {
+	.right-sidebar-container,
+	.right-sidebar {
+		width: var(--sl-sidebar-width) !important;
 	}
 }
