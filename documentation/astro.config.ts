@@ -63,6 +63,7 @@ export default defineConfig({
 					},
 					themes: ["github-light", "dracula"],
 				},
+				favicon: "/favicon.svg?v=2",
 				logo: {
 					replacesTitle: false,
 					src: "./src/assets/new-logo.svg",

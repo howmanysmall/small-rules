@@ -1,157 +1,38 @@
-<svg height="100%" viewBox="0 0 500 500" width="100%" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+	<!-- SVG created with Arrow, by QuiverAI (https://quiver.ai) -->
+	<style>
+		.cls-0 {
+			fill: #846ee7;
+		}
+		.cls-1 {
+			fill: url("#rail-long");
+		}
+		.cls-2 {
+			fill: url("#rail-short");
+		}
+		.cls-3 {
+			fill: url("#rail-lower");
+		}
+	</style>
 	<defs>
-		<!-- Outer Gear/Ring Gradient (Oxlint Red/Orange/Yellow) -->
-		<linearGradient id="outerGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-			<stop offset="0%" stop-color="#EF4444" />
-			<stop offset="50%" stop-color="#F97316" />
-			<stop offset="100%" stop-color="#FBBF24" />
+		<linearGradient gradientUnits="userSpaceOnUse" id="rail-long" x1="59.79" x2="113.1" y1="55.38" y2="55.38">
+			<stop offset="0" stop-color="#1d5053" />
+			<stop offset=".4688" stop-color="#1f5a5e" />
+			<stop offset="1" stop-color="#1b4c50" />
 		</linearGradient>
-
-		<!-- Ruler Checkmark Gradient (Vibrant TS Blue to Purple/Pink) -->
-		<linearGradient id="rulerGrad" x1="0%" x2="100%" y1="100%" y2="0%">
-			<stop offset="0%" stop-color="#2563EB" />
-			<stop offset="40%" stop-color="#4F46E5" />
-			<stop offset="80%" stop-color="#7C3AED" />
-			<stop offset="100%" stop-color="#DB2777" />
+		<linearGradient gradientUnits="userSpaceOnUse" id="rail-short" x1="30.66" x2="56.69" y1="96.99" y2="111.3">
+			<stop offset="0" stop-color="#1f5a5e" />
+			<stop offset=".4571" stop-color="#1d5053" />
+			<stop offset="1" stop-color="#1b4c50" />
 		</linearGradient>
-
-		<!-- Sparkle Radial Glow -->
-		<radialGradient cx="50%" cy="50%" id="sparkleGlow" r="50%">
-			<stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.8" />
-			<stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
-		</radialGradient>
-
-		<!-- Radial BG Glow -->
-		<radialGradient cx="50%" cy="50%" id="bgGlow" r="50%">
-			<stop offset="0%" stop-color="#4F46E5" stop-opacity="0.15" />
-			<stop offset="100%" stop-color="#4F46E5" stop-opacity="0" />
-		</radialGradient>
-
-		<!-- High-quality Drop Shadow for the main group -->
-		<filter height="140%" id="mainShadow" width="140%" x="-20%" y="-20%">
-			<feDropShadow dx="0" dy="16" flood-color="#0F172A" flood-opacity="0.4" stdDeviation="20" />
-			<feDropShadow dx="0" dy="6" flood-color="#0F172A" flood-opacity="0.2" stdDeviation="8" />
-		</filter>
-
-		<!-- Shadow specifically for the right leg to create the overlapping 3D effect -->
-		<filter height="160%" id="legShadow" width="160%" x="-30%" y="-30%">
-			<feDropShadow dx="-6" dy="8" flood-color="#000000" flood-opacity="0.4" stdDeviation="6" />
-		</filter>
-
-		<!-- Soft glow for neon accents -->
-		<filter height="140%" id="neonGlow" width="140%" x="-20%" y="-20%">
-			<feGaussianBlur result="blur" stdDeviation="6" />
-			<feMerge>
-				<feMergeNode in="blur" />
-				<feMergeNode in="SourceGraphic" />
-			</feMerge>
-		</filter>
+		<linearGradient gradientUnits="userSpaceOnUse" id="rail-lower" x1="40.87" x2="138.6" y1="85.17" y2="85.17">
+			<stop offset="0" stop-color="#1b4c50" />
+			<stop offset=".5222" stop-color="#1f5a5e" />
+			<stop offset="1" stop-color="#1b4c50" />
+		</linearGradient>
 	</defs>
-
-	<!-- Background Ambient Glow -->
-	<circle cx="250" cy="250" fill="url(#bgGlow)" r="220" />
-
-	<!-- Main Logo Group with Shadow -->
-	<g filter="url(#mainShadow)">
-		<!-- 1. Outer thin precision border -->
-		<circle cx="250" cy="250" fill="none" opacity="0.25" r="196" stroke="url(#outerGrad)" stroke-width="1.5" />
-
-		<!-- 2. Neon glow ring underneath (subtle) - Perfectly seamless array -->
-		<circle
-			cx="250"
-			cy="250"
-			fill="none"
-			filter="url(#neonGlow)"
-			opacity="0.2"
-			r="180"
-			stroke="url(#outerGrad)"
-			stroke-dasharray="45 40 15 41.37167"
-			stroke-linecap="round"
-			stroke-width="14" />
-
-		<!-- 3. Main segmented tech ring - Perfectly seamless array -->
-		<circle
-			cx="250"
-			cy="250"
-			fill="none"
-			r="180"
-			stroke="url(#outerGrad)"
-			stroke-dasharray="45 40 15 41.37167"
-			stroke-linecap="round"
-			stroke-width="12" />
-
-		<!-- 4. Inner dotted tracking circle - perfectly seamless -->
-		<circle
-			cx="250"
-			cy="250"
-			fill="none"
-			opacity="0.6"
-			r="162"
-			stroke="url(#outerGrad)"
-			stroke-dasharray="2 8.17876"
-			stroke-linecap="round"
-			stroke-width="3" />
-
-		<!-- ====== RULER / CHECKMARK ====== -->
-		<!-- LEFT LEG (Short Leg) - drawn underneath -->
-		<path d="M 125 245 L 215 335" fill="none" stroke="url(#rulerGrad)" stroke-linecap="round" stroke-width="46" />
-
-		<!-- Left leg reflection -->
-		<path
-			d="M 137 247 L 213 323"
-			fill="none"
-			opacity="0.3"
-			stroke="#FFFFFF"
-			stroke-linecap="round"
-			stroke-width="3" />
-
-		<!-- RIGHT LEG (Long Leg/Ruler Body) - drawn on top with its own drop shadow -->
-		<path
-			d="M 215 335 L 385 165"
-			fill="none"
-			filter="url(#legShadow)"
-			stroke="url(#rulerGrad)"
-			stroke-linecap="round"
-			stroke-width="46" />
-
-		<!-- Right leg reflection -->
-		<path
-			d="M 217 323 L 373 167"
-			fill="none"
-			opacity="0.3"
-			stroke="#FFFFFF"
-			stroke-linecap="round"
-			stroke-width="3" />
-
-		<!-- ====== PRECISION RULER TICKS (on Right Leg) ====== -->
-		<g opacity="0.9" stroke="#FFFFFF" stroke-linecap="round">
-			<!-- 7 Ticks mathematically aligned perpendicular to the right leg -->
-			<line stroke-width="4" x1="207" x2="217" y1="307" y2="317" />
-			<line stroke-width="3" x1="233" x2="239" y1="283" y2="289" />
-			<line stroke-width="4" x1="257" x2="267" y1="257" y2="267" />
-			<line stroke-width="3" x1="283" x2="289" y1="233" y2="239" />
-			<line stroke-width="4" x1="307" x2="317" y1="207" y2="217" />
-			<line stroke-width="3" x1="333" x2="339" y1="183" y2="189" />
-			<line stroke-width="4" x1="357" x2="367" y1="157" y2="167" />
-		</g>
-
-		<!-- ====== ELEGANT SPARKLES ====== -->
-		<!-- Top-Right Sparkle -->
-		<g transform="translate(405, 115)">
-			<circle cx="0" cy="0" fill="url(#sparkleGlow)" filter="url(#neonGlow)" opacity="0.6" r="25" />
-			<path d="M 0 -22 Q 0 0 22 0 Q 0 0 0 22 Q 0 0 -22 0 Q 0 0 0 -22" fill="#FBBF24" />
-			<path d="M 0 -14 Q 0 0 14 0 Q 0 0 0 14 Q 0 0 -14 0 Q 0 0 0 -14" fill="#FFFFFF" />
-			<circle cx="22" cy="18" fill="#FFFFFF" opacity="0.8" r="2.5" />
-		</g>
-
-		<!-- Bottom-Left Sparkle -->
-		<g transform="translate(95, 345)">
-			<circle cx="0" cy="0" fill="url(#sparkleGlow)" opacity="0.4" r="15" />
-			<path d="M 0 -14 Q 0 0 14 0 Q 0 0 0 14 Q 0 0 -14 0 Q 0 0 0 -14" fill="#F87171" />
-			<path d="M 0 -9 Q 0 0 9 0 Q 0 0 0 9 Q 0 0 -9 0 Q 0 0 0 -9" fill="#FFFFFF" />
-		</g>
-
-		<circle cx="170" cy="140" fill="#FFFFFF" opacity="0.6" r="1.5" />
-		<circle cx="310" cy="390" fill="#FFFFFF" opacity="0.4" r="2" />
-	</g>
+	<polygon class="cls-0" points="116.7 26.3 70.5 72.3 66.6 68.4 59.6 75.7 70.5 86.6 123.8 33.7" />
+	<path class="cls-1" d="m18.5 109.1-7.2-7.5 90.5-89.7 11.3 10.9-7.7 7.6-3.8-4-83.1 82.7z" />
+	<polygon class="cls-2" points="67.1 90 33.2 123.6 25.9 116.7 60 83" />
+	<polygon class="cls-3" points="127.4 37 125.9 37.9 119.5 43.9 123.5 47.6 40.9 131.1 48.1 138.4 138.6 47.6" />
 </svg>
