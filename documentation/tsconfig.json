@@ -10,7 +10,6 @@
 			"$small-rules": ["../src/index.ts"],
 			"@/*": ["./src/*"]
 		},
-		"plugins": [{ "name": "@astrojs/ts-plugin" }],
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo"
 	},
 	"exclude": ["dist", "node_modules"],

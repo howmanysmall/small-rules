@@ -1,6 +1,6 @@
 ---
-export interface Props {
-	variant: "error" | "suggestion" | "fixable" | "roblox";
+interface Props {
+	readonly variant: "error" | "suggestion" | "fixable" | "roblox";
 }
 
 const { variant } = Astro.props;
