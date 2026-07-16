@@ -144,7 +144,18 @@
 		},
 		{
 			"files": ["documentation/src/**/*.{ts,tsx}"],
-			"plugins": ["react", "react-perf", "jsx-a11y"]
+			"plugins": ["react", "react-perf", "jsx-a11y"],
+			"rules": {
+				"react/jsx-filename-extension": [
+					"error",
+					{
+						"extensions": ["jsx", "tsx"],
+						"ignoreFilesWithoutCode": true
+					}
+				],
+				"react/jsx-max-depth": ["error", { "max": 3 }],
+				"react/react-in-jsx-scope": "off"
+			}
 		}
 	],
 	"plugins": ["eslint", "import", "jsdoc", "node", "oxc", "promise", "typescript", "unicorn"],
@@ -787,6 +798,19 @@
 			"implementsReplacesDocs": false,
 			"overrideReplacesDocs": true,
 			"tagNamePreference": {}
+		},
+		"jsx-a11y": {
+			"attributes": {},
+			"components": {}
+		},
+		"react": {
+			"componentWrapperFunctions": [],
+			"formComponents": [],
+			"linkComponents": [],
+			"version": "19.2.7"
+		},
+		"vitest": {
+			"typecheck": true
 		}
 	}
 }
