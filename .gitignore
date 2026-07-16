@@ -58,3 +58,6 @@ hk.local.pkl
 .agents/skills/tsdown/
 .agents/skills/vitest/
 .agents/skills/migrate-pullhook-install/
+.agents/skills/vercel-composition-patterns/
+.agents/skills/vercel-react-best-practices/
+.agents/skills/web-design-guidelines/

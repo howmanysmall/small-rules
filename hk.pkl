@@ -95,8 +95,8 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
-        fix = "nr oxlint --no-error-on-unmatched-pattern --fix {{files}}"
+        check = "node --run oxlint -- --no-error-on-unmatched-pattern {{files}}"
+        fix = "node --run oxlint -- --no-error-on-unmatched-pattern --fix {{files}}"
         check_first = true
         batch = false
       }
@@ -114,23 +114,23 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "nr biome lint --no-errors-on-unmatched {{files}}"
-        fix = "nr biome lint --write --no-errors-on-unmatched {{files}}"
+        check = "node --run biome -- check --no-errors-on-unmatched {{files}}"
+        fix = "node --run biome -- check --write --no-errors-on-unmatched {{files}}"
         check_first = true
         batch = false
       }
       ["oxfmt-js"] = (Builtins.oxfmt) {
         glob = List("*.ts", "*.tsx", "*.mts", "*.cts")
-        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
-        fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+        check = "node --run oxfmt -- --no-error-on-unmatched-pattern --check {{files}}"
+        fix = "node --run oxfmt -- --no-error-on-unmatched-pattern {{files}}"
         check_first = true
       }
 
       // Biome non-JS — css, html, grit
       ["biome-non-js"] = (Builtins.biome) {
         glob = List("*.css", "*.html", "*.grit")
-        check = "nr biome check --no-errors-on-unmatched {{files}}"
-        fix = "nr biome check --write --no-errors-on-unmatched {{files}}"
+        check = "node --run biome -- check --no-errors-on-unmatched {{files}}"
+        fix = "node --run biome -- check --write --no-errors-on-unmatched {{files}}"
         check_first = true
         batch = false
       }
@@ -139,8 +139,9 @@ hooks {
       // Note: .astro is intentionally excluded. oxfmt does not support it.
       ["oxfmt-json-mdx"] = (Builtins.oxfmt) {
         glob = List("*.json", "*.jsonc", "*.json5", "*.code-workspace", "*.mdx")
-        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
-        fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+        exclude = List("skills-lock.json")
+        check = "node --run oxfmt -- --no-error-on-unmatched-pattern --check {{files}}"
+        fix = "node --run oxfmt -- --no-error-on-unmatched-pattern {{files}}"
         check_first = true
       }
       // Pkl — hk and other typed config files
@@ -211,7 +212,8 @@ hooks {
   ["commit-msg"] {
     steps {
       ["commitlint"] {
-        check = "nr commitlint --strict --config commitlint.config.ts --edit {{commit_msg_file}}"
+        check =
+          "node --run commitlint -- --strict --config commitlint.config.ts --edit {{commit_msg_file}}"
       }
     }
   }
@@ -283,7 +285,7 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
+        check = "node --run oxlint -- --no-error-on-unmatched-pattern {{files}}"
         batch = true
       }
       ["biome-js"] = (Builtins.biome) {
@@ -300,12 +302,12 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "nr biome lint --no-errors-on-unmatched {{files}}"
+        check = "node --run biome -- lint --no-errors-on-unmatched {{files}}"
         batch = true
       }
       ["biome-non-js"] = (Builtins.biome) {
         glob = List("*.css", "*.html", "*.grit")
-        check = "nr biome check --no-errors-on-unmatched {{files}}"
+        check = "node --run biome -- check --no-errors-on-unmatched {{files}}"
         batch = true
       }
       ["oxfmt"] = (Builtins.oxfmt) {
@@ -325,7 +327,7 @@ hooks {
             "*.code-workspace",
             "*.mdx",
           )
-        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
+        check = "node --run oxfmt -- --no-error-on-unmatched-pattern --check {{files}}"
       }
       ["pkl-format"] = (Builtins.pkl_format) {
         glob = List("*.pkl")
@@ -403,8 +405,8 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "nr oxlint --no-error-on-unmatched-pattern {{files}}"
-        fix = "nr oxlint --no-error-on-unmatched-pattern --fix {{files}}"
+        check = "node --run oxlint -- --no-error-on-unmatched-pattern {{files}}"
+        fix = "node --run oxlint -- --no-error-on-unmatched-pattern --fix {{files}}"
         batch = true
       }
       ["biome-js"] = (Builtins.biome) {
@@ -421,14 +423,14 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "nr biome lint --no-errors-on-unmatched {{files}}"
-        fix = "nr biome lint --write --no-errors-on-unmatched {{files}}"
+        check = "node --run biome -- lint --no-errors-on-unmatched {{files}}"
+        fix = "node --run biome -- lint --write --no-errors-on-unmatched {{files}}"
         batch = true
       }
       ["biome-non-js"] = (Builtins.biome) {
         glob = List("*.css", "*.html", "*.grit")
-        check = "nr biome check --no-errors-on-unmatched {{files}}"
-        fix = "nr biome check --write --no-errors-on-unmatched {{files}}"
+        check = "node --run biome -- check --no-errors-on-unmatched {{files}}"
+        fix = "node --run biome -- check --write --no-errors-on-unmatched {{files}}"
         batch = true
       }
       ["oxfmt"] = (Builtins.oxfmt) {
@@ -448,8 +450,8 @@ hooks {
             "*.code-workspace",
             "*.mdx",
           )
-        check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
-        fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
+        check = "node --run oxfmt -- --no-error-on-unmatched-pattern --check {{files}}"
+        fix = "node --run oxfmt -- --no-error-on-unmatched-pattern {{files}}"
       }
       ["pkl-format"] = (Builtins.pkl_format) {
         glob = List("*.pkl")
