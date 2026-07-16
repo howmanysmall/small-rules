@@ -17,7 +17,6 @@ lockfile = true
 actionlint = "latest"
 betterleaks = "latest"
 bun = "latest"
-gitleaks = "latest"
 hk = "latest"
 ni = "latest"
 node = "24"
