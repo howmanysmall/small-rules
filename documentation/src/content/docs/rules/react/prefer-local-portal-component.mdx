@@ -33,7 +33,7 @@ import Portal from "../components/portal";
 import { createPortal } from "@rbxts/react-roblox";
 
 export function Example(target: Instance) {
-    return createPortal(<frame />, target);
+	return createPortal(<frame />, target);
 }
 ```
 
@@ -46,7 +46,11 @@ import Portal from "../components/portal";
 import { createPortal } from "@rbxts/react-roblox";
 
 export function Example(target: Instance) {
-    return <Portal target={target}><frame /></Portal>;
+	return (
+		<Portal target={target}>
+			<frame />
+		</Portal>
+	);
 }
 ```
 
@@ -56,7 +60,11 @@ export function Example(target: Instance) {
 import Portal from "../components/portal";
 
 export function Example(target: Instance) {
-    return <Portal target={target}><frame /></Portal>;
+	return (
+		<Portal target={target}>
+			<frame />
+		</Portal>
+	);
 }
 ```
 

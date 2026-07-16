@@ -1,0 +1,25 @@
+---
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+
+const managers = [
+	{ command: "aube add -D @pobammer-ts/small-rules oxlint", label: "aube" },
+	{ command: "npm install -D @pobammer-ts/small-rules oxlint", label: "npm" },
+	{ command: "pnpm add -D @pobammer-ts/small-rules oxlint", label: "pnpm" },
+	{ command: "yarn add -D @pobammer-ts/small-rules oxlint", label: "yarn" },
+	{ command: "bun add -d @pobammer-ts/small-rules oxlint", label: "bun" },
+	{ command: "deno add -D npm:@pobammer-ts/small-rules npm:oxlint", label: "deno" },
+	{ command: "vlt install -D @pobammer-ts/small-rules oxlint", label: "vlt" },
+	{ command: "vp add -D @pobammer-ts/small-rules oxlint", label: "vp" },
+	{ command: "ni -D @pobammer-ts/small-rules oxlint", label: "ni" },
+];
+---
+
+<Tabs syncKey="package-manager">
+	{
+		managers.map(({ command, label }) => (
+			<TabItem label={label}>
+				<Code code={command} lang="bash" />
+			</TabItem>
+		))
+	}
+</Tabs>

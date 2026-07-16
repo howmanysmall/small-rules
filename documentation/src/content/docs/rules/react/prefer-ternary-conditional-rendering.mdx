@@ -28,7 +28,19 @@ This rule is configured as `small-rules/prefer-ternary-conditional-rendering` an
 
 ```tsx
 function Component({ gradient, gradientToUse, rarityStyle }) {
-    return <>{gradient !== undefined && <uigradient key="ui-gradient" Color={gradient} />}{gradient === undefined && <AnimatedGradient key="animated-gradient" colorValue={gradientToUse} rotation={45} sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0} />}</>;
+	return (
+		<>
+			{gradient !== undefined && <uigradient key="ui-gradient" Color={gradient} />}
+			{gradient === undefined && (
+				<AnimatedGradient
+					key="animated-gradient"
+					colorValue={gradientToUse}
+					rotation={45}
+					sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0}
+				/>
+			)}
+		</>
+	);
 }
 ```
 
@@ -38,14 +50,29 @@ When auto-fixed, this becomes:
 
 ```tsx
 function Component({ gradient, gradientToUse, rarityStyle }) {
-    return <>{gradient !== undefined ? <uigradient key="ui-gradient" Color={gradient} /> : <AnimatedGradient key="animated-gradient" colorValue={gradientToUse} rotation={45} sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0} />}</>;
+	return (
+		<>
+			{gradient !== undefined ? (
+				<uigradient key="ui-gradient" Color={gradient} />
+			) : (
+				<AnimatedGradient
+					key="animated-gradient"
+					colorValue={gradientToUse}
+					rotation={45}
+					sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0}
+				/>
+			)}
+		</>
+	);
 }
 ```
 
 <RuleExample type="pass" title="Passes">
 
 ```tsx
-function Component({ flag }) { return <>{flag ? <A /> : <B />}</>; }
+function Component({ flag }) {
+	return <>{flag ? <A /> : <B />}</>;
+}
 ```
 
 </RuleExample>
