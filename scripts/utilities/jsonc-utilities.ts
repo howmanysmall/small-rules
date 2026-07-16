@@ -77,38 +77,3 @@ export function editJsonc<TIn extends object>(
 
 	return updatedContent;
 }
-
-function validateObject(value: unknown): object {
-	if (typeof value === "object" && value !== null) return value;
-
-	const error = new TypeError(`Expected object but received ${typeof value}`);
-	Error.captureStackTrace(error, validateObject);
-	throw error;
-}
-
-export function editJsoncNoValidate(content: string, mutate: (draft: object) => object): string {
-	const parsed = validateObject(parse(content));
-	const indentation = detectIndentation(content);
-
-	const modified = mutate(structuredClone(parsed));
-	const changes = diff(parsed, modified);
-
-	let updatedContent = content;
-	for (const change of changes) {
-		const options = change.op === "add" ? { isArrayInsertion: true } : {};
-		const edits = modify(updatedContent, change.path, change.value, options);
-
-		for (const edit of edits) {
-			if (edit.length > 0) continue;
-
-			const inlineSpace = isInlineArrayNode(updatedContent, change.path.slice(0, -1));
-			const indent = inlineSpace ? " " : `\n${indentation.repeat(change.path.length)}`;
-
-			formatInsertionEdit(edit, indent, inlineSpace);
-		}
-
-		updatedContent = applyEdits(updatedContent, edits);
-	}
-
-	return updatedContent;
-}

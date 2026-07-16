@@ -2,8 +2,6 @@ import { ruleCategoryDefinitions, ruleCategoryOrder } from "./rule-sidebar";
 
 import type { RuleCategoryDefinition, RuleCategoryKey } from "./rule-sidebar";
 
-export { ruleSidebarGroups } from "./rule-sidebar";
-
 interface RuleCategoryStats {
 	readonly count: number;
 	readonly label: string;
