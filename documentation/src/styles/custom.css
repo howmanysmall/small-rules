@@ -358,19 +358,19 @@ starlight-link-card:hover {
 
 .rule-options-table__table {
 	display: table !important;
-	width: max(100%, 62rem);
-	min-width: 62rem;
+	width: 100%;
+	min-width: 0;
 	margin: 0;
 	table-layout: fixed !important;
 	border-collapse: collapse;
 }
 
 .rule-options-table__option-column {
-	width: 18%;
+	width: 24%;
 }
 
 .rule-options-table__type-column {
-	width: 24%;
+	width: 16%;
 }
 
 .rule-options-table__required-column {
@@ -378,17 +378,20 @@ starlight-link-card:hover {
 }
 
 .rule-options-table__default-column {
-	width: 13%;
+	width: 16%;
 }
 
 .rule-options-table__description-column {
-	width: 35%;
+	width: 34%;
 }
 
 .rule-options-table__cell {
 	padding: 1rem 0.875rem !important;
 	line-height: 1.5 !important;
 	vertical-align: top !important;
+	hyphens: manual;
+	word-break: normal;
+	overflow-wrap: break-word;
 	border-bottom: 1px solid var(--glass-border) !important;
 }
 
@@ -406,7 +409,9 @@ starlight-link-card:hover {
 	font-weight: 500;
 	line-height: inherit;
 	color: var(--sl-color-accent-high);
-	overflow-wrap: anywhere;
+	hyphens: manual;
+	word-break: normal;
+	overflow-wrap: break-word;
 	background: none;
 	border: none;
 }
@@ -637,24 +642,30 @@ starlight-link-card:hover {
 	border-radius: 0;
 }
 
+.page-title-row {
+	position: relative;
+	display: block;
+	margin-bottom: 1.5rem;
+}
+
 .contextual-menu {
+	position: absolute;
+	top: 0.35rem;
+	right: 0;
+	z-index: 2;
 	display: inline-flex;
 	gap: 0.6rem;
 	align-items: center;
-	margin-left: 0.75rem;
-	vertical-align: middle;
+	margin: 0;
 	white-space: nowrap;
+	pointer-events: none;
 	opacity: 0;
 	transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-main h1 {
-	position: relative;
-}
-
-main h1:hover + .contextual-menu,
-.contextual-menu:hover,
+.page-title-row:hover .contextual-menu,
 .contextual-menu:focus-within {
+	pointer-events: auto;
 	opacity: 1;
 }
 
@@ -694,20 +705,9 @@ main h1:hover + .contextual-menu,
 	text-decoration: none;
 }
 
-main:has(> .content-panel .hero-splash) > .content-panel:first-child h1 {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	white-space: nowrap;
-	border: 0;
-	clip: rect(0, 0, 0, 0);
-}
-
-main:has(> .content-panel .hero-splash) > .content-panel:first-child .sl-container {
-	padding-top: 0;
+/* Hero pages render their own title; collapse Starlight's empty title panel. */
+main:has(> .content-panel .hero-splash) > .content-panel:first-child {
+	display: none;
 }
 
 .hero-splash--compact {
@@ -1588,6 +1588,12 @@ main h1 {
 	background-clip: text;
 }
 
+/* After `main h1` so specificity stays ascending (noDescendingSpecificity). */
+main .page-title-row > h1 {
+	padding-right: 0.5rem;
+	margin-bottom: 0 !important;
+}
+
 :root[data-theme="dark"] main h1 {
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(135deg, #ffffff 0%, var(--violet-200) 60%, var(--violet-400) 100%);
@@ -1665,6 +1671,15 @@ nav.sidebar a[aria-current="page"] {
 nav.sidebar summary,
 nav.sidebar a {
 	transition: all 0.25s var(--spring);
+}
+
+nav.sidebar a {
+	font-size: 0.875rem;
+	line-height: 1.35;
+	hyphens: manual;
+	word-break: normal;
+	text-wrap: pretty;
+	overflow-wrap: break-word;
 }
 
 nav.sidebar a:hover {
