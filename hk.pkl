@@ -74,7 +74,6 @@ hooks {
       ["detect-private-key"] = (Builtins.detect_private_key) {
         exclude = binary_excludes
       }
-      ["gitleaks"] = (Builtins.gitleaks) {}
       ["betterleaks"] = Builtins.betterleaks
       ["sherif"] = (Builtins.sherif) {
         check = "sherif -r root-package-private-field -r root-package-dependencies"
@@ -265,7 +264,6 @@ hooks {
       ["detect-private-key"] = (Builtins.detect_private_key) {
         exclude = binary_excludes
       }
-      ["gitleaks"] = (Builtins.gitleaks) {}
       ["betterleaks"] = Builtins.betterleaks
       ["sherif"] = (Builtins.sherif) {
         check = "sherif -r root-package-private-field -r root-package-dependencies"
@@ -386,7 +384,6 @@ hooks {
       ["detect-private-key"] = (Builtins.detect_private_key) {
         exclude = binary_excludes
       }
-      ["gitleaks"] = (Builtins.gitleaks) {}
       ["betterleaks"] = Builtins.betterleaks
       ["sherif"] = (Builtins.sherif) {
         check = "sherif -r root-package-private-field -r root-package-dependencies"
