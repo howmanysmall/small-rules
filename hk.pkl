@@ -37,6 +37,24 @@ local binary_excludes =
     "*.mov",
   )
 
+local workflow_action_files =
+  List(
+    ".github/workflows/**/*.yml",
+    ".github/workflows/**/*.yaml",
+    ".github/actions/**/action.yml",
+    ".github/actions/**/action.yaml",
+  )
+local zizmor_files =
+  List(
+    ".github/workflows/**/*.yml",
+    ".github/workflows/**/*.yaml",
+    ".github/actions/**/action.yml",
+    ".github/actions/**/action.yaml",
+    ".github/dependabot.yml",
+  )
+local markdown_files = List("**/*.md", "**/*.markdown", "**/*.mdx")
+local toml_files = List("**/*.toml")
+
 hooks {
   ["pre-commit"] {
     fix = true
@@ -133,22 +151,38 @@ hooks {
       }
 
       // Shell scripts
-      ["shfmt"] = Builtins.shfmt
-      ["shellcheck"] = Builtins.shellcheck
+      ["shfmt"] = (Builtins.shfmt) {
+        match_any =
+          List(
+            new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
+            new Config.FileSelector { types = List("shell") },
+          )
+      }
+      ["shellcheck"] = (Builtins.shellcheck) {
+        match_any =
+          List(
+            new Config.FileSelector {
+              glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
+            },
+            new Config.FileSelector { types = List("shell") },
+          )
+      }
 
       // GitHub Actions workflows
       ["actionlint"] = (Builtins.actionlint) {
-        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+        glob = workflow_action_files
       }
       ["zizmor"] = (Builtins.zizmor) {
-        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+        glob = zizmor_files
       }
-      ["pinact"] = Builtins.pinact
+      ["pinact"] = (Builtins.pinact) {
+        glob = workflow_action_files
+      }
 
       // Markdown — rumdl lint + fmt
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
-        glob = List("*.md")
+        glob = markdown_files
         exclude = List(".agents/skills/**/SKILL.md")
         check = "rumdl check {{files}}"
         fix =
@@ -162,7 +196,7 @@ hooks {
 
       // TOML — tombi lint + format
       ["tombi"] = (Builtins.tombi) {
-        glob = List("*.toml")
+        glob = toml_files
         check = "tombi lint {{files}} && tombi format --check {{files}}"
         fix =
           """
@@ -298,23 +332,39 @@ hooks {
       ["pkl-format"] = (Builtins.pkl_format) {
         glob = List("*.pkl")
       }
-      ["shfmt"] = Builtins.shfmt
-      ["shellcheck"] = Builtins.shellcheck
+      ["shfmt"] = (Builtins.shfmt) {
+        match_any =
+          List(
+            new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
+            new Config.FileSelector { types = List("shell") },
+          )
+      }
+      ["shellcheck"] = (Builtins.shellcheck) {
+        match_any =
+          List(
+            new Config.FileSelector {
+              glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
+            },
+            new Config.FileSelector { types = List("shell") },
+          )
+      }
       ["actionlint"] = (Builtins.actionlint) {
-        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+        glob = workflow_action_files
       }
       ["zizmor"] = (Builtins.zizmor) {
-        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+        glob = zizmor_files
       }
-      ["pinact"] = Builtins.pinact
+      ["pinact"] = (Builtins.pinact) {
+        glob = workflow_action_files
+      }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
-        glob = List("*.md")
+        glob = markdown_files
         exclude = List(".agents/skills/**/SKILL.md")
         check = "rumdl check {{files}}"
       }
       ["tombi"] = (Builtins.tombi) {
-        glob = List("*.toml")
+        glob = toml_files
         check = "tombi lint {{files}} && tombi format --check {{files}}"
       }
     }
@@ -407,18 +457,34 @@ hooks {
       ["pkl-format"] = (Builtins.pkl_format) {
         glob = List("*.pkl")
       }
-      ["shfmt"] = Builtins.shfmt
-      ["shellcheck"] = Builtins.shellcheck
+      ["shfmt"] = (Builtins.shfmt) {
+        match_any =
+          List(
+            new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
+            new Config.FileSelector { types = List("shell") },
+          )
+      }
+      ["shellcheck"] = (Builtins.shellcheck) {
+        match_any =
+          List(
+            new Config.FileSelector {
+              glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
+            },
+            new Config.FileSelector { types = List("shell") },
+          )
+      }
       ["actionlint"] = (Builtins.actionlint) {
-        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+        glob = workflow_action_files
       }
       ["zizmor"] = (Builtins.zizmor) {
-        glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml")
+        glob = zizmor_files
       }
-      ["pinact"] = Builtins.pinact
+      ["pinact"] = (Builtins.pinact) {
+        glob = workflow_action_files
+      }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
-        glob = List("*.md")
+        glob = markdown_files
         exclude = List(".agents/skills/**/SKILL.md")
         fix =
           """
@@ -427,7 +493,7 @@ hooks {
           """
       }
       ["tombi"] = (Builtins.tombi) {
-        glob = List("*.toml")
+        glob = toml_files
         fix =
           """
           tombi lint {{files}}

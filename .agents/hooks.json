@@ -1,0 +1,44 @@
+{
+	"auto-format": {
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "pnpm run format",
+						"timeout": 15,
+						"type": "command"
+					}
+				],
+				"matcher": "(write_to_file|replace_file_content|multi_replace_file_content)"
+			}
+		]
+	},
+	"run-tests": {
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "bash scripts/quiet-on-success.sh bash scripts/test-relevant.sh",
+						"timeout": 45,
+						"type": "command"
+					}
+				],
+				"matcher": "(write_to_file|replace_file_content|multi_replace_file_content)"
+			}
+		]
+	},
+	"type-check": {
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "bash scripts/quiet-on-success.sh pnpm run type-check:agent",
+						"timeout": 30,
+						"type": "command"
+					}
+				],
+				"matcher": "(write_to_file|replace_file_content|multi_replace_file_content)"
+			}
+		]
+	}
+}
