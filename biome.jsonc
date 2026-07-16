@@ -142,6 +142,11 @@
 	},
 
 	"linter": {
+		"domains": {
+			"project": "all",
+			"react": "all",
+			"types": "all"
+		},
 		"enabled": true,
 		"includes": ["**", "!**/{dist,do-not-sync-ever,garbage,node_modules}/**"],
 		"rules": {
@@ -190,6 +195,7 @@
 				"noUnusedPrivateClassMembers": "error",
 				"noUnusedVariables": "error",
 				"preset": "recommended",
+				"useImportExtensions": "off",
 				"useInlineScriptId": "error",
 				"useJsonImportAttributes": "off",
 				"useSingleJsDocAsterisk": "error"
@@ -458,6 +464,15 @@
 					"style": {
 						"noJsxLiterals": "off"
 					}
+				}
+			}
+		},
+
+		{
+			"includes": ["documentation/src/**/*.astro", "tests/fixtures/**/*.tsx"],
+			"linter": {
+				"domains": {
+					"react": "none"
 				}
 			}
 		},
