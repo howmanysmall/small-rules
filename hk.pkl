@@ -1,5 +1,6 @@
 // hk configuration - https://hk.jdx.dev/
 amends "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Config.pkl"
+
 import "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Builtins.pkl"
 
 exclude =
@@ -97,7 +98,7 @@ hooks {
         batch = false
       }
       ["oxfmt-js"] = (Builtins.oxfmt) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts", "*.astro")
+        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
         fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
         check_first = true
@@ -113,6 +114,7 @@ hooks {
       }
 
       // oxfmt for json, jsonc, json5, code-workspace, and mdx
+      // Note: .astro is intentionally excluded. oxfmt does not support it.
       ["oxfmt-json-mdx"] = (Builtins.oxfmt) {
         glob = List("*.json", "*.jsonc", "*.json5", "*.code-workspace", "*.mdx")
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
@@ -278,7 +280,6 @@ hooks {
             "*.cjs",
             "*.mts",
             "*.cts",
-            "*.astro",
             "*.json",
             "*.jsonc",
             "*.json5",
@@ -384,7 +385,6 @@ hooks {
             "*.cjs",
             "*.mts",
             "*.cts",
-            "*.astro",
             "*.json",
             "*.jsonc",
             "*.json5",
