@@ -4,8 +4,8 @@
 			{
 				"hooks": [
 					{
-						"command": "pnpm run format",
-						"timeout": 15,
+						"command": "bash scripts/quiet-on-success.sh bash scripts/format-lint-relevant.sh",
+						"timeout": 30,
 						"type": "command"
 					}
 				],
