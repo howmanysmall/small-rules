@@ -32,7 +32,13 @@ The failing example assumes the project has a resolvable local `ContextStack` co
 import ContextStack from "../providers/context-stack";
 
 export function Example(locale: string, theme: string) {
-    return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
+	return (
+		<ThemeContext.Provider value={theme}>
+			<LocaleContext.Provider value={locale}>
+				<App />
+			</LocaleContext.Provider>
+		</ThemeContext.Provider>
+	);
 }
 ```
 
@@ -44,7 +50,11 @@ When auto-fixed, this becomes:
 import ContextStack from "../providers/context-stack";
 
 export function Example(locale: string, theme: string) {
-    return <ContextStack providers={[<ThemeContext.Provider value={theme} />, <LocaleContext.Provider value={locale} />]}><App /></ContextStack>;
+	return (
+		<ContextStack providers={[<ThemeContext.Provider value={theme} />, <LocaleContext.Provider value={locale} />]}>
+			<App />
+		</ContextStack>
+	);
 }
 ```
 
@@ -54,7 +64,11 @@ export function Example(locale: string, theme: string) {
 import ContextStack from "../providers/context-stack";
 
 export function Example(theme: string) {
-    return <ThemeContext.Provider value={theme}><App /></ThemeContext.Provider>;
+	return (
+		<ThemeContext.Provider value={theme}>
+			<App />
+		</ThemeContext.Provider>
+	);
 }
 ```
 

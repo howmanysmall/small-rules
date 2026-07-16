@@ -27,7 +27,8 @@ This rule is configured as `small-rules/no-native-properties-spread` and reports
 <RuleExample type="fail" title="Fails">
 
 ```tsx
-const SOME_CONSTANT = {}; const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;
+const SOME_CONSTANT = {};
+const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;
 ```
 
 </RuleExample>

@@ -3,8 +3,9 @@ title: "Quick Start"
 description: "Get small-rules running in your project in minutes."
 ---
 
-import { Aside, CardGrid, LinkCard, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
 
+import PackageManagerTabs from "@/components/package-manager-tabs.astro";
 import PageHeader from "@/components/page-header.astro";
 
 <PageHeader
@@ -15,84 +16,9 @@ import PageHeader from "@/components/page-header.astro";
 
 ## Install
 
-Add `small-rules` and `oxlint` to your roblox-ts project:
+Add `small-rules` and `oxlint` to your roblox-ts project. Since they are only needed during development, install them as dev dependencies:
 
-<Tabs syncKey="package-manager">
-	<TabItem label="aube">
-
-```bash
-aube add -D @pobammer-ts/small-rules oxlint
-```
-
-Since `small-rules` and `oxlint` are only needed during development, install them as dev dependencies.
-
-    </TabItem>
-    <TabItem label="npm">
-
-```bash
-npm install @pobammer-ts/small-rules oxlint
-npm install -D @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-    <TabItem label="pnpm">
-
-```bash
-pnpm add @pobammer-ts/small-rules oxlint
-pnpm add -D @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-    <TabItem label="yarn">
-
-```bash
-yarn add @pobammer-ts/small-rules oxlint
-yarn add -D @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-    <TabItem label="bun">
-
-```bash
-bun add @pobammer-ts/small-rules oxlint
-bun add -d @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-    <TabItem label="deno">
-
-```bash
-deno add npm:@pobammer-ts/small-rules npm:oxlint
-deno add -D npm:@pobammer-ts/small-rules npm:oxlint
-```
-
-    </TabItem>
-    <TabItem label="vlt">
-
-```bash
-vlt install @pobammer-ts/small-rules oxlint
-vlt install -D @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-    <TabItem label="vp">
-
-```bash
-vp add @pobammer-ts/small-rules oxlint
-vp add -D @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-    <TabItem label="ni">
-
-```bash
-ni @pobammer-ts/small-rules oxlint
-ni -D @pobammer-ts/small-rules oxlint
-```
-
-    </TabItem>
-
-</Tabs>
+<PackageManagerTabs />
 
 ## Configure
 

@@ -26,7 +26,9 @@ This rule is configured as `small-rules/no-render-helper-functions` and reports 
 <RuleExample type="fail" title="Fails">
 
 ```tsx
-function createLabel() { return <div />; }
+function createLabel() {
+	return <div />;
+}
 ```
 
 </RuleExample>
@@ -34,7 +36,9 @@ function createLabel() { return <div />; }
 <RuleExample type="pass" title="Passes">
 
 ```tsx
-function Component() { return <div />; }
+function Component() {
+	return <div />;
+}
 ```
 
 </RuleExample>
