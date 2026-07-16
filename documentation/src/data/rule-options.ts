@@ -26,12 +26,15 @@ function isString(value: unknown): value is string {
 }
 
 function isJsonValue(value: unknown): value is JsonValue {
-	if (value === null) return true;
-	if (typeof value === "boolean" || typeof value === "number" || isString(value)) return true;
-	if (Array.isArray(value)) return value.every(isJsonValue);
+	if (value === null || typeof value === "boolean" || typeof value === "number" || isString(value)) return true;
+	if (Array.isArray(value)) {
+		for (const subValue of value) if (!isJsonValue(subValue)) return false;
+		return true;
+	}
 	if (!isSchemaRecord.allows(value)) return false;
 
-	return Object.values(value).every(isJsonValue);
+	for (const subValue of Object.values(value)) if (!isJsonValue(subValue)) return false;
+	return true;
 }
 
 function getRuleSchema(ruleName: RuleName): unknown {
