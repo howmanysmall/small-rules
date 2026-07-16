@@ -27,7 +27,7 @@ jobs:
       id-token: write # Required for NPM Trusted Publishing (OIDC)
     steps:
       - name: Checkout (full history)
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -80,7 +80,7 @@ jobs:
       - name: Setup Node.js for NPM publishing
         if: ${{ env.DRY_RUN != 'true' }}
         # This step is only here to configure the NPM registry URL.
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: "24"
           package-manager-cache: false
@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload npm debug log on failure
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: npm-debug-log
           path: /home/runner/.npm/_logs/*.log
