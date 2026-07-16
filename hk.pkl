@@ -98,7 +98,7 @@ hooks {
         batch = false
       }
       ["oxfmt-js"] = (Builtins.oxfmt) {
-        glob = List("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs", "*.mts", "*.cts")
+        glob = List("*.ts", "*.tsx", "*.mts", "*.cts")
         check = "nr oxfmt --no-error-on-unmatched-pattern --check {{files}}"
         fix = "nr oxfmt --no-error-on-unmatched-pattern {{files}}"
         check_first = true
