@@ -1,7 +1,7 @@
 {
 	"$schema": "node_modules/oxfmt/configuration_schema.json",
 	"arrowParens": "always",
-	"bracketSameLine": true,
+	"bracketSameLine": false,
 	"bracketSpacing": true,
 	"embeddedLanguageFormatting": "auto",
 	"endOfLine": "lf",

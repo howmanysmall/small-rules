@@ -1559,10 +1559,6 @@ a.sl-link-card .description {
 		grid-template-columns: 1fr;
 	}
 
-	.home-proof {
-		grid-template-columns: 1fr;
-	}
-
 	.hero-preview {
 		justify-self: stretch;
 		max-width: none;
