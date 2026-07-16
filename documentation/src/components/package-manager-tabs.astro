@@ -23,11 +23,9 @@ const managers = [
 ---
 
 <Tabs syncKey="package-manager">
-	{
-		managers.map(({ install, label, run }) => (
+	{managers.map(({ install, label, run }) => (
 			<TabItem label={label}>
 				<Code code={preset === "install" ? install : run} lang="bash" />
 			</TabItem>
-		))
-	}
+		))}
 </Tabs>
