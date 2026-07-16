@@ -1,0 +1,16 @@
+{
+	"hooks": {
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"command": "bin/lint-changed.sh",
+						"timeout": 90,
+						"type": "command"
+					}
+				],
+				"matcher": "Write|Edit|MultiEdit|search_replace|write"
+			}
+		]
+	}
+}
