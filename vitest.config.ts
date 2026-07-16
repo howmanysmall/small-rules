@@ -19,7 +19,7 @@ const configuration = defineConfig({
 		coverage: {
 			clean: true,
 			enabled: !(isFocusedRun || isVitiateRun),
-			exclude: ["src/index.ts", "src/types/**/*.ts"],
+			exclude: ["documentation/**", "src/index.ts", "src/types/**/*.ts"],
 			include: ["src/**/*.ts"],
 			provider: "v8",
 			reportOnFailure: false,
