@@ -117,8 +117,14 @@ export interface RuleTestCases {
 	valid: ReadonlyArray<string | ValidRuleCase>;
 }
 
+export interface RuleCaseDocumentation {
+	readonly id: string;
+	readonly title: string;
+}
+
 export interface BaseRuleCase {
 	code: string;
+	readonly documentation?: RuleCaseDocumentation;
 	filename?: string;
 	language?: TestLanguage;
 	only?: boolean;
