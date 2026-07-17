@@ -1,0 +1,46 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+import { ruleExamples } from "@/data/rule-examples";
+import type { RuleName } from "@/data/rule-manifest";
+import RuleExample from "./rule-example.astro";
+
+interface Props {
+	readonly exemption?: string;
+	readonly rule: RuleName;
+}
+
+const { exemption, rule } = Astro.props;
+const examples = ruleExamples.get(rule) ?? [];
+
+function getCodeLanguage(language: string | undefined): "js" | "jsx" | "ts" | "tsx" {
+	if (language === "js" || language === "jsx" || language === "ts" || language === "tsx") return language;
+	return "ts";
+}
+---
+
+<section aria-labelledby="examples">
+	<h2 id="examples">Examples</h2>
+	{exemption === undefined ? (
+		<div class="rule-examples">
+			{examples.map((example) => (
+				<RuleExample title={example.title} type={example.kind === "valid" ? "pass" : "fail"}>
+					<Code code={example.code} lang={getCodeLanguage(example.language)} meta='frame="none"' />
+					{typeof example.output === "string" && (
+						<div class="rule-example-output">
+							<p><strong>After auto-fix</strong></p>
+							{example.output === "" ? (
+								<p class="rule-example-note">The file is empty after this fix.</p>
+							) : (
+								<Code code={example.output} lang={getCodeLanguage(example.language)} meta='frame="none"' />
+							)}
+						</div>
+					)}
+					{example.suggestions !== undefined && <p class="rule-example-note">This diagnostic includes a code suggestion.</p>}
+				</RuleExample>
+			))}
+		</div>
+	) : (
+		<p class="rule-examples-exemption">{exemption}</p>
+	)}
+</section>

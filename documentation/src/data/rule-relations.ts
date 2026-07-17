@@ -1,3 +1,5 @@
+import type { RuleName } from "./rule-manifest";
+
 /**
  * Hand-curated semantic relationships between small-rules.
  *
@@ -23,17 +25,21 @@ export type RuleRelationKind =
 	| "supersedes";
 
 export interface RuleRelation {
-	readonly from: string;
+	readonly from: RuleName;
 	readonly kind: RuleRelationKind;
 	readonly reason: string;
-	readonly to: string;
+	readonly to: RuleName;
+}
+
+function defineRuleRelations<const TRelations extends ReadonlyArray<RuleRelation>>(relations: TRelations): TRelations {
+	return relations;
 }
 
 /**
  * Undirected kinds are stored once (lexicographically smaller `from` preferred when both directions are equivalent).
  * Directed kinds use explicit `from` → `to`.
  */
-export const ruleRelations = [
+export const ruleRelations = defineRuleRelations([
 	// ---------------------------------------------------------------------------
 	// Directive comment family
 	// ---------------------------------------------------------------------------
@@ -393,16 +399,16 @@ export const ruleRelations = [
 		reason: "Both rewrite simple math patterns to clearer/faster Luau builtins (idiv vs min/max).",
 		to: "prefer-math-min-max",
 	},
-] as const satisfies ReadonlyArray<RuleRelation>;
+]);
 
 const UNDIRECTED_KINDS = new Set<RuleRelationKind>(["related", "overlaps", "alternative"]);
 
-export function getRelatedRules(ruleName: string): ReadonlyArray<RuleRelation> {
+export function getRelatedRules(ruleName: RuleName): ReadonlyArray<RuleRelation> {
 	return ruleRelations.filter((edge) => edge.from === ruleName || edge.to === ruleName);
 }
 
-export function getRelatedRuleNames(ruleName: string): ReadonlyArray<string> {
-	const names = new Set<string>();
+export function getRelatedRuleNames(ruleName: RuleName): ReadonlyArray<RuleName> {
+	const names = new Set<RuleName>();
 	for (const edge of getRelatedRules(ruleName)) {
 		if (edge.from === ruleName) names.add(edge.to);
 		if (edge.to === ruleName && UNDIRECTED_KINDS.has(edge.kind)) names.add(edge.from);

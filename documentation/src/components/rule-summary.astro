@@ -1,22 +1,14 @@
 ---
-import type { RuleName } from "@/data/rule-options";
-import smallRules from "$small-rules";
+import { getRuleFacts } from "@/data/rule-facts";
+
+import type { RuleName } from "@/data/rule-manifest";
 
 interface Props {
 	readonly rule: RuleName;
 }
 
 const { rule } = Astro.props;
-const ruleDefinition = smallRules.rules[rule];
-
-const { meta } = ruleDefinition;
-if (meta === undefined) {
-	const error = new Error(`Rule "${rule}" is missing metadata.`);
-	Error.captureStackTrace(error);
-	throw error;
-}
-
-const description = meta.docs?.description ?? "<MISSING-DESCRIPTION>";
+const { description } = getRuleFacts(rule);
 ---
 
 <div class="rule-summary">

@@ -225,6 +225,14 @@ starlight-link-card:hover {
 	margin: 1rem 0 1.25rem;
 }
 
+.rule-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	margin: 0.75rem 0 1rem;
+}
+
 .rule-summary-id {
 	align-self: flex-start;
 	padding: 0.25rem 0.55rem;
@@ -246,6 +254,90 @@ starlight-link-card:hover {
 
 .rule-summary-text code {
 	font-size: 0.92em;
+}
+
+.rule-diagnostics {
+	display: grid;
+	gap: 0.75rem;
+	margin: 1rem 0 1.5rem;
+}
+
+.rule-diagnostic {
+	min-width: 0;
+	padding: 1rem;
+	background: var(--card-bg);
+	border: 1px solid var(--glass-border);
+	border-radius: 0.75rem;
+}
+
+.rule-diagnostic-id {
+	display: inline-block;
+	margin-bottom: 0.75rem;
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	color: var(--sl-color-accent-high);
+	background: transparent;
+}
+
+.rule-examples-exemption,
+.rule-example-note {
+	color: var(--sl-color-text-muted);
+}
+
+.rule-example-output {
+	padding-top: 1rem;
+	margin-top: 1rem;
+	border-top: 1px solid var(--glass-border);
+}
+
+.rule-example-output > p {
+	margin: 0 0 0.75rem;
+	font-size: var(--sl-text-sm);
+}
+
+.related-rules {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+	gap: 0.75rem;
+	margin: 1rem 0;
+}
+
+.related-rule {
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+	padding: 1rem;
+	color: var(--sl-color-text);
+	text-decoration: none;
+	background: var(--card-bg);
+	border: 1px solid var(--glass-border);
+	border-radius: 0.75rem;
+	transition:
+		border-color 0.2s var(--spring),
+		box-shadow 0.2s var(--spring),
+		transform 0.2s var(--spring);
+}
+
+.related-rule:hover {
+	color: var(--sl-color-text);
+	border-color: var(--glass-border-strong);
+	box-shadow: var(--shadow-sm);
+	transform: translateY(-1px);
+}
+
+.related-rule-heading {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.related-rule-kind {
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	color: var(--sl-color-accent-high);
+	letter-spacing: 0.02em;
 }
 
 .badge {
@@ -702,8 +794,17 @@ starlight-link-card:hover {
 	border-color: var(--glass-border-strong);
 }
 
+.rule-diagnostic .expressive-code {
+	max-width: 100%;
+	margin: 0 !important;
+}
+
 .expressive-code .frame {
 	border: none !important;
+}
+
+.rule-diagnostic .expressive-code .frame {
+	overflow-x: auto;
 }
 
 .rule-options-config .expressive-code {

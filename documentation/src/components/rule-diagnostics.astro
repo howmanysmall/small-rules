@@ -1,0 +1,23 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+interface Props {
+	readonly messages: Readonly<Record<string, string>> | undefined;
+}
+
+const messages = Object.entries(Astro.props.messages ?? {});
+---
+
+{messages.length > 0 && (
+	<section aria-labelledby="diagnostic-messages">
+		<h2 id="diagnostic-messages">Diagnostic Messages</h2>
+		<div class="rule-diagnostics">
+			{messages.map(([messageId, message]) => (
+				<article class="rule-diagnostic">
+					<code class="rule-diagnostic-id">{messageId}</code>
+					<Code code={message} lang="text" meta='frame="none"' />
+				</article>
+			))}
+		</div>
+	</section>
+)}
