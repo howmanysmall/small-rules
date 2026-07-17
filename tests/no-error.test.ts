@@ -8,6 +8,7 @@ describe("no-error", () => {
 		invalid: [
 			{
 				code: "error('Hello');",
+				documentation: { id: "fail", title: "Ban global error call" },
 				errors: [{ messageId: "noError" }],
 			},
 			{
@@ -33,7 +34,7 @@ describe("no-error", () => {
 		],
 		valid: [
 			"Log.error('Hello');",
-			"throw new Error('test');",
+			{ code: "throw new Error('test');", documentation: { id: "pass", title: "Throw a new error" } },
 			"console.error('test');",
 			"const error = 'string';",
 			"const errorMessage = () => value;",

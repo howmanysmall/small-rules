@@ -8,6 +8,7 @@ describe("no-restricted-property-assignment", () => {
 		invalid: [
 			{
 				code: "_G.__DEV__ = true;",
+				documentation: { id: "fail", title: "Restricted property assignment" },
 				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
@@ -106,6 +107,7 @@ describe("no-restricted-property-assignment", () => {
 			"_G.__DEV__;",
 			{
 				code: "_G.__PROD__ = true;",
+				documentation: { id: "pass", title: "Non-matching property assignment" },
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
 			{

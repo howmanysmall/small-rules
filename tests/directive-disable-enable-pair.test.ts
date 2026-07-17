@@ -8,6 +8,7 @@ describe("directive-disable-enable-pair", () => {
 		invalid: [
 			{
 				code: "const z = 0;\n/* oxlint-disable no-console */\nconst x = 1;",
+				documentation: { id: "fail", title: "Unpaired block disable directive" },
 				errors: [{ messageId: "missingRulePair" }],
 			},
 			{
@@ -38,6 +39,7 @@ describe("directive-disable-enable-pair", () => {
 			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
+				documentation: { id: "pass", title: "Properly paired disable directive" },
 			},
 			{
 				code: "/* oxlint-disable */\nconst x = 1;\n/* oxlint-enable */",

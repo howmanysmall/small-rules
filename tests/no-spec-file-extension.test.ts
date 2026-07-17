@@ -11,8 +11,9 @@ describe("no-spec-file-extension", () => {
 		invalid: [
 			{
 				code: "export const x = 1;",
+				documentation: { id: "fail", title: "Spec file extension" },
 				errors: [{ messageId: "noSpecFileExtension" }],
-				filename: join(FIXTURES, "component.spec.ts"),
+				filename: "component.spec.ts",
 			},
 			{
 				code: "export const x = 1;",
@@ -33,7 +34,8 @@ describe("no-spec-file-extension", () => {
 		valid: [
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "component.test.ts"),
+				documentation: { id: "pass", title: "Test file extension" },
+				filename: "component.test.ts",
 			},
 			{
 				code: "export const x = 1;",

@@ -8,6 +8,7 @@ describe("directive-no-restricted-disable", () => {
 		invalid: [
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
+				documentation: { id: "fail", title: "Restricted rule disable" },
 				errors: [{ messageId: "disallow" }],
 				options: ["no-console"],
 			},
@@ -28,6 +29,7 @@ describe("directive-no-restricted-disable", () => {
 			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
+				documentation: { id: "pass", title: "Non-restricted rule disable" },
 				options: ["no-alert"],
 			},
 		],

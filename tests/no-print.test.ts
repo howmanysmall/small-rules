@@ -8,6 +8,7 @@ describe("no-print", () => {
 		invalid: [
 			{
 				code: "print('Hello');",
+				documentation: { id: "fail", title: "global print call" },
 				errors: [{ messageId: "noPrint" }],
 			},
 			{
@@ -32,7 +33,10 @@ describe("no-print", () => {
 			},
 		],
 		valid: [
-			"Log.info('Hello');",
+			{
+				code: "Log.info('Hello');",
+				documentation: { id: "pass", title: "logger info call" },
+			},
 			"Log.debug(value);",
 			"console.log('test');",
 			"const print = 'string';",

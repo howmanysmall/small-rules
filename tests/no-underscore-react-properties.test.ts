@@ -13,6 +13,7 @@ describe("no-underscore-react-props", () => {
     _tooltipGradient={tooltipGradient}
 />;
 `,
+				documentation: { id: "fail", title: "Underscored React prop" },
 				errors: [{ data: { propName: "_tooltipGradient" }, messageId: "noUnderscoreReactProperty" }],
 			},
 			{
@@ -37,10 +38,11 @@ const view = <panel _ />;
 			{
 				code: `
 <InventoryItemTooltip
-    key="inventory-tooltip"
-    tooltipGradient={tooltipGradient}
+	    key="inventory-tooltip"
+	    tooltipGradient={tooltipGradient}
 />;
 `,
+				documentation: { id: "pass", title: "Regular React prop" },
 			},
 			{
 				code: `

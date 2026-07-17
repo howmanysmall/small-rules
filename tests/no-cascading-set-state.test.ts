@@ -22,6 +22,7 @@ function Component() {
 	}, [firstValue, secondValue, thirdValue]);
 }
 `,
+				documentation: { id: "fail", title: "Multiple state updates in effect" },
 				errors: [{ messageId: "cascadingSetState" }],
 			},
 			{
@@ -80,6 +81,7 @@ function Component() {
 	}, [firstValue, secondValue]);
 }
 `,
+				documentation: { id: "pass", title: "Two state updates in effect" },
 			},
 			{
 				code: `

@@ -33,7 +33,11 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "ban-react-fc" },
 				{ name: "memoized-effect-dependencies" },
 				{ name: "no-cascading-set-state" },
-				{ name: "no-giant-component" },
+				{
+					exampleExemption:
+						"Examples require components exceeding 300 lines, which are too long to display on a documentation page.",
+					name: "no-giant-component",
+				},
 				{ name: "no-god-components" },
 				{ name: "no-inline-property-on-memo-component" },
 				{ name: "no-new-instance-in-use-memo" },

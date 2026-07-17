@@ -8,6 +8,7 @@ describe("no-render-helper-functions", () => {
 		invalid: [
 			{
 				code: "function createLabel() { return <div />; }",
+				documentation: { id: "fail", title: "Lowercase render helper" },
 				errors: [{ messageId: "noRenderHelper" }],
 			},
 			{
@@ -99,7 +100,10 @@ describe("no-render-helper-functions", () => {
 			},
 		],
 		valid: [
-			"function Component() { return <div />; }",
+			{
+				code: "function Component() { return <div />; }",
+				documentation: { id: "pass", title: "Named component function" },
+			},
 			"function MyComponent() { return <div />; }",
 			"function MyComponent(props: Props) { return <div>{props.children}</div>; }",
 			"const Component = () => <div />;",

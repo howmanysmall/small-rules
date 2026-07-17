@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import smallRules from "$small-rules";
 
+import { ruleExamples } from "../documentation/src/data/rule-examples";
 import {
 	formatRuleTitle,
 	getRuleCategoryPath,
@@ -14,6 +15,13 @@ import { ruleRelations } from "../documentation/src/data/rule-relations";
 
 const docsContentDirectory = fileURLToPath(new URL("../documentation/src/content/docs", import.meta.url));
 const rulePagesDirectory = join(docsContentDirectory, "rules");
+
+interface RuleExampleCoverage {
+	readonly exemption: string | undefined;
+	readonly invalidCount: number;
+	readonly name: string;
+	readonly validCount: number;
+}
 
 function getManifestRuleNames(): ReadonlyArray<string> {
 	return ruleManifest.categories.flatMap((category) => category.rules.map((entry) => entry.name));
@@ -29,6 +37,37 @@ function getRulePagePaths(): ReadonlyArray<string> {
 	return readdirSync(rulePagesDirectory, { encoding: "utf8", recursive: true })
 		.filter((relativePath) => relativePath.endsWith(".mdx") && basename(relativePath) !== "index.mdx")
 		.map((relativePath) => join(rulePagesDirectory, relativePath));
+}
+
+function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
+	return ruleManifest.categories.flatMap((category) =>
+		category.rules.map((entry): RuleExampleCoverage => {
+			const examples = ruleExamples.get(entry.name) ?? [];
+			return {
+				exemption: "exampleExemption" in entry ? entry.exampleExemption : undefined,
+				invalidCount: examples.filter((example) => example.kind === "invalid").length,
+				name: entry.name,
+				validCount: examples.filter((example) => example.kind === "valid").length,
+			};
+		}),
+	);
+}
+
+function getUncoveredRuleNames(): ReadonlyArray<string> {
+	return getRuleExampleCoverage()
+		.filter(({ exemption, invalidCount, validCount }) => {
+			const hasExamples = invalidCount > 0 && validCount > 0;
+			const hasReasonedExemption = exemption !== undefined && exemption.trim() !== "";
+			return !(hasExamples || hasReasonedExemption);
+		})
+		.map(({ name }) => name);
+}
+
+function getExampleCountViolationNames(): ReadonlyArray<string> {
+	return getRuleExampleCoverage()
+		.filter(({ exemption }) => exemption === undefined)
+		.filter(({ invalidCount, validCount }) => invalidCount !== 1 || validCount !== 1)
+		.map(({ name }) => name);
 }
 
 describe("documentation rule coverage", () => {
@@ -100,7 +139,17 @@ describe("documentation rule coverage", () => {
 
 		expect(relationEndpoints.every((name) => manifestRuleNames.has(name))).toBe(true);
 	});
-});
 
-// Phase 2 extension points: extracted examples and explicit example exemptions.
+	it("provides a fail and pass example or a reasoned exemption for every rule", () => {
+		expect.assertions(1);
+
+		expect(getUncoveredRuleNames()).toStrictEqual([]);
+	});
+
+	it("extracts exactly one fail and one pass example for each non-exempt rule", () => {
+		expect.assertions(1);
+
+		expect(getExampleCountViolationNames()).toStrictEqual([]);
+	});
+});
 // Phase 4 extension points: category landing pages and the all-rules landing page.

@@ -12,6 +12,7 @@ function Component({ gradient, gradientToUse, rarityStyle }) {
     return <>{gradient !== undefined && <uigradient key="ui-gradient" Color={gradient} />}{gradient === undefined && <AnimatedGradient key="animated-gradient" colorValue={gradientToUse} rotation={45} sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0} />}</>;
 }
 `,
+				documentation: { id: "fail", title: "Paired conditional JSX branches" },
 				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: `
 function Component({ gradient, gradientToUse, rarityStyle }) {
@@ -153,7 +154,10 @@ function Component({ flag }) {
 			},
 		],
 		valid: [
-			"function Component({ flag }) { return <>{flag ? <A /> : <B />}</>; }",
+			{
+				code: "function Component({ flag }) { return <>{flag ? <A /> : <B />}</>; }",
+				documentation: { id: "pass", title: "Explicit JSX ternary" },
+			},
 			"function Component({ first, second }) { return <>{first && <A />}{second && <B />}</>; }",
 			"function Component({ flag }) { return <>{flag && doThing()}{!flag && <B />}</>; }",
 			"function Component({ flag }) { return <>{flag && <A />}</>; }",

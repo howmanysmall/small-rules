@@ -12,7 +12,8 @@ describe("require-async-suffix", () => {
 				code: `async function getAll(): Promise<string> {
 	return "value";
 }`,
-				errors: missingAsyncSuffixErrors,
+				documentation: { id: "fail", title: "Missing Async suffix" },
+				errors: [{ messageId: "missingAsyncSuffix" }],
 			},
 			{
 				code: `const getAll = async (): Promise<string> => {
@@ -68,9 +69,12 @@ describe("require-async-suffix", () => {
 			},
 		],
 		valid: [
-			`async function getAllAsync(): Promise<string> {
+			{
+				code: `async function getAllAsync(): Promise<string> {
 	return "value";
 }`,
+				documentation: { id: "pass", title: "Async function suffix" },
+			},
 			`const getAllAsync = async (): Promise<string> => {
 	return "value";
 };`,

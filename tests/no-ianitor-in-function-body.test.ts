@@ -17,6 +17,7 @@ export function isPlacementVfxId(value: unknown) {
 	return Ianitor.keyOf(placementVfxIds)(value).success;
 }
 `,
+				documentation: { id: "fail", title: "Ianitor validator inside function" },
 				errors: [{ messageId: "hoistIanitorValidator" }],
 			},
 			// Arrow function body
@@ -71,7 +72,8 @@ function validate(data: unknown) {
 		],
 		valid: [
 			// Module-root Ianitor call (hoisted)
-			`
+			{
+				code: `
 import { Ianitor } from "@packages/ianitor";
 
 const placementVfxIds = { a: "a", b: "b" } as const;
@@ -81,6 +83,8 @@ export function isPlacementVfxId(value: unknown) {
 	return isPlacementVfxIdIanitor(value).success;
 }
 `,
+				documentation: { id: "pass", title: "hoisted Ianitor validator" },
+			},
 			// Module-root Ianitor call with type annotation
 			`
 import { Ianitor } from "@packages/ianitor";

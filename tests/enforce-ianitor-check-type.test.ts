@@ -17,6 +17,7 @@ const isUser = Ianitor.strictInterface({
 	}),
 });
 `,
+				documentation: { id: "fail", title: "Ianitor schema without check type" },
 				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
@@ -82,7 +83,10 @@ interface ChainableGetter<U extends Instance> {
 `,
 				options: [{ baseThreshold: 1, interfacePenalty: 1 }],
 			},
-			{ code: "const validator: Ianitor.Check<User> = Ianitor.interface({ name: Ianitor.string });" },
+			{
+				code: "const validator: Ianitor.Check<User> = Ianitor.interface({ name: Ianitor.string });",
+				documentation: { id: "pass", title: "explicit Ianitor check type" },
+			},
 			{
 				code: `
 const validator = Ianitor.string;

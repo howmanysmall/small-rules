@@ -20,7 +20,8 @@
 		"react": "catalog:frontend",
 		"react-dom": "catalog:frontend",
 		"satteri": "catalog:prod",
-		"sharp": "catalog:prod"
+		"sharp": "catalog:prod",
+		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "catalog:",
