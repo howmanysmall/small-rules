@@ -8,7 +8,8 @@
 		"dev": "astro dev",
 		"postinstall": "astro sync",
 		"preview": "astro preview",
-		"start": "astro dev"
+		"start": "astro dev",
+		"test:browser": "playwright test"
 	},
 	"dependencies": {
 		"@astrojs/markdown-satteri": "catalog:prod",
@@ -24,6 +25,7 @@
 		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
+		"@playwright/test": "catalog:test",
 		"@total-typescript/ts-reset": "catalog:",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
