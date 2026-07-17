@@ -17,6 +17,7 @@ function ComponentNoMemo() {
 
 export default memo(ComponentNoMemo);
 `,
+				documentation: { id: "fail", title: "Memo export without display name" },
 				errors: [{ messageId: "directMemoExport" }],
 			},
 
@@ -244,6 +245,7 @@ export const ChecklistClaimButton = memo(ChecklistClaimButtonNoMemo);
 ChecklistClaimButton.displayName = "ChecklistClaimButton";
 export default ChecklistClaimButton;
 `,
+				documentation: { id: "pass", title: "Memo export with display name" },
 			},
 
 			// Context with displayName - proper pattern

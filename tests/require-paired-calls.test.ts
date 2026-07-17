@@ -14,6 +14,7 @@ function test() {
     doWork();
 }
 `,
+				documentation: { id: "fail", title: "Unpaired opener lacks closer" },
 				errors: [{ messageId: "unpairedOpener" }],
 			},
 
@@ -1057,6 +1058,7 @@ function test() {
     debug.profileend();
 }
 	`,
+				documentation: { id: "pass", title: "Paired opener and closer" },
 			},
 			// Dynamic callee calls are not paired-call names
 			{

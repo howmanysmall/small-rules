@@ -8,6 +8,7 @@ describe("no-task-wait", () => {
 		invalid: [
 			{
 				code: "task.wait();",
+				documentation: { id: "fail", title: "direct task.wait call" },
 				errors: [{ messageId: "noTaskWait" }],
 			},
 			{
@@ -37,7 +38,10 @@ describe("no-task-wait", () => {
 		],
 		valid: [
 			"callback();",
-			"task.delay(1, callback);",
+			{
+				code: "task.delay(1, callback);",
+				documentation: { id: "pass", title: "delayed task callback" },
+			},
 			"advanceFrameLoopBy(1);",
 			"wait(1);",
 			"object.wait();",

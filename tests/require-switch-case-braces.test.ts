@@ -3,9 +3,6 @@ import rule from "$oxc-rules/require-switch-case-braces";
 
 import { js } from "./rule-testers";
 
-const case1Input = ["switch (value) {", "  case 1:", "    doFirst();", "    break;", "}"].join("\n");
-const case1Output = ["switch (value) {", "  case 1:", "    {", "doFirst();", "    break;", "}", "}"].join("\n");
-
 const case3Input = [
 	"switch (value) {",
 	"  case 1:",
@@ -121,9 +118,10 @@ describe("require-switch-case-braces", () => {
 	js.run("require-switch-case-braces", rule, {
 		invalid: [
 			{
-				code: case1Input,
+				code: ["switch (value) {", "  case 1:", "    doFirst();", "    break;", "}"].join("\n"),
+				documentation: { id: "fail", title: "Unbraced switch case body" },
 				errors: [{ messageId: "wrapCaseBody" }],
-				output: case1Output,
+				output: ["switch (value) {", "  case 1:", "    {", "doFirst();", "    break;", "}", "}"].join("\n"),
 			},
 			{
 				code: case3Input,
@@ -166,7 +164,10 @@ describe("require-switch-case-braces", () => {
 		valid: [
 			"switch (value) { case 1: }",
 			"switch (value) { case 1: doThing(); }",
-			"switch (value) { case 1: { doThing(); break; } }",
+			{
+				code: "switch (value) { case 1: { doThing(); break; } }",
+				documentation: { id: "pass", title: "Braced switch case body" },
+			},
 			"switch (value) { case 1: break; default: doDefault(); }",
 			"switch (value) { case 1: doFirst(); break; }",
 			{

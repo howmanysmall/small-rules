@@ -1,8 +1,11 @@
 import smallRules from "$small-rules";
 import { type } from "arktype";
 
+import type { RuleName } from "./rule-manifest";
+
+export type { RuleName } from "./rule-manifest";
+
 type JsonValue = boolean | null | number | string | ReadonlyArray<JsonValue> | { readonly [key: string]: JsonValue };
-export type RuleName = keyof typeof smallRules.rules;
 
 const isSchemaRecord = type("Record<string, unknown>").readonly();
 type SchemaRecord = typeof isSchemaRecord.infer;

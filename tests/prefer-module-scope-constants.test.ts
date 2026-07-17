@@ -30,12 +30,21 @@ describe("prefer-module-scope-constants", () => {
 
 			// Not at module scope
 			{ code: "{ const FOO = true; }", errors: moduleScopeErrors },
-			{ code: "function foo() { const FOO = true; }", errors: moduleScopeErrors },
+			{
+				code: "function foo() { const FOO = true; }",
+				documentation: { id: "fail", title: "Function constant at local scope" },
+				errors: [
+					{
+						message:
+							"You must place screaming snake case at module scope. If this is not meant to be a module-scoped variable, use camelcase instead.",
+					},
+				],
+			},
 			{ code: "{ const foo = false, FOO = true; }", errors: moduleScopeErrors },
 		],
 		valid: [
 			// Module scope const - valid
-			{ code: "const FOO = true;" },
+			{ code: "const FOO = true;", documentation: { id: "pass", title: "Module-scoped screaming constant" } },
 			// Lowercase - not affected
 			{ code: "const foo = true;" },
 			{ code: "{ const foo = true; }" },

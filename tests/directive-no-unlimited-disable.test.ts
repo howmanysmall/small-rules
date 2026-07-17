@@ -8,6 +8,7 @@ describe("directive-no-unlimited-disable", () => {
 		invalid: [
 			{
 				code: "/* oxlint-disable */\nconst x = 1;",
+				documentation: { id: "fail", title: "Bare disable without rule name" },
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
@@ -25,6 +26,7 @@ describe("directive-no-unlimited-disable", () => {
 			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
+				documentation: { id: "pass", title: "Named disable with matching enable" },
 			},
 			{
 				code: "const x = 1;\n// oxlint-disable-line no-console",

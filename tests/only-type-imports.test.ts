@@ -8,6 +8,7 @@ describe("only-type-imports", () => {
 		invalid: [
 			{
 				code: 'import { Foo } from "./bar";',
+				documentation: { id: "fail", title: "Value import needs type keyword" },
 				errors: [{ messageId: "onlyTypeImports" }],
 			},
 			{
@@ -28,7 +29,10 @@ describe("only-type-imports", () => {
 			},
 		],
 		valid: [
-			'import type { Foo } from "./bar";',
+			{
+				code: 'import type { Foo } from "./bar";',
+				documentation: { id: "pass", title: "Type-only import declaration" },
+			},
 			'import type Foo from "./bar";',
 			'import type { Foo, Bar } from "./bar";',
 			'import type * as Foo from "./bar";',

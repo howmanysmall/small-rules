@@ -1,6 +1,6 @@
-import { ruleCategoryDefinitions, ruleCategoryOrder } from "./rule-sidebar";
+import { getRuleFactCategory } from "./rule-facts";
 
-import type { RuleCategoryDefinition, RuleCategoryKey } from "./rule-sidebar";
+import type { RuleCategoryKey } from "./rule-manifest";
 
 interface RuleCategoryStats {
 	readonly count: number;
@@ -8,16 +8,16 @@ interface RuleCategoryStats {
 	readonly slug: string;
 }
 
-function createRuleCategoryStats(definition: RuleCategoryDefinition): RuleCategoryStats {
-	return { count: definition.rules.length, label: definition.label, slug: definition.slug };
+function createRuleCategoryStats(categoryKey: RuleCategoryKey): RuleCategoryStats {
+	const category = getRuleFactCategory(categoryKey);
+	return { count: category.count, label: category.label, slug: category.path };
 }
 
 export const ruleCategories: Record<RuleCategoryKey, RuleCategoryStats> = {
-	general: createRuleCategoryStats(ruleCategoryDefinitions.general),
-	naming: createRuleCategoryStats(ruleCategoryDefinitions.naming),
-	react: createRuleCategoryStats(ruleCategoryDefinitions.react),
-	roblox: createRuleCategoryStats(ruleCategoryDefinitions.roblox),
+	general: createRuleCategoryStats("general"),
+	naming: createRuleCategoryStats("naming"),
+	react: createRuleCategoryStats("react"),
+	roblox: createRuleCategoryStats("roblox"),
 };
 
-export const totalCategories = ruleCategoryOrder.length;
-export const totalRules = ruleCategoryOrder.reduce((sum, cat) => sum + ruleCategories[cat].count, 0);
+export { totalCategories, totalRules } from "./rule-facts";

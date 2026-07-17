@@ -12,6 +12,7 @@ function View() {
 	return <staticbadge />;
 }
 `,
+				documentation: { id: "fail", title: "Inline static JSX element" },
 				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
@@ -109,6 +110,7 @@ function View() {
 	return <Component enabled={true} />;
 }
 `,
+				documentation: { id: "pass", title: "Dynamic component element" },
 			},
 			{
 				code: `

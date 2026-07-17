@@ -15,6 +15,7 @@ type User = {
 
 type HiddenUser = Omit<User, "password">;
 `,
+				documentation: { id: "fail", title: "Disallowed Omit utility type" },
 				errors: [{ messageId: "bannedTypeWithReplacement" }],
 			},
 			{
@@ -94,6 +95,7 @@ type User = {
 
 type ActiveUser = Pick<User, "name">;
 `,
+				documentation: { id: "pass", title: "Allowed Pick utility type" },
 			},
 			{
 				code: `

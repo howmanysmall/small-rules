@@ -20,8 +20,14 @@ describe("strict-component-boundaries", () => {
 			// Reaching into another component and going deeper
 			{
 				code: "import someThing from '../Bar/any-path';",
-				errors,
-				filename: join(BASIC_APP, "components", "Foo", "index.ts"),
+				documentation: { id: "fail", title: "Nested component import" },
+				errors: [
+					{
+						message:
+							"Do not reach into an individual component's folder for nested modules. Import from the closest shared components folder instead.",
+					},
+				],
+				filename: "tests/fixtures/strict-boundaries/basic-app/app/components/Foo/index.ts",
 			},
 			{
 				code: "import someThing from './components/Bar/any-path';",
@@ -59,7 +65,8 @@ describe("strict-component-boundaries", () => {
 			// Importing components folder itself (no PascalCase reached)
 			{
 				code: "import {someThing} from './components';",
-				filename: join(BASIC_APP, "index.ts"),
+				documentation: { id: "pass", title: "Shared components import" },
+				filename: "tests/fixtures/strict-boundaries/basic-app/app/index.ts",
 			},
 			// Component folder entrypoint should be allowed
 			{

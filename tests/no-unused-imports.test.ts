@@ -8,6 +8,7 @@ describe("no-unused-imports", () => {
 		invalid: [
 			{
 				code: "import UnusedDefault from './module';",
+				documentation: { id: "fail", title: "Unused default import removal" },
 				errors: [{ data: { identifierName: "UnusedDefault" }, messageId: "unusedImport" }],
 				output: "",
 			},
@@ -64,6 +65,7 @@ describe("no-unused-imports", () => {
 		valid: [
 			{
 				code: "import UsedDefault from './module';\nUsedDefault();",
+				documentation: { id: "pass", title: "Used default import" },
 			},
 			{
 				code: "import { usedFunction } from './utils';\nusedFunction();",

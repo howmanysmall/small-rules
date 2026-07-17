@@ -14,6 +14,7 @@ const model = useMemo(() => {
     return new Instance("Model");
 }, []);
 `,
+				documentation: { id: "fail", title: "New instance inside memo" },
 				errors: [{ data: { constructorName: "Instance" }, messageId: "noNewInUseMemo" }],
 			},
 			{
@@ -174,6 +175,7 @@ function useMemo(factory) {
 
 const model = useMemo(() => new Instance("Model"), []);
 `,
+				documentation: { id: "pass", title: "Non-React memo function" },
 			},
 			{
 				code: `

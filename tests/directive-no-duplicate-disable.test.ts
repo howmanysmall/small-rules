@@ -8,6 +8,7 @@ describe("directive-no-duplicate-disable", () => {
 		invalid: [
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-disable no-console */",
+				documentation: { id: "fail", title: "Duplicate rule disable directive" },
 				errors: [{ messageId: "duplicateRule" }],
 			},
 			{
@@ -16,7 +17,10 @@ describe("directive-no-duplicate-disable", () => {
 			},
 		],
 		valid: [
-			"/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
+			{
+				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
+				documentation: { id: "pass", title: "Paired disable and enable" },
+			},
 			"/* oxlint-disable */\nconst x = 1;\n/* oxlint-enable */",
 			"const x = 1;\n// oxlint-disable-line no-console",
 		],

@@ -9,6 +9,7 @@ describe("ban-instances", () => {
 			// Array config - new Instance()
 			{
 				code: 'new Instance("Part");',
+				documentation: { id: "fail", title: "banned instance construction" },
 				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part"] }],
 			},
@@ -208,6 +209,7 @@ describe("ban-instances", () => {
 			// Non-banned classes - new Instance()
 			{
 				code: 'new Instance("MeshPart");',
+				documentation: { id: "pass", title: "unlisted instance class" },
 				options: [{ bannedInstances: ["Part"] }],
 			},
 			// Capitalized JSX = custom React component (NOT Roblox Instance)

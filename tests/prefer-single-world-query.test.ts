@@ -12,6 +12,7 @@ describe("prefer-single-world-query", () => {
 const componentA = world.get(entity, ComponentA);
 const componentB = world.get(entity, ComponentB);
 `,
+				documentation: { id: "fail", title: "repeated world get calls" },
 				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB] = world.get(entity, ComponentA, ComponentB);
@@ -205,6 +206,7 @@ if (hasC) { doSomethingElse(); }
 			// Single world.get call (nothing to optimize)
 			{
 				code: "const componentA = world.get(entity, ComponentA);",
+				documentation: { id: "pass", title: "single world get call" },
 			},
 			// Different worlds
 			{

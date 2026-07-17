@@ -420,6 +420,9 @@ importers:
       sharp:
         specifier: catalog:prod
         version: 0.34.5
+      yuku-parser:
+        specifier: catalog:prod
+        version: 0.6.1
     devDependencies:
       '@total-typescript/ts-reset':
         specifier: 'catalog:'

@@ -23,6 +23,7 @@ describe("prevent-abbreviations", () => {
 			// Variable declaration with abbreviation (const)
 			{
 				code: "const err = new Error();",
+				documentation: { id: "fail", title: "Abbreviated variable names" },
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
@@ -602,6 +603,7 @@ describe("prevent-abbreviations", () => {
 			// Valid full names
 			{
 				code: "const error = new Error();",
+				documentation: { id: "pass", title: "Expanded variable names" },
 			},
 			{
 				code: "const arguments = [1, 2, 3];",

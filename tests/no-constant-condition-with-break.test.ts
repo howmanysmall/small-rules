@@ -8,6 +8,7 @@ describe("no-constant-condition-with-break", () => {
 		invalid: [
 			{
 				code: "if (true) { doThing(); }",
+				documentation: { id: "fail", title: "Constant if condition" },
 				errors: [{ messageId: "unexpected" }],
 			},
 			{
@@ -190,7 +191,10 @@ describe("no-constant-condition-with-break", () => {
 			},
 		],
 		valid: [
-			"if (condition) { doThing(); }",
+			{
+				code: "if (condition) { doThing(); }",
+				documentation: { id: "pass", title: "Variable condition is allowed" },
+			},
 			"while (true) { if (done) break; doThing(); }",
 			"for (; true;) { if (done) break; doThing(); }",
 			"for (;;) { break; }",

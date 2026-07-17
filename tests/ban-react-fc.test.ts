@@ -8,6 +8,7 @@ describe("ban-react-fc", () => {
 		invalid: [
 			{
 				code: "const Component: React.FC = () => {};",
+				documentation: { id: "fail", title: "React FC component type" },
 				errors: [{ messageId: "banReactFC" }],
 			},
 			{
@@ -74,7 +75,10 @@ describe("ban-react-fc", () => {
 			},
 		],
 		valid: [
-			"function Component() {}",
+			{
+				code: "function Component() {}",
+				documentation: { id: "pass", title: "Function component declaration" },
+			},
 			"function Component(props: Props) {}",
 			"export function Component(props: Props) {}",
 			"const Component = () => {};",

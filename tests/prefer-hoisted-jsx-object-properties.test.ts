@@ -12,6 +12,7 @@ function View() {
 	return <Component options={{ enabled: true, count: 5 }} />;
 }
 `,
+				documentation: { id: "fail", title: "Inline JSX object property" },
 				errors: [{ messageId: "hoistableObjectProp" }],
 			},
 			{
@@ -155,6 +156,7 @@ const PROPS = { enabled: true };
 
 const view = <Component options={PROPS} />;
 `,
+				documentation: { id: "pass", title: "Hoisted JSX property object" },
 			},
 			{
 				code: `

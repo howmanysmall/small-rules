@@ -14,6 +14,7 @@ function useStoryModesState() {
     const log = new Log();
     log.Info("test");
 }`,
+				documentation: { id: "fail", title: "nested logger instantiation" },
 				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
 			},
@@ -150,6 +151,7 @@ const log = new Log();
 function useStoryModesState() {
     log.Info("test");
 }`,
+				documentation: { id: "pass", title: "module-level logger instantiation" },
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
 			},
 

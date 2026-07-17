@@ -15,6 +15,7 @@ class BadThen {
     }
 }
 `,
+				documentation: { id: "fail", title: "Promise chain inside constructor" },
 				errors: [{ messageId: "promiseChainInConstructor" }],
 			},
 
@@ -197,6 +198,7 @@ class GoodFactory {
     }
 }
 `,
+				documentation: { id: "pass", title: "Static async factory method" },
 			},
 
 			// Storing promise on this for later consumption

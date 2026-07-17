@@ -16,6 +16,7 @@ export function isX(value: unknown) {
 	return validator(value).success;
 }
 `,
+				documentation: { id: "fail", title: "Ianitor success property access" },
 				errors: [{ messageId: "preferCreateGuard" }],
 			},
 			// Ianitor.keyOf inline in function body
@@ -119,11 +120,14 @@ function run() {
 		],
 		valid: [
 			// Ianitor check stored, no .success access
-			`
+			{
+				code: `
 import { Ianitor } from "@packages/ianitor";
 const ids = { a: "a", b: "b" } as const;
 const validator = Ianitor.keyOf(ids);
 `,
+				documentation: { id: "pass", title: "validator without success access" },
+			},
 			// Ianitor with type annotation, no .success
 			`
 import { Ianitor } from "@packages/ianitor";

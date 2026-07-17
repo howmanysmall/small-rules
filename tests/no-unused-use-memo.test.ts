@@ -12,6 +12,7 @@ import { useMemo } from "react";
 
 useMemo(() => 1, []);
 `,
+				documentation: { id: "fail", title: "Unused memoized value" },
 				errors: [{ messageId: "unusedUseMemo" }],
 				options: [{ environment: "standard" }],
 			},
@@ -50,6 +51,7 @@ import { useMemo } from "react";
 
 const value = useMemo(() => 1, []);
 `,
+				documentation: { id: "pass", title: "Consumed memoized value" },
 				options: [{ environment: "standard" }],
 			},
 			{

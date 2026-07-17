@@ -19,6 +19,7 @@ function Bad1() {
     );
 }
 `,
+				documentation: { id: "fail", title: "Fragment children without keys" },
 				errors: 2,
 			},
 			// Single element in fragment
@@ -473,6 +474,7 @@ function Good1() {
     return <div />;
 }
 `,
+				documentation: { id: "pass", title: "Keyed fragment children" },
 			},
 			// Arrow function top-level return
 			{

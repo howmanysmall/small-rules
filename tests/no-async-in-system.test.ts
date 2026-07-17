@@ -40,6 +40,7 @@ describe("no-async-in-system", () => {
 			{
 				code: `import { Players as RobloxPlayers } from "@rbxts/services";
 				const socialSystem: SystemFunction = () => RobloxPlayers.GetFriendsAsync(userId);`,
+				documentation: { id: "fail", title: "async service call in system" },
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
@@ -171,10 +172,13 @@ describe("no-async-in-system", () => {
 			},
 		],
 		valid: [
-			`import { Players } from "@rbxts/services";
+			{
+				code: `import { Players } from "@rbxts/services";
 			const system: SystemFunction = () => {
 				world.added(PlayerComponent, () => Players.GetFriendsAsync(userId));
 			};`,
+				documentation: { id: "pass", title: "async call in event callback" },
+			},
 			`import { Players } from "@rbxts/services";
 			function system(): SystemReturn {
 				Players.GetFriendsAsync(userId);
