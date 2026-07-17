@@ -186,6 +186,9 @@ catalogs:
     '@fast-check/vitest':
       specifier: 0.4.1
       version: 0.4.1
+    '@playwright/test':
+      specifier: 1.61.1
+      version: 1.61.1
     '@stryker-mutator/vitest-runner':
       specifier: 9.6.1
       version: 9.6.1
@@ -424,6 +427,9 @@ importers:
         specifier: catalog:prod
         version: 0.6.1
     devDependencies:
+      '@playwright/test':
+        specifier: catalog:test
+        version: 1.61.1
       '@total-typescript/ts-reset':
         specifier: 'catalog:'
         version: 0.6.1
@@ -2234,6 +2240,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@playwright/test@1.61.1':
+    resolution: {integrity: sha512-8nKv6+0RJSL9FE4jYOEGXnPeM/Hg12qZpmqzZjRh3qM0Y7c3z1mrOTfFLids72RDQYVh9WpLEfR5WdpNX4fkig==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
@@ -3690,6 +3701,11 @@ packages:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
     engines: {node: '>= 8'}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -4683,6 +4699,16 @@ packages:
 
   pkg-types@2.3.1:
     resolution: {integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==}
+
+  playwright-core@1.61.1:
+    resolution: {integrity: sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.61.1:
+    resolution: {integrity: sha512-DWnY5o3YbLWK4GovuAVwpqL+1VwGNdUGrRr++8j8PtQQzvAVZUIMjKQ90fY689sEJZJBbZVw1rXaOKSTitkzPQ==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   pncat@0.12.0:
     resolution: {integrity: sha512-si3s7F9QQBnz06Gk+POXg2e5s8YQwamCV1I0uRO8MEgwC/GAPzTqwCB0y3SlXCIExJrgIeNOjDJWIEa8H5pMiQ==}
@@ -7129,6 +7155,10 @@ snapshots:
   '@pagefind/windows-x64@1.5.2':
     optional: true
 
+  '@playwright/test@1.61.1':
+    dependencies:
+      playwright: 1.61.1
+
   '@quansync/fs@1.0.0':
     dependencies:
       quansync: 1.0.0
@@ -8599,6 +8629,9 @@ snapshots:
     dependencies:
       minipass: 3.3.6
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -10001,6 +10034,14 @@ snapshots:
       exsolve: 1.1.0
       pathe: 2.0.3
 
+  playwright-core@1.61.1: {}
+
+  playwright@1.61.1:
+    dependencies:
+      playwright-core: 1.61.1
+    optionalDependencies:
+      fsevents: 2.3.2
+
   pncat@0.12.0:
     dependencies:
       '@clack/prompts': 1.7.0
@@ -10925,6 +10966,7 @@ time:
   '@jsr/cliffy__command@1.2.1': '2026-06-04T15:50:53.474Z'
   '@jsr/std__msgpack@1.0.3': '2025-01-31T08:14:09.999Z'
   '@octokit/rest@22.0.1': '2025-10-31T20:59:36.519Z'
+  '@playwright/test@1.61.1': '2026-06-23T19:49:12.825Z'
   '@stryker-mutator/api@9.6.1': '2026-04-10T20:24:57.631Z'
   '@stryker-mutator/core@9.6.1': '2026-04-10T20:25:04.648Z'
   '@stryker-mutator/vitest-runner@9.6.1': '2026-04-10T20:25:14.040Z'

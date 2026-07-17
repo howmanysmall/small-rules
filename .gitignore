@@ -48,6 +48,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # hk — local developer overrides (do not commit)
 hk.local.pkl
+/DESIGN.md
 
 .agents/skills/clean-code/
 .agents/skills/dry-refactoring/

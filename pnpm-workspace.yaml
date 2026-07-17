@@ -172,6 +172,7 @@ catalogs:
     sharp: 0.34.5
     yuku-parser: 0.6.1
   test:
+    "@playwright/test": 1.61.1
     "@fast-check/vitest": 0.4.1
     "@stryker-mutator/vitest-runner": 9.6.1
     "@vitest/coverage-v8": 4.1.10
