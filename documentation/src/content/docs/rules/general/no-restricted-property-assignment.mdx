@@ -6,16 +6,26 @@ import RulePage from "@/components/rule-page.astro";
 
 <RulePage rule="no-restricted-property-assignment">
 	<Fragment slot="rationale">
-
-## Rationale
-
-    	This rule blocks writes to selected properties on selected objects. It reports direct assignments, compound assignments, and update expressions such as `++` or `--`. Reading the same property remains allowed.
-
-    	Each restriction pairs an object pattern with one or more property patterns. Literal names and glob patterns can cover families of globals or properties. The object must be a direct identifier such as `_G`; a nested expression such as `container._G.__DEV__` does not match.
-
-    	Computed string properties are checked by default. Set `checkComputed` to `false` to exclude code such as `_G["__DEV__"] = true`. Dynamic keys cannot match because their property name is unknown during linting.
-
-    	The `restrictions` array is required. Each restriction can supply a diagnostic `message`; otherwise, the rule reports the matched object and property names. Use `allowFiles` for filenames or glob patterns that are permitted to perform these writes.
-    </Fragment>
-
+		<h2>Rationale</h2>
+		<p>
+			This rule blocks writes to selected properties on selected objects. It reports direct assignments, compound
+			assignments, and update expressions such as <code>++</code> or <code>--</code>. Reading the same property
+			remains allowed.
+		</p>
+		<p>
+			Each restriction pairs an object pattern with one or more property patterns. Literal names and glob patterns
+			can cover families of globals or properties. The object must be a direct identifier such as <code>_G</code>;
+			a nested expression such as <code>container._G.__DEV__</code> does not match.
+		</p>
+		<p>
+			Computed string properties are checked by default. Set <code>checkComputed</code> to <code>false</code> to
+			exclude code such as <code>_G["__DEV__"] = true</code>. Dynamic keys cannot match because their property
+			name is unknown during linting.
+		</p>
+		<p>
+			The <code>restrictions</code> array is required. Each restriction can supply a diagnostic{" "}
+			<code>message</code>; otherwise, the rule reports the matched object and property names. Use{" "}
+			<code>allowFiles</code> for filenames or glob patterns that are permitted to perform these writes.
+		</p>
+	</Fragment>
 </RulePage>

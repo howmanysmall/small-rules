@@ -6,16 +6,29 @@ import RulePage from "@/components/rule-page.astro";
 
 <RulePage rule="no-async-in-system">
 	<Fragment slot="rationale">
-
-## Rationale
-
-    	Planck systems run synchronously. A yielding Roblox API call can pause a system midway through a world update, so this rule reports those calls from the active system function.
-
-    	The rule recognizes functions typed as `PlanckSystem`, `System`, `SystemFunction`, `SystemReturn`, or `SystemTableLike`. It also checks functions returned by system factories and the `system` property of objects typed with, or satisfying, one of those system types.
-
-    	Yielding members come from the Roblox API catalog bundled with the plugin. The rule resolves services imported from `@rbxts/services`, services returned by `game.GetService()`, and Roblox class names supplied by type annotations.
-
-    	Use `additionalSystemTypeNames` for project-specific Planck wrappers. `synchronousCallbacks` identifies callback arguments that run before the surrounding call returns. `callbackParameterTypes` describes callback parameter types supplied by imported APIs when TypeScript syntax does not include them.
-    </Fragment>
-
+		<h2>Rationale</h2>
+		<p>
+			Planck systems run synchronously. A yielding Roblox API call can pause a system midway through a world
+			update, so this rule reports those calls from the active system function.
+		</p>
+		<p>
+			The rule recognizes functions typed as <code>PlanckSystem</code>, <code>System</code>,{" "}
+			<code>SystemFunction</code>,<code>SystemReturn</code>, or <code>SystemTableLike</code>. It also checks
+			functions returned by system factories and the <code>system</code> property of objects typed with, or
+			satisfying, one of those system types.
+		</p>
+		<p>
+			Yielding members come from the Roblox API catalog bundled with the plugin. The rule resolves services
+			imported from
+			<code>@rbxts/services</code>, services returned by <code>game.GetService()</code>, and Roblox class names
+			supplied by type annotations.
+		</p>
+		<p>
+			Use <code>additionalSystemTypeNames</code> for project-specific Planck wrappers.{" "}
+			<code>synchronousCallbacks</code>
+			identifies callback arguments that run before the surrounding call returns.{" "}
+			<code>callbackParameterTypes</code>
+			describes callback parameter types supplied by imported APIs when TypeScript syntax does not include them.
+		</p>
+	</Fragment>
 </RulePage>
