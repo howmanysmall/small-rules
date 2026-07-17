@@ -6,6 +6,7 @@ description: "What is small-rules and why should you use it?"
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 
 import PageHeader from "@/components/page-header.astro";
+import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 
 <PageHeader
 	title="Introduction"
@@ -13,7 +14,7 @@ import PageHeader from "@/components/page-header.astro";
 	kicker="Getting started"
 />
 
-`@pobammer-ts/small-rules` is an oxlint-native lint plugin for TypeScript projects. It provides 88 custom rules that catch common mistakes, enforce consistent patterns, and improve code quality across TypeScript, React Luau, and Roblox-specific APIs.
+`@pobammer-ts/small-rules` is an oxlint-native lint plugin for TypeScript projects. It provides {ruleFactCounts.totalRules} custom rules that catch common mistakes, enforce consistent patterns, and improve code quality across TypeScript, React Luau, and Roblox-specific APIs.
 
 ## Why oxlint?
 
@@ -21,29 +22,12 @@ Oxlint is a fast, Rust-based linter for JavaScript and TypeScript. It runs order
 
 ## Rule Categories
 
-The rules are organized into four categories:
+The rules are organized into {ruleFactCounts.totalCategories} categories:
 
 <CardGrid>
-	<LinkCard
-		title="React Rules"
-		href="/small-rules/rules/react/ban-react-fc/"
-		description="Rules for React Luau components, hooks, and JSX patterns."
-	/>
-	<LinkCard
-		title="Roblox & Luau Rules"
-		href="/small-rules/rules/roblox/ban-instances/"
-		description="Rules for Roblox instances, Ianitor, Color3, UDim2, and other Roblox APIs."
-	/>
-	<LinkCard
-		title="Naming & Conventions"
-		href="/small-rules/rules/naming/array-type-generic/"
-		description="Rules for naming conventions, type style, and file naming."
-	/>
-	<LinkCard
-		title="General Logic & Style"
-		href="/small-rules/rules/general/prefer-early-return/"
-		description="Rules for code quality, control flow, and common pitfalls."
-	/>
+	{Array.from(ruleFactCategories.values()).map((category) => (
+		<LinkCard title={category.label} href={`/small-rules/${category.path}/`} description={category.description} />
+	))}
 </CardGrid>
 
 ## Design Principles

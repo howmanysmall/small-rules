@@ -8,12 +8,12 @@ import HeroSplash from "@/components/hero-splash.astro";
 import CategoryCard from "@/components/category-card.astro";
 import FeatureCard from "@/components/feature-card.astro";
 import Icon from "@/components/icon.astro";
-import { homeFacts } from "@/data/home-facts";
+import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 
 <HeroSplash
 	kicker="Oxlint-native linting for roblox-ts"
 	title="small-rules"
-	subtitle={`${homeFacts.totalRules} source-backed rules for React Luau, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality.`}
+	subtitle={`${ruleFactCounts.totalRules} source-backed rules for React Luau, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality.`}
 />
 
 <div class="home-proof reveal">
@@ -22,15 +22,15 @@ import { homeFacts } from "@/data/home-facts";
 	</p>
 	<ul class="home-proof-grid">
 		<li class="home-proof-item">
-			<span class="home-proof-value">{homeFacts.totalRules}</span>
+			<span class="home-proof-value">{ruleFactCounts.totalRules}</span>
 			<span class="home-proof-label">rules</span>
 		</li>
 		<li class="home-proof-item">
-			<span class="home-proof-value">{homeFacts.fixableRules}</span>
+			<span class="home-proof-value">{ruleFactCounts.fixableRules}</span>
 			<span class="home-proof-label">fixable</span>
 		</li>
 		<li class="home-proof-item">
-			<span class="home-proof-value">{homeFacts.totalCategories}</span>
+			<span class="home-proof-value">{ruleFactCounts.totalCategories}</span>
 			<span class="home-proof-label">categories</span>
 		</li>
 		<li class="home-proof-item">
@@ -86,34 +86,14 @@ import { homeFacts } from "@/data/home-facts";
 </div>
 
 <div class="category-grid reveal">
-	<CategoryCard
-		slug="ban-react-fc"
-		label="React & React Luau"
-		count={homeFacts.categories.react}
-		description="Component patterns, hooks, memoization, and React Luau-specific checks."
-		category="react"
-	/>
-	<CategoryCard
-		slug="ban-instances"
-		label="Roblox & Luau"
-		count={homeFacts.categories.roblox}
-		description="Instances, Ianitor lifecycle, UI constraints, modding helpers, and unsafe globals."
-		category="roblox"
-	/>
-	<CategoryCard
-		slug="array-type-generic"
-		label="Naming & Conventions"
-		count={homeFacts.categories.naming}
-		description="Naming rules, enum style, async suffixes, and abbreviation cleanup."
-		category="naming"
-	/>
-	<CategoryCard
-		slug="prefer-early-return"
-		label="General Logic & Style"
-		count={homeFacts.categories.general}
-		description="Control flow, imports, directives, and TypeScript hygiene that cuts across the repo."
-		category="general"
-	/>
+	{Array.from(ruleFactCategories.values()).map((category) => (
+		<CategoryCard
+			category={category.key}
+			count={category.count}
+			description={category.description}
+			label={category.label}
+		/>
+	))}
 </div>
 
 <div class="section-header reveal">
@@ -138,7 +118,7 @@ import { homeFacts } from "@/data/home-facts";
 	<FeatureCard
 		icon="wand"
 		title="Fixes where they help"
-		description={`${homeFacts.fixableRules} rules currently expose code fixes or fixer suggestions for repetitive cleanup.`}
+		description={`${ruleFactCounts.fixableRules} rules currently expose code fixes or fixer suggestions for repetitive cleanup.`}
 	/>
 </div>
 

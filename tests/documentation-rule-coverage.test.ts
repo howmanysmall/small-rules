@@ -56,6 +56,13 @@ function getCuratedRationaleRulePagePaths(): ReadonlyArray<string> {
 		.toSorted();
 }
 
+function getExpectedRuleIndexPagePaths(): ReadonlyArray<string> {
+	return [
+		join(rulePagesDirectory, "index.mdx"),
+		...ruleManifest.categories.map((category) => join(rulePagesDirectory, category.key, "index.mdx")),
+	];
+}
+
 function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
 	return ruleManifest.categories.flatMap((category) =>
 		category.rules.map((entry): RuleExampleCoverage => {
@@ -184,5 +191,12 @@ describe("documentation rule coverage", () => {
 
 		expect(getExampleCountViolationNames()).toStrictEqual([]);
 	});
+
+	it("provides an all-rules page and one landing page per category", () => {
+		expect.assertions(2);
+		const expectedRuleIndexPagePaths = getExpectedRuleIndexPagePaths();
+
+		expect(expectedRuleIndexPagePaths).toHaveLength(5);
+		expect(expectedRuleIndexPagePaths.filter((path) => !existsSync(path))).toStrictEqual([]);
+	});
 });
-// Phase 4 extension points: category landing pages and the all-rules landing page.
