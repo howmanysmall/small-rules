@@ -10,10 +10,14 @@ description: Use when creating a new Oxlint JS plugin rule from scratch, or port
 When this skill is active, you MUST follow this order:
 
 1. Create or port the test file in `tests/`.
-2. Add the initial valid/invalid cases.
+2. Add the initial valid/invalid cases, including one documented fail example
+   and one documented pass example unless a reasoned exemption is necessary.
 3. Only then implement the rule in `src/rules/`.
 4. Register the rule in `src/index.ts` and update `tests/index.test.ts`.
-5. Run the targeted rule tests, then the required lint/type-check verification.
+5. Add the rule to the documentation manifest and create its MDX page under
+   `documentation/src/content/docs/rules/`.
+6. Run the targeted rule test and documentation coverage test, then the full
+   required test/lint/type-check verification.
 
 **Hard rule: never write the rule implementation before the test file exists. ALWAYS use TDD.**
 
@@ -330,6 +334,92 @@ export default smallRules;
 **Also add the rule name to `tests/index.test.ts`** — the `expectedRuleNames`
 array and `toHaveLength` assertion in that file must be kept in sync with
 `src/index.ts`, or `nr test:agent` will fail.
+
+---
+
+## Documenting a New Rule
+
+Documentation is part of the rule, not follow-up work. Complete all applicable
+artifacts below for every new rule.
+
+### 1. Mark One Failing and One Passing Test Case for Documentation
+
+The documentation site extracts examples directly from the rule test. Exactly
+one `invalid` case and one `valid` case must be objects with static
+`documentation` metadata:
+
+```ts
+ts.run("my-rule", myRule, {
+  invalid: [
+    {
+      code: "forbidden();",
+      documentation: { id: "fail", title: "Forbidden call" },
+      errors: [{ messageId: "noForbidden" }],
+    },
+  ],
+  valid: [
+    {
+      code: "allowed();",
+      documentation: { id: "pass", title: "Allowed call" },
+    },
+  ],
+});
+```
+
+Use representative examples that teach the rule. The `id` and `title` must be
+static strings. Do not attach `documentation` to more than one passing or
+failing case. If a useful example is genuinely impractical, add a specific
+`exampleExemption` to the manifest entry instead of inventing a misleading
+example.
+
+### 2. Add the Rule to the Documentation Manifest
+
+Add `{ name: "my-rule" }` to the correct category in
+`documentation/src/data/rule-manifest.ts`:
+
+- `general` — control flow, correctness, and general code quality
+- `naming` — naming, type style, and file conventions
+- `react` — React components, hooks, and JSX
+- `roblox` — Roblox and Luau APIs
+
+The manifest drives the rule index, category pages, sidebar, facts, options,
+and canonical route. Do not duplicate that data elsewhere. Add an entry to
+`documentation/src/data/rule-relations.ts` only when a real relationship with
+another rule exists.
+
+### 3. Create the Thin MDX Page
+
+Create
+`documentation/src/content/docs/rules/{category}/{rule-name}.mdx` using the
+shared rule page component:
+
+```mdx
+---
+title: "My Rule"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="my-rule" />
+```
+
+Use the title produced by `formatRuleTitle` in
+`documentation/src/data/rule-manifest.ts`. Do not copy diagnostics,
+configuration, options, or examples into MDX; `RulePage` derives them from the
+rule metadata, manifest, and documented test cases. Add a rationale slot only
+when the rule needs explanation beyond those generated sections.
+
+### Documentation Completion Gate
+
+Run the rule test and the documentation coverage test together:
+
+```sh
+nr test:agent tests/my-rule.test.ts tests/documentation-rule-coverage.test.ts
+```
+
+The documentation coverage test must prove that the plugin, manifest, MDX
+pages, and extracted examples agree. A new rule is incomplete until this test
+passes.
 
 ---
 
@@ -721,10 +811,18 @@ Please create new utility functions / modules to reduce duplicated code.
 - [ ] **Added to `tests/index.test.ts`** — this file has a hardcoded
       `expectedRuleNames` array and length assertion that MUST be updated when
       adding a rule, or `nr test:agent` will fail.
-- [ ] Tests written and passing (`nr test:agent tests/{rule-name}.test.ts`)
+- [ ] Exactly one documented failing case and one documented passing case in
+      `tests/{rule-name}.test.ts`, or a reasoned manifest `exampleExemption`
+- [ ] Added to the correct category in
+      `documentation/src/data/rule-manifest.ts`
+- [ ] Thin rule page created at
+      `documentation/src/content/docs/rules/{category}/{rule-name}.mdx`
+- [ ] Targeted rule and documentation coverage tests pass
+      (`nr test:agent tests/{rule-name}.test.ts tests/documentation-rule-coverage.test.ts`)
 - [ ] `meta.fixable` set if the rule emits fixes
 - [ ] `meta.hasSuggestions: true` if the rule emits suggestions
 - [ ] `meta.schema` present (even as `[]`)
-- [ ] `nr lint:agent src/rules/{rule-name}.ts tests/{rule-name}.test.ts` passes
-- [ ] `nr type-check` passes
+- [ ] Full tests pass (`nr test:agent`)
+- [ ] `nr lint:agent` passes for every changed file
+- [ ] `nr type-check:agent` passes
 - [ ] Rule enabled in `.oxlintrc.json` or `oxlint.config.ts` if it should be active
