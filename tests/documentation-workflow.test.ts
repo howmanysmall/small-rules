@@ -19,14 +19,17 @@ describe("documentation validation workflow", () => {
 	});
 
 	it("builds the site and runs Chromium tests in reusable checks", () => {
-		expect.assertions(6);
+		expect.assertions(9);
 		expect(CHECKS_YAML).toContain("name: Documentation");
 		expect(CHECKS_YAML).toContain('tools: "bun node pnpm ni"');
 		expect(SETUP_ACTION_YAML).toMatch(/install_args: \$\{\{ inputs\.tools \}\}/u);
 		expect(CHECKS_YAML).toContain("pnpm --filter docs exec playwright install --with-deps chromium");
-		expect(CHECKS_YAML.indexOf("node --run docs:build")).toBeLessThan(
-			CHECKS_YAML.indexOf("pnpm --filter docs test:browser"),
+		expect(CHECKS_YAML.match(/working-directory: documentation/gu)).toHaveLength(3);
+		expect(CHECKS_YAML.indexOf("node --run build")).toBeLessThan(CHECKS_YAML.indexOf("node --run test:unit"));
+		expect(CHECKS_YAML.indexOf("node --run test:unit")).toBeLessThan(
+			CHECKS_YAML.indexOf("node --run test:browser"),
 		);
+		expect(CHECKS_YAML).not.toContain("pnpm --filter docs test:");
 		expect(CHECKS_YAML).toContain("persist-credentials: false");
 	});
 });

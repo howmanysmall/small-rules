@@ -2,8 +2,59 @@ import { expect, test as it } from "@playwright/test";
 
 const allRulesPath = "rules/";
 const baseUrl = "http://127.0.0.1:4321/small-rules/";
+const complexOptionsRulePath = "rules/react/no-useless-use-memo/";
 const rulePath = "rules/roblox/no-print/";
 const builtScriptPrefix = "/small-rules/_astro/";
+
+it("renders the custom homepage sections", async ({ page }) => {
+	await page.goto(baseUrl);
+
+	await expect(page.locator(".hero-splash")).toHaveCount(1);
+	await expect(page.locator(".hero-preview code")).toContainText('"@pobammer-ts/small-rules"');
+	await expect(page.locator(".category-card")).toHaveCount(4);
+	await expect(page.locator(".feature-card")).toHaveCount(3);
+	await expect(page.getByRole("link", { name: "Get started" })).toHaveAttribute("href", "/small-rules/quick-start/");
+});
+
+it("renders the custom rule documentation sections", async ({ page }) => {
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	await expect(page.locator(".rule-badges .badge")).not.toHaveCount(0);
+	await expect(page.locator(".rule-summary-id")).toHaveText("small-rules/no-print");
+	await expect(page.locator(".rule-diagnostic")).not.toHaveCount(0);
+	await expect(page.locator("[data-rule-example]")).toHaveCount(2);
+	await expect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
+});
+
+it("copies a rule example", async ({ page }) => {
+	await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	const copyButton = page.locator("[data-rule-example]").first().locator(".RuleExample-copy");
+	await expect(copyButton).toHaveAccessibleName("Copy example");
+	await copyButton.click();
+
+	await expect(copyButton).toHaveAttribute("data-copied", "");
+	await expect(copyButton).toHaveAccessibleName("Example copied");
+});
+
+it("expands and copies complex React rule options", async ({ page }) => {
+	await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
+	await page.goto(`${baseUrl}${complexOptionsRulePath}`);
+
+	const disclosure = page.getByRole("button", { name: "25 static global factories" });
+	await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+	await disclosure.click();
+	await expect(disclosure).toHaveAttribute("aria-expanded", "true");
+	await expect(page.getByText("Default JSON")).toBeVisible();
+
+	const copyButton = page.getByRole("button", { name: "Copy default JSON: staticGlobalFactories" });
+	await copyButton.click();
+	await expect(page.getByRole("button", { name: "Copied: staticGlobalFactories" })).toHaveAttribute(
+		"data-state",
+		"copied",
+	);
+});
 
 it("filters the server-rendered rule catalog", async ({ page }) => {
 	await page.goto(`${baseUrl}${allRulesPath}`);
@@ -27,7 +78,7 @@ it("keeps the catalog readable without JavaScript", async ({ browser }) => {
 
 	await expect(page.locator("[data-rule-card]")).toHaveCount(90);
 	await expect(page.locator("[data-rule-filters]")).toBeHidden();
-	await expect(page.locator('[data-rule-card][data-rule-search-text^="no-print "]')).toHaveAttribute(
+	await expect(page.locator('[data-rule-card][href="/small-rules/rules/roblox/no-print/"]')).toHaveAttribute(
 		"href",
 		"/small-rules/rules/roblox/no-print/",
 	);
@@ -49,7 +100,7 @@ it("exposes filters, links, and copy controls to the keyboard", async ({ page })
 	await expect(page.locator("[data-rule-card]").first()).toBeFocused();
 
 	await page.goto(`${baseUrl}${rulePath}`);
-	const copyButton = page.getByRole("button", { name: "Copy example" }).first();
+	const copyButton = page.locator("[data-rule-example]").first().getByRole("button", { name: "Copy example" });
 	await copyButton.focus();
 	await expect(copyButton).toBeFocused();
 	await expect(copyButton).toBeVisible();
@@ -62,7 +113,7 @@ it("preserves essential UI in forced colors", async ({ browser }) => {
 
 	const heading = page.getByRole("heading", { level: 1 });
 	const badge = page.locator(".badge").first();
-	const copyButton = page.getByRole("button", { name: "Copy example" }).first();
+	const copyButton = page.locator("[data-rule-example]").first().getByRole("button", { name: "Copy example" });
 	await expect(heading).toBeVisible();
 	await expect(badge).toBeVisible();
 	await expect(copyButton).toBeVisible();
@@ -83,7 +134,7 @@ it("shows copy controls on a touch viewport", async ({ browser }) => {
 	const page = await context.newPage();
 	await page.goto(`${baseUrl}${rulePath}`);
 
-	const copyButton = page.getByRole("button", { name: "Copy example" }).first();
+	const copyButton = page.locator("[data-rule-example]").first().getByRole("button", { name: "Copy example" });
 	await expect(copyButton).toBeVisible();
 	await expect(copyButton).toHaveCSS("opacity", "1");
 	expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);

@@ -3,7 +3,7 @@ import { Code } from "@astrojs/starlight/components";
 
 import { ruleExamples } from "@/data/rule-examples";
 import type { RuleName } from "@/data/rule-manifest";
-import RuleExample from "./rule-example.astro";
+import { RuleExample } from "./rule-example";
 
 interface Props {
 	readonly exemption?: string;
@@ -24,7 +24,7 @@ function getCodeLanguage(language: string | undefined): "js" | "jsx" | "ts" | "t
 	{exemption === undefined ? (
 		<div class="rule-examples">
 			{examples.map((example) => (
-				<RuleExample title={example.title} type={example.kind === "valid" ? "pass" : "fail"}>
+				<RuleExample client:idle={true} title={example.title} type={example.kind === "valid" ? "pass" : "fail"}>
 					<Code code={example.code} lang={getCodeLanguage(example.language)} meta='frame="none"' />
 					{typeof example.output === "string" && (
 						<div class="rule-example-output">
