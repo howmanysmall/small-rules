@@ -3,8 +3,12 @@ title: "All Rules"
 description: "Search and filter every small-rules lint rule."
 ---
 
-import RuleIndex from "@/components/rule-index.astro";
+import { createRuleIndexCategories } from "@/components/rule-index-data";
+import { RuleIndex } from "@/components/rule-index";
+import { ruleFactCategories } from "@/data/rule-facts";
+
+export const ruleIndexCategories = createRuleIndexCategories(ruleFactCategories.values());
 
 Browse every rule by name, behavior, or category. All rules remain available when JavaScript is disabled.
 
-<RuleIndex />
+<RuleIndex categories={ruleIndexCategories} client:load mode="catalog" />

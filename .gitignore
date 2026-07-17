@@ -8,6 +8,7 @@
 out
 dist
 *.tgz
+/documentation/test-results/
 
 # code coverage
 coverage
