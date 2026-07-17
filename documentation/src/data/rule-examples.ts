@@ -1,6 +1,5 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { basename, join, resolve } from "node:path";
 
 import { extractRuleExamples } from "../utilities/extract-rule-examples";
 import { ruleManifest } from "./rule-manifest";
@@ -8,7 +7,8 @@ import { ruleManifest } from "./rule-manifest";
 import type { RuleExample } from "../utilities/extract-rule-examples";
 import type { RuleName } from "./rule-manifest";
 
-const testsDirectory = fileURLToPath(new URL("../../../tests", import.meta.url));
+const workingDirectory = process.cwd();
+const testsDirectory = resolve(workingDirectory, basename(workingDirectory) === "documentation" ? "../tests" : "tests");
 const testFileNames = readdirSync(testsDirectory, { encoding: "utf8", withFileTypes: true })
 	.filter((entry) => entry.isFile() && entry.name.endsWith(".test.ts"))
 	.map((entry) => entry.name)

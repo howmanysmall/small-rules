@@ -456,6 +456,9 @@
 
 		{
 			"includes": [
+				"documentation/src/components/related-rules.astro",
+				"documentation/src/components/rule-diagnostics.astro",
+				"documentation/src/components/rule-examples.astro",
 				"documentation/src/components/rule-options.astro",
 				"documentation/src/components/rule-options-table.tsx"
 			],
@@ -469,6 +472,17 @@
 					}
 				}
 			}
+		},
+
+		{
+			"assist": {
+				"actions": {
+					"source": {
+						"useSortedAttributes": "off"
+					}
+				}
+			},
+			"includes": ["documentation/src/components/rule-page.astro"]
 		},
 
 		{

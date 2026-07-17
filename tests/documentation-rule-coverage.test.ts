@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -37,6 +37,23 @@ function getRulePagePaths(): ReadonlyArray<string> {
 	return readdirSync(rulePagesDirectory, { encoding: "utf8", recursive: true })
 		.filter((relativePath) => relativePath.endsWith(".mdx") && basename(relativePath) !== "index.mdx")
 		.map((relativePath) => join(rulePagesDirectory, relativePath));
+}
+
+function getRulePageSources(): ReadonlyArray<{ readonly path: string; readonly source: string }> {
+	return getRulePagePaths().map((path) => ({ path, source: readFileSync(path, "utf8") }));
+}
+
+function getNonThinRulePagePaths(): ReadonlyArray<string> {
+	return getRulePageSources()
+		.filter(({ source }) => !source.includes('import RulePage from "@/components/rule-page.astro";'))
+		.map(({ path }) => path);
+}
+
+function getCuratedRationaleRulePagePaths(): ReadonlyArray<string> {
+	return getRulePageSources()
+		.filter(({ source }) => source.includes('slot="rationale"'))
+		.map(({ path }) => path)
+		.toSorted();
 }
 
 function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
@@ -130,6 +147,22 @@ describe("documentation rule coverage", () => {
 		const orphanRulePagePaths = getRulePagePaths().filter((path) => !expectedRulePagePaths.has(path));
 
 		expect(orphanRulePagePaths).toStrictEqual([]);
+	});
+
+	it("uses the shared rule page component for every rule", () => {
+		expect.assertions(1);
+
+		expect(getNonThinRulePagePaths()).toStrictEqual([]);
+	});
+
+	it("keeps curated rationale only for the two complex rules", () => {
+		expect.assertions(1);
+		const expectedPaths = [
+			join(rulePagesDirectory, "general/no-restricted-property-assignment.mdx"),
+			join(rulePagesDirectory, "roblox/no-async-in-system.mdx"),
+		].toSorted();
+
+		expect(getCuratedRationaleRulePagePaths()).toStrictEqual(expectedPaths);
 	});
 
 	it("keeps relation endpoints in the manifest", () => {
