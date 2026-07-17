@@ -15,7 +15,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
@@ -112,15 +112,57 @@ jobs:
         if: ${{ env.DRY_RUN == 'true' }}
         run: node --run build -- --minify
 
+      - name: Generate release notes
+        if: ${{ env.DRY_RUN != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"
+          node --run changelogithub -- --to "$GITHUB_REF_NAME" --output "$RELEASE_NOTES"
+          echo "RELEASE_NOTES=$RELEASE_NOTES" >> "$GITHUB_ENV"
+
+      - name: Commit release notes to main
+        if: ${{ env.DRY_RUN != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_WORKTREE="$RUNNER_TEMP/release-main"
+          git fetch origin main
+          git worktree add --detach "$RELEASE_WORKTREE" origin/main
+          RELEASE_ARTIFACT="$RELEASE_WORKTREE/documentation/src/content/releases/$GITHUB_REF_NAME.md"
+
+          if [ -f "$RELEASE_ARTIFACT" ]; then
+            if cmp --silent "$RELEASE_NOTES" "$RELEASE_ARTIFACT"; then
+              echo "Release notes already match $GITHUB_REF_NAME"
+              exit 0
+            fi
+            echo "::error title=Release notes differ::Refusing to overwrite $RELEASE_ARTIFACT" >&2
+            exit 1
+          fi
+
+          mkdir -p "$(dirname "$RELEASE_ARTIFACT")"
+          cp "$RELEASE_NOTES" "$RELEASE_ARTIFACT"
+          git -C "$RELEASE_WORKTREE" config user.name "github-actions[bot]"
+          git -C "$RELEASE_WORKTREE" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$RELEASE_WORKTREE" add "$RELEASE_ARTIFACT"
+          git -C "$RELEASE_WORKTREE" commit -m "chore(docs): add $GITHUB_REF_NAME release notes"
+          gh auth setup-git
+          git -C "$RELEASE_WORKTREE" push origin HEAD:main
+
       - name: Publish to NPM (Trusted Publishing)
         if: ${{ env.DRY_RUN != 'true' }}
         run: pnpm publish --provenance --access public --no-git-checks
 
-      - name: Generate changelog & GitHub release
+      - name: Create or update GitHub release
         if: ${{ env.DRY_RUN != 'true' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node --run changelogithub
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"
+          else
+            gh release create "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES" --title "$GITHUB_REF_NAME"
+          fi
 
       - name: Upload npm debug log on failure
         if: failure()
@@ -132,4 +174,4 @@ jobs:
       - name: Dry-run summary
         if: ${{ env.DRY_RUN == 'true' }}
         run: |
-          echo "Dry run: skipped changelog + publish. Validation completed."
+          echo "Dry run: skipped release notes, publish, and GitHub release creation."

@@ -1,5 +1,3 @@
-import { getCollection } from "astro:content";
-
 export interface ReleaseVersion {
 	readonly major: number;
 	readonly minor: number;
@@ -35,12 +33,19 @@ export interface PopulatedReleaseHistory {
 
 export type ReleaseHistory = EmptyReleaseHistory | PopulatedReleaseHistory;
 
-interface ReleaseContentEntry {
+export interface ReleaseContentEntry {
 	readonly body: string;
 	readonly id: string;
 }
 
+interface CollectionReleaseEntry {
+	readonly body?: string;
+	readonly filePath?: string;
+	readonly id: string;
+}
+
 const releaseVersionPattern = /^v(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)$/u;
+const pathSeparatorPattern = /[\\/]/u;
 
 function createReleaseFilenameError(id: string): Error {
 	const error = new Error(`Release filename "${id}" must use the v<major>.<minor>.<patch>.md format.`);
@@ -65,8 +70,15 @@ function createReleaseHistoryEntry(entry: ReleaseContentEntry): ReleaseHistoryEn
 	return { body: entry.body, version: parseReleaseVersion(entry.id) };
 }
 
-function getReleaseContentEntry(entry: { readonly body?: string; readonly id: string }): ReleaseContentEntry {
-	if (entry.body !== undefined) return { body: entry.body, id: entry.id };
+function getReleaseId(entry: CollectionReleaseEntry): string {
+	if (entry.filePath === undefined) return entry.id;
+
+	const filename = entry.filePath.split(pathSeparatorPattern).at(-1);
+	return filename?.endsWith(".md") === true ? filename.slice(0, -3) : entry.id;
+}
+
+export function getReleaseContentEntry(entry: CollectionReleaseEntry): ReleaseContentEntry {
+	if (entry.body !== undefined) return { body: entry.body, id: getReleaseId(entry) };
 
 	const error = new Error(`Release "${entry.id}" is missing its Markdown body.`);
 	Error.captureStackTrace(error, getReleaseContentEntry);
@@ -81,12 +93,8 @@ function compareReleaseHistoryEntries(left: ReleaseHistoryEntry, right: ReleaseH
 	);
 }
 
-export async function getReleaseHistoryAsync(): Promise<ReleaseHistory> {
-	const releaseEntries = await getCollection("releases");
-	const entries = releaseEntries
-		.map(getReleaseContentEntry)
-		.map(createReleaseHistoryEntry)
-		.toSorted(compareReleaseHistoryEntries);
+export function createReleaseHistory(releaseEntries: ReadonlyArray<ReleaseContentEntry>): ReleaseHistory {
+	const entries = releaseEntries.map(createReleaseHistoryEntry).toSorted(compareReleaseHistoryEntries);
 	if (entries.length === 0) return { emptyState: releaseHistoryEmptyState, entries: [], kind: "empty" };
 
 	return { entries, kind: "populated" };

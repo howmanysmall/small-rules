@@ -1818,6 +1818,42 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 	border-radius: var(--radius-lg);
 }
 
+.release-history {
+	display: grid;
+	gap: var(--space-8);
+	margin-block: var(--space-6);
+}
+
+.release-history-entry {
+	padding: clamp(var(--space-5), 4vw, var(--space-8));
+	background: var(--card-bg);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-card);
+}
+
+.release-history-entry > :first-child {
+	margin-top: 0;
+}
+
+.release-history-entry > :last-child {
+	margin-bottom: 0;
+}
+
+.release-history-empty {
+	padding: var(--space-8);
+	margin-block: var(--space-6);
+	color: var(--sl-color-text-muted);
+	text-align: center;
+	background: var(--card-bg);
+	border: 1px dashed var(--glass-border-strong);
+	border-radius: var(--radius-lg);
+}
+
+.release-history-empty p {
+	margin-top: 0;
+}
+
 @media (max-width: 800px) {
 	.rule-index-filters {
 		grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.7fr);

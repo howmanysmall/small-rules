@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from "astro:content";
+
+import { createReleaseHistory, getReleaseContentEntry } from "@/data/release-history";
+
+const contentEntries = await getCollection("releases");
+const releaseContentEntries = contentEntries.map((entry) => ({
+	content: entry,
+	release: getReleaseContentEntry(entry),
+}));
+const releaseHistory = createReleaseHistory(releaseContentEntries.map(({ release }) => release));
+
+function getContentEntry(tag: string): (typeof contentEntries)[number] {
+	const entry = releaseContentEntries.find(({ release }) => release.id === tag);
+	if (entry !== undefined) return entry.content;
+
+	const error = new Error(`Release content entry "${tag}" was not found.`);
+	Error.captureStackTrace(error, getContentEntry);
+	throw error;
+}
+
+const renderedEntries =
+	releaseHistory.kind === "populated"
+		? await Promise.all(
+				releaseHistory.entries.map(async (entry) => {
+					const rendered = await render(getContentEntry(entry.version.tag));
+					return { Content: rendered.Content, version: entry.version };
+				}),
+			)
+		: [];
+---
+
+{releaseHistory.kind === "empty" ? (
+	<div class="release-history-empty">
+		<p>{releaseHistory.emptyState.message}</p>
+		<a href={releaseHistory.emptyState.githubReleasesUrl}>View releases on GitHub</a>
+	</div>
+) : (
+	<div class="release-history">
+		{renderedEntries.map(({ Content, version }) => (
+			<section aria-labelledby={`release-${version.tag}`} class="release-history-entry">
+				<h2 id={`release-${version.tag}`}>{version.tag}</h2>
+				<Content />
+			</section>
+		))}
+	</div>
+)}
