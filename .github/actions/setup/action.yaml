@@ -6,6 +6,10 @@ inputs:
     description: Enable Mise caching.
     required: false
     default: "true"
+  tools:
+    description: Space-separated Mise tools to install.
+    required: false
+    default: "bun node pnpm"
 
 runs:
   using: composite
@@ -13,5 +17,5 @@ runs:
     - name: Setup Mise
       uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
       with:
-        install_args: "bun node pnpm"
+        install_args: ${{ inputs.tools }}
         cache: ${{ inputs.cache }}

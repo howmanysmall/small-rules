@@ -37,6 +37,11 @@ local binary_excludes =
     "*.mov",
   )
 
+local workflow_files =
+  List(
+    ".github/workflows/**/*.yml",
+    ".github/workflows/**/*.yaml",
+  )
 local workflow_action_files =
   List(
     ".github/workflows/**/*.yml",
@@ -170,7 +175,7 @@ hooks {
 
       // GitHub Actions workflows
       ["actionlint"] = (Builtins.actionlint) {
-        glob = workflow_action_files
+        glob = workflow_files
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
@@ -349,7 +354,7 @@ hooks {
           )
       }
       ["actionlint"] = (Builtins.actionlint) {
-        glob = workflow_action_files
+        glob = workflow_files
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
@@ -473,7 +478,7 @@ hooks {
           )
       }
       ["actionlint"] = (Builtins.actionlint) {
-        glob = workflow_action_files
+        glob = workflow_files
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files

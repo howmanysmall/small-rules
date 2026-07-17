@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const CHECKS_YAML = readFileSync(".github/workflows/checks.yaml", "utf8");
 const CI_YAML = readFileSync(".github/workflows/ci.yaml", "utf8");
 const DOCS_WORKFLOW_PATH = ".github/workflows/docs.yaml";
+const SETUP_ACTION_YAML = readFileSync(".github/actions/setup/action.yaml", "utf8");
 
 function getDocsYaml(): string {
 	return existsSync(DOCS_WORKFLOW_PATH) ? readFileSync(DOCS_WORKFLOW_PATH, "utf8") : "";
@@ -18,8 +19,10 @@ describe("documentation validation workflow", () => {
 	});
 
 	it("builds the site and runs Chromium tests in reusable checks", () => {
-		expect.assertions(4);
+		expect.assertions(6);
 		expect(CHECKS_YAML).toContain("name: Documentation");
+		expect(CHECKS_YAML).toContain('tools: "bun node pnpm ni"');
+		expect(SETUP_ACTION_YAML).toMatch(/install_args: \$\{\{ inputs\.tools \}\}/u);
 		expect(CHECKS_YAML).toContain("pnpm --filter docs exec playwright install --with-deps chromium");
 		expect(CHECKS_YAML.indexOf("node --run docs:build")).toBeLessThan(
 			CHECKS_YAML.indexOf("pnpm --filter docs test:browser"),
