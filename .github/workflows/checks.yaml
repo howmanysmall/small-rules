@@ -76,7 +76,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
 
       - name: Build documentation
         run: node --run docs:build

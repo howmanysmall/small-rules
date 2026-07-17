@@ -20,7 +20,7 @@ describe("documentation validation workflow", () => {
 	it("builds the site and runs Chromium tests in reusable checks", () => {
 		expect.assertions(4);
 		expect(CHECKS_YAML).toContain("name: Documentation");
-		expect(CHECKS_YAML).toContain("pnpm exec playwright install --with-deps chromium");
+		expect(CHECKS_YAML).toContain("pnpm --filter docs exec playwright install --with-deps chromium");
 		expect(CHECKS_YAML.indexOf("node --run docs:build")).toBeLessThan(
 			CHECKS_YAML.indexOf("pnpm --filter docs test:browser"),
 		);
