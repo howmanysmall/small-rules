@@ -9,7 +9,8 @@
 		"postinstall": "astro sync",
 		"preview": "astro preview",
 		"start": "astro dev",
-		"test:browser": "playwright test"
+		"test:browser": "playwright test",
+		"test:unit": "vitest run --config vitest.config.ts"
 	},
 	"dependencies": {
 		"@astrojs/markdown-satteri": "catalog:prod",
@@ -26,9 +27,13 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "catalog:test",
+		"@testing-library/react": "catalog:test",
+		"@testing-library/user-event": "catalog:test",
 		"@total-typescript/ts-reset": "catalog:",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
-		"typescript": "catalog:dev"
+		"jsdom": "catalog:test",
+		"typescript": "catalog:dev",
+		"vitest": "catalog:test"
 	}
 }

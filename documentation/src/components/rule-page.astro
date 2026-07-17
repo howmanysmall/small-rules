@@ -2,12 +2,12 @@
 import { getRuleFacts } from "@/data/rule-facts";
 import { ruleManifest } from "@/data/rule-manifest";
 import type { RuleName } from "@/data/rule-manifest";
-import Badge from "./badge.astro";
-import RelatedRules from "./related-rules.astro";
+import { Badge } from "./badge";
+import { RelatedRules } from "./related-rules";
 import RuleDiagnostics from "./rule-diagnostics.astro";
 import RuleExamples from "./rule-examples.astro";
 import RuleOptions from "./rule-options.astro";
-import RuleSummary from "./rule-summary.astro";
+import { RuleSummary } from "./rule-summary";
 
 interface Props {
 	readonly rule: RuleName;
