@@ -8,6 +8,7 @@ describe("prefer-math-min-max", () => {
 		invalid: [
 			{
 				code: "height > 50 ? 50 : height;",
+				documentation: { id: "fail", title: "ternary minimum expression" },
 				errors: [{ messageId: "preferMathMethod" }],
 				output: "math.min(height, 50);",
 			},
@@ -78,7 +79,10 @@ describe("prefer-math-min-max", () => {
 			},
 		],
 		valid: [
-			"math.min(height, 50);",
+			{
+				code: "math.min(height, 50);",
+				documentation: { id: "pass", title: "math minimum call" },
+			},
 			"math.max(height, 50);",
 			"height > 50 ? height + 1 : height;",
 			"height < 50 ? 0 : height;",

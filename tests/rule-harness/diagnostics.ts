@@ -252,10 +252,27 @@ function renderMessage(
 	const messages = getObjectProperty(meta, "messages");
 	const template = messages === undefined ? undefined : getStringProperty(messages, messageId);
 	if (template === undefined) return messageId;
-	return template.replaceAll(/\{\{(?<key>[^}]+)\}\}/gu, (_match, key: string) => {
-		const value = data[key.trim()];
-		return formatMessageValue(value);
-	});
+	return interpolateMessage(template, data);
+}
+
+function interpolateMessage(template: string, data: Record<string, unknown>): string {
+	let result = "";
+	let cursor = 0;
+
+	while (cursor < template.length) {
+		const openIndex = template.indexOf("{{", cursor);
+		if (openIndex === -1) return result + template.slice(cursor);
+
+		const closeIndex = template.indexOf("}}", openIndex + 2);
+		if (closeIndex === -1) return result + template.slice(cursor);
+
+		const key = template.slice(openIndex + 2, closeIndex).trim();
+		result += template.slice(cursor, openIndex);
+		result += formatMessageValue(data[key]);
+		cursor = closeIndex + 2;
+	}
+
+	return result;
 }
 
 function formatMessageValue(value: unknown): string {

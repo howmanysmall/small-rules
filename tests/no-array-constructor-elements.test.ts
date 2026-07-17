@@ -8,6 +8,7 @@ describe("no-array-constructor-elements", () => {
 		invalid: [
 			{
 				code: 'const values = new Array("a", "b");',
+				documentation: { id: "fail", title: "array constructor with elements" },
 				errors: [{ messageId: "avoidConstructorEnumeration" }],
 				output: 'const values = ["a", "b"];',
 			},
@@ -236,7 +237,10 @@ const array = ["a", "b"];
 		],
 		valid: [
 			"const value = new Set();",
-			"const value = new Array<string>();",
+			{
+				code: "const value = new Array<string>();",
+				documentation: { id: "pass", title: "empty generic array constructor" },
+			},
 			"const value: Array<string> = new Array();",
 			"const value: ReadonlyArray<string> = new Array();",
 			"const [first]: Array<string> = new Array();",

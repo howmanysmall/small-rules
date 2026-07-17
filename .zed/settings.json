@@ -58,6 +58,9 @@
 	},
 	"jsx_tag_auto_close": { "enabled": true },
 	"languages": {
+		"Astro": {
+			"language_servers": ["...", "knip"]
+		},
 		"CSS": {
 			"code_actions_on_format": {
 				"source.fixAll.biome": true,
@@ -277,7 +280,17 @@
 				}
 			],
 			"hard_tabs": true,
-			"language_servers": ["biome", "oxfmt", "oxlint", "!tsgo", "vtsls", "harper-ls", "codebook", "wakatime"],
+			"language_servers": [
+				"biome",
+				"oxfmt",
+				"oxlint",
+				"!tsgo",
+				"vtsls",
+				"harper-ls",
+				"codebook",
+				"wakatime",
+				"knip"
+			],
 			"prettier": { "allowed": false },
 			"tab_size": 4
 		},
@@ -297,7 +310,17 @@
 				}
 			],
 			"hard_tabs": true,
-			"language_servers": ["biome", "oxfmt", "oxlint", "!tsgo", "vtsls", "harper-ls", "codebook", "wakatime"],
+			"language_servers": [
+				"biome",
+				"oxfmt",
+				"oxlint",
+				"!tsgo",
+				"vtsls",
+				"harper-ls",
+				"codebook",
+				"wakatime",
+				"knip"
+			],
 			"prettier": { "allowed": false },
 			"tab_size": 4
 		},

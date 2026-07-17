@@ -81,7 +81,7 @@ function isConstructorLiteralAssignment(statement: ESTree.Statement): statement 
 
 const preferClassProperties = defineRule({
 	create(context): Visitor {
-		const [mode = "always"] = context.options;
+		const [mode] = context.options;
 
 		if (mode === "never") {
 			return {

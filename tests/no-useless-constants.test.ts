@@ -5,15 +5,21 @@ import { ts, tsx } from "./rule-testers";
 
 describe("no-useless-constants", () => {
 	describe("autofix coverage", () => {
-		ts.run("inlines an adjacent plain-expression constant", rule, {
+		ts.run("no-useless-constants", rule, {
 			invalid: [
 				{
 					code: "const TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					documentation: { id: "fail", title: "Inline adjacent constant" },
 					errors: [{ messageId: "uselessConstant" }],
 					output: "const TEXT_NATIVE = { Offset: 225 };",
 				},
 			],
-			valid: ["const TEXT_NATIVE = { Offset: 225 };"],
+			valid: [
+				{
+					code: "const TEXT_NATIVE = { Offset: 225 };",
+					documentation: { id: "pass", title: "Already inlined constant" },
+				},
+			],
 		});
 
 		ts.run("remains idempotent after autofix", rule, {

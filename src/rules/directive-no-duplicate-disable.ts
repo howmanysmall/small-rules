@@ -19,7 +19,7 @@ const directiveNoDuplicateDisable = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "disallow duplicate `eslint-disable` comments",
+			description: "Disallow duplicate `oxlint-disable` or `eslint-disable` comments.",
 		},
 		messages: {
 			duplicate: "ESLint rules have been disabled already.",

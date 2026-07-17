@@ -1,0 +1,38 @@
+<svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+	<!-- SVG created with Arrow, by QuiverAI (https://quiver.ai) -->
+	<style>
+		.cls-0 {
+			fill: #846ee7;
+		}
+		.cls-1 {
+			fill: url("#rail-long");
+		}
+		.cls-2 {
+			fill: url("#rail-short");
+		}
+		.cls-3 {
+			fill: url("#rail-lower");
+		}
+	</style>
+	<defs>
+		<linearGradient gradientUnits="userSpaceOnUse" id="rail-long" x1="59.79" x2="113.1" y1="55.38" y2="55.38">
+			<stop offset="0" stop-color="#1d5053" />
+			<stop offset=".4688" stop-color="#1f5a5e" />
+			<stop offset="1" stop-color="#1b4c50" />
+		</linearGradient>
+		<linearGradient gradientUnits="userSpaceOnUse" id="rail-short" x1="30.66" x2="56.69" y1="96.99" y2="111.3">
+			<stop offset="0" stop-color="#1f5a5e" />
+			<stop offset=".4571" stop-color="#1d5053" />
+			<stop offset="1" stop-color="#1b4c50" />
+		</linearGradient>
+		<linearGradient gradientUnits="userSpaceOnUse" id="rail-lower" x1="40.87" x2="138.6" y1="85.17" y2="85.17">
+			<stop offset="0" stop-color="#1b4c50" />
+			<stop offset=".5222" stop-color="#1f5a5e" />
+			<stop offset="1" stop-color="#1b4c50" />
+		</linearGradient>
+	</defs>
+	<polygon class="cls-0" points="116.7 26.3 70.5 72.3 66.6 68.4 59.6 75.7 70.5 86.6 123.8 33.7" />
+	<path class="cls-1" d="m18.5 109.1-7.2-7.5 90.5-89.7 11.3 10.9-7.7 7.6-3.8-4-83.1 82.7z" />
+	<polygon class="cls-2" points="67.1 90 33.2 123.6 25.9 116.7 60 83" />
+	<polygon class="cls-3" points="127.4 37 125.9 37.9 119.5 43.9 123.5 47.6 40.9 131.1 48.1 138.4 138.6 47.6" />
+</svg>

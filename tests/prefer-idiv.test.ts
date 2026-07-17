@@ -9,6 +9,7 @@ describe("prefer-idiv", () => {
 			// Simple division - auto-fix cases
 			{
 				code: "math.floor(x / y);",
+				documentation: { id: "fail", title: "floor division expression" },
 				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(y);",
 			},
@@ -115,7 +116,10 @@ describe("prefer-idiv", () => {
 		],
 		valid: [
 			// Already using idiv
-			"x.idiv(y);",
+			{
+				code: "x.idiv(y);",
+				documentation: { id: "pass", title: "integer division method" },
+			},
 			"a.idiv(b).idiv(c);",
 			// Not a division
 			"math.floor(x);",

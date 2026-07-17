@@ -2,6 +2,7 @@
 **/node_modules/**
 **/do-not-sync-ever/**
 .pnpm-store/
+**/.astro/**
 
 # output
 out
@@ -47,6 +48,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # hk — local developer overrides (do not commit)
 hk.local.pkl
+/DESIGN.md
 
 .agents/skills/clean-code/
 .agents/skills/dry-refactoring/
@@ -57,3 +59,6 @@ hk.local.pkl
 .agents/skills/tsdown/
 .agents/skills/vitest/
 .agents/skills/migrate-pullhook-install/
+.agents/skills/vercel-composition-patterns/
+.agents/skills/vercel-react-best-practices/
+.agents/skills/web-design-guidelines/

@@ -12,6 +12,7 @@ function Component({ options = {} }) {
     return options;
 }
 `,
+				documentation: { id: "fail", title: "Empty object parameter default" },
 				errors: [{ messageId: "emptyObjectDefault" }],
 			},
 			{
@@ -68,6 +69,7 @@ function Component({ options = { enabled: true } }) {
     return options;
 }
 `,
+				documentation: { id: "pass", title: "Non-empty object parameter default" },
 			},
 			{
 				code: `

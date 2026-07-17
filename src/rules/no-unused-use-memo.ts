@@ -40,6 +40,7 @@ const noUnusedUseMemo = defineRule({
 				properties: {
 					environment: {
 						default: "roblox-ts",
+						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
 						enum: ["roblox-ts", "standard"],
 						type: "string",
 					},

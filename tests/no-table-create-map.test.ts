@@ -8,6 +8,7 @@ describe("no-table-create-map", () => {
 		invalid: [
 			{
 				code: "const mapped = table.create(total).map((_, index) => index);",
+				documentation: { id: "fail", title: "table creation followed by map" },
 				errors: [{ messageId: "avoidConstructThenMap" }],
 			},
 			{
@@ -64,7 +65,10 @@ class Array<TValue> {
 }
 const mapped = new Array<number>(5, 0).map((value) => value);
 `,
-			"table.create(entries);",
+			{
+				code: "table.create(entries);",
+				documentation: { id: "pass", title: "table creation without mapping" },
+			},
 			"new Array<number>(entries);",
 			"new Array<number>(a, b, c).map((value) => value);",
 			"const mapped = table.create?.(entries, 0).map((value) => value);",

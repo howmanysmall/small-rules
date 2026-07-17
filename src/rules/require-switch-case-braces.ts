@@ -60,7 +60,7 @@ const requireSwitchCaseBraces = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Require braces around switch case bodies that span multiple lines.",
+			description: "Require braces around switch case bodies selected by line span or statement count.",
 		},
 		fixable: "code",
 		messages: {
@@ -72,6 +72,7 @@ const requireSwitchCaseBraces = defineRule({
 				properties: {
 					metric: {
 						default: "lines",
+						description: "Whether to report cases by line span or by statement count.",
 						enum: ["lines", "statements"],
 						type: "string",
 					},

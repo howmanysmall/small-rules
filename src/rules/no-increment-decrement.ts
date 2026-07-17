@@ -43,7 +43,7 @@ const noIncrementDecrement = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Disallow standalone `++` and `--` statements.",
+			description: "Disallow standalone `++` and `--` statements and for-loop update clauses.",
 			recommended: true,
 		},
 		fixable: "code",
@@ -57,6 +57,7 @@ const noIncrementDecrement = defineRule({
 				properties: {
 					allowAutofix: {
 						default: false,
+						description: "Allow the fixer to replace standalone ++ and -- statements and for-loop updates.",
 						type: "boolean",
 					},
 				},

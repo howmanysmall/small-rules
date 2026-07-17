@@ -13,6 +13,7 @@ describe("no-color3-constructor", () => {
 			},
 			{
 				code: "new Color3(255);",
+				documentation: { id: "fail", title: "single-channel Color3 constructor" },
 				errors: [{ messageId: "useFromRGB" }],
 				output: "Color3.fromRGB(255, 0, 0);",
 			},
@@ -70,7 +71,10 @@ describe("no-color3-constructor", () => {
 		valid: [
 			"new Color3();",
 			"new Color3(0, 0, 0);",
-			"Color3.fromRGB(255, 128, 64);",
+			{
+				code: "Color3.fromRGB(255, 128, 64);",
+				documentation: { id: "pass", title: "Color3 fromRGB factory" },
+			},
 			"Color3.fromRGB(0, 0, 0);",
 			"const color = Color3.fromRGB(255, 255, 255);",
 			"new Color();",

@@ -13,7 +13,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
@@ -45,7 +45,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
@@ -57,3 +57,31 @@ jobs:
 
       - name: Run tests
         run: node --run test -- --reporter github-actions --reporter dot
+
+  documentation:
+    name: Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup
+        with:
+          tools: "bun node pnpm ni"
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Install Chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
+
+      - name: Build documentation
+        run: node --run docs:build
+
+      - name: Test documentation in Chromium
+        run: pnpm --filter docs test:browser

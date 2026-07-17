@@ -78,6 +78,7 @@ const value = useMemo(() => {
 	return 1;
 }, []);
 `,
+				documentation: { id: "fail", title: "Memoized constant computation" },
 				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
 			},
@@ -204,9 +205,10 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 function Component({ theme }) {
 	const value = useMemo(() => getAnimationConfiguration(theme, AnimationLibrary.ReactSpring), [theme]);
-	return value;
-}
+		return value;
+	}
 `,
+				documentation: { id: "pass", title: "Memoized theme-dependent value" },
 				options: [{ environment: "standard" }],
 			},
 			{

@@ -3,18 +3,58 @@ import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-const WORD_PATTERN = /[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+/gu;
-const NORMALIZE_0 = /^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/gu;
-const NORMALIZE_1 = /(?<first>[a-z0-9])(?<second>[A-Z])/gu;
-const NORMALIZE_2 = /[_\-\s]+/gu;
+function isAsciiDigit(value: string): boolean {
+	return value >= "0" && value <= "9";
+}
+
+function isAsciiLowercase(value: string): boolean {
+	return value >= "a" && value <= "z";
+}
+
+function isAsciiUppercase(value: string): boolean {
+	return value >= "A" && value <= "Z";
+}
+
+function isAsciiAlphanumeric(value: string): boolean {
+	return isAsciiDigit(value) || isAsciiLowercase(value) || isAsciiUppercase(value);
+}
+
+function isWordBoundary(previous: string, current: string, next: string | undefined): boolean {
+	if (isAsciiDigit(previous) !== isAsciiDigit(current)) return true;
+	if (isAsciiLowercase(previous) && isAsciiUppercase(current)) return true;
+	return isAsciiUppercase(previous) && isAsciiUppercase(current) && next !== undefined && isAsciiLowercase(next);
+}
+
+function pushSplitRun(words: Array<string>, run: string): void {
+	let start = 0;
+
+	for (let index = 1; index < run.length; index += 1) {
+		const next = index + 1 < run.length ? run.charAt(index + 1) : undefined;
+		if (!isWordBoundary(run.charAt(index - 1), run.charAt(index), next)) continue;
+		words.push(run.slice(start, index));
+		start = index;
+	}
+
+	words.push(run.slice(start));
+}
 
 function splitIntoWords(value: string): ReadonlyArray<string> {
-	const normalized = value
-		.replaceAll(NORMALIZE_0, "")
-		.replaceAll(NORMALIZE_1, "$<first> $<second>")
-		.replaceAll(NORMALIZE_2, " ");
-	/* v8 ignore next -- @preserve TypeScript enum identifiers and member names contain at least one word token. */
-	return normalized.match(WORD_PATTERN) ?? [];
+	const words = new Array<string>();
+	let runStart: number | undefined;
+
+	for (let index = 0; index < value.length; index += 1) {
+		if (isAsciiAlphanumeric(value.charAt(index))) {
+			runStart ??= index;
+			continue;
+		}
+
+		if (runStart === undefined) continue;
+		pushSplitRun(words, value.slice(runStart, index));
+		runStart = undefined;
+	}
+
+	if (runStart !== undefined) pushSplitRun(words, value.slice(runStart));
+	return words;
 }
 
 function toPascalCase(value: string): string {
@@ -22,7 +62,7 @@ function toPascalCase(value: string): string {
 	let result = "";
 
 	for (const word of words) {
-		/* v8 ignore next -- @preserve splitIntoWords uses a non-empty word regexp. */
+		/* v8 ignore next -- @preserve splitIntoWords pushes only non-empty alphanumeric runs. */
 		if (word.length === 0) continue;
 		result += `${word.slice(0, 1).toUpperCase()}${word.slice(1).toLowerCase()}`;
 	}
@@ -66,7 +106,7 @@ const preferPascalCaseEnums = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Enforce Pascal case when naming enums.",
+			description: "Enforce PascalCase names for enums and enum members.",
 			recommended: true,
 		},
 		messages: {

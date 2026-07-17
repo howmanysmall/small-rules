@@ -9,7 +9,11 @@ describe("react-hooks-strict-return", () => {
 	js.run("react-hooks-strict-return", rule, {
 		invalid: [
 			// Direct array with 3+ elements
-			{ code: "function useFoo() { return [1, 2, 3] }", errors },
+			{
+				code: "function useFoo() { return [1, 2, 3] }",
+				documentation: { id: "fail", title: "Hook returns too many values" },
+				errors: [{ messageId: "tooManyReturnValues" }],
+			},
 
 			// Variable reference to 3+ element array
 			{ code: "function useFoo() { const bar = [1, 2, 3]; return bar; }", errors },
@@ -40,7 +44,10 @@ describe("react-hooks-strict-return", () => {
 		],
 		valid: [
 			// 1 or 2 element arrays are fine
-			{ code: "function useFoo() { return [1] }" },
+			{
+				code: "function useFoo() { return [1] }",
+				documentation: { id: "pass", title: "Hook returns one value" },
+			},
 			{ code: "function useFoo() { return [1, 2] }" },
 			{ code: "function useFoo() { const bar = [1, 2]; return bar; }" },
 			{ code: "function useFoo() { const bar = [1, 2]; return [...bar]; }" },

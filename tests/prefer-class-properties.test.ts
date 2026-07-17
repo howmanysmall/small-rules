@@ -25,7 +25,17 @@ describe("prefer-class-properties", () => {
 			{ code: "class Foo { foo = 123; }", errors: classPropertyErrors, options: ["never"] },
 
 			// 'always' mode - constructor assignments of literals are not allowed
-			{ code: "class Foo { constructor() { this.foo = 123; } }", errors: assignErrors, options: ["always"] },
+			{
+				code: "class Foo { constructor() { this.foo = 123; } }",
+				documentation: { id: "fail", title: "Constructor literal class property" },
+				errors: [
+					{
+						message:
+							"Constructor assigns a literal value to this.property. Literals are static and known at class definition time. Move to a class property declaration: propertyName = value; at class level. This clarifies intent and reduces constructor complexity.",
+					},
+				],
+				options: ["always"],
+			},
 			{
 				code: "const Foo = class { constructor() { this.foo = 123; } };",
 				errors: assignErrors,
@@ -71,7 +81,11 @@ describe("prefer-class-properties", () => {
 		],
 		valid: [
 			// 'always' mode - class properties are fine
-			{ code: 'class Foo { foo = "bar"; }', options: ["always"] },
+			{
+				code: 'class Foo { foo = "bar"; }',
+				documentation: { id: "pass", title: "Existing class property declaration" },
+				options: ["always"],
+			},
 			{ code: "class Foo { foo = bar(); }", options: ["always"] },
 			{ code: "class Foo { foo = 123; }", options: ["always"] },
 

@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"incremental": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
+		"paths": {
+			"$oxc-rules/*": ["../src/rules/*"],
+			"$oxc-types/*": ["../src/types/*"],
+			"$oxc-utilities/*": ["../src/utilities/*"],
+			"$small-rules": ["../src/index.ts"],
+			"@/*": ["./src/*"]
+		},
+		"tsBuildInfoFile": "node_modules/.tsbuildinfo"
+	},
+	"exclude": ["dist", "node_modules"],
+	"extends": "astro/tsconfigs/strictest",
+	"include": [".astro/types.d.ts", "astro.config.ts", "reset.d.ts", "src/**/*"]
+}

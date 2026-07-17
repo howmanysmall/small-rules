@@ -5,6 +5,8 @@ import { createRuleTester, js, ts, tsx } from "./rule-testers";
 
 import type { Fix } from "oxlint-plugin-utilities";
 
+import type { RuleCaseDocumentation } from "./rule-testers";
+
 describe("rule-testers languages", () => {
 	js.run("language-smoke-js", reportProgramRule, {
 		invalid: [{ code: "const value = 1;", errors: [{ messageId: "program" }] }],
@@ -37,6 +39,34 @@ describe("rule-testers source type", () => {
 			},
 		],
 		valid: ["const value = 1;"],
+	});
+});
+
+describe("rule-testers documentation metadata", () => {
+	const invalidDocumentation: RuleCaseDocumentation = {
+		id: "invalid-script",
+		title: "Invalid script source type",
+	};
+	const validDocumentation: RuleCaseDocumentation = {
+		id: "valid-module",
+		title: "Valid module source type",
+	};
+
+	js.run("documentation-metadata", sourceTypeRule, {
+		invalid: [
+			{
+				code: "var value = 1;",
+				documentation: invalidDocumentation,
+				errors: [{ messageId: "script" }],
+				sourceType: "script",
+			},
+		],
+		valid: [
+			{
+				code: "const value = 1;",
+				documentation: validDocumentation,
+			},
+		],
 	});
 });
 

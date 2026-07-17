@@ -23,7 +23,7 @@ const directiveNoUnusedEnable = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "disallow unused `eslint-enable` comments",
+			description: "Disallow unused `oxlint-enable` or `eslint-enable` comments.",
 		},
 		messages: {
 			unused: "Unused '{{kind}}' comment. No reported rules are disabled.",

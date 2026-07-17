@@ -15,6 +15,7 @@ function Big() {
     return <div />;
 }
 `,
+				documentation: { id: "fail", title: "Component exceeds maximum lines" },
 				errors: [{ messageId: "exceedsMaxLines" }],
 				options: [{ enforceTargetLines: false, maxLines: 5, targetLines: 5 }],
 			},
@@ -243,6 +244,7 @@ function Small({ a, b }) {
     return <div><span>{a}{b}</span></div>;
 }
 `,
+				documentation: { id: "pass", title: "Component within configured limits" },
 			},
 			{
 				code: `

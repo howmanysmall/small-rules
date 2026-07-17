@@ -1,0 +1,28 @@
+---
+title: "Changelog"
+description: "Release history for small-rules."
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import ReleaseHistory from "@/components/release-history.astro";
+
+<ReleaseHistory />
+
+## How Releases Work
+
+`small-rules` uses [bumpp](https://github.com/antfu/bumpp) for versioning. Releases are triggered by pushing a `v*.*.*` tag to the repository.
+
+Each release is published to NPM via Trusted Publishing (OIDC) and a GitHub Release is created automatically with `changelogithub`.
+
+<CardGrid>
+	<LinkCard
+		title="GitHub Releases"
+		href="https://github.com/howmanysmall/small-rules/releases"
+		description="View all releases on GitHub."
+	/>
+	<LinkCard
+		title="NPM Package"
+		href="https://www.npmjs.com/package/@pobammer-ts/small-rules"
+		description="View the package on NPM."
+	/>
+</CardGrid>

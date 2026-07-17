@@ -22,7 +22,8 @@ const directiveNoAggregatingEnable = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "disallow `eslint-enable` comments for multiple `eslint-disable` directives",
+			description:
+				"Disallow aggregating `oxlint-enable` or `eslint-enable` comments across multiple disable directives.",
 		},
 		messages: {
 			aggregatingEnable:

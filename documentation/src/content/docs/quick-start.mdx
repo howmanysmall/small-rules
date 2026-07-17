@@ -1,0 +1,90 @@
+---
+title: "Quick Start"
+description: "Get small-rules running in your project in minutes."
+---
+
+import { Aside, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+import PackageManagerTabs from "@/components/package-manager-tabs.astro";
+import PageHeader from "@/components/page-header.astro";
+
+<PageHeader
+	title="Quick Start"
+	subtitle="Install the plugin, add a few rules to .oxlintrc.json, and run your first lint in under two minutes."
+	kicker="Getting started"
+/>
+
+## Install
+
+Add `small-rules` and `oxlint` to your roblox-ts project. Since they are only needed during development, install them as dev dependencies:
+
+<PackageManagerTabs />
+
+## Configure
+
+Create or update your `.oxlintrc.json` to register the plugin and enable rules:
+
+```json
+{
+	"jsPlugins": ["@pobammer-ts/small-rules"],
+	"rules": {
+		"small-rules/no-print": "error",
+		"small-rules/no-warn": "error",
+		"small-rules/ban-react-fc": "error",
+		"small-rules/no-task-wait": "error",
+		"small-rules/prefer-early-return": "warn"
+	}
+}
+```
+
+<Aside type="note">
+	Start with a few high-impact rules and gradually add more. The `error` severity will fail the lint check, while
+	`warn` will show a warning without failing.
+</Aside>
+
+## Run
+
+Run the linter manually:
+
+```bash
+oxlint .
+```
+
+Or add it to your `package.json` scripts:
+
+```json
+{
+	"scripts": {
+		"lint": "oxlint"
+	}
+}
+```
+
+Then run:
+
+<PackageManagerTabs preset="run" />
+
+## Auto-fix
+
+Many rules provide automatic fixes. Apply them with:
+
+```bash
+oxlint --fix
+```
+
+<Aside type="caution">
+	Always review auto-fixes before committing. While the fixes are designed to be safe, edge cases can occur.
+</Aside>
+
+## Next Steps
+
+<CardGrid>
+	<LinkCard
+		title="Configuration"
+		href="/small-rules/configuration/"
+		description="Learn about all configuration options and rule severities."
+	/>
+	<LinkCard title="React Rules" href="/small-rules/rules/react/" description="Explore the React rule category." />
+	<LinkCard title="Roblox Rules" href="/small-rules/rules/roblox/" description="Explore the Roblox rule category." />
+	<LinkCard title="Changelog" href="/small-rules/changelog/" description="See what changed in recent releases." />
+</CardGrid>

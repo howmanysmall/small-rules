@@ -18,8 +18,8 @@ const UI_ASPECT_RATIO_CONSTRAINT = <uiaspectratioconstraint AspectRatio={1.5} />
 function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
 	return (
 		<imagelabel>
-			{children}
-			<uiaspectratioconstraint AspectRatio={1.5} />
+						{children}
+						<uiaspectratioconstraint AspectRatio={1.5} />
 		</imagelabel>
 	);
 }
@@ -27,9 +27,10 @@ function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
 const view = (
 	<LabelSpritesheet sprite="icon">
 		{UI_ASPECT_RATIO_CONSTRAINT}
-	</LabelSpritesheet>
-);
+			</LabelSpritesheet>
+		);
 `,
+				documentation: { id: "fail", title: "duplicate aspect ratio constraint" },
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
 			},
 			{
@@ -147,9 +148,10 @@ const view = (
 	<LabelSpritesheet sprite="icon">
 		<uigradient Color={gradient} />
 		<textlabel Text="hello" />
-	</LabelSpritesheet>
-);
+			</LabelSpritesheet>
+		);
 `,
+				documentation: { id: "pass", title: "non-redundant layout constraint" },
 			},
 			{
 				code: `

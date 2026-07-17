@@ -240,7 +240,8 @@ const requireThrowErrorCapture = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Require 'Error.captureStackTrace' before throwing errors to produce accurate stack traces.",
+			description:
+				"Require 'Error.captureStackTrace' before directly throwing new Error instances in named functions.",
 			recommended: false,
 		},
 		fixable: "code",

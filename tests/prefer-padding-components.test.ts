@@ -18,8 +18,9 @@ describe("prefer-padding-components", () => {
 export function Example(padding: UDim) {
     return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
 }`,
+				documentation: { id: "fail", title: "Equal padding component replacement" },
 				errors: [{ messageId: "preferEqualPadding" }],
-				filename: join(WITH_COMPONENTS, "src", "screens", "equal.tsx"),
+				filename: "tests/fixtures/prefer-padding-components/with-components/src/screens/equal.tsx",
 				output: `import { EqualPadding } from "../ui/equal-padding";
 
 export function Example(padding: UDim) {
@@ -158,6 +159,7 @@ export function Example(padding: UDim) {
 export function Example(padding: UDim) {
     return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
 }`,
+				documentation: { id: "pass", title: "Padding without component context" },
 				filename: "",
 			},
 			{

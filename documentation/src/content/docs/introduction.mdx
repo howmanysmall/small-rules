@@ -1,0 +1,49 @@
+---
+title: "Introduction"
+description: "What is small-rules and why should you use it?"
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+import PageHeader from "@/components/page-header.astro";
+import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
+
+<PageHeader
+	title="Introduction"
+	subtitle="What small-rules is, why it exists, and how it fits into the roblox-ts toolchain."
+	kicker="Getting started"
+/>
+
+`@pobammer-ts/small-rules` is an oxlint-native lint plugin for TypeScript projects. It provides {ruleFactCounts.totalRules} custom rules that catch common mistakes, enforce consistent patterns, and improve code quality across TypeScript, React Luau, and Roblox-specific APIs.
+
+Use it with oxlint 1.69.0 or later, TypeScript 5 through 7, and Node.js `^20.19.0` or `>=22.12.0`.
+
+## Why oxlint?
+
+Oxlint is a fast, Rust-based linter for JavaScript and TypeScript. It runs orders of magnitude faster than ESLint while covering the most common linting needs. `small-rules` extends oxlint with domain-specific rules that understand roblox-ts patterns, React component conventions, and Roblox API idioms.
+
+## Rule Categories
+
+The rules are organized into {ruleFactCounts.totalCategories} categories:
+
+<CardGrid>
+	{Array.from(ruleFactCategories.values()).map((category) => (
+		<LinkCard title={category.label} href={`/small-rules/${category.path}/`} description={category.description} />
+	))}
+</CardGrid>
+
+## Design Principles
+
+1. **Oxlint-native** — Rules use the oxlint rule API, not ESLint compatibility layers. This means faster execution and better integration with oxlint's diagnostic output.
+2. **roblox-ts aware** — Rules understand roblox-ts idioms like `Ianitor`, `Color3`, `UDim2`, `task.wait()`, and React Luau components.
+3. **Minimal configuration** — Most rules work with zero configuration. Options are available for rules that need them, but sensible defaults cover the common cases.
+4. **Auto-fixable where safe** — Many rules provide automatic fixes that can be applied with `oxlint --fix`.
+
+## Compatibility
+
+`small-rules` requires:
+
+- `oxlint` 1.x (developed and tested against 1.71.0)
+- TypeScript `>=5 <8` (for roblox-ts projects)
+- Node.js `^20.19.0 || >=22.12.0`
+- An oxlint configuration file (`.oxlintrc.json` or `oxlint.config.ts`)

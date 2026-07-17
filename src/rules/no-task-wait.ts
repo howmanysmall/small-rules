@@ -35,7 +35,7 @@ const noTaskWait = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Disallow task.wait() calls.",
+			description: "Disallow task.wait() and Promise.delay(...).await() calls.",
 		},
 		messages: {
 			noPromiseDelayAwait:

@@ -37,8 +37,7 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	entry: ["scripts/lint-json.ts", "*.config.ts"],
-	ignoreBinaries: ["hk"],
+	ignoreBinaries: ["hk", "nr", "playwright"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
@@ -46,10 +45,19 @@ const configuration: KnipConfig = {
 		"fast-check",
 		"sfw",
 	],
-	ignoreFiles: ["tests/fixtures/**", "scripts/reset.d.ts"],
-	paths,
-	project: ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx,d.ts}", "*.config.ts"],
+	ignoreFiles: ["tests/fixtures/**"],
 	tsdown: true,
+	workspaces: {
+		".": {
+			entry: ["scripts/disable-tsgo.ts", "scripts/generate-*.ts", "scripts/lint-json.ts", "*.config.ts"],
+			paths,
+			project: ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx,d.ts}", "*.config.ts"],
+		},
+		documentation: {
+			// Optional peer for Starlight's Sätteri markdown branch (type ambient + peer resolution).
+			ignoreDependencies: ["satteri"],
+		},
+	},
 };
 
 export default configuration;

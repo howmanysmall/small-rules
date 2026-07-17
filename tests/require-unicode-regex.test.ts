@@ -8,6 +8,7 @@ describe("require-unicode-regex", () => {
 		invalid: [
 			{
 				code: 'const x = regex("foo");',
+				documentation: { id: "fail", title: "Regex lacks unicode flag" },
 				errors: [{ messageId: "requireUnicodeFlag" }],
 			},
 			{
@@ -34,6 +35,7 @@ describe("require-unicode-regex", () => {
 		valid: [
 			{
 				code: 'const x = regex("foo", "u");',
+				documentation: { id: "pass", title: "Regex includes unicode flag" },
 			},
 			{
 				code: 'const x = regex("foo", "v");',

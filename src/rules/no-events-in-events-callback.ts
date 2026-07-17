@@ -408,6 +408,7 @@ const noEventsInEventsCallback = defineRule({
 				additionalProperties: false,
 				properties: {
 					eventsImportPaths: {
+						description: "Import paths that identify Events objects whose callbacks should be checked.",
 						items: {
 							minLength: 1,
 							type: "string",

@@ -6,6 +6,8 @@ import type { ESTree } from "oxlint-plugin-utilities";
 export type Environment = "roblox-ts" | "standard";
 
 export const ENVIRONMENT_SCHEMA = {
+	default: "roblox-ts",
+	description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
 	enum: ["roblox-ts", "standard"] as const,
 	type: "string",
 };

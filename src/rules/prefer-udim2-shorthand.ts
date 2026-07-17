@@ -101,8 +101,7 @@ function evaluateExpression(node: ESTree.Expression): number | undefined {
 			return undefined;
 
 		case "Literal":
-			/* v8 ignore next -- @preserve collectArguments admits numeric literals or identifiers before evaluation. */
-			return isNumber(node.value) ? node.value : undefined;
+			return Number(node.value);
 
 		case "UnaryExpression": {
 			const argumentValue = evaluateExpression(node.argument);

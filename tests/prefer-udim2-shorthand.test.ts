@@ -9,6 +9,7 @@ describe("prefer-udim2-shorthand", () => {
 			// FromScale pattern tests
 			{
 				code: "new UDim2(1, 0, 1, 0);",
+				documentation: { id: "fail", title: "long-form UDim2 scale" },
 				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(1, 1);",
 			},
@@ -135,7 +136,10 @@ describe("prefer-udim2-shorthand", () => {
 		],
 		valid: [
 			// Mixed values - not simplifiable
-			"new UDim2(1, 2, 3, 4);",
+			{
+				code: "new UDim2(1, 2, 3, 4);",
+				documentation: { id: "pass", title: "mixed UDim2 components" },
+			},
 			"new UDim2(1, 0, 2, 3);",
 			"new UDim2(1, 2, 0, 0);",
 			"new UDim2(1 + (value && 2), 0, 3, 0);",

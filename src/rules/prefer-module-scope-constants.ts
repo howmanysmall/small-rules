@@ -53,7 +53,7 @@ const preferModuleScopeConstants = defineRule({
 	meta: {
 		docs: {
 			description:
-				"Prefer that screaming snake case variables always be defined using `const`, and always appear at module scope.",
+				"Prefer screaming snake case constants at module scope or the allowed top-level wrapper scope.",
 		},
 		messages: {
 			mustBeModuleScope:

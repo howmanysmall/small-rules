@@ -15,6 +15,7 @@ function Component() {
     }
 }
 `,
+				documentation: { id: "fail", title: "Conditional hook call" },
 				errors: [{ messageId: "conditionalHook" }],
 			},
 
@@ -323,11 +324,14 @@ function Component() {
 		],
 		valid: [
 			// Basic top-level call
-			`
+			{
+				code: `
 function Component() {
-    useEffect(() => {});
+	    useEffect(() => {});
 }
 `,
+				documentation: { id: "pass", title: "Top-level hook call" },
+			},
 
 			// Multiple hooks at top level
 			`

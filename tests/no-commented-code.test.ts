@@ -22,6 +22,7 @@ describe("no-commented-code", () => {
 			},
 			{
 				code: "// const value = 1;",
+				documentation: { id: "fail", title: "Remove commented-out code" },
 				errors: [
 					{
 						messageId: "commentedCode",
@@ -234,6 +235,7 @@ qux(); */`,
 			// Custom maxLines: single-line code is OK when maxLines >= 1
 			{
 				code: "// if (something) {}",
+				documentation: { id: "pass", title: "Allow one commented code line" },
 				options: [{ maxLines: 1 }],
 			},
 			// Custom maxLines: two-line code block is OK when maxLines >= 2

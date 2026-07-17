@@ -10,7 +10,7 @@ const noUnderscoreReactProperties = defineRule({
 
 				context.report({
 					data: { propName: node.name.name },
-					messageId: "noUnderscoreReactProp",
+					messageId: "noUnderscoreReactProperty",
 					node: node.name,
 				});
 			},
@@ -21,7 +21,7 @@ const noUnderscoreReactProperties = defineRule({
 			description: "Ban React property names that begin with an underscore in JSX.",
 		},
 		messages: {
-			noUnderscoreReactProp:
+			noUnderscoreReactProperty:
 				"React prop '{{propName}}' starts with '_'. Remove the leading underscore from the prop name.",
 		},
 		schema: [] as const,

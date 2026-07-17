@@ -636,6 +636,7 @@ const noConstantConditionWithBreak = defineRule({
 				additionalProperties: false,
 				properties: {
 					loopExitCalls: {
+						description: "Call expressions that count as intentional loop exits inside constant loops.",
 						items: {
 							minLength: 1,
 							type: "string",

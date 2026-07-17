@@ -13,6 +13,7 @@ const springs = useSpring({
   from: { x: 0 },
 });
 `,
+				documentation: { id: "fail", title: "Spring with only initial value" },
 				errors: [{ messageId: "uselessSpring" }],
 			},
 			// Only `to` without `from` is still useless
@@ -211,6 +212,7 @@ const springs = useSpring({
   to: { x: 1 },
 });
 `,
+				documentation: { id: "pass", title: "Spring with mount animation" },
 			},
 			{
 				code: `

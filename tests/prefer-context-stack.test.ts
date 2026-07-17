@@ -18,8 +18,9 @@ describe("prefer-context-stack", () => {
 export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
+				documentation: { id: "fail", title: "Nested context providers" },
 				errors: [{ messageId: "preferContextStack" }],
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "basic.tsx"),
+				filename: "tests/fixtures/prefer-context-stack/with-context-stack/src/screens/basic.tsx",
 				output: `import ContextStack from "../providers/context-stack";
 
 export function Example(locale: string, theme: string) {
@@ -88,7 +89,8 @@ export function Example(locale: string, theme: string) {
 export function Example(theme: string) {
     return <ThemeContext.Provider value={theme}><App /></ThemeContext.Provider>;
 }`,
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "single.tsx"),
+				documentation: { id: "pass", title: "Single context provider" },
+				filename: "tests/fixtures/prefer-context-stack/with-context-stack/src/screens/single.tsx",
 			},
 			{
 				code: `import ContextStack from "../providers/context-stack";

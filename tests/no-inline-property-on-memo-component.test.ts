@@ -14,6 +14,7 @@ const MemoCard = memo(() => <div />);
 
 const view = <MemoCard options={{ enabled: true }} />;
 `,
+				documentation: { id: "fail", title: "Inline object prop on memo" },
 				errors: [{ data: { name: "MemoCard", type: "object" }, messageId: "inlineProperty" }],
 			},
 			{
@@ -68,6 +69,7 @@ function Card() {
 
 const view = <Card options={{ enabled: true }} />;
 `,
+				documentation: { id: "pass", title: "Regular component property" },
 			},
 			{
 				code: `

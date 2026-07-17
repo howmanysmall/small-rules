@@ -8,6 +8,7 @@ describe("no-identity-map", () => {
 		invalid: [
 			{
 				code: "scaleBinding.map(v => v)",
+				documentation: { id: "fail", title: "Identity binding map" },
 				errors: [{ messageId: "identityBindingMap" }],
 				output: "scaleBinding",
 			},
@@ -201,7 +202,7 @@ joined;
 			},
 		],
 		valid: [
-			"binding.map(v => v + 1)",
+			{ code: "binding.map(v => v + 1)", documentation: { id: "pass", title: "Transforming map callback" } },
 			"binding.map(v => v * 2)",
 			"array.map(x => x - 1)",
 

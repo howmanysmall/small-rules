@@ -26,7 +26,7 @@ const directiveNoUse = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "disallow ESLint directive-comments",
+			description: "Disallow block ESLint/Oxlint directive comments.",
 		},
 		messages: {
 			disallow: "Unexpected ESLint directive comment.",
@@ -36,6 +36,7 @@ const directiveNoUse = defineRule({
 				additionalProperties: false,
 				properties: {
 					allow: {
+						description: "Directive kinds that are still allowed in block comments.",
 						items: { type: "string" as const },
 						type: "array" as const,
 						uniqueItems: true,
