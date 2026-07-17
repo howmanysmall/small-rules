@@ -76,7 +76,7 @@ function createRuleFactEntries(): ReadonlyArray<readonly [RuleName, RuleFacts]> 
 	);
 }
 
-export const ruleFacts: ReadonlyMap<RuleName, RuleFacts> = new Map(createRuleFactEntries());
+const ruleFacts: ReadonlyMap<RuleName, RuleFacts> = new Map(createRuleFactEntries());
 
 export function getRuleFacts(ruleName: RuleName): RuleFacts {
 	const facts = ruleFacts.get(ruleName);
@@ -141,4 +141,3 @@ function deriveRuleFactCounts(): RuleFactCounts {
 }
 
 export const ruleFactCounts = deriveRuleFactCounts();
-export const { autofixableRules, fixableRules, suggestionRules, totalCategories, totalRules } = ruleFactCounts;

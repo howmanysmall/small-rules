@@ -37,7 +37,7 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	ignoreBinaries: ["hk", "nr"],
+	ignoreBinaries: ["hk", "nr", "playwright"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",

@@ -1,11 +1,11 @@
-export interface ReleaseVersion {
+interface ReleaseVersion {
 	readonly major: number;
 	readonly minor: number;
 	readonly patch: number;
 	readonly tag: string;
 }
 
-export interface ReleaseHistoryEntry {
+interface ReleaseHistoryEntry {
 	readonly body: string;
 	readonly version: ReleaseVersion;
 }
@@ -20,13 +20,13 @@ export const releaseHistoryEmptyState: ReleaseHistoryEmptyState = {
 	message: "No release notes have been published yet.",
 };
 
-export interface EmptyReleaseHistory {
+interface EmptyReleaseHistory {
 	readonly emptyState: ReleaseHistoryEmptyState;
 	readonly entries: readonly [];
 	readonly kind: "empty";
 }
 
-export interface PopulatedReleaseHistory {
+interface PopulatedReleaseHistory {
 	readonly entries: ReadonlyArray<ReleaseHistoryEntry>;
 	readonly kind: "populated";
 }

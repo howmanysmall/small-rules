@@ -10,7 +10,7 @@ import type { RuleName } from "./rule-manifest";
  * Rule ids match plugin keys in `src/index.ts` / `rule-sidebar.ts`.
  */
 
-export type RuleRelationKind =
+type RuleRelationKind =
 	/** Same problem family or complementary checks. Default bidirectional. */
 	| "related"
 	/** A makes B more useful, or A is a stricter multi-metric companion of B. Directed. */
@@ -401,21 +401,6 @@ export const ruleRelations = defineRuleRelations([
 	},
 ]);
 
-const UNDIRECTED_KINDS = new Set<RuleRelationKind>(["related", "overlaps", "alternative"]);
-
 export function getRelatedRules(ruleName: RuleName): ReadonlyArray<RuleRelation> {
 	return ruleRelations.filter((edge) => edge.from === ruleName || edge.to === ruleName);
-}
-
-export function getRelatedRuleNames(ruleName: RuleName): ReadonlyArray<RuleName> {
-	const names = new Set<RuleName>();
-	for (const edge of getRelatedRules(ruleName)) {
-		if (edge.from === ruleName) names.add(edge.to);
-		if (edge.to === ruleName && UNDIRECTED_KINDS.has(edge.kind)) names.add(edge.from);
-		if (edge.to === ruleName && !UNDIRECTED_KINDS.has(edge.kind)) {
-			// Directed reverse: still expose the counterpart for docs navigation.
-			names.add(edge.from);
-		}
-	}
-	return [...names].toSorted((left, right) => left.localeCompare(right));
 }
