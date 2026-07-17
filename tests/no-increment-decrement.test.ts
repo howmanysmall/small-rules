@@ -8,6 +8,7 @@ describe("no-increment-decrement", () => {
 		invalid: [
 			{
 				code: "size++;",
+				documentation: { id: "fail", title: "Post-increment compound assignment fix" },
 				errors: [{ messageId: "noIncrement" }],
 				options: [{ allowAutofix: true }],
 				output: "size += 1;",
@@ -70,7 +71,7 @@ describe("no-increment-decrement", () => {
 			"x = ++size;",
 			"x = size--;",
 			"x = --size;",
-			"size += 1;",
+			{ code: "size += 1;", documentation: { id: "pass", title: "Compound assignment is allowed" } },
 			"size -= 1;",
 			"array[index] = value;",
 			"const x = 1;",

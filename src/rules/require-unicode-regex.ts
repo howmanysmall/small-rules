@@ -47,7 +47,7 @@ const requireUnicodeRegex = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Require the 'u' or 'v' unicode flag on arktype regex() calls.",
+			description: "Require the 'u' or 'v' unicode flag on calls named regex().",
 		},
 		messages: {
 			requireUnicodeFlag:

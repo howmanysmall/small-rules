@@ -8,6 +8,7 @@ describe("prefer-sequence-overloads", () => {
 		invalid: [
 			{
 				code: "const gradient = new ColorSequence(new Color3(), new Color3());",
+				documentation: { id: "fail", title: "redundant sequence overload" },
 				errors: [{ messageId: "preferSingleOverload" }],
 				output: "const gradient = new ColorSequence(new Color3());",
 			},
@@ -80,7 +81,10 @@ new NumberSequence([
 			`,
 
 			// Already optimized constructors
-			"new ColorSequence(Color3.fromRGB(100, 200, 255));",
+			{
+				code: "new ColorSequence(Color3.fromRGB(100, 200, 255));",
+				documentation: { id: "pass", title: "single-point ColorSequence overload" },
+			},
 			"new ColorSequence(Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255));",
 			"new NumberSequence(0);",
 			"new NumberSequence(0, 1);",

@@ -1,0 +1,140 @@
+---
+title: "small-rules"
+description: "Oxlint-native rules for TypeScript, React, and roblox-ts"
+tableOfContents: false
+---
+
+import HeroSplash from "@/components/hero-splash.astro";
+import CategoryCard from "@/components/category-card.astro";
+import FeatureCard from "@/components/feature-card.astro";
+import Icon from "@/components/icon.astro";
+import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
+
+<HeroSplash
+	kicker="Oxlint-native linting for roblox-ts"
+	title="small-rules"
+	subtitle={`${ruleFactCounts.totalRules} source-backed rules for React Luau, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality.`}
+/>
+
+<div class="home-proof reveal">
+	<p class="home-proof-copy">
+		Native oxlint speed, roblox-ts-specific checks, and fixes where repetitive cleanup should be automatic.
+	</p>
+	<ul class="home-proof-grid">
+		<li class="home-proof-item">
+			<span class="home-proof-value">{ruleFactCounts.totalRules}</span>
+			<span class="home-proof-label">rules</span>
+		</li>
+		<li class="home-proof-item">
+			<span class="home-proof-value">{ruleFactCounts.fixableRules}</span>
+			<span class="home-proof-label">fixable</span>
+		</li>
+		<li class="home-proof-item">
+			<span class="home-proof-value">{ruleFactCounts.totalCategories}</span>
+			<span class="home-proof-label">categories</span>
+		</li>
+		<li class="home-proof-item">
+			<span class="home-proof-value">native</span>
+			<span class="home-proof-label">oxlint plugin</span>
+		</li>
+	</ul>
+</div>
+
+<div class="section-header reveal">
+	<span class="section-eyebrow">
+		<Icon name="rocket" size={12} /> Start here
+	</span>
+	<h2>Use the docs like a reference, not a landing page</h2>
+	<p>Start with installation, copy a minimal config, then browse rules by category as you tighten the codebase.</p>
+</div>
+
+<div class="home-start-links reveal">
+	<a class="home-start-link" href="/small-rules/quick-start/">
+		<span class="home-start-index">1</span>
+		<span class="home-start-body">
+			<span class="home-start-title">Quick Start</span>
+			<span class="home-start-desc">Install the plugin, register it in oxlint, and run the first pass.</span>
+		</span>
+		<span class="home-start-arrow">→</span>
+	</a>
+	<a class="home-start-link" href="/small-rules/configuration/">
+		<span class="home-start-index">2</span>
+		<span class="home-start-body">
+			<span class="home-start-title">Configuration</span>
+			<span class="home-start-desc">
+				Set severities and define what should block CI versus what should stay advisory.
+			</span>
+		</span>
+		<span class="home-start-arrow">→</span>
+	</a>
+	<a class="home-start-link" href="/small-rules/changelog/">
+		<span class="home-start-index">3</span>
+		<span class="home-start-body">
+			<span class="home-start-title">Changelog</span>
+			<span class="home-start-desc">Track rule additions and behavior changes before you upgrade.</span>
+		</span>
+		<span class="home-start-arrow">→</span>
+	</a>
+</div>
+
+<div class="section-header reveal">
+	<span class="section-eyebrow">
+		<Icon name="search" size={12} /> Browse
+	</span>
+	<h2>Pick the part of the codebase you want to harden</h2>
+	<p>These category counts reflect the current plugin, not stale marketing numbers.</p>
+</div>
+
+<div class="category-grid reveal">
+	{Array.from(ruleFactCategories.values()).map((category) => (
+		<CategoryCard
+			category={category.key}
+			count={category.count}
+			description={category.description}
+			label={category.label}
+		/>
+	))}
+</div>
+
+<div class="section-header reveal">
+	<span class="section-eyebrow">
+		<Icon name="sparkles" size={12} /> Why it exists
+	</span>
+	<h2>Focused rules for the failures oxlint does not catch by itself</h2>
+	<p>The plugin is strongest where roblox-ts teams hit ecosystem-specific footguns and repeated review churn.</p>
+</div>
+
+<div class="feature-grid reveal">
+	<FeatureCard
+		icon="bolt"
+		title="Oxlint-native"
+		description="Ships as a real oxlint plugin, so you keep the native execution model instead of routing through ESLint."
+	/>
+	<FeatureCard
+		icon="puzzle"
+		title="Roblox-aware"
+		description="Targets React Luau patterns, Ianitor lifecycle rules, UI conventions, and Roblox-specific APIs that generic linters miss."
+	/>
+	<FeatureCard
+		icon="wand"
+		title="Fixes where they help"
+		description={`${ruleFactCounts.fixableRules} rules currently expose code fixes or fixer suggestions for repetitive cleanup.`}
+	/>
+</div>
+
+<div class="bottom-cta reveal">
+	<div class="bottom-cta-copy">
+		<span class="bottom-cta-kicker">Start enforcing</span>
+		<h2>Make the codebase argue less.</h2>
+		<p>Pick the rules that match your standards. Let oxlint handle the repetitive review comments.</p>
+	</div>
+	<div class="bottom-cta-actions">
+		<a href="/small-rules/quick-start/" class="bottom-cta-action bottom-cta-action--primary">
+			<span>Open quick start</span>
+			<Icon name="arrow-right" size={18} />
+		</a>
+		<a href="/small-rules/introduction/" class="bottom-cta-action bottom-cta-action--secondary">
+			See how it works
+		</a>
+	</div>
+</div>

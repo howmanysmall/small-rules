@@ -27,7 +27,8 @@ const directiveDisableEnablePair = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "require a `eslint-enable` comment for every `eslint-disable` comment",
+			description:
+				"Require a matching enable comment for every `oxlint-disable` or `eslint-disable` block directive.",
 		},
 		messages: {
 			missingPair: "Requires 'eslint-enable' directive.",
@@ -38,6 +39,7 @@ const directiveDisableEnablePair = defineRule({
 				additionalProperties: false,
 				properties: {
 					allowWholeFile: {
+						description: "Allow a disable directive that covers the entire file.",
 						type: "boolean" as const,
 					},
 				},

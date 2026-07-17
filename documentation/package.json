@@ -1,0 +1,34 @@
+{
+	"name": "docs",
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"astro": "astro",
+		"build": "astro build",
+		"dev": "astro dev",
+		"postinstall": "astro sync",
+		"preview": "astro preview",
+		"start": "astro dev",
+		"test:browser": "playwright test"
+	},
+	"dependencies": {
+		"@astrojs/markdown-satteri": "catalog:prod",
+		"@astrojs/mdx": "catalog:prod",
+		"@astrojs/react": "catalog:frontend",
+		"@astrojs/starlight": "catalog:prod",
+		"arktype": "catalog:",
+		"astro": "catalog:prod",
+		"react": "catalog:frontend",
+		"react-dom": "catalog:frontend",
+		"satteri": "catalog:prod",
+		"sharp": "catalog:prod",
+		"yuku-parser": "catalog:prod"
+	},
+	"devDependencies": {
+		"@playwright/test": "catalog:test",
+		"@total-typescript/ts-reset": "catalog:",
+		"@types/react": "catalog:types",
+		"@types/react-dom": "catalog:types",
+		"typescript": "catalog:dev"
+	}
+}

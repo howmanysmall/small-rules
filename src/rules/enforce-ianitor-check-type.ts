@@ -8,7 +8,6 @@ interface ComplexityConfiguration {
 	readonly errorThreshold: number;
 	readonly interfacePenalty: number;
 	readonly performanceMode: boolean;
-	readonly warnThreshold: number;
 }
 
 interface ComplexityCache {
@@ -21,7 +20,6 @@ const DEFAULT_CONFIGURATION: ComplexityConfiguration = {
 	errorThreshold: 25,
 	interfacePenalty: 20,
 	performanceMode: true,
-	warnThreshold: 15,
 };
 
 function isIanitorValidator(node: ESTree.CallExpression): boolean {
@@ -578,11 +576,31 @@ const enforceIanitorCheckType = defineRule({
 			{
 				additionalProperties: false,
 				properties: {
-					baseThreshold: { minimum: 1, type: "number" },
-					errorThreshold: { minimum: 1, type: "number" },
-					interfacePenalty: { minimum: 1, type: "number" },
-					performanceMode: { type: "boolean" },
-					warnThreshold: { minimum: 1, type: "number" },
+					baseThreshold: {
+						default: DEFAULT_CONFIGURATION.baseThreshold,
+						description:
+							"Minimum complexity score before missing Ianitor.Check<T> annotations are reported.",
+						minimum: 1,
+						type: "number",
+					},
+					errorThreshold: {
+						default: DEFAULT_CONFIGURATION.errorThreshold,
+						description: "Complexity score used to cap recursive analysis before reporting is determined.",
+						minimum: 1,
+						type: "number",
+					},
+					interfacePenalty: {
+						default: DEFAULT_CONFIGURATION.interfacePenalty,
+						description:
+							"Complexity penalty applied when an Ianitor validator builds an interface-like shape.",
+						minimum: 1,
+						type: "number",
+					},
+					performanceMode: {
+						default: DEFAULT_CONFIGURATION.performanceMode,
+						description: "Whether repeated type nodes are cached during complexity analysis.",
+						type: "boolean",
+					},
 				},
 				type: "object",
 			},

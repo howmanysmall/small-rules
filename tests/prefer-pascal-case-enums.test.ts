@@ -13,7 +13,16 @@ describe("prefer-pascal-case-enums", () => {
 	ts.run("prefer-pascal-case-enums", rule, {
 		invalid: [
 			// All caps
-			{ code: "enum SORTORDER {MostRecent, LeastRecent, Newest, Oldest}", errors: [errorWithName("SORTORDER")] },
+			{
+				code: "enum SORTORDER {MostRecent, LeastRecent, Newest, Oldest}",
+				documentation: { id: "fail", title: "All-caps enum name" },
+				errors: [
+					{
+						message:
+							"Enum 'SORTORDER' uses non-standard casing. TypeScript convention requires PascalCase for enum names and members to distinguish them from variables (camelCase) and constants (UPPER_CASE). Rename to PascalCase: capitalize first letter of each word, no underscores.",
+					},
+				],
+			},
 			// All lowercase
 			{ code: "enum sortorder {MostRecent, LeastRecent, Newest, Oldest}", errors: [errorWithName("sortorder")] },
 			// Snake case
@@ -38,10 +47,17 @@ describe("prefer-pascal-case-enums", () => {
 				code: "enum Example {'foo' = 'bar', '1024x1024' = '1024x1024', Oldest}",
 				errors: [errorWithName("foo")],
 			},
+			{
+				code: "enum Example {'--foo--bar--' = 'value', '--' = 'empty'}",
+				errors: [errorWithName("--foo--bar--"), errorWithName("--")],
+			},
 		],
 		valid: [
 			// Proper PascalCase
-			{ code: "enum SortOrder {MostRecent, LeastRecent, Newest, Oldest}" },
+			{
+				code: "enum SortOrder {MostRecent, LeastRecent, Newest, Oldest}",
+				documentation: { id: "pass", title: "PascalCase enum names" },
+			},
 
 			// Single letter enum members (valid per Shopify rule)
 			{ code: "enum Grade {A, B, C, D, E, F}" },

@@ -65,11 +65,12 @@ import { useEffect, useState } from "@rbxts/react";
 
 function Component(properties) {
     const [count, setCount] = useState(0);
-    useEffect(() => {
-        setCount(properties.initialCount);
-    }, [properties.initialCount]);
+useEffect(() => {
+    setCount(properties.initialCount);
+}, [properties.initialCount]);
 }
 `,
+				documentation: { id: "fail", title: "Derived state inside effect" },
 				errors: [{ messageId: "derivedState" }],
 				options: [{}],
 			},
@@ -1405,11 +1406,12 @@ function Component({ title }) {
 import { useEffect } from "@rbxts/react";
 
 function Component() {
-    useEffect(() => {
-        trackPageView("/home");
-    }, []);
+useEffect(() => {
+    trackPageView("/home");
+}, []);
 }
 `,
+				documentation: { id: "pass", title: "Effect synchronizes external system" },
 			},
 
 			// Named function with actual side effects

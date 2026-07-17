@@ -12,6 +12,7 @@ import { useMemo } from "react";
 
 const value = useMemo(() => 1, []);
 `,
+				documentation: { id: "fail", title: "Memoized simple literal" },
 				errors: [{ messageId: "simpleMemo" }],
 			},
 			{
@@ -113,6 +114,7 @@ const index = 1;
 
 const value = useMemo(() => values[index], [index]);
 `,
+				documentation: { id: "pass", title: "Memoized indexed lookup" },
 			},
 			{
 				code: `

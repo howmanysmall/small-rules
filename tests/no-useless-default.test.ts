@@ -250,10 +250,11 @@ describe("no-useless-default comparison helpers", () => {
 });
 
 describe("no-useless-default JSX detection", () => {
-	tsx.run("no-useless-default JSX defaults", rule, {
+	tsx.run("no-useless-default", rule, {
 		invalid: [
 			{
 				code: "const view = <uiaspectratioconstraint AspectRatio={1} />;",
+				documentation: { id: "fail", title: "default UI property assignment" },
 				errors: [
 					{
 						data: { className: "UIAspectRatioConstraint", propertyName: "AspectRatio" },
@@ -361,7 +362,10 @@ describe("no-useless-default JSX detection", () => {
 			},
 		],
 		valid: [
-			{ code: 'const view = <uiaspectratioconstraint key="my-key" />;' },
+			{
+				code: 'const view = <uiaspectratioconstraint key="my-key" />;',
+				documentation: { id: "pass", title: "non-default aspect ratio attribute" },
+			},
 			{ code: "const view = <uiaspectratioconstraint AspectRatio={2} />;" },
 			{ code: "const view = <uiaspectratioconstraint AspectRatio />;" },
 			{ code: "const view = <uiaspectratioconstraint AspectRatio={undefined} />;" },

@@ -1,0 +1,23 @@
+---
+import { getRuleOptionsDocumentation } from "@/data/rule-options";
+import type { RuleName } from "@/data/rule-options";
+import { Code } from "@astrojs/starlight/components";
+import { RuleOptionsTable } from "./rule-options-table";
+
+interface Props {
+	readonly rule: RuleName;
+}
+
+const { rule } = Astro.props;
+const documentation = getRuleOptionsDocumentation(rule);
+---
+
+<p>{documentation.schemaSummary}</p>
+
+{documentation.options.length > 0 && (
+	<RuleOptionsTable options={documentation.options} client:visible={true} />
+)}
+
+<div class="rule-options-config">
+	<Code code={documentation.config} lang="json" meta='frame="none"' />
+</div>

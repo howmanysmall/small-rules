@@ -13,6 +13,7 @@ useEffect(() => {
     console.log("effect");
 }, []);
 `,
+				documentation: { id: "fail", title: "Anonymous effect callback" },
 				errors: [{ messageId: "arrowFunction" }],
 			},
 			// Anonymous function expressions
@@ -226,6 +227,7 @@ function handleEffect() {
 }
 useEffect(handleEffect, []);
 `,
+				documentation: { id: "pass", title: "Named effect callback" },
 			},
 			// Function declaration referenced with cleanup
 			{

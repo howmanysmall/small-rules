@@ -1,7 +1,7 @@
 {
 	"$schema": "node_modules/oxfmt/configuration_schema.json",
 	"arrowParens": "always",
-	"bracketSameLine": true,
+	"bracketSameLine": false,
 	"bracketSpacing": true,
 	"embeddedLanguageFormatting": "auto",
 	"endOfLine": "lf",
@@ -39,21 +39,15 @@
 		},
 		{
 			"files": ["**/*.jsonc"],
-			"options": {
-				"trailingComma": "all"
-			}
+			"options": { "trailingComma": "all" }
 		},
 		{
 			"files": ["biome.jsonc", ".oxlintrc.json", "knip.jsonc"],
-			"options": {
-				"trailingComma": "none"
-			}
+			"options": { "trailingComma": "none" }
 		},
 		{
 			"files": [".oxfmtrc.json"],
-			"options": {
-				"trailingComma": "all"
-			}
+			"options": { "trailingComma": "all" }
 		}
 	],
 	"printWidth": 120,
@@ -144,6 +138,7 @@
 		"sortSideEffects": false
 	},
 	"sortPackageJson": { "sortScripts": true },
+	"sortTailwindcss": true,
 	"tabWidth": 4,
 	"trailingComma": "all",
 	"useTabs": true

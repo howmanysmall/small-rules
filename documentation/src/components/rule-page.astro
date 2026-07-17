@@ -1,0 +1,43 @@
+---
+import { getRuleFacts } from "@/data/rule-facts";
+import { ruleManifest } from "@/data/rule-manifest";
+import type { RuleName } from "@/data/rule-manifest";
+import Badge from "./badge.astro";
+import RelatedRules from "./related-rules.astro";
+import RuleDiagnostics from "./rule-diagnostics.astro";
+import RuleExamples from "./rule-examples.astro";
+import RuleOptions from "./rule-options.astro";
+import RuleSummary from "./rule-summary.astro";
+
+interface Props {
+	readonly rule: RuleName;
+}
+
+const { rule } = Astro.props;
+const facts = getRuleFacts(rule);
+const entry = ruleManifest.categories
+	.flatMap((category) => category.rules)
+	.find((candidate) => candidate.name === rule);
+const exampleExemption = entry !== undefined && "exampleExemption" in entry ? entry.exampleExemption : undefined;
+---
+
+<div class="rule-badges" aria-label="Rule characteristics">
+	<Badge variant={facts.type === "problem" ? "error" : "suggestion"} />
+	{facts.fixable !== undefined && <Badge variant="fixable" />}
+	{facts.category === "roblox" && <Badge variant="roblox" />}
+</div>
+
+<RuleSummary rule={rule} />
+
+<RuleDiagnostics messages={facts.messages} />
+
+<section aria-labelledby="configuration">
+	<h2 id="configuration">Configuration</h2>
+	<RuleOptions rule={rule} />
+</section>
+
+<RuleExamples rule={rule} exemption={exampleExemption} />
+
+{Astro.slots.has("rationale") && <slot name="rationale" />}
+
+<RelatedRules rule={rule} />

@@ -76,6 +76,11 @@ describe("ci workflow", () => {
 });
 
 describe("release workflow", () => {
+	it("serializes all real releases through one concurrency group", () => {
+		expect.assertions(1);
+		expect(RELEASE_YAML).toContain("group: release");
+	});
+
 	it("publishes through pnpm so catalog versions are resolved", () => {
 		expect.assertions(1);
 		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
@@ -95,6 +100,36 @@ describe("release workflow", () => {
 		expect.assertions(2);
 		expect(RELEASE_YAML).toContain('gh run list --workflow ci.yaml --commit "$GITHUB_SHA"');
 		expect(RELEASE_YAML).toContain('gh run watch "$CI_RUN_ID" --exit-status');
+	});
+
+	it("generates one release body and reuses it for documentation and GitHub", () => {
+		expect.assertions(5);
+		expect(RELEASE_YAML).toContain('RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"');
+		expect(RELEASE_YAML).toContain(
+			'node --run changelogithub -- --to "$GITHUB_REF_NAME" --output "$RELEASE_NOTES"',
+		);
+		expect(RELEASE_YAML).toContain('cp "$RELEASE_NOTES" "$RELEASE_ARTIFACT"');
+		expect(RELEASE_YAML).toContain('gh release create "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"');
+		expect(RELEASE_YAML).toContain('gh release edit "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"');
+	});
+
+	it("commits release notes from a temporary main worktree before publishing the tag", () => {
+		expect.assertions(5);
+		const commitStep = RELEASE_YAML.indexOf("git worktree add");
+		const publishStep = RELEASE_YAML.indexOf("pnpm publish --provenance");
+
+		expect(commitStep).toBeGreaterThan(-1);
+		expect(publishStep).toBeGreaterThan(commitStep);
+		expect(RELEASE_YAML).toContain('git -C "$RELEASE_WORKTREE" push origin HEAD:main');
+		expect(RELEASE_YAML).toContain('cmp --silent "$RELEASE_NOTES" "$RELEASE_ARTIFACT"');
+		expect(RELEASE_YAML).toContain("chore(docs): add $GITHUB_REF_NAME release notes");
+	});
+
+	it("keeps dry runs read-only", () => {
+		expect.assertions(3);
+		expect(RELEASE_YAML).toContain("env.DRY_RUN != 'true'");
+		expect(RELEASE_YAML).toContain("Dry run: skipped release notes, publish, and GitHub release creation.");
+		expect(RELEASE_YAML).not.toContain("env.DRY_RUN == 'true'\n        run: git");
 	});
 
 	it("does not explicitly build before pnpm runs prepublishOnly", () => {

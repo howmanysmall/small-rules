@@ -253,7 +253,7 @@ const banInstances = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "Ban specified Roblox Instance classes in new Instance() calls and JSX elements.",
+			description: "Ban specified Roblox Instance classes and configured Instance properties.",
 		},
 		messages: {
 			bannedInstance:

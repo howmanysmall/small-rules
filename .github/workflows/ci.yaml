@@ -9,6 +9,7 @@ on:
       - "src/**/*.tsx"
       - "src/**/*.json"
       - "tests/**"
+      - "documentation/**"
       - "scripts/**"
       - "patches/**"
       - "package.json"
@@ -23,6 +24,7 @@ on:
       - ".github/actions/**"
       - ".github/workflows/checks.yaml"
       - ".github/workflows/ci.yaml"
+      - ".github/workflows/docs.yaml"
   pull_request:
     paths: *ci-paths
 
@@ -37,3 +39,12 @@ jobs:
     uses: ./.github/workflows/checks.yaml
     permissions:
       contents: read
+
+  deploy-documentation:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: checks
+    uses: ./.github/workflows/docs.yaml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

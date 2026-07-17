@@ -18,6 +18,8 @@ function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTy
 	if (!(isRecord(rawOptions) && "bannedTypes" in rawOptions)) return bannedTypes;
 
 	const { bannedTypes: configuredBannedTypes } = rawOptions;
+	/* v8 ignore next -- @preserve rule schema oneOf ensures bannedTypes is never undefined when the key is present. */
+	if (configuredBannedTypes === undefined) return bannedTypes;
 
 	if (isStringArray(configuredBannedTypes)) {
 		for (const typeName of configuredBannedTypes) {
@@ -93,6 +95,7 @@ const banTypes = defineRule({
 				additionalProperties: false,
 				properties: {
 					bannedTypes: {
+						default: { Omit: "Except" },
 						description:
 							"Array of banned type names or an object mapping banned type names to preferred replacement names.",
 						oneOf: [

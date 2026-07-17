@@ -1,0 +1,58 @@
+---
+import Icon from "./icon.astro";
+
+interface Props {
+	readonly kicker?: string;
+	readonly subtitle?: string;
+	readonly title: string;
+}
+
+const { title, subtitle, kicker = "Oxlint plugin for roblox-ts" } = Astro.props;
+---
+
+<section class="hero-splash">
+	<div class="hero-grid">
+		<div class="hero-copy">
+			<span class="hero-kicker hero-kicker--static">
+				<Icon name="sparkles" size={14} />
+				<span>{kicker}</span>
+			</span>
+
+			<h1 class="hero-title">{title}</h1>
+
+			{subtitle && <p class="hero-subtitle">{subtitle}</p>}
+
+			<div class="hero-actions">
+				<a class="hero-cta hero-cta--primary" href="/small-rules/quick-start/">
+					<Icon name="rocket" size={16} />
+					<span>Get started</span>
+				</a>
+				<a
+					class="hero-cta hero-cta--ghost"
+					href="https://github.com/howmanysmall/small-rules"
+					rel="noopener"
+					target="_blank">
+					<Icon name="github" size={16} />
+					<span>View on GitHub</span>
+				</a>
+			</div>
+		</div>
+
+		<div aria-label="Code preview" class="hero-preview">
+			<div class="hero-preview-chrome">
+				<span class="hero-preview-dot hero-preview-dot--r"></span>
+				<span class="hero-preview-dot hero-preview-dot--y"></span>
+				<span class="hero-preview-dot hero-preview-dot--g"></span>
+				<span class="hero-preview-name">.oxlintrc.json</span>
+			</div>
+			<pre class="hero-preview-code"><code><span class="t-k">{"{"}</span>
+	<span class="t-s">"jsPlugins"</span><span class="t-k">:</span> <span class="t-a">[</span><span class="t-s">"@pobammer-ts/small-rules"</span><span class="t-a">]</span><span class="t-k">,</span>
+	<span class="t-s">"rules"</span><span class="t-k">:</span> <span class="t-k">{"{"}</span>
+		<span class="t-s">"small-rules/ban-react-fc"</span><span class="t-k">:</span> <span class="t-s">"error"</span><span class="t-k">,</span>
+		<span class="t-s">"small-rules/no-print"</span><span class="t-k">:</span> <span class="t-s">"error"</span><span class="t-k">,</span>
+		<span class="t-s">"small-rules/prefer-early-return"</span><span class="t-k">:</span> <span class="t-s">"warn"</span>
+	<span class="t-k">{"}"}</span>
+<span class="t-k">{"}"}</span></code></pre>
+		</div>
+	</div>
+</section>

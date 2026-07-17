@@ -8,6 +8,7 @@ describe("no-array-constructor-index-assignment", () => {
 		invalid: [
 			{
 				code: "const samples = new Array<string>();\nsamples[0] = replacement;",
+				documentation: { id: "fail", title: "array index assignment after construction" },
 				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const samples = [replacement];",
 			},
@@ -73,7 +74,10 @@ describe("no-array-constructor-index-assignment", () => {
 			},
 		],
 		valid: [
-			"const samples = [replacement];",
+			{
+				code: "const samples = [replacement];",
+				documentation: { id: "pass", title: "array literal initialization" },
+			},
 			"const values = new Array<number>();",
 			"declare const values: Array<number>;",
 			"const values = new Set<number>();\nvalues[0] = 1;",

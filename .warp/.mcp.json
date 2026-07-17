@@ -1,0 +1,11 @@
+{
+	"mcpServers": {
+		"astro-docs": {
+			"url": "https://mcp.docs.astro.build/mcp"
+		},
+		"chrome-devtools": {
+			"args": ["./scripts/get-chrome-path.sh", "--serve"],
+			"command": "bash"
+		}
+	}
+}

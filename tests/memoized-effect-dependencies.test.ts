@@ -15,6 +15,7 @@ function Component() {
     useEffect(() => {}, [dep]);
 }
 `,
+				documentation: { id: "fail", title: "Unmemoized object effect dependency" },
 				errors: [{ messageId: "unmemoizedDependency" }],
 			},
 			{
@@ -122,6 +123,7 @@ function Component() {
     useEffect(() => {}, [memo, callback]);
 }
 `,
+				documentation: { id: "pass", title: "Memoized effect dependencies" },
 			},
 			{
 				code: `

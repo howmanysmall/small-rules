@@ -8,6 +8,7 @@ describe("no-warn", () => {
 		invalid: [
 			{
 				code: "warn('Hello');",
+				documentation: { id: "fail", title: "global warn call" },
 				errors: [{ messageId: "noWarn" }],
 			},
 			{
@@ -32,7 +33,10 @@ describe("no-warn", () => {
 			},
 		],
 		valid: [
-			"Log.warn('Hello');",
+			{
+				code: "Log.warn('Hello');",
+				documentation: { id: "pass", title: "logger warn call" },
+			},
 			"Log.Warning(value);",
 			"console.log('test');",
 			"const warn = 'string';",

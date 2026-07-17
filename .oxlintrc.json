@@ -31,6 +31,33 @@
 	},
 	"overrides": [
 		{
+			"env": {
+				"astro": true,
+				"browser": true,
+				"node": true
+			},
+			"files": ["documentation/**/*"]
+		},
+		{
+			"files": ["documentation/**/*.astro"],
+			"plugins": [],
+			"rules": {
+				"import/unambiguous": "off",
+				"small-rules/no-unused-imports": "off",
+				"small-rules/prevent-abbreviations": "off",
+				"sonar/unused-import": "off",
+				"unused-imports/no-unused-imports": "off"
+			}
+		},
+		{
+			"files": ["documentation/src/types/satteri-optional-peers.d.ts"],
+			"rules": {
+				"import/unambiguous": "off",
+				"small-rules/no-unused-imports": "off",
+				"typescript/no-redundant-type-constituents": "off"
+			}
+		},
+		{
 			"files": ["scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
 			"rules": { "no-console": "off" }
 		},
@@ -114,6 +141,49 @@
 		{
 			"files": ["**/*.d.ts"],
 			"rules": { "import/unambiguous": "off" }
+		},
+		{
+			"files": ["documentation/src/**/*.{ts,tsx}"],
+			"plugins": ["react", "react-perf", "jsx-a11y"],
+			"rules": {
+				"react/jsx-curly-brace-presence": [
+					"error",
+					{
+						"children": "always"
+					}
+				],
+				"react/jsx-filename-extension": [
+					"error",
+					{
+						"extensions": ["jsx", "tsx"],
+						"ignoreFilesWithoutCode": true
+					}
+				],
+				"react/jsx-max-depth": ["error", { "max": 3 }],
+				"react/react-in-jsx-scope": "off",
+				"small-rules/ban-react-fc": "error",
+				"small-rules/memoized-effect-dependencies": "error",
+				"small-rules/prefer-hoisted-jsx-elements": [
+					"error",
+					{
+						"additionalHoistableComponents": [],
+						"additionalStaticFactories": []
+					}
+				],
+				"small-rules/prefer-hoisted-jsx-object-properties": "error",
+				"small-rules/require-named-effect-functions": [
+					"error",
+					{
+						"environment": "standard",
+						"hooks": [
+							{ "allowAsync": false, "name": "useEffect" },
+							{ "allowAsync": false, "name": "useLayoutEffect" },
+							{ "allowAsync": false, "name": "useInsertionEffect" }
+						]
+					}
+				],
+				"small-rules/require-react-display-names": ["error", { "environment": "standard" }]
+			}
 		}
 	],
 	"plugins": ["eslint", "import", "jsdoc", "node", "oxc", "promise", "typescript", "unicorn"],
@@ -756,6 +826,19 @@
 			"implementsReplacesDocs": false,
 			"overrideReplacesDocs": true,
 			"tagNamePreference": {}
+		},
+		"jsx-a11y": {
+			"attributes": {},
+			"components": {}
+		},
+		"react": {
+			"componentWrapperFunctions": [],
+			"formComponents": [],
+			"linkComponents": [],
+			"version": "19.2.7"
+		},
+		"vitest": {
+			"typecheck": true
 		}
 	}
 }

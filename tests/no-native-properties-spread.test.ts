@@ -8,6 +8,7 @@ describe("no-native-properties-spread", () => {
 		invalid: [
 			{
 				code: 'const SOME_CONSTANT = {}; const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;',
+				documentation: { id: "fail", title: "native properties spread" },
 				errors: [
 					{
 						data: { prop: "nativeProperties", source: "SOME_CONSTANT" },
@@ -73,6 +74,7 @@ describe("no-native-properties-spread", () => {
 		valid: [
 			{
 				code: "const view = <Frame nativeProperties={SOME_CONSTANT} />;",
+				documentation: { id: "pass", title: "direct native properties reference" },
 			},
 			{
 				code: "const view = <Frame nativeProperties />;",

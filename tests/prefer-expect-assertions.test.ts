@@ -193,6 +193,7 @@ describe("prefer-expect-assertions", () => {
 			},
 			{
 				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); });",
+				documentation: { id: "fail", title: "Prefer assertion count over hasAssertions" },
 				errors: [{ messageId: "preferAssertionsCount" }],
 				output: "test('works', () => { expect.assertions(1); expect(value).toBe(1); });",
 			},
@@ -216,6 +217,7 @@ describe("prefer-expect-assertions", () => {
 		valid: [
 			{
 				code: "test('works', () => { expect.assertions(1); expect(value).toBe(1); });",
+				documentation: { id: "pass", title: "Explicit assertion count" },
 			},
 			{
 				code: "test('works', () => { expect.assertions(2); expect(first).toBe(1); expect(second).toBe(2); });",

@@ -6,7 +6,6 @@ import { tsx } from "./rule-testers";
 
 const FIXTURES = join(import.meta.dirname, "fixtures", "prefer-local-portal-component");
 const WITH_PORTAL = join(FIXTURES, "with-portal");
-const WITHOUT_PORTAL = join(FIXTURES, "without-portal");
 const AMBIGUOUS_PORTAL = join(FIXTURES, "ambiguous-portal");
 const FIXTURE_ONLY_PORTAL = join(FIXTURES, "fixture-only");
 
@@ -20,8 +19,9 @@ import { createPortal } from "@rbxts/react-roblox";
 export function Example(target: Instance) {
     return createPortal(<frame />, target);
 }`,
+				documentation: { id: "fail", title: "Direct portal call with local component" },
 				errors: [{ messageId: "preferPortalComponent" }],
-				filename: join(WITH_PORTAL, "src", "screens", "example.tsx"),
+				filename: "tests/fixtures/prefer-local-portal-component/with-portal/src/screens/example.tsx",
 				output: `import Portal from "../components/portal";
 import { createPortal } from "@rbxts/react-roblox";
 
@@ -120,7 +120,8 @@ export function Example(content: React.ReactNode, target: Instance) {
 export function Example(target: Instance) {
     return createPortal(<frame />, target);
 }`,
-				filename: join(WITHOUT_PORTAL, "src", "screens", "example.tsx"),
+				documentation: { id: "pass", title: "Portal call without local component" },
+				filename: "tests/fixtures/prefer-local-portal-component/without-portal/src/screens/example.tsx",
 			},
 			{
 				code: `import { createPortal } from "@rbxts/react-roblox";

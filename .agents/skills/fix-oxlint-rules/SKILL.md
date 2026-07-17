@@ -1,6 +1,6 @@
 ---
 name: fix-oxlint-rules
-description: Use when an Oxlint small-rule or plugin rule in this repo fails unit tests, `tsgo`, or disagrees with an upstream port. You should NOT use this when CREATING a new rule. It is ONLY for fixing.
+description: Use when an Oxlint small-rule or plugin rule in this repo fails unit tests, `tsgo`, or disagrees with an upstream port. You should NOT use this when CREATING a new rule. It is ONLY for fixing existing rules. This is NOT for fixing linting errors.
 ---
 
 # Fix Oxlint Rules

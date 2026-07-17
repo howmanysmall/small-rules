@@ -8,7 +8,7 @@ A collection of [Oxlint](https://oxc.rs)-native rules for linting [roblox-ts](ht
 ni -D @pobammer-ts/small-rules
 ```
 
-This package is an [Oxlint plugin](https://oxc.rs/docs/guide/usage/plugins) and must be used with [Oxlint](https://oxc.rs) v1.69.0 or later. It also requires TypeScript 6 and Node.js `^20.19.0` / `>=22.12.0`.
+This package is an [Oxlint plugin](https://oxc.rs/docs/guide/usage/plugins) and must be used with [Oxlint](https://oxc.rs) v1.69.0 or later. It supports TypeScript versions from 5 up to, but not including, 8 and requires Node.js `^20.19.0` or `>=22.12.0`.
 
 ## Configuration
 
@@ -28,7 +28,7 @@ All rules are namespaced under the `small-rules/` prefix. Pick the subset that f
 
 ## Rules
 
-Full rule documentation is forthcoming alongside the project docs site.
+Browse the [complete rule catalog](https://howmanysmall.github.io/small-rules/rules/) for source-backed descriptions, configuration, diagnostics, and examples.
 
 ## License
 

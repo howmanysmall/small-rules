@@ -16,6 +16,7 @@ function Component() {
     }, []);
 }
 `,
+				documentation: { id: "fail", title: "Missing effect dependency" },
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -1213,7 +1214,8 @@ function Component() {
 `,
 			},
 			// Correct dependencies
-			`
+			{
+				code: `
 function Component() {
     const a = 1;
     useEffect(() => {
@@ -1221,6 +1223,8 @@ function Component() {
     }, [a]);
 }
 `,
+				documentation: { id: "pass", title: "Complete effect dependencies" },
+			},
 
 			// Multiple correct dependencies
 			`

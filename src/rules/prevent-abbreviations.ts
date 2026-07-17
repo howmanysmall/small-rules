@@ -11,6 +11,11 @@ import {
 } from "$oxc-utilities/oxc-utilities";
 import {
 	ANOTHER_NAME_MESSAGE,
+	DEFAULT_ALLOW_LIST,
+	DEFAULT_ALLOW_PROPERTY_ACCESS,
+	DEFAULT_IGNORE,
+	DEFAULT_REPLACEMENTS,
+	DEFAULT_SHORTHANDS,
 	MESSAGE_ID_REPLACE,
 	MESSAGE_ID_SUGGESTION,
 } from "$oxc-utilities/prevent-abbreviations/constants";
@@ -451,43 +456,66 @@ const preventAbbreviations = defineRule({
 				properties: {
 					allowList: {
 						additionalProperties: { type: "boolean" },
+						default: DEFAULT_ALLOW_LIST,
+						defaultLabel: "default allow list",
+						description: "Names that should be allowed even when they match a discouraged abbreviation.",
 						type: "object",
 					},
 					allowPropertyAccess: {
+						default: DEFAULT_ALLOW_PROPERTY_ACCESS,
+						description: "Property names that may keep abbreviated member access.",
 						items: { type: "string" },
 						type: "array",
 					},
 					checkDefaultAndNamespaceImports: {
+						default: "internal",
+						description: "Whether default and namespace import local names should be checked.",
 						enum: [false, true, "internal"],
 					},
 					checkFilenames: {
+						default: true,
+						description: "Whether file names should be checked for abbreviations.",
 						type: "boolean",
 					},
 					checkProperties: {
+						default: false,
+						description: "Whether object, member, and JSX property names should be checked.",
 						type: "boolean",
 					},
 					checkShorthandImports: {
+						default: "internal",
+						description: "Whether renamed shorthand imports should be checked.",
 						enum: [false, true, "internal"],
 					},
 					checkShorthandProperties: {
+						default: true,
+						description: "Whether shorthand object property names should be checked.",
 						type: "boolean",
 					},
 					checkVariables: {
+						default: true,
+						description: "Whether variable, function, class, and component names should be checked.",
 						type: "boolean",
 					},
 					extendDefaultAllowList: {
+						default: true,
+						description: "Merge configured allowList entries with the default allow list.",
 						type: "boolean",
 					},
 					extendDefaultReplacements: {
+						default: true,
+						description: "Merge configured replacements with the default replacement map.",
 						type: "boolean",
 					},
 					ignore: {
-						items: {
-							oneOf: [{ type: "object" }, { type: "string" }],
-						},
+						default: DEFAULT_IGNORE,
+						description: "Names or regular expression patterns that should be ignored.",
+						items: { type: "string" },
 						type: "array",
 					},
 					ignoreShorthands: {
+						default: [],
+						description: "Shorthand names that should not be reported.",
 						items: { type: "string" },
 						type: "array",
 					},
@@ -501,10 +529,16 @@ const preventAbbreviations = defineRule({
 								},
 							],
 						},
+						default: DEFAULT_REPLACEMENTS,
+						defaultLabel: "default replacement map",
+						description: "Replacement suggestions for discouraged names.",
 						type: "object",
 					},
 					shorthands: {
 						additionalProperties: { type: "string" },
+						default: DEFAULT_SHORTHANDS,
+						defaultLabel: "default shorthands",
+						description: "Shorthand names and the full names they should expand to.",
 						type: "object",
 					},
 				},

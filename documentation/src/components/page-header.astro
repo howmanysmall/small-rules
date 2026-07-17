@@ -1,0 +1,32 @@
+---
+import Icon from "./icon.astro";
+
+interface Props {
+	kicker?: string;
+	subtitle?: string;
+	title: string;
+}
+
+const { title, subtitle, kicker } = Astro.props;
+---
+
+<section class="hero-splash hero-splash--compact">
+	<div aria-hidden="true" class="hero-orbs">
+		<span class="hero-orb hero-orb--1"></span>
+		<span class="hero-orb hero-orb--2"></span>
+		<span class="hero-orb hero-orb--3"></span>
+	</div>
+
+	<div class="hero-copy hero-copy--centered">
+		{kicker && (
+				<span class="hero-kicker hero-kicker--static">
+					<Icon name="sparkles" size={14} />
+					<span>{kicker}</span>
+				</span>
+			)}
+
+		<h1 class="hero-title hero-title--compact">{title}</h1>
+
+		{subtitle && <p class="hero-subtitle hero-subtitle--compact">{subtitle}</p>}
+	</div>
+</section>

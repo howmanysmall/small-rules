@@ -9,6 +9,7 @@ describe("no-array-size-assignment", () => {
 			// .size() pattern (default roblox-ts)
 			{
 				code: "array[array.size()] = value;",
+				documentation: { id: "fail", title: "array size index assignment" },
 				errors: [{ messageId: "usePush" }],
 				options: [{ allowAutofix: true }],
 				output: "array.push(value);",
@@ -167,7 +168,10 @@ describe("no-array-size-assignment", () => {
 		],
 		valid: [
 			// .size() valid (default roblox-ts)
-			"array.push(value);",
+			{
+				code: "array.push(value);",
+				documentation: { id: "pass", title: "append with push" },
+			},
 			"array[array.size() - 1] = value;",
 			"array[other.size()] = value;",
 			"array[factory().size()] = value;",

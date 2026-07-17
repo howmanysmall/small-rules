@@ -20,10 +20,11 @@ describe("directive-require-description", () => {
 		],
 	});
 
-	js.run("directive-require-description (javascript)", rule, {
+	js.run("directive-require-description", rule, {
 		invalid: [
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
+				documentation: { id: "fail", title: "Missing directive description" },
 				errors: [{ data: { kind: "oxlint-disable" }, messageId: "missingDescription" }],
 			},
 			{
@@ -56,6 +57,7 @@ describe("directive-require-description", () => {
 			},
 			{
 				code: "/* oxlint-disable no-console -- need for debugging */\nconst x = 1;",
+				documentation: { id: "pass", title: "Described directive comment" },
 			},
 			{
 				code: "const x = 1;\n// oxlint-disable-line no-console -- temp",

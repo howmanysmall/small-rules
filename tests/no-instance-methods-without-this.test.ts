@@ -15,6 +15,7 @@ class MyClass {
     }
 }
 `,
+				documentation: { id: "fail", title: "instance method without this" },
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 			},
 			// Protected methods without this
@@ -124,6 +125,7 @@ class MyClass {
     }
 }
 `,
+				documentation: { id: "pass", title: "static method without this" },
 			},
 			// Methods using this.property
 			{

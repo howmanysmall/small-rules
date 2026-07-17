@@ -13,37 +13,40 @@ lockfile = true
 [tools]
 "cargo:similarity-ts" = "latest"
 "github:howmanysmall/pullhook" = "latest"
+"npm:sherif" = "latest"
 actionlint = "latest"
+betterleaks = "latest"
 bun = "latest"
-gitleaks = "latest"
 hk = "latest"
+ni = "latest"
 node = "24"
+nub = "latest"
+pinact = "latest"
 pkl = "latest"
 pnpm = "11.10.0"
 rumdl = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 tombi = "latest"
+vale = "latest"
 zizmor = "latest"
-nub = "latest"
-ni = "latest"
 
 [tasks]
 [tasks.install]
 description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
-run = "pnpm install"
+run = "ni"
 
 [tasks.lint]
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."
-run = "nr lint"
+run = "node --run lint"
 
 [tasks.type-check]
 description = "Run TypeScript type checking with tsgo without emitting files."
-run = "nr type-check"
+run = "node --run type-check"
 
 [tasks.knip]
 description = "Detect unused files, exports, and dependencies with Knip."
-run = "nr knip"
+run = "node --run knip"
 
 [tasks.duplicates]
 alias = "dupes"
@@ -52,11 +55,11 @@ run = "similarity-ts --threshold 0.85 --min-lines 5 --print src"
 
 [tasks.build]
 description = "Build the package into dist using tsdown."
-run = "nr build"
+run = "node --run build"
 
 [tasks.test]
 description = "Run the Vitest unit test suite once without sharding."
-run = "nr test"
+run = "node --run test"
 
 [tasks.check]
 description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
@@ -71,7 +74,7 @@ description = "Run local validation, then bump version, commit, tag, and push vi
 depends = ["check"]
 interactive = true
 confirm = "This will run bumpp, create a release commit/tag, and push. Continue?"
-run = "nr release"
+run = "node --run release"
 
 [tasks.dry-release]
 alias = "dr"

@@ -9,6 +9,7 @@ describe("no-recursive", () => {
 			// Direct recursion — factorial
 			{
 				code: `function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); }`,
+				documentation: { id: "fail", title: "Direct recursive function call" },
 				errors: [{ messageId: "noRecursive" }],
 			},
 			// Direct recursion — fibonacci (two recursive call sites)
@@ -60,7 +61,10 @@ describe("no-recursive", () => {
 		],
 		valid: [
 			// Non-recursive function
-			`function foo() { return 1; }`,
+			{
+				code: `function foo() { return 1; }`,
+				documentation: { id: "pass", title: "Simple non-recursive function" },
+			},
 			// No self-reference
 			`function greet() { console.log("hello"); }`,
 			// Arrow function with no recursion

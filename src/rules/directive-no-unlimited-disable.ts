@@ -26,7 +26,7 @@ const directiveNoUnlimitedDisable = defineRule({
 	},
 	meta: {
 		docs: {
-			description: "disallow `eslint-disable` comments without rule names",
+			description: "Disallow `oxlint-disable` or `eslint-disable` comments without rule names.",
 		},
 		messages: {
 			unexpected: "Unexpected unlimited '{{kind}}' comment. Specify some rule names to disable.",

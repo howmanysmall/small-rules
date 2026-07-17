@@ -13,7 +13,6 @@ import {
 
 import { ts, tsx } from "./rule-testers";
 
-const TEST_IGNORE_PATTERN = /^test/u;
 const MANY_REPLACEMENTS = Object.fromEntries(
 	Array.from({ length: 104 }, (_, index) => [`replacement${index.toString().padStart(3, "0")}`, true]),
 );
@@ -24,6 +23,7 @@ describe("prevent-abbreviations", () => {
 			// Variable declaration with abbreviation (const)
 			{
 				code: "const err = new Error();",
+				documentation: { id: "fail", title: "Abbreviated variable names" },
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
@@ -579,7 +579,7 @@ describe("prevent-abbreviations", () => {
 			// Ignore patterns (regex)
 			{
 				code: "const testErr = new Error();",
-				options: [{ ignore: [TEST_IGNORE_PATTERN] }],
+				options: [{ ignore: ["^test"] }],
 			},
 			// Ignore patterns (string)
 			{
@@ -603,6 +603,7 @@ describe("prevent-abbreviations", () => {
 			// Valid full names
 			{
 				code: "const error = new Error();",
+				documentation: { id: "pass", title: "Expanded variable names" },
 			},
 			{
 				code: "const arguments = [1, 2, 3];",
@@ -799,6 +800,19 @@ describe("prevent-abbreviations", () => {
 			expect(getNameReplacements("txtName", overlapOptions)).toStrictEqual({ samples: ["textName"], total: 1 });
 			expect(getNameReplacements("kept", options)).toStrictEqual({ total: 0 });
 			expect(getNameReplacements("testName", options)).toStrictEqual({ total: 0 });
+		});
+
+		it("normalizes ignore patterns with RegExp instances", () => {
+			expect.assertions(4);
+
+			const options = prepareOptions({
+				ignore: [/^test/u, "regexString"],
+			});
+
+			// RegExp instances pass through directly; strings get converted
+			for (const pattern of options.ignore) {
+				expect(pattern instanceof RegExp).toBe(true);
+			}
 		});
 	});
 

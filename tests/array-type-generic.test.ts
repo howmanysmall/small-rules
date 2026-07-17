@@ -8,6 +8,7 @@ describe("array-type-generic", () => {
 		invalid: [
 			{
 				code: "type A = string[];",
+				documentation: { id: "fail", title: "Bracket array type syntax" },
 				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type A = Array<string>;",
 			},
@@ -48,7 +49,10 @@ describe("array-type-generic", () => {
 			},
 		],
 		valid: [
-			"type Point = [x: number, y: number];",
+			{
+				code: "type Point = [x: number, y: number];",
+				documentation: { id: "pass", title: "Generic array type syntax" },
+			},
 			"function parseValues(values: [unknown, string, ...unknown[]]): void {}",
 			"type OptionalPoint = readonly [x: number, y: number];",
 			"type Values = Array<string>;",

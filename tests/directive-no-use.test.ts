@@ -9,12 +9,14 @@ describe("directive-no-use", () => {
 			invalid: [
 				{
 					code: "/* oxlint-disable no-console */\nconst x = 1;",
+					documentation: { id: "fail", title: "Disallow block directive comments" },
 					errors: [{ messageId: "disallow" }],
 				},
 			],
 			valid: [
 				{
 					code: "/* oxlint-disable no-console */\nconst x = 1;",
+					documentation: { id: "pass", title: "Allow configured directive comment" },
 					options: [{ allow: ["oxlint-disable"] }],
 				},
 			],

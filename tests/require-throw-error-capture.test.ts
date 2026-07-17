@@ -13,7 +13,8 @@ describe("require-throw-error-capture", () => {
 			// Named function declaration
 			{
 				code: ["function foo() {", "	throw new Error('bad');", "}"].join("\n"),
-				errors: [error],
+				documentation: { id: "fail", title: "Missing stack trace capture" },
+				errors: [{ messageId: "missingCaptureStackTrace" }],
 				output: [
 					"function foo() {",
 					"	const error = new Error('bad');",
@@ -316,13 +317,16 @@ describe("require-throw-error-capture", () => {
 		],
 		valid: [
 			// Already using `captureStackTrace` pattern
-			[
-				"function good() {",
-				"	const err = new Error('msg');",
-				"	Error.captureStackTrace(err, good);",
-				"	throw err;",
-				"}",
-			].join("\n"),
+			{
+				code: [
+					"function good() {",
+					"	const err = new Error('msg');",
+					"	Error.captureStackTrace(err, good);",
+					"	throw err;",
+					"}",
+				].join("\n"),
+				documentation: { id: "pass", title: "Captured stack trace before throw" },
+			},
 			// Throw with identifier (not a `NewExpression`)
 			["function rethrow(e: Error) {", "	throw e;", "}"].join("\n"),
 			// Throw with non-Error new expression

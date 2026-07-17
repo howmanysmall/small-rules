@@ -12,6 +12,7 @@ import * as React from "@rbxts/react";
 
 const element = React.createElement("frame");
 `,
+				documentation: { id: "fail", title: "Static React createElement call" },
 				errors: [{ messageId: "useJsx" }],
 			},
 			{
@@ -160,6 +161,7 @@ import React from "@rbxts/react";
 
 const element = React["createElement"]("frame");
 `,
+				documentation: { id: "pass", title: "Computed createElement property" },
 			},
 			{
 				code: `

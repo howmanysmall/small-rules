@@ -1,19 +1,41 @@
-allowBuilds:
-  "@swc/core": true
-
-enableGlobalVirtualStore: true
+# Equivalent to pnpm-workspace.yaml `packages:`
 packages:
   - documentation
-fetchRetries: 5
-fetchRetryMintimeout: 1000
-fetchRetryMaxtimeout: 30000
-fetchTimeout: 60000
+
+# Force specific versions of any dependency (including transitive)
+overrides:
+  vite: ^8
+
+packageExtensions:
+  "@astrojs/mdx@7.0.0":
+    dependencies:
+      satteri: 0.9.2
+      "@astrojs/starlight": 0.41.1
+
+# Block exotic sub-dependencies (e.g. git, file: deps)
+blockExoticSubdeps: true
+strictSsl: true
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 10080
 trustPolicyExclude:
   - skills
 
-blockExoticSubdeps: true
+# Only allow specific packages to run install scripts
+allowBuilds:
+  "@swc/core": true
+  esbuild: true
+  sharp: true
+
+strictDepBuilds: true
+strictPeerDependencies: true
+
+# Global virtual store (pnpm's node_modules/.pnpm equivalent)
+enableGlobalVirtualStore: true
+
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
+  - "@astrojs/markdown-satteri"
+  - "@astrojs/starlight"
   - "@biomejs/biome"
   - "@biomejs/cli-darwin-arm64"
   - "@biomejs/cli-darwin-x64"
@@ -24,15 +46,10 @@ minimumReleaseAgeExclude:
   - "@biomejs/cli-linux-x64-musl"
   - "@biomejs/cli-win32-arm64"
   - "@biomejs/cli-win32-x64"
-  - "@yuku-parser/binding-darwin-arm64"
-  - "@yuku-parser/binding-darwin-x64"
-  - "@yuku-parser/binding-linux-x64-gnu"
-  - "@yuku-parser/binding-linux-arm64-gnu"
-  - "@yuku-parser/binding-linux-x64-musl"
-  - "@yuku-parser/binding-linux-arm64-musl"
-  - "@yuku-parser/binding-freebsd-x64"
-  - "@yuku-parser/binding-win32-x64"
-  - "@yuku-parser/binding-win32-arm64"
+  - "@expressive-code/core"
+  - "@expressive-code/plugin-frames"
+  - "@expressive-code/plugin-shiki"
+  - "@expressive-code/plugin-text-markers"
   - "@oxfmt/binding-android-arm-eabi"
   - "@oxfmt/binding-android-arm64"
   - "@oxfmt/binding-darwin-arm64"
@@ -60,20 +77,40 @@ minimumReleaseAgeExclude:
   - "@typescript/native-preview-linux-x64"
   - "@typescript/native-preview-win32-arm64"
   - "@typescript/native-preview-win32-x64"
-  - oxfmt
-  - oxlint-plugin-utilities
+  - "@yuku-parser/binding-darwin-arm64"
+  - "@yuku-parser/binding-darwin-x64"
+  - "@yuku-parser/binding-freebsd-x64"
+  - "@yuku-parser/binding-linux-arm-gnu"
+  - "@yuku-parser/binding-linux-arm-musl"
+  - "@yuku-parser/binding-linux-arm64-gnu"
+  - "@yuku-parser/binding-linux-arm64-musl"
+  - "@yuku-parser/binding-linux-x64-gnu"
+  - "@yuku-parser/binding-linux-x64-musl"
+  - "@yuku-parser/binding-win32-arm64"
+  - "@yuku-parser/binding-win32-x64"
   - "@yuku-parser/binding-linux-arm-gnu@0.6.1"
   - "@yuku-parser/binding-linux-arm-musl@0.6.1"
+  - astro
+  - astro-expressive-code
+  - expressive-code
+  - oxfmt
+  - oxlint
+  - oxlint-plugin-utilities
+  - rehype-expressive-code
+  - skills
   - yuku-parser@0.6.1
 
 minimumReleaseAgeStrict: true
+
+# Use time-based resolution for reproducible installs
 resolutionMode: time-based
+
+fetchRetries: 5
+fetchRetryMintimeout: 1000
+fetchRetryMaxtimeout: 30000
+fetchTimeout: 60000
+
 strictStorePkgContentCheck: true
-strictDepBuilds: true
-strictPeerDependencies: true
-strictSsl: true
-trustPolicy: no-downgrade
-trustPolicyIgnoreAfter: 10080
 verifyStoreIntegrity: true
 catalogs:
   build:
@@ -86,7 +123,6 @@ catalogs:
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     "@stryker-mutator/api": 9.6.1
     "@stryker-mutator/core": 9.6.1
-    "@total-typescript/ts-reset": 0.6.1
     "@typescript/native-preview": 7.0.0-dev.20260707.2
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
@@ -98,15 +134,23 @@ catalogs:
     get-tsconfig: 4.14.0
     jiti: 2.7.0
     jscpd: 5.0.12
+    jsonc-parser: 3.3.1
+    just-diff: 6.0.2
+    mutative: 1.3.0
     oxfmt: 0.58.0
     oxlint: 1.73.0
     oxlint-tsgolint: 0.24.0
-    pncat: 0.12.0
+    picocolors: 1.1.1
     sfw: 2.0.6
     skills: 1.5.16
     type-fest: 5.8.0
+    typescript: 5.9.3
     vitiate: 0.3.1
     zx: 8.8.5
+  frontend:
+    "@astrojs/react": 6.0.0
+    react: 19.2.7
+    react-dom: 19.2.7
   lint:
     "@biomejs/biome": 2.5.3
     eslint: 10.7.0
@@ -116,13 +160,19 @@ catalogs:
     eslint-plugin-unused-imports: 4.4.1
     knip: 6.26.0
   prod:
-    arktype: 2.2.3
+    "@astrojs/markdown-satteri": 0.3.2
+    "@astrojs/mdx": 7.0.0
+    "@astrojs/starlight": 0.41.1
+    astro: 7.0.3
     ignore: 7.0.6
     minimatch: 10.2.5
     oxc-resolver: 11.23.0
     oxlint-plugin-utilities: 1.1.0
+    satteri: 0.9.2
+    sharp: 0.34.5
     yuku-parser: 0.6.1
   test:
+    "@playwright/test": 1.61.1
     "@fast-check/vitest": 0.4.1
     "@stryker-mutator/vitest-runner": 9.6.1
     "@vitest/coverage-v8": 4.1.10
@@ -131,3 +181,10 @@ catalogs:
   types:
     "@types/bun": 1.3.14
     "@types/node": "25"
+    "@types/react": 19.2.17
+    "@types/react-dom": 19.2.3
+catalog:
+  "@total-typescript/ts-reset": 0.6.1
+  arktype: 2.2.3
+  pncat: 0.12.0
+  vite-tsconfig-paths: 6.1.1

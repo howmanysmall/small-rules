@@ -18,8 +18,9 @@ Events.units.unequipUnit.connect((player: Player, unitKey: string): void => {
     }
 });
 `,
+				documentation: { id: "fail", title: "event fired inside callback" },
 				errors: [{ messageId: "preferFunctions" }],
-				options,
+				options: [{ eventsImportPaths: ["server/networking"] }],
 			},
 			{
 				code: `
@@ -375,10 +376,11 @@ Events.units.unequipUnit.connect((player: Player): void => {
 				code: `
 	import { Events } from "server/networking";
 
-	Events.units.unequipUnit.connect((player: Player): void => {
-	    Events.promptNotification.fire(player, "error");
-	});
-	`,
+Events.units.unequipUnit.connect((player: Player): void => {
+    Events.promptNotification.fire(player, "error");
+});
+`,
+				documentation: { id: "pass", title: "event callback without configured import" },
 			},
 			{
 				code: `

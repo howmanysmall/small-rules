@@ -330,7 +330,11 @@ const memoizedEffectDependencies = defineRule({
 						type: "string",
 					},
 					hooks: {
-						description: "Array of effect hook entries to check for memoized dependencies",
+						default: Array.from(DEFAULT_EFFECT_HOOKS, ([name, dependenciesIndex]) => ({
+							dependenciesIndex,
+							name,
+						})),
+						description: "Effect hooks checked by default; configured entries are added to this set.",
 						items: {
 							additionalProperties: false,
 							properties: {

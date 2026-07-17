@@ -393,14 +393,18 @@ const useHookAtTopLevel = defineRule({
 				additionalProperties: false,
 				properties: {
 					ignoreHooks: {
+						description: "Hook names that should be ignored even when they match the hook naming pattern.",
 						items: { type: "string" },
 						type: "array",
 					},
 					importSources: {
 						additionalProperties: { type: "boolean" },
+						description:
+							"Import sources or namespace names mapped to whether their hooks should be checked.",
 						type: "object",
 					},
 					onlyHooks: {
+						description: "If set, only these hook names are checked.",
 						items: { type: "string" },
 						type: "array",
 					},

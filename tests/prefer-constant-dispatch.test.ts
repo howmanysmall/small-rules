@@ -27,11 +27,12 @@ function Component() {
 function Component() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    dispatch({ type: "OPEN" });
+	    dispatch({ type: "OPEN" });
 
     return state;
 }
 `,
+				documentation: { id: "fail", title: "Inline constant reducer action" },
 				errors: [
 					{
 						messageId: "preferConstantDispatch",
@@ -44,7 +45,7 @@ const PREFER_CONSTANT_ACTION_0 = { type: "OPEN" };
 function Component() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    dispatch(PREFER_CONSTANT_ACTION_0);
+	    dispatch(PREFER_CONSTANT_ACTION_0);
 
     return state;
 }
@@ -207,6 +208,7 @@ function Component(type) {
     return state;
 }
 `,
+				documentation: { id: "pass", title: "Dynamic reducer action type" },
 			},
 			{
 				code: `

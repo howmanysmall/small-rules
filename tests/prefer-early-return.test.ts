@@ -14,7 +14,13 @@ describe("prefer-early-return", () => {
 			// Default maximumStatements = 1, so 2+ statements triggers
 			{
 				code: "function foo() { if (something) { doSomething(); doSomethingElse(); } }",
-				errors: [error],
+				documentation: { id: "fail", title: "Function body needs guard clause" },
+				errors: [
+					{
+						message:
+							"Function body is wrapped in a single conditional without an else branch. This increases nesting depth and cognitive load. Invert the condition and return early: if (!condition) return; then place the main logic at the top level.",
+					},
+				],
 			},
 			// MaximumStatements = 0 means even 1 statement triggers
 			{
@@ -45,7 +51,10 @@ describe("prefer-early-return", () => {
 		],
 		valid: [
 			// Already using early return pattern
-			{ code: "function foo() { if (!something) { return; } doSomething(); doSomethingElse(); }" },
+			{
+				code: "function foo() { if (!something) { return; } doSomething(); doSomethingElse(); }",
+				documentation: { id: "pass", title: "Early return guard clause" },
+			},
 			// Only 1 statement (default max is 1)
 			{ code: "function foo() { if (something) { doSomething(); } }" },
 			// Expression statement without block
