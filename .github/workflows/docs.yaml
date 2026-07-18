@@ -2,7 +2,10 @@ name: Deploy Documentation
 
 on:
   workflow_call:
-  workflow_dispatch:
+    inputs:
+      ref:
+        required: true
+        type: string
 
 concurrency:
   group: pages
@@ -22,6 +25,7 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.ref }}
 
       - name: Setup toolchain
         uses: ./.github/actions/setup
@@ -33,7 +37,8 @@ jobs:
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
 
       - name: Build documentation
-        run: node --run docs:build
+        working-directory: documentation
+        run: node --run build
 
       - name: Upload documentation
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
