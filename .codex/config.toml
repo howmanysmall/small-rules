@@ -2,6 +2,7 @@ model = "gpt-5.6-sol"
 model_context_window = 372000
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "xhigh"
+features.hooks = true
 
 [mcp_servers.astro-docs]
 url = "https://mcp.docs.astro.build/mcp"
@@ -16,3 +17,11 @@ url = "https://mcp.context7.com/mcp"
 
 [features.multi_agent_v2]
 max_concurrent_threads_per_session = 1000
+
+[[hooks.PostToolUse]]
+matcher = "apply_patch"
+
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "bash scripts/quiet-on-success.sh bash -c 'set -euo pipefail; bash scripts/format-lint-relevant.sh; bash scripts/test-relevant.sh'"
+timeout = 600
