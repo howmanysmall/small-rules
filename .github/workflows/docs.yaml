@@ -6,6 +6,13 @@ on:
       ref:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to deploy."
+        required: true
+        default: "main"
+        type: string
 
 concurrency:
   group: pages
