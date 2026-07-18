@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const CHECKS_YAML = readFileSync(".github/workflows/checks.yaml", "utf8");
 const CI_YAML = readFileSync(".github/workflows/ci.yaml", "utf8");
 const DOCS_WORKFLOW_PATH = ".github/workflows/docs.yaml";
+const RELEASE_YAML = readFileSync(".github/workflows/release.yaml", "utf8");
 const SETUP_ACTION_YAML = readFileSync(".github/actions/setup/action.yaml", "utf8");
 
 function getDocsYaml(): string {
@@ -35,16 +36,19 @@ describe("documentation validation workflow", () => {
 });
 
 describe("documentation deployment workflow", () => {
-	it("deploys only after successful main CI or manual dispatch", () => {
-		expect.assertions(8);
+	it("deploys only after a successful version-tag release", () => {
+		expect.assertions(11);
 		const docsYaml = getDocsYaml();
 
 		expect(docsYaml).toContain("workflow_call:");
-		expect(docsYaml).toContain("workflow_dispatch:");
-		expect(CI_YAML).toContain("needs: checks");
-		expect(CI_YAML).toContain("github.event_name == 'push'");
-		expect(CI_YAML).toContain("github.ref == 'refs/heads/main'");
-		expect(CI_YAML).toContain("uses: ./.github/workflows/docs.yaml");
+		expect(docsYaml).not.toContain("workflow_dispatch:");
+		expect(CI_YAML).not.toContain("uses: ./.github/workflows/docs.yaml");
+		expect(CI_YAML).not.toContain("pages: write");
+		expect(RELEASE_YAML).toContain("needs: publish");
+		expect(RELEASE_YAML).toContain("github.event_name == 'push'");
+		expect(RELEASE_YAML).toContain("startsWith(github.ref, 'refs/tags/')");
+		expect(RELEASE_YAML).toContain("uses: ./.github/workflows/docs.yaml");
+		expect(RELEASE_YAML).toContain("ref: main");
 		expect(docsYaml).not.toContain("workflow_run:");
 		expect(docsYaml).not.toContain("pull_request:");
 	});
@@ -60,6 +64,15 @@ describe("documentation deployment workflow", () => {
 		expect(docsYaml).toContain("actions/upload-pages-artifact@");
 		expect(docsYaml).toContain("actions/deploy-pages@");
 		expect(docsYaml).toContain("environment: github-pages");
+	});
+
+	it("builds the generated release notes from main without ni", () => {
+		expect.assertions(3);
+		const docsYaml = getDocsYaml();
+
+		expect(docsYaml).toMatch(/ref: \$\{\{ inputs\.ref \}\}/u);
+		expect(docsYaml).toContain("working-directory: documentation");
+		expect(docsYaml).toContain("run: node --run build");
 	});
 
 	it("keeps validation and deployment workflows free of branch writes and release credentials", () => {

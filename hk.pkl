@@ -180,8 +180,11 @@ hooks {
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
       }
-      ["pinact"] = (Builtins.pinact) {
+      ["pinact"] {
         glob = workflow_action_files
+        check = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
+        fix = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
+        check_first = true
       }
 
       // Markdown — rumdl lint + fmt
@@ -359,8 +362,9 @@ hooks {
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
       }
-      ["pinact"] = (Builtins.pinact) {
+      ["pinact"] {
         glob = workflow_action_files
+        check = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
       }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
@@ -483,8 +487,9 @@ hooks {
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
       }
-      ["pinact"] = (Builtins.pinact) {
+      ["pinact"] {
         glob = workflow_action_files
+        fix = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
       }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
