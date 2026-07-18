@@ -4,11 +4,16 @@ import { describe, expect, it } from "vitest";
 const CHECKS_YAML = readFileSync(".github/workflows/checks.yaml", "utf8");
 const CI_YAML = readFileSync(".github/workflows/ci.yaml", "utf8");
 const DOCS_WORKFLOW_PATH = ".github/workflows/docs.yaml";
+const DEPLOY_SCRIPT_PATH = "scripts/deploy-docs.sh";
 const RELEASE_YAML = readFileSync(".github/workflows/release.yaml", "utf8");
 const SETUP_ACTION_YAML = readFileSync(".github/actions/setup/action.yaml", "utf8");
 
 function getDocsYaml(): string {
 	return existsSync(DOCS_WORKFLOW_PATH) ? readFileSync(DOCS_WORKFLOW_PATH, "utf8") : "";
+}
+
+function getDeployScript(): string {
+	return existsSync(DEPLOY_SCRIPT_PATH) ? readFileSync(DEPLOY_SCRIPT_PATH, "utf8") : "";
 }
 
 describe("documentation validation workflow", () => {
@@ -36,12 +41,12 @@ describe("documentation validation workflow", () => {
 });
 
 describe("documentation deployment workflow", () => {
-	it("deploys only after a successful version-tag release", () => {
+	it("deploys after a successful version-tag release, never ordinary CI", () => {
 		expect.assertions(11);
 		const docsYaml = getDocsYaml();
 
 		expect(docsYaml).toContain("workflow_call:");
-		expect(docsYaml).not.toContain("workflow_dispatch:");
+		expect(docsYaml).toContain("workflow_dispatch:");
 		expect(CI_YAML).not.toContain("uses: ./.github/workflows/docs.yaml");
 		expect(CI_YAML).not.toContain("pages: write");
 		expect(RELEASE_YAML).toContain("needs: publish");
@@ -73,6 +78,17 @@ describe("documentation deployment workflow", () => {
 		expect(docsYaml).toMatch(/ref: \$\{\{ inputs\.ref \}\}/u);
 		expect(docsYaml).toContain("working-directory: documentation");
 		expect(docsYaml).toContain("run: node --run build");
+	});
+
+	it("dispatches an explicit main deployment through the script", () => {
+		expect.assertions(4);
+		const docsYaml = getDocsYaml();
+		const deployScript = getDeployScript();
+
+		expect(docsYaml).toContain("workflow_dispatch:");
+		expect(docsYaml).toContain('default: "main"');
+		expect(docsYaml).toContain('description: "Git ref to deploy."');
+		expect(deployScript).toContain("gh workflow run docs.yaml --ref main -f ref=main");
 	});
 
 	it("keeps validation and deployment workflows free of branch writes and release credentials", () => {
