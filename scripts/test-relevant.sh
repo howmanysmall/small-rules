@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
 
 testsToRun=()
 
@@ -23,22 +23,22 @@ while IFS= read -r -d '' record; do
 	path="${record:3}"
 
 	case "${status}" in
-	*R* | *C*)
-		IFS= read -r -d '' _source_path
-		;;
+		*R* | *C*)
+			IFS= read -r -d ''
+			;;
 	esac
 
 	case "${path}" in
-	tests/*.test.ts | tests/*.spec.ts)
-		addTestIfPresent "${path}"
-		;;
-	src/rules/*.ts)
-		ruleName="${path#src/rules/}"
-		addTestIfPresent "tests/${ruleName%.ts}.test.ts"
-		;;
-	src/index.ts)
-		addTestIfPresent "tests/index.test.ts"
-		;;
+		tests/*.test.ts | tests/*.spec.ts)
+			addTestIfPresent "${path}"
+			;;
+		src/rules/*.ts)
+			ruleName="${path#src/rules/}"
+			addTestIfPresent "tests/${ruleName%.ts}.test.ts"
+			;;
+		src/index.ts)
+			addTestIfPresent "tests/index.test.ts"
+			;;
 	esac
 done < <(git status --porcelain=v1 -z --untracked-files=all)
 

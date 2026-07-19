@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
 
 ecmaFiles=()
 shellFiles=()
@@ -15,19 +15,19 @@ wasWorkspaceChanged=false
 
 isShellFile() {
 	case "$1" in
-	*.sh | *.bash | *.ksh | *.dash | *.zsh)
-		return 0
-		;;
+		*.sh | *.bash | *.ksh | *.dash | *.zsh)
+			return 0
+			;;
 	esac
 
-	IFS= read -r firstLine <"$1" || true
+	IFS= read -r firstLine < "$1" || true
 	case "${firstLine}" in
-	'#!'*'/bash'* | '#!'*'/sh'* | '#!'*'/zsh'* | '#!'*'/ksh'* | '#!'*'/dash'*)
-		return 0
-		;;
-	*)
-		return 1
-		;;
+		'#!'*'/bash'* | '#!'*'/sh'* | '#!'*'/zsh'* | '#!'*'/ksh'* | '#!'*'/dash'*)
+			return 0
+			;;
+		*)
+			return 1
+			;;
 	esac
 }
 
@@ -36,34 +36,34 @@ while IFS= read -r -d '' record; do
 	path="${record:3}"
 
 	case "${status}" in
-	*R* | *C*)
-		IFS= read -r -d '' _source_path
-		;;
+		*R* | *C*)
+			IFS= read -r -d ''
+			;;
 	esac
 
 	[[ -z "${path}" || ! -f "${path}" ]] && continue
 
 	case "${path}" in
-	*.js | *.jsx | *.ts | *.tsx | *.mjs | *.cjs | *.mts | *.cts | *.astro)
-		ecmaFiles+=("${path}")
-		;;
-	*.toml)
-		tomlFiles+=("${path}")
-		;;
-	*.md | *.markdown | *.mdx)
-		markdownFiles+=("${path}")
-		;;
-	.github/workflows/*.yml | .github/workflows/*.yaml | .github/actions/*/action.yml | .github/actions/*/action.yaml)
-		actionlintFiles+=("${path}")
-		pinactFiles+=("${path}")
-		zizmorFiles+=("${path}")
-		;;
-	.github/dependabot.yml)
-		zizmorFiles+=("${path}")
-		;;
-	package.json | pnpm-workspace.yaml)
-		wasWorkspaceChanged=true
-		;;
+		*.js | *.jsx | *.ts | *.tsx | *.mjs | *.cjs | *.mts | *.cts | *.astro)
+			ecmaFiles+=("${path}")
+			;;
+		*.toml)
+			tomlFiles+=("${path}")
+			;;
+		*.md | *.markdown | *.mdx)
+			markdownFiles+=("${path}")
+			;;
+		.github/workflows/*.yml | .github/workflows/*.yaml | .github/actions/*/action.yml | .github/actions/*/action.yaml)
+			actionlintFiles+=("${path}")
+			pinactFiles+=("${path}")
+			zizmorFiles+=("${path}")
+			;;
+		.github/dependabot.yml)
+			zizmorFiles+=("${path}")
+			;;
+		package.json | pnpm-workspace.yaml)
+			wasWorkspaceChanged=true
+			;;
 	esac
 
 	if isShellFile "${path}"; then
@@ -78,7 +78,7 @@ if [[ ${#ecmaFiles[@]} -gt 0 ]]; then
 fi
 
 if [[ ${#shellFiles[@]} -gt 0 ]]; then
-	shfmt -w "${shellFiles[@]}"
+	shfmt -bn -ci -sr -w "${shellFiles[@]}"
 	shellcheck "${shellFiles[@]}"
 fi
 
