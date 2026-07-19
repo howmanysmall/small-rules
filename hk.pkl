@@ -156,12 +156,15 @@ hooks {
       }
 
       // Shell scripts
-      ["shfmt"] = (Builtins.shfmt) {
+      ["shfmt"] {
         match_any =
           List(
             new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
             new Config.FileSelector { types = List("shell") },
           )
+        check = "shfmt -bn -ci -sr -d {{files}}"
+        fix = "shfmt -bn -ci -sr -w {{files}}"
+        check_first = true
       }
       ["shellcheck"] = (Builtins.shellcheck) {
         match_any =
@@ -340,12 +343,13 @@ hooks {
       ["pkl-format"] = (Builtins.pkl_format) {
         glob = List("*.pkl")
       }
-      ["shfmt"] = (Builtins.shfmt) {
+      ["shfmt"] {
         match_any =
           List(
             new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
             new Config.FileSelector { types = List("shell") },
           )
+        check = "shfmt -bn -ci -sr -d {{files}}"
       }
       ["shellcheck"] = (Builtins.shellcheck) {
         match_any =
@@ -465,12 +469,13 @@ hooks {
       ["pkl-format"] = (Builtins.pkl_format) {
         glob = List("*.pkl")
       }
-      ["shfmt"] = (Builtins.shfmt) {
+      ["shfmt"] {
         match_any =
           List(
             new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
             new Config.FileSelector { types = List("shell") },
           )
+        fix = "shfmt -bn -ci -sr -w {{files}}"
       }
       ["shellcheck"] = (Builtins.shellcheck) {
         match_any =
