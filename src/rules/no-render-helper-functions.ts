@@ -93,7 +93,7 @@ function getBindingIdentifierName(binding: ESTree.BindingPattern): string | unde
 
 function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	let current = node;
-	/* v8 ignore next -- @preserve wrapper parents are optional parser shapes; property references do not require them. */
+	/* v8 ignore next -- @preserve wrapper parents are optional parser shapes; direct references do not require them. */
 	while (current !== undefined && WRAPPER_PARENT_TYPES.has(current.type)) current = current.parent ?? undefined;
 	return current;
 }
@@ -102,10 +102,18 @@ function isPropertyValueReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
 	const parent = ascendPastWrappers(node.parent ?? undefined);
 	/* v8 ignore next -- @preserve scope references always have parents in parser-produced ASTs. */
-	return parent?.type === "Property" && unwrapPropertyValue(parent.value) === node;
+	return parent?.type === "Property" && unwrapReferenceValue(parent.value) === node;
 }
 
-function unwrapPropertyValue(node: ESTree.Node): ESTree.Node {
+function isCallArgumentReference(node: ESTree.Node): boolean {
+	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
+	const parent = ascendPastWrappers(node.parent ?? undefined);
+	if (parent?.type !== "CallExpression") return false;
+
+	return parent.arguments.some((argument) => unwrapReferenceValue(argument) === node);
+}
+
+function unwrapReferenceValue(node: ESTree.Node): ESTree.Node {
 	let current = node;
 
 	while (isWrapperParent(current)) current = current.expression;
@@ -133,7 +141,7 @@ function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunct
 	return declared.length > 0 ? declared[0] : undefined;
 }
 
-function isCallbackPropertyFunction(node: CallbackFunction, sourceCode: SourceCode): boolean {
+function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceCode): boolean {
 	const variable = getDeclaredFunctionVariable(sourceCode, node);
 	/* v8 ignore next -- @preserve callers only pass declarations that have declared variables. */
 	if (variable === undefined) return false;
@@ -144,7 +152,9 @@ function isCallbackPropertyFunction(node: CallbackFunction, sourceCode: SourceCo
 		if (reference.isWrite()) continue;
 
 		hasReadReference = true;
-		if (!isPropertyValueReference(reference.identifier)) return false;
+		if (!(isPropertyValueReference(reference.identifier) || isCallArgumentReference(reference.identifier))) {
+			return false;
+		}
 	}
 
 	return hasReadReference;
@@ -175,7 +185,7 @@ const noRenderHelperFunctions = defineRule({
 
 			const variableName = getBindingIdentifierName(parent.id);
 			if (variableName === undefined || isUppercaseName(variableName) || isHookName(variableName)) return;
-			if (isCallbackPropertyFunction(node, context.sourceCode)) return;
+			if (isCallbackReferenceFunction(node, context.sourceCode)) return;
 
 			const typeAnnotation = getTypeAnnotationFromBinding(parent.id);
 			const hasReactNodeAnnotation =
@@ -208,7 +218,7 @@ const noRenderHelperFunctions = defineRule({
 
 				if (componentDepth > 0) return;
 				if (isHookName(functionName)) return;
-				if (isCallbackPropertyFunction(node, context.sourceCode)) return;
+				if (isCallbackReferenceFunction(node, context.sourceCode)) return;
 
 				const returnTypeAnnotation = getReturnTypeAnnotation(node);
 				const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);
