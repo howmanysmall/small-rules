@@ -13,6 +13,7 @@ You **MUST** follow these guidelines. There is NO exception.
 - You are NEVER to cast. This codebase is strongly typed. The `defineRule` function can infer options without manual type annotations. Do NOT do it.
 - You MUST use `nr lint:agent [files...]` to run the linter. There is no exception to failing lint checks.
 - You MUST use `nr test:agent` to run Vitest unit tests. There is no exception to failing tests.
+- You MUST have 100% coverage in Vitest.
 - You MUST use `nr type-check:agent` to run type checking. There is no exception to failing type checks.
 - You MUST always use TDD.
 
