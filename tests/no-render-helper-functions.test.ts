@@ -102,6 +102,10 @@ describe("no-render-helper-functions", () => {
 				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } projects.map(renderRepositoryNode); renderRepositoryNode(project);",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
+			{
+				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } const callback = renderRepositoryNode;",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
 		],
 		valid: [
 			{
