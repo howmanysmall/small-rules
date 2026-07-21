@@ -403,6 +403,7 @@
 		],
 		"small-rules/no-error": "off",
 		"small-rules/no-events-in-events-callback": "off",
+		"small-rules/no-filter-map-chain": "off",
 		"small-rules/no-giant-component": "off",
 		"small-rules/no-god-components": "off",
 		"small-rules/no-ianitor-in-function-body": "off",
