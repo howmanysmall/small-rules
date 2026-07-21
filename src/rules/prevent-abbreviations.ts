@@ -1,9 +1,12 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	hasName,
+	isCallExpression,
 	isIdentifierName,
+	isImportDeclaration,
 	isJsxIdentifier,
 	isMemberExpression,
+	isObjectExpression,
 	isProperty,
 	isStringLiteral,
 	isTsQualifiedName,
@@ -59,6 +62,8 @@ import type {
 	Visitor,
 } from "oxlint-plugin-utilities";
 
+const NON_PACKAGE_IMPORT_PATTERN = /^(?:[#$./]|[~@]\/)/u;
+
 function createIsSafeGeneratedName(scopeToNamesGeneratedByFixer: WeakMap<Scope, Set<string>>): IsSafe {
 	return function isSafeGeneratedName(name: string, scopes: ReadonlyArray<Scope>): boolean {
 		return scopes.every((scope) => {
@@ -88,6 +93,32 @@ function isObjectIdentifierImported(node: ESTree.IdentifierName, sourceCode: Sou
 	if (objectNode === undefined || !hasName(objectNode)) return false;
 
 	return getVariableByName(sourceCode.getScope(node), objectNode.name)?.defs[0]?.type === "ImportBinding";
+}
+
+function isExternalPackageImport(definition: Definition | undefined): boolean {
+	if (definition?.type !== "ImportBinding") return false;
+
+	const { parent } = definition;
+	/* v8 ignore next -- @preserve parser import bindings retain their ImportDeclaration parent. */
+	if (parent === null || !isImportDeclaration(parent) || !isStringLiteral(parent.source)) return false;
+
+	return !NON_PACKAGE_IMPORT_PATTERN.test(parent.source.value);
+}
+
+function isExternallyControlledProperty(node: ESTree.IdentifierName, sourceCode: SourceCode): boolean {
+	if (!isObjectPropertyKey(node)) return false;
+
+	const objectExpression = node.parent.parent;
+	if (objectExpression === null || !isObjectExpression(objectExpression)) return false;
+
+	const callExpression = objectExpression.parent;
+	if (!isCallExpression(callExpression)) return false;
+
+	const { callee } = callExpression;
+	if (!isIdentifierName(callee)) return false;
+
+	const definition = getVariableByName(sourceCode.getScope(callee), callee.name)?.defs[0];
+	return isExternalPackageImport(definition);
 }
 
 function reportShorthandReplacement(
@@ -315,6 +346,7 @@ function checkPropertyIdentifier(
 	const propertyAccess = isShorthandPropertyAccess(node);
 
 	if (propertyAccess && isObjectIdentifierImported(node, sourceCode)) return;
+	if (isExternallyControlledProperty(node, sourceCode)) return;
 
 	if (checkShorthandIdentifier(node, propertyLike, propertyAccess, options, report)) return;
 	if (!(options.checkProperties && propertyLike)) return;
