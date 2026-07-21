@@ -561,6 +561,41 @@ describe("prevent-abbreviations", () => {
 				],
 				options: [{ checkProperties: true }],
 			},
+			{
+				code: 'import { useRender } from "./use-render"; useRender({ props: value });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender } from "$components/use-render"; useRender({ props: value });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "function useRender(options) { return options; } useRender({ props: value });",
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender } from "@base-ui/react/use-render"; useRender({ configuration: { props: value } });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender } from "@base-ui/react/use-render"; const options = { props: value }; useRender(options);',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "({ props: value })();",
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import * as BaseUi from "@base-ui/react"; BaseUi.useRender({ props: value });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
 		],
 		valid: [
 			// CONSTANTS (all caps) should be ignored
@@ -704,6 +739,18 @@ describe("prevent-abbreviations", () => {
 			{
 				code: 'import type { Button } from "library"; type T = Button.Props;',
 				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import { useRender } from "@base-ui/react/use-render"; useRender({ props: value });',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender as render } from "@base-ui/react/use-render"; render({ props: value });',
+				options: [{ shorthands: { props: "properties" } }],
+			},
+			{
+				code: 'import configure from "library"; configure({ args: value });',
+				options: [{ checkProperties: true }],
 			},
 			{
 				code: "const err = value;",
