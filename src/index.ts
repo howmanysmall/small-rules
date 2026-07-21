@@ -23,6 +23,7 @@ import noCommentedCode from "$oxc-rules/no-commented-code";
 import noConstantConditionWithBreak from "$oxc-rules/no-constant-condition-with-break";
 import noError from "$oxc-rules/no-error";
 import noEventsInEventsCallback from "$oxc-rules/no-events-in-events-callback";
+import noFilterMapChain from "$oxc-rules/no-filter-map-chain";
 import noGiantComponent from "$oxc-rules/no-giant-component";
 import noGodComponents from "$oxc-rules/no-god-components";
 import noIanitorInFunctionBody from "$oxc-rules/no-ianitor-in-function-body";
@@ -118,6 +119,7 @@ const smallRules = definePlugin({
 		"no-constant-condition-with-break": noConstantConditionWithBreak,
 		"no-error": noError,
 		"no-events-in-events-callback": noEventsInEventsCallback,
+		"no-filter-map-chain": noFilterMapChain,
 		"no-giant-component": noGiantComponent,
 		"no-god-components": noGodComponents,
 		"no-ianitor-in-function-body": noIanitorInFunctionBody,

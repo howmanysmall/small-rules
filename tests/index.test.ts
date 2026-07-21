@@ -26,6 +26,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-constant-condition-with-break",
 	"no-error",
 	"no-events-in-events-callback",
+	"no-filter-map-chain",
 	"no-giant-component",
 	"no-god-components",
 	"no-ianitor-in-function-body",
@@ -110,7 +111,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(90);
+			expect(ruleNames).toHaveLength(91);
 		}, 5000);
 	});
 });

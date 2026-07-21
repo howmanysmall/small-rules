@@ -131,6 +131,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-commented-code" },
 				{ name: "no-constant-condition-with-break" },
 				{ name: "no-error" },
+				{ name: "no-filter-map-chain" },
 				{ name: "no-identity-map" },
 				{ name: "no-increment-decrement" },
 				{ name: "no-restricted-property-assignment" },
