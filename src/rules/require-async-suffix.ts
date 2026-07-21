@@ -2,15 +2,12 @@ import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-function hasAsyncSuffix(name: string): boolean {
-	return name.endsWith("Async");
-}
-
-function isPropertyInCallArgument(node: ESTree.ObjectProperty): boolean {
+function isExternallyConstrainedProperty(node: ESTree.ObjectProperty): boolean {
 	const { parent } = node;
 	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
 	if (parent.type !== "ObjectExpression") return false;
 	const { parent: grandparent } = parent;
+	if (grandparent.type === "TSSatisfiesExpression") return true;
 	if (grandparent.type === "CallExpression" || grandparent.type === "NewExpression") {
 		return (grandparent.arguments as ReadonlyArray<ESTree.Node>).includes(parent);
 	}
@@ -22,12 +19,8 @@ const requireAsyncSuffix = defineRule({
 		const exceptOption = context.options[0]?.except;
 		const exceptSet: ReadonlySet<string> = exceptOption === undefined ? new Set() : new Set(exceptOption);
 
-		function shouldSkipName(name: string): boolean {
-			return hasAsyncSuffix(name) || exceptSet.has(name);
-		}
-
 		function reportIfNotSkipped(node: ESTree.IdentifierName): void {
-			if (shouldSkipName(node.name)) return;
+			if (node.name.endsWith("Async") || exceptSet.has(node.name)) return;
 			context.report({ messageId: "missingAsyncSuffix", node });
 		}
 
@@ -43,7 +36,7 @@ const requireAsyncSuffix = defineRule({
 			Property(node): void {
 				if (!node.method || node.value.type !== "FunctionExpression" || !node.value.async) return;
 				if (node.key.type !== "Identifier") return;
-				if (isPropertyInCallArgument(node)) return;
+				if (isExternallyConstrainedProperty(node)) return;
 				reportIfNotSkipped(node.key);
 			},
 			PropertyDefinition(node): void {
