@@ -125,6 +125,11 @@ describe("require-async-suffix", () => {
 		return new Response("ok");
 	},
 });`,
+			`const handler = {
+	async fetch(request: Request): Promise<Response> {
+		return new Response("ok");
+	},
+} satisfies ExportedHandler<Env>;`,
 			`const handlers = {
 	async ["fetch"](request: Request): Promise<Response> {
 		return new Response("ok");
