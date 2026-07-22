@@ -167,7 +167,8 @@
 					"error",
 					{
 						"additionalHoistableComponents": [],
-						"additionalStaticFactories": []
+						"additionalStaticFactories": [],
+						"environment": "standard"
 					}
 				],
 				"small-rules/prefer-hoisted-jsx-object-properties": "error",
