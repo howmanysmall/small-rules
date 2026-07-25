@@ -37,7 +37,7 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	ignoreBinaries: ["hk", "nr", "playwright"],
+	ignoreBinaries: ["hk", "nr"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
@@ -55,7 +55,7 @@ const configuration: KnipConfig = {
 		},
 		documentation: {
 			// Optional peer for Starlight's Sätteri markdown branch (type ambient + peer resolution).
-			ignoreDependencies: ["satteri"],
+			ignoreDependencies: ["babel-plugin-react-compiler", "satteri"],
 		},
 	},
 };
