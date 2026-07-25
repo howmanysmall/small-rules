@@ -60,7 +60,7 @@ it("filters the server-rendered rule catalog", async ({ page }) => {
 	await page.goto(`${baseUrl}${allRulesPath}`);
 
 	const cards = page.locator("[data-rule-card]");
-	await expect(cards).toHaveCount(90);
+	await expect(cards).toHaveCount(92);
 	await page.getByLabel("Search rules").fill("no-print");
 	await expect(cards.filter({ visible: true })).toHaveCount(1);
 	await expect(page.getByText("Showing 1 rule", { exact: true })).toBeVisible();
@@ -76,7 +76,7 @@ it("keeps the catalog readable without JavaScript", async ({ browser }) => {
 	const page = await context.newPage();
 	await page.goto(`${baseUrl}${allRulesPath}`);
 
-	await expect(page.locator("[data-rule-card]")).toHaveCount(90);
+	await expect(page.locator("[data-rule-card]")).toHaveCount(92);
 	await expect(page.locator("[data-rule-filters]")).toBeHidden();
 	await expect(page.locator('[data-rule-card][href="/small-rules/rules/roblox/no-print/"]')).toHaveAttribute(
 		"href",

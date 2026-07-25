@@ -23,8 +23,8 @@ describe("RuleIndex", () => {
 		expect(search.getAttribute("placeholder")).toBe("Try no-print");
 		expect(category.tagName).toBe("SELECT");
 		expect(screen.getByRole("button", { name: "Reset filters" }).hasAttribute("disabled")).toBe(false);
-		expect(screen.getByText("Showing 90 rules").textContent).toBe("Showing 90 rules");
-		expect(screen.getAllByRole("link")).toHaveLength(90);
+		expect(screen.getByText("Showing 92 rules").textContent).toBe("Showing 92 rules");
+		expect(screen.getAllByRole("link")).toHaveLength(92);
 	});
 
 	it("filters rules by search text", async () => {
@@ -84,7 +84,7 @@ describe("RuleIndex", () => {
 
 		expect(search).toHaveProperty("value", "");
 		expect(category).toHaveProperty("value", "");
-		expect(screen.getByText("Showing 90 rules").textContent).toBe("Showing 90 rules");
+		expect(screen.getByText("Showing 92 rules").textContent).toBe("Showing 92 rules");
 	});
 
 	it("renders a category listing without catalog filters", () => {
