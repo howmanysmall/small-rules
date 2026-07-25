@@ -51,6 +51,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-useless-use-spring" },
 				{ name: "prefer-constant-dispatch" },
 				{ name: "prefer-context-stack" },
+				{ name: "prefer-direct-hook-imports" },
 				{ name: "prefer-hoisted-jsx-elements" },
 				{ name: "prefer-hoisted-jsx-object-properties" },
 				{ name: "prefer-local-portal-component" },
