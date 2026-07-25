@@ -182,6 +182,7 @@ hooks {
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
+        prefix = "GH_TOKEN=\"$(gh auth token)\""
       }
       ["pinact"] {
         glob = workflow_action_files
@@ -365,6 +366,7 @@ hooks {
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
+        prefix = "GH_TOKEN=\"$(gh auth token)\""
       }
       ["pinact"] {
         glob = workflow_action_files
@@ -491,6 +493,8 @@ hooks {
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
+        check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
+        fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
       ["pinact"] {
         glob = workflow_action_files
