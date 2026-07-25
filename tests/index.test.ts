@@ -60,6 +60,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"prefer-class-properties",
 	"prefer-constant-dispatch",
 	"prefer-context-stack",
+	"prefer-direct-hook-imports",
 	"prefer-early-return",
 	"prefer-expect-assertions",
 	"prefer-hoisted-jsx-elements",
@@ -111,7 +112,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(91);
+			expect(ruleNames).toHaveLength(92);
 		}, 5000);
 	});
 });

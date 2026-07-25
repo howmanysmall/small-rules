@@ -57,6 +57,7 @@ import onlyTypeImports from "$oxc-rules/only-type-imports";
 import preferClassProperties from "$oxc-rules/prefer-class-properties";
 import preferConstantDispatch from "$oxc-rules/prefer-constant-dispatch";
 import preferContextStack from "$oxc-rules/prefer-context-stack";
+import preferDirectHookImports from "$oxc-rules/prefer-direct-hook-imports";
 import preferEarlyReturn from "$oxc-rules/prefer-early-return";
 import preferExpectAssertions from "$oxc-rules/prefer-expect-assertions";
 import preferHoistedJsxElements from "$oxc-rules/prefer-hoisted-jsx-elements";
@@ -153,6 +154,7 @@ const smallRules = definePlugin({
 		"prefer-class-properties": preferClassProperties,
 		"prefer-constant-dispatch": preferConstantDispatch,
 		"prefer-context-stack": preferContextStack,
+		"prefer-direct-hook-imports": preferDirectHookImports,
 		"prefer-early-return": preferEarlyReturn,
 		"prefer-expect-assertions": preferExpectAssertions,
 		"prefer-hoisted-jsx-elements": preferHoistedJsxElements,
