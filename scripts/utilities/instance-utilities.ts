@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fdir } from "fdir";
-import { parse, walk } from "yuku-parser";
+import { walk } from "yuku-ast";
+import { parse } from "yuku-parser";
 
 import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement } from "yuku-parser";
 

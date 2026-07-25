@@ -297,7 +297,7 @@ function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean
 
 function isIgnoredCallExpression(
 	node: ESTree.JSXElement | ESTree.JSXFragment,
-	ignoreList: ReadonlyArray<string>,
+	ignoredCallExpressions: ReadonlySet<string>,
 ): boolean {
 	let parent: ESTree.Node | undefined = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
@@ -313,14 +313,14 @@ function isIgnoredCallExpression(
 	for (let depth = 0; depth < maxDepth && parent !== undefined; depth += 1) {
 		if (parent.type === "CallExpression") {
 			const { callee } = parent;
-			if (callee.type === "Identifier") return ignoreList.includes(callee.name);
+			if (callee.type === "Identifier") return ignoredCallExpressions.has(callee.name);
 
 			if (
 				callee.type === "MemberExpression" &&
 				callee.object.type === "Identifier" &&
 				callee.property.type === "Identifier"
 			) {
-				return ignoreList.includes(`${callee.object.name}.${callee.property.name}`);
+				return ignoredCallExpressions.has(`${callee.object.name}.${callee.property.name}`);
 			}
 
 			return false;
@@ -420,6 +420,7 @@ const requireReactComponentKeys = defineRule({
 			...configuredOptions,
 		};
 
+		const ignoredCallExpressions = new Set(options.ignoreCallExpressions);
 		const iterationMethods = new Set(options.iterationMethods);
 		const memoizationHooks = new Set(options.memoizationHooks);
 
@@ -442,7 +443,7 @@ const requireReactComponentKeys = defineRule({
 				return;
 			}
 
-			if (isIgnoredCallExpression(node, options.ignoreCallExpressions)) return;
+			if (isIgnoredCallExpression(node, ignoredCallExpressions)) return;
 			if (isAssignedJSXValue(node) || isJsxPropertyValue(node) || isTernaryJSXChild(node)) return;
 			if (node.type === "JSXFragment" && isLogicalJSXChild(node)) return;
 			if (

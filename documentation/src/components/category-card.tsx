@@ -2,7 +2,7 @@ import { siteBasePath } from "@/utilities/site-base-path";
 
 import { Icon } from "./icon";
 
-import type React from "react";
+import type { ReactNode } from "react";
 
 import type { RuleCategoryKey } from "@/data/rule-manifest";
 
@@ -13,12 +13,18 @@ interface CategoryCardProperties {
 	readonly label: string;
 }
 
-const cardGlow = <span aria-hidden="true" className="category-card-glow" />;
+const CARD_GLOW = <span aria-hidden="true" className="category-card-glow" />;
+const BROWSE_RULES = (
+	<span className="category-card-cta">
+		{"Browse rules"}
+		<Icon name="arrow-right" size={14} />
+	</span>
+);
 
-export function CategoryCard({ category, count, description, label }: CategoryCardProperties): React.JSX.Element {
+export function CategoryCard({ category, count, description, label }: CategoryCardProperties): ReactNode {
 	return (
 		<a className="category-card" data-category={category} href={`${siteBasePath}rules/${category}/`}>
-			{cardGlow}
+			{CARD_GLOW}
 			<div className="category-card-icon">
 				<Icon name={category} size={22} />
 			</div>
@@ -28,10 +34,7 @@ export function CategoryCard({ category, count, description, label }: CategoryCa
 					<span className="category-card-count">{count}</span>
 				</div>
 				<p className="category-card-desc">{description}</p>
-				<span className="category-card-cta">
-					{"Browse rules"}
-					<Icon name="arrow-right" size={14} />
-				</span>
+				{BROWSE_RULES}
 			</div>
 		</a>
 	);

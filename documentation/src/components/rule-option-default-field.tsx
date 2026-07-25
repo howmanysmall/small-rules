@@ -1,12 +1,12 @@
 import { RuleOptionDefaultActions } from "./rule-option-default-actions";
 
-import type React from "react";
+import type { ReactNode } from "react";
 
 import type { ObjectOption } from "@/data/rule-options";
 
 interface RuleOptionDefaultFieldProperties {
 	readonly copyLabel: string;
-	readonly copyStatus: "copied" | "failed" | undefined;
+	readonly copyStatus?: "copied" | "failed" | undefined;
 	readonly detailId: string;
 	readonly isExpanded: boolean;
 	readonly onCopy: () => void;
@@ -14,7 +14,7 @@ interface RuleOptionDefaultFieldProperties {
 	readonly option: ObjectOption;
 }
 
-const defaultLabel = <dt>{"Default"}</dt>;
+const DEFAULT = <dt>{"Default"}</dt>;
 
 export function RuleOptionDefaultField({
 	copyLabel,
@@ -24,10 +24,10 @@ export function RuleOptionDefaultField({
 	onCopy,
 	onToggle,
 	option,
-}: RuleOptionDefaultFieldProperties): React.JSX.Element {
+}: RuleOptionDefaultFieldProperties): ReactNode {
 	return (
 		<div className="rule-option__field rule-option__field--default">
-			{defaultLabel}
+			{DEFAULT}
 			<dd>
 				{option.defaultValue.kind === "complex" ? (
 					<RuleOptionDefaultActions

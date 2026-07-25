@@ -249,19 +249,21 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 			continue;
 		}
 
+		const { start } = comment.loc;
+
 		const ruleIds =
 			directive.value !== undefined && directive.value !== "" ? directive.value.split(DELIMITER) : undefined;
 
 		switch (kind) {
 			case "eslint-disable":
 			case "oxlint-disable": {
-				disable(collection, comment, comment.loc.start, ruleIds, "block");
+				disable(collection, comment, start, ruleIds, "block");
 				break;
 			}
 
 			case "eslint-disable-line":
 			case "oxlint-disable-line": {
-				const { line } = comment.loc.start;
+				const { line } = start;
 				disable(collection, comment, { column: 0, line }, ruleIds, "line");
 				enable(collection, comment, { column: -1, line: line + 1 }, ruleIds, "line");
 				break;
@@ -269,7 +271,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 
 			case "eslint-disable-next-line":
 			case "oxlint-disable-next-line": {
-				const { line } = comment.loc.start;
+				const { line } = start;
 				disable(collection, comment, { column: 0, line: line + 1 }, ruleIds, "line");
 				enable(collection, comment, { column: -1, line: line + 2 }, ruleIds, "line");
 				break;
@@ -277,7 +279,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 
 			case "eslint-enable":
 			case "oxlint-enable": {
-				enable(collection, comment, comment.loc.start, ruleIds, "block");
+				enable(collection, comment, start, ruleIds, "block");
 				break;
 			}
 		}

@@ -1,5 +1,5 @@
 // oxlint-disable unicorn/no-null -- ESTree Program parents use null sentinels.
-import { CHILD_KEYS } from "yuku-parser/decode.js";
+import { CHILD_KEYS } from "yuku-ast";
 
 import { HarnessError } from "./harness-error";
 import { locationForRange } from "./locations";

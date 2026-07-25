@@ -23,6 +23,7 @@
 		"react-dom": "catalog:frontend",
 		"satteri": "catalog:prod",
 		"sharp": "catalog:prod",
+		"yuku-ast": "catalog:dev",
 		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
@@ -32,8 +33,10 @@
 		"@total-typescript/ts-reset": "catalog:",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
+		"babel-plugin-react-compiler": "catalog:build",
 		"jsdom": "catalog:test",
 		"typescript": "catalog:dev",
 		"vitest": "catalog:test"
-	}
+	},
+	"packageManager": "pnpm@11.17.0"
 }
