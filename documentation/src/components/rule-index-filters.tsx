@@ -1,11 +1,11 @@
 import { useEffect, useId, useRef } from "react";
 
-import type { ChangeEvent, ReactElement, SyntheticEvent } from "react";
+import type { ChangeEvent, ReactNode, SyntheticEvent } from "react";
 
 import type { RuleIndexCategory } from "./rule-index-data";
 
-const allCategoriesOption = <option value="">{"All categories"}</option>;
-const resetButton = (
+const ALL_CATEGORIES = <option value="">{"All categories"}</option>;
+const RESET_BUTTON = (
 	<button className="rule-index-reset" type="reset">
 		{"Reset filters"}
 	</button>
@@ -27,7 +27,7 @@ export function RuleIndexFilters({
 	onReset,
 	query,
 	selectedCategory,
-}: RuleIndexFiltersProperties): ReactElement {
+}: RuleIndexFiltersProperties): ReactNode {
 	const filters = useRef<HTMLFormElement>(null);
 	const searchId = useId();
 	const categoryId = useId();
@@ -68,7 +68,7 @@ export function RuleIndexFilters({
 					onChange={onCategoryChange}
 					value={selectedCategory}
 				>
-					{allCategoriesOption}
+					{ALL_CATEGORIES}
 					{/* biome-ignore lint/performance/useSolidForComponent: This is a React component. */}
 					{categories.map((category) => (
 						<option key={category.key} value={category.key}>
@@ -77,7 +77,7 @@ export function RuleIndexFilters({
 					))}
 				</select>
 			</div>
-			{resetButton}
+			{RESET_BUTTON}
 		</form>
 	);
 }

@@ -49,9 +49,10 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 
 	for (const property of objectPattern.properties) {
 		if (property.type !== "Property" || property.key.type !== "Identifier") continue;
-		if (property.key.name === "error" || property.key.name === "value") return false;
+		const { name } = property.key;
+		if (name === "error" || name === "value") return false;
 		/* v8 ignore next -- @preserve success-only object patterns reach this path from parser Property keys. */
-		if (property.key.name === "success") hasSuccess = true;
+		if (name === "success") hasSuccess = true;
 	}
 
 	return hasSuccess;

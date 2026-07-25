@@ -1,40 +1,41 @@
 import { Icon } from "./icon";
 
-import type React from "react";
+import type { ReactNode } from "react";
 
 interface PageHeaderProperties {
-	readonly kicker?: string;
-	readonly subtitle?: string;
+	readonly kicker?: string | undefined;
+	readonly subtitle?: string | undefined;
 	readonly title: string;
 }
 
-const heroOrbs = (
+const HERO_ORBS = (
 	<div aria-hidden="true" className="hero-orbs">
 		<span className="hero-orb hero-orb--1" />
 		<span className="hero-orb hero-orb--2" />
 		<span className="hero-orb hero-orb--3" />
 	</div>
 );
+const SPARKLES = <Icon name="sparkles" size={14} />;
 
-export function PageHeader({ kicker, subtitle, title }: PageHeaderProperties): React.JSX.Element {
-	let kickerElement: React.JSX.Element | undefined;
+export function PageHeader({ kicker, subtitle, title }: PageHeaderProperties): ReactNode {
+	let kickerElement: ReactNode;
 	if (kicker !== undefined && kicker.length > 0) {
 		kickerElement = (
 			<span className="hero-kicker hero-kicker--static">
-				<Icon name="sparkles" size={14} />
+				{SPARKLES}
 				<span>{kicker}</span>
 			</span>
 		);
 	}
 
-	let subtitleElement: React.JSX.Element | undefined;
+	let subtitleElement: ReactNode;
 	if (subtitle !== undefined && subtitle.length > 0) {
 		subtitleElement = <p className="hero-subtitle hero-subtitle--compact">{subtitle}</p>;
 	}
 
 	return (
 		<section className="hero-splash hero-splash--compact">
-			{heroOrbs}
+			{HERO_ORBS}
 			<div className="hero-copy hero-copy--centered">
 				{kickerElement}
 				<h1 className="hero-title hero-title--compact">{title}</h1>

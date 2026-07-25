@@ -98,6 +98,14 @@ describe("no-render-helper-functions", () => {
 				code: "function renderEmpty(): React.ReactNode { return <div />; } const value = { autoFill: { renderEmpty } }; renderEmpty();",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
+			{
+				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } projects.map(renderRepositoryNode); renderRepositoryNode(project);",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } const callback = renderRepositoryNode;",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
 		],
 		valid: [
 			{
@@ -161,6 +169,15 @@ describe("no-render-helper-functions", () => {
 			},
 			{
 				code: "const value = { renderEmpty: (function renderEmpty(): React.ReactNode { return <div />; }) };",
+			},
+			{
+				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } projects.map(renderRepositoryNode);",
+			},
+			{
+				code: "const renderRepositoryNode = (project: Project): React.ReactNode => <li key={project.id} />; projects.map(renderRepositoryNode);",
+			},
+			{
+				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } projects.map(renderRepositoryNode as (project: Project) => React.ReactNode);",
 			},
 			{
 				code: "function createPortal(): React.ReactPortal { return portal; }",

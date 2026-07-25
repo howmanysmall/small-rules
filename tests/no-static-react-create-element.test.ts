@@ -42,6 +42,24 @@ const element = createElement("div");
 			},
 			{
 				code: `
+import { createElement } from "react";
+
+export function HeroSplash(title: string) {
+	const heroCopy = <h1>{title}</h1>;
+	const heroPreview = <aside />;
+
+	return createElement(
+		"section",
+		{ className: "hero-splash" },
+		createElement("div", { className: "hero-grid" }, heroCopy, heroPreview),
+	);
+}
+`,
+				errors: [{ messageId: "useJsx" }, { messageId: "useJsx" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
 import { createElement as create } from "@rbxts/roact";
 
 const element = create("frame");

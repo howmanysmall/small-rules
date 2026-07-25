@@ -1,15 +1,15 @@
-import type React from "react";
+import type { ReactNode } from "react";
 
 interface RuleOptionTypeFieldProperties {
 	readonly type: string;
 }
 
-const typeLabel = <dt>{"Type"}</dt>;
+const TYPE_LABEL = <dt>{"Type"}</dt>;
 
-export function RuleOptionTypeField({ type }: RuleOptionTypeFieldProperties): React.JSX.Element {
+export function RuleOptionTypeField({ type }: RuleOptionTypeFieldProperties): ReactNode {
 	return (
 		<div className="rule-option__field">
-			{typeLabel}
+			{TYPE_LABEL}
 			<dd>
 				<code>{type}</code>
 			</dd>

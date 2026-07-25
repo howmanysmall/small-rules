@@ -1,9 +1,9 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import { RuleIndexCard } from "./rule-index-card";
 import { RuleIndexFilters } from "./rule-index-filters";
 
-import type { ChangeEvent, ReactElement, SyntheticEvent } from "react";
+import type { ChangeEvent, ReactNode, SyntheticEvent } from "react";
 
 import type { RuleIndexCategory } from "./rule-index-data";
 
@@ -12,13 +12,13 @@ export interface RuleIndexProperties {
 	readonly mode: "catalog" | "category";
 }
 
-const emptyState = (
+const EMPTY_STATE = (
 	<p className="rule-index-empty" data-rule-empty="">
 		{"No rules match those filters."}
 	</p>
 );
 
-export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactElement {
+export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactNode {
 	const [query, setQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("");
 	const rules = categories.flatMap((category) => category.rules);
@@ -29,21 +29,19 @@ export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactEleme
 			(selectedCategory === "" || rule.category === selectedCategory),
 	);
 
-	const handleCategoryChange = useCallback(function handleCategoryChange(
-		event: ChangeEvent<HTMLSelectElement>,
-	): void {
+	function handleCategoryChange(event: ChangeEvent<HTMLSelectElement>): void {
 		setSelectedCategory(event.currentTarget.value);
-	}, []);
+	}
 
-	const handleQueryChange = useCallback(function handleQueryChange(event: ChangeEvent<HTMLInputElement>): void {
+	function handleQueryChange(event: ChangeEvent<HTMLInputElement>): void {
 		setQuery(event.currentTarget.value);
-	}, []);
+	}
 
-	const handleReset = useCallback(function handleReset(event: SyntheticEvent<HTMLFormElement>): void {
+	function handleReset(event: SyntheticEvent<HTMLFormElement>): void {
 		event.preventDefault();
 		setQuery("");
 		setSelectedCategory("");
-	}, []);
+	}
 
 	return (
 		<div className="rule-index" data-rule-index="">
@@ -69,7 +67,7 @@ export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactEleme
 				))}
 			</div>
 
-			{visibleRules.length === 0 && emptyState}
+			{visibleRules.length === 0 && EMPTY_STATE}
 		</div>
 	);
 }

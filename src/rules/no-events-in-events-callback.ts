@@ -364,20 +364,21 @@ const noEventsInEventsCallback = defineRule({
 				if (!allowedImportPaths.has(importSource)) return;
 
 				for (const specifier of node.specifiers) {
+					const { name } = specifier.local;
 					if (specifier.type === "ImportDefaultSpecifier") {
-						if (specifier.local.name === "Events") trackedEventsIdentifiers.add(specifier.local.name);
+						if (name === "Events") trackedEventsIdentifiers.add(name);
 						continue;
 					}
 
 					if (specifier.type !== "ImportSpecifier") continue;
 
 					if (specifier.imported.type === "Identifier" && specifier.imported.name === "Events") {
-						trackedEventsIdentifiers.add(specifier.local.name);
+						trackedEventsIdentifiers.add(name);
 						continue;
 					}
 
 					if (specifier.imported.type === "Literal" && specifier.imported.value === "Events") {
-						trackedEventsIdentifiers.add(specifier.local.name);
+						trackedEventsIdentifiers.add(name);
 					}
 				}
 			},

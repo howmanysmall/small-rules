@@ -31,18 +31,16 @@ function isMode(value: unknown): value is Mode {
 }
 
 function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: ReadonlySet<string>): string | undefined {
-	if (callee.computed) return undefined;
-	if (callee.object.type !== "Identifier") return undefined;
-	if (!reactNamespaces.has(callee.object.name)) return undefined;
+	if (callee.computed || callee.object.type !== "Identifier" || !reactNamespaces.has(callee.object.name)) {
+		return undefined;
+	}
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
 	return callee.property.type === "Identifier" ? callee.property.name : undefined;
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
 	let current = unwrapExpression(expression);
-	while (current.type === "MemberExpression") {
-		current = unwrapExpression(current.object);
-	}
+	while (current.type === "MemberExpression") current = unwrapExpression(current.object);
 	return current.type === "Identifier" ? current : undefined;
 }
 
@@ -244,9 +242,7 @@ const memoizedEffectDependencies = defineRule({
 		function classifyDependency(node: ESTree.Expression): Stability {
 			const unwrapped = unwrapExpression(node);
 			if (isUnmemoizedInline(unwrapped)) return "unmemoized";
-			if (unwrapped.type === "CallExpression") {
-				return mode === "definite" ? "unknown" : "unmemoized";
-			}
+			if (unwrapped.type === "CallExpression") return mode === "definite" ? "unknown" : "unmemoized";
 
 			const rootIdentifier = getRootIdentifier(unwrapped);
 			if (rootIdentifier === undefined) return "unknown";

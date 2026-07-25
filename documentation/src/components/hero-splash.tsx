@@ -1,34 +1,15 @@
-import { createElement } from "react";
+import { HeroCopy } from "./hero-copy";
+import { HeroGrid } from "./hero-grid";
 
-import { Icon } from "./icon";
-
-import type { JSX } from "react";
+import type { ReactNode } from "react";
 
 interface HeroSplashProperties {
-	readonly kicker?: string;
-	readonly subtitle?: string;
+	readonly kicker?: string | undefined;
+	readonly subtitle?: string | undefined;
 	readonly title: string;
 }
 
-const heroActions = (
-	<div className="hero-actions">
-		<a className="hero-cta hero-cta--primary" href="/small-rules/quick-start/">
-			<Icon name="rocket" size={16} />
-			<span>{"Get started"}</span>
-		</a>
-		<a
-			className="hero-cta hero-cta--ghost"
-			href="https://github.com/howmanysmall/small-rules"
-			rel="noopener noreferrer"
-			target="_blank"
-		>
-			<Icon name="github" size={16} />
-			<span>{"View on GitHub"}</span>
-		</a>
-	</div>
-);
-
-const previewChrome = (
+const PREVIEW_CHROME = (
 	<div className="hero-preview-chrome">
 		<span className="hero-preview-dot hero-preview-dot--r" />
 		<span className="hero-preview-dot hero-preview-dot--y" />
@@ -37,7 +18,7 @@ const previewChrome = (
 	</div>
 );
 
-const configurationPreview = (
+const CONFIGURATION_PREVIEW = (
 	<pre className="hero-preview-code">
 		<code>
 			<span className="t-k">{"{"}</span>
@@ -69,10 +50,10 @@ const configurationPreview = (
 	</pre>
 );
 
-const heroPreview = (
+const HERO_PREVIEW = (
 	<div aria-label="Code preview" className="hero-preview">
-		{previewChrome}
-		{configurationPreview}
+		{PREVIEW_CHROME}
+		{CONFIGURATION_PREVIEW}
 	</div>
 );
 
@@ -80,29 +61,12 @@ export function HeroSplash({
 	kicker = "Oxlint plugin for roblox-ts",
 	subtitle,
 	title,
-}: HeroSplashProperties): JSX.Element {
-	let heroSubtitle: JSX.Element | undefined;
-	if (subtitle !== undefined && subtitle.length > 0) {
-		heroSubtitle = <p className="hero-subtitle">{subtitle}</p>;
-	}
-	const heroKicker = (
-		<span className="hero-kicker hero-kicker--static">
-			<Icon name="sparkles" size={14} />
-			<span>{kicker}</span>
-		</span>
-	);
-	const heroCopy = (
-		<div className="hero-copy">
-			{heroKicker}
-			<h1 className="hero-title">{title}</h1>
-			{heroSubtitle}
-			{heroActions}
-		</div>
-	);
-
-	return createElement(
-		"section",
-		{ className: "hero-splash" },
-		createElement("div", { className: "hero-grid" }, heroCopy, heroPreview),
+}: HeroSplashProperties): ReactNode {
+	return (
+		<section className="hero-splash">
+			<HeroGrid preview={HERO_PREVIEW}>
+				<HeroCopy kicker={kicker} subtitle={subtitle} title={title} />
+			</HeroGrid>
+		</section>
 	);
 }

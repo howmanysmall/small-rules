@@ -14,13 +14,19 @@ function isMarkdownRouteProperties(value: unknown): value is MarkdownRouteProper
 
 export const getStaticPaths = (async (): Promise<GetStaticPathsResult> => {
 	const entries = await getCollection("docs");
-	return entries
-		.filter((entry) => entry.id !== "")
-		.map((entry) => ({
+	const staticPaths: GetStaticPathsResult = [];
+	let size = 0;
+
+	for (const entry of entries) {
+		if (entry.id === "") continue;
+		staticPaths[size++] = {
 			params: { path: entry.id },
 			// oxlint-disable-next-line small-rules/prevent-abbreviations -- bruh.
 			props: { body: entry.body },
-		}));
+		};
+	}
+
+	return staticPaths;
 }) satisfies GetStaticPaths;
 
 // oxlint-disable-next-line small-rules/require-async-suffix typescript/require-await -- Astro route handlers must be named GET.

@@ -23,7 +23,7 @@ node = "24"
 nub = "latest"
 pinact = "latest"
 pkl = "latest"
-pnpm = "11.10.0"
+pnpm = "11.17.0"
 rumdl = "latest"
 shellcheck = "latest"
 shfmt = "latest"
@@ -61,13 +61,17 @@ run = "node --run build"
 description = "Run the Vitest unit test suite once without sharding."
 run = "node --run test"
 
+[tasks.documentation]
+description = "Run the documentation build plus unit and Chromium browser tests."
+run = "pnpm --filter docs exec playwright install chromium && pnpm --filter docs run build && pnpm --filter docs run test:unit && pnpm --filter docs run test:browser"
+
 [tasks.check]
 description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
 depends = ["lint", "type-check", "knip", "build", "test"]
 
 [tasks.ci]
-description = "Run install plus the full local validation suite. Use before opening or merging PRs."
-depends = ["install", "check"]
+description = "Run the full CI suite, including package and documentation validation."
+depends = ["install", "check", "documentation"]
 
 [tasks.release]
 description = "Run local validation, then bump version, commit, tag, and push via bumpp. Run from an up-to-date main branch."

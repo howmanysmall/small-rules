@@ -23,6 +23,7 @@ import noCommentedCode from "$oxc-rules/no-commented-code";
 import noConstantConditionWithBreak from "$oxc-rules/no-constant-condition-with-break";
 import noError from "$oxc-rules/no-error";
 import noEventsInEventsCallback from "$oxc-rules/no-events-in-events-callback";
+import noFilterMapChain from "$oxc-rules/no-filter-map-chain";
 import noGiantComponent from "$oxc-rules/no-giant-component";
 import noGodComponents from "$oxc-rules/no-god-components";
 import noIanitorInFunctionBody from "$oxc-rules/no-ianitor-in-function-body";
@@ -56,6 +57,7 @@ import onlyTypeImports from "$oxc-rules/only-type-imports";
 import preferClassProperties from "$oxc-rules/prefer-class-properties";
 import preferConstantDispatch from "$oxc-rules/prefer-constant-dispatch";
 import preferContextStack from "$oxc-rules/prefer-context-stack";
+import preferDirectHookImports from "$oxc-rules/prefer-direct-hook-imports";
 import preferEarlyReturn from "$oxc-rules/prefer-early-return";
 import preferExpectAssertions from "$oxc-rules/prefer-expect-assertions";
 import preferHoistedJsxElements from "$oxc-rules/prefer-hoisted-jsx-elements";
@@ -118,6 +120,7 @@ const smallRules = definePlugin({
 		"no-constant-condition-with-break": noConstantConditionWithBreak,
 		"no-error": noError,
 		"no-events-in-events-callback": noEventsInEventsCallback,
+		"no-filter-map-chain": noFilterMapChain,
 		"no-giant-component": noGiantComponent,
 		"no-god-components": noGodComponents,
 		"no-ianitor-in-function-body": noIanitorInFunctionBody,
@@ -151,6 +154,7 @@ const smallRules = definePlugin({
 		"prefer-class-properties": preferClassProperties,
 		"prefer-constant-dispatch": preferConstantDispatch,
 		"prefer-context-stack": preferContextStack,
+		"prefer-direct-hook-imports": preferDirectHookImports,
 		"prefer-early-return": preferEarlyReturn,
 		"prefer-expect-assertions": preferExpectAssertions,
 		"prefer-hoisted-jsx-elements": preferHoistedJsxElements,

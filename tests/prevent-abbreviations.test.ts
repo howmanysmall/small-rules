@@ -561,6 +561,61 @@ describe("prevent-abbreviations", () => {
 				],
 				options: [{ checkProperties: true }],
 			},
+			{
+				code: 'import { useRender } from "./use-render"; useRender({ props: value });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender } from "$components/use-render"; useRender({ props: value });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "function useRender(options) { return options; } useRender({ props: value });",
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender } from "@base-ui/react/use-render"; useRender({ configuration: { props: value } });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender } from "@base-ui/react/use-render"; const options = { props: value }; useRender(options);',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "({ props: value })();",
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import * as BaseUi from "@base-ui/react"; BaseUi.useRender({ props: value });',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderConfiguration } from "./render"; const options: RenderConfiguration = { props: value };',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "type RenderOptions = { value: unknown }; const options: RenderOptions = { props: value };",
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: "const options: { value: unknown } = { props: value };",
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'const options: import("./render").RenderConfiguration = { props: value };',
+				errors: [{ messageId: "replace" }],
+				options: [{ checkProperties: true }],
+			},
 		],
 		valid: [
 			// CONSTANTS (all caps) should be ignored
@@ -704,6 +759,42 @@ describe("prevent-abbreviations", () => {
 			{
 				code: 'import type { Button } from "library"; type T = Button.Props;',
 				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import { useRender } from "@base-ui/react/use-render"; useRender({ props: value });',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import { useRender as render } from "@base-ui/react/use-render"; render({ props: value });',
+				options: [{ shorthands: { props: "properties" } }],
+			},
+			{
+				code: 'import configure from "library"; configure({ args: value });',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; const options: RenderProps = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type * as BaseUi from "@base-ui/react"; const options: BaseUi.RenderProps = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'const options: import("@base-ui/react").RenderProps = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; const options = { props: value } satisfies RenderProps;',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; const options = { props: value } as RenderProps;',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; const options = <RenderProps>{ props: value };',
+				options: [{ checkProperties: true }],
 			},
 			{
 				code: "const err = value;",

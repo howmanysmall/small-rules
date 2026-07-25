@@ -1,3 +1,4 @@
+// oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 import { isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -736,6 +737,7 @@ const requirePairedCalls = defineRule({
 		}
 
 		function handleCloser(node: ESTree.CallExpression, closer: string): void {
+			// oxlint-disable-next-line react-doctor/js-set-map-lookups -- this is not something I can do.
 			const matchingIndex = openerStack.findLastIndex((entry) => getValidClosers(entry.config).includes(closer));
 
 			if (matchingIndex === -1) {

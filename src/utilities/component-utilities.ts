@@ -49,16 +49,6 @@ export function hasJSXIdentifierAttribute(node: ESTree.JSXElement, attributeName
 	return false;
 }
 
-export function isHoistableJSXElementName(
-	name: ESTree.JSXElementName,
-	additionalComponents: ReadonlySet<string>,
-): boolean {
-	if (name.type !== "JSXIdentifier") return false;
-	const firstCharacter = name.name.charAt(0);
-	if (firstCharacter !== "" && firstCharacter === firstCharacter.toLowerCase()) return true;
-	return additionalComponents.has(name.name);
-}
-
 export function isSimpleExpression(node: ESTree.Node): boolean {
 	if (node.type === "BinaryExpression") {
 		switch (node.operator) {

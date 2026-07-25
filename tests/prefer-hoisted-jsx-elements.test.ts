@@ -14,6 +14,7 @@ function View() {
 `,
 				documentation: { id: "fail", title: "Inline static JSX element" },
 				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "roblox-ts" }],
 			},
 			{
 				code: `
@@ -98,6 +99,164 @@ function View() {
 const CORNER = <roundedpanel radius={8} />;
 function View() {
 	return <layoutframe opacity={0}>{CORNER}</layoutframe>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+function View() {
+	return <div>Hello</div>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { EmptyState } from "./empty-state";
+
+function View() {
+	return <EmptyState />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import * as Icons from "./icons";
+
+function View() {
+	return <Icons.Empty />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+function View() {
+	return <><div>Ready</div><span /></>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+function View() {
+	return <frame>{<roundedpanel radius={8} />}</frame>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+function View() {
+	return <my-widget Event="ready" Change={undefined} />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+declare function consume(value: JSX.Element): void;
+
+while (Math.random() > 0.5) consume(<div />);
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+function FunctionComponent({ label }: { readonly label: string }) {
+	return label;
+}
+
+function View() {
+	return <FunctionComponent label="ready" />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+class ClassComponent extends React.Component<{ readonly label: string }> {
+	public render() {
+		return this.props.label;
+	}
+}
+
+function View() {
+	return <ClassComponent label="ready" />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+const ConstantComponent = ({ label }: { readonly label: string }) => label;
+
+function View() {
+	return <ConstantComponent label="ready" />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import * as Icons from "./icons";
+
+function View() {
+	return <Icons.Empty />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+				options: [{ additionalHoistableComponents: ["Icons"] }],
+			},
+			{
+				code: `
+const CONTENT = <><frame /><frame /></>;
+
+function View() {
+	return <folder>{CONTENT}</folder>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+function View() {
+	return <frame color={Color3.fromRGB(255, 0, 0)} />;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+let FRAME = <frame />;
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+function View() {
+	return <frame>{1 + 2}</frame>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+const LABEL = "ready";
+
+function View() {
+	return <frame>{LABEL}</frame>;
 }
 `,
 				errors: [{ messageId: "hoistableJsxElement" }],
@@ -371,6 +530,101 @@ function View() {
 	return FRAME;
 }
 `,
+			},
+			{
+				code: `
+function View() {
+	return <div>Hello</div>;
+}
+`,
+			},
+			{
+				code: `
+function View() {
+	const Empty = ({ label }: { readonly label: string }) => <div>{label}</div>;
+	return <Empty label="none" />;
+}
+`,
+				options: [{ additionalHoistableComponents: ["Empty"], environment: "standard" }],
+			},
+			{
+				code: `
+const FRAME = (<frame /> as React.ReactNode);
+const PANEL = (<roundedpanel /> satisfies React.ReactNode);
+
+function FrameView() {
+	return FRAME;
+}
+
+function PanelView() {
+	return PANEL;
+}
+`,
+			},
+			{
+				code: `
+function View() {
+	const props = { opacity: 0 };
+	return <frame {...props} />;
+}
+`,
+			},
+			{
+				code: `
+declare function First(): JSX.Element;
+declare function Second(): JSX.Element;
+
+let Current = First;
+
+function View() {
+	return <Current />;
+}
+
+Current = Second;
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+declare function First(): JSX.Element;
+declare function Second(): JSX.Element;
+
+let Components = { Current: First };
+
+function View() {
+	return <Components.Current />;
+}
+
+Components = { Current: Second };
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+import { randomUUID } from "node:crypto";
+
+function View() {
+	return <div id={randomUUID()} />;
+}
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+const LOOP = <frame>{LOOP}</frame>;
+
+function View() {
+	return <folder>{LOOP}</folder>;
+}
+`,
+			},
+			{
+				code: `
+function View() {
+	return <div value={(function getValue() { return 1; })()} />;
+}
+`,
+				options: [{ environment: "standard" }],
 			},
 		],
 	});

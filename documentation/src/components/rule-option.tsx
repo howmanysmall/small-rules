@@ -1,10 +1,10 @@
-import { useCallback, useId, useState } from "react";
+import { useId, useState } from "react";
 
 import { RuleOptionDefaultDetail } from "./rule-option-default-detail";
 import { RuleOptionDefaultField } from "./rule-option-default-field";
 import { RuleOptionTypeField } from "./rule-option-type-field";
 
-import type React from "react";
+import type { ReactNode } from "react";
 
 import type { ObjectOption } from "@/data/rule-options";
 
@@ -21,17 +21,17 @@ const labels = {
 	required: "Required",
 } as const;
 
-export function RuleOption({ option }: RuleOptionProperties): React.JSX.Element {
+export function RuleOption({ option }: RuleOptionProperties): ReactNode {
 	const detailIdPrefix = useId();
 	const [copyStatus, setCopyStatus] = useState<"copied" | "failed" | undefined>();
 	const [isExpanded, setIsExpanded] = useState(false);
 	const detailId = `${detailIdPrefix}-${option.name}-default`;
 
-	const toggleDefault = useCallback((): void => {
+	function toggleDefault(): void {
 		setIsExpanded((currentValue) => !currentValue);
-	}, []);
+	}
 
-	const copyDefault = useCallback(async (): Promise<void> => {
+	async function copyDefaultAsync(): Promise<void> {
 		if (option.defaultValue.kind !== "complex" || navigator.clipboard === undefined) {
 			setCopyStatus("failed");
 			return;
@@ -47,11 +47,11 @@ export function RuleOption({ option }: RuleOptionProperties): React.JSX.Element 
 			}
 			throw error;
 		}
-	}, [option.defaultValue]);
+	}
 
-	const handleCopyDefault = useCallback((): void => {
-		void copyDefault();
-	}, [copyDefault]);
+	function handleCopyDefault(): void {
+		void copyDefaultAsync();
+	}
 
 	let copyLabel: string = labels.copy;
 	if (copyStatus === "copied") copyLabel = labels.copied;

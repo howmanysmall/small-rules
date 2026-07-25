@@ -1,6 +1,6 @@
 import { siteBasePath } from "@/utilities/site-base-path";
 
-import type { ReactElement } from "react";
+import type { ReactNode } from "react";
 
 import type { RuleIndexCategory } from "./rule-index-data";
 
@@ -10,7 +10,7 @@ export interface RuleIndexCardProperties {
 	readonly rule: RuleIndexRule;
 }
 
-export function RuleIndexCard({ rule }: RuleIndexCardProperties): ReactElement {
+export function RuleIndexCard({ rule }: RuleIndexCardProperties): ReactNode {
 	return (
 		<a
 			className="rule-index-card"

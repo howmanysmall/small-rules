@@ -7,6 +7,7 @@ import { createRuleIndexCategories } from "@/components/rule-index-data";
 import { ruleFactCategories } from "@/data/rule-facts";
 
 const catalogCategories = createRuleIndexCategories(ruleFactCategories.values());
+const catalogRuleCount = catalogCategories.flatMap((category) => category.rules).length;
 const noPrintPattern = /No Print/u;
 const banReactFcPattern = /Ban React Fc/u;
 const preventAbbreviationsPattern = /Prevent Abbreviations/u;
@@ -23,8 +24,10 @@ describe("RuleIndex", () => {
 		expect(search.getAttribute("placeholder")).toBe("Try no-print");
 		expect(category.tagName).toBe("SELECT");
 		expect(screen.getByRole("button", { name: "Reset filters" }).hasAttribute("disabled")).toBe(false);
-		expect(screen.getByText("Showing 90 rules").textContent).toBe("Showing 90 rules");
-		expect(screen.getAllByRole("link")).toHaveLength(90);
+		expect(screen.getByText(`Showing ${catalogRuleCount} rules`).textContent).toBe(
+			`Showing ${catalogRuleCount} rules`,
+		);
+		expect(screen.getAllByRole("link")).toHaveLength(catalogRuleCount);
 	});
 
 	it("filters rules by search text", async () => {
@@ -84,7 +87,9 @@ describe("RuleIndex", () => {
 
 		expect(search).toHaveProperty("value", "");
 		expect(category).toHaveProperty("value", "");
-		expect(screen.getByText("Showing 90 rules").textContent).toBe("Showing 90 rules");
+		expect(screen.getByText(`Showing ${catalogRuleCount} rules`).textContent).toBe(
+			`Showing ${catalogRuleCount} rules`,
+		);
 	});
 
 	it("renders a category listing without catalog filters", () => {

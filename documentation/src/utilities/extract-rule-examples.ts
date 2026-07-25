@@ -1,4 +1,5 @@
-import { parse, walk } from "yuku-parser";
+import { walk } from "yuku-ast";
+import { parse } from "yuku-parser";
 
 import type {
 	ArrayExpression,

@@ -1,4 +1,3 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	hasName,
 	isIdentifierName,
@@ -20,6 +19,7 @@ import {
 	MESSAGE_ID_SUGGESTION,
 } from "$oxc-utilities/prevent-abbreviations/constants";
 import { isValidIdentifier } from "$oxc-utilities/prevent-abbreviations/identifier";
+import { isExternallyControlledProperty } from "$oxc-utilities/prevent-abbreviations/property-ownership";
 import {
 	getMessage,
 	getNameReplacements,
@@ -74,20 +74,6 @@ function isShorthandPropertyAccess(node: ESTree.IdentifierName): boolean {
 		(isMemberExpression(parent) && parent.property === node && !parent.computed) ||
 		(isTsQualifiedName(parent) && parent.right === node)
 	);
-}
-
-function isObjectIdentifierImported(node: ESTree.IdentifierName, sourceCode: SourceCode): boolean {
-	const { parent } = node;
-
-	let objectNode: ESTree.Node | undefined;
-	/* v8 ignore else -- isShorthandPropertyAccess limits callers to member or TS-qualified property access. @preserve */
-	if (isMemberExpression(parent) && parent.property === node && !parent.computed) {
-		objectNode = parent.object;
-	} else if (isTsQualifiedName(parent) && parent.right === node) objectNode = parent.left;
-
-	if (objectNode === undefined || !hasName(objectNode)) return false;
-
-	return getVariableByName(sourceCode.getScope(node), objectNode.name)?.defs[0]?.type === "ImportBinding";
 }
 
 function reportShorthandReplacement(
@@ -314,7 +300,7 @@ function checkPropertyIdentifier(
 	const propertyLike = shouldReportIdentifierAsProperty(node);
 	const propertyAccess = isShorthandPropertyAccess(node);
 
-	if (propertyAccess && isObjectIdentifierImported(node, sourceCode)) return;
+	if (isExternallyControlledProperty(node, sourceCode)) return;
 
 	if (checkShorthandIdentifier(node, propertyLike, propertyAccess, options, report)) return;
 	if (!(options.checkProperties && propertyLike)) return;
