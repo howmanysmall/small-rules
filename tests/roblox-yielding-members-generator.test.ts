@@ -4,6 +4,7 @@ import {
 	catalogHasYieldingMember,
 	createYieldingMemberCatalog,
 	parseClasses,
+	renderCatalog,
 } from "../scripts/utilities/roblox-yielding-members";
 import { classHasYieldingMember } from "../src/generated/roblox-yielding-members";
 
@@ -43,6 +44,33 @@ describe("roblox yielding-member catalog generation", () => {
 		expect(catalog.instanceMembers).toStrictEqual(["WaitForChild"]);
 		expect(catalog.yieldingMembers.get("Players")).toStrictEqual(["GetFriendsAsync"]);
 		expect(catalog.yieldingMembers.has("ServiceProvider")).toBe(false);
+	});
+
+	it("deduplicates repeated yielding-member groups in generated output", () => {
+		expect.assertions(2);
+
+		const rendered = renderCatalog(
+			parseClasses({
+				Classes: [
+					{
+						Members: [
+							{ MemberType: "Function", Name: "IntersectAsync", Tags: ["Yields"] },
+							{ MemberType: "Function", Name: "SubtractAsync", Tags: ["Yields"] },
+							{ MemberType: "Function", Name: "UnionAsync", Tags: ["Yields"] },
+						],
+						Name: "BasePart",
+						Superclass: "Instance",
+					},
+					{ Members: [], Name: "Instance", Superclass: "<<<ROOT>>>" },
+					{ Members: [], Name: "Part", Superclass: "BasePart" },
+					{ Members: [], Name: "WedgePart", Superclass: "BasePart" },
+				],
+			}),
+		);
+
+		const yieldingMemberGroup = "IntersectAsync,SubtractAsync,UnionAsync";
+		expect(rendered.split(yieldingMemberGroup)).toHaveLength(2);
+		expect(rendered.split("WedgePart")).toHaveLength(2);
 	});
 
 	it("resolves generated universal instance members", () => {

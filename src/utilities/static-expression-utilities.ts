@@ -4,6 +4,7 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 export interface StaticExpressionOptions {
+	readonly staticCallsRequireFactories?: boolean;
 	readonly staticGlobalFactories: ReadonlySet<string>;
 }
 
@@ -167,12 +168,23 @@ function isStaticMemberProperty(
 	return isStaticExpression(sourceCode, property, seen, options);
 }
 
+function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
+	let unwrapped = unwrapExpression(callee);
+	while (unwrapped.type === "MemberExpression") unwrapped = unwrapExpression(unwrapped.object);
+	return unwrapped.type === "Identifier" ? unwrapped.name : undefined;
+}
+
 function isStaticCallCallee(
 	sourceCode: SourceCode,
 	callee: ESTree.Expression,
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
+	if (options.staticCallsRequireFactories === true) {
+		const factoryRootName = getStaticFactoryRootName(callee);
+		if (factoryRootName === undefined || !options.staticGlobalFactories.has(factoryRootName)) return false;
+	}
+
 	const unwrapped = unwrapExpression(callee);
 	if (unwrapped.type === "Identifier") return isStaticIdentifier(sourceCode, unwrapped, seen, options);
 	if (unwrapped.type !== "MemberExpression") return false;
