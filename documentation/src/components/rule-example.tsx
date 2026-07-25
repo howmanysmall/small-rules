@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import type { MouseEvent as ReactMouseEvent, ReactElement, ReactNode } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 
-const passStatusIcon = (
+const PASS_STATUS_ICON = (
 	<svg
 		fill="none"
 		height="12"
@@ -17,7 +17,7 @@ const passStatusIcon = (
 	</svg>
 );
 
-const failStatusIcon = (
+const FAIL_STATUS_ICON = (
 	<svg
 		fill="none"
 		height="12"
@@ -33,7 +33,7 @@ const failStatusIcon = (
 	</svg>
 );
 
-const copyIcon = (
+const COPY_ICON = (
 	<svg
 		aria-hidden="true"
 		fill="none"
@@ -52,15 +52,15 @@ const copyIcon = (
 
 interface RuleExampleProperties {
 	readonly children: ReactNode;
-	readonly title?: string;
+	readonly title?: string | undefined;
 	readonly type: "pass" | "fail";
 }
 
-export function RuleExample({ children, title, type }: RuleExampleProperties): ReactElement {
+export function RuleExample({ children, title, type }: RuleExampleProperties): ReactNode {
 	const [copied, setCopied] = useState(false);
 	const isPass = type === "pass";
 	const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
-	const statusIcon = isPass ? passStatusIcon : failStatusIcon;
+	const statusIcon = isPass ? PASS_STATUS_ICON : FAIL_STATUS_ICON;
 
 	useEffect(
 		function resetCopiedState(): (() => void) | undefined {
@@ -76,21 +76,18 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 		[copied],
 	);
 
-	const copyExampleAsync = useCallback(async function copyExampleAsync(code: Element): Promise<void> {
+	async function copyExampleAsync(code: Element): Promise<void> {
 		await navigator.clipboard.writeText(code.textContent ?? "");
 		setCopied(true);
-	}, []);
+	}
 
-	const handleCopyExample = useCallback(
-		function handleCopyExample(event: ReactMouseEvent<HTMLButtonElement>): void {
-			const card = event.currentTarget.closest("[data-rule-example]");
-			const code = card?.querySelector("pre code, code");
-			if (code === null || code === undefined) return;
+	function handleCopyExample(event: ReactMouseEvent<HTMLButtonElement>): void {
+		const card = event.currentTarget.closest("[data-rule-example]");
+		const code = card?.querySelector("pre code, code");
+		if (code === null || code === undefined) return;
 
-			void copyExampleAsync(code);
-		},
-		[copyExampleAsync],
-	);
+		void copyExampleAsync(code);
+	}
 
 	const copyButton = (
 		<button
@@ -102,7 +99,7 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 			onClick={handleCopyExample}
 			type="button"
 		>
-			{copyIcon}
+			{COPY_ICON}
 		</button>
 	);
 	const badge = (

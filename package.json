@@ -117,9 +117,11 @@
 		"mutative": "catalog:dev",
 		"oxfmt": "catalog:dev",
 		"oxlint": "catalog:dev",
+		"oxlint-plugin-react-doctor": "catalog:lint",
 		"oxlint-tsgolint": "catalog:dev",
 		"picocolors": "catalog:dev",
 		"pncat": "catalog:",
+		"react-doctor": "catalog:lint",
 		"sfw": "catalog:dev",
 		"skills": "catalog:dev",
 		"tsdown": "catalog:build",
@@ -128,6 +130,7 @@
 		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:test",
 		"vitiate": "catalog:dev",
+		"yuku-ast": "catalog:dev",
 		"zx": "catalog:dev"
 	},
 	"peerDependencies": {
@@ -136,5 +139,5 @@
 	"engines": {
 		"node": "^20.19.0 || >=22.12.0"
 	},
-	"packageManager": "pnpm@11.10.0"
+	"packageManager": "pnpm@11.17.0"
 }

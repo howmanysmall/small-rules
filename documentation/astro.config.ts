@@ -93,7 +93,13 @@ export default defineConfig({
 			}),
 		),
 		ensureAstroIntegration(mdx()),
-		ensureAstroIntegration(react()),
+		ensureAstroIntegration(
+			react({
+				babel: {
+					plugins: ["babel-plugin-react-compiler"],
+				},
+			}),
+		),
 		ensureAstroIntegration(contextualMenu()),
 		ensureAstroIntegration(motion()),
 	],

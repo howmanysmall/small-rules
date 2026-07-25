@@ -1,6 +1,6 @@
 import { Icon } from "./icon";
 
-import type React from "react";
+import type { ReactNode } from "react";
 
 import type { IconName } from "./icon";
 
@@ -10,7 +10,7 @@ interface FeatureCardProperties {
 	readonly title: string;
 }
 
-export function FeatureCard({ description, icon, title }: FeatureCardProperties): React.JSX.Element {
+export function FeatureCard({ description, icon, title }: FeatureCardProperties): ReactNode {
 	return (
 		<div className="feature-card">
 			<div className="feature-card-icon">

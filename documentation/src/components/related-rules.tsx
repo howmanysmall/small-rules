@@ -2,7 +2,7 @@ import { getRuleFacts } from "@/data/rule-facts";
 import { getRelatedRules } from "@/data/rule-relations";
 import { siteBasePath } from "@/utilities/site-base-path";
 
-import type React from "react";
+import type { ReactNode } from "react";
 
 import type { RuleFacts } from "@/data/rule-facts";
 import type { RuleName } from "@/data/rule-manifest";
@@ -31,7 +31,7 @@ function formatRelationKind(kind: string): string {
 // biome-ignore lint/correctness/useUniqueElementIds: This preserves the existing public heading anchor and label target.
 const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 
-function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): React.JSX.Element {
+function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): ReactNode {
 	return (
 		<a className="related-rule" href={`${siteBasePath}${counterpart.path}/`} key={counterpart.name}>
 			<span className="related-rule-heading">
@@ -43,7 +43,7 @@ function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties)
 	);
 }
 
-export function RelatedRules({ rule }: RelatedRulesProperties): React.JSX.Element | undefined {
+export function RelatedRules({ rule }: RelatedRulesProperties): ReactNode {
 	const relations = getRelatedRules(rule).map((relation) => ({
 		counterpart: getRuleFacts(getCounterpartName(relation, rule)),
 		relation,

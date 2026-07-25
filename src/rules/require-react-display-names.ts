@@ -163,14 +163,15 @@ const requireReactDisplayNames = defineRule({
 				if (!isReactImport(node, reactSources)) return;
 
 				for (const specifier of node.specifiers) {
+					const { name } = specifier.local;
 					if (specifier.type === "ImportSpecifier") {
 						const importedName = getImportedName(specifier);
-						if (importedName === "memo") memoIdentifiers.add(specifier.local.name);
-						if (importedName === "createContext") createContextIdentifiers.add(specifier.local.name);
+						if (importedName === "memo") memoIdentifiers.add(name);
+						if (importedName === "createContext") createContextIdentifiers.add(name);
 						continue;
 					}
 
-					reactNamespaces.add(specifier.local.name);
+					reactNamespaces.add(name);
 				}
 			},
 			"Program:exit"(): void {

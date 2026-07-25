@@ -129,8 +129,8 @@ function buildReplacementNames(replacement: ReadonlyMap<string, boolean>): Repla
 	}
 
 	return {
-		lowerFirst: lowerFirstReplacements.toSorted(),
-		upperFirst: upperFirstReplacements.toSorted(),
+		lowerFirst: lowerFirstReplacements.toSorted((left, right) => left.localeCompare(right)),
+		upperFirst: upperFirstReplacements.toSorted((left, right) => left.localeCompare(right)),
 	};
 }
 

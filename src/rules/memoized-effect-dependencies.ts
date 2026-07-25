@@ -31,8 +31,9 @@ function isMode(value: unknown): value is Mode {
 }
 
 function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: ReadonlySet<string>): string | undefined {
-	if (callee.computed || callee.object.type !== "Identifier" || !reactNamespaces.has(callee.object.name))
+	if (callee.computed || callee.object.type !== "Identifier" || !reactNamespaces.has(callee.object.name)) {
 		return undefined;
+	}
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
 	return callee.property.type === "Identifier" ? callee.property.name : undefined;
 }

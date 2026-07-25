@@ -320,6 +320,7 @@ function getExplicitPlaceholder(schema: SchemaRecord, hint: string | undefined):
 		const matchingSchema = schema.anyOf.find(
 			(entry) =>
 				isSchemaRecord.allows(entry) &&
+				// oxlint-disable-next-line react-doctor/js-set-map-lookups -- schema type lists are tiny; allocating a Set per branch costs more.
 				getSchemaTypeNames(entry).includes("object") &&
 				hint !== undefined &&
 				objectPlaceholders.has(hint),

@@ -12,5 +12,6 @@ export interface GenericSpritesheetProperties {
 }
 
 export function GenericSpritesheet({ imageType }: GenericSpritesheetProperties): React.ReactNode {
+	// oxlint-disable-next-line react-doctor/jsx-no-useless-fragment -- shut the up
 	return <>{imageType}</>;
 }

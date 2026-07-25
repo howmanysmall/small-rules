@@ -9,6 +9,7 @@ import type { RuleName } from "./rule-manifest";
 
 const workingDirectory = process.cwd();
 const testsDirectory = resolve(workingDirectory, basename(workingDirectory) === "documentation" ? "../tests" : "tests");
+// oxlint-disable-next-line react-doctor/js-combine-iterations -- called once.
 const testFileNames = readdirSync(testsDirectory, { encoding: "utf8", withFileTypes: true })
 	.filter((entry) => entry.isFile() && entry.name.endsWith(".test.ts"))
 	.map((entry) => entry.name)

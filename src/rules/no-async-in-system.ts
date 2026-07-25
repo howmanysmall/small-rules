@@ -68,7 +68,8 @@ function pushChildren(node: ESTree.Node, stack: Array<unknown>): void {
 	}
 }
 
-function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | undefined): void {
+// oxlint-disable-next-line typescript/no-invalid-void-type -- fixes other shit
+function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | undefined | void): void {
 	const stack: Array<unknown> = [root];
 	while (stack.length > 0) {
 		const current = stack.pop();
@@ -224,13 +225,14 @@ function collectAnnotatedTypes(
 			return;
 		}
 		if (!isAnyFunction(node)) return;
-		const variables = sourceCode.getDeclaredVariables(node);
+		const variables = new Map(sourceCode.getDeclaredVariables(node).map((variable) => [variable.name, variable]));
+
 		for (const parameter of node.params) {
 			if (parameter.type !== "Identifier") continue;
 			const parameterName = parameter.name;
 			const className = getReferencedTypeName(parameter.typeAnnotation, false);
 			if (className === undefined || declaredTypeNames.has(className)) continue;
-			const variable = variables.find((candidate) => candidate.name === parameterName);
+			const variable = variables.get(parameterName);
 			/* v8 ignore else -- @preserve identifier parameters always appear in their function's declared variables. */
 			if (variable !== undefined) types.set(variable, className);
 		}

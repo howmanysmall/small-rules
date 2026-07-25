@@ -1,15 +1,14 @@
 import { getRuleFacts } from "@/data/rule-facts";
 
-import type React from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 import type { RuleName } from "@/data/rule-manifest";
 
 interface RuleSummaryProperties {
-	readonly children?: React.ReactNode;
 	readonly rule: RuleName;
 }
 
-export function RuleSummary({ children, rule }: RuleSummaryProperties): React.JSX.Element {
+export function RuleSummary({ children, rule }: PropsWithChildren<RuleSummaryProperties>): ReactNode {
 	const { description } = getRuleFacts(rule);
 
 	return (
