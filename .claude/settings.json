@@ -1,0 +1,13 @@
+{
+	"enabledPlugins": {
+		"howmanysmall-lsps@howmanysmall": true
+	},
+	"extraKnownMarketplaces": {
+		"howmanysmall": {
+			"source": {
+				"path": ".",
+				"source": "directory"
+			}
+		}
+	}
+}

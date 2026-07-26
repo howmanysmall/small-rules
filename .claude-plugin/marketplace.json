@@ -1,0 +1,14 @@
+{
+	"description": "Claude Code plugins for TypeScript projects",
+	"name": "howmanysmall",
+	"owner": {
+		"name": "HowManySmall"
+	},
+	"plugins": [
+		{
+			"description": "Project language servers for Claude Code",
+			"name": "howmanysmall-lsps",
+			"source": "./.claude/plugins/howmanysmall-lsps"
+		}
+	]
+}
