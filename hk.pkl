@@ -1,7 +1,7 @@
 // hk configuration - https://hk.jdx.dev/
-amends "package://github.com/jdx/hk/releases/download/v1.51.0/hk@1.51.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v1.50.0/hk@1.50.0#/Config.pkl"
 
-import "package://github.com/jdx/hk/releases/download/v1.51.0/hk@1.51.0#/Builtins.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.50.0/hk@1.50.0#/Builtins.pkl"
 
 exclude =
   List(
@@ -80,7 +80,8 @@ hooks {
         exclude = binary_excludes
       }
       ["betterleaks"] = Builtins.betterleaks
-      ["sherif"] = (Builtins.sherif) {
+      ["sherif"] {
+        glob = List("package.json", "pnpm-workspace.yaml")
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
@@ -157,23 +158,13 @@ hooks {
 
       // Shell scripts
       ["shfmt"] {
-        match_any =
-          List(
-            new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
-            new Config.FileSelector { types = List("shell") },
-          )
+        glob = List("**/*.sh", "**/*.bash", "**/*.ksh")
         check = "shfmt -bn -ci -sr -d {{files}}"
         fix = "shfmt -bn -ci -sr -w {{files}}"
         check_first = true
       }
       ["shellcheck"] = (Builtins.shellcheck) {
-        match_any =
-          List(
-            new Config.FileSelector {
-              glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-            },
-            new Config.FileSelector { types = List("shell") },
-          )
+        glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
       }
 
       // GitHub Actions workflows
@@ -279,7 +270,8 @@ hooks {
         exclude = binary_excludes
       }
       ["betterleaks"] = Builtins.betterleaks
-      ["sherif"] = (Builtins.sherif) {
+      ["sherif"] {
+        glob = List("package.json", "pnpm-workspace.yaml")
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
@@ -345,21 +337,11 @@ hooks {
         glob = List("*.pkl")
       }
       ["shfmt"] {
-        match_any =
-          List(
-            new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
-            new Config.FileSelector { types = List("shell") },
-          )
+        glob = List("**/*.sh", "**/*.bash", "**/*.ksh")
         check = "shfmt -bn -ci -sr -d {{files}}"
       }
       ["shellcheck"] = (Builtins.shellcheck) {
-        match_any =
-          List(
-            new Config.FileSelector {
-              glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-            },
-            new Config.FileSelector { types = List("shell") },
-          )
+        glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
       }
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
@@ -402,7 +384,8 @@ hooks {
         exclude = binary_excludes
       }
       ["betterleaks"] = Builtins.betterleaks
-      ["sherif"] = (Builtins.sherif) {
+      ["sherif"] {
+        glob = List("package.json", "pnpm-workspace.yaml")
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
@@ -472,21 +455,11 @@ hooks {
         glob = List("*.pkl")
       }
       ["shfmt"] {
-        match_any =
-          List(
-            new Config.FileSelector { glob = List("**/*.sh", "**/*.bash", "**/*.ksh") },
-            new Config.FileSelector { types = List("shell") },
-          )
+        glob = List("**/*.sh", "**/*.bash", "**/*.ksh")
         fix = "shfmt -bn -ci -sr -w {{files}}"
       }
       ["shellcheck"] = (Builtins.shellcheck) {
-        match_any =
-          List(
-            new Config.FileSelector {
-              glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-            },
-            new Config.FileSelector { types = List("shell") },
-          )
+        glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
       }
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
