@@ -2,6 +2,7 @@ import arrayTypeGeneric from "$oxc-rules/array-type-generic";
 import banInstances from "$oxc-rules/ban-instances";
 import banReactFc from "$oxc-rules/ban-react-fc";
 import banTypes from "$oxc-rules/ban-types";
+import consistentCompoundWords from "$oxc-rules/consistent-compound-words";
 import directiveDisableEnablePair from "$oxc-rules/directive-disable-enable-pair";
 import directiveNoAggregatingEnable from "$oxc-rules/directive-no-aggregating-enable";
 import directiveNoDuplicateDisable from "$oxc-rules/directive-no-duplicate-disable";
@@ -11,6 +12,7 @@ import directiveNoUnusedEnable from "$oxc-rules/directive-no-unused-enable";
 import directiveNoUse from "$oxc-rules/directive-no-use";
 import directiveRequireDescription from "$oxc-rules/directive-require-description";
 import enforceIanitorCheckType from "$oxc-rules/enforce-ianitor-check-type";
+import isolatedFunctions from "$oxc-rules/isolated-functions";
 import memoizedEffectDependencies from "$oxc-rules/memoized-effect-dependencies";
 import noArrayConstructorElements from "$oxc-rules/no-array-constructor-elements";
 import noArrayConstructorIndexAssignment from "$oxc-rules/no-array-constructor-index-assignment";
@@ -34,6 +36,7 @@ import noIdentityMap from "$oxc-rules/no-identity-map";
 import noIncrementDecrement from "$oxc-rules/no-increment-decrement";
 import noInlinePropertyOnMemoComponent from "$oxc-rules/no-inline-property-on-memo-component";
 import noInstanceMethodsWithoutThis from "$oxc-rules/no-instance-methods-without-this";
+import noLoopIterableMutation from "$oxc-rules/no-loop-iterable-mutation";
 import noNativePropertiesSpread from "$oxc-rules/no-native-properties-spread";
 import noNewInstanceInUseMemo from "$oxc-rules/no-new-instance-in-use-memo";
 import noPrint from "$oxc-rules/no-print";
@@ -45,10 +48,12 @@ import noSpecFileExtension from "$oxc-rules/no-spec-file-extension";
 import noStaticReactCreateElement from "$oxc-rules/no-static-react-create-element";
 import noTableCreateMap from "$oxc-rules/no-table-create-map";
 import noTaskWait from "$oxc-rules/no-task-wait";
+import noTrivialAssertions from "$oxc-rules/no-trivial-assertions";
 import noUnderscoreReactProperties from "$oxc-rules/no-underscore-react-properties";
 import noUnusedImports from "$oxc-rules/no-unused-imports";
 import noUnusedUseMemo from "$oxc-rules/no-unused-use-memo";
 import noUseMemoSimpleExpression from "$oxc-rules/no-use-memo-simple-expression";
+import noUseOfEmptyReturnValue from "$oxc-rules/no-use-of-empty-return-value";
 import noUselessConstants from "$oxc-rules/no-useless-constants";
 import noUselessDefault from "$oxc-rules/no-useless-default";
 import noUselessUseEffect from "$oxc-rules/no-useless-use-effect";
@@ -102,6 +107,7 @@ const smallRules = definePlugin({
 		"ban-instances": banInstances,
 		"ban-react-fc": banReactFc,
 		"ban-types": banTypes,
+		"consistent-compound-words": consistentCompoundWords,
 		"directive-disable-enable-pair": directiveDisableEnablePair,
 		"directive-no-aggregating-enable": directiveNoAggregatingEnable,
 		"directive-no-duplicate-disable": directiveNoDuplicateDisable,
@@ -111,6 +117,7 @@ const smallRules = definePlugin({
 		"directive-no-use": directiveNoUse,
 		"directive-require-description": directiveRequireDescription,
 		"enforce-ianitor-check-type": enforceIanitorCheckType,
+		"isolated-functions": isolatedFunctions,
 		"memoized-effect-dependencies": memoizedEffectDependencies,
 		"no-array-constructor-elements": noArrayConstructorElements,
 		"no-array-constructor-index-assignment": noArrayConstructorIndexAssignment,
@@ -134,6 +141,7 @@ const smallRules = definePlugin({
 		"no-increment-decrement": noIncrementDecrement,
 		"no-inline-property-on-memo-component": noInlinePropertyOnMemoComponent,
 		"no-instance-methods-without-this": noInstanceMethodsWithoutThis,
+		"no-loop-iterable-mutation": noLoopIterableMutation,
 		"no-native-properties-spread": noNativePropertiesSpread,
 		"no-new-instance-in-use-memo": noNewInstanceInUseMemo,
 		"no-print": noPrint,
@@ -145,10 +153,12 @@ const smallRules = definePlugin({
 		"no-static-react-create-element": noStaticReactCreateElement,
 		"no-table-create-map": noTableCreateMap,
 		"no-task-wait": noTaskWait,
+		"no-trivial-assertions": noTrivialAssertions,
 		"no-underscore-react-props": noUnderscoreReactProperties,
 		"no-unused-imports": noUnusedImports,
 		"no-unused-use-memo": noUnusedUseMemo,
 		"no-use-memo-simple-expression": noUseMemoSimpleExpression,
+		"no-use-of-empty-return-value": noUseOfEmptyReturnValue,
 		"no-useless-constants": noUselessConstants,
 		"no-useless-default": noUselessDefault,
 		"no-useless-use-effect": noUselessUseEffect,
