@@ -833,7 +833,7 @@ describe("prevent-abbreviations", () => {
 		});
 
 		it("supports shorthand fallbacks, ignored shorthand matches, and property access allow lists", () => {
-			expect.assertions(7);
+			expect.assertions(9);
 
 			const options = prepareOptions({
 				allowPropertyAccess: ["Txt"],
@@ -854,6 +854,8 @@ describe("prevent-abbreviations", () => {
 			assert.ok(textReplacement !== undefined);
 			expect(literalReplacement).toBeUndefined();
 			expect(propsReplacement?.replaced).toBe("PanelProperties");
+			expect(getShorthandReplacement("Btn2", options.shorthandConfiguration)?.replaced).toBe("Button2");
+			expect(isShorthandIgnored("Btn", options.shorthandConfiguration)).toBe(true);
 			expect(isShorthandIgnored("Btn", options.shorthandConfiguration)).toBe(true);
 			expect(isShorthandIgnored("PanelProps", options.shorthandConfiguration)).toBe(true);
 			expect(isShorthandIgnored("TxtLabel", options.shorthandConfiguration)).toBe(false);
@@ -904,6 +906,32 @@ describe("prevent-abbreviations", () => {
 			for (const pattern of options.ignore) {
 				expect(pattern instanceof RegExp).toBe(true);
 			}
+		});
+
+		it("reuses normalized configuration while isolating per-run lookup caches", () => {
+			expect.assertions(9);
+
+			const configuration = {
+				ignoreShorthands: ["Props"],
+				replacements: { res: { response: true, result: true } },
+				shorthands: { Props: "Properties" },
+			};
+			const firstOptions = prepareOptions(configuration);
+			const secondOptions = prepareOptions(configuration);
+			const firstShorthand = getShorthandReplacement("PanelProps", firstOptions.shorthandConfiguration);
+			const firstNameReplacements = getNameReplacements("res", firstOptions);
+
+			expect(firstOptions).not.toBe(secondOptions);
+			expect(firstOptions.allowList).toBe(secondOptions.allowList);
+			expect(firstOptions.allowPropertyAccess).toBe(secondOptions.allowPropertyAccess);
+			expect(firstOptions.ignore).toBe(secondOptions.ignore);
+			expect(firstOptions.replacements).toBe(secondOptions.replacements);
+			expect(firstOptions.shorthandConfiguration.exactMatchers).toBe(
+				secondOptions.shorthandConfiguration.exactMatchers,
+			);
+			expect(getShorthandReplacement("PanelProps", firstOptions.shorthandConfiguration)).toBe(firstShorthand);
+			expect(getNameReplacements("res", firstOptions)).toBe(firstNameReplacements);
+			expect(getNameReplacements("res", secondOptions)).not.toBe(firstNameReplacements);
 		});
 	});
 
