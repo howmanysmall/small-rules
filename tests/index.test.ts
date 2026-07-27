@@ -5,6 +5,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"ban-instances",
 	"ban-react-fc",
 	"ban-types",
+	"consistent-compound-words",
 	"directive-disable-enable-pair",
 	"directive-no-aggregating-enable",
 	"directive-no-duplicate-disable",
@@ -14,6 +15,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"directive-no-use",
 	"directive-require-description",
 	"enforce-ianitor-check-type",
+	"isolated-functions",
 	"memoized-effect-dependencies",
 	"no-array-constructor-elements",
 	"no-array-constructor-index-assignment",
@@ -37,6 +39,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-increment-decrement",
 	"no-inline-property-on-memo-component",
 	"no-instance-methods-without-this",
+	"no-loop-iterable-mutation",
 	"no-native-properties-spread",
 	"no-new-instance-in-use-memo",
 	"no-print",
@@ -48,10 +51,12 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-static-react-create-element",
 	"no-table-create-map",
 	"no-task-wait",
+	"no-trivial-assertions",
 	"no-underscore-react-props",
 	"no-unused-imports",
 	"no-unused-use-memo",
 	"no-use-memo-simple-expression",
+	"no-use-of-empty-return-value",
 	"no-useless-constants",
 	"no-useless-default",
 	"no-useless-use-effect",
@@ -115,7 +120,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(95);
+			expect(ruleNames).toHaveLength(100);
 		}, 5000);
 	});
 });

@@ -1,0 +1,130 @@
+{
+	"astro": {
+		"args": ["--stdio"],
+		"command": "astro-ls",
+		"extensionToLanguage": { ".astro": "astro" }
+	},
+	"bash": {
+		"args": ["start"],
+		"command": "bash-language-server",
+		"extensionToLanguage": {
+			".bash": "shellscript",
+			".ksh": "shellscript",
+			".sh": "shellscript",
+			".zsh": "shellscript"
+		}
+	},
+	"biome": {
+		"args": ["lsp-proxy"],
+		"command": "biome",
+		"extensionToLanguage": {
+			".astro": "astro",
+			".cjs": "javascript",
+			".css": "css",
+			".cts": "typescript",
+			".gql": "graphql",
+			".graphql": "graphql",
+			".html": "html",
+			".js": "javascript",
+			".json": "json",
+			".jsonc": "jsonc",
+			".jsx": "javascriptreact",
+			".mjs": "javascript",
+			".mts": "typescript",
+			".scss": "scss",
+			".svelte": "svelte",
+			".ts": "typescript",
+			".tsx": "typescriptreact",
+			".vue": "vue",
+			".yaml": "yaml",
+			".yml": "yaml"
+		}
+	},
+	"oxfmt": {
+		"args": ["--lsp"],
+		"command": "oxfmt",
+		"extensionToLanguage": {
+			".cjs": "javascript",
+			".css": "css",
+			".cts": "typescript",
+			".gql": "graphql",
+			".graphql": "graphql",
+			".handlebars": "handlebars",
+			".hbs": "handlebars",
+			".htm": "html",
+			".html": "html",
+			".js": "javascript",
+			".json": "json",
+			".json5": "json5",
+			".jsonc": "jsonc",
+			".jsx": "javascriptreact",
+			".less": "less",
+			".mdx": "mdx",
+			".mjs": "javascript",
+			".mts": "typescript",
+			".sass": "sass",
+			".scss": "scss",
+			".ts": "typescript",
+			".tsx": "typescriptreact",
+			".vue": "vue",
+			".yaml": "yaml",
+			".yml": "yaml"
+		}
+	},
+	"oxlint": {
+		"args": ["--lsp"],
+		"command": "oxlint",
+		"extensionToLanguage": {
+			".astro": "astro",
+			".cjs": "javascript",
+			".cts": "typescript",
+			".js": "javascript",
+			".jsx": "javascriptreact",
+			".mjs": "javascript",
+			".mts": "typescript",
+			".svelte": "svelte",
+			".ts": "typescript",
+			".tsx": "typescriptreact",
+			".vue": "vue"
+		}
+	},
+	"rumdl": {
+		"args": ["server"],
+		"command": "rumdl",
+		"extensionToLanguage": {
+			".Rmd": "rmarkdown",
+			".markdown": "markdown",
+			".md": "markdown",
+			".mdown": "markdown",
+			".mdtext": "markdown",
+			".mdtxt": "markdown",
+			".mdwn": "markdown",
+			".mkd": "markdown",
+			".mkdn": "markdown",
+			".text": "plaintext"
+		}
+	},
+	"tombi": {
+		"args": ["lsp"],
+		"command": "tombi",
+		"extensionToLanguage": {
+			".toml": "toml"
+		}
+	},
+	"typescript": {
+		"args": ["--lsp", "--stdio"],
+		"command": "tsgo",
+		"extensionToLanguage": {
+			".ts": "typescript",
+			".tsx": "typescriptreact"
+		}
+	},
+	"yaml": {
+		"args": ["--stdio"],
+		"command": "yaml-language-server",
+		"extensionToLanguage": {
+			".yaml": "yaml",
+			".yml": "yaml"
+		}
+	}
+}
