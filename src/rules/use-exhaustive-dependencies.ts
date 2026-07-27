@@ -823,26 +823,17 @@ function getRootIdentifierName(node: ESTree.Node): string | undefined {
 	return rootIdentifier?.type === "Identifier" ? rootIdentifier.name : undefined;
 }
 
-function getMatchingCaptures(
-	captures: ReadonlyArray<CaptureInfo>,
-	dependency: DependencyInfo,
-): ReadonlyArray<CaptureInfo> {
+function getMatchingCapture(captures: ReadonlyArray<CaptureInfo>, dependency: DependencyInfo): CaptureInfo | undefined {
 	const dependencyName = getRootIdentifierName(dependency.node);
-	if (dependencyName === undefined) return [];
+	if (dependencyName === undefined) return undefined;
 
-	return captures.filter((capture) => getRootIdentifierName(capture.node) === dependencyName);
+	// At most one capture can match: collectCaptures dedupes by identifier name, and a capture's
+	// node always roots at that same identifier.
+	return captures.find((capture) => getRootIdentifierName(capture.node) === dependencyName);
 }
 
-function isStableDependency(
-	matchingCaptures: ReadonlyArray<CaptureInfo>,
-	stableHooks: Map<string, StableResult>,
-): boolean {
-	return (
-		matchingCaptures.length > 0 &&
-		matchingCaptures.every(
-			(capture) => !capture.forceDependency && isStableValue(capture.variable, capture.name, stableHooks),
-		)
-	);
+function isStableDependency(capture: CaptureInfo, stableHooks: Map<string, StableResult>): boolean {
+	return !capture.forceDependency && isStableValue(capture.variable, capture.name, stableHooks);
 }
 
 function reportUnnecessaryDependencies(
@@ -855,19 +846,18 @@ function reportUnnecessaryDependencies(
 	reportStableDependencies: boolean,
 ): void {
 	for (const dependency of dependencies) {
-		const matchingCaptures = getMatchingCaptures(captures, dependency);
-		if (matchingCaptures.length === 0) {
+		const matchingCapture = getMatchingCapture(captures, dependency);
+		if (matchingCapture === undefined) {
 			if (reportUnnecessary) reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
 			continue;
 		}
 
-		if (reportStableDependencies && isStableDependency(matchingCaptures, stableHooks)) {
+		if (reportStableDependencies && isStableDependency(matchingCapture, stableHooks)) {
 			reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
 			continue;
 		}
 
-		const maxCaptureDepth = Math.max(...matchingCaptures.map(({ depth }) => depth));
-		if (reportUnnecessary && dependency.depth > maxCaptureDepth) {
+		if (reportUnnecessary && dependency.depth > matchingCapture.depth) {
 			reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
 		}
 	}

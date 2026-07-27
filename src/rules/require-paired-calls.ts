@@ -98,26 +98,30 @@ function getCallName({ callee }: ESTree.CallExpression): string | undefined {
 
 function getValidClosers(configuration: PairConfiguration): Array<string> {
 	const result = new Array<string>();
+	let size = 0;
 
 	if (isStringArray(configuration.closer)) {
-		result.push(...configuration.closer);
+		for (const closer of configuration.closer) result[size++] = closer;
 	} else {
 		/* v8 ignore start -- @preserve validated pair configs only allow string closers after the array branch fails. */
 		// oxlint-disable-next-line eslint/no-lonely-if -- V8 ignore must wrap only this defensive validated-shape branch.
 		if (isStringRaw(configuration.closer)) {
-			result.push(configuration.closer);
+			result[size++] = configuration.closer;
 		}
 		/* v8 ignore stop -- @preserve */
 	}
 
-	if (configuration.alternatives) for (const alternative of configuration.alternatives) result.push(alternative);
+	if (configuration.alternatives) for (const alternative of configuration.alternatives) result[size++] = alternative;
 
 	return result;
 }
 
 function getAllOpeners(configuration: PairConfiguration): Array<string> {
 	const openers = [configuration.opener];
-	if (configuration.openerAlternatives) openers.push(...configuration.openerAlternatives);
+	if (configuration.openerAlternatives) {
+		let size = 1;
+		for (const alternative of configuration.openerAlternatives) openers[size++] = alternative;
+	}
 	return openers;
 }
 
@@ -400,16 +404,14 @@ const requirePairedCalls = defineRule({
 
 		function onFunctionExit(): void {
 			if (openerStack.length > 0) {
-				for (const entry of openerStack) {
-					reportUnpairedEntry(entry, "function exit");
-				}
+				for (const entry of openerStack) reportUnpairedEntry(entry, "function exit");
 			}
 
 			const parentStack = functionStacks.pop();
 			/* v8 ignore else -- @preserve function exits are paired with function enters that push a parent stack. */
 			if (parentStack) {
 				openerStack.length = 0;
-				openerStack.push(...parentStack);
+				for (const entry of parentStack) openerStack.push(entry);
 			} else openerStack.length = 0;
 
 			popContext();
@@ -422,6 +424,7 @@ const requirePairedCalls = defineRule({
 			saveSnapshot(ifNode);
 		}
 
+		// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
 		function onIfStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for IfStatement visitor keys. */
 			if (node.type !== "IfStatement") return;
@@ -444,13 +447,12 @@ const requirePairedCalls = defineRule({
 				if (hasCompleteElse) {
 					reportPartiallyClosedOpeners(originalStack, branches, "not all execution paths");
 
-					const commonOpeners = originalStack.filter((opener) => isOpenerInAllBranches(opener, branches));
-
 					openerStack.length = 0;
-					openerStack.push(...commonOpeners);
-				} else {
-					restoreOpenerStack(originalStack);
-				}
+					for (const opener of originalStack) {
+						if (!isOpenerInAllBranches(opener, branches)) continue;
+						openerStack.push(opener);
+					}
+				} else restoreOpenerStack(originalStack);
 			}
 
 			stackSnapshots.delete(node);
@@ -478,9 +480,7 @@ const requirePairedCalls = defineRule({
 			const { parent } = alternateNode;
 
 			/* v8 ignore else -- @preserve alternate exit selector only runs for IfStatement alternates. */
-			if (parent?.type === "IfStatement") {
-				recordBranchSnapshot(parent);
-			}
+			if (parent?.type === "IfStatement") recordBranchSnapshot(parent);
 		}
 
 		function onTryStatementEnter(node: ESTree.Node): void {
@@ -489,6 +489,7 @@ const requirePairedCalls = defineRule({
 			saveSnapshot(node);
 		}
 
+		// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
 		function onTryStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for TryStatement visitor keys. */
 			if (node.type !== "TryStatement") return;
@@ -530,10 +531,11 @@ const requirePairedCalls = defineRule({
 					}
 				}
 
-				const commonOpeners = originalStack.filter((opener) => isOpenerInAllBranches(opener, branches));
-
 				openerStack.length = 0;
-				openerStack.push(...commonOpeners);
+				for (const opener of originalStack) {
+					if (!isOpenerInAllBranches(opener, branches)) continue;
+					openerStack.push(opener);
+				}
 			}
 
 			stackSnapshots.delete(node);
@@ -604,10 +606,8 @@ const requirePairedCalls = defineRule({
 					);
 
 					openerStack.length = 0;
-					openerStack.push(...commonOpeners);
-				} else {
-					restoreOpenerStack(originalStack);
-				}
+					for (const entry of commonOpeners) openerStack.push(entry);
+				} else restoreOpenerStack(originalStack);
 			}
 
 			stackSnapshots.delete(node);

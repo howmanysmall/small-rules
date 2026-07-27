@@ -21,9 +21,11 @@ import noCascadingSetState from "$oxc-rules/no-cascading-set-state";
 import noColor3Constructor from "$oxc-rules/no-color3-constructor";
 import noCommentedCode from "$oxc-rules/no-commented-code";
 import noConstantConditionWithBreak from "$oxc-rules/no-constant-condition-with-break";
+import noDeadStore from "$oxc-rules/no-dead-store";
 import noError from "$oxc-rules/no-error";
 import noEventsInEventsCallback from "$oxc-rules/no-events-in-events-callback";
 import noFilterMapChain from "$oxc-rules/no-filter-map-chain";
+import noFloatingPointEquality from "$oxc-rules/no-floating-point-equality";
 import noGiantComponent from "$oxc-rules/no-giant-component";
 import noGodComponents from "$oxc-rules/no-god-components";
 import noIanitorInFunctionBody from "$oxc-rules/no-ianitor-in-function-body";
@@ -52,6 +54,7 @@ import noUselessDefault from "$oxc-rules/no-useless-default";
 import noUselessUseEffect from "$oxc-rules/no-useless-use-effect";
 import noUselessUseMemo from "$oxc-rules/no-useless-use-memo";
 import noUselessUseSpring from "$oxc-rules/no-useless-use-spring";
+import noVariadicSpread from "$oxc-rules/no-variadic-spread";
 import noWarn from "$oxc-rules/no-warn";
 import onlyTypeImports from "$oxc-rules/only-type-imports";
 import preferClassProperties from "$oxc-rules/prefer-class-properties";
@@ -118,9 +121,11 @@ const smallRules = definePlugin({
 		"no-color3-constructor": noColor3Constructor,
 		"no-commented-code": noCommentedCode,
 		"no-constant-condition-with-break": noConstantConditionWithBreak,
+		"no-dead-store": noDeadStore,
 		"no-error": noError,
 		"no-events-in-events-callback": noEventsInEventsCallback,
 		"no-filter-map-chain": noFilterMapChain,
+		"no-floating-point-equality": noFloatingPointEquality,
 		"no-giant-component": noGiantComponent,
 		"no-god-components": noGodComponents,
 		"no-ianitor-in-function-body": noIanitorInFunctionBody,
@@ -149,6 +154,7 @@ const smallRules = definePlugin({
 		"no-useless-use-effect": noUselessUseEffect,
 		"no-useless-use-memo": noUselessUseMemo,
 		"no-useless-use-spring": noUselessUseSpring,
+		"no-variadic-spread": noVariadicSpread,
 		"no-warn": noWarn,
 		"only-type-imports": onlyTypeImports,
 		"prefer-class-properties": preferClassProperties,

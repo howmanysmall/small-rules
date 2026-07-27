@@ -1124,6 +1124,17 @@ function Component() {
 			},
 		],
 		valid: [
+			// Coverage: the first capture of a root identifier fixes the depth compared against dependencies
+			{
+				code: `
+function Component(props) {
+    useEffect(() => {
+        console.log(props.a.b);
+        console.log(props.a);
+    }, [props.a.b]);
+}
+`,
+			},
 			// Coverage: TSSatisfiesExpression and other TS nodes
 			{
 				code: `

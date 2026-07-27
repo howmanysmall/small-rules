@@ -1069,6 +1069,21 @@ function test(makeCall) {
 `,
 			},
 
+			// An opener that stays open through both arms of a complete if/else survives the branch merge
+			{
+				code: `
+function test(condition) {
+    debug.profilebegin("task");
+    if (condition) {
+        doWork();
+    } else {
+        doOtherWork();
+    }
+    debug.profileend();
+}
+`,
+			},
+
 			// Nested pairs - valid LIFO order
 			{
 				code: `

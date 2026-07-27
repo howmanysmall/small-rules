@@ -353,7 +353,7 @@ version = "1.13.0"
 backend = "npm:sherif"
 
 [[tools.nub]]
-version = "0.5.0"
+version = "0.6.0"
 backend = "npm:@nubjs/nub"
 
 [tools.nub.options]

@@ -149,6 +149,9 @@ catalogs:
     vitiate: 0.3.1
     yuku-ast: 0.8.0
     zx: 8.8.5
+    yaml-language-server: 1.24.0
+    "@astrojs/language-server": 2.16.13
+    bash-language-server: 5.6.0
   frontend:
     "@astrojs/react": 6.0.0
     react: 19.2.7

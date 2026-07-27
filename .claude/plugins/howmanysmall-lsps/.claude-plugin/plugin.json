@@ -1,0 +1,9 @@
+{
+	"author": {
+		"name": "HowManySmall"
+	},
+	"description": "Project language servers for Astro, TypeScript, JavaScript, shell, YAML, Markdown, TOML, and web formats",
+	"lspServers": "./.lsp.json",
+	"name": "howmanysmall-lsps",
+	"version": "1.1.0"
+}

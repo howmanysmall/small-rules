@@ -40,6 +40,10 @@ You **MUST** follow these guidelines. There is NO exception.
 
 Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined in `mise.toml`.
 
+## Performance Guidelines
+
+Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md`](docs/hot-path-conventions.md). Per-node allocation, stateful regex `g` flags, recursive walks, and pop-based traversal are the common pitfalls — adheres to ADR-0001.
+
 ## Code Architecture
 
 ### Entry Point - `src/index.ts`
@@ -111,6 +115,8 @@ describe("no-print", () => {
 ```
 
 `invalid` cases specify code strings with expected `messageId` (or multiple). `valid` cases are just code strings that should not trigger.
+
+Documented examples (`documentation: { id, title }`) are rendered verbatim on the docs site. Multi-statement snippets must use real newlines via `.join("\n")` arrays — single-line multi-statement code collapses into one unreadable line. `tests/documentation-rule-coverage.test.ts` enforces this.
 
 ## Key Config Files
 

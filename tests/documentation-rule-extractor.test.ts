@@ -37,6 +37,7 @@ describe("extractRuleExamples", () => {
 				errors: [{ messageId: "joined" }, { message: "A second diagnostic" }],
 				id: "joined",
 				kind: "invalid",
+				language: "ts",
 				output: "const\nvalue = 2;",
 				title: "Joined source",
 			},
@@ -45,6 +46,7 @@ describe("extractRuleExamples", () => {
 				errors: [{ messageId: "literal" }],
 				id: "literal",
 				kind: "invalid",
+				language: "ts",
 				title: "String literal",
 			},
 			{
@@ -57,6 +59,7 @@ describe("extractRuleExamples", () => {
 				],
 				id: "raw",
 				kind: "invalid",
+				language: "ts",
 				title: "Raw template",
 			},
 			{
@@ -81,6 +84,7 @@ describe("extractRuleExamples", () => {
 				code: "const valid = true;",
 				id: "pass",
 				kind: "valid",
+				language: "ts",
 				title: "Static case",
 			},
 		]);

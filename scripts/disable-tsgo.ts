@@ -197,7 +197,8 @@ function formatDiff(filePath: string, oldContent: string, newContent: string): s
 			}
 		}
 
-		out.push(dim(`@@ -${regionOldStart},${oldCount} +${regionNewStart},${newCount} @@`), ...hunkLines);
+		out.push(dim(`@@ -${regionOldStart},${oldCount} +${regionNewStart},${newCount} @@`));
+		for (const line of hunkLines) out.push(line);
 	}
 
 	return out.join("\n");

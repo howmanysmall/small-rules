@@ -24,9 +24,11 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-color3-constructor",
 	"no-commented-code",
 	"no-constant-condition-with-break",
+	"no-dead-store",
 	"no-error",
 	"no-events-in-events-callback",
 	"no-filter-map-chain",
+	"no-floating-point-equality",
 	"no-giant-component",
 	"no-god-components",
 	"no-ianitor-in-function-body",
@@ -55,6 +57,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-useless-use-effect",
 	"no-useless-use-memo",
 	"no-useless-use-spring",
+	"no-variadic-spread",
 	"no-warn",
 	"only-type-imports",
 	"prefer-class-properties",
@@ -112,7 +115,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(92);
+			expect(ruleNames).toHaveLength(95);
 		}, 5000);
 	});
 });

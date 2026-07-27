@@ -64,9 +64,7 @@
 		},
 		{
 			"files": ["documentation/**/*.astro", "scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
-			"rules": {
-				"node/no-top-level-await": "off"
-			}
+			"rules": { "node/no-top-level-await": "off" }
 		},
 		{
 			"files": ["tests/**/*.test.{tsx,ts}"],
@@ -194,6 +192,10 @@
 				],
 				"small-rules/require-react-display-names": ["error", { "environment": "standard" }]
 			}
+		},
+		{
+			"files": ["src/**/*.{ts,tsx}"],
+			"rules": { "small-rules/no-variadic-spread": "error" }
 		}
 	],
 	"plugins": ["eslint", "import", "jsdoc", "node", "oxc", "promise", "typescript", "unicorn"],
@@ -800,6 +802,7 @@
 		"small-rules/no-useless-use-effect": "off",
 		"small-rules/no-useless-use-memo": "off",
 		"small-rules/no-useless-use-spring": "off",
+		"small-rules/no-variadic-spread": "off",
 		"small-rules/no-warn": "off",
 		"small-rules/only-type-imports": "off",
 		"small-rules/prefer-class-properties": "error",

@@ -13,7 +13,14 @@ describe("prefer-early-return", () => {
 		invalid: [
 			// Default maximumStatements = 1, so 2+ statements triggers
 			{
-				code: "function foo() { if (something) { doSomething(); doSomethingElse(); } }",
+				code: [
+					"function foo() {",
+					"  if (something) {",
+					"    doSomething();",
+					"    doSomethingElse();",
+					"  }",
+					"}",
+				].join("\n"),
 				documentation: { id: "fail", title: "Function body needs guard clause" },
 				errors: [
 					{
@@ -52,7 +59,15 @@ describe("prefer-early-return", () => {
 		valid: [
 			// Already using early return pattern
 			{
-				code: "function foo() { if (!something) { return; } doSomething(); doSomethingElse(); }",
+				code: [
+					"function foo() {",
+					"  if (!something) {",
+					"    return;",
+					"  }",
+					"  doSomething();",
+					"  doSomethingElse();",
+					"}",
+				].join("\n"),
 				documentation: { id: "pass", title: "Early return guard clause" },
 			},
 			// Only 1 statement (default max is 1)

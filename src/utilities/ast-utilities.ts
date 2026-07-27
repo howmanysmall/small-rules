@@ -45,6 +45,14 @@ export function getVariableByName(scope: null | Scope, name: string): ScopeVaria
 	return undefined;
 }
 
+export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable: ScopeVariable) => void): void {
+	const scopes = [sourceCode.getScope(sourceCode.ast)];
+	for (const scope of scopes) {
+		for (const child of scope.childScopes) scopes.push(child);
+		for (const variable of scope.variables) callback(variable);
+	}
+}
+
 export function hasShadowedBinding(sourceCode: SourceCode, node: ESTree.Node, name: string): boolean {
 	let scope: null | Scope = sourceCode.getScope(node);
 

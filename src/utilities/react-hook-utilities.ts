@@ -26,21 +26,18 @@ export function getEffectCallback(callExpression: ESTree.CallExpression): Callba
 }
 
 export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
-	const stack = [node];
-	while (stack.length > 0) {
-		const current = stack.pop();
-		/* v8 ignore next -- @preserve The loop condition guarantees pop returns a node. */
-		if (current === undefined) break;
+	const worklist = [node];
+	for (const current of worklist) {
 		callback(current);
-		pushChildNodes(current, stack);
+		pushChildNodes(current, worklist);
 	}
 }
 
 export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
-	callback(node);
-
-	for (const child of Object.values(node)) {
-		walkChildSlop(child, node, callback);
+	const worklist = [node];
+	for (const current of worklist) {
+		callback(current);
+		for (const child of Object.values(current)) pushSlopValue(child, current, worklist);
 	}
 }
 
@@ -74,14 +71,14 @@ function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, sta
 	}
 }
 
-function walkChildSlop(value: unknown, parent: ESTree.Node, callback: (child: ESTree.Node) => void): void {
+function pushSlopValue(value: unknown, parent: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	if (Array.isArray(value)) {
-		for (const item of value) walkChildSlop(item, parent, callback);
+		for (const item of value) pushSlopValue(item, parent, worklist);
 		return;
 	}
 
 	if (value === parent.parent || !isNode(value)) return;
-	walkAstSlop(value, callback);
+	worklist.push(value);
 }
 
 export function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {

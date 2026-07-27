@@ -118,12 +118,22 @@ const ROBLOX_CLASS_INDEXES = new Map(${JSON.stringify(classNames.join(","))}.spl
 const ROBLOX_INSTANCE_YIELDING_MEMBERS = new Set(${JSON.stringify(catalog.instanceMembers.join(","))}.split(","));
 const ROBLOX_YIELDING_MEMBER_GROUPS = ${JSON.stringify(sharedMemberGroups)} as const;
 const ROBLOX_YIELDING_MEMBERS = new Map<number, string>([${yieldingMemberEntries}]);
+const ROBLOX_YIELDING_MEMBER_SETS = new Map<number, ReadonlySet<string>>();
 
 export function classHasYieldingMember(className: string, memberName: string): boolean {
 	const classIndex = ROBLOX_CLASS_INDEXES.get(className);
 	if (classIndex === undefined) return false;
 	if (ROBLOX_INSTANCE_YIELDING_MEMBERS.has(memberName)) return true;
-	return ROBLOX_YIELDING_MEMBERS.get(classIndex)?.split(",").includes(memberName) === true;
+
+	const cached = ROBLOX_YIELDING_MEMBER_SETS.get(classIndex);
+	if (cached !== undefined) return cached.has(memberName);
+
+	const packed = ROBLOX_YIELDING_MEMBERS.get(classIndex);
+	if (packed === undefined) return false;
+
+	const members: ReadonlySet<string> = new Set(packed.split(","));
+	ROBLOX_YIELDING_MEMBER_SETS.set(classIndex, members);
+	return members.has(memberName);
 }
 `;
 }

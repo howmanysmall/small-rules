@@ -226,14 +226,16 @@ function isReturnWithoutArgument(statement: ESTree.Statement): boolean {
 function pushStatementBody(statement: ESTree.Statement, stack: Array<ESTree.Node>): void {
 	/* v8 ignore else -- callers pass only body-bearing statement kinds. @preserve */
 	if ("body" in statement && isNode(statement.body)) {
-		if (statement.body.type === "BlockStatement") stack.push(...statement.body.body);
-		else stack.push(statement.body);
+		if (statement.body.type === "BlockStatement") {
+			for (const subStatement of statement.body.body) stack.push(subStatement);
+		} else stack.push(statement.body);
 	}
 }
 
+// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
 function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node>): void {
 	if (current.type === "BlockStatement") {
-		stack.push(...current.body);
+		for (const statement of current.body) stack.push(statement);
 		return;
 	}
 
@@ -257,15 +259,21 @@ function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node
 	}
 
 	if (current.type === "SwitchStatement") {
-		for (const switchCase of current.cases) stack.push(...switchCase.consequent);
+		for (const switchCase of current.cases) {
+			for (const statement of switchCase.consequent) stack.push(statement);
+		}
 		return;
 	}
 
 	/* v8 ignore next -- try-body cleanup traversal is covered; V8 leaves a synthetic alternate branch here. @preserve */
 	if (current.type === "TryStatement") {
-		stack.push(...current.block.body);
-		if (current.handler !== null) stack.push(...current.handler.body.body);
-		if (current.finalizer !== null) stack.push(...current.finalizer.body);
+		for (const statement of current.block.body) stack.push(statement);
+		if (current.handler !== null) {
+			for (const statement of current.handler.body.body) stack.push(statement);
+		}
+		if (current.finalizer !== null) {
+			for (const statement of current.finalizer.body) stack.push(statement);
+		}
 	}
 }
 
@@ -562,7 +570,7 @@ function pushExpressionSearchChildren(current: ExpressionSearchNode, stack: Arra
 			break;
 		}
 		case "TemplateLiteral": {
-			stack.push(...current.expressions);
+			for (const expression of current.expressions) stack.push(expression);
 			break;
 		}
 		case "UnaryExpression": {
@@ -584,7 +592,6 @@ function expressionContainsIdentifier(node: ESTree.Expression): boolean {
 		visited.add(current);
 
 		if (current.type === "Identifier") return true;
-
 		pushExpressionSearchChildren(current, stack);
 	}
 

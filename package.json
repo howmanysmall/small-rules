@@ -81,6 +81,7 @@
 		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
+		"@astrojs/language-server": "catalog:dev",
 		"@biomejs/biome": "catalog:lint",
 		"@cliffy/command": "catalog:dev",
 		"@commitlint/config-conventional": "catalog:dev",
@@ -98,6 +99,7 @@
 		"@vitest/coverage-v8": "catalog:test",
 		"@vitiate/core": "catalog:dev",
 		"@vitiate/fuzzed-data-provider": "catalog:dev",
+		"bash-language-server": "catalog:dev",
 		"bumpp": "catalog:dev",
 		"changelogithub": "catalog:dev",
 		"commitlint": "catalog:dev",
@@ -131,6 +133,7 @@
 		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:test",
 		"vitiate": "catalog:dev",
+		"yaml-language-server": "catalog:dev",
 		"yuku-ast": "catalog:dev",
 		"zx": "catalog:dev"
 	},
