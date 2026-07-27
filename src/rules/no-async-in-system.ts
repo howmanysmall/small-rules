@@ -181,8 +181,10 @@ function collectConfiguredCallbackTypes(
 ): void {
 	forEachNode(program, (node) => {
 		if (node.type !== "CallExpression" || node.callee.type !== "MemberExpression") return;
+
 		const chain = getMemberChain(node.callee);
 		if (chain === undefined) return;
+
 		const rootVariable = getIdentifierVariable(sourceCode, chain.root);
 		const binding = rootVariable === undefined ? undefined : imports.get(rootVariable);
 		if (binding === undefined) return;
@@ -195,10 +197,13 @@ function collectConfiguredCallbackTypes(
 			) {
 				continue;
 			}
+
 			const callback = node.arguments[configuration.callbackArgumentIndex];
 			if (callback === undefined || callback.type === "SpreadElement" || !isAnyFunction(callback)) continue;
+
 			const parameter = callback.params[configuration.parameterIndex];
 			if (parameter?.type !== "Identifier") continue;
+
 			const variable = getIdentifierVariable(sourceCode, parameter);
 			/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
 			if (variable !== undefined) types.set(variable, configuration.className);

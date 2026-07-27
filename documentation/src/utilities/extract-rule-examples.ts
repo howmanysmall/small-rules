@@ -159,9 +159,8 @@ function extractCaseExample(
 	context: ExtractionContext,
 ): RuleExample | undefined {
 	const documentationValue = findField(testCase, "documentation")?.property.value;
-	if (documentationValue?.type !== "ObjectExpression") {
-		return undefined;
-	}
+	if (documentationValue?.type !== "ObjectExpression") return undefined;
+
 	const fields = getObjectFields(testCase, context);
 	for (const field of fields) {
 		if (!CASE_FIELD_NAMES.has(field.key)) {

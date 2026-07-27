@@ -22,7 +22,7 @@ for (const testFileName of testFileNames) {
 	for (const extraction of extractRuleExamples(sourceText, relativePath)) {
 		const examples = examplesByRuleName.get(extraction.ruleName) ?? new Array<RuleExample>();
 		examplesByRuleName.set(extraction.ruleName, examples);
-		examples.push(...extraction.examples);
+		for (const example of extraction.examples) examples.push(example);
 	}
 }
 

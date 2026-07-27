@@ -845,6 +845,7 @@ function isStableDependency(
 	);
 }
 
+// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
 function reportUnnecessaryDependencies(
 	context: RuleContext,
 	dependencies: ReadonlyArray<DependencyInfo>,
@@ -866,7 +867,8 @@ function reportUnnecessaryDependencies(
 			continue;
 		}
 
-		const maxCaptureDepth = Math.max(...matchingCaptures.map(({ depth }) => depth));
+		let maxCaptureDepth = Number.NEGATIVE_INFINITY;
+		for (const { depth } of matchingCaptures) if (depth > maxCaptureDepth) maxCaptureDepth = depth;
 		if (reportUnnecessary && dependency.depth > maxCaptureDepth) {
 			reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
 		}
