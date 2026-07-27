@@ -63,3 +63,6 @@ hk.local.pkl
 .agents/skills/vercel-composition-patterns/
 .agents/skills/vercel-react-best-practices/
 .agents/skills/web-design-guidelines/
+.agents/skills/codebase-design/
+.agents/skills/domain-modeling/
+.agents/skills/ubiquitous-language/

@@ -7,6 +7,18 @@
       "skillPath": "skills/.experimental/clean-code/SKILL.md",
       "computedHash": "8e6463cd93d289c5f79b995871b0ce8afc479e952d29be945c35b91afe0bac8f"
     },
+    "codebase-design": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/codebase-design/SKILL.md",
+      "computedHash": "6d9d51d8caa01633fd00cf87089c5618c982321f942ac69f62565dc001c6b22f"
+    },
+    "domain-modeling": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/domain-modeling/SKILL.md",
+      "computedHash": "363cb0f53b0b431e7c00086ad1f823500b7e1b70b5616ee969c979f0934e9e6e"
+    },
     "dry-refactoring": {
       "source": "kucherenko/jscpd",
       "sourceType": "github",
@@ -17,7 +29,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
-      "computedHash": "ef32aea0a8fab9b365ff9e08a95f8d353e20ca21ea46ec2e73587c86dd341351"
+      "computedHash": "66e8a50c83c3c724fcfe0769701b665c56cec220cc4f49cc1aee8bdfc07de94a"
     },
     "migrate-pullhook-install": {
       "source": "howmanysmall/pullhook",
@@ -48,6 +60,12 @@
       "sourceType": "github",
       "skillPath": "skills/tsdown/SKILL.md",
       "computedHash": "5d7a0732aa15849d7363d168c13eec9c4367c9e534397de3fc550d582ffea09b"
+    },
+    "ubiquitous-language": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/deprecated/ubiquitous-language/SKILL.md",
+      "computedHash": "0395170031b57ea63f2eb22561542894c03e3047430a2f1118a06b411054429b"
     },
     "vercel-composition-patterns": {
       "source": "vercel-labs/agent-skills",
