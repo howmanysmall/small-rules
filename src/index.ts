@@ -54,6 +54,7 @@ import noUselessDefault from "$oxc-rules/no-useless-default";
 import noUselessUseEffect from "$oxc-rules/no-useless-use-effect";
 import noUselessUseMemo from "$oxc-rules/no-useless-use-memo";
 import noUselessUseSpring from "$oxc-rules/no-useless-use-spring";
+import noVariadicSpread from "$oxc-rules/no-variadic-spread";
 import noWarn from "$oxc-rules/no-warn";
 import onlyTypeImports from "$oxc-rules/only-type-imports";
 import preferClassProperties from "$oxc-rules/prefer-class-properties";
@@ -153,6 +154,7 @@ const smallRules = definePlugin({
 		"no-useless-use-effect": noUselessUseEffect,
 		"no-useless-use-memo": noUselessUseMemo,
 		"no-useless-use-spring": noUselessUseSpring,
+		"no-variadic-spread": noVariadicSpread,
 		"no-warn": noWarn,
 		"only-type-imports": onlyTypeImports,
 		"prefer-class-properties": preferClassProperties,

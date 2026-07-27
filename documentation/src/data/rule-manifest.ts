@@ -140,6 +140,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-restricted-property-assignment" },
 				{ name: "no-unused-imports" },
 				{ name: "no-useless-constants" },
+				{ name: "no-variadic-spread" },
 				{ name: "only-type-imports" },
 				{ name: "prefer-class-properties" },
 				{ name: "prefer-early-return" },

@@ -16,13 +16,17 @@ Nothing constructed inside a visitor callback — `new RegExp`, `new Set`, `.fil
 
 Never re-derive a data structure from static data on every call (e.g. `str.split(",").includes(name)` per lookup). Materialize once at module init or memoize. Likewise, a list consulted per-node should be a `Set` built once in `create()`, not an `Array.prototype.includes` linear scan.
 
-## 3. No stateful global-flag regexes for boolean tests
+## 3. No stateful global-flag regexes for `test`/`exec`
 
-A shared `g`/`y` regex carries mutable `lastIndex` across calls, so `.test()` becomes position-dependent — a correctness bug, not just churn. Drop the `g` flag for boolean tests, or reset `lastIndex` explicitly.
+A shared `g`/`y` regex carries mutable `lastIndex` across calls, so `.test()` and `.exec()` become position-dependent — a correctness bug, not just churn. Drop the `g` flag for boolean tests, or reset `lastIndex` explicitly before each use.
+
+This does not apply to `String.prototype.match` or `replace`, which ignore and reset `lastIndex`; a `g` flag there is the correct way to count or replace all matches (see `recognizers/contains-detector.ts`).
 
 ## 4. No recursion or spread in AST walks
 
 Native call-stack depth scales with AST depth, and generated/minified code nests pathologically deep (long `a + b + c + ...` chains). Recursion and `array.push(...children)` both crash with `RangeError` on adversarial input. Use the append-only worklist shape from ADR-0001.
+
+The spread half of this is machine-enforced by the `no-variadic-spread` rule.
 
 ## 5. Reset per-file state in `createOnce` rules
 
@@ -36,9 +40,17 @@ Module-level caches are only allowed for immutable facts (filesystem contents, c
 
 Don't call a full-tree walk (`walkAst`) or an ancestor climb from inside a per-node visitor — that's O(n·depth) or O(n²). Accumulate during the single visitor pass and do cross-cutting analysis once in `Program`/`Program:exit`.
 
-## Known violations (as of writing)
+## Enforcement
 
-- `src/utilities/react-hook-utilities.ts` — `walkAst` uses the pop-based dead-branch shape ADR-0001 rejects; `walkAstSlop` recurses and allocates `Object.values(node)` per node (§4, §1)
-- `src/generated/roblox-yielding-members.ts` — `classHasYieldingMember` splits a CSV string on every lookup (§2)
-- `src/utilities/recognizers/contains-detector.ts` — compiles shared patterns with the `g` flag (§3)
-- `src/rules/require-async-suffix.ts` — contains a type cast (`as ReadonlyArray<ESTree.Node>`), violating the repo-wide no-cast rule
+| Convention | Enforced by |
+| --- | --- |
+| §1 hoist allocations | review |
+| §2 no parse-per-lookup | review |
+| §3 stateful `g` regex | review |
+| §4 spread into variadic call | `no-variadic-spread` |
+| §4 recursion in walks | review |
+| §5 `createOnce` state reset | review |
+| §6 structural comparison | review |
+| §7 one pass then `Program:exit` | review |
+
+The remaining conventions are candidates for rules but are not mechanically decidable without whole-program analysis; see the triage notes when adding new ones. All previously recorded violations of these conventions have been fixed.

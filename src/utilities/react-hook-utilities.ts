@@ -34,8 +34,11 @@ export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => voi
 }
 
 export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
-	callback(node);
-	for (const child of Object.values(node)) walkChildSlop(child, node, callback);
+	const worklist = [node];
+	for (const current of worklist) {
+		callback(current);
+		for (const child of Object.values(current)) pushSlopValue(child, current, worklist);
+	}
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
@@ -68,14 +71,14 @@ function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, sta
 	}
 }
 
-function walkChildSlop(value: unknown, parent: ESTree.Node, callback: (child: ESTree.Node) => void): void {
+function pushSlopValue(value: unknown, parent: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	if (Array.isArray(value)) {
-		for (const item of value) walkChildSlop(item, parent, callback);
+		for (const item of value) pushSlopValue(item, parent, worklist);
 		return;
 	}
 
 	if (value === parent.parent || !isNode(value)) return;
-	walkAstSlop(value, callback);
+	worklist.push(value);
 }
 
 export function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {

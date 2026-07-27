@@ -9,7 +9,7 @@ function isExternallyConstrainedProperty(node: ESTree.ObjectProperty): boolean {
 	const { parent: grandparent } = parent;
 	if (grandparent.type === "TSSatisfiesExpression") return true;
 	if (grandparent.type === "CallExpression" || grandparent.type === "NewExpression") {
-		return (grandparent.arguments as ReadonlyArray<ESTree.Node>).includes(parent);
+		return grandparent.arguments.some((argument) => argument === parent);
 	}
 	return false;
 }
