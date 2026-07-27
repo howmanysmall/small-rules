@@ -8,9 +8,15 @@ import { ruleFactCategories } from "@/data/rule-facts";
 
 const catalogCategories = createRuleIndexCategories(ruleFactCategories.values());
 const catalogRuleCount = catalogCategories.flatMap((category) => category.rules).length;
+const namingRuleCount = catalogCategories.find((category) => category.key === "naming")?.rules.length ?? 0;
+const robloxRuleCount = catalogCategories.find((category) => category.key === "roblox")?.rules.length ?? 0;
 const noPrintPattern = /No Print/u;
 const banReactFcPattern = /Ban React Fc/u;
 const preventAbbreviationsPattern = /Prevent Abbreviations/u;
+
+function showingRulesLabel(count: number): string {
+	return `Showing ${String(count)} ${count === 1 ? "rule" : "rules"}`;
+}
 
 describe("RuleIndex", () => {
 	it("renders the complete catalog with accessible filter controls", () => {
@@ -53,7 +59,9 @@ describe("RuleIndex", () => {
 
 		await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "naming");
 
-		expect(screen.getByText("Showing 8 rules").textContent).toBe("Showing 8 rules");
+		expect(screen.getByText(showingRulesLabel(namingRuleCount)).textContent).toBe(
+			showingRulesLabel(namingRuleCount),
+		);
 		expect(screen.getByRole("link", { name: preventAbbreviationsPattern }).getAttribute("href")).toContain(
 			"/rules/naming/prevent-abbreviations/",
 		);
@@ -101,6 +109,8 @@ describe("RuleIndex", () => {
 
 		expect(screen.queryByRole("searchbox", { name: "Search rules" })).toBeNull();
 		expect(screen.queryByRole("combobox", { name: "Category" })).toBeNull();
-		expect(screen.getByText("Showing 25 rules").textContent).toBe("Showing 25 rules");
+		expect(screen.getByText(showingRulesLabel(robloxRuleCount)).textContent).toBe(
+			showingRulesLabel(robloxRuleCount),
+		);
 	});
 });

@@ -16,8 +16,9 @@ When this skill is active, you MUST follow this order:
 4. Register the rule in `src/index.ts` and update `tests/index.test.ts`.
 5. Add the rule to the documentation manifest and create its MDX page under
    `documentation/src/content/docs/rules/`.
-6. Run the targeted rule test and documentation coverage test, then the full
-   required test/lint/type-check verification.
+6. Run the targeted rule test, documentation coverage test, and
+   documentation package unit tests (`cd documentation && pnpm exec vitest run tests/unit`),
+   then the full required test/lint/type-check verification.
 
 **Hard rule: never write the rule implementation before the test file exists. ALWAYS use TDD.**
 
@@ -424,9 +425,31 @@ Run the rule test and the documentation coverage test together:
 nr test:agent tests/my-rule.test.ts tests/documentation-rule-coverage.test.ts
 ```
 
+Also run the documentation package unit tests when you change the manifest or
+add MDX pages (CI job `checks / Documentation` runs these):
+
+```sh
+cd documentation && pnpm exec vitest run tests/unit
+```
+
 The documentation coverage test must prove that the plugin, manifest, MDX
 pages, and extracted examples agree. A new rule is incomplete until this test
 passes.
+
+### Never Hardcode Catalog Counts
+
+Adding a rule to `rule-manifest.ts` changes category sizes on the docs rule
+index. **Do not** hardcode numbers like `"Showing 7 rules"` or
+`toHaveCount(7)` for a category in:
+
+- `documentation/tests/unit/rule-index.test.tsx`
+- `documentation/tests/browser/documentation.test.ts`
+
+Those tests **must** derive counts from the catalog/manifest data (or count
+DOM cards after filtering). If you introduce a new assertion about how many
+rules appear in a category, compute it from `catalogCategories` /
+`ruleFactCategories` (or live card count), never a literal integer that will
+rot on the next rule addition.
 
 ---
 
@@ -824,8 +847,12 @@ Please create new utility functions / modules to reduce duplicated code.
       `documentation/src/data/rule-manifest.ts`
 - [ ] Thin rule page created at
       `documentation/src/content/docs/rules/{category}/{rule-name}.mdx`
+- [ ] Did **not** hardcode docs catalog/category rule counts; counts come from
+      the manifest/catalog (see "Never Hardcode Catalog Counts")
 - [ ] Targeted rule and documentation coverage tests pass
       (`nr test:agent tests/{rule-name}.test.ts tests/documentation-rule-coverage.test.ts`)
+- [ ] Documentation package unit tests pass
+      (`cd documentation && pnpm exec vitest run tests/unit`)
 - [ ] `meta.fixable` set if the rule emits fixes
 - [ ] `meta.hasSuggestions: true` if the rule emits suggestions
 - [ ] `meta.schema` present (even as `[]`)
