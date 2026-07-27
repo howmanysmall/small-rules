@@ -116,6 +116,8 @@ describe("no-print", () => {
 
 `invalid` cases specify code strings with expected `messageId` (or multiple). `valid` cases are just code strings that should not trigger.
 
+Documented examples (`documentation: { id, title }`) are rendered verbatim on the docs site. Multi-statement snippets must use real newlines via `.join("\n")` arrays — single-line multi-statement code collapses into one unreadable line. `tests/documentation-rule-coverage.test.ts` enforces this.
+
 ## Key Config Files
 
 - `tsconfig.base.json` - Strict TS config, `module: "preserve"`, `verbatimModuleSyntax`, `bundler` resolution

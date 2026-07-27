@@ -7,7 +7,10 @@ describe("no-native-properties-spread", () => {
 	tsx.run("no-native-properties-spread", rule, {
 		invalid: [
 			{
-				code: 'const SOME_CONSTANT = {}; const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;',
+				code: [
+					"const SOME_CONSTANT = {};",
+					'const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;',
+				].join("\n"),
 				documentation: { id: "fail", title: "native properties spread" },
 				errors: [
 					{

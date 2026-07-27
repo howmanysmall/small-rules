@@ -8,7 +8,12 @@ describe("no-recursive", () => {
 		invalid: [
 			// Direct recursion — factorial
 			{
-				code: `function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); }`,
+				code: [
+					"function factorial(n) {",
+					"  if (n <= 1) return 1;",
+					"  return n * factorial(n - 1);",
+					"}",
+				].join("\n"),
 				documentation: { id: "fail", title: "Direct recursive function call" },
 				errors: [{ messageId: "noRecursive" }],
 			},

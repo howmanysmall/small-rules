@@ -88,7 +88,7 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 			if (invocation === undefined) return;
 			const idOffsets = idOffsetsByRuleName.get(invocation.ruleName) ?? new Map<string, number>();
 			idOffsetsByRuleName.set(invocation.ruleName, idOffsets);
-			const examples = extractInvocationExamples(invocation.cases, context, idOffsets);
+			const examples = extractInvocationExamples(invocation.cases, invocation.language, context, idOffsets);
 			if (examples.length === 0) return;
 			const existingExamples = examplesByRuleName.get(invocation.ruleName);
 			if (existingExamples === undefined) examplesByRuleName.set(invocation.ruleName, examples);
@@ -103,11 +103,12 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 
 function getRuleRunnerInvocation(
 	node: CallExpression,
-): { readonly cases: ObjectExpression; readonly ruleName: string } | undefined {
+): { readonly cases: ObjectExpression; readonly language: string; readonly ruleName: string } | undefined {
 	if (!isRuleRunner(node.callee)) return undefined;
 	const [ruleNameNode, , casesNode] = node.arguments;
 	if (!isStringLiteral(ruleNameNode) || casesNode?.type !== "ObjectExpression") return undefined;
-	return { cases: casesNode, ruleName: ruleNameNode.value };
+	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return undefined;
+	return { cases: casesNode, language: node.callee.object.name, ruleName: ruleNameNode.value };
 }
 
 function isRuleRunner(callee: Expression): boolean {
@@ -123,6 +124,7 @@ function isRuleRunner(callee: Expression): boolean {
 
 function extractInvocationExamples(
 	cases: ObjectExpression,
+	runnerLanguage: string,
 	context: ExtractionContext,
 	idOffsets: Map<string, number>,
 ): Array<RuleExample> {
@@ -130,7 +132,7 @@ function extractInvocationExamples(
 	for (const caseArray of getCaseArrays(cases, context)) {
 		for (const element of caseArray.cases.elements) {
 			if (element?.type !== "ObjectExpression") continue;
-			const example = extractCaseExample(element, caseArray.kind, context);
+			const example = extractCaseExample(element, caseArray.kind, runnerLanguage, context);
 			if (example === undefined) continue;
 			const idOffset = getDocumentationIdOffset(element);
 			if (idOffsets.has(example.id)) {
@@ -156,6 +158,7 @@ function getCaseArrays(cases: ObjectExpression, context: ExtractionContext): Arr
 function extractCaseExample(
 	testCase: ObjectExpression,
 	kind: "invalid" | "valid",
+	runnerLanguage: string,
 	context: ExtractionContext,
 ): RuleExample | undefined {
 	const documentationValue = findField(testCase, "documentation")?.property.value;
@@ -173,7 +176,13 @@ function extractCaseExample(
 
 	const documentation = evaluateDocumentation(documentationValue, context);
 	const code = evaluateRequiredString(fields, "code", context);
-	const example: RuleExample = { code, id: documentation.id, kind, title: documentation.title };
+	const example: RuleExample = {
+		code,
+		id: documentation.id,
+		kind,
+		language: runnerLanguage,
+		title: documentation.title,
+	};
 	for (const field of fields) {
 		if (field.key === "documentation" || field.key === "code") continue;
 		const value = evaluateStatic(field.property.value, context);

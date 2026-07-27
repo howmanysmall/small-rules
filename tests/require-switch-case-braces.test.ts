@@ -165,7 +165,7 @@ describe("require-switch-case-braces", () => {
 			"switch (value) { case 1: }",
 			"switch (value) { case 1: doThing(); }",
 			{
-				code: "switch (value) { case 1: { doThing(); break; } }",
+				code: ["switch (value) {", "  case 1: {", "    doThing();", "    break;", "  }", "}"].join("\n"),
 				documentation: { id: "pass", title: "Braced switch case body" },
 			},
 			"switch (value) { case 1: break; default: doDefault(); }",
