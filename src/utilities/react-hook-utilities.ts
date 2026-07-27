@@ -26,22 +26,16 @@ export function getEffectCallback(callExpression: ESTree.CallExpression): Callba
 }
 
 export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
-	const stack = [node];
-	while (stack.length > 0) {
-		const current = stack.pop();
-		/* v8 ignore next -- @preserve The loop condition guarantees pop returns a node. */
-		if (current === undefined) break;
+	const worklist = [node];
+	for (const current of worklist) {
 		callback(current);
-		pushChildNodes(current, stack);
+		pushChildNodes(current, worklist);
 	}
 }
 
 export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
 	callback(node);
-
-	for (const child of Object.values(node)) {
-		walkChildSlop(child, node, callback);
-	}
+	for (const child of Object.values(node)) walkChildSlop(child, node, callback);
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
