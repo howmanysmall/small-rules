@@ -53,7 +53,7 @@ describe("RuleIndex", () => {
 
 		await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "naming");
 
-		expect(screen.getByText("Showing 7 rules").textContent).toBe("Showing 7 rules");
+		expect(screen.getByText("Showing 8 rules").textContent).toBe("Showing 8 rules");
 		expect(screen.getByRole("link", { name: preventAbbreviationsPattern }).getAttribute("href")).toContain(
 			"/rules/naming/prevent-abbreviations/",
 		);

@@ -68,8 +68,8 @@ it("filters the server-rendered rule catalog", async ({ page }) => {
 
 	await page.getByRole("button", { name: "Reset filters" }).click();
 	await page.getByLabel("Category").selectOption("naming");
-	await expect(cards.filter({ visible: true })).toHaveCount(7);
-	await expect(page.getByText("Showing 7 rules", { exact: true })).toBeVisible();
+	await expect(cards.filter({ visible: true })).toHaveCount(8);
+	await expect(page.getByText("Showing 8 rules", { exact: true })).toBeVisible();
 });
 
 it("keeps the catalog readable without JavaScript", async ({ browser }) => {
