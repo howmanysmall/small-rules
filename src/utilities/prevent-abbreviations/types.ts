@@ -18,9 +18,11 @@ interface ShorthandMatch {
 
 export interface ShorthandConfiguration {
 	readonly exactMatchers: ReadonlyMap<string, string>;
+	readonly ignoredIdentifiers: Map<string, boolean>;
 	readonly ignoreExact: ReadonlySet<string>;
 	readonly ignoreMatchers: ReadonlyArray<ShorthandMatcher>;
 	readonly matchers: ReadonlyArray<ShorthandMatcher>;
+	readonly replacementsByIdentifier: Map<string, false | ShorthandReplacement>;
 }
 
 export interface ShorthandReplacement {
@@ -38,6 +40,7 @@ export interface PreparedOptions {
 	readonly checkShorthandProperties: boolean;
 	readonly checkVariables: boolean;
 	readonly ignore: ReadonlyArray<RegExp>;
+	readonly nameReplacements: Map<string, NameReplacements>;
 	readonly replacements: Map<string, Map<string, boolean>>;
 	readonly shorthandConfiguration: ShorthandConfiguration;
 }

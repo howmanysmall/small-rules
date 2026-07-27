@@ -299,6 +299,7 @@ function checkPropertyIdentifier(
 ): void {
 	const propertyLike = shouldReportIdentifierAsProperty(node);
 	const propertyAccess = isShorthandPropertyAccess(node);
+	if (!(propertyLike || propertyAccess)) return;
 
 	if (isExternallyControlledProperty(node, sourceCode)) return;
 

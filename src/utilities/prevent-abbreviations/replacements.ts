@@ -1,5 +1,5 @@
 import { evilTernary } from "$oxc-utilities/evil-ternary-utilities";
-import { isRecord, isStringRaw, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringArray, isStringRaw, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import {
 	DEFAULT_ALLOW_LIST,
@@ -23,9 +23,6 @@ import type {
 	ShorthandReplacement,
 } from "./types";
 
-const CAMELCASE_BOUNDARY_REGEX = /(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/u;
-const DIGIT_BOUNDARY_REGEX = /(?<=[a-zA-Z])(?=\d)|(?<=\d)(?=[a-zA-Z])/u;
-const IDENTIFIER_PART_PATTERN = /[a-zA-Z]+|\d+|[^a-zA-Z\d]+/gu;
 const SPECIAL_CHARACTER_REGEX = /[.+^${}()|[\]\\]/gu;
 const REGEX_PATTERN_MATCHER = /^\/(?<first>.+)\/(?<second>[dgimsuvy]*)$/u;
 
@@ -35,6 +32,7 @@ interface ReplacementNames {
 }
 
 const replacementNamesByConfiguration = new WeakMap<Map<string, boolean>, ReplacementNames>();
+const preparedOptionsByConfiguration = new WeakMap<object, PreparedOptions>();
 
 function isUpperCase(value: string): boolean {
 	return value === value.toUpperCase();
@@ -56,38 +54,53 @@ function ensureUnicodeFlag(flags: string): string {
 	return flags.includes("u") || flags.includes("v") ? flags : `${flags}u`;
 }
 
-function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
-	const parts = identifier.match(IDENTIFIER_PART_PATTERN);
-	/* v8 ignore next -- non-empty identifiers always match the catch-all identifier part pattern. @preserve */
-	if (parts === null) return [identifier];
+const CHARACTER_TYPE_LOWERCASE = 0;
+const CHARACTER_TYPE_UPPERCASE = 1;
+const CHARACTER_TYPE_DIGIT = 2;
+const CHARACTER_TYPE_OTHER = 3;
 
-	const words = new Array<string>();
-	let size = 0;
-
-	for (const part of parts) {
-		if (!IS_ALPHABETIC.test(part)) {
-			words[size++] = part;
-			continue;
-		}
-
-		size = appendAlphabeticWords(part, words, size);
-	}
-
-	return words;
+function getCharacterType(characterCode: number | undefined): number {
+	if (characterCode === undefined) return CHARACTER_TYPE_OTHER;
+	if (characterCode >= 97 && characterCode <= 122) return CHARACTER_TYPE_LOWERCASE;
+	if (characterCode >= 65 && characterCode <= 90) return CHARACTER_TYPE_UPPERCASE;
+	if (characterCode >= 48 && characterCode <= 57) return CHARACTER_TYPE_DIGIT;
+	return CHARACTER_TYPE_OTHER;
 }
 
-function appendAlphabeticWords(part: string, words: Array<string>, size: number): number {
-	let nextSize = size;
-	for (const digitPart of part.split(DIGIT_BOUNDARY_REGEX)) {
-		/* v8 ignore next -- zero-width digit boundaries do not produce empty parts for matched identifier words. @preserve */
-		if (digitPart.length === 0) continue;
-		for (const word of digitPart.split(CAMELCASE_BOUNDARY_REGEX)) {
-			/* v8 ignore else -- camel-case boundaries do not produce empty words for matched identifier words. @preserve */
-			if (word.length > 0) words[nextSize++] = word;
+function shouldSplitIdentifier(previousType: number, currentType: number, nextType: number): boolean {
+	if (previousType === CHARACTER_TYPE_OTHER || currentType === CHARACTER_TYPE_OTHER) {
+		return previousType !== currentType;
+	}
+	if (previousType === CHARACTER_TYPE_DIGIT || currentType === CHARACTER_TYPE_DIGIT) {
+		return previousType !== currentType;
+	}
+	return (
+		(previousType === CHARACTER_TYPE_LOWERCASE && currentType === CHARACTER_TYPE_UPPERCASE) ||
+		(previousType === CHARACTER_TYPE_UPPERCASE &&
+			currentType === CHARACTER_TYPE_UPPERCASE &&
+			nextType === CHARACTER_TYPE_LOWERCASE)
+	);
+}
+
+function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
+	if (identifier.length < 2) return [identifier];
+
+	const words = new Array<string>();
+	let wordStart = 0;
+	let previousType = getCharacterType(identifier.codePointAt(0));
+
+	for (let index = 1; index < identifier.length; index += 1) {
+		const currentType = getCharacterType(identifier.codePointAt(index));
+		const nextType = getCharacterType(identifier.codePointAt(index + 1));
+		if (shouldSplitIdentifier(previousType, currentType, nextType)) {
+			words.push(identifier.slice(wordStart, index));
+			wordStart = index;
 		}
+		previousType = currentType;
 	}
 
-	return nextSize;
+	words.push(identifier.slice(wordStart));
+	return words;
 }
 
 const DOLLAR_NUMBER_REGEX = /\$\d+/gu;
@@ -357,11 +370,13 @@ function normalizeShorthandConfiguration(options: unknown): ShorthandConfigurati
 		exactMatchers,
 		ignoreExact,
 		ignoreMatchers,
+		ignoredIdentifiers: new Map<string, boolean>(),
 		matchers,
+		replacementsByIdentifier: new Map<string, false | ShorthandReplacement>(),
 	};
 }
 
-export function prepareOptions(options: unknown): PreparedOptions {
+function createPreparedOptions(options: unknown): PreparedOptions {
 	const normalizedOptions = isRecord(options) ? options : undefined;
 	return {
 		allowList: normalizeAllowList(normalizedOptions),
@@ -376,9 +391,33 @@ export function prepareOptions(options: unknown): PreparedOptions {
 		checkShorthandProperties: normalizeBooleanOption(normalizedOptions?.checkShorthandProperties, true),
 		checkVariables: normalizeBooleanOption(normalizedOptions?.checkVariables, true),
 		ignore: normalizeIgnorePatterns(normalizedOptions),
+		nameReplacements: new Map<string, NameReplacements>(),
 		replacements: normalizeReplacements(normalizedOptions),
 		shorthandConfiguration: normalizeShorthandConfiguration(normalizedOptions),
 	};
+}
+
+function clonePreparedOptions(options: PreparedOptions): PreparedOptions {
+	return {
+		...options,
+		nameReplacements: new Map<string, NameReplacements>(),
+		shorthandConfiguration: {
+			...options.shorthandConfiguration,
+			ignoredIdentifiers: new Map<string, boolean>(),
+			replacementsByIdentifier: new Map<string, false | ShorthandReplacement>(),
+		},
+	};
+}
+
+export function prepareOptions(options: unknown): PreparedOptions {
+	if (!isRecord(options)) return createPreparedOptions(options);
+
+	const cachedOptions = preparedOptionsByConfiguration.get(options);
+	if (cachedOptions !== undefined) return clonePreparedOptions(cachedOptions);
+
+	const preparedOptions = createPreparedOptions(options);
+	preparedOptionsByConfiguration.set(options, preparedOptions);
+	return clonePreparedOptions(preparedOptions);
 }
 
 function getWordReplacements(word: string, options: PreparedOptions): ReadonlyArray<string> {
@@ -402,20 +441,22 @@ export function getShorthandReplacement(
 	identifier: string,
 	configuration: ShorthandConfiguration,
 ): ShorthandReplacement | undefined {
+	const cachedReplacement = configuration.replacementsByIdentifier.get(identifier);
+	if (cachedReplacement !== undefined) return cachedReplacement === false ? undefined : cachedReplacement;
 	if (identifier.length === 0) return undefined;
 
 	const words = splitIdentifierIntoWords(identifier);
 	const matches = new Array<ShorthandReplacement["matches"][number]>();
-	let hasMatch = false;
 
 	for (const word of words) {
 		const match = matchWord(word, configuration);
-		if (match === undefined) continue;
-		hasMatch = true;
-		matches.push(match);
+		if (match !== undefined) matches.push(match);
 	}
 
-	if (!hasMatch) return undefined;
+	if (matches.length === 0) {
+		configuration.replacementsByIdentifier.set(identifier, false);
+		return undefined;
+	}
 
 	let replaced = "";
 	let matchIndex = 0;
@@ -430,22 +471,26 @@ export function getShorthandReplacement(
 		replaced += word;
 	}
 
-	return { matches, replaced };
+	const replacement = { matches, replaced };
+	configuration.replacementsByIdentifier.set(identifier, replacement);
+	return replacement;
 }
 
 export function isShorthandIgnored(identifier: string, configuration: ShorthandConfiguration): boolean {
-	if (isWordIgnored(identifier, configuration)) return true;
+	const cachedIgnored = configuration.ignoredIdentifiers.get(identifier);
+	if (cachedIgnored !== undefined) return cachedIgnored;
 
-	const words = splitIdentifierIntoWords(identifier);
-	let hasRelevantMatch = false;
-	for (const word of words) {
-		const match = matchWord(word, configuration);
-		if (match === undefined) continue;
-		hasRelevantMatch = true;
-		if (!isWordIgnored(match.matchedWord, configuration)) return false;
+	let ignored = isWordIgnored(identifier, configuration);
+	if (!ignored) {
+		const replacement = getShorthandReplacement(identifier, configuration);
+		ignored =
+			replacement !== undefined &&
+			replacement.matches.length > 0 &&
+			replacement.matches.every((match) => isWordIgnored(match.matchedWord, configuration));
 	}
 
-	return hasRelevantMatch;
+	configuration.ignoredIdentifiers.set(identifier, ignored);
+	return ignored;
 }
 
 export function isPropertyAccessAllowed(
@@ -463,6 +508,16 @@ export function isPropertyAccessAllowed(
 }
 
 export function getNameReplacements(name: string, options: PreparedOptions, limit = 3): NameReplacements {
+	const cacheKey = `${limit}\0${name}`;
+	const cachedReplacements = options.nameReplacements.get(cacheKey);
+	if (cachedReplacements !== undefined) return cachedReplacements;
+
+	const replacements = computeNameReplacements(name, options, limit);
+	options.nameReplacements.set(cacheKey, replacements);
+	return replacements;
+}
+
+function computeNameReplacements(name: string, options: PreparedOptions, limit: number): NameReplacements {
 	if (options.allowList.get(name) === true || options.ignore.some((pattern) => pattern.test(name))) {
 		return { total: 0 };
 	}
