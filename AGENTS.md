@@ -40,6 +40,10 @@ You **MUST** follow these guidelines. There is NO exception.
 
 Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined in `mise.toml`.
 
+## Performance Guidelines
+
+Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md`](docs/hot-path-conventions.md). Per-node allocation, stateful regex `g` flags, recursive walks, and pop-based traversal are the common pitfalls — adheres to ADR-0001.
+
 ## Code Architecture
 
 ### Entry Point - `src/index.ts`
