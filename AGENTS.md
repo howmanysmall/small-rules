@@ -118,6 +118,8 @@ describe("no-print", () => {
 
 Documented examples (`documentation: { id, title }`) are rendered verbatim on the docs site. Multi-statement snippets must use real newlines via `.join("\n")` arrays — single-line multi-statement code collapses into one unreadable line. `tests/documentation-rule-coverage.test.ts` enforces this.
 
+When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, run `cd documentation && pnpm exec vitest run tests/unit` (CI job `checks / Documentation`). Never hardcode category counts such as `"Showing N rules"` in docs tests — derive them from the catalog/manifest so the next rule addition cannot break CI.
+
 ## Key Config Files
 
 - `tsconfig.base.json` - Strict TS config, `module: "preserve"`, `verbatimModuleSyntax`, `bundler` resolution
