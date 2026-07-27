@@ -416,8 +416,25 @@ function readModeForIdentifier(node: HarnessNode): ReferenceMode {
 	if (parent?.type === "AssignmentExpression" && parent.left === node) {
 		return parent.operator === "=" ? "write" : "readwrite";
 	}
+	const patternAssignment = findPatternAssignment(node);
+	if (patternAssignment !== undefined) return patternAssignment.operator === "=" ? "write" : "readwrite";
 	if (parent?.type === "UpdateExpression" && parent.argument === node) return "readwrite";
 	return "read";
+}
+
+function findPatternAssignment(node: HarnessNode): HarnessNode | undefined {
+	let current = node;
+	while (
+		current.parent?.type === "ArrayPattern" ||
+		current.parent?.type === "AssignmentPattern" ||
+		current.parent?.type === "ObjectPattern" ||
+		current.parent?.type === "Property" ||
+		current.parent?.type === "RestElement"
+	) {
+		current = current.parent;
+	}
+	const { parent } = current;
+	return parent?.type === "AssignmentExpression" && parent.left === current ? parent : undefined;
 }
 
 function resolveReferences(scope: HarnessScope): void {
