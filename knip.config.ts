@@ -39,6 +39,7 @@ const configuration: KnipConfig = {
 	bun: true,
 	ignoreBinaries: ["hk", "nr"],
 	ignoreDependencies: [
+		"language-server$",
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
 		"@vitiate/fuzzed-data-provider",
