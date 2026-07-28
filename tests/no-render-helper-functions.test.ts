@@ -106,6 +106,10 @@ describe("no-render-helper-functions", () => {
 				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } const callback = renderRepositoryNode;",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
+			{
+				code: "function renderStoryItem(): React.ReactNode { return <div />; } const child = <div>{renderStoryItem}</div>;",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
 		],
 		valid: [
 			{
@@ -178,6 +182,15 @@ describe("no-render-helper-functions", () => {
 			},
 			{
 				code: "function renderRepositoryNode(project: Project): React.ReactNode { return <li key={project.id} />; } projects.map(renderRepositoryNode as (project: Project) => React.ReactNode);",
+			},
+			{
+				code: [
+					"function renderStoryItem(item: number | undefined): React.ReactNode {",
+					"\tif (item === undefined) return <EmptyItem />;",
+					"\treturn <StoryItem item={item} />;",
+					"}",
+					"const panel = <VirtualGridPanel renderItem={renderStoryItem} />;",
+				].join("\n"),
 			},
 			{
 				code: "function createPortal(): React.ReactPortal { return portal; }",
