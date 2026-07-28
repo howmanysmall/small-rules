@@ -28,7 +28,7 @@ All rules are namespaced under the `small-rules/` prefix. Pick the subset that f
 
 ## Rules
 
-Browse the [complete rule catalog](https://howmanysmall.github.io/small-rules/rules/) for source-backed descriptions, configuration, diagnostics, and examples.
+Browse the [complete rule catalog](https://docs.howmanysmall.com/small-rules/rules/) for source-backed descriptions, configuration, diagnostics, and examples.
 
 ## License
 

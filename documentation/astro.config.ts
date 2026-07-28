@@ -103,7 +103,7 @@ export default defineConfig({
 		ensureAstroIntegration(contextualMenu()),
 		ensureAstroIntegration(motion()),
 	],
-	site: "https://howmanysmall.github.io",
+	site: "https://docs.howmanysmall.com",
 	vite: {
 		build: {
 			rolldownOptions: {
