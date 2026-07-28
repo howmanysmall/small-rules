@@ -43,6 +43,7 @@ const banReactFc = defineRule({
 		docs: {
 			description:
 				"Ban React.FC and similar component type annotations. Use explicit function declarations instead.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/ban-react-fc/",
 		},
 		messages: {
 			banReactFC:
