@@ -2,6 +2,7 @@ import { extname } from "node:path";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
+	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -23,7 +24,7 @@ function isProviderElement(node: ESTree.JSXElement): boolean {
 
 function getMeaningfulChildren(node: ESTree.JSXElement): ReadonlyArray<ESTree.JSXChild> {
 	return node.children.filter((child) => {
-		if (child.type === "JSXText") return child.value.trim() !== "";
+		if (child.type === "JSXText") return child.value.trim().length > 0;
 		if (child.type === "JSXExpressionContainer") return child.expression.type !== "JSXEmptyExpression";
 		return true;
 	});
@@ -131,6 +132,8 @@ const preferContextStack = defineRule({
 		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const discoveredContextStack =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, CONTEXT_STACK_COMPONENT);
+		const isContextStackDefinitionFile =
+			filename !== "" && inspectLocalComponentFile(filename, CONTEXT_STACK_COMPONENT).matches;
 		/* v8 ignore stop -- @preserve */
 		const contextStackIdentifiers = new Set<string>();
 
@@ -146,7 +149,7 @@ const preferContextStack = defineRule({
 			},
 
 			JSXElement(node): void {
-				if (isNestedProviderInChain(node)) return;
+				if (isContextStackDefinitionFile || isNestedProviderInChain(node)) return;
 
 				const providerChain = collectProviderChain(node);
 				if (

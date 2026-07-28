@@ -3,6 +3,7 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
+	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -109,11 +110,13 @@ const preferLocalPortalComponent = defineRule({
 		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const discoveredPortal =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, PORTAL_COMPONENT);
+		const isPortalDefinitionFile = filename !== "" && inspectLocalComponentFile(filename, PORTAL_COMPONENT).matches;
 		/* v8 ignore stop -- @preserve */
 		const availablePortalIdentifiers = new Set<string>();
 
 		return {
 			CallExpression(node): void {
+				if (isPortalDefinitionFile) return;
 				if (!isPortalFactoryCall(sourceCode, node) || node.arguments.length !== 2) return;
 
 				const hasAvailablePortal = availablePortalIdentifiers.size > 0 || discoveredPortal.found;

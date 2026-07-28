@@ -1,3 +1,5 @@
+import { tokenizeJson } from "@/utilities/json-highlighter";
+
 import type { ReactNode } from "react";
 
 import type { DefaultValueDocumentation } from "@/data/rule-options";
@@ -17,11 +19,23 @@ export function RuleOptionDefaultDetail({
 }: RuleOptionDefaultDetailProperties): ReactNode {
 	if (defaultValue.kind !== "complex") return undefined;
 
+	const tokens = tokenizeJson(defaultValue.displayValue);
+
 	return (
 		<div className="rule-option__detail" hidden={!isExpanded} id={detailId}>
 			{DETAIL}
 			<pre>
-				<code>{defaultValue.displayValue}</code>
+				<code>
+					{tokens.map((token, index) =>
+						token.className === undefined ? (
+							token.text
+						) : (
+							<span className={token.className} key={`${String(index)}-${token.text}`}>
+								{token.text}
+							</span>
+						),
+					)}
+				</code>
 			</pre>
 		</div>
 	);

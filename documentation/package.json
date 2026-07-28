@@ -23,6 +23,7 @@
 		"react-dom": "catalog:frontend",
 		"satteri": "catalog:prod",
 		"sharp": "catalog:prod",
+		"shiki": "catalog:frontend",
 		"yuku-ast": "catalog:dev",
 		"yuku-parser": "catalog:prod"
 	},

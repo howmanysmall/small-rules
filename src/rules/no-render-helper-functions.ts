@@ -105,6 +105,16 @@ function isPropertyValueReference(node: ESTree.Node): boolean {
 	return parent?.type === "Property" && unwrapReferenceValue(parent.value) === node;
 }
 
+function isJsxAttributeValueReference(node: ESTree.Node): boolean {
+	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
+	const parent = ascendPastWrappers(node.parent ?? undefined);
+	return (
+		parent?.type === "JSXExpressionContainer" &&
+		parent.parent?.type === "JSXAttribute" &&
+		unwrapReferenceValue(parent.expression) === node
+	);
+}
+
 function isCallArgumentReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
 	const parent = ascendPastWrappers(node.parent ?? undefined);
@@ -152,7 +162,13 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 		if (reference.isWrite()) continue;
 
 		hasReadReference = true;
-		if (!(isPropertyValueReference(reference.identifier) || isCallArgumentReference(reference.identifier))) {
+		if (
+			!(
+				isPropertyValueReference(reference.identifier) ||
+				isJsxAttributeValueReference(reference.identifier) ||
+				isCallArgumentReference(reference.identifier)
+			)
+		) {
 			return false;
 		}
 	}

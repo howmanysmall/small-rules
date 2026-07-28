@@ -61,7 +61,6 @@ export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactNode 
 			</p>
 
 			<div className="rule-index-grid">
-				{/* biome-ignore lint/performance/useSolidForComponent: This is a React component. */}
 				{visibleRules.map((rule) => (
 					<RuleIndexCard key={rule.path} rule={rule} />
 				))}

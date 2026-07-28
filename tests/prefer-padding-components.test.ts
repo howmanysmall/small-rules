@@ -151,8 +151,48 @@ export function Example(padding: UDim) {
     );
 }`,
 			},
+			{
+				code: `import { DirectionalPadding } from "./directional-padding";
+
+export default function EqualPadding({ horizontal, vertical }: { horizontal: UDim; vertical: UDim }) {
+    return <uipadding PaddingBottom={vertical} PaddingLeft={horizontal} PaddingRight={horizontal} PaddingTop={vertical} />;
+}`,
+				errors: [{ messageId: "preferDirectionalPadding" }],
+				filename: join(WITH_COMPONENTS, "src", "ui", "equal-padding.tsx"),
+				output: `import { DirectionalPadding } from "./directional-padding";
+
+export default function EqualPadding({ horizontal, vertical }: { horizontal: UDim; vertical: UDim }) {
+    return <DirectionalPadding horizontal={vertical} vertical={horizontal} />;
+}`,
+			},
+			{
+				code: `import { EqualPadding } from "./equal-padding";
+
+export function DirectionalPadding({ padding }: { padding: UDim }) {
+    return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
+}`,
+				errors: [{ messageId: "preferEqualPadding" }],
+				filename: join(WITH_COMPONENTS, "src", "ui", "directional-padding.tsx"),
+				output: `import { EqualPadding } from "./equal-padding";
+
+export function DirectionalPadding({ padding }: { padding: UDim }) {
+    return <EqualPadding padding={padding} />;
+}`,
+			},
 		],
 		valid: [
+			{
+				code: `export default function EqualPadding({ padding }: { padding: UDim }) {
+    return <uipadding PaddingBottom={padding} PaddingLeft={padding} PaddingRight={padding} PaddingTop={padding} />;
+}`,
+				filename: join(WITH_COMPONENTS, "src", "ui", "equal-padding.tsx"),
+			},
+			{
+				code: `export function DirectionalPadding({ horizontal, vertical }: { horizontal: UDim; vertical: UDim }) {
+    return <uipadding PaddingBottom={vertical} PaddingLeft={horizontal} PaddingRight={horizontal} PaddingTop={vertical} />;
+}`,
+				filename: join(WITH_COMPONENTS, "src", "ui", "directional-padding.tsx"),
+			},
 			{
 				code: `import { EqualPadding } from "../ui/equal-padding";
 

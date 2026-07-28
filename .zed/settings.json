@@ -226,7 +226,7 @@
 				}
 			},
 			"hard_tabs": true,
-			"language_servers": ["pkl-lsp", "wakatime"],
+			"language_servers": ["pkl", "wakatime"],
 			"tab_size": 4
 		},
 		"SCSS": {

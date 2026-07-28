@@ -252,7 +252,7 @@
 				"noJsxPropsBind": "off",
 				"noSyncScripts": "error",
 				"preset": "recommended",
-				"useSolidForComponent": "error",
+				"useSolidForComponent": "off",
 				"useTopLevelRegex": "error"
 			},
 
