@@ -373,6 +373,7 @@ const useHookAtTopLevel = defineRule({
 			description:
 				"Enforce that React hooks are only called at the top level of components or custom hooks, never conditionally or in nested functions",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/use-hook-at-top-level/",
 		},
 		messages: {
 			afterEarlyReturn:

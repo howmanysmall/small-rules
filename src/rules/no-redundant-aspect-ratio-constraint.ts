@@ -208,6 +208,7 @@ const noRedundantAspectRatioConstraint = defineRule({
 		docs: {
 			description:
 				"Disallow redundant uiaspectratioconstraint children inside components that already manage their own aspect ratio internally.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-redundant-aspect-ratio-constraint/",
 		},
 		messages: {
 			redundantAspectRatioConstraint:

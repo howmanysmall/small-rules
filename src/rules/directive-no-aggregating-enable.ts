@@ -24,6 +24,7 @@ const directiveNoAggregatingEnable = defineRule({
 		docs: {
 			description:
 				"Disallow aggregating `oxlint-enable` or `eslint-enable` comments across multiple disable directives.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-aggregating-enable/",
 		},
 		messages: {
 			aggregatingEnable:

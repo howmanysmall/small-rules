@@ -254,6 +254,7 @@ const banInstances = defineRule({
 	meta: {
 		docs: {
 			description: "Ban specified Roblox Instance classes and configured Instance properties.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/ban-instances/",
 		},
 		messages: {
 			bannedInstance:

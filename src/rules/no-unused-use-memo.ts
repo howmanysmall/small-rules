@@ -29,6 +29,7 @@ const noUnusedUseMemo = defineRule({
 		docs: {
 			description: "Disallow standalone useMemo calls that ignore the memoized value.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-unused-use-memo/",
 		},
 		messages: {
 			unusedUseMemo:

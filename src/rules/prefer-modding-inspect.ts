@@ -79,6 +79,7 @@ const preferModdingInspect = defineRule({
 		docs: {
 			description: "Prefer Modding.inspect over manually enumerating every enum member in a Record<Enum, true>.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-modding-inspect/",
 		},
 		fixable: "code",
 		messages: {

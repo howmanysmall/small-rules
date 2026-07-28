@@ -300,7 +300,10 @@ const noFloatingPointEquality = defineRule({
 		};
 	},
 	meta: {
-		docs: { description: "Disallow exact comparisons involving inexact floating-point values." },
+		docs: {
+			description: "Disallow exact comparisons involving inexact floating-point values.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-floating-point-equality/",
+		},
 		messages: {
 			exactFloatComparison: "Compare floating-point results within a tolerance instead of for exact equality.",
 		},

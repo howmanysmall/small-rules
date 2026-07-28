@@ -171,6 +171,7 @@ const preferMathMinMax = defineRule({
 		docs: {
 			description: "Prefer math.min() and math.max() over simple clamp-like ternaries.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-math-min-max/",
 		},
 		fixable: "code",
 		messages: {

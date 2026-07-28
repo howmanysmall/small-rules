@@ -279,6 +279,7 @@ const preferExpectAssertions = defineRule({
 			description:
 				"Enforce expect assertion guards in tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/prefer-expect-assertions/",
 		},
 		fixable: "code",
 		hasSuggestions: true,

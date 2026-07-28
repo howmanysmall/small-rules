@@ -554,6 +554,7 @@ const noArrayConstructorElements = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow array constructor element forms and enforce roblox-ts-aware constructor patterns.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-array-constructor-elements/",
 		},
 		fixable: "code",
 		hasSuggestions: true,

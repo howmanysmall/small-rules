@@ -330,6 +330,7 @@ const preferTernaryConditionalRendering = defineRule({
 	meta: {
 		docs: {
 			description: "Prefer ternary expressions over complementary JSX && branches.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-ternary-conditional-rendering/",
 		},
 		fixable: "code",
 		messages: {

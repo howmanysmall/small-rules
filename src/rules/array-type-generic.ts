@@ -57,6 +57,7 @@ const arrayTypeGeneric = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow bracket array type syntax and require Array<T> / ReadonlyArray<T>.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/array-type-generic/",
 		},
 		fixable: "code",
 		messages: {

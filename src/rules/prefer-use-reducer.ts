@@ -47,6 +47,7 @@ const preferUseReducer = defineRule({
 		docs: {
 			description: "Suggest using useReducer for related state updates instead of multiple useState calls.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-use-reducer/",
 		},
 		messages: {
 			excessiveUseState:

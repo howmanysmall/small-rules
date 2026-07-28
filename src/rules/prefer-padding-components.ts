@@ -279,6 +279,7 @@ const preferPaddingComponents = defineRule({
 		docs: {
 			description:
 				"Prefer local EqualPadding and DirectionalPadding components over matching <uipadding /> declarations.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-padding-components/",
 		},
 		fixable: "code",
 		messages: {

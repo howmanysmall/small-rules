@@ -60,6 +60,7 @@ const preferEarlyReturn = defineRule({
 		docs: {
 			description: "Prefer early returns over full-body conditional wrapping.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/prefer-early-return/",
 		},
 		messages: {
 			preferEarlyReturn:

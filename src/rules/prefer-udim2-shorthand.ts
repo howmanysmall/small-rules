@@ -220,6 +220,7 @@ const preferUDim2Shorthand = defineRule({
 		docs: {
 			description:
 				"Prefer UDim2.fromScale() or UDim2.fromOffset() over new UDim2() when all offsets or all scales are zero.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-udim2-shorthand/",
 		},
 		fixable: "code",
 		messages: {

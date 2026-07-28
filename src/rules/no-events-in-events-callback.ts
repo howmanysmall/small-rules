@@ -399,6 +399,7 @@ const noEventsInEventsCallback = defineRule({
 		docs: {
 			description:
 				"Disallow sending Events back to the same player inside an Events.connect callback; use Functions for request/response.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-events-in-events-callback/",
 		},
 		messages: {
 			preferFunctions:

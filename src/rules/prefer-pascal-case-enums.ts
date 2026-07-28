@@ -108,6 +108,7 @@ const preferPascalCaseEnums = defineRule({
 		docs: {
 			description: "Enforce PascalCase names for enums and enum members.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/prefer-pascal-case-enums/",
 		},
 		messages: {
 			notPascalCase:

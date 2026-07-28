@@ -343,6 +343,7 @@ const preferHoistedJsxElements = defineRule({
 	meta: {
 		docs: {
 			description: "Prefer extracting static JSX elements to module-level constants.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-hoisted-jsx-elements/",
 		},
 		messages: {
 			hoistableJsxElement:

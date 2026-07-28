@@ -30,6 +30,7 @@ const directiveNoRestrictedDisable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow `oxlint-disable` or `eslint-disable` comments for configured rules.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-restricted-disable/",
 		},
 		messages: {
 			disallow: "Disabling '{{ruleId}}' is not allowed.",

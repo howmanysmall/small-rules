@@ -289,7 +289,10 @@ const noDeadStore = defineRule({
 		};
 	},
 	meta: {
-		docs: { description: "Disallow assignments whose value is never read." },
+		docs: {
+			description: "Disallow assignments whose value is never read.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-dead-store/",
+		},
 		messages: { deadStore: 'The value assigned to "{{name}}" is never read.' },
 		schema: [],
 		type: "problem",

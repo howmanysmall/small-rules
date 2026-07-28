@@ -372,6 +372,7 @@ const noNewInstanceInUseMemo = defineRule({
 		docs: {
 			description:
 				"Disallow configured constructor calls (default: new Instance) inside React useMemo callbacks.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-new-instance-in-use-memo/",
 		},
 		messages: {
 			noNewInUseMemo:

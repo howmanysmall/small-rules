@@ -145,6 +145,7 @@ const preferSingularEnums = defineRule({
 		docs: {
 			description: "Prefer singular naming for enums.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/prefer-singular-enums/",
 		},
 		messages: {
 			notSingular: 'Enum name "{{name}}" should be singular.',

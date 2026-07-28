@@ -131,6 +131,7 @@ const noNativePropertiesSpread = defineRule({
 			description:
 				"Disallow spreading static property bags into nativeProperties/*NativeProperties props and onto JSX elements via intermediate objects, because the spread creates a new copied table every render.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-native-properties-spread/",
 		},
 		messages: {
 			noElementSpread:

@@ -189,6 +189,7 @@ const preferContextStack = defineRule({
 	meta: {
 		docs: {
 			description: "Prefer a local ContextStack component over directly nesting multiple context providers.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-context-stack/",
 		},
 		fixable: "code",
 		messages: {

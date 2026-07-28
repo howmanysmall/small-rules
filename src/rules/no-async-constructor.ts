@@ -180,6 +180,7 @@ const noAsyncConstructor = defineRule({
 		docs: {
 			description:
 				"Disallow asynchronous operations inside class constructors. Constructors return immediately, so async work causes race conditions, unhandled rejections, and incomplete object states.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-async-constructor/",
 		},
 		messages: {
 			asyncIifeInConstructor:

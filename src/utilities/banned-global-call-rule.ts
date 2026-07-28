@@ -11,6 +11,8 @@ interface BannedGlobalCallRuleOptions<TMessageId extends string> {
 	readonly messageId: TMessageId;
 	/** The name of the global function to ban. */
 	readonly name: string;
+	/** Optional URL to the rule's documentation page. */
+	readonly url?: string;
 }
 
 export function createBannedGlobalCallRule<const TMessageId extends string>(
@@ -31,6 +33,7 @@ export function createBannedGlobalCallRule<const TMessageId extends string>(
 		},
 		meta: {
 			docs: {
+				...(options.url !== undefined && { url: options.url }),
 				description: `Use ${options.alternative} instead of ${options.name}().`,
 			},
 			messages: {

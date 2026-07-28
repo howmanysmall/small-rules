@@ -61,6 +61,7 @@ const requireSwitchCaseBraces = defineRule({
 	meta: {
 		docs: {
 			description: "Require braces around switch case bodies selected by line span or statement count.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/require-switch-case-braces/",
 		},
 		fixable: "code",
 		messages: {

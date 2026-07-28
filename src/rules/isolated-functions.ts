@@ -377,6 +377,7 @@ const isolatedFunctions = defineRule({
 		docs: {
 			description: "Prevent usage of variables from outside the scope of isolated functions.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/isolated-functions/",
 		},
 		messages: {
 			externallyScopedVariable:

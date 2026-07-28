@@ -627,6 +627,7 @@ const noConstantConditionWithBreak = defineRule({
 		docs: {
 			description:
 				"Disallow constant conditions, but allow constant loops that include loop exits such as break, return, or configured calls.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-constant-condition-with-break/",
 		},
 		messages: {
 			unexpected: "Unexpected constant condition.",

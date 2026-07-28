@@ -913,6 +913,7 @@ const requirePairedCalls = defineRule({
 		docs: {
 			description: "Enforces balanced opener/closer function calls across all execution paths",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/require-paired-calls/",
 		},
 		messages,
 		schema: [

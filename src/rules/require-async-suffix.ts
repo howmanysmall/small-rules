@@ -55,6 +55,7 @@ const requireAsyncSuffix = defineRule({
 	meta: {
 		docs: {
 			description: "Require async function names to end with Async.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/require-async-suffix/",
 		},
 		messages: {
 			missingAsyncSuffix: "Async functions must have names that end with Async.",

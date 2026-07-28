@@ -19,6 +19,7 @@ const noUnderscoreReactProperties = defineRule({
 	meta: {
 		docs: {
 			description: "Ban React property names that begin with an underscore in JSX.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-underscore-react-props/",
 		},
 		messages: {
 			noUnderscoreReactProperty:

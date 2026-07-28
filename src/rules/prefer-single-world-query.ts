@@ -301,6 +301,7 @@ const preferSingleWorldQuery = defineRule({
 		docs: {
 			description:
 				"Enforce combining multiple world.get() or world.has() calls into a single call for better Jecs performance.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-single-world-query/",
 		},
 		fixable: "code",
 		messages: {

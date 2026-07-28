@@ -108,6 +108,7 @@ const noUseOfEmptyReturnValue = defineRule({
 		docs: {
 			description: "Disallow using the return value of functions that do not return anything.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-use-of-empty-return-value/",
 		},
 		messages: {
 			removeUseOfOutput: 'Remove this use of the output from "{{name}}"; "{{name}}" doesn\'t return anything.',

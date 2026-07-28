@@ -431,6 +431,7 @@ const preventAbbreviations = defineRule({
 		docs: {
 			description: "Prevent abbreviations.",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/prevent-abbreviations/",
 		},
 		fixable: "code",
 		messages: {

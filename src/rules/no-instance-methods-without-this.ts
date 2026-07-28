@@ -99,6 +99,7 @@ const noInstanceMethodsWithoutThis = defineRule({
 		docs: {
 			description:
 				"Detect instance methods that do not use 'this' and suggest converting them to standalone functions for better performance in roblox-ts.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-instance-methods-without-this/",
 		},
 		messages: {
 			noInstanceMethodWithoutThis:

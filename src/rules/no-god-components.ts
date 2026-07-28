@@ -299,6 +299,7 @@ const noGodComponents = defineRule({
 			description:
 				"Enforce React component size and complexity limits inspired by the 'Refactor God Component' checklist.",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-god-components/",
 		},
 		messages: {
 			exceedsMaxLines:

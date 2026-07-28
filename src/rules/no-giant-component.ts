@@ -76,6 +76,7 @@ const noGiantComponent = defineRule({
 		docs: {
 			description: "Report React components whose bodies exceed 300 lines.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-giant-component/",
 		},
 		messages: {
 			giantComponent:

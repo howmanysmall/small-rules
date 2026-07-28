@@ -27,6 +27,7 @@ const directiveNoUse = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow block ESLint/Oxlint directive comments.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-use/",
 		},
 		messages: {
 			disallow: "Unexpected ESLint directive comment.",

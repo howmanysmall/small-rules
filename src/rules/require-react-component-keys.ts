@@ -480,6 +480,7 @@ const requireReactComponentKeys = defineRule({
 		docs: {
 			description:
 				"Require keys on nested React JSX children, fragments, and configured iteration or memoization contexts.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/require-react-component-keys/",
 		},
 		messages: {
 			missingKey:

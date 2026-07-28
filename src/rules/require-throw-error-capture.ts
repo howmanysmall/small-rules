@@ -241,6 +241,7 @@ const requireThrowErrorCapture = defineRule({
 			description:
 				"Require 'Error.captureStackTrace' before directly throwing new Error instances in named functions.",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/require-throw-error-capture/",
 		},
 		fixable: "code",
 		messages: {

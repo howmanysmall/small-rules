@@ -499,6 +499,7 @@ const noUselessConstants = defineRule({
 		docs: {
 			description: "Disallow constants that do not add value.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-useless-constants/",
 		},
 		fixable: "code",
 		messages: {

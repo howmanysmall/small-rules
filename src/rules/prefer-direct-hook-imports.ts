@@ -83,6 +83,7 @@ const preferDirectHookImports = defineRule({
 		docs: {
 			description: "Prefer importing React hooks directly instead of calling them via the React namespace.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-direct-hook-imports/",
 		},
 		messages: {
 			preferDirectHookImport: "Import `{{hookName}}` directly instead of calling `React.{{hookName}}`.",

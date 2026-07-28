@@ -118,6 +118,7 @@ const requireModuleLevelInstantiation = defineRule({
 	meta: {
 		docs: {
 			description: "Require configured classes to be instantiated at module level only.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/require-module-level-instantiation/",
 		},
 		messages: {
 			mustBeModuleLevel: "'{{className}}' from '{{importSource}}' must be instantiated at module level only.",

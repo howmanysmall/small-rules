@@ -36,6 +36,7 @@ const noTaskWait = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow task.wait() and Promise.delay(...).await() calls.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-task-wait/",
 		},
 		messages: {
 			noPromiseDelayAwait:

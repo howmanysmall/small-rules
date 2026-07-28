@@ -212,6 +212,7 @@ const consistentCompoundWords = defineRule({
 		docs: {
 			description: "Enforce consistent spelling of compound words in identifiers.",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/consistent-compound-words/",
 		},
 		messages: {
 			error: "Prefer `{{replacement}}` over `{{name}}`.",

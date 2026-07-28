@@ -298,6 +298,7 @@ const noTrivialAssertions = defineRule({
 		docs: {
 			description: "Disallow assertions that always succeed or compare against freshly created values.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-trivial-assertions/",
 		},
 		messages: {
 			freshIdentity: "Use `{{matcher}}` instead; freshly-created values are never identical to other values.",

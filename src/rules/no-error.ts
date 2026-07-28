@@ -5,6 +5,7 @@ const noError = createBannedGlobalCallRule({
 	message: "Replace {{name}}(...) with {{alternative}}.",
 	messageId: "noError",
 	name: "error",
+	url: "https://docs.howmanysmall.com/small-rules/rules/general/no-error/",
 });
 
 export default noError;

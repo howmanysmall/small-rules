@@ -565,6 +565,7 @@ const enforceIanitorCheckType = defineRule({
 		docs: {
 			description: "Enforce Ianitor.Check<T> type annotations on complex TypeScript types",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/enforce-ianitor-check-type/",
 		},
 		messages: {
 			complexInterfaceNeedsCheck:

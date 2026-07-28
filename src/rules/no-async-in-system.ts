@@ -494,6 +494,7 @@ const noAsyncInSystem = defineRule({
 		docs: {
 			description: "Disallow yielding Roblox API calls in synchronous Planck system execution.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-async-in-system/",
 		},
 		messages: {
 			noAsyncInSystem: "Do not call a yielding Roblox API from a synchronous Planck system.",

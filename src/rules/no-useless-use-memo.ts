@@ -138,6 +138,7 @@ const noUselessUseMemo = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow useMemo calls that only wrap values static enough to live at module scope.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-useless-use-memo/",
 		},
 		messages: {
 			uselessUseMemo:

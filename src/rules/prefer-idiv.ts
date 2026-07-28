@@ -67,6 +67,7 @@ const preferIdiv = defineRule({
 		docs: {
 			description: "Prefer .idiv() for integer division instead of math.floor(x / y).",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-idiv/",
 		},
 		fixable: "code",
 		messages: {

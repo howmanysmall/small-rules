@@ -66,6 +66,7 @@ const directiveRequireDescription = defineRule({
 	meta: {
 		docs: {
 			description: "Require descriptions for `oxlint` and `eslint` disable/enable directives.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-require-description/",
 		},
 		messages: {
 			missingDescription: "Missing description for '{{kind}}' comment.",

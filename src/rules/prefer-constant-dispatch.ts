@@ -192,6 +192,7 @@ const preferConstantDispatch = defineRule({
 		docs: {
 			description: "Disallow inline useReducer action objects that could be module-level constants.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-constant-dispatch/",
 		},
 		hasSuggestions: true,
 		messages: {

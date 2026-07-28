@@ -147,6 +147,7 @@ const noRestrictedPropertyAssignment = defineRule({
 		docs: {
 			description: "Disallow assignment to restricted object properties.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-restricted-property-assignment/",
 		},
 		messages: {
 			restricted: "Assignment to '{{object}}.{{property}}' is not permitted.",

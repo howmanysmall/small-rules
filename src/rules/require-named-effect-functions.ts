@@ -271,6 +271,7 @@ const requireNamedEffectFunctions = defineRule({
 			description:
 				"Enforce named effect functions for better debuggability. Prevents inline arrow functions in useEffect and similar hooks.",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/require-named-effect-functions/",
 		},
 		messages: {
 			anonymousFunction:

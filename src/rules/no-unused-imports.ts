@@ -148,6 +148,7 @@ const noUnusedImports = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow unused imports",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-unused-imports/",
 		},
 		fixable: "code",
 		messages: {

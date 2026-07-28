@@ -38,6 +38,7 @@ const noVariadicSpread = defineRule({
 		docs: {
 			description:
 				"Disallow spreading a potentially unbounded array into a variadic call, because every element becomes a stack-allocated argument.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-variadic-spread/",
 		},
 		messages: {
 			noVariadicSpread:

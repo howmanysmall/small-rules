@@ -54,6 +54,7 @@ const preferModuleScopeConstants = defineRule({
 		docs: {
 			description:
 				"Prefer screaming snake case constants at module scope or the allowed top-level wrapper scope.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/prefer-module-scope-constants/",
 		},
 		messages: {
 			mustBeModuleScope:

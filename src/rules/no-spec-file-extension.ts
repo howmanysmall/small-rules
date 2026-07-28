@@ -22,6 +22,7 @@ const noSpecFileExtension = defineRule({
 		docs: {
 			description: "Disallow the .spec.{ts,tsx} file extension for test files. Use .test.{ts,tsx} instead.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/no-spec-file-extension/",
 		},
 		messages: {
 			noSpecFileExtension:

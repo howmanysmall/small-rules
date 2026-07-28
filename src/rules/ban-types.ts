@@ -84,6 +84,7 @@ const banTypes = defineRule({
 	meta: {
 		docs: {
 			description: "Ban configured TypeScript utility types, defaulting to Omit in favor of Except.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/naming/ban-types/",
 		},
 		messages: {
 			bannedType:

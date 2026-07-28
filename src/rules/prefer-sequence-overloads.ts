@@ -115,6 +115,7 @@ const preferSequenceOverloads = defineRule({
 			description:
 				"Prefer direct ColorSequence and NumberSequence overloads over identical direct arguments and two-keypoint arrays.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-sequence-overloads/",
 		},
 		fixable: "code",
 		messages: {

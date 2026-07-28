@@ -123,6 +123,7 @@ const preferClassProperties = defineRule({
 	meta: {
 		docs: {
 			description: "Prefer class properties to assignment of literals in constructors.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/prefer-class-properties/",
 		},
 		messages: {
 			unexpectedAssignment:

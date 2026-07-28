@@ -256,6 +256,7 @@ const noCommentedCode = defineRule({
 		docs: {
 			description: "Disallow commented-out code",
 			recommended: false,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-commented-code/",
 		},
 		hasSuggestions: true,
 		messages: {

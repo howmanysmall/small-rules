@@ -85,6 +85,7 @@ const noColor3Constructor = defineRule({
 		docs: {
 			description:
 				"Ban new Color3(...) except new Color3() or new Color3(0, 0, 0). Use Color3.fromRGB() instead.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-color3-constructor/",
 		},
 		fixable: "code",
 		messages: {

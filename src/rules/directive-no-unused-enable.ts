@@ -24,6 +24,7 @@ const directiveNoUnusedEnable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow unused `oxlint-enable` or `eslint-enable` comments.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-unused-enable/",
 		},
 		messages: {
 			unused: "Unused '{{kind}}' comment. No reported rules are disabled.",

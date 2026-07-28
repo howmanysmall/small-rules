@@ -20,6 +20,7 @@ const directiveNoDuplicateDisable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow duplicate `oxlint-disable` or `eslint-disable` comments.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-duplicate-disable/",
 		},
 		messages: {
 			duplicate: "ESLint rules have been disabled already.",

@@ -27,6 +27,7 @@ const directiveNoUnlimitedDisable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow `oxlint-disable` or `eslint-disable` comments without rule names.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-unlimited-disable/",
 		},
 		messages: {
 			unexpected: "Unexpected unlimited '{{kind}}' comment. Specify some rule names to disable.",

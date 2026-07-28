@@ -8,6 +8,7 @@ const noWarn = createBannedGlobalCallRule({
 		"Replace {{name}}(...) with {{alternative}}.",
 	messageId: "noWarn",
 	name: "warn",
+	url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-warn/",
 });
 
 export default noWarn;

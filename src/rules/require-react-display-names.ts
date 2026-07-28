@@ -219,6 +219,7 @@ const requireReactDisplayNames = defineRule({
 	meta: {
 		docs: {
 			description: "Require displayName on exported memo components and contexts.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/require-react-display-names/",
 		},
 		messages: {
 			directContextExport: "Directly exporting createContext() result prevents setting displayName.",

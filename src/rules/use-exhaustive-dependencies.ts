@@ -1112,6 +1112,7 @@ const useExhaustiveDependencies = defineRule({
 		docs: {
 			description:
 				"Enforce exhaustive and correct dependency specification in React hooks to prevent stale closures and unnecessary re-renders",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/use-exhaustive-dependencies/",
 		},
 		fixable: "code",
 		hasSuggestions: true,

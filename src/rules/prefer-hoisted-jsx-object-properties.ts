@@ -123,6 +123,7 @@ const preferHoistedJsxObjectProperties = defineRule({
 		docs: {
 			description:
 				"Prefer extracting inline JSX object props to module-level constants when the entire object is statically hoistable.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-hoisted-jsx-object-properties/",
 		},
 		messages: {
 			hoistableObjectProp:

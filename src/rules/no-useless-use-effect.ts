@@ -1645,6 +1645,7 @@ const noUselessUseEffect = defineRule({
 		docs: {
 			description:
 				"Disallow empty effects, duplicate dependencies, effect chains, log-only effects, derived state, external-store state sync, state initialization, reset effects, parent notifications, parent ref callbacks, and event side effects routed through state.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-useless-use-effect/",
 		},
 		messages: {
 			adjustState:

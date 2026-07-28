@@ -28,6 +28,7 @@ const noFilterMapChain = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow map(...) directly after filter(...).",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-filter-map-chain/",
 		},
 		messages: {
 			avoidFilterMapChain:

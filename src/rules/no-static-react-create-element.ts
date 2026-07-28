@@ -194,6 +194,7 @@ const noStaticReactCreateElement = defineRule({
 		docs: {
 			description: "Require JSX for static React.createElement calls.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-static-react-create-element/",
 		},
 		messages: {
 			useJsx: "Use JSX instead of static React.createElement calls.",

@@ -266,6 +266,7 @@ const noArrayConstructorIndexAssignment = defineRule({
 		docs: {
 			description:
 				"Disallow new Array<T>() followed by contiguous index assignments; use an array literal instead.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-array-constructor-index-assignment/",
 		},
 		fixable: "code",
 		messages: {

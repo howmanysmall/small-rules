@@ -83,6 +83,7 @@ const strictComponentBoundaries = defineRule({
 	meta: {
 		docs: {
 			description: "Prevent imports that reach into another component's nested modules.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/strict-component-boundaries/",
 		},
 		messages: {
 			noReachingIntoComponent:

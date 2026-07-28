@@ -956,6 +956,7 @@ const noUselessDefault = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow Roblox JSX properties whose values already match the class defaults.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-useless-default/",
 		},
 		fixable: "code",
 		messages: {

@@ -143,6 +143,7 @@ const noIdentityMap = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow pointless identity `.map()` calls that return the parameter unchanged",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-identity-map/",
 		},
 		fixable: "code",
 		messages: {

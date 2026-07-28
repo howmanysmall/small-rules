@@ -40,6 +40,7 @@ const noCascadingSetState = defineRule({
 		docs: {
 			description: "Disallow effect hooks with many cascading state updates.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-cascading-set-state/",
 		},
 		messages: {
 			cascadingSetState:

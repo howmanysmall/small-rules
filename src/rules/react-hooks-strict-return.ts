@@ -253,6 +253,7 @@ const reactHooksStrictReturn = defineRule({
 	meta: {
 		docs: {
 			description: "Restrict React hooks to object returns or short tuples.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/react-hooks-strict-return/",
 		},
 		messages: {
 			tooManyReturnValues:

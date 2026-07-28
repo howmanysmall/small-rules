@@ -48,6 +48,7 @@ const requireUnicodeRegex = defineRule({
 	meta: {
 		docs: {
 			description: "Require the 'u' or 'v' unicode flag on calls named regex().",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/require-unicode-regex/",
 		},
 		messages: {
 			requireUnicodeFlag:

@@ -222,6 +222,7 @@ const noLoopIterableMutation = defineRule({
 		docs: {
 			description: "Disallow mutating a loop iterable during iteration.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-loop-iterable-mutation/",
 		},
 		messages: {
 			noLoopIterableMutation: "Do not mutate `{{iterable}}` while iterating over it.",

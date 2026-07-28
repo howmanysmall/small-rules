@@ -8,6 +8,7 @@ const noPrint = createBannedGlobalCallRule({
 		"Replace {{name}}(...) with {{alternative}}.",
 	messageId: "noPrint",
 	name: "print",
+	url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-print/",
 });
 
 export default noPrint;

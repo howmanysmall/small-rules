@@ -29,6 +29,7 @@ const directiveDisableEnablePair = defineRule({
 		docs: {
 			description:
 				"Require a matching enable comment for every `oxlint-disable` or `eslint-disable` block directive.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-disable-enable-pair/",
 		},
 		messages: {
 			missingPair: "Requires 'eslint-enable' directive.",

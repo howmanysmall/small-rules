@@ -310,6 +310,7 @@ const memoizedEffectDependencies = defineRule({
 		docs: {
 			description:
 				"Flags effect dependencies that are not memoized. Unmemoized dependencies can cause unnecessary re-renders or infinite loops.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/memoized-effect-dependencies/",
 		},
 		messages: {
 			unmemoizedDependency:

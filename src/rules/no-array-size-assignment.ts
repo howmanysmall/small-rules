@@ -179,6 +179,7 @@ const noArraySizeAssignment = defineRule({
 		docs: {
 			description:
 				"Disallow array append assignments using array[array.size()] = value (roblox-ts) or array[array.length] = value (standard) and prefer push-based appends.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-array-size-assignment/",
 		},
 		fixable: "code",
 		messages: {

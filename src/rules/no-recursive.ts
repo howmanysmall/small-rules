@@ -216,6 +216,10 @@ const noRecursive = defineRule({
 		};
 	},
 	meta: {
+		docs: {
+			description: "Disallow recursive function calls to prevent stack overflow.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-recursive/",
+		},
 		messages: {
 			noRecursive:
 				"Recursion is not allowed (JPL Power of 10). Use iteration instead — a loop or explicit stack.",

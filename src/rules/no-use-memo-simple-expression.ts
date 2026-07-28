@@ -40,6 +40,7 @@ const noUseMemoSimpleExpression = defineRule({
 		docs: {
 			description: "Disallow useMemo for expressions that are already trivial to compute.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-use-memo-simple-expression/",
 		},
 		messages: {
 			simpleMemo: "useMemo wrapping a trivially cheap expression - memo overhead exceeds the computation",

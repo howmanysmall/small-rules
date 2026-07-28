@@ -45,6 +45,7 @@ const noIncrementDecrement = defineRule({
 		docs: {
 			description: "Disallow standalone `++` and `--` statements and for-loop update clauses.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-increment-decrement/",
 		},
 		fixable: "code",
 		messages: {

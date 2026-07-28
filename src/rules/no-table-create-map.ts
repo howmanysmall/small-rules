@@ -56,6 +56,7 @@ const noTableCreateMap = defineRule({
 		docs: {
 			description:
 				"Disallow map(...) directly on table.create(...) and new Array(...) constructor patterns in roblox-ts.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-table-create-map/",
 		},
 		messages: {
 			avoidConstructThenMap:

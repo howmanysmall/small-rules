@@ -159,6 +159,7 @@ const preferLocalPortalComponent = defineRule({
 		docs: {
 			description:
 				"Prefer a local Portal component over direct createPortal calls when the project already defines one.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-local-portal-component/",
 		},
 		fixable: "code",
 		messages: {

@@ -75,6 +75,7 @@ const noInlinePropertyOnMemoComponent = defineRule({
 		docs: {
 			description: "Prevent inline properties from being passed to memoized components.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-inline-property-on-memo-component/",
 		},
 		messages: {
 			inlineProperty:

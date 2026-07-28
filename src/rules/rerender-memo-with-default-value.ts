@@ -81,6 +81,7 @@ const rerenderMemoWithDefaultValue = defineRule({
 		docs: {
 			description: "Prevent inline empty object and array defaults in component prop destructuring.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/rerender-memo-with-default-value/",
 		},
 		messages: {
 			emptyArrayDefault:

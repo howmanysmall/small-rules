@@ -140,6 +140,7 @@ const noUselessUseSpring = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow useSpring hooks whose config and dependencies are entirely static",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-useless-use-spring/",
 		},
 		messages: {
 			uselessSpring:

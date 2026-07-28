@@ -47,6 +47,7 @@ const noIanitorInFunctionBody = defineRule({
 			description:
 				"Disallow Ianitor validator creation inside function bodies. Hoist to module scope to avoid recreating validators on every call.",
 			recommended: true,
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-ianitor-in-function-body/",
 		},
 		messages: {
 			hoistIanitorValidator:

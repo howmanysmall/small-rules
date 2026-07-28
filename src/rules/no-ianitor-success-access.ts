@@ -178,6 +178,7 @@ const noIanitorSuccessAccess = defineRule({
 		docs: {
 			description:
 				"Disallow accessing `.success` on Ianitor check results when the full result object is not needed.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-ianitor-success-access/",
 		},
 		messages: {
 			preferCreateGuard:

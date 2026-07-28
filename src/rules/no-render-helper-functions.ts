@@ -251,6 +251,7 @@ const noRenderHelperFunctions = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow non-component functions that return JSX or React elements.",
+			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-render-helper-functions/",
 		},
 		messages: {
 			noRenderHelper:
