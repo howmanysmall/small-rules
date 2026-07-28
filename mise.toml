@@ -65,6 +65,12 @@ run = "node --run test"
 description = "Run the documentation build plus unit and Chromium browser tests."
 run = "pnpm --filter docs exec playwright install chromium && pnpm --filter docs run build && pnpm --filter docs run test:unit && pnpm --filter docs run test:browser"
 
+[tasks.deploy-docs]
+alias = "dd"
+description = "Trigger the Deploy Documentation workflow. Rebuilds and deploys the docs site without a release."
+usage = 'arg "[ref]" default="main" help="Git ref to deploy"'
+run = "gh workflow run 'Deploy Documentation' --ref ${usage_ref:-main}"
+
 [tasks.check]
 description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
 depends = ["lint", "type-check", "knip", "build", "test"]
