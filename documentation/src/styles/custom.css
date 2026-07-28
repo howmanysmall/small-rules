@@ -152,6 +152,13 @@
 	--code-pass: #10b981;
 	--code-fail: #f43f5e;
 
+	--json-key: #0e7490;
+	--json-string: #059669;
+	--json-number: #d97706;
+	--json-boolean: #7c3aed;
+	--json-null: #7c3aed;
+	--json-punct: var(--sl-color-text-muted);
+
 	--site-bg: #f7f8fa;
 	--site-text: #1e2028;
 }
@@ -178,6 +185,13 @@
 
 	--code-pass: #34d399;
 	--code-fail: #fb7185;
+
+	--json-key: #22d3ee;
+	--json-string: #34d399;
+	--json-number: #fbbf24;
+	--json-boolean: #a78bfa;
+	--json-null: #a78bfa;
+	--json-punct: var(--sl-color-text-muted);
 
 	--site-bg: #0f131c;
 	--site-text: #e8ecf2;
@@ -652,7 +666,28 @@ starlight-link-card:hover {
 
 .rule-option__detail code {
 	font-family: inherit;
-	color: inherit;
+}
+
+/* JSON syntax highlighting tokens */
+.json-key {
+	color: var(--json-key);
+}
+
+.json-string {
+	color: var(--json-string);
+}
+
+.json-number {
+	color: var(--json-number);
+}
+
+.json-boolean,
+.json-null {
+	color: var(--json-boolean);
+}
+
+.json-punctuation {
+	color: var(--json-punct);
 }
 
 :root[data-theme="dark"] .rule-option__name,

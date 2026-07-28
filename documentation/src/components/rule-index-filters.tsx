@@ -69,7 +69,6 @@ export function RuleIndexFilters({
 					value={selectedCategory}
 				>
 					{ALL_CATEGORIES}
-					{/* biome-ignore lint/performance/useSolidForComponent: This is a React component. */}
 					{categories.map((category) => (
 						<option key={category.key} value={category.key}>
 							{category.label}
