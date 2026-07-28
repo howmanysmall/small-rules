@@ -156,6 +156,7 @@ catalogs:
     "@astrojs/react": 6.0.0
     react: 19.2.7
     react-dom: 19.2.7
+    shiki: 3.4.1
   lint:
     "@biomejs/biome": 2.5.5
     eslint: 10.7.0

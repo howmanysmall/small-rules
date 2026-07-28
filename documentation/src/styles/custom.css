@@ -545,6 +545,19 @@ starlight-link-card:hover {
 	border: 0;
 }
 
+/* Shiki dual-theme highlight support for type annotations.
+   Each span carries inline --shiki-light and --shiki-dark; we
+   switch which one controls `color` based on the active theme. */
+.rule-option__field .highlighted-type span {
+	color: var(--shiki-light);
+	background: none;
+}
+
+:root[data-theme="dark"] .rule-option__field .highlighted-type span {
+	color: var(--shiki-dark) !important;
+	background: none !important;
+}
+
 .rule-option__field--default dd > code {
 	white-space: nowrap;
 }

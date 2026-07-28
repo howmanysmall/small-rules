@@ -1,5 +1,6 @@
 ---
 import { getRuleOptionsDocumentation } from "@/data/rule-options";
+import { highlightTypeScriptAsync } from "@/utilities/highlight-type";
 import type { RuleName } from "@/data/rule-options";
 import { Code } from "@astrojs/starlight/components";
 import { RuleOptionsTable } from "./rule-options-table";
@@ -10,12 +11,22 @@ interface Props {
 
 const { rule } = Astro.props;
 const documentation = getRuleOptionsDocumentation(rule);
+
+const highlightedTypes = Object.fromEntries(
+	await Promise.all(
+		documentation.options.map(async (option) => [option.name, await highlightTypeScriptAsync(option.type)]),
+	),
+);
 ---
 
 <p>{documentation.schemaSummary}</p>
 
 {documentation.options.length > 0 && (
-	<RuleOptionsTable options={documentation.options} client:visible={true} />
+	<RuleOptionsTable
+		highlightedTypes={highlightedTypes}
+		options={documentation.options}
+		client:visible={true}
+	/>
 )}
 
 <div class="rule-options-config">
