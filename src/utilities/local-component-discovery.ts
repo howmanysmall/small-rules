@@ -200,7 +200,10 @@ function isIgnoredComponentPath(filePath: string): boolean {
 	return false;
 }
 
-function inspectLocalComponentFile(filePath: string, definition: LocalComponentDefinition): LocalComponentInspection {
+export function inspectLocalComponentFile(
+	filePath: string,
+	definition: LocalComponentDefinition,
+): LocalComponentInspection {
 	if (isIgnoredComponentPath(filePath)) return { importStyle: undefined, matches: false };
 
 	const extension = extname(filePath);

@@ -84,6 +84,12 @@ export function Example(locale: string, theme: string) {
 		],
 		valid: [
 			{
+				code: `export default function ContextStack({ children, locale, theme }: { children: React.ReactNode; locale: string; theme: string }) {
+    return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider></ThemeContext.Provider>;
+}`,
+				filename: join(WITH_CONTEXT_STACK, "src", "providers", "context-stack.tsx"),
+			},
+			{
 				code: `import ContextStack from "../providers/context-stack";
 
 export function Example(theme: string) {

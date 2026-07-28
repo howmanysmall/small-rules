@@ -3,6 +3,7 @@ import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
+	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import { isRecord } from "$oxc-utilities/type-utilities";
@@ -198,6 +199,10 @@ const preferPaddingComponents = defineRule({
 			filename === "" ? { found: false } : discoverLocalComponent(filename, DIRECTIONAL_PADDING_COMPONENT);
 		const discoveredEqualPadding =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, EQUAL_PADDING_COMPONENT);
+		const isDirectionalPaddingDefinitionFile =
+			filename !== "" && inspectLocalComponentFile(filename, DIRECTIONAL_PADDING_COMPONENT).matches;
+		const isEqualPaddingDefinitionFile =
+			filename !== "" && inspectLocalComponentFile(filename, EQUAL_PADDING_COMPONENT).matches;
 		/* v8 ignore stop -- @preserve */
 		const directionalPaddingIdentifiers = new Set<string>();
 		const equalPaddingIdentifiers = new Set<string>();
@@ -236,6 +241,11 @@ const preferPaddingComponents = defineRule({
 
 				const messageId = getPaddingMessageId(attributes);
 				if (messageId === undefined) return;
+				const isDefinitionFile =
+					messageId === "preferEqualPadding"
+						? isEqualPaddingDefinitionFile
+						: isDirectionalPaddingDefinitionFile;
+				if (isDefinitionFile) return;
 				const componentIdentifiers =
 					messageId === "preferEqualPadding" ? equalPaddingIdentifiers : directionalPaddingIdentifiers;
 				const discoveredComponent =

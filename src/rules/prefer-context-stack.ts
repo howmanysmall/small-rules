@@ -2,6 +2,7 @@ import { extname } from "node:path";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
+	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import { defineRule } from "oxlint-plugin-utilities";
@@ -131,6 +132,8 @@ const preferContextStack = defineRule({
 		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const discoveredContextStack =
 			filename === "" ? { found: false } : discoverLocalComponent(filename, CONTEXT_STACK_COMPONENT);
+		const isContextStackDefinitionFile =
+			filename !== "" && inspectLocalComponentFile(filename, CONTEXT_STACK_COMPONENT).matches;
 		/* v8 ignore stop -- @preserve */
 		const contextStackIdentifiers = new Set<string>();
 
@@ -146,6 +149,7 @@ const preferContextStack = defineRule({
 			},
 
 			JSXElement(node): void {
+				if (isContextStackDefinitionFile) return;
 				if (isNestedProviderInChain(node)) return;
 
 				const providerChain = collectProviderChain(node);

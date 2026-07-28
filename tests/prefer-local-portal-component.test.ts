@@ -117,6 +117,22 @@ export function Example(content: React.ReactNode, target: Instance) {
 			{
 				code: `import { createPortal } from "@rbxts/react-roblox";
 
+export default function Portal({ target, children }: PortalProperties) {
+    return target === undefined ? undefined : createPortal(children, target);
+}`,
+				filename: join(WITH_PORTAL, "src", "components", "portal.tsx"),
+			},
+			{
+				code: `import { createPortal } from "@rbxts/react-roblox";
+
+export function Example(target: Instance) {
+    return createPortal(<frame />, target);
+}`,
+				filename: "",
+			},
+			{
+				code: `import { createPortal } from "@rbxts/react-roblox";
+
 export function Example(target: Instance) {
     return createPortal(<frame />, target);
 }`,
