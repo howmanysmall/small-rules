@@ -68,8 +68,7 @@ run = "pnpm --filter docs exec playwright install chromium && pnpm --filter docs
 [tasks.deploy-docs]
 alias = "dd"
 description = "Trigger the Deploy Documentation workflow. Rebuilds and deploys the docs site without a release."
-usage = 'arg "[ref]" default="main" help="Git ref to deploy"'
-run = "gh workflow run 'Deploy Documentation' --ref ${usage_ref:-main}"
+run = "gh workflow run 'Deploy Documentation' --ref main"
 
 [tasks.check]
 description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
