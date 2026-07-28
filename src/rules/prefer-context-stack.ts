@@ -24,7 +24,7 @@ function isProviderElement(node: ESTree.JSXElement): boolean {
 
 function getMeaningfulChildren(node: ESTree.JSXElement): ReadonlyArray<ESTree.JSXChild> {
 	return node.children.filter((child) => {
-		if (child.type === "JSXText") return child.value.trim() !== "";
+		if (child.type === "JSXText") return child.value.trim().length > 0;
 		if (child.type === "JSXExpressionContainer") return child.expression.type !== "JSXEmptyExpression";
 		return true;
 	});
@@ -149,8 +149,7 @@ const preferContextStack = defineRule({
 			},
 
 			JSXElement(node): void {
-				if (isContextStackDefinitionFile) return;
-				if (isNestedProviderInChain(node)) return;
+				if (isContextStackDefinitionFile || isNestedProviderInChain(node)) return;
 
 				const providerChain = collectProviderChain(node);
 				if (
