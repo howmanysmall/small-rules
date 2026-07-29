@@ -438,17 +438,26 @@ function extractQuadruple(
 	return [first, second, third, fourth];
 }
 
-function extractVector2Value(node: ESTree.Expression): readonly [x: number, y: number] | undefined {
+function extractVectorComponents<TValue extends ReadonlyArray<number>>(
+	node: ESTree.Expression,
+	className: string,
+	zeroValue: TValue,
+	extractor: (parameters: ESTree.NewExpression["arguments"]) => TValue | undefined,
+): TValue | undefined {
 	if (node.type === "MemberExpression") {
 		const path = getMemberPath(node);
-		if (path?.length === 2 && path[0] === "Vector2" && path[1] === "zero") return [0, 0];
+		if (path?.length === 2 && path[0] === className && path[1] === "zero") return zeroValue;
 		return undefined;
 	}
 
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Vector2")) return undefined;
-	if (node.arguments.length === 0) return [0, 0];
+	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, className)) return undefined;
+	if (node.arguments.length === 0) return zeroValue;
 
-	return extractNumberPair(node.arguments);
+	return extractor(node.arguments);
+}
+
+function extractVector2Value(node: ESTree.Expression): readonly [x: number, y: number] | undefined {
+	return extractVectorComponents(node, "Vector2", [0, 0], extractNumberPair);
 }
 
 function extractNumberPair(
@@ -481,16 +490,7 @@ function extractNumberTriple(
 }
 
 function extractVector3Value(node: ESTree.Expression): readonly [x: number, y: number, z: number] | undefined {
-	if (node.type === "MemberExpression") {
-		const path = getMemberPath(node);
-		if (path?.length === 2 && path[0] === "Vector3" && path[1] === "zero") return [0, 0, 0];
-		return undefined;
-	}
-
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Vector3")) return undefined;
-	if (node.arguments.length === 0) return [0, 0, 0];
-
-	return extractNumberTriple(node.arguments);
+	return extractVectorComponents(node, "Vector3", [0, 0, 0], extractNumberTriple);
 }
 
 function extractUDimValue(node: ESTree.Expression): readonly [scale: number, offset: number] | undefined {
