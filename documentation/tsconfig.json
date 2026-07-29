@@ -10,6 +10,7 @@
 			"$small-rules": ["../src/index.ts"],
 			"@/*": ["./src/*"]
 		},
+		"skipLibCheck": true,
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo"
 	},
 	"exclude": ["dist", "node_modules"],

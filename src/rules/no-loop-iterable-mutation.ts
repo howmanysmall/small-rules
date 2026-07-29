@@ -58,8 +58,7 @@ function getIdentifierName(node: ESTree.Node | null | undefined): string | undef
 
 function getFirstArrayPatternName(node: ESTree.Node): string | undefined {
 	if (node.type !== "ArrayPattern") return undefined;
-	const [first] = node.elements;
-	return getIdentifierName(first ?? undefined);
+	return getIdentifierName(node.elements[0] ?? undefined);
 }
 
 function getLoopBinding(loop: ESTree.ForOfStatement): ESTree.Node | undefined {
@@ -85,6 +84,7 @@ function getLiveIterable(right: ESTree.Expression): { method: string; name: stri
 		return undefined;
 	}
 	if (node.callee.optional || node.callee.object.type !== "Identifier") return undefined;
+
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;
 	return { method, name: node.callee.object.name };

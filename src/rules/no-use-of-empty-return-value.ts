@@ -72,13 +72,13 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 			ArrowFunctionExpression: enterFunction,
 			"ArrowFunctionExpression:exit": exitFunction,
 			CallExpression(node): void {
-				if (!callReturnValueIsUsed(node)) return;
-				if (node.callee.type !== "Identifier") return;
+				if (!callReturnValueIsUsed(node) || node.callee.type !== "Identifier") return;
 
 				const scope = context.sourceCode.getScope(node);
 				const reference = scope.references.find((entry) => entry.identifier === node.callee);
 				const resolved = reference?.resolved ?? getVariableByName(scope, node.callee.name);
 				if (resolved === null || resolved === undefined) return;
+
 				const functionNode = functionFromVariable(resolved);
 				if (functionNode !== undefined) callExpressionsToCheck.set(node.callee, functionNode);
 			},
@@ -97,7 +97,7 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				}
 			},
 			ReturnStatement(node): void {
-				if (node.argument === null || node.argument === undefined) return;
+				if (node.argument === null) return;
 				const current = functionStack.at(-1);
 				/* v8 ignore next -- ReturnStatement only appears inside function scopes. @preserve */
 				if (current !== undefined) functionsWithReturnValue.add(current);

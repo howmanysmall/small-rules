@@ -2,7 +2,7 @@
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type ConstantPrimitive = bigint | boolean | null | number | string | undefined;
 type PredicateKind = "defined" | "falsy" | "null" | "truthy" | "undefined";
@@ -11,16 +11,7 @@ interface ResolvedConstant {
 	readonly value: ConstantPrimitive;
 }
 
-type AssertionMessageId = "freshIdentity" | "freshPredicate" | "issue";
-
-interface RuleReporter {
-	readonly report: (descriptor: {
-		data?: Record<string, string>;
-		messageId: AssertionMessageId;
-		node: ESTree.Node;
-	}) => void;
-	readonly sourceCode: SourceCode;
-}
+type Context = InferContextFromRule<typeof noTrivialAssertions>;
 
 function isFalsyConstant(value: ConstantPrimitive): boolean {
 	return value === false || value === 0 || value === "" || value === null || value === undefined || value === 0n;
@@ -185,7 +176,7 @@ function firstExpressionArgument(node: ESTree.CallExpression, index: number): ES
 }
 
 function reportPredicateAssertion(
-	context: RuleReporter,
+	context: Context,
 	actual: ESTree.Node,
 	predicate: PredicateKind,
 	negated: boolean,
@@ -201,7 +192,7 @@ function reportPredicateAssertion(
 }
 
 function reportComparisonAssertion(
-	context: RuleReporter,
+	context: Context,
 	actual: ESTree.Node,
 	expected: ESTree.Node,
 	strict: boolean,
@@ -223,7 +214,7 @@ function reportComparisonAssertion(
 	if (equal !== negated) context.report({ messageId: "issue", node: actual });
 }
 
-function reportTrivialExpect(context: RuleReporter, node: ESTree.CallExpression): void {
+function reportTrivialExpect(context: Context, node: ESTree.CallExpression): void {
 	const receiver = getExpectReceiver(node);
 	/* v8 ignore next -- getExpectReceiver only succeeds for MemberExpression matchers. @preserve */
 	if (receiver === undefined || node.callee.type !== "MemberExpression") return;
@@ -248,7 +239,7 @@ function reportTrivialExpect(context: RuleReporter, node: ESTree.CallExpression)
 	reportComparisonAssertion(context, actual, expected, isIdentity, negated, negated ? "not.toEqual" : "toEqual");
 }
 
-function reportTrivialAssert(context: RuleReporter, node: ESTree.CallExpression): void {
+function reportTrivialAssert(context: Context, node: ESTree.CallExpression): void {
 	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return;
 	if (node.callee.object.name !== "assert") return;
 	const method = getMemberPropertyName(node.callee);
