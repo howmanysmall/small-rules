@@ -242,9 +242,7 @@ function getCommandFromArguments(parameters: unknown): string | undefined {
 function assertNoNpxScriptBypass(command: string, scripts: ReadonlySet<string>): void {
 	for (const specifier of extractNpxPackageSpecifiers(command)) {
 		const scriptName = matchScriptForNpxPackage(specifier, scripts);
-		if (scriptName !== undefined) {
-			throwBlockedNpxError(specifier, scriptName);
-		}
+		if (scriptName !== undefined) throwBlockedNpxError(specifier, scriptName);
 	}
 }
 
