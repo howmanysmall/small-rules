@@ -1,6 +1,7 @@
 # Equivalent to pnpm-workspace.yaml `packages:`
 packages:
   - documentation
+  - scripts
   - .opencode
 
 # Force specific versions of any dependency (including transitive)
@@ -151,6 +152,7 @@ catalogs:
     "@typescript/native-preview": 7.0.0-dev.20260707.2
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
+    arkenv: 0.12.3
     bumpp: 12.1.0
     changelogithub: 14.0.0
     commitlint: 21.2.1
@@ -166,6 +168,7 @@ catalogs:
     oxlint-tsgolint: 7.0.2001
     oxlint: 1.76.0
     picocolors: 1.1.1
+    pncat: 0.13.0
     sfw: 2.0.6
     skills: 1.5.20
     type-fest: 5.8.0
@@ -173,8 +176,6 @@ catalogs:
     vitiate: 0.3.1
     yuku-ast: 0.8.1
     zx: 8.8.5
-    pncat: 0.13.0
-    arkenv: 0.12.3
   frontend:
     "@astrojs/react": 6.0.0
     react: 19.2.7
