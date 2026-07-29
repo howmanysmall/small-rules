@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// oxlint-disable sonar/no-os-command-from-path -- turbo slop
 
 import { execFile } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -28,11 +29,7 @@ await writeFile(outputPath, html, "utf8");
 console.log(`Wrote ${outputPath}`);
 
 if (shouldOpen) {
-	if (process.platform === "darwin") {
-		execFile("/usr/bin/open", [outputPath]);
-	} else if (process.platform === "win32") {
-		execFile(String.raw`C:\Windows\System32\cmd.exe`, ["/c", "start", "", outputPath]);
-	} else {
-		execFile("/usr/bin/xdg-open", [outputPath]);
-	}
+	if (process.platform === "darwin") execFile("open", [outputPath]);
+	else if (process.platform === "win32") execFile("cmd", ["/c", "start", "", outputPath]);
+	else execFile("xdg-open", [outputPath]);
 }
