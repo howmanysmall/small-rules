@@ -5,14 +5,20 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isPromiseDelayAwaitCall(node: ESTree.CallExpression): boolean {
 	const { callee } = node;
-	if (callee.type !== "MemberExpression") return false;
-	if (getMemberPropertyName(callee) !== "await") return false;
-	if (callee.object.type !== "CallExpression") return false;
+	if (
+		callee.type !== "MemberExpression" ||
+		getMemberPropertyName(callee) !== "await" ||
+		callee.object.type !== "CallExpression"
+	) {
+		return false;
+	}
 
 	const delayCallee = callee.object.callee;
-	if (delayCallee.type !== "MemberExpression") return false;
-	if (delayCallee.object.type !== "Identifier" || delayCallee.object.name !== "Promise") return false;
-	return getMemberPropertyName(delayCallee) === "delay";
+	return delayCallee.type !== "MemberExpression" ||
+		delayCallee.object.type !== "Identifier" ||
+		delayCallee.object.name !== "Promise"
+		? false
+		: getMemberPropertyName(delayCallee) === "delay";
 }
 
 const noTaskWait = createRule("no-task-wait", "roblox", {
