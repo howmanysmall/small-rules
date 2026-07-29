@@ -1126,7 +1126,7 @@
 		"sonar/x-powered-by": "error",
 		"sonar/xml-parser-xxe": "error",
 		"sort-imports": [
-			"off",
+			"warn",
 			{
 				"allowSeparatedGroups": true,
 				"ignoreCase": true,
@@ -1151,7 +1151,13 @@
 				"readonly": "generic"
 			}
 		],
-		"typescript/no-unnecessary-condition": "off",
+		"typescript/no-unnecessary-condition": [
+			"error",
+			{
+				"allowConstantLoopConditions": "always",
+				"checkTypePredicates": false
+			}
+		],
 		// Types can be wrong, especially when dealing with packages that use `.d.ts` instead.
 		// Highly recommended to disable this on a case-by-case basis.
 		"typescript/prefer-literal-enum-member": [
