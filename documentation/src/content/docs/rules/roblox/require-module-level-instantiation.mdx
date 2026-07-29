@@ -1,7 +1,20 @@
 ---
-title: "Require Module Level Instantiation"
+title: "Require Module-Level Instantiation"
 ---
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="require-module-level-instantiation" />
+<RulePage rule="require-module-level-instantiation">
+	<Fragment slot="rationale">
+		<p>
+			Some classes should only ever exist once per file, and `Log` from `@rbxts/rbxts-sleitnick-log` is the one I
+			care about: one logger per file, not a fresh instance every time a function runs. Let a class get
+			instantiated inside a loop or a helper and you end up with a pile of them doing the same job.
+		</p>
+		<p>
+			You tell the rule which classes matter through the `classes` option (class name mapped to its import
+			source). Anything you configure has to be created at module scope, or it reports. Keeps the expensive or
+			stateful stuff exactly where it belongs.
+		</p>
+	</Fragment>
+</RulePage>
