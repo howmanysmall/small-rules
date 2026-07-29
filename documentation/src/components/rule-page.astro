@@ -26,6 +26,13 @@ const exampleExemption = entry?.exampleExemption;
 
 <RuleSummary rule={rule} />
 
+{Astro.slots.has("rationale") && (
+	<section aria-labelledby="rationale">
+		<h2 id="rationale">{"Rationale"}</h2>
+		<slot name="rationale" />
+	</section>
+)}
+
 <RuleDiagnostics messages={facts.messages} />
 
 <section aria-labelledby="configuration">
@@ -34,7 +41,5 @@ const exampleExemption = entry?.exampleExemption;
 </section>
 
 <RuleExamples rule={rule} exemption={exampleExemption} />
-
-{Astro.slots.has("rationale") && <slot name="rationale" />}
 
 <RelatedRules rule={rule} />
