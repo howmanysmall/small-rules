@@ -616,6 +616,12 @@ describe("prevent-abbreviations", () => {
 				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
 			},
+			// Three-level TSQualifiedName chain without import — still flagged
+			{
+				code: "namespace N { export namespace Root { export type Props = unknown; } } type T = N.Root.Props;",
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
+				options: [{ checkVariables: false, shorthands: { "*Props": "*Properties", "*Root": "*Base" } }],
+			},
 		],
 		valid: [
 			// CONSTANTS (all caps) should be ignored
@@ -759,6 +765,24 @@ describe("prevent-abbreviations", () => {
 			{
 				code: 'import type { Button } from "library"; type T = Button.Props;',
 				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			// Three-level TSQualifiedName chain with import — should not flag
+			{
+				code: 'import * as MenuPrimitive from "library"; type T = MenuPrimitive.Root.Props;',
+				options: [{ shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import * as MenuPrimitive from "library"; type T = MenuPrimitive.Root.Props;',
+				options: [{ shorthands: { "*Root": "*Base" } }],
+			},
+			// Three-level MemberExpression chain with import — should not flag
+			{
+				code: 'import * as MenuPrimitive from "library"; const result = MenuPrimitive.Root.Props;',
+				options: [{ checkShorthandProperties: true, shorthands: { "*Props": "*Properties" } }],
+			},
+			{
+				code: 'import * as MenuPrimitive from "library"; const result = MenuPrimitive.Root.Props;',
+				options: [{ checkShorthandProperties: true, shorthands: { "*Root": "*Base" } }],
 			},
 			{
 				code: 'import { useRender } from "@base-ui/react/use-render"; useRender({ props: value });',
