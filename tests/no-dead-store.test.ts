@@ -7,13 +7,11 @@ describe("no-dead-store", () => {
 	ts.run("no-dead-store", rule, {
 		invalid: [
 			{
-				code: [
-					"function refresh() {",
-					"  let snapshot = readDisk();",
-					"  snapshot = readNetwork();",
-					"  return snapshot;",
-					"}",
-				].join("\n"),
+				code: `function refresh() {
+  let snapshot = readDisk();
+  snapshot = readNetwork();
+  return snapshot;
+}`,
 				documentation: { id: "fail", title: "Value replaced before use" },
 				errors: [{ messageId: "deadStore" }],
 			},
@@ -68,12 +66,10 @@ describe("no-dead-store", () => {
 		],
 		valid: [
 			{
-				code: [
-					"function render(verbose: boolean) {",
-					"  const label = makeLabel();",
-					"  if (verbose) printLabel(label);",
-					"}",
-				].join("\n"),
+				code: `function render(verbose: boolean) {
+  const label = makeLabel();
+  if (verbose) printLabel(label);
+}`,
 				documentation: { id: "pass", title: "Value used conditionally" },
 			},
 			"let processState = createState();",
