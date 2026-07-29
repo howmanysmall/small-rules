@@ -223,8 +223,8 @@ hooks {
 
   ["pre-push"] {
     steps {
-      ["ci"] {
-        check = "scripts/quiet-on-success.sh mise run ci"
+      ["check"] {
+        check = "scripts/quiet-on-success.sh mise run check"
       }
     }
   }
