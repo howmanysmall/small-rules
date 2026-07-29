@@ -97,6 +97,9 @@ function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 function assignmentReadsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const { parent } = write.node;
 	if (parent.type !== "AssignmentExpression") return false;
+	// Compound assignments (+=, -=, etc.) always read the previous value of the left-hand side,
+	// even when the right-hand side doesn't reference the variable.
+	if (parent.operator !== "=") return true;
 	return usages.some((usage) => usage.isRead && rangeContains(parent.right, usage.node));
 }
 
@@ -146,18 +149,82 @@ function usageObservesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<
 	return (usage.isRead && !usage.isWrite) || (usage.isWrite && assignmentReadsPreviousValue(usage, usages));
 }
 
+function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
+	const loops: Array<ESTree.Node> = [];
+	let current: ESTree.Node | null = node.parent;
+	while (current !== null) {
+		if (LOOP_STATEMENT_TYPES.has(current.type)) {
+			loops.push(current);
+		} else if (
+			current.type === "Program" ||
+			current.type === "ArrowFunctionExpression" ||
+			current.type === "FunctionDeclaration" ||
+			current.type === "FunctionExpression"
+		) {
+			break;
+		}
+		current = current.parent;
+	}
+	return loops;
+}
+
+function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): boolean {
+	const writeLoops = collectLoopAncestors(write.node);
+	let current: ESTree.Node | null = (usage.node as ESTree.Node).parent;
+	while (current !== null) {
+		for (const loop of writeLoops) {
+			if (loop === current) return true;
+		}
+		if (
+			current.type === "Program" ||
+			current.type === "ArrowFunctionExpression" ||
+			current.type === "FunctionDeclaration" ||
+			current.type === "FunctionExpression"
+		) {
+			break;
+		}
+		current = current.parent;
+	}
+	return false;
+}
+
+function isReadAcrossLoop(usage: VariableUsage, write: VariableUsage, root: ESTree.Node): boolean {
+	return usage.isRead && !usage.isWrite && executionRoot(usage.node) === root && hasCommonLoopAncestor(write, usage);
+}
+
+function checkObservation(
+	usage: VariableUsage,
+	write: VariableUsage,
+	root: ESTree.Node,
+	currentPath: ReadonlyArray<BranchStep>,
+	coveredPaths: Array<ReadonlyArray<BranchStep>>,
+	usages: ReadonlyArray<VariableUsage>,
+): boolean | undefined {
+	if (usage.node.range[0] <= write.node.range[0]) {
+		if (usage.node.range[0] < write.node.range[0] && isReadAcrossLoop(usage, write, root)) return true;
+		return undefined;
+	}
+	if (executionRoot(usage.node) !== root) return undefined;
+
+	const referencePath = branchPath(usage.node, root);
+	if (pathsAreCompatible(currentPath, referencePath)) {
+		if (usageObservesPreviousValue(usage, usages)) return true;
+		if (usage.isWrite && isGuaranteedOverwrite(referencePath, currentPath, coveredPaths)) return false;
+		return undefined;
+	}
+	if (isReadAcrossLoop(usage, write, root)) return true;
+	return undefined;
+}
+
 function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const root = executionRoot(write.node);
 	const currentPath = branchPath(write.node, root);
 	const coveredPaths = new Array<ReadonlyArray<BranchStep>>();
 
 	for (const usage of usages) {
-		if (usage.node.range[0] <= write.node.range[0] || executionRoot(usage.node) !== root) continue;
-
-		const referencePath = branchPath(usage.node, root);
-		if (!pathsAreCompatible(currentPath, referencePath)) continue;
-		if (usageObservesPreviousValue(usage, usages)) return true;
-		if (usage.isWrite && isGuaranteedOverwrite(referencePath, currentPath, coveredPaths)) return false;
+		const result = checkObservation(usage, write, root, currentPath, coveredPaths, usages);
+		if (result === true) return true;
+		if (result === false) return false;
 	}
 	return false;
 }

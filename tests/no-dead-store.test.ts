@@ -7,13 +7,11 @@ describe("no-dead-store", () => {
 	ts.run("no-dead-store", rule, {
 		invalid: [
 			{
-				code: [
-					"function refresh() {",
-					"  let snapshot = readDisk();",
-					"  snapshot = readNetwork();",
-					"  return snapshot;",
-					"}",
-				].join("\n"),
+				code: `function refresh() {
+  let snapshot = readDisk();
+  snapshot = readNetwork();
+  return snapshot;
+}`,
 				documentation: { id: "fail", title: "Value replaced before use" },
 				errors: [{ messageId: "deadStore" }],
 			},
@@ -68,12 +66,10 @@ describe("no-dead-store", () => {
 		],
 		valid: [
 			{
-				code: [
-					"function render(verbose: boolean) {",
-					"  const label = makeLabel();",
-					"  if (verbose) printLabel(label);",
-					"}",
-				].join("\n"),
+				code: `function render(verbose: boolean) {
+  const label = makeLabel();
+  if (verbose) printLabel(label);
+}`,
 				documentation: { id: "pass", title: "Value used conditionally" },
 			},
 			"let processState = createState();",
@@ -98,7 +94,40 @@ describe("no-dead-store", () => {
 			"function declared() { let value: number; value = 1; return value; }",
 			"function enumValue() { enum State { Ready = compute() } return State.Ready; }",
 			"function separatePaths(first: boolean, second: boolean) { let value = load(); if (first) { if (second) value = one(); } if (!first) { if (!second) value = two(); } consume(value); }",
+			`function countInLoop(items: Array<unknown>) {
+  let count = 0;
+  for (const item of items) {
+    if (item) count += 1;
+    count += compute(item);
+  }
+  return count;
+}`,
+			[
+				"function findBest(items: Array<string>) {",
+				"  let best: string | undefined;",
+				"  let bestRank = -1;",
+				"  for (const item of items) {",
+				"    const rank = getRank(item);",
+				"    if (rank > bestRank) {",
+				"      bestRank = rank;",
+				"      best = item;",
+				"    }",
+				"  }",
+				"  return best;",
+				"}",
+			].join("\n"),
 			"function separateConditions(first: boolean, second: boolean) { let value = load(); first ? (value = one()) : noop(); second ? (value = two()) : noop(); consume(value); }",
+			"function generateTuple() { for (let index = 0; index < 10; index += 1) run(); }",
+			`function process(items: Array<number>) {
+  let x = 0;
+  for (const item of items) {
+    if (item > 0) {
+      x = item;
+    } else {
+      consume(x);
+    }
+  }
+}`,
 			"function unrelatedTernaries(a: boolean, b: boolean, c: boolean, d: boolean) { let value = load(); a ? (b ? (value = one()) : noop()) : noop(); c ? (d ? (value = two()) : noop()) : noop(); consume(value); }",
 		],
 	});

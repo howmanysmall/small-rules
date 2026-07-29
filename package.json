@@ -130,7 +130,6 @@
 		"tsdown": "catalog:build",
 		"type-fest": "catalog:dev",
 		"typescript": "catalog:dev",
-		"vite-tsconfig-paths": "catalog:test",
 		"vitest": "catalog:test",
 		"vitiate": "catalog:dev",
 		"yaml-language-server": "catalog:dev",
