@@ -26,6 +26,9 @@ jobs:
       - name: Biome
         run: node --run biome -- ci
 
+      - name: oxfmt
+        run: node --run oxfmt -- --check
+
       - name: Lint
         run: node --run oxlint
 
@@ -76,6 +79,10 @@ jobs:
 
       - name: Install dependencies
         uses: ./.github/actions/install
+
+      - name: Type check documentation
+        working-directory: documentation
+        run: node --run check
 
       - name: Install Chromium
         run: pnpm --filter docs exec playwright install --with-deps chromium
