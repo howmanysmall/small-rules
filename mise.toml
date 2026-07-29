@@ -32,6 +32,10 @@ vale = "latest"
 zizmor = "latest"
 
 [tasks]
+backtickify = '''
+find documentation/src -name '*.mdx' -exec sed -i '' 's|<code>\([^<]*\)</code>|`\1`|g' {} +
+'''
+
 [tasks.install]
 description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
 run = "ni"
