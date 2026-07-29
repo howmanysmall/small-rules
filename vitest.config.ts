@@ -1,7 +1,6 @@
 import { availableParallelism } from "node:os";
 import { argv, env } from "node:process";
 import { vitiatePlugin } from "@vitiate/core";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 const isVitiateRun = env.VITIATE_FUZZ === "1" || env.VITIATE_SUPERVISOR === "1" || env.VITIATE_OPTIMIZE === "1";
@@ -10,10 +9,9 @@ const isFocusedRun = argv.slice(2).some((argument) => argument.endsWith(".test.t
 const cpuCount = availableParallelism();
 const workerCount = Math.max(2, Math.min(cpuCount - 1, 12));
 
-const tsconfig = tsconfigPaths();
-
 const configuration = defineConfig({
-	plugins: isVitiateRun ? [vitiatePlugin(), tsconfig] : [tsconfig],
+	plugins: isVitiateRun ? [vitiatePlugin()] : [],
+	resolve: { tsconfigPaths: true },
 	test: {
 		bail: 1,
 		coverage: {

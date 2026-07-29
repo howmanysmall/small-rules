@@ -104,16 +104,10 @@ settings:
 
 catalogs:
   build:
-    babel-plugin-react-compiler:
-      specifier: 1.0.0
-      version: 1.0.0
     tsdown:
       specifier: 0.22.14
       version: 0.22.14
   dev:
-    '@astrojs/check':
-      specifier: 0.9.10
-      version: 0.9.10
     '@cliffy/command':
       specifier: npm:@jsr/cliffy__command@1.2.1
       version: 1.2.1
@@ -126,9 +120,6 @@ catalogs:
     '@octokit/rest':
       specifier: 22.0.1
       version: 22.0.1
-    '@opencode-ai/plugin':
-      specifier: 1.18.9
-      version: 1.18.9
     '@std/msgpack':
       specifier: npm:@jsr/std__msgpack@1.0.3
       version: 1.0.3
@@ -222,19 +213,6 @@ catalogs:
     zx:
       specifier: 8.8.5
       version: 8.8.5
-  frontend:
-    '@astrojs/react':
-      specifier: 6.0.0
-      version: 6.0.0
-    react:
-      specifier: 19.2.7
-      version: 19.2.7
-    react-dom:
-      specifier: 19.2.7
-      version: 19.2.7
-    shiki:
-      specifier: 3.4.1
-      version: 3.4.1
   lint:
     '@biomejs/biome':
       specifier: 2.5.6
@@ -264,21 +242,9 @@ catalogs:
       specifier: 0.9.2
       version: 0.9.2
   prod:
-    '@astrojs/markdown-satteri':
-      specifier: 0.3.2
-      version: 0.3.2
-    '@astrojs/mdx':
-      specifier: 7.0.0
-      version: 7.0.0
-    '@astrojs/starlight':
-      specifier: 0.41.1
-      version: 0.41.1
     arktype:
       specifier: 2.2.3
       version: 2.2.3
-    astro:
-      specifier: 7.0.3
-      version: 7.0.3
     ignore:
       specifier: 7.0.6
       version: 7.0.6
@@ -291,12 +257,6 @@ catalogs:
     oxlint-plugin-utilities:
       specifier: 1.1.0
       version: 1.1.0
-    satteri:
-      specifier: 0.9.2
-      version: 0.9.2
-    sharp:
-      specifier: 0.34.5
-      version: 0.34.5
     yuku-parser:
       specifier: 0.8.0
       version: 0.8.0
@@ -304,30 +264,15 @@ catalogs:
     '@fast-check/vitest':
       specifier: 0.4.1
       version: 0.4.1
-    '@playwright/test':
-      specifier: 1.61.1
-      version: 1.61.1
     '@stryker-mutator/vitest-runner':
       specifier: 9.6.1
       version: 9.6.1
-    '@testing-library/react':
-      specifier: 16.3.2
-      version: 16.3.2
-    '@testing-library/user-event':
-      specifier: 14.6.1
-      version: 14.6.1
     '@vitest/coverage-v8':
       specifier: 4.1.10
       version: 4.1.10
     confbox:
       specifier: 0.2.4
       version: 0.2.4
-    jsdom:
-      specifier: 29.1.1
-      version: 29.1.1
-    vite-tsconfig-paths:
-      specifier: 6.1.1
-      version: 6.1.1
     vitest:
       specifier: 4.1.10
       version: 4.1.10
@@ -341,12 +286,6 @@ catalogs:
     '@types/node':
       specifier: ^26
       version: 26.1.1
-    '@types/react':
-      specifier: 19.2.17
-      version: 19.2.17
-    '@types/react-dom':
-      specifier: 19.2.3
-      version: 19.2.3
 
 overrides:
   vite: ^8
@@ -520,9 +459,6 @@ importers:
       typescript:
         specifier: catalog:dev
         version: 5.9.3
-      vite-tsconfig-paths:
-        specifier: catalog:test
-        version: 6.1.1(supports-color@7.2.0)(typescript@5.9.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
       vitest:
         specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -4757,9 +4693,6 @@ packages:
     resolution: {integrity: sha512-Czmyns5dUsq4seFBR/Kdydhmo8y9kC79hiSkPn0YcGtNnYWnrgt0vjrSjx9tspoDGWm2CMarffRuLjM4xUz8xg==}
     engines: {node: '>=18'}
 
-  globrex@0.1.2:
-    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
-
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -6428,17 +6361,6 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
-  tsconfck@3.1.6:
-    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
-    engines: {node: ^18 || >=20}
-    deprecated: unmaintained
-    hasBin: true
-    peerDependencies:
-      typescript: ^5.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   tsdown@0.22.14:
     resolution: {integrity: sha512-ule7Y+fsAN2iZbLDoo7C4KYljFJNJJ+fLshyn+9gozeTspVersWHxwdGB+Dm2hzA38s6muFnUTl0jK3vJm9ifQ==}
     engines: {node: ^22.18.0 || >=24.11.0}
@@ -6699,11 +6621,6 @@ packages:
 
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
-
-  vite-tsconfig-paths@6.1.1:
-    resolution: {integrity: sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg==}
-    peerDependencies:
-      vite: ^8
 
   vite@8.1.5:
     resolution: {integrity: sha512-7ULLwsCdYx/nRyrpiEwvqb5TFHrMVZyBt+rg/OAXT7rgj/z+DtTDyKFeLAdDkubDVDKD8jOsndmy7m55XcfUsw==}
@@ -10920,8 +10837,6 @@ snapshots:
 
   globals@17.7.0: {}
 
-  globrex@0.1.2: {}
-
   gopd@1.2.0: {}
 
   h3@1.15.11:
@@ -13170,10 +13085,6 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  tsconfck@3.1.6(typescript@5.9.3):
-    optionalDependencies:
-      typescript: 5.9.3
-
   tsdown@0.22.14(@typescript/native-preview@7.0.0-dev.20260707.2)(@volar/typescript@2.4.28)(oxc-resolver@11.24.2)(typescript@5.9.3):
     dependencies:
       ansis: 4.3.1
@@ -13383,16 +13294,6 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
-
-  vite-tsconfig-paths@6.1.1(supports-color@7.2.0)(typescript@5.9.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)):
-    dependencies:
-      debug: 4.4.3(supports-color@7.2.0)
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@5.9.3)
-      vite: 8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
@@ -13840,7 +13741,6 @@ time:
   tsdown@0.22.14: '2026-07-23T18:24:29.579Z'
   type-fest@5.8.0: '2026-07-04T22:51:13.318Z'
   typescript@5.9.3: '2025-09-30T21:19:38.784Z'
-  vite-tsconfig-paths@6.1.1: '2026-02-11T23:26:08.179Z'
   vitest@4.1.10: '2026-07-06T06:44:42.684Z'
   vitiate@0.3.1: '2026-06-22T02:01:18.701Z'
   yaml-language-server@1.24.0: '2026-07-07T20:01:54.754Z'
