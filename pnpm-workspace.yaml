@@ -213,4 +213,7 @@ catalogs:
     "@types/node": ^26
     "@types/react": 19.2.17
     "@types/react-dom": 19.2.3
-    '@total-typescript/ts-reset': 0.6.1
+    "@total-typescript/ts-reset": 0.6.1
+
+configDependencies:
+  "@pnpm/pacquet": 0.11.12
