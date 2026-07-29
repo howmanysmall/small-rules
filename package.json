@@ -36,6 +36,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"astro-language-server": "astro-ls",
 		"biome": "biome",
 		"build": "tsdown",
 		"build:local": "node --run build -- --minify && cp dist/index.js plugins/small-rules.js",

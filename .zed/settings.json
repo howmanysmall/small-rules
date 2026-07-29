@@ -59,7 +59,7 @@
 	"jsx_tag_auto_close": { "enabled": true },
 	"languages": {
 		"Astro": {
-			"language_servers": ["...", "knip"]
+			"language_servers": ["knip", "astro-language-server", "..."]
 		},
 		"CSS": {
 			"code_actions_on_format": {
@@ -354,6 +354,12 @@
 	"linked_edits": true,
 	"load_direnv": "direct",
 	"lsp": {
+		"astro-language-server": {
+			"binary": {
+				"arguments": ["--run", "astro-language-server", "--", "--stdio"],
+				"path": "node"
+			}
+		},
 		"bash-language-server": {
 			"settings": {
 				"bashIde": {
