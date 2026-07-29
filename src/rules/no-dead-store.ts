@@ -149,13 +149,27 @@ function usageObservesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<
 	return (usage.isRead && !usage.isWrite) || (usage.isWrite && assignmentReadsPreviousValue(usage, usages));
 }
 
+function isReadBeforeWriteInLoop(usage: VariableUsage, write: VariableUsage, root: ESTree.Node): boolean {
+	return (
+		usage.node.range[0] < write.node.range[0] &&
+		usage.isRead &&
+		!usage.isWrite &&
+		executionRoot(usage.node) === root &&
+		hasLoopStep(write, usage, root)
+	);
+}
+
 function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const root = executionRoot(write.node);
 	const currentPath = branchPath(write.node, root);
 	const coveredPaths = new Array<ReadonlyArray<BranchStep>>();
 
 	for (const usage of usages) {
-		if (usage.node.range[0] <= write.node.range[0] || executionRoot(usage.node) !== root) continue;
+		if (usage.node.range[0] <= write.node.range[0]) {
+			if (isReadBeforeWriteInLoop(usage, write, root)) return true;
+			continue;
+		}
+		if (executionRoot(usage.node) !== root) continue;
 
 		const referencePath = branchPath(usage.node, root);
 		if (!pathsAreCompatible(currentPath, referencePath)) continue;
@@ -163,6 +177,14 @@ function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsa
 		if (usage.isWrite && isGuaranteedOverwrite(referencePath, currentPath, coveredPaths)) return false;
 	}
 	return false;
+}
+
+function hasLoopStep(write: VariableUsage, read: VariableUsage, root: ESTree.Node): boolean {
+	const writePath = branchPath(write.node, root);
+	const readPath = branchPath(read.node, root);
+	return writePath.some(
+		(step) => LOOP_STATEMENT_TYPES.has(step.control.type) && branchArm(readPath, step.control) === step.arm,
+	);
 }
 
 function isBasicInitializer(node: ESTree.Expression): boolean {

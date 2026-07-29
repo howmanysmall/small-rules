@@ -102,6 +102,20 @@ describe("no-dead-store", () => {
   }
   return count;
 }`,
+			[
+				"function findBest(items: Array<string>) {",
+				"  let best: string | undefined;",
+				"  let bestRank = -1;",
+				"  for (const item of items) {",
+				"    const rank = getRank(item);",
+				"    if (rank > bestRank) {",
+				"      bestRank = rank;",
+				"      best = item;",
+				"    }",
+				"  }",
+				"  return best;",
+				"}",
+			].join("\n"),
 			"function separateConditions(first: boolean, second: boolean) { let value = load(); first ? (value = one()) : noop(); second ? (value = two()) : noop(); consume(value); }",
 			"function unrelatedTernaries(a: boolean, b: boolean, c: boolean, d: boolean) { let value = load(); a ? (b ? (value = one()) : noop()) : noop(); c ? (d ? (value = two()) : noop()) : noop(); consume(value); }",
 		],
