@@ -114,9 +114,6 @@ catalogs:
     '@astrojs/check':
       specifier: 0.9.10
       version: 0.9.10
-    '@astrojs/language-server':
-      specifier: 2.16.13
-      version: 2.16.13
     '@cliffy/command':
       specifier: npm:@jsr/cliffy__command@1.2.1
       version: 1.2.1
@@ -376,9 +373,6 @@ importers:
         specifier: catalog:prod
         version: 0.8.0
     devDependencies:
-      '@astrojs/language-server':
-        specifier: catalog:dev
-        version: 2.16.13(prettier@3.9.6)(typescript@5.9.3)
       '@biomejs/biome':
         specifier: catalog:lint
         version: 2.5.6
@@ -13581,7 +13575,6 @@ snapshots:
 
 time:
   '@astrojs/check@0.9.10': '2026-07-27T13:10:17.800Z'
-  '@astrojs/language-server@2.16.13': '2026-07-21T12:34:21.238Z'
   '@astrojs/markdown-satteri@0.3.2': '2026-06-23T16:22:52.457Z'
   '@astrojs/mdx@7.0.0': '2026-06-22T10:10:04.884Z'
   '@astrojs/react@6.0.0': '2026-06-22T10:10:05.834Z'
