@@ -4,4 +4,17 @@ title: "No Redundant Aspect Ratio Constraint"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-redundant-aspect-ratio-constraint" />
+<RulePage rule="no-redundant-aspect-ratio-constraint">
+	<Fragment slot="rationale">
+		<p>
+			Some components already render a `uiaspectratioconstraint` internally -- passing one as a child is redundant
+			and can cause layout fighting. This catches the case where you hand a `UIAspectRatioConstraint` to a
+			component that manages its own.
+		</p>
+		<p>
+			It's not just checking the current file. The rule reads imported component files to see if they already
+			render the constraint, so `ButtonSpritesheet` and friends get caught even when the constraint lives in their
+			source. Spritesheet components are known to do this.
+		</p>
+	</Fragment>
+</RulePage>
