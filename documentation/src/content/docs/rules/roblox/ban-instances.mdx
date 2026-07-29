@@ -4,4 +4,21 @@ title: "Ban Instances"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="ban-instances" />
+<RulePage rule="ban-instances">
+	<Fragment slot="rationale">
+		<p>
+			Some Roblox Instances are just useless and actively break things. I ban `UITextSizeConstraint` because it
+			breaks high resolution displays, and `UISizeConstraint.MaxSize` because it breaks scaling. This rule is how
+			I keep that out of the codebase.
+		</p>
+		<p>
+			You list the classes you hate and the rule flags any `new`, variable, or JSX element that uses them. Works
+			through variables too — `const p = new UITextSizeConstraint()` gets caught even if the `new` is far from the
+			declaration.
+		</p>
+		<p>
+			Hate a specific property but not the whole class? Use `bannedProperties` to block just
+			`UISizeConstraint.MaxSize` and leave the rest alone.
+		</p>
+	</Fragment>
+</RulePage>
