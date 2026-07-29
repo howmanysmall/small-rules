@@ -4,4 +4,15 @@ title: "No `task.wait`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-task-wait" />
+<RulePage rule="no-task-wait">
+	<Fragment slot="rationale">
+		<p>
+			`task.wait()` and `Promise.delay(...).await()` depend on real wall-clock time, so tests using them pass on a
+			fast machine and fail on a slow CI runner. Flaky tests are the worst kind of tests.
+		</p>
+		<p>
+			Advance your scheduler or wait for the actual condition instead of sleeping and hoping. Don't know if this
+			catches every case, but it catches the obvious ones.
+		</p>
+	</Fragment>
+</RulePage>
