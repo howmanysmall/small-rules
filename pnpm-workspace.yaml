@@ -44,6 +44,11 @@ allowBuilds:
 strictDepBuilds: true
 strictPeerDependencies: true
 
+peerDependencyRules:
+  allowedVersions:
+    "@emnapi/core": ">=1.0.0"
+    "@emnapi/runtime": ">=1.0.0"
+
 # Global virtual store (pnpm's node_modules/.pnpm equivalent)
 enableGlobalVirtualStore: true
 
@@ -168,9 +173,8 @@ catalogs:
     vitiate: 0.3.1
     yuku-ast: 0.8.1
     zx: 8.8.5
-    yaml-language-server: 1.24.0
-    bash-language-server: 5.6.0
     pncat: 0.13.0
+    arkenv: 0.12.3
   frontend:
     "@astrojs/react": 6.0.0
     react: 19.2.7

@@ -1,0 +1,19 @@
+{
+	"name": "small-rules-scripts",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@cliffy/command": "catalog:dev",
+		"@octokit/rest": "catalog:dev",
+		"arkenv": "catalog:dev",
+		"arktype": "catalog:prod",
+		"fdir": "catalog:dev",
+		"jsonc-parser": "catalog:dev",
+		"just-diff": "catalog:dev",
+		"mutative": "catalog:dev",
+		"picocolors": "catalog:dev",
+		"yuku-ast": "catalog:dev",
+		"yuku-parser": "catalog:prod",
+		"zx": "catalog:dev"
+	}
+}

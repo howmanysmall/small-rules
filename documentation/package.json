@@ -18,6 +18,7 @@
 		"@astrojs/mdx": "catalog:prod",
 		"@astrojs/react": "catalog:frontend",
 		"@astrojs/starlight": "catalog:prod",
+		"arkenv": "catalog:dev",
 		"arktype": "catalog:prod",
 		"astro": "catalog:prod",
 		"react": "catalog:frontend",
