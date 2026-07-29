@@ -1,14 +1,14 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 	const { parent } = node;
-	return parent?.type === "ExpressionStatement" || (parent?.type === "ForStatement" && parent.update === node);
+	return parent.type === "ExpressionStatement" || (parent.type === "ForStatement" && parent.update === node);
 }
 
-const noIncrementDecrement = defineRule({
+const noIncrementDecrement = createRule("no-increment-decrement", "general", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;

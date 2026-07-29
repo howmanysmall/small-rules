@@ -1,8 +1,8 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const onlyTypeImports = defineRule({
+const onlyTypeImports = createRule("only-type-imports", "general", {
 	create(context): Visitor {
 		return {
 			ImportDeclaration(node): void {

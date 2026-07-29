@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { countSetStateCalls, getEffectCallback, getHookName } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -15,7 +15,7 @@ const EFFECT_HOOK_NAMES = new Set([
 	"useUpdateEffect",
 ]);
 
-const noCascadingSetState = defineRule({
+const noCascadingSetState = createRule("no-cascading-set-state", "react", {
 	create(context): Visitor {
 		return {
 			CallExpression(node): void {

@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { computeDisabledArea, toRuleIdLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoUnusedEnable = defineRule({
+const directiveNoUnusedEnable = createRule("directive-no-unused-enable", "general", {
 	create(context): Visitor {
 		const disabledArea = computeDisabledArea(context.sourceCode);
 

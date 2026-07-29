@@ -1,7 +1,7 @@
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
-import { isRecord, isStringRaw, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { isRecord, isStringArray, isStringRaw, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -104,19 +104,17 @@ function getInstanceClassName(node: ESTree.NewExpression): string | undefined {
 
 function getVariableDeclaratorForNewExpression(node: ESTree.NewExpression): ESTree.VariableDeclarator | undefined {
 	const { parent } = node;
-	if (parent?.type !== "VariableDeclarator" || parent.init !== node || parent.id.type !== "Identifier") {
+	if (parent.type !== "VariableDeclarator" || parent.init !== node || parent.id.type !== "Identifier") {
 		return undefined;
 	}
 	return parent;
 }
 
-const banInstances = defineRule({
+const banInstances = createRule("ban-instances", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const [rawOptions] = context.options;
-		if (rawOptions === undefined || typeof rawOptions !== "object" || rawOptions === null) {
-			return {} satisfies Visitor;
-		}
+		if (!isRecord(rawOptions)) return {} satisfies Visitor;
 
 		const bannedClasses = normalizeConfiguration(rawOptions);
 		const bannedProperties = normalizePropertyConfiguration(rawOptions);

@@ -47,8 +47,7 @@ function isKey(raw: Array<HighlightToken>, index: number): boolean {
 }
 
 export function tokenizeJson(json: string): Array<HighlightToken> {
-	const raw: Array<HighlightToken> = [];
-	const result: Array<HighlightToken> = [];
+	const raw = new Array<HighlightToken>();
 
 	for (const match of json.matchAll(JSON_TOKEN)) {
 		const [text] = match;
@@ -56,12 +55,11 @@ export function tokenizeJson(json: string): Array<HighlightToken> {
 		raw.push({ className, text });
 	}
 
+	const result = new Array<HighlightToken>();
 	for (const token of raw) {
 		if (token.className === "json-string" && isKey(raw, raw.indexOf(token))) {
 			result.push({ className: "json-key", text: token.text });
-		} else {
-			result.push(token);
-		}
+		} else result.push(token);
 	}
 
 	return result;

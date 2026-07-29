@@ -5,6 +5,7 @@
 	"scripts": {
 		"astro": "astro",
 		"build": "astro build",
+		"check": "astro check",
 		"dev": "astro dev",
 		"postinstall": "astro sync",
 		"preview": "astro preview",
@@ -17,7 +18,7 @@
 		"@astrojs/mdx": "catalog:prod",
 		"@astrojs/react": "catalog:frontend",
 		"@astrojs/starlight": "catalog:prod",
-		"arktype": "catalog:",
+		"arktype": "catalog:prod",
 		"astro": "catalog:prod",
 		"react": "catalog:frontend",
 		"react-dom": "catalog:frontend",
@@ -28,10 +29,11 @@
 		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
+		"@astrojs/check": "catalog:dev",
 		"@playwright/test": "catalog:test",
 		"@testing-library/react": "catalog:test",
 		"@testing-library/user-event": "catalog:test",
-		"@total-typescript/ts-reset": "catalog:",
+		"@total-typescript/ts-reset": "catalog:types",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
 		"babel-plugin-react-compiler": "catalog:build",

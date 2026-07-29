@@ -1,6 +1,6 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { BindingName, CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -270,7 +270,7 @@ function seedPlayerValueFromParameter(parameter: ESTree.Node, state: CallbackSta
 	markPatternValues(parameter, state);
 }
 
-const noEventsInEventsCallback = defineRule({
+const noEventsInEventsCallback = createRule("no-events-in-events-callback", "roblox", {
 	create(context): Visitor {
 		const allowedImportPaths = normalizeImportPaths(context.options[0]);
 		const trackedEventsIdentifiers = new Set<string>();

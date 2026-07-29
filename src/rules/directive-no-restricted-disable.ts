@@ -1,10 +1,10 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, toRuleIdLocation } from "$oxc-utilities/directive-comments";
 import ignore from "ignore";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoRestrictedDisable = defineRule({
+const directiveNoRestrictedDisable = createRule("directive-no-restricted-disable", "general", {
 	create(context): Visitor {
 		const disabledArea = computeDisabledArea(context.sourceCode);
 		const restrictedRules = context.options;

@@ -1,6 +1,6 @@
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -172,7 +172,7 @@ function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {
 	return false;
 }
 
-const consistentCompoundWords = defineRule({
+const consistentCompoundWords = createRule("consistent-compound-words", "naming", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
 
@@ -188,10 +188,14 @@ const consistentCompoundWords = defineRule({
 
 		return {
 			Identifier(node): void {
-				if (!options.checkProperties) return;
-				if (node.name === "__proto__") return;
-				if (node.parent?.type === "ExportSpecifier") return;
-				if (!shouldReportPropertyIdentifier(node)) return;
+				if (
+					!options.checkProperties ||
+					node.name === "__proto__" ||
+					node.parent.type === "ExportSpecifier" ||
+					!shouldReportPropertyIdentifier(node)
+				) {
+					return;
+				}
 				reportName(node, node.name);
 			},
 			"Program:exit"(): void {
@@ -201,8 +205,12 @@ const consistentCompoundWords = defineRule({
 					if (variable.defs.length === 0) return;
 					const [definition] = variable.defs;
 					/* v8 ignore next -- non-empty defs arrays always yield a first entry. @preserve */
-					if (definition === undefined) return;
-					if (!options.checkShorthandProperties && isShorthandPropertyValue(definition.name)) return;
+					if (
+						definition === undefined ||
+						(!options.checkShorthandProperties && isShorthandPropertyValue(definition.name))
+					) {
+						return;
+					}
 					reportName(definition.name, variable.name);
 				});
 			},

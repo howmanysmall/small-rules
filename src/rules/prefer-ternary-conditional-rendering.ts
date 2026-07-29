@@ -1,6 +1,6 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -256,7 +256,7 @@ function getBranchCandidate(child: ESTree.JSXChild): BranchCandidate | undefined
 	};
 }
 
-const preferTernaryConditionalRendering = defineRule({
+const preferTernaryConditionalRendering = createRule("prefer-ternary-conditional-rendering", "react", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 

@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoUnlimitedDisable = defineRule({
+const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable", "general", {
 	create(context): Visitor {
 		for (const comment of context.sourceCode.getAllComments()) {
 			const directive = parseDirectiveComment(comment);

@@ -1,5 +1,5 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -179,7 +179,7 @@ function popArrayInitializer(
 	}
 }
 
-const reactHooksStrictReturn = defineRule({
+const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const arrayInitializersByName = new Map<string, Array<ESTree.ArrayExpression>>();

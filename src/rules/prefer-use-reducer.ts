@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment, isHookCall } from "$oxc-utilities/lint-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -26,7 +26,7 @@ function reportExcessiveUseState(context: Context, esTreeNode: ESTree.Node, comp
 	});
 }
 
-const preferUseReducer = defineRule({
+const preferUseReducer = createRule("prefer-use-reducer", "react", {
 	create(context): Visitor {
 		return {
 			FunctionDeclaration(node) {

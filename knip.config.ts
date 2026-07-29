@@ -37,7 +37,7 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	ignoreBinaries: ["hk", "nr"],
+	ignoreBinaries: ["hk", "nr", "xdg-open"],
 	ignoreDependencies: [
 		"language-server$",
 		"@commitlint/config-conventional",
@@ -50,7 +50,13 @@ const configuration: KnipConfig = {
 	tsdown: true,
 	workspaces: {
 		".": {
-			entry: ["scripts/disable-tsgo.ts", "scripts/generate-*.ts", "scripts/lint-json.ts", "*.config.ts"],
+			entry: [
+				"scripts/disable-tsgo.ts",
+				"scripts/generate-*.ts",
+				"scripts/lint-json.ts",
+				"scripts/dupes-viewer.ts",
+				"*.config.ts",
+			],
 			paths,
 			project: ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx,d.ts}", "*.config.ts"],
 		},

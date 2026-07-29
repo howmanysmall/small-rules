@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -135,7 +135,7 @@ function isProtectedComponentUsage(
 	);
 }
 
-const noRedundantAspectRatioConstraint = defineRule({
+const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-constraint", "roblox", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
 		const protectedComponents = new Set<string>();

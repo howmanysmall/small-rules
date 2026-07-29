@@ -1,21 +1,14 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
-import type { ESTree, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type GlobalMode = "off" | "readonly" | "writable";
 type FunctionNode = ESTree.ArrowFunctionExpression | ESTree.Function;
 
-interface RuleReporter {
-	readonly report: (descriptor: {
-		data?: Record<string, string>;
-		messageId: "externallyScopedVariable" | "super" | "thisExpression";
-		node: ESTree.Node;
-	}) => void;
-	readonly sourceCode: SourceCode;
-}
+type Context = InferContextFromRule<typeof isolatedFunctions>;
 
 interface RuleOptions {
 	readonly comments: ReadonlyArray<string>;
@@ -123,9 +116,9 @@ function getExecuteScriptPropertyReason(node: ESTree.Node): string | undefined {
 	}
 	const objectExpression = property.parent;
 	/* v8 ignore next -- Property parents in this path are ObjectExpression nodes. @preserve */
-	if (objectExpression?.type !== "ObjectExpression") return undefined;
+	if (objectExpression.type !== "ObjectExpression") return undefined;
 	const call = objectExpression.parent;
-	if (call?.type !== "CallExpression" || call.arguments[0] !== objectExpression) return undefined;
+	if (call.type !== "CallExpression" || call.arguments[0] !== objectExpression) return undefined;
 	const scriptingObjectName = getScriptingObjectName(call);
 	if (scriptingObjectName === undefined) return undefined;
 	return `property "func" passed to "${scriptingObjectName}.scripting.executeScript"`;
@@ -252,12 +245,7 @@ function getAllowedGlobalMode(
 	return "readonly";
 }
 
-function reportExternalReferences(
-	context: RuleReporter,
-	node: FunctionNode,
-	reason: string,
-	options: RuleOptions,
-): void {
+function reportExternalReferences(context: Context, node: FunctionNode, reason: string, options: RuleOptions): void {
 	const functionScope = context.sourceCode.getScope(node);
 	for (const reference of collectExternalReferences(functionScope)) {
 		const { identifier } = reference;
@@ -313,7 +301,7 @@ function shouldSkipNestedNode(node: ESTree.Node, root: FunctionNode, worklist: A
 	return true;
 }
 
-function reportThisAndSuper(context: RuleReporter, root: FunctionNode, reason: string): void {
+function reportThisAndSuper(context: Context, root: FunctionNode, reason: string): void {
 	const worklist: Array<ESTree.Node> = [root];
 	for (const node of worklist) {
 		if (shouldSkipNestedNode(node, root, worklist)) continue;
@@ -330,7 +318,7 @@ function reportThisAndSuper(context: RuleReporter, root: FunctionNode, reason: s
 }
 
 function reportIsolatedFunction(
-	context: RuleReporter,
+	context: Context,
 	node: FunctionNode,
 	reason: string,
 	options: RuleOptions,
@@ -343,7 +331,7 @@ function reportIsolatedFunction(
 	reportThisAndSuper(context, node, reason);
 }
 
-const isolatedFunctions = defineRule({
+const isolatedFunctions = createRule("isolated-functions", "general", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
 		const checked = new WeakSet<ESTree.Node>();

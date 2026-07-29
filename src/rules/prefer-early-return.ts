@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -30,7 +30,7 @@ function canSimplifyConditionalBody(body: ESTree.BlockStatement, maximumStatemen
 	return isOffendingConsequent(statement.consequent, maximumStatements);
 }
 
-const preferEarlyReturn = defineRule({
+const preferEarlyReturn = createRule("prefer-early-return", "general", {
 	create(context): Visitor {
 		const maximumStatements = getMaximumStatements(context.options[0]);
 

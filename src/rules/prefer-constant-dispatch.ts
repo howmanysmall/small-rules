@@ -1,7 +1,7 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -101,6 +101,7 @@ function getTrackedDispatchVariable(
 function getProgram(node: ESTree.Node): ESTree.Program | undefined {
 	let current: ESTree.Node | undefined = node;
 
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting lint
 	while (current !== undefined) {
 		if (current.type === "Program") return current;
 		current = current.parent;
@@ -139,7 +140,7 @@ function getDeclarationInsertionFix(
 	return fixer.insertTextAfterRange([program.range[0], program.range[1]], declarationText);
 }
 
-const preferConstantDispatch = defineRule({
+const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 	create(context): Visitor {
 		const trackedDispatchVariables = new Set<ScopeVariable>();
 		const { sourceCode } = context;

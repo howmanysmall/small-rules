@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -84,6 +84,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
 			return node.property.type === "Identifier" || node.property.type === "PrivateIdentifier";
 		}
 
@@ -138,7 +139,7 @@ function getAppendTarget(
 	return undefined;
 }
 
-const noArraySizeAssignment = defineRule({
+const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;

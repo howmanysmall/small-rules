@@ -7,10 +7,10 @@ import { normalizeCases } from "./parse";
 import type {
 	NormalizedCase,
 	NormalizedInvalidCase,
+	RuleExecutionResult,
+	RuleRunnerDefaults,
 	RuleTestCases,
 	RuleTestRunner,
-	RuleRunnerDefaults,
-	RuleExecutionResult,
 } from "./types";
 
 const ONLY_TEST_KEY = "only";

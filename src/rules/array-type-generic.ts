@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -32,7 +32,7 @@ function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
 	);
 }
 
-const arrayTypeGeneric = defineRule({
+const arrayTypeGeneric = createRule("array-type-generic", "naming", {
 	createOnce(context): Visitor {
 		function reportArrayType(node: ESTree.TSArrayType | ESTree.TSTypeOperator): void {
 			context.report({

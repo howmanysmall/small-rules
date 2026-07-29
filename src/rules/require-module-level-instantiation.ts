@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -86,7 +86,7 @@ function collectTrackedBindings(
 	}
 }
 
-const requireModuleLevelInstantiation = defineRule({
+const requireModuleLevelInstantiation = createRule("require-module-level-instantiation", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const trackedClasses = normalizeConfig(context.options[0]);

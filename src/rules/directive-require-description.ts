@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import {
 	getOptionalStringArrayProperty,
@@ -11,7 +11,7 @@ import type { Comment, Visitor } from "oxlint-plugin-utilities";
 const DESCRIPTION_SEPARATOR = /\s-{2,}\s/u;
 const OXLINT_LINE_DIRECTIVE = /^(?<kind>oxlint-disable|oxlint-enable)(?:\s|$)/u;
 
-const directiveRequireDescription = defineRule({
+const directiveRequireDescription = createRule("directive-require-description", "general", {
 	create(context): Visitor {
 		const ignoreKinds: ReadonlySet<string> = new Set(getOptionalStringArrayProperty(context.options[0], "ignore"));
 

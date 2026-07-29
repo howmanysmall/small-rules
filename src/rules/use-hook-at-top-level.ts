@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isComponentName, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -142,7 +142,7 @@ function getMemberHookSourceDecision(
 	return undefined;
 }
 
-const useHookAtTopLevel = defineRule({
+const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 	create(context): Visitor {
 		const configuration = getOptions(context.options[0]);
 		const contextStack = new Array<ControlFlowContext>();

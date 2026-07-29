@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -462,8 +462,10 @@ function isComputedPropertyIdentifier(identifier: ESTree.Node): boolean {
 function isInTypePosition(identifier: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve type-position checks are only requested for Identifier nodes. */
 	if (identifier.type !== "Identifier") return false;
+	// oxlint-disable typescript/no-unnecessary-condition -- no.
 	/* v8 ignore next -- @preserve parser-provided identifiers have parent links inside the visited closure tree. */
 	let parent: ESTree.Node | undefined = identifier.parent ?? undefined;
+	// oxlint-enable typescript/no-unnecessary-condition -- lol.
 
 	while (parent) {
 		if (TS_RUNTIME_EXPRESSIONS.has(parent.type)) {
@@ -994,7 +996,7 @@ function reportUnstableDependencies(
 	}
 }
 
-const useExhaustiveDependencies = defineRule({
+const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "react", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const resolvedOptions: Required<UseExhaustiveDependenciesOptions> = {

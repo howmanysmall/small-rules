@@ -1,4 +1,5 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -10,7 +11,6 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isRecord, isStringArray } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
@@ -308,7 +308,7 @@ function reportHoistableJavaScriptXmlNode(context: Context, node: JavaScriptXmlN
 	});
 }
 
-const preferHoistedJsxElements = defineRule({
+const preferHoistedJsxElements = createRule("prefer-hoisted-jsx-elements", "react", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 		const additionalComponents = normalizeAdditionalHoistableComponents(rawOptions);

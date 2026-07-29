@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { isRecord } from "../utilities/type-utilities";
 
@@ -32,7 +32,7 @@ function shouldReportSwitchCaseBraces(node: ESTree.SwitchCase, metric: SwitchCas
 	return firstStatement.loc.start.line !== lastStatement.loc.end.line;
 }
 
-const requireSwitchCaseBraces = defineRule({
+const requireSwitchCaseBraces = createRule("require-switch-case-braces", "general", {
 	create(context): Visitor {
 		const metric = normalizeMetric(context.options[0]);
 

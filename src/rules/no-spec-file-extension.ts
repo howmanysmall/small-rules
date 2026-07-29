@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
 const SPEC_EXTENSION_PATTERN = /\.spec\.(?:ts|tsx)$/u;
 
-const noSpecFileExtension = defineRule({
+const noSpecFileExtension = createRule("no-spec-file-extension", "naming", {
 	createOnce(context): Visitor {
 		return {
 			Program(node): void {

@@ -1,9 +1,9 @@
 // oxlint-disable small-rules/prevent-abbreviations -- this would be a breaking change.
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
 import { isNumberRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -183,7 +183,7 @@ function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
 	};
 }
 
-const noGodComponents = defineRule({
+const noGodComponents = createRule("no-god-components", "react", {
 	create(context): Visitor {
 		const configuration = parseOptions(context.options[0]);
 		const ignoreSet = new Set(configuration.ignoreComponents);

@@ -1,5 +1,5 @@
 // oxlint-disable max-params -- nobody cares lol
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -45,8 +45,7 @@ function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined
 	if (typeName.type !== "TSQualifiedName") return undefined;
 
 	const { left, right } = typeName;
-	if (left.type !== "Identifier" || left.name !== "Ianitor") return undefined;
-	if (right.type !== "Identifier" || right.name !== "Static") return undefined;
+	if (left.type !== "Identifier" || left.name !== "Ianitor" || right.name !== "Static") return undefined;
 
 	const first = typeArguments?.params[0];
 	if (first?.type !== "TSTypeQuery") return undefined;
@@ -63,8 +62,7 @@ function hasIanitorStaticType(typeNode: ESTree.Node): boolean {
 	if (typeName.type !== "TSQualifiedName") return false;
 
 	const { left, right } = typeName;
-	if (left.type !== "Identifier" || left.name !== "Ianitor") return false;
-	if (right.type !== "Identifier" || right.name !== "Static") return false;
+	if (left.type !== "Identifier" || left.name !== "Ianitor" || right.name !== "Static") return false;
 
 	return typeArguments?.params[0]?.type === "TSTypeQuery";
 }
@@ -259,44 +257,29 @@ function calculateStructuralComplexity(
 		}
 
 		case "TSConditionalType": {
-			score = 3;
 			const { checkType, extendsType, trueType, falseType } = node;
-			/* v8 ignore else -- @preserve parser-produced TSConditionalType nodes always supply checkType. */
-			if (checkType !== undefined) {
-				score = addScore(
-					score,
+			score = addScore(
+				addScore(
+					3,
 					calculateStructuralComplexity(checkType, nextDepth, config, cache, depthMultiplierCache, ceiling),
 					config,
 					ceiling,
-				);
-			}
-			/* v8 ignore else -- @preserve parser-produced TSConditionalType nodes always supply extendsType. */
-			if (extendsType !== undefined) {
-				score = addScore(
-					score,
-					calculateStructuralComplexity(extendsType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-					config,
-					ceiling,
-				);
-			}
-			/* v8 ignore else -- @preserve parser-produced TSConditionalType nodes always supply trueType. */
-			if (trueType !== undefined) {
-				score = addScore(
+				),
+				calculateStructuralComplexity(extendsType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+				config,
+				ceiling,
+			);
+			score = addScore(
+				addScore(
 					score,
 					calculateStructuralComplexity(trueType, nextDepth, config, cache, depthMultiplierCache, ceiling),
 					config,
 					ceiling,
-				);
-			}
-			/* v8 ignore else -- @preserve parser-produced TSConditionalType nodes always supply falseType. */
-			if (falseType !== undefined) {
-				score = addScore(
-					score,
-					calculateStructuralComplexity(falseType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-					config,
-					ceiling,
-				);
-			}
+				),
+				calculateStructuralComplexity(falseType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+				config,
+				ceiling,
+			);
 			break;
 		}
 
@@ -351,7 +334,7 @@ function calculateStructuralComplexity(
 		case "TSInterfaceDeclaration": {
 			score = config.interfacePenalty;
 			const { extends: extendsClause, body } = node;
-			if (extendsClause !== undefined && extendsClause.length > 0) {
+			if (extendsClause.length > 0) {
 				score = addScore(score, extendsClause.length * 5, config, ceiling);
 			}
 
@@ -375,13 +358,10 @@ function calculateStructuralComplexity(
 		}
 
 		case "TSMappedType": {
-			score = 5;
 			const { constraint, typeAnnotation } = node;
 			/* v8 ignore else -- @preserve parser-produced mapped types always supply a constraint. */
-			if (constraint !== undefined) {
-				score = addStructuralScore(score, constraint, nextDepth, config, cache, depthMultiplierCache, ceiling);
-			}
-			if (typeAnnotation !== undefined && typeAnnotation !== null) {
+			score = addStructuralScore(5, constraint, nextDepth, config, cache, depthMultiplierCache, ceiling);
+			if (typeAnnotation !== null) {
 				score = addStructuralScore(
 					score,
 					typeAnnotation,
@@ -455,7 +435,7 @@ function calculateStructuralComplexity(
 	return score;
 }
 
-const enforceIanitorCheckType = defineRule({
+const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox", {
 	create(context): Visitor {
 		const rawOptions = (context.options[0] ?? {}) as Partial<ComplexityConfiguration>;
 		const config: ComplexityConfiguration = { ...DEFAULT_CONFIGURATION, ...rawOptions };
@@ -552,6 +532,7 @@ const enforceIanitorCheckType = defineRule({
 				if (init?.type !== "CallExpression" || !isIanitorValidator(init)) return;
 
 				hasIanitorReference = true;
+				// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
 				if (id.type === "Identifier" && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
 
 				const complexity = calculateIanitorComplexity(init);

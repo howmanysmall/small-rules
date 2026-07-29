@@ -3,8 +3,8 @@ import {
 	hasJSXIdentifierAttribute,
 	isReactComponentHigherOrderCall,
 } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -409,7 +409,7 @@ function isLogicalJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 	return isJSXChildWrappedBy(node, "LogicalExpression");
 }
 
-const requireReactComponentKeys = defineRule({
+const requireReactComponentKeys = createRule("require-react-component-keys", "react", {
 	create(context): Visitor {
 		const [configuredOptions] = context.options;
 		const options: Required<ReactKeysOptions> = {

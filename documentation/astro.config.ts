@@ -50,6 +50,10 @@ export default defineConfig({
 	integrations: [
 		ensureAstroIntegration(
 			starlight({
+				components: {
+					PageTitle: "./src/components/overrides/page-title.astro",
+					Sidebar: "./src/components/overrides/sidebar.astro",
+				},
 				customCss: ["./src/styles/custom.css"],
 				description: "Oxlint-native rules for TypeScript, React, and roblox-ts",
 				editLink: {

@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isLiteral } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -79,7 +79,7 @@ function isConstructorLiteralAssignment(statement: ESTree.Statement): statement 
 	);
 }
 
-const preferClassProperties = defineRule({
+const preferClassProperties = createRule("prefer-class-properties", "general", {
 	create(context): Visitor {
 		const [mode] = context.options;
 

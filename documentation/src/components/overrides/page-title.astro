@@ -1,0 +1,20 @@
+---
+import InlineMarkdownText from "@/components/inline-markdown-text.astro";
+
+// Must match Starlight's PAGE_TITLE_ID so "skip to content" and heading anchors keep working.
+const PAGE_TITLE_ID = "_top";
+---
+
+<h1 id={PAGE_TITLE_ID}><InlineMarkdownText text={Astro.locals.starlightRoute.entry.data.title} /></h1>
+
+<style>
+	@layer starlight.core {
+		h1 {
+			margin-top: 1rem;
+			font-size: var(--sl-text-h1);
+			font-weight: 600;
+			line-height: var(--sl-line-height-headings);
+			color: var(--sl-color-white);
+		}
+	}
+</style>

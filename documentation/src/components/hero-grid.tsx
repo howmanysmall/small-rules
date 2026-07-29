@@ -1,4 +1,4 @@
-import type { ReactNode, PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 interface HeroGridProperties {
 	readonly preview: ReactNode;

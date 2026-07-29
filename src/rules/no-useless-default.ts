@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import defaultProperties from "../generated/default-properties.json";
 import { unwrapExpression } from "../utilities/ast-utilities";
@@ -65,15 +65,10 @@ const intrinsicClassNamesByTagName = new Map(
 	Object.entries(defaultProperties.classes).map(([className]) => [className.toLowerCase(), className]),
 );
 
-interface DefaultPropertyLookupEntry {
-	readonly propertyName: string;
-	readonly value: CanonicalValue;
-}
-
 function createDefaultPropertyLookupEntries(
 	properties: Readonly<Record<string, unknown>>,
-): ReadonlyMap<string, DefaultPropertyLookupEntry> {
-	const propertyLookupEntries = new Map<string, DefaultPropertyLookupEntry>();
+): ReadonlyMap<string, DefaultPropertyMatch> {
+	const propertyLookupEntries = new Map<string, DefaultPropertyMatch>();
 
 	for (const [propertyName, propertyValue] of Object.entries(properties)) {
 		/* v8 ignore next -- @preserve generated default-properties entries are canonical value records. */
@@ -117,23 +112,23 @@ function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalVa
 	return isCanonicalValue(candidate) ? candidate : undefined;
 }
 
-const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>([
+const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, DefaultPropertyMatch>>([
 	[
 		"TextLabel",
-		new Map<string, DefaultPropertyLookupEntry>([
+		new Map<string, DefaultPropertyMatch>([
 			["text", { propertyName: "Text", value: { type: "string", value: "" } }],
 		]),
 	],
 	[
 		"UICorner",
-		new Map<string, DefaultPropertyLookupEntry>([
+		new Map<string, DefaultPropertyMatch>([
 			["cornerradius", { propertyName: "CornerRadius", value: { type: "UDim", value: [0, 0] } }],
 		]),
 	],
 ]);
 
-function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<string, DefaultPropertyLookupEntry>> {
-	const lookups = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>();
+function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<string, DefaultPropertyMatch>> {
+	const lookups = new Map<string, ReadonlyMap<string, DefaultPropertyMatch>>();
 	for (const [className, entries] of Object.entries(defaultProperties.classes)) {
 		const properties: Record<string, unknown> = {};
 		for (let index = 0; index < entries.length; index += 2) {
@@ -357,8 +352,7 @@ function matchesTuple(expected: ReadonlyArray<CanonicalNumericComponent>, actual
 	for (const [index, expectedComponent] of expected.entries()) {
 		const actualComponent = actual[index];
 		/* v8 ignore next -- @preserve tuple iteration over canonical defaults and extracted tuples yields defined components. */
-		if (expectedComponent === undefined || actualComponent === undefined) return false;
-		if (!matchesComponentValue(expectedComponent, actualComponent)) return false;
+		if (actualComponent === undefined || !matchesComponentValue(expectedComponent, actualComponent)) return false;
 	}
 
 	return true;
@@ -444,17 +438,26 @@ function extractQuadruple(
 	return [first, second, third, fourth];
 }
 
-function extractVector2Value(node: ESTree.Expression): readonly [x: number, y: number] | undefined {
+function extractVectorComponents<TValue extends ReadonlyArray<number>>(
+	node: ESTree.Expression,
+	className: string,
+	zeroValue: TValue,
+	extractor: (parameters: ESTree.NewExpression["arguments"]) => TValue | undefined,
+): TValue | undefined {
 	if (node.type === "MemberExpression") {
 		const path = getMemberPath(node);
-		if (path?.length === 2 && path[0] === "Vector2" && path[1] === "zero") return [0, 0];
+		if (path?.length === 2 && path[0] === className && path[1] === "zero") return zeroValue;
 		return undefined;
 	}
 
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Vector2")) return undefined;
-	if (node.arguments.length === 0) return [0, 0];
+	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, className)) return undefined;
+	if (node.arguments.length === 0) return zeroValue;
 
-	return extractNumberPair(node.arguments);
+	return extractor(node.arguments);
+}
+
+function extractVector2Value(node: ESTree.Expression): readonly [x: number, y: number] | undefined {
+	return extractVectorComponents(node, "Vector2", [0, 0], extractNumberPair);
 }
 
 function extractNumberPair(
@@ -487,16 +490,7 @@ function extractNumberTriple(
 }
 
 function extractVector3Value(node: ESTree.Expression): readonly [x: number, y: number, z: number] | undefined {
-	if (node.type === "MemberExpression") {
-		const path = getMemberPath(node);
-		if (path?.length === 2 && path[0] === "Vector3" && path[1] === "zero") return [0, 0, 0];
-		return undefined;
-	}
-
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Vector3")) return undefined;
-	if (node.arguments.length === 0) return [0, 0, 0];
-
-	return extractNumberTriple(node.arguments);
+	return extractVectorComponents(node, "Vector3", [0, 0, 0], extractNumberTriple);
 }
 
 function extractUDimValue(node: ESTree.Expression): readonly [scale: number, offset: number] | undefined {
@@ -694,7 +688,7 @@ export function isDefaultValue(node: ESTree.Expression, canonicalValue: Canonica
 	}
 }
 
-const noUselessDefault = defineRule({
+const noUselessDefault = createRule("no-useless-default", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 

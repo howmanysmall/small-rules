@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isNumber } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -155,7 +155,7 @@ function collectArguments(
 	return { offsetXText, offsetYText, scaleXText, scaleYText };
 }
 
-const preferUDim2Shorthand = defineRule({
+const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 	create(context): Visitor {
 		return {
 			NewExpression(node): void {

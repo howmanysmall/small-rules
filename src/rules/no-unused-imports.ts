@@ -1,6 +1,6 @@
 // oxlint-disable small-rules/prevent-abbreviations -- `jsdoc` is valid.
 
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Comment, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -100,7 +100,7 @@ function removeImportSpecifier(
 	return fixer.remove(specifierNode);
 }
 
-const noUnusedImports = defineRule({
+const noUnusedImports = createRule("no-unused-imports", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 

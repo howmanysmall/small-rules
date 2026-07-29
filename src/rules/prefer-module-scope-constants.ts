@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -17,7 +17,7 @@ function isTopScope(scope: Scope): boolean {
 	return false;
 }
 
-const preferModuleScopeConstants = defineRule({
+const preferModuleScopeConstants = createRule("prefer-module-scope-constants", "general", {
 	create(context): Visitor {
 		let inConstDeclaration = false;
 

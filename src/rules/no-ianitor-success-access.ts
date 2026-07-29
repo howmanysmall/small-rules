@@ -1,5 +1,5 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -70,7 +70,7 @@ function findSuccessPropertyKey(objectPattern: ESTree.ObjectPattern): ESTree.Nod
 	return undefined;
 }
 
-const noIanitorSuccessAccess = defineRule({
+const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 

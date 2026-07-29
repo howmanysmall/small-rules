@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -110,7 +110,7 @@ function isJsxAttributeValueReference(node: ESTree.Node): boolean {
 	const parent = ascendPastWrappers(node.parent ?? undefined);
 	return (
 		parent?.type === "JSXExpressionContainer" &&
-		parent.parent?.type === "JSXAttribute" &&
+		parent.parent.type === "JSXAttribute" &&
 		unwrapReferenceValue(parent.expression) === node
 	);
 }
@@ -144,7 +144,7 @@ function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunct
 
 	const { parent } = node;
 	/* v8 ignore next -- @preserve non-declaration callbacks reach this helper only from variable declarators. */
-	if (parent?.type !== "VariableDeclarator") return undefined;
+	if (parent.type !== "VariableDeclarator") return undefined;
 
 	const declared = sourceCode.getDeclaredVariables(parent);
 	/* v8 ignore next -- @preserve identifier variable declarators always declare one variable. */
@@ -176,7 +176,7 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 	return hasReadReference;
 }
 
-const noRenderHelperFunctions = defineRule({
+const noRenderHelperFunctions = createRule("no-render-helper-functions", "react", {
 	create(context): Visitor {
 		let componentDepth = 0;
 

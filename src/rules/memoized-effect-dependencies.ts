@@ -1,7 +1,7 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { getReactSources, forEachReactNamedImport, isEnvironment } from "$oxc-utilities/react-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -82,7 +82,7 @@ function registerConfiguredEffectHooks(
 	}
 }
 
-const memoizedEffectDependencies = defineRule({
+const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "react", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 		const options = isRecord(rawOptions) ? rawOptions : {};

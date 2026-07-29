@@ -1,8 +1,8 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const noUnderscoreReactProperties = defineRule({
+const noUnderscoreReactProperties = createRule("no-underscore-react-props", "react", {
 	createOnce(context): Visitor {
 		return {
 			JSXAttribute(node): void {

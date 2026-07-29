@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -248,7 +248,7 @@ function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	reportCombinedQuery(calls, context, fixedCode, "preferSingleHas", firstCall);
 }
 
-const preferSingleWorldQuery = defineRule({
+const preferSingleWorldQuery = createRule("prefer-single-world-query", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		let currentGetBuffer = new Array<WorldQueryCall>();

@@ -15,9 +15,9 @@ import type {
 	NormalizedInvalidCase,
 	NormalizedRuleCase,
 	NormalizedValidCase,
+	RuleRunnerDefaults,
 	RuleTestCases,
 	RuleTestError,
-	RuleRunnerDefaults,
 	TestLanguage,
 	ValidRuleCase,
 } from "./types";
@@ -89,7 +89,7 @@ function normalizeInvalidCase(input: InvalidRuleCase, defaults: RuleRunnerDefaul
 		errors: normalizeErrors(input.errors),
 		kind: "invalid",
 	};
-	if ("output" in input && input.output !== undefined) return { ...normalized, output: input.output };
+	if ("output" in input) return { ...normalized, output: input.output };
 	return normalized;
 }
 

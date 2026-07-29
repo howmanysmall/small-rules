@@ -4,7 +4,7 @@ export type RuleName = keyof typeof smallRules.rules;
 export type RuleCategoryKey = "general" | "naming" | "react" | "roblox";
 
 export interface RuleManifestEntry {
-	readonly exampleExemption?: string;
+	readonly exampleExemption?: string | undefined;
 	readonly name: RuleName;
 }
 

@@ -5,7 +5,7 @@ import { cwd } from "node:process";
 import { editJsonc } from "$script-utilities/jsonc-utilities";
 import { Command } from "@cliffy/command";
 import { type } from "arktype";
-import { argv, JSONC, file, write } from "bun";
+import { argv, file, JSONC, write } from "bun";
 import { fdir } from "fdir";
 import { create } from "mutative";
 import { bold, cyan, dim, green, red, yellow } from "picocolors";

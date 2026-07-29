@@ -1,32 +1,18 @@
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getImportedName, isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
-import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
+import {
+	ENVIRONMENT_SCHEMA,
+	getReactSourcesFromOptions,
+	isReactImportDefinition,
+} from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const REACT_FRAGMENT = "Fragment";
-
-function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
-	/* v8 ignore next -- parser import bindings retain their ImportDeclaration parent. @preserve */
-	return node.parent?.type === "ImportDeclaration" ? node.parent : undefined;
-}
-
-function isReactImportDefinition(
-	definition: ScopeVariable["defs"][number],
-	reactSources: ReadonlySet<string>,
-): boolean {
-	if (definition.type !== "ImportBinding") return false;
-
-	const importDeclaration = getImportDeclarationParent(definition.node);
-	/* v8 ignore next -- ImportBinding definitions are parser-parented by an ImportDeclaration. @preserve */
-	if (importDeclaration === undefined) return false;
-
-	return reactSources.has(importDeclaration.source.value);
-}
 
 function isReactNamespaceImport(variable: ScopeVariable | undefined, reactSources: ReadonlySet<string>): boolean {
 	if (variable === undefined) return false;
@@ -170,7 +156,7 @@ function isStaticElementArgument(
 	return false;
 }
 
-const noStaticReactCreateElement = defineRule({
+const noStaticReactCreateElement = createRule("no-static-react-create-element", "react", {
 	create(context): Visitor {
 		const reactSources = getReactSourcesFromOptions(context.options[0]);
 		const { sourceCode } = context;

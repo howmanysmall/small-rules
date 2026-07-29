@@ -10,7 +10,7 @@
 		"roblox-ts",
 		"typescript"
 	],
-	"homepage": "https://github.com/howmanysmall/small-rules#readme",
+	"homepage": "https://docs.howmanysmall.com/small-rules/",
 	"bugs": {
 		"url": "https://github.com/howmanysmall/small-rules/issues"
 	},
@@ -36,6 +36,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"astro-language-server": "astro-ls",
 		"biome": "biome",
 		"build": "tsdown",
 		"build:local": "node --run build -- --minify && cp dist/index.js plugins/small-rules.js",
@@ -43,6 +44,7 @@
 		"changelogithub": "changelogithub",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F docs build",
+		"docs:check": "nr -F docs check",
 		"docs:dev": "nr -F docs dev",
 		"doctor": "npx react-doctor@latest",
 		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --fix $a && node --run oxfmt -- $a' _",
@@ -73,7 +75,7 @@
 		"type-check:agent": "tsgo --noEmit --pretty false"
 	},
 	"dependencies": {
-		"arktype": "catalog:",
+		"arktype": "catalog:prod",
 		"ignore": "catalog:prod",
 		"minimatch": "catalog:prod",
 		"oxc-resolver": "catalog:prod",
@@ -92,7 +94,7 @@
 		"@stryker-mutator/api": "catalog:dev",
 		"@stryker-mutator/core": "catalog:dev",
 		"@stryker-mutator/vitest-runner": "catalog:test",
-		"@total-typescript/ts-reset": "catalog:",
+		"@total-typescript/ts-reset": "catalog:types",
 		"@types/bun": "catalog:types",
 		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:dev",
@@ -123,14 +125,14 @@
 		"oxlint-plugin-react-doctor": "catalog:lint",
 		"oxlint-tsgolint": "catalog:dev",
 		"picocolors": "catalog:dev",
-		"pncat": "catalog:",
+		"pncat": "catalog:dev",
 		"react-doctor": "catalog:lint",
 		"sfw": "catalog:dev",
 		"skills": "catalog:dev",
 		"tsdown": "catalog:build",
 		"type-fest": "catalog:dev",
 		"typescript": "catalog:dev",
-		"vite-tsconfig-paths": "catalog:",
+		"vite-tsconfig-paths": "catalog:test",
 		"vitest": "catalog:test",
 		"vitiate": "catalog:dev",
 		"yaml-language-server": "catalog:dev",

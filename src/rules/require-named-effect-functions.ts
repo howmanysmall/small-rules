@@ -1,8 +1,8 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
@@ -53,19 +53,16 @@ interface ResolvedArrowFunction {
 	readonly type: "arrow";
 }
 
-interface ResolvedFunctionDeclaration {
+interface FunnyResolvedFunction<TType extends "declaration" | "expression"> {
 	readonly isAsync: boolean;
 	readonly node: ESTree.Function;
-	readonly type: "function-declaration";
+	readonly type: `function-${TType}`;
 }
 
-interface ResolvedFunctionExpression {
-	readonly isAsync: boolean;
-	readonly node: ESTree.Function;
-	readonly type: "function-expression";
-}
-
-type ResolvedFunction = ResolvedArrowFunction | ResolvedFunctionDeclaration | ResolvedFunctionExpression;
+type ResolvedFunction =
+	| ResolvedArrowFunction
+	| FunnyResolvedFunction<"declaration">
+	| FunnyResolvedFunction<"expression">;
 
 type RequireNamedEffectFunctionsMessageId =
 	| "anonymousFunction"
@@ -131,7 +128,7 @@ function isCallbackHookResult(sourceCode: SourceCode, identifier: ESTree.Identif
 	return false;
 }
 
-const requireNamedEffectFunctions = defineRule({
+const requireNamedEffectFunctions = createRule("require-named-effect-functions", "react", {
 	create(context): Visitor {
 		const { environment, hooks } = parseOptions(context.options[0]);
 		const hookAsyncConfig = new Map(hooks.map((hookConfig) => [hookConfig.name, hookConfig.allowAsync]));

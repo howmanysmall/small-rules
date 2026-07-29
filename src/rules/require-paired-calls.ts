@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
-import { isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
+import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -205,7 +205,7 @@ const messages = {
 		"Closer '{{closer}}' called out of order - expected to close '{{expected}}' but '{{actual}}' is still open",
 } as const;
 
-const requirePairedCalls = defineRule({
+const requirePairedCalls = createRule("require-paired-calls", "general", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 		const options: RequirePairedCallsOptions = {

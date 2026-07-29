@@ -95,14 +95,14 @@ function isVariableDefinition(definition: Definition): boolean {
 export function getConstInitializer(definition: Definition): ESTree.Expression | undefined {
 	if (!isVariableDefinition(definition)) return undefined;
 
-	const declarator = definition.node;
+	const { node } = definition;
 	/* v8 ignore next -- @preserve Variable definitions from the parser always point at VariableDeclarator nodes. */
-	if (declarator.type !== "VariableDeclarator") return undefined;
+	if (node.type !== "VariableDeclarator") return undefined;
 
-	const { parent } = declarator;
+	const { parent } = node;
 	if (parent.type !== "VariableDeclaration" || parent.kind !== "const") return undefined;
 
-	return declarator.init ?? undefined;
+	return node.init ?? undefined;
 }
 
 export function getModuleConstInitializer(
@@ -187,8 +187,9 @@ function isStaticCallCallee(
 
 	const unwrapped = unwrapExpression(callee);
 	if (unwrapped.type === "Identifier") return isStaticIdentifier(sourceCode, unwrapped, seen, options);
-	if (unwrapped.type !== "MemberExpression") return false;
-	if (!isStaticExpression(sourceCode, unwrapped.object, seen, options)) return false;
+	if (unwrapped.type !== "MemberExpression" || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
+		return false;
+	}
 	if (unwrapped.computed) return isStaticExpression(sourceCode, unwrapped.property, seen, options);
 	return unwrapped.property.type === "Identifier";
 }
@@ -318,8 +319,7 @@ export function isStaticObjectExpression(
 	options: StaticExpressionOptions,
 ): boolean {
 	for (const property of objectExpr.properties) {
-		if (property.type !== "Property") return false;
-		if (property.kind !== "init") return false;
+		if (property.type !== "Property" || property.kind !== "init") return false;
 
 		if (
 			(property.computed &&

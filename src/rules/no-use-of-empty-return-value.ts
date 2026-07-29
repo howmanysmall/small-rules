@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -13,7 +13,7 @@ function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
 		const last = parent.expressions.at(-1);
 		if (last !== child) return false;
 		const { parent: grandParent } = parent;
-		return grandParent !== null && parentUsesValue(grandParent, parent);
+		return parentUsesValue(grandParent, parent);
 	}
 	return (
 		parent.type !== "ExpressionStatement" &&
@@ -26,8 +26,7 @@ function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
 }
 
 function callReturnValueIsUsed(callExpression: ESTree.CallExpression): boolean {
-	const { parent } = callExpression;
-	return parent !== null && parentUsesValue(parent, callExpression);
+	return parentUsesValue(callExpression.parent, callExpression);
 }
 
 function functionFromVariable(variable: Variable): FunctionLike | undefined {
@@ -47,7 +46,7 @@ function functionFromVariable(variable: Variable): FunctionLike | undefined {
 	return undefined;
 }
 
-const noUseOfEmptyReturnValue = defineRule({
+const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "general", {
 	create(context): Visitor {
 		const callExpressionsToCheck = new Map<ESTree.IdentifierReference, FunctionLike>();
 		const functionsWithReturnValue = new Set<FunctionLike>();
@@ -72,13 +71,13 @@ const noUseOfEmptyReturnValue = defineRule({
 			ArrowFunctionExpression: enterFunction,
 			"ArrowFunctionExpression:exit": exitFunction,
 			CallExpression(node): void {
-				if (!callReturnValueIsUsed(node)) return;
-				if (node.callee.type !== "Identifier") return;
+				if (!callReturnValueIsUsed(node) || node.callee.type !== "Identifier") return;
 
 				const scope = context.sourceCode.getScope(node);
 				const reference = scope.references.find((entry) => entry.identifier === node.callee);
 				const resolved = reference?.resolved ?? getVariableByName(scope, node.callee.name);
-				if (resolved === null || resolved === undefined) return;
+				if (resolved === undefined) return;
+
 				const functionNode = functionFromVariable(resolved);
 				if (functionNode !== undefined) callExpressionsToCheck.set(node.callee, functionNode);
 			},
@@ -97,7 +96,7 @@ const noUseOfEmptyReturnValue = defineRule({
 				}
 			},
 			ReturnStatement(node): void {
-				if (node.argument === null || node.argument === undefined) return;
+				if (node.argument === null) return;
 				const current = functionStack.at(-1);
 				/* v8 ignore next -- ReturnStatement only appears inside function scopes. @preserve */
 				if (current !== undefined) functionsWithReturnValue.add(current);

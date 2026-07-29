@@ -3,6 +3,7 @@ import { basename, extname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const frameworkBoundaryComponents = [
+	"inline-markdown-text",
 	"package-manager-tabs",
 	"release-history",
 	"rule-diagnostics",

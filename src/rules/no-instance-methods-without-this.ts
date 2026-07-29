@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -79,7 +79,7 @@ function getMethodName(node: ESTree.MethodDefinition): string {
 	return node.key.type === "Identifier" ? node.key.name : "unknown";
 }
 
-const noInstanceMethodsWithoutThis = defineRule({
+const noInstanceMethodsWithoutThis = createRule("no-instance-methods-without-this", "roblox", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
 

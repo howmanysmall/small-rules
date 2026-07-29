@@ -1,9 +1,9 @@
 import { isAbsolute, relative } from "node:path";
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import { type } from "arktype";
 import { minimatch, Minimatch } from "minimatch";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { MinimatchOptions } from "minimatch";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -99,10 +99,11 @@ function getEffectiveOptions(context: Context): EffectiveOptions {
 			fileCandidates.some((filename) => minimatch(filename, pattern, FILE_MATCH_OPTIONS)),
 		) ?? false;
 
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety.
 	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions: restrictions.map(compileRestriction) };
 }
 
-const noRestrictedPropertyAssignment = defineRule({
+const noRestrictedPropertyAssignment = createRule("no-restricted-property-assignment", "general", {
 	create(context): Visitor {
 		const { checkComputed, isAllowedFile, restrictions } = getEffectiveOptions(context);
 

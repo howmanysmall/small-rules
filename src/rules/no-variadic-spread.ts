@@ -1,6 +1,6 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isIdentifierNamed, isMemberExpression } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -19,7 +19,7 @@ function getVariadicMethodName(callee: ESTree.Node): string | undefined {
 	return isIdentifierNamed(callee.object, MATH_NAMESPACE) ? `${MATH_NAMESPACE}.${propertyName}` : undefined;
 }
 
-const noVariadicSpread = defineRule({
+const noVariadicSpread = createRule("no-variadic-spread", "general", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {

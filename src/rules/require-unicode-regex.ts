@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -23,7 +23,7 @@ function isNotSpread(node: ESTree.Argument): node is ESTree.Expression {
 	return node.type !== "SpreadElement";
 }
 
-const requireUnicodeRegex = defineRule({
+const requireUnicodeRegex = createRule("require-unicode-regex", "general", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {

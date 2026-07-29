@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -12,7 +12,7 @@ function isIanitorMethodCall({ callee }: ESTree.CallExpression): boolean {
 	return object.type === "Identifier" && object.name === "Ianitor";
 }
 
-const noIanitorInFunctionBody = defineRule({
+const noIanitorInFunctionBody = createRule("no-ianitor-in-function-body", "roblox", {
 	create(context): Visitor {
 		let functionDepth = 0;
 		function increment(): void {

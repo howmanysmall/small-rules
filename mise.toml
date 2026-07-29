@@ -7,8 +7,8 @@ HK_MISE = 1
 [settings]
 auto_install = false
 experimental = true
-github_attestations = false
 lockfile = true
+provenance_api_failures_fatal = false
 
 [tools]
 "cargo:similarity-ts" = "latest"
@@ -52,6 +52,11 @@ run = "node --run knip"
 alias = "dupes"
 description = "Detect duplicated/structurally-similar code in src with similarity-ts (AST-based jscpd replacement)."
 run = "similarity-ts --threshold 0.85 --min-lines 5 --print src"
+
+[tasks.duplicates-ui]
+alias = "dupes-ui"
+description = "Run similarity-ts and open a readable duplicate report in the browser."
+run = "similarity-ts --threshold 0.85 --min-lines 5 --print src | bun scripts/dupes-viewer.ts --open"
 
 [tasks.build]
 description = "Build the package into dist using tsdown."

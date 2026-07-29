@@ -1,5 +1,5 @@
 import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -19,7 +19,7 @@ function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Exp
 	return current;
 }
 
-const preferIdiv = defineRule({
+const preferIdiv = createRule("prefer-idiv", "roblox", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {

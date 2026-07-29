@@ -4,8 +4,8 @@ import {
 	hasShadowedBinding,
 	unwrapExpression,
 } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { classHasYieldingMember } from "../generated/roblox-yielding-members";
 
@@ -428,7 +428,7 @@ function reportYieldingCalls(
 	for (const activeFunction of activeFunctions) inspectActiveFunction(activeFunction);
 }
 
-const noAsyncInSystem = defineRule({
+const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 	create(context): Visitor {
 		const additionalSystemTypeNames = context.options[0]?.additionalSystemTypeNames ?? [];
 		const callbackParameterTypes = context.options[0]?.callbackParameterTypes ?? [];

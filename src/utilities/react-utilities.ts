@@ -3,6 +3,8 @@ import { isRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
+import type { ScopeVariable } from "./ast-utilities";
+
 export type Environment = "roblox-ts" | "standard";
 
 export const ENVIRONMENT_SCHEMA = {
@@ -57,4 +59,22 @@ export function forEachReactNamedImport(
 export function getEnvironment(value: unknown): Environment {
 	if (!isRecord(value) || value.environment !== "standard") return "roblox-ts";
 	return "standard";
+}
+
+function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
+	/* v8 ignore next -- parser import bindings retain their ImportDeclaration parent. @preserve */
+	return node.parent?.type === "ImportDeclaration" ? node.parent : undefined;
+}
+
+export function isReactImportDefinition(
+	definition: ScopeVariable["defs"][number],
+	reactSources: ReadonlySet<string>,
+): boolean {
+	if (definition.type !== "ImportBinding") return false;
+
+	const importDeclaration = getImportDeclarationParent(definition.node);
+	/* v8 ignore next -- ImportBinding definitions are parser-parented by an ImportDeclaration. @preserve */
+	if (importDeclaration === undefined) return false;
+
+	return reactSources.has(importDeclaration.source.value);
 }

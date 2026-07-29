@@ -40,3 +40,50 @@ jobs:
     uses: ./.github/workflows/checks.yaml
     permissions:
       contents: read
+
+  workflow-security:
+    name: Workflow Security
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check if .github/ changed
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+          fi
+          if git diff --name-only "$BASE" "$HEAD" 2>/dev/null | grep -q '^\.github/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup toolchain
+        if: steps.changes.outputs.changed == 'true'
+        uses: ./.github/actions/setup
+        with:
+          tools: "actionlint pinact zizmor"
+
+      - name: actionlint
+        if: steps.changes.outputs.changed == 'true'
+        run: actionlint
+
+      - name: pinact
+        if: steps.changes.outputs.changed == 'true'
+        run: pinact run
+
+      - name: zizmor
+        if: steps.changes.outputs.changed == 'true'
+        run: zizmor .github

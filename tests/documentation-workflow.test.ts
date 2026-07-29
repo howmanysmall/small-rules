@@ -30,7 +30,7 @@ describe("documentation validation workflow", () => {
 		expect(CHECKS_YAML).toContain('tools: "bun node pnpm ni"');
 		expect(SETUP_ACTION_YAML).toMatch(/install_args: \$\{\{ inputs\.tools \}\}/u);
 		expect(CHECKS_YAML).toContain("pnpm --filter docs exec playwright install --with-deps chromium");
-		expect(CHECKS_YAML.match(/working-directory: documentation/gu)).toHaveLength(3);
+		expect(CHECKS_YAML.match(/working-directory: documentation/gu)).toHaveLength(4);
 		expect(CHECKS_YAML.indexOf("node --run build")).toBeLessThan(CHECKS_YAML.indexOf("node --run test:unit"));
 		expect(CHECKS_YAML.indexOf("node --run test:unit")).toBeLessThan(
 			CHECKS_YAML.indexOf("node --run test:browser"),

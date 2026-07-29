@@ -6,8 +6,8 @@ import { HarnessError } from "./harness-error";
 import { getArrayProperty, getObjectProperty, getProperty, getStringProperty, isRecord } from "./object";
 
 import type {
-	FixProvider,
 	Fix,
+	FixProvider,
 	HarnessNode,
 	HarnessSourceCode,
 	NormalizedInvalidCase,
@@ -279,5 +279,5 @@ function formatMessageValue(value: unknown): string {
 	if (value === undefined) return "";
 	if (typeof value === "string") return value;
 	if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return value.toString();
-	return JSON.stringify(value) ?? "";
+	return JSON.stringify(value);
 }

@@ -1,6 +1,6 @@
 import { isMemoCall } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isJsxOpeningExpression } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -35,7 +35,7 @@ function getInlinePropertyType(node: ESTree.Expression): InlinePropertyType | un
 	}
 }
 
-const noInlinePropertyOnMemoComponent = defineRule({
+const noInlinePropertyOnMemoComponent = createRule("no-inline-property-on-memo-component", "react", {
 	create(context): Visitor {
 		const memoizedComponentNames = new Set<string>();
 

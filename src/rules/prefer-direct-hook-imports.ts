@@ -1,30 +1,16 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { getReactSourcesFromOptions, ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import {
+	ENVIRONMENT_SCHEMA,
+	getReactSourcesFromOptions,
+	isReactImportDefinition,
+} from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { Visitor } from "oxlint-plugin-utilities";
 
 const HOOK_NAME_PATTERN = /^use[A-Z]/v;
-
-function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
-	/* v8 ignore next -- parser import bindings retain their ImportDeclaration parent. @preserve */
-	return node.parent?.type === "ImportDeclaration" ? node.parent : undefined;
-}
-
-function isReactImportDefinition(
-	definition: ScopeVariable["defs"][number],
-	reactSources: ReadonlySet<string>,
-): boolean {
-	if (definition.type !== "ImportBinding") return false;
-
-	const importDeclaration = getImportDeclarationParent(definition.node);
-	/* v8 ignore next -- ImportBinding definitions are parser-parented by an ImportDeclaration. @preserve */
-	if (importDeclaration === undefined) return false;
-
-	return reactSources.has(importDeclaration.source.value);
-}
 
 function isReactNamespaceSource(variable: ScopeVariable | undefined, reactSources: ReadonlySet<string>): boolean {
 	if (variable === undefined) return false;
@@ -52,7 +38,7 @@ function normalizeOptions(raw: unknown): { readonly allowedHooks: ReadonlySet<st
 	return { allowedHooks: new Set(isStringArray(options.allowedHooks) ? options.allowedHooks : []) };
 }
 
-const preferDirectHookImports = defineRule({
+const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react", {
 	create(context) {
 		const reactSources = getReactSourcesFromOptions(context.options[0]);
 		const { allowedHooks } = normalizeOptions(context.options[0]);
