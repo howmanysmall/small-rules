@@ -36,7 +36,6 @@
 		"access": "public"
 	},
 	"scripts": {
-		"astro-language-server": "astro-ls",
 		"biome": "biome",
 		"build": "tsdown",
 		"build:local": "node --run build -- --minify && cp dist/index.js plugins/small-rules.js",
@@ -83,7 +82,6 @@
 		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
-		"@astrojs/language-server": "catalog:dev",
 		"@biomejs/biome": "catalog:lint",
 		"@cliffy/command": "catalog:dev",
 		"@commitlint/config-conventional": "catalog:dev",

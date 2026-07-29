@@ -364,12 +364,6 @@
 	"linked_edits": true,
 	"load_direnv": "direct",
 	"lsp": {
-		"astro-language-server": {
-			"binary": {
-				"arguments": ["--run", "astro-language-server", "--", "--stdio"],
-				"path": "node"
-			}
-		},
 		"bash-language-server": {
 			"settings": {
 				"bashIde": {
