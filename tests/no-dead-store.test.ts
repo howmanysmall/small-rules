@@ -98,6 +98,14 @@ describe("no-dead-store", () => {
 			"function declared() { let value: number; value = 1; return value; }",
 			"function enumValue() { enum State { Ready = compute() } return State.Ready; }",
 			"function separatePaths(first: boolean, second: boolean) { let value = load(); if (first) { if (second) value = one(); } if (!first) { if (!second) value = two(); } consume(value); }",
+			`function countInLoop(items: Array<unknown>) {
+  let count = 0;
+  for (const item of items) {
+    if (item) count += 1;
+    count += compute(item);
+  }
+  return count;
+}`,
 			"function separateConditions(first: boolean, second: boolean) { let value = load(); first ? (value = one()) : noop(); second ? (value = two()) : noop(); consume(value); }",
 			"function unrelatedTernaries(a: boolean, b: boolean, c: boolean, d: boolean) { let value = load(); a ? (b ? (value = one()) : noop()) : noop(); c ? (d ? (value = two()) : noop()) : noop(); consume(value); }",
 		],

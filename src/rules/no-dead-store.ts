@@ -97,6 +97,9 @@ function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 function assignmentReadsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const { parent } = write.node;
 	if (parent.type !== "AssignmentExpression") return false;
+	// Compound assignments (+=, -=, etc.) always read the previous value of the left-hand side,
+	// even when the right-hand side doesn't reference the variable.
+	if (parent.operator !== "=") return true;
 	return usages.some((usage) => usage.isRead && rangeContains(parent.right, usage.node));
 }
 
