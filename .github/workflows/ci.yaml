@@ -86,4 +86,4 @@ jobs:
 
       - name: zizmor
         if: steps.changes.outputs.changed == 'true'
-        run: zizmor
+        run: zizmor .github
