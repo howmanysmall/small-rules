@@ -59,7 +59,17 @@
 	"jsx_tag_auto_close": { "enabled": true },
 	"languages": {
 		"Astro": {
-			"language_servers": ["knip", "astro-language-server", "..."]
+			"format_on_save": "on",
+			"formatter": [
+				{
+					"external": {
+						"arguments": ["--run", "biome", "--", "check", "--fix", "--stdin-file-path", "{buffer_path}"],
+						"command": "node"
+					}
+				}
+			],
+			"hard_tabs": true,
+			"language_servers": ["knip", "astro-language-server", "biome", "..."]
 		},
 		"CSS": {
 			"code_actions_on_format": {
