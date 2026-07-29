@@ -60,6 +60,10 @@ const configuration: KnipConfig = {
 			paths,
 			project: ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx,d.ts}", "*.config.ts"],
 		},
+		".opencode": {
+			entry: ["plugin/**/*.ts"],
+			project: ["plugin/**/*.ts"],
+		},
 		documentation: {
 			// Optional peer for Starlight's Sätteri markdown branch (type ambient + peer resolution).
 			ignoreDependencies: ["babel-plugin-react-compiler", "satteri"],

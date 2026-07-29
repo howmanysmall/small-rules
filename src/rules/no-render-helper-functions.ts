@@ -188,19 +188,13 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 			});
 		}
 
-		function checkVariableFunctionExit(node: CallbackFunction): void {
-			const { parent } = node;
-			const functionName = getVariableDeclaratorFunctionName(node);
+		function shouldSkipVariableName(variableName: string | undefined): boolean {
+			return variableName === undefined || isUppercaseName(variableName) || isHookName(variableName);
+		}
 
-			if (functionName !== undefined && isUppercaseName(functionName)) {
-				componentDepth -= 1;
-				return;
-			}
-
-			if (componentDepth > 0 || isInlineCallback(node) || parent.type !== "VariableDeclarator") return;
-
+		function checkVariableDeclaratorExit(node: CallbackFunction, parent: ESTree.VariableDeclarator): void {
 			const variableName = getBindingIdentifierName(parent.id);
-			if (variableName === undefined || isUppercaseName(variableName) || isHookName(variableName)) return;
+			if (shouldSkipVariableName(variableName)) return;
 			if (isCallbackReferenceFunction(node, context.sourceCode)) return;
 
 			const typeAnnotation = getTypeAnnotationFromBinding(parent.id);
@@ -210,7 +204,42 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 			const returnTypeAnnotation = getReturnTypeAnnotation(node);
 			const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);
 
-			if (hasReactNodeAnnotation || hasReturnType || hasJsxReturn(node)) reportRenderHelper(parent, variableName);
+			if ((hasReactNodeAnnotation || hasReturnType || hasJsxReturn(node)) && variableName !== undefined) {
+				reportRenderHelper(parent, variableName);
+			}
+		}
+
+		function checkReturnStatementExit(node: CallbackFunction): void {
+			const variableName = node.type === "FunctionExpression" ? node.id?.name : undefined;
+			if (shouldSkipVariableName(variableName)) return;
+
+			const returnTypeAnnotation = getReturnTypeAnnotation(node);
+			const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);
+
+			if ((hasReturnType || hasJsxReturn(node)) && variableName !== undefined) {
+				reportRenderHelper(node, variableName);
+			}
+		}
+
+		function checkVariableFunctionExit(node: CallbackFunction): void {
+			const { parent } = node;
+			const functionName = getVariableDeclaratorFunctionName(node);
+
+			if (functionName !== undefined && isUppercaseName(functionName)) {
+				componentDepth -= 1;
+				return;
+			}
+
+			if (componentDepth > 0 || isInlineCallback(node)) return;
+
+			if (parent.type === "VariableDeclarator") {
+				checkVariableDeclaratorExit(node, parent);
+				return;
+			}
+
+			if (parent.type === "ReturnStatement") {
+				checkReturnStatementExit(node);
+			}
 		}
 
 		return {

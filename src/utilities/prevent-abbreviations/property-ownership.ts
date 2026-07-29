@@ -67,6 +67,13 @@ function getContextualType(objectExpression: ESTree.ObjectExpression): ESTree.TS
 	return undefined;
 }
 
+function resolveRootObjectIdentifier(node: ESTree.Node): ESTree.Node | undefined {
+	if (isIdentifierName(node)) return node;
+	if (isMemberExpression(node)) return resolveRootObjectIdentifier(node.object);
+	if (isTsQualifiedName(node)) return resolveRootObjectIdentifier(node.left);
+	return undefined;
+}
+
 function isImportedObjectPropertyAccess(node: ESTree.IdentifierName, sourceCode: SourceCode): boolean {
 	const { parent } = node;
 
@@ -76,9 +83,12 @@ function isImportedObjectPropertyAccess(node: ESTree.IdentifierName, sourceCode:
 		objectNode = parent.object;
 	} else if (isTsQualifiedName(parent) && parent.right === node) objectNode = parent.left;
 
-	if (objectNode === undefined || !hasName(objectNode)) return false;
+	if (objectNode === undefined) return false;
 
-	return getVariableByName(sourceCode.getScope(node), objectNode.name)?.defs[0]?.type === "ImportBinding";
+	const rootNode = isIdentifierName(objectNode) ? objectNode : resolveRootObjectIdentifier(objectNode);
+	if (rootNode === undefined || !hasName(rootNode)) return false;
+
+	return getVariableByName(sourceCode.getScope(node), rootNode.name)?.defs[0]?.type === "ImportBinding";
 }
 
 function isExternalCallProperty(objectExpression: ESTree.ObjectExpression, sourceCode: SourceCode): boolean {

@@ -110,6 +110,53 @@ describe("no-render-helper-functions", () => {
 				code: "function renderStoryItem(): React.ReactNode { return <div />; } const child = <div>{renderStoryItem}</div>;",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
+			{
+				code: `function createExternalNavigationLink({
+	href,
+	label,
+}: Readonly<{ href: string; label: string }>): (properties: HTMLAttributes<HTMLAnchorElement>) => ReactElement {
+	return function renderExternalNavigationLink({
+		className,
+		...properties
+	}: HTMLAttributes<HTMLAnchorElement>): ReactElement {
+		return createElement(
+			"a",
+			{
+				...properties,
+				href,
+				rel: "noopener noreferrer",
+				target: "_blank",
+			},
+			createElement("span", undefined, label),
+		);
+	};
+}`,
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function create() { return function renderHelper() { return <div />; }; }",
+				errors: [{ messageId: "noRenderHelper" }, { messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function create() { return function renderHelper(): React.ReactNode { return <div />; }; }",
+				errors: [{ messageId: "noRenderHelper" }, { messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function create() { return function Helper() { return <div />; }; }",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function create() { return function useHelper() { return <div />; }; }",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function create() { return () => { return <div />; }; }",
+				errors: [{ messageId: "noRenderHelper" }],
+			},
+			{
+				code: "function create() { return function helper() { return 42; }; }",
+				errors: [],
+			},
 		],
 		valid: [
 			{
