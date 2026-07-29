@@ -5,7 +5,9 @@ description: "Configure small-rules in your oxlint setup."
 
 import { Aside } from "@astrojs/starlight/components";
 
-## Plugin Registration
+## Add the plugin
+
+I keep the plugin registration separate from the rules themselves so I can add or remove the rules I actually want. Register it in your `.oxlintrc.json`:
 
 Register the plugin in your `.oxlintrc.json`:
 
@@ -15,7 +17,9 @@ Register the plugin in your `.oxlintrc.json`:
 }
 ```
 
-## Rule Severity
+## Choose rule severity
+
+I usually start new rules as warnings, then promote the ones I want CI to enforce. `error` fails the lint check, `warn` reports the problem without failing, and `off` disables the rule.
 
 Each rule can be set to one of three severity levels:
 
@@ -35,7 +39,9 @@ Each rule can be set to one of three severity levels:
 }
 ```
 
-## Rule Options
+## Pass rule options
+
+Most rules do not need configuration. When one does, pass the severity first and the options object second:
 
 Some rules accept options for customization. Pass them as an array where the first element is the severity and the second is an options object:
 
@@ -61,7 +67,9 @@ Some rules accept options for customization. Pass them as an array where the fir
 
 <Aside type="note">Not all rules accept options. Check the individual rule pages for available configuration.</Aside>
 
-## File-level Overrides
+## Override files
+
+Use oxlint's `overrides` field when a rule makes sense for application code but not for tests or generated files:
 
 Use oxlint's `overrides` field to apply different rules to different file patterns:
 
@@ -78,7 +86,9 @@ Use oxlint's `overrides` field to apply different rules to different file patter
 }
 ```
 
-## Disabling Rules Inline
+## Disable a rule inline
+
+Sometimes a violation is intentional. Disable only that line when possible:
 
 You can disable rules for specific lines using directive comments:
 
@@ -98,7 +108,9 @@ print("Debug 2");
 
 <Aside type="note">oxlint also recognizes the equivalent `eslint-disable` / `eslint-enable` directives.</Aside>
 
-## Recommended Configuration
+## A starting configuration
+
+For most roblox-ts projects, I would start with a small set of rules that catch noisy output, unsafe waits, and patterns I do not want spreading through the codebase. Add the rest as you run into a reason to use them.
 
 For most roblox-ts projects, start with this baseline:
 
