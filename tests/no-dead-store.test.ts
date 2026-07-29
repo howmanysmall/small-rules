@@ -117,6 +117,16 @@ describe("no-dead-store", () => {
 				"}",
 			].join("\n"),
 			"function separateConditions(first: boolean, second: boolean) { let value = load(); first ? (value = one()) : noop(); second ? (value = two()) : noop(); consume(value); }",
+			`function process(items: Array<number>) {
+  let x = 0;
+  for (const item of items) {
+    if (item > 0) {
+      x = item;
+    } else {
+      consume(x);
+    }
+  }
+}`,
 			"function unrelatedTernaries(a: boolean, b: boolean, c: boolean, d: boolean) { let value = load(); a ? (b ? (value = one()) : noop()) : noop(); c ? (d ? (value = two()) : noop()) : noop(); consume(value); }",
 		],
 	});
