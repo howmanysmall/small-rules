@@ -65,15 +65,10 @@ const intrinsicClassNamesByTagName = new Map(
 	Object.entries(defaultProperties.classes).map(([className]) => [className.toLowerCase(), className]),
 );
 
-interface DefaultPropertyLookupEntry {
-	readonly propertyName: string;
-	readonly value: CanonicalValue;
-}
-
 function createDefaultPropertyLookupEntries(
 	properties: Readonly<Record<string, unknown>>,
-): ReadonlyMap<string, DefaultPropertyLookupEntry> {
-	const propertyLookupEntries = new Map<string, DefaultPropertyLookupEntry>();
+): ReadonlyMap<string, DefaultPropertyMatch> {
+	const propertyLookupEntries = new Map<string, DefaultPropertyMatch>();
 
 	for (const [propertyName, propertyValue] of Object.entries(properties)) {
 		/* v8 ignore next -- @preserve generated default-properties entries are canonical value records. */
@@ -117,23 +112,23 @@ function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalVa
 	return isCanonicalValue(candidate) ? candidate : undefined;
 }
 
-const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>([
+const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, DefaultPropertyMatch>>([
 	[
 		"TextLabel",
-		new Map<string, DefaultPropertyLookupEntry>([
+		new Map<string, DefaultPropertyMatch>([
 			["text", { propertyName: "Text", value: { type: "string", value: "" } }],
 		]),
 	],
 	[
 		"UICorner",
-		new Map<string, DefaultPropertyLookupEntry>([
+		new Map<string, DefaultPropertyMatch>([
 			["cornerradius", { propertyName: "CornerRadius", value: { type: "UDim", value: [0, 0] } }],
 		]),
 	],
 ]);
 
-function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<string, DefaultPropertyLookupEntry>> {
-	const lookups = new Map<string, ReadonlyMap<string, DefaultPropertyLookupEntry>>();
+function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<string, DefaultPropertyMatch>> {
+	const lookups = new Map<string, ReadonlyMap<string, DefaultPropertyMatch>>();
 	for (const [className, entries] of Object.entries(defaultProperties.classes)) {
 		const properties: Record<string, unknown> = {};
 		for (let index = 0; index < entries.length; index += 2) {
