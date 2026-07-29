@@ -33,37 +33,31 @@ function isKnownNonNumberDefinition(definition: ScopeVariable["defs"][number]): 
 	if (definition.type === "Parameter") {
 		const identifier = definition.name;
 
-		if (
-			identifier.type === "Identifier" &&
-			identifier.typeAnnotation !== undefined &&
-			identifier.typeAnnotation !== null
-		) {
+		if (identifier.typeAnnotation !== undefined && identifier.typeAnnotation !== null) {
 			return !isNumberTypeAnnotation(identifier.typeAnnotation);
 		}
 
 		const { parent } = identifier;
-		return parent?.type === "AssignmentPattern" && isKnownNonNumberLiteral(parent.right);
+		return parent.type === "AssignmentPattern" && isKnownNonNumberLiteral(parent.right);
 	}
 
 	/* v8 ignore next -- @preserve scope definitions reaching identifier expressions are parameters or variables. */
 	if (definition.type !== "Variable" || definition.node.type !== "VariableDeclarator") return false;
 
 	const { id, init } = definition.node;
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- false flag
 	if (id.type === "Identifier" && id.typeAnnotation !== undefined && id.typeAnnotation !== null) {
 		return !isNumberTypeAnnotation(id.typeAnnotation);
 	}
 
-	return init !== undefined && init !== null && isKnownNonNumberLiteral(init);
+	return init !== null && isKnownNonNumberLiteral(init);
 }
 
 function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): boolean {
 	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
 	if (variable === undefined) return false;
 
-	for (const definition of variable.defs) {
-		if (isKnownNonNumberDefinition(definition)) return true;
-	}
-
+	for (const definition of variable.defs) if (isKnownNonNumberDefinition(definition)) return true;
 	return false;
 }
 

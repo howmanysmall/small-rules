@@ -101,6 +101,7 @@ function getTrackedDispatchVariable(
 function getProgram(node: ESTree.Node): ESTree.Program | undefined {
 	let current: ESTree.Node | undefined = node;
 
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting lint
 	while (current !== undefined) {
 		if (current.type === "Program") return current;
 		current = current.parent;

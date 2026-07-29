@@ -21,7 +21,7 @@ import {
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
-import { isNumberRaw } from "$oxc-utilities/type-utilities";
+import { isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
 
 import type { BindingName } from "$oxc-types/missing-types";
 import type { FixReturn } from "$oxc-utilities/oxc-utilities";
@@ -486,11 +486,11 @@ function appendPushArguments(
 
 const noArrayConstructorElements = createRule("no-array-constructor-elements", "roblox", {
 	create(context): Visitor {
+		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety
 		const rawOptions = context.options?.[0];
-		const options: Required<NoArrayConstructorElementsOptions> =
-			typeof rawOptions === "object" && rawOptions !== null
-				? { ...DEFAULT_OPTIONS, ...(rawOptions as Partial<NoArrayConstructorElementsOptions>) }
-				: { ...DEFAULT_OPTIONS };
+		const options: Required<NoArrayConstructorElementsOptions> = isRecord(rawOptions)
+			? { ...DEFAULT_OPTIONS, ...(rawOptions as Partial<NoArrayConstructorElementsOptions>) }
+			: { ...DEFAULT_OPTIONS };
 		const { sourceCode } = context;
 
 		function inspectPushCollapse(statements: ReadonlyArray<ProgramStatement>): void {

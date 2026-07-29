@@ -357,8 +357,7 @@ function matchesTuple(expected: ReadonlyArray<CanonicalNumericComponent>, actual
 	for (const [index, expectedComponent] of expected.entries()) {
 		const actualComponent = actual[index];
 		/* v8 ignore next -- @preserve tuple iteration over canonical defaults and extracted tuples yields defined components. */
-		if (expectedComponent === undefined || actualComponent === undefined) return false;
-		if (!matchesComponentValue(expectedComponent, actualComponent)) return false;
+		if (actualComponent === undefined || !matchesComponentValue(expectedComponent, actualComponent)) return false;
 	}
 
 	return true;

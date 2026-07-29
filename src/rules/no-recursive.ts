@@ -158,7 +158,7 @@ const noRecursive = createRule("no-recursive", "general", {
 			FunctionExpression(node): void {
 				if (node.id) registerFunction(node.id.name);
 				const { parent } = node;
-				if (parent?.type === "MethodDefinition" && parent.key.type === "Identifier") {
+				if (parent.type === "MethodDefinition" && parent.key.type === "Identifier") {
 					pushFunction(parent.key.name);
 				} else pushFunction(undefined);
 			},

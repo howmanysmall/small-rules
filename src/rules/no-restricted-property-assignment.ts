@@ -99,6 +99,7 @@ function getEffectiveOptions(context: Context): EffectiveOptions {
 			fileCandidates.some((filename) => minimatch(filename, pattern, FILE_MATCH_OPTIONS)),
 		) ?? false;
 
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety.
 	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions: restrictions.map(compileRestriction) };
 }
 

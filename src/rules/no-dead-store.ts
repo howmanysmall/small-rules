@@ -119,6 +119,7 @@ function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): bool
 	for (const [leftIndex, left] of coveredPaths.entries()) {
 		for (const [rightIndex, right] of coveredPaths.entries()) {
 			if (rightIndex <= leftIndex) continue;
+
 			const merged = mergePaths(left, right);
 			if (merged === undefined) continue;
 			coveredPaths.splice(rightIndex, 1);
@@ -148,11 +149,10 @@ function usageObservesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<
 function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const root = executionRoot(write.node);
 	const currentPath = branchPath(write.node, root);
-	const coveredPaths: Array<ReadonlyArray<BranchStep>> = [];
+	const coveredPaths = new Array<ReadonlyArray<BranchStep>>();
 
 	for (const usage of usages) {
-		if (usage.node.range[0] <= write.node.range[0]) continue;
-		if (executionRoot(usage.node) !== root) continue;
+		if (usage.node.range[0] <= write.node.range[0] || executionRoot(usage.node) !== root) continue;
 
 		const referencePath = branchPath(usage.node, root);
 		if (!pathsAreCompatible(currentPath, referencePath)) continue;
@@ -242,7 +242,7 @@ function isCaptured(variable: Variable): boolean {
 
 function getVariableUsages(variable: Variable): Array<VariableUsage> {
 	const usages: Array<VariableUsage> = variable.references.map((reference) => ({
-		init: reference.init ?? false,
+		init: reference.init,
 		isRead: reference.isRead(),
 		isWrite: reference.isWrite(),
 		node: reference.identifier,
@@ -251,7 +251,6 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 	for (const definition of variable.defs) {
 		if (
 			definition.type !== "Variable" ||
-			definition.name.type !== "Identifier" ||
 			definition.node.type !== "VariableDeclarator" ||
 			definition.node.init === null ||
 			usages.some((usage) => usage.node.range[0] === definition.name.range[0])

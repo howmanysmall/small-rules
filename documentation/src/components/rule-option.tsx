@@ -33,7 +33,7 @@ export function RuleOption({ highlightedType, option }: RuleOptionProperties): R
 	}
 
 	async function copyDefaultAsync(): Promise<void> {
-		if (option.defaultValue.kind !== "complex" || navigator.clipboard === undefined) {
+		if (option.defaultValue.kind !== "complex") {
 			setCopyStatus("failed");
 			return;
 		}
@@ -41,12 +41,8 @@ export function RuleOption({ highlightedType, option }: RuleOptionProperties): R
 		try {
 			await navigator.clipboard.writeText(option.defaultValue.copyValue);
 			setCopyStatus("copied");
-		} catch (error) {
-			if (error instanceof Error) {
-				setCopyStatus("failed");
-				return;
-			}
-			throw error;
+		} catch {
+			setCopyStatus("failed");
 		}
 	}
 

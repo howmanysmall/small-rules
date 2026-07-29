@@ -1,7 +1,7 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
-import { isNonEmptyString, isNumberRaw } from "$oxc-utilities/type-utilities";
+import { isNonEmptyString, isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -372,6 +372,7 @@ function isLoopNode(node: ESTree.Node): node is LoopNode {
 function findLabeledStatementBody(labelName: string, startingNode: ESTree.Node): ESTree.Statement | undefined {
 	let current: ESTree.Node | null = startingNode;
 
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting rules
 	while (current !== null) {
 		if (current.type === "LabeledStatement" && current.label.name === labelName) return current.body;
 		/* v8 ignore next -- @preserve valid break labels must resolve before Program is reached. */
@@ -391,6 +392,7 @@ function breaksTargetLoop(statement: ESTree.BreakStatement, loopNode: LoopNode):
 
 	let current: ESTree.Node | null = statement.parent;
 
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting rules
 	while (current !== null) {
 		if (current.type === "Program" || isAnyFunction(current) || current.type === "SwitchStatement") {
 			return false;
@@ -580,10 +582,9 @@ function shouldReportLoop(
 
 const noConstantConditionWithBreak = createRule("no-constant-condition-with-break", "general", {
 	create(context): Visitor {
+		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety!
 		const rawOptions = context.options?.[0];
-		const loopExitCalls = normalizeLoopExitCalls(
-			typeof rawOptions === "object" && rawOptions !== null ? rawOptions : undefined,
-		);
+		const loopExitCalls = normalizeLoopExitCalls(isRecord(rawOptions) ? rawOptions : undefined);
 
 		function reportConstantCondition(testExpression: ESTree.Expression): void {
 			const testResult = getConstantBoolean(testExpression);

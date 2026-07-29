@@ -188,10 +188,14 @@ const consistentCompoundWords = createRule("consistent-compound-words", "naming"
 
 		return {
 			Identifier(node): void {
-				if (!options.checkProperties) return;
-				if (node.name === "__proto__") return;
-				if (node.parent?.type === "ExportSpecifier") return;
-				if (!shouldReportPropertyIdentifier(node)) return;
+				if (
+					!options.checkProperties ||
+					node.name === "__proto__" ||
+					node.parent.type === "ExportSpecifier" ||
+					!shouldReportPropertyIdentifier(node)
+				) {
+					return;
+				}
 				reportName(node, node.name);
 			},
 			"Program:exit"(): void {
@@ -201,8 +205,12 @@ const consistentCompoundWords = createRule("consistent-compound-words", "naming"
 					if (variable.defs.length === 0) return;
 					const [definition] = variable.defs;
 					/* v8 ignore next -- non-empty defs arrays always yield a first entry. @preserve */
-					if (definition === undefined) return;
-					if (!options.checkShorthandProperties && isShorthandPropertyValue(definition.name)) return;
+					if (
+						definition === undefined ||
+						(!options.checkShorthandProperties && isShorthandPropertyValue(definition.name))
+					) {
+						return;
+					}
 					reportName(definition.name, variable.name);
 				});
 			},

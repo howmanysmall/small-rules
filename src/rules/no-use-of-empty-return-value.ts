@@ -13,7 +13,7 @@ function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
 		const last = parent.expressions.at(-1);
 		if (last !== child) return false;
 		const { parent: grandParent } = parent;
-		return grandParent !== null && parentUsesValue(grandParent, parent);
+		return parentUsesValue(grandParent, parent);
 	}
 	return (
 		parent.type !== "ExpressionStatement" &&
@@ -26,8 +26,7 @@ function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
 }
 
 function callReturnValueIsUsed(callExpression: ESTree.CallExpression): boolean {
-	const { parent } = callExpression;
-	return parent !== null && parentUsesValue(parent, callExpression);
+	return parentUsesValue(callExpression.parent, callExpression);
 }
 
 function functionFromVariable(variable: Variable): FunctionLike | undefined {
@@ -77,7 +76,7 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				const scope = context.sourceCode.getScope(node);
 				const reference = scope.references.find((entry) => entry.identifier === node.callee);
 				const resolved = reference?.resolved ?? getVariableByName(scope, node.callee.name);
-				if (resolved === null || resolved === undefined) return;
+				if (resolved === undefined) return;
 
 				const functionNode = functionFromVariable(resolved);
 				if (functionNode !== undefined) callExpressionsToCheck.set(node.callee, functionNode);

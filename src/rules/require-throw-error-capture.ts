@@ -60,13 +60,13 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 
 			case "FunctionExpression": {
 				return (
-					(current.parent?.type === "MethodDefinition" || current.parent?.type === "PropertyDefinition") &&
-					current.parent.parent?.type === "ClassBody"
+					(current.parent.type === "MethodDefinition" || current.parent.type === "PropertyDefinition") &&
+					current.parent.parent.type === "ClassBody"
 				);
 			}
 
 			case "ArrowFunctionExpression": {
-				return current.parent?.type === "PropertyDefinition" && current.parent.parent?.type === "ClassBody";
+				return current.parent.type === "PropertyDefinition" && current.parent.parent.type === "ClassBody";
 			}
 
 			default:
@@ -198,8 +198,11 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const allowList = context.options[0]?.allow ?? [];
+
+		// oxlint-disable typescript/no-unnecessary-condition -- so dumb
 		/* v8 ignore next -- @preserve the rule harness and Oxlint provide a physical filename for rule execution. */
 		const physicalFilename = context.physicalFilename ?? "<input>";
+		// oxlint-enable typescript/no-unnecessary-condition -- so dumb
 
 		return {
 			ThrowStatement(node): void {
@@ -227,7 +230,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 							`throw ${variableName};`,
 						].join(`\n`);
 
-						if (node.parent?.type === "BlockStatement") return fixer.replaceText(node, replacement);
+						if (node.parent.type === "BlockStatement") return fixer.replaceText(node, replacement);
 						return fixer.replaceText(node, `{\n${replacement}\n}`);
 					},
 					messageId: "missingCaptureStackTrace",

@@ -42,8 +42,7 @@ const ASSERT_STRICT_METHODS = new Set(["deepStrictEqual", "notDeepStrictEqual", 
 const ASSERT_LOOSE_METHODS = new Set(["deepEqual", "equal", "notDeepEqual", "notEqual"]);
 
 function isFreshReferenceExpression(node: ESTree.Node): boolean {
-	if (node.type === "Literal" && "regex" in node && node.regex !== undefined) return true;
-	return FRESH_REFERENCE_TYPES.has(node.type);
+	return (node.type === "Literal" && "regex" in node) || FRESH_REFERENCE_TYPES.has(node.type);
 }
 
 function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {

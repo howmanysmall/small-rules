@@ -462,8 +462,10 @@ function isComputedPropertyIdentifier(identifier: ESTree.Node): boolean {
 function isInTypePosition(identifier: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve type-position checks are only requested for Identifier nodes. */
 	if (identifier.type !== "Identifier") return false;
+	// oxlint-disable typescript/no-unnecessary-condition -- no.
 	/* v8 ignore next -- @preserve parser-provided identifiers have parent links inside the visited closure tree. */
 	let parent: ESTree.Node | undefined = identifier.parent ?? undefined;
+	// oxlint-enable typescript/no-unnecessary-condition -- lol.
 
 	while (parent) {
 		if (TS_RUNTIME_EXPRESSIONS.has(parent.type)) {

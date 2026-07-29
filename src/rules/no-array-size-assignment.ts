@@ -84,6 +84,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
+			// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
 			return node.property.type === "Identifier" || node.property.type === "PrivateIdentifier";
 		}
 

@@ -110,7 +110,7 @@ function isJsxAttributeValueReference(node: ESTree.Node): boolean {
 	const parent = ascendPastWrappers(node.parent ?? undefined);
 	return (
 		parent?.type === "JSXExpressionContainer" &&
-		parent.parent?.type === "JSXAttribute" &&
+		parent.parent.type === "JSXAttribute" &&
 		unwrapReferenceValue(parent.expression) === node
 	);
 }
@@ -144,7 +144,7 @@ function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunct
 
 	const { parent } = node;
 	/* v8 ignore next -- @preserve non-declaration callbacks reach this helper only from variable declarators. */
-	if (parent?.type !== "VariableDeclarator") return undefined;
+	if (parent.type !== "VariableDeclarator") return undefined;
 
 	const declared = sourceCode.getDeclaredVariables(parent);
 	/* v8 ignore next -- @preserve identifier variable declarators always declare one variable. */

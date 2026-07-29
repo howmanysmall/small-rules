@@ -260,7 +260,7 @@ function getInlineInitializerText(sourceCode: SourceCode, initializer: ESTree.Ex
 function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree.VariableDeclaration): boolean {
 	const { parent } = first;
 	/* v8 ignore next -- @preserve VariableDeclaration parents visited by this rule are Program or BlockStatement containers. */
-	if (parent === undefined || parent === null || !isStatementContainer(parent)) return false;
+	if (!isStatementContainer(parent)) return false;
 
 	const { body } = parent;
 	for (let index = 0; index < body.length; index += 1) {
@@ -304,10 +304,10 @@ function getDeclarationRemovalRange(
 }
 
 function findEnclosingConstDeclarator(node: ESTree.Node): ESTree.VariableDeclarator | undefined {
-	let current: ESTree.Node | null | undefined = node.parent;
+	let current: ESTree.Node | null = node.parent;
 	let previous: ESTree.Node = node;
 
-	while (current !== undefined && current !== null) {
+	while (current !== null) {
 		if (isVariableDeclarator(current) && current.init === previous) return current;
 
 		previous = current;
@@ -327,18 +327,16 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 		function hasAttachedComments(node: ESTree.Node): boolean {
 			if (sourceCode.getCommentsInside(node).length > 0) return true;
 
-			const nodeStartLine = node.loc?.start.line;
-			const nodeEndLine = node.loc?.end.line;
-			/* v8 ignore next -- @preserve parser-provided rule nodes always include location data. */
-			if (nodeStartLine === undefined || nodeEndLine === undefined) return false;
+			const nodeStartLine = node.loc.start.line;
+			const nodeEndLine = node.loc.end.line;
 
 			for (const comment of sourceCode.getCommentsBefore(node)) {
-				const commentEndLine = comment.loc?.end.line;
+				const commentEndLine = comment.loc.end.line;
 				if (commentEndLine === nodeStartLine || commentEndLine === nodeStartLine - 1) return true;
 			}
 
 			for (const comment of sourceCode.getCommentsAfter(node)) {
-				const commentStartLine = comment.loc?.start.line;
+				const commentStartLine = comment.loc.start.line;
 				if (commentStartLine === nodeEndLine || commentStartLine === nodeEndLine + 1) return true;
 			}
 

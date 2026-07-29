@@ -77,7 +77,7 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 	);
 
 	async function copyExampleAsync(code: Element): Promise<void> {
-		await navigator.clipboard.writeText(code.textContent ?? "");
+		await navigator.clipboard.writeText(code.textContent);
 		setCopied(true);
 	}
 

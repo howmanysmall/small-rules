@@ -1,6 +1,6 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getReactSources, forEachReactNamedImport, isEnvironment } from "$oxc-utilities/react-utilities";
+import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";

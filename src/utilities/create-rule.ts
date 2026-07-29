@@ -1,6 +1,6 @@
 import type {
-	CreateRule,
 	CreateOnceRule,
+	CreateRule,
 	DefaultOptionsFromSchema,
 	RuleSchemaDefinition,
 } from "oxlint-plugin-utilities";

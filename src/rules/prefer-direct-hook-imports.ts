@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getReactSourcesFromOptions, ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";

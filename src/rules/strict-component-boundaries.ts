@@ -1,8 +1,8 @@
-import path from "node:path";
+import nodePath from "node:path";
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
-import { isStringRaw } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -16,7 +16,7 @@ function hasAnotherComponentInPath(pathParts: ReadonlyArray<string>): boolean {
 	return pathParts.some((part) => part === toPascalCase(part) && !part.includes("."));
 }
 function isIndexFile(filePath: string): boolean {
-	return path.basename(filePath, path.extname(filePath)) === "index";
+	return nodePath.basename(filePath, nodePath.extname(filePath)) === "index";
 }
 function isValidFixtureImport(pathParts: ReadonlyArray<string>): boolean {
 	if (!pathParts.includes("fixtures")) return false;
@@ -29,9 +29,9 @@ function isValidFixtureImport(pathParts: ReadonlyArray<string>): boolean {
 
 const strictComponentBoundaries = createRule("strict-component-boundaries", "react", {
 	create(context): Visitor {
+		// oxlint-disable-next-line typescript/no-unnecessary-condition -- false flag.
 		const rawOptions = context.options?.[0];
-		const { allow = [], maxDepth = 1 } =
-			typeof rawOptions === "object" && rawOptions !== null ? rawOptions : { allow: [], maxDepth: 1 };
+		const { allow = [], maxDepth = 1 } = isRecord(rawOptions) ? rawOptions : { allow: [], maxDepth: 1 };
 
 		const allowPatterns = allow.map((pattern) => new RegExp(pattern, "u"));
 
@@ -48,7 +48,7 @@ const strictComponentBoundaries = createRule("strict-component-boundaries", "rea
 				const resolved = resolveRelativeImport(importSource, filename);
 				if (!resolved.found) return;
 
-				const pathDifference = path.relative(filename, resolved.path).replaceAll("\\", "/");
+				const pathDifference = nodePath.relative(filename, resolved.path).replaceAll("\\", "/");
 				const pathParts = pathSegmentsFromSource(pathDifference);
 				const traversals = countParentTraversals(pathDifference);
 

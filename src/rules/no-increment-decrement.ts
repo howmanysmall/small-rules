@@ -5,7 +5,7 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 	const { parent } = node;
-	return parent?.type === "ExpressionStatement" || (parent?.type === "ForStatement" && parent.update === node);
+	return parent.type === "ExpressionStatement" || (parent.type === "ForStatement" && parent.update === node);
 }
 
 const noIncrementDecrement = createRule("no-increment-decrement", "general", {

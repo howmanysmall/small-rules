@@ -116,9 +116,9 @@ function getExecuteScriptPropertyReason(node: ESTree.Node): string | undefined {
 	}
 	const objectExpression = property.parent;
 	/* v8 ignore next -- Property parents in this path are ObjectExpression nodes. @preserve */
-	if (objectExpression?.type !== "ObjectExpression") return undefined;
+	if (objectExpression.type !== "ObjectExpression") return undefined;
 	const call = objectExpression.parent;
-	if (call?.type !== "CallExpression" || call.arguments[0] !== objectExpression) return undefined;
+	if (call.type !== "CallExpression" || call.arguments[0] !== objectExpression) return undefined;
 	const scriptingObjectName = getScriptingObjectName(call);
 	if (scriptingObjectName === undefined) return undefined;
 	return `property "func" passed to "${scriptingObjectName}.scripting.executeScript"`;

@@ -8,7 +8,7 @@ import {
 	isStaticArrayExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { isRecord, isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
+import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";

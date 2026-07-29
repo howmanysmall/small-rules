@@ -1,6 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
-import { isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
+import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
