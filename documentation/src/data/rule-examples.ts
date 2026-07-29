@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
 import { extractRuleExamples } from "../utilities/extract-rule-examples";

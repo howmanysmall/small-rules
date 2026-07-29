@@ -1,7 +1,7 @@
 #!/usr/bin/env nub
 
 import { resolve } from "node:path";
-import { exit, argv } from "node:process";
+import { argv, exit } from "node:process";
 import { $ } from "zx";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
