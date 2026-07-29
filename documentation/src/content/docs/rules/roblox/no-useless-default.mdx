@@ -4,4 +4,12 @@ title: "No Useless Default"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-useless-default" />
+<RulePage rule="no-useless-default">
+	<Fragment slot="rationale">
+		<p>
+			Default parameters that just assign the value the type already defaults to (like `undefined` for an optional
+			field) are just noise. They don't change the behavior of the function; they just make the signature longer.
+		</p>
+		<p>Keep your signatures lean. If the default doesn't actually provide a meaningful fallback, TAKE IT OUT.</p>
+	</Fragment>
+</RulePage>
