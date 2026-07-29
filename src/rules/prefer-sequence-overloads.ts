@@ -1,7 +1,7 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isNumericLiteralValue(node: ESTree.Node, value: number): node is ESTree.NumericLiteral {
 	return isNumericLiteral(node) && node.value === value;
@@ -32,7 +32,7 @@ interface SequenceReplacement {
 }
 
 function getDirectArgumentReplacement(
-	context: { sourceCode: { getText: (node: ESTree.Node) => string } },
+	context: Context,
 	node: ESTree.NewExpression,
 	sequenceName: string,
 ): SequenceReplacement | undefined {
@@ -55,7 +55,7 @@ function getDirectArgumentReplacement(
 }
 
 function getKeypointArrayReplacement(
-	context: { sourceCode: { getText: (node: ESTree.Node) => string } },
+	context: Context,
 	node: ESTree.NewExpression,
 	sequenceName: string,
 	keypointName: string,
