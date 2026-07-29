@@ -4,4 +4,32 @@ title: "No Increment Decrement"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-increment-decrement" />
+<RulePage rule="no-increment-decrement">
+	<Fragment slot="rationale">
+		<p>My reasoning for this rule are pretty much identical to why Swift removed them back in Swift 3.</p>
+		<ul>
+			<li>
+				**Low utility relative to the readability loss:** these operators only save a few characters compared to
+				`value += 1` or `value -= 1`. Almost never worth it.
+			</li>
+			<li>
+				**Prefix vs postfix confusion:** having both `++value` and `value++` is confusing. It can also lead to
+				fun subtle bugs, especially when you nest them inside larger expressions where evaluation order matters.
+			</li>
+			<li>
+				**Redundancy:** the increment and decrement operators are redundant with `+=` and `-=`, which are more
+				general and therefore more useful. You can increment or decrement by any value, not just 1.
+			</li>
+			<li>
+				**Clarity over brevity:** we like to prioritize explicit and readable code. Writing `value += 1` makes
+				the intent immediately clear without requiring anyone to puzzle over operator precedence.
+			</li>
+		</ul>
+		<p>
+			Now, where I differ on Swift is instead of banning it entirely, I allow it for `array[size++] = value`
+			expressions. I already prefer doing this over `array.push(value)` when possible for performance reasons, and
+			I think the increment operator is a nice shorthand for this specific use case. That is why this rule exists
+			when the native Oxlint version also does.
+		</p>
+	</Fragment>
+</RulePage>
