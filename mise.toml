@@ -9,6 +9,7 @@ auto_install = false
 experimental = true
 github_attestations = false
 lockfile = true
+provenance_api_failures_fatal = false
 
 [tools]
 "cargo:similarity-ts" = "latest"
