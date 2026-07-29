@@ -4,4 +4,13 @@ title: "No Recursive"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-recursive" />
+<RulePage rule="no-recursive">
+	<Fragment slot="rationale">
+		<p>
+			This lint will yell at you over recursion. If you don't know, Luau does [not support
+			TCO](https://github.com/luau-lang/luau/discussions/1183#discussioncomment-8719963) (why I added this rule
+			specifically) and NASA also hates it. This is good if you are writing code that prioritizes performance and
+			safety.
+		</p>
+	</Fragment>
+</RulePage>
