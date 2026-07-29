@@ -188,6 +188,124 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-
 version = "0.5.0"
 backend = "cargo:similarity-ts"
 
+[[tools.communique]]
+version = "1.2.3"
+backend = "github:jdx/communique"
+
+[tools.communique."platforms.linux-arm64"]
+checksum = "sha256:083e1dd1a0c3894118af9b80d9feea11ed7470f7161964719d8073905fc9e4aa"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186422"
+provenance = "github-attestations"
+
+[tools.communique."platforms.linux-arm64-musl"]
+checksum = "sha256:bab19453334ca0df1de46e7b33dda2f26abc7bae132aaf5d2ba629462c9c468f"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186389"
+provenance = "github-attestations"
+
+[tools.communique."platforms.linux-x64"]
+checksum = "sha256:180f970282986f27f7fa9ee216e4971e8dec3624869d4222f22f3e2535fccc58"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186105"
+provenance = "github-attestations"
+
+[tools.communique."platforms.linux-x64-baseline"]
+checksum = "sha256:180f970282986f27f7fa9ee216e4971e8dec3624869d4222f22f3e2535fccc58"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186105"
+provenance = "github-attestations"
+
+[tools.communique."platforms.linux-x64-musl"]
+checksum = "sha256:23010d19c9dc0bb09fefc43916b03b7b16f0d07761980bb54166170ce85d9112"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186277"
+provenance = "github-attestations"
+
+[tools.communique."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:23010d19c9dc0bb09fefc43916b03b7b16f0d07761980bb54166170ce85d9112"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186277"
+provenance = "github-attestations"
+
+[tools.communique."platforms.macos-arm64"]
+checksum = "sha256:668683480d8b8d62de9616c3a2258f802daf6ce3440d2fa6cf1f7d72eecade89"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186196"
+provenance = "github-attestations"
+provenance_verified = true
+
+[tools.communique."platforms.windows-x64"]
+checksum = "sha256:63f2370f9c6ff97b31f9be266d8860dd65dce0aafb269c492de7cdbb9d29d782"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186666"
+provenance = "github-attestations"
+
+[tools.communique."platforms.windows-x64-baseline"]
+checksum = "sha256:63f2370f9c6ff97b31f9be266d8860dd65dce0aafb269c492de7cdbb9d29d782"
+url = "https://github.com/jdx/communique/releases/download/v1.2.3/communique-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/jdx/communique/releases/assets/477186666"
+provenance = "github-attestations"
+
+[[tools.git-cliff]]
+version = "2.10.0"
+backend = "aqua:orhun/git-cliff"
+
+[tools.git-cliff."platforms.linux-arm64"]
+checksum = "sha256:950fc9f3de372f387b4a208276a2fe3db4de0a9af31192b490355bc995585e16"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276794041"
+
+[tools.git-cliff."platforms.linux-arm64-musl"]
+checksum = "sha256:950fc9f3de372f387b4a208276a2fe3db4de0a9af31192b490355bc995585e16"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276794041"
+
+[tools.git-cliff."platforms.linux-x64"]
+checksum = "sha256:1cf5298984816684c408b365a3bf772422a69a40a37b694498e91b02e1825fd8"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276793879"
+
+[tools.git-cliff."platforms.linux-x64-baseline"]
+checksum = "sha256:1cf5298984816684c408b365a3bf772422a69a40a37b694498e91b02e1825fd8"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276793879"
+
+[tools.git-cliff."platforms.linux-x64-musl"]
+checksum = "sha256:1cf5298984816684c408b365a3bf772422a69a40a37b694498e91b02e1825fd8"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276793879"
+
+[tools.git-cliff."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:1cf5298984816684c408b365a3bf772422a69a40a37b694498e91b02e1825fd8"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276793879"
+
+[tools.git-cliff."platforms.macos-arm64"]
+checksum = "sha256:a2c37949a7fe6929ba0c7e1628f650aa4e9d2e616b3f32d502feedf3f72f5950"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276793856"
+
+[tools.git-cliff."platforms.macos-x64"]
+checksum = "sha256:bc03321d61383241003c6bc983f3010c88eedad4b2807c35a3f2f314e34e831b"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276794064"
+
+[tools.git-cliff."platforms.macos-x64-baseline"]
+checksum = "sha256:bc03321d61383241003c6bc983f3010c88eedad4b2807c35a3f2f314e34e831b"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276794064"
+
+[tools.git-cliff."platforms.windows-x64"]
+checksum = "sha256:460a455bf0c6f4a0a9f5bab31d151ed483451dfd5bf60ddfa5eb6a1173b0d1cd"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276794299"
+
+[tools.git-cliff."platforms.windows-x64-baseline"]
+checksum = "sha256:460a455bf0c6f4a0a9f5bab31d151ed483451dfd5bf60ddfa5eb6a1173b0d1cd"
+url = "https://github.com/orhun/git-cliff/releases/download/v2.10.0/git-cliff-2.10.0-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/orhun/git-cliff/releases/assets/276794299"
+
 [[tools."github:howmanysmall/pullhook"]]
 version = "1.1.1"
 backend = "github:howmanysmall/pullhook"
@@ -863,6 +981,9 @@ checksum = "sha256:324e43770cfacf4216f8aefb287263b5b5c733c85b03bf7583b5cc4a04602
 url = "https://github.com/zizmorcore/zizmor/releases/download/v1.28.0/zizmor-aarch64-unknown-linux-gnu.tar.gz"
 url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/485211654"
 
+[tools.zizmor."platforms.linux-arm64-musl"]
+provenance = "github-attestations"
+
 [tools.zizmor."platforms.linux-x64"]
 checksum = "sha256:e87b67160194884e375a46a12c57ccc904f762b53845f254fab7f17d98809c09"
 url = "https://github.com/zizmorcore/zizmor/releases/download/v1.28.0/zizmor-x86_64-unknown-linux-gnu.tar.gz"
@@ -872,6 +993,12 @@ url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/485211
 checksum = "sha256:e87b67160194884e375a46a12c57ccc904f762b53845f254fab7f17d98809c09"
 url = "https://github.com/zizmorcore/zizmor/releases/download/v1.28.0/zizmor-x86_64-unknown-linux-gnu.tar.gz"
 url_api = "https://api.github.com/repos/zizmorcore/zizmor/releases/assets/485211657"
+
+[tools.zizmor."platforms.linux-x64-musl"]
+provenance = "github-attestations"
+
+[tools.zizmor."platforms.linux-x64-musl-baseline"]
+provenance = "github-attestations"
 
 [tools.zizmor."platforms.macos-arm64"]
 checksum = "sha256:54949bbd6b4c8527046bb8990bac9e0dab3eec787640f4e6199ae121dd1040be"
