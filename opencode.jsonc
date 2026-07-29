@@ -320,12 +320,7 @@
 		"webfetch": "allow",
 		"websearch": "allow",
 	},
-	"plugin": [
-		"opencode-wakatime",
-		"@nick-vi/opencode-type-inject",
-		"@mohak34/opencode-notifier@latest",
-		"opencode-goal-plugin",
-	],
+	"plugin": ["@nick-vi/opencode-type-inject", "@mohak34/opencode-notifier@latest", "opencode-goal-plugin"],
 	"provider": {
 		"openai": {
 			"models": {
