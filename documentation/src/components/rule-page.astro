@@ -1,6 +1,5 @@
 ---
-import { getRuleFacts } from "@/data/rule-facts";
-import { ruleManifest } from "@/data/rule-manifest";
+import { getRuleEntry, getRuleFacts } from "@/data/rule-facts";
 import type { RuleName } from "@/data/rule-manifest";
 import { Badge } from "./badge";
 import { RelatedRules } from "./related-rules";
@@ -15,10 +14,8 @@ interface Props {
 
 const { rule } = Astro.props;
 const facts = getRuleFacts(rule);
-const entry = ruleManifest.categories
-	.flatMap((category) => category.rules)
-	.find((candidate) => candidate.name === rule);
-const exampleExemption = entry !== undefined && "exampleExemption" in entry ? entry.exampleExemption : undefined;
+const entry = getRuleEntry(rule);
+const exampleExemption = entry?.exampleExemption;
 ---
 
 <div class="rule-badges" aria-label="Rule characteristics">

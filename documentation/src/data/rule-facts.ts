@@ -87,6 +87,23 @@ export function getRuleFacts(ruleName: RuleName): RuleFacts {
 	throw error;
 }
 
+export function getRuleEntry(ruleName: RuleName): RuleCategoryManifest | undefined {
+	let ruleCategoryManifest: RuleCategoryManifest | undefined;
+
+	for (const category of ruleManifest.categories) {
+		for (const candidate of category.rules) {
+			if (candidate.name === ruleName) {
+				ruleCategoryManifest = category;
+				break;
+			}
+		}
+
+		if (ruleCategoryManifest !== undefined) break;
+	}
+
+	return ruleCategoryManifest;
+}
+
 function createRuleFactCategory(category: RuleCategoryManifest): RuleFactCategory {
 	const rules = category.rules.map((entry) => getRuleFacts(entry.name));
 
