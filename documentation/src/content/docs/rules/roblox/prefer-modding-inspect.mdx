@@ -4,4 +4,15 @@ title: "Prefer `Modding.inspect`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="prefer-modding-inspect" />
+<RulePage rule="prefer-modding-inspect">
+	<Fragment slot="rationale">
+		<p>
+			Writing `Record<SomeEnum, true>` by hand means listing every enum member as `Member: true`. Pointless busywork,
+			and you have to touch it every time the enum changes.
+		</p>
+		<p>
+			`Modding.inspect<Record<SomeEnum, true>>()` generates that map from the enum automatically whenever a new item is
+			added — so there's just less to maintain. This catches the hand-written literal form and auto-fixes it.
+		</p>
+	</Fragment>
+</RulePage>
