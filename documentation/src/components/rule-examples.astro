@@ -6,7 +6,7 @@ import type { RuleName } from "@/data/rule-manifest";
 import { RuleExample } from "./rule-example";
 
 interface Props {
-	readonly exemption?: string;
+	readonly exemption?: string | undefined;
 	readonly rule: RuleName;
 }
 

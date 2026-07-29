@@ -87,21 +87,21 @@ export function getRuleFacts(ruleName: RuleName): RuleFacts {
 	throw error;
 }
 
-export function getRuleEntry(ruleName: RuleName): RuleCategoryManifest | undefined {
-	let ruleCategoryManifest: RuleCategoryManifest | undefined;
+export function getRuleEntry(ruleName: RuleName): RuleManifestEntry | undefined {
+	let ruleManifestEntry: RuleManifestEntry | undefined;
 
 	for (const category of ruleManifest.categories) {
 		for (const candidate of category.rules) {
 			if (candidate.name === ruleName) {
-				ruleCategoryManifest = category;
+				ruleManifestEntry = candidate;
 				break;
 			}
 		}
 
-		if (ruleCategoryManifest !== undefined) break;
+		if (ruleManifestEntry !== undefined) break;
 	}
 
-	return ruleCategoryManifest;
+	return ruleManifestEntry;
 }
 
 function createRuleFactCategory(category: RuleCategoryManifest): RuleFactCategory {
