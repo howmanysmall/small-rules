@@ -4,4 +4,20 @@ title: "No Instance Methods Without `this`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-instance-methods-without-this" />
+<RulePage rule="no-instance-methods-without-this">
+	<Fragment slot="rationale">
+		<p>
+			If a method never touches `this`, it shouldn't be a method. In roblox-ts, instance methods carry metatable
+			overhead even when they don't use the instance. A standalone function is just faster.
+		</p>
+		<p>
+			This catches any non-static method that doesn't reference `this` or `super` anywhere in its body. You can
+			scope it with `checkPrivate`, `checkProtected`, and `checkPublic` if you only care about some visibility
+			levels.
+		</p>
+		<p>
+			Won't fire on static methods or constructors -- those are fine. Only flags genuine instance methods that
+			could be free functions.
+		</p>
+	</Fragment>
+</RulePage>
