@@ -44,6 +44,7 @@
 		"changelogithub": "changelogithub",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F docs build",
+		"docs:check": "nr -F docs check",
 		"docs:dev": "nr -F docs dev",
 		"doctor": "npx react-doctor@latest",
 		"format": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run biome -- check --fix $a && node --run oxfmt -- $a' _",
