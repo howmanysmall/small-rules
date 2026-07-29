@@ -1,4 +1,5 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { classifyDependencies, DependenciesKind } from "$oxc-utilities/react-hook-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -8,7 +9,6 @@ import {
 	isStaticArrayExpression,
 	isStaticObjectExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -96,7 +96,7 @@ function isSpringHookCall({ callee }: ESTree.CallExpression, options: Normalized
 	return false;
 }
 
-const noUselessUseSpring = defineRule({
+const noUselessUseSpring = createRule("no-useless-use-spring", "react", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 		const normalized: NormalizedOptions = {
@@ -140,7 +140,6 @@ const noUselessUseSpring = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow useSpring hooks whose config and dependencies are entirely static",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-useless-use-spring/",
 		},
 		messages: {
 			uselessSpring:

@@ -1,5 +1,5 @@
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -269,7 +269,7 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 	return usages.toSorted((left, right) => left.node.range[0] - right.node.range[0]);
 }
 
-const noDeadStore = defineRule({
+const noDeadStore = createRule("no-dead-store", "general", {
 	create(context): Visitor {
 		return {
 			Program(): void {
@@ -291,7 +291,6 @@ const noDeadStore = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow assignments whose value is never read.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-dead-store/",
 		},
 		messages: { deadStore: 'The value assigned to "{{name}}" is never read.' },
 		schema: [],

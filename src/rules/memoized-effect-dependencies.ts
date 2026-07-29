@@ -1,7 +1,7 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getReactSources, forEachReactNamedImport, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -82,7 +82,7 @@ function registerConfiguredEffectHooks(
 	}
 }
 
-const memoizedEffectDependencies = defineRule({
+const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "react", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 		const options = isRecord(rawOptions) ? rawOptions : {};
@@ -310,7 +310,6 @@ const memoizedEffectDependencies = defineRule({
 		docs: {
 			description:
 				"Flags effect dependencies that are not memoized. Unmemoized dependencies can cause unnecessary re-renders or infinite loops.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/memoized-effect-dependencies/",
 		},
 		messages: {
 			unmemoizedDependency:

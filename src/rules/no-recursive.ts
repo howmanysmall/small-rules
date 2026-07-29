@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -55,7 +55,7 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 	return inCycle;
 }
 
-const noRecursive = defineRule({
+const noRecursive = createRule("no-recursive", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
@@ -218,7 +218,6 @@ const noRecursive = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow recursive function calls to prevent stack overflow.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-recursive/",
 		},
 		messages: {
 			noRecursive:

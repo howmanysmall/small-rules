@@ -1,5 +1,5 @@
 import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -27,7 +27,7 @@ function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expre
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
 
-const noTableCreateMap = defineRule({
+const noTableCreateMap = createRule("no-table-create-map", "roblox", {
 	create(context): Visitor {
 		return {
 			CallExpression(node): void {
@@ -56,7 +56,6 @@ const noTableCreateMap = defineRule({
 		docs: {
 			description:
 				"Disallow map(...) directly on table.create(...) and new Array(...) constructor patterns in roblox-ts.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-table-create-map/",
 		},
 		messages: {
 			avoidConstructThenMap:

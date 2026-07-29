@@ -1,6 +1,6 @@
 import { forEachScopeVariable, getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -272,7 +272,7 @@ function indirectComparisonOperands(
 	return undefined;
 }
 
-const noFloatingPointEquality = defineRule({
+const noFloatingPointEquality = createRule("no-floating-point-equality", "general", {
 	create(context): Visitor {
 		return {
 			Program(program): void {
@@ -302,7 +302,6 @@ const noFloatingPointEquality = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow exact comparisons involving inexact floating-point values.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-floating-point-equality/",
 		},
 		messages: {
 			exactFloatComparison: "Compare floating-point results within a tolerance instead of for exact equality.",

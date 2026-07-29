@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
 const SPEC_EXTENSION_PATTERN = /\.spec\.(?:ts|tsx)$/u;
 
-const noSpecFileExtension = defineRule({
+const noSpecFileExtension = createRule("no-spec-file-extension", "naming", {
 	createOnce(context): Visitor {
 		return {
 			Program(node): void {
@@ -22,7 +22,6 @@ const noSpecFileExtension = defineRule({
 		docs: {
 			description: "Disallow the .spec.{ts,tsx} file extension for test files. Use .test.{ts,tsx} instead.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/no-spec-file-extension/",
 		},
 		messages: {
 			noSpecFileExtension:

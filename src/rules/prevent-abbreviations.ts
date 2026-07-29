@@ -1,3 +1,4 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
 	isIdentifierName,
@@ -44,7 +45,6 @@ import {
 	shouldReportIdentifierAsProperty,
 } from "$oxc-utilities/prevent-abbreviations/scope";
 import { isNumberRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
 import type {
@@ -372,7 +372,7 @@ function getFixablePropertyReplacement(
 	return undefined;
 }
 
-const preventAbbreviations = defineRule({
+const preventAbbreviations = createRule("prevent-abbreviations", "naming", {
 	create(context): Visitor {
 		const options = prepareOptions(context.options[0]);
 		const filenameWithExtension = context.physicalFilename;
@@ -431,7 +431,6 @@ const preventAbbreviations = defineRule({
 		docs: {
 			description: "Prevent abbreviations.",
 			recommended: false,
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/prevent-abbreviations/",
 		},
 		fixable: "code",
 		messages: {

@@ -1,8 +1,8 @@
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -46,7 +46,7 @@ function getComponentAssignmentDetails(node: ESTree.Node): ComponentDetails | un
 	return { body: node.init.body, name, nameNode: node.id };
 }
 
-const noGiantComponent = defineRule({
+const noGiantComponent = createRule("no-giant-component", "react", {
 	create(context): Visitor {
 		function reportOversizedComponent(node: ESTree.Node, name: string, body: ESTree.Node): void {
 			const lineCount = getLineCount(body);
@@ -76,7 +76,6 @@ const noGiantComponent = defineRule({
 		docs: {
 			description: "Report React components whose bodies exceed 300 lines.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-giant-component/",
 		},
 		messages: {
 			giantComponent:

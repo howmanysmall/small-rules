@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
 
@@ -46,7 +46,7 @@ function isTrueObjectExpression(node: ESTree.Expression | null | undefined): boo
 	return true;
 }
 
-const preferModdingInspect = defineRule({
+const preferModdingInspect = createRule("prefer-modding-inspect", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
@@ -79,7 +79,6 @@ const preferModdingInspect = defineRule({
 		docs: {
 			description: "Prefer Modding.inspect over manually enumerating every enum member in a Record<Enum, true>.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-modding-inspect/",
 		},
 		fixable: "code",
 		messages: {

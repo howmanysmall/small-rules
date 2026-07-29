@@ -1,9 +1,9 @@
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getImportedName, isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -170,7 +170,7 @@ function isStaticElementArgument(
 	return false;
 }
 
-const noStaticReactCreateElement = defineRule({
+const noStaticReactCreateElement = createRule("no-static-react-create-element", "react", {
 	create(context): Visitor {
 		const reactSources = getReactSourcesFromOptions(context.options[0]);
 		const { sourceCode } = context;
@@ -194,7 +194,6 @@ const noStaticReactCreateElement = defineRule({
 		docs: {
 			description: "Require JSX for static React.createElement calls.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-static-react-create-element/",
 		},
 		messages: {
 			useJsx: "Use JSX instead of static React.createElement calls.",

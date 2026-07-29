@@ -1,3 +1,4 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
 import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
@@ -8,7 +9,6 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isRecord, isStringRaw, isStringArray } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
@@ -92,7 +92,7 @@ function dependenciesAreNonUpdating(dependenciesKind: DependenciesKind, options:
 	}
 }
 
-const noUselessUseMemo = defineRule({
+const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
 		const staticOptions = toStaticExpressionOptions(options);
@@ -138,7 +138,6 @@ const noUselessUseMemo = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow useMemo calls that only wrap values static enough to live at module scope.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-useless-use-memo/",
 		},
 		messages: {
 			uselessUseMemo:

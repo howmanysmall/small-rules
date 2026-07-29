@@ -4,8 +4,8 @@ import {
 	hasShadowedBinding,
 	unwrapExpression,
 } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { classHasYieldingMember } from "../generated/roblox-yielding-members";
 
@@ -428,7 +428,7 @@ function reportYieldingCalls(
 	for (const activeFunction of activeFunctions) inspectActiveFunction(activeFunction);
 }
 
-const noAsyncInSystem = defineRule({
+const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 	create(context): Visitor {
 		const additionalSystemTypeNames = context.options[0]?.additionalSystemTypeNames ?? [];
 		const callbackParameterTypes = context.options[0]?.callbackParameterTypes ?? [];
@@ -494,7 +494,6 @@ const noAsyncInSystem = defineRule({
 		docs: {
 			description: "Disallow yielding Roblox API calls in synchronous Planck system execution.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-async-in-system/",
 		},
 		messages: {
 			noAsyncInSystem: "Do not call a yielding Roblox API from a synchronous Planck system.",

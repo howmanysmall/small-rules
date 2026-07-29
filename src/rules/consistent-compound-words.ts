@@ -1,6 +1,6 @@
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -172,7 +172,7 @@ function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {
 	return false;
 }
 
-const consistentCompoundWords = defineRule({
+const consistentCompoundWords = createRule("consistent-compound-words", "naming", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
 
@@ -212,7 +212,6 @@ const consistentCompoundWords = defineRule({
 		docs: {
 			description: "Enforce consistent spelling of compound words in identifiers.",
 			recommended: false,
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/consistent-compound-words/",
 		},
 		messages: {
 			error: "Prefer `{{replacement}}` over `{{name}}`.",

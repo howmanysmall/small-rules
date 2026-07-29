@@ -1,7 +1,7 @@
 import { isSimpleExpression } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isHookCall } from "$oxc-utilities/lint-utilities";
 import { getEffectCallback } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -17,7 +17,7 @@ function getReturnExpression(callback: CallbackFunction): ESTree.Expression | un
 	return onlyStatement.argument ?? undefined;
 }
 
-const noUseMemoSimpleExpression = defineRule({
+const noUseMemoSimpleExpression = createRule("no-use-memo-simple-expression", "react", {
 	create(context): Visitor {
 		return {
 			CallExpression(node): void {
@@ -40,7 +40,6 @@ const noUseMemoSimpleExpression = defineRule({
 		docs: {
 			description: "Disallow useMemo for expressions that are already trivial to compute.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-use-memo-simple-expression/",
 		},
 		messages: {
 			simpleMemo: "useMemo wrapping a trivially cheap expression - memo overhead exceeds the computation",

@@ -1,11 +1,11 @@
 import { extname } from "node:path";
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -126,7 +126,7 @@ function getContextStackReplacement(
 	return `<${componentName} providers={[${providers.join(", ")}]}>${children}</${componentName}>`;
 }
 
-const preferContextStack = defineRule({
+const preferContextStack = createRule("prefer-context-stack", "react", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
 		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
@@ -189,7 +189,6 @@ const preferContextStack = defineRule({
 	meta: {
 		docs: {
 			description: "Prefer a local ContextStack component over directly nesting multiple context providers.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-context-stack/",
 		},
 		fixable: "code",
 		messages: {

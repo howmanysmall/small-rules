@@ -1,7 +1,7 @@
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 import { isNode } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -64,7 +64,7 @@ function getComponentAssignmentParameters(node: ESTree.Node): ReadonlyArray<ESTr
 	return [...node.init.params];
 }
 
-const rerenderMemoWithDefaultValue = defineRule({
+const rerenderMemoWithDefaultValue = createRule("rerender-memo-with-default-value", "react", {
 	create(context): Visitor {
 		return {
 			FunctionDeclaration(node): void {
@@ -81,7 +81,6 @@ const rerenderMemoWithDefaultValue = defineRule({
 		docs: {
 			description: "Prevent inline empty object and array defaults in component prop destructuring.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/rerender-memo-with-default-value/",
 		},
 		messages: {
 			emptyArrayDefault:

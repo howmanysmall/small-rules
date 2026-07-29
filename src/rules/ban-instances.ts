@@ -1,7 +1,7 @@
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringRaw, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -110,7 +110,7 @@ function getVariableDeclaratorForNewExpression(node: ESTree.NewExpression): ESTr
 	return parent;
 }
 
-const banInstances = defineRule({
+const banInstances = createRule("ban-instances", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const [rawOptions] = context.options;
@@ -254,7 +254,6 @@ const banInstances = defineRule({
 	meta: {
 		docs: {
 			description: "Ban specified Roblox Instance classes and configured Instance properties.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/ban-instances/",
 		},
 		messages: {
 			bannedInstance:

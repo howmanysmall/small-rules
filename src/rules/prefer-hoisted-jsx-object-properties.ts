@@ -1,10 +1,10 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
 	isModuleLevelScope,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -95,7 +95,7 @@ function reportHoistableObjectProperties(context: Context, objectExpression: EST
 	}
 }
 
-const preferHoistedJsxObjectProperties = defineRule({
+const preferHoistedJsxObjectProperties = createRule("prefer-hoisted-jsx-object-properties", "react", {
 	create(context): Visitor {
 		return {
 			JSXAttribute(node): void {
@@ -123,7 +123,6 @@ const preferHoistedJsxObjectProperties = defineRule({
 		docs: {
 			description:
 				"Prefer extracting inline JSX object props to module-level constants when the entire object is statically hoistable.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-hoisted-jsx-object-properties/",
 		},
 		messages: {
 			hoistableObjectProp:

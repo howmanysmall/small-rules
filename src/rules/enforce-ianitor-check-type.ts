@@ -1,5 +1,5 @@
 // oxlint-disable max-params -- nobody cares lol
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -455,7 +455,7 @@ function calculateStructuralComplexity(
 	return score;
 }
 
-const enforceIanitorCheckType = defineRule({
+const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox", {
 	create(context): Visitor {
 		const rawOptions = (context.options[0] ?? {}) as Partial<ComplexityConfiguration>;
 		const config: ComplexityConfiguration = { ...DEFAULT_CONFIGURATION, ...rawOptions };
@@ -565,7 +565,6 @@ const enforceIanitorCheckType = defineRule({
 		docs: {
 			description: "Enforce Ianitor.Check<T> type annotations on complex TypeScript types",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/enforce-ianitor-check-type/",
 		},
 		messages: {
 			complexInterfaceNeedsCheck:

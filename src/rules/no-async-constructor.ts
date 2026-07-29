@@ -1,7 +1,7 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -147,7 +147,7 @@ function findConstructorViolations(
 	return violations;
 }
 
-const noAsyncConstructor = defineRule({
+const noAsyncConstructor = createRule("no-async-constructor", "general", {
 	create(context): Visitor {
 		function reportViolation(violation: ConstructorViolation): void {
 			context.report({
@@ -180,7 +180,6 @@ const noAsyncConstructor = defineRule({
 		docs: {
 			description:
 				"Disallow asynchronous operations inside class constructors. Constructors return immediately, so async work causes race conditions, unhandled rejections, and incomplete object states.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-async-constructor/",
 		},
 		messages: {
 			asyncIifeInConstructor:

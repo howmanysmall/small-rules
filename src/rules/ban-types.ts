@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isRecord, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -46,7 +46,7 @@ function getReferencedTypeName(typeNameNode: ESTree.TSTypeName): string | undefi
 	return undefined;
 }
 
-const banTypes = defineRule({
+const banTypes = createRule("ban-types", "naming", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 
@@ -84,7 +84,6 @@ const banTypes = defineRule({
 	meta: {
 		docs: {
 			description: "Ban configured TypeScript utility types, defaulting to Omit in favor of Except.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/ban-types/",
 		},
 		messages: {
 			bannedType:

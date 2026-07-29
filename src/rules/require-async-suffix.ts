@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -14,7 +14,7 @@ function isExternallyConstrainedProperty(node: ESTree.ObjectProperty): boolean {
 	return false;
 }
 
-const requireAsyncSuffix = defineRule({
+const requireAsyncSuffix = createRule("require-async-suffix", "naming", {
 	create(context): Visitor {
 		const exceptOption = context.options[0]?.except;
 		const exceptSet: ReadonlySet<string> = exceptOption === undefined ? new Set() : new Set(exceptOption);
@@ -55,7 +55,6 @@ const requireAsyncSuffix = defineRule({
 	meta: {
 		docs: {
 			description: "Require async function names to end with Async.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/require-async-suffix/",
 		},
 		messages: {
 			missingAsyncSuffix: "Async functions must have names that end with Async.",

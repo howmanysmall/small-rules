@@ -1,6 +1,6 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -83,7 +83,7 @@ function resolveObjectExpression(
 	return undefined;
 }
 
-const noNativePropertiesSpread = defineRule({
+const noNativePropertiesSpread = createRule("no-native-properties-spread", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
@@ -131,7 +131,6 @@ const noNativePropertiesSpread = defineRule({
 			description:
 				"Disallow spreading static property bags into nativeProperties/*NativeProperties props and onto JSX elements via intermediate objects, because the spread creates a new copied table every render.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-native-properties-spread/",
 		},
 		messages: {
 			noElementSpread:

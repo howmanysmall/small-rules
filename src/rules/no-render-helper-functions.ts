@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -176,7 +176,7 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 	return hasReadReference;
 }
 
-const noRenderHelperFunctions = defineRule({
+const noRenderHelperFunctions = createRule("no-render-helper-functions", "react", {
 	create(context): Visitor {
 		let componentDepth = 0;
 
@@ -251,7 +251,6 @@ const noRenderHelperFunctions = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow non-component functions that return JSX or React elements.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-render-helper-functions/",
 		},
 		messages: {
 			noRenderHelper:

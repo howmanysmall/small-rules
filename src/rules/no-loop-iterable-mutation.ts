@@ -1,6 +1,6 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNode } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -198,7 +198,7 @@ function isAllowedMutation(
 	return false;
 }
 
-const noLoopIterableMutation = defineRule({
+const noLoopIterableMutation = createRule("no-loop-iterable-mutation", "general", {
 	create(context): Visitor {
 		return {
 			"ForOfStatement:exit"(node): void {
@@ -222,7 +222,6 @@ const noLoopIterableMutation = defineRule({
 		docs: {
 			description: "Disallow mutating a loop iterable during iteration.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-loop-iterable-mutation/",
 		},
 		messages: {
 			noLoopIterableMutation: "Do not mutate `{{iterable}}` while iterating over it.",

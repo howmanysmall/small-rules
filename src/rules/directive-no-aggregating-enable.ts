@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { computeDisabledArea, toForceLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoAggregatingEnable = defineRule({
+const directiveNoAggregatingEnable = createRule("directive-no-aggregating-enable", "general", {
 	create(context): Visitor {
 		const disabledArea = computeDisabledArea(context.sourceCode);
 
@@ -24,7 +24,6 @@ const directiveNoAggregatingEnable = defineRule({
 		docs: {
 			description:
 				"Disallow aggregating `oxlint-enable` or `eslint-enable` comments across multiple disable directives.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-aggregating-enable/",
 		},
 		messages: {
 			aggregatingEnable:

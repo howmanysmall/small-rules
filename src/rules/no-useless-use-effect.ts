@@ -1,8 +1,8 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { Environment } from "$oxc-utilities/react-utilities";
@@ -1240,7 +1240,7 @@ function hasRealExternalSideEffect(
 
 const PROGRAM_FUNCTION_ID = 0;
 
-const noUselessUseEffect = defineRule({
+const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 	create(context) {
 		const options = normalizeOptions(context.options[0]);
 		const reactSources = getReactSources(options.environment);
@@ -1645,7 +1645,6 @@ const noUselessUseEffect = defineRule({
 		docs: {
 			description:
 				"Disallow empty effects, duplicate dependencies, effect chains, log-only effects, derived state, external-store state sync, state initialization, reset effects, parent notifications, parent ref callbacks, and event side effects routed through state.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-useless-use-effect/",
 		},
 		messages: {
 			adjustState:

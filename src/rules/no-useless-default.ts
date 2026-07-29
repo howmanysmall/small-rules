@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import defaultProperties from "../generated/default-properties.json";
 import { unwrapExpression } from "../utilities/ast-utilities";
@@ -694,7 +694,7 @@ export function isDefaultValue(node: ESTree.Expression, canonicalValue: Canonica
 	}
 }
 
-const noUselessDefault = defineRule({
+const noUselessDefault = createRule("no-useless-default", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
@@ -956,7 +956,6 @@ const noUselessDefault = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow Roblox JSX properties whose values already match the class defaults.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-useless-default/",
 		},
 		fixable: "code",
 		messages: {

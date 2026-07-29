@@ -1,12 +1,12 @@
 import { extname } from "node:path";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -104,7 +104,7 @@ function getPortalReplacement(
 	return `<${componentName} target={${sourceCode.getText(targetArgument)}}>${children}</${componentName}>`;
 }
 
-const preferLocalPortalComponent = defineRule({
+const preferLocalPortalComponent = createRule("prefer-local-portal-component", "react", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
 		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
@@ -159,7 +159,6 @@ const preferLocalPortalComponent = defineRule({
 		docs: {
 			description:
 				"Prefer a local Portal component over direct createPortal calls when the project already defines one.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-local-portal-component/",
 		},
 		fixable: "code",
 		messages: {

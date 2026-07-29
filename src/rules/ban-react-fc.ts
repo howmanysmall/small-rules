@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isTsTypeAnnotation } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -16,7 +16,7 @@ function getTypeAnnotationFromId(node: ESTree.VariableDeclarator): ESTree.TSType
 	return isTsTypeAnnotation(typeAnnotation) ? typeAnnotation : undefined;
 }
 
-const banReactFc = defineRule({
+const banReactFc = createRule("ban-react-fc", "react", {
 	createOnce(context): Visitor {
 		return {
 			VariableDeclarator(node): void {
@@ -43,7 +43,6 @@ const banReactFc = defineRule({
 		docs: {
 			description:
 				"Ban React.FC and similar component type annotations. Use explicit function declarations instead.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/ban-react-fc/",
 		},
 		messages: {
 			banReactFC:

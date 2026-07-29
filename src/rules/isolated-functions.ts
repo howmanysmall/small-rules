@@ -1,7 +1,7 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -343,7 +343,7 @@ function reportIsolatedFunction(
 	reportThisAndSuper(context, node, reason);
 }
 
-const isolatedFunctions = defineRule({
+const isolatedFunctions = createRule("isolated-functions", "general", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
 		const checked = new WeakSet<ESTree.Node>();
@@ -377,7 +377,6 @@ const isolatedFunctions = defineRule({
 		docs: {
 			description: "Prevent usage of variables from outside the scope of isolated functions.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/isolated-functions/",
 		},
 		messages: {
 			externallyScopedVariable:

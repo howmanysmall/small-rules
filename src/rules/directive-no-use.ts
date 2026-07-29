@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import {
 	getOptionalStringArrayProperty,
@@ -8,7 +8,7 @@ import {
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoUse = defineRule({
+const directiveNoUse = createRule("directive-no-use", "general", {
 	create(context): Visitor {
 		const allowed = new Set(getOptionalStringArrayProperty(context.options[0], "allow"));
 
@@ -27,7 +27,6 @@ const directiveNoUse = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow block ESLint/Oxlint directive comments.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-use/",
 		},
 		messages: {
 			disallow: "Unexpected ESLint directive comment.",

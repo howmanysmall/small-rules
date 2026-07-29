@@ -1,9 +1,9 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction, isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
 import { isNumber, isRecord, isStringArray } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -240,7 +240,7 @@ function collectRootFunctionIds(
 	return rootFunctionIds;
 }
 
-const noNewInstanceInUseMemo = defineRule({
+const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
 		if (options.constructors.size === 0) return {};
@@ -372,7 +372,6 @@ const noNewInstanceInUseMemo = defineRule({
 		docs: {
 			description:
 				"Disallow configured constructor calls (default: new Instance) inside React useMemo callbacks.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-new-instance-in-use-memo/",
 		},
 		messages: {
 			noNewInUseMemo:

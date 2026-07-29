@@ -1,9 +1,9 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const noFilterMapChain = defineRule({
+const noFilterMapChain = createRule("no-filter-map-chain", "general", {
 	create(context): Visitor {
 		return {
 			CallExpression(node): void {
@@ -28,7 +28,6 @@ const noFilterMapChain = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow map(...) directly after filter(...).",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-filter-map-chain/",
 		},
 		messages: {
 			avoidFilterMapChain:

@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -47,7 +47,7 @@ function functionFromVariable(variable: Variable): FunctionLike | undefined {
 	return undefined;
 }
 
-const noUseOfEmptyReturnValue = defineRule({
+const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "general", {
 	create(context): Visitor {
 		const callExpressionsToCheck = new Map<ESTree.IdentifierReference, FunctionLike>();
 		const functionsWithReturnValue = new Set<FunctionLike>();
@@ -108,7 +108,6 @@ const noUseOfEmptyReturnValue = defineRule({
 		docs: {
 			description: "Disallow using the return value of functions that do not return anything.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-use-of-empty-return-value/",
 		},
 		messages: {
 			removeUseOfOutput: 'Remove this use of the output from "{{name}}"; "{{name}}" doesn\'t return anything.',

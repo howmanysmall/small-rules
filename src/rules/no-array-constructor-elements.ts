@@ -1,4 +1,5 @@
 import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
 	isArrayExpression,
@@ -21,7 +22,6 @@ import {
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { BindingName } from "$oxc-types/missing-types";
 import type { FixReturn } from "$oxc-utilities/oxc-utilities";
@@ -484,7 +484,7 @@ function appendPushArguments(
 	return hasUnsafeArgument;
 }
 
-const noArrayConstructorElements = defineRule({
+const noArrayConstructorElements = createRule("no-array-constructor-elements", "roblox", {
 	create(context): Visitor {
 		const rawOptions = context.options?.[0];
 		const options: Required<NoArrayConstructorElementsOptions> =
@@ -554,7 +554,6 @@ const noArrayConstructorElements = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow array constructor element forms and enforce roblox-ts-aware constructor patterns.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-array-constructor-elements/",
 		},
 		fixable: "code",
 		hasSuggestions: true,

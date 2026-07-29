@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -994,7 +994,7 @@ function reportUnstableDependencies(
 	}
 }
 
-const useExhaustiveDependencies = defineRule({
+const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "react", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const resolvedOptions: Required<UseExhaustiveDependenciesOptions> = {
@@ -1112,7 +1112,6 @@ const useExhaustiveDependencies = defineRule({
 		docs: {
 			description:
 				"Enforce exhaustive and correct dependency specification in React hooks to prevent stale closures and unnecessary re-renders",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/use-exhaustive-dependencies/",
 		},
 		fixable: "code",
 		hasSuggestions: true,

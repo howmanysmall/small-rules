@@ -1,3 +1,4 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	countExpectCalls,
 	getTestCallback,
@@ -7,7 +8,6 @@ import {
 } from "$oxc-utilities/jest-utilities";
 import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -206,7 +206,7 @@ function validateAssertionCall(
 	}
 }
 
-const preferExpectAssertions = defineRule({
+const preferExpectAssertions = createRule("prefer-expect-assertions", "general", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
 
@@ -279,7 +279,6 @@ const preferExpectAssertions = defineRule({
 			description:
 				"Enforce expect assertion guards in tests and prefer expect.assertions(n) over expect.hasAssertions() when the count is known.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/prefer-expect-assertions/",
 		},
 		fixable: "code",
 		hasSuggestions: true,

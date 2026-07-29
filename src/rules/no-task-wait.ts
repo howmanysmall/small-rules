@@ -1,5 +1,5 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -15,7 +15,7 @@ function isPromiseDelayAwaitCall(node: ESTree.CallExpression): boolean {
 	return getMemberPropertyName(delayCallee) === "delay";
 }
 
-const noTaskWait = defineRule({
+const noTaskWait = createRule("no-task-wait", "roblox", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
@@ -36,7 +36,6 @@ const noTaskWait = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow task.wait() and Promise.delay(...).await() calls.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-task-wait/",
 		},
 		messages: {
 			noPromiseDelayAwait:

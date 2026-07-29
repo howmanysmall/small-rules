@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -38,7 +38,7 @@ function collectNumericComponents(parameters: ReadonlyArray<ESTree.Node>): Numer
 	return [allZero, components];
 }
 
-const noColor3Constructor = defineRule({
+const noColor3Constructor = createRule("no-color3-constructor", "roblox", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
 
@@ -85,7 +85,6 @@ const noColor3Constructor = defineRule({
 		docs: {
 			description:
 				"Ban new Color3(...) except new Color3() or new Color3(0, 0, 0). Use Color3.fromRGB() instead.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-color3-constructor/",
 		},
 		fixable: "code",
 		messages: {

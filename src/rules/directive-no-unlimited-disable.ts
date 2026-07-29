@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoUnlimitedDisable = defineRule({
+const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable", "general", {
 	create(context): Visitor {
 		for (const comment of context.sourceCode.getAllComments()) {
 			const directive = parseDirectiveComment(comment);
@@ -27,7 +27,6 @@ const directiveNoUnlimitedDisable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow `oxlint-disable` or `eslint-disable` comments without rule names.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-unlimited-disable/",
 		},
 		messages: {
 			unexpected: "Unexpected unlimited '{{kind}}' comment. Specify some rule names to disable.",

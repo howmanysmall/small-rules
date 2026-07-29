@@ -1,7 +1,7 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -138,7 +138,7 @@ function getAppendTarget(
 	return undefined;
 }
 
-const noArraySizeAssignment = defineRule({
+const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
@@ -179,7 +179,6 @@ const noArraySizeAssignment = defineRule({
 		docs: {
 			description:
 				"Disallow array append assignments using array[array.size()] = value (roblox-ts) or array[array.length] = value (standard) and prefer push-based appends.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-array-size-assignment/",
 		},
 		fixable: "code",
 		messages: {

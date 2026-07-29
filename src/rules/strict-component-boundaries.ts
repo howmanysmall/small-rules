@@ -1,8 +1,8 @@
 import path from "node:path";
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -27,7 +27,7 @@ function isValidFixtureImport(pathParts: ReadonlyArray<string>): boolean {
 	return !hasAnotherComponentInPath(partsBeforeFixture);
 }
 
-const strictComponentBoundaries = defineRule({
+const strictComponentBoundaries = createRule("strict-component-boundaries", "react", {
 	create(context): Visitor {
 		const rawOptions = context.options?.[0];
 		const { allow = [], maxDepth = 1 } =
@@ -83,7 +83,6 @@ const strictComponentBoundaries = defineRule({
 	meta: {
 		docs: {
 			description: "Prevent imports that reach into another component's nested modules.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/strict-component-boundaries/",
 		},
 		messages: {
 			noReachingIntoComponent:

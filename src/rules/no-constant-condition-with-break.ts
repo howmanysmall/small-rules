@@ -1,7 +1,7 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString, isNumberRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -578,7 +578,7 @@ function shouldReportLoop(
 	return !statementContainsLoopExit(loopNode.body, loopNode, loopExitCalls);
 }
 
-const noConstantConditionWithBreak = defineRule({
+const noConstantConditionWithBreak = createRule("no-constant-condition-with-break", "general", {
 	create(context): Visitor {
 		const rawOptions = context.options?.[0];
 		const loopExitCalls = normalizeLoopExitCalls(
@@ -627,7 +627,6 @@ const noConstantConditionWithBreak = defineRule({
 		docs: {
 			description:
 				"Disallow constant conditions, but allow constant loops that include loop exits such as break, return, or configured calls.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-constant-condition-with-break/",
 		},
 		messages: {
 			unexpected: "Unexpected constant condition.",

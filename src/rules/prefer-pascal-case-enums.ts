@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -79,7 +79,7 @@ function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
 	return IS_INTEGER.test(node.id.value) ? undefined : node.id.value;
 }
 
-const preferPascalCaseEnums = defineRule({
+const preferPascalCaseEnums = createRule("prefer-pascal-case-enums", "naming", {
 	createOnce(context): Visitor {
 		return {
 			TSEnumDeclaration(node): void {
@@ -108,7 +108,6 @@ const preferPascalCaseEnums = defineRule({
 		docs: {
 			description: "Enforce PascalCase names for enums and enum members.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/prefer-pascal-case-enums/",
 		},
 		messages: {
 			notPascalCase:

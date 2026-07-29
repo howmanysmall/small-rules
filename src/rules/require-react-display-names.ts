@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { getImportedName, isReactNamedCall } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactImport } from "$oxc-utilities/react-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -100,7 +100,7 @@ function reportMissingDisplayName(
 	});
 }
 
-const requireReactDisplayNames = defineRule({
+const requireReactDisplayNames = createRule("require-react-display-names", "react", {
 	create(context): Visitor {
 		const reactSources = getReactSourcesFromOptions(context.options[0]);
 		const memoIdentifiers = new Set<string>();
@@ -219,7 +219,6 @@ const requireReactDisplayNames = defineRule({
 	meta: {
 		docs: {
 			description: "Require displayName on exported memo components and contexts.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/require-react-display-names/",
 		},
 		messages: {
 			directContextExport: "Directly exporting createContext() result prevents setting displayName.",

@@ -1,4 +1,5 @@
 import { hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAssignmentExpression,
 	isBindingIdentifier,
@@ -9,7 +10,6 @@ import {
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -228,7 +228,7 @@ function createFix(
 	return fixes;
 }
 
-const noArrayConstructorIndexAssignment = defineRule({
+const noArrayConstructorIndexAssignment = createRule("no-array-constructor-index-assignment", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
@@ -266,7 +266,6 @@ const noArrayConstructorIndexAssignment = defineRule({
 		docs: {
 			description:
 				"Disallow new Array<T>() followed by contiguous index assignments; use an array literal instead.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-array-constructor-index-assignment/",
 		},
 		fixable: "code",
 		messages: {

@@ -1,8 +1,8 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const noUnderscoreReactProperties = defineRule({
+const noUnderscoreReactProperties = createRule("no-underscore-react-props", "react", {
 	createOnce(context): Visitor {
 		return {
 			JSXAttribute(node): void {
@@ -19,7 +19,6 @@ const noUnderscoreReactProperties = defineRule({
 	meta: {
 		docs: {
 			description: "Ban React property names that begin with an underscore in JSX.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-underscore-react-props/",
 		},
 		messages: {
 			noUnderscoreReactProperty:

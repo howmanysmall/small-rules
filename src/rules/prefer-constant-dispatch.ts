@@ -1,7 +1,7 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -139,7 +139,7 @@ function getDeclarationInsertionFix(
 	return fixer.insertTextAfterRange([program.range[0], program.range[1]], declarationText);
 }
 
-const preferConstantDispatch = defineRule({
+const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 	create(context): Visitor {
 		const trackedDispatchVariables = new Set<ScopeVariable>();
 		const { sourceCode } = context;
@@ -192,7 +192,6 @@ const preferConstantDispatch = defineRule({
 		docs: {
 			description: "Disallow inline useReducer action objects that could be module-level constants.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-constant-dispatch/",
 		},
 		hasSuggestions: true,
 		messages: {

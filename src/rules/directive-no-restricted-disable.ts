@@ -1,10 +1,10 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, toRuleIdLocation } from "$oxc-utilities/directive-comments";
 import ignore from "ignore";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoRestrictedDisable = defineRule({
+const directiveNoRestrictedDisable = createRule("directive-no-restricted-disable", "general", {
 	create(context): Visitor {
 		const disabledArea = computeDisabledArea(context.sourceCode);
 		const restrictedRules = context.options;
@@ -30,7 +30,6 @@ const directiveNoRestrictedDisable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow `oxlint-disable` or `eslint-disable` comments for configured rules.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-restricted-disable/",
 		},
 		messages: {
 			disallow: "Disabling '{{ruleId}}' is not allowed.",

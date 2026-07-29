@@ -1,7 +1,7 @@
 import { getVariableByName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { isNumberRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -140,7 +140,7 @@ function getPreferredMathMethod(sourceCode: SourceCode, node: ESTree.Conditional
 	return undefined;
 }
 
-const preferMathMinMax = defineRule({
+const preferMathMinMax = createRule("prefer-math-min-max", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
@@ -171,7 +171,6 @@ const preferMathMinMax = defineRule({
 		docs: {
 			description: "Prefer math.min() and math.max() over simple clamp-like ternaries.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-math-min-max/",
 		},
 		fixable: "code",
 		messages: {

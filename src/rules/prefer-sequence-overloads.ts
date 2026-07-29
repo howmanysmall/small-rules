@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -87,7 +87,7 @@ function getKeypointArrayReplacement(
 	};
 }
 
-const preferSequenceOverloads = defineRule({
+const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox", {
 	createOnce(context): Visitor {
 		return {
 			NewExpression(node): void {
@@ -115,7 +115,6 @@ const preferSequenceOverloads = defineRule({
 			description:
 				"Prefer direct ColorSequence and NumberSequence overloads over identical direct arguments and two-keypoint arrays.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-sequence-overloads/",
 		},
 		fixable: "code",
 		messages: {

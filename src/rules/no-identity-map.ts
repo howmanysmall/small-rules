@@ -1,6 +1,6 @@
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -105,7 +105,7 @@ function isLikelyBinding(
 	);
 }
 
-const noIdentityMap = defineRule({
+const noIdentityMap = createRule("no-identity-map", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const [options] = context.options;
@@ -143,7 +143,6 @@ const noIdentityMap = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow pointless identity `.map()` calls that return the parameter unchanged",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-identity-map/",
 		},
 		fixable: "code",
 		messages: {

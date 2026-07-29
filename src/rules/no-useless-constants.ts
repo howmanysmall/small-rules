@@ -1,3 +1,4 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBindingIdentifier,
 	isCallbackFunction,
@@ -6,7 +7,6 @@ import {
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -317,7 +317,7 @@ function findEnclosingConstDeclarator(node: ESTree.Node): ESTree.VariableDeclara
 	return undefined;
 }
 
-const noUselessConstants = defineRule({
+const noUselessConstants = createRule("no-useless-constants", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const [rawOptions] = context.options;
@@ -499,7 +499,6 @@ const noUselessConstants = defineRule({
 		docs: {
 			description: "Disallow constants that do not add value.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/no-useless-constants/",
 		},
 		fixable: "code",
 		messages: {

@@ -1,11 +1,11 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const noUnusedUseMemo = defineRule({
+const noUnusedUseMemo = createRule("no-unused-use-memo", "react", {
 	create(context): Visitor {
 		const memoIdentifiers = new Set<string>();
 		const reactNamespaces = new Set<string>();
@@ -29,7 +29,6 @@ const noUnusedUseMemo = defineRule({
 		docs: {
 			description: "Disallow standalone useMemo calls that ignore the memoized value.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/no-unused-use-memo/",
 		},
 		messages: {
 			unusedUseMemo:

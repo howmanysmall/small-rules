@@ -1,5 +1,5 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -194,7 +194,7 @@ function isAllowedError(
 	return allowList.some((specifier) => matchesSpecifier(sourceCode, physicalFilename, node, specifier));
 }
 
-const requireThrowErrorCapture = defineRule({
+const requireThrowErrorCapture = createRule("require-throw-error-capture", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const allowList = context.options[0]?.allow ?? [];
@@ -241,7 +241,6 @@ const requireThrowErrorCapture = defineRule({
 			description:
 				"Require 'Error.captureStackTrace' before directly throwing new Error instances in named functions.",
 			recommended: false,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/require-throw-error-capture/",
 		},
 		fixable: "code",
 		messages: {

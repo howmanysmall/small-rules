@@ -1,8 +1,8 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const onlyTypeImports = defineRule({
+const onlyTypeImports = createRule("only-type-imports", "general", {
 	create(context): Visitor {
 		return {
 			ImportDeclaration(node): void {
@@ -17,7 +17,6 @@ const onlyTypeImports = defineRule({
 			description:
 				"Require all imports to be type-only imports. Benchmarks cannot import non-types because the benchmarker plugin will throw an error.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/only-type-imports/",
 		},
 		messages: {
 			onlyTypeImports:

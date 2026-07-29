@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { computeDisabledArea, toRuleIdLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveNoDuplicateDisable = defineRule({
+const directiveNoDuplicateDisable = createRule("directive-no-duplicate-disable", "general", {
 	create(context): Visitor {
 		const disabledArea = computeDisabledArea(context.sourceCode);
 
@@ -20,7 +20,6 @@ const directiveNoDuplicateDisable = defineRule({
 	meta: {
 		docs: {
 			description: "Disallow duplicate `oxlint-disable` or `eslint-disable` comments.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-no-duplicate-disable/",
 		},
 		messages: {
 			duplicate: "ESLint rules have been disabled already.",

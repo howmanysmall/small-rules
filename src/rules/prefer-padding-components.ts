@@ -1,5 +1,6 @@
 import { extname } from "node:path";
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
@@ -7,7 +8,6 @@ import {
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import { isRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -191,7 +191,7 @@ function isJsxIdentifier(node: ESTree.JSXElementName): node is ESTree.JSXIdentif
 	return node.type === "JSXIdentifier";
 }
 
-const preferPaddingComponents = defineRule({
+const preferPaddingComponents = createRule("prefer-padding-components", "react", {
 	create(context): Visitor {
 		const { filename } = context;
 		/* v8 ignore start -- @preserve rule execution supplies a filename before local component discovery. */
@@ -279,7 +279,6 @@ const preferPaddingComponents = defineRule({
 		docs: {
 			description:
 				"Prefer local EqualPadding and DirectionalPadding components over matching <uipadding /> declarations.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-padding-components/",
 		},
 		fixable: "code",
 		messages: {

@@ -1,7 +1,7 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getReactSourcesFromOptions, ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -52,7 +52,7 @@ function normalizeOptions(raw: unknown): { readonly allowedHooks: ReadonlySet<st
 	return { allowedHooks: new Set(isStringArray(options.allowedHooks) ? options.allowedHooks : []) };
 }
 
-const preferDirectHookImports = defineRule({
+const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react", {
 	create(context) {
 		const reactSources = getReactSourcesFromOptions(context.options[0]);
 		const { allowedHooks } = normalizeOptions(context.options[0]);
@@ -83,7 +83,6 @@ const preferDirectHookImports = defineRule({
 		docs: {
 			description: "Prefer importing React hooks directly instead of calling them via the React namespace.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/react/prefer-direct-hook-imports/",
 		},
 		messages: {
 			preferDirectHookImport: "Import `{{hookName}}` directly instead of calling `React.{{hookName}}`.",

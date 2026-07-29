@@ -1,18 +1,14 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
 
 interface BannedGlobalCallRuleOptions<TMessageId extends string> {
-	/** A description of what to use instead. */
 	readonly alternative: string;
-	/** The error message template. Use {{name}} and {{alternative}} placeholders. */
+	readonly category: string;
 	readonly message: string;
-	/** The ESLint message ID (e.g., "noGlobalCall"). */
 	readonly messageId: TMessageId;
-	/** The name of the global function to ban. */
 	readonly name: string;
-	/** Optional URL to the rule's documentation page. */
-	readonly url?: string;
+	readonly ruleName: string;
 }
 
 export function createBannedGlobalCallRule<const TMessageId extends string>(
@@ -20,7 +16,7 @@ export function createBannedGlobalCallRule<const TMessageId extends string>(
 ): CreateRule<readonly [], TMessageId, readonly []> {
 	const selector = `CallExpression[callee.type="Identifier"][callee.name="${options.name}"]`;
 
-	return defineRule({
+	return createRule(options.ruleName, options.category, {
 		create(context): Visitor {
 			return {
 				[selector](node: ESTree.CallExpression): void {
@@ -33,7 +29,6 @@ export function createBannedGlobalCallRule<const TMessageId extends string>(
 		},
 		meta: {
 			docs: {
-				...(options.url !== undefined && { url: options.url }),
 				description: `Use ${options.alternative} instead of ${options.name}().`,
 			},
 			messages: {

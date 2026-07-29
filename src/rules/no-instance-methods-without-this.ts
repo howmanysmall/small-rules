@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -79,7 +79,7 @@ function getMethodName(node: ESTree.MethodDefinition): string {
 	return node.key.type === "Identifier" ? node.key.name : "unknown";
 }
 
-const noInstanceMethodsWithoutThis = defineRule({
+const noInstanceMethodsWithoutThis = createRule("no-instance-methods-without-this", "roblox", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
 
@@ -99,7 +99,6 @@ const noInstanceMethodsWithoutThis = defineRule({
 		docs: {
 			description:
 				"Detect instance methods that do not use 'this' and suggest converting them to standalone functions for better performance in roblox-ts.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/no-instance-methods-without-this/",
 		},
 		messages: {
 			noInstanceMethodWithoutThis:

@@ -1,4 +1,4 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -126,7 +126,7 @@ function isPlural(identifier: string): boolean {
 	return lastToken !== undefined && isPluralWord(lastToken.lowercased, lastToken.original);
 }
 
-const preferSingularEnums = defineRule({
+const preferSingularEnums = createRule("prefer-singular-enums", "naming", {
 	createOnce(context): Visitor {
 		return {
 			TSEnumDeclaration({ id }): void {
@@ -145,7 +145,6 @@ const preferSingularEnums = defineRule({
 		docs: {
 			description: "Prefer singular naming for enums.",
 			recommended: true,
-			url: "https://docs.howmanysmall.com/small-rules/rules/naming/prefer-singular-enums/",
 		},
 		messages: {
 			notSingular: 'Enum name "{{name}}" should be singular.',

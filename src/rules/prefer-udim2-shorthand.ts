@@ -1,6 +1,6 @@
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isNumber } from "$oxc-utilities/type-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -155,7 +155,7 @@ function collectArguments(
 	return { offsetXText, offsetYText, scaleXText, scaleYText };
 }
 
-const preferUDim2Shorthand = defineRule({
+const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 	create(context): Visitor {
 		return {
 			NewExpression(node): void {
@@ -220,7 +220,6 @@ const preferUDim2Shorthand = defineRule({
 		docs: {
 			description:
 				"Prefer UDim2.fromScale() or UDim2.fromOffset() over new UDim2() when all offsets or all scales are zero.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/roblox/prefer-udim2-shorthand/",
 		},
 		fixable: "code",
 		messages: {

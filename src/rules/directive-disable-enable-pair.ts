@@ -1,10 +1,10 @@
-import { defineRule } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import { computeDisabledArea, lte, toRuleIdLocation } from "../utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-const directiveDisableEnablePair = defineRule({
+const directiveDisableEnablePair = createRule("directive-disable-enable-pair", "general", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowWholeFile = options?.allowWholeFile === true;
@@ -29,7 +29,6 @@ const directiveDisableEnablePair = defineRule({
 		docs: {
 			description:
 				"Require a matching enable comment for every `oxlint-disable` or `eslint-disable` block directive.",
-			url: "https://docs.howmanysmall.com/small-rules/rules/general/directive-disable-enable-pair/",
 		},
 		messages: {
 			missingPair: "Requires 'eslint-enable' directive.",
