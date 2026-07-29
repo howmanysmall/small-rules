@@ -34,6 +34,9 @@ function normalizeOptions(rawOptions: unknown): NormalizedOptions {
 function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOptions): boolean {
 	if (node.static || node.kind !== "method") return false;
 
+	// Skip TypeScript overload signatures and abstract methods: both have no body to inspect.
+	if (node.value.type !== "FunctionExpression") return false;
+
 	const accessibility = node.accessibility ?? "public";
 	if (accessibility === "private" && !options.checkPrivate) return false;
 	if (accessibility === "protected" && !options.checkProtected) return false;
@@ -70,8 +73,6 @@ function childUsesThis(childValue: unknown, visited: WeakSet<ESTree.Node>): bool
 }
 
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
-	/* v8 ignore next -- @preserve MethodDefinition.value is a FunctionExpression in parser output. */
-	if (value.type !== "FunctionExpression") return false;
 	return traverseForThis(value, new WeakSet());
 }
 
