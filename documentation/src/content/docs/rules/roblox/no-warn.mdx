@@ -4,4 +4,15 @@ title: "No `warn`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-warn" />
+<RulePage rule="no-warn">
+	<Fragment slot="rationale">
+		<p>
+			Same reasoning as `print()`. `warn()` is just `print()` with a different output channel: no levels, no
+			filtering, useless in production.
+		</p>
+		<p>
+			Use [`Log`](https://npmx.dev/package/@rbxts/rbxts-sleitnick-log) instead. It handles severity through its
+			API, not through which global you called. Not recommended to suppress this one either.
+		</p>
+	</Fragment>
+</RulePage>

@@ -4,4 +4,16 @@ title: "No `Color3` Constructor"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-color3-constructor" />
+<RulePage rule="no-color3-constructor">
+	<Fragment slot="rationale">
+		<p>
+			`new Color3(r, g, b)` takes floats from 0 to 1. `Color3.fromRGB(r, g, b)` takes 0 to 255. The float version
+			is easier to get wrong and it's slower -- the engine converts internally. Just use `fromRGB`.
+		</p>
+		<p>
+			This bans `new Color3(...)` unless it's `new Color3()` or `new Color3(0, 0, 0)` -- those are fine.
+			Auto-fixes the rest to `fromRGB`. If a component isn't a literal number it'll still flag it (set
+			`reportUnknownComponents` to `false` if that bugs you).
+		</p>
+	</Fragment>
+</RulePage>

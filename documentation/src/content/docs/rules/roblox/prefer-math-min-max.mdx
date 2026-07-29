@@ -1,7 +1,21 @@
 ---
-title: "Prefer `math.min` and `math.max`"
+title: "Prefer `math.min` / `math.max`"
 ---
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="prefer-math-min-max" />
+<RulePage rule="prefer-math-min-max">
+	<Fragment slot="rationale">
+		<p>
+			Ok, so you can just use `math.min()` and `math.max()` instead of ternary expressions for clamping values you
+			know. It'll be more readable AND with Luau's optimizations, it will run better! All the more reason to use
+			this rule.
+		</p>
+		<p>
+			Ported from
+			[`unicorn/prefer-math-min-max`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-math-min-max.md).
+			Only fires when the ternary is a simple comparison returning one of the two operands. Won't catch every
+			pattern, but covers the obvious ones.
+		</p>
+	</Fragment>
+</RulePage>

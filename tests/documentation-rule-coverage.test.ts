@@ -232,12 +232,37 @@ describe("documentation rule coverage", () => {
 		expect(getNonThinRulePagePaths()).toStrictEqual([]);
 	});
 
-	it("keeps curated rationale only for the two complex rules", () => {
+	it("keeps curated rationale pages explicit", () => {
 		expect.assertions(1);
 		const expectedPaths = [
-			join(rulePagesDirectory, "general/no-restricted-property-assignment.mdx"),
-			join(rulePagesDirectory, "roblox/no-async-in-system.mdx"),
-		].toSorted();
+			"general/no-increment-decrement",
+			"general/no-recursive",
+			"general/no-restricted-property-assignment",
+			"roblox/ban-instances",
+			"roblox/no-array-constructor-elements",
+			"roblox/no-array-constructor-index-assignment",
+			"roblox/no-array-size-assignment",
+			"roblox/no-async-in-system",
+			"roblox/no-color3-constructor",
+			"roblox/no-events-in-events-callback",
+			"roblox/no-instance-methods-without-this",
+			"roblox/no-native-properties-spread",
+			"roblox/no-print",
+			"roblox/no-redundant-aspect-ratio-constraint",
+			"roblox/no-table-create-map",
+			"roblox/no-task-wait",
+			"roblox/no-useless-default",
+			"roblox/no-warn",
+			"roblox/prefer-idiv",
+			"roblox/prefer-math-min-max",
+			"roblox/prefer-modding-inspect",
+			"roblox/prefer-sequence-overloads",
+			"roblox/prefer-single-world-query",
+			"roblox/prefer-udim2-shorthand",
+			"roblox/require-module-level-instantiation",
+		]
+			.map((path) => join(rulePagesDirectory, `${path}.mdx`))
+			.toSorted((left, right) => left.localeCompare(right));
 
 		expect(getCuratedRationaleRulePagePaths()).toStrictEqual(expectedPaths);
 	});

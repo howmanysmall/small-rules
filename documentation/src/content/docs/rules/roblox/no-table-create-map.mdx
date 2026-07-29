@@ -4,4 +4,23 @@ title: "No `table.create().map()`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-table-create-map" />
+<RulePage rule="no-table-create-map">
+	<Fragment slot="rationale">
+		<p>
+			I see this pattern way too often and it annoys me every time. `table.create(...).map(...)` allocates an
+			intermediate table, throws away the function allocation when `.map()` returns, and allocates *another* table
+			for the result. Two allocations where one would do. Dumb.
+		</p>
+		<ul>
+			<li>
+				**Just write it:** loop and assign by index, or use an array literal. One allocation, no intermediate
+				garbage.
+			</li>
+			<li>
+				**Readability:** `table.create().map()` looks like you're transforming an existing table, but you're
+				building a new one from scratch.
+			</li>
+		</ul>
+		<p>Same applies to `new Array(n).map(...)`. Allocate first, then write. Hate this pattern.</p>
+	</Fragment>
+</RulePage>

@@ -9,20 +9,20 @@ import PackageManagerTabs from "@/components/package-manager-tabs.astro";
 import { PageHeader } from "@/components/page-header";
 
 <PageHeader
-	title="Quick Start"
-	subtitle="Install the plugin, add a few rules to .oxlintrc.json, and run your first lint in under two minutes."
+	title="Quick start"
+	subtitle="Install the plugin, add a few rules to .oxlintrc.json, and run your first lint."
 	kicker="Getting started"
 />
 
 ## Install
 
-Add `small-rules` and `oxlint` to your roblox-ts project. Since they are only needed during development, install them as dev dependencies:
+Add `small-rules` and `oxlint` to your roblox-ts project as dev dependencies:
 
 <PackageManagerTabs />
 
 ## Configure
 
-Create or update your `.oxlintrc.json` to register the plugin and enable rules:
+Register the plugin in `.oxlintrc.json`, then enable the rules you want to try:
 
 ```json
 {
@@ -38,19 +38,19 @@ Create or update your `.oxlintrc.json` to register the plugin and enable rules:
 ```
 
 <Aside type="note">
-	Start with a few high-impact rules and gradually add more. The `error` severity will fail the lint check, while
-	`warn` will show a warning without failing.
+	I would start with a few rules, run them against the codebase, and add more once I know the noise level. `error`
+	fails the lint check. `warn` reports a problem without failing it.
 </Aside>
 
 ## Run
 
-Run the linter manually:
+Run the linter:
 
 ```bash
 oxlint .
 ```
 
-Or add it to your `package.json` scripts:
+If you want a package script, add one to `package.json`:
 
 ```json
 {
@@ -66,17 +66,17 @@ Then run:
 
 ## Auto-fix
 
-Many rules provide automatic fixes. Apply them with:
+Some rules provide automatic fixes. Apply them with:
 
 ```bash
 oxlint --fix
 ```
 
 <Aside type="caution">
-	Always review auto-fixes before committing. While the fixes are designed to be safe, edge cases can occur.
+	Review auto-fixes before committing. They are intended to be safe, but code fixes can still meet an edge case.
 </Aside>
 
-## Next Steps
+## Where to go next
 
 <CardGrid>
 	<LinkCard

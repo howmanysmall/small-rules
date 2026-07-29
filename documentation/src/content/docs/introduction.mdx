@@ -14,13 +14,13 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 	kicker="Getting started"
 />
 
-`@pobammer-ts/small-rules` is an oxlint-native lint plugin for TypeScript projects. It provides {ruleFactCounts.totalRules} custom rules that catch common mistakes, enforce consistent patterns, and improve code quality across TypeScript, React Luau, and Roblox-specific APIs.
+I made `@pobammer-ts/small-rules` for TypeScript projects that use roblox-ts and React Luau. It adds rules for the APIs and conventions that a general linter cannot understand, while still using oxlint for the ordinary JavaScript and TypeScript work.
 
 Use it with oxlint 1.69.0 or later, TypeScript 5 through 7, and Node.js `^20.19.0` or `>=22.12.0`.
 
 ## Why oxlint?
 
-Oxlint is a fast, Rust-based linter for JavaScript and TypeScript. It runs orders of magnitude faster than ESLint while covering the most common linting needs. `small-rules` extends oxlint with domain-specific rules that understand roblox-ts patterns, React component conventions, and Roblox API idioms.
+I chose oxlint because it is a Rust-based linter with a native plugin API. That gives me a place to put roblox-ts-specific checks without rebuilding the project around ESLint compatibility. I would not claim every rule is useful to every project, but the ones here come from patterns I actually want called out.
 
 ## Rule Categories
 
@@ -32,12 +32,14 @@ The rules are organized into {ruleFactCounts.totalCategories} categories:
 	))}
 </CardGrid>
 
-## Design Principles
+## What I care about
 
-1. **Oxlint-native** — Rules use the oxlint rule API, not ESLint compatibility layers. This means faster execution and better integration with oxlint's diagnostic output.
-2. **roblox-ts aware** — Rules understand roblox-ts idioms like `Ianitor`, `Color3`, `UDim2`, `task.wait()`, and React Luau components.
-3. **Minimal configuration** — Most rules work with zero configuration. Options are available for rules that need them, but sensible defaults cover the common cases.
-4. **Auto-fixable where safe** — Many rules provide automatic fixes that can be applied with `oxlint --fix`.
+- **Use the native API:** I want these rules to run as oxlint rules, not as an ESLint-shaped layer bolted on afterward.
+- **Know the platform:** `Ianitor`, `Color3`, `UDim2`, `task.wait()`, and React Luau components are not ordinary TypeScript patterns. A plugin for roblox-ts needs to understand that.
+- **Keep configuration small:** Most rules should work without options. I add configuration when a project genuinely needs a choice, not to make every rule look flexible.
+- **Fix the boring parts:** Where a fix is safe, I would rather let `oxlint --fix` handle it than make someone rewrite the same cleanup by hand.
+
+This project overlaps with general Oxlint rules in a few places. The point is not to replace those rules. It is to cover the roblox-ts and React Luau cases they cannot reasonably know about.
 
 ## Compatibility
 

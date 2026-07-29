@@ -18,7 +18,8 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 
 <div class="home-proof reveal">
 	<p class="home-proof-copy">
-		Native oxlint speed, roblox-ts-specific checks, and fixes where repetitive cleanup should be automatic.
+		I made these rules for the roblox-ts problems I keep seeing in real code, with fixes for the repetitive cleanup
+		that does not need a review comment.
 	</p>
 	<ul class="home-proof-grid">
 		<li class="home-proof-item">
@@ -44,8 +45,11 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 	<span class="section-eyebrow">
 		<Icon name="rocket" size={12} /> Start here
 	</span>
-	<h2>Use the docs like a reference, not a landing page</h2>
-	<p>Start with installation, copy a minimal config, then browse rules by category as you tighten the codebase.</p>
+	<h2>Start with the part you need</h2>
+	<p>
+		Install the plugin, copy a small config, then browse the rule pages when you want to tighten a particular part
+		of the codebase.
+	</p>
 </div>
 
 <div class="home-start-links reveal">
@@ -53,7 +57,7 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 		<span class="home-start-index">1</span>
 		<span class="home-start-body">
 			<span class="home-start-title">Quick Start</span>
-			<span class="home-start-desc">Install the plugin, register it in oxlint, and run the first pass.</span>
+			<span class="home-start-desc">Install the plugin, register it in oxlint, and run a first pass.</span>
 		</span>
 		<span class="home-start-arrow">→</span>
 	</a>
@@ -62,7 +66,7 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 		<span class="home-start-body">
 			<span class="home-start-title">Configuration</span>
 			<span class="home-start-desc">
-				Set severities and define what should block CI versus what should stay advisory.
+				Choose which rules should block CI and which ones should stay advisory while you try them out.
 			</span>
 		</span>
 		<span class="home-start-arrow">→</span>
@@ -71,7 +75,7 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 		<span class="home-start-index">3</span>
 		<span class="home-start-body">
 			<span class="home-start-title">Changelog</span>
-			<span class="home-start-desc">Track rule additions and behavior changes before you upgrade.</span>
+			<span class="home-start-desc">Check rule additions and behavior changes before you upgrade.</span>
 		</span>
 		<span class="home-start-arrow">→</span>
 	</a>
@@ -82,7 +86,10 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 		<Icon name="search" size={12} /> Browse
 	</span>
 	<h2>Pick the part of the codebase you want to harden</h2>
-	<p>These category counts reflect the current plugin, not stale marketing numbers.</p>
+	<p>
+		The catalog builds these counts from the current rule metadata, so the numbers have somewhere to go when the
+		plugin changes.
+	</p>
 </div>
 
 <div class="category-grid reveal">
@@ -100,33 +107,38 @@ import { ruleFactCategories, ruleFactCounts } from "@/data/rule-facts";
 	<span class="section-eyebrow">
 		<Icon name="sparkles" size={12} /> Why it exists
 	</span>
-	<h2>Focused rules for the failures oxlint does not catch by itself</h2>
-	<p>The plugin is strongest where roblox-ts teams hit ecosystem-specific footguns and repeated review churn.</p>
+	<h2>Rules for the gaps I care about</h2>
+	<p>
+		Oxlint handles the general linting work. I use this plugin for roblox-ts APIs, React Luau patterns, Ianitor
+		lifecycle code, and the repeated mistakes that are specific to those ecosystems.
+	</p>
 </div>
 
 <div class="feature-grid reveal">
 	<FeatureCard
 		icon="bolt"
 		title="Oxlint-native"
-		description="Ships as a real oxlint plugin, so you keep the native execution model instead of routing through ESLint."
+		description="Uses the oxlint plugin API directly, so these rules run in oxlint instead of going through an ESLint compatibility layer."
 	/>
 	<FeatureCard
 		icon="puzzle"
 		title="Roblox-aware"
-		description="Targets React Luau patterns, Ianitor lifecycle rules, UI conventions, and Roblox-specific APIs that generic linters miss."
+		description="Checks React Luau patterns, Ianitor lifecycle code, UI conventions, and Roblox APIs that a general TypeScript linter cannot know about."
 	/>
 	<FeatureCard
 		icon="wand"
 		title="Fixes where they help"
-		description={`${ruleFactCounts.fixableRules} rules currently expose code fixes or fixer suggestions for repetitive cleanup.`}
+		description={`${ruleFactCounts.fixableRules} rules currently have fixes or fixer suggestions for cleanup that is usually mechanical.`}
 	/>
 </div>
 
 <div class="bottom-cta reveal">
 	<div class="bottom-cta-copy">
 		<span class="bottom-cta-kicker">Start enforcing</span>
-		<h2>Make the codebase argue less.</h2>
-		<p>Pick the rules that match your standards. Let oxlint handle the repetitive review comments.</p>
+		<h2>Give the review comments somewhere else to go.</h2>
+		<p>
+			Pick the rules that match your standards and let oxlint catch the mechanical stuff before it reaches review.
+		</p>
 	</div>
 	<div class="bottom-cta-actions">
 		<a href="/small-rules/quick-start/" class="bottom-cta-action bottom-cta-action--primary">

@@ -4,4 +4,18 @@ title: "No Array Size Assignment"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-array-size-assignment" />
+<RulePage rule="no-array-size-assignment">
+	<Fragment slot="rationale">
+		<p>
+			`array[array.size()] = value` works but it's goofy. Just use `array.push(value)` -- clearer, faster, and it
+			matches what every JS dev expects. Or even better... use `array[size++] = value` like what was mentioned in
+			the rationale for `no-increment-decrement`.
+		</p>
+		<p>
+			This flags any assignment where the index is the array's own size. Auto-fixes to `.push()` when the target
+			is simple. If the assignment references the array in a way that would change semantics (like
+			`array[array.size()] = array[array.size() - 1]`), it won't touch it. `allowAutofix` is off by default so you
+			can review each one.
+		</p>
+	</Fragment>
+</RulePage>

@@ -4,4 +4,16 @@ title: "Prefer Sequence Overloads"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="prefer-sequence-overloads" />
+<RulePage rule="prefer-sequence-overloads">
+	<Fragment slot="rationale">
+		<p>
+			`new ColorSequence(a, a)` is just `new ColorSequence(a)` with extra typing and overhead. Same for
+			`NumberSequence`. And `new ColorSequence([a, b])` is the two-keypoint array form when `new ColorSequence(a,
+			b)` exists and is FAR cheaper to run AND type.
+		</p>
+		<p>
+			This collapses both cases into the shorter overload. Auto-fixes when the keypoint values match what the
+			overload expects. Works for `ColorSequence` and `NumberSequence` -- anything with a `Keypoint` type.
+		</p>
+	</Fragment>
+</RulePage>

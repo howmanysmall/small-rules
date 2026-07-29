@@ -4,4 +4,16 @@ title: "No Array Constructor Index Assignment"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-array-constructor-index-assignment" />
+<RulePage rule="no-array-constructor-index-assignment">
+	<Fragment slot="rationale">
+		<p>
+			`new Array<T>()` then immediately writing `arr[0] = a; arr[1] = b;` right after is just a slow, ugly way to
+			write `[a, b]`. And on roblox-ts specifically, you're doing something that Luau does not like: unnecessary indexing.
+		</p>
+		<p>
+			This catches the pattern where you declare an empty array and fill it in by index right after. Auto-fixes to a
+			literal when the assignments are contiguous and don't reference the array itself. If you're actually building a
+			sparse array with gaps, this rule stays out of your way.
+		</p>
+	</Fragment>
+</RulePage>

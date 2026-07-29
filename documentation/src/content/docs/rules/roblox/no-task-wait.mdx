@@ -4,4 +4,16 @@ title: "No `task.wait`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-task-wait" />
+<RulePage rule="no-task-wait">
+	<Fragment slot="rationale">
+		<p>
+			Our unit tests were taking ten billion years to run because of `task.wait()` calls scattered everywhere,
+			each one actually sleeping. `Promise.delay(...).await()` does the same thing. Absolute nonsense in a test
+			suite.
+		</p>
+		<p>
+			Advance your scheduler or wait for the actual condition instead of sleeping and hoping. The game code can
+			use it fine, this is really about keeping the test run from dragging.
+		</p>
+	</Fragment>
+</RulePage>

@@ -4,4 +4,15 @@ title: "No Recursive"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-recursive" />
+<RulePage rule="no-recursive">
+	<Fragment slot="rationale">
+		<p>
+			This lint will yell at you over recursion. I added this rule specifically because Luau does [not support
+			tail-call optimization](https://github.com/luau-lang/luau/discussions/1183#discussioncomment-8719963) (as
+			confirmed by Roblox employees), meaning recursion will blow your stack. If that wasn't enough, NASA's [Power
+			of 10 rules for safety-critical code](http://web.eecs.umich.edu/~imarkov/10rules.pdf) explicitly bans direct
+			or indirect recursion to keep control flow deterministic and bounded. Good if you are writing code that
+			prioritizes performance and safety.
+		</p>
+	</Fragment>
+</RulePage>

@@ -4,4 +4,20 @@ title: "No Array Constructor Elements"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-array-constructor-elements" />
+<RulePage rule="no-array-constructor-elements">
+	<Fragment slot="rationale">
+		<p>
+			Heads up: `new Array(n)` is fine here. In roblox-ts it compiles to `table.create(n)`, which is a normal,
+			welcomed pattern. This rule does NOT flag that.
+		</p>
+		<p>
+			What it does catch: `new Array(a, b, c)` (element enumeration — just write `[a, b, c]`), a bare `new
+			Array()` with no generic type, and the "declare an empty array then `.push()` a bunch right after" pattern,
+			which it collapses into one literal. Auto-fixes when the values are side-effect free.
+		</p>
+		<p>
+			In `standard` mode it also bans `new Array(n)` length constructors, but in roblox-ts that's allowed. Flip
+			`environment` to `"standard"` if you want the stricter behavior.
+		</p>
+	</Fragment>
+</RulePage>

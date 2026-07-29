@@ -4,4 +4,16 @@ title: "Prefer `UDim2` Shorthand"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="prefer-udim2-shorthand" />
+<RulePage rule="prefer-udim2-shorthand">
+	<Fragment slot="rationale">
+		<p>
+			When you write `new UDim2(scaleX, 0, scaleY, 0)` those zeros are dead weight. Same story for `new UDim2(0,
+			offsetX, 0, offsetY)`. You are ONLY using scale, or ONLY using offset, and the constructor makes you spell
+			out all four anyway.
+		</p>
+		<p>
+			`UDim2.fromScale(scaleX, scaleY)` and `UDim2.fromOffset(offsetX, offsetY)` say exactly what you meant
+			without the noise. Auto-fixes, so there is no excuse to keep the long form around.
+		</p>
+	</Fragment>
+</RulePage>

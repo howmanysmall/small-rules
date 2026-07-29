@@ -4,4 +4,16 @@ title: "Prefer Single World Query"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="prefer-single-world-query" />
+<RulePage rule="prefer-single-world-query">
+	<Fragment slot="rationale">
+		<p>
+			Jecs lets you ask `world` for multiple components in one `get()` or `has()` call. Writing one query per
+			component against the same entity is just leaving performance on the table, and it reads like a shopping
+			list instead of one coherent request.
+		</p>
+		<p>
+			This rule finds consecutive queries on the same world and entity and collapses them into a single call. It
+			auto-fixes, so you don't have to hand-merge anything. I'd turn this on anywhere you use Jecs.
+		</p>
+	</Fragment>
+</RulePage>

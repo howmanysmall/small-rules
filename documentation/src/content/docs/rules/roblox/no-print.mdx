@@ -4,4 +4,15 @@ title: "No `print`"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-print" />
+<RulePage rule="no-print">
+	<Fragment slot="rationale">
+		<p>
+			I just really don't like unnecessary output logging. `print()` is a raw Luau function with no log levels, no
+			timestamps, and no filtering. Once it's in production you can't turn it off or route it anywhere useful.
+		</p>
+		<p>
+			Use [`Log`](https://npmx.dev/package/@rbxts/rbxts-sleitnick-log) instead. It gives you levels among other
+			things. Not recommended to suppress this one.
+		</p>
+	</Fragment>
+</RulePage>
