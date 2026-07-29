@@ -7,6 +7,15 @@ overrides:
   vite: ^8
 
 packageExtensions:
+  "astro@7.0.3":
+    peerDependencies:
+      "@astrojs/check": "*"
+      typescript: "*"
+    peerDependenciesMeta:
+      "@astrojs/check":
+        optional: true
+      typescript:
+        optional: true
   "@astrojs/mdx@7.0.0":
     dependencies:
       satteri: 0.9.2
