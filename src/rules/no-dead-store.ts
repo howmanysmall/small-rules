@@ -149,16 +149,47 @@ function usageObservesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<
 	return (usage.isRead && !usage.isWrite) || (usage.isWrite && assignmentReadsPreviousValue(usage, usages));
 }
 
-function hasLoopStep(write: VariableUsage, read: VariableUsage, root: ESTree.Node): boolean {
-	const writePath = branchPath(write.node, root);
-	const readPath = branchPath(read.node, root);
-	return writePath.some(
-		(step) => LOOP_STATEMENT_TYPES.has(step.control.type) && branchArm(readPath, step.control) === step.arm,
-	);
+function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
+	const loops: Array<ESTree.Node> = [];
+	let current: ESTree.Node | null = node.parent;
+	while (current !== null) {
+		if (LOOP_STATEMENT_TYPES.has(current.type)) {
+			loops.push(current);
+		} else if (
+			current.type === "Program" ||
+			current.type === "ArrowFunctionExpression" ||
+			current.type === "FunctionDeclaration" ||
+			current.type === "FunctionExpression"
+		) {
+			break;
+		}
+		current = current.parent;
+	}
+	return loops;
+}
+
+function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): boolean {
+	const writeLoops = collectLoopAncestors(write.node);
+	let current: ESTree.Node | null = (usage.node as ESTree.Node).parent;
+	while (current !== null) {
+		for (const loop of writeLoops) {
+			if (loop === current) return true;
+		}
+		if (
+			current.type === "Program" ||
+			current.type === "ArrowFunctionExpression" ||
+			current.type === "FunctionDeclaration" ||
+			current.type === "FunctionExpression"
+		) {
+			break;
+		}
+		current = current.parent;
+	}
+	return false;
 }
 
 function isReadAcrossLoop(usage: VariableUsage, write: VariableUsage, root: ESTree.Node): boolean {
-	return usage.isRead && !usage.isWrite && executionRoot(usage.node) === root && hasLoopStep(write, usage, root);
+	return usage.isRead && !usage.isWrite && executionRoot(usage.node) === root && hasCommonLoopAncestor(write, usage);
 }
 
 function checkObservation(

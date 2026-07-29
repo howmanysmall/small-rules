@@ -117,6 +117,7 @@ describe("no-dead-store", () => {
 				"}",
 			].join("\n"),
 			"function separateConditions(first: boolean, second: boolean) { let value = load(); first ? (value = one()) : noop(); second ? (value = two()) : noop(); consume(value); }",
+			"function generateTuple() { for (let index = 0; index < 10; index += 1) run(); }",
 			`function process(items: Array<number>) {
   let x = 0;
   for (const item of items) {
