@@ -1,0 +1,152 @@
+---
+// Copy of Starlight's SidebarSublist that renders labels through InlineMarkdownText
+// so backticks in rule titles display as code. Keep in sync with upstream on upgrades.
+import { Badge, Icon } from "@astrojs/starlight/components";
+import SidebarRestorePoint from "@astrojs/starlight/components/SidebarRestorePoint.astro";
+import InlineMarkdownText from "@/components/inline-markdown-text.astro";
+
+import type { StarlightRouteData } from "@astrojs/starlight/route-data";
+
+type SidebarEntry = StarlightRouteData["sidebar"][number];
+
+interface Props {
+	nested?: boolean;
+	sublist: Array<SidebarEntry>;
+}
+
+const { sublist, nested } = Astro.props;
+
+function containsCurrent(entries: ReadonlyArray<SidebarEntry>): boolean {
+	return entries.some((entry) => (entry.type === "link" ? entry.isCurrent : containsCurrent(entry.entries)));
+}
+---
+
+<ul class:list={{ "top-level": !nested }}>
+	{sublist.map((entry) => (
+			<li>
+				{entry.type === "link" ? (
+					<a
+						aria-current={entry.isCurrent ? "page" : undefined}
+						href={entry.href}
+						class:list={[{ large: !nested }, entry.attrs.class]}
+						{...entry.attrs}
+					>
+						<span>
+							<InlineMarkdownText text={entry.label} />
+						</span>
+						{entry.badge && <Badge class={entry.badge.class} text={entry.badge.text} variant={entry.badge.variant} />}
+					</a>
+				) : (
+					<details open={containsCurrent(entry.entries) || !entry.collapsed}>
+						<summary>
+							<span class="group-label">
+								<span class="large">
+									<InlineMarkdownText text={entry.label} />
+								</span>
+								{entry.badge && (
+									<Badge class={entry.badge.class} text={entry.badge.text} variant={entry.badge.variant} />
+								)}
+							</span>
+							<Icon class="caret" name="right-caret" size="1.25rem" />
+						</summary>
+						<SidebarRestorePoint />
+						<Astro.self nested={true} sublist={entry.entries} />
+					</details>
+				)}
+			</li>
+		))}
+</ul>
+
+<style>
+	@layer starlight.core {
+		ul {
+			--sl-sidebar-item-padding-inline: 0.5rem;
+			padding: 0;
+			list-style: none;
+		}
+
+		li {
+			overflow-wrap: anywhere;
+		}
+
+		ul ul li {
+			padding-inline-start: var(--sl-sidebar-item-padding-inline);
+			margin-inline-start: var(--sl-sidebar-item-padding-inline);
+			border-inline-start: 1px solid var(--sl-color-hairline-light);
+		}
+
+		.large {
+			font-size: var(--sl-text-lg);
+			font-weight: 600;
+			color: var(--sl-color-white);
+		}
+
+		.top-level > li + li {
+			margin-top: 0.75rem;
+		}
+
+		summary {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.2em var(--sl-sidebar-item-padding-inline);
+			line-height: 1.4;
+			cursor: pointer;
+			user-select: none;
+		}
+		summary::marker,
+		summary::-webkit-details-marker {
+			display: none;
+		}
+
+		.caret {
+			flex-shrink: 0;
+			transition: transform 0.2s ease-in-out;
+		}
+		:global([dir="rtl"]) .caret {
+			transform: rotateZ(180deg);
+		}
+		[open] > summary .caret {
+			transform: rotateZ(90deg);
+		}
+
+		a {
+			display: block;
+			padding: 0.3em var(--sl-sidebar-item-padding-inline);
+			line-height: 1.4;
+			color: var(--sl-color-gray-2);
+			text-decoration: none;
+			border-radius: 0.25rem;
+		}
+
+		a:hover,
+		a:focus {
+			color: var(--sl-color-white);
+		}
+
+		[aria-current="page"],
+		[aria-current="page"]:hover,
+		[aria-current="page"]:focus {
+			font-weight: 600;
+			color: var(--sl-color-text-invert);
+			background-color: var(--sl-color-text-accent);
+		}
+
+		a > *:not(:last-child),
+		.group-label > *:not(:last-child) {
+			margin-inline-end: 0.25em;
+		}
+
+		@media (min-width: 50rem) {
+			.top-level > li + li {
+				margin-top: 0.5rem;
+			}
+			.large {
+				font-size: var(--sl-text-base);
+			}
+			a {
+				font-size: var(--sl-text-sm);
+			}
+		}
+	}
+</style>

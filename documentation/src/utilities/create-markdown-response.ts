@@ -1,6 +1,6 @@
 export interface MarkdownResponseOptions {
 	readonly body: string;
-	readonly status?: number;
+	readonly status?: number | undefined;
 }
 
 const MARKDOWN_CONTENT_TYPE = "text/markdown; charset=utf-8";

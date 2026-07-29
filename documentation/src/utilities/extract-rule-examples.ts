@@ -231,6 +231,7 @@ function evaluateRequiredString(
 
 function getObjectFields(object: ObjectExpression, context: ExtractionContext): Array<ObjectField> {
 	const fields = new Array<ObjectField>();
+	let size = 0;
 	for (const property of object.properties) {
 		if (property.type === "SpreadElement") {
 			throwExtractionError(context, property.start, "spread properties are not supported.");
@@ -239,7 +240,7 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 		if (property.kind !== "init" || property.method) {
 			throwExtractionError(context, property.start, "object methods, getters, and setters are not supported.");
 		}
-		fields.push({ key: getStaticKey(property.key, context), property });
+		fields[size++] = { key: getStaticKey(property.key, context), property };
 	}
 	return fields;
 }
@@ -293,7 +294,7 @@ function isStaticLiteral(node: Expression): node is Literal & { readonly value: 
 	);
 }
 
-function isStringLiteral(node: Node | undefined): node is Literal & { readonly value: string } {
+function isStringLiteral(node?: Node): node is Literal & { readonly value: string } {
 	return node?.type === "Literal" && typeof node.value === "string";
 }
 
@@ -317,12 +318,13 @@ function isStringRawTag(tag: Expression): boolean {
 
 function evaluateArray(array: ArrayExpression, context: ExtractionContext): ReadonlyArray<StaticValue> {
 	const values = new Array<StaticValue>();
+	let size = 0;
 	for (const element of array.elements) {
 		if (element === null) throwExtractionError(context, array.start, "array holes are not supported.");
 		if (element.type === "SpreadElement") {
 			throwExtractionError(context, element.start, "array spreads are not supported.");
 		}
-		values.push(evaluateStatic(element, context));
+		values[size++] = evaluateStatic(element, context);
 	}
 	return values;
 }

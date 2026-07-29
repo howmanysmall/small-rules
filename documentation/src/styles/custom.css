@@ -444,8 +444,11 @@ starlight-link-card:hover {
 }
 
 .sl-markdown-content :not(pre) > code:not(:where(.not-content *)),
-.rule-summary-text :not(pre) > code {
+.rule-summary-text :not(pre) > code,
+.sidebar-content :not(pre) > code,
+h1#_top > code {
 	padding: 0;
+	font-family: var(--sl-font-mono);
 	font-size: 0.92em;
 	font-weight: 500;
 	color: var(--sl-color-accent-high);
@@ -454,8 +457,15 @@ starlight-link-card:hover {
 }
 
 :root[data-theme="dark"] .sl-markdown-content :not(pre) > code:not(:where(.not-content *)),
-:root[data-theme="dark"] .rule-summary-text :not(pre) > code {
+:root[data-theme="dark"] .rule-summary-text :not(pre) > code,
+:root[data-theme="dark"] .sidebar-content :not(pre) > code,
+:root[data-theme="dark"] h1#_top > code {
 	color: var(--accent-border);
+}
+
+/* The active sidebar link sits on an accent background; code must inherit its contrast color. */
+.sidebar-content [aria-current="page"] :not(pre) > code {
+	color: inherit;
 }
 
 .table-container,
