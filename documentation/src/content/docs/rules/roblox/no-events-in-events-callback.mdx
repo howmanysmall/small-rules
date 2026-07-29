@@ -4,4 +4,16 @@ title: "No Events In Events Callback"
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="no-events-in-events-callback" />
+<RulePage rule="no-events-in-events-callback">
+	<Fragment slot="rationale">
+		<p>
+			Firing an Event back to the same player from inside its own `.connect` callback is a footgun. You'll get
+			recursion or just confuse the request/response flow. Use a `Functions` callback for that -- it's the right
+			tool.
+		</p>
+		<p>
+			This tracks which players you're sending Events to inside a callback and yells if you call Events for them
+			again from within. You point it at your Events import with `eventsImportPaths` -- it doesn't guess.
+		</p>
+	</Fragment>
+</RulePage>
