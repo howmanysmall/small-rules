@@ -85,7 +85,7 @@ depends = ["lint", "type-check", "knip", "build", "test"]
 
 [tasks.ci]
 description = "Run the full CI suite, including package and documentation validation."
-depends = ["install", "check", "documentation"]
+depends = ["install", "check", "documentation", "check"]
 
 [tasks.release]
 description = "Run local validation, then bump version, commit, tag, and push via bumpp. Run from an up-to-date main branch."
