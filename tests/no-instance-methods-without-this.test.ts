@@ -114,6 +114,19 @@ class MyClass {
 `,
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }, { messageId: "noInstanceMethodWithoutThis" }],
 			},
+			// Overload signatures are skipped, but the implementation is still flagged
+			{
+				code: `
+class UniqueRandom {
+    public nextNumber(): number;
+    public nextNumber(minimum: number, maximum: number): number;
+    public nextNumber(minimum?: number, maximum?: number): number {
+        return Math.random();
+    }
+}
+`,
+				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
+			},
 		],
 		valid: [
 			// Static methods are skipped
@@ -245,6 +258,28 @@ class MyClass {
     constructor() {
         console.log("constructed");
     }
+}
+`,
+			},
+			// TypeScript method overload signatures are not implementations
+			{
+				code: `
+class UniqueRandom {
+    private value = 0;
+
+    public nextNumber(): number;
+    public nextNumber(minimum: number, maximum: number): number;
+    public nextNumber(minimum?: number, maximum?: number): number {
+        return this.value++;
+    }
+}
+`,
+			},
+			// Abstract methods have no body to check
+			{
+				code: `
+abstract class MyClass {
+    public abstract nextNumber(): number;
 }
 `,
 			},
