@@ -1,7 +1,19 @@
 ---
-title: "Prefer `Number.prototype.idiv`"
+title: "Prefer `idiv`"
 ---
 
 import RulePage from "@/components/rule-page.astro";
 
-<RulePage rule="prefer-idiv" />
+<RulePage rule="prefer-idiv">
+	<Fragment slot="rationale">
+		<p>
+			roblox-ts has a dedicated integer division operator, `x.idiv(y)`, that does exactly what `math.floor(x / y)`
+			does but compiles to `x // y` instead of a floor plus a division. Should be a bit faster, and it's clearer
+			about what you meant.
+		</p>
+		<p>
+			Auto-fixes `math.floor(x / y)` to `x.idiv(y)`. Only fires when the divisor is a division expression, so it
+			won't touch anything weird.
+		</p>
+	</Fragment>
+</RulePage>
