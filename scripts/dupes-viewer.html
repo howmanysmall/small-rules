@@ -638,12 +638,17 @@
 			/* ─── Code Grid ─── */
 			.code-grid {
 				display: grid;
-				grid-template-columns: 1fr 1fr;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 				gap: 0;
+				min-width: 0;
 			}
 
 			.snippet {
 				border-right: 1px solid var(--line);
+				min-width: 0;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
 			}
 
 			.snippet:last-child {
@@ -658,6 +663,7 @@
 				padding: 12px 20px;
 				background: rgba(13, 17, 23, 0.8);
 				border-bottom: 1px solid var(--line);
+				min-width: 0;
 			}
 
 			.snippet-head span {
@@ -667,6 +673,7 @@
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
+				min-width: 0;
 			}
 
 			.copy {
@@ -701,15 +708,23 @@
 				margin: 0;
 				padding: 16px 20px;
 				overflow-x: auto;
+				overflow-y: auto;
 				background: var(--surface-code);
+				min-width: 0;
+				max-width: 100%;
+				flex: 1;
 			}
 
 			code {
-				font-family:
-					"JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+				font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 				font-size: 12.5px;
 				line-height: 1.7;
 				color: var(--text);
+				font-variant-ligatures: none;
+				white-space: pre;
+				display: block;
+				width: max-content;
+				min-width: 100%;
 			}
 
 			/* ─── Syntax Highlighting ─── */
