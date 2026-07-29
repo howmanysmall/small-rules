@@ -53,19 +53,16 @@ interface ResolvedArrowFunction {
 	readonly type: "arrow";
 }
 
-interface ResolvedFunctionDeclaration {
+interface FunnyResolvedFunction<TType extends "declaration" | "expression"> {
 	readonly isAsync: boolean;
 	readonly node: ESTree.Function;
-	readonly type: "function-declaration";
+	readonly type: `function-${TType}`;
 }
 
-interface ResolvedFunctionExpression {
-	readonly isAsync: boolean;
-	readonly node: ESTree.Function;
-	readonly type: "function-expression";
-}
-
-type ResolvedFunction = ResolvedArrowFunction | ResolvedFunctionDeclaration | ResolvedFunctionExpression;
+type ResolvedFunction =
+	| ResolvedArrowFunction
+	| FunnyResolvedFunction<"declaration">
+	| FunnyResolvedFunction<"expression">;
 
 type RequireNamedEffectFunctionsMessageId =
 	| "anonymousFunction"
