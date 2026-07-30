@@ -30,7 +30,7 @@ footer = """
     {% else -%}
         [Unreleased]: https://github.com/howmanysmall/small-rules/compare/{{ release.previous.version }}...HEAD
     {% endif -%}
-{% endfor %}
+{% endfor %}\\
 """
 trim = true
 render_always = true
