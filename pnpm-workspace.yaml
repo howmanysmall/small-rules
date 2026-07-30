@@ -154,7 +154,6 @@ catalogs:
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
     bumpp: 12.1.0
-    changelogithub: 14.0.0
     commitlint: 21.2.1
     fast-check: 4.9.0
     fdir: 6.5.0
