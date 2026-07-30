@@ -1,7 +1,5 @@
 [changelog]
 header = """
-# Changelog
-
 All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 """

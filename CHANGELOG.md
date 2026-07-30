@@ -1,8 +1,10 @@
-# Changelog
-
 All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 ## [Unreleased]
+
+### Added
+
+- **release:** Replace changelogithub with communique for release notes
 
 ### Fixed
 
@@ -15,6 +17,10 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 - **vitest:** Remove vite-tsconfig-paths in favor of native support
 - **no-dead-store:** Extract observation check logic
+
+### Documentation
+
+- **agents:** Update release workflow documentation with communique
 
 ### Build
 
@@ -34,6 +40,7 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **deps:** Prune unused dependencies and update configuration
 - **deps:** Remove unused dependencies from pnpm lockfile
 - **changelog:** Add git-cliff and communique configuration files
+- **release:** Switch changelog generator to git-cliff
 
 ## [v2.11.0] - 2026-07-29
 
