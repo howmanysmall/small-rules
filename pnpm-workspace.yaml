@@ -1,6 +1,7 @@
 # Equivalent to pnpm-workspace.yaml `packages:`
 packages:
   - documentation
+  - scripts
   - .opencode
 
 # Force specific versions of any dependency (including transitive)
@@ -36,6 +37,7 @@ trustPolicyExclude:
 
 # Only allow specific packages to run install scripts
 allowBuilds:
+  "@openrouter/sdk": true
   "@swc/core": true
   esbuild: true
   msgpackr-extract: true
@@ -43,6 +45,11 @@ allowBuilds:
 
 strictDepBuilds: true
 strictPeerDependencies: true
+
+peerDependencyRules:
+  allowedVersions:
+    "@emnapi/core": ">=1.0.0"
+    "@emnapi/runtime": ">=1.0.0"
 
 # Global virtual store (pnpm's node_modules/.pnpm equivalent)
 enableGlobalVirtualStore: true
@@ -147,7 +154,6 @@ catalogs:
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
     bumpp: 12.1.0
-    changelogithub: 14.0.0
     commitlint: 21.2.1
     fast-check: 4.9.0
     fdir: 6.5.0
@@ -161,6 +167,7 @@ catalogs:
     oxlint-tsgolint: 7.0.2001
     oxlint: 1.76.0
     picocolors: 1.1.1
+    pncat: 0.13.0
     sfw: 2.0.6
     skills: 1.5.20
     type-fest: 5.8.0
@@ -168,9 +175,6 @@ catalogs:
     vitiate: 0.3.1
     yuku-ast: 0.8.1
     zx: 8.8.5
-    yaml-language-server: 1.24.0
-    bash-language-server: 5.6.0
-    pncat: 0.13.0
   frontend:
     "@astrojs/react": 6.0.0
     react: 19.2.7

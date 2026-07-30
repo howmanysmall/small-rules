@@ -116,9 +116,13 @@ jobs:
         if: ${{ env.DRY_RUN != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.CROFAI_API_KEY }}
         run: |
           RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"
-          node --run changelogithub -- --to "$GITHUB_REF_NAME" --output "$RELEASE_NOTES"
+          if ! communique generate "$GITHUB_REF_NAME" --output "$RELEASE_NOTES"; then
+            echo "::warning title=communique failed::Falling back to git-cliff release notes."
+            git-cliff --current --strip all --output "$RELEASE_NOTES"
+          fi
           echo "RELEASE_NOTES=$RELEASE_NOTES" >> "$GITHUB_ENV"
 
       - name: Commit release notes to main

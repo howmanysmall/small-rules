@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 const frameworkBoundaryComponents = [
 	"inline-markdown-text",
 	"package-manager-tabs",
-	"release-history",
 	"rule-diagnostics",
 	"rule-examples",
 	"rule-options",

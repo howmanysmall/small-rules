@@ -140,7 +140,7 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 - **Validate** — sequential Biome, Oxlint, type-check (`tsgo`), Knip, and minified build on one runner
 - **Test** — Vitest with compact `--reporter github-actions --reporter dot` output
 
-`.github/workflows/release.yaml` — Triggered by `v*.*.*` tags or manually with `dry_run`. Does **not** re-run CI: it waits for the matching main-branch CI run for the tag SHA, then publishes via NPM Trusted Publishing (OIDC). The real publish build is `prepublishOnly` only; dry runs still build explicitly. Creates a GitHub release via `changelogithub`.
+`.github/workflows/release.yaml` — Triggered by `v*.*.*` tags or manually with `dry_run`. Does **not** re-run CI: it waits for the matching main-branch CI run for the tag SHA, then publishes via NPM Trusted Publishing (OIDC). The real publish build is `prepublishOnly` only; dry runs still build explicitly. `communique` generates the documentation and GitHub Release notes, with `git-cliff` as the fallback.
 
 ## Release Flow
 

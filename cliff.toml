@@ -1,0 +1,65 @@
+[changelog]
+header = """
+All notable changes to `@pobammer-ts/small-rules` are documented here.
+
+"""
+body = """
+{% if version %}\
+    ## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+    ## [Unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | striptags | trim }}
+    {% for commit in commits %}
+        - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}\
+            {% if commit.breaking %}**Breaking:** {% endif %}\
+            {{ commit.message | upper_first }}\
+    {% endfor %}
+{% endfor %}
+
+"""
+footer = """
+{% for release in releases -%}
+    {% if release.version -%}
+        {% if release.previous.version -%}
+            [{{ release.version }}]: https://github.com/howmanysmall/small-rules/compare/{{ release.previous.version }}...{{ release.version }}
+        {% else -%}
+            [{{ release.version }}]: https://github.com/howmanysmall/small-rules/commits/{{ release.version }}
+        {% endif -%}
+    {% else -%}
+        [Unreleased]: https://github.com/howmanysmall/small-rules/compare/{{ release.previous.version }}...HEAD
+    {% endif -%}
+{% endfor %}\\
+"""
+trim = true
+render_always = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+filter_commits = false
+protect_breaking_commits = true
+split_commits = false
+tag_pattern = "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+commit_parsers = [
+	{ message = "^chore\\(docs\\): add v[0-9]+\\.[0-9]+\\.[0-9]+ release notes$", skip = true },
+	{ message = "^chore(?:\\(release\\))?: (?:release v|bump version to )[0-9]+\\.[0-9]+\\.[0-9]+$", skip = true },
+	{ message = "^feat", group = "<!-- 0 -->Added" },
+	{ message = "^fix", group = "<!-- 1 -->Fixed" },
+	{ message = "^perf", group = "<!-- 2 -->Performance" },
+	{ message = "^refactor", group = "<!-- 3 -->Changed" },
+	{ message = "^docs?", group = "<!-- 4 -->Documentation" },
+	{ message = "^build", group = "<!-- 5 -->Build" },
+	{ message = "^test", group = "<!-- 6 -->Tests" },
+	{ message = "^ci", group = "<!-- 7 -->Continuous Integration" },
+	{ message = "^style", group = "<!-- 8 -->Style" },
+	{ message = "^chore", group = "<!-- 9 -->Maintenance" },
+	{ message = "^revert", group = "<!-- 10 -->Reverted" },
+	{ message = ".*", group = "<!-- 11 -->Other" },
+]
+sort_commits = "oldest"
+topo_order = false
+topo_order_commits = false
+use_branch_tags = false
+recurse_submodules = false
