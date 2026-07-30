@@ -1,6 +1,5 @@
 dictionaries = ["en_us"]
 words = [
-	"changelogithub",
 	"bumpp",
 	"bexport",
 	"billboardgui",
@@ -8,10 +7,13 @@ words = [
 	"canvasgroup",
 	"cjs",
 	"codestral",
+	"communique",
+	"crof",
 	"ecs",
 	"filenaming",
 	"flamework",
 	"gsub",
+	"glm",
 	"hedgefund",
 	"hexflame",
 	"hoverable",

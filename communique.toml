@@ -1,17 +1,17 @@
-# Extra instructions appended to the system prompt.
-# Use this to customize tone, style, or project-specific conventions.
-# system_extra = ""
+system_extra = """
+Lead with user impact. Call out breaking changes prominently and include concrete migration steps when users need to change code or configuration. Omit internal-only churn, release automation, dependency maintenance, and refactors with no observable effect. Prefer specific rule names and observable behavior over implementation details. Do not invent benefits, compatibility claims, or links.
+"""
 
-# Extra context included in every user prompt.
-# Useful for project descriptions or recurring context.
-# context = ""
+context = """
+small-rules is an Oxlint-native lint plugin for TypeScript projects. It includes general TypeScript rules and rules for Roblox, React Luau, Ianitor life cycles, useReducer patterns, and Roblox UI conventions. These notes are read by package users deciding whether and how to upgrade.
+"""
 
 [defaults]
-# model = "claude-opus-4-8"
-# max_tokens = 16384
-# repo = "owner/repo"
-# provider = "anthropic"
-# base_url = ""
-# emoji = true
-# verify_links = true
-# match_style = true
+model = "glm-5.2"
+max_tokens = 16384
+repo = "howmanysmall/small-rules"
+provider = "openai"
+base_url = "https://crof.ai/v1"
+emoji = true
+verify_links = true
+match_style = true

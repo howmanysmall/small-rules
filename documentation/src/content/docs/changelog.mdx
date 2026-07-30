@@ -12,7 +12,7 @@ import ReleaseHistory from "@/components/release-history.astro";
 
 `small-rules` uses [bumpp](https://github.com/antfu/bumpp) for versioning. Releases are triggered by pushing a `v*.*.*` tag to the repository.
 
-Each release is published to NPM via Trusted Publishing (OIDC) and a GitHub Release is created automatically with `changelogithub`.
+Each release is published to NPM via Trusted Publishing (OIDC). `communique` writes the user-facing release notes, and `git-cliff` takes over if that generation fails.
 
 <CardGrid>
 	<LinkCard

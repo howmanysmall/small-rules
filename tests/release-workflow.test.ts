@@ -103,11 +103,8 @@ describe("release workflow", () => {
 	});
 
 	it("generates one release body and reuses it for documentation and GitHub", () => {
-		expect.assertions(5);
+		expect.assertions(4);
 		expect(RELEASE_YAML).toContain('RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"');
-		expect(RELEASE_YAML).toContain(
-			'node --run changelogithub -- --to "$GITHUB_REF_NAME" --output "$RELEASE_NOTES"',
-		);
 		expect(RELEASE_YAML).toContain('cp "$RELEASE_NOTES" "$RELEASE_ARTIFACT"');
 		expect(RELEASE_YAML).toContain('gh release create "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"');
 		expect(RELEASE_YAML).toContain('gh release edit "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"');
