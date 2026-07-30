@@ -4,11 +4,9 @@
 	"type": "module",
 	"dependencies": {
 		"@cliffy/command": "catalog:dev",
-		"@cliffy/table": "catalog:dev",
-		"@openrouter/sdk": "catalog:dev",
-		"arkenv": "catalog:dev",
+		"@octokit/rest": "catalog:dev",
+		"@std/msgpack": "catalog:dev",
 		"arktype": "catalog:prod",
-		"better-all": "catalog:dev",
 		"fdir": "catalog:dev",
 		"jsonc-parser": "catalog:dev",
 		"just-diff": "catalog:dev",
@@ -17,5 +15,8 @@
 		"yuku-ast": "catalog:dev",
 		"yuku-parser": "catalog:prod",
 		"zx": "catalog:dev"
+	},
+	"devDependencies": {
+		"@total-typescript/ts-reset": "catalog:types"
 	}
 }

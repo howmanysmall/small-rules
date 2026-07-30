@@ -117,9 +117,6 @@ catalogs:
     '@cliffy/command':
       specifier: npm:@jsr/cliffy__command@1.2.1
       version: 1.2.1
-    '@cliffy/table':
-      specifier: npm:@jsr/cliffy__table@1.2.1
-      version: 1.2.1
     '@commitlint/config-conventional':
       specifier: 21.2.0
       version: 21.2.0
@@ -132,9 +129,6 @@ catalogs:
     '@opencode-ai/plugin':
       specifier: 1.18.9
       version: 1.18.9
-    '@openrouter/sdk':
-      specifier: 1.1.16
-      version: 1.1.16
     '@std/msgpack':
       specifier: npm:@jsr/std__msgpack@1.0.3
       version: 1.0.3
@@ -153,12 +147,6 @@ catalogs:
     '@vitiate/fuzzed-data-provider':
       specifier: 0.3.1
       version: 0.3.1
-    arkenv:
-      specifier: 0.12.3
-      version: 0.12.3
-    better-all:
-      specifier: 0.0.8
-      version: 0.0.8
     bumpp:
       specifier: 12.1.0
       version: 12.1.0
@@ -382,9 +370,6 @@ importers:
       '@biomejs/biome':
         specifier: catalog:lint
         version: 2.5.6
-      '@cliffy/command':
-        specifier: catalog:dev
-        version: '@jsr/cliffy__command@1.2.1'
       '@commitlint/config-conventional':
         specifier: catalog:dev
         version: 21.2.0
@@ -397,9 +382,6 @@ importers:
       '@octokit/rest':
         specifier: catalog:dev
         version: 22.0.1
-      '@std/msgpack':
-        specifier: catalog:dev
-        version: '@jsr/std__msgpack@1.0.3'
       '@stryker-mutator/api':
         specifier: catalog:dev
         version: 9.6.1
@@ -630,21 +612,15 @@ importers:
       '@cliffy/command':
         specifier: catalog:dev
         version: '@jsr/cliffy__command@1.2.1'
-      '@cliffy/table':
+      '@octokit/rest':
         specifier: catalog:dev
-        version: '@jsr/cliffy__table@1.2.1'
-      '@openrouter/sdk':
+        version: 22.0.1
+      '@std/msgpack':
         specifier: catalog:dev
-        version: 1.1.16
-      arkenv:
-        specifier: catalog:dev
-        version: 0.12.3(arktype@2.2.3)
+        version: '@jsr/std__msgpack@1.0.3'
       arktype:
         specifier: catalog:prod
         version: 2.2.3
-      better-all:
-        specifier: catalog:dev
-        version: 0.0.8
       fdir:
         specifier: catalog:dev
         version: 6.5.0(picomatch@4.0.5)
@@ -669,6 +645,10 @@ importers:
       zx:
         specifier: catalog:dev
         version: 8.8.5
+    devDependencies:
+      '@total-typescript/ts-reset':
+        specifier: catalog:types
+        version: 0.6.1
 
 packages:
 
@@ -2004,9 +1984,6 @@ packages:
 
   '@opencode-ai/sdk@1.18.9':
     resolution: {integrity: sha512-oDJSmsmiGW+3lNLmZYj3EpUkpiT3ITZBKffH3mrmu2KMJXlkxQ/Nvv7jqPffSM7o8lCdBZS/aCE+2GkA3/92gQ==}
-
-  '@openrouter/sdk@1.1.16':
-    resolution: {integrity: sha512-oNBFX+8wB2D+n8XhpKcvweHi+lxLdkYRDUNAQi6QRTpL/TcG1scMgST9LK05/d0WXk2oW2Sg854xzQ6vpxfmYg==}
 
   '@opentelemetry/api-logs@0.220.0':
     resolution: {integrity: sha512-CmVa4ImJ+ynfrPMNaAXHET6Bhb44SwzmfyVJFq9ni2jgXJR/l7C6gfVFddNmHP+ZOkP9cf4f9DBe68qVLTHc9w==}
@@ -3900,14 +3877,6 @@ packages:
     resolution: {integrity: sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==}
     engines: {node: '>= 0.4'}
 
-  arkenv@0.12.3:
-    resolution: {integrity: sha512-MX1/O52eG+XysuCotCyBvjZBbBk4qFbefqSYcb337gLwYOgNQhbtDrTOr+biMhjfAyGo3s+3Kn+fLH4aYgxTtg==}
-    peerDependencies:
-      arktype: ^2.1.22
-    peerDependenciesMeta:
-      arktype:
-        optional: true
-
   arkregex@0.0.8:
     resolution: {integrity: sha512-PJcx6G1kQTgLKPUbeYlYecDRaKq15AMSGVajlKFYWlPeJRQL+j3dKE6tyMs40HZ99djS1l9Vhl3ezAHy9JBIqQ==}
 
@@ -3983,9 +3952,6 @@ packages:
 
   before-after-hook@4.0.0:
     resolution: {integrity: sha512-q6tR3RPqIB1pMiTRMFcZwuG5T8vwp+vUvEG0vuI6B+Rikh5BfPp2fQ82c925FOs+b0lcFQ8CFrL+KbilfZFhOQ==}
-
-  better-all@0.0.8:
-    resolution: {integrity: sha512-d43wsd1dg3CgF4F3wAmd4j0tSEMSRbHJ5pgsKCqI7PCygiciq3deuuEz0XhZCcim+owAouSgikvGMGvFTjFcOg==}
 
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
@@ -8477,10 +8443,6 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@openrouter/sdk@1.1.16':
-    dependencies:
-      zod: 4.4.3
-
   '@opentelemetry/api-logs@0.220.0':
     dependencies:
       '@opentelemetry/api': 1.9.1
@@ -9841,10 +9803,6 @@ snapshots:
 
   aria-query@5.3.2: {}
 
-  arkenv@0.12.3(arktype@2.2.3):
-    optionalDependencies:
-      arktype: 2.2.3
-
   arkregex@0.0.8:
     dependencies:
       '@ark/util': 0.56.2
@@ -9999,8 +9957,6 @@ snapshots:
       is-decimal: 2.0.1
 
   before-after-hook@4.0.0: {}
-
-  better-all@0.0.8: {}
 
   bidi-js@1.0.3:
     dependencies:
@@ -13674,11 +13630,9 @@ time:
   '@commitlint/types@21.2.0': '2026-06-30T09:53:50.232Z'
   '@fast-check/vitest@0.4.1': '2026-04-28T22:22:05.897Z'
   '@jsr/cliffy__command@1.2.1': '2026-06-04T15:50:53.474Z'
-  '@jsr/cliffy__table@1.2.1': '2026-06-04T15:50:36.123Z'
   '@jsr/std__msgpack@1.0.3': '2025-01-31T08:14:09.999Z'
   '@octokit/rest@22.0.1': '2025-10-31T20:59:36.519Z'
   '@opencode-ai/plugin@1.18.9': '2026-07-28T18:13:48.548Z'
-  '@openrouter/sdk@1.1.16': '2026-07-28T19:25:08.937Z'
   '@playwright/test@1.61.1': '2026-06-23T19:49:12.825Z'
   '@stryker-mutator/api@9.6.1': '2026-04-10T20:24:57.631Z'
   '@stryker-mutator/core@9.6.1': '2026-04-10T20:25:04.648Z'
@@ -13694,11 +13648,9 @@ time:
   '@vitest/coverage-v8@4.1.10': '2026-07-06T06:44:13.365Z'
   '@vitiate/core@0.3.1': '2026-06-22T01:48:29.902Z'
   '@vitiate/fuzzed-data-provider@0.3.1': '2026-06-22T01:48:27.001Z'
-  arkenv@0.12.3: '2026-07-17T21:17:45.306Z'
   arktype@2.2.3: '2026-07-07T20:07:39.065Z'
   astro@7.0.3: '2026-06-25T16:17:05.372Z'
   babel-plugin-react-compiler@1.0.0: '2025-10-07T19:19:01.781Z'
-  better-all@0.0.8: '2026-07-21T15:41:29.873Z'
   bumpp@12.1.0: '2026-07-28T14:25:23.669Z'
   changelogithub@14.0.0: '2025-11-25T08:58:59.411Z'
   commitlint@21.2.1: '2026-07-08T07:48:08.940Z'
