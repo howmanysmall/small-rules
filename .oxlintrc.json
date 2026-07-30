@@ -858,9 +858,12 @@
 		"small-rules/require-named-effect-functions": "off",
 		"small-rules/require-paired-calls": "error",
 		"small-rules/require-react-component-keys": "off",
-		"small-rules/require-react-display-names": "off",
-		"small-rules/require-switch-case-braces": ["error", { "metric": "lines" }],
-		"small-rules/require-throw-error-capture": "error",
+		"small-rules/require-throw-error-capture": [
+			"error",
+			{
+				"allow": [{ "from": "package", "name": "ValidationError", "package": "@cliffy/command" }]
+			}
+		],
 		"small-rules/require-unicode-regex": "error",
 		"small-rules/rerender-memo-with-default-value": "off",
 		"small-rules/strict-component-boundaries": ["error", { "allow": [] }],
