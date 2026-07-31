@@ -1,6 +1,6 @@
 All notable changes to `@pobammer-ts/small-rules` are documented here.
 
-## [v2.12.0] - 2026-07-31
+## [Unreleased]
 
 ### Added
 
@@ -12,7 +12,6 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **no-dead-store:** Handle reads before writes inside loop steps
 - **no-dead-store:** Correctly detect loop-crossing reads for variables
 - **no-instance-methods-without-this:** Skip methods without bodies
-- **require-async-suffix:** Ignore overridden async members
 
 ### Changed
 
@@ -42,9 +41,6 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **deps:** Remove unused dependencies from pnpm lockfile
 - **changelog:** Add git-cliff and communique configuration files
 - **release:** Switch changelog generator to git-cliff
-- **changelog:** Update changelog configuration and integration
-- **release:** Remove obsolete changelog component
-- **release:** Fix trailing newline in changelog footer template
 
 ## [v2.11.0] - 2026-07-29
 
@@ -714,7 +710,7 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **deps:** Update tool versions and lockfiles
 - **deps:** Update oxfmt to 0.55.0
 
-[v2.12.0]: https://github.com/howmanysmall/small-rules/compare/v2.11.0...v2.12.0
+[Unreleased]: https://github.com/howmanysmall/small-rules/compare/v2.11.0...HEAD
 [v2.11.0]: https://github.com/howmanysmall/small-rules/compare/v2.10.0...v2.11.0
 [v2.10.0]: https://github.com/howmanysmall/small-rules/compare/v2.9.0...v2.10.0
 [v2.9.0]: https://github.com/howmanysmall/small-rules/compare/v2.8.0...v2.9.0
@@ -732,4 +728,3 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 [v2.1.0]: https://github.com/howmanysmall/small-rules/compare/v2.0.0...v2.1.0
 [v2.0.0]: https://github.com/howmanysmall/small-rules/compare/v1.1.0...v2.0.0
 [v1.1.0]: https://github.com/howmanysmall/small-rules/commits/v1.1.0
-\
