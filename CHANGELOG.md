@@ -1,54 +1,14 @@
 All notable changes to `@pobammer-ts/small-rules` are documented here.
 
-## [v2.12.0] - 2026-07-31
+## Unreleased
 
-### Added
+## [2.12.0] - 2026-07-31
 
-- **release:** Replace changelogithub with communique for release notes
+## Fixed
 
-### Fixed
-
-- **no-dead-store:** Handle compound assignments properly
-- **no-dead-store:** Handle reads before writes inside loop steps
-- **no-dead-store:** Correctly detect loop-crossing reads for variables
-- **no-instance-methods-without-this:** Skip methods without bodies
-- **require-async-suffix:** Ignore overridden async members
-
-### Changed
-
-- **vitest:** Remove vite-tsconfig-paths in favor of native support
-- **no-dead-store:** Extract observation check logic
-
-### Documentation
-
-- **agents:** Update release workflow documentation with communique
-
-### Build
-
-- **deps:** Add build type to commitlint type-enum configuration
-- **workspace:** Add scripts package to monorepo workspace
-
-### Tests
-
-- **no-dead-store:** Use template literals in test case definitions
-
-### Continuous Integration
-
-- **release:** Verify release note generators in workflow
-
-### Maintenance
-
-- **deps:** Update dependencies
-- Add communique and git-cliff to toolchain
-- **deps:** Update dependencies and add arkenv to catalogs
-- **deps:** Update dependencies and configuration rules
-- **deps:** Prune unused dependencies and update configuration
-- **deps:** Remove unused dependencies from pnpm lockfile
-- **changelog:** Add git-cliff and communique configuration files
-- **release:** Switch changelog generator to git-cliff
-- **changelog:** Update changelog configuration and integration
-- **release:** Remove obsolete changelog component
-- **release:** Fix trailing newline in changelog footer template
+- **no-dead-store**: Stop false positives for compound assignments and reads that span loop iterations, [#32](https://github.com/howmanysmall/small-rules/pull/32)
+- **no-instance-methods-without-this**: Ignore TypeScript overload signatures and abstract methods without bodies, [#33](https://github.com/howmanysmall/small-rules/pull/33)
+- **require-async-suffix**: Ignore overridden async methods and class fields whose names follow a base-class contract, [#35](https://github.com/howmanysmall/small-rules/pull/35)
 
 ## [v2.11.0] - 2026-07-29
 
