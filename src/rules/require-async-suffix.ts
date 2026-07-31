@@ -30,18 +30,17 @@ const requireAsyncSuffix = createRule("require-async-suffix", "naming", {
 				reportIfNotSkipped(node.id);
 			},
 			MethodDefinition(node): void {
-				if (!node.value.async || node.key.type !== "Identifier") return;
+				if (!node.value.async || node.key.type !== "Identifier" || node.override === true) return;
 				reportIfNotSkipped(node.key);
 			},
 			Property(node): void {
 				if (!node.method || node.value.type !== "FunctionExpression" || !node.value.async) return;
-				if (node.key.type !== "Identifier") return;
-				if (isExternallyConstrainedProperty(node)) return;
+				if (node.key.type !== "Identifier" || isExternallyConstrainedProperty(node)) return;
 				reportIfNotSkipped(node.key);
 			},
 			PropertyDefinition(node): void {
 				if (node.value?.type !== "ArrowFunctionExpression" && node.value?.type !== "FunctionExpression") return;
-				if (!node.value.async || node.key.type !== "Identifier") return;
+				if (!node.value.async || node.key.type !== "Identifier" || node.override === true) return;
 				reportIfNotSkipped(node.key);
 			},
 			VariableDeclarator(node): void {

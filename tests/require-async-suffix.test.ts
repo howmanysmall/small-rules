@@ -157,6 +157,17 @@ describe("require-async-suffix", () => {
 }`,
 				options: [{ except: ["getAll"] }],
 			},
+			// Overridden methods/fields are constrained by a base class contract.
+			`class Bruh extends Base {
+	public override async getAll(): Promise<string> {
+		return "value";
+	}
+}`,
+			`class Bruh extends Base {
+	public override getAll = async (): Promise<string> => {
+		return "value";
+	};
+}`,
 		],
 	});
 });
