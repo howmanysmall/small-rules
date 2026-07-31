@@ -38,7 +38,7 @@ function pushSplitRun(words: Array<string>, run: string): void {
 	words.push(run.slice(start));
 }
 
-function splitIntoWords(value: string): ReadonlyArray<string> {
+function splitIntoWords(value: string): ReadonlyArray<string> | undefined {
 	const words = new Array<string>();
 	let runStart: number | undefined;
 
@@ -47,6 +47,9 @@ function splitIntoWords(value: string): ReadonlyArray<string> {
 			runStart ??= index;
 			continue;
 		}
+
+		const codePoint = value.codePointAt(index);
+		if (codePoint === undefined || codePoint > 127) return undefined;
 
 		if (runStart === undefined) continue;
 		pushSplitRun(words, value.slice(runStart, index));
@@ -57,8 +60,9 @@ function splitIntoWords(value: string): ReadonlyArray<string> {
 	return words;
 }
 
-function toPascalCase(value: string): string {
+function toPascalCase(value: string): string | undefined {
 	const words = splitIntoWords(value);
+	if (words === undefined) return undefined;
 	let result = "";
 
 	for (const word of words) {
@@ -84,7 +88,8 @@ const preferPascalCaseEnums = createRule("prefer-pascal-case-enums", "naming", {
 		return {
 			TSEnumDeclaration(node): void {
 				const identifier = node.id.name;
-				if (toPascalCase(identifier) === identifier) return;
+				const pascalCase = toPascalCase(identifier);
+				if (pascalCase === undefined || pascalCase === identifier) return;
 
 				context.report({
 					data: { identifier },
@@ -94,7 +99,9 @@ const preferPascalCaseEnums = createRule("prefer-pascal-case-enums", "naming", {
 			},
 			TSEnumMember(node): void {
 				const identifier = getEnumMemberName(node);
-				if (identifier === undefined || toPascalCase(identifier) === identifier) return;
+				if (identifier === undefined) return;
+				const pascalCase = toPascalCase(identifier);
+				if (pascalCase === undefined || pascalCase === identifier) return;
 
 				context.report({
 					data: { identifier },

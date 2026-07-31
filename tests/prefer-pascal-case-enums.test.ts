@@ -71,6 +71,10 @@ describe("prefer-pascal-case-enums", () => {
 
 			// Single letter enum name
 			{ code: "enum X {Foo, Bar}" },
+
+			// Non-ASCII identifiers are out of scope for an ASCII-only casing rule
+			{ code: "enum CommuniquéMode {Roblox, Studio}" },
+			{ code: "enum Mode {Communiqué, Studio}" },
 		],
 	});
 });
