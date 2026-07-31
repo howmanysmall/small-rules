@@ -76,6 +76,12 @@ jobs:
         uses: ./.github/actions/setup
         with:
           cache: false
+          tools: "bun node pnpm communique git-cliff"
+
+      - name: Verify release note generators
+        run: |
+          communique --version
+          git-cliff --version
 
       - name: Setup Node.js for NPM publishing
         if: ${{ env.DRY_RUN != 'true' }}
