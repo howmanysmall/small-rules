@@ -13,7 +13,12 @@
 		"builtin": true,
 		"node": true
 	},
-	"ignorePatterns": ["**/{dist,do-not-sync-ever,node_modules}/**", "**/*.js", "scripts/dupes-viewer.html"],
+	"ignorePatterns": [
+		"**/{dist,do-not-sync-ever,node_modules}/**",
+		"**/*.js",
+		"scripts/dupes-viewer.html",
+		"scripts/clis/**/*.ts"
+	],
 	"jsPlugins": [
 		"./plugins/small-rules.js",
 		{ "name": "react-doctor", "specifier": "oxlint-plugin-react-doctor" },
