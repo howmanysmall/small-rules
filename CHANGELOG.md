@@ -6,694 +6,130 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 ## Fixed
 
-- **no-dead-store**: Stop false positives for compound assignments and reads that span loop iterations, [#32](https://github.com/howmanysmall/small-rules/pull/32)
-- **no-instance-methods-without-this**: Ignore TypeScript overload signatures and abstract methods without bodies, [#33](https://github.com/howmanysmall/small-rules/pull/33)
-- **require-async-suffix**: Ignore overridden async methods and class fields whose names follow a base-class contract, [#35](https://github.com/howmanysmall/small-rules/pull/35)
-
-## [v2.11.0] - 2026-07-29
-
-### Added
-
-- **utilities:** Add createRule helper for automated doc urls
-- **docs:** Support inline markdown in sidebar titles and page headers
-- **scripts:** Commit dupes-viewer html (oops!)
-- **opencode:** Add plugin to block npx commands for existing scripts
-
-### Fixed
-
-- **docs:** Remove CNAME file to avoid Worker proxy conflict
-- **sidebar:** Update mobile menu footer import path
-- **knip:** Add dupes-viewer.ts as entry point
-- Resolve root object for nested member and qualified names
-
-### Changed
-
-- **rules:** Migrate rule definitions to createRule utility
-- Use InferContextFromRule utility for lint rule contexts
-- **rules:** Appease linting
-- **utilities:** Combine early return conditions
-- **docs:** Extract rule entry lookup logic
-- **docs:** Update return type and variable names in getRuleEntry
-- **dedupe:** Use Context type for rule context parameter
-- **rules:** Consolidate resolved function type definitions
-- **no-useless-default:** Kill duplicate type
-- **no-useless-default:** Abstract vector component extraction logic
-- **rules:** Extract function to shared react-utilities
-- **rules:** Simplify promise delay await check in no-task-wait
-- **no-render-helper-functions:** Support nested return statements
-
-### Documentation
-
-- Update documentation site URL to custom domain
-- **naming:** Format rule titles with inline code and proper casing
-- **react:** Format rule titles with proper casing and inline code
-- **roblox:** Add code formatting to rule titles
-- **rules:** Use inline code formatting in rule titles
-- **ban-react-fc:** Add documentation url to rule metadata
-- **rules:** Add documentation URLs to rule metadata definitions
-- **naming:** Update markdown titles to use proper casing
-- **rules:** Update title of no-color3-constructor rule page
-- **react:** Remove backticks from require-react-component-keys title
-- **readme:** Enhance documentation with badges and cleaner layout
-- **documentation:** Wrap rationale slot in section with heading
-- **documentation:** Add rationale for no-increment-decrement rule
-- **roblox:** Add rationale documentation for no-table-create-map rule
-- **roblox:** Add rationale and update title for prefer-math-min-max
-- **roblox:** Simplify no-async-in-system rationale
-- **rules:** Add rationale for no-recursive lint rule
-- **rules:** Expand explanation for no-recursive rule rationale
-- **general:** Update rationale for this rule
-- **roblox:** Add rationale documentation for ban-instances rule
-- **roblox:** Add rationale for no-array-constructor-index-assignment
-- Add rationale documentation for no-array-constructor-elements
-- **roblox:** Add rationale for no-array-size-assignment rule
-- **roblox:** Add rationale documentation for no-color3-constructor rule
-- **roblox:** Add rationale for no-events-in-events-callback rule
-- Add rationale documentation for no-instance-methods-without-this
-- **roblox:** Add rationale for no-native-properties-spread rule
-- **rule:** Add rationale for no-redundant-aspect-ratio-constraint
-- **roblox:** Add rationale for prefer-sequence-overloads rule
-- **roblox:** Add rationale for prefer-modding-inspect rule
-- **roblox:** Add custom rationale for no-print rule
-- Rewrite documentation prose to be more natural and direct
-- **roblox:** Add rationale documentation for no-task-wait rule
-- **roblox:** Update rationale for no-task-wait rule documentation
-- **roblox:** Add rationale documentation for no-warn rule
-- **roblox:** Add rationale and auto-fix details for prefer-idiv rule
-- **roblox:** Add rationale for no-useless-default rule
-- **roblox:** Add rationale for prefer-single-world-query rule
-- **roblox:** Add documentation for prefer-udim2-shorthand rule
-- **rule:** Add rationale documentation
-
-### Build
-
-- **deps:** Update development and linting dependencies
-- **deps:** Migrate dependencies to explicit pnpm catalogs
-- **deps:** Remove @astrojs/language-server from dependencies
-
-### Tests
-
-- **documentation:** Add missing component to boundary tests
-- **docs:** Update working directory match count in workflow tests
-- **documentation:** Update expected curated rationale rule pages
-
-### Continuous Integration
-
-- **workflows:** Add oxfmt check, docs type checking, and security job
-- Specify workflow directory for zizmor scanner
-- **workflow:** Disable mise github attestations in ci
-- **workflow:** Remove obsolete github attestations configuration
-
-### Style
-
-- **linter:** Relax strictness for sort-imports and typescript checks
-- Sort import declarations alphabetically
-- **plugin:** Inline single-statement conditional in block-npx-scripts
+- **no-dead-store**: Stop false positives for compound assignments and values read across loop iterations in [#32](https://github.com/howmanysmall/small-rules/pull/32).
+- **no-instance-methods-without-this**: Ignore TypeScript overload signatures and abstract methods without bodies in [#33](https://github.com/howmanysmall/small-rules/pull/33).
+- **require-async-suffix**: Ignore overridden async methods and class fields whose names follow a base-class contract in [#35](https://github.com/howmanysmall/small-rules/pull/35).
 
-### Maintenance
+## [2.11.0] - 2026-07-29
 
-- **mise:** Add deploy-docs task to trigger documentation workflow
-- **mise:** Remove unused ref argument from deploy-docs task
-- **config:** Update token context limits for gpt-5.6 models
-- **deps:** Update pnpm-workspace.yaml package extensions
-- **config:** Update ignore patterns for codegraph directory
-- **config:** Remove opencode-wakatime plugin
-- **editor:** Configure astro-language-server in zed settings
-- **zed:** Configure biome formatter for astro files
-- **deps:** Add @astrojs/check to documentation
-- **deps:** Configure astro peer dependencies
-- **tooling:** Add duplicates viewer script and mise task
-- Update html
-- Hate
-- **package:** Remove private flag from package configuration
-- **repo:** Update documentation homepage url in package.json
-- **scripts:** Simplify command execution in dupes-viewer script
-- Disable fatal provenance api failures in mise configuration
-- **deps:** Add @pnpm/pacquet dependency to pnpm configuration
-- **zed:** Remove custom astro-language-server lsp configuration
-- **mise:** Add backtickify task for documentation markdown files
-- **deps:** Remove @astrojs/language-server from catalog
-- **ci:** Run check task twice in ci pipeline
-- **config:** Add opencode workspace configuration to knip
-- **ci:** Remove duplicate check task from CI workflow
-- **hooks:** Update pre-push hook to run check task
-
-## [v2.10.0] - 2026-07-28
-
-### Added
-
-- **docs:** Add JSON syntax highlighting to rule option defaults
-- **documentation:** Add syntax highlighting to rule option types
-
-### Fixed
-
-- **rules:** Ignore component definition files in lint rules
-- **no-render-helper-functions:** Allow render helpers in jsx attributes
-
-### Performance
-
-- **prevent-abbreviations:** Cache hot-path lookups
-
-### Changed
-
-- **prefer-context-stack:** Simplify early returns and checks
-
-### Style
-
-- **docs:** Replace default themes with custom shiki themes
-
-### Maintenance
-
-- **zed:** Update pkl language server name in settings
-- **docs:** Update accent colors and logo to cyan palette
-
-## [v2.9.0] - 2026-07-27
-
-### Added
-
-- **lsps:** Add howmanysmall-lsps plugin and language servers
-- **skills:** Add codebase-design, domain-modeling, ubiquitous-language
-- **rules:** Add no-dead-store and no-floating-point-equality rules
-- **lint:** Add no-variadic-spread rule and fix AST walk recursion
-- **rules:** Add rules for compound words, isolated functions, and more
-
-### Changed
+## Fixed
 
-- **react-hook-utilities:** Use worklist for AST traversal
-- **lint:** Remove variadic spreads from source
-- **rules:** Optimize capture lookup to return single match
+- **no-render-helper-functions**: Report JSX-returning named function expressions returned from another function, while continuing to ignore PascalCase components and hooks - by @howmanysmall in [#31](https://github.com/howmanysmall/small-rules/pull/31)
+- **prevent-abbreviations**: Resolve the imported root of nested member and TypeScript qualified-name chains, so imported namespaces such as `MenuPrimitive.Root.Props` are not reported as abbreviations - by @howmanysmall in [#31](https://github.com/howmanysmall/small-rules/pull/31)
 
-### Documentation
+## [2.10.0] - 2026-07-28
 
-- Add project context and traversal architecture ADR
-- **guidelines:** Add performance guidelines for AST visitors
-- Add documentation pages for general and naming rules
-- **agents:** Require dynamic docs catalog counts when adding rules
+## Fixed
 
-### Tests
+- **prefer-context-stack**, **prefer-local-portal-component**, and **prefer-padding-components** no longer report the native provider, portal, or padding implementation inside the corresponding component definition files ([#27](https://github.com/howmanysmall/small-rules/pull/27)).
+- **no-render-helper-functions** allows render helpers passed directly as JSX attribute values, while continuing to report the same helpers used as JSX children ([#27](https://github.com/howmanysmall/small-rules/pull/27)).
 
-- **docs:** Enforce multi-line formatting for documented examples
-- **docs:** Update naming category count after new compound-words rule
-- **docs:** Derive rule-index category counts from the catalog
-
-### Continuous Integration
-
-- **deps:** Update github actions versions
-
-### Maintenance
-
-- **knip:** Add language-server to ignored dependencies
-- **deps:** Update nub version to 0.6.0
-- **lsp:** Add LSP server configurations
-- Rebuild rules
-
-## [v2.8.0] - 2026-07-26
-
-### Added
-
-- **no-async-in-system:** Detect yielding calls properly
-- Replace oxc-parser with yuku-parser 0.6.1
-- **opencode:** Add gpt-5.6 model limits
-- **docs:** Add package-manager-tabs component and revamp rule examples
-- **package-manager-tabs:** Add run command presets
-- **hooks:** Add PostToolUse hook to lint changed files
-- **hk:** Add betterleaks, sherif, pinact, vale hooks; bump to 1.51.0
-- **docs:** Replace rule-options table with interactive React component
-- **rule-options-table:** Extract option components into separate files
-- **docs:** Replace logo and favicon with new brand assets
-- **docs:** Add semantic rule relation data
-- **docs:** Establish documentation data contracts
-- **docs:** Derive rule facts and examples from source
-- **docs:** Add generated rule indexes
-- **docs:** Publish committed release notes
-- **docs:** Enforce documentation completion gate for new rules
-- **ci:** Parameterize mise tools in setup action
-- **codex:** Add small-rules environment configuration
-- **documentation:** Reactify custom site components
-- **docs:** Add manual documentation deployment
-- **codex:** Add post-tool-use hook for lint and test on patch
-- **hooks:** Add shfmt check and fix support for shell files
-- **no-render-helper-functions:** Allow functions as call arguments
-- **small-rules:** Add no-filter-map-chain rule
-- **rules:** Add direct React hook import rule
-- **react:** Add prefer-direct-hook-imports rule
-- **deps:** Integrate react-doctor and enable react compiler
+## [2.9.0] - 2026-07-27
 
-### Fixed
+## Added
 
-- **docs:** Improve contextual menu and table layout for docs site
-- **styles:** Constrain right sidebar width on wide screens
-- **docs:** Improve documentation accessibility
-- **docs:** Normalize rationale markup
-- **ci:** Run playwright install in docs package scope
-- **prevent-abbreviations:** Skip checks for externally controlled props
-- **require-async-suffix:** Skip check for ts satisfies expressions
+- Add eight rules covering dead stores, floating-point equality, variadic spreads, compound-word spelling, isolated callbacks, loop-iterable mutation, trivial assertions, and void return values in [#24](https://github.com/howmanysmall/small-rules/pull/24) and [#25](https://github.com/howmanysmall/small-rules/pull/25).
 
-### Changed
+## [2.8.0] - 2026-07-26
 
-- Migrate from oxc-parser to yuku-parser
-- **knip:** Enable workspace mode and clean up unused code
-- **pre-commit:** Extract reusable file selector lists
-- **rule-options:** Simplify json value validation
-- **docs:** Rebuild rule pages from source facts
-- **documentation:** Remove unused types and exports
+## Added
+- **no-filter-map-chain** and **prefer-direct-hook-imports** are now available, with the React hook rule recommended - [#23](https://github.com/howmanysmall/small-rules/pull/23)
 
-### Documentation
+## Fixed
+- **no-async-in-system**, **no-render-helper-functions**, **prevent-abbreviations**, and **require-async-suffix** now handle returned callbacks, external props, and constrained object properties correctly - [#19](https://github.com/howmanysmall/small-rules/pull/19), [#23](https://github.com/howmanysmall/small-rules/pull/23)
 
-- Add documentation for two new rules
+## [2.7.0] - 2026-07-13
 
-### Build
+No user-facing changes to lint rules, diagnostics, options, or supported syntax.
 
-- **tools:** Add new tool entries
-- **config:** Remove gitleaks tool from hooks and lock files
-- **mise:** Replace nr commands with node --run
-- **deps:** Update project dependencies
+## [2.6.0] - 2026-07-13
 
-### Tests
+## Changed
+- **no-async-in-system**: Detect yielding Roblox APIs using class-aware service, instance, and typed-receiver analysis, while ignoring unrelated `Async`-named calls. [#17](https://github.com/howmanysmall/small-rules/pull/17) [67aef25](https://github.com/howmanysmall/small-rules/commit/67aef25)
 
-- **no-async-in-system:** Add missing branch coverage for edge cases
-- **no-render-helper-functions:** Catch helper assignments
-- **documentation:** Update expected rule count to 92
-- **docs:** Dynamic rule counts in tests and update pre-push hooks
+## [2.5.2] - 2026-07-12
 
-### Continuous Integration
+No user-facing changes.
 
-- **github-actions:** Bump action versions to latest patches
-- **ci:** Trigger docs deployment from release workflow
-- **react-doctor:** Add automated code health scanning
+## [2.5.1] - 2026-07-12
 
-### Style
+No user-facing changes.
 
-- Disable import/unambiguous rule for type declaration files
-- Update bracket formatting and remove unused CSS grid rule
-- **rules:** Simplify conditional formatting
+## [2.5.0] - 2026-07-12
 
-### Maintenance
+## Added
 
-- **codex:** Update model and multi-agent config
-- **hk:** Remove astro from oxfmt-js and biome hooks
-- **biome:** Enable all linter domains and adjust rules
-- Update tool versions in mise.lock
-- **hk:** Disable js on oxfmt
-- **plugin:** Rebuild rules
-- **scripts:** Add format-lint-relevant and test-relevant scripts
-- **hooks:** Remove legacy hook scripts and config
-- **vitest:** Block documentation as coverage
-- **oxlint:** Add react and vitest rules for docs
-- **hk:** Replace `nr` with `node --run` in hook commands
-- **docs:** Validate and deploy documentation
-- **oxlint:** Set standard environment
-- Rebuild
-- **hooks:** Prepend gh auth token to zizmor execution commands
-- Remove useless slop test
-- **deps:** Downgrade hk tool version to 1.52.0
-- **deps:** Downgrade hk to 1.50.0
+- Add `no-async-in-system` to report `Async`-suffixed calls inside synchronous Planck systems, with configurable `additionalSystemTypeNames` support ([#14](https://github.com/howmanysmall/small-rules/pull/14)).
 
-## [v2.7.0] - 2026-07-13
+## [2.4.1] - 2026-07-07
 
-### Added
+## Fixed
 
-- **default-properties:** Add compact default properties generator
-- **ci:** Split checks and gate release on ci
+- **no-restricted-property-assignment**: Make `allowFiles` globs match absolute filenames through their paths relative to the working directory, while retaining basename matching - [#13](https://github.com/howmanysmall/small-rules/pull/13)
 
-## [v2.6.0] - 2026-07-13
+## [2.4.0] - 2026-07-07
 
-### Added
+## Added
 
-- **no-async-in-system:** Restrict rule to Roblox-derived async calls
-- **no-async-in-system:** Expand Roblox async detection
-- **rules:** Generate Roblox yielding catalog
+- **no-restricted-property-assignment**: Support glob patterns for restricted object names and property names, including patterns such as `_G*` and `__*__` ([#12](https://github.com/howmanysmall/small-rules/pull/12)).
 
-### Changed
+## [2.3.0] - 2026-06-30
 
-- **script:** Fetch roblox api dump from raw github
+## Added
 
-### Maintenance
+- **no-restricted-property-assignment**: Add the `allowFiles` glob option for exempting matching files from restricted property assignment and update diagnostics in [#11](https://github.com/howmanysmall/small-rules/pull/11).
 
-- **lint:** Trim oxlint rule set
-- **package-json:** Format generated roblox members file
+## [2.2.1] - 2026-06-30
 
-## [v2.5.2] - 2026-07-12
+No user-facing changes in this release.
 
-### Continuous Integration
+## [2.2.0] - 2026-06-30
 
-- **release:** Skip git checks when publishing to npm
+## Added
 
-## [v2.5.1] - 2026-07-12
+- **no-restricted-property-assignment**: Add configurable diagnostics for writes and updates to restricted properties, with glob patterns, computed-property control, custom messages, and file allowlists ([#10](https://github.com/howmanysmall/small-rules/pull/10)).
 
-### Tests
+## Fixed
 
-- **release-workflow:** Verify pnpm publish and catalog resolution
-- **release-workflow:** Replace named path import with default import
+- **require-throw-error-capture**: Stop treating object-literal property keys as variable names when checking anonymous functions ([#9](https://github.com/howmanysmall/small-rules/pull/9)).
 
-### Continuous Integration
+## [2.1.0] - 2026-06-23
 
-- **release:** Switch publish command from npm to pnpm
-- **workflows:** Expand glob pattern in CI trigger paths
+## 🚀 Added
+- **no-array-constructor-index-assignment**: Flag contiguous `new Array<T>()` index initialization and offer an array-literal autofix - by @howmanysmall [<samp>(17ad2)</samp>](https://github.com/howmanysmall/small-rules/commit/17ad2aa)
+- **no-recursive**: Report direct and mutual recursion, including async, generator, arrow-function, and class-method calls - by @howmanysmall [<samp>(db9bf)</samp>](https://github.com/howmanysmall/small-rules/commit/db9bf7f)
 
-### Maintenance
+## 🐞 Fixed
+- **prevent-abbreviations**: Stop checking member and qualified type names rooted at imported bindings - by @howmanysmall [<samp>(071c7)</samp>](https://github.com/howmanysmall/small-rules/commit/071c7e3)
+- **require-throw-error-capture**: Avoid autofix variable collisions with catch parameters - by @howmanysmall in [#7](https://github.com/howmanysmall/small-rules/pull/7)
 
-- **deps:** Add confbox to test catalog and pin zx version
-- Sort keys and properties across config and source files
+## 🔧 Changed
+- **no-commented-code**: Add `maxLines` to allow short commented-out code blocks - by @howmanysmall in [#6](https://github.com/howmanysmall/small-rules/pull/6)
+- **no-array-size-assignment**: Add `environment: "standard"` support for `array[array.length] = value` while retaining `roblox-ts` as the default - by @howmanysmall [<samp>(8f243)</samp>](https://github.com/howmanysmall/small-rules/commit/8f24343)
+- **require-async-suffix**: Add an `except` allowlist and skip externally constrained object methods - by @howmanysmall in [#7](https://github.com/howmanysmall/small-rules/pull/7)
+- **require-throw-error-capture**: Support class-method stack capture and replace `from: "lib"` with `from: "library"`; add `path` filtering for file-based allowlist entries - by @howmanysmall in [#7](https://github.com/howmanysmall/small-rules/pull/7)
 
-## [v2.5.0] - 2026-07-12
+## [2.0.0] - 2026-06-16
 
-### Added
+## ⚠️ Breaking Changes
+- Remove `prefer-expect-assertions-count`; use `prefer-expect-assertions` instead [#5](https://github.com/howmanysmall/small-rules/pull/5)
 
-- **zed:** Configure biome and oxfmt to use node run
-- **rules:** Add no-async-in-system rule
-- **scripts:** Replace bun with zx+nub for json linting
+## 🔧 Changed
+- `prefer-expect-assertions` now supports `additionalAssertionFunctions` and fixes deterministic `expect.hasAssertions()` calls to `expect.assertions(n)` [#5](https://github.com/howmanysmall/small-rules/pull/5)
+- Expand the TypeScript peer dependency from version 6 to `>=5 <8` [900a2](https://github.com/howmanysmall/small-rules/commit/900a20f835e8adf230fbd8bc360320a2f3f0c9fd)
 
-### Changed
+## [1.1.0] - 2026-06-15
 
-- **deps:** Switch to pnpm catalogs
+## 🚀 Added
+- Add 14 user-facing rules covering isolated callbacks, recursion, loop mutations, trivial assertions, empty return values, array construction, async system calls, dead stores, floating-point equality, variadic spreads, restricted assignments, filter/map chains, compound-word spelling, and direct React hook imports. [83eab77](https://github.com/howmanysmall/small-rules/commit/83eab77) [390c6ba](https://github.com/howmanysmall/small-rules/commit/390c6ba) [4cfe8fe](https://github.com/howmanysmall/small-rules/commit/4cfe8fe) [78a4e7f](https://github.com/howmanysmall/small-rules/commit/78a4e7f) [18cbefe](https://github.com/howmanysmall/small-rules/commit/18cbefe)
 
-### Continuous Integration
+## 🐞 Fixed
+- Correct stable object-property handling in `use-exhaustive-dependencies`, root type scoring in `enforce-ianitor-check-type`, circular static-expression detection, and Oxlint line-directive descriptions. [70e3f84](https://github.com/howmanysmall/small-rules/commit/70e3f84) [2e2f901](https://github.com/howmanysmall/small-rules/commit/2e2f901) [e74342f](https://github.com/howmanysmall/small-rules/commit/e74342f) [3cf8f16](https://github.com/howmanysmall/small-rules/commit/3cf8f16)
+- Remove false positives in `no-dead-store`, `no-instance-methods-without-this`, `require-async-suffix`, and `prefer-pascal-case-enums`. [abc6c55](https://github.com/howmanysmall/small-rules/commit/abc6c55) [c2a8102](https://github.com/howmanysmall/small-rules/commit/c2a8102) [6b6a26b](https://github.com/howmanysmall/small-rules/commit/6b6a26b) [ecd7bd9](https://github.com/howmanysmall/small-rules/commit/ecd7bd9)
 
-- Replace aube with pnpm and remove aube tooling
-- Consolidate ci workflow jobs into a single matrix job
-- Replace `nr` with `node --run` in CI workflow
-- **workflows:** Extract setup and install steps into composite actions
-- Extract reusable checks workflow and simplify ci pipelines
+## 🔧 Changed
+- Add configurable allowlists and file-aware matching to `require-throw-error-capture`, plus safer fixes for class methods and catch parameters. [af46db8](https://github.com/howmanysmall/small-rules/commit/af46db8) [5c154dc](https://github.com/howmanysmall/small-rules/commit/5c154dc) [a823f58](https://github.com/howmanysmall/small-rules/commit/a823f58)
+- Add `maxLines` to `no-commented-code`, `except` to `require-async-suffix`, and assertion-function counting and deterministic fixes to `prefer-expect-assertions`. [2ffd6d0](https://github.com/howmanysmall/small-rules/commit/2ffd6d0) [9ae3bfb](https://github.com/howmanysmall/small-rules/commit/9ae3bfb) [ff6d751](https://github.com/howmanysmall/small-rules/commit/ff6d751)
 
-### Maintenance
-
-- **deps:** Switch from aube to pnpm as package manager
-- Replace nr with node for build scripts
-- Update dev dependencies
-- Appease linting
-- Regenerate default properties
-- **scripts:** Migrate tooling to nub
-- **stryker:** Ignore generated directories
-- **knip:** Fix pre-push hook issues
-- **deps:** Replace `@antfu/ni` npm dep with mise-managed `ni`
-- Replace `aube` with `node --run` in tool commands
-- Remove package-manager-detector dependency and its patch
-- **knip:** Simplify entry glob with wildcard pattern
-
-## [v2.4.1] - 2026-07-07
-
-### Added
-
-- **no-restricted-property-assignment:** Test allowFiles match basename
-
-### Fixed
-
-- **rules:** Match allowFiles against relative paths
-
-## [v2.4.0] - 2026-07-07
-
-### Added
-
-- **no-restricted-property-assignment:** Add glob support
-- **rule:** Precompile property restrictions
-
-### Changed
-
-- **rules:** Use shared function and global call helpers
-
-### Maintenance
-
-- Use catalog versioning for deps
-
-## [v2.3.0] - 2026-06-30
-
-### Added
-
-- **rule:** Add allowFiles option minimatch dep
-
-### Changed
-
-- **lint:** Replace manual type guards with ArkType
-
-### Maintenance
-
-- **deps:** Update picomatch to 4.0.4
-
-## [v2.2.1] - 2026-06-30
-
-### Continuous Integration
-
-- Upgrade actions to v5 and tweak release build
-
-## [v2.2.0] - 2026-06-30
-
-### Added
-
-- **mcp:** Add astro-docs remote entry to mcp config
-- **codex:** Add MCP server config
-- Upgrade Vite to v8 and add new lint rules
-- **test:** Switch to custom RuleTester
-- **rules:** Add no-restricted-property-assignment rule
-
-### Fixed
-
-- **rule:** Exclude property from name extraction
-
-### Changed
-
-- **rules:** Infer rule contexts automatically
-- Simplify autofix option checks
-- **rules:** Use createOnce for single-pass rules
-- Simplify number extraction JSX checks
-- Move shared AST helpers to oxc-utilities
-- **no-native-properties-spread:** Use scope check
-- **rule-harness:** Use HarnessError
-- **rule-harness:** Drop unused helpers
-
-### Documentation
-
-- **skills:** Add similarity-ts docs
-
-### Maintenance
-
-- **deps:** Bump dependencies
-- Update lint config and downgrade commitlint deps
-- **rules:** Add v8 ignore comments
-- **warp:** Add MCP server configuration
-- Migrate to pnpm and update CI workflows
-- **deps:** Bump deps and update lint rules
-- **deps:** Bump oxlint plugin utilities
-- Relax biome rule settings
-- Rebuild local rule
-- **deps:** Prune unused eslint packages
-- **deps:** Bump oxfmt, oxlint, skills
-
-## [v2.1.0] - 2026-06-23
-
-### Added
-
-- **no-commented-code:** Add maxLines option
-- Add tsgo disable script and JSONC utilities
-- **scripts:** Add docs tasks and tsgo dry run
-- Documentation site start
-- **hooks:** Add .astro and .mdx support to lint/format hooks
-- **docs:** Add rule options docs, config aliases
-- **rules:** Add class method support, path option
-- **rules:** Add except option to require-async-suffix rule
-- **scripts:** Add Bun JSON lint script
-- **vite:** Add tsconfig paths plugin
-- **config:** Enable browser env for documentation linting
-- **docs:** Add satteri optional peers types
-- **no-array-size-assignment:** Add environment option
-- **rules:** Add no-array-constructor-index-assignment rule
-- Add no-recursive rule
-- Maximize test coverage
-
-### Fixed
-
-- **require-throw-error-capture:** Consider catch parameter
-- **test:** Update messageId in no-underscore-react-properties tests
-- **rules:** Skip imported type member names in abbreviations checks
-- **prevent-abbreviations:** Skip imported members
-- **ci:** Pin native TypeScript preview
-
-### Other
-
-- **rules:** Use isNumberRaw for number checks
-- **hooks:** Remove redundant 'mise x' prefixes from hook commands
-
-### Changed
-
-- **rules:** Simplify type scoring
-- **rules:** Simplify element type extraction
-- **rules:** Combine Ianitor validator checks
-- Simplify getNestedTypeAnnotation
-- **rules:** Simplify ianitor rule
-- **type-utilities:** Add isStringRaw helper
-- **tests:** Simplify ignore pattern in prevent-abbreviations test
-- **rules:** Refactor env option schema to use shared config
-- **utilities:** Extract isAllowAutofixOption to option-utilities
-- **no-recursive:** Use Color enum
-
-### Documentation
-
-- **quick-start:** Add package manager tabs
-- Refresh hero splash and homepage stats
-- **roblox:** Fix title casing for prefer-idiv rule
-- **docs:** Update site colors and hide table of contents
-- Update documentation for v3.0 release
-- **styles:** Fix css
-- Improve rule documentation and schema descriptions
-- Style rule options table with BEM classes and column widths
-- **agents:** Update plugin description and require TDD
-- **agents:** Update command list in AGENTS.md
-
-### Style
-
-- **package:** Reorder exports fields in package.json
-
-### Maintenance
-
-- Update the local plugin and configuration
-- **config:** Update configuration
-- **biome:** Exclude all package.json files
-- **scripts:** Use concise reporter for lint:agent biome check
-- Update dependencies and ignore aube-lock.yaml
-- **oxfmt:** Collapse multiline JSON options to single line
-- Update agent command docs and scripts
-- Ignore do-not-sync-ever directories
-- **package:** Add lint:json script
-- **knip:** Add lint-json script to entry list
-- **deps:** Bump dependencies
-- **deps:** @oxlint/plugins, bump native-preview
-- **deps:** Remove unused oxlint plugin
-
-## [v2.0.0] - 2026-06-16
-
-### Changed
-
-- **rules:** **Breaking:** Consolidate expect assertions rules
-
-### Documentation
-
-- **skills:** Add fix-oxlint-rules skill
-
-### Maintenance
-
-- **deps:** Bump TypeScript peer dependency range
-- Dumb shit models never listen
-
-## [v1.1.0] - 2026-06-15
-
-### Added
-
-- Initial commit
-- **require-throw-error-capture:** Add allow option
-- **scripts:** Start script to generate json for useless-default
-- **rules:** Support oxlint line comment directives
-- **ci:** Add pull request CI pipeline with test sharding
-- **ci:** Add release workflow for NPM publishing
-- Add aube support and mise tasks
-- **hooks:** Integrate pullhook and add new linters/formatters
-- **opencode:** Add configuration file
-
-### Fixed
-
-- **utilities:** Reject circular static expressions
-- **rules:** Honor stable hook object results
-- **rules:** Score root structural types
-- **scripts:** Correct typo in variable name
-- **ci:** Stabilize aube install
-- **ci:** Setup tools for parallel jobs
-- **ci:** Preserve workspace artifact metadata
-- **ci:** Install dependencies per check job
-- **ci:** Disable setup-node package manager cache
-- **ci:** Publish before creating release
-
-### Other
-
-- Upgrade mise-action to v4 and add node install
-- **release:** Streamline CI and integrate bumpp
-
-### Changed
-
-- **lint:** Reduce rule complexity
-- **utilities:** Remove dead annotation guards
-- **rules:** Remove unreachable ban-types guard
-- **rules:** Remove unreachable closer fallback
-- **core:** Add Bun types and refactor utilities
-- **rules:** Inline type complexity calculators
-
-### Documentation
-
-- Add README and AGENTS guide
-
-### Tests
-
-- **utilities:** Cover expression and casing helpers
-- **utilities:** Cover expression safety branches
-- **utilities:** Cover component utility branches
-- **utilities:** Cover type and import helpers
-- **rules:** Cover memo and react fc guards
-- **rules:** Cover ban-instances property guards
-- **rules:** Cover array constructor default annotations
-- **rules:** Cover abbreviation checks in jsx
-- **rules:** Cover binary conditional complements
-- **rules:** Cover constant relocation helpers
-- **rules:** Cover loop exit expression guards
-- **rules:** Cover use effect callback shapes
-- **rules:** Cover ianitor validator score buckets
-- **rules:** Cover useless default edge cases
-- **rules:** Cover constant loop exit branches
-- **rules:** Cover effect event logic branches
-- **rules:** Cover dependency expression resolution
-- **rules:** Cover default comparison escapes
-- **rules:** Cover constant condition edge cases
-- **rules:** Cover useless effect edge cases
-- **rules:** Cover exhaustive dependency edges
-- **rules:** Cover memoized dependency edges
-- **rules:** Cover ianitor type scoring edges
-- **rules:** Cover array constructor edges
-- **rules:** Cover useless default edge cases
-- **rules:** Cover paired call edges
-- **rules:** Cover component key edges
-- **rules:** Fix component key fragment fixture
-- **rules:** Cover directive and effect edges
-- **rules:** Cover remaining rule edge cases
-- **rules:** Cover hook and dispatch edges
-- **rules:** Cover paired call and render edges
-- **vitest:** Relax coverage thresholds
-
-### Continuous Integration
-
-- **workflows:** Condense CI workflow and expand trigger paths
-- Add bun to mise install args
-- **workflows:** Split CI into parallel job matrix
-
-### Maintenance
-
-- **deps:** Upgrade biome to v2.5.0 and sync configs
-- **mise:** Add jscpd to tool configuration
-- Add jscpd setup and refactor ColumnLine type
-- Update default properties json
-- **ci:** Expand path triggers to include entire dirs and patches
-- **workspace:** Add documentation package and rename scope
-- **ci:** Switch to frozen lockfile and update deps
-- **deps:** Pin dependency versions to exact and add jscpd
-- **dev-deps:** Add aube, remove deno and jscpd, drop baseline variants
-- **ci:** Migrate jsr packages to npm specifiers
-- **config:** Add MCP server configuration
-- **ci:** Pin actions to shas and restrict perms
-- **deps:** Update tool versions and lockfiles
-- **deps:** Update oxfmt to 0.55.0
-
-[v2.12.0]: https://github.com/howmanysmall/small-rules/compare/v2.11.0...v2.12.0
-[v2.11.0]: https://github.com/howmanysmall/small-rules/compare/v2.10.0...v2.11.0
-[v2.10.0]: https://github.com/howmanysmall/small-rules/compare/v2.9.0...v2.10.0
-[v2.9.0]: https://github.com/howmanysmall/small-rules/compare/v2.8.0...v2.9.0
-[v2.8.0]: https://github.com/howmanysmall/small-rules/compare/v2.7.0...v2.8.0
-[v2.7.0]: https://github.com/howmanysmall/small-rules/compare/v2.6.0...v2.7.0
-[v2.6.0]: https://github.com/howmanysmall/small-rules/compare/v2.5.2...v2.6.0
-[v2.5.2]: https://github.com/howmanysmall/small-rules/compare/v2.5.1...v2.5.2
-[v2.5.1]: https://github.com/howmanysmall/small-rules/compare/v2.5.0...v2.5.1
-[v2.5.0]: https://github.com/howmanysmall/small-rules/compare/v2.4.1...v2.5.0
-[v2.4.1]: https://github.com/howmanysmall/small-rules/compare/v2.4.0...v2.4.1
-[v2.4.0]: https://github.com/howmanysmall/small-rules/compare/v2.3.0...v2.4.0
-[v2.3.0]: https://github.com/howmanysmall/small-rules/compare/v2.2.1...v2.3.0
-[v2.2.1]: https://github.com/howmanysmall/small-rules/compare/v2.2.0...v2.2.1
-[v2.2.0]: https://github.com/howmanysmall/small-rules/compare/v2.1.0...v2.2.0
-[v2.1.0]: https://github.com/howmanysmall/small-rules/compare/v2.0.0...v2.1.0
-[v2.0.0]: https://github.com/howmanysmall/small-rules/compare/v1.1.0...v2.0.0
-[v1.1.0]: https://github.com/howmanysmall/small-rules/commits/v1.1.0
-\
+## 🗑️ Removed
+- Remove `prefer-expect-assertions-count`; configure `prefer-expect-assertions` instead. [ff6d751](https://github.com/howmanysmall/small-rules/commit/ff6d751)
