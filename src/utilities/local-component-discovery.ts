@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { basename, dirname, extname, join, relative } from "node:path";
+import nodePath from "node:path";
 
 import { resolveRelativeImport } from "./resolve-import";
 import { isStringRaw } from "./type-utilities";
@@ -124,12 +124,15 @@ function getProjectRootFromDirectory(startDirectory: string): string | undefined
 
 	let currentDirectory = startDirectory;
 	while (true) {
-		if (existsSync(join(currentDirectory, "package.json")) || existsSync(join(currentDirectory, "tsconfig.json"))) {
+		if (
+			existsSync(nodePath.join(currentDirectory, "package.json")) ||
+			existsSync(nodePath.join(currentDirectory, "tsconfig.json"))
+		) {
 			projectRootCache.set(startDirectory, currentDirectory);
 			return currentDirectory;
 		}
 
-		const parentDirectory = dirname(currentDirectory);
+		const parentDirectory = nodePath.dirname(currentDirectory);
 		if (parentDirectory === currentDirectory) {
 			projectRootCache.set(startDirectory, undefined);
 			return undefined;
@@ -152,17 +155,17 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 				continue;
 			}
 
-			const fullPath = join(directory, entry.name);
+			const fullPath = nodePath.join(directory, entry.name);
 			if (entry.isDirectory()) {
 				visit(fullPath);
 				continue;
 			}
 
-			const extension = extname(entry.name);
+			const extension = nodePath.extname(entry.name);
 			if (!COMPONENT_EXTENSIONS.has(extension)) continue;
 			if (entry.name.endsWith(".d.ts")) continue;
 
-			const baseName = basename(entry.name, extension).toLowerCase();
+			const baseName = nodePath.basename(entry.name, extension).toLowerCase();
 			const existing = index.get(baseName);
 			if (existing === undefined) index.set(baseName, [fullPath]);
 			else existing.push(fullPath);
@@ -179,7 +182,7 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 }
 
 function toImportSource(sourceFile: string, targetFile: string): string {
-	let importSource = normalizePathSeparator(relative(dirname(sourceFile), targetFile));
+	let importSource = normalizePathSeparator(nodePath.relative(nodePath.dirname(sourceFile), targetFile));
 	importSource = importSource.replace(SOURCE_EXTENSION_PATTERN, "");
 	importSource = importSource.replace(INDEX_SUFFIX_PATTERN, "");
 
@@ -188,10 +191,10 @@ function toImportSource(sourceFile: string, targetFile: string): string {
 }
 
 function isIgnoredComponentPath(filePath: string): boolean {
-	const projectRoot = getProjectRootFromDirectory(dirname(filePath));
+	const projectRoot = getProjectRootFromDirectory(nodePath.dirname(filePath));
 	const normalizedPath = normalizePathSeparator(
 		/* v8 ignore next -- @preserve discovered component paths come from files under a project root. */
-		projectRoot === undefined ? filePath : relative(projectRoot, filePath),
+		projectRoot === undefined ? filePath : nodePath.relative(projectRoot, filePath),
 	);
 	for (const segment of normalizedPath.split("/")) {
 		if (IGNORED_DIRECTORIES.has(segment.toLowerCase())) return true;
@@ -206,12 +209,12 @@ export function inspectLocalComponentFile(
 ): LocalComponentInspection {
 	if (isIgnoredComponentPath(filePath)) return { importStyle: undefined, matches: false };
 
-	const extension = extname(filePath);
+	const extension = nodePath.extname(filePath);
 	if (!COMPONENT_EXTENSIONS.has(extension) || filePath.endsWith(".d.ts")) {
 		return { importStyle: undefined, matches: false };
 	}
 
-	const baseName = basename(filePath, extension).toLowerCase();
+	const baseName = nodePath.basename(filePath, extension).toLowerCase();
 	const fileNames = definition.fileNames.map((fileName) => fileName.toLowerCase());
 	if (!fileNames.includes(baseName)) return { importStyle: undefined, matches: false };
 
@@ -275,7 +278,7 @@ export function discoverLocalComponent(
 	sourceFile: string,
 	definition: LocalComponentDefinition,
 ): LocalComponentDiscovery {
-	const projectRoot = getProjectRootFromDirectory(dirname(sourceFile));
+	const projectRoot = getProjectRootFromDirectory(nodePath.dirname(sourceFile));
 	if (projectRoot === undefined) return { found: false };
 
 	const projectFiles = indexProjectFiles(projectRoot);

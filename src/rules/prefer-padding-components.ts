@@ -1,4 +1,4 @@
-import { extname } from "node:path";
+import nodePath from "node:path";
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -253,7 +253,7 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 
 				if (componentIdentifiers.size === 0 && !discoveredComponent.found) return;
 
-				const canFix = JSX_EXTENSIONS.has(extname(filename)) && componentIdentifiers.size === 1;
+				const canFix = JSX_EXTENSIONS.has(nodePath.extname(filename)) && componentIdentifiers.size === 1;
 				const [componentIdentifier] = [...componentIdentifiers];
 				const replacement =
 					canFix && componentIdentifier !== undefined
