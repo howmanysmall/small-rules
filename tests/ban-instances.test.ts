@@ -331,6 +331,11 @@ describe("ban-instances", () => {
 				code: "const c = getConstraint(); c.MaxSize = new Vector2(100, 100);",
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
 			},
+			// bannedProperties: destructured Instance declaration is not tracked
+			{
+				code: 'const { x } = new Instance("UISizeConstraint"); x.MaxSize = new Vector2(100, 100);',
+				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+			},
 			// bannedProperties: Instance class name is dynamic
 			{
 				code: "const c = new Instance(className); c.MaxSize = new Vector2(100, 100);",

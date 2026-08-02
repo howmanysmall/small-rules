@@ -7,7 +7,7 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
 interface BannedClassEntry {
-	readonly message?: string | undefined;
+	readonly message: string;
 	readonly originalName: string;
 }
 
@@ -18,29 +18,37 @@ interface BannedPropertyEntry {
 
 interface TrackedVariable {
 	readonly className: string;
+	readonly classNameKey: string;
 	readonly functionScope: Scope;
 }
+
+type NormalizedOptions = Readonly<{
+	bannedClasses: ReadonlyMap<string, BannedClassEntry>;
+	bannedProperties: ReadonlyMap<string, ReadonlyMap<string, BannedPropertyEntry>>;
+}>;
+
+const EMPTY_OPTIONS: NormalizedOptions = {
+	bannedClasses: new Map(),
+	bannedProperties: new Map(),
+};
 
 function getJsxAttributeName(name: ESTree.JSXAttributeName): string | undefined {
 	return name.type === "JSXIdentifier" ? name.name : name.name.name;
 }
 
-function normalizeConfiguration(rawOptions: unknown): ReadonlyMap<string, BannedClassEntry> {
-	if (!(isRecord(rawOptions) && "bannedInstances" in rawOptions)) return new Map();
-
-	const { bannedInstances } = rawOptions;
+function normalizeClassBans(rawBans: unknown): Map<string, BannedClassEntry> {
 	const bannedClasses = new Map<string, BannedClassEntry>();
 
-	if (isStringArray(bannedInstances)) {
-		for (const className of bannedInstances) {
-			bannedClasses.set(className.toLowerCase(), { message: undefined, originalName: className });
+	if (isStringArray(rawBans)) {
+		for (const className of rawBans) {
+			bannedClasses.set(className.toLowerCase(), { message: "", originalName: className });
 		}
 		return bannedClasses;
 	}
 
-	/* v8 ignore next -- rule schema rejects non-array/non-record bannedInstances @preserve */
-	if (isStringRecord(bannedInstances)) {
-		for (const [className, message] of Object.entries(bannedInstances)) {
+	/* v8 ignore next -- @preserve rule schema rejects non-array/non-record bannedInstances. */
+	if (isStringRecord(rawBans)) {
+		for (const [className, message] of Object.entries(rawBans)) {
 			bannedClasses.set(className.toLowerCase(), { message, originalName: className });
 		}
 	}
@@ -48,24 +56,21 @@ function normalizeConfiguration(rawOptions: unknown): ReadonlyMap<string, Banned
 	return bannedClasses;
 }
 
-function normalizePropertyConfiguration(
-	rawOptions: unknown,
-): ReadonlyMap<string, ReadonlyMap<string, BannedPropertyEntry>> {
-	if (!(isRecord(rawOptions) && "bannedProperties" in rawOptions)) return new Map();
-
-	const { bannedProperties } = rawOptions;
+function normalizePropertyBans(rawBans: unknown): Map<string, ReadonlyMap<string, BannedPropertyEntry>> {
 	const bannedClasses = new Map<string, ReadonlyMap<string, BannedPropertyEntry>>();
 
-	/* v8 ignore next -- rule schema rejects non-record bannedProperties @preserve */
-	if (!isRecord(bannedProperties)) return bannedClasses;
+	if (rawBans === undefined) return bannedClasses;
 
-	for (const [className, propertyConfiguration] of Object.entries(bannedProperties)) {
-		/* v8 ignore next -- rule schema rejects non-record bannedProperties entries @preserve */
+	/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties. */
+	if (!isRecord(rawBans)) return bannedClasses;
+
+	for (const [className, propertyConfiguration] of Object.entries(rawBans)) {
+		/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties entries. */
 		if (!isRecord(propertyConfiguration)) continue;
 
 		const bannedPropertiesForClass = new Map<string, BannedPropertyEntry>();
 		for (const [propertyName, message] of Object.entries(propertyConfiguration)) {
-			/* v8 ignore next -- rule schema rejects non-string banned property messages @preserve */
+			/* v8 ignore next -- @preserve rule schema rejects non-string banned property messages. */
 			if (!isStringRaw(message)) continue;
 			bannedPropertiesForClass.set(propertyName.toLowerCase(), { message, propertyName });
 		}
@@ -76,6 +81,17 @@ function normalizePropertyConfiguration(
 	}
 
 	return bannedClasses;
+}
+
+function normalizeOptions(rawOptions: unknown): NormalizedOptions {
+	if (!isRecord(rawOptions)) return EMPTY_OPTIONS;
+
+	const { bannedInstances, bannedProperties } = rawOptions;
+
+	return {
+		bannedClasses: normalizeClassBans(bannedInstances),
+		bannedProperties: normalizePropertyBans(bannedProperties),
+	};
 }
 
 function getEnclosingFunctionScope(scope: Scope): Scope {
@@ -102,29 +118,17 @@ function getInstanceClassName(node: ESTree.NewExpression): string | undefined {
 	return firstArgument.value;
 }
 
-function getVariableDeclaratorForNewExpression(node: ESTree.NewExpression): ESTree.VariableDeclarator | undefined {
-	const { parent } = node;
-	if (parent.type !== "VariableDeclarator" || parent.init !== node || parent.id.type !== "Identifier") {
-		return undefined;
-	}
-	return parent;
-}
-
 const banInstances = createRule("ban-instances", "roblox", {
 	create(context): Visitor {
+		const options = normalizeOptions(context.options[0]);
+		if (options.bannedClasses.size === 0 && options.bannedProperties.size === 0) return {} satisfies Visitor;
+
 		const { sourceCode } = context;
-		const [rawOptions] = context.options;
-		if (!isRecord(rawOptions)) return {} satisfies Visitor;
-
-		const bannedClasses = normalizeConfiguration(rawOptions);
-		const bannedProperties = normalizePropertyConfiguration(rawOptions);
-		if (bannedClasses.size === 0 && bannedProperties.size === 0) return {} satisfies Visitor;
-
+		const { bannedClasses, bannedProperties } = options;
 		const trackedVariables = new Map<ScopeVariable, TrackedVariable>();
-		const recordedDeclarators = new Set<ESTree.VariableDeclarator>();
 
 		function reportBannedClass(node: ESTree.Node, entry: BannedClassEntry): void {
-			if (entry.message !== undefined && entry.message !== "") {
+			if (entry.message !== "") {
 				context.report({
 					data: { className: entry.originalName, customMessage: entry.message },
 					messageId: "bannedInstanceCustom",
@@ -158,7 +162,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 		}
 
 		function recordTrackedVariable(node: ESTree.VariableDeclarator): void {
-			if (recordedDeclarators.has(node) || node.id.type !== "Identifier" || node.init === null) return;
+			if (node.id.type !== "Identifier" || node.init === null) return;
 
 			const initializer = unwrapExpression(node.init);
 			if (initializer.type !== "NewExpression") return;
@@ -172,9 +176,9 @@ const banInstances = createRule("ban-instances", "roblox", {
 
 			trackedVariables.set(variable, {
 				className,
+				classNameKey: className.toLowerCase(),
 				functionScope: getEnclosingFunctionScope(variable.scope),
 			});
-			recordedDeclarators.add(node);
 		}
 
 		function getTrackedVariable(identifier: ESTree.IdentifierReference): TrackedVariable | undefined {
@@ -202,7 +206,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 				const trackedVariable = getTrackedVariable(objectExpression);
 				if (trackedVariable === undefined) return;
 
-				const bannedPropertiesForClass = bannedProperties.get(trackedVariable.className.toLowerCase());
+				const bannedPropertiesForClass = bannedProperties.get(trackedVariable.classNameKey);
 				if (bannedPropertiesForClass === undefined) return;
 
 				const propertyEntry = bannedPropertiesForClass.get(propertyName.toLowerCase());
@@ -217,10 +221,11 @@ const banInstances = createRule("ban-instances", "roblox", {
 				const firstCharacter = name.charAt(0);
 				if (firstCharacter !== firstCharacter.toLowerCase()) return;
 
-				const entry = bannedClasses.get(name.toLowerCase());
+				const classNameKey = name.toLowerCase();
+				const entry = bannedClasses.get(classNameKey);
 				if (entry !== undefined) reportBannedClass(node, entry);
 
-				const bannedPropertiesForClass = bannedProperties.get(name.toLowerCase());
+				const bannedPropertiesForClass = bannedProperties.get(classNameKey);
 				if (bannedPropertiesForClass === undefined) return;
 
 				for (const attribute of node.attributes) {
@@ -237,9 +242,6 @@ const banInstances = createRule("ban-instances", "roblox", {
 			NewExpression(node): void {
 				const className = getInstanceClassName(node);
 				if (className === undefined) return;
-
-				const variableDeclarator = getVariableDeclaratorForNewExpression(node);
-				if (variableDeclarator !== undefined) recordTrackedVariable(variableDeclarator);
 
 				const entry = bannedClasses.get(className.toLowerCase());
 				if (entry !== undefined) reportBannedClass(node, entry);

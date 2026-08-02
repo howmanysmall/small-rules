@@ -122,10 +122,11 @@ jobs:
         if: ${{ env.DRY_RUN != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.CROFAI_API_KEY }}
+          COMMUNIQUE_OPENROUTER_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
         run: |
           RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"
-          if ! communique generate "$GITHUB_REF_NAME" --output "$RELEASE_NOTES"; then
+          if ! communique generate "$GITHUB_REF_NAME" --changelog --output "$RELEASE_NOTES"; then
             echo "::warning title=communique failed::Falling back to git-cliff release notes."
             git-cliff --current --strip all --output "$RELEASE_NOTES"
           fi
@@ -142,19 +143,24 @@ jobs:
           RELEASE_ARTIFACT="$RELEASE_WORKTREE/documentation/src/content/releases/$GITHUB_REF_NAME.md"
 
           if [ -f "$RELEASE_ARTIFACT" ]; then
-            if cmp --silent "$RELEASE_NOTES" "$RELEASE_ARTIFACT"; then
-              echo "Release notes already match $GITHUB_REF_NAME"
-              exit 0
+            if ! cmp --silent "$RELEASE_NOTES" "$RELEASE_ARTIFACT"; then
+              echo "::error title=Release notes differ::Refusing to overwrite $RELEASE_ARTIFACT" >&2
+              exit 1
             fi
-            echo "::error title=Release notes differ::Refusing to overwrite $RELEASE_ARTIFACT" >&2
-            exit 1
+            echo "Release notes already match $GITHUB_REF_NAME"
+          else
+            mkdir -p "$(dirname "$RELEASE_ARTIFACT")"
+            cp "$RELEASE_NOTES" "$RELEASE_ARTIFACT"
           fi
 
-          mkdir -p "$(dirname "$RELEASE_ARTIFACT")"
-          cp "$RELEASE_NOTES" "$RELEASE_ARTIFACT"
+          cp CHANGELOG.md "$RELEASE_WORKTREE/CHANGELOG.md"
           git -C "$RELEASE_WORKTREE" config user.name "github-actions[bot]"
           git -C "$RELEASE_WORKTREE" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C "$RELEASE_WORKTREE" add "$RELEASE_ARTIFACT"
+          git -C "$RELEASE_WORKTREE" add "$RELEASE_ARTIFACT" CHANGELOG.md
+          if git -C "$RELEASE_WORKTREE" diff --cached --quiet; then
+            echo "Release notes and changelog already match main"
+            exit 0
+          fi
           git -C "$RELEASE_WORKTREE" commit -m "chore(docs): add $GITHUB_REF_NAME release notes"
           gh auth setup-git
           git -C "$RELEASE_WORKTREE" push origin HEAD:main
