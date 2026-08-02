@@ -1,4 +1,4 @@
-import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+import { getMemberPropertyName, pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
@@ -220,7 +220,7 @@ function collectExternalReferences(functionScope: Scope): Array<Reference> {
 	const external = new Array<Reference>();
 	const scopes = [functionScope];
 	for (const scope of scopes) {
-		for (const child of scope.childScopes) scopes.push(child);
+		pushChildScopes(scopes, scope);
 		for (const reference of scope.references) {
 			if (isExternalReference(functionScope, reference)) external.push(reference);
 		}

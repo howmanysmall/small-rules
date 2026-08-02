@@ -1,4 +1,4 @@
-import { extname } from "node:path";
+import nodePath from "node:path";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -122,7 +122,7 @@ const preferLocalPortalComponent = createRule("prefer-local-portal-component", "
 				const hasAvailablePortal = availablePortalIdentifiers.size > 0 || discoveredPortal.found;
 				if (!hasAvailablePortal) return;
 
-				const canFix = JSX_EXTENSIONS.has(extname(filename)) && availablePortalIdentifiers.size === 1;
+				const canFix = JSX_EXTENSIONS.has(nodePath.extname(filename)) && availablePortalIdentifiers.size === 1;
 				const [portalIdentifier] = availablePortalIdentifiers;
 				const replacement =
 					canFix && portalIdentifier !== undefined

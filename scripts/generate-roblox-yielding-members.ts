@@ -38,8 +38,9 @@ const command = new Command()
 		const json = JSON.parse(textDecoder.decode(bytes));
 		const generated = renderCatalog(parseClasses(json));
 		const { mkdir, writeFile } = await import("node:fs/promises");
-		const { dirname } = await import("node:path");
-		await mkdir(dirname(output), { recursive: true });
+		// oxlint-disable-next-line unicorn/import-style -- what?
+		const nodePath = await import("node:path");
+		await mkdir(nodePath.dirname(output), { recursive: true });
 		await writeFile(output, generated, "utf8");
 		console.log(`Wrote ${generated.length} bytes to ${output}`);
 	});

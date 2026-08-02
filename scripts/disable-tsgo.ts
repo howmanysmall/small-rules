@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { relative, resolve } from "node:path";
+import nodePath from "node:path";
 import { cwd } from "node:process";
 import { editJsonc } from "$script-utilities/jsonc-utilities";
 import { Command } from "@cliffy/command";
@@ -257,7 +257,7 @@ function processSettingsFile(
 	if (updatedContents === content) return false;
 
 	if (dryRun) {
-		const relativePath = relative(scanRoot, filePath);
+		const relativePath = nodePath.relative(scanRoot, filePath);
 		const label = relativePath.startsWith("..") ? filePath : relativePath;
 		console.log(formatDiff(label, content, updatedContents));
 		console.log();
@@ -297,7 +297,7 @@ const command = new Command()
 	})
 	.action(async (options: { readonly dryRun: unknown }, scanFrom: string) => {
 		const dryRun = options.dryRun === true;
-		const scanRoot = resolve(scanFrom);
+		const scanRoot = nodePath.resolve(scanFrom);
 
 		const settingsPaths = await fdirZed.crawl(scanRoot).withPromise();
 		const settingsJsons = await getSettingsJsonsAsync(settingsPaths);

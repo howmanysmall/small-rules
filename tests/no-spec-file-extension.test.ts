@@ -1,10 +1,10 @@
-import { join } from "node:path";
+import nodePath from "node:path";
 import { describe } from "vitest";
 import rule from "$oxc-rules/no-spec-file-extension";
 
 import { ts } from "./rule-testers";
 
-const FIXTURES = join(import.meta.dirname, "fixtures", "no-spec-file-extension");
+const FIXTURES = nodePath.join(import.meta.dirname, "fixtures", "no-spec-file-extension");
 
 describe("no-spec-file-extension", () => {
 	ts.run("no-spec-file-extension", rule, {
@@ -18,17 +18,17 @@ describe("no-spec-file-extension", () => {
 			{
 				code: "export const x = 1;",
 				errors: [{ messageId: "noSpecFileExtension" }],
-				filename: join(FIXTURES, "component.spec.tsx"),
+				filename: nodePath.join(FIXTURES, "component.spec.tsx"),
 			},
 			{
 				code: "export const x = 1;",
 				errors: [{ messageId: "noSpecFileExtension" }],
-				filename: join(FIXTURES, "Button.spec.ts"),
+				filename: nodePath.join(FIXTURES, "Button.spec.ts"),
 			},
 			{
 				code: "export const x = 1;",
 				errors: [{ messageId: "noSpecFileExtension" }],
-				filename: join(FIXTURES, "hooks/useAuth.spec.tsx"),
+				filename: nodePath.join(FIXTURES, "hooks/useAuth.spec.tsx"),
 			},
 		],
 		valid: [
@@ -39,31 +39,31 @@ describe("no-spec-file-extension", () => {
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "component.test.tsx"),
+				filename: nodePath.join(FIXTURES, "component.test.tsx"),
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "component.ts"),
+				filename: nodePath.join(FIXTURES, "component.ts"),
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "component.tsx"),
+				filename: nodePath.join(FIXTURES, "component.tsx"),
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "utils.js"),
+				filename: nodePath.join(FIXTURES, "utils.js"),
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "utils.jsx"),
+				filename: nodePath.join(FIXTURES, "utils.jsx"),
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "spec-component.ts"),
+				filename: nodePath.join(FIXTURES, "spec-component.ts"),
 			},
 			{
 				code: "export const x = 1;",
-				filename: join(FIXTURES, "component.spec-test.ts"),
+				filename: nodePath.join(FIXTURES, "component.spec-test.ts"),
 			},
 		],
 	});

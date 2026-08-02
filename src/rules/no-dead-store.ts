@@ -25,6 +25,25 @@ const LOOP_STATEMENT_TYPES = new Set([
 	"WhileStatement",
 ]);
 
+function statementTransfersControl(node: ESTree.Node): boolean {
+	if (
+		node.type === "BreakStatement" ||
+		node.type === "ContinueStatement" ||
+		node.type === "ReturnStatement" ||
+		node.type === "ThrowStatement"
+	) {
+		return true;
+	}
+	if (node.type === "BlockStatement") {
+		/* v8 ignore next -- @preserve callers only inspect non-empty consequent blocks. */
+		const last = node.body.at(-1);
+		/* v8 ignore next -- @preserve non-empty consequent blocks always have a final statement. */
+		if (last === undefined) return false;
+		return statementTransfersControl(last);
+	}
+	return false;
+}
+
 function executionRoot(node: ESTree.Node): ESTree.Node {
 	let current = node;
 	while (current.parent !== null) {
@@ -42,7 +61,15 @@ function executionRoot(node: ESTree.Node): ESTree.Node {
 
 function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
 	if (parent.type === "IfStatement") {
-		if (parent.consequent === current) return { arm: "then", complete: parent.alternate !== null, control: parent };
+		if (parent.consequent === current) {
+			return {
+				arm: "then",
+				// A consequent ending in break/continue/return/throw never falls through, so the
+				// then arm fully determines whether later statements in the block are reached.
+				complete: parent.alternate !== null || statementTransfersControl(parent.consequent),
+				control: parent,
+			};
+		}
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	}
 	if (parent.type === "ConditionalExpression") {
@@ -50,6 +77,26 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	}
 	return undefined;
+}
+
+// Statements after an if-without-else whose consequent transfers control only run when the
+// condition was false, so they belong to an implicit else arm rather than both arms.
+function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
+	if (parent.type !== "BlockStatement" && parent.type !== "SwitchCase") return [];
+	const siblings: ReadonlyArray<ESTree.Node> = parent.type === "BlockStatement" ? parent.body : parent.consequent;
+	const index = siblings.indexOf(current);
+	if (index <= 0) return [];
+	const steps: Array<BranchStep> = [];
+	for (const sibling of siblings.slice(0, index)) {
+		if (
+			sibling.type === "IfStatement" &&
+			sibling.alternate === null &&
+			statementTransfersControl(sibling.consequent)
+		) {
+			steps.push({ arm: "else", complete: true, control: sibling });
+		}
+	}
+	return steps;
 }
 
 function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
@@ -77,6 +124,7 @@ function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchS
 	while (current !== root && current.parent !== null) {
 		const step = branchStep(current, current.parent);
 		if (step !== undefined) path.push(step);
+		for (const elseStep of implicitElseSteps(current, current.parent)) path.push(elseStep);
 		current = current.parent;
 	}
 	return path;
@@ -118,19 +166,31 @@ function mergePaths(
 	return left.filter((step) => step.control !== differingControl);
 }
 
-function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): boolean {
+interface MergeablePair {
+	readonly leftIndex: number;
+	readonly merged: ReadonlyArray<BranchStep>;
+	readonly rightIndex: number;
+}
+
+function findFirstMergeablePair(coveredPaths: Array<ReadonlyArray<BranchStep>>): MergeablePair | undefined {
 	for (const [leftIndex, left] of coveredPaths.entries()) {
 		for (const [rightIndex, right] of coveredPaths.entries()) {
 			if (rightIndex <= leftIndex) continue;
 
 			const merged = mergePaths(left, right);
 			if (merged === undefined) continue;
-			coveredPaths.splice(rightIndex, 1);
-			coveredPaths.splice(leftIndex, 1, merged);
-			return merged.length === 0 || mergeCoveredPaths(coveredPaths);
+			return { leftIndex, merged, rightIndex };
 		}
 	}
-	return false;
+	return undefined;
+}
+
+function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): boolean {
+	const pair = findFirstMergeablePair(coveredPaths);
+	if (pair === undefined) return false;
+	coveredPaths.splice(pair.rightIndex, 1);
+	coveredPaths.splice(pair.leftIndex, 1, pair.merged);
+	return pair.merged.length === 0 || mergeCoveredPaths(coveredPaths);
 }
 
 function isGuaranteedOverwrite(
@@ -141,6 +201,23 @@ function isGuaranteedOverwrite(
 	const extraSteps = writePath.filter((step) => branchArm(currentPath, step.control) === undefined);
 	if (extraSteps.length === 0) return true;
 	if (extraSteps.some((step) => !step.complete)) return false;
+
+	function currentArm(step: BranchStep): string | undefined {
+		return branchArm(currentPath, step.control);
+	}
+
+	/* v8 ignore next -- @preserve unreachable: extra steps are filtered to controls absent from the current path. */
+	if (
+		extraSteps.some((step) => {
+			const arm = currentArm(step);
+			/* v8 ignore next -- @preserve extra steps cannot reference controls in the current path, so the arm check cannot hold. */
+			return arm !== undefined && arm !== step.arm;
+		})
+	) {
+		/* v8 ignore next -- @preserve unreachable: the arm check above can never hold for filtered extra steps. */
+		return false;
+	}
+
 	coveredPaths.push(extraSteps);
 	return mergeCoveredPaths(coveredPaths);
 }
@@ -153,9 +230,8 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 	const loops: Array<ESTree.Node> = [];
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
-		if (LOOP_STATEMENT_TYPES.has(current.type)) {
-			loops.push(current);
-		} else if (
+		if (LOOP_STATEMENT_TYPES.has(current.type)) loops.push(current);
+		else if (
 			current.type === "Program" ||
 			current.type === "ArrowFunctionExpression" ||
 			current.type === "FunctionDeclaration" ||
@@ -170,11 +246,10 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 
 function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): boolean {
 	const writeLoops = collectLoopAncestors(write.node);
-	let current: ESTree.Node | null = (usage.node as ESTree.Node).parent;
+	let current: ESTree.Node | null = usage.node.parent;
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- giga coal
 	while (current !== null) {
-		for (const loop of writeLoops) {
-			if (loop === current) return true;
-		}
+		for (const loop of writeLoops) if (loop === current) return true;
 		if (
 			current.type === "Program" ||
 			current.type === "ArrowFunctionExpression" ||
@@ -272,7 +347,7 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 		const parent: ESTree.Node = current.parent;
 		if (parent.type === "TryStatement" && parent.block === current) {
 			const handlers = [parent.handler?.body, parent.finalizer].filter(
-				(node) => node !== null && node !== undefined,
+				(node): node is ESTree.BlockStatement => node !== null && node !== undefined,
 			);
 			if (
 				handlers.some((handler) =>

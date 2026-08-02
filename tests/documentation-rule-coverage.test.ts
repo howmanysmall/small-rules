@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import smallRules from "$small-rules";
@@ -20,7 +20,7 @@ import type { Node, Program } from "yuku-parser";
 import type { RuleExample } from "../documentation/src/utilities/extract-rule-examples";
 
 const docsContentDirectory = fileURLToPath(new URL("../documentation/src/content/docs", import.meta.url));
-const rulePagesDirectory = join(docsContentDirectory, "rules");
+const rulePagesDirectory = nodePath.join(docsContentDirectory, "rules");
 
 interface RuleExampleCoverage {
 	readonly exemption: string | undefined;
@@ -35,14 +35,14 @@ function getManifestRuleNames(): ReadonlyArray<string> {
 
 function getExpectedRulePagePaths(): ReadonlyArray<string> {
 	return ruleManifest.categories.flatMap((category) =>
-		category.rules.map((entry) => join(docsContentDirectory, `${getRulePath(category, entry.name)}.mdx`)),
+		category.rules.map((entry) => nodePath.join(docsContentDirectory, `${getRulePath(category, entry.name)}.mdx`)),
 	);
 }
 
 function getRulePagePaths(): ReadonlyArray<string> {
 	return readdirSync(rulePagesDirectory, { encoding: "utf8", recursive: true })
-		.filter((relativePath) => relativePath.endsWith(".mdx") && basename(relativePath) !== "index.mdx")
-		.map((relativePath) => join(rulePagesDirectory, relativePath));
+		.filter((relativePath) => relativePath.endsWith(".mdx") && nodePath.basename(relativePath) !== "index.mdx")
+		.map((relativePath) => nodePath.join(rulePagesDirectory, relativePath));
 }
 
 function getRulePageSources(): ReadonlyArray<{ readonly path: string; readonly source: string }> {
@@ -64,8 +64,8 @@ function getCuratedRationaleRulePagePaths(): ReadonlyArray<string> {
 
 function getExpectedRuleIndexPagePaths(): ReadonlyArray<string> {
 	return [
-		join(rulePagesDirectory, "index.mdx"),
-		...ruleManifest.categories.map((category) => join(rulePagesDirectory, category.key, "index.mdx")),
+		nodePath.join(rulePagesDirectory, "index.mdx"),
+		...ruleManifest.categories.map((category) => nodePath.join(rulePagesDirectory, category.key, "index.mdx")),
 	];
 }
 
@@ -261,7 +261,7 @@ describe("documentation rule coverage", () => {
 			"roblox/prefer-udim2-shorthand",
 			"roblox/require-module-level-instantiation",
 		]
-			.map((path) => join(rulePagesDirectory, `${path}.mdx`))
+			.map((path) => nodePath.join(rulePagesDirectory, `${path}.mdx`))
 			.toSorted((left, right) => left.localeCompare(right));
 
 		expect(getCuratedRationaleRulePagePaths()).toStrictEqual(expectedPaths);

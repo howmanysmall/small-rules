@@ -63,6 +63,10 @@ describe("no-dead-store", () => {
 				code: "function repeatedTernary(flag: boolean) { let value = load(); flag ? ((value = one()), (value = two())) : noop(); consume(value); }",
 				errors: [{ messageId: "deadStore" }],
 			},
+			{
+				code: "function guard(flag: boolean) { let value = load(); if (flag) { value = replace(); return; } value = fallback(); }",
+				errors: [{ messageId: "deadStore" }, { messageId: "deadStore" }, { messageId: "deadStore" }],
+			},
 		],
 		valid: [
 			{
@@ -129,6 +133,41 @@ describe("no-dead-store", () => {
   }
 }`,
 			"function unrelatedTernaries(a: boolean, b: boolean, c: boolean, d: boolean) { let value = load(); a ? (b ? (value = one()) : noop()) : noop(); c ? (d ? (value = two()) : noop()) : noop(); consume(value); }",
+			{
+				code: `function f(x: any) { let score = 0; switch (x.type) { case "arr": score = 1; break; default: score = 2; } return score; }`,
+			},
+			[
+				"function scoreByKind(kind: string) {",
+				"  let score = 0;",
+				"  switch (kind) {",
+				'    case "array": {',
+				"      if (kind.length > 0) {",
+				"        score = computeScore(kind);",
+				"        break;",
+				"      }",
+				"      score = 1;",
+				"      break;",
+				"    }",
+				"    default:",
+				"      score = 2;",
+				"  }",
+				"  return score;",
+				"}",
+			].join("\n"),
+			[
+				"function scan(items: Array<number>) {",
+				"  let best = -1;",
+				"  for (const item of items) {",
+				"    if (item > 0) {",
+				"      best = item;",
+				"      break;",
+				"    }",
+				"    best = 0;",
+				"  }",
+				"  return best;",
+				"}",
+			].join("\n"),
+			"function earlyExit(flag: boolean) { let value = load(); if (flag) { value = replace(); consume(value); return; } consume(value); }",
 		],
 	});
 });

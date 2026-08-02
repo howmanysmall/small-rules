@@ -3,9 +3,9 @@
 
 import { execFile } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import nodePath from "node:path";
 
-const outputPath = resolve(
+const outputPath = nodePath.resolve(
 	process.argv[2] === "--open" ? "reports/dupes.html" : (process.argv[2] ?? "reports/dupes.html"),
 );
 const shouldOpen = process.argv.includes("--open");
@@ -24,7 +24,7 @@ const html = template.replace(
 	`window.__DUPE_REPORT__ = decodeReport("${encodedReport}");`,
 );
 
-await mkdir(dirname(outputPath), { recursive: true });
+await mkdir(nodePath.dirname(outputPath), { recursive: true });
 await writeFile(outputPath, html, "utf8");
 console.log(`Wrote ${outputPath}`);
 
