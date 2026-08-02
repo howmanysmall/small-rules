@@ -118,19 +118,31 @@ function mergePaths(
 	return left.filter((step) => step.control !== differingControl);
 }
 
-function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): boolean {
+interface MergeablePair {
+	readonly leftIndex: number;
+	readonly merged: ReadonlyArray<BranchStep>;
+	readonly rightIndex: number;
+}
+
+function findFirstMergeablePair(coveredPaths: Array<ReadonlyArray<BranchStep>>): MergeablePair | undefined {
 	for (const [leftIndex, left] of coveredPaths.entries()) {
 		for (const [rightIndex, right] of coveredPaths.entries()) {
 			if (rightIndex <= leftIndex) continue;
 
 			const merged = mergePaths(left, right);
 			if (merged === undefined) continue;
-			coveredPaths.splice(rightIndex, 1);
-			coveredPaths.splice(leftIndex, 1, merged);
-			return merged.length === 0 || mergeCoveredPaths(coveredPaths);
+			return { leftIndex, merged, rightIndex };
 		}
 	}
-	return false;
+	return undefined;
+}
+
+function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): boolean {
+	const pair = findFirstMergeablePair(coveredPaths);
+	if (pair === undefined) return false;
+	coveredPaths.splice(pair.rightIndex, 1);
+	coveredPaths.splice(pair.leftIndex, 1, pair.merged);
+	return pair.merged.length === 0 || mergeCoveredPaths(coveredPaths);
 }
 
 function isGuaranteedOverwrite(

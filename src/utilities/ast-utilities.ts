@@ -45,10 +45,14 @@ export function getVariableByName(scope: null | Scope, name: string): ScopeVaria
 	return undefined;
 }
 
+export function pushChildScopes(scopes: Array<Scope>, scope: Scope): void {
+	for (const child of scope.childScopes) scopes.push(child);
+}
+
 export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable: ScopeVariable) => void): void {
 	const scopes = [sourceCode.getScope(sourceCode.ast)];
 	for (const scope of scopes) {
-		for (const child of scope.childScopes) scopes.push(child);
+		pushChildScopes(scopes, scope);
 		for (const variable of scope.variables) callback(variable);
 	}
 }
