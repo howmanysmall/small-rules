@@ -153,6 +153,20 @@ function isGuaranteedOverwrite(
 	const extraSteps = writePath.filter((step) => branchArm(currentPath, step.control) === undefined);
 	if (extraSteps.length === 0) return true;
 	if (extraSteps.some((step) => !step.complete)) return false;
+
+	function currentArm(step: BranchStep): string | undefined {
+		return branchArm(currentPath, step.control);
+	}
+
+	if (
+		extraSteps.some((step) => {
+			const arm = currentArm(step);
+			return arm !== undefined && arm !== step.arm;
+		})
+	) {
+		return false;
+	}
+
 	coveredPaths.push(extraSteps);
 	return mergeCoveredPaths(coveredPaths);
 }

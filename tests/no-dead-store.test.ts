@@ -129,6 +129,13 @@ describe("no-dead-store", () => {
   }
 }`,
 			"function unrelatedTernaries(a: boolean, b: boolean, c: boolean, d: boolean) { let value = load(); a ? (b ? (value = one()) : noop()) : noop(); c ? (d ? (value = two()) : noop()) : noop(); consume(value); }",
+			{
+				code: `function f(x: any) { let score = 0; switch (x.type) { case "arr": score = 1; break; default: score = 2; } return score; }`,
+				documentation: {
+					id: "pass-switch-break",
+					title: "Switch with break and post-switch read (false positive)",
+				},
+			},
 		],
 	});
 });
