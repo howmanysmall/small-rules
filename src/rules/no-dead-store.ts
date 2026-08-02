@@ -179,9 +179,8 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 	const loops: Array<ESTree.Node> = [];
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
-		if (LOOP_STATEMENT_TYPES.has(current.type)) {
-			loops.push(current);
-		} else if (
+		if (LOOP_STATEMENT_TYPES.has(current.type)) loops.push(current);
+		else if (
 			current.type === "Program" ||
 			current.type === "ArrowFunctionExpression" ||
 			current.type === "FunctionDeclaration" ||
@@ -196,11 +195,10 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 
 function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): boolean {
 	const writeLoops = collectLoopAncestors(write.node);
-	let current: ESTree.Node | null = (usage.node as ESTree.Node).parent;
+	let current: ESTree.Node | null = usage.node.parent;
+	// oxlint-disable-next-line typescript/no-unnecessary-condition -- giga coal
 	while (current !== null) {
-		for (const loop of writeLoops) {
-			if (loop === current) return true;
-		}
+		for (const loop of writeLoops) if (loop === current) return true;
 		if (
 			current.type === "Program" ||
 			current.type === "ArrowFunctionExpression" ||
@@ -298,7 +296,7 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 		const parent: ESTree.Node = current.parent;
 		if (parent.type === "TryStatement" && parent.block === current) {
 			const handlers = [parent.handler?.body, parent.finalizer].filter(
-				(node) => node !== null && node !== undefined,
+				(node): node is ESTree.BlockStatement => node !== null && node !== undefined,
 			);
 			if (
 				handlers.some((handler) =>
