@@ -1,10 +1,10 @@
 #!/usr/bin/env nub
 
-import { resolve } from "node:path";
+import nodePath from "node:path";
 import { argv, exit } from "node:process";
 import { $ } from "zx";
 
-const repositoryRoot = resolve(import.meta.dirname, "..");
+const repositoryRoot = nodePath.resolve(import.meta.dirname, "..");
 
 function getLintArguments(parameters: ReadonlyArray<string>): ReadonlyArray<string> {
 	const flags = new Array<string>();

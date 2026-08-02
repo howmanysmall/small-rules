@@ -1,4 +1,4 @@
-import { extname } from "node:path";
+import nodePath from "node:path";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
@@ -160,7 +160,7 @@ const preferContextStack = createRule("prefer-context-stack", "react", {
 				}
 
 				const canFix =
-					JSX_EXTENSIONS.has(extname(filename)) &&
+					JSX_EXTENSIONS.has(nodePath.extname(filename)) &&
 					contextStackIdentifiers.size === 1 &&
 					isSafelyFixableProviderChain(providerChain);
 

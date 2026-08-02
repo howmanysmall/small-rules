@@ -1,6 +1,5 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	addLocalComponentImportIdentifiers,
@@ -27,9 +26,7 @@ function createCollectorRule(inspection: LocalComponentInspection): CreateRule<r
 				ImportDeclaration(node): void {
 					const identifiers = new Set<string>();
 					addLocalComponentImportIdentifiers(node, inspection, COMPONENT_NAME, identifiers);
-					if (identifiers.size > 0) {
-						context.report({ messageId: "found", node });
-					}
+					if (identifiers.size > 0) context.report({ messageId: "found", node });
 				},
 			} satisfies Visitor;
 		},
@@ -167,7 +164,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Arrange
 		const project = createProjectFixture("unresolved-import");
-		const filename = join(project, "src", "screen.tsx");
+		const filename = nodePath.join(project, "src", "screen.tsx");
 
 		const node = {
 			source: { value: "./missing-button" },
@@ -213,7 +210,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const bareInspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			bareImportNode,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 		const missingFilenameInspection = inspectRelativeLocalComponentImport(
@@ -249,7 +246,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -278,7 +275,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -307,7 +304,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -336,7 +333,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -365,7 +362,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -394,7 +391,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -423,7 +420,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -461,13 +458,13 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const matchingInspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			definition,
 		);
 		const nonMatchingInspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
 			node,
-			join(project, "src", "screen.tsx"),
+			nodePath.join(project, "src", "screen.tsx"),
 			missingMarkerDefinition,
 		);
 
@@ -492,7 +489,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			specifiers: [],
 			type: "ImportDeclaration",
 		};
-		const filename = join(project, "src", "screen.tsx");
+		const filename = nodePath.join(project, "src", "screen.tsx");
 
 		// Act
 		for (let index = 0; index < 70; index += 1) {
@@ -522,10 +519,13 @@ describe("discoverLocalComponent", () => {
 		expect.assertions(1);
 
 		// Arrange
-		const directory = mkdtempSync(join(tmpdir(), "small-rules-local-component-no-root-"));
+		const directory = mkdtempSync(nodePath.join(tmpdir(), "small-rules-local-component-no-root-"));
 
 		// Act
-		const discovery = discoverLocalComponent(join(directory, "src", "screen.tsx"), createComponentDefinition());
+		const discovery = discoverLocalComponent(
+			nodePath.join(directory, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
 
 		// Assert
 		expect(discovery).toStrictEqual({ found: false });
@@ -543,7 +543,10 @@ describe("discoverLocalComponent", () => {
 		});
 
 		// Act
-		const discovery = discoverLocalComponent(join(project, "src", "screen.tsx"), createComponentDefinition());
+		const discovery = discoverLocalComponent(
+			nodePath.join(project, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
 
 		// Assert
 		expect(discovery).toMatchObject({
@@ -567,7 +570,10 @@ describe("discoverLocalComponent", () => {
 		});
 
 		// Act
-		const discovery = discoverLocalComponent(join(project, "src", "screen.tsx"), createComponentDefinition());
+		const discovery = discoverLocalComponent(
+			nodePath.join(project, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
 
 		// Assert
 		expect(discovery).toMatchObject({
@@ -586,7 +592,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
-		const sourceFile = join(project, "src", "screen.tsx");
+		const sourceFile = nodePath.join(project, "src", "screen.tsx");
 
 		// Act
 		const firstDiscovery = discoverLocalComponent(sourceFile, createComponentDefinition());
@@ -609,7 +615,10 @@ describe("discoverLocalComponent", () => {
 		});
 
 		// Act
-		const discovery = discoverLocalComponent(join(project, "src", "screen.tsx"), createComponentDefinition());
+		const discovery = discoverLocalComponent(
+			nodePath.join(project, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
 
 		// Assert
 		expect(discovery).toStrictEqual({ found: false });
@@ -627,7 +636,7 @@ describe("discoverLocalComponent", () => {
 		});
 
 		// Act
-		const discovery = discoverLocalComponent(join(project, "src", "screens", "example.tsx"), {
+		const discovery = discoverLocalComponent(nodePath.join(project, "src", "screens", "example.tsx"), {
 			componentName: COMPONENT_NAME,
 			fileNames: ["index"],
 		});
@@ -654,7 +663,7 @@ describe("discoverLocalComponent", () => {
 
 		// Act
 		const discovery = discoverLocalComponent(
-			join(project, "src", "screens", "example.tsx"),
+			nodePath.join(project, "src", "screens", "example.tsx"),
 			createComponentDefinition(),
 		);
 
@@ -679,12 +688,12 @@ function createComponentDefinition(): LocalComponentDefinition {
 }
 
 function createProjectFixture(name: string, files?: Record<string, string>): string {
-	const project = mkdtempSync(join(tmpdir(), `small-rules-local-component-${name}-`));
-	writeFileSync(join(project, "package.json"), '{"name":"fixture","type":"module"}\n');
+	const project = mkdtempSync(nodePath.join(tmpdir(), `small-rules-local-component-${name}-`));
+	writeFileSync(nodePath.join(project, "package.json"), '{"name":"fixture","type":"module"}\n');
 
 	for (const [relativePath, contents] of Object.entries(files ?? { "src/screen.tsx": "export {};\n" })) {
-		const absolutePath = join(project, relativePath);
-		mkdirSync(dirname(absolutePath), { recursive: true });
+		const absolutePath = nodePath.join(project, relativePath);
+		mkdirSync(nodePath.dirname(absolutePath), { recursive: true });
 		writeFileSync(absolutePath, contents);
 	}
 

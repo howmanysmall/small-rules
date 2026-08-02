@@ -1,12 +1,12 @@
-import { join } from "node:path";
+import nodePath from "node:path";
 import { describe } from "vitest";
 import rule from "$oxc-rules/no-redundant-aspect-ratio-constraint";
 
 import { tsx } from "./rule-testers";
 
-const FIXTURES = join(import.meta.dirname, "fixtures", "no-redundant-aspect-ratio-constraint");
-const WITH_CONSTRAINT = join(FIXTURES, "with-constraint");
-const WITHOUT_CONSTRAINT = join(FIXTURES, "without-constraint");
+const FIXTURES = nodePath.join(import.meta.dirname, "fixtures", "no-redundant-aspect-ratio-constraint");
+const WITH_CONSTRAINT = nodePath.join(FIXTURES, "with-constraint");
+const WITHOUT_CONSTRAINT = nodePath.join(FIXTURES, "without-constraint");
 
 describe("no-redundant-aspect-ratio-constraint", () => {
 	tsx.run("no-redundant-aspect-ratio-constraint", rule, {
@@ -80,7 +80,7 @@ const view = (
 );
 `,
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
-				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -97,7 +97,7 @@ const view = (
 );
 `,
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
-				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -110,7 +110,7 @@ const view = (
 );
 `,
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
-				filename: join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -264,7 +264,7 @@ const view = (
 	</LabelSpritesheet>
 );
 `,
-				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -276,7 +276,7 @@ const view = (
 	</RegularLabel>
 );
 `,
-				filename: join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -288,7 +288,7 @@ const view = (
 	</RegularLabel>
 );
 `,
-				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -300,7 +300,7 @@ const view = (
 	</MissingSpritesheet>
 );
 `,
-				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -332,7 +332,7 @@ const view = (
 	</GenericSpritesheet>
 );
 `,
-				filename: join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -362,7 +362,7 @@ const view = (
 	</LabelSpritesheet>
 );
 `,
-				filename: join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -374,7 +374,7 @@ const view = (
 	</GenericSpritesheet>
 );
 `,
-				filename: join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 		],
 	});

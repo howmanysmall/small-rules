@@ -503,8 +503,9 @@ const command = new Command()
 			if (output === undefined) console.log(json);
 			else {
 				const { mkdir, writeFile } = await import("node:fs/promises");
-				const { dirname } = await import("node:path");
-				await mkdir(dirname(output), { recursive: true });
+				// oxlint-disable-next-line unicorn/import-style -- lol
+				const nodePath = await import("node:path");
+				await mkdir(nodePath.dirname(output), { recursive: true });
 				await writeFile(output, json, "utf8");
 				console.log(`Wrote ${json.length} bytes to ${output}`);
 			}

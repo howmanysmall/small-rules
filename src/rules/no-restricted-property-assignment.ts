@@ -1,4 +1,4 @@
-import { isAbsolute, relative } from "node:path";
+import nodePath from "node:path";
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isMemberExpression } from "$oxc-utilities/oxc-utilities";
@@ -49,9 +49,9 @@ function normalizePath(value: string): string {
 
 function createFileCandidates(filename: string): ReadonlyArray<string> {
 	const normalizedFilename = normalizePath(filename);
-	if (!isAbsolute(filename)) return [normalizedFilename];
+	if (!nodePath.isAbsolute(filename)) return [normalizedFilename];
 
-	const relativeFilename = normalizePath(relative(process.cwd(), filename));
+	const relativeFilename = normalizePath(nodePath.relative(process.cwd(), filename));
 	if (relativeFilename.length === 0 || relativeFilename.startsWith("..")) return [normalizedFilename];
 
 	return [normalizedFilename, relativeFilename];

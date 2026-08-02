@@ -1,4 +1,4 @@
-import { extname } from "node:path";
+import nodePath from "node:path";
 import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
@@ -177,7 +177,7 @@ function isValidParseResult(result: ParseResult): boolean {
 }
 
 function tryParse(value: string, filename: string): ParseResult | undefined {
-	const extension = extname(filename);
+	const extension = nodePath.extname(filename);
 	const LANG_BY_EXTENSION: Partial<Record<string, "js" | "jsx" | "tsx">> = { ".jsx": "jsx", ".tsx": "tsx" };
 	const lang = LANG_BY_EXTENSION[extension] ?? "js";
 	const result = parse(value, { lang, sourceType: "module" });
