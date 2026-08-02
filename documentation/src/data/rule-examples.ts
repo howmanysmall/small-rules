@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { basename, join, resolve } from "node:path";
+import nodePath from "node:path";
 
 import { extractRuleExamples } from "../utilities/extract-rule-examples";
 import { ruleManifest } from "./rule-manifest";
@@ -8,7 +8,10 @@ import type { RuleExample } from "../utilities/extract-rule-examples";
 import type { RuleName } from "./rule-manifest";
 
 const workingDirectory = process.cwd();
-const testsDirectory = resolve(workingDirectory, basename(workingDirectory) === "documentation" ? "../tests" : "tests");
+const testsDirectory = nodePath.resolve(
+	workingDirectory,
+	nodePath.basename(workingDirectory) === "documentation" ? "../tests" : "tests",
+);
 // oxlint-disable-next-line react-doctor/js-combine-iterations -- called once.
 const testFileNames = readdirSync(testsDirectory, { encoding: "utf8", withFileTypes: true })
 	.filter((entry) => entry.isFile() && entry.name.endsWith(".test.ts"))
@@ -18,7 +21,7 @@ const examplesByRuleName = new Map<string, Array<RuleExample>>();
 
 for (const testFileName of testFileNames) {
 	const relativePath = `tests/${testFileName}`;
-	const sourceText = readFileSync(join(testsDirectory, testFileName), "utf8");
+	const sourceText = readFileSync(nodePath.join(testsDirectory, testFileName), "utf8");
 	for (const extraction of extractRuleExamples(sourceText, relativePath)) {
 		const examples = examplesByRuleName.get(extraction.ruleName) ?? new Array<RuleExample>();
 		examplesByRuleName.set(extraction.ruleName, examples);

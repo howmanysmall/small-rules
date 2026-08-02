@@ -1,13 +1,13 @@
-import { join } from "node:path";
+import nodePath from "node:path";
 import { describe } from "vitest";
 import rule from "$oxc-rules/prefer-context-stack";
 
 import { tsx } from "./rule-testers";
 
-const FIXTURES = join(import.meta.dirname, "fixtures", "prefer-context-stack");
-const WITH_CONTEXT_STACK = join(FIXTURES, "with-context-stack");
-const WITHOUT_CONTEXT_STACK = join(FIXTURES, "without-context-stack");
-const FIXTURE_ONLY_CONTEXT_STACK = join(FIXTURES, "fixture-only");
+const FIXTURES = nodePath.join(import.meta.dirname, "fixtures", "prefer-context-stack");
+const WITH_CONTEXT_STACK = nodePath.join(FIXTURES, "with-context-stack");
+const WITHOUT_CONTEXT_STACK = nodePath.join(FIXTURES, "without-context-stack");
+const FIXTURE_ONLY_CONTEXT_STACK = nodePath.join(FIXTURES, "fixture-only");
 
 describe("prefer-context-stack", () => {
 	tsx.run("prefer-context-stack", rule, {
@@ -32,7 +32,7 @@ export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
 				errors: [{ messageId: "preferContextStack" }],
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "report-only.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "report-only.tsx"),
 			},
 			{
 				code: `import Stack from "../providers/context-stack";
@@ -41,7 +41,7 @@ export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
 				errors: [{ messageId: "preferContextStack" }],
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "alias-report-only.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "alias-report-only.tsx"),
 				output: `import Stack from "../providers/context-stack";
 
 export function Example(locale: string, theme: string) {
@@ -55,7 +55,7 @@ export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}>{/* keep */}<LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
 				errors: [{ messageId: "preferContextStack" }],
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "comment.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "comment.tsx"),
 			},
 			{
 				code: `import ContextStack from "../providers/context-stack";
@@ -65,7 +65,7 @@ export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
 				errors: [{ messageId: "preferContextStack" }],
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "multiple-identifiers.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "multiple-identifiers.tsx"),
 			},
 			{
 				code: `import ContextStack from "../providers/context-stack";
@@ -74,7 +74,7 @@ export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
 				errors: [{ messageId: "preferContextStack" }],
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "empty-inner.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "empty-inner.tsx"),
 				output: `import ContextStack from "../providers/context-stack";
 
 export function Example(locale: string, theme: string) {
@@ -87,7 +87,7 @@ export function Example(locale: string, theme: string) {
 				code: `export default function ContextStack({ children, locale, theme }: { children: React.ReactNode; locale: string; theme: string }) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider></ThemeContext.Provider>;
 }`,
-				filename: join(WITH_CONTEXT_STACK, "src", "providers", "context-stack.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "providers", "context-stack.tsx"),
 			},
 			{
 				code: `import ContextStack from "../providers/context-stack";
@@ -104,19 +104,19 @@ export function Example(theme: string) {
 export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><Toolbar /><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "not-direct.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "not-direct.tsx"),
 			},
 			{
 				code: `export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
-				filename: join(WITHOUT_CONTEXT_STACK, "src", "screens", "missing.tsx"),
+				filename: nodePath.join(WITHOUT_CONTEXT_STACK, "src", "screens", "missing.tsx"),
 			},
 			{
 				code: `export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}><LocaleContext.Provider value={locale}><App /></LocaleContext.Provider></ThemeContext.Provider>;
 }`,
-				filename: join(FIXTURE_ONLY_CONTEXT_STACK, "src", "screens", "fixture.tsx"),
+				filename: nodePath.join(FIXTURE_ONLY_CONTEXT_STACK, "src", "screens", "fixture.tsx"),
 			},
 			{
 				code: `import ContextStack from "../providers/context-stack";
@@ -128,7 +128,7 @@ export function Example(locale: string, theme: string) {
         </>
     </ThemeContext.Provider>;
 }`,
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "fragment-wrapper.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "fragment-wrapper.tsx"),
 			},
 			{
 				code: `import ContextStack from "../providers/context-stack";
@@ -136,7 +136,7 @@ export function Example(locale: string, theme: string) {
 export function Example(locale: string, theme: string) {
     return <ThemeContext.Provider value={theme}>{maybeLocale && <LocaleContext.Provider value={locale}><App /></LocaleContext.Provider>}</ThemeContext.Provider>;
 }`,
-				filename: join(WITH_CONTEXT_STACK, "src", "screens", "conditional-child.tsx"),
+				filename: nodePath.join(WITH_CONTEXT_STACK, "src", "screens", "conditional-child.tsx"),
 			},
 		],
 	});

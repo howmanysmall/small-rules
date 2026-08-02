@@ -887,9 +887,7 @@ const configuration = defineConfig({
 		"unicorn/import-style": [
 			"error",
 			{
-				styles: {
-					"node:path": { named: true },
-				},
+				styles: {},
 			},
 		],
 		"unicorn/no-array-callback-reference": "off",

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +12,7 @@ const fixtureDirectory = fileURLToPath(new URL("fixtures/documentation-rule-extr
 
 function extractFixture(fixtureName: string): ReturnType<typeof extractRuleExamples> {
 	const relativePath = `tests/fixtures/documentation-rule-extractor/${fixtureName}`;
-	const sourceText = readFileSync(join(fixtureDirectory, fixtureName), "utf8");
+	const sourceText = readFileSync(nodePath.join(fixtureDirectory, fixtureName), "utf8");
 	return extractRuleExamples(sourceText, relativePath);
 }
 
