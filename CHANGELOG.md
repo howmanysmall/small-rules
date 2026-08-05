@@ -2,6 +2,20 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- **prefer-idiv:** Support reciprocal multiplication in prefer-idiv rule
+- **require-named-effect-functions:** Add sloptor support
+
+### Build
+
+- **deps:** Bump @biomejs/biome to 2.5.7
+- **deps:** Update yuku dependencies to 0.8.3
+
+### Maintenance
+
+- **deps:** Bump pnpm to 11.19.0 and update dependencies
+
 ## [v2.12.1] - 2026-08-03
 
 ### Fixed
