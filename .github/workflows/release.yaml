@@ -76,11 +76,12 @@ jobs:
         uses: ./.github/actions/setup
         with:
           cache: false
-          tools: "bun node pnpm communique"
+          tools: "bun node pnpm communique git-cliff"
 
       - name: Verify release note generators
         run: |
           communique --version
+          git-cliff --version
 
       - name: Setup Node.js for NPM publishing
         if: ${{ env.DRY_RUN != 'true' }}
@@ -124,10 +125,11 @@ jobs:
           COMMUNIQUE_OPENROUTER_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
         run: |
-          set -euo pipefail
           RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"
-          communique generate "$GITHUB_REF_NAME" --changelog --output "$RELEASE_NOTES"
-          test -s "$RELEASE_NOTES"
+          if ! communique generate "$GITHUB_REF_NAME" --changelog --output "$RELEASE_NOTES"; then
+            echo "::warning title=communique failed::Falling back to git-cliff release notes."
+            git-cliff --current --strip all --output "$RELEASE_NOTES"
+          fi
           echo "RELEASE_NOTES=$RELEASE_NOTES" >> "$GITHUB_ENV"
 
       - name: Commit release notes to main
