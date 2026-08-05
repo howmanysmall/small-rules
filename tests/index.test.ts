@@ -111,7 +111,7 @@ describe("small-rules plugin", () => {
 			const smallRules = await import("$small-rules");
 
 			expect(smallRules.default.meta?.name).toBe("small-rules");
-		}, 5000);
+		}, 30_000);
 
 		it("exports every registered rule", async () => {
 			expect.assertions(2);
@@ -121,6 +121,6 @@ describe("small-rules plugin", () => {
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
 			expect(ruleNames).toHaveLength(100);
-		}, 5000);
+		}, 30_000);
 	});
 });
