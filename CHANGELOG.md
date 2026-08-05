@@ -7,17 +7,6 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **prefer-idiv:** Support reciprocal multiplication in prefer-idiv rule
 - **require-named-effect-functions:** Add sloptor support
 
-### Build
-
-- **deps:** Bump @biomejs/biome to 2.5.7
-- **deps:** Update yuku dependencies to 0.8.3
-
-### Maintenance
-
-- **deps:** Bump pnpm to 11.19.0 and update dependencies
-
-## [v2.12.1] - 2026-08-03
-
 ### Fixed
 
 - **prefer-pascal-case-enums:** Skip non-ascii identifiers
@@ -41,8 +30,14 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 - **release:** Use OpenRouter for communique
 
+### Build
+
+- **deps:** Bump @biomejs/biome to 2.5.7
+- **deps:** Update yuku dependencies to 0.8.3
+
 ### Maintenance
 
+- **deps:** Bump pnpm to 11.19.0 and update dependencies
 - **tooling:** Exclude CLI scripts from linting and formatting
 - **config:** Update LLM system prompt and model settings in communique
 - Update local plugin
@@ -769,7 +764,6 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **deps:** Update tool versions and lockfiles
 - **deps:** Update oxfmt to 0.55.0
 
-[v2.12.1]: https://github.com/howmanysmall/small-rules/compare/v2.12.0...v2.12.1
 [v2.12.0]: https://github.com/howmanysmall/small-rules/compare/v2.11.0...v2.12.0
 [v2.11.0]: https://github.com/howmanysmall/small-rules/compare/v2.10.0...v2.11.0
 [v2.10.0]: https://github.com/howmanysmall/small-rules/compare/v2.9.0...v2.10.0
