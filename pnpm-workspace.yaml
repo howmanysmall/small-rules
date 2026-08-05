@@ -198,7 +198,7 @@ catalogs:
     react-dom: 19.2.7
     shiki: 3.4.1
   lint:
-    "@biomejs/biome": 2.5.6
+    "@biomejs/biome": 2.5.7
     eslint: 10.8.0
     eslint-plugin-antfu: 3.2.3
     eslint-plugin-regexp: 3.1.1
