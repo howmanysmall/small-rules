@@ -16,6 +16,8 @@ interface HookConfiguration {
 interface EffectFunctionOptions {
 	readonly environment: Environment;
 	readonly hooks: ReadonlyArray<HookConfiguration>;
+	readonly inlineFunctionDeclarations: boolean;
+	readonly sloptor: boolean;
 }
 
 const DEFAULT_HOOKS = [
@@ -30,21 +32,28 @@ function isHookConfiguration(value: unknown): value is HookConfiguration {
 }
 
 function parseOptions(rawOptions: unknown): EffectFunctionOptions {
-	if (!isRecord(rawOptions)) return { environment: "roblox-ts", hooks: DEFAULT_HOOKS };
+	const sloptor = isRecord(rawOptions) && rawOptions.sloptor === true;
+	const inlineFunctionDeclarations = isRecord(rawOptions) && rawOptions.inlineFunctionDeclarations === true;
+
+	if (!isRecord(rawOptions)) {
+		return { environment: "roblox-ts", hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
+	}
 
 	/* v8 ignore next -- @preserve rule schema restricts environment to known values when provided. */
 	const environment: Environment = isEnvironment(rawOptions.environment) ? rawOptions.environment : "roblox-ts";
 
 	const rawHooks = rawOptions.hooks;
 	/* v8 ignore next -- @preserve array check branches are both exercised; V8 branch tracking miscounts one. */
-	if (!Array.isArray(rawHooks)) return { environment, hooks: DEFAULT_HOOKS };
+	if (!Array.isArray(rawHooks)) {
+		return { environment, hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
+	}
 
 	const hooks = new Array<HookConfiguration>();
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
 	for (const rawHook of rawHooks) if (isHookConfiguration(rawHook)) hooks.push(rawHook);
 
-	if (hooks.length === 0) return { environment, hooks: DEFAULT_HOOKS };
-	return { environment, hooks };
+	if (hooks.length === 0) return { environment, hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
+	return { environment, hooks, inlineFunctionDeclarations, sloptor };
 }
 
 interface ResolvedArrowFunction {
@@ -130,10 +139,10 @@ function isCallbackHookResult(sourceCode: SourceCode, identifier: ESTree.Identif
 
 const requireNamedEffectFunctions = createRule("require-named-effect-functions", "react", {
 	create(context): Visitor {
-		const { environment, hooks } = parseOptions(context.options[0]);
+		const { environment, hooks, inlineFunctionDeclarations, sloptor } = parseOptions(context.options[0]);
 		const hookAsyncConfig = new Map(hooks.map((hookConfig) => [hookConfig.name, hookConfig.allowAsync]));
 		const effectHooks = new Set(hookAsyncConfig.keys());
-		const isRobloxTsMode = environment === "roblox-ts";
+		const isRobloxTsMode = environment === "roblox-ts" && !sloptor;
 
 		function isAsyncAllowed(hookName: string): boolean {
 			const result = hookAsyncConfig.get(hookName);
@@ -178,12 +187,13 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				return;
 			}
 
-			reportResolvedIdentifier(hookName, node, resolved);
+			reportResolvedIdentifier(hookName, node, identifier, resolved);
 		}
 
 		function reportResolvedIdentifier(
 			hookName: string,
 			node: ESTree.CallExpression,
+			identifier: ESTree.IdentifierReference,
 			resolved: ResolvedFunction,
 		): void {
 			if (resolved.type === "arrow") {
@@ -200,8 +210,12 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				return;
 			}
 
-			if (resolved.isAsync && !isAsyncAllowed(hookName)) {
-				reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
+			if (resolved.isAsync) {
+				if (!isAsyncAllowed(hookName)) {
+					reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
+				}
+			} else if (!isRobloxTsMode && inlineFunctionDeclarations) {
+				reportDeclarationReference(hookName, node, identifier, resolved.node);
 			}
 		}
 
@@ -215,6 +229,22 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			} else if (isRobloxTsMode) {
 				reportHookIssue(hookName, node, "functionExpression");
 			}
+		}
+
+		function reportDeclarationReference(
+			hookName: string,
+			node: ESTree.CallExpression,
+			identifier: ESTree.IdentifierReference,
+			declaration: ESTree.Function,
+		): void {
+			context.report({
+				data: { hook: hookName },
+				fix(fixer) {
+					return fixer.replaceText(identifier, context.sourceCode.getText(declaration));
+				},
+				messageId: "identifierReferencesFunctionDeclaration",
+				node,
+			});
 		}
 
 		function reportInlineFunctionExpression(
@@ -269,6 +299,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				"Enforce named effect functions for better debuggability. Prevents inline arrow functions in useEffect and similar hooks.",
 			recommended: false,
 		},
+		fixable: "code",
 		messages: {
 			anonymousFunction:
 				"Anonymous function passed to {{hook}}. debug.info returns empty string for anonymous functions, making stack traces useless for debugging. Extract to: function effectName() { ... } then pass effectName.",
@@ -292,6 +323,8 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				"{{hook}} receives identifier pointing to async function. Async effects require cancellation logic for unmount. Implement cleanup or set allowAsync: true if cancellation is handled.",
 			identifierReferencesCallback:
 				"{{hook}} receives identifier from useCallback/useMemo. These hooks return new references when dependencies change, causing unexpected effect re-runs. Use a stable function declaration: function effectName() { ... }",
+			identifierReferencesFunctionDeclaration:
+				"{{hook}} receives identifier pointing to a named function declaration. Convert it to an inline named function expression so the effect callback is self-contained: useEffect(function effectName() {}, [])",
 		},
 		schema: [
 			{
@@ -323,6 +356,18 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 							type: "object",
 						},
 						type: "array",
+					},
+					inlineFunctionDeclarations: {
+						default: false,
+						description:
+							"Convert effect callbacks that reference a named function declaration into inline named function expressions (standard and sloptor modes only), keeping the effect body visible to dependency analysis.",
+						type: "boolean",
+					},
+					sloptor: {
+						default: false,
+						description:
+							"Compile with sloptor (a Go-based roblox-ts compiler). Sloptor targets @rbxts/react like roblox-ts but supports standard TypeScript features, so the rule applies standard-mode behavior. Use with environment: 'roblox-ts'.",
+						type: "boolean",
 					},
 				},
 				type: "object",

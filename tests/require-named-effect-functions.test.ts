@@ -469,6 +469,146 @@ useEffect(effect, []);
 			],
 		});
 
+		tsx.run("require-named-effect-functions-sloptor-mode", rule, {
+			invalid: [
+				// Arrow functions should still fail in sloptor mode
+				{
+					code: `
+useEffect(() => {
+    console.log("effect");
+}, []);
+`,
+					errors: [{ messageId: "arrowFunction" }],
+					options: [{ environment: "roblox-ts", sloptor: true }],
+				},
+				// Anonymous function expressions should still fail in sloptor mode
+				{
+					code: `
+useEffect(function() {
+    console.log("effect");
+}, []);
+`,
+					errors: [{ messageId: "anonymousFunction" }],
+					options: [{ environment: "roblox-ts", sloptor: true }],
+				},
+				// Named function expressions are reported in plain roblox-ts mode
+				{
+					code: `
+useEffect(function handleEffect() {
+    console.log("effect");
+}, []);
+`,
+					errors: [{ messageId: "functionExpression" }],
+					options: [{ environment: "roblox-ts" }],
+				},
+			],
+			valid: [
+				// Named function expressions are allowed in sloptor mode (standard behavior)
+				{
+					code: `
+useEffect(function handleEffect() {
+    console.log("effect");
+}, []);
+`,
+					options: [{ environment: "roblox-ts", sloptor: true }],
+				},
+				// Named function expression via identifier is allowed in sloptor mode
+				{
+					code: `
+const effect = function handleEffect() {
+    console.log("effect");
+};
+useEffect(effect, []);
+`,
+					options: [{ environment: "roblox-ts", sloptor: true }],
+				},
+				// Function declaration references are allowed in sloptor mode
+				{
+					code: `
+function effect() {
+    console.log("effect");
+}
+useEffect(effect, []);
+`,
+					options: [{ environment: "roblox-ts", sloptor: true }],
+				},
+			],
+		});
+
+		tsx.run("require-named-effect-functions-inline-function-declarations", rule, {
+			invalid: [
+				// Standard mode: declaration reference is converted to an inline named function expression
+				{
+					code: `
+function doSomething(): void {}
+useEffect(doSomething, []);
+`,
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					output: `
+function doSomething(): void {}
+useEffect(function doSomething(): void {}, []);
+`,
+				},
+				// Sloptor mode: same conversion preserves parameters and annotations
+				{
+					code: `
+function doSomething(amount: number): void {}
+useEffect(doSomething, []);
+`,
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+					options: [{ environment: "roblox-ts", inlineFunctionDeclarations: true, sloptor: true }],
+					output: `
+function doSomething(amount: number): void {}
+useEffect(function doSomething(amount: number): void {}, []);
+`,
+				},
+				// Async declarations keep the async report without a fix
+				{
+					code: `
+async function handleEffect() {
+    await fetchData();
+}
+useEffect(handleEffect, []);
+`,
+					errors: [{ messageId: "identifierReferencesAsyncFunction" }],
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+				},
+			],
+			valid: [
+				// Standard mode without the opt-in keeps declaration references allowed
+				{
+					code: `
+function effect() {
+    console.log("effect");
+}
+useEffect(effect, []);
+`,
+					options: [{ environment: "standard" }],
+				},
+				// Sloptor mode without the opt-in keeps declaration references allowed
+				{
+					code: `
+function effect() {
+    console.log("effect");
+}
+useEffect(effect, []);
+`,
+					options: [{ environment: "roblox-ts", sloptor: true }],
+				},
+				// Plain roblox-ts mode ignores the opt-in
+				{
+					code: `
+function effect() {
+    console.log("effect");
+}
+useEffect(effect, []);
+`,
+					options: [{ inlineFunctionDeclarations: true }],
+				},
+			],
+		});
+
 		tsx.run("require-named-effect-functions-custom-hooks", rule, {
 			invalid: [
 				// Custom hook with arrow function
