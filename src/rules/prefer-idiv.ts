@@ -1,7 +1,7 @@
 import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isSimpleReceiver({ type }: ESTree.Expression): boolean {
 	return (
@@ -17,6 +17,35 @@ function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Exp
 	let current = expression;
 	while (current.type === "ParenthesizedExpression") current = current.expression;
 	return current;
+}
+
+function isLiteral(expression: ESTree.Expression): boolean {
+	return unwrapExpression(expression).type === "Literal";
+}
+
+/**
+ * Returns the integer divisor when `expression` is a numeric literal that is the reciprocal of an integer, like 0.5,
+ * 0.25, 0.125, 0.1, or 0.2. `math.floor(x * 0.5)` is exactly `math.floor(x / 2)`, so multiplying by the literal reads
+ * as dividing by `1 / value`. Literals whose reciprocal is not an integer (0.3, 0.7, ...) and values outside (0, 1) are
+ * left alone.
+ *
+ * @param expression The operand of a `*` expression to test for being a reciprocal literal.
+ * @returns The integer divisor `1 / value`, or `undefined` when `expression` is not a reciprocal literal.
+ */
+function getReciprocalDivisor(expression: ESTree.Expression): number | undefined {
+	const literal = unwrapExpression(expression);
+	if (literal.type !== "Literal" || typeof literal.value !== "number") return undefined;
+
+	const { value } = literal;
+	if (!(value > 0 && value < 1)) return undefined;
+
+	const divisor = 1 / value;
+	return Number.isInteger(divisor) ? divisor : undefined;
+}
+
+function getReceiverText(sourceCode: SourceCode, receiver: ESTree.Expression): string {
+	const receiverText = sourceCode.getText(stripParenthesizedExpression(receiver));
+	return isSimpleReceiver(unwrapExpression(receiver)) ? receiverText : `(${receiverText})`;
 }
 
 const preferIdiv = createRule("prefer-idiv", "roblox", {
@@ -48,15 +77,34 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 				if (argument === undefined || argument.type === "SpreadElement") return;
 
 				const expression = unwrapExpression(argument);
-				if (expression.type !== "BinaryExpression" || expression.operator !== "/") return;
+				if (expression.type !== "BinaryExpression") return;
 
-				const left = unwrapExpression(expression.left);
-				const leftText = context.sourceCode.getText(stripParenthesizedExpression(expression.left));
-				const receiverText = isSimpleReceiver(left) ? leftText : `(${leftText})`;
-				const rightText = context.sourceCode.getText(stripParenthesizedExpression(expression.right));
+				let receiver: ESTree.Expression;
+				let divisorText: string;
+
+				if (expression.operator === "/") {
+					receiver = expression.left;
+					divisorText = context.sourceCode.getText(stripParenthesizedExpression(expression.right));
+				} else if (expression.operator === "*") {
+					const rightDivisor = getReciprocalDivisor(expression.right);
+					if (rightDivisor !== undefined && !isLiteral(expression.left)) {
+						receiver = expression.left;
+						divisorText = String(rightDivisor);
+					} else {
+						const leftDivisor = getReciprocalDivisor(expression.left);
+						if (leftDivisor === undefined || isLiteral(expression.right)) return;
+
+						receiver = expression.right;
+						divisorText = String(leftDivisor);
+					}
+				} else return;
 
 				context.report({
-					fix: (fixer) => fixer.replaceText(node, `${receiverText}.idiv(${rightText})`),
+					fix: (fixer) =>
+						fixer.replaceText(
+							node,
+							`${getReceiverText(context.sourceCode, receiver)}.idiv(${divisorText})`,
+						),
 					messageId: "useIdiv",
 					node,
 				});
@@ -65,12 +113,12 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 	},
 	meta: {
 		docs: {
-			description: "Prefer .idiv() for integer division instead of math.floor(x / y).",
+			description: "Prefer .idiv() for integer division instead of math.floor(x / y) or math.floor(x * 0.5).",
 			recommended: true,
 		},
 		fixable: "code",
 		messages: {
-			useIdiv: "Use .idiv() instead of math.floor(x / y) for integer division.",
+			useIdiv: "Use .idiv() instead of math.floor(x / y) or math.floor(x * 0.5) for integer division.",
 		},
 		schema: [] as const,
 		type: "suggestion",

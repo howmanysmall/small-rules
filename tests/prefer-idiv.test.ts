@@ -63,6 +63,47 @@ describe("prefer-idiv", () => {
 				errors: [{ messageId: "useIdiv" }],
 				output: "(x = y).idiv(z);",
 			},
+			// Multiplication by a reciprocal literal (1/n) - auto-fix cases
+			{
+				code: "math.floor(value * 0.5);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "value.idiv(2);",
+			},
+			{
+				code: "math.floor(x * 0.25);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "x.idiv(4);",
+			},
+			{
+				code: "math.floor(x * 0.1);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "x.idiv(10);",
+			},
+			{
+				code: "math.floor(x * 0.2);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "x.idiv(5);",
+			},
+			{
+				code: "math.floor(0.5 * x);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "x.idiv(2);",
+			},
+			{
+				code: "math.floor((a + b) * 0.5);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "(a + b).idiv(2);",
+			},
+			{
+				code: "math.floor(foo() * 0.125);",
+				errors: [{ messageId: "useIdiv" }],
+				output: "foo().idiv(8);",
+			},
+			{
+				code: "math.floor(x * (0.5));",
+				errors: [{ messageId: "useIdiv" }],
+				output: "x.idiv(2);",
+			},
 			// Computed property access
 			{
 				code: 'math["floor"](x / y);',
@@ -124,6 +165,16 @@ describe("prefer-idiv", () => {
 			// Not a division
 			"math.floor(x);",
 			"math.floor(x * y);",
+			// Multiplication by a non-reciprocal, out-of-range, or non-number value
+			"math.floor(x * 0.3);",
+			"math.floor(x * 2);",
+			"math.floor(x * 0);",
+			"math.floor(x * -0.5);",
+			'math.floor(x * "0.5");',
+			// Literal receivers cannot be converted to .idiv()
+			"math.floor(2 * 0.5);",
+			"math.floor(0.5 * 2);",
+			"math.floor(0.5 * 0.5);",
 			"math.floor(x + y);",
 			"math.floor(x - y);",
 			"math.floor(x % y);",
