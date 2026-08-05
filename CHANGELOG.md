@@ -1,11 +1,8 @@
 All notable changes to `@pobammer-ts/small-rules` are documented here.
 
-## [v2.13.0] - 2026-08-05
+## [Unreleased]
 
-### Added
-
-- **prefer-idiv:** Support reciprocal multiplication in prefer-idiv rule
-- **require-named-effect-functions:** Add sloptor support
+## [v2.12.1] - 2026-08-03
 
 ### Fixed
 
@@ -26,11 +23,6 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 - **changelog:** Regenerate all release notes
 
-### Build
-
-- **deps:** Bump @biomejs/biome to 2.5.7
-- **deps:** Update yuku dependencies to 0.8.3
-
 ### Continuous Integration
 
 - **release:** Use OpenRouter for communique
@@ -44,7 +36,6 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Rebuild
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
-- **deps:** Bump pnpm to 11.19.0 and update dependencies
 
 ## [v2.12.0] - 2026-07-31
 
@@ -764,7 +755,7 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - **deps:** Update tool versions and lockfiles
 - **deps:** Update oxfmt to 0.55.0
 
-[v2.13.0]: https://github.com/howmanysmall/small-rules/compare/v2.12.0...v2.13.0
+[v2.12.1]: https://github.com/howmanysmall/small-rules/compare/v2.12.0...v2.12.1
 [v2.12.0]: https://github.com/howmanysmall/small-rules/compare/v2.11.0...v2.12.0
 [v2.11.0]: https://github.com/howmanysmall/small-rules/compare/v2.10.0...v2.11.0
 [v2.10.0]: https://github.com/howmanysmall/small-rules/compare/v2.9.0...v2.10.0

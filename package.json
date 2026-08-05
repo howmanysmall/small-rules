@@ -1,6 +1,6 @@
 {
 	"name": "@pobammer-ts/small-rules",
-	"version": "2.13.0",
+	"version": "2.12.1",
 	"description": "Various Oxlint-native rules for linting roblox-ts projects.",
 	"keywords": [
 		"lint",
@@ -40,7 +40,7 @@
 		"build": "tsdown",
 		"build:local": "node --run build -- --minify && cp dist/index.js plugins/small-rules.js",
 		"build:local:dev": "node --run build && cp dist/index.js plugins/small-rules.js",
-		"changelog:version": "git-cliff --tag \"v$(node -p 'require(\"./package.json\").version')\" --output CHANGELOG.md && git add CHANGELOG.md",
+		"changelog:version": "bun run scripts/ensure-unreleased.ts && git add CHANGELOG.md",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F docs build",
 		"docs:check": "nr -F docs check",
