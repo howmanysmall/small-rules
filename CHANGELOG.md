@@ -46,6 +46,16 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.14.0] - 2026-08-05
+
+## Added
+- **prefer-idiv** now reports and autofixes reciprocal multiplication such as `math.floor(x * 0.5)` to `x.idiv(2)` in [#38](https://github.com/howmanysmall/small-rules/pull/38).
+- **require-named-effect-functions** adds `sloptor` support and the opt-in `inlineFunctionDeclarations` fixer in [#38](https://github.com/howmanysmall/small-rules/pull/38).
+
+## Fixed
+- **no-dead-store** no longer reports stores incorrectly across control-transfer branches or post-switch reads in [#37](https://github.com/howmanysmall/small-rules/pull/37) and [db5a3](https://github.com/howmanysmall/small-rules/commit/db5a36cfc698b6b9fa4443287ab7bef06e9da0c3).
+- **prefer-pascal-case-enums** skips non-ASCII enum identifiers in [ecd7b](https://github.com/howmanysmall/small-rules/commit/ecd7bd9d7d134b9ce447061a493ccf6d2eeb1118).
+
 ## [v2.12.0] - 2026-07-31
 
 ### Added
