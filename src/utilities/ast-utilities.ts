@@ -68,3 +68,50 @@ export function hasShadowedBinding(sourceCode: SourceCode, node: ESTree.Node, na
 
 	return false;
 }
+
+export function getDeclarationRemovalRange(
+	sourceText: string,
+	declarationNode: ESTree.Node,
+): [start: number, end: number] {
+	let [start] = declarationNode.range;
+	while (start > 0) {
+		const previousCharacter = sourceText[start - 1];
+		if (previousCharacter === " " || previousCharacter === "\t") {
+			start -= 1;
+			continue;
+		}
+		break;
+	}
+
+	const [, declarationEnd] = declarationNode.range;
+	let end = declarationEnd;
+	while (end < sourceText.length) {
+		const nextCharacter = sourceText[end];
+		if (nextCharacter === "\n" || nextCharacter === "\r") {
+			end += 1;
+			continue;
+		}
+		break;
+	}
+
+	return [start, end];
+}
+
+export function hasAttachedComments(sourceCode: SourceCode, node: ESTree.Node): boolean {
+	if (sourceCode.getCommentsInside(node).length > 0) return true;
+
+	const nodeStartLine = node.loc.start.line;
+	const nodeEndLine = node.loc.end.line;
+
+	for (const comment of sourceCode.getCommentsBefore(node)) {
+		const commentEndLine = comment.loc.end.line;
+		if (commentEndLine === nodeStartLine || commentEndLine === nodeStartLine - 1) return true;
+	}
+
+	for (const comment of sourceCode.getCommentsAfter(node)) {
+		const commentStartLine = comment.loc.start.line;
+		if (commentStartLine === nodeEndLine || commentStartLine === nodeEndLine + 1) return true;
+	}
+
+	return false;
+}

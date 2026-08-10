@@ -1,3 +1,4 @@
+import { getDeclarationRemovalRange, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBindingIdentifier,
@@ -275,34 +276,6 @@ function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree
 	return false;
 }
 
-function getDeclarationRemovalRange(
-	sourceText: string,
-	declarationNode: ESTree.VariableDeclaration,
-): [start: number, end: number] {
-	let [start] = declarationNode.range;
-	while (start > 0) {
-		const previousCharacter = sourceText[start - 1];
-		if (previousCharacter === " " || previousCharacter === "\t") {
-			start -= 1;
-			continue;
-		}
-		break;
-	}
-
-	const [, declarationEnd] = declarationNode.range;
-	let end = declarationEnd;
-	while (end < sourceText.length) {
-		const nextCharacter = sourceText[end];
-		if (nextCharacter === "\n" || nextCharacter === "\r") {
-			end += 1;
-			continue;
-		}
-		break;
-	}
-
-	return [start, end];
-}
-
 function findEnclosingConstDeclarator(node: ESTree.Node): ESTree.VariableDeclarator | undefined {
 	let current: ESTree.Node | null = node.parent;
 	let previous: ESTree.Node = node;
@@ -323,25 +296,6 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 		const [rawOptions] = context.options;
 		const ignoreCallPatterns = rawOptions?.ignoreCallPatterns ?? OBJECT_CONSTRUCTOR_PATTERNS;
 		const ignoredCallPatternMatchers = ignoreCallPatterns.map((pattern) => new RegExp(pattern, "u"));
-
-		function hasAttachedComments(node: ESTree.Node): boolean {
-			if (sourceCode.getCommentsInside(node).length > 0) return true;
-
-			const nodeStartLine = node.loc.start.line;
-			const nodeEndLine = node.loc.end.line;
-
-			for (const comment of sourceCode.getCommentsBefore(node)) {
-				const commentEndLine = comment.loc.end.line;
-				if (commentEndLine === nodeStartLine || commentEndLine === nodeStartLine - 1) return true;
-			}
-
-			for (const comment of sourceCode.getCommentsAfter(node)) {
-				const commentStartLine = comment.loc.start.line;
-				if (commentStartLine === nodeEndLine || commentStartLine === nodeEndLine + 1) return true;
-			}
-
-			return false;
-		}
 
 		function getSingleReadOnlyReference(
 			scope: Scope,
@@ -429,7 +383,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				const canFix =
 					(isAdjacent || isSafeStaticInitializer) &&
 					hasSafeInlineSyntax &&
-					!hasAttachedComments(candidate.declarationNode);
+					!hasAttachedComments(sourceCode, candidate.declarationNode);
 
 				if (!canFix) {
 					context.report({

@@ -1,4 +1,4 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
@@ -6,7 +6,7 @@ import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface HookConfiguration {
 	readonly allowAsync: boolean;
@@ -137,6 +137,19 @@ function isCallbackHookResult(sourceCode: SourceCode, identifier: ESTree.Identif
 	return false;
 }
 
+function isDeclarationRemovable(
+	sourceCode: SourceCode,
+	variable: ScopeVariable,
+	declaration: ESTree.Function,
+): boolean {
+	if (variable.references.length !== 1) return false;
+
+	const parentType = declaration.parent.type;
+	if (parentType === "ExportNamedDeclaration" || parentType === "ExportDefaultDeclaration") return false;
+
+	return !hasAttachedComments(sourceCode, declaration);
+}
+
 const requireNamedEffectFunctions = createRule("require-named-effect-functions", "react", {
 	create(context): Visitor {
 		const { environment, hooks, inlineFunctionDeclarations, sloptor } = parseOptions(context.options[0]);
@@ -187,7 +200,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				return;
 			}
 
-			reportResolvedIdentifier(hookName, node, identifier, resolved);
+			reportResolvedIdentifier(hookName, node, identifier, resolved, variable);
 		}
 
 		function reportResolvedIdentifier(
@@ -195,6 +208,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			node: ESTree.CallExpression,
 			identifier: ESTree.IdentifierReference,
 			resolved: ResolvedFunction,
+			variable: ScopeVariable,
 		): void {
 			if (resolved.type === "arrow") {
 				if (resolved.isAsync && !isAsyncAllowed(hookName)) {
@@ -215,7 +229,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 					reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
 				}
 			} else if (!isRobloxTsMode && inlineFunctionDeclarations) {
-				reportDeclarationReference(hookName, node, identifier, resolved.node);
+				reportDeclarationReference(hookName, node, identifier, resolved.node, variable);
 			}
 		}
 
@@ -236,11 +250,18 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			node: ESTree.CallExpression,
 			identifier: ESTree.IdentifierReference,
 			declaration: ESTree.Function,
+			variable: ScopeVariable,
 		): void {
 			context.report({
 				data: { hook: hookName },
-				fix(fixer) {
-					return fixer.replaceText(identifier, context.sourceCode.getText(declaration));
+				fix(fixer): Array<Fix> {
+					const fixes: Array<Fix> = [fixer.replaceText(identifier, context.sourceCode.getText(declaration))];
+
+					if (isDeclarationRemovable(context.sourceCode, variable, declaration)) {
+						fixes.push(fixer.removeRange(getDeclarationRemovalRange(context.sourceCode.text, declaration)));
+					}
+
+					return fixes;
 				},
 				messageId: "identifierReferencesFunctionDeclaration",
 				node,
@@ -360,7 +381,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 					inlineFunctionDeclarations: {
 						default: false,
 						description:
-							"Convert effect callbacks that reference a named function declaration into inline named function expressions (standard and sloptor modes only), keeping the effect body visible to dependency analysis.",
+							"Convert effect callbacks that reference a named function declaration into inline named function expressions (standard and sloptor modes only), keeping the effect body visible to dependency analysis. When the declaration is only referenced by the effect and is not exported or commented, the fix also removes the now-unused declaration.",
 						type: "boolean",
 					},
 					sloptor: {

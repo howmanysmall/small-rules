@@ -538,6 +538,7 @@ useEffect(effect, []);
 		tsx.run("require-named-effect-functions-inline-function-declarations", rule, {
 			invalid: [
 				// Standard mode: declaration reference is converted to an inline named function expression
+				// and the now-unused single-reference declaration is removed
 				{
 					code: `
 function doSomething(): void {}
@@ -546,7 +547,6 @@ useEffect(doSomething, []);
 					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					output: `
-function doSomething(): void {}
 useEffect(function doSomething(): void {}, []);
 `,
 				},
@@ -559,8 +559,74 @@ useEffect(doSomething, []);
 					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 					options: [{ environment: "roblox-ts", inlineFunctionDeclarations: true, sloptor: true }],
 					output: `
-function doSomething(amount: number): void {}
 useEffect(function doSomething(amount: number): void {}, []);
+`,
+				},
+				// Multiple references keep the declaration (inlining each call site would be safe,
+				// but removing the declaration would break the other reference)
+				{
+					code: `
+function doSomething(): void {}
+useEffect(doSomething, []);
+useEffect(doSomething, [a]);
+`,
+					errors: [
+						{ messageId: "identifierReferencesFunctionDeclaration" },
+						{ messageId: "identifierReferencesFunctionDeclaration" },
+					],
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					output: `
+function doSomething(): void {}
+useEffect(function doSomething(): void {}, []);
+useEffect(function doSomething(): void {}, [a]);
+`,
+				},
+				// Exported declarations are kept (removing them would break the export)
+				{
+					code: `
+export function doSomething(): void {}
+useEffect(doSomething, []);
+`,
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					output: `
+export function doSomething(): void {}
+useEffect(function doSomething(): void {}, []);
+`,
+				},
+				// Declarations with attached comments are kept (removing them would orphan the comment)
+				{
+					code: `
+// Some business logic
+function doSomething(): void {}
+useEffect(doSomething, []);
+`,
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					output: `
+// Some business logic
+function doSomething(): void {}
+useEffect(function doSomething(): void {}, []);
+`,
+				},
+				// Single-reference declarations in nested scopes are removed with their indentation
+				{
+					code: `
+function makeComponent() {
+    function handleEffect() {
+        console.log("effect");
+    }
+    return useEffect(handleEffect, []);
+}
+`,
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					output: `
+function makeComponent() {
+    return useEffect(function handleEffect() {
+        console.log("effect");
+    }, []);
+}
 `,
 				},
 				// Async declarations keep the async report without a fix
@@ -605,6 +671,14 @@ function effect() {
 useEffect(effect, []);
 `,
 					options: [{ inlineFunctionDeclarations: true }],
+				},
+				// Ambient declarations have no body to inline
+				{
+					code: `
+declare function doSomething(): void;
+useEffect(doSomething, []);
+`,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 				},
 			],
 		});
