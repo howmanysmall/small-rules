@@ -3,6 +3,7 @@ packages:
   - documentation
   - scripts
   - .opencode
+  - .omp
 
 # Force specific versions of any dependency (including transitive)
 overrides:
@@ -41,6 +42,8 @@ allowBuilds:
   "@swc/core": true
   esbuild: true
   msgpackr-extract: true
+  onnxruntime-node: true
+  protobufjs: true
   sharp: true
 
 strictDepBuilds: true
@@ -194,6 +197,7 @@ catalogs:
     vitiate: 0.3.1
     yuku-ast: 0.8.3
     zx: 8.8.5
+    '@oh-my-pi/pi-coding-agent': 17.2.12
   frontend:
     "@astrojs/react": 6.0.0
     react: 19.2.7
@@ -239,5 +243,5 @@ catalogs:
     "@types/react-dom": 19.2.3
     "@total-typescript/ts-reset": 0.6.1
 
-configDependencies:
-  "@pnpm/pacquet": 0.11.12
+# configDependencies:
+#   "@pnpm/pacquet": 0.11.12

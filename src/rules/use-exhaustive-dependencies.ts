@@ -228,6 +228,14 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 	return new Array<string>();
 }
 
+const TS_RUNTIME_EXPRESSIONS = new Set<string>([
+	"TSAsExpression",
+	"TSInstantiationExpression",
+	"TSNonNullExpression",
+	"TSSatisfiesExpression",
+	"TSTypeAssertion",
+]);
+
 function isExpression(
 	node: ESTree.Node,
 ): node is ESTree.TSAsExpression | ESTree.TSNonNullExpression | ESTree.TSSatisfiesExpression | ESTree.TSTypeAssertion {
@@ -442,14 +450,6 @@ const IS_CEASE_BOUNDARY = new Set<string>([
 	"FunctionDeclaration",
 	"FunctionExpression",
 	"VariableDeclarator",
-]);
-
-const TS_RUNTIME_EXPRESSIONS = new Set<string>([
-	"TSAsExpression",
-	"TSInstantiationExpression",
-	"TSNonNullExpression",
-	"TSSatisfiesExpression",
-	"TSTypeAssertion",
 ]);
 
 function isComputedPropertyIdentifier(identifier: ESTree.Node): boolean {

@@ -296,11 +296,15 @@ const configuration = defineConfig({
 		"no-bitwise": "off",
 		"no-continue": "off",
 		"no-duplicate-imports": "off",
-		"no-else-return": "off",
+		"no-else-return": [
+			"error",
+			{
+				allowElseIf: false,
+			},
+		],
 		"no-magic-numbers": "off",
 		"no-nested-ternary": "off",
 		"no-new-array": "off",
-		"no-obj-calls": "off",
 		"no-optional-chaining": "off",
 		"no-plusplus": "off",
 		"no-ternary": "off",
@@ -320,7 +324,12 @@ const configuration = defineConfig({
 				varsIgnorePattern: "^logger$|^_",
 			},
 		],
-		"no-use-before-define": "off",
+		"no-use-before-define": [
+			"error",
+			{
+				functions: false,
+			},
+		],
 		// Doesn't work award
 		"no-useless-undefined": "off",
 		"no-void": ["error", { allowAsStatement: true }],
@@ -884,12 +893,6 @@ const configuration = defineConfig({
 			},
 		],
 		"unicorn/filename-case": ["error", { case: "kebabCase" }],
-		"unicorn/import-style": [
-			"error",
-			{
-				styles: {},
-			},
-		],
 		"unicorn/no-array-callback-reference": "off",
 		"unicorn/no-nested-ternary": "off",
 		"unicorn/no-new-array": "error",
@@ -901,6 +904,7 @@ const configuration = defineConfig({
 		"unicorn/switch-case-braces": "off",
 		"unused-imports/no-unused-imports": "error",
 		"unused-imports/no-unused-vars": "off",
+		"vue/no-dupe-keys": "off",
 	},
 	settings: {
 		jsdoc: {
