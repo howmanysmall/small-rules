@@ -37,6 +37,11 @@ const configuration = defineConfig((inlineConfiguration) => {
 	const bundleAll = "bundleAll" in inlineConfiguration && inlineConfiguration.bundleAll === true;
 
 	return {
+		attw: {
+			enabled: true,
+			level: "error",
+			profile: "esm-only",
+		},
 		clean: true,
 		deps: bundleAll
 			? {
@@ -55,6 +60,10 @@ const configuration = defineConfig((inlineConfiguration) => {
 		format: ["esm"],
 		outDir: "dist",
 		platform: "node",
+		publint: {
+			enabled: true,
+			level: "error",
+		},
 		tsconfig: "tsconfig.json",
 	};
 });
