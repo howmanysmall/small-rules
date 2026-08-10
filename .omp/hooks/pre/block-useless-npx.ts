@@ -4,7 +4,9 @@ import { regex } from "arktype";
 
 import type { HookAPI, ToolCallEventResult } from "@oh-my-pi/pi-coding-agent/extensibility/hooks";
 
-const NPX_CALL = /(?:^|\s)n[p|l]x(?=\s|$)/u;
+// package-exec runners to block: single-token (npx, nlx, pnpx, bunx) and two-word (bun x, pnpm dlx/exec, npm exec, yarn dlx)
+const RUNNER_TOKEN = /(?:^|\s)(?:n[p|l]x|pnpx|bunx)(?=\s|$)/u;
+const RUNNER_PHRASE = /(?:^|\s)(?:bun x|pnpm dlx|pnpm exec|npm exec|yarn dlx)(?=\s|$)/u;
 const NPX_FLAG = /^(?:--yes|-y)\b/u;
 // oxlint-disable-next-line unicorn/prefer-string-raw -- arktype
 const PACKAGE_NAME = regex("^(?<package>@?[\\w.-]+(?:/[\\w.-]+)?)(?:@[\\w.-]+)?(?=\\s|$)", "u");
@@ -14,18 +16,22 @@ const RUNNER_PREFIX = /^(?:node --run|pnpm run|pnpm exec|npm run|bun run|bunx|nr
 const WHITESPACE = /\s+/u;
 const VERSION_SUFFIX = /@[\w.-]+$/u;
 
-function npxPackage(command: string): string | undefined {
-	const npxMatch = NPX_CALL.exec(command);
-	if (npxMatch === null) return undefined;
+function runnerInvocation(command: string): { runner: string; packageName: string | undefined } | undefined {
+	const tokenMatch = RUNNER_TOKEN.exec(command);
+	const phraseMatch = RUNNER_PHRASE.exec(command);
+	const match = tokenMatch ?? phraseMatch;
+	if (match === null) return undefined;
 
-	const remainder = command.slice(npxMatch.index + npxMatch[0].length).trim();
+	const runner = match[0].trim();
+	const remainder = command.slice(match.index + match[0].length).trim();
 	const flagMatch = NPX_FLAG.exec(remainder);
 	const afterFlags = flagMatch === null ? remainder : remainder.slice(flagMatch[0].length).trim();
 
 	const packageMatch = PACKAGE_NAME.exec(afterFlags);
-	if (packageMatch === null) return undefined;
+	if (packageMatch === null) return { packageName: undefined, runner };
+
 	const packageName = packageMatch.groups.package;
-	return packageName.length === 0 ? undefined : packageName;
+	return { packageName: packageName.length === 0 ? undefined : packageName, runner };
 }
 
 function firstBinary(scriptValue: string): string | undefined {
@@ -107,18 +113,29 @@ export default function blockUselessNpx(hookApi: HookAPI): void {
 		if (event.toolName !== "bash") return {};
 
 		const command = typeof event.input.command === "string" ? event.input.command : "";
-		const packageName = npxPackage(command);
-		if (packageName === undefined) return {};
+		const invocation = runnerInvocation(command);
+		if (invocation === undefined) return {};
+
+		const { runner, packageName } = invocation;
+		if (packageName === undefined) {
+			return {
+				block: true,
+				reason: `Blocked: \`${runner}\` — package-exec runners are not allowed. Run tools via package.json scripts with \`nr <script>\` instead.`,
+			};
+		}
 
 		const scripts = findScripts();
-		if (scripts === undefined) return {};
-
-		const preferred = scriptFor(scripts, packageName);
-		if (preferred === undefined) return {};
+		const preferred = scripts === undefined ? undefined : scriptFor(scripts, packageName);
+		if (preferred === undefined) {
+			return {
+				block: true,
+				reason: `Blocked: \`${runner} ${packageName}\` — package-exec runners are not allowed. Define a package.json script for ${packageName} and run it with \`nr <script>\` instead.`,
+			};
+		}
 
 		return {
 			block: true,
-			reason: `Blocked: \`npx ${packageName}\` — ${packageName} is already a package.json script. Run \`nr ${preferred}\` instead (alternatives: \`node --run ${preferred}\`, \`pnpm run ${preferred}\`).`,
+			reason: `Blocked: \`${runner} ${packageName}\` — ${packageName} is already a package.json script. Run \`nr ${preferred}\` instead (alternatives: \`node --run ${preferred}\`, \`pnpm run ${preferred}\`).`,
 		};
 	});
 }
