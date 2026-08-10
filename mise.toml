@@ -106,3 +106,14 @@ run = "gh workflow run release.yaml --ref main -f dry_run=true"
 [tasks.release-status]
 description = "Show recent Publish Package workflow runs in GitHub Actions."
 run = "gh run list --workflow release.yaml --limit 5"
+
+[tasks.commit]
+description = "Commits the staged changes."
+usage = """
+arg <message> {
+    help "Git commit message"
+}
+"""
+run = """
+git commit --signoff --message "${usage_message?}"
+"""
