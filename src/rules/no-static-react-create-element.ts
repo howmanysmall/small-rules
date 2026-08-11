@@ -1,10 +1,11 @@
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getImportedName, isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
+import { isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
 	getReactSourcesFromOptions,
-	isReactImportDefinition,
+	isReactNamedImport,
+	isReactNamespaceImport,
 } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
@@ -13,37 +14,6 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const REACT_FRAGMENT = "Fragment";
-
-function isReactNamespaceImport(variable: ScopeVariable | undefined, reactSources: ReadonlySet<string>): boolean {
-	if (variable === undefined) return false;
-
-	for (const definition of variable.defs) {
-		if (!isReactImportDefinition(definition, reactSources)) continue;
-		/* v8 ignore next -- @preserve React namespace checks only reach default or namespace import definitions. */
-		if (definition.node.type === "ImportDefaultSpecifier" || definition.node.type === "ImportNamespaceSpecifier") {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-function isReactNamedImport(
-	variable: ScopeVariable | undefined,
-	importedName: string,
-	reactSources: ReadonlySet<string>,
-): boolean {
-	if (variable === undefined) return false;
-
-	for (const definition of variable.defs) {
-		if (!isReactImportDefinition(definition, reactSources)) continue;
-		/* v8 ignore next -- named-import scope lookups expose ImportSpecifier definitions here. @preserve */
-		if (definition.node.type !== "ImportSpecifier") continue;
-		if (getImportedName(definition.node) === importedName) return true;
-	}
-
-	return false;
-}
 
 function isReactCreateElementCall(
 	sourceCode: SourceCode,
