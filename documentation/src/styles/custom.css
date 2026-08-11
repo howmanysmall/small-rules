@@ -2199,10 +2199,14 @@ main p {
 	color: var(--sl-color-text-muted);
 }
 
+nav.sidebar,
+#starlight__sidebar {
+	overflow-anchor: none;
+}
+
 nav.sidebar {
 	background: transparent;
 	border-right: 1px solid var(--border);
-	overflow-anchor: none;
 }
 
 nav.sidebar summary {

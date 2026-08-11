@@ -91,7 +91,7 @@ export default defineConfig({
 					},
 				],
 				logo: {
-					replacesTitle: true,
+					replacesTitle: false,
 					src: "./src/assets/new-logo.svg",
 				},
 				plugins: [],
