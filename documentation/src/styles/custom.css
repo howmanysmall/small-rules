@@ -186,6 +186,12 @@ header.header {
 	backdrop-filter: blur(16px);
 }
 
+header.header .site-title img {
+	width: auto;
+	max-width: min(13.5rem, 55vw);
+	height: 2.5rem;
+}
+
 .card {
 	transition:
 		transform 0.4s var(--spring),
@@ -2180,6 +2186,7 @@ main p {
 nav.sidebar {
 	background: transparent;
 	border-right: 1px solid var(--border);
+	overflow-anchor: none;
 }
 
 nav.sidebar summary {
