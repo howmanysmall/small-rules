@@ -166,6 +166,7 @@ const Child = memo(({ onFetched }) => {
 		],
 		valid: [
 			{
+				// A literal callback argument is not data, so there is nothing to report.
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -173,6 +174,17 @@ const Child = ({ onTextChanged }) => {
   useEffect(() => {
     onTextChanged("Hello World");
   }, [onTextChanged]);
+}
+`,
+			},
+			{
+				code: `
+import { useState } from "@rbxts/react";
+
+function Parent() {
+  const data = useSomeAPI();
+
+  return <Child data={data} />;
 }
 `,
 				documentation: { id: "pass", title: "Parent owns the data" },

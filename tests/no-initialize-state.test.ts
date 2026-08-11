@@ -147,7 +147,7 @@ function MyComponent() {
   }, []);
 }
 `,
-				documentation: { id: "pass", title: "State initialized during render" },
+				documentation: { id: "pass", title: "State initialized from an async source" },
 			},
 			{
 				// Don't know why someone would use a synchronous IIFE here,

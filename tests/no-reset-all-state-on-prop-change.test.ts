@@ -203,6 +203,20 @@ function ProfilePage({ userId }) {
   }, [userId]);
 }
 `,
+			},
+			{
+				code: `
+import { useState } from "@rbxts/react";
+
+function ProfilePage({ userId }) {
+  const [comment, setComment] = useState('type something');
+  return <textlabel Text={comment} />;
+}
+
+function Page({ userId }) {
+  return <ProfilePage key={userId} userId={userId} />;
+}
+`,
 				documentation: { id: "pass", title: "Component reset with a key" },
 			},
 			{

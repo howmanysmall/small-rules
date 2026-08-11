@@ -212,6 +212,7 @@ function C() {
 `,
 			},
 			{
+				// A non-subscription effect is not an external store subscription.
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -219,6 +220,24 @@ function C() {
   useEffect(() => {
     console.log('hello');
   }, []);
+}
+`,
+			},
+			{
+				code: `
+import { useSyncExternalStore } from "@rbxts/react";
+
+function subscribe(callback) {
+  window.addEventListener('online', callback);
+  window.addEventListener('offline', callback);
+  return () => {
+    window.removeEventListener('online', callback);
+    window.removeEventListener('offline', callback);
+  };
+}
+
+function useOnlineStatus() {
+  return useSyncExternalStore(subscribe, () => navigator.onLine);
 }
 `,
 				documentation: { id: "pass", title: "Subscription managed with useSyncExternalStore" },

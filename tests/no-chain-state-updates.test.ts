@@ -188,6 +188,26 @@ function Counter() {
   }, [count]);
 }
 `,
+			},
+			{
+				code: `
+import { useState } from "@rbxts/react";
+
+function Game() {
+  const [round, setRound] = useState(1);
+  const [isGameOver, setIsGameOver] = useState(false);
+
+  const handleRoundComplete = () => {
+    const nextRound = round + 1;
+    setRound(nextRound);
+    if (nextRound > 10) {
+      setIsGameOver(true);
+    }
+  };
+
+  return <textbutton Text={'Round ' + round} Event={{ Activated: handleRoundComplete }} />;
+}
+`,
 				documentation: { id: "pass", title: "Related state updated together" },
 			},
 			{
