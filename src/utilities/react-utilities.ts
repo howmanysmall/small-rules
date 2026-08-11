@@ -124,7 +124,16 @@ export function isReactImportedCall(
 
 	if (callee.type === "Identifier") {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
-		return isReactNamedImport(variable, callee.name, reactSources) && importedNames.has(callee.name);
+		if (variable === undefined) return false;
+		return variable.defs.some((definition) => {
+			if (definition.type !== "ImportBinding" || definition.node.type !== "ImportSpecifier") return false;
+			const importDeclaration = getImportDeclarationParent(definition.node);
+			if (importDeclaration === undefined || !reactSources.has(importDeclaration.source.value)) {
+				return false;
+			}
+			const importedName = getImportedName(definition.node);
+			return importedName !== undefined && importedNames.has(importedName);
+		});
 	}
 
 	if (callee.type !== "MemberExpression" || callee.computed) return false;

@@ -45,8 +45,7 @@ const configuration: KnipConfig = {
 		"fast-check",
 		"sfw",
 	],
-	ignoreFiles: ["tests/fixtures/**"],
-	tsdown: true,
+	ignoreExportsUsedInFile: true,
 	workspaces: {
 		".": {
 			entry: ["*.config.ts"],
