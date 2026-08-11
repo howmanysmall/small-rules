@@ -1,5 +1,6 @@
 ---
 import { getRuleEntry, getRuleFacts } from "@/data/rule-facts";
+import { getRuleNewness } from "@/data/rule-newness";
 import type { RuleName } from "@/data/rule-manifest";
 import { Badge } from "./badge";
 import { RelatedRules } from "./related-rules";
@@ -16,9 +17,11 @@ const { rule } = Astro.props;
 const facts = getRuleFacts(rule);
 const entry = getRuleEntry(rule);
 const exampleExemption = entry?.exampleExemption;
+const newness = getRuleNewness().get(rule);
 ---
 
 <div class="rule-badges" aria-label="Rule characteristics">
+	{newness?.isNew === true && <Badge variant="new" />}
 	<Badge variant={facts.type === "problem" ? "error" : "suggestion"} />
 	{facts.fixable !== undefined && <Badge variant="fixable" />}
 	{facts.category === "roblox" && <Badge variant="roblox" />}

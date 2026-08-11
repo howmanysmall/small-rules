@@ -68,6 +68,28 @@ export default defineConfig({
 					themes: ["github-light", "dracula"],
 				},
 				favicon: "/favicon.svg?v=2",
+				head: [
+					{
+						attrs: {
+							as: "font",
+							crossorigin: "anonymous",
+							href: "/small-rules/fonts/geist-latin-wght-normal.woff2",
+							rel: "preload",
+							type: "font/woff2",
+						},
+						tag: "link",
+					},
+					{
+						attrs: {
+							as: "font",
+							crossorigin: "anonymous",
+							href: "/small-rules/fonts/ibm-plex-sans-latin-wght-normal.woff2",
+							rel: "preload",
+							type: "font/woff2",
+						},
+						tag: "link",
+					},
+				],
 				logo: {
 					replacesTitle: false,
 					src: "./src/assets/new-logo.svg",

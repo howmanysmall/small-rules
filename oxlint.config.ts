@@ -59,6 +59,14 @@ const configuration = defineConfig({
 			files: ["documentation/**/*"],
 		},
 		{
+			// rule-newness.ts spawns git to classify rules; the binary is a fixed system dependency.
+			files: ["documentation/src/data/rule-newness.ts"],
+			rules: {
+				"no-console": "off",
+				"sonar/no-os-command-from-path": "off",
+			},
+		},
+		{
 			files: ["documentation/**/*.astro"],
 			plugins: [],
 			rules: {
