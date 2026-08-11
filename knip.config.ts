@@ -37,15 +37,19 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	ignoreBinaries: ["git-cliff", "hk", "nr", "xdg-open"],
+	ignoreBinaries: ["hk", "nr", "xdg-open"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
+		"@oh-my-pi/pi-coding-agent",
 		"@vitiate/fuzzed-data-provider",
+		"arktype",
 		"fast-check",
 		"sfw",
 	],
 	ignoreExportsUsedInFile: true,
+	ignoreFiles: [".omp/**", "tests/fixtures/**"],
+	tsdown: true,
 	workspaces: {
 		".": {
 			entry: ["*.config.ts"],
