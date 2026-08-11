@@ -186,10 +186,26 @@ header.header {
 	backdrop-filter: blur(16px);
 }
 
+header.header .site-title {
+	gap: 0.625rem;
+}
+
 header.header .site-title img {
 	width: auto;
 	max-width: min(13.5rem, 55vw);
 	height: 2.5rem;
+}
+
+.header .site-title > :where(span) {
+	font-family: "IBM Plex Sans Variable", "Inter", system-ui, sans-serif;
+	font-size: 1.25rem;
+	font-weight: 700;
+	line-height: 1;
+	-webkit-text-fill-color: transparent;
+	letter-spacing: -0.022rem;
+	background: linear-gradient(to right, #e8f4f8 0 54%, #7ed0e6 54%);
+	-webkit-background-clip: text;
+	background-clip: text;
 }
 
 .card {
