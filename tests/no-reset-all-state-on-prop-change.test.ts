@@ -8,16 +8,30 @@ describe("no-reset-all-state-on-prop-change", () => {
 		invalid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
-  const [comment, setComment] = useState('type something');
+declare function recordView(): void;
+declare const utilities: {
+	readonly trackView: () => void;
+};
 
-  useEffect(() => {
-    setUser(null);
-    setComment('type something');
-  }, [userId]);
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [user, setUser] = useState<string | undefined>(undefined);
+	const [comment, setComment] = useState("type something");
+	recordView();
+	utilities.trackView();
+
+	useEffect(() => {
+		setUser(undefined);
+		setComment("type something");
+	}, [userId]);
+
+	return (
+		<frame>
+			<textlabel Text={user} />
+			<textlabel Text={comment} />
+		</frame>
+	);
 }
 `,
 				documentation: { id: "fail", title: "Effect resets all state after a prop change" },
@@ -25,61 +39,80 @@ function ProfilePage({ userId }) {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { memo, useEffect, useState } from "@rbxts/react";
 
-const ProfilePage = memo(({ userId }) => {
-  const [user, setUser] = useState(null);
-  const [comment, setComment] = useState('type something');
+// oxlint-disable-next-line react-doctor/display-name -- The memo wrapper's declarator name is what the rule under test reports.
+export const ProfilePage = memo(({ userId }: { userId: string }): React.Element => {
+	const [user, setUser] = useState<string | undefined>(undefined);
+	const [comment, setComment] = useState("type something");
 
-  useEffect(() => {
-    setUser(null);
-    setComment('type something');
-  }, [userId]);
-})
+	useEffect(() => {
+		setUser(undefined);
+		setComment("type something");
+	}, [userId]);
+
+	return (
+		<frame>
+			<textlabel Text={user} />
+			<textlabel Text={comment} />
+		</frame>
+	);
+});
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const initialState = 'meow meow'
-  const [user, setUser] = useState(null);
-  const [comment, setComment] = useState(initialState);
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const initialState = "meow meow";
+	const [user, setUser] = useState<string | undefined>(undefined);
+	const [comment, setComment] = useState(initialState);
 
-  useEffect(() => {
-    setUser(null);
-    setComment(initialState);
-  }, [userId]);
+	useEffect(() => {
+		setUser(undefined);
+		setComment(initialState);
+	}, [userId]);
+
+	return (
+		<frame>
+			<textlabel Text={user} />
+			<textlabel Text={comment} />
+		</frame>
+	);
 }
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ user }) {
-  const [comment, setComment] = useState('type something');
+export function ProfilePage({ user }: { user: { readonly id: string } }): React.Element {
+	const [comment, setComment] = useState("type something");
 
-  useEffect(() => {
-    setComment('type something');
-  }, [user.id]);
+	useEffect(() => {
+		setComment("type something");
+	}, [user.id]);
+
+	return <textlabel Text={comment} />;
 }
 `,
 				errors: [{ data: { prop: "user" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId, friends }) {
-  const [comment, setComment] = useState('type something');
+export function ProfilePage({ userId, friends }: { userId: string; friends: ReadonlyArray<string> }): React.Element {
+	const [comment, setComment] = useState("type something");
 
-  useEffect(() => {
-    setComment('type something');
-  }, [userId, friends]);
+	useEffect(() => {
+		setComment("type something");
+	}, [userId, friends]);
+
+	return <textlabel Text={comment} />;
 }
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
@@ -87,32 +120,36 @@ function ProfilePage({ userId, friends }) {
 			{
 				// These are equivalent because state initializes to `undefined` when it has no argument
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selectedItem, setSelectedItem] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selectedItem, setSelectedItem] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelectedItem(undefined);
-  }, [items]);
+	useEffect(() => {
+		setSelectedItem(undefined);
+	}, [items]);
+
+	return <textlabel Text={selectedItem} />;
 }
 `,
 				errors: [{ messageId: "avoidResettingAllStateWhenAPropChanges" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [comment, setComment] = useState(getInitialComment());
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [comment, setComment] = useState(getInitialComment());
 
-  useEffect(() => {
-    setComment(getInitialComment());
-  }, [userId]);
+	useEffect(() => {
+		setComment(getInitialComment());
+	}, [userId]);
+
+	return <textlabel Text={comment} />;
 }
 
-function getInitialComment() {
-  return 'type something';
+function getInitialComment(): string {
+	return "type something";
 }
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
@@ -120,17 +157,23 @@ function getInitialComment() {
 			{
 				// `React.useState` member calls count as useState declarations.
 				code: `
-import * as React from "@rbxts/react";
-import { useEffect } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = React.useState(null);
-  const [comment, setComment] = React.useState("type something");
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [user, setUser] = React.useState<string | undefined>(undefined);
+	const [comment, setComment] = React.useState("type something");
 
-  useEffect(() => {
-    setUser(null);
-    setComment("type something");
-  }, [userId]);
+	useEffect(() => {
+		setUser(undefined);
+		setComment("type something");
+	}, [userId]);
+
+	return (
+		<frame>
+			<textlabel Text={user} />
+			<textlabel Text={comment} />
+		</frame>
+	);
 }
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
@@ -140,17 +183,17 @@ function ProfilePage({ userId }) {
 				// (an arrow IIFE) is skipped by `countUseStates`, but the recognized
 				// setter still resets all counted state.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [user, setUser] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    setUser(null);
-  }, [userId]);
+	useEffect(() => {
+		setUser(undefined);
+	}, [userId]);
 
-  (() => {})();
-  return <div>{user}</div>;
+	((): string => "ignored")();
+	return <textlabel Text={user} />;
 }
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
@@ -159,16 +202,23 @@ function ProfilePage({ userId }) {
 				// A computed member call is skipped by `countUseStates`, but the
 				// recognized `React.useState` setter still resets to its initial value.
 				code: `
-import * as React from "@rbxts/react";
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
-  const [comment, setComment] = React["useState"]("type something");
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [user, setUser] = useState<string | undefined>(undefined);
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store, typescript/dot-notation -- The setter stays unused and the computed member call is what countUseStates skips.
+	const [comment, setComment] = React["useState"]("type something");
 
-  useEffect(() => {
-    setUser(null);
-  }, [userId]);
+	useEffect(() => {
+		setUser(undefined);
+	}, [userId]);
+
+	return (
+		<frame>
+			<textlabel Text={user} />
+			<textlabel Text={comment} />
+		</frame>
+	);
 }
 `,
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
@@ -177,44 +227,54 @@ function ProfilePage({ userId }) {
 		valid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelection(items[0]);
-  }, [items]);
+	useEffect(() => {
+		setSelection(items[0]);
+	}, [items]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
-  const [comment, setComment] = useState('type something');
-  const [catName, setCatName] = useState('Sparky');
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [user, setUser] = useState<string | undefined>(undefined);
+	const [comment, setComment] = useState("type something");
+	const [catName, setCatName] = useState("Sparky");
 
-  useEffect(() => {
-    setUser(null);
-    setComment('meow')
-  }, [userId]);
+	useEffect(() => {
+		setUser(undefined);
+		setComment("meow");
+	}, [userId]);
+
+	return (
+		<frame>
+			<textlabel Text={user} />
+			<textlabel Text={comment} />
+			<textbox Text={catName} TextChanged={(textbox: { readonly Text: string }) => setCatName(textbox.Text)} />
+		</frame>
+	);
 }
 `,
 			},
 			{
 				code: `
-import { useState } from "@rbxts/react";
+import React, { useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [comment, setComment] = useState('type something');
-  return <textlabel Text={comment} />;
+export function ProfilePage(_properties: { key: string }): React.Element {
+	const [comment, setComment] = useState("type something");
+	return <textbox Text={comment} TextChanged={(textbox: { readonly Text: string }) => setComment(textbox.Text)} />;
 }
 
-function Page({ userId }) {
-  return <ProfilePage key={userId} userId={userId} />;
+export function Page({ userId }: { userId: string }): React.Element {
+	return <ProfilePage key={userId} />;
 }
 `,
 				documentation: { id: "pass", title: "Component reset with a key" },
@@ -222,14 +282,17 @@ function Page({ userId }) {
 			{
 				// Because undefined !== null
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selectedItem, setSelectedItem] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selectedItem, setSelectedItem] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelectedItem(null);
-  }, [items]);
+	useEffect(() => {
+		// oxlint-disable-next-line unicorn/no-null -- The sample relies on null differing from the undefined initial state to stay valid.
+		setSelectedItem(null);
+	}, [items]);
+
+	return <textlabel Text={selectedItem} />;
 }
 `,
 			},
@@ -237,16 +300,18 @@ function List({ items }) {
 				// Verifies that the rule doesn't crash when it can't find the containing component to count `useState`s.
 				// This *is* a rule-break, but detecting the lowercased function name would probably introduce more false positives than it'd save in false negatives.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function buildComponent() {
-  const [comment, setComment] = useState('type something');
+declare const userId: string;
 
-  useEffect(() => {
-    setComment('type something');
-  }, [userId]);
+export function buildComponent(): React.Element {
+	const [comment, setComment] = useState("type something");
 
-  return <div>hi</div>;
+	useEffect(() => {
+		setComment("type something");
+	}, [userId]);
+
+	return <textlabel Text={comment} />;
 }
 `,
 			},
@@ -254,64 +319,73 @@ function buildComponent() {
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
-function useCustomHook({ userId }) {
-  const [user, setUser] = useState(null);
-  const [comment, setComment] = useState('type something');
+export function useCustomHook({ userId }: { userId: string }): {
+	readonly user: string | undefined;
+	readonly comment: string;
+} {
+	const [user, setUser] = useState<string | undefined>(undefined);
+	const [comment, setComment] = useState("type something");
 
-  useEffect(() => {
-    setUser(null);
-    setComment('type something');
-  }, [userId]);
+	useEffect(() => {
+		setUser(undefined);
+		setComment("type something");
+	}, [userId]);
+
+	return { comment, user };
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const initialState = 'meow meow'
-  const [comment, setComment] = useState(initialState);
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const initialState = "meow meow";
+	const [comment, setComment] = useState(initialState);
 
-  useEffect(() => {
-    const derivedInitialState = initialState + '!';
-    setComment(derivedInitialState);
-  }, [userId]);
+	useEffect(() => {
+		const derivedInitialState = \`\${initialState}!\`;
+		setComment(derivedInitialState);
+	}, [userId]);
+
+	return <textlabel Text={comment} />;
 }
 `,
 			},
 			{
 				// https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/issues/55
 				code: `
-import { useEffect, useState, useTransition } from "@rbxts/react";
+import React, { useEffect, useState, useTransition } from "@rbxts/react";
 
-const Foo = () => {
-  const [_0, setState] = useState(false);
-  const [_1, startTransition] = useTransition();
+export function Foo(): React.Element {
+	const [pending, setPending] = useState(false);
+	const [, startTransition] = useTransition();
 
-  useEffect(() => {
-    startTransition(() => {
-      setState(true);
-    });
-  }, []);
+	useEffect(() => {
+		startTransition((): void => {
+			setPending(true);
+		});
+	}, []);
 
-  return null;
-};
+	return <textlabel Text={pending} />;
+}
 `,
 			},
 			{
 				// `countUseStates` only counts member calls whose object is named `React`,
-				// so an aliased namespace import is not recognized and the state isn't counted.
+				// so a differently-named object isn't recognized and the state isn't counted.
 				code: `
-import * as R from "@rbxts/react";
-import { useEffect } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [comment, setComment] = R.useState("type something");
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const utilities = { useState };
+	const [comment, setComment] = utilities.useState("type something");
 
-  useEffect(() => {
-    setComment("type something");
-  }, [userId]);
+	useEffect(() => {
+		setComment("type something");
+	}, [userId]);
+
+	return <textlabel Text={comment} />;
 }
 `,
 			},
@@ -319,15 +393,17 @@ function ProfilePage({ userId }) {
 				// A computed member call without a recognized setter: no state calls
 				// are detected, so the effect isn't an all-state reset.
 				code: `
-import * as React from "@rbxts/react";
-import { useEffect } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [comment, setComment] = React["useState"]("type something");
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	// oxlint-disable-next-line typescript/dot-notation -- The computed member call is skipped by countUseStates; dot notation would be counted.
+	const [comment, setComment] = React["useState"]("type something");
 
-  useEffect(() => {
-    setComment("type something");
-  }, [userId]);
+	useEffect(() => {
+		setComment("type something");
+	}, [userId]);
+
+	return <textlabel Text={comment} />;
 }
 `,
 			},
@@ -335,30 +411,40 @@ function ProfilePage({ userId }) {
 				// The HOC's first argument is an options object rather than the component,
 				// so `countUseStates` cannot count the component's `useState` calls.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const ProfilePage = mysteryWrapper(options, ({ userId }) => {
-  const [comment, setComment] = useState("hi");
+declare const options: { readonly kind: string };
+declare function mysteryWrapper(
+	options: { readonly kind: string },
+	component: (properties: { readonly userId: string }) => React.Element,
+): React.Element;
 
-  useEffect(() => {
-    setComment("hi");
-  }, [userId]);
+const ProfilePage = mysteryWrapper(options, ({ userId }: { userId: string }): React.Element => {
+	const [comment, setComment] = useState("hi");
 
-  return <div>{comment}</div>;
+	useEffect(() => {
+		setComment("hi");
+	}, [userId]);
+
+	return <textlabel Text={comment} />;
 });
+
+export default ProfilePage;
 `,
 			},
 			{
 				// An effect with no dependency array has no dependency references to check.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
+export function ProfilePage(): React.Element {
+	const [user, setUser] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    setUser(null);
-  });
+	useEffect(() => {
+		setUser(undefined);
+	});
+
+	return <textlabel Text={user} />;
 }
 `,
 			},
@@ -366,15 +452,17 @@ function ProfilePage({ userId }) {
 				// A state setter referenced through an alias has no call expression,
 				// so `isSetStateToInitialValue` can't confirm the reset.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
+export function ProfilePage({ userId }: { userId: string }): React.Element {
+	const [user, setUser] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    const wrapper = setUser;
-    wrapper(null);
-  }, [userId]);
+	useEffect(() => {
+		const wrapper = setUser;
+		wrapper(undefined);
+	}, [userId]);
+
+	return <textlabel Text={user} />;
 }
 `,
 			},

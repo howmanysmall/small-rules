@@ -8,166 +8,160 @@ describe("no-event-handler", () => {
 		invalid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-function Form({ dataToSubmit }) {
-  useEffect(() => {
-    if (dataToSubmit) {
-      submitData(dataToSubmit);
-    }
-  }, [dataToSubmit]);
+declare function submitData(data: string): void;
+
+export function Form({ dataToSubmit }: { dataToSubmit: string | undefined }): React.Element {
+	useEffect(() => {
+		if (dataToSubmit !== undefined) {
+			submitData(dataToSubmit);
+		}
+	}, [dataToSubmit]);
+
+	return <textlabel Text={dataToSubmit} />;
 }
 `,
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidPropHandler" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form() {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare function submitData(data: { readonly name: string }): void;
 
-  useEffect(() => {
-    if (dataToSubmit) {
-      submitData(dataToSubmit);
-    }
-  }, [dataToSubmit]);
+export function Form(): React.Element {
+	const [name, setName] = useState("");
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={() => setDataToSubmit({ name })}>Submit</button>
-    </div>
-  )
+	useEffect(() => {
+		if (dataToSubmit !== undefined) {
+			submitData(dataToSubmit);
+		}
+	}, [dataToSubmit]);
+
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={() => setDataToSubmit({ name })} />
+		</frame>
+	);
 }
 `,
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidEventHandler" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form() {
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare function submitData(data: { readonly name: string }): void;
 
-  useEffect(() => {
-    if (dataToSubmit) {
-      submitData(dataToSubmit);
-    }
-  });
+export function Form(): React.Element {
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  return (
-    <button onClick={() => setDataToSubmit({ name: 'test' })}>Submit</button>
-  )
+	useEffect(() => {
+		if (dataToSubmit !== undefined) {
+			submitData(dataToSubmit);
+		}
+	});
+
+	return <textbutton Text="Submit" Activated={() => setDataToSubmit({ name: "test" })} />;
 }
 `,
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidEventHandler" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form() {
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare function submitData(data: { readonly name: string }): void;
 
-  useEffect(() => {
-    if (dataToSubmit) {
-      submitData(dataToSubmit);
-    }
-  }, []);
+export function Form(): React.Element {
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  return (
-    <button onClick={() => setDataToSubmit({ name: 'test' })}>Submit</button>
-  )
+	useEffect(() => {
+		if (dataToSubmit !== undefined) {
+			submitData(dataToSubmit);
+		}
+	}, []);
+
+	return <textbutton Text="Submit" Activated={() => setDataToSubmit({ name: "test" })} />;
 }
 `,
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidEventHandler" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form({ submitData }) {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+export function Form({ submitData }: { submitData: (data: { readonly name: string }) => void }): React.Element {
+	const [name, setName] = useState("");
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  useEffect(() => {
-    if (dataToSubmit) {
-      submitData(dataToSubmit);
-    }
-  }, [dataToSubmit]);
+	useEffect(() => {
+		if (dataToSubmit !== undefined) {
+			submitData(dataToSubmit);
+		}
+	}, [dataToSubmit]);
 
-  return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={() => setDataToSubmit({ name })}>Submit</button>
-    </div>
-  )
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={() => setDataToSubmit({ name })} />
+		</frame>
+	);
 }
 `,
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidEventHandler" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form() {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare function submitData(data: { readonly name: string }): void;
 
-  useEffect(() => {
-    if (!dataToSubmit) return;
+export function Form(): React.Element {
+	const [name, setName] = useState("");
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-    submitData(dataToSubmit);
-  }, [dataToSubmit]);
+	useEffect(() => {
+		if (dataToSubmit === undefined) return;
 
-  return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={() => setDataToSubmit({ name })}>Submit</button>
-    </div>
-  )
+		submitData(dataToSubmit);
+	}, [dataToSubmit]);
+
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={() => setDataToSubmit({ name })} />
+		</frame>
+	);
 }
 `,
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidEventHandler" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form() {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare function submitData(data: { readonly name: string }): void;
 
-  useEffect(() => {
-    if (dataToSubmit.name && dataToSubmit.name.length > 0) {
-      submitData(dataToSubmit);
-    }
-  }, [dataToSubmit]);
+export function Form(): React.Element {
+	const [name, setName] = useState("");
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={() => setDataToSubmit({ name })}>Submit</button>
-    </div>
-  )
+	useEffect(() => {
+		if (dataToSubmit !== undefined && dataToSubmit.name.length > 0) {
+			submitData(dataToSubmit);
+		}
+	}, [dataToSubmit]);
+
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={() => setDataToSubmit({ name })} />
+		</frame>
+	);
 }
 `,
 				errors: [
@@ -177,49 +171,54 @@ function Form() {
 			},
 			{
 				code: `
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
-function Form({ value }) {
-  const derived = value + 2;
+declare function cleanupA(): void;
+declare function cleanupB(): void;
 
-  useEffect(() => {
-    if (derived === "a") return;
-    if (derived === "b") return;
-  }, [derived]);
+export function Form({ value }: { value: string }): React.Element {
+	const derived = value + 2;
+
+	useEffect(() => {
+		if (derived === "a") cleanupA();
+		if (derived === "b") cleanupB();
+	}, [derived]);
+
+	return <textlabel Text={derived} />;
 }
 `,
 				errors: [
-					{ data: { name: "derived" }, line: 8, messageId: "avoidPropHandler" },
-					{ data: { name: "derived" }, line: 9, messageId: "avoidPropHandler" },
+					{ data: { name: "derived" }, line: 11, messageId: "avoidPropHandler" },
+					{ data: { name: "derived" }, line: 12, messageId: "avoidPropHandler" },
 				],
 				options: [{ environment: "standard" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form() {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare const os: {
+	readonly clock: () => number;
+};
 
-  useEffect(() => {
-    if (dataToSubmit && os.clock() % 2 === 0) {
-      submitData(dataToSubmit);
-    }
-  }, [dataToSubmit]);
+declare function submitData(data: { readonly name: string }): void;
 
-  return (
-    <frame>
-      <textbox
-        Text={name}
-        TextChanged={(textbox) => setName(textbox.Text)}
-      />
-      <textbutton
-        Text="Submit"
-        Activated={() => setDataToSubmit({ name })}
-      />
-    </frame>
-  )
+export function Form(): React.Element {
+	const [name, setName] = useState("");
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
+
+	useEffect(() => {
+		if (dataToSubmit !== undefined && os.clock() % 2 === 0) {
+			submitData(dataToSubmit);
+		}
+	}, [dataToSubmit]);
+
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={() => setDataToSubmit({ name })} />
+		</frame>
+	);
 }
 `,
 				documentation: { id: "fail", title: "Effect used as an event handler" },
@@ -229,60 +228,58 @@ function Form() {
 		valid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useState } from "@rbxts/react";
 
-function Form() {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+declare function submitData(data: { readonly name: string }): void;
 
-  const handleSubmit = () => {
-    if (dataToSubmit) {
-      submitData(dataToSubmit);
-    }
-  };
+export function Form(): React.Element {
+	const [name, setName] = useState("");
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the handler submits the state directly.
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  return (
-    <frame>
-      <textbox
-        Text={name}
-        TextChanged={(textbox) => setName(textbox.Text)}
-      />
-      <textbutton Text="Submit" Activated={handleSubmit} />
-    </frame>
-  )
+	function handleSubmit(): void {
+		if (dataToSubmit !== undefined) {
+			submitData(dataToSubmit);
+		}
+	}
+
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={handleSubmit} />
+		</frame>
+	);
 }
 `,
 				documentation: { id: "pass", title: "Logic called from the event handler" },
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Search() {
-  const [query, setQuery] = useState();
-  const [results, setResults] = useState();
+declare function search(query: string): Promise<ReadonlyArray<{ readonly id: number; readonly title: string }>>;
 
-  useEffect(() => {
-    fetch('/search?query=' + query).then((data) => {
-      setResults(data);
-    });
-  }, [query]);
+export function Search(): React.Element {
+	const [query, setQuery] = useState("");
+	const [results, setResults] = useState<
+		ReadonlyArray<{ readonly id: number; readonly title: string }> | undefined
+	>();
 
-  return (
-    <div>
-      <input
-        name="query"
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <ul>
-        {results.map((result) => (
-          <li key={result.id}>{result.title}</li>
-        ))}
-      </ul>
-    </div>
-  )
+	useEffect(() => {
+		void (async (): Promise<void> => {
+			const data = await search(query);
+			setResults(data);
+		})();
+	}, [query]);
+
+	return (
+		<frame>
+			<textbox Text={query} TextChanged={(textbox: { readonly Text: string }) => setQuery(textbox.Text)} />
+			{results?.map((result: { readonly id: number; readonly title: string }) => (
+				<textlabel key={result.id} Text={result.title} />
+			))}
+		</frame>
+	);
 }
 `,
 			},
@@ -293,11 +290,14 @@ import { useEffect } from "react";
 
 // Captures an optional URL search param and persists it to localStorage + cookie.
 // First-touch attribution: never overwrites an existing code.
-export function useSaveReferralCode(refCode) {
-  useEffect(() => {
-    const valid = validateReferralCode(refCode)
-    if (valid) saveReferredByCode(valid)
-  }, [refCode])
+declare function validateReferralCode(referralCode: string): string | undefined;
+declare function saveReferredByCode(referralCode: string): void;
+
+export function useSaveReferralCode(referralCode: string): void {
+	useEffect(() => {
+		const valid = validateReferralCode(referralCode);
+		if (valid !== undefined) saveReferredByCode(valid);
+	}, [referralCode]);
 }
 `,
 				options: [{ environment: "standard" }],

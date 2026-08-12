@@ -8,14 +8,16 @@ describe("no-adjust-state-on-prop-change", () => {
 		invalid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelection(null);
-  }, [items]);
+	useEffect(() => {
+		setSelection(undefined);
+	}, [items]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 				documentation: { id: "fail", title: "State adjusted after a prop change" },
@@ -28,15 +30,18 @@ function List({ items }) {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
-  const [internalData, setInternalData] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads internalData from the effect.
+	const [internalData, setInternalData] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelection(internalData);
-  }, [items, internalData]);
+	useEffect(() => {
+		setSelection(internalData);
+	}, [items, internalData]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 				errors: [
@@ -48,15 +53,19 @@ function List({ items }) {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
-  const { data: externalData } = useDataSource();
+declare function useDataSource(): { readonly data: string | undefined };
 
-  useEffect(() => {
-    setSelection(externalData);
-  }, [items]);
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
+	const { data: externalData } = useDataSource();
+
+	useEffect(() => {
+		setSelection(externalData);
+	}, [items]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 				errors: [
@@ -68,16 +77,18 @@ function List({ items }) {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form({ result }) {
-  const [error, setError] = useState();
+export function Form({ result }: { result: { readonly data?: string } }): React.Element {
+	const [error, setError] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (result.data) {
-      setError(null);
-    }
-  }, [result]);
+	useEffect(() => {
+		if (result.data !== undefined) {
+			setError(undefined);
+		}
+	}, [result]);
+
+	return <textlabel Text={error} />;
 }
 `,
 				errors: [
@@ -89,14 +100,16 @@ function Form({ result }) {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items, user }) {
-  const [selection, setSelection] = useState();
+export function List({ items, user }: { items: ReadonlyArray<string>; user: string }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelection(null);
-  }, [items, user]);
+	useEffect(() => {
+		setSelection(undefined);
+	}, [items, user]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 				errors: [
@@ -110,15 +123,17 @@ function List({ items, user }) {
 				// An alias-RHS setter inside the effect has no call expression; the
 				// aliased call still adjusts state when the prop changes.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    const alias = setSelection;
-    alias(null);
-  }, [items]);
+	useEffect(() => {
+		const alias = setSelection;
+		alias(undefined);
+	}, [items]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 				errors: [
@@ -132,45 +147,54 @@ function List({ items }) {
 		valid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [isReverse, setIsReverse] = useState(false);
-  const [selection, setSelection] = useState(null);
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>(undefined);
+	const [previousItems, setPreviousItems] = useState(items);
 
-  const [prevItems, setPrevItems] = useState(items);
-  if (items !== prevItems) {
-    setPrevItems(items);
-    setSelection(null);
-  }
+	if (items !== previousItems) {
+		setPreviousItems(items);
+		setSelection(undefined);
+	}
+
+	return <textlabel Text={selection} />;
 }
 `,
 				documentation: { id: "pass", title: "State adjusted during render" },
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Counter() {
-  const [count, setCount] = useState(0);
-  const [otherState, setOtherState] = useState();
+export function Counter(): React.Element {
+	const [count, setCount] = useState(0);
+	const [otherState, setOtherState] = useState<string | undefined>();
 
-  useEffect(() => {
-    setOtherState('Hello World');
-  }, [count]);
+	useEffect(() => {
+		setOtherState("Hello World");
+	}, [count]);
+
+	return (
+		<textbutton Text={count} onActivated={() => setCount(count + 1)}>
+			<textlabel Text={otherState} />
+		</textbutton>
+	);
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Counter({ count }) {
-  const [doubleCount, setDoubleCount] = useState(0);
+export function Counter({ count }: { count: number }): React.Element {
+	const [doubleCount, setDoubleCount] = useState(0);
 
-  useEffect(() => {
-    setDoubleCount(count * 2);
-  }, [count]);
+	useEffect(() => {
+		setDoubleCount(count * 2);
+	}, [count]);
+
+	return <textlabel Text={doubleCount} />;
 }
 `,
 			},
@@ -178,16 +202,19 @@ function Counter({ count }) {
 				// A state setter returned from the effect is not inside any call callee,
 				// so `getCallExpression` cannot resolve it.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (items.length > 0) {
-      return setSelection;
-    }
-  }, [items]);
+	useEffect(() => {
+		if (items.length > 0) {
+			return setSelection;
+		}
+		return undefined;
+	}, [items]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 			},
@@ -195,42 +222,51 @@ function List({ items }) {
 				// A setter bound to the name `useState` matches `isUseState` itself, so
 				// `getStateName` finds no destructured declaration and yields undefined.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [data, useState] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [data, setData] = useState<string | undefined>();
 
-  useEffect(() => {
-    useState(5);
-  }, [items]);
+	useEffect(() => {
+		// oxlint-disable-next-line no-shadow -- The setter is bound to the hook name to exercise the rule's name resolution.
+		const useState = setData;
+		// oxlint-disable-next-line react-doctor/hook-use-state -- A deliberate call to the aliased setter exercises the rule's name resolution.
+		useState(undefined);
+	}, [items]);
+
+	return <textlabel Text={data} />;
 }
 `,
 			},
 			{
 				// An effect without a dependency array has no dependency references to analyze.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
+export function List(): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    setSelection(5);
-  });
+	useEffect(() => {
+		setSelection(5);
+	});
+
+	return <textlabel Text={selection} />;
 }
 `,
 			},
 			{
 				// A setter called through `void` is not synchronous within the effect.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function List({ items }) {
-  const [selection, setSelection] = useState();
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState<string | undefined>();
 
-  useEffect(() => {
-    void setSelection(5);
-  }, [items]);
+	useEffect(() => {
+		void setSelection(5);
+	}, [items]);
+
+	return <textlabel Text={selection} />;
 }
 `,
 			},

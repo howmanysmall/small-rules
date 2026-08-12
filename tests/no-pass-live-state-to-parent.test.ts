@@ -8,21 +8,16 @@ describe("no-pass-live-state-to-parent", () => {
 		invalid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
+export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    onTextChanged(text);
-  }, [onTextChanged, text]);
+	useEffect(() => {
+		onTextChanged(text);
+	}, [onTextChanged, text]);
 
-  return (
-    <textbox
-      Text={text}
-      TextChanged={(textbox) => setText(textbox.Text)}
-    />
-  );
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
 				documentation: { id: "fail", title: "Effect passes live state to a parent" },
@@ -35,21 +30,37 @@ const Child = ({ onTextChanged }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
+export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    onTextChanged(text);
-  });
+	useEffect(() => {
+		onTextChanged(text);
+	});
 
-  return (
-    <input
-      type="text"
-      onChange={(e) => setText(e.target.value)}
-    />
-  );
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
+}
+`,
+				errors: [
+					{
+						data: { name: '"Child"', state: '"text"' },
+						messageId: "avoidPassingLiveStateToParentInComponent",
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect, useState } from "@rbxts/react";
+
+export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
+
+	useEffect(() => {
+		onTextChanged(text);
+	}, []);
+
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
 				errors: [
@@ -63,38 +74,13 @@ const Child = ({ onTextChanged }) => {
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
+export function useCustomHook({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): void {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads the state value.
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    onTextChanged(text);
-  }, []);
-
-  return (
-    <input
-      type="text"
-      onChange={(e) => setText(e.target.value)}
-    />
-  );
-}
-`,
-				errors: [
-					{
-						data: { name: '"Child"', state: '"text"' },
-						messageId: "avoidPassingLiveStateToParentInComponent",
-					},
-				],
-			},
-			{
-				code: `
-import { useEffect, useState } from "@rbxts/react";
-
-const useCustomHook = ({ onTextChanged }) => {
-  const [text, setText] = useState();
-
-  useEffect(() => {
-    onTextChanged(text);
-  }, [onTextChanged, text]);
+	useEffect(() => {
+		onTextChanged(text);
+	}, [onTextChanged, text]);
 }
 `,
 				errors: [
@@ -106,22 +92,23 @@ const useCustomHook = ({ onTextChanged }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onTextChanged(text, data);
-  }, [onTextChanged, text, data]);
+export function Child({
+	onTextChanged,
+}: {
+	onTextChanged: (text: string | undefined, data: string) => void;
+}): React.Element {
+	const [text, setText] = useState<string | undefined>();
+	const data = useSomeAPI();
 
-  return (
-    <input
-      type="text"
-      onChange={(e) => setText(e.target.value)}
-    />
-  );
+	useEffect(() => {
+		onTextChanged(text, data);
+	}, [onTextChanged, text, data]);
+
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
 				errors: [
@@ -133,22 +120,17 @@ const Child = ({ onTextChanged }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
+export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    const firstChar = text[0];
-    onTextChanged(firstChar);
-  }, [onTextChanged, text]);
+	useEffect(() => {
+		const [firstCharacter] = text;
+		onTextChanged(firstCharacter);
+	}, [onTextChanged, text]);
 
-  return (
-    <input
-      type="text"
-      onChange={(e) => setText(e.target.value)}
-    />
-  );
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
 				errors: [
@@ -160,15 +142,21 @@ const Child = ({ onTextChanged }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onFetched }) => {
-  const [data, setData] = useState();
-  const onFetchedWrapper = (v) => onFetched(v);
+export function Child({ onFetched }: { onFetched: (value: string | undefined) => void }): React.Element {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads the state value.
+	const [data, setData] = useState<string | undefined>();
 
-  useEffect(() => {
-    onFetchedWrapper(data);
-  }, [onFetched, data]);
+	function onFetchedWrapper(value: string | undefined): void {
+		onFetched(value);
+	}
+
+	useEffect(() => {
+		onFetchedWrapper(data);
+	}, [onFetched, data]);
+
+	return <textlabel Text={data} />;
 }
 `,
 				errors: [
@@ -180,15 +168,18 @@ const Child = ({ onFetched }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = (props) => {
-  const [data, setData] = useState();
-  const { onFetched } = props;
+export function Child(properties: { readonly onFetched: (value: string | undefined) => void }): React.Element {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads the state value.
+	const [data, setData] = useState<string | undefined>();
+	const { onFetched } = properties;
 
-  useEffect(() => {
-    onFetched(data);
-  }, [onFetched, data]);
+	useEffect(() => {
+		onFetched(data);
+	}, [onFetched, data]);
+
+	return <textlabel Text={data} />;
 }
 `,
 				errors: [
@@ -200,28 +191,24 @@ const Child = (props) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form({ onSubmit }) {
-  const [name, setName] = useState();
-  const [dataToSubmit, setDataToSubmit] = useState();
+export function Form({ onSubmit }: { onSubmit: (data: { readonly name: string }) => void }): React.Element {
+	const [name, setName] = useState("");
+	const [dataToSubmit, setDataToSubmit] = useState<{ readonly name: string } | undefined>();
 
-  useEffect(() => {
-    if (!dataToSubmit) return;
+	useEffect(() => {
+		if (dataToSubmit === undefined) return;
 
-    onSubmit(dataToSubmit);
-  }, [dataToSubmit]);
+		onSubmit(dataToSubmit);
+	}, [dataToSubmit]);
 
-  return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={() => setDataToSubmit({ name })}>Submit</button>
-    </div>
-  )
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Submit" Activated={() => setDataToSubmit({ name })} />
+		</frame>
+	);
 }
 `,
 				errors: [
@@ -233,15 +220,22 @@ function Form({ onSubmit }) {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const [text, setText] = useState();
-  const [count, setCount] = useState(0);
+export function Child({ onChanged }: { onChanged: (text: string | undefined, count: number) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
+	const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    onChanged(text, count);
-  }, [onChanged, text, count]);
+	useEffect(() => {
+		onChanged(text, count);
+	}, [onChanged, text, count]);
+
+	return (
+		<frame>
+			<textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />
+			<textbutton Text={count} onActivated={() => setCount(count + 1)} />
+		</frame>
+	);
 }
 `,
 				errors: [
@@ -256,12 +250,13 @@ const Child = ({ onChanged }) => {
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
-function useCustomHook(onChanged) {
-  const [text, setText] = useState();
+export function useCustomHook(onChanged: (text: string | undefined) => void): void {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads the state value.
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    onChanged(text);
-  }, [onChanged, text]);
+	useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
 }
 `,
 				errors: [
@@ -274,14 +269,17 @@ function useCustomHook(onChanged) {
 			{
 				// A memo-wrapped arrow reports the component's declared name.
 				code: `
-import { memo, useEffect, useState } from "@rbxts/react";
+import React, { memo, useEffect, useState } from "@rbxts/react";
 
-const Child = memo(({ onTextChanged }) => {
-  const [text, setText] = useState();
+// oxlint-disable-next-line react-doctor/display-name -- The memo wrapper's declarator name is what the rule under test reports.
+export const Child = memo(({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element => {
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    onTextChanged(text);
-  }, [onTextChanged, text]);
+	useEffect(() => {
+		onTextChanged(text);
+	}, [onTextChanged, text]);
+
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 });
 `,
 				errors: [
@@ -296,23 +294,36 @@ const Child = memo(({ onTextChanged }) => {
 			{
 				// A literal callback argument is not live state, so there is nothing to report.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  useEffect(() => {
-    onTextChanged("Hello World");
-  }, [onTextChanged]);
+export function Child({ onTextChanged }: { onTextChanged: (text: string) => void }): React.Element {
+	useEffect(() => {
+		onTextChanged("Hello World");
+	}, [onTextChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useState } from "@rbxts/react";
+import React, { useState } from "@rbxts/react";
 
-function Parent() {
-  const [text, setText] = useState('');
+function Child({ text, onTextChanged }: { text: string; onTextChanged: (text: string) => void }): React.Element {
+	return (
+		<textbox
+			Text={text}
+			TextChanged={(textbox: { readonly Text: string }): void => {
+				onTextChanged(textbox.Text);
+			}}
+		/>
+	);
+}
 
-  return <Child text={text} onTextChanged={setText} />;
+export function Parent(): React.Element {
+	const [text, setText] = useState("");
+
+	return <Child text={text} onTextChanged={setText} />;
 }
 `,
 				documentation: { id: "pass", title: "Parent owns the state" },
@@ -320,14 +331,18 @@ function Parent() {
 			{
 				// A setter passed as a callback argument is not a call, so there is nothing to report.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
+declare function registerCallback(callback: (text: string | undefined) => void): void;
 
-  useEffect(() => {
-    registerCallback(setText);
-  }, [onTextChanged, setText]);
+export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
+
+	useEffect(() => {
+		registerCallback(setText);
+	}, [onTextChanged, setText]);
+
+	return <textlabel Text={text} />;
 }
 `,
 			},
@@ -335,30 +350,40 @@ const Child = ({ onTextChanged }) => {
 				// An alias of a prop callback that is itself passed as an argument (not called)
 				// has a prop-call chain but no call expression.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const [text, setText] = useState();
+declare function registerCallback(callback: (text: string | undefined) => void): void;
 
-  useEffect(() => {
-    const wrapper = onChanged;
-    registerCallback(wrapper);
-  }, [onChanged, text]);
+export function Child({ onChanged }: { onChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
+
+	useEffect(() => {
+		const wrapper = onChanged;
+		registerCallback(wrapper);
+	}, [onChanged, text]);
+
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
 			},
 			{
 				// A wrapper arrow invoked later defers the callback outside the synchronous effect body.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const [text, setText] = useState();
+declare function registerCallback(callback: (text: string | undefined) => void): void;
 
-  useEffect(() => {
-    const wrapper = (v) => onChanged(v);
-    registerCallback(wrapper);
-  }, [onChanged, text]);
+export function Child({ onChanged }: { onChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
+
+	useEffect(() => {
+		function wrapper(value: string | undefined): void {
+			onChanged(value);
+		}
+		registerCallback(wrapper);
+	}, [onChanged, text]);
+
+	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
 			},
@@ -366,136 +391,196 @@ const Child = ({ onChanged }) => {
 				// No idea why someone would do this, but maybe there's a less contrived pattern.
 				// Plus the rule's message and linked docs only mention state - obviously you can't "lift" a prop.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ text, onTextChanged }) => {
-  useEffect(() => {
-    onTextChanged(text);
-  }, [text, onTextChanged]);
+export function Child({ text, onTextChanged }: { text: string; onTextChanged: (text: string) => void }): React.Element {
+	useEffect(() => {
+		onTextChanged(text);
+	}, [text, onTextChanged]);
+
+	return <textlabel Text={text} />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form({ onClose }) {
-  const [name, setName] = useState();
-  const [isOpen, setIsOpen] = useState(true);
+export function Form({ onClose }: { onClose: () => void }): React.Element {
+	const [name, setName] = useState("");
+	const [isOpen, setIsOpen] = useState(true);
 
-  useEffect(() => {
-    if (!isOpen) {
-      onClose();
-    }
-  }, [isOpen]);
+	useEffect(() => {
+		if (isOpen === false) {
+			onClose();
+		}
+	}, [isOpen]);
 
-  return (
-    <button onClick={() => setIsOpen(false)}>Close</button>
-  )
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Close" Activated={() => setIsOpen(false)} />
+		</frame>
+	);
 }
 `,
 			},
 			{
 				// This might be an anti-pattern in the first place...
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-function Child({ getData }) {
-  useEffect(() => {
-    console.log(getData());
-  }, [getData]);
+export function Child({ getData }: { getData: () => string }): React.Element {
+	useEffect(() => {
+		// oxlint-disable-next-line no-console -- The console call is a stand-in for side effects the rule ignores.
+		console.log(getData());
+	}, [getData]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useState } from "@rbxts/react";
 
-const MyComponent = withRouter(({ history }) => {
-  const [option, setOption] = useState();
+declare function withRouter(
+	component: (properties: { readonly history: { readonly push: (path: string) => void } }) => React.Element,
+): () => React.Element;
 
-  useEffect(() => {
-    history.push(option);
-  }, [option]);
+const MyComponent = withRouter(({ history }: { history: { readonly push: (path: string) => void } }): React.Element => {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only pushes the current option.
+	const [option, setOption] = useState<string | undefined>();
+
+	useEffect(() => {
+		history.push(option ?? "");
+	}, [option]);
+
+	return <textlabel Text={option} />;
 });
+
+export default MyComponent;
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const MyComponent = inject('ourStore')(observer(({ ourStore }) => {
-  const [option, setOption] = useState();
+declare function inject(
+	storeName: string,
+): (
+	component: (properties: {
+		readonly ourStore: { readonly push: (option: string | undefined) => void };
+	}) => React.Element,
+) => (properties: { readonly ourStore: { readonly push: (option: string | undefined) => void } }) => React.Element;
+declare function observer(
+	component: (properties: {
+		readonly ourStore: { readonly push: (option: string | undefined) => void };
+	}) => React.Element,
+): (properties: { readonly ourStore: { readonly push: (option: string | undefined) => void } }) => React.Element;
 
-  useEffect(() => {
-    ourStore.push(option);
-  }, [option]);
-}));
+const MyComponent = inject("ourStore")(
+	// oxlint-disable-next-line react-doctor/display-name -- The HOC wrapper's declarator name is what the sample exercises.
+	observer(({ ourStore }: { ourStore: { readonly push: (option: string | undefined) => void } }): React.Element => {
+		// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only pushes the current option.
+		const [option, setOption] = useState<string | undefined>();
+
+		useEffect(() => {
+			ourStore.push(option);
+		}, [option]);
+
+		return <textlabel Text={option} />;
+	}),
+);
+
+export default MyComponent;
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useState } from "@rbxts/react";
 
-const MyComponent = ({ history }) => {
-  const [option, setOption] = useState();
+declare function withRouter(
+	component: (properties: { readonly history: { readonly push: (path: string) => void } }) => React.Element,
+): () => React.Element;
 
-  useEffect(() => {
-    history.push(option);
-  }, [option]);
+// oxlint-disable-next-line func-style -- The arrow keeps the HOC-wrapped-separately shape that the rule's name resolution relies on.
+const MyComponent = ({ history }: { history: { readonly push: (path: string) => void } }): React.Element => {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only pushes the current option.
+	const [option, setOption] = useState<string | undefined>();
+
+	useEffect(() => {
+		history.push(option ?? "");
+	}, [option]);
+
+	return <textlabel Text={option} />;
 };
 
-const wrapped = withRouter(MyComponent);
+export const wrapped = withRouter(MyComponent);
 `,
 			},
 			{
 				// https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/issues/46
 				code: `
-import { useEffect, useState } from "@rbxts/react";
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useState } from "@rbxts/react";
 
-const MyComponent = ({ history }) => {
-  const [option, setOption] = useState();
+declare function inject(storeName: string): (component: () => React.Element) => () => React.Element;
+declare function observer(
+	component: (properties: { readonly history: { readonly push: (path: string) => void } }) => React.Element,
+): () => React.Element;
 
-  useEffect(() => {
-    history.push(option);
-  }, [option]);
+// oxlint-disable-next-line func-style -- The arrow keeps the HOC-wrapped-separately shape that the rule's name resolution relies on.
+const MyComponent = ({ history }: { history: { readonly push: (path: string) => void } }): React.Element => {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only pushes the current option.
+	const [option, setOption] = useState<string | undefined>();
+
+	useEffect(() => {
+		history.push(option ?? "");
+	}, [option]);
+
+	return <textlabel Text={option} />;
 };
 
-const EnhancedComponent = inject('ourStore')(observer(MyComponent))
-export default EnhancedComponent
+const EnhancedComponent = inject("ourStore")(observer(MyComponent));
+export default EnhancedComponent;
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
-import { withRouter } from 'react-router-dom';
+import React, { useEffect } from "@rbxts/react";
 
-const MyComponent = withRouter(({ history }) => {
-  const data = useSomeAPI();
+declare function withRouter(
+	component: (properties: { readonly history: { readonly push: (path: string) => void } }) => React.Element,
+): () => React.Element;
+declare function useSomeAPI(): { readonly error?: string };
 
-  useEffect(() => {
-    if (data.error) {
-      history.push(data.error);
-    }
-  }, [data]);
+const MyComponent = withRouter(({ history }: { history: { readonly push: (path: string) => void } }): React.Element => {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		if (data.error !== undefined) {
+			history.push(data.error ?? "/error");
+		}
+	}, [data]);
+
+	return <textlabel Text={data.error} />;
 });
+
+export default MyComponent;
 `,
 			},
 			{
 				code: `
-import { useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 
-const Child = ({ onRef }) => {
-  const ref = useRef();
+export function Child({ onRef }: { onRef: (value: unknown) => void }): React.Element {
+	const ref = useRef<unknown>(undefined);
 
-  useEffect(() => {
-    onRef(ref.current);
-  }, [onRef, ref.current]);
+	useEffect(() => {
+		onRef(ref.current);
+	}, [onRef, ref.current]);
 
-  return <div ref={ref}>Child</div>;
+	return <div ref={ref}>Child</div>;
 }
 `,
 			},

@@ -8,14 +8,18 @@ describe("no-pass-data-to-parent", () => {
 		invalid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onFetched }) => {
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onFetched(data);
-  }, [onFetched, data]);
+export function Child({ onFetched }: { onFetched: (data: string) => void }): React.Element {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		onFetched(data);
+	}, [onFetched, data]);
+
+	return <textlabel Text={data} />;
 }
 `,
 				documentation: { id: "fail", title: "Effect passes fetched data to a parent" },
@@ -28,14 +32,18 @@ const Child = ({ onFetched }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onFetched }) => {
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onFetched(data);
-  });
+export function Child({ onFetched }: { onFetched: (data: string) => void }): React.Element {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		onFetched(data);
+	});
+
+	return <textlabel Text={data} />;
 }
 `,
 				errors: [
@@ -47,14 +55,18 @@ const Child = ({ onFetched }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onFetched }) => {
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onFetched(data);
-  }, []);
+export function Child({ onFetched }: { onFetched: (data: string) => void }): React.Element {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		onFetched(data);
+	}, []);
+
+	return <textlabel Text={data} />;
 }
 `,
 				errors: [
@@ -66,14 +78,16 @@ const Child = ({ onFetched }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import { useEffect } from "@rbxts/react";
 
-const useCustomHook = ({ onFetched }) => {
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onFetched(data);
-  }, [onFetched, data]);
+export function useCustomHook({ onFetched }: { onFetched: (data: string) => void }): void {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		onFetched(data);
+	}, [onFetched, data]);
 }
 `,
 				errors: [
@@ -85,15 +99,19 @@ const useCustomHook = ({ onFetched }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onFetched }) => {
-  const data = useSomeAPI();
-  const firstElement = data[0];
+declare function useSomeAPI(): ReadonlyArray<string>;
 
-  useEffect(() => {
-    onFetched(firstElement);
-  }, [onFetched, firstElement]);
+export function Child({ onFetched }: { onFetched: (element: string | undefined) => void }): React.Element {
+	const data = useSomeAPI();
+	const [firstElement] = data;
+
+	useEffect(() => {
+		onFetched(firstElement);
+	}, [onFetched, firstElement]);
+
+	return <textlabel Text={firstElement} />;
 }
 `,
 				errors: [
@@ -105,15 +123,20 @@ const Child = ({ onFetched }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onResult }) => {
-  const data = useSomeAPI();
-  const meta = useOtherAPI();
+declare function useSomeAPI(): string;
+declare function useOtherAPI(): string;
 
-  useEffect(() => {
-    onResult(data, meta);
-  }, [onResult, data, meta]);
+export function Child({ onResult }: { onResult: (data: string, meta: string) => void }): React.Element {
+	const data = useSomeAPI();
+	const meta = useOtherAPI();
+
+	useEffect(() => {
+		onResult(data, meta);
+	}, [onResult, data, meta]);
+
+	return <textlabel Text={data} />;
 }
 `,
 				errors: [
@@ -125,15 +148,24 @@ const Child = ({ onResult }) => {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const [count, setCount] = useState(0);
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onChanged(data, count);
-  }, [onChanged, data, count]);
+export function Child({ onChanged }: { onChanged: (data: string, count: number) => void }): React.Element {
+	const [count, setCount] = useState(0);
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		onChanged(data, count);
+	}, [onChanged, data, count]);
+
+	return (
+		<frame>
+			<textlabel Text={data} />
+			<textbutton Text={count} onActivated={() => setCount(count + 1)} />
+		</frame>
+	);
 }
 `,
 				errors: [
@@ -144,16 +176,21 @@ const Child = ({ onChanged }) => {
 				],
 			},
 			{
-				// A memo-wrapped arrow component reports the declared component name.
+				// A memo-wrapped component still reports the declared component name.
 				code: `
-import { memo, useEffect, useState } from "@rbxts/react";
+import React, { memo, useEffect } from "@rbxts/react";
 
-const Child = memo(({ onFetched }) => {
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    onFetched(data);
-  }, [onFetched, data]);
+// oxlint-disable-next-line react-doctor/display-name -- The memo wrapper's declarator name is what the rule under test reports.
+export const Child = memo(({ onFetched }: { onFetched: (data: string) => void }): React.Element => {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		onFetched(data);
+	}, [onFetched, data]);
+
+	return <textlabel Text={data} />;
 });
 `,
 				errors: [
@@ -168,23 +205,31 @@ const Child = memo(({ onFetched }) => {
 			{
 				// A literal callback argument is not data, so there is nothing to report.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  useEffect(() => {
-    onTextChanged("Hello World");
-  }, [onTextChanged]);
+export function Child({ onTextChanged }: { onTextChanged: (text: string) => void }): React.Element {
+	useEffect(() => {
+		onTextChanged("Hello World");
+	}, [onTextChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useState } from "@rbxts/react";
+import React from "@rbxts/react";
 
-function Parent() {
-  const data = useSomeAPI();
+declare function useSomeAPI(): string;
 
-  return <Child data={data} />;
+function Child({ data }: { data: string }): React.Element {
+	return <textlabel Text={data} />;
+}
+
+export function Parent(): React.Element {
+	const data = useSomeAPI();
+
+	return <Child data={data} />;
 }
 `,
 				documentation: { id: "pass", title: "Parent owns the data" },
@@ -192,153 +237,185 @@ function Parent() {
 			{
 				// Passing the `useState` callee itself as data is not flagged.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  useEffect(() => {
-    onChanged(useState);
-  }, [onChanged]);
+export function Child({ onChanged }: { onChanged: (value: unknown) => void }): React.Element {
+	useEffect(() => {
+		onChanged(useState);
+	}, [onChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				// Passing the `useRef` callee itself as data is not flagged.
 				code: `
-import { useEffect, useRef } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  useEffect(() => {
-    onChanged(useRef);
-  }, [onChanged]);
+export function Child({ onChanged }: { onChanged: (value: unknown) => void }): React.Element {
+	useEffect(() => {
+		onChanged(useRef);
+	}, [onChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const hello = "Hello";
-  const world = "World";
-  const greeting = hello + " " + world;
-  useEffect(() => {
-    onTextChanged(greeting);
-  }, [onTextChanged]);
+export function Child({ onTextChanged }: { onTextChanged: (text: string) => void }): React.Element {
+	const hello = "Hello";
+	const world = "World";
+	const greeting = \`\${hello} \${world}\`;
+	useEffect(() => {
+		onTextChanged(greeting);
+	}, [onTextChanged]);
+
+	return <textlabel Text={greeting} />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onTextChanged }) => {
-  const [text, setText] = useState();
+export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
+	const [text, setText] = useState<string | undefined>();
 
-  useEffect(() => {
-    onTextChanged(text);
-  }, [onTextChanged, text]);
+	useEffect(() => {
+		onTextChanged(text);
+	}, [onTextChanged, text]);
 
-  return (
-    <input
-      type="text"
-      value={text}
-      onChange={(e) => setText(e.target.value)}
-    />
-  );
+	return (
+		<input
+			type="text"
+			value={text}
+			onChange={(event: { readonly target: { readonly value: string } }) => setText(event.target.value)}
+		/>
+	);
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ text, onTextChanged }) => {
-  useEffect(() => {
-    onTextChanged(text);
-  }, [onTextChanged, text]);
+export function Child({ text, onTextChanged }: { text: string; onTextChanged: (text: string) => void }): React.Element {
+	useEffect(() => {
+		onTextChanged(text);
+	}, [onTextChanged, text]);
 
-  return (
-    <input
-      type="text"
-      value={text}
-      onChange={(e) => setText(e.target.value)}
-    />
-  );
+	return (
+		<input
+			type="text"
+			value={text}
+			onChange={(event: { readonly target: { readonly value: string } }): void => {
+				onTextChanged(event.target.value);
+			}}
+		/>
+	);
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function Form({ onClose }) {
-  const [name, setName] = useState();
-  const [isOpen, setIsOpen] = useState(true);
+export function Form({ onClose }: { onClose: () => void }): React.Element {
+	const [name, setName] = useState("");
+	const [isOpen, setIsOpen] = useState(true);
 
-  useEffect(() => {
-    if (!isOpen) {
-      onClose();
-    }
-  }, [isOpen]);
+	useEffect(() => {
+		if (isOpen === false) {
+			onClose();
+		}
+	}, [isOpen]);
 
-  return (
-    <button onClick={() => setIsOpen(false)}>Close</button>
-  )
+	return (
+		<frame>
+			<textbox Text={name} TextChanged={(textbox: { readonly Text: string }) => setName(textbox.Text)} />
+			<textbutton Text="Close" Activated={() => setIsOpen(false)} />
+		</frame>
+	);
 }
 `,
 			},
 			{
 				// This might be an anti-pattern in the first place...
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-function Child({ getData }) {
-  useEffect(() => {
-    console.log(getData());
-  }, [getData]);
+export function Child({ getData }: { getData: () => string }): React.Element {
+	useEffect(() => {
+		// oxlint-disable-next-line no-console -- The console call is a stand-in for side effects the rule ignores.
+		console.log(getData());
+	}, [getData]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useState } from "@rbxts/react";
 
-const MyComponent = withRouter(({ history }) => {
-  const [option, setOption] = useState();
+declare function withRouter(
+	component: (properties: { readonly history: { readonly push: (path: string) => void } }) => React.Element,
+): () => React.Element;
 
-  useEffect(() => {
-    history.push(option);
-  }, [option]);
+const MyComponent = withRouter(({ history }: { history: { readonly push: (path: string) => void } }): React.Element => {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only pushes the current option.
+	const [option, setOption] = useState<string | undefined>();
+
+	useEffect(() => {
+		history.push(option ?? "");
+	}, [option]);
+
+	return <textlabel Text={option} />;
 });
+
+export default MyComponent;
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
-import { withRouter } from 'react-router-dom';
+import React, { useEffect } from "@rbxts/react";
 
-const MyComponent = withRouter(({ history }) => {
-  const data = useSomeAPI();
+declare function withRouter(
+	component: (properties: { readonly history: { readonly push: (path: string) => void } }) => React.Element,
+): () => React.Element;
+declare function useSomeAPI(): { readonly error?: string };
 
-  useEffect(() => {
-    if (data.error) {
-      history.push('/error');
-    }
-  }, [data]);
+const MyComponent = withRouter(({ history }: { history: { readonly push: (path: string) => void } }): React.Element => {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		if (data.error !== undefined) {
+			history.push("/error");
+		}
+	}, [data]);
+
+	return <textlabel Text={data.error} />;
 });
+
+export default MyComponent;
 `,
 			},
 			{
 				code: `
-import { useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 
-const Child = ({ onRef }) => {
-  const ref = useRef();
+export function Child({ onRef }: { onRef: (value: unknown) => void }): React.Element {
+	const ref = useRef<unknown>(undefined);
 
-  useEffect(() => {
-    onRef(ref.current);
-  }, [onRef, ref.current]);
+	useEffect(() => {
+		onRef(ref.current);
+	}, [onRef, ref.current]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
@@ -346,118 +423,163 @@ const Child = ({ onRef }) => {
 				// https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/issues/37
 				// Alternate solutions exist, but this is arguably the most readable.
 				code: `
+import React from "react";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
-function DeleteDropTarget({ onDelete }) {
-  const ref = React.useRef(null);
+export function DeleteDropTarget({ onDelete }: { onDelete: (data: unknown) => void }): React.Element {
+	const ref = React.useRef<unknown>(undefined);
 
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
+	React.useEffect(() => {
+		const element = ref.current;
+		return element === undefined
+			? undefined
+			: dropTargetForElements({
+					element,
+					onDrop: ({ source }: { source: { readonly data: unknown } }): void => {
+						onDelete(source.data);
+					},
+				});
+	}, [onDelete]);
 
-    const cleanup = dropTargetForElements({
-      element,
-      onDrop: ({ source }) => {
-        onDelete(source.data);
-      },
-    });
-
-    return cleanup;
-  }, [onDelete]);
-
-  return <div ref={ref}>Drop an item here to delete</div>;
-};
+	return <div ref={ref}>Drop an item here to delete</div>;
+}
 `,
 				options: [{ environment: "standard" }],
 			},
 			{
 				// https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/issues/43
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import { useEffect } from "@rbxts/react";
 
-function useActorLogger(actorRef) {
-  useEffect(() => {
-    return actorRef.system.inspect((next) => {
-      if (next.type === '@xstate.snapshot') {
-        console.log('ACTOR SNAPSHOT', next.snapshot);
-      }
-    }).unsubscribe;
-  }, [actorRef]);
+export function useActorLogger(actorRef: {
+	readonly system: {
+		readonly inspect: (callback: (event: { readonly type: string; readonly snapshot: string }) => void) => {
+			readonly unsubscribe: () => void;
+		};
+	};
+}): void {
+	useEffect(() => {
+		const subscription = actorRef.system.inspect(
+			(event: { readonly type: string; readonly snapshot: string }): void => {
+				if (event.type === "@xstate.snapshot") {
+					// oxlint-disable-next-line no-console -- The console call is a stand-in for logging the inspected snapshot.
+					console.log("ACTOR SNAPSHOT", event.snapshot);
+				}
+			},
+		).unsubscribe;
+		return subscription;
+	}, [actorRef]);
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 
-const Child = ({ onClicked }) => {
-  const ref = useRef();
+export function Child({ onClicked }: { onClicked: (event: { readonly type: string }) => void }): React.Element {
+	const ref = useRef<
+		| {
+				readonly addEventListener: (
+					event: string,
+					callback: (event: { readonly type: string }) => void,
+				) => void;
+		  }
+		| undefined
+	>(undefined);
 
-  useEffect(() => {
-    ref.current.addEventListener('click', (event) => {
-      onClicked(event);
-    });
-  }, [onClicked, ref]);
+	useEffect(() => {
+		ref.current?.addEventListener("click", (event: { readonly type: string }): void => {
+			onClicked(event);
+		});
+	}, [onClicked, ref]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ ref }) => {
-  useEffect(() => {
-    ref.current.addEventListener('click', (event) => {
-      console.log('Clicked', event);
-    });
-  }, [ref]);
+export function Child({
+	ref,
+}: {
+	ref: {
+		readonly current: {
+			readonly addEventListener: (event: string, callback: (event: { readonly type: string }) => void) => void;
+		};
+	};
+}): React.Element {
+	useEffect(() => {
+		ref.current.addEventListener("click", (event: { readonly type: string }): void => {
+			// oxlint-disable-next-line no-console -- The console call is a stand-in for listener side effects the rule ignores.
+			console.log("Clicked", event);
+		});
+	}, [ref]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onResized }) => {
-  useEffect(() => {
-    window.addEventListener('resize', (event) => {
-      onResized({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    });
-    return () => window.removeEventListener('resize', handleResize);
-  }, [onResized]);
+declare const viewport: {
+	readonly addEventListener: (event: string, callback: (event: { readonly type: string }) => void) => void;
+	readonly innerHeight: number;
+	readonly innerWidth: number;
+	readonly removeEventListener: (event: string, callback: (event: { readonly type: string }) => void) => void;
+};
+
+export function Child({
+	onResized,
+}: {
+	onResized: (size: { readonly height: number; readonly width: number }) => void;
+}): React.Element {
+	useEffect(() => {
+		function handleResize(): void {
+			onResized({ height: viewport.innerHeight, width: viewport.innerWidth });
+		}
+		viewport.addEventListener("resize", handleResize);
+		return (): void => {
+			viewport.removeEventListener("resize", handleResize);
+		};
+	}, [onResized]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				// A member expression that is not a React hook is treated as data.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const api = { useState };
+export function Child({ onChanged }: { onChanged: (value: unknown) => void }): React.Element {
+	const api = { useState };
 
-  useEffect(() => {
-    onChanged(api.useState);
-  }, [onChanged]);
+	useEffect(() => {
+		onChanged(api.useState);
+	}, [onChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				// A member expression that is not a React hook is treated as data.
 				code: `
-import { useEffect, useRef } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const api = { useRef };
+export function Child({ onChanged }: { onChanged: (value: unknown) => void }): React.Element {
+	const api = { useRef };
 
-  useEffect(() => {
-    onChanged(api.useRef);
-  }, [onChanged]);
+	useEffect(() => {
+		onChanged(api.useRef);
+	}, [onChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
@@ -465,53 +587,78 @@ const Child = ({ onChanged }) => {
 				// An alias of a prop callback that is itself passed as an argument
 				// has a prop-call chain but no call expression.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const data = useSomeAPI();
+declare function registerCallback(callback: () => void): void;
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    const wrapper = onChanged;
-    registerCallback(wrapper);
-  }, [onChanged, data]);
+export function Child({ onChanged }: { onChanged: () => void }): React.Element {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		const wrapper = onChanged;
+		registerCallback(wrapper);
+	}, [onChanged, data]);
+
+	return <textlabel Text={data} />;
 }
 `,
 			},
 			{
 				// A prop callback passed as an argument (not called) has no call expression.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  useEffect(() => {
-    registerCallback(onChanged);
-  }, [onChanged]);
+declare function registerCallback(callback: () => void): void;
+
+export function Child({ onChanged }: { onChanged: () => void }): React.Element {
+	useEffect(() => {
+		registerCallback(onChanged);
+	}, [onChanged]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},
 			{
 				// A callback used asynchronously is not considered a synchronous call.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onChanged }) => {
-  const data = useSomeAPI();
+declare function fetchData(): Promise<unknown>;
+declare function useSomeAPI(): string;
 
-  useEffect(() => {
-    fetch('/data').then(() => onChanged(data));
-  }, [onChanged, data]);
+export function Child({ onChanged }: { onChanged: (data: string) => void }): React.Element {
+	const data = useSomeAPI();
+
+	useEffect(() => {
+		void (async (): Promise<void> => {
+			await fetchData();
+			onChanged(data);
+		})();
+	}, [onChanged, data]);
+
+	return <textlabel Text={data} />;
 }
 `,
 			},
 			{
 				// A ref object received from props has its `current` access skipped as data.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
-const Child = ({ onChanged, ref }) => {
-  useEffect(() => {
-    onChanged(ref.current);
-  }, [onChanged, ref]);
+export function Child({
+	onChanged,
+	ref,
+}: {
+	onChanged: (value: unknown) => void;
+	ref: { readonly current: unknown };
+}): React.Element {
+	useEffect(() => {
+		onChanged(ref.current);
+	}, [onChanged, ref]);
+
+	return <textlabel Text="Hello World" />;
 }
 `,
 			},

@@ -8,16 +8,16 @@ describe("no-initialize-state", () => {
 		invalid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    setState("Hello");
-  }, []);
+	useEffect(() => {
+		setState("Hello");
+	}, []);
 
-  return <textlabel Text={state} />;
+	return <textlabel Text={state} />;
 }
 `,
 				documentation: { id: "fail", title: "State initialized by an effect" },
@@ -25,74 +25,84 @@ function MyComponent() {
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
-  const [otherState, setOtherState] = useState('Meow');
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads otherState to initialize the state.
+	const [otherState, setOtherState] = useState("Meow");
 
-  useEffect(() => {
-    setState(otherState);
-  }, []);
+	useEffect(() => {
+		setState(otherState);
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 				errors: [{ data: { arguments: "otherState", state: "state" }, messageId: "avoidInitializingState" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    console.log('Meow');
-    setState('Hello World');
-  }, []);
+	useEffect(() => {
+		setState("Hello World");
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
-				errors: [{ data: { arguments: "'Hello World'", state: "state" }, messageId: "avoidInitializingState" }],
+				errors: [{ data: { arguments: '"Hello World"', state: "state" }, messageId: "avoidInitializingState" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState('Meow');
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    setState();
-  }, []);
+	useEffect(() => {
+		setState();
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 				errors: [{ data: { arguments: "undefined", state: "state" }, messageId: "avoidInitializingState" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const upstream = 'Meow';
-  const [state, setState] = useState(upstream);
+export function MyComponent(): React.Element {
+	const upstream = "Meow";
+	const [state, setState] = useState(upstream);
 
-  useEffect(() => {
-    const upstreamTwo = 'Meow';
-    setState(upstreamTwo);
-  }, []);
+	useEffect(() => {
+		const upstreamTwo = "Meow";
+		setState(upstreamTwo);
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 				errors: [{ data: { arguments: "upstreamTwo", state: "state" }, messageId: "avoidInitializingState" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    setState("Hello");
-  }, [setState]);
+	useEffect(() => {
+		setState("Hello");
+	}, [setState]);
+
+	return <textlabel Text={state} />;
 }
 `,
 				errors: [{ data: { arguments: '"Hello"', state: "state" }, messageId: "avoidInitializingState" }],
@@ -101,15 +111,17 @@ function MyComponent() {
 				// An alias-RHS setter inside the effect has no call expression; the
 				// aliased call still initializes state.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    const alias = setState;
-    alias("Hello");
-  }, []);
+	useEffect(() => {
+		const alias = setState;
+		alias("Hello");
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 				errors: [{ data: { arguments: '"Hello"', state: "state" }, messageId: "avoidInitializingState" }],
@@ -118,34 +130,44 @@ function MyComponent() {
 		valid: [
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+declare function fetchData(): Promise<string>;
 
-  useEffect(() => {
-    fetch("https://api.example.com/data")
-      .then(response => response.json())
-      .then(data => setState(data));
-  }, []);
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+
+	useEffect(() => {
+		// oxlint-disable-next-line promise/prefer-await-to-then -- The promise chain keeps the setter outside the effect's synchronous flow, which the rule must treat as valid.
+		void fetchData().then(
+			(data) => setState(data),
+			(_error: unknown) => setState(undefined),
+		);
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+declare const game: {
+	readonly GetService: (service: string) => { readonly GetAsync: (url: string) => Promise<string> };
+};
 
-  useEffect(() => {
-    (async () => {
-      const response = await game
-        .GetService("HttpService")
-        .GetAsync("https://api.example.com/data");
-      setState(response);
-    })();
-  }, []);
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+
+	useEffect(() => {
+		void (async (): Promise<void> => {
+			const response = await game.GetService("HttpService").GetAsync("https://api.example.com/data");
+			setState(response);
+		})();
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 				documentation: { id: "pass", title: "State initialized from an async source" },
@@ -154,67 +176,87 @@ function MyComponent() {
 				// Don't know why someone would use a synchronous IIFE here,
 				// hence we don't make the effort to flag it, but just documenting this behavior.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    (() => {
-      setState("Hello");
-    })();
-  }, []);
+	useEffect(() => {
+		((): void => {
+			setState("Hello");
+		})();
+	}, []);
+
+	return <textlabel Text={state} />;
 }
 `,
 			},
 			{
 				code: `
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export const MyComponent = () => {
-  const [state, setState] = useState();
-
-  useEffect(() => {
-    window.addEventListener('load', () => {
-      (() => {
-        setState('Loaded');
-      })();
-    });
-  }, []);
+declare const window: {
+	readonly addEventListener: (event: string, listener: () => void) => void;
 };
+
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+
+	useEffect(() => {
+		window.addEventListener("load", (): void => {
+			((): void => {
+				setState("Loaded");
+			})();
+		});
+	}, []);
+
+	return <textlabel Text={state} />;
+}
 `,
 				options: [{ environment: "standard" }],
 			},
 			{
 				code: `
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export const MyComponent = () => {
-  const [state, setState] = useState();
-
-  useEffect(() => {
-    (() => {
-      window.addEventListener('load', () => {
-        setState('Loaded');
-      });
-    })();
-  }, []);
+declare const window: {
+	readonly addEventListener: (event: string, listener: () => void) => void;
 };
+
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+
+	useEffect(() => {
+		((): void => {
+			window.addEventListener("load", () => {
+				setState("Loaded");
+			});
+		})();
+	}, []);
+
+	return <textlabel Text={state} />;
+}
 `,
 				options: [{ environment: "standard" }],
 			},
 			{
 				// We ignore this because `react-hooks/exhaustive-deps` will flag the unnecessary dependency
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
-  const [other, setOther] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+	const [other, setOther] = useState<string | undefined>();
 
-  useEffect(() => {
-    setState("Hello");
-  }, [other]);
+	useEffect(() => {
+		setState("Hello");
+	}, [other]);
+
+	return (
+		<textbutton Text={other} onActivated={() => setOther(undefined)}>
+			<textlabel Text={state} />
+		</textbutton>
+	);
 }
 `,
 			},
@@ -222,17 +264,20 @@ function MyComponent() {
 				// A state setter returned from the effect is not inside any call callee,
 				// so `getCallExpression` cannot resolve it.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
-  const [other, setOther] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
+	const [other, setOther] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (other) {
-      return setState;
-    }
-  }, [setState, setOther]);
+	useEffect(() => {
+		if (other !== undefined) {
+			return setState;
+		}
+		return undefined;
+	}, [setState, setOther]);
+
+	return <textlabel Text={state} />;
 }
 `,
 			},
@@ -240,29 +285,40 @@ function MyComponent() {
 				// A setter bound to the name `useState` matches `isUseState` itself, so
 				// `getStateName` finds no destructured declaration and yields undefined.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [data, useState] = useState();
-  const [other, setOther] = useState();
+export function MyComponent(): React.Element {
+	const [data, setData] = useState<string | undefined>();
+	const [other, setOther] = useState<string | undefined>();
 
-  useEffect(() => {
-    useState(5);
-  }, [setOther]);
+	useEffect(() => {
+		// oxlint-disable-next-line no-shadow -- The setter is bound to the hook name to exercise the rule's name resolution.
+		const useState = setData;
+		// oxlint-disable-next-line react-doctor/hook-use-state -- A deliberate call to the aliased setter exercises the rule's name resolution.
+		useState(undefined);
+	}, [setOther]);
+
+	return (
+		<textbutton Text={other} onActivated={() => setOther(undefined)}>
+			<textlabel Text={data} />
+		</textbutton>
+	);
 }
 `,
 			},
 			{
 				// An effect without a dependency array has no dependency references to analyze.
 				code: `
-import { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 
-function MyComponent() {
-  const [state, setState] = useState();
+export function MyComponent(): React.Element {
+	const [state, setState] = useState<string | undefined>();
 
-  useEffect(() => {
-    setState("Hello");
-  });
+	useEffect(() => {
+		setState("Hello");
+	});
+
+	return <textlabel Text={state} />;
 }
 `,
 			},
