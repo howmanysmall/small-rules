@@ -344,6 +344,7 @@ const configuration = defineConfig({
 		"no-warning-comments": "warn",
 		"node/callback-return": "off",
 		"node/no-sync": "off",
+		"one-var": "off",
 		"oxc/no-async-await": "off",
 		"oxc/no-const-enum": "off",
 		"oxc/no-rest-spread-properties": "off",
