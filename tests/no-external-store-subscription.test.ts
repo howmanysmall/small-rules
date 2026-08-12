@@ -10,25 +10,19 @@ describe("no-external-store-subscription", () => {
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
-function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(true);
+function useStoreValue(store) {
+  const [value, setValue] = useState(0);
   useEffect(() => {
-    function updateState() {
-      setIsOnline(navigator.onLine);
-    }
-    updateState();
-    window.addEventListener('online', updateState);
-    window.addEventListener('offline', updateState);
-    return () => {
-      window.removeEventListener('online', updateState);
-      window.removeEventListener('offline', updateState);
-    };
-  }, []);
-  return isOnline;
+    setValue(store.get());
+    const update = () => setValue(store.get());
+    store.subscribe(update);
+    return () => store.unsubscribe(update);
+  }, [store]);
+  return value;
 }
 `,
 				documentation: { id: "fail", title: "Effect subscribes to an external store" },
-				errors: [{ data: { state: "isOnline" }, messageId: "avoidExternalStoreSubscription" }],
+				errors: [{ data: { state: "value" }, messageId: "avoidExternalStoreSubscription" }],
 			},
 			{
 				code: `
@@ -228,16 +222,12 @@ function C() {
 import { useSyncExternalStore } from "@rbxts/react";
 
 function subscribe(callback) {
-  window.addEventListener('online', callback);
-  window.addEventListener('offline', callback);
-  return () => {
-    window.removeEventListener('online', callback);
-    window.removeEventListener('offline', callback);
-  };
+  store.subscribe(callback);
+  return () => store.unsubscribe(callback);
 }
 
-function useOnlineStatus() {
-  return useSyncExternalStore(subscribe, () => navigator.onLine);
+function useStoreValue() {
+  return useSyncExternalStore(subscribe, () => store.get());
 }
 `,
 				documentation: { id: "pass", title: "Subscription managed with useSyncExternalStore" },

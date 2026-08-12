@@ -9,6 +9,23 @@ import RulePage from "@/components/rule-page.astro";
 		<p>
 			Ported from{" "}
 			[`eslint-plugin-react-you-might-not-need-an-effect/no-external-store-subscription`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-external-store-subscription.ts).
+			The upstream rule points straight at the ["Subscribing to an external
+			store"](https://react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store) section of
+			the React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			By "external state" I mean state that React doesn't own. You can read it and subscribe to it, but you can't
+			derive it from props or other state. On the web that's browser APIs or your store. roblox-ts has no `window`
+			or `navigator`, so in practice it's stores: `store.get()` to read, `store.subscribe()` to listen,
+			`store.unsubscribe()` to clean up. That's why the examples here use a store instead of the online-status
+			code from the React docs.
+		</p>
+		<p>
+			The rule doesn't actually check that you subscribed to anything, though. It keys off the shape: the effect
+			body synchronously writes state, and the cleanup references the same setter. That's the
+			subscribe/unsubscribe pair, but it also fires on effects that just reset state in their cleanup, with no
+			store in sight. Treat the diagnostic as "this has the external-store shape" and check whether there's a real
+			store before reaching for `useSyncExternalStore`.
 		</p>
 	</Fragment>
 </RulePage>
