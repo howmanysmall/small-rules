@@ -46,6 +46,14 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.15.0] - 2026-08-12
+
+## Added
+- Add nine React effect anti-pattern rules for derived state, chained updates, prop-driven resets, event handlers, external-store subscriptions, parent notifications, and mount-time state initialization [#40](https://github.com/howmanysmall/small-rules/pull/40).
+
+## Changed
+- Update `require-named-effect-functions` autofixes to remove an unreferenced, non-exported, uncommented function declaration after inlining it [#40](https://github.com/howmanysmall/small-rules/pull/40).
+
 ## [2.14.0] - 2026-08-05
 
 ## Added
