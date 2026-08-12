@@ -10,7 +10,13 @@ describe("no-external-store-subscription", () => {
 				code: `
 import { useEffect, useState } from "@rbxts/react";
 
-function useStoreValue(store) {
+interface Store {
+  get(): number;
+  subscribe(callback: () => void): void;
+  unsubscribe(callback: () => void): void;
+}
+
+function useStoreValue(store: Store): number {
   const [value, setValue] = useState(0);
   useEffect(() => {
     setValue(store.get());
@@ -221,12 +227,20 @@ function C() {
 				code: `
 import { useSyncExternalStore } from "@rbxts/react";
 
-function subscribe(callback) {
+interface Store {
+  get(): number;
+  subscribe(callback: () => void): void;
+  unsubscribe(callback: () => void): void;
+}
+
+declare const store: Store;
+
+function subscribe(callback: () => void): () => void {
   store.subscribe(callback);
   return () => store.unsubscribe(callback);
 }
 
-function useStoreValue() {
+function useStoreValue(): number {
   return useSyncExternalStore(subscribe, () => store.get());
 }
 `,
