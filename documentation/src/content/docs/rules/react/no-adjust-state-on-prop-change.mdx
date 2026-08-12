@@ -9,6 +9,21 @@ import RulePage from "@/components/rule-page.astro";
 		<p>
 			Ported from{" "}
 			[`eslint-plugin-react-you-might-not-need-an-effect/no-adjust-state-on-prop-change`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-adjust-state-on-prop-change.ts).
+			The upstream rule points at the ["Adjusting some state when a prop
+			changes"](https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes)
+			section of the React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			The shape this flags is an effect whose dependencies include a prop, and whose body synchronously writes
+			state. What you've built is a prop-to-state sync, and it costs you two renders: the prop arrives, you render
+			with the old state, then the effect fires and you render again with the corrected one. In between, the UI
+			shows state that's already wrong. On Roblox that usually shows up as a textlabel or a frame popping in a
+			frame late.
+		</p>
+		<p>
+			The fix is usually to not copy the prop into state at all. Compute what you need during render and let the
+			prop stay the source of truth. If the state genuinely has its own lifecycle, there are better tools than an
+			effect for resetting it, but more often than not the honest answer is that the state shouldn't exist.
 		</p>
 	</Fragment>
 </RulePage>

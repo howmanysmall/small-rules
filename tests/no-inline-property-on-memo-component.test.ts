@@ -10,7 +10,7 @@ describe("no-inline-property-on-memo-component", () => {
 				code: `
 import { memo } from "@rbxts/react";
 
-const MemoCard = memo(() => <div />);
+const MemoCard = memo(() => <frame />);
 
 const view = <MemoCard options={{ enabled: true }} />;
 `,
@@ -64,7 +64,7 @@ const view = <MemoPanel fallback={<></>} />;
 import { memo } from "@rbxts/react";
 
 function Card() {
-	return <div />;
+	return <frame />;
 }
 
 const view = <Card options={{ enabled: true }} />;

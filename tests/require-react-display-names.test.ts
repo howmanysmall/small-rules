@@ -12,7 +12,7 @@ describe("require-react-display-names", () => {
 import { memo } from "@rbxts/react";
 
 function ComponentNoMemo() {
-    return <div />;
+    return <frame />;
 }
 
 export default memo(ComponentNoMemo);
@@ -238,7 +238,7 @@ export default React.memo(Comp);
 import { memo } from "@rbxts/react";
 
 function ChecklistClaimButtonNoMemo() {
-    return <div />;
+    return <frame />;
 }
 
 export const ChecklistClaimButton = memo(ChecklistClaimButtonNoMemo);

@@ -8,13 +8,12 @@ describe("no-unused-use-memo", () => {
 		invalid: [
 			{
 				code: `
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 useMemo(() => 1, []);
 `,
 				documentation: { id: "fail", title: "Unused memoized value" },
 				errors: [{ messageId: "unusedUseMemo" }],
-				options: [{ environment: "standard" }],
 			},
 			{
 				code: `
@@ -47,12 +46,11 @@ void React.useMemo(() => 1, []);
 		valid: [
 			{
 				code: `
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 const value = useMemo(() => 1, []);
 `,
 				documentation: { id: "pass", title: "Consumed memoized value" },
-				options: [{ environment: "standard" }],
 			},
 			{
 				code: `

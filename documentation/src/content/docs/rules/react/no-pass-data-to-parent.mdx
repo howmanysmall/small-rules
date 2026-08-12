@@ -9,6 +9,19 @@ import RulePage from "@/components/rule-page.astro";
 		<p>
 			Ported from{" "}
 			[`eslint-plugin-react-you-might-not-need-an-effect/no-pass-data-to-parent`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-pass-data-to-parent.ts).
+			The upstream rule points at the ["Passing data to the
+			parent"](https://react.dev/learn/you-might-not-need-an-effect#passing-data-to-the-parent) section of the
+			React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			This flags an effect that calls a parent callback with an argument that's none of the usual suspects: not
+			state, not a prop, not a ref, not a constant. The rule literally identifies data by process of elimination.
+			What you've built is two-way data flow, and the parent can't act on it until the child renders, the effect
+			runs, and the callback fires. Always a render late.
+		</p>
+		<p>
+			Fetch or compute in the parent and pass the result down, or return it from a hook. On Roblox the parent is
+			usually a screen controller that should own the data anyway.
 		</p>
 	</Fragment>
 </RulePage>

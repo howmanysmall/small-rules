@@ -12,7 +12,7 @@ function Big() {
     const a = 1;
     const b = 2;
     const c = 3;
-    return <div />;
+    return <frame />;
 }
 `,
 				documentation: { id: "fail", title: "Component exceeds maximum lines" },
@@ -241,7 +241,7 @@ Assigned = memo(function Assigned() {
 function Small({ a, b }) {
     const [count, setCount] = useState(0);
     if (count > 0) setCount(count - 1);
-    return <div><span>{a}{b}</span></div>;
+    return <frame><textlabel Text={a + b} /></frame>;
 }
 `,
 				documentation: { id: "pass", title: "Component within configured limits" },

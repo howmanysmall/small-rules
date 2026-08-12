@@ -203,20 +203,22 @@ function Form() {
   const [dataToSubmit, setDataToSubmit] = useState();
 
   useEffect(() => {
-    if (dataToSubmit && Date.now() % 2 === 0) {
+    if (dataToSubmit && os.clock() % 2 === 0) {
       submitData(dataToSubmit);
     }
   }, [dataToSubmit]);
 
   return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
+    <frame>
+      <textbox
+        Text={name}
+        TextChanged={(textbox) => setName(textbox.Text)}
       />
-      <button onClick={() => setDataToSubmit({ name })}>Submit</button>
-    </div>
+      <textbutton
+        Text="Submit"
+        Activated={() => setDataToSubmit({ name })}
+      />
+    </frame>
   )
 }
 `,
@@ -240,14 +242,13 @@ function Form() {
   };
 
   return (
-    <div>
-      <input
-        name="name"
-        type="text"
-        onChange={(e) => setName(e.target.value)}
+    <frame>
+      <textbox
+        Text={name}
+        TextChanged={(textbox) => setName(textbox.Text)}
       />
-      <button onClick={handleSubmit}>Submit</button>
-    </div>
+      <textbutton Text="Submit" Activated={handleSubmit} />
+    </frame>
   )
 }
 `,

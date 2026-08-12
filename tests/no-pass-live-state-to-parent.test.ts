@@ -18,9 +18,9 @@ const Child = ({ onTextChanged }) => {
   }, [onTextChanged, text]);
 
   return (
-    <input
-      type="text"
-      onChange={(e) => setText(e.target.value)}
+    <textbox
+      Text={text}
+      TextChanged={(textbox) => setText(textbox.Text)}
     />
   );
 }

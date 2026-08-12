@@ -17,7 +17,7 @@ function MyComponent() {
     setState("Hello");
   }, []);
 
-  return <div>{state}</div>;
+  return <textlabel Text={state} />;
 }
 `,
 				documentation: { id: "fail", title: "State initialized by an effect" },
@@ -140,9 +140,10 @@ function MyComponent() {
 
   useEffect(() => {
     (async () => {
-      const response = await fetch("https://api.example.com/data");
-      const data = await response.json();
-      setState(data);
+      const response = await game
+        .GetService("HttpService")
+        .GetAsync("https://api.example.com/data");
+      setState(response);
     })();
   }, []);
 }

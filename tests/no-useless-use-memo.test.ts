@@ -72,7 +72,7 @@ const value = useMemo(() => makeStatic(1), []);
 			},
 			{
 				code: `
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 const value = useMemo(() => {
 	return 1;
@@ -80,7 +80,6 @@ const value = useMemo(() => {
 `,
 				documentation: { id: "fail", title: "Memoized constant computation" },
 				errors: [{ messageId: "uselessUseMemo" }],
-				options: [{ environment: "standard" }],
 			},
 			{
 				code: `
@@ -200,7 +199,7 @@ const value = useMemo(() => getAnimationConfiguration(SpringConfiguration.Sharp,
 		valid: [
 			{
 				code: `
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from "./animation-config";
 
 function Component({ theme }) {
@@ -209,7 +208,6 @@ function Component({ theme }) {
 	}
 `,
 				documentation: { id: "pass", title: "Memoized theme-dependent value" },
-				options: [{ environment: "standard" }],
 			},
 			{
 				code: `

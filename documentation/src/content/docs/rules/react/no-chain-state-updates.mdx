@@ -9,6 +9,20 @@ import RulePage from "@/components/rule-page.astro";
 		<p>
 			Ported from{" "}
 			[`eslint-plugin-react-you-might-not-need-an-effect/no-chain-state-updates`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-chain-state-updates.ts).
+			The upstream rule points at the ["Chains of
+			computations"](https://react.dev/learn/you-might-not-need-an-effect#chains-of-computations) section of the
+			React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			This flags the shape where an effect depends on state and then writes different state. State A changes, the
+			effect runs, it sets state B, you render again. That's a chain, and chains are how one input change becomes
+			four renders. If B happens to be in another effect's dependencies, the chain keeps going.
+		</p>
+		<p>
+			The chain usually exists because someone wanted a computed value but reached for an effect instead of
+			computing during render. Set both states where the change originates, or derive the follow-on value during
+			render and skip the middleman. The rule can't tell whether the chain is deliberate, say fetch-then-set, so
+			treat it as a nudge to look rather than a verdict.
 		</p>
 	</Fragment>
 </RulePage>

@@ -10,7 +10,7 @@ describe("require-named-effect-functions", () => {
 			{
 				code: `
 useEffect(() => {
-    console.log("effect");
+    print("effect");
 }, []);
 `,
 				documentation: { id: "fail", title: "Anonymous effect callback" },
@@ -223,7 +223,7 @@ useEffect(callback, []);
 			{
 				code: `
 function handleEffect() {
-    console.log("effect");
+    print("effect");
 }
 useEffect(handleEffect, []);
 `,

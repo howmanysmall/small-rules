@@ -10,8 +10,16 @@ describe("no-async-constructor", () => {
 			{
 				code: `
 class BadThen {
+    data: string;
+
     constructor() {
-        fetch('/api').then(r => { this.data = r; });
+        this.load().then((data) => {
+            this.data = data;
+        });
+    }
+
+    async load(): Promise<string> {
+        // ...
     }
 }
 `,
