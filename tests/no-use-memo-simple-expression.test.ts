@@ -8,7 +8,7 @@ describe("no-use-memo-simple-expression", () => {
 		invalid: [
 			{
 				code: `
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 const value = useMemo(() => 1, []);
 `,
@@ -107,7 +107,7 @@ const value = useMemo(1, []);
 			},
 			{
 				code: `
-import { useMemo } from "react";
+import { useMemo } from "@rbxts/react";
 
 const values = [1, 2, 3];
 const index = 1;

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type BadgeVariant = "error" | "suggestion" | "fixable" | "roblox";
+type BadgeVariant = "error" | "new" | "suggestion" | "fixable" | "roblox";
 
 interface BadgeProperties {
 	readonly variant: BadgeVariant;
@@ -38,6 +38,9 @@ const ROBLOX_ICON = (
 		<line x1="12" x2="12" y1="22.08" y2="12" />
 	</>
 );
+const NEW_ICON = (
+	<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+);
 const SUGGESTION_ICON = (
 	<>
 		<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2 1.5 3.5.8.8 1.3 1.5 1.5 2.5" />
@@ -56,6 +59,11 @@ const badgeDefinitions = {
 		icon: FIXABLE_ICON,
 		label: "Auto-fixable",
 		title: "This rule includes an automatic code fix.",
+	},
+	new: {
+		icon: NEW_ICON,
+		label: "New",
+		title: "This rule was added in the most recent release.",
 	},
 	roblox: {
 		icon: ROBLOX_ICON,

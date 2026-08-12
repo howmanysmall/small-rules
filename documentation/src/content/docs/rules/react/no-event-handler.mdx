@@ -1,0 +1,28 @@
+---
+title: "No Event Handler"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-event-handler">
+	<Fragment slot="rationale">
+		<p>
+			Ported from{" "}
+			[`eslint-plugin-react-you-might-not-need-an-effect/no-event-handler`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-event-handler.ts).
+			The upstream rule points at the ["Sharing logic between event
+			handlers"](https://react.dev/learn/you-might-not-need-an-effect#sharing-logic-between-event-handlers)
+			section of the React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			This flags effects whose body is an if-guard around logic that reads state or props. That's an event handler
+			wearing an effect costume: the condition is the event, the body is the handler. The difference matters
+			because an effect runs after render and only when its dependencies change, so the logic fires late and on a
+			render schedule instead of when the user actually does the thing.
+		</p>
+		<p>
+			In Roblox the event is a `TextChanged`, `Activated`, or similar callback. Put the logic there, or in the
+			parent if it reads props. The rule only catches the if-guard shape though, so it won't find every disguised
+			handler, it's a heuristic.
+		</p>
+	</Fragment>
+</RulePage>

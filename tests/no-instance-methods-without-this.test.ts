@@ -11,7 +11,7 @@ describe("no-instance-methods-without-this", () => {
 				code: `
 class MyClass {
     private notifyChanges(value: number): void {
-        console.log(value);
+        print(value);
     }
 }
 `,
@@ -134,7 +134,7 @@ class UniqueRandom {
 				code: `
 class MyClass {
     static helper(): void {
-        console.log("static");
+        print("static");
     }
 }
 `,

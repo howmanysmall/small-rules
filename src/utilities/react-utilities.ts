@@ -1,7 +1,8 @@
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { getImportedName } from "$oxc-utilities/oxc-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 
-import type { ESTree } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "./ast-utilities";
 
@@ -77,4 +78,67 @@ export function isReactImportDefinition(
 	if (importDeclaration === undefined) return false;
 
 	return reactSources.has(importDeclaration.source.value);
+}
+
+export function isReactNamedImport(
+	variable: ScopeVariable | undefined,
+	importedName: string,
+	reactSources: ReadonlySet<string>,
+): boolean {
+	if (variable === undefined) return false;
+
+	for (const definition of variable.defs) {
+		if (!isReactImportDefinition(definition, reactSources)) continue;
+		/* v8 ignore next -- named-import scope lookups expose ImportSpecifier definitions here. @preserve */
+		if (definition.node.type !== "ImportSpecifier") continue;
+		if (getImportedName(definition.node) === importedName) return true;
+	}
+
+	return false;
+}
+
+export function isReactNamespaceImport(
+	variable: ScopeVariable | undefined,
+	reactSources: ReadonlySet<string>,
+): boolean {
+	if (variable === undefined) return false;
+
+	for (const definition of variable.defs) {
+		if (!isReactImportDefinition(definition, reactSources)) continue;
+		/* v8 ignore next -- React namespace checks only reach default or namespace import definitions. @preserve */
+		if (definition.node.type === "ImportDefaultSpecifier" || definition.node.type === "ImportNamespaceSpecifier") {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+export function isReactImportedCall(
+	sourceCode: SourceCode,
+	node: ESTree.CallExpression,
+	importedNames: ReadonlySet<string>,
+	reactSources: ReadonlySet<string>,
+): boolean {
+	const { callee } = node;
+
+	if (callee.type === "Identifier") {
+		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
+		if (variable === undefined) return false;
+		return variable.defs.some((definition) => {
+			if (definition.type !== "ImportBinding" || definition.node.type !== "ImportSpecifier") return false;
+			const importDeclaration = getImportDeclarationParent(definition.node);
+			if (importDeclaration === undefined || !reactSources.has(importDeclaration.source.value)) {
+				return false;
+			}
+			const importedName = getImportedName(definition.node);
+			return importedName !== undefined && importedNames.has(importedName);
+		});
+	}
+
+	if (callee.type !== "MemberExpression" || callee.computed) return false;
+	if (callee.object.type !== "Identifier" || callee.property.type !== "Identifier") return false;
+
+	const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
+	return isReactNamespaceImport(variable, reactSources) && importedNames.has(callee.property.name);
 }

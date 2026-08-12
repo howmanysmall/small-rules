@@ -1,0 +1,9 @@
+{
+	"name": "omp",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@oh-my-pi/pi-coding-agent": "catalog:dev",
+		"arktype": "catalog:prod"
+	}
+}

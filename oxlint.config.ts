@@ -59,6 +59,14 @@ const configuration = defineConfig({
 			files: ["documentation/**/*"],
 		},
 		{
+			// rule-newness.ts spawns git to classify rules; the binary is a fixed system dependency.
+			files: ["documentation/src/data/rule-newness.ts"],
+			rules: {
+				"no-console": "off",
+				"sonar/no-os-command-from-path": "off",
+			},
+		},
+		{
 			files: ["documentation/**/*.astro"],
 			plugins: [],
 			rules: {
@@ -296,11 +304,15 @@ const configuration = defineConfig({
 		"no-bitwise": "off",
 		"no-continue": "off",
 		"no-duplicate-imports": "off",
-		"no-else-return": "off",
+		"no-else-return": [
+			"error",
+			{
+				allowElseIf: false,
+			},
+		],
 		"no-magic-numbers": "off",
 		"no-nested-ternary": "off",
 		"no-new-array": "off",
-		"no-obj-calls": "off",
 		"no-optional-chaining": "off",
 		"no-plusplus": "off",
 		"no-ternary": "off",
@@ -320,13 +332,19 @@ const configuration = defineConfig({
 				varsIgnorePattern: "^logger$|^_",
 			},
 		],
-		"no-use-before-define": "off",
+		"no-use-before-define": [
+			"error",
+			{
+				functions: false,
+			},
+		],
 		// Doesn't work award
 		"no-useless-undefined": "off",
 		"no-void": ["error", { allowAsStatement: true }],
 		"no-warning-comments": "warn",
 		"node/callback-return": "off",
 		"node/no-sync": "off",
+		"one-var": "off",
 		"oxc/no-async-await": "off",
 		"oxc/no-const-enum": "off",
 		"oxc/no-rest-spread-properties": "off",
@@ -437,6 +455,7 @@ const configuration = defineConfig({
 			},
 		],
 		"small-rules/memoized-effect-dependencies": "off",
+		"small-rules/no-adjust-state-on-prop-change": "off",
 		"small-rules/no-array-constructor-elements": [
 			"error",
 			{
@@ -456,6 +475,7 @@ const configuration = defineConfig({
 			},
 		],
 		"small-rules/no-cascading-set-state": "off",
+		"small-rules/no-chain-state-updates": "off",
 		"small-rules/no-color3-constructor": "off",
 		"small-rules/no-commented-code": "error",
 		"small-rules/no-constant-condition-with-break": [
@@ -465,8 +485,11 @@ const configuration = defineConfig({
 			},
 		],
 		"small-rules/no-dead-store": "error",
+		"small-rules/no-derived-state": "off",
 		"small-rules/no-error": "off",
+		"small-rules/no-event-handler": "off",
 		"small-rules/no-events-in-events-callback": "off",
+		"small-rules/no-external-store-subscription": "off",
 		"small-rules/no-filter-map-chain": "off",
 		"small-rules/no-floating-point-equality": "error",
 		"small-rules/no-giant-component": "off",
@@ -475,14 +498,18 @@ const configuration = defineConfig({
 		"small-rules/no-ianitor-success-access": "off",
 		"small-rules/no-identity-map": "off",
 		"small-rules/no-increment-decrement": ["error", { allowAutofix: true }],
+		"small-rules/no-initialize-state": "off",
 		"small-rules/no-inline-property-on-memo-component": "off",
 		"small-rules/no-instance-methods-without-this": "off",
 		"small-rules/no-loop-iterable-mutation": "error",
 		"small-rules/no-native-properties-spread": "off",
 		"small-rules/no-new-instance-in-use-memo": "off",
+		"small-rules/no-pass-data-to-parent": "off",
+		"small-rules/no-pass-live-state-to-parent": "off",
 		"small-rules/no-print": "off",
 		"small-rules/no-redundant-aspect-ratio-constraint": "off",
 		"small-rules/no-render-helper-functions": "off",
+		"small-rules/no-reset-all-state-on-prop-change": "off",
 		"small-rules/no-restricted-property-assignment": "off",
 		"small-rules/no-spec-file-extension": "error",
 		"small-rules/no-static-react-create-element": "error",
@@ -884,12 +911,6 @@ const configuration = defineConfig({
 			},
 		],
 		"unicorn/filename-case": ["error", { case: "kebabCase" }],
-		"unicorn/import-style": [
-			"error",
-			{
-				styles: {},
-			},
-		],
 		"unicorn/no-array-callback-reference": "off",
 		"unicorn/no-nested-ternary": "off",
 		"unicorn/no-new-array": "error",
@@ -901,6 +922,7 @@ const configuration = defineConfig({
 		"unicorn/switch-case-braces": "off",
 		"unused-imports/no-unused-imports": "error",
 		"unused-imports/no-unused-vars": "off",
+		"vue/no-dupe-keys": "off",
 	},
 	settings: {
 		jsdoc: {

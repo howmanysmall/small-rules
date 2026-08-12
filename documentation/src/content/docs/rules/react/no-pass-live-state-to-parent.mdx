@@ -1,0 +1,26 @@
+---
+title: "No Pass Live State to Parent"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-pass-live-state-to-parent">
+	<Fragment slot="rationale">
+		<p>
+			Ported from{" "}
+			[`eslint-plugin-react-you-might-not-need-an-effect/no-pass-live-state-to-parent`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-pass-live-state-to-parent.ts).
+			The upstream rule points at the ["Notifying parent components about state
+			changes"](https://react.dev/learn/you-might-not-need-an-effect#notifying-parent-components-about-state-changes)
+			section of the React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			Same family as passing data up, except the payload is the child's own state. If the parent needs to react to
+			the child's state, the state lives in the wrong component. The effect-based notification is lifting state
+			with extra steps: an extra render, and the parent updating from state it doesn't own.
+		</p>
+		<p>
+			Lift the state. The parent owns it, passes the value and a setter down, and renders with what it needs on
+			the same frame. React's answer to two-way binding has always been that data flows down.
+		</p>
+	</Fragment>
+</RulePage>

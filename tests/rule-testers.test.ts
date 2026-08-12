@@ -7,6 +7,155 @@ import type { Fix } from "oxlint-plugin-utilities";
 
 import type { RuleCaseDocumentation } from "./rule-testers";
 
+const reportProgramRule = defineRule({
+	create(context) {
+		return {
+			Program(node): void {
+				context.report({ messageId: "program", node });
+			},
+		};
+	},
+	meta: {
+		messages: { program: "Program was visited." },
+		type: "problem",
+	},
+});
+const sourceTypeRule = defineRule({
+	create(context) {
+		return {
+			Program(node): void {
+				if (node.sourceType === "script") context.report({ messageId: "script", node });
+			},
+		};
+	},
+	meta: {
+		messages: { script: "Script source type was preserved." },
+		type: "problem",
+	},
+});
+
+const createOnceRule = defineRule({
+	createOnce(context) {
+		let programs = 0;
+		return {
+			Program(): void {
+				// nobody gaf
+			},
+			after(): void {
+				if (programs === 2) context.report({ messageId: "afterSecondCase", node: context.sourceCode.ast });
+			},
+			before(): void {
+				programs += 1;
+			},
+		};
+	},
+	meta: {
+		messages: { afterSecondCase: "Second case completed." },
+		type: "problem",
+	},
+});
+
+const scopeRule = defineRule({
+	create(context) {
+		return {
+			FunctionDeclaration(node): void {
+				for (const variable of context.sourceCode.getDeclaredVariables(node)) {
+					if (variable.name === "input") {
+						context.report({ data: { name: variable.name }, messageId: "declaredParameter", node });
+					}
+				}
+			},
+			Identifier(node): void {
+				if (node.name !== "useMemo" && node.name !== "value") return;
+				const variable = context.sourceCode.getScope(node).set.get(node.name);
+				if (variable?.defs[0]?.type === "ImportBinding") {
+					context.report({ data: { name: node.name }, messageId: "importBinding", node });
+				}
+				if (variable?.scope.type === "module" && variable.defs[0]?.type === "Variable") {
+					context.report({ data: { name: node.name }, messageId: "moduleBinding", node });
+				}
+			},
+		};
+	},
+	meta: {
+		messages: {
+			declaredParameter: "{{name}} was declared as a parameter.",
+			importBinding: "{{name}} was resolved as an import binding.",
+			moduleBinding: "{{name}} was resolved as a module binding.",
+		},
+		type: "problem",
+	},
+});
+
+const sourceCodeRule = defineRule({
+	create(context) {
+		return {
+			"Program:exit"(node): void {
+				const [statement] = node.body;
+				if (statement === undefined) return;
+				if (context.sourceCode.getAllComments().length !== 2) return;
+				if (context.sourceCode.getCommentsBefore(statement).length === 1) return;
+				context.report({ messageId: "comments", node });
+			},
+			VariableDeclarator(node): void {
+				context.report({ messageId: "comments", node });
+				context.report({
+					data: { text: context.sourceCode.getText(node.id) },
+					messageId: "text",
+					node: node.id,
+				});
+				context.report({
+					data: { token: context.sourceCode.getTokenAfter(node.id)?.value ?? "" },
+					messageId: "tokenAfter",
+					node: node.id,
+				});
+			},
+		};
+	},
+	meta: {
+		messages: {
+			comments: "Comments were exposed.",
+			text: "Text was '{{text}}'.",
+			tokenAfter: "Next token was '{{token}}'.",
+		},
+		type: "problem",
+	},
+});
+
+const fixRule = defineRule({
+	create(context) {
+		return {
+			Identifier(node): void {
+				if (node.name !== "oldName") return;
+				context.report({
+					fix(fixer): Fix {
+						return fixer.replaceText(node, "newName");
+					},
+					messageId: "rename",
+					node,
+					suggest: [
+						{
+							fix(fixer): Fix {
+								return fixer.replaceText(node, "suggestedName");
+							},
+							messageId: "suggestRename",
+						},
+					],
+				});
+			},
+		};
+	},
+	meta: {
+		fixable: "code",
+		hasSuggestions: true,
+		messages: {
+			rename: "Rename this identifier.",
+			suggestRename: "Rename using the suggestion.",
+		},
+		type: "suggestion",
+	},
+});
+
 describe("rule-testers languages", () => {
 	js.run("language-smoke-js", reportProgramRule, {
 		invalid: [{ code: "const value = 1;", errors: [{ messageId: "program" }] }],
@@ -180,154 +329,4 @@ describe("rule-testers configuration validation", () => {
 			});
 		}).toThrow("options must be JSON-serializable");
 	});
-});
-
-const reportProgramRule = defineRule({
-	create(context) {
-		return {
-			Program(node): void {
-				context.report({ messageId: "program", node });
-			},
-		};
-	},
-	meta: {
-		messages: { program: "Program was visited." },
-		type: "problem",
-	},
-});
-
-const sourceTypeRule = defineRule({
-	create(context) {
-		return {
-			Program(node): void {
-				if (node.sourceType === "script") context.report({ messageId: "script", node });
-			},
-		};
-	},
-	meta: {
-		messages: { script: "Script source type was preserved." },
-		type: "problem",
-	},
-});
-
-const createOnceRule = defineRule({
-	createOnce(context) {
-		let programs = 0;
-		return {
-			Program(): void {
-				// nobody gaf
-			},
-			after(): void {
-				if (programs === 2) context.report({ messageId: "afterSecondCase", node: context.sourceCode.ast });
-			},
-			before(): void {
-				programs += 1;
-			},
-		};
-	},
-	meta: {
-		messages: { afterSecondCase: "Second case completed." },
-		type: "problem",
-	},
-});
-
-const scopeRule = defineRule({
-	create(context) {
-		return {
-			FunctionDeclaration(node): void {
-				for (const variable of context.sourceCode.getDeclaredVariables(node)) {
-					if (variable.name === "input") {
-						context.report({ data: { name: variable.name }, messageId: "declaredParameter", node });
-					}
-				}
-			},
-			Identifier(node): void {
-				if (node.name !== "useMemo" && node.name !== "value") return;
-				const variable = context.sourceCode.getScope(node).set.get(node.name);
-				if (variable?.defs[0]?.type === "ImportBinding") {
-					context.report({ data: { name: node.name }, messageId: "importBinding", node });
-				}
-				if (variable?.scope.type === "module" && variable.defs[0]?.type === "Variable") {
-					context.report({ data: { name: node.name }, messageId: "moduleBinding", node });
-				}
-			},
-		};
-	},
-	meta: {
-		messages: {
-			declaredParameter: "{{name}} was declared as a parameter.",
-			importBinding: "{{name}} was resolved as an import binding.",
-			moduleBinding: "{{name}} was resolved as a module binding.",
-		},
-		type: "problem",
-	},
-});
-
-const sourceCodeRule = defineRule({
-	create(context) {
-		return {
-			"Program:exit"(node): void {
-				const [statement] = node.body;
-				if (statement === undefined) return;
-				if (context.sourceCode.getAllComments().length !== 2) return;
-				if (context.sourceCode.getCommentsBefore(statement).length === 1) return;
-				context.report({ messageId: "comments", node });
-			},
-			VariableDeclarator(node): void {
-				context.report({ messageId: "comments", node });
-				context.report({
-					data: { text: context.sourceCode.getText(node.id) },
-					messageId: "text",
-					node: node.id,
-				});
-				context.report({
-					data: { token: context.sourceCode.getTokenAfter(node.id)?.value ?? "" },
-					messageId: "tokenAfter",
-					node: node.id,
-				});
-			},
-		};
-	},
-	meta: {
-		messages: {
-			comments: "Comments were exposed.",
-			text: "Text was '{{text}}'.",
-			tokenAfter: "Next token was '{{token}}'.",
-		},
-		type: "problem",
-	},
-});
-
-const fixRule = defineRule({
-	create(context) {
-		return {
-			Identifier(node): void {
-				if (node.name !== "oldName") return;
-				context.report({
-					fix(fixer): Fix {
-						return fixer.replaceText(node, "newName");
-					},
-					messageId: "rename",
-					node,
-					suggest: [
-						{
-							fix(fixer): Fix {
-								return fixer.replaceText(node, "suggestedName");
-							},
-							messageId: "suggestRename",
-						},
-					],
-				});
-			},
-		};
-	},
-	meta: {
-		fixable: "code",
-		hasSuggestions: true,
-		messages: {
-			rename: "Rename this identifier.",
-			suggestRename: "Rename using the suggestion.",
-		},
-		type: "suggestion",
-	},
 });

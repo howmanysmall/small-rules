@@ -13,6 +13,7 @@ const reactHeadingName = /React/u;
 describe("Badge", () => {
 	it.each([
 		["error", "Error", "This rule reports problems and fails the lint run."],
+		["new", "New", "This rule was added in the most recent release."],
 		["suggestion", "Suggestion", "This rule reports suggestions and does not fail the lint run."],
 		["fixable", "Auto-fixable", "This rule includes an automatic code fix."],
 		["roblox", "Roblox", "This rule is specific to Roblox / Luau patterns."],

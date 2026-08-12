@@ -27,8 +27,8 @@
 	"sideEffects": false,
 	"exports": {
 		".": {
-			"default": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
 		},
 		"./package.json": "./package.json"
 	},
@@ -83,6 +83,7 @@
 		"yuku-parser": "catalog:prod"
 	},
 	"devDependencies": {
+		"@arethetypeswrong/core": "catalog:build",
 		"@biomejs/biome": "catalog:lint",
 		"@commitlint/config-conventional": "catalog:dev",
 		"@commitlint/types": "catalog:dev",
@@ -115,6 +116,7 @@
 		"oxlint-plugin-react-doctor": "catalog:lint",
 		"oxlint-tsgolint": "catalog:dev",
 		"pncat": "catalog:dev",
+		"publint": "catalog:build",
 		"react-doctor": "catalog:lint",
 		"sfw": "catalog:dev",
 		"skills": "catalog:dev",

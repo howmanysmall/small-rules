@@ -7,7 +7,7 @@ describe("no-render-helper-functions", () => {
 	tsx.run("no-render-helper-functions", rule, {
 		invalid: [
 			{
-				code: "function createLabel() { return <div />; }",
+				code: "function createLabel() { return <frame />; }",
 				documentation: { id: "fail", title: "Lowercase render helper" },
 				errors: [{ messageId: "noRenderHelper" }],
 			},
@@ -160,7 +160,7 @@ describe("no-render-helper-functions", () => {
 		],
 		valid: [
 			{
-				code: "function Component() { return <div />; }",
+				code: "function Component() { return <frame />; }",
 				documentation: { id: "pass", title: "Named component function" },
 			},
 			"function MyComponent() { return <div />; }",

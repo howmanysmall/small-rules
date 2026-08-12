@@ -1,0 +1,28 @@
+---
+title: "No Initialize State"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-initialize-state">
+	<Fragment slot="rationale">
+		<p>
+			Ported from{" "}
+			[`eslint-plugin-react-you-might-not-need-an-effect/no-initialize-state`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-initialize-state.ts).
+			The upstream rule points at TkDodo's post on [avoiding hydration mismatches with
+			`useSyncExternalStore`](https://tkdodo.eu/blog/avoiding-hydration-mismatches-with-use-sync-external-store),
+			which is a web-React problem.
+		</p>
+		<p>
+			The shape is a mount-only effect that synchronously sets state. You already have a place for initial values:
+			the `useState()` initializer. An effect that initializes state means the first frame renders without the
+			value, then the effect fires and it pops in a frame later. On the web that's also a hydration mismatch,
+			which is what the upstream link is about; roblox-ts has no server render, so that half doesn't apply here,
+			but the initial-value problem is identical.
+		</p>
+		<p>
+			The one legitimate case is async initialization, you can't await in an initializer, so the rule backs off
+			when the state write happens inside an async callback. That's the exception, not the rule.
+		</p>
+	</Fragment>
+</RulePage>

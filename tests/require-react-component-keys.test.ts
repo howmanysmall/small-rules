@@ -13,8 +13,8 @@ describe("require-react-component-keys", () => {
 function Bad1() {
     return (
         <>
-            <div />
-            <span />
+            <frame />
+            <textlabel />
         </>
     );
 }
@@ -471,7 +471,7 @@ function CallWithSpread(items, render) {
 			{
 				code: `
 function Good1() {
-    return <div />;
+    return <frame />;
 }
 `,
 				documentation: { id: "pass", title: "Keyed fragment children" },

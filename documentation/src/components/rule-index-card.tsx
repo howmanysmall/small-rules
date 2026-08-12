@@ -20,6 +20,14 @@ export function RuleIndexCard({ rule }: RuleIndexCardProperties): ReactNode {
 		>
 			<div className="rule-index-card-heading">
 				<h2>{rule.title}</h2>
+				{rule.isNew === true && (
+					<span
+						className="rule-index-card-new"
+						title={rule.addedIn === undefined ? "Not yet in a release" : `Added in ${rule.addedIn}`}
+					>
+						{"New"}
+					</span>
+				)}
 				<span className="rule-index-card-category">{rule.categoryLabel}</span>
 			</div>
 			<code>{rule.name}</code>

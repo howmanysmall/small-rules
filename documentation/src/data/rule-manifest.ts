@@ -33,6 +33,15 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "ban-react-fc" },
 				{ name: "memoized-effect-dependencies" },
 				{ name: "no-cascading-set-state" },
+				{ name: "no-derived-state" },
+				{ name: "no-chain-state-updates" },
+				{ name: "no-event-handler" },
+				{ name: "no-adjust-state-on-prop-change" },
+				{ name: "no-reset-all-state-on-prop-change" },
+				{ name: "no-pass-live-state-to-parent" },
+				{ name: "no-pass-data-to-parent" },
+				{ name: "no-external-store-subscription" },
+				{ name: "no-initialize-state" },
 				{
 					exampleExemption:
 						"Examples require components exceeding 300 lines, which are too long to display on a documentation page.",

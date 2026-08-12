@@ -17,18 +17,23 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"enforce-ianitor-check-type",
 	"isolated-functions",
 	"memoized-effect-dependencies",
+	"no-adjust-state-on-prop-change",
 	"no-array-constructor-elements",
 	"no-array-constructor-index-assignment",
 	"no-array-size-assignment",
 	"no-async-constructor",
 	"no-async-in-system",
 	"no-cascading-set-state",
+	"no-chain-state-updates",
 	"no-color3-constructor",
 	"no-commented-code",
 	"no-constant-condition-with-break",
 	"no-dead-store",
+	"no-derived-state",
 	"no-error",
+	"no-event-handler",
 	"no-events-in-events-callback",
+	"no-external-store-subscription",
 	"no-filter-map-chain",
 	"no-floating-point-equality",
 	"no-giant-component",
@@ -37,15 +42,19 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-ianitor-success-access",
 	"no-identity-map",
 	"no-increment-decrement",
+	"no-initialize-state",
 	"no-inline-property-on-memo-component",
 	"no-instance-methods-without-this",
 	"no-loop-iterable-mutation",
 	"no-native-properties-spread",
 	"no-new-instance-in-use-memo",
+	"no-pass-data-to-parent",
+	"no-pass-live-state-to-parent",
 	"no-print",
 	"no-recursive",
 	"no-redundant-aspect-ratio-constraint",
 	"no-render-helper-functions",
+	"no-reset-all-state-on-prop-change",
 	"no-restricted-property-assignment",
 	"no-spec-file-extension",
 	"no-static-react-create-element",
@@ -120,7 +129,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(100);
+			expect(ruleNames).toHaveLength(109);
 		}, 30_000);
 	});
 });

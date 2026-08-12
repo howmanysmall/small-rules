@@ -39,6 +39,21 @@ export function isIdentifierNamed(node: ESTree.Node, name: string): node is ESTr
 	return node.type === "Identifier" && node.name === name;
 }
 
+export function getNamespacedCallNames(
+	callee: ESTree.CallExpression["callee"],
+): { readonly objectName: string; readonly propertyName: string } | undefined {
+	if (
+		callee.type !== "MemberExpression" ||
+		callee.computed ||
+		callee.object.type !== "Identifier" ||
+		callee.property.type !== "Identifier"
+	) {
+		return undefined;
+	}
+
+	return { objectName: callee.object.name, propertyName: callee.property.name };
+}
+
 export function isReactNamedCall(
 	node: ESTree.CallExpression,
 	identifiers: ReadonlySet<string>,

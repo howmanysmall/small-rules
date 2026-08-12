@@ -12,7 +12,7 @@ describe("use-exhaustive-dependencies", () => {
 function Component() {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        console.log(count);
+        print(count);
     }, []);
 }
 `,
@@ -27,7 +27,7 @@ function Component() {
 function Component() {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        console.log(count);
+        print(count);
     }, [count]);
 }
 `,
@@ -39,7 +39,7 @@ function Component() {
 function Component() {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        console.log(count);
+        print(count);
     }, [count]);
 }
 `,
@@ -1230,7 +1230,7 @@ function Component() {
 function Component() {
     const a = 1;
     useEffect(() => {
-        console.log(a);
+        print(a);
     }, [a]);
 }
 `,

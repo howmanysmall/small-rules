@@ -14,18 +14,23 @@ import directiveRequireDescription from "$oxc-rules/directive-require-descriptio
 import enforceIanitorCheckType from "$oxc-rules/enforce-ianitor-check-type";
 import isolatedFunctions from "$oxc-rules/isolated-functions";
 import memoizedEffectDependencies from "$oxc-rules/memoized-effect-dependencies";
+import noAdjustStateOnPropChange from "$oxc-rules/no-adjust-state-on-prop-change";
 import noArrayConstructorElements from "$oxc-rules/no-array-constructor-elements";
 import noArrayConstructorIndexAssignment from "$oxc-rules/no-array-constructor-index-assignment";
 import noArraySizeAssignment from "$oxc-rules/no-array-size-assignment";
 import noAsyncConstructor from "$oxc-rules/no-async-constructor";
 import noAsyncInSystem from "$oxc-rules/no-async-in-system";
 import noCascadingSetState from "$oxc-rules/no-cascading-set-state";
+import noChainStateUpdates from "$oxc-rules/no-chain-state-updates";
 import noColor3Constructor from "$oxc-rules/no-color3-constructor";
 import noCommentedCode from "$oxc-rules/no-commented-code";
 import noConstantConditionWithBreak from "$oxc-rules/no-constant-condition-with-break";
 import noDeadStore from "$oxc-rules/no-dead-store";
+import noDerivedState from "$oxc-rules/no-derived-state";
 import noError from "$oxc-rules/no-error";
+import noEventHandler from "$oxc-rules/no-event-handler";
 import noEventsInEventsCallback from "$oxc-rules/no-events-in-events-callback";
+import noExternalStoreSubscription from "$oxc-rules/no-external-store-subscription";
 import noFilterMapChain from "$oxc-rules/no-filter-map-chain";
 import noFloatingPointEquality from "$oxc-rules/no-floating-point-equality";
 import noGiantComponent from "$oxc-rules/no-giant-component";
@@ -34,15 +39,19 @@ import noIanitorInFunctionBody from "$oxc-rules/no-ianitor-in-function-body";
 import noIanitorSuccessAccess from "$oxc-rules/no-ianitor-success-access";
 import noIdentityMap from "$oxc-rules/no-identity-map";
 import noIncrementDecrement from "$oxc-rules/no-increment-decrement";
+import noInitializeState from "$oxc-rules/no-initialize-state";
 import noInlinePropertyOnMemoComponent from "$oxc-rules/no-inline-property-on-memo-component";
 import noInstanceMethodsWithoutThis from "$oxc-rules/no-instance-methods-without-this";
 import noLoopIterableMutation from "$oxc-rules/no-loop-iterable-mutation";
 import noNativePropertiesSpread from "$oxc-rules/no-native-properties-spread";
 import noNewInstanceInUseMemo from "$oxc-rules/no-new-instance-in-use-memo";
+import noPassDataToParent from "$oxc-rules/no-pass-data-to-parent";
+import noPassLiveStateToParent from "$oxc-rules/no-pass-live-state-to-parent";
 import noPrint from "$oxc-rules/no-print";
 import noRecursive from "$oxc-rules/no-recursive";
 import noRedundantAspectRatioConstraint from "$oxc-rules/no-redundant-aspect-ratio-constraint";
 import noRenderHelperFunctions from "$oxc-rules/no-render-helper-functions";
+import noResetAllStateOnPropChange from "$oxc-rules/no-reset-all-state-on-prop-change";
 import noRestrictedPropertyAssignment from "$oxc-rules/no-restricted-property-assignment";
 import noSpecFileExtension from "$oxc-rules/no-spec-file-extension";
 import noStaticReactCreateElement from "$oxc-rules/no-static-react-create-element";
@@ -119,18 +128,23 @@ const smallRules = definePlugin({
 		"enforce-ianitor-check-type": enforceIanitorCheckType,
 		"isolated-functions": isolatedFunctions,
 		"memoized-effect-dependencies": memoizedEffectDependencies,
+		"no-adjust-state-on-prop-change": noAdjustStateOnPropChange,
 		"no-array-constructor-elements": noArrayConstructorElements,
 		"no-array-constructor-index-assignment": noArrayConstructorIndexAssignment,
 		"no-array-size-assignment": noArraySizeAssignment,
 		"no-async-constructor": noAsyncConstructor,
 		"no-async-in-system": noAsyncInSystem,
 		"no-cascading-set-state": noCascadingSetState,
+		"no-chain-state-updates": noChainStateUpdates,
 		"no-color3-constructor": noColor3Constructor,
 		"no-commented-code": noCommentedCode,
 		"no-constant-condition-with-break": noConstantConditionWithBreak,
 		"no-dead-store": noDeadStore,
+		"no-derived-state": noDerivedState,
 		"no-error": noError,
+		"no-event-handler": noEventHandler,
 		"no-events-in-events-callback": noEventsInEventsCallback,
+		"no-external-store-subscription": noExternalStoreSubscription,
 		"no-filter-map-chain": noFilterMapChain,
 		"no-floating-point-equality": noFloatingPointEquality,
 		"no-giant-component": noGiantComponent,
@@ -139,15 +153,19 @@ const smallRules = definePlugin({
 		"no-ianitor-success-access": noIanitorSuccessAccess,
 		"no-identity-map": noIdentityMap,
 		"no-increment-decrement": noIncrementDecrement,
+		"no-initialize-state": noInitializeState,
 		"no-inline-property-on-memo-component": noInlinePropertyOnMemoComponent,
 		"no-instance-methods-without-this": noInstanceMethodsWithoutThis,
 		"no-loop-iterable-mutation": noLoopIterableMutation,
 		"no-native-properties-spread": noNativePropertiesSpread,
 		"no-new-instance-in-use-memo": noNewInstanceInUseMemo,
+		"no-pass-data-to-parent": noPassDataToParent,
+		"no-pass-live-state-to-parent": noPassLiveStateToParent,
 		"no-print": noPrint,
 		"no-recursive": noRecursive,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
 		"no-render-helper-functions": noRenderHelperFunctions,
+		"no-reset-all-state-on-prop-change": noResetAllStateOnPropChange,
 		"no-restricted-property-assignment": noRestrictedPropertyAssignment,
 		"no-spec-file-extension": noSpecFileExtension,
 		"no-static-react-create-element": noStaticReactCreateElement,

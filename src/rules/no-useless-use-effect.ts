@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isFunction, isNode } from "$oxc-utilities/oxc-utilities";
+import { getNamespacedCallNames, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
@@ -150,21 +150,6 @@ function normalizeOptions(raw: NoUselessUseEffectOptions | undefined): Normalize
 		reportResetState: raw.reportResetState ?? true,
 		stateHooks: new Set(isStringArray(raw.stateHooks) ? raw.stateHooks : DEFAULT_STATE_HOOKS),
 	};
-}
-
-function getNamespacedCallNames(
-	callee: ESTree.CallExpression["callee"],
-): { readonly objectName: string; readonly propertyName: string } | undefined {
-	if (
-		callee.type !== "MemberExpression" ||
-		callee.computed ||
-		callee.object.type !== "Identifier" ||
-		callee.property.type !== "Identifier"
-	) {
-		return undefined;
-	}
-
-	return { objectName: callee.object.name, propertyName: callee.property.name };
 }
 
 function getNonComputedCalleePropertyName(callee: ESTree.CallExpression["callee"]): string | undefined {

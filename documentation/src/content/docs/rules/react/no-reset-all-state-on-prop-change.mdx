@@ -1,0 +1,27 @@
+---
+title: "No Reset All State on Prop Change"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-reset-all-state-on-prop-change">
+	<Fragment slot="rationale">
+		<p>
+			Ported from{" "}
+			[`eslint-plugin-react-you-might-not-need-an-effect/no-reset-all-state-on-prop-change`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-reset-all-state-on-prop-change.ts).
+			The upstream rule points at the ["Resetting all state when a prop
+			changes"](https://react.dev/learn/you-might-not-need-an-effect#resetting-all-state-when-a-prop-changes)
+			section of the React docs, so that's where the intent comes from.
+		</p>
+		<p>
+			This flags an effect that resets every piece of state back to its initial value, keyed off a prop change.
+			That's a remount you're implementing by hand, and it's worse than a remount because you get an extra render
+			with the stale state first.
+		</p>
+		<p>
+			React already has the primitive for this: pass the prop as `key` and the component remounts with fresh
+			state, no effect required. It only works at the component boundary though, which is why the rule skips
+			custom hooks, a hook can't receive a `key`.
+		</p>
+	</Fragment>
+</RulePage>
