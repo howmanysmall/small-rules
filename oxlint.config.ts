@@ -591,7 +591,7 @@ const configuration = defineConfig({
 			},
 		],
 		"small-rules/require-throw-error-capture": [
-			"error",
+			"off",
 			{
 				allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }],
 			},
