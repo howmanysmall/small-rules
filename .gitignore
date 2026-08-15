@@ -51,6 +51,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 hk.local.pkl
 /DESIGN.md
 
+.eslintcache*
+
 .agents/skills/clean-code/
 .agents/skills/dry-refactoring/
 .agents/skills/improve-codebase-architecture/
