@@ -34,7 +34,7 @@ Do not use this skill for:
 | Goal | Command |
 | --- | --- |
 | Reproduce one rule test | `nr test:agent -- tests/<rule>.test.ts` |
-| Lint the touched rule files | `nr lint:agent src/rules/<rule>.ts tests/<rule>.test.ts` |
+| Lint the touched rule files | `nr lint:agent src/rules/<category>/<rule>.ts tests/<rule>.test.ts` |
 | Check type errors | `nr type-check` |
 | Find rule wiring | `rg -n "<rule-name>" src tests` |
 | Inspect test expectations | `sed -n '1,260p' tests/<rule>.test.ts` |
@@ -61,7 +61,7 @@ Do not use this skill for:
 6. Change the smallest correct artifact:
    rule, test, or both.
 7. Rerun the focused test.
-8. Run `nr lint:agent src/rules/<rule>.ts tests/<rule>.test.ts`.
+8. Run `nr lint:agent src/rules/<category>/<rule>.ts tests/<rule>.test.ts`.
 9. Rerun `nr type-check`.
 10. Stop there unless the specific failure shows a wider plugin surface needs verification.
 
@@ -89,7 +89,7 @@ For `no-identity-map`:
 4. If the local rule is intentionally stricter or safer than upstream, update
    the test instead of flattenening the rule back to the port.
 5. Rerun the focused test, then run
-   `nr lint:agent src/rules/no-identity-map.ts tests/no-identity-map.test.ts`,
+   `nr lint:agent src/rules/general/no-identity-map.ts tests/no-identity-map.test.ts`,
    then rerun `nr type-check`.
 
 ## Common Mistakes

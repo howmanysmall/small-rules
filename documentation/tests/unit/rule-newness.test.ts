@@ -12,7 +12,7 @@ const ADD_LOG_FIXTURE = [
 	"__COMMIT__bbbb2222",
 	"src/rules/no-chain-state-updates.ts",
 	"src/rules/no-derived-state.ts",
-	"src/rules/subdir/not-a-rule.ts",
+	"src/rules/subdir/nested/not-a-rule.ts",
 	"",
 	"__COMMIT__cccc3333",
 	"src/rules/no-initialize-state.ts",
@@ -60,10 +60,10 @@ describe("parseAddCommits", () => {
 		expect(adds.get("no-chain-state-updates")).toBe("aaaa1111");
 	});
 
-	it("ignores non-rule paths and nested rule files", () => {
+	it("ignores deeply nested paths and non-`.ts` files", () => {
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
 
-		expect(adds.has("subdir/not-a-rule")).toBe(false);
+		expect(adds.has("subdir/nested/not-a-rule")).toBe(false);
 		expect(adds.has("not-a-rule")).toBe(false);
 	});
 });

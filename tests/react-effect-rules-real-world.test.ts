@@ -1,13 +1,13 @@
 import { describe } from "vitest";
-import noAdjustStateOnPropChange from "$oxc-rules/no-adjust-state-on-prop-change";
-import noChainStateUpdates from "$oxc-rules/no-chain-state-updates";
-import noDerivedState from "$oxc-rules/no-derived-state";
-import noEventHandler from "$oxc-rules/no-event-handler";
-import noExternalStoreSubscription from "$oxc-rules/no-external-store-subscription";
-import noInitializeState from "$oxc-rules/no-initialize-state";
-import noPassDataToParent from "$oxc-rules/no-pass-data-to-parent";
-import noPassLiveStateToParent from "$oxc-rules/no-pass-live-state-to-parent";
-import noResetAllStateOnPropChange from "$oxc-rules/no-reset-all-state-on-prop-change";
+import noAdjustStateOnPropChange from "$oxc-rules/react/no-adjust-state-on-prop-change";
+import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
+import noDerivedState from "$oxc-rules/react/no-derived-state";
+import noEventHandler from "$oxc-rules/react/no-event-handler";
+import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subscription";
+import noInitializeState from "$oxc-rules/react/no-initialize-state";
+import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
+import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
+import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-prop-change";
 
 import { tsx } from "./rule-testers";
 

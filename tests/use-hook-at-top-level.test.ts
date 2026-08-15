@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/use-hook-at-top-level";
+import rule from "$oxc-rules/react/use-hook-at-top-level";
 
 import { jsx } from "./rule-testers";
 

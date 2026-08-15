@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-paired-calls";
+import rule from "$oxc-rules/general/require-paired-calls";
 
 import { js } from "./rule-testers";
 

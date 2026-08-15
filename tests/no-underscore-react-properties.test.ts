@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-underscore-react-properties";
+import rule from "$oxc-rules/react/no-underscore-react-properties";
 
 import { tsx } from "./rule-testers";
 

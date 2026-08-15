@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-singular-enums";
+import rule from "$oxc-rules/naming/prefer-singular-enums";
 
 import { ts } from "./rule-testers";
 

@@ -1,6 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-
-import { computeDisabledArea, lte, toRuleIdLocation } from "../utilities/directive-comments";
+import { computeDisabledArea, lte, toRuleIdLocation } from "$oxc-utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

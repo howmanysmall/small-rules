@@ -161,7 +161,12 @@ it("keeps build-only code out of browser assets", async ({ page }) => {
 	await page.goto(`${baseUrl}${rulePath}`);
 	await page.waitForLoadState("networkidle");
 	const browserCode = scriptBodies.join("\n");
-	for (const forbiddenText of ["yuku-parser", "vitest", "documentation-rule-extractor", "src/rules/no-print"]) {
+	for (const forbiddenText of [
+		"yuku-parser",
+		"vitest",
+		"documentation-rule-extractor",
+		"src/rules/roblox/no-print",
+	]) {
 		expect(browserCode).not.toContain(forbiddenText);
 	}
 

@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-initialize-state";
+import rule from "$oxc-rules/react/no-initialize-state";
 
 import { tsx } from "./rule-testers";
 

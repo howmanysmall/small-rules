@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-giant-component";
+import rule from "$oxc-rules/react/no-giant-component";
 
 import { tsx } from "./rule-testers";
 

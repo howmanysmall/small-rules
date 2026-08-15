@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-event-handler";
+import rule from "$oxc-rules/react/no-event-handler";
 
 import { tsx } from "./rule-testers";
 

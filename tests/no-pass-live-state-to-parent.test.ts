@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-pass-live-state-to-parent";
+import rule from "$oxc-rules/react/no-pass-live-state-to-parent";
 
 import { tsx } from "./rule-testers";
 

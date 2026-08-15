@@ -1,3 +1,4 @@
+import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
 import {
 	getMemberPropertyName,
 	getVariableByName,
@@ -6,8 +7,6 @@ import {
 } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
-
-import { classHasYieldingMember } from "../generated/roblox-yielding-members";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";

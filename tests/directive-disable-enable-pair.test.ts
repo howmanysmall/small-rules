@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/directive-disable-enable-pair";
+import rule from "$oxc-rules/general/directive-disable-enable-pair";
 
 import { js } from "./rule-testers";
 

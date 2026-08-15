@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-trivial-assertions";
+import rule from "$oxc-rules/general/no-trivial-assertions";
 
 import { js, ts } from "./rule-testers";
 

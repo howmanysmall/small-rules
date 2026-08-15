@@ -1,6 +1,6 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-spec-file-extension";
+import rule from "$oxc-rules/naming/no-spec-file-extension";
 
 import { ts } from "./rule-testers";
 

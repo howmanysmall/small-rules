@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-early-return";
+import rule from "$oxc-rules/general/prefer-early-return";
 
 import { js } from "./rule-testers";
 

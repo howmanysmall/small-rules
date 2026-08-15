@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-increment-decrement";
+import rule from "$oxc-rules/general/no-increment-decrement";
 
 import { js } from "./rule-testers";
 

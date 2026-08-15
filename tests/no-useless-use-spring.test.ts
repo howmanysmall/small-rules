@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-useless-use-spring";
+import rule from "$oxc-rules/react/no-useless-use-spring";
 
 import { ts } from "./rule-testers";
 

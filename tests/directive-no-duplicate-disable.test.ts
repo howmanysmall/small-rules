@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/directive-no-duplicate-disable";
+import rule from "$oxc-rules/general/directive-no-duplicate-disable";
 
 import { js } from "./rule-testers";
 

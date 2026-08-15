@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-single-world-query";
+import rule from "$oxc-rules/roblox/prefer-single-world-query";
 
 import { ts } from "./rule-testers";
 

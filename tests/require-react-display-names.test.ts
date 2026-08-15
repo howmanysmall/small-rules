@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-react-display-names";
+import rule from "$oxc-rules/react/require-react-display-names";
 
 import { tsx } from "./rule-testers";
 

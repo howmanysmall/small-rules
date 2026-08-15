@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-external-store-subscription";
+import rule from "$oxc-rules/react/no-external-store-subscription";
 
 import { tsx } from "./rule-testers";
 

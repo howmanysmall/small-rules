@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-identity-map";
+import rule from "$oxc-rules/general/no-identity-map";
 
 import { ts } from "./rule-testers";
 

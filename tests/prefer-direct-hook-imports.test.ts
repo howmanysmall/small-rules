@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-direct-hook-imports";
+import rule from "$oxc-rules/react/prefer-direct-hook-imports";
 
 import { tsx } from "./rule-testers";
 

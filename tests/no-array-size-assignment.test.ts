@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-array-size-assignment";
+import rule from "$oxc-rules/roblox/no-array-size-assignment";
 
 import { js } from "./rule-testers";
 

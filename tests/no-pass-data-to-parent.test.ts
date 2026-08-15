@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-pass-data-to-parent";
+import rule from "$oxc-rules/react/no-pass-data-to-parent";
 
 import { tsx } from "./rule-testers";
 

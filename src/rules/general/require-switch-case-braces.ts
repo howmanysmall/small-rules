@@ -1,6 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-
-import { isRecord } from "../utilities/type-utilities";
+import { isRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

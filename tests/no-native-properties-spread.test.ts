@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-native-properties-spread";
+import rule from "$oxc-rules/roblox/no-native-properties-spread";
 
 import { tsx } from "./rule-testers";
 

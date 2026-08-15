@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-task-wait";
+import rule from "$oxc-rules/roblox/no-task-wait";
 
 import { js } from "./rule-testers";
 

@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/directive-require-description";
+import rule from "$oxc-rules/general/directive-require-description";
 
 import { js, ts } from "./rule-testers";
 

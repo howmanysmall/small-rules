@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-ianitor-success-access";
+import rule from "$oxc-rules/roblox/no-ianitor-success-access";
 
 import { ts } from "./rule-testers";
 

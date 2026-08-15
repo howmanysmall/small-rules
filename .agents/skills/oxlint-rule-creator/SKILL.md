@@ -12,7 +12,7 @@ When this skill is active, you MUST follow this order:
 1. Create or port the test file in `tests/`.
 2. Add the initial valid/invalid cases, including one documented fail example
    and one documented pass example unless a reasoned exemption is necessary.
-3. Only then implement the rule in `src/rules/`.
+3. Only then implement the rule in `src/rules/<category>/`.
 4. Register the rule in `src/index.ts` and update `tests/index.test.ts`.
 5. Add the rule to the documentation manifest and create its MDX page under
    `documentation/src/content/docs/rules/`.
@@ -26,7 +26,7 @@ When this skill is active, you MUST follow this order:
 
 YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS.
 
-If you catch yourself drafting `src/rules/{rule-name}.ts` before drafting
+If you catch yourself drafting `src/rules/<category>/{rule-name}.ts` before drafting
 `tests/{rule-name}.test.ts`, STOP at once. That is the wrong workflow for this
 skill.
 
@@ -49,7 +49,7 @@ If any answer is no, do not write the implementation yet.
 
 ## Overview
 
-Oxlint JS plugins use an ESLint-compatible API. Rules live under `src/rules/`
+Oxlint JS plugins use an ESLint-compatible API. Rules live under `src/rules/<category>/`
 in this repo and are registered in `src/index.ts`.
 
 **Nonnegotiable workflow for new rules: TDD is required.**
@@ -320,7 +320,7 @@ return {
 
 ```ts
 import { definePlugin } from "oxlint-plugin-utilities";
-import myRule from "$oxc-rules/my-rule";
+import myRule from "$oxc-rules/<category>/my-rule";
 
 const smallRules = definePlugin({
   meta: { name: "small-rules" },
@@ -675,7 +675,7 @@ preconfigured testers from `tests/rule-testers.ts`.
 ```ts
 // tests/my-rule.test.ts
 import { describe } from "vitest";
-import myRule from "$oxc-rules/my-rule";
+import myRule from "$oxc-rules/<category>/my-rule";
 import { ts } from "./rule-testers";
 
 describe("my-rule", () => {
@@ -831,7 +831,7 @@ Please create new utility functions / modules to reduce duplicated code.
 
 ## Verification Checklist
 
-- [ ] Rule file at `src/rules/{rule-name}.ts`
+- [ ] Rule file at `src/rules/<category>/{rule-name}.ts`
 - [ ] Tests at `tests/{rule-name}.test.ts`
 - [ ] Tests were written or ported before the rule implementation (required; do not skip)
 - [ ] I did not output implementation-first code for a new rule

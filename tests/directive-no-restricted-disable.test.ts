@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/directive-no-restricted-disable";
+import rule from "$oxc-rules/general/directive-no-restricted-disable";
 
 import { js } from "./rule-testers";
 

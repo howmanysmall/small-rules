@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/ban-instances";
+import rule from "$oxc-rules/roblox/ban-instances";
 
 import { tsx } from "./rule-testers";
 

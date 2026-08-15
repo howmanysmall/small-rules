@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-async-in-system";
+import rule from "$oxc-rules/roblox/no-async-in-system";
 
 import { ts } from "./rule-testers";
 

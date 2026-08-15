@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-ternary-conditional-rendering";
+import rule from "$oxc-rules/react/prefer-ternary-conditional-rendering";
 
 import { jsx } from "./rule-testers";
 

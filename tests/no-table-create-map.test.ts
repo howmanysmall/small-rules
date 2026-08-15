@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-table-create-map";
+import rule from "$oxc-rules/roblox/no-table-create-map";
 
 import { ts } from "./rule-testers";
 
