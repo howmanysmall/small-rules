@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-math-min-max";
+import rule from "$oxc-rules/roblox/prefer-math-min-max";
 
 import { ts } from "./rule-testers";
 

@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-pascal-case-enums";
+import rule from "$oxc-rules/naming/prefer-pascal-case-enums";
 
 import { ts } from "./rule-testers";
 

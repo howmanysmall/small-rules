@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-use-of-empty-return-value";
+import rule from "$oxc-rules/general/no-use-of-empty-return-value";
 
 import { js, ts } from "./rule-testers";
 

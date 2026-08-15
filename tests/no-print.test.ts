@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-print";
+import rule from "$oxc-rules/roblox/no-print";
 
 import { js } from "./rule-testers";
 

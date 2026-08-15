@@ -4,6 +4,7 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"paths": {
+			"$oxc-generated/*": ["../src/generated/*"],
 			"$oxc-rules/*": ["../src/rules/*"],
 			"$oxc-types/*": ["../src/types/*"],
 			"$oxc-utilities/*": ["../src/utilities/*"],

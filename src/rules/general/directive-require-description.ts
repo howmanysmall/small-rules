@@ -1,10 +1,9 @@
 import { createRule } from "$oxc-utilities/create-rule";
-
 import {
 	getOptionalStringArrayProperty,
 	isDisableOrEnableDirectiveKind,
 	parseDirectiveComment,
-} from "../utilities/directive-comments";
+} from "$oxc-utilities/directive-comments";
 
 import type { Comment, Visitor } from "oxlint-plugin-utilities";
 

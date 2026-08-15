@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/directive-no-unused-enable";
+import rule from "$oxc-rules/general/directive-no-unused-enable";
 
 import { js } from "./rule-testers";
 

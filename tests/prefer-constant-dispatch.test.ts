@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-constant-dispatch";
+import rule from "$oxc-rules/react/prefer-constant-dispatch";
 
 import { tsx } from "./rule-testers";
 

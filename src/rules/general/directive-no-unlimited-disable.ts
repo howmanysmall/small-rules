@@ -1,6 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-
-import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "../utilities/directive-comments";
+import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "$oxc-utilities/directive-comments";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

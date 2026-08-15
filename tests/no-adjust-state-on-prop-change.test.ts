@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-adjust-state-on-prop-change";
+import rule from "$oxc-rules/react/no-adjust-state-on-prop-change";
 
 import { tsx } from "./rule-testers";
 

@@ -6,10 +6,10 @@
  * reach the internal branch arms that the focused rule tests cannot.
  */
 import { describe } from "vitest";
-import noChainStateUpdates from "$oxc-rules/no-chain-state-updates";
-import noDerivedState from "$oxc-rules/no-derived-state";
-import noExternalStoreSubscription from "$oxc-rules/no-external-store-subscription";
-import noPassDataToParent from "$oxc-rules/no-pass-data-to-parent";
+import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
+import noDerivedState from "$oxc-rules/react/no-derived-state";
+import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subscription";
+import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 
 import { tsx } from "./rule-testers";
 

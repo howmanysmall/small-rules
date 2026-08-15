@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/ban-types";
+import rule from "$oxc-rules/naming/ban-types";
 
 import { ts } from "./rule-testers";
 

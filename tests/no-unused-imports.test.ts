@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-unused-imports";
+import rule from "$oxc-rules/general/no-unused-imports";
 
 import { ts } from "./rule-testers";
 

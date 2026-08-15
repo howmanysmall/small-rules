@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-unicode-regex";
+import rule from "$oxc-rules/general/require-unicode-regex";
 
 import { ts } from "./rule-testers";
 

@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-use-reducer";
+import rule from "$oxc-rules/react/prefer-use-reducer";
 
 import { ts } from "./rule-testers";
 

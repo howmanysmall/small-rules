@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-array-constructor-elements";
+import rule from "$oxc-rules/roblox/no-array-constructor-elements";
 
 import { ts, tsx } from "./rule-testers";
 

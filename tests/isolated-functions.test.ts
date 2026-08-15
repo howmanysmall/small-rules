@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/isolated-functions";
+import rule from "$oxc-rules/general/isolated-functions";
 
 import { js, ts } from "./rule-testers";
 

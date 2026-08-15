@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-restricted-property-assignment";
+import rule from "$oxc-rules/general/no-restricted-property-assignment";
 
 import { js } from "./rule-testers";
 

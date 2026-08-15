@@ -122,7 +122,7 @@ Roblox, React Luau components, Ianitor life cycles, `useReducer` patterns, and R
 conventions.
 
 Repository layout worth reading when researching a change:
-- `src/rules/<rule-name>.ts` is one rule per file, keyed by its kebab-case name.
+- `src/rules/<category>/<rule-name>.ts` is one rule per file, keyed by its kebab-case name.
 - `tests/<rule-name>.test.ts` holds the `valid` and `invalid` cases for that rule. A case moved
   from `invalid` to `valid` is a fixed false positive; the reverse is a fixed false negative.
 - `src/utilities/` holds shared AST helpers. Changes here are internal unless a rule's reported

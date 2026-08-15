@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-chain-state-updates";
+import rule from "$oxc-rules/react/no-chain-state-updates";
 
 import { tsx } from "./rule-testers";
 

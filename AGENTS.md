@@ -48,11 +48,11 @@ Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md
 
 ### Entry Point - `src/index.ts`
 
-Uses `definePlugin` from `oxlint-plugin-utilities` to register all 87 rules. Each rule is imported from `$oxc-rules/<rule-name>` and mapped by kebab-case key. Rules are exported as a default export.
+Uses `definePlugin` from `oxlint-plugin-utilities` to register all rules. Each rule is imported from `$oxc-rules/<category>/<rule-name>` and mapped by kebab-case key. Rules are exported as a default export.
 
-### Rules - `src/rules/*.ts`
+### Rules - `src/rules/*/*.ts`
 
-Each file is a single rule. Rules are created with:
+Each file is a single rule, grouped under `src/rules/<category>/`. Rules are created with:
 
 - **`defineRule()`** - standard oxlint rule factory from `oxlint-plugin-utilities`. Receives `context` (with `report()`, `options`, `sourceCode`) and returns a `Visitor` object keyed by AST node type.
 - **`createBannedGlobalCallRule()`** - convenience factory for banning global function calls (e.g. `print()`, `error()`, `warn()`). Takes `name`, `message`, `alternative`, `messageId`.
@@ -101,7 +101,7 @@ Test pattern:
 
 ```ts
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-print";
+import rule from "$oxc-rules/roblox/no-print";
 import { js } from "./rule-testers";
 
 describe("no-print", () => {

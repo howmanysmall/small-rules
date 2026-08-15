@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-color3-constructor";
+import rule from "$oxc-rules/roblox/no-color3-constructor";
 
 import { js } from "./rule-testers";
 

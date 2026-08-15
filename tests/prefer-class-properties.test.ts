@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-class-properties";
+import rule from "$oxc-rules/general/prefer-class-properties";
 
 import { js } from "./rule-testers";
 

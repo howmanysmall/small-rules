@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-ianitor-in-function-body";
+import rule from "$oxc-rules/roblox/no-ianitor-in-function-body";
 
 import { ts } from "./rule-testers";
 

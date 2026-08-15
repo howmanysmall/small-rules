@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-module-level-instantiation";
+import rule from "$oxc-rules/roblox/require-module-level-instantiation";
 
 import { tsx } from "./rule-testers";
 

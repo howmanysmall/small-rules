@@ -1,6 +1,6 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-redundant-aspect-ratio-constraint";
+import rule from "$oxc-rules/roblox/no-redundant-aspect-ratio-constraint";
 
 import { tsx } from "./rule-testers";
 

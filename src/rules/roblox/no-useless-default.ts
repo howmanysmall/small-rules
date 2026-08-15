@@ -1,9 +1,8 @@
+import defaultProperties from "$oxc-generated/default-properties.json";
+import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-
-import defaultProperties from "../generated/default-properties.json";
-import { unwrapExpression } from "../utilities/ast-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 

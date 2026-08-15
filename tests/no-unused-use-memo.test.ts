@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-unused-use-memo";
+import rule from "$oxc-rules/react/no-unused-use-memo";
 
 import { ts } from "./rule-testers";
 

@@ -1,6 +1,6 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
-import rule from "$oxc-rules/prefer-padding-components";
+import rule from "$oxc-rules/react/prefer-padding-components";
 
 import { tsx } from "./rule-testers";
 

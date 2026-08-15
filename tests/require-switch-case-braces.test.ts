@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-switch-case-braces";
+import rule from "$oxc-rules/general/require-switch-case-braces";
 
 import { js } from "./rule-testers";
 

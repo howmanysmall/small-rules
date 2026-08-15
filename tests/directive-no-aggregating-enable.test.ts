@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/directive-no-aggregating-enable";
+import rule from "$oxc-rules/general/directive-no-aggregating-enable";
 
 import { js } from "./rule-testers";
 

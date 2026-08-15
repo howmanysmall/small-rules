@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-named-effect-functions";
+import rule from "$oxc-rules/react/require-named-effect-functions";
 
 import { tsx } from "./rule-testers";
 

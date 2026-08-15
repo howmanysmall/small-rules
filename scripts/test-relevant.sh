@@ -32,8 +32,8 @@ while IFS= read -r -d '' record; do
 		tests/*.test.ts | tests/*.spec.ts)
 			addTestIfPresent "${path}"
 			;;
-		src/rules/*.ts)
-			ruleName="${path#src/rules/}"
+		src/rules/*/*.ts)
+			ruleName="${path#src/rules/*/}"
 			addTestIfPresent "tests/${ruleName%.ts}.test.ts"
 			;;
 		src/index.ts)

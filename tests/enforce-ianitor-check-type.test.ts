@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/enforce-ianitor-check-type";
+import rule from "$oxc-rules/roblox/enforce-ianitor-check-type";
 
 import { ts } from "./rule-testers";
 

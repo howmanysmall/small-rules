@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/no-loop-iterable-mutation";
+import rule from "$oxc-rules/general/no-loop-iterable-mutation";
 
 import { js, ts } from "./rule-testers";
 

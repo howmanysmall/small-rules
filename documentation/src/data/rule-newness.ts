@@ -60,15 +60,16 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
 			currentCommit = line.slice(COMMIT_MARKER.length);
 			continue;
 		}
+		const relativePath = line.slice(RULE_DIRECTORY.length);
 		if (
 			currentCommit === undefined ||
 			!line.startsWith(RULE_DIRECTORY) ||
 			!line.endsWith(".ts") ||
-			line.slice(RULE_DIRECTORY.length, -".ts".length).includes("/")
+			relativePath.split("/").length > 2
 		) {
 			continue;
 		}
-		const ruleName = line.slice(RULE_DIRECTORY.length, -".ts".length);
+		const ruleName = nodePath.basename(line, ".ts");
 		if (!addedInByRule.has(ruleName)) addedInByRule.set(ruleName, currentCommit);
 	}
 

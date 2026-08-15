@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/require-async-suffix";
+import rule from "$oxc-rules/naming/require-async-suffix";
 
 import { ts } from "./rule-testers";
 

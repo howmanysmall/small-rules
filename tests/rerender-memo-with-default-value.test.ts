@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/rerender-memo-with-default-value";
+import rule from "$oxc-rules/react/rerender-memo-with-default-value";
 
 import { ts } from "./rule-testers";
 
