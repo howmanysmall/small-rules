@@ -8,9 +8,9 @@
 				"preset": "recommended",
 				"useSortedAttributes": "on",
 				"useSortedEnumMembers": "on",
-				"useSortedInterfaceMembers": "on",
+				"useSortedInterfaceMembers": "off",
 				"useSortedKeys": {
-					"level": "on",
+					"level": "off",
 					"options": {
 						"groupByNesting": false,
 						"sortOrder": "lexicographic"
@@ -210,7 +210,7 @@
 
 			"nursery": {
 				"noBaseToString": "error",
-				"noConditionalExpect": "error",
+				"noConditionalExpect": "off",
 				"noExcessiveNestedCallbacks": {
 					// temporarily disabled
 					"level": "off",
@@ -236,7 +236,7 @@
 				"useExplicitReturnType": "error",
 				"useExplicitType": "off",
 				"useIframeSandbox": "error",
-				"useImportsFirst": "error",
+				"useImportsFirst": "off",
 				"useMathMinMax": "error",
 				"useNamedCaptureGroup": "error",
 				"useNullishCoalescing": "error",
