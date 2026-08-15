@@ -53,6 +53,7 @@ peerDependencyRules:
   allowedVersions:
     "@emnapi/core": ">=1.0.0"
     "@emnapi/runtime": ">=1.0.0"
+    "@typescript-eslint/*>typescript": "6.0.2"
 
 # Global virtual store (pnpm's node_modules/.pnpm equivalent)
 enableGlobalVirtualStore: true
@@ -193,7 +194,7 @@ catalogs:
     sfw: 2.0.6
     skills: 1.5.22
     type-fest: 5.8.0
-    typescript: 7.0.2
+    typescript: npm:@typescript/typescript6@^6.0.2
     vitiate: 0.3.1
     yuku-ast: 0.8.4
     zx: 8.8.5
@@ -213,8 +214,8 @@ catalogs:
     knip: 6.32.1
     react-doctor: 0.9.11
     oxlint-plugin-react-doctor: 0.9.11
-    '@vitest/eslint-plugin': 1.6.27
-    '@isentinel/eslint-config': 6.0.0-beta.42
+    "@vitest/eslint-plugin": 1.6.27
+    "@isentinel/eslint-config": 6.0.0-beta.42
     eslint-plugin-n: 18.3.0
     eslint-plugin-pnpm: 1.8.0
   prod:
