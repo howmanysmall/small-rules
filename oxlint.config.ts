@@ -13,7 +13,6 @@ const reactDoctorRules = Object.fromEntries(
 );
 
 const configuration = defineConfig({
-	$schema: "node_modules/oxlint/configuration_schema.json",
 	categories: {
 		correctness: "error",
 		nursery: "error",
