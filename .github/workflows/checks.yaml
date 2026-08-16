@@ -8,9 +8,9 @@ permissions: {}
 jobs:
   check:
     name: Validate
-    runs-on: ubuntu-latest
     permissions:
       contents: read
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -41,11 +41,49 @@ jobs:
       - name: Build
         run: node --run build -- --minify && test -f dist/index.js
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
+  documentation:
+    name: Documentation
     permissions:
       contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup
+        with:
+          tools: bun node pnpm ni
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Type check documentation
+        run: node --run check
+        working-directory: documentation
+
+      - name: Install Chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
+
+      - name: Build documentation
+        run: node --run build
+        working-directory: documentation
+
+      - name: Test React components
+        run: node --run test:unit
+        working-directory: documentation
+
+      - name: Test documentation in Chromium
+        run: node --run test:browser
+        working-directory: documentation
+
+  test:
+    name: Test
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -60,41 +98,3 @@ jobs:
 
       - name: Run tests
         run: node --run test -- --reporter github-actions --reporter dot
-
-  documentation:
-    name: Documentation
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Setup toolchain
-        uses: ./.github/actions/setup
-        with:
-          tools: "bun node pnpm ni"
-
-      - name: Install dependencies
-        uses: ./.github/actions/install
-
-      - name: Type check documentation
-        working-directory: documentation
-        run: node --run check
-
-      - name: Install Chromium
-        run: pnpm --filter docs exec playwright install --with-deps chromium
-
-      - name: Build documentation
-        working-directory: documentation
-        run: node --run build
-
-      - name: Test React components
-        working-directory: documentation
-        run: node --run test:unit
-
-      - name: Test documentation in Chromium
-        working-directory: documentation
-        run: node --run test:browser

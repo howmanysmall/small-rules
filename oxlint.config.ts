@@ -954,7 +954,7 @@ const configuration = defineConfig({
 if (import.meta.main) {
 	const START_NEW_LINE = /^/gmu;
 	function indentEveryLine(value: string, amount = 1): string {
-		return value.replace(START_NEW_LINE, "\t".repeat(amount));
+		return value.replace(START_NEW_LINE, () => "\t".repeat(amount));
 	}
 
 	interface JsonSchema {

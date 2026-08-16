@@ -2,7 +2,7 @@ import { defineConfig, mergeConfig } from "vitest/config";
 
 import baseConfiguration from "./vitest.config";
 
-export default mergeConfig(
+const configuration = mergeConfig(
 	baseConfiguration,
 	defineConfig({
 		test: {
@@ -11,3 +11,5 @@ export default mergeConfig(
 		},
 	}),
 );
+
+export default configuration;

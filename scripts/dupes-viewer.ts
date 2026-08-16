@@ -21,7 +21,7 @@ if (report.trim().length === 0) {
 const encodedReport = Buffer.from(report, "utf8").toString("base64");
 const html = template.replace(
 	'window.__DUPE_REPORT__ = "";',
-	`window.__DUPE_REPORT__ = decodeReport("${encodedReport}");`,
+	() => `window.__DUPE_REPORT__ = decodeReport("${encodedReport}");`,
 );
 
 await mkdir(nodePath.dirname(outputPath), { recursive: true });

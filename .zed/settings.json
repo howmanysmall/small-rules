@@ -23,6 +23,20 @@
 	},
 	"ensure_final_newline_on_save": true,
 	"extend_comment_on_newline": false,
+	"file_scan_exclusions": [
+		"**/.git",
+		"**/.svn",
+		"**/.hg",
+		"**/.jj",
+		"**/.sl",
+		"**/.repo",
+		"**/CVS",
+		"**/.DS_Store",
+		"**/Thumbs.db",
+		"**/.classpath",
+		"**/.settings",
+		"**/node_modules"
+	],
 	"file_types": {
 		"JSONC": [
 			"tsconfig.json",
@@ -276,9 +290,7 @@
 			"binary": {
 				"env": {
 					"ESLINT_IN_EDITOR": "true"
-				},
-				"arguments": ["--stdio"],
-				"path": "vscode-eslint-language-server"
+				}
 			},
 			"settings": {
 				"codeActionOnSave": { "mode": "problems" },

@@ -616,11 +616,9 @@ function countSetterCalls(
 	return countMatchingCalls(statements, (callExpression) => {
 		if (!isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
 
-		const hasDerivedArgument = callExpression.arguments.some((argument) =>
+		return callExpression.arguments.some((argument) =>
 			argument.type === "SpreadElement" ? false : expressionContainsIdentifier(argument),
 		);
-
-		return hasDerivedArgument;
 	});
 }
 

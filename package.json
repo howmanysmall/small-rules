@@ -14,17 +14,14 @@
 	"bugs": {
 		"url": "https://github.com/howmanysmall/small-rules/issues"
 	},
-	"license": "MIT",
-	"author": "HowManySmall",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/howmanysmall/small-rules.git"
 	},
-	"files": [
-		"dist"
-	],
-	"type": "module",
+	"license": "MIT",
+	"author": "HowManySmall",
 	"sideEffects": false,
+	"type": "module",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -32,9 +29,9 @@
 		},
 		"./package.json": "./package.json"
 	},
-	"publishConfig": {
-		"access": "public"
-	},
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"biome": "biome",
 		"build": "tsdown",
@@ -54,15 +51,14 @@
 		"generate:roblox-yielding-members": "nub scripts/generate-roblox-yielding-members.ts && node --run format:safe -- src/generated/roblox-yielding-members.ts",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
+		"isentinel-lint": "isentinel-lint",
 		"jscpd": "jscpd",
 		"knip": "knip-bun",
-		"isentinel-lint": "isentinel-lint",
-		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- $a && node --run biome -- check --no-errors-on-unmatched --reporter concise $a' _",
+		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- $a && node --run biome -- check --no-errors-on-unmatched $a' _",
 		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- --agents $a && node --run biome -- check --no-errors-on-unmatched --reporter concise $a' _",
 		"oxfmt": "oxfmt",
 		"oxlint": "oxlint",
 		"prepublishOnly": "node --run build -- --minify",
-		"preversion": "if test -n \"$(git status --porcelain)\"; then echo 'Release requires a clean worktree.' >&2; exit 1; fi",
 		"release": "bumpp",
 		"skills": "skills",
 		"test": "vitest run",
@@ -72,7 +68,8 @@
 		"test:mutation": "stryker run",
 		"tsgo": "tsgo",
 		"type-check": "tsgo --noEmit",
-		"type-check:agent": "tsgo --noEmit --pretty false"
+		"type-check:agent": "tsgo --noEmit --pretty false",
+		"preversion": "if test -n \"$(git status --porcelain)\"; then echo 'Release requires a clean worktree.' >&2; exit 1; fi"
 	},
 	"dependencies": {
 		"arktype": "catalog:prod",
@@ -135,8 +132,11 @@
 	"peerDependencies": {
 		"typescript": ">=5 <8"
 	},
+	"packageManager": "pnpm@11.21.0",
 	"engines": {
 		"node": "^20.19.0 || >=22.12.0"
 	},
-	"packageManager": "pnpm@11.21.0"
+	"publishConfig": {
+		"access": "public"
+	}
 }
