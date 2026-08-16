@@ -10,6 +10,6 @@
 			"$small-rules": ["./src/index.ts"]
 		}
 	},
-	"include": ["*.config.ts", "src/**/*.ts", "tests/**/*.ts"],
+	"include": ["*.config.ts", "src/**/*.ts", "tests/**/*.ts", "tests/**/*.tsx"],
 	"exclude": ["**/{do-not-sync-ever,node_modules}/**", "{coverage,dist,plugins}/**"]
 }
