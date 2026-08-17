@@ -9,8 +9,7 @@
 import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import nodePath from "node:path";
-
-import type { Hooks, Plugin } from "@opencode-ai/plugin";
+import { Plugin } from "@opencode-ai/plugin";
 
 const HOOK_NAME = "block-npx-scripts";
 
@@ -246,34 +245,25 @@ function assertNoNpxScriptBypass(command: string, scripts: ReadonlySet<string>):
 	}
 }
 
-function createToolExecuteBeforeHandler(
-	directory: string,
-	worktree: string,
-): NonNullable<Hooks["tool.execute.before"]> {
-	return async (input, output): Promise<void> => {
-		if (!SHELL_TOOLS.has(input.tool.toLowerCase())) return;
+const blockNpxScriptsPlugin = Plugin.define({
+	id: HOOK_NAME,
+	setup: async ({ tool }) => {
+		const packageJsonPath = findPackageJson(process.cwd());
+		// Warm the scripts cache at plugin load so the first blocked command is cheap.
+		if (packageJsonPath !== undefined) await loadScriptNamesAsync(packageJsonPath);
 
-		const command = getCommandFromArguments(output.args);
-		if (command === undefined || !NPX_OR_NPM_EXEC_PATTERN.test(command)) return;
+		await tool.hook("execute.before", async (input): Promise<void> => {
+			if (!SHELL_TOOLS.has(input.tool.toLowerCase())) return;
 
-		const packageJsonPath = findPackageJson(directory, worktree);
-		if (packageJsonPath === undefined) return;
+			const command = getCommandFromArguments(input.input);
+			if (command === undefined || !NPX_OR_NPM_EXEC_PATTERN.test(command)) return;
+			if (packageJsonPath === undefined) return;
 
-		const scripts = await loadScriptNamesAsync(packageJsonPath);
-		if (scripts.size === 0) return;
+			const scripts = await loadScriptNamesAsync(packageJsonPath);
+			if (scripts.size === 0) return;
 
-		assertNoNpxScriptBypass(command, scripts);
-	};
-}
-
-// oxlint-disable-next-line small-rules/require-async-suffix -- lol.
-const blockNpxScriptsPlugin: Plugin = async ({ directory, worktree }) => {
-	const packageJsonPath = findPackageJson(directory, worktree);
-	// Warm the scripts cache at plugin load so the first blocked command is cheap.
-	if (packageJsonPath !== undefined) await loadScriptNamesAsync(packageJsonPath);
-
-	return {
-		"tool.execute.before": createToolExecuteBeforeHandler(directory, worktree),
-	};
-};
+			assertNoNpxScriptBypass(command, scripts);
+		});
+	},
+});
 export default blockNpxScriptsPlugin;

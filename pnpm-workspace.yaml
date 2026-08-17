@@ -24,7 +24,13 @@ minimumReleaseAgeExclude:
   - "@expressive-code/plugin-frames"
   - "@expressive-code/plugin-shiki"
   - "@expressive-code/plugin-text-markers"
+  - "@isentinel/dict-rbxts"
+  - "@isentinel/dict-roblox"
+  - "@opencode-ai/ai"
+  - "@opencode-ai/client"
   - "@opencode-ai/plugin"
+  - "@opencode-ai/protocol"
+  - "@opencode-ai/schema"
   - "@opencode-ai/sdk"
   - "@oxfmt/binding-android-arm-eabi"
   - "@oxfmt/binding-android-arm64"
@@ -130,7 +136,7 @@ catalogs:
     "@commitlint/types": 21.2.0
     "@octokit/rest": 22.0.1
     "@oh-my-pi/pi-coding-agent": 17.2.12
-    "@opencode-ai/plugin": 1.18.9
+    "@opencode-ai/plugin": 0.0.0-beta-17519
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     "@stryker-mutator/api": 9.6.1
     "@stryker-mutator/core": 9.6.1
@@ -243,7 +249,7 @@ peerDependencyRules:
   allowedVersions:
     "@emnapi/core": ">=1.0.0"
     "@emnapi/runtime": ">=1.0.0"
-    "@typescript-eslint/*>typescript": 6.0.2
+    "@typescript-eslint/*>typescript": ">=6.0.0 <7.0.0"
 
 fetchRetries: 5
 fetchRetryMaxtimeout: 30000
