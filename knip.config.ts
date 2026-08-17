@@ -38,7 +38,7 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	ignoreBinaries: ["hk", "nr", "xdg-open"],
+	ignoreBinaries: ["hk", "nr", "xdg-open", "nlx"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
@@ -47,6 +47,8 @@ const configuration: KnipConfig = {
 		"arktype",
 		"fast-check",
 		"sfw",
+		"eslint-plugin-*",
+		"oxlint-plugin-*",
 	],
 	ignoreExportsUsedInFile: true,
 	ignoreFiles: [".omp/**", "tests/fixtures/**"],
