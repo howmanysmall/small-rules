@@ -199,9 +199,9 @@ const noGodComponents = createRule("no-god-components", "react", {
 			if (lines > config.maxLines) {
 				context.report({
 					data: {
+						name,
 						lines: String(lines),
 						max: String(config.maxLines),
-						name,
 						target: String(config.targetLines),
 					},
 					messageId: "exceedsMaxLines",
@@ -210,9 +210,9 @@ const noGodComponents = createRule("no-god-components", "react", {
 			} else if (config.enforceTargetLines && lines > config.targetLines) {
 				context.report({
 					data: {
+						name,
 						lines: String(lines),
 						max: String(config.maxLines),
-						name,
 						target: String(config.targetLines),
 					},
 					messageId: "exceedsTargetLines",
@@ -223,7 +223,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 			const propertiesCount = countDestructuredProperties(node);
 			if (isNumberRaw(propertiesCount) && propertiesCount > config.maxDestructuredProps) {
 				context.report({
-					data: { count: String(propertiesCount), max: String(config.maxDestructuredProps), name },
+					data: { name, count: String(propertiesCount), max: String(config.maxDestructuredProps) },
 					messageId: "tooManyProps",
 					node,
 				});
@@ -232,7 +232,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 			const analysis = analyzeComponentBody(node, stateHooks);
 			if (analysis.maxJsxDepth > config.maxTsxNesting) {
 				context.report({
-					data: { depth: String(analysis.maxJsxDepth), max: String(config.maxTsxNesting), name },
+					data: { name, depth: String(analysis.maxJsxDepth), max: String(config.maxTsxNesting) },
 					messageId: "tsxNestingTooDeep",
 					node,
 				});
@@ -241,10 +241,10 @@ const noGodComponents = createRule("no-god-components", "react", {
 			if (analysis.stateHookCount > config.maxStateHooks) {
 				context.report({
 					data: {
+						name,
 						count: String(analysis.stateHookCount),
 						hooks: config.stateHooks.join(", "),
 						max: String(config.maxStateHooks),
-						name,
 					},
 					messageId: "tooManyStateHooks",
 					node,

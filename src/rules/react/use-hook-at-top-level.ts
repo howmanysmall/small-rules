@@ -64,6 +64,7 @@ function isInFinallyBlock(node: ESTree.Node): boolean {
 	const maxDepth = 20;
 	let inFinallyBlock = false;
 
+	// oxlint-disable-next-line unicorn-js/prefer-simple-condition-first -- no?
 	for (let depth = 0; depth < maxDepth && current !== null; depth += 1) {
 		if (isAnyFunction(current)) break;
 
@@ -213,7 +214,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				const current = getCurrentContext();
 				if (
 					current === undefined ||
-					!(current.isComponentOrHook || current.inNestedFunction) ||
+					(!current.isComponentOrHook && !current.inNestedFunction) ||
 					isInFinallyBlock(node)
 				) {
 					return;
@@ -314,17 +315,13 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			},
 
 			ImportDeclaration(node): void {
-				const source = node.source.value;
-
 				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
-				if (
-					config.importSources === undefined ||
-					Object.keys(config.importSources).length === 0
-				) {
+				if (config.importSources === undefined || Object.keys(config.importSources).length === 0) {
 					return;
 				}
 				/* v8 ignore stop -- @preserve */
 
+				const source = node.source.value;
 				for (const specifier of node.specifiers) {
 					if (specifier.type !== "ImportSpecifier") continue;
 					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. */

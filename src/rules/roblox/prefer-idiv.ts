@@ -24,10 +24,11 @@ function isLiteral(expression: ESTree.Expression): boolean {
 }
 
 /**
- * Returns the integer divisor when `expression` is a numeric literal that is the reciprocal of an integer, like 0.5,
- * 0.25, 0.125, 0.1, or 0.2. `math.floor(x * 0.5)` is exactly `math.floor(x / 2)`, so multiplying by the literal reads
- * as dividing by `1 / value`. Literals whose reciprocal is not an integer (0.3, 0.7, ...) and values outside (0, 1) are
- * left alone.
+ * Returns the integer divisor when `expression` is a numeric literal that is
+ * the reciprocal of an integer, like 0.5, 0.25, 0.125, 0.1, or 0.2.
+ * `math.floor(x * 0.5)` is exactly `math.floor(x / 2)`, so multiplying by the
+ * literal reads as dividing by `1 / value`. Literals whose reciprocal is not
+ * an integer (0.3, 0.7, ...) and values outside (0, 1) are left alone.
  *
  * @param expression - The operand of a `*` expression to test for being a reciprocal literal.
  * @returns The integer divisor `1 / value`, or `undefined` when `expression` is not a reciprocal literal.

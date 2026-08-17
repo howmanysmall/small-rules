@@ -163,9 +163,9 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 
 		hasReadReference = true;
 		if (
-			!(isPropertyValueReference(reference.identifier) ||
-				isJsxAttributeValueReference(reference.identifier)) &&
-				!isCallArgumentReference(reference.identifier)
+			!isPropertyValueReference(reference.identifier) &&
+			!isJsxAttributeValueReference(reference.identifier) &&
+			!isCallArgumentReference(reference.identifier)
 		) {
 			return false;
 		}

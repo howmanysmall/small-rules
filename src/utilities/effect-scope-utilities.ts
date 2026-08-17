@@ -358,7 +358,7 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 			} else {
 				return false;
 			}
-			return undefined;
+			return;
 		},
 		visited,
 	);

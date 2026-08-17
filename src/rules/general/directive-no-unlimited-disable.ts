@@ -15,7 +15,7 @@ const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable",
 			}
 			if (directive.value === undefined || directive.value === "") {
 				context.report({
-					data: { kind: directive.kind },
+					data: { kind },
 					loc: toForceLocation(directive.comment.loc),
 					messageId: "unexpected",
 				});

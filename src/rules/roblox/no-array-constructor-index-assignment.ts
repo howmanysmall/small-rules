@@ -170,9 +170,8 @@ function getCandidate(
 function createFix(
 	fixer: Fixer,
 	sourceCode: SourceCode,
-	candidate: Candidate,
+	{ assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement }: Candidate,
 ): Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> {
-	const { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement } = candidate;
 	const { init } = declarator;
 	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
 	if (init === null) return [];

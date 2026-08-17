@@ -191,10 +191,7 @@ function createMatcher(key: string, replacement: string): MatcherResult {
 	return { original: key, replacement, type: "exact" };
 }
 
-function matchWord(
-	word: string,
-	configuration: ShorthandConfig,
-): ShorthandReplacement["matches"][number] | undefined {
+function matchWord(word: string, configuration: ShorthandConfig): ShorthandReplacement["matches"][number] | undefined {
 	const exactReplacement = configuration.exactMatchers.get(word);
 	if (exactReplacement !== undefined) {
 		return {
@@ -368,9 +365,9 @@ function normalizeShorthandConfiguration(options: unknown): ShorthandConfig {
 
 	return {
 		exactMatchers,
+		ignoredIdentifiers: new Map<string, boolean>(),
 		ignoreExact,
 		ignoreMatchers,
-		ignoredIdentifiers: new Map<string, boolean>(),
 		matchers,
 		replacementsByIdentifier: new Map<string, false | ShorthandReplacement>(),
 	};

@@ -9,8 +9,8 @@ import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface HookConfig {
-	readonly allowAsync: boolean;
 	readonly name: string;
+	readonly allowAsync: boolean;
 }
 
 interface EffectFunctionOptions {
@@ -21,9 +21,9 @@ interface EffectFunctionOptions {
 }
 
 const DEFAULT_HOOKS = [
-	{ allowAsync: false, name: "useEffect" },
-	{ allowAsync: false, name: "useLayoutEffect" },
-	{ allowAsync: false, name: "useInsertionEffect" },
+	{ name: "useEffect", allowAsync: false },
+	{ name: "useLayoutEffect", allowAsync: false },
+	{ name: "useInsertionEffect", allowAsync: false },
 ] as const;
 
 function isHookConfiguration(value: unknown): value is HookConfig {

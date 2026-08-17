@@ -105,7 +105,9 @@ const noUnusedImports = createRule("no-unused-imports", "general", {
 		const { sourceCode } = context;
 
 		const checkJsDoc = context.options[0]?.checkJSDoc ?? true;
-		const jsdocIdentifiers = checkJsDoc ? collectJsDocumentIdentifiers(sourceCode.getAllComments()) : new Set<string>();
+		const jsdocIdentifiers = checkJsDoc
+			? collectJsDocumentIdentifiers(sourceCode.getAllComments())
+			: new Set<string>();
 
 		const imports = new Array<ImportInfo>();
 		let scopeReference: ESTree.ImportDeclaration | undefined;

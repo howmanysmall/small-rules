@@ -31,7 +31,7 @@ function isIanitorValidator(node: ESTree.CallExpression): boolean {
 function unwrapReadonlyType(typeNode: ESTree.Node): ESTree.Node {
 	if (typeNode.type !== "TSTypeReference") return typeNode;
 
-	const { typeName, typeArguments } = typeNode;
+	const { typeArguments, typeName } = typeNode;
 	if (typeName.type !== "Identifier" || typeName.name !== "Readonly") return typeNode;
 
 	return typeArguments?.params[0] ?? typeNode;
@@ -41,7 +41,7 @@ function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined
 	const currentType = unwrapReadonlyType(typeNode);
 	if (currentType.type !== "TSTypeReference") return undefined;
 
-	const { typeName, typeArguments } = currentType;
+	const { typeArguments, typeName } = currentType;
 	if (typeName.type !== "TSQualifiedName") return undefined;
 
 	const { left, right } = typeName;
@@ -58,7 +58,7 @@ function hasIanitorStaticType(typeNode: ESTree.Node): boolean {
 	const currentType = unwrapReadonlyType(typeNode);
 	if (currentType.type !== "TSTypeReference") return false;
 
-	const { typeName, typeArguments } = currentType;
+	const { typeArguments, typeName } = currentType;
 	if (typeName.type !== "TSQualifiedName") return false;
 
 	const { left, right } = typeName;
@@ -109,7 +109,9 @@ function addScore(current: number, addition: number, config: ComplexityConfig, c
 	return Math.min(nextScore, ceiling);
 }
 
-// biome-ignore lint/complexity/useMaxParams: do not care.
+/**
+ * Biome-ignore lint/complexity/useMaxParams: do not care.
+ */
 function addStructuralScore(
 	current: number,
 	node: ESTree.Node,
@@ -156,7 +158,9 @@ function addNestedTypeAnnotationScores(
 	return score;
 }
 
-// biome-ignore lint/complexity/useMaxParams: do not care.
+/**
+ * Biome-ignore lint/complexity/useMaxParams: do not care.
+ */
 function addTypeUnionScores(
 	score: number,
 	node: ESTree.Node,
@@ -257,7 +261,7 @@ function calculateStructuralComplexity(
 		}
 
 		case "TSConditionalType": {
-			const { checkType, extendsType, trueType, falseType } = node;
+			const { checkType, extendsType, falseType, trueType } = node;
 			score = addScore(
 				addScore(
 					3,
@@ -333,7 +337,7 @@ function calculateStructuralComplexity(
 
 		case "TSInterfaceDeclaration": {
 			score = config.interfacePenalty;
-			const { extends: extendsClause, body } = node;
+			const { body, extends: extendsClause } = node;
 			if (extendsClause.length > 0) {
 				score = addScore(score, extendsClause.length * 5, config, ceiling);
 			}

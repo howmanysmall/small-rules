@@ -1,31 +1,31 @@
-/* !
- * react-effect-utilities.ts
- *
- * Ported analysis helpers from
- * eslint-plugin-react-you-might-not-need-an-effect.
- *
- * MIT License
- *
- * Copyright (c) 2025 Nick van Dyke
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// !
+// react-effect-utilities.ts
+//
+// Ported analysis helpers from
+// eslint-plugin-react-you-might-not-need-an-effect.
+//
+// MIT License
+//
+// Copyright (c) 2025 Nick van Dyke
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
@@ -350,7 +350,9 @@ function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 // Does not include `useLayoutEffect`.
 // When used correctly, it interacts with the DOM = external system = (probably)
 // valid effect. When used incorrectly, it's probably too difficult to accurately
-// analyze anyway.
+/**
+ * Analyze anyway.
+ */
 function isUseEffect(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	/* v8 ignore next -- isUseEffect is only called with CallExpression nodes from the program call index. @preserve */
 	if (node.type !== "CallExpression") return false;
@@ -478,7 +480,9 @@ function isUseStateVariableDefinition(state: ReactEffectAnalysisState, definitio
 }
 
 // Returns false for props of HOCs (e.g. `withRouter`) because they usually have
-// side effects.
+/**
+ * Side effects.
+ */
 function isProperty(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	return (
 		reference.resolved?.defs.some((definition) => {
@@ -593,7 +597,9 @@ function getDeclaringNode(node: ESTree.Node): ESTree.Node {
 // Per the `isFunctionalComponent` etc. internals, this will return undefined for
 // some non-idiomatic component definitions. e.g. `function buildComponent(arg1,
 // arg2) { return <div />; }` Not sure we can account for that without introducing
-// false positives, and those are rare and arguably bad practice.
+/**
+ * False positives, and those are rare and arguably bad practice.
+ */
 function findEnclosingReactNode(
 	state: ReactEffectAnalysisState,
 	node: ESTree.Node | null | undefined,
@@ -609,7 +615,9 @@ function findEnclosingReactNode(
 
 // Extracts the component/hook name from a node found by `findEnclosingReactNode`.
 // Returns `undefined` for anonymous functions or when the node cannot be
-// identified.
+/**
+ * Identified.
+ */
 function getComponentName(node: ReactOwner | undefined): string | undefined {
 	/* v8 ignore next 2 -- rules only call getComponentName with a resolved owner; the undefined guard is unreachable. @preserve */
 	if (node === undefined) return undefined;

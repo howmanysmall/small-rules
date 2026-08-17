@@ -82,7 +82,9 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 
 // Statements after an if-without-else whose consequent transfers control only
 // run when the condition was false, so they belong to an implicit else arm rather
-// than both arms.
+/**
+ * Than both arms.
+ */
 function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
 	if (parent.type !== "BlockStatement" && parent.type !== "SwitchCase") return [];
 	const siblings: ReadonlyArray<ESTree.Node> = parent.type === "BlockStatement" ? parent.body : parent.consequent;

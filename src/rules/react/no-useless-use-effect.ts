@@ -1,3 +1,4 @@
+// oxlint-disable unicorn-js/no-break-in-nested-loop -- annoying as hell
 import { createRule } from "$oxc-utilities/create-rule";
 import { getNamespacedCallNames, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
@@ -161,12 +162,11 @@ function getNonComputedCalleePropertyName(callee: ESTree.CallExpression["callee"
 }
 
 function isHookCall(
-	node: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	hookIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 	hookNames: ReadonlySet<string>,
 ): boolean {
-	const { callee } = node;
 	if (callee.type === "Identifier") return hookIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
@@ -274,8 +274,10 @@ function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
 			/* v8 ignore next -- statement-only traversal never pushes arrow expressions. @preserve */
 			case "ArrowFunctionExpression":
 				continue;
+
 			case "FunctionDeclaration":
 				continue;
+
 			/* v8 ignore next -- statement-only traversal never pushes function expressions. @preserve */
 			case "FunctionExpression":
 				continue;
@@ -367,8 +369,7 @@ function isResetValue(node: ESTree.Node): boolean {
 		return value === "" || value === 0 || value === false || value === null;
 	}
 
-	if (isConstantLiteral(node)) return true;
-	return isEmptyArrayExpression(node) || isEmptyObjectExpression(node);
+	return isConstantLiteral(node) || isEmptyArrayExpression(node) || isEmptyObjectExpression(node);
 }
 
 function getResetFlagNameFromStatement(
@@ -679,11 +680,10 @@ function buildFunctionContext(
 }
 
 function isPropertyCallbackCall(
-	callExpression: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	functionContext: FunctionContext,
 	propertyCallbackPrefixes: ReadonlySet<string>,
 ): boolean {
-	const { callee } = callExpression;
 	if (callee.type === "Identifier") return functionContext.propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
@@ -776,10 +776,9 @@ function collectSetterCalls(
 }
 
 function isAllowedPropertyCallbackCall(
-	callExpression: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
-	const { callee } = callExpression;
 	if (callee.type === "Identifier") return propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
@@ -969,24 +968,24 @@ function hasConditionalSetterBasedOnProperty(
 	dependencyIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
-			if (
-				hasPropertyDependencyInCondition(statement, stateValueIdentifiers, dependencyIdentifiers) &&
-				hasSetterCallStatement(getStatementsFromConsequent(statement.consequent), stateSetterIdentifiers)
-			) {
-				return true;
-			}
+		if (statement.type !== "IfStatement") continue;
 
-			if (
-				hasConditionalSetterBasedOnProperty(
-					getAlternateStatements(statement),
-					stateSetterIdentifiers,
-					stateValueIdentifiers,
-					dependencyIdentifiers,
-				)
-			) {
-				return true;
-			}
+		if (
+			hasPropertyDependencyInCondition(statement, stateValueIdentifiers, dependencyIdentifiers) &&
+			hasSetterCallStatement(getStatementsFromConsequent(statement.consequent), stateSetterIdentifiers)
+		) {
+			return true;
+		}
+
+		if (
+			hasConditionalSetterBasedOnProperty(
+				getAlternateStatements(statement),
+				stateSetterIdentifiers,
+				stateValueIdentifiers,
+				dependencyIdentifiers,
+			)
+		) {
+			return true;
 		}
 	}
 
@@ -1038,9 +1037,7 @@ function hasEventSpecificLogic(
 	stateValueIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (!(statement.type === "IfStatement")) {
-			continue;
-		}
+		if (statement.type !== "IfStatement") continue;
 
 		if (
 			hasStateInCondition(statement, stateValueIdentifiers) &&
@@ -1323,10 +1320,10 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 
 		function hasMixedDerivedStateWithoutRealSideEffect(state: EffectAnalysisState): boolean {
 			if (
-				!(options.reportMixedDerivedState &&
-					state.setterCalls.size > 0 &&
-					state.hasNonSetter) ||
-					state.hasReturnCleanup
+				!options.reportMixedDerivedState ||
+				state.setterCalls.size === 0 ||
+				!state.hasNonSetter ||
+				state.hasReturnCleanup
 			) {
 				return false;
 			}

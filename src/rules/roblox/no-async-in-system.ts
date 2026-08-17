@@ -310,14 +310,11 @@ function getExpressionClass(
 	const current = unwrapExpression(expression);
 	if (current.type === "Identifier") return getIdentifierClass(current, sourceCode, imports, types, visited);
 	if (
-		!(
-			current.type === "CallExpression" &&
+		!(current.type === "CallExpression" &&
 			current.callee.type === "MemberExpression" &&
 			getMemberPropertyName(current.callee) === "GetService" &&
-			current.callee.object.type === "Identifier" &&
-			current.callee.object.name === "game" &&
-			!hasShadowedBinding(sourceCode, current.callee.object, "game")
-		)
+			current.callee.object.type === "Identifier") ||
+			current.callee.object.name !== "game" || hasShadowedBinding(sourceCode, current.callee.object, "game")
 	) {
 		return undefined;
 	}
