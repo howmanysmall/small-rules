@@ -90,6 +90,7 @@ function getTrackedDispatchVariable(
 	if (variableDeclarator.init?.type !== "CallExpression") return undefined;
 	if (getHookName(variableDeclarator.init) !== "useReducer") return undefined;
 
+	// oxlint-disable-next-line prefer-destructuring -- ugly.
 	const dispatchElement = variableDeclarator.id.elements[1];
 	if (dispatchElement === undefined || dispatchElement === null) return undefined;
 	if (dispatchElement.type !== "Identifier") return undefined;
