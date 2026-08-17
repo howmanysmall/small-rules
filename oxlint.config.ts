@@ -26,6 +26,7 @@ const config = isentinel(
 			"**/*.js",
 			"scripts/dupes-viewer.html",
 			"scripts/clis/**/*.ts",
+			"src/generated/**",
 		],
 		roblox: false,
 		rules: {
@@ -40,12 +41,14 @@ const config = isentinel(
 			"comment-length/limit-multi-line-comments": [
 				"error",
 				{
-					semanticComments: ["v8 ignore next"],
+					semanticComments: ["v8 ignore"],
 				},
 			],
 			complexity: "off",
 			curly: ["error", "multi-line"],
 			"default-case": "off",
+			"flawless/arrow-return-style": "off",
+			"flawless/max-lines-per-function": "off",
 			"id-length": [
 				"error",
 				{
@@ -55,6 +58,7 @@ const config = isentinel(
 				},
 			],
 			"import/exports-last": "off",
+			"import/extensions": "off",
 			"import/group-exports": "off",
 			"import/max-dependencies": "off",
 			"import/no-default-export": "off",
@@ -73,6 +77,7 @@ const config = isentinel(
 			"jsdoc/require-returns-type": "off",
 			"max-lines": "off",
 			"max-lines-per-function": "off",
+			"max-params": "off",
 			"max-statements": "off",
 			"new-cap": "off",
 			"no-bitwise": "off",
@@ -86,15 +91,18 @@ const config = isentinel(
 			"no-underscore-dangle": "off",
 			"node/callback-return": "off",
 			"node/no-sync": "off",
+			"object-shorthand": ["error"],
 			"one-var": "off",
 			"oxc/no-async-await": "off",
 			"oxc/no-const-enum": "off",
 			"oxc/no-optional-chaining": "off",
 			"oxc/no-rest-spread-properties": "off",
+			"perfectionist/sort-modules": "off",
 			"prefer-named-capture-group": "off",
 			"small-rules/ban-instances": "off",
 			"small-rules/ban-react-fc": "off",
 			"small-rules/enforce-ianitor-check-type": "off",
+			"sonar/no-nested-incdec": "off",
 			"sort-imports": [
 				"off",
 				{
@@ -114,6 +122,14 @@ const config = isentinel(
 					natural: true,
 				},
 			],
+			"style/padding-line-between-statements": [
+				"error",
+				{
+					blankLine: "never",
+					next: "*",
+					prev: "directive",
+				},
+			],
 			"ts/prefer-readonly-parameter-types": "off",
 			"ts/switch-exhaustiveness-check": [
 				"error",
@@ -123,6 +139,8 @@ const config = isentinel(
 					requireDefaultForNonUnion: false,
 				},
 			],
+			"unicorn-js/no-keyword-prefix": "off",
+			"unicorn-js/prefer-global-number-constants": "off",
 			"unicorn/no-array-callback-reference": "off",
 			"unicorn/no-new-array": "error",
 			"unicorn/no-process-exit": "off",

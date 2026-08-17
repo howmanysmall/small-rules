@@ -181,7 +181,7 @@
 				},
 				"useOptionalChain": "error",
 				"useSimpleNumberKeys": "error",
-				"useSimplifiedLogicExpression": "error",
+				"useSimplifiedLogicExpression": "off",
 				"useWhile": "error"
 			},
 
