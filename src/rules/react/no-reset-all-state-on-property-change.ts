@@ -5,7 +5,7 @@ import { getEnvironment } from "$oxc-utilities/react-utilities";
 import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import type { ESTree, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-const noResetAllStateOnPropertyChange = createRule("no-reset-all-state-on-prop-change", "react", {
+const noResetAllStateOnPropertyChange = createRule("no-reset-all-state-on-property-change", "react", {
 	create(context): Visitor {
 		const environment = getEnvironment(context.options[0]);
 		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
@@ -128,7 +128,7 @@ function isSetStateToInitialValue(
 	return sourceCode.getText(setStateToValue) === sourceCode.getText(stateInitialValue);
 }
 
-function isUndefined(node: ESTree.Node | undefined): boolean {
+function isUndefined(node?: ESTree.Node): boolean {
 	return node === undefined || (node.type === "Identifier" && node.name === "undefined");
 }
 
@@ -150,17 +150,14 @@ function countUseStates(
 		}
 		return countUseStates(analysis, componentArgument);
 	}
-	return analysis.scope.getDescendantCallExpressions(componentNode).filter((callExpression) => {
-		const { callee } = callExpression;
+	return analysis.scope.getDescendantCallExpressions(componentNode).filter(({ callee }) => {
 		if (callee.type !== "Identifier" && callee.type !== "MemberExpression") return false;
 		if (callee.type === "MemberExpression") {
 			if (callee.computed || callee.object.type !== "Identifier" || callee.property.type !== "Identifier") {
 				return false;
 			}
 			if (callee.object.name !== "React" || callee.property.name !== "useState") return false;
-		} else if (callee.name !== "useState") {
-			return false;
-		}
+		} else if (callee.name !== "useState") return false;
 		return true;
 	}).length;
 }

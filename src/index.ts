@@ -57,7 +57,7 @@ import noNewInstanceInUseMemo from "$oxc-rules/react/no-new-instance-in-use-memo
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
 import noRenderHelperFunctions from "$oxc-rules/react/no-render-helper-functions";
-import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-prop-change";
+import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-property-change";
 import noStaticReactCreateElement from "$oxc-rules/react/no-static-react-create-element";
 import noUnderscoreReactProperties from "$oxc-rules/react/no-underscore-react-properties";
 import noUnusedUseMemo from "$oxc-rules/react/no-unused-use-memo";
