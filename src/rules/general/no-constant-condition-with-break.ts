@@ -19,6 +19,13 @@ interface ConstantBooleanResult {
 	readonly value?: boolean;
 }
 
+type LoopNode =
+	| ESTree.DoWhileStatement
+	| ESTree.ForInStatement
+	| ESTree.ForOfStatement
+	| ESTree.ForStatement
+	| ESTree.WhileStatement;
+
 function toConstantValue(value: unknown): ConstantValueResult {
 	return { constant: true, value };
 }
@@ -356,13 +363,6 @@ function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): Consta
 	if (leftValue.value !== undefined) return toConstantBoolean(Boolean(leftValue.value));
 	return getConstantBoolean(expression.right);
 }
-
-type LoopNode =
-	| ESTree.DoWhileStatement
-	| ESTree.ForInStatement
-	| ESTree.ForOfStatement
-	| ESTree.ForStatement
-	| ESTree.WhileStatement;
 
 const LOOP_TYPES = new Set(["DoWhileStatement", "ForInStatement", "ForOfStatement", "ForStatement", "WhileStatement"]);
 function isLoopNode(node: ESTree.Node): node is LoopNode {
