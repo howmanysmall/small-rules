@@ -133,7 +133,6 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 
 		default:
 			visitChildren(node, scope, state);
-
 	}
 }
 

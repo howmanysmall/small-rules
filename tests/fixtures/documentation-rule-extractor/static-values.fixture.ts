@@ -30,7 +30,7 @@ ts.run("static-values", rule, {
 		{
 			filename: "example.ts",
 			code: "const valid = true;",
-			// eslint-disable-next-line unicorn/no-null -- Verifies static null extraction.
+			// oxlint-disable-next-line unicorn/no-null -- Verifies static null extraction.
 			options: [{ enabled: true, limit: 2, nothing: null, values: ["first", "second"] }],
 			documentation: { id: "template", title: "Template literal" },
 			language: "ts",

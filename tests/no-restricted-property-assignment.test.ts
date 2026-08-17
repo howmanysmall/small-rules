@@ -1,3 +1,4 @@
+import { cwd } from "node:process";
 import { describe } from "vitest";
 import rule from "$oxc-rules/general/no-restricted-property-assignment";
 
@@ -204,14 +205,14 @@ describe("no-restricted-property-assignment", () => {
 				],
 			},
 			{
-				filename: `${process.cwd()}/test/utils/development-flag.ts`,
+				filename: `${cwd()}/test/utils/development-flag.ts`,
 				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				filename: `${process.cwd()}/test/utils/development-flag.tsx`,
+				filename: `${cwd()}/test/utils/development-flag.tsx`,
 				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
