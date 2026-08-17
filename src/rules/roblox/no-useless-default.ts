@@ -183,8 +183,7 @@ function getJsxAttributeName(node: ESTree.JSXAttributeName): string | undefined 
 	return node.name;
 }
 
-function getJsxAttributeExpression(node: ESTree.JSXAttribute): ESTree.Expression | undefined {
-	const { value } = node;
+function getJsxAttributeExpression({ value }: ESTree.JSXAttribute): ESTree.Expression | undefined {
 	if (value === null) return undefined;
 	if (value.type === "Literal") return value;
 	/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
@@ -562,7 +561,7 @@ function extractColor3Value(node: ESTree.Expression): readonly [red: number, gre
 	if (node.type === "CallExpression") {
 		const path = getMemberPath(node.callee);
 		const components = extractTriple(node.arguments);
-		if (path?.length !== 2 || path[0] !== "Color3" || path[1] !== "fromRGB" || components === undefined) {
+		if (components === undefined || path?.length !== 2 || path[0] !== "Color3" || path[1] !== "fromRGB") {
 			return undefined;
 		}
 
@@ -737,12 +736,12 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			}
 
 			const previousToken = sourceCode.getTokenBefore(attribute);
-			const nextToken = sourceCode.getTokenAfter(attribute);
 			/* v8 ignore next -- @preserve JSX attributes always have a preceding token in their opening element. */
-			if (previousToken === null) return undefined;
-			if (hasCommentsAroundNode(attribute)) return undefined;
+			if (previousToken === null || hasCommentsAroundNode(attribute)) return undefined;
 			/* v8 ignore next -- @preserve SourceCode reports adjacent JSX comments through getCommentsBefore before this defensive token-between check. */
 			if (sourceCode.commentsExistBetween(previousToken, attribute)) return undefined;
+
+			const nextToken = sourceCode.getTokenAfter(attribute);
 			/* v8 ignore next -- @preserve SourceCode reports adjacent JSX comments through getCommentsAfter before this defensive token-between check. */
 			if (nextToken !== null && sourceCode.commentsExistBetween(attribute, nextToken)) return undefined;
 

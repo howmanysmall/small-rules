@@ -29,6 +29,7 @@ function objectHasFromAndTo(objectExpression: ESTree.ObjectExpression): boolean 
 		if (property.type !== "Property" || property.computed || property.key.type !== "Identifier") continue;
 
 		if (property.key.name === "from") hasFrom = true;
+		// oxlint-disable-next-line unicorn-js/prefer-else-if -- what?
 		if (property.key.name === "to") hasTo = true;
 		if (hasFrom && hasTo) return true;
 	}
@@ -43,7 +44,6 @@ function objectExpressionMatches(
 ): boolean {
 	const unwrapped = unwrapExpression(expression);
 	if (unwrapped.type === "ObjectExpression") return predicate(unwrapped);
-
 	if (unwrapped.type !== "Identifier") return false;
 
 	const variable = getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name);
