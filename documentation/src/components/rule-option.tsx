@@ -47,7 +47,9 @@ export function RuleOption({ highlightedType, option }: RuleOptionProperties): R
 	}
 
 	function handleCopyDefault(): void {
-		void copyDefaultAsync();
+		copyDefaultAsync().catch((error) => {
+			console.error("Failed to copy default value to clipboard", error);
+		});
 	}
 
 	let copyLabel: string = labels.copy;

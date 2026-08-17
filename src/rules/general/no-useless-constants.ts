@@ -137,7 +137,9 @@ function appendRelocatableCallChildren(
 	const rootName = getCallRootIdentifierName(node.callee);
 	/* v8 ignore next -- @preserve static-expression filtering rejects calls without an identifier or member root before relocation checks. */
 	if (rootName === undefined || !staticGlobalFactories.has(rootName)) return false;
-	worklist.push(node.callee, ...node.arguments);
+
+	worklist.push(node.callee);
+	for (const parameter of node.arguments) worklist.push(parameter);
 	return true;
 }
 
@@ -207,7 +209,7 @@ function appendRelocatableChildren(
 		}
 
 		case "TemplateLiteral": {
-			worklist.push(...node.expressions);
+			for (const expression of node.expressions) worklist.push(expression);
 			return true;
 		}
 

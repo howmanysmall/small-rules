@@ -1,3 +1,4 @@
+// oxlint-disable sonar/no-duplicate-string -- relations.
 import type { RuleName } from "./rule-manifest";
 
 /**
@@ -51,9 +52,6 @@ function defineRuleRelations<const TRelations extends ReadonlyArray<RuleRelation
  * `to`.
  */
 export const ruleRelations = defineRuleRelations([
-	// ---------------------------------------------------------------------------
-	// Directive comment family
-	// ---------------------------------------------------------------------------
 	{
 		from: "directive-disable-enable-pair",
 		kind: "related",
@@ -127,9 +125,6 @@ export const ruleRelations = defineRuleRelations([
 		to: "directive-require-description",
 	},
 
-	// ---------------------------------------------------------------------------
-	// Imports, constants, enums, errors
-	// ---------------------------------------------------------------------------
 	{
 		from: "no-useless-constants",
 		kind: "related",
@@ -155,9 +150,6 @@ export const ruleRelations = defineRuleRelations([
 		to: "no-warn",
 	},
 
-	// ---------------------------------------------------------------------------
-	// React: state / reducer / effects
-	// ---------------------------------------------------------------------------
 	{
 		from: "no-cascading-set-state",
 		kind: "related",
@@ -273,9 +265,6 @@ export const ruleRelations = defineRuleRelations([
 		to: "use-hook-at-top-level",
 	},
 
-	// ---------------------------------------------------------------------------
-	// React: useMemo / reference stability
-	// ---------------------------------------------------------------------------
 	{
 		from: "no-unused-use-memo",
 		kind: "related",
@@ -331,9 +320,6 @@ export const ruleRelations = defineRuleRelations([
 		to: "prefer-hoisted-jsx-object-properties",
 	},
 
-	// ---------------------------------------------------------------------------
-	// React: component shape / architecture
-	// ---------------------------------------------------------------------------
 	{
 		from: "no-giant-component",
 		kind: "overlaps",
@@ -383,9 +369,6 @@ export const ruleRelations = defineRuleRelations([
 		to: "prefer-hoisted-jsx-elements",
 	},
 
-	// ---------------------------------------------------------------------------
-	// Roblox: Ianitor / construction / arrays / yielding / UI
-	// ---------------------------------------------------------------------------
 	{
 		from: "enforce-ianitor-check-type",
 		kind: "related",

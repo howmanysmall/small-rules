@@ -30,6 +30,14 @@ for (const testFileName of testFileNames) {
 	}
 }
 
+const collator = new Intl.Collator();
+
+function orderExamples(examples: ReadonlyArray<RuleExample>): Array<RuleExample> {
+	return examples.toSorted(
+		(left, right) => collator.compare(left.kind, right.kind) || collator.compare(left.id, right.id),
+	);
+}
+
 export const ruleExamples: ReadonlyMap<RuleName, ReadonlyArray<RuleExample>> = new Map<
 	RuleName,
 	ReadonlyArray<RuleExample>
@@ -38,11 +46,3 @@ export const ruleExamples: ReadonlyMap<RuleName, ReadonlyArray<RuleExample>> = n
 		category.rules.map((entry) => [entry.name, orderExamples(examplesByRuleName.get(entry.name) ?? [])]),
 	),
 );
-
-const collator = new Intl.Collator();
-
-function orderExamples(examples: ReadonlyArray<RuleExample>): Array<RuleExample> {
-	return examples.toSorted(
-		(left, right) => collator.compare(left.kind, right.kind) || collator.compare(left.id, right.id),
-	);
-}

@@ -134,7 +134,7 @@ describe("extractRuleExamples", () => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("computed-key.fixture.ts")).toThrow(
-			"tests/fixtures/documentation-rule-extractor/computed-key.fixture.ts:11:4: computed object keys are not supported.",
+			"tests/fixtures/documentation-rule-extractor/computed-key.fixture.ts:12:4: computed object keys are not supported.",
 		);
 	});
 
@@ -142,7 +142,7 @@ describe("extractRuleExamples", () => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("invalid-marker.fixture.ts")).toThrow(
-			"tests/fixtures/documentation-rule-extractor/invalid-marker.fixture.ts:10:25: documentation.id must evaluate to a string.",
+			"tests/fixtures/documentation-rule-extractor/invalid-marker.fixture.ts:11:25: documentation.id must evaluate to a string.",
 		);
 	});
 

@@ -139,12 +139,13 @@ function addExpressionChildrenToPending(expression: ESTree.Expression, pending: 
 
 		case "SequenceExpression":
 		case "TemplateLiteral": {
-			pending.push(...expression.expressions);
+			for (const subExpression of expression.expressions) pending.push(subExpression);
 			break;
 		}
 
 		case "TaggedTemplateExpression": {
-			pending.push(expression.tag, ...expression.quasi.expressions);
+			pending.push(expression.tag);
+			for (const quasi of expression.quasi.expressions) pending.push(quasi);
 			break;
 		}
 

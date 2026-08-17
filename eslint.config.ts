@@ -74,6 +74,7 @@ const configuration = isentinel(
 		pnpm: true,
 		roblox: false,
 		rules: {
+			"sonar/no-redundant-optional": "off",
 			"ts/prefer-destructuring": "off",
 			"unicorn/no-non-function-verb-prefix": "off",
 		},

@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import nodePath from "node:path";
+import { cwd } from "node:process";
 
 import { ruleManifest } from "./rule-manifest";
 
@@ -16,7 +17,7 @@ export interface RuleNewness {
 	readonly isNew: boolean;
 }
 
-export type GitRunner = (arguments_: ReadonlyArray<string>) => string;
+export type GitRunner = (parameters: ReadonlyArray<string>) => string;
 
 /**
  * Finds the repository root by walking up from the current working directory
@@ -26,7 +27,7 @@ export type GitRunner = (arguments_: ReadonlyArray<string>) => string;
  * @returns Absolute path to the repository root.
  */
 function resolveRepositoryRoot(): string {
-	let directory = process.cwd();
+	let directory = cwd();
 	while (true) {
 		if (existsSync(nodePath.join(directory, ".git"))) return directory;
 
@@ -39,6 +40,7 @@ function resolveRepositoryRoot(): string {
 const repositoryRoot = resolveRepositoryRoot();
 const RULE_DIRECTORY = "src/rules/";
 const COMMIT_MARKER = "__COMMIT__";
+
 /**
  * Returns the first non-empty line of a command's output, or undefined when
  * empty.
@@ -85,8 +87,9 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
 }
 
 /**
- * Classifies each rule as "new". A rule is new when it was added in the latest release or added after it (not yet
- * released). This single expression is the entire freshness policy.
+ * Classifies each rule as "new". A rule is new when it was added in the latest
+ * release or added after it (not yet released). This single expression is the
+ * entire freshness policy.
  *
  * @param addedInByRule - Rule name to first containing release (undefined = unreleased).
  * @param latestTag - The most recent release tag.
@@ -105,8 +108,9 @@ export function resolveNewness(
 }
 
 /**
- * Derives rule newness from git history. Runs one `tag --contains` call per distinct add commit. Returns an empty map
- * when no release tags exist (e.g. Shallow clones)..
+ * Derives rule newness from git history. Runs one `tag --contains` call per
+ * distinct add commit. Returns an empty map when no release tags exist (e.g.
+ * Shallow clones)..
  *
  * @param run - Git command runner.
  * @returns Map of rule name to newness classification, filtered to manifest rules.
@@ -128,7 +132,8 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 	);
 
 	const firstReleaseByCommit = new Map<string, string | undefined>();
-	for (const commit of new Set(addedInByRule.values())) {
+	const commitSet = new Set(addedInByRule.values());
+	for (const commit of commitSet) {
 		firstReleaseByCommit.set(
 			commit,
 			firstLine(run(["tag", "--contains", commit, "--list", "v*", "--sort=version:refname"])),

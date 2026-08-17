@@ -1,7 +1,7 @@
 ---
 import { getRuleEntry, getRuleFacts } from "@/data/rule-facts";
-import { getRuleNewness } from "@/data/rule-newness";
 import type { RuleName } from "@/data/rule-manifest";
+import { getRuleNewness } from "@/data/rule-newness";
 import { Badge } from "./badge";
 import { RelatedRules } from "./related-rules";
 import RuleDiagnostics from "./rule-diagnostics.astro";
@@ -13,11 +13,12 @@ interface Props {
 	readonly rule: RuleName;
 }
 
-const { rule } = Astro.props,
- facts = getRuleFacts(rule),
- entry = getRuleEntry(rule),
- exampleExemption = entry?.exampleExemption,
- newness = getRuleNewness().get(rule);
+const { rule } = Astro.props;
+
+const facts = getRuleFacts(rule);
+const entry = getRuleEntry(rule);
+const exampleExemption = entry?.exampleExemption;
+const newness = getRuleNewness().get(rule);
 ---
 
 <div class="rule-badges" aria-label="Rule characteristics">
