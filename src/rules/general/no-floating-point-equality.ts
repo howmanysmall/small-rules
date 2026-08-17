@@ -115,33 +115,50 @@ function binaryIsFloating(
 	);
 }
 
+function resolveFloatingExpressionRoot(
+	node: ESTree.Expression,
+	variables: ReadonlyMap<ESTree.Node, Variable>,
+	visited: Set<Variable>,
+): ESTree.Expression | undefined {
+	let current = node;
+	while (true) {
+		const unwrapped = unwrapExpression(current);
+		if (unwrapped !== current) {
+			current = unwrapped;
+			continue;
+		}
+		if (current.type !== "Identifier") return current;
+		const variable = variables.get(current);
+		if (variable === undefined || visited.has(variable)) return undefined;
+		const initializer = getConstInitializer(variable);
+		if (initializer === undefined) return undefined;
+		visited.add(variable);
+		current = initializer;
+	}
+}
+
 function isFloatingExpression(
 	node: ESTree.Expression,
 	variables: ReadonlyMap<ESTree.Node, Variable>,
 	visited: Set<Variable>,
 ): boolean {
-	const unwrapped = unwrapExpression(node);
-	if (unwrapped !== node) return isFloatingExpression(unwrapped, variables, visited);
-	if (node.type === "Literal" && typeof node.value === "number") {
-		const raw = String(node.raw);
+	const current = resolveFloatingExpressionRoot(node, variables, visited);
+	if (current === undefined) return false;
+	if (current.type === "Literal" && typeof current.value === "number") {
+		const raw = String(current.raw);
 		return (raw.includes(".") || EXPONENT_PATTERN.test(raw)) && !isExactDecimal(raw);
 	}
-	if (node.type === "UnaryExpression") {
+	if (current.type === "UnaryExpression") {
 		return (
-			(node.operator === "+" || node.operator === "-") && isFloatingExpression(node.argument, variables, visited)
+			(current.operator === "+" || current.operator === "-") &&
+			isFloatingExpression(current.argument, variables, visited)
 		);
 	}
-	if (node.type === "BinaryExpression") {
-		if (!isComparableBinary(node)) return false;
-		return binaryIsFloating(node, variables, visited);
-	}
-	if (node.type !== "Identifier") return false;
-	const variable = variables.get(node);
-	if (variable === undefined || visited.has(variable)) return false;
-	const initializer = getConstInitializer(variable);
-	if (initializer === undefined) return false;
-	visited.add(variable);
-	return isFloatingExpression(initializer, variables, visited);
+	return (
+		current.type === "BinaryExpression" &&
+		isComparableBinary(current) &&
+		binaryIsFloating(current, variables, visited)
+	);
 }
 
 function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {

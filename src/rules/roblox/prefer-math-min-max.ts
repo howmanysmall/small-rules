@@ -9,13 +9,15 @@ import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnnotation | undefined): boolean {
 	/* v8 ignore next -- @preserve callers use undefined to mean no type annotation. */
 	if (typeAnnotation === undefined) return false;
-	if (typeAnnotation.type === "TSTypeAnnotation") return isNumberTypeAnnotation(typeAnnotation.typeAnnotation);
-	if (typeAnnotation.type === "TSNumberKeyword") return true;
+
+	let current = typeAnnotation;
+	while (current.type === "TSTypeAnnotation") current = current.typeAnnotation;
+	if (current.type === "TSNumberKeyword") return true;
 
 	return (
-		typeAnnotation.type === "TSTypeReference" &&
-		typeAnnotation.typeName.type === "Identifier" &&
-		typeAnnotation.typeName.name === "Number"
+		current.type === "TSTypeReference" &&
+		current.typeName.type === "Identifier" &&
+		current.typeName.name === "Number"
 	);
 }
 
@@ -62,18 +64,17 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 }
 
 function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	if (expression.type === "ParenthesizedExpression") {
-		return isKnownNonNumberExpression(sourceCode, expression.expression);
-	}
+	let current = expression;
+	while (current.type === "ParenthesizedExpression") current = current.expression;
 
-	if (expression.type === "TSAsExpression" || expression.type === "TSTypeAssertion") {
-		return !isNumberTypeAnnotation(expression.typeAnnotation);
+	if (current.type === "TSAsExpression" || current.type === "TSTypeAssertion") {
+		return !isNumberTypeAnnotation(current.typeAnnotation);
 	}
 
 	/* v8 ignore next -- @preserve literal non-number cases are covered by direct literal tests. */
-	if (isKnownNonNumberLiteral(expression)) return true;
+	if (isKnownNonNumberLiteral(current)) return true;
 
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = unwrapExpression(current);
 	return unwrapped.type === "Identifier" && isKnownNonNumberIdentifier(sourceCode, unwrapped);
 }
 

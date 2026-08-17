@@ -279,27 +279,32 @@ function computeArgumentUpstreamReferences(
 }
 
 function isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
-	if (node === within) return true;
+	let current = node;
+	while (current !== within) {
+		if (
+			current.type === "AwaitExpression" ||
+			(current.type === "UnaryExpression" && current.operator === "void") ||
+			FUNCTION_NODE_TYPES.has(current.type)
+		) {
+			return false;
+		}
 
-	if (
-		node.type === "AwaitExpression" ||
-		(node.type === "UnaryExpression" && node.operator === "void") ||
-		FUNCTION_NODE_TYPES.has(node.type)
-	) {
-		return false;
+		const { parent } = current;
+		/* v8 ignore next -- `within` is always an ancestor reached before the parent chain ends. @preserve */
+		if (parent === null) return false;
+		current = parent;
 	}
-
-	const { parent } = node;
-	/* v8 ignore next -- `within` is always an ancestor reached before the parent chain ends. @preserve */
-	if (parent === null) return false;
-	return isSynchronousWithin(parent, within);
+	return true;
 }
 
 function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference: Reference): ReadonlyArray<Reference> {
 	function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefined {
-		if (node === null || node === undefined) return undefined;
-		if (FUNCTION_NODE_TYPES.has(node.type)) return node;
-		return findEnclosingFunction(node.parent);
+		let current = node;
+		while (current !== null && current !== undefined) {
+			if (FUNCTION_NODE_TYPES.has(current.type)) return current;
+			current = current.parent;
+		}
+		return undefined;
 	}
 
 	function isAliasRef(candidateReference: Reference): boolean {

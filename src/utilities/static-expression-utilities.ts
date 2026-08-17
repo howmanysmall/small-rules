@@ -235,10 +235,6 @@ export function isStaticExpression(
 		case "CallExpression":
 			return checkStaticCallOrNewExpression(sourceCode, unwrapped.arguments, unwrapped.callee, seen, options);
 
-		/* v8 ignore next 2 -- @preserve unwrapExpression removes ChainExpression before this switch. */
-		case "ChainExpression":
-			return isStaticExpression(sourceCode, unwrapped.expression, seen, options);
-
 		case "ConditionalExpression": {
 			return (
 				isStaticExpression(sourceCode, unwrapped.test, seen, options) &&

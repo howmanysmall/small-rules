@@ -2,6 +2,8 @@ import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
+const SIMPLE_BINARY_OPERATORS = new Set(["%", "*", "**", "+", "-", "/"]);
+
 export function isComponentDeclaration(node: ESTree.Node): boolean {
 	return node.type === "FunctionDeclaration" && node.id !== null && isUppercaseName(node.id.name);
 }
@@ -49,26 +51,52 @@ export function hasJSXIdentifierAttribute(node: ESTree.JSXElement, attributeName
 	return false;
 }
 
-export function isSimpleExpression(node: ESTree.Node): boolean {
-	if (node.type === "BinaryExpression") {
-		switch (node.operator) {
-			case "%":
-			case "*":
-			case "**":
-			case "+":
-			case "-":
-			case "/":
-				return isSimpleExpression(node.left) && isSimpleExpression(node.right);
+function pushSimpleExpressionChildren(node: ESTree.Node, nodes: Array<ESTree.Node>): boolean {
+	switch (node.type) {
+		case "BinaryExpression": {
+			if (!SIMPLE_BINARY_OPERATORS.has(node.operator)) return false;
+			nodes.push(node.right, node.left);
+			return true;
+		}
 
-			default:
-				return false;
+		case "Identifier":
+		case "Literal": {
+			return true;
+		}
+
+		case "MemberExpression": {
+			if (node.computed) return false;
+			nodes.push(node.object);
+			return true;
+		}
+
+		case "ParenthesizedExpression": {
+			nodes.push(node.expression);
+			return true;
+		}
+
+		case "TemplateLiteral": {
+			return node.expressions.length === 0;
+		}
+
+		case "UnaryExpression": {
+			nodes.push(node.argument);
+			return true;
+		}
+
+		default: {
+			return false;
 		}
 	}
+}
 
-	if (node.type === "Identifier" || node.type === "Literal") return true;
-	if (node.type === "MemberExpression") return !node.computed && isSimpleExpression(node.object);
-	if (node.type === "ParenthesizedExpression") return isSimpleExpression(node.expression);
-	if (node.type === "TemplateLiteral") return node.expressions.length === 0;
-	if (node.type === "UnaryExpression") return isSimpleExpression(node.argument);
-	return false;
+export function isSimpleExpression(node: ESTree.Node): boolean {
+	const nodes = [node];
+	while (nodes.length > 0) {
+		const current = nodes.pop();
+		/* v8 ignore next -- the loop guard ensures pop never returns undefined. @preserve */
+		if (current === undefined) break;
+		if (!pushSimpleExpressionChildren(current, nodes)) return false;
+	}
+	return true;
 }

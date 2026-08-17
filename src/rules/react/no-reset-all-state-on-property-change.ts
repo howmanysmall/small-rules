@@ -136,30 +136,37 @@ function countUseStates(
 	analysis: ReactEffectAnalysis,
 	componentNode: ESTree.ArrowFunctionExpression | ESTree.Function | ESTree.VariableDeclarator | undefined,
 ): number {
-	if (componentNode === undefined) {
-		return 0;
+	let currentNode = componentNode;
+
+	while (currentNode !== undefined) {
+		if (currentNode.type === "VariableDeclarator" && currentNode.init?.type === "CallExpression") {
+			// Because `descend` will ignore the arguments.
+			const [componentArgument] = currentNode.init.arguments;
+			/* v8 ignore next -- memo/forwardRef calls always receive the component as their first argument. @preserve */
+			if (componentArgument === undefined) return 0;
+			if (
+				componentArgument.type !== "ArrowFunctionExpression" &&
+				componentArgument.type !== "FunctionExpression"
+			) {
+				return 0;
+			}
+			currentNode = componentArgument;
+			continue;
+		}
+
+		return analysis.scope.getDescendantCallExpressions(currentNode).filter(({ callee }) => {
+			if (callee.type !== "Identifier" && callee.type !== "MemberExpression") return false;
+			if (callee.type === "MemberExpression") {
+				if (callee.computed || callee.object.type !== "Identifier" || callee.property.type !== "Identifier") {
+					return false;
+				}
+				if (callee.object.name !== "React" || callee.property.name !== "useState") return false;
+			} else if (callee.name !== "useState") return false;
+			return true;
+		}).length;
 	}
 
-	if (componentNode.type === "VariableDeclarator" && componentNode.init?.type === "CallExpression") {
-		// Because `descend` will ignore the arguments.
-		const [componentArgument] = componentNode.init.arguments;
-		/* v8 ignore next -- memo/forwardRef calls always receive the component as their first argument. @preserve */
-		if (componentArgument === undefined) return 0;
-		if (componentArgument.type !== "ArrowFunctionExpression" && componentArgument.type !== "FunctionExpression") {
-			return 0;
-		}
-		return countUseStates(analysis, componentArgument);
-	}
-	return analysis.scope.getDescendantCallExpressions(componentNode).filter(({ callee }) => {
-		if (callee.type !== "Identifier" && callee.type !== "MemberExpression") return false;
-		if (callee.type === "MemberExpression") {
-			if (callee.computed || callee.object.type !== "Identifier" || callee.property.type !== "Identifier") {
-				return false;
-			}
-			if (callee.object.name !== "React" || callee.property.name !== "useState") return false;
-		} else if (callee.name !== "useState") return false;
-		return true;
-	}).length;
+	return 0;
 }
 
 export default noResetAllStateOnPropertyChange;

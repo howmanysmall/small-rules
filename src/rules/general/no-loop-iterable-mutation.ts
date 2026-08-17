@@ -42,16 +42,19 @@ interface MutationCall {
 }
 
 function getIdentifierName(node?: ESTree.Node | null): string | undefined {
-	if (node === null || node === undefined) return undefined;
-	if (node.type === "Identifier") return node.name;
-	if (
-		node.type === "ParenthesizedExpression" ||
-		node.type === "TSAsExpression" ||
-		node.type === "TSNonNullExpression" ||
-		node.type === "TSSatisfiesExpression" ||
-		node.type === "TSTypeAssertion"
-	) {
-		return getIdentifierName(node.expression);
+	let current = node;
+	while (current !== null && current !== undefined) {
+		if (current.type === "Identifier") return current.name;
+		if (
+			current.type !== "ParenthesizedExpression" &&
+			current.type !== "TSAsExpression" &&
+			current.type !== "TSNonNullExpression" &&
+			current.type !== "TSSatisfiesExpression" &&
+			current.type !== "TSTypeAssertion"
+		) {
+			return undefined;
+		}
+		current = current.expression;
 	}
 	return undefined;
 }

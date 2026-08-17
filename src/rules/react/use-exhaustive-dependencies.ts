@@ -198,33 +198,58 @@ function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 }
 
 function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
-	if (node.type === "Identifier") return [node.name];
-	if (node.type === "MemberExpression") return collectIdentifierNames(node.object);
-	if (node.type === "ChainExpression") return collectIdentifierNames(node.expression);
-	if (
+	const names = new Array<string>();
+	const nodes = [node];
+
+	while (nodes.length > 0) {
+		const current = nodes.pop();
+		if (current === undefined) continue;
+
+		if (current.type === "Identifier") {
+			names.push(current.name);
+			continue;
+		}
+		if (current.type === "MemberExpression") {
+			nodes.push(current.object);
+			continue;
+		}
+		if (isTransparentDependencyExpression(current)) {
+			nodes.push(current.expression);
+			continue;
+		}
+		if (current.type === "BinaryExpression" || current.type === "LogicalExpression") {
+			nodes.push(current.right, current.left);
+			continue;
+		}
+		if (current.type === "UnaryExpression") {
+			nodes.push(current.argument);
+			continue;
+		}
+		if (current.type === "ConditionalExpression") {
+			nodes.push(current.alternate, current.consequent, current.test);
+		}
+	}
+
+	return names;
+}
+
+function isTransparentDependencyExpression(
+	node: ESTree.Node,
+): node is
+	| ESTree.ChainExpression
+	| ESTree.ParenthesizedExpression
+	| ESTree.TSAsExpression
+	| ESTree.TSNonNullExpression
+	| ESTree.TSSatisfiesExpression
+	| ESTree.TSTypeAssertion {
+	return (
+		node.type === "ChainExpression" ||
 		node.type === "ParenthesizedExpression" ||
-		node.type === "TSNonNullExpression" ||
 		node.type === "TSAsExpression" ||
+		node.type === "TSNonNullExpression" ||
 		node.type === "TSSatisfiesExpression" ||
 		node.type === "TSTypeAssertion"
-	) {
-		return collectIdentifierNames(node.expression);
-	}
-
-	if (node.type === "BinaryExpression" || node.type === "LogicalExpression") {
-		return [...collectIdentifierNames(node.left), ...collectIdentifierNames(node.right)];
-	}
-
-	if (node.type === "UnaryExpression") return collectIdentifierNames(node.argument);
-	if (node.type === "ConditionalExpression") {
-		return [
-			...collectIdentifierNames(node.test),
-			...collectIdentifierNames(node.consequent),
-			...collectIdentifierNames(node.alternate),
-		];
-	}
-
-	return new Array<string>();
+	);
 }
 
 const TS_RUNTIME_EXPRESSIONS = new Set<string>([
@@ -242,26 +267,33 @@ function isExpression(
 }
 
 function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
-	if (node.type === "Identifier") return node.name;
-	if (node.type === "ChainExpression" || node.type === "ParenthesizedExpression" || isExpression(node)) {
-		return nodeToSafeDependencyPath(node.expression, sourceCode);
+	const members = new Array<ESTree.MemberExpression>();
+	let current = node;
+
+	while (true) {
+		if (current.type === "ChainExpression" || current.type === "ParenthesizedExpression" || isExpression(current)) {
+			current = current.expression;
+			continue;
+		}
+		if (current.type !== "MemberExpression") break;
+		members.push(current);
+		current = current.object;
 	}
 
-	/* v8 ignore next -- @preserve dependency path conversion only receives identifiers, chains, transparent TS wrappers, or member expressions. */
-	if (node.type === "MemberExpression") {
-		const objectPath = nodeToSafeDependencyPath(node.object, sourceCode);
-		if (node.computed) {
-			const propertyText = sourceCode.getText(node.property);
-			return `${objectPath}[${propertyText}]`;
+	let path = current.type === "Identifier" ? current.name : sourceCode.getText(current);
+	for (let index = members.length - 1; index >= 0; index -= 1) {
+		const member = members[index];
+		if (member === undefined) continue;
+		if (member.computed) {
+			path += `[${sourceCode.getText(member.property)}]`;
+			continue;
 		}
 		/* v8 ignore next -- @preserve non-computed dependency member properties are parser-provided identifiers. */
-		const propertyName = node.property.type === "Identifier" ? node.property.name : "";
-		const separator = node.optional ? "?." : ".";
-		return `${objectPath}${separator}${propertyName}`;
+		const propertyName = member.property.type === "Identifier" ? member.property.name : "";
+		path += `${member.optional ? "?." : "."}${propertyName}`;
 	}
 
-	/* v8 ignore next -- @preserve capture dependency paths are collected from identifiers, member expressions, chains, and transparent TS expression wrappers. */
-	return sourceCode.getText(node);
+	return path;
 }
 
 function isStableBindingPattern(

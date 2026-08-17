@@ -26,22 +26,20 @@ const LOOP_STATEMENT_TYPES = new Set([
 ]);
 
 function statementTransfersControl(node: ESTree.Node): boolean {
-	if (
-		node.type === "BreakStatement" ||
-		node.type === "ContinueStatement" ||
-		node.type === "ReturnStatement" ||
-		node.type === "ThrowStatement"
-	) {
-		return true;
-	}
-	if (node.type === "BlockStatement") {
+	let current = node;
+	while (current.type === "BlockStatement") {
 		/* v8 ignore next -- @preserve callers only inspect non-empty consequent blocks. */
-		const last = node.body.at(-1);
+		const last = current.body.at(-1);
 		/* v8 ignore next -- @preserve non-empty consequent blocks always have a final statement. */
 		if (last === undefined) return false;
-		return statementTransfersControl(last);
+		current = last;
 	}
-	return false;
+	return (
+		current.type === "BreakStatement" ||
+		current.type === "ContinueStatement" ||
+		current.type === "ReturnStatement" ||
+		current.type === "ThrowStatement"
+	);
 }
 
 function executionRoot(node: ESTree.Node): ESTree.Node {

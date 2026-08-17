@@ -33,16 +33,19 @@ interface SynchronousCallbackConfig {
 
 function getTypeName(typeNode: ESTree.Node, allowQualified: boolean): string | undefined {
 	if (typeNode.type === "Identifier") return typeNode.name;
-	if (allowQualified && typeNode.type === "TSQualifiedName") return getTypeName(typeNode.right, allowQualified);
+	if (allowQualified && typeNode.type === "TSQualifiedName") return typeNode.right.name;
 	return undefined;
 }
 
 function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQualified = true): string | undefined {
 	if (typeNode === null || typeNode === undefined) return undefined;
-	if (typeNode.type === "TSTypeAnnotation") return getReferencedTypeName(typeNode.typeAnnotation, allowQualified);
-	if (typeNode.type === "TSUnionType") {
+
+	let referencedType = typeNode;
+	while (referencedType.type === "TSTypeAnnotation") referencedType = referencedType.typeAnnotation;
+
+	if (referencedType.type === "TSUnionType") {
 		let referencedTypeName: string | undefined;
-		for (const unionType of typeNode.types) {
+		for (const unionType of referencedType.types) {
 			if (unionType.type === "TSUndefinedKeyword" || unionType.type === "TSNullKeyword") continue;
 			const unionTypeName = getReferencedTypeName(unionType, allowQualified);
 			if (unionTypeName === undefined || referencedTypeName !== undefined) return undefined;
@@ -50,8 +53,8 @@ function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQu
 		}
 		return referencedTypeName;
 	}
-	if (typeNode.type !== "TSTypeReference") return undefined;
-	return getTypeName(typeNode.typeName, allowQualified);
+	if (referencedType.type !== "TSTypeReference") return undefined;
+	return getTypeName(referencedType.typeName, allowQualified);
 }
 
 function isRecognizedType(typeNode: ESTree.Node | null | undefined, systemTypeNames: ReadonlySet<string>): boolean {

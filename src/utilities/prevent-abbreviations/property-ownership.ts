@@ -32,11 +32,10 @@ function isExternalPackageImport(definition: Definition | undefined): boolean {
 }
 
 function getRootTypeName(typeName: ESTree.TSTypeName): ESTree.IdentifierReference | undefined {
-	if (typeName.type === "Identifier") return typeName;
-	/* v8 ignore next -- @preserve parser-produced TSTypeReference names are identifiers or qualified names. */
-	if (typeName.type === "TSQualifiedName") return getRootTypeName(typeName.left);
+	let current = typeName;
+	while (current.type === "TSQualifiedName") current = current.left;
 	/* v8 ignore next -- @preserve TSTypeReference cannot use a this expression as its type name in parsed source. */
-	return undefined;
+	return current.type === "Identifier" ? current : undefined;
 }
 
 function isExternalType(typeAnnotation: ESTree.TSType, sourceCode: SourceCode): boolean {
@@ -68,10 +67,19 @@ function getContextualType(objectExpression: ESTree.ObjectExpression): ESTree.TS
 }
 
 function resolveRootObjectIdentifier(node: ESTree.Node): ESTree.Node | undefined {
-	if (isIdentifierName(node)) return node;
-	if (isMemberExpression(node)) return resolveRootObjectIdentifier(node.object);
-	if (isTsQualifiedName(node)) return resolveRootObjectIdentifier(node.left);
-	return undefined;
+	let current = node;
+	while (true) {
+		if (isIdentifierName(current)) return current;
+		if (isMemberExpression(current)) {
+			current = current.object;
+			continue;
+		}
+		if (isTsQualifiedName(current)) {
+			current = current.left;
+			continue;
+		}
+		return undefined;
+	}
 }
 
 function isImportedObjectPropertyAccess(node: ESTree.IdentifierName, sourceCode: SourceCode): boolean {
