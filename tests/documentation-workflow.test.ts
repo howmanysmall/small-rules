@@ -4,67 +4,90 @@ import { describe, expect, it } from "vitest";
 import { type } from "arktype";
 import { parseYAML } from "confbox";
 
+const isMaybeString = type("string | undefined");
+const isUndefined = type("undefined");
+const isUnknown = type("unknown");
+
 const isSteps = type({
-	"name?": "string | undefined",
-	"run?": "string | undefined",
-	"uses?": "string | undefined",
+	"name?": isMaybeString,
+	"run?": isMaybeString,
+	"uses?": isMaybeString,
 	"with?": type({
-		"install_args?": "string | undefined",
+		"install_args?": isMaybeString,
 		"persist-credentials?": "boolean | undefined",
-		"ref?": "string | undefined",
-		"tools?": "string | undefined",
-	}).or("undefined"),
-	"working-directory?": "string | undefined",
+		"ref?": isMaybeString,
+		"tools?": isMaybeString,
+	}).or(isUndefined),
+	"working-directory?": isMaybeString,
 }).array();
 
-const isWorkflowJob = type({
-	"environment?": "string | undefined",
-	"if?": "string | undefined",
-	"name?": "string | undefined",
-	"needs?": "string | undefined",
-	"steps?": isSteps.or("undefined"),
-	"uses?": "string | undefined",
-	"with?": type({
-		"ref?": "string | undefined",
-	}).or("undefined"),
+const isCiJob = type({
+	"uses?": isMaybeString,
 });
 
-const isDispatchRefInput = type({
-	"default?": "string | undefined",
-	"description?": "string | undefined",
+const isCi = type({
+	"jobs?": type({ "[string]": isCiJob }).or(isUndefined),
+	"on?": type({ "push?": type({ "paths?": "string[] | undefined" }).or(isUndefined) }).or(isUndefined),
+	"permissions?": type({ "pages?": isMaybeString }).or(isUndefined),
 });
 
-const isDispatchInputs = type({
-	"ref?": isDispatchRefInput.or("undefined"),
+const isChecksJob = type({
+	"name?": isMaybeString,
+	"steps?": isSteps.or(isUndefined),
 });
 
-const isWorkflowOn = type({
-	"pull_request?": "unknown",
-	"push?": type({
-		"paths?": "string[] | undefined",
-	}).or("undefined"),
-	"workflow_call?": "unknown",
-	"workflow_dispatch?": type({
-		"inputs?": isDispatchInputs.or("undefined"),
-	}).or("undefined"),
-	"workflow_run?": "unknown",
+const isChecks = type({
+	"jobs?": type({ "[string]": isChecksJob }).or(isUndefined),
 });
 
-const isWorkflow = type({
+const isReleaseWith = type({ "ref?": isMaybeString });
+
+const isDeployDocumentation = type({
+	"if?": isMaybeString,
+	"needs?": isMaybeString,
+	"uses?": isMaybeString,
+	"with?": isReleaseWith.or(isUndefined),
+});
+
+const isRelease = type({
 	"jobs?": type({
-		"[string]": isWorkflowJob,
-	}).or("undefined"),
-	"on?": isWorkflowOn.or("undefined"),
-	"permissions?": type({
-		"contents?": "string | undefined",
-		"id-token?": "string | undefined",
-		"pages?": "string | undefined",
-	}).or("undefined"),
+		"deploy-documentation?": isDeployDocumentation.or(isUndefined),
+	}).or(isUndefined),
 });
-type Workflow = typeof isWorkflow.infer;
 
-const isCompositeAction = type({
-	"runs?": type({ "steps?": isSteps.or("undefined") }).or("undefined"),
+const isDeployJob = type({
+	"environment?": isMaybeString,
+	"steps?": isSteps.or(isUndefined),
+});
+
+const isWorkflowDispatch = type({
+	"inputs?": type({
+		"ref?": type({
+			"default?": isMaybeString,
+			"description?": isMaybeString,
+		}).or(isUndefined),
+	}).or(isUndefined),
+});
+
+const isDocs = type({
+	"jobs?": type({
+		"deploy?": isDeployJob.or(isUndefined),
+	}).or(isUndefined),
+	"on?": type({
+		"pull_request?": isUnknown,
+		"workflow_call?": isUnknown,
+		"workflow_dispatch?": isWorkflowDispatch.or(isUndefined),
+		"workflow_run?": isUnknown,
+	}).or(isUndefined),
+	"permissions?": type({
+		"contents?": isMaybeString,
+		"id-token?": isMaybeString,
+		"pages?": isMaybeString,
+	}).or(isUndefined),
+});
+
+const isSetupAction = type({
+	"runs?": type({ "steps?": isSteps.or(isUndefined) }).or(isUndefined),
 });
 
 const ciRaw = readFileSync(".github/workflows/ci.yaml", "utf8");
@@ -74,17 +97,19 @@ const setupActionRaw = readFileSync(".github/actions/setup/action.yaml", "utf8")
 const DOCS_WORKFLOW_PATH = ".github/workflows/docs.yaml";
 const DEPLOY_SCRIPT_PATH = "scripts/deploy-docs.sh";
 
-const ci = isWorkflow.assert(parseYAML(ciRaw));
-const checks = isWorkflow.assert(parseYAML(checksRaw));
-const release = isWorkflow.assert(parseYAML(releaseRaw));
-const setupAction = isCompositeAction.assert(parseYAML(setupActionRaw));
+const ci = isCi.assert(parseYAML(ciRaw));
+const checks = isChecks.assert(parseYAML(checksRaw));
+const release = isRelease.assert(parseYAML(releaseRaw));
+const setupAction = isSetupAction.assert(parseYAML(setupActionRaw));
 
-function loadDocs(): Workflow {
+type Docs = typeof isDocs.infer;
+
+function loadDocs(): Docs {
 	if (!existsSync(DOCS_WORKFLOW_PATH)) {
 		throw new TypeError(`Docs workflow not found at ${DOCS_WORKFLOW_PATH}`);
 	}
 	const docsRaw = readFileSync(DOCS_WORKFLOW_PATH, "utf8");
-	return isWorkflow.assert(parseYAML(docsRaw));
+	return isDocs.assert(parseYAML(docsRaw));
 }
 
 function readDocsRaw(): string {
