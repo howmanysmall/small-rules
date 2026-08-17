@@ -47,6 +47,7 @@ const configuration = isentinel(
 			complexity: "off",
 			curly: ["error", "multi-line"],
 			"default-case": "off",
+			"eslint-js/id-length": "off",
 			"flawless/arrow-return-style": "off",
 			"flawless/max-lines-per-function": "off",
 			"id-length": [
@@ -123,7 +124,6 @@ const configuration = isentinel(
 			],
 			"small-rules/directive-disable-enable-pair": "error",
 			"small-rules/directive-no-aggregating-enable": "error",
-
 			"small-rules/directive-no-duplicate-disable": "error",
 			"small-rules/directive-no-restricted-disable": "error",
 			"small-rules/directive-no-unlimited-disable": "error",
@@ -346,6 +346,11 @@ const configuration = isentinel(
 			"react-doctor/jsx-curly-brace-presence": "off",
 			"react-doctor/react-in-jsx-scope": "off",
 		},
+	},
+	{
+		name: "small-rules/disable-stupid-rule",
+		files: ["src/rules/react/no-adjust-state-on-prop-change.ts"],
+		rules: { "sonar/file-name-differ-from-class": "off" },
 	},
 );
 
