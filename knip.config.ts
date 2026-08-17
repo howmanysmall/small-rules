@@ -46,6 +46,7 @@ const configuration: KnipConfig = {
 		"@vitiate/fuzzed-data-provider",
 		"arktype",
 		"fast-check",
+		"file:",
 		"sfw",
 		"eslint-plugin-*",
 		"oxlint-plugin-*",
