@@ -41,7 +41,7 @@ interface MutationCall {
 	readonly property: ESTree.Node;
 }
 
-function getIdentifierName(node: ESTree.Node | null | undefined): string | undefined {
+function getIdentifierName(node?: ESTree.Node | null): string | undefined {
 	if (node === null || node === undefined) return undefined;
 	if (node.type === "Identifier") return node.name;
 	if (
@@ -175,11 +175,10 @@ function collectMutationCalls(body: ESTree.Node, iterableName: string): Array<Mu
 }
 
 function isAllowedMutation(
-	mutation: MutationCall,
+	{ call, method }: MutationCall,
 	loopContext: LoopContext,
 	mutations: ReadonlyArray<MutationCall>,
 ): boolean {
-	const { call, method } = mutation;
 	if (method === "delete" && argumentMatchesName(call, loopContext.deleteArgumentName)) return true;
 
 	if (

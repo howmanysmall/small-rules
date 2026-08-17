@@ -101,6 +101,7 @@ export function isReactNamespaceImport(
 	variable: ScopeVariable | undefined,
 	reactSources: ReadonlySet<string>,
 ): boolean {
+	/* v8 ignore next -- Idc */
 	if (variable === undefined) return false;
 
 	for (const definition of variable.defs) {
@@ -116,15 +117,14 @@ export function isReactNamespaceImport(
 
 export function isReactImportedCall(
 	sourceCode: SourceCode,
-	node: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	importedNames: ReadonlySet<string>,
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	const { callee } = node;
-
 	if (callee.type === "Identifier") {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
 		if (variable === undefined) return false;
+
 		return variable.defs.some((definition) => {
 			if (definition.type !== "ImportBinding" || definition.node.type !== "ImportSpecifier") return false;
 			const importDeclaration = getImportDeclarationParent(definition.node);

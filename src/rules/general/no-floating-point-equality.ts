@@ -70,9 +70,9 @@ function divisionIsInexact(node: ESTree.BinaryExpression): boolean {
 	if (
 		numerator === undefined ||
 		denominator === undefined ||
+		denominator === 0 ||
 		!Number.isSafeInteger(numerator) ||
-		!Number.isSafeInteger(denominator) ||
-		denominator === 0
+		!Number.isSafeInteger(denominator)
 	) {
 		return false;
 	}

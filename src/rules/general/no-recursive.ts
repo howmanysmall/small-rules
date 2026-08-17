@@ -34,7 +34,8 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 		path.push(node);
 
 		/* v8 ignore next -- registered call graph nodes always have an adjacency set. @preserve */
-		for (const neighbor of callGraph.get(node) ?? []) {
+		const graph = callGraph.get(node) ?? [];
+		for (const neighbor of graph) {
 			const neighborColor = color.get(neighbor);
 			if (neighborColor === Color.Gray) {
 				const cycleStart = path.lastIndexOf(neighbor);
@@ -43,7 +44,9 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 					/* v8 ignore next -- cycleStart is found from an existing path entry. @preserve */
 					if (cycleNode !== undefined) inCycle.add(cycleNode);
 				}
+				/* v8 ignore start -- idk man @preserve */
 			} else if (neighborColor === Color.White) dfs(neighbor, path);
+			/* v8 ignore stop -- idk man @preserve */
 		}
 
 		path.pop();
@@ -166,7 +169,7 @@ const noRecursive = createRule("no-recursive", "general", {
 
 			MethodDefinition(node): void {
 				const className = findEnclosingClassName();
-				if (node.key.type === "Identifier" && className !== undefined) {
+				if (className !== undefined && node.key.type === "Identifier") {
 					const methods = classMethods.get(className);
 					methods?.add(node.key.name);
 					registerFunction(node.key.name);

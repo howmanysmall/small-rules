@@ -17,11 +17,9 @@ const REACT_FRAGMENT = "Fragment";
 
 function isReactCreateElementCall(
 	sourceCode: SourceCode,
-	node: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	const { callee } = node;
-
 	if (callee.type === "Identifier") {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
 		return isReactNamedImport(variable, "createElement", reactSources);
@@ -41,8 +39,7 @@ function isStringElementName(node: ESTree.Expression): boolean {
 
 function isStaticComponentVariable(variable: ScopeVariable, name: string): boolean {
 	if (isImportBinding(variable)) return isComponentName(name) || name === REACT_FRAGMENT;
-	if (!isModuleLevelScope(variable.scope)) return false;
-	if (!isComponentName(name) && name !== REACT_FRAGMENT) return false;
+	if (!isModuleLevelScope(variable.scope) || (name !== REACT_FRAGMENT && !isComponentName(name))) return false;
 
 	for (const definition of variable.defs) {
 		if (definition.type === "FunctionName" || definition.type === "ClassName") return true;
@@ -53,9 +50,7 @@ function isStaticComponentVariable(variable: ScopeVariable, name: string): boole
 
 		const initializer = definition.node.init ?? undefined;
 		if (initializer === undefined) continue;
-		if (isCallbackFunction(initializer) || initializer.type === "ClassExpression") {
-			return true;
-		}
+		if (isCallbackFunction(initializer) || initializer.type === "ClassExpression") return true;
 	}
 
 	return false;
@@ -108,7 +103,7 @@ function isStaticMemberElement(
 	if (propertyName === undefined) return false;
 
 	const rootVariable = getVariableByName(sourceCode.getScope(rootIdentifier), rootIdentifier.name);
-	if (isReactNamespaceImport(rootVariable, reactSources) && propertyName === REACT_FRAGMENT) return true;
+	if (propertyName === REACT_FRAGMENT && isReactNamespaceImport(rootVariable, reactSources)) return true;
 	if (rootVariable === undefined || !isImportBinding(rootVariable)) return false;
 
 	return isComponentName(propertyName);

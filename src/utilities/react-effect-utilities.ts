@@ -295,7 +295,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 			variable?.references.some((candidateRef) => {
 				const { parent } = candidateRef.identifier;
 				if (parent.type !== "CallExpression") return false;
-				if (parent.arguments.every((argument) => !(argument === candidateRef.identifier))) return false;
+				if (parent.arguments.every((argument) => argument !== candidateRef.identifier)) return false;
 				return parent.callee.type === "Identifier" && !KNOWN_PURE_HOCS.has(parent.callee.name);
 			}) ?? false
 		);
@@ -460,7 +460,9 @@ function getStateElements(
 	state: ReactEffectAnalysisState,
 	reference: Reference,
 ): ESTree.ArrayPattern["elements"] | undefined {
-	const definition = reference.resolved?.defs.find((candidate) => isUseStateVariableDefinition(state, candidate));
+	const definition = reference.resolved?.defs.find((candidate) =>
+		isUseStateVariableDefinition(state, candidate.node),
+	);
 	if (definition?.node.type !== "VariableDeclarator" || definition.node.id.type !== "ArrayPattern") {
 		return undefined;
 	}
@@ -469,8 +471,7 @@ function getStateElements(
 	return elements;
 }
 
-function isUseStateVariableDefinition(state: ReactEffectAnalysisState, definition: { node: ESTree.Node }): boolean {
-	const { node } = definition;
+function isUseStateVariableDefinition(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	return (
 		node.type === "VariableDeclarator" &&
 		node.init?.type === "CallExpression" &&
@@ -479,10 +480,6 @@ function isUseStateVariableDefinition(state: ReactEffectAnalysisState, definitio
 	);
 }
 
-// Returns false for props of HOCs (e.g. `withRouter`) because they usually have
-/**
- * Side effects.
- */
 function isProperty(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	return (
 		reference.resolved?.defs.some((definition) => {
@@ -528,12 +525,6 @@ function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	/* v8 ignore stop */
 }
 
-// Whether the reference's `current` property is being accessed.
-// Heuristic for whether the reference is a React ref object.
-// Because we don't always have access to the `useRef` call itself.
-/**
- * For example when receiving a ref from props.
- */
 function isRefCurrent(reference: Reference): boolean {
 	const { parent } = reference.identifier;
 	return (

@@ -48,7 +48,7 @@ export function getScopes(scope: Scope): Array<Scope> {
 }
 
 function isSafeName(name: string, scopes: ReadonlyArray<Scope>): boolean {
-	return scopes.every((scope) => !(getVariableByName(scope, name) !== undefined));
+	return scopes.every((scope) => getVariableByName(scope, name) === undefined);
 }
 
 export function getAvailableVariableName(
@@ -58,11 +58,11 @@ export function getAvailableVariableName(
 ): string | undefined {
 	let candidate = name;
 	if (!isValidIdentifier(candidate)) {
-		candidate = `${candidate}_`;
+		candidate += "_";
 		if (!isValidIdentifier(candidate)) return undefined;
 	}
 
-	while (!isSafeName(candidate, scopes) || !isSafe(candidate, scopes)) candidate = `${candidate}_`;
+	while (!isSafeName(candidate, scopes) || !isSafe(candidate, scopes)) candidate += "_";
 	return candidate;
 }
 
@@ -239,10 +239,9 @@ function getImportSource(definition: Definition): string | undefined {
 		if (parent !== null && isImportDeclaration(parent) && isStringLiteral(parent.source)) {
 			return parent.source.value;
 		}
-	}
-
-	/* v8 ignore next -- variable import checks only reach require-backed variable definitions. @preserve */
-	if (definition.type === "Variable") {
+		/* v8 ignore start -- variable import checks only reach require-backed variable definitions. @preserve */
+	} else if (definition.type === "Variable") {
+		/* v8 ignore stop -- variable import checks only reach require-backed variable definitions. @preserve */
 		const { node } = definition;
 		/* v8 ignore else -- callers only ask for sources from static require declarators. @preserve */
 		if (isVariableDeclarator(node) && node.init !== null && isStaticRequire(node.init)) {

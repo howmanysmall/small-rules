@@ -244,6 +244,7 @@ function hasStaticJavaScriptXmlAncestor(
 	staticOptions: StaticExpressionOptions,
 	environment: Environment,
 ): boolean {
+	// oxlint-disable-next-line flawless/prefer-parameter-destructuring -- rule conflict.
 	let { parent } = node;
 	while (parent.type !== "Program") {
 		if (
