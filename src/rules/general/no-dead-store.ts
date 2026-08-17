@@ -64,27 +64,18 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 		if (parent.consequent === current) {
 			return {
 				arm: "then",
-				// A consequent ending in break/continue/return/throw never falls
-				// through, so the then arm fully determines whether later
-				// statements in the block are reached.
 				complete: parent.alternate !== null || statementTransfersControl(parent.consequent),
 				control: parent,
 			};
 		}
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
-	}
-	if (parent.type === "ConditionalExpression") {
+	} else if (parent.type === "ConditionalExpression") {
 		if (parent.consequent === current) return { arm: "then", complete: true, control: parent };
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	}
 	return undefined;
 }
 
-// Statements after an if-without-else whose consequent transfers control only
-// run when the condition was false, so they belong to an implicit else arm rather
-/**
- * Than both arms.
- */
 function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
 	if (parent.type !== "BlockStatement" && parent.type !== "SwitchCase") return [];
 	const siblings: ReadonlyArray<ESTree.Node> = parent.type === "BlockStatement" ? parent.body : parent.consequent;
@@ -193,6 +184,7 @@ function findFirstMergeablePair(coveredPaths: Array<ReadonlyArray<BranchStep>>):
 function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): boolean {
 	const pair = findFirstMergeablePair(coveredPaths);
 	if (pair === undefined) return false;
+
 	coveredPaths.splice(pair.rightIndex, 1);
 	coveredPaths.splice(pair.leftIndex, 1, pair.merged);
 	return pair.merged.length === 0 || mergeCoveredPaths(coveredPaths);

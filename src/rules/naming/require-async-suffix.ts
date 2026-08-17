@@ -2,8 +2,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-function isExternallyConstrainedProperty(node: ESTree.ObjectProperty): boolean {
-	const { parent } = node;
+function isExternallyConstrainedProperty({ parent }: ESTree.ObjectProperty): boolean {
 	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
 	if (parent.type !== "ObjectExpression") return false;
 	const { parent: grandparent } = parent;

@@ -319,6 +319,7 @@ const configuration = isentinel(
 				},
 			],
 			"unicorn-js/name-replacements": "off",
+			"unicorn-js/no-break-in-nested-loop": "off",
 			"unicorn-js/no-keyword-prefix": "off",
 			"unicorn-js/prefer-global-number-constants": "off",
 			"unicorn/no-array-callback-reference": "off",

@@ -310,11 +310,12 @@ function getExpressionClass(
 	const current = unwrapExpression(expression);
 	if (current.type === "Identifier") return getIdentifierClass(current, sourceCode, imports, types, visited);
 	if (
-		!(current.type === "CallExpression" &&
-			current.callee.type === "MemberExpression" &&
-			getMemberPropertyName(current.callee) === "GetService" &&
-			current.callee.object.type === "Identifier") ||
-			current.callee.object.name !== "game" || hasShadowedBinding(sourceCode, current.callee.object, "game")
+		current.type !== "CallExpression" ||
+		current.callee.type !== "MemberExpression" ||
+		getMemberPropertyName(current.callee) !== "GetService" ||
+		current.callee.object.type !== "Identifier" ||
+		current.callee.object.name !== "game" ||
+		hasShadowedBinding(sourceCode, current.callee.object, "game")
 	) {
 		return undefined;
 	}
@@ -386,7 +387,9 @@ function getSynchronousCallbacks(
 		if (!pathsEqual(calleePath, configuration.calleePath)) continue;
 		for (const argumentIndex of configuration.callbackArgumentIndexes) {
 			const argument = call.arguments[argumentIndex];
+			// oxlint-disable-next-line unicorn-js/no-break-in-nested-loop -- no dude
 			if (argument === undefined || argument.type === "SpreadElement") continue;
+
 			const callback = getReferencedCallback(argument, sourceCode);
 			if (callback !== undefined) callbacks.add(callback);
 		}
@@ -409,7 +412,7 @@ function reportYieldingCalls(
 		if (activeFunction.async || activeFunction.body === null || visitedFunctions.has(activeFunction)) return;
 		visitedFunctions.add(activeFunction);
 		forEachNode(activeFunction.body, (node) => {
-			if (isAnyFunction(node) && node !== activeFunction) return false;
+			if (node !== activeFunction && isAnyFunction(node)) return false;
 			if (node.type !== "CallExpression") return true;
 			if (isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
 			for (const callback of getSynchronousCallbacks(node, sourceCode, synchronousCallbacks)) {

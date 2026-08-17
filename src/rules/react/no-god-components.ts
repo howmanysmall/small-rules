@@ -119,7 +119,7 @@ function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>
 	let currentJsxDepth = 0;
 
 	walkAst(node.body, (current) => {
-		if (FUNCTION_BOUNDARY_TYPES.has(current.type) && current !== node) return;
+		if (current !== node && FUNCTION_BOUNDARY_TYPES.has(current.type)) return;
 
 		if (current.type === "JSXElement" || current.type === "JSXFragment") {
 			currentJsxDepth += 1;
