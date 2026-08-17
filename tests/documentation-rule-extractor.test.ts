@@ -33,23 +33,24 @@ describe("extractRuleExamples", () => {
 
 		expect(getFixtureExamples("static-values.fixture.ts")).toStrictEqual([
 			{
+				id: "joined",
 				code: "const\nvalue = 1;",
 				errors: [{ messageId: "joined" }, { message: "A second diagnostic" }],
-				id: "joined",
 				kind: "invalid",
 				language: "ts",
 				output: "const\nvalue = 2;",
 				title: "Joined source",
 			},
 			{
+				id: "literal",
 				code: "const value = 1;",
 				errors: [{ messageId: "literal" }],
-				id: "literal",
 				kind: "invalid",
 				language: "ts",
 				title: "String literal",
 			},
 			{
+				id: "raw",
 				code: "const raw = `value`;",
 				errors: [
 					{
@@ -57,15 +58,14 @@ describe("extractRuleExamples", () => {
 						suggestions: [{ messageId: "replaceRaw", output: "const raw = 'value';" }],
 					},
 				],
-				id: "raw",
 				kind: "invalid",
 				language: "ts",
 				title: "Raw template",
 			},
 			{
+				id: "template",
 				code: "const valid = true;",
 				filename: "example.ts",
-				id: "template",
 				kind: "valid",
 				language: "ts",
 				options: [{ enabled: true, limit: 2, nothing: null, values: ["first", "second"] }],
@@ -81,8 +81,8 @@ describe("extractRuleExamples", () => {
 
 		expect(getFixtureExamples("unmarked-unsupported.fixture.ts")).toStrictEqual([
 			{
-				code: "const valid = true;",
 				id: "pass",
+				code: "const valid = true;",
 				kind: "valid",
 				language: "ts",
 				title: "Static case",

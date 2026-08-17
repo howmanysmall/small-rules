@@ -15,9 +15,9 @@ function Big() {
     return <frame />;
 }
 `,
-				documentation: { id: "fail", title: "Component exceeds maximum lines" },
-				errors: [{ messageId: "exceedsMaxLines" }],
 				options: [{ enforceTargetLines: false, maxLines: 5, targetLines: 5 }],
+				errors: [{ messageId: "exceedsMaxLines" }],
+				documentation: { id: "fail", title: "Component exceeds maximum lines" },
 			},
 			{
 				code: `
@@ -27,8 +27,8 @@ function OverTarget() {
     return <div />;
 }
 `,
-				errors: [{ messageId: "exceedsTargetLines" }],
 				options: [{ enforceTargetLines: true, maxLines: 10, targetLines: 3 }],
+				errors: [{ messageId: "exceedsTargetLines" }],
 			},
 			{
 				code: `
@@ -42,7 +42,6 @@ function Deep() {
     );
 }
 `,
-				errors: [{ messageId: "tsxNestingTooDeep" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -52,6 +51,7 @@ function Deep() {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "tsxNestingTooDeep" }],
 			},
 			{
 				code: `
@@ -61,7 +61,6 @@ function Statey() {
     return <div />;
 }
 `,
-				errors: [{ messageId: "tooManyStateHooks" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -71,6 +70,7 @@ function Statey() {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "tooManyStateHooks" }],
 			},
 			{
 				code: `
@@ -78,7 +78,6 @@ function Propsy({ a, b, c }) {
     return <div />;
 }
 `,
-				errors: [{ messageId: "tooManyProps" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -87,6 +86,7 @@ function Propsy({ a, b, c }) {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "tooManyProps" }],
 			},
 			{
 				code: `
@@ -95,7 +95,6 @@ function Nullish() {
     return <div>{value}</div>;
 }
 `,
-				errors: [{ messageId: "nullLiteral" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -105,6 +104,7 @@ function Nullish() {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "nullLiteral" }],
 			},
 			{
 				code: `
@@ -114,7 +114,6 @@ const MemberState = () => {
     return <div />;
 };
 `,
-				errors: [{ messageId: "tooManyStateHooks" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -126,6 +125,7 @@ const MemberState = () => {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "tooManyStateHooks" }],
 			},
 			{
 				code: `
@@ -135,7 +135,6 @@ const BadMemo = memo(() => {
     return <div />;
 });
 `,
-				errors: [{ messageId: "tooManyStateHooks" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -147,6 +146,7 @@ const BadMemo = memo(() => {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "tooManyStateHooks" }],
 			},
 			{
 				code: `
@@ -155,7 +155,6 @@ const ReactBad = React.memo(function ReactBad() {
     return <div>{value}</div>;
 });
 `,
-				errors: [{ messageId: "nullLiteral" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -166,6 +165,7 @@ const ReactBad = React.memo(function ReactBad() {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "nullLiteral" }],
 			},
 			{
 				code: `
@@ -176,8 +176,8 @@ export default memo(function DefaultBad() {
     return <div />;
 });
 `,
-				errors: [{ messageId: "exceedsMaxLines" }],
 				options: [{ enforceTargetLines: false, maxLines: 3, targetLines: 3 }],
+				errors: [{ messageId: "exceedsMaxLines" }],
 			},
 			{
 				code: `
@@ -188,7 +188,6 @@ const Components = {
     },
 };
 `,
-				errors: [{ messageId: "nullLiteral" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -199,6 +198,7 @@ const Components = {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "nullLiteral" }],
 			},
 			{
 				code: `
@@ -209,7 +209,6 @@ class View {
     }
 }
 `,
-				errors: [{ messageId: "nullLiteral" }],
 				options: [
 					{
 						enforceTargetLines: false,
@@ -220,6 +219,7 @@ class View {
 						targetLines: 1000,
 					},
 				],
+				errors: [{ messageId: "nullLiteral" }],
 			},
 			{
 				code: `
@@ -231,8 +231,8 @@ Assigned = memo(function Assigned() {
     return <div />;
 });
 `,
-				errors: [{ messageId: "exceedsMaxLines" }],
 				options: [{ enforceTargetLines: false, maxLines: 3, targetLines: 3 }],
+				errors: [{ messageId: "exceedsMaxLines" }],
 			},
 		],
 		valid: [
@@ -253,7 +253,8 @@ function PlainProps(props) {
 }
 `,
 			},
-			// Export default HOC with named function expression (covers getComponentNameFromCallParent export default case)
+			// Export default HOC with named function expression (covers
+			// getComponentNameFromCallParent export default case)
 			{
 				code: `
 export default memo(function DefaultMemo() {
@@ -261,7 +262,8 @@ export default memo(function DefaultMemo() {
 });
 `,
 			},
-			// HOC call with non-function argument (covers CallExpression early-return)
+			// HOC call with non-function argument (covers CallExpression
+			// early-return)
 			{
 				code: `
 function Wrapper() {
@@ -271,7 +273,8 @@ function Wrapper() {
 }
 `,
 			},
-			// Assignment pattern destructuring (covers countDestructuredProps assignment pattern)
+			// Assignment pattern destructuring (covers countDestructuredProps
+			// assignment pattern)
 			{
 				code: `
 function DefaultProps({ a, b } = {}) {
@@ -291,7 +294,8 @@ function RestProps({ a, ...rest }) {
 declare function DeclaredComponent(): JSX.Element;
 `,
 			},
-			// Member-expression hook + computed hook access (covers getHookName member/undefined branches)
+			// Member-expression hook + computed hook access (covers getHookName
+			// member/undefined branches)
 			{
 				code: `
 function Hooks() {
@@ -301,7 +305,8 @@ function Hooks() {
 }
 `,
 			},
-			// Non-React member call should not be treated as a React HOC (covers isReactComponentHOC fallback)
+			// Non-React member call should not be treated as a React HOC (covers
+			// isReactComponentHOC fallback)
 			{
 				code: `
 function NotReact() {
@@ -310,7 +315,8 @@ function NotReact() {
 }
 `,
 			},
-			// Direct HOC call expression without assignment (covers getComponentNameFromCallParent undefined path)
+			// Direct HOC call expression without assignment (covers
+			// getComponentNameFromCallParent undefined path)
 			{
 				code: `
 memo(function DirectMemo() {

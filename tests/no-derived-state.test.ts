@@ -31,8 +31,8 @@ export function Form(): React.Element {
 	);
 }
 `,
-				documentation: { id: "fail", title: "Derived state stored by an effect" },
 				errors: [{ data: { state: "fullName" }, messageId: "avoidDerivedState" }],
+				documentation: { id: "fail", title: "Derived state stored by an effect" },
 			},
 			{
 				code: `
@@ -253,8 +253,8 @@ export function CountAccumulator({ count }: { count: number }): React.Element {
 	return <textlabel Text={total} />;
 }
 `,
-				errors: [{ data: { state: "total" }, messageId: "avoidDerivedState" }],
 				options: [{ environment: "standard" }],
+				errors: [{ data: { state: "total" }, messageId: "avoidDerivedState" }],
 			},
 			{
 				code: `
@@ -485,8 +485,8 @@ export function DoubleCounter(): React.Element {
 	);
 }
 `,
-				errors: [{ data: { state: "doubleCount" }, messageId: "avoidDerivedState" }],
 				options: [{ environment: "standard" }],
+				errors: [{ data: { state: "doubleCount" }, messageId: "avoidDerivedState" }],
 			},
 			{
 				code: `
@@ -508,8 +508,8 @@ export function DoubleCounter(): React.Element {
 	);
 }
 `,
-				errors: [{ data: { state: "doubleCount" }, messageId: "avoidDerivedState" }],
 				options: [{ environment: "standard" }],
+				errors: [{ data: { state: "doubleCount" }, messageId: "avoidDerivedState" }],
 			},
 			{
 				code: `
@@ -763,8 +763,8 @@ export function AttemptCounter(): React.Element {
 	return <textbutton Text={count} onActivated={() => setCount(count + 1)} />;
 }
 `,
-				errors: [{ data: { state: "setAttempts" }, messageId: "avoidDerivedState" }],
 				options: [{ environment: "standard" }],
+				errors: [{ data: { state: "setAttempts" }, messageId: "avoidDerivedState" }],
 			},
 			{
 				code: `
@@ -956,7 +956,8 @@ export function Component(): React.Element {
 				errors: [{ data: { state: "data" }, messageId: "avoidDerivedState" }],
 			},
 			{
-				// A bare `return;` is not effect cleanup, so a derived-state setter still reports.
+				// A bare `return;` is not effect cleanup, so a derived-state
+				// setter still reports.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -976,12 +977,14 @@ export function Form(): React.Element {
 				errors: [{ data: { state: "fullName" }, messageId: "avoidDerivedState" }],
 			},
 			{
-				// Generated 2,048-link alias chain must report without recursive-stack failure.
+				// Generated 2,048-link alias chain must report without
+				// recursive-stack failure.
 				code: generateAliasChain(),
 				errors: [{ data: { state: "data" }, messageId: "avoidDerivedState" }],
 			},
 			{
-				// A standard React alias must still produce the focused diagnostic.
+				// A standard React alias must still produce the focused
+				// diagnostic.
 				code: `
 import React, { useEffect as effect, useState as state } from "react";
 
@@ -997,8 +1000,8 @@ export function Form(): React.Element {
 	return <textlabel Text={fullName} />;
 }
 `,
-				errors: [{ data: { state: "fullName" }, messageId: "avoidDerivedState" }],
 				options: [{ environment: "standard" }],
+				errors: [{ data: { state: "fullName" }, messageId: "avoidDerivedState" }],
 			},
 		],
 
@@ -1057,7 +1060,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// Setter passed as a callback argument is not a synchronous call chain.
+				// Setter passed as a callback argument is not a synchronous call
+				// chain.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1753,7 +1757,8 @@ export function Form(): React.Element {
 				options: [{ environment: "standard" }],
 			},
 			{
-				// useLayoutEffect is deliberately excluded from the focused rules.
+				// useLayoutEffect is deliberately excluded from the focused
+				// rules.
 				code: `
 import React, { useLayoutEffect, useState } from "@rbxts/react";
 
@@ -1778,8 +1783,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// A state setter returned from the effect is not inside any call callee,
-				// so `getCallExpression` cannot resolve it.
+				// A state setter returned from the effect is not inside any call
+				// callee, so `getCallExpression` cannot resolve it.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1800,8 +1805,9 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// A setter bound to the name `useState` matches `isUseState` itself, so
-				// `getStateName` finds no destructured declaration and yields undefined.
+				// A setter bound to the name `useState` matches `isUseState`
+				// itself, so `getStateName` finds no destructured declaration and
+				// yields undefined.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1820,8 +1826,9 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// An unimported `useEffect` resolves to no variable: the binding-aware
-				// import check returns false and the effect is not analyzed.
+				// An unimported `useEffect` resolves to no variable: the
+				// binding-aware import check returns false and the effect is not
+				// analyzed.
 				code: `
 import React, { useState } from "@rbxts/react";
 
@@ -1861,8 +1868,9 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// A namespace import called directly resolves to an ImportBinding that is
-				// not an ImportSpecifier, so the binding-aware check rejects it.
+				// A namespace import called directly resolves to an
+				// ImportBinding that is not an ImportSpecifier, so the
+				// binding-aware check rejects it.
 				code: `
 // oxlint-disable-next-line import/no-namespace -- The namespace import is called directly, which the binding-aware check rejects.
 import * as React from "@rbxts/react";
@@ -1895,7 +1903,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// An unresolvable identifier callback produces no effect analysis.
+				// An unresolvable identifier callback produces no effect
+				// analysis.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1912,7 +1921,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// An identifier bound to an initializer-less declaration cannot be resolved.
+				// An identifier bound to an initializer-less declaration cannot
+				// be resolved.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1929,7 +1939,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// A three-element useState destructure is not a recognized state pair.
+				// A three-element useState destructure is not a recognized state
+				// pair.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1951,8 +1962,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// An alias initializer inside the effect is a state call whose call
-				// expression cannot be resolved (the ref is not a callee).
+				// An alias initializer inside the effect is a state call whose
+				// call expression cannot be resolved (the ref is not a callee).
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -1969,8 +1980,8 @@ export function Form(): React.Element {
 `,
 			},
 			{
-				// A recursive helper called in the effect revisits its own declaration,
-				// which the analysis must tolerate without hanging.
+				// A recursive helper called in the effect revisits its own
+				// declaration, which the analysis must tolerate without hanging.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 

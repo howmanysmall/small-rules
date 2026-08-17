@@ -22,8 +22,8 @@ function Component() {
 	}, [firstValue, secondValue, thirdValue]);
 }
 `,
-				documentation: { id: "fail", title: "Multiple state updates in effect" },
 				errors: [{ messageId: "cascadingSetState" }],
+				documentation: { id: "fail", title: "Multiple state updates in effect" },
 			},
 			{
 				code: `

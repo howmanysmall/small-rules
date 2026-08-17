@@ -7,8 +7,8 @@ ts.run("interpolated-template", rule, {
 	invalid: [
 		{
 			code: `const value = ${name};`,
-			documentation: { id: "fail", title: "Interpolated" },
 			errors: [{ messageId: "interpolated" }],
+			documentation: { id: "fail", title: "Interpolated" },
 		},
 	],
 	valid: [],

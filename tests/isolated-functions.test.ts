@@ -8,13 +8,13 @@ describe("isolated-functions", () => {
 		invalid: [
 			{
 				code: ["const foo = 'hi';", "makeSynchronous(() => {", "  return foo.slice();", "});"].join("\n"),
-				documentation: { id: "fail", title: "Outer variable in isolated callback" },
 				errors: [
 					{
 						data: { name: "foo", reason: 'callee of function named "makeSynchronous"' },
 						messageId: "externallyScopedVariable",
 					},
 				],
+				documentation: { id: "fail", title: "Outer variable in isolated callback" },
 			},
 			{
 				code: "const foo = 'hi';\nworkerize(() => foo.slice());",
@@ -148,16 +148,17 @@ describe("isolated-functions", () => {
 			},
 			{
 				code: "const foo = 'hi';\nserialize(() => foo.slice());",
+				options: [{ functions: ["serialize"] }],
 				errors: [
 					{
 						data: { name: "foo", reason: 'callee of function named "serialize"' },
 						messageId: "externallyScopedVariable",
 					},
 				],
-				options: [{ functions: ["serialize"] }],
 			},
 			{
 				code: "makeSynchronous(() => { console = 1; });",
+				options: [{ overrideGlobals: { console: "readonly" } }],
 				errors: [
 					{
 						data: {
@@ -167,10 +168,10 @@ describe("isolated-functions", () => {
 						messageId: "externallyScopedVariable",
 					},
 				],
-				options: [{ overrideGlobals: { console: "readonly" } }],
 			},
 			{
 				code: "makeSynchronous(() => { process = 1; });",
+				options: [{ overrideGlobals: { process: "off" } }],
 				errors: [
 					{
 						data: {
@@ -180,12 +181,11 @@ describe("isolated-functions", () => {
 						messageId: "externallyScopedVariable",
 					},
 				],
-				options: [{ overrideGlobals: { process: "off" } }],
 			},
 			{
 				code: "makeSynchronous(() => { foo = 1; });",
-				errors: [{ messageId: "externallyScopedVariable" }],
 				options: [{ overrideGlobals: { foo: "readable" } }],
+				errors: [{ messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: "const Outer = class {};\n/** @isolated */\nfunction make() {\n  class Child extends Outer {}\n  return Child;\n}",
@@ -206,8 +206,8 @@ describe("isolated-functions", () => {
 			},
 			{
 				code: "const foo = 1;\nfunction handler() { return foo; }",
-				errors: [{ messageId: "externallyScopedVariable" }],
 				options: [{ selectors: ["FunctionDeclaration[id.name='handler']"] }],
+				errors: [{ messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: [
@@ -232,33 +232,33 @@ describe("isolated-functions", () => {
 			},
 			{
 				code: "const local = 1;\nmakeSynchronous(() => { local = 2; });",
-				errors: [{ messageId: "externallyScopedVariable" }],
 				options: [{ overrideGlobals: { local: "writable" } }],
+				errors: [{ messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: "const foo = 1;\n/** @worker */\nfunction run() { return foo; }",
-				errors: [{ messageId: "externallyScopedVariable" }],
 				options: [{ comments: ["@worker"] }],
+				errors: [{ messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: "const foo = 1;\nmakeSynchronous(() => foo);\nfunction handler() { return foo; }",
-				errors: [{ messageId: "externallyScopedVariable" }, { messageId: "externallyScopedVariable" }],
 				options: [{ selectors: ["FunctionDeclaration[id.name='handler']"] }],
+				errors: [{ messageId: "externallyScopedVariable" }, { messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: "makeSynchronous(() => { foo = 1; });",
-				errors: [{ messageId: "externallyScopedVariable" }],
 				options: [{ overrideGlobals: { foo: "nope" } }],
+				errors: [{ messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: "const foo = 1;\nmakeSynchronous(() => foo);",
-				errors: [{ messageId: "externallyScopedVariable" }],
 				options: [
 					{
 						functions: ["makeSynchronous"],
 						selectors: ["ArrowFunctionExpression"],
 					},
 				],
+				errors: [{ messageId: "externallyScopedVariable" }],
 			},
 			{
 				code: "const foo = 1;\nmakeSynchronous(extra, () => foo);",

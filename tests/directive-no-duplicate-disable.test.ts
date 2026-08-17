@@ -8,8 +8,8 @@ describe("directive-no-duplicate-disable", () => {
 		invalid: [
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-disable no-console */",
-				documentation: { id: "fail", title: "Duplicate rule disable directive" },
 				errors: [{ messageId: "duplicateRule" }],
+				documentation: { id: "fail", title: "Duplicate rule disable directive" },
 			},
 			{
 				code: "/* oxlint-disable */\nconst x = 1;\n/* oxlint-disable */",

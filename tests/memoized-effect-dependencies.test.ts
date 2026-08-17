@@ -15,8 +15,8 @@ function Component() {
     useEffect(() => {}, [dep]);
 }
 `,
-				documentation: { id: "fail", title: "Unmemoized object effect dependency" },
 				errors: [{ messageId: "unmemoizedDependency" }],
+				documentation: { id: "fail", title: "Unmemoized object effect dependency" },
 			},
 			{
 				code: `
@@ -59,8 +59,8 @@ function Component() {
     useEffect(() => {}, [dep]);
 }
 `,
-				errors: [{ messageId: "unmemoizedDependency" }],
 				options: [{ mode: "moderate" }],
+				errors: [{ messageId: "unmemoizedDependency" }],
 			},
 			{
 				code: `
@@ -72,8 +72,8 @@ function Component() {
     useEffect(() => {}, [dep]);
 }
 `,
-				errors: [{ messageId: "unmemoizedDependency" }],
 				options: [{ mode: "aggressive" }],
+				errors: [{ messageId: "unmemoizedDependency" }],
 			},
 			{
 				code: `
@@ -84,8 +84,8 @@ function Component() {
     React.useLayoutEffect(() => {}, [dependency]);
 }
 `,
-				errors: [{ messageId: "unmemoizedDependency" }],
 				options: [{ mode: "moderate" }],
+				errors: [{ messageId: "unmemoizedDependency" }],
 			},
 			{
 				code: `
@@ -96,8 +96,8 @@ function Component() {
     useEffect(() => {}, [...dependencies]);
 }
 `,
-				errors: [{ messageId: "unmemoizedDependency" }],
 				options: [{ mode: "moderate" }],
+				errors: [{ messageId: "unmemoizedDependency" }],
 			},
 			{
 				code: `
@@ -108,8 +108,8 @@ function Component() {
     useCustomEffect(() => {}, [dependency]);
 }
 `,
-				errors: [{ messageId: "unmemoizedDependency" }],
 				options: [{ hooks: [{ name: "useCustomEffect" }] }],
+				errors: [{ messageId: "unmemoizedDependency" }],
 			},
 		],
 		valid: [
@@ -308,8 +308,8 @@ function Component() {
     useEffect(() => {}, [dep]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "aggressive" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 			],
 			valid: [
@@ -338,8 +338,8 @@ function Component() {
     useCustomEffect(() => {}, [dep]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ hooks: [{ name: "useCustomEffect" }] }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 			],
 			valid: [
@@ -380,8 +380,8 @@ function Component() {
     useEffect(() => {}, [buildDependency()]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "moderate" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -391,8 +391,8 @@ function Component(props: { value: number }) {
     useEffect(() => {}, [props.value]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "aggressive" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -414,8 +414,8 @@ function Component() {
     useEffect(() => {}, [dependency]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "moderate" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -426,8 +426,8 @@ function Component() {
     useEffect(() => {}, [resetCount]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "aggressive" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -438,8 +438,8 @@ function Component() {
     useEffect(() => {}, [resetCount]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "aggressive" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -450,8 +450,8 @@ function Component() {
     useEffect(() => {}, [dependency]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "moderate" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -462,8 +462,8 @@ function Component() {
     useEffect(() => {}, [dependency, dependency]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }, { messageId: "unmemoizedDependency" }],
 					options: [{ mode: "moderate" }],
+					errors: [{ messageId: "unmemoizedDependency" }, { messageId: "unmemoizedDependency" }],
 				},
 			],
 			valid: [
@@ -616,8 +616,8 @@ function Component() {
     useEffect(() => {}, [count]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "aggressive" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -629,8 +629,8 @@ function Component() {
     useEffect(() => {}, [dependency]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "moderate" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 				{
 					code: `
@@ -642,8 +642,8 @@ function Component() {
     useEffect(() => {}, [dependency]);
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ mode: "moderate" }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 			],
 			valid: [
@@ -736,8 +736,8 @@ function Component() {
     useIndexedEffect([dep], () => {});
 }
 `,
-					errors: [{ messageId: "unmemoizedDependency" }],
 					options: [{ hooks: [{ dependenciesIndex: 0, name: "useIndexedEffect" }] }],
+					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 			],
 			valid: [
@@ -750,7 +750,7 @@ function Component() {
     useIndexedEffect([dep], () => {});
 }
 `,
-					options: [{ hooks: [{ dependenciesIndex: 0, name: "useIndexedEffect" }] }],
+					options: [{ hooks: [{ name: "useIndexedEffect", dependenciesIndex: 0 }] }],
 				},
 			],
 		});

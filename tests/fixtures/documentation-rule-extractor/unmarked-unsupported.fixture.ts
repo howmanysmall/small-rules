@@ -9,8 +9,8 @@ ts.run("unmarked-unsupported", rule, {
 	invalid: [
 		{
 			code: formatCode(value),
-			errors: [{ messageId: "dynamic" }],
 			options: [{ ...sharedOptions }],
+			errors: [{ messageId: "dynamic" }],
 		},
 	],
 	valid: [

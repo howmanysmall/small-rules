@@ -119,46 +119,46 @@ describe("require-switch-case-braces", () => {
 		invalid: [
 			{
 				code: ["switch (value) {", "  case 1:", "    doFirst();", "    break;", "}"].join("\n"),
-				documentation: { id: "fail", title: "Unbraced switch case body" },
-				errors: [{ messageId: "wrapCaseBody" }],
 				output: ["switch (value) {", "  case 1:", "    {", "doFirst();", "    break;", "}", "}"].join("\n"),
+				errors: [{ messageId: "wrapCaseBody" }],
+				documentation: { id: "fail", title: "Unbraced switch case body" },
 			},
 			{
 				code: case3Input,
-				errors: [{ messageId: "wrapCaseBody" }],
 				output: case3Output,
+				errors: [{ messageId: "wrapCaseBody" }],
 			},
 			{
 				code: singleLineStatementsInput,
-				errors: [{ messageId: "wrapCaseBody" }],
-				options: [{ metric: "statements" }],
 				output: singleLineStatementsOutput,
+				options: [{ metric: "statements" }],
+				errors: [{ messageId: "wrapCaseBody" }],
 			},
 			{
 				code: caseAndDefaultInput,
-				errors: [{ messageId: "wrapCaseBody" }, { messageId: "wrapCaseBody" }],
 				output: caseAndDefaultOutput,
+				errors: [{ messageId: "wrapCaseBody" }, { messageId: "wrapCaseBody" }],
 			},
 			{
 				code: multilineSingleInput,
-				errors: [{ messageId: "wrapCaseBody" }],
 				output: multilineSingleOutput,
+				errors: [{ messageId: "wrapCaseBody" }],
 			},
 			{
 				code: defaultOnlyInput,
-				errors: [{ messageId: "wrapCaseBody" }],
 				output: defaultOnlyOutput,
+				errors: [{ messageId: "wrapCaseBody" }],
 			},
 			{
 				code: statementsMode3Input,
-				errors: [{ messageId: "wrapCaseBody" }],
-				options: [{ metric: "statements" }],
 				output: statementsMode3Output,
+				options: [{ metric: "statements" }],
+				errors: [{ messageId: "wrapCaseBody" }],
 			},
 			{
 				code: fallthroughInput,
-				errors: [{ messageId: "wrapCaseBody" }],
 				output: fallthroughOutput,
+				errors: [{ messageId: "wrapCaseBody" }],
 			},
 		],
 		valid: [

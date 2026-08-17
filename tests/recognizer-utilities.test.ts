@@ -221,7 +221,7 @@ describe("createEndWithDetector utility", () => {
 
 			const detector = createEndWithDetector(0.95, [";"]);
 
-			expect(detector.scan("   ")).toBe(0);
+			expect(detector.scan(' '.repeat(3))).toBe(0);
 		}, 5000);
 	});
 

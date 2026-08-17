@@ -12,8 +12,8 @@ import React from "@rbxts/react";
 
 const [state, setState] = React.useState(false);
 `,
-				documentation: { id: "fail", title: "React.useState namespace call" },
 				errors: [{ messageId: "preferDirectHookImport" }],
+				documentation: { id: "fail", title: "React.useState namespace call" },
 			},
 			{
 				code: `
@@ -29,8 +29,8 @@ import React from "react";
 
 React.useCallback(() => {}, []);
 `,
-				errors: [{ messageId: "preferDirectHookImport" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "preferDirectHookImport" }],
 			},
 			{
 				code: `

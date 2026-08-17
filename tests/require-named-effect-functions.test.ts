@@ -13,8 +13,8 @@ useEffect(() => {
     print("effect");
 }, []);
 `,
-				documentation: { id: "fail", title: "Anonymous effect callback" },
 				errors: [{ messageId: "arrowFunction" }],
+				documentation: { id: "fail", title: "Anonymous effect callback" },
 			},
 			// Anonymous function expressions
 			{
@@ -70,7 +70,8 @@ React.useEffect(() => {
 `,
 				errors: [{ messageId: "arrowFunction" }],
 			},
-			// Member expression hook with anonymous function (for line 29 coverage)
+			// Member expression hook with anonymous function (for line 29
+			// coverage)
 			{
 				code: `
 React.useLayoutEffect(function() {
@@ -90,7 +91,8 @@ useEffect(function() {
 `,
 				errors: [{ messageId: "anonymousFunction" }],
 			},
-			// Identifier referencing function expression with inferred name (roblox-ts mode)
+			// Identifier referencing function expression with inferred name
+			// (roblox-ts mode)
 			{
 				code: `
 const anonymousFunc = function() {
@@ -100,7 +102,8 @@ useEffect(anonymousFunc, []);
 `,
 				errors: [{ messageId: "anonymousFunction" }],
 			},
-			// Arrow function assigned to variable is invalid (doesn't have a real name)
+			// Arrow function assigned to variable is invalid (doesn't have a
+			// real name)
 			{
 				code: `
 const handleEffect = () => {
@@ -302,9 +305,9 @@ useEffect(function handleEffect() {
 					{
 						environment: "standard",
 						hooks: [
-							{ allowAsync: false, name: "useEffect" },
-							{ allowAsync: false, name: "useLayoutEffect" },
-							{ allowAsync: false, name: "useInsertionEffect" },
+							{ name: "useEffect", allowAsync: false },
+							{ name: "useLayoutEffect", allowAsync: false },
+							{ name: "useInsertionEffect", allowAsync: false },
 						],
 					},
 				],
@@ -321,9 +324,9 @@ useEffect(effect, []);
 					{
 						environment: "standard",
 						hooks: [
-							{ allowAsync: false, name: "useEffect" },
-							{ allowAsync: false, name: "useLayoutEffect" },
-							{ allowAsync: false, name: "useInsertionEffect" },
+							{ name: "useEffect", allowAsync: false },
+							{ name: "useLayoutEffect", allowAsync: false },
+							{ name: "useInsertionEffect", allowAsync: false },
 						],
 					},
 				],
@@ -374,9 +377,9 @@ useEffect(effect, []);
 				options: [
 					{
 						hooks: [
-							{ allowAsync: true, name: "useEffect" },
-							{ allowAsync: false, name: "useLayoutEffect" },
-							{ allowAsync: false, name: "useInsertionEffect" },
+							{ name: "useEffect", allowAsync: true },
+							{ name: "useLayoutEffect", allowAsync: false },
+							{ name: "useInsertionEffect", allowAsync: false },
 						],
 					},
 				],
@@ -392,14 +395,15 @@ useEffect(handleEffect, []);
 				options: [
 					{
 						hooks: [
-							{ allowAsync: true, name: "useEffect" },
-							{ allowAsync: false, name: "useLayoutEffect" },
-							{ allowAsync: false, name: "useInsertionEffect" },
+							{ name: "useEffect", allowAsync: true },
+							{ name: "useLayoutEffect", allowAsync: false },
+							{ name: "useInsertionEffect", allowAsync: false },
 						],
 					},
 				],
 			},
-			// Computed member access (getHookName returns undefined, rule doesn't check)
+			// Computed member access (getHookName returns undefined, rule
+			// doesn't check)
 			{
 				code: `
 const hooks = { useEffect };
@@ -432,8 +436,8 @@ useEffect(() => {
     console.log("effect");
 }, []);
 `,
-					errors: [{ messageId: "arrowFunction" }],
 					options: [{ environment: "standard" }],
+					errors: [{ messageId: "arrowFunction" }],
 				},
 				// Anonymous functions should still fail in standard mode
 				{
@@ -442,8 +446,8 @@ useEffect(function() {
     console.log("effect");
 }, []);
 `,
-					errors: [{ messageId: "anonymousFunction" }],
 					options: [{ environment: "standard" }],
+					errors: [{ messageId: "anonymousFunction" }],
 				},
 			],
 			valid: [
@@ -478,18 +482,19 @@ useEffect(() => {
     console.log("effect");
 }, []);
 `,
-					errors: [{ messageId: "arrowFunction" }],
 					options: [{ environment: "roblox-ts", sloptor: true }],
+					errors: [{ messageId: "arrowFunction" }],
 				},
-				// Anonymous function expressions should still fail in sloptor mode
+				// Anonymous function expressions should still fail in sloptor
+				// mode
 				{
 					code: `
 useEffect(function() {
     console.log("effect");
 }, []);
 `,
-					errors: [{ messageId: "anonymousFunction" }],
 					options: [{ environment: "roblox-ts", sloptor: true }],
+					errors: [{ messageId: "anonymousFunction" }],
 				},
 				// Named function expressions are reported in plain roblox-ts mode
 				{
@@ -498,12 +503,13 @@ useEffect(function handleEffect() {
     console.log("effect");
 }, []);
 `,
-					errors: [{ messageId: "functionExpression" }],
 					options: [{ environment: "roblox-ts" }],
+					errors: [{ messageId: "functionExpression" }],
 				},
 			],
 			valid: [
-				// Named function expressions are allowed in sloptor mode (standard behavior)
+				// Named function expressions are allowed in sloptor mode
+				// (standard behavior)
 				{
 					code: `
 useEffect(function handleEffect() {
@@ -512,7 +518,8 @@ useEffect(function handleEffect() {
 `,
 					options: [{ environment: "roblox-ts", sloptor: true }],
 				},
-				// Named function expression via identifier is allowed in sloptor mode
+				// Named function expression via identifier is allowed in sloptor
+				// mode
 				{
 					code: `
 const effect = function handleEffect() {
@@ -537,79 +544,85 @@ useEffect(effect, []);
 
 		tsx.run("require-named-effect-functions-inline-function-declarations", rule, {
 			invalid: [
-				// Standard mode: declaration reference is converted to an inline named function expression
-				// and the now-unused single-reference declaration is removed
+				// Standard mode: declaration reference is converted to an inline
+				// named function expression and the now-unused single-reference
+				// declaration is removed
 				{
 					code: `
 function doSomething(): void {}
 useEffect(doSomething, []);
 `,
-					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
-					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					output: `
 useEffect(function doSomething(): void {}, []);
 `,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 				},
-				// Sloptor mode: same conversion preserves parameters and annotations
+				// Sloptor mode: same conversion preserves parameters and
+				// annotations
 				{
 					code: `
 function doSomething(amount: number): void {}
 useEffect(doSomething, []);
 `,
-					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
-					options: [{ environment: "roblox-ts", inlineFunctionDeclarations: true, sloptor: true }],
 					output: `
 useEffect(function doSomething(amount: number): void {}, []);
 `,
+					options: [{ environment: "roblox-ts", inlineFunctionDeclarations: true, sloptor: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 				},
-				// Multiple references keep the declaration (inlining each call site would be safe,
-				// but removing the declaration would break the other reference)
+				// Multiple references keep the declaration (inlining each call
+				// site would be safe, but removing the declaration would break
+				// the other reference)
 				{
 					code: `
 function doSomething(): void {}
 useEffect(doSomething, []);
 useEffect(doSomething, [a]);
 `,
-					errors: [
-						{ messageId: "identifierReferencesFunctionDeclaration" },
-						{ messageId: "identifierReferencesFunctionDeclaration" },
-					],
-					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					output: `
 function doSomething(): void {}
 useEffect(function doSomething(): void {}, []);
 useEffect(function doSomething(): void {}, [a]);
 `,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [
+						{ messageId: "identifierReferencesFunctionDeclaration" },
+						{ messageId: "identifierReferencesFunctionDeclaration" },
+					],
 				},
-				// Exported declarations are kept (removing them would break the export)
+				// Exported declarations are kept (removing them would break the
+				// export)
 				{
 					code: `
 export function doSomething(): void {}
 useEffect(doSomething, []);
 `,
-					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
-					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					output: `
 export function doSomething(): void {}
 useEffect(function doSomething(): void {}, []);
 `,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 				},
-				// Declarations with attached comments are kept (removing them would orphan the comment)
+				// Declarations with attached comments are kept (removing them
+				// would orphan the comment)
 				{
 					code: `
 // Some business logic
 function doSomething(): void {}
 useEffect(doSomething, []);
 `,
-					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
-					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					output: `
 // Some business logic
 function doSomething(): void {}
 useEffect(function doSomething(): void {}, []);
 `,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 				},
-				// Single-reference declarations in nested scopes are removed with their indentation
+				// Single-reference declarations in nested scopes are removed
+				// with their indentation
 				{
 					code: `
 function makeComponent() {
@@ -619,8 +632,6 @@ function makeComponent() {
     return useEffect(handleEffect, []);
 }
 `,
-					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
-					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					output: `
 function makeComponent() {
     return useEffect(function handleEffect() {
@@ -628,6 +639,8 @@ function makeComponent() {
     }, []);
 }
 `,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
 				},
 				// Async declarations keep the async report without a fix
 				{
@@ -637,12 +650,13 @@ async function handleEffect() {
 }
 useEffect(handleEffect, []);
 `,
-					errors: [{ messageId: "identifierReferencesAsyncFunction" }],
 					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesAsyncFunction" }],
 				},
 			],
 			valid: [
-				// Standard mode without the opt-in keeps declaration references allowed
+				// Standard mode without the opt-in keeps declaration references
+				// allowed
 				{
 					code: `
 function effect() {
@@ -652,7 +666,8 @@ useEffect(effect, []);
 `,
 					options: [{ environment: "standard" }],
 				},
-				// Sloptor mode without the opt-in keeps declaration references allowed
+				// Sloptor mode without the opt-in keeps declaration references
+				// allowed
 				{
 					code: `
 function effect() {
@@ -692,8 +707,8 @@ useCustomHook(() => {
     console.log("custom");
 }, []);
 `,
-					errors: [{ messageId: "arrowFunction" }],
 					options: [{ hooks: [{ allowAsync: false, name: "useCustomHook" }] }],
+					errors: [{ messageId: "arrowFunction" }],
 				},
 			],
 			valid: [
@@ -715,16 +730,17 @@ function handleCustom() {
 }
 useCustomHook(handleCustom, []);
 `,
-					options: [{ hooks: [{ allowAsync: false, name: "useCustomHook" }] }],
+					options: [{ hooks: [{ name: "useCustomHook", allowAsync: false }] }],
 				},
-				// Default hooks should not be checked when custom hooks are specified
+				// Default hooks should not be checked when custom hooks are
+				// specified
 				{
 					code: `
 useEffect(() => {
     console.log("effect");
 }, []);
 `,
-					options: [{ hooks: [{ allowAsync: false, name: "useCustomHook" }] }],
+					options: [{ hooks: [{ name: "useCustomHook", allowAsync: false }] }],
 				},
 			],
 		});

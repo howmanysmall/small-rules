@@ -1,4 +1,4 @@
-/*!
+/* !
  * Direct tests for the react-effect analysis utilities.
  *
  * Exercises internal analysis helpers end-to-end through the rule harness:
@@ -34,7 +34,7 @@ const Child = ({ onChanged }) => {
 `,
 				errors: [
 					{
-						data: { data: '"instance"', name: '"Child"' },
+						data: { name: '"Child"', data: '"instance"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],

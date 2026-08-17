@@ -8,19 +8,19 @@ describe("no-identity-map", () => {
 		invalid: [
 			{
 				code: "scaleBinding.map(v => v)",
-				documentation: { id: "fail", title: "Identity binding map" },
-				errors: [{ messageId: "identityBindingMap" }],
 				output: "scaleBinding",
+				errors: [{ messageId: "identityBindingMap" }],
+				documentation: { id: "fail", title: "Identity binding map" },
 			},
 			{
 				code: "const result = shadowTransparencyBinding.map((trans: number) => trans);",
-				errors: [{ messageId: "identityBindingMap" }],
 				output: "const result = shadowTransparencyBinding;",
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 			{
 				code: "myBinding.map(v => { return v; })",
-				errors: [{ messageId: "identityBindingMap" }],
 				output: "myBinding",
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 
 			{
@@ -28,122 +28,122 @@ describe("no-identity-map", () => {
 const [binding] = useBinding(0);
 binding.map(v => v);
 `,
-				errors: [{ messageId: "identityBindingMap" }],
 				output: `
 const [binding] = useBinding(0);
 binding;
 `,
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 			{
 				code: `
 const [b] = React.useBinding(0);
 b.map(v => v);
 `,
-				errors: [{ messageId: "identityBindingMap" }],
 				output: `
 const [b] = React.useBinding(0);
 b;
 `,
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 			{
 				code: `
 const mapped = source.map(x => x + 1);
 mapped.map(v => v);
 `,
-				errors: [{ messageId: "identityBindingMap" }],
 				output: `
 const mapped = source.map(x => x + 1);
 mapped;
 `,
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 
 			{
 				code: "React.joinBindings({ a, b }).map(v => v)",
-				errors: [{ messageId: "identityBindingMap" }],
 				output: "React.joinBindings({ a, b })",
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 			{
 				code: "joinBindings({ a }).map(x => x)",
-				errors: [{ messageId: "identityBindingMap" }],
 				output: "joinBindings({ a })",
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 
 			{
 				code: "binding.map(x => x + 1).map(y => y)",
-				errors: [{ messageId: "identityBindingMap" }],
 				output: "binding.map(x => x + 1)",
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 
 			{
 				code: "items.map(v => v)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "items",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: `
     const [x] = foo(0);
     x.map(v => v);
     `,
-				errors: [{ messageId: "identityArrayMap" }],
 				output: `
     const [x] = foo(0);
     x;
     `,
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: `
     const x = foo["useBinding"](0);
     x.map(v => v);
     `,
-				errors: [{ messageId: "identityArrayMap" }],
 				output: `
     const x = foo["useBinding"](0);
     x;
     `,
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: "array.map((v) => v)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "array",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 
 			{
 				code: "data.map((v: number) => v)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "data",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: "items.map((item: Readonly<T>) => item)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "items",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 
 			{
 				code: "list.map(v => { return v; })",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "list",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: "arr.map((x: string) => { return x; })",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "arr",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 
 			{
 				code: "data.map(function(v) { return v; })",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "data",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: "items.map(function foo(v) { return v; })",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "items",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 
 			{
 				code: "arr.map((x = 0) => x)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "arr",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 
 			{
@@ -151,11 +151,11 @@ mapped;
 const joined = joinBindings({ a, b });
 joined.map(v => v);
 `,
-				errors: [{ messageId: "identityBindingMap" }],
 				output: `
 const joined = joinBindings({ a, b });
 joined;
 `,
+				errors: [{ messageId: "identityBindingMap" }],
 			},
 
 			{
@@ -166,13 +166,13 @@ joined;
     })}
 />
 `,
-				errors: [{ messageId: "identityArrayMap" }],
-				language: "tsx",
 				output: `
 <frame
     BackgroundTransparency={shadowTransparency}
 />
 `,
+				errors: [{ messageId: "identityArrayMap" }],
+				language: "tsx",
 			},
 			{
 				code: `
@@ -182,23 +182,23 @@ joined;
     })}
 />
 `,
-				errors: [{ messageId: "identityBindingMap" }],
-				language: "tsx",
 				output: `
 <component
     gap={glowWidthBinding}
 />
 `,
+				errors: [{ messageId: "identityBindingMap" }],
+				language: "tsx",
 			},
 			{
 				code: "function store() {} store.map(v => v)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "function store() {} store",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 			{
 				code: "const store = 1; store.map(v => v)",
-				errors: [{ messageId: "identityArrayMap" }],
 				output: "const store = 1; store",
+				errors: [{ messageId: "identityArrayMap" }],
 			},
 		],
 		valid: [

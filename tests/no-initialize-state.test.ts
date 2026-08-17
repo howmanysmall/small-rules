@@ -20,8 +20,8 @@ export function MyComponent(): React.Element {
 	return <textlabel Text={state} />;
 }
 `,
-				documentation: { id: "fail", title: "State initialized by an effect" },
 				errors: [{ data: { arguments: '"Hello"', state: "state" }, messageId: "avoidInitializingState" }],
+				documentation: { id: "fail", title: "State initialized by an effect" },
 			},
 			{
 				code: `
@@ -108,8 +108,8 @@ export function MyComponent(): React.Element {
 				errors: [{ data: { arguments: '"Hello"', state: "state" }, messageId: "avoidInitializingState" }],
 			},
 			{
-				// An alias-RHS setter inside the effect has no call expression; the
-				// aliased call still initializes state.
+				// An alias-RHS setter inside the effect has no call expression;
+				// the aliased call still initializes state.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -174,7 +174,8 @@ export function MyComponent(): React.Element {
 			},
 			{
 				// Don't know why someone would use a synchronous IIFE here,
-				// hence we don't make the effort to flag it, but just documenting this behavior.
+				// hence we don't make the effort to flag it, but just
+				// documenting this behavior.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -240,7 +241,8 @@ export function MyComponent(): React.Element {
 				options: [{ environment: "standard" }],
 			},
 			{
-				// We ignore this because `react-hooks/exhaustive-deps` will flag the unnecessary dependency
+				// We ignore this because `react-hooks/exhaustive-deps` will flag
+				// the unnecessary dependency
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -261,8 +263,8 @@ export function MyComponent(): React.Element {
 `,
 			},
 			{
-				// A state setter returned from the effect is not inside any call callee,
-				// so `getCallExpression` cannot resolve it.
+				// A state setter returned from the effect is not inside any call
+				// callee, so `getCallExpression` cannot resolve it.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -282,8 +284,9 @@ export function MyComponent(): React.Element {
 `,
 			},
 			{
-				// A setter bound to the name `useState` matches `isUseState` itself, so
-				// `getStateName` finds no destructured declaration and yields undefined.
+				// A setter bound to the name `useState` matches `isUseState`
+				// itself, so `getStateName` finds no destructured declaration and
+				// yields undefined.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -307,7 +310,8 @@ export function MyComponent(): React.Element {
 `,
 			},
 			{
-				// An effect without a dependency array has no dependency references to analyze.
+				// An effect without a dependency array has no dependency
+				// references to analyze.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 

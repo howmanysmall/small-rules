@@ -23,9 +23,9 @@ const docsContentDirectory = fileURLToPath(new URL("../documentation/src/content
 const rulePagesDirectory = nodePath.join(docsContentDirectory, "rules");
 
 interface RuleExampleCoverage {
+	readonly name: string;
 	readonly exemption: string | undefined;
 	readonly invalidCount: number;
-	readonly name: string;
 	readonly validCount: number;
 }
 
@@ -74,9 +74,9 @@ function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
 		category.rules.map((entry): RuleExampleCoverage => {
 			const examples = ruleExamples.get(entry.name) ?? [];
 			return {
+				name: entry.name,
 				exemption: "exampleExemption" in entry ? entry.exampleExemption : undefined,
 				invalidCount: examples.filter((example) => example.kind === "invalid").length,
-				name: entry.name,
 				validCount: examples.filter((example) => example.kind === "valid").length,
 			};
 		}),
@@ -88,7 +88,7 @@ function getUncoveredRuleNames(): ReadonlyArray<string> {
 		.filter(({ exemption, invalidCount, validCount }) => {
 			const hasExamples = invalidCount > 0 && validCount > 0;
 			const hasReasonedExemption = exemption !== undefined && exemption.trim() !== "";
-			return !(hasExamples || hasReasonedExemption);
+			return !hasExamples && !hasReasonedExemption;
 		})
 		.map(({ name }) => name);
 }
@@ -121,8 +121,8 @@ function parseExampleProgram(code: string, language: ExampleParseLanguage): Prog
 
 function isMultiStatementContainer(node: Node): boolean {
 	switch (node.type) {
-		case "Program":
-		case "BlockStatement": {
+		case "BlockStatement":
+		case "Program": {
 			return node.body.length >= 2;
 		}
 		case "SwitchCase": {

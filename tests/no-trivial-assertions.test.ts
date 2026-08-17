@@ -8,8 +8,8 @@ describe("no-trivial-assertions", () => {
 		invalid: [
 			{
 				code: "expect(true).toBe(true);",
-				documentation: { id: "fail", title: "Constant always-true equality" },
 				errors: [{ messageId: "issue" }],
+				documentation: { id: "fail", title: "Constant always-true equality" },
 			},
 			{ code: "expect(1).toBe(1);", errors: [{ messageId: "issue" }] },
 			{ code: "expect('a').toEqual('a');", errors: [{ messageId: "issue" }] },

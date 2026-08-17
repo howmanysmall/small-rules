@@ -12,8 +12,8 @@ function View() {
 	return <Component options={{ enabled: true, count: 5 }} />;
 }
 `,
-				documentation: { id: "fail", title: "Inline JSX object property" },
 				errors: [{ messageId: "hoistableObjectProp" }],
+				documentation: { id: "fail", title: "Inline JSX object property" },
 			},
 			{
 				code: `

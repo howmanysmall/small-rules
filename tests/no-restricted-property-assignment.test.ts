@@ -8,62 +8,61 @@ describe("no-restricted-property-assignment", () => {
 		invalid: [
 			{
 				code: "_G.__DEV__ = true;",
-				documentation: { id: "fail", title: "Restricted property assignment" },
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
+				documentation: { id: "fail", title: "Restricted property assignment" },
 			},
 			{
 				code: "_G.__DEV__ = true;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__PROD__ = true;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__*__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G_other.__DEV__ = true;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G*", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: '_G["__DEV__"] = false;',
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.anything = 1;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["*"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: '_G[".secret"] = 1;',
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["*"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__DEV__ = 1;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__", "__PROD__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__PROD__ = 1;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__", "__PROD__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__DEV__ = true;",
-				errors: [{ messageId: "restrictedCustom" }],
 				options: [
 					{
 						restrictions: [{ message: "No global writes", object: "_G", properties: ["__DEV__"] }],
 					},
 				],
+				errors: [{ messageId: "restrictedCustom" }],
 			},
 			{
 				code: "config.debug = true;",
-				errors: [{ messageId: "restricted" }],
 				options: [
 					{
 						restrictions: [
@@ -72,34 +71,35 @@ describe("no-restricted-property-assignment", () => {
 						],
 					},
 				],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__DEV__ ||= true;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__DEV__ += 1;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "_G.__DEV__++;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
 				code: "--_G.__DEV__;",
-				errors: [{ messageId: "restricted" }],
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				errors: [{ messageId: "restricted" }],
 			},
 			{
-				code: "_G.__DEV__ = true; // allowFiles should not suppress on non-matching files",
-				errors: [{ messageId: "restricted" }],
 				filename: "some/other/file.ts",
+				code: "_G.__DEV__ = true; // allowFiles should not suppress on non-matching files",
 				options: [
 					{ allowFiles: ["main.server.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
+				errors: [{ messageId: "restricted" }],
 			},
 		],
 		valid: [
@@ -107,8 +107,8 @@ describe("no-restricted-property-assignment", () => {
 			"_G.__DEV__;",
 			{
 				code: "_G.__PROD__ = true;",
-				documentation: { id: "pass", title: "Non-matching property assignment" },
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
+				documentation: { id: "pass", title: "Non-matching property assignment" },
 			},
 			{
 				code: "other.__DEV__ = true;",
@@ -176,58 +176,57 @@ describe("no-restricted-property-assignment", () => {
 			},
 			// allowFiles: should suppress reports on matching files
 			{
-				code: "_G.__DEV__ = true;",
 				filename: "main.server.ts",
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["main.server.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				code: "_G.__DEV__ = true;",
 				filename: "src/main.client.ts",
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["main.client.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				code: "_G.__DEV__ = true;",
 				filename: "stories/button.story.ts",
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["*.story.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				code: "_G.__DEV__ = true;",
 				filename: "stories/button.story.tsx",
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["*.story.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				code: "_G.__DEV__ = true;",
 				filename: `${process.cwd()}/test/utils/development-flag.ts`,
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				code: "_G.__DEV__ = true;",
 				filename: `${process.cwd()}/test/utils/development-flag.tsx`,
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["test/**/*.{ts,tsx}"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
-				code: "_G.__DEV__ = true;",
-				// oxlint-disable-next-line sonar/publicly-writable-directories -- slop rule
 				filename: "/tmp/development-flag.ts",
+				code: "_G.__DEV__ = true;",
 				options: [
 					{ allowFiles: ["development-flag.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],
 			},
 			{
+				filename: "main.server.ts",
 				code: "_G.__DEV__ = true; // multiple allow patterns",
-				filename: "main.server.ts",
 				options: [
 					{
 						allowFiles: ["main.server.ts", "main.client.ts"],
@@ -236,8 +235,8 @@ describe("no-restricted-property-assignment", () => {
 				],
 			},
 			{
-				code: "_G.__DEV__ = true; // multiple allow patterns - second match",
 				filename: "main.client.ts",
+				code: "_G.__DEV__ = true; // multiple allow patterns - second match",
 				options: [
 					{
 						allowFiles: ["main.server.ts", "main.client.ts"],
@@ -246,8 +245,8 @@ describe("no-restricted-property-assignment", () => {
 				],
 			},
 			{
-				code: "_G.__DEV__++; // allowFiles should work on update expressions too",
 				filename: "main.server.ts",
+				code: "_G.__DEV__++; // allowFiles should work on update expressions too",
 				options: [
 					{ allowFiles: ["main.server.ts"], restrictions: [{ object: "_G", properties: ["__DEV__"] }] },
 				],

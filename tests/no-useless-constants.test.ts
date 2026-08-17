@@ -9,9 +9,9 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					documentation: { id: "fail", title: "Inline adjacent constant" },
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
+					documentation: { id: "fail", title: "Inline adjacent constant" },
 				},
 			],
 			valid: [
@@ -40,8 +40,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_OFFSET = 225;\nconst MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -51,8 +51,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const REWARDS_GRID_CAPACITY = 32;\nconst BASE_ITEM_BOX_NATIVE_PROPERTIES_CONFIG_2 = { LayoutOrder: 3 };\nfunction renderAutoFillReward() { return null; }\nconst REWARDS_AUTO_FILL_CONFIGURATION = {\n  capacity: REWARDS_GRID_CAPACITY,\n  renderEmpty: renderAutoFillReward,\n};",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const BASE_ITEM_BOX_NATIVE_PROPERTIES_CONFIG_2 = { LayoutOrder: 3 };\nfunction renderAutoFillReward() { return null; }\nconst REWARDS_AUTO_FILL_CONFIGURATION = {\n  capacity: 32,\n  renderEmpty: renderAutoFillReward,\n};",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -62,8 +62,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_TEXT_GRADIENT = new ColorSequence([\n  new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),\n  new ColorSequenceKeypoint(1, Color3.fromRGB(251, 120, 255)),\n]);\nconst MIDDLE = 42;\nexport const STYLE = {\n  title: { Color: TITLE_TEXT_GRADIENT },\n};",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const MIDDLE = 42;\nexport const STYLE = {\n  title: { Color: new ColorSequence([\n  new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),\n  new ColorSequenceKeypoint(1, Color3.fromRGB(251, 120, 255)),\n]) },\n};",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -73,8 +73,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_PADDING = new UDim(0, 1 + 2);\nconst MIDDLE = 42;\nconst STYLE = { padding: TITLE_PADDING };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const MIDDLE = 42;\nconst STYLE = { padding: new UDim(0, 1 + 2) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -84,8 +84,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_COLOR = Color3.fromRGB(true ? 255 : 128, 120, 255);\nconst MIDDLE = 42;\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const MIDDLE = 42;\nconst STYLE = { color: Color3.fromRGB(true ? 255 : 128, 120, 255) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -95,13 +95,13 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TWEEN_INFO = new TweenInfo({ Time: 1, DelayTime: 0 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ Time: 1, DelayTime: 0 }) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: 'const TWEEN_INFO = new TweenInfo({ ["Time"]: 1 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };',
-					errors: [{ messageId: "uselessConstant" }],
 					output: 'const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ ["Time"]: 1 }) };',
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -111,38 +111,38 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80));\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) as Color3;\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) as Color3 };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80)!;\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80)! };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) satisfies Color3;\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) satisfies Color3 };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_COLOR = Color3.fromRGB<number>(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3.fromRGB<number>(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_COLOR = Color3?.fromRGB(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: Color3?.fromRGB(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_COLOR = <Color3>Color3.fromRGB(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: <Color3>Color3.fromRGB(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -155,23 +155,23 @@ describe("no-useless-constants", () => {
 				invalid: [
 					{
 						code: `const TITLE_TEXT = ${templateExpression};\nconst STYLE = { text: TITLE_TEXT };`,
-						errors: [{ messageId: "uselessConstant" }],
 						output: `const STYLE = { text: ${templateExpression} };`,
+						errors: [{ messageId: "uselessConstant" }],
 					},
 					{
 						code: "const TITLE_SIZE = +UDim2.fromOffset(1, 2).X.Offset;\nconst STYLE = { size: TITLE_SIZE };",
-						errors: [{ messageId: "uselessConstant" }],
 						output: "const STYLE = { size: +UDim2.fromOffset(1, 2).X.Offset };",
+						errors: [{ messageId: "uselessConstant" }],
 					},
 					{
 						code: 'const TITLE_ANCHOR = Vector2["yAxis"];\nconst STYLE = { anchor: TITLE_ANCHOR };',
-						errors: [{ messageId: "uselessConstant" }],
 						output: 'const STYLE = { anchor: Vector2["yAxis"] };',
+						errors: [{ messageId: "uselessConstant" }],
 					},
 					{
 						code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) ?? Color3.fromRGB(90, 90, 90);\nconst STYLE = { color: TITLE_COLOR };",
-						errors: [{ messageId: "uselessConstant" }],
 						output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) ?? Color3.fromRGB(90, 90, 90) };",
+						errors: [{ messageId: "uselessConstant" }],
 					},
 				],
 				valid: [],
@@ -182,8 +182,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const COLOR_SEQUENCE = new ColorSequence([ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0))]);\nconst STYLE = { color: COLOR_SEQUENCE };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const STYLE = { color: new ColorSequence([ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0))]) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -193,13 +193,13 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80), Color3.fromRGB(90, 90, 90));\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "const TITLE_COLOR = new ColorSequence([, ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 90, 90))]);\nconst STYLE = { color: TITLE_COLOR };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 			],
 			valid: [],
@@ -209,8 +209,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_TEXT_GRADIENT = new ColorSequence(Color3.fromRGB(255, 255, 255));\nconst OUTLINE_GRADIENT = new ColorSequence(Color3.fromRGB(252, 178, 255));\nexport const STYLE = {\n  title: { Color: TITLE_TEXT_GRADIENT },\n  outline: { Color: OUTLINE_GRADIENT },\n};",
-					errors: [{ messageId: "uselessConstants" }],
 					output: "export const STYLE = {\n  title: { Color: new ColorSequence(Color3.fromRGB(255, 255, 255)) },\n  outline: { Color: new ColorSequence(Color3.fromRGB(252, 178, 255)) },\n};",
+					errors: [{ messageId: "uselessConstants" }],
 				},
 			],
 			valid: [],
@@ -220,8 +220,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const TITLE_OFFSET = getOffset();\nconst MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 			],
 			valid: [],
@@ -231,18 +231,18 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: 'import { makeGradient } from "styles";\nconst TITLE_GRADIENT = makeGradient(1);\nconst MIDDLE = 42;\nconst STYLE = { gradient: TITLE_GRADIENT };',
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "const TWEEN_INFO = new TweenInfo({ ...defaults });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "const TWEEN_INFO = new TweenInfo(...defaults);\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 			],
 			valid: [],
@@ -252,38 +252,38 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "// important note\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "const TITLE_OFFSET = 225;\n// keep with offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "const TITLE_OFFSET = /* keep */ 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "const TITLE_OFFSET = 225; // keep offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstantNoFix" }],
 					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
 				},
 				{
 					code: "// file note\n\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "// file note\n\nconst TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_OFFSET = 225;\n\n// detached note\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "// detached note\nconst TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 				{
 					code: "const TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };\n\n// file note",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const TEXT_NATIVE = { Offset: 225 };\n\n// file note",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -295,8 +295,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "function render() {\n  const OFFSET_X = 42;\n  const CONFIG = { x: OFFSET_X };\n  return CONFIG;\n}",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "function render() {\n  const CONFIG = { x: 42 };\n  return CONFIG;\n}",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -428,8 +428,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const SHADOW_POSITION = UDim2.fromScale(-0.7, 0.7);\nconst SHADOW_NATIVE_PROPERTIES = { Position: SHADOW_POSITION };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const SHADOW_NATIVE_PROPERTIES = { Position: UDim2.fromScale(-0.7, 0.7) };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],
@@ -439,8 +439,8 @@ describe("no-useless-constants", () => {
 			invalid: [
 				{
 					code: "const SHADOW_ANCHOR = Vector2.yAxis;\nconst SHADOW_NATIVE_PROPERTIES = { AnchorPoint: SHADOW_ANCHOR };",
-					errors: [{ messageId: "uselessConstant" }],
 					output: "const SHADOW_NATIVE_PROPERTIES = { AnchorPoint: Vector2.yAxis };",
+					errors: [{ messageId: "uselessConstant" }],
 				},
 			],
 			valid: [],

@@ -12,8 +12,8 @@ import * as React from "@rbxts/react";
 
 const element = React.createElement("frame");
 `,
-				documentation: { id: "fail", title: "Static React createElement call" },
 				errors: [{ messageId: "useJsx" }],
+				documentation: { id: "fail", title: "Static React createElement call" },
 			},
 			{
 				code: `
@@ -37,8 +37,8 @@ import { createElement } from "react";
 
 const element = createElement("div");
 `,
-				errors: [{ messageId: "useJsx" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "useJsx" }],
 			},
 			{
 				code: `
@@ -55,8 +55,8 @@ export function HeroSplash(title: string) {
 	);
 }
 `,
-				errors: [{ messageId: "useJsx" }, { messageId: "useJsx" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "useJsx" }, { messageId: "useJsx" }],
 			},
 			{
 				code: `

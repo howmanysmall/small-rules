@@ -9,188 +9,189 @@ describe("ban-instances", () => {
 			// Array config - new Instance()
 			{
 				code: 'new Instance("Part");',
-				documentation: { id: "fail", title: "banned instance construction" },
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part"] }],
+				errors: [{ messageId: "bannedInstance" }],
+				documentation: { id: "fail", title: "banned instance construction" },
 			},
 			{
 				code: 'const part = new Instance("Part");',
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part", "Frame"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			{
 				code: 'new Instance("Frame");',
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part", "Frame"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			// Array config - JSX (lowercase = Roblox Instance)
 			{
 				code: "<part />;",
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			{
 				code: "<frame><textlabel /></frame>;",
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Frame"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			// Object config with custom messages - new Instance()
 			{
 				code: 'new Instance("Script");',
-				errors: [{ messageId: "bannedInstanceCustom" }],
 				options: [{ bannedInstances: { Script: "Scripts should not be created at runtime" } }],
+				errors: [{ messageId: "bannedInstanceCustom" }],
 			},
 			{
 				code: 'new Instance("Part");',
-				errors: [{ messageId: "bannedInstanceCustom" }],
 				options: [{ bannedInstances: { Part: "Use MeshPart instead" } }],
+				errors: [{ messageId: "bannedInstanceCustom" }],
 			},
 			// Object config with custom messages - JSX (lowercase)
 			{
 				code: "<script />;",
-				errors: [{ messageId: "bannedInstanceCustom" }],
 				options: [{ bannedInstances: { Script: "Scripts should not be created at runtime" } }],
+				errors: [{ messageId: "bannedInstanceCustom" }],
 			},
 			// Case-insensitive lookup - UITextSizeConstraint
 			{
 				code: "<uitextsizeconstraint />;",
-				errors: [{ messageId: "bannedInstanceCustom" }],
 				options: [{ bannedInstances: { UITextSizeConstraint: "Use something else" } }],
+				errors: [{ messageId: "bannedInstanceCustom" }],
 			},
 			{
 				code: 'new Instance("UITextSizeConstraint");',
-				errors: [{ messageId: "bannedInstanceCustom" }],
 				options: [{ bannedInstances: { UITextSizeConstraint: "Use something else" } }],
+				errors: [{ messageId: "bannedInstanceCustom" }],
 			},
 			// Case-insensitive new Instance() - lowercase string matches
 			{
 				code: 'new Instance("part");',
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			// Multiple errors
 			{
 				code: 'new Instance("Part"); new Instance("Frame");',
-				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part", "Frame"] }],
+				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedInstance" }],
 			},
 			{
 				code: "<part />;  <frame />;",
-				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part", "Frame"] }],
+				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedInstance" }],
 			},
 			// Mixed new Instance() and JSX
 			{
 				code: '<part />; new Instance("Frame");',
-				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part", "Frame"] }],
+				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedInstance" }],
 			},
 			// Nested JSX - only inner lowercase element errors
 			{
 				code: "<Frame><part /></Frame>;",
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Part"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			// Nested JSX - outer lowercase element errors
 			{
 				code: "<frame><Part /></frame>;",
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: ["Frame"] }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			// bannedProperties: JSX property bans
 			{
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: "<uisizeconstraint maxsize={new Vector2(100, 100)} />;",
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			// bannedProperties: imperative property bans
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MaxSize = new Vector2(100, 100);',
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: 'const c = new Instance("uisizeconstraint"); c.MaxSize = new Vector2(100, 100);',
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.maxsize = new Vector2(100, 100);',
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			// bannedProperties: computed string-literal property assignment
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c["MaxSize"] = new Vector2(100, 100);',
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
-			// bannedProperties: property-only bans (no bannedInstances entry for the class)
+			// bannedProperties: property-only bans (no bannedInstances entry for
+			// the class)
 			{
 				code: "<uiaspectratioconstraint AspectRatio={16} />;",
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [
 					{ bannedProperties: { UIAspectRatioConstraint: { AspectRatio: "Use a different approach" } } },
 				],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: 'const c = new Instance("UIAspectRatioConstraint"); c.AspectRatio = 16;',
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [
 					{ bannedProperties: { UIAspectRatioConstraint: { AspectRatio: "Use a different approach" } } },
 				],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: '{ const c = new Instance("UISizeConstraint"); c.MaxSize = new Vector2(100, 100); }',
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: "<uisizeconstraint native:MaxSize={new Vector2(100, 100)} />;",
-				errors: [{ messageId: "bannedPropertyCustom" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
+				errors: [{ messageId: "bannedPropertyCustom" }],
 			},
 			// bannedProperties: default message (empty custom message)
 			{
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
-				errors: [{ messageId: "bannedProperty" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "" } } }],
+				errors: [{ messageId: "bannedProperty" }],
 			},
 			// combined class + property bans on same JSX element
 			{
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
-				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedPropertyCustom" }],
 				options: [
 					{
 						bannedInstances: ["UISizeConstraint"],
 						bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } },
 					},
 				],
+				errors: [{ messageId: "bannedInstance" }, { messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
-				errors: [{ messageId: "bannedInstanceCustom" }, { messageId: "bannedPropertyCustom" }],
 				options: [
 					{
 						bannedInstances: { UISizeConstraint: "Use something else" },
 						bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } },
 					},
 				],
+				errors: [{ messageId: "bannedInstanceCustom" }, { messageId: "bannedPropertyCustom" }],
 			},
 			{
 				code: 'new Instance("Part");',
-				errors: [{ messageId: "bannedInstance" }],
 				options: [{ bannedInstances: { Part: "" } }],
+				errors: [{ messageId: "bannedInstance" }],
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MaxSize = new Vector2(100, 100);',
-				errors: [{ messageId: "bannedProperty" }],
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "" } } }],
+				errors: [{ messageId: "bannedProperty" }],
 			},
 		],
 		valid: [
@@ -209,8 +210,8 @@ describe("ban-instances", () => {
 			// Non-banned classes - new Instance()
 			{
 				code: 'new Instance("MeshPart");',
-				documentation: { id: "pass", title: "unlisted instance class" },
 				options: [{ bannedInstances: ["Part"] }],
+				documentation: { id: "pass", title: "unlisted instance class" },
 			},
 			// Capitalized JSX = custom React component (NOT Roblox Instance)
 			{
@@ -296,7 +297,8 @@ describe("ban-instances", () => {
 				code: "<UISizeConstraint MaxSize={new Vector2(100, 100)} />;",
 				options: [{ bannedProperties: { UISizeConstraint: { MaxSize: "Use a different approach" } } }],
 			},
-			// bannedProperties: no bannedProperties config (only bannedInstances, different class)
+			// bannedProperties: no bannedProperties config (only
+			// bannedInstances, different class)
 			{
 				code: "<uisizeconstraint MaxSize={new Vector2(100, 100)} />;",
 				options: [{ bannedInstances: ["Part"] }],

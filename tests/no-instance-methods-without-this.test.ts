@@ -15,8 +15,8 @@ class MyClass {
     }
 }
 `,
-				documentation: { id: "fail", title: "instance method without this" },
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
+				documentation: { id: "fail", title: "instance method without this" },
 			},
 			// Protected methods without this
 			{
@@ -71,7 +71,8 @@ class MyClass {
 `,
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 			},
-			// Computed method names fall back to an unknown method name in diagnostics
+			// Computed method names fall back to an unknown method name in
+			// diagnostics
 			{
 				code: `
 class MyClass {
@@ -114,7 +115,8 @@ class MyClass {
 `,
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }, { messageId: "noInstanceMethodWithoutThis" }],
 			},
-			// Overload signatures are skipped, but the implementation is still flagged
+			// Overload signatures are skipped, but the implementation is still
+			// flagged
 			{
 				code: `
 class UniqueRandom {
@@ -319,8 +321,8 @@ class MyClass {
     }
 }
 `,
-					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 					options: [{ checkPrivate: false }],
+					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 				},
 			],
 			valid: [
@@ -347,8 +349,8 @@ class MyClass {
     }
 }
 `,
-					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 					options: [{ checkProtected: false }],
+					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 				},
 			],
 			valid: [
@@ -375,8 +377,8 @@ class MyClass {
     }
 }
 `,
-					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 					options: [{ checkPublic: false }],
+					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 				},
 			],
 			valid: [
@@ -403,8 +405,8 @@ class MyClass {
     }
 }
 `,
-					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 					options: [{ checkPrivate: false, checkProtected: false }],
+					errors: [{ messageId: "noInstanceMethodWithoutThis" }],
 				},
 			],
 			valid: [

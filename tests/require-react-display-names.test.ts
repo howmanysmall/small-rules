@@ -17,8 +17,8 @@ function ComponentNoMemo() {
 
 export default memo(ComponentNoMemo);
 `,
-				documentation: { id: "fail", title: "Memo export without display name" },
 				errors: [{ messageId: "directMemoExport" }],
+				documentation: { id: "fail", title: "Memo export without display name" },
 			},
 
 			// Direct React.memo export
@@ -171,8 +171,8 @@ function Button() {
 const MemoButton = memo(Button);
 export default MemoButton;
 `,
-				errors: [{ messageId: "missingMemoDisplayName" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "missingMemoDisplayName" }],
 			},
 
 			// Standard React environment - createContext
@@ -183,8 +183,8 @@ import React from "react";
 const AppContext = React.createContext<string>("");
 export default AppContext;
 `,
-				errors: [{ messageId: "missingContextDisplayName" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "missingContextDisplayName" }],
 			},
 
 			// Export as default via specifier
@@ -464,7 +464,8 @@ export default a;
 `,
 			},
 
-			// Non-memo method on React namespace (hits false branch in isMemoCall)
+			// Non-memo method on React namespace (hits false branch in
+			// isMemoCall)
 			{
 				code: `
 import React from "@rbxts/react";
@@ -493,7 +494,8 @@ export default React["createContext"](0);
 `,
 			},
 
-			// Direct createContext export with unsupported namespace object is ignored
+			// Direct createContext export with unsupported namespace object is
+			// ignored
 			{
 				code: `
 import React from "@rbxts/react";
@@ -502,7 +504,8 @@ export default getReact().createContext<number>(0);
 `,
 			},
 
-			// Computed property access on React (not a MemberExpression with Identifier property)
+			// Computed property access on React (not a MemberExpression with
+			// Identifier property)
 			{
 				code: `
 import React from "@rbxts/react";
@@ -527,7 +530,8 @@ export default Comp;
 `,
 			},
 
-			// Variable not found in any scope (edge case - hits findVariable return undefined)
+			// Variable not found in any scope (edge case - hits findVariable
+			// return undefined)
 			{
 				code: `
 import React from "@rbxts/react";

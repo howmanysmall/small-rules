@@ -8,64 +8,64 @@ describe("no-color3-constructor", () => {
 		invalid: [
 			{
 				code: "new Color3(value);",
-				errors: [{ messageId: "useFromRGB" }],
 				output: null,
+				errors: [{ messageId: "useFromRGB" }],
 			},
 			{
 				code: "new Color3(255);",
-				documentation: { id: "fail", title: "single-channel Color3 constructor" },
-				errors: [{ messageId: "useFromRGB" }],
 				output: "Color3.fromRGB(255, 0, 0);",
+				errors: [{ messageId: "useFromRGB" }],
+				documentation: { id: "fail", title: "single-channel Color3 constructor" },
 			},
 			{
 				code: "new Color3(0.5);",
-				errors: [{ messageId: "useFromRGB" }],
 				output: "Color3.fromRGB(128, 0, 0);",
+				errors: [{ messageId: "useFromRGB" }],
 			},
 			{
 				code: "new Color3(1, 0);",
-				errors: [{ messageId: "useFromRGB" }],
 				output: "Color3.fromRGB(255, 0, 0);",
+				errors: [{ messageId: "useFromRGB" }],
 			},
 			{
 				code: "new Color3(255, 128);",
-				errors: [{ messageId: "useFromRGB" }],
 				output: "Color3.fromRGB(255, 128, 0);",
+				errors: [{ messageId: "useFromRGB" }],
 			},
 			{
 				code: "new Color3(255, 128, 64);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: "Color3.fromRGB(255, 128, 64);",
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 			{
 				code: "new Color3(1, 1, 1);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: "Color3.fromRGB(255, 255, 255);",
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 			{
 				code: "new Color3(0, 0, 1);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: "Color3.fromRGB(0, 0, 255);",
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 			{
 				code: "new Color3(0, 1, 0);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: "Color3.fromRGB(0, 255, 0);",
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 			{
 				code: "new Color3(1, 0, 0);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: "Color3.fromRGB(255, 0, 0);",
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 			{
 				code: "const c = new Color3(0.5, 0.5, 0.5);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: "const c = Color3.fromRGB(128, 128, 128);",
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 			{
 				code: "new Color3(255, green, 64);",
-				errors: [{ messageId: "onlyZeroArgs" }],
 				output: null,
+				errors: [{ messageId: "onlyZeroArgs" }],
 			},
 		],
 		valid: [

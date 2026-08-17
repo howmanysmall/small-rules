@@ -15,7 +15,7 @@ describe("lint utilities", () => {
 
 	const rule = defineRule({
 		create(context): Visitor {
-			const hooks = new Set(["useMemo", "useEffect"]);
+			const hooks = new Set(["useEffect", "useMemo"]);
 
 			return {
 				CallExpression(node): void {

@@ -1,5 +1,6 @@
 import { harnessVisitorKeys } from "./ast";
 import { createLocationIndex } from "./locations";
+
 // oxlint-disable unicorn/no-null -- SourceCode token helpers return null when no neighboring token exists.
 import { buildScopeManager } from "./scope";
 import { createComments, tokenize } from "./tokens";

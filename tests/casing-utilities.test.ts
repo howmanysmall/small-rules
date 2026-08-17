@@ -6,7 +6,7 @@ describe("toPascalCase", () => {
 		expect.assertions(1);
 
 		// Arrange
-		const value = "   ";
+		const value = ' '.repeat(3);
 
 		// Act
 		const result = toPascalCase(value);
@@ -32,7 +32,7 @@ describe("toPascalCase", () => {
 		expect.assertions(1);
 
 		// Arrange
-		const separator = String.fromCodePoint(0);
+		const separator = String.fromCharCode(0);
 		const value = `${separator}already${separator}${separator}Split${separator}`;
 
 		// Act
@@ -46,7 +46,7 @@ describe("toPascalCase", () => {
 		expect.assertions(1);
 
 		// Arrange
-		const separator = String.fromCodePoint(0);
+		const separator = String.fromCharCode(0);
 		const value = separator.repeat(2);
 
 		// Act
@@ -60,7 +60,7 @@ describe("toPascalCase", () => {
 		expect.assertions(1);
 
 		// Arrange
-		const separator = String.fromCodePoint(0);
+		const separator = String.fromCharCode(0);
 		const value = `phase${separator}2${separator}complete`;
 
 		// Act

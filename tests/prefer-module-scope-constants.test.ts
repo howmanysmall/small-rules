@@ -32,13 +32,13 @@ describe("prefer-module-scope-constants", () => {
 			{ code: "{ const FOO = true; }", errors: moduleScopeErrors },
 			{
 				code: "function foo() { const FOO = true; }",
-				documentation: { id: "fail", title: "Function constant at local scope" },
 				errors: [
 					{
 						message:
 							"You must place screaming snake case at module scope. If this is not meant to be a module-scoped variable, use camelcase instead.",
 					},
 				],
+				documentation: { id: "fail", title: "Function constant at local scope" },
 			},
 			{ code: "{ const foo = false, FOO = true; }", errors: moduleScopeErrors },
 		],

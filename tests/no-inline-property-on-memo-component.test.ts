@@ -14,8 +14,8 @@ const MemoCard = memo(() => <frame />);
 
 const view = <MemoCard options={{ enabled: true }} />;
 `,
-				documentation: { id: "fail", title: "Inline object prop on memo" },
 				errors: [{ data: { name: "MemoCard", type: "object" }, messageId: "inlineProperty" }],
+				documentation: { id: "fail", title: "Inline object prop on memo" },
 			},
 			{
 				code: `

@@ -20,13 +20,13 @@ export function List({ items }: { items: ReadonlyArray<string> }): React.Element
 	return <textlabel Text={selection} />;
 }
 `,
-				documentation: { id: "fail", title: "State adjusted after a prop change" },
 				errors: [
 					{
 						data: { props: '"items"', state: "selection" },
 						messageId: "avoidAdjustingStateWhenAPropChanges",
 					},
 				],
+				documentation: { id: "fail", title: "State adjusted after a prop change" },
 			},
 			{
 				code: `
@@ -120,8 +120,8 @@ export function List({ items, user }: { items: ReadonlyArray<string>; user: stri
 				],
 			},
 			{
-				// An alias-RHS setter inside the effect has no call expression; the
-				// aliased call still adjusts state when the prop changes.
+				// An alias-RHS setter inside the effect has no call expression;
+				// the aliased call still adjusts state when the prop changes.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -199,8 +199,8 @@ export function Counter({ count }: { count: number }): React.Element {
 `,
 			},
 			{
-				// A state setter returned from the effect is not inside any call callee,
-				// so `getCallExpression` cannot resolve it.
+				// A state setter returned from the effect is not inside any call
+				// callee, so `getCallExpression` cannot resolve it.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -219,8 +219,9 @@ export function List({ items }: { items: ReadonlyArray<string> }): React.Element
 `,
 			},
 			{
-				// A setter bound to the name `useState` matches `isUseState` itself, so
-				// `getStateName` finds no destructured declaration and yields undefined.
+				// A setter bound to the name `useState` matches `isUseState`
+				// itself, so `getStateName` finds no destructured declaration and
+				// yields undefined.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -239,7 +240,8 @@ export function List({ items }: { items: ReadonlyArray<string> }): React.Element
 `,
 			},
 			{
-				// An effect without a dependency array has no dependency references to analyze.
+				// An effect without a dependency array has no dependency
+				// references to analyze.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -255,7 +257,8 @@ export function List(): React.Element {
 `,
 			},
 			{
-				// A setter called through `void` is not synchronous within the effect.
+				// A setter called through `void` is not synchronous within the
+				// effect.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 

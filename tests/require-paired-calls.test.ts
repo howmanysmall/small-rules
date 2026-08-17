@@ -14,8 +14,8 @@ function test() {
     doWork();
 }
 `,
-				documentation: { id: "fail", title: "Unpaired opener lacks closer" },
 				errors: [{ messageId: "unpairedOpener" }],
+				documentation: { id: "fail", title: "Unpaired opener lacks closer" },
 			},
 
 			// Unpaired closer (no opener)
@@ -139,7 +139,6 @@ function test() {
     Iris.End();
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }],
 				options: [
 					{
 						pairs: [
@@ -152,6 +151,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }],
 			},
 
 			// Wrong LIFO order
@@ -177,7 +177,6 @@ function test() {
     debug.profileend();
 }
 `,
-				errors: [{ messageId: "multipleOpeners" }],
 				options: [
 					{
 						allowMultipleOpeners: false,
@@ -191,6 +190,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "multipleOpeners" }],
 			},
 
 			// Too many closers
@@ -212,7 +212,6 @@ function test() {
     Iris.End();
 }
 `,
-				errors: [{ data: { closer: "Iris.End" }, messageId: "unpairedCloser" }],
 				options: [
 					{
 						pairs: [
@@ -226,6 +225,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ data: { closer: "Iris.End" }, messageId: "unpairedCloser" }],
 			},
 
 			// Contextual error: wrong closer when stack has opener
@@ -236,11 +236,6 @@ function test() {
     debug.profileend();
 }
 `,
-				errors: [
-					// Iris.CollapsingHeader never closed
-					{ messageId: "unpairedOpener" },
-					{ data: { closer: "debug.profileend", expected: "Iris.End" }, messageId: "unexpectedCloser" },
-				],
 				options: [
 					{
 						pairs: [
@@ -259,6 +254,11 @@ function test() {
 						],
 					},
 				],
+				errors: [
+					// Iris.CollapsingHeader never closed
+					{ messageId: "unpairedOpener" },
+					{ data: { closer: "debug.profileend", expected: "Iris.End" }, messageId: "unexpectedCloser" },
+				],
 			},
 
 			// Contextual error: multiple expected closers
@@ -269,13 +269,6 @@ function test() {
     Iris.End();
 }
 `,
-				errors: [
-					{ messageId: "unpairedOpener" },
-					{
-						data: { closer: "Iris.End", expected: "db.commit' or 'db.rollback" },
-						messageId: "unexpectedCloser",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -292,6 +285,13 @@ function test() {
 								requireSync: true,
 							},
 						],
+					},
+				],
+				errors: [
+					{ messageId: "unpairedOpener" },
+					{
+						data: { closer: "Iris.End", expected: "db.commit' or 'db.rollback" },
+						messageId: "unexpectedCloser",
 					},
 				],
 			},
@@ -428,7 +428,6 @@ function test() {
     debug.profileend();
 }
 `,
-				errors: [{ messageId: "maxNestingExceeded" }],
 				options: [
 					{
 						maxNestingDepth: 2,
@@ -442,6 +441,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "maxNestingExceeded" }],
 			},
 
 			// Missing closer in if branch
@@ -525,7 +525,6 @@ function test() {
     Iris.End();
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 				options: [
 					{
 						pairs: [
@@ -539,6 +538,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 			},
 
 			// BUG FIX: Nested if-blocks with missing closers
@@ -553,7 +553,6 @@ function test() {
     }
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 				options: [
 					{
 						pairs: [
@@ -567,6 +566,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 			},
 
 			// BUG FIX: Multiple openers with partial closers in if-block
@@ -581,7 +581,6 @@ function test() {
     }
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 				options: [
 					{
 						pairs: [
@@ -595,6 +594,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 			},
 
 			// BUG FIX: Openers in both if and else branches without closers
@@ -608,7 +608,6 @@ function test() {
     }
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 				options: [
 					{
 						pairs: [
@@ -622,6 +621,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
 			},
 
 			// Repeated wrong closers reuse the expected-closer cache
@@ -633,11 +633,6 @@ function test() {
     Iris.End();
 }
 `,
-				errors: [
-					{ messageId: "unpairedOpener" },
-					{ data: { closer: "Iris.End", expected: "db.commit" }, messageId: "unexpectedCloser" },
-					{ data: { closer: "Iris.End", expected: "db.commit" }, messageId: "unexpectedCloser" },
-				],
 				options: [
 					{
 						pairs: [
@@ -654,9 +649,15 @@ function test() {
 						],
 					},
 				],
+				errors: [
+					{ messageId: "unpairedOpener" },
+					{ data: { closer: "Iris.End", expected: "db.commit" }, messageId: "unexpectedCloser" },
+					{ data: { closer: "Iris.End", expected: "db.commit" }, messageId: "unexpectedCloser" },
+				],
 			},
 
-			// Duplicate closer candidates are de-duplicated in expected-closer messages
+			// Duplicate closer candidates are de-duplicated in expected-closer
+			// messages
 			{
 				code: `
 function test() {
@@ -664,16 +665,6 @@ function test() {
     ui.close();
 }
 `,
-				errors: [
-					{
-						data: { closer: "cache.close' or 'cache.abort", opener: "cache.open", paths: "function exit" },
-						messageId: "unpairedOpener",
-					},
-					{
-						data: { closer: "ui.close", expected: "cache.close' or 'cache.abort" },
-						messageId: "unexpectedCloser",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -697,6 +688,16 @@ function test() {
 						],
 					},
 				],
+				errors: [
+					{
+						data: { closer: "cache.close' or 'cache.abort", opener: "cache.open", paths: "function exit" },
+						messageId: "unpairedOpener",
+					},
+					{
+						data: { closer: "ui.close", expected: "cache.close' or 'cache.abort" },
+						messageId: "unexpectedCloser",
+					},
+				],
 			},
 
 			// Unpaired openers report all configured closer names
@@ -706,12 +707,6 @@ function test() {
     lock.acquire();
 }
 `,
-				errors: [
-					{
-						data: { closer: "lock.release' or 'lock.free", opener: "lock.acquire", paths: "function exit" },
-						messageId: "unpairedOpener",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -721,6 +716,12 @@ function test() {
 								requireSync: false,
 							},
 						],
+					},
+				],
+				errors: [
+					{
+						data: { closer: "lock.release' or 'lock.free", opener: "lock.acquire", paths: "function exit" },
+						messageId: "unpairedOpener",
 					},
 				],
 			},
@@ -734,12 +735,6 @@ async function test() {
     lock.release();
 }
 `,
-				errors: [
-					{
-						data: { asyncType: "await", closer: "lock.release' or 'lock.free", opener: "lock.acquire" },
-						messageId: "asyncViolation",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -751,9 +746,16 @@ async function test() {
 						],
 					},
 				],
+				errors: [
+					{
+						data: { asyncType: "await", closer: "lock.release' or 'lock.free", opener: "lock.acquire" },
+						messageId: "asyncViolation",
+					},
+				],
 			},
 
-			// Multiple closer labels are shown when a yielding Roblox call auto-closes profiles
+			// Multiple closer labels are shown when a yielding Roblox call
+			// auto-closes profiles
 			{
 				code: `
 function test() {
@@ -762,12 +764,6 @@ function test() {
     Span.stop();
 }
 `,
-				errors: [
-					{
-						data: { closer: "Span.stop' or 'Span.abort", yieldingFunction: "task.wait" },
-						messageId: "robloxYieldViolation",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -782,6 +778,12 @@ function test() {
 						],
 					},
 				],
+				errors: [
+					{
+						data: { closer: "Span.stop' or 'Span.abort", yieldingFunction: "task.wait" },
+						messageId: "robloxYieldViolation",
+					},
+				],
 			},
 
 			// Early exits report all configured closer names
@@ -793,16 +795,6 @@ function test() {
     lock.release();
 }
 `,
-				errors: [
-					{
-						data: {
-							closer: "lock.release' or 'lock.free",
-							opener: "lock.acquire",
-							paths: "return at line 4",
-						},
-						messageId: "unpairedOpener",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -812,6 +804,16 @@ function test() {
 								requireSync: false,
 							},
 						],
+					},
+				],
+				errors: [
+					{
+						data: {
+							closer: "lock.release' or 'lock.free",
+							opener: "lock.acquire",
+							paths: "return at line 4",
+						},
+						messageId: "unpairedOpener",
 					},
 				],
 			},
@@ -827,16 +829,6 @@ function test(items) {
     }
 }
 `,
-				errors: [
-					{
-						data: {
-							closer: "lock.release' or 'lock.free",
-							opener: "lock.acquire",
-							paths: "break at line 5",
-						},
-						messageId: "unpairedOpener",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -846,6 +838,16 @@ function test(items) {
 								requireSync: false,
 							},
 						],
+					},
+				],
+				errors: [
+					{
+						data: {
+							closer: "lock.release' or 'lock.free",
+							opener: "lock.acquire",
+							paths: "break at line 5",
+						},
+						messageId: "unpairedOpener",
 					},
 				],
 			},
@@ -860,7 +862,6 @@ function test() {
     lock.release();
 }
 `,
-				errors: [{ messageId: "wrongOrder" }],
 				options: [
 					{
 						pairs: [
@@ -877,6 +878,7 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "wrongOrder" }],
 			},
 			{
 				code: `
@@ -887,7 +889,6 @@ function test() {
     b.close();
 }
 `,
-				errors: [{ messageId: "wrongOrder" }],
 				options: [
 					{
 						pairs: [
@@ -904,9 +905,11 @@ function test() {
 						],
 					},
 				],
+				errors: [{ messageId: "wrongOrder" }],
 			},
 
-			// Closing an older opener before the top opener reports the actual still-open pair
+			// Closing an older opener before the top opener reports the actual
+			// still-open pair
 			{
 				code: `
 function test() {
@@ -916,12 +919,6 @@ function test() {
     inner.end();
 }
 `,
-				errors: [
-					{
-						data: { actual: "inner.begin", closer: "outer.end", expected: "outer.begin" },
-						messageId: "wrongOrder",
-					},
-				],
 				options: [
 					{
 						pairs: [
@@ -938,9 +935,16 @@ function test() {
 						],
 					},
 				],
+				errors: [
+					{
+						data: { actual: "inner.begin", closer: "outer.end", expected: "outer.begin" },
+						messageId: "wrongOrder",
+					},
+				],
 			},
 
-			// Complete switch branches must all close an opener that predates the switch
+			// Complete switch branches must all close an opener that predates
+			// the switch
 			{
 				code: `
 function test(kind) {
@@ -957,7 +961,8 @@ function test(kind) {
 				errors: [{ messageId: "unpairedOpener" }],
 			},
 
-			// Complete if branches must all close every opener that predates the branch
+			// Complete if branches must all close every opener that predates the
+			// branch
 			{
 				code: `
 function test(kind) {
@@ -970,7 +975,6 @@ function test(kind) {
     }
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }, { messageId: "wrongOrder" }],
 				options: [
 					{
 						pairs: [
@@ -987,8 +991,10 @@ function test(kind) {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }, { messageId: "wrongOrder" }],
 			},
-			// Complete switch branches with a default must all close an opener that predates the switch
+			// Complete switch branches with a default must all close an opener
+			// that predates the switch
 			{
 				code: `
 function test(kind) {
@@ -1005,7 +1011,8 @@ function test(kind) {
 `,
 				errors: [{ messageId: "unpairedOpener" }],
 			},
-			// Try/catch branches must all preserve an opener that predates the try
+			// Try/catch branches must all preserve an opener that predates the
+			// try
 			{
 				code: `
 function test(enabled) {
@@ -1019,7 +1026,6 @@ function test(enabled) {
     }
 }
 `,
-				errors: [{ messageId: "unpairedOpener" }],
 				options: [
 					{
 						pairs: [
@@ -1031,6 +1037,7 @@ function test(enabled) {
 						],
 					},
 				],
+				errors: [{ messageId: "unpairedOpener" }],
 			},
 			// Do-while loop exits can bypass an opener created inside the loop
 			{
@@ -1069,7 +1076,8 @@ function test(makeCall) {
 `,
 			},
 
-			// An opener that stays open through both arms of a complete if/else survives the branch merge
+			// An opener that stays open through both arms of a complete if/else
+			// survives the branch merge
 			{
 				code: `
 function test(condition) {
@@ -1109,7 +1117,8 @@ function test() {
 }
 `,
 			},
-			// Do-while loops are valid when the closer is reached before loop control exits
+			// Do-while loops are valid when the closer is reached before loop
+			// control exits
 			{
 				code: `
 function test(items) {
@@ -1521,7 +1530,8 @@ function test() {
 `,
 			},
 
-			// Literal computed members are also ignored because static names are required
+			// Literal computed members are also ignored because static names are
+			// required
 			{
 				code: `
 function test() {
@@ -1531,7 +1541,8 @@ function test() {
 `,
 			},
 
-			// Labeled breaks to non-loop blocks should not be treated as loop exits
+			// Labeled breaks to non-loop blocks should not be treated as loop
+			// exits
 			{
 				code: `
 function test(ready) {
@@ -1545,7 +1556,8 @@ function test(ready) {
 `,
 			},
 
-			// Conditional closers can be intentionally optional in try/catch branches
+			// Conditional closers can be intentionally optional in try/catch
+			// branches
 			{
 				code: `
 function test() {

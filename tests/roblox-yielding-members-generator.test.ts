@@ -85,7 +85,8 @@ describe("roblox yielding-member catalog generation", () => {
 		expect.assertions(4);
 
 		expect(classHasYieldingMember("DataStore", "GetAsync")).toBe(true);
-		// Repeat lookups exercise the cached member set rather than re-splitting the packed list.
+		// Repeat lookups exercise the cached member set rather than re-splitting
+		// the packed list.
 		expect(classHasYieldingMember("DataStore", "UpdateAsync")).toBe(true);
 		expect(classHasYieldingMember("DataStore", "MissingMember")).toBe(false);
 		expect(classHasYieldingMember("Folder", "MissingMember")).toBe(false);

@@ -13,8 +13,6 @@ describe("require-throw-error-capture", () => {
 			// Named function declaration
 			{
 				code: ["function foo() {", "	throw new Error('bad');", "}"].join("\n"),
-				documentation: { id: "fail", title: "Missing stack trace capture" },
-				errors: [{ messageId: "missingCaptureStackTrace" }],
 				output: [
 					"function foo() {",
 					"	const error = new Error('bad');",
@@ -22,11 +20,12 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				errors: [{ messageId: "missingCaptureStackTrace" }],
+				documentation: { id: "fail", title: "Missing stack trace capture" },
 			},
 			// TypeError subclass
 			{
 				code: ["function bar() {", "	throw new TypeError('invalid');", "}"].join("\n"),
-				errors: [error],
 				output: [
 					"function bar() {",
 					"	const error = new TypeError('invalid');",
@@ -34,11 +33,11 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// NewExpression without arguments
 			{
 				code: ["function baz() {", "	throw new Error();", "}"].join("\n"),
-				errors: [error],
 				output: [
 					"function baz() {",
 					"	const error = new Error();",
@@ -46,11 +45,11 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Method in a class
 			{
 				code: ["class Foo {", "	doThing() {", "		throw new Error('oops');", "	}", "}"].join("\n"),
-				errors: [error],
 				output: [
 					"class Foo {",
 					"	doThing() {",
@@ -60,11 +59,11 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Private method in a class
 			{
 				code: ["class Foo {", "	#doThing() {", "		throw new Error('oops');", "	}", "}"].join("\n"),
-				errors: [error],
 				output: [
 					"class Foo {",
 					"	#doThing() {",
@@ -74,13 +73,13 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Arrow function assigned to class property
 			{
 				code: ["class Foo {", "	doThing = () => {", "		throw new Error('oops');", "	}", "}"].join(
 					"\n",
 				),
-				errors: [error],
 				output: [
 					"class Foo {",
 					"	doThing = () => {",
@@ -90,13 +89,13 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Static method in a class
 			{
 				code: ["class Foo {", "	static doThing() {", "		throw new Error('oops');", "	}", "}"].join(
 					"\n",
 				),
-				errors: [error],
 				output: [
 					"class Foo {",
 					"	static doThing() {",
@@ -106,11 +105,11 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Arrow function assigned to variable
 			{
 				code: ["const myFn = () => {", "	throw new Error('oops');", "};"].join("\n"),
-				errors: [error],
 				output: [
 					"const myFn = () => {",
 					"	const error = new Error('oops');",
@@ -118,11 +117,11 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"};",
 				].join("\n"),
+				errors: [error],
 			},
 			// Function expression assigned to variable
 			{
 				code: ["const myFn2 = function() {", "	throw new Error('nope');", "};"].join("\n"),
-				errors: [error],
 				output: [
 					"const myFn2 = function() {",
 					"	const error = new Error('nope');",
@@ -130,10 +129,10 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"};",
 				].join("\n"),
+				errors: [error],
 			},
 			{
 				code: ["const myFn3 = function Inner() {", "	throw new Error('nope');", "};"].join("\n"),
-				errors: [error],
 				output: [
 					"const myFn3 = function Inner() {",
 					"	const error = new Error('nope');",
@@ -141,6 +140,7 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"};",
 				].join("\n"),
+				errors: [error],
 			},
 			{
 				code: [
@@ -150,7 +150,6 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
-				errors: [error],
 				output: [
 					"class Foo {",
 					"	doThing = function() {",
@@ -160,12 +159,12 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			{
 				code: ["class Foo {", "	#handle = () => {", "		throw new Error('oops');", "	}", "}"].join(
 					"\n",
 				),
-				errors: [error],
 				output: [
 					"class Foo {",
 					"	#handle = () => {",
@@ -175,11 +174,11 @@ describe("require-throw-error-capture", () => {
 					"	}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Custom error class ending with Error
 			{
 				code: ["function handler() {", "	throw new CustomError('fail');", "}"].join("\n"),
-				errors: [error],
 				output: [
 					"function handler() {",
 					"	const error = new CustomError('fail');",
@@ -187,20 +186,19 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Single-line if body must be wrapped in braces
 			{
 				// oxlint-disable-next-line no-template-curly-in-string -- this is fine.
 				code: "function fetchModels() { if (!response.ok) throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`); }",
-				errors: [error],
 				// oxlint-disable-next-line no-template-curly-in-string -- this is fine.
 				output: "function fetchModels() { if (!response.ok) {\nconst error = new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);\nError.captureStackTrace(error, fetchModels);\nthrow error;\n} }",
+				errors: [error],
 			},
 			// File specifier with path that does not match <input> still reports
 			{
 				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
-				errors: [error],
-				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
 				output: [
 					"function foo() {",
 					"\tconst error = new ValidationError('bad');",
@@ -208,12 +206,12 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				errors: [error],
 			},
 			// Non-allowed error still reports when allow option is present
 			{
 				code: ["function foo() {", "\tthrow new Error('bad');", "}"].join("\n"),
-				errors: [error],
-				options: [{ allow: ["ValidationError"] }],
 				output: [
 					"function foo() {",
 					"\tconst error = new Error('bad');",
@@ -221,11 +219,11 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				options: [{ allow: ["ValidationError"] }],
+				errors: [error],
 			},
 			{
 				code: ["const TypeError = Error;", "function foo() {", "\tthrow new TypeError('bad');", "}"].join("\n"),
-				errors: [error],
-				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
 				output: [
 					"const TypeError = Error;",
 					"function foo() {",
@@ -234,6 +232,8 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
+				errors: [error],
 			},
 			// Throw in catch block doesn't collide with catch param name
 			{
@@ -246,7 +246,6 @@ describe("require-throw-error-capture", () => {
 					"\t}",
 					"}",
 				].join("\n"),
-				errors: [error],
 				output: [
 					"async function runJsonAsync() {",
 					"\ttry {",
@@ -258,6 +257,7 @@ describe("require-throw-error-capture", () => {
 					"\t}",
 					"}",
 				].join("\n"),
+				errors: [error],
 			},
 			// Package-aware specifier does not match a different import source
 			{
@@ -267,8 +267,6 @@ describe("require-throw-error-capture", () => {
 					"\tthrow new ValidationError('bad');",
 					"}",
 				].join("\n"),
-				errors: [error],
-				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
 				output: [
 					"import { ValidationError } from 'other-package';",
 					"function foo() {",
@@ -277,6 +275,8 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
+				errors: [error],
 			},
 			{
 				code: [
@@ -285,16 +285,16 @@ describe("require-throw-error-capture", () => {
 					"\tthrow new ValidationError('bad');",
 					"}",
 				].join("\n"),
-				errors: [error],
+				output: [
+					"import { ValidationError } from '@cliffy/command';",
+					"function foo() {",
+					"\tconst error = new ValidationError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
 				options: [{ allow: [{ from: "package", name: "ValidationError" }] }],
-				output: [
-					"import { ValidationError } from '@cliffy/command';",
-					"function foo() {",
-					"\tconst error = new ValidationError('bad');",
-					"Error.captureStackTrace(error, foo);",
-					"throw error;",
-					"}",
-				].join("\n"),
+				errors: [error],
 			},
 			{
 				code: [
@@ -303,8 +303,6 @@ describe("require-throw-error-capture", () => {
 					"\tthrow new ValidationError('bad');",
 					"}",
 				].join("\n"),
-				errors: [error],
-				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
 				output: [
 					"const ValidationError = makeError();",
 					"function foo() {",
@@ -313,6 +311,8 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
+				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				errors: [error],
 			},
 		],
 		valid: [
@@ -343,7 +343,8 @@ describe("require-throw-error-capture", () => {
 			),
 			// Anonymous callback has no name to capture
 			"setTimeout(function() { throw new Error('async'); }, 100);",
-			// Anonymous function expression in object literal — property key is not a variable
+			// Anonymous function expression in object literal — property key is
+			// not a variable
 			["const handlers = {", "\tload: function() {", "\t\tthrow new Error('oops');", "\t},", "};"].join("\n"),
 			// Arrow function in object literal — same reason
 			[
@@ -366,7 +367,7 @@ describe("require-throw-error-capture", () => {
 					"\tthrow new ValidationError('bad');",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "package", package: "@cliffy/command" }] }],
 			},
 			// File-local allowlist skips locally declared errors
 			{
@@ -376,22 +377,22 @@ describe("require-throw-error-capture", () => {
 					"\tthrow new ValidationError('bad');",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "file", name: "ValidationError" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "file" }] }],
 			},
 			{
+				filename: "src/errors.ts",
 				code: [
 					"class ValidationError extends Error {}",
 					"function foo() {",
 					"\tthrow new ValidationError('bad');",
 					"}",
 				].join("\n"),
-				filename: "src/errors.ts",
-				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "file", path: "src/errors.ts" }] }],
 			},
 			// Library allowlist skips global errors
 			{
 				code: ["function foo() {", "\tthrow new TypeError('bad');", "}"].join("\n"),
-				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
+				options: [{ allow: [{ name: "TypeError", from: "library" }] }],
 			},
 			{
 				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),

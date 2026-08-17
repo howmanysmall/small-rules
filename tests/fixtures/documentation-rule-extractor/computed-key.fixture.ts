@@ -7,9 +7,9 @@ ts.run("computed-key", rule, {
 	invalid: [
 		{
 			code: "const invalid = true;",
+			errors: [{ messageId: "computed" }],
 			documentation: { id: "fail", title: "Computed key" },
 			[dynamicKey]: "value",
-			errors: [{ messageId: "computed" }],
 		},
 	],
 	valid: [],

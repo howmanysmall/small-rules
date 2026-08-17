@@ -14,7 +14,7 @@ import { tsx } from "./rule-testers";
 // Sanity check that runs the focused effect rules on common + valid real-world
 // code, as opposed to contrived test cases. Each snippet must pass all nine
 // rules.
-const realWorldSnippets: ReadonlyArray<{ readonly code: string; readonly name: string; }> = [
+const realWorldSnippets: ReadonlyArray<{ readonly code: string; readonly name: string }> = [
 	{
 		name: "useLayoutEffect",
 		code: `

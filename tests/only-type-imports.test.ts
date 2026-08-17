@@ -8,8 +8,8 @@ describe("only-type-imports", () => {
 		invalid: [
 			{
 				code: 'import { Foo } from "./bar";',
-				documentation: { id: "fail", title: "Value import needs type keyword" },
 				errors: [{ messageId: "onlyTypeImports" }],
+				documentation: { id: "fail", title: "Value import needs type keyword" },
 			},
 			{
 				code: 'import Foo from "./bar";',

@@ -9,129 +9,129 @@ describe("prefer-udim2-shorthand", () => {
 			// FromScale pattern tests
 			{
 				code: "new UDim2(1, 0, 1, 0);",
-				documentation: { id: "fail", title: "long-form UDim2 scale" },
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(1, 1);",
+				errors: [{ messageId: "preferFromScale" }],
+				documentation: { id: "fail", title: "long-form UDim2 scale" },
 			},
 			{
 				code: "new UDim2(0.5, 0, 0.75, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(0.5, 0.75);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "const size = new UDim2(100, 0, 200, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "const size = UDim2.fromScale(100, 200);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "func(new UDim2(1, 0, 2, 0));",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "func(UDim2.fromScale(1, 2));",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 
 			// FromOffset pattern tests
 			{
 				code: "new UDim2(0, 1, 0, 1);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(1, 1);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "new UDim2(0, 100, 0, 50);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(100, 50);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "const padding = new UDim2(0, 5, 0, 10);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "const padding = UDim2.fromOffset(5, 10);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "method(new UDim2(0, 20, 0, 30));",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "method(UDim2.fromOffset(20, 30));",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 
 			// Math expressions - fromScale
 			{
 				code: "new UDim2(1 + 1, 0, 2 + 2, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(1 + 1, 2 + 2);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(5 / 4, 0, 0.85, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(5 / 4, 0.85);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(1 * 2, 0, 3 / 4, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(1 * 2, 3 / 4);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(+0.5, 0, +0.75, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(+0.5, +0.75);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 
 			// Math expressions - fromOffset
 			{
 				code: "new UDim2(0, -1, 0, 5);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(-1, 5);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "new UDim2(0, 100 - 10, 0, 50);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(100 - 10, 50);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "new UDim2(0, 10 + 2, 0, 5 * 2);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(10 + 2, 5 * 2);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "new UDim2(8 % 3, 0, 12 % 5, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(8 % 3, 12 % 5);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(0, 20 % 7, 0, 15 % 4);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(20 % 7, 15 % 4);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 
 			// Variables as arguments
 			{
 				code: "new UDim2(x, 0, y, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(x, y);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(0, offset, 0, offset);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(offset, offset);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 			{
 				code: "new UDim2(0, x, 0, 10);",
-				errors: [{ messageId: "preferFromOffset" }],
 				output: "UDim2.fromOffset(x, 10);",
+				errors: [{ messageId: "preferFromOffset" }],
 			},
 
 			// Expressions with variables
 			{
 				code: "new UDim2(10 / x, 0, 10 % y, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(10 / x, 10 % y);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(x + 1, 0, 1 - y, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(x + 1, 1 - y);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 			{
 				code: "new UDim2(x * 2, 0, 2 / z, 0);",
-				errors: [{ messageId: "preferFromScale" }],
 				output: "UDim2.fromScale(x * 2, 2 / z);",
+				errors: [{ messageId: "preferFromScale" }],
 			},
 		],
 		valid: [

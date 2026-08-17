@@ -6,8 +6,8 @@ ts.run("duplicate-id", rule, {
 	invalid: [
 		{
 			code: "const invalid = true;",
-			documentation: { id: "same", title: "Invalid" },
 			errors: [{ messageId: "invalid" }],
+			documentation: { id: "same", title: "Invalid" },
 		},
 	],
 	valid: [

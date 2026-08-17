@@ -187,11 +187,11 @@ export function Form({ value }: { value: string }): React.Element {
 	return <textlabel Text={derived} />;
 }
 `,
+				options: [{ environment: "standard" }],
 				errors: [
 					{ data: { name: "derived" }, line: 11, messageId: "avoidPropHandler" },
 					{ data: { name: "derived" }, line: 12, messageId: "avoidPropHandler" },
 				],
-				options: [{ environment: "standard" }],
 			},
 			{
 				code: `
@@ -221,8 +221,8 @@ export function Form(): React.Element {
 	);
 }
 `,
-				documentation: { id: "fail", title: "Effect used as an event handler" },
 				errors: [{ data: { name: "dataToSubmit" }, messageId: "avoidEventHandler" }],
+				documentation: { id: "fail", title: "Effect used as an event handler" },
 			},
 		],
 		valid: [

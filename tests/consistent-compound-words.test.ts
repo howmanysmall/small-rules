@@ -8,8 +8,8 @@ describe("consistent-compound-words", () => {
 		invalid: [
 			{
 				code: "const passWord = 'secret';",
-				documentation: { id: "fail", title: "Split compound word" },
 				errors: [{ data: { name: "passWord", replacement: "password" }, messageId: "error" }],
+				documentation: { id: "fail", title: "Split compound word" },
 			},
 			{
 				code: "const isInViewPort = true;",
@@ -33,33 +33,33 @@ describe("consistent-compound-words", () => {
 			},
 			{
 				code: "const { passWord } = object;",
-				errors: [{ messageId: "error" }],
 				options: [{ checkShorthandProperties: true }],
+				errors: [{ messageId: "error" }],
 			},
 			{
 				code: "({ passWord: 1 });",
-				errors: [{ messageId: "error" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "error" }],
 			},
 			{
 				code: "class Box { passWord = 1; }",
-				errors: [{ messageId: "error" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "error" }],
 			},
 			{
 				code: "class Box { passWord() {} }",
-				errors: [{ messageId: "error" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "error" }],
 			},
 			{
 				code: "const x = { passWord };",
-				errors: [{ messageId: "error" }],
 				options: [{ checkProperties: true, checkVariables: false }],
+				errors: [{ messageId: "error" }],
 			},
 			{
 				code: "const fooBar = 1;",
-				errors: [{ data: { name: "fooBar", replacement: "foobar" }, messageId: "error" }],
 				options: [{ extendDefaultReplacements: false, replacements: { fooBar: "foobar" } }],
+				errors: [{ data: { name: "fooBar", replacement: "foobar" }, messageId: "error" }],
 			},
 			{
 				code: "const timeOutMs = 1;",
@@ -67,13 +67,13 @@ describe("consistent-compound-words", () => {
 			},
 			{
 				code: "const FooBar = 1;",
-				errors: [{ data: { name: "FooBar", replacement: "Foobar" }, messageId: "error" }],
 				options: [{ extendDefaultReplacements: false, replacements: { fooBar: "foobar" } }],
+				errors: [{ data: { name: "FooBar", replacement: "Foobar" }, messageId: "error" }],
 			},
 			{
 				code: "const x = { PassWord: 1 };",
-				errors: [{ messageId: "error" }],
 				options: [{ checkProperties: true, checkVariables: false }],
+				errors: [{ messageId: "error" }],
 			},
 		],
 		valid: [

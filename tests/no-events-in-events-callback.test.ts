@@ -18,9 +18,9 @@ Events.units.unequipUnit.connect((player: Player, unitKey: string): void => {
     }
 });
 `,
-				documentation: { id: "fail", title: "event fired inside callback" },
-				errors: [{ messageId: "preferFunctions" }],
 				options: [{ eventsImportPaths: ["server/networking"] }],
+				errors: [{ messageId: "preferFunctions" }],
+				documentation: { id: "fail", title: "event fired inside callback" },
 			},
 			{
 				code: `
@@ -31,8 +31,8 @@ Events.units.unequipUnit.connect((player: Player): void => {
     Events.promptNotification.fire(samePlayer, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -44,8 +44,8 @@ Events.units.unequipUnit.connect((player: Player): void => {
     Events.promptNotification.fire(targetPlayer, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -57,8 +57,8 @@ Events.units.unequipUnit.connect((player: Player): void => {
     Events.promptNotification.fire(targetPlayer, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -70,8 +70,8 @@ Events.units.unequipUnit.connect((player: Player): void => {
     Events.promptNotification.fire(target, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -81,8 +81,8 @@ ServerEvents.units.unequipUnit.connect((player: Player): void => {
     ServerEvents.promptNotification(player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -92,8 +92,8 @@ Events.units.unequipUnit.connect(({ player }: { readonly player: Player }): void
     Events.promptNotification.fire(player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -104,8 +104,8 @@ ServerEvents.units.unequipUnit.connect((player: Player): void => {
     ServerEvents.promptNotification.fire(payload.player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -117,8 +117,8 @@ Events.units.unequipUnit.connect((player: Player): void => {
     Events.promptNotification.fire(targetPlayer, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -128,8 +128,8 @@ Events.units.unequipUnit.connect(([player = fallbackPlayer]: ReadonlyArray<Playe
     Events.promptNotification.fire(player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -139,8 +139,8 @@ import { Events } from "server/networking";
     (Events.promptNotification.fire as Fire)(player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -153,8 +153,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPlayer, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -166,8 +166,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPlayer, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -178,8 +178,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPlayer, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -189,8 +189,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire?.(player, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -200,8 +200,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(player, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -212,8 +212,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPlayer, "error", remainingPlayers);
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -225,8 +225,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPlayer, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -237,8 +237,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(payload[0], "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -250,8 +250,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPlayer, "error");
 	});
 	`,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -264,8 +264,8 @@ import { Events } from "server/networking";
 	    Events.promptNotification.fire(targetPayload.player, "error");
 	});
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -275,8 +275,8 @@ Events.units.unequipUnit.connect(function(player: Player): void {
     Events.promptNotification.fire(player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 			{
 				code: `
@@ -286,8 +286,8 @@ Events?.units.unequipUnit.connect((player: Player): void => {
     Events?.promptNotification.fire(player, "error");
 });
 `,
-				errors: [{ messageId: "preferFunctions" }],
 				options,
+				errors: [{ messageId: "preferFunctions" }],
 			},
 		],
 		valid: [

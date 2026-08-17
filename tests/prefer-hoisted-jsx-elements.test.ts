@@ -12,9 +12,9 @@ function View() {
 	return <staticbadge />;
 }
 `,
-				documentation: { id: "fail", title: "Inline static JSX element" },
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "roblox-ts" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
+				documentation: { id: "fail", title: "Inline static JSX element" },
 			},
 			{
 				code: `
@@ -56,8 +56,8 @@ function View() {
 	return <IconSprite variant="label"><staticgradient /></IconSprite>;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ additionalHoistableComponents: ["IconSprite"] }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -70,13 +70,13 @@ function View() {
 	</IconSprite>;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [
 					{
 						additionalHoistableComponents: ["IconSprite"],
 						additionalStaticFactories: ["createIconToken"],
 					},
 				],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -109,8 +109,8 @@ function View() {
 	return <div>Hello</div>;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -120,8 +120,8 @@ function View() {
 	return <EmptyState />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -131,8 +131,8 @@ function View() {
 	return <Icons.Empty />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -140,8 +140,8 @@ function View() {
 	return <><div>Ready</div><span /></>;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -157,8 +157,8 @@ function View() {
 	return <my-widget Event="ready" Change={undefined} />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -166,8 +166,8 @@ declare function consume(value: JSX.Element): void;
 
 while (Math.random() > 0.5) consume(<div />);
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -179,8 +179,8 @@ function View() {
 	return <FunctionComponent label="ready" />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -194,8 +194,8 @@ function View() {
 	return <ClassComponent label="ready" />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -205,8 +205,8 @@ function View() {
 	return <ConstantComponent label="ready" />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `
@@ -216,8 +216,8 @@ function View() {
 	return <Icons.Empty />;
 }
 `,
-				errors: [{ messageId: "hoistableJsxElement" }],
 				options: [{ additionalHoistableComponents: ["Icons"] }],
+				errors: [{ messageId: "hoistableJsxElement" }],
 			},
 			{
 				code: `

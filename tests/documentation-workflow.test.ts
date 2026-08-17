@@ -1,4 +1,4 @@
-// oxlint-disable unicorn-js/name-replacements -- you annoy me.
+// oxlint-disable vitest/no-conditional-in-test -- you annoy me.
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { type } from "arktype";

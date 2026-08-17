@@ -8,8 +8,8 @@ describe("no-task-wait", () => {
 		invalid: [
 			{
 				code: "task.wait();",
-				documentation: { id: "fail", title: "direct task.wait call" },
 				errors: [{ messageId: "noTaskWait" }],
+				documentation: { id: "fail", title: "direct task.wait call" },
 			},
 			{
 				code: "task.wait(1);",

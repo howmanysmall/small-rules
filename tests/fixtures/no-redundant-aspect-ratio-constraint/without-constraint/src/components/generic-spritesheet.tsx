@@ -7,8 +7,8 @@ export const enum ImageType {
 }
 
 export interface GenericSpritesheetProperties {
-	readonly children?: React.ReactNode;
 	readonly imageType: ImageType;
+	readonly children?: React.ReactNode;
 }
 
 export function GenericSpritesheet({ imageType }: GenericSpritesheetProperties): React.ReactNode {

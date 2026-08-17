@@ -8,8 +8,8 @@ describe("no-variadic-spread", () => {
 		invalid: [
 			{
 				code: "target.push(...source);",
-				documentation: { id: "fail", title: "Spreading an array into push()" },
 				errors: [{ data: { method: "push" }, messageId: "noVariadicSpread" }],
+				documentation: { id: "fail", title: "Spreading an array into push()" },
 			},
 			{
 				code: "target.unshift(...source);",

@@ -18,8 +18,8 @@ function Component() {
 	const [fifthValue] = useState(0);
 }
 `,
-				documentation: { id: "fail", title: "Too many state hooks" },
 				errors: [{ messageId: "excessiveUseState" }],
+				documentation: { id: "fail", title: "Too many state hooks" },
 			},
 			{
 				code: `

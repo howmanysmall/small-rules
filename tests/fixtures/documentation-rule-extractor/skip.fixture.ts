@@ -6,8 +6,8 @@ ts.run("skip", rule, {
 	invalid: [
 		{
 			code: "const invalid = true;",
-			documentation: { id: "fail", title: "Skipped" },
 			errors: [{ messageId: "skip" }],
+			documentation: { id: "fail", title: "Skipped" },
 			skip: true,
 		},
 	],

@@ -8,69 +8,69 @@ describe("no-array-constructor-index-assignment", () => {
 		invalid: [
 			{
 				code: "const samples = new Array<string>();\nsamples[0] = replacement;",
-				documentation: { id: "fail", title: "array index assignment after construction" },
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const samples = [replacement];",
+				errors: [{ messageId: "preferArrayLiteral" }],
+				documentation: { id: "fail", title: "array index assignment after construction" },
 			},
 			{
 				code: "const samples = new Array<string>();\nconst other = compute();\nsamples[0] = other;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const other = compute();\nconst samples = [other];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values = new Array<number>();\nvalues[0] = 1;\nvalues[1] = 2;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const values = [1, 2];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values: Array<number> = new Array();\nvalues[0] = 1;\nvalues[1] = 2;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const values: Array<number> = [1, 2];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values: ReadonlyArray<number> = new Array();\nvalues[0] = 1;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const values: ReadonlyArray<number> = [1];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "let values = new Array<number>();\nvalues[0] = 1;\nvalues[1] = 2;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "let values = [1, 2];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "function f() {\n  const values = new Array<number>();\n  values[0] = 1;\n  return values;\n}",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "function f() {\n  const values = [1];\n  return values;\n}",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values = new Array<number>();\nconst other = compute();\nvalues[0] = other;\nconsole.log(values);",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const other = compute();\nconst values = [other];\nconsole.log(values);",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values = new Array<number>();\nvalues[0] = 1;\nvalues[0] = 2;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const values = [1];\nvalues[0] = 2;",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values = new Array<number>();\nother[0] = 1;\nvalues[0] = other[0];",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "other[0] = 1;\nconst values = [other[0]];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "before();\nconst values = new Array<number>();\nsideEffect();\nvalues[0] = 1;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "before();\nsideEffect();\nconst values = [1];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values = new Array<number>();\nconst pattern = /value/u;\nvalues[0] = 1;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const pattern = /value/u;\nconst values = [1];",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
 				code: "const values = new Array<number>();\rvalues[0] = 1;",
-				errors: [{ messageId: "preferArrayLiteral" }],
 				output: "const values = [1];\r",
+				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 		],
 		valid: [

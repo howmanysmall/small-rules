@@ -16,8 +16,8 @@ export function isX(value: unknown) {
 	return validator(value).success;
 }
 `,
-				documentation: { id: "fail", title: "Ianitor success property access" },
 				errors: [{ messageId: "preferCreateGuard" }],
+				documentation: { id: "fail", title: "Ianitor success property access" },
 			},
 			// Ianitor.keyOf inline in function body
 			{
@@ -242,7 +242,8 @@ const validator = Ianitor.keyOf(ids);
 const result = validator("a");
 result["success"];
 `,
-			// Stored result, .success checked, then variable returned (full result forwarded)
+			// Stored result, .success checked, then variable returned (full
+			// result forwarded)
 			`
 import { Ianitor } from "@packages/ianitor";
 const ids = { a: "a" } as const;

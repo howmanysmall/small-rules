@@ -20,13 +20,13 @@ export function Child({ onTextChanged }: { onTextChanged: (text: string | undefi
 	return <textbox Text={text} TextChanged={(textbox: { readonly Text: string }) => setText(textbox.Text)} />;
 }
 `,
-				documentation: { id: "fail", title: "Effect passes live state to a parent" },
 				errors: [
 					{
 						data: { name: '"Child"', state: '"text"' },
 						messageId: "avoidPassingLiveStateToParentInComponent",
 					},
 				],
+				documentation: { id: "fail", title: "Effect passes live state to a parent" },
 			},
 			{
 				code: `
@@ -292,7 +292,8 @@ export const Child = memo(({ onTextChanged }: { onTextChanged: (text: string | u
 		],
 		valid: [
 			{
-				// A literal callback argument is not live state, so there is nothing to report.
+				// A literal callback argument is not live state, so there is
+				// nothing to report.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -329,7 +330,8 @@ export function Parent(): React.Element {
 				documentation: { id: "pass", title: "Parent owns the state" },
 			},
 			{
-				// A setter passed as a callback argument is not a call, so there is nothing to report.
+				// A setter passed as a callback argument is not a call, so there
+				// is nothing to report.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -347,8 +349,9 @@ export function Child({ onTextChanged }: { onTextChanged: (text: string | undefi
 `,
 			},
 			{
-				// An alias of a prop callback that is itself passed as an argument (not called)
-				// has a prop-call chain but no call expression.
+				// An alias of a prop callback that is itself passed as an
+				// argument (not called) has a prop-call chain but no call
+				// expression.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -367,7 +370,8 @@ export function Child({ onChanged }: { onChanged: (text: string | undefined) => 
 `,
 			},
 			{
-				// A wrapper arrow invoked later defers the callback outside the synchronous effect body.
+				// A wrapper arrow invoked later defers the callback outside the
+				// synchronous effect body.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -388,8 +392,9 @@ export function Child({ onChanged }: { onChanged: (text: string | undefined) => 
 `,
 			},
 			{
-				// No idea why someone would do this, but maybe there's a less contrived pattern.
-				// Plus the rule's message and linked docs only mention state - obviously you can't "lift" a prop.
+				// No idea why someone would do this, but maybe there's a less
+				// contrived pattern. Plus the rule's message and linked docs only
+				// mention state - obviously you can't "lift" a prop.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 

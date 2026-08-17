@@ -8,8 +8,8 @@ describe("no-print", () => {
 		invalid: [
 			{
 				code: "print('Hello');",
-				documentation: { id: "fail", title: "global print call" },
 				errors: [{ messageId: "noPrint" }],
+				documentation: { id: "fail", title: "global print call" },
 			},
 			{
 				code: "print(value);",

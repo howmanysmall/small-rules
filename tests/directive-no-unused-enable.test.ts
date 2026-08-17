@@ -8,8 +8,8 @@ describe("directive-no-unused-enable", () => {
 		invalid: [
 			{
 				code: "/* oxlint-enable no-console */\nconst x = 1;",
-				documentation: { id: "fail", title: "Unused enable directive" },
 				errors: [{ messageId: "unusedRule" }],
+				documentation: { id: "fail", title: "Unused enable directive" },
 			},
 			{
 				code: "/* oxlint-enable */\nconst x = 1;",

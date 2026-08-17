@@ -16,7 +16,14 @@ function Component() {
     }, []);
 }
 `,
-				documentation: { id: "fail", title: "Missing effect dependency" },
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        print(count);
+    }, [count]);
+}
+`,
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -35,14 +42,7 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        print(count);
-    }, [count]);
-}
-`,
+				documentation: { id: "fail", title: "Missing effect dependency" },
 			},
 
 			// Missing multiple dependencies
@@ -54,6 +54,15 @@ function Component() {
     useEffect(() => {
         console.log(count, name);
     }, []);
+}
+`,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    const [name, setName] = useState("");
+    useEffect(() => {
+        console.log(count, name);
+    }, [count, name]);
 }
 `,
 				errors: [
@@ -75,15 +84,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    const [name, setName] = useState("");
-    useEffect(() => {
-        console.log(count, name);
-    }, [count, name]);
-}
-`,
 			},
 
 			// Missing dependencies array
@@ -94,6 +94,14 @@ function Component() {
     useEffect(() => {
         console.log(count);
     });
+}
+`,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
 }
 `,
 				errors: [
@@ -114,14 +122,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
 
 			// Unnecessary dependency
@@ -130,6 +130,12 @@ function Component() {
 function Component() {
     const [count, setCount] = useState(0);
     useEffect(() => {}, [count]);
+}
+`,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {}, []);
 }
 `,
 				errors: [
@@ -148,12 +154,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {}, []);
-}
-`,
 			},
 			{
 				code: `
@@ -161,6 +161,13 @@ function Component({ keep, value }: { keep: number; value: number }) {
     useEffect(() => {
         console.log(keep);
     }, [keep, (value as number)!]);
+}
+`,
+				output: `
+function Component({ keep, value }: { keep: number; value: number }) {
+    useEffect(() => {
+        console.log(keep);
+    }, [keep]);
 }
 `,
 				errors: [
@@ -181,13 +188,6 @@ function Component({ keep, value }: { keep: number; value: number }) {
 					},
 				],
 				language: "ts",
-				output: `
-function Component({ keep, value }: { keep: number; value: number }) {
-    useEffect(() => {
-        console.log(keep);
-    }, [keep]);
-}
-`,
 			},
 
 			// Unstable dependency - inline function
@@ -226,6 +226,14 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    const callback = useCallback(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -244,14 +252,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    const callback = useCallback(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
 
 			// Missing dependency in useMemo
@@ -264,6 +264,14 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    const value = useMemo(() => {
+        return count * 2;
+    }, [count]);
+}
+`,
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -282,14 +290,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    const value = useMemo(() => {
-        return count * 2;
-    }, [count]);
-}
-`,
 			},
 
 			// Missing dependency in useLayoutEffect
@@ -302,6 +302,14 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useLayoutEffect(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -320,14 +328,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useLayoutEffect(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
 
 			// Missing dependency with member expression
@@ -338,6 +338,14 @@ function Component() {
     useEffect(() => {
         console.log(obj.prop);
     }, []);
+}
+`,
+				output: `
+function Component() {
+    const obj = { prop: 1 };
+    useEffect(() => {
+        console.log(obj.prop);
+    }, [obj.prop]);
 }
 `,
 				errors: [
@@ -358,14 +366,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const obj = { prop: 1 };
-    useEffect(() => {
-        console.log(obj.prop);
-    }, [obj.prop]);
-}
-`,
 			},
 
 			// Member expression - dependency too specific
@@ -376,6 +376,14 @@ function Component() {
     useEffect(() => {
         console.log(obj.nested);
     }, [obj.nested.value]);
+}
+`,
+				output: `
+function Component() {
+    const obj = { nested: { value: 1 } };
+    useEffect(() => {
+        console.log(obj.nested);
+    }, []);
 }
 `,
 				errors: [
@@ -396,14 +404,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const obj = { nested: { value: 1 } };
-    useEffect(() => {
-        console.log(obj.nested);
-    }, []);
-}
-`,
 			},
 
 			// Missing dependency in useImperativeHandle (closure at index 1)
@@ -414,6 +414,14 @@ function Component(ref) {
     useImperativeHandle(ref, () => ({
         getValue: () => value
     }), []);
+}
+`,
+				output: `
+function Component(ref) {
+    const [value, setValue] = useState(0);
+    useImperativeHandle(ref, () => ({
+        getValue: () => value
+    }), [value]);
 }
 `,
 				errors: [
@@ -434,14 +442,6 @@ function Component(ref) {
 						],
 					},
 				],
-				output: `
-function Component(ref) {
-    const [value, setValue] = useState(0);
-    useImperativeHandle(ref, () => ({
-        getValue: () => value
-    }), [value]);
-}
-`,
 			},
 
 			// React Lua - useBinding with missing dependency
@@ -453,6 +453,15 @@ function Component() {
     useEffect(() => {
         console.log(count);
     }, []);
+}
+`,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    const [binding, setBinding] = useBinding(() => count);
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
 }
 `,
 				errors: [
@@ -474,15 +483,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    const [binding, setBinding] = useBinding(() => count);
-    useEffect(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
 
 			// Multiple hooks with missing dependencies
@@ -498,6 +498,17 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
+    useCallback(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -538,17 +549,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        console.log(count);
-    }, [count]);
-    useCallback(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
 
 			// Prop dependency missing
@@ -558,6 +558,13 @@ function Component(props) {
     useEffect(() => {
         console.log(props.value);
     }, []);
+}
+`,
+				output: `
+function Component(props) {
+    useEffect(() => {
+        console.log(props.value);
+    }, [props.value]);
 }
 `,
 				errors: [
@@ -577,13 +584,6 @@ function Component(props) {
 						],
 					},
 				],
-				output: `
-function Component(props) {
-    useEffect(() => {
-        console.log(props.value);
-    }, [props.value]);
-}
-`,
 			},
 
 			// Optional chaining - missing dependency
@@ -592,6 +592,12 @@ function Component(props) {
 function Component() {
     const obj = { prop: 1 };
     useMemo(() => obj?.prop, []);
+}
+`,
+				output: `
+function Component() {
+    const obj = { prop: 1 };
+    useMemo(() => obj?.prop, [obj?.prop]);
 }
 `,
 				errors: [
@@ -610,12 +616,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const obj = { prop: 1 };
-    useMemo(() => obj?.prop, [obj?.prop]);
-}
-`,
 			},
 
 			// Optional chaining - chained access missing
@@ -624,6 +624,12 @@ function Component() {
 function Component() {
     const obj = { nested: { value: 1 } };
     useMemo(() => obj?.nested?.value, []);
+}
+`,
+				output: `
+function Component() {
+    const obj = { nested: { value: 1 } };
+    useMemo(() => obj?.nested?.value, [obj?.nested?.value]);
 }
 `,
 				errors: [
@@ -642,19 +648,19 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const obj = { nested: { value: 1 } };
-    useMemo(() => obj?.nested?.value, [obj?.nested?.value]);
-}
-`,
 			},
 
-			// Non-null assertion - missing dependency (strips ! for dependency array)
+			// Non-null assertion - missing dependency (strips ! for dependency
+			// array)
 			{
 				code: `
 function Component({ foo }) {
     useMemo(() => foo!.bar, []);
+}
+`,
+				output: `
+function Component({ foo }) {
+    useMemo(() => foo!.bar, [foo.bar]);
 }
 `,
 				errors: [
@@ -673,11 +679,6 @@ function Component({ foo }) {
 					},
 				],
 				language: "ts",
-				output: `
-function Component({ foo }) {
-    useMemo(() => foo!.bar, [foo.bar]);
-}
-`,
 			},
 
 			// Shorthand property IS a capture - should detect missing dependency
@@ -686,6 +687,12 @@ function Component({ foo }) {
 function Component() {
     const cellPadding = { x: 1 };
     useMemo(() => ({ cellPadding }), []);
+}
+`,
+				output: `
+function Component() {
+    const cellPadding = { x: 1 };
+    useMemo(() => ({ cellPadding }), [cellPadding]);
 }
 `,
 				errors: [
@@ -704,21 +711,23 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const cellPadding = { x: 1 };
-    useMemo(() => ({ cellPadding }), [cellPadding]);
-}
-`,
 			},
 
-			// Computed property key IS a capture - should detect missing dependency
+			// Computed property key IS a capture - should detect missing
+			// dependency
 			{
 				code: `
 function Component() {
     const key = "prop";
     const value = 1;
     useMemo(() => ({ [key]: value }), [value]);
+}
+`,
+				output: `
+function Component() {
+    const key = "prop";
+    const value = 1;
+    useMemo(() => ({ [key]: value }), [key, value]);
 }
 `,
 				errors: [
@@ -738,13 +747,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const key = "prop";
-    const value = 1;
-    useMemo(() => ({ [key]: value }), [key, value]);
-}
-`,
 			},
 
 			// Coverage: Non-const variable decl should not be stable
@@ -755,6 +757,14 @@ function Component() {
     useEffect(() => {
         console.log(a);
     }, []);
+}
+`,
+				output: `
+function Component() {
+    let a = 1;
+    useEffect(() => {
+        console.log(a);
+    }, [a]);
 }
 `,
 				errors: [
@@ -775,16 +785,9 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    let a = 1;
-    useEffect(() => {
-        console.log(a);
-    }, [a]);
-}
-`,
 			},
-			// Sparse dependency arrays ignore empty slots while fixing missing dependencies
+			// Sparse dependency arrays ignore empty slots while fixing missing
+			// dependencies
 			{
 				code: `
 function Component() {
@@ -792,6 +795,14 @@ function Component() {
     useEffect(() => {
         console.log(count);
     }, [,]);
+}
+`,
+				output: `
+function Component() {
+    const count = props.count;
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
 }
 `,
 				errors: [
@@ -812,14 +823,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const count = props.count;
-    useEffect(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
 			{
 				code: `
@@ -830,6 +833,15 @@ function Component() {
     }, [setCount]);
 }
 `,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(count + 1);
+    }, []);
+}
+`,
+				options: [{ reportUnnecessaryStableDependencies: true }],
 				errors: [
 					{
 						messageId: "unnecessaryDependency",
@@ -864,15 +876,6 @@ function Component() {
 						],
 					},
 				],
-				options: [{ reportUnnecessaryStableDependencies: true }],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        setCount(count + 1);
-    }, []);
-}
-`,
 			},
 			{
 				code: `
@@ -882,6 +885,15 @@ function Component() {
         console.log(count);
     }
     useEffect(handler, []);
+}
+`,
+				output: `
+function Component() {
+    const count = props.count;
+    function handler() {
+        console.log(count);
+    }
+    useEffect(handler, [count]);
 }
 `,
 				errors: [
@@ -903,15 +915,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const count = props.count;
-    function handler() {
-        console.log(count);
-    }
-    useEffect(handler, [count]);
-}
-`,
 			},
 			{
 				code: `
@@ -920,6 +923,14 @@ function Component({ count }) {
         console.log(count);
     };
     useEffect(handler, []);
+}
+`,
+				output: `
+function Component({ count }) {
+    const handler = () => {
+        console.log(count);
+    };
+    useEffect(handler, [count]);
 }
 `,
 				errors: [
@@ -940,20 +951,18 @@ function Component({ count }) {
 						],
 					},
 				],
-				output: `
-function Component({ count }) {
-    const handler = () => {
-        console.log(count);
-    };
-    useEffect(handler, [count]);
-}
-`,
 			},
 			{
 				code: `
 function Component() {
     const obj = { value: 1 };
     useMemo(() => obj["value"], []);
+}
+`,
+				output: `
+function Component() {
+    const obj = { value: 1 };
+    useMemo(() => obj["value"], [obj["value"]]);
 }
 `,
 				errors: [
@@ -972,12 +981,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const obj = { value: 1 };
-    useMemo(() => obj["value"], [obj["value"]]);
-}
-`,
 			},
 			{
 				code: `
@@ -985,6 +988,13 @@ function Component({ value }) {
     useEffect(() => {
         console.log(value);
     }, [value + 1]);
+}
+`,
+				output: `
+function Component({ value }) {
+    useEffect(() => {
+        console.log(value);
+    }, []);
 }
 `,
 				errors: [
@@ -1004,13 +1014,6 @@ function Component({ value }) {
 						],
 					},
 				],
-				output: `
-function Component({ value }) {
-    useEffect(() => {
-        console.log(value);
-    }, []);
-}
-`,
 			},
 			{
 				code: `
@@ -1019,6 +1022,14 @@ function Component() {
     useEffect(() => {
         console.log(value);
     }, []);
+}
+`,
+				output: `
+function Component() {
+    const value = Math["random"]();
+    useEffect(() => {
+        console.log(value);
+    }, [value]);
 }
 `,
 				errors: [
@@ -1039,14 +1050,6 @@ function Component() {
 						],
 					},
 				],
-				output: `
-function Component() {
-    const value = Math["random"]();
-    useEffect(() => {
-        console.log(value);
-    }, [value]);
-}
-`,
 			},
 			{
 				code: `
@@ -1057,13 +1060,7 @@ function Component() {
     }, []);
 }
 `,
-				errors: [
-					{
-						messageId: "missingDependency",
-						suggestions: [
-							{
-								desc: "Add 'rest' to dependencies array",
-								output: `
+				output: `
 function Component() {
     const { stable, ...rest } = useCustomState();
     useEffect(() => {
@@ -1071,12 +1068,14 @@ function Component() {
     }, [rest]);
 }
 `,
-							},
-						],
-					},
-				],
 				options: [{ hooks: [{ name: "useCustomState", stableResult: ["stable"] }] }],
-				output: `
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'rest' to dependencies array",
+								output: `
 function Component() {
     const { stable, ...rest } = useCustomState();
     useEffect(() => {
@@ -1084,6 +1083,10 @@ function Component() {
     }, [rest]);
 }
 `,
+							},
+						],
+					},
+				],
 			},
 			{
 				code: `
@@ -1094,6 +1097,15 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [stable, ...rest] = useCustomState();
+    useEffect(() => {
+        console.log(rest);
+    }, [rest]);
+}
+`,
+				options: [{ hooks: [{ name: "useCustomState", stableResult: [0] }] }],
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -1112,19 +1124,11 @@ function Component() {
 						],
 					},
 				],
-				options: [{ hooks: [{ name: "useCustomState", stableResult: [0] }] }],
-				output: `
-function Component() {
-    const [stable, ...rest] = useCustomState();
-    useEffect(() => {
-        console.log(rest);
-    }, [rest]);
-}
-`,
 			},
 		],
 		valid: [
-			// Coverage: the first capture of a root identifier fixes the depth compared against dependencies
+			// Coverage: the first capture of a root identifier fixes the depth
+			// compared against dependencies
 			{
 				code: `
 function Component(props) {
@@ -1180,7 +1184,8 @@ function Component() {
 					},
 				],
 			},
-			// Custom hook entries without closure indices only contribute stable results
+			// Custom hook entries without closure indices only contribute stable
+			// results
 			{
 				code: `
 function Component() {
@@ -1215,7 +1220,7 @@ function Component() {
     });
 }
 `,
-				options: [{ hooks: [{ closureIndex: 1, dependenciesIndex: 2, name: "useCustomHook" }] }],
+				options: [{ hooks: [{ name: "useCustomHook", closureIndex: 1, dependenciesIndex: 2 }] }],
 			},
 			{
 				code: `
@@ -1521,7 +1526,8 @@ function Component() {
 }
 `,
 
-			// TypeScript type parameters should not be dependencies (simplified without generic syntax)
+			// TypeScript type parameters should not be dependencies (simplified
+			// without generic syntax)
 			`
 function Component() {
     const setMemorySafeState = useCallback((newState) => {
@@ -1777,7 +1783,8 @@ function Component({ obj }) {
 				language: "ts",
 			},
 
-			// Object literal with property name same as outer variable - only value is a capture
+			// Object literal with property name same as outer variable - only
+			// value is a capture
 			`
 function Component() {
     const cellPadding = { x: 1 };
@@ -1828,7 +1835,8 @@ function Component() {
 }
 `,
 
-			// UseMemo returning a function that references itself via closure variable
+			// UseMemo returning a function that references itself via closure
+			// variable
 			`
 function Component() {
     const factorial = useMemo(() => {
@@ -1861,6 +1869,25 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useCustomHook(() => {
+        console.log(count);
+    }, [count]);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								closureIndex: 0,
+								dependenciesIndex: 1,
+								name: "useCustomHook",
+							},
+						],
+					},
+				],
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -1879,27 +1906,9 @@ function Component() {
 						],
 					},
 				],
-				options: [
-					{
-						hooks: [
-							{
-								closureIndex: 0,
-								dependenciesIndex: 1,
-								name: "useCustomHook",
-							},
-						],
-					},
-				],
-				output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useCustomHook(() => {
-        console.log(count);
-    }, [count]);
-}
-`,
 			},
-			// Unlisted object properties from a stable custom hook are still required
+			// Unlisted object properties from a stable custom hook are still
+			// required
 			{
 				code: `
 function Component() {
@@ -1909,6 +1918,24 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const { setter, value } = useCustomState();
+    useEffect(() => {
+        value();
+    }, [value]);
+}
+`,
+				options: [
+					{
+						hooks: [
+							{
+								name: "useCustomState",
+								stableResult: ["setter"],
+							},
+						],
+					},
+				],
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -1927,24 +1954,6 @@ function Component() {
 						],
 					},
 				],
-				options: [
-					{
-						hooks: [
-							{
-								name: "useCustomState",
-								stableResult: ["setter"],
-							},
-						],
-					},
-				],
-				output: `
-function Component() {
-    const { setter, value } = useCustomState();
-    useEffect(() => {
-        value();
-    }, [value]);
-}
-`,
 			},
 		],
 		valid: [
@@ -1994,9 +2003,9 @@ function Component() {
 					{
 						hooks: [
 							{
+								name: "useCustomHook",
 								closureIndex: 0,
 								dependenciesIndex: 1,
-								name: "useCustomHook",
 							},
 						],
 					},
@@ -2177,8 +2186,8 @@ function Component({ value }) {
     }, [(value as number)!]);
 }
 `,
-				language: "ts",
 				options: [{ reportUnnecessaryDependencies: false }],
+				language: "ts",
 			},
 			{
 				code: `
@@ -2209,8 +2218,8 @@ function Component({ value }) {
     }, [value as number]);
 }
 `,
-				language: "ts",
 				options: [{ reportUnnecessaryDependencies: false }],
+				language: "ts",
 			},
 			{
 				code: `
@@ -2220,8 +2229,8 @@ function Component({ value }: { value: number }) {
     }, [(value + 1) as number]);
 }
 `,
-				language: "ts",
 				options: [{ reportUnnecessaryDependencies: false }],
+				language: "ts",
 			},
 			{
 				code: `
@@ -2378,6 +2387,15 @@ function Component() {
     }, [setCount]);
 }
 `,
+					output: `
+function Component() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        console.log(count);
+    }, []);
+}
+`,
+					options: [{ reportUnnecessaryStableDependencies: true }],
 					errors: [
 						{
 							messageId: "unnecessaryDependency",
@@ -2412,15 +2430,6 @@ function Component() {
 							],
 						},
 					],
-					options: [{ reportUnnecessaryStableDependencies: true }],
-					output: `
-function Component() {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        console.log(count);
-    }, []);
-}
-`,
 				},
 			],
 			valid: [
@@ -2448,6 +2457,14 @@ function Component({ count }) {
     }, [count + 1]);
 }
 `,
+					output: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(count);
+    }, [count, count + 1]);
+}
+`,
+					options: [{ reportUnnecessaryDependencies: false, resolveExpressionDependencies: false }],
 					errors: [
 						{
 							messageId: "missingDependency",
@@ -2465,14 +2482,6 @@ function Component({ count }) {
 							],
 						},
 					],
-					options: [{ reportUnnecessaryDependencies: false, resolveExpressionDependencies: false }],
-					output: `
-function Component({ count }) {
-    useEffect(() => {
-        console.log(count);
-    }, [count, count + 1]);
-}
-`,
 				},
 			],
 			valid: [
@@ -2505,6 +2514,15 @@ function Component() {
     }, []);
 }
 `,
+				output: `
+function Component() {
+    const [setter] = useCustomState();
+    useEffect(() => {
+        setter(1);
+    }, [setter]);
+}
+`,
+				options: [{ hooks: [{ name: "useCustomState", stableResult: [1] }] }],
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -2523,15 +2541,6 @@ function Component() {
 						],
 					},
 				],
-				options: [{ hooks: [{ name: "useCustomState", stableResult: [1] }] }],
-				output: `
-function Component() {
-    const [setter] = useCustomState();
-    useEffect(() => {
-        setter(1);
-    }, [setter]);
-}
-`,
 			},
 		],
 		valid: [
@@ -2571,6 +2580,13 @@ function Component({ count }) {
     }, []);
 }
 `,
+				output: `
+function Component({ count }) {
+    useEffect(() => {
+        console.log(<number>count);
+    }, [count]);
+}
+`,
 				errors: [
 					{
 						messageId: "missingDependency",
@@ -2588,13 +2604,6 @@ function Component({ count }) {
 						],
 					},
 				],
-				output: `
-function Component({ count }) {
-    useEffect(() => {
-        console.log(<number>count);
-    }, [count]);
-}
-`,
 			},
 		],
 		valid: [],

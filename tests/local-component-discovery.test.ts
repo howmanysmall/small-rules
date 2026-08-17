@@ -124,7 +124,8 @@ describe("addLocalComponentImportIdentifiers Oxc IdentifierName behavior", () =>
 			type: "ImportDeclaration",
 		};
 
-		// @ts-expect-error -- Oxc IdentifierName node shape not expressible in espree-aligned types; structurally correct at runtime
+		// @ts-expect-error -- Oxc IdentifierName node shape not expressible in
+		// espree-aligned types; structurally correct at runtime
 		addLocalComponentImportIdentifiers(node, MATCHING_INSPECTION, COMPONENT_NAME, identifiers);
 
 		expect(identifiers.has("Button")).toBe(false);
@@ -151,7 +152,8 @@ describe("addLocalComponentImportIdentifiers", () => {
 		};
 
 		// Act
-		// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+		// @ts-expect-error -- Minimal ESTree shape for the public utility
+		// contract
 		addLocalComponentImportIdentifiers(node, MATCHING_INSPECTION, COMPONENT_NAME, identifiers);
 
 		// Assert
@@ -175,7 +177,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			filename,
 			createComponentDefinition(),
@@ -209,13 +212,15 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const bareInspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			bareImportNode,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
 		const missingFilenameInspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			relativeImportNode,
 			"",
 			createComponentDefinition(),
@@ -245,7 +250,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -274,7 +280,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -303,7 +310,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -332,7 +340,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -361,7 +370,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -390,7 +400,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -419,7 +430,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
@@ -457,13 +469,15 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Act
 		const matchingInspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			definition,
 		);
 		const nonMatchingInspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			nodePath.join(project, "src", "screen.tsx"),
 			missingMarkerDefinition,
@@ -495,14 +509,16 @@ describe("inspectRelativeLocalComponentImport", () => {
 		// Act
 		for (let index = 0; index < 70; index += 1) {
 			inspectRelativeLocalComponentImport(
-				// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+				// @ts-expect-error -- Minimal ESTree shape for the public
+				// utility contract
 				node,
 				filename,
 				{ componentName: `Missing${index}`, fileNames: ["button"] },
 			);
 		}
 		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility contract
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
 			node,
 			filename,
 			createComponentDefinition(),

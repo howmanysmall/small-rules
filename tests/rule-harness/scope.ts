@@ -69,8 +69,8 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 			return;
 		}
 
-		case "FunctionExpression":
-		case "ArrowFunctionExpression": {
+		case "ArrowFunctionExpression":
+		case "FunctionExpression": {
 			visitFunctionLike(node, scope, state);
 			return;
 		}
@@ -278,6 +278,21 @@ function definePattern(
 	state: ScopeState,
 ): void {
 	switch (pattern.type) {
+		case "ArrayPattern": {
+			for (const element of getNodeArrayProperty(pattern, "elements")) {
+				definePattern(element, scope, type, definitionNode, state);
+			}
+			return;
+		}
+
+		case "AssignmentPattern": {
+			const left = getNodeProperty(pattern, "left");
+			const right = getNodeProperty(pattern, "right");
+			if (left !== undefined) definePattern(left, scope, type, definitionNode, state);
+			if (right !== undefined) visitNode(right, scope, state);
+			return;
+		}
+
 		case "Identifier": {
 			if (typeof pattern.name !== "string") return;
 			const variable = defineVariable(scope, pattern.name, pattern, {
@@ -290,24 +305,9 @@ function definePattern(
 			return;
 		}
 
-		case "AssignmentPattern": {
-			const left = getNodeProperty(pattern, "left");
-			const right = getNodeProperty(pattern, "right");
-			if (left !== undefined) definePattern(left, scope, type, definitionNode, state);
-			if (right !== undefined) visitNode(right, scope, state);
-			return;
-		}
-
 		case "RestElement": {
 			const argument = getNodeProperty(pattern, "argument");
 			if (argument !== undefined) definePattern(argument, scope, type, definitionNode, state);
-			return;
-		}
-
-		case "ArrayPattern": {
-			for (const element of getNodeArrayProperty(pattern, "elements")) {
-				definePattern(element, scope, type, definitionNode, state);
-			}
 			return;
 		}
 
@@ -339,9 +339,9 @@ function defineVariable(
 	}
 
 	const variable: HarnessVariable = {
+		name,
 		defs: [definition],
 		identifiers: [identifier],
-		name,
 		references: [],
 		scope,
 	};
@@ -353,9 +353,9 @@ function defineVariable(
 function defineImplicitVariable(scope: HarnessScope, name: string): void {
 	if (scope.set.has(name)) return;
 	const variable: HarnessVariable = {
+		name,
 		defs: [],
 		identifiers: [],
-		name,
 		references: [],
 		scope,
 	};

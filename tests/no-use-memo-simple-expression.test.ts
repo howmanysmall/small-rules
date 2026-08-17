@@ -12,8 +12,8 @@ import { useMemo } from "@rbxts/react";
 
 const value = useMemo(() => 1, []);
 `,
-				documentation: { id: "fail", title: "Memoized simple literal" },
 				errors: [{ messageId: "simpleMemo" }],
+				documentation: { id: "fail", title: "Memoized simple literal" },
 			},
 			{
 				code: `

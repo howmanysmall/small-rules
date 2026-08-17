@@ -30,8 +30,8 @@ const view = (
 			</LabelSpritesheet>
 		);
 `,
-				documentation: { id: "fail", title: "duplicate aspect ratio constraint" },
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+				documentation: { id: "fail", title: "duplicate aspect ratio constraint" },
 			},
 			{
 				code: `
@@ -70,6 +70,7 @@ const view = (
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
 			},
 			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { LabelSpritesheet } from "../components/label-spritesheet";
 
@@ -80,9 +81,9 @@ const view = (
 );
 `,
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
-				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { LabelSpritesheet } from "../components/label-spritesheet";
 
@@ -97,9 +98,9 @@ const view = (
 );
 `,
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
-				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { GenericSpritesheet } from "../components/generic-spritesheet";
 
@@ -110,7 +111,6 @@ const view = (
 );
 `,
 				errors: [{ messageId: "redundantAspectRatioConstraint" }],
-				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -254,6 +254,7 @@ const view = (
 `,
 			},
 			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { LabelSpritesheet } from "../components/label-spritesheet";
 
@@ -264,9 +265,9 @@ const view = (
 	</LabelSpritesheet>
 );
 `,
-				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { RegularLabel } from "../components/label-spritesheet";
 
@@ -276,9 +277,9 @@ const view = (
 	</RegularLabel>
 );
 `,
-				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { RegularLabel } from "@components/label-spritesheet";
 
@@ -288,9 +289,9 @@ const view = (
 	</RegularLabel>
 );
 `,
-				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { MissingSpritesheet } from "../components/missing-spritesheet";
 
@@ -300,7 +301,6 @@ const view = (
 	</MissingSpritesheet>
 );
 `,
-				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -323,6 +323,7 @@ const view = (
 `,
 			},
 			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { GenericSpritesheet } from "../components/generic-spritesheet";
 
@@ -332,7 +333,6 @@ const view = (
 	</GenericSpritesheet>
 );
 `,
-				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
 				code: `
@@ -353,6 +353,7 @@ const view = (
 `,
 			},
 			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { LabelSpritesheet } from "../components/label-spritesheet";
 
@@ -362,9 +363,9 @@ const view = (
 	</LabelSpritesheet>
 );
 `,
-				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 				code: `
 import { GenericSpritesheet } from "../components/generic-spritesheet";
 
@@ -374,7 +375,6 @@ const view = (
 	</GenericSpritesheet>
 );
 `,
-				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
 			},
 		],
 	});

@@ -22,13 +22,13 @@ export function Child({ onFetched }: { onFetched: (data: string) => void }): Rea
 	return <textlabel Text={data} />;
 }
 `,
-				documentation: { id: "fail", title: "Effect passes fetched data to a parent" },
 				errors: [
 					{
 						data: { data: '"useSomeAPI"', name: '"Child"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
+				documentation: { id: "fail", title: "Effect passes fetched data to a parent" },
 			},
 			{
 				code: `
@@ -48,7 +48,7 @@ export function Child({ onFetched }: { onFetched: (data: string) => void }): Rea
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
@@ -71,7 +71,7 @@ export function Child({ onFetched }: { onFetched: (data: string) => void }): Rea
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
@@ -92,7 +92,7 @@ export function useCustomHook({ onFetched }: { onFetched: (data: string) => void
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"useCustomHook"' },
+						data: { name: '"useCustomHook"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInHook",
 					},
 				],
@@ -116,7 +116,7 @@ export function Child({ onFetched }: { onFetched: (element: string | undefined) 
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
@@ -141,7 +141,7 @@ export function Child({ onResult }: { onResult: (data: string, meta: string) => 
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI" and "useOtherAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI" and "useOtherAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
@@ -170,13 +170,14 @@ export function Child({ onChanged }: { onChanged: (data: string, count: number) 
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
 			},
 			{
-				// A memo-wrapped component still reports the declared component name.
+				// A memo-wrapped component still reports the declared component
+				// name.
 				code: `
 import React, { memo, useEffect } from "@rbxts/react";
 
@@ -195,7 +196,7 @@ export const Child = memo(({ onFetched }: { onFetched: (data: string) => void })
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
@@ -203,7 +204,8 @@ export const Child = memo(({ onFetched }: { onFetched: (data: string) => void })
 		],
 		valid: [
 			{
-				// A literal callback argument is not data, so there is nothing to report.
+				// A literal callback argument is not data, so there is nothing
+				// to report.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -421,7 +423,8 @@ export function Child({ onRef }: { onRef: (value: unknown) => void }): React.Ele
 			},
 			{
 				// https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/issues/37
-				// Alternate solutions exist, but this is arguably the most readable.
+				// Alternate solutions exist, but this is arguably the most
+				// readable.
 				code: `
 import React from "react";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
@@ -552,7 +555,8 @@ export function Child({
 `,
 			},
 			{
-				// A member expression that is not a React hook is treated as data.
+				// A member expression that is not a React hook is treated as
+				// data.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -568,7 +572,8 @@ export function Child({ onChanged }: { onChanged: (value: unknown) => void }): R
 `,
 			},
 			{
-				// A member expression that is not a React hook is treated as data.
+				// A member expression that is not a React hook is treated as
+				// data.
 				code: `
 import React, { useEffect, useRef } from "@rbxts/react";
 
@@ -584,8 +589,8 @@ export function Child({ onChanged }: { onChanged: (value: unknown) => void }): R
 `,
 			},
 			{
-				// An alias of a prop callback that is itself passed as an argument
-				// has a prop-call chain but no call expression.
+				// An alias of a prop callback that is itself passed as an
+				// argument has a prop-call chain but no call expression.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -605,7 +610,8 @@ export function Child({ onChanged }: { onChanged: () => void }): React.Element {
 `,
 			},
 			{
-				// A prop callback passed as an argument (not called) has no call expression.
+				// A prop callback passed as an argument (not called) has no call
+				// expression.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -621,7 +627,8 @@ export function Child({ onChanged }: { onChanged: () => void }): React.Element {
 `,
 			},
 			{
-				// A callback used asynchronously is not considered a synchronous call.
+				// A callback used asynchronously is not considered a synchronous
+				// call.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -643,7 +650,8 @@ export function Child({ onChanged }: { onChanged: (data: string) => void }): Rea
 `,
 			},
 			{
-				// A ref object received from props has its `current` access skipped as data.
+				// A ref object received from props has its `current` access
+				// skipped as data.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 

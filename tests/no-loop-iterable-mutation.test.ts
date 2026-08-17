@@ -8,8 +8,8 @@ describe("no-loop-iterable-mutation", () => {
 		invalid: [
 			{
 				code: ["for (const item of items) {", "  items.push(item.clone());", "}"].join("\n"),
-				documentation: { id: "fail", title: "Mutating iterable during for-of" },
 				errors: [{ data: { iterable: "items" }, messageId: "noLoopIterableMutation" }],
+				documentation: { id: "fail", title: "Mutating iterable during for-of" },
 			},
 			{
 				code: "for (const value of values) {\n  values.shift();\n}",

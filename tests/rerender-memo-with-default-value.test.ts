@@ -12,8 +12,8 @@ function Component({ options = {} }) {
     return options;
 }
 `,
-				documentation: { id: "fail", title: "Empty object parameter default" },
 				errors: [{ messageId: "emptyObjectDefault" }],
+				documentation: { id: "fail", title: "Empty object parameter default" },
 			},
 			{
 				code: `

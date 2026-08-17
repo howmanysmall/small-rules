@@ -15,8 +15,8 @@ function Component() {
     }
 }
 `,
-				documentation: { id: "fail", title: "Conditional hook call" },
 				errors: [{ messageId: "conditionalHook" }],
+				documentation: { id: "fail", title: "Conditional hook call" },
 			},
 
 			// Conditional execution - ternary operator
@@ -291,8 +291,8 @@ function Component() {
     }
 }
 `,
-				errors: [{ messageId: "conditionalHook" }],
 				options: [{ onlyHooks: ["useState"] }],
+				errors: [{ messageId: "conditionalHook" }],
 			},
 
 			// Configuration: importSources - should check React hooks
@@ -305,8 +305,8 @@ function Component() {
     }
 }
 `,
-				errors: [{ messageId: "conditionalHook" }],
 				options: [{ importSources: { "my-ecs": false, react: true } }],
+				errors: [{ messageId: "conditionalHook" }],
 			},
 			{
 				code: `
@@ -318,8 +318,8 @@ function Component() {
     }
 }
 `,
-				errors: [{ messageId: "conditionalHook" }],
 				options: [{ importSources: { React: true } }],
+				errors: [{ messageId: "conditionalHook" }],
 			},
 		],
 		valid: [
@@ -537,7 +537,8 @@ const Component = () => {
     }
     `,
 
-			// Configuration: importSources - no matching import should fall back to checking the hook
+			// Configuration: importSources - no matching import should fall back
+			// to checking the hook
 			{
 				code: `
     function Component() {
