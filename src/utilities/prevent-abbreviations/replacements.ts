@@ -129,8 +129,6 @@ function buildReplacementPatterns(replacement: string): ReadonlyArray<RegExp> {
 	return patterns;
 }
 
-const collator = new Intl.Collator();
-
 function buildReplacementNames(replacement: ReadonlyMap<string, boolean>): ReplacementNames {
 	const lowerFirstReplacements = new Array<string>();
 	const upperFirstReplacements = new Array<string>();
@@ -144,8 +142,8 @@ function buildReplacementNames(replacement: ReadonlyMap<string, boolean>): Repla
 	}
 
 	return {
-		lowerFirst: lowerFirstReplacements.toSorted((left, right) => collator.compare(left, right)),
-		upperFirst: upperFirstReplacements.toSorted((left, right) => collator.compare(left, right)),
+		lowerFirst: lowerFirstReplacements.toSorted((left, right) => left.localeCompare(right)),
+		upperFirst: upperFirstReplacements.toSorted((left, right) => left.localeCompare(right)),
 	};
 }
 

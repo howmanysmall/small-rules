@@ -85,6 +85,8 @@ const configuration = isentinel(
 			complexity: "off",
 			curly: ["error", "multi-line"],
 			"default-case": "off",
+			// this is literally not true -- it just worsens performance!
+			"e18e/prefer-static-collator": "off",
 			"flawless/arrow-return-style": "off",
 			"flawless/max-lines-per-function": "off",
 			"func-style": [
