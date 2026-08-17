@@ -26,18 +26,18 @@ const OBJECT_CONSTRUCTOR_PATTERNS: ReadonlyArray<string> = [
 ];
 
 interface FixableConstant {
+	readonly name: string;
 	readonly declarationNode: ESTree.VariableDeclaration;
 	readonly initializerText: string;
-	readonly name: string;
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
 
 interface UselessConstantCandidate {
+	readonly name: string;
 	readonly declarationNode: ESTree.VariableDeclaration;
 	readonly enclosingDeclaration: ESTree.VariableDeclaration;
 	readonly initializer: ESTree.Expression;
-	readonly name: string;
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
@@ -45,7 +45,7 @@ interface UselessConstantCandidate {
 type ScopeVariable = Scope["variables"][number];
 
 function collectAllScopes(root: Scope): Array<Scope> {
-	const scopes: Array<Scope> = [];
+	const scopes = new Array<Scope>();
 	let size = 0;
 	const stack = [root];
 
@@ -89,156 +89,151 @@ function isStatementContainer(node: ESTree.Node): node is ESTree.BlockStatement 
 }
 
 function getCallRootIdentifierName(node: ESTree.Node): string | undefined {
-	/* v8 ignore next 10 -- @preserve CallExpression/NewExpression callees do not expose TS wrapper nodes after parser normalization. */
-	switch (node.type) {
-		case "ChainExpression":
-		case "ParenthesizedExpression":
-		case "TSAsExpression":
-		case "TSInstantiationExpression":
-		case "TSNonNullExpression":
-		case "TSSatisfiesExpression":
-		case "TSTypeAssertion":
-			return getCallRootIdentifierName(node.expression);
+	let current = node;
+	while (true) {
+		/* v8 ignore next 10 -- @preserve CallExpression/NewExpression callees do not expose TS wrapper nodes after parser normalization. */
+		switch (current.type) {
+			case "ChainExpression":
+			case "ParenthesizedExpression":
+			case "TSAsExpression":
+			case "TSInstantiationExpression":
+			case "TSNonNullExpression":
+			case "TSSatisfiesExpression":
+			case "TSTypeAssertion": {
+				current = current.expression;
+				break;
+			}
 
-		case "Identifier":
-			return node.name;
+			case "Identifier": {
+				return current.name;
+			}
 
-		case "MemberExpression":
-			return getCallRootIdentifierName(node.object);
+			case "MemberExpression": {
+				current = current.object;
+				break;
+			}
 
-		default:
-			/* v8 ignore next -- @preserve only handled expression nodes can appear as relocatable static call roots. */
-			return undefined;
-	}
-}
-
-function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: ReadonlySet<string>): boolean {
-	switch (node.type) {
-		case "ArrayExpression":
-			return hasOnlyRelocatableArrayElements(node, staticGlobalFactories);
-
-		case "BinaryExpression":
-		case "LogicalExpression":
-			return hasOnlyRelocatablePair(node, staticGlobalFactories);
-
-		case "CallExpression":
-		case "NewExpression":
-			return hasOnlyRelocatableCall(node, staticGlobalFactories);
-
-		case "ChainExpression":
-			return hasOnlyRelocatableCalls(node.expression, staticGlobalFactories);
-
-		/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
-		case "ParenthesizedExpression":
-		case "TSAsExpression":
-		case "TSInstantiationExpression":
-		case "TSNonNullExpression":
-		case "TSSatisfiesExpression":
-		case "TSTypeAssertion": {
-			return hasOnlyRelocatableCalls(node.expression, staticGlobalFactories);
+			default: {
+				/* v8 ignore next -- @preserve only handled expression nodes can appear as relocatable static call roots. */
+				return undefined;
+			}
 		}
-
-		case "ConditionalExpression":
-			return hasOnlyRelocatableConditional(node, staticGlobalFactories);
-
-		case "MemberExpression":
-			return hasOnlyRelocatableMember(node, staticGlobalFactories);
-
-		case "ObjectExpression":
-			return hasOnlyRelocatableObjectProperties(node, staticGlobalFactories);
-
-		case "SequenceExpression":
-			return false;
-
-		case "SpreadElement":
-			return false;
-
-		case "TemplateLiteral":
-			return hasOnlyRelocatableExpressions(node.expressions, staticGlobalFactories);
-
-		case "UnaryExpression":
-			return hasOnlyRelocatableCalls(node.argument, staticGlobalFactories);
-
-		default:
-			return true;
 	}
 }
 
-function hasOnlyRelocatableArrayElements(
-	node: ESTree.ArrayExpression,
-	staticGlobalFactories: ReadonlySet<string>,
-): boolean {
+function appendRelocatableArrayElements(node: ESTree.ArrayExpression, worklist: Array<ESTree.Node>): boolean {
 	for (const element of node.elements) {
-		if (element === null || !hasOnlyRelocatableCalls(element, staticGlobalFactories)) return false;
+		if (element === null) return false;
+		worklist.push(element);
 	}
-
 	return true;
 }
 
-function hasOnlyRelocatablePair(
-	node: ESTree.BinaryExpression | ESTree.LogicalExpression | ESTree.PrivateInExpression,
-	staticGlobalFactories: ReadonlySet<string>,
-): boolean {
-	return (
-		hasOnlyRelocatableCalls(node.left, staticGlobalFactories) &&
-		hasOnlyRelocatableCalls(node.right, staticGlobalFactories)
-	);
-}
-
-function hasOnlyRelocatableCall(
+function appendRelocatableCallChildren(
 	node: ESTree.CallExpression | ESTree.NewExpression,
 	staticGlobalFactories: ReadonlySet<string>,
+	worklist: Array<ESTree.Node>,
 ): boolean {
 	const rootName = getCallRootIdentifierName(node.callee);
 	/* v8 ignore next -- @preserve static-expression filtering rejects calls without an identifier or member root before relocation checks. */
 	if (rootName === undefined || !staticGlobalFactories.has(rootName)) return false;
-	/* v8 ignore next -- @preserve parser-normalized static call callees are identifiers or static member chains handled above. */
-	if (!hasOnlyRelocatableCalls(node.callee, staticGlobalFactories)) return false;
-	return hasOnlyRelocatableExpressions(node.arguments, staticGlobalFactories);
-}
 
-function hasOnlyRelocatableConditional(
-	node: ESTree.ConditionalExpression,
-	staticGlobalFactories: ReadonlySet<string>,
-): boolean {
-	return (
-		hasOnlyRelocatableCalls(node.test, staticGlobalFactories) &&
-		hasOnlyRelocatableCalls(node.consequent, staticGlobalFactories) &&
-		hasOnlyRelocatableCalls(node.alternate, staticGlobalFactories)
-	);
-}
-
-function hasOnlyRelocatableMember(node: ESTree.MemberExpression, staticGlobalFactories: ReadonlySet<string>): boolean {
-	return (
-		hasOnlyRelocatableCalls(node.object, staticGlobalFactories) &&
-		(!node.computed || hasOnlyRelocatableCalls(node.property, staticGlobalFactories))
-	);
-}
-
-function hasOnlyRelocatableObjectProperties(
-	node: ESTree.ObjectExpression,
-	staticGlobalFactories: ReadonlySet<string>,
-): boolean {
-	for (const property of node.properties) {
-		/* v8 ignore next -- @preserve spread object properties are rejected by static-expression analysis before relocation checks. */
-		if (property.type !== "Property") return false;
-		/* v8 ignore next -- @preserve computed object keys with non-relocatable expressions are rejected by static-expression analysis first. */
-		if (property.computed && !hasOnlyRelocatableCalls(property.key, staticGlobalFactories)) return false;
-		/* v8 ignore next -- @preserve object property values have already passed static-expression analysis before relocation checks. */
-		if (!hasOnlyRelocatableCalls(property.value, staticGlobalFactories)) return false;
-	}
-
+	worklist.push(node.callee);
+	for (const parameter of node.arguments) worklist.push(parameter);
 	return true;
 }
 
-function hasOnlyRelocatableExpressions(
-	expressions: ReadonlyArray<ESTree.Node>,
+function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, worklist: Array<ESTree.Node>): boolean {
+	for (const property of node.properties) {
+		/* v8 ignore next -- @preserve spread object properties are rejected by static-expression analysis before relocation checks. */
+		if (property.type !== "Property") return false;
+		if (property.computed) worklist.push(property.key);
+		worklist.push(property.value);
+	}
+	return true;
+}
+
+function appendRelocatableChildren(
+	node: ESTree.Node,
 	staticGlobalFactories: ReadonlySet<string>,
+	worklist: Array<ESTree.Node>,
 ): boolean {
-	for (const expression of expressions) {
-		if (!hasOnlyRelocatableCalls(expression, staticGlobalFactories)) return false;
+	/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
+	if (
+		node.type === "ChainExpression" ||
+		node.type === "ParenthesizedExpression" ||
+		node.type === "TSAsExpression" ||
+		node.type === "TSInstantiationExpression" ||
+		node.type === "TSNonNullExpression" ||
+		node.type === "TSSatisfiesExpression" ||
+		node.type === "TSTypeAssertion"
+	) {
+		worklist.push(node.expression);
+		return true;
 	}
 
+	switch (node.type) {
+		case "ArrayExpression": {
+			return appendRelocatableArrayElements(node, worklist);
+		}
+
+		case "BinaryExpression":
+		case "LogicalExpression": {
+			worklist.push(node.left, node.right);
+			return true;
+		}
+
+		case "CallExpression":
+		case "NewExpression": {
+			return appendRelocatableCallChildren(node, staticGlobalFactories, worklist);
+		}
+
+		case "ConditionalExpression": {
+			worklist.push(node.test, node.consequent, node.alternate);
+			return true;
+		}
+
+		case "MemberExpression": {
+			worklist.push(node.object);
+			if (node.computed) worklist.push(node.property);
+			return true;
+		}
+
+		case "ObjectExpression": {
+			return appendRelocatableObjectProperties(node, worklist);
+		}
+
+		case "SequenceExpression":
+		case "SpreadElement": {
+			return false;
+		}
+
+		case "TemplateLiteral": {
+			for (const expression of node.expressions) worklist.push(expression);
+			return true;
+		}
+
+		case "UnaryExpression": {
+			worklist.push(node.argument);
+			return true;
+		}
+
+		default: {
+			return true;
+		}
+	}
+}
+
+function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: ReadonlySet<string>): boolean {
+	const worklist: Array<ESTree.Node> = [node];
+	let index = 0;
+	while (index < worklist.length) {
+		const current = worklist[index];
+		/* v8 ignore next -- @preserve the index is bounded by the worklist length. */
+		if (current === undefined) return false;
+		index += 1;
+		if (!appendRelocatableChildren(current, staticGlobalFactories, worklist)) return false;
+	}
 	return true;
 }
 
@@ -324,7 +319,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 		function getUselessConstantCandidate(
 			scope: Scope,
 			scopeVariable: ScopeVariable,
-		): UselessConstantCandidate | undefined {
+		): undefined | UselessConstantCandidate {
 			const { name } = scopeVariable;
 			if (!SCREAMING_SNAKE_CASE.test(name)) return undefined;
 
@@ -333,7 +328,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 
 			const declaratorNode = variableDefinition.node;
 			/* v8 ignore next -- @preserve ESLint Variable defs for this scope variable point at binding variable declarators. */
-			if (!(isVariableDeclarator(declaratorNode) && isBindingIdentifier(declaratorNode.id))) return undefined;
+			if (!isVariableDeclarator(declaratorNode) || !isBindingIdentifier(declaratorNode.id)) return undefined;
 			/* v8 ignore next -- @preserve reported runtime VariableDeclarators for const bindings always have initializers. */
 			if (declaratorNode.init === null) return undefined;
 
@@ -359,10 +354,10 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			if (!isVariableDeclaration(enclosingDeclaration) || enclosingDeclaration.kind !== "const") return undefined;
 
 			return {
+				name,
 				declarationNode,
 				enclosingDeclaration,
 				initializer,
-				name,
 				referenceIdentifier: readOnlyReference.identifier,
 				reportNode: declaratorNode.id,
 			};
@@ -395,9 +390,9 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				}
 
 				fixableConstants.push({
+					name: candidate.name,
 					declarationNode: candidate.declarationNode,
 					initializerText: getInlineInitializerText(sourceCode, candidate.initializer),
-					name: candidate.name,
 					referenceIdentifier: candidate.referenceIdentifier,
 					reportNode: candidate.reportNode,
 				});

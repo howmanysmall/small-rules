@@ -109,18 +109,18 @@ const isEnumType = type("/^Enum\\.\\w+$/");
 const isDataType = isEnumType.or(isRobloxDataType);
 
 const isDatabaseProperty = type({
+	name: "string",
 	"+": "reject",
 	dataType: isDataType,
-	name: "string",
 	scriptability: isDatabaseScriptability,
 	tags: isDatabasePropertyTag.array().readonly(),
 }).readonly();
 type DatabaseProperty = typeof isDatabaseProperty.infer;
 
 const isDatabaseClass = type({
+	name: "string",
 	"+": "reject",
 	defaultProperties: type("Record<string, unknown>").readonly(),
-	name: "string",
 	properties: type.Record("string", isDatabaseProperty).readonly(),
 	superclass: "string | null",
 }).readonly();
@@ -177,7 +177,7 @@ export function parseDatabase(raw: unknown, allowedClasses?: ReadonlySet<string>
 		const defaultMap = resolveDefaults(merged.defaults, merged.propertyDefaults, enumLookup);
 		const propertyMap = buildPropertyMap(merged.propertyDefaults);
 
-		classes.set(className, { defaultProperties: defaultMap, name, properties: propertyMap, superclass });
+		classes.set(className, { name, defaultProperties: defaultMap, properties: propertyMap, superclass });
 	}
 
 	return classes;
@@ -209,7 +209,8 @@ function getDataTypeString(value: unknown): string {
 	return "string";
 }
 
-// Let's define clean internal interfaces so we can burn the raw index lookups (`[3]`, `[4]`) with fire.
+// Let's define clean internal interfaces so we can burn the raw index lookups
+// (`[3]`, `[4]`) with fire.
 interface RawClassData {
 	readonly defaults: Record<string, unknown>;
 	readonly properties: Record<string, unknown>;
@@ -271,22 +272,23 @@ function mergeSuperclassImplementation(
 	className: string,
 	allClasses: ReadonlyMap<string, ReadonlyArray<unknown>>,
 ): {
-	readonly propertyDefaults: Record<string, NormalizedPropertyDefault>;
 	readonly defaults: Record<string, unknown>;
+	readonly propertyDefaults: Record<string, NormalizedPropertyDefault>;
 } {
 	const propertyDefs: Record<string, NormalizedPropertyDefault> = {};
 	const defaults: Record<string, unknown> = {};
 
 	const inheritanceChain = getInheritanceChain(className, allClasses);
 
-	for (const { properties, defaults: classDefaults } of inheritanceChain) {
+	for (const { defaults: classDefaults, properties } of inheritanceChain) {
 		// 1. Merge properties
 		for (const [key, rawTuple] of Object.entries(properties)) {
 			const normalized = normalizeProperty(rawTuple);
 			if (normalized !== undefined) propertyDefs[key] = normalized;
 		}
 
-		// 2. Merge defaults (subclasses override superclasses, or keep original if applying root-first)
+		// 2. Merge defaults (subclasses override superclasses, or keep original
+		// if applying root-first)
 		for (const [propertyName, value] of Object.entries(classDefaults)) {
 			if (!(propertyName in defaults)) {
 				defaults[propertyName] = value;
@@ -337,7 +339,7 @@ function resolveDefaults(
 function buildPropertyMap(propertyDefaults: PropertyDefaults): Record<string, DatabaseProperty> {
 	const result: Record<string, DatabaseProperty> = {};
 	for (const [key, [dataType, name, scriptability, tags]] of Object.entries(propertyDefaults)) {
-		result[key] = isDatabaseProperty.assert({ dataType, name, scriptability, tags });
+		result[key] = isDatabaseProperty.assert({ name, dataType, scriptability, tags });
 	}
 	return result;
 }
@@ -356,10 +358,10 @@ const NUMBER_DATA_TYPES: ReadonlySet<string> = new Set([
 	RobloxDataType.Float16,
 	RobloxDataType.Float32,
 	RobloxDataType.Float64,
+	RobloxDataType.Int8,
 	RobloxDataType.Int16,
 	RobloxDataType.Int32,
 	RobloxDataType.Int64,
-	RobloxDataType.Int8,
 ]);
 const COMMA_SEPARATED_TYPES: ReadonlySet<string> = new Set([
 	RobloxDataType.CFrame,
@@ -401,11 +403,11 @@ function normalizeNumberValue(value: unknown): CanonicalValue | undefined {
 	return undefined;
 }
 
-function isStringOrNumber(value: unknown): value is string | number {
+function isStringOrNumber(value: unknown): value is number | string {
 	return typeof value === "string" || typeof value === "number";
 }
 
-function normalizeComponent(component: string | number): number | string {
+function normalizeComponent(component: number | string): number | string {
 	if (typeof component === "number") {
 		if (component === Number.POSITIVE_INFINITY) return "inf";
 		if (component === Number.NEGATIVE_INFINITY) return "-inf";
@@ -471,7 +473,7 @@ type ClassDefault = Record<string, CanonicalValue>;
 function extractClassDefaults(
 	className: string,
 	{ defaultProperties, properties }: DatabaseClass,
-	quiet?: boolean,
+	quiet = false,
 ): ClassDefault | undefined {
 	const classEntry: ClassDefault = {};
 	let hasDefaults = false;
@@ -489,9 +491,7 @@ function extractClassDefaults(
 			continue;
 		}
 
-		if (quiet !== true) {
-			console.warn(`Skipping ${className}.${propertyName} (${dataType}) — no canonical value mapping`);
-		}
+		if (!quiet) console.warn(`Skipping ${className}.${propertyName} (${dataType}) — no canonical value mapping`);
 	}
 
 	return hasDefaults ? classEntry : undefined;

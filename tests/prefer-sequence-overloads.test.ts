@@ -8,14 +8,14 @@ describe("prefer-sequence-overloads", () => {
 		invalid: [
 			{
 				code: "const gradient = new ColorSequence(new Color3(), new Color3());",
-				documentation: { id: "fail", title: "redundant sequence overload" },
-				errors: [{ messageId: "preferSingleOverload" }],
 				output: "const gradient = new ColorSequence(new Color3());",
+				errors: [{ messageId: "preferSingleOverload" }],
+				documentation: { id: "fail", title: "redundant sequence overload" },
 			},
 			{
 				code: "const constant = new NumberSequence(42, 42);",
-				errors: [{ messageId: "preferSingleOverload" }],
 				output: "const constant = new NumberSequence(42);",
+				errors: [{ messageId: "preferSingleOverload" }],
 			},
 			{
 				code:
@@ -23,8 +23,8 @@ describe("prefer-sequence-overloads", () => {
 					"    new ColorSequenceKeypoint(0, Color3.fromRGB(100, 200, 255)),\n" +
 					"    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 100, 200)),\n" +
 					"]);",
-				errors: [{ messageId: "preferTwoPointOverload" }],
 				output: "const gradient = new ColorSequence(Color3.fromRGB(100, 200, 255), Color3.fromRGB(255, 100, 200));",
+				errors: [{ messageId: "preferTwoPointOverload" }],
 			},
 			{
 				code:
@@ -32,8 +32,8 @@ describe("prefer-sequence-overloads", () => {
 					"    new ColorSequenceKeypoint(0, Color3.fromRGB(100, 200, 255)),\n" +
 					"    new ColorSequenceKeypoint(1, Color3.fromRGB(100, 200, 255)),\n" +
 					"]);",
-				errors: [{ messageId: "preferSingleOverload" }],
 				output: "const solid = new ColorSequence(Color3.fromRGB(100, 200, 255));",
+				errors: [{ messageId: "preferSingleOverload" }],
 			},
 			{
 				code:
@@ -41,8 +41,8 @@ describe("prefer-sequence-overloads", () => {
 					"    new NumberSequenceKeypoint(0, 0),\n" +
 					"    new NumberSequenceKeypoint(1, 100),\n" +
 					"]);",
-				errors: [{ messageId: "preferTwoPointOverload" }],
 				output: "const fade = new NumberSequence(0, 100);",
+				errors: [{ messageId: "preferTwoPointOverload" }],
 			},
 			{
 				code:
@@ -50,8 +50,8 @@ describe("prefer-sequence-overloads", () => {
 					"    new NumberSequenceKeypoint(0, 42),\n" +
 					"    new NumberSequenceKeypoint(1, 42),\n" +
 					"]);",
-				errors: [{ messageId: "preferSingleOverload" }],
 				output: "const constant = new NumberSequence(42);",
+				errors: [{ messageId: "preferSingleOverload" }],
 			},
 		],
 		valid: [

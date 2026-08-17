@@ -8,8 +8,8 @@ describe("no-constant-condition-with-break", () => {
 		invalid: [
 			{
 				code: "if (true) { doThing(); }",
-				documentation: { id: "fail", title: "Constant if condition" },
 				errors: [{ messageId: "unexpected" }],
+				documentation: { id: "fail", title: "Constant if condition" },
 			},
 			{
 				code: "while (true) { doThing(); }",
@@ -41,13 +41,13 @@ describe("no-constant-condition-with-break", () => {
 			},
 			{
 				code: "while (true) { task.wait(); doThing(); }",
-				errors: [{ messageId: "unexpected" }],
 				options: [{ loopExitCalls: ["coroutine.yield"] }],
+				errors: [{ messageId: "unexpected" }],
 			},
 			{
 				code: "while (true) { const pause = () => coroutine.yield(); pause(); doThing(); }",
-				errors: [{ messageId: "unexpected" }],
 				options: [{ loopExitCalls: ["coroutine.yield"] }],
+				errors: [{ messageId: "unexpected" }],
 			},
 			{
 				code: "while (false) { break; }",
@@ -209,6 +209,10 @@ describe("no-constant-condition-with-break", () => {
 			},
 			{
 				code: "while (true) { task.wait(); doThing(); }",
+				options: [{ loopExitCalls: ["task.wait"] }],
+			},
+			{
+				code: "class Container { #value; contains(target) { while (true) { #value in task.wait(); } } }",
 				options: [{ loopExitCalls: ["task.wait"] }],
 			},
 			{

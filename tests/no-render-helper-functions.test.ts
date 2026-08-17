@@ -8,8 +8,8 @@ describe("no-render-helper-functions", () => {
 		invalid: [
 			{
 				code: "function createLabel() { return <frame />; }",
-				documentation: { id: "fail", title: "Lowercase render helper" },
 				errors: [{ messageId: "noRenderHelper" }],
+				documentation: { id: "fail", title: "Lowercase render helper" },
 			},
 			{
 				code: "function createLeftLabel(text: string) { return <TextLabel text={text} />; }",

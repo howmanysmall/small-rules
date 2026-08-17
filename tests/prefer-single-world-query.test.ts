@@ -12,11 +12,11 @@ describe("prefer-single-world-query", () => {
 const componentA = world.get(entity, ComponentA);
 const componentB = world.get(entity, ComponentB);
 `,
-				documentation: { id: "fail", title: "repeated world get calls" },
-				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB] = world.get(entity, ComponentA, ComponentB);
 `,
+				errors: [{ messageId: "preferSingleGet" }],
+				documentation: { id: "fail", title: "repeated world get calls" },
 			},
 			// Three get components
 			{
@@ -25,10 +25,10 @@ const componentA = world.get(entity, ComponentA);
 const componentB = world.get(entity, ComponentB);
 const componentC = world.get(entity, ComponentC);
 `,
-				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB, componentC] = world.get(entity, ComponentA, ComponentB, ComponentC);
 `,
+				errors: [{ messageId: "preferSingleGet" }],
 			},
 			// Four get components (max for Jecs)
 			{
@@ -38,10 +38,10 @@ const componentB = world.get(entity, ComponentB);
 const componentC = world.get(entity, ComponentC);
 const componentD = world.get(entity, ComponentD);
 `,
-				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB, componentC, componentD] = world.get(entity, ComponentA, ComponentB, ComponentC, ComponentD);
 `,
+				errors: [{ messageId: "preferSingleGet" }],
 			},
 			// Method call on world object
 			{
@@ -49,10 +49,10 @@ const [componentA, componentB, componentC, componentD] = world.get(entity, Compo
 const componentA = this.world.get(entity, ComponentA);
 const componentB = this.world.get(entity, ComponentB);
 `,
-				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB] = this.world.get(entity, ComponentA, ComponentB);
 `,
+				errors: [{ messageId: "preferSingleGet" }],
 			},
 			// Multiple different entities (should only group matching entity)
 			{
@@ -61,11 +61,11 @@ const componentA = world.get(entityA, ComponentA);
 const componentB = world.get(entityA, ComponentB);
 const componentC = world.get(entityB, ComponentC);
 `,
-				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB] = world.get(entityA, ComponentA, ComponentB);
 const componentC = world.get(entityB, ComponentC);
 `,
+				errors: [{ messageId: "preferSingleGet" }],
 			},
 			// Complex expression as entity
 			{
@@ -73,10 +73,10 @@ const componentC = world.get(entityB, ComponentC);
 const componentA = world.get(entities[0], ComponentA);
 const componentB = world.get(entities[0], ComponentB);
 `,
-				errors: [{ messageId: "preferSingleGet" }],
 				output: `
 const [componentA, componentB] = world.get(entities[0], ComponentA, ComponentB);
 `,
+				errors: [{ messageId: "preferSingleGet" }],
 			},
 			// Has() calls combined in && expression
 			{
@@ -85,11 +85,11 @@ const hasA = world.has(entity, ComponentA);
 const hasB = world.has(entity, ComponentB);
 if (hasA && hasB) { doSomething(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 if (hasA && hasB) { doSomething(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			{
 				code: `
@@ -98,12 +98,12 @@ const hasB = world.has(entity, ComponentB);
 hasA = false;
 if (hasA && hasB) { doSomething(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 hasA = false;
 if (hasA && hasB) { doSomething(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Three has() calls in &&
 			{
@@ -113,11 +113,11 @@ const hasB = world.has(entity, ComponentB);
 const hasC = world.has(entity, ComponentC);
 if (hasA && hasB && hasC) { doSomething(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB, ComponentC);
 if (hasA && hasB && hasC) { doSomething(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Has() in while loop condition
 			{
@@ -126,11 +126,11 @@ const hasA = world.has(entity, ComponentA);
 const hasB = world.has(entity, ComponentB);
 while (hasA && hasB) { doSomething(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 while (hasA && hasB) { doSomething(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Has() in ternary
 			{
@@ -139,11 +139,11 @@ const hasA = world.has(entity, ComponentA);
 const hasB = world.has(entity, ComponentB);
 const result = hasA && hasB ? "yes" : "no";
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 const result = hasA && hasB ? "yes" : "no";
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Has() in for loop condition
 			{
@@ -152,11 +152,11 @@ const hasA = world.has(entity, ComponentA);
 const hasB = world.has(entity, ComponentB);
 for (; hasA && hasB;) { doSomething(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 for (; hasA && hasB;) { doSomething(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Has() in do/while condition
 			{
@@ -165,11 +165,11 @@ const hasA = world.has(entity, ComponentA);
 const hasB = world.has(entity, ComponentB);
 do { doSomething(); } while (hasA && hasB);
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 do { doSomething(); } while (hasA && hasB);
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Has() in nested if condition
 			{
@@ -178,13 +178,14 @@ const hasA = world.has(entity, ComponentA);
 const hasB = world.has(entity, ComponentB);
 if ((hasA && hasB) === true) { doSomething(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
 if ((hasA && hasB) === true) { doSomething(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
-			// Flushes a has() group when the next consecutive query changes entity
+			// Flushes a has() group when the next consecutive query changes
+			// entity
 			{
 				code: `
 const hasA = world.has(entityA, ComponentA);
@@ -193,13 +194,13 @@ const hasC = world.has(entityB, ComponentC);
 if (hasA && hasB) { doSomething(); }
 if (hasC) { doSomethingElse(); }
 `,
-				errors: [{ messageId: "preferSingleHas" }],
 				output: `
 const hasAll = world.has(entityA, ComponentA, ComponentB);
 const hasC = world.has(entityB, ComponentC);
 if (hasA && hasB) { doSomething(); }
 if (hasC) { doSomethingElse(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
 			},
 		],
 		valid: [
@@ -233,7 +234,8 @@ const componentB = world.get(entityB, ComponentB);
 			{
 				code: "const componentA = world.get(entity, ComponentA, extraArg);",
 			},
-			// Multiple declarators are left alone because the fixer replaces whole declarations
+			// Multiple declarators are left alone because the fixer replaces
+			// whole declarations
 			{
 				code: "const componentA = world.get(entity, ComponentA), componentB = world.get(entity, ComponentB);",
 			},

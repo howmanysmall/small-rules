@@ -110,15 +110,17 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 		const defaultExportedNames = new Set<string>();
 
 		return {
-			'AssignmentExpression[left.type="MemberExpression"]'(node: ESTree.AssignmentExpression): void {
-				const { left } = node;
+			'AssignmentExpression[left.type="MemberExpression"]'({ left }: ESTree.AssignmentExpression): void {
 				/* v8 ignore next -- @preserve visitor selector restricts left to MemberExpression. */
 				if (left.type !== "MemberExpression") return;
-				if (left.property.type !== "Identifier") return;
-				if (left.property.name !== "displayName") return;
-				if (left.object.type !== "Identifier") return;
 
-				const trackedVariable = trackedVariables.get(left.object.name);
+				const { property } = left;
+				if (property.type !== "Identifier" || property.name !== "displayName") return;
+
+				const { object } = left;
+				if (object.type !== "Identifier") return;
+
+				const trackedVariable = trackedVariables.get(object.name);
 				if (trackedVariable === undefined) return;
 
 				trackedVariable.hasDisplayName = true;
@@ -167,7 +169,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 					if (specifier.type === "ImportSpecifier") {
 						const importedName = getImportedName(specifier);
 						if (importedName === "memo") memoIdentifiers.add(name);
-						if (importedName === "createContext") createContextIdentifiers.add(name);
+						else if (importedName === "createContext") createContextIdentifiers.add(name);
 						continue;
 					}
 

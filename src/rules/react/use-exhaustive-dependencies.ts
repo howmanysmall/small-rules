@@ -15,9 +15,9 @@ const UNSTABLE_VALUES = new Set<string>([
 ]);
 
 interface HookEntry {
+	readonly name: string;
 	readonly closureIndex?: number;
 	readonly dependenciesIndex?: number;
-	readonly name: string;
 	readonly stableResult?: boolean | number | ReadonlyArray<number> | ReadonlyArray<string>;
 }
 
@@ -48,15 +48,15 @@ interface VariableLike {
 type ScopeVariable = Scope["set"]["get"] extends (key: string) => infer TReturn ? TReturn : never;
 
 interface DependencyInfo {
-	readonly depth: number;
 	readonly name: string;
+	readonly depth: number;
 	readonly node: ESTree.Node;
 }
 
 interface CaptureInfo {
+	readonly name: string;
 	readonly depth: number;
 	readonly forceDependency: boolean;
-	readonly name: string;
 	readonly node: ESTree.Node;
 	readonly usagePath: string;
 	readonly variable: undefined | VariableLike;
@@ -142,11 +142,8 @@ const GLOBAL_BUILTINS = new Set([
 	"Window",
 ]);
 
-function getHookName(node: ESTree.CallExpression): string | undefined {
-	const { callee } = node;
-
+function getHookName({ callee }: ESTree.CallExpression): string | undefined {
 	if (callee.type === "Identifier") return callee.name;
-
 	if (callee.type === "MemberExpression" && callee.property.type === "Identifier") {
 		return callee.property.name;
 	}
@@ -201,31 +198,59 @@ function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 }
 
 function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
-	if (node.type === "Identifier") return [node.name];
-	if (node.type === "MemberExpression") return collectIdentifierNames(node.object);
-	if (node.type === "ChainExpression") return collectIdentifierNames(node.expression);
-	if (
-		node.type === "ParenthesizedExpression" ||
-		node.type === "TSNonNullExpression" ||
-		node.type === "TSAsExpression" ||
-		node.type === "TSSatisfiesExpression" ||
-		node.type === "TSTypeAssertion"
-	) {
-		return collectIdentifierNames(node.expression);
-	}
-	if (node.type === "BinaryExpression" || node.type === "LogicalExpression") {
-		return [...collectIdentifierNames(node.left), ...collectIdentifierNames(node.right)];
-	}
-	if (node.type === "UnaryExpression") return collectIdentifierNames(node.argument);
-	if (node.type === "ConditionalExpression") {
-		return [
-			...collectIdentifierNames(node.test),
-			...collectIdentifierNames(node.consequent),
-			...collectIdentifierNames(node.alternate),
-		];
+	const names = new Array<string>();
+	const nodes = [node];
+
+	while (nodes.length > 0) {
+		const current = nodes.pop();
+		/* v8 ignore next -- @preserve loop condition guarantees a queued node. */
+		if (current === undefined) continue;
+
+		if (current.type === "Identifier") {
+			names.push(current.name);
+			continue;
+		}
+		if (current.type === "MemberExpression") {
+			nodes.push(current.object);
+			continue;
+		}
+		if (isTransparentDependencyExpression(current)) {
+			nodes.push(current.expression);
+			continue;
+		}
+		if (current.type === "BinaryExpression" || current.type === "LogicalExpression") {
+			nodes.push(current.right, current.left);
+			continue;
+		}
+		if (current.type === "UnaryExpression") {
+			nodes.push(current.argument);
+			continue;
+		}
+		if (current.type === "ConditionalExpression") {
+			nodes.push(current.alternate, current.consequent, current.test);
+		}
 	}
 
-	return new Array<string>();
+	return names;
+}
+
+function isTransparentDependencyExpression(
+	node: ESTree.Node,
+): node is
+	| ESTree.ChainExpression
+	| ESTree.ParenthesizedExpression
+	| ESTree.TSAsExpression
+	| ESTree.TSNonNullExpression
+	| ESTree.TSSatisfiesExpression
+	| ESTree.TSTypeAssertion {
+	return (
+		node.type === "ChainExpression" ||
+		node.type === "ParenthesizedExpression" ||
+		node.type === "TSAsExpression" ||
+		node.type === "TSNonNullExpression" ||
+		node.type === "TSSatisfiesExpression" ||
+		node.type === "TSTypeAssertion"
+	);
 }
 
 const TS_RUNTIME_EXPRESSIONS = new Set<string>([
@@ -243,26 +268,34 @@ function isExpression(
 }
 
 function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
-	if (node.type === "Identifier") return node.name;
-	if (node.type === "ChainExpression" || node.type === "ParenthesizedExpression" || isExpression(node)) {
-		return nodeToSafeDependencyPath(node.expression, sourceCode);
+	const members = new Array<ESTree.MemberExpression>();
+	let current = node;
+
+	while (true) {
+		if (current.type === "ChainExpression" || current.type === "ParenthesizedExpression" || isExpression(current)) {
+			current = current.expression;
+			continue;
+		}
+		if (current.type !== "MemberExpression") break;
+		members.push(current);
+		current = current.object;
 	}
 
-	/* v8 ignore next -- @preserve dependency path conversion only receives identifiers, chains, transparent TS wrappers, or member expressions. */
-	if (node.type === "MemberExpression") {
-		const objectPath = nodeToSafeDependencyPath(node.object, sourceCode);
-		if (node.computed) {
-			const propertyText = sourceCode.getText(node.property);
-			return `${objectPath}[${propertyText}]`;
+	let path = current.type === "Identifier" ? current.name : sourceCode.getText(current);
+	for (let index = members.length - 1; index >= 0; index -= 1) {
+		const member = members[index];
+		/* v8 ignore next -- @preserve index is bounded by members.length. */
+		if (member === undefined) continue;
+		if (member.computed) {
+			path += `[${sourceCode.getText(member.property)}]`;
+			continue;
 		}
 		/* v8 ignore next -- @preserve non-computed dependency member properties are parser-provided identifiers. */
-		const propertyName = node.property.type === "Identifier" ? node.property.name : "";
-		const separator = node.optional ? "?." : ".";
-		return `${objectPath}${separator}${propertyName}`;
+		const propertyName = member.property.type === "Identifier" ? member.property.name : "";
+		path += `${member.optional ? "?." : "."}${propertyName}`;
 	}
 
-	/* v8 ignore next -- @preserve capture dependency paths are collected from identifiers, member expressions, chains, and transparent TS expression wrappers. */
-	return sourceCode.getText(node);
+	return path;
 }
 
 function isStableBindingPattern(
@@ -283,7 +316,7 @@ function isStableArrayIndex(
 	identifierName: string,
 ): boolean {
 	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set && isStableBindingPattern(node, "ArrayPattern"))) return false;
+	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ArrayPattern")) return false;
 
 	const { elements } = node.id;
 	let index = 0;
@@ -303,7 +336,7 @@ function isStableObjectProperty(
 	identifierName: string,
 ): boolean {
 	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set && isStableBindingPattern(node, "ObjectPattern"))) return false;
+	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ObjectPattern")) return false;
 
 	for (const property of node.id.properties) {
 		if (property.type !== "Property") continue;
@@ -378,11 +411,10 @@ function isModuleLevelVariable(variable: VariableLike, node: ESTree.Node): boole
 
 function isStableVariableDefinition(
 	variable: VariableLike,
-	definition: VariableDefinitionLike,
+	{ node, type }: VariableDefinitionLike,
 	identifierName: string,
 	stableHooks: Map<string, StableResult>,
 ): boolean {
-	const { node, type } = definition;
 	if (STABLE_VALUE_TYPES.has(type)) return true;
 	if (type !== "Variable" || node.type !== "VariableDeclarator") return false;
 
@@ -433,7 +465,7 @@ function findTopmostMemberExpression(node: ESTree.Node, parent?: ESTree.Node): E
 		const isNonNullParent = currentParent.type === "TSNonNullExpression";
 
 		/* v8 ignore next -- @preserve captured member chains stop at member, chain, or non-null parents before this guard. */
-		if (!(isMemberParent || isChainParent || isNonNullParent)) {
+		if (!isMemberParent && !isChainParent && !isNonNullParent) {
 			break;
 		}
 
@@ -574,7 +606,7 @@ function isDefinitionInsideNode(definition: VariableDefinitionLike, node: ESTree
 }
 
 function shouldCaptureVariable(variable: ScopeVariable, node: ESTree.Node): boolean {
-	return variable !== undefined && !variable.defs.some((definition) => isDefinitionInsideNode(definition, node));
+	return variable?.defs.every((definition) => !isDefinitionInsideNode(definition, node)) ?? false;
 }
 
 function getCaptureInfo(
@@ -586,9 +618,9 @@ function getCaptureInfo(
 	/* v8 ignore next -- @preserve captured identifiers have parser parent links in the visited closure tree. */
 	const depthNode = findTopmostMemberExpression(current, current.parent ?? undefined);
 	return {
+		name,
 		depth: getMemberExpressionDepth(depthNode),
 		forceDependency: isComputedPropertyIdentifier(current),
-		name,
 		node: depthNode,
 		usagePath: nodeToSafeDependencyPath(depthNode, sourceCode),
 		variable,
@@ -694,8 +726,8 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 		const depth = getMemberExpressionDepth(actualNode);
 
 		dependencies.push({
-			depth,
 			name,
+			depth,
 			node: actualNode,
 		});
 	}
@@ -829,8 +861,8 @@ function getMatchingCapture(captures: ReadonlyArray<CaptureInfo>, dependency: De
 	const dependencyName = getRootIdentifierName(dependency.node);
 	if (dependencyName === undefined) return undefined;
 
-	// At most one capture can match: collectCaptures dedupes by identifier name, and a capture's
-	// node always roots at that same identifier.
+	// At most one capture can match: collectCaptures dedupes by identifier name,
+	// and a capture's node always roots at that same identifier.
 	return captures.find((capture) => getRootIdentifierName(capture.node) === dependencyName);
 }
 
@@ -881,7 +913,6 @@ function dependencyCoversCapture(
 	const captureName = getRootIdentifierName(capture.node);
 	/* v8 ignore next -- @preserve captures considered for dependency coverage always have root identifiers. */
 	if (captureName === undefined) return false;
-
 	return collectIdentifierNames(dependency.node).includes(captureName);
 }
 
@@ -921,7 +952,7 @@ function reportMissingCaptures(
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
 	const firstMissing = missingCaptures.at(0);
 
-	if (missingCaptures.length === 1 && firstMissing !== undefined) {
+	if (firstMissing !== undefined && missingCaptures.length === 1) {
 		context.report({
 			data: { name: firstMissing.usagePath },
 			fix(fixer): Fix {
@@ -1139,6 +1170,10 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 						items: {
 							additionalProperties: false,
 							properties: {
+								name: {
+									description: "The name of the hook",
+									type: "string",
+								},
 								closureIndex: {
 									description: "Index of the closure argument for dependency validation",
 									type: "number",
@@ -1146,10 +1181,6 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 								dependenciesIndex: {
 									description: "Index of the dependencies array for validation",
 									type: "number",
-								},
-								name: {
-									description: "The name of the hook",
-									type: "string",
 								},
 								stableResult: {
 									description:

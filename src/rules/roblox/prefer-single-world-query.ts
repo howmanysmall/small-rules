@@ -47,7 +47,7 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	if (declarator === undefined) return undefined;
 
 	const { id, init } = declarator;
-	if (id.type !== "Identifier" || init === null || !isWorldQueryCall(init, queryType)) return undefined;
+	if (init === null || id.type !== "Identifier" || !isWorldQueryCall(init, queryType)) return undefined;
 
 	const { callee } = init;
 	/* v8 ignore next 3 -- @preserve isWorldQueryCall already narrows the callee to a static member expression. */
@@ -212,9 +212,7 @@ function reportCombinedQuery(
 	const firstDeclaration = calls.at(0)?.variableDeclaration;
 	const lastDeclaration = calls.at(-1)?.variableDeclaration;
 	/* v8 ignore next -- @preserve callers only report non-empty query groups. */
-	if (firstDeclaration === undefined || lastDeclaration === undefined) {
-		return;
-	}
+	if (firstDeclaration === undefined || lastDeclaration === undefined) return;
 	context.report({
 		data: { fixedCode },
 		fix(fixer) {
@@ -236,9 +234,7 @@ function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 
 	const [firstCall] = calls;
 	/* v8 ignore next 3 -- @preserve length guard above guarantees a first call. */
-	if (firstCall === undefined) {
-		return;
-	}
+	if (firstCall === undefined) return;
 
 	const worldText = sourceCode.getText(firstCall.worldNode);
 	const entityText = sourceCode.getText(firstCall.entityNode);

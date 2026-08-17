@@ -8,7 +8,7 @@ interface RuleSummaryProperties {
 	readonly rule: RuleName;
 }
 
-export function RuleSummary({ children, rule }: PropsWithChildren<RuleSummaryProperties>): ReactNode {
+export function RuleSummary({ rule, children }: PropsWithChildren<RuleSummaryProperties>): ReactNode {
 	const { description } = getRuleFacts(rule);
 
 	return (

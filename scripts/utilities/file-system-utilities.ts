@@ -1,11 +1,12 @@
 import { lstat } from "node:fs/promises";
 import { type } from "arktype";
 
+const isMaybeString = type("string | undefined");
 const isNodeSystemError = type.instanceOf(Error).and({
-	"code?": "string | undefined",
+	"code?": isMaybeString,
 	"errno?": "number | undefined",
-	"path?": "string | undefined",
-	"syscall?": "string | undefined",
+	"path?": isMaybeString,
+	"syscall?": isMaybeString,
 });
 
 export async function existsAsync(path: string): Promise<boolean> {

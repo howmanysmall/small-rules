@@ -4,13 +4,13 @@ export type RuleName = keyof typeof smallRules.rules;
 export type RuleCategoryKey = "general" | "naming" | "react" | "roblox";
 
 export interface RuleManifestEntry {
-	readonly exampleExemption?: string | undefined;
 	readonly name: RuleName;
+	readonly exampleExemption?: string | undefined;
 }
 
 export interface RuleCategoryManifest {
-	readonly description: string;
 	readonly key: RuleCategoryKey;
+	readonly description: string;
 	readonly label: string;
 	readonly rules: ReadonlyArray<RuleManifestEntry>;
 }
@@ -26,8 +26,8 @@ function defineRuleManifest<const TManifest extends RuleManifest>(manifest: TMan
 export const ruleManifest = defineRuleManifest({
 	categories: [
 		{
-			description: "Rules for React Luau components, hooks, and JSX patterns.",
 			key: "react",
+			description: "Rules for React Luau components, hooks, and JSX patterns.",
 			label: "React Rules",
 			rules: [
 				{ name: "ban-react-fc" },
@@ -43,9 +43,9 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-external-store-subscription" },
 				{ name: "no-initialize-state" },
 				{
+					name: "no-giant-component",
 					exampleExemption:
 						"Examples require components exceeding 300 lines, which are too long to display on a documentation page.",
-					name: "no-giant-component",
 				},
 				{ name: "no-god-components" },
 				{ name: "no-inline-property-on-memo-component" },
@@ -78,8 +78,8 @@ export const ruleManifest = defineRuleManifest({
 			],
 		},
 		{
-			description: "Rules for Roblox instances, Ianitor, Color3, UDim2, and other Roblox APIs.",
 			key: "roblox",
+			description: "Rules for Roblox instances, Ianitor, Color3, UDim2, and other Roblox APIs.",
 			label: "Roblox & Luau Rules",
 			rules: [
 				{ name: "no-array-constructor-index-assignment" },
@@ -110,8 +110,8 @@ export const ruleManifest = defineRuleManifest({
 			],
 		},
 		{
-			description: "Rules for naming conventions, type style, and file naming.",
 			key: "naming",
+			description: "Rules for naming conventions, type style, and file naming.",
 			label: "Naming & Conventions",
 			rules: [
 				{ name: "array-type-generic" },
@@ -125,8 +125,8 @@ export const ruleManifest = defineRuleManifest({
 			],
 		},
 		{
-			description: "Rules for code quality, control flow, and common pitfalls.",
 			key: "general",
+			description: "Rules for code quality, control flow, and common pitfalls.",
 			label: "General Logic & Style",
 			rules: [
 				{ name: "no-recursive" },

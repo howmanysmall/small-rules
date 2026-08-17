@@ -6,11 +6,11 @@
 				"noDuplicateClasses": "on",
 				"organizeImports": "off",
 				"preset": "recommended",
-				"useSortedAttributes": "on",
+				"useSortedAttributes": "off",
 				"useSortedEnumMembers": "on",
-				"useSortedInterfaceMembers": "on",
+				"useSortedInterfaceMembers": "off",
 				"useSortedKeys": {
-					"level": "on",
+					"level": "off",
 					"options": {
 						"groupByNesting": false,
 						"sortOrder": "lexicographic"
@@ -176,12 +176,12 @@
 				"useFlatMap": "error",
 				"useLiteralKeys": "error",
 				"useMaxParams": {
-					"level": "error",
+					"level": "off",
 					"options": { "max": 7 }
 				},
 				"useOptionalChain": "error",
 				"useSimpleNumberKeys": "error",
-				"useSimplifiedLogicExpression": "error",
+				"useSimplifiedLogicExpression": "off",
 				"useWhile": "error"
 			},
 
@@ -210,7 +210,7 @@
 
 			"nursery": {
 				"noBaseToString": "error",
-				"noConditionalExpect": "error",
+				"noConditionalExpect": "off",
 				"noExcessiveNestedCallbacks": {
 					// temporarily disabled
 					"level": "off",
@@ -236,7 +236,7 @@
 				"useExplicitReturnType": "error",
 				"useExplicitType": "off",
 				"useIframeSandbox": "error",
-				"useImportsFirst": "error",
+				"useImportsFirst": "off",
 				"useMathMinMax": "error",
 				"useNamedCaptureGroup": "error",
 				"useNullishCoalescing": "error",

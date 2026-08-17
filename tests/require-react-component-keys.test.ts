@@ -4,7 +4,8 @@ import rule from "$oxc-rules/react/require-react-component-keys";
 import { tsx } from "./rule-testers";
 
 describe("require-react-component-keys", () => {
-	// And this test file intentionally passes the rule as-is for runtime validation.
+	// And this test file intentionally passes the rule as-is for runtime
+	// validation.
 	tsx.run("require-react-component-keys", rule, {
 		invalid: [
 			// Elements in fragment
@@ -19,8 +20,8 @@ function Bad1() {
     );
 }
 `,
-				documentation: { id: "fail", title: "Fragment children without keys" },
 				errors: 2,
+				documentation: { id: "fail", title: "Fragment children without keys" },
 			},
 			// Single element in fragment
 			{
@@ -332,7 +333,8 @@ const Component = React.forwardRef((props, ref) => (
 `,
 				errors: [{ messageId: "rootComponentWithKey" }],
 			},
-			// Conditional element with siblings - needs key (user's original issue)
+			// Conditional element with siblings - needs key (user's original
+			// issue)
 			{
 				code: `
 function Page({ navigation, title, children }) {
@@ -456,7 +458,8 @@ function WrappedFragmentChild() {
 `,
 				errors: 1,
 			},
-			// Spread arguments before an inline callback still leave the callback JSX needing a key
+			// Spread arguments before an inline callback still leave the
+			// callback JSX needing a key
 			{
 				code: `
 function CallWithSpread(items, render) {
@@ -634,7 +637,8 @@ function FromList(iterable) {
 }
 `,
 			},
-			// Callback assigned to an existing binding is not treated as a declared iterator callback
+			// Callback assigned to an existing binding is not treated as a
+			// declared iterator callback
 			{
 				code: `
 let renderEnemy;
@@ -865,7 +869,8 @@ function GoodAssertedLogicalChild({ show }) {
 }
 `,
 			},
-			// Logical JSX children may wrap the rendered element before the logical parent
+			// Logical JSX children may wrap the rendered element before the
+			// logical parent
 			{
 				code: `
 function GoodWrappedLogicalOperand({ show }) {
@@ -877,7 +882,8 @@ function GoodWrappedLogicalOperand({ show }) {
 }
 `,
 			},
-			// Logical fragment children are allowed inside shorthand fragments too
+			// Logical fragment children are allowed inside shorthand fragments
+			// too
 			{
 				code: `
 function GoodLogicalFragmentInFragment({ show }) {
@@ -953,7 +959,8 @@ function withErrorBoundary(Component) {
 }
 `,
 			},
-			// Component registration with manager - top-level returns should not need keys
+			// Component registration with manager - top-level returns should not
+			// need keys
 			{
 				code: `
 interface DialogProperties {
@@ -1089,7 +1096,8 @@ function Component({ error, data }) {
 }
 `,
 			},
-			// Fragments inside ternary as JSX child (mutually exclusive alternatives)
+			// Fragments inside ternary as JSX child (mutually exclusive
+			// alternatives)
 			{
 				code: `
 function Frame({ hasGlow, children }) {

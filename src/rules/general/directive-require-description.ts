@@ -19,19 +19,24 @@ const directiveRequireDescription = createRule("directive-require-description", 
 
 			if (directive !== undefined) {
 				const { kind } = directive;
-				if (!isDisableOrEnableDirectiveKind(kind)) return;
-				if (ignoreKinds.has(kind)) return;
-				if (directive.description !== undefined) return;
+				if (
+					!isDisableOrEnableDirectiveKind(kind) ||
+					ignoreKinds.has(kind) ||
+					directive.description !== undefined
+				) {
+					return;
+				}
 
 				context.report({
-					data: { kind: directive.kind },
+					data: { kind },
 					loc: directive.comment.loc,
 					messageId: "missingDescription",
 				});
 				return;
 			}
 
-			// parseDirectiveComment rejects line comments with block-style directives
+			// parseDirectiveComment rejects line comments with block-style
+			// directives
 			// (eslint-disable, oxlint-disable, etc.) because ESLint requires block
 			// comments for those. But oxlint supports // oxlint-disable and
 			// // oxlint-enable in line comments, so check those directly.
@@ -42,12 +47,9 @@ const directiveRequireDescription = createRule("directive-require-description", 
 			if (match === null) return;
 
 			const kind = match.groups?.kind;
-			/* v8 ignore next -- the named regex group is present whenever this regex matches. @preserve */
-			if (kind === undefined) return;
 			/* v8 ignore next -- OXLINT_LINE_DIRECTIVE only matches disable/enable directive kinds. @preserve */
-			if (!isDisableOrEnableDirectiveKind(kind)) return;
-			if (ignoreKinds.has(kind)) return;
-			if (DESCRIPTION_SEPARATOR.test(text)) return;
+			if (kind === undefined || !isDisableOrEnableDirectiveKind(kind)) return;
+			if (ignoreKinds.has(kind) || DESCRIPTION_SEPARATOR.test(text)) return;
 
 			context.report({
 				data: { kind },
@@ -56,9 +58,7 @@ const directiveRequireDescription = createRule("directive-require-description", 
 			});
 		}
 
-		for (const comment of context.sourceCode.getAllComments()) {
-			checkComment(comment);
-		}
+		for (const comment of context.sourceCode.getAllComments()) checkComment(comment);
 
 		return {};
 	},

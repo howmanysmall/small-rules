@@ -197,7 +197,7 @@ function parseSelector(selector: string): { matches: NodePredicate; nodeType: st
 	};
 }
 
-function parseChildFieldSelector(selector: string): { matches: NodePredicate; nodeType: string } | undefined {
+function parseChildFieldSelector(selector: string): undefined | { matches: NodePredicate; nodeType: string } {
 	const match = CHILD_FIELD_SELECTOR_PATTERN.exec(selector);
 	const parentType = match?.groups?.parentType;
 	const field = match?.groups?.field;
@@ -215,14 +215,14 @@ function parseChildFieldSelector(selector: string): { matches: NodePredicate; no
 	};
 }
 
-function parseStatementNotSelector(selector: string): { matches: NodePredicate; nodeType: string } | undefined {
+function parseStatementNotSelector(selector: string): undefined | { matches: NodePredicate; nodeType: string } {
 	const prefix = ":statement:not(";
-	if (!(selector.startsWith(prefix) && selector.endsWith(")"))) return undefined;
+	if (!selector.startsWith(prefix) || !selector.endsWith(")")) return undefined;
 
 	const excluded = parseSelector(selector.slice(prefix.length, -1));
 	return {
 		matches(node): boolean {
-			return isStatementNode(node) && !(node.type === excluded.nodeType && excluded.matches(node));
+			return isStatementNode(node) && (node.type !== excluded.nodeType || !excluded.matches(node));
 		},
 		nodeType: "*",
 	};

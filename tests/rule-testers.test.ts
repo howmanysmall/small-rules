@@ -38,14 +38,14 @@ const createOnceRule = defineRule({
 	createOnce(context) {
 		let programs = 0;
 		return {
-			Program(): void {
-				// nobody gaf
-			},
 			after(): void {
 				if (programs === 2) context.report({ messageId: "afterSecondCase", node: context.sourceCode.ast });
 			},
 			before(): void {
 				programs += 1;
+			},
+			Program(): void {
+				// nobody gaf
 			},
 		};
 	},
@@ -205,8 +205,8 @@ describe("rule-testers documentation metadata", () => {
 		invalid: [
 			{
 				code: "var value = 1;",
-				documentation: invalidDocumentation,
 				errors: [{ messageId: "script" }],
+				documentation: invalidDocumentation,
 				sourceType: "script",
 			},
 		],
@@ -266,13 +266,13 @@ describe("rule-testers fixes and suggestions", () => {
 		invalid: [
 			{
 				code: "const oldName = 1;",
+				output: "const newName = 1;",
 				errors: [
 					{
 						messageId: "rename",
 						suggestions: [{ messageId: "suggestRename", output: "const suggestedName = 1;" }],
 					},
 				],
-				output: "const newName = 1;",
 			},
 		],
 		valid: [],
@@ -282,15 +282,15 @@ describe("rule-testers fixes and suggestions", () => {
 		invalid: [
 			{
 				code: "const oldName = 1;",
-				errors: [{ messageId: "rename", suggestions: 1 }],
 				output: "const newName = 1;",
+				errors: [{ messageId: "rename", suggestions: 1 }],
 			},
 		],
 		valid: [],
 	});
 
 	js.run("output-null", reportProgramRule, {
-		invalid: [{ code: "const value = 1;", errors: [{ messageId: "program" }], output: null }],
+		invalid: [{ code: "const value = 1;", output: null, errors: [{ messageId: "program" }] }],
 		valid: [],
 	});
 });
@@ -321,8 +321,8 @@ describe("rule-testers configuration validation", () => {
 				invalid: [
 					{
 						code: "const value = 1;",
-						errors: [{ messageId: "program" }],
 						options: [{ value: undefined }],
+						errors: [{ messageId: "program" }],
 					},
 				],
 				valid: [],

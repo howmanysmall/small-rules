@@ -239,7 +239,8 @@ describe("no-useless-default comparison helpers", () => {
 	describe("unsupported canonical values", () => {
 		ts.run(
 			"no-useless-default unsupported defaults",
-			// @ts-expect-error Deliberately exercises the runtime fallback for unknown canonical types.
+			// @ts-expect-error Deliberately exercises the runtime fallback for
+			// unknown canonical types.
 			createComparisonRule({ type: "unsupported", value: "x" }),
 			{
 				invalid: [{ code: "check('x');", errors: [{ messageId: "mismatch" }] }],
@@ -254,111 +255,111 @@ describe("no-useless-default JSX detection", () => {
 		invalid: [
 			{
 				code: "const view = <uiaspectratioconstraint AspectRatio={1} />;",
-				documentation: { id: "fail", title: "default UI property assignment" },
+				output: "const view = <uiaspectratioconstraint />;",
 				errors: [
 					{
 						data: { className: "UIAspectRatioConstraint", propertyName: "AspectRatio" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: "const view = <uiaspectratioconstraint />;",
+				documentation: { id: "fail", title: "default UI property assignment" },
 			},
 			{
 				code: "const view = <frame BackgroundTransparency={0} Size={size} />;",
+				output: "const view = <frame Size={size} />;",
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: "const view = <frame Size={size} />;",
 			},
 			{
 				code: "const view = <frame BackgroundTransparency={0} enabled={true} />;",
+				output: "const view = <frame enabled={true} />;",
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: "const view = <frame enabled={true} />;",
 			},
 			{
 				code: "const view = <frame {...spreadProps} BackgroundTransparency={0} />;",
+				output: null,
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: 'const view = <textlabel Text="" />;',
-				errors: [{ data: { className: "TextLabel", propertyName: "Text" }, messageId: "uselessDefault" }],
 				output: "const view = <textlabel />;",
+				errors: [{ data: { className: "TextLabel", propertyName: "Text" }, messageId: "uselessDefault" }],
 			},
 			{
 				code: "const view = <uicorner CornerRadius={new UDim(0, 0)} />;",
+				output: "const view = <uicorner />;",
 				errors: [
 					{ data: { className: "UICorner", propertyName: "CornerRadius" }, messageId: "uselessDefault" },
 				],
-				output: "const view = <uicorner />;",
 			},
 			{
 				code: "const view = <FRAME BackgroundTransparency={0} />;",
+				output: "const view = <FRAME />;",
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: "const view = <FRAME />;",
 			},
 			{
 				code: "const view = <frame backgroundtransparency={0} />;",
+				output: "const view = <frame />;",
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: "const view = <frame />;",
 			},
 			{
 				code: "const view = <billboardgui Enabled />;",
-				errors: [{ data: { className: "BillboardGui", propertyName: "Enabled" }, messageId: "uselessDefault" }],
 				output: "const view = <billboardgui />;",
+				errors: [{ data: { className: "BillboardGui", propertyName: "Enabled" }, messageId: "uselessDefault" }],
 			},
 			{
 				code: "const view = <frame /* keep */ BackgroundTransparency={0} />;",
+				output: null,
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: "const view = <frame BackgroundTransparency={0} /* keep */ />;",
+				output: null,
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: "const view = <frame\n\tBackgroundTransparency={0}\n\tSize={size}\n/>;",
+				output: "const view = <frame\n\tSize={size}\n/>;",
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: "const view = <frame\n\tSize={size}\n/>;",
 			},
 		],
 		valid: [
@@ -388,103 +389,103 @@ describe("no-useless-default imperative detection", () => {
 		invalid: [
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(); c.Name = "x";',
+				output: 'const c = new Instance("UISizeConstraint"); c.Name = "x";',
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: 'const c = new Instance("UISizeConstraint"); c.Name = "x";',
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = Vector2.zero;',
+				output: 'const c = new Instance("UISizeConstraint");',
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: 'const c = new Instance("UISizeConstraint");',
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint");\n/* keep */\nc.MinSize = new Vector2();\nc.Name = "x";',
+				output: null,
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c.MinSize = new Vector2(); /* keep */ c.Name = "x";',
+				output: null,
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); /* keep */ c.MinSize = new Vector2();',
+				output: null,
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint") /* keep */\nc.MinSize = new Vector2();',
+				output: null,
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: null,
 			},
 			{
 				code: 'const f = new Instance("Frame"); f.BackgroundTransparency = 0; f.Size = new UDim2(0, 100, 0, 200);',
+				output: 'const f = new Instance("Frame"); f.Size = new UDim2(0, 100, 0, 200);',
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: 'const f = new Instance("Frame"); f.Size = new UDim2(0, 100, 0, 200);',
 			},
 			{
 				code: 'const f = new Instance("Frame"); f.backgroundtransparency = 0; f.Size = new UDim2(0, 100, 0, 200);',
+				output: 'const f = new Instance("Frame"); f.Size = new UDim2(0, 100, 0, 200);',
 				errors: [
 					{
 						data: { className: "Frame", propertyName: "BackgroundTransparency" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: 'const f = new Instance("Frame"); f.Size = new UDim2(0, 100, 0, 200);',
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); [alias] = [c]; c.MinSize = new Vector2();',
+				output: 'const c = new Instance("UISizeConstraint"); [alias] = [c];',
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: 'const c = new Instance("UISizeConstraint"); [alias] = [c];',
 			},
 			{
 				code: 'const c = new Instance("UISizeConstraint"); c; c.MinSize = new Vector2();',
+				output: 'const c = new Instance("UISizeConstraint"); c;',
 				errors: [
 					{
 						data: { className: "UISizeConstraint", propertyName: "MinSize" },
 						messageId: "uselessDefault",
 					},
 				],
-				output: 'const c = new Instance("UISizeConstraint"); c;',
 			},
 		],
 		valid: [

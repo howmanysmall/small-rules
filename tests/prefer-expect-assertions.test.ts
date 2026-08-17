@@ -148,6 +148,7 @@ describe("prefer-expect-assertions", () => {
 			},
 			{
 				code: "test('works', async () => { expect(value).toBe(1); });",
+				options: [{ onlyFunctionsWithAsyncKeyword: true }],
 				errors: [
 					{
 						messageId: "haveExpectAssertions",
@@ -159,10 +160,10 @@ describe("prefer-expect-assertions", () => {
 						],
 					},
 				],
-				options: [{ onlyFunctionsWithAsyncKeyword: true }],
 			},
 			{
 				code: "test('works', () => { while (condition) { expect(value).toBe(1); } });",
+				options: [{ onlyFunctionsWithExpectInLoop: true }],
 				errors: [
 					{
 						messageId: "haveExpectAssertions",
@@ -174,10 +175,10 @@ describe("prefer-expect-assertions", () => {
 						],
 					},
 				],
-				options: [{ onlyFunctionsWithExpectInLoop: true }],
 			},
 			{
 				code: "test('works', () => { values.forEach(() => { expect(value).toBe(1); }); });",
+				options: [{ onlyFunctionsWithExpectInCallback: true }],
 				errors: [
 					{
 						messageId: "haveExpectAssertions",
@@ -189,33 +190,32 @@ describe("prefer-expect-assertions", () => {
 						],
 					},
 				],
-				options: [{ onlyFunctionsWithExpectInCallback: true }],
 			},
 			{
 				code: ["test('works', () => {", "  expect.hasAssertions();", "  expect(value).toBe(1);", "});"].join(
 					"\n",
 				),
-				documentation: { id: "fail", title: "Prefer assertion count over hasAssertions" },
-				errors: [{ messageId: "preferAssertionsCount" }],
 				output: ["test('works', () => {", "  expect.assertions(1);", "  expect(value).toBe(1);", "});"].join(
 					"\n",
 				),
+				errors: [{ messageId: "preferAssertionsCount" }],
+				documentation: { id: "fail", title: "Prefer assertion count over hasAssertions" },
 			},
 			{
 				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); expect(other).toBe(2); expect(third).toBe(3); });",
-				errors: [{ messageId: "preferAssertionsCount" }],
 				output: "test('works', () => { expect.assertions(3); expect(value).toBe(1); expect(other).toBe(2); expect(third).toBe(3); });",
+				errors: [{ messageId: "preferAssertionsCount" }],
 			},
 			{
 				code: "test('works', () => { expect.hasAssertions(); expectRecord(value, 'x'); expectArray(items, 'x'); expectPresent(result, 'x'); });",
-				errors: [{ messageId: "preferAssertionsCount" }],
-				options: [{ additionalAssertionFunctions: ["expectRecord", "expectArray", "expectPresent"] }],
 				output: "test('works', () => { expect.assertions(3); expectRecord(value, 'x'); expectArray(items, 'x'); expectPresent(result, 'x'); });",
+				options: [{ additionalAssertionFunctions: ["expectRecord", "expectArray", "expectPresent"] }],
+				errors: [{ messageId: "preferAssertionsCount" }],
 			},
 			{
 				code: "test('works', () => { expect.hasAssertions(); try { expect(value).toBe(1); } finally { restore(); } });",
-				errors: [{ messageId: "preferAssertionsCount" }],
 				output: "test('works', () => { expect.assertions(1); try { expect(value).toBe(1); } finally { restore(); } });",
+				errors: [{ messageId: "preferAssertionsCount" }],
 			},
 		],
 		valid: [

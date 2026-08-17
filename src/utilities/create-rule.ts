@@ -10,7 +10,11 @@ const BASE_URL = "https://docs.howmanysmall.com/small-rules/rules";
 /**
  * Creates a rule with automatic documentation URL generation.
  *
- * URLs follow the pattern: `https://docs.howmanysmall.com/small-rules/rules/{category}/{name}/`
+ * URLs follow the pattern: `https://docs.howmanysmall.com/small-rules/rules/{category}/{name}/`.
+ *
+ * @template TSchema - The schema definition for the rule options.
+ * @template TMessageIds - The message IDs used in the rule.
+ * @template TDefaultOptions - The default options derived from the schema.
  */
 export function createRule<
 	const TSchema extends RuleSchemaDefinition | undefined = undefined,
@@ -33,8 +37,8 @@ export function createRule<
 export function createRule(
 	name: string,
 	category: string,
-	rule: CreateRule | CreateOnceRule,
-): CreateRule | CreateOnceRule {
+	rule: CreateOnceRule | CreateRule,
+): CreateOnceRule | CreateRule {
 	const url = `${BASE_URL}/${category}/${name}/`;
 
 	if (rule.meta !== undefined) {

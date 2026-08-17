@@ -7,14 +7,16 @@ import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subs
 import noInitializeState from "$oxc-rules/react/no-initialize-state";
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
-import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-prop-change";
+import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-property-change";
 
 import { tsx } from "./rule-testers";
 
 // Sanity check that runs the focused effect rules on common + valid real-world
-// code, as opposed to contrived test cases. Each snippet must pass all nine rules.
-const realWorldSnippets: ReadonlyArray<{ readonly name: string; readonly code: string }> = [
+// code, as opposed to contrived test cases. Each snippet must pass all nine
+// rules.
+const realWorldSnippets: ReadonlyArray<{ readonly code: string; readonly name: string }> = [
 	{
+		name: "useLayoutEffect",
 		code: `
 import { useEffect, useLayoutEffect, useRef, useState } from "@rbxts/react";
 
@@ -32,9 +34,9 @@ function Input({ count }) {
   )
 }
 `,
-		name: "useLayoutEffect",
 	},
 	{
+		name: "Managing a timer",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -54,9 +56,9 @@ function Timer() {
   return <div>{seconds}</div>;
 }
 `,
-		name: "Managing a timer",
 	},
 	{
+		name: "Debouncing",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -77,9 +79,9 @@ function useDebouncedState(value, delay) {
   return [state, debouncedState, setState];
 }
 `,
-		name: "Debouncing",
 	},
 	{
+		name: "Debouncing via Lodash",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 import debounce from 'lodash/debounce';
@@ -98,9 +100,9 @@ export const useDebouncedState = (delay) => {
   return [];
 };
 `,
-		name: "Debouncing via Lodash",
 	},
 	{
+		name: "Listening for window events",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -122,9 +124,9 @@ function WindowSize() {
   return <div>{size.width} x {size.height}</div>;
 }
 `,
-		name: "Listening for window events",
 	},
 	{
+		name: "ResizeObserver",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -149,9 +151,9 @@ function useHasOverflow({ contentRef, maxHeight }) {
   return hasOverflow;
 }
 `,
-		name: "ResizeObserver",
 	},
 	{
+		name: "Play/pausing DOM video",
 		code: `
 import { useEffect, useRef, useState } from "@rbxts/react";
 
@@ -173,9 +175,9 @@ function VideoPlayer() {
   </div>
 }
 `,
-		name: "Play/pausing DOM video",
 	},
 	{
+		name: "Saving to LocalStorage",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -196,9 +198,9 @@ function Notes() {
   />
 }
 `,
-		name: "Saving to LocalStorage",
 	},
 	{
+		name: "Logging/Analytics",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -218,9 +220,9 @@ function Nav() {
   )
 }
 `,
-		name: "Logging/Analytics",
 	},
 	{
+		name: "CountryPicker",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 
@@ -245,9 +247,9 @@ function CountryPicker({ withEmoji }) {
   }, [translation, withEmoji]);
 }
 `,
-		name: "CountryPicker",
 	},
 	{
+		name: "navigation.setOptions",
 		code: `
 import { useNavigation } from '@react-navigation/native';
 import { useState, useLayoutEffect } from 'react';
@@ -263,9 +265,9 @@ function ProfileScreen({ route }) {
   }, [navigation, route]);
 }
 `,
-		name: "navigation.setOptions",
 	},
 	{
+		name: "Keyboard state listener",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 import keyboardReducer from './reducers';
@@ -297,9 +299,9 @@ export const useKeyboardStore = () => {
 
 useKeyboardStore.setKeyboardState = setKeyboardState;
 `,
-		name: "Keyboard state listener",
 	},
 	{
+		name: "Indexing ref state with internal state",
 		code: `
 import { useEffect, useRef, useState } from "@rbxts/react";
 
@@ -324,9 +326,9 @@ const Component = ({ value }) => {
   )
 }
 `,
-		name: "Indexing ref state with internal state",
 	},
 	{
+		name: "Ref callback",
 		code: `
 import { useCallback, useEffect, useState } from "@rbxts/react";
 
@@ -356,9 +358,9 @@ export const useOnScreen = () => {
     return { ref, isIntersecting };
 };
 `,
-		name: "Ref callback",
 	},
 	{
+		name: "Effect with recursion",
 		code: `
 import { useEffect } from "@rbxts/react";
 
@@ -435,9 +437,9 @@ function Component() {
   ])
 }
 `,
-		name: "Effect with recursion",
 	},
 	{
+		name: "TanStack useInfinityQuery useInView",
 		code: `
 import React from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -477,9 +479,9 @@ function Example() {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 }
 `,
-		name: "TanStack useInfinityQuery useInView",
 	},
 	{
+		name: "React Query: fresh data synced to state",
 		code: `
 import { useEffect, useState } from "@rbxts/react";
 import { useQuery } from '@tanstack/react-query'
@@ -501,9 +503,9 @@ function Items() {
   return <div>{items}</div>
 }
 `,
-		name: "React Query: fresh data synced to state",
 	},
 	{
+		name: "TanStack useInfinityQuery useInView with state, prop and data in queryKey",
 		code: `
 import React from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -545,7 +547,6 @@ function Example(props) {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 }
 `,
-		name: "TanStack useInfinityQuery useInView with state, prop and data in queryKey",
 	},
 ];
 

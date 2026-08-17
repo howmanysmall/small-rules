@@ -5,8 +5,8 @@ _.path = ["{{config_root}}/node_modules/.bin", "{{cwd}}/node_modules/.bin"]
 HK_MISE = 1
 
 [settings]
-auto_install = false
 experimental = true
+auto_install = false
 lockfile = true
 provenance_api_failures_fatal = false
 
@@ -19,13 +19,13 @@ betterleaks = "latest"
 bun = "latest"
 communique = "latest"
 git-cliff = "latest"
-hk = "1.50.0"
+hk = "1.55.0"
 ni = "latest"
 node = "24"
 nub = "latest"
 pinact = "latest"
 pkl = "latest"
-pnpm = "11.19.0"
+pnpm = "11.21.0"
 rumdl = "latest"
 shellcheck = "latest"
 shfmt = "latest"
@@ -38,21 +38,63 @@ backtickify = '''
 find documentation/src -name '*.mdx' -exec sed -i '' 's|<code>\([^<]*\)</code>|`\1`|g' {} +
 '''
 
-[tasks.install]
-description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
-run = "ni"
+[tasks."amend:no-verify"]
+description = "Amends the staged changes, reusing the previous commit message."
+run = "git commit --amend --reuse-message=HEAD --signoff --no-verify"
 
-[tasks.lint]
-description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."
-run = "node --run lint"
+[tasks."commit:no-verify"]
+description = "Commits the staged changes without running Git hooks."
+usage = """
+arg <message> {
+	help "Git commit message"
+}
+"""
+run = """
+git commit --signoff --message "${usage_message?}" --no-verify
+"""
 
-[tasks.type-check]
-description = "Run TypeScript type checking with tsgo without emitting files."
-run = "node --run type-check"
+[tasks.amend]
+description = "Amends the staged changes, reusing the previous commit message."
+run = "git commit --amend --reuse-message=HEAD --signoff"
 
-[tasks.knip]
-description = "Detect unused files, exports, and dependencies with Knip."
-run = "node --run knip"
+[tasks.build]
+description = "Build the package into dist using tsdown."
+run = "node --run build"
+
+[tasks.check]
+description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
+depends = ["lint", "type-check", "knip", "build", "test"]
+
+[tasks.ci]
+description = "Install dependencies, then run package and documentation validation in parallel."
+depends = ["install"]
+run = "mise run check documentation"
+
+[tasks.commit]
+description = "Commits the staged changes."
+usage = """
+arg <message> {
+	help "Git commit message"
+}
+"""
+run = """
+git commit --signoff --message "${usage_message?}"
+"""
+
+[tasks.deploy-docs]
+alias = "dd"
+description = "Trigger the Deploy Documentation workflow. Rebuilds and deploys the docs site without a release."
+run = "gh workflow run 'Deploy Documentation' --ref main"
+
+[tasks.documentation]
+description = "Run the documentation build plus unit and Chromium browser tests."
+run = "pnpm --filter docs exec playwright install chromium && pnpm --filter docs run build && pnpm --filter docs run test:unit && pnpm --filter docs run test:browser"
+
+[tasks.dry-release]
+alias = "dr"
+description = "Trigger the GitHub release workflow on main with dry_run=true. Validates release CI without publishing."
+interactive = true
+run = "gh workflow run release.yaml --ref main -f dry_run=true"
 
 [tasks.duplicates]
 alias = "dupes"
@@ -64,31 +106,40 @@ alias = "dupes-ui"
 description = "Run similarity-ts and open a readable duplicate report in the browser."
 run = "similarity-ts --threshold 0.85 --min-lines 5 --print src | bun scripts/dupes-viewer.ts --open"
 
-[tasks.build]
-description = "Build the package into dist using tsdown."
-run = "node --run build"
+[tasks.install]
+description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
+run = "ni"
 
-[tasks.test]
-description = "Run the Vitest unit test suite once without sharding."
-run = "node --run test"
+[tasks.knip]
+description = "Detect unused files, exports, and dependencies with Knip."
+run = "node --run knip"
 
-[tasks.documentation]
-description = "Run the documentation build plus unit and Chromium browser tests."
-run = "pnpm --filter docs exec playwright install chromium && pnpm --filter docs run build && pnpm --filter docs run test:unit && pnpm --filter docs run test:browser"
+[tasks.lint]
+description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."
+run = "node --run lint"
 
-[tasks.deploy-docs]
-alias = "dd"
-description = "Trigger the Deploy Documentation workflow. Rebuilds and deploys the docs site without a release."
-run = "gh workflow run 'Deploy Documentation' --ref main"
+[tasks.lint-configuration]
+description = "View the lint configuration."
+usage = '''
+arg "<type>" {
+    help "What linting configuration do you want to run the inspector for?"
+    choices "eslint" "oxlint"
+}
+'''
+run = '''
+#!/usr/bin/env bash
 
-[tasks.check]
-description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
-depends = ["lint", "type-check", "knip", "build", "test"]
+set -euo pipefail
 
-[tasks.ci]
-description = "Install dependencies, then run package and documentation validation in parallel."
-depends = ["install"]
-run = "mise run check documentation"
+case "${usage_type?}" in
+	eslint)
+		nlx @eslint/config-inspector
+		;;
+	oxlint)
+		nlx oxlint-config-inspector
+		;;
+esac
+'''
 
 [tasks.release]
 description = "Run local validation, then bump version, commit, tag, and push via bumpp. Run from an up-to-date main branch."
@@ -97,42 +148,14 @@ interactive = true
 confirm = "This will run bumpp, create a release commit/tag, and push. Continue?"
 run = "node --run release"
 
-[tasks.dry-release]
-alias = "dr"
-description = "Trigger the GitHub release workflow on main with dry_run=true. Validates release CI without publishing."
-interactive = true
-run = "gh workflow run release.yaml --ref main -f dry_run=true"
-
 [tasks.release-status]
 description = "Show recent Publish Package workflow runs in GitHub Actions."
 run = "gh run list --workflow release.yaml --limit 5"
 
-[tasks.commit]
-description = "Commits the staged changes."
-usage = """
-arg <message> {
-    help "Git commit message"
-}
-"""
-run = """
-git commit --signoff --message "${usage_message?}"
-"""
+[tasks.test]
+description = "Run the Vitest unit test suite once without sharding."
+run = "node --run test"
 
-[tasks."commit:no-verify"]
-description = "Commits the staged changes without running Git hooks."
-usage = """
-arg <message> {
-    help "Git commit message"
-}
-"""
-run = """
-git commit --signoff --message "${usage_message?}" --no-verify
-"""
-
-[tasks.amend]
-description = "Amends the staged changes, reusing the previous commit message."
-run = "git commit --amend --reuse-message=HEAD --signoff"
-
-[tasks."amend:no-verify"]
-description = "Amends the staged changes, reusing the previous commit message."
-run = "git commit --amend --reuse-message=HEAD --signoff --no-verify"
+[tasks.type-check]
+description = "Run TypeScript type checking with tsgo without emitting files."
+run = "node --run type-check"

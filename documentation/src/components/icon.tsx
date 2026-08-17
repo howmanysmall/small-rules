@@ -1,26 +1,26 @@
 import type { ReactNode } from "react";
 
 export type IconName =
+	| "arrow-right"
+	| "bolt"
+	| "check"
+	| "copy"
+	| "general"
+	| "github"
+	| "naming"
+	| "puzzle"
 	| "react"
 	| "roblox"
-	| "naming"
-	| "general"
-	| "bolt"
-	| "wand"
-	| "shield"
-	| "puzzle"
-	| "arrow-right"
-	| "github"
-	| "check"
-	| "x"
-	| "sparkles"
 	| "rocket"
 	| "search"
-	| "copy";
+	| "shield"
+	| "sparkles"
+	| "wand"
+	| "x";
 
 interface IconProperties {
-	readonly className?: string | undefined;
 	readonly name: IconName;
+	readonly className?: string | undefined;
 	readonly size?: number | undefined;
 }
 
@@ -135,7 +135,7 @@ const iconContents = {
 	x: X_ICON,
 } satisfies Readonly<Record<IconName, ReactNode>>;
 
-export function Icon({ className, name, size = 24 }: IconProperties): ReactNode {
+export function Icon({ name, className, size = 24 }: IconProperties): ReactNode {
 	const isFilled = name === "github";
 	const strokeWidth = name === "check" || name === "x" ? 2.5 : 1.75;
 

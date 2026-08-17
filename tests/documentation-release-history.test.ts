@@ -20,9 +20,9 @@ describe("documentation release history", () => {
 	it("sorts populated release entries by semantic version", () => {
 		expect.assertions(1);
 		const history = createReleaseHistory([
-			{ body: "Patch notes", id: "v2.7.1" },
-			{ body: "Major notes", id: "v3.0.0" },
-			{ body: "Release notes", id: "v2.7.0" },
+			{ id: "v2.7.1", body: "Patch notes" },
+			{ id: "v3.0.0", body: "Major notes" },
+			{ id: "v2.7.0", body: "Release notes" },
 		]);
 
 		expect(history).toMatchObject({
@@ -39,7 +39,7 @@ describe("documentation release history", () => {
 		expect.assertions(1);
 
 		expect(
-			getReleaseContentEntry({ body: "Release notes", filePath: "src/content/releases/v2.7.0.md", id: "v270" }),
-		).toStrictEqual({ body: "Release notes", id: "v2.7.0" });
+			getReleaseContentEntry({ id: "v270", body: "Release notes", filePath: "src/content/releases/v2.7.0.md" }),
+		).toStrictEqual({ id: "v2.7.0", body: "Release notes" });
 	});
 });

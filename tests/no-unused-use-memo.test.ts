@@ -12,8 +12,8 @@ import { useMemo } from "@rbxts/react";
 
 useMemo(() => 1, []);
 `,
-				documentation: { id: "fail", title: "Unused memoized value" },
 				errors: [{ messageId: "unusedUseMemo" }],
+				documentation: { id: "fail", title: "Unused memoized value" },
 			},
 			{
 				code: `
@@ -21,8 +21,8 @@ import * as React from "react";
 
 React.useMemo(() => 1, []);
 `,
-				errors: [{ messageId: "unusedUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "unusedUseMemo" }],
 			},
 			{
 				code: `
@@ -30,8 +30,8 @@ import { useMemo } from "react";
 
 void useMemo(() => 1, []);
 `,
-				errors: [{ messageId: "unusedUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "unusedUseMemo" }],
 			},
 			{
 				code: `
@@ -39,8 +39,8 @@ import * as React from "react";
 
 void React.useMemo(() => 1, []);
 `,
-				errors: [{ messageId: "unusedUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "unusedUseMemo" }],
 			},
 		],
 		valid: [

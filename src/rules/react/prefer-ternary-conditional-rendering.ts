@@ -212,7 +212,7 @@ function getComplementMatch(
 
 	const firstComparison = getStrictComparison(firstCondition);
 	const secondComparison = getStrictComparison(secondCondition);
-	if (!(firstComparison && secondComparison)) return undefined;
+	if (!firstComparison || !secondComparison) return undefined;
 
 	const operatorsComplement =
 		(firstComparison.operator === "===" && secondComparison.operator === "!==") ||
@@ -226,7 +226,7 @@ function getComplementMatch(
 		areEquivalentOperand(firstComparison.left, secondComparison.right, sourceCode) &&
 		areEquivalentOperand(firstComparison.right, secondComparison.left, sourceCode);
 
-	if (!(directMatch || swappedMatch)) return undefined;
+	if (!directMatch && !swappedMatch) return undefined;
 
 	return {
 		isFixSafe:

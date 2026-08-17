@@ -33,7 +33,7 @@ interface Candidate {
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
 }
 
-const VISITOR_KEYS_TO_SKIP = new Set(["parent", "range", "loc", "tokens", "comments"]);
+const VISITOR_KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
 
 function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {
 	return node.type === "Identifier";
@@ -93,7 +93,7 @@ function getArrayIndexAssignment(
 	if (!isAssignmentExpression(expression) || expression.operator !== "=") return undefined;
 
 	const { left } = expression;
-	if (!(isMemberExpression(left) && left.computed)) return undefined;
+	if (!isMemberExpression(left) || !left.computed) return undefined;
 
 	const { object, property } = left;
 	if (!isIdentifierReference(object) || object.name !== arrayIdentifierName) return undefined;
@@ -170,15 +170,14 @@ function getCandidate(
 function createFix(
 	fixer: Fixer,
 	sourceCode: SourceCode,
-	candidate: Candidate,
-): Array<ReturnType<Fixer["replaceText"] | Fixer["removeRange"]>> {
-	const { declaration, declarator, assignments, firstAssignmentStatement, lastAssignmentStatement } = candidate;
+	{ assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement }: Candidate,
+): Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> {
 	const { init } = declarator;
 	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
 	if (init === null) return [];
 
 	const literalText = `[${assignments.map((assignment) => assignment.valueText).join(", ")}]`;
-	const fixes: Array<ReturnType<Fixer["replaceText"] | Fixer["removeRange"]>> = [
+	const fixes: Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> = [
 		fixer.replaceText(init, literalText),
 	];
 

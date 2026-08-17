@@ -3,32 +3,47 @@ import { createRule } from "$oxc-utilities/create-rule";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): string {
-	if (typeNode.type === "TSParenthesizedType") return toGenericArrayType(typeNode.typeAnnotation, sourceCode);
+	const arrayTypeNames = new Array<string>();
+	let size = 0;
+	let currentType = typeNode;
 
-	if (typeNode.type === "TSArrayType") {
-		const elementText = toGenericArrayType(typeNode.elementType, sourceCode);
-		return `Array<${elementText}>`;
+	while (true) {
+		if (currentType.type === "TSParenthesizedType") {
+			currentType = currentType.typeAnnotation;
+			continue;
+		}
+
+		if (currentType.type === "TSArrayType") {
+			arrayTypeNames[size++] = "Array";
+			currentType = currentType.elementType;
+			continue;
+		}
+
+		if (
+			currentType.type === "TSTypeOperator" &&
+			currentType.operator === "readonly" &&
+			currentType.typeAnnotation.type === "TSArrayType"
+		) {
+			arrayTypeNames[size++] = "ReadonlyArray";
+			currentType = currentType.typeAnnotation.elementType;
+			continue;
+		}
+
+		let typeText = sourceCode.getText(currentType);
+		for (let index = arrayTypeNames.length - 1; index >= 0; index -= 1) {
+			typeText = `${arrayTypeNames[index]}<${typeText}>`;
+		}
+		return typeText;
 	}
-
-	if (
-		typeNode.type === "TSTypeOperator" &&
-		typeNode.operator === "readonly" &&
-		typeNode.typeAnnotation.type === "TSArrayType"
-	) {
-		const elementText = toGenericArrayType(typeNode.typeAnnotation.elementType, sourceCode);
-		return `ReadonlyArray<${elementText}>`;
-	}
-
-	return sourceCode.getText(typeNode);
 }
 
 function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
 	const meaningfulParent = parent.type === "TSParenthesizedType" ? parent.parent : parent;
-	return !(
-		(meaningfulParent.type === "TSRestType" && meaningfulParent.parent.type === "TSTupleType") ||
-		meaningfulParent.type === "TSTupleType" ||
-		meaningfulParent.type === "TSArrayType" ||
-		(meaningfulParent.type === "TSTypeOperator" && meaningfulParent.operator === "readonly")
+	return (
+		(meaningfulParent.type !== "TSRestType" || meaningfulParent.parent.type !== "TSTupleType") &&
+		meaningfulParent.type !== "TSTupleType" &&
+		meaningfulParent.type !== "TSArrayType" &&
+		(meaningfulParent.type !== "TSTypeOperator" || meaningfulParent.operator !== "readonly")
 	);
 }
 

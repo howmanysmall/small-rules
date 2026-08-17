@@ -7,8 +7,8 @@ ts.run("call", rule, {
 	invalid: [
 		{
 			code: createCode(),
-			documentation: { id: "fail", title: "Call" },
 			errors: [{ messageId: "call" }],
+			documentation: { id: "fail", title: "Call" },
 		},
 	],
 	valid: [],

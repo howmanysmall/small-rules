@@ -8,8 +8,8 @@ describe("no-table-create-map", () => {
 		invalid: [
 			{
 				code: "const mapped = table.create(total).map((_, index) => index);",
-				documentation: { id: "fail", title: "table creation followed by map" },
 				errors: [{ messageId: "avoidConstructThenMap" }],
+				documentation: { id: "fail", title: "table creation followed by map" },
 			},
 			{
 				code: "const mapped = table.create(total, fallback).map((value) => value);",

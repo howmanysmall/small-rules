@@ -85,10 +85,9 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 		return {
 			CallExpression(node): void {
 				for (const argument of node.arguments) {
-					if (argument.type === "Identifier") {
-						const result = ianitorResultVariables.get(argument.name);
-						if (result !== undefined) result.referencedFully = true;
-					}
+					if (argument.type !== "Identifier") continue;
+					const result = ianitorResultVariables.get(argument.name);
+					if (result !== undefined) result.referencedFully = true;
 				}
 			},
 
@@ -116,10 +115,10 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 			"Program:exit"(): void {
 				for (const [, { firstSuccessNode, properties, referencedFully }] of ianitorResultVariables) {
 					if (
+						!referencedFully &&
 						properties.has("success") &&
 						!properties.has("error") &&
-						!properties.has("value") &&
-						!referencedFully
+						!properties.has("value")
 					) {
 						context.report({
 							messageId: "preferCreateGuard",

@@ -26,23 +26,26 @@ interface MemberChain {
 	readonly root: ESTree.IdentifierReference;
 }
 
-interface SynchronousCallbackConfiguration {
+interface SynchronousCallbackConfig {
 	readonly callbackArgumentIndexes: ReadonlyArray<number>;
 	readonly calleePath: ReadonlyArray<string>;
 }
 
 function getTypeName(typeNode: ESTree.Node, allowQualified: boolean): string | undefined {
 	if (typeNode.type === "Identifier") return typeNode.name;
-	if (allowQualified && typeNode.type === "TSQualifiedName") return getTypeName(typeNode.right, allowQualified);
+	if (allowQualified && typeNode.type === "TSQualifiedName") return typeNode.right.name;
 	return undefined;
 }
 
 function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQualified = true): string | undefined {
 	if (typeNode === null || typeNode === undefined) return undefined;
-	if (typeNode.type === "TSTypeAnnotation") return getReferencedTypeName(typeNode.typeAnnotation, allowQualified);
-	if (typeNode.type === "TSUnionType") {
+
+	let referencedType = typeNode;
+	while (referencedType.type === "TSTypeAnnotation") referencedType = referencedType.typeAnnotation;
+
+	if (referencedType.type === "TSUnionType") {
 		let referencedTypeName: string | undefined;
-		for (const unionType of typeNode.types) {
+		for (const unionType of referencedType.types) {
 			if (unionType.type === "TSUndefinedKeyword" || unionType.type === "TSNullKeyword") continue;
 			const unionTypeName = getReferencedTypeName(unionType, allowQualified);
 			if (unionTypeName === undefined || referencedTypeName !== undefined) return undefined;
@@ -50,8 +53,8 @@ function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQu
 		}
 		return referencedTypeName;
 	}
-	if (typeNode.type !== "TSTypeReference") return undefined;
-	return getTypeName(typeNode.typeName, allowQualified);
+	if (referencedType.type !== "TSTypeReference") return undefined;
+	return getTypeName(referencedType.typeName, allowQualified);
 }
 
 function isRecognizedType(typeNode: ESTree.Node | null | undefined, systemTypeNames: ReadonlySet<string>): boolean {
@@ -67,7 +70,6 @@ function pushChildren(node: ESTree.Node, stack: Array<unknown>): void {
 	}
 }
 
-// oxlint-disable-next-line typescript/no-invalid-void-type -- fixes other shit
 function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | undefined | void): void {
 	const stack: Array<unknown> = [root];
 	while (stack.length > 0) {
@@ -310,14 +312,12 @@ function getExpressionClass(
 	const current = unwrapExpression(expression);
 	if (current.type === "Identifier") return getIdentifierClass(current, sourceCode, imports, types, visited);
 	if (
-		!(
-			current.type === "CallExpression" &&
-			current.callee.type === "MemberExpression" &&
-			getMemberPropertyName(current.callee) === "GetService" &&
-			current.callee.object.type === "Identifier" &&
-			current.callee.object.name === "game" &&
-			!hasShadowedBinding(sourceCode, current.callee.object, "game")
-		)
+		current.type !== "CallExpression" ||
+		current.callee.type !== "MemberExpression" ||
+		getMemberPropertyName(current.callee) !== "GetService" ||
+		current.callee.object.type !== "Identifier" ||
+		current.callee.object.name !== "game" ||
+		hasShadowedBinding(sourceCode, current.callee.object, "game")
 	) {
 		return undefined;
 	}
@@ -380,7 +380,7 @@ function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: Sour
 function getSynchronousCallbacks(
 	call: ESTree.CallExpression,
 	sourceCode: SourceCode,
-	configurations: ReadonlyArray<SynchronousCallbackConfiguration>,
+	configurations: ReadonlyArray<SynchronousCallbackConfig>,
 ): ReadonlySet<CallbackFunction> {
 	const callbacks = new Set<CallbackFunction>();
 	const calleePath = getCalleePath(call.callee);
@@ -390,6 +390,7 @@ function getSynchronousCallbacks(
 		for (const argumentIndex of configuration.callbackArgumentIndexes) {
 			const argument = call.arguments[argumentIndex];
 			if (argument === undefined || argument.type === "SpreadElement") continue;
+
 			const callback = getReferencedCallback(argument, sourceCode);
 			if (callback !== undefined) callbacks.add(callback);
 		}
@@ -402,7 +403,7 @@ function reportYieldingCalls(
 	sourceCode: SourceCode,
 	imports: ReadonlyMap<ScopeVariable, ImportBinding>,
 	types: ReadonlyMap<ScopeVariable, string>,
-	synchronousCallbacks: ReadonlyArray<SynchronousCallbackConfiguration>,
+	synchronousCallbacks: ReadonlyArray<SynchronousCallbackConfig>,
 	report: (node: ESTree.CallExpression) => void,
 ): void {
 	if (systemFunction.async) return;
@@ -412,7 +413,7 @@ function reportYieldingCalls(
 		if (activeFunction.async || activeFunction.body === null || visitedFunctions.has(activeFunction)) return;
 		visitedFunctions.add(activeFunction);
 		forEachNode(activeFunction.body, (node) => {
-			if (isAnyFunction(node) && node !== activeFunction) return false;
+			if (node !== activeFunction && isAnyFunction(node)) return false;
 			if (node.type !== "CallExpression") return true;
 			if (isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
 			for (const callback of getSynchronousCallbacks(node, sourceCode, synchronousCallbacks)) {

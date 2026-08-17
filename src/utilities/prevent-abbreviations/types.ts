@@ -58,9 +58,9 @@ export type BroadIdentifier =
 	| NamedIdentifier;
 
 export interface VariableLike {
+	readonly name: string;
 	readonly defs: ReadonlyArray<Definition>;
 	readonly identifiers: ReadonlyArray<BroadIdentifier>;
-	readonly name: string;
 	readonly references: ReadonlyArray<Reference>;
 	readonly scope: Scope;
 }

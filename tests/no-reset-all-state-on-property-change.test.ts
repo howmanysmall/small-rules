@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import rule from "$oxc-rules/react/no-reset-all-state-on-prop-change";
+import rule from "$oxc-rules/react/no-reset-all-state-on-property-change";
 
 import { tsx } from "./rule-testers";
 
@@ -34,8 +34,8 @@ export function ProfilePage({ userId }: { userId: string }): React.Element {
 	);
 }
 `,
-				documentation: { id: "fail", title: "Effect resets all state after a prop change" },
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
+				documentation: { id: "fail", title: "Effect resets all state after a prop change" },
 			},
 			{
 				code: `
@@ -118,7 +118,8 @@ export function ProfilePage({ userId, friends }: { userId: string; friends: Read
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
 			},
 			{
-				// These are equivalent because state initializes to `undefined` when it has no argument
+				// These are equivalent because state initializes to `undefined`
+				// when it has no argument
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -179,9 +180,9 @@ export function ProfilePage({ userId }: { userId: string }): React.Element {
 				errors: [{ data: { prop: "userId" }, messageId: "avoidResettingAllStateWhenAPropChanges" }],
 			},
 			{
-				// A call whose callee is neither an identifier nor a member expression
-				// (an arrow IIFE) is skipped by `countUseStates`, but the recognized
-				// setter still resets all counted state.
+				// A call whose callee is neither an identifier nor a member
+				// expression (an arrow IIFE) is skipped by `countUseStates`, but
+				// the recognized setter still resets all counted state.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -200,7 +201,8 @@ export function ProfilePage({ userId }: { userId: string }): React.Element {
 			},
 			{
 				// A computed member call is skipped by `countUseStates`, but the
-				// recognized `React.useState` setter still resets to its initial value.
+				// recognized `React.useState` setter still resets to its initial
+				// value.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -297,8 +299,11 @@ export function List({ items }: { items: ReadonlyArray<string> }): React.Element
 `,
 			},
 			{
-				// Verifies that the rule doesn't crash when it can't find the containing component to count `useState`s.
-				// This *is* a rule-break, but detecting the lowercased function name would probably introduce more false positives than it'd save in false negatives.
+				// Verifies that the rule doesn't crash when it can't find the
+				// containing component to count `useState`s. This *is* a
+				// rule-break, but detecting the lowercased function name would
+				// probably introduce more false positives than it'd save in false
+				// negatives.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -372,8 +377,9 @@ export function Foo(): React.Element {
 `,
 			},
 			{
-				// `countUseStates` only counts member calls whose object is named `React`,
-				// so a differently-named object isn't recognized and the state isn't counted.
+				// `countUseStates` only counts member calls whose object is
+				// named `React`, so a differently-named object isn't recognized
+				// and the state isn't counted.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -390,8 +396,8 @@ export function ProfilePage({ userId }: { userId: string }): React.Element {
 `,
 			},
 			{
-				// A computed member call without a recognized setter: no state calls
-				// are detected, so the effect isn't an all-state reset.
+				// A computed member call without a recognized setter: no state
+				// calls are detected, so the effect isn't an all-state reset.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -408,8 +414,9 @@ export function ProfilePage({ userId }: { userId: string }): React.Element {
 `,
 			},
 			{
-				// The HOC's first argument is an options object rather than the component,
-				// so `countUseStates` cannot count the component's `useState` calls.
+				// The HOC's first argument is an options object rather than the
+				// component, so `countUseStates` cannot count the component's
+				// `useState` calls.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -433,7 +440,8 @@ export default ProfilePage;
 `,
 			},
 			{
-				// An effect with no dependency array has no dependency references to check.
+				// An effect with no dependency array has no dependency
+				// references to check.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -449,8 +457,9 @@ export function ProfilePage(): React.Element {
 `,
 			},
 			{
-				// A state setter referenced through an alias has no call expression,
-				// so `isSetStateToInitialValue` can't confirm the reset.
+				// A state setter referenced through an alias has no call
+				// expression, so `isSetStateToInitialValue` can't confirm the
+				// reset.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 

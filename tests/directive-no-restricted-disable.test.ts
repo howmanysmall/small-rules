@@ -8,19 +8,19 @@ describe("directive-no-restricted-disable", () => {
 		invalid: [
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
-				documentation: { id: "fail", title: "Restricted rule disable" },
-				errors: [{ messageId: "disallow" }],
 				options: ["no-console"],
+				errors: [{ messageId: "disallow" }],
+				documentation: { id: "fail", title: "Restricted rule disable" },
 			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
-				errors: [{ messageId: "disallow" }],
 				options: ["no-*"],
+				errors: [{ messageId: "disallow" }],
 			},
 			{
 				code: "/* oxlint-disable */\nconst x = 1;",
-				errors: [{ messageId: "disallow" }],
 				options: ["no-console"],
+				errors: [{ messageId: "disallow" }],
 			},
 		],
 		valid: [
@@ -29,8 +29,8 @@ describe("directive-no-restricted-disable", () => {
 			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
-				documentation: { id: "pass", title: "Non-restricted rule disable" },
 				options: ["no-alert"],
+				documentation: { id: "pass", title: "Non-restricted rule disable" },
 			},
 		],
 	});

@@ -8,44 +8,44 @@ describe("array-type-generic", () => {
 		invalid: [
 			{
 				code: "type A = string[];",
-				documentation: { id: "fail", title: "Bracket array type syntax" },
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type A = Array<string>;",
+				errors: [{ messageId: "useGenericArrayType" }],
+				documentation: { id: "fail", title: "Bracket array type syntax" },
 			},
 			{
 				code: "type B = readonly number[];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type B = ReadonlyArray<number>;",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 			{
 				code: "type C = [number, string][];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type C = Array<[number, string]>;",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 			{
 				code: "type D = string[][];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type D = Array<Array<string>>;",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 			{
 				code: "type E = readonly string[][];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type E = ReadonlyArray<Array<string>>;",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 			{
 				code: "type Nested = (readonly number[])[];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type Nested = Array<ReadonlyArray<number>>;",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 			{
 				code: "type F = (string | number)[];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "type F = Array<string | number>;",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 			{
 				code: "const values: string[] = [];",
-				errors: [{ messageId: "useGenericArrayType" }],
 				output: "const values: Array<string> = [];",
+				errors: [{ messageId: "useGenericArrayType" }],
 			},
 		],
 		valid: [

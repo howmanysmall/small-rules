@@ -34,8 +34,8 @@ interface RegExpPattern {
 type CompiledPattern = RegExpPattern | StringPattern;
 
 /**
- * Creates a detector that finds patterns in compressed text (whitespace removed). Supports both string literals and
- * RegExp patterns.
+ * Creates a detector that finds patterns in compressed text (whitespace
+ * removed). Supports both string literals and RegExp patterns.
  *
  * @param probability - Base probability (0-1).
  * @param patterns - Patterns to detect (strings are escaped, RegExp used as-is).

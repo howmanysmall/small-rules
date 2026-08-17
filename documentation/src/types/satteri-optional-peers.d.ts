@@ -3,9 +3,9 @@ declare module "satteri" {
 	import type {
 		BlockContent,
 		DefinitionContent,
+		RootContent as MdastRootContent,
 		Parent,
 		PhrasingContent,
-		RootContent as MdastRootContent,
 	} from "mdast";
 	import type { ContainerDirectiveData, LeafDirectiveData, TextDirectiveData } from "mdast-util-directive";
 
@@ -15,8 +15,8 @@ declare module "satteri" {
 	}
 
 	interface DirectiveFields {
-		readonly attributes?: Record<string, string | null | undefined> | null;
 		readonly name: string;
+		readonly attributes?: null | Record<string, null | string | undefined>;
 	}
 
 	export interface ContainerDirective extends DirectiveFields, Parent {
@@ -38,16 +38,16 @@ declare module "satteri" {
 	}
 
 	export interface MdastPluginDefinition {
+		readonly name: string;
 		readonly containerDirective?: (
 			node: ContainerDirective,
 			context: MdastPluginContext,
 		) => MdastRootContent | undefined;
 		readonly leafDirective?: (node: LeafDirective, context: MdastPluginContext) => MdastRootContent | undefined;
-		readonly name: string;
 		readonly textDirective?: (node: TextDirective, context: MdastPluginContext) => MdastRootContent | undefined;
 	}
 
-	export type MdastPluginInput = MdastPluginDefinition | (() => MdastPluginDefinition);
+	export type MdastPluginInput = (() => MdastPluginDefinition) | MdastPluginDefinition;
 
 	export interface HastPluginContext {
 		readonly fileURL?: string;
@@ -65,15 +65,15 @@ declare module "satteri" {
 	}
 
 	export interface HastPluginDefinition {
-		readonly element?: HastElementVisitor | ReadonlyArray<HastElementVisitor>;
 		readonly name: string;
+		readonly element?: HastElementVisitor | ReadonlyArray<HastElementVisitor>;
 		readonly raw?: (
 			node: RawNode,
 			context: HastPluginContext,
-		) => { readonly type: "raw"; readonly value: string } | undefined;
+		) => undefined | { readonly type: "raw"; readonly value: string };
 	}
 
-	export type HastPluginInput = HastPluginDefinition | (() => HastPluginDefinition);
+	export type HastPluginInput = (() => HastPluginDefinition) | HastPluginDefinition;
 }
 
 declare module "@astrojs/markdown-satteri" {

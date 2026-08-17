@@ -7,21 +7,24 @@ import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
 type FunctionLike = ESTree.ArrowFunctionExpression | ESTree.Function;
 
 function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
-	if (parent.type === "LogicalExpression") return parent.left === child;
-	if (parent.type === "ConditionalExpression") return parent.test === child;
-	if (parent.type === "SequenceExpression") {
-		const last = parent.expressions.at(-1);
-		if (last !== child) return false;
-		const { parent: grandParent } = parent;
-		return parentUsesValue(grandParent, parent);
+	let currentParent = parent;
+	let currentChild = child;
+
+	while (currentParent.type === "SequenceExpression") {
+		if (currentParent.expressions.at(-1) !== currentChild) return false;
+		currentChild = currentParent;
+		currentParent = currentParent.parent;
 	}
+
+	if (currentParent.type === "LogicalExpression") return currentParent.left === currentChild;
+	if (currentParent.type === "ConditionalExpression") return currentParent.test === currentChild;
 	return (
-		parent.type !== "ExpressionStatement" &&
-		parent.type !== "ArrowFunctionExpression" &&
-		parent.type !== "UnaryExpression" &&
-		parent.type !== "AwaitExpression" &&
-		parent.type !== "ReturnStatement" &&
-		parent.type !== "ThrowStatement"
+		currentParent.type !== "ExpressionStatement" &&
+		currentParent.type !== "ArrowFunctionExpression" &&
+		currentParent.type !== "UnaryExpression" &&
+		currentParent.type !== "AwaitExpression" &&
+		currentParent.type !== "ReturnStatement" &&
+		currentParent.type !== "ThrowStatement"
 	);
 }
 

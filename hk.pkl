@@ -1,7 +1,7 @@
 // hk configuration - https://hk.jdx.dev/
-amends "package://github.com/jdx/hk/releases/download/v1.50.0/hk@1.50.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v1.55.0/hk@1.55.0#/Config.pkl"
 
-import "package://github.com/jdx/hk/releases/download/v1.50.0/hk@1.50.0#/Builtins.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.55.0/hk@1.55.0#/Builtins.pkl"
 
 exclude =
   List(
@@ -86,8 +86,8 @@ hooks {
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
 
-      // JS/TS pipeline — oxlint + biome + oxfmt
-      ["oxlint"] = (Builtins.ox_lint) {
+      // JS/TS pipeline — isentinel-lint + biome + oxfmt
+      ["isentinel-lint"] {
         glob =
           List(
             "*.js",
@@ -101,8 +101,8 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "node --run oxlint -- --no-error-on-unmatched-pattern {{files}}"
-        fix = "node --run oxlint -- --no-error-on-unmatched-pattern --fix {{files}}"
+        check = "node --run isentinel-lint -- {{files}}"
+        fix = "node --run isentinel-lint -- --fix {{files}}"
         check_first = true
         batch = false
       }
@@ -163,9 +163,7 @@ hooks {
         fix = "shfmt -bn -ci -sr -w {{files}}"
         check_first = true
       }
-      ["shellcheck"] = (Builtins.shellcheck) {
-        glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-      }
+      ["shellcheck"] = Builtins.shellcheck
 
       // GitHub Actions workflows
       ["actionlint"] = (Builtins.actionlint) {
@@ -177,8 +175,14 @@ hooks {
       }
       ["pinact"] {
         glob = workflow_action_files
-        check = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
-        fix = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
+        check = new CommandSpec {
+          command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
+          effect = "read"
+        }
+        fix = new CommandSpec {
+          command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
+          effect = "write"
+        }
         check_first = true
       }
 
@@ -275,7 +279,7 @@ hooks {
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
-      ["oxlint"] = (Builtins.ox_lint) {
+      ["isentinel-lint"] {
         glob =
           List(
             "*.js",
@@ -289,7 +293,7 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "node --run oxlint -- --no-error-on-unmatched-pattern {{files}}"
+        check = "node --run isentinel-lint -- {{files}}"
         batch = true
       }
       ["biome-js"] = (Builtins.biome) {
@@ -340,9 +344,7 @@ hooks {
         glob = List("**/*.sh", "**/*.bash", "**/*.ksh")
         check = "shfmt -bn -ci -sr -d {{files}}"
       }
-      ["shellcheck"] = (Builtins.shellcheck) {
-        glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-      }
+      ["shellcheck"] = Builtins.shellcheck
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
       }
@@ -352,7 +354,10 @@ hooks {
       }
       ["pinact"] {
         glob = workflow_action_files
-        check = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
+        check = new CommandSpec {
+          command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
+          effect = "read"
+        }
       }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
@@ -389,7 +394,7 @@ hooks {
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
-      ["oxlint"] = (Builtins.ox_lint) {
+      ["isentinel-lint"] {
         glob =
           List(
             "*.js",
@@ -403,8 +408,8 @@ hooks {
             "*.astro",
             "*.mdx",
           )
-        check = "node --run oxlint -- --no-error-on-unmatched-pattern {{files}}"
-        fix = "node --run oxlint -- --no-error-on-unmatched-pattern --fix {{files}}"
+        check = "node --run isentinel-lint -- {{files}}"
+        fix = "node --run isentinel-lint -- --fix {{files}}"
         batch = true
       }
       ["biome-js"] = (Builtins.biome) {
@@ -458,9 +463,7 @@ hooks {
         glob = List("**/*.sh", "**/*.bash", "**/*.ksh")
         fix = "shfmt -bn -ci -sr -w {{files}}"
       }
-      ["shellcheck"] = (Builtins.shellcheck) {
-        glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-      }
+      ["shellcheck"] = Builtins.shellcheck
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
       }
@@ -471,7 +474,10 @@ hooks {
       }
       ["pinact"] {
         glob = workflow_action_files
-        fix = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
+        fix = new CommandSpec {
+          command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
+          effect = "write"
+        }
       }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {

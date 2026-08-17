@@ -34,7 +34,8 @@ const testRule = defineRule({
 
 const tester = createRuleTester({ language: "js", sourceType: "module" });
 
-const templateExpressionCode = `check(\`${String.fromCodePoint(36)}{value}\`);`;
+// oxlint-disable-next-line unicorn/prefer-code-point -- slop rule
+const templateExpressionCode = `check(\`${String.fromCharCode(36)}{value}\`);`;
 
 describe("isExpressionSideEffectSafe", () => {
 	it("should treat private identifier property keys as safe parser keys", () => {
@@ -45,8 +46,8 @@ describe("isExpressionSideEffectSafe", () => {
 		const expression = {
 			properties: [
 				{
-					computed: true,
 					key: { name: "value", type: "PrivateIdentifier" },
+					computed: true,
 					kind: "init",
 					method: false,
 					type: "Property",

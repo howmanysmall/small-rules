@@ -34,14 +34,14 @@ interface PopulatedReleaseHistory {
 export type ReleaseHistory = EmptyReleaseHistory | PopulatedReleaseHistory;
 
 export interface ReleaseContentEntry {
-	readonly body: string;
 	readonly id: string;
+	readonly body: string;
 }
 
 interface CollectionReleaseEntry {
+	readonly id: string;
 	readonly body?: string;
 	readonly filePath?: string;
-	readonly id: string;
 }
 
 const releaseVersionPattern = /^v(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)$/u;
@@ -78,7 +78,7 @@ function getReleaseId(entry: CollectionReleaseEntry): string {
 }
 
 export function getReleaseContentEntry(entry: CollectionReleaseEntry): ReleaseContentEntry {
-	if (entry.body !== undefined) return { body: entry.body, id: getReleaseId(entry) };
+	if (entry.body !== undefined) return { id: getReleaseId(entry), body: entry.body };
 
 	const error = new Error(`Release "${entry.id}" is missing its Markdown body.`);
 	Error.captureStackTrace(error, getReleaseContentEntry);

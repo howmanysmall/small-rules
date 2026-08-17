@@ -36,18 +36,21 @@ function collectCleanupVariables(
 	cleanupReferences: ReadonlyArray<Reference>,
 ): Set<Variable> {
 	// Trace both the body setter and cleanup refs through alias chains.
-	// If they share any upstream variable, the cleanup references the same setter.
+	// If they share any upstream variable, the cleanup references the same
+	// setter.
 	const cleanupVariables = new Set<Variable>();
 	for (const cleanupReference of cleanupReferences) {
 		for (const upstreamReference of analysis.scope.getUpstreamReferences(cleanupReference)) {
-			// `resolved` is typed `Variable | null`, but the harness exposes unresolved
-			// bindings as `undefined`; the cast makes the runtime shape visible to lint.
-			const resolved: Variable | null | undefined = upstreamReference.resolved;
+			// `resolved` is typed `Variable | null`, but the harness exposes
+			// unresolved bindings as `undefined`; the cast makes the runtime
+			// shape visible to lint.
+			const resolved: null | undefined | Variable = upstreamReference.resolved;
 			// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
 			if (resolved === null || resolved === undefined) continue;
-			// Import-bound variables (e.g. the `useState` callee) are shared by every
-			// setter's upstream chain; ignoring them preserves the upstream rule's
-			// behavior, where unresolved globals were skipped the same way.
+			// Import-bound variables (e.g. the `useState` callee) are shared by
+			// every setter's upstream chain; ignoring them preserves the upstream
+			// rule's behavior, where unresolved globals were skipped the same
+			// way.
 			if (isImportBoundVariable(resolved)) continue;
 			cleanupVariables.add(resolved);
 		}
@@ -65,7 +68,7 @@ function reportSharedCleanupSetters(
 		const sharesCleanupVariable = analysis.scope
 			.getUpstreamReferences(reference)
 			.some((upstreamReference: Reference) => {
-				const resolved: Variable | null | undefined = upstreamReference.resolved;
+				const resolved: null | undefined | Variable = upstreamReference.resolved;
 				// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
 				return resolved !== null && resolved !== undefined && cleanupVariables.has(resolved);
 			});
@@ -94,8 +97,9 @@ const noExternalStoreSubscription = createRule("no-external-store-subscription",
 			Program(): void {
 				for (const effect of analysis.effects) {
 					if (effect.cleanup === undefined) continue;
-					// `getEffectCleanup` filters out bare `return;` (argument === null),
-					// so a cleanup ReturnStatement always carries an argument here.
+					// `getEffectCleanup` filters out bare `return;` (argument
+					// === null), so a cleanup ReturnStatement always carries an
+					// argument here.
 					/* v8 ignore next -- bare returns never reach this check. @preserve */
 					if (effect.cleanup.argument === null) continue;
 

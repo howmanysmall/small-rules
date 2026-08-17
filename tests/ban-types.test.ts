@@ -15,8 +15,8 @@ type User = {
 
 type HiddenUser = Omit<User, "password">;
 `,
-				documentation: { id: "fail", title: "Disallowed Omit utility type" },
 				errors: [{ messageId: "bannedTypeWithReplacement" }],
+				documentation: { id: "fail", title: "Disallowed Omit utility type" },
 			},
 			{
 				code: `
@@ -27,8 +27,8 @@ type User = {
 
 type HiddenUser = Omit<User, "password">;
 `,
-				errors: [{ messageId: "bannedTypeWithReplacement" }],
 				options: [{}],
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
 			},
 			{
 				code: `
@@ -38,8 +38,8 @@ type User = {
 
 type FrozenUser = Readonly<User>;
 `,
-				errors: [{ messageId: "bannedType" }],
 				options: [{ bannedTypes: ["Readonly"] }],
+				errors: [{ messageId: "bannedType" }],
 			},
 			{
 				code: `
@@ -49,8 +49,8 @@ type User = {
 
 type PartialUser = Partial<User>;
 `,
-				errors: [{ messageId: "bannedTypeWithReplacement" }],
 				options: [{ bannedTypes: { Partial: "DeepPartial" } }],
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
 			},
 			{
 				code: `
@@ -60,8 +60,8 @@ type User = {
 
 type PartialUser = Utility.Partial<User>;
 `,
-				errors: [{ messageId: "bannedTypeWithReplacement" }],
 				options: [{ bannedTypes: { Partial: "DeepPartial" } }],
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
 			},
 			{
 				code: `
@@ -71,8 +71,8 @@ type User = {
 
 type PartialUser = Partial<User>;
 `,
-				errors: [{ messageId: "bannedType" }],
 				options: [{ bannedTypes: { Partial: "" } }],
+				errors: [{ messageId: "bannedType" }],
 			},
 			{
 				code: `
@@ -82,8 +82,8 @@ type User = {
 
 type FrozenUser = Readonly<User>;
 `,
-				errors: [{ messageId: "bannedType" }],
 				options: [{ bannedTypes: ["readonly"] }],
+				errors: [{ messageId: "bannedType" }],
 			},
 		],
 		valid: [

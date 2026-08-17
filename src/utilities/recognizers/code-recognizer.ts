@@ -5,7 +5,8 @@ import type { Detector } from "./detector";
 const PROBABILITY_THRESHOLD = 0.9;
 
 /**
- * Calculate combined probability that a line contains code. Uses: `p = 1 - (1-p1)(1-p2)...(1-pn)` for calculations.
+ * Calculate combined probability that a line contains code. Uses: `p = 1 -
+ * (1-p1)(1-p2)...(1-pn)` for calculations.
  *
  * @param detectors - Array of detectors to use.
  * @param line - The line to analyze.
@@ -34,7 +35,7 @@ function isLikelyCode(detectors: ReadonlyArray<Detector>, line: string): boolean
 }
 
 /**
- * Check if any line in the array is likely code.
+ * Check if any line in the array is likely a code line.
  *
  * @param detectors - Array of detectors to use.
  * @param lines - Array of lines to check.

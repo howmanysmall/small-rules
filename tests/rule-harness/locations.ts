@@ -32,13 +32,13 @@ function positionForIndex(index: LocationIndex, offset: number): Position {
 		const middle = Math.floor((low + high) / 2);
 		const lineStart = index.lineStarts[middle];
 		if (lineStart === undefined) break;
-		const nextLineStart = index.lineStarts[middle + 1];
 
 		if (offset < lineStart) {
 			high = middle - 1;
 			continue;
 		}
 
+		const nextLineStart = index.lineStarts[middle + 1];
 		if (nextLineStart !== undefined && offset >= nextLineStart) {
 			low = middle + 1;
 			continue;

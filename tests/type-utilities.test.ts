@@ -21,7 +21,7 @@ describe("isStringRecord", () => {
 		expect.assertions(1);
 
 		// Arrange
-		const value = { count: 1, name: "valid" };
+		const value = { name: "valid", count: 1 };
 
 		// Act
 		const result = isStringRecord(value);

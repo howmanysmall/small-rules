@@ -21,15 +21,15 @@ describe("no-commented-code", () => {
 				],
 			},
 			{
+				filename: "source",
 				code: "// const value = 1;",
-				documentation: { id: "fail", title: "Remove commented-out code" },
 				errors: [
 					{
 						messageId: "commentedCode",
 						suggestions: [{ desc: "Remove this commented out code", output: "" }],
 					},
 				],
-				filename: "source",
+				documentation: { id: "fail", title: "Remove commented-out code" },
 			},
 			{
 				code: `// // nested comment
@@ -196,25 +196,25 @@ let x = 0;`,
 				code: `// foo();
 // bar();
 // baz();`,
+				options: [{ maxLines: 2 }],
 				errors: [
 					{
 						messageId: "commentedCode",
 						suggestions: [{ desc: "Remove this commented out code", output: "" }],
 					},
 				],
-				options: [{ maxLines: 2 }],
 			},
 			// Custom maxLines: two-line code block errors when maxLines is 1
 			{
 				code: `// foo();
 // bar();`,
+				options: [{ maxLines: 1 }],
 				errors: [
 					{
 						messageId: "commentedCode",
 						suggestions: [{ desc: "Remove this commented out code", output: "" }],
 					},
 				],
-				options: [{ maxLines: 1 }],
 			},
 			// Custom maxLines: four-line block comment errors when maxLines is 3
 			{
@@ -222,21 +222,21 @@ let x = 0;`,
 bar();
 baz();
 qux(); */`,
+				options: [{ maxLines: 3 }],
 				errors: [
 					{
 						messageId: "commentedCode",
 						suggestions: [{ desc: "Remove this commented out code", output: "" }],
 					},
 				],
-				options: [{ maxLines: 3 }],
 			},
 		],
 		valid: [
 			// Custom maxLines: single-line code is OK when maxLines >= 1
 			{
 				code: "// if (something) {}",
-				documentation: { id: "pass", title: "Allow one commented code line" },
 				options: [{ maxLines: 1 }],
+				documentation: { id: "pass", title: "Allow one commented code line" },
 			},
 			// Custom maxLines: two-line code block is OK when maxLines >= 2
 			{

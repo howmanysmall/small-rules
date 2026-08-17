@@ -25,7 +25,7 @@ interface JsonResult {
 
 async function runJsonAsync(command: string, parameters: ReadonlyArray<string>): Promise<JsonResult> {
 	try {
-		const { stdout, exitCode } = await $({ cwd: repositoryRoot })`${[command, ...parameters]}`.nothrow().quiet();
+		const { exitCode, stdout } = await $({ cwd: repositoryRoot })`${[command, ...parameters]}`.nothrow().quiet();
 
 		const output = stdout.trim();
 		if (output.length === 0) {

@@ -13,8 +13,8 @@ const array = baseArray
 	.filter((value) => value % 2 === 0)
 	.map((value) => value * 2);
 `,
-				documentation: { id: "fail", title: "filter followed by map" },
 				errors: [{ messageId: "avoidFilterMapChain" }],
+				documentation: { id: "fail", title: "filter followed by map" },
 			},
 			{
 				code: 'const result = values["filter"](predicate)["map"](transform);',

@@ -31,8 +31,8 @@ export function useStoreValue(store: Store): number {
 	return value;
 }
 `,
-				documentation: { id: "fail", title: "Effect subscribes to an external store" },
 				errors: [{ data: { state: "value" }, messageId: "avoidExternalStoreSubscription" }],
+				documentation: { id: "fail", title: "Effect subscribes to an external store" },
 			},
 			{
 				code: `
@@ -310,8 +310,9 @@ export function Counter(): React.Element {
 				errors: [{ data: { state: "count" }, messageId: "avoidExternalStoreSubscription" }],
 			},
 			{
-				// A state pair declared at module scope has a useState call with no
-				// enclosing function, so the synchronous call chain stops short of it.
+				// A state pair declared at module scope has a useState call with
+				// no enclosing function, so the synchronous call chain stops
+				// short of it.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -344,7 +345,8 @@ export function Counter(): React.Element {
 `,
 			},
 			{
-				// A non-subscription effect is not an external store subscription.
+				// A non-subscription effect is not an external store
+				// subscription.
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
@@ -693,7 +695,8 @@ export function Pair(): React.Element {
 `,
 			},
 			{
-				// A bare `return;` is not effect cleanup, so the rule has nothing to match.
+				// A bare `return;` is not effect cleanup, so the rule has
+				// nothing to match.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -712,8 +715,9 @@ export function ExternalValue(): React.Element {
 `,
 			},
 			{
-				// A setter bound to the name `useState` matches `isUseState` itself, so
-				// `getStateName` finds no destructured declaration and yields undefined.
+				// A setter bound to the name `useState` matches `isUseState`
+				// itself, so `getStateName` finds no destructured declaration and
+				// yields undefined.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 

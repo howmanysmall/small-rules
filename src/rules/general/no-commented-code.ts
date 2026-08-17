@@ -231,7 +231,7 @@ const noCommentedCode = createRule("no-commented-code", "general", {
 					const firstComment = group.comments.at(0);
 					const lastComment = group.comments.at(-1);
 					/* v8 ignore next -- comment groups are created only from non-empty comment arrays. @preserve */
-					if (!(firstComment && lastComment)) continue;
+					if (!firstComment || !lastComment) continue;
 
 					context.report({
 						loc: {

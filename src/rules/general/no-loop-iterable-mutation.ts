@@ -41,17 +41,20 @@ interface MutationCall {
 	readonly property: ESTree.Node;
 }
 
-function getIdentifierName(node: ESTree.Node | null | undefined): string | undefined {
-	if (node === null || node === undefined) return undefined;
-	if (node.type === "Identifier") return node.name;
-	if (
-		node.type === "ParenthesizedExpression" ||
-		node.type === "TSAsExpression" ||
-		node.type === "TSNonNullExpression" ||
-		node.type === "TSSatisfiesExpression" ||
-		node.type === "TSTypeAssertion"
-	) {
-		return getIdentifierName(node.expression);
+function getIdentifierName(node?: ESTree.Node | null): string | undefined {
+	let current = node;
+	while (current !== null && current !== undefined) {
+		if (current.type === "Identifier") return current.name;
+		if (
+			current.type !== "ParenthesizedExpression" &&
+			current.type !== "TSAsExpression" &&
+			current.type !== "TSNonNullExpression" &&
+			current.type !== "TSSatisfiesExpression" &&
+			current.type !== "TSTypeAssertion"
+		) {
+			return undefined;
+		}
+		current = current.expression;
 	}
 	return undefined;
 }
@@ -76,9 +79,9 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 	return loop.left.type === "VariableDeclaration" && loop.left.kind === "const";
 }
 
-function getLiveIterable(right: ESTree.Expression): { method: string; name: string } | undefined {
+function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
 	const node = unwrapExpression(right);
-	if (node.type === "Identifier") return { method: "direct", name: node.name };
+	if (node.type === "Identifier") return { name: node.name, method: "direct" };
 
 	if (node.type !== "CallExpression" || node.callee.type !== "MemberExpression" || node.arguments.length > 0) {
 		return undefined;
@@ -87,7 +90,7 @@ function getLiveIterable(right: ESTree.Expression): { method: string; name: stri
 
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;
-	return { method, name: node.callee.object.name };
+	return { name: node.callee.object.name, method };
 }
 
 function buildLoopContext(loop: ESTree.ForOfStatement): LoopContext | undefined {
@@ -175,11 +178,10 @@ function collectMutationCalls(body: ESTree.Node, iterableName: string): Array<Mu
 }
 
 function isAllowedMutation(
-	mutation: MutationCall,
+	{ call, method }: MutationCall,
 	loopContext: LoopContext,
 	mutations: ReadonlyArray<MutationCall>,
 ): boolean {
-	const { method, call } = mutation;
 	if (method === "delete" && argumentMatchesName(call, loopContext.deleteArgumentName)) return true;
 
 	if (

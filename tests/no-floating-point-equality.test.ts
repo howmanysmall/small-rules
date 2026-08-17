@@ -8,8 +8,8 @@ describe("no-floating-point-equality", () => {
 		invalid: [
 			{
 				code: "const isReady = progress === 0.2;",
-				documentation: { id: "fail", title: "Exact comparison with an inexact decimal" },
 				errors: [{ messageId: "exactFloatComparison" }],
+				documentation: { id: "fail", title: "Exact comparison with an inexact decimal" },
 			},
 			{
 				code: "const changed = sample() !== 2 / 7;",

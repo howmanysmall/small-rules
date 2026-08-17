@@ -161,12 +161,11 @@ function getNonComputedCalleePropertyName(callee: ESTree.CallExpression["callee"
 }
 
 function isHookCall(
-	node: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	hookIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 	hookNames: ReadonlySet<string>,
 ): boolean {
-	const { callee } = node;
 	if (callee.type === "Identifier") return hookIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
@@ -187,7 +186,7 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 
 	if (
 		"key" in parent &&
-		!("computed" in parent && parent.computed) &&
+		(!("computed" in parent) || !parent.computed) &&
 		isNode(parent.key) &&
 		parent.key.type === "Identifier"
 	) {
@@ -274,8 +273,10 @@ function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
 			/* v8 ignore next -- statement-only traversal never pushes arrow expressions. @preserve */
 			case "ArrowFunctionExpression":
 				continue;
+
 			case "FunctionDeclaration":
 				continue;
+
 			/* v8 ignore next -- statement-only traversal never pushes function expressions. @preserve */
 			case "FunctionExpression":
 				continue;
@@ -285,11 +286,11 @@ function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
 				continue;
 			}
 
+			case "BlockStatement":
 			case "DoWhileStatement":
 			case "ForInStatement":
 			case "ForOfStatement":
 			case "ForStatement":
-			case "BlockStatement":
 			case "IfStatement":
 			case "LabeledStatement":
 			case "SwitchStatement":
@@ -367,8 +368,7 @@ function isResetValue(node: ESTree.Node): boolean {
 		return value === "" || value === 0 || value === false || value === null;
 	}
 
-	if (isConstantLiteral(node)) return true;
-	return isEmptyArrayExpression(node) || isEmptyObjectExpression(node);
+	return isConstantLiteral(node) || isEmptyArrayExpression(node) || isEmptyObjectExpression(node);
 }
 
 function getResetFlagNameFromStatement(
@@ -419,20 +419,20 @@ function matchGuardedEventFlagPattern(
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): string | undefined {
 	const [guard, first, second] = statements;
-	if (guard?.type !== "IfStatement" || guard.alternate !== null || first === undefined || second === undefined) {
-		return undefined;
-	}
+	if (first === undefined || second === undefined || guard?.type !== "IfStatement") return undefined;
+	/* v8 ignore next -- @preserve all tests pass IfStatements without an alternate branch. */
+	if (guard.alternate !== null) return undefined;
 
 	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
 	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
 	const guardReturns = isReturnWithoutArgument(guard.consequent);
 	if (firstFlag !== undefined && secondFlag === undefined) {
-		if (!(guardReturns && isNegativeFlagTest(guard.test, firstFlag))) return undefined;
+		if (!guardReturns || !isNegativeFlagTest(guard.test, firstFlag)) return undefined;
 		return getSideEffectCall(second, stateSetterIdentifiers) === undefined ? undefined : firstFlag;
 	}
 
 	if (secondFlag === undefined || firstFlag !== undefined) return undefined;
-	if (!(guardReturns && isNegativeFlagTest(guard.test, secondFlag))) return undefined;
+	if (!guardReturns || !isNegativeFlagTest(guard.test, secondFlag)) return undefined;
 	/* v8 ignore next -- no-side-effect guarded flag exits are covered as non-event-flag valid behavior. @preserve */
 	return getSideEffectCall(first, stateSetterIdentifiers) === undefined ? undefined : secondFlag;
 }
@@ -446,7 +446,7 @@ function matchPositiveEventFlagPattern(
 
 	const consequentStatements = getStatementsFromConsequent(statement.consequent);
 	const [first, second] = consequentStatements;
-	if (consequentStatements.length !== 2 || first === undefined || second === undefined) return undefined;
+	if (first === undefined || second === undefined || consequentStatements.length !== 2) return undefined;
 
 	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
 	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
@@ -616,11 +616,9 @@ function countSetterCalls(
 	return countMatchingCalls(statements, (callExpression) => {
 		if (!isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
 
-		const hasDerivedArgument = callExpression.arguments.some((argument) =>
+		return callExpression.arguments.some((argument) =>
 			argument.type === "SpreadElement" ? false : expressionContainsIdentifier(argument),
 		);
-
-		return hasDerivedArgument;
 	});
 }
 
@@ -681,11 +679,10 @@ function buildFunctionContext(
 }
 
 function isPropertyCallbackCall(
-	callExpression: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	functionContext: FunctionContext,
 	propertyCallbackPrefixes: ReadonlySet<string>,
 ): boolean {
-	const { callee } = callExpression;
 	if (callee.type === "Identifier") return functionContext.propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
@@ -778,10 +775,9 @@ function collectSetterCalls(
 }
 
 function isAllowedPropertyCallbackCall(
-	callExpression: ESTree.CallExpression,
+	{ callee }: ESTree.CallExpression,
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
-	const { callee } = callExpression;
 	if (callee.type === "Identifier") return propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
@@ -948,10 +944,10 @@ function getAlternateStatements(statement: ESTree.IfStatement): ReadonlyArray<ES
 function hasPropertyDependencyInCondition(
 	statement: ESTree.IfStatement,
 	stateValueIdentifiers: ReadonlySet<string>,
-	depIdentifiers: ReadonlySet<string>,
+	dependencyIdentifiers: ReadonlySet<string>,
 ): boolean {
 	const conditionIdentifiers = collectIdentifiers(statement.test);
-	return [...conditionIdentifiers].some((id) => depIdentifiers.has(id) && !stateValueIdentifiers.has(id));
+	return [...conditionIdentifiers].some((id) => dependencyIdentifiers.has(id) && !stateValueIdentifiers.has(id));
 }
 
 function hasSetterCallStatement(
@@ -968,27 +964,27 @@ function hasConditionalSetterBasedOnProperty(
 	statements: ReadonlyArray<ESTree.Statement>,
 	stateSetterIdentifiers: ReadonlySet<string>,
 	stateValueIdentifiers: ReadonlySet<string>,
-	depIdentifiers: ReadonlySet<string>,
+	dependencyIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
-			if (
-				hasPropertyDependencyInCondition(statement, stateValueIdentifiers, depIdentifiers) &&
-				hasSetterCallStatement(getStatementsFromConsequent(statement.consequent), stateSetterIdentifiers)
-			) {
-				return true;
-			}
+		if (statement.type !== "IfStatement") continue;
 
-			if (
-				hasConditionalSetterBasedOnProperty(
-					getAlternateStatements(statement),
-					stateSetterIdentifiers,
-					stateValueIdentifiers,
-					depIdentifiers,
-				)
-			) {
-				return true;
-			}
+		if (
+			hasPropertyDependencyInCondition(statement, stateValueIdentifiers, dependencyIdentifiers) &&
+			hasSetterCallStatement(getStatementsFromConsequent(statement.consequent), stateSetterIdentifiers)
+		) {
+			return true;
+		}
+
+		if (
+			hasConditionalSetterBasedOnProperty(
+				getAlternateStatements(statement),
+				stateSetterIdentifiers,
+				stateValueIdentifiers,
+				dependencyIdentifiers,
+			)
+		) {
+			return true;
 		}
 	}
 
@@ -1040,22 +1036,22 @@ function hasEventSpecificLogic(
 	stateValueIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
-			if (
-				hasStateInCondition(statement, stateValueIdentifiers) &&
-				getStatementsFromConsequent(statement.consequent).some((stmt) =>
-					isEventSideEffectCall(stmt, stateSetterIdentifiers),
-				)
-			) {
-				return true;
-			}
+		if (statement.type !== "IfStatement") continue;
 
-			if (
-				statement.alternate !== null &&
-				hasEventSpecificLogic(getAlternateStatements(statement), stateSetterIdentifiers, stateValueIdentifiers)
-			) {
-				return true;
-			}
+		if (
+			hasStateInCondition(statement, stateValueIdentifiers) &&
+			getStatementsFromConsequent(statement.consequent).some((stmt) =>
+				isEventSideEffectCall(stmt, stateSetterIdentifiers),
+			)
+		) {
+			return true;
+		}
+
+		if (
+			statement.alternate !== null &&
+			hasEventSpecificLogic(getAlternateStatements(statement), stateSetterIdentifiers, stateValueIdentifiers)
+		) {
+			return true;
 		}
 	}
 
@@ -1323,12 +1319,10 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 
 		function hasMixedDerivedStateWithoutRealSideEffect(state: EffectAnalysisState): boolean {
 			if (
-				!(
-					options.reportMixedDerivedState &&
-					state.setterCalls.size > 0 &&
-					state.hasNonSetter &&
-					!state.hasReturnCleanup
-				)
+				!options.reportMixedDerivedState ||
+				state.setterCalls.size === 0 ||
+				!state.hasNonSetter ||
+				state.hasReturnCleanup
 			) {
 				return false;
 			}
@@ -1355,7 +1349,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				? matchEventFlagPattern(statements, stateSetterToValue, stateSetterIdentifiers)
 				: undefined;
 			const hasPropertyDependency = [...dependencyIdentifiers].some(
-				(id) => !(stateValueIdentifiers.has(id) || stateSetterIdentifiers.has(id)),
+				(id) => !stateValueIdentifiers.has(id) && !stateSetterIdentifiers.has(id),
 			);
 
 			const checks: ReadonlyArray<readonly [boolean, EffectReportMessageId]> = [
@@ -1520,7 +1514,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			});
 		}
 
-		function analyzeDuplicateDeps(): void {
+		function analyzeDuplicateDependencies(): void {
 			if (!options.reportDuplicateDeps || componentEffects.length < 2) return;
 
 			const reported = new Set<number>();
@@ -1617,7 +1611,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			},
 			"Program:exit"(): void {
 				analyzeEffectChains();
-				analyzeDuplicateDeps();
+				analyzeDuplicateDependencies();
 			},
 			VariableDeclarator(node): void {
 				recordStateSetter(node);

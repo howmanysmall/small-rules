@@ -14,11 +14,11 @@ export interface SourceLocation {
 }
 
 export interface HarnessNode {
+	[key: string]: unknown;
 	loc: SourceLocation;
 	parent?: HarnessNode | null;
 	range: Range;
 	type: string;
-	[key: string]: unknown;
 }
 
 export interface HarnessComment {
@@ -54,9 +54,9 @@ export interface HarnessDefinition {
 }
 
 export interface HarnessVariable {
+	name: string;
 	defs: Array<HarnessDefinition>;
 	identifiers: Array<HarnessNode>;
-	name: string;
 	references: Array<HarnessReference>;
 	scope: HarnessScope;
 }
@@ -223,8 +223,8 @@ export interface Fixer {
 export type FixProvider = (fixer: Fixer) => Fix | ReadonlyArray<Fix> | undefined;
 
 export interface HarnessContext {
-	filename: string;
 	id: string;
+	filename: string;
 	options: ReadonlyArray<unknown>;
 	physicalFilename: string;
 	report: (diagnostic: unknown) => void;

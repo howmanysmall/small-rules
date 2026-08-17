@@ -8,8 +8,8 @@ describe("no-use-of-empty-return-value", () => {
 		invalid: [
 			{
 				code: ["function doWork() {", "  sideEffect();", "}", "const result = doWork();"].join("\n"),
-				documentation: { id: "fail", title: "Using void function result" },
 				errors: [{ data: { name: "doWork" }, messageId: "removeUseOfOutput" }],
+				documentation: { id: "fail", title: "Using void function result" },
 			},
 			{ code: "function clear() {}\nconst value = clear();", errors: [{ messageId: "removeUseOfOutput" }] },
 			{ code: "function clear() {}\nconsume(clear());", errors: [{ messageId: "removeUseOfOutput" }] },

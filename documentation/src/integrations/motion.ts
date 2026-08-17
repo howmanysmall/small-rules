@@ -70,11 +70,11 @@ function injectMotionScript(): string {
 
 export default function motion(): AstroIntegration {
 	return {
+		name: "motion",
 		hooks: {
 			"astro:config:setup": ({ injectScript }): void => {
 				injectScript("page", injectMotionScript());
 			},
 		},
-		name: "motion",
 	};
 }

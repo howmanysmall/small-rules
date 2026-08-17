@@ -4,7 +4,8 @@ import rule from "$oxc-rules/react/require-react-component-keys";
 import { tsx } from "./rule-testers";
 
 describe("require-react-component-keys with custom configurations", () => {
-	// And this test file intentionally passes the rule as-is for runtime validation.
+	// And this test file intentionally passes the rule as-is for runtime
+	// validation.
 	tsx.run("require-react-component-keys - custom iterationMethods", rule, {
 		invalid: [
 			// Custom iteration method in list - keys required in callback
@@ -14,12 +15,13 @@ function CustomIteration(items) {
     return items.customMap((item) => <div>{item}</div>);
 }
 `,
-				errors: 1,
 				options: [{ iterationMethods: ["customMap"] }],
+				errors: 1,
 			},
 		],
 		valid: [
-			// Custom iteration method in list with key - should not error since key is present
+			// Custom iteration method in list with key - should not error since
+			// key is present
 			{
 				code: `
 function CustomIteration(items) {
@@ -28,7 +30,8 @@ function CustomIteration(items) {
 `,
 				options: [{ iterationMethods: ["customMap"] }],
 			},
-			// Custom iteration method 'each' not in list - should not be treated as iteration (no keys needed elsewhere)
+			// Custom iteration method 'each' not in list - should not be treated
+			// as iteration (no keys needed elsewhere)
 			{
 				code: `
 function CustomEach(items) {
@@ -51,7 +54,8 @@ function DefaultIteration(items) {
 		],
 	});
 
-	// And this test file intentionally passes the rule as-is for runtime validation.
+	// And this test file intentionally passes the rule as-is for runtime
+	// validation.
 	tsx.run("require-react-component-keys - custom memoizationHooks", rule, {
 		invalid: [
 			// Default hooks with custom configuration - should error
@@ -64,8 +68,8 @@ function CustomNamedHooks() {
     return <div>{renderLayout()}</div>;
 }
 `,
-				errors: 1,
 				options: [{ memoizationHooks: ["useCallback"] }],
+				errors: 1,
 			},
 			// Custom hook in list but missing key - should error
 			{
@@ -77,12 +81,13 @@ function CustomMemoizedBad() {
     return <div>{renderLayout()}</div>;
 }
 `,
-				errors: 1,
 				options: [{ memoizationHooks: ["useCustomMemo"] }],
+				errors: 1,
 			},
 		],
 		valid: [
-			// Default React hooks not in custom list - should not be treated as memoization (no keys forced elsewhere)
+			// Default React hooks not in custom list - should not be treated as
+			// memoization (no keys forced elsewhere)
 			{
 				code: `
 function WithoutKeys() {

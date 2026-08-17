@@ -17,43 +17,43 @@ const isUser = Ianitor.strictInterface({
 	}),
 });
 `,
-				documentation: { id: "fail", title: "Ianitor schema without check type" },
 				errors: [{ messageId: "missingIanitorCheckType" }],
+				documentation: { id: "fail", title: "Ianitor schema without check type" },
 			},
 			{
 				code: "const validator = Ianitor.array(Ianitor.string);",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: "const validator = Ianitor.instanceOf(Folder);",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: "const validator = Ianitor.boolean();",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: "const validator = Ianitor.union(Ianitor.string, Ianitor.number);",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: "const validator = Ianitor.map(Ianitor.string, Ianitor.number);",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: "const validator = Ianitor.custom((value): value is string => typeIs(value, 'string'));",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: "const validator = Ianitor.intersection(Ianitor.string, Ianitor.number);",
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 			{
 				code: `
@@ -62,8 +62,8 @@ const validator = Ianitor.interface({
 	flags: Ianitor.array(Ianitor.string),
 });
 `,
-				errors: [{ messageId: "missingIanitorCheckType" }],
 				options: [{ baseThreshold: 1 }],
+				errors: [{ messageId: "missingIanitorCheckType" }],
 			},
 		],
 		valid: [

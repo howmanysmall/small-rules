@@ -34,14 +34,14 @@ describe("no-async-in-system", () => {
 						UserService.GetUserInfosByUserIdsAsync([otherUserId]);
 					});
 				};`,
-				errors: [{ messageId: "noAsyncInSystem" }],
 				options: inferredPlayerOptions,
+				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
 				code: `import { Players as RobloxPlayers } from "@rbxts/services";
 				const socialSystem: SystemFunction = () => RobloxPlayers.GetFriendsAsync(userId);`,
-				documentation: { id: "fail", title: "async service call in system" },
 				errors: [{ messageId: "noAsyncInSystem" }],
+				documentation: { id: "fail", title: "async service call in system" },
 			},
 			{
 				code: `import { Players } from "@rbxts/services";
@@ -69,23 +69,23 @@ describe("no-async-in-system", () => {
 				const system: SystemFunction = () => {
 					world.added(PlayerComponent, () => Players.GetFriendsAsync(userId));
 				};`,
-				errors: [{ messageId: "noAsyncInSystem" }],
 				options: [
 					{
 						synchronousCallbacks: [{ callbackArgumentIndexes: [1], calleePath: ["world", "added"] }],
 					},
 				],
+				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
 				code: `import { Players } from "@rbxts/services";
 				const callback = () => Players.GetFriendsAsync(userId);
 				const system: SystemFunction = () => queue(callback);`,
-				errors: [{ messageId: "noAsyncInSystem" }],
 				options: [
 					{
 						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
 					},
 				],
+				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
 				code: `function socialSystem(): Planck.SystemReturn {
@@ -121,7 +121,7 @@ describe("no-async-in-system", () => {
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
-				code: `const system: SystemFunction = () => game.GetService("Players").GetFriendsAsync(userId);`,
+				code: 'const system: SystemFunction = () => game.GetService("Players").GetFriendsAsync(userId);',
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
@@ -163,12 +163,12 @@ describe("no-async-in-system", () => {
 					queue(async () => player.IsFriendsWithAsync(userId));
 				}
 				export = { system: collectUpdates } satisfies System<Context>;`,
-				errors: [{ messageId: "noAsyncInSystem" }],
 				options: [
 					{
 						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
 					},
 				],
+				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 		],
 		valid: [
@@ -193,8 +193,8 @@ describe("no-async-in-system", () => {
 					},
 				],
 			},
-			`declare function declaredSystem(): SystemReturn;`,
-			`function helper() { Players.GetFriendsAsync(userId); }`,
+			"declare function declaredSystem(): SystemReturn;",
+			"function helper() { Players.GetFriendsAsync(userId); }",
 			`import { Players } from "external-library";
 				const system: SystemFunction = () => Players.GetFriendsAsync(userId);`,
 			`import Players from "@rbxts/services";
@@ -263,16 +263,16 @@ describe("no-async-in-system", () => {
 				CharacterUtilities.loadCharacterAsync(player);
 				loadCharacterAsync();
 			}`,
-			`const descriptor = { system: createSystem() } satisfies System<Context>;`,
-			`const descriptor = { system: missingSystem } satisfies System<Context>;`,
-			`const descriptor = { ...base, system: createSystem() } satisfies System<Context>;`,
-			`const descriptor = { 1: createSystem() } satisfies System<Context>;`,
-			`const value: SystemFunction = createSystem();`,
+			"const descriptor = { system: createSystem() } satisfies System<Context>;",
+			"const descriptor = { system: missingSystem } satisfies System<Context>;",
+			"const descriptor = { ...base, system: createSystem() } satisfies System<Context>;",
+			"const descriptor = { 1: createSystem() } satisfies System<Context>;",
+			"const value: SystemFunction = createSystem();",
 			`const key = "system";
 				const descriptor = { [key]: () => game.GetService("Players").GetFriendsAsync(userId) } satisfies System<Context>;`,
 			`const serviceName = "Players";
 				const system: SystemFunction = () => game.GetService(serviceName).GetFriendsAsync(userId);`,
-			`const system: SystemFunction = () => game.GetService("Players")[method](userId);`,
+			'const system: SystemFunction = () => game.GetService("Players")[method](userId);',
 			{
 				code: `import { Events } from "server/network";
 				const system: SystemFunction = () => Events.general.friendUpdated.connect();`,
@@ -291,7 +291,8 @@ describe("no-async-in-system", () => {
 			`function customSystem(): CustomSystemResult {
 				return () => loadCharacterAsync();
 			}`,
-			// Cover getCalleePath with non-Identifier, non-MemberExpression callee (line 155)
+			// Cover getCalleePath with non-Identifier, non-MemberExpression
+			// callee (line 155)
 			{
 				code: `const system: SystemFunction = () => {
 					(function() {})();
@@ -302,7 +303,8 @@ describe("no-async-in-system", () => {
 					},
 				],
 			},
-			// Cover getReferencedFunction: function declaration ref (line 284 true)
+			// Cover getReferencedFunction: function declaration ref (line 284
+			// true)
 			{
 				code: `function callback() {}
 				const system: SystemFunction = () => queue(callback);`,
@@ -312,25 +314,29 @@ describe("no-async-in-system", () => {
 					},
 				],
 			},
-			// Cover getReferencedFunction: parameter def is not VariableDeclarator (line 285)
+			// Cover getReferencedFunction: parameter def is not
+			// VariableDeclarator (line 285)
 			`function socialSystem(param: () => void): SystemReturn {
 				return param;
 			}`,
-			// Cover getReturnedFunctions: return identifier that doesn't resolve to function (line 366)
+			// Cover getReturnedFunctions: return identifier that doesn't resolve
+			// to function (line 366)
 			`const result = {};
 			function socialSystem(): SystemReturn {
 				return result;
 			}`,
-			// Cover getReferencedFunction: variable with 0 defs (line 281 true branch)
+			// Cover getReferencedFunction: variable with 0 defs (line 281 true
+			// branch)
 			{
-				code: `const system: SystemFunction = () => queue(undefinedVar);`,
+				code: "const system: SystemFunction = () => queue(undefinedVar);",
 				options: [
 					{
 						synchronousCallbacks: [{ callbackArgumentIndexes: [0], calleePath: ["queue"] }],
 					},
 				],
 			},
-			// Cover getReferencedFunction: VariableDeclarator with null init (line 285)
+			// Cover getReferencedFunction: VariableDeclarator with null init
+			// (line 285)
 			{
 				code: `let callback;
 				const system: SystemFunction = () => queue(callback);`,
@@ -362,7 +368,8 @@ describe("no-async-in-system", () => {
 					},
 				],
 			},
-			// Cover getSynchronousCallbacks: callback doesn't resolve to function (line 386)
+			// Cover getSynchronousCallbacks: callback doesn't resolve to
+			// function (line 386)
 			{
 				code: `const notAFunction = 42;
 				const system: SystemFunction = () => queue(notAFunction);`,

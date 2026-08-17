@@ -14,7 +14,7 @@ export function RuleOptionsTable({ highlightedTypes, options }: RuleOptionsTable
 	return (
 		<div className="rule-options-list not-content">
 			{options.map((option) => (
-				<RuleOption highlightedType={highlightedTypes?.[option.name]} key={option.name} option={option} />
+				<RuleOption key={option.name} highlightedType={highlightedTypes?.[option.name]} option={option} />
 			))}
 		</div>
 	);

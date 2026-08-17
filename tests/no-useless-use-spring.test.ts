@@ -13,8 +13,8 @@ const springs = useSpring({
   from: { x: 0 },
 });
 `,
-				documentation: { id: "fail", title: "Spring with only initial value" },
 				errors: [{ messageId: "uselessSpring" }],
+				documentation: { id: "fail", title: "Spring with only initial value" },
 			},
 			// Only `to` without `from` is still useless
 			{
@@ -117,12 +117,12 @@ function Component() {
 				code: `
 const spring = useMotion({ opacity: 1 }, []);
 `,
-				errors: [{ messageId: "uselessSpring" }],
 				options: [
 					{
 						springHooks: ["useMotion"],
 					},
 				],
+				errors: [{ messageId: "uselessSpring" }],
 			},
 			{
 				code: `
@@ -195,12 +195,12 @@ const spring = useSpring(
   [],
 );
 `,
-				errors: [{ messageId: "uselessSpring" }],
 				options: [
 					{
 						staticGlobalFactories: ["CustomFactory"],
 					},
 				],
+				errors: [{ messageId: "uselessSpring" }],
 			},
 		],
 		valid: [

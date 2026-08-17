@@ -11,8 +11,8 @@ describe("react-hooks-strict-return", () => {
 			// Direct array with 3+ elements
 			{
 				code: "function useFoo() { return [1, 2, 3] }",
-				documentation: { id: "fail", title: "Hook returns too many values" },
 				errors: [{ messageId: "tooManyReturnValues" }],
+				documentation: { id: "fail", title: "Hook returns too many values" },
 			},
 
 			// Variable reference to 3+ element array
@@ -76,7 +76,8 @@ describe("react-hooks-strict-return", () => {
 			// Unknown variable return (covers line 31 - undefined return path)
 			{ code: "function useFoo(bar) { return bar; }" },
 
-			// Undeclared global reference (covers getVariableByName returning undefined)
+			// Undeclared global reference (covers getVariableByName returning
+			// undefined)
 			{ code: "function useFoo() { return undeclaredGlobal; }" },
 
 			// Hook + non-hook in same file

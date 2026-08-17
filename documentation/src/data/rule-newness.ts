@@ -1,26 +1,33 @@
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import nodePath from "node:path";
+import { cwd } from "node:process";
 
 import { ruleManifest } from "./rule-manifest";
 
 export interface RuleNewness {
-	/** First release tag containing the add commit, e.g. "v2.14.0". Undefined when unreleased. */
+	/**
+	 * First release tag containing the add commit, e.g. "v2.14.0". Undefined
+	 * when unreleased.
+	 */
 	readonly addedIn: string | undefined;
-	/** True when the rule was added in the latest release or is not yet released. */
+	/**
+	 * True when the rule was added in the latest release or is not yet released.
+	 */
 	readonly isNew: boolean;
 }
 
-export type GitRunner = (arguments_: ReadonlyArray<string>) => string;
+export type GitRunner = (parameters: ReadonlyArray<string>) => string;
 
 /**
- * Finds the repository root by walking up from the current working directory until a `.git` directory is found. Robust
- * against bundlers rewriting `import.meta.url` (Astro/Vite SSR bundles) and against any invocation cwd.
+ * Finds the repository root by walking up from the current working directory
+ * until a `.git` directory is found. Robust against bundlers rewriting
+ * `import.meta.url` (Astro/Vite SSR bundles) and against any invocation cwd.
  *
  * @returns Absolute path to the repository root.
  */
 function resolveRepositoryRoot(): string {
-	let directory = process.cwd();
+	let directory = cwd();
 	while (true) {
 		if (existsSync(nodePath.join(directory, ".git"))) return directory;
 
@@ -33,22 +40,25 @@ function resolveRepositoryRoot(): string {
 const repositoryRoot = resolveRepositoryRoot();
 const RULE_DIRECTORY = "src/rules/";
 const COMMIT_MARKER = "__COMMIT__";
+
 /**
- * Returns the first non-empty line of a command's output, or undefined when empty.
+ * Returns the first non-empty line of a command's output, or undefined when
+ * empty.
  *
- * @param output Command output.
+ * @param output - Command output.
  * @returns First non-empty line, or undefined.
  */
 function firstLine(output: string): string | undefined {
-	const line = output.split("\n")[0]?.trim();
+	const line = output.split("\n", 1)[0]?.trim();
 	return line === "" ? undefined : line;
 }
 
 /**
- * Parses `git log --reverse --diff-filter=A --format=__COMMIT__%H --name-only -- src/rules/` output into a map of rule
- * name (filename minus `.ts`) to the first commit that added it.
+ * Parses `git log --reverse --diff-filter=A --format=__COMMIT__%H --name-only
+ * -- src/rules/` output into a map of rule name (filename minus `.ts`) to the
+ * first commit that added it.
  *
- * @param logOutput Raw git log output.
+ * @param logOutput - Raw git log output.
  * @returns Map of rule name to first add commit sha.
  */
 export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> {
@@ -77,11 +87,12 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
 }
 
 /**
- * Classifies each rule as "new". A rule is new when it was added in the latest release or added after it (not yet
- * released). This single expression is the entire freshness policy.
+ * Classifies each rule as "new". A rule is new when it was added in the latest
+ * release or added after it (not yet released). This single expression is the
+ * entire freshness policy.
  *
- * @param addedInByRule Rule name to first containing release (undefined = unreleased).
- * @param latestTag The most recent release tag.
+ * @param addedInByRule - Rule name to first containing release (undefined = unreleased).
+ * @param latestTag - The most recent release tag.
  * @returns Map of rule name to newness classification.
  */
 export function resolveNewness(
@@ -89,7 +100,7 @@ export function resolveNewness(
 	latestTag: string,
 ): ReadonlyMap<string, RuleNewness> {
 	return new Map(
-		[...addedInByRule].map(([ruleName, addedIn]) => [
+		Array.from(addedInByRule, ([ruleName, addedIn]) => [
 			ruleName,
 			{ addedIn, isNew: addedIn === undefined || addedIn === latestTag },
 		]),
@@ -97,10 +108,11 @@ export function resolveNewness(
 }
 
 /**
- * Derives rule newness from git history. Runs one `tag --contains` call per distinct add commit. Returns an empty map
- * when no release tags exist (e.g. shallow clones).
+ * Derives rule newness from git history. Runs one `tag --contains` call per
+ * distinct add commit. Returns an empty map when no release tags exist (e.g.
+ * Shallow clones)..
  *
- * @param run Git command runner.
+ * @param run - Git command runner.
  * @returns Map of rule name to newness classification, filtered to manifest rules.
  */
 export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewness> {
@@ -120,7 +132,8 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 	);
 
 	const firstReleaseByCommit = new Map<string, string | undefined>();
-	for (const commit of new Set(addedInByRule.values())) {
+	const commitSet = new Set(addedInByRule.values());
+	for (const commit of commitSet) {
 		firstReleaseByCommit.set(
 			commit,
 			firstLine(run(["tag", "--contains", commit, "--list", "v*", "--sort=version:refname"])),
@@ -141,7 +154,8 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 }
 
 function runGit(arguments_: ReadonlyArray<string>): string {
-	// sonar(no-os-command-from-path): git is a fixed system binary, not a user-writable PATH entry.
+	// sonar(no-os-command-from-path): git is a fixed system binary, not a
+	// user-writable PATH entry.
 	return execFileSync("git", [...arguments_], {
 		cwd: repositoryRoot,
 		encoding: "utf8",
@@ -152,11 +166,12 @@ function runGit(arguments_: ReadonlyArray<string>): string {
 let cachedNewness: ReadonlyMap<string, RuleNewness> | undefined;
 
 /**
- * Memoized classification backed by an injected git runner. Test seam: the singleton uses the real runner; tests inject
- * fakes or throwing runners without module mocking. Never throws: when git history is unavailable the site builds with
- * zero badges.
+ * Memoized classification backed by an injected git runner. Test seam: the
+ * singleton uses the real runner; tests inject fakes or throwing runners
+ * without module mocking. Never throws: when git history is unavailable the
+ * site builds with zero badges.
  *
- * @param run Git command runner.
+ * @param run - Git command runner.
  * @returns Map of rule name to newness classification.
  */
 export function getRuleNewnessWith(run: GitRunner): ReadonlyMap<string, RuleNewness> {

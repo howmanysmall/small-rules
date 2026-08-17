@@ -11,7 +11,8 @@ async function getPathsAsync(): Promise<Record<string, Array<string>>> {
 	const tsconfigResults = new Array<TsConfigResult>();
 	let size = 0;
 
-	for await (const filePath of glob("tsconfig*.json", { cwd: CWD })) {
+	const filePaths = glob("tsconfig*.json", { cwd: CWD });
+	for await (const filePath of filePaths) {
 		const tsconfigResult = getTsconfig(CWD, filePath);
 		if (tsconfigResult === null) continue;
 		tsconfigResults[size++] = tsconfigResult;
@@ -37,7 +38,7 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
-	ignoreBinaries: ["hk", "nr", "xdg-open"],
+	ignoreBinaries: ["hk", "nr", "xdg-open", "nlx"],
 	ignoreDependencies: [
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
@@ -45,7 +46,10 @@ const configuration: KnipConfig = {
 		"@vitiate/fuzzed-data-provider",
 		"arktype",
 		"fast-check",
+		"file:",
 		"sfw",
+		"eslint-plugin-*",
+		"oxlint-plugin-*",
 	],
 	ignoreExportsUsedInFile: true,
 	ignoreFiles: [".omp/**", "tests/fixtures/**"],
@@ -61,7 +65,8 @@ const configuration: KnipConfig = {
 			project: ["plugin/**/*.ts"],
 		},
 		documentation: {
-			// Optional peer for Starlight's Sätteri markdown branch (type ambient + peer resolution).
+			// Optional peer for Starlight's Sätteri markdown branch (type
+			// ambient + peer resolution).
 			ignoreDependencies: ["babel-plugin-react-compiler", "satteri"],
 		},
 		scripts: {

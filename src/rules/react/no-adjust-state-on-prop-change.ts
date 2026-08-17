@@ -10,12 +10,12 @@ type RuleContext = InferContextFromRule<typeof noAdjustStateOnPropertyChange>;
 
 function getPropertyReferences(analysis: ReactEffectAnalysis, effect: ReactEffect): ReadonlyArray<Reference> {
 	const propertyReferences = new Array<Reference>();
+	let size = 0;
 	/* v8 ignore next -- @preserve dependencyReferences is guarded against undefined at the only call site, so the fallback is unreachable. */
-	for (const reference of effect.dependencyReferences ?? []) {
+	const dependencyReferences = effect.dependencyReferences ?? [];
+	for (const reference of dependencyReferences) {
 		for (const upstreamReference of analysis.scope.getUpstreamReferences(reference)) {
-			if (analysis.isProp(upstreamReference)) {
-				propertyReferences.push(upstreamReference);
-			}
+			if (analysis.isProp(upstreamReference)) propertyReferences[size++] = upstreamReference;
 		}
 	}
 	return propertyReferences;
@@ -28,15 +28,18 @@ function reportAdjustStateEffect(
 	propertyReferences: ReadonlyArray<Reference>,
 ): void {
 	for (const reference of effect.functionReferences) {
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isStateCall(reference)) continue;
+		if (
+			!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode) ||
+			!analysis.isStateCall(reference)
+		) {
+			continue;
+		}
+
 		const callExpression = analysis.scope.getCallExpression(reference);
 		if (callExpression === undefined) continue;
 
 		// Avoid overlap with no-derived-state
-		const isSomeArgumentsProperties = analysis.scope
-			.getArgumentUpstreamReferences(reference)
-			.some((upstreamReference) => analysis.isProp(upstreamReference));
+		const isSomeArgumentsProperties = analysis.scope.getArgumentUpstreamReferences(reference).some(analysis.isProp);
 
 		if (isSomeArgumentsProperties) continue;
 

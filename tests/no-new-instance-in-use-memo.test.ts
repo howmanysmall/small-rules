@@ -14,8 +14,8 @@ const model = useMemo(() => {
     return new Instance("Model");
 }, []);
 `,
-				documentation: { id: "fail", title: "New instance inside memo" },
 				errors: [{ data: { constructorName: "Instance" }, messageId: "noNewInUseMemo" }],
+				documentation: { id: "fail", title: "New instance inside memo" },
 			},
 			{
 				code: `
@@ -64,8 +64,8 @@ import { useMemo } from "@rbxts/react";
 
 const value = useMemo(() => new Vector3(1, 2, 3), []);
 `,
-				errors: [{ data: { constructorName: "Vector3" }, messageId: "noNewInUseMemo" }],
 				options: [{ constructors: ["Vector3"] }],
+				errors: [{ data: { constructorName: "Vector3" }, messageId: "noNewInUseMemo" }],
 			},
 			{
 				code: `
@@ -162,8 +162,8 @@ import { useMemo } from "react";
 
 const model = useMemo(() => new Instance("Model"), []);
 `,
-				errors: [{ data: { constructorName: "Instance" }, messageId: "noNewInUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ data: { constructorName: "Instance" }, messageId: "noNewInUseMemo" }],
 			},
 		],
 		valid: [

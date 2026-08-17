@@ -16,8 +16,8 @@ const rotationConfiguration = useMemo(
 	[],
 );
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -26,8 +26,8 @@ import { AnimationLibrary } from "./animation-config";
 
 const glowConfiguration = React.useMemo(() => AnimationLibrary.ReactSpring, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -38,8 +38,8 @@ const COLOR = Color3.fromRGB(255, 255, 255);
 
 const accent = useMemo(() => COLOR, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -48,8 +48,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => ({ enabled: true, label: "Ready" }), ["Ready"]);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -58,8 +58,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => [1, 2, 3], []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ dependencyMode: "empty-or-omitted", environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -67,8 +67,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => makeStatic(1), []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard", staticGlobalFactories: ["makeStatic"] }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -78,8 +78,8 @@ const value = useMemo(() => {
 	return 1;
 }, []);
 `,
-				documentation: { id: "fail", title: "Memoized constant computation" },
 				errors: [{ messageId: "uselessUseMemo" }],
+				documentation: { id: "fail", title: "Memoized constant computation" },
 			},
 			{
 				code: `
@@ -87,8 +87,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => \`ready\`, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -96,8 +96,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => 1 + 2, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -105,8 +105,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => true ? "a" : "b", []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -114,8 +114,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => (1, 2), []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -124,8 +124,8 @@ import { AnimationLibrary } from "./animation-config";
 
 const value = useMemo(() => AnimationLibrary?.ReactSpring, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -133,8 +133,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => -1, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -142,8 +142,8 @@ import { useMemo } from "react";
 
 const value = useMemo(() => new Vector3(1, 2, 3), []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -152,8 +152,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => (getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring) as const)!, []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -162,8 +162,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => (getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring) satisfies unknown), []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -172,8 +172,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => (<unknown>getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring)), []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -182,8 +182,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => getAnimationConfiguration<string>(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring), []);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
 				code: `
@@ -192,8 +192,8 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring), [theme]);
 `,
-				errors: [{ messageId: "uselessUseMemo" }],
 				options: [{ dependencyMode: "aggressive", environment: "standard" }],
+				errors: [{ messageId: "uselessUseMemo" }],
 			},
 		],
 		valid: [

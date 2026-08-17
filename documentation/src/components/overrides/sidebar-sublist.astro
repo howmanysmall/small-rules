@@ -1,17 +1,17 @@
 ---
 // Copy of Starlight's SidebarSublist that renders labels through InlineMarkdownText
-// so backticks in rule titles display as code. Keep in sync with upstream on upgrades.
+// So backticks in rule titles display as code. Keep in sync with upstream on upgrades.
+import InlineMarkdownText from "@/components/inline-markdown-text.astro";
 import { Badge, Icon } from "@astrojs/starlight/components";
 import SidebarRestorePoint from "@astrojs/starlight/components/SidebarRestorePoint.astro";
-import InlineMarkdownText from "@/components/inline-markdown-text.astro";
 
 import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
 type SidebarEntry = StarlightRouteData["sidebar"][number];
 
 interface Props {
-	nested?: boolean;
-	sublist: Array<SidebarEntry>;
+	readonly nested?: boolean | undefined;
+	readonly sublist: Array<SidebarEntry>;
 }
 
 const { sublist, nested } = Astro.props;

@@ -32,7 +32,6 @@ function Component() {
     return state;
 }
 `,
-				documentation: { id: "fail", title: "Inline constant reducer action" },
 				errors: [
 					{
 						messageId: "preferConstantDispatch",
@@ -54,6 +53,7 @@ function Component() {
 						],
 					},
 				],
+				documentation: { id: "fail", title: "Inline constant reducer action" },
 			},
 			{
 				code: `

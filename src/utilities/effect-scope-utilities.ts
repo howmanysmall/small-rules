@@ -2,7 +2,7 @@ import { isNode } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 
-const CONTAINER_PARENT_TYPES = new Set(["Property", "ObjectExpression", "ArrayExpression", "SequenceExpression"]);
+const CONTAINER_PARENT_TYPES = new Set(["ArrayExpression", "ObjectExpression", "Property", "SequenceExpression"]);
 const FUNCTION_NODE_TYPES = new Set(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
 
 export interface EffectScopeAnalysis {
@@ -106,9 +106,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 			}
 			return refs;
 		},
-		isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
-			return isSynchronousWithin(node, within);
-		},
+		isSynchronousWithin,
 	};
 }
 
@@ -155,13 +153,10 @@ function traverseAll(state: EffectScopeAnalysisState, root: ESTree.Node, result:
 function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: TraversalResult): void {
 	if (node === root) return;
 	if (node.type === "CallExpression") result.callExpressions.push(node);
-	if (node.type === "IfStatement") result.ifStatements.push(node);
+	else if (node.type === "IfStatement") result.ifStatements.push(node);
 }
 
 function indexReferences(state: EffectScopeAnalysisState): void {
-	// The harness SourceCode exposes `scopeManager` without a `scopes` array,
-	// so references are indexed by traversing the AST (including call arguments)
-	// and resolving each identifier through `getScope`.
 	const result: TraversalResult = { callExpressions: [], ifStatements: [], references: [] };
 	traverseAll(state, state.sourceCode.ast, result);
 	for (const reference of result.references) {
@@ -188,8 +183,6 @@ function pushChildren(
 	/* v8 ignore next -- every parser-produced node type has visitor keys; the fallback never fires. @preserve */
 	const keys = state.sourceCode.visitorKeys[node.type] ?? [];
 	for (const key of keys) {
-		// Many times simpler to just ignore arguments (to CallExpressions and NewExpressions).
-		// Too complicated to follow them, and often we can't at all (imported functions).
 		if (key === "arguments" && !includeArguments) continue;
 		const child: unknown = Reflect.get(node, key);
 		if (Array.isArray(child)) {
@@ -197,9 +190,7 @@ function pushChildren(
 				const item = child[index];
 				if (isNode(item)) worklist.push(item);
 			}
-		} else if (isNode(child)) {
-			worklist.push(child);
-		}
+		} else if (isNode(child)) worklist.push(child);
 	}
 }
 
@@ -215,12 +206,12 @@ function getReference(state: EffectScopeAnalysisState, identifier: ESTree.Identi
 function computeUpstreamReferences(state: EffectScopeAnalysisState, reference: Reference): ReadonlyArray<Reference> {
 	const refs = new Array<Reference>();
 	const visited = new Set<Reference>();
+	let size = 0;
 	ascend(
 		state,
 		reference,
 		(upRef) => {
-			refs.push(upRef);
-			return undefined;
+			refs[size++] = upRef;
 		},
 		visited,
 	);
@@ -234,18 +225,18 @@ function ascend(
 	visited: Set<Reference>,
 ): void {
 	if (visited.has(reference)) return;
-	const cont = visit(reference);
-	visited.add(reference);
-	if (cont === false) return;
 
-	for (const definition of reference.resolved?.defs ?? []) {
-		// We have no analytical use for import statements; terminate at the previous reference (actually using the imported thing).
-		if (definition.type === "ImportBinding") continue;
-		// Don't traverse parameter definitions.
-		// Their definition node is the function, so downstream would include the whole function body.
-		if (definition.type === "Parameter") continue;
+	const shouldContinue = visit(reference);
+	visited.add(reference);
+	if (shouldContinue === false) return;
+
+	const definitions = reference.resolved?.defs ?? [];
+	for (const definition of definitions) {
+		if (definition.type === "ImportBinding" || definition.type === "Parameter") continue;
+
 		const definitionNode = getDefinitionValueNode(definition);
 		if (definitionNode === undefined) continue;
+
 		for (const downRef of getTraversal(state, definitionNode).references) {
 			ascend(state, downRef, visit, visited);
 		}
@@ -256,15 +247,11 @@ function computeCallExpression(reference: Reference): ESTree.CallExpression | un
 	let current: ESTree.Node = reference.identifier.parent;
 	while (true) {
 		if (current.type === "CallExpression") {
-			// We've reached the top - confirm that the ref is the (eventual) callee, as opposed to an argument.
 			let node: ESTree.Node = reference.identifier;
-			while (node.parent.type === "MemberExpression") {
-				node = node.parent;
-			}
+			while (node.parent.type === "MemberExpression") node = node.parent;
 			/* v8 ignore next -- refs in member chains always resolve to the call's callee (probed across the rule corpus). @preserve */
 			if (current.callee === node) return current;
-		}
-		if (current.type === "MemberExpression") {
+		} else if (current.type === "MemberExpression") {
 			current = current.parent;
 			continue;
 		}
@@ -292,40 +279,41 @@ function computeArgumentUpstreamReferences(
 }
 
 function isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
-	// Reached the top without finding any blocking conditions
-	if (node === within) return true;
+	let current = node;
+	while (current !== within) {
+		if (
+			current.type === "AwaitExpression" ||
+			(current.type === "UnaryExpression" && current.operator === "void") ||
+			FUNCTION_NODE_TYPES.has(current.type)
+		) {
+			return false;
+		}
 
-	if (
-		node.type === "AwaitExpression" ||
-		(node.type === "UnaryExpression" && node.operator === "void") ||
-		// Inside a named or anonymous function that may be called later, either as a callback or by the developer.
-		FUNCTION_NODE_TYPES.has(node.type)
-	) {
-		return false;
+		const { parent } = current;
+		/* v8 ignore next -- `within` is always an ancestor reached before the parent chain ends. @preserve */
+		if (parent === null) return false;
+		current = parent;
 	}
-
-	const { parent } = node;
-	/* v8 ignore next -- `within` is always an ancestor reached before the parent chain ends. @preserve */
-	if (parent === null) return false;
-	return isSynchronousWithin(parent, within);
+	return true;
 }
 
 function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference: Reference): ReadonlyArray<Reference> {
-	function findEnclosingFunction(node: ESTree.Node | null | undefined): ESTree.Node | undefined {
-		if (node === null || node === undefined) return undefined;
-		if (FUNCTION_NODE_TYPES.has(node.type)) return node;
-		return findEnclosingFunction(node.parent);
+	function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefined {
+		let current = node;
+		while (current !== null && current !== undefined) {
+			if (FUNCTION_NODE_TYPES.has(current.type)) return current;
+			current = current.parent;
+		}
+		return undefined;
 	}
 
-	function isAliasRef(candidateRef: Reference): boolean {
-		let node: ESTree.Node = candidateRef.identifier;
+	function isAliasRef(candidateReference: Reference): boolean {
+		let node: ESTree.Node = candidateReference.identifier;
 		for (;;) {
 			const parent: ESTree.Node | null = node.parent;
 			/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
 			if (parent === null) return false;
-			if (parent.type === "VariableDeclarator" && parent.init === node) {
-				return true;
-			}
+			if (parent.type === "VariableDeclarator" && parent.init === node) return true;
 			if (CONTAINER_PARENT_TYPES.has(parent.type)) {
 				node = parent;
 				continue;
@@ -334,7 +322,7 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 		}
 	}
 
-	const callExprRefs = new Array<Reference>();
+	const callExpressionRefs = new Array<Reference>();
 	const visited = new Set<Reference>();
 	ascend(
 		state,
@@ -347,25 +335,19 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 				enclosingFunction !== undefined &&
 				isSynchronousWithin(callExpr, enclosingFunction)
 			) {
-				callExprRefs.push(upRef);
-			} else if (isAliasRef(upRef)) {
-				callExprRefs.push(upRef);
-			} else {
-				return false;
-			}
+				callExpressionRefs.push(upRef);
+			} else if (isAliasRef(upRef)) callExpressionRefs.push(upRef);
+			else return false;
+
 			return undefined;
 		},
 		visited,
 	);
-	return callExprRefs;
+	return callExpressionRefs;
 }
 
 function getDefinitionValueNode(definition: Definition): ESTree.Node | undefined {
-	// `def.node.init` is for ArrowFunctionExpression, VariableDeclarator, (etc?).
-	// `def.node.body` is for FunctionDeclaration.
-	if ("init" in definition.node) {
-		return definition.node.init ?? undefined;
-	}
+	if ("init" in definition.node) return definition.node.init ?? undefined;
 	/* v8 ignore next 2 -- every surviving definition is a VariableDeclarator (init) or FunctionDeclaration (body); the else is unreachable. @preserve */
 	if ("body" in definition.node) {
 		const { body } = definition.node;

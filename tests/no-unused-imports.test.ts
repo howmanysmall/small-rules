@@ -8,58 +8,58 @@ describe("no-unused-imports", () => {
 		invalid: [
 			{
 				code: "import UnusedDefault from './module';",
-				documentation: { id: "fail", title: "Unused default import removal" },
-				errors: [{ data: { identifierName: "UnusedDefault" }, messageId: "unusedImport" }],
 				output: "",
+				errors: [{ data: { identifierName: "UnusedDefault" }, messageId: "unusedImport" }],
+				documentation: { id: "fail", title: "Unused default import removal" },
 			},
 			{
 				code: "import { unusedFunction } from './utils';",
-				errors: [{ data: { identifierName: "unusedFunction" }, messageId: "unusedImport" }],
 				output: "",
+				errors: [{ data: { identifierName: "unusedFunction" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import * as UnusedNamespace from './module';",
-				errors: [{ data: { identifierName: "UnusedNamespace" }, messageId: "unusedImport" }],
 				output: "",
+				errors: [{ data: { identifierName: "UnusedNamespace" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import type { TypeOnly } from './types';",
-				errors: [{ data: { identifierName: "TypeOnly" }, messageId: "unusedImport" }],
 				output: "",
+				errors: [{ data: { identifierName: "TypeOnly" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import { unused1, unused2 } from './module';",
+				output: "import { unused2 } from './module';",
 				errors: [
 					{ data: { identifierName: "unused1" }, messageId: "unusedImport" },
 					{ data: { identifierName: "unused2" }, messageId: "unusedImport" },
 				],
-				output: "import { unused2 } from './module';",
 			},
 			{
 				code: "/** @see {unusedFunction} */\nimport { unusedFunction } from './utils';",
-				errors: [{ data: { identifierName: "unusedFunction" }, messageId: "unusedImport" }],
-				options: [{ checkJSDoc: false }],
 				output: "/** @see {unusedFunction} */\n",
+				options: [{ checkJSDoc: false }],
+				errors: [{ data: { identifierName: "unusedFunction" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import { used, unused } from './module';\nused();",
-				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 				output: "import { used } from './module';\nused();",
+				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import UnusedDefault, { used } from './module';\nused();",
-				errors: [{ data: { identifierName: "UnusedDefault" }, messageId: "unusedImport" }],
 				output: "import { used } from './module';\nused();",
+				errors: [{ data: { identifierName: "UnusedDefault" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import { unused, used } from './module';\nused();",
-				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 				output: "import { used } from './module';\nused();",
+				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 			},
 			{
 				code: "import { used, unused, other } from './module';\nused();\nother();",
-				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 				output: "import { used,  other } from './module';\nused();\nother();",
+				errors: [{ data: { identifierName: "unused" }, messageId: "unusedImport" }],
 			},
 		],
 		valid: [

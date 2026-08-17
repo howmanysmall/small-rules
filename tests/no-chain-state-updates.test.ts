@@ -28,8 +28,8 @@ export function Game(): React.Element {
 	);
 }
 `,
-				documentation: { id: "fail", title: "State update chained through an effect" },
 				errors: [{ data: { state: "isGameOver" }, messageId: "avoidChainingStateUpdates" }],
+				documentation: { id: "fail", title: "State update chained through an effect" },
 			},
 			{
 				code: `
@@ -130,7 +130,8 @@ export function MyComponent(): React.Element {
 		],
 		valid: [
 			{
-				// A setter called through `void` is not synchronous within the effect.
+				// A setter called through `void` is not synchronous within the
+				// effect.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -152,8 +153,8 @@ export function Game(): React.Element {
 `,
 			},
 			{
-				// A state setter returned from the effect is not inside any call callee,
-				// so `getCallExpression` cannot resolve it.
+				// A state setter returned from the effect is not inside any call
+				// callee, so `getCallExpression` cannot resolve it.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -178,8 +179,9 @@ export function Game(): React.Element {
 `,
 			},
 			{
-				// A setter bound to the name `useState` matches `isUseState` itself, so
-				// `getStateName` finds no destructured declaration and yields undefined.
+				// A setter bound to the name `useState` matches `isUseState`
+				// itself, so `getStateName` finds no destructured declaration and
+				// yields undefined.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -198,7 +200,8 @@ export function Game(): React.Element {
 `,
 			},
 			{
-				// An effect without a dependency array has no dependency references to analyze.
+				// An effect without a dependency array has no dependency
+				// references to analyze.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -346,7 +349,8 @@ export function Game(): React.Element {
 `,
 			},
 			{
-				// Because we don't trace the args passed to `JSON.stringify` (hard to generalize)
+				// Because we don't trace the args passed to `JSON.stringify`
+				// (hard to generalize)
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
@@ -364,8 +368,9 @@ export function Feed(): React.Element {
 `,
 			},
 			{
-				// An alias-RHS setter inside the effect has no call expression, so
-				// the rule skips it; the aliased call with state-derived args is valid.
+				// An alias-RHS setter inside the effect has no call expression,
+				// so the rule skips it; the aliased call with state-derived args
+				// is valid.
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 

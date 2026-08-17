@@ -299,12 +299,12 @@ function checkPropertyIdentifier(
 ): void {
 	const propertyLike = shouldReportIdentifierAsProperty(node);
 	const propertyAccess = isShorthandPropertyAccess(node);
-	if (!(propertyLike || propertyAccess)) return;
+	if (!propertyLike && !propertyAccess) return;
 
 	if (isExternallyControlledProperty(node, sourceCode)) return;
 
 	if (checkShorthandIdentifier(node, propertyLike, propertyAccess, options, report)) return;
-	if (!(options.checkProperties && propertyLike)) return;
+	if (!propertyLike || !options.checkProperties) return;
 
 	reportPropertyIdentifier(node, options, report);
 }
@@ -317,7 +317,7 @@ function checkShorthandIdentifier(
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
 ): boolean {
 	const shorthandReplacement = getShorthandReplacement(node.name, options.shorthandConfiguration);
-	if (shorthandReplacement === undefined || !(propertyLike || propertyAccess)) return false;
+	if (shorthandReplacement === undefined || (!propertyLike && !propertyAccess)) return false;
 	if (isShorthandIgnored(node.name, options.shorthandConfiguration)) return true;
 	if (!options.checkShorthandProperties) return true;
 	if (propertyAccess && isPropertyAccessAllowed(node.name, shorthandReplacement, options.allowPropertyAccess)) {
@@ -390,7 +390,7 @@ const preventAbbreviations = createRule("prevent-abbreviations", "naming", {
 				checkPropertyIdentifier(node, options, context.report, sourceCode);
 			},
 			JSXOpeningElement({ name }): void {
-				if (!(options.checkVariables && isJsxIdentifier(name) && isUpperFirst(name.name))) return;
+				if (!options.checkVariables || !isJsxIdentifier(name) || !isUpperFirst(name.name)) return;
 
 				const replacements = getNameReplacements(name.name, options);
 				if (replacements.total === 0) return;
@@ -400,9 +400,9 @@ const preventAbbreviations = createRule("prevent-abbreviations", "naming", {
 			},
 			"Program:exit"(program): void {
 				if (
-					options.checkFilenames &&
 					filenameWithExtension !== "<input>" &&
-					filenameWithExtension !== "<text>"
+					filenameWithExtension !== "<text>" &&
+					options.checkFilenames
 				) {
 					const lastSeparator = Math.max(
 						filenameWithExtension.lastIndexOf("/"),

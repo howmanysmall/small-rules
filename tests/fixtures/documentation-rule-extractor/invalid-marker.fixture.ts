@@ -7,8 +7,8 @@ ts.run("invalid-marker", rule, {
 	invalid: [
 		{
 			code: "const invalid = true;",
-			documentation: { id: 1, title: "Invalid marker" },
 			errors: [{ messageId: "marker" }],
+			documentation: { id: 1, title: "Invalid marker" },
 		},
 	],
 	valid: [],

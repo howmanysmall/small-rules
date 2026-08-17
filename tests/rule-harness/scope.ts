@@ -54,56 +54,9 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 	state.nodeToScope.set(node, scope);
 
 	switch (node.type) {
-		case "Program": {
-			visitChildren(node, scope, state);
-			return;
-		}
-
-		case "ImportDeclaration": {
-			defineImportSpecifiers(node, scope, state);
-			return;
-		}
-
-		case "FunctionDeclaration": {
-			defineFunctionDeclaration(node, scope, state);
-			return;
-		}
-
-		case "FunctionExpression":
-		case "ArrowFunctionExpression": {
+		case "ArrowFunctionExpression":
+		case "FunctionExpression": {
 			visitFunctionLike(node, scope, state);
-			return;
-		}
-
-		case "ClassDeclaration": {
-			defineClassDeclaration(node, scope, state);
-			visitClassLike(node, scope, state);
-			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
-			return;
-		}
-
-		case "ClassExpression": {
-			visitClassLike(node, scope, state);
-			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
-			return;
-		}
-
-		case "TSEnumDeclaration": {
-			defineTSEnumDeclaration(node, scope, state);
-			visitChildren(node, scope, state);
-			return;
-		}
-
-		case "TSInterfaceDeclaration":
-		case "TSTypeAliasDeclaration": {
-			defineTypeDeclaration(node, scope, state);
-			visitChildren(node, scope, state);
-			return;
-		}
-
-		case "VariableDeclaration": {
-			defineVariableDeclaration(node, scope, state);
-			visitVariableDeclarationChildren(node, scope, state);
 			return;
 		}
 
@@ -126,14 +79,60 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 			return;
 		}
 
+		case "ClassDeclaration": {
+			defineClassDeclaration(node, scope, state);
+			visitClassLike(node, scope, state);
+			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
+			return;
+		}
+
+		case "ClassExpression": {
+			visitClassLike(node, scope, state);
+			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
+			return;
+		}
+
+		case "FunctionDeclaration": {
+			defineFunctionDeclaration(node, scope, state);
+			return;
+		}
+
 		case "Identifier": {
 			if (isReferenceIdentifier(node)) addReference(node, scope, readModeForIdentifier(node));
 			return;
 		}
 
-		default: {
-			visitChildren(node, scope, state);
+		case "ImportDeclaration": {
+			defineImportSpecifiers(node, scope, state);
+			return;
 		}
+
+		case "Program": {
+			visitChildren(node, scope, state);
+			return;
+		}
+
+		case "TSEnumDeclaration": {
+			defineTSEnumDeclaration(node, scope, state);
+			visitChildren(node, scope, state);
+			return;
+		}
+
+		case "TSInterfaceDeclaration":
+		case "TSTypeAliasDeclaration": {
+			defineTypeDeclaration(node, scope, state);
+			visitChildren(node, scope, state);
+			return;
+		}
+
+		case "VariableDeclaration": {
+			defineVariableDeclaration(node, scope, state);
+			visitVariableDeclarationChildren(node, scope, state);
+			return;
+		}
+
+		default:
+			visitChildren(node, scope, state);
 	}
 }
 
@@ -237,7 +236,7 @@ function visitFunctionLike(node: HarnessNode, parentScope: HarnessScope, state: 
 	state.nodeToScope.set(node, functionScope);
 
 	const id = getNodeProperty(node, "id");
-	if (node.type === "FunctionExpression" && id !== undefined && typeof id.name === "string") {
+	if (node.type === "FunctionExpression" && typeof id?.name === "string") {
 		defineVariable(functionScope, id.name, id, {
 			name: id,
 			node,
@@ -278,6 +277,21 @@ function definePattern(
 	state: ScopeState,
 ): void {
 	switch (pattern.type) {
+		case "ArrayPattern": {
+			for (const element of getNodeArrayProperty(pattern, "elements")) {
+				definePattern(element, scope, type, definitionNode, state);
+			}
+			return;
+		}
+
+		case "AssignmentPattern": {
+			const left = getNodeProperty(pattern, "left");
+			const right = getNodeProperty(pattern, "right");
+			if (left !== undefined) definePattern(left, scope, type, definitionNode, state);
+			if (right !== undefined) visitNode(right, scope, state);
+			return;
+		}
+
 		case "Identifier": {
 			if (typeof pattern.name !== "string") return;
 			const variable = defineVariable(scope, pattern.name, pattern, {
@@ -290,24 +304,9 @@ function definePattern(
 			return;
 		}
 
-		case "AssignmentPattern": {
-			const left = getNodeProperty(pattern, "left");
-			const right = getNodeProperty(pattern, "right");
-			if (left !== undefined) definePattern(left, scope, type, definitionNode, state);
-			if (right !== undefined) visitNode(right, scope, state);
-			return;
-		}
-
 		case "RestElement": {
 			const argument = getNodeProperty(pattern, "argument");
 			if (argument !== undefined) definePattern(argument, scope, type, definitionNode, state);
-			return;
-		}
-
-		case "ArrayPattern": {
-			for (const element of getNodeArrayProperty(pattern, "elements")) {
-				definePattern(element, scope, type, definitionNode, state);
-			}
 			return;
 		}
 
@@ -339,9 +338,9 @@ function defineVariable(
 	}
 
 	const variable: HarnessVariable = {
+		name,
 		defs: [definition],
 		identifiers: [identifier],
-		name,
 		references: [],
 		scope,
 	};
@@ -353,9 +352,9 @@ function defineVariable(
 function defineImplicitVariable(scope: HarnessScope, name: string): void {
 	if (scope.set.has(name)) return;
 	const variable: HarnessVariable = {
+		name,
 		defs: [],
 		identifiers: [],
-		name,
 		references: [],
 		scope,
 	};

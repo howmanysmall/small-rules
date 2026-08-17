@@ -4,7 +4,7 @@ interface HeroGridProperties {
 	readonly preview: ReactNode;
 }
 
-export function HeroGrid({ children, preview }: PropsWithChildren<HeroGridProperties>): ReactNode {
+export function HeroGrid({ preview, children }: PropsWithChildren<HeroGridProperties>): ReactNode {
 	return (
 		<div className="hero-grid">
 			{children}

@@ -235,10 +235,6 @@ export function isStaticExpression(
 		case "CallExpression":
 			return checkStaticCallOrNewExpression(sourceCode, unwrapped.arguments, unwrapped.callee, seen, options);
 
-		/* v8 ignore next 2 -- @preserve unwrapExpression removes ChainExpression before this switch. */
-		case "ChainExpression":
-			return isStaticExpression(sourceCode, unwrapped.expression, seen, options);
-
 		case "ConditionalExpression": {
 			return (
 				isStaticExpression(sourceCode, unwrapped.test, seen, options) &&
@@ -269,7 +265,7 @@ export function isStaticExpression(
 		case "SequenceExpression": {
 			return (
 				unwrapped.expressions.length > 0 &&
-				unwrapped.expressions.every((expr) => isStaticExpression(sourceCode, expr, seen, options))
+				unwrapped.expressions.every((expression_) => isStaticExpression(sourceCode, expression_, seen, options))
 			);
 		}
 
@@ -314,11 +310,11 @@ function isExpressionKey(key: ESTree.ObjectProperty["key"]): key is ESTree.Expre
 
 export function isStaticObjectExpression(
 	sourceCode: SourceCode,
-	objectExpr: ESTree.ObjectExpression,
+	objectExpression: ESTree.ObjectExpression,
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	for (const property of objectExpr.properties) {
+	for (const property of objectExpression.properties) {
 		if (property.type !== "Property" || property.kind !== "init") return false;
 
 		if (

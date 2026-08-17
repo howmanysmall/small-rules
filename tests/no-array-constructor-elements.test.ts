@@ -8,22 +8,24 @@ describe("no-array-constructor-elements", () => {
 		invalid: [
 			{
 				code: 'const values = new Array("a", "b");',
-				documentation: { id: "fail", title: "array constructor with elements" },
-				errors: [{ messageId: "avoidConstructorEnumeration" }],
 				output: 'const values = ["a", "b"];',
+				errors: [{ messageId: "avoidConstructorEnumeration" }],
+				documentation: { id: "fail", title: "array constructor with elements" },
 			},
 			{
 				code: 'const values = new Array<string>("a", "b");',
-				errors: [{ messageId: "avoidConstructorEnumeration" }],
 				output: 'const values = ["a", "b"];',
+				errors: [{ messageId: "avoidConstructorEnumeration" }],
 			},
 			{
 				code: 'const value = new Array("a");',
-				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: 'const value = ["a"];',
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 			},
 			{
 				code: "const value = new Array(size);",
+				output: null,
+				options: [{ environment: "standard" }],
 				errors: [
 					{
 						messageId: "avoidLengthConstructorInStandard",
@@ -35,11 +37,11 @@ describe("no-array-constructor-elements", () => {
 						],
 					},
 				],
-				options: [{ environment: "standard" }],
-				output: null,
 			},
 			{
 				code: "const value = new Array(3);",
+				output: null,
+				options: [{ environment: "standard" }],
 				errors: [
 					{
 						messageId: "avoidLengthConstructorInStandard",
@@ -51,26 +53,25 @@ describe("no-array-constructor-elements", () => {
 						],
 					},
 				],
-				options: [{ environment: "standard" }],
-				output: null,
 			},
 			{
 				code: "const value = new Array(256, -1);",
+				output: "const value = [256, -1];",
+				options: [{ environment: "standard" }],
 				errors: [
 					{
 						messageId: "avoidConstructorEnumeration",
 					},
 				],
-				options: [{ environment: "standard" }],
-				output: "const value = [256, -1];",
 			},
 			{
 				code: "const value = new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "const value = new Array(...items);",
+				output: null,
 				errors: [
 					{
 						messageId: "avoidSingleArgumentConstructor",
@@ -82,10 +83,10 @@ describe("no-array-constructor-elements", () => {
 						],
 					},
 				],
-				output: null,
 			},
 			{
 				code: 'const value = new Array("a", ...items);',
+				output: null,
 				errors: [
 					{
 						messageId: "avoidConstructorEnumeration",
@@ -97,32 +98,31 @@ describe("no-array-constructor-elements", () => {
 						],
 					},
 				],
-				output: null,
 			},
 			{
 				code: "const value = new Array(() => value);",
-				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: "const value = [() => value];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 			},
 			{
 				code: "const value = new Array({ value });",
-				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: "const value = [{ value }];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 			},
 			{
 				code: "const value = new Array(class Value {});",
-				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: "const value = [class Value {}];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 			},
 			{
 				code: "const value = new Array(`static`);",
-				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: "const value = [`static`];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 			},
 			{
 				code: "const value = new Array(void value);",
-				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 				output: "const value = [void value];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
 			},
 			{
 				code: `
@@ -131,20 +131,20 @@ array.push("a");
 array.push("b");
 array.push("c", "d", "e", "f");
 `,
-				errors: [{ messageId: "collapseArrayPushInitialization" }],
 				output: `
 const array = ["a", "b", "c", "d", "e", "f"];
 `,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
 			},
 			{
 				code: `
 const array = new Array<string>();
 array.push(this.value, item.value, item[key], +value, value ? first : second, \`\${value}\`, [value], { value }, (first, second));
 `,
-				errors: [{ messageId: "collapseArrayPushInitialization" }],
 				output: `
 const array = [this.value, item.value, item[key], +value, value ? first : second, \`\${value}\`, [value], { value }, (first, second)];
 `,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
 			},
 			{
 				code: `
@@ -152,6 +152,7 @@ const array = new Array<string>();
 array.push(getValue());
 array.push("b");
 `,
+				output: null,
 				errors: [
 					{
 						messageId: "collapseArrayPushInitialization",
@@ -165,7 +166,6 @@ const array = [getValue(), "b"];
 						],
 					},
 				],
-				output: null,
 			},
 			{
 				code: `
@@ -173,6 +173,7 @@ const array = new Array<string>();
 array.push(...items);
 array.push("b");
 `,
+				output: null,
 				errors: [
 					{
 						messageId: "collapseArrayPushInitialization",
@@ -186,7 +187,6 @@ const array = [...items, "b"];
 						],
 					},
 				],
-				output: null,
 			},
 			{
 				code: `
@@ -194,45 +194,45 @@ const array = new Array<string>();
 	array.push("a");
 	array.push("b");
 `,
-				errors: [{ messageId: "collapseArrayPushInitialization" }],
 				output: `
 const array = ["a", "b"];
 `,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
 			},
 			{
 				code: "const { values }: { values: string } = new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "consume(new Array());",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "const value = new Array() as unknown;",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "const value: Promise<string> = new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "const value: readonly string[] = new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "const value: Array = new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
 				code: "const value: Collections.Array<string> = new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 		],
 		valid: [
@@ -343,8 +343,8 @@ array.push("b");
 		invalid: [
 			{
 				code: "const value = <unknown>new Array();",
-				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 				output: null,
+				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 		],
 		valid: ["const value = <Array<string>>new Array();"],

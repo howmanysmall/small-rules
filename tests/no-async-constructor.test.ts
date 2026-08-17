@@ -23,8 +23,8 @@ class BadThen {
     }
 }
 `,
-				documentation: { id: "fail", title: "Promise chain inside constructor" },
 				errors: [{ messageId: "promiseChainInConstructor" }],
+				documentation: { id: "fail", title: "Promise chain inside constructor" },
 			},
 
 			// .catch() chain on async method

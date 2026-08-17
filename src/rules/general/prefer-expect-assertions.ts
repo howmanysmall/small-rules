@@ -222,7 +222,7 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 				/* v8 ignore next -- @preserve parser callback functions always expose a body. */
 				if (body === undefined) return;
 
-				const { deterministic, indeterminate, hasIndeterminate, hasExpectInCallback, hasExpectInLoop } =
+				const { deterministic, hasExpectInCallback, hasExpectInLoop, hasIndeterminate, indeterminate } =
 					countExpectCalls(body, getAdditionalExpectCallNames(options));
 				if (
 					!shouldCheckTest(
@@ -245,10 +245,10 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 					validateAssertionCall(context, assertionCall, deterministic, hasIndeterminate);
 
 					if (
+						!hasIndeterminate &&
 						isExpectHasAssertionsCall(assertionCall) &&
 						assertionCall.arguments.length === 0 &&
-						deterministic > 0 &&
-						!hasIndeterminate
+						deterministic > 0
 					) {
 						/* v8 ignore next -- @preserve first assertion calls are already known to be inside a block body. */
 						const blockBody = getCallbackBlockBody(callback);

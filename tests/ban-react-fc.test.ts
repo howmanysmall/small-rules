@@ -8,8 +8,8 @@ describe("ban-react-fc", () => {
 		invalid: [
 			{
 				code: "const Component: React.FC = () => {};",
-				documentation: { id: "fail", title: "React FC component type" },
 				errors: [{ messageId: "banReactFC" }],
+				documentation: { id: "fail", title: "React FC component type" },
 			},
 			{
 				code: "const Component: React.FC<Props> = () => {};",

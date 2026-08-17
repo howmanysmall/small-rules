@@ -7,7 +7,7 @@ export interface LabelSpritesheetProperties {
 
 export function LabelSpritesheet({ children }: LabelSpritesheetProperties): React.ReactNode {
 	// oxlint-disable-next-line typescript/no-unsafe-assignment -- it's fine.
-	const uiAspectRatioConstraint = <uiaspectratioconstraint AspectRatio={1.5} key="ui-aspect-ratio-constraint" />;
+	const uiAspectRatioConstraint = <uiaspectratioconstraint key="ui-aspect-ratio-constraint" AspectRatio={1.5} />;
 
 	return (
 		<imagelabel BackgroundTransparency={1}>

@@ -39,9 +39,7 @@ const noTableCreateMap = createRule("no-table-create-map", "roblox", {
 				}
 
 				const base = unwrapExpression(callee.object);
-				if (
-					!(isTableCreateBase(context.sourceCode, base) || isArrayConstructorBase(context.sourceCode, base))
-				) {
+				if (!isTableCreateBase(context.sourceCode, base) && !isArrayConstructorBase(context.sourceCode, base)) {
 					return;
 				}
 

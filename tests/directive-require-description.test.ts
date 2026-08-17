@@ -7,15 +7,15 @@ describe("directive-require-description", () => {
 	ts.run("directive-require-description (typescript)", rule, {
 		invalid: [
 			{
+				filename: "index.d.ts",
 				code: "/* oxlint-disable typescript/no-explicit-any */\nexport type Value = any;\n",
 				errors: [{ data: { kind: "oxlint-disable" }, messageId: "missingDescription" }],
-				filename: "index.d.ts",
 			},
 		],
 		valid: [
 			{
-				code: "/* oxlint-disable typescript/no-explicit-any -- legacy API surface */\nexport type Value = any;\n",
 				filename: "index.d.ts",
+				code: "/* oxlint-disable typescript/no-explicit-any -- legacy API surface */\nexport type Value = any;\n",
 			},
 		],
 	});
@@ -24,8 +24,8 @@ describe("directive-require-description", () => {
 		invalid: [
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
-				documentation: { id: "fail", title: "Missing directive description" },
 				errors: [{ data: { kind: "oxlint-disable" }, messageId: "missingDescription" }],
+				documentation: { id: "fail", title: "Missing directive description" },
 			},
 			{
 				code: "// oxlint-disable small-rules/prefer-pascal-case-enums\nconst x = 1;",

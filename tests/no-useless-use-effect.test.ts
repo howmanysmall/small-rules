@@ -70,9 +70,9 @@ useEffect(() => {
 }, [properties.initialCount]);
 }
 `,
-				documentation: { id: "fail", title: "Derived state inside effect" },
-				errors: [{ messageId: "derivedState" }],
 				options: [{}],
+				errors: [{ messageId: "derivedState" }],
+				documentation: { id: "fail", title: "Derived state inside effect" },
 			},
 			{
 				code: `
@@ -131,8 +131,8 @@ function Component(properties) {
     }, [properties.initialCount]);
 }
 `,
-				errors: [{ messageId: "derivedState" }],
 				options: [{ environment: "standard" }],
+				errors: [{ messageId: "derivedState" }],
 			},
 
 			// NotifyParent - existing
@@ -381,8 +381,9 @@ function Component() {
 			},
 
 			// ========== NEW: emptyEffect ==========
-			// Note: Empty arrow function bodies like `() => {}` may have subtle parsing
-			// Differences. The following tests check for effects with truly empty bodies.
+			// Note: Empty arrow function bodies like `() => {}` may have subtle
+			// parsing Differences. The following tests check for effects with
+			// truly empty bodies.
 
 			{
 				code: `
@@ -630,9 +631,10 @@ function Component({ user }) {
 				errors: [{ messageId: "adjustState" }],
 			},
 			// ========== NEW: eventSpecificLogic ==========
-			// Note: This detection is intentionally conservative to avoid false positives
-			// On legitimate synchronization patterns like "fetch data, then process it"
-			// The eventFlag pattern handles the common "toggle flag -> run side effect" case
+			// Note: This detection is intentionally conservative to avoid false
+			// positives On legitimate synchronization patterns like "fetch data,
+			// then process it" The eventFlag pattern handles the common "toggle
+			// flag -> run side effect" case
 			{
 				code: `
 import { useEffect, useState } from "@rbxts/react";
@@ -867,9 +869,10 @@ function Component({ count }) {
 			},
 
 			// ========== NEW: effectChain ==========
-			// Note: EffectChain detection identifies chains of effects where one effect
-			// Sets state that triggers another effect. The individual effects in the chain
-			// May not trigger derivedState if they use callback form setters or set constants.
+			// Note: EffectChain detection identifies chains of effects where one
+			// effect Sets state that triggers another effect. The individual
+			// effects in the chain May not trigger derivedState if they use
+			// callback form setters or set constants.
 
 			{
 				code: `
@@ -2614,8 +2617,8 @@ function Component(properties) {
     }, [properties.initialCount]);
 }
 `,
-				errors: [{ messageId: "derivedState" }],
 				options: [{ hooks: ["useEffect", "useLayoutEffect", "useInsertionEffect", "useMountEffect"] }],
+				errors: [{ messageId: "derivedState" }],
 			},
 			{
 				code: `
@@ -2627,8 +2630,8 @@ function Component({ handleChange, value }) {
     }, [handleChange, value]);
 }
 `,
-				errors: [{ messageId: "notifyParent" }],
 				options: [{ propertyCallbackPrefixes: ["on", "handle"] }],
+				errors: [{ messageId: "notifyParent" }],
 			},
 			{
 				code: `
@@ -2641,8 +2644,8 @@ function Component({ onReady }) {
     }, [onReady, ref]);
 }
 `,
-				errors: [{ messageId: "passRefToParent" }],
 				options: [{ refHooks: ["useRef", "useLatestRef"] }],
+				errors: [{ messageId: "passRefToParent" }],
 			},
 			{
 				code: `
@@ -2655,8 +2658,8 @@ function Component(properties) {
     }, [properties.initialCount]);
 }
 `,
-				errors: [{ messageId: "derivedState" }],
 				options: [{ stateHooks: ["useState", "useReducer", "useAtom"] }],
+				errors: [{ messageId: "derivedState" }],
 			},
 		],
 		valid: [],

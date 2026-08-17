@@ -10,8 +10,8 @@ async function getHighlighterAsync(): Promise<Highlighter> {
 		langs: ["typescript"],
 		themes: [
 			{
-				colors: { "editor.background": "#f8fafc", "editor.foreground": "#334155" },
 				name: "small-rules-types-light",
+				colors: { "editor.background": "#f8fafc", "editor.foreground": "#334155" },
 				settings: [
 					{ settings: { foreground: "#334155" } },
 					{ scope: "variable.other.readwrite.ts", settings: { foreground: "#0e7490" } },
@@ -33,8 +33,8 @@ async function getHighlighterAsync(): Promise<Highlighter> {
 				type: "light",
 			},
 			{
-				colors: { "editor.background": "#101a24", "editor.foreground": "#d9e4ee" },
 				name: "small-rules-types-dark",
+				colors: { "editor.background": "#101a24", "editor.foreground": "#d9e4ee" },
 				settings: [
 					{ settings: { foreground: "#d9e4ee" } },
 					{ scope: "variable.other.readwrite.ts", settings: { foreground: "#67e8f9" } },
@@ -65,7 +65,7 @@ async function getHighlighterAsync(): Promise<Highlighter> {
  *
  * @param code - Raw TypeScript type string to highlight.
  * @returns HTML string with `<span>` elements carrying `--shiki-light` and
- * `--shiki-dark` CSS variables per token
+ * `--shiki-dark` CSS variables per token.
  */
 export async function highlightTypeScriptAsync(code: string): Promise<string> {
 	const shiki = await getHighlighterAsync();

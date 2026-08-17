@@ -12,8 +12,8 @@ describe("require-async-suffix", () => {
 				code: `async function getAll(): Promise<string> {
 	return "value";
 }`,
-				documentation: { id: "fail", title: "Missing Async suffix" },
 				errors: [{ messageId: "missingAsyncSuffix" }],
+				documentation: { id: "fail", title: "Missing Async suffix" },
 			},
 			{
 				code: `const getAll = async (): Promise<string> => {
@@ -113,7 +113,8 @@ describe("require-async-suffix", () => {
 			`void (async () => {
 	await getAllAsync();
 })();`,
-			// Object literal method shorthand passed as call argument — name is API-required
+			// Object literal method shorthand passed as call argument — name is
+			// API-required
 			`Bun.serve({
 	async fetch(request: Request): Promise<Response> {
 		return new Response("ok");
@@ -140,7 +141,7 @@ describe("require-async-suffix", () => {
 		return "value";
 	};
 }`,
-			`const { getAll } = service;`,
+			"const { getAll } = service;",
 			`class Bruh {
 	public getAll = 1;
 }`,

@@ -15,7 +15,7 @@ const DEFAULT_BANNED_TYPES = new Map<string, BannedTypeEntry>([
 function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTypeEntry> {
 	const bannedTypes = new Map(DEFAULT_BANNED_TYPES);
 
-	if (!(isRecord(rawOptions) && "bannedTypes" in rawOptions)) return bannedTypes;
+	if (!isRecord(rawOptions) || !("bannedTypes" in rawOptions)) return bannedTypes;
 
 	const { bannedTypes: configuredBannedTypes } = rawOptions;
 	/* v8 ignore next -- @preserve rule schema oneOf ensures bannedTypes is never undefined when the key is present. */

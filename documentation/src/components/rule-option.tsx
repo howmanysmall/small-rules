@@ -47,7 +47,9 @@ export function RuleOption({ highlightedType, option }: RuleOptionProperties): R
 	}
 
 	function handleCopyDefault(): void {
-		void copyDefaultAsync();
+		copyDefaultAsync().catch((error) => {
+			console.error("Failed to copy default value to clipboard", error);
+		});
 	}
 
 	let copyLabel: string = labels.copy;
@@ -68,9 +70,9 @@ export function RuleOption({ highlightedType, option }: RuleOptionProperties): R
 					copyStatus={copyStatus}
 					detailId={detailId}
 					isExpanded={isExpanded}
+					option={option}
 					onCopy={handleCopyDefault}
 					onToggle={toggleDefault}
-					option={option}
 				/>
 			</dl>
 			<RuleOptionDefaultDetail defaultValue={option.defaultValue} detailId={detailId} isExpanded={isExpanded} />

@@ -9,150 +9,150 @@ describe("prefer-idiv", () => {
 			// Simple division - auto-fix cases
 			{
 				code: "math.floor(x / y);",
-				documentation: { id: "fail", title: "floor division expression" },
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(y);",
+				errors: [{ messageId: "useIdiv" }],
+				documentation: { id: "fail", title: "floor division expression" },
 			},
 			{
 				code: "const result = math.floor(a / b);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "const result = a.idiv(b);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor((a + b) / c);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(a + b).idiv(c);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(a / (b + c));",
-				errors: [{ messageId: "useIdiv" }],
 				output: "a.idiv(b + c);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(foo() / bar());",
-				errors: [{ messageId: "useIdiv" }],
 				output: "foo().idiv(bar());",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(100 / 3);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(100).idiv(3);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(x / 2);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(2);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor((x * y) / (z + w));",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(x * y).idiv(z + w);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(-x / y);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(-x).idiv(y);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor((a && b) / c);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(a && b).idiv(c);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor((x = y) / z);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(x = y).idiv(z);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			// Multiplication by a reciprocal literal (1/n) - auto-fix cases
 			{
 				code: "math.floor(value * 0.5);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "value.idiv(2);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(x * 0.25);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(4);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(x * 0.1);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(10);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(x * 0.2);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(5);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(0.5 * x);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(2);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor((a + b) * 0.5);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(a + b).idiv(2);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(foo() * 0.125);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "foo().idiv(8);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(x * (0.5));",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(2);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			// Computed property access
 			{
 				code: 'math["floor"](x / y);',
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(y);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			// Type assertions on the call expression
 			{
 				code: "(math.floor(x / y) as number);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(x.idiv(y) as number);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			// Type assertions on the argument (unwraps to x / y, not (x) / y)
 			{
 				code: "math.floor((x / y) as number);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(y);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			// Non-null assertion on the argument
 			{
 				code: "math.floor((x / y)!);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "x.idiv(y);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			// Multiple calls in same expression
 			{
 				code: "math.floor(a / b) + math.floor(c / d);",
-				errors: [{ messageId: "useIdiv" }, { messageId: "useIdiv" }],
 				output: "a.idiv(b) + c.idiv(d);",
+				errors: [{ messageId: "useIdiv" }, { messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(a / b / c);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(a / b).idiv(c);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(x / y / z / w);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "(x / y / z).idiv(w);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "const result = math.floor(a / b / c);",
-				errors: [{ messageId: "useIdiv" }],
 				output: "const result = (a / b).idiv(c);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 			{
 				code: "math.floor(a / (b / c));",
-				errors: [{ messageId: "useIdiv" }],
 				output: "a.idiv(b / c);",
+				errors: [{ messageId: "useIdiv" }],
 			},
 		],
 		valid: [
@@ -165,7 +165,8 @@ describe("prefer-idiv", () => {
 			// Not a division
 			"math.floor(x);",
 			"math.floor(x * y);",
-			// Multiplication by a non-reciprocal, out-of-range, or non-number value
+			// Multiplication by a non-reciprocal, out-of-range, or non-number
+			// value
 			"math.floor(x * 0.3);",
 			"math.floor(x * 2);",
 			"math.floor(x * 0);",

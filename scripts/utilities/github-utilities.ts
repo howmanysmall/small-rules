@@ -9,7 +9,7 @@ export interface DownloadOptions {
 
 export async function downloadGitHubFileAsync(
 	octokit: Octokit,
-	{ owner, repository, path, branch = "main" }: DownloadOptions,
+	{ branch = "main", owner, path, repository }: DownloadOptions,
 ): Promise<Uint8Array> {
 	const { data } = await octokit.rest.repos.getContent({
 		owner,

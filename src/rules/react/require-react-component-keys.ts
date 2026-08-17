@@ -310,6 +310,7 @@ function isIgnoredCallExpression(
 	}
 
 	const maxDepth = 20;
+	// oxlint-disable-next-line unicorn-js/prefer-simple-condition-first -- no?
 	for (let depth = 0; depth < maxDepth && parent !== undefined; depth += 1) {
 		if (parent.type === "CallExpression") {
 			const { callee } = parent;

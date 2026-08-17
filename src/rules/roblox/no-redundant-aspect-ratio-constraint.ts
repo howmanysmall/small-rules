@@ -59,6 +59,7 @@ function getImportSourceFromVariable(variable: ScopeVariable): string | undefine
 		if (parent?.type === "ImportDeclaration" && isStringRaw(parent.source.value)) return parent.source.value;
 		/* v8 ignore stop -- @preserve */
 	}
+
 	/* v8 ignore next -- @preserve imported component variables always have import binding definitions. */
 	return undefined;
 }
@@ -105,6 +106,7 @@ function hasScaledFalseAttribute(node: ESTree.JSXElement): boolean {
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -113,6 +115,7 @@ function isRedundantAspectRatioChild(node: ESTree.JSXChild): boolean {
 	if (node.type === "JSXExpressionContainer" && node.expression.type === "Identifier") {
 		return node.expression.name === REDUNDANT_CONSTANT_NAME;
 	}
+
 	return false;
 }
 
@@ -153,6 +156,7 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 				) {
 					return;
 				}
+
 				if (!hasAspectRatioConstraintInSubtree(body)) return;
 				protectedComponents.add(name);
 			},

@@ -9,24 +9,24 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Git ref to deploy."
+        description: Git ref to deploy.
         required: true
-        default: "main"
+        default: main
         type: string
+
+permissions:
+  contents: read
+  id-token: write
+  pages: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   deploy:
-    environment: github-pages
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,8 +45,8 @@ jobs:
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Build documentation
-        working-directory: documentation
         run: node --run build
+        working-directory: documentation
 
       - name: Upload documentation
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

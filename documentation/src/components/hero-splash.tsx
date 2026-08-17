@@ -23,25 +23,25 @@ const CONFIGURATION_PREVIEW = (
 		<code>
 			<span className="t-k">{"{"}</span>
 			{"\n\t"}
-			<span className="t-s">{`"jsPlugins"`}</span>
+			<span className="t-s">{'"jsPlugins"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-a">{"["}</span>
-			<span className="t-s">{`"@pobammer-ts/small-rules"`}</span>
+			<span className="t-s">{'"@pobammer-ts/small-rules"'}</span>
 			<span className="t-a">{"]"}</span>
 			<span className="t-k">{","}</span>
 			{"\n\t"}
-			<span className="t-s">{`"rules"`}</span>
+			<span className="t-s">{'"rules"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-k">{"{"}</span>
 			{"\n\t\t"}
-			<span className="t-s">{`"small-rules/ban-react-fc"`}</span>
-			<span className="t-k">{":"}</span> <span className="t-s">{`"error"`}</span>
+			<span className="t-s">{'"small-rules/ban-react-fc"'}</span>
+			<span className="t-k">{":"}</span> <span className="t-s">{'"error"'}</span>
 			<span className="t-k">{","}</span>
 			{"\n\t\t"}
-			<span className="t-s">{`"small-rules/no-print"`}</span>
-			<span className="t-k">{":"}</span> <span className="t-s">{`"error"`}</span>
+			<span className="t-s">{'"small-rules/no-print"'}</span>
+			<span className="t-k">{":"}</span> <span className="t-s">{'"error"'}</span>
 			<span className="t-k">{","}</span>
 			{"\n\t\t"}
-			<span className="t-s">{`"small-rules/prefer-early-return"`}</span>
-			<span className="t-k">{":"}</span> <span className="t-s">{`"warn"`}</span>
+			<span className="t-s">{'"small-rules/prefer-early-return"'}</span>
+			<span className="t-k">{":"}</span> <span className="t-s">{'"warn"'}</span>
 			{"\n\t"}
 			<span className="t-k">{"}"}</span>
 			{"\n"}

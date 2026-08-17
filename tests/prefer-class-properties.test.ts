@@ -20,71 +20,71 @@ describe("prefer-class-properties", () => {
 	js.run("prefer-class-properties", rule, {
 		invalid: [
 			// 'never' mode - class properties are not allowed
-			{ code: 'class Foo { foo = "bar"; }', errors: classPropertyErrors, options: ["never"] },
-			{ code: "class Foo { foo = bar(); }", errors: classPropertyErrors, options: ["never"] },
-			{ code: "class Foo { foo = 123; }", errors: classPropertyErrors, options: ["never"] },
+			{ code: 'class Foo { foo = "bar"; }', options: ["never"], errors: classPropertyErrors },
+			{ code: "class Foo { foo = bar(); }", options: ["never"], errors: classPropertyErrors },
+			{ code: "class Foo { foo = 123; }", options: ["never"], errors: classPropertyErrors },
 
 			// 'always' mode - constructor assignments of literals are not allowed
 			{
 				code: "class Foo { constructor() { this.foo = 123; } }",
-				documentation: { id: "fail", title: "Constructor literal class property" },
+				options: ["always"],
 				errors: [
 					{
 						message:
 							"Constructor assigns a literal value to this.property. Literals are static and known at class definition time. Move to a class property declaration: propertyName = value; at class level. This clarifies intent and reduces constructor complexity.",
 					},
 				],
-				options: ["always"],
+				documentation: { id: "fail", title: "Constructor literal class property" },
 			},
 			{
 				code: "const Foo = class { constructor() { this.foo = 123; } };",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
-			{ code: "class Foo { constructor() { this.foo = false; } }", errors: assignErrors, options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = false; } }", options: ["always"], errors: assignErrors },
 			{
 				code: "class Foo { constructor() { this.foo = /something/; } }",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
-			{ code: "class Foo { constructor() { this.foo = '123'; } }", errors: assignErrors, options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = '123'; } }", options: ["always"], errors: assignErrors },
 			{
 				code: "class Foo { constructor() { this.foo = '123'.toUpperCase(); } }",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
 			// MemberExpression on literal (covers line 29)
 			{
 				code: "class Foo { constructor() { this.foo = 'bar'.length; } }",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
-			{ code: "class Foo { constructor() { this.foo = []; } }", errors: assignErrors, options: ["always"] },
-			{ code: "class Foo { constructor() { this.foo = [, 123]; } }", errors: assignErrors, options: ["always"] },
-			{ code: "class Foo { constructor() { this.foo = {}; } }", errors: assignErrors, options: ["always"] },
+			{ code: "class Foo { constructor() { this.foo = []; } }", options: ["always"], errors: assignErrors },
+			{ code: "class Foo { constructor() { this.foo = [, 123]; } }", options: ["always"], errors: assignErrors },
+			{ code: "class Foo { constructor() { this.foo = {}; } }", options: ["always"], errors: assignErrors },
 			{
 				code: "class Foo { constructor() { this.foo = [123, 456, 789]; } }",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
 			{
 				code: "class Foo { constructor() { this.foo = [123, [456, 789]]; } }",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
 			{
 				code: "class Foo { constructor() { this.foo = {foo: 123, bar: {baz: '456'}}; } }",
-				errors: assignErrors,
 				options: ["always"],
+				errors: assignErrors,
 			},
-			{ code: "class Foo { constructor() { this['foo'] = 123; } }", errors: assignErrors, options: ["always"] },
+			{ code: "class Foo { constructor() { this['foo'] = 123; } }", options: ["always"], errors: assignErrors },
 		],
 		valid: [
 			// 'always' mode - class properties are fine
 			{
 				code: 'class Foo { foo = "bar"; }',
-				documentation: { id: "pass", title: "Existing class property declaration" },
 				options: ["always"],
+				documentation: { id: "pass", title: "Existing class property declaration" },
 			},
 			{ code: "class Foo { foo = bar(); }", options: ["always"] },
 			{ code: "class Foo { foo = 123; }", options: ["always"] },
@@ -99,7 +99,8 @@ describe("prefer-class-properties", () => {
 			{ code: "class Foo { constructor() { this.foo = 123; } }", options: ["never"] },
 			{ code: "class Foo { constructor() { this.foo = '123'; } }", options: ["never"] },
 
-			// 'always' mode - computed properties are fine (can't be class properties)
+			// 'always' mode - computed properties are fine (can't be class
+			// properties)
 			{ code: "class Foo { constructor() { this[foo] = 123; } }", options: ["always"] },
 			{ code: "class Foo { constructor() { this.foo[bar] = 123; } }", options: ["always"] },
 
@@ -114,7 +115,8 @@ describe("prefer-class-properties", () => {
 			{ code: "class Foo { constructor() { this.foo = [123, ...values]; } }", options: ["always"] },
 			{ code: "class Foo { constructor() { this.foo = factory.create(); } }", options: ["always"] },
 
-			// 'always' mode - conditional assignments are fine (not top-level in constructor)
+			// 'always' mode - conditional assignments are fine (not top-level in
+			// constructor)
 			{ code: "class Foo { constructor() { if (something) { this.foo = 123; } } }", options: ["always"] },
 
 			// 'always' mode - assignments in other methods are fine

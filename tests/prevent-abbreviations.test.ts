@@ -23,109 +23,109 @@ describe("prevent-abbreviations", () => {
 			// Variable declaration with abbreviation (const)
 			{
 				code: "const err = new Error();",
-				documentation: { id: "fail", title: "Abbreviated variable names" },
+				output: "const error = new Error();",
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				output: "const error = new Error();",
+				documentation: { id: "fail", title: "Abbreviated variable names" },
 			},
 			// Default shorthand replacement takes priority
 			{
 				code: "let args = [1, 2, 3];",
+				output: "let parameters = [1, 2, 3];",
 				errors: [
 					{
 						data: { discouragedName: "args", nameTypeText: "variable", replacement: "parameters" },
 						messageId: "replace",
 					},
 				],
-				output: "let parameters = [1, 2, 3];",
 			},
 			{
 				code: "const plr = getPlayer();",
-				errors: [{ messageId: "replace" }],
 				output: "const player = getPlayer();",
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: "const plr = Players.LocalPlayer;",
+				output: "const localPlayer = Players.LocalPlayer;",
 				errors: [
 					{
 						data: { discouragedName: "plr", nameTypeText: "variable", replacement: "localPlayer" },
 						messageId: "replace",
 					},
 				],
-				output: "const localPlayer = Players.LocalPlayer;",
 			},
 			{
 				code: "const dt = 0.016;",
+				output: "const deltaTime = 0.016;",
 				errors: [
 					{
 						data: { discouragedName: "dt", nameTypeText: "variable", replacement: "deltaTime" },
 						messageId: "replace",
 					},
 				],
-				output: "const deltaTime = 0.016;",
 			},
 			{
 				code: "const char = getCharacter();",
-				errors: [{ messageId: "replace" }],
 				output: "const character = getCharacter();",
+				errors: [{ messageId: "replace" }],
 			},
 			// Variable declaration with abbreviation (var)
 			{
 				code: "var dist = 10;",
+				output: "var distance = 10;",
 				errors: [
 					{
 						data: { discouragedName: "dist", nameTypeText: "variable", replacement: "distance" },
 						messageId: "replace",
 					},
 				],
-				output: "var distance = 10;",
 			},
 			// Function parameter with abbreviation
 			{
 				code: "function foo(err) { return err; }",
+				output: "function foo(error) { return error; }",
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				output: "function foo(error) { return error; }",
 			},
 			{
 				code: "function foo(err = fallback) { return err; }",
+				output: "function foo(error = fallback) { return error; }",
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				output: "function foo(error = fallback) { return error; }",
 			},
 			{
 				code: "function foo(plr) { return plr; }",
-				errors: [{ messageId: "replace" }],
 				output: "function foo(player) { return player; }",
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: "const { plr } = obj;",
-				errors: [{ messageId: "replace" }],
 				output: "const { plr: player } = obj;",
+				errors: [{ messageId: "replace" }],
 			},
 			// Property name with abbreviation (when checkProperties: true)
 			{
 				code: "const obj = { err: 'value' };",
+				output: "const obj = { error: 'value' };",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
-				output: "const obj = { error: 'value' };",
 			},
 			// Multiple replacement suggestions (no auto-fix)
 			{
@@ -143,6 +143,7 @@ describe("prevent-abbreviations", () => {
 			},
 			{
 				code: "const res = value;",
+				options: [{ replacements: { res: { resource: true, response: true, result: true } } }],
 				errors: [
 					{
 						data: {
@@ -153,10 +154,10 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
-				options: [{ replacements: { res: { resource: true, response: true, result: true } } }],
 			},
 			{
 				code: "const abbr = value;",
+				options: [{ replacements: { abbr: MANY_REPLACEMENTS } }],
 				errors: [
 					{
 						data: {
@@ -168,10 +169,10 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
-				options: [{ replacements: { abbr: MANY_REPLACEMENTS } }],
 			},
 			{
 				code: "const Res = value;",
+				options: [{ replacements: { res: { resource: true, response: true, result: true } } }],
 				errors: [
 					{
 						data: {
@@ -182,43 +183,44 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
-				options: [{ replacements: { res: { resource: true, response: true, result: true } } }],
 			},
 			// Custom replacements
 			{
 				code: "const custom = 'test';",
+				output: "const customReplacement = 'test';",
+				options: [{ replacements: { custom: { customReplacement: true } } }],
 				errors: [
 					{
 						data: { discouragedName: "custom", nameTypeText: "variable", replacement: "customReplacement" },
 						messageId: "replace",
 					},
 				],
-				options: [{ replacements: { custom: { customReplacement: true } } }],
-				output: "const customReplacement = 'test';",
 			},
 			// Custom shorthand replacement
 			{
 				code: "const result = obj.fr;",
+				options: [{ checkShorthandProperties: true, shorthands: { fr: "fullResult" } }],
 				errors: [
 					{
 						data: { discouragedName: "fr", nameTypeText: "property", replacement: "fullResult" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkShorthandProperties: true, shorthands: { fr: "fullResult" } }],
 			},
 			{
 				code: "getThing().fr;",
+				options: [{ checkShorthandProperties: true, shorthands: { fr: "fullResult" } }],
 				errors: [
 					{
 						data: { discouragedName: "fr", nameTypeText: "property", replacement: "fullResult" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkShorthandProperties: true, shorthands: { fr: "fullResult" } }],
 			},
 			{
 				code: "interface UnitBoxBadgeInfoProps {}",
+				output: "interface UnitBoxBadgeInfoProperties {}",
+				options: [{ shorthands: { Props: "Properties" } }],
 				errors: [
 					{
 						data: {
@@ -229,11 +231,11 @@ describe("prevent-abbreviations", () => {
 						messageId: "replace",
 					},
 				],
-				options: [{ shorthands: { Props: "Properties" } }],
-				output: "interface UnitBoxBadgeInfoProperties {}",
 			},
 			{
 				code: "const myBtnClick = () => {};",
+				output: "const myButtonClick = () => {};",
+				options: [{ shorthands: { "*Btn*": "*Button*" } }],
 				errors: [
 					{
 						data: {
@@ -244,11 +246,11 @@ describe("prevent-abbreviations", () => {
 						messageId: "replace",
 					},
 				],
-				options: [{ shorthands: { "*Btn*": "*Button*" } }],
-				output: "const myButtonClick = () => {};",
 			},
 			{
 				code: "const GEM_PANEL_FRAME_PROPS = {};",
+				output: "const GEM_PANEL_FRAME_PROPERTIES = {};",
+				options: [{ shorthands: { "*PROPS": "*PROPERTIES" } }],
 				errors: [
 					{
 						data: {
@@ -259,11 +261,11 @@ describe("prevent-abbreviations", () => {
 						messageId: "replace",
 					},
 				],
-				options: [{ shorthands: { "*PROPS": "*PROPERTIES" } }],
-				output: "const GEM_PANEL_FRAME_PROPERTIES = {};",
 			},
 			{
 				code: "const TEXT_LABEL_TXT_GRAD_N_PROPS_2 = {};",
+				output: "const TEXT_LABEL_TXT_GRAD_N_PROPERTIES_2 = {};",
+				options: [{ shorthands: { "*PROPS": "*PROPERTIES" } }],
 				errors: [
 					{
 						data: {
@@ -274,23 +276,21 @@ describe("prevent-abbreviations", () => {
 						messageId: "replace",
 					},
 				],
-				options: [{ shorthands: { "*PROPS": "*PROPERTIES" } }],
-				output: "const TEXT_LABEL_TXT_GRAD_N_PROPERTIES_2 = {};",
 			},
 			{
 				code: "const strName = '';",
+				output: "const stringName = '';",
+				options: [{ shorthands: { "/^str(.*)$/": "string$1" } }],
 				errors: [
 					{
 						data: { discouragedName: "strName", nameTypeText: "variable", replacement: "stringName" },
 						messageId: "replace",
 					},
 				],
-				options: [{ shorthands: { "/^str(.*)$/": "string$1" } }],
-				output: "const stringName = '';",
 			},
 			{
 				code: "const first = 1; const second = 2;",
-				errors: [{ messageId: "replace" }, { messageId: "replace" }],
+				output: "const value = 1; const value_ = 2;",
 				options: [
 					{
 						replacements: {
@@ -299,10 +299,20 @@ describe("prevent-abbreviations", () => {
 						},
 					},
 				],
-				output: "const value = 1; const value_ = 2;",
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
 			},
 			{
 				code: "const target = 1; const source = 2;",
+				output: "const destination = 1; const source = 2;",
+				options: [
+					{
+						extendDefaultReplacements: false,
+						replacements: {
+							source: { target: true },
+							target: { destination: true },
+						},
+					},
+				],
 				errors: [
 					{
 						data: { discouragedName: "target", nameTypeText: "variable", replacement: "destination" },
@@ -317,19 +327,10 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
-				options: [
-					{
-						extendDefaultReplacements: false,
-						replacements: {
-							source: { target: true },
-							target: { destination: true },
-						},
-					},
-				],
-				output: "const destination = 1; const source = 2;",
 			},
 			{
 				code: "let param;",
+				options: [{ replacements: { param: { arguments: true } } }],
 				errors: [
 					{
 						data: {
@@ -340,10 +341,10 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
-				options: [{ replacements: { param: { arguments: true } } }],
 			},
 			{
 				code: "const handler = (param) => param;",
+				options: [{ replacements: { param: { arguments: true } } }],
 				errors: [
 					{
 						data: {
@@ -354,82 +355,81 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
-				options: [{ replacements: { param: { arguments: true } } }],
 			},
 			{
 				code: "const { err = fallback } = payload;",
+				output: "const { err: error = fallback } = payload;",
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				output: "const { err: error = fallback } = payload;",
 			},
 			// CamelCase word splitting
 			{
 				code: "const myErr = new Error();",
+				output: "const myError = new Error();",
 				errors: [
 					{
 						data: { discouragedName: "myErr", nameTypeText: "variable", replacement: "myError" },
 						messageId: "replace",
 					},
 				],
-				output: "const myError = new Error();",
 			},
 			{
+				filename: "src/err.ts",
 				code: "const value = 1;",
+				options: [{ checkFilenames: true }],
 				errors: [
 					{
 						data: { discouragedName: "err.ts", nameTypeText: "filename", replacement: "error.ts" },
 						messageId: "replace",
 					},
 				],
-				filename: "src/err.ts",
-				options: [{ checkFilenames: true }],
 			},
 			{
 				code: 'import err from "./module";',
+				output: 'import error from "./module";',
+				options: [{ checkDefaultAndNamespaceImports: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkDefaultAndNamespaceImports: true }],
-				output: 'import error from "./module";',
 			},
 			{
 				code: 'import * as args from "./module";',
+				output: 'import * as parameters from "./module";',
+				options: [{ checkDefaultAndNamespaceImports: "internal" }],
 				errors: [
 					{
 						data: { discouragedName: "args", nameTypeText: "variable", replacement: "parameters" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkDefaultAndNamespaceImports: "internal" }],
-				output: 'import * as parameters from "./module";',
 			},
 			{
 				code: 'import { err } from "./module";',
+				output: 'import { err as error } from "./module";',
+				options: [{ checkShorthandImports: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkShorthandImports: true }],
-				output: 'import { err as error } from "./module";',
 			},
 			{
 				code: "const err = 1; export { err };",
+				output: "const error = 1; export { error as err };",
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				output: "const error = 1; export { error as err };",
 			},
 			{
 				code: "export function err() {}",
@@ -442,185 +442,185 @@ describe("prevent-abbreviations", () => {
 			},
 			{
 				code: "export class Err {}",
+				options: [{ replacements: { err: { error: true } } }],
 				errors: [
 					{
 						data: { discouragedName: "Err", nameTypeText: "variable", replacement: "Error_" },
 						messageId: "replace",
 					},
 				],
-				options: [{ replacements: { err: { error: true } } }],
 			},
 			{
 				code: "export type Err = string;",
+				options: [{ replacements: { err: { error: true } } }],
 				errors: [
 					{
 						data: { discouragedName: "Err", nameTypeText: "variable", replacement: "Error_" },
 						messageId: "replace",
 					},
 				],
-				options: [{ replacements: { err: { error: true } } }],
 			},
 			{
 				code: "interface Shape { err: string }",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
 			},
 			{
 				code: "class Shape { err = 1 }",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
 			},
 			{
 				code: "const payload = { err: 1 };",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
 			},
 			{
 				code: "const err = value;",
+				options: [{ replacements: { err: { "bad-name": true } } }],
 				errors: [
 					{
 						messageId: "suggestion",
 					},
 				],
-				options: [{ replacements: { err: { "bad-name": true } } }],
 			},
 			{
 				code: 'import { default as err } from "./module";',
+				output: 'import { default as error } from "./module";',
+				options: [{ checkDefaultAndNamespaceImports: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkDefaultAndNamespaceImports: true }],
-				output: 'import { default as error } from "./module";',
 			},
 			{
 				code: 'const err = require("./module");',
+				output: 'const error = require("./module");',
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				output: 'const error = require("./module");',
 			},
 			{
 				code: "target.err = 1;",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
 			},
 			{
+				filename: "src/err",
 				code: "const value = 1;",
+				options: [{ checkFilenames: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "filename", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				filename: "src/err",
-				options: [{ checkFilenames: true }],
 			},
 			{
 				code: "class Shape { err() {} }",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
 			},
 			{
 				code: "const { err: value } = payload;",
+				options: [{ checkProperties: true }],
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "property", replacement: "error" },
 						messageId: "replace",
 					},
 				],
-				options: [{ checkProperties: true }],
 			},
 			{
 				code: 'import { useRender } from "./use-render"; useRender({ props: value });',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: 'import { useRender } from "$components/use-render"; useRender({ props: value });',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: "function useRender(options) { return options; } useRender({ props: value });",
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: 'import { useRender } from "@base-ui/react/use-render"; useRender({ configuration: { props: value } });',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: 'import { useRender } from "@base-ui/react/use-render"; const options = { props: value }; useRender(options);',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: "({ props: value })();",
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: 'import * as BaseUi from "@base-ui/react"; BaseUi.useRender({ props: value });',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: 'import type { RenderConfiguration } from "./render"; const options: RenderConfiguration = { props: value };',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: "type RenderOptions = { value: unknown }; const options: RenderOptions = { props: value };",
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: "const options: { value: unknown } = { props: value };",
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			{
 				code: 'const options: import("./render").RenderConfiguration = { props: value };',
-				errors: [{ messageId: "replace" }],
 				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
 			},
 			// Three-level TSQualifiedName chain without import — still flagged
 			{
 				code: "namespace N { export namespace Root { export type Props = unknown; } } type T = N.Root.Props;",
-				errors: [{ messageId: "replace" }, { messageId: "replace" }],
 				options: [{ checkVariables: false, shorthands: { "*Props": "*Properties", "*Root": "*Base" } }],
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
 			},
 		],
 		valid: [
@@ -676,8 +676,8 @@ describe("prevent-abbreviations", () => {
 				code: "const distance = 10;",
 			},
 			{
-				code: "const value = 1;",
 				filename: "src/value.ts",
+				code: "const value = 1;",
 				options: [{ checkFilenames: true }],
 			},
 			// Function with valid parameter name
@@ -829,8 +829,8 @@ describe("prevent-abbreviations", () => {
 				options: [{ extendDefaultReplacements: false, replacements: { err: { error: false } } }],
 			},
 			{
-				code: "const value = 1;",
 				filename: "<input>",
+				code: "const value = 1;",
 				options: [{ checkFilenames: true }],
 			},
 		],
@@ -963,13 +963,13 @@ describe("prevent-abbreviations", () => {
 		invalid: [
 			{
 				code: "<Btn />;",
+				options: [{ shorthands: { Btn: "Button" } }],
 				errors: [
 					{
 						data: { discouragedName: "Btn", nameTypeText: "variable", replacement: "Button" },
 						messageId: "replace",
 					},
 				],
-				options: [{ shorthands: { Btn: "Button" } }],
 			},
 		],
 		valid: [

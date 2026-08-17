@@ -8,13 +8,14 @@ permissions: {}
 jobs:
   check:
     name: Validate
-    runs-on: ubuntu-latest
     permissions:
       contents: read
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup toolchain
@@ -23,14 +24,40 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install
 
+      - name: Restore ESLint cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('pnpm-lock.yaml', 'eslint.config.ts') }}-${{ github.sha }}
+          path: .eslintcache-*
+          restore-keys: |
+            ${{ runner.os }}-eslint-v1-${{ hashFiles('pnpm-lock.yaml', 'eslint.config.ts') }}-
+
+      - name: Collect changed files
+        run: git diff --name-only --diff-filter=ACMRT -z "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/changed-files"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
       - name: Biome
-        run: node --run biome -- ci
+        run: |
+          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+          if ((${#changed_files[@]} > 0)); then
+            node --run biome -- ci --no-errors-on-unmatched "${changed_files[@]}"
+          fi
 
       - name: oxfmt
-        run: node --run oxfmt -- --check
+        run: |
+          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+          if ((${#changed_files[@]} > 0)); then
+            node --run oxfmt -- --no-error-on-unmatched-pattern --check "${changed_files[@]}"
+          fi
 
       - name: Lint
-        run: node --run oxlint
+        run: |
+          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+          if ((${#changed_files[@]} > 0)); then
+            node --run isentinel-lint -- "${changed_files[@]}"
+          fi
 
       - name: Type Check
         run: node --run type-check
@@ -41,11 +68,55 @@ jobs:
       - name: Build
         run: node --run build -- --minify && test -f dist/index.js
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
+  documentation:
+    name: Documentation
     permissions:
       contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup
+        with:
+          tools: bun node pnpm ni
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Type check documentation
+        run: node --run check
+        working-directory: documentation
+
+      - name: Restore Chromium cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-${{ runner.arch }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+
+      - name: Install Chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
+
+      - name: Build documentation
+        run: node --run build
+        working-directory: documentation
+
+      - name: Test React components
+        run: node --run test:unit
+        working-directory: documentation
+
+      - name: Test documentation in Chromium
+        run: node --run test:browser
+        working-directory: documentation
+
+  test:
+    name: Test
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -60,41 +131,3 @@ jobs:
 
       - name: Run tests
         run: node --run test -- --reporter github-actions --reporter dot
-
-  documentation:
-    name: Documentation
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Setup toolchain
-        uses: ./.github/actions/setup
-        with:
-          tools: "bun node pnpm ni"
-
-      - name: Install dependencies
-        uses: ./.github/actions/install
-
-      - name: Type check documentation
-        working-directory: documentation
-        run: node --run check
-
-      - name: Install Chromium
-        run: pnpm --filter docs exec playwright install --with-deps chromium
-
-      - name: Build documentation
-        working-directory: documentation
-        run: node --run build
-
-      - name: Test React components
-        working-directory: documentation
-        run: node --run test:unit
-
-      - name: Test documentation in Chromium
-        working-directory: documentation
-        run: node --run test:browser

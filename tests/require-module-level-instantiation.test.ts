@@ -14,9 +14,9 @@ function useStoryModesState() {
     const log = new Log();
     log.Info("test");
 }`,
-				documentation: { id: "fail", title: "nested logger instantiation" },
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
+				documentation: { id: "fail", title: "nested logger instantiation" },
 			},
 
 			{
@@ -26,8 +26,8 @@ import Log from "@rbxts/rbxts-sleitnick-log";
 const handler = () => {
     const log = new Log();
 };`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -39,8 +39,8 @@ class MyClass {
         const log = new Log();
     }
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -50,8 +50,8 @@ import { Logger } from "@company/logging";
 function init() {
     const logger = new Logger();
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Logger: "@company/logging" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -61,8 +61,8 @@ import { Logger as Log } from "@company/logging";
 function init() {
     const log = new Log();
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Logger: "@company/logging" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 			{
 				code: `
@@ -71,8 +71,8 @@ import { "Logger" as Log } from "@company/logging";
 function init() {
     const log = new Log();
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Logger: "@company/logging" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -84,7 +84,6 @@ function setup() {
     const log = new Log();
     const server = new Server();
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }, { messageId: "mustBeModuleLevel" }],
 				options: [
 					{
 						classes: {
@@ -93,6 +92,7 @@ function setup() {
 						},
 					},
 				],
+				errors: [{ messageId: "mustBeModuleLevel" }, { messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -104,8 +104,8 @@ function outer() {
         const log = new Log();
     }
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -115,8 +115,8 @@ import Log from "@rbxts/rbxts-sleitnick-log";
 (function() {
     const log = new Log();
 })();`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -126,8 +126,8 @@ import Log from "@rbxts/rbxts-sleitnick-log";
 items.forEach(() => {
     const log = new Log();
 });`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 
 			{
@@ -137,8 +137,8 @@ import * as Logging from "@rbxts/rbxts-sleitnick-log";
 function init() {
     const log = new Logging.Log();
 }`,
-				errors: [{ messageId: "mustBeModuleLevel" }],
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				errors: [{ messageId: "mustBeModuleLevel" }],
 			},
 		],
 		valid: [
@@ -151,8 +151,8 @@ const log = new Log();
 function useStoryModesState() {
     log.Info("test");
 }`,
-				documentation: { id: "pass", title: "module-level logger instantiation" },
 				options: [{ classes: { Log: "@rbxts/rbxts-sleitnick-log" } }],
+				documentation: { id: "pass", title: "module-level logger instantiation" },
 			},
 
 			{

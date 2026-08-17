@@ -21,24 +21,24 @@ describe("prefer-early-return", () => {
 					"  }",
 					"}",
 				].join("\n"),
-				documentation: { id: "fail", title: "Function body needs guard clause" },
 				errors: [
 					{
 						message:
 							"Function body is wrapped in a single conditional without an else branch. This increases nesting depth and cognitive load. Invert the condition and return early: if (!condition) return; then place the main logic at the top level.",
 					},
 				],
+				documentation: { id: "fail", title: "Function body needs guard clause" },
 			},
 			// MaximumStatements = 0 means even 1 statement triggers
 			{
 				code: "function foo() { if (something) doSomething(); }",
-				errors: [error],
 				options: [{ maximumStatements: 0 }],
+				errors: [error],
 			},
 			{
 				code: "function foo() { if (something) { doSomething(); } }",
-				errors: [error],
 				options: [{ maximumStatements: 0 }],
+				errors: [error],
 			},
 			// Function expressions
 			{

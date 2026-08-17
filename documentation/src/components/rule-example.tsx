@@ -51,12 +51,12 @@ const COPY_ICON = (
 );
 
 interface RuleExampleProperties {
-	readonly children: ReactNode;
 	readonly title?: string | undefined;
-	readonly type: "pass" | "fail";
+	readonly type: "fail" | "pass";
+	readonly children: ReactNode;
 }
 
-export function RuleExample({ children, title, type }: RuleExampleProperties): ReactNode {
+export function RuleExample({ title, type, children }: RuleExampleProperties): ReactNode {
 	const [copied, setCopied] = useState(false);
 	const isPass = type === "pass";
 	const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
@@ -66,11 +66,11 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 		function resetCopiedState(): (() => void) | undefined {
 			if (!copied) return undefined;
 
-			const timeout = globalThis.setTimeout(function clearCopiedState(): void {
+			const timeout = setTimeout(function clearCopiedState(): void {
 				setCopied(false);
 			}, 1_500);
 			return function clearResetTimer(): void {
-				globalThis.clearTimeout(timeout);
+				clearTimeout(timeout);
 			};
 		},
 		[copied],
@@ -86,7 +86,9 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 		const code = card?.querySelector("pre code, code");
 		if (code === null || code === undefined) return;
 
-		void copyExampleAsync(code);
+		copyExampleAsync(code).catch((error) => {
+			console.error("Failed to copy rule example:", error);
+		});
 	}
 
 	const copyButton = (
@@ -96,8 +98,8 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 			aria-live="polite"
 			className="RuleExample-copy"
 			data-copied={copied ? "" : undefined}
-			onClick={handleCopyExample}
 			type="button"
+			onClick={handleCopyExample}
 		>
 			{COPY_ICON}
 		</button>

@@ -7,8 +7,8 @@ ts.run("identifier-reference", rule, {
 	invalid: [
 		{
 			code: sharedCode,
-			documentation: { id: "fail", title: "Identifier" },
 			errors: [{ messageId: "identifier" }],
+			documentation: { id: "fail", title: "Identifier" },
 		},
 	],
 	valid: [],

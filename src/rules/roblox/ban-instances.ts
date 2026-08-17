@@ -64,12 +64,12 @@ function normalizePropertyBans(rawBans: unknown): Map<string, ReadonlyMap<string
 	/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties. */
 	if (!isRecord(rawBans)) return bannedClasses;
 
-	for (const [className, propertyConfiguration] of Object.entries(rawBans)) {
+	for (const [className, propertyConfig] of Object.entries(rawBans)) {
 		/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties entries. */
-		if (!isRecord(propertyConfiguration)) continue;
+		if (!isRecord(propertyConfig)) continue;
 
 		const bannedPropertiesForClass = new Map<string, BannedPropertyEntry>();
-		for (const [propertyName, message] of Object.entries(propertyConfiguration)) {
+		for (const [propertyName, message] of Object.entries(propertyConfig)) {
 			/* v8 ignore next -- @preserve rule schema rejects non-string banned property messages. */
 			if (!isStringRaw(message)) continue;
 			bannedPropertiesForClass.set(propertyName.toLowerCase(), { message, propertyName });

@@ -9,7 +9,7 @@ interface TrackedInstantiation {
 }
 
 function normalizeConfig(options: unknown): ReadonlyMap<string, string> {
-	if (!(isRecord(options) && "classes" in options && isRecord(options.classes))) return new Map();
+	if (!isRecord(options) || !("classes" in options) || !isRecord(options.classes)) return new Map();
 	const { classes } = options;
 	const result = new Map<string, string>();
 	for (const [key, value] of Object.entries(classes)) {

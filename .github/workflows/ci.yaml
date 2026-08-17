@@ -5,57 +5,59 @@ on:
     branches:
       - main
     paths: &ci-paths
+      - "*.config.ts"
+      - ".github/actions/**"
+      - .github/workflows/checks.yaml
+      - .github/workflows/ci.yaml
+      - .github/workflows/docs.yaml
+      - .github/workflows/release.yaml
+      - ".ox*trc.json"
+      - biome.jsonc
+      - "documentation/**"
+      - hk.pkl
+      - mise.lock
+      - mise.toml
+      - package.json
+      - "patches/**"
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - "scripts/**"
+      - "src/**/*.json"
       - "src/**/*.ts"
       - "src/**/*.tsx"
-      - "src/**/*.json"
       - "tests/**"
-      - "documentation/**"
-      - "scripts/**"
-      - "patches/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "mise.toml"
-      - "mise.lock"
-      - "*.config.ts"
       - "tsconfig*.json"
-      - ".ox*trc.json"
-      - "biome.jsonc"
-      - ".github/actions/**"
-      - ".github/workflows/checks.yaml"
-      - ".github/workflows/ci.yaml"
-      - ".github/workflows/docs.yaml"
-      - ".github/workflows/release.yaml"
+      - zizmor.yaml
   pull_request:
     paths: *ci-paths
+
+permissions: {}
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
-
 jobs:
   checks:
-    uses: ./.github/workflows/checks.yaml
     permissions:
       contents: read
+    uses: ./.github/workflows/checks.yaml
 
   workflow-security:
-    name: Workflow Security
     if: github.event_name == 'push' || github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    name: Workflow Security
     permissions:
       contents: read
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Check if .github/ changed
-        id: changes
+      - id: changes
+        name: Check if .github/ changed
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE="${{ github.event.pull_request.base.sha }}"
@@ -70,20 +72,20 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Setup toolchain
-        if: steps.changes.outputs.changed == 'true'
+      - if: steps.changes.outputs.changed == 'true'
+        name: Setup toolchain
         uses: ./.github/actions/setup
         with:
-          tools: "actionlint pinact zizmor"
+          tools: actionlint pinact zizmor
 
-      - name: actionlint
-        if: steps.changes.outputs.changed == 'true'
+      - if: steps.changes.outputs.changed == 'true'
+        name: actionlint
         run: actionlint
 
-      - name: pinact
-        if: steps.changes.outputs.changed == 'true'
+      - if: steps.changes.outputs.changed == 'true'
+        name: pinact
         run: pinact run
 
-      - name: zizmor
-        if: steps.changes.outputs.changed == 'true'
+      - if: steps.changes.outputs.changed == 'true'
+        name: zizmor
         run: zizmor .github

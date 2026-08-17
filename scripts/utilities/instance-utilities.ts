@@ -5,16 +5,17 @@ import { parse } from "yuku-parser";
 
 import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement } from "yuku-parser";
 
+// biome-ignore assist/source/useSortedEnumMembers: compatibility issue
 export const enum ScanType {
 	Both = "both",
-	React = "tsx",
 	TypeScript = "ts",
+	React = "tsx",
 }
 
 const GATHER_TO_SCAN_TYPE: Record<ScanType, fdir> = {
 	[ScanType.Both]: new fdir().glob("**/*.{ts,tsx}").withFullPaths(),
-	[ScanType.TypeScript]: new fdir().glob("**/*.ts").withFullPaths(),
 	[ScanType.React]: new fdir().glob("**/*.tsx").withFullPaths(),
+	[ScanType.TypeScript]: new fdir().glob("**/*.ts").withFullPaths(),
 };
 
 function isAllLowerCase(value: string): boolean {

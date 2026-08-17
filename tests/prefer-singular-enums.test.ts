@@ -15,8 +15,8 @@ describe("prefer-singular-enums", () => {
 			// Regular plural -s
 			{
 				code: "enum SortOrders {MostRecent, LeastRecent, Newest, Oldest}",
-				documentation: { id: "fail", title: "Plural enum names" },
 				errors: [{ message: 'Enum name "SortOrders" should be singular.' }],
+				documentation: { id: "fail", title: "Plural enum names" },
 			},
 			{ code: "enum Commands {Up, Down}", errors: [errorWithName("Commands")] },
 			{ code: "enum Pages {Products, Orders}", errors: [errorWithName("Pages")] },

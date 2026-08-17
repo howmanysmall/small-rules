@@ -1,6 +1,6 @@
 /**
- * A detector scans lines and returns match counts. Recognition probability: `1 - (1 - p)^matches`, where `p` is the
- * base probability.
+ * A detector scans lines and returns match counts. Recognition probability: `1
+ * - (1 - p)^matches`, where `p` is the base probability.
  */
 export interface Detector {
 	readonly probability: number;

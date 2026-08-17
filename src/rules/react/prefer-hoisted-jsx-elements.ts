@@ -19,7 +19,7 @@ import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilit
 type JavaScriptXmlNode = ESTree.JSXElement | ESTree.JSXFragment;
 
 function normalizeAdditionalHoistableComponents(rawOptions: unknown): ReadonlySet<string> {
-	if (!(isRecord(rawOptions) && "additionalHoistableComponents" in rawOptions)) return new Set();
+	if (!isRecord(rawOptions) || !("additionalHoistableComponents" in rawOptions)) return new Set();
 
 	const { additionalHoistableComponents } = rawOptions;
 	/* v8 ignore start -- @preserve rule schema rejects non-array additionalHoistableComponents values. */
@@ -32,7 +32,7 @@ function normalizeAdditionalHoistableComponents(rawOptions: unknown): ReadonlySe
 }
 
 function normalizeAdditionalStaticFactories(rawOptions: unknown): ReadonlySet<string> {
-	if (!(isRecord(rawOptions) && "additionalStaticFactories" in rawOptions)) return new Set();
+	if (!isRecord(rawOptions) || !("additionalStaticFactories" in rawOptions)) return new Set();
 
 	const { additionalStaticFactories } = rawOptions;
 	/* v8 ignore start -- @preserve rule schema rejects non-array additionalStaticFactories values. */
@@ -244,6 +244,7 @@ function hasStaticJavaScriptXmlAncestor(
 	staticOptions: StaticExpressionOptions,
 	environment: Environment,
 ): boolean {
+	// oxlint-disable-next-line flawless/prefer-parameter-destructuring -- rule conflict.
 	let { parent } = node;
 	while (parent.type !== "Program") {
 		if (

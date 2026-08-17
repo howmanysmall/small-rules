@@ -82,9 +82,9 @@ describe("prevent-abbreviations identifier utilities", () => {
 
 	describe("isValidIdentifier behavior", () => {
 		describe.each([
-			{ label: "simple lowercase", name: "value" },
-			{ label: "with trailing digit", name: "value9" },
-			{ label: "Greek letter", name: "πValue" },
+			{ name: "value", label: "simple lowercase" },
+			{ name: "value9", label: "with trailing digit" },
+			{ name: "πValue", label: "Greek letter" },
 		])("accepts $label", ({ name }) => {
 			it(`should return true for "${name}"`, () => {
 				expect.assertions(1);
@@ -93,10 +93,10 @@ describe("prevent-abbreviations identifier utilities", () => {
 		});
 
 		describe.each([
-			{ label: "empty string", name: "" },
-			{ label: "JS keyword", name: "class" },
-			{ label: "starts with digit", name: "9value" },
-			{ label: "contains whitespace", name: "value name" },
+			{ name: "", label: "empty string" },
+			{ name: "class", label: "JS keyword" },
+			{ name: "9value", label: "starts with digit" },
+			{ name: "value name", label: "contains whitespace" },
 		])("rejects $label", ({ name }) => {
 			it(`should return false for "${name}"`, () => {
 				expect.assertions(1);

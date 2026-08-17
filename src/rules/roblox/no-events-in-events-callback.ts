@@ -37,27 +37,35 @@ function normalizeImportPaths(options?: Options): ReadonlySet<string> {
 }
 
 function unwrapNode(node: ESTree.Node): ESTree.Node {
-	/* v8 ignore next -- @preserve wrapper variants are parser-shape defensive cases. */
-	switch (node.type) {
-		case "ChainExpression":
-		case "ParenthesizedExpression":
-		case "TSAsExpression":
-		case "TSInstantiationExpression":
-		case "TSNonNullExpression":
-		case "TSTypeAssertion":
-			return unwrapNode(node.expression);
+	let current = node;
 
-		default:
-			return node;
+	while (true) {
+		/* v8 ignore next -- @preserve wrapper variants are parser-shape defensive cases. */
+		switch (current.type) {
+			case "ChainExpression":
+			case "ParenthesizedExpression":
+			case "TSAsExpression":
+			case "TSInstantiationExpression":
+			case "TSNonNullExpression":
+			case "TSTypeAssertion": {
+				current = current.expression;
+				continue;
+			}
+
+			default:
+				return current;
+		}
 	}
 }
 function getRootIdentifierName(node: ESTree.Node): string | undefined {
-	const unwrapped = unwrapNode(node);
+	let current = node;
 
-	if (unwrapped.type === "Identifier") return unwrapped.name;
-	if (unwrapped.type !== "MemberExpression") return undefined;
-
-	return getRootIdentifierName(unwrapped.object);
+	while (true) {
+		const unwrapped = unwrapNode(current);
+		if (unwrapped.type === "Identifier") return unwrapped.name;
+		if (unwrapped.type !== "MemberExpression") return undefined;
+		current = unwrapped.object;
+	}
 }
 
 function getConnectCallback(
@@ -106,48 +114,76 @@ function markAsPlayerContainer(name: string, state: CallbackState): boolean {
 	return addIfMissing(state.playerContainers, name);
 }
 
-function markPatternValues(pattern: ESTree.Node, state: CallbackState): boolean {
-	switch (pattern.type) {
-		case "ArrayPattern": {
-			let changed = false;
-			for (const element of pattern.elements) {
-				if (!element) continue;
-				/* v8 ignore next -- @preserve duplicate pattern names only need to change taint once. */
-				changed = markPatternValues(element, state) || changed;
-			}
-			return changed;
-		}
+type ObjectPatternProperty = Extract<ESTree.Node, { type: "ObjectPattern" }>["properties"][number];
 
-		case "AssignmentPattern":
-			return markPatternValues(pattern.left, state);
-
-		case "Identifier":
-			return markAsPlayerValue(pattern.name, state);
-
-		case "ObjectPattern": {
-			let changed = false;
-			for (const property of pattern.properties) {
-				if (property.type === "RestElement") {
-					/* v8 ignore next -- @preserve duplicate pattern names only need to change taint once. */
-					changed = markPatternValues(property.argument, state) || changed;
-					continue;
-				}
-
-				/* v8 ignore next -- @preserve duplicate pattern names only need to change taint once. */
-				changed = markPatternValues(property.value, state) || changed;
-			}
-
-			return changed;
-		}
-
-		case "RestElement":
-			return markPatternValues(pattern.argument, state);
-
-		/* v8 ignore start -- @preserve callers pass binding/assignment patterns handled above. */
-		default:
-			return false;
-		/* v8 ignore stop -- @preserve */
+function appendArrayPatternElementsInReverse(
+	patterns: Array<ESTree.Node>,
+	elements: ReadonlyArray<ESTree.Node | null>,
+): void {
+	let index = elements.length;
+	while (index > 0) {
+		index -= 1;
+		const element = elements[index];
+		if (element) patterns.push(element);
 	}
+}
+
+function appendObjectPatternValuesInReverse(
+	patterns: Array<ESTree.Node>,
+	properties: ReadonlyArray<ObjectPatternProperty>,
+): void {
+	let index = properties.length;
+	while (index > 0) {
+		index -= 1;
+		const property = properties[index];
+		/* v8 ignore next -- @preserve object patterns do not permit elisions. */
+		if (!property) continue;
+		patterns.push(property.type === "RestElement" ? property.argument : property.value);
+	}
+}
+
+function markPatternValues(pattern: ESTree.Node, state: CallbackState): boolean {
+	const patterns = [pattern];
+	let changed = false;
+
+	while (patterns.length > 0) {
+		const current = patterns.pop();
+		/* v8 ignore next -- @preserve patterns always contains nodes pushed below. */
+		if (!current) continue;
+
+		switch (current.type) {
+			case "ArrayPattern": {
+				appendArrayPatternElementsInReverse(patterns, current.elements);
+				break;
+			}
+
+			case "AssignmentPattern": {
+				patterns.push(current.left);
+				break;
+			}
+
+			case "Identifier": {
+				if (markAsPlayerValue(current.name, state)) changed = true;
+				break;
+			}
+
+			case "ObjectPattern": {
+				appendObjectPatternValuesInReverse(patterns, current.properties);
+				break;
+			}
+
+			case "RestElement": {
+				patterns.push(current.argument);
+				break;
+			}
+
+			/* v8 ignore next 2 -- @preserve callers pass binding/assignment patterns handled above; no test exercises the default case. */
+			default:
+				break;
+		}
+	}
+
+	return changed;
 }
 
 function markBindingPattern(
@@ -192,38 +228,46 @@ function markAssignmentTarget(target: ESTree.Node, kind: TaintKind, state: Callb
 }
 
 function classifyNodeTaint(node: ESTree.Node, state: CallbackState): TaintKind {
-	const unwrapped = unwrapNode(node);
+	let current = node;
 
-	switch (unwrapped.type) {
-		case "ArrayExpression":
-			return classifyArrayTaint(unwrapped, state);
+	while (true) {
+		const unwrapped = unwrapNode(current);
 
-		case "AssignmentExpression":
-			return classifyNodeTaint(unwrapped.right, state);
+		switch (unwrapped.type) {
+			case "ArrayExpression":
+				return classifyArrayTaint(unwrapped, state);
 
-		case "ConditionalExpression":
-			return classifyConditionalTaint(unwrapped, state);
+			case "AssignmentExpression": {
+				current = unwrapped.right;
+				continue;
+			}
 
-		case "Identifier": {
-			if (state.playerValues.has(unwrapped.name)) return TaintKind.Value;
-			if (state.playerContainers.has(unwrapped.name)) return TaintKind.Container;
-			return TaintKind.None;
+			case "ConditionalExpression":
+				return classifyConditionalTaint(unwrapped, state);
+
+			case "Identifier": {
+				if (state.playerValues.has(unwrapped.name)) return TaintKind.Value;
+				if (state.playerContainers.has(unwrapped.name)) return TaintKind.Container;
+				return TaintKind.None;
+			}
+
+			case "MemberExpression":
+				return classifyMemberTaint(unwrapped, state);
+
+			case "ObjectExpression":
+				return classifyObjectTaint(unwrapped, state);
+
+			case "SequenceExpression": {
+				const lastExpression = unwrapped.expressions.at(-1);
+				/* v8 ignore next -- @preserve parser sequence expressions have at least one expression. */
+				if (lastExpression === undefined) return TaintKind.None;
+				current = lastExpression;
+				continue;
+			}
+
+			default:
+				return TaintKind.None;
 		}
-
-		case "MemberExpression":
-			return classifyMemberTaint(unwrapped, state);
-
-		case "ObjectExpression":
-			return classifyObjectTaint(unwrapped, state);
-
-		case "SequenceExpression": {
-			const lastExpression = unwrapped.expressions.at(-1);
-			/* v8 ignore next -- @preserve parser sequence expressions have at least one expression. */
-			return lastExpression === undefined ? TaintKind.None : classifyNodeTaint(lastExpression, state);
-		}
-
-		default:
-			return TaintKind.None;
 	}
 }
 
@@ -337,7 +381,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 				}
 
 				const currentCallbackState = getCurrentTopLevelCallbackState();
-				if (!(currentCallbackState && isEventsMethodCall(node, trackedEventsIdentifiers))) return;
+				if (!currentCallbackState || !isEventsMethodCall(node, trackedEventsIdentifiers)) return;
 
 				const [firstArgument] = node.arguments;
 				if (
@@ -385,7 +429,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 
 			VariableDeclarator(node): void {
 				const callbackState = getCurrentTopLevelCallbackState();
-				if (!(callbackState && node.init)) return;
+				if (!callbackState || !node.init) return;
 
 				const taint = classifyNodeTaint(node.init, callbackState);
 				if (taint === TaintKind.None) return;

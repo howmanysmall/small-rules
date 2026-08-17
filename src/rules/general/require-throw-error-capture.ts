@@ -7,7 +7,7 @@ type ErrorSpecifier =
 	| string
 	| {
 			readonly from?: "file" | "library" | "package";
-			readonly name: string | ReadonlyArray<string>;
+			readonly name: ReadonlyArray<string> | string;
 			readonly package?: string;
 			readonly path?: string;
 	  };
@@ -17,6 +17,9 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 
 	while (current !== null) {
 		switch (current.type) {
+			case "ArrowFunctionExpression":
+				return getAssignedName(current);
+
 			case "FunctionDeclaration":
 				return current.id?.name;
 
@@ -24,9 +27,6 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 				if (current.id) return current.id.name;
 				return getAssignedName(current);
 			}
-
-			case "ArrowFunctionExpression":
-				return getAssignedName(current);
 
 			default:
 				break;
@@ -55,6 +55,10 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
 		switch (current.type) {
+			case "ArrowFunctionExpression": {
+				return current.parent.type === "PropertyDefinition" && current.parent.parent.type === "ClassBody";
+			}
+
 			case "FunctionDeclaration":
 				return false;
 
@@ -63,10 +67,6 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 					(current.parent.type === "MethodDefinition" || current.parent.type === "PropertyDefinition") &&
 					current.parent.parent.type === "ClassBody"
 				);
-			}
-
-			case "ArrowFunctionExpression": {
-				return current.parent.type === "PropertyDefinition" && current.parent.parent.type === "ClassBody";
 			}
 
 			default:
@@ -85,7 +85,8 @@ function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: 
 		const scope = sourceCode.getScope(node);
 		const names = new Set(scope.variables.map((variable) => variable.name));
 
-		// Catch clause parameters may not appear in scope.variables, so walk ancestors
+		// Catch clause parameters may not appear in scope.variables, so walk
+		// ancestors
 		let current: ESTree.Node | null = node.parent;
 		while (current !== null) {
 			if (current.type === "CatchClause" && current.param?.type === "Identifier") names.add(current.param.name);
@@ -109,7 +110,7 @@ function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: 
 
 function resolveImportSource(sourceCode: SourceCode, node: ESTree.IdentifierReference): string | undefined {
 	try {
-		let scope: Scope | null = sourceCode.getScope(node);
+		let scope: null | Scope = sourceCode.getScope(node);
 		while (scope !== null) {
 			const variable = scope.set.get(node.name);
 			if (variable !== undefined) {
@@ -131,7 +132,7 @@ function resolveImportSource(sourceCode: SourceCode, node: ESTree.IdentifierRefe
 
 function isDeclaredLocally(sourceCode: SourceCode, node: ESTree.IdentifierReference): boolean {
 	try {
-		let scope: Scope | null = sourceCode.getScope(node);
+		let scope: null | Scope = sourceCode.getScope(node);
 		while (scope !== null) {
 			if (scope.set.has(node.name)) return true;
 			scope = scope.upper;
@@ -161,12 +162,6 @@ function matchesSpecifier(
 
 	/* v8 ignore next -- @preserve rule schema restricts object specifiers to handled source kinds. */
 	switch (specifier.from) {
-		case undefined:
-			return true;
-
-		case "package":
-			return resolveImportSource(sourceCode, node) === specifier.package;
-
 		case "file": {
 			const isLocal = isDeclaredLocally(sourceCode, node) && resolveImportSource(sourceCode, node) === undefined;
 			if (!isLocal) return false;
@@ -177,6 +172,12 @@ function matchesSpecifier(
 
 		case "library":
 			return sourceCode.isGlobalReference(node);
+
+		case "package":
+			return resolveImportSource(sourceCode, node) === specifier.package;
+
+		case undefined:
+			return true;
 
 		default:
 			/* v8 ignore start -- @preserve rule schema restricts specifier.from to handled values. */
@@ -228,7 +229,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 							`const ${variableName} = ${sourceCode.getText(argument)};`,
 							`Error.captureStackTrace(${variableName}, ${capturedName});`,
 							`throw ${variableName};`,
-						].join(`\n`);
+						].join("\n");
 
 						if (node.parent.type === "BlockStatement") return fixer.replaceText(node, replacement);
 						return fixer.replaceText(node, `{\n${replacement}\n}`);
@@ -262,14 +263,14 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 								{
 									additionalProperties: false,
 									properties: {
+										name: {
+											anyOf: [{ type: "string" }, { items: { type: "string" }, type: "array" }],
+											description: "Name(s) of the error class",
+										},
 										from: {
 											description: "Where the error class is declared",
 											enum: ["file", "library", "package"],
 											type: "string",
-										},
-										name: {
-											anyOf: [{ type: "string" }, { items: { type: "string" }, type: "array" }],
-											description: "Name(s) of the error class",
 										},
 										package: {
 											description:

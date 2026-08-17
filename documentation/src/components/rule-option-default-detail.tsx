@@ -30,7 +30,7 @@ export function RuleOptionDefaultDetail({
 						token.className === undefined ? (
 							token.text
 						) : (
-							<span className={token.className} key={`${String(index)}-${token.text}`}>
+							<span key={`${String(index)}-${token.text}`} className={token.className}>
 								{token.text}
 							</span>
 						),

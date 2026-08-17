@@ -66,6 +66,4 @@ words = [
 	"zshenv",
 	"stryker",
 ]
-ignore_paths = [
-	"scripts/generate-default-properties.ts",
-]
+ignore_paths = ["scripts/generate-default-properties.ts"]

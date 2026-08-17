@@ -40,8 +40,8 @@ function ensureAstroIntegration(integration: unknown): AstroIntegration {
 	}
 
 	return {
-		hooks,
 		name,
+		hooks,
 	};
 }
 

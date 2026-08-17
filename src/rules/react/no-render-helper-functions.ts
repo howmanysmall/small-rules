@@ -163,11 +163,9 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 
 		hasReadReference = true;
 		if (
-			!(
-				isPropertyValueReference(reference.identifier) ||
-				isJsxAttributeValueReference(reference.identifier) ||
-				isCallArgumentReference(reference.identifier)
-			)
+			!isPropertyValueReference(reference.identifier) &&
+			!isJsxAttributeValueReference(reference.identifier) &&
+			!isCallArgumentReference(reference.identifier)
 		) {
 			return false;
 		}
@@ -204,7 +202,7 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 			const returnTypeAnnotation = getReturnTypeAnnotation(node);
 			const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);
 
-			if ((hasReactNodeAnnotation || hasReturnType || hasJsxReturn(node)) && variableName !== undefined) {
+			if (variableName !== undefined && (hasReactNodeAnnotation || hasReturnType || hasJsxReturn(node))) {
 				reportRenderHelper(parent, variableName);
 			}
 		}
@@ -216,7 +214,7 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 			const returnTypeAnnotation = getReturnTypeAnnotation(node);
 			const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);
 
-			if ((hasReturnType || hasJsxReturn(node)) && variableName !== undefined) {
+			if (variableName !== undefined && (hasReturnType || hasJsxReturn(node))) {
 				reportRenderHelper(node, variableName);
 			}
 		}

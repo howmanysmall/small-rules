@@ -11,13 +11,13 @@ describe("no-native-properties-spread", () => {
 					"const SOME_CONSTANT = {};",
 					'const view = <Frame nativeProperties={{ ...SOME_CONSTANT, Text: "hello" }} />;',
 				].join("\n"),
-				documentation: { id: "fail", title: "native properties spread" },
 				errors: [
 					{
 						data: { prop: "nativeProperties", source: "SOME_CONSTANT" },
 						messageId: "noNativePropertiesSpread",
 					},
 				],
+				documentation: { id: "fail", title: "native properties spread" },
 			},
 			{
 				code: "const INFO_BOX_GRADIENT_NATIVE_PROPERTIES = {}; function Component(gradientNativeProperties) { return <Frame gradientNativeProperties={{ ...INFO_BOX_GRADIENT_NATIVE_PROPERTIES, ...gradientNativeProperties }} />; }",

@@ -26,22 +26,20 @@ const LOOP_STATEMENT_TYPES = new Set([
 ]);
 
 function statementTransfersControl(node: ESTree.Node): boolean {
-	if (
-		node.type === "BreakStatement" ||
-		node.type === "ContinueStatement" ||
-		node.type === "ReturnStatement" ||
-		node.type === "ThrowStatement"
-	) {
-		return true;
-	}
-	if (node.type === "BlockStatement") {
+	let current = node;
+	while (current.type === "BlockStatement") {
 		/* v8 ignore next -- @preserve callers only inspect non-empty consequent blocks. */
-		const last = node.body.at(-1);
+		const last = current.body.at(-1);
 		/* v8 ignore next -- @preserve non-empty consequent blocks always have a final statement. */
 		if (last === undefined) return false;
-		return statementTransfersControl(last);
+		current = last;
 	}
-	return false;
+	return (
+		current.type === "BreakStatement" ||
+		current.type === "ContinueStatement" ||
+		current.type === "ReturnStatement" ||
+		current.type === "ThrowStatement"
+	);
 }
 
 function executionRoot(node: ESTree.Node): ESTree.Node {
@@ -64,23 +62,18 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 		if (parent.consequent === current) {
 			return {
 				arm: "then",
-				// A consequent ending in break/continue/return/throw never falls through, so the
-				// then arm fully determines whether later statements in the block are reached.
 				complete: parent.alternate !== null || statementTransfersControl(parent.consequent),
 				control: parent,
 			};
 		}
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
-	}
-	if (parent.type === "ConditionalExpression") {
+	} else if (parent.type === "ConditionalExpression") {
 		if (parent.consequent === current) return { arm: "then", complete: true, control: parent };
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	}
 	return undefined;
 }
 
-// Statements after an if-without-else whose consequent transfers control only run when the
-// condition was false, so they belong to an implicit else arm rather than both arms.
 function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
 	if (parent.type !== "BlockStatement" && parent.type !== "SwitchCase") return [];
 	const siblings: ReadonlyArray<ESTree.Node> = parent.type === "BlockStatement" ? parent.body : parent.consequent;
@@ -145,8 +138,9 @@ function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 function assignmentReadsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const { parent } = write.node;
 	if (parent.type !== "AssignmentExpression") return false;
-	// Compound assignments (+=, -=, etc.) always read the previous value of the left-hand side,
-	// even when the right-hand side doesn't reference the variable.
+	// Compound assignments (+=, -=, etc.) always read the previous value of the
+	// left-hand side, even when the right-hand side doesn't reference the
+	// variable.
 	if (parent.operator !== "=") return true;
 	return usages.some((usage) => usage.isRead && rangeContains(parent.right, usage.node));
 }
@@ -188,8 +182,9 @@ function findFirstMergeablePair(coveredPaths: Array<ReadonlyArray<BranchStep>>):
 function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): boolean {
 	const pair = findFirstMergeablePair(coveredPaths);
 	if (pair === undefined) return false;
+
+	coveredPaths[pair.leftIndex] = pair.merged;
 	coveredPaths.splice(pair.rightIndex, 1);
-	coveredPaths.splice(pair.leftIndex, 1, pair.merged);
 	return pair.merged.length === 0 || mergeCoveredPaths(coveredPaths);
 }
 

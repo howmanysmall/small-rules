@@ -8,8 +8,8 @@ describe("no-error", () => {
 		invalid: [
 			{
 				code: "error('Hello');",
-				documentation: { id: "fail", title: "Ban global error call" },
 				errors: [{ messageId: "noError" }],
+				documentation: { id: "fail", title: "Ban global error call" },
 			},
 			{
 				code: "error(value);",

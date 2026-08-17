@@ -8,8 +8,8 @@ describe("no-warn", () => {
 		invalid: [
 			{
 				code: "warn('Hello');",
-				documentation: { id: "fail", title: "global warn call" },
 				errors: [{ messageId: "noWarn" }],
+				documentation: { id: "fail", title: "global warn call" },
 			},
 			{
 				code: "warn(value);",

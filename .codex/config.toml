@@ -15,6 +15,10 @@ command = "bash"
 env_http_headers = { CONTEXT7_API_KEY = "CONTEXT7_API_KEY" }
 url = "https://mcp.context7.com/mcp"
 
+[mcp_servers.hk]
+args = ["mcp", "--root", "."]
+command = "hk"
+
 [features.multi_agent_v2]
 max_concurrent_threads_per_session = 1000
 

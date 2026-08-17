@@ -6,7 +6,8 @@ import { ts } from "./rule-testers";
 describe("no-ianitor-in-function-body", () => {
 	ts.run("no-ianitor-in-function-body", rule, {
 		invalid: [
-			// Exact pattern from user's example: Ianitor.keyOf(ids)(value) inside function
+			// Exact pattern from user's example: Ianitor.keyOf(ids)(value)
+			// inside function
 			{
 				code: `
 import { Ianitor } from "@packages/ianitor";
@@ -17,8 +18,8 @@ export function isPlacementVfxId(value: unknown) {
 	return Ianitor.keyOf(placementVfxIds)(value).success;
 }
 `,
-				documentation: { id: "fail", title: "Ianitor validator inside function" },
 				errors: [{ messageId: "hoistIanitorValidator" }],
+				documentation: { id: "fail", title: "Ianitor validator inside function" },
 			},
 			// Arrow function body
 			{
@@ -113,7 +114,8 @@ function validate(value: unknown) {
 	ianitorAssert(Ianitor.keyOf(ids), value);
 }
 `,
-			// Nested call where the inner callee is not an Ianitor member expression
+			// Nested call where the inner callee is not an Ianitor member
+			// expression
 			`
 import { Ianitor } from "@packages/ianitor";
 

@@ -12,78 +12,78 @@ function Component({ gradient, gradientToUse, rarityStyle }) {
     return <>{gradient !== undefined && <uigradient key="ui-gradient" Color={gradient} />}{gradient === undefined && <AnimatedGradient key="animated-gradient" colorValue={gradientToUse} rotation={45} sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0} />}</>;
 }
 `,
-				documentation: { id: "fail", title: "Paired conditional JSX branches" },
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: `
 function Component({ gradient, gradientToUse, rarityStyle }) {
     return <>{gradient !== undefined ? <uigradient key="ui-gradient" Color={gradient} /> : <AnimatedGradient key="animated-gradient" colorValue={gradientToUse} rotation={45} sweepingSpeed={rarityStyle?.sweepingSpeed ?? 0} />}</>;
 }
 `,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+				documentation: { id: "fail", title: "Paired conditional JSX branches" },
 			},
 			{
 				code: "function Component({ flag }) { return <>{flag && <A />}{!flag && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: "function Component({ flag }) { return <>{flag ? <A /> : <B />}</>; }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: 'function Component({ mode }) { return <>{mode === "x" && <A />}{mode !== "x" && <B />}</>; }',
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: 'function Component({ mode }) { return <>{mode === "x" ? <A /> : <B />}</>; }',
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: 'function Component({ mode }) { return <>{mode === "x" && <A />}{"x" !== mode && <B />}</>; }',
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: 'function Component({ mode }) { return <>{mode === "x" ? <A /> : <B />}</>; }',
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component() { return <>{isReady() && <A />}{!isReady() && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ mode }) { return <>{mode === getMode() && <A />}{mode !== getMode() && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ state }) { return <>{state.value === 1 && <A />}{state.value !== 1 && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ state }) { return <>{state[mode] === 1 && <A />}{state[mode] !== 1 && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ value, items }) { return <>{isReady(value, ...items) && <A />}{!isReady(value, ...items) && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ flag, active }) { return <>{flag && active && <A />}{!(flag && active) && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ value, offset }) { return <>{!(value + offset) && <A />}{value + offset && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component() { return <>{this === target && <A />}{this !== target && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: "function Component() { return <>{this === target ? <A /> : <B />}</>; }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ flag }) { return <>{!flag && <A />}{flag && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: "function Component({ flag }) { return <>{!flag ? <A /> : <B />}</>; }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ flag }) { return <>{1 === flag && <A />}{flag !== 1 && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: "function Component({ flag }) { return <>{1 === flag ? <A /> : <B />}</>; }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: `
@@ -96,7 +96,6 @@ function Component({ flag }) {
     );
 }
 `,
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: `
 function Component({ flag }) {
     return (
@@ -106,51 +105,52 @@ function Component({ flag }) {
     );
 }
 `,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ flag }) { return <frame>{flag && <A />}{!flag && <B />}</frame>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: "function Component({ flag }) { return <frame>{flag ? <A /> : <B />}</frame>; }",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ isReady, value }) { return <>{isReady?.(value) && <A />}{!isReady?.(value) && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ service }) { return <>{service?.state === this && <A />}{this !== service?.state && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: 'function Component({ getMode, mode, items }) { return <>{getMode(mode, ...items) === "x" && <A />}{"x" !== getMode(mode, ...items) && <B />}</>; }',
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component({ flag }) { return <>{!!flag && <A />}{!flag && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "function Component() { return <>{new.target && <A />}{!new.target && <B />}</>; }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "class Component { #state; render() { return <>{this.#state === 1 && <A />}{this.#state !== 1 && <B />}</>; } }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "class Component { #state; render(value) { return <>{(#state in value) === true && <A />}{(#state in value) !== true && <B />}</>; } }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 			{
 				code: "class Base { value; } class Component extends Base { render() { return <>{super.value === target && <A />}{super.value !== target && <B />}</>; } }",
-				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
 		],
 		valid: [

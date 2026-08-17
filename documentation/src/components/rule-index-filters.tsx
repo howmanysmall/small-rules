@@ -39,12 +39,12 @@ export function RuleIndexFilters({
 
 	return (
 		<form
+			ref={filters}
 			aria-label="Filter rules"
 			className="rule-index-filters"
 			data-rule-filters=""
 			hidden={initiallyHidden}
 			onReset={onReset}
-			ref={filters}
 		>
 			<div className="rule-index-field rule-index-field--search">
 				<label htmlFor={searchId}>{"Search rules"}</label>
@@ -53,10 +53,10 @@ export function RuleIndexFilters({
 					data-rule-search=""
 					id={searchId}
 					name="query"
-					onChange={onQueryChange}
 					placeholder="Try no-print"
 					type="search"
 					value={query}
+					onChange={onQueryChange}
 				/>
 			</div>
 			<div className="rule-index-field">
@@ -65,8 +65,8 @@ export function RuleIndexFilters({
 					data-rule-category=""
 					id={categoryId}
 					name="category"
-					onChange={onCategoryChange}
 					value={selectedCategory}
+					onChange={onCategoryChange}
 				>
 					{ALL_CATEGORIES}
 					{categories.map((category) => (

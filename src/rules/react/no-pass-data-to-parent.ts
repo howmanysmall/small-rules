@@ -10,20 +10,19 @@ type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
 function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): ReadonlyArray<Reference> {
 	const dataArguments = new Array<Reference>();
 	for (const upstreamReference of analysis.scope.getArgumentUpstreamReferences(reference)) {
-		// Leaves only because our "is data" check is essentially "is not all this other stuff",
-		// and the "other stuff" only works on leaf nodes.
+		// Leaves only because our "is data" check is essentially "is not all
+		// this other stuff", and the "other stuff" only works on leaf nodes.
 		// Mid-stream nodes are effectively nothing, and so would pass those.
 		if (analysis.scope.getUpstreamReferences(upstreamReference).length !== 1) continue;
+
 		// Ideally would use isState and isRef, not the hooks.
 		// But because it goes to leaves. Must be some other way?
 		const { identifier } = upstreamReference;
-		if (isUseState(identifier)) continue;
-		if (analysis.isProp(upstreamReference)) continue;
-		if (isUseRef(identifier)) continue;
+		if (isUseState(identifier) || analysis.isProp(upstreamReference) || isUseRef(identifier)) continue;
+
 		/* v8 ignore next -- data leaves resolve to plain identifiers; `ref.current` / constant leaf shapes are covered by the isProp/isUseRef guards above. @preserve */
 		if (analysis.isRefCurrent(upstreamReference)) continue;
-		if (analysis.isConstant(upstreamReference)) continue;
-		dataArguments.push(upstreamReference);
+		if (!analysis.isConstant(upstreamReference)) dataArguments.push(upstreamReference);
 	}
 	return dataArguments;
 }
@@ -35,9 +34,7 @@ function getComponentDisplayName(
 ): string {
 	const name = analysis.getComponentName(containingNode);
 	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
-	if (name !== undefined && name !== "") {
-		return `"${name}"`;
-	}
+	if (name !== undefined && name !== "") return `"${name}"`;
 	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
 	return isInCustomHook ? "this custom hook" : "this component";
 }
@@ -46,8 +43,8 @@ function reportPassDataEffect(context: RuleContext, analysis: ReactEffectAnalysi
 	for (const reference of effect.functionReferences) {
 		/* v8 ignore next -- effect traversal skips call arguments, so no non-synchronous prop-call reference is ever collected. @preserve */
 		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isPropCall(reference)) continue;
-		if (analysis.isRefCall(reference)) continue;
+		if (!analysis.isPropCall(reference) || analysis.isRefCall(reference)) continue;
+
 		const callExpression = analysis.scope.getCallExpression(reference);
 		if (callExpression === undefined) continue;
 
@@ -59,8 +56,8 @@ function reportPassDataEffect(context: RuleContext, analysis: ReactEffectAnalysi
 
 		context.report({
 			data: {
-				data: dataArguments.map((dataReference) => `"${dataReference.identifier.name}"`).join(" and "),
 				name: getComponentDisplayName(analysis, containingNode, isInCustomHook),
+				data: dataArguments.map((dataReference) => `"${dataReference.identifier.name}"`).join(" and "),
 			},
 			messageId: isInCustomHook ? "avoidPassingDataToParentInHook" : "avoidPassingDataToParentInComponent",
 			node: callExpression,

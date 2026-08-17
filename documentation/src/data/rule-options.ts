@@ -5,7 +5,7 @@ import type { RuleName } from "./rule-manifest";
 
 export type { RuleName } from "./rule-manifest";
 
-type JsonValue = boolean | null | number | string | ReadonlyArray<JsonValue> | { readonly [key: string]: JsonValue };
+type JsonValue = boolean | null | number | ReadonlyArray<JsonValue> | string | { readonly [key: string]: JsonValue };
 
 const isSchemaRecord = type("Record<string, unknown>").readonly();
 type SchemaRecord = typeof isSchemaRecord.infer;
@@ -25,9 +25,9 @@ interface InlineDefaultValueDocumentation {
 export type DefaultValueDocumentation = ComplexDefaultValueDocumentation | InlineDefaultValueDocumentation;
 
 export interface ObjectOption {
+	readonly name: string;
 	readonly defaultValue: DefaultValueDocumentation;
 	readonly description: string | undefined;
-	readonly name: string;
 	readonly required: boolean;
 	readonly type: string;
 }
@@ -76,13 +76,13 @@ function formatInline(value: unknown): string {
 	return JSON.stringify(value);
 }
 
-function isComplexJsonValue(value: JsonValue): value is ReadonlyArray<JsonValue> | Readonly<Record<string, JsonValue>> {
+function isComplexJsonValue(value: JsonValue): value is Readonly<Record<string, JsonValue>> | ReadonlyArray<JsonValue> {
 	return typeof value === "object" && value !== null;
 }
 
 const camelCaseBoundary = /(?<lowercase>[a-z\d])(?<uppercase>[A-Z])/gu;
 
-function summarizeComplexDefault(name: string, value: ReadonlyArray<JsonValue> | object): string {
+function summarizeComplexDefault(name: string, value: object | ReadonlyArray<JsonValue>): string {
 	if (!Array.isArray(value)) return `${Object.keys(value).length} fields`;
 	if (value.length === 1) return "1 item";
 
@@ -133,11 +133,11 @@ const exactStringPlaceholders = new Map([
 	["closer", "cleanup"],
 	["constructors", "Instance"],
 	["directive-no-restricted-disable", "no-console"],
+	["eventsImportPaths", "server/networking"],
 	["ignore", "oxlint-disable"],
 	["ignoreComponents", "LegacyPanel"],
 	["ignoreHooks", "useEntity"],
 	["ignoreShorthands", "props"],
-	["eventsImportPaths", "server/networking"],
 	["loopExitCalls", "task.wait"],
 	["name", "useCustomEffect"],
 	["onlyHooks", "useState"],
@@ -172,9 +172,9 @@ function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 				{
 					environment: "roblox-ts",
 					hooks: [
-						{ allowAsync: false, name: "useEffect" },
-						{ allowAsync: false, name: "useLayoutEffect" },
-						{ allowAsync: false, name: "useInsertionEffect" },
+						{ name: "useEffect", allowAsync: false },
+						{ name: "useLayoutEffect", allowAsync: false },
+						{ name: "useInsertionEffect", allowAsync: false },
 					],
 				},
 			];
@@ -236,9 +236,9 @@ function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 				{
 					hooks: [
 						{
+							name: "useCustomEffect",
 							closureIndex: 0,
 							dependenciesIndex: 1,
-							name: "useCustomEffect",
 							stableResult: false,
 						},
 					],
@@ -375,9 +375,9 @@ function createObjectOptions(schema: SchemaRecord): ReadonlyArray<ObjectOption> 
 	return Object.entries(schema.properties).map(([name, optionSchema]) => {
 		const option = isSchemaRecord.allows(optionSchema) ? optionSchema : {};
 		return {
+			name,
 			defaultValue: formatDefaultValue(name, option),
 			description: isString(option.description) ? option.description : undefined,
-			name,
 			required: required.has(name),
 			type: getSchemaType(option),
 		};

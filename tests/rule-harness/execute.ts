@@ -88,9 +88,9 @@ function getDiagnosticStart(diagnostic: RuntimeDiagnostic): number {
 function createMutableContext(ruleName: string): MutableHarnessContext {
 	const unset = createUnsetSourceCode();
 	const context: MutableHarnessContext = {
+		id: ruleName,
 		diagnostics: createDiagnosticCollector({}),
 		filename: "",
-		id: ruleName,
 		options: [],
 		physicalFilename: "",
 		report(diagnostic): void {

@@ -8,24 +8,24 @@ describe("prefer-modding-inspect", () => {
 		invalid: [
 			{
 				code: "const x: ReadonlyRecord<MyEnum, true> = { a: true, b: true };",
-				documentation: { id: "fail", title: "boolean record literal" },
-				errors: [{ messageId: "preferModdingInspect" }],
 				output: "const x = Modding.inspect<Record<MyEnum, true>>();",
+				errors: [{ messageId: "preferModdingInspect" }],
+				documentation: { id: "fail", title: "boolean record literal" },
 			},
 			{
 				code: "const x: Record<MyEnum, true> = { a: true, b: true };",
-				errors: [{ messageId: "preferModdingInspect" }],
 				output: "const x = Modding.inspect<Record<MyEnum, true>>();",
+				errors: [{ messageId: "preferModdingInspect" }],
 			},
 			{
 				code: "const x: ReadonlyRecord<SomeEnum, true> = { memberA: true, memberB: true, memberC: true };",
-				errors: [{ messageId: "preferModdingInspect" }],
 				output: "const x = Modding.inspect<Record<SomeEnum, true>>();",
+				errors: [{ messageId: "preferModdingInspect" }],
 			},
 			{
 				code: "export const x: ReadonlyRecord<MyEnum, true> = { a: true };",
-				errors: [{ messageId: "preferModdingInspect" }],
 				output: "export const x = Modding.inspect<Record<MyEnum, true>>();",
+				errors: [{ messageId: "preferModdingInspect" }],
 			},
 		],
 		valid: [

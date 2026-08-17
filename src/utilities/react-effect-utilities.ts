@@ -1,30 +1,31 @@
-/*!
- * react-effect-utilities.ts
- *
- * Ported analysis helpers from eslint-plugin-react-you-might-not-need-an-effect.
- *
- * MIT License
- *
- * Copyright (c) 2025 Nick van Dyke
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// !
+// react-effect-utilities.ts
+//
+// Ported analysis helpers from
+// eslint-plugin-react-you-might-not-need-an-effect.
+//
+// MIT License
+//
+// Copyright (c) 2025 Nick van Dyke
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
@@ -39,7 +40,7 @@ const EFFECT_HOOK_NAME = "useEffect";
 const USE_STATE_HOOK_NAME = "useState";
 const USE_REF_HOOK_NAME = "useRef";
 
-export type EffectFunctionNode = ESTree.ArrowFunctionExpression | ESTree.Function | ESTree.BlockStatement;
+export type EffectFunctionNode = ESTree.ArrowFunctionExpression | ESTree.BlockStatement | ESTree.Function;
 
 export type ReactOwner = ESTree.Function | ESTree.VariableDeclarator;
 
@@ -200,16 +201,15 @@ function resolveEffectFunction(
 	const definition = reference?.resolved?.defs[0];
 	/* v8 ignore start -- @preserve identifier callbacks resolve to a definition value node in every reachable case (probed via setDerivedName and deferredCallback). */
 	if (definition === undefined) return undefined;
-	const definitionNode = getDefinitionValueNode(definition);
+
+	const definitionNode = getDefinitionValueNode(definition.node);
 	if (definitionNode === undefined) return undefined;
-	if (
-		definitionNode.type === "ArrowFunctionExpression" ||
+
+	return definitionNode.type === "ArrowFunctionExpression" ||
 		definitionNode.type === "FunctionExpression" ||
 		definitionNode.type === "BlockStatement"
-	) {
-		return definitionNode;
-	}
-	return undefined;
+		? definitionNode
+		: undefined;
 	/* v8 ignore stop */
 }
 
@@ -217,36 +217,27 @@ function getDependencyReferences(
 	state: ReactEffectAnalysisState,
 	node: ESTree.CallExpression,
 ): ReadonlyArray<Reference> | undefined {
-	const [, depsArray] = node.arguments;
-	if (depsArray?.type !== "ArrayExpression") return undefined;
-	return state.scope.getDownstreamReferences(depsArray);
+	const [, dependenciesArray] = node.arguments;
+	if (dependenciesArray?.type !== "ArrayExpression") return undefined;
+	return state.scope.getDownstreamReferences(dependenciesArray);
 }
 
 function getEffectCleanup(functionNode: EffectFunctionNode): ESTree.ReturnStatement | undefined {
 	if (functionNode.type !== "ArrowFunctionExpression" && functionNode.type !== "FunctionExpression") {
 		return undefined;
 	}
-	if (functionNode.body?.type !== "BlockStatement") {
-		return undefined;
-	}
+	if (functionNode.body?.type !== "BlockStatement") return undefined;
 	const { body } = functionNode.body;
 	for (let index = body.length - 1; index >= 0; index -= 1) {
 		const statement = body[index];
-		if (statement?.type === "ReturnStatement" && statement.argument !== null) {
-			return statement;
-		}
+		if (statement?.type === "ReturnStatement" && statement.argument !== null) return statement;
 	}
 	return undefined;
 }
 
-function getDefinitionValueNode(definition: { node: ESTree.Node }): ESTree.Node | undefined {
-	// `def.node.init` is for ArrowFunctionExpression, VariableDeclarator, (etc?).
-	// `def.node.body` is for FunctionDeclaration.
-	const { node } = definition;
+function getDefinitionValueNode(node: ESTree.Node): ESTree.Node | undefined {
 	/* v8 ignore start -- @preserve definitions from the parser are always VariableDeclarators (init) or FunctionDeclarations (body); the fallback arms are unreachable. */
-	if ("init" in node) {
-		return node.init ?? undefined;
-	}
+	if ("init" in node) return node.init ?? undefined;
 	if ("body" in node) {
 		const { body } = node;
 		return isNode(body) ? body : undefined;
@@ -278,8 +269,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 		}
 		const [firstArgument] = candidate.init.arguments;
 		/* v8 ignore start -- @preserve the arrow arm is exercised by the memo/withRouter cases; the FunctionExpression arm never executes (probed). */
-		if (firstArgument?.type === "ArrowFunctionExpression") return true;
-		return firstArgument?.type === "FunctionExpression";
+		return firstArgument?.type === "ArrowFunctionExpression" || firstArgument?.type === "FunctionExpression";
 		/* v8 ignore stop */
 	}
 
@@ -294,7 +284,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 			variable?.references.some((candidateRef) => {
 				const { parent } = candidateRef.identifier;
 				if (parent.type !== "CallExpression") return false;
-				if (!parent.arguments.some((argument) => argument === candidateRef.identifier)) return false;
+				if (parent.arguments.every((argument) => argument !== candidateRef.identifier)) return false;
 				return parent.callee.type === "Identifier" && !KNOWN_PURE_HOCS.has(parent.callee.name);
 			}) ?? false
 		);
@@ -346,9 +336,6 @@ function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 }
 /* v8 ignore stop */
 
-// Does not include `useLayoutEffect`.
-// When used correctly, it interacts with the DOM = external system = (probably) valid effect.
-// When used incorrectly, it's probably too difficult to accurately analyze anyway.
 function isUseEffect(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	/* v8 ignore next -- isUseEffect is only called with CallExpression nodes from the program call index. @preserve */
 	if (node.type !== "CallExpression") return false;
@@ -365,13 +352,13 @@ function isReactMemberCall(state: ReactEffectAnalysisState, node: ESTree.MemberE
 	return node.property.name === name && isReactNamespaceImport(state, node.object);
 }
 
-function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.Node): Variable | undefined {
+function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.Node): undefined | Variable {
 	/* v8 ignore start -- @preserve callers only pass identifier-shaped nodes from parser-valid ASTs. */
 	if (identifier.type !== "Identifier") return undefined;
 	/* v8 ignore stop */
 	const { name } = identifier;
 	const scope = state.sourceCode.getScope(identifier);
-	let current: Scope | null = scope;
+	let current: null | Scope = scope;
 	while (current !== null) {
 		const variable = current.set.get(name);
 		if (variable !== undefined) return variable;
@@ -380,7 +367,7 @@ function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.N
 	return undefined;
 }
 function isReactNamedImportVariable(
-	variable: Variable | undefined,
+	variable: undefined | Variable,
 	importedName: string,
 	reactSources: ReadonlySet<string>,
 ): boolean {
@@ -410,7 +397,7 @@ function matchesNamedImport(
 	return false;
 }
 
-function isReactNamespaceImportVariable(variable: Variable | undefined, reactSources: ReadonlySet<string>): boolean {
+function isReactNamespaceImportVariable(variable: undefined | Variable, reactSources: ReadonlySet<string>): boolean {
 	/* v8 ignore start -- @preserve callers pass resolved variables from parser-valid import bindings. */
 	if (variable === undefined) return false;
 	for (const definition of variable.defs) {
@@ -456,17 +443,17 @@ function getStateElements(
 	state: ReactEffectAnalysisState,
 	reference: Reference,
 ): ESTree.ArrayPattern["elements"] | undefined {
-	const definition = reference.resolved?.defs.find((candidate) => isUseStateVariableDefinition(state, candidate));
+	const definition = reference.resolved?.defs.find((candidate) =>
+		isUseStateVariableDefinition(state, candidate.node),
+	);
 	if (definition?.node.type !== "VariableDeclarator" || definition.node.id.type !== "ArrayPattern") {
 		return undefined;
 	}
 	const { elements } = definition.node.id;
-	if (elements.length !== 1 && elements.length !== 2) return undefined;
-	return elements;
+	return elements.length !== 1 && elements.length !== 2 ? undefined : elements;
 }
 
-function isUseStateVariableDefinition(state: ReactEffectAnalysisState, definition: { node: ESTree.Node }): boolean {
-	const { node } = definition;
+function isUseStateVariableDefinition(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	return (
 		node.type === "VariableDeclarator" &&
 		node.init?.type === "CallExpression" &&
@@ -475,7 +462,6 @@ function isUseStateVariableDefinition(state: ReactEffectAnalysisState, definitio
 	);
 }
 
-// Returns false for props of HOCs (e.g. `withRouter`) because they usually have side effects.
 function isProperty(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	return (
 		reference.resolved?.defs.some((definition) => {
@@ -491,7 +477,8 @@ function isProperty(state: ReactEffectAnalysisState, reference: Reference): bool
 
 function isConstant(reference: Reference): boolean {
 	// v8 mis-attributes the `||` chain arms; the TemplateLiteral/Array/Object
-	// arms are exercised by the constant-leaf cases in react-effect-utilities.test.ts.
+	// arms are exercised by the constant-leaf cases in
+	// react-effect-utilities.test.ts.
 	/* v8 ignore start -- @preserve all four literal-shape arms are covered by the constant-leaf test cases; the collector folds the chain. */
 	return (reference.resolved?.defs ?? []).some((definition) => {
 		if (definition.node.type !== "VariableDeclarator") return false;
@@ -507,7 +494,8 @@ function isConstant(reference: Reference): boolean {
 }
 
 function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
-	// v8 folds the guard arms; the corpus exercises both declarator shapes (24+ calls via isRefCall).
+	// v8 folds the guard arms; the corpus exercises both declarator shapes (24+
+	// calls via isRefCall).
 	/* v8 ignore start -- @preserve both guard arms are covered by the isRefCall corpus cases; the collector attributes them to the some() call. */
 	return (
 		reference.resolved?.defs.some((definition) => {
@@ -519,10 +507,6 @@ function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	/* v8 ignore stop */
 }
 
-// Whether the reference's `current` property is being accessed.
-// Heuristic for whether the reference is a React ref object.
-// Because we don't always have access to the `useRef` call itself.
-// For example when receiving a ref from props.
 function isRefCurrent(reference: Reference): boolean {
 	const { parent } = reference.identifier;
 	return (
@@ -581,11 +565,6 @@ function getDeclaringNode(node: ESTree.Node): ESTree.Node {
 	return parent.type === "CallExpression" ? parent.parent : parent;
 }
 
-// Returns the component or custom hook that contains the `useEffect` node.
-//
-// Per the `isFunctionalComponent` etc. internals, this will return undefined for some non-idiomatic component definitions.
-// e.g. `function buildComponent(arg1, arg2) { return <div />; }`
-// Not sure we can account for that without introducing false positives, and those are rare and arguably bad practice.
 function findEnclosingReactNode(
 	state: ReactEffectAnalysisState,
 	node: ESTree.Node | null | undefined,
@@ -595,12 +574,9 @@ function findEnclosingReactNode(
 	if (isFunctionalComponent(node) || isFunctionalHOC(state, node) || isCustomHook(node)) return toReactOwner(node);
 
 	const { parent } = node;
-	if (parent === null) return undefined;
-	return findEnclosingReactNode(state, parent);
+	return parent === null ? undefined : findEnclosingReactNode(state, parent);
 }
 
-// Extracts the component/hook name from a node found by `findEnclosingReactNode`.
-// Returns `undefined` for anonymous functions or when the node cannot be identified.
 function getComponentName(node: ReactOwner | undefined): string | undefined {
 	/* v8 ignore next 2 -- rules only call getComponentName with a resolved owner; the undefined guard is unreachable. @preserve */
 	if (node === undefined) return undefined;
@@ -626,8 +602,7 @@ function toReactOwner(node: ESTree.Node): ReactOwner | undefined {
 		return node;
 	}
 	/* v8 ignore start -- @preserve toReactOwner is only called with nodes already matched as components/HOCs/custom hooks; the fallback never executes. */
-	if (node.type === "VariableDeclarator") return node;
-	return undefined;
+	return node.type === "VariableDeclarator" ? node : undefined;
 	/* v8 ignore stop */
 }
 

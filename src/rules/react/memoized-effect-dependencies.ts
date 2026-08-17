@@ -71,11 +71,11 @@ function registerConfiguredEffectHooks(
 	rawOptions: Record<PropertyKey, unknown>,
 	effectHooks: Map<string, number>,
 ): void {
-	if (!("hooks" in rawOptions && Array.isArray(rawOptions.hooks))) return;
+	if (!("hooks" in rawOptions) || !Array.isArray(rawOptions.hooks)) return;
 
 	for (const hook of rawOptions.hooks) {
 		/* v8 ignore next -- @preserve rule schema rejects hook entries without string names. */
-		if (!(isRecord(hook) && "name" in hook && isStringRaw(hook.name))) continue;
+		if (!isRecord(hook) || !("name" in hook) || !isStringRaw(hook.name)) continue;
 		const dependenciesIndex =
 			"dependenciesIndex" in hook && isNumberRaw(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
 		effectHooks.set(hook.name, dependenciesIndex);
@@ -137,8 +137,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			return undefined;
 		}
 
-		function isMemoHookCall(node: ESTree.CallExpression): boolean {
-			const { callee } = node;
+		function isMemoHookCall({ callee }: ESTree.CallExpression): boolean {
 			if (callee.type === "Identifier") return memoHookIdentifiers.has(callee.name);
 			if (callee.type === "MemberExpression") {
 				const hookName = getMemberHookName(callee, reactNamespaces);
@@ -147,8 +146,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			return false;
 		}
 
-		function getStableHookKind(node: ESTree.CallExpression): "index1" | "whole" | undefined {
-			const { callee } = node;
+		function getStableHookKind({ callee }: ESTree.CallExpression): "index1" | "whole" | undefined {
 			if (callee.type === "Identifier") {
 				const importedName = stableHookIdentifiers.get(callee.name);
 				if (importedName === undefined) return undefined;
@@ -246,12 +244,12 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 
 			const rootIdentifier = getRootIdentifier(unwrapped);
 			if (rootIdentifier === undefined) return "unknown";
+
 			const variable = resolveVariable(rootIdentifier);
 			return variable === undefined ? "unknown" : getVariableStability(variable);
 		}
 
-		function getDependenciesIndex(node: ESTree.CallExpression): number | undefined {
-			const { callee } = node;
+		function getDependenciesIndex({ callee }: ESTree.CallExpression): number | undefined {
 			if (callee.type === "Identifier") return effectHookIdentifiers.get(callee.name);
 			if (callee.type === "MemberExpression") {
 				const hookName = getMemberHookName(callee, reactNamespaces);
@@ -327,20 +325,20 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 					},
 					hooks: {
 						default: Array.from(DEFAULT_EFFECT_HOOKS, ([name, dependenciesIndex]) => ({
-							dependenciesIndex,
 							name,
+							dependenciesIndex,
 						})),
 						description: "Effect hooks checked by default; configured entries are added to this set.",
 						items: {
 							additionalProperties: false,
 							properties: {
-								dependenciesIndex: {
-									description: "Index of the dependencies array for validation",
-									type: "number",
-								},
 								name: {
 									description: "The name of the hook",
 									type: "string",
+								},
+								dependenciesIndex: {
+									description: "Index of the dependencies array for validation",
+									type: "number",
 								},
 							},
 							required: ["name"],

@@ -6,7 +6,7 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 const DEFAULT_MAXIMUM_STATEMENTS = 1;
 
 function getMaximumStatements(value: unknown): number {
-	if (!(isRecord(value) && isNumberRaw(value.maximumStatements))) return DEFAULT_MAXIMUM_STATEMENTS;
+	if (!isRecord(value) || !isNumberRaw(value.maximumStatements)) return DEFAULT_MAXIMUM_STATEMENTS;
 	return value.maximumStatements;
 }
 

@@ -9,7 +9,7 @@ const noSpecFileExtension = createRule("no-spec-file-extension", "naming", {
 		return {
 			Program(node): void {
 				const { filename } = context;
-				if (!(filename && SPEC_EXTENSION_PATTERN.test(filename))) return;
+				if (filename.length === 0 || !SPEC_EXTENSION_PATTERN.test(filename)) return;
 
 				context.report({
 					messageId: "noSpecFileExtension",

@@ -1,14 +1,16 @@
 {
 	"compilerOptions": {
+		"target": "ESNext",
+		"lib": ["ESNext"],
+		"moduleDetection": "force",
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"resolveJsonModule": true,
+		"types": ["bun", "node"],
 		"allowImportingTsExtensions": true,
 		"allowJs": false,
-		"esModuleInterop": true,
+		"strict": true,
 		"exactOptionalPropertyTypes": true,
-		"lib": ["ESNext"],
-		"module": "preserve",
-		"moduleDetection": "force",
-		"moduleResolution": "bundler",
-		"noEmit": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
@@ -16,13 +18,11 @@
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"target": "ESNext",
-		"types": ["bun", "node"],
-		"verbatimModuleSyntax": true
+		"noEmit": true,
+		"esModuleInterop": true,
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true
 	},
-	"exclude": ["node_modules"],
-	"include": ["hooks/**/*.ts"]
+	"include": ["hooks/**/*.ts"],
+	"exclude": ["node_modules"]
 }

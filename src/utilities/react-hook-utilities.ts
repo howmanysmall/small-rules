@@ -81,17 +81,15 @@ function pushSlopValue(value: unknown, parent: ESTree.Node, worklist: Array<ESTr
 	worklist.push(value);
 }
 
-export function getBindingPropertyKeyName(property: ESTree.BindingProperty): string | undefined {
-	const { key } = property;
+export function getBindingPropertyKeyName({ key }: ESTree.BindingProperty): string | undefined {
 	if (key.type === "Identifier") return key.name;
 	if (key.type === "Literal" && isStringRaw(key.value)) return key.value;
 	return undefined;
 }
 
-export function getBindingPropertyValueIdentifier(
-	property: ESTree.BindingProperty,
-): ESTree.BindingIdentifier | undefined {
-	const { value } = property;
+export function getBindingPropertyValueIdentifier({
+	value,
+}: ESTree.BindingProperty): ESTree.BindingIdentifier | undefined {
 	if (value.type === "Identifier") return value;
 	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
 	return undefined;

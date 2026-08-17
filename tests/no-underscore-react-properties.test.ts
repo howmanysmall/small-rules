@@ -13,8 +13,8 @@ describe("no-underscore-react-props", () => {
     _tooltipGradient={tooltipGradient}
 />;
 `,
-				documentation: { id: "fail", title: "Underscored React prop" },
 				errors: [{ data: { propName: "_tooltipGradient" }, messageId: "noUnderscoreReactProperty" }],
+				documentation: { id: "fail", title: "Underscored React prop" },
 			},
 			{
 				code: `

@@ -15,13 +15,13 @@ describe("prefer-pascal-case-enums", () => {
 			// All caps
 			{
 				code: "enum SORTORDER {MostRecent, LeastRecent, Newest, Oldest}",
-				documentation: { id: "fail", title: "All-caps enum name" },
 				errors: [
 					{
 						message:
 							"Enum 'SORTORDER' uses non-standard casing. TypeScript convention requires PascalCase for enum names and members to distinguish them from variables (camelCase) and constants (UPPER_CASE). Rename to PascalCase: capitalize first letter of each word, no underscores.",
 					},
 				],
+				documentation: { id: "fail", title: "All-caps enum name" },
 			},
 			// All lowercase
 			{ code: "enum sortorder {MostRecent, LeastRecent, Newest, Oldest}", errors: [errorWithName("sortorder")] },
@@ -72,7 +72,8 @@ describe("prefer-pascal-case-enums", () => {
 			// Single letter enum name
 			{ code: "enum X {Foo, Bar}" },
 
-			// Non-ASCII identifiers are out of scope for an ASCII-only casing rule
+			// Non-ASCII identifiers are out of scope for an ASCII-only casing
+			// rule
 			{ code: "enum CommuniquéMode {Roblox, Studio}" },
 			{ code: "enum Mode {Communiqué, Studio}" },
 		],

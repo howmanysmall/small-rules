@@ -2,11 +2,12 @@ import { readFile } from "node:fs/promises";
 import { type } from "arktype";
 import { defineConfig } from "tsdown";
 
+const isStringRecord = type("Record<string, string>").readonly();
 const isPackageJsonDependencies = type({
 	"+": "ignore",
-	"dependencies?": type("Record<string, string>").readonly().or("null"),
-	"optionalDependencies?": type("Record<string, string>").readonly().or("null"),
-	"peerDependencies?": type("Record<string, string>").readonly().or("null"),
+	"dependencies?": isStringRecord.or("null"),
+	"optionalDependencies?": isStringRecord.or("null"),
+	"peerDependencies?": isStringRecord.or("null"),
 }).readonly();
 
 const ALWAYS_KEEP = new Set(["oxlint-plugin-utilities"]);
@@ -15,11 +16,7 @@ const NATIVE_NEVER_BUNDLE = ["oxc-resolver", /^@oxc-resolver\//u, "yuku-parser",
 async function getNeverBundleAsync(): Promise<Array<string>> {
 	const fileContent = await readFile("package.json", "utf8");
 	const packageJson = isPackageJsonDependencies(JSON.parse(fileContent));
-	if (packageJson instanceof type.errors) {
-		const error = new TypeError(`Invalid package.json: ${packageJson.summary}`);
-		Error.captureStackTrace(error, getNeverBundleAsync);
-		throw error;
-	}
+	if (packageJson instanceof type.errors) throw new TypeError(`Invalid package.json: ${packageJson.summary}`);
 
 	const baseNeverBundle = [
 		...Object.keys(packageJson.dependencies ?? {}),
@@ -27,8 +24,7 @@ async function getNeverBundleAsync(): Promise<Array<string>> {
 		...Object.keys(packageJson.optionalDependencies ?? {}),
 	];
 
-	const neverBundle = baseNeverBundle.filter((packageName) => !ALWAYS_KEEP.has(packageName));
-	return neverBundle;
+	return baseNeverBundle.filter((packageName) => !ALWAYS_KEEP.has(packageName));
 }
 
 const neverBundle = await getNeverBundleAsync();

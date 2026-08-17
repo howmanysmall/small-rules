@@ -14,7 +14,11 @@ import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-type DependencyMode = "aggressive" | "empty-or-omitted" | "non-updating";
+export const enum DependencyMode {
+	Aggressive = "aggressive",
+	EmptyOrOmitted = "empty-or-omitted",
+	NonUpdating = "non-updating",
+}
 
 interface NormalizedOptions {
 	readonly dependencyMode: DependencyMode;
@@ -23,11 +27,12 @@ interface NormalizedOptions {
 }
 
 function getDependencyMode(value: unknown): DependencyMode {
-	if (!(isRecord(value) && isStringRaw(value.dependencyMode))) return "non-updating";
-	if (value.dependencyMode === "empty-or-omitted" || value.dependencyMode === "aggressive") {
+	if (!isRecord(value) || !isStringRaw(value.dependencyMode)) return DependencyMode.NonUpdating;
+	// oxlint-disable-next-line typescript/no-unsafe-enum-comparison -- shut up lol
+	if (value.dependencyMode === DependencyMode.EmptyOrOmitted || value.dependencyMode === DependencyMode.Aggressive) {
 		return value.dependencyMode;
 	}
-	return "non-updating";
+	return DependencyMode.NonUpdating;
 }
 
 function normalizeOptions(raw: unknown): NormalizedOptions {
@@ -65,17 +70,17 @@ function getMemoCallbackExpression(node: ESTree.CallExpression): ESTree.Expressi
 
 function dependenciesAreNonUpdating(dependenciesKind: DependenciesKind, options: NormalizedOptions): boolean {
 	switch (options.dependencyMode) {
-		case "aggressive":
+		case DependencyMode.Aggressive:
 			return true;
 
-		case "empty-or-omitted": {
+		case DependencyMode.EmptyOrOmitted: {
 			return (
 				dependenciesKind === DependenciesKind.MissingOrOmitted ||
 				dependenciesKind === DependenciesKind.EmptyArray
 			);
 		}
 
-		case "non-updating": {
+		case DependencyMode.NonUpdating: {
 			return (
 				dependenciesKind === DependenciesKind.MissingOrOmitted ||
 				dependenciesKind === DependenciesKind.EmptyArray ||
@@ -148,9 +153,9 @@ const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 				additionalProperties: false,
 				properties: {
 					dependencyMode: {
-						default: "non-updating",
+						default: DependencyMode.NonUpdating,
 						description: "Dependency-array mode used to decide whether a memoized value is static.",
-						enum: ["empty-or-omitted", "non-updating", "aggressive"],
+						enum: [DependencyMode.EmptyOrOmitted, DependencyMode.Aggressive, DependencyMode.NonUpdating],
 						type: "string",
 					},
 					environment: {

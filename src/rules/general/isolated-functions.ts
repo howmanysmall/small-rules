@@ -196,13 +196,12 @@ function reasonForIsolatedFunction(
 	);
 }
 
-function isTypePositionIdentifier(identifier: ESTree.Node): boolean {
-	const { parent } = identifier;
+function isTypePositionIdentifier({ parent }: ESTree.Node): boolean {
 	return parent !== null && (parent.type === "TSTypeReference" || parent.type === "TSTypeQuery");
 }
 
 function isScopeInside(inner: Scope, outer: Scope): boolean {
-	let current: Scope | null = inner;
+	let current: null | Scope = inner;
 	while (current !== null) {
 		if (current === outer) return true;
 		current = current.upper;
@@ -210,8 +209,7 @@ function isScopeInside(inner: Scope, outer: Scope): boolean {
 	return false;
 }
 
-function isExternalReference(functionScope: Scope, reference: Reference): boolean {
-	const { resolved } = reference;
+function isExternalReference(functionScope: Scope, { resolved }: Reference): boolean {
 	if (resolved?.scope === undefined) return true;
 	return !isScopeInside(resolved.scope, functionScope);
 }

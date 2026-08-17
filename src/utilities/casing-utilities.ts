@@ -2,7 +2,7 @@
 
 const SPLIT_LOWER_TO_UPPER = /(?<first>[\p{Ll}\d])(?<second>\p{Lu})/gu;
 const SPLIT_UPPER_TO_UPPER = /(?<first>\p{Lu})(?<second>\p{Lu}\p{Ll})/gu;
-const SPLIT_REPLACE_VALUE = `$<first>\0$<second>`;
+const SPLIT_REPLACE_VALUE = "$<first>\0$<second>";
 
 export function toPascalCase(value: string): string {
 	const trimmed = value.trim();

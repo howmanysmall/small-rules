@@ -19,20 +19,22 @@ interface ConstantBooleanResult {
 	readonly value?: boolean;
 }
 
+type LoopNode =
+	| ESTree.DoWhileStatement
+	| ESTree.ForInStatement
+	| ESTree.ForOfStatement
+	| ESTree.ForStatement
+	| ESTree.WhileStatement;
+
+const NON_CONSTANT_VALUE: ConstantValueResult = { constant: false };
+const NON_CONSTANT_BOOLEAN: ConstantBooleanResult = { constant: false };
+
 function toConstantValue(value: unknown): ConstantValueResult {
 	return { constant: true, value };
 }
 
-function toNonConstantValue(): ConstantValueResult {
-	return { constant: false };
-}
-
 function toConstantBoolean(value: boolean): ConstantBooleanResult {
 	return { constant: true, value };
-}
-
-function toNonConstantBoolean(): ConstantBooleanResult {
-	return { constant: false };
 }
 
 function normalizeLoopExitCalls(options: NoConstantConditionWithBreakOptions | undefined): ReadonlySet<string> {
@@ -72,11 +74,89 @@ function isConfiguredLoopExitCall(callExpression: ESTree.CallExpression, loopExi
 	return loopExitCalls.has(calleePath);
 }
 
-function expressionOrSpreadContainsConfiguredLoopExit(
-	node: ESTree.Expression | ESTree.SpreadElement,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	return expressionContainsConfiguredLoopExit(node.type === "SpreadElement" ? node.argument : node, loopExitCalls);
+function addArrayElementsToPending(expression: ESTree.ArrayExpression, pending: Array<ESTree.Expression>): void {
+	for (const element of expression.elements) {
+		if (element !== null) pending.push(element.type === "SpreadElement" ? element.argument : element);
+	}
+}
+
+function addCallArgumentsToPending(
+	arguments_: ReadonlyArray<ESTree.Expression | ESTree.SpreadElement>,
+	pending: Array<ESTree.Expression>,
+): void {
+	for (const argument of arguments_) {
+		pending.push(argument.type === "SpreadElement" ? argument.argument : argument);
+	}
+}
+
+function addExpressionChildrenToPending(expression: ESTree.Expression, pending: Array<ESTree.Expression>): void {
+	switch (expression.type) {
+		case "ArrayExpression": {
+			addArrayElementsToPending(expression, pending);
+			break;
+		}
+
+		case "AssignmentExpression": {
+			pending.push(expression.right);
+			break;
+		}
+
+		case "AwaitExpression":
+		case "UnaryExpression":
+		case "UpdateExpression": {
+			pending.push(expression.argument);
+			break;
+		}
+
+		case "BinaryExpression": {
+			if (expression.left.type !== "PrivateIdentifier") pending.push(expression.left);
+			pending.push(expression.right);
+			break;
+		}
+
+		case "CallExpression":
+		case "NewExpression": {
+			pending.push(expression.callee);
+			addCallArgumentsToPending(expression.arguments, pending);
+			break;
+		}
+
+		case "ConditionalExpression": {
+			pending.push(expression.test, expression.consequent, expression.alternate);
+			break;
+		}
+
+		case "LogicalExpression": {
+			pending.push(expression.left, expression.right);
+			break;
+		}
+
+		case "MemberExpression": {
+			pending.push(expression.object);
+			if (expression.computed) pending.push(expression.property);
+			break;
+		}
+
+		case "SequenceExpression":
+		case "TemplateLiteral": {
+			for (const subExpression of expression.expressions) pending.push(subExpression);
+			break;
+		}
+
+		case "TaggedTemplateExpression": {
+			pending.push(expression.tag);
+			for (const quasi of expression.quasi.expressions) pending.push(quasi);
+			break;
+		}
+
+		case "YieldExpression": {
+			if (expression.argument) pending.push(expression.argument);
+			break;
+		}
+
+		default:
+			break;
+	}
 }
 
 function expressionContainsConfiguredLoopExit(
@@ -84,147 +164,35 @@ function expressionContainsConfiguredLoopExit(
 	loopExitCalls: ReadonlySet<string>,
 ): boolean {
 	if (loopExitCalls.size === 0) return false;
-	const unwrapped = unwrapExpression(expression);
 
-	switch (unwrapped.type) {
-		case "ArrayExpression":
-			return arrayExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
+	const pending = [expression];
+	let index = 0;
+	while (index < pending.length) {
+		const current = pending[index++];
+		/* v8 ignore next -- @preserve index is bounded by pending.length. */
+		if (current === undefined) continue;
 
-		case "ArrowFunctionExpression":
-		case "ClassExpression":
-		case "FunctionExpression":
-			return false;
-
-		case "AssignmentExpression":
-			return expressionContainsConfiguredLoopExit(unwrapped.right, loopExitCalls);
-
-		case "AwaitExpression":
-			return expressionContainsConfiguredLoopExit(unwrapped.argument, loopExitCalls);
-
-		case "BinaryExpression":
-			return binaryExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
-
-		case "CallExpression":
-			return callExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
-
-		case "ConditionalExpression":
-			return conditionalContainsLoopExit(unwrapped, loopExitCalls);
-
-		case "LogicalExpression":
-			return logicalExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
-
-		case "MemberExpression":
-			return memberExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
-
-		case "NewExpression":
-			return newExpressionContainsConfiguredLoopExit(unwrapped, loopExitCalls);
-
-		case "SequenceExpression":
-			return unwrapped.expressions.some((part) => expressionContainsConfiguredLoopExit(part, loopExitCalls));
-
-		case "TaggedTemplateExpression":
-			return taggedTemplateContainsLoopExit(unwrapped, loopExitCalls);
-
-		case "TemplateLiteral":
-			return unwrapped.expressions.some((part) => expressionContainsConfiguredLoopExit(part, loopExitCalls));
-
-		case "UnaryExpression":
-		case "UpdateExpression":
-			return expressionContainsConfiguredLoopExit(unwrapped.argument, loopExitCalls);
-
-		case "YieldExpression":
-			return unwrapped.argument ? expressionContainsConfiguredLoopExit(unwrapped.argument, loopExitCalls) : false;
-
-		default:
-			return false;
-	}
-}
-
-function arrayExpressionContainsConfiguredLoopExit(
-	expression: ESTree.ArrayExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	for (const element of expression.elements) {
-		if (element === null) continue;
-		if (expressionOrSpreadContainsConfiguredLoopExit(element, loopExitCalls)) return true;
+		const unwrapped = unwrapExpression(current);
+		if (unwrapped.type === "CallExpression" && isConfiguredLoopExitCall(unwrapped, loopExitCalls)) return true;
+		addExpressionChildrenToPending(unwrapped, pending);
 	}
 
 	return false;
 }
 
-function binaryExpressionContainsConfiguredLoopExit(
-	expression: ESTree.BinaryExpression | ESTree.PrivateInExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	const { left } = expression;
-	if (left.type !== "PrivateIdentifier" && expressionContainsConfiguredLoopExit(left, loopExitCalls)) return true;
-	return expressionContainsConfiguredLoopExit(expression.right, loopExitCalls);
-}
-
-function callExpressionContainsConfiguredLoopExit(
-	expression: ESTree.CallExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	if (isConfiguredLoopExitCall(expression, loopExitCalls)) return true;
-	if (expressionContainsConfiguredLoopExit(expression.callee, loopExitCalls)) return true;
-	return expression.arguments.some((argument) =>
-		expressionOrSpreadContainsConfiguredLoopExit(argument, loopExitCalls),
-	);
-}
-
-function conditionalContainsLoopExit(
-	expression: ESTree.ConditionalExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	return (
-		expressionContainsConfiguredLoopExit(expression.test, loopExitCalls) ||
-		expressionContainsConfiguredLoopExit(expression.consequent, loopExitCalls) ||
-		expressionContainsConfiguredLoopExit(expression.alternate, loopExitCalls)
-	);
-}
-
-function logicalExpressionContainsConfiguredLoopExit(
-	expression: ESTree.LogicalExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	return (
-		expressionContainsConfiguredLoopExit(expression.left, loopExitCalls) ||
-		expressionContainsConfiguredLoopExit(expression.right, loopExitCalls)
-	);
-}
-
-function memberExpressionContainsConfiguredLoopExit(
-	expression: ESTree.MemberExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	if (expressionContainsConfiguredLoopExit(expression.object, loopExitCalls)) return true;
-	return expression.computed && expressionContainsConfiguredLoopExit(expression.property, loopExitCalls);
-}
-
-function newExpressionContainsConfiguredLoopExit(
-	expression: ESTree.NewExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	if (expressionContainsConfiguredLoopExit(expression.callee, loopExitCalls)) return true;
-	return expression.arguments.some((argument) =>
-		expressionOrSpreadContainsConfiguredLoopExit(argument, loopExitCalls),
-	);
-}
-
-function taggedTemplateContainsLoopExit(
-	expression: ESTree.TaggedTemplateExpression,
-	loopExitCalls: ReadonlySet<string>,
-): boolean {
-	if (expressionContainsConfiguredLoopExit(expression.tag, loopExitCalls)) return true;
-	return expression.quasi.expressions.some((part) => expressionContainsConfiguredLoopExit(part, loopExitCalls));
-}
-
 function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
-	const unwrapped = unwrapExpression(expression);
+	let unwrapped = unwrapExpression(expression);
+
+	while (unwrapped.type === "SequenceExpression") {
+		const lastExpression = unwrapped.expressions.at(-1);
+		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
+		if (!lastExpression) return NON_CONSTANT_VALUE;
+		unwrapped = unwrapExpression(lastExpression);
+	}
 
 	switch (unwrapped.type) {
 		case "ArrayExpression":
-			return toConstantValue(new Array<unknown>());
+			return toConstantValue([]);
 
 		case "ArrowFunctionExpression":
 		case "ClassExpression":
@@ -235,7 +203,7 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			if (unwrapped.name === "undefined") return toConstantValue(undefined);
 			if (unwrapped.name === "NaN") return toConstantValue(Number.NaN);
 			if (unwrapped.name === "Infinity") return toConstantValue(Number.POSITIVE_INFINITY);
-			return toNonConstantValue();
+			return NON_CONSTANT_VALUE;
 		}
 
 		case "Literal":
@@ -247,15 +215,8 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 		case "ObjectExpression":
 			return toConstantValue({});
 
-		case "SequenceExpression": {
-			const lastExpression = unwrapped.expressions.at(-1);
-			/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
-			if (!lastExpression) return toNonConstantValue();
-			return getConstantValue(lastExpression);
-		}
-
 		case "TemplateLiteral": {
-			if (unwrapped.expressions.length > 0) return toNonConstantValue();
+			if (unwrapped.expressions.length > 0) return NON_CONSTANT_VALUE;
 			/* v8 ignore next -- @preserve parsers keep at least one quasi for template literals. */
 			if (unwrapped.quasis.length === 0) return toConstantValue("");
 			/* v8 ignore next -- @preserve untagged template literal cooked values are strings in parser output. */
@@ -266,13 +227,13 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			return getUnaryConstantValue(unwrapped);
 
 		default:
-			return toNonConstantValue();
+			return NON_CONSTANT_VALUE;
 	}
 }
 
 function getLogicalConstantValue(expression: ESTree.LogicalExpression): ConstantValueResult {
 	const left = getConstantValue(expression.left);
-	if (!left.constant) return toNonConstantValue();
+	if (!left.constant) return NON_CONSTANT_VALUE;
 
 	if (expression.operator === "&&") {
 		if (left.value !== true) return toConstantValue(left.value);
@@ -293,18 +254,25 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 	if (expression.operator === "void") return toConstantValue(undefined);
 
 	const argument = getConstantValue(expression.argument);
-	if (!argument.constant) return toNonConstantValue();
+	if (!argument.constant) return NON_CONSTANT_VALUE;
 
 	// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
 	if (expression.operator === "!") return toConstantValue(!argument.value);
 	if (expression.operator === "+" && isNumberRaw(argument.value)) return toConstantValue(argument.value);
 	if (expression.operator === "-" && isNumberRaw(argument.value)) return toConstantValue(-argument.value);
 	if (expression.operator === "~" && isNumberRaw(argument.value)) return toConstantValue(~argument.value);
-	return toNonConstantValue();
+	return NON_CONSTANT_VALUE;
 }
 
 function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResult {
-	const unwrapped = unwrapExpression(expression);
+	let unwrapped = unwrapExpression(expression);
+
+	while (unwrapped.type === "SequenceExpression") {
+		const lastExpression = unwrapped.expressions.at(-1);
+		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
+		if (!lastExpression) return NON_CONSTANT_BOOLEAN;
+		unwrapped = unwrapExpression(lastExpression);
+	}
 
 	if (unwrapped.type === "ConditionalExpression") {
 		return getConditionalConstantBoolean(unwrapped);
@@ -314,15 +282,8 @@ function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResul
 		return getLogicalConstantBoolean(unwrapped);
 	}
 
-	if (unwrapped.type === "SequenceExpression") {
-		const lastExpression = unwrapped.expressions.at(-1);
-		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
-		if (!lastExpression) return toNonConstantBoolean();
-		return getConstantBoolean(lastExpression);
-	}
-
 	const value = getConstantValue(unwrapped);
-	if (!value.constant) return toNonConstantBoolean();
+	if (!value.constant) return NON_CONSTANT_BOOLEAN;
 	return toConstantBoolean(Boolean(value.value));
 }
 
@@ -333,12 +294,12 @@ function getConditionalConstantBoolean(expression: ESTree.ConditionalExpression)
 	const consequent = getConstantBoolean(expression.consequent);
 	const alternate = getConstantBoolean(expression.alternate);
 	if (consequent.constant && alternate.constant && consequent.value === alternate.value) return consequent;
-	return toNonConstantBoolean();
+	return NON_CONSTANT_BOOLEAN;
 }
 
 function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): ConstantBooleanResult {
 	const left = getConstantBoolean(expression.left);
-	if (!left.constant) return toNonConstantBoolean();
+	if (!left.constant) return NON_CONSTANT_BOOLEAN;
 
 	if (expression.operator === "&&") {
 		// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
@@ -352,17 +313,10 @@ function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): Consta
 	}
 
 	const leftValue = getConstantValue(expression.left);
-	if (!leftValue.constant) return toNonConstantBoolean();
+	if (!leftValue.constant) return NON_CONSTANT_BOOLEAN;
 	if (leftValue.value !== undefined) return toConstantBoolean(Boolean(leftValue.value));
 	return getConstantBoolean(expression.right);
 }
-
-type LoopNode =
-	| ESTree.DoWhileStatement
-	| ESTree.ForInStatement
-	| ESTree.ForOfStatement
-	| ESTree.ForStatement
-	| ESTree.WhileStatement;
 
 const LOOP_TYPES = new Set(["DoWhileStatement", "ForInStatement", "ForOfStatement", "ForStatement", "WhileStatement"]);
 function isLoopNode(node: ESTree.Node): node is LoopNode {
@@ -452,41 +406,41 @@ function statementContainsLoopExit(
 	loopNode: LoopNode,
 	loopExitCalls: ReadonlySet<string>,
 ): boolean {
-	switch (statement.type) {
+	let currentStatement = statement;
+	while (currentStatement.type === "LabeledStatement") currentStatement = currentStatement.body;
+
+	switch (currentStatement.type) {
 		case "BlockStatement": {
-			return statement.body.some((bodyStatement) =>
+			return currentStatement.body.some((bodyStatement) =>
 				statementContainsLoopExit(bodyStatement, loopNode, loopExitCalls),
 			);
 		}
 
 		case "BreakStatement":
-			return breaksTargetLoop(statement, loopNode);
+			return breaksTargetLoop(currentStatement, loopNode);
 
 		case "DoWhileStatement":
 		case "WhileStatement":
-			return loopStatementContainsLoopExit(statement, loopNode, loopExitCalls);
+			return loopStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		case "ExpressionStatement":
-			return expressionContainsConfiguredLoopExit(statement.expression, loopExitCalls);
+			return expressionContainsConfiguredLoopExit(currentStatement.expression, loopExitCalls);
 
 		case "ForInStatement":
 		case "ForOfStatement":
-			return forEachStatementContainsLoopExit(statement, loopNode, loopExitCalls);
+			return forEachStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		case "ForStatement":
-			return forStatementContainsLoopExit(statement, loopNode, loopExitCalls);
+			return forStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		case "IfStatement":
-			return ifStatementContainsLoopExit(statement, loopNode, loopExitCalls);
-
-		case "LabeledStatement":
-			return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
+			return ifStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		case "ReturnStatement":
 			return true;
 
 		case "SwitchStatement": {
-			return statement.cases.some((switchCase) =>
+			return currentStatement.cases.some((switchCase) =>
 				switchCase.consequent.some((consequent) =>
 					statementContainsLoopExit(consequent, loopNode, loopExitCalls),
 				),
@@ -494,16 +448,16 @@ function statementContainsLoopExit(
 		}
 
 		case "TryStatement":
-			return tryStatementContainsLoopExit(statement, loopNode, loopExitCalls);
+			return tryStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		case "VariableDeclaration": {
-			return statement.declarations.some((declaration) =>
+			return currentStatement.declarations.some((declaration) =>
 				declaration.init ? expressionContainsConfiguredLoopExit(declaration.init, loopExitCalls) : false,
 			);
 		}
 
 		case "WithStatement":
-			return withStatementContainsLoopExit(statement, loopNode, loopExitCalls);
+			return withStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		default:
 			return false;
