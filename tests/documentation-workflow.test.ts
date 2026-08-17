@@ -1,3 +1,4 @@
+// oxlint-disable unicorn-js/name-replacements -- you annoy me.
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
