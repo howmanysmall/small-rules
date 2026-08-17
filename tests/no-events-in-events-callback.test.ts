@@ -149,6 +149,7 @@ import { Events } from "server/networking";
 	Events.units.unequipUnit.connect((player: Player): void => {
 	    let targetPlayer: Player | undefined;
 	    ({ targetPlayer } = { targetPlayer: player });
+	    ({ targetPlayer } = { targetPlayer: player });
 	    Events.promptNotification.fire(targetPlayer, "error");
 	});
 	`,

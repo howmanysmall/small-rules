@@ -183,8 +183,8 @@ function mergeCoveredPaths(coveredPaths: Array<ReadonlyArray<BranchStep>>): bool
 	const pair = findFirstMergeablePair(coveredPaths);
 	if (pair === undefined) return false;
 
+	coveredPaths[pair.leftIndex] = pair.merged;
 	coveredPaths.splice(pair.rightIndex, 1);
-	coveredPaths.splice(pair.leftIndex, 1, pair.merged);
 	return pair.merged.length === 0 || mergeCoveredPaths(coveredPaths);
 }
 

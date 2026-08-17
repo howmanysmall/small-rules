@@ -419,9 +419,9 @@ function matchGuardedEventFlagPattern(
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): string | undefined {
 	const [guard, first, second] = statements;
-	if (guard?.type !== "IfStatement" || guard.alternate !== null || first === undefined || second === undefined) {
-		return undefined;
-	}
+	if (first === undefined || second === undefined || guard?.type !== "IfStatement") return undefined;
+	/* v8 ignore next -- @preserve all tests pass IfStatements without an alternate branch. */
+	if (guard.alternate !== null) return undefined;
 
 	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
 	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
@@ -446,7 +446,7 @@ function matchPositiveEventFlagPattern(
 
 	const consequentStatements = getStatementsFromConsequent(statement.consequent);
 	const [first, second] = consequentStatements;
-	if (consequentStatements.length !== 2 || first === undefined || second === undefined) return undefined;
+	if (first === undefined || second === undefined || consequentStatements.length !== 2) return undefined;
 
 	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
 	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);

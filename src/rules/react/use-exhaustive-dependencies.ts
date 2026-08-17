@@ -203,6 +203,7 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 
 	while (nodes.length > 0) {
 		const current = nodes.pop();
+		/* v8 ignore next -- @preserve loop condition guarantees a queued node. */
 		if (current === undefined) continue;
 
 		if (current.type === "Identifier") {
@@ -283,6 +284,7 @@ function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): st
 	let path = current.type === "Identifier" ? current.name : sourceCode.getText(current);
 	for (let index = members.length - 1; index >= 0; index -= 1) {
 		const member = members[index];
+		/* v8 ignore next -- @preserve index is bounded by members.length. */
 		if (member === undefined) continue;
 		if (member.computed) {
 			path += `[${sourceCode.getText(member.property)}]`;

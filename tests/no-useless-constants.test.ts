@@ -98,6 +98,11 @@ describe("no-useless-constants", () => {
 					errors: [{ messageId: "uselessConstant" }],
 					output: "const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ Time: 1, DelayTime: 0 }) };",
 				},
+				{
+					code: 'const TWEEN_INFO = new TweenInfo({ ["Time"]: 1 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };',
+					errors: [{ messageId: "uselessConstant" }],
+					output: 'const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ ["Time"]: 1 }) };',
+				},
 			],
 			valid: [],
 		});

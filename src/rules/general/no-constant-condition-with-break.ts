@@ -191,7 +191,7 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 
 	switch (unwrapped.type) {
 		case "ArrayExpression":
-			return toConstantValue(new Array<unknown>());
+			return toConstantValue([]);
 
 		case "ArrowFunctionExpression":
 		case "ClassExpression":

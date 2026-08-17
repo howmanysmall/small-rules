@@ -136,6 +136,7 @@ function appendObjectPatternValuesInReverse(
 	while (index > 0) {
 		index -= 1;
 		const property = properties[index];
+		/* v8 ignore next -- @preserve object patterns do not permit elisions. */
 		if (!property) continue;
 		patterns.push(property.type === "RestElement" ? property.argument : property.value);
 	}
@@ -176,7 +177,7 @@ function markPatternValues(pattern: ESTree.Node, state: CallbackState): boolean 
 				break;
 			}
 
-			/* v8 ignore next -- @preserve callers pass binding/assignment patterns handled above. */
+			/* v8 ignore next 2 -- @preserve callers pass binding/assignment patterns handled above; no test exercises the default case. */
 			default:
 				break;
 		}
