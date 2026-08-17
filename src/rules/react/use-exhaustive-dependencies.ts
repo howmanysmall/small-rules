@@ -377,11 +377,10 @@ function isModuleLevelVariable(variable: VariableLike, node: ESTree.Node): boole
 
 function isStableVariableDefinition(
 	variable: VariableLike,
-	definition: VariableDefinitionLike,
+	{ node, type }: VariableDefinitionLike,
 	identifierName: string,
 	stableHooks: Map<string, StableResult>,
 ): boolean {
-	const { node, type } = definition;
 	if (STABLE_VALUE_TYPES.has(type)) return true;
 	if (type !== "Variable" || node.type !== "VariableDeclarator") return false;
 
@@ -919,7 +918,7 @@ function reportMissingCaptures(
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
 	const firstMissing = missingCaptures.at(0);
 
-	if (missingCaptures.length === 1 && firstMissing !== undefined) {
+	if (firstMissing !== undefined && missingCaptures.length === 1) {
 		context.report({
 			data: { name: firstMissing.usagePath },
 			fix(fixer): Fix {

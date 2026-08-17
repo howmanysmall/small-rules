@@ -149,7 +149,8 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 	const index = new Map<string, Array<string>>();
 
 	function visit(directory: string): void {
-		for (const entry of readdirSync(directory, { withFileTypes: true })) {
+		const dirents = readdirSync(directory, { withFileTypes: true });
+		for (const entry of dirents) {
 			const entryName = entry.name.toLowerCase();
 			if ((entry.name.startsWith(".") && entry.name !== ".storybook") || IGNORED_DIRECTORIES.has(entryName)) {
 				continue;
@@ -242,7 +243,7 @@ export function inspectRelativeLocalComponentImport(
 	definition: LocalComponentDefinition,
 ): LocalComponentInspection {
 	const importSource = node.source.value;
-	if (!isStringRaw(importSource) || !importSource.startsWith(".") || filename === "") {
+	if (!isStringRaw(importSource) || !importSource.startsWith(".") || filename.length === 0) {
 		return { importStyle: undefined, matches: false };
 	}
 
@@ -284,7 +285,8 @@ export function discoverLocalComponent(
 	const projectFiles = indexProjectFiles(projectRoot);
 	const candidatePaths = new Set<string>();
 	for (const fileName of definition.fileNames) {
-		for (const candidatePath of projectFiles.get(fileName.toLowerCase()) ?? []) candidatePaths.add(candidatePath);
+		const files = projectFiles.get(fileName.toLowerCase()) ?? [];
+		for (const candidatePath of files) candidatePaths.add(candidatePath);
 	}
 
 	const matches = [...candidatePaths].filter(
