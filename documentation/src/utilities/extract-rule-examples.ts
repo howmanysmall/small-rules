@@ -278,8 +278,9 @@ function evaluateStatic(node: Expression, context: ExtractionContext): StaticVal
 	if (node.type === "CallExpression" && isStringJoin(node)) return evaluateStringJoin(node, context);
 	if (node.type === "Identifier") {
 		throwExtractionError(context, node.start, "identifier references are not supported.");
+	} else if (node.type === "CallExpression") {
+		throwExtractionError(context, node.start, "function calls are not supported.");
 	}
-	if (node.type === "CallExpression") throwExtractionError(context, node.start, "function calls are not supported.");
 	return throwExtractionError(context, node.start, `${node.type} values are not supported.`);
 }
 
@@ -357,7 +358,7 @@ function evaluateStringJoin(node: CallExpression, context: ExtractionContext): s
 		throwExtractionError(context, node.start, "function calls are not supported.");
 	}
 	const values = evaluateArray(node.callee.object, context);
-	if (values.some((value) => !(typeof value === "string"))) {
+	if (values.some((value) => typeof value !== "string")) {
 		throwExtractionError(context, node.callee.object.start, "join arrays must contain only strings.");
 	}
 	// oxlint-disable-next-line typescript/no-base-to-string -- i hate.

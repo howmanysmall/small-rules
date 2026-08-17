@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
+import { cwd } from "node:process";
 
 import { extractRuleExamples } from "../utilities/extract-rule-examples";
 import { ruleManifest } from "./rule-manifest";
@@ -7,7 +8,7 @@ import { ruleManifest } from "./rule-manifest";
 import type { RuleExample } from "../utilities/extract-rule-examples";
 import type { RuleName } from "./rule-manifest";
 
-const workingDirectory = process.cwd();
+const workingDirectory = cwd();
 const testsDirectory = nodePath.resolve(
 	workingDirectory,
 	nodePath.basename(workingDirectory) === "documentation" ? "../tests" : "tests",
@@ -38,6 +39,10 @@ export const ruleExamples: ReadonlyMap<RuleName, ReadonlyArray<RuleExample>> = n
 	),
 );
 
+const collator = new Intl.Collator();
+
 function orderExamples(examples: ReadonlyArray<RuleExample>): Array<RuleExample> {
-	return examples.toSorted((left, right) => left.kind.localeCompare(right.kind) || left.id.localeCompare(right.id));
+	return examples.toSorted(
+		(left, right) => collator.compare(left.kind, right.kind) || collator.compare(left.id, right.id),
+	);
 }

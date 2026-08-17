@@ -16,7 +16,7 @@ declare module "satteri" {
 
 	interface DirectiveFields {
 		readonly name: string;
-		readonly attributes?: Record<string, string | null | undefined> | null;
+		readonly attributes?: null | Record<string, null | string | undefined>;
 	}
 
 	export interface ContainerDirective extends DirectiveFields, Parent {

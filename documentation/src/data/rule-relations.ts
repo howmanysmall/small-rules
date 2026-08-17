@@ -14,11 +14,20 @@ import type { RuleName } from "./rule-manifest";
 type RuleRelationKind =
 	/** Same problem family or complementary checks. Default bidirectional. */
 	| "alternative"
-	/** A makes B more useful, or A is a stricter multi-metric companion of B. Directed. */
+	/**
+	 * A makes B more useful, or A is a stricter multi-metric companion of B.
+	 * Directed.
+	 */
 	| "depends-on-concept"
-	/** Different approaches to a similar concern; usually not both required. Directed or bi. */
+	/**
+	 * Different approaches to a similar concern; usually not both required.
+	 * Directed or bi.
+	 */
 	| "overlaps"
-	/** Can flag similar code; boundary is worth documenting. Default bidirectional. */
+	/**
+	 * Can flag similar code; boundary is worth documenting. Default
+	 * bidirectional.
+	 */
 	| "related"
 	/** Understanding/using A assumes the practice B enforces. Directed. */
 	| "strengthens"

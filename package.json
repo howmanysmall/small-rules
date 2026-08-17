@@ -102,6 +102,7 @@
 		"confbox": "catalog:test",
 		"eslint": "catalog:lint",
 		"eslint-plugin-antfu": "catalog:lint",
+		"eslint-plugin-astro": "catalog:lint",
 		"eslint-plugin-eslint-plugin": "catalog:lint",
 		"eslint-plugin-n": "catalog:lint",
 		"eslint-plugin-pnpm": "catalog:lint",

@@ -38,10 +38,10 @@ export function createRuleIndexCategories(
 			const ruleNewness = newness.get(rule.name);
 			const isNew = ruleNewness?.isNew === true;
 			const ruleDetails = {
+				name: rule.name,
 				category: rule.category,
 				categoryLabel: rule.categoryLabel,
 				description: rule.description,
-				name: rule.name,
 				path: rule.path,
 				title: rule.title,
 				type: rule.type,

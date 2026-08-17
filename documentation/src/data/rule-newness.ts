@@ -40,7 +40,8 @@ const repositoryRoot = resolveRepositoryRoot();
 const RULE_DIRECTORY = "src/rules/";
 const COMMIT_MARKER = "__COMMIT__";
 /**
- * Returns the first non-empty line of a command's output, or undefined when empty.
+ * Returns the first non-empty line of a command's output, or undefined when
+ * empty.
  *
  * @param output - Command output.
  * @returns First non-empty line, or undefined.
@@ -51,8 +52,9 @@ function firstLine(output: string): string | undefined {
 }
 
 /**
- * Parses `git log --reverse --diff-filter=A --format=__COMMIT__%H --name-only -- src/rules/` output into a map of rule
- * name (filename minus `.ts`) to the first commit that added it.
+ * Parses `git log --reverse --diff-filter=A --format=__COMMIT__%H --name-only
+ * -- src/rules/` output into a map of rule name (filename minus `.ts`) to the
+ * first commit that added it.
  *
  * @param logOutput - Raw git log output.
  * @returns Map of rule name to first add commit sha.
@@ -87,7 +89,7 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
  * released). This single expression is the entire freshness policy.
  *
  * @param addedInByRule - Rule name to first containing release (undefined = unreleased).
- * @param latestTag The most recent release tag.
+ * @param latestTag - The most recent release tag.
  * @returns Map of rule name to newness classification.
  */
 export function resolveNewness(
@@ -104,7 +106,7 @@ export function resolveNewness(
 
 /**
  * Derives rule newness from git history. Runs one `tag --contains` call per distinct add commit. Returns an empty map
- * when no release tags exist (e.g. shallow clones).
+ * when no release tags exist (e.g. Shallow clones)..
  *
  * @param run - Git command runner.
  * @returns Map of rule name to newness classification, filtered to manifest rules.
@@ -159,9 +161,10 @@ function runGit(arguments_: ReadonlyArray<string>): string {
 let cachedNewness: ReadonlyMap<string, RuleNewness> | undefined;
 
 /**
- * Memoized classification backed by an injected git runner. Test seam: the singleton uses the real runner; tests inject
- * fakes or throwing runners without module mocking. Never throws: when git history is unavailable the site builds with
- * zero badges.
+ * Memoized classification backed by an injected git runner. Test seam: the
+ * singleton uses the real runner; tests inject fakes or throwing runners
+ * without module mocking. Never throws: when git history is unavailable the
+ * site builds with zero badges.
  *
  * @param run - Git command runner.
  * @returns Map of rule name to newness classification.

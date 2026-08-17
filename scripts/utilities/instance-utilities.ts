@@ -5,6 +5,7 @@ import { parse } from "yuku-parser";
 
 import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningElement } from "yuku-parser";
 
+// biome-ignore assist/source/useSortedEnumMembers: compatibility issue
 export const enum ScanType {
 	Both = "both",
 	TypeScript = "ts",

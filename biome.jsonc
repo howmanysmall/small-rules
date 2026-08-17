@@ -6,7 +6,7 @@
 				"noDuplicateClasses": "on",
 				"organizeImports": "off",
 				"preset": "recommended",
-				"useSortedAttributes": "on",
+				"useSortedAttributes": "off",
 				"useSortedEnumMembers": "on",
 				"useSortedInterfaceMembers": "off",
 				"useSortedKeys": {

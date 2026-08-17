@@ -1,6 +1,7 @@
 // oxlint-disable small-rules/prevent-abbreviations -- configuration file
 
 import isentinel from "@isentinel/eslint-config";
+import { configs as astroConfigs } from "eslint-plugin-astro";
 
 const configuration = isentinel(
 	{
@@ -98,6 +99,7 @@ const configuration = isentinel(
 			},
 		},
 	},
+	...astroConfigs.recommended,
 	{
 		name: "small-rules/package-json",
 		files: ["**/package.json", "!package.json"],

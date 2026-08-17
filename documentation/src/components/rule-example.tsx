@@ -52,7 +52,7 @@ const COPY_ICON = (
 
 interface RuleExampleProperties {
 	readonly title?: string | undefined;
-	readonly type: "pass" | "fail";
+	readonly type: "fail" | "pass";
 	readonly children: ReactNode;
 }
 
@@ -66,11 +66,11 @@ export function RuleExample({ title, type, children }: RuleExampleProperties): R
 		function resetCopiedState(): (() => void) | undefined {
 			if (!copied) return undefined;
 
-			const timeout = globalThis.setTimeout(function clearCopiedState(): void {
+			const timeout = setTimeout(function clearCopiedState(): void {
 				setCopied(false);
 			}, 1_500);
 			return function clearResetTimer(): void {
-				globalThis.clearTimeout(timeout);
+				clearTimeout(timeout);
 			};
 		},
 		[copied],
@@ -86,7 +86,9 @@ export function RuleExample({ title, type, children }: RuleExampleProperties): R
 		const code = card?.querySelector("pre code, code");
 		if (code === null || code === undefined) return;
 
-		void copyExampleAsync(code);
+		copyExampleAsync(code).catch((error) => {
+			console.error("Failed to copy rule example:", error);
+		});
 	}
 
 	const copyButton = (

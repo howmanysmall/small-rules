@@ -118,6 +118,29 @@ run = "node --run knip"
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."
 run = "node --run lint"
 
+[tasks.lint-configuration]
+description = "View the lint configuration."
+usage = '''
+arg "<type>" {
+    help "What linting configuration do you want to run the inspector for?"
+    choices "eslint" "oxlint"
+}
+'''
+run = '''
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+case "${usage_type?}" in
+	eslint)
+		nlx @eslint/config-inspector
+		;;
+	oxlint)
+		nlx oxlint-config-inspector
+		;;
+esac
+'''
+
 [tasks.release]
 description = "Run local validation, then bump version, commit, tag, and push via bumpp. Run from an up-to-date main branch."
 depends = ["check"]

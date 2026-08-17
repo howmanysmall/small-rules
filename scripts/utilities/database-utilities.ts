@@ -473,7 +473,7 @@ type ClassDefault = Record<string, CanonicalValue>;
 function extractClassDefaults(
 	className: string,
 	{ defaultProperties, properties }: DatabaseClass,
-	quiet?: boolean,
+	quiet = false,
 ): ClassDefault | undefined {
 	const classEntry: ClassDefault = {};
 	let hasDefaults = false;
@@ -491,9 +491,7 @@ function extractClassDefaults(
 			continue;
 		}
 
-		if (quiet !== true) {
-			console.warn(`Skipping ${className}.${propertyName} (${dataType}) — no canonical value mapping`);
-		}
+		if (!quiet) console.warn(`Skipping ${className}.${propertyName} (${dataType}) — no canonical value mapping`);
 	}
 
 	return hasDefaults ? classEntry : undefined;
