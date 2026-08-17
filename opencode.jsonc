@@ -211,7 +211,7 @@
 				"url": "https://mcp.docs.astro.build/mcp",
 			},
 			"chrome-devtools": {
-				"command": ["bash", "./scripts/get-chrome-path.sh", "--serve"],
+				"command": ["bash", "scripts/get-chrome-path.sh", "--serve"],
 				"disabled": false,
 				"type": "local",
 			},
@@ -220,6 +220,11 @@
 				"headers": { "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}" },
 				"type": "remote",
 				"url": "https://mcp.context7.com/mcp",
+			},
+			"hk": {
+				"command": ["hk", "mcp", "--root", "."],
+				"disabled": false,
+				"type": "local",
 			},
 			"gh-grep": {
 				"disabled": true,

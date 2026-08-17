@@ -29,7 +29,6 @@ function formatRelationKind(kind: string): string {
 }
 
 // biome-ignore lint/correctness/useUniqueElementIds: This preserves the existing
-// public heading anchor and label target.
 const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 
 function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): ReactNode {

@@ -7,9 +7,9 @@ interface Props {
 	readonly preset?: Preset | undefined;
 }
 
-const { preset = "install" } = Astro.props,
+const { preset = "install" } = Astro.props;
 
- managers = [
+const managers = [
 	{ install: "aube add -D @pobammer-ts/small-rules oxlint", label: "aube", run: "aube run lint" },
 	{ install: "npm install -D @pobammer-ts/small-rules oxlint", label: "npm", run: "npm run lint" },
 	{ install: "pnpm add -D @pobammer-ts/small-rules oxlint", label: "pnpm", run: "pnpm run lint" },

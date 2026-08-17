@@ -117,7 +117,9 @@ describe("createRuleNewness", () => {
 
 describe("getRuleNewnessWith", () => {
 	it("returns an empty map and warns when git is unavailable", () => {
-		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {
+			// purposefully empty
+		});
 
 		const newness = getRuleNewnessWith(() => {
 			throw new Error("spawn git ENOENT");

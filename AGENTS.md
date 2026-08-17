@@ -147,3 +147,11 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 1. `mise run release` - runs local check, then `nr release` (`bumpp` bumps version, commits, tags, pushes)
 2. Tag push triggers `release.yaml`, which waits for the existing successful CI run for that commit
 3. Or `mise run dr` to trigger a dry run on GitHub Actions for validation
+
+## `hk`
+
+- Before changing files, inspect the project with `hk mcp` or `hk run check --safe --format json`.
+- Scope checks to the files you changed. For exact filenames, write a NUL-delimited list and use `--files0-from`; use `--cd` instead of changing hk's process-wide directory.
+- Inspect each planned command's effect. Prefer `--safe`; never run an unknown or destructive command without explicit user approval.
+- Consume normalized diagnostics from JSON/JSONL, preserve raw tool output for debugging, and review the resulting diff after fixes.
+- Use `hk run check --safe --format jsonl` for streaming lifecycle events. A final summary is emitted even when a step fails.
