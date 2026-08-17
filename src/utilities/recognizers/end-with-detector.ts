@@ -3,8 +3,8 @@ import type { Detector } from "./detector";
 const WHITESPACE_REGEX = /\s/u;
 
 /**
- * Creates a detector for lines ending with specific characters. Scans backwards, skipping whitespace and comment
- * markers (* /).
+ * Creates a detector for lines ending with specific characters. Scans
+ * backwards, skipping whitespace and comment markers (* /).
  *
  * @param probability - Base probability (0-1).
  * @param endings - Characters to match at line end.

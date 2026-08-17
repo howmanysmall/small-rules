@@ -50,7 +50,7 @@ function areStructurallyEqual(left: unknown, right: unknown): boolean {
 	if (left === null || right === null) return false;
 
 	/* v8 ignore next -- comparable JSX values are parser-produced record-shaped ESTree nodes. @preserve */
-	if (!(isRecord(left) && isRecord(right))) return false;
+	if (!isRecord(left) || !isRecord(right)) return false;
 
 	return areRecordsStructurallyEqual(left, right);
 }

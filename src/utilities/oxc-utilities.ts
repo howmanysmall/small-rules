@@ -41,7 +41,7 @@ export function isIdentifierNamed(node: ESTree.Node, name: string): node is ESTr
 
 export function getNamespacedCallNames(
 	callee: ESTree.CallExpression["callee"],
-): { readonly objectName: string; readonly propertyName: string } | undefined {
+): undefined | { readonly objectName: string; readonly propertyName: string } {
 	if (
 		callee.type !== "MemberExpression" ||
 		callee.computed ||

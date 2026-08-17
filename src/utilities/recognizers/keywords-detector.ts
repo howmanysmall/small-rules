@@ -3,7 +3,8 @@ import type { Detector } from "./detector";
 const WORD_SPLIT_REGEX = /[ \t(),{}]/u;
 
 /**
- * Creates a detector that counts keyword occurrences. Splits line by word boundaries and counts matches.
+ * Creates a detector that counts keyword occurrences. Splits line by word
+ * boundaries and counts matches.
  *
  * @param probability - Base probability (0-1).
  * @param keywords - Keywords to detect.

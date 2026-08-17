@@ -13,7 +13,7 @@ const noUnusedUseMemo = createRule("no-unused-use-memo", "react", {
 
 		return {
 			CallExpression(node): void {
-				if (!(isUseMemoCall(node, memoIdentifiers, reactNamespaces) && isStandaloneUseMemo(node))) return;
+				if (!isUseMemoCall(node, memoIdentifiers, reactNamespaces) || !isStandaloneUseMemo(node)) return;
 
 				context.report({
 					messageId: "unusedUseMemo",

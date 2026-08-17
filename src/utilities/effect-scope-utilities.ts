@@ -2,7 +2,7 @@ import { isNode } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 
-const CONTAINER_PARENT_TYPES = new Set(["Property", "ObjectExpression", "ArrayExpression", "SequenceExpression"]);
+const CONTAINER_PARENT_TYPES = new Set(["ArrayExpression", "ObjectExpression", "Property", "SequenceExpression"]);
 const FUNCTION_NODE_TYPES = new Set(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
 
 export interface EffectScopeAnalysis {
@@ -188,8 +188,9 @@ function pushChildren(
 	/* v8 ignore next -- every parser-produced node type has visitor keys; the fallback never fires. @preserve */
 	const keys = state.sourceCode.visitorKeys[node.type] ?? [];
 	for (const key of keys) {
-		// Many times simpler to just ignore arguments (to CallExpressions and NewExpressions).
-		// Too complicated to follow them, and often we can't at all (imported functions).
+		// Many times simpler to just ignore arguments (to CallExpressions and
+		// NewExpressions). Too complicated to follow them, and often we can't at
+		// all (imported functions).
 		if (key === "arguments" && !includeArguments) continue;
 		const child: unknown = Reflect.get(node, key);
 		if (Array.isArray(child)) {
@@ -220,7 +221,7 @@ function computeUpstreamReferences(state: EffectScopeAnalysisState, reference: R
 		reference,
 		(upRef) => {
 			refs.push(upRef);
-			return undefined;
+			return;
 		},
 		visited,
 	);
@@ -239,10 +240,12 @@ function ascend(
 	if (cont === false) return;
 
 	for (const definition of reference.resolved?.defs ?? []) {
-		// We have no analytical use for import statements; terminate at the previous reference (actually using the imported thing).
+		// We have no analytical use for import statements; terminate at the
+		// previous reference (actually using the imported thing).
 		if (definition.type === "ImportBinding") continue;
 		// Don't traverse parameter definitions.
-		// Their definition node is the function, so downstream would include the whole function body.
+		// Their definition node is the function, so downstream would include the
+		// whole function body.
 		if (definition.type === "Parameter") continue;
 		const definitionNode = getDefinitionValueNode(definition);
 		if (definitionNode === undefined) continue;
@@ -256,7 +259,8 @@ function computeCallExpression(reference: Reference): ESTree.CallExpression | un
 	let current: ESTree.Node = reference.identifier.parent;
 	while (true) {
 		if (current.type === "CallExpression") {
-			// We've reached the top - confirm that the ref is the (eventual) callee, as opposed to an argument.
+			// We've reached the top - confirm that the ref is the (eventual)
+			// callee, as opposed to an argument.
 			let node: ESTree.Node = reference.identifier;
 			while (node.parent.type === "MemberExpression") {
 				node = node.parent;
@@ -298,7 +302,8 @@ function isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
 	if (
 		node.type === "AwaitExpression" ||
 		(node.type === "UnaryExpression" && node.operator === "void") ||
-		// Inside a named or anonymous function that may be called later, either as a callback or by the developer.
+		// Inside a named or anonymous function that may be called later, either
+		// as a callback or by the developer.
 		FUNCTION_NODE_TYPES.has(node.type)
 	) {
 		return false;
@@ -334,7 +339,7 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 		}
 	}
 
-	const callExprRefs = new Array<Reference>();
+	const callExpressionRefs = new Array<Reference>();
 	const visited = new Set<Reference>();
 	ascend(
 		state,
@@ -347,9 +352,9 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 				enclosingFunction !== undefined &&
 				isSynchronousWithin(callExpr, enclosingFunction)
 			) {
-				callExprRefs.push(upRef);
+				callExpressionRefs.push(upRef);
 			} else if (isAliasRef(upRef)) {
-				callExprRefs.push(upRef);
+				callExpressionRefs.push(upRef);
 			} else {
 				return false;
 			}
@@ -357,7 +362,7 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 		},
 		visited,
 	);
-	return callExprRefs;
+	return callExpressionRefs;
 }
 
 function getDefinitionValueNode(definition: Definition): ESTree.Node | undefined {

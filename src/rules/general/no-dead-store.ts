@@ -64,8 +64,9 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 		if (parent.consequent === current) {
 			return {
 				arm: "then",
-				// A consequent ending in break/continue/return/throw never falls through, so the
-				// then arm fully determines whether later statements in the block are reached.
+				// A consequent ending in break/continue/return/throw never falls
+				// through, so the then arm fully determines whether later
+				// statements in the block are reached.
 				complete: parent.alternate !== null || statementTransfersControl(parent.consequent),
 				control: parent,
 			};
@@ -79,8 +80,9 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 	return undefined;
 }
 
-// Statements after an if-without-else whose consequent transfers control only run when the
-// condition was false, so they belong to an implicit else arm rather than both arms.
+// Statements after an if-without-else whose consequent transfers control only
+// run when the condition was false, so they belong to an implicit else arm rather
+// than both arms.
 function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
 	if (parent.type !== "BlockStatement" && parent.type !== "SwitchCase") return [];
 	const siblings: ReadonlyArray<ESTree.Node> = parent.type === "BlockStatement" ? parent.body : parent.consequent;
@@ -145,8 +147,9 @@ function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 function assignmentReadsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const { parent } = write.node;
 	if (parent.type !== "AssignmentExpression") return false;
-	// Compound assignments (+=, -=, etc.) always read the previous value of the left-hand side,
-	// even when the right-hand side doesn't reference the variable.
+	// Compound assignments (+=, -=, etc.) always read the previous value of the
+	// left-hand side, even when the right-hand side doesn't reference the
+	// variable.
 	if (parent.operator !== "=") return true;
 	return usages.some((usage) => usage.isRead && rangeContains(parent.right, usage.node));
 }

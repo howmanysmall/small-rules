@@ -31,7 +31,8 @@ const directiveRequireDescription = createRule("directive-require-description", 
 				return;
 			}
 
-			// parseDirectiveComment rejects line comments with block-style directives
+			// parseDirectiveComment rejects line comments with block-style
+			// directives
 			// (eslint-disable, oxlint-disable, etc.) because ESLint requires block
 			// comments for those. But oxlint supports // oxlint-disable and
 			// // oxlint-enable in line comments, so check those directly.

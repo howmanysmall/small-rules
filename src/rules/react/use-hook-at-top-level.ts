@@ -144,7 +144,7 @@ function getMemberHookSourceDecision(
 
 const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 	create(context): Visitor {
-		const configuration = getOptions(context.options[0]);
+		const config = getOptions(context.options[0]);
 		const contextStack = new Array<ControlFlowContext>();
 		const functionNameStack = new Array<string | undefined>();
 		let currentFunctionName: string | undefined;
@@ -169,7 +169,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 		}
 
 		function shouldIgnoreHook(hookName: string, node: ESTree.CallExpression): boolean {
-			const { ignoreHooks, importSources, onlyHooks } = configuration;
+			const { ignoreHooks, importSources, onlyHooks } = config;
 
 			if (onlyHooks !== undefined && onlyHooks.length > 0) return !onlyHooks.includes(hookName);
 			if (ignoreHooks?.includes(hookName) === true) return true;
@@ -318,8 +318,8 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 
 				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
 				if (
-					configuration.importSources === undefined ||
-					Object.keys(configuration.importSources).length === 0
+					config.importSources === undefined ||
+					Object.keys(config.importSources).length === 0
 				) {
 					return;
 				}

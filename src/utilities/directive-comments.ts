@@ -52,7 +52,7 @@ interface ColumnLine {
 
 interface DisabledArea {
 	readonly comment: Comment;
-	readonly end: undefined | ColumnLine;
+	readonly end: ColumnLine | undefined;
 	readonly kind: "block" | "line";
 	readonly ruleId: string | undefined;
 	readonly start: ColumnLine;
@@ -115,7 +115,7 @@ export function parseDirectiveComment(comment: Comment): DirectiveComment | unde
 
 function parseDirectiveText(
 	textToParse: string,
-): undefined | Readonly<{ description: string | undefined; kind: string; value: string }> {
+): Readonly<{ description: string | undefined; kind: string; value: string }> | undefined {
 	const { description, text } = divideDirectiveComment(textToParse);
 	const valueStart = text.search(DIRECTIVE_VALUE_SEPARATOR);
 	const directiveText = valueStart === -1 ? text : text.slice(0, valueStart);

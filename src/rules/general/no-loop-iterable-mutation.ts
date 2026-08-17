@@ -76,9 +76,9 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 	return loop.left.type === "VariableDeclaration" && loop.left.kind === "const";
 }
 
-function getLiveIterable(right: ESTree.Expression): { method: string; name: string } | undefined {
+function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
 	const node = unwrapExpression(right);
-	if (node.type === "Identifier") return { method: "direct", name: node.name };
+	if (node.type === "Identifier") return { name: node.name, method: "direct" };
 
 	if (node.type !== "CallExpression" || node.callee.type !== "MemberExpression" || node.arguments.length > 0) {
 		return undefined;
@@ -87,7 +87,7 @@ function getLiveIterable(right: ESTree.Expression): { method: string; name: stri
 
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;
-	return { method, name: node.callee.object.name };
+	return { name: node.callee.object.name, method };
 }
 
 function buildLoopContext(loop: ESTree.ForOfStatement): LoopContext | undefined {
@@ -179,7 +179,7 @@ function isAllowedMutation(
 	loopContext: LoopContext,
 	mutations: ReadonlyArray<MutationCall>,
 ): boolean {
-	const { method, call } = mutation;
+	const { call, method } = mutation;
 	if (method === "delete" && argumentMatchesName(call, loopContext.deleteArgumentName)) return true;
 
 	if (

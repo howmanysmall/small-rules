@@ -58,6 +58,7 @@ function getArrayInitializerFromVariable(variable: ScopeVariable): ESTree.ArrayE
 		if (definition?.node.type !== "VariableDeclarator" || definition.node.init?.type !== "ArrayExpression") {
 			continue;
 		}
+
 		return definition.node.init;
 	}
 
@@ -141,10 +142,10 @@ function shouldAllowIdentifierReturn(sourceCode: SourceCode, node: ESTree.Node &
 
 function getArrayInitializer(
 	node: ESTree.VariableDeclarator,
-): { init: ESTree.ArrayExpression; name: string } | undefined {
+): undefined | { init: ESTree.ArrayExpression; name: string } {
 	const name = getVariableDeclaratorName(node);
 	if (name === undefined || node.init?.type !== "ArrayExpression") return undefined;
-	return { init: node.init, name };
+	return { name, init: node.init };
 }
 
 function pushArrayInitializer(
@@ -154,7 +155,7 @@ function pushArrayInitializer(
 	const initializer = getArrayInitializer(node);
 	if (initializer === undefined) return;
 
-	const { init, name } = initializer;
+	const { name, init } = initializer;
 	const initializers = arrayInitializersByName.get(name) ?? new Array<ESTree.ArrayExpression>();
 	initializers.push(init);
 	arrayInitializersByName.set(name, initializers);

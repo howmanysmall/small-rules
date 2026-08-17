@@ -17,9 +17,9 @@ interface NormalizedOptions {
 }
 
 interface FunctionInfo {
+	readonly id: number;
 	readonly callees: Set<number>;
 	readonly callIdentifiers: Array<ESTree.IdentifierReference>;
-	readonly id: number;
 }
 
 interface TrackedNewExpression {
@@ -263,9 +263,9 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			if (existing !== undefined) return existing;
 
 			const created: FunctionInfo = {
-				callIdentifiers: [],
-				callees: new Set<number>(),
 				id: functionCounter,
+				callees: new Set<number>(),
+				callIdentifiers: [],
 			};
 
 			functionCounter += 1;
@@ -357,7 +357,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 						trackedNewExpression.containingFunctionId !== undefined &&
 						reachableFunctionIds.has(trackedNewExpression.containingFunctionId);
 
-					if (!(trackedNewExpression.isLexicallyInsideUseMemo || matchesHelperTrace)) continue;
+					if (!trackedNewExpression.isLexicallyInsideUseMemo && !matchesHelperTrace) continue;
 
 					context.report({
 						data: { constructorName: trackedNewExpression.constructorName },

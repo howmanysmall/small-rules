@@ -29,7 +29,7 @@ function isLiteral(expression: ESTree.Expression): boolean {
  * as dividing by `1 / value`. Literals whose reciprocal is not an integer (0.3, 0.7, ...) and values outside (0, 1) are
  * left alone.
  *
- * @param expression The operand of a `*` expression to test for being a reciprocal literal.
+ * @param expression - The operand of a `*` expression to test for being a reciprocal literal.
  * @returns The integer divisor `1 / value`, or `undefined` when `expression` is not a reciprocal literal.
  */
 function getReciprocalDivisor(expression: ESTree.Expression): number | undefined {
@@ -37,7 +37,7 @@ function getReciprocalDivisor(expression: ESTree.Expression): number | undefined
 	if (literal.type !== "Literal" || typeof literal.value !== "number") return undefined;
 
 	const { value } = literal;
-	if (!(value > 0 && value < 1)) return undefined;
+	if (!(value > 0) || !(value < 1)) return undefined;
 
 	const divisor = 1 / value;
 	return Number.isInteger(divisor) ? divisor : undefined;

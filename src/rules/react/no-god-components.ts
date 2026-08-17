@@ -185,9 +185,9 @@ function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
 
 const noGodComponents = createRule("no-god-components", "react", {
 	create(context): Visitor {
-		const configuration = parseOptions(context.options[0]);
-		const ignoreSet = new Set(configuration.ignoreComponents);
-		const stateHooks = new Set(configuration.stateHooks);
+		const config = parseOptions(context.options[0]);
+		const ignoreSet = new Set(config.ignoreComponents);
+		const stateHooks = new Set(config.stateHooks);
 		const checked = new WeakSet<ESTree.Node>();
 
 		function checkComponent(node: ESTree.Node, name: string): void {
@@ -196,24 +196,24 @@ const noGodComponents = createRule("no-god-components", "react", {
 
 			const location = node.loc;
 			const lines = location.end.line - location.start.line + 1;
-			if (lines > configuration.maxLines) {
+			if (lines > config.maxLines) {
 				context.report({
 					data: {
 						lines: String(lines),
-						max: String(configuration.maxLines),
+						max: String(config.maxLines),
 						name,
-						target: String(configuration.targetLines),
+						target: String(config.targetLines),
 					},
 					messageId: "exceedsMaxLines",
 					node,
 				});
-			} else if (configuration.enforceTargetLines && lines > configuration.targetLines) {
+			} else if (config.enforceTargetLines && lines > config.targetLines) {
 				context.report({
 					data: {
 						lines: String(lines),
-						max: String(configuration.maxLines),
+						max: String(config.maxLines),
 						name,
-						target: String(configuration.targetLines),
+						target: String(config.targetLines),
 					},
 					messageId: "exceedsTargetLines",
 					node,
@@ -221,29 +221,29 @@ const noGodComponents = createRule("no-god-components", "react", {
 			}
 
 			const propertiesCount = countDestructuredProperties(node);
-			if (isNumberRaw(propertiesCount) && propertiesCount > configuration.maxDestructuredProps) {
+			if (isNumberRaw(propertiesCount) && propertiesCount > config.maxDestructuredProps) {
 				context.report({
-					data: { count: String(propertiesCount), max: String(configuration.maxDestructuredProps), name },
+					data: { count: String(propertiesCount), max: String(config.maxDestructuredProps), name },
 					messageId: "tooManyProps",
 					node,
 				});
 			}
 
 			const analysis = analyzeComponentBody(node, stateHooks);
-			if (analysis.maxJsxDepth > configuration.maxTsxNesting) {
+			if (analysis.maxJsxDepth > config.maxTsxNesting) {
 				context.report({
-					data: { depth: String(analysis.maxJsxDepth), max: String(configuration.maxTsxNesting), name },
+					data: { depth: String(analysis.maxJsxDepth), max: String(config.maxTsxNesting), name },
 					messageId: "tsxNestingTooDeep",
 					node,
 				});
 			}
 
-			if (analysis.stateHookCount > configuration.maxStateHooks) {
+			if (analysis.stateHookCount > config.maxStateHooks) {
 				context.report({
 					data: {
 						count: String(analysis.stateHookCount),
-						hooks: configuration.stateHooks.join(", "),
-						max: String(configuration.maxStateHooks),
+						hooks: config.stateHooks.join(", "),
+						max: String(config.maxStateHooks),
 						name,
 					},
 					messageId: "tooManyStateHooks",

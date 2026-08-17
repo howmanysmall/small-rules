@@ -8,14 +8,14 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-interface HookConfiguration {
+interface HookConfig {
 	readonly allowAsync: boolean;
 	readonly name: string;
 }
 
 interface EffectFunctionOptions {
 	readonly environment: Environment;
-	readonly hooks: ReadonlyArray<HookConfiguration>;
+	readonly hooks: ReadonlyArray<HookConfig>;
 	readonly inlineFunctionDeclarations: boolean;
 	readonly sloptor: boolean;
 }
@@ -26,7 +26,7 @@ const DEFAULT_HOOKS = [
 	{ allowAsync: false, name: "useInsertionEffect" },
 ] as const;
 
-function isHookConfiguration(value: unknown): value is HookConfiguration {
+function isHookConfiguration(value: unknown): value is HookConfig {
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
 	return isRecord(value) && isStringRaw(value.name) && typeof value.allowAsync === "boolean";
 }
@@ -48,7 +48,7 @@ function parseOptions(rawOptions: unknown): EffectFunctionOptions {
 		return { environment, hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
 	}
 
-	const hooks = new Array<HookConfiguration>();
+	const hooks = new Array<HookConfig>();
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
 	for (const rawHook of rawHooks) if (isHookConfiguration(rawHook)) hooks.push(rawHook);
 
@@ -69,9 +69,9 @@ interface FunnyResolvedFunction<TType extends "declaration" | "expression"> {
 }
 
 type ResolvedFunction =
-	| ResolvedArrowFunction
 	| FunnyResolvedFunction<"declaration">
-	| FunnyResolvedFunction<"expression">;
+	| FunnyResolvedFunction<"expression">
+	| ResolvedArrowFunction;
 
 type RequireNamedEffectFunctionsMessageId =
 	| "anonymousFunction"
@@ -364,13 +364,13 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 						items: {
 							additionalProperties: false,
 							properties: {
-								allowAsync: {
-									description: "Whether async functions are allowed for this hook",
-									type: "boolean",
-								},
 								name: {
 									description: "Hook name to check",
 									type: "string",
+								},
+								allowAsync: {
+									description: "Whether async functions are allowed for this hook",
+									type: "boolean",
 								},
 							},
 							required: ["name", "allowAsync"],

@@ -15,9 +15,9 @@ const UNSTABLE_VALUES = new Set<string>([
 ]);
 
 interface HookEntry {
+	readonly name: string;
 	readonly closureIndex?: number;
 	readonly dependenciesIndex?: number;
-	readonly name: string;
 	readonly stableResult?: boolean | number | ReadonlyArray<number> | ReadonlyArray<string>;
 }
 
@@ -48,15 +48,15 @@ interface VariableLike {
 type ScopeVariable = Scope["set"]["get"] extends (key: string) => infer TReturn ? TReturn : never;
 
 interface DependencyInfo {
-	readonly depth: number;
 	readonly name: string;
+	readonly depth: number;
 	readonly node: ESTree.Node;
 }
 
 interface CaptureInfo {
+	readonly name: string;
 	readonly depth: number;
 	readonly forceDependency: boolean;
-	readonly name: string;
 	readonly node: ESTree.Node;
 	readonly usagePath: string;
 	readonly variable: undefined | VariableLike;
@@ -283,7 +283,7 @@ function isStableArrayIndex(
 	identifierName: string,
 ): boolean {
 	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set && isStableBindingPattern(node, "ArrayPattern"))) return false;
+	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ArrayPattern")) return false;
 
 	const { elements } = node.id;
 	let index = 0;
@@ -303,7 +303,7 @@ function isStableObjectProperty(
 	identifierName: string,
 ): boolean {
 	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set && isStableBindingPattern(node, "ObjectPattern"))) return false;
+	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ObjectPattern")) return false;
 
 	for (const property of node.id.properties) {
 		if (property.type !== "Property") continue;
@@ -433,7 +433,7 @@ function findTopmostMemberExpression(node: ESTree.Node, parent?: ESTree.Node): E
 		const isNonNullParent = currentParent.type === "TSNonNullExpression";
 
 		/* v8 ignore next -- @preserve captured member chains stop at member, chain, or non-null parents before this guard. */
-		if (!(isMemberParent || isChainParent || isNonNullParent)) {
+		if (!isMemberParent && !isChainParent && !isNonNullParent) {
 			break;
 		}
 
@@ -574,7 +574,7 @@ function isDefinitionInsideNode(definition: VariableDefinitionLike, node: ESTree
 }
 
 function shouldCaptureVariable(variable: ScopeVariable, node: ESTree.Node): boolean {
-	return variable !== undefined && !variable.defs.some((definition) => isDefinitionInsideNode(definition, node));
+	return variable !== undefined && variable.defs.every((definition) => !isDefinitionInsideNode(definition, node));
 }
 
 function getCaptureInfo(
@@ -586,9 +586,9 @@ function getCaptureInfo(
 	/* v8 ignore next -- @preserve captured identifiers have parser parent links in the visited closure tree. */
 	const depthNode = findTopmostMemberExpression(current, current.parent ?? undefined);
 	return {
+		name,
 		depth: getMemberExpressionDepth(depthNode),
 		forceDependency: isComputedPropertyIdentifier(current),
-		name,
 		node: depthNode,
 		usagePath: nodeToSafeDependencyPath(depthNode, sourceCode),
 		variable,
@@ -694,8 +694,8 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 		const depth = getMemberExpressionDepth(actualNode);
 
 		dependencies.push({
-			depth,
 			name,
+			depth,
 			node: actualNode,
 		});
 	}
@@ -829,8 +829,8 @@ function getMatchingCapture(captures: ReadonlyArray<CaptureInfo>, dependency: De
 	const dependencyName = getRootIdentifierName(dependency.node);
 	if (dependencyName === undefined) return undefined;
 
-	// At most one capture can match: collectCaptures dedupes by identifier name, and a capture's
-	// node always roots at that same identifier.
+	// At most one capture can match: collectCaptures dedupes by identifier name,
+	// and a capture's node always roots at that same identifier.
 	return captures.find((capture) => getRootIdentifierName(capture.node) === dependencyName);
 }
 
@@ -1139,6 +1139,10 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 						items: {
 							additionalProperties: false,
 							properties: {
+								name: {
+									description: "The name of the hook",
+									type: "string",
+								},
 								closureIndex: {
 									description: "Index of the closure argument for dependency validation",
 									type: "number",
@@ -1146,10 +1150,6 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 								dependenciesIndex: {
 									description: "Index of the dependencies array for validation",
 									type: "number",
-								},
-								name: {
-									description: "The name of the hook",
-									type: "string",
 								},
 								stableResult: {
 									description:

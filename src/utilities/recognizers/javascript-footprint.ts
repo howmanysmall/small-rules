@@ -60,7 +60,8 @@ const CODE_PATTERNS: ReadonlyArray<RegExp | string> = [
 const LINE_ENDINGS = ["}", ";", "{"] as const;
 
 /**
- * Creates a set of detectors for identifying JavaScript/TypeScript code patterns.
+ * Creates a set of detectors for identifying JavaScript/TypeScript code
+ * patterns.
  *
  * @returns Array of configured detectors.
  */

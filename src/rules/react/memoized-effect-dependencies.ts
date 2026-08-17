@@ -71,11 +71,11 @@ function registerConfiguredEffectHooks(
 	rawOptions: Record<PropertyKey, unknown>,
 	effectHooks: Map<string, number>,
 ): void {
-	if (!("hooks" in rawOptions && Array.isArray(rawOptions.hooks))) return;
+	if (!("hooks" in rawOptions) || !Array.isArray(rawOptions.hooks)) return;
 
 	for (const hook of rawOptions.hooks) {
 		/* v8 ignore next -- @preserve rule schema rejects hook entries without string names. */
-		if (!(isRecord(hook) && "name" in hook && isStringRaw(hook.name))) continue;
+		if (!isRecord(hook) || !("name" in hook) || !isStringRaw(hook.name)) continue;
 		const dependenciesIndex =
 			"dependenciesIndex" in hook && isNumberRaw(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
 		effectHooks.set(hook.name, dependenciesIndex);
@@ -327,20 +327,20 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 					},
 					hooks: {
 						default: Array.from(DEFAULT_EFFECT_HOOKS, ([name, dependenciesIndex]) => ({
-							dependenciesIndex,
 							name,
+							dependenciesIndex,
 						})),
 						description: "Effect hooks checked by default; configured entries are added to this set.",
 						items: {
 							additionalProperties: false,
 							properties: {
-								dependenciesIndex: {
-									description: "Index of the dependencies array for validation",
-									type: "number",
-								},
 								name: {
 									description: "The name of the hook",
 									type: "string",
+								},
+								dependenciesIndex: {
+									description: "Index of the dependencies array for validation",
+									type: "number",
 								},
 							},
 							required: ["name"],

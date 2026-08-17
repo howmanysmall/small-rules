@@ -101,10 +101,10 @@ function getPreferredMathMethod(sourceCode: SourceCode, node: ESTree.Conditional
 	const { alternate, consequent, test } = node;
 	const { left, operator, right } = test;
 	/* v8 ignore next -- @preserve binary expressions cannot contain PrivateIdentifier operands in this parser shape. */
-	if (!(isExpressionOperand(left) && isExpressionOperand(right))) return undefined;
+	if (!isExpressionOperand(left) || !isExpressionOperand(right)) return undefined;
 
 	/* v8 ignore next -- @preserve side-effecting operands are rejected before reporting. */
-	if (!(isExpressionSideEffectSafe(left) && isExpressionSideEffectSafe(right))) return undefined;
+	if (!isExpressionSideEffectSafe(left) || !isExpressionSideEffectSafe(right)) return undefined;
 	if (isKnownNonNumberExpression(sourceCode, left) || isKnownNonNumberExpression(sourceCode, right)) {
 		return undefined;
 	}
@@ -147,7 +147,7 @@ const preferMathMinMax = createRule("prefer-math-min-max", "roblox", {
 
 				const { left, right } = node.test;
 				/* v8 ignore next -- @preserve getPreferredMathMethod already rejected non-expression operands. */
-				if (!(isExpressionOperand(left) && isExpressionOperand(right))) return;
+				if (!isExpressionOperand(left) || !isExpressionOperand(right)) return;
 				const leftText = getMathArgumentText(sourceCode, left);
 				const rightText = getMathArgumentText(sourceCode, right);
 

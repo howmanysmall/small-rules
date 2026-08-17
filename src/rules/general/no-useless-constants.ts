@@ -26,18 +26,18 @@ const OBJECT_CONSTRUCTOR_PATTERNS: ReadonlyArray<string> = [
 ];
 
 interface FixableConstant {
+	readonly name: string;
 	readonly declarationNode: ESTree.VariableDeclaration;
 	readonly initializerText: string;
-	readonly name: string;
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
 
 interface UselessConstantCandidate {
+	readonly name: string;
 	readonly declarationNode: ESTree.VariableDeclaration;
 	readonly enclosingDeclaration: ESTree.VariableDeclaration;
 	readonly initializer: ESTree.Expression;
-	readonly name: string;
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
@@ -128,16 +128,6 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 		case "ChainExpression":
 			return hasOnlyRelocatableCalls(node.expression, staticGlobalFactories);
 
-		/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
-		case "ParenthesizedExpression":
-		case "TSAsExpression":
-		case "TSInstantiationExpression":
-		case "TSNonNullExpression":
-		case "TSSatisfiesExpression":
-		case "TSTypeAssertion": {
-			return hasOnlyRelocatableCalls(node.expression, staticGlobalFactories);
-		}
-
 		case "ConditionalExpression":
 			return hasOnlyRelocatableConditional(node, staticGlobalFactories);
 
@@ -146,6 +136,15 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 
 		case "ObjectExpression":
 			return hasOnlyRelocatableObjectProperties(node, staticGlobalFactories);
+
+		/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
+		case "ParenthesizedExpression":
+		case "TSAsExpression":
+		case "TSInstantiationExpression":
+		case "TSNonNullExpression":
+		case "TSSatisfiesExpression":
+		case "TSTypeAssertion":
+			return hasOnlyRelocatableCalls(node.expression, staticGlobalFactories);
 
 		case "SequenceExpression":
 			return false;
@@ -324,7 +323,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 		function getUselessConstantCandidate(
 			scope: Scope,
 			scopeVariable: ScopeVariable,
-		): UselessConstantCandidate | undefined {
+		): undefined | UselessConstantCandidate {
 			const { name } = scopeVariable;
 			if (!SCREAMING_SNAKE_CASE.test(name)) return undefined;
 
@@ -333,7 +332,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 
 			const declaratorNode = variableDefinition.node;
 			/* v8 ignore next -- @preserve ESLint Variable defs for this scope variable point at binding variable declarators. */
-			if (!(isVariableDeclarator(declaratorNode) && isBindingIdentifier(declaratorNode.id))) return undefined;
+			if (!isVariableDeclarator(declaratorNode) || !isBindingIdentifier(declaratorNode.id)) return undefined;
 			/* v8 ignore next -- @preserve reported runtime VariableDeclarators for const bindings always have initializers. */
 			if (declaratorNode.init === null) return undefined;
 
@@ -359,10 +358,10 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			if (!isVariableDeclaration(enclosingDeclaration) || enclosingDeclaration.kind !== "const") return undefined;
 
 			return {
+				name,
 				declarationNode,
 				enclosingDeclaration,
 				initializer,
-				name,
 				referenceIdentifier: readOnlyReference.identifier,
 				reportNode: declaratorNode.id,
 			};
@@ -395,9 +394,9 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				}
 
 				fixableConstants.push({
+					name: candidate.name,
 					declarationNode: candidate.declarationNode,
 					initializerText: getInlineInitializerText(sourceCode, candidate.initializer),
-					name: candidate.name,
 					referenceIdentifier: candidate.referenceIdentifier,
 					reportNode: candidate.reportNode,
 				});

@@ -26,7 +26,7 @@ interface MemberChain {
 	readonly root: ESTree.IdentifierReference;
 }
 
-interface SynchronousCallbackConfiguration {
+interface SynchronousCallbackConfig {
 	readonly callbackArgumentIndexes: ReadonlyArray<number>;
 	readonly calleePath: ReadonlyArray<string>;
 }
@@ -380,7 +380,7 @@ function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: Sour
 function getSynchronousCallbacks(
 	call: ESTree.CallExpression,
 	sourceCode: SourceCode,
-	configurations: ReadonlyArray<SynchronousCallbackConfiguration>,
+	configurations: ReadonlyArray<SynchronousCallbackConfig>,
 ): ReadonlySet<CallbackFunction> {
 	const callbacks = new Set<CallbackFunction>();
 	const calleePath = getCalleePath(call.callee);
@@ -402,7 +402,7 @@ function reportYieldingCalls(
 	sourceCode: SourceCode,
 	imports: ReadonlyMap<ScopeVariable, ImportBinding>,
 	types: ReadonlyMap<ScopeVariable, string>,
-	synchronousCallbacks: ReadonlyArray<SynchronousCallbackConfiguration>,
+	synchronousCallbacks: ReadonlyArray<SynchronousCallbackConfig>,
 	report: (node: ESTree.CallExpression) => void,
 ): void {
 	if (systemFunction.async) return;

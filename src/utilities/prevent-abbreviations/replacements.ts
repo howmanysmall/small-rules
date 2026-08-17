@@ -18,7 +18,7 @@ import type {
 	MessageIds,
 	NameReplacements,
 	PreparedOptions,
-	ShorthandConfiguration,
+	ShorthandConfiguration as ShorthandConfig,
 	ShorthandMatcher,
 	ShorthandReplacement,
 } from "./types";
@@ -193,7 +193,7 @@ function createMatcher(key: string, replacement: string): MatcherResult {
 
 function matchWord(
 	word: string,
-	configuration: ShorthandConfiguration,
+	configuration: ShorthandConfig,
 ): ShorthandReplacement["matches"][number] | undefined {
 	const exactReplacement = configuration.exactMatchers.get(word);
 	if (exactReplacement !== undefined) {
@@ -225,7 +225,7 @@ function matchWord(
 	return undefined;
 }
 
-function isWordIgnored(word: string, configuration: ShorthandConfiguration): boolean {
+function isWordIgnored(word: string, configuration: ShorthandConfig): boolean {
 	if (configuration.ignoreExact.has(word)) return true;
 
 	for (const matcher of configuration.ignoreMatchers) {
@@ -343,7 +343,7 @@ function normalizeAllowPropertyAccess(options: unknown): ReadonlySet<string> {
 	return allowPropertyAccess;
 }
 
-function normalizeShorthandConfiguration(options: unknown): ShorthandConfiguration {
+function normalizeShorthandConfiguration(options: unknown): ShorthandConfig {
 	const normalizedOptions = isRecord(options) ? options : undefined;
 	const exactMatchers = new Map<string, string>();
 	const ignoreExact = new Set<string>();
@@ -439,7 +439,7 @@ function getWordReplacements(word: string, options: PreparedOptions): ReadonlyAr
 
 export function getShorthandReplacement(
 	identifier: string,
-	configuration: ShorthandConfiguration,
+	configuration: ShorthandConfig,
 ): ShorthandReplacement | undefined {
 	const cachedReplacement = configuration.replacementsByIdentifier.get(identifier);
 	if (cachedReplacement !== undefined) return cachedReplacement === false ? undefined : cachedReplacement;
@@ -476,7 +476,7 @@ export function getShorthandReplacement(
 	return replacement;
 }
 
-export function isShorthandIgnored(identifier: string, configuration: ShorthandConfiguration): boolean {
+export function isShorthandIgnored(identifier: string, configuration: ShorthandConfig): boolean {
 	const cachedIgnored = configuration.ignoredIdentifiers.get(identifier);
 	if (cachedIgnored !== undefined) return cachedIgnored;
 

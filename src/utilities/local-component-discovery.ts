@@ -242,7 +242,7 @@ export function inspectRelativeLocalComponentImport(
 	definition: LocalComponentDefinition,
 ): LocalComponentInspection {
 	const importSource = node.source.value;
-	if (!(isStringRaw(importSource) && importSource.startsWith(".")) || filename === "") {
+	if (!isStringRaw(importSource) || !importSource.startsWith(".") || filename === "") {
 		return { importStyle: undefined, matches: false };
 	}
 

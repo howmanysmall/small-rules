@@ -21,11 +21,11 @@ interface NormalizedOptions {
 
 const DEFAULT_SPRING_HOOKS: ReadonlyArray<string> = ["useSpring"];
 
-function objectHasFromAndTo(objectExpr: ESTree.ObjectExpression): boolean {
+function objectHasFromAndTo(objectExpression: ESTree.ObjectExpression): boolean {
 	let hasFrom = false;
 	let hasTo = false;
 
-	for (const property of objectExpr.properties) {
+	for (const property of objectExpression.properties) {
 		if (property.type !== "Property" || property.computed || property.key.type !== "Identifier") continue;
 
 		if (property.key.name === "from") hasFrom = true;

@@ -38,7 +38,7 @@ const strictComponentBoundaries = createRule("strict-component-boundaries", "rea
 		return {
 			ImportDeclaration(node): void {
 				const importSource = node.source.value;
-				if (!(isStringRaw(importSource) && importSource.startsWith("."))) return;
+				if (!isStringRaw(importSource) || !importSource.startsWith(".")) return;
 				if (allowPatterns.some((regexp) => regexp.test(importSource))) return;
 
 				const { filename } = context;

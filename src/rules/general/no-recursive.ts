@@ -9,7 +9,7 @@ interface CallSite {
 }
 
 function isResolvedInScope(name: string, scope: Scope): boolean {
-	let currentScope: Scope | null = scope;
+	let currentScope: null | Scope = scope;
 	while (currentScope) {
 		if (currentScope.set.has(name)) return true;
 		currentScope = currentScope.upper;
@@ -190,11 +190,9 @@ const noRecursive = createRule("no-recursive", "general", {
 
 			VariableDeclarator(node): void {
 				if (
-					!(
-						node.id.type === "Identifier" &&
-						node.init !== null &&
-						(node.init.type === "FunctionExpression" || node.init.type === "ArrowFunctionExpression")
-					)
+					!(node.id.type === "Identifier" &&
+						node.init !== null) ||
+						!(node.init.type === "FunctionExpression" || node.init.type === "ArrowFunctionExpression")
 				) {
 					return;
 				}
@@ -203,11 +201,9 @@ const noRecursive = createRule("no-recursive", "general", {
 			},
 			"VariableDeclarator:exit"(node): void {
 				if (
-					!(
-						node.id.type === "Identifier" &&
-						node.init !== null &&
-						(node.init.type === "FunctionExpression" || node.init.type === "ArrowFunctionExpression")
-					)
+					!(node.id.type === "Identifier" &&
+						node.init !== null) ||
+						!(node.init.type === "FunctionExpression" || node.init.type === "ArrowFunctionExpression")
 				) {
 					return;
 				}

@@ -41,8 +41,7 @@ const noInitializeState = createRule("no-initialize-state", "react", {
 					if (effect.dependencyReferences === undefined) continue;
 
 					const isEffectRunOnlyOnMount =
-						effect.dependencyReferences.filter((reference) => !analysis.isStateSetter(reference)).length ===
-						0;
+						!effect.dependencyReferences.some((reference) => !analysis.isStateSetter(reference));
 					if (!isEffectRunOnlyOnMount) continue;
 
 					reportInitializeStateEffect(context, analysis, effect);

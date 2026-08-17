@@ -26,7 +26,7 @@ function isImportSpecifier(node: ESTree.Node): node is AnyImportSpecifier {
 	);
 }
 
-function collectJsDocIdentifiers(comments: ReadonlyArray<Comment>): Set<string> {
+function collectJsDocumentIdentifiers(comments: ReadonlyArray<Comment>): Set<string> {
 	const identifiers = new Set<string>();
 	for (const comment of comments) {
 		/* v8 ignore next -- @preserve line comments cannot contain usable JSDoc type annotations. */
@@ -105,7 +105,7 @@ const noUnusedImports = createRule("no-unused-imports", "general", {
 		const { sourceCode } = context;
 
 		const checkJsDoc = context.options[0]?.checkJSDoc ?? true;
-		const jsdocIdentifiers = checkJsDoc ? collectJsDocIdentifiers(sourceCode.getAllComments()) : new Set<string>();
+		const jsdocIdentifiers = checkJsDoc ? collectJsDocumentIdentifiers(sourceCode.getAllComments()) : new Set<string>();
 
 		const imports = new Array<ImportInfo>();
 		let scopeReference: ESTree.ImportDeclaration | undefined;

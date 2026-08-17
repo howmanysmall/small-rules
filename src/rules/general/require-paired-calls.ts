@@ -1,11 +1,12 @@
 import { createRule } from "$oxc-utilities/create-rule";
+
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-const isPairConfiguration = type({
+const isPairConfig = type({
 	"alternatives?": type("string[]").readonly().or("undefined"),
 	closer: type("string[]").readonly().or("string"),
 	opener: "string",
@@ -14,7 +15,7 @@ const isPairConfiguration = type({
 	"requireSync?": "boolean | undefined",
 	"yieldingFunctions?": type("string[]").readonly().or("undefined"),
 }).readonly();
-type PairConfiguration = typeof isPairConfiguration.infer;
+type PairConfiguration = typeof isPairConfig.infer;
 
 interface RequirePairedCallsOptions {
 	readonly allowConditionalClosers?: boolean;
@@ -96,31 +97,31 @@ function getCallName({ callee }: ESTree.CallExpression): string | undefined {
 	return undefined;
 }
 
-function getValidClosers(configuration: PairConfiguration): Array<string> {
+function getValidClosers(config: PairConfiguration): Array<string> {
 	const result = new Array<string>();
 	let size = 0;
 
-	if (isStringArray(configuration.closer)) {
-		for (const closer of configuration.closer) result[size++] = closer;
+	if (isStringArray(config.closer)) {
+		for (const closer of config.closer) result[size++] = closer;
 	} else {
 		/* v8 ignore start -- @preserve validated pair configs only allow string closers after the array branch fails. */
 		// oxlint-disable-next-line eslint/no-lonely-if -- V8 ignore must wrap only this defensive validated-shape branch.
-		if (isStringRaw(configuration.closer)) {
-			result[size++] = configuration.closer;
+		if (isStringRaw(config.closer)) {
+			result[size++] = config.closer;
 		}
 		/* v8 ignore stop -- @preserve */
 	}
 
-	if (configuration.alternatives) for (const alternative of configuration.alternatives) result[size++] = alternative;
+	if (config.alternatives) for (const alternative of config.alternatives) result[size++] = alternative;
 
 	return result;
 }
 
-function getAllOpeners(configuration: PairConfiguration): Array<string> {
-	const openers = [configuration.opener];
-	if (configuration.openerAlternatives) {
+function getAllOpeners(config: PairConfiguration): Array<string> {
+	const openers = [config.opener];
+	if (config.openerAlternatives) {
 		let size = 1;
-		for (const alternative of configuration.openerAlternatives) openers[size++] = alternative;
+		for (const alternative of config.openerAlternatives) openers[size++] = alternative;
 	}
 	return openers;
 }
@@ -313,7 +314,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			stackSnapshots.set(node, cloneStack());
 		}
 
-		function findPairConfiguration(functionName: string, isOpener: boolean): PairConfiguration | undefined {
+		function findPairConfig(functionName: string, isOpener: boolean): PairConfiguration | undefined {
 			return resolvedOptions.pairs.find((pair) =>
 				(isOpener ? getAllOpeners(pair) : getValidClosers(pair)).includes(functionName),
 			);
@@ -839,13 +840,13 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const callName = getCallName(node);
 			if (callName === undefined || callName === "") return;
 
-			const openerConfig = findPairConfiguration(callName, true);
+			const openerConfig = findPairConfig(callName, true);
 			if (openerConfig) {
 				handleOpener(node, callName, openerConfig);
 				return;
 			}
 
-			if (findPairConfiguration(callName, false)) {
+			if (findPairConfig(callName, false)) {
 				handleCloser(node, callName);
 				return;
 			}
@@ -888,9 +889,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			"FunctionExpression:exit": onFunctionExit,
 
 			IfStatement: onIfStatementEnter,
+			"IfStatement:exit": onIfStatementExit,
 			"IfStatement > .alternate:exit": onIfAlternateExit,
 			"IfStatement > .consequent:exit": onIfConsequentExit,
-			"IfStatement:exit": onIfStatementExit,
 
 			ReturnStatement: onEarlyExit,
 			"SwitchCase:exit": onSwitchCaseExit,
@@ -899,11 +900,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			"SwitchStatement:exit": onSwitchStatementExit,
 			ThrowStatement: onEarlyExit,
 			TryStatement: onTryStatementEnter,
+			"TryStatement:exit": onTryStatementExit,
 			"TryStatement > .block": onTryBlockEnter,
 			"TryStatement > .block:exit": onTryBlockExit,
 			"TryStatement > .finalizer": onFinallyBlockEnter,
 			"TryStatement > .finalizer:exit": popContext,
-			"TryStatement:exit": onTryStatementExit,
 			WhileStatement: onLoopEnter,
 			"WhileStatement:exit": onLoopExit,
 			YieldExpression: onAsyncYield,

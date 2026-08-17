@@ -222,7 +222,7 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 				/* v8 ignore next -- @preserve parser callback functions always expose a body. */
 				if (body === undefined) return;
 
-				const { deterministic, indeterminate, hasIndeterminate, hasExpectInCallback, hasExpectInLoop } =
+				const { deterministic, hasExpectInCallback, hasExpectInLoop, hasIndeterminate, indeterminate } =
 					countExpectCalls(body, getAdditionalExpectCallNames(options));
 				if (
 					!shouldCheckTest(

@@ -214,7 +214,7 @@ function isCanonicalNumericComponent(value: unknown): value is CanonicalNumericC
 
 function isCanonicalValue(value: unknown): value is CanonicalValue {
 	/* v8 ignore next -- @preserve generated default-properties entries are canonical value records. */
-	if (!(isRecord(value) && isStringRaw(value.type) && "value" in value)) return false;
+	if (!isRecord(value) || !isStringRaw(value.type) || !("value" in value)) return false;
 
 	switch (value.type) {
 		case "bool":

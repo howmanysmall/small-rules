@@ -48,7 +48,7 @@ export function getScopes(scope: Scope): Array<Scope> {
 }
 
 function isSafeName(name: string, scopes: ReadonlyArray<Scope>): boolean {
-	return !scopes.some((scope) => getVariableByName(scope, name) !== undefined);
+	return scopes.every((scope) => !(getVariableByName(scope, name) !== undefined));
 }
 
 export function getAvailableVariableName(
@@ -62,7 +62,7 @@ export function getAvailableVariableName(
 		if (!isValidIdentifier(candidate)) return undefined;
 	}
 
-	while (!(isSafeName(candidate, scopes) && isSafe(candidate, scopes))) candidate = `${candidate}_`;
+	while (!isSafeName(candidate, scopes) || !isSafe(candidate, scopes)) candidate = `${candidate}_`;
 	return candidate;
 }
 
@@ -155,7 +155,7 @@ function isExportedIdentifier(identifier: BroadIdentifier): boolean {
 
 export function shouldFix(variable: VariableLike): boolean {
 	return getVariableIdentifiers(variable).every(
-		(identifier) => !(isExportedIdentifier(identifier) || isJsxIdentifier(identifier)),
+		(identifier) => !isExportedIdentifier(identifier) && !isJsxIdentifier(identifier),
 	);
 }
 

@@ -23,7 +23,7 @@ interface NormalizedOptions {
 }
 
 function getDependencyMode(value: unknown): DependencyMode {
-	if (!(isRecord(value) && isStringRaw(value.dependencyMode))) return "non-updating";
+	if (!isRecord(value) || !isStringRaw(value.dependencyMode)) return "non-updating";
 	if (value.dependencyMode === "empty-or-omitted" || value.dependencyMode === "aggressive") {
 		return value.dependencyMode;
 	}

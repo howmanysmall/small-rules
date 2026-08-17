@@ -6,7 +6,7 @@ import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilit
 
 const EXPONENT_PATTERN = /e/iu;
 const EQUALITY_OPERATORS = new Set(["!=", "!==", "==", "==="]);
-const ARITHMETIC_OPERATORS = new Set(["+", "-", "*", "%", "**"]);
+const ARITHMETIC_OPERATORS = new Set(["%", "*", "**", "+", "-"]);
 const EXACT_ASSERTION_METHODS = new Set(["deepStrictEqual", "notDeepStrictEqual", "notStrictEqual", "strictEqual"]);
 const EXACT_EXPECT_MATCHERS = new Set(["toBe", "toEqual", "toStrictEqual"]);
 const EXPECT_MODULES = new Set(["@jest/globals", "bun:test", "vitest"]);
@@ -249,7 +249,7 @@ function indirectComparisonOperands(
 	node: ESTree.LogicalExpression,
 	sourceCode: SourceCode,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (!(isComparableBinary(node.left) && isComparableBinary(node.right))) return undefined;
+	if (!isComparableBinary(node.left) || !isComparableBinary(node.right)) return undefined;
 	const accepted =
 		(node.operator === "&&" &&
 			(node.left.operator === "<=" || node.left.operator === ">=") &&

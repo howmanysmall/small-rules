@@ -34,8 +34,8 @@ interface CompiledRestriction {
 }
 type EffectiveOptions = Simplify<
 	Except<typeof isRuleOptions.infer, "allowFiles" | "restrictions"> & {
-		readonly isAllowedFile: boolean;
 		readonly checkComputed: boolean;
+		readonly isAllowedFile: boolean;
 		readonly restrictions: ReadonlyArray<CompiledRestriction>;
 	}
 >;

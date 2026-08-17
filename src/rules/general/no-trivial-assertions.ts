@@ -143,7 +143,8 @@ function freshReferencePredicateHolds(predicate: PredicateKind): boolean {
 }
 
 function constantsEqual(_strict: boolean, left: ConstantPrimitive, right: ConstantPrimitive): boolean {
-	// Resolved constants are primitive-only; Object.is matches both strict and practical loose cases we cover.
+	// Resolved constants are primitive-only; Object.is matches both strict and
+	// practical loose cases we cover.
 	return Object.is(left, right);
 }
 
@@ -231,10 +232,13 @@ function reportTrivialExpect(context: Context, node: ESTree.CallExpression): voi
 	}
 
 	const isIdentity = IDENTITY_MATCHERS.has(matcher);
-	if (!(isIdentity || DEEP_MATCHERS.has(matcher))) return;
+	if (!isIdentity && !DEEP_MATCHERS.has(matcher)) return;
+
 	const expected = firstExpressionArgument(node, 0);
 	if (expected === undefined) return;
-	// Only identity matchers get the fresh-reference hint; deep matchers only constant-fold.
+
+	// Only identity matchers get the fresh-reference hint; deep matchers only
+	// constant-fold.
 	reportComparisonAssertion(context, actual, expected, isIdentity, negated, negated ? "not.toEqual" : "toEqual");
 }
 
@@ -259,8 +263,10 @@ function reportTrivialAssert(context: Context, node: ESTree.CallExpression): voi
 
 	const right = firstExpressionArgument(node, 1);
 	if (right === undefined) return;
+
 	const isStrict = ASSERT_STRICT_METHODS.has(method);
-	if (!(isStrict || ASSERT_LOOSE_METHODS.has(method))) return;
+	if (!isStrict && !ASSERT_LOOSE_METHODS.has(method)) return;
+
 	const negated = method.startsWith("not");
 	reportComparisonAssertion(
 		context,

@@ -202,7 +202,7 @@ function isTypePositionIdentifier(identifier: ESTree.Node): boolean {
 }
 
 function isScopeInside(inner: Scope, outer: Scope): boolean {
-	let current: Scope | null = inner;
+	let current: null | Scope = inner;
 	while (current !== null) {
 		if (current === outer) return true;
 		current = current.upper;

@@ -13,32 +13,14 @@ const STATIC_OPTIONS: StaticExpressionOptions = {
 	staticGlobalFactories: new Set(DEFAULT_STATIC_GLOBAL_FACTORIES),
 };
 
-function getAttributeExpression(node: ESTree.JSXAttribute): ESTree.Expression | undefined {
-	const { value } = node;
+function getAttributeExpression({ value }: ESTree.JSXAttribute): ESTree.Expression | undefined {
 	if (value?.type !== "JSXExpressionContainer") return undefined;
 	/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
 	if (value.expression.type === "JSXEmptyExpression") return undefined;
 	return value.expression;
 }
 
-type WalkableParent = ESTree.Node;
-
-function isJsxElementAssignedToModuleConst(context: Context, node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	let current: WalkableParent = node;
-
-	while (true) {
-		const { parent } = current;
-		/* v8 ignore next -- @preserve decorated parser ASTs keep JSX ancestors attached until traversal stops. */
-		if (parent === null) return false;
-		if (parent.type === "VariableDeclarator") return isModuleConstDeclaration(context, node, parent, current);
-
-		const nextParent = getWalkableJsxParent(parent);
-		if (nextParent === undefined) return false;
-		current = nextParent;
-	}
-}
-
-function getWalkableJsxParent(parent: ESTree.Node): WalkableParent | undefined {
+function getWalkableJsxParent(parent: ESTree.Node): ESTree.Node | undefined {
 	if (
 		parent.type === "JSXElement" ||
 		parent.type === "JSXFragment" ||
@@ -56,7 +38,7 @@ function isModuleConstDeclaration(
 	context: Context,
 	node: ESTree.JSXElement | ESTree.JSXFragment,
 	parent: ESTree.VariableDeclarator,
-	current: WalkableParent,
+	current: ESTree.Node,
 ): boolean {
 	/* v8 ignore next -- @preserve non-identifier module bindings cannot be referenced as JSX constants. */
 	if (parent.id.type !== "Identifier") return false;
@@ -66,6 +48,21 @@ function isModuleConstDeclaration(
 	const scope = context.sourceCode.getScope(node);
 	const variable = getVariableByName(scope, parent.id.name);
 	return variable !== undefined && isModuleLevelScope(variable.scope);
+}
+
+function isJsxElementAssignedToModuleConst(context: Context, node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
+	let current: ESTree.Node = node;
+
+	while (true) {
+		const { parent } = current;
+		/* v8 ignore next -- @preserve decorated parser ASTs keep JSX ancestors attached until traversal stops. */
+		if (parent === null) return false;
+		if (parent.type === "VariableDeclarator") return isModuleConstDeclaration(context, node, parent, current);
+
+		const nextParent = getWalkableJsxParent(parent);
+		if (nextParent === undefined) return false;
+		current = nextParent;
+	}
 }
 
 function reportHoistableObject(context: Context, objectExpression: ESTree.ObjectExpression): void {

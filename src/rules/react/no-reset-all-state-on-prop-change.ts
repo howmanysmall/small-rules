@@ -15,7 +15,8 @@ const noResetAllStateOnPropertyChange = createRule("no-reset-all-state-on-prop-c
 			Program(): void {
 				for (const effect of analysis.effects) {
 					if (effect.dependencyReferences === undefined) continue;
-					// Skip custom hooks because they can't receive `key` like components can.
+					// Skip custom hooks because they can't receive `key` like
+					// components can.
 					const containingNode = analysis.findEnclosingReactNode(effect.node);
 					if (containingNode !== undefined && analysis.isCustomHook(containingNode)) continue;
 
@@ -95,9 +96,10 @@ function isSetStateToInitialValue(
 	if (callExpression === undefined) return false;
 	const [setStateToValue] = callExpression.arguments;
 	const useStateDeclaration = analysis.getUseStateDeclaration(setterReference);
-	// `getUseStateDeclaration` only returns declarators whose init is the `useState(...)` call
-	// (the upstream chain always reaches the setter's own declaration), so a non-call init
-	// or a missing declaration can never occur for the state calls this rule inspects.
+	// `getUseStateDeclaration` only returns declarators whose init is the
+	// `useState(...)` call (the upstream chain always reaches the setter's own
+	// declaration), so a non-call init or a missing declaration can never occur
+	// for the state calls this rule inspects.
 	/* v8 ignore next -- useState declarations always have a CallExpression init here. @preserve */
 	if (useStateDeclaration?.init?.type !== "CallExpression") {
 		return false;
@@ -113,14 +115,16 @@ function isSetStateToInitialValue(
 		return true;
 	}
 
-	// `sourceCode.getText()` returns the entire file when passed null/undefined - let's short circuit that
+	// `sourceCode.getText()` returns the entire file when passed null/undefined
+	// - let's short circuit that
 	if (setStateToValue === undefined || stateInitialValue === undefined) {
 		return false;
 	}
 
 	// This is one of the few places we compare just the immediate nodes,
 	// not upstream variables - that seems pretty complicated here?
-	// At the least, upstream functions would have to return literals for us to consider too, not just variables.
+	// At the least, upstream functions would have to return literals for us to
+	// consider too, not just variables.
 	return sourceCode.getText(setStateToValue) === sourceCode.getText(stateInitialValue);
 }
 
@@ -130,7 +134,7 @@ function isUndefined(node: ESTree.Node | undefined): boolean {
 
 function countUseStates(
 	analysis: ReactEffectAnalysis,
-	componentNode: ESTree.Function | ESTree.VariableDeclarator | ESTree.ArrowFunctionExpression | undefined,
+	componentNode: ESTree.ArrowFunctionExpression | ESTree.Function | ESTree.VariableDeclarator | undefined,
 ): number {
 	if (componentNode === undefined) {
 		return 0;

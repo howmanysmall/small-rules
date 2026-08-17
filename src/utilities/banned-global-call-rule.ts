@@ -3,11 +3,11 @@ import { createRule } from "$oxc-utilities/create-rule";
 import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
 
 interface BannedGlobalCallRuleOptions<TMessageId extends string> {
+	readonly name: string;
 	readonly alternative: string;
 	readonly category: string;
 	readonly message: string;
 	readonly messageId: TMessageId;
-	readonly name: string;
 	readonly ruleName: string;
 }
 

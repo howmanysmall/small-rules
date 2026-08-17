@@ -337,7 +337,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 				}
 
 				const currentCallbackState = getCurrentTopLevelCallbackState();
-				if (!(currentCallbackState && isEventsMethodCall(node, trackedEventsIdentifiers))) return;
+				if (!currentCallbackState || !isEventsMethodCall(node, trackedEventsIdentifiers)) return;
 
 				const [firstArgument] = node.arguments;
 				if (
@@ -385,7 +385,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 
 			VariableDeclarator(node): void {
 				const callbackState = getCurrentTopLevelCallbackState();
-				if (!(callbackState && node.init)) return;
+				if (!callbackState || !node.init) return;
 
 				const taint = classifyNodeTaint(node.init, callbackState);
 				if (taint === TaintKind.None) return;

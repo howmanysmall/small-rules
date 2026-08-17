@@ -3,7 +3,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-interface ComplexityConfiguration {
+interface ComplexityConfig {
 	readonly baseThreshold: number;
 	readonly errorThreshold: number;
 	readonly interfacePenalty: number;
@@ -15,7 +15,7 @@ interface ComplexityCache {
 	readonly visitedNodes: WeakSet<object>;
 }
 
-const DEFAULT_CONFIGURATION: ComplexityConfiguration = {
+const DEFAULT_CONFIGURATION: ComplexityConfig = {
 	baseThreshold: 10,
 	errorThreshold: 25,
 	interfacePenalty: 20,
@@ -103,7 +103,7 @@ function calculateIanitorComplexity(node: ESTree.CallExpression): number {
 	}
 }
 
-function addScore(current: number, addition: number, config: ComplexityConfiguration, ceiling: number): number {
+function addScore(current: number, addition: number, config: ComplexityConfig, ceiling: number): number {
 	const nextScore = current + addition;
 	if (!config.performanceMode) return nextScore;
 	return Math.min(nextScore, ceiling);
@@ -114,7 +114,7 @@ function addStructuralScore(
 	current: number,
 	node: ESTree.Node,
 	depth: number,
-	config: ComplexityConfiguration,
+	config: ComplexityConfig,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -132,7 +132,7 @@ function addNestedTypeAnnotationScores(
 	current: number,
 	members: ReadonlyArray<ESTree.Node>,
 	depth: number,
-	config: ComplexityConfiguration,
+	config: ComplexityConfig,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -161,7 +161,7 @@ function addTypeUnionScores(
 	score: number,
 	node: ESTree.Node,
 	nextDepth: number,
-	config: ComplexityConfiguration,
+	config: ComplexityConfig,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -203,7 +203,7 @@ function getDepthMultiplier(depth: number, cache: Map<number, number>): number {
 function calculateStructuralComplexity(
 	node: ESTree.Node,
 	depth: number,
-	config: ComplexityConfiguration,
+	config: ComplexityConfig,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -437,8 +437,8 @@ function calculateStructuralComplexity(
 
 const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox", {
 	create(context): Visitor {
-		const rawOptions = (context.options[0] ?? {}) as Partial<ComplexityConfiguration>;
-		const config: ComplexityConfiguration = { ...DEFAULT_CONFIGURATION, ...rawOptions };
+		const rawOptions = (context.options[0] ?? {}) as Partial<ComplexityConfig>;
+		const config: ComplexityConfig = { ...DEFAULT_CONFIGURATION, ...rawOptions };
 		const cache: ComplexityCache = {
 			nodeCache: new WeakMap(),
 			visitedNodes: new WeakSet(),
@@ -459,7 +459,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 			"Program:exit"(): void {
 				if (!hasIanitorReference) return;
 
-				for (const [node, data] of typeAliasesToCheck.entries()) {
+				for (const [node, data] of typeAliasesToCheck) {
 					/* v8 ignore next -- @preserve top-level depth scoring keeps type alias checks below threshold today. */
 					context.report({
 						data: { score: data.complexity.toFixed(1) },
@@ -468,7 +468,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 					});
 				}
 
-				for (const [node] of interfacesToCheck.entries()) {
+				for (const [node] of interfacesToCheck) {
 					/* v8 ignore next -- @preserve top-level depth scoring keeps interface checks below threshold today. */
 					context.report({
 						data: { name: node.id.name },
@@ -477,7 +477,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 					});
 				}
 
-				for (const [node, data] of variableDeclaratorsToCheck.entries()) {
+				for (const [node, data] of variableDeclaratorsToCheck) {
 					const { id } = node;
 					if (id.type === "Identifier" && ianitorStaticVariables.has(id.name)) continue;
 
@@ -528,7 +528,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 			},
 
 			VariableDeclarator(node): void {
-				const { init, id } = node;
+				const { id, init } = node;
 				if (init?.type !== "CallExpression" || !isIanitorValidator(init)) return;
 
 				hasIanitorReference = true;

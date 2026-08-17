@@ -1,6 +1,7 @@
 import { createBannedGlobalCallRule } from "$oxc-utilities/banned-global-call-rule";
 
 const noWarn = createBannedGlobalCallRule({
+	name: "warn",
 	alternative: "Log",
 	category: "roblox",
 	message:
@@ -8,7 +9,6 @@ const noWarn = createBannedGlobalCallRule({
 		"Production systems require structured logging for debugging and monitoring. " +
 		"Replace {{name}}(...) with {{alternative}}.",
 	messageId: "noWarn",
-	name: "warn",
 	ruleName: "no-warn",
 });
 

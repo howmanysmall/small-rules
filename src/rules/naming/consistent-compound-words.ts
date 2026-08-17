@@ -148,8 +148,10 @@ function getReplacementForPart(part: string, replacements: ReadonlyMap<string, s
 	return isUpperFirst(part) ? upperFirst(replacement) : lowerFirst(replacement);
 }
 
-function getNameReplacement(name: string, options: RuleOptions): string | undefined {
-	const { replacementRegExp, replacements, allowList } = options;
+function getNameReplacement(
+	name: string,
+	{ allowList, replacementRegExp, replacements }: RuleOptions,
+): string | undefined {
 	if (replacementRegExp === undefined || isUpperCase(name) || allowList.has(name)) return undefined;
 	replacementRegExp.lastIndex = 0;
 	/* v8 ignore next -- matched parts always resolve through the replacements map. @preserve */
@@ -166,10 +168,11 @@ function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {
 	const { parent } = node;
 	/* v8 ignore next -- Identifier visitors always have parents in parser ASTs. @preserve */
 	if (parent === null) return false;
-	if (parent.type === "Property" && parent.key === node && !parent.computed) return true;
-	if (parent.type === "PropertyDefinition" && parent.key === node && !parent.computed) return true;
-	if (parent.type === "MethodDefinition" && parent.key === node && !parent.computed) return true;
-	return false;
+	return (
+		(parent.type === "Property" && parent.key === node && !parent.computed) ||
+		(parent.type === "PropertyDefinition" && parent.key === node && !parent.computed) ||
+		(parent.type === "MethodDefinition" && parent.key === node && !parent.computed)
+	);
 }
 
 const consistentCompoundWords = createRule("consistent-compound-words", "naming", {
