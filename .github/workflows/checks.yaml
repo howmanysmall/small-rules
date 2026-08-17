@@ -91,6 +91,12 @@ jobs:
         run: node --run check
         working-directory: documentation
 
+      - name: Restore Chromium cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          key: ${{ runner.os }}-${{ runner.arch }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
+
       - name: Install Chromium
         run: pnpm --filter docs exec playwright install --with-deps chromium
 
