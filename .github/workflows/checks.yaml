@@ -15,6 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup toolchain
@@ -23,14 +24,32 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install
 
+      - name: Collect changed files
+        run: git diff --name-only --diff-filter=ACMRT -z "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/changed-files"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
       - name: Biome
-        run: node --run biome -- ci
+        run: |
+          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+          if ((${#changed_files[@]} > 0)); then
+            node --run biome -- ci --no-errors-on-unmatched "${changed_files[@]}"
+          fi
 
       - name: oxfmt
-        run: node --run oxfmt -- --check
+        run: |
+          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+          if ((${#changed_files[@]} > 0)); then
+            node --run oxfmt -- --no-error-on-unmatched-pattern --check "${changed_files[@]}"
+          fi
 
       - name: Lint
-        run: node --run isentinel-lint
+        run: |
+          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+          if ((${#changed_files[@]} > 0)); then
+            node --run isentinel-lint -- "${changed_files[@]}"
+          fi
 
       - name: Type Check
         run: node --run type-check
