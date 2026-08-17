@@ -348,13 +348,4 @@ const configuration = isentinel(
 	},
 );
 
-const localSmallRulesUrl = new URL("plugins/small-rules.js", import.meta.url);
-const localSmallRulesSpecifier = localSmallRulesUrl.href;
-for (const plugins of [configuration.jsPlugins, ...(configuration.overrides ?? []).map(({ jsPlugins }) => jsPlugins)]) {
-	if (!plugins) continue;
-	for (const plugin of plugins) {
-		if (typeof plugin !== "string" && plugin.name === "small-rules") plugin.specifier = localSmallRulesSpecifier;
-	}
-}
-
 export default configuration;

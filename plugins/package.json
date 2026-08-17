@@ -1,0 +1,9 @@
+{
+	"name": "@pobammer-ts/small-rules",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./small-rules.js"
+	}
+}

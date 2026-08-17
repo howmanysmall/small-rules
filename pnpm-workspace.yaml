@@ -114,6 +114,7 @@ packages:
 
 # Force specific versions of any dependency (including transitive)
 overrides:
+  "@isentinel/eslint-config>@pobammer-ts/small-rules": "link:./plugins"
   vite: ^8
 
 catalogs:
