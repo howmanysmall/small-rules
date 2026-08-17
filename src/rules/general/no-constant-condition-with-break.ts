@@ -26,20 +26,15 @@ type LoopNode =
 	| ESTree.ForStatement
 	| ESTree.WhileStatement;
 
+const NON_CONSTANT_VALUE: ConstantValueResult = { constant: false };
+const NON_CONSTANT_BOOLEAN: ConstantBooleanResult = { constant: false };
+
 function toConstantValue(value: unknown): ConstantValueResult {
 	return { constant: true, value };
 }
 
-function toNonConstantValue(): ConstantValueResult {
-	return { constant: false };
-}
-
 function toConstantBoolean(value: boolean): ConstantBooleanResult {
 	return { constant: true, value };
-}
-
-function toNonConstantBoolean(): ConstantBooleanResult {
-	return { constant: false };
 }
 
 function normalizeLoopExitCalls(options: NoConstantConditionWithBreakOptions | undefined): ReadonlySet<string> {
@@ -172,8 +167,8 @@ function expressionContainsConfiguredLoopExit(
 	const pending = [expression];
 	let index = 0;
 	while (index < pending.length) {
-		const current = pending[index];
-		index += 1;
+		const current = pending[index++];
+		/* v8 ignore next -- @preserve index is bounded by pending.length. */
 		if (current === undefined) continue;
 
 		const unwrapped = unwrapExpression(current);
@@ -190,7 +185,7 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 	while (unwrapped.type === "SequenceExpression") {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
-		if (!lastExpression) return toNonConstantValue();
+		if (!lastExpression) return NON_CONSTANT_VALUE;
 		unwrapped = unwrapExpression(lastExpression);
 	}
 
@@ -207,7 +202,7 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			if (unwrapped.name === "undefined") return toConstantValue(undefined);
 			if (unwrapped.name === "NaN") return toConstantValue(Number.NaN);
 			if (unwrapped.name === "Infinity") return toConstantValue(Number.POSITIVE_INFINITY);
-			return toNonConstantValue();
+			return NON_CONSTANT_VALUE;
 		}
 
 		case "Literal":
@@ -220,7 +215,7 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			return toConstantValue({});
 
 		case "TemplateLiteral": {
-			if (unwrapped.expressions.length > 0) return toNonConstantValue();
+			if (unwrapped.expressions.length > 0) return NON_CONSTANT_VALUE;
 			/* v8 ignore next -- @preserve parsers keep at least one quasi for template literals. */
 			if (unwrapped.quasis.length === 0) return toConstantValue("");
 			/* v8 ignore next -- @preserve untagged template literal cooked values are strings in parser output. */
@@ -231,13 +226,13 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			return getUnaryConstantValue(unwrapped);
 
 		default:
-			return toNonConstantValue();
+			return NON_CONSTANT_VALUE;
 	}
 }
 
 function getLogicalConstantValue(expression: ESTree.LogicalExpression): ConstantValueResult {
 	const left = getConstantValue(expression.left);
-	if (!left.constant) return toNonConstantValue();
+	if (!left.constant) return NON_CONSTANT_VALUE;
 
 	if (expression.operator === "&&") {
 		if (left.value !== true) return toConstantValue(left.value);
@@ -258,14 +253,14 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 	if (expression.operator === "void") return toConstantValue(undefined);
 
 	const argument = getConstantValue(expression.argument);
-	if (!argument.constant) return toNonConstantValue();
+	if (!argument.constant) return NON_CONSTANT_VALUE;
 
 	// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
 	if (expression.operator === "!") return toConstantValue(!argument.value);
 	if (expression.operator === "+" && isNumberRaw(argument.value)) return toConstantValue(argument.value);
 	if (expression.operator === "-" && isNumberRaw(argument.value)) return toConstantValue(-argument.value);
 	if (expression.operator === "~" && isNumberRaw(argument.value)) return toConstantValue(~argument.value);
-	return toNonConstantValue();
+	return NON_CONSTANT_VALUE;
 }
 
 function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResult {
@@ -274,7 +269,7 @@ function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResul
 	while (unwrapped.type === "SequenceExpression") {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
-		if (!lastExpression) return toNonConstantBoolean();
+		if (!lastExpression) return NON_CONSTANT_BOOLEAN;
 		unwrapped = unwrapExpression(lastExpression);
 	}
 
@@ -287,7 +282,7 @@ function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResul
 	}
 
 	const value = getConstantValue(unwrapped);
-	if (!value.constant) return toNonConstantBoolean();
+	if (!value.constant) return NON_CONSTANT_BOOLEAN;
 	return toConstantBoolean(Boolean(value.value));
 }
 
@@ -298,12 +293,12 @@ function getConditionalConstantBoolean(expression: ESTree.ConditionalExpression)
 	const consequent = getConstantBoolean(expression.consequent);
 	const alternate = getConstantBoolean(expression.alternate);
 	if (consequent.constant && alternate.constant && consequent.value === alternate.value) return consequent;
-	return toNonConstantBoolean();
+	return NON_CONSTANT_BOOLEAN;
 }
 
 function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): ConstantBooleanResult {
 	const left = getConstantBoolean(expression.left);
-	if (!left.constant) return toNonConstantBoolean();
+	if (!left.constant) return NON_CONSTANT_BOOLEAN;
 
 	if (expression.operator === "&&") {
 		// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
@@ -317,7 +312,7 @@ function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): Consta
 	}
 
 	const leftValue = getConstantValue(expression.left);
-	if (!leftValue.constant) return toNonConstantBoolean();
+	if (!leftValue.constant) return NON_CONSTANT_BOOLEAN;
 	if (leftValue.value !== undefined) return toConstantBoolean(Boolean(leftValue.value));
 	return getConstantBoolean(expression.right);
 }
