@@ -14,7 +14,7 @@ import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-const enum DependencyMode {
+export const enum DependencyMode {
 	Aggressive = "aggressive",
 	EmptyOrOmitted = "empty-or-omitted",
 	NonUpdating = "non-updating",
