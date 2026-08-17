@@ -114,7 +114,7 @@ function resolveDefinitionToFunctionIds(
 	cache: Map<ScopeVariable, ReadonlySet<number>>,
 	visited: Set<ScopeVariable>,
 ): ReadonlySet<number> {
-	if (definition.type === "FunctionName") return resolveFunctionNameDefinition(definition, functionInfosByNode);
+	if (definition.type === "FunctionName") return resolveFunctionNameDefinition(definition.node, functionInfosByNode);
 	if (definition.type !== "Variable") return new Set<number>();
 
 	const { node } = definition;
@@ -130,10 +130,9 @@ function resolveDefinitionToFunctionIds(
 }
 
 function resolveFunctionNameDefinition(
-	definition: ScopeVariable["defs"][number],
+	node: ESTree.Node,
 	functionInfosByNode: ReadonlyMap<CallbackFunction, FunctionInfo>,
 ): ReadonlySet<number> {
-	const { node } = definition;
 	/* v8 ignore next -- @preserve FunctionName definitions are backed by function declarations in parser scopes. */
 	if (node.type !== "FunctionDeclaration") return new Set<number>();
 	return getFunctionIdSet(node, functionInfosByNode);
@@ -357,7 +356,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 						trackedNewExpression.containingFunctionId !== undefined &&
 						reachableFunctionIds.has(trackedNewExpression.containingFunctionId);
 
-					if (!trackedNewExpression.isLexicallyInsideUseMemo && !matchesHelperTrace) continue;
+					if (!matchesHelperTrace && !trackedNewExpression.isLexicallyInsideUseMemo) continue;
 
 					context.report({
 						data: { constructorName: trackedNewExpression.constructorName },

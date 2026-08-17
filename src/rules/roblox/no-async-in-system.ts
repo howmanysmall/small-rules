@@ -67,7 +67,6 @@ function pushChildren(node: ESTree.Node, stack: Array<unknown>): void {
 	}
 }
 
-// oxlint-disable-next-line typescript/no-invalid-void-type -- fixes other shit
 function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | undefined | void): void {
 	const stack: Array<unknown> = [root];
 	while (stack.length > 0) {
@@ -387,7 +386,6 @@ function getSynchronousCallbacks(
 		if (!pathsEqual(calleePath, configuration.calleePath)) continue;
 		for (const argumentIndex of configuration.callbackArgumentIndexes) {
 			const argument = call.arguments[argumentIndex];
-			// oxlint-disable-next-line unicorn-js/no-break-in-nested-loop -- no dude
 			if (argument === undefined || argument.type === "SpreadElement") continue;
 
 			const callback = getReferencedCallback(argument, sourceCode);

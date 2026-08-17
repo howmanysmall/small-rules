@@ -61,7 +61,6 @@ const noColor3Constructor = createRule("no-color3-constructor", "roblox", {
 				}
 
 				if (parameters.length < 3) {
-					// oxlint-disable-next-line prefer-destructuring -- wtf do you expect?
 					const [red, green = 0] = collected[1];
 					context.report({
 						fix: (fixer) => fixer.replaceText(node, `Color3.fromRGB(${red}, ${green}, 0)`),

@@ -19,6 +19,7 @@ export function createEndWithDetector(probability: number, endings: ReadonlyArra
 			for (let index = line.length - 1; index >= 0; index -= 1) {
 				const character = line.charAt(index);
 				if (endingsSet.has(character)) return 1;
+				// oxlint-disable-next-line unicorn-js/prefer-simple-condition-first -- no
 				if (!WHITESPACE_REGEX.test(character) && character !== "*" && character !== "/") return 0;
 			}
 

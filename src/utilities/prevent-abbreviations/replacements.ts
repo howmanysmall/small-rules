@@ -609,11 +609,9 @@ export function isDiscouragedReplacementName(name: string, options: PreparedOpti
 
 export function getMessage(
 	discouragedName: string,
-	replacements: NameReplacements,
+	{ samples = [], total }: NameReplacements,
 	nameTypeText: string,
 ): { data: Record<string, string>; messageId: MessageIds } {
-	const { samples = [], total } = replacements;
-
 	if (total === 1) {
 		return {
 			data: {

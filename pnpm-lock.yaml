@@ -251,6 +251,9 @@ catalogs:
     eslint-plugin-antfu:
       specifier: 3.2.3
       version: 3.2.3
+    eslint-plugin-eslint-plugin:
+      specifier: 7.6.1
+      version: 7.6.1
     eslint-plugin-n:
       specifier: 18.3.0
       version: 18.3.0
@@ -403,7 +406,7 @@ importers:
         version: 0.4.1(vitest@4.1.10)
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.0.0-beta.42(@typescript/typescript6@6.0.2)(@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2)(vitest@4.1.10))(eslint-plugin-n@18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)))(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(oxc-parser@0.142.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2)
+        version: 6.0.0-beta.42(@typescript/typescript6@6.0.2)(@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2)(vitest@4.1.10))(eslint-plugin-eslint-plugin@7.6.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)))(eslint-plugin-n@18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)))(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(oxc-parser@0.142.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2)
       '@stryker-mutator/api':
         specifier: catalog:dev
         version: 9.6.1
@@ -452,6 +455,9 @@ importers:
       eslint-plugin-antfu:
         specifier: catalog:lint
         version: 3.2.3(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
+      eslint-plugin-eslint-plugin:
+        specifier: catalog:lint
+        version: 7.6.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-n:
         specifier: catalog:lint
         version: 18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
@@ -5445,6 +5451,12 @@ packages:
     peerDependencies:
       eslint: '>=8'
 
+  eslint-plugin-eslint-plugin@7.6.1:
+    resolution: {integrity: sha512-Knh3EFP4T9K/hIu/V7LE29P/wkwfodITf8b5Zcv+YVTvpb1LIlO44NZzZ7MHMEkD9alxeDmXiR462mgMYL2Odg==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
+    peerDependencies:
+      eslint: '>=9.0.0'
+
   eslint-plugin-flawless@1.11.0:
     resolution: {integrity: sha512-RSsERBUoMdxaR2xujkSfbk8ZK+5VEVQkNk/V5vq6IxFQsayuQq32PxSHvm6Dmt+IvF8/k/Wv0MoltuWQ007+ug==}
     engines: {node: '>=24.12.0'}
@@ -10147,7 +10159,7 @@ snapshots:
 
   '@isentinel/dict-roblox@1.0.11': {}
 
-  '@isentinel/eslint-config@6.0.0-beta.42(@typescript/typescript6@6.0.2)(@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2)(vitest@4.1.10))(eslint-plugin-n@18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)))(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(oxc-parser@0.142.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2)':
+  '@isentinel/eslint-config@6.0.0-beta.42(@typescript/typescript6@6.0.2)(@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2)(vitest@4.1.10))(eslint-plugin-eslint-plugin@7.6.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)))(eslint-plugin-n@18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)))(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(oxc-parser@0.142.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2)':
     dependencies:
       '@antfu/install-pkg': 2.0.1
       '@clack/prompts': 1.7.0
@@ -10206,6 +10218,7 @@ snapshots:
       yargs: 18.0.0
     optionalDependencies:
       '@vitest/eslint-plugin': 1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@10.2.2)(vitest@4.1.10)
+      eslint-plugin-eslint-plugin: 7.6.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint-plugin-n: 18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
       oxlint: 1.78.0(oxlint-tsgolint@7.0.2001)
       oxlint-tsgolint: 7.0.2001
@@ -13177,6 +13190,12 @@ snapshots:
       '@eslint-community/regexpp': 4.12.2
       eslint: 10.8.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-compat-utils: 0.5.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
+
+  eslint-plugin-eslint-plugin@7.6.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0)):
+    dependencies:
+      '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))
+      eslint: 10.8.0(jiti@2.7.0)(supports-color@7.2.0)
+      estraverse: 5.3.0
 
   eslint-plugin-flawless@1.11.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@7.2.0))(oxc-parser@0.142.0)(oxfmt@0.63.0)(supports-color@10.2.2):
     dependencies:
@@ -16994,6 +17013,7 @@ time:
   commitlint@21.2.1: '2026-07-08T07:48:08.940Z'
   confbox@0.2.4: '2026-02-06T12:11:42.581Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
+  eslint-plugin-eslint-plugin@7.6.1: '2026-08-06T01:41:00.609Z'
   eslint-plugin-n@18.3.0: '2026-08-08T14:03:55.663Z'
   eslint-plugin-pnpm@1.8.0: '2026-08-13T06:26:51.536Z'
   eslint-plugin-regexp@3.1.1: '2026-06-25T23:07:43.989Z'

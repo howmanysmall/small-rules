@@ -3,8 +3,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-function isPromiseDelayAwaitCall(node: ESTree.CallExpression): boolean {
-	const { callee } = node;
+function isPromiseDelayAwaitCall({ callee }: ESTree.CallExpression): boolean {
 	if (
 		callee.type !== "MemberExpression" ||
 		getMemberPropertyName(callee) !== "await" ||

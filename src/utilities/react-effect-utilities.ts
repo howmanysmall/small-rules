@@ -201,16 +201,15 @@ function resolveEffectFunction(
 	const definition = reference?.resolved?.defs[0];
 	/* v8 ignore start -- @preserve identifier callbacks resolve to a definition value node in every reachable case (probed via setDerivedName and deferredCallback). */
 	if (definition === undefined) return undefined;
-	const definitionNode = getDefinitionValueNode(definition);
+
+	const definitionNode = getDefinitionValueNode(definition.node);
 	if (definitionNode === undefined) return undefined;
-	if (
-		definitionNode.type === "ArrowFunctionExpression" ||
+
+	return definitionNode.type === "ArrowFunctionExpression" ||
 		definitionNode.type === "FunctionExpression" ||
 		definitionNode.type === "BlockStatement"
-	) {
-		return definitionNode;
-	}
-	return undefined;
+		? definitionNode
+		: undefined;
 	/* v8 ignore stop */
 }
 
@@ -231,21 +230,14 @@ function getEffectCleanup(functionNode: EffectFunctionNode): ESTree.ReturnStatem
 	const { body } = functionNode.body;
 	for (let index = body.length - 1; index >= 0; index -= 1) {
 		const statement = body[index];
-		if (statement?.type === "ReturnStatement" && statement.argument !== null) {
-			return statement;
-		}
+		if (statement?.type === "ReturnStatement" && statement.argument !== null) return statement;
 	}
 	return undefined;
 }
 
-function getDefinitionValueNode(definition: { node: ESTree.Node }): ESTree.Node | undefined {
-	// `def.node.init` is for ArrowFunctionExpression, VariableDeclarator, (etc?).
-	// `def.node.body` is for FunctionDeclaration.
-	const { node } = definition;
+function getDefinitionValueNode(node: ESTree.Node): ESTree.Node | undefined {
 	/* v8 ignore start -- @preserve definitions from the parser are always VariableDeclarators (init) or FunctionDeclarations (body); the fallback arms are unreachable. */
-	if ("init" in node) {
-		return node.init ?? undefined;
-	}
+	if ("init" in node) return node.init ?? undefined;
 	if ("body" in node) {
 		const { body } = node;
 		return isNode(body) ? body : undefined;
@@ -277,8 +269,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 		}
 		const [firstArgument] = candidate.init.arguments;
 		/* v8 ignore start -- @preserve the arrow arm is exercised by the memo/withRouter cases; the FunctionExpression arm never executes (probed). */
-		if (firstArgument?.type === "ArrowFunctionExpression") return true;
-		return firstArgument?.type === "FunctionExpression";
+		return firstArgument?.type === "ArrowFunctionExpression" || firstArgument?.type === "FunctionExpression";
 		/* v8 ignore stop */
 	}
 
@@ -345,12 +336,6 @@ function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 }
 /* v8 ignore stop */
 
-// Does not include `useLayoutEffect`.
-// When used correctly, it interacts with the DOM = external system = (probably)
-// valid effect. When used incorrectly, it's probably too difficult to accurately
-/**
- * Analyze anyway.
- */
 function isUseEffect(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	/* v8 ignore next -- isUseEffect is only called with CallExpression nodes from the program call index. @preserve */
 	if (node.type !== "CallExpression") return false;

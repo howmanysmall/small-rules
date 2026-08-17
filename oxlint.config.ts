@@ -1,4 +1,6 @@
 // oxlint-disable small-rules/prevent-abbreviations -- ok.
+
+import { argv } from "node:process";
 import { isentinel } from "@isentinel/eslint-config/oxlint";
 import { ALL_REACT_DOCTOR_RULES } from "oxlint-plugin-react-doctor";
 
@@ -21,6 +23,34 @@ const configuration = isentinel(
 			style: "error",
 			suspicious: "error",
 		},
+		eslintPlugin: false,
+		formatters: {
+			css: false,
+			graphql: true,
+			html: true,
+			lua: false,
+			markdown: false,
+			prettierOptions: {
+				arrowParens: "always",
+				bracketSameLine: false,
+				bracketSpacing: true,
+				embeddedLanguageFormatting: "auto",
+				endOfLine: "auto",
+				experimentalOperatorPosition: "end",
+				experimentalTernaries: false,
+				htmlWhitespaceSensitivity: "css",
+				jsxSingleQuote: false,
+				objectWrap: "preserve",
+				printWidth: 120,
+				proseWrap: "preserve",
+				quoteProps: "as-needed",
+				semi: true,
+				singleQuote: false,
+				tabWidth: 4,
+				trailingComma: "all",
+				useTabs: true,
+			},
+		},
 		ignores: [
 			"**/{dist,do-not-sync-ever,node_modules}/**",
 			"**/*.js",
@@ -28,6 +58,14 @@ const configuration = isentinel(
 			"scripts/clis/**/*.ts",
 			"src/generated/**",
 		],
+		options: {
+			denyWarnings: true,
+			maxWarnings: 0,
+			reportUnusedDisableDirectives: "deny",
+			respectEslintDisableDirectives: false,
+			typeAware: true,
+			typeCheck: !argv.includes("--lsp"),
+		},
 		roblox: false,
 		rules: {
 			"better-max-params/better-max-params": [
@@ -47,17 +85,8 @@ const configuration = isentinel(
 			complexity: "off",
 			curly: ["error", "multi-line"],
 			"default-case": "off",
-			"eslint-js/id-length": "off",
 			"flawless/arrow-return-style": "off",
 			"flawless/max-lines-per-function": "off",
-			"id-length": [
-				"error",
-				{
-					exceptionPatterns: ["^_"],
-					exceptions: ["_", "x", "y", "z", "a", "b", "$"],
-					max: 45,
-				},
-			],
 			"import/exports-last": "off",
 			"import/extensions": "off",
 			"import/group-exports": "off",
@@ -336,6 +365,21 @@ const configuration = isentinel(
 			vitest: { typecheck: true },
 		},
 		spellCheck: false,
+	},
+	{
+		name: "small-rules/native-id-length",
+		files: ["**/*.{js,jsx,ts,tsx}"],
+		rules: {
+			"eslint-js/id-length": "off",
+			"id-length": [
+				"error",
+				{
+					exceptionPatterns: ["^_"],
+					exceptions: ["_", "x", "y", "z", "a", "b", "$"],
+					max: 45,
+				},
+			],
+		},
 	},
 	{
 		name: "small-rules/react-doctor",

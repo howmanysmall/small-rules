@@ -1,4 +1,3 @@
-// oxlint-disable unicorn-js/no-break-in-nested-loop -- annoying as hell
 import { createRule } from "$oxc-utilities/create-rule";
 import { getNamespacedCallNames, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
