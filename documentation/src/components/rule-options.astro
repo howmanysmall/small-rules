@@ -9,10 +9,10 @@ interface Props {
 	readonly rule: RuleName;
 }
 
-const { rule } = Astro.props;
-const documentation = getRuleOptionsDocumentation(rule);
+const { rule } = Astro.props,
+ documentation = getRuleOptionsDocumentation(rule),
 
-const highlightedTypes = Object.fromEntries(
+ highlightedTypes = Object.fromEntries(
 	await Promise.all(
 		documentation.options.map(async (option) => [option.name, await highlightTypeScriptAsync(option.type)]),
 	),

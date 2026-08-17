@@ -99,8 +99,8 @@ const configuration = isentinel(
 		},
 	},
 	{
-		files: ["**/package.json", "!package.json"],
 		name: "small-rules/package-json",
+		files: ["**/package.json", "!package.json"],
 		rules: {
 			"package-json/require-attribution": "off",
 			"package-json/require-bugs": "off",
@@ -118,12 +118,12 @@ const configuration = isentinel(
 		},
 	},
 	{
-		ignores: ["{.omo,.rumdl_cache}/**", ".github/workflows/react-doctor.yml", "**/*.js"],
 		name: "small-rules/ignores",
+		ignores: ["{.omo,.rumdl_cache}/**", ".github/workflows/react-doctor.yml", "**/*.js"],
 	},
 	{
-		files: ["src/**"],
 		name: "small-rules/block-no-unsafe-string-replacement",
+		files: ["src/**"],
 		rules: { "unicorn/no-unsafe-string-replacement": "off" },
 	},
 );

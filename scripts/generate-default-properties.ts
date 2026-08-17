@@ -469,13 +469,13 @@ const command = new Command()
 			classes,
 			filePath,
 			forceLatest,
+			githubPat,
+			githubPersonalAccessToken,
+			githubToken,
 			loadClassesFrom,
 			output,
 			pretty,
 			quiet,
-			githubToken,
-			githubPat,
-			githubPersonalAccessToken,
 		}) => {
 			const { Octokit } = await import("@octokit/rest");
 			const octokit = new Octokit({

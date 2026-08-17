@@ -51,12 +51,12 @@ const COPY_ICON = (
 );
 
 interface RuleExampleProperties {
-	readonly children: ReactNode;
 	readonly title?: string | undefined;
 	readonly type: "pass" | "fail";
+	readonly children: ReactNode;
 }
 
-export function RuleExample({ children, title, type }: RuleExampleProperties): ReactNode {
+export function RuleExample({ title, type, children }: RuleExampleProperties): ReactNode {
 	const [copied, setCopied] = useState(false);
 	const isPass = type === "pass";
 	const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
@@ -96,8 +96,8 @@ export function RuleExample({ children, title, type }: RuleExampleProperties): R
 			aria-live="polite"
 			className="RuleExample-copy"
 			data-copied={copied ? "" : undefined}
-			onClick={handleCopyExample}
 			type="button"
+			onClick={handleCopyExample}
 		>
 			{COPY_ICON}
 		</button>

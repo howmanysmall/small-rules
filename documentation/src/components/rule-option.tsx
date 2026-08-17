@@ -68,9 +68,9 @@ export function RuleOption({ highlightedType, option }: RuleOptionProperties): R
 					copyStatus={copyStatus}
 					detailId={detailId}
 					isExpanded={isExpanded}
+					option={option}
 					onCopy={handleCopyDefault}
 					onToggle={toggleDefault}
-					option={option}
 				/>
 			</dl>
 			<RuleOptionDefaultDetail defaultValue={option.defaultValue} detailId={detailId} isExpanded={isExpanded} />

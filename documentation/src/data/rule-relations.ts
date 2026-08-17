@@ -3,8 +3,9 @@ import type { RuleName } from "./rule-manifest";
 /**
  * Hand-curated semantic relationships between small-rules.
  *
- * This is intentionally sparse. Same-category adjacency is not a relation. Only real problem-family, complementarity,
- * overlap, or conceptual dependency edges belong here. The previous docs "Related Rules" sections were category
+ * This is intentionally sparse. Same-category adjacency is not a relation.
+ * Only real problem-family, complementarity, overlap, or conceptual dependency
+ * edges belong here. The previous docs "Related Rules" sections were category
  * neighbor spam and should be driven from this map instead.
  *
  * Rule ids match plugin keys in `src/index.ts` / `rule-sidebar.ts`.
@@ -12,15 +13,15 @@ import type { RuleName } from "./rule-manifest";
 
 type RuleRelationKind =
 	/** Same problem family or complementary checks. Default bidirectional. */
-	| "related"
-	/** A makes B more useful, or A is a stricter multi-metric companion of B. Directed. */
-	| "strengthens"
-	/** Different approaches to a similar concern; usually not both required. Directed or bi. */
 	| "alternative"
-	/** Can flag similar code; boundary is worth documenting. Default bidirectional. */
-	| "overlaps"
-	/** Understanding/using A assumes the practice B enforces. Directed. */
+	/** A makes B more useful, or A is a stricter multi-metric companion of B. Directed. */
 	| "depends-on-concept"
+	/** Different approaches to a similar concern; usually not both required. Directed or bi. */
+	| "overlaps"
+	/** Can flag similar code; boundary is worth documenting. Default bidirectional. */
+	| "related"
+	/** Understanding/using A assumes the practice B enforces. Directed. */
+	| "strengthens"
 	/** Enabling A largely replaces B for the covered surface. Directed. */
 	| "supersedes";
 
@@ -36,8 +37,9 @@ function defineRuleRelations<const TRelations extends ReadonlyArray<RuleRelation
 }
 
 /**
- * Undirected kinds are stored once (lexicographically smaller `from` preferred when both directions are equivalent).
- * Directed kinds use explicit `from` → `to`.
+ * Undirected kinds are stored once (lexicographically smaller `from` preferred
+ * when both directions are equivalent). Directed kinds use explicit `from` →
+ * `to`.
  */
 export const ruleRelations = defineRuleRelations([
 	// ---------------------------------------------------------------------------

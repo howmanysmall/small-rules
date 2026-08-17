@@ -61,7 +61,8 @@ const configuration: KnipConfig = {
 			project: ["plugin/**/*.ts"],
 		},
 		documentation: {
-			// Optional peer for Starlight's Sätteri markdown branch (type ambient + peer resolution).
+			// Optional peer for Starlight's Sätteri markdown branch (type
+			// ambient + peer resolution).
 			ignoreDependencies: ["babel-plugin-react-compiler", "satteri"],
 		},
 		scripts: {

@@ -72,9 +72,9 @@ describe("resolveNewness", () => {
 	it("marks rules new only when added in the latest release or unreleased", () => {
 		const newness = resolveNewness(
 			new Map([
-				["unreleased", undefined],
 				["latest", "v2.14.0"],
 				["older", "v1.1.0"],
+				["unreleased", undefined],
 			]),
 			"v2.14.0",
 		);
@@ -117,7 +117,7 @@ describe("createRuleNewness", () => {
 
 describe("getRuleNewnessWith", () => {
 	it("returns an empty map and warns when git is unavailable", () => {
-		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
 		const newness = getRuleNewnessWith(() => {
 			throw new Error("spawn git ENOENT");

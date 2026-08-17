@@ -4,7 +4,8 @@ import { regex } from "arktype";
 
 import type { HookAPI, ToolCallEventResult } from "@oh-my-pi/pi-coding-agent/extensibility/hooks";
 
-// package-exec runners to block: single-token (npx, nlx, pnpx, bunx) and two-word (bun x, pnpm dlx/exec, npm exec, yarn dlx)
+// package-exec runners to block: single-token (npx, nlx, pnpx, bunx) and
+// two-word (bun x, pnpm dlx/exec, npm exec, yarn dlx)
 const RUNNER_TOKEN = /(?:^|\s)(?:n[p|l]x|pnpx|bunx)(?=\s|$)/u;
 const RUNNER_PHRASE = /(?:^|\s)(?:bun x|pnpm dlx|pnpm exec|npm exec|yarn dlx)(?=\s|$)/u;
 const NPX_FLAG = /^(?:--yes|-y)\b/u;
@@ -16,7 +17,7 @@ const RUNNER_PREFIX = /^(?:node --run|pnpm run|pnpm exec|npm run|bun run|bunx|nr
 const WHITESPACE = /\s+/u;
 const VERSION_SUFFIX = /@[\w.-]+$/u;
 
-function runnerInvocation(command: string): { runner: string; packageName: string | undefined } | undefined {
+function runnerInvocation(command: string): undefined | { runner: string; packageName: string | undefined } {
 	const tokenMatch = RUNNER_TOKEN.exec(command);
 	const phraseMatch = RUNNER_PHRASE.exec(command);
 	const match = tokenMatch ?? phraseMatch;
@@ -116,7 +117,7 @@ export default function blockUselessNpx(hookApi: HookAPI): void {
 		const invocation = runnerInvocation(command);
 		if (invocation === undefined) return {};
 
-		const { runner, packageName } = invocation;
+		const { packageName, runner } = invocation;
 		if (packageName === undefined) {
 			return {
 				block: true,

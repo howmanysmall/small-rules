@@ -28,12 +28,13 @@ function formatRelationKind(kind: string): string {
 		.join(" ");
 }
 
-// biome-ignore lint/correctness/useUniqueElementIds: This preserves the existing public heading anchor and label target.
+// biome-ignore lint/correctness/useUniqueElementIds: This preserves the existing
+// public heading anchor and label target.
 const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 
 function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): ReactNode {
 	return (
-		<a className="related-rule" href={`${siteBasePath}${counterpart.path}/`} key={counterpart.name}>
+		<a key={counterpart.name} className="related-rule" href={`${siteBasePath}${counterpart.path}/`}>
 			<span className="related-rule-heading">
 				<strong>{counterpart.title}</strong>
 				<span className="related-rule-kind">{formatRelationKind(relation.kind)}</span>

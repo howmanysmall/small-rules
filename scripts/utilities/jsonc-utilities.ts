@@ -16,7 +16,7 @@ function detectIndentation(content: string): string {
 
 const MISSING_SPACE_AFTER_COLON_REGEXP = /":(?!\s)/gv;
 
-function isInlineArrayNode(updatedContent: string, parentPath: ReadonlyArray<string | number>): boolean {
+function isInlineArrayNode(updatedContent: string, parentPath: ReadonlyArray<number | string>): boolean {
 	if (parentPath.length === 0) return false;
 
 	try {
@@ -42,7 +42,7 @@ function formatInsertionEdit(edit: { content: string; length: number }, indent: 
 /**
  * Edits a JSONC string while preserving comments.
  *
- * @param content The JSONC content to edit.
+ * @param content - The JSONC content to edit.
  * @param validator A function that validates and returns the parsed data.
  * @param mutate A function that receives a draft of the data and returns the modified version.
  * @returns The modified JSONC string with comments preserved.

@@ -17,15 +17,15 @@ type StaticValue =
 	| boolean
 	| null
 	| number
-	| string
 	| ReadonlyArray<StaticValue>
+	| string
 	| { readonly [key: string]: StaticValue };
 
 export interface RuleExample {
+	readonly id: string;
 	readonly code: string;
 	readonly errors?: StaticValue;
 	readonly filename?: string;
-	readonly id: string;
 	readonly kind: "invalid" | "valid";
 	readonly language?: string;
 	readonly options?: StaticValue;
@@ -96,14 +96,13 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 		},
 	});
 
-	return [...examplesByRuleName.entries()]
-		.map(([ruleName, examples]) => ({ examples: orderExamples(examples), ruleName }))
+	return Array.from(examplesByRuleName.entries(), ([ruleName, examples]) => ({ examples: orderExamples(examples), ruleName }))
 		.toSorted((left, right) => left.ruleName.localeCompare(right.ruleName));
 }
 
 function getRuleRunnerInvocation(
 	node: CallExpression,
-): { readonly cases: ObjectExpression; readonly language: string; readonly ruleName: string } | undefined {
+): undefined | { readonly cases: ObjectExpression; readonly language: string; readonly ruleName: string } {
 	if (!isRuleRunner(node.callee)) return undefined;
 	const [ruleNameNode, , casesNode] = node.arguments;
 	if (!isStringLiteral(ruleNameNode) || casesNode?.type !== "ObjectExpression") return undefined;
@@ -177,8 +176,8 @@ function extractCaseExample(
 	const documentation = evaluateDocumentation(documentationValue, context);
 	const code = evaluateRequiredString(fields, "code", context);
 	const example: RuleExample = {
-		code,
 		id: documentation.id,
+		code,
 		kind,
 		language: runnerLanguage,
 		title: documentation.title,
@@ -356,7 +355,7 @@ function evaluateStringJoin(node: CallExpression, context: ExtractionContext): s
 		throwExtractionError(context, node.start, "function calls are not supported.");
 	}
 	const values = evaluateArray(node.callee.object, context);
-	if (!values.every((value) => typeof value === "string")) {
+	if (values.some((value) => !(typeof value === "string"))) {
 		throwExtractionError(context, node.callee.object.start, "join arrays must contain only strings.");
 	}
 	return values.join("\n");

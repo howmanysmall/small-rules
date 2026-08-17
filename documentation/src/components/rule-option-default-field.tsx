@@ -36,9 +36,9 @@ export function RuleOptionDefaultField({
 						detailId={detailId}
 						isExpanded={isExpanded}
 						name={option.name}
+						summary={option.defaultValue.summary}
 						onCopy={onCopy}
 						onToggle={onToggle}
-						summary={option.defaultValue.summary}
 					/>
 				) : (
 					<code>{option.defaultValue.displayValue}</code>

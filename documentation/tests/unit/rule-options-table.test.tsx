@@ -7,17 +7,18 @@ import { RuleOptionsTable } from "@/components/rule-options-table";
 import type { ObjectOption } from "@/data/rule-options";
 
 const inlineOption = {
+	name: "environment",
 	defaultValue: {
 		displayValue: "roblox-ts",
 		kind: "inline",
 	},
 	description: "Selects the runtime environment.",
-	name: "environment",
 	required: false,
 	type: '"node" | "roblox-ts"',
 } satisfies ObjectOption;
 
 const complexOption = {
+	name: "hooks",
 	defaultValue: {
 		copyValue: '[{"name":"useEffect"}]',
 		displayValue: '[\n\t{\n\t\t"name": "useEffect"\n\t}\n]',
@@ -25,7 +26,6 @@ const complexOption = {
 		summary: "1 hook",
 	},
 	description: "Configures recognized effect hooks.",
-	name: "hooks",
 	required: true,
 	type: "Array<HookConfiguration>",
 } satisfies ObjectOption;

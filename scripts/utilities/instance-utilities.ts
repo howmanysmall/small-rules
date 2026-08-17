@@ -7,14 +7,14 @@ import type { CallExpression, JSXElementName, JSXMemberExpression, JSXOpeningEle
 
 export const enum ScanType {
 	Both = "both",
-	React = "tsx",
 	TypeScript = "ts",
+	React = "tsx",
 }
 
 const GATHER_TO_SCAN_TYPE: Record<ScanType, fdir> = {
 	[ScanType.Both]: new fdir().glob("**/*.{ts,tsx}").withFullPaths(),
-	[ScanType.TypeScript]: new fdir().glob("**/*.ts").withFullPaths(),
 	[ScanType.React]: new fdir().glob("**/*.tsx").withFullPaths(),
+	[ScanType.TypeScript]: new fdir().glob("**/*.ts").withFullPaths(),
 };
 
 function isAllLowerCase(value: string): boolean {

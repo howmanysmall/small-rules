@@ -25,7 +25,7 @@ interface JsonResult {
 
 async function runJsonAsync(command: string, parameters: ReadonlyArray<string>): Promise<JsonResult> {
 	try {
-		const { stdout, exitCode } = await $({ cwd: repositoryRoot })`${[command, ...parameters]}`.nothrow().quiet();
+		const { exitCode, stdout } = await $({ cwd: repositoryRoot })`${[command, ...parameters]}`.nothrow().quiet();
 
 		const output = stdout.trim();
 		if (output.length === 0) {
@@ -39,10 +39,10 @@ async function runJsonAsync(command: string, parameters: ReadonlyArray<string>):
 				exitCode: exitCode ?? 0,
 				output: JSON.parse(output),
 			};
-		} catch (error) {
+		} catch (err) {
 			const exception = new Error(
-				`Failed to parse ${command} JSON output: ${error instanceof Error ? error.message : String(error)}\n${output}`,
-				{ cause: error },
+				`Failed to parse ${command} JSON output: ${err instanceof Error ? err.message : String(err)}\n${output}`,
+				{ cause: err },
 			);
 			Error.captureStackTrace(exception, runJsonAsync);
 			throw exception;

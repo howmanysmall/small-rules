@@ -367,9 +367,12 @@ const configuration = isentinel(
 			"unicorn-js/no-break-in-nested-loop": "off",
 			"unicorn-js/no-keyword-prefix": "off",
 			"unicorn-js/prefer-global-number-constants": "off",
+			"unicorn/catch-error-name": ["warn", { name: "error" }],
 			"unicorn/no-array-callback-reference": "off",
 			"unicorn/no-new-array": "error",
 			"unicorn/no-process-exit": "off",
+			// shit rule that breaks everything:
+			"unicorn/no-useless-undefined": "off",
 			"unicorn/numeric-separators-style": "off",
 			"unicorn/prefer-event-target": "off",
 			"unicorn/prefer-math-trunc": "off",

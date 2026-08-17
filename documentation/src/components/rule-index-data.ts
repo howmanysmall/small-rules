@@ -24,7 +24,7 @@ export function createRuleIndexCategories(
 	categories: Iterable<RuleFactCategory>,
 	newness: ReadonlyMap<string, RuleNewness> = getRuleNewness(),
 ): ReadonlyArray<RuleIndexCategory> {
-	return [...categories].map((category) => ({
+	return Array.from(categories, (category) => ({
 		key: category.key,
 		label: category.label,
 		rules: category.rules.map((rule) => {

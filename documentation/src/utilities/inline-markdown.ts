@@ -11,7 +11,7 @@ interface MutableSegment {
 }
 
 function createFlags(length: number): Array<boolean> {
-	return Array.from({ length }, () => false);
+	return Array.from({length: length}).fill(false);
 }
 
 function markCodeSpans(text: string, code: Array<boolean>, drop: Array<boolean>): void {
@@ -73,8 +73,9 @@ function collectSegments(
 }
 
 /**
- * Splits text on inline Markdown so titles like "No `print`" or "**No `print`**" can render code spans and bold as
- * elements. Code spans take precedence over bold, and unclosed delimiters stay literal.
+ * Splits text on inline Markdown so titles like "No `print`" or "**No
+ * `print`**" can render code spans and bold as elements. Code spans take
+ * precedence over bold, and unclosed delimiters stay literal.
  *
  * @param text - The raw title text that may contain backtick or `**` pairs.
  * @returns The flagged segments in source order.

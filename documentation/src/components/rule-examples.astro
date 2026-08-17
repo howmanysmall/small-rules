@@ -10,11 +10,11 @@ interface Props {
 	readonly rule: RuleName;
 }
 
-const { exemption, rule } = Astro.props;
-const examples = ruleExamples.get(rule) ?? [];
+const { exemption, rule } = Astro.props,
+ examples = ruleExamples.get(rule) ?? [];
 
 function getCodeLanguage(language: string | undefined): "js" | "jsx" | "ts" | "tsx" {
-	if (language === "js" || language === "jsx" || language === "ts" || language === "tsx") return language;
+	if (language === "js" || language === "jsx" || language === "ts" || language === "tsx") {return language;}
 	return "ts";
 }
 ---

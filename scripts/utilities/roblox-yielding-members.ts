@@ -1,6 +1,6 @@
 interface RobloxClass {
-	readonly members: ReadonlyArray<unknown>;
 	readonly name: string;
+	readonly members: ReadonlyArray<unknown>;
 	readonly superclass: string;
 }
 
@@ -17,7 +17,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function parseClass(value: unknown): RobloxClass | undefined {
 	if (!isRecord(value) || typeof value.Name !== "string" || typeof value.Superclass !== "string") return undefined;
 	if (!Array.isArray(value.Members)) return undefined;
-	return { members: value.Members, name: value.Name, superclass: value.Superclass };
+	return { name: value.Name, members: value.Members, superclass: value.Superclass };
 }
 
 function isYieldingFunction(value: unknown): value is Record<string, unknown> & { readonly Name: string } {
@@ -26,7 +26,7 @@ function isYieldingFunction(value: unknown): value is Record<string, unknown> & 
 }
 
 export function parseClasses(value: unknown): ReadonlyMap<string, RobloxClass> {
-	if (!(isRecord(value) && Array.isArray(value.Classes))) {
+	if (!isRecord(value) || !Array.isArray(value.Classes)) {
 		const error = new TypeError("Roblox API dump has no Classes array.");
 		Error.captureStackTrace(error, parseClasses);
 		throw error;

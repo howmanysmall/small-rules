@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 
 interface RuleOptionTypeFieldProperties {
-	/** Build-time Shiki-highlighted HTML for the type, or undefined to fall back to plain text. */
+	/**
+	 * Build-time Shiki-highlighted HTML for the type, or undefined to fall back
+	 * to plain text.
+	 */
 	readonly highlightedType: string | undefined;
 	/** Raw type string (used as fallback when highlighting is unavailable). */
 	readonly type: string;

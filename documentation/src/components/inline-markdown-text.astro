@@ -5,8 +5,8 @@ interface Props {
 	readonly text: string;
 }
 
-const { text } = Astro.props;
-const segments = parseInlineMarkdown(text);
+const { text } = Astro.props,
+ segments = parseInlineMarkdown(text);
 ---
 
 {segments.map((segment) => {

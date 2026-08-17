@@ -48,11 +48,11 @@ export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactNode 
 			{mode === "catalog" && (
 				<RuleIndexFilters
 					categories={categories}
+					query={query}
+					selectedCategory={selectedCategory}
 					onCategoryChange={handleCategoryChange}
 					onQueryChange={handleQueryChange}
 					onReset={handleReset}
-					query={query}
-					selectedCategory={selectedCategory}
 				/>
 			)}
 

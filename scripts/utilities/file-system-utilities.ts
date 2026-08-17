@@ -12,8 +12,8 @@ export async function existsAsync(path: string): Promise<boolean> {
 	try {
 		await lstat(path);
 		return true;
-	} catch (error) {
-		if (isNodeSystemError.allows(error) && error.code === "ENOENT") return false;
-		throw error;
+	} catch (err) {
+		if (isNodeSystemError.allows(err) && err.code === "ENOENT") return false;
+		throw err;
 	}
 }

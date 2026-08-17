@@ -9,13 +9,13 @@ import type { RuleOptionsDocumentation } from "./rule-options";
 type RuleMeta = NonNullable<(typeof smallRules.rules)[RuleName]["meta"]>;
 
 export interface RuleFacts {
+	readonly name: RuleName;
 	readonly category: RuleCategoryKey;
 	readonly categoryLabel: string;
 	readonly description: string;
 	readonly fixable: RuleMeta["fixable"];
 	readonly hasSuggestions: RuleMeta["hasSuggestions"];
 	readonly messages: RuleMeta["messages"];
-	readonly name: RuleName;
 	readonly options: RuleOptionsDocumentation;
 	readonly path: string;
 	readonly title: string;
@@ -23,9 +23,9 @@ export interface RuleFacts {
 }
 
 export interface RuleFactCategory {
+	readonly key: RuleCategoryKey;
 	readonly count: number;
 	readonly description: string;
-	readonly key: RuleCategoryKey;
 	readonly label: string;
 	readonly path: string;
 	readonly rules: ReadonlyArray<RuleFacts>;
@@ -52,13 +52,13 @@ function createRuleFacts(category: RuleCategoryManifest, entry: RuleManifestEntr
 	const meta = getRuleMeta(entry.name);
 
 	return {
+		name: entry.name,
 		category: category.key,
 		categoryLabel: category.label,
 		description: meta.docs?.description ?? "<MISSING-DESCRIPTION>",
 		fixable: meta.fixable,
 		hasSuggestions: meta.hasSuggestions,
 		messages: meta.messages,
-		name: entry.name,
 		options: getRuleOptionsDocumentation(entry.name),
 		path: getRulePath(category, entry.name),
 		title: formatRuleTitle(entry.name),
@@ -108,9 +108,9 @@ function createRuleFactCategory(category: RuleCategoryManifest): RuleFactCategor
 	const rules = category.rules.map((entry) => getRuleFacts(entry.name));
 
 	return {
+		key: category.key,
 		count: rules.length,
 		description: category.description,
-		key: category.key,
 		label: category.label,
 		path: getRuleCategoryPath(category),
 		rules,

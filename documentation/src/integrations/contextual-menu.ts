@@ -91,11 +91,11 @@ function injectContextualMenuScript(): string {
 
 export default function contextualMenu(): AstroIntegration {
 	return {
+		name: "contextual-menu",
 		hooks: {
 			"astro:config:setup": ({ injectScript }): void => {
 				injectScript("page", injectContextualMenuScript());
 			},
 		},
-		name: "contextual-menu",
 	};
 }

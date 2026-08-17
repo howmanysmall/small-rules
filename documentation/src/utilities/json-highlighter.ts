@@ -1,8 +1,9 @@
 /**
  * Lightweight regex-based JSON syntax highlighter.
  *
- * Tokenizes a JSON string into segments with CSS class names for syntax highlighting. Uses two passes: first tokenize,
- * then promote string tokens followed by `:` to "key" tokens. No external dependencies, no AST parser.
+ * Tokenizes a JSON string into segments with CSS class names for syntax
+ * highlighting. Uses two passes: first tokenize, then promote string tokens
+ * followed by `:` to "key" tokens. No external dependencies, no AST parser.
  */
 
 const JSON_TOKEN = new RegExp(

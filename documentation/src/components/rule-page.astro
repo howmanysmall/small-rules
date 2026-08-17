@@ -13,11 +13,11 @@ interface Props {
 	readonly rule: RuleName;
 }
 
-const { rule } = Astro.props;
-const facts = getRuleFacts(rule);
-const entry = getRuleEntry(rule);
-const exampleExemption = entry?.exampleExemption;
-const newness = getRuleNewness().get(rule);
+const { rule } = Astro.props,
+ facts = getRuleFacts(rule),
+ entry = getRuleEntry(rule),
+ exampleExemption = entry?.exampleExemption,
+ newness = getRuleNewness().get(rule);
 ---
 
 <div class="rule-badges" aria-label="Rule characteristics">

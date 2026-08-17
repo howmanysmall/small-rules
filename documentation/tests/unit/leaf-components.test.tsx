@@ -72,7 +72,7 @@ describe("HeroSplash", () => {
 		render(<HeroSplash subtitle="Focused rules for strict projects." title="Small rules, big impact." />);
 
 		expect(screen.getByText("Oxlint plugin for roblox-ts").textContent).toBe("Oxlint plugin for roblox-ts");
-		expect(screen.getByRole("heading", { level: 1, name: "Small rules, big impact." }).textContent).toBe(
+		expect(screen.getByRole("heading", { name: "Small rules, big impact.", level: 1 }).textContent).toBe(
 			"Small rules, big impact.",
 		);
 		expect(screen.getByText("Focused rules for strict projects.").textContent).toBe(
@@ -99,7 +99,7 @@ describe("PageHeader", () => {
 	it("renders optional context with the page title", () => {
 		render(<PageHeader kicker="Rule index" subtitle="Browse every rule." title="Rules" />);
 
-		expect(screen.getByRole("heading", { level: 1, name: "Rules" }).textContent).toBe("Rules");
+		expect(screen.getByRole("heading", { name: "Rules", level: 1 }).textContent).toBe("Rules");
 		expect(screen.getByText("Rule index").textContent).toBe("Rule index");
 		expect(screen.getByText("Browse every rule.").textContent).toBe("Browse every rule.");
 	});
@@ -107,7 +107,7 @@ describe("PageHeader", () => {
 	it("omits empty optional context", () => {
 		const { container } = render(<PageHeader kicker="" subtitle="" title="Rules" />);
 
-		expect(screen.getByRole("heading", { level: 1, name: "Rules" }).textContent).toBe("Rules");
+		expect(screen.getByRole("heading", { name: "Rules", level: 1 }).textContent).toBe("Rules");
 		expect(container.querySelector(".hero-kicker")).toBeNull();
 		expect(container.querySelector(".hero-subtitle")).toBeNull();
 	});

@@ -127,8 +127,8 @@ function expandChangeRegion(operations: ReadonlyArray<DiffOperation>, startIndex
 
 function collectRegions(
 	operations: ReadonlyArray<DiffOperation>,
-): ReadonlyArray<{ readonly start: number; readonly end: number }> {
-	const regions = new Array<{ start: number; end: number }>();
+): ReadonlyArray<{ readonly end: number; readonly start: number; }> {
+	const regions = new Array<{ end: number; start: number; }>();
 	let scanIndex = 0;
 
 	while (scanIndex < operations.length) {
@@ -153,7 +153,7 @@ function collectRegions(
 function countLines(
 	operations: ReadonlyArray<DiffOperation>,
 	upTo: number,
-): { readonly oldNumber: number; readonly newNumber: number } {
+): { readonly newNumber: number; readonly oldNumber: number; } {
 	let oldNumber = 1;
 	let newNumber = 1;
 	for (const [index, operation] of operations.entries()) {
@@ -174,8 +174,8 @@ function formatDiff(filePath: string, oldContent: string, newContent: string): s
 
 	const out = [cyan(`--- ${filePath}`), cyan(`+++ ${filePath}`)];
 
-	for (const { start, end } of regions) {
-		const { oldNumber: regionOldStart, newNumber: regionNewStart } = countLines(operations, start);
+	for (const { end, start } of regions) {
+		const { newNumber: regionNewStart, oldNumber: regionOldStart } = countLines(operations, start);
 
 		const hunkLines = new Array<string>();
 		let oldCount = 0;
