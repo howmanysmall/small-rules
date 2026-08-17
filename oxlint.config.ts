@@ -345,6 +345,7 @@ const configuration = isentinel(
 					natural: true,
 				},
 			],
+			"style/jsx-curly-brace-presence": "off",
 			"style/padding-line-between-statements": [
 				"error",
 				{
