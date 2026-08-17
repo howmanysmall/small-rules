@@ -9,7 +9,7 @@ const reactDoctorRules = Object.fromEntries(
 	}),
 );
 
-const config = isentinel(
+const configuration = isentinel(
 	{
 		name: "small-rules",
 		categories: {
@@ -99,9 +99,188 @@ const config = isentinel(
 			"oxc/no-rest-spread-properties": "off",
 			"perfectionist/sort-modules": "off",
 			"prefer-named-capture-group": "off",
+			"small-rules/array-type-generic": "error",
 			"small-rules/ban-instances": "off",
 			"small-rules/ban-react-fc": "off",
+			"small-rules/ban-types": [
+				"error",
+				{
+					bannedTypes: {
+						Omit: "Except",
+					},
+				},
+			],
+			"small-rules/consistent-compound-words": [
+				"error",
+				{
+					allowList: {},
+					checkProperties: false,
+					checkShorthandProperties: false,
+					checkVariables: false,
+					extendDefaultReplacements: false,
+					replacements: {},
+				},
+			],
+			"small-rules/directive-disable-enable-pair": "error",
+			"small-rules/directive-no-aggregating-enable": "error",
+
+			"small-rules/directive-no-duplicate-disable": "error",
+			"small-rules/directive-no-restricted-disable": "error",
+			"small-rules/directive-no-unlimited-disable": "error",
+			"small-rules/directive-no-unused-enable": "error",
+			"small-rules/directive-no-use": "error",
+			"small-rules/directive-require-description": "error",
 			"small-rules/enforce-ianitor-check-type": "off",
+			"small-rules/isolated-functions": [
+				"error",
+				{
+					comments: [],
+					functions: [],
+					overrideGlobals: {},
+					selectors: [],
+				},
+			],
+			"small-rules/memoized-effect-dependencies": "off",
+			"small-rules/no-adjust-state-on-prop-change": "off",
+			"small-rules/no-array-constructor-elements": [
+				"error",
+				{
+					environment: "standard",
+					requireExplicitGenericOnNewArray: true,
+				},
+			],
+			"small-rules/no-array-constructor-index-assignment": "error",
+			"small-rules/no-array-size-assignment": ["error", { allowAutofix: false }],
+			"small-rules/no-async-in-system": [
+				"error",
+				{
+					additionalSystemTypeNames: [],
+					callbackParameterTypes: [],
+					synchronousCallbacks: [],
+				},
+			],
+			"small-rules/no-cascading-set-state": "off",
+			"small-rules/no-chain-state-updates": "off",
+			"small-rules/no-color3-constructor": "off",
+			"small-rules/no-constant-condition-with-break": [
+				"error",
+				{
+					loopExitCalls: ["break", "return", "throw"],
+				},
+			],
+			"small-rules/no-dead-store": "error",
+			"small-rules/no-derived-state": "off",
+			"small-rules/no-error": "off",
+			"small-rules/no-event-handler": "off",
+			"small-rules/no-events-in-events-callback": "off",
+			"small-rules/no-external-store-subscription": "off",
+			"small-rules/no-filter-map-chain": "off",
+			"small-rules/no-floating-point-equality": "error",
+			"small-rules/no-giant-component": "off",
+			"small-rules/no-god-components": "off",
+			"small-rules/no-ianitor-in-function-body": "off",
+			"small-rules/no-ianitor-success-access": "off",
+			"small-rules/no-identity-map": "off",
+			"small-rules/no-increment-decrement": ["error", { allowAutofix: true }],
+			"small-rules/no-initialize-state": "off",
+			"small-rules/no-inline-property-on-memo-component": "off",
+			"small-rules/no-instance-methods-without-this": "off",
+			"small-rules/no-native-properties-spread": "off",
+			"small-rules/no-new-instance-in-use-memo": "off",
+			"small-rules/no-pass-data-to-parent": "off",
+			"small-rules/no-pass-live-state-to-parent": "off",
+			"small-rules/no-print": "off",
+			"small-rules/no-redundant-aspect-ratio-constraint": "off",
+			"small-rules/no-render-helper-functions": "off",
+			"small-rules/no-reset-all-state-on-prop-change": "off",
+			"small-rules/no-restricted-property-assignment": "off",
+			"small-rules/no-spec-file-extension": "error",
+			"small-rules/no-static-react-create-element": "error",
+			"small-rules/no-table-create-map": "off",
+			"small-rules/no-task-wait": "off",
+			"small-rules/no-trivial-assertions": "off",
+			"small-rules/no-underscore-react-props": "off",
+			"small-rules/no-unused-imports": "error",
+			"small-rules/no-unused-use-memo": "off",
+			"small-rules/no-use-memo-simple-expression": "off",
+			"small-rules/no-useless-constants": "error",
+			"small-rules/no-useless-default": "off",
+			"small-rules/no-useless-use-effect": "off",
+			"small-rules/no-useless-use-memo": "off",
+			"small-rules/no-useless-use-spring": "off",
+			"small-rules/no-variadic-spread": "off",
+			"small-rules/no-warn": "off",
+			"small-rules/only-type-imports": "off",
+			"small-rules/prefer-constant-dispatch": "off",
+			"small-rules/prefer-context-stack": "off",
+			"small-rules/prefer-direct-hook-imports": "off",
+			"small-rules/prefer-early-return": "error",
+			"small-rules/prefer-expect-assertions": "off",
+			"small-rules/prefer-hoisted-jsx-elements": "off",
+			"small-rules/prefer-hoisted-jsx-object-properties": "off",
+			"small-rules/prefer-idiv": "off",
+			"small-rules/prefer-local-portal-component": "off",
+			"small-rules/prefer-math-min-max": "off",
+			"small-rules/prefer-modding-inspect": "off",
+			"small-rules/prefer-module-scope-constants": "off",
+			"small-rules/prefer-padding-components": "off",
+			"small-rules/prefer-pascal-case-enums": "error",
+			"small-rules/prefer-sequence-overloads": "off",
+			"small-rules/prefer-single-world-query": "off",
+			"small-rules/prefer-ternary-conditional-rendering": "off",
+			"small-rules/prefer-udim2-shorthand": "off",
+			"small-rules/prefer-use-reducer": "off",
+			"small-rules/prevent-abbreviations": [
+				"error",
+				{
+					allowPropertyAccess: [
+						"char",
+						"InstanceProps",
+						"InferProps",
+						"PropsWithoutRef",
+						"ComponentProps",
+						"screenProps",
+						"getScreenProps",
+						"PropsWithChildren",
+						"args",
+					],
+					ignoreShorthands: ["InferProps", "InstanceProps", "PropsWithoutRef", "ComponentProps"],
+					shorthands: {
+						"*Props": "*Properties",
+						"*props": "*properties",
+						args: "parameters",
+						btn: "button",
+						char: "character",
+						dt: "deltaTime",
+						plr: "player",
+						str: "string",
+					},
+				},
+			],
+			"small-rules/react-hooks-strict-return": "off",
+			"small-rules/require-async-suffix": "error",
+			"small-rules/require-module-level-instantiation": "off",
+			"small-rules/require-named-effect-functions": "off",
+			"small-rules/require-paired-calls": "error",
+			"small-rules/require-react-component-keys": "off",
+			"small-rules/require-react-display-names": "off",
+			"small-rules/require-switch-case-braces": [
+				"error",
+				{
+					metric: "lines",
+				},
+			],
+			"small-rules/require-throw-error-capture": [
+				"off",
+				{
+					allow: [{ name: "ValidationError", from: "package", package: "@cliffy/command" }],
+				},
+			],
+			"small-rules/require-unicode-regex": "error",
+			"small-rules/rerender-memo-with-default-value": "off",
+			"small-rules/strict-component-boundaries": ["error", { allow: [] }],
+			"small-rules/use-exhaustive-dependencies": "off",
+			"small-rules/use-hook-at-top-level": "off",
 			"sonar/no-nested-incdec": "off",
 			"sort-imports": [
 				"off",
@@ -139,6 +318,7 @@ const config = isentinel(
 					requireDefaultForNonUnion: false,
 				},
 			],
+			"unicorn-js/name-replacements": "off",
 			"unicorn-js/no-keyword-prefix": "off",
 			"unicorn-js/prefer-global-number-constants": "off",
 			"unicorn/no-array-callback-reference": "off",
@@ -168,4 +348,13 @@ const config = isentinel(
 	},
 );
 
-export default config;
+const localSmallRulesUrl = new URL("plugins/small-rules.js", import.meta.url);
+const localSmallRulesSpecifier = localSmallRulesUrl.href;
+for (const plugins of [configuration.jsPlugins, ...(configuration.overrides ?? []).map(({ jsPlugins }) => jsPlugins)]) {
+	if (!plugins) continue;
+	for (const plugin of plugins) {
+		if (typeof plugin !== "string" && plugin.name === "small-rules") plugin.specifier = localSmallRulesSpecifier;
+	}
+}
+
+export default configuration;

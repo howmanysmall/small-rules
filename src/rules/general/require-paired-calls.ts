@@ -1,21 +1,24 @@
-import { createRule } from "$oxc-utilities/create-rule";
-
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
+
+import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-const isPairConfig = type({
-	"alternatives?": type("string[]").readonly().or("undefined"),
-	closer: type("string[]").readonly().or("string"),
-	opener: "string",
-	"openerAlternatives?": type("string[]").readonly().or("undefined"),
+const NOT_ALL = "not all execution paths";
+
+const isPairConfiguration = type({
+	"alternatives?": isReadonlyArrayOfStrings.or(isUndefined),
+	closer: isReadonlyArrayOfStrings.or(isString),
+	opener: isString,
+	"openerAlternatives?": isReadonlyArrayOfStrings.or(isUndefined),
 	"platform?": type('"roblox" | undefined'),
-	"requireSync?": "boolean | undefined",
-	"yieldingFunctions?": type("string[]").readonly().or("undefined"),
+	"requireSync?": isBoolean.or(isUndefined),
+	"yieldingFunctions?": isReadonlyArrayOfStrings.or(isUndefined),
 }).readonly();
-type PairConfiguration = typeof isPairConfig.infer;
+type PairConfiguration = typeof isPairConfiguration.infer;
 
 interface RequirePairedCallsOptions {
 	readonly allowConditionalClosers?: boolean;
@@ -82,7 +85,7 @@ function getBranchesWithOpener(
 	opener: OpenerStackEntry,
 	branches: ReadonlyArray<ReadonlyArray<OpenerStackEntry>>,
 ): ReadonlyArray<ReadonlyArray<OpenerStackEntry>> {
-	return branches.filter((branchStack) => branchStack.some((branch) => branch.index === opener.index));
+	return branches.filter((branchStack) => branchStack.some(({ index }) => index === opener.index));
 }
 
 function getCallName({ callee }: ESTree.CallExpression): string | undefined {
@@ -320,10 +323,10 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			);
 		}
 
-		function isRobloxYieldingFunction(functionName: string, configuration: PairConfiguration): boolean {
-			if (configuration.platform !== "roblox") return false;
+		function isRobloxYieldingFunction(functionName: string, config: PairConfiguration): boolean {
+			if (config.platform !== "roblox") return false;
 
-			const yieldingFunctions = configuration.yieldingFunctions ?? DEFAULT_ROBLOX_YIELDING_FUNCTIONS;
+			const yieldingFunctions = config.yieldingFunctions ?? DEFAULT_ROBLOX_YIELDING_FUNCTIONS;
 			return yieldingFunctions.some((pattern) => {
 				if (pattern.startsWith("*.")) {
 					const methodName = pattern.slice(2);
@@ -446,7 +449,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 				}
 
 				if (hasCompleteElse) {
-					reportPartiallyClosedOpeners(originalStack, branches, "not all execution paths");
+					reportPartiallyClosedOpeners(originalStack, branches, NOT_ALL);
 
 					openerStack.length = 0;
 					for (const opener of originalStack) {
@@ -524,7 +527,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 							data: {
 								closer,
 								opener: opener.opener,
-								paths: "not all execution paths",
+								paths: NOT_ALL,
 							},
 							messageId: "unpairedOpener",
 							node: opener.node,
@@ -600,7 +603,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 				const hasDefault = node.cases.some((caseNode) => caseNode.test === null);
 
 				if (hasDefault && branches.length === node.cases.length) {
-					reportPartiallyClosedOpeners(originalStack, branches, "not all execution paths");
+					reportPartiallyClosedOpeners(originalStack, branches, NOT_ALL);
 
 					const commonOpeners = originalStack.filter((openerEntry) =>
 						isOpenerInAllBranches(openerEntry, branches),
@@ -681,7 +684,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			if (!targetLoop) return;
 
 			for (const { config, loopAncestors, node: openerNode, opener } of openerStack) {
-				if (!loopAncestors.some((loopNode) => loopNode === targetLoop)) continue;
+				if (loopAncestors.every((loopNode) => loopNode !== targetLoop)) continue;
 
 				const validClosers = getValidClosers(config);
 				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
@@ -702,7 +705,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			}
 		}
 
-		function handleOpener(node: ESTree.CallExpression, opener: string, config: PairConfiguration): void {
+		function handleOpener(node: ESTree.CallExpression, opener: string, pairConfiguration: PairConfiguration): void {
 			/* v8 ignore next -- @preserve options are normalized with a concrete max depth default before opener handling. */
 			const maxDepth = resolvedOptions.maxNestingDepth ?? 0;
 			if (maxDepth > 0 && openerStack.length >= maxDepth) {
@@ -726,7 +729,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			}
 
 			const entry: OpenerStackEntry = {
-				config,
+				config: pairConfiguration,
 				index: stackIndexCounter++,
 				location: node.loc,
 				loopAncestors: [...loopStack],
@@ -738,7 +741,6 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		}
 
 		function handleCloser(node: ESTree.CallExpression, closer: string): void {
-			// oxlint-disable-next-line react-doctor/js-set-map-lookups -- this is not something I can do.
 			const matchingIndex = openerStack.findLastIndex((entry) => getValidClosers(entry.config).includes(closer));
 
 			if (matchingIndex === -1) {

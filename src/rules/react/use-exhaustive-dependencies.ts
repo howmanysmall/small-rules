@@ -142,11 +142,8 @@ const GLOBAL_BUILTINS = new Set([
 	"Window",
 ]);
 
-function getHookName(node: ESTree.CallExpression): string | undefined {
-	const { callee } = node;
-
+function getHookName({ callee }: ESTree.CallExpression): string | undefined {
 	if (callee.type === "Identifier") return callee.name;
-
 	if (callee.type === "MemberExpression" && callee.property.type === "Identifier") {
 		return callee.property.name;
 	}
@@ -213,9 +210,11 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 	) {
 		return collectIdentifierNames(node.expression);
 	}
+
 	if (node.type === "BinaryExpression" || node.type === "LogicalExpression") {
 		return [...collectIdentifierNames(node.left), ...collectIdentifierNames(node.right)];
 	}
+
 	if (node.type === "UnaryExpression") return collectIdentifierNames(node.argument);
 	if (node.type === "ConditionalExpression") {
 		return [
@@ -574,7 +573,7 @@ function isDefinitionInsideNode(definition: VariableDefinitionLike, node: ESTree
 }
 
 function shouldCaptureVariable(variable: ScopeVariable, node: ESTree.Node): boolean {
-	return variable !== undefined && variable.defs.every((definition) => !isDefinitionInsideNode(definition, node));
+	return variable?.defs.every((definition) => !isDefinitionInsideNode(definition, node)) ?? false;
 }
 
 function getCaptureInfo(
@@ -881,7 +880,6 @@ function dependencyCoversCapture(
 	const captureName = getRootIdentifierName(capture.node);
 	/* v8 ignore next -- @preserve captures considered for dependency coverage always have root identifiers. */
 	if (captureName === undefined) return false;
-
 	return collectIdentifierNames(dependency.node).includes(captureName);
 }
 

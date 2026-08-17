@@ -45,7 +45,7 @@ interface UselessConstantCandidate {
 type ScopeVariable = Scope["variables"][number];
 
 function collectAllScopes(root: Scope): Array<Scope> {
-	const scopes: Array<Scope> = [];
+	const scopes = new Array<Scope>();
 	let size = 0;
 	const stack = [root];
 

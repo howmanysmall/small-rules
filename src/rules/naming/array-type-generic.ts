@@ -24,10 +24,12 @@ function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): st
 
 function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
 	const meaningfulParent = parent.type === "TSParenthesizedType" ? parent.parent : parent;
-	return !((meaningfulParent.type === "TSRestType" && meaningfulParent.parent.type === "TSTupleType") ||
-		meaningfulParent.type === "TSTupleType" ||
-		meaningfulParent.type === "TSArrayType") &&
-		!(meaningfulParent.type === "TSTypeOperator" && meaningfulParent.operator === "readonly");
+	return (
+		(meaningfulParent.type !== "TSRestType" || meaningfulParent.parent.type !== "TSTupleType") &&
+		meaningfulParent.type !== "TSTupleType" &&
+		meaningfulParent.type !== "TSArrayType" &&
+		(meaningfulParent.type !== "TSTypeOperator" || meaningfulParent.operator !== "readonly")
+	);
 }
 
 const arrayTypeGeneric = createRule("array-type-generic", "naming", {
