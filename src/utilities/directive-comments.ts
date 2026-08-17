@@ -3,34 +3,43 @@ import { isRecord, isStringRaw } from "./type-utilities";
 import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
 
+const ESLINT_DISABLE = "eslint-disable";
+const ESLINT_DISABLE_LINE = "eslint-disable-line";
+const ESLINT_DISABLE_NEXT_LINE = "eslint-disable-next-line";
+const ESLINT_ENABLE = "eslint-enable";
+const OXLINT_DISABLE = "oxlint-disable";
+const OXLINT_DISABLE_LINE = "oxlint-disable-line";
+const OXLINT_DISABLE_NEXT_LINE = "oxlint-disable-next-line";
+const OXLINT_ENABLE = "oxlint-enable";
+
 const LINE_COMMENT_PATTERN = /^(?:eslint|oxlint)-disable-(?:next-)?line$/u;
 const DELIMITER = /[\s,]+/gu;
 const DIRECTIVE_VALUE_SEPARATOR = /\s/u;
 const DISABLE_DIRECTIVE_KINDS = new Set([
-	"eslint-disable",
-	"eslint-disable-line",
-	"eslint-disable-next-line",
-	"oxlint-disable",
-	"oxlint-disable-line",
-	"oxlint-disable-next-line",
+	ESLINT_DISABLE,
+	ESLINT_DISABLE_LINE,
+	ESLINT_DISABLE_NEXT_LINE,
+	OXLINT_DISABLE,
+	OXLINT_DISABLE_LINE,
+	OXLINT_DISABLE_NEXT_LINE,
 ]);
-const DISABLE_OR_ENABLE_DIRECTIVE_KINDS = new Set([...DISABLE_DIRECTIVE_KINDS, "eslint-enable", "oxlint-enable"]);
+const DISABLE_OR_ENABLE_DIRECTIVE_KINDS = new Set([...DISABLE_DIRECTIVE_KINDS, ESLINT_ENABLE, OXLINT_ENABLE]);
 const DIRECTIVE_KINDS = new Set([
 	"eslint",
-	"eslint-disable",
-	"eslint-disable-line",
-	"eslint-disable-next-line",
-	"eslint-enable",
 	"eslint-env",
+	ESLINT_DISABLE,
+	ESLINT_DISABLE_LINE,
+	ESLINT_DISABLE_NEXT_LINE,
+	ESLINT_ENABLE,
 	"exported",
 	"global",
 	"globals",
 	"oxlint",
-	"oxlint-disable",
-	"oxlint-disable-line",
-	"oxlint-disable-next-line",
-	"oxlint-enable",
 	"oxlint-env",
+	OXLINT_DISABLE,
+	OXLINT_DISABLE_LINE,
+	OXLINT_DISABLE_NEXT_LINE,
+	OXLINT_ENABLE,
 ]);
 
 interface Directive {
@@ -98,9 +107,9 @@ export function parseDirectiveComment(comment: Comment): DirectiveComment | unde
 
 	const lineCommentSupported = LINE_COMMENT_PATTERN.test(parsed.kind);
 	if (
-		(comment.type === "Line" && !lineCommentSupported) ||
-		((parsed.kind === "eslint-disable-line" || parsed.kind === "oxlint-disable-line") &&
-			comment.loc.start.line !== comment.loc.end.line)
+		(!lineCommentSupported && comment.type === "Line") ||
+		(comment.loc.start.line !== comment.loc.end.line &&
+			(parsed.kind === ESLINT_DISABLE_LINE || parsed.kind === OXLINT_DISABLE_LINE))
 	) {
 		return undefined;
 	}
@@ -255,30 +264,30 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 			directive.value !== undefined && directive.value !== "" ? directive.value.split(DELIMITER) : undefined;
 
 		switch (kind) {
-			case "eslint-disable":
-			case "oxlint-disable": {
+			case ESLINT_DISABLE:
+			case OXLINT_DISABLE: {
 				disable(collection, comment, start, ruleIds, "block");
 				break;
 			}
 
-			case "eslint-disable-line":
-			case "oxlint-disable-line": {
+			case ESLINT_DISABLE_LINE:
+			case OXLINT_DISABLE_LINE: {
 				const { line } = start;
 				disable(collection, comment, { column: 0, line }, ruleIds, "line");
 				enable(collection, comment, { column: -1, line: line + 1 }, ruleIds, "line");
 				break;
 			}
 
-			case "eslint-disable-next-line":
-			case "oxlint-disable-next-line": {
+			case ESLINT_DISABLE_NEXT_LINE:
+			case OXLINT_DISABLE_NEXT_LINE: {
 				const { line } = start;
 				disable(collection, comment, { column: 0, line: line + 1 }, ruleIds, "line");
 				enable(collection, comment, { column: -1, line: line + 2 }, ruleIds, "line");
 				break;
 			}
 
-			case "eslint-enable":
-			case "oxlint-enable": {
+			case ESLINT_ENABLE:
+			case OXLINT_ENABLE: {
 				enable(collection, comment, start, ruleIds, "block");
 				break;
 			}

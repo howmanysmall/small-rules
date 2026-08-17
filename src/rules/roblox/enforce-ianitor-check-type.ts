@@ -1,4 +1,4 @@
-// oxlint-disable max-params -- nobody cares lol
+// oxlint-disable better-max-params/better-max-params -- nobody cares lol
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -22,8 +22,7 @@ const DEFAULT_CONFIGURATION: ComplexityConfig = {
 	performanceMode: true,
 };
 
-function isIanitorValidator(node: ESTree.CallExpression): boolean {
-	const { callee } = node;
+function isIanitorValidator({ callee }: ESTree.CallExpression): boolean {
 	if (callee.type !== "MemberExpression") return false;
 	return callee.object.type === "Identifier" && callee.object.name === "Ianitor";
 }
@@ -109,9 +108,6 @@ function addScore(current: number, addition: number, config: ComplexityConfig, c
 	return Math.min(nextScore, ceiling);
 }
 
-/**
- * Biome-ignore lint/complexity/useMaxParams: do not care.
- */
 function addStructuralScore(
 	current: number,
 	node: ESTree.Node,
@@ -158,9 +154,6 @@ function addNestedTypeAnnotationScores(
 	return score;
 }
 
-/**
- * Biome-ignore lint/complexity/useMaxParams: do not care.
- */
 function addTypeUnionScores(
 	score: number,
 	node: ESTree.Node,

@@ -227,9 +227,7 @@ function getEffectCleanup(functionNode: EffectFunctionNode): ESTree.ReturnStatem
 	if (functionNode.type !== "ArrowFunctionExpression" && functionNode.type !== "FunctionExpression") {
 		return undefined;
 	}
-	if (functionNode.body?.type !== "BlockStatement") {
-		return undefined;
-	}
+	if (functionNode.body?.type !== "BlockStatement") return undefined;
 	const { body } = functionNode.body;
 	for (let index = body.length - 1; index >= 0; index -= 1) {
 		const statement = body[index];
@@ -467,8 +465,7 @@ function getStateElements(
 		return undefined;
 	}
 	const { elements } = definition.node.id;
-	if (elements.length !== 1 && elements.length !== 2) return undefined;
-	return elements;
+	return elements.length !== 1 && elements.length !== 2 ? undefined : elements;
 }
 
 function isUseStateVariableDefinition(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
@@ -583,14 +580,6 @@ function getDeclaringNode(node: ESTree.Node): ESTree.Node {
 	return parent.type === "CallExpression" ? parent.parent : parent;
 }
 
-// Returns the component or custom hook that contains the `useEffect` node.
-//
-// Per the `isFunctionalComponent` etc. internals, this will return undefined for
-// some non-idiomatic component definitions. e.g. `function buildComponent(arg1,
-// arg2) { return <div />; }` Not sure we can account for that without introducing
-/**
- * False positives, and those are rare and arguably bad practice.
- */
 function findEnclosingReactNode(
 	state: ReactEffectAnalysisState,
 	node: ESTree.Node | null | undefined,
@@ -600,15 +589,9 @@ function findEnclosingReactNode(
 	if (isFunctionalComponent(node) || isFunctionalHOC(state, node) || isCustomHook(node)) return toReactOwner(node);
 
 	const { parent } = node;
-	if (parent === null) return undefined;
-	return findEnclosingReactNode(state, parent);
+	return parent === null ? undefined : findEnclosingReactNode(state, parent);
 }
 
-// Extracts the component/hook name from a node found by `findEnclosingReactNode`.
-// Returns `undefined` for anonymous functions or when the node cannot be
-/**
- * Identified.
- */
 function getComponentName(node: ReactOwner | undefined): string | undefined {
 	/* v8 ignore next 2 -- rules only call getComponentName with a resolved owner; the undefined guard is unreachable. @preserve */
 	if (node === undefined) return undefined;
@@ -634,8 +617,7 @@ function toReactOwner(node: ESTree.Node): ReactOwner | undefined {
 		return node;
 	}
 	/* v8 ignore start -- @preserve toReactOwner is only called with nodes already matched as components/HOCs/custom hooks; the fallback never executes. */
-	if (node.type === "VariableDeclarator") return node;
-	return undefined;
+	return node.type === "VariableDeclarator" ? node : undefined;
 	/* v8 ignore stop */
 }
 

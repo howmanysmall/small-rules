@@ -176,7 +176,7 @@
 				"useFlatMap": "error",
 				"useLiteralKeys": "error",
 				"useMaxParams": {
-					"level": "error",
+					"level": "off",
 					"options": { "max": 7 }
 				},
 				"useOptionalChain": "error",

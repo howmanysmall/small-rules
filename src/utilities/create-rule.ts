@@ -11,6 +11,10 @@ const BASE_URL = "https://docs.howmanysmall.com/small-rules/rules";
  * Creates a rule with automatic documentation URL generation.
  *
  * URLs follow the pattern: `https://docs.howmanysmall.com/small-rules/rules/{category}/{name}/`.
+ *
+ * @template TSchema - The schema definition for the rule options.
+ * @template TMessageIds - The message IDs used in the rule.
+ * @template TDefaultOptions - The default options derived from the schema.
  */
 export function createRule<
 	const TSchema extends RuleSchemaDefinition | undefined = undefined,
