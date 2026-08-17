@@ -48,7 +48,7 @@
 	},
 	"formatter": {
 		"biome": {
-			"command": ["mise", "x", "--", "node", "--run", "biome", "--", "format", "--write", "$FILE"],
+			"command": ["node", "--run", "biome", "--", "format", "--write", "$FILE"],
 			"extensions": [
 				".astro",
 				".cjs",
@@ -73,7 +73,7 @@
 			],
 		},
 		"oxfmt": {
-			"command": ["mise", "x", "--", "node", "--run", "oxfmt", "--", "$FILE"],
+			"command": ["node", "--run", "oxfmt", "--", "$FILE"],
 			"extensions": [
 				".cjs",
 				".css",
@@ -103,7 +103,7 @@
 			],
 		},
 		"rumdl": {
-			"command": ["mise", "x", "--", "rumdl", "check", "--fix", "$FILE"],
+			"command": ["rumdl", "check", "--fix", "$FILE"],
 			"extensions": [
 				".md",
 				".markdown",
@@ -118,14 +118,14 @@
 			],
 		},
 		"tombi": {
-			"command": ["mise", "x", "--", "tombi", "format", "$FILE"],
+			"command": ["tombi", "format", "$FILE"],
 			"extensions": [".toml"],
 		},
 	},
 	"instructions": ["./AGENTS.md"],
 	"lsp": {
 		"biome": {
-			"command": ["mise", "x", "--", "node", "--run", "biome", "--", "lsp-proxy"],
+			"command": ["node", "--run", "biome", "--", "lsp-proxy"],
 			"extensions": [
 				".astro",
 				".cjs",
@@ -149,9 +149,8 @@
 				".yml",
 			],
 		},
-		"eslint": { "disabled": true },
 		"oxfmt": {
-			"command": ["mise", "x", "--", "node", "--run", "oxfmt", "--", "--lsp"],
+			"command": ["node", "--run", "oxfmt", "--", "--lsp"],
 			"extensions": [
 				".cjs",
 				".css",
@@ -181,11 +180,11 @@
 			],
 		},
 		"oxlint": {
-			"command": ["mise", "x", "--", "node", "--run", "oxlint", "--", "--lsp"],
+			"command": ["node", "--run", "oxlint", "--", "--lsp"],
 			"extensions": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
 		},
 		"rumdl": {
-			"command": ["mise", "x", "--", "rumdl", "server"],
+			"command": ["rumdl", "server"],
 			"extensions": [
 				".md",
 				".markdown",
@@ -200,11 +199,11 @@
 			],
 		},
 		"tombi": {
-			"command": ["mise", "x", "--", "tombi", "lsp"],
+			"command": ["tombi", "lsp"],
 			"extensions": [".toml"],
 		},
 		"typescript": {
-			"command": ["mise", "x", "--", "node", "--run", "tsgo", "--", "--lsp", "--stdio"],
+			"command": ["node", "--run", "tsgo", "--", "--lsp", "--stdio"],
 			"extensions": [".ts", ".tsx"],
 		},
 	},
