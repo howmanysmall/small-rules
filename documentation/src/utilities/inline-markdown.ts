@@ -11,7 +11,7 @@ interface MutableSegment {
 }
 
 function createFlags(length: number): Array<boolean> {
-	return Array.from({length: length}).fill(false);
+	return Array.from<boolean>({ length }).fill(false);
 }
 
 function markCodeSpans(text: string, code: Array<boolean>, drop: Array<boolean>): void {

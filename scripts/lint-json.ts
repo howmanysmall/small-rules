@@ -39,10 +39,10 @@ async function runJsonAsync(command: string, parameters: ReadonlyArray<string>):
 				exitCode: exitCode ?? 0,
 				output: JSON.parse(output),
 			};
-		} catch (err) {
+		} catch (error) {
 			const exception = new Error(
-				`Failed to parse ${command} JSON output: ${err instanceof Error ? err.message : String(err)}\n${output}`,
-				{ cause: err },
+				`Failed to parse ${command} JSON output: ${error instanceof Error ? error.message : String(error)}\n${output}`,
+				{ cause: error },
 			);
 			Error.captureStackTrace(exception, runJsonAsync);
 			throw exception;

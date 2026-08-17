@@ -2,11 +2,12 @@ import { readFile } from "node:fs/promises";
 import { type } from "arktype";
 import { defineConfig } from "tsdown";
 
+const isStringRecord = type("Record<string, string>").readonly();
 const isPackageJsonDependencies = type({
 	"+": "ignore",
-	"dependencies?": type("Record<string, string>").readonly().or("null"),
-	"optionalDependencies?": type("Record<string, string>").readonly().or("null"),
-	"peerDependencies?": type("Record<string, string>").readonly().or("null"),
+	"dependencies?": isStringRecord.or("null"),
+	"optionalDependencies?": isStringRecord.or("null"),
+	"peerDependencies?": isStringRecord.or("null"),
 }).readonly();
 
 const ALWAYS_KEEP = new Set(["oxlint-plugin-utilities"]);

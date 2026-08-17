@@ -127,8 +127,8 @@ function expandChangeRegion(operations: ReadonlyArray<DiffOperation>, startIndex
 
 function collectRegions(
 	operations: ReadonlyArray<DiffOperation>,
-): ReadonlyArray<{ readonly end: number; readonly start: number; }> {
-	const regions = new Array<{ end: number; start: number; }>();
+): ReadonlyArray<{ readonly end: number; readonly start: number }> {
+	const regions = new Array<{ end: number; start: number }>();
 	let scanIndex = 0;
 
 	while (scanIndex < operations.length) {
@@ -153,7 +153,7 @@ function collectRegions(
 function countLines(
 	operations: ReadonlyArray<DiffOperation>,
 	upTo: number,
-): { readonly newNumber: number; readonly oldNumber: number; } {
+): { readonly newNumber: number; readonly oldNumber: number } {
 	let oldNumber = 1;
 	let newNumber = 1;
 	for (const [index, operation] of operations.entries()) {

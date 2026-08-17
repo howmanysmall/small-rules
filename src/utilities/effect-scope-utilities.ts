@@ -339,7 +339,6 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 			} else if (isAliasRef(upRef)) callExpressionRefs.push(upRef);
 			else return false;
 
-			// oxlint-disable-next-line unicorn/no-useless-undefined -- you are useless lol
 			return undefined;
 		},
 		visited,

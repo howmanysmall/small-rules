@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import nodePath from "node:path";
+import { cwd } from "node:process";
 import { regex } from "arktype";
 
 import type { HookAPI, ToolCallEventResult } from "@oh-my-pi/pi-coding-agent/extensibility/hooks";
@@ -17,7 +18,7 @@ const RUNNER_PREFIX = /^(?:node --run|pnpm run|pnpm exec|npm run|bun run|bunx|nr
 const WHITESPACE = /\s+/u;
 const VERSION_SUFFIX = /@[\w.-]+$/u;
 
-function runnerInvocation(command: string): undefined | { runner: string; packageName: string | undefined } {
+function runnerInvocation(command: string): undefined | { packageName: string | undefined; runner: string } {
 	const tokenMatch = RUNNER_TOKEN.exec(command);
 	const phraseMatch = RUNNER_PHRASE.exec(command);
 	const match = tokenMatch ?? phraseMatch;
@@ -79,7 +80,7 @@ function scriptFor(scripts: Record<string, string>, packageName: string): string
 }
 
 function findScripts(): Record<string, string> | undefined {
-	let directory = process.cwd();
+	let directory = cwd();
 	for (let depth = 0; depth < 6; depth += 1) {
 		const scripts = readScripts(directory);
 		if (scripts !== undefined) return scripts;

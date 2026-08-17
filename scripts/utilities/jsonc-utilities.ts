@@ -34,7 +34,7 @@ function isInlineArrayNode(updatedContent: string, parentPath: ReadonlyArray<num
 
 function formatInsertionEdit(edit: { content: string; length: number }, indent: string, inlineSpace: boolean): void {
 	if (edit.content.startsWith(",")) edit.content = `,${indent}${edit.content.slice(1)}`;
-	else if (edit.content.length > 0 && !inlineSpace) edit.content = `${indent}${edit.content}`;
+	else if (!inlineSpace && edit.content.length > 0) edit.content = `${indent}${edit.content}`;
 
 	edit.content = edit.content.replaceAll(MISSING_SPACE_AFTER_COLON_REGEXP, '": ');
 }
@@ -43,8 +43,9 @@ function formatInsertionEdit(edit: { content: string; length: number }, indent: 
  * Edits a JSONC string while preserving comments.
  *
  * @param content - The JSONC content to edit.
- * @param validator A function that validates and returns the parsed data.
- * @param mutate A function that receives a draft of the data and returns the modified version.
+ * @param validator - A function that validates and returns the parsed data.
+ * @param mutate - A function that receives a draft of the data and returns the modified version.
+ * @template TIn - The type of the input data.
  * @returns The modified JSONC string with comments preserved.
  */
 export function editJsonc<TIn extends object>(

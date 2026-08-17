@@ -96,8 +96,10 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 		},
 	});
 
-	return Array.from(examplesByRuleName.entries(), ([ruleName, examples]) => ({ examples: orderExamples(examples), ruleName }))
-		.toSorted((left, right) => left.ruleName.localeCompare(right.ruleName));
+	return Array.from(examplesByRuleName, ([ruleName, examples]) => ({
+		examples: orderExamples(examples),
+		ruleName,
+	})).toSorted((left, right) => left.ruleName.localeCompare(right.ruleName));
 }
 
 function getRuleRunnerInvocation(
@@ -358,6 +360,7 @@ function evaluateStringJoin(node: CallExpression, context: ExtractionContext): s
 	if (values.some((value) => !(typeof value === "string"))) {
 		throwExtractionError(context, node.callee.object.start, "join arrays must contain only strings.");
 	}
+	// oxlint-disable-next-line typescript/no-base-to-string -- i hate.
 	return values.join("\n");
 }
 

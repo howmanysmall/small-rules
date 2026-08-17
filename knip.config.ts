@@ -11,7 +11,8 @@ async function getPathsAsync(): Promise<Record<string, Array<string>>> {
 	const tsconfigResults = new Array<TsConfigResult>();
 	let size = 0;
 
-	for await (const filePath of glob("tsconfig*.json", { cwd: CWD })) {
+	const filePaths = glob("tsconfig*.json", { cwd: CWD });
+	for await (const filePath of filePaths) {
 		const tsconfigResult = getTsconfig(CWD, filePath);
 		if (tsconfigResult === null) continue;
 		tsconfigResults[size++] = tsconfigResult;
