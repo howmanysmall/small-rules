@@ -14,6 +14,7 @@ on:
       - ".ox*trc.json"
       - biome.jsonc
       - "documentation/**"
+      - hk.pkl
       - mise.lock
       - mise.toml
       - package.json
@@ -26,6 +27,7 @@ on:
       - "src/**/*.tsx"
       - "tests/**"
       - "tsconfig*.json"
+      - zizmor.yaml
   pull_request:
     paths: *ci-paths
 

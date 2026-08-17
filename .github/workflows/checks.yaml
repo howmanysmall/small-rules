@@ -23,14 +23,11 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install
 
-      - name: Biome
-        run: node --run biome -- ci
-
       - name: oxfmt
         run: node --run oxfmt -- --check
 
       - name: Lint
-        run: node --run oxlint
+        run: node --run lint
 
       - name: Type Check
         run: node --run type-check
