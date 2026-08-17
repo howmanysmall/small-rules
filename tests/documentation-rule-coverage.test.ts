@@ -102,8 +102,7 @@ function getExampleCountViolationNames(): ReadonlyArray<string> {
 
 type ExampleParseLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
 
-function resolveExampleLanguage(example: RuleExample): ExampleParseLanguage {
-	const { language } = example;
+function resolveExampleLanguage({ language }: RuleExample): ExampleParseLanguage {
 	if (language === "dts" || language === "js" || language === "jsx" || language === "ts" || language === "tsx") {
 		return language;
 	}
@@ -122,18 +121,17 @@ function parseExampleProgram(code: string, language: ExampleParseLanguage): Prog
 function isMultiStatementContainer(node: Node): boolean {
 	switch (node.type) {
 		case "BlockStatement":
-		case "Program": {
+		case "Program":
 			return node.body.length >= 2;
-		}
-		case "SwitchCase": {
+
+		case "ClassBody":
+			return node.body.length >= 2;
+
+		case "SwitchCase":
 			return node.consequent.length >= 2;
-		}
-		case "ClassBody": {
-			return node.body.length >= 2;
-		}
-		default: {
+
+		default:
 			return false;
-		}
 	}
 }
 
@@ -153,6 +151,8 @@ function isCrampedDocumentedExample(code: string, language: ExampleParseLanguage
 	return cramped;
 }
 
+const collator = new Intl.Collator();
+
 function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 	const labels = new Array<string>();
 	for (const [ruleName, examples] of ruleExamples) {
@@ -161,7 +161,7 @@ function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 			labels.push(`${ruleName}/${example.kind}/${example.id}`);
 		}
 	}
-	return labels.toSorted((left, right) => left.localeCompare(right));
+	return labels.toSorted((left, right) => collator.compare(left, right));
 }
 
 describe("documentation rule coverage", () => {
@@ -271,7 +271,7 @@ describe("documentation rule coverage", () => {
 			"roblox/require-module-level-instantiation",
 		]
 			.map((path) => nodePath.join(rulePagesDirectory, `${path}.mdx`))
-			.toSorted((left, right) => left.localeCompare(right));
+			.toSorted((left, right) => collator.compare(left, right));
 
 		expect(getCuratedRationaleRulePagePaths()).toStrictEqual(expectedPaths);
 	});

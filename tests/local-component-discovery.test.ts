@@ -708,7 +708,8 @@ function createProjectFixture(name: string, files?: Record<string, string>): str
 	const project = mkdtempSync(nodePath.join(tmpdir(), `small-rules-local-component-${name}-`));
 	writeFileSync(nodePath.join(project, "package.json"), '{"name":"fixture","type":"module"}\n');
 
-	for (const [relativePath, contents] of Object.entries(files ?? { "src/screen.tsx": "export {};\n" })) {
+	const entries = Object.entries(files ?? { "src/screen.tsx": "export {};\n" });
+	for (const [relativePath, contents] of entries) {
 		const absolutePath = nodePath.join(project, relativePath);
 		mkdirSync(nodePath.dirname(absolutePath), { recursive: true });
 		writeFileSync(absolutePath, contents);

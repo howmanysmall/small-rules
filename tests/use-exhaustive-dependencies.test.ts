@@ -1881,9 +1881,9 @@ function Component() {
 					{
 						hooks: [
 							{
+								name: "useCustomHook",
 								closureIndex: 0,
 								dependenciesIndex: 1,
-								name: "useCustomHook",
 							},
 						],
 					},

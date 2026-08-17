@@ -1,10 +1,10 @@
-/* !
- * Direct tests for the react-effect analysis utilities.
- *
- * Exercises internal analysis helpers end-to-end through the rule harness:
- * each rule runner builds a full analysis for its source, so these cases
- * reach the internal branch arms that the focused rule tests cannot.
- */
+// !
+// Direct tests for the react-effect analysis utilities.
+//
+// Exercises internal analysis helpers end-to-end through the rule harness:
+// each rule runner builds a full analysis for its source, so these cases
+// reach the internal branch arms that the focused rule tests cannot.
+//
 import { describe } from "vitest";
 import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
 import noDerivedState from "$oxc-rules/react/no-derived-state";

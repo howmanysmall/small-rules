@@ -54,56 +54,9 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 	state.nodeToScope.set(node, scope);
 
 	switch (node.type) {
-		case "Program": {
-			visitChildren(node, scope, state);
-			return;
-		}
-
-		case "ImportDeclaration": {
-			defineImportSpecifiers(node, scope, state);
-			return;
-		}
-
-		case "FunctionDeclaration": {
-			defineFunctionDeclaration(node, scope, state);
-			return;
-		}
-
 		case "ArrowFunctionExpression":
 		case "FunctionExpression": {
 			visitFunctionLike(node, scope, state);
-			return;
-		}
-
-		case "ClassDeclaration": {
-			defineClassDeclaration(node, scope, state);
-			visitClassLike(node, scope, state);
-			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
-			return;
-		}
-
-		case "ClassExpression": {
-			visitClassLike(node, scope, state);
-			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
-			return;
-		}
-
-		case "TSEnumDeclaration": {
-			defineTSEnumDeclaration(node, scope, state);
-			visitChildren(node, scope, state);
-			return;
-		}
-
-		case "TSInterfaceDeclaration":
-		case "TSTypeAliasDeclaration": {
-			defineTypeDeclaration(node, scope, state);
-			visitChildren(node, scope, state);
-			return;
-		}
-
-		case "VariableDeclaration": {
-			defineVariableDeclaration(node, scope, state);
-			visitVariableDeclarationChildren(node, scope, state);
 			return;
 		}
 
@@ -126,14 +79,61 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 			return;
 		}
 
+		case "ClassDeclaration": {
+			defineClassDeclaration(node, scope, state);
+			visitClassLike(node, scope, state);
+			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
+			return;
+		}
+
+		case "ClassExpression": {
+			visitClassLike(node, scope, state);
+			visitChildren(node, state.nodeToScope.get(node) ?? scope, state);
+			return;
+		}
+
+		case "FunctionDeclaration": {
+			defineFunctionDeclaration(node, scope, state);
+			return;
+		}
+
 		case "Identifier": {
 			if (isReferenceIdentifier(node)) addReference(node, scope, readModeForIdentifier(node));
 			return;
 		}
 
-		default: {
-			visitChildren(node, scope, state);
+		case "ImportDeclaration": {
+			defineImportSpecifiers(node, scope, state);
+			return;
 		}
+
+		case "Program": {
+			visitChildren(node, scope, state);
+			return;
+		}
+
+		case "TSEnumDeclaration": {
+			defineTSEnumDeclaration(node, scope, state);
+			visitChildren(node, scope, state);
+			return;
+		}
+
+		case "TSInterfaceDeclaration":
+		case "TSTypeAliasDeclaration": {
+			defineTypeDeclaration(node, scope, state);
+			visitChildren(node, scope, state);
+			return;
+		}
+
+		case "VariableDeclaration": {
+			defineVariableDeclaration(node, scope, state);
+			visitVariableDeclarationChildren(node, scope, state);
+			return;
+		}
+
+		default:
+			visitChildren(node, scope, state);
+
 	}
 }
 
@@ -237,7 +237,7 @@ function visitFunctionLike(node: HarnessNode, parentScope: HarnessScope, state: 
 	state.nodeToScope.set(node, functionScope);
 
 	const id = getNodeProperty(node, "id");
-	if (node.type === "FunctionExpression" && id !== undefined && typeof id.name === "string") {
+	if (node.type === "FunctionExpression" && typeof id?.name === "string") {
 		defineVariable(functionScope, id.name, id, {
 			name: id,
 			node,

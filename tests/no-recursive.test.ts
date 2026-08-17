@@ -71,7 +71,7 @@ describe("no-recursive", () => {
 				documentation: { id: "pass", title: "Simple non-recursive function" },
 			},
 			// No self-reference
-			"function greet() { console.log(\"hello\"); }",
+			'function greet() { console.log("hello"); }',
 			// Arrow function with no recursion
 			"const add = (a, b) => a + b;",
 			// Callback to external function is not flagged
@@ -84,14 +84,14 @@ describe("no-recursive", () => {
 			// Empty function
 			"function empty() {}",
 			// Non-recursive method
-			"class Greeter { sayHi() { return \"hi\"; } }",
+			'class Greeter { sayHi() { return "hi"; } }',
 			// Non-recursive async
 			"async function noop() { return null; }",
 			// Non-recursive generator
 			"function* range() { yield 1; }",
 			// Anonymous class expressions should not be treated as local
 			// this-recursion
-			"const Greeter = class { sayHi() { return this.sayHiOutside(); } sayHiOutside() { return \"hi\"; } };",
+			'const Greeter = class { sayHi() { return this.sayHiOutside(); } sayHiOutside() { return "hi"; } };',
 		],
 	});
 });

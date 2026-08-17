@@ -34,6 +34,7 @@ const testRule = defineRule({
 
 const tester = createRuleTester({ language: "js", sourceType: "module" });
 
+// oxlint-disable-next-line unicorn/prefer-code-point -- slop rule
 const templateExpressionCode = `check(\`${String.fromCharCode(36)}{value}\`);`;
 
 describe("isExpressionSideEffectSafe", () => {

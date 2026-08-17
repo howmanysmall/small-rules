@@ -121,7 +121,7 @@ describe("no-async-in-system", () => {
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
-				code: "const system: SystemFunction = () => game.GetService(\"Players\").GetFriendsAsync(userId);",
+				code: 'const system: SystemFunction = () => game.GetService("Players").GetFriendsAsync(userId);',
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
 			{
@@ -272,7 +272,7 @@ describe("no-async-in-system", () => {
 				const descriptor = { [key]: () => game.GetService("Players").GetFriendsAsync(userId) } satisfies System<Context>;`,
 			`const serviceName = "Players";
 				const system: SystemFunction = () => game.GetService(serviceName).GetFriendsAsync(userId);`,
-			"const system: SystemFunction = () => game.GetService(\"Players\")[method](userId);",
+			'const system: SystemFunction = () => game.GetService("Players")[method](userId);',
 			{
 				code: `import { Events } from "server/network";
 				const system: SystemFunction = () => Events.general.friendUpdated.connect();`,

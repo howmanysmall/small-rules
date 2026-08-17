@@ -736,7 +736,7 @@ function Component() {
     useIndexedEffect([dep], () => {});
 }
 `,
-					options: [{ hooks: [{ dependenciesIndex: 0, name: "useIndexedEffect" }] }],
+					options: [{ hooks: [{ name: "useIndexedEffect", dependenciesIndex: 0 }] }],
 					errors: [{ messageId: "unmemoizedDependency" }],
 				},
 			],

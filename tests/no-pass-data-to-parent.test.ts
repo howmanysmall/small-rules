@@ -24,7 +24,7 @@ export function Child({ onFetched }: { onFetched: (data: string) => void }): Rea
 `,
 				errors: [
 					{
-						data: { data: '"useSomeAPI"', name: '"Child"' },
+						data: { name: '"Child"', data: '"useSomeAPI"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],

@@ -206,7 +206,7 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "file", path: "src/errors.ts" }] }],
 				errors: [error],
 			},
 			// Non-allowed error still reports when allow option is present
@@ -232,7 +232,7 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "library", name: "TypeError" }] }],
+				options: [{ allow: [{ name: "TypeError", from: "library" }] }],
 				errors: [error],
 			},
 			// Throw in catch block doesn't collide with catch param name
@@ -275,7 +275,7 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "package", name: "ValidationError", package: "@cliffy/command" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "package", package: "@cliffy/command" }] }],
 				errors: [error],
 			},
 			{
@@ -293,7 +293,7 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "package", name: "ValidationError" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "package" }] }],
 				errors: [error],
 			},
 			{
@@ -311,7 +311,7 @@ describe("require-throw-error-capture", () => {
 					"throw error;",
 					"}",
 				].join("\n"),
-				options: [{ allow: [{ from: "file", name: "ValidationError", path: "src/errors.ts" }] }],
+				options: [{ allow: [{ name: "ValidationError", from: "file", path: "src/errors.ts" }] }],
 				errors: [error],
 			},
 		],

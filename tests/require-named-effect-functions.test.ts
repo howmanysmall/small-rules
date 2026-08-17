@@ -707,7 +707,7 @@ useCustomHook(() => {
     console.log("custom");
 }, []);
 `,
-					options: [{ hooks: [{ allowAsync: false, name: "useCustomHook" }] }],
+					options: [{ hooks: [{ name: "useCustomHook", allowAsync: false }] }],
 					errors: [{ messageId: "arrowFunction" }],
 				},
 			],
