@@ -25,8 +25,10 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-async-in-system",
 	"no-cascading-set-state",
 	"no-chain-state-updates",
+	"no-chained-type-assertions",
 	"no-color3-constructor",
 	"no-commented-code",
+	"no-conditional-empty-object-spread",
 	"no-constant-condition-with-break",
 	"no-dead-store",
 	"no-derived-state",
@@ -129,7 +131,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(109);
+			expect(ruleNames).toHaveLength(111);
 		}, 30_000);
 	});
 });
