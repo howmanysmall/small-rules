@@ -163,7 +163,9 @@ const rules: OxlintRules = {
 	],
 	"small-rules/no-cascading-set-state": "off",
 	"small-rules/no-chain-state-updates": "off",
+	"small-rules/no-chained-type-assertions": "error",
 	"small-rules/no-color3-constructor": "off",
+	"small-rules/no-conditional-empty-object-spread": "error",
 	"small-rules/no-constant-condition-with-break": [
 		"error",
 		{
