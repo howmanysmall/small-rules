@@ -44,6 +44,10 @@ Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined
 
 Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md`](docs/hot-path-conventions.md). Per-node allocation, stateful regex `g` flags, recursive walks, and pop-based traversal are the common pitfalls — adheres to ADR-0001.
 
+## Vendored Code
+
+Third-party code copied into this repo (currently `src/rules/anti-slop/`, from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)) follows [`docs/vendoring.md`](docs/vendoring.md): provenance header on every file, an entry in `THIRD-PARTY-NOTICES.md`, and the license notice embedded in `VENDORED_NOTICE` in `tsdown.config.ts`. The source headers are stripped by minification, so the notices file and the bundle banner are what actually satisfy the upstream license.
+
 ## Code Architecture
 
 ### Entry Point - `src/index.ts`

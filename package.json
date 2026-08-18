@@ -30,7 +30,8 @@
 		"./package.json": "./package.json"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"THIRD-PARTY-NOTICES.md"
 	],
 	"scripts": {
 		"biome": "biome",

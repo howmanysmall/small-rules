@@ -53,3 +53,6 @@ Browse the [**full rule catalog →**](https://docs.howmanysmall.com/small-rules
 ## License
 
 MIT © HowManySmall
+
+Includes MIT-licensed code from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop).
+See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
