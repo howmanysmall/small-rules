@@ -46,7 +46,9 @@ Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md
 
 ## Vendored Code
 
-Third-party code copied into this repo (currently `src/rules/anti-slop/`, from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)) follows [`docs/vendoring.md`](docs/vendoring.md): provenance header on every file, an entry in `THIRD-PARTY-NOTICES.md`, and the license notice embedded in `VENDORED_NOTICE` in `tsdown.config.ts`. The source headers are stripped by minification, so the notices file and the bundle banner are what actually satisfy the upstream license.
+Third-party code copied into this repo (currently `src/rules/anti-slop/`, from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)) is described in exactly one place: `VENDORED_COMPONENTS` in [`scripts/utilities/vendored-notices.ts`](scripts/utilities/vendored-notices.ts). Add an entry there, add the provenance header to each vendored file, then run `nr generate:third-party-notices`.
+
+`THIRD-PARTY-NOTICES.md` and the `dist/index.js` legal banner are both generated from that catalog - never hand-edit either. The `//` headers in the sources are stripped by minification, so the notices file and the banner are what actually satisfy the upstream license. `tests/third-party-notices.test.ts` fails on drift. Full procedure in [`docs/vendoring.md`](docs/vendoring.md).
 
 ## Code Architecture
 

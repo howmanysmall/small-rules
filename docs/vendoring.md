@@ -1,37 +1,74 @@
-# Vendoring third-party code
+# Vendoring Third-Party Code
 
-How to bring outside code into this repository. The legal artifact this produces is
-[`THIRD-PARTY-NOTICES.md`](../THIRD-PARTY-NOTICES.md); this document is the procedure,
-not the notice.
+How to bring outside code into this repository.
 
-## File header
+`THIRD-PARTY-NOTICES.md` and the `dist/index.js` legal banner are both generated from
+[`scripts/utilities/vendored-notices.ts`](../scripts/utilities/vendored-notices.ts).
+That module is the only place a component is described. Do not hand-edit either output.
 
-Every vendored file begins with this header before any other content:
+## Adding a Component
 
-```ts
-// oxlint-disable comment-length/limit-single-line-comments -- vendored header
-// Vendored from <upstream-path>@<upstream-sha> by <upstream-author>.
-// Source: <upstream-url>
-// SPDX-License-Identifier: MIT
-```
+1. **Add the provenance header** to each vendored file:
 
-For vendored `*.md` files, use `<!--` / `-->` instead of `//`.
+   ```ts
+   // oxlint-disable comment-length/limit-single-line-comments -- vendored header
+   // Vendored from <upstream-path>@<upstream-sha> by <upstream-author>.
+   // Source: <upstream-url>
+   // SPDX-License-Identifier: MIT
+   ```
 
-The header is provenance for people reading the source tree. It is not what satisfies
-the upstream license — the build minifies these comments away, so the notice that
-actually ships comes from `THIRD-PARTY-NOTICES.md` and the bundle banner.
+   For vendored `*.md` files, use `<!--` / `-->` instead of `//`.
 
-## Checklist
+   This header is for people reading the source tree. It is not what satisfies the
+   upstream license — minification strips it — so it is a courtesy, not the obligation.
 
-1. Add the header above to each vendored file.
-2. Add or update the component's entry in `THIRD-PARTY-NOTICES.md`: source URL, vendored
-   commit SHA, copyright line, license name, the file mapping table, and the verbatim
-   license text.
-3. If the component is new, add its copyright and license to `VENDORED_NOTICE` in
-   `tsdown.config.ts` so the notice is embedded in `dist/index.js`.
-4. Confirm `THIRD-PARTY-NOTICES.md` is listed in `files` in `package.json`.
+2. **Add one entry** to `VENDORED_COMPONENTS`:
 
-Do not record per-change modification notes. MIT requires only that the copyright notice
-and permission notice survive; a prose changelog of local edits goes stale and is not a
-license obligation. State once in the notices entry whether the vendored files are
-verbatim or adapted, and leave it there.
+   ```ts
+   {
+       commit: "446268e5d15baa968eaec669ff65358d36ae6259",
+       copyright: "Copyright (c) 2026 Dillon Mulroy",
+       directory: "src/rules/anti-slop/",
+       files: [{ local: "no-chained-type-assertions.ts", upstream: "src/rules/no-chained-type-assertions.ts" }],
+       license: "MIT",
+       name: "anti-slop",
+       source: "https://github.com/dmmulroy/anti-slop",
+       verbatim: false,
+   }
+   ```
+
+3. **Regenerate:**
+
+   ```bash
+   node --run generate:third-party-notices
+   ```
+
+That is the whole procedure. The notices file, the bundle banner, and the npm tarball all
+follow from the entry.
+
+## What Enforces This
+
+`tests/third-party-notices.test.ts` fails if `THIRD-PARTY-NOTICES.md` does not match what
+the catalog renders, if a listed file does not exist on disk, or if the banner loses a
+copyright line or permission grant. `node --run generate:third-party-notices -- --check`
+does the staleness half of that without writing, for hooks and CI.
+
+## Licenses
+
+`license` accepts any SPDX identifier in `LICENSE_TEMPLATES`: `MIT`, `ISC`,
+`BSD-2-Clause`, `BSD-3-Clause`. Anything else is a compile error, deliberately. Those four
+are permissive licenses whose full text is a copyright substitution away, so rendering
+them is mechanical.
+
+Apache-2.0 and the copyleft family are absent on purpose. Apache-2.0 additionally requires
+propagating a `NOTICE` file and stating significant changes; the copyleft licenses require
+a source offer. Adding them to the template map would produce a notice that looks complete
+while omitting the actual obligation, so vendoring such a component should force a
+deliberate decision rather than a one-line data edit.
+
+## What Not to Record
+
+Do not keep per-change modification logs. MIT, ISC, and BSD require only that the
+copyright notice and permission notice survive; a prose changelog of local edits is an
+Apache-2.0 §4(b) habit that goes stale and obligates nothing here. The `verbatim` flag
+states once whether the files were adapted, which is all the notice needs.
