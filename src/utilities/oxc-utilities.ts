@@ -280,3 +280,24 @@ export function isBindingIdentifier(node: ESTree.Node): node is ESTree.BindingId
 export function isExpressionNode(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
 	return node.type !== "PrivateIdentifier";
 }
+
+export type TypeAssertionExpression = ESTree.TSAsExpression | ESTree.TSTypeAssertion;
+export function isTypeAssertionExpression(node: ESTree.Node): node is TypeAssertionExpression {
+	return isTsAsExpression(node) || isTsTypeAssertion(node);
+}
+
+function isTypeReference(node: ESTree.Node): node is ESTree.TSTypeReference {
+	return node.type === "TSTypeReference";
+}
+
+export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): boolean {
+	return (
+		isTypeReference(typeAnnotation) &&
+		typeAnnotation.typeName.type === "Identifier" &&
+		typeAnnotation.typeName.name === "const"
+	);
+}
+
+export function isEmptyObjectExpression(node: ESTree.Expression): boolean {
+	return isObjectExpression(node) && node.properties.length === 0;
+}

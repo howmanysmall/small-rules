@@ -1,3 +1,5 @@
+import noChainedTypeAssertions from "$oxc-rules/anti-slop/no-chained-type-assertions";
+import noConditionalEmptyObjectSpread from "$oxc-rules/anti-slop/no-conditional-empty-object-spread";
 import directiveDisableEnablePair from "$oxc-rules/general/directive-disable-enable-pair";
 import directiveNoAggregatingEnable from "$oxc-rules/general/directive-no-aggregating-enable";
 import directiveNoDuplicateDisable from "$oxc-rules/general/directive-no-duplicate-disable";
@@ -136,8 +138,10 @@ const smallRules = definePlugin({
 		"no-async-in-system": noAsyncInSystem,
 		"no-cascading-set-state": noCascadingSetState,
 		"no-chain-state-updates": noChainStateUpdates,
+		"no-chained-type-assertions": noChainedTypeAssertions,
 		"no-color3-constructor": noColor3Constructor,
 		"no-commented-code": noCommentedCode,
+		"no-conditional-empty-object-spread": noConditionalEmptyObjectSpread,
 		"no-constant-condition-with-break": noConstantConditionWithBreak,
 		"no-dead-store": noDeadStore,
 		"no-derived-state": noDerivedState,

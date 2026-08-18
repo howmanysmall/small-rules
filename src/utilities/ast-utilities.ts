@@ -26,6 +26,12 @@ export function unwrapExpression(expression: ESTree.Expression): ESTree.Expressi
 	}
 }
 
+export function unwrapParenthesis(expression: ESTree.Expression): ESTree.Expression {
+	let current = expression;
+	while (current.type === "ParenthesizedExpression") current = current.expression;
+	return current;
+}
+
 export function getMemberPropertyName(node: ESTree.MemberExpression): string | undefined {
 	if (node.computed) {
 		return node.property.type === "Literal" && isStringRaw(node.property.value) ? node.property.value : undefined;
