@@ -15,8 +15,6 @@
 				".graphql",
 				".html",
 				".js",
-				".json",
-				".jsonc",
 				".jsx",
 				".mjs",
 				".mts",
@@ -46,9 +44,7 @@
 				".htm",
 				".html",
 				".js",
-				".json",
 				".json5",
-				".jsonc",
 				".jsx",
 				".less",
 				".mdx",
@@ -87,6 +83,20 @@
 			"fileTypes": [".toml"],
 			"languageId": "toml",
 			"rootMarkers": ["Cargo.toml", "pyproject.toml", ".git"]
+		},
+		"vscode-html-language-server": {
+			"command": "vscode-html-language-server",
+			"args": ["--stdio"],
+			"fileTypes": [".html", ".htm"],
+			"languageId": "html",
+			"rootMarkers": [".git"]
+		},
+		"vscode-json-language-server": {
+			"command": "vscode-json-language-server",
+			"args": ["--stdio"],
+			"fileTypes": [".json", ".jsonc"],
+			"languageId": "json",
+			"rootMarkers": ["package.json", "tsconfig.json", ".git"]
 		},
 		"typescript": {
 			"command": "node",
