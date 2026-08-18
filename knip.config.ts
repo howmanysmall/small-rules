@@ -26,6 +26,7 @@ async function getPathsAsync(): Promise<Record<string, Array<string>>> {
 		for (const [key, value] of Object.entries(tsconfigPaths)) {
 			if (key in paths) {
 				console.warn(`Duplicate path key detected: ${key}`);
+				// oxlint-disable-next-line small-rules/no-variadic-spread -- not a relevant hot path.
 				paths[key]?.push(...value);
 			} else paths[key] = value;
 		}

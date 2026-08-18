@@ -92,7 +92,7 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 			if (examples.length === 0) return;
 			const existingExamples = examplesByRuleName.get(invocation.ruleName);
 			if (existingExamples === undefined) examplesByRuleName.set(invocation.ruleName, examples);
-			else existingExamples.push(...examples);
+			else for (const example of examples) existingExamples.push(example);
 		},
 	});
 
@@ -106,9 +106,11 @@ function getRuleRunnerInvocation(
 	node: CallExpression,
 ): undefined | { readonly cases: ObjectExpression; readonly language: string; readonly ruleName: string } {
 	if (!isRuleRunner(node.callee)) return undefined;
+
 	const [ruleNameNode, , casesNode] = node.arguments;
 	if (!isStringLiteral(ruleNameNode) || casesNode?.type !== "ObjectExpression") return undefined;
 	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return undefined;
+
 	return { cases: casesNode, language: node.callee.object.name, ruleName: ruleNameNode.value };
 }
 
@@ -133,12 +135,15 @@ function extractInvocationExamples(
 	for (const caseArray of getCaseArrays(cases, context)) {
 		for (const element of caseArray.cases.elements) {
 			if (element?.type !== "ObjectExpression") continue;
+
 			const example = extractCaseExample(element, caseArray.kind, runnerLanguage, context);
 			if (example === undefined) continue;
+
 			const idOffset = getDocumentationIdOffset(element);
 			if (idOffsets.has(example.id)) {
 				throwExtractionError(context, idOffset, `duplicate documentation example ID "${example.id}".`);
 			}
+
 			idOffsets.set(example.id, idOffset);
 			examples.push(example);
 		}

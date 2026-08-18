@@ -212,7 +212,7 @@ const rules: OxlintRules = {
 	"small-rules/no-useless-use-effect": "off",
 	"small-rules/no-useless-use-memo": "off",
 	"small-rules/no-useless-use-spring": "off",
-	"small-rules/no-variadic-spread": "off",
+	"small-rules/no-variadic-spread": "error",
 	"small-rules/no-warn": "off",
 	"small-rules/only-type-imports": "off",
 	"small-rules/prefer-constant-dispatch": "off",
@@ -406,6 +406,7 @@ const configuration = isentinel(
 			vitest: { typecheck: true },
 		},
 		spellCheck: false,
+		stylistic: true,
 	},
 	{
 		name: "small-rules/native-id-length",
@@ -623,11 +624,6 @@ const configuration = isentinel(
 			],
 			"small-rules/require-react-display-names": ["error", { environment: "standard" }],
 		},
-	},
-	{
-		name: "small-rules/no-variadic-spread",
-		files: ["src/**/*.{ts,tsx}"],
-		rules: { "small-rules/no-variadic-spread": "error" },
 	},
 );
 
