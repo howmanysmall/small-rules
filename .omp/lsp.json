@@ -1,5 +1,15 @@
 {
 	"servers": {
+		"typescript-language-server": {
+			"disabled": true
+		},
+		"typescript": {
+			"command": "node",
+			"args": ["--run", "tsgo", "--", "--lsp", "--stdio"],
+			"fileTypes": [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"],
+			"languageId": "typescript",
+			"rootMarkers": ["tsconfig.json", "package.json", ".git"]
+		},
 		"pkl-lsp": {
 			"command": "pkl-lsp",
 			"fileTypes": [".pkl"],
