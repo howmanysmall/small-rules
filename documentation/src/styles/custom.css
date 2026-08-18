@@ -203,6 +203,12 @@ header.header .site-title img {
 	line-height: 1;
 	-webkit-text-fill-color: transparent;
 	letter-spacing: -0.022rem;
+	background: linear-gradient(to right, var(--sl-color-text) 0 54%, var(--sl-color-accent) 54%);
+	-webkit-background-clip: text;
+	background-clip: text;
+}
+
+:root[data-theme="dark"] .header .site-title > :where(span) {
 	background: linear-gradient(to right, #e8f4f8 0 54%, #7ed0e6 54%);
 	-webkit-background-clip: text;
 	background-clip: text;

@@ -1,0 +1,33 @@
+---
+title: "No Conditional Empty Object Spread"
+---
+
+import { Code } from "@astrojs/starlight/components";
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-conditional-empty-object-spread">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>'s{" "}
+			<code>no-conditional-empty-object-spread</code> — I wanted his ban on using <code>{"{}"}</code> as a no-op
+			to hide omission. Credit for the pattern is his.
+		</p>
+		<ul>
+			<li>
+				**Intent is hidden:** <code>{"...(cond ? {} : { prop: value })"}</code> reads as a merge when you mean
+				an optional field. You have to puzzle out which branch is the empty one.
+			</li>
+			<li>
+				**Clarity over brevity:** building the object and assigning the field only when present keeps the type
+				as a plain optional property and avoids a throwaway allocation. Probably not a perf win you'll measure,
+				but it's the more direct spelling.
+			</li>
+			<li>
+				**Scope matters:** the rule only flags object spreads. Array spreads like{" "}
+				<code>{"[...(cond ? {} : other)]"}</code> are fine — different semantics.
+			</li>
+		</ul>
+		<p>I'd rather you write it as two statements — you probably won't need the ternary at all:</p>
+		<Code code={`const obj: { prop?: string } = { ...base };\nif (condition) obj.prop = value;`} lang="ts" />
+	</Fragment>
+</RulePage>

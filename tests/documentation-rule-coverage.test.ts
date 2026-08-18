@@ -40,9 +40,16 @@ function getExpectedRulePagePaths(): ReadonlyArray<string> {
 }
 
 function getRulePagePaths(): ReadonlyArray<string> {
-	return readdirSync(rulePagesDirectory, { encoding: "utf8", recursive: true })
-		.filter((relativePath) => relativePath.endsWith(".mdx") && nodePath.basename(relativePath) !== "index.mdx")
-		.map((relativePath) => nodePath.join(rulePagesDirectory, relativePath));
+	const relativePaths = readdirSync(rulePagesDirectory, { encoding: "utf8", recursive: true });
+	const rulePagePaths = new Array<string>();
+	let size = 0;
+
+	for (const relativePath of relativePaths) {
+		if (!relativePath.endsWith(".mdx") || nodePath.basename(relativePath) === "index.mdx") continue;
+		rulePagePaths[size++] = nodePath.join(rulePagesDirectory, relativePath);
+	}
+
+	return rulePagePaths;
 }
 
 function getRulePageSources(): ReadonlyArray<{ readonly path: string; readonly source: string }> {
@@ -235,6 +242,8 @@ describe("documentation rule coverage", () => {
 	it("keeps curated rationale pages explicit", () => {
 		expect.assertions(1);
 		const expectedPaths = [
+			"anti-slop/no-chained-type-assertions",
+			"anti-slop/no-conditional-empty-object-spread",
 			"general/no-increment-decrement",
 			"general/no-recursive",
 			"general/no-restricted-property-assignment",
@@ -306,7 +315,7 @@ describe("documentation rule coverage", () => {
 		expect.assertions(2);
 		const expectedRuleIndexPagePaths = getExpectedRuleIndexPagePaths();
 
-		expect(expectedRuleIndexPagePaths).toHaveLength(5);
+		expect(expectedRuleIndexPagePaths).toHaveLength(6);
 		expect(expectedRuleIndexPagePaths.filter((path) => !existsSync(path))).toStrictEqual([]);
 	});
 });

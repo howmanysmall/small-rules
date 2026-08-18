@@ -17,8 +17,7 @@ export function RuleCategoryPage({ category: categoryKey }: RuleCategoryPageProp
 	return (
 		<>
 			<p className="rule-category-summary">
-				{category.description}
-				{"Browse all "}
+				{category.description} {"Browse all "}
 				{category.count} {category.count === 1 ? "rule" : "rules"}
 				{" in this category."}
 			</p>

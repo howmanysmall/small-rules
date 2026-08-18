@@ -1,3 +1,10 @@
+// oxlint-disable comment-length/limit-single-line-comments -- vendored header
+// Vendored from src/rules/no-conditional-empty-object-spread.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Source: https://github.com/dmmulroy/anti-slop
+// SPDX-License-Identifier: MIT
+//
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities).
+
 import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isEmptyObjectExpression } from "$oxc-utilities/oxc-utilities";

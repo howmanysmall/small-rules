@@ -1,3 +1,11 @@
+// oxlint-disable comment-length/limit-single-line-comments -- vendored header
+// Vendored from src/rules/no-chained-type-assertions.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Source: https://github.com/dmmulroy/anti-slop
+// SPDX-License-Identifier: MIT
+//
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities),
+// added ParenthesizedExpression unwrapping and const-assertion carve-out.
+
 import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isConstAssertion, isTypeAssertionExpression } from "$oxc-utilities/oxc-utilities";

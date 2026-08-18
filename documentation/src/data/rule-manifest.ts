@@ -1,7 +1,7 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
-export type RuleCategoryKey = "general" | "naming" | "react" | "roblox";
+export type RuleCategoryKey = "anti-slop" | "general" | "naming" | "react" | "roblox";
 
 export interface RuleManifestEntry {
 	readonly name: RuleName;
@@ -123,6 +123,12 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "prevent-abbreviations" },
 				{ name: "require-async-suffix" },
 			],
+		},
+		{
+			key: "anti-slop",
+			description: "Rules to prevent common LLM slop. Ported from dmmulroy/anti-slop.",
+			label: "Anti-Slop",
+			rules: [{ name: "no-chained-type-assertions" }, { name: "no-conditional-empty-object-spread" }],
 		},
 		{
 			key: "general",
