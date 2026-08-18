@@ -135,7 +135,7 @@ catalogs:
     "@commitlint/config-conventional": 21.2.0
     "@commitlint/types": 21.2.0
     "@octokit/rest": 22.0.1
-    "@oh-my-pi/pi-coding-agent": 17.2.12
+    "@oh-my-pi/pi-coding-agent": 17.3.7
     "@opencode-ai/plugin": 0.0.0-beta-17519
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     "@stryker-mutator/api": 9.6.1
