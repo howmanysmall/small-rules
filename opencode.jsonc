@@ -222,7 +222,7 @@
 				"url": "https://mcp.context7.com/mcp",
 			},
 			"hk": {
-				"command": ["hk", "mcp", "--root", "."],
+				"command": ["mise", "x", "--", "hk", "mcp", "--root", "."],
 				"disabled": false,
 				"type": "local",
 			},
