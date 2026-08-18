@@ -3,6 +3,91 @@
 		"typescript-language-server": {
 			"disabled": true
 		},
+		"biome": {
+			"command": "node",
+			"args": ["--run", "biome", "--", "lsp-proxy"],
+			"fileTypes": [
+				".astro",
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".html",
+				".js",
+				".json",
+				".jsonc",
+				".jsx",
+				".mjs",
+				".mts",
+				".scss",
+				".svelte",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"languageId": "biome",
+			"rootMarkers": ["biome.json", "biome.jsonc", ".git"],
+			"isLinter": true
+		},
+		"oxfmt": {
+			"command": "node",
+			"args": ["--run", "oxfmt", "--", "--lsp"],
+			"fileTypes": [
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".handlebars",
+				".hbs",
+				".htm",
+				".html",
+				".js",
+				".json",
+				".json5",
+				".jsonc",
+				".jsx",
+				".less",
+				".mdx",
+				".mjs",
+				".mts",
+				".sass",
+				".scss",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"languageId": "oxfmt",
+			"rootMarkers": [".oxfmtrc.json", ".git"],
+			"isLinter": true
+		},
+		"oxlint": {
+			"command": "node",
+			"args": ["--run", "oxlint", "--", "--lsp"],
+			"fileTypes": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
+			"languageId": "oxlint",
+			"rootMarkers": [".oxlintrc.json", ".git"],
+			"isLinter": true
+		},
+		"rumdl": {
+			"command": "rumdl",
+			"args": ["server"],
+			"fileTypes": [".md", ".markdown", ".mdown", ".mkdn", ".mkd", ".mdwn", ".mdtxt", ".mdtext", ".text", ".Rmd"],
+			"languageId": "markdown",
+			"rootMarkers": [".git"]
+		},
+		"tombi": {
+			"command": "tombi",
+			"args": ["lsp"],
+			"fileTypes": [".toml"],
+			"languageId": "toml",
+			"rootMarkers": ["Cargo.toml", "pyproject.toml", ".git"]
+		},
 		"typescript": {
 			"command": "node",
 			"args": ["--run", "tsgo", "--", "--lsp", "--stdio"],
