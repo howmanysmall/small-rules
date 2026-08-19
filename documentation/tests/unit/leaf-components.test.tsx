@@ -57,6 +57,7 @@ describe("FeatureCard", () => {
 
 describe("Icon", () => {
 	it("renders decorative SVGs at the requested size", () => {
+		// oxlint-disable-next-line react/forbid-component-props -- whatever!
 		const { container } = render(<Icon className="example-icon" name="search" size={20} />);
 
 		const icon = container.querySelector("svg");

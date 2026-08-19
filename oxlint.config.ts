@@ -102,6 +102,21 @@ const rules: OxlintRules = {
 	"perfectionist/sort-modules": "off",
 	"prefer-destructuring": "error",
 	"prefer-named-capture-group": "off",
+	"react-perf/jsx-no-new-function-as-prop": "off",
+	"react/jsx-curly-brace-presence": [
+		"error",
+		{
+			children: "always",
+		},
+	],
+	"react/jsx-filename-extension": [
+		"error",
+		{
+			extensions: ["jsx", "tsx"],
+			ignoreFilesWithoutCode: true,
+		},
+	],
+	"react/react-in-jsx-scope": "off",
 	"small-rules/array-type-generic": "error",
 	"small-rules/ban-instances": "off",
 	"small-rules/ban-react-fc": "off",
@@ -345,6 +360,15 @@ const rules: OxlintRules = {
 	"vue/no-dupe-keys": "off",
 };
 
+const reactTestRules: OxlintRules = {
+	"react-perf/jsx-no-new-array-as-prop": "off",
+	"react-perf/jsx-no-new-function-as-prop": "off",
+	"react-perf/jsx-no-new-object-as-prop": "off",
+	"react/no-multi-comp": "off",
+	"react/no-unknown-property": "off",
+	"react/only-export-components": "off",
+};
+
 const configuration = isentinel(
 	{
 		name: "small-rules",
@@ -400,9 +424,11 @@ const configuration = isentinel(
 			typeAware: true,
 			typeCheck: !argv.includes("--lsp"),
 		},
+		react: true,
 		roblox: false,
 		rules,
 		settings: {
+			react: { version: "19.2.8" },
 			vitest: { typecheck: true },
 		},
 		spellCheck: false,
@@ -569,9 +595,15 @@ const configuration = isentinel(
 		name: "small-rules/fixtures",
 		files: ["tests/fixtures/**/*.{ts,tsx}"],
 		rules: {
+			...reactTestRules,
 			"eslint-js/no-restricted-syntax": "off",
 			"typescript/ban-ts-comment": "off",
 		},
+	},
+	{
+		name: "small-rules/documentation-react-tests",
+		files: ["documentation/tests/**/*.test.tsx"],
+		rules: reactTestRules,
 	},
 	{
 		name: "small-rules/allow-unambiguous-import",
@@ -598,7 +630,6 @@ const configuration = isentinel(
 				},
 			],
 			"react/jsx-max-depth": ["error", { max: 3 }],
-			"react/react-in-jsx-scope": "off",
 			"small-rules/ban-react-fc": "error",
 			"small-rules/memoized-effect-dependencies": "error",
 			"small-rules/no-static-react-create-element": ["error", { environment: "standard" }],
