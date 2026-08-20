@@ -261,6 +261,35 @@ function View() {
 `,
 				errors: [{ messageId: "hoistableJsxElement" }],
 			},
+			{
+				code: `
+function View() {
+	const config = { icon: <frame /> };
+	return <folder>{config.icon}</folder>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+let config = { icon: <frame /> };
+
+function View() {
+	return <folder>{config.icon}</folder>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
+			{
+				code: `
+const config = { render: () => <frame /> };
+
+function View() {
+	return <folder>{config.render()}</folder>;
+}
+`,
+				errors: [{ messageId: "hoistableJsxElement" }],
+			},
 		],
 		valid: [
 			{
@@ -558,6 +587,77 @@ function FrameView() {
 
 function PanelView() {
 	return PANEL;
+}
+`,
+			},
+			{
+				code: `
+const TAG_PRESENTATION = {
+	now: { icon: <frame aria-hidden="true" /> },
+	"open source": { icon: <frame aria-hidden="true" /> },
+	tooling: { icon: <frame aria-hidden="true" /> },
+};
+
+function View() {
+	return <folder>{TAG_PRESENTATION.now.icon}</folder>;
+}
+`,
+			},
+			{
+				code: `
+const ICONS = [<frame />, <frame />];
+
+function View() {
+	return <folder>{ICONS[0]}</folder>;
+}
+`,
+			},
+			{
+				code: `
+const CONFIG = {
+	nested: {
+		icon: <frame />,
+	},
+};
+
+function View() {
+	return <folder>{CONFIG.nested.icon}</folder>;
+}
+`,
+			},
+			{
+				code: `
+const CONFIG = {
+	icons: [<frame />, <frame />],
+};
+
+function View() {
+	return <folder>{CONFIG.icons[0]}</folder>;
+}
+`,
+			},
+			{
+				code: `
+import { Icon } from "./icon";
+
+const CONFIG = {
+	icon: <Icon aria-hidden="true" />,
+};
+
+function View() {
+	return <div>{CONFIG.icon}</div>;
+}
+`,
+				options: [{ environment: "standard" }],
+			},
+			{
+				code: `
+const CONFIG = {
+	wrapper: <frame><roundedpanel /></frame>,
+};
+
+function View() {
+	return <folder>{CONFIG.wrapper}</folder>;
 }
 `,
 			},
