@@ -6,7 +6,7 @@ import { RuleOptionTypeField } from "./rule-option-type-field";
 
 import type { ReactNode } from "react";
 
-import type { ObjectOption } from "@/data/rule-options";
+import type { ObjectOption } from "$data/rule-options";
 
 interface RuleOptionProperties {
 	readonly highlightedType?: string | undefined;

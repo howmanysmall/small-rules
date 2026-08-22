@@ -1,16 +1,16 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { RelatedRules } from "@/components/related-rules";
-import { RuleCategoryPage } from "@/components/rule-category-page";
-import { RuleSummary } from "@/components/rule-summary";
+import { RelatedRules } from "$components/related-rules";
+import { RuleCategoryPage } from "$components/rule-category-page";
+import { RuleSummary } from "$components/rule-summary";
 
 import type React from "react";
 
 const categorySummaryPattern = /Browse all \d+ rules in this category\./u;
 const noWarnNamePattern = /No Warn/u;
 
-vi.mock("@/components/rule-index", () => ({
+vi.mock("$components/rule-index", () => ({
 	RuleIndex: (): React.JSX.Element => <div data-testid="rule-index" />,
 }));
 

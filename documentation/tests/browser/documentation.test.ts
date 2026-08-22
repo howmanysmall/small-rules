@@ -1,5 +1,7 @@
 import { expect, test as it } from "@playwright/test";
 
+import { ruleManifest } from "../../src/data/rule-manifest";
+
 const allRulesPath = "rules/";
 const baseUrl = "http://127.0.0.1:4321/small-rules/";
 const complexOptionsRulePath = "rules/react/no-useless-use-memo/";
@@ -11,7 +13,7 @@ it("renders the custom homepage sections", async ({ page }) => {
 
 	await expect(page.locator(".hero-splash")).toHaveCount(1);
 	await expect(page.locator(".hero-preview code")).toContainText('"@pobammer-ts/small-rules"');
-	await expect(page.locator(".category-card")).toHaveCount(4);
+	await expect(page.locator(".category-card")).toHaveCount(ruleManifest.categories.length);
 	await expect(page.locator(".feature-card")).toHaveCount(3);
 	await expect(page.getByRole("link", { name: "Get started" })).toHaveAttribute("href", "/small-rules/quick-start/");
 });

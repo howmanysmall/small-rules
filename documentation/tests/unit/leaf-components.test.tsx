@@ -1,12 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
-import { Badge } from "@/components/badge";
-import { CategoryCard } from "@/components/category-card";
-import { FeatureCard } from "@/components/feature-card";
-import { HeroSplash } from "@/components/hero-splash";
-import { Icon } from "@/components/icon";
-import { PageHeader } from "@/components/page-header";
+import { Badge } from "$components/badge";
+import { CategoryCard } from "$components/category-card";
+import { FeatureCard } from "$components/feature-card";
+import { HeroSplash } from "$components/hero-splash";
+import { Icon } from "$components/icon";
+import { PageHeader } from "$components/page-header";
 
 const reactHeadingName = /React/u;
 

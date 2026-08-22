@@ -1,8 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-import { RuleExample } from "@/components/rule-example";
+import { RuleExample } from "$components/rule-example";
 
 const clipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, "clipboard");
 const answerExample = "const answer = 42;";

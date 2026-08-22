@@ -2,7 +2,7 @@ import { RuleOptionDefaultActions } from "./rule-option-default-actions";
 
 import type { ReactNode } from "react";
 
-import type { ObjectOption } from "@/data/rule-options";
+import type { ObjectOption } from "$data/rule-options";
 
 interface RuleOptionDefaultFieldProperties {
 	readonly copyLabel: string;
