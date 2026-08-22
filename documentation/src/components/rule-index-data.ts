@@ -1,7 +1,7 @@
-import { getRuleNewness } from "@/data/rule-newness";
+import { getRuleNewness } from "$data/rule-newness";
 
-import type { RuleFactCategory } from "@/data/rule-facts";
-import type { RuleNewness } from "@/data/rule-newness";
+import type { RuleFactCategory } from "$data/rule-facts";
+import type { RuleNewness } from "$data/rule-newness";
 
 interface Rule {
 	readonly name: string;

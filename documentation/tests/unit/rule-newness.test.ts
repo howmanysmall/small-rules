@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+import { createRuleNewness, getRuleNewnessWith, parseAddCommits, resolveNewness } from "$data/rule-newness";
 
-import { createRuleNewness, getRuleNewnessWith, parseAddCommits, resolveNewness } from "@/data/rule-newness";
-
-import type { GitRunner } from "@/data/rule-newness";
+import type { GitRunner } from "$data/rule-newness";
 
 const ADD_LOG_FIXTURE = [
 	"__COMMIT__aaaa1111",

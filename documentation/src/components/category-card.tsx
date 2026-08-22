@@ -1,10 +1,9 @@
-import { siteBasePath } from "@/utilities/site-base-path";
+import { siteBasePath } from "$utilities/site-base-path";
 
 import { Icon } from "./icon";
 
+import type { RuleCategoryKey } from "$data/rule-manifest";
 import type { ReactNode } from "react";
-
-import type { RuleCategoryKey } from "@/data/rule-manifest";
 
 interface CategoryCardProperties {
 	readonly category: RuleCategoryKey;

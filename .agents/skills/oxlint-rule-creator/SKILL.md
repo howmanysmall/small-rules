@@ -406,7 +406,7 @@ shared rule page component:
 title: "My Rule"
 ---
 
-import RulePage from "@/components/rule-page.astro";
+import RulePage from "$components/rule-page.astro";
 
 <RulePage rule="my-rule" />
 ```

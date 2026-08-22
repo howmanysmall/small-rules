@@ -11,7 +11,16 @@
 			"$oxc-types/*": ["../src/types/*"],
 			"$oxc-utilities/*": ["../src/utilities/*"],
 			"$small-rules": ["../src/index.ts"],
-			"@/*": ["./src/*"]
+
+			"$assets/*": ["./src/assets/*"],
+			"$components/*": ["./src/components/*"],
+			"$content/*": ["./src/content/*"],
+			"$data/*": ["./src/data/*"],
+			"$integrations/*": ["./src/integrations/*"],
+			"$pages/*": ["./src/pages/*"],
+			"$styles/*": ["./src/styles/*"],
+			"$types/*": ["./src/types/*"],
+			"$utilities/*": ["./src/utilities/*"]
 		}
 	},
 	"include": [

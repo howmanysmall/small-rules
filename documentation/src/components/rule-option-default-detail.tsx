@@ -1,8 +1,8 @@
-import { tokenizeJson } from "@/utilities/json-highlighter";
+import { tokenizeJson } from "$utilities/json-highlighter";
 
 import type { ReactNode } from "react";
 
-import type { DefaultValueDocumentation } from "@/data/rule-options";
+import type { DefaultValueDocumentation } from "$data/rule-options";
 
 interface RuleOptionDefaultDetailProperties {
 	readonly defaultValue: DefaultValueDocumentation;

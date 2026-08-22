@@ -3,9 +3,9 @@ title: "All Rules"
 description: "Search and filter every small-rules lint rule."
 ---
 
-import { createRuleIndexCategories } from "@/components/rule-index-data";
-import { RuleIndex } from "@/components/rule-index";
-import { ruleFactCategories } from "@/data/rule-facts";
+import { createRuleIndexCategories } from "$components/rule-index-data";
+import { RuleIndex } from "$components/rule-index";
+import { ruleFactCategories } from "$data/rule-facts";
 
 export const ruleIndexCategories = createRuleIndexCategories(ruleFactCategories.values());
 
