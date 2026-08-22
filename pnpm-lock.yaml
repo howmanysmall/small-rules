@@ -209,7 +209,7 @@ catalogs:
       specifier: 7.0.3
       version: 7.0.3
     effect:
-      specifier: 3.22.1
+      specifier: 4.0.0-rc.111
       version: 3.22.1
     ignore:
       specifier: 7.0.6
@@ -479,7 +479,7 @@ importers:
         version: 2.2.3
       effect:
         specifier: catalog:prod
-        version: 3.22.1
+        version: 4.0.0-rc.111
 
   .opencode:
     dependencies:
@@ -5225,6 +5225,9 @@ packages:
 
   effect@4.0.0-beta.101:
     resolution: {integrity: sha512-HjowumlIo+orthn4jMlEJPuzIYPBV+uq/XiciHWhiedLsXQpWHdNJHO5d59BVDP5s1LPuvERcktwFqRXnJqnhA==}
+
+  effect@4.0.0-rc.111:
+    resolution: {integrity: sha512-ASd5L58EIR0CUNueZNKKjSsyOCd+2alxOAIaTcHaqkJkPsaYSsw5Cg/cfANk5K4Jr2YsX756xvX11shzqsreWA==}
 
   electron-to-chromium@1.5.409:
     resolution: {integrity: sha512-ChI4N44d0B4A6C8prnNjMOaGgE59fUyEVYcRYm2XEXIjMbbvF5i9UL1cblDbpGqiU0uS8FE8UcKxqZqTXdmzbQ==}
@@ -13273,6 +13276,12 @@ snapshots:
       uuid: 14.0.1
       yaml: 2.9.0
 
+  effect@4.0.0-rc.111:
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      fast-check: 4.9.0
+      msgpackr: 2.0.5
+
   electron-to-chromium@1.5.409: {}
 
   emmet@2.4.11:
@@ -17402,6 +17411,7 @@ time:
   commitlint@21.2.1: '2026-07-08T07:48:08.940Z'
   confbox@0.2.4: '2026-02-06T12:11:42.581Z'
   effect@3.22.1: '2026-07-30T04:29:21.637Z'
+  effect@4.0.0-rc.111: '2026-08-20T04:49:00.643Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
   eslint-plugin-astro@3.1.0: '2026-08-02T14:03:14.890Z'
   eslint-plugin-eslint-plugin@7.6.1: '2026-08-06T01:41:00.609Z'
