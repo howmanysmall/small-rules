@@ -1,4 +1,5 @@
-// oxlint-disable unicorn/no-null -- The unset scope mirrors eslint-scope's null upper scope sentinel.
+// oxlint-disable unicorn/no-null -- The unset scope mirrors eslint-scope's
+// null upper scope sentinel.
 import { traverseAst } from "./ast";
 import { createDiagnosticCollector } from "./diagnostics";
 import { HarnessError } from "./harness-error";

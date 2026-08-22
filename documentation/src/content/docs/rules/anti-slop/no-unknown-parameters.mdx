@@ -1,0 +1,15 @@
+---
+title: "No Unknown Parameters"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-unknown-parameters">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. Unknown input belongs at
+			the boundary where you can decode it. The sole exception is an explicitly named <code>cause</code>, which
+			follows the normal error-enrichment convention.
+		</p>
+	</Fragment>
+</RulePage>

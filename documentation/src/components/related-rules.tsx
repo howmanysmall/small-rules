@@ -28,7 +28,7 @@ function formatRelationKind(kind: string): string {
 		.join(" ");
 }
 
-// biome-ignore lint/correctness/useUniqueElementIds: This preserves the existing
+// biome-ignore lint/correctness/useUniqueElementIds: preserve
 const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 
 function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): ReactNode {

@@ -1,0 +1,15 @@
+---
+title: "No Object Parameters"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-object-parameters">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. <code>object</code> says
+			that a value is non-primitive but says nothing useful about its contract. Accept the owner type you need and
+			parse external input before this function is called.
+		</p>
+	</Fragment>
+</RulePage>

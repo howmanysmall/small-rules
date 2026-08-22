@@ -40,6 +40,19 @@ const rules: OxlintRules = {
 			semanticComments: ["v8 ignore"],
 		},
 	],
+	"comment-length/limit-single-line-comments": [
+		"error",
+		{
+			semanticComments: [
+				"Modifications",
+				"Vendored from",
+				"oxlint-disable",
+				"oxlint-disable-next-line",
+				"biome-ignore",
+				"eslint-disable-next-line",
+			],
+		},
+	],
 	complexity: "off",
 	curly: ["error", "multi-line"],
 	"default-case": "off",

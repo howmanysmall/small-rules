@@ -1,4 +1,5 @@
-// oxlint-disable small-rules/prevent-abbreviations id-length -- out of my control. this is for defining them.
+// oxlint-disable small-rules/prevent-abbreviations id-length -- out of my
+// control. this is for defining them.
 export const MESSAGE_ID_REPLACE = "replace";
 export const MESSAGE_ID_SUGGESTION = "suggestion";
 export const ANOTHER_NAME_MESSAGE = "A more descriptive name will do too.";

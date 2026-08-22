@@ -1,4 +1,5 @@
-// oxlint-disable unicorn/no-null -- assertion constants include the null primitive.
+// oxlint-disable unicorn/no-null -- assertion constants include the null
+// primitive.
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 

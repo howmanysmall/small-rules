@@ -1,4 +1,6 @@
-// oxlint-disable sonar/cognitive-complexity unicorn/no-null -- Scope construction is a compact AST dispatcher that mirrors eslint-scope null sentinels.
+// oxlint-disable sonar/cognitive-complexity unicorn/no-null -- Scope
+// construction is a compact AST dispatcher that mirrors eslint-scope null
+// sentinels.
 import { getNodeChildren } from "./ast";
 
 import type {

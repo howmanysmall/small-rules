@@ -1,5 +1,18 @@
 import noChainedTypeAssertions from "$oxc-rules/anti-slop/no-chained-type-assertions";
 import noConditionalEmptyObjectSpread from "$oxc-rules/anti-slop/no-conditional-empty-object-spread";
+import noKnownValueWidening from "$oxc-rules/anti-slop/no-known-value-widening";
+import noModuleMocking from "$oxc-rules/anti-slop/no-module-mocking";
+import noObjectParameters from "$oxc-rules/anti-slop/no-object-parameters";
+import noReflectApply from "$oxc-rules/anti-slop/no-reflect-apply";
+import noReflectGet from "$oxc-rules/anti-slop/no-reflect-get";
+import noRuntimeTypeof from "$oxc-rules/anti-slop/no-runtime-typeof";
+import noShapeInSymbolNames from "$oxc-rules/anti-slop/no-shape-in-symbol-names";
+import noUnknownParameters from "$oxc-rules/anti-slop/no-unknown-parameters";
+import noUnknownReturns from "$oxc-rules/anti-slop/no-unknown-returns";
+import noUnknownTypeAliases from "$oxc-rules/anti-slop/no-unknown-type-aliases";
+import noUnsafeDictionaryType from "$oxc-rules/anti-slop/no-unsafe-dictionary-type";
+import noWidenThenAssert from "$oxc-rules/anti-slop/no-widen-then-assert";
+import requireSafetyCommentForTypeAssertion from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
 import directiveDisableEnablePair from "$oxc-rules/general/directive-disable-enable-pair";
 import directiveNoAggregatingEnable from "$oxc-rules/general/directive-no-aggregating-enable";
 import directiveNoDuplicateDisable from "$oxc-rules/general/directive-no-duplicate-disable";
@@ -160,23 +173,34 @@ const smallRules = definePlugin({
 		"no-initialize-state": noInitializeState,
 		"no-inline-property-on-memo-component": noInlinePropertyOnMemoComponent,
 		"no-instance-methods-without-this": noInstanceMethodsWithoutThis,
+		"no-known-value-widening": noKnownValueWidening,
 		"no-loop-iterable-mutation": noLoopIterableMutation,
+		"no-module-mocking": noModuleMocking,
 		"no-native-properties-spread": noNativePropertiesSpread,
 		"no-new-instance-in-use-memo": noNewInstanceInUseMemo,
+		"no-object-parameters": noObjectParameters,
 		"no-pass-data-to-parent": noPassDataToParent,
 		"no-pass-live-state-to-parent": noPassLiveStateToParent,
 		"no-print": noPrint,
 		"no-recursive": noRecursive,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
+		"no-reflect-apply": noReflectApply,
+		"no-reflect-get": noReflectGet,
 		"no-render-helper-functions": noRenderHelperFunctions,
 		"no-reset-all-state-on-prop-change": noResetAllStateOnPropChange,
 		"no-restricted-property-assignment": noRestrictedPropertyAssignment,
+		"no-runtime-typeof": noRuntimeTypeof,
+		"no-shape-in-symbol-names": noShapeInSymbolNames,
 		"no-spec-file-extension": noSpecFileExtension,
 		"no-static-react-create-element": noStaticReactCreateElement,
 		"no-table-create-map": noTableCreateMap,
 		"no-task-wait": noTaskWait,
 		"no-trivial-assertions": noTrivialAssertions,
 		"no-underscore-react-props": noUnderscoreReactProperties,
+		"no-unknown-parameters": noUnknownParameters,
+		"no-unknown-returns": noUnknownReturns,
+		"no-unknown-type-aliases": noUnknownTypeAliases,
+		"no-unsafe-dictionary-type": noUnsafeDictionaryType,
 		"no-unused-imports": noUnusedImports,
 		"no-unused-use-memo": noUnusedUseMemo,
 		"no-use-memo-simple-expression": noUseMemoSimpleExpression,
@@ -188,6 +212,7 @@ const smallRules = definePlugin({
 		"no-useless-use-spring": noUselessUseSpring,
 		"no-variadic-spread": noVariadicSpread,
 		"no-warn": noWarn,
+		"no-widen-then-assert": noWidenThenAssert,
 		"only-type-imports": onlyTypeImports,
 		"prefer-class-properties": preferClassProperties,
 		"prefer-constant-dispatch": preferConstantDispatch,
@@ -218,6 +243,7 @@ const smallRules = definePlugin({
 		"require-paired-calls": requirePairedCalls,
 		"require-react-component-keys": requireReactComponentKeys,
 		"require-react-display-names": requireReactDisplayNames,
+		"require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertion,
 		"require-switch-case-braces": requireSwitchCaseBraces,
 		"require-throw-error-capture": requireThrowErrorCapture,
 		"require-unicode-regex": requireUnicodeRegex,

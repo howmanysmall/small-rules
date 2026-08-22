@@ -1,4 +1,6 @@
-// oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the harness AST to the rule's ESTree SourceCode types for direct utility coverage.
+// oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the
+// harness AST to the rule's ESTree SourceCode types for direct utility
+// coverage.
 import { describe, expect, it } from "vitest";
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
