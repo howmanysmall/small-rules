@@ -151,10 +151,12 @@ function collectRegions(
 	return regions;
 }
 
-function countLines(
-	operations: ReadonlyArray<DiffOperation>,
-	upTo: number,
-): { readonly newNumber: number; readonly oldNumber: number } {
+interface Lines {
+	readonly newNumber: number;
+	readonly oldNumber: number;
+}
+
+function countLines(operations: ReadonlyArray<DiffOperation>, upTo: number): Lines {
 	let oldNumber = 1;
 	let newNumber = 1;
 	for (const [index, operation] of operations.entries()) {
@@ -162,7 +164,7 @@ function countLines(
 		if (operation.operation === Operation.Equal || operation.operation === Operation.Delete) oldNumber += 1;
 		if (operation.operation === Operation.Equal || operation.operation === Operation.Add) newNumber += 1;
 	}
-	return { newNumber, oldNumber };
+	return { newNumber, oldNumber } satisfies Lines;
 }
 
 function formatDiff(filePath: string, oldContent: string, newContent: string): string {
