@@ -655,7 +655,7 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/allow-default-export",
-		files: ["tests/fixtures/**/*.{ts,tsx}", "*.config.{cjs,mjs,js,cts,mts,ts}"],
+		files: ["tests/fixtures/**/*.{ts,tsx}", CONFIGURATION_FILES],
 		rules: { "import/no-default-export": "off" },
 	},
 	{
@@ -669,6 +669,8 @@ const configuration = isentinel(
 		rules: {
 			...reactTestRules,
 			"eslint-js/no-restricted-syntax": "off",
+			"small-rules/no-unknown-parameters": "off",
+			"small-rules/no-unknown-returns": "off",
 			"typescript/ban-ts-comment": "off",
 		},
 	},
