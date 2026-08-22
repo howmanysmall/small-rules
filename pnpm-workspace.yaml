@@ -213,7 +213,7 @@ catalogs:
     "@astrojs/starlight": 0.41.1
     arktype: 2.2.3
     astro: 7.0.3
-    effect: 3.22.1
+    effect: 4.0.0-rc.111
     ignore: 7.0.6
     minimatch: 10.2.6
     oxc-resolver: 11.24.2
