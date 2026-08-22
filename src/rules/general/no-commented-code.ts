@@ -1,9 +1,10 @@
 import nodePath from "node:path";
+import { parse } from "yuku-parser";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
-import { parse } from "yuku-parser";
 
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

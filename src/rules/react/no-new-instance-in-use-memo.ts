@@ -5,10 +5,11 @@ import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
 import { isNumber, isRecord, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface NormalizedOptions {
 	readonly constructors: ReadonlySet<string>;

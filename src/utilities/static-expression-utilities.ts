@@ -1,7 +1,8 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 export interface StaticExpressionOptions {
 	readonly staticCallsRequireFactories?: boolean;

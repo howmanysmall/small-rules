@@ -4,9 +4,10 @@ import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$o
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 interface NoUselessUseEffectOptions {
 	readonly environment?: Environment;

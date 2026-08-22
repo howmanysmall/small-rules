@@ -15,8 +15,9 @@ import {
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
+
+import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 
 type FunctionExpression = ESTree.ArrowFunctionExpression | ESTree.Function;
 

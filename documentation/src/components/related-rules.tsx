@@ -2,10 +2,11 @@ import { getRuleFacts } from "$data/rule-facts";
 import { getRelatedRules } from "$data/rule-relations";
 import { siteBasePath } from "$utilities/site-base-path";
 
+import type { ReactNode } from "react";
+
 import type { RuleFacts } from "$data/rule-facts";
 import type { RuleName } from "$data/rule-manifest";
 import type { RuleRelation } from "$data/rule-relations";
-import type { ReactNode } from "react";
 
 interface RelatedRulesProperties {
 	readonly rule: RuleName;

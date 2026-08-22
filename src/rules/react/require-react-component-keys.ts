@@ -6,8 +6,9 @@ import {
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 type ScopeVariable = Scope["set"] extends Map<string, infer VariableType> ? VariableType : never;
 

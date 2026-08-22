@@ -1,9 +1,10 @@
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 
+import { type } from "arktype";
+
 import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
-import { type } from "arktype";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";

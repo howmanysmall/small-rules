@@ -2,8 +2,9 @@ import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-uti
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 const DEFAULT_BINDING_PATTERNS: ReadonlyArray<string> = ["binding"];
 

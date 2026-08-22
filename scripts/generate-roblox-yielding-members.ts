@@ -1,9 +1,10 @@
 #!/usr/bin/env nub
 
 import { argv } from "node:process";
+import { Command, ValidationError } from "@cliffy/command";
+
 import { textDecoder } from "$script-constants/reused-classes";
 import { parseClasses, renderCatalog } from "$script-utilities/roblox-yielding-members";
-import { Command, ValidationError } from "@cliffy/command";
 
 const command = new Command()
 	.name("generate-roblox-yielding-members")

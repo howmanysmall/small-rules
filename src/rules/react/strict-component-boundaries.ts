@@ -1,4 +1,5 @@
 import nodePath from "node:path";
+
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";

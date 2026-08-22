@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/no-render-helper-functions";
 
 import { tsx } from "./rule-testers";

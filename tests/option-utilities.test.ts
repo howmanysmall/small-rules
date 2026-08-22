@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 
 describe("option utilities", () => {

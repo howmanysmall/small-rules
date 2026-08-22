@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 describe("isStringArray", () => {

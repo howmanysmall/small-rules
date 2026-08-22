@@ -1,6 +1,7 @@
 import { describe } from "vitest";
-import { isHookCall } from "$oxc-utilities/lint-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { isHookCall } from "$oxc-utilities/lint-utilities";
 
 import { createRuleTester } from "./rule-testers";
 

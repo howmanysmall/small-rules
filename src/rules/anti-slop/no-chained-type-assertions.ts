@@ -9,8 +9,9 @@ import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isConstAssertion, isTypeAssertionExpression } from "$oxc-utilities/oxc-utilities";
 
-import type { TypeAssertionExpression } from "$oxc-utilities/oxc-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
+import type { TypeAssertionExpression } from "$oxc-utilities/oxc-utilities";
 
 function isOutermostAssertionInChain(node: TypeAssertionExpression): boolean {
 	let current: ESTree.Expression = node;

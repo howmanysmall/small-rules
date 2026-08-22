@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import noAdjustStateOnPropChange from "$oxc-rules/react/no-adjust-state-on-prop-change";
 import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
 import noDerivedState from "$oxc-rules/react/no-derived-state";

@@ -6,8 +6,9 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 
-import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
+
+import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
 const STATIC_OPTIONS: StaticExpressionOptions = {
 	staticGlobalFactories: new Set(DEFAULT_STATIC_GLOBAL_FACTORIES),

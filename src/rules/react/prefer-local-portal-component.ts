@@ -1,4 +1,5 @@
 import nodePath from "node:path";
+
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -8,8 +9,9 @@ import {
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 const PORTAL_COMPONENT = {
 	componentName: "Portal",

@@ -3,8 +3,9 @@ import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const REACT_NODE_TYPE_NAMES = new Set(["JSXElement", "ReactElement", "ReactNode"]);
 const WRAPPER_PARENT_TYPES = new Set([

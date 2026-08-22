@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/no-cascading-set-state";
 
 import { ts } from "./rule-testers";

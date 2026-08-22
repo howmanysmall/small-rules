@@ -10,8 +10,9 @@ import {
 	isStaticObjectExpression,
 } from "$oxc-utilities/static-expression-utilities";
 
-import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
 interface NormalizedOptions {
 	readonly springHooks: ReadonlySet<string>;

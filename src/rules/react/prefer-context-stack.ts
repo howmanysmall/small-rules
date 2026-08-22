@@ -1,4 +1,5 @@
 import nodePath from "node:path";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,

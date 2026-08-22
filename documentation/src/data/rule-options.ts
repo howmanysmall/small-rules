@@ -1,5 +1,6 @@
-import smallRules from "$small-rules";
 import { type } from "arktype";
+
+import smallRules from "$small-rules";
 
 import type { RuleName } from "./rule-manifest";
 

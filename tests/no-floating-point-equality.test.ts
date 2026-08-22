@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/no-floating-point-equality";
 
 import { ts } from "./rule-testers";

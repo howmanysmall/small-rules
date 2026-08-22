@@ -8,8 +8,9 @@ import {
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const DEFAULT_SYSTEM_TYPE_NAMES = ["PlanckSystem", "System", "SystemFunction", "SystemReturn", "SystemTableLike"];
 const KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);

@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/no-reset-all-state-on-property-change";
 
 import { tsx } from "./rule-testers";

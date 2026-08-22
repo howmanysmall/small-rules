@@ -1,5 +1,6 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/prefer-context-stack";
 
 import { tsx } from "./rule-testers";

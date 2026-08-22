@@ -10,9 +10,10 @@ import {
 } from "$oxc-utilities/static-expression-utilities";
 import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
 
+import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 export const enum DependencyMode {
 	Aggressive = "aggressive",

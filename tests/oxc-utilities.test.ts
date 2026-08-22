@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { isTsTypeAssertion } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";

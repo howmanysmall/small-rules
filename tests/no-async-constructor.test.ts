@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/no-async-constructor";
 
 import { tsx } from "./rule-testers";

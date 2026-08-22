@@ -1,5 +1,6 @@
 import { cwd } from "node:process";
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/no-restricted-property-assignment";
 
 import { js } from "./rule-testers";

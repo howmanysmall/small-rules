@@ -6,6 +6,7 @@
 // reach the internal branch arms that the focused rule tests cannot.
 //
 import { describe } from "vitest";
+
 import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
 import noDerivedState from "$oxc-rules/react/no-derived-state";
 import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subscription";

@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/naming/consistent-compound-words";
 
 import { js, ts } from "./rule-testers";

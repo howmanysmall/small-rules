@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/anti-slop/no-chained-type-assertions";
 
 import { ts } from "./rule-testers";

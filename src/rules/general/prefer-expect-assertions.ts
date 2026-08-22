@@ -9,8 +9,9 @@ import {
 import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 

@@ -4,9 +4,10 @@ import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
+import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface HookConfig {
 	readonly name: string;

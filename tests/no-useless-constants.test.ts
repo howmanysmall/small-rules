@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/no-useless-constants";
 
 import { ts, tsx } from "./rule-testers";

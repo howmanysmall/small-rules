@@ -2,8 +2,9 @@ import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
-import type { BindingName, CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
+import type { BindingName, CallbackFunction } from "$oxc-types/missing-types";
 
 interface Options {
 	readonly eventsImportPaths?: ReadonlyArray<string>;

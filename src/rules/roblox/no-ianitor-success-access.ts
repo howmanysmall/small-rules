@@ -1,8 +1,9 @@
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 interface ResultVariable {
 	readonly firstSuccessNode: ESTree.Node;

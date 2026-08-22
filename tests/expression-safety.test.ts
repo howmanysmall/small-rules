@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 
 import { createRuleTester } from "./rule-testers";
 
