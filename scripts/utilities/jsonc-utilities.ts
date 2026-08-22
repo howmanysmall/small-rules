@@ -50,6 +50,7 @@ function formatInsertionEdit(edit: { content: string; length: number }, indent: 
  */
 export function editJsonc<TIn extends object>(
 	content: string,
+	// oxlint-disable-next-line small-rules/no-unknown-parameters -- this is literally what it is?
 	validator: (data: unknown) => TIn,
 	mutate: (draft: TIn) => TIn,
 ): string {
