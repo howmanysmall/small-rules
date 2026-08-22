@@ -121,7 +121,7 @@ minimumReleaseAgeStrict: true
 resolutionMode: time-based
 shellEmulator: true
 strictDepBuilds: true
-strictPeerDependencies: true
+strictPeerDependencies: false
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
