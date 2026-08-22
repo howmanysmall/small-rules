@@ -14,10 +14,10 @@
 		"test:unit": "vitest run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@astrojs/markdown-satteri": "catalog:prod",
-		"@astrojs/mdx": "catalog:prod",
+		"@astrojs/markdown-satteri": "catalog:frontend",
+		"@astrojs/mdx": "catalog:frontend",
 		"@astrojs/react": "catalog:frontend",
-		"@astrojs/starlight": "catalog:prod",
+		"@astrojs/starlight": "catalog:frontend",
 		"arktype": "catalog:prod",
 		"astro": "catalog:prod",
 		"react": "catalog:frontend",

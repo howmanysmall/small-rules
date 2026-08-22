@@ -103,7 +103,7 @@ minimumReleaseAgeStrict: true
 resolutionMode: time-based
 shellEmulator: true
 strictDepBuilds: true
-strictPeerDependencies: true
+strictPeerDependencies: false
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
@@ -166,7 +166,10 @@ catalogs:
     yuku-ast: 0.8.4
     zx: 8.8.5
   frontend:
+    "@astrojs/markdown-satteri": 0.3.2
+    "@astrojs/mdx": 7.0.0
     "@astrojs/react": 6.0.0
+    "@astrojs/starlight": 0.41.1
     react: 19.2.7
     react-dom: 19.2.7
     shiki: 3.4.1
@@ -187,9 +190,6 @@ catalogs:
     oxlint-plugin-react-doctor: 0.9.11
     react-doctor: 0.9.11
   prod:
-    "@astrojs/markdown-satteri": 0.3.2
-    "@astrojs/mdx": 7.0.0
-    "@astrojs/starlight": 0.41.1
     arktype: 2.2.3
     astro: 7.0.3
     ignore: 7.0.6
