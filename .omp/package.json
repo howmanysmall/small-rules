@@ -5,6 +5,6 @@
 	"dependencies": {
 		"@oh-my-pi/pi-coding-agent": "catalog:dev",
 		"arktype": "catalog:prod",
-		"effect": "catalog:dev"
+		"effect": "catalog:prod"
 	}
 }

@@ -75,6 +75,7 @@
 	},
 	"dependencies": {
 		"arktype": "catalog:prod",
+		"effect": "catalog:prod",
 		"ignore": "catalog:prod",
 		"minimatch": "catalog:prod",
 		"oxc-resolver": "catalog:prod",
