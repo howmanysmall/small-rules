@@ -64,6 +64,9 @@ catalogs:
     commitlint:
       specifier: 21.2.1
       version: 21.2.1
+    effect:
+      specifier: 3.22.1
+      version: 3.22.1
     fast-check:
       specifier: 4.9.0
       version: 4.9.0
@@ -471,6 +474,9 @@ importers:
       arktype:
         specifier: catalog:prod
         version: 2.2.3
+      effect:
+        specifier: catalog:dev
+        version: 3.22.1
 
   .opencode:
     dependencies:
@@ -5211,6 +5217,9 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
+  effect@3.22.1:
+    resolution: {integrity: sha512-TNoXushmPOBAjJlthF5d2QwnX2xBPEtcNJr5XKNKbRLbDvBcOYkXlYDfvGfSA0zriwLFuCll5MDtNMAdZL17PQ==}
+
   effect@4.0.0-beta.101:
     resolution: {integrity: sha512-HjowumlIo+orthn4jMlEJPuzIYPBV+uq/XiciHWhiedLsXQpWHdNJHO5d59BVDP5s1LPuvERcktwFqRXnJqnhA==}
 
@@ -5684,6 +5693,10 @@ packages:
 
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
+
+  fast-check@3.23.2:
+    resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
+    engines: {node: '>=8.0.0'}
 
   fast-check@4.9.0:
     resolution: {integrity: sha512-7ms6T7SybUev/PQITciI0yLM2pOSFy5zpG8Ty7tQofcVaQUvrMXp6CBwqF6fThLCLOrfBtuHAtwq6Yu4XPCllg==}
@@ -7341,6 +7354,9 @@ packages:
   puppeteer-core@25.3.0:
     resolution: {integrity: sha512-fm+wpUr2oigH1PXZvwgATrM2tYWHMDG8ASzTEe9uukCye4X5Ldx1K5BTHPFKITrIWvQQAQ256d1NpbEveBcKjA==}
     engines: {node: '>=22.12.0'}
+
+  pure-rand@6.1.0:
+    resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
   pure-rand@8.4.2:
     resolution: {integrity: sha512-vvuOGgcuPJAirlHvuQw1TrOiw7ptaIXXmIbNuiNOY6lNGJJH49PQ1Kj4nd783nPdQhQdicgOjVI2yI/9BD6/Ng==}
@@ -11971,8 +11987,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.65.0(@typescript/typescript6@6.0.2)(supports-color@10.2.2)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.65.0(@typescript/typescript6@6.0.2)
-      '@typescript-eslint/types': 8.65.0
+      '@typescript-eslint/tsconfig-utils': 8.67.0(@typescript/typescript6@6.0.2)
+      '@typescript-eslint/types': 8.67.0
       debug: 4.4.3(supports-color@10.2.2)
       typescript: '@typescript/typescript6@6.0.2'
     transitivePeerDependencies:
@@ -13236,6 +13252,11 @@ snapshots:
       minimatch: 10.2.6
       semver: 7.8.5
 
+  effect@3.22.1:
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      fast-check: 3.23.2
+
   effect@4.0.0-beta.101:
     dependencies:
       '@standard-schema/spec': 1.1.0
@@ -13890,6 +13911,10 @@ snapshots:
   exsolve@1.1.1: {}
 
   extend@3.0.2: {}
+
+  fast-check@3.23.2:
+    dependencies:
+      pure-rand: 6.1.0
 
   fast-check@4.9.0:
     dependencies:
@@ -16018,6 +16043,8 @@ snapshots:
       - utf-8-validate
       - yauzl
 
+  pure-rand@6.1.0: {}
+
   pure-rand@8.4.2: {}
 
   qified@0.10.1:
@@ -17371,6 +17398,7 @@ time:
   bumpp@12.2.0: '2026-08-06T00:09:55.598Z'
   commitlint@21.2.1: '2026-07-08T07:48:08.940Z'
   confbox@0.2.4: '2026-02-06T12:11:42.581Z'
+  effect@3.22.1: '2026-07-30T04:29:21.637Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
   eslint-plugin-astro@3.1.0: '2026-08-02T14:03:14.890Z'
   eslint-plugin-eslint-plugin@7.6.1: '2026-08-06T01:41:00.609Z'
