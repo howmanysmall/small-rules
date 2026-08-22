@@ -1,10 +1,15 @@
 // oxlint-disable small-rules/prevent-abbreviations -- ok.
 
 import { argv } from "node:process";
+import { GLOB_SRC_EXT } from "@isentinel/eslint-config";
 import { isentinel, translateRuleToOxlint } from "@isentinel/eslint-config/oxlint";
 import { ALL_REACT_DOCTOR_RULES } from "oxlint-plugin-react-doctor";
 
 import type { OxlintRules } from "@isentinel/eslint-config/oxlint";
+
+type GetRecordValue<TRecord extends Record<string, unknown>> = TRecord[keyof TRecord];
+type DummyRule = NonNullable<GetRecordValue<OxlintRules>>;
+const CONFIGURATION_FILES = `*.config.${GLOB_SRC_EXT}`;
 
 const reactDoctorRules = Object.fromEntries(
 	Object.entries(ALL_REACT_DOCTOR_RULES).map(([key, value]) => {
@@ -13,15 +18,17 @@ const reactDoctorRules = Object.fromEntries(
 	}),
 );
 
-function convertOxlintRules(oxlintRules: OxlintRules): Record<string, unknown> {
+type ConvertedRules = Record<string, DummyRule>;
+function convertOxlintRules(oxlintRules: OxlintRules): ConvertedRules {
 	const entries = Object.entries(oxlintRules);
-	const conversion: Record<string, unknown> = {};
+	const conversion: ConvertedRules = {};
 
 	for (const [rule, options] of entries) {
 		if (options === undefined) continue;
 		conversion[translateRuleToOxlint(rule)] = options;
 	}
 
+	// oxlint-disable-next-line small-rules/no-known-value-widening -- beyond dumb.
 	return conversion;
 }
 
@@ -217,21 +224,32 @@ const rules: OxlintRules = {
 	"small-rules/no-initialize-state": "off",
 	"small-rules/no-inline-property-on-memo-component": "off",
 	"small-rules/no-instance-methods-without-this": "off",
+	"small-rules/no-known-value-widening": "error",
+	"small-rules/no-module-mocking": "error",
 	"small-rules/no-native-properties-spread": "off",
 	"small-rules/no-new-instance-in-use-memo": "off",
+	"small-rules/no-object-parameters": "error",
 	"small-rules/no-pass-data-to-parent": "off",
 	"small-rules/no-pass-live-state-to-parent": "off",
 	"small-rules/no-print": "off",
 	"small-rules/no-redundant-aspect-ratio-constraint": "off",
+	"small-rules/no-reflect-apply": "error",
+	"small-rules/no-reflect-get": "error",
 	"small-rules/no-render-helper-functions": "off",
 	"small-rules/no-reset-all-state-on-prop-change": "off",
 	"small-rules/no-restricted-property-assignment": "off",
+	"small-rules/no-runtime-typeof": "error",
+	"small-rules/no-shape-in-symbol-names": "error",
 	"small-rules/no-spec-file-extension": "error",
 	"small-rules/no-static-react-create-element": "error",
 	"small-rules/no-table-create-map": "off",
 	"small-rules/no-task-wait": "off",
 	"small-rules/no-trivial-assertions": "off",
 	"small-rules/no-underscore-react-props": "off",
+	"small-rules/no-unknown-parameters": "error",
+	"small-rules/no-unknown-returns": "error",
+	"small-rules/no-unknown-type-aliases": "error",
+	"small-rules/no-unsafe-dictionary-type": "error",
 	"small-rules/no-unused-imports": "error",
 	"small-rules/no-unused-use-memo": "off",
 	"small-rules/no-use-memo-simple-expression": "off",
@@ -242,6 +260,7 @@ const rules: OxlintRules = {
 	"small-rules/no-useless-use-spring": "off",
 	"small-rules/no-variadic-spread": "error",
 	"small-rules/no-warn": "off",
+	"small-rules/no-widen-then-assert": "error",
 	"small-rules/only-type-imports": "off",
 	"small-rules/prefer-constant-dispatch": "off",
 	"small-rules/prefer-context-stack": "off",
@@ -296,6 +315,7 @@ const rules: OxlintRules = {
 	"small-rules/require-paired-calls": "error",
 	"small-rules/require-react-component-keys": "off",
 	"small-rules/require-react-display-names": "off",
+	"small-rules/require-safety-comment-for-type-assertion": "error",
 	"small-rules/require-switch-case-braces": [
 		"error",
 		{
@@ -401,22 +421,54 @@ const configuration = isentinel(
 			html: true,
 			lua: false,
 			markdown: false,
-			prettierOptions: {
+			oxfmtOptions: {
 				arrowParens: "always",
 				bracketSameLine: false,
 				bracketSpacing: true,
 				embeddedLanguageFormatting: "auto",
-				endOfLine: "auto",
-				experimentalOperatorPosition: "end",
-				experimentalTernaries: false,
+				endOfLine: "lf",
 				htmlWhitespaceSensitivity: "css",
+				ignorePatterns: [
+					"**/*.{md,toml,js,snap,toml}",
+					"**/do-not-sync-ever/**",
+					".tsbuildinfo*",
+					"**/*-lock.{json,yaml}",
+					"**/ses_*.json",
+					"**/*.yaml",
+				],
+				insertFinalNewline: true,
+				jsdoc: false,
 				jsxSingleQuote: false,
 				objectWrap: "preserve",
+				overrides: [
+					{
+						files: ["**/*.{yaml,yml}"],
+						options: {
+							tabWidth: 2,
+							useTabs: false,
+						},
+					},
+					{
+						files: ["**/*.jsonc"],
+						options: { trailingComma: "all" },
+					},
+					{
+						files: ["biome.jsonc", ".oxlintrc.json", "knip.jsonc"],
+						options: { trailingComma: "none" },
+					},
+					{
+						files: [".oxfmtrc.json"],
+						options: { trailingComma: "all" },
+					},
+				],
 				printWidth: 120,
 				proseWrap: "preserve",
 				quoteProps: "as-needed",
 				semi: true,
+				singleAttributePerLine: false,
 				singleQuote: false,
+				sortPackageJson: false,
+				sortTailwindcss: true,
 				tabWidth: 4,
 				trailingComma: "all",
 				useTabs: true,
@@ -519,13 +571,20 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/allow-top-level-await",
-		files: ["documentation/**/*.astro", "scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
+		files: ["documentation/**/*.astro", "scripts/**/*.{ts,tsx}", CONFIGURATION_FILES],
 		rules: { "node/no-top-level-await": "off" },
 	},
 	{
 		name: "small-rules/allow-console",
-		files: ["scripts/**/*.{ts,tsx}", "*.config.{ts,mjs,tsx}"],
+		files: ["scripts/**/*.{ts,tsx}", CONFIGURATION_FILES],
 		rules: { "no-console": "off" },
+	},
+	{
+		name: "small-rules/these-are-fine",
+		files: [CONFIGURATION_FILES],
+		rules: {
+			"small-rules/no-unsafe-dictionary-type": "off",
+		},
 	},
 	{
 		name: "small-rules/vitest",
