@@ -278,10 +278,28 @@ function isTransparentJavaScriptXmlContainer(parent: ESTree.Node, child: ESTree.
 	return parent.type === "JSXExpressionContainer" && parent.expression === child;
 }
 
+function isTransparentInitializerParent(parent: ESTree.Node, child: ESTree.Node): boolean {
+	if (isTransparentExpressionWrapper(parent, child) || isTransparentJavaScriptXmlContainer(parent, child)) {
+		return true;
+	}
+
+	switch (parent.type) {
+		case "ArrayExpression":
+		case "ObjectExpression":
+			return true;
+
+		case "Property":
+			return parent.value === child;
+
+		default:
+			return false;
+	}
+}
+
 function isAssignedToModuleConst(context: Context, node: JavaScriptXmlNode): boolean {
 	let current: ESTree.Node = node;
 	let { parent } = current;
-	while (isTransparentExpressionWrapper(parent, current) || isTransparentJavaScriptXmlContainer(parent, current)) {
+	while (isTransparentInitializerParent(parent, current)) {
 		current = parent;
 		const { parent: nextParent } = current;
 		/* v8 ignore next -- @preserve parser JSX nodes have parents up to Program. */
