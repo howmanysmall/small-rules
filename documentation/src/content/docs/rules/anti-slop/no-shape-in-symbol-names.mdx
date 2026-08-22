@@ -1,0 +1,15 @@
+---
+title: "No Shape in Symbol Names"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-shape-in-symbol-names">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. <code>shape</code>{" "}
+			describes structure, not the domain responsibility a symbol owns. Name the user, command, payload, or other
+			real concept instead.
+		</p>
+	</Fragment>
+</RulePage>

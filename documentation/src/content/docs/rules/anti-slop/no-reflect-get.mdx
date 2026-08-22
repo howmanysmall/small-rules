@@ -1,0 +1,14 @@
+---
+title: "No Reflect Get"
+---
+
+import RulePage from "@/components/rule-page.astro";
+
+<RulePage rule="no-reflect-get">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. Prefer typed property
+			access. If the key or owner is dynamic, parse it into a domain type before reading it.
+		</p>
+	</Fragment>
+</RulePage>

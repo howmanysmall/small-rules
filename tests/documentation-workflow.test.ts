@@ -137,7 +137,7 @@ describe("documentation validation workflow", () => {
 		const setupStep = docSteps.find((step) => step.name === "Setup toolchain");
 		expect(setupStep?.with?.tools).toBe("bun node pnpm ni");
 
-		// oxlint-disable-next-line eslint/no-template-curly-in-string -- GitHub Actions expression, not a JS template literal
+		// oxlint-disable-next-line eslint/no-template-curly-in-string -- GitHub.
 		expect(setupAction.runs?.steps?.[0]?.with?.install_args).toBe("${{ inputs.tools }}");
 
 		const runCommands = docSteps.map((step) => step.run).filter((run): run is string => run !== undefined);
@@ -204,7 +204,7 @@ describe("documentation deployment workflow", () => {
 		const docs = loadDocs();
 		const deploySteps = docs.jobs?.deploy?.steps ?? [];
 		const checkoutStep = deploySteps.find((step) => step.name === "Checkout");
-		// oxlint-disable-next-line eslint/no-template-curly-in-string -- GitHub Actions expression, not a JS template literal
+		// oxlint-disable-next-line eslint/no-template-curly-in-string -- GitHub.
 		expect(checkoutStep?.with?.ref).toBe("${{ inputs.ref }}");
 
 		const buildStep = deploySteps.find((step) => step.run === "node --run build");

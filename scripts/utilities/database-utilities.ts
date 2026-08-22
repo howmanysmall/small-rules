@@ -1,4 +1,5 @@
-// oxlint-disable small-rules/prefer-pascal-case-enums -- Roblox data types are weird.
+// oxlint-disable small-rules/prefer-pascal-case-enums -- Roblox data types are
+// weird.
 
 import { readFile } from "node:fs/promises";
 import { type } from "arktype";

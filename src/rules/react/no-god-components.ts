@@ -1,4 +1,5 @@
-// oxlint-disable small-rules/prevent-abbreviations -- this would be a breaking change.
+// oxlint-disable small-rules/prevent-abbreviations -- this would be a breaking
+// change.
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";

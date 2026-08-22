@@ -1,4 +1,5 @@
-// oxlint-disable small-rules/prevent-abbreviations -- the `props` data key is a published contract.
+// oxlint-disable small-rules/prevent-abbreviations -- the `props` data key is
+// a published contract.
 import { createRule } from "$oxc-utilities/create-rule";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { getEnvironment } from "$oxc-utilities/react-utilities";
