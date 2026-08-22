@@ -2,10 +2,11 @@
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: replaced the upstream cast with repository type guards and adapted imports.
+// Modifications: replaced the upstream cast with repository type guards and
+// adapted imports; descendant expansion relies on the isNode filter instead of
+// a redundant record guard.
 
 import { isNode } from "$oxc-utilities/oxc-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -18,6 +19,7 @@ function appendChildNodes(value: unknown, pending: Array<ESTree.Node>): void {
 		return;
 	}
 	for (const child of value) {
+		/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
 		if (isNode(child)) {
 			pending.push(child);
 		}
@@ -29,15 +31,12 @@ function appendDescendants(
 	visitorKeys: SourceCode["visitorKeys"],
 	pending: Array<ESTree.Node>,
 ): void {
-	if (!isRecord(node)) {
-		return;
-	}
 	const keys = visitorKeys[node.type];
 	if (keys === undefined) {
 		return;
 	}
 	for (const key of keys) {
-		appendChildNodes(node[key], pending);
+		appendChildNodes(Reflect.get(node, key), pending);
 	}
 }
 

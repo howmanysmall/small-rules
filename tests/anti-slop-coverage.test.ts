@@ -33,6 +33,10 @@ describe("anti-slop coverage", () => {
 				{ code: "type Handler = (value: object) => void;", errors: [objectParameter] },
 				{ code: "interface Handler { save(value: object): void }", errors: [objectParameter] },
 				{ code: "function save({ id }: object) {}", errors: [objectParameter] },
+				{ code: "export type Alias = object; function save(value: Alias) {}", errors: [objectParameter] },
+				{ code: "class Owner { constructor(private readonly value: object) {} }", errors: [objectParameter] },
+				{ code: "function save(value: object = {}) {}", errors: [objectParameter] },
+				{ code: "function save({ id }: object = {}) {}", errors: [objectParameter] },
 			],
 			valid: [
 				"type Alias = object; function save<Alias>(value: Alias) {}",
@@ -40,6 +44,8 @@ describe("anti-slop coverage", () => {
 				"type Alias = object; type Handlers<Key extends string> = { [Alias in Key]: (value: Alias) => void };",
 				"type Alias<T> = object; function save(value: Alias<string>) {}",
 				"type First = Second; type Second = First; function save(value: First) {}",
+				"function save(...values) {}",
+				"function save(value = {}) {}",
 			],
 		});
 	});
@@ -59,6 +65,7 @@ describe("anti-slop coverage", () => {
 				"function save(...cause: unknown[]) {}",
 				"type Constructor = new (cause: unknown) => Error;",
 				"class Owner { constructor(public cause: unknown) {} }",
+				"function save(...values) {}",
 			],
 		});
 	});
@@ -75,6 +82,10 @@ describe("anti-slop coverage", () => {
 				},
 				{ code: "interface Loader { load(): unknown }", errors: [unknownReturn] },
 				{ code: "type Loader = () => Promise<unknown>;", errors: [unknownReturn] },
+				{
+					code: "export type Result = unknown; function load(): Result { return input; }",
+					errors: [unknownReturn],
+				},
 			],
 			valid: [
 				"type Result = unknown; function load<Result>(): Result { return value; }",
@@ -82,6 +93,10 @@ describe("anti-slop coverage", () => {
 				"type Result = unknown; type Factories<Key extends string> = { [Result in Key]: () => Result };",
 				"type First = Second; type Second = First; function load(): First { return value; }",
 				"function load(): Promise<string> { return promise; }",
+				"declare namespace NS { type Payload = string } function load(): NS.Payload { return value; }",
+				"function load(): Promise { return input; }",
+				"type Box<Value> = { value: Value }; function load(): Box<string> { return box; }",
+				"function load() { return input; }",
 			],
 		});
 	});
@@ -119,6 +134,7 @@ describe("anti-slop coverage", () => {
 				{ code: "type Metadata = Record<string, unknown | string>;", errors: [unsafeDictionary] },
 				{ code: "type Metadata = Record<string, unknown & object>;", errors: [unsafeDictionary] },
 				{ code: "type Metadata = Record<string, unknown & any>;", errors: [unsafeDictionary] },
+				{ code: "type Metadata = Record<string, readonly unknown>;", errors: [unsafeDictionary] },
 			],
 			valid: [
 				"interface Owner { readonly id: string } type Metadata = Record<string, unknown & Owner>;",
@@ -128,6 +144,11 @@ describe("anti-slop coverage", () => {
 				"interface Escape {} interface Escape { readonly id: string } type Metadata = Record<string, Escape>;",
 				'import { Record } from "./owner"; type Metadata = Record<string, unknown>;',
 				"type Record<Key, Value> = { key: Key; value: Value }; type Metadata = Record<string, unknown>;",
+				"type Metadata = { [key: string]: Partial };",
+				"type Metadata = Record;",
+				"interface Owner { readonly id: string } type Metadata = Record<string, Owner | string>;",
+				"type Metadata = { [Key in string] };",
+				"type Values = readonly string[]; type Metadata = Values;",
 			],
 		});
 	});
@@ -137,6 +158,10 @@ describe("anti-slop coverage", () => {
 			invalid: [
 				{ code: 'vi.doMock("./owner");', errors: [{ messageId: "moduleMock" }] },
 				{ code: 'jest["mock"]("./owner");', errors: [{ messageId: "moduleMock" }] },
+				{
+					code: 'import { "vi" as framework } from "vitest"; framework.mock("./owner");',
+					errors: [{ messageId: "moduleMock" }],
+				},
 				{
 					code: 'import { vi as testFramework } from "vitest"; testFramework.mock("./owner");',
 					errors: [{ messageId: "moduleMock" }],
@@ -152,6 +177,11 @@ describe("anti-slop coverage", () => {
 				"const { jest } = frameworks; jest.mock();",
 				'vi[method]("./owner");',
 				"jest.resetModules();",
+				'import vi from "vitest"; vi.mock("./owner");',
+				'import * as vitest from "vitest"; vitest.mock("./owner");',
+				'createFramework().mock("./owner");',
+				'anything.mock("./owner");',
+				'mockDirectly("./owner");',
 				"class Child extends Parent { constructor() { super(); } }",
 			],
 		});
@@ -168,6 +198,7 @@ describe("anti-slop coverage", () => {
 				'import { Reflect } from "./owner"; Reflect.apply();',
 				"Reflect[method](operation, owner, arguments);",
 				"Reflect.call(operation, owner, arguments);",
+				"invokeWith(operation, owner, arguments);",
 				"class Child extends Parent { constructor() { super(); } }",
 			],
 		});
@@ -184,6 +215,7 @@ describe("anti-slop coverage", () => {
 				'import { Reflect } from "./owner"; Reflect.get();',
 				"Reflect[method](owner, key);",
 				"Reflect.has(owner, key);",
+				"apply(owner, key);",
 				"class Child extends Parent { constructor() { super(); } }",
 			],
 		});
@@ -202,6 +234,11 @@ describe("anti-slop coverage", () => {
 					errors: [{ messageId: "runtimeTypeof" }],
 				},
 				{ code: "const type = typeof value;", options: [{}], errors: [{ messageId: "runtimeTypeof" }] },
+				{
+					code: "const kind = typeof value;",
+					options: [{ allowInTypeGuards: true }],
+					errors: [{ messageId: "runtimeTypeof" }],
+				},
 			],
 			valid: [
 				{
@@ -251,6 +288,13 @@ describe("anti-slop coverage", () => {
 				'let source = { id: "one" }; const value: unknown = source;',
 				"declare const load: () => object; const value: unknown = load();",
 				'const value = ({ id: "one" } as unknown) as User;',
+				"value.prop = 1;",
+				"leaked = 1;",
+				"function assign(parameter: object) { parameter = {}; }",
+				"function finish(): void { return; }",
+				"const [first] = values;",
+				'const value: {} = "one";',
+				"type A = B; type B = A; const value: A = {};",
 			],
 		});
 	});
@@ -304,6 +348,14 @@ describe("anti-slop coverage", () => {
 				"declare const input: unknown; const widened: unknown = input; const parsed = widened as { readonly id: string };",
 				'const source = { id: "one" }; const widened: unknown = source; const parsed = widened as object;',
 				'type Open = Record<string, unknown>; const source = { id: "one" }; const widened: Open = source; const parsed = widened as { readonly id: string };',
+				'const source = { id: "one" }; const widened = source; const parsed = widened as { readonly id: string };',
+				"const parsed = source.id as { readonly id: string };",
+				"const parsed = undeclared as { readonly id: string };",
+				"function read(widened: unknown) { const parsed = widened as { readonly id: string }; }",
+				"const [first] = [1, 2]; const widened: unknown = first; const parsed = widened as number[];",
+				"const source = getValue(); const widened: unknown = source; const parsed = widened as { readonly id: string };",
+				'const source = { id: "one" }; const widened: Record<string, string> = source; const parsed = widened as { readonly id: string };',
+				"const source = {}; const widened: Record<string> = source; const parsed = widened as { readonly id: string };",
 			],
 		});
 	});

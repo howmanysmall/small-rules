@@ -2,15 +2,22 @@
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local
+// path aliases; alias resolution unwraps parenthesized types that yuku-parser
+// preserves rather than drops.
 
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-function referencedAliasName(type: ESTree.TSType): string | undefined {
+function unwrapParenthesizedType(type: ESTree.TSType): ESTree.TSType {
 	let current = type;
 	while (current.type === "TSParenthesizedType") current = current.typeAnnotation;
+	return current;
+}
+
+function referencedAliasName(type: ESTree.TSType): string | undefined {
+	const current = unwrapParenthesizedType(type);
 	if (current.type !== "TSTypeReference" || current.typeName.type !== "Identifier") return undefined;
 	const argumentCount = current.typeArguments?.params.length ?? 0;
 	return argumentCount === 0 ? current.typeName.name : undefined;
@@ -24,6 +31,7 @@ const noUnknownTypeAliases = createRule("no-unknown-type-aliases", "anti-slop", 
 			const visited = new Set<string>();
 			let current = type;
 			while (true) {
+				current = unwrapParenthesizedType(current);
 				if (current.type === "TSUnknownKeyword") return true;
 				const aliasName = referencedAliasName(current);
 				if (aliasName === undefined || visited.has(aliasName)) return false;
@@ -39,6 +47,7 @@ const noUnknownTypeAliases = createRule("no-unknown-type-aliases", "anti-slop", 
 				aliases.clear();
 				for (const statement of node.body) {
 					const declaration = statement.type === "ExportNamedDeclaration" ? statement.declaration : statement;
+					/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
 					if (declaration?.type === "TSTypeAliasDeclaration") {
 						aliases.set(declaration.id.name, declaration);
 					}
