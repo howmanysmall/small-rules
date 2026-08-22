@@ -252,9 +252,7 @@ function unsafeValue(type: ESTree.TSType, environment: TypeEnvironment): undefin
 		nextEvaluationId = nextId;
 	}
 
-	for (let index = compounds.length - 1; index >= 0; index -= 1) {
-		const compound = compounds[index];
-		if (compound === undefined) continue;
+	for (const compound of compounds.toReversed()) {
 		values.set(compound.id, compoundUnsafeValue(compound, values));
 	}
 
@@ -348,6 +346,7 @@ function collectTypeDeclaration(
 ): void {
 	if (declaration.type === "ImportDeclaration") {
 		for (const specifier of declaration.specifiers) {
+			/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
 			if (Object.hasOwn(BUILTIN_TYPE_NAMES, specifier.local.name)) {
 				shadowedBuiltIns.add(specifier.local.name);
 			}

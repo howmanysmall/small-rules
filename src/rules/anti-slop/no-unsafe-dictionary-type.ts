@@ -2,7 +2,9 @@
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local
+// path aliases; the type environment starts empty instead of undefined
+// because traversal always visits `Program` before any type node.
 
 import {
 	classifyUnsafeDictionary,
@@ -16,14 +18,21 @@ import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilit
 
 type RuleContext = InferContextFromRule<typeof noUnsafeDictionaryType>;
 
+// Placeholder used only before the `Program` visitor assigns the real
+// module-level declarations.
+const UNSET_TYPE_ENVIRONMENT: TypeEnvironment = {
+	aliases: new Map(),
+	interfaces: new Map(),
+	shadowedBuiltIns: new Set(),
+};
+
 function reportUnsafeDictionary(
 	context: RuleContext,
-	environment: TypeEnvironment | undefined,
+	environment: TypeEnvironment,
 	node: ESTree.TSType,
 	reportedRanges: Array<readonly [number, number]>,
 ): void {
 	if (reportedRanges.some(([start, end]) => start <= node.start && node.end <= end)) return;
-	if (environment === undefined) return;
 	const unsafe = classifyUnsafeDictionary(node, environment);
 	if (unsafe === undefined) return;
 	reportedRanges.push(node.range);
@@ -32,7 +41,7 @@ function reportUnsafeDictionary(
 
 const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slop", {
 	createOnce(context): Visitor {
-		let environment: TypeEnvironment | undefined;
+		let environment = UNSET_TYPE_ENVIRONMENT;
 		const reportedRanges = new Array<readonly [number, number]>();
 
 		return {
@@ -41,7 +50,6 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 				reportedRanges.length = 0;
 			},
 			TSIndexSignature(node): void {
-				if (environment === undefined) return;
 				const unsafe = classifyUnsafeDictionaryValue(node.typeAnnotation.typeAnnotation, environment);
 				if (unsafe === undefined) return;
 				if (reportedRanges.some(([start, end]) => start <= node.start && node.end <= end)) return;

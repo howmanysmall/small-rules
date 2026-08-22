@@ -2,7 +2,10 @@
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local
+// path aliases; assertion nesting checks climb parenthesized expressions that
+// yuku-parser preserves rather than drops; enclosing functions are tracked
+// with an enter/exit visitor stack instead of an ancestor walk.
 
 import {
 	classifyWideningTarget,
@@ -62,22 +65,6 @@ function recordKnownEvidence(
 	knownEvidenceVariables.add(variable);
 }
 
-function enclosingFunction(node: ESTree.Node): FunctionExpression | undefined {
-	let current = node.parent ?? undefined;
-	while (current?.type !== "Program") {
-		if (current === undefined) return undefined;
-		if (
-			current.type === "ArrowFunctionExpression" ||
-			current.type === "FunctionDeclaration" ||
-			current.type === "FunctionExpression"
-		) {
-			return current;
-		}
-		current = current.parent;
-	}
-	return undefined;
-}
-
 function functionName(owner: FunctionExpression | undefined): string {
 	if (!owner?.id) return "anonymous function";
 	return owner.id.name;
@@ -86,6 +73,12 @@ function functionName(owner: FunctionExpression | undefined): string {
 function isEmptyObjectExpression(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
 	return unwrapped.type === "ObjectExpression" && unwrapped.properties.length === 0;
+}
+
+function isNestedInAssertion(node: { readonly parent: ESTree.Node }): boolean {
+	let current = node.parent;
+	while (current.type === "ParenthesizedExpression") current = current.parent;
+	return current.type === "TSAsExpression" || current.type === "TSTypeAssertion";
 }
 
 type NullableAnnotation = ESTree.TSTypeAnnotation | Exclude<ESTree.Node["parent"], ESTree.Node>;
@@ -102,6 +95,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 	createOnce(context): Visitor {
 		let environment: TypeEnvironment | undefined;
 		const knownEvidenceVariables = new WeakSet<Variable>();
+		const enclosingFunctions = new Array<FunctionExpression>();
 
 		function reportFlow(expression: ESTree.Expression, target: ESTree.TSType | undefined, subject: string): void {
 			if (environment === undefined || target === undefined) return;
@@ -127,9 +121,13 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 
 		return {
 			ArrowFunctionExpression(node): void {
+				enclosingFunctions.push(node);
 				if (node.body.type !== "BlockStatement") {
 					reportFlow(node.body, node.returnType?.typeAnnotation, `return value of \`${functionName(node)}\``);
 				}
+			},
+			"ArrowFunctionExpression:exit"(): void {
+				enclosingFunctions.pop();
 			},
 			AssignmentExpression(node): void {
 				if (node.operator !== "=" || node.left.type !== "Identifier") return;
@@ -139,12 +137,24 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				if (declarator === undefined) return;
 				reportFlow(node.right, typeAnnotationFromBinding(declarator), `binding \`${node.left.name}\``);
 			},
+			FunctionDeclaration(node): void {
+				enclosingFunctions.push(node);
+			},
+			"FunctionDeclaration:exit"(): void {
+				enclosingFunctions.pop();
+			},
+			FunctionExpression(node): void {
+				enclosingFunctions.push(node);
+			},
+			"FunctionExpression:exit"(): void {
+				enclosingFunctions.pop();
+			},
 			Program(node): void {
 				environment = createTypeEnvironment(node);
 			},
 			ReturnStatement(node): void {
 				if (!node.argument) return;
-				const owner = enclosingFunction(node);
+				const owner = enclosingFunctions.at(-1);
 				reportFlow(
 					node.argument,
 					owner?.returnType?.typeAnnotation,
@@ -152,12 +162,14 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				);
 			},
 			TSAsExpression(node): void {
-				if (node.parent.type !== "TSAsExpression" && node.parent.type !== "TSTypeAssertion") {
+				/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
+				if (!isNestedInAssertion(node)) {
 					reportFlow(node.expression, node.typeAnnotation, "assertion");
 				}
 			},
 			TSTypeAssertion(node): void {
-				if (node.parent.type !== "TSAsExpression" && node.parent.type !== "TSTypeAssertion") {
+				/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
+				if (!isNestedInAssertion(node)) {
 					reportFlow(node.expression, node.typeAnnotation, "assertion");
 				}
 			},
