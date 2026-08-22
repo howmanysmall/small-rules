@@ -28,104 +28,10 @@ catalogs:
     '@commitlint/types':
       specifier: 21.2.0
       version: 21.2.0
-  dev:
+  frontend:
     '@astrojs/check':
       specifier: 0.9.10
       version: 0.9.10
-    '@cliffy/command':
-      specifier: npm:@jsr/cliffy__command@1.2.1
-      version: 1.2.1
-    '@octokit/rest':
-      specifier: 22.0.1
-      version: 22.0.1
-    '@oh-my-pi/pi-coding-agent':
-      specifier: 17.2.12
-      version: 17.2.12
-    '@opencode-ai/plugin':
-      specifier: 0.0.0-beta-17519
-      version: 0.0.0-beta-17519
-    '@std/msgpack':
-      specifier: npm:@jsr/std__msgpack@1.0.3
-      version: 1.0.3
-    '@stryker-mutator/api':
-      specifier: 9.6.1
-      version: 9.6.1
-    '@stryker-mutator/core':
-      specifier: 9.6.1
-      version: 9.6.1
-    '@typescript/native-preview':
-      specifier: 7.0.0-dev.20260707.2
-      version: 7.0.0-dev.20260707.2
-    '@vitiate/core':
-      specifier: 0.3.1
-      version: 0.3.1
-    '@vitiate/fuzzed-data-provider':
-      specifier: 0.3.1
-      version: 0.3.1
-    bumpp:
-      specifier: 12.2.0
-      version: 12.2.0
-    fast-check:
-      specifier: 4.9.0
-      version: 4.9.0
-    fdir:
-      specifier: 6.5.0
-      version: 6.5.0
-    get-tsconfig:
-      specifier: 4.14.1
-      version: 4.14.1
-    jiti:
-      specifier: 2.7.0
-      version: 2.7.0
-    jscpd:
-      specifier: 5.0.14
-      version: 5.0.14
-    jsonc-parser:
-      specifier: 3.3.1
-      version: 3.3.1
-    just-diff:
-      specifier: 6.0.2
-      version: 6.0.2
-    mutative:
-      specifier: 1.3.0
-      version: 1.3.0
-    oxfmt:
-      specifier: 0.63.0
-      version: 0.63.0
-    oxlint:
-      specifier: 1.78.0
-      version: 1.78.0
-    oxlint-tsgolint:
-      specifier: 7.0.2001
-      version: 7.0.2001
-    picocolors:
-      specifier: 1.1.1
-      version: 1.1.1
-    pncat:
-      specifier: 0.13.2
-      version: 0.13.2
-    sfw:
-      specifier: 2.0.6
-      version: 2.0.6
-    skills:
-      specifier: 1.5.22
-      version: 1.5.22
-    type-fest:
-      specifier: 5.8.0
-      version: 5.8.0
-    typescript:
-      specifier: npm:@typescript/typescript6@^6.0.2
-      version: 6.0.2
-    vitiate:
-      specifier: 0.3.1
-      version: 0.3.1
-    yuku-ast:
-      specifier: 0.8.4
-      version: 0.8.4
-    zx:
-      specifier: 8.8.5
-      version: 8.8.5
-  frontend:
     '@astrojs/markdown-satteri':
       specifier: 0.3.2
       version: 0.3.2
@@ -196,13 +102,26 @@ catalogs:
     knip:
       specifier: 6.32.1
       version: 6.32.1
+    oxfmt:
+      specifier: 0.63.0
+      version: 0.63.0
+    oxlint:
+      specifier: 1.78.0
+      version: 1.78.0
     oxlint-plugin-react-doctor:
       specifier: 0.9.11
       version: 0.9.11
+    oxlint-tsgolint:
+      specifier: 7.0.2001
+      version: 7.0.2001
     react-doctor:
       specifier: 0.9.11
       version: 0.9.11
-  prod:
+  release:
+    bumpp:
+      specifier: 12.2.0
+      version: 12.2.0
+  runtime:
     arktype:
       specifier: 2.2.3
       version: 2.2.3
@@ -221,6 +140,34 @@ catalogs:
     yuku-parser:
       specifier: 0.8.4
       version: 0.8.4
+  scripts:
+    '@cliffy/command':
+      specifier: npm:@jsr/cliffy__command@1.2.1
+      version: 1.2.1
+    '@octokit/rest':
+      specifier: 22.0.1
+      version: 22.0.1
+    '@std/msgpack':
+      specifier: npm:@jsr/std__msgpack@1.0.3
+      version: 1.0.3
+    fdir:
+      specifier: 6.5.0
+      version: 6.5.0
+    jsonc-parser:
+      specifier: 3.3.1
+      version: 3.3.1
+    just-diff:
+      specifier: 6.0.2
+      version: 6.0.2
+    mutative:
+      specifier: 1.3.0
+      version: 1.3.0
+    picocolors:
+      specifier: 1.1.1
+      version: 1.1.1
+    zx:
+      specifier: 8.8.5
+      version: 8.8.5
   test:
     '@fast-check/vitest':
       specifier: 0.4.1
@@ -228,6 +175,12 @@ catalogs:
     '@playwright/test':
       specifier: 1.61.1
       version: 1.61.1
+    '@stryker-mutator/api':
+      specifier: 9.6.1
+      version: 9.6.1
+    '@stryker-mutator/core':
+      specifier: 9.6.1
+      version: 9.6.1
     '@stryker-mutator/vitest-runner':
       specifier: 9.6.1
       version: 9.6.1
@@ -240,15 +193,55 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: 4.1.10
       version: 4.1.10
+    '@vitiate/core':
+      specifier: 0.3.1
+      version: 0.3.1
+    '@vitiate/fuzzed-data-provider':
+      specifier: 0.3.1
+      version: 0.3.1
     confbox:
       specifier: 0.2.4
       version: 0.2.4
+    fast-check:
+      specifier: 4.9.0
+      version: 4.9.0
     jsdom:
       specifier: 29.1.1
       version: 29.1.1
     vitest:
       specifier: 4.1.10
       version: 4.1.10
+    vitiate:
+      specifier: 0.3.1
+      version: 0.3.1
+  tooling:
+    '@oh-my-pi/pi-coding-agent':
+      specifier: 17.2.12
+      version: 17.2.12
+    '@opencode-ai/plugin':
+      specifier: 0.0.0-beta-17519
+      version: 0.0.0-beta-17519
+    get-tsconfig:
+      specifier: 4.14.1
+      version: 4.14.1
+    jiti:
+      specifier: 2.7.0
+      version: 2.7.0
+    jscpd:
+      specifier: 5.0.14
+      version: 5.0.14
+    pncat:
+      specifier: 0.13.2
+      version: 0.13.2
+    sfw:
+      specifier: 2.0.6
+      version: 2.0.6
+    skills:
+      specifier: 1.5.22
+      version: 1.5.22
+    yuku-ast:
+      specifier: 0.8.4
+      version: 0.8.4
   types:
     '@total-typescript/ts-reset':
       specifier: 0.6.1
@@ -265,6 +258,15 @@ catalogs:
     '@types/react-dom':
       specifier: 19.2.3
       version: 19.2.3
+    '@typescript/native-preview':
+      specifier: 7.0.0-dev.20260707.2
+      version: 7.0.0-dev.20260707.2
+    type-fest:
+      specifier: 5.8.0
+      version: 5.8.0
+    typescript:
+      specifier: npm:@typescript/typescript6@^6.0.2
+      version: 6.0.2
 
 overrides:
   '@isentinel/eslint-config>@pobammer-ts/small-rules': link:./plugins
@@ -277,22 +279,22 @@ importers:
   .:
     dependencies:
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       ignore:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 7.0.6
       minimatch:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 10.2.6
       oxc-resolver:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 11.24.2
       oxlint-plugin-utilities:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 1.1.0(@typescript/typescript6@6.0.2)
       yuku-parser:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 0.8.4
     devDependencies:
       '@arethetypeswrong/core':
@@ -317,10 +319,10 @@ importers:
         specifier: catalog:lint
         version: 6.0.0-beta.42(@typescript/typescript6@6.0.2)(@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(vitest@4.1.10))(eslint-plugin-eslint-plugin@7.6.1(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2)))(eslint-plugin-n@18.3.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2)))(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(oxc-parser@0.142.0)(oxlint-tsgolint@7.0.2001)(oxlint@1.78.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2)
       '@stryker-mutator/api':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 9.6.1
       '@stryker-mutator/core':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 9.6.1(@types/node@26.2.0)(supports-color@10.2.2)(vitest@4.1.10)
       '@stryker-mutator/vitest-runner':
         specifier: catalog:test
@@ -335,7 +337,7 @@ importers:
         specifier: catalog:types
         version: 26.2.0
       '@typescript/native-preview':
-        specifier: catalog:dev
+        specifier: catalog:types
         version: 7.0.0-dev.20260707.2
       '@vitest/coverage-v8':
         specifier: catalog:test
@@ -344,13 +346,13 @@ importers:
         specifier: catalog:lint
         version: 1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(vitest@4.1.10)
       '@vitiate/core':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 0.3.1(@typescript/typescript6@6.0.2)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10)
       '@vitiate/fuzzed-data-provider':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 0.3.1
       bumpp:
-        specifier: catalog:dev
+        specifier: catalog:release
         version: 12.2.0
       confbox:
         specifier: catalog:test
@@ -383,34 +385,34 @@ importers:
         specifier: catalog:lint
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))
       fast-check:
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 4.9.0
       get-tsconfig:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 4.14.1
       jiti:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 2.7.0
       jscpd:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 5.0.14
       knip:
         specifier: catalog:lint
         version: 6.32.1
       oxfmt:
-        specifier: catalog:dev
+        specifier: catalog:lint
         version: 0.63.0
       oxlint:
-        specifier: catalog:dev
+        specifier: catalog:lint
         version: 1.78.0(oxlint-tsgolint@7.0.2001)
       oxlint-plugin-react-doctor:
         specifier: catalog:lint
         version: 0.9.11
       oxlint-tsgolint:
-        specifier: catalog:dev
+        specifier: catalog:lint
         version: 7.0.2001
       pncat:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.13.2
       publint:
         specifier: catalog:build
@@ -419,46 +421,46 @@ importers:
         specifier: catalog:lint
         version: 0.9.11(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint-tsgolint@7.0.2001)(supports-color@10.2.2)
       sfw:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 2.0.6
       skills:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 1.5.22
       tsdown:
         specifier: catalog:build
         version: 0.22.14(@arethetypeswrong/core@0.18.5)(@typescript/native-preview@7.0.0-dev.20260707.2)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.23)
       type-fest:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: 5.8.0
       typescript:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: '@typescript/typescript6@6.0.2'
       vitest:
         specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
       vitiate:
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 0.3.1(@typescript/typescript6@6.0.2)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10)
       yuku-ast:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.8.4
       zx:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 8.8.5
 
   .omp:
     dependencies:
       '@oh-my-pi/pi-coding-agent':
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 17.2.12
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
 
   .opencode:
     dependencies:
       '@opencode-ai/plugin':
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.0.0-beta-17519(supports-color@10.2.2)
     devDependencies:
       '@types/bun':
@@ -468,7 +470,7 @@ importers:
         specifier: catalog:types
         version: 26.2.0
       typescript:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: '@typescript/typescript6@6.0.2'
 
   documentation:
@@ -486,7 +488,7 @@ importers:
         specifier: catalog:frontend
         version: 0.41.1(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(astro@7.0.3(@astrojs/check@0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6))(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(aws4fetch@1.0.20)(jiti@2.7.0)(yaml@2.9.0))(supports-color@10.2.2)
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       astro:
         specifier: catalog:frontend
@@ -507,14 +509,14 @@ importers:
         specifier: catalog:frontend
         version: 3.4.1
       yuku-ast:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.8.4
       yuku-parser:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 0.8.4
     devDependencies:
       '@astrojs/check':
-        specifier: catalog:dev
+        specifier: catalog:frontend
         version: 0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6)
       '@playwright/test':
         specifier: catalog:test
@@ -541,7 +543,7 @@ importers:
         specifier: catalog:test
         version: 29.1.1
       typescript:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: '@typescript/typescript6@6.0.2'
       vitest:
         specifier: catalog:test
@@ -550,40 +552,40 @@ importers:
   scripts:
     dependencies:
       '@cliffy/command':
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: '@jsr/cliffy__command@1.2.1'
       '@octokit/rest':
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 22.0.1
       '@std/msgpack':
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: '@jsr/std__msgpack@1.0.3'
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       fdir:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 6.5.0(picomatch@4.0.5)
       jsonc-parser:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 3.3.1
       just-diff:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 6.0.2
       mutative:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 1.3.0
       picocolors:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 1.1.1
       yuku-ast:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.8.4
       yuku-parser:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 0.8.4
       zx:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 8.8.5
     devDependencies:
       '@total-typescript/ts-reset':

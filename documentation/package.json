@@ -18,18 +18,18 @@
 		"@astrojs/mdx": "catalog:frontend",
 		"@astrojs/react": "catalog:frontend",
 		"@astrojs/starlight": "catalog:frontend",
-		"arktype": "catalog:prod",
+		"arktype": "catalog:runtime",
 		"astro": "catalog:frontend",
 		"react": "catalog:frontend",
 		"react-dom": "catalog:frontend",
 		"satteri": "catalog:frontend",
 		"sharp": "catalog:frontend",
 		"shiki": "catalog:frontend",
-		"yuku-ast": "catalog:dev",
-		"yuku-parser": "catalog:prod"
+		"yuku-ast": "catalog:tooling",
+		"yuku-parser": "catalog:runtime"
 	},
 	"devDependencies": {
-		"@astrojs/check": "catalog:dev",
+		"@astrojs/check": "catalog:frontend",
 		"@playwright/test": "catalog:test",
 		"@testing-library/react": "catalog:test",
 		"@testing-library/user-event": "catalog:test",
@@ -38,7 +38,7 @@
 		"@types/react-dom": "catalog:types",
 		"babel-plugin-react-compiler": "catalog:build",
 		"jsdom": "catalog:test",
-		"typescript": "catalog:dev",
+		"typescript": "catalog:types",
 		"vitest": "catalog:test"
 	},
 	"packageManager": "pnpm@11.17.0"

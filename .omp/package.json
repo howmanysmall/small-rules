@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"@oh-my-pi/pi-coding-agent": "catalog:dev",
-		"arktype": "catalog:prod"
+		"@oh-my-pi/pi-coding-agent": "catalog:tooling",
+		"arktype": "catalog:runtime"
 	}
 }
