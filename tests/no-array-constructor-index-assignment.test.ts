@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/roblox/no-array-constructor-index-assignment";
 
 import { ts } from "./rule-testers";

@@ -2,8 +2,9 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { getEnvironment } from "$oxc-utilities/react-utilities";
 
-import type { ReactEffect, ReactEffectAnalysis, ReactOwner } from "$oxc-utilities/react-effect-utilities";
 import type { ESTree, InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
+
+import type { ReactEffect, ReactEffectAnalysis, ReactOwner } from "$oxc-utilities/react-effect-utilities";
 
 type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
 

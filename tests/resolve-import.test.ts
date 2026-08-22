@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 
 describe("resolveRelativeImport", () => {

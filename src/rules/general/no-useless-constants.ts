@@ -9,8 +9,9 @@ import {
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
-import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
 const SCREAMING_SNAKE_CASE = /^[A-Z][A-Z0-9_]*$/u;
 const STATIC_OPTIONS: StaticExpressionOptions = {

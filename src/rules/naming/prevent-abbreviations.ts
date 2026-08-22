@@ -46,7 +46,6 @@ import {
 } from "$oxc-utilities/prevent-abbreviations/scope";
 import { isNumberRaw } from "$oxc-utilities/type-utilities";
 
-import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
 import type {
 	Definition,
 	Diagnostic,
@@ -58,6 +57,8 @@ import type {
 	Variable,
 	Visitor,
 } from "oxlint-plugin-utilities";
+
+import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
 
 function createIsSafeGeneratedName(scopeToNamesGeneratedByFixer: WeakMap<Scope, Set<string>>): IsSafe {
 	return function isSafeGeneratedName(name: string, scopes: ReadonlyArray<Scope>): boolean {

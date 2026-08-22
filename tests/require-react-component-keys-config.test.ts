@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/require-react-component-keys";
 
 import { tsx } from "./rule-testers";

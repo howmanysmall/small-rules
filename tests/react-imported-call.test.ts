@@ -2,6 +2,7 @@
 // harness AST to the rule's ESTree SourceCode types for direct utility
 // coverage.
 import { describe, expect, it } from "vitest";
+
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { traverseAst } from "./rule-harness/ast";

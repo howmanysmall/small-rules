@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+
 import { RuleIndex } from "$components/rule-index";
 import { createRuleIndexCategories } from "$components/rule-index-data";
 import { ruleFactCategories } from "$data/rule-facts";

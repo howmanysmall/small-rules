@@ -1,6 +1,7 @@
 // oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the
 // harness AST to the utilities' ESTree types for direct coverage.
 import { describe, expect, it } from "vitest";
+
 import { createTypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 

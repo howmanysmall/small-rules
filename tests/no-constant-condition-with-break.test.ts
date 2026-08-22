@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/no-constant-condition-with-break";
 
 import { js } from "./rule-testers";

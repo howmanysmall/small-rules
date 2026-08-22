@@ -3,8 +3,9 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 function isModuleScopeConst(variable: ScopeVariable): boolean {
 	if (!isModuleLevelScope(variable.scope)) return false;

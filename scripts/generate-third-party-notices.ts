@@ -2,8 +2,9 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { argv } from "node:process";
-import { renderNoticesMarkdown } from "$script-utilities/vendored-notices";
 import { Command } from "@cliffy/command";
+
+import { renderNoticesMarkdown } from "$script-utilities/vendored-notices";
 
 const command = new Command()
 	.name("generate-third-party-notices")

@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/no-static-react-create-element";
 
 import { tsx } from "./rule-testers";

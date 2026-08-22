@@ -1,3 +1,5 @@
+import { definePlugin } from "oxlint-plugin-utilities";
+
 import noChainedTypeAssertions from "$oxc-rules/anti-slop/no-chained-type-assertions";
 import noConditionalEmptyObjectSpread from "$oxc-rules/anti-slop/no-conditional-empty-object-spread";
 import noKnownValueWidening from "$oxc-rules/anti-slop/no-known-value-widening";
@@ -122,7 +124,6 @@ import preferSequenceOverloads from "$oxc-rules/roblox/prefer-sequence-overloads
 import preferSingleWorldQuery from "$oxc-rules/roblox/prefer-single-world-query";
 import preferUDim2Shorthand from "$oxc-rules/roblox/prefer-udim2-shorthand";
 import requireModuleLevelInstantiation from "$oxc-rules/roblox/require-module-level-instantiation";
-import { definePlugin } from "oxlint-plugin-utilities";
 
 const smallRules = definePlugin({
 	meta: { name: "small-rules" },

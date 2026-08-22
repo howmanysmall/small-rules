@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import noKnownValueWidening from "$oxc-rules/anti-slop/no-known-value-widening";
 import noModuleMocking from "$oxc-rules/anti-slop/no-module-mocking";
 import noObjectParameters from "$oxc-rules/anti-slop/no-object-parameters";

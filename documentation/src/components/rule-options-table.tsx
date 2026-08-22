@@ -1,7 +1,8 @@
 import { RuleOption } from "./rule-option";
 
-import type { ObjectOption } from "$data/rule-options";
 import type { ReactNode } from "react";
+
+import type { ObjectOption } from "$data/rule-options";
 
 interface RuleOptionsTableProperties {
 	/** Build-time TypeScript syntax-highlighted HTML per option name. */

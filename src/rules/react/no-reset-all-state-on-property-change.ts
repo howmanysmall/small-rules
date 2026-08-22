@@ -2,8 +2,9 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { getEnvironment } from "$oxc-utilities/react-utilities";
 
-import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import type { ESTree, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
 const noResetAllStateOnPropertyChange = createRule("no-reset-all-state-on-property-change", "react", {
 	create(context): Visitor {

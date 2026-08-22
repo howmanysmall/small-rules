@@ -1,8 +1,9 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, FixFunction } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 export type FixReturn = ReturnType<FixFunction>;
 

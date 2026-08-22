@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/roblox/prefer-modding-inspect";
 
 import { ts } from "./rule-testers";

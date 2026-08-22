@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { defineRule } from "oxlint-plugin-utilities";
+
 import {
 	classifyDependencies,
 	countSetStateCalls,
@@ -11,12 +13,12 @@ import {
 	walkAst,
 	walkAstSlop,
 } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { createRuleTester } from "./rule-testers";
 
-import type { IsStaticArrayExpression } from "$oxc-utilities/react-hook-utilities";
 import type { Visitor } from "oxlint-plugin-utilities";
+
+import type { IsStaticArrayExpression } from "$oxc-utilities/react-hook-utilities";
 
 const tester = createRuleTester({ language: "js", sourceType: "module" });
 

@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/prefer-module-scope-constants";
 
 import { createRuleTester, js } from "./rule-testers";

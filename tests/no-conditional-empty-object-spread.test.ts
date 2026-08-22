@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/anti-slop/no-conditional-empty-object-spread";
 
 import { ts } from "./rule-testers";

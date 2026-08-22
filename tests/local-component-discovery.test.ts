@@ -2,17 +2,19 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import { describe, expect, it } from "vitest";
+import { defineRule } from "oxlint-plugin-utilities";
+
 import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { createRuleTester } from "./rule-testers";
 
-import type { LocalComponentDefinition, LocalComponentInspection } from "$oxc-utilities/local-component-discovery";
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
+
+import type { LocalComponentDefinition, LocalComponentInspection } from "$oxc-utilities/local-component-discovery";
 
 const COMPONENT_NAME = "Button";
 const MATCHING_INSPECTION: LocalComponentInspection = { importStyle: "default", matches: true };

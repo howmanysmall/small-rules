@@ -3,8 +3,9 @@ import { isAnyFunction, isComponentName, isIdentifierName } from "$oxc-utilities
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isRecord } from "$oxc-utilities/type-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 interface ControlFlowContext {
 	readonly afterEarlyReturn: boolean;

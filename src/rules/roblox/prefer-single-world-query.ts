@@ -2,8 +2,9 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 type QueryType = "get" | "has";
 type Context = InferContextFromRule<typeof preferSingleWorldQuery>;

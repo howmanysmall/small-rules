@@ -10,8 +10,9 @@ import {
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringRaw } from "$oxc-utilities/type-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 const REACT_FRAGMENT = "Fragment";
 

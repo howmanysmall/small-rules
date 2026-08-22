@@ -1,6 +1,7 @@
+import ignore from "ignore";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, toRuleIdLocation } from "$oxc-utilities/directive-comments";
-import ignore from "ignore";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

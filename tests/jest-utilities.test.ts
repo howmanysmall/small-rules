@@ -1,4 +1,6 @@
 import { describe } from "vitest";
+import { defineRule } from "oxlint-plugin-utilities";
+
 import {
 	countExpectCalls,
 	getTestCallback,
@@ -6,7 +8,6 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { createRuleTester } from "./rule-testers";
 

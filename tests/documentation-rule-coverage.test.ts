@@ -2,9 +2,10 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import smallRules from "$small-rules";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
+
+import smallRules from "$small-rules";
 
 import { ruleExamples } from "../documentation/src/data/rule-examples";
 import {

@@ -3,8 +3,9 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isRecord, isStringArray, isStringRaw, isStringRecord } from "$oxc-utilities/type-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 interface BannedClassEntry {
 	readonly message: string;

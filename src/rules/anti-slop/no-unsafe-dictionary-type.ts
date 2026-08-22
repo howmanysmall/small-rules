@@ -13,8 +13,9 @@ import {
 } from "$oxc-utilities/anti-slop/dictionary-types";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+
+import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 
 type RuleContext = InferContextFromRule<typeof noUnsafeDictionaryType>;
 

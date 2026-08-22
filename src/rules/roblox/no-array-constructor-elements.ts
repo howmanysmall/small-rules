@@ -23,10 +23,11 @@ import {
 } from "$oxc-utilities/oxc-utilities";
 import { isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
 
+import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
 import type { BindingName } from "$oxc-types/missing-types";
 import type { FixReturn } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface NoArrayConstructorElementsOptions {
 	readonly environment?: Environment;

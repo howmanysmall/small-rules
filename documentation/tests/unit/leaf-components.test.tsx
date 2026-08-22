@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
 import { Badge } from "$components/badge";
 import { CategoryCard } from "$components/category-card";
 import { FeatureCard } from "$components/feature-card";

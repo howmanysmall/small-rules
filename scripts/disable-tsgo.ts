@@ -2,13 +2,14 @@
 
 import nodePath from "node:path";
 import { cwd } from "node:process";
-import { editJsonc } from "$script-utilities/jsonc-utilities";
 import { Command } from "@cliffy/command";
 import { type } from "arktype";
 import { argv, file, JSONC, write } from "bun";
 import { fdir } from "fdir";
 import { create } from "mutative";
 import { bold, cyan, dim, green, red, yellow } from "picocolors";
+
+import { editJsonc } from "$script-utilities/jsonc-utilities";
 
 const fdirZed = new fdir().glob("**/.zed/settings.json").withFullPaths();
 

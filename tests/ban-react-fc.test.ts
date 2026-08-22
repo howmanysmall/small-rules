@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/ban-react-fc";
 
 import { tsx } from "./rule-testers";

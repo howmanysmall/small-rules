@@ -3,8 +3,9 @@ import { isKeyOfNode, isNode } from "$oxc-utilities/oxc-utilities";
 
 import { isStringRaw } from "./type-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const SETTER_IDENTIFIER_PATTERN = /^set[A-Z]/u;
 

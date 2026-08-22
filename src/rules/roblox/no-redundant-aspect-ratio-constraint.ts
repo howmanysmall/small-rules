@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";

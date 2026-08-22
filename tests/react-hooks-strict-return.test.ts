@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/react-hooks-strict-return";
 
 import { js } from "./rule-testers";

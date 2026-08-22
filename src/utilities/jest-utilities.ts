@@ -2,8 +2,9 @@ import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { isFunction } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 export interface ExpectCallCount {
 	readonly deterministic: number;

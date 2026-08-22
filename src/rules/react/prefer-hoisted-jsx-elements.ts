@@ -12,9 +12,10 @@ import {
 } from "$oxc-utilities/static-expression-utilities";
 import { isRecord, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
-import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type JavaScriptXmlNode = ESTree.JSXElement | ESTree.JSXFragment;
 

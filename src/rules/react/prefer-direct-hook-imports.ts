@@ -7,8 +7,9 @@ import {
 } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Visitor } from "oxlint-plugin-utilities";
+
+import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 const HOOK_NAME_PATTERN = /^use[A-Z]/v;
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { getJSXAttributeName, isSimpleExpression } from "$oxc-utilities/component-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";

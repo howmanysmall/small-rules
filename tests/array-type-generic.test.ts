@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/naming/array-type-generic";
 
 import { tsx } from "./rule-testers";
