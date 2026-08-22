@@ -163,6 +163,7 @@ catalogs:
     "@vitiate/fuzzed-data-provider": 0.3.1
     bumpp: 12.2.0
     commitlint: 21.2.1
+    effect: 3.22.1
     fast-check: 4.9.0
     fdir: 6.5.0
     get-tsconfig: 4.14.1
