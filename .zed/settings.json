@@ -306,7 +306,8 @@
 			"initialization_options": {
 				"settings": {
 					"configPath": "oxlint.config.ts",
-					"fixKind": "safe_fix"
+					"fixKind": "safe_fix",
+					"typeAware": false
 				}
 			}
 		},
