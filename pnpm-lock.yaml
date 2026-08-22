@@ -18,6 +18,16 @@ catalogs:
     tsdown:
       specifier: 0.22.14
       version: 0.22.14
+  commitlint:
+    '@commitlint/cli':
+      specifier: 21.2.1
+      version: 21.2.1
+    '@commitlint/config-conventional':
+      specifier: 21.2.0
+      version: 21.2.0
+    '@commitlint/types':
+      specifier: 21.2.0
+      version: 21.2.0
   dev:
     '@astrojs/check':
       specifier: 0.9.10
@@ -25,12 +35,6 @@ catalogs:
     '@cliffy/command':
       specifier: npm:@jsr/cliffy__command@1.2.1
       version: 1.2.1
-    '@commitlint/config-conventional':
-      specifier: 21.2.0
-      version: 21.2.0
-    '@commitlint/types':
-      specifier: 21.2.0
-      version: 21.2.0
     '@octokit/rest':
       specifier: 22.0.1
       version: 22.0.1
@@ -61,9 +65,6 @@ catalogs:
     bumpp:
       specifier: 12.2.0
       version: 12.2.0
-    commitlint:
-      specifier: 21.2.1
-      version: 21.2.1
     fast-check:
       specifier: 4.9.0
       version: 4.9.0
@@ -300,11 +301,14 @@ importers:
       '@biomejs/biome':
         specifier: catalog:lint
         version: 2.5.8
+      '@commitlint/cli':
+        specifier: catalog:commitlint
+        version: 21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
       '@commitlint/config-conventional':
-        specifier: catalog:dev
+        specifier: catalog:commitlint
         version: 21.2.0
       '@commitlint/types':
-        specifier: catalog:dev
+        specifier: catalog:commitlint
         version: 21.2.0
       '@fast-check/vitest':
         specifier: catalog:test
@@ -348,9 +352,6 @@ importers:
       bumpp:
         specifier: catalog:dev
         version: 12.2.0
-      commitlint:
-        specifier: catalog:dev
-        version: 21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
       confbox:
         specifier: catalog:test
         version: 0.2.4
@@ -1162,8 +1163,8 @@ packages:
     resolution: {integrity: sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==}
     engines: {node: '>= 20.12.0'}
 
-  '@commitlint/cli@21.2.2':
-    resolution: {integrity: sha512-a+6hQxIxnpdvSvS2apvttPNbEliYsVC3PqFYDiiB2kjbwIsQsj1urvQ4Tkf70pKYozPalKAuRQmm/GHwndduqA==}
+  '@commitlint/cli@21.2.1':
+    resolution: {integrity: sha512-blsZGe29hJ72VGEFVl72IVYX+1vsfINpjA9yWQA6i7OKD/McGEOXg08sKIRKjFk4JvzhV/9n0l3i6NooPLTNfg==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -4855,11 +4856,6 @@ packages:
   comment-parser@1.4.8:
     resolution: {integrity: sha512-rKZTGo4fzKYna8UcL0isTg5wkBNla7bxTypLwZQXjIdi++IdP1OJ41rI5Mti3/jltkPujbu4i9LIARYA+zpotQ==}
     engines: {node: '>= 12.0.0'}
-
-  commitlint@21.2.1:
-    resolution: {integrity: sha512-Ki6U66eL6wXsZf/is2qCs/6W2fNeF/WL2GSiacnuf2wwmCPapjtOoUvwfwMoqUAwosKbJfXVwr2iLnV08J7JmA==}
-    engines: {node: '>=22.12.0'}
-    hasBin: true
 
   common-ancestor-path@2.0.0:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
@@ -9261,7 +9257,7 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@commitlint/cli@21.2.2(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)':
+  '@commitlint/cli@21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)':
     dependencies:
       '@commitlint/config-conventional': 21.2.2
       '@commitlint/format': 21.2.2
@@ -12743,16 +12739,6 @@ snapshots:
   comment-parser@1.4.7: {}
 
   comment-parser@1.4.8: {}
-
-  commitlint@21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2):
-    dependencies:
-      '@commitlint/cli': 21.2.2(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
-      '@commitlint/types': 21.2.0
-    transitivePeerDependencies:
-      - '@types/node'
-      - conventional-commits-filter
-      - conventional-commits-parser
-      - typescript
 
   common-ancestor-path@2.0.0: {}
 
@@ -17113,6 +17099,7 @@ time:
   '@astrojs/react@6.0.0': '2026-06-22T10:10:05.834Z'
   '@astrojs/starlight@0.41.1': '2026-06-25T12:49:50.497Z'
   '@biomejs/biome@2.5.8': '2026-08-11T08:57:57.925Z'
+  '@commitlint/cli@21.2.1': '2026-07-08T07:48:07.331Z'
   '@commitlint/config-conventional@21.2.0': '2026-06-30T09:53:56.373Z'
   '@commitlint/types@21.2.0': '2026-06-30T09:53:50.232Z'
   '@fast-check/vitest@0.4.1': '2026-04-28T22:22:05.897Z'
@@ -17143,7 +17130,6 @@ time:
   astro@7.0.3: '2026-06-25T16:17:05.372Z'
   babel-plugin-react-compiler@1.0.0: '2025-10-07T19:19:01.781Z'
   bumpp@12.2.0: '2026-08-06T00:09:55.598Z'
-  commitlint@21.2.1: '2026-07-08T07:48:08.940Z'
   confbox@0.2.4: '2026-02-06T12:11:42.581Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
   eslint-plugin-astro@3.1.0: '2026-08-02T14:03:14.890Z'
