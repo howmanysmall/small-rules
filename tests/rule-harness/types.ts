@@ -1,3 +1,4 @@
+// oxlint-disable small-rules/no-unknown-parameters small-rules/no-unsafe-dictionary-type -- this is a types file.
 type TestSourceType = "commonjs" | "module" | "script" | "unambiguous";
 
 export type TestLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";

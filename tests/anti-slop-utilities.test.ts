@@ -1,12 +1,13 @@
-// oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the
-// harness AST to the utilities' ESTree types for direct coverage.
 import { describe, expect, it } from "vitest";
 
 import { createTypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
+import { isNode } from "$oxc-utilities/oxc-utilities";
 
 import { traverseAst } from "./rule-harness/ast";
 import { parseCase } from "./rule-harness/parse";
+
+import type { ESTree } from "oxlint-plugin-utilities";
 
 import type { HarnessNode, HarnessSourceCode } from "./rule-harness/types";
 
@@ -22,19 +23,47 @@ function parseCode(code: string): HarnessSourceCode {
 	});
 }
 
-function findNodeOfType(source: HarnessSourceCode, nodeType: string): HarnessNode {
-	let found: HarnessNode | undefined;
+function findConditionalType(source: HarnessSourceCode): ESTree.TSConditionalType {
+	let found: ESTree.TSConditionalType | undefined;
 	traverseAst(source.ast, {
-		[nodeType](node: HarnessNode) {
-			found ??= node;
+		TSConditionalType(node: HarnessNode) {
+			if (isNode(node) && node.type === "TSConditionalType") {
+				found ??= node;
+			}
 		},
 	});
 	if (found === undefined) {
-		const error = new Error(`Node of type "${nodeType}" not found.`);
-		Error.captureStackTrace(error, findNodeOfType);
+		const error = new Error('Node of type "TSConditionalType" not found.');
+		Error.captureStackTrace(error, findConditionalType);
 		throw error;
 	}
 	return found;
+}
+
+function findMappedTypeAnnotation(source: HarnessSourceCode): ESTree.TSType {
+	let found: ESTree.TSType | undefined;
+	traverseAst(source.ast, {
+		TSMappedType(node: HarnessNode) {
+			if (isNode(node) && node.type === "TSMappedType" && node.typeAnnotation !== null) {
+				found ??= node.typeAnnotation;
+			}
+		},
+	});
+	if (found === undefined) {
+		const error = new Error("TSMappedType annotation not found.");
+		Error.captureStackTrace(error, findMappedTypeAnnotation);
+		throw error;
+	}
+	return found;
+}
+
+function expectProgram(source: HarnessSourceCode): ESTree.Program {
+	if (isNode(source.ast) && source.ast.type === "Program") {
+		return source.ast;
+	}
+	const error = new Error("Source AST is not a program node.");
+	Error.captureStackTrace(error, expectProgram);
+	throw error;
 }
 
 describe("lexicalTypeParameterNames", () => {
@@ -42,9 +71,8 @@ describe("lexicalTypeParameterNames", () => {
 		expect.assertions(1);
 
 		const source = parseCode("type Handler<Value> = Value extends { readonly item: infer Item } ? Item : never;");
-		const conditional = findNodeOfType(source, "TSConditionalType");
-		const trueType = conditional.trueType as HarnessNode;
-		const names = lexicalTypeParameterNames(trueType as never, {});
+		const conditional = findConditionalType(source);
+		const names = lexicalTypeParameterNames(conditional.trueType, {});
 
 		expect([...names]).toStrictEqual(["Value"]);
 	});
@@ -53,9 +81,8 @@ describe("lexicalTypeParameterNames", () => {
 		expect.assertions(1);
 
 		const source = parseCode("type Handler<Value> = Value extends { readonly item: infer Item } ? Item : never;");
-		const conditional = findNodeOfType(source, "TSConditionalType");
-		const trueType = conditional.trueType as HarnessNode;
-		const names = lexicalTypeParameterNames(trueType as never, source.visitorKeys);
+		const conditional = findConditionalType(source);
+		const names = lexicalTypeParameterNames(conditional.trueType, source.visitorKeys);
 
 		expect([...names].toSorted()).toStrictEqual(["Item", "Value"]);
 	});
@@ -64,9 +91,8 @@ describe("lexicalTypeParameterNames", () => {
 		expect.assertions(1);
 
 		const source = parseCode("type Mappers<Key extends string> = { [Target in Key]: () => void };");
-		const mapped = findNodeOfType(source, "TSMappedType");
-		const annotation = mapped.typeAnnotation as HarnessNode;
-		const names = lexicalTypeParameterNames(annotation as never, source.visitorKeys);
+		const annotation = findMappedTypeAnnotation(source);
+		const names = lexicalTypeParameterNames(annotation, source.visitorKeys);
 
 		expect([...names].toSorted()).toStrictEqual(["Key", "Target"]);
 	});
@@ -86,7 +112,7 @@ describe("createTypeEnvironment", () => {
 				"interface Box { readonly width: number }",
 			].join("\n"),
 		);
-		const environment = createTypeEnvironment(source.ast as never);
+		const environment = createTypeEnvironment(expectProgram(source));
 
 		expect(environment.aliases.has("Payload")).toBe(true);
 		expect(environment.interfaces.get("Box")).toHaveLength(2);

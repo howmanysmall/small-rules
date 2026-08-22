@@ -671,6 +671,7 @@ const configuration = isentinel(
 			"eslint-js/no-restricted-syntax": "off",
 			"small-rules/no-unknown-parameters": "off",
 			"small-rules/no-unknown-returns": "off",
+			"small-rules/no-unsafe-dictionary-type": "off",
 			"typescript/ban-ts-comment": "off",
 		},
 	},
