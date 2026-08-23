@@ -61,6 +61,7 @@ const noModuleMocking = createRule("no-module-mocking", "anti-slop", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
+				/* v8 ignore next -- Oxc's parser does not produce V8 intrinsic call expressions. @preserve */
 				if (node.callee.type === "Super" || node.callee.type === "V8IntrinsicExpression") return;
 				if (isModuleMockCall(context.sourceCode, node.callee)) {
 					context.report({ messageId: "moduleMock", node });

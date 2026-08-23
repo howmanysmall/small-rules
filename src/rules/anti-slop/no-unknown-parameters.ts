@@ -2,7 +2,11 @@
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: local API and path alias adaptation.
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local path
+// aliases. Local departure from the pinned commit: the single parameter named by an
+// explicit type predicate (`value is T`) or assertion predicate (`asserts value is
+// T`) return type is allowed, because validating exactly that parameter is the
+// predicate's whole job.
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -17,6 +21,7 @@ type ParameterOwner =
 	| ESTree.TSConstructSignatureDeclaration
 	| ESTree.TSFunctionType
 	| ESTree.TSMethodSignature;
+
 interface TypeAnnotatedParameter {
 	readonly typeAnnotation?: ESTree.TSTypeAnnotation | null;
 }
@@ -38,8 +43,7 @@ function parameterAnnotation(parameter: Parameter): ESTree.TSTypeAnnotation | un
 			continue;
 		}
 		if (current.type === "AssignmentPattern") {
-			current = current.left;
-			continue;
+			return current.typeAnnotation ?? annotationOf(current.left);
 		}
 		return annotationOf(current);
 	}
@@ -60,19 +64,28 @@ function parameterName(parameter: Parameter, sourceText: string): string {
 			current = current.argument;
 			continue;
 		}
-		return current.type === "Identifier" ? current.name : sourceText.split(": unknown").join("").trim();
+		return current.type === "Identifier" ? current.name : sourceText.replace(/\s*:\s*unknown\s*$/u, "");
 	}
+}
+
+/** The parameter that an explicit type predicate or assertion predicate validates. */
+function validatedParameterName(node: ParameterOwner): string | undefined {
+	const predicate = node.returnType?.typeAnnotation;
+	if (predicate?.type !== "TSTypePredicate") return undefined;
+	/* v8 ignore next -- `this`-based predicates do not name a parameter. @preserve */
+	return predicate.parameterName.type === "Identifier" ? predicate.parameterName.name : undefined;
 }
 
 const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 	createOnce(context): Visitor {
 		function checkParameters(node: ParameterOwner): void {
+			const validatedName = validatedParameterName(node);
 			for (const parameter of node.params) {
 				const annotation = parameterAnnotation(parameter);
 				if (annotation?.typeAnnotation.type !== "TSUnknownKeyword") continue;
 
 				const name = parameterName(parameter, context.sourceCode.getText(parameter));
-				if (name === "cause") continue;
+				if (name === "cause" || name === validatedName) continue;
 
 				context.report({
 					data: { parameter: name },
@@ -98,7 +111,7 @@ const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 	meta: {
 		docs: {
 			description:
-				"Disallow explicitly unknown function parameters except `cause`; decode unknown input at its I/O boundary instead.",
+				"Disallow explicitly unknown function parameters except `cause` and the parameter named by a type predicate; decode unknown input at its I/O boundary instead.",
 			recommended: true,
 		},
 		messages: {
