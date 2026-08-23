@@ -2,11 +2,11 @@ import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } fr
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
+import { Predicate } from "effect";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
-import { Predicate } from "effect";
 
 interface HookConfig {
 	readonly name: string;

@@ -2,9 +2,9 @@ import nodePath from "node:path";
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
+import { Predicate } from "effect";
 
 import type { Visitor } from "oxlint-plugin-utilities";
-import { Predicate } from "effect";
 
 function pathSegmentsFromSource(source: string): ReadonlyArray<string> {
 	return source.split("/").filter((part) => !part.startsWith("."));

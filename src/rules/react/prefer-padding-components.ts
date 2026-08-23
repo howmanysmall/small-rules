@@ -7,9 +7,9 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
+import { Predicate } from "effect";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-import { Predicate } from "effect";
 
 type MessageIds = "preferDirectionalPadding" | "preferEqualPadding";
 

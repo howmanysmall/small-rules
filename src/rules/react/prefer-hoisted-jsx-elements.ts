@@ -11,11 +11,11 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-import { Predicate } from "effect";
 
 type JavaScriptXmlNode = ESTree.JSXElement | ESTree.JSXFragment;
 

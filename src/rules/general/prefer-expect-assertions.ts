@@ -7,10 +7,10 @@ import {
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
 import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import { Predicate } from "effect";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-import { Predicate } from "effect";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 
