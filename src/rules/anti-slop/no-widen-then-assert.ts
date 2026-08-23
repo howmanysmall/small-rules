@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
-// aliases; variable resolution uses the shared getVariableByName helper instead of
-// upstream's scope-manager reference scan.
+// aliases; variable resolution uses the shared getVariableByName helper
+// instead of upstream's scope-manager reference scan.
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { Except } from "type-fest";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
@@ -17,9 +18,9 @@ type BroadTypeKind = "object" | "record" | "top";
 
 type Parameter = ESTree.ParamPattern;
 
-type KnownValueEvidence = {
+interface KnownValueEvidence {
 	readonly type: ESTree.TSType | null;
-};
+}
 
 const FUNCTION_BOUNDARY_TYPES = new Set([
 	"ArrowFunctionExpression",
@@ -48,7 +49,7 @@ function unwrapTypeParentheses(type: ESTree.TSType): ESTree.TSType {
 	return current;
 }
 
-function typeReferenceName(type: ESTree.TSTypeReference): string | null {
+function typeReferenceName(type: ESTree.TSTypeReference): null | string {
 	return type.typeName.type === "Identifier" ? type.typeName.name : null;
 }
 
@@ -142,10 +143,10 @@ function isDefinitelyObjectType(type: ESTree.TSType): boolean {
 		case "TSObjectKeyword":
 		case "TSTupleType":
 			return true;
-		case "TSTypeLiteral":
-			return unwrapped.members.length > 0;
 		case "TSIntersectionType":
 			return unwrapped.types.every(isDefinitelyObjectType);
+		case "TSTypeLiteral":
+			return unwrapped.members.length > 0;
 		case "TSTypeOperator":
 			return unwrapped.operator === "readonly" && isDefinitelyObjectType(unwrapped.typeAnnotation);
 		default:
@@ -178,7 +179,7 @@ function functionBoundary(node: ESTree.Node): ESTree.Node | null {
 	return null;
 }
 
-function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): ScopeVariable | null {
+function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): null | ScopeVariable {
 	return getVariableByName(sourceCode.getScope(identifier), identifier.name) ?? null;
 }
 
@@ -266,7 +267,7 @@ function knownValueEvidence(
 function widenedBinding(
 	sourceCode: SourceCode,
 	variable: ScopeVariable,
-): (Omit<WidenedBinding, "boundary"> & { boundary: ESTree.Node | null }) | null {
+): (Except<WidenedBinding, "boundary"> & { boundary: ESTree.Node | null }) | null {
 	const declarator = variableDeclarator(variable);
 	if (declarator === null) return null;
 	const bindingId: Parameter = declarator.id;
@@ -315,7 +316,7 @@ function assertionIsNarrower(
 const noWidenThenAssert = createRule("no-widen-then-assert", "anti-slop", {
 	createOnce(context): Visitor {
 		function checkAssertion(node: ESTree.TSAsExpression | ESTree.TSTypeAssertion): void {
-			const sourceCode = context.sourceCode;
+			const { sourceCode } = context;
 			const expression = assertedExpression(node);
 			if (expression.type !== "Identifier") return;
 
