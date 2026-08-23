@@ -13,16 +13,24 @@ const testsDirectory = nodePath.resolve(
 	workingDirectory,
 	nodePath.basename(workingDirectory) === "documentation" ? "../tests" : "tests",
 );
-// oxlint-disable-next-line react-doctor/js-combine-iterations -- called once.
-const testFileNames = readdirSync(testsDirectory, { encoding: "utf8", withFileTypes: true })
-	.filter((entry) => entry.isFile() && entry.name.endsWith(".test.ts"))
-	.map((entry) => entry.name)
+// Mirror the Vitest include while skipping support directories that never
+// document rules.
+const IGNORED_TEST_ROOTS = new Set(["do-not-sync-ever", "fixtures"]);
+
+function isCollectedTestFile(relativePath: string): boolean {
+	if (!relativePath.endsWith(".test.ts")) return false;
+	const [root] = relativePath.split("/");
+	return root !== undefined && !IGNORED_TEST_ROOTS.has(root);
+}
+
+const testFileRelativePaths = readdirSync(testsDirectory, { encoding: "utf8", recursive: true })
+	.filter(isCollectedTestFile)
 	.toSorted();
 const examplesByRuleName = new Map<string, Array<RuleExample>>();
 
-for (const testFileName of testFileNames) {
-	const relativePath = `tests/${testFileName}`;
-	const sourceText = readFileSync(nodePath.join(testsDirectory, testFileName), "utf8");
+for (const testFileRelativePath of testFileRelativePaths) {
+	const relativePath = `tests/${testFileRelativePath}`;
+	const sourceText = readFileSync(nodePath.join(testsDirectory, testFileRelativePath), "utf8");
 	for (const extraction of extractRuleExamples(sourceText, relativePath)) {
 		const examples = examplesByRuleName.get(extraction.ruleName) ?? new Array<RuleExample>();
 		examplesByRuleName.set(extraction.ruleName, examples);

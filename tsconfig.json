@@ -4,6 +4,7 @@
 		"tsBuildInfoFile": "./node_modules/.tsbuildinfo",
 		"paths": {
 			"$oxc-generated/*": ["./src/generated/*"],
+			"$test/*": ["./tests/*"],
 			"$oxc-rules/*": ["./src/rules/*"],
 			"$oxc-types/*": ["./src/types/*"],
 			"$oxc-utilities/*": ["./src/utilities/*"],

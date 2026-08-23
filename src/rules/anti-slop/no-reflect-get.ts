@@ -12,6 +12,7 @@ const noReflectGet = createRule("no-reflect-get", "anti-slop", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
+				/* v8 ignore next -- Oxc's parser does not produce V8 intrinsic call expressions. @preserve */
 				if (node.callee.type === "Super" || node.callee.type === "V8IntrinsicExpression") return;
 				if (isGlobalReflectMethodCall(context.sourceCode, node.callee, "get")) {
 					context.report({ messageId: "reflectGet", node });

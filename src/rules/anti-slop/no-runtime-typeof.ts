@@ -53,7 +53,18 @@ const noRuntimeTypeof = createRule("no-runtime-typeof", "anti-slop", {
 				"A `typeof` check narrows a representation without establishing its contract. Parse input at its I/O boundary, then branch on the domain value.",
 		},
 		schema: [
-			{ additionalProperties: false, properties: { allowInTypeGuards: { type: "boolean" } }, type: "object" },
+			{
+				additionalProperties: false,
+				properties: {
+					allowInTypeGuards: {
+						default: false,
+						description:
+							"Allow `typeof` inside functions whose return type is a type predicate (`value is T`) or an assertion predicate (`asserts value is T`).",
+						type: "boolean",
+					},
+				},
+				type: "object",
+			},
 		],
 		type: "problem",
 	},

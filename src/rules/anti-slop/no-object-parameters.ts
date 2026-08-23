@@ -41,9 +41,8 @@ function parameterName(parameter: Parameter, annotation: ESTree.TSTypeAnnotation
 	if (parameter.type === "Identifier") {
 		return parameter.name;
 	}
-	if (annotation.range[1] !== parameter.range[1]) {
-		return sourceText;
-	}
+	// Yuku parameter nodes span their type annotation, so trimming the annotation
+	// text always yields the displayed name; upstream kept a foreign-parser branch.
 	return sourceText.slice(0, sourceText.length - (annotation.range[1] - annotation.range[0])).trimEnd();
 }
 

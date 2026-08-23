@@ -2,8 +2,9 @@
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities),
-// added ParenthesizedExpression unwrapping and const-assertion carve-out.
+// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities).
+// Parenthesis unwrapping and the const-assertion carve-out match the pinned upstream
+// implementation; only the API adaptation is local.
 
 import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -39,7 +40,7 @@ function isForbiddenAssertionChain(node: TypeAssertionExpression): boolean {
 	return assertionCount > 1 && hasNonConstAssertion;
 }
 
-const noChainedTypeAssertions = createRule("no-chained-type-assertion", "anti-slop", {
+const noChainedTypeAssertions = createRule("no-chained-type-assertions", "anti-slop", {
 	createOnce(context): Visitor {
 		function checkTypeAssertion(node: TypeAssertionExpression): void {
 			if (!isOutermostAssertionInChain(node) || !isForbiddenAssertionChain(node)) return;
