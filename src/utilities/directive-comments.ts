@@ -102,6 +102,8 @@ export function getOptionalStringArrayProperty(
 }
 
 export function parseDirectiveComment(comment: Comment): DirectiveComment | undefined {
+	if (!Predicate.isString(comment.value)) return undefined;
+
 	const parsed = parseDirectiveText(comment.value);
 	if (parsed === undefined) return undefined;
 
@@ -180,6 +182,7 @@ const LINES_REGEXP = /\r\n|[\r\n\u2028\u2029]/u;
 
 export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 	if (ruleId === undefined) return toForceLocation(comment.loc);
+	if (typeof comment.value !== "string") return comment.loc;
 
 	const lines = comment.value.split(LINES_REGEXP);
 	const [firstLine] = lines;
