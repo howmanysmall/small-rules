@@ -110,6 +110,8 @@ describe("no-unsafe-dictionary-type", () => {
 			"interface Owner { readonly id: string } type A = Record<string, object & Owner>;",
 			"type Wrap<T> = { readonly wrapped: T }; type Inner<T, U> = { readonly value: T } & Wrap<U>; type Outer<T, U> = Record<string, Inner<T, U>>; declare function f<T, U>(): Outer<T, U>;",
 			"declare namespace NS { export type Deep<T> = T }\ntype Qualified = NS.Deep<unknown>;\nfunction use(v: NS.Deep<string>) {}",
+			"declare namespace NS { export type Dictionary = Record<string, Command> }\ntype Qualified = NS.Dictionary;",
+			"interface Indexed { [key: string]: Command }",
 		],
 	});
 });

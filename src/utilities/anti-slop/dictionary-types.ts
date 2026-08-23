@@ -3,14 +3,15 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to local path aliases and the repository ESTree re-export,
-// omitted the unused `isPopulatedObjectExpression` export, and replaced upstream's
-// TypeScript assertions and recursive substitution resolution with no-cast iterative
-// equivalents. Classification semantics otherwise match the pinned commit.
+// omitted the unused `isPopulatedObjectExpression` export, and replaced
+// upstream's TypeScript assertions and recursive substitution resolution with
+// no-cast iterative equivalents. Classification semantics otherwise match the
+// pinned commit.
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
-const BUILT_INS = new Set(["Record", "Readonly", "Partial", "Required", "Pick", "Omit", "PropertyKey", "NonNullable"]);
-const TRANSPARENT_WRAPPERS = new Set(["Readonly", "Partial", "Required", "NonNullable"]);
+const BUILT_INS = new Set(["NonNullable", "Omit", "Partial", "Pick", "PropertyKey", "Readonly", "Record", "Required"]);
+const TRANSPARENT_WRAPPERS = new Set(["NonNullable", "Partial", "Readonly", "Required"]);
 
 type SubstitutionEnvironment = ReadonlyMap<string, ESTree.TSType>;
 
@@ -21,7 +22,7 @@ interface ResolvedValueType {
 
 export interface TypeEnvironment {
 	readonly aliases: ReadonlyMap<string, ESTree.TSTypeAliasDeclaration>;
-	readonly interfaces: ReadonlyMap<string, readonly ESTree.TSInterfaceDeclaration[]>;
+	readonly interfaces: ReadonlyMap<string, ReadonlyArray<ESTree.TSInterfaceDeclaration>>;
 	readonly shadowedBuiltIns: ReadonlySet<string>;
 }
 
@@ -61,8 +62,11 @@ export function createTypeEnvironment(program: ESTree.Program): TypeEnvironment 
 		}
 
 		if (declaration?.type === "TSTypeAliasDeclaration") {
-			if (!aliases.has(declaration.id.name)) aliases.set(declaration.id.name, declaration);
-			else shadowedBuiltIns.add(declaration.id.name);
+			if (aliases.has(declaration.id.name)) {
+				shadowedBuiltIns.add(declaration.id.name);
+			} else {
+				aliases.set(declaration.id.name, declaration);
+			}
 			if (BUILT_INS.has(declaration.id.name)) shadowedBuiltIns.add(declaration.id.name);
 			continue;
 		}
@@ -82,10 +86,10 @@ export function createTypeEnvironment(program: ESTree.Program): TypeEnvironment 
 
 		if (
 			(declaration?.type === "ClassDeclaration" || declaration?.type === "FunctionDeclaration") &&
-			declaration.id !== null
-		) {
-			if (BUILT_INS.has(declaration.id.name)) shadowedBuiltIns.add(declaration.id.name);
-		}
+			declaration.id !== null &&
+			BUILT_INS.has(declaration.id.name)
+		)
+			shadowedBuiltIns.add(declaration.id.name);
 	}
 
 	return { aliases, interfaces, shadowedBuiltIns };
@@ -126,7 +130,7 @@ function isNeverType(type: ESTree.TSType): boolean {
 function isEffectivelyEmptyMember(member: ESTree.TSSignature): boolean {
 	return (
 		member.type === "TSPropertySignature" &&
-		member.optional === true &&
+		member.optional &&
 		member.typeAnnotation !== null &&
 		isNeverType(member.typeAnnotation.typeAnnotation)
 	);
@@ -136,17 +140,17 @@ function isEffectivelyEmptyTypeLiteral(type: ESTree.TSTypeLiteral): boolean {
 	return type.members.length === 0 || type.members.every(isEffectivelyEmptyMember);
 }
 
-function isEffectivelyEmptyInterface(declarations: readonly ESTree.TSInterfaceDeclaration[]): boolean {
+function isEffectivelyEmptyInterface(declarations: ReadonlyArray<ESTree.TSInterfaceDeclaration>): boolean {
 	if (declarations.length !== 1) return false;
 	const [type] = declarations;
 	return (
-		type !== undefined &&
-		type.extends.length === 0 &&
-		(type.body.body.length === 0 || type.body.body.every(isEffectivelyEmptyMember))
+		type?.extends.length === 0 && (type.body.body.length === 0 || type.body.body.every(isEffectivelyEmptyMember))
 	);
 }
 
-/** Resolves substitution arguments through dependent default type parameters. */
+/**
+ * Resolves substitution arguments through dependent default type parameters.
+ */
 function resolvedSubstitutionArgument(type: ESTree.TSType, base: SubstitutionEnvironment): ESTree.TSType {
 	let current = type;
 	let resolving = "";
@@ -168,10 +172,10 @@ function aliasSubstitution(
 	base: SubstitutionEnvironment,
 ): SubstitutionEnvironment | undefined {
 	const parameters = alias.typeParameters?.params ?? [];
-	const args = type.typeArguments?.params ?? [];
+	const parameters_ = type.typeArguments?.params ?? [];
 	const next = new Map(base);
 	for (const [index, parameter] of parameters.entries()) {
-		const argument = args[index] ?? parameter.default;
+		const argument = parameters_[index] ?? parameter.default;
 		if (argument === null || argument === undefined) return undefined;
 		next.set(parameter.name.name, resolvedSubstitutionArgument(argument, next));
 	}
@@ -183,7 +187,7 @@ function unsafeDirectValue(
 	environment: TypeEnvironment,
 	substitutions: SubstitutionEnvironment,
 	resolvingAliases: ReadonlySet<string>,
-): UnsafeValueKind | null {
+): null | UnsafeValueKind {
 	const unwrapped = unwrapTransparentType(type);
 	switch (true) {
 		case unwrapped.type === "TSUnknownKeyword":
@@ -204,7 +208,7 @@ function unsafeDirectValue(
 		return null;
 	}
 	if (unwrapped.type === "TSIntersectionType") {
-		let firstUnsafe: UnsafeValueKind | null = null;
+		let firstUnsafe: null | UnsafeValueKind = null;
 		let allUnsafe = unwrapped.types.length > 0;
 		for (const member of unwrapped.types) {
 			const unsafe = unsafeDirectValue(member, environment, substitutions, resolvingAliases);
@@ -300,7 +304,7 @@ function dictionaryValueTypes(
 export function classifyUnsafeDictionaryValue(
 	valueType: ESTree.TSType,
 	environment: TypeEnvironment,
-): UnsafeDictionary | undefined {
+): undefined | UnsafeDictionary {
 	const unsafeValue = unsafeDirectValue(valueType, environment, new Map(), new Set());
 	return unsafeValue === null ? undefined : { kind: "unsafe-dictionary", unsafeValue };
 }
@@ -308,7 +312,7 @@ export function classifyUnsafeDictionaryValue(
 export function classifyUnsafeDictionary(
 	type: ESTree.TSType,
 	environment: TypeEnvironment,
-): UnsafeDictionary | undefined {
+): undefined | UnsafeDictionary {
 	for (const valueType of dictionaryValueTypes(type, environment, new Map(), new Set())) {
 		const unsafeValue = unsafeDirectValue(valueType.type, environment, valueType.substitutions, new Set());
 		if (unsafeValue !== null) return { kind: "unsafe-dictionary", unsafeValue };
@@ -325,7 +329,7 @@ function resolvesToDictionary(
 	return dictionaryValueTypes(type, environment, substitutions, resolvingAliases).length > 0;
 }
 
-export function classifyWideningTarget(type: ESTree.TSType, environment: TypeEnvironment): WideningTarget | undefined {
+export function classifyWideningTarget(type: ESTree.TSType, environment: TypeEnvironment): undefined | WideningTarget {
 	const unwrapped = unwrapTransparentType(type);
 	if (unwrapped.type === "TSUnknownKeyword") return { kind: "unknown" };
 	if (unwrapped.type === "TSObjectKeyword") return { kind: "object" };
@@ -385,7 +389,7 @@ function classifyAliasBroadTarget(
 	environment: TypeEnvironment,
 	substitutions: SubstitutionEnvironment,
 	resolvingAliases: ReadonlySet<string>,
-): WideningTarget | undefined {
+): undefined | WideningTarget {
 	const unwrapped = unwrapTransparentType(type);
 	if (unwrapped.type === "TSUnknownKeyword") return { kind: "unknown" };
 	if (unwrapped.type === "TSObjectKeyword") return { kind: "object" };
@@ -403,6 +407,7 @@ function classifyAliasBroadTarget(
 	const name = typeReferenceName(unwrapped);
 	if (name === undefined) return undefined;
 	const substitution = substitutions.get(name);
+	/* v8 ignore next -- This helper only receives aliases without type parameters, so substitutions are always empty. @preserve */
 	if (substitution !== undefined) {
 		return isUnappliedReferenceTo(substitution, name)
 			? undefined

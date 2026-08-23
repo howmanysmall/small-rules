@@ -24,6 +24,7 @@ describe("no-known-value-widening", () => {
 			{ code: "const load = (): unknown => `value`;", errors: [widening] },
 			{ code: "const value: unknown = -1;", errors: [widening] },
 			{ code: 'const value = <unknown>{ id: "one" };', errors: [widening] },
+			{ code: 'const value = <object><unknown>{ id: "one" };', errors: 1 },
 			{
 				code: withPrelude("const commands: Record<string, Command> = { start: startCommand };"),
 				errors: [widening],

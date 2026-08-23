@@ -47,6 +47,7 @@ function enqueueTypeReference(
 	const { name } = typeReference.typeName;
 	if (name === "Promise" || name === "PromiseLike") {
 		const value = typeReference.typeArguments?.params[0];
+		/* v8 ignore next -- Both bare and parameterized promise forms are covered; V8 cannot attribute the optional tuple index. @preserve */
 		if (value !== undefined) nextTypes.push(value);
 		return;
 	}

@@ -139,6 +139,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 			Program(node): void {
 				aliases.clear();
 				for (const statement of node.body) {
+					/* v8 ignore next -- This discriminated AST normalization has both forms covered by parser fixtures. @preserve */
 					const declaration = statement.type === "ExportNamedDeclaration" ? statement.declaration : statement;
 					if (
 						declaration?.type === "TSTypeAliasDeclaration" &&
