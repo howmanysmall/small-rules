@@ -1,12 +1,12 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 type SwitchCaseBraceMetric = "lines" | "statements";
 
 function normalizeMetric(rawOptions: unknown): SwitchCaseBraceMetric {
-	if (!isRecord(rawOptions)) return "lines";
+	if (!Predicate.isObject(rawOptions)) return "lines";
 	/* v8 ignore next -- schema rejects non-statement metric values before rule execution. @preserve */
 	if (rawOptions.metric === "statements") return "statements";
 	/* v8 ignore next -- schema rejects non-statement metric values before rule execution. @preserve */

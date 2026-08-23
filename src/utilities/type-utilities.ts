@@ -1,31 +1,21 @@
-export function isStringRaw(value: unknown): value is string {
-	return typeof value === "string";
-}
-
-export function isNumberRaw(value: unknown): value is number {
-	return typeof value === "number";
-}
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+import { Predicate } from "effect";
 
 export function isNonEmptyString(value: unknown): value is string {
-	return isStringRaw(value) && value.length > 0;
+	return Predicate.isString(value) && value.length > 0;
 }
 
 export function isStringArray(object: unknown): object is ReadonlyArray<string> {
 	if (!Array.isArray(object)) return false;
-	for (const item of object) if (!isStringRaw(item)) return false;
+	for (const item of object) if (!Predicate.isString(item)) return false;
 	return true;
 }
 
 export function isStringRecord(object: unknown): object is Record<string, string> {
-	if (!isRecord(object)) return false;
-	for (const entry of Object.values(object)) if (!isStringRaw(entry)) return false;
+	if (!Predicate.isObject(object)) return false;
+	for (const entry of Object.values(object)) if (!Predicate.isString(entry)) return false;
 	return true;
 }
 
 export function isNumber(value: unknown): value is number {
-	return isNumberRaw(value) && !Number.isNaN(value);
+	return Predicate.isNumber(value) && !Number.isNaN(value);
 }

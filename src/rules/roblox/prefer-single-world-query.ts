@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -87,17 +87,17 @@ const VALID_PARENT_TYPES = new Set<string>([
 ]);
 
 function isNodeWithParent(value: unknown): value is { readonly parent: unknown } {
-	return isRecord(value) && "parent" in value;
+	return Predicate.isObject(value) && "parent" in value;
 }
 
 function getNodeType(value: unknown): string | undefined {
 	/* v8 ignore next -- @preserve scope reference parents are parser nodes with string type tags. */
-	return isRecord(value) && isStringRaw(value.type) ? value.type : undefined;
+	return Predicate.isObject(value) && Predicate.isString(value.type) ? value.type : undefined;
 }
 
 function getOperator(value: unknown): string | undefined {
 	/* v8 ignore next -- @preserve logical-expression parents expose parser-provided string operators. */
-	return isRecord(value) && isStringRaw(value.operator) ? value.operator : undefined;
+	return Predicate.isObject(value) && Predicate.isString(value.operator) ? value.operator : undefined;
 }
 
 function isLogicalAndExpression(value: unknown): boolean {
@@ -105,7 +105,7 @@ function isLogicalAndExpression(value: unknown): boolean {
 }
 
 function isIdentifierReference(value: unknown): value is ESTree.IdentifierReference {
-	return isRecord(value) && value.type === "Identifier" && isStringRaw(value.name);
+	return Predicate.isObject(value) && value.type === "Identifier" && Predicate.isString(value.name);
 }
 
 function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierReference): boolean {

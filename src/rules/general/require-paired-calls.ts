@@ -2,8 +2,9 @@
 
 import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isStringArray } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -109,9 +110,7 @@ function getValidClosers(config: PairConfiguration): Array<string> {
 	} else {
 		/* v8 ignore start -- @preserve validated pair configs only allow string closers after the array branch fails. */
 		// oxlint-disable-next-line eslint/no-lonely-if -- V8 ignore must wrap only this defensive validated-shape branch.
-		if (isStringRaw(config.closer)) {
-			result[size++] = config.closer;
-		}
+		if (Predicate.isString(config.closer)) result[size++] = config.closer;
 		/* v8 ignore stop -- @preserve */
 	}
 

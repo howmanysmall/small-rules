@@ -1,7 +1,8 @@
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
-import { isNonEmptyString, isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
+import { isNonEmptyString } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -258,9 +259,9 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 
 	// oxlint-disable-next-line typescript/strict-boolean-expressions -- really dumb
 	if (expression.operator === "!") return toConstantValue(!argument.value);
-	if (expression.operator === "+" && isNumberRaw(argument.value)) return toConstantValue(argument.value);
-	if (expression.operator === "-" && isNumberRaw(argument.value)) return toConstantValue(-argument.value);
-	if (expression.operator === "~" && isNumberRaw(argument.value)) return toConstantValue(~argument.value);
+	if (expression.operator === "+" && Predicate.isNumber(argument.value)) return toConstantValue(argument.value);
+	if (expression.operator === "-" && Predicate.isNumber(argument.value)) return toConstantValue(-argument.value);
+	if (expression.operator === "~" && Predicate.isNumber(argument.value)) return toConstantValue(~argument.value);
 	return NON_CONSTANT_VALUE;
 }
 
@@ -538,7 +539,7 @@ const noConstantConditionWithBreak = createRule("no-constant-condition-with-brea
 	create(context): Visitor {
 		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety!
 		const rawOptions = context.options?.[0];
-		const loopExitCalls = normalizeLoopExitCalls(isRecord(rawOptions) ? rawOptions : undefined);
+		const loopExitCalls = normalizeLoopExitCalls(Predicate.isObject(rawOptions) ? rawOptions : undefined);
 
 		function reportConstantCondition(testExpression: ESTree.Expression): void {
 			const testResult = getConstantBoolean(testExpression);

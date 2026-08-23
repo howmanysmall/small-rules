@@ -3,11 +3,11 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"@opencode-ai/plugin": "catalog:dev"
+		"@opencode-ai/plugin": "catalog:tooling"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:types",
 		"@types/node": "catalog:types",
-		"typescript": "catalog:dev"
+		"typescript": "catalog:types"
 	}
 }

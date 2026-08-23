@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -145,7 +145,7 @@ function isDeclaredLocally(sourceCode: SourceCode, node: ESTree.IdentifierRefere
 }
 
 function nameMatches(specifier: ErrorSpecifier, calleeName: string): boolean {
-	if (isStringRaw(specifier)) return calleeName === specifier;
+	if (Predicate.isString(specifier)) return calleeName === specifier;
 
 	const names = Array.isArray(specifier.name) ? specifier.name : [specifier.name];
 	return names.includes(calleeName);
@@ -158,7 +158,7 @@ function matchesSpecifier(
 	specifier: ErrorSpecifier,
 ): boolean {
 	if (!nameMatches(specifier, node.name)) return false;
-	if (isStringRaw(specifier)) return true;
+	if (Predicate.isString(specifier)) return true;
 
 	/* v8 ignore next -- @preserve rule schema restricts object specifiers to handled source kinds. */
 	switch (specifier.from) {

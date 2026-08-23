@@ -1,6 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNode } from "$oxc-utilities/oxc-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -19,7 +19,7 @@ const DEFAULT_OPTIONS: NormalizedOptions = {
 };
 
 function normalizeOptions(rawOptions: unknown): NormalizedOptions {
-	if (!isRecord(rawOptions)) return DEFAULT_OPTIONS;
+	if (!Predicate.isObject(rawOptions)) return DEFAULT_OPTIONS;
 
 	return {
 		/* v8 ignore next -- rule schema rejects non-boolean checkPrivate @preserve */
@@ -52,7 +52,7 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	visited.add(currentNode);
 	if (currentNode.type === "ThisExpression" || currentNode.type === "Super") return true;
 	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
-	if (!isRecord(currentNode)) return false;
+	if (!Predicate.isObject(currentNode)) return false;
 
 	// biome-ignore lint/suspicious/noForIn: required for AST traversal
 	for (const key in currentNode) {
