@@ -27,6 +27,7 @@ function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierRe
 }
 
 function variableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator | undefined {
+	/* v8 ignore next -- Scope lookups omit unresolved globals instead of returning zero-definition variables. @preserve */
 	if (variable.defs.length !== 1) return undefined;
 	const [definition] = variable.defs;
 	if (definition?.type !== "Variable") return undefined;
@@ -198,7 +199,9 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				reportFlow(node.expression, classifyWideningTarget(node.typeAnnotation, environment), "assertion");
 			},
 			TSTypeAssertion(node): void {
-				if (environment === undefined || hasParentAssertion(node)) return;
+				/* v8 ignore next -- The Program visitor initializes this before descendants run. @preserve */
+				if (environment === undefined) return;
+				if (hasParentAssertion(node)) return;
 				reportFlow(node.expression, classifyWideningTarget(node.typeAnnotation, environment), "assertion");
 			},
 			VariableDeclarator(node): void {

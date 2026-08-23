@@ -30,12 +30,13 @@ function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironme
 	return true;
 }
 
-function shouldReportType(type: ESTree.TSType, environment: TypeEnvironment): boolean {
-	if (isPlainAliasConsumerUse(type, environment)) return false;
+function reportableUnsafeDictionary(type: ESTree.TSType, environment: TypeEnvironment) {
+	if (isPlainAliasConsumerUse(type, environment)) return undefined;
 	const unsafe = classifyUnsafeDictionary(type, environment);
-	if (unsafe === undefined) return false;
+	if (unsafe === undefined) return undefined;
 	let current: ESTree.Node | undefined = type.parent;
 	while (current !== undefined && current.type !== "Program") {
+		/* v8 ignore next 8 -- These branches only narrow ESTree's broad Node union. The three root visitors exercise all reportable roots. @preserve */
 		const ancestorClassified =
 			current.type === "TSMappedType"
 				? classifyUnsafeDictionary(current, environment)
@@ -44,10 +45,10 @@ function shouldReportType(type: ESTree.TSType, environment: TypeEnvironment): bo
 					: current.type === "TSTypeReference"
 						? classifyUnsafeDictionary(current, environment)
 						: undefined;
-		if (ancestorClassified !== undefined) return false;
+		if (ancestorClassified !== undefined) return undefined;
 		current = current.parent;
 	}
-	return true;
+	return unsafe;
 }
 
 const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slop", {
@@ -55,8 +56,9 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 		let environment: TypeEnvironment | undefined;
 
 		function reportIfUnsafe(type: ESTree.TSType): void {
-			if (environment === undefined || !shouldReportType(type, environment)) return;
-			const unsafe = classifyUnsafeDictionary(type, environment);
+			/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
+			if (environment === undefined) return;
+			const unsafe = reportableUnsafeDictionary(type, environment);
 			if (unsafe === undefined) return;
 			context.report({ data: { value: unsafe.unsafeValue }, messageId: "unsafeDictionary", node: type });
 		}

@@ -94,12 +94,14 @@ describe("createTypeEnvironment", () => {
 		expect(fixture.environment.shadowedBuiltIns.has("Payload")).toBe(false);
 	});
 
-	it("marks built-in names redeclared by classes, enums, functions, and duplicate aliases", () => {
-		expect.assertions(6);
+	it("marks built-in names redeclared by classes, enums, functions, interfaces, and duplicate aliases", () => {
+		expect.assertions(8);
 
 		const classEnvironment = createTypeEnvironment(getProgram(parseCode("class Partial {}")));
 		const enumEnvironment = createTypeEnvironment(getProgram(parseCode("enum Record {}")));
+		const localEnumEnvironment = createTypeEnvironment(getProgram(parseCode("enum Local {}")));
 		const functionEnvironment = createTypeEnvironment(getProgram(parseCode("function Omit() {}")));
+		const interfaceEnvironment = createTypeEnvironment(getProgram(parseCode("interface Required {}")));
 		const duplicateAliasEnvironment = createTypeEnvironment(
 			getProgram(parseCode("type Readonly<T> = T; type Readonly<T> = T;")),
 		);
@@ -109,7 +111,9 @@ describe("createTypeEnvironment", () => {
 
 		expect(classEnvironment.shadowedBuiltIns.has("Partial")).toBe(true);
 		expect(enumEnvironment.shadowedBuiltIns.has("Record")).toBe(true);
+		expect(localEnumEnvironment.shadowedBuiltIns.has("Record")).toBe(false);
 		expect(functionEnvironment.shadowedBuiltIns.has("Omit")).toBe(true);
+		expect(interfaceEnvironment.shadowedBuiltIns.has("Required")).toBe(true);
 		expect(duplicateAliasEnvironment.shadowedBuiltIns.has("Readonly")).toBe(true);
 		expect(anonymousDefaultEnvironment.interfaces.size).toBe(0);
 		expect(anonymousDefaultEnvironment.aliases.size).toBe(0);
@@ -299,6 +303,20 @@ describe("classifyUnsafeDictionaryValue", () => {
 				: classifyUnsafeDictionaryValue(escapeReference, mergedInterfaces.environment),
 		).toBeUndefined();
 	});
+
+	it("leaves qualified references and generic aliases without arguments unclassified", () => {
+		expect.assertions(2);
+
+		const qualified = setup("declare namespace NS { export type Value = unknown } const value: NS.Value = input;");
+		expect(
+			classifyUnsafeDictionaryValue(getFirstAnnotationTarget(qualified.source), qualified.environment),
+		).toBeUndefined();
+
+		const unapplied = setup("type Value<T> = T; const value: Value = input;");
+		expect(
+			classifyUnsafeDictionaryValue(getFirstAnnotationTarget(unapplied.source), unapplied.environment),
+		).toBeUndefined();
+	});
 });
 
 function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
@@ -413,6 +431,36 @@ describe("classifyWideningTarget", () => {
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(genericDictionary.source), genericDictionary.environment),
 		).toStrictEqual({ kind: "generic container" });
+	});
+
+	it.each([
+		["const value: readonly string[] = [];", undefined],
+		["declare namespace NS { export type Value = string } const value: NS.Value = input;", undefined],
+		['type A = "literal"; const value: A = "literal";', undefined],
+		["declare namespace NS { export type Value = string } type A = NS.Value; const value: A = input;", undefined],
+		["type Broad = unknown; const value: Broad = input;", "unknown"],
+		["type Broad = object; const value: Broad = input;", "object"],
+		["const value: Open = {}; type Open = { [key: string]: string };", "open dictionary"],
+		["type Wrapper = Readonly; const value: Wrapper = input;", undefined],
+		["const value: Alias = {}; type Index<T> = Record<string, T>; type Alias = Index;", undefined],
+		["const value: Narrow = {}; type Narrow = { [K in 'only']: string };", undefined],
+		[
+			"const value: Narrow = {}; declare namespace NS { export type Key = string } type Narrow = { [K in NS.Key]: string };",
+			undefined,
+		],
+		["const value: Index = {}; type Index<T> = Record<string, T>;", undefined],
+	])("handles transparent, qualified, and alias-backed widening target %s", (code, expected) => {
+		const fixture = setup(code);
+		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
+			expected,
+		);
+	});
+
+	it("does not classify dictionaries when a generic alias lacks its required argument", () => {
+		expect.assertions(1);
+
+		const fixture = setup("type Index<T> = Record<string, T>; const value: Index = {};");
+		expect(classifyUnsafeDictionary(getFirstAnnotationTarget(fixture.source), fixture.environment)).toBeUndefined();
 	});
 
 	it.each([

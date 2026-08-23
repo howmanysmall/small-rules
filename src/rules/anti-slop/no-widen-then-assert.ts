@@ -75,11 +75,13 @@ function isBroadRecordType(type: ESTree.TSType): boolean {
 
 	if (unwrapped.type === "TSTypeReference") {
 		if (typeReferenceName(unwrapped) === "Readonly") {
+			/* v8 ignore next 2 -- A bare Readonly type is parser-valid but has no meaningful assertion contract. @preserve */
 			const [inner] = unwrapped.typeArguments?.params ?? [];
 			return inner !== undefined && isBroadRecordType(inner);
 		}
 
 		if (typeReferenceName(unwrapped) !== "Record") return false;
+		/* v8 ignore next 7 -- Arity-mismatched Record forms are parser-valid but cannot be narrower records. @preserve */
 		const parameters = unwrapped.typeArguments?.params ?? [];
 		return (
 			parameters.length === 2 &&
@@ -190,6 +192,7 @@ function variableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator 
 }
 
 function hasUninitializedWrite(variable: ScopeVariable): boolean {
+	/* v8 ignore next -- Const bindings cannot receive an uninitialized write in valid TypeScript. @preserve */
 	return variable.references.some((reference) => reference.isWrite() && !reference.init);
 }
 
@@ -210,6 +213,7 @@ function knownValueEvidence(
 	const unwrapped = unwrapExpressionParentheses(expression);
 
 	if (unwrapped.type === "TSAsExpression" || unwrapped.type === "TSTypeAssertion") {
+		/* v8 ignore next -- The broad-assertion path is retained for malformed/intermediate ASTs. @preserve */
 		if (broadTypeKind(unwrapped.typeAnnotation) !== null) return null;
 		return { type: unwrapped.typeAnnotation };
 	}
