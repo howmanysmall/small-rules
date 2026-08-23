@@ -3,7 +3,8 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction, isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
-import { isNumber, isRecord, isStringArray } from "$oxc-utilities/type-utilities";
+import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -40,11 +41,11 @@ const DEFAULT_MAX_HELPER_TRACE_DEPTH = 4;
 
 function normalizeOptions(raw: unknown): NormalizedOptions {
 	const constructors =
-		isRecord(raw) && isStringArray(raw.constructors) ? new Set(raw.constructors) : DEFAULT_CONSTRUCTORS;
+		Predicate.isObject(raw) && isStringArray(raw.constructors) ? new Set(raw.constructors) : DEFAULT_CONSTRUCTORS;
 
-	const environment = isRecord(raw) && raw.environment === "standard" ? "standard" : "roblox-ts";
+	const environment = Predicate.isObject(raw) && raw.environment === "standard" ? "standard" : "roblox-ts";
 
-	const candidateDepth = isRecord(raw) ? raw.maxHelperTraceDepth : undefined;
+	const candidateDepth = Predicate.isObject(raw) ? raw.maxHelperTraceDepth : undefined;
 	const maxHelperTraceDepth =
 		isNumber(candidateDepth) && Number.isInteger(candidateDepth) && candidateDepth >= 0
 			? candidateDepth

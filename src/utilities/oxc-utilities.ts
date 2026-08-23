@@ -1,5 +1,5 @@
 import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
-import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, FixFunction } from "oxlint-plugin-utilities";
 
@@ -11,7 +11,7 @@ const COMPONENT_NAME_PATTERN = /^[A-Z]/v;
 const KEY_OF_NODE = new Set(["end", "loc", "parent", "range", "start", "type"]);
 
 export function isNode(value: unknown): value is ESTree.Node {
-	return isRecord(value) && isStringRaw(value.type);
+	return Predicate.isObject(value) && Predicate.isString(value.type);
 }
 
 export type KeyOfNode = "end" | "loc" | "parent" | "range" | "start" | "type";
@@ -33,7 +33,7 @@ export function getTypeAnnotationFromBinding(binding: ESTree.BindingPattern): ES
 }
 
 export function isTsTypeAnnotation(value: unknown): value is ESTree.TSTypeAnnotation {
-	return isRecord(value) && "type" in value && value.type === "TSTypeAnnotation";
+	return Predicate.isObject(value) && "type" in value && value.type === "TSTypeAnnotation";
 }
 
 export function isIdentifierNamed(node: ESTree.Node, name: string): node is ESTree.IdentifierName {
@@ -81,7 +81,7 @@ export function getImportedName({ imported }: ESTree.ImportSpecifier): string | 
 export function hasName(
 	node: ESTree.Node,
 ): node is ESTree.BindingIdentifier | ESTree.IdentifierName | ESTree.IdentifierReference {
-	return node.type === "Identifier" && isStringRaw(node.name);
+	return node.type === "Identifier" && Predicate.isString(node.name);
 }
 
 export function isIdentifierName(node: ESTree.Node): node is ESTree.IdentifierName {
@@ -101,7 +101,7 @@ export function isImportDeclaration(node: ESTree.Node): node is ESTree.ImportDec
 }
 
 export function isStringLiteral(node: ESTree.Node): node is ESTree.StringLiteral {
-	return node.type === "Literal" && isStringRaw(node.value);
+	return node.type === "Literal" && Predicate.isString(node.value);
 }
 
 export function isCallExpression(node: ESTree.Node): node is ESTree.CallExpression {
@@ -221,7 +221,7 @@ export function isTsQualifiedName(node: ESTree.Node): node is ESTree.TSQualified
 }
 
 export function isNumericLiteral(node: ESTree.Node): node is ESTree.NumericLiteral {
-	return node.type === "Literal" && isNumberRaw(node.value);
+	return node.type === "Literal" && Predicate.isNumber(node.value);
 }
 
 export function isNewExpression(node: ESTree.Node): node is ESTree.NewExpression {

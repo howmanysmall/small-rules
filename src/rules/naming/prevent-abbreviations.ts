@@ -44,7 +44,7 @@ import {
 	shouldFix,
 	shouldReportIdentifierAsProperty,
 } from "$oxc-utilities/prevent-abbreviations/scope";
-import { isNumberRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type {
 	Definition,
@@ -239,7 +239,7 @@ function checkVariable(
 
 	const baseSamples = safeSamples.length > 0 ? safeSamples : variableReplacements.samples;
 	const hasCompleteSamples =
-		isNumberRaw(variableReplacements.samples.length) &&
+		Predicate.isNumber(variableReplacements.samples.length) &&
 		variableReplacements.samples.length === variableReplacements.total;
 	const effectiveTotal = hasCompleteSamples
 		? Math.max(0, variableReplacements.total - droppedDiscouraged)

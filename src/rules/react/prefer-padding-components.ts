@@ -8,7 +8,7 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -51,7 +51,7 @@ function areStructurallyEqual(left: unknown, right: unknown): boolean {
 	if (left === null || right === null) return false;
 
 	/* v8 ignore next -- comparable JSX values are parser-produced record-shaped ESTree nodes. @preserve */
-	if (!isRecord(left) || !isRecord(right)) return false;
+	if (!Predicate.isObject(left) || !Predicate.isObject(right)) return false;
 
 	return areRecordsStructurallyEqual(left, right);
 }

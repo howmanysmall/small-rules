@@ -1,6 +1,6 @@
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -112,23 +112,23 @@ function buildReplacementRegExp(replacements: ReadonlyMap<string, string>): RegE
 
 function parseReplacements(raw: unknown, extendDefault: boolean): Map<string, string> {
 	const merged = new Map(extendDefault ? DEFAULT_REPLACEMENTS_MAP : undefined);
-	if (!isRecord(raw)) return merged;
+	if (!Predicate.isObject(raw)) return merged;
 	for (const [key, value] of Object.entries(raw)) {
 		if (value === false) {
 			merged.delete(key);
 			continue;
 		}
-		if (isStringRaw(value) && value.length > 0) merged.set(key, value);
+		if (Predicate.isString(value) && value.length > 0) merged.set(key, value);
 	}
 	return merged;
 }
 
 function parseOptions(rawOptions: unknown): RuleOptions {
-	const options = isRecord(rawOptions) ? rawOptions : {};
+	const options = Predicate.isObject(rawOptions) ? rawOptions : {};
 	const extendDefaultReplacements = options.extendDefaultReplacements !== false;
 	const replacements = parseReplacements(options.replacements, extendDefaultReplacements);
 	const allowList = new Set<string>();
-	if (isRecord(options.allowList)) {
+	if (Predicate.isObject(options.allowList)) {
 		for (const key of Object.keys(options.allowList)) allowList.add(key);
 	}
 	return {

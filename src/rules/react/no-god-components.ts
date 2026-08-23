@@ -4,7 +4,7 @@ import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilit
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
-import { isNumberRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -173,14 +173,14 @@ function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
 		enforceTargetLines:
 			typeof cast.enforceTargetLines === "boolean" ? cast.enforceTargetLines : defaults.enforceTargetLines,
 		ignoreComponents: Array.isArray(cast.ignoreComponents) ? cast.ignoreComponents : defaults.ignoreComponents,
-		maxDestructuredProps: isNumberRaw(cast.maxDestructuredProps)
+		maxDestructuredProps: Predicate.isNumber(cast.maxDestructuredProps)
 			? cast.maxDestructuredProps
 			: defaults.maxDestructuredProps,
-		maxLines: isNumberRaw(cast.maxLines) ? cast.maxLines : defaults.maxLines,
-		maxStateHooks: isNumberRaw(cast.maxStateHooks) ? cast.maxStateHooks : defaults.maxStateHooks,
-		maxTsxNesting: isNumberRaw(cast.maxTsxNesting) ? cast.maxTsxNesting : defaults.maxTsxNesting,
+		maxLines: Predicate.isNumber(cast.maxLines) ? cast.maxLines : defaults.maxLines,
+		maxStateHooks: Predicate.isNumber(cast.maxStateHooks) ? cast.maxStateHooks : defaults.maxStateHooks,
+		maxTsxNesting: Predicate.isNumber(cast.maxTsxNesting) ? cast.maxTsxNesting : defaults.maxTsxNesting,
 		stateHooks: Array.isArray(cast.stateHooks) ? cast.stateHooks : defaults.stateHooks,
-		targetLines: isNumberRaw(cast.targetLines) ? cast.targetLines : defaults.targetLines,
+		targetLines: Predicate.isNumber(cast.targetLines) ? cast.targetLines : defaults.targetLines,
 	};
 }
 
@@ -222,7 +222,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 			}
 
 			const propertiesCount = countDestructuredProperties(node);
-			if (isNumberRaw(propertiesCount) && propertiesCount > config.maxDestructuredProps) {
+			if (Predicate.isNumber(propertiesCount) && propertiesCount > config.maxDestructuredProps) {
 				context.report({
 					data: { name, count: String(propertiesCount), max: String(config.maxDestructuredProps) },
 					messageId: "tooManyProps",

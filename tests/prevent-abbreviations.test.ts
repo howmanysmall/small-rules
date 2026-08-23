@@ -623,6 +623,59 @@ describe("prevent-abbreviations", () => {
 				options: [{ checkVariables: false, shorthands: { "*Props": "*Properties", "*Root": "*Base" } }],
 				errors: [{ messageId: "replace" }, { messageId: "replace" }],
 			},
+			// Locally declared types are owned even when reached through an alias
+			{
+				code: "type Story = { value: unknown }; const options: Story = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: 'import type { RenderConfiguration } from "./render"; type Story = RenderConfiguration; const options: Story = { props: value };',
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			// Cyclic local aliases terminate and stay flagged
+			{
+				code: "type LoopA = LoopB; type LoopB = LoopA; const options: LoopA = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "interface LocalStory { value: unknown } const options: LocalStory = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			// Type arguments of a locally-owned generic do not transfer ownership
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; type Handler<T> = { value: T }; const options: Handler<RenderProps> = { props: value };',
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "const options: Record<string, { value: unknown }> = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "type Maybe = { value: unknown } | string[]; const options: Maybe = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "type Both = { value: unknown } & { other: string }; const options: Both = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "const options: UnknownConfiguration = { props: value };",
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: 'type Local = { value: unknown }; const options: Local["value"] = { props: value };',
+				options: [{ checkProperties: true }],
+				errors: [{ messageId: "replace" }],
+			},
 		],
 		valid: [
 			// CONSTANTS (all caps) should be ignored
@@ -819,6 +872,43 @@ describe("prevent-abbreviations", () => {
 			},
 			{
 				code: 'import type { RenderProps } from "@base-ui/react"; const options = <RenderProps>{ props: value };',
+				options: [{ checkProperties: true }],
+			},
+			// Local type aliases resolving to external imports transfer ownership
+			{
+				code: 'import type { Meta, StoryObj } from "@storybook/react"; type Story = StoryObj<typeof meta>; export const Default: Story = { args: {} };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; type First = RenderProps; type Second = First; const options: Second = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type * as BaseUi from "@base-ui/react"; type Story = BaseUi.RenderProps; const options: Story = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; type Maybe = RenderProps | { value: unknown }; const options: Maybe = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; type Both = RenderProps & { value: unknown }; const options: Both = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; type Picked = Pick<RenderProps, "props">; const options: Picked = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { RenderProps } from "@base-ui/react"; const options: RenderProps["props"] = { props: value };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type { BaseStory } from "@storybook/react"; interface ExtendedStory extends BaseStory { extra: unknown } const options: ExtendedStory = { args: {} };',
+				options: [{ checkProperties: true }],
+			},
+			{
+				code: 'import type * as Storybook from "@storybook/react"; interface ExtendedStory extends Storybook.BaseStory { extra: unknown } const options: ExtendedStory = { args: {} };',
 				options: [{ checkProperties: true }],
 			},
 			{

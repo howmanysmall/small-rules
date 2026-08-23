@@ -1,4 +1,4 @@
-import { isRecord, isStringRaw } from "./type-utilities";
+import { Predicate } from "effect";
 
 import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
@@ -86,7 +86,7 @@ export function getOptionalStringArrayProperty(
 	value: unknown,
 	propertyName: string,
 ): ReadonlyArray<string> | undefined {
-	if (!isRecord(value)) return undefined;
+	if (!Predicate.isObject(value)) return undefined;
 
 	const property = Reflect.get(value, propertyName);
 	if (property === undefined || !Array.isArray(property)) return undefined;
@@ -94,7 +94,7 @@ export function getOptionalStringArrayProperty(
 	const strings = new Array<string>();
 	let size = 0;
 	for (const item of property) {
-		if (!isStringRaw(item)) return undefined;
+		if (!Predicate.isString(item)) return undefined;
 		strings[size++] = item;
 	}
 

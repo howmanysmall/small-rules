@@ -1,10 +1,10 @@
 import nodePath from "node:path";
+import { Predicate } from "effect";
 import { parse } from "yuku-parser";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
-import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -105,11 +105,13 @@ function isUnaryPlusMinus(expression: ESTree.Expression): boolean {
 }
 
 function isExcludedLiteral(expression: { type: string; value?: unknown }): boolean {
-	return expression.type === "Literal" && (isStringRaw(expression.value) || isNumberRaw(expression.value));
+	return (
+		expression.type === "Literal" && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value))
+	);
 }
 
 function isParsedStatement(value: unknown): value is ESTree.Statement {
-	return isRecord(value) && isStringRaw(value.type);
+	return Predicate.isObject(value) && Predicate.isString(value.type);
 }
 
 function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.Statement> {

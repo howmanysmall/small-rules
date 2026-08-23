@@ -1,4 +1,4 @@
-import { type } from "arktype";
+import { Predicate } from "effect";
 
 import smallRules from "$small-rules";
 
@@ -8,8 +8,7 @@ export type { RuleName } from "./rule-manifest";
 
 type JsonValue = boolean | null | number | ReadonlyArray<JsonValue> | string | { readonly [key: string]: JsonValue };
 
-const isSchemaRecord = type("Record<string, unknown>").readonly();
-type SchemaRecord = typeof isSchemaRecord.infer;
+type SchemaRecord = Record<string, unknown>;
 
 interface ComplexDefaultValueDocumentation {
 	readonly copyValue: string;
@@ -39,17 +38,15 @@ export interface RuleOptionsDocumentation {
 	readonly schemaSummary: string;
 }
 
-function isString(value: unknown): value is string {
-	return typeof value === "string";
-}
-
 function isJsonValue(value: unknown): value is JsonValue {
-	if (value === null || typeof value === "boolean" || typeof value === "number" || isString(value)) return true;
+	if (value === null || Predicate.isBoolean(value) || Predicate.isNumber(value) || Predicate.isString(value)) {
+		return true;
+	}
 	if (Array.isArray(value)) {
 		for (const subValue of value) if (!isJsonValue(subValue)) return false;
 		return true;
 	}
-	if (!isSchemaRecord.allows(value)) return false;
+	if (!Predicate.isReadonlyObject(value)) return false;
 
 	for (const subValue of Object.values(value)) if (!isJsonValue(subValue)) return false;
 	return true;
@@ -73,7 +70,7 @@ function formatJson(value: JsonValue): string {
 
 function formatInline(value: unknown): string {
 	if (value === undefined) return "-";
-	if (isString(value)) return value;
+	if (Predicate.isString(value)) return value;
 	return JSON.stringify(value);
 }
 
@@ -97,21 +94,21 @@ function formatDefaultValue(name: string, schema: SchemaRecord): DefaultValueDoc
 			copyValue: JSON.stringify(schema.default),
 			displayValue: formatJson(schema.default),
 			kind: "complex",
-			summary: isString(schema.defaultLabel)
+			summary: Predicate.isString(schema.defaultLabel)
 				? schema.defaultLabel
 				: summarizeComplexDefault(name, schema.default),
 		};
 	}
 
 	return {
-		displayValue: isString(schema.defaultLabel) ? schema.defaultLabel : formatInline(schema.default),
+		displayValue: Predicate.isString(schema.defaultLabel) ? schema.defaultLabel : formatInline(schema.default),
 		kind: "inline",
 	};
 }
 
 function getSchemaTypeNames(schema: SchemaRecord): ReadonlyArray<string> {
-	if (isString(schema.type)) return [schema.type];
-	if (Array.isArray(schema.type)) return schema.type.filter(isString);
+	if (Predicate.isString(schema.type)) return [schema.type];
+	if (Array.isArray(schema.type)) return schema.type.filter(Predicate.isString);
 	if (schema.items !== undefined) return ["array"];
 	if (schema.properties !== undefined || schema.additionalProperties !== undefined) return ["object"];
 	return [];
@@ -258,17 +255,17 @@ function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 }
 
 function getObjectSchemaType(schema: SchemaRecord): string {
-	if (isSchemaRecord.allows(schema.properties)) {
-		const required = new Set(Array.isArray(schema.required) ? schema.required.filter(isString) : []);
+	if (Predicate.isReadonlyObject(schema.properties)) {
+		const required = new Set(Array.isArray(schema.required) ? schema.required.filter(Predicate.isString) : []);
 		const properties = Object.entries(schema.properties).map(([propertyName, propertySchema]) => {
 			const optional = required.has(propertyName) ? "" : "?";
-			const propertyType = isSchemaRecord.allows(propertySchema) ? getSchemaType(propertySchema) : "unknown";
+			const propertyType = Predicate.isReadonlyObject(propertySchema) ? getSchemaType(propertySchema) : "unknown";
 			return `${propertyName}${optional}: ${propertyType}`;
 		});
 		return `{ ${properties.join("; ")} }`;
 	}
 
-	if (isSchemaRecord.allows(schema.additionalProperties)) {
+	if (Predicate.isReadonlyObject(schema.additionalProperties)) {
 		return `Record<string, ${getSchemaType(schema.additionalProperties)}>`;
 	}
 
@@ -280,21 +277,21 @@ function getSchemaType(schema: SchemaRecord): string {
 	if (Array.isArray(schema.enum)) return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
 	if (Array.isArray(schema.oneOf)) {
 		return schema.oneOf
-			.map((entry) => (isSchemaRecord.allows(entry) ? getSchemaType(entry) : "unknown"))
+			.map((entry) => (Predicate.isReadonlyObject(entry) ? getSchemaType(entry) : "unknown"))
 			.join(" | ");
 	}
 	if (Array.isArray(schema.anyOf)) {
 		return schema.anyOf
-			.map((entry) => (isSchemaRecord.allows(entry) ? getSchemaType(entry) : "unknown"))
+			.map((entry) => (Predicate.isReadonlyObject(entry) ? getSchemaType(entry) : "unknown"))
 			.join(" | ");
 	}
 
 	const typeNames = getSchemaTypeNames(schema);
 	if (typeNames.includes("array")) {
 		if (Array.isArray(schema.items)) {
-			return `[${schema.items.map((item) => (isSchemaRecord.allows(item) ? getSchemaType(item) : "unknown")).join(", ")}]`;
+			return `[${schema.items.map((item) => (Predicate.isReadonlyObject(item) ? getSchemaType(item) : "unknown")).join(", ")}]`;
 		}
-		return `Array<${isSchemaRecord.allows(schema.items) ? getSchemaType(schema.items) : "unknown"}>`;
+		return `Array<${Predicate.isReadonlyObject(schema.items) ? getSchemaType(schema.items) : "unknown"}>`;
 	}
 	if (typeNames.includes("object")) return getObjectSchemaType(schema);
 	if (typeNames.length > 0) return joinTypes(typeNames);
@@ -320,7 +317,7 @@ function getExplicitPlaceholder(schema: SchemaRecord, hint: string | undefined):
 	if (Array.isArray(schema.anyOf)) {
 		const matchingSchema = schema.anyOf.find(
 			(entry) =>
-				isSchemaRecord.allows(entry) &&
+				Predicate.isReadonlyObject(entry) &&
 				// oxlint-disable-next-line react-doctor/js-set-map-lookups -- schema type lists are tiny; allocating a Set per branch costs more.
 				getSchemaTypeNames(entry).includes("object") &&
 				hint !== undefined &&
@@ -345,7 +342,7 @@ function createNumberPlaceholder(schema: SchemaRecord): number {
 function createObjectPlaceholder(schema: SchemaRecord, hint: string | undefined): JsonValue {
 	const knownPlaceholder = hint === undefined ? undefined : objectPlaceholders.get(hint);
 	if (knownPlaceholder !== undefined) return knownPlaceholder;
-	if (!isSchemaRecord.allows(schema.properties)) return {};
+	if (!Predicate.isReadonlyObject(schema.properties)) return {};
 
 	const placeholder: Record<string, JsonValue> = {};
 	for (const [propertyName, propertySchema] of Object.entries(schema.properties)) {
@@ -355,7 +352,7 @@ function createObjectPlaceholder(schema: SchemaRecord, hint: string | undefined)
 }
 
 function createPlaceholder(schema: unknown, hint?: string): JsonValue {
-	if (!isSchemaRecord.allows(schema)) return {};
+	if (!Predicate.isReadonlyObject(schema)) return {};
 	const explicitPlaceholder = getExplicitPlaceholder(schema, hint);
 	if (explicitPlaceholder !== undefined) return explicitPlaceholder;
 
@@ -369,16 +366,16 @@ function createPlaceholder(schema: unknown, hint?: string): JsonValue {
 }
 
 function createObjectOptions(schema: SchemaRecord): ReadonlyArray<ObjectOption> {
-	if (!isSchemaRecord.allows(schema.properties)) return [];
+	if (!Predicate.isReadonlyObject(schema.properties)) return [];
 
-	const required = new Set(Array.isArray(schema.required) ? schema.required.filter(isString) : []);
+	const required = new Set(Array.isArray(schema.required) ? schema.required.filter(Predicate.isString) : []);
 
 	return Object.entries(schema.properties).map(([name, optionSchema]) => {
-		const option = isSchemaRecord.allows(optionSchema) ? optionSchema : {};
+		const option = Predicate.isReadonlyObject(optionSchema) ? optionSchema : {};
 		return {
 			name,
 			defaultValue: formatDefaultValue(name, option),
-			description: isString(option.description) ? option.description : undefined,
+			description: Predicate.isString(option.description) ? option.description : undefined,
 			required: required.has(name),
 			type: getSchemaType(option),
 		};
@@ -408,7 +405,7 @@ function createConfiguration(ruleName: RuleName, schema: unknown): string {
 	const optionsValue = createOptionsValue(schema);
 	let ruleConfig: JsonValue = optionsValue === undefined ? "error" : ["error", optionsValue];
 
-	if (isSchemaRecord.allows(schema) && schema.type === "array") {
+	if (Predicate.isReadonlyObject(schema) && schema.type === "array") {
 		ruleConfig = ["error", createPlaceholder(schema.items, ruleName)];
 	}
 
@@ -424,7 +421,7 @@ function getSchemaSummary(schema: unknown): string {
 		if (schema.length === 0) return "This rule does not accept options.";
 		return "This rule accepts one options object after the severity.";
 	}
-	if (isSchemaRecord.allows(schema) && schema.type === "array") {
+	if (Predicate.isReadonlyObject(schema) && schema.type === "array") {
 		return "This rule accepts positional array options after the severity.";
 	}
 	return "This rule exposes a custom options schema.";
@@ -437,7 +434,7 @@ export function getRuleOptionsDocumentation(ruleName: RuleName): RuleOptionsDocu
 	return {
 		config: createConfiguration(ruleName, schema),
 		options:
-			isSchemaRecord.allows(optionSchema) && optionSchema.type === "object"
+			Predicate.isReadonlyObject(optionSchema) && optionSchema.type === "object"
 				? createObjectOptions(optionSchema)
 				: [],
 		schemaSummary: getSchemaSummary(schema),

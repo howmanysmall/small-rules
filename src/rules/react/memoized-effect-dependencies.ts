@@ -1,7 +1,7 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
-import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -75,9 +75,9 @@ function registerConfiguredEffectHooks(
 
 	for (const hook of rawOptions.hooks) {
 		/* v8 ignore next -- @preserve rule schema rejects hook entries without string names. */
-		if (!isRecord(hook) || !("name" in hook) || !isStringRaw(hook.name)) continue;
+		if (!Predicate.isObject(hook) || !("name" in hook) || !Predicate.isString(hook.name)) continue;
 		const dependenciesIndex =
-			"dependenciesIndex" in hook && isNumberRaw(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
+			"dependenciesIndex" in hook && Predicate.isNumber(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
 		effectHooks.set(hook.name, dependenciesIndex);
 	}
 }
@@ -85,7 +85,7 @@ function registerConfiguredEffectHooks(
 const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "react", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
-		const options = isRecord(rawOptions) ? rawOptions : {};
+		const options = Predicate.isObject(rawOptions) ? rawOptions : {};
 		const mode: Mode = "mode" in options && isMode(options.mode) ? options.mode : "definite";
 		const environment =
 			"environment" in options && isEnvironment(options.environment) ? options.environment : "roblox-ts";
