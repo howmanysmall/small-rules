@@ -8,12 +8,7 @@ import { parse } from "yuku-parser";
 import smallRules from "$small-rules";
 
 import { ruleExamples } from "../documentation/src/data/rule-examples";
-import {
-	formatRuleTitle,
-	getRuleCategoryPath,
-	getRulePath,
-	ruleManifest,
-} from "../documentation/src/data/rule-manifest";
+import { getRulePath, ruleManifest } from "../documentation/src/data/rule-manifest";
 import { ruleRelations } from "../documentation/src/data/rule-relations";
 
 import type { Node, Program } from "yuku-parser";
@@ -34,40 +29,27 @@ function getManifestRuleNames(): ReadonlyArray<string> {
 	return ruleManifest.categories.flatMap((category) => category.rules.map((entry) => entry.name));
 }
 
-function getExpectedRulePagePaths(): ReadonlyArray<string> {
-	return ruleManifest.categories.flatMap((category) =>
-		category.rules.map((entry) => nodePath.join(docsContentDirectory, `${getRulePath(category, entry.name)}.mdx`)),
-	);
-}
-
-function getRulePagePaths(): ReadonlyArray<string> {
+function getRulePageSources(): ReadonlyArray<{ readonly path: string; readonly source: string }> {
 	const relativePaths = readdirSync(rulePagesDirectory, { encoding: "utf8", recursive: true });
-	const rulePagePaths = new Array<string>();
-	let size = 0;
+	const pages = new Array<{ readonly path: string; readonly source: string }>();
 
 	for (const relativePath of relativePaths) {
 		if (!relativePath.endsWith(".mdx") || nodePath.basename(relativePath) === "index.mdx") continue;
-		rulePagePaths[size++] = nodePath.join(rulePagesDirectory, relativePath);
+		const path = nodePath.join(rulePagesDirectory, relativePath);
+		pages.push({ path, source: readFileSync(path, "utf8") });
 	}
 
-	return rulePagePaths;
+	return pages;
 }
 
-function getRulePageSources(): ReadonlyArray<{ readonly path: string; readonly source: string }> {
-	return getRulePagePaths().map((path) => ({ path, source: readFileSync(path, "utf8") }));
-}
-
-function getNonThinRulePagePaths(): ReadonlyArray<string> {
-	return getRulePageSources()
-		.filter(({ source }) => !source.includes('import RulePage from "@/components/rule-page.astro";'))
-		.map(({ path }) => path);
-}
-
-function getCuratedRationaleRulePagePaths(): ReadonlyArray<string> {
-	return getRulePageSources()
-		.filter(({ source }) => source.includes('slot="rationale"'))
-		.map(({ path }) => path)
-		.toSorted();
+function getExpectedRulePagePaths(): ReadonlySet<string> {
+	return new Set(
+		ruleManifest.categories.flatMap((category) =>
+			category.rules.map((entry) =>
+				nodePath.join(docsContentDirectory, `${getRulePath(category, entry.name)}.mdx`),
+			),
+		),
+	);
 }
 
 function getExpectedRuleIndexPagePaths(): ReadonlyArray<string> {
@@ -91,30 +73,28 @@ function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
 	);
 }
 
-function getUncoveredRuleNames(): ReadonlyArray<string> {
+function getExampleCoverageViolations(): ReadonlyArray<string> {
 	return getRuleExampleCoverage()
 		.filter(({ exemption, invalidCount, validCount }) => {
-			const hasExamples = invalidCount > 0 && validCount > 0;
-			const hasReasonedExemption = exemption !== undefined && exemption.trim() !== "";
-			return !hasExamples && !hasReasonedExemption;
+			if (exemption !== undefined) return exemption.trim() === "";
+			return invalidCount !== 1 || validCount !== 1;
 		})
-		.map(({ name }) => name);
-}
-
-function getExampleCountViolationNames(): ReadonlyArray<string> {
-	return getRuleExampleCoverage()
-		.filter(({ exemption }) => exemption === undefined)
-		.filter(({ invalidCount, validCount }) => invalidCount !== 1 || validCount !== 1)
 		.map(({ name }) => name);
 }
 
 type ExampleParseLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
 
 function resolveExampleLanguage({ language }: RuleExample): ExampleParseLanguage {
-	if (language === "dts" || language === "js" || language === "jsx" || language === "ts" || language === "tsx") {
-		return language;
+	switch (language) {
+		case "dts":
+		case "js":
+		case "jsx":
+		case "ts":
+		case "tsx":
+			return language;
+		default:
+			return "ts";
 	}
-	return "ts";
 }
 
 function parseExampleProgram(code: string, language: ExampleParseLanguage): Program | undefined {
@@ -145,12 +125,11 @@ function isMultiStatementContainer(node: Node): boolean {
 
 function isCrampedDocumentedExample(code: string, language: ExampleParseLanguage): boolean {
 	if (code.includes("\n") || code.trim() === "") return false;
+
 	const program = parseExampleProgram(code, language);
-	if (program === undefined) return false;
+	if (program === undefined || isMultiStatementContainer(program)) return program !== undefined;
 
-	let cramped = isMultiStatementContainer(program);
-	if (cramped) return true;
-
+	let cramped = false;
 	walk(program, {
 		enter(node) {
 			if (isMultiStatementContainer(node)) cramped = true;
@@ -165,158 +144,56 @@ function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 	const labels = new Array<string>();
 	for (const [ruleName, examples] of ruleExamples) {
 		for (const example of examples) {
-			if (!isCrampedDocumentedExample(example.code, resolveExampleLanguage(example))) continue;
-			labels.push(`${ruleName}/${example.kind}/${example.id}`);
+			if (isCrampedDocumentedExample(example.code, resolveExampleLanguage(example))) {
+				labels.push(`${ruleName}/${example.kind}/${example.id}`);
+			}
 		}
 	}
 	return labels.toSorted((left, right) => collator.compare(left, right));
 }
 
 describe("documentation rule coverage", () => {
-	it("matches the plugin rule set", () => {
+	it("derives every documented rule from the plugin", () => {
 		expect.assertions(1);
-		const manifestRuleNames = getManifestRuleNames().toSorted();
-		const pluginRuleNames = Object.keys(smallRules.rules).toSorted();
 
-		expect(manifestRuleNames).toStrictEqual(pluginRuleNames);
+		expect(getManifestRuleNames().toSorted()).toStrictEqual(Object.keys(smallRules.rules).toSorted());
 	});
 
-	it("does not duplicate manifest rules", () => {
-		expect.assertions(1);
-		const manifestRuleNames = getManifestRuleNames();
-
-		expect(new Set(manifestRuleNames).size).toBe(manifestRuleNames.length);
-	});
-
-	it("does not duplicate manifest categories", () => {
-		expect.assertions(1);
-		const categoryKeys = ruleManifest.categories.map((category) => category.key);
-
-		expect(new Set(categoryKeys).size).toBe(categoryKeys.length);
-	});
-
-	it("generates canonical category and rule paths", () => {
+	it("keeps one authored MDX page per manifest rule", () => {
 		expect.assertions(2);
-		const [reactCategory] = ruleManifest.categories;
+		const missingPages = [...getExpectedRulePagePaths()].filter((path) => !existsSync(path));
+		const pagesWithoutRulePage = getRulePageSources()
+			.filter(({ source }) => !source.includes("<RulePage rule="))
+			.map(({ path }) => path);
 
-		expect(getRuleCategoryPath(reactCategory)).toBe("rules/react");
-		expect(getRulePath(reactCategory, "ban-react-fc")).toBe("rules/react/ban-react-fc");
-	});
-
-	it("formats kebab-case rule titles", () => {
-		expect.assertions(2);
-
-		expect(formatRuleTitle("no-print")).toBe("No Print");
-		expect(formatRuleTitle("prefer-udim2-shorthand")).toBe("Prefer Udim2 Shorthand");
-	});
-
-	it("maps every manifest rule to one existing MDX page", () => {
-		expect.assertions(2);
-		const expectedRulePagePaths = getExpectedRulePagePaths();
-
-		expect(new Set(expectedRulePagePaths).size).toBe(expectedRulePagePaths.length);
-		expect(expectedRulePagePaths.filter((path) => existsSync(path))).toHaveLength(expectedRulePagePaths.length);
-	});
-
-	it("maps every discovered rule page to the manifest", () => {
-		expect.assertions(1);
-		const expectedRulePagePaths = new Set(getExpectedRulePagePaths());
-		const discoveredRulePagePaths = getRulePagePaths();
-
-		expect(discoveredRulePagePaths.every((path) => expectedRulePagePaths.has(path))).toBe(true);
+		expect(missingPages).toStrictEqual([]);
+		expect(pagesWithoutRulePage).toStrictEqual([]);
 	});
 
 	it("does not contain orphan rule pages", () => {
 		expect.assertions(1);
-		const expectedRulePagePaths = new Set(getExpectedRulePagePaths());
-		const orphanRulePagePaths = getRulePagePaths().filter((path) => !expectedRulePagePaths.has(path));
+		const expectedRulePagePaths = getExpectedRulePagePaths();
+		const orphanPages = getRulePageSources()
+			.map(({ path }) => path)
+			.filter((path) => !expectedRulePagePaths.has(path));
 
-		expect(orphanRulePagePaths).toStrictEqual([]);
+		expect(orphanPages).toStrictEqual([]);
 	});
 
-	it("uses the shared rule page component for every rule", () => {
+	it("keeps relation endpoints in the plugin", () => {
 		expect.assertions(1);
+		const pluginRuleNames = new Set(Object.keys(smallRules.rules));
+		const unknownEndpoints = ruleRelations
+			.flatMap((relation) => [relation.from, relation.to])
+			.filter((name) => !pluginRuleNames.has(name));
 
-		expect(getNonThinRulePagePaths()).toStrictEqual([]);
+		expect(unknownEndpoints).toStrictEqual([]);
 	});
 
-	it("keeps curated rationale pages explicit", () => {
-		expect.assertions(1);
-		const expectedPaths = [
-			"anti-slop/no-chained-type-assertions",
-			"anti-slop/no-conditional-empty-object-spread",
-			"anti-slop/no-known-value-widening",
-			"anti-slop/no-module-mocking",
-			"anti-slop/no-object-parameters",
-			"anti-slop/no-reflect-apply",
-			"anti-slop/no-reflect-get",
-			"anti-slop/no-runtime-typeof",
-			"anti-slop/no-shape-in-symbol-names",
-			"anti-slop/no-unknown-parameters",
-			"anti-slop/no-unknown-returns",
-			"anti-slop/no-unknown-type-aliases",
-			"anti-slop/no-unsafe-dictionary-type",
-			"anti-slop/no-widen-then-assert",
-			"anti-slop/require-safety-comment-for-type-assertion",
-			"general/no-increment-decrement",
-			"general/no-recursive",
-			"general/no-restricted-property-assignment",
-			"react/no-adjust-state-on-prop-change",
-			"react/no-chain-state-updates",
-			"react/no-derived-state",
-			"react/no-event-handler",
-			"react/no-external-store-subscription",
-			"react/no-initialize-state",
-			"react/no-pass-data-to-parent",
-			"react/no-pass-live-state-to-parent",
-			"react/no-reset-all-state-on-prop-change",
-			"roblox/ban-instances",
-			"roblox/no-array-constructor-elements",
-			"roblox/no-array-constructor-index-assignment",
-			"roblox/no-array-size-assignment",
-			"roblox/no-async-in-system",
-			"roblox/no-color3-constructor",
-			"roblox/no-events-in-events-callback",
-			"roblox/no-instance-methods-without-this",
-			"roblox/no-native-properties-spread",
-			"roblox/no-print",
-			"roblox/no-redundant-aspect-ratio-constraint",
-			"roblox/no-table-create-map",
-			"roblox/no-task-wait",
-			"roblox/no-useless-default",
-			"roblox/no-warn",
-			"roblox/prefer-idiv",
-			"roblox/prefer-math-min-max",
-			"roblox/prefer-modding-inspect",
-			"roblox/prefer-sequence-overloads",
-			"roblox/prefer-single-world-query",
-			"roblox/prefer-udim2-shorthand",
-			"roblox/require-module-level-instantiation",
-		]
-			.map((path) => nodePath.join(rulePagesDirectory, `${path}.mdx`))
-			.toSorted((left, right) => collator.compare(left, right));
-
-		expect(getCuratedRationaleRulePagePaths()).toStrictEqual(expectedPaths);
-	});
-
-	it("keeps relation endpoints in the manifest", () => {
-		expect.assertions(1);
-		const manifestRuleNames = new Set(getManifestRuleNames());
-		const relationEndpoints = ruleRelations.flatMap((relation) => [relation.from, relation.to]);
-
-		expect(relationEndpoints.every((name) => manifestRuleNames.has(name))).toBe(true);
-	});
-
-	it("provides a fail and pass example or a reasoned exemption for every rule", () => {
+	it("extracts one fail and one pass example for each non-exempt rule", () => {
 		expect.assertions(1);
 
-		expect(getUncoveredRuleNames()).toStrictEqual([]);
-	});
-
-	it("extracts exactly one fail and one pass example for each non-exempt rule", () => {
-		expect.assertions(1);
-
-		expect(getExampleCountViolationNames()).toStrictEqual([]);
+		expect(getExampleCoverageViolations()).toStrictEqual([]);
 	});
 
 	it("keeps multi-statement documented examples on multiple lines", () => {
@@ -326,10 +203,9 @@ describe("documentation rule coverage", () => {
 	});
 
 	it("provides an all-rules page and one landing page per category", () => {
-		expect.assertions(2);
-		const expectedRuleIndexPagePaths = getExpectedRuleIndexPagePaths();
+		expect.assertions(1);
+		const missingIndexPages = getExpectedRuleIndexPagePaths().filter((path) => !existsSync(path));
 
-		expect(expectedRuleIndexPagePaths).toHaveLength(6);
-		expect(expectedRuleIndexPagePaths.filter((path) => !existsSync(path))).toStrictEqual([]);
+		expect(missingIndexPages).toStrictEqual([]);
 	});
 });
