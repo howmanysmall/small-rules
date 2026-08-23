@@ -3,12 +3,12 @@ import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { ruleExamples } from "../documentation/src/data/rule-examples";
-import { extractRuleExamples } from "../documentation/src/utilities/extract-rule-examples";
+import { ruleExamples } from "../../documentation/src/data/rule-examples";
+import { extractRuleExamples } from "../../documentation/src/utilities/extract-rule-examples";
 
-import type { RuleExample } from "../documentation/src/utilities/extract-rule-examples";
+import type { RuleExample } from "../../documentation/src/utilities/extract-rule-examples";
 
-const fixtureDirectory = fileURLToPath(new URL("fixtures/documentation-rule-extractor", import.meta.url));
+const fixtureDirectory = fileURLToPath(new URL("../fixtures/documentation-rule-extractor", import.meta.url));
 
 function extractFixture(fixtureName: string): ReturnType<typeof extractRuleExamples> {
 	const relativePath = `tests/fixtures/documentation-rule-extractor/${fixtureName}`;
@@ -22,7 +22,7 @@ function getFixtureExamples(fixtureName: string): ReadonlyArray<RuleExample> | u
 }
 
 describe("extractRuleExamples", () => {
-	it("loads every top-level rule test into the Astro build-time map", () => {
+	it("loads every nested rule test into the Astro build-time map", () => {
 		expect.assertions(1);
 
 		expect(ruleExamples.size).toBeGreaterThan(0);

@@ -4,7 +4,7 @@ import {
 	createReleaseHistory,
 	getReleaseContentEntry,
 	releaseHistoryEmptyState,
-} from "../documentation/src/data/release-history";
+} from "../../documentation/src/data/release-history";
 
 describe("documentation release history", () => {
 	it("returns the documented empty state when no releases exist", () => {
