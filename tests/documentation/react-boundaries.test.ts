@@ -15,7 +15,7 @@ describe("documentation React boundaries", () => {
 	it("keeps Astro only where Astro or Starlight owns the rendering boundary", () => {
 		expect.assertions(1);
 
-		const componentsDirectory = nodePath.resolve(import.meta.dirname, "../documentation/src/components");
+		const componentsDirectory = nodePath.resolve(import.meta.dirname, "../../documentation/src/components");
 		const astroComponents = readdirSync(componentsDirectory)
 			.filter((fileName) => nodePath.extname(fileName) === ".astro")
 			.map((fileName) => nodePath.basename(fileName, ".astro"))

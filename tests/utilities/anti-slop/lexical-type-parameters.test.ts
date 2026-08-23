@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { createTypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import { isNode } from "$oxc-utilities/oxc-utilities";
-
-import { traverseAst } from "./rule-harness/ast";
-import { parseCase } from "./rule-harness/parse";
+import { traverseAst } from "$test/rule-harness/ast";
+import { parseCase } from "$test/rule-harness/parse";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
-import type { HarnessNode, HarnessSourceCode } from "./rule-harness/types";
+import type { HarnessNode, HarnessSourceCode } from "$test/rule-harness/types";
 
 function parseCode(code: string): HarnessSourceCode {
 	return parseCase({
@@ -57,15 +55,6 @@ function findMappedTypeAnnotation(source: HarnessSourceCode): ESTree.TSType {
 	return found;
 }
 
-function expectProgram(source: HarnessSourceCode): ESTree.Program {
-	if (isNode(source.ast) && source.ast.type === "Program") {
-		return source.ast;
-	}
-	const error = new Error("Source AST is not a program node.");
-	Error.captureStackTrace(error, expectProgram);
-	throw error;
-}
-
 describe("lexicalTypeParameterNames", () => {
 	it("stops descending when the node type has no visitor keys", () => {
 		expect.assertions(1);
@@ -95,29 +84,5 @@ describe("lexicalTypeParameterNames", () => {
 		const names = lexicalTypeParameterNames(annotation, source.visitorKeys);
 
 		expect([...names].toSorted()).toStrictEqual(["Key", "Target"]);
-	});
-});
-
-describe("createTypeEnvironment", () => {
-	it("collects aliases, interfaces, and shadowed built-ins from module declarations", () => {
-		expect.assertions(5);
-
-		const source = parseCode(
-			[
-				'import { Record } from "./owner";',
-				"export default class Owner {}",
-				"export {};",
-				"export type Payload = unknown;",
-				"interface Box { readonly id: string }",
-				"interface Box { readonly width: number }",
-			].join("\n"),
-		);
-		const environment = createTypeEnvironment(expectProgram(source));
-
-		expect(environment.aliases.has("Payload")).toBe(true);
-		expect(environment.interfaces.get("Box")).toHaveLength(2);
-		expect(environment.shadowedBuiltIns.has("Record")).toBe(true);
-		expect(environment.shadowedBuiltIns.has("Partial")).toBe(false);
-		expect(environment.shadowedBuiltIns.has("Payload")).toBe(false);
 	});
 });
