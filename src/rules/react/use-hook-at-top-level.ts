@@ -1,7 +1,7 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isComponentName, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -30,7 +30,7 @@ function isReactHookName(name: string): boolean {
 }
 
 function getOptions(value: unknown): UseHookAtTopLevelOptions {
-	return isRecord(value) ? value : {};
+	return Predicate.isObject(value) ? value : {};
 }
 
 function isComponentOrHook(node: CallbackFunction): boolean {

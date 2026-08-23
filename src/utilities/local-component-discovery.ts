@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
+import { Predicate } from "effect";
 
 import { resolveRelativeImport } from "./resolve-import";
-import { isStringRaw } from "./type-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
@@ -243,7 +243,7 @@ export function inspectRelativeLocalComponentImport(
 	definition: LocalComponentDefinition,
 ): LocalComponentInspection {
 	const importSource = node.source.value;
-	if (!isStringRaw(importSource) || !importSource.startsWith(".") || filename.length === 0) {
+	if (!Predicate.isString(importSource) || !importSource.startsWith(".") || filename.length === 0) {
 		return { importStyle: undefined, matches: false };
 	}
 

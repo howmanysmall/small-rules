@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isRecord, isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
+import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -15,7 +16,7 @@ const DEFAULT_BANNED_TYPES = new Map<string, BannedTypeEntry>([
 function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTypeEntry> {
 	const bannedTypes = new Map(DEFAULT_BANNED_TYPES);
 
-	if (!isRecord(rawOptions) || !("bannedTypes" in rawOptions)) return bannedTypes;
+	if (!Predicate.isObject(rawOptions) || !("bannedTypes" in rawOptions)) return bannedTypes;
 
 	const { bannedTypes: configuredBannedTypes } = rawOptions;
 	/* v8 ignore next -- @preserve rule schema oneOf ensures bannedTypes is never undefined when the key is present. */

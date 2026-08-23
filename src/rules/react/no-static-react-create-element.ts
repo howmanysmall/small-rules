@@ -8,7 +8,7 @@ import {
 	isReactNamespaceImport,
 } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
-import { isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -35,7 +35,7 @@ function isReactCreateElementCall(
 }
 
 function isStringElementName(node: ESTree.Expression): boolean {
-	return node.type === "Literal" && isStringRaw(node.value);
+	return node.type === "Literal" && Predicate.isString(node.value);
 }
 
 function isStaticComponentVariable(variable: ScopeVariable, name: string): boolean {

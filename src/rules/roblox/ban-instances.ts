@@ -1,7 +1,8 @@
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
-import { isRecord, isStringArray, isStringRaw, isStringRecord } from "$oxc-utilities/type-utilities";
+import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -63,16 +64,16 @@ function normalizePropertyBans(rawBans: unknown): Map<string, ReadonlyMap<string
 	if (rawBans === undefined) return bannedClasses;
 
 	/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties. */
-	if (!isRecord(rawBans)) return bannedClasses;
+	if (!Predicate.isObject(rawBans)) return bannedClasses;
 
 	for (const [className, propertyConfig] of Object.entries(rawBans)) {
 		/* v8 ignore next -- @preserve rule schema rejects non-record bannedProperties entries. */
-		if (!isRecord(propertyConfig)) continue;
+		if (!Predicate.isObject(propertyConfig)) continue;
 
 		const bannedPropertiesForClass = new Map<string, BannedPropertyEntry>();
 		for (const [propertyName, message] of Object.entries(propertyConfig)) {
 			/* v8 ignore next -- @preserve rule schema rejects non-string banned property messages. */
-			if (!isStringRaw(message)) continue;
+			if (!Predicate.isString(message)) continue;
 			bannedPropertiesForClass.set(propertyName.toLowerCase(), { message, propertyName });
 		}
 
@@ -85,7 +86,7 @@ function normalizePropertyBans(rawBans: unknown): Map<string, ReadonlyMap<string
 }
 
 function normalizeOptions(rawOptions: unknown): NormalizedOptions {
-	if (!isRecord(rawOptions)) return EMPTY_OPTIONS;
+	if (!Predicate.isObject(rawOptions)) return EMPTY_OPTIONS;
 
 	const { bannedInstances, bannedProperties } = rawOptions;
 
@@ -114,7 +115,7 @@ function getInstanceClassName(node: ESTree.NewExpression): string | undefined {
 	if (!isNamedGlobalCall(node, "Instance")) return undefined;
 
 	const [firstArgument] = node.arguments;
-	if (firstArgument?.type !== "Literal" || !isStringRaw(firstArgument.value)) return undefined;
+	if (firstArgument?.type !== "Literal" || !Predicate.isString(firstArgument.value)) return undefined;
 
 	return firstArgument.value;
 }

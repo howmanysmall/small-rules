@@ -1,4 +1,4 @@
-import { isStringRaw } from "./type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
@@ -34,7 +34,9 @@ export function unwrapParenthesis(expression: ESTree.Expression): ESTree.Express
 
 export function getMemberPropertyName(node: ESTree.MemberExpression): string | undefined {
 	if (node.computed) {
-		return node.property.type === "Literal" && isStringRaw(node.property.value) ? node.property.value : undefined;
+		return node.property.type === "Literal" && Predicate.isString(node.property.value)
+			? node.property.value
+			: undefined;
 	}
 
 	/* v8 ignore next -- @preserve non-computed member properties are parser-provided identifiers. */

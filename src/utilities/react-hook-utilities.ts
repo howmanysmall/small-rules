@@ -1,7 +1,6 @@
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { isKeyOfNode, isNode } from "$oxc-utilities/oxc-utilities";
-
-import { isStringRaw } from "./type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -84,7 +83,7 @@ function pushSlopValue(value: unknown, parent: ESTree.Node, worklist: Array<ESTr
 
 export function getBindingPropertyKeyName({ key }: ESTree.BindingProperty): string | undefined {
 	if (key.type === "Identifier") return key.name;
-	if (key.type === "Literal" && isStringRaw(key.value)) return key.value;
+	if (key.type === "Literal" && Predicate.isString(key.value)) return key.value;
 	return undefined;
 }
 

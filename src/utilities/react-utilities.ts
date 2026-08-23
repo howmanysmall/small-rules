@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { getImportedName } from "$oxc-utilities/oxc-utilities";
-import { isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -58,7 +58,7 @@ export function forEachReactNamedImport(
 }
 
 export function getEnvironment(value: unknown): Environment {
-	if (!isRecord(value) || value.environment !== "standard") return "roblox-ts";
+	if (!Predicate.isObject(value) || value.environment !== "standard") return "roblox-ts";
 	return "standard";
 }
 

@@ -6,7 +6,7 @@ import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
-import { isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -57,7 +57,7 @@ function getImportSourceFromVariable(variable: ScopeVariable): string | undefine
 		/* v8 ignore stop -- @preserve */
 		const { parent } = definition.node;
 		/* v8 ignore start -- @preserve import binding definitions have ImportDeclaration parents. */
-		if (parent?.type === "ImportDeclaration" && isStringRaw(parent.source.value)) return parent.source.value;
+		if (parent?.type === "ImportDeclaration" && Predicate.isString(parent.source.value)) return parent.source.value;
 		/* v8 ignore stop -- @preserve */
 	}
 

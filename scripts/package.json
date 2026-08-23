@@ -3,18 +3,18 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"@cliffy/command": "catalog:dev",
-		"@octokit/rest": "catalog:dev",
-		"@std/msgpack": "catalog:dev",
-		"arktype": "catalog:prod",
-		"fdir": "catalog:dev",
-		"jsonc-parser": "catalog:dev",
-		"just-diff": "catalog:dev",
-		"mutative": "catalog:dev",
-		"picocolors": "catalog:dev",
-		"yuku-ast": "catalog:dev",
-		"yuku-parser": "catalog:prod",
-		"zx": "catalog:dev"
+		"@cliffy/command": "catalog:scripts",
+		"@octokit/rest": "catalog:scripts",
+		"@std/msgpack": "catalog:scripts",
+		"arktype": "catalog:runtime",
+		"fdir": "catalog:scripts",
+		"jsonc-parser": "catalog:scripts",
+		"just-diff": "catalog:scripts",
+		"mutative": "catalog:scripts",
+		"picocolors": "catalog:scripts",
+		"yuku-ast": "catalog:tooling",
+		"yuku-parser": "catalog:runtime",
+		"zx": "catalog:scripts"
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "catalog:types"

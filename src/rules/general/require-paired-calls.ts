@@ -1,10 +1,11 @@
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 
 import { type } from "arktype";
+import { Predicate } from "effect";
 
 import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
@@ -16,7 +17,7 @@ const isPairConfiguration = type({
 	closer: isReadonlyArrayOfStrings.or(isString),
 	opener: isString,
 	"openerAlternatives?": isReadonlyArrayOfStrings.or(isUndefined),
-	"platform?": type('"roblox" | undefined'),
+	"platform?": '"roblox" | undefined',
 	"requireSync?": isBoolean.or(isUndefined),
 	"yieldingFunctions?": isReadonlyArrayOfStrings.or(isUndefined),
 }).readonly();
@@ -111,9 +112,7 @@ function getValidClosers(config: PairConfiguration): Array<string> {
 	} else {
 		/* v8 ignore start -- @preserve validated pair configs only allow string closers after the array branch fails. */
 		// oxlint-disable-next-line eslint/no-lonely-if -- V8 ignore must wrap only this defensive validated-shape branch.
-		if (isStringRaw(config.closer)) {
-			result[size++] = config.closer;
-		}
+		if (Predicate.isString(config.closer)) result[size++] = config.closer;
 		/* v8 ignore stop -- @preserve */
 	}
 

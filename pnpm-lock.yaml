@@ -18,122 +18,47 @@ catalogs:
     tsdown:
       specifier: 0.22.14
       version: 0.22.14
-  dev:
-    '@astrojs/check':
-      specifier: 0.9.10
-      version: 0.9.10
-    '@cliffy/command':
-      specifier: npm:@jsr/cliffy__command@1.2.1
-      version: 1.2.1
+  commitlint:
+    '@commitlint/cli':
+      specifier: 21.2.1
+      version: 21.2.1
     '@commitlint/config-conventional':
       specifier: 21.2.0
       version: 21.2.0
     '@commitlint/types':
       specifier: 21.2.0
       version: 21.2.0
-    '@octokit/rest':
-      specifier: 22.0.1
-      version: 22.0.1
-    '@oh-my-pi/pi-coding-agent':
-      specifier: 17.3.7
-      version: 17.3.7
-    '@opencode-ai/plugin':
-      specifier: 0.0.0-beta-17519
-      version: 0.0.0-beta-17519
-    '@std/msgpack':
-      specifier: npm:@jsr/std__msgpack@1.0.3
-      version: 1.0.3
-    '@stryker-mutator/api':
-      specifier: 9.6.1
-      version: 9.6.1
-    '@stryker-mutator/core':
-      specifier: 9.6.1
-      version: 9.6.1
-    '@typescript/native-preview':
-      specifier: 7.0.0-dev.20260707.2
-      version: 7.0.0-dev.20260707.2
-    '@vitiate/core':
-      specifier: 0.3.1
-      version: 0.3.1
-    '@vitiate/fuzzed-data-provider':
-      specifier: 0.3.1
-      version: 0.3.1
-    bumpp:
-      specifier: 12.2.0
-      version: 12.2.0
-    commitlint:
-      specifier: 21.2.1
-      version: 21.2.1
-    fast-check:
-      specifier: 4.9.0
-      version: 4.9.0
-    fdir:
-      specifier: 6.5.0
-      version: 6.5.0
-    get-tsconfig:
-      specifier: 4.14.1
-      version: 4.14.1
-    jiti:
-      specifier: 2.7.0
-      version: 2.7.0
-    jscpd:
-      specifier: 5.0.14
-      version: 5.0.14
-    jsonc-parser:
-      specifier: 3.3.1
-      version: 3.3.1
-    just-diff:
-      specifier: 6.0.2
-      version: 6.0.2
-    mutative:
-      specifier: 1.3.0
-      version: 1.3.0
-    oxfmt:
-      specifier: 0.63.0
-      version: 0.63.0
-    oxlint:
-      specifier: 1.78.0
-      version: 1.78.0
-    oxlint-tsgolint:
-      specifier: 7.0.2001
-      version: 7.0.2001
-    picocolors:
-      specifier: 1.1.1
-      version: 1.1.1
-    pncat:
-      specifier: 0.13.2
-      version: 0.13.2
-    sfw:
-      specifier: 2.0.6
-      version: 2.0.6
-    skills:
-      specifier: 1.5.22
-      version: 1.5.22
-    type-fest:
-      specifier: 5.8.0
-      version: 5.8.0
-    typescript:
-      specifier: npm:@typescript/typescript6@^6.0.2
-      version: 6.0.2
-    vitiate:
-      specifier: 0.3.1
-      version: 0.3.1
-    yuku-ast:
-      specifier: 0.8.4
-      version: 0.8.4
-    zx:
-      specifier: 8.8.5
-      version: 8.8.5
   frontend:
+    '@astrojs/check':
+      specifier: 0.9.10
+      version: 0.9.10
+    '@astrojs/markdown-satteri':
+      specifier: 0.3.2
+      version: 0.3.2
+    '@astrojs/mdx':
+      specifier: 7.0.0
+      version: 7.0.0
     '@astrojs/react':
       specifier: 6.0.0
       version: 6.0.0
+    '@astrojs/starlight':
+      specifier: 0.41.1
+      version: 0.41.1
+    astro:
+      specifier: 7.0.3
+      version: 7.0.3
     react:
       specifier: 19.2.7
       version: 19.2.7
     react-dom:
       specifier: 19.2.7
       version: 19.2.7
+    satteri:
+      specifier: 0.9.2
+      version: 0.9.2
+    sharp:
+      specifier: 0.34.5
+      version: 0.34.5
     shiki:
       specifier: 3.4.1
       version: 3.4.1
@@ -186,31 +111,32 @@ catalogs:
     knip:
       specifier: 6.32.1
       version: 6.32.1
+    oxfmt:
+      specifier: 0.63.0
+      version: 0.63.0
+    oxlint:
+      specifier: 1.78.0
+      version: 1.78.0
     oxlint-plugin-react-doctor:
       specifier: 0.9.11
       version: 0.9.11
+    oxlint-tsgolint:
+      specifier: 7.0.2001
+      version: 7.0.2001
     react-doctor:
       specifier: 0.9.11
       version: 0.9.11
-  prod:
-    '@astrojs/markdown-satteri':
-      specifier: 0.3.2
-      version: 0.3.2
-    '@astrojs/mdx':
-      specifier: 7.0.0
-      version: 7.0.0
-    '@astrojs/starlight':
-      specifier: 0.41.1
-      version: 0.41.1
+  release:
+    bumpp:
+      specifier: 12.2.0
+      version: 12.2.0
+  runtime:
     arktype:
       specifier: 2.2.3
       version: 2.2.3
-    astro:
-      specifier: 7.0.3
-      version: 7.0.3
     effect:
       specifier: 4.0.0-rc.111
-      version: 3.22.1
+      version: 4.0.0-rc.111
     ignore:
       specifier: 7.0.6
       version: 7.0.6
@@ -223,15 +149,37 @@ catalogs:
     oxlint-plugin-utilities:
       specifier: 1.1.0
       version: 1.1.0
-    satteri:
-      specifier: 0.9.2
-      version: 0.9.2
-    sharp:
-      specifier: 0.34.5
-      version: 0.34.5
     yuku-parser:
       specifier: 0.8.4
       version: 0.8.4
+  scripts:
+    '@cliffy/command':
+      specifier: npm:@jsr/cliffy__command@1.2.1
+      version: 1.2.1
+    '@octokit/rest':
+      specifier: 22.0.1
+      version: 22.0.1
+    '@std/msgpack':
+      specifier: npm:@jsr/std__msgpack@1.0.3
+      version: 1.0.3
+    fdir:
+      specifier: 6.5.0
+      version: 6.5.0
+    jsonc-parser:
+      specifier: 3.3.1
+      version: 3.3.1
+    just-diff:
+      specifier: 6.0.2
+      version: 6.0.2
+    mutative:
+      specifier: 1.3.0
+      version: 1.3.0
+    picocolors:
+      specifier: 1.1.1
+      version: 1.1.1
+    zx:
+      specifier: 8.8.5
+      version: 8.8.5
   test:
     '@fast-check/vitest':
       specifier: 0.4.1
@@ -239,6 +187,12 @@ catalogs:
     '@playwright/test':
       specifier: 1.61.1
       version: 1.61.1
+    '@stryker-mutator/api':
+      specifier: 9.6.1
+      version: 9.6.1
+    '@stryker-mutator/core':
+      specifier: 9.6.1
+      version: 9.6.1
     '@stryker-mutator/vitest-runner':
       specifier: 9.6.1
       version: 9.6.1
@@ -251,15 +205,55 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: 4.1.10
       version: 4.1.10
+    '@vitiate/core':
+      specifier: 0.3.1
+      version: 0.3.1
+    '@vitiate/fuzzed-data-provider':
+      specifier: 0.3.1
+      version: 0.3.1
     confbox:
       specifier: 0.2.4
       version: 0.2.4
+    fast-check:
+      specifier: 4.9.0
+      version: 4.9.0
     jsdom:
       specifier: 29.1.1
       version: 29.1.1
     vitest:
       specifier: 4.1.10
       version: 4.1.10
+    vitiate:
+      specifier: 0.3.1
+      version: 0.3.1
+  tooling:
+    '@oh-my-pi/pi-coding-agent':
+      specifier: 17.3.7
+      version: 17.3.7
+    '@opencode-ai/plugin':
+      specifier: 0.0.0-beta-17519
+      version: 0.0.0-beta-17519
+    get-tsconfig:
+      specifier: 4.14.1
+      version: 4.14.1
+    jiti:
+      specifier: 2.7.0
+      version: 2.7.0
+    jscpd:
+      specifier: 5.0.14
+      version: 5.0.14
+    pncat:
+      specifier: 0.13.2
+      version: 0.13.2
+    sfw:
+      specifier: 2.0.6
+      version: 2.0.6
+    skills:
+      specifier: 1.5.22
+      version: 1.5.22
+    yuku-ast:
+      specifier: 0.8.4
+      version: 0.8.4
   types:
     '@total-typescript/ts-reset':
       specifier: 0.6.1
@@ -276,6 +270,15 @@ catalogs:
     '@types/react-dom':
       specifier: 19.2.3
       version: 19.2.3
+    '@typescript/native-preview':
+      specifier: 7.0.0-dev.20260707.2
+      version: 7.0.0-dev.20260707.2
+    type-fest:
+      specifier: 5.8.0
+      version: 5.8.0
+    typescript:
+      specifier: npm:@typescript/typescript6@^6.0.2
+      version: 6.0.2
 
 overrides:
   '@isentinel/eslint-config>@pobammer-ts/small-rules': link:./plugins
@@ -288,25 +291,25 @@ importers:
   .:
     dependencies:
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       effect:
-        specifier: catalog:prod
-        version: 3.22.1
+        specifier: catalog:runtime
+        version: 4.0.0-rc.111
       ignore:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 7.0.6
       minimatch:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 10.2.6
       oxc-resolver:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 11.24.2
       oxlint-plugin-utilities:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 1.1.0(@typescript/typescript6@6.0.2)
       yuku-parser:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 0.8.4
     devDependencies:
       '@arethetypeswrong/core':
@@ -315,11 +318,14 @@ importers:
       '@biomejs/biome':
         specifier: catalog:lint
         version: 2.5.8
+      '@commitlint/cli':
+        specifier: catalog:commitlint
+        version: 21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
       '@commitlint/config-conventional':
-        specifier: catalog:dev
+        specifier: catalog:commitlint
         version: 21.2.0
       '@commitlint/types':
-        specifier: catalog:dev
+        specifier: catalog:commitlint
         version: 21.2.0
       '@fast-check/vitest':
         specifier: catalog:test
@@ -328,10 +334,10 @@ importers:
         specifier: catalog:lint
         version: 6.0.0-beta.42(465c1fe88564cb7a645e330fc4f0f92d)
       '@stryker-mutator/api':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 9.6.1
       '@stryker-mutator/core':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 9.6.1(@types/node@26.2.0)(supports-color@10.2.2)(vitest@4.1.10)
       '@stryker-mutator/vitest-runner':
         specifier: catalog:test
@@ -346,7 +352,7 @@ importers:
         specifier: catalog:types
         version: 26.2.0
       '@typescript/native-preview':
-        specifier: catalog:dev
+        specifier: catalog:types
         version: 7.0.0-dev.20260707.2
       '@vitest/coverage-v8':
         specifier: catalog:test
@@ -355,17 +361,14 @@ importers:
         specifier: catalog:lint
         version: 1.6.27(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(vitest@4.1.10)
       '@vitiate/core':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 0.3.1(@typescript/typescript6@6.0.2)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10)
       '@vitiate/fuzzed-data-provider':
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 0.3.1
       bumpp:
-        specifier: catalog:dev
+        specifier: catalog:release
         version: 12.2.0
-      commitlint:
-        specifier: catalog:dev
-        version: 21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
       confbox:
         specifier: catalog:test
         version: 0.2.4
@@ -406,34 +409,34 @@ importers:
         specifier: catalog:lint
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))
       fast-check:
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 4.9.0
       get-tsconfig:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 4.14.1
       jiti:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 2.7.0
       jscpd:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 5.0.14
       knip:
         specifier: catalog:lint
         version: 6.32.1
       oxfmt:
-        specifier: catalog:dev
+        specifier: catalog:lint
         version: 0.63.0
       oxlint:
-        specifier: catalog:dev
+        specifier: catalog:lint
         version: 1.78.0(oxlint-tsgolint@7.0.2001)
       oxlint-plugin-react-doctor:
         specifier: catalog:lint
         version: 0.9.11
       oxlint-tsgolint:
-        specifier: catalog:dev
+        specifier: catalog:lint
         version: 7.0.2001
       pncat:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.13.2
       publint:
         specifier: catalog:build
@@ -442,49 +445,49 @@ importers:
         specifier: catalog:lint
         version: 0.9.11(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint-tsgolint@7.0.2001)(supports-color@10.2.2)
       sfw:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 2.0.6
       skills:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 1.5.22
       tsdown:
         specifier: catalog:build
         version: 0.22.14(@arethetypeswrong/core@0.18.5)(@typescript/native-preview@7.0.0-dev.20260707.2)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.23)
       type-fest:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: 5.8.0
       typescript:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: '@typescript/typescript6@6.0.2'
       vitest:
         specifier: catalog:test
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(jsdom@29.1.1)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
       vitiate:
-        specifier: catalog:dev
+        specifier: catalog:test
         version: 0.3.1(@typescript/typescript6@6.0.2)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10)
       yuku-ast:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.8.4
       zx:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 8.8.5
 
   .omp:
     dependencies:
       '@oh-my-pi/pi-coding-agent':
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 17.3.7
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       effect:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 4.0.0-rc.111
 
   .opencode:
     dependencies:
       '@opencode-ai/plugin':
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.0.0-beta-17519(supports-color@10.2.2)
     devDependencies:
       '@types/bun':
@@ -494,29 +497,32 @@ importers:
         specifier: catalog:types
         version: 26.2.0
       typescript:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: '@typescript/typescript6@6.0.2'
 
   documentation:
     dependencies:
       '@astrojs/markdown-satteri':
-        specifier: catalog:prod
+        specifier: catalog:frontend
         version: 0.3.2
       '@astrojs/mdx':
-        specifier: catalog:prod
+        specifier: catalog:frontend
         version: 7.0.0(@astrojs/markdown-satteri@0.3.2)(@typescript/typescript6@6.0.2)(astro@7.0.3(@astrojs/check@0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6))(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(aws4fetch@1.0.20)(jiti@2.7.0)(yaml@2.9.0))(supports-color@10.2.2)
       '@astrojs/react':
         specifier: catalog:frontend
         version: 6.0.0(@types/node@26.2.0)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@10.2.2)(yaml@2.9.0)
       '@astrojs/starlight':
-        specifier: catalog:prod
+        specifier: catalog:frontend
         version: 0.41.1(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(astro@7.0.3(@astrojs/check@0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6))(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(aws4fetch@1.0.20)(jiti@2.7.0)(yaml@2.9.0))(supports-color@10.2.2)
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       astro:
-        specifier: catalog:prod
+        specifier: catalog:frontend
         version: 7.0.3(@astrojs/check@0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6))(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(aws4fetch@1.0.20)(jiti@2.7.0)(yaml@2.9.0)
+      effect:
+        specifier: catalog:runtime
+        version: 4.0.0-rc.111
       react:
         specifier: catalog:frontend
         version: 19.2.7
@@ -524,23 +530,23 @@ importers:
         specifier: catalog:frontend
         version: 19.2.7(react@19.2.7)
       satteri:
-        specifier: catalog:prod
+        specifier: catalog:frontend
         version: 0.9.2
       sharp:
-        specifier: catalog:prod
+        specifier: catalog:frontend
         version: 0.34.5
       shiki:
         specifier: catalog:frontend
         version: 3.4.1
       yuku-ast:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.8.4
       yuku-parser:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 0.8.4
     devDependencies:
       '@astrojs/check':
-        specifier: catalog:dev
+        specifier: catalog:frontend
         version: 0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6)
       '@playwright/test':
         specifier: catalog:test
@@ -567,7 +573,7 @@ importers:
         specifier: catalog:test
         version: 29.1.1
       typescript:
-        specifier: catalog:dev
+        specifier: catalog:types
         version: '@typescript/typescript6@6.0.2'
       vitest:
         specifier: catalog:test
@@ -576,40 +582,40 @@ importers:
   scripts:
     dependencies:
       '@cliffy/command':
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: '@jsr/cliffy__command@1.2.1'
       '@octokit/rest':
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 22.0.1
       '@std/msgpack':
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: '@jsr/std__msgpack@1.0.3'
       arktype:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 2.2.3
       fdir:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 6.5.0(picomatch@4.0.5)
       jsonc-parser:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 3.3.1
       just-diff:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 6.0.2
       mutative:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 1.3.0
       picocolors:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 1.1.1
       yuku-ast:
-        specifier: catalog:dev
+        specifier: catalog:tooling
         version: 0.8.4
       yuku-parser:
-        specifier: catalog:prod
+        specifier: catalog:runtime
         version: 0.8.4
       zx:
-        specifier: catalog:dev
+        specifier: catalog:scripts
         version: 8.8.5
     devDependencies:
       '@total-typescript/ts-reset':
@@ -1189,8 +1195,8 @@ packages:
     resolution: {integrity: sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==}
     engines: {node: '>= 20.12.0'}
 
-  '@commitlint/cli@21.2.2':
-    resolution: {integrity: sha512-a+6hQxIxnpdvSvS2apvttPNbEliYsVC3PqFYDiiB2kjbwIsQsj1urvQ4Tkf70pKYozPalKAuRQmm/GHwndduqA==}
+  '@commitlint/cli@21.2.1':
+    resolution: {integrity: sha512-blsZGe29hJ72VGEFVl72IVYX+1vsfINpjA9yWQA6i7OKD/McGEOXg08sKIRKjFk4JvzhV/9n0l3i6NooPLTNfg==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -4932,11 +4938,6 @@ packages:
     resolution: {integrity: sha512-rKZTGo4fzKYna8UcL0isTg5wkBNla7bxTypLwZQXjIdi++IdP1OJ41rI5Mti3/jltkPujbu4i9LIARYA+zpotQ==}
     engines: {node: '>= 12.0.0'}
 
-  commitlint@21.2.1:
-    resolution: {integrity: sha512-Ki6U66eL6wXsZf/is2qCs/6W2fNeF/WL2GSiacnuf2wwmCPapjtOoUvwfwMoqUAwosKbJfXVwr2iLnV08J7JmA==}
-    engines: {node: '>=22.12.0'}
-    hasBin: true
-
   common-ancestor-path@2.0.0:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
     engines: {node: '>= 18'}
@@ -5219,9 +5220,6 @@ packages:
     resolution: {integrity: sha512-T0ix8GhtxyKVfUFEcvdNDt3YGqlwkFHbD4/5bgFUDgFmxhI/cSRAeJ87/Sz//Cq8Eam6JX/e23RkoFO71P7aAA==}
     engines: {node: '>=20'}
     hasBin: true
-
-  effect@3.22.1:
-    resolution: {integrity: sha512-TNoXushmPOBAjJlthF5d2QwnX2xBPEtcNJr5XKNKbRLbDvBcOYkXlYDfvGfSA0zriwLFuCll5MDtNMAdZL17PQ==}
 
   effect@4.0.0-beta.101:
     resolution: {integrity: sha512-HjowumlIo+orthn4jMlEJPuzIYPBV+uq/XiciHWhiedLsXQpWHdNJHO5d59BVDP5s1LPuvERcktwFqRXnJqnhA==}
@@ -5699,10 +5697,6 @@ packages:
 
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
-
-  fast-check@3.23.2:
-    resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
-    engines: {node: '>=8.0.0'}
 
   fast-check@4.9.0:
     resolution: {integrity: sha512-7ms6T7SybUev/PQITciI0yLM2pOSFy5zpG8Ty7tQofcVaQUvrMXp6CBwqF6fThLCLOrfBtuHAtwq6Yu4XPCllg==}
@@ -7360,9 +7354,6 @@ packages:
   puppeteer-core@25.3.0:
     resolution: {integrity: sha512-fm+wpUr2oigH1PXZvwgATrM2tYWHMDG8ASzTEe9uukCye4X5Ldx1K5BTHPFKITrIWvQQAQ256d1NpbEveBcKjA==}
     engines: {node: '>=22.12.0'}
-
-  pure-rand@6.1.0:
-    resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
   pure-rand@8.4.2:
     resolution: {integrity: sha512-vvuOGgcuPJAirlHvuQw1TrOiw7ptaIXXmIbNuiNOY6lNGJJH49PQ1Kj4nd783nPdQhQdicgOjVI2yI/9BD6/Ng==}
@@ -9371,7 +9362,7 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@commitlint/cli@21.2.2(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)':
+  '@commitlint/cli@21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)':
     dependencies:
       '@commitlint/config-conventional': 21.2.2
       '@commitlint/format': 21.2.2
@@ -11939,7 +11930,7 @@ snapshots:
 
   '@types/sax@1.2.7':
     dependencies:
-      '@types/node': 24.13.3
+      '@types/node': 26.2.0
 
   '@types/unist@2.0.11': {}
 
@@ -12941,16 +12932,6 @@ snapshots:
 
   comment-parser@1.4.8: {}
 
-  commitlint@21.2.1(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2):
-    dependencies:
-      '@commitlint/cli': 21.2.2(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
-      '@commitlint/types': 21.2.0
-    transitivePeerDependencies:
-      - '@types/node'
-      - conventional-commits-filter
-      - conventional-commits-parser
-      - typescript
-
   common-ancestor-path@2.0.0: {}
 
   compare-versions@6.1.1: {}
@@ -13257,11 +13238,6 @@ snapshots:
       commander: 14.0.3
       minimatch: 10.2.6
       semver: 7.8.5
-
-  effect@3.22.1:
-    dependencies:
-      '@standard-schema/spec': 1.1.0
-      fast-check: 3.23.2
 
   effect@4.0.0-beta.101:
     dependencies:
@@ -13923,10 +13899,6 @@ snapshots:
   exsolve@1.1.1: {}
 
   extend@3.0.2: {}
-
-  fast-check@3.23.2:
-    dependencies:
-      pure-rand: 6.1.0
 
   fast-check@4.9.0:
     dependencies:
@@ -16055,8 +16027,6 @@ snapshots:
       - utf-8-validate
       - yauzl
 
-  pure-rand@6.1.0: {}
-
   pure-rand@8.4.2: {}
 
   qified@0.10.1:
@@ -17378,6 +17348,7 @@ time:
   '@astrojs/react@6.0.0': '2026-06-22T10:10:05.834Z'
   '@astrojs/starlight@0.41.1': '2026-06-25T12:49:50.497Z'
   '@biomejs/biome@2.5.8': '2026-08-11T08:57:57.925Z'
+  '@commitlint/cli@21.2.1': '2026-07-08T07:48:07.331Z'
   '@commitlint/config-conventional@21.2.0': '2026-06-30T09:53:56.373Z'
   '@commitlint/types@21.2.0': '2026-06-30T09:53:50.232Z'
   '@fast-check/vitest@0.4.1': '2026-04-28T22:22:05.897Z'
@@ -17408,9 +17379,7 @@ time:
   astro@7.0.3: '2026-06-25T16:17:05.372Z'
   babel-plugin-react-compiler@1.0.0: '2025-10-07T19:19:01.781Z'
   bumpp@12.2.0: '2026-08-06T00:09:55.598Z'
-  commitlint@21.2.1: '2026-07-08T07:48:08.940Z'
   confbox@0.2.4: '2026-02-06T12:11:42.581Z'
-  effect@3.22.1: '2026-07-30T04:29:21.637Z'
   effect@4.0.0-rc.111: '2026-08-20T04:49:00.643Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
   eslint-plugin-astro@3.1.0: '2026-08-02T14:03:14.890Z'
