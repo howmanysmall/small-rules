@@ -4,8 +4,9 @@
 //
 // Modifications: local API and path alias adaptation.
 
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -33,7 +34,7 @@ const noRuntimeTypeof = createRule("no-runtime-typeof", "anti-slop", {
 		return {
 			UnaryExpression(node): void {
 				const [option] = context.options;
-				const allowInTypeGuards = isRecord(option) && option.allowInTypeGuards === true;
+				const allowInTypeGuards = Predicate.isObject(option) && option.allowInTypeGuards === true;
 				if (node.operator === "typeof" && (!allowInTypeGuards || !isInsideTypeGuard(node))) {
 					context.report({ messageId: "runtimeTypeof", node });
 				}
