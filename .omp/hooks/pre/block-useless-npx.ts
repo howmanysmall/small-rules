@@ -102,7 +102,7 @@ function readScripts(directory: string): Record<string, string> | undefined {
 		return undefined;
 	}
 
-	if (!Predicate.isRecord(parsed)) return undefined;
+	if (!Predicate.isObject(parsed)) return undefined;
 
 	const scripts = new Map<string, string>();
 	for (const [name, value] of Object.entries(parsed)) if (Predicate.isString(value)) scripts.set(name, value);

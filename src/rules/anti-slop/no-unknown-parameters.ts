@@ -70,8 +70,10 @@ const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 			for (const parameter of node.params) {
 				const annotation = parameterAnnotation(parameter);
 				if (annotation?.typeAnnotation.type !== "TSUnknownKeyword") continue;
+
 				const name = parameterName(parameter, context.sourceCode.getText(parameter));
 				if (name === "cause") continue;
+
 				context.report({
 					data: { parameter: name },
 					messageId: "unknownParameter",

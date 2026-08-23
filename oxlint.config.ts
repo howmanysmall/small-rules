@@ -238,7 +238,7 @@ const rules: OxlintRules = {
 	"small-rules/no-render-helper-functions": "off",
 	"small-rules/no-reset-all-state-on-prop-change": "off",
 	"small-rules/no-restricted-property-assignment": "off",
-	"small-rules/no-runtime-typeof": "error",
+	"small-rules/no-runtime-typeof": ["error", { allowInTypeGuards: true }],
 	"small-rules/no-shape-in-symbol-names": "error",
 	"small-rules/no-spec-file-extension": "error",
 	"small-rules/no-static-react-create-element": "error",
