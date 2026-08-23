@@ -9,11 +9,12 @@ import {
 	isObjectExpression,
 	isStringLiteral,
 	isTsQualifiedName,
+	isTsTypeAliasDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { isObjectPropertyKey } from "$oxc-utilities/prevent-abbreviations/scope";
 
-import type { Definition, ESTree, SourceCode } from "oxlint-plugin-utilities";
+import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 const NON_PACKAGE_IMPORT_PATTERN = /^(?:[#$./]|[~@]\/)/u;
 
@@ -39,15 +40,84 @@ function getRootTypeName(typeName: ESTree.TSTypeName): ESTree.IdentifierReferenc
 }
 
 function isExternalType(typeAnnotation: ESTree.TSType, sourceCode: SourceCode): boolean {
-	if (typeAnnotation.type === "TSImportType") return isExternalModuleSpecifier(typeAnnotation.source.value);
-	if (typeAnnotation.type !== "TSTypeReference") return false;
+	return isExternalTypeNode(typeAnnotation, sourceCode, new Set<object>());
+}
 
-	const rootTypeName = getRootTypeName(typeAnnotation.typeName);
-	/* v8 ignore next -- @preserve parsed TSTypeReference names always resolve to an identifier root. */
-	if (rootTypeName === undefined) return false;
+function isExternalTypeNode(
+	typeAnnotation: ESTree.TSType,
+	sourceCode: SourceCode,
+	visitedDeclarations: Set<object>,
+): boolean {
+	let current = typeAnnotation;
+	while (current.type === "TSIndexedAccessType") current = current.objectType;
 
-	const definition = getVariableByName(sourceCode.getScope(rootTypeName), rootTypeName.name)?.defs[0];
-	return isExternalPackageImport(definition);
+	if (current.type === "TSImportType") return isExternalModuleSpecifier(current.source.value);
+	if (current.type === "TSTypeReference") {
+		const rootTypeName = getRootTypeName(current.typeName);
+		/* v8 ignore next -- @preserve parsed TSTypeReference names always resolve to an identifier root. */
+		if (rootTypeName === undefined) return false;
+
+		return isExternalNamedType(
+			rootTypeName.name,
+			sourceCode.getScope(rootTypeName),
+			current.typeArguments,
+			sourceCode,
+			visitedDeclarations,
+		);
+	}
+	if (current.type === "TSUnionType" || current.type === "TSIntersectionType") {
+		return current.types.some((member) => isExternalTypeNode(member, sourceCode, visitedDeclarations));
+	}
+
+	return false;
+}
+
+function isExternalNamedType(
+	name: string,
+	scope: null | Scope,
+	typeArguments: ESTree.TSTypeParameterInstantiation | null,
+	sourceCode: SourceCode,
+	visitedDeclarations: Set<object>,
+): boolean {
+	const definition = getVariableByName(scope, name)?.defs[0];
+	if (isExternalPackageImport(definition)) return true;
+
+	if (definition === undefined) {
+		if (typeArguments === null) return false;
+		return typeArguments.params.some((parameter) => isExternalTypeNode(parameter, sourceCode, visitedDeclarations));
+	}
+
+	const declaration = definition.node;
+	if (isTsTypeAliasDeclaration(declaration)) {
+		if (visitedDeclarations.has(declaration)) return false;
+		visitedDeclarations.add(declaration);
+		return isExternalTypeNode(declaration.typeAnnotation, sourceCode, visitedDeclarations);
+	}
+	if (declaration.type === "TSInterfaceDeclaration") {
+		return declaration.extends.some((heritage) =>
+			isExternalInterfaceHeritage(heritage, sourceCode, visitedDeclarations),
+		);
+	}
+
+	return false;
+}
+
+function isExternalInterfaceHeritage(
+	heritage: ESTree.TSInterfaceHeritage,
+	sourceCode: SourceCode,
+	visitedDeclarations: Set<object>,
+): boolean {
+	const rootNode = resolveRootObjectIdentifier(heritage.expression);
+	/* v8 ignore next -- @preserve parsed heritage roots resolve to named identifiers or import types. */
+	if (rootNode === undefined || !hasName(rootNode)) return false;
+
+	return isExternalNamedType(
+		rootNode.name,
+		sourceCode.getScope(rootNode),
+		heritage.typeArguments,
+		sourceCode,
+		visitedDeclarations,
+	);
 }
 
 function getContextualType(objectExpression: ESTree.ObjectExpression): ESTree.TSType | undefined {
