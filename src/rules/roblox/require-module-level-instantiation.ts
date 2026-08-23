@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -9,12 +9,14 @@ interface TrackedInstantiation {
 }
 
 function normalizeConfig(options: unknown): ReadonlyMap<string, string> {
-	if (!isRecord(options) || !("classes" in options) || !isRecord(options.classes)) return new Map();
+	if (!Predicate.isObject(options) || !("classes" in options) || !Predicate.isObject(options.classes)) {
+		return new Map();
+	}
 	const { classes } = options;
 	const result = new Map<string, string>();
 	for (const [key, value] of Object.entries(classes)) {
 		/* v8 ignore start -- @preserve rule schema restricts configured class import sources to strings. */
-		if (!isStringRaw(value)) continue;
+		if (!Predicate.isString(value)) continue;
 		/* v8 ignore stop -- @preserve */
 		result.set(key, value);
 	}
@@ -31,7 +33,7 @@ function getImportedClassName(specifier: ESTree.ImportDeclaration["specifiers"][
 	if (specifier.type !== "ImportSpecifier") return undefined;
 	if (specifier.imported.type === "Identifier") return specifier.imported.name;
 	/* v8 ignore start -- @preserve TypeScript import specifiers provide identifier imported names here. */
-	if (isStringRaw(specifier.imported.value)) return specifier.imported.value;
+	if (Predicate.isString(specifier.imported.value)) return specifier.imported.value;
 	return undefined;
 	/* v8 ignore stop -- @preserve */
 }
@@ -70,7 +72,7 @@ function collectTrackedBindings(
 	localBindings: Map<string, string>,
 ): void {
 	/* v8 ignore start -- @preserve import declaration source values are string literals. */
-	if (!isStringRaw(node.source.value)) return;
+	if (!Predicate.isString(node.source.value)) return;
 	/* v8 ignore stop -- @preserve */
 
 	const importSource = node.source.value;

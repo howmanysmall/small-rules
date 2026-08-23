@@ -1,7 +1,8 @@
 import { getMemberPropertyName, pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
-import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isStringArray } from "$oxc-utilities/type-utilities";
+import { String as EffectString, Predicate } from "effect";
 
 import type { ESTree, InferContextFromRule, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -42,9 +43,9 @@ function parseGlobalMode(value: unknown): GlobalMode | undefined {
 }
 
 function parseOptions(rawOptions: unknown): RuleOptions {
-	if (!isRecord(rawOptions)) {
+	if (!Predicate.isObject(rawOptions)) {
 		return {
-			comments: DEFAULT_COMMENTS.map((comment) => comment.toLowerCase()),
+			comments: DEFAULT_COMMENTS.map(EffectString.toLowerCase),
 			functions: new Set(DEFAULT_FUNCTIONS),
 			overrideGlobals: new Map(),
 			selectors: [],
@@ -52,12 +53,12 @@ function parseOptions(rawOptions: unknown): RuleOptions {
 	}
 
 	const comments = isStringArray(rawOptions.comments)
-		? rawOptions.comments.map((comment) => comment.toLowerCase())
-		: DEFAULT_COMMENTS.map((comment) => comment.toLowerCase());
+		? rawOptions.comments.map(EffectString.toLowerCase)
+		: DEFAULT_COMMENTS.map(EffectString.toLowerCase);
 	const functions = isStringArray(rawOptions.functions) ? new Set(rawOptions.functions) : new Set(DEFAULT_FUNCTIONS);
 	const selectors = isStringArray(rawOptions.selectors) ? rawOptions.selectors : [];
 	const overrideGlobals = new Map<string, GlobalMode>();
-	if (isRecord(rawOptions.overrideGlobals)) {
+	if (Predicate.isObject(rawOptions.overrideGlobals)) {
 		for (const [name, value] of Object.entries(rawOptions.overrideGlobals)) {
 			const mode = parseGlobalMode(value);
 			if (mode !== undefined) overrideGlobals.set(name, mode);
@@ -76,7 +77,7 @@ function getObjectPropertyName(node: ESTree.Node): string | undefined {
 	if (node.type !== "Property" && node.type !== "MethodDefinition") return undefined;
 	if (node.computed && node.key.type !== "Literal") return undefined;
 	if (node.key.type === "Identifier") return node.key.name;
-	if (node.key.type === "Literal" && isStringRaw(node.key.value)) return node.key.value;
+	if (node.key.type === "Literal" && Predicate.isString(node.key.value)) return node.key.value;
 	return undefined;
 }
 
@@ -271,7 +272,7 @@ function pushChildNodes(sourceCode: SourceCode, node: ESTree.Node, worklist: Arr
 	const keys = sourceCode.visitorKeys[node.type] ?? [];
 	for (const key of keys) {
 		/* v8 ignore next -- parser-produced ESTree nodes are always records. @preserve */
-		if (!isRecord(node)) break;
+		if (!Predicate.isObject(node)) break;
 		const value = node[key];
 		if (Array.isArray(value)) {
 			/* v8 ignore next -- visitor-key arrays only contain nodes or null holes already filtered. @preserve */

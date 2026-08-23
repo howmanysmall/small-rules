@@ -2,9 +2,9 @@ import nodePath from "node:path";
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
+import { Predicate } from "effect";
 
 function pathSegmentsFromSource(source: string): ReadonlyArray<string> {
 	return source.split("/").filter((part) => !part.startsWith("."));
@@ -31,14 +31,14 @@ const strictComponentBoundaries = createRule("strict-component-boundaries", "rea
 	create(context): Visitor {
 		// oxlint-disable-next-line typescript/no-unnecessary-condition -- false flag.
 		const rawOptions = context.options?.[0];
-		const { allow = [], maxDepth = 1 } = isRecord(rawOptions) ? rawOptions : { allow: [], maxDepth: 1 };
+		const { allow = [], maxDepth = 1 } = Predicate.isObject(rawOptions) ? rawOptions : { allow: [], maxDepth: 1 };
 
 		const allowPatterns = allow.map((pattern) => new RegExp(pattern, "u"));
 
 		return {
 			ImportDeclaration(node): void {
 				const importSource = node.source.value;
-				if (!isStringRaw(importSource) || !importSource.startsWith(".")) return;
+				if (!Predicate.isString(importSource) || !importSource.startsWith(".")) return;
 				if (allowPatterns.some((regexp) => regexp.test(importSource))) return;
 
 				const { filename } = context;

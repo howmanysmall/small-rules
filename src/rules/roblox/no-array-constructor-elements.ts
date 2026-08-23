@@ -21,7 +21,7 @@ import {
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
-import { isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { BindingName } from "$oxc-types/missing-types";
 import type { FixReturn } from "$oxc-utilities/oxc-utilities";
@@ -145,7 +145,7 @@ function isReadonlyArrayAnnotation(typeAnnotation: ESTree.TSTypeAnnotation | und
 
 function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (isLiteral(unwrapped) && "value" in unwrapped) return !isNumberRaw(unwrapped.value);
+	if (isLiteral(unwrapped) && "value" in unwrapped) return !Predicate.isNumber(unwrapped.value);
 
 	if (
 		isArrayExpression(unwrapped) ||
@@ -488,7 +488,7 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 	create(context): Visitor {
 		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety
 		const rawOptions = context.options?.[0];
-		const options: Required<NoArrayConstructorElementsOptions> = isRecord(rawOptions)
+		const options: Required<NoArrayConstructorElementsOptions> = Predicate.isObject(rawOptions)
 			? { ...DEFAULT_OPTIONS, ...(rawOptions as Partial<NoArrayConstructorElementsOptions>) }
 			: { ...DEFAULT_OPTIONS };
 		const { sourceCode } = context;

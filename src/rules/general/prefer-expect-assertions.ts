@@ -7,10 +7,10 @@ import {
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
 import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+import { Predicate } from "effect";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 
@@ -24,11 +24,11 @@ interface RuleOptions {
 
 function parseStringArray(value: unknown): ReadonlyArray<string> {
 	/* v8 ignore next -- @preserve rule schema restricts these options to a string array type before create() runs. */
-	return Array.isArray(value) ? value.filter(isStringRaw) : [];
+	return Array.isArray(value) ? value.filter(Predicate.isString) : [];
 }
 
 function parseOptions(rawOptions: unknown): RuleOptions {
-	if (!isRecord(rawOptions)) {
+	if (!Predicate.isObject(rawOptions)) {
 		return {
 			additionalAssertionFunctions: [],
 			additionalExpectCallNames: [],

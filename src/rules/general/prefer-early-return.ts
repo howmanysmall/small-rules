@@ -1,12 +1,12 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isNumberRaw, isRecord } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 const DEFAULT_MAXIMUM_STATEMENTS = 1;
 
 function getMaximumStatements(value: unknown): number {
-	if (!isRecord(value) || !isNumberRaw(value.maximumStatements)) return DEFAULT_MAXIMUM_STATEMENTS;
+	if (!Predicate.isObject(value) || !Predicate.isNumber(value.maximumStatements)) return DEFAULT_MAXIMUM_STATEMENTS;
 	return value.maximumStatements;
 }
 
@@ -42,18 +42,17 @@ const preferEarlyReturn = createRule("prefer-early-return", "general", {
 			});
 		}
 
+		function onFunction(node: ESTree.Function): void {
+			/* v8 ignore next -- @preserve implemented function declarations have parser bodies. */
+			if (node.body !== null) checkFunctionBody(node.body);
+		}
+
 		return {
 			ArrowFunctionExpression(node): void {
 				if (node.body.type === "BlockStatement") checkFunctionBody(node.body);
 			},
-			FunctionDeclaration(node): void {
-				/* v8 ignore next -- @preserve implemented function declarations have parser bodies. */
-				if (node.body !== null) checkFunctionBody(node.body);
-			},
-			FunctionExpression(node): void {
-				/* v8 ignore next -- @preserve implemented function expressions have parser bodies. */
-				if (node.body !== null) checkFunctionBody(node.body);
-			},
+			FunctionDeclaration: onFunction,
+			FunctionExpression: onFunction,
 		} satisfies Visitor;
 	},
 	meta: {

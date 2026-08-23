@@ -125,6 +125,9 @@ catalogs:
     arktype:
       specifier: 2.2.3
       version: 2.2.3
+    effect:
+      specifier: 4.0.0-rc.111
+      version: 4.0.0-rc.111
     ignore:
       specifier: 7.0.6
       version: 7.0.6
@@ -281,6 +284,9 @@ importers:
       arktype:
         specifier: catalog:runtime
         version: 2.2.3
+      effect:
+        specifier: catalog:runtime
+        version: 4.0.0-rc.111
       ignore:
         specifier: catalog:runtime
         version: 7.0.6
@@ -493,6 +499,9 @@ importers:
       astro:
         specifier: catalog:frontend
         version: 7.0.3(@astrojs/check@0.9.10(@typescript/typescript6@6.0.2)(prettier@3.9.6))(@astrojs/markdown-remark@7.2.0(supports-color@10.2.2))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(@typescript/typescript6@6.0.2)(aws4fetch@1.0.20)(jiti@2.7.0)(yaml@2.9.0)
+      effect:
+        specifier: catalog:runtime
+        version: 4.0.0-rc.111
       react:
         specifier: catalog:frontend
         version: 19.2.7
@@ -5141,6 +5150,9 @@ packages:
 
   effect@4.0.0-beta.101:
     resolution: {integrity: sha512-HjowumlIo+orthn4jMlEJPuzIYPBV+uq/XiciHWhiedLsXQpWHdNJHO5d59BVDP5s1LPuvERcktwFqRXnJqnhA==}
+
+  effect@4.0.0-rc.111:
+    resolution: {integrity: sha512-ASd5L58EIR0CUNueZNKKjSsyOCd+2alxOAIaTcHaqkJkPsaYSsw5Cg/cfANk5K4Jr2YsX756xvX11shzqsreWA==}
 
   electron-to-chromium@1.5.408:
     resolution: {integrity: sha512-SLoprcYpJ/OH2v2ps0+N5biv9H4/KBT3+YmmDew64TwK5y9j2wv7pMOFY7IorVkyMtEyLSCRlXKLsNlakeAlPw==}
@@ -13060,6 +13072,12 @@ snapshots:
       uuid: 14.0.1
       yaml: 2.9.0
 
+  effect@4.0.0-rc.111:
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      fast-check: 4.9.0
+      msgpackr: 2.0.5
+
   electron-to-chromium@1.5.408: {}
 
   emmet@2.4.11:
@@ -17133,6 +17151,7 @@ time:
   babel-plugin-react-compiler@1.0.0: '2025-10-07T19:19:01.781Z'
   bumpp@12.2.0: '2026-08-06T00:09:55.598Z'
   confbox@0.2.4: '2026-02-06T12:11:42.581Z'
+  effect@4.0.0-rc.111: '2026-08-20T04:49:00.643Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
   eslint-plugin-astro@3.1.0: '2026-08-02T14:03:14.890Z'
   eslint-plugin-eslint-plugin@7.6.1: '2026-08-06T01:41:00.609Z'

@@ -168,6 +168,7 @@ catalogs:
     bumpp: 12.2.0
   runtime:
     arktype: 2.2.3
+    effect: 4.0.0-rc.111
     ignore: 7.0.6
     minimatch: 10.2.6
     oxc-resolver: 11.24.2

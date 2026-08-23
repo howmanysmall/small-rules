@@ -1,10 +1,10 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
-import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import { Predicate } from "effect";
 
 const UNSTABLE_VALUES = new Set<string>([
 	"ArrayExpression",
@@ -649,7 +649,7 @@ function visitChildNodes(current: ESTree.Node, sourceCode: SourceCode, visit: (n
 	const keys = sourceCode.visitorKeys[current.type] ?? [];
 	for (const key of keys) {
 		/* v8 ignore next -- @preserve traversal only visits parser node records. */
-		if (!isRecord(current)) break;
+		if (!Predicate.isObject(current)) break;
 		const value = current[key];
 		if (Array.isArray(value)) {
 			/* v8 ignore next -- @preserve visitor-key arrays contain parser nodes when present. */
@@ -751,17 +751,17 @@ function isSelfReferenceCapture(capture: CaptureInfo, { parent }: ESTree.CallExp
 }
 
 function isNumericArray(array: ReadonlyArray<unknown>): array is Array<number> {
-	return array.length > 0 && isNumberRaw(array[0]);
+	return array.length > 0 && Predicate.isNumber(array[0]);
 }
 function isStringArray(array: ReadonlyArray<unknown>): array is Array<string> {
-	return array.length > 0 && isStringRaw(array[0]);
+	return array.length > 0 && Predicate.isString(array[0]);
 }
 
 function convertStableResult(
 	stableResult: boolean | number | ReadonlyArray<number> | ReadonlyArray<string>,
 ): StableResult {
 	if (typeof stableResult === "boolean") return stableResult;
-	if (isNumberRaw(stableResult)) return new Set([stableResult]);
+	if (Predicate.isNumber(stableResult)) return new Set([stableResult]);
 
 	/* v8 ignore next -- @preserve stableResult option schema only permits boolean, number, or arrays. */
 	if (Array.isArray(stableResult)) {

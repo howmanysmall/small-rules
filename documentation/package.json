@@ -20,6 +20,7 @@
 		"@astrojs/starlight": "catalog:frontend",
 		"arktype": "catalog:runtime",
 		"astro": "catalog:frontend",
+		"effect": "catalog:runtime",
 		"react": "catalog:frontend",
 		"react-dom": "catalog:frontend",
 		"satteri": "catalog:frontend",

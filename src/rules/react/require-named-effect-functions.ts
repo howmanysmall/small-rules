@@ -2,11 +2,11 @@ import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } fr
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
-import { isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import { Predicate } from "effect";
 
 interface HookConfig {
 	readonly name: string;
@@ -28,14 +28,14 @@ const DEFAULT_HOOKS = [
 
 function isHookConfiguration(value: unknown): value is HookConfig {
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
-	return isRecord(value) && isStringRaw(value.name) && typeof value.allowAsync === "boolean";
+	return Predicate.isObject(value) && Predicate.isString(value.name) && typeof value.allowAsync === "boolean";
 }
 
 function parseOptions(rawOptions: unknown): EffectFunctionOptions {
-	const sloptor = isRecord(rawOptions) && rawOptions.sloptor === true;
-	const inlineFunctionDeclarations = isRecord(rawOptions) && rawOptions.inlineFunctionDeclarations === true;
+	const sloptor = Predicate.isObject(rawOptions) && rawOptions.sloptor === true;
+	const inlineFunctionDeclarations = Predicate.isObject(rawOptions) && rawOptions.inlineFunctionDeclarations === true;
 
-	if (!isRecord(rawOptions)) {
+	if (!Predicate.isObject(rawOptions)) {
 		return { environment: "roblox-ts", hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
 	}
 

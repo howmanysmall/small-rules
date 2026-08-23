@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -15,7 +15,7 @@ function isIdentifierWithName(node: ESTree.Expression, name: string): node is ES
 }
 
 function getFlagsString(node: ESTree.Node): string | undefined {
-	if (node.type !== "Literal" || !isStringRaw(node.value)) return undefined;
+	if (node.type !== "Literal" || !Predicate.isString(node.value)) return undefined;
 	return node.value;
 }
 
@@ -38,8 +38,7 @@ const requireUnicodeRegex = createRule("require-unicode-regex", "general", {
 				if (flagsNode === undefined || !isNotSpread(flagsNode)) return;
 
 				const flags = getFlagsString(flagsNode);
-				if (flags === undefined) return;
-				if (!hasUnicodeFlag(flags)) {
+				if (flags !== undefined && !hasUnicodeFlag(flags)) {
 					context.report({ messageId: "requireUnicodeFlag", node });
 				}
 			},

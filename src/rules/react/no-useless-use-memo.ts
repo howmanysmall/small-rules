@@ -8,7 +8,8 @@ import {
 	isStaticArrayExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { isRecord, isStringArray, isStringRaw } from "$oxc-utilities/type-utilities";
+import { isStringArray } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
@@ -27,7 +28,7 @@ interface NormalizedOptions {
 }
 
 function getDependencyMode(value: unknown): DependencyMode {
-	if (!isRecord(value) || !isStringRaw(value.dependencyMode)) return DependencyMode.NonUpdating;
+	if (!Predicate.isObject(value) || !Predicate.isString(value.dependencyMode)) return DependencyMode.NonUpdating;
 	// oxlint-disable-next-line typescript/no-unsafe-enum-comparison -- shut up lol
 	if (value.dependencyMode === DependencyMode.EmptyOrOmitted || value.dependencyMode === DependencyMode.Aggressive) {
 		return value.dependencyMode;
@@ -37,7 +38,7 @@ function getDependencyMode(value: unknown): DependencyMode {
 
 function normalizeOptions(raw: unknown): NormalizedOptions {
 	const factories =
-		isRecord(raw) && isStringArray(raw.staticGlobalFactories)
+		Predicate.isObject(raw) && isStringArray(raw.staticGlobalFactories)
 			? raw.staticGlobalFactories
 			: DEFAULT_STATIC_GLOBAL_FACTORIES;
 

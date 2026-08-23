@@ -2,7 +2,7 @@ import defaultProperties from "$oxc-generated/default-properties.json";
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
-import { isNumberRaw, isRecord, isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 
@@ -208,12 +208,12 @@ function isIgnoredPropertyName(propertyName: string): boolean {
 }
 
 function isCanonicalNumericComponent(value: unknown): value is CanonicalNumericComponent {
-	return isNumberRaw(value) || value === "inf" || value === "-inf";
+	return Predicate.isNumber(value) || value === "inf" || value === "-inf";
 }
 
 function isCanonicalValue(value: unknown): value is CanonicalValue {
 	/* v8 ignore next -- @preserve generated default-properties entries are canonical value records. */
-	if (!isRecord(value) || !isStringRaw(value.type) || !("value" in value)) return false;
+	if (!Predicate.isObject(value) || !Predicate.isString(value.type) || !("value" in value)) return false;
 
 	switch (value.type) {
 		case "bool":
@@ -228,11 +228,11 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 		}
 
 		case "Color3": {
-			return Array.isArray(value.value) && value.value.length === 3 && value.value.every(isNumberRaw);
+			return Array.isArray(value.value) && value.value.length === 3 && value.value.every(Predicate.isNumber);
 		}
 
 		case "Enum":
-			return isStringRaw(value.enumType) && isStringRaw(value.value);
+			return Predicate.isString(value.enumType) && Predicate.isString(value.value);
 
 		case "number":
 			return isCanonicalNumericComponent(value.value);
@@ -245,7 +245,7 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 		}
 
 		case "string":
-			return isStringRaw(value.value);
+			return Predicate.isString(value.value);
 
 		case "UDim":
 		case "Vector2": {
@@ -288,7 +288,7 @@ function containsIdentifierReference(
 		return false;
 	}
 
-	if (!isRecord(value) || visitedValues.has(value)) return false;
+	if (!Predicate.isObject(value) || visitedValues.has(value)) return false;
 
 	visitedValues.add(value);
 	if (value.type === "Identifier" && value.name === identifierName) return true;

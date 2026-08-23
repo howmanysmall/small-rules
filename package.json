@@ -73,6 +73,7 @@
 	},
 	"dependencies": {
 		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime",
 		"ignore": "catalog:runtime",
 		"minimatch": "catalog:runtime",
 		"oxc-resolver": "catalog:runtime",

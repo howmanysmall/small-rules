@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isStringRaw } from "$oxc-utilities/type-utilities";
+import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -79,7 +79,7 @@ const IS_INTEGER = /^\d/u;
 function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
 	if (node.id.type === "Identifier") return node.id.name;
 	/* v8 ignore next -- @preserve TypeScript enum literal member names are parser string literals here. */
-	if (node.id.type !== "Literal" || !isStringRaw(node.id.value)) return undefined;
+	if (node.id.type !== "Literal" || !Predicate.isString(node.id.value)) return undefined;
 	return IS_INTEGER.test(node.id.value) ? undefined : node.id.value;
 }
 
