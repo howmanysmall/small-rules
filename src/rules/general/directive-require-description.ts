@@ -4,6 +4,7 @@ import {
 	isDisableOrEnableDirectiveKind,
 	parseDirectiveComment,
 } from "$oxc-utilities/directive-comments";
+import { Predicate } from "effect";
 
 import type { Comment, Visitor } from "oxlint-plugin-utilities";
 
@@ -40,7 +41,7 @@ const directiveRequireDescription = createRule("directive-require-description", 
 			// (eslint-disable, oxlint-disable, etc.) because ESLint requires block
 			// comments for those. But oxlint supports // oxlint-disable and
 			// // oxlint-enable in line comments, so check those directly.
-			if (comment.type !== "Line") return;
+			if (comment.type !== "Line" || !Predicate.isString(comment.value)) return;
 
 			const text = comment.value.trim();
 			const match = OXLINT_LINE_DIRECTIVE.exec(text);
