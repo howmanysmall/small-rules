@@ -1,7 +1,8 @@
 import { expect } from "vitest";
-import { parseDirectiveComment, toRuleIdLocation } from "$oxc-utilities/directive-comments";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
+
+import { parseDirectiveComment, toRuleIdLocation } from "$oxc-utilities/directive-comments";
 
 import type { Comment } from "oxlint-plugin-utilities";
 

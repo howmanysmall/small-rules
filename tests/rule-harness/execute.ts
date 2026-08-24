@@ -1,10 +1,17 @@
-// oxlint-disable unicorn/no-null -- The unset scope mirrors eslint-scope's null upper scope sentinel.
+// oxlint-disable unicorn/no-null -- The unset scope mirrors eslint-scope's
+// null upper scope sentinel.
+
+import { Predicate } from "effect";
+
 import { traverseAst } from "./ast";
 import { createDiagnosticCollector } from "./diagnostics";
 import { HarnessError } from "./harness-error";
-import { getProperty, isRecord } from "./object";
+import { getProperty } from "./object";
 import { getRuleMeta, parseCase } from "./parse";
 
+import type { UnknownRecord } from "type-fest";
+
+import type { HarnessValue } from "./object";
 import type {
 	HarnessContext,
 	HarnessNode,
@@ -18,7 +25,10 @@ interface MutableHarnessContext extends HarnessContext {
 	diagnostics: ReturnType<typeof createDiagnosticCollector>;
 }
 
-export function createRuleExecutor(ruleName: string, rule: unknown): (testCase: NormalizedCase) => RuleExecutionResult {
+export function createRuleExecutor(
+	ruleName: string,
+	rule: HarnessValue,
+): (testCase: NormalizedCase) => RuleExecutionResult {
 	const meta = getRuleMeta(rule);
 	const createOnce = getRuleFunction(rule, "createOnce");
 	if (createOnce !== undefined) {
@@ -29,9 +39,7 @@ export function createRuleExecutor(ruleName: string, rule: unknown): (testCase: 
 
 	const create = getRuleFunction(rule, "create");
 	if (create === undefined) {
-		const error = new HarnessError(`Rule '${ruleName}' does not expose create() or createOnce().`);
-		Error.captureStackTrace(error, createRuleExecutor);
-		throw error;
+		throw new HarnessError(`Rule '${ruleName}' does not expose create() or createOnce().`);
 	}
 
 	return (testCase) => {
@@ -51,8 +59,8 @@ export function createRuleExecutor(ruleName: string, rule: unknown): (testCase: 
 
 function executeWithExistingVisitor(
 	context: MutableHarnessContext,
-	visitor: unknown,
-	meta: Record<string, unknown>,
+	visitor: HarnessValue,
+	meta: UnknownRecord,
 	testCase: NormalizedCase,
 ): RuleExecutionResult {
 	const sourceCode = parseCase(testCase);
@@ -151,29 +159,29 @@ function createUnsetNode(): HarnessNode {
 	};
 }
 
-type RuleFactory = (context: HarnessContext) => unknown;
+type RuleFactory = (context: HarnessContext) => HarnessValue;
 
-function getRuleFunction(rule: unknown, key: string): RuleFactory | undefined {
-	if (!isRecord(rule)) return undefined;
+function getRuleFunction(rule: HarnessValue, key: string): RuleFactory | undefined {
+	if (!Predicate.isObject(rule)) return undefined;
 	const value = getProperty(rule, key);
 	return isRuleFactory(value) ? value : undefined;
 }
 
-function isRuleFactory(value: unknown): value is RuleFactory {
-	return typeof value === "function";
+function isRuleFactory(value: HarnessValue): value is RuleFactory {
+	return Predicate.isFunction(value);
 }
 
-function runVisitor(visitor: unknown, sourceCode: HarnessSourceCode): void {
+function runVisitor(visitor: HarnessValue, sourceCode: HarnessSourceCode): void {
 	traverseAst(sourceCode.ast, visitor);
 }
 
-function runHook(visitor: unknown, key: string): unknown {
-	if (!isRecord(visitor)) return undefined;
+function runHook(visitor: HarnessValue, key: string): HarnessValue {
+	if (!Predicate.isObject(visitor)) return undefined;
 	const hook = getProperty(visitor, key);
 	if (!isHook(hook)) return undefined;
 	return hook();
 }
 
-function isHook(value: unknown): value is () => unknown {
-	return typeof value === "function";
+function isHook(value: HarnessValue): value is () => HarnessValue {
+	return Predicate.isFunction(value);
 }

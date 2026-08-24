@@ -1,10 +1,12 @@
+import { Predicate } from "effect";
+
 import { getVariableByName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
-import { Predicate } from "effect";
+
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnnotation | undefined): boolean {
 	/* v8 ignore next -- @preserve callers use undefined to mean no type annotation. */

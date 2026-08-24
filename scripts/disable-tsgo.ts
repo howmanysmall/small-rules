@@ -2,13 +2,14 @@
 
 import nodePath from "node:path";
 import { cwd } from "node:process";
-import { editJsonc } from "$script-utilities/jsonc-utilities";
 import { Command } from "@cliffy/command";
 import { type } from "arktype";
 import { argv, file, JSONC, write } from "bun";
 import { fdir } from "fdir";
 import { create } from "mutative";
 import { bold, cyan, dim, green, red, yellow } from "picocolors";
+
+import { editJsonc } from "$script-utilities/jsonc-utilities";
 
 const fdirZed = new fdir().glob("**/.zed/settings.json").withFullPaths();
 
@@ -150,10 +151,12 @@ function collectRegions(
 	return regions;
 }
 
-function countLines(
-	operations: ReadonlyArray<DiffOperation>,
-	upTo: number,
-): { readonly newNumber: number; readonly oldNumber: number } {
+interface Lines {
+	readonly newNumber: number;
+	readonly oldNumber: number;
+}
+
+function countLines(operations: ReadonlyArray<DiffOperation>, upTo: number): Lines {
 	let oldNumber = 1;
 	let newNumber = 1;
 	for (const [index, operation] of operations.entries()) {
@@ -161,7 +164,7 @@ function countLines(
 		if (operation.operation === Operation.Equal || operation.operation === Operation.Delete) oldNumber += 1;
 		if (operation.operation === Operation.Equal || operation.operation === Operation.Add) newNumber += 1;
 	}
-	return { newNumber, oldNumber };
+	return { newNumber, oldNumber } satisfies Lines;
 }
 
 function formatDiff(filePath: string, oldContent: string, newContent: string): string {

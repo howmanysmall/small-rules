@@ -1,0 +1,16 @@
+---
+title: "No Runtime Typeof"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-runtime-typeof">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. A <code>typeof</code>{" "}
+			check narrows a representation but does not establish the value's full contract. Parse at the I/O boundary
+			instead. Set <code>allowInTypeGuards</code> only for schema-free codebases that deliberately use
+			type-predicate helpers.
+		</p>
+	</Fragment>
+</RulePage>

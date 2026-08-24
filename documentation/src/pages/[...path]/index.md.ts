@@ -1,6 +1,6 @@
 import { getCollection } from "astro:content";
 
-import { createMarkdownResponse } from "@/utilities/create-markdown-response";
+import { createMarkdownResponse } from "$utilities/create-markdown-response";
 
 import type { APIRoute, GetStaticPaths, GetStaticPathsResult } from "astro";
 

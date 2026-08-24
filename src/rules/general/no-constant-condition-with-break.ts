@@ -1,10 +1,12 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { JsonValue } from "type-fest";
 
 interface NoConstantConditionWithBreakOptions {
 	readonly loopExitCalls?: ReadonlyArray<string>;
@@ -12,8 +14,10 @@ interface NoConstantConditionWithBreakOptions {
 
 interface ConstantValueResult {
 	readonly constant: boolean;
-	readonly value?: unknown;
+	readonly value?: ConstantValue;
 }
+
+type ConstantValue = bigint | JsonValue | RegExp | undefined;
 
 interface ConstantBooleanResult {
 	readonly constant: boolean;
@@ -30,7 +34,7 @@ type LoopNode =
 const NON_CONSTANT_VALUE: ConstantValueResult = { constant: false };
 const NON_CONSTANT_BOOLEAN: ConstantBooleanResult = { constant: false };
 
-function toConstantValue(value: unknown): ConstantValueResult {
+function toConstantValue(value: ConstantValue): ConstantValueResult {
 	return { constant: true, value };
 }
 

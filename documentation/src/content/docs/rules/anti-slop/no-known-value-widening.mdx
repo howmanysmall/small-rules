@@ -1,0 +1,16 @@
+---
+title: "No Known Value Widening"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-known-value-widening">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. An explicit
+			<code>unknown</code>, <code>object</code>, open dictionary, or anonymous-object annotation can erase the
+			useful evidence an object literal already has. I prefer inference, or <code>satisfies</code> when you need
+			to validate the object against a wider contract without throwing away its known keys.
+		</p>
+	</Fragment>
+</RulePage>

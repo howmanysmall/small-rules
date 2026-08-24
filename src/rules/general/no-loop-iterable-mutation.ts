@@ -142,10 +142,8 @@ function argumentMatchesName(call: ESTree.CallExpression, name: string | undefin
 }
 
 function pushChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
-	// biome-ignore lint/suspicious/noForIn: AST worklist traversal
-	for (const key in node) {
+	for (const [key, value] of Object.entries(node)) {
 		if (key === "parent" || key === "range" || key === "loc") continue;
-		const value: unknown = Reflect.get(node, key);
 		if (Array.isArray(value)) {
 			/* v8 ignore next -- AST child arrays only contain nodes or null pattern holes. @preserve */
 			for (const item of value) if (isNode(item)) worklist.push(item);

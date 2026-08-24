@@ -1,39 +1,38 @@
-export function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null;
-}
+import { Predicate } from "effect";
 
-export function getProperty(value: unknown, key: string): unknown {
-	if (!isRecord(value)) return undefined;
+import type { UnknownRecord } from "type-fest";
+
+export type HarnessValue = UnknownRecord[keyof UnknownRecord];
+
+export function getProperty(value: HarnessValue, key: string): HarnessValue {
+	if (!Predicate.isObject(value)) return undefined;
 	return value[key];
 }
 
-export function getStringProperty(value: unknown, key: string): string | undefined {
+export function getStringProperty(value: HarnessValue, key: string): string | undefined {
 	const property = getProperty(value, key);
-	return typeof property === "string" ? property : undefined;
+	return Predicate.isString(property) ? property : undefined;
 }
 
-export function getArrayProperty(value: unknown, key: string): ReadonlyArray<unknown> | undefined {
+export function getArrayProperty(value: HarnessValue, key: string): ReadonlyArray<HarnessValue> | undefined {
 	const property = getProperty(value, key);
 	return Array.isArray(property) ? property : undefined;
 }
 
-export function getObjectProperty(value: unknown, key: string): Record<string, unknown> | undefined {
+export function getObjectProperty(value: HarnessValue, key: string): undefined | UnknownRecord {
 	const property = getProperty(value, key);
-	return isRecord(property) ? property : undefined;
+	return Predicate.isObject(property) ? property : undefined;
 }
 
-export function isJsonSerializable(value: unknown): boolean {
+export function isJsonSerializable(value: HarnessValue): boolean {
 	if (value === null) return true;
-	const valueType = typeof value;
-	if (valueType === "string" || valueType === "boolean") return true;
-	if (valueType === "number") return Number.isFinite(value);
-	if (valueType !== "object") return false;
+	if (Predicate.isString(value) || Predicate.isBoolean(value)) return true;
+	if (Predicate.isNumber(value)) return Number.isFinite(value);
 	if (Array.isArray(value)) return value.every(isJsonSerializable);
-	if (!isRecord(value)) return false;
+	if (!Predicate.isObject(value)) return false;
 
 	for (const [key, property] of Object.entries(value)) {
-		if (key === "__proto__") return false;
-		if (!isJsonSerializable(property)) return false;
+		if (key === "__proto__" || !isJsonSerializable(property)) return false;
 	}
 
 	return true;

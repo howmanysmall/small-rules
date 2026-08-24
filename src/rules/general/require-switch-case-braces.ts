@@ -1,11 +1,14 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import { Predicate } from "effect";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type SwitchCaseBraceMetric = "lines" | "statements";
 
-function normalizeMetric(rawOptions: unknown): SwitchCaseBraceMetric {
+type RuleOptions = InferContextFromRule<typeof requireSwitchCaseBraces>["options"][0];
+
+function normalizeMetric(rawOptions: RuleOptions): SwitchCaseBraceMetric {
 	if (!Predicate.isObject(rawOptions)) return "lines";
 	/* v8 ignore next -- schema rejects non-statement metric values before rule execution. @preserve */
 	if (rawOptions.metric === "statements") return "statements";

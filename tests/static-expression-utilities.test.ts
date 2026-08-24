@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { defineRule } from "oxlint-plugin-utilities";
+
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
 	getModuleConstInitializer,
 	isExplicitUndefinedExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { createRuleTester } from "./rule-testers";
 

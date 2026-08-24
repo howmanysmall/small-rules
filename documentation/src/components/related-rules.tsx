@@ -1,12 +1,12 @@
-import { getRuleFacts } from "@/data/rule-facts";
-import { getRelatedRules } from "@/data/rule-relations";
-import { siteBasePath } from "@/utilities/site-base-path";
+import { getRuleFacts } from "$data/rule-facts";
+import { getRelatedRules } from "$data/rule-relations";
+import { siteBasePath } from "$utilities/site-base-path";
 
 import type { ReactNode } from "react";
 
-import type { RuleFacts } from "@/data/rule-facts";
-import type { RuleName } from "@/data/rule-manifest";
-import type { RuleRelation } from "@/data/rule-relations";
+import type { RuleFacts } from "$data/rule-facts";
+import type { RuleName } from "$data/rule-manifest";
+import type { RuleRelation } from "$data/rule-relations";
 
 interface RelatedRulesProperties {
 	readonly rule: RuleName;
@@ -28,7 +28,7 @@ function formatRelationKind(kind: string): string {
 		.join(" ");
 }
 
-// biome-ignore lint/correctness/useUniqueElementIds: This preserves the existing
+// biome-ignore lint/correctness/useUniqueElementIds: preserve
 const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 
 function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): ReactNode {

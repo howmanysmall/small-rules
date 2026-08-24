@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -39,17 +41,14 @@ function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierRefe
 	return node.type === "Identifier";
 }
 
-function isNode(value: object): value is ESTree.Node {
-	return "type" in value && typeof value.type === "string";
+function isNode(value: unknown): value is ESTree.Node {
+	return Predicate.isObject(value) && Predicate.isString(value.type);
 }
 
 function pushNodeChildren(node: ESTree.Node, stack: Array<unknown>): void {
-	for (const key of Object.keys(node)) {
+	for (const [key, value] of Object.entries(node)) {
 		if (VISITOR_KEYS_TO_SKIP.has(key)) continue;
-		const value: unknown = Reflect.get(node, key);
-		if (value !== null && value !== undefined) {
-			stack.push(value);
-		}
+		if (value !== null && value !== undefined) stack.push(value);
 	}
 }
 
@@ -58,15 +57,11 @@ function containsArrayReference(node: ESTree.Node, arrayIdentifierName: string):
 
 	while (stack.length > 0) {
 		const current = stack.pop();
-		if (current === undefined || current === null || typeof current !== "object") continue;
-
 		if (Array.isArray(current)) {
-			for (const child of current) {
-				stack.push(child);
-			}
-
+			for (const child of current) stack.push(child);
 			continue;
 		}
+		if (!Predicate.isObject(current)) continue;
 
 		if (!isNode(current)) continue;
 		if (current.type === "Identifier" && current.name === arrayIdentifierName) return true;
@@ -189,9 +184,7 @@ function createFix(
 	const textBetween = sourceCode.text.slice(declarationEnd, firstAssignmentStart);
 	if (textBetween.trim().length > 0) {
 		let moveStart = declarationStart;
-		if (moveStart > 0 && sourceCode.text[moveStart - 1] === "\n") {
-			moveStart -= 1;
-		}
+		if (moveStart > 0 && sourceCode.text[moveStart - 1] === "\n") moveStart -= 1;
 
 		let textAfterDeclaration = textBetween;
 		if (moveStart === declarationStart && textAfterDeclaration.startsWith("\n")) {
@@ -252,13 +245,13 @@ const noArrayConstructorIndexAssignment = createRule("no-array-constructor-index
 			}
 		}
 
+		function onNode(node: ESTree.BlockStatement | ESTree.Program): void {
+			inspect(node.body);
+		}
+
 		return {
-			BlockStatement(node): void {
-				inspect(node.body);
-			},
-			Program(node): void {
-				inspect(node.body);
-			},
+			BlockStatement: onNode,
+			Program: onNode,
 		} satisfies Visitor;
 	},
 	meta: {

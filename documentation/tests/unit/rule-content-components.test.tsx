@@ -1,18 +1,13 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { RelatedRules } from "@/components/related-rules";
-import { RuleCategoryPage } from "@/components/rule-category-page";
-import { RuleSummary } from "@/components/rule-summary";
-
-import type React from "react";
+import { RelatedRules } from "$components/related-rules";
+import { RuleCategoryPage } from "$components/rule-category-page";
+import { RuleSummary } from "$components/rule-summary";
 
 const categorySummaryPattern = /Browse all \d+ rules in this category\./u;
 const noWarnNamePattern = /No Warn/u;
-
-vi.mock("@/components/rule-index", () => ({
-	RuleIndex: (): React.JSX.Element => <div data-testid="rule-index" />,
-}));
+const ruleIndexCountPattern = /^Showing \d+ rules$/u;
 
 describe("RelatedRules", () => {
 	it("links a rule to its documented semantic counterpart", () => {
@@ -39,7 +34,7 @@ describe("RuleCategoryPage", () => {
 			screen.getByText("Rules for code quality, control flow, and common pitfalls.", { exact: false }),
 		).toBeInstanceOf(HTMLElement);
 		expect(screen.getByText(categorySummaryPattern)).toBeInstanceOf(HTMLElement);
-		expect(screen.getByTestId("rule-index")).toBeInstanceOf(HTMLElement);
+		expect(screen.getByText(ruleIndexCountPattern)).toBeInstanceOf(HTMLElement);
 	});
 });
 

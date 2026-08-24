@@ -1,7 +1,7 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
-export type RuleCategoryKey = "general" | "naming" | "react" | "roblox";
+export type RuleCategoryKey = "anti-slop" | "general" | "naming" | "react" | "roblox";
 
 export interface RuleManifestEntry {
 	readonly name: RuleName;
@@ -122,6 +122,28 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "prefer-singular-enums" },
 				{ name: "prevent-abbreviations" },
 				{ name: "require-async-suffix" },
+			],
+		},
+		{
+			key: "anti-slop",
+			description: "Rules to prevent common LLM slop. Ported from dmmulroy/anti-slop.",
+			label: "Anti-Slop",
+			rules: [
+				{ name: "no-chained-type-assertions" },
+				{ name: "no-conditional-empty-object-spread" },
+				{ name: "no-known-value-widening" },
+				{ name: "no-module-mocking" },
+				{ name: "no-object-parameters" },
+				{ name: "no-reflect-apply" },
+				{ name: "no-reflect-get" },
+				{ name: "no-runtime-typeof" },
+				{ name: "no-shape-in-symbol-names" },
+				{ name: "no-unknown-parameters" },
+				{ name: "no-unknown-returns" },
+				{ name: "no-unknown-type-aliases" },
+				{ name: "no-unsafe-dictionary-type" },
+				{ name: "no-widen-then-assert" },
+				{ name: "require-safety-comment-for-type-assertion" },
 			],
 		},
 		{

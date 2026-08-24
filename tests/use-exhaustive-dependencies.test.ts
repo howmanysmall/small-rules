@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/use-exhaustive-dependencies";
 
 import { jsx, ts } from "./rule-testers";

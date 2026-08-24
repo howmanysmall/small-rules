@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseInlineMarkdown } from "@/utilities/inline-markdown";
+import { parseInlineMarkdown } from "$utilities/inline-markdown";
 
 describe("parseInlineMarkdown", () => {
 	it("returns an empty array for an empty string", () => {

@@ -1,15 +1,19 @@
 import assert from "node:assert/strict";
 import nodePath from "node:path";
-import smallRules from "$small-rules";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 import { Predicate } from "effect";
 
+import smallRules from "$small-rules";
+
 import { createRuleExecutor } from "./rule-harness/execute";
 import { applyFixes, fixer } from "./rule-harness/fixes";
-import { getArrayProperty, getObjectProperty, getProperty, getStringProperty, isRecord } from "./rule-harness/object";
+import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "./rule-harness/object";
 import { getRuleMeta, parseCase } from "./rule-harness/parse";
 
+import type { UnknownRecord } from "type-fest";
+
+import type { HarnessValue } from "./rule-harness/object";
 import type { Fix, NormalizedValidCase, RuntimeDiagnostic } from "./rule-harness/types";
 
 interface JsonObject {
@@ -157,7 +161,7 @@ export { FuzzClass${suffix}, FuzzComponent${suffix}, FuzzItems${suffix}, process
 `;
 }
 
-function createOptions(schema: unknown, provider: FuzzedDataProvider): ReadonlyArray<unknown> {
+function createOptions(schema: HarnessValue, provider: FuzzedDataProvider): ReadonlyArray<unknown> {
 	if (Array.isArray(schema)) {
 		const [optionSchema] = schema;
 		return optionSchema === undefined ? [] : [createSchemaValue(optionSchema, provider, "option")];
@@ -167,9 +171,9 @@ function createOptions(schema: unknown, provider: FuzzedDataProvider): ReadonlyA
 	return Array.isArray(options) ? options : [];
 }
 
-function createSchemaValue(schema: unknown, provider: FuzzedDataProvider, salt: string): JsonValue {
+function createSchemaValue(schema: HarnessValue, provider: FuzzedDataProvider, salt: string): JsonValue {
 	const resolvedSchema = resolveAlternative(schema, provider);
-	if (!isRecord(resolvedSchema)) return false;
+	if (!Predicate.isObject(resolvedSchema)) return false;
 
 	const enumeration = getArrayProperty(resolvedSchema, "enum");
 	if (enumeration !== undefined) {
@@ -194,9 +198,9 @@ function createSchemaValue(schema: unknown, provider: FuzzedDataProvider, salt: 
 	}
 }
 
-function resolveAlternative(schema: unknown, provider: FuzzedDataProvider): unknown {
+function resolveAlternative(schema: HarnessValue, provider: FuzzedDataProvider): HarnessValue {
 	let resolvedSchema = schema;
-	while (isRecord(resolvedSchema)) {
+	while (Predicate.isObject(resolvedSchema)) {
 		const alternatives = getArrayProperty(resolvedSchema, "oneOf") ?? getArrayProperty(resolvedSchema, "anyOf");
 		if (alternatives === undefined || alternatives.length === 0) return resolvedSchema;
 		resolvedSchema = provider.pickValue(alternatives);
@@ -204,11 +208,7 @@ function resolveAlternative(schema: unknown, provider: FuzzedDataProvider): unkn
 	return resolvedSchema;
 }
 
-function createSchemaArray(
-	schema: Record<string, unknown>,
-	provider: FuzzedDataProvider,
-	salt: string,
-): Array<JsonValue> {
+function createSchemaArray(schema: UnknownRecord, provider: FuzzedDataProvider, salt: string): Array<JsonValue> {
 	const items = getProperty(schema, "items");
 	const minimumItems = getNonnegativeInteger(schema, "minItems") ?? 1;
 	const maximumItems = getNonnegativeInteger(schema, "maxItems") ?? minimumItems + 2;
@@ -220,13 +220,13 @@ function createSchemaArray(
 	return result;
 }
 
-function createSchemaNumber(schema: Record<string, unknown>, provider: FuzzedDataProvider): number {
+function createSchemaNumber(schema: UnknownRecord, provider: FuzzedDataProvider): number {
 	const minimum = getFiniteNumber(schema, "minimum") ?? 0;
 	const maximum = getFiniteNumber(schema, "maximum") ?? minimum + 100;
 	return provider.consumeIntegralInRange(Math.ceil(minimum), Math.max(Math.ceil(minimum), Math.floor(maximum)));
 }
 
-function createSchemaObject(schema: Record<string, unknown>, provider: FuzzedDataProvider, salt: string): JsonObject {
+function createSchemaObject(schema: UnknownRecord, provider: FuzzedDataProvider, salt: string): JsonObject {
 	const result: JsonObject = {};
 	const required = new Set(getStringArray(schema, "required"));
 	const properties = getObjectProperty(schema, "properties");
@@ -238,7 +238,7 @@ function createSchemaObject(schema: Record<string, unknown>, provider: FuzzedDat
 	}
 
 	const additionalProperties = getProperty(schema, "additionalProperties");
-	if (isRecord(additionalProperties) && provider.consumeBoolean()) {
+	if (Predicate.isObject(additionalProperties) && provider.consumeBoolean()) {
 		const name = `fuzz${salt}${bytesToHex(provider.consumeBytes(8))}`;
 		result[name] = createSchemaValue(additionalProperties, provider, `${salt}additional`);
 	}
@@ -246,21 +246,21 @@ function createSchemaObject(schema: Record<string, unknown>, provider: FuzzedDat
 	return result;
 }
 
-function getStringArray(value: unknown, key: string): ReadonlyArray<string> {
+function getStringArray(value: HarnessValue, key: string): ReadonlyArray<string> {
 	return getArrayProperty(value, key)?.filter(Predicate.isString) ?? [];
 }
 
-function getFiniteNumber(value: unknown, key: string): number | undefined {
+function getFiniteNumber(value: HarnessValue, key: string): number | undefined {
 	const property = getProperty(value, key);
 	return Predicate.isNumber(property) && Number.isFinite(property) ? property : undefined;
 }
 
-function getNonnegativeInteger(value: unknown, key: string): number | undefined {
+function getNonnegativeInteger(value: HarnessValue, key: string): number | undefined {
 	const property = getFiniteNumber(value, key);
 	return property !== undefined && Number.isInteger(property) && property >= 0 ? property : undefined;
 }
 
-function toJsonValue(value: unknown): JsonValue | undefined {
+function toJsonValue(value: HarnessValue): JsonValue | undefined {
 	if (Predicate.isBoolean(value) || Predicate.isString(value)) return value;
 	if (Predicate.isNumber(value)) return Number.isFinite(value) ? value : undefined;
 	if (Array.isArray(value)) {
@@ -272,7 +272,7 @@ function toJsonValue(value: unknown): JsonValue | undefined {
 		}
 		return result;
 	}
-	if (!isRecord(value)) return undefined;
+	if (!Predicate.isObject(value)) return undefined;
 
 	const result: JsonObject = {};
 	for (const [key, item] of Object.entries(value)) {

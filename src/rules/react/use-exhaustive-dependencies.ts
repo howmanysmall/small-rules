@@ -1,10 +1,12 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
-import { Predicate } from "effect";
+
+import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const UNSTABLE_VALUES = new Set<string>([
 	"ArrayExpression",
@@ -760,7 +762,7 @@ function isStringArray(array: ReadonlyArray<unknown>): array is Array<string> {
 function convertStableResult(
 	stableResult: boolean | number | ReadonlyArray<number> | ReadonlyArray<string>,
 ): StableResult {
-	if (typeof stableResult === "boolean") return stableResult;
+	if (stableResult === true || stableResult === false) return stableResult;
 	if (Predicate.isNumber(stableResult)) return new Set([stableResult]);
 
 	/* v8 ignore next -- @preserve stableResult option schema only permits boolean, number, or arrays. */

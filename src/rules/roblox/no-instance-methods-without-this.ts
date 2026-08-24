@@ -1,16 +1,12 @@
-import { createRule } from "$oxc-utilities/create-rule";
-import { isNode } from "$oxc-utilities/oxc-utilities";
 import { Predicate } from "effect";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isNode } from "$oxc-utilities/oxc-utilities";
 
-interface Options {
-	readonly checkPrivate?: boolean;
-	readonly checkProtected?: boolean;
-	readonly checkPublic?: boolean;
-}
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-type NormalizedOptions = Readonly<Required<Options>>;
+type Options = InferContextFromRule<typeof noInstanceMethodsWithoutThis>["options"][0];
+type NormalizedOptions = NonNullable<Options>;
 
 const DEFAULT_OPTIONS: NormalizedOptions = {
 	checkPrivate: true,
@@ -18,17 +14,8 @@ const DEFAULT_OPTIONS: NormalizedOptions = {
 	checkPublic: true,
 };
 
-function normalizeOptions(rawOptions: unknown): NormalizedOptions {
-	if (!Predicate.isObject(rawOptions)) return DEFAULT_OPTIONS;
-
-	return {
-		/* v8 ignore next -- rule schema rejects non-boolean checkPrivate @preserve */
-		checkPrivate: typeof rawOptions.checkPrivate === "boolean" ? rawOptions.checkPrivate : true,
-		/* v8 ignore next -- rule schema rejects non-boolean checkProtected @preserve */
-		checkProtected: typeof rawOptions.checkProtected === "boolean" ? rawOptions.checkProtected : true,
-		/* v8 ignore next -- rule schema rejects non-boolean checkPublic @preserve */
-		checkPublic: typeof rawOptions.checkPublic === "boolean" ? rawOptions.checkPublic : true,
-	};
+function normalizeOptions(rawOptions: Options): NormalizedOptions {
+	return rawOptions === undefined ? DEFAULT_OPTIONS : { ...DEFAULT_OPTIONS, ...rawOptions };
 }
 
 function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOptions): boolean {
@@ -46,6 +33,18 @@ function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOpt
 	return true;
 }
 
+function containsThisInChildren(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
+	for (const child of Object.values(currentNode)) {
+		if (Array.isArray(child)) {
+			for (const item of child) if (isNode(item) && traverseForThis(item, visited)) return true;
+			continue;
+		}
+		if (isNode(child) && traverseForThis(child, visited)) return true;
+	}
+
+	return false;
+}
+
 function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
 	if (visited.has(currentNode)) return false;
 
@@ -54,23 +53,7 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
 	if (!Predicate.isObject(currentNode)) return false;
 
-	// biome-ignore lint/suspicious/noForIn: required for AST traversal
-	for (const key in currentNode) {
-		/* v8 ignore next -- @preserve for-in over parser nodes only observes own enumerable keys. */
-		if (!Object.hasOwn(currentNode, key)) continue;
-		if (childUsesThis(currentNode[key], visited)) return true;
-	}
-
-	return false;
-}
-
-function childUsesThis(childValue: unknown, visited: WeakSet<ESTree.Node>): boolean {
-	if (Array.isArray(childValue)) {
-		for (const item of childValue) if (isNode(item) && traverseForThis(item, visited)) return true;
-		return false;
-	}
-
-	return isNode(childValue) && traverseForThis(childValue, visited);
+	return containsThisInChildren(currentNode, visited);
 }
 
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {

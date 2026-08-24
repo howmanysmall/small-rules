@@ -1,12 +1,16 @@
+import { Predicate } from "effect";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
 
 import { decorateAst } from "./ast";
 import { HarnessError } from "./harness-error";
 import { createLocationIndex } from "./locations";
-import { getObjectProperty, getProperty, isJsonSerializable, isRecord } from "./object";
+import { getObjectProperty, getProperty, isJsonSerializable } from "./object";
 import { createSourceCode } from "./source-code";
 
+import type { UnknownRecord } from "type-fest";
+
+import type { HarnessValue } from "./object";
 import type {
 	BaseRuleCase,
 	HarnessSourceCode,
@@ -22,13 +26,13 @@ import type {
 	ValidRuleCase,
 } from "./types";
 
-const DEFAULT_FILENAME_BY_LANGUAGE: Record<TestLanguage, string> = {
+const DEFAULT_FILENAME_BY_LANGUAGE = {
 	dts: "case.d.ts",
 	js: "case.js",
 	jsx: "case.jsx",
 	ts: "case.ts",
 	tsx: "case.tsx",
-};
+} satisfies Record<TestLanguage, string>;
 const LEGACY_LANGUAGE_OPTIONS_KEY = ["language", "Options"].join("");
 const LEGACY_PARSER_KEY = ["pars", "er"].join("");
 
@@ -42,13 +46,15 @@ export function normalizeCases(cases: RuleTestCases, defaults: RuleRunnerDefault
 	return normalized;
 }
 
+// oxlint-disable-next-line small-rules/no-known-value-widening -- lol?
+const SOURCE_TYPE_MAP: Record<string, "module" | "script"> = {
+	commonjs: "script",
+	module: "module",
+	script: "script",
+	unambiguous: "module",
+};
+
 export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
-	const SOURCE_TYPE_MAP: Record<string, "module" | "script"> = {
-		commonjs: "script",
-		module: "module",
-		script: "script",
-		unambiguous: "module",
-	};
 	const sourceType = SOURCE_TYPE_MAP[testCase.sourceType] ?? "module";
 	const parseResult = parse(testCase.code, {
 		lang: testCase.language,
@@ -56,10 +62,8 @@ export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
 	});
 
 	if (parseResult.diagnostics.length > 0) {
-		const [error0] = parseResult.diagnostics;
-		const error = new HarnessError(error0?.message ?? "Yuku parser failed to parse test case.", { cause: error0 });
-		Error.captureStackTrace(error, parseCase);
-		throw error;
+		const [error] = parseResult.diagnostics;
+		throw new HarnessError(error?.message ?? "Yuku parser failed to parse test case.", { cause: error });
 	}
 
 	// Yuku nodes have start/end (byte offsets) instead of range/loc.
@@ -79,7 +83,7 @@ export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
 }
 
 function normalizeValidCase(input: string | ValidRuleCase, defaults: RuleRunnerDefaults): NormalizedValidCase {
-	const base = typeof input === "string" ? { code: input } : input;
+	const base = Predicate.isString(input) ? { code: input } : input;
 	return { ...normalizeBaseCase(base, defaults), kind: "valid" };
 }
 
@@ -120,15 +124,11 @@ function rejectLegacyLanguageOptions(input: BaseRuleCase): void {
 	const legacyOptions = getObjectProperty(input, LEGACY_LANGUAGE_OPTIONS_KEY);
 	if (legacyOptions === undefined) return;
 	if (LEGACY_PARSER_KEY in legacyOptions) {
-		const error = new HarnessError("Legacy parser configuration is not supported by the Oxc-native rule tester.");
-		Error.captureStackTrace(error, rejectLegacyLanguageOptions);
-		throw error;
+		throw new HarnessError("Legacy parser configuration is not supported by the Oxc-native rule tester.");
 	}
-	const error = new HarnessError(
+	throw new HarnessError(
 		"Legacy language options are not supported. Use top-level language and sourceType test fields.",
 	);
-	Error.captureStackTrace(error, rejectLegacyLanguageOptions);
-	throw error;
 }
 
 function resolveLanguage(input: BaseRuleCase, defaults: RuleRunnerDefaults): TestLanguage {
@@ -144,19 +144,17 @@ function languageFromFilename(filename = ""): TestLanguage {
 	return "js";
 }
 
-function assertJsonSerializable(name: string, value: unknown): void {
+function assertJsonSerializable(name: string, value: HarnessValue): void {
 	if (isJsonSerializable(value)) return;
-	const error = new HarnessError(`${name} must be JSON-serializable.`);
-	Error.captureStackTrace(error, assertJsonSerializable);
-	throw error;
+	throw new HarnessError(`${name} must be JSON-serializable.`);
 }
 
-export function getRuleMeta(rule: unknown): Record<string, unknown> {
+export function getRuleMeta(rule: HarnessValue): UnknownRecord {
 	const meta = getProperty(rule, "meta");
-	return isRecord(meta) ? meta : {};
+	return Predicate.isObject(meta) ? meta : {};
 }
 
 function normalizeErrors(errors: number | ReadonlyArray<RuleTestError>): ReadonlyArray<RuleTestError> {
-	if (typeof errors !== "number") return errors;
+	if (!Predicate.isNumber(errors)) return errors;
 	return Array.from({ length: errors }, () => ({}));
 }

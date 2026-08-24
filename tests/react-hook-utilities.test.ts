@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { defineRule } from "oxlint-plugin-utilities";
+
 import {
 	classifyDependencies,
 	countSetStateCalls,
@@ -11,36 +13,36 @@ import {
 	walkAst,
 	walkAstSlop,
 } from "$oxc-utilities/react-hook-utilities";
-import { defineRule } from "oxlint-plugin-utilities";
 
 import { createRuleTester } from "./rule-testers";
 
-import type { IsStaticArrayExpression } from "$oxc-utilities/react-hook-utilities";
 import type { Visitor } from "oxlint-plugin-utilities";
+
+import type { IsStaticArrayExpression } from "$oxc-utilities/react-hook-utilities";
 
 const tester = createRuleTester({ language: "js", sourceType: "module" });
 
 const isStaticArray: IsStaticArrayExpression<object> = () => true;
 
-describe("getHookName utility", () => {
-	const hookNameMessages: Record<string, string> = {
-		none: "none",
-		useCallback: "useCallback",
-		useEffect: "useEffect",
-		useMemo: "useMemo",
-		useState: "useState",
-	};
+const hookNameMessages = {
+	none: "none",
+	useCallback: "useCallback",
+	useEffect: "useEffect",
+	useMemo: "useMemo",
+	useState: "useState",
+} as const;
+function isHookNameMessage(messageId: string): messageId is keyof typeof hookNameMessages {
+	return messageId in hookNameMessages;
+}
 
+describe("getHookName utility", () => {
 	const hookNameRule = defineRule({
 		create(context): Visitor {
 			return {
 				CallExpression(node): void {
 					const name = getHookName(node);
-					if (name !== undefined && name in hookNameMessages) {
-						context.report({ messageId: name, node });
-					} else {
-						context.report({ messageId: "none", node });
-					}
+					if (name !== undefined && isHookNameMessage(name)) context.report({ messageId: name, node });
+					else context.report({ messageId: "none", node });
 				},
 			} satisfies Visitor;
 		},
@@ -162,23 +164,24 @@ describe("getEffectCallback utility", () => {
 	});
 });
 
-describe("countSetStateCalls behavior", () => {
-	const countMessages: Record<string, string> = {
-		"0": "0",
-		"1": "1",
-		"2": "2",
-		"3": "3",
-	};
+const countMessages = {
+	"0": "0",
+	"1": "1",
+	"2": "2",
+	"3": "3",
+} as const;
+function isCountMessage(messageId: string): messageId is keyof typeof countMessages {
+	return messageId in countMessages;
+}
 
+describe("countSetStateCalls behavior", () => {
 	const hookTestRule = defineRule({
 		create(context): Visitor {
 			return {
 				ArrowFunctionExpression(node): void {
 					const count = countSetStateCalls(node);
 					const key = String(count);
-					if (key in countMessages) {
-						context.report({ messageId: key, node });
-					}
+					if (isCountMessage(key)) context.report({ messageId: key, node });
 				},
 			} satisfies Visitor;
 		},
@@ -214,9 +217,12 @@ describe("countSetStateCalls behavior", () => {
 	});
 });
 
-describe("walkAst utility", () => {
-	const walkerMessages: Record<string, string> = { "2": "2", "4": "4", identifier: "identifier" };
+const walkerMessages = { "2": "2", "4": "4", identifier: "identifier" } as const;
+function isWalkerMessage(messageId: string): messageId is keyof typeof walkerMessages {
+	return messageId in walkerMessages;
+}
 
+describe("walkAst utility", () => {
 	const walkerTestRule = defineRule({
 		create(context): Visitor {
 			return {
@@ -226,9 +232,7 @@ describe("walkAst utility", () => {
 						types.push(child.type);
 					});
 					const key = String(types.length);
-					if (key in walkerMessages) {
-						context.report({ messageId: key, node });
-					}
+					if (isWalkerMessage(key)) context.report({ messageId: key, node });
 				},
 				FunctionDeclaration(node): void {
 					const types = new Set<string>();
@@ -265,7 +269,7 @@ describe("walkAst utility", () => {
 });
 
 describe("walkAstSlop utility", () => {
-	const slopMessages: Record<string, string> = { identifier: "identifier" };
+	const slopMessages = { identifier: "identifier" } as const;
 
 	const slopRule = defineRule({
 		create(context): Visitor {
@@ -291,12 +295,12 @@ describe("walkAstSlop utility", () => {
 });
 
 describe("binding property utilities", () => {
-	const bindingMessages: Record<string, string> = {
+	const bindingMessages = {
 		assigned: "assigned",
 		identifier: "identifier",
 		literal: "literal",
 		missing: "missing",
-	};
+	} as const;
 
 	const bindingRule = defineRule({
 		create(context): Visitor {
@@ -354,7 +358,7 @@ describe("binding property utilities", () => {
 });
 
 describe("classifyDependencies utility", () => {
-	const classifyMessages: Record<string, string> = {
+	const classifyMessages = {
 		empty: "empty",
 		missing: "missing",
 		spread: "spread",

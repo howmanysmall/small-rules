@@ -4,6 +4,7 @@
 	"type": "module",
 	"dependencies": {
 		"@oh-my-pi/pi-coding-agent": "catalog:tooling",
-		"arktype": "catalog:runtime"
+		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime"
 	}
 }

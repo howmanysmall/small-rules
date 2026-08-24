@@ -1,11 +1,13 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
+
+import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
 interface BannedClassEntry {
 	readonly message: string;
@@ -33,11 +35,13 @@ const EMPTY_OPTIONS: NormalizedOptions = {
 	bannedProperties: new Map(),
 };
 
+type RuleOptions = NonNullable<InferContextFromRule<typeof banInstances>["options"][0]>;
+
 function getJsxAttributeName(name: ESTree.JSXAttributeName): string | undefined {
 	return name.type === "JSXIdentifier" ? name.name : name.name.name;
 }
 
-function normalizeClassBans(rawBans: unknown): Map<string, BannedClassEntry> {
+function normalizeClassBans(rawBans: RuleOptions["bannedInstances"]): Map<string, BannedClassEntry> {
 	const bannedClasses = new Map<string, BannedClassEntry>();
 
 	if (isStringArray(rawBans)) {
@@ -57,7 +61,9 @@ function normalizeClassBans(rawBans: unknown): Map<string, BannedClassEntry> {
 	return bannedClasses;
 }
 
-function normalizePropertyBans(rawBans: unknown): Map<string, ReadonlyMap<string, BannedPropertyEntry>> {
+function normalizePropertyBans(
+	rawBans: RuleOptions["bannedProperties"],
+): Map<string, ReadonlyMap<string, BannedPropertyEntry>> {
 	const bannedClasses = new Map<string, ReadonlyMap<string, BannedPropertyEntry>>();
 
 	if (rawBans === undefined) return bannedClasses;
@@ -84,7 +90,7 @@ function normalizePropertyBans(rawBans: unknown): Map<string, ReadonlyMap<string
 	return bannedClasses;
 }
 
-function normalizeOptions(rawOptions: unknown): NormalizedOptions {
+function normalizeOptions(rawOptions: RuleOptions | undefined): NormalizedOptions {
 	if (!Predicate.isObject(rawOptions)) return EMPTY_OPTIONS;
 
 	const { bannedInstances, bannedProperties } = rawOptions;

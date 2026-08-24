@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createCamelCaseDetector } from "$oxc-utilities/recognizers/camel-case-detector";
 import { createContainsDetector } from "$oxc-utilities/recognizers/contains-detector";
 import { recognize } from "$oxc-utilities/recognizers/detector";

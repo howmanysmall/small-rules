@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/roblox/no-instance-methods-without-this";
 
 import { tsx } from "./rule-testers";

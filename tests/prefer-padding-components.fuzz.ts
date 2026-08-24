@@ -1,8 +1,9 @@
 import nodePath from "node:path";
 import { expect } from "vitest";
-import rule from "$oxc-rules/react/prefer-padding-components";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
+
+import rule from "$oxc-rules/react/prefer-padding-components";
 
 import { createRuleExecutor } from "./rule-harness/execute";
 

@@ -1,11 +1,15 @@
-// oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the harness AST to the rule's ESTree SourceCode types for direct utility coverage.
+// oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the
+// harness AST to the rule's ESTree SourceCode types for direct utility
+// coverage.
 import { describe, expect, it } from "vitest";
+import { Predicate } from "effect";
+
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { traverseAst } from "./rule-harness/ast";
-import { isRecord } from "./rule-harness/object";
 import { parseCase } from "./rule-harness/parse";
 
+import type { HarnessValue } from "./rule-harness/object";
 import type { HarnessNode, HarnessSourceCode } from "./rule-harness/types";
 
 const reactSources = new Set(["react"]);
@@ -19,32 +23,32 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 			if (calleeName(node.callee) === name) found = node;
 		},
 	});
-	if (found === undefined) {
-		const error = new Error(`Call expression "${name}" not found.`);
-		Error.captureStackTrace(error, findCall);
-		throw error;
-	}
+	if (found === undefined) throw new Error(`Call expression "${name}" not found.`);
 	return found;
 }
 
-function calleeName(callee: unknown): string | undefined {
-	if (!isRecord(callee)) return undefined;
+function calleeName(callee: HarnessValue): string | undefined {
+	if (!Predicate.isObject(callee)) return undefined;
 	const { type } = callee;
 	if (type === "Identifier") {
 		const { name } = callee;
-		return typeof name === "string" ? name : undefined;
+		return Predicate.isString(name) ? name : undefined;
 	}
 	if (type !== "MemberExpression") return undefined;
+
 	const { property } = callee;
-	if (!isRecord(property)) return undefined;
+	if (!Predicate.isObject(property)) return undefined;
+
 	if (property.type === "Identifier") {
 		const { name } = property;
-		return typeof name === "string" ? name : undefined;
+		return Predicate.isString(name) ? name : undefined;
 	}
+
 	if (property.type === "Literal") {
 		const { value } = property;
-		return typeof value === "string" ? value : undefined;
+		return Predicate.isString(value) ? value : undefined;
 	}
+
 	return undefined;
 }
 
@@ -60,76 +64,65 @@ function parseCode(code: string): HarnessSourceCode {
 	});
 }
 
+function isEffectCall(source: HarnessSourceCode, name: string): boolean {
+	// SAFETY: parseCase creates the contracts this utility reads.
+	return isReactImportedCall(source as never, findCall(source, name) as never, effectNames, reactSources);
+}
+
 describe("isReactImportedCall", () => {
 	it("matches a named import by its imported name", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import { useEffect as effect } from "react"; effect(() => {});');
-		expect(
-			isReactImportedCall(source as never, findCall(source, "effect") as never, effectNames, reactSources),
-		).toBe(true);
+		expect(isEffectCall(source, "effect")).toBe(true);
 	});
 
 	it("rejects an identifier with no binding", () => {
 		expect.assertions(1);
 
 		const source = parseCode("useEffect(() => {});");
-		expect(
-			isReactImportedCall(source as never, findCall(source, "useEffect") as never, effectNames, reactSources),
-		).toBe(false);
+		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
 	it("rejects an import from a non-react source", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import { useEffect } from "preact/hooks"; useEffect(() => {});');
-		expect(
-			isReactImportedCall(source as never, findCall(source, "useEffect") as never, effectNames, reactSources),
-		).toBe(false);
+		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
 	it("rejects a default/namespace import used as a named callee", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React(() => {});');
-		expect(
-			isReactImportedCall(source as never, findCall(source, "React") as never, effectNames, reactSources),
-		).toBe(false);
+		expect(isEffectCall(source, "React")).toBe(false);
 	});
 
 	it("rejects a non-imported identifier binding", () => {
 		expect.assertions(1);
 
 		const source = parseCode("const useEffect = () => {}; useEffect(() => {});");
-		expect(
-			isReactImportedCall(source as never, findCall(source, "useEffect") as never, effectNames, reactSources),
-		).toBe(false);
+		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
 	it("matches a namespace member call", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React.useEffect(() => {});');
-		expect(
-			isReactImportedCall(source as never, findCall(source, "useEffect") as never, effectNames, reactSources),
-		).toBe(true);
+		expect(isEffectCall(source, "useEffect")).toBe(true);
 	});
 
 	it("rejects a computed member call", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React["useEffect"](() => {});');
-		expect(
-			isReactImportedCall(source as never, findCall(source, "useEffect") as never, effectNames, reactSources),
-		).toBe(false);
+		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
 	it("rejects a non-identifier member object", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; getReact().useEffect(() => {});');
-		expect(
-			isReactImportedCall(source as never, findCall(source, "useEffect") as never, effectNames, reactSources),
-		).toBe(false);
+		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 });

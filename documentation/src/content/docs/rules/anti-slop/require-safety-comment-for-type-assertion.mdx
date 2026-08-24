@@ -1,0 +1,15 @@
+---
+title: "Require Safety Comment for Type Assertion"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="require-safety-comment-for-type-assertion">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. A cast is an unchecked
+			claim. A nearby <code>SAFETY:</code> comment records the invariant that makes that claim legitimate;{" "}
+			<code>as const</code> is exempt because it does not claim an unrelated runtime shape.
+		</p>
+	</Fragment>
+</RulePage>

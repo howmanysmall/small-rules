@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/no-inline-property-on-memo-component";
 
 import { tsx } from "./rule-testers";

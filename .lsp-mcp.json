@@ -1,0 +1,133 @@
+{
+	"servers": [
+		{
+			"id": "typescript",
+			"extensions": [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"],
+			"languageIds": ["typescript", "typescriptreact", "javascript", "javascriptreact"],
+			"command": "node",
+			"args": ["--run", "tsgo", "--", "--lsp", "--stdio"],
+			"rootPatterns": ["tsconfig.json", "package.json", ".git"]
+		},
+		{
+			"id": "biome",
+			"extensions": [
+				".astro",
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".html",
+				".js",
+				".jsx",
+				".mjs",
+				".mts",
+				".scss",
+				".svelte",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"languageIds": ["biome"],
+			"command": "node",
+			"args": ["--run", "biome", "--", "lsp-proxy"],
+			"rootPatterns": ["biome.json", "biome.jsonc", ".git"]
+		},
+		{
+			"id": "oxfmt",
+			"extensions": [
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".handlebars",
+				".hbs",
+				".htm",
+				".html",
+				".js",
+				".json5",
+				".jsx",
+				".less",
+				".mdx",
+				".mjs",
+				".mts",
+				".sass",
+				".scss",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"languageIds": ["oxfmt"],
+			"command": "node",
+			"args": ["--run", "oxfmt", "--", "--lsp"],
+			"rootPatterns": [".oxfmtrc.json", ".git"]
+		},
+		{
+			"id": "oxlint",
+			"extensions": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
+			"languageIds": ["oxlint"],
+			"command": "node",
+			"args": ["--run", "oxlint", "--", "--lsp"],
+			"rootPatterns": [".oxlintrc.json", ".git"]
+		},
+		{
+			"id": "rumdl",
+			"extensions": [
+				".md",
+				".markdown",
+				".mdown",
+				".mkdn",
+				".mkd",
+				".mdwn",
+				".mdtxt",
+				".mdtext",
+				".text",
+				".Rmd"
+			],
+			"languageIds": ["markdown"],
+			"command": "rumdl",
+			"args": ["server"],
+			"rootPatterns": [".git"]
+		},
+		{
+			"id": "tombi",
+			"extensions": [".toml"],
+			"languageIds": ["toml"],
+			"command": "tombi",
+			"args": ["lsp"],
+			"rootPatterns": ["Cargo.toml", "pyproject.toml", ".git"]
+		},
+		{
+			"id": "vscode-html-language-server",
+			"extensions": [".html", ".htm"],
+			"languageIds": ["html"],
+			"command": "vscode-html-language-server",
+			"args": ["--stdio"],
+			"rootPatterns": [".git"]
+		},
+		{
+			"id": "vscode-json-language-server",
+			"extensions": [".json", ".jsonc"],
+			"languageIds": ["json"],
+			"command": "vscode-json-language-server",
+			"args": ["--stdio"],
+			"rootPatterns": ["package.json", "tsconfig.json", ".git"]
+		},
+		{
+			"id": "pkl-lsp",
+			"extensions": [".pkl"],
+			"languageIds": ["pkl"],
+			"command": "pkl-lsp",
+			"args": [],
+			"rootPatterns": ["hk.pkl", "*.pkl", ".git"]
+		}
+	],
+	"requestTimeout": 30000,
+	"autoStart": true,
+	"logLevel": "info"
+}

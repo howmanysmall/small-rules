@@ -1,11 +1,14 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import { Predicate } from "effect";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 const DEFAULT_MAXIMUM_STATEMENTS = 1;
 
-function getMaximumStatements(value: unknown): number {
+type RuleOptions = InferContextFromRule<typeof preferEarlyReturn>["options"][0];
+
+function getMaximumStatements(value: RuleOptions): number {
 	if (!Predicate.isObject(value) || !Predicate.isNumber(value.maximumStatements)) return DEFAULT_MAXIMUM_STATEMENTS;
 	return value.maximumStatements;
 }

@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/prefer-hoisted-jsx-elements";
 
 import { tsx } from "./rule-testers";

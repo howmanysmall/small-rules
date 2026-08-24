@@ -252,11 +252,11 @@ function isUppercaseStart(name: string): boolean {
 }
 
 function isFunctionalComponent(node: ESTree.Node): boolean {
-	const isComponentShaped =
+	const isFunctionalComponentDeclaration =
 		node.type === "FunctionDeclaration" ||
 		(node.type === "VariableDeclarator" &&
 			(node.init?.type === "ArrowFunctionExpression" || node.init?.type === "CallExpression"));
-	if (!isComponentShaped || node.id?.type !== "Identifier") return false;
+	if (!isFunctionalComponentDeclaration || node.id?.type !== "Identifier") return false;
 	return isUppercaseStart(node.id.name);
 }
 

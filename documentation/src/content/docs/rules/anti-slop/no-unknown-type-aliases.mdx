@@ -1,0 +1,15 @@
+---
+title: "No Unknown Type Aliases"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-unknown-type-aliases">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. Renaming{" "}
+			<code>unknown</code> hides where parsing is still required. Keep it visible at the boundary, then introduce
+			a real domain type after validation.
+		</p>
+	</Fragment>
+</RulePage>

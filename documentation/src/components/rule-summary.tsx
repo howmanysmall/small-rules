@@ -1,8 +1,8 @@
-import { getRuleFacts } from "@/data/rule-facts";
+import { getRuleFacts } from "$data/rule-facts";
 
 import type { PropsWithChildren, ReactNode } from "react";
 
-import type { RuleName } from "@/data/rule-manifest";
+import type { RuleName } from "$data/rule-manifest";
 
 interface RuleSummaryProperties {
 	readonly rule: RuleName;

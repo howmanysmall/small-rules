@@ -1,8 +1,10 @@
-import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { Predicate } from "effect";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
+
 import type { ESTree, FixFunction } from "oxlint-plugin-utilities";
+
+import type { CallbackFunction } from "$oxc-types/missing-types";
 
 export type FixReturn = ReturnType<FixFunction>;
 
@@ -195,10 +197,6 @@ export function isClass(node: ESTree.Node): node is ESTree.Class {
 	return node.type === "ClassDeclaration" || node.type === "ClassExpression";
 }
 
-export function isTsTypeAliasDeclaration(node: ESTree.Node): node is ESTree.TSTypeAliasDeclaration {
-	return node.type === "TSTypeAliasDeclaration";
-}
-
 export function isTsPropertySignature(node: ESTree.Node): node is ESTree.TSPropertySignature {
 	return node.type === "TSPropertySignature";
 }
@@ -279,4 +277,25 @@ export function isBindingIdentifier(node: ESTree.Node): node is ESTree.BindingId
 
 export function isExpressionNode(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
 	return node.type !== "PrivateIdentifier";
+}
+
+export type TypeAssertionExpression = ESTree.TSAsExpression | ESTree.TSTypeAssertion;
+export function isTypeAssertionExpression(node: ESTree.Node): node is TypeAssertionExpression {
+	return isTsAsExpression(node) || isTsTypeAssertion(node);
+}
+
+function isTypeReference(node: ESTree.Node): node is ESTree.TSTypeReference {
+	return node.type === "TSTypeReference";
+}
+
+export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): boolean {
+	return (
+		isTypeReference(typeAnnotation) &&
+		typeAnnotation.typeName.type === "Identifier" &&
+		typeAnnotation.typeName.name === "const"
+	);
+}
+
+export function isEmptyObjectExpression(node: ESTree.Expression): boolean {
+	return isObjectExpression(node) && node.properties.length === 0;
 }

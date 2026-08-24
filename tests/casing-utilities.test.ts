@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 
 describe("toPascalCase", () => {

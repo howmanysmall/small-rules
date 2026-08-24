@@ -1,3 +1,4 @@
+import { Predicate } from "effect";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
 
@@ -20,6 +21,17 @@ type StaticValue =
 	| ReadonlyArray<StaticValue>
 	| string
 	| { readonly [key: string]: StaticValue };
+type StaticObject = Record<string, StaticValue>;
+
+interface DocumentationMetadata {
+	readonly id: string;
+	readonly title: string;
+}
+
+interface SourcePosition {
+	readonly column: number;
+	readonly line: number;
+}
 
 export interface RuleExample {
 	readonly id: string;
@@ -92,7 +104,7 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 			if (examples.length === 0) return;
 			const existingExamples = examplesByRuleName.get(invocation.ruleName);
 			if (existingExamples === undefined) examplesByRuleName.set(invocation.ruleName, examples);
-			else existingExamples.push(...examples);
+			else for (const example of examples) existingExamples.push(example);
 		},
 	});
 
@@ -106,9 +118,11 @@ function getRuleRunnerInvocation(
 	node: CallExpression,
 ): undefined | { readonly cases: ObjectExpression; readonly language: string; readonly ruleName: string } {
 	if (!isRuleRunner(node.callee)) return undefined;
+
 	const [ruleNameNode, , casesNode] = node.arguments;
 	if (!isStringLiteral(ruleNameNode) || casesNode?.type !== "ObjectExpression") return undefined;
 	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return undefined;
+
 	return { cases: casesNode, language: node.callee.object.name, ruleName: ruleNameNode.value };
 }
 
@@ -133,12 +147,15 @@ function extractInvocationExamples(
 	for (const caseArray of getCaseArrays(cases, context)) {
 		for (const element of caseArray.cases.elements) {
 			if (element?.type !== "ObjectExpression") continue;
+
 			const example = extractCaseExample(element, caseArray.kind, runnerLanguage, context);
 			if (example === undefined) continue;
+
 			const idOffset = getDocumentationIdOffset(element);
 			if (idOffsets.has(example.id)) {
 				throwExtractionError(context, idOffset, `duplicate documentation example ID "${example.id}".`);
 			}
+
 			idOffsets.set(example.id, idOffset);
 			examples.push(example);
 		}
@@ -188,7 +205,7 @@ function extractCaseExample(
 		if (field.key === "documentation" || field.key === "code") continue;
 		const value = evaluateStatic(field.property.value, context);
 		if (field.key === "filename" || field.key === "language" || field.key === "sourceType") {
-			if (typeof value !== "string") {
+			if (!Predicate.isString(value)) {
 				throwExtractionError(context, field.property.value.start, `${field.key} must evaluate to a string.`);
 			}
 			Object.assign(example, { [field.key]: value });
@@ -197,10 +214,7 @@ function extractCaseExample(
 	return example;
 }
 
-function evaluateDocumentation(
-	value: Expression,
-	context: ExtractionContext,
-): { readonly id: string; readonly title: string } {
+function evaluateDocumentation(value: Expression, context: ExtractionContext): DocumentationMetadata {
 	if (value.type !== "ObjectExpression") {
 		throwExtractionError(context, value.start, "documentation must be an object with id and title.");
 	}
@@ -224,7 +238,7 @@ function evaluateRequiredString(
 	const field = fields.find((candidate) => candidate.key === name);
 	if (field === undefined) throwExtractionError(context, 0, `${prefix}${name} is required.`);
 	const value = evaluateStatic(field.property.value, context);
-	if (typeof value !== "string") {
+	if (!Predicate.isString(value)) {
 		throwExtractionError(context, field.property.value.start, `${prefix}${name} must evaluate to a string.`);
 	}
 	return value;
@@ -331,12 +345,10 @@ function evaluateArray(array: ArrayExpression, context: ExtractionContext): Read
 	return values;
 }
 
-function evaluateObject(object: ObjectExpression, context: ExtractionContext): Record<string, StaticValue> {
-	const value: Record<string, StaticValue> = {};
-	for (const field of getObjectFields(object, context)) {
-		value[field.key] = evaluateStatic(field.property.value, context);
-	}
-	return value;
+function evaluateObject(object: ObjectExpression, context: ExtractionContext): StaticObject {
+	return Object.fromEntries(
+		getObjectFields(object, context).map((field) => [field.key, evaluateStatic(field.property.value, context)]),
+	);
 }
 
 function isStringJoin(node: CallExpression): boolean {
@@ -358,7 +370,7 @@ function evaluateStringJoin(node: CallExpression, context: ExtractionContext): s
 		throwExtractionError(context, node.start, "function calls are not supported.");
 	}
 	const values = evaluateArray(node.callee.object, context);
-	if (values.some((value) => typeof value !== "string")) {
+	if (values.some((value) => !Predicate.isString(value))) {
 		throwExtractionError(context, node.callee.object.start, "join arrays must contain only strings.");
 	}
 	// oxlint-disable-next-line typescript/no-base-to-string -- i hate.
@@ -376,7 +388,7 @@ function throwExtractionError(context: ExtractionContext, offset: number, reason
 	throw error;
 }
 
-function getSourcePosition(sourceText: string, offset: number): { readonly column: number; readonly line: number } {
+function getSourcePosition(sourceText: string, offset: number): SourcePosition {
 	const prefix = Buffer.from(sourceText).subarray(0, offset).toString("utf8");
 	const lastLineBreak = prefix.lastIndexOf("\n");
 	return { column: prefix.length - lastLineBreak, line: prefix.split("\n").length };

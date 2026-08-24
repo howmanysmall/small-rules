@@ -1,8 +1,9 @@
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import { Predicate } from "effect";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 const DEFAULT_REPLACEMENTS: ReadonlyArray<readonly [string, string]> = [
 	["backGround", "background"],
@@ -72,6 +73,8 @@ interface RuleOptions {
 	readonly replacements: ReadonlyMap<string, string>;
 }
 
+type RawOptions = NonNullable<InferContextFromRule<typeof consistentCompoundWords>["options"][0]>;
+
 function escapeRegExp(value: string): string {
 	return value.replaceAll(REGEXP_ESCAPE_PATTERN, String.raw`\$&`);
 }
@@ -110,7 +113,7 @@ function buildReplacementRegExp(replacements: ReadonlyMap<string, string>): RegE
 	return new RegExp(`(?:^(?:${lowerFirstForms.join("|")})|(?:${upperFirstForms.join("|")}))${BOUNDARY}`, "gu");
 }
 
-function parseReplacements(raw: unknown, extendDefault: boolean): Map<string, string> {
+function parseReplacements(raw: RawOptions["replacements"] | undefined, extendDefault: boolean): Map<string, string> {
 	const merged = new Map(extendDefault ? DEFAULT_REPLACEMENTS_MAP : undefined);
 	if (!Predicate.isObject(raw)) return merged;
 	for (const [key, value] of Object.entries(raw)) {
@@ -123,7 +126,7 @@ function parseReplacements(raw: unknown, extendDefault: boolean): Map<string, st
 	return merged;
 }
 
-function parseOptions(rawOptions: unknown): RuleOptions {
+function parseOptions(rawOptions: RawOptions | undefined): RuleOptions {
 	const options = Predicate.isObject(rawOptions) ? rawOptions : {};
 	const extendDefaultReplacements = options.extendDefaultReplacements !== false;
 	const replacements = parseReplacements(options.replacements, extendDefaultReplacements);

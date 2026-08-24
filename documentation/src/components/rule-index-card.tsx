@@ -1,4 +1,4 @@
-import { siteBasePath } from "@/utilities/site-base-path";
+import { siteBasePath } from "$utilities/site-base-path";
 
 import type { ReactNode } from "react";
 

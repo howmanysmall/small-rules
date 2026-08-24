@@ -44,6 +44,12 @@ Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined
 
 Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md`](docs/hot-path-conventions.md). Per-node allocation, stateful regex `g` flags, recursive walks, and pop-based traversal are the common pitfalls — adheres to ADR-0001.
 
+## Vendored Code
+
+Third-party code copied into this repo (currently `src/rules/anti-slop/`, from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)) is described in exactly one place: `VENDORED_COMPONENTS` in [`scripts/utilities/vendored-notices.ts`](scripts/utilities/vendored-notices.ts). Add an entry there, add the provenance header to each vendored file, then run `nr generate:third-party-notices`.
+
+`THIRD-PARTY-NOTICES.md` and the `dist/index.js` legal banner are both generated from that catalog - never hand-edit either. The `//` headers in the sources are stripped by minification, so the notices file and the banner are what actually satisfy the upstream license. `tests/third-party-notices.test.ts` fails on drift. Full procedure in [`docs/vendoring.md`](docs/vendoring.md).
+
 ## Code Architecture
 
 ### Entry Point - `src/index.ts`
@@ -155,3 +161,17 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 - Inspect each planned command's effect. Prefer `--safe`; never run an unknown or destructive command without explicit user approval.
 - Consume normalized diagnostics from JSON/JSONL, preserve raw tool output for debugging, and review the resulting diff after fixes.
 - Use `hk run check --safe --format jsonl` for streaming lifecycle events. A final summary is emitted even when a step fails.
+
+## Agent Skills
+
+### Issue Tracker
+
+Issues are tracked in GitHub Issues on `howmanysmall/small-rules`. See `docs/agents/issue-tracker.md`.
+
+### Triage Labels
+
+Five canonical triage roles, label names equal to role names: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain Docs
+
+Single-context: one root `CONTEXT.md` and `docs/adr/` for ADRs. See `docs/agents/domain.md`.

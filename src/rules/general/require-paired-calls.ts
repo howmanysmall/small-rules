@@ -1,12 +1,14 @@
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 
-import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isStringArray } from "$oxc-utilities/type-utilities";
 import { type } from "arktype";
 import { Predicate } from "effect";
 
+import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isStringArray } from "$oxc-utilities/type-utilities";
+
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { Writable } from "type-fest";
 
 const NOT_ALL = "not all execution paths";
 
@@ -15,7 +17,7 @@ const isPairConfiguration = type({
 	closer: isReadonlyArrayOfStrings.or(isString),
 	opener: isString,
 	"openerAlternatives?": isReadonlyArrayOfStrings.or(isUndefined),
-	"platform?": type('"roblox" | undefined'),
+	"platform?": '"roblox" | undefined',
 	"requireSync?": isBoolean.or(isUndefined),
 	"yieldingFunctions?": isReadonlyArrayOfStrings.or(isUndefined),
 }).readonly();
@@ -231,19 +233,19 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 					]
 				: options.pairs;
 
-		const resolvedOptions: RequirePairedCallsOptions = {
-			/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
-			...(options.allowConditionalClosers === undefined
-				? {}
-				: { allowConditionalClosers: options.allowConditionalClosers }),
-			/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
-			...(options.allowMultipleOpeners === undefined
-				? {}
-				: { allowMultipleOpeners: options.allowMultipleOpeners }),
-			/* v8 ignore next -- @preserve options are normalized with a concrete max depth default before resolution. */
-			...(options.maxNestingDepth === undefined ? {} : { maxNestingDepth: options.maxNestingDepth }),
-			pairs,
-		};
+		const resolvedOptions: Writable<RequirePairedCallsOptions> = { pairs };
+		/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
+		if (options.allowConditionalClosers !== undefined) {
+			resolvedOptions.allowConditionalClosers = options.allowConditionalClosers;
+		}
+		/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
+		if (options.allowMultipleOpeners !== undefined) {
+			resolvedOptions.allowMultipleOpeners = options.allowMultipleOpeners;
+		}
+		/* v8 ignore next -- @preserve options are normalized with a concrete max depth default before resolution. */
+		if (options.maxNestingDepth !== undefined) {
+			resolvedOptions.maxNestingDepth = options.maxNestingDepth;
+		}
 
 		const openerStack = new Array<OpenerStackEntry>();
 		const loopStack = new Array<LoopLikeStatement>();

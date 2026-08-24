@@ -1,5 +1,6 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/react/strict-component-boundaries";
 
 import { js } from "./rule-testers";

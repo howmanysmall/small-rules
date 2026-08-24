@@ -7,11 +7,13 @@
 		"@octokit/rest": "catalog:scripts",
 		"@std/msgpack": "catalog:scripts",
 		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime",
 		"fdir": "catalog:scripts",
 		"jsonc-parser": "catalog:scripts",
 		"just-diff": "catalog:scripts",
 		"mutative": "catalog:scripts",
 		"picocolors": "catalog:scripts",
+		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",
 		"yuku-parser": "catalog:runtime",
 		"zx": "catalog:scripts"

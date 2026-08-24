@@ -1,10 +1,12 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isComponentName, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
-import { Predicate } from "effect";
+
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 interface ControlFlowContext {
 	readonly afterEarlyReturn: boolean;
@@ -24,11 +26,13 @@ interface UseHookAtTopLevelOptions {
 
 const HOOK_NAME_PATTERN = /^use[A-Z]/u;
 
+type RuleOptions = InferContextFromRule<typeof useHookAtTopLevel>["options"][0];
+
 function isReactHookName(name: string): boolean {
 	return HOOK_NAME_PATTERN.test(name);
 }
 
-function getOptions(value: unknown): UseHookAtTopLevelOptions {
+function getOptions(value: RuleOptions): UseHookAtTopLevelOptions {
 	return Predicate.isObject(value) ? value : {};
 }
 

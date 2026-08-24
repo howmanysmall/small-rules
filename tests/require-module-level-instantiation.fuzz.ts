@@ -1,7 +1,8 @@
 import { expect } from "vitest";
-import rule from "$oxc-rules/roblox/require-module-level-instantiation";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
+
+import rule from "$oxc-rules/roblox/require-module-level-instantiation";
 
 import { createRuleExecutor } from "./rule-harness/execute";
 

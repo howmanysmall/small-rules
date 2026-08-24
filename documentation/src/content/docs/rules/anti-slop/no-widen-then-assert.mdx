@@ -1,0 +1,15 @@
+---
+title: "No Widen Then Assert"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-widen-then-assert">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. Widening a known local
+			value then asserting it back recreates evidence that was already available. Preserve the precise type
+			through the flow, or parse external data once.
+		</p>
+	</Fragment>
+</RulePage>

@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import noRecursive from "$oxc-rules/general/no-recursive";
 
 import { js } from "./rule-testers";

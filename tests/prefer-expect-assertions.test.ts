@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+
 import rule from "$oxc-rules/general/prefer-expect-assertions";
 
 import { ts } from "./rule-testers";

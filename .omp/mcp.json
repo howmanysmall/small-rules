@@ -1,9 +1,18 @@
 {
 	"$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
 	"mcpServers": {
+		"astro-docs": {
+			"type": "http",
+			"url": "https://mcp.docs.astro.build/mcp"
+		},
+		"chrome-devtools": {
+			"args": ["scripts/get-chrome-path.sh", "--serve"],
+			"command": "bash",
+			"type": "stdio"
+		},
 		"hk": {
-			"args": ["mcp", "--root", "."],
-			"command": "hk",
+			"args": ["x", "--", "hk", "mcp", "--root", "."],
+			"command": "mise",
 			"type": "stdio"
 		}
 	}

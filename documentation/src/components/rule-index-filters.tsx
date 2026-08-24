@@ -28,18 +28,18 @@ export function RuleIndexFilters({
 	query,
 	selectedCategory,
 }: RuleIndexFiltersProperties): ReactNode {
-	const filters = useRef<HTMLFormElement>(null);
+	const filtersRef = useRef<HTMLFormElement>(null);
 	const searchId = useId();
 	const categoryId = useId();
 	const initiallyHidden = true;
 
 	useEffect(function revealFilters() {
-		filters.current?.removeAttribute("hidden");
+		filtersRef.current?.removeAttribute("hidden");
 	}, []);
 
 	return (
 		<form
-			ref={filters}
+			ref={filtersRef}
 			aria-label="Filter rules"
 			className="rule-index-filters"
 			data-rule-filters=""

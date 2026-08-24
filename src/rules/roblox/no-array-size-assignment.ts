@@ -3,8 +3,9 @@ import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 
-import type { Environment } from "$oxc-utilities/react-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { Environment } from "$oxc-utilities/react-utilities";
 
 type SizeCallExpression = ESTree.CallExpression & {
 	readonly callee: ESTree.StaticMemberExpression;

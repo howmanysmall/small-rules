@@ -1,7 +1,26 @@
 import type { Definition, ESTree, Reference, Scope } from "oxlint-plugin-utilities";
+import type { UnknownRecord } from "type-fest";
 
 export type MessageIds = "replace" | "suggestion";
 export type ImportCheckOption = "internal" | boolean;
+export type RawOptionValue = UnknownRecord[keyof UnknownRecord];
+
+export interface RawOptions {
+	readonly allowList?: RawOptionValue;
+	readonly allowPropertyAccess?: RawOptionValue;
+	readonly checkDefaultAndNamespaceImports?: RawOptionValue;
+	readonly checkFilenames?: RawOptionValue;
+	readonly checkProperties?: RawOptionValue;
+	readonly checkShorthandImports?: RawOptionValue;
+	readonly checkShorthandProperties?: RawOptionValue;
+	readonly checkVariables?: RawOptionValue;
+	readonly extendDefaultAllowList?: RawOptionValue;
+	readonly extendDefaultReplacements?: RawOptionValue;
+	readonly ignore?: RawOptionValue;
+	readonly ignoreShorthands?: RawOptionValue;
+	readonly replacements?: RawOptionValue;
+	readonly shorthands?: RawOptionValue;
+}
 
 export interface ShorthandMatcher {
 	readonly original: string;

@@ -1,9 +1,9 @@
-// oxlint-disable small-rules/prevent-abbreviations -- this would be a breaking change.
+import { Predicate } from "effect";
+
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -12,6 +12,8 @@ const FUNCTION_BOUNDARY_TYPES = new Set<string>([
 	"FunctionDeclaration",
 	"FunctionExpression",
 ]);
+
+const MAX_DESTRUCTURED_PROPERTIES_OPTION = "maxDestructuredProps";
 
 function getComponentNameFromFunction(node: ESTree.Node): string | undefined {
 	if (node.type === "FunctionDeclaration" && node.id !== null && isComponentName(node.id.name)) {
@@ -141,10 +143,10 @@ function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>
 	return { maxJsxDepth, nullLiterals, stateHookCount };
 }
 
-interface NoGodComponentsOptions {
+interface RawNoGodComponentsOptions {
 	readonly enforceTargetLines?: boolean;
 	readonly ignoreComponents?: ReadonlyArray<string>;
-	readonly maxDestructuredProps?: number;
+	readonly [MAX_DESTRUCTURED_PROPERTIES_OPTION]?: number;
 	readonly maxLines?: number;
 	readonly maxStateHooks?: number;
 	readonly maxTsxNesting?: number;
@@ -152,11 +154,24 @@ interface NoGodComponentsOptions {
 	readonly targetLines?: number;
 }
 
-function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
+interface NoGodComponentsOptions {
+	readonly enforceTargetLines?: boolean;
+	readonly ignoreComponents?: ReadonlyArray<string>;
+	readonly maxDestructuredProperties?: number;
+	readonly maxLines?: number;
+	readonly maxStateHooks?: number;
+	readonly maxTsxNesting?: number;
+	readonly stateHooks?: ReadonlyArray<string>;
+	readonly targetLines?: number;
+}
+
+type NoGodComponentsRuleOptions = RawNoGodComponentsOptions | undefined;
+
+function parseOptions(options: NoGodComponentsRuleOptions): Required<NoGodComponentsOptions> {
 	const defaults: Required<NoGodComponentsOptions> = {
 		enforceTargetLines: true,
 		ignoreComponents: new Array<string>(),
-		maxDestructuredProps: 5,
+		maxDestructuredProperties: 5,
 		maxLines: 200,
 		maxStateHooks: 5,
 		maxTsxNesting: 3,
@@ -164,24 +179,20 @@ function parseOptions(options: unknown): Required<NoGodComponentsOptions> {
 		targetLines: 120,
 	};
 
-	if (typeof options !== "object" || options === null) return defaults;
-
-	const cast = options as NoGodComponentsOptions;
-	/* v8 ignore next -- schema-valid options cover these fallbacks; they defend direct rule calls. @preserve */
+	const configured: NoGodComponentsRuleOptions = options ?? {};
 	return {
-		enforceTargetLines:
-			typeof cast.enforceTargetLines === "boolean" ? cast.enforceTargetLines : defaults.enforceTargetLines,
-		ignoreComponents: Array.isArray(cast.ignoreComponents) ? cast.ignoreComponents : defaults.ignoreComponents,
-		maxDestructuredProps: Predicate.isNumber(cast.maxDestructuredProps)
-			? cast.maxDestructuredProps
-			: defaults.maxDestructuredProps,
-		maxLines: Predicate.isNumber(cast.maxLines) ? cast.maxLines : defaults.maxLines,
-		maxStateHooks: Predicate.isNumber(cast.maxStateHooks) ? cast.maxStateHooks : defaults.maxStateHooks,
-		maxTsxNesting: Predicate.isNumber(cast.maxTsxNesting) ? cast.maxTsxNesting : defaults.maxTsxNesting,
-		stateHooks: Array.isArray(cast.stateHooks) ? cast.stateHooks : defaults.stateHooks,
-		targetLines: Predicate.isNumber(cast.targetLines) ? cast.targetLines : defaults.targetLines,
+		enforceTargetLines: configured.enforceTargetLines ?? defaults.enforceTargetLines,
+		ignoreComponents: configured.ignoreComponents ?? defaults.ignoreComponents,
+		maxDestructuredProperties: configured[MAX_DESTRUCTURED_PROPERTIES_OPTION] ?? defaults.maxDestructuredProperties,
+		maxLines: configured.maxLines ?? defaults.maxLines,
+		maxStateHooks: configured.maxStateHooks ?? defaults.maxStateHooks,
+		maxTsxNesting: configured.maxTsxNesting ?? defaults.maxTsxNesting,
+		stateHooks: configured.stateHooks ?? defaults.stateHooks,
+		targetLines: configured.targetLines ?? defaults.targetLines,
 	};
 }
+
+const TOO_MANY_PROPERTIES_MESSAGE_ID = "tooManyProps";
 
 const noGodComponents = createRule("no-god-components", "react", {
 	create(context): Visitor {
@@ -221,10 +232,10 @@ const noGodComponents = createRule("no-god-components", "react", {
 			}
 
 			const propertiesCount = countDestructuredProperties(node);
-			if (Predicate.isNumber(propertiesCount) && propertiesCount > config.maxDestructuredProps) {
+			if (Predicate.isNumber(propertiesCount) && propertiesCount > config.maxDestructuredProperties) {
 				context.report({
-					data: { name, count: String(propertiesCount), max: String(config.maxDestructuredProps) },
-					messageId: "tooManyProps",
+					data: { name, count: String(propertiesCount), max: String(config.maxDestructuredProperties) },
+					messageId: TOO_MANY_PROPERTIES_MESSAGE_ID,
 					node,
 				});
 			}
@@ -306,7 +317,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 			exceedsTargetLines:
 				"Component '{{name}}' is {{lines}} lines; target is {{target}} (max {{max}}). Consider extracting hooks/components.",
 			nullLiteral: "Avoid `null` in components; use `undefined` instead.",
-			tooManyProps:
+			[TOO_MANY_PROPERTIES_MESSAGE_ID]:
 				"Component '{{name}}' destructures {{count}} props; max allowed is {{max}}. Group props or split the component.",
 			tooManyStateHooks:
 				"Component '{{name}}' has {{count}} state hooks ({{hooks}}); max allowed is {{max}}. Extract cohesive state into a custom hook.",
@@ -328,7 +339,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 						items: { type: "string" },
 						type: "array",
 					},
-					maxDestructuredProps: {
+					[MAX_DESTRUCTURED_PROPERTIES_OPTION]: {
 						default: 5,
 						description: "Maximum number of destructured props in a component parameter.",
 						type: "number",

@@ -1,10 +1,12 @@
+import { Predicate } from "effect";
+
 import defaultProperties from "$oxc-generated/default-properties.json";
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
+import type { JsonArray, JsonObject, JsonValue } from "type-fest";
 
 type CanonicalNumericComponent = "-inf" | "inf" | number;
 
@@ -65,7 +67,7 @@ const intrinsicClassNamesByTagName = new Map(
 );
 
 function createDefaultPropertyLookupEntries(
-	properties: Readonly<Record<string, unknown>>,
+	properties: Readonly<Record<string, CanonicalValue>>,
 ): ReadonlyMap<string, DefaultPropertyMatch> {
 	const propertyLookupEntries = new Map<string, DefaultPropertyMatch>();
 
@@ -99,7 +101,7 @@ const canonicalValueTypes = [
 function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalValue | undefined {
 	const [valueTypeIndex] = encodedValue;
 	/* v8 ignore next -- @preserve generated compact values always start with a numeric type index. */
-	if (typeof valueTypeIndex !== "number") return undefined;
+	if (!Predicate.isNumber(valueTypeIndex)) return undefined;
 	const valueType = canonicalValueTypes[valueTypeIndex];
 	/* v8 ignore next -- @preserve the generator only emits indexes from canonicalValueTypes. */
 	if (valueType === undefined) return undefined;
@@ -129,7 +131,7 @@ const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, Default
 function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<string, DefaultPropertyMatch>> {
 	const lookups = new Map<string, ReadonlyMap<string, DefaultPropertyMatch>>();
 	for (const [className, entries] of Object.entries(defaultProperties.classes)) {
-		const properties: Record<string, unknown> = {};
+		const properties: Record<string, CanonicalValue> = {};
 		for (let index = 0; index < entries.length; index += 2) {
 			const propertyIndex = entries[index];
 			const valueIndex = entries[index + 1];
@@ -276,19 +278,29 @@ function getTrackedInstanceClassName(node: ESTree.Expression): string | undefine
 	return firstArgument.value;
 }
 
+type IdentifierSearchValue = ESTree.Node | JsonValue | undefined;
+
+function isIdentifierSearchArray(value: IdentifierSearchValue): value is JsonArray {
+	return Array.isArray(value);
+}
+
+function isIdentifierSearchObject(value: IdentifierSearchValue): value is JsonObject {
+	return Predicate.isObject(value);
+}
+
 function containsIdentifierReference(
-	value: unknown,
+	value: IdentifierSearchValue,
 	identifierName: string,
 	visitedValues: WeakSet<object> = new WeakSet<object>(),
 ): boolean {
-	if (Array.isArray(value)) {
+	if (isIdentifierSearchArray(value)) {
 		for (const element of value) {
 			if (containsIdentifierReference(element, identifierName, visitedValues)) return true;
 		}
 		return false;
 	}
 
-	if (!Predicate.isObject(value) || visitedValues.has(value)) return false;
+	if (!isIdentifierSearchObject(value) || visitedValues.has(value)) return false;
 
 	visitedValues.add(value);
 	if (value.type === "Identifier" && value.name === identifierName) return true;

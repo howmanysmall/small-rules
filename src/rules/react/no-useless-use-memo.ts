@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
@@ -9,11 +11,11 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
+
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 export const enum DependencyMode {
 	Aggressive = "aggressive",
@@ -27,16 +29,17 @@ interface NormalizedOptions {
 	readonly staticGlobalFactories: ReadonlySet<string>;
 }
 
-function getDependencyMode(value: unknown): DependencyMode {
+type RuleOptions = InferContextFromRule<typeof noUselessUseMemo>["options"][0];
+
+function getDependencyMode(value: RuleOptions): DependencyMode {
 	if (!Predicate.isObject(value) || !Predicate.isString(value.dependencyMode)) return DependencyMode.NonUpdating;
-	// oxlint-disable-next-line typescript/no-unsafe-enum-comparison -- shut up lol
 	if (value.dependencyMode === DependencyMode.EmptyOrOmitted || value.dependencyMode === DependencyMode.Aggressive) {
 		return value.dependencyMode;
 	}
 	return DependencyMode.NonUpdating;
 }
 
-function normalizeOptions(raw: unknown): NormalizedOptions {
+function normalizeOptions(raw: RuleOptions): NormalizedOptions {
 	const factories =
 		Predicate.isObject(raw) && isStringArray(raw.staticGlobalFactories)
 			? raw.staticGlobalFactories

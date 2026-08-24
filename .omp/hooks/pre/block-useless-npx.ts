@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import nodePath from "node:path";
 import { cwd } from "node:process";
 import { regex } from "arktype";
+import { Predicate } from "effect";
 
 import type { HookAPI, ToolCallEventResult } from "@oh-my-pi/pi-coding-agent/extensibility/hooks";
 
@@ -101,12 +102,10 @@ function readScripts(directory: string): Record<string, string> | undefined {
 		return undefined;
 	}
 
-	if (typeof parsed !== "object" || parsed === null) return undefined;
+	if (!Predicate.isObject(parsed)) return undefined;
 
 	const scripts = new Map<string, string>();
-	for (const [name, value] of Object.entries(parsed)) {
-		if (typeof value === "string") scripts.set(name, value);
-	}
+	for (const [name, value] of Object.entries(parsed)) if (Predicate.isString(value)) scripts.set(name, value);
 	return scripts.size > 0 ? Object.fromEntries(scripts) : undefined;
 }
 
@@ -114,7 +113,7 @@ export default function blockUselessNpx(hookApi: HookAPI): void {
 	hookApi.on("tool_call", (event): ToolCallEventResult => {
 		if (event.toolName !== "bash") return {};
 
-		const command = typeof event.input.command === "string" ? event.input.command : "";
+		const command = Predicate.isString(event.input.command) ? event.input.command : "";
 		const invocation = runnerInvocation(command);
 		if (invocation === undefined) return {};
 

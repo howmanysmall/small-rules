@@ -1,12 +1,14 @@
+import { Predicate } from "effect";
+
 import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
-import { Predicate } from "effect";
+
+import type { ESTree, Fix, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface HookConfig {
 	readonly name: string;
@@ -26,14 +28,16 @@ const DEFAULT_HOOKS = [
 	{ name: "useInsertionEffect", allowAsync: false },
 ] as const;
 
+type RuleOptions = InferContextFromRule<typeof requireNamedEffectFunctions>["options"][0];
+
 function isHookConfiguration(value: unknown): value is HookConfig {
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
 	return Predicate.isObject(value) && Predicate.isString(value.name) && typeof value.allowAsync === "boolean";
 }
 
-function parseOptions(rawOptions: unknown): EffectFunctionOptions {
-	const sloptor = Predicate.isObject(rawOptions) && rawOptions.sloptor === true;
-	const inlineFunctionDeclarations = Predicate.isObject(rawOptions) && rawOptions.inlineFunctionDeclarations === true;
+function parseOptions(rawOptions: RuleOptions): EffectFunctionOptions {
+	const sloptor = Predicate.isObject(rawOptions) && rawOptions.sloptor;
+	const inlineFunctionDeclarations = Predicate.isObject(rawOptions) && rawOptions.inlineFunctionDeclarations;
 
 	if (!Predicate.isObject(rawOptions)) {
 		return { environment: "roblox-ts", hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
@@ -160,7 +164,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 		function isAsyncAllowed(hookName: string): boolean {
 			const result = hookAsyncConfig.get(hookName);
 			/* v8 ignore next -- @preserve hookAsyncConfig is built from boolean schema-validated hook entries. */
-			return typeof result === "boolean" ? result : false;
+			return result ?? false;
 		}
 
 		function reportHookIssue(

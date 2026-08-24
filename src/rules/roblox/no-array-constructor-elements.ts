@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
@@ -21,12 +23,12 @@ import {
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
-import { Predicate } from "effect";
+
+import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { BindingName } from "$oxc-types/missing-types";
 import type { FixReturn } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 interface NoArrayConstructorElementsOptions {
 	readonly environment?: Environment;
@@ -42,6 +44,13 @@ interface PushCollapseCandidate {
 	readonly literalText: string;
 	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
 	readonly statement: ESTree.VariableDeclaration;
+}
+
+interface PushScanResult {
+	readonly argumentParts: ReadonlyArray<string>;
+	readonly hasUnsafeArgument: boolean;
+	readonly nextIndex: number;
+	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
 }
 
 type NoArrayConstructorElementsMessageId =
@@ -433,12 +442,7 @@ function scanPushStatements(
 	statements: ReadonlyArray<ProgramStatement>,
 	startIndex: number,
 	arrayIdentifierName: string,
-): {
-	readonly argumentParts: ReadonlyArray<string>;
-	readonly hasUnsafeArgument: boolean;
-	readonly nextIndex: number;
-	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
-} {
+): PushScanResult {
 	const pushStatements = new Array<ESTree.ExpressionStatement>();
 	const argumentParts = new Array<string>();
 	let hasUnsafeArgument = false;
@@ -486,11 +490,8 @@ function appendPushArguments(
 
 const noArrayConstructorElements = createRule("no-array-constructor-elements", "roblox", {
 	create(context): Visitor {
-		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety
-		const rawOptions = context.options?.[0];
-		const options: Required<NoArrayConstructorElementsOptions> = Predicate.isObject(rawOptions)
-			? { ...DEFAULT_OPTIONS, ...(rawOptions as Partial<NoArrayConstructorElementsOptions>) }
-			: { ...DEFAULT_OPTIONS };
+		const [rawOptions] = context.options;
+		const options = Predicate.isObject(rawOptions) ? { ...DEFAULT_OPTIONS, ...rawOptions } : { ...DEFAULT_OPTIONS };
 		const { sourceCode } = context;
 
 		function inspectPushCollapse(statements: ReadonlyArray<ProgramStatement>): void {

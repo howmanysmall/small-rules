@@ -3,6 +3,7 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import { Predicate } from "effect";
 
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
 import contextualMenu from "./src/integrations/contextual-menu";
@@ -14,24 +15,28 @@ function fromRepositoryRoot(path: string): string {
 	return fileURLToPath(new URL(`../${path}`, import.meta.url));
 }
 
-function ensureAstroIntegration(integration: unknown): AstroIntegration {
-	if (typeof integration !== "object" || integration === null) {
-		const error = new Error(`Expected Astro integration to be an object, received: ${String(integration)}`);
+function ensureAstroIntegration<Integration extends AstroIntegration>(
+	integration: Integration,
+): AstroIntegration & Pick<Integration, "hooks" | "name"> {
+	if (!Predicate.isObject(integration)) {
+		const error = new Error(
+			`Expected Astro integration to be an object, received: ${Object.prototype.toString.call(integration)}`,
+		);
 		Error.captureStackTrace(error, ensureAstroIntegration);
 		throw error;
 	}
 
 	const name = "name" in integration ? integration.name : undefined;
-	if (typeof name !== "string" || name.length === 0) {
+	if (!Predicate.isString(name) || name.length === 0) {
 		const error = new Error(
-			`Expected Astro integration to have a non-empty string "name" property, received: ${String(name)}`,
+			`Expected Astro integration to have a non-empty string "name" property, received: ${name}`,
 		);
 		Error.captureStackTrace(error, ensureAstroIntegration);
 		throw error;
 	}
 
 	const hooks = "hooks" in integration ? integration.hooks : undefined;
-	if (typeof hooks !== "object" || hooks === null) {
+	if (!Predicate.isObject(hooks)) {
 		const error = new Error(
 			`Expected Astro integration "${name}" to have a "hooks" object, received: ${String(hooks)}`,
 		);
@@ -41,9 +46,15 @@ function ensureAstroIntegration(integration: unknown): AstroIntegration {
 
 	return {
 		name,
-		hooks,
+		hooks: integration.hooks,
 	};
 }
+
+const reactOptions = {
+	babel: {
+		plugins: ["babel-plugin-react-compiler"],
+	},
+};
 
 export default defineConfig({
 	base: "/small-rules",
@@ -119,13 +130,7 @@ export default defineConfig({
 			}),
 		),
 		ensureAstroIntegration(mdx()),
-		ensureAstroIntegration(
-			react({
-				babel: {
-					plugins: ["babel-plugin-react-compiler"],
-				},
-			}),
-		),
+		ensureAstroIntegration(react(reactOptions)),
 		ensureAstroIntegration(contextualMenu()),
 		ensureAstroIntegration(motion()),
 	],

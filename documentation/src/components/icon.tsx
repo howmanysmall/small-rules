@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 export type IconName =
+	| "anti-slop"
 	| "arrow-right"
 	| "bolt"
 	| "check"
@@ -117,6 +118,7 @@ const X_ICON = (
 );
 
 const iconContents = {
+	"anti-slop": SHIELD_ICON,
 	"arrow-right": ARROW_RIGHT_ICON,
 	bolt: BOLT_ICON,
 	check: CHECK_ICON,

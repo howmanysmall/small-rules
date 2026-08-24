@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	countExpectCalls,
@@ -7,12 +9,13 @@ import {
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
 import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
-import { Predicate } from "effect";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
+import type { CallbackFunction } from "$oxc-types/missing-types";
+
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
+type RawRuleOptions = RuleContext["options"][0];
 
 interface RuleOptions {
 	readonly additionalAssertionFunctions: ReadonlyArray<string>;
@@ -22,12 +25,12 @@ interface RuleOptions {
 	readonly onlyFunctionsWithExpectInLoop: boolean;
 }
 
-function parseStringArray(value: unknown): ReadonlyArray<string> {
+function parseStringArray(value: ReadonlyArray<unknown> | undefined): ReadonlyArray<string> {
 	/* v8 ignore next -- @preserve rule schema restricts these options to a string array type before create() runs. */
 	return Array.isArray(value) ? value.filter(Predicate.isString) : [];
 }
 
-function parseOptions(rawOptions: unknown): RuleOptions {
+function parseOptions(rawOptions: RawRuleOptions): RuleOptions {
 	if (!Predicate.isObject(rawOptions)) {
 		return {
 			additionalAssertionFunctions: [],
@@ -41,9 +44,9 @@ function parseOptions(rawOptions: unknown): RuleOptions {
 	return {
 		additionalAssertionFunctions: parseStringArray(rawOptions.additionalAssertionFunctions),
 		additionalExpectCallNames: parseStringArray(rawOptions.additionalExpectCallNames),
-		onlyFunctionsWithAsyncKeyword: rawOptions.onlyFunctionsWithAsyncKeyword === true,
-		onlyFunctionsWithExpectInCallback: rawOptions.onlyFunctionsWithExpectInCallback === true,
-		onlyFunctionsWithExpectInLoop: rawOptions.onlyFunctionsWithExpectInLoop === true,
+		onlyFunctionsWithAsyncKeyword: rawOptions.onlyFunctionsWithAsyncKeyword,
+		onlyFunctionsWithExpectInCallback: rawOptions.onlyFunctionsWithExpectInCallback,
+		onlyFunctionsWithExpectInLoop: rawOptions.onlyFunctionsWithExpectInLoop,
 	};
 }
 

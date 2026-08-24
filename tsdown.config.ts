@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import { type } from "arktype";
 import { defineConfig } from "tsdown";
 
+import { renderBundleBanner } from "./scripts/utilities/vendored-notices.ts";
+
 const isStringRecord = type("Record<string, string>").readonly();
 const isPackageJsonDependencies = type({
 	"+": "ignore",
@@ -29,6 +31,9 @@ async function getNeverBundleAsync(): Promise<Array<string>> {
 
 const neverBundle = await getNeverBundleAsync();
 const MATCH_ANYTHING = /.*/u;
+
+const VENDORED_NOTICE = renderBundleBanner();
+
 const configuration = defineConfig((inlineConfiguration) => {
 	const bundleAll = "bundleAll" in inlineConfiguration && inlineConfiguration.bundleAll === true;
 
@@ -55,6 +60,7 @@ const configuration = defineConfig((inlineConfiguration) => {
 		fixedExtension: false,
 		format: ["esm"],
 		outDir: "dist",
+		outputOptions: { postBanner: VENDORED_NOTICE },
 		platform: "node",
 		publint: {
 			enabled: true,

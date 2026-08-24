@@ -1,13 +1,20 @@
 import nodePath from "node:path";
+import { Predicate } from "effect";
+import { parse } from "yuku-parser";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
-import { Predicate } from "effect";
-import { parse } from "yuku-parser";
 
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const EXCLUDED_STATEMENTS = new Set(["BreakStatement", "ContinueStatement", "LabeledStatement"]);
+type ParseLanguage = "js" | "jsx" | "tsx";
+const LANG_BY_EXTENSION = new Map<string, ParseLanguage>([
+	[".jsx", "jsx"],
+	[".tsx", "tsx"],
+]);
+
 function isExcludedStatement(
 	statement: ESTree.Statement,
 ): statement is ESTree.BreakStatement | ESTree.ContinueStatement | ESTree.LabeledStatement {
@@ -180,8 +187,7 @@ function isValidParseResult(result: ParseResult): boolean {
 
 function tryParse(value: string, filename: string): ParseResult | undefined {
 	const extension = nodePath.extname(filename);
-	const LANG_BY_EXTENSION: Partial<Record<string, "js" | "jsx" | "tsx">> = { ".jsx": "jsx", ".tsx": "tsx" };
-	const lang = LANG_BY_EXTENSION[extension] ?? "js";
+	const lang = LANG_BY_EXTENSION.get(extension) ?? "js";
 	const result = parse(value, { lang, sourceType: "module" });
 
 	if (isValidParseResult(result)) return result;

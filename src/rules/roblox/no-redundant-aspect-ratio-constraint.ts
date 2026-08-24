@@ -1,11 +1,12 @@
 import { readFileSync } from "node:fs";
+import { Predicate } from "effect";
+
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 

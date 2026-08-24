@@ -1,12 +1,15 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { getNamespacedCallNames, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { Environment } from "$oxc-utilities/react-utilities";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 interface NoUselessUseEffectOptions {
 	readonly environment?: Environment;
@@ -827,7 +830,7 @@ function hasOnlySetterCallsWithArgument(
 
 function isConstantValue(node: ESTree.Node): boolean {
 	return (
-		(node.type === "Literal" && typeof node.value !== "object") ||
+		(node.type === "Literal" && node.value !== null && !Predicate.isObject(node.value)) ||
 		isEmptyArrayExpression(node) ||
 		isEmptyObjectExpression(node)
 	);

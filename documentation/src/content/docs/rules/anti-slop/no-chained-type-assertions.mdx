@@ -1,0 +1,35 @@
+---
+title: "No Chained Type Assertions"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-chained-type-assertions">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>'s{" "}
+			<code>no-chained-type-assertions</code> — I wanted the same guard against casts that fabricate evidence.
+			Credit for the rule idea is his; the port here just matches my checker and my one carve-out.
+		</p>
+		<ul>
+			<li>
+				**Fabricated evidence:** the second <code>as</code> (or angle-bracket) doesn't narrow anything — it just
+				discards whatever the first one claimed. <code>value as string as number</code> proves neither.
+			</li>
+			<li>
+				**Boundary parsing over brute-forcing:** when you see <code>as unknown as T</code> or{" "}
+				<code>as any as T</code> the input is probably untrusted. I'd rather you validate it at the boundary
+				with a guard or schema and keep the precise type from there. Almost never worth papering over.
+			</li>
+			<li>
+				**Parenthesized chains count:** <code>(value as string) as number</code> is the same trick with parens.
+				The rule unwraps them, so you can't hide it.
+			</li>
+		</ul>
+		<p>
+			Where I differ is I allow <code>as const as const</code>. It's idempotent — it doesn't widen or narrow, so
+			there's nothing to discard. Everything else with two non-const assertions is a problem, though maybe not
+			worth fixing if the upstream type is truly untyped and you have no control over it.
+		</p>
+	</Fragment>
+</RulePage>

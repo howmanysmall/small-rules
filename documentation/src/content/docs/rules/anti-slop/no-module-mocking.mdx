@@ -1,0 +1,15 @@
+---
+title: "No Module Mocking"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-module-mocking">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. Module mocks make tests
+			depend on import machinery instead of the dependency seam the production code actually owns. Use a real
+			interface, service layer, or faithful in-memory implementation.
+		</p>
+	</Fragment>
+</RulePage>

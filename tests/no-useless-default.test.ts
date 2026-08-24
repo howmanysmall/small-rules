@@ -1,11 +1,13 @@
 import { describe } from "vitest";
-import rule, { isDefaultValue } from "$oxc-rules/roblox/no-useless-default";
 import { defineRule } from "oxlint-plugin-utilities";
+
+import rule, { isDefaultValue } from "$oxc-rules/roblox/no-useless-default";
 
 import { ts, tsx } from "./rule-testers";
 
-import type { CanonicalValue } from "$oxc-rules/roblox/no-useless-default";
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
+
+import type { CanonicalValue } from "$oxc-rules/roblox/no-useless-default";
 
 function createComparisonRule(
 	defaultValue: CanonicalValue,

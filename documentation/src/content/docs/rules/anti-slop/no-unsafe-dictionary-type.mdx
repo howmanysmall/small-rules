@@ -1,0 +1,15 @@
+---
+title: "No Unsafe Dictionary Type"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-unsafe-dictionary-type">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. A dictionary needs a
+			concrete value contract. <code>unknown</code>, <code>any</code>, <code>object</code>, and empty-object
+			values defer that contract to every reader; parse before insertion instead.
+		</p>
+	</Fragment>
+</RulePage>

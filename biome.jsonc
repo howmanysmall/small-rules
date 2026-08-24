@@ -57,7 +57,12 @@
 		"enabled": true,
 		"expand": "auto",
 		"formatWithErrors": true,
-		"includes": ["**", "!**/*.js", "!**/{dist,do-not-sync-ever,garbage,node_modules}/**"],
+		"includes": [
+			"**",
+			"!**/*.js",
+			"!**/{dist,do-not-sync-ever,garbage,node_modules}/**",
+			"!documentation/src/components/rule-index-data.ts"
+		],
 		"indentStyle": "tab",
 		"indentWidth": 4,
 		"lineEnding": "lf",
