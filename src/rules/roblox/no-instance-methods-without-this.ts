@@ -3,15 +3,10 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-interface Options {
-	readonly checkPrivate?: boolean;
-	readonly checkProtected?: boolean;
-	readonly checkPublic?: boolean;
-}
-
-type NormalizedOptions = Readonly<Required<Options>>;
+type Options = InferContextFromRule<typeof noInstanceMethodsWithoutThis>["options"][0];
+type NormalizedOptions = NonNullable<Options>;
 
 const DEFAULT_OPTIONS: NormalizedOptions = {
 	checkPrivate: true,
@@ -19,17 +14,8 @@ const DEFAULT_OPTIONS: NormalizedOptions = {
 	checkPublic: true,
 };
 
-function normalizeOptions(rawOptions: unknown): NormalizedOptions {
-	if (!Predicate.isObject(rawOptions)) return DEFAULT_OPTIONS;
-
-	return {
-		/* v8 ignore next -- rule schema rejects non-boolean checkPrivate @preserve */
-		checkPrivate: typeof rawOptions.checkPrivate === "boolean" ? rawOptions.checkPrivate : true,
-		/* v8 ignore next -- rule schema rejects non-boolean checkProtected @preserve */
-		checkProtected: typeof rawOptions.checkProtected === "boolean" ? rawOptions.checkProtected : true,
-		/* v8 ignore next -- rule schema rejects non-boolean checkPublic @preserve */
-		checkPublic: typeof rawOptions.checkPublic === "boolean" ? rawOptions.checkPublic : true,
-	};
+function normalizeOptions(rawOptions: Options): NormalizedOptions {
+	return rawOptions === undefined ? DEFAULT_OPTIONS : { ...DEFAULT_OPTIONS, ...rawOptions };
 }
 
 function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOptions): boolean {
