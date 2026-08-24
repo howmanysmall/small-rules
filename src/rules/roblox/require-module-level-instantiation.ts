@@ -1,21 +1,26 @@
+import { type } from "arktype";
 import { Predicate } from "effect";
 
+import { isReadonlyRecordOfStrings } from "$oxc-utilities/arktype-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
 
 interface TrackedInstantiation {
 	readonly className: string;
 	readonly importSource: string;
 }
 
-function normalizeConfig(options: unknown): ReadonlyMap<string, string> {
-	if (!Predicate.isObject(options) || !("classes" in options) || !Predicate.isObject(options.classes)) {
-		return new Map();
-	}
-	const { classes } = options;
+const isValidConfiguration = type({
+	classes: isReadonlyRecordOfStrings,
+}).readonly();
+
+type Options = InferContextFromRule<typeof requireModuleLevelInstantiation>["options"][0];
+
+function normalizeOptions(options: Options): ReadonlyMap<string, string> {
+	if (!isValidConfiguration.allows(options)) return new Map();
 	const result = new Map<string, string>();
-	for (const [key, value] of Object.entries(classes)) {
+	for (const [key, value] of Object.entries(options.classes)) {
 		/* v8 ignore start -- @preserve rule schema restricts configured class import sources to strings. */
 		if (!Predicate.isString(value)) continue;
 		/* v8 ignore stop -- @preserve */
@@ -92,7 +97,7 @@ function collectTrackedBindings(
 const requireModuleLevelInstantiation = createRule("require-module-level-instantiation", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
-		const trackedClasses = normalizeConfig(context.options[0]);
+		const trackedClasses = normalizeOptions(context.options[0]);
 		if (trackedClasses.size === 0) return {} satisfies Visitor;
 
 		const localBindings = new Map<string, string>();
@@ -103,9 +108,7 @@ const requireModuleLevelInstantiation = createRule("require-module-level-instant
 			},
 			NewExpression(node): void {
 				const trackedInstantiation = getTrackedInstantiation(node, localBindings, trackedClasses);
-				if (trackedInstantiation === undefined) return;
-
-				if (isModuleScope(sourceCode.getScope(node))) return;
+				if (trackedInstantiation === undefined || isModuleScope(sourceCode.getScope(node))) return;
 
 				context.report({
 					data: {
