@@ -12,6 +12,7 @@ import { parseCase } from "$test/rule-harness/parse";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
+import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
 import type { HarnessNode, HarnessSourceCode } from "$test/rule-harness/types";
 
 function parseCode(code: string): HarnessSourceCode {
@@ -28,9 +29,7 @@ function parseCode(code: string): HarnessSourceCode {
 
 function getProgram(source: HarnessSourceCode): ESTree.Program {
 	if (isNode(source.ast) && source.ast.type === "Program") return source.ast;
-	const error = new Error("Source AST is not a program node.");
-	Error.captureStackTrace(error, getProgram);
-	throw error;
+	throw new Error("Source AST is not a program node.");
 }
 
 function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
@@ -53,23 +52,6 @@ function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
 		},
 	});
 	return collected;
-}
-
-function firstOfType(types: ReadonlyArray<ESTree.TSType>, nodeType: string): ESTree.TSType | undefined {
-	for (const candidate of types) {
-		if (candidate.type === nodeType) return candidate;
-	}
-	return undefined;
-}
-
-interface TypeFixture {
-	readonly environment: ReturnType<typeof createTypeEnvironment>;
-	readonly source: HarnessSourceCode;
-}
-
-function setup(code: string): TypeFixture {
-	const source = parseCode(code);
-	return { environment: createTypeEnvironment(getProgram(source)), source };
 }
 
 describe("createTypeEnvironment", () => {
@@ -105,9 +87,9 @@ describe("createTypeEnvironment", () => {
 		const duplicateAliasEnvironment = createTypeEnvironment(
 			getProgram(parseCode("type Readonly<T> = T; type Readonly<T> = T;")),
 		);
-		const anonymousDefaultEnvironment = createTypeEnvironment(
-			getProgram(parseCode(["export default class {}", "export {};"].join("\n"))),
-		);
+		const anonymousSource = parseCode(["export default class {}", "export {};"].join("\n"));
+		const anonymousProgram = getProgram(anonymousSource);
+		const anonymousDefaultEnvironment = createTypeEnvironment(anonymousProgram);
 
 		expect(classEnvironment.shadowedBuiltIns.has("Partial")).toBe(true);
 		expect(enumEnvironment.shadowedBuiltIns.has("Record")).toBe(true);
@@ -140,24 +122,7 @@ describe("classifyUnsafeDictionary", () => {
 		expect.assertions(2);
 
 		const fixture = setup(code);
-		let classified: ReturnType<typeof classifyUnsafeDictionary> | undefined;
-		traverseAst(fixture.source.ast, {
-			TSMappedType(node: HarnessNode) {
-				if (isNode(node) && node.type === "TSMappedType" && classified === undefined) {
-					classified = classifyUnsafeDictionary(node, fixture.environment);
-				}
-			},
-			TSTypeLiteral(node: HarnessNode) {
-				if (isNode(node) && node.type === "TSTypeLiteral" && classified === undefined) {
-					classified = classifyUnsafeDictionary(node, fixture.environment);
-				}
-			},
-			TSTypeReference(node: HarnessNode) {
-				if (isNode(node) && node.type === "TSTypeReference" && classified === undefined) {
-					classified = classifyUnsafeDictionary(node, fixture.environment);
-				}
-			},
-		});
+		const classified = findFirstClassifiable(fixture.source, fixture.environment);
 
 		expect(classified?.kind).toBe("unsafe-dictionary");
 		expect(classified?.unsafeValue).toBe(unsafeValue);
@@ -176,18 +141,7 @@ describe("classifyUnsafeDictionary", () => {
 		];
 		for (const code of cases) {
 			const fixture = setup(code);
-			let reported = false;
-			traverseAst(fixture.source.ast, {
-				TSTypeLiteral(node: HarnessNode) {
-					if (!isNode(node) || node.type !== "TSTypeLiteral") return;
-					if (classifyUnsafeDictionary(node, fixture.environment) !== undefined) reported = true;
-				},
-				TSTypeReference(node: HarnessNode) {
-					if (!isNode(node) || node.type !== "TSTypeReference") return;
-					if (classifyUnsafeDictionary(node, fixture.environment) !== undefined) reported = true;
-				},
-			});
-			expect(reported, code).toBe(false);
+			expect(checkReportedInConcrete(fixture.source, fixture.environment)).toBe(false);
 		}
 	});
 
@@ -196,16 +150,8 @@ describe("classifyUnsafeDictionary", () => {
 
 		for (const wrapper of ["Pick", "Omit"]) {
 			const fixture = setup(`type Source = Record<string, unknown>; type A = ${wrapper}<Source, never>;`);
-			const references = new Array<ESTree.TSTypeReference>();
-			traverseAst(fixture.source.ast, {
-				TSTypeReference(node: HarnessNode) {
-					if (isNode(node) && node.type === "TSTypeReference") references.push(node);
-				},
-			});
-			const pickReference = references[1];
-			expect(
-				pickReference === undefined ? undefined : classifyUnsafeDictionary(pickReference, fixture.environment),
-			).toBeDefined();
+			const pickReference = getNthTypeReference(fixture.source, 1);
+			expect(classifyUnsafeDictionary(pickReference, fixture.environment)).toBeDefined();
 		}
 	});
 
@@ -213,11 +159,9 @@ describe("classifyUnsafeDictionary", () => {
 		expect.assertions(1);
 
 		const fixture = setup("type Cycle = Cycle | unknown; type A = Record<string, Cycle>;");
-		const literal = firstOfType(collectTypes(fixture.source), "TSTypeLiteral");
+		const recordReference = getNthTypeReference(fixture.source, 1);
 
-		expect(() =>
-			literal === undefined ? undefined : classifyUnsafeDictionary(literal, fixture.environment),
-		).not.toThrow();
+		expect(() => classifyUnsafeDictionary(recordReference, fixture.environment)).not.toThrow();
 	});
 });
 
@@ -226,82 +170,38 @@ describe("classifyUnsafeDictionaryValue", () => {
 		expect.assertions(6);
 
 		const plainUnknown = setup("type A = Record<string, unknown>;");
-		const recordValue = firstOfType(collectTypes(plainUnknown.source), "TSUnknownKeyword");
-		expect(
-			recordValue === undefined
-				? undefined
-				: classifyUnsafeDictionaryValue(recordValue, plainUnknown.environment)?.unsafeValue,
-		).toBe("unknown");
+		const recordValue = requireFirstOfType(collectTypes(plainUnknown.source), "TSUnknownKeyword");
+		expect(classifyUnsafeDictionaryValue(recordValue, plainUnknown.environment)?.unsafeValue).toBe("unknown");
 
 		const wrapped = setup("type A = { [key: string]: Required<unknown> };");
-		const wrappedValue = firstOfType(collectTypes(wrapped.source), "TSUnknownKeyword");
-		expect(
-			wrappedValue === undefined
-				? undefined
-				: classifyUnsafeDictionaryValue(wrappedValue, wrapped.environment)?.unsafeValue,
-		).toBe("unknown");
+		const wrappedValue = requireFirstOfType(collectTypes(wrapped.source), "TSUnknownKeyword");
+		expect(classifyUnsafeDictionaryValue(wrappedValue, wrapped.environment)?.unsafeValue).toBe("unknown");
 
 		const ownerIntersection = setup(
 			"interface Owner { readonly id: string } type A = Record<string, unknown & Owner>;",
 		);
-		const intersection = firstOfType(collectTypes(ownerIntersection.source), "TSIntersectionType");
-		expect(
-			intersection === undefined
-				? undefined
-				: classifyUnsafeDictionaryValue(intersection, ownerIntersection.environment),
-		).toBeUndefined();
+		const intersection = requireFirstOfType(collectTypes(ownerIntersection.source), "TSIntersectionType");
+		expect(classifyUnsafeDictionaryValue(intersection, ownerIntersection.environment)).toBeUndefined();
 
 		const anyIntersection = setup("interface Owner { readonly id: string } type A = Record<string, any & Owner>;");
-		const anyIntersectionType = firstOfType(collectTypes(anyIntersection.source), "TSIntersectionType");
-		expect(
-			anyIntersectionType === undefined
-				? undefined
-				: classifyUnsafeDictionaryValue(anyIntersectionType, anyIntersection.environment)?.unsafeValue,
-		).toBe("any");
+		const anyIntersectionType = requireFirstOfType(collectTypes(anyIntersection.source), "TSIntersectionType");
+		expect(classifyUnsafeDictionaryValue(anyIntersectionType, anyIntersection.environment)?.unsafeValue).toBe(
+			"any",
+		);
 
 		const optionalNeverInterface = setup(
 			"interface Brand { readonly __brand?: never } type A = Record<string, Brand>;",
 		);
-		let brandReference: ESTree.TSTypeReference | undefined;
-		traverseAst(optionalNeverInterface.source.ast, {
-			TSTypeReference(node: HarnessNode) {
-				if (
-					isNode(node) &&
-					node.type === "TSTypeReference" &&
-					node.typeName.type === "Identifier" &&
-					node.typeName.name === "Brand"
-				) {
-					brandReference ??= node;
-				}
-			},
-		});
-		expect(
-			brandReference === undefined
-				? undefined
-				: classifyUnsafeDictionaryValue(brandReference, optionalNeverInterface.environment)?.unsafeValue,
-		).toBe("empty-object");
+		const brandReference = findIdentifierReference(optionalNeverInterface.source, "Brand");
+		expect(classifyUnsafeDictionaryValue(brandReference, optionalNeverInterface.environment)?.unsafeValue).toBe(
+			"empty-object",
+		);
 
 		const mergedInterfaces = setup(
 			"interface Escape {} interface Escape { readonly id: string } type A = Record<string, Escape>;",
 		);
-		let escapeReference: ESTree.TSTypeReference | undefined;
-		traverseAst(mergedInterfaces.source.ast, {
-			TSTypeReference(node: HarnessNode) {
-				if (
-					isNode(node) &&
-					node.type === "TSTypeReference" &&
-					node.typeName.type === "Identifier" &&
-					node.typeName.name === "Escape"
-				) {
-					escapeReference ??= node;
-				}
-			},
-		});
-		expect(
-			escapeReference === undefined
-				? undefined
-				: classifyUnsafeDictionaryValue(escapeReference, mergedInterfaces.environment),
-		).toBeUndefined();
+		const escapeReference = findIdentifierReference(mergedInterfaces.source, "Escape");
+		expect(classifyUnsafeDictionaryValue(escapeReference, mergedInterfaces.environment)).toBeUndefined();
 	});
 
 	it("leaves qualified references and generic aliases without arguments unclassified", () => {
@@ -319,6 +219,147 @@ describe("classifyUnsafeDictionaryValue", () => {
 	});
 });
 
+function requireFirstOfType(types: ReadonlyArray<ESTree.TSType>, nodeType: string): ESTree.TSType {
+	for (const candidate of types) {
+		if (candidate.type === nodeType) return candidate;
+	}
+	const error = new Error(`Node of type "${nodeType}" not found.`);
+	Error.captureStackTrace(error, requireFirstOfType);
+	throw error;
+}
+
+function findIdentifierReference(source: HarnessSourceCode, name: string): ESTree.TSTypeReference {
+	let found: ESTree.TSTypeReference | undefined;
+	traverseAst(source.ast, {
+		TSTypeReference(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSTypeReference" &&
+				node.typeName.type === "Identifier" &&
+				node.typeName.name === name
+			) {
+				found ??= node;
+			}
+		},
+	});
+	if (found === undefined) {
+		const error = new Error(`Reference "${name}" not found.`);
+		Error.captureStackTrace(error, findIdentifierReference);
+		throw error;
+	}
+	return found;
+}
+
+function getNthTypeReference(source: HarnessSourceCode, index: number): ESTree.TSTypeReference {
+	const references = new Array<ESTree.TSTypeReference>();
+	traverseAst(source.ast, {
+		TSTypeReference(node: HarnessNode) {
+			if (isNode(node) && node.type === "TSTypeReference") references.push(node);
+		},
+	});
+	const reference = references[index];
+	if (reference === undefined) {
+		const error = new Error(`Type reference at index ${index} not found.`);
+		Error.captureStackTrace(error, getNthTypeReference);
+		throw error;
+	}
+	return reference;
+}
+
+function findFirstClassifiable(
+	source: HarnessSourceCode,
+	environment: TypeEnvironment,
+): ReturnType<typeof classifyUnsafeDictionary> | undefined {
+	let result: ReturnType<typeof classifyUnsafeDictionary> | undefined;
+	traverseAst(source.ast, {
+		TSMappedType(node: HarnessNode) {
+			if (result === undefined && isNode(node) && node.type === "TSMappedType") {
+				result = classifyUnsafeDictionary(node, environment);
+			}
+		},
+		TSTypeLiteral(node: HarnessNode) {
+			if (result === undefined && isNode(node) && node.type === "TSTypeLiteral") {
+				result = classifyUnsafeDictionary(node, environment);
+			}
+		},
+		TSTypeReference(node: HarnessNode) {
+			if (result === undefined && isNode(node) && node.type === "TSTypeReference") {
+				result = classifyUnsafeDictionary(node, environment);
+			}
+		},
+	});
+	return result;
+}
+
+function checkReportedInConcrete(source: HarnessSourceCode, environment: TypeEnvironment): boolean {
+	let reported = false;
+	traverseAst(source.ast, {
+		TSTypeLiteral(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSTypeLiteral" &&
+				classifyUnsafeDictionary(node, environment) !== undefined
+			) {
+				reported = true;
+			}
+		},
+		TSTypeReference(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSTypeReference" &&
+				classifyUnsafeDictionary(node, environment) !== undefined
+			) {
+				reported = true;
+			}
+		},
+	});
+	return reported;
+}
+
+function checkDictionaryReported(source: HarnessSourceCode, environment: TypeEnvironment): boolean {
+	let reported = false;
+	traverseAst(source.ast, {
+		TSMappedType(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSMappedType" &&
+				classifyUnsafeDictionary(node, environment) !== undefined
+			) {
+				reported = true;
+			}
+		},
+		TSTypeLiteral(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSTypeLiteral" &&
+				classifyUnsafeDictionary(node, environment) !== undefined
+			) {
+				reported = true;
+			}
+		},
+		TSTypeReference(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSTypeReference" &&
+				classifyUnsafeDictionary(node, environment) !== undefined
+			) {
+				reported = true;
+			}
+		},
+	});
+	return reported;
+}
+
+interface TypeFixture {
+	readonly environment: ReturnType<typeof createTypeEnvironment>;
+	readonly source: HarnessSourceCode;
+}
+
+function setup(code: string): TypeFixture {
+	const source = parseCode(code);
+	return { environment: createTypeEnvironment(getProgram(source)), source };
+}
+
 function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
 	let found: ESTree.TSType | undefined;
 	traverseAst(source.ast, {
@@ -332,6 +373,30 @@ function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
 		throw error;
 	}
 	return found;
+}
+
+function getFirstTypeLiteral(source: HarnessSourceCode): ESTree.TSTypeLiteral {
+	let found: ESTree.TSTypeLiteral | undefined;
+	traverseAst(source.ast, {
+		TSTypeLiteral(node: HarnessNode) {
+			if (isNode(node) && node.type === "TSTypeLiteral") found ??= node;
+		},
+	});
+	if (found === undefined) {
+		const error = new Error("Type literal not found.");
+		Error.captureStackTrace(error, getFirstTypeLiteral);
+		throw error;
+	}
+	return found;
+}
+
+function clearIndexTypeAnnotations(literal: ESTree.TSTypeLiteral): ESTree.TSTypeLiteral {
+	for (const member of literal.members) {
+		if (member.type === "TSIndexSignature") {
+			Reflect.set(member, "typeAnnotation", null);
+		}
+	}
+	return literal;
 }
 
 describe("classifyWideningTarget", () => {
@@ -450,6 +515,8 @@ describe("classifyWideningTarget", () => {
 		],
 		["const value: Index = {}; type Index<T> = Record<string, T>;", undefined],
 	])("handles transparent, qualified, and alias-backed widening target %s", (code, expected) => {
+		expect.assertions(1);
+
 		const fixture = setup(code);
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
 			expected,
@@ -519,33 +586,15 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
-		let reported = false;
-		traverseAst(fixture.source.ast, {
-			TSMappedType(node: HarnessNode) {
-				if (
-					isNode(node) &&
-					node.type === "TSMappedType" &&
-					classifyUnsafeDictionary(node, fixture.environment) !== undefined
-				)
-					{reported = true;}
-			},
-			TSTypeLiteral(node: HarnessNode) {
-				if (
-					isNode(node) &&
-					node.type === "TSTypeLiteral" &&
-					classifyUnsafeDictionary(node, fixture.environment) !== undefined
-				)
-					{reported = true;}
-			},
-			TSTypeReference(node: HarnessNode) {
-				if (
-					isNode(node) &&
-					node.type === "TSTypeReference" &&
-					classifyUnsafeDictionary(node, fixture.environment) !== undefined
-				)
-					{reported = true;}
-			},
-		});
-		expect(reported).toBe(expectUnsafe);
+		expect(checkDictionaryReported(fixture.source, fixture.environment)).toBe(expectUnsafe);
+	});
+
+	it("ignores index signatures with missing type annotations", () => {
+		expect.assertions(1);
+
+		const fixture = setup("type A = { [key: string]: unknown };");
+		const literal = clearIndexTypeAnnotations(getFirstTypeLiteral(fixture.source));
+
+		expect(classifyUnsafeDictionary(literal, fixture.environment)).toBeUndefined();
 	});
 });
