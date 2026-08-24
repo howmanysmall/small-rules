@@ -2,6 +2,7 @@
 // harness AST to the rule's ESTree SourceCode types for direct utility
 // coverage.
 import { describe, expect, it } from "vitest";
+import { Predicate } from "effect";
 
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
@@ -22,11 +23,7 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 			if (calleeName(node.callee) === name) found = node;
 		},
 	});
-	if (found === undefined) {
-		const error = new Error(`Call expression "${name}" not found.`);
-		Error.captureStackTrace(error, findCall);
-		throw error;
-	}
+	if (found === undefined) throw new Error(`Call expression "${name}" not found.`);
 	return found;
 }
 
@@ -35,19 +32,23 @@ function calleeName(callee: unknown): string | undefined {
 	const { type } = callee;
 	if (type === "Identifier") {
 		const { name } = callee;
-		return typeof name === "string" ? name : undefined;
+		return Predicate.isString(name) ? name : undefined;
 	}
 	if (type !== "MemberExpression") return undefined;
+
 	const { property } = callee;
 	if (!isRecord(property)) return undefined;
+
 	if (property.type === "Identifier") {
 		const { name } = property;
-		return typeof name === "string" ? name : undefined;
+		return Predicate.isString(name) ? name : undefined;
 	}
+
 	if (property.type === "Literal") {
 		const { value } = property;
-		return typeof value === "string" ? value : undefined;
+		return Predicate.isString(value) ? value : undefined;
 	}
+
 	return undefined;
 }
 
