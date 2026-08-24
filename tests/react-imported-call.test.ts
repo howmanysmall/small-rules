@@ -7,7 +7,6 @@ import { Predicate } from "effect";
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { traverseAst } from "./rule-harness/ast";
-import { isRecord } from "./rule-harness/object";
 import { parseCase } from "./rule-harness/parse";
 
 import type { HarnessNode, HarnessSourceCode } from "./rule-harness/types";
@@ -28,7 +27,7 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 }
 
 function calleeName(callee: unknown): string | undefined {
-	if (!isRecord(callee)) return undefined;
+	if (!Predicate.isObject(callee)) return undefined;
 	const { type } = callee;
 	if (type === "Identifier") {
 		const { name } = callee;
@@ -37,7 +36,7 @@ function calleeName(callee: unknown): string | undefined {
 	if (type !== "MemberExpression") return undefined;
 
 	const { property } = callee;
-	if (!isRecord(property)) return undefined;
+	if (!Predicate.isObject(property)) return undefined;
 
 	if (property.type === "Identifier") {
 		const { name } = property;
