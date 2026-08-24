@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
+// oxlint-disable small-rules/no-shape-in-symbol-names -- what?
 
 import { createRule } from "$oxc-utilities/create-rule";
 

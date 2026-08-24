@@ -38,27 +38,21 @@ function isConstAssertion(node: TypeAssertion): boolean {
 	);
 }
 
-/**
- * A described Oxlint suppression of the unsafe-assertion rule documents the
- * same invariant a `SAFETY:` comment would; unrelated or undescribed
- * suppressions do not. Mirrors the directive grammar of `directive-comments`
- * for this one kind.
- */
+const COMMA_REGEXP = /[\s,]+/u;
+
 function disablesUnsafeAssertionRule(comment: SourceCodeComment): boolean {
 	const text = comment.value.trim();
 	if (!OXLINT_DISABLE_DIRECTIVE.test(text)) return false;
 
 	const divided = text.split(DIRECTIVE_DESCRIPTION_SEPARATOR);
-	const directiveText = divided[0];
+	const [directiveText] = divided;
 	const description = divided[1]?.trim();
 	if (directiveText === undefined || description === undefined) return false;
 
 	const valueStart = directiveText.search(DIRECTIVE_VALUE_SEPARATOR);
 	/* v8 ignore next -- a described directive always contains the kind/value separator. @preserve */
 	const value = valueStart === -1 ? "" : directiveText.slice(valueStart);
-	for (const ruleId of value.split(/[\s,]+/u)) {
-		if (ruleId === UNSAFE_ASSERTION_RULE_ID) return true;
-	}
+	for (const ruleId of value.split(COMMA_REGEXP)) if (ruleId === UNSAFE_ASSERTION_RULE_ID) return true;
 	return false;
 }
 
