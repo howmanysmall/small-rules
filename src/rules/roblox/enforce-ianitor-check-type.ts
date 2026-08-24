@@ -1,7 +1,7 @@
 // oxlint-disable better-max-params/better-max-params -- nobody cares lol
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 interface ComplexityConfig {
 	readonly baseThreshold: number;
@@ -21,6 +21,8 @@ const DEFAULT_CONFIGURATION: ComplexityConfig = {
 	interfacePenalty: 20,
 	performanceMode: true,
 };
+
+type RuleOptions = InferContextFromRule<typeof enforceIanitorCheckType>["options"][0];
 
 function isIanitorValidator({ callee }: ESTree.CallExpression): boolean {
 	if (callee.type !== "MemberExpression") return false;
@@ -434,7 +436,7 @@ function calculateStructuralComplexity(
 
 const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox", {
 	create(context): Visitor {
-		const rawOptions = (context.options[0] ?? {}) as Partial<ComplexityConfig>;
+		const rawOptions: RuleOptions = context.options[0];
 		const config: ComplexityConfig = { ...DEFAULT_CONFIGURATION, ...rawOptions };
 		const cache: ComplexityCache = {
 			nodeCache: new WeakMap(),

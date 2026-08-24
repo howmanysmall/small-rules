@@ -9,6 +9,7 @@ import { locationForRange } from "./locations";
 import type { UnknownRecord } from "type-fest";
 
 import type { LocationIndex } from "./locations";
+import type { HarnessValue } from "./object";
 import type { HarnessNode, Range } from "./types";
 
 export const harnessVisitorKeys: Record<string, ReadonlyArray<string>> = CHILD_KEYS;
@@ -16,19 +17,19 @@ export const harnessVisitorKeys: Record<string, ReadonlyArray<string>> = CHILD_K
 const ATTRIBUTE_SELECTOR_PATTERN = /\[(?<path>[\w.]+)=(?<quote>["'])(?<value>.*?)\k<quote>\]/gu;
 const CHILD_FIELD_SELECTOR_PATTERN = /^(?<parentType>\w+)\s*>\s*\.(?<field>\w+)$/u;
 
-export function decorateAst(program: unknown, locationIndex: LocationIndex): HarnessNode {
+export function decorateAst(program: HarnessValue, locationIndex: LocationIndex): HarnessNode {
 	if (!isParsedNode(program)) throw new HarnessError("Yuku parser returned an invalid Program node.");
 	attachNodeMetadata(program, null, locationIndex);
 	if (!isHarnessNode(program)) throw new HarnessError("Yuku parser Program node could not be decorated.");
 	return program;
 }
 
-export function traverseAst(root: HarnessNode, visitor: unknown): void {
+export function traverseAst(root: HarnessNode, visitor: HarnessValue): void {
 	const entries = createVisitorEntries(visitor);
 	traverseNode(root, entries);
 }
 
-function isHarnessNode(value: unknown): value is HarnessNode {
+function isHarnessNode(value: HarnessValue): value is HarnessNode {
 	if (!Predicate.isObject(value)) return false;
 	return Predicate.isString(value.type) && isRange(value.range) && Predicate.isObject(value.loc);
 }
@@ -59,7 +60,7 @@ function attachNodeMetadata(node: UnknownRecord, parent: HarnessNode | null, loc
 	const range = readRange(node.range);
 	if (range === undefined) return;
 
-	normalizeNodeShape(node);
+	normalizeMethodDefinitionKind(node);
 	node.parent = parent;
 	node.loc = locationForRange(locationIndex, range);
 
@@ -79,24 +80,24 @@ function attachNodeMetadata(node: UnknownRecord, parent: HarnessNode | null, loc
 	}
 }
 
-function normalizeNodeShape(node: UnknownRecord): void {
+function normalizeMethodDefinitionKind(node: UnknownRecord): void {
 	if (node.type !== "MethodDefinition" || Predicate.isString(node.kind)) return;
 	const { key } = node;
 	if (!Predicate.isObject(key)) return;
 	node.kind = key.name === "constructor" ? "constructor" : "method";
 }
 
-function isParsedNode(value: unknown): value is UnknownRecord {
+function isParsedNode(value: HarnessValue): value is UnknownRecord {
 	if (!Predicate.isObject(value)) return false;
 	return Predicate.isString(value.type) && readRange(value.range) !== undefined;
 }
 
-function readRange(value: unknown): Range | undefined {
+function readRange(value: HarnessValue): Range | undefined {
 	if (!isRange(value)) return undefined;
 	return value;
 }
 
-function isRange(value: unknown): value is Range {
+function isRange(value: HarnessValue): value is Range {
 	return Array.isArray(value) && value.length === 2 && Predicate.isNumber(value[0]) && Predicate.isNumber(value[1]);
 }
 
@@ -113,7 +114,7 @@ interface VisitorEntry {
 	matches: NodePredicate;
 }
 
-function createVisitorEntries(visitor: unknown): VisitorEntries {
+function createVisitorEntries(visitor: HarnessValue): VisitorEntries {
 	const entries: VisitorEntries = { enter: new Map(), exit: new Map() };
 	if (!Predicate.isObject(visitor)) return entries;
 
@@ -141,7 +142,7 @@ function addVisitor(map: Map<string, Array<VisitorEntry>>, selector: string, vis
 	visitors.push(entry);
 }
 
-function isVisitorCallback(value: unknown): value is VisitorCallback {
+function isVisitorCallback(value: HarnessValue): value is VisitorCallback {
 	return Predicate.isFunction(value);
 }
 
@@ -159,7 +160,12 @@ function getVisitors(map: Map<string, Array<VisitorEntry>>, nodeType: string): R
 	return [...(map.get(nodeType) ?? []), ...(map.get("*") ?? [])];
 }
 
-function parseSelector(selector: string): { matches: NodePredicate; nodeType: string } {
+interface ParsedSelector {
+	matches: NodePredicate;
+	nodeType: string;
+}
+
+function parseSelector(selector: string): ParsedSelector {
 	const childSelector = parseChildFieldSelector(selector);
 	if (childSelector !== undefined) return childSelector;
 
@@ -186,7 +192,7 @@ function parseSelector(selector: string): { matches: NodePredicate; nodeType: st
 	};
 }
 
-function parseChildFieldSelector(selector: string): undefined | { matches: NodePredicate; nodeType: string } {
+function parseChildFieldSelector(selector: string): ParsedSelector | undefined {
 	const match = CHILD_FIELD_SELECTOR_PATTERN.exec(selector);
 	const parentType = match?.groups?.parentType;
 	const field = match?.groups?.field;
@@ -204,7 +210,7 @@ function parseChildFieldSelector(selector: string): undefined | { matches: NodeP
 	};
 }
 
-function parseStatementNotSelector(selector: string): undefined | { matches: NodePredicate; nodeType: string } {
+function parseStatementNotSelector(selector: string): ParsedSelector | undefined {
 	const prefix = ":statement:not(";
 	if (!selector.startsWith(prefix) || !selector.endsWith(")")) return undefined;
 
@@ -221,8 +227,8 @@ function isStatementNode(node: HarnessNode): boolean {
 	return node.type.endsWith("Statement") || node.type.endsWith("Declaration");
 }
 
-function readPath(node: HarnessNode, path: string): unknown {
-	let current: unknown = node;
+function readPath(node: HarnessNode, path: string): HarnessValue {
+	let current: HarnessValue = node;
 	for (const key of path.split(".")) {
 		if (!Predicate.isObject(current)) return undefined;
 		current = current[key];

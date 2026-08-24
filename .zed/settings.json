@@ -332,27 +332,6 @@
 				}
 			}
 		},
-		"typescript-ls": {
-			"binary": {
-				"arguments": ["--run", "tsgo", "--", "--lsp", "--stdio"],
-				"path": "node"
-			},
-			"settings": {
-				"typescript": {
-					"inlayHints": {
-						"enumMemberValues": { "enabled": false },
-						"functionLikeReturnTypes": { "enabled": false },
-						"parameterNames": {
-							"enabled": "none",
-							"suppressWhenArgumentMatchesName": false
-						},
-						"parameterTypes": { "enabled": false },
-						"propertyDeclarationTypes": { "enabled": false },
-						"variableTypes": { "enabled": false }
-					}
-				}
-			}
-		},
 		"vtsls": {
 			"settings": {
 				"javascript": {

@@ -11,6 +11,7 @@ import {
 } from "$oxc-utilities/local-component-discovery";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { JsonArray, JsonObject, JsonValue } from "type-fest";
 
 type MessageIds = "preferDirectionalPadding" | "preferEqualPadding";
 
@@ -36,27 +37,37 @@ interface PaddingAttributes {
 	readonly paddingTop: ESTree.JSXAttribute;
 }
 
-function areStructurallyEqual(left: unknown, right: unknown): boolean {
+type StructuralValue = ESTree.Expression | JsonValue | undefined;
+type StructuralRecord = JsonObject;
+
+function isStructuralRecord(value: StructuralValue): value is StructuralRecord {
+	return Predicate.isObject(value);
+}
+
+function areStructurallyEqual(left: StructuralValue, right: StructuralValue): boolean {
 	if (Object.is(left, right)) return true;
 
-	if (Array.isArray(left)) {
+	if (isStructuralArray(left)) {
 		return Array.isArray(right) && areArraysStructurallyEqual(left, right);
 	}
 
 	/* v8 ignore next -- parser-produced ESTree nodes are records, not native arrays. @preserve */
 	if (Array.isArray(right)) return false;
 
-	if (typeof left !== "object" || typeof right !== "object") return false;
-	/* v8 ignore next -- comparable JSX values are ESTree node objects, not raw null. @preserve */
-	if (left === null || right === null) return false;
-
 	/* v8 ignore next -- comparable JSX values are parser-produced record-shaped ESTree nodes. @preserve */
-	if (!Predicate.isObject(left) || !Predicate.isObject(right)) return false;
+	if (!isStructuralRecord(left) || !isStructuralRecord(right)) return false;
 
 	return areRecordsStructurallyEqual(left, right);
 }
 
-function areArraysStructurallyEqual(left: ReadonlyArray<unknown>, right: ReadonlyArray<unknown>): boolean {
+function isStructuralArray(value: StructuralValue): value is JsonArray {
+	return Array.isArray(value);
+}
+
+function areArraysStructurallyEqual(
+	left: ReadonlyArray<StructuralValue>,
+	right: ReadonlyArray<StructuralValue>,
+): boolean {
 	if (left.length !== right.length) return false;
 
 	let index = 0;
@@ -64,7 +75,7 @@ function areArraysStructurallyEqual(left: ReadonlyArray<unknown>, right: Readonl
 	return true;
 }
 
-function areRecordsStructurallyEqual(left: Record<string, unknown>, right: Record<string, unknown>): boolean {
+function areRecordsStructurallyEqual(left: StructuralRecord, right: StructuralRecord): boolean {
 	const leftEntries = Object.entries(left).filter(([key]) => !IGNORED_COMPARISON_KEYS.has(key));
 	const rightEntries = Object.entries(right).filter(([key]) => !IGNORED_COMPARISON_KEYS.has(key));
 	if (leftEntries.length !== rightEntries.length) return false;

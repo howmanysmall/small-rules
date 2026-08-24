@@ -10,6 +10,7 @@ import { createSourceCode } from "./source-code";
 
 import type { UnknownRecord } from "type-fest";
 
+import type { HarnessValue } from "./object";
 import type {
 	BaseRuleCase,
 	HarnessSourceCode,
@@ -143,12 +144,12 @@ function languageFromFilename(filename = ""): TestLanguage {
 	return "js";
 }
 
-function assertJsonSerializable(name: string, value: unknown): void {
+function assertJsonSerializable(name: string, value: HarnessValue): void {
 	if (isJsonSerializable(value)) return;
 	throw new HarnessError(`${name} must be JSON-serializable.`);
 }
 
-export function getRuleMeta(rule: unknown): UnknownRecord {
+export function getRuleMeta(rule: HarnessValue): UnknownRecord {
 	const meta = getProperty(rule, "meta");
 	return Predicate.isObject(meta) ? meta : {};
 }

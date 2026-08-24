@@ -19,22 +19,22 @@ const ADD_LOG_FIXTURE = [
 	"",
 ].join("\n");
 
-const RESPONSES: Readonly<Record<string, string>> = {
-	"log --reverse --diff-filter=A --format=__COMMIT__%H --name-only -- src/rules/": ADD_LOG_FIXTURE,
-	"tag --contains aaaa1111 --list v* --sort=version:refname": "v1.1.0\n",
-	"tag --contains bbbb2222 --list v* --sort=version:refname": "v2.14.0\n",
-	"tag --contains cccc3333 --list v* --sort=version:refname": "",
-	"tag --list v* --sort=-version:refname": "v2.14.0\n",
-};
+const RESPONSES = new Map([
+	["log --reverse --diff-filter=A --format=__COMMIT__%H --name-only -- src/rules/", ADD_LOG_FIXTURE],
+	["tag --contains aaaa1111 --list v* --sort=version:refname", "v1.1.0\n"],
+	["tag --contains bbbb2222 --list v* --sort=version:refname", "v2.14.0\n"],
+	["tag --contains cccc3333 --list v* --sort=version:refname", ""],
+	["tag --list v* --sort=-version:refname", "v2.14.0\n"],
+]);
 
-function createFakeRunner(responses: Readonly<Record<string, string>>): GitRunner {
-	return (parameters) => responses[parameters.join(" ")] ?? "";
+function createFakeRunner(responses: ReadonlyMap<string, string>): GitRunner {
+	return (parameters) => responses.get(parameters.join(" ")) ?? "";
 }
 
 function createRecordingRunner(calls: Array<ReadonlyArray<string>>): GitRunner {
 	return (parameters) => {
 		calls.push(parameters);
-		return RESPONSES[parameters.join(" ")] ?? "";
+		return RESPONSES.get(parameters.join(" ")) ?? "";
 	};
 }
 function createManifestFilteredRunner(): GitRunner {

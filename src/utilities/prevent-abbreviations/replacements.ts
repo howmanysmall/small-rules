@@ -20,6 +20,8 @@ import type {
 	MessageIds,
 	NameReplacements,
 	PreparedOptions,
+	RawOptions,
+	RawOptionValue,
 	ShorthandConfiguration as ShorthandConfig,
 	ShorthandMatcher,
 	ShorthandReplacement,
@@ -33,8 +35,17 @@ interface ReplacementNames {
 	readonly upperFirst: ReadonlyArray<string>;
 }
 
+interface Message {
+	readonly data: Record<string, string>;
+	readonly messageId: MessageIds;
+}
+
 const replacementNamesByConfiguration = new WeakMap<Map<string, boolean>, ReplacementNames>();
 const preparedOptionsByConfiguration = new WeakMap<object, PreparedOptions>();
+
+function isRawOptions(value: RawOptions | undefined): value is RawOptions {
+	return Predicate.isObject(value);
+}
 
 function isUpperCase(value: string): boolean {
 	return value === value.toUpperCase();
@@ -234,12 +245,12 @@ function isWordIgnored(word: string, configuration: ShorthandConfig): boolean {
 	return false;
 }
 
-function normalizeImportCheckOption(value: unknown, defaultValue: ImportCheckOption): ImportCheckOption {
+function normalizeImportCheckOption(value: RawOptionValue, defaultValue: ImportCheckOption): ImportCheckOption {
 	if (value === "internal" || Predicate.isBoolean(value)) return value;
 	return defaultValue;
 }
 
-function normalizeBooleanRecord(value: unknown): Record<string, boolean> | undefined {
+function normalizeBooleanRecord(value: RawOptions["allowList"]): Record<string, boolean> | undefined {
 	if (!Predicate.isObject(value)) return undefined;
 
 	const normalizedValue: Record<string, boolean> = {};
@@ -248,12 +259,12 @@ function normalizeBooleanRecord(value: unknown): Record<string, boolean> | undef
 	return normalizedValue;
 }
 
-function normalizeBooleanOption(value: unknown, defaultValue: boolean): boolean {
+function normalizeBooleanOption(value: RawOptionValue, defaultValue: boolean): boolean {
 	return Predicate.isBoolean(value) ? value : defaultValue;
 }
 
-function normalizeAllowList(options: unknown): Map<string, boolean> {
-	const normalizedOptions = Predicate.isObject(options) ? options : undefined;
+function normalizeAllowList(options: RawOptions | undefined): Map<string, boolean> {
+	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const configuredAllowList = normalizeBooleanRecord(normalizedOptions?.allowList);
 	const extendDefaultAllowList = normalizeBooleanOption(normalizedOptions?.extendDefaultAllowList, true);
 	const mergedAllowList = evilTernary(
@@ -265,13 +276,15 @@ function normalizeAllowList(options: unknown): Map<string, boolean> {
 	return new Map(Object.entries(mergedAllowList));
 }
 
-function normalizeReplacementOverrides(value: unknown): Record<string, false | Record<string, boolean>> {
-	if (!Predicate.isObject(value)) return {};
+function normalizeReplacementOverrides(
+	value: RawOptions["replacements"],
+): Map<string, false | Record<string, boolean>> {
+	if (!Predicate.isObject(value)) return new Map();
 
-	const overrides: Record<string, false | Record<string, boolean>> = {};
+	const overrides = new Map<string, false | Record<string, boolean>>();
 	for (const [name, override] of Object.entries(value)) {
 		if (override === false) {
-			overrides[name] = false;
+			overrides.set(name, false);
 			continue;
 		}
 
@@ -281,25 +294,22 @@ function normalizeReplacementOverrides(value: unknown): Record<string, false | R
 		for (const [replacementName, enabled] of Object.entries(override)) {
 			if (Predicate.isBoolean(enabled)) normalizedOverride[replacementName] = enabled;
 		}
-		overrides[name] = normalizedOverride;
+		overrides.set(name, normalizedOverride);
 	}
 
 	return overrides;
 }
 
-function normalizeReplacements(options: unknown): Map<string, Map<string, boolean>> {
-	const normalizedOptions = Predicate.isObject(options) ? options : undefined;
+function normalizeReplacements(options: RawOptions | undefined): Map<string, Map<string, boolean>> {
+	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const extendDefaultReplacements = normalizeBooleanOption(normalizedOptions?.extendDefaultReplacements, true);
 	const configuredReplacements = normalizeReplacementOverrides(normalizedOptions?.replacements);
-	const replacementKeys = new Set<string>([
-		...Object.keys(DEFAULT_REPLACEMENTS),
-		...Object.keys(configuredReplacements),
-	]);
+	const replacementKeys = new Set<string>([...Object.keys(DEFAULT_REPLACEMENTS), ...configuredReplacements.keys()]);
 
 	const mergedReplacements = new Array<[string, Map<string, boolean>]>();
 
 	for (const discouragedName of replacementKeys) {
-		const configuredOverride = configuredReplacements[discouragedName];
+		const configuredOverride = configuredReplacements.get(discouragedName);
 		const baseReplacements = extendDefaultReplacements ? (DEFAULT_REPLACEMENTS[discouragedName] ?? {}) : {};
 		const mergedForName =
 			configuredOverride === false
@@ -316,8 +326,8 @@ function normalizeReplacements(options: unknown): Map<string, Map<string, boolea
 	return new Map(mergedReplacements);
 }
 
-function normalizeIgnorePatterns(options: unknown): ReadonlyArray<RegExp> {
-	const normalizedOptions = Predicate.isObject(options) ? options : undefined;
+function normalizeIgnorePatterns(options: RawOptions | undefined): ReadonlyArray<RegExp> {
+	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const ignorePatterns = new Array<RegExp | string>();
 
 	for (const pattern of DEFAULT_IGNORE) ignorePatterns.push(pattern);
@@ -331,8 +341,8 @@ function normalizeIgnorePatterns(options: unknown): ReadonlyArray<RegExp> {
 	return ignorePatterns.map((pattern) => (pattern instanceof RegExp ? pattern : new RegExp(pattern, "u")));
 }
 
-function normalizeAllowPropertyAccess(options: unknown): ReadonlySet<string> {
-	const normalizedOptions = Predicate.isObject(options) ? options : undefined;
+function normalizeAllowPropertyAccess(options: RawOptions | undefined): ReadonlySet<string> {
+	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const allowPropertyAccess = new Set<string>(DEFAULT_ALLOW_PROPERTY_ACCESS);
 	if (!isStringArray(normalizedOptions?.allowPropertyAccess)) return allowPropertyAccess;
 
@@ -340,8 +350,8 @@ function normalizeAllowPropertyAccess(options: unknown): ReadonlySet<string> {
 	return allowPropertyAccess;
 }
 
-function normalizeShorthandConfiguration(options: unknown): ShorthandConfig {
-	const normalizedOptions = Predicate.isObject(options) ? options : undefined;
+function normalizeShorthandConfiguration(options: RawOptions | undefined): ShorthandConfig {
+	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const exactMatchers = new Map<string, string>();
 	const ignoreExact = new Set<string>();
 	const ignoreMatchers = new Array<ShorthandMatcher>();
@@ -373,8 +383,8 @@ function normalizeShorthandConfiguration(options: unknown): ShorthandConfig {
 	};
 }
 
-function createPreparedOptions(options: unknown): PreparedOptions {
-	const normalizedOptions = Predicate.isObject(options) ? options : undefined;
+function createPreparedOptions(options: RawOptions | undefined): PreparedOptions {
+	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	return {
 		allowList: normalizeAllowList(normalizedOptions),
 		allowPropertyAccess: normalizeAllowPropertyAccess(normalizedOptions),
@@ -406,8 +416,8 @@ function clonePreparedOptions(options: PreparedOptions): PreparedOptions {
 	};
 }
 
-export function prepareOptions(options: unknown): PreparedOptions {
-	if (!Predicate.isObject(options)) return createPreparedOptions(options);
+export function prepareOptions(options: RawOptions | undefined): PreparedOptions {
+	if (!isRawOptions(options)) return createPreparedOptions(undefined);
 
 	const cachedOptions = preparedOptionsByConfiguration.get(options);
 	if (cachedOptions !== undefined) return clonePreparedOptions(cachedOptions);
@@ -609,7 +619,7 @@ export function getMessage(
 	discouragedName: string,
 	{ samples = [], total }: NameReplacements,
 	nameTypeText: string,
-): { data: Record<string, string>; messageId: MessageIds } {
+): Message {
 	if (total === 1) {
 		return {
 			data: {

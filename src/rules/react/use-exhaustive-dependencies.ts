@@ -762,7 +762,7 @@ function isStringArray(array: ReadonlyArray<unknown>): array is Array<string> {
 function convertStableResult(
 	stableResult: boolean | number | ReadonlyArray<number> | ReadonlyArray<string>,
 ): StableResult {
-	if (typeof stableResult === "boolean") return stableResult;
+	if (stableResult === true || stableResult === false) return stableResult;
 	if (Predicate.isNumber(stableResult)) return new Set([stableResult]);
 
 	/* v8 ignore next -- @preserve stableResult option schema only permits boolean, number, or arrays. */

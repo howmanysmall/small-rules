@@ -3,7 +3,24 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { type } from "arktype";
 
-const isDefaultProperties = type({ classes: "Record<string, Record<string, unknown>>" }).readonly();
+type CanonicalPropertyValue = boolean | number | ReadonlyArray<number> | string;
+
+interface CanonicalDefaultProperty {
+	readonly enumType?: string;
+	readonly type: string;
+	readonly value: CanonicalPropertyValue;
+}
+
+const isDefaultProperties = type({
+	classes: type.Record(
+		"string",
+		type.Record("string", {
+			enumType: "string?",
+			type: "string",
+			value: "boolean | number | string | number[]",
+		}),
+	),
+}).readonly();
 const defaultProperties = isDefaultProperties(JSON.parse(await readFile("src/default-properties.json", "utf8")));
 if (defaultProperties instanceof type.errors) throw new TypeError(defaultProperties.summary);
 
@@ -13,18 +30,8 @@ const valueTypeIndexes = new Map(
 	),
 );
 
-function encodeValue(value: unknown): ReadonlyArray<unknown> {
-	if (typeof value !== "object" || value === null || !("type" in value) || !("value" in value)) {
-		const error = new TypeError("Invalid canonical default property value.");
-		Error.captureStackTrace(error, encodeValue);
-		throw error;
-	}
+function encodeValue(value: CanonicalDefaultProperty): ReadonlyArray<CanonicalPropertyValue | number> {
 	const valueType = value.type;
-	if (typeof valueType !== "string") {
-		const error = new TypeError("Invalid canonical default property type.");
-		Error.captureStackTrace(error, encodeValue);
-		throw error;
-	}
 	const valueTypeIndex = valueTypeIndexes.get(valueType);
 	if (valueTypeIndex === undefined) {
 		const error = new TypeError(`Unknown canonical default property type: ${valueType}`);
@@ -32,7 +39,7 @@ function encodeValue(value: unknown): ReadonlyArray<unknown> {
 		throw error;
 	}
 	if (valueType === "Enum") {
-		if (!("enumType" in value) || typeof value.enumType !== "string") {
+		if (value.enumType === undefined) {
 			const error = new TypeError("Invalid canonical enum default property value.");
 			Error.captureStackTrace(error, encodeValue);
 			throw error;

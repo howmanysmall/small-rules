@@ -1,8 +1,9 @@
 declare module "satteri" {
-	import type { Element, RootContent as HastRootContent } from "hast";
+	import type { Element, Node as HastNode, RootContent as HastRootContent } from "hast";
 	import type {
 		BlockContent,
 		DefinitionContent,
+		Node as MdastNode,
 		RootContent as MdastRootContent,
 		Parent,
 		PhrasingContent,
@@ -11,7 +12,7 @@ declare module "satteri" {
 
 	export interface MdastPluginContext {
 		readonly fileURL?: string;
-		readonly textContent: (node: unknown) => string;
+		readonly textContent: (node: MdastNode) => string;
 	}
 
 	interface DirectiveFields {
@@ -52,7 +53,7 @@ declare module "satteri" {
 	export interface HastPluginContext {
 		readonly fileURL?: string;
 		readonly setProperty: (node: Element, key: string, value: string) => void;
-		readonly textContent: (node: unknown) => string;
+		readonly textContent: (node: HastNode) => string;
 	}
 
 	export interface HastElementVisitor {

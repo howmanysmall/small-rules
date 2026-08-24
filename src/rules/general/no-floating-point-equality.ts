@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { forEachScopeVariable, getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
@@ -41,10 +43,10 @@ function isExactDecimal(raw: string): boolean {
 }
 
 function numericLiteralValue(node: ESTree.Node): number | undefined {
-	if (node.type === "Literal" && typeof node.value === "number") return node.value;
+	if (node.type === "Literal" && Predicate.isNumber(node.value)) return node.value;
 	if (node.type !== "UnaryExpression" || (node.operator !== "+" && node.operator !== "-")) return undefined;
 	const value = node.argument.type === "Literal" ? node.argument.value : undefined;
-	if (typeof value !== "number") return undefined;
+	if (!Predicate.isNumber(value)) return undefined;
 	return node.operator === "-" ? -value : value;
 }
 
@@ -144,7 +146,7 @@ function isFloatingExpression(
 ): boolean {
 	const current = resolveFloatingExpressionRoot(node, variables, visited);
 	if (current === undefined) return false;
-	if (current.type === "Literal" && typeof current.value === "number") {
+	if (current.type === "Literal" && Predicate.isNumber(current.value)) {
 		const raw = String(current.raw);
 		return (raw.includes(".") || EXPONENT_PATTERN.test(raw)) && !isExactDecimal(raw);
 	}
@@ -193,7 +195,7 @@ function collectImportedSpecifier(
 function collectImportedAssertions(program: ESTree.Program): Map<string, ImportedAssertionKind> {
 	const assertions = new Map<string, ImportedAssertionKind>();
 	for (const statement of program.body) {
-		if (statement.type !== "ImportDeclaration" || typeof statement.source.value !== "string") continue;
+		if (statement.type !== "ImportDeclaration" || !Predicate.isString(statement.source.value)) continue;
 		const source = statement.source.value;
 		for (const specifier of statement.specifiers) {
 			collectImportedSpecifier(assertions, source, specifier);

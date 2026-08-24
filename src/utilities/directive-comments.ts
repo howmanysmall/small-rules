@@ -1,7 +1,7 @@
 import { Predicate } from "effect";
 
 import type { Comment, Location, SourceCode } from "oxlint-plugin-utilities";
-import type { Writable } from "type-fest";
+import type { UnknownRecord, Writable } from "type-fest";
 
 const ESLINT_DISABLE = "eslint-disable";
 const ESLINT_DISABLE_LINE = "eslint-disable-line";
@@ -59,6 +59,16 @@ interface ColumnLine {
 	readonly line: number;
 }
 
+interface DividedDirectiveComment {
+	readonly description: string | undefined;
+	readonly text: string;
+}
+
+interface ForceLocation {
+	readonly end: ColumnLine;
+	readonly start: ColumnLine;
+}
+
 interface DisabledArea {
 	readonly comment: Comment;
 	readonly end: ColumnLine | undefined;
@@ -83,12 +93,12 @@ export function isDisableOrEnableDirectiveKind(kind: string): boolean {
 }
 
 export function getOptionalStringArrayProperty(
-	value: unknown,
+	value: null | undefined | UnknownRecord,
 	propertyName: string,
 ): ReadonlyArray<string> | undefined {
 	if (!Predicate.isObject(value)) return undefined;
 
-	const property = Reflect.get(value, propertyName);
+	const property = value[propertyName];
 	if (property === undefined || !Array.isArray(property)) return undefined;
 
 	const strings = new Array<string>();
@@ -141,10 +151,7 @@ function parseDirectiveText(
 
 const DIRECTIVE_REGEXP = /\s-{2,}\s/u;
 
-function divideDirectiveComment(value: string): {
-	readonly description: string | undefined;
-	readonly text: string;
-} {
+function divideDirectiveComment(value: string): DividedDirectiveComment {
 	const divided = value.split(DIRECTIVE_REGEXP);
 	const [text, description] = divided;
 	/* v8 ignore next -- @preserve String.prototype.split always returns at least one item. */
@@ -168,10 +175,7 @@ export function lte(firstLine: ColumnLine, secondLine: ColumnLine): boolean {
 	);
 }
 
-export function toForceLocation(location: Location): {
-	readonly end: ColumnLine;
-	readonly start: ColumnLine;
-} {
+export function toForceLocation(location: Location): ForceLocation {
 	return {
 		end: location.end,
 		start: { column: 0, line: location.start.line },
@@ -182,7 +186,7 @@ const LINES_REGEXP = /\r\n|[\r\n\u2028\u2029]/u;
 
 export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 	if (ruleId === undefined) return toForceLocation(comment.loc);
-	if (typeof comment.value !== "string") return comment.loc;
+	if (!Predicate.isString(comment.value)) return comment.loc;
 
 	const lines = comment.value.split(LINES_REGEXP);
 	const [firstLine] = lines;

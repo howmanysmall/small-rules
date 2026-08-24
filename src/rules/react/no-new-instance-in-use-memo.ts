@@ -7,7 +7,7 @@ import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
 import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
@@ -40,7 +40,9 @@ interface TraversalState {
 const DEFAULT_CONSTRUCTORS = new Set(["Instance"]);
 const DEFAULT_MAX_HELPER_TRACE_DEPTH = 4;
 
-function normalizeOptions(raw: unknown): NormalizedOptions {
+type RuleOptions = InferContextFromRule<typeof noNewInstanceInUseMemo>["options"][0];
+
+function normalizeOptions(raw: RuleOptions): NormalizedOptions {
 	const constructors =
 		Predicate.isObject(raw) && isStringArray(raw.constructors) ? new Set(raw.constructors) : DEFAULT_CONSTRUCTORS;
 

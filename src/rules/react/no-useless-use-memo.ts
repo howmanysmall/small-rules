@@ -12,7 +12,7 @@ import {
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
@@ -29,16 +29,17 @@ interface NormalizedOptions {
 	readonly staticGlobalFactories: ReadonlySet<string>;
 }
 
-function getDependencyMode(value: unknown): DependencyMode {
+type RuleOptions = InferContextFromRule<typeof noUselessUseMemo>["options"][0];
+
+function getDependencyMode(value: RuleOptions): DependencyMode {
 	if (!Predicate.isObject(value) || !Predicate.isString(value.dependencyMode)) return DependencyMode.NonUpdating;
-	// oxlint-disable-next-line typescript/no-unsafe-enum-comparison -- shut up lol
 	if (value.dependencyMode === DependencyMode.EmptyOrOmitted || value.dependencyMode === DependencyMode.Aggressive) {
 		return value.dependencyMode;
 	}
 	return DependencyMode.NonUpdating;
 }
 
-function normalizeOptions(raw: unknown): NormalizedOptions {
+function normalizeOptions(raw: RuleOptions): NormalizedOptions {
 	const factories =
 		Predicate.isObject(raw) && isStringArray(raw.staticGlobalFactories)
 			? raw.staticGlobalFactories

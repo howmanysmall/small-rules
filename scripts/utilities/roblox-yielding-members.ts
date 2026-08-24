@@ -1,8 +1,14 @@
+import { Predicate } from "effect";
+
+import type { JsonObject, JsonValue } from "type-fest";
+
 interface RobloxClass {
 	readonly name: string;
-	readonly members: ReadonlyArray<unknown>;
+	readonly members: ReadonlyArray<JsonValue>;
 	readonly superclass: string;
 }
+
+type RobloxApiValue = ReturnType<typeof JSON.parse>;
 
 export interface YieldingMemberCatalog {
 	readonly classes: ReadonlySet<string>;
@@ -10,22 +16,22 @@ export interface YieldingMemberCatalog {
 	readonly yieldingMembers: ReadonlyMap<string, ReadonlyArray<string>>;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null;
+function isRecord(value: RobloxApiValue): value is JsonObject {
+	return Predicate.isObject(value) && !Array.isArray(value);
 }
 
-function parseClass(value: unknown): RobloxClass | undefined {
-	if (!isRecord(value) || typeof value.Name !== "string" || typeof value.Superclass !== "string") return undefined;
+function parseClass(value: RobloxApiValue): RobloxClass | undefined {
+	if (!isRecord(value) || !Predicate.isString(value.Name) || !Predicate.isString(value.Superclass)) return undefined;
 	if (!Array.isArray(value.Members)) return undefined;
 	return { name: value.Name, members: value.Members, superclass: value.Superclass };
 }
 
-function isYieldingFunction(value: unknown): value is Record<string, unknown> & { readonly Name: string } {
-	if (!isRecord(value) || value.MemberType !== "Function" || typeof value.Name !== "string") return false;
+function isYieldingFunction(value: RobloxApiValue): value is JsonObject & { readonly Name: string } {
+	if (!isRecord(value) || value.MemberType !== "Function" || !Predicate.isString(value.Name)) return false;
 	return Array.isArray(value.Tags) && value.Tags.some((tag) => tag === "Yields" || tag === "CanYield");
 }
 
-export function parseClasses(value: unknown): ReadonlyMap<string, RobloxClass> {
+export function parseClasses(value: RobloxApiValue): ReadonlyMap<string, RobloxClass> {
 	if (!isRecord(value) || !Array.isArray(value.Classes)) {
 		const error = new TypeError("Roblox API dump has no Classes array.");
 		Error.captureStackTrace(error, parseClasses);

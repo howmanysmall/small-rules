@@ -8,6 +8,7 @@ import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } f
 
 import type { UnknownRecord } from "type-fest";
 
+import type { HarnessValue } from "./object";
 import type {
 	Fix,
 	FixProvider,
@@ -21,10 +22,12 @@ import type {
 	SourceLocation,
 } from "./types";
 
-export function createDiagnosticCollector(meta: UnknownRecord): {
+interface DiagnosticCollector {
 	diagnostics: Array<RuntimeDiagnostic>;
-	report: (diagnostic: unknown) => void;
-} {
+	report: (diagnostic: HarnessValue) => void;
+}
+
+export function createDiagnosticCollector(meta: UnknownRecord): DiagnosticCollector {
 	const diagnostics = new Array<RuntimeDiagnostic>();
 	return {
 		diagnostics,
@@ -57,7 +60,7 @@ export function assertInvalidCase(
 	assertAutofixOutput(diagnostics, testCase, sourceCode);
 }
 
-function normalizeDiagnostic(diagnostic: unknown, meta: UnknownRecord): RuntimeDiagnostic {
+function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): RuntimeDiagnostic {
 	if (!Predicate.isObject(diagnostic)) throw new HarnessError("context.report() received a non-object diagnostic.");
 
 	const messageId = getStringProperty(diagnostic, "messageId");
@@ -196,7 +199,7 @@ function getFixProvider(diagnostic: UnknownRecord, key: string): FixProvider | u
 	return isFixProvider(fix) ? fix : undefined;
 }
 
-function isFixProvider(value: unknown): value is FixProvider {
+function isFixProvider(value: HarnessValue): value is FixProvider {
 	return Predicate.isFunction(value);
 }
 
@@ -205,7 +208,7 @@ function getNodeProperty(diagnostic: UnknownRecord, key: string): HarnessNode | 
 	return isHarnessNodeLike(node) ? node : undefined;
 }
 
-function isHarnessNodeLike(value: unknown): value is HarnessNode {
+function isHarnessNodeLike(value: HarnessValue): value is HarnessNode {
 	return (
 		Predicate.isObject(value) &&
 		Predicate.isString(value.type) &&
@@ -214,7 +217,7 @@ function isHarnessNodeLike(value: unknown): value is HarnessNode {
 	);
 }
 
-function isFix(value: unknown): value is Fix {
+function isFix(value: HarnessValue): value is Fix {
 	if (!Predicate.isObject(value)) return false;
 
 	const { range } = value;
@@ -276,7 +279,7 @@ function interpolateMessage(template: string, data: UnknownRecord): string {
 	return result;
 }
 
-function formatMessageValue(value: unknown): string {
+function formatMessageValue(value: HarnessValue): string {
 	if (value === undefined) return "";
 	if (Predicate.isString(value)) return value;
 	if (Predicate.isNumber(value) || Predicate.isBoolean(value) || Predicate.isBigInt(value)) return value.toString();

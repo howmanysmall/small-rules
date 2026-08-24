@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -25,7 +27,7 @@ function isLiteral(expression: ESTree.Expression): boolean {
 
 function getReciprocalDivisor(expression: ESTree.Expression): number | undefined {
 	const literal = unwrapExpression(expression);
-	if (literal.type !== "Literal" || typeof literal.value !== "number") return undefined;
+	if (literal.type !== "Literal" || !Predicate.isNumber(literal.value)) return undefined;
 
 	const { value } = literal;
 	if (value <= 0 || value >= 1) return undefined;

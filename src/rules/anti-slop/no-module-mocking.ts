@@ -4,6 +4,8 @@
 //
 // Modifications: local API and path alias adaptation.
 
+import { Predicate } from "effect";
+
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -50,7 +52,7 @@ function isModuleMockCall(sourceCode: SourceCode, callee: ESTree.Expression): bo
 	if (callee.computed) {
 		return (
 			callee.property.type === "Literal" &&
-			typeof callee.property.value === "string" &&
+			Predicate.isString(callee.property.value) &&
 			MODULE_MOCK_METHODS.has(callee.property.value)
 		);
 	}

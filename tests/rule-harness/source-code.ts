@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 // oxlint-disable unicorn/no-null -- SourceCode token helpers return null when
 // no neighboring token exists.
 import { harnessVisitorKeys } from "./ast";
@@ -5,6 +7,7 @@ import { createLocationIndex } from "./locations";
 import { buildScopeManager } from "./scope";
 import { createComments, tokenize } from "./tokens";
 
+import type { HarnessValue } from "./object";
 import type {
 	HarnessComment,
 	HarnessNode,
@@ -19,7 +22,7 @@ import type {
 export function createSourceCode(
 	text: string,
 	ast: HarnessNode,
-	rawComments: ReadonlyArray<unknown>,
+	rawComments: ReadonlyArray<HarnessValue>,
 ): HarnessSourceCode {
 	const locationIndex = createLocationIndex(text);
 	const comments = createComments(rawComments, locationIndex);
@@ -70,7 +73,7 @@ export function createSourceCode(
 		},
 		isGlobalReference(node): boolean {
 			const scope = getScope(scopeManager, node);
-			const name = typeof node.name === "string" ? node.name : undefined;
+			const name = Predicate.isString(node.name) ? node.name : undefined;
 			if (name === undefined) return false;
 			let current: HarnessScope | null = scope;
 			while (current !== null) {
@@ -139,3 +142,5 @@ function getPreviousToken(tokens: ReadonlyArray<HarnessToken>, node: RangeLike):
 	}
 	return undefined;
 }
+
+// oxlint-enable unicorn/no-null -- Null sentinel handling ends here.

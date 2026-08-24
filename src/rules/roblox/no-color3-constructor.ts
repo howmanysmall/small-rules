@@ -1,7 +1,9 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 function mapComponentToRgbRange(value: number): number {
 	return Math.round(value > 1 ? value : value * 255);
@@ -11,13 +13,15 @@ interface NoColor3ConstructorOptions {
 	readonly reportUnknownComponents?: boolean;
 }
 
+type RuleOptions = InferContextFromRule<typeof noColor3Constructor>["options"][0];
+
 type NumericComponentCollection = readonly [allZero: boolean, components: ReadonlyArray<number>];
 
-function normalizeOptions(value: unknown): Required<NoColor3ConstructorOptions> {
+function normalizeOptions(value: RuleOptions): Required<NoColor3ConstructorOptions> {
 	return {
 		reportUnknownComponents:
-			typeof value === "object" && value !== null && "reportUnknownComponents" in value
-				? value.reportUnknownComponents === true
+			Predicate.isObject(value) && "reportUnknownComponents" in value
+				? Predicate.isBoolean(value.reportUnknownComponents) && value.reportUnknownComponents
 				: true,
 	};
 }

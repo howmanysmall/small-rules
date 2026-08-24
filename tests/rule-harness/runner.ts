@@ -4,6 +4,7 @@ import { assertInvalidCase, assertValidCase } from "./diagnostics";
 import { createRuleExecutor } from "./execute";
 import { normalizeCases } from "./parse";
 
+import type { HarnessValue } from "./object";
 import type {
 	NormalizedCase,
 	NormalizedInvalidCase,
@@ -24,7 +25,12 @@ export function createRuleTester(defaults: RuleRunnerDefaults = {}): RuleTestRun
 	};
 }
 
-function runRuleTests(ruleName: string, rule: unknown, cases: RuleTestCases, defaults: RuleRunnerDefaults = {}): void {
+function runRuleTests(
+	ruleName: string,
+	rule: HarnessValue,
+	cases: RuleTestCases,
+	defaults: RuleRunnerDefaults = {},
+): void {
 	const normalizedCases = normalizeCases(cases, defaults);
 	const execute = createRuleExecutor(ruleName, rule);
 

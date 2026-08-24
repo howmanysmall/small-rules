@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { getNamespacedCallNames, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
@@ -828,7 +830,7 @@ function hasOnlySetterCallsWithArgument(
 
 function isConstantValue(node: ESTree.Node): boolean {
 	return (
-		(node.type === "Literal" && typeof node.value !== "object") ||
+		(node.type === "Literal" && node.value !== null && !Predicate.isObject(node.value)) ||
 		isEmptyArrayExpression(node) ||
 		isEmptyObjectExpression(node)
 	);

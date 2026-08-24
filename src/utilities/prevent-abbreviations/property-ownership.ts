@@ -9,7 +9,6 @@ import {
 	isObjectExpression,
 	isStringLiteral,
 	isTsQualifiedName,
-	isTsTypeAliasDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { isObjectPropertyKey } from "$oxc-utilities/prevent-abbreviations/scope";
@@ -88,7 +87,7 @@ function isExternalNamedType(
 	}
 
 	const declaration = definition.node;
-	if (isTsTypeAliasDeclaration(declaration)) {
+	if (declaration.type === "TSTypeAliasDeclaration") {
 		if (visitedDeclarations.has(declaration)) return false;
 		visitedDeclarations.add(declaration);
 		return isExternalTypeNode(declaration.typeAnnotation, sourceCode, visitedDeclarations);

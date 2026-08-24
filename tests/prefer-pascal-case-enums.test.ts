@@ -4,7 +4,11 @@ import rule from "$oxc-rules/naming/prefer-pascal-case-enums";
 
 import { ts } from "./rule-testers";
 
-function errorWithName(name: string): { message: string } {
+interface RuleMessage {
+	message: string;
+}
+
+function errorWithName(name: string): RuleMessage {
 	return {
 		message: `Enum '${name}' uses non-standard casing. TypeScript convention requires PascalCase for enum names and members to distinguish them from variables (camelCase) and constants (UPPER_CASE). Rename to PascalCase: capitalize first letter of each word, no underscores.`,
 	};

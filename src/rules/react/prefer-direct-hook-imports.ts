@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -7,7 +9,7 @@ import {
 } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
-import type { Visitor } from "oxlint-plugin-utilities";
+import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
@@ -27,16 +29,14 @@ function isReactNamespaceSource(variable: ScopeVariable | undefined, reactSource
 	return false;
 }
 
-interface PreferDirectHookImportsOptions {
-	readonly allowedHooks?: ReadonlyArray<string>;
-	readonly environment?: "roblox-ts" | "standard";
+type RuleOptions = InferContextFromRule<typeof preferDirectHookImports>["options"][0];
+interface NormalizedOptions {
+	readonly allowedHooks: ReadonlySet<string>;
 }
 
-function normalizeOptions(raw: unknown): { readonly allowedHooks: ReadonlySet<string> } {
-	if (typeof raw !== "object" || raw === null) return { allowedHooks: new Set() };
-
-	const options = raw as PreferDirectHookImportsOptions;
-	return { allowedHooks: new Set(isStringArray(options.allowedHooks) ? options.allowedHooks : []) };
+function normalizeOptions(raw: RuleOptions): NormalizedOptions {
+	if (!Predicate.isObject(raw)) return { allowedHooks: new Set() };
+	return { allowedHooks: new Set(isStringArray(raw.allowedHooks) ? raw.allowedHooks : []) };
 }
 
 const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react", {

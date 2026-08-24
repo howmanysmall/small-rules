@@ -1,10 +1,11 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getOptionalStringArrayProperty,
 	isDisableOrEnableDirectiveKind,
 	parseDirectiveComment,
 } from "$oxc-utilities/directive-comments";
-import { Predicate } from "effect";
 
 import type { Comment, Visitor } from "oxlint-plugin-utilities";
 

@@ -41,14 +41,13 @@ function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierRefe
 	return node.type === "Identifier";
 }
 
-function isNode(value: object): value is ESTree.Node {
-	return "type" in value && Predicate.isString(value.type);
+function isNode(value: unknown): value is ESTree.Node {
+	return Predicate.isObject(value) && Predicate.isString(value.type);
 }
 
 function pushNodeChildren(node: ESTree.Node, stack: Array<unknown>): void {
-	for (const key of Object.keys(node)) {
+	for (const [key, value] of Object.entries(node)) {
 		if (VISITOR_KEYS_TO_SKIP.has(key)) continue;
-		const value: unknown = Reflect.get(node, key);
 		if (value !== null && value !== undefined) stack.push(value);
 	}
 }
@@ -58,13 +57,11 @@ function containsArrayReference(node: ESTree.Node, arrayIdentifierName: string):
 
 	while (stack.length > 0) {
 		const current = stack.pop();
-		// oxlint-disable-next-line small-rules/no-runtime-typeof -- SHUT UP!
-		if (current === undefined || current === null || typeof current !== "object") continue;
-
 		if (Array.isArray(current)) {
 			for (const child of current) stack.push(child);
 			continue;
 		}
+		if (!Predicate.isObject(current)) continue;
 
 		if (!isNode(current)) continue;
 		if (current.type === "Identifier" && current.name === arrayIdentifierName) return true;

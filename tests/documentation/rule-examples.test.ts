@@ -16,6 +16,10 @@ interface RuleExampleCoverage {
 	readonly validCount: number;
 }
 
+function isMissingRequiredExamples({ exemption, invalidCount, validCount }: RuleExampleCoverage): boolean {
+	return exemption === undefined && (invalidCount !== 1 || validCount !== 1);
+}
+
 type ExampleParseLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
 
 function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
@@ -104,10 +108,7 @@ describe("documented rule examples", () => {
 	it("extracts one fail and one pass example for each non-exempt rule", () => {
 		expect.assertions(1);
 		const violations = getRuleExampleCoverage()
-			.filter(({ exemption, invalidCount, validCount }) => {
-				if (exemption !== undefined) return false;
-				return invalidCount !== 1 || validCount !== 1;
-			})
+			.filter(isMissingRequiredExamples)
 			.map(({ name }) => name);
 
 		expect(violations).toStrictEqual([]);
