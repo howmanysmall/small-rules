@@ -1,10 +1,15 @@
 // oxlint-disable unicorn/no-null -- The unset scope mirrors eslint-scope's
 // null upper scope sentinel.
+
+import { Predicate } from "effect";
+
 import { traverseAst } from "./ast";
 import { createDiagnosticCollector } from "./diagnostics";
 import { HarnessError } from "./harness-error";
-import { getProperty, isRecord } from "./object";
+import { getProperty } from "./object";
 import { getRuleMeta, parseCase } from "./parse";
+
+import type { UnknownRecord } from "type-fest";
 
 import type {
 	HarnessContext,
@@ -30,9 +35,7 @@ export function createRuleExecutor(ruleName: string, rule: unknown): (testCase: 
 
 	const create = getRuleFunction(rule, "create");
 	if (create === undefined) {
-		const error = new HarnessError(`Rule '${ruleName}' does not expose create() or createOnce().`);
-		Error.captureStackTrace(error, createRuleExecutor);
-		throw error;
+		throw new HarnessError(`Rule '${ruleName}' does not expose create() or createOnce().`);
 	}
 
 	return (testCase) => {
@@ -53,7 +56,7 @@ export function createRuleExecutor(ruleName: string, rule: unknown): (testCase: 
 function executeWithExistingVisitor(
 	context: MutableHarnessContext,
 	visitor: unknown,
-	meta: Record<string, unknown>,
+	meta: UnknownRecord,
 	testCase: NormalizedCase,
 ): RuleExecutionResult {
 	const sourceCode = parseCase(testCase);
@@ -155,7 +158,7 @@ function createUnsetNode(): HarnessNode {
 type RuleFactory = (context: HarnessContext) => unknown;
 
 function getRuleFunction(rule: unknown, key: string): RuleFactory | undefined {
-	if (!isRecord(rule)) return undefined;
+	if (!Predicate.isObject(rule)) return undefined;
 	const value = getProperty(rule, key);
 	return isRuleFactory(value) ? value : undefined;
 }
@@ -169,12 +172,12 @@ function runVisitor(visitor: unknown, sourceCode: HarnessSourceCode): void {
 }
 
 function runHook(visitor: unknown, key: string): unknown {
-	if (!isRecord(visitor)) return undefined;
+	if (!Predicate.isObject(visitor)) return undefined;
 	const hook = getProperty(visitor, key);
 	if (!isHook(hook)) return undefined;
 	return hook();
 }
 
 function isHook(value: unknown): value is () => unknown {
-	return typeof value === "function";
+	return Predicate.isFunction(value);
 }
