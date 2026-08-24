@@ -249,6 +249,7 @@ describe("no-widen-then-assert", () => {
 			"const u: unknown = ghost; const p = u as { readonly id: string };",
 			"declare function getValue(): Map<string, number>;\nconst w = getValue() as unknown;\nconst p = w as Map<string, number>;",
 			"function g() { const b: object = {}; const w: unknown = b; const p2 = w as { readonly id: string }; return p2; }",
+			"function read(input) { const widened: unknown = input; return widened as { readonly id: string }; }",
 			"const widened: Record<string, unknown> = {}; const parsed = widened as Map<string, string>;",
 			"const widened: Record<string, unknown> = {}; const parsed = widened as Readonly;",
 			"const widened: Record<string, unknown> = {}; const parsed = widened as Record;",
