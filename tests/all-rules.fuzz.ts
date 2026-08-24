@@ -3,6 +3,7 @@ import nodePath from "node:path";
 import smallRules from "$small-rules";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
+import { Predicate } from "effect";
 
 import { createRuleExecutor } from "./rule-harness/execute";
 import { applyFixes, fixer } from "./rule-harness/fixes";
@@ -246,14 +247,12 @@ function createSchemaObject(schema: Record<string, unknown>, provider: FuzzedDat
 }
 
 function getStringArray(value: unknown, key: string): ReadonlyArray<string> {
-	const property = getArrayProperty(value, key);
-	if (property === undefined) return [];
-	return property.filter((item): item is string => typeof item === "string");
+	return getArrayProperty(value, key)?.filter(Predicate.isString) ?? [];
 }
 
 function getFiniteNumber(value: unknown, key: string): number | undefined {
 	const property = getProperty(value, key);
-	return typeof property === "number" && Number.isFinite(property) ? property : undefined;
+	return Predicate.isNumber(property) && Number.isFinite(property) ? property : undefined;
 }
 
 function getNonnegativeInteger(value: unknown, key: string): number | undefined {
@@ -262,8 +261,8 @@ function getNonnegativeInteger(value: unknown, key: string): number | undefined 
 }
 
 function toJsonValue(value: unknown): JsonValue | undefined {
-	if (typeof value === "boolean" || typeof value === "string") return value;
-	if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+	if (Predicate.isBoolean(value) || Predicate.isString(value)) return value;
+	if (Predicate.isNumber(value)) return Number.isFinite(value) ? value : undefined;
 	if (Array.isArray(value)) {
 		const result = new Array<JsonValue>();
 		for (const item of value) {
@@ -284,7 +283,7 @@ function toJsonValue(value: unknown): JsonValue | undefined {
 	return result;
 }
 
-function isJsonValue(value: JsonValue | undefined): value is JsonValue {
+function isJsonValue(value?: JsonValue): value is JsonValue {
 	return value !== undefined;
 }
 
