@@ -213,7 +213,7 @@
 			},
 			"format_on_save": "on",
 			"hard_tabs": true,
-			"language_servers": ["biome", "eslint", "oxlint", "vtsls", "wakatime", "harper-ls", "codebook"],
+			"language_servers": ["biome", "eslint", "oxlint", "typescript-ls", "wakatime", "harper-ls", "codebook"],
 			"prettier": { "allowed": false },
 			"tab_size": 4
 		},
@@ -226,7 +226,7 @@
 			},
 			"format_on_save": "on",
 			"hard_tabs": true,
-			"language_servers": ["biome", "eslint", "oxlint", "vtsls", "wakatime", "harper-ls", "codebook"],
+			"language_servers": ["biome", "eslint", "oxlint", "typescript-ls", "wakatime", "harper-ls", "codebook"],
 			"prettier": { "allowed": false },
 			"tab_size": 4
 		},
@@ -308,6 +308,27 @@
 					"configPath": "oxlint.config.ts",
 					"fixKind": "safe_fix",
 					"typeAware": true
+				}
+			}
+		},
+		"typescript-ls": {
+			"binary": {
+				"arguments": ["--run", "tsgo", "--", "--lsp", "--stdio"],
+				"path": "node"
+			},
+			"settings": {
+				"typescript": {
+					"inlayHints": {
+						"enumMemberValues": { "enabled": false },
+						"functionLikeReturnTypes": { "enabled": false },
+						"parameterNames": {
+							"enabled": "none",
+							"suppressWhenArgumentMatchesName": false
+						},
+						"parameterTypes": { "enabled": false },
+						"propertyDeclarationTypes": { "enabled": false },
+						"variableTypes": { "enabled": false }
+					}
 				}
 			}
 		},
