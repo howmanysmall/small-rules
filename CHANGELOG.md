@@ -46,6 +46,16 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.16.0] - 2026-08-24
+
+## Added
+- Add 15 anti-slop rules covering unsafe assertions, broad or unknown types, reflective access, module mocking, and shape-based naming ([#44](https://github.com/howmanysmall/small-rules/pull/44)).
+
+## Fixed
+- Extend `prefer-hoisted-jsx-elements` to JSX nested in object and array initializers ([#43](https://github.com/howmanysmall/small-rules/pull/43)).
+- Resolve external ownership through local type aliases and inherited interfaces in `prevent-abbreviations` ([#46](https://github.com/howmanysmall/small-rules/pull/46)).
+- Ignore directive comments with missing values instead of crashing ([#47](https://github.com/howmanysmall/small-rules/pull/47)).
+
 ## [2.15.0] - 2026-08-12
 
 ## Added
