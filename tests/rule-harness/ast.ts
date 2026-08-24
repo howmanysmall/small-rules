@@ -1,9 +1,12 @@
 // oxlint-disable unicorn/no-null -- ESTree Program parents use null sentinels.
+
+import { Predicate } from "effect";
 import { CHILD_KEYS } from "yuku-ast";
 
 import { HarnessError } from "./harness-error";
 import { locationForRange } from "./locations";
-import { isRecord } from "./object";
+
+import type { UnknownRecord } from "type-fest";
 
 import type { LocationIndex } from "./locations";
 import type { HarnessNode, Range } from "./types";
@@ -14,17 +17,9 @@ const ATTRIBUTE_SELECTOR_PATTERN = /\[(?<path>[\w.]+)=(?<quote>["'])(?<value>.*?
 const CHILD_FIELD_SELECTOR_PATTERN = /^(?<parentType>\w+)\s*>\s*\.(?<field>\w+)$/u;
 
 export function decorateAst(program: unknown, locationIndex: LocationIndex): HarnessNode {
-	if (!isParsedNode(program)) {
-		const error = new HarnessError("Yuku parser returned an invalid Program node.");
-		Error.captureStackTrace(error, decorateAst);
-		throw error;
-	}
+	if (!isParsedNode(program)) throw new HarnessError("Yuku parser returned an invalid Program node.");
 	attachNodeMetadata(program, null, locationIndex);
-	if (!isHarnessNode(program)) {
-		const error = new HarnessError("Yuku parser Program node could not be decorated.");
-		Error.captureStackTrace(error, decorateAst);
-		throw error;
-	}
+	if (!isHarnessNode(program)) throw new HarnessError("Yuku parser Program node could not be decorated.");
 	return program;
 }
 
@@ -34,8 +29,8 @@ export function traverseAst(root: HarnessNode, visitor: unknown): void {
 }
 
 function isHarnessNode(value: unknown): value is HarnessNode {
-	if (!isRecord(value)) return false;
-	return typeof value.type === "string" && isRange(value.range) && isRecord(value.loc);
+	if (!Predicate.isObject(value)) return false;
+	return Predicate.isString(value.type) && isRange(value.range) && Predicate.isObject(value.loc);
 }
 
 export function getNodeChildren(node: HarnessNode): Array<HarnessNode> {
@@ -46,9 +41,7 @@ export function getNodeChildren(node: HarnessNode): Array<HarnessNode> {
 	for (const key of keys) {
 		const child = node[key];
 		if (Array.isArray(child)) {
-			for (const item of child) {
-				if (isHarnessNode(item)) children[size++] = item;
-			}
+			for (const item of child) if (isHarnessNode(item)) children[size++] = item;
 			continue;
 		}
 
@@ -62,11 +55,7 @@ function compareNodeRanges(left: HarnessNode, right: HarnessNode): number {
 	return left.range[0] - right.range[0] || left.range[1] - right.range[1];
 }
 
-function attachNodeMetadata(
-	node: Record<string, unknown>,
-	parent: HarnessNode | null,
-	locationIndex: LocationIndex,
-): void {
+function attachNodeMetadata(node: UnknownRecord, parent: HarnessNode | null, locationIndex: LocationIndex): void {
 	const range = readRange(node.range);
 	if (range === undefined) return;
 
@@ -90,16 +79,16 @@ function attachNodeMetadata(
 	}
 }
 
-function normalizeNodeShape(node: Record<string, unknown>): void {
-	if (node.type !== "MethodDefinition" || typeof node.kind === "string") return;
+function normalizeNodeShape(node: UnknownRecord): void {
+	if (node.type !== "MethodDefinition" || Predicate.isString(node.kind)) return;
 	const { key } = node;
-	if (!isRecord(key)) return;
+	if (!Predicate.isObject(key)) return;
 	node.kind = key.name === "constructor" ? "constructor" : "method";
 }
 
-function isParsedNode(value: unknown): value is Record<string, unknown> {
-	if (!isRecord(value)) return false;
-	return typeof value.type === "string" && readRange(value.range) !== undefined;
+function isParsedNode(value: unknown): value is UnknownRecord {
+	if (!Predicate.isObject(value)) return false;
+	return Predicate.isString(value.type) && readRange(value.range) !== undefined;
 }
 
 function readRange(value: unknown): Range | undefined {
@@ -108,7 +97,7 @@ function readRange(value: unknown): Range | undefined {
 }
 
 function isRange(value: unknown): value is Range {
-	return Array.isArray(value) && value.length === 2 && typeof value[0] === "number" && typeof value[1] === "number";
+	return Array.isArray(value) && value.length === 2 && Predicate.isNumber(value[0]) && Predicate.isNumber(value[1]);
 }
 
 interface VisitorEntries {
@@ -126,7 +115,7 @@ interface VisitorEntry {
 
 function createVisitorEntries(visitor: unknown): VisitorEntries {
 	const entries: VisitorEntries = { enter: new Map(), exit: new Map() };
-	if (!isRecord(visitor)) return entries;
+	if (!Predicate.isObject(visitor)) return entries;
 
 	for (const [key, value] of Object.entries(visitor)) {
 		if (!isVisitorCallback(value)) continue;
@@ -153,7 +142,7 @@ function addVisitor(map: Map<string, Array<VisitorEntry>>, selector: string, vis
 }
 
 function isVisitorCallback(value: unknown): value is VisitorCallback {
-	return typeof value === "function";
+	return Predicate.isFunction(value);
 }
 
 function traverseNode(node: HarnessNode, entries: VisitorEntries): void {
@@ -235,7 +224,7 @@ function isStatementNode(node: HarnessNode): boolean {
 function readPath(node: HarnessNode, path: string): unknown {
 	let current: unknown = node;
 	for (const key of path.split(".")) {
-		if (!isRecord(current)) return undefined;
+		if (!Predicate.isObject(current)) return undefined;
 		current = current[key];
 	}
 	return current;

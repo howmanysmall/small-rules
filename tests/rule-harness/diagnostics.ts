@@ -1,9 +1,12 @@
 import { deepEqual, equal } from "node:assert/strict";
 import { expect } from "vitest";
+import { Predicate } from "effect";
 
 import { applyFixes, fixer } from "./fixes";
 import { HarnessError } from "./harness-error";
-import { getArrayProperty, getObjectProperty, getProperty, getStringProperty, isRecord } from "./object";
+import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "./object";
+
+import type { UnknownRecord } from "type-fest";
 
 import type {
 	Fix,
@@ -18,7 +21,7 @@ import type {
 	SourceLocation,
 } from "./types";
 
-export function createDiagnosticCollector(meta: Record<string, unknown>): {
+export function createDiagnosticCollector(meta: UnknownRecord): {
 	diagnostics: Array<RuntimeDiagnostic>;
 	report: (diagnostic: unknown) => void;
 } {
@@ -54,12 +57,8 @@ export function assertInvalidCase(
 	assertAutofixOutput(diagnostics, testCase, sourceCode);
 }
 
-function normalizeDiagnostic(diagnostic: unknown, meta: Record<string, unknown>): RuntimeDiagnostic {
-	if (!isRecord(diagnostic)) {
-		const error = new HarnessError("context.report() received a non-object diagnostic.");
-		Error.captureStackTrace(error, normalizeDiagnostic);
-		throw error;
-	}
+function normalizeDiagnostic(diagnostic: unknown, meta: UnknownRecord): RuntimeDiagnostic {
+	if (!Predicate.isObject(diagnostic)) throw new HarnessError("context.report() received a non-object diagnostic.");
 
 	const messageId = getStringProperty(diagnostic, "messageId");
 	const data = getDiagnosticData(diagnostic);
@@ -87,17 +86,14 @@ function normalizeDiagnostic(diagnostic: unknown, meta: Record<string, unknown>)
 	return normalized;
 }
 
-function normalizeSuggestions(
-	diagnostic: Record<string, unknown>,
-	meta: Record<string, unknown>,
-): Array<RuntimeSuggestion> {
+function normalizeSuggestions(diagnostic: UnknownRecord, meta: UnknownRecord): Array<RuntimeSuggestion> {
 	const suggestions = getArrayProperty(diagnostic, "suggest");
 	if (suggestions === undefined) return [];
 
 	const normalized = new Array<RuntimeSuggestion>();
 	let size = 0;
 	for (const suggestion of suggestions) {
-		if (!isRecord(suggestion)) continue;
+		if (!Predicate.isObject(suggestion)) continue;
 		const messageId = getStringProperty(suggestion, "messageId");
 		const data = getDiagnosticData(suggestion);
 		const normalizedSuggestion: RuntimeSuggestion = {
@@ -131,7 +127,7 @@ function assertSuggestions(
 	expected: number | ReadonlyArray<RuleTestSuggestion>,
 	sourceText: string,
 ): void {
-	if (typeof expected === "number") {
+	if (Predicate.isNumber(expected)) {
 		equal(actual.suggestions.length, expected);
 		return;
 	}
@@ -183,9 +179,7 @@ function collectFixes(diagnostics: ReadonlyArray<RuntimeDiagnostic>): Array<Fix>
 		const fixResult = runFixProvider(diagnostic.fix);
 		if (fixResult === undefined) continue;
 		if (Array.isArray(fixResult)) {
-			for (const fix of fixResult) {
-				if (isFix(fix)) fixes.push(fix);
-			}
+			for (const fix of fixResult) if (isFix(fix)) fixes.push(fix);
 			continue;
 		}
 		if (isFix(fixResult)) fixes.push(fixResult);
@@ -193,48 +187,56 @@ function collectFixes(diagnostics: ReadonlyArray<RuntimeDiagnostic>): Array<Fix>
 	return fixes;
 }
 
-function getDiagnosticData(diagnostic: Record<string, unknown>): Record<string, unknown> {
-	const data = getObjectProperty(diagnostic, "data");
-	return data ?? {};
+function getDiagnosticData(diagnostic: UnknownRecord): UnknownRecord {
+	return getObjectProperty(diagnostic, "data") ?? {};
 }
 
-function getFixProvider(diagnostic: Record<string, unknown>, key: string): FixProvider | undefined {
+function getFixProvider(diagnostic: UnknownRecord, key: string): FixProvider | undefined {
 	const fix = getProperty(diagnostic, key);
 	return isFixProvider(fix) ? fix : undefined;
 }
 
 function isFixProvider(value: unknown): value is FixProvider {
-	return typeof value === "function";
+	return Predicate.isFunction(value);
 }
 
-function getNodeProperty(diagnostic: Record<string, unknown>, key: string): HarnessNode | undefined {
+function getNodeProperty(diagnostic: UnknownRecord, key: string): HarnessNode | undefined {
 	const node = getProperty(diagnostic, key);
 	return isHarnessNodeLike(node) ? node : undefined;
 }
 
 function isHarnessNodeLike(value: unknown): value is HarnessNode {
-	return isRecord(value) && typeof value.type === "string" && Array.isArray(value.range) && isRecord(value.loc);
+	return (
+		Predicate.isObject(value) &&
+		Predicate.isString(value.type) &&
+		Array.isArray(value.range) &&
+		Predicate.isObject(value.loc)
+	);
 }
 
 function isFix(value: unknown): value is Fix {
-	if (!isRecord(value)) return false;
+	if (!Predicate.isObject(value)) return false;
+
 	const { range } = value;
-	if (!Array.isArray(range) || range.length !== 2 || typeof value.text !== "string") return false;
+	if (!Array.isArray(range) || range.length !== 2 || !Predicate.isString(value.text)) return false;
+
 	const [start, end] = range;
-	return typeof start === "number" && typeof end === "number";
+	return Predicate.isNumber(start) && Predicate.isNumber(end);
 }
 
-function getLocationProperty(diagnostic: Record<string, unknown>): SourceLocation | undefined {
+function getLocationProperty(diagnostic: UnknownRecord): SourceLocation | undefined {
 	const loc = getObjectProperty(diagnostic, "loc");
 	if (loc === undefined) return undefined;
+
 	const start = getObjectProperty(loc, "start");
 	const end = getObjectProperty(loc, "end");
 	if (start === undefined || end === undefined) return undefined;
+
 	if (
-		typeof start.line !== "number" ||
-		typeof start.column !== "number" ||
-		typeof end.line !== "number" ||
-		typeof end.column !== "number"
+		!Predicate.isNumber(start.line) ||
+		!Predicate.isNumber(start.column) ||
+		!Predicate.isNumber(end.line) ||
+		!Predicate.isNumber(end.column)
 	) {
 		return undefined;
 	}
@@ -244,19 +246,17 @@ function getLocationProperty(diagnostic: Record<string, unknown>): SourceLocatio
 	};
 }
 
-function renderMessage(
-	meta: Record<string, unknown>,
-	messageId: string | undefined,
-	data: Record<string, unknown>,
-): string {
+function renderMessage(meta: UnknownRecord, messageId: string | undefined, data: UnknownRecord): string {
 	if (messageId === undefined) return "";
+
 	const messages = getObjectProperty(meta, "messages");
 	const template = messages === undefined ? undefined : getStringProperty(messages, messageId);
 	if (template === undefined) return messageId;
+
 	return interpolateMessage(template, data);
 }
 
-function interpolateMessage(template: string, data: Record<string, unknown>): string {
+function interpolateMessage(template: string, data: UnknownRecord): string {
 	let result = "";
 	let cursor = 0;
 
@@ -278,7 +278,7 @@ function interpolateMessage(template: string, data: Record<string, unknown>): st
 
 function formatMessageValue(value: unknown): string {
 	if (value === undefined) return "";
-	if (typeof value === "string") return value;
-	if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return value.toString();
+	if (Predicate.isString(value)) return value;
+	if (Predicate.isNumber(value) || Predicate.isBoolean(value) || Predicate.isBigInt(value)) return value.toString();
 	return JSON.stringify(value);
 }
