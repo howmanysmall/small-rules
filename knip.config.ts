@@ -43,7 +43,6 @@ const configuration: KnipConfig = {
 		"@commitlint/config-conventional",
 		"@fast-check/vitest",
 		"@oh-my-pi/pi-coding-agent",
-		"@vitiate/fuzzed-data-provider",
 		"arktype",
 		"fast-check",
 		"file:",
@@ -56,7 +55,7 @@ const configuration: KnipConfig = {
 	tsdown: true,
 	workspaces: {
 		".": {
-			entry: ["*.config.ts"],
+			entry: ["*.config.ts", "tests/**/*.fuzz.ts"],
 			paths,
 			project: ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "*.config.ts"],
 		},
