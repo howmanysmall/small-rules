@@ -235,7 +235,7 @@ function isWordIgnored(word: string, configuration: ShorthandConfig): boolean {
 }
 
 function normalizeImportCheckOption(value: unknown, defaultValue: ImportCheckOption): ImportCheckOption {
-	if (value === "internal" || typeof value === "boolean") return value;
+	if (value === "internal" || Predicate.isBoolean(value)) return value;
 	return defaultValue;
 }
 
@@ -243,15 +243,13 @@ function normalizeBooleanRecord(value: unknown): Record<string, boolean> | undef
 	if (!Predicate.isObject(value)) return undefined;
 
 	const normalizedValue: Record<string, boolean> = {};
-	for (const [key, entry] of Object.entries(value)) {
-		if (typeof entry === "boolean") normalizedValue[key] = entry;
-	}
+	for (const [key, entry] of Object.entries(value)) if (Predicate.isBoolean(entry)) normalizedValue[key] = entry;
 
 	return normalizedValue;
 }
 
 function normalizeBooleanOption(value: unknown, defaultValue: boolean): boolean {
-	return typeof value === "boolean" ? value : defaultValue;
+	return Predicate.isBoolean(value) ? value : defaultValue;
 }
 
 function normalizeAllowList(options: unknown): Map<string, boolean> {
@@ -281,7 +279,7 @@ function normalizeReplacementOverrides(value: unknown): Record<string, false | R
 
 		const normalizedOverride: Record<string, boolean> = {};
 		for (const [replacementName, enabled] of Object.entries(override)) {
-			if (typeof enabled === "boolean") normalizedOverride[replacementName] = enabled;
+			if (Predicate.isBoolean(enabled)) normalizedOverride[replacementName] = enabled;
 		}
 		overrides[name] = normalizedOverride;
 	}

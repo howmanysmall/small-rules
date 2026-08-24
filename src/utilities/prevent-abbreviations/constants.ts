@@ -4,15 +4,16 @@ export const MESSAGE_ID_REPLACE = "replace";
 export const MESSAGE_ID_SUGGESTION = "suggestion";
 export const ANOTHER_NAME_MESSAGE = "A more descriptive name will do too.";
 
-export const DEFAULT_SHORTHANDS: Record<string, string> = {
+export const DEFAULT_SHORTHANDS = {
 	args: "parameters",
 	char: "character",
 	dt: "deltaTime",
 	plr: "player",
-};
+} satisfies Record<string, string>;
 
 export const DEFAULT_ALLOW_PROPERTY_ACCESS = ["char"];
 
+// oxlint-disable-next-line small-rules/no-known-value-widening -- you'd be wrong!
 export const DEFAULT_REPLACEMENTS: Record<string, Record<string, boolean>> = {
 	acc: { accumulator: true },
 	arg: { argument: true },
@@ -91,6 +92,7 @@ export const DEFAULT_REPLACEMENTS: Record<string, Record<string, boolean>> = {
 	ver: { version: true },
 };
 
+// oxlint-disable-next-line small-rules/no-known-value-widening -- you'd be wrong!
 export const DEFAULT_ALLOW_LIST: Record<string, boolean> = {
 	defaultProps: true,
 	devDependencies: true,
