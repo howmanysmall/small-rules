@@ -104,6 +104,16 @@ describe("parseDirectiveComment", () => {
 		expect(parseDirectiveComment(tsComment)).toBeUndefined();
 	});
 
+	it("should ignore comments without string values", () => {
+		expect.assertions(2);
+
+		const directive = comment("oxlint-disable no-console");
+		Object.assign(directive, { value: null });
+
+		expect(parseDirectiveComment(directive)).toBeUndefined();
+		expect(toRuleIdLocation(directive, "no-console")).toStrictEqual(directive.loc);
+	});
+
 	it("should parse non-disable directive kinds", () => {
 		expect.assertions(1);
 
