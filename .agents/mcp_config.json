@@ -13,6 +13,10 @@
 		},
 		"npm-registry": {
 			"command": "npm-registry-mcp"
+		},
+		"lsp": {
+			"command": "nlx",
+			"args": ["lsp-mcp-server"]
 		}
 	}
 }
