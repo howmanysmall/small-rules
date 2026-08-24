@@ -1,8 +1,9 @@
+import { Predicate } from "effect";
+
 import defaultProperties from "$oxc-generated/default-properties.json";
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 

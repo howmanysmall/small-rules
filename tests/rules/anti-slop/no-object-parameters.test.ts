@@ -19,18 +19,18 @@ describe("no-object-parameters", () => {
 			{ code: "class Owner { constructor(private readonly value: object) {} }", errors: [objectParameter] },
 			{
 				code: "function save({ id }: object) {}",
-				errors: [{ messageId: "objectParameter", data: { parameter: "{ id }" } }],
+				errors: [{ data: { parameter: "{ id }" }, messageId: "objectParameter" }],
 			},
 			{
 				code: "function f(value: (object | string)) {}",
-				errors: [{ messageId: "objectParameter", data: { parameter: "value" } }],
+				errors: [{ data: { parameter: "value" }, messageId: "objectParameter" }],
 			},
 			{ code: "function save(value: object = {}) {}", errors: [objectParameter] },
 			{ code: "interface Handler { save(value: object): void }", errors: [objectParameter] },
 			{ code: "type Handler = (value: object) => void;", errors: [objectParameter] },
 			{
 				code: "function save(...values: object) {}",
-				errors: [{ messageId: "objectParameter", data: { parameter: "...values" } }],
+				errors: [{ data: { parameter: "...values" }, messageId: "objectParameter" }],
 			},
 			{
 				code: "type Item = object; type Fallback<Input> = Input extends infer Item ? string : (value: Item) => void;",

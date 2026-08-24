@@ -1,8 +1,9 @@
+import { Predicate } from "effect";
+
 import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

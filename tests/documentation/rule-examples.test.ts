@@ -23,9 +23,9 @@ function getRuleExampleCoverage(): ReadonlyArray<RuleExampleCoverage> {
 		category.rules.map((entry): RuleExampleCoverage => {
 			const examples = ruleExamples.get(entry.name) ?? [];
 			return {
+				name: entry.name,
 				exemption: "exampleExemption" in entry ? entry.exampleExemption : undefined,
 				invalidCount: examples.filter((example) => example.kind === "invalid").length,
-				name: entry.name,
 				validCount: examples.filter((example) => example.kind === "valid").length,
 			};
 		}),
@@ -116,7 +116,7 @@ describe("documented rule examples", () => {
 	it("rejects blank example exemptions", () => {
 		expect.assertions(1);
 		const blankExemptions = getRuleExampleCoverage()
-			.filter(({ exemption }) => exemption !== undefined && exemption.trim() === "")
+			.filter(({ exemption }) => exemption?.trim() === "")
 			.map(({ name }) => name);
 
 		expect(blankExemptions).toStrictEqual([]);

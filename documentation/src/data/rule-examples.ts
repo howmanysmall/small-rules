@@ -19,7 +19,7 @@ const IGNORED_TEST_ROOTS = new Set(["do-not-sync-ever", "fixtures"]);
 
 function isCollectedTestFile(relativePath: string): boolean {
 	if (!relativePath.endsWith(".test.ts")) return false;
-	const [root] = relativePath.split("/");
+	const [root] = relativePath.split("/", 1);
 	return root !== undefined && !IGNORED_TEST_ROOTS.has(root);
 }
 

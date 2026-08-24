@@ -36,6 +36,9 @@ function getProgram(source: HarnessSourceCode): ESTree.Program {
 function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
 	const collected = new Array<ESTree.TSType>();
 	traverseAst(source.ast, {
+		TSIntersectionType(node: HarnessNode) {
+			if (isNode(node) && node.type === "TSIntersectionType") collected.push(node);
+		},
 		TSMappedType(node: HarnessNode) {
 			if (isNode(node) && node.type === "TSMappedType") collected.push(node);
 		},
@@ -47,9 +50,6 @@ function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
 		},
 		TSUnknownKeyword(node: HarnessNode) {
 			if (isNode(node) && node.type === "TSUnknownKeyword") collected.push(node);
-		},
-		TSIntersectionType(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSIntersectionType") collected.push(node);
 		},
 	});
 	return collected;
@@ -178,12 +178,12 @@ describe("classifyUnsafeDictionary", () => {
 			const fixture = setup(code);
 			let reported = false;
 			traverseAst(fixture.source.ast, {
-				TSTypeReference(node: HarnessNode) {
-					if (!isNode(node) || node.type !== "TSTypeReference") return;
-					if (classifyUnsafeDictionary(node, fixture.environment) !== undefined) reported = true;
-				},
 				TSTypeLiteral(node: HarnessNode) {
 					if (!isNode(node) || node.type !== "TSTypeLiteral") return;
+					if (classifyUnsafeDictionary(node, fixture.environment) !== undefined) reported = true;
+				},
+				TSTypeReference(node: HarnessNode) {
+					if (!isNode(node) || node.type !== "TSTypeReference") return;
 					if (classifyUnsafeDictionary(node, fixture.environment) !== undefined) reported = true;
 				},
 			});
@@ -527,7 +527,7 @@ describe("classifyWideningTarget", () => {
 					node.type === "TSMappedType" &&
 					classifyUnsafeDictionary(node, fixture.environment) !== undefined
 				)
-					reported = true;
+					{reported = true;}
 			},
 			TSTypeLiteral(node: HarnessNode) {
 				if (
@@ -535,7 +535,7 @@ describe("classifyWideningTarget", () => {
 					node.type === "TSTypeLiteral" &&
 					classifyUnsafeDictionary(node, fixture.environment) !== undefined
 				)
-					reported = true;
+					{reported = true;}
 			},
 			TSTypeReference(node: HarnessNode) {
 				if (
@@ -543,7 +543,7 @@ describe("classifyWideningTarget", () => {
 					node.type === "TSTypeReference" &&
 					classifyUnsafeDictionary(node, fixture.environment) !== undefined
 				)
-					reported = true;
+					{reported = true;}
 			},
 		});
 		expect(reported).toBe(expectUnsafe);

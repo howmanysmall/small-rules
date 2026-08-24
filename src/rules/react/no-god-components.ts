@@ -1,10 +1,11 @@
+import { Predicate } from "effect";
+
 // oxlint-disable small-rules/prevent-abbreviations -- this would be a breaking
 // change.
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

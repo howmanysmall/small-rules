@@ -1,7 +1,8 @@
+import { Predicate } from "effect";
+
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
-import { Predicate } from "effect";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 

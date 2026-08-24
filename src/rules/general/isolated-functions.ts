@@ -1,8 +1,9 @@
+import { String as EffectString, Predicate } from "effect";
+
 import { getMemberPropertyName, pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
-import { String as EffectString, Predicate } from "effect";
 
 import type { ESTree, InferContextFromRule, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

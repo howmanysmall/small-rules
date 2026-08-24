@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities).
-// Parenthesis unwrapping and the const-assertion carve-out match the pinned upstream
-// implementation; only the API adaptation is local.
+// Parenthesis unwrapping and the const-assertion carve-out match the pinned
+// upstream implementation; only the API adaptation is local.
 
 import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";

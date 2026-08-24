@@ -42,7 +42,8 @@ function parameterName(parameter: Parameter, annotation: ESTree.TSTypeAnnotation
 		return parameter.name;
 	}
 	// Yuku parameter nodes span their type annotation, so trimming the annotation
-	// text always yields the displayed name; upstream kept a foreign-parser branch.
+	// text always yields the displayed name; upstream kept a foreign-parser
+	// branch.
 	return sourceText.slice(0, sourceText.length - (annotation.range[1] - annotation.range[0])).trimEnd();
 }
 

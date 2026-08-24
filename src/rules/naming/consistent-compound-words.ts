@@ -1,6 +1,7 @@
+import { Predicate } from "effect";
+
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

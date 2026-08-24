@@ -1,6 +1,7 @@
+import { Predicate } from "effect";
+
 import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { isKeyOfNode, isNode } from "$oxc-utilities/oxc-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 

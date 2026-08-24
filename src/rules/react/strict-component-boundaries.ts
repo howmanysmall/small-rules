@@ -1,9 +1,9 @@
 import nodePath from "node:path";
+import { Predicate } from "effect";
 
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
-import { Predicate } from "effect";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

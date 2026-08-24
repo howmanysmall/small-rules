@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
-// aliases. Local departure from the pinned commit: the single parameter named by an
-// explicit type predicate (`value is T`) or assertion predicate (`asserts value is
-// T`) return type is allowed, because validating exactly that parameter is the
-// predicate's whole job.
+// aliases. Local departure from the pinned commit: the single parameter named
+// by an explicit type predicate (`value is T`) or assertion predicate (`asserts
+// value is T`) return type is allowed, because validating exactly that
+// parameter is the predicate's whole job.
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -68,7 +68,10 @@ function parameterName(parameter: Parameter, sourceText: string): string {
 	}
 }
 
-/** The parameter that an explicit type predicate or assertion predicate validates. */
+/**
+ * The parameter that an explicit type predicate or assertion predicate
+ * validates.
+ */
 function validatedParameterName(node: ParameterOwner): string | undefined {
 	const predicate = node.returnType?.typeAnnotation;
 	if (predicate?.type !== "TSTypePredicate") return undefined;

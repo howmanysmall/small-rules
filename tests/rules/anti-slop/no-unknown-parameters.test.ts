@@ -20,15 +20,15 @@ describe("no-unknown-parameters", () => {
 			{ code: "function save({ id }: unknown) {}", errors: [unknownParameter] },
 			{
 				code: "declare function isNode(value: unknown, other: unknown): value is Node;",
-				errors: [{ messageId: "unknownParameter", data: { parameter: "other" } }],
+				errors: [{ data: { parameter: "other" }, messageId: "unknownParameter" }],
 			},
 			{
 				code: "class Owner { constructor(private readonly value: unknown) {} }",
-				errors: [{ messageId: "unknownParameter", data: { parameter: "value" } }],
+				errors: [{ data: { parameter: "value" }, messageId: "unknownParameter" }],
 			},
 			{
 				code: "function save(...values: unknown) {}",
-				errors: [{ messageId: "unknownParameter", data: { parameter: "values" } }],
+				errors: [{ data: { parameter: "values" }, messageId: "unknownParameter" }],
 			},
 		],
 		valid: [

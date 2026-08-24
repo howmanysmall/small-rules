@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
@@ -9,7 +11,6 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

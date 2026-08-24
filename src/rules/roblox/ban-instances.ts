@@ -1,8 +1,9 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 

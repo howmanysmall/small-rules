@@ -1,8 +1,9 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
