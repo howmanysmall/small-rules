@@ -16,35 +16,30 @@ import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
+import type { TypeEnvironment, UnsafeDictionary } from "$oxc-utilities/anti-slop/dictionary-types";
 
 function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironment): boolean {
 	if (type.type !== "TSTypeReference" || (type.typeArguments?.params.length ?? 0) > 0) return false;
 	if (type.typeName.type !== "Identifier") return false;
 	if (!environment.aliases.has(type.typeName.name)) return false;
-	let current: ESTree.Node | undefined = type.parent;
-	while (current !== undefined && current.type !== "Program") {
+	let current: ESTree.Node = type.parent;
+	while (current.type !== "Program") {
 		if (current.type === "TSTypeAliasDeclaration") return false;
 		current = current.parent;
 	}
 	return true;
 }
 
-function reportableUnsafeDictionary(type: ESTree.TSType, environment: TypeEnvironment) {
+function reportableUnsafeDictionary(type: ESTree.TSType, environment: TypeEnvironment): undefined | UnsafeDictionary {
 	if (isPlainAliasConsumerUse(type, environment)) return undefined;
 	const unsafe = classifyUnsafeDictionary(type, environment);
 	if (unsafe === undefined) return undefined;
-	let current: ESTree.Node | undefined = type.parent;
-	while (current !== undefined && current.type !== "Program") {
-		/* v8 ignore next 8 -- These branches only narrow ESTree's broad Node union. The three root visitors exercise all reportable roots. @preserve */
-		const ancestorClassified =
-			current.type === "TSMappedType"
-				? classifyUnsafeDictionary(current, environment)
-				: current.type === "TSTypeLiteral"
-					? classifyUnsafeDictionary(current, environment)
-					: current.type === "TSTypeReference"
-						? classifyUnsafeDictionary(current, environment)
-						: undefined;
+	let current: ESTree.Node = type.parent;
+	while (current.type !== "Program") {
+		let ancestorClassified: undefined | UnsafeDictionary;
+		if (current.type === "TSMappedType" || current.type === "TSTypeLiteral" || current.type === "TSTypeReference") {
+			ancestorClassified = classifyUnsafeDictionary(current, environment);
+		}
 		if (ancestorClassified !== undefined) return undefined;
 		current = current.parent;
 	}
@@ -67,13 +62,10 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 			Program(node): void {
 				environment = createTypeEnvironment(node);
 			},
-			TSMappedType: reportIfUnsafe,
-			TSTypeLiteral: reportIfUnsafe,
-			TSTypeReference: reportIfUnsafe,
 			TSIndexSignature(node): void {
-				if (environment === undefined || node.typeAnnotation === null || node.parent.type === "TSTypeLiteral") {
-					return;
-				}
+				/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
+				if (environment === undefined) return;
+				if (node.parent.type === "TSTypeLiteral") return;
 				const unsafe = classifyUnsafeDictionaryValue(node.typeAnnotation.typeAnnotation, environment);
 				if (unsafe !== undefined) {
 					context.report({
@@ -83,6 +75,9 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 					});
 				}
 			},
+			TSMappedType: reportIfUnsafe,
+			TSTypeLiteral: reportIfUnsafe,
+			TSTypeReference: reportIfUnsafe,
 		};
 	},
 	meta: {

@@ -34,7 +34,7 @@ const noRuntimeTypeof = createRule("no-runtime-typeof", "anti-slop", {
 		return {
 			UnaryExpression(node): void {
 				const [option] = context.options;
-				const allowInTypeGuards = Predicate.isObject(option) && option.allowInTypeGuards === true;
+				const allowInTypeGuards = Predicate.isObject(option) && option.allowInTypeGuards;
 				if (node.operator === "typeof" && (!allowInTypeGuards || !isInsideTypeGuard(node))) {
 					context.report({ messageId: "runtimeTypeof", node });
 				}
