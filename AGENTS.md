@@ -161,3 +161,17 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 - Inspect each planned command's effect. Prefer `--safe`; never run an unknown or destructive command without explicit user approval.
 - Consume normalized diagnostics from JSON/JSONL, preserve raw tool output for debugging, and review the resulting diff after fixes.
 - Use `hk run check --safe --format jsonl` for streaming lifecycle events. A final summary is emitted even when a step fails.
+
+## Agent Skills
+
+### Issue Tracker
+
+Issues are tracked in GitHub Issues on `howmanysmall/small-rules`. See `docs/agents/issue-tracker.md`.
+
+### Triage Labels
+
+Five canonical triage roles, label names equal to role names: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain Docs
+
+Single-context: one root `CONTEXT.md` and `docs/adr/` for ADRs. See `docs/agents/domain.md`.
