@@ -13,6 +13,7 @@
 		"just-diff": "catalog:scripts",
 		"mutative": "catalog:scripts",
 		"picocolors": "catalog:scripts",
+		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",
 		"yuku-parser": "catalog:runtime",
 		"zx": "catalog:scripts"

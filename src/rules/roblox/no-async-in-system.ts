@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
 import {
 	getMemberPropertyName,
@@ -64,9 +66,8 @@ function isRecognizedType(typeNode: ESTree.Node | null | undefined, systemTypeNa
 }
 
 function pushChildren(node: ESTree.Node, stack: Array<unknown>): void {
-	for (const key of Object.keys(node)) {
+	for (const [key, value] of Object.entries(node)) {
 		if (KEYS_TO_SKIP.has(key)) continue;
-		const value: unknown = Reflect.get(node, key);
 		if (value !== null && value !== undefined) stack.push(value);
 	}
 }
@@ -75,11 +76,11 @@ function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | 
 	const stack: Array<unknown> = [root];
 	while (stack.length > 0) {
 		const current = stack.pop();
-		if (current === undefined || current === null || typeof current !== "object") continue;
 		if (Array.isArray(current)) {
 			for (const child of current) stack.push(child);
 			continue;
 		}
+		if (!Predicate.isObject(current)) continue;
 		/* v8 ignore next -- @preserve parser object fields are arrays or AST nodes. */
 		if (!isNode(current)) continue;
 		if (visit(current) === false) continue;
@@ -90,12 +91,12 @@ function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | 
 function getPropertyName(property: ESTree.ObjectExpression["properties"][number]): string | undefined {
 	if (property.type !== "Property") return undefined;
 	if (property.computed) {
-		return property.key.type === "Literal" && typeof property.key.value === "string"
+		return property.key.type === "Literal" && Predicate.isString(property.key.value)
 			? property.key.value
 			: undefined;
 	}
 	if (property.key.type === "Identifier") return property.key.name;
-	return property.key.type === "Literal" && typeof property.key.value === "string" ? property.key.value : undefined;
+	return property.key.type === "Literal" && Predicate.isString(property.key.value) ? property.key.value : undefined;
 }
 
 function addSystemPropertyFunction(
@@ -124,7 +125,7 @@ function collectImportBindings(
 ): ReadonlyMap<ScopeVariable, ImportBinding> {
 	const bindings = new Map<ScopeVariable, ImportBinding>();
 	for (const statement of program.body) {
-		if (statement.type !== "ImportDeclaration" || typeof statement.source.value !== "string") continue;
+		if (statement.type !== "ImportDeclaration" || !Predicate.isString(statement.source.value)) continue;
 		const variables = sourceCode.getDeclaredVariables(statement);
 		for (const specifier of statement.specifiers) {
 			const imported = getImportedName(specifier);
@@ -323,7 +324,7 @@ function getExpressionClass(
 		return undefined;
 	}
 	const [serviceName] = current.arguments;
-	return serviceName?.type === "Literal" && typeof serviceName.value === "string" ? serviceName.value : undefined;
+	return serviceName?.type === "Literal" && Predicate.isString(serviceName.value) ? serviceName.value : undefined;
 }
 
 function getIdentifierClass(

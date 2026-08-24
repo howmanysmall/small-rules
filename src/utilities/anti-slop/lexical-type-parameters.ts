@@ -10,14 +10,12 @@ import { isNode } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
-function appendChildNodes(value: unknown, pending: Array<ESTree.Node>): void {
+function appendChildNodes(value: PropertyDescriptor["value"], pending: Array<ESTree.Node>): void {
 	if (isNode(value)) {
 		pending.push(value);
 		return;
 	}
-	if (!Array.isArray(value)) {
-		return;
-	}
+	if (!Array.isArray(value)) return;
 	for (const child of value) {
 		/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
 		if (isNode(child)) {
@@ -35,8 +33,9 @@ function appendDescendants(
 	if (keys === undefined) {
 		return;
 	}
-	for (const key of keys) {
-		appendChildNodes(Reflect.get(node, key), pending);
+	const childKeys = new Set(keys);
+	for (const [key, value] of Object.entries(node)) {
+		if (childKeys.has(key)) appendChildNodes(value, pending);
 	}
 }
 

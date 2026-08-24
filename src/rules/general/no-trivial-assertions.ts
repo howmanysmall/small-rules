@@ -1,5 +1,7 @@
 // oxlint-disable unicorn/no-null -- assertion constants include the null
 // primitive.
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -16,6 +18,10 @@ type Context = InferContextFromRule<typeof noTrivialAssertions>;
 
 function isFalsyConstant(value: ConstantPrimitive): boolean {
 	return value === false || value === 0 || value === "" || value === null || value === undefined || value === 0n;
+}
+
+function getConstantTypeName(value: ConstantPrimitive): string {
+	return Object.prototype.toString.call(value).slice(8, -1).toLowerCase().replace("null", "object");
 }
 
 const FRESH_REFERENCE_TYPES = new Set([
@@ -49,10 +55,10 @@ function isFreshReferenceExpression(node: ESTree.Node): boolean {
 function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {
 	if (node.type !== "Literal") return undefined;
 	if (node.value === null) return { value: null };
-	if (typeof node.value === "string" || typeof node.value === "number" || typeof node.value === "boolean") {
+	if (Predicate.isString(node.value) || Predicate.isNumber(node.value) || Predicate.isBoolean(node.value)) {
 		return { value: node.value };
 	}
-	if (typeof node.value === "bigint") return { value: node.value };
+	if (Predicate.isBigInt(node.value)) return { value: node.value };
 	/* v8 ignore next -- remaining Literal values are non-primitive (e.g. regex already handled as fresh). @preserve */
 	return undefined;
 }
@@ -81,12 +87,12 @@ function resolveUnaryConstant(
 	if (expression.operator === "void") return { value: undefined };
 	if (expression.operator === "typeof") {
 		const argument = resolveConstantPrimitive(sourceCode, expression.argument, seen);
-		return argument === undefined ? undefined : { value: typeof argument.value };
+		return argument === undefined ? undefined : { value: getConstantTypeName(argument.value) };
 	}
 	const argument = resolveConstantPrimitive(sourceCode, expression.argument, seen);
 	if (argument === undefined) return undefined;
 	if (expression.operator === "!") return { value: isFalsyConstant(argument.value) };
-	if (typeof argument.value !== "number") return undefined;
+	if (!Predicate.isNumber(argument.value)) return undefined;
 	if (expression.operator === "+") return { value: argument.value };
 	if (expression.operator === "-") return { value: -argument.value };
 	return undefined;

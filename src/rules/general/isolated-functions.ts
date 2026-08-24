@@ -9,8 +9,10 @@ import type { ESTree, InferContextFromRule, Reference, Scope, SourceCode, Visito
 
 type GlobalMode = "off" | "readonly" | "writable";
 type FunctionNode = ESTree.ArrowFunctionExpression | ESTree.Function;
+type GlobalModeOption = "off" | "readable" | "readonly" | "writable" | "writeable" | boolean;
 
 type Context = InferContextFromRule<typeof isolatedFunctions>;
+type RawOptions = Context["options"][0];
 
 interface RuleOptions {
 	readonly comments: ReadonlyArray<string>;
@@ -36,14 +38,14 @@ const NESTED_FUNCTION_CUTOFF_TYPES = new Set(["FunctionDeclaration", "FunctionEx
 const CLASS_TYPES = new Set(["ClassDeclaration", "ClassExpression"]);
 const LEADING_JSDOC_STAR_PATTERN = /(?:\*\s*)*/u;
 
-function parseGlobalMode(value: unknown): GlobalMode | undefined {
+function parseGlobalMode(value: GlobalModeOption | undefined): GlobalMode | undefined {
 	if (value === true || value === "writable" || value === "writeable") return "writable";
 	if (value === false || value === "off") return "off";
 	if (value === "readonly" || value === "readable") return "readonly";
 	return undefined;
 }
 
-function parseOptions(rawOptions: unknown): RuleOptions {
+function parseOptions(rawOptions: RawOptions): RuleOptions {
 	if (!Predicate.isObject(rawOptions)) {
 		return {
 			comments: DEFAULT_COMMENTS.map(EffectString.toLowerCase),
@@ -344,7 +346,7 @@ const isolatedFunctions = createRule("isolated-functions", "general", {
 			reportIsolatedFunction(context, node, reason, options, checked);
 		}
 
-		const visitor: Record<string, (node: ESTree.Node) => void> = {
+		const visitor = {
 			ArrowFunctionExpression: checkFunctionNode,
 			FunctionDeclaration: checkFunctionNode,
 			FunctionExpression: checkFunctionNode,
@@ -352,11 +354,13 @@ const isolatedFunctions = createRule("isolated-functions", "general", {
 
 		for (const selector of options.selectors) {
 			const reason = `matches selector ${JSON.stringify(selector)}`;
-			visitor[selector] = (node: ESTree.Node): void => {
-				/* v8 ignore next -- selectors may match non-function nodes. @preserve */
-				if (!isFunctionNode(node)) return;
-				reportIsolatedFunction(context, node, reason, options, checked);
-			};
+			Object.assign(visitor, {
+				[selector]: (node: ESTree.Node): void => {
+					/* v8 ignore next -- selectors may match non-function nodes. @preserve */
+					if (!isFunctionNode(node)) return;
+					reportIsolatedFunction(context, node, reason, options, checked);
+				},
+			});
 		}
 
 		return visitor;

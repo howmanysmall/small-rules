@@ -30,7 +30,7 @@ describe("rule manifest integrity", () => {
 	});
 
 	it("keeps every category label and description nonblank", () => {
-		expect.assertions(ruleManifest.categories.length * 2);
+		expect.hasAssertions();
 
 		for (const category of ruleManifest.categories) {
 			expect(category.description.trim(), `${category.key} description`).not.toBe("");

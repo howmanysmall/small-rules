@@ -22,7 +22,6 @@ import {
 	isStaticRequire,
 	isStringLiteral,
 	isTsPropertySignature,
-	isTsTypeAliasDeclaration,
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
@@ -146,7 +145,7 @@ function isExportedIdentifier(identifier: BroadIdentifier): boolean {
 	}
 
 	if (isClass(parent) && parent.id === identifier) return isExportNamedDeclaration(parent.parent);
-	if (isTsTypeAliasDeclaration(parent) && parent.id === identifier) {
+	if (parent.type === "TSTypeAliasDeclaration" && parent.id === identifier) {
 		return isExportNamedDeclaration(parent.parent);
 	}
 

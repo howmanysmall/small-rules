@@ -12,7 +12,12 @@ import {
 
 import type { Comment, SourceCode } from "oxlint-plugin-utilities";
 
-function lineColumn(line: number, column: number): { column: number; line: number } {
+interface LineColumn {
+	column: number;
+	line: number;
+}
+
+function lineColumn(line: number, column: number): LineColumn {
 	return { column, line };
 }
 

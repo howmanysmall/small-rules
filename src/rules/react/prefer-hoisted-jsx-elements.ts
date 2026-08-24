@@ -21,12 +21,12 @@ import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-u
 
 type JavaScriptXmlNode = ESTree.JSXElement | ESTree.JSXFragment;
 
-function normalizeAdditionalHoistableComponents(rawOptions: unknown): ReadonlySet<string> {
+function normalizeAdditionalHoistableComponents(rawOptions: Context["options"][0]): ReadonlySet<string> {
 	if (!Predicate.isObject(rawOptions) || !("additionalHoistableComponents" in rawOptions)) return new Set();
 
 	const { additionalHoistableComponents } = rawOptions;
 	/* v8 ignore start -- @preserve rule schema rejects non-array additionalHoistableComponents values. */
-	if (additionalHoistableComponents === undefined || !isStringArray(additionalHoistableComponents)) {
+	if (!isStringArray(additionalHoistableComponents)) {
 		return new Set();
 	}
 	/* v8 ignore stop -- @preserve */
@@ -34,12 +34,12 @@ function normalizeAdditionalHoistableComponents(rawOptions: unknown): ReadonlySe
 	return new Set(additionalHoistableComponents);
 }
 
-function normalizeAdditionalStaticFactories(rawOptions: unknown): ReadonlySet<string> {
+function normalizeAdditionalStaticFactories(rawOptions: Context["options"][0]): ReadonlySet<string> {
 	if (!Predicate.isObject(rawOptions) || !("additionalStaticFactories" in rawOptions)) return new Set();
 
 	const { additionalStaticFactories } = rawOptions;
 	/* v8 ignore start -- @preserve rule schema rejects non-array additionalStaticFactories values. */
-	if (additionalStaticFactories === undefined || !isStringArray(additionalStaticFactories)) {
+	if (!isStringArray(additionalStaticFactories)) {
 		return new Set();
 	}
 	/* v8 ignore stop -- @preserve */

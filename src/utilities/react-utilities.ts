@@ -9,6 +9,10 @@ import type { ScopeVariable } from "./ast-utilities";
 
 export type Environment = "roblox-ts" | "standard";
 
+export interface ReactOptions {
+	readonly environment?: unknown;
+}
+
 export const ENVIRONMENT_SCHEMA = {
 	default: "roblox-ts",
 	description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
@@ -28,7 +32,7 @@ export function getReactSources(environment: Environment): ReadonlySet<string> {
 	return ROBLOX_TS_REACT_SOURCES;
 }
 
-export function getReactSourcesFromOptions(value: unknown): ReadonlySet<string> {
+export function getReactSourcesFromOptions(value: ReactOptions | undefined): ReadonlySet<string> {
 	return getReactSources(getEnvironment(value));
 }
 
@@ -58,7 +62,7 @@ export function forEachReactNamedImport(
 	}
 }
 
-export function getEnvironment(value: unknown): Environment {
+export function getEnvironment(value: ReactOptions | undefined): Environment {
 	if (!Predicate.isObject(value) || value.environment !== "standard") return "roblox-ts";
 	return "standard";
 }

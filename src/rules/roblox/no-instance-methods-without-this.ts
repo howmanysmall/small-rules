@@ -33,6 +33,18 @@ function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOpt
 	return true;
 }
 
+function containsThisInChildren(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
+	for (const child of Object.values(currentNode)) {
+		if (Array.isArray(child)) {
+			for (const item of child) if (isNode(item) && traverseForThis(item, visited)) return true;
+			continue;
+		}
+		if (isNode(child) && traverseForThis(child, visited)) return true;
+	}
+
+	return false;
+}
+
 function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
 	if (visited.has(currentNode)) return false;
 
@@ -41,23 +53,7 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
 	if (!Predicate.isObject(currentNode)) return false;
 
-	// biome-ignore lint/suspicious/noForIn: required for AST traversal
-	for (const key in currentNode) {
-		/* v8 ignore next -- @preserve for-in over parser nodes only observes own enumerable keys. */
-		if (!Object.hasOwn(currentNode, key)) continue;
-		if (childUsesThis(currentNode[key], visited)) return true;
-	}
-
-	return false;
-}
-
-function childUsesThis(childValue: unknown, visited: WeakSet<ESTree.Node>): boolean {
-	if (Array.isArray(childValue)) {
-		for (const item of childValue) if (isNode(item) && traverseForThis(item, visited)) return true;
-		return false;
-	}
-
-	return isNode(childValue) && traverseForThis(childValue, visited);
+	return containsThisInChildren(currentNode, visited);
 }
 
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {

@@ -5,6 +5,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
+import type { UnknownRecord } from "type-fest";
 
 type Mode = "aggressive" | "definite" | "moderate";
 type Stability = "memoized" | "unknown" | "unmemoized";
@@ -68,10 +69,7 @@ function isModuleScope(variable: Variable): boolean {
 	return variable.scope.type === "module" || variable.scope.type === "global";
 }
 
-function registerConfiguredEffectHooks(
-	rawOptions: Record<PropertyKey, unknown>,
-	effectHooks: Map<string, number>,
-): void {
+function registerConfiguredEffectHooks(rawOptions: UnknownRecord, effectHooks: Map<string, number>): void {
 	if (!("hooks" in rawOptions) || !Array.isArray(rawOptions.hooks)) return;
 
 	for (const hook of rawOptions.hooks) {

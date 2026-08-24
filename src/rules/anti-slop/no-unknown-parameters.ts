@@ -64,13 +64,18 @@ function parameterName(parameter: Parameter, sourceText: string): string {
 			current = current.argument;
 			continue;
 		}
-		return current.type === "Identifier" ? current.name : sourceText.replace(/\s*:\s*unknown\s*$/u, "");
+		return current.type === "Identifier"
+			? current.name
+			: sourceText.slice(0, sourceText.trimEnd().lastIndexOf(":")).trimEnd();
 	}
 }
 
 /**
  * The parameter that an explicit type predicate or assertion predicate
  * validates.
+ *
+ * @param node - Function-like node whose return type may contain a predicate.
+ * @returns The predicate's parameter name, if it names one.
  */
 function validatedParameterName(node: ParameterOwner): string | undefined {
 	const predicate = node.returnType?.typeAnnotation;

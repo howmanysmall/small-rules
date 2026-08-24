@@ -46,6 +46,13 @@ interface PushCollapseCandidate {
 	readonly statement: ESTree.VariableDeclaration;
 }
 
+interface PushScanResult {
+	readonly argumentParts: ReadonlyArray<string>;
+	readonly hasUnsafeArgument: boolean;
+	readonly nextIndex: number;
+	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+}
+
 type NoArrayConstructorElementsMessageId =
 	| "avoidConstructorEnumeration"
 	| "avoidLengthConstructorInStandard"
@@ -435,12 +442,7 @@ function scanPushStatements(
 	statements: ReadonlyArray<ProgramStatement>,
 	startIndex: number,
 	arrayIdentifierName: string,
-): {
-	readonly argumentParts: ReadonlyArray<string>;
-	readonly hasUnsafeArgument: boolean;
-	readonly nextIndex: number;
-	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
-} {
+): PushScanResult {
 	const pushStatements = new Array<ESTree.ExpressionStatement>();
 	const argumentParts = new Array<string>();
 	let hasUnsafeArgument = false;
@@ -488,11 +490,8 @@ function appendPushArguments(
 
 const noArrayConstructorElements = createRule("no-array-constructor-elements", "roblox", {
 	create(context): Visitor {
-		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety
-		const rawOptions = context.options?.[0];
-		const options: Required<NoArrayConstructorElementsOptions> = Predicate.isObject(rawOptions)
-			? { ...DEFAULT_OPTIONS, ...(rawOptions as Partial<NoArrayConstructorElementsOptions>) }
-			: { ...DEFAULT_OPTIONS };
+		const [rawOptions] = context.options;
+		const options = Predicate.isObject(rawOptions) ? { ...DEFAULT_OPTIONS, ...rawOptions } : { ...DEFAULT_OPTIONS };
 		const { sourceCode } = context;
 
 		function inspectPushCollapse(statements: ReadonlyArray<ProgramStatement>): void {

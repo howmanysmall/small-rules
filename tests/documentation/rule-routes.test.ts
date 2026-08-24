@@ -7,12 +7,23 @@ import { getRulePath, ruleManifest } from "../../documentation/src/data/rule-man
 
 const docsContentDirectory = fileURLToPath(new URL("../../documentation/src/content/docs", import.meta.url));
 const rulePagesDirectory = nodePath.join(docsContentDirectory, "rules");
-const RULE_PAGE_PROPS = /<RulePage\s+rule="([^"]+)"/gu;
+const RULE_PAGE_PROPS = /<RulePage\s+rule="(?<name>[^"]+)"/gu;
 
 interface RulePageSource {
 	readonly name: string | undefined;
 	readonly path: string;
 	readonly propCount: number;
+}
+
+function isRulePageMismatch(
+	{ name, path, propCount }: RulePageSource,
+	expectedRulePagePaths: ReadonlyMap<string, string>,
+): boolean {
+	return propCount !== 1 || expectedRulePagePaths.get(path) !== name;
+}
+
+function formatRulePageMismatch(name: string | undefined, path: string): string {
+	return `${nodePath.relative(docsContentDirectory, path)}: ${name ?? ""}`;
 }
 
 function getExpectedRulePagePaths(): ReadonlyMap<string, string> {
@@ -34,7 +45,7 @@ function getRulePageSources(): ReadonlyArray<RulePageSource> {
 		const path = nodePath.join(rulePagesDirectory, relativePath);
 		const source = readFileSync(path, "utf8");
 		const props = [...source.matchAll(RULE_PAGE_PROPS)];
-		pages.push({ name: props[0]?.[1], path, propCount: props.length });
+		pages.push({ name: props[0]?.groups?.name, path, propCount: props.length });
 	}
 
 	return pages;
@@ -61,16 +72,13 @@ describe("rule page routes", () => {
 	it("binds exactly one RulePage wrapper per page to the route's rule", () => {
 		expect.assertions(2);
 		const expectedRulePagePaths = getExpectedRulePagePaths();
-		const mismatches = getRulePageSources().filter(({ name, path, propCount }) => {
-			if (propCount !== 1) return true;
-			return expectedRulePagePaths.get(path) !== name;
-		});
+		const mismatches = getRulePageSources().filter((source) => isRulePageMismatch(source, expectedRulePagePaths));
 
 		expect(mismatches.filter(({ propCount }) => propCount !== 1).map(({ path }) => path)).toStrictEqual([]);
 		expect(
 			mismatches
 				.filter(({ propCount }) => propCount === 1)
-				.map(({ name, path }) => `${nodePath.relative(docsContentDirectory, path)}: ${name ?? ""}`),
+				.map(({ name, path }) => formatRulePageMismatch(name, path)),
 		).toStrictEqual([]);
 	});
 

@@ -8,7 +8,7 @@ import noObjectParameters from "$oxc-rules/anti-slop/no-object-parameters";
 import noReflectApply from "$oxc-rules/anti-slop/no-reflect-apply";
 import noReflectGet from "$oxc-rules/anti-slop/no-reflect-get";
 import noRuntimeTypeof from "$oxc-rules/anti-slop/no-runtime-typeof";
-import noShapeInSymbolNames from "$oxc-rules/anti-slop/no-shape-in-symbol-names";
+import noStructuralTermInSymbolNames from "$oxc-rules/anti-slop/no-shape-in-symbol-names";
 import noUnknownParameters from "$oxc-rules/anti-slop/no-unknown-parameters";
 import noUnknownReturns from "$oxc-rules/anti-slop/no-unknown-returns";
 import noUnknownTypeAliases from "$oxc-rules/anti-slop/no-unknown-type-aliases";
@@ -191,7 +191,7 @@ const smallRules = definePlugin({
 		"no-reset-all-state-on-prop-change": noResetAllStateOnPropChange,
 		"no-restricted-property-assignment": noRestrictedPropertyAssignment,
 		"no-runtime-typeof": noRuntimeTypeof,
-		"no-shape-in-symbol-names": noShapeInSymbolNames,
+		"no-shape-in-symbol-names": noStructuralTermInSymbolNames,
 		"no-spec-file-extension": noSpecFileExtension,
 		"no-static-react-create-element": noStaticReactCreateElement,
 		"no-table-create-map": noTableCreateMap,

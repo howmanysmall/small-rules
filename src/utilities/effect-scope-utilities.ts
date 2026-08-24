@@ -174,23 +174,28 @@ function collectProgramCallExpressions(
 	traverseAll(state, state.sourceCode.ast, { callExpressions, ifStatements: [], references: [] });
 }
 
+function pushChildValue(value: PropertyDescriptor["value"], worklist: Array<ESTree.Node>): void {
+	if (Array.isArray(value)) {
+		for (let index = value.length - 1; index >= 0; index -= 1) {
+			const item = value[index];
+			if (isNode(item)) worklist.push(item);
+		}
+		return;
+	}
+
+	if (isNode(value)) worklist.push(value);
+}
+
 function pushChildren(
 	state: EffectScopeAnalysisState,
 	node: ESTree.Node,
 	worklist: Array<ESTree.Node>,
 	includeArguments: boolean,
 ): void {
-	/* v8 ignore next -- every parser-produced node type has visitor keys; the fallback never fires. @preserve */
-	const keys = state.sourceCode.visitorKeys[node.type] ?? [];
-	for (const key of keys) {
-		if (key === "arguments" && !includeArguments) continue;
-		const child: unknown = Reflect.get(node, key);
-		if (Array.isArray(child)) {
-			for (let index = child.length - 1; index >= 0; index -= 1) {
-				const item = child[index];
-				if (isNode(item)) worklist.push(item);
-			}
-		} else if (isNode(child)) worklist.push(child);
+	const childKeys = new Set(state.sourceCode.visitorKeys[node.type]);
+	for (const [key, value] of Object.entries(node)) {
+		if (!childKeys.has(key) || (key === "arguments" && !includeArguments)) continue;
+		pushChildValue(value, worklist);
 	}
 }
 

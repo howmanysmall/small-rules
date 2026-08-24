@@ -4,6 +4,7 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { UnknownRecord } from "type-fest";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
@@ -20,6 +21,8 @@ interface WorldQueryCall {
 	readonly variableName: string;
 	readonly worldNode: ESTree.Expression;
 }
+
+type InspectableNode = ESTree.Node | null | UnknownRecord;
 
 function isLengthOfTwo<TValue>(array: ReadonlyArray<TValue>): array is readonly [TValue, TValue] {
 	return array.length === 2;
@@ -88,25 +91,25 @@ const VALID_PARENT_TYPES = new Set<string>([
 	"WhileStatement",
 ]);
 
-function isNodeWithParent(value: unknown): value is { readonly parent: unknown } {
+function isNodeWithParent(value: InspectableNode): value is { readonly parent: InspectableNode } {
 	return Predicate.isObject(value) && "parent" in value;
 }
 
-function getNodeType(value: unknown): string | undefined {
+function getNodeType(value: InspectableNode): string | undefined {
 	/* v8 ignore next -- @preserve scope reference parents are parser nodes with string type tags. */
 	return Predicate.isObject(value) && Predicate.isString(value.type) ? value.type : undefined;
 }
 
-function getOperator(value: unknown): string | undefined {
+function getOperator(value: InspectableNode): string | undefined {
 	/* v8 ignore next -- @preserve logical-expression parents expose parser-provided string operators. */
 	return Predicate.isObject(value) && Predicate.isString(value.operator) ? value.operator : undefined;
 }
 
-function isLogicalAndExpression(value: unknown): boolean {
+function isLogicalAndExpression(value: InspectableNode): boolean {
 	return getNodeType(value) === "LogicalExpression" && getOperator(value) === "&&";
 }
 
-function isIdentifierReference(value: unknown): value is ESTree.IdentifierReference {
+function isIdentifierReference(value: InspectableNode): value is ESTree.IdentifierReference {
 	return Predicate.isObject(value) && value.type === "Identifier" && Predicate.isString(value.name);
 }
 
@@ -117,11 +120,11 @@ function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierRefere
 	const parentType = getNodeType(parent);
 	if (parentType === undefined || !VALID_PARENT_TYPES.has(parentType)) return false;
 
-	let current: unknown = identifier;
-	while (current !== undefined && current !== parent) {
+	let current: InspectableNode = identifier;
+	while (current !== parent) {
 		/* v8 ignore next -- @preserve parser-provided reference ancestor chains expose parent links up to the checked parent. */
 		if (!isNodeWithParent(current)) break;
-		const currentParent = current.parent;
+		const currentParent: InspectableNode = current.parent;
 		/* v8 ignore next -- @preserve direct logical-and parents are handled before walking ancestors. */
 		if (isLogicalAndExpression(currentParent)) return true;
 		current = currentParent;

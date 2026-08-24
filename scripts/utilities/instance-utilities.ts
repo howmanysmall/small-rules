@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { Predicate } from "effect";
 import { fdir } from "fdir";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
@@ -12,11 +13,11 @@ export const enum ScanType {
 	React = "tsx",
 }
 
-const GATHER_TO_SCAN_TYPE: Record<ScanType, fdir> = {
+const GATHER_TO_SCAN_TYPE = {
 	[ScanType.Both]: new fdir().glob("**/*.{ts,tsx}").withFullPaths(),
 	[ScanType.React]: new fdir().glob("**/*.tsx").withFullPaths(),
 	[ScanType.TypeScript]: new fdir().glob("**/*.ts").withFullPaths(),
-};
+} satisfies Record<ScanType, fdir>;
 
 function isAllLowerCase(value: string): boolean {
 	for (let index = 0; index < value.length; index += 1) {
@@ -76,7 +77,7 @@ function isCreateElementCall(callee: CallExpression["callee"]): boolean {
 
 function getFirstStringArgument(parameters: ReadonlyArray<CallExpression["arguments"][number]>): string | undefined {
 	const [firstParameter] = parameters;
-	return firstParameter?.type === "Literal" && typeof firstParameter.value === "string"
+	return firstParameter?.type === "Literal" && Predicate.isString(firstParameter.value)
 		? firstParameter.value
 		: undefined;
 }

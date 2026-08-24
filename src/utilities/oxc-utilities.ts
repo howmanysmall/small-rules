@@ -197,10 +197,6 @@ export function isClass(node: ESTree.Node): node is ESTree.Class {
 	return node.type === "ClassDeclaration" || node.type === "ClassExpression";
 }
 
-export function isTsTypeAliasDeclaration(node: ESTree.Node): node is ESTree.TSTypeAliasDeclaration {
-	return node.type === "TSTypeAliasDeclaration";
-}
-
 export function isTsPropertySignature(node: ESTree.Node): node is ESTree.TSPropertySignature {
 	return node.type === "TSPropertySignature";
 }

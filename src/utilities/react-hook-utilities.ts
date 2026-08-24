@@ -43,15 +43,14 @@ export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) =>
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
-	// biome-ignore lint/suspicious/noForIn: required for AST traversal
-	for (const key in node) {
+	for (const [key, value] of Object.entries(node)) {
 		if (isKeyOfNode(key)) continue;
-		pushChildValue(Reflect.get(node, key), node, stack);
+		pushChildValue(value, node, stack);
 	}
 }
 
-function pushChildValue(value: unknown, parent: ESTree.Node, stack: Array<ESTree.Node>): void {
-	if (typeof value !== "object" || value === null || value === parent.parent) return;
+function pushChildValue(value: PropertyDescriptor["value"], parent: ESTree.Node, stack: Array<ESTree.Node>): void {
+	if (value === null || value === undefined || value === parent.parent) return;
 
 	if (Array.isArray(value)) {
 		pushChildArray(value, parent, stack);
@@ -72,7 +71,7 @@ function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, sta
 	}
 }
 
-function pushSlopValue(value: unknown, parent: ESTree.Node, worklist: Array<ESTree.Node>): void {
+function pushSlopValue(value: PropertyDescriptor["value"], parent: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	if (Array.isArray(value)) {
 		for (const item of value) pushSlopValue(item, parent, worklist);
 		return;

@@ -1,6 +1,8 @@
 // oxlint-disable sonar/cognitive-complexity unicorn/no-null -- Scope
 // construction is a compact AST dispatcher that mirrors eslint-scope null
 // sentinels.
+import { Predicate } from "effect";
+
 import { getNodeChildren } from "./ast";
 
 import type {
@@ -157,7 +159,7 @@ function defineImportSpecifiers(node: HarnessNode, scope: HarnessScope, state: S
 	const specifiers = getNodeArrayProperty(node, "specifiers");
 	for (const specifier of specifiers) {
 		const local = getNodeProperty(specifier, "local");
-		if (local === undefined || typeof local.name !== "string") continue;
+		if (local === undefined || !Predicate.isString(local.name)) continue;
 		defineVariable(scope, local.name, local, {
 			name: local,
 			node: specifier,
@@ -170,7 +172,7 @@ function defineImportSpecifiers(node: HarnessNode, scope: HarnessScope, state: S
 
 function defineFunctionDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
 	const id = getNodeProperty(node, "id");
-	if (id !== undefined && typeof id.name === "string") {
+	if (id !== undefined && Predicate.isString(id.name)) {
 		const variable = defineVariable(scope, id.name, id, {
 			name: id,
 			node,
@@ -185,7 +187,7 @@ function defineFunctionDeclaration(node: HarnessNode, scope: HarnessScope, state
 
 function defineClassDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
 	const id = getNodeProperty(node, "id");
-	if (id === undefined || typeof id.name !== "string") return;
+	if (id === undefined || !Predicate.isString(id.name)) return;
 	const variable = defineVariable(scope, id.name, id, {
 		name: id,
 		node,
@@ -199,7 +201,7 @@ function visitClassLike(node: HarnessNode, parentScope: HarnessScope, state: Sco
 	const classScope = createScope("class", parentScope, node);
 	state.nodeToScope.set(node, classScope);
 	const id = getNodeProperty(node, "id");
-	if (id !== undefined && typeof id.name === "string") {
+	if (id !== undefined && Predicate.isString(id.name)) {
 		defineVariable(classScope, id.name, id, {
 			name: id,
 			node,
@@ -211,7 +213,7 @@ function visitClassLike(node: HarnessNode, parentScope: HarnessScope, state: Sco
 
 function defineTSEnumDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
 	const id = getNodeProperty(node, "id");
-	if (id === undefined || typeof id.name !== "string") return;
+	if (id === undefined || !Predicate.isString(id.name)) return;
 	const variable = defineVariable(scope, id.name, id, {
 		name: id,
 		node,
@@ -223,7 +225,7 @@ function defineTSEnumDeclaration(node: HarnessNode, scope: HarnessScope, state: 
 
 function defineTypeDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
 	const id = getNodeProperty(node, "id");
-	if (id === undefined || typeof id.name !== "string") return;
+	if (id === undefined || !Predicate.isString(id.name)) return;
 	const variable = defineVariable(scope, id.name, id, {
 		name: id,
 		node,
@@ -238,7 +240,7 @@ function visitFunctionLike(node: HarnessNode, parentScope: HarnessScope, state: 
 	state.nodeToScope.set(node, functionScope);
 
 	const id = getNodeProperty(node, "id");
-	if (node.type === "FunctionExpression" && typeof id?.name === "string") {
+	if (node.type === "FunctionExpression" && Predicate.isString(id?.name)) {
 		defineVariable(functionScope, id.name, id, {
 			name: id,
 			node,
@@ -295,7 +297,7 @@ function definePattern(
 		}
 
 		case "Identifier": {
-			if (typeof pattern.name !== "string") return;
+			if (!Predicate.isString(pattern.name)) return;
 			const variable = defineVariable(scope, pattern.name, pattern, {
 				name: pattern,
 				node: definitionNode,
@@ -464,7 +466,7 @@ function getVariableByName(scope: HarnessScope, name: string | undefined): Harne
 }
 
 function getIdentifierName(node: HarnessNode): string | undefined {
-	return typeof node.name === "string" ? node.name : undefined;
+	return Predicate.isString(node.name) ? node.name : undefined;
 }
 
 function isReferenceIdentifier(node: HarnessNode): boolean {
@@ -544,5 +546,5 @@ function getNodeArrayProperty(node: HarnessNode, key: string): Array<HarnessNode
 }
 
 function isNode(value: unknown): value is HarnessNode {
-	return typeof value === "object" && value !== null && "type" in value && "range" in value && "loc" in value;
+	return Predicate.isObject(value) && "type" in value && "range" in value && "loc" in value;
 }

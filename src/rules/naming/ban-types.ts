@@ -3,7 +3,7 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 interface BannedTypeEntry {
 	readonly originalName: string;
@@ -14,14 +14,14 @@ const DEFAULT_BANNED_TYPES = new Map<string, BannedTypeEntry>([
 	["omit", { originalName: "Omit", replacementName: "Except" }],
 ]);
 
-function normalizeBannedTypes(rawOptions: unknown): ReadonlyMap<string, BannedTypeEntry> {
+type RuleOptions = InferContextFromRule<typeof banTypes>["options"][0];
+
+function normalizeBannedTypes(rawOptions: RuleOptions): ReadonlyMap<string, BannedTypeEntry> {
 	const bannedTypes = new Map(DEFAULT_BANNED_TYPES);
 
 	if (!Predicate.isObject(rawOptions) || !("bannedTypes" in rawOptions)) return bannedTypes;
 
 	const { bannedTypes: configuredBannedTypes } = rawOptions;
-	/* v8 ignore next -- @preserve rule schema oneOf ensures bannedTypes is never undefined when the key is present. */
-	if (configuredBannedTypes === undefined) return bannedTypes;
 
 	if (isStringArray(configuredBannedTypes)) {
 		for (const typeName of configuredBannedTypes) {

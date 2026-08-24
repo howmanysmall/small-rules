@@ -6,7 +6,9 @@ import { ts } from "$test/rule-testers";
 const widening = { messageId: "widening" };
 
 const prelude = "type Command = () => void;\nconst startCommand = () => {};";
-const withPrelude = (code: string): string => `${prelude}\n${code}`;
+function withPrelude(code: string): string {
+	return `${prelude}\n${code}`;
+}
 
 describe("no-known-value-widening", () => {
 	ts.run("no-known-value-widening", rule, {
