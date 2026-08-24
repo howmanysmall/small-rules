@@ -121,6 +121,7 @@ packages:
 # Force specific versions of any dependency (including transitive)
 overrides:
   "@isentinel/eslint-config>@pobammer-ts/small-rules": "link:./plugins"
+  "@vitiate/core>@swc/core": 1.15.41
   vite: ^8
 
 catalogs:
