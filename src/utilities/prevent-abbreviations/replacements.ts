@@ -1,6 +1,7 @@
+import { Predicate } from "effect";
+
 import { evilTernary } from "$oxc-utilities/evil-ternary-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
 
 import {
 	DEFAULT_ALLOW_LIST,

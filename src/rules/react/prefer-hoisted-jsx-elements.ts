@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
@@ -11,7 +13,6 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 

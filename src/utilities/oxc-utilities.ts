@@ -1,5 +1,6 @@
-import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { Predicate } from "effect";
+
+import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 
 import type { ESTree, FixFunction } from "oxlint-plugin-utilities";
 

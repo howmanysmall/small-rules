@@ -1,5 +1,6 @@
-import { isUppercaseName } from "$oxc-utilities/string-utilities";
 import { Predicate } from "effect";
+
+import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 

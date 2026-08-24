@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
-// aliases. Local departure from the pinned commit: a described Oxlint directive that
-// disables `typescript/no-unsafe-type-assertion` counts as a safety justification,
-// matching the suppression style enforced by the directive rules.
+// aliases. Local departure from the pinned commit: a described Oxlint
+// directive that disables `typescript/no-unsafe-type-assertion` counts as a
+// safety justification, matching the suppression style enforced by the
+// directive rules.
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -38,9 +39,10 @@ function isConstAssertion(node: TypeAssertion): boolean {
 }
 
 /**
- * A described Oxlint suppression of the unsafe-assertion rule documents the same
- * invariant a `SAFETY:` comment would; unrelated or undescribed suppressions do not.
- * Mirrors the directive grammar of `directive-comments` for this one kind.
+ * A described Oxlint suppression of the unsafe-assertion rule documents the
+ * same invariant a `SAFETY:` comment would; unrelated or undescribed
+ * suppressions do not. Mirrors the directive grammar of `directive-comments`
+ * for this one kind.
  */
 function disablesUnsafeAssertionRule(comment: SourceCodeComment): boolean {
 	const text = comment.value.trim();

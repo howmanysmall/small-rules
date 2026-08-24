@@ -1,5 +1,6 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

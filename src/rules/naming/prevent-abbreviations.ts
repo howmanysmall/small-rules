@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
@@ -44,7 +46,6 @@ import {
 	shouldFix,
 	shouldReportIdentifierAsProperty,
 } from "$oxc-utilities/prevent-abbreviations/scope";
-import { Predicate } from "effect";
 
 import type {
 	Definition,

@@ -1,3 +1,5 @@
+import { Predicate } from "effect";
+
 import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
@@ -8,7 +10,6 @@ import {
 	isReactNamespaceImport,
 } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
-import { Predicate } from "effect";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
