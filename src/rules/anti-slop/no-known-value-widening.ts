@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
-// aliases; variable resolution uses the shared getVariableByName helper instead of
-// upstream's inline scope walk. Parent-assertion suppression climbs parentheses
-// because the local parser preserves ParenthesizedExpression nodes.
+// aliases; variable resolution uses the shared getVariableByName helper instead
+// of upstream's inline scope walk. Parent-assertion suppression climbs
+// parentheses because the local parser preserves ParenthesizedExpression nodes.
 
 import {
 	classifyWideningTarget,
@@ -47,25 +47,32 @@ function isStableConstVariable(variable: ScopeVariable, declarator: ESTree.Varia
 function hasKnownEvidence(
 	sourceCode: SourceCode,
 	expression: ESTree.Expression,
-	visitedVariables: Set<ScopeVariable> = new Set(),
+	visitedVariables: Set<ScopeVariable> = new Set<ScopeVariable>(),
 ): boolean {
-	if (isKnownEvidenceExpression(expression)) return true;
-	const unwrapped = unwrapExpression(expression);
-	if (unwrapped.type !== "Identifier") return false;
-	const variable = resolveVariable(sourceCode, unwrapped);
-	if (variable === undefined || visitedVariables.has(variable)) return false;
-	const declarator = variableDeclarator(variable);
-	if (declarator === undefined || declarator.init === null || !isStableConstVariable(variable, declarator)) {
-		return false;
+	let currentExpression = expression;
+	for (;;) {
+		if (isKnownEvidenceExpression(currentExpression)) return true;
+		const unwrapped = unwrapExpression(currentExpression);
+		if (unwrapped.type !== "Identifier") return false;
+		const variable = resolveVariable(sourceCode, unwrapped);
+		if (variable === undefined || visitedVariables.has(variable)) return false;
+		const declarator = variableDeclarator(variable);
+		if (declarator === undefined) return false;
+		const { init: initializer } = declarator;
+		if (initializer === null || !isStableConstVariable(variable, declarator)) {
+			return false;
+		}
+		visitedVariables.add(variable);
+		currentExpression = initializer;
 	}
-	visitedVariables.add(variable);
-	return hasKnownEvidence(sourceCode, declarator.init, visitedVariables);
 }
 
-function annotationTarget(annotation: ESTree.TSTypeAnnotation | null | undefined, environment: TypeEnvironment) {
-	return annotation === null || annotation === undefined
-		? undefined
-		: classifyWideningTarget(annotation.typeAnnotation, environment);
+function annotationTarget(
+	annotation: ESTree.TSTypeAnnotation | null | undefined,
+	environment: TypeEnvironment,
+): undefined | WideningTarget {
+	if (annotation === null || annotation === undefined) return undefined;
+	return classifyWideningTarget(annotation.typeAnnotation, environment);
 }
 
 function enclosingFunction(node: ESTree.Node): FunctionExpression | undefined {
@@ -94,7 +101,7 @@ function functionName(sourceCode: SourceCode, owner: FunctionExpression | undefi
 	/* v8 ignore next 3 -- top-level returns only occur in script sources this suite does not exercise. @preserve */
 	if (owner === undefined) return "anonymous function";
 	if (owner.id !== null) return owner.id.name;
-	const parent = owner.parent;
+	const { parent } = owner;
 	if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
 	if (parent.type === "MethodDefinition") return sourceKeyName(sourceCode, parent.key);
 	return "anonymous function";
@@ -135,7 +142,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 
 		function reportFlow(
 			expression: ESTree.Expression,
-			destination: WideningTarget | undefined,
+			destination: undefined | WideningTarget,
 			subject: string,
 		): void {
 			if (destination === undefined) return;
@@ -148,7 +155,9 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			});
 		}
 
-		function targetFromAnnotation(annotation: ESTree.TSTypeAnnotation | null | undefined) {
+		function targetFromAnnotation(
+			annotation: ESTree.TSTypeAnnotation | null | undefined,
+		): undefined | WideningTarget {
 			/* v8 ignore next -- the environment is always built by the Program visitor first. @preserve */
 			return environment === undefined ? undefined : annotationTarget(annotation, environment);
 		}
@@ -167,12 +176,9 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				const variable = resolveVariable(context.sourceCode, node.left);
 				if (variable === undefined) return;
 				const declarator = variableDeclarator(variable);
-				if (declarator === undefined || declarator.id.type !== "Identifier") return;
-				reportFlow(
-					node.right,
-					targetFromAnnotation(declarator.id.typeAnnotation),
-					`binding \`${declarator.id.name}\``,
-				);
+				const binding = declarator?.id;
+				if (binding?.type !== "Identifier") return;
+				reportFlow(node.right, targetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
 			},
 			Program(node): void {
 				environment = createTypeEnvironment(node);
