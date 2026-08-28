@@ -48,7 +48,13 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 
 ## [2.16.1] - 2026-08-28
 
-No user-facing changes.
+## Added
+- Added 15 anti-slop rules covering broad or unsafe TypeScript contracts, reflective access, module mocking, chained assertions, conditional empty-object spreads, and assertion safety, [#44](https://github.com/howmanysmall/small-rules/pull/44).
+
+## Fixed
+- Fixed `prefer-hoisted-jsx-elements` coverage for static JSX nested in object properties and array elements, [#43](https://github.com/howmanysmall/small-rules/pull/43).
+- Fixed `prevent-abbreviations` ownership detection through local aliases, unions, indexed accesses, and interfaces extending external types, [#46](https://github.com/howmanysmall/small-rules/pull/46).
+- Fixed directive comment handling when a parsed comment has no string value, [#47](https://github.com/howmanysmall/small-rules/pull/47).
 
 ## [2.16.0] - 2026-08-24
 
