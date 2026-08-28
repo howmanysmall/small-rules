@@ -113,7 +113,8 @@ export default function blockUselessNpx(hookApi: HookAPI): void {
 	hookApi.on("tool_call", (event): ToolCallEventResult => {
 		if (event.toolName !== "bash") return {};
 
-		const command = Predicate.isString(event.input.command) ? event.input.command : "";
+		const inputCommand = event.input.command;
+		const command = Predicate.isString(inputCommand) ? inputCommand : "";
 		const invocation = runnerInvocation(command);
 		if (invocation === undefined) return {};
 
