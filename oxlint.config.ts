@@ -520,7 +520,16 @@ const configuration = isentinel(
 		jsPlugins: [{ name: "react-doctor", specifier: "oxlint-plugin-react-doctor" }],
 		rules: {
 			...reactDoctorRules,
+			// STOP DUPLICATING NATIVE RULES!!!
+			"react-doctor/forbid-component-props": "off",
 			"react-doctor/jsx-curly-brace-presence": "off",
+			"react-doctor/jsx-max-depth": "off",
+			"react-doctor/jsx-no-new-array-as-prop": "off",
+			"react-doctor/jsx-no-new-function-as-prop": "off",
+			"react-doctor/jsx-no-new-object-as-prop": "off",
+			"react-doctor/no-multi-comp": "off",
+			"react-doctor/no-unknown-property": "off",
+			"react-doctor/only-export-components": "off",
 			"react-doctor/react-in-jsx-scope": "off",
 		},
 	},
