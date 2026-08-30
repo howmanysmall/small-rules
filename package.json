@@ -56,6 +56,7 @@
 		"isentinel-lint": "isentinel-lint",
 		"jscpd": "jscpd",
 		"knip": "knip-bun",
+		"knip:production": "knip-bun --production --strict --workspace .",
 		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- $a && node --run biome -- check --no-errors-on-unmatched $a' _",
 		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- --agents $a && node --run biome -- check --no-errors-on-unmatched --reporter concise $a' _",
 		"oxfmt": "oxfmt",
