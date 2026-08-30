@@ -19,29 +19,23 @@ function ensureAstroIntegration<Integration extends AstroIntegration>(
 	integration: Integration,
 ): AstroIntegration & Pick<Integration, "hooks" | "name"> {
 	if (!Predicate.isObject(integration)) {
-		const error = new Error(
+		throw new Error(
 			`Expected Astro integration to be an object, received: ${Object.prototype.toString.call(integration)}`,
 		);
-		Error.captureStackTrace(error, ensureAstroIntegration);
-		throw error;
 	}
 
 	const name = "name" in integration ? integration.name : undefined;
 	if (!Predicate.isString(name) || name.length === 0) {
-		const error = new Error(
+		throw new Error(
 			`Expected Astro integration to have a non-empty string "name" property, received: ${name}`,
 		);
-		Error.captureStackTrace(error, ensureAstroIntegration);
-		throw error;
 	}
 
 	const hooks = "hooks" in integration ? integration.hooks : undefined;
 	if (!Predicate.isObject(hooks)) {
-		const error = new Error(
+		throw new Error(
 			`Expected Astro integration "${name}" to have a "hooks" object, received: ${String(hooks)}`,
 		);
-		Error.captureStackTrace(error, ensureAstroIntegration);
-		throw error;
 	}
 
 	return {
