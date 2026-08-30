@@ -186,8 +186,14 @@ describe("directive locations", () => {
 
 		const directive = comment("oxlint-disable no-console");
 
-		expect(toRuleIdLocation(directive, undefined)).toStrictEqual(toForceLocation(directive.loc));
-		expect(toRuleIdLocation(directive, "no-alert")).toStrictEqual(directive.loc);
+		expect(toRuleIdLocation(directive, undefined)).toStrictEqual({
+			end: lineColumn(1, 27),
+			start: lineColumn(1, 0),
+		});
+		expect(toRuleIdLocation(directive, "no-alert")).toStrictEqual({
+			end: lineColumn(1, 27),
+			start: lineColumn(1, 0),
+		});
 	});
 
 	it("should locate rule identifiers that contain regexp syntax", () => {

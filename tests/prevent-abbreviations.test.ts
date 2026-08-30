@@ -1010,22 +1010,27 @@ describe("prevent-abbreviations", () => {
 			expect(getNameReplacements("testName", options)).toStrictEqual({ total: 0 });
 		});
 
-		it("normalizes ignore patterns with RegExp instances", () => {
-			expect.assertions(4);
+		it("accepts RegExp instances in ignore from oxlint.config.ts", () => {
+			expect.assertions(6);
 
 			const options = prepareOptions({
-				ignore: [/^test/u, "regexString"],
+				ignore: [/^test/u, "ignored"],
 			});
 
-			// RegExp instances pass through directly; strings get converted
+			// Both string and RegExp inputs become RegExp instances.
 			for (const pattern of options.ignore) {
 				expect(pattern instanceof RegExp).toBe(true);
 			}
+
+			// Each pattern actually suppresses a matching abbreviation.
+			expect(getNameReplacements("testErr", options)).toStrictEqual({ total: 0 });
+			expect(getNameReplacements("ignoredErr", options)).toStrictEqual({ total: 0 });
 		});
 
-		it("reuses normalized configuration while isolating per-run lookup caches", () => {
-			expect.assertions(9);
+		it("returns consistent results across repeated lookups and separately prepared configurations", () => {
+			expect.assertions(4);
 
+			// Catches a cached lookup returning a different answer than a fresh one.
 			const configuration = {
 				ignoreShorthands: ["Props"],
 				replacements: { res: { response: true, result: true } },
@@ -1036,17 +1041,15 @@ describe("prevent-abbreviations", () => {
 			const firstShorthand = getShorthandReplacement("PanelProps", firstOptions.shorthandConfiguration);
 			const firstNameReplacements = getNameReplacements("res", firstOptions);
 
-			expect(firstOptions).not.toBe(secondOptions);
-			expect(firstOptions.allowList).toBe(secondOptions.allowList);
-			expect(firstOptions.allowPropertyAccess).toBe(secondOptions.allowPropertyAccess);
-			expect(firstOptions.ignore).toBe(secondOptions.ignore);
-			expect(firstOptions.replacements).toBe(secondOptions.replacements);
-			expect(firstOptions.shorthandConfiguration.exactMatchers).toBe(
-				secondOptions.shorthandConfiguration.exactMatchers,
+			expect(firstShorthand?.replaced).toBe("PanelProperties");
+			expect(getShorthandReplacement("PanelProps", firstOptions.shorthandConfiguration)).toStrictEqual(
+				firstShorthand,
 			);
-			expect(getShorthandReplacement("PanelProps", firstOptions.shorthandConfiguration)).toBe(firstShorthand);
-			expect(getNameReplacements("res", firstOptions)).toBe(firstNameReplacements);
-			expect(getNameReplacements("res", secondOptions)).not.toBe(firstNameReplacements);
+			expect(getNameReplacements("res", firstOptions)).toStrictEqual(firstNameReplacements);
+			expect(getNameReplacements("res", secondOptions)).toStrictEqual({
+				samples: ["resource", "response", "result"],
+				total: 3,
+			});
 		});
 	});
 

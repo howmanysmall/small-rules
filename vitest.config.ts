@@ -21,7 +21,6 @@ const configuration = defineConfig({
 				"documentation/**",
 				"src/index.ts",
 				"src/types/**/*.ts",
-				"src/utilities/create-rule.ts",
 				"src/utilities/prevent-abbreviations/types.ts",
 			],
 			include: ["src/**/*.ts"],

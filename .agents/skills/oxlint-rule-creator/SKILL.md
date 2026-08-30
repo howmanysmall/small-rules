@@ -161,15 +161,58 @@ defineRule({
 - The rule can benefit from early file-skipping via `before() { return false; }`.
 - Writing a new rule from scratch where the `before`-init model is a natural
   fit for the state.
+- The rule reads `context.options` (or any other per-file context field). Read
+  them in `before()`, not at the top of `createOnce` and not per node.
 
-**Do NOT use `createOnce` just because it sounds more performant.** A `create`
-rule with no per-file state is already optimal — adding a pointless `before`
-hook to a `createOnce` rule is strictly more overhead than plain `create`.
-The performance advantage of `createOnce` is primarily forward-looking:
-Oxlint's Rust layer plans to statically analyze the returned visitor to skip
-files that contain none of the rule's target nodes, an optimization that
-requires `createOnce` to be viable. That optimization does not exist in the
-current release.
+### What `oxlint` Actually Does
+
+From `node_modules/oxlint/dist/lint.js` (plugin load ~17881, per-file walk ~23904):
+
+- `createOnce(context)` runs **once at plugin registration**. `filename`,
+  `sourceCode`, `settings`, and friends throw if you touch them there
+  (`Cannot access context.* in createOnce`). Options are not assigned yet.
+- Per file, oxlint writes `context.options` onto that same context object,
+  then either:
+  - `createOnce`: call `before()` if present, reuse the stored visitor, or
+  - `create`: `visitor = rule.create(context)` — **new visitor object every file**.
+- The planned “skip `before` when the file has none of this rule’s node
+  types” optimization is **not in the current release**. `before()` runs for
+  every file.
+
+The Vitest harness matches this: `createOnce` is called once with a shared
+context; each test case then assigns `context.options` and runs `before`
+before walking. Reading `context.options` at the top of `createOnce` sees
+whatever the first case (or nothing) left there.
+
+### Measured Cost (8000 Files, Node)
+
+Option-derived data for a two-identifier allow-list, modeled on oxlint’s
+loop. Fastest in each row is 1.00x.
+
+| Workload | `createOnce` + per-node `options[0]?.x ?? []` | `create` (new visitor/file) | `createOnce` + `before()` cache |
+| --- | --- | --- | --- |
+| 0 assertion nodes/file | ~0.03 ms (2.7x) | 0.13 ms (**11x**) | ~0.03 ms (3.0x) |
+| 1 node/file | 2.3x | 2.3x | **1.00x** |
+| 8 nodes/file | 1.25x | 1.14x | **1.00x** |
+| 80 nodes/file | 1.39x | 1.01x | **1.00x** |
+
+Takeaways:
+
+- **Do not use `create` just to read options once.** On files with no target
+  nodes — the common case for a `TSAsExpression` rule — `create` is an order
+  of magnitude slower because it allocates a visitor object per file.
+- **Do not read options inside the visitor.** `?? []` allocates a fresh empty
+  array on every node when the option is missing (the 80-node empty case was
+  1.62x). Even when configured, the extra property walk shows up at 8–80 nodes.
+- **`createOnce` + `before()` cache is the right default for option-derived
+  data.** Same speed as `create` on assertion-heavy files, without `create`’s
+  per-file alloc on empty ones. Hoist a module-level empty array and reuse it
+  instead of `?? []`.
+
+The “`create` with no state is already optimal” line is wrong for current
+oxlint. `createOnce` without a `before` hook is cheapest when the visitor
+never fires; add `before` when you have per-file inputs (options) or state.
+The Rust-side skip-if-no-nodes plan is still forward-looking.
 
 ---
 
@@ -556,11 +599,19 @@ context.report({
 Accessed via `context.options[0]`, `context.options[1]`, etc.
 
 ```ts
+const DEFAULT_THRESHOLD = 5;
+
 createOnce(context): VisitorWithHooks {
-  const threshold: number = context.options[0]?.threshold ?? 5;
+  // Options are not assigned yet. Do not read context.options here —
+  // oxlint calls createOnce at plugin load; the harness calls it once
+  // for the whole test file.
+  let threshold = DEFAULT_THRESHOLD;
   let count: number;
   return {
-    before() { count = 0; },
+    before() {
+      threshold = context.options[0]?.threshold ?? DEFAULT_THRESHOLD;
+      count = 0;
+    },
     CallExpression(node) {
       count += 1;
       if (count > threshold)

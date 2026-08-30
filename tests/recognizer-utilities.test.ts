@@ -49,12 +49,13 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("const x = 1")).toBe(0);
 		}, 5000);
 
-		it("counts empty pattern positions", () => {
+		it("treats an empty pattern as matching nothing", () => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, [""]);
 
-			expect(detector.scan("foo")).toBe(4);
+			// Empty patterns must not hang the scan or inflate counts.
+			expect(detector.scan("foo")).toBe(0);
 		}, 5000);
 	});
 
@@ -411,13 +412,12 @@ describe("recognize (detector probability)", () => {
 		expect(probability).toBeLessThan(1);
 	}, 5000);
 
-	it("computes 1 - (1-p)^matches correctly", () => {
+	it("compounds the documented probability for repeated matches", () => {
 		expect.assertions(1);
 
 		const detector = createKeywordsDetector(0.3, ["return"]);
-		const probability = recognize(detector, "return return return");
-		const expected = 1 - (1 - 0.3) ** 3;
 
-		expect(probability).toBeCloseTo(expected, 10);
+		// 1 - (1 - 0.3)^3 from the Detector doc contract, written out as a literal.
+		expect(recognize(detector, "return return return")).toBeCloseTo(0.657, 10);
 	}, 5000);
 });

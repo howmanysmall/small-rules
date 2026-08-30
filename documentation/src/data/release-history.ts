@@ -14,12 +14,12 @@ interface ReleaseHistoryEntry {
 	readonly version: ReleaseVersion;
 }
 
-export interface ReleaseHistoryEmptyState {
+interface ReleaseHistoryEmptyState {
 	readonly githubReleasesUrl: string;
 	readonly message: string;
 }
 
-export const releaseHistoryEmptyState: ReleaseHistoryEmptyState = {
+const releaseHistoryEmptyState: ReleaseHistoryEmptyState = {
 	githubReleasesUrl: "https://github.com/howmanysmall/small-rules/releases",
 	message: "No release notes have been published yet.",
 };
