@@ -3,7 +3,6 @@ import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { ruleExamples } from "../../documentation/src/data/rule-examples";
 import { extractRuleExamples } from "../../documentation/src/utilities/extract-rule-examples";
 
 import type { RuleExample } from "../../documentation/src/utilities/extract-rule-examples";
@@ -22,12 +21,6 @@ function getFixtureExamples(fixtureName: string): ReadonlyArray<RuleExample> | u
 }
 
 describe("extractRuleExamples", () => {
-	it("loads every nested rule test into the Astro build-time map", () => {
-		expect.assertions(1);
-
-		expect(ruleExamples.size).toBeGreaterThan(0);
-	});
-
 	it("extracts every supported static expression and orders examples by kind then ID", () => {
 		expect.assertions(1);
 

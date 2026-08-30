@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import {
-	createReleaseHistory,
-	getReleaseContentEntry,
-	releaseHistoryEmptyState,
-} from "../../documentation/src/data/release-history";
+import { createReleaseHistory, getReleaseContentEntry } from "$data/release-history";
 
 describe("documentation release history", () => {
-	it("returns the documented empty state when no releases exist", () => {
+	// Catches an empty release list rendering a blank page instead of an
+	// explanation that points at the GitHub releases page.
+	it("renders an explanatory empty state pointing at GitHub releases when no releases exist", () => {
 		expect.assertions(1);
 
 		expect(createReleaseHistory([])).toStrictEqual({
-			emptyState: releaseHistoryEmptyState,
+			emptyState: {
+				githubReleasesUrl: "https://github.com/howmanysmall/small-rules/releases",
+				message: "No release notes have been published yet.",
+			},
 			entries: [],
 			kind: "empty",
 		});

@@ -27,13 +27,14 @@ describe("react utilities", () => {
 	});
 
 	it("returns standard React sources for the standard environment", () => {
-		expect.assertions(4);
+		expect.assertions(5);
 
 		const sources = getReactSources("standard");
 
 		expect(sources.has("react")).toBe(true);
 		expect(sources.has("react-dom")).toBe(true);
 		expect(sources.has("@rbxts/react")).toBe(false);
-		expect(getReactSourcesFromOptions({ environment: "standard" })).toBe(sources);
+		expect(getReactSourcesFromOptions({ environment: "standard" }).has("react")).toBe(true);
+		expect(getReactSourcesFromOptions({ environment: "standard" }).has("@rbxts/react")).toBe(false);
 	});
 });

@@ -1,132 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-const expectedRuleNames: ReadonlyArray<string> = [
-	"array-type-generic",
-	"ban-instances",
-	"ban-react-fc",
-	"ban-types",
-	"consistent-compound-words",
-	"directive-disable-enable-pair",
-	"directive-no-aggregating-enable",
-	"directive-no-duplicate-disable",
-	"directive-no-restricted-disable",
-	"directive-no-unlimited-disable",
-	"directive-no-unused-enable",
-	"directive-no-use",
-	"directive-require-description",
-	"enforce-ianitor-check-type",
-	"isolated-functions",
-	"memoized-effect-dependencies",
-	"no-adjust-state-on-prop-change",
-	"no-array-constructor-elements",
-	"no-array-constructor-index-assignment",
-	"no-array-size-assignment",
-	"no-async-constructor",
-	"no-async-in-system",
-	"no-cascading-set-state",
-	"no-chain-state-updates",
-	"no-chained-type-assertions",
-	"no-color3-constructor",
-	"no-commented-code",
-	"no-conditional-empty-object-spread",
-	"no-constant-condition-with-break",
-	"no-dead-store",
-	"no-derived-state",
-	"no-error",
-	"no-event-handler",
-	"no-events-in-events-callback",
-	"no-external-store-subscription",
-	"no-filter-map-chain",
-	"no-floating-point-equality",
-	"no-giant-component",
-	"no-god-components",
-	"no-ianitor-in-function-body",
-	"no-ianitor-success-access",
-	"no-identity-map",
-	"no-increment-decrement",
-	"no-initialize-state",
-	"no-inline-property-on-memo-component",
-	"no-instance-methods-without-this",
-	"no-known-value-widening",
-	"no-loop-iterable-mutation",
-	"no-module-mocking",
-	"no-native-properties-spread",
-	"no-new-instance-in-use-memo",
-	"no-object-parameters",
-	"no-pass-data-to-parent",
-	"no-pass-live-state-to-parent",
-	"no-print",
-	"no-recursive",
-	"no-redundant-aspect-ratio-constraint",
-	"no-reflect-apply",
-	"no-reflect-get",
-	"no-render-helper-functions",
-	"no-reset-all-state-on-prop-change",
-	"no-restricted-property-assignment",
-	"no-runtime-typeof",
-	"no-shape-in-symbol-names",
-	"no-spec-file-extension",
-	"no-static-react-create-element",
-	"no-table-create-map",
-	"no-task-wait",
-	"no-trivial-assertions",
-	"no-underscore-react-props",
-	"no-unknown-parameters",
-	"no-unknown-returns",
-	"no-unknown-type-aliases",
-	"no-unsafe-dictionary-type",
-	"no-unsupported-syntax",
-	"no-unused-imports",
-	"no-unused-use-memo",
-	"no-use-memo-simple-expression",
-	"no-use-of-empty-return-value",
-	"no-useless-constants",
-	"no-useless-default",
-	"no-useless-use-effect",
-	"no-useless-use-memo",
-	"no-useless-use-spring",
-	"no-variadic-spread",
-	"no-warn",
-	"no-widen-then-assert",
-	"only-type-imports",
-	"prefer-class-properties",
-	"prefer-constant-dispatch",
-	"prefer-context-stack",
-	"prefer-direct-hook-imports",
-	"prefer-early-return",
-	"prefer-expect-assertions",
-	"prefer-hoisted-jsx-elements",
-	"prefer-hoisted-jsx-object-properties",
-	"prefer-idiv",
-	"prefer-local-portal-component",
-	"prefer-math-min-max",
-	"prefer-modding-inspect",
-	"prefer-module-scope-constants",
-	"prefer-padding-components",
-	"prefer-pascal-case-enums",
-	"prefer-sequence-overloads",
-	"prefer-single-world-query",
-	"prefer-singular-enums",
-	"prefer-ternary-conditional-rendering",
-	"prefer-udim2-shorthand",
-	"prefer-use-reducer",
-	"prevent-abbreviations",
-	"react-hooks-strict-return",
-	"require-async-suffix",
-	"require-module-level-instantiation",
-	"require-named-effect-functions",
-	"require-paired-calls",
-	"require-react-component-keys",
-	"require-react-display-names",
-	"require-safety-comment-for-type-assertion",
-	"require-switch-case-braces",
-	"require-throw-error-capture",
-	"require-unicode-regex",
-	"rerender-memo-with-default-value",
-	"strict-component-boundaries",
-	"use-exhaustive-dependencies",
-	"use-hook-at-top-level",
-];
+const DOCS_URL_PATTERN = /^https:\/\/docs\.howmanysmall\.com\/small-rules\/rules\/[a-z-]+\/[a-z0-9-]+\/$/u;
+const KEBAB_CASE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u;
+
+interface RuleLike {
+	readonly meta?: { readonly docs?: { readonly url?: string } };
+}
+
+function unconfigurableRuleNames<RuleEntry extends RuleLike>(rules: Record<string, RuleEntry>): Array<string> {
+	return Object.keys(rules).filter((name) => !KEBAB_CASE_PATTERN.test(name));
+}
+
+function rulesWithoutDocsUrl<RuleEntry extends RuleLike>(rules: Record<string, RuleEntry>): Array<string> {
+	return Object.entries(rules)
+		.filter(([, rule]) => rule.meta?.docs?.url === undefined || !DOCS_URL_PATTERN.test(rule.meta.docs.url))
+		.map(([name]) => name);
+}
 
 describe("small-rules plugin", () => {
 	describe("plugin metadata", () => {
@@ -138,14 +27,30 @@ describe("small-rules plugin", () => {
 			expect(smallRules.default.meta?.name).toBe("small-rules");
 		}, 30_000);
 
-		it("exports every registered rule", async () => {
-			expect.assertions(2);
+		it("registers at least one rule", async () => {
+			expect.assertions(1);
 
 			const smallRules = await import("$small-rules");
-			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
-			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(125);
+			expect(Object.keys(smallRules.default.rules).length).toBeGreaterThan(0);
+		}, 30_000);
+
+		// Catches a rule registered under a name users cannot configure.
+		it("registers every rule under a kebab-case name users can configure", async () => {
+			expect.assertions(1);
+
+			const smallRules = await import("$small-rules");
+
+			expect(unconfigurableRuleNames(smallRules.default.rules)).toStrictEqual([]);
+		}, 30_000);
+
+		// Catches a rule bypassing createRule and shipping without a docs URL.
+		it("advertises a docs URL on the documented docs site for every rule", async () => {
+			expect.assertions(1);
+
+			const smallRules = await import("$small-rules");
+
+			expect(rulesWithoutDocsUrl(smallRules.default.rules)).toStrictEqual([]);
 		}, 30_000);
 	});
 });

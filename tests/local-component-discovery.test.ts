@@ -8,6 +8,7 @@ import {
 	addLocalComponentImportIdentifiers,
 	discoverLocalComponent,
 	inspectRelativeLocalComponentImport,
+	MAX_REGEX_CACHE_SIZE,
 } from "$oxc-utilities/local-component-discovery";
 
 import { createRuleTester } from "./rule-testers";
@@ -509,7 +510,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const filename = nodePath.join(project, "src", "screen.tsx");
 
 		// Act
-		for (let index = 0; index < 70; index += 1) {
+		for (let index = 0; index < MAX_REGEX_CACHE_SIZE + 6; index += 1) {
 			inspectRelativeLocalComponentImport(
 				// @ts-expect-error -- Minimal ESTree shape for the public
 				// utility contract

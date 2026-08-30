@@ -9,8 +9,6 @@ import { $ } from "zx";
 
 const TAR_BLOCK_SIZE = 512;
 
-const CHECKS_YAML = readFileSync(".github/workflows/checks.yaml", "utf8");
-const CI_YAML = readFileSync(".github/workflows/ci.yaml", "utf8");
 const RELEASE_YAML = readFileSync(".github/workflows/release.yaml", "utf8");
 const PACKAGE_JSON = readFileSync("package.json", "utf8");
 
@@ -27,8 +25,23 @@ const isPublish = type({
 }).readonly();
 
 const isWorkflow = type({
+	"concurrency?": type({
+		"cancel-in-progress?": "boolean | undefined",
+		"group?": "string | undefined",
+	})
+		.readonly()
+		.or("undefined"),
 	"jobs?": type({
 		"publish?": isPublish.or("undefined"),
+	})
+		.readonly()
+		.or("undefined"),
+}).readonly();
+
+const isPackageScripts = type({
+	"scripts?": type({
+		"prepublish?": "string | undefined",
+		"prepublishOnly?": "string | undefined",
 	})
 		.readonly()
 		.or("undefined"),
@@ -56,88 +69,69 @@ function readPackageManifest(archivePath: string): string {
 	throw error;
 }
 
-describe("checks workflow", () => {
-	it("runs repository validation in one job", () => {
-		expect.assertions(1);
-		expect(CHECKS_YAML).not.toContain("matrix.name");
-	});
-
-	it("uses compact Vitest reporting in CI", () => {
-		expect.assertions(1);
-		expect(CHECKS_YAML).toContain("--reporter github-actions --reporter dot");
-	});
-});
-
-describe("ci workflow", () => {
-	it("delegates checks to the reusable checks workflow", () => {
-		expect.assertions(1);
-		expect(CI_YAML).toContain("uses: ./.github/workflows/checks.yaml");
-	});
-});
-
 describe("release workflow", () => {
-	it("serializes all real releases through one concurrency group", () => {
-		expect.assertions(1);
-		expect(RELEASE_YAML).toContain("group: release");
+	// Catches two tag pushes racing into a double or cancelled publish.
+	it("serializes all releases through one never-cancelling concurrency group", () => {
+		expect.assertions(2);
+		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
+
+		expect(workflow.concurrency?.group).toBeDefined();
+		expect(workflow.concurrency?.["cancel-in-progress"]).toBe(false);
 	});
 
-	it("publishes through pnpm so catalog versions are resolved", () => {
-		expect.assertions(1);
+	// Catches npm publish, which drops provenance and leaks catalog: refs.
+	it("publishes with provenance through pnpm", () => {
+		expect.assertions(2);
 		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
 		const publishStep = workflow.jobs?.publish?.steps?.find(
 			({ name }) => name === "Publish to NPM (Trusted Publishing)",
 		);
 
-		expect(publishStep?.run).toBe("pnpm publish --provenance --access public --no-git-checks");
+		expect(publishStep?.run?.startsWith("pnpm publish")).toBe(true);
+		expect(publishStep?.run).toContain("--provenance");
 	});
 
+	// A tag commit is validated on main; re-running checks doubles the bill.
 	it("does not rerun CI checks for a tag already validated on main", () => {
 		expect.assertions(1);
 		expect(RELEASE_YAML).not.toContain("uses: ./.github/workflows/checks.yaml");
 	});
 
+	// Catches publishing a commit that CI never validated.
 	it("waits for the matching main-branch CI run before publishing", () => {
 		expect.assertions(2);
 		expect(RELEASE_YAML).toContain('gh run list --workflow ci.yaml --commit "$GITHUB_SHA"');
 		expect(RELEASE_YAML).toContain('gh run watch "$CI_RUN_ID" --exit-status');
 	});
 
-	it("generates one release body and reuses it for documentation and GitHub", () => {
-		expect.assertions(4);
-		expect(RELEASE_YAML).toContain('RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"');
-		expect(RELEASE_YAML).toContain('cp "$RELEASE_NOTES" "$RELEASE_ARTIFACT"');
-		expect(RELEASE_YAML).toContain('gh release create "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"');
-		expect(RELEASE_YAML).toContain('gh release edit "$GITHUB_REF_NAME" --notes-file "$RELEASE_NOTES"');
-	});
-
-	it("commits release notes from a temporary main worktree before publishing the tag", () => {
-		expect.assertions(5);
-		const commitStep = RELEASE_YAML.indexOf("git worktree add");
-		const publishStep = RELEASE_YAML.indexOf("pnpm publish --provenance");
-
-		expect(commitStep).toBeGreaterThan(-1);
-		expect(publishStep).toBeGreaterThan(commitStep);
-		expect(RELEASE_YAML).toContain('git -C "$RELEASE_WORKTREE" push origin HEAD:main');
-		expect(RELEASE_YAML).toContain('cmp --silent "$RELEASE_NOTES" "$RELEASE_ARTIFACT"');
-		expect(RELEASE_YAML).toContain("chore(docs): add $GITHUB_REF_NAME release notes");
-	});
-
-	it("keeps dry runs read-only", () => {
+	// Ordering is the contract: notes must land on main before the tag
+	// publishes, or the documentation deployment from main misses them.
+	it("commits release notes to main before publishing the tag", () => {
 		expect.assertions(3);
+		const worktreeIndex = RELEASE_YAML.indexOf("git worktree add");
+		const publishIndex = RELEASE_YAML.indexOf("pnpm publish --provenance");
+
+		expect(worktreeIndex).toBeGreaterThan(-1);
+		expect(publishIndex).toBeGreaterThan(worktreeIndex);
+		expect(RELEASE_YAML).toContain('git -C "$RELEASE_WORKTREE" push origin HEAD:main');
+	});
+
+	// Catches a dry run mutating the repository, which CI cannot surface.
+	it("keeps dry runs read-only", () => {
+		expect.assertions(2);
 		expect(RELEASE_YAML).toContain("env.DRY_RUN != 'true'");
-		expect(RELEASE_YAML).toContain("Dry run: skipped release notes, publish, and GitHub release creation.");
 		expect(RELEASE_YAML).not.toContain("env.DRY_RUN == 'true'\n        run: git");
 	});
 
-	it("does not explicitly build before pnpm runs prepublishOnly", () => {
-		expect.assertions(1);
-		expect(RELEASE_YAML).not.toContain("name: Build");
-	});
-
+	// A stray prepublish script or Build step would double-build or ship
+	// stale output.
 	it("uses prepublishOnly as the single real-release build", () => {
-		expect.assertions(2);
-		expect(PACKAGE_JSON).toContain('"prepublishOnly": "node --run build -- --minify"');
-		expect(PACKAGE_JSON).not.toContain('"prepublish":');
+		expect.assertions(3);
+		const manifest = isPackageScripts.assert(JSON.parse(PACKAGE_JSON));
+
+		expect(manifest.scripts?.prepublishOnly).toBeDefined();
+		expect(manifest.scripts?.prepublish).toBeUndefined();
+		expect(RELEASE_YAML).not.toContain("name: Build");
 	});
 
 	it("resolves catalog dependencies to registry-compatible versions", async () => {

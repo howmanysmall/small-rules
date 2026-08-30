@@ -155,13 +155,18 @@ describe("classifyUnsafeDictionary", () => {
 		}
 	});
 
-	it("terminates on recursive alias cycles", () => {
+	// Catches a recursive alias hanging or silently exempting an
+	// unknown-valued dictionary. Completion proves termination.
+	it("classifies a dictionary whose value type is a self-referential union and terminates", () => {
 		expect.assertions(1);
 
 		const fixture = setup("type Cycle = Cycle | unknown; type A = Record<string, Cycle>;");
 		const recordReference = getNthTypeReference(fixture.source, 1);
 
-		expect(() => classifyUnsafeDictionary(recordReference, fixture.environment)).not.toThrow();
+		expect(classifyUnsafeDictionary(recordReference, fixture.environment)).toStrictEqual({
+			kind: "unsafe-dictionary",
+			unsafeValue: "union",
+		});
 	});
 });
 

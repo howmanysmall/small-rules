@@ -62,7 +62,7 @@ function escapeRegExp(value: string): string {
 	return value.replaceAll(REGEXP_REGEXP, AND);
 }
 
-const MAX_REGEX_CACHE_SIZE = 64;
+export const MAX_REGEX_CACHE_SIZE = 64;
 const regexCache = new Map<string, RegExp>();
 
 function ensureUnicodeFlag(flags: string): string {
