@@ -8,6 +8,7 @@ const configuration: KnipConfig = {
 	workspaces: {
 		".": {
 			entry: ["src/reset.d.ts!", "*.config.ts", "tests/**/*.fuzz.ts"],
+			ignoreExportsUsedInFile: true,
 			project: ["src/**/*.{ts,tsx}!", "tests/**/*.{ts,tsx}", "*.config.ts"],
 		},
 		".omp": {
