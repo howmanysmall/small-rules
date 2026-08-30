@@ -5,10 +5,10 @@ const configuration: KnipConfig = {
 	ignoreBinaries: ["hk", "nlx", "nr", "xdg-open"],
 	ignoreDependencies: ["@fast-check/vitest", "fast-check", "sfw", "oxlint-plugin-*", "file:"],
 	ignoreFiles: ["tests/fixtures/**"],
+	tags: ["-knipignore"],
 	workspaces: {
 		".": {
 			entry: ["src/reset.d.ts!", "*.config.ts", "tests/**/*.fuzz.ts"],
-			ignoreExportsUsedInFile: true,
 			project: ["src/**/*.{ts,tsx}!", "tests/**/*.{ts,tsx}", "*.config.ts"],
 		},
 		".omp": {
