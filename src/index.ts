@@ -257,4 +257,5 @@ const smallRules = definePlugin({
 	},
 });
 
+export { DependencyMode } from "$oxc-rules/react/no-useless-use-memo";
 export default smallRules;

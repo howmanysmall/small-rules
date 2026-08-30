@@ -45,6 +45,8 @@ type CFrameCanonicalValue = readonly [
 	r22: CanonicalNumericComponent,
 ];
 
+// oxlint-disable-next-line jsdoc/empty-tags -- worthless rule.
+/** @internal Exported only because it appears in `isDefaultValue`'s signature; not part of the published surface. */
 export type CanonicalValue =
 	| { readonly enumType: string; readonly type: "Enum"; readonly value: string }
 	| { readonly type: "bool"; readonly value: boolean }
