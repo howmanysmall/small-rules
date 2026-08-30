@@ -34,9 +34,7 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 				if (checks.labels) context.report({ messageId: "label", node });
 			},
 			Literal(node) {
-				if (checks.regexLiterals && "regex" in node) {
-					context.report({ messageId: "regexLiteral", node });
-				}
+				if (checks.regexLiterals && "regex" in node) context.report({ messageId: "regexLiteral", node });
 			},
 			MemberExpression(node) {
 				if (
@@ -106,9 +104,8 @@ function reportRestElements(
 	members: ReadonlyArray<ESTree.Node | null>,
 ): void {
 	for (const member of members) {
-		if (member?.type === "RestElement") {
-			context.report({ messageId: "spreadDestructuring", node: member });
-		}
+		if (member?.type !== "RestElement") continue;
+		context.report({ messageId: "spreadDestructuring", node: member });
 	}
 }
 
