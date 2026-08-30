@@ -116,7 +116,6 @@
 		"eslint-plugin-sonarjs": "catalog:lint",
 		"eslint-plugin-unused-imports": "catalog:lint",
 		"fast-check": "catalog:test",
-		"get-tsconfig": "catalog:tooling",
 		"jiti": "catalog:tooling",
 		"jscpd": "catalog:tooling",
 		"knip": "catalog:lint",

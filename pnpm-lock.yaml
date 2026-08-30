@@ -233,9 +233,6 @@ catalogs:
     '@opencode-ai/plugin':
       specifier: 0.0.0-beta-17519
       version: 0.0.0-beta-17519
-    get-tsconfig:
-      specifier: 4.14.3
-      version: 4.14.3
     jiti:
       specifier: 2.7.0
       version: 2.7.0
@@ -412,9 +409,6 @@ importers:
       fast-check:
         specifier: catalog:test
         version: 4.9.0
-      get-tsconfig:
-        specifier: catalog:tooling
-        version: 4.14.3
       jiti:
         specifier: catalog:tooling
         version: 2.7.0
@@ -12666,8 +12660,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.65.0(@typescript/typescript6@6.0.2)(supports-color@10.2.2)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.65.0(@typescript/typescript6@6.0.2)
-      '@typescript-eslint/types': 8.65.0
+      '@typescript-eslint/tsconfig-utils': 8.67.0(@typescript/typescript6@6.0.2)
+      '@typescript-eslint/types': 8.67.0
       debug: 4.4.3(supports-color@10.2.2)
       typescript: '@typescript/typescript6@6.0.2'
     transitivePeerDependencies:
@@ -18181,7 +18175,6 @@ time:
   eslint@10.8.0: '2026-07-24T20:15:20.693Z'
   fast-check@4.9.0: '2026-07-08T21:33:03.026Z'
   fdir@6.5.0: '2025-08-14T16:56:03.948Z'
-  get-tsconfig@4.14.3: '2026-08-17T12:23:09.262Z'
   ignore@7.0.6: '2026-07-10T12:42:51.502Z'
   jiti@2.7.0: '2026-05-05T21:02:47.918Z'
   jscpd@5.0.16: '2026-08-18T07:10:18.237Z'
