@@ -13,6 +13,7 @@
 			"$small-rules": ["../src/index.ts"],
 
 			"$assets/*": ["./src/assets/*"],
+			"$classes/*": ["./src/classes/*"],
 			"$components/*": ["./src/components/*"],
 			"$content/*": ["./src/content/*"],
 			"$data/*": ["./src/data/*"],

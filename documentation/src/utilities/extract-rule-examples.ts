@@ -2,6 +2,8 @@ import { Predicate } from "effect";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
 
+import { ExtractionError } from "$classes/extraction-error";
+
 import type {
 	ArrayExpression,
 	CallExpression,
@@ -13,6 +15,8 @@ import type {
 	PropertyKey,
 	TemplateLiteral,
 } from "yuku-parser";
+
+import type { ExtractionContext } from "$classes/extraction-error";
 
 type StaticValue =
 	| boolean
@@ -26,11 +30,6 @@ type StaticObject = Record<string, StaticValue>;
 interface DocumentationMetadata {
 	readonly id: string;
 	readonly title: string;
-}
-
-interface SourcePosition {
-	readonly column: number;
-	readonly line: number;
 }
 
 export interface RuleExample {
@@ -51,11 +50,6 @@ export interface RuleExample {
 export interface ExtractedRuleExamples {
 	readonly examples: ReadonlyArray<RuleExample>;
 	readonly ruleName: string;
-}
-
-interface ExtractionContext {
-	readonly relativePath: string;
-	readonly sourceText: string;
 }
 
 interface ObjectField {
@@ -85,11 +79,15 @@ const CASE_FIELD_NAMES = new Set([
 const RUNNER_NAMES = new Set(["js", "jsx", "ts", "tsx"]);
 
 export function extractRuleExamples(sourceText: string, relativePath: string): ReadonlyArray<ExtractedRuleExamples> {
-	const context = { relativePath, sourceText };
+	const extractionContext = { relativePath, sourceText } satisfies ExtractionContext;
 	const parsed = parse(sourceText, { lang: "ts", sourceType: "module" });
 	const [firstDiagnostic] = parsed.diagnostics;
 	if (firstDiagnostic !== undefined) {
-		throwExtractionError(context, firstDiagnostic.start, `failed to parse source: ${firstDiagnostic.message}`);
+		throw new ExtractionError(
+			extractionContext,
+			firstDiagnostic.start,
+			`failed to parse source: ${firstDiagnostic.message}`,
+		);
 	}
 
 	const examplesByRuleName = new Map<string, Array<RuleExample>>();
@@ -98,10 +96,17 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 		CallExpression(node) {
 			const invocation = getRuleRunnerInvocation(node);
 			if (invocation === undefined) return;
+
 			const idOffsets = idOffsetsByRuleName.get(invocation.ruleName) ?? new Map<string, number>();
 			idOffsetsByRuleName.set(invocation.ruleName, idOffsets);
-			const examples = extractInvocationExamples(invocation.cases, invocation.language, context, idOffsets);
+			const examples = extractInvocationExamples(
+				invocation.cases,
+				invocation.language,
+				extractionContext,
+				idOffsets,
+			);
 			if (examples.length === 0) return;
+
 			const existingExamples = examplesByRuleName.get(invocation.ruleName);
 			if (existingExamples === undefined) examplesByRuleName.set(invocation.ruleName, examples);
 			else for (const example of examples) existingExamples.push(example);
@@ -114,9 +119,13 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 	})).toSorted((left, right) => left.ruleName.localeCompare(right.ruleName));
 }
 
-function getRuleRunnerInvocation(
-	node: CallExpression,
-): undefined | { readonly cases: ObjectExpression; readonly language: string; readonly ruleName: string } {
+interface RunnerInvocation {
+	readonly cases: ObjectExpression;
+	readonly language: string;
+	readonly ruleName: string;
+}
+
+function getRuleRunnerInvocation(node: CallExpression): RunnerInvocation | undefined {
 	if (!isRuleRunner(node.callee)) return undefined;
 
 	const [ruleNameNode, , casesNode] = node.arguments;
@@ -140,20 +149,24 @@ function isRuleRunner(callee: Expression): boolean {
 function extractInvocationExamples(
 	cases: ObjectExpression,
 	runnerLanguage: string,
-	context: ExtractionContext,
+	extractionContext: ExtractionContext,
 	idOffsets: Map<string, number>,
 ): Array<RuleExample> {
 	const examples = new Array<RuleExample>();
-	for (const caseArray of getCaseArrays(cases, context)) {
+	for (const caseArray of getCaseArrays(cases, extractionContext)) {
 		for (const element of caseArray.cases.elements) {
 			if (element?.type !== "ObjectExpression") continue;
 
-			const example = extractCaseExample(element, caseArray.kind, runnerLanguage, context);
+			const example = extractCaseExample(element, caseArray.kind, runnerLanguage, extractionContext);
 			if (example === undefined) continue;
 
 			const idOffset = getDocumentationIdOffset(element);
 			if (idOffsets.has(example.id)) {
-				throwExtractionError(context, idOffset, `duplicate documentation example ID "${example.id}".`);
+				throw new ExtractionError(
+					extractionContext,
+					idOffset,
+					`duplicate documentation example ID "${example.id}".`,
+				);
 			}
 
 			idOffsets.set(example.id, idOffset);
@@ -177,23 +190,31 @@ function extractCaseExample(
 	testCase: ObjectExpression,
 	kind: "invalid" | "valid",
 	runnerLanguage: string,
-	context: ExtractionContext,
+	extractionContext: ExtractionContext,
 ): RuleExample | undefined {
 	const documentationValue = findField(testCase, "documentation")?.property.value;
 	if (documentationValue?.type !== "ObjectExpression") return undefined;
 
-	const fields = getObjectFields(testCase, context);
+	const fields = getObjectFields(testCase, extractionContext);
 	for (const field of fields) {
 		if (!CASE_FIELD_NAMES.has(field.key)) {
-			throwExtractionError(context, field.property.start, `unknown field "${field.key}" in documented case.`);
+			throw new ExtractionError(
+				extractionContext,
+				field.property.start,
+				`unknown field "${field.key}" in documented case.`,
+			);
 		}
 		if (field.key === "only" || field.key === "skip") {
-			throwExtractionError(context, field.property.start, `documented cases cannot use ${field.key}.`);
+			throw new ExtractionError(
+				extractionContext,
+				field.property.start,
+				`documented cases cannot use ${field.key}.`,
+			);
 		}
 	}
 
-	const documentation = evaluateDocumentation(documentationValue, context);
-	const code = evaluateRequiredString(fields, "code", context);
+	const documentation = evaluateDocumentation(documentationValue, extractionContext);
+	const code = evaluateRequiredString(fields, "code", extractionContext);
 	const example: RuleExample = {
 		id: documentation.id,
 		code,
@@ -203,10 +224,14 @@ function extractCaseExample(
 	};
 	for (const field of fields) {
 		if (field.key === "documentation" || field.key === "code") continue;
-		const value = evaluateStatic(field.property.value, context);
+		const value = evaluateStatic(field.property.value, extractionContext);
 		if (field.key === "filename" || field.key === "language" || field.key === "sourceType") {
 			if (!Predicate.isString(value)) {
-				throwExtractionError(context, field.property.value.start, `${field.key} must evaluate to a string.`);
+				throw new ExtractionError(
+					extractionContext,
+					field.property.value.start,
+					`${field.key} must evaluate to a string.`,
+				);
 			}
 			Object.assign(example, { [field.key]: value });
 		} else Object.assign(example, { [field.key]: value });
@@ -214,16 +239,20 @@ function extractCaseExample(
 	return example;
 }
 
-function evaluateDocumentation(value: Expression, context: ExtractionContext): DocumentationMetadata {
+function evaluateDocumentation(value: Expression, extractionContext: ExtractionContext): DocumentationMetadata {
 	if (value.type !== "ObjectExpression") {
-		throwExtractionError(context, value.start, "documentation must be an object with id and title.");
+		throw new ExtractionError(extractionContext, value.start, "documentation must be an object with id and title.");
 	}
-	const fields = getObjectFields(value, context);
-	const id = evaluateRequiredString(fields, "id", context, "documentation.");
-	const title = evaluateRequiredString(fields, "title", context, "documentation.");
+	const fields = getObjectFields(value, extractionContext);
+	const id = evaluateRequiredString(fields, "id", extractionContext, "documentation.");
+	const title = evaluateRequiredString(fields, "title", extractionContext, "documentation.");
 	for (const field of fields) {
 		if (field.key !== "id" && field.key !== "title") {
-			throwExtractionError(context, field.property.start, "documentation only supports id and title.");
+			throw new ExtractionError(
+				extractionContext,
+				field.property.start,
+				"documentation only supports id and title.",
+			);
 		}
 	}
 	return { id, title };
@@ -236,10 +265,10 @@ function evaluateRequiredString(
 	prefix = "",
 ): string {
 	const field = fields.find((candidate) => candidate.key === name);
-	if (field === undefined) throwExtractionError(context, 0, `${prefix}${name} is required.`);
+	if (field === undefined) throw new ExtractionError(context, 0, `${prefix}${name} is required.`);
 	const value = evaluateStatic(field.property.value, context);
 	if (!Predicate.isString(value)) {
-		throwExtractionError(context, field.property.value.start, `${prefix}${name} must evaluate to a string.`);
+		throw new ExtractionError(context, field.property.value.start, `${prefix}${name} must evaluate to a string.`);
 	}
 	return value;
 }
@@ -249,11 +278,17 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 	let size = 0;
 	for (const property of object.properties) {
 		if (property.type === "SpreadElement") {
-			throwExtractionError(context, property.start, "spread properties are not supported.");
+			throw new ExtractionError(context, property.start, "spread properties are not supported.");
 		}
-		if (property.computed) throwExtractionError(context, property.start, "computed object keys are not supported.");
+		if (property.computed) {
+			throw new ExtractionError(context, property.start, "computed object keys are not supported.");
+		}
 		if (property.kind !== "init" || property.method) {
-			throwExtractionError(context, property.start, "object methods, getters, and setters are not supported.");
+			throw new ExtractionError(
+				context,
+				property.start,
+				"object methods, getters, and setters are not supported.",
+			);
 		}
 		fields[size++] = { key: getStaticKey(property.key, context), property };
 	}
@@ -278,7 +313,7 @@ function getDocumentationIdOffset(testCase: ObjectExpression): number {
 function getStaticKey(key: PropertyKey, context: ExtractionContext): string {
 	if (key.type === "Identifier") return key.name;
 	if (isStringLiteral(key)) return key.value;
-	return throwExtractionError(context, key.start, "object keys must be static strings.");
+	throw new ExtractionError(context, key.start, "object keys must be static strings.");
 }
 
 function evaluateStatic(node: Expression, context: ExtractionContext): StaticValue {
@@ -291,11 +326,11 @@ function evaluateStatic(node: Expression, context: ExtractionContext): StaticVal
 	if (node.type === "ObjectExpression") return evaluateObject(node, context);
 	if (node.type === "CallExpression" && isStringJoin(node)) return evaluateStringJoin(node, context);
 	if (node.type === "Identifier") {
-		throwExtractionError(context, node.start, "identifier references are not supported.");
+		throw new ExtractionError(context, node.start, "identifier references are not supported.");
 	} else if (node.type === "CallExpression") {
-		throwExtractionError(context, node.start, "function calls are not supported.");
+		throw new ExtractionError(context, node.start, "function calls are not supported.");
 	}
-	return throwExtractionError(context, node.start, `${node.type} values are not supported.`);
+	throw new ExtractionError(context, node.start, `${node.type} values are not supported.`);
 }
 
 function isStaticLiteral(node: Expression): node is Literal & { readonly value: boolean | null | number | string } {
@@ -314,9 +349,13 @@ function isStringLiteral(node?: Node): node is Literal & { readonly value: strin
 	return node?.type === "Literal" && typeof node.value === "string";
 }
 
-function evaluateTemplate(template: TemplateLiteral, context: ExtractionContext): string {
+function evaluateTemplate(template: TemplateLiteral, extractionContext: ExtractionContext): string {
 	if (template.expressions.length > 0) {
-		throwExtractionError(context, template.start, "interpolated template literals are not supported.");
+		throw new ExtractionError(
+			extractionContext,
+			template.start,
+			"interpolated template literals are not supported.",
+		);
 	}
 	return template.quasis.map((quasi) => quasi.value.cooked).join("");
 }
@@ -332,22 +371,27 @@ function isStringRawTag(tag: Expression): boolean {
 	);
 }
 
-function evaluateArray(array: ArrayExpression, context: ExtractionContext): ReadonlyArray<StaticValue> {
+function evaluateArray(array: ArrayExpression, extractionContext: ExtractionContext): ReadonlyArray<StaticValue> {
 	const values = new Array<StaticValue>();
 	let size = 0;
 	for (const element of array.elements) {
-		if (element === null) throwExtractionError(context, array.start, "array holes are not supported.");
-		if (element.type === "SpreadElement") {
-			throwExtractionError(context, element.start, "array spreads are not supported.");
+		if (element === null) {
+			throw new ExtractionError(extractionContext, array.start, "array holes are not supported.");
 		}
-		values[size++] = evaluateStatic(element, context);
+		if (element.type === "SpreadElement") {
+			throw new ExtractionError(extractionContext, element.start, "array spreads are not supported.");
+		}
+		values[size++] = evaluateStatic(element, extractionContext);
 	}
 	return values;
 }
 
-function evaluateObject(object: ObjectExpression, context: ExtractionContext): StaticObject {
+function evaluateObject(object: ObjectExpression, extractionContext: ExtractionContext): StaticObject {
 	return Object.fromEntries(
-		getObjectFields(object, context).map((field) => [field.key, evaluateStatic(field.property.value, context)]),
+		getObjectFields(object, extractionContext).map((field) => [
+			field.key,
+			evaluateStatic(field.property.value, extractionContext),
+		]),
 	);
 }
 
@@ -365,13 +409,17 @@ function isStringJoin(node: CallExpression): boolean {
 	);
 }
 
-function evaluateStringJoin(node: CallExpression, context: ExtractionContext): string {
+function evaluateStringJoin(node: CallExpression, extractionContext: ExtractionContext): string {
 	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "ArrayExpression") {
-		throwExtractionError(context, node.start, "function calls are not supported.");
+		throw new ExtractionError(extractionContext, node.start, "function calls are not supported.");
 	}
-	const values = evaluateArray(node.callee.object, context);
+	const values = evaluateArray(node.callee.object, extractionContext);
 	if (values.some((value) => !Predicate.isString(value))) {
-		throwExtractionError(context, node.callee.object.start, "join arrays must contain only strings.");
+		throw new ExtractionError(
+			extractionContext,
+			node.callee.object.start,
+			"join arrays must contain only strings.",
+		);
 	}
 	// oxlint-disable-next-line typescript/no-base-to-string -- i hate.
 	return values.join("\n");
@@ -379,17 +427,4 @@ function evaluateStringJoin(node: CallExpression, context: ExtractionContext): s
 
 function orderExamples(examples: ReadonlyArray<RuleExample>): Array<RuleExample> {
 	return examples.toSorted((left, right) => left.kind.localeCompare(right.kind) || left.id.localeCompare(right.id));
-}
-
-function throwExtractionError(context: ExtractionContext, offset: number, reason: string): never {
-	const position = getSourcePosition(context.sourceText, offset);
-	const error = new Error(`${context.relativePath}:${position.line}:${position.column}: ${reason}`);
-	Error.captureStackTrace(error, throwExtractionError);
-	throw error;
-}
-
-function getSourcePosition(sourceText: string, offset: number): SourcePosition {
-	const prefix = Buffer.from(sourceText).subarray(0, offset).toString("utf8");
-	const lastLineBreak = prefix.lastIndexOf("\n");
-	return { column: prefix.length - lastLineBreak, line: prefix.split("\n").length };
 }

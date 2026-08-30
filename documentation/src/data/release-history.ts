@@ -1,3 +1,7 @@
+import { regex } from "arktype";
+
+import { ReleaseFilenameError } from "$classes/release-filename-error";
+
 interface ReleaseVersion {
 	readonly major: number;
 	readonly minor: number;
@@ -40,29 +44,20 @@ export interface ReleaseContentEntry {
 
 interface CollectionReleaseEntry {
 	readonly id: string;
-	readonly body?: string;
-	readonly filePath?: string;
+	readonly body?: string | undefined;
+	readonly filePath?: string | undefined;
 }
 
-const releaseVersionPattern = /^v(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)$/u;
-const pathSeparatorPattern = /[\\/]/u;
-
-function createReleaseFilenameError(id: string): Error {
-	const error = new Error(`Release filename "${id}" must use the v<major>.<minor>.<patch>.md format.`);
-	Error.captureStackTrace(error, createReleaseFilenameError);
-	return error;
-}
+// oxlint-disable-next-line unicorn/prefer-string-raw -- ArkType regex feature
+const RELEASE_VERSION_REGEXP = regex("^v(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$", "u");
+const PATH_SEPARATOR_REGEXP = /[\\/]/u;
 
 function parseReleaseVersion(id: string): ReleaseVersion {
-	const match = releaseVersionPattern.exec(id);
+	const match = RELEASE_VERSION_REGEXP.exec(id);
 	const groups = match?.groups;
-	if (groups === undefined) throw createReleaseFilenameError(id);
+	if (groups === undefined) throw new ReleaseFilenameError(id);
 
 	const { major, minor, patch } = groups;
-	if (major === undefined || minor === undefined || patch === undefined) {
-		throw createReleaseFilenameError(id);
-	}
-
 	return { major: Number(major), minor: Number(minor), patch: Number(patch), tag: id };
 }
 
@@ -73,16 +68,13 @@ function createReleaseHistoryEntry(entry: ReleaseContentEntry): ReleaseHistoryEn
 function getReleaseId(entry: CollectionReleaseEntry): string {
 	if (entry.filePath === undefined) return entry.id;
 
-	const filename = entry.filePath.split(pathSeparatorPattern).at(-1);
+	const filename = entry.filePath.split(PATH_SEPARATOR_REGEXP).at(-1);
 	return filename?.endsWith(".md") === true ? filename.slice(0, -3) : entry.id;
 }
 
 export function getReleaseContentEntry(entry: CollectionReleaseEntry): ReleaseContentEntry {
 	if (entry.body !== undefined) return { id: getReleaseId(entry), body: entry.body };
-
-	const error = new Error(`Release "${entry.id}" is missing its Markdown body.`);
-	Error.captureStackTrace(error, getReleaseContentEntry);
-	throw error;
+	throw new Error(`Release "${entry.id}" is missing its Markdown body.`);
 }
 
 function compareReleaseHistoryEntries(left: ReleaseHistoryEntry, right: ReleaseHistoryEntry): number {

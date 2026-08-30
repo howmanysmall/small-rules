@@ -153,10 +153,10 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 	return newness;
 }
 
-function runGit(arguments_: ReadonlyArray<string>): string {
+function runGit(parameters: ReadonlyArray<string>): string {
 	// sonar(no-os-command-from-path): git is a fixed system binary, not a
 	// user-writable PATH entry.
-	return execFileSync("git", [...arguments_], {
+	return execFileSync("git", [...parameters], {
 		cwd: repositoryRoot,
 		encoding: "utf8",
 		stdio: ["ignore", "pipe", "ignore"],
