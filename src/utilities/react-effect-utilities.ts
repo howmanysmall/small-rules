@@ -40,7 +40,7 @@ const EFFECT_HOOK_NAME = "useEffect";
 const USE_STATE_HOOK_NAME = "useState";
 const USE_REF_HOOK_NAME = "useRef";
 
-export type EffectFunctionNode = ESTree.ArrowFunctionExpression | ESTree.BlockStatement | ESTree.Function;
+type EffectFunctionNode = ESTree.ArrowFunctionExpression | ESTree.BlockStatement | ESTree.Function;
 
 export type ReactOwner = ESTree.Function | ESTree.VariableDeclarator;
 

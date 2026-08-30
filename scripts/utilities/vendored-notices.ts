@@ -119,10 +119,10 @@ SOFTWARE.`,
 } as const;
 
 /** SPDX identifiers this repository knows how to render a notice for. */
-export type LicenseIdentifier = keyof typeof LICENSE_TEMPLATES;
+type LicenseIdentifier = keyof typeof LICENSE_TEMPLATES;
 
 /** One vendored file and the upstream file it came from. */
-export interface VendoredFile {
+interface VendoredFile {
 	/** Path within {@linkcode VendoredComponent.directory}. */
 	readonly local: string;
 	/** Path within the upstream repository. */
