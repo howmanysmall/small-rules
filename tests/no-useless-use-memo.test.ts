@@ -1,6 +1,6 @@
 import { describe } from "vitest";
 
-import rule from "$oxc-rules/react/no-useless-use-memo";
+import rule, { DependencyMode } from "$oxc-rules/react/no-useless-use-memo";
 
 import { ts } from "./rule-testers";
 
@@ -59,7 +59,7 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => [1, 2, 3], []);
 `,
-				options: [{ dependencyMode: "empty-or-omitted", environment: "standard" }],
+				options: [{ dependencyMode: DependencyMode.EmptyOrOmitted, environment: "standard" }],
 				errors: [{ messageId: "uselessUseMemo" }],
 			},
 			{
@@ -193,7 +193,7 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring), [theme]);
 `,
-				options: [{ dependencyMode: "aggressive", environment: "standard" }],
+				options: [{ dependencyMode: DependencyMode.Aggressive, environment: "standard" }],
 				errors: [{ messageId: "uselessUseMemo" }],
 			},
 		],
@@ -232,7 +232,7 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring), [theme]);
 `,
-				options: [{ dependencyMode: "empty-or-omitted", environment: "standard" }],
+				options: [{ dependencyMode: DependencyMode.EmptyOrOmitted, environment: "standard" }],
 			},
 			{
 				code: `
@@ -241,7 +241,7 @@ import { AnimationLibrary, SpringConfiguration, getAnimationConfiguration } from
 
 const value = useMemo(() => getAnimationConfiguration(SpringConfiguration.Sharp, AnimationLibrary.ReactSpring), [theme]);
 `,
-				options: [{ dependencyMode: "non-updating", environment: "standard" }],
+				options: [{ dependencyMode: DependencyMode.NonUpdating, environment: "standard" }],
 			},
 			{
 				code: `
