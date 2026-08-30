@@ -75,6 +75,7 @@ const expectedRuleNames: ReadonlyArray<string> = [
 	"no-unknown-returns",
 	"no-unknown-type-aliases",
 	"no-unsafe-dictionary-type",
+	"no-unsupported-syntax",
 	"no-unused-imports",
 	"no-unused-use-memo",
 	"no-use-memo-simple-expression",
@@ -144,7 +145,7 @@ describe("small-rules plugin", () => {
 			const ruleNames = Object.keys(smallRules.default.rules).toSorted();
 
 			expect(ruleNames).toStrictEqual(expectedRuleNames);
-			expect(ruleNames).toHaveLength(124);
+			expect(ruleNames).toHaveLength(125);
 		}, 30_000);
 	});
 });

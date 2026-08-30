@@ -98,6 +98,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-redundant-aspect-ratio-constraint" },
 				{ name: "no-table-create-map" },
 				{ name: "no-task-wait" },
+				{ name: "no-unsupported-syntax" },
 				{ name: "no-useless-default" },
 				{ name: "no-warn" },
 				{ name: "prefer-idiv" },
