@@ -2,12 +2,10 @@ import type { KnipConfig } from "knip";
 
 const configuration: KnipConfig = {
 	bun: true,
-	commitlint: true,
 	ignoreBinaries: ["hk", "nlx", "nr", "xdg-open"],
-	ignoreDependencies: ["@fast-check/vitest", "fast-check", "sfw", "eslint-plugin-*", "oxlint-plugin-*", "file:"],
-	ignoreExportsUsedInFile: true,
+	ignoreDependencies: ["@fast-check/vitest", "fast-check", "sfw", "oxlint-plugin-*", "file:"],
+	ignoreExportsUsedInFile: { interface: true, type: true },
 	ignoreFiles: ["tests/fixtures/**"],
-	tsdown: true,
 	workspaces: {
 		".": {
 			entry: ["*.config.ts", "src/reset.d.ts", "tests/**/*.fuzz.ts"],
@@ -25,7 +23,7 @@ const configuration: KnipConfig = {
 			ignoreDependencies: ["babel-plugin-react-compiler", "satteri"],
 		},
 		scripts: {
-			entry: ["**/*.ts"],
+			entry: ["*.ts"],
 			project: ["**/*.ts"],
 		},
 	},

@@ -4,8 +4,6 @@ export const isBoolean = type("boolean");
 export const isString = type("string");
 export const isUndefined = type("undefined");
 
-export const isArrayOfStrings = isString.array();
-export const isReadonlyArrayOfStrings = isArrayOfStrings.readonly();
+export const isReadonlyArrayOfStrings = isString.array().readonly();
 
-export const isRecordOfStrings = type("Record<string, string>");
-export const isReadonlyRecordOfStrings = isRecordOfStrings.readonly();
+export const isReadonlyRecordOfStrings = type("Record<string, string>").readonly();
