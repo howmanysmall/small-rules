@@ -205,6 +205,21 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 		source: "https://github.com/dmmulroy/anti-slop",
 		verbatim: false,
 	},
+	{
+		name: "eslint-plugin-roblox-ts",
+		commit: "e1581d4f3d83a3d05b015a0a216507c3a20016de",
+		copyright: "Copyright (c) 2025-PRESENT roblox-ts",
+		directory: "src/rules/roblox/",
+		files: [
+			{
+				local: "no-unsupported-syntax.ts",
+				upstream: "src/rules/no-unsupported-syntax/rule.ts",
+			},
+		],
+		license: "MIT",
+		source: "https://github.com/roblox-ts/eslint-plugin-roblox-ts",
+		verbatim: false,
+	},
 ];
 
 /**

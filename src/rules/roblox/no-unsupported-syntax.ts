@@ -1,3 +1,11 @@
+// Vendored from src/rules/no-unsupported-syntax/rule.ts@e1581d4f3d83a3d05b015a0a216507c3a20016de by roblox-ts.
+// Source: https://github.com/roblox-ts/eslint-plugin-roblox-ts
+// SPDX-License-Identifier: MIT
+//
+// Modifications: adapted to the oxlint-plugin-utilities createRule API, options
+// added to toggle each check, and regex-literal detection moved from token
+// inspection to the `regex` literal property.
+
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
