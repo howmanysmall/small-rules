@@ -28,8 +28,10 @@ import RulePage from "$components/rule-page.astro";
 		</ul>
 		<p>
 			Where I differ is I allow <code>as const as const</code>. It's idempotent — it doesn't widen or narrow, so
-			there's nothing to discard. Everything else with two non-const assertions is a problem, though maybe not
-			worth fixing if the upstream type is truly untyped and you have no control over it.
+			there's nothing to discard. I also let you name specific identifier targets for a single{" "}
+			<code>as unknown as T</code> bridge via <code>allowedTargets</code>. That's for nominal twins like Roblox{" "}
+			<code>vector</code> / <code>Vector3</code>, not a free pass: <code>as unknown as string</code> still flags.
+			Everything else with two non-const assertions is a problem.
 		</p>
 	</Fragment>
 </RulePage>
