@@ -4,6 +4,7 @@ import rule from "$oxc-rules/anti-slop/no-chained-type-assertions";
 import { ts } from "$test/rule-testers";
 
 const chained = { messageId: "chained" };
+const vectorBridge = [{ allowedTargets: ["vector", "Vector3"] }] as const;
 
 describe("no-chained-type-assertions", () => {
 	ts.run("no-chained-type-assertions", rule, {
@@ -28,6 +29,17 @@ describe("no-chained-type-assertions", () => {
 			{ code: "const x = value as any as string;", errors: [chained] },
 			{ code: "const x = value as unknown as unknown;", errors: [chained] },
 			{ code: "const x = value as unknown as unknown as unknown;", errors: [chained] },
+			{ code: "const x = value as unknown as vector;", errors: [chained] },
+			{
+				code: "const x = value as unknown as string;",
+				options: [...vectorBridge],
+				errors: [chained],
+			},
+			{
+				code: "const x = value as unknown as Foo;",
+				options: [...vectorBridge],
+				errors: [chained],
+			},
 		],
 		valid: [
 			{
@@ -43,6 +55,26 @@ describe("no-chained-type-assertions", () => {
 			{ code: "const x = value;" },
 			{ code: "const x = value satisfies string;" },
 			{ code: "const x = value as Record<string, unknown>;" },
+			{
+				code: "const x = value as unknown as vector;",
+				options: [...vectorBridge],
+			},
+			{
+				code: "const x = transform.Position as unknown as vector;",
+				options: [...vectorBridge],
+			},
+			{
+				code: "const x = value as unknown as Vector3;",
+				options: [...vectorBridge],
+			},
+			{
+				code: "const x = (value as unknown) as vector;",
+				options: [...vectorBridge],
+			},
+			{
+				code: "const x = <unknown>value as Vector3;",
+				options: [...vectorBridge],
+			},
 		],
 	});
 });
