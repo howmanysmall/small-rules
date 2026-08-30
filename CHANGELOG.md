@@ -46,6 +46,14 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.17.0] - 2026-08-30
+
+## Added
+- **no-unsupported-syntax** reports five syntax forms that roblox-ts cannot compile to Luau, with per-check boolean options, in [#51](https://github.com/howmanysmall/small-rules/pull/51).
+
+## Changed
+- **no-useless-use-memo** now exports the `DependencyMode` type at the package root, in [d82f9](https://github.com/howmanysmall/small-rules/commit/d82f95edbf60645a53596a5118e1b119f6a24f82).
+
 ## [2.16.1] - 2026-08-28
 
 ## Added
