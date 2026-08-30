@@ -1,10 +1,9 @@
-# Block exotic sub-dependencies (e.g. git, file: deps)
+autoInstallPeers: true
 blockExoticSubdeps: true
 catalogMode: prefer
 cleanupUnusedCatalogs: true
-
-# Global virtual store (pnpm's node_modules/.pnpm equivalent)
 enableGlobalVirtualStore: true
+engineStrict: true
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
@@ -119,6 +118,7 @@ minimumReleaseAgeExclude:
 
 minimumReleaseAgeStrict: true
 resolutionMode: time-based
+shamefullyHoist: false
 shellEmulator: true
 strictDepBuilds: true
 strictPeerDependencies: false
@@ -128,15 +128,14 @@ trustPolicyExclude:
   - skills
 
 trustPolicyIgnoreAfter: 10080
+lockfile: true
 
-# Equivalent to pnpm-workspace.yaml `packages:`
 packages:
   - .omp
   - .opencode
   - documentation
   - scripts
 
-# Force specific versions of any dependency (including transitive)
 overrides:
   "@isentinel/eslint-config>@pobammer-ts/small-rules": "link:./plugins"
   "@vitiate/core>@swc/core": 1.15.41
@@ -242,7 +241,6 @@ catalogs:
     type-fest: 5.8.0
     typescript: npm:@typescript/typescript6@^6.0.2
 
-# Only allow specific packages to run install scripts
 allowBuilds:
   "@openrouter/sdk": true
   "@swc/core": true
@@ -281,9 +279,10 @@ fetchRetries: 5
 fetchRetryMaxtimeout: 30000
 fetchRetryMintimeout: 1000
 fetchTimeout: 60000
+
+registries:
+  "@jsr": https://npm.jsr.io
+
 strictSsl: true
 strictStorePkgContentCheck: true
 verifyStoreIntegrity: true
-
-# configDependencies:
-#   "@pnpm/pacquet": 0.11.12
