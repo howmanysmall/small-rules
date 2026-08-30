@@ -13,8 +13,6 @@ const testsDirectory = nodePath.resolve(
 	workingDirectory,
 	nodePath.basename(workingDirectory) === "documentation" ? "../tests" : "tests",
 );
-// Mirror the Vitest include while skipping support directories that never
-// document rules.
 const IGNORED_TEST_ROOTS = new Set(["do-not-sync-ever", "fixtures"]);
 
 function isCollectedTestFile(relativePath: string): boolean {

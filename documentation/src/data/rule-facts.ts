@@ -43,9 +43,7 @@ function getRuleMeta(ruleName: RuleName): RuleMeta {
 	const { meta } = smallRules.rules[ruleName];
 	if (meta !== undefined) return meta;
 
-	const error = new Error(`Rule "${ruleName}" is missing metadata.`);
-	Error.captureStackTrace(error, getRuleMeta);
-	throw error;
+	throw new Error(`Rule "${ruleName}" is missing metadata.`);
 }
 
 function createRuleFacts(category: RuleCategoryManifest, entry: RuleManifestEntry): RuleFacts {
@@ -82,9 +80,7 @@ export function getRuleFacts(ruleName: RuleName): RuleFacts {
 	const facts = ruleFacts.get(ruleName);
 	if (facts !== undefined) return facts;
 
-	const error = new Error(`Rule "${ruleName}" is missing from the rule manifest.`);
-	Error.captureStackTrace(error, getRuleFacts);
-	throw error;
+	throw new Error(`Rule "${ruleName}" is missing from the rule manifest.`);
 }
 
 export function getRuleEntry(ruleName: RuleName): RuleManifestEntry | undefined {
@@ -129,9 +125,7 @@ export function getRuleFactCategory(categoryKey: RuleCategoryKey): RuleFactCateg
 	const category = ruleFactCategories.get(categoryKey);
 	if (category !== undefined) return category;
 
-	const error = new Error(`Rule category "${categoryKey}" is missing from the rule manifest.`);
-	Error.captureStackTrace(error, getRuleFactCategory);
-	throw error;
+	throw new Error(`Rule category "${categoryKey}" is missing from the rule manifest.`);
 }
 
 function deriveRuleFactCounts(): RuleFactCounts {

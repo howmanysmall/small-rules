@@ -27,15 +27,13 @@ export interface TypeEnvironment {
 	readonly shadowedBuiltIns: ReadonlySet<string>;
 }
 
+type UnsafeValueKind = "any" | "empty-object" | "object" | "union" | "unknown";
 export interface UnsafeDictionary {
 	readonly kind: "unsafe-dictionary";
-	readonly unsafeValue: "any" | "empty-object" | "object" | "union" | "unknown";
+	readonly unsafeValue: UnsafeValueKind;
 }
 
-export type UnsafeValueKind = UnsafeDictionary["unsafeValue"];
-
-export type WideningTargetKind = "anonymous object" | "generic container" | "object" | "open dictionary" | "unknown";
-
+type WideningTargetKind = "anonymous object" | "generic container" | "object" | "open dictionary" | "unknown";
 export interface WideningTarget {
 	readonly kind: WideningTargetKind;
 }
@@ -93,25 +91,29 @@ function registerDeclaration(
 			}
 			return;
 		}
+
 		case "ImportDeclaration": {
 			registerImportDeclaration(declaration, shadowedBuiltIns);
 			return;
 		}
+
 		case "TSEnumDeclaration": {
 			if (BUILT_INS.has(declaration.id.name)) shadowedBuiltIns.add(declaration.id.name);
 			return;
 		}
+
 		case "TSInterfaceDeclaration": {
 			registerInterface(declaration, interfaces, shadowedBuiltIns);
 			return;
 		}
+
 		case "TSTypeAliasDeclaration": {
 			registerTypeAlias(declaration, aliases, shadowedBuiltIns);
 			break;
 		}
-		default: {
+
+		default:
 			break;
-		}
 	}
 }
 
@@ -186,10 +188,13 @@ function resolvedSubstitutionArgument(type: ESTree.TSType, base: SubstitutionEnv
 	for (;;) {
 		const unwrapped = unwrapTransparentType(current);
 		if (unwrapped.type !== "TSTypeReference") return current;
+
 		const name = typeReferenceName(unwrapped);
 		if (name === undefined || name === resolving) return current;
+
 		const substitution = base.get(name);
 		if (substitution === undefined) return current;
+
 		resolving = name;
 		current = substitution;
 	}

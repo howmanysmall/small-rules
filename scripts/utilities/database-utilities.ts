@@ -1,4 +1,4 @@
-// oxlint-disable small-rules/prefer-pascal-case-enums -- Roblox data types are
+// oxlint-disable small-rules/prefer-pascal-case-enums small-rules/no-unknown-parameters small-rules/no-unknown-returns -- Roblox data types are
 // weird.
 
 import { readFile } from "node:fs/promises";
@@ -150,15 +150,8 @@ const isRawDatabase = type([
 	"unknown",
 ]).readonly();
 
-type RawValue = UnknownRecord[keyof UnknownRecord];
-type RawRecord = Record<string, RawValue>;
-
-function isRecord(value: RawValue): value is RawRecord {
-	return Predicate.isObject(value) && !Array.isArray(value);
-}
-
-function unwrapValue(value: RawValue): RawValue {
-	if (!isRecord(value)) return value;
+function unwrapValue(value: unknown): unknown {
+	if (!Predicate.isObject(value)) return value;
 
 	const keys = Object.keys(value);
 	if (keys.length !== 1) return value;
@@ -169,7 +162,7 @@ function unwrapValue(value: RawValue): RawValue {
 
 type EnumLookup = ReadonlyMap<string, ReadonlyMap<number, string>>;
 
-export function parseDatabase(raw: RawValue, allowedClasses?: ReadonlySet<string>): ReadonlyMap<string, DatabaseClass> {
+export function parseDatabase(raw: unknown, allowedClasses?: ReadonlySet<string>): ReadonlyMap<string, DatabaseClass> {
 	const [, rawClasses, rawEnums] = isRawDatabase.assert(raw);
 
 	const enumLookup = buildEnumLookup(rawEnums);
@@ -189,14 +182,14 @@ export function parseDatabase(raw: RawValue, allowedClasses?: ReadonlySet<string
 	return classes;
 }
 
-function buildEnumLookup(rawEnums: RawValue): EnumLookup {
+function buildEnumLookup(rawEnums: unknown): EnumLookup {
 	const lookup = new Map<string, Map<number, string>>();
-	if (!isRecord(rawEnums)) return lookup;
+	if (!Predicate.isObject(rawEnums)) return lookup;
 
 	for (const [enumType, rawEntry] of Object.entries(rawEnums)) {
 		if (!Array.isArray(rawEntry)) continue;
 		const [, items] = rawEntry;
-		if (!isRecord(items)) continue;
+		if (!Predicate.isObject(items)) continue;
 		const reverse = new Map<number, string>();
 		for (const [name, value] of Object.entries(items)) if (Predicate.isNumber(value)) reverse.set(value, name);
 		lookup.set(enumType, reverse);
@@ -204,15 +197,15 @@ function buildEnumLookup(rawEnums: RawValue): EnumLookup {
 	return lookup;
 }
 
-function isDataTypeObject(value: RawValue): value is { readonly Enum: string } | { readonly Value: string } {
-	return isRecord(value) && ("Enum" in value || "Value" in value);
+function isDataTypeObject(value: unknown): value is { readonly Enum: string } | { readonly Value: string } {
+	return Predicate.isObject(value) && ("Enum" in value || "Value" in value);
 }
 
-function isStringOrUndefined(value: RawValue): value is string | undefined {
+function isStringOrUndefined(value: unknown): value is string | undefined {
 	return value === undefined || Predicate.isString(value);
 }
 
-function getDataTypeString(value: RawValue): string {
+function getDataTypeString(value: unknown): string {
 	if (isDataTypeObject(value)) return "Enum" in value ? `Enum.${value.Enum}` : value.Value;
 	return "string";
 }
@@ -220,8 +213,8 @@ function getDataTypeString(value: RawValue): string {
 // Let's define clean internal interfaces so we can burn the raw index lookups
 // (`[3]`, `[4]`) with fire.
 interface RawClassData {
-	readonly defaults: RawRecord;
-	readonly properties: RawRecord;
+	readonly defaults: UnknownRecord;
+	readonly properties: UnknownRecord;
 	readonly superclass: string | undefined;
 }
 
@@ -233,23 +226,25 @@ type NormalizedPropertyDefault = [
 ];
 
 interface MergedClassData {
-	readonly defaults: RawRecord;
+	readonly defaults: UnknownRecord;
 	readonly propertyDefaults: Record<string, NormalizedPropertyDefault>;
 }
 
-function parseRawClassData(classData: ReadonlyArray<RawValue>): RawClassData | undefined {
+function parseRawClassData(classData: ReadonlyArray<unknown>): RawClassData | undefined {
 	const superclass = isStringOrUndefined(classData[2]) ? classData[2] : undefined;
 	// oxlint-disable-next-line prefer-destructuring -- ugly.
 	const properties = classData[3];
 	// oxlint-disable-next-line prefer-destructuring -- ugly.
 	const defaults = classData[4];
 
-	return isRecord(properties) && isRecord(defaults) ? { defaults, properties, superclass } : undefined;
+	return Predicate.isObject(properties) && Predicate.isObject(defaults)
+		? { defaults, properties, superclass }
+		: undefined;
 }
 
 function getInheritanceChain(
 	startClassName: string,
-	allClasses: ReadonlyMap<string, ReadonlyArray<RawValue>>,
+	allClasses: ReadonlyMap<string, ReadonlyArray<unknown>>,
 ): ReadonlyArray<RawClassData> {
 	const chain = new Array<RawClassData>();
 	let currentName: string | undefined = startClassName;
@@ -268,7 +263,7 @@ function getInheritanceChain(
 	return chain.toReversed();
 }
 
-function normalizeProperty(propertyTuple: RawValue): NormalizedPropertyDefault | undefined {
+function normalizeProperty(propertyTuple: unknown): NormalizedPropertyDefault | undefined {
 	if (!Array.isArray(propertyTuple) || propertyTuple.length < 3) return undefined;
 
 	const propertyName = Predicate.isString(propertyTuple[0]) ? propertyTuple[0] : "";
@@ -281,10 +276,10 @@ function normalizeProperty(propertyTuple: RawValue): NormalizedPropertyDefault |
 
 function mergeSuperclassImplementation(
 	className: string,
-	allClasses: ReadonlyMap<string, ReadonlyArray<RawValue>>,
+	allClasses: ReadonlyMap<string, ReadonlyArray<unknown>>,
 ): MergedClassData {
 	const propertyDefs: Record<string, NormalizedPropertyDefault> = {};
-	const defaults: RawRecord = {};
+	const defaults: UnknownRecord = {};
 
 	const inheritanceChain = getInheritanceChain(className, allClasses);
 
@@ -309,7 +304,7 @@ function mergeSuperclassImplementation(
 
 type PropertyDefaults = Record<string, [string, string, string, ReadonlyArray<string>]>;
 
-function resolveEnumValue(innerValue: RawValue, dataType: string, enumLookup: EnumLookup): string | undefined {
+function resolveEnumValue(innerValue: unknown, dataType: string, enumLookup: EnumLookup): string | undefined {
 	if (!Predicate.isNumber(innerValue)) return undefined;
 
 	const enumType = dataType.slice(5);
@@ -321,11 +316,11 @@ function resolveEnumValue(innerValue: RawValue, dataType: string, enumLookup: En
 }
 
 function resolveDefaults(
-	rawDefaults: RawRecord,
+	rawDefaults: UnknownRecord,
 	propertyDefaults: PropertyDefaults,
 	enumLookup: EnumLookup,
-): Record<string, RawValue> {
-	const entries = new Array<[string, RawValue]>();
+): UnknownRecord {
+	const entries = new Array<[string, unknown]>();
 	for (const [propertyName, value] of Object.entries(rawDefaults)) {
 		const innerValue = unwrapValue(value);
 		const property = propertyDefaults[propertyName];
@@ -396,7 +391,7 @@ function parseComponents(value: string): ReadonlyArray<number | string> {
 	return components;
 }
 
-function normalizeNumberValue(value: RawValue): CanonicalValue | undefined {
+function normalizeNumberValue(value: unknown): CanonicalValue | undefined {
 	if (Predicate.isNumber(value)) {
 		if (value === Number.POSITIVE_INFINITY) return { type: "number", value: "inf" };
 		if (value === Number.NEGATIVE_INFINITY) return { type: "number", value: "-inf" };
@@ -411,7 +406,7 @@ function normalizeNumberValue(value: RawValue): CanonicalValue | undefined {
 	return undefined;
 }
 
-function isStringOrNumber(value: RawValue): value is number | string {
+function isStringOrNumber(value: unknown): value is number | string {
 	return Predicate.isString(value) || Predicate.isNumber(value);
 }
 
@@ -429,14 +424,14 @@ function normalizeComponent(component: number | string): number | string {
 interface CanonicalValue {
 	readonly enumType?: string | undefined;
 	readonly type: string;
-	readonly value: RawValue;
+	readonly value: unknown;
 }
 
-function isRawArray(value: RawValue): value is ReadonlyArray<RawValue> {
+function isRawArray(value: unknown): value is ReadonlyArray<unknown> {
 	return Array.isArray(value);
 }
 
-function makeCanonicalValue(dataType: string, value: RawValue): CanonicalValue | undefined {
+function makeCanonicalValue(dataType: string, value: unknown): CanonicalValue | undefined {
 	if (NUMBER_DATA_TYPES.has(dataType)) return normalizeNumberValue(value);
 
 	if (dataType === "Bool") return { type: "bool", value: Boolean(value) };

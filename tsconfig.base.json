@@ -1,16 +1,36 @@
 {
 	"compilerOptions": {
 		"incremental": true,
-		"tsBuildInfoFile": "./node_modules/.tsbuildinfo",
 		"target": "ESNext",
-		"jsx": "react-jsx",
-		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"moduleDetection": "force",
 		"experimentalDecorators": true,
 		"module": "preserve",
 		"moduleResolution": "bundler",
+		"paths": {
+			"$oxc-generated/*": ["./src/generated/*"],
+			"$oxc-rules/*": ["./src/rules/*"],
+			"$oxc-types/*": ["./src/types/*"],
+			"$oxc-utilities/*": ["./src/utilities/*"],
+			"$small-rules": ["./src/index.ts"],
+			"$test/*": ["./tests/*"],
+
+			"$script-commands/*": ["./scripts/commands/*"],
+			"$script-constants/*": ["./scripts/constants/*"],
+			"$script-types/*": ["./scripts/types/*"],
+			"$script-utilities/*": ["./scripts/utilities/*"],
+
+			"$assets/*": ["./documentation/src/assets/*"],
+			"$classes/*": ["./documentation/src/classes/*"],
+			"$components/*": ["./documentation/src/components/*"],
+			"$content/*": ["./documentation/src/content/*"],
+			"$data/*": ["./documentation/src/data/*"],
+			"$integrations/*": ["./documentation/src/integrations/*"],
+			"$pages/*": ["./documentation/src/pages/*"],
+			"$styles/*": ["./documentation/src/styles/*"],
+			"$types/*": ["./documentation/src/types/*"],
+			"$utilities/*": ["./documentation/src/utilities/*"]
+		},
 		"resolveJsonModule": true,
-		"types": ["node"],
 		"allowImportingTsExtensions": true,
 		"allowJs": false,
 		"strict": true,
@@ -26,6 +46,5 @@
 		"esModuleInterop": true,
 		"verbatimModuleSyntax": true,
 		"skipLibCheck": true
-	},
-	"exclude": ["dist", "**/node_modules/**", "**/do-not-sync-ever/**"]
+	}
 }

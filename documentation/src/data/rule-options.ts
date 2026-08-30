@@ -63,13 +63,8 @@ function isJsonArray(value: SchemaInput): value is ReadonlyArray<JsonValue> {
 }
 
 function getRuleSchema(ruleName: RuleName): SchemaInput {
-	const rule = smallRules.rules[ruleName];
-	const { meta } = rule;
-	if (meta === undefined) {
-		const error = new Error(`Rule "${ruleName}" is missing metadata.`);
-		Error.captureStackTrace(error, getRuleSchema);
-		throw error;
-	}
+	const { meta } = smallRules.rules[ruleName];
+	if (meta === undefined) throw new Error(`Rule "${ruleName}" is missing metadata.`);
 
 	return isJsonValue(meta.schema) ? meta.schema : undefined;
 }
@@ -88,13 +83,13 @@ function isComplexJsonValue(value: JsonValue): value is ComplexJsonValue {
 	return Array.isArray(value) || Predicate.isReadonlyObject(value);
 }
 
-const camelCaseBoundary = /(?<lowercase>[a-z\d])(?<uppercase>[A-Z])/gu;
+const CAMEL_CASE_REGEXP = /(?<lowercase>[a-z\d])(?<uppercase>[A-Z])/gu;
 
 function summarizeComplexDefault(name: string, value: ComplexJsonValue): string {
 	if (!Array.isArray(value)) return `${Object.keys(value).length} fields`;
 	if (value.length === 1) return "1 item";
 
-	const itemLabel = name.endsWith("s") ? name.replace(camelCaseBoundary, "$<lowercase> $<uppercase>") : "items";
+	const itemLabel = name.endsWith("s") ? name.replace(CAMEL_CASE_REGEXP, "$<lowercase> $<uppercase>") : "items";
 	return `${value.length} ${itemLabel.toLowerCase()}`;
 }
 
@@ -258,9 +253,8 @@ function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 			];
 		}
 
-		default: {
+		default:
 			return undefined;
-		}
 	}
 }
 
@@ -305,7 +299,7 @@ function getSchemaType(schema: SchemaRecord): string {
 	return "unknown";
 }
 
-function createStringPlaceholder(hint: string | undefined): string {
+function createStringPlaceholder(hint?: string): string {
 	const exactPlaceholder = hint === undefined ? undefined : exactStringPlaceholders.get(hint);
 	if (exactPlaceholder !== undefined) return exactPlaceholder;
 
@@ -314,7 +308,7 @@ function createStringPlaceholder(hint: string | undefined): string {
 	return partialPlaceholder?.value ?? "value";
 }
 
-function getExplicitPlaceholder(schema: SchemaRecord, hint: string | undefined): JsonValue | undefined {
+function getExplicitPlaceholder(schema: SchemaRecord, hint?: string): JsonValue | undefined {
 	if (isJsonValue(schema.default)) return schema.default;
 	if (isJsonArray(schema.enum) && schema.enum.length > 0) {
 		const [firstEnumValue] = schema.enum;
@@ -345,7 +339,7 @@ function createNumberPlaceholder(schema: SchemaRecord): number {
 	return 0;
 }
 
-function createObjectPlaceholder(schema: SchemaRecord, hint: string | undefined): JsonValue {
+function createObjectPlaceholder(schema: SchemaRecord, hint?: string): JsonValue {
 	const knownPlaceholder = hint === undefined ? undefined : objectPlaceholders.get(hint);
 	if (knownPlaceholder !== undefined) return knownPlaceholder;
 	if (!isSchemaRecord(schema.properties)) return {};

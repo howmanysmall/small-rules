@@ -4,6 +4,7 @@ import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import { Predicate } from "effect";
+import { getTsconfig } from "get-tsconfig";
 
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
 import contextualMenu from "./src/integrations/contextual-menu";
@@ -19,42 +20,48 @@ function ensureAstroIntegration<Integration extends AstroIntegration>(
 	integration: Integration,
 ): AstroIntegration & Pick<Integration, "hooks" | "name"> {
 	if (!Predicate.isObject(integration)) {
-		const error = new Error(
+		throw new TypeError(
 			`Expected Astro integration to be an object, received: ${Object.prototype.toString.call(integration)}`,
 		);
-		Error.captureStackTrace(error, ensureAstroIntegration);
-		throw error;
 	}
 
 	const name = "name" in integration ? integration.name : undefined;
-	if (!Predicate.isString(name) || name.length === 0) {
-		const error = new Error(
-			`Expected Astro integration to have a non-empty string "name" property, received: ${name}`,
-		);
-		Error.captureStackTrace(error, ensureAstroIntegration);
-		throw error;
+	if (name === undefined || name.length === 0) {
+		throw new Error(`Expected Astro integration to have a non-empty string "name" property, received: ${name}`);
 	}
 
 	const hooks = "hooks" in integration ? integration.hooks : undefined;
 	if (!Predicate.isObject(hooks)) {
-		const error = new Error(
+		throw new TypeError(
 			`Expected Astro integration "${name}" to have a "hooks" object, received: ${String(hooks)}`,
 		);
-		Error.captureStackTrace(error, ensureAstroIntegration);
-		throw error;
 	}
 
-	return {
-		name,
-		hooks: integration.hooks,
-	};
+	return { name, hooks };
 }
 
-const reactOptions = {
-	babel: {
-		plugins: ["babel-plugin-react-compiler"],
-	},
-};
+function removeTrailingWildcard(path: string): string {
+	return path.endsWith("/*") ? path.slice(0, -2) : path;
+}
+
+function getAliases(): Record<string, string> {
+	const tsconfig = getTsconfig(fromRepositoryRoot("."), "tsconfig.base.json");
+	if (tsconfig === null) throw new Error("Could not load tsconfig.base.json.");
+
+	const paths = tsconfig.config.compilerOptions?.paths;
+	if (paths === undefined) return {};
+
+	return Object.fromEntries(
+		Object.entries(paths).map(([pattern, targets]) => {
+			const [target] = targets;
+			if (target === undefined) {
+				throw new Error(`Expected a path target for "${pattern}".`);
+			}
+
+			return [removeTrailingWildcard(pattern), fromRepositoryRoot(removeTrailingWildcard(target))];
+		}),
+	);
+}
 
 export default defineConfig({
 	base: "/small-rules",
@@ -130,7 +137,13 @@ export default defineConfig({
 			}),
 		),
 		ensureAstroIntegration(mdx()),
-		ensureAstroIntegration(react(reactOptions)),
+		ensureAstroIntegration(
+			react({
+				babel: {
+					plugins: ["babel-plugin-react-compiler"],
+				},
+			}),
+		),
 		ensureAstroIntegration(contextualMenu()),
 		ensureAstroIntegration(motion()),
 	],
@@ -149,12 +162,7 @@ export default defineConfig({
 			transformer: "lightningcss",
 		},
 		resolve: {
-			alias: {
-				"$oxc-rules": fromRepositoryRoot("src/rules"),
-				"$oxc-types": fromRepositoryRoot("src/types"),
-				"$oxc-utilities": fromRepositoryRoot("src/utilities"),
-				"$small-rules": fromRepositoryRoot("src/index.ts"),
-			},
+			alias: getAliases(),
 		},
 	},
 });

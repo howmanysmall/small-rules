@@ -39,6 +39,7 @@
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
 		"babel-plugin-react-compiler": "catalog:build",
+		"get-tsconfig": "catalog:build",
 		"jsdom": "catalog:test",
 		"typescript": "catalog:types",
 		"vitest": "catalog:test"

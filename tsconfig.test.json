@@ -1,0 +1,24 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"composite": true,
+		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-test",
+		"jsx": "react-jsx",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"types": ["node"]
+	},
+	"include": [
+		"documentation/src/classes/extraction-error.ts",
+		"documentation/src/classes/release-filename-error.ts",
+		"documentation/src/data/release-history.ts",
+		"documentation/src/data/rule-examples.ts",
+		"documentation/src/data/rule-manifest.ts",
+		"documentation/src/utilities/extract-rule-examples.ts",
+		"scripts/utilities/roblox-yielding-members.ts",
+		"scripts/utilities/vendored-notices.ts",
+		"src/**/*.ts",
+		"tests/**/*.ts",
+		"tests/**/*.tsx"
+	],
+	"exclude": ["**/{do-not-sync-ever,node_modules}/**", "{coverage,dist,plugins}/**"]
+}

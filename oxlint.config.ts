@@ -374,6 +374,7 @@ const rules: OxlintRules = {
 			requireDefaultForNonUnion: false,
 		},
 	],
+	"typescript/explicit-member-accessibility": ["error", {}],
 	"unicorn-js/name-replacements": "off",
 	"unicorn-js/no-break-in-nested-loop": "off",
 	"unicorn-js/no-keyword-prefix": "off",

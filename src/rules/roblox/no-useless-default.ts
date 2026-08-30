@@ -45,6 +45,8 @@ type CFrameCanonicalValue = readonly [
 	r22: CanonicalNumericComponent,
 ];
 
+// oxlint-disable-next-line jsdoc/empty-tags -- worthless rule.
+/** @internal Exported only because it appears in `isDefaultValue`'s signature; not part of the published surface. */
 export type CanonicalValue =
 	| { readonly enumType: string; readonly type: "Enum"; readonly value: string }
 	| { readonly type: "bool"; readonly value: boolean }
@@ -631,6 +633,9 @@ function extractEnumValue(node: ESTree.Expression): undefined | { readonly enumT
 	return { enumType, value };
 }
 
+// oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- I hate you lol
+/** @internal Exported for unit tests; not part of the published surface. */
+// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- shut up
 export function isDefaultValue(node: ESTree.Expression, canonicalValue: CanonicalValue): boolean {
 	switch (canonicalValue.type) {
 		case "bool":

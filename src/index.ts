@@ -115,6 +115,7 @@ import noPrint from "$oxc-rules/roblox/no-print";
 import noRedundantAspectRatioConstraint from "$oxc-rules/roblox/no-redundant-aspect-ratio-constraint";
 import noTableCreateMap from "$oxc-rules/roblox/no-table-create-map";
 import noTaskWait from "$oxc-rules/roblox/no-task-wait";
+import noUnsupportedSyntax from "$oxc-rules/roblox/no-unsupported-syntax";
 import noUselessDefault from "$oxc-rules/roblox/no-useless-default";
 import noWarn from "$oxc-rules/roblox/no-warn";
 import preferIdiv from "$oxc-rules/roblox/prefer-idiv";
@@ -202,6 +203,7 @@ const smallRules = definePlugin({
 		"no-unknown-returns": noUnknownReturns,
 		"no-unknown-type-aliases": noUnknownTypeAliases,
 		"no-unsafe-dictionary-type": noUnsafeDictionaryType,
+		"no-unsupported-syntax": noUnsupportedSyntax,
 		"no-unused-imports": noUnusedImports,
 		"no-unused-use-memo": noUnusedUseMemo,
 		"no-use-memo-simple-expression": noUseMemoSimpleExpression,
@@ -255,4 +257,5 @@ const smallRules = definePlugin({
 	},
 });
 
+export { DependencyMode } from "$oxc-rules/react/no-useless-use-memo";
 export default smallRules;

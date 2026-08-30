@@ -1,6 +1,6 @@
 import { expect, test as it } from "@playwright/test";
 
-import { ruleManifest } from "../../src/data/rule-manifest";
+import { ruleManifest } from "$data/rule-manifest";
 
 const allRulesPath = "rules/";
 const baseUrl = "http://127.0.0.1:4321/small-rules/";

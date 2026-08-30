@@ -66,7 +66,7 @@ const configuration = defineConfig((inlineConfiguration) => {
 			enabled: true,
 			level: "error",
 		},
-		tsconfig: "tsconfig.json",
+		tsconfig: "tsconfig.lib.json",
 	};
 });
 

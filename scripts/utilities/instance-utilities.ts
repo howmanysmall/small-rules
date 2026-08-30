@@ -38,11 +38,8 @@ function resolveJsxElementName(jsxElementName: JSXElementName): string {
 		case "JSXNamespacedName":
 			return `${jsxElementName.namespace.name}:${JSON.stringify(jsxElementName.name)}`;
 
-		default: {
-			const error = new Error(`Unknown JSXElementName type: ${JSON.stringify(jsxElementName)}`);
-			Error.captureStackTrace(error, resolveJsxElementName);
-			throw error;
-		}
+		default:
+			throw new Error(`Unknown JSXElementName type: ${JSON.stringify(jsxElementName)}`);
 	}
 }
 
@@ -54,11 +51,8 @@ function resolveJsxMemberObject(object: JSXMemberExpression["object"]): string {
 		case "JSXMemberExpression":
 			return `${resolveJsxMemberObject(object.object)}.${object.property.name}`;
 
-		default: {
-			const error = new Error(`Unknown JSXMemberExpression object type: ${JSON.stringify(object)}`);
-			Error.captureStackTrace(error, resolveJsxMemberObject);
-			throw error;
-		}
+		default:
+			throw new Error(`Unknown JSXMemberExpression object type: ${JSON.stringify(object)}`);
 	}
 }
 

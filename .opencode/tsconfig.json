@@ -1,28 +1,8 @@
 {
+	"extends": "../tsconfig.node.json",
 	"compilerOptions": {
-		"allowImportingTsExtensions": true,
-		"allowJs": false,
-		"esModuleInterop": true,
-		"exactOptionalPropertyTypes": true,
-		"lib": ["ESNext"],
-		"module": "preserve",
-		"moduleDetection": "force",
-		"moduleResolution": "bundler",
-		"noEmit": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
-		"noImplicitReturns": true,
-		"noPropertyAccessFromIndexSignature": false,
-		"noUncheckedIndexedAccess": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"target": "ESNext",
-		"types": ["bun", "node"],
-		"verbatimModuleSyntax": true
+		"tsBuildInfoFile": "../node_modules/.tsbuildinfo-opencode"
 	},
-	"exclude": ["node_modules"],
-	"include": ["plugin/**/*.ts"]
+	"include": ["plugin/**/*.ts"],
+	"exclude": ["node_modules"]
 }

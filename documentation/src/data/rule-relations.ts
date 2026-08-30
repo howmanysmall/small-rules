@@ -51,7 +51,7 @@ function defineRuleRelations<const TRelations extends ReadonlyArray<RuleRelation
  * when both directions are equivalent). Directed kinds use explicit `from` →
  * `to`.
  */
-export const ruleRelations = defineRuleRelations([
+const ruleRelations = defineRuleRelations([
 	{
 		from: "directive-disable-enable-pair",
 		kind: "related",

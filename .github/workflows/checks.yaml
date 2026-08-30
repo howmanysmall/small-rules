@@ -63,7 +63,7 @@ jobs:
         run: node --run type-check
 
       - name: Knip
-        run: node --run knip
+        run: node --run knip:production
 
       - name: Build
         run: node --run build -- --minify && test -f dist/index.js

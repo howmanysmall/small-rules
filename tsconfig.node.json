@@ -1,16 +1,13 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-scripts",
+		"composite": true,
+		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-node",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"rootDir": ".",
-		"paths": {
-			"$script-commands/*": ["./scripts/commands/*"],
-			"$script-constants/*": ["./scripts/constants/*"],
-			"$script-types/*": ["./scripts/types/*"],
-			"$script-utilities/*": ["./scripts/utilities/*"]
-		},
 		"types": ["bun", "node"],
 		"sourceMap": false
 	},
-	"include": ["scripts/**/*.ts"]
+	"include": ["*.config.ts", "scripts/**/*.ts"],
+	"exclude": ["dist", "node_modules"]
 }

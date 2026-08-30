@@ -1,16 +1,10 @@
 {
 	"extends": "./tsconfig.base.json",
-	"compilerOptions": {
-		"tsBuildInfoFile": "./node_modules/.tsbuildinfo",
-		"paths": {
-			"$oxc-generated/*": ["./src/generated/*"],
-			"$test/*": ["./tests/*"],
-			"$oxc-rules/*": ["./src/rules/*"],
-			"$oxc-types/*": ["./src/types/*"],
-			"$oxc-utilities/*": ["./src/utilities/*"],
-			"$small-rules": ["./src/index.ts"]
-		}
-	},
-	"include": ["*.config.ts", "src/**/*.ts", "tests/**/*.ts", "tests/**/*.tsx"],
-	"exclude": ["**/{do-not-sync-ever,node_modules}/**", "{coverage,dist,plugins}/**"]
+	"references": [
+		{ "path": "./tsconfig.lib.json" },
+		{ "path": "./tsconfig.test.json" },
+		{ "path": "./tsconfig.node.json" }
+	],
+	"files": [],
+	"include": []
 }
