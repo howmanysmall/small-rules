@@ -6,7 +6,7 @@ const WHITESPACE_GLOBAL_REGEX = /\s+/gu;
 
 function countOccurrences(text: string, pattern: string): number {
 	// Empty patterns match nothing; without this guard indexOf loops forever.
-	if (pattern === "") return 0;
+	if (pattern.length === 0) return 0;
 
 	let count = 0;
 	let searchIndex = 0;
