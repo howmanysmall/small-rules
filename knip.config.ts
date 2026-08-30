@@ -39,18 +39,9 @@ const paths = await getPathsAsync();
 
 const configuration: KnipConfig = {
 	bun: true,
+	commitlint: true,
 	ignoreBinaries: ["hk", "nr", "xdg-open", "nlx"],
-	ignoreDependencies: [
-		"@commitlint/config-conventional",
-		"@fast-check/vitest",
-		"@oh-my-pi/pi-coding-agent",
-		"arktype",
-		"fast-check",
-		"file:",
-		"sfw",
-		"eslint-plugin-*",
-		"oxlint-plugin-*",
-	],
+	ignoreDependencies: ["@fast-check/vitest", "fast-check", "file:", "sfw", "eslint-plugin-*", "oxlint-plugin-*"],
 	ignoreExportsUsedInFile: true,
 	ignoreFiles: ["tests/fixtures/**"],
 	tsdown: true,
