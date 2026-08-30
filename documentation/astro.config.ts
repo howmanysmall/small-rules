@@ -25,7 +25,7 @@ function ensureAstroIntegration<Integration extends AstroIntegration>(
 	}
 
 	const name = "name" in integration ? integration.name : undefined;
-	if (!Predicate.isString(name) || name.length === 0) {
+	if (name === undefined || name.length === 0) {
 		throw new Error(`Expected Astro integration to have a non-empty string "name" property, received: ${name}`);
 	}
 
