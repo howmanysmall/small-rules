@@ -1,28 +1,10 @@
 {
-	"extends": "astro/tsconfigs/strictest",
+	"extends": ["astro/tsconfigs/strictest", "../tsconfig.paths.json"],
 	"compilerOptions": {
 		"incremental": true,
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo",
 		"jsx": "react-jsx",
-		"jsxImportSource": "react",
-		"paths": {
-			"$oxc-generated/*": ["../src/generated/*"],
-			"$oxc-rules/*": ["../src/rules/*"],
-			"$oxc-types/*": ["../src/types/*"],
-			"$oxc-utilities/*": ["../src/utilities/*"],
-			"$small-rules": ["../src/index.ts"],
-
-			"$assets/*": ["./src/assets/*"],
-			"$classes/*": ["./src/classes/*"],
-			"$components/*": ["./src/components/*"],
-			"$content/*": ["./src/content/*"],
-			"$data/*": ["./src/data/*"],
-			"$integrations/*": ["./src/integrations/*"],
-			"$pages/*": ["./src/pages/*"],
-			"$styles/*": ["./src/styles/*"],
-			"$types/*": ["./src/types/*"],
-			"$utilities/*": ["./src/utilities/*"]
-		}
+		"jsxImportSource": "react"
 	},
 	"include": [
 		".astro/types.d.ts",

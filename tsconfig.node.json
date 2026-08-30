@@ -1,14 +1,8 @@
 {
-	"extends": "./tsconfig.base.json",
+	"extends": ["./tsconfig.base.json", "./tsconfig.paths.json"],
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.tsbuildinfo-scripts",
 		"rootDir": ".",
-		"paths": {
-			"$script-commands/*": ["./scripts/commands/*"],
-			"$script-constants/*": ["./scripts/constants/*"],
-			"$script-types/*": ["./scripts/types/*"],
-			"$script-utilities/*": ["./scripts/utilities/*"]
-		},
 		"types": ["bun", "node"],
 		"sourceMap": false
 	},
