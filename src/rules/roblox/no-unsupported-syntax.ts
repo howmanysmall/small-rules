@@ -2,28 +2,40 @@
 // Source: https://github.com/roblox-ts/eslint-plugin-roblox-ts
 // SPDX-License-Identifier: MIT
 //
-// Modifications: adapted to the oxlint-plugin-utilities createRule API, options
-// added to toggle each check, and regex-literal detection moved from token
-// inspection to the `regex` literal property.
+// Modifications: adapted to the oxlint-plugin-utilities createRule API using
+// createOnce like the upstream rule, option toggles added per check, and
+// regex-literal detection moved from token inspection to the `regex` literal
+// property.
 
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, VisitorWithHooks } from "oxlint-plugin-utilities";
+
+interface Checks {
+	globalThis: boolean;
+	labels: boolean;
+	prototype: boolean;
+	regexLiterals: boolean;
+	spreadDestructuring: boolean;
+}
 
 const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
-	create(context) {
-		const [rawOptions] = context.options;
-		const checks = {
-			globalThis: rawOptions?.globalThis ?? true,
-			labels: rawOptions?.labels ?? true,
-			prototype: rawOptions?.prototype ?? true,
-			regexLiterals: rawOptions?.regexLiterals ?? true,
-			spreadDestructuring: rawOptions?.spreadDestructuring ?? true,
-		};
+	createOnce(context): VisitorWithHooks {
+		let checks: Checks;
 
 		return {
 			ArrayPattern(node) {
 				if (checks.spreadDestructuring) reportRestElements(context, node.elements);
+			},
+			before(): void {
+				const [rawOptions] = context.options;
+				checks = {
+					globalThis: rawOptions?.globalThis ?? true,
+					labels: rawOptions?.labels ?? true,
+					prototype: rawOptions?.prototype ?? true,
+					regexLiterals: rawOptions?.regexLiterals ?? true,
+					spreadDestructuring: rawOptions?.spreadDestructuring ?? true,
+				};
 			},
 			Identifier(node) {
 				if (checks.globalThis && node.name === "globalThis") {
@@ -49,7 +61,7 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 			ObjectPattern(node) {
 				if (checks.spreadDestructuring) reportRestElements(context, node.properties);
 			},
-		} satisfies Visitor;
+		} satisfies VisitorWithHooks;
 	},
 	meta: {
 		docs: {
