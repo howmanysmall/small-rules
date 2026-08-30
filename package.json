@@ -69,8 +69,8 @@
 		"test:fuzz:run": "vitiate fuzz --fuzz-time 10 --config vitest.vitiate.config.ts",
 		"test:mutation": "stryker run",
 		"tsgo": "tsgo",
-		"type-check": "tsgo --noEmit",
-		"type-check:agent": "tsgo --noEmit --pretty false",
+		"type-check": "tsgo --build",
+		"type-check:agent": "node --run type-check -- --pretty false",
 		"preversion": "if test -n \"$(git status --porcelain)\"; then echo 'Release requires a clean worktree.' >&2; exit 1; fi"
 	},
 	"dependencies": {

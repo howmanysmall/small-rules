@@ -1,7 +1,6 @@
 {
-	"extends": ["astro/tsconfigs/strictest", "../tsconfig.paths.json"],
+	"extends": ["../tsconfig.base.json", "astro/tsconfigs/strictest"],
 	"compilerOptions": {
-		"incremental": true,
 		"tsBuildInfoFile": "node_modules/.tsbuildinfo",
 		"jsx": "react-jsx",
 		"jsxImportSource": "react"

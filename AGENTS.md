@@ -126,10 +126,11 @@ Documented examples (`documentation: { id, title }`) are rendered verbatim on th
 
 When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, run `cd documentation && pnpm exec vitest run tests/unit` (CI job `checks / Documentation`). Never hardcode category counts such as `"Showing N rules"` in docs tests — derive them from the catalog/manifest so the next rule addition cannot break CI.
 
-## Key Config Files
+## Key Configuration Files
 
-- `tsconfig.base.json` - Strict TS config, `module: "preserve"`, `verbatimModuleSyntax`, `bundler` resolution
-- `tsconfig.json` - Extends base, adds path aliases (`$oxc-rules/*`, `$oxc-utilities/*`, `$oxc-types/*`, `$small-rules`)
+- `tsconfig.base.json` - Shared strict compiler policy and path aliases
+- `tsconfig.json` - Solution config referencing the library, test, and Node tooling projects
+- `tsconfig.lib.json`, `tsconfig.test.json`, `tsconfig.node.json` - Focused configs for package source, tests, and Bun-enabled repository tooling
 - `biome.jsonc` - Linting + formatting (tabs, 120 width, double quotes)
 - `mise.toml` - Tool versions and task definitions (ci, check, release)
 - `pnpm-workspace.yaml` - Package manager config (catalogs, trust policy, resolution mode)

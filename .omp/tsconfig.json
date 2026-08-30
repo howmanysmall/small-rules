@@ -1,27 +1,7 @@
 {
+	"extends": "../tsconfig.node.json",
 	"compilerOptions": {
-		"target": "ESNext",
-		"lib": ["ESNext"],
-		"moduleDetection": "force",
-		"module": "preserve",
-		"moduleResolution": "bundler",
-		"resolveJsonModule": true,
-		"types": ["bun", "node"],
-		"allowImportingTsExtensions": true,
-		"allowJs": false,
-		"strict": true,
-		"exactOptionalPropertyTypes": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
-		"noImplicitReturns": true,
-		"noPropertyAccessFromIndexSignature": false,
-		"noUncheckedIndexedAccess": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noEmit": true,
-		"esModuleInterop": true,
-		"verbatimModuleSyntax": true,
-		"skipLibCheck": true
+		"tsBuildInfoFile": "../node_modules/.tsbuildinfo-omp"
 	},
 	"include": ["hooks/**/*.ts"],
 	"exclude": ["node_modules"]

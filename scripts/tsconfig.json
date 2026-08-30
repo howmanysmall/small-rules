@@ -1,1 +1,7 @@
-{ "extends": "../tsconfig.node.json" }
+{
+	"extends": "../tsconfig.node.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "../node_modules/.tsbuildinfo-scripts"
+	},
+	"include": ["**/*.ts"]
+}

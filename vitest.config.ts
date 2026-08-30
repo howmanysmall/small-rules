@@ -44,7 +44,7 @@ const configuration = defineConfig({
 			checker: "tsgo",
 			enabled: !isVitiateRun,
 			include: ["tests/**/*.test.ts", "tests/**/*.test-d.ts"],
-			tsconfig: "./tsconfig.json",
+			tsconfig: "./tsconfig.test.json",
 		},
 	},
 });
