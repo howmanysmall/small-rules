@@ -146,6 +146,7 @@ catalogs:
   build:
     "@arethetypeswrong/core": 0.18.5
     babel-plugin-react-compiler: 1.0.0
+    get-tsconfig: 4.14.3
     publint: 0.3.24
     tsdown: 0.22.14
   commitlint:
