@@ -93,6 +93,14 @@ const rules: OxlintRules = {
 	],
 	"import/prefer-default-export": "off",
 	"init-declarations": "off",
+	"jsdoc/check-tag-names": [
+		"error",
+		{
+			definedTags: ["knipignore"],
+			jsxTags: false,
+			typed: false,
+		},
+	],
 	"jsdoc/require-param-type": "off",
 	"jsdoc/require-property-type": "off",
 	"jsdoc/require-returns-type": "off",
@@ -494,6 +502,11 @@ const configuration = isentinel(
 		roblox: false,
 		rules,
 		settings: {
+			jsdoc: {
+				tagNamePreference: {
+					knipignore: "knipignore",
+				},
+			},
 			react: { version: "19.2.8" },
 			vitest: { typecheck: true },
 		},
