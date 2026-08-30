@@ -17,7 +17,7 @@ export interface YieldingMemberCatalog {
 }
 
 function isRecord(value: RobloxApiValue): value is JsonObject {
-	return Predicate.isObject(value) && !Array.isArray(value);
+	return Predicate.isObject(value);
 }
 
 function parseClass(value: RobloxApiValue): RobloxClass | undefined {
@@ -32,11 +32,7 @@ function isYieldingFunction(value: RobloxApiValue): value is JsonObject & { read
 }
 
 export function parseClasses(value: RobloxApiValue): ReadonlyMap<string, RobloxClass> {
-	if (!isRecord(value) || !Array.isArray(value.Classes)) {
-		const error = new TypeError("Roblox API dump has no Classes array.");
-		Error.captureStackTrace(error, parseClasses);
-		throw error;
-	}
+	if (!isRecord(value) || !Array.isArray(value.Classes)) throw new TypeError("Roblox API dump has no Classes array.");
 
 	const classes = new Map<string, RobloxClass>();
 	for (const classValue of value.Classes) {
@@ -59,8 +55,10 @@ export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxC
 	function collectMembers(className: string): ReadonlyArray<string> {
 		const cached = cache.get(className);
 		if (cached !== undefined) return cached;
+
 		const classDefinition = classes.get(className);
 		if (classDefinition === undefined) return [];
+
 		const inherited = collectMembers(classDefinition.superclass);
 		const members = [...new Set([...inherited, ...(directMembers.get(className) ?? [])])].toSorted();
 		cache.set(className, members);

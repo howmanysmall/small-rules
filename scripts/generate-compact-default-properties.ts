@@ -34,15 +34,11 @@ function encodeValue(value: CanonicalDefaultProperty): ReadonlyArray<CanonicalPr
 	const valueType = value.type;
 	const valueTypeIndex = valueTypeIndexes.get(valueType);
 	if (valueTypeIndex === undefined) {
-		const error = new TypeError(`Unknown canonical default property type: ${valueType}`);
-		Error.captureStackTrace(error, encodeValue);
-		throw error;
+		throw new TypeError(`Unknown canonical default property type: ${valueType}`);
 	}
 	if (valueType === "Enum") {
 		if (value.enumType === undefined) {
-			const error = new TypeError("Invalid canonical enum default property value.");
-			Error.captureStackTrace(error, encodeValue);
-			throw error;
+			throw new TypeError("Invalid canonical enum default property value.");
 		}
 		return [valueTypeIndex, value.enumType, value.value];
 	}
