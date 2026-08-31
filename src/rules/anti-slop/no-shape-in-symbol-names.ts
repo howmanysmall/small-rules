@@ -3,6 +3,10 @@
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
+// Local departure from the pinned commit: non-computed MemberExpression
+// (and equivalent JSXMemberExpression / TSQualifiedName) property identifiers
+// are ignored because they often name an external API surface such as
+// `Part.Shape` in Roblox, which is not within the author's control to rename.
 // oxlint-disable small-rules/no-shape-in-symbol-names -- what?
 
 import { createRule } from "$oxc-utilities/create-rule";
@@ -15,10 +19,30 @@ function containsForbiddenSymbolName(name: string): boolean {
 	return name.toLowerCase().includes(FORBIDDEN_SYMBOL_NAME);
 }
 
+type IdentifierNode =
+	| ESTree.BindingIdentifier
+	| ESTree.IdentifierName
+	| ESTree.IdentifierReference
+	| ESTree.JSXIdentifier
+	| ESTree.LabelIdentifier
+	| ESTree.PrivateIdentifier
+	| ESTree.TSIndexSignatureName
+	| ESTree.TSThisParameter;
+
+function isExternalMemberPropertyIdentifier(node: IdentifierNode): boolean {
+	const { parent } = node;
+
+	return (
+		(parent.type === "MemberExpression" && !parent.computed && parent.property === node) ||
+		(parent.type === "JSXMemberExpression" && parent.property === node) ||
+		(parent.type === "TSQualifiedName" && parent.right === node)
+	);
+}
+
 const noShapeInSymbolNames = createRule("no-shape-in-symbol-names", "anti-slop", {
 	createOnce(context): Visitor {
-		function reportForbiddenSymbolName(node: ESTree.Node & { name: string }): void {
-			if (!containsForbiddenSymbolName(node.name)) return;
+		function reportForbiddenSymbolName(node: IdentifierNode): void {
+			if (isExternalMemberPropertyIdentifier(node) || !containsForbiddenSymbolName(node.name)) return;
 			context.report({ data: { name: node.name }, messageId: "forbiddenSymbolName", node });
 		}
 

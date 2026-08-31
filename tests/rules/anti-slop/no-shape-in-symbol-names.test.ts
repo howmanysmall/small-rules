@@ -24,6 +24,17 @@ describe("no-shape-in-symbol-names", () => {
 			"const userFactory = createUser;",
 			"const owner = <OwnerPanel />;",
 			"interface DomainModel { id: string }",
+			"nodePart.Shape = Enum.PartType.Ball;",
+			"nodePart.Shape;",
+			"obj.Shape = 1;",
+			"const view2 = <Foo.Shape />;",
+			"type T = Foo.Shape;",
+			[
+				"function createNodePart(node: vector, nodeIndex: number, parent: Folder): void {",
+				'\tconst nodePart = new Instance("Part");',
+				"\tnodePart.Shape = Enum.PartType.Ball;",
+				"}",
+			].join("\n"),
 		],
 	});
 });
