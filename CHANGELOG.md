@@ -46,6 +46,12 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.18.0] - 2026-08-31
+
+## 🔧 Changed
+
+- **no-chained-type-assertions**: Add `allowedTargets` to exempt configured identifier targets from a single `as unknown`, `as any`, or `as never` bridge, while continuing to report unlisted targets and longer assertion chains - by @howmanysmall in [#52](https://github.com/howmanysmall/small-rules/pull/52)
+
 ## [2.17.0] - 2026-08-30
 
 ## Added
