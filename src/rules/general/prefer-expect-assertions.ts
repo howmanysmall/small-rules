@@ -3,12 +3,11 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	countExpectCalls,
-	getTestCallback,
 	isExpectAssertionsCall,
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import { isFunction, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -25,7 +24,7 @@ interface RuleOptions {
 	readonly onlyFunctionsWithExpectInLoop: boolean;
 }
 
-function parseStringArray(value: ReadonlyArray<unknown> | undefined): ReadonlyArray<string> {
+function parseStringArray(value?: ReadonlyArray<unknown>): ReadonlyArray<string> {
 	/* v8 ignore next -- @preserve rule schema restricts these options to a string array type before create() runs. */
 	return Array.isArray(value) ? value.filter(Predicate.isString) : [];
 }
@@ -217,7 +216,7 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 			CallExpression(node): void {
 				if (!isTestCaseCall(node)) return;
 
-				const callback = getTestCallback(node);
+				const callback = node.arguments.findLast(isFunction);
 				/* v8 ignore next -- @preserve test-case calls without callbacks have no assertion behavior to check. */
 				if (callback === undefined) return;
 
