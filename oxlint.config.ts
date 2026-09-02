@@ -1,7 +1,7 @@
 // oxlint-disable small-rules/prevent-abbreviations -- ok.
 
 import { argv } from "node:process";
-import { GLOB_SRC_EXT } from "@isentinel/eslint-config";
+import { GLOB_SRC, GLOB_SRC_EXT, GLOB_TESTS } from "@isentinel/eslint-config";
 import { isentinel, translateRuleToOxlint } from "@isentinel/eslint-config/oxlint";
 import { ALL_REACT_DOCTOR_RULES } from "oxlint-plugin-react-doctor";
 
@@ -9,7 +9,9 @@ import type { OxlintRules } from "@isentinel/eslint-config/oxlint";
 
 type GetRecordValue<TRecord extends Record<string, unknown>> = TRecord[keyof TRecord];
 type DummyRule = NonNullable<GetRecordValue<OxlintRules>>;
-const CONFIGURATION_FILES = `*.config.${GLOB_SRC_EXT}`;
+
+const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
+const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
 
 const reactDoctorRules = Object.fromEntries(
 	Object.entries(ALL_REACT_DOCTOR_RULES).map(([key, value]) => {
@@ -512,10 +514,11 @@ const configuration = isentinel(
 		},
 		spellCheck: false,
 		stylistic: true,
+		type: "package",
 	},
 	{
 		name: "small-rules/native-id-length",
-		files: ["**/*.{js,jsx,ts,tsx}"],
+		files: [GLOB_SRC],
 		rules: {
 			"eslint-js/id-length": "off",
 			"id-length": [
@@ -530,7 +533,7 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/react-doctor",
-		files: ["**/*.{ts,tsx}"],
+		files: [GLOB_SRC],
 		jsPlugins: [{ name: "react-doctor", specifier: "oxlint-plugin-react-doctor" }],
 		rules: {
 			...reactDoctorRules,
@@ -611,7 +614,7 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/vitest",
-		files: ["tests/**/*.test.{tsx,ts}"],
+		files: GLOB_TESTS,
 		plugins: ["vitest"],
 		rules: {
 			"max-lines": "off",
@@ -678,7 +681,7 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/allow-default-export",
-		files: ["tests/fixtures/**/*.{ts,tsx}", CONFIGURATION_FILES],
+		files: [FIXTURES_FILES, CONFIGURATION_FILES],
 		rules: { "import/no-default-export": "off" },
 	},
 	{
@@ -688,7 +691,7 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/fixtures",
-		files: ["tests/fixtures/**/*.{ts,tsx}"],
+		files: [FIXTURES_FILES],
 		rules: {
 			...reactTestRules,
 			"eslint-js/no-restricted-syntax": "off",
