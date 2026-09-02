@@ -1,4 +1,11 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isTsArrayType,
+	isTsParenthesizedType,
+	isTsRestType,
+	isTsTupleType,
+	isTsTypeOperator,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -8,21 +15,21 @@ function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): st
 	let currentType = typeNode;
 
 	while (true) {
-		if (currentType.type === "TSParenthesizedType") {
+		if (isTsParenthesizedType(currentType)) {
 			currentType = currentType.typeAnnotation;
 			continue;
 		}
 
-		if (currentType.type === "TSArrayType") {
+		if (isTsArrayType(currentType)) {
 			arrayTypeNames[size++] = "Array";
 			currentType = currentType.elementType;
 			continue;
 		}
 
 		if (
-			currentType.type === "TSTypeOperator" &&
+			isTsTypeOperator(currentType) &&
 			currentType.operator === "readonly" &&
-			currentType.typeAnnotation.type === "TSArrayType"
+			isTsArrayType(currentType.typeAnnotation)
 		) {
 			arrayTypeNames[size++] = "ReadonlyArray";
 			currentType = currentType.typeAnnotation.elementType;
@@ -38,12 +45,12 @@ function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): st
 }
 
 function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
-	const meaningfulParent = parent.type === "TSParenthesizedType" ? parent.parent : parent;
+	const meaningfulParent = isTsParenthesizedType(parent) ? parent.parent : parent;
 	return (
-		(meaningfulParent.type !== "TSRestType" || meaningfulParent.parent.type !== "TSTupleType") &&
-		meaningfulParent.type !== "TSTupleType" &&
-		meaningfulParent.type !== "TSArrayType" &&
-		(meaningfulParent.type !== "TSTypeOperator" || meaningfulParent.operator !== "readonly")
+		(!isTsRestType(meaningfulParent) || !isTsTupleType(meaningfulParent.parent)) &&
+		!isTsTupleType(meaningfulParent) &&
+		!isTsArrayType(meaningfulParent) &&
+		(!isTsTypeOperator(meaningfulParent) || meaningfulParent.operator !== "readonly")
 	);
 }
 
@@ -64,7 +71,7 @@ const arrayTypeGeneric = createRule("array-type-generic", "naming", {
 				if (isTopLevelArrayType(node)) reportArrayType(node);
 			},
 			TSTypeOperator(node): void {
-				if (node.operator !== "readonly" || node.typeAnnotation.type !== "TSArrayType") return;
+				if (node.operator !== "readonly" || !isTsArrayType(node.typeAnnotation)) return;
 				if (isTopLevelArrayType(node)) reportArrayType(node);
 			},
 		} satisfies Visitor;

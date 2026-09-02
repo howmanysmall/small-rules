@@ -1,18 +1,22 @@
-// Vendored from src/rules/no-unknown-parameters.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/rules/no-unknown-parameters.ts@d3f6ae4676a0a313b4779249cf7f1bac42645b8d by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
-// aliases. Local departure from the pinned commit: the single parameter named
-// by an explicit type predicate (`value is T`) or assertion predicate (`asserts
-// value is T`) return type is allowed, because validating exactly that
-// parameter is the predicate's whole job.
+// aliases. The single parameter named by an explicit type predicate or
+// assertion predicate return type is allowed. Union and parenthesized unknown
+// detection is provided by the shared function-parameters helper.
 
+import {
+	containsUnknownType,
+	functionParameterBindingName,
+	functionParameterTypeAnnotation,
+} from "$oxc-utilities/anti-slop/function-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
+import { isBindingIdentifier, isTsTypePredicate } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-type Parameter = ESTree.ParamPattern;
 type ParameterOwner =
 	| ESTree.ArrowFunctionExpression
 	| ESTree.Function
@@ -21,54 +25,6 @@ type ParameterOwner =
 	| ESTree.TSConstructSignatureDeclaration
 	| ESTree.TSFunctionType
 	| ESTree.TSMethodSignature;
-
-interface TypeAnnotatedParameter {
-	readonly typeAnnotation?: ESTree.TSTypeAnnotation | null;
-}
-
-function annotationOf(parameter: TypeAnnotatedParameter): ESTree.TSTypeAnnotation | undefined {
-	return parameter.typeAnnotation ?? undefined;
-}
-
-function parameterAnnotation(parameter: Parameter): ESTree.TSTypeAnnotation | undefined {
-	let current = parameter;
-	while (true) {
-		if (current.type === "TSParameterProperty") {
-			current = current.parameter;
-			continue;
-		}
-		if (current.type === "RestElement") {
-			if (current.typeAnnotation) return current.typeAnnotation;
-			current = current.argument;
-			continue;
-		}
-		if (current.type === "AssignmentPattern") {
-			return current.typeAnnotation ?? annotationOf(current.left);
-		}
-		return annotationOf(current);
-	}
-}
-
-function parameterName(parameter: Parameter, sourceText: string): string {
-	let current = parameter;
-	while (true) {
-		if (current.type === "TSParameterProperty") {
-			current = current.parameter;
-			continue;
-		}
-		if (current.type === "AssignmentPattern") {
-			current = current.left;
-			continue;
-		}
-		if (current.type === "RestElement") {
-			current = current.argument;
-			continue;
-		}
-		return current.type === "Identifier"
-			? current.name
-			: sourceText.slice(0, sourceText.trimEnd().lastIndexOf(":")).trimEnd();
-	}
-}
 
 /**
  * The parameter that an explicit type predicate or assertion predicate
@@ -79,9 +35,9 @@ function parameterName(parameter: Parameter, sourceText: string): string {
  */
 function validatedParameterName(node: ParameterOwner): string | undefined {
 	const predicate = node.returnType?.typeAnnotation;
-	if (predicate?.type !== "TSTypePredicate") return undefined;
+	if (!isTsTypePredicate(predicate)) return undefined;
 	/* v8 ignore next -- `this`-based predicates do not name a parameter. @preserve */
-	return predicate.parameterName.type === "Identifier" ? predicate.parameterName.name : undefined;
+	return isBindingIdentifier(predicate.parameterName) ? predicate.parameterName.name : undefined;
 }
 
 const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
@@ -89,10 +45,11 @@ const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 		function checkParameters(node: ParameterOwner): void {
 			const validatedName = validatedParameterName(node);
 			for (const parameter of node.params) {
-				const annotation = parameterAnnotation(parameter);
-				if (annotation?.typeAnnotation.type !== "TSUnknownKeyword") continue;
+				const annotation = functionParameterTypeAnnotation(parameter);
+				if (annotation === null || annotation === undefined) continue;
+				if (!containsUnknownType(annotation.typeAnnotation)) continue;
 
-				const name = parameterName(parameter, context.sourceCode.getText(parameter));
+				const name = functionParameterBindingName(parameter, context.sourceCode);
 				if (name === "cause" || name === validatedName) continue;
 
 				context.report({

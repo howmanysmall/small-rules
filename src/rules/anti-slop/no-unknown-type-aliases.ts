@@ -7,14 +7,9 @@
 // preserves rather than drops.
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { unwrapParenthesizedType } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
-
-function unwrapParenthesizedType(type: ESTree.TSType): ESTree.TSType {
-	let current = type;
-	while (current.type === "TSParenthesizedType") current = current.typeAnnotation;
-	return current;
-}
 
 function referencedAliasName(type: ESTree.TSType): string | undefined {
 	const current = unwrapParenthesizedType(type);

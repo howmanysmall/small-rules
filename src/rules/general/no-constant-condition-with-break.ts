@@ -1,12 +1,60 @@
 import { Predicate } from "effect";
 
-import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
+	BINARY_EXPRESSION,
+	BLOCK_STATEMENT,
+	BREAK_STATEMENT,
+	CALL_EXPRESSION,
+	CLASS_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	EXPRESSION_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	FUNCTION_EXPRESSION,
+	getMemberPropertyName,
+	IDENTIFIER,
+	IF_STATEMENT,
+	isAnyFunction,
+	isBindingIdentifier,
+	isLabeledStatement,
+	isLoopNode,
+	isMemberExpression,
+	isProgram,
+	isSpreadElement,
+	isSwitchStatement,
+	isVariableDeclaration,
+	LITERAL,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+	RETURN_STATEMENT,
+	SEQUENCE_EXPRESSION,
+	SWITCH_STATEMENT,
+	TAGGED_TEMPLATE_EXPRESSION,
+	TEMPLATE_LITERAL,
+	TRY_STATEMENT,
+	UNARY_EXPRESSION,
+	unwrapExpression,
+	UPDATE_EXPRESSION,
+	VARIABLE_DECLARATION,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
+	YIELD_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { JsonValue } from "type-fest";
+
+import type { LoopNode } from "$oxc-utilities/oxc-utilities";
 
 interface NoConstantConditionWithBreakOptions {
 	readonly loopExitCalls?: ReadonlyArray<string>;
@@ -23,13 +71,6 @@ interface ConstantBooleanResult {
 	readonly constant: boolean;
 	readonly value?: boolean;
 }
-
-type LoopNode =
-	| ESTree.DoWhileStatement
-	| ESTree.ForInStatement
-	| ESTree.ForOfStatement
-	| ESTree.ForStatement
-	| ESTree.WhileStatement;
 
 const NON_CONSTANT_VALUE: ConstantValueResult = { constant: false };
 const NON_CONSTANT_BOOLEAN: ConstantBooleanResult = { constant: false };
@@ -57,8 +98,8 @@ function normalizeLoopExitCalls(options: NoConstantConditionWithBreakOptions | u
 function getNodePath(node: ESTree.Expression): string | undefined {
 	const unwrapped = unwrapExpression(node);
 
-	if (unwrapped.type === "Identifier") return unwrapped.name;
-	if (unwrapped.type !== "MemberExpression") return undefined;
+	if (isBindingIdentifier(unwrapped)) return unwrapped.name;
+	if (!isMemberExpression(unwrapped)) return undefined;
 
 	const objectPath = getNodePath(unwrapped.object);
 	if (objectPath === undefined || objectPath.length === 0) return undefined;
@@ -81,80 +122,78 @@ function isConfiguredLoopExitCall(callExpression: ESTree.CallExpression, loopExi
 
 function addArrayElementsToPending(expression: ESTree.ArrayExpression, pending: Array<ESTree.Expression>): void {
 	for (const element of expression.elements) {
-		if (element !== null) pending.push(element.type === "SpreadElement" ? element.argument : element);
+		if (element !== null) pending.push(isSpreadElement(element) ? element.argument : element);
 	}
 }
 
 function addCallArgumentsToPending(
-	arguments_: ReadonlyArray<ESTree.Expression | ESTree.SpreadElement>,
+	parameters: ReadonlyArray<ESTree.Expression | ESTree.SpreadElement>,
 	pending: Array<ESTree.Expression>,
 ): void {
-	for (const argument of arguments_) {
-		pending.push(argument.type === "SpreadElement" ? argument.argument : argument);
-	}
+	for (const argument of parameters) pending.push(isSpreadElement(argument) ? argument.argument : argument);
 }
 
 function addExpressionChildrenToPending(expression: ESTree.Expression, pending: Array<ESTree.Expression>): void {
 	switch (expression.type) {
-		case "ArrayExpression": {
+		case ARRAY_EXPRESSION: {
 			addArrayElementsToPending(expression, pending);
 			break;
 		}
 
-		case "AssignmentExpression": {
+		case ASSIGNMENT_EXPRESSION: {
 			pending.push(expression.right);
 			break;
 		}
 
-		case "AwaitExpression":
-		case "UnaryExpression":
-		case "UpdateExpression": {
+		case AWAIT_EXPRESSION:
+		case UNARY_EXPRESSION:
+		case UPDATE_EXPRESSION: {
 			pending.push(expression.argument);
 			break;
 		}
 
-		case "BinaryExpression": {
+		case BINARY_EXPRESSION: {
 			if (expression.left.type !== "PrivateIdentifier") pending.push(expression.left);
 			pending.push(expression.right);
 			break;
 		}
 
-		case "CallExpression":
-		case "NewExpression": {
+		case CALL_EXPRESSION:
+		case NEW_EXPRESSION: {
 			pending.push(expression.callee);
 			addCallArgumentsToPending(expression.arguments, pending);
 			break;
 		}
 
-		case "ConditionalExpression": {
+		case CONDITIONAL_EXPRESSION: {
 			pending.push(expression.test, expression.consequent, expression.alternate);
 			break;
 		}
 
-		case "LogicalExpression": {
+		case LOGICAL_EXPRESSION: {
 			pending.push(expression.left, expression.right);
 			break;
 		}
 
-		case "MemberExpression": {
+		case MEMBER_EXPRESSION: {
 			pending.push(expression.object);
 			if (expression.computed) pending.push(expression.property);
 			break;
 		}
 
-		case "SequenceExpression":
-		case "TemplateLiteral": {
+		case SEQUENCE_EXPRESSION:
+		case TEMPLATE_LITERAL: {
 			for (const subExpression of expression.expressions) pending.push(subExpression);
 			break;
 		}
 
-		case "TaggedTemplateExpression": {
+		case TAGGED_TEMPLATE_EXPRESSION: {
 			pending.push(expression.tag);
 			for (const quasi of expression.quasi.expressions) pending.push(quasi);
 			break;
 		}
 
-		case "YieldExpression": {
+		case YIELD_EXPRESSION: {
 			if (expression.argument) pending.push(expression.argument);
 			break;
 		}
@@ -196,31 +235,31 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 	}
 
 	switch (unwrapped.type) {
-		case "ArrayExpression":
+		case ARRAY_EXPRESSION:
 			return toConstantValue([]);
 
-		case "ArrowFunctionExpression":
-		case "ClassExpression":
-		case "FunctionExpression":
+		case ARROW_FUNCTION_EXPRESSION:
+		case CLASS_EXPRESSION:
+		case FUNCTION_EXPRESSION:
 			return toConstantValue(true);
 
-		case "Identifier": {
+		case IDENTIFIER: {
 			if (unwrapped.name === "undefined") return toConstantValue(undefined);
 			if (unwrapped.name === "NaN") return toConstantValue(Number.NaN);
 			if (unwrapped.name === "Infinity") return toConstantValue(Number.POSITIVE_INFINITY);
 			return NON_CONSTANT_VALUE;
 		}
 
-		case "Literal":
+		case LITERAL:
 			return toConstantValue(unwrapped.value);
 
-		case "LogicalExpression":
+		case LOGICAL_EXPRESSION:
 			return getLogicalConstantValue(unwrapped);
 
-		case "ObjectExpression":
+		case OBJECT_EXPRESSION:
 			return toConstantValue({});
 
-		case "TemplateLiteral": {
+		case TEMPLATE_LITERAL: {
 			if (unwrapped.expressions.length > 0) return NON_CONSTANT_VALUE;
 			/* v8 ignore next -- @preserve parsers keep at least one quasi for template literals. */
 			if (unwrapped.quasis.length === 0) return toConstantValue("");
@@ -228,7 +267,7 @@ function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 			return toConstantValue(unwrapped.quasis[0]?.value.cooked ?? "");
 		}
 
-		case "UnaryExpression":
+		case UNARY_EXPRESSION:
 			return getUnaryConstantValue(unwrapped);
 
 		default:
@@ -323,19 +362,14 @@ function getLogicalConstantBoolean(expression: ESTree.LogicalExpression): Consta
 	return getConstantBoolean(expression.right);
 }
 
-const LOOP_TYPES = new Set(["DoWhileStatement", "ForInStatement", "ForOfStatement", "ForStatement", "WhileStatement"]);
-function isLoopNode(node: ESTree.Node): node is LoopNode {
-	return LOOP_TYPES.has(node.type);
-}
-
 function findLabeledStatementBody(labelName: string, startingNode: ESTree.Node): ESTree.Statement | undefined {
 	let current: ESTree.Node | null = startingNode;
 
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting rules
 	while (current !== null) {
-		if (current.type === "LabeledStatement" && current.label.name === labelName) return current.body;
+		if (isLabeledStatement(current) && current.label.name === labelName) return current.body;
 		/* v8 ignore next -- @preserve valid break labels must resolve before Program is reached. */
-		if (current.type === "Program") return undefined;
+		if (isProgram(current)) return undefined;
 		current = current.parent;
 	}
 
@@ -353,9 +387,7 @@ function breaksTargetLoop(statement: ESTree.BreakStatement, loopNode: LoopNode):
 
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting rules
 	while (current !== null) {
-		if (current.type === "Program" || isAnyFunction(current) || current.type === "SwitchStatement") {
-			return false;
-		}
+		if (isProgram(current) || isAnyFunction(current) || isSwitchStatement(current)) return false;
 		if (isLoopNode(current)) return current === loopNode;
 		current = current.parent;
 	}
@@ -365,12 +397,12 @@ function breaksTargetLoop(statement: ESTree.BreakStatement, loopNode: LoopNode):
 }
 
 function forStatementInitContainsConfiguredLoopExit(
-	initialization: ESTree.ForStatement["init"],
+	initialization: ESTree.ForStatementInit | null,
 	loopExitCalls: ReadonlySet<string>,
 ): boolean {
 	if (!initialization) return false;
 
-	if (initialization.type === "VariableDeclaration") {
+	if (isVariableDeclaration(initialization)) {
 		return initialization.declarations.some((declaration) =>
 			declaration.init ? expressionContainsConfiguredLoopExit(declaration.init, loopExitCalls) : false,
 		);
@@ -382,21 +414,22 @@ function forStatementInitContainsConfiguredLoopExit(
 function loopHeaderContainsConfiguredLoopExit(loopNode: LoopNode, loopExitCalls: ReadonlySet<string>): boolean {
 	/* v8 ignore next -- @preserve caller loop-node narrowing restricts this switch to handled loop types. */
 	switch (loopNode.type) {
-		case "DoWhileStatement":
-		case "WhileStatement":
+		case DO_WHILE_STATEMENT:
+		case WHILE_STATEMENT:
 			return expressionContainsConfiguredLoopExit(loopNode.test, loopExitCalls);
 
 		/* v8 ignore start -- @preserve constant-condition visitors never pass for-in or for-of nodes here. */
-		case "ForInStatement":
-		case "ForOfStatement":
+		case FOR_IN_STATEMENT:
+		case FOR_OF_STATEMENT:
 			return expressionContainsConfiguredLoopExit(loopNode.right, loopExitCalls);
 		/* v8 ignore stop -- @preserve */
 
-		case "ForStatement": {
-			if (forStatementInitContainsConfiguredLoopExit(loopNode.init, loopExitCalls)) return true;
-			if (loopNode.test && expressionContainsConfiguredLoopExit(loopNode.test, loopExitCalls)) return true;
-			if (loopNode.update && expressionContainsConfiguredLoopExit(loopNode.update, loopExitCalls)) return true;
-			return false;
+		case FOR_STATEMENT: {
+			return (
+				forStatementInitContainsConfiguredLoopExit(loopNode.init, loopExitCalls) ||
+				(loopNode.test !== null && expressionContainsConfiguredLoopExit(loopNode.test, loopExitCalls)) ||
+				(loopNode.update !== null && expressionContainsConfiguredLoopExit(loopNode.update, loopExitCalls))
+			);
 		}
 
 		/* v8 ignore start -- @preserve LoopNode is restricted to the handled loop statement types. */
@@ -412,39 +445,39 @@ function statementContainsLoopExit(
 	loopExitCalls: ReadonlySet<string>,
 ): boolean {
 	let currentStatement = statement;
-	while (currentStatement.type === "LabeledStatement") currentStatement = currentStatement.body;
+	while (isLabeledStatement(currentStatement)) currentStatement = currentStatement.body;
 
 	switch (currentStatement.type) {
-		case "BlockStatement": {
+		case BLOCK_STATEMENT: {
 			return currentStatement.body.some((bodyStatement) =>
 				statementContainsLoopExit(bodyStatement, loopNode, loopExitCalls),
 			);
 		}
 
-		case "BreakStatement":
+		case BREAK_STATEMENT:
 			return breaksTargetLoop(currentStatement, loopNode);
 
-		case "DoWhileStatement":
-		case "WhileStatement":
+		case DO_WHILE_STATEMENT:
+		case WHILE_STATEMENT:
 			return loopStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
-		case "ExpressionStatement":
+		case EXPRESSION_STATEMENT:
 			return expressionContainsConfiguredLoopExit(currentStatement.expression, loopExitCalls);
 
-		case "ForInStatement":
-		case "ForOfStatement":
+		case FOR_IN_STATEMENT:
+		case FOR_OF_STATEMENT:
 			return forEachStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
-		case "ForStatement":
+		case FOR_STATEMENT:
 			return forStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
-		case "IfStatement":
+		case IF_STATEMENT:
 			return ifStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
-		case "ReturnStatement":
+		case RETURN_STATEMENT:
 			return true;
 
-		case "SwitchStatement": {
+		case SWITCH_STATEMENT: {
 			return currentStatement.cases.some((switchCase) =>
 				switchCase.consequent.some((consequent) =>
 					statementContainsLoopExit(consequent, loopNode, loopExitCalls),
@@ -452,16 +485,16 @@ function statementContainsLoopExit(
 			);
 		}
 
-		case "TryStatement":
+		case TRY_STATEMENT:
 			return tryStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
-		case "VariableDeclaration": {
+		case VARIABLE_DECLARATION: {
 			return currentStatement.declarations.some((declaration) =>
 				declaration.init ? expressionContainsConfiguredLoopExit(declaration.init, loopExitCalls) : false,
 			);
 		}
 
-		case "WithStatement":
+		case WITH_STATEMENT:
 			return withStatementContainsLoopExit(currentStatement, loopNode, loopExitCalls);
 
 		default:
@@ -492,10 +525,12 @@ function forStatementContainsLoopExit(
 	loopNode: LoopNode,
 	loopExitCalls: ReadonlySet<string>,
 ): boolean {
-	if (forStatementInitContainsConfiguredLoopExit(statement.init, loopExitCalls)) return true;
-	if (statement.test && expressionContainsConfiguredLoopExit(statement.test, loopExitCalls)) return true;
-	if (statement.update && expressionContainsConfiguredLoopExit(statement.update, loopExitCalls)) return true;
-	return statementContainsLoopExit(statement.body, loopNode, loopExitCalls);
+	return (
+		forStatementInitContainsConfiguredLoopExit(statement.init, loopExitCalls) ||
+		(statement.test !== null && expressionContainsConfiguredLoopExit(statement.test, loopExitCalls)) ||
+		(statement.update !== null && expressionContainsConfiguredLoopExit(statement.update, loopExitCalls)) ||
+		statementContainsLoopExit(statement.body, loopNode, loopExitCalls)
+	);
 }
 
 function ifStatementContainsLoopExit(
@@ -512,10 +547,11 @@ function tryStatementContainsLoopExit(
 	loopNode: LoopNode,
 	loopExitCalls: ReadonlySet<string>,
 ): boolean {
-	if (statementContainsLoopExit(statement.block, loopNode, loopExitCalls)) return true;
-	if (statement.handler && statementContainsLoopExit(statement.handler.body, loopNode, loopExitCalls)) return true;
-	if (statement.finalizer && statementContainsLoopExit(statement.finalizer, loopNode, loopExitCalls)) return true;
-	return false;
+	return (
+		statementContainsLoopExit(statement.block, loopNode, loopExitCalls) ||
+		(statement.handler !== null && statementContainsLoopExit(statement.handler.body, loopNode, loopExitCalls)) ||
+		(statement.finalizer !== null && statementContainsLoopExit(statement.finalizer, loopNode, loopExitCalls))
+	);
 }
 
 function withStatementContainsLoopExit(
@@ -541,7 +577,7 @@ function shouldReportLoop(
 
 const noConstantConditionWithBreak = createRule("no-constant-condition-with-break", "general", {
 	create(context): Visitor {
-		// oxlint-disable-next-line typescript/no-unnecessary-condition -- safety!
+		// oxlint-disable-next-line typescript/no-unnecessary-condition -- WHAT ARE YOU TALKING ABOUT
 		const rawOptions = context.options?.[0];
 		const loopExitCalls = normalizeLoopExitCalls(Predicate.isObject(rawOptions) ? rawOptions : undefined);
 

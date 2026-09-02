@@ -1,7 +1,6 @@
 import nodePath from "node:path";
 import { Predicate } from "effect";
 
-import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
@@ -9,6 +8,7 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
+import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";

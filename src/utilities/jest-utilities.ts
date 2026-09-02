@@ -1,5 +1,4 @@
-import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
-import { isFunction } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName, isAnyFunction, isLoopNode } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
@@ -39,17 +38,7 @@ function isEachFactoryCall(node: ESTree.CallExpression): boolean {
 
 function getLastCallbackArgument(node: ESTree.CallExpression): CallbackFunction | undefined {
 	const lastArgument = node.arguments.at(-1);
-	return lastArgument === undefined || !isFunction(lastArgument) ? undefined : lastArgument;
-}
-
-function isIndeterminateLoopNode(node: ESTree.Node): boolean {
-	return (
-		node.type === "DoWhileStatement" ||
-		node.type === "ForInStatement" ||
-		node.type === "ForOfStatement" ||
-		node.type === "ForStatement" ||
-		node.type === "WhileStatement"
-	);
+	return lastArgument === undefined || !isAnyFunction(lastArgument) ? undefined : lastArgument;
 }
 
 function isSameNode(left: ESTree.Node, right: ESTree.Node): boolean {
@@ -74,15 +63,15 @@ function getExpectContext(currentParent: ESTree.Node, root: ESTree.Node): Expect
 	}
 
 	const ownContext: ExpectContext = {
-		hasCallback: isFunction(currentParent),
+		hasCallback: isAnyFunction(currentParent),
 		hasIndeterminate:
-			isFunction(currentParent) ||
-			isIndeterminateLoopNode(currentParent) ||
+			isAnyFunction(currentParent) ||
+			isLoopNode(currentParent) ||
 			currentParent.type === "ConditionalExpression" ||
 			currentParent.type === "IfStatement" ||
 			currentParent.type === "SwitchCase" ||
 			(currentParent.type === "TryStatement" && currentParent.handler !== null),
-		hasLoop: isIndeterminateLoopNode(currentParent),
+		hasLoop: isLoopNode(currentParent),
 	};
 
 	/* v8 ignore next -- @preserve Parser traversal sets parent links before expect-call context is inspected. */

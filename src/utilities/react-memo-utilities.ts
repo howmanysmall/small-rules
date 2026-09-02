@@ -1,12 +1,17 @@
-import { isIdentifierNamed } from "$oxc-utilities/oxc-utilities";
+import {
+	isExpressionStatement,
+	isIdentifierNamed,
+	isImportSpecifier,
+	isUnaryExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { isReactImport } from "$oxc-utilities/react-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
 export function isStandaloneUseMemo(node: ESTree.CallExpression): boolean {
-	if (node.parent.type === "ExpressionStatement") return true;
-	if (node.parent.type !== "UnaryExpression" || node.parent.operator !== "void") return false;
-	return node.parent.parent.type === "ExpressionStatement";
+	if (isExpressionStatement(node.parent)) return true;
+	if (!isUnaryExpression(node.parent) || node.parent.operator !== "void") return false;
+	return isExpressionStatement(node.parent.parent);
 }
 
 export function trackUseMemoImports(
@@ -19,7 +24,7 @@ export function trackUseMemoImports(
 
 	for (const specifier of node.specifiers) {
 		/* v8 ignore next -- @preserve React useMemo tracking currently receives named imports in exercised rule paths. */
-		if (specifier.type === "ImportSpecifier") {
+		if (isImportSpecifier(specifier)) {
 			if (isIdentifierNamed(specifier.imported, "useMemo")) memoIdentifiers.add(specifier.local.name);
 			continue;
 		}

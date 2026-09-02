@@ -13,35 +13,45 @@ import {
 	createTypeEnvironment,
 } from "$oxc-utilities/anti-slop/dictionary-types";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isBindingIdentifier,
+	isProgram,
+	isTsMappedType,
+	isTsTypeAliasDeclaration,
+	isTsTypeLiteral,
+	isTsTypeReference,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 import type { TypeEnvironment, UnsafeDictionary } from "$oxc-utilities/anti-slop/dictionary-types";
 
 function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironment): boolean {
-	if (type.type !== "TSTypeReference" || (type.typeArguments?.params.length ?? 0) > 0) return false;
-	if (type.typeName.type !== "Identifier") return false;
-	if (!environment.aliases.has(type.typeName.name)) return false;
-	let current: ESTree.Node = type.parent;
-	while (current.type !== "Program") {
-		if (current.type === "TSTypeAliasDeclaration") return false;
-		current = current.parent;
+	if (!isTsTypeReference(type) || (type.typeArguments?.params.length ?? 0) > 0) return false;
+	if (!isBindingIdentifier(type.typeName) || !environment.aliases.has(type.typeName.name)) return false;
+
+	let { parent } = type;
+	while (!isProgram(parent)) {
+		if (isTsTypeAliasDeclaration(parent)) return false;
+		({ parent } = parent);
 	}
 	return true;
 }
 
 function reportableUnsafeDictionary(type: ESTree.TSType, environment: TypeEnvironment): undefined | UnsafeDictionary {
 	if (isPlainAliasConsumerUse(type, environment)) return undefined;
+
 	const unsafe = classifyUnsafeDictionary(type, environment);
 	if (unsafe === undefined) return undefined;
-	let current: ESTree.Node = type.parent;
-	while (current.type !== "Program") {
+
+	let { parent } = type;
+	while (!isProgram(parent)) {
 		let ancestorClassified: undefined | UnsafeDictionary;
-		if (current.type === "TSMappedType" || current.type === "TSTypeLiteral" || current.type === "TSTypeReference") {
-			ancestorClassified = classifyUnsafeDictionary(current, environment);
+		if (isTsMappedType(parent) || isTsTypeLiteral(parent) || isTsTypeReference(parent)) {
+			ancestorClassified = classifyUnsafeDictionary(parent, environment);
 		}
 		if (ancestorClassified !== undefined) return undefined;
-		current = current.parent;
+		({ parent } = parent);
 	}
 	return unsafe;
 }
@@ -53,8 +63,10 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 		function reportIfUnsafe(type: ESTree.TSType): void {
 			/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
 			if (environment === undefined) return;
+
 			const unsafe = reportableUnsafeDictionary(type, environment);
 			if (unsafe === undefined) return;
+
 			context.report({ data: { value: unsafe.unsafeValue }, messageId: "unsafeDictionary", node: type });
 		}
 
@@ -64,8 +76,7 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 			},
 			TSIndexSignature(node): void {
 				/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
-				if (environment === undefined) return;
-				if (node.parent.type === "TSTypeLiteral") return;
+				if (environment === undefined || isTsTypeLiteral(node.parent)) return;
 				const unsafe = classifyUnsafeDictionaryValue(node.typeAnnotation.typeAnnotation, environment);
 				if (unsafe !== undefined) {
 					context.report({

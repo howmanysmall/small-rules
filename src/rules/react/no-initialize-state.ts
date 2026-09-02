@@ -8,13 +8,18 @@ import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effe
 
 type RuleContext = InferContextFromRule<typeof noInitializeState>;
 
-function reportInitializeStateEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
+function reportInitializeStateEffect(
+	context: RuleContext,
+	{ getStateName, isStateCall, scope }: ReactEffectAnalysis,
+	effect: ReactEffect,
+): void {
 	for (const reference of effect.functionReferences) {
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isStateCall(reference)) continue;
-		const callExpression = analysis.scope.getCallExpression(reference);
+		if (!scope.isSynchronousWithin(reference.identifier, effect.functionNode) || !isStateCall(reference)) continue;
+
+		const callExpression = scope.getCallExpression(reference);
+
 		if (callExpression === undefined) continue;
-		const stateName = analysis.getStateName(reference);
+		const stateName = getStateName(reference);
 		if (stateName === undefined) continue;
 
 		let argumentText = "undefined";

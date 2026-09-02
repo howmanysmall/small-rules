@@ -1,16 +1,31 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	ARROW_FUNCTION_EXPRESSION,
+	FUNCTION_DECLARATION,
+	FUNCTION_EXPRESSION,
+	isBlockStatement,
+	isCatchClause,
+	isClassBody,
+	isIdentifierName,
+	isImportDeclaration,
+	isMethodDefinitionRaw,
+	isNewExpression,
+	isPrivateIdentifier,
+	isPropertyDefinitionRaw,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type ErrorSpecifier =
 	| string
 	| {
-			readonly from?: "file" | "library" | "package";
+			readonly from?: "file" | "library" | "package" | undefined;
 			readonly name: ReadonlyArray<string> | string;
-			readonly package?: string;
-			readonly path?: string;
+			readonly package?: string | undefined;
+			readonly path?: string | undefined;
 	  };
 
 function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
@@ -18,13 +33,13 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 
 	while (current !== null) {
 		switch (current.type) {
-			case "ArrowFunctionExpression":
+			case ARROW_FUNCTION_EXPRESSION:
 				return getAssignedName(current);
 
-			case "FunctionDeclaration":
+			case FUNCTION_DECLARATION:
 				return current.id?.name;
 
-			case "FunctionExpression": {
+			case FUNCTION_EXPRESSION: {
 				if (current.id) return current.id.name;
 				return getAssignedName(current);
 			}
@@ -42,11 +57,11 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 }
 
 function getAssignedName({ parent }: ESTree.Node): string | undefined {
-	if (parent?.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
-	if (parent?.type === "PropertyDefinition" || parent?.type === "MethodDefinition") {
-		if (parent.key.type === "PrivateIdentifier") return `#${parent.key.name}`;
+	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
+	if (isPropertyDefinitionRaw(parent) || isMethodDefinitionRaw(parent)) {
+		if (isPrivateIdentifier(parent.key)) return `#${parent.key.name}`;
 		/* v8 ignore next -- @preserve class and object member keys are identifiers after private keys are handled. */
-		if (parent.key.type === "Identifier") return parent.key.name;
+		if (isIdentifierName(parent.key)) return parent.key.name;
 	}
 
 	return undefined;
@@ -56,17 +71,16 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
 		switch (current.type) {
-			case "ArrowFunctionExpression": {
-				return current.parent.type === "PropertyDefinition" && current.parent.parent.type === "ClassBody";
-			}
+			case ARROW_FUNCTION_EXPRESSION:
+				return isPropertyDefinitionRaw(current.parent) && isClassBody(current.parent.parent);
 
-			case "FunctionDeclaration":
+			case FUNCTION_DECLARATION:
 				return false;
 
-			case "FunctionExpression": {
+			case FUNCTION_EXPRESSION: {
 				return (
-					(current.parent.type === "MethodDefinition" || current.parent.type === "PropertyDefinition") &&
-					current.parent.parent.type === "ClassBody"
+					(isMethodDefinitionRaw(current.parent) || isPropertyDefinitionRaw(current.parent)) &&
+					isClassBody(current.parent.parent)
 				);
 			}
 
@@ -90,7 +104,7 @@ function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: 
 		// ancestors
 		let current: ESTree.Node | null = node.parent;
 		while (current !== null) {
-			if (current.type === "CatchClause" && current.param?.type === "Identifier") names.add(current.param.name);
+			if (isCatchClause(current) && isIdentifierName(current.param)) names.add(current.param.name);
 			current = current.parent;
 		}
 
@@ -116,7 +130,7 @@ function resolveImportSource(sourceCode: SourceCode, node: ESTree.IdentifierRefe
 			const variable = scope.set.get(node.name);
 			if (variable !== undefined) {
 				const importBinding = variable.defs.find((definition) => definition.type === "ImportBinding");
-				if (importBinding?.parent?.type === "ImportDeclaration") return importBinding.parent.source.value;
+				if (isImportDeclaration(importBinding?.parent)) return importBinding.parent.source.value;
 				return undefined;
 			}
 
@@ -209,10 +223,10 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 		return {
 			ThrowStatement(node): void {
 				const { argument } = node;
-				if (argument.type !== "NewExpression") return;
+				if (!isNewExpression(argument)) return;
 
 				const { callee } = argument;
-				if (callee.type !== "Identifier" || !callee.name.endsWith("Error")) return;
+				if (!isIdentifierName(callee) || !callee.name.endsWith("Error")) return;
 
 				if (isAllowedError(sourceCode, physicalFilename, callee, allowList)) return;
 
@@ -232,7 +246,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 							`throw ${variableName};`,
 						].join("\n");
 
-						if (node.parent.type === "BlockStatement") return fixer.replaceText(node, replacement);
+						if (isBlockStatement(node.parent)) return fixer.replaceText(node, replacement);
 						return fixer.replaceText(node, `{\n${replacement}\n}`);
 					},
 					messageId: "missingCaptureStackTrace",

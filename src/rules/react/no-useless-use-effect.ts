@@ -1,7 +1,7 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getNamespacedCallNames, isFunction, isNode } from "$oxc-utilities/oxc-utilities";
+import { getNamespacedCallNames, isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
@@ -1598,7 +1598,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 					return;
 				}
 
-				if (!isFunction(callback)) return;
+				if (!isAnyFunction(callback)) return;
 				analyzeInlineEffectCallback(node, callback);
 			},
 			FunctionDeclaration: enterFunction,

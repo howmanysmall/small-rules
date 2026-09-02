@@ -1,6 +1,6 @@
 import { Predicate } from "effect";
 
-import { hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAssignmentExpression,
@@ -11,6 +11,7 @@ import {
 	isNumericLiteral,
 	isVariableDeclaration,
 	isVariableDeclarator,
+	unwrapExpression,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";

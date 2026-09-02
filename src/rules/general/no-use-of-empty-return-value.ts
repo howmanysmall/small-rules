@@ -1,6 +1,20 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
+import {
+	isAnyFunction,
+	isArrowFunctionExpression,
+	isAwaitExpression,
+	isBindingIdentifier,
+	isCallbackFunction,
+	isConditionalExpression,
+	isExpressionStatement,
+	isLogicalExpression,
+	isReturnStatement,
+	isSequenceExpression,
+	isThrowStatement,
+	isUnaryExpression,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -10,21 +24,21 @@ function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
 	let currentParent = parent;
 	let currentChild = child;
 
-	while (currentParent.type === "SequenceExpression") {
+	while (isSequenceExpression(currentParent)) {
 		if (currentParent.expressions.at(-1) !== currentChild) return false;
 		currentChild = currentParent;
 		currentParent = currentParent.parent;
 	}
 
-	if (currentParent.type === "LogicalExpression") return currentParent.left === currentChild;
-	if (currentParent.type === "ConditionalExpression") return currentParent.test === currentChild;
+	if (isLogicalExpression(currentParent)) return currentParent.left === currentChild;
+	if (isConditionalExpression(currentParent)) return currentParent.test === currentChild;
 	return (
-		currentParent.type !== "ExpressionStatement" &&
-		currentParent.type !== "ArrowFunctionExpression" &&
-		currentParent.type !== "UnaryExpression" &&
-		currentParent.type !== "AwaitExpression" &&
-		currentParent.type !== "ReturnStatement" &&
-		currentParent.type !== "ThrowStatement"
+		!isExpressionStatement(currentParent) &&
+		!isArrowFunctionExpression(currentParent) &&
+		!isUnaryExpression(currentParent) &&
+		!isAwaitExpression(currentParent) &&
+		!isReturnStatement(currentParent) &&
+		!isThrowStatement(currentParent)
 	);
 }
 
@@ -34,15 +48,16 @@ function callReturnValueIsUsed(callExpression: ESTree.CallExpression): boolean {
 
 function functionFromVariable(variable: Variable): FunctionLike | undefined {
 	if (variable.defs.length !== 1) return undefined;
+
 	const [definition] = variable.defs;
 	/* v8 ignore next -- length === 1 guarantees a definition entry. @preserve */
 	if (definition === undefined) return undefined;
+
 	if (definition.type === "FunctionName" && isAnyFunction(definition.node)) return definition.node;
 	if (
 		definition.type === "Variable" &&
-		definition.node.type === "VariableDeclarator" &&
-		definition.node.init !== null &&
-		(definition.node.init.type === "FunctionExpression" || definition.node.init.type === "ArrowFunctionExpression")
+		isVariableDeclarator(definition.node) &&
+		isCallbackFunction(definition.node.init)
 	) {
 		return definition.node.init;
 	}
@@ -61,9 +76,7 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				functionsWithReturnValue.add(node);
 				return;
 			}
-			if (node.type === "ArrowFunctionExpression" && node.expression) {
-				functionsWithReturnValue.add(node);
-			}
+			if (isArrowFunctionExpression(node) && node.expression) functionsWithReturnValue.add(node);
 		}
 
 		function exitFunction(): void {
@@ -74,7 +87,7 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 			ArrowFunctionExpression: enterFunction,
 			"ArrowFunctionExpression:exit": exitFunction,
 			CallExpression(node): void {
-				if (!callReturnValueIsUsed(node) || node.callee.type !== "Identifier") return;
+				if (!callReturnValueIsUsed(node) || !isBindingIdentifier(node.callee)) return;
 
 				const scope = context.sourceCode.getScope(node);
 				const reference = scope.references.find((entry) => entry.identifier === node.callee);

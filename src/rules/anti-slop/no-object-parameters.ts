@@ -6,6 +6,20 @@
 
 import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isAssignmentPattern,
+	isBindingIdentifier,
+	isExportNamedDeclaration,
+	isIdentifierReference,
+	isRestElement,
+	isTsObjectKeyword,
+	isTsParameterProperty,
+	isTsParenthesizedType,
+	isTsTypeAliasDeclaration,
+	isTsTypeAnnotation,
+	isTsTypeReference,
+	isTsUnionType,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -21,26 +35,23 @@ type ParameterOwner =
 
 function parameterAnnotation(parameter: Parameter): ESTree.TSTypeAnnotation | undefined {
 	let current = parameter;
-	while (current.type === "TSParameterProperty" || current.type === "RestElement") {
-		if (current.type === "TSParameterProperty") {
+	while (isTsParameterProperty(current) || isRestElement(current)) {
+		if (isTsParameterProperty(current)) {
 			current = current.parameter;
 			continue;
 		}
-		if (current.typeAnnotation?.type === "TSTypeAnnotation") {
-			return current.typeAnnotation;
-		}
+
+		if (isTsTypeAnnotation(current.typeAnnotation)) return current.typeAnnotation;
 		current = current.argument;
 	}
-	if (current.type === "AssignmentPattern") {
-		return current.typeAnnotation ?? current.left.typeAnnotation ?? undefined;
-	}
+
+	if (isAssignmentPattern(current)) return current.typeAnnotation ?? current.left.typeAnnotation ?? undefined;
 	return current.typeAnnotation ?? undefined;
 }
 
 function parameterName(parameter: Parameter, annotation: ESTree.TSTypeAnnotation, sourceText: string): string {
-	if (parameter.type === "Identifier") {
-		return parameter.name;
-	}
+	if (isBindingIdentifier(parameter)) return parameter.name;
+
 	// Yuku parameter nodes span their type annotation, so trimming the annotation
 	// text always yields the displayed name; upstream kept a foreign-parser
 	// branch.
@@ -49,8 +60,8 @@ function parameterName(parameter: Parameter, annotation: ESTree.TSTypeAnnotation
 
 function aliasName(type: ESTree.TSType): string | undefined {
 	if (
-		type.type !== "TSTypeReference" ||
-		type.typeName.type !== "Identifier" ||
+		!isTsTypeReference(type) ||
+		!isIdentifierReference(type.typeName) ||
 		(type.typeArguments?.params.length ?? 0) > 0
 	) {
 		return undefined;
@@ -59,14 +70,12 @@ function aliasName(type: ESTree.TSType): string | undefined {
 }
 
 function enqueueNestedTypes(type: ESTree.TSType, pending: Array<ESTree.TSType>): boolean {
-	if (type.type === "TSParenthesizedType") {
+	if (isTsParenthesizedType(type)) {
 		pending.push(type.typeAnnotation);
 		return true;
 	}
-	if (type.type === "TSUnionType") {
-		for (const member of type.types) {
-			pending.push(member);
-		}
+	if (isTsUnionType(type)) {
+		for (const member of type.types) pending.push(member);
 		return true;
 	}
 	return false;
@@ -88,9 +97,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 			}
 			visitedAliases.add(name);
 			const alias = aliases.get(name);
-			if (alias !== undefined) {
-				pending.push(alias);
-			}
+			if (alias !== undefined) pending.push(alias);
 		}
 
 		function resolvesToObject(type: ESTree.TSType, shadowedAliases: ReadonlySet<string>): boolean {
@@ -98,14 +105,10 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 			let pending: Array<ESTree.TSType> = [type];
 
 			while (pending.length > 0) {
-				const next: Array<ESTree.TSType> = [];
+				const next = new Array<ESTree.TSType>();
 				for (const current of pending) {
-					if (current.type === "TSObjectKeyword") {
-						return true;
-					}
-					if (enqueueNestedTypes(current, next)) {
-						continue;
-					}
+					if (isTsObjectKeyword(current)) return true;
+					if (enqueueNestedTypes(current, next)) continue;
 					enqueueAlias(current, shadowedAliases, visitedAliases, next);
 				}
 				pending = next;
@@ -117,10 +120,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 			const shadowedAliases = lexicalTypeParameterNames(node, context.sourceCode.visitorKeys);
 			for (const parameter of node.params) {
 				const annotation = parameterAnnotation(parameter);
-				if (
-					annotation?.type !== "TSTypeAnnotation" ||
-					!resolvesToObject(annotation.typeAnnotation, shadowedAliases)
-				) {
+				if (!isTsTypeAnnotation(annotation) || !resolvesToObject(annotation.typeAnnotation, shadowedAliases)) {
 					continue;
 				}
 				context.report({
@@ -141,9 +141,9 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 				aliases.clear();
 				for (const statement of node.body) {
 					/* v8 ignore next -- This discriminated AST normalization has both forms covered by parser fixtures. @preserve */
-					const declaration = statement.type === "ExportNamedDeclaration" ? statement.declaration : statement;
+					const declaration = isExportNamedDeclaration(statement) ? statement.declaration : statement;
 					if (
-						declaration?.type === "TSTypeAliasDeclaration" &&
+						isTsTypeAliasDeclaration(declaration) &&
 						(declaration.typeParameters?.params.length ?? 0) === 0
 					) {
 						aliases.set(declaration.id.name, declaration.typeAnnotation);

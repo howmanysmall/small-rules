@@ -12,8 +12,25 @@ import {
 	createTypeEnvironment,
 	isKnownEvidenceExpression,
 } from "$oxc-utilities/anti-slop/dictionary-types";
-import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isAnyFunction,
+	isAnyLiteral,
+	isBindingIdentifier,
+	isMethodDefinition,
+	isObjectExpression,
+	isParenthesizedExpression,
+	isPrivateIdentifier,
+	isProgram,
+	isTsAsExpression,
+	isTsNonNullExpression,
+	isTsSatisfiesExpression,
+	isTsTypeAssertion,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -26,19 +43,21 @@ function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierRe
 	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
 }
 
-function variableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator | undefined {
+function getVariableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator | undefined {
 	/* v8 ignore next -- Scope lookups omit unresolved globals instead of returning zero-definition variables. @preserve */
 	if (variable.defs.length !== 1) return undefined;
+
 	const [definition] = variable.defs;
 	if (definition?.type !== "Variable") return undefined;
+
 	const { node } = definition;
 	/* v8 ignore next -- Variable definitions are always declarator nodes in this parser. @preserve */
-	return node.type === "VariableDeclarator" ? node : undefined;
+	return isVariableDeclarator(node) ? node : undefined;
 }
 
 function isStableConstVariable(variable: ScopeVariable, declarator: ESTree.VariableDeclarator): boolean {
 	return (
-		declarator.parent.type === "VariableDeclaration" &&
+		isVariableDeclaration(declarator.parent) &&
 		declarator.parent.kind === "const" &&
 		variable.references.every((reference) => reference.init || !reference.isWrite())
 	);
@@ -53,15 +72,17 @@ function hasKnownEvidence(
 	for (;;) {
 		if (isKnownEvidenceExpression(currentExpression)) return true;
 		const unwrapped = unwrapExpression(currentExpression);
-		if (unwrapped.type !== "Identifier") return false;
+		if (!isBindingIdentifier(unwrapped)) return false;
+
 		const variable = resolveVariable(sourceCode, unwrapped);
 		if (variable === undefined || visitedVariables.has(variable)) return false;
-		const declarator = variableDeclarator(variable);
+
+		const declarator = getVariableDeclarator(variable);
 		if (declarator === undefined) return false;
+
 		const { init: initializer } = declarator;
-		if (initializer === null || !isStableConstVariable(variable, declarator)) {
-			return false;
-		}
+		if (initializer === null || !isStableConstVariable(variable, declarator)) return false;
+
 		visitedVariables.add(variable);
 		currentExpression = initializer;
 	}
@@ -75,41 +96,37 @@ function annotationTarget(
 	return classifyWideningTarget(annotation.typeAnnotation, environment);
 }
 
-function enclosingFunction(node: ESTree.Node): FunctionExpression | undefined {
+function getEnclosingFunction(node: ESTree.Node): FunctionExpression | undefined {
 	let current: ESTree.Node | null = node.parent;
-	while (current !== null && current.type !== "Program") {
-		if (
-			current.type === "ArrowFunctionExpression" ||
-			current.type === "FunctionDeclaration" ||
-			current.type === "FunctionExpression"
-		) {
-			return current;
-		}
+	while (current !== null && !isProgram(current)) {
+		if (isAnyFunction(current)) return current;
 		current = current.parent;
 	}
 	/* v8 ignore next -- top-level returns only occur in script sources this suite does not exercise. @preserve */
 	return undefined;
 }
 
-function sourceKeyName(sourceCode: SourceCode, key: ESTree.PropertyKey): string {
-	if (key.type === "Identifier" || key.type === "PrivateIdentifier") return key.name;
-	if (key.type === "Literal") return String(key.value);
-	return sourceCode.getText(key);
+function getSourceKeyName(sourceCode: SourceCode, key: ESTree.PropertyKey): string {
+	if (isBindingIdentifier(key) || isPrivateIdentifier(key)) return key.name;
+	return isAnyLiteral(key) ? String(key.value) : sourceCode.getText(key);
 }
 
-function functionName(sourceCode: SourceCode, owner: FunctionExpression | undefined): string {
+const ANONYMOUS = "anonymous function";
+
+function functionName(sourceCode: SourceCode, owner?: FunctionExpression): string {
 	/* v8 ignore next 3 -- top-level returns only occur in script sources this suite does not exercise. @preserve */
-	if (owner === undefined) return "anonymous function";
+	if (owner === undefined) return ANONYMOUS;
 	if (owner.id !== null) return owner.id.name;
+
 	const { parent } = owner;
-	if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
-	if (parent.type === "MethodDefinition") return sourceKeyName(sourceCode, parent.key);
-	return "anonymous function";
+	if (isVariableDeclarator(parent) && isBindingIdentifier(parent.id)) return parent.id.name;
+
+	return isMethodDefinition(parent) ? getSourceKeyName(sourceCode, parent.key) : ANONYMOUS;
 }
 
 function isEmptyObjectExpression(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpressionParentheses(expression);
-	return unwrapped.type === "ObjectExpression" && unwrapped.properties.length === 0;
+	return isObjectExpression(unwrapped) && unwrapped.properties.length === 0;
 }
 
 function isDictionaryAccumulatorTarget(destination: WideningTarget): boolean {
@@ -118,18 +135,18 @@ function isDictionaryAccumulatorTarget(destination: WideningTarget): boolean {
 
 function hasParentAssertion(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null | undefined = node.parent;
-	while (current?.type === "ParenthesizedExpression") current = current.parent;
-	return current?.type === "TSAsExpression" || current?.type === "TSTypeAssertion";
+	while (isParenthesizedExpression(current)) current = current.parent;
+	return isTsAsExpression(current) || isTsTypeAssertion(current);
 }
 
 function unwrapExpressionParentheses(expression: ESTree.Expression): ESTree.Expression {
 	let current = expression;
 	while (
-		current.type === "ParenthesizedExpression" ||
-		current.type === "TSAsExpression" ||
-		current.type === "TSSatisfiesExpression" ||
-		current.type === "TSTypeAssertion" ||
-		current.type === "TSNonNullExpression"
+		isParenthesizedExpression(current) ||
+		isTsAsExpression(current) ||
+		isTsSatisfiesExpression(current) ||
+		isTsTypeAssertion(current) ||
+		isTsNonNullExpression(current)
 	) {
 		current = current.expression;
 	}
@@ -148,6 +165,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			if (destination === undefined) return;
 			if (isDictionaryAccumulatorTarget(destination) && isEmptyObjectExpression(expression)) return;
 			if (!hasKnownEvidence(context.sourceCode, expression)) return;
+
 			context.report({
 				data: { subject, target: destination.kind },
 				messageId: "widening",
@@ -155,9 +173,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			});
 		}
 
-		function targetFromAnnotation(
-			annotation: ESTree.TSTypeAnnotation | null | undefined,
-		): undefined | WideningTarget {
+		function targetFromAnnotation(annotation?: ESTree.TSTypeAnnotation | null): undefined | WideningTarget {
 			/* v8 ignore next -- the environment is always built by the Program visitor first. @preserve */
 			return environment === undefined ? undefined : annotationTarget(annotation, environment);
 		}
@@ -175,8 +191,8 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				if (node.operator !== "=" || node.left.type !== "Identifier") return;
 				const variable = resolveVariable(context.sourceCode, node.left);
 				if (variable === undefined) return;
-				const declarator = variableDeclarator(variable);
-				const binding = declarator?.id;
+
+				const binding = getVariableDeclarator(variable)?.id;
 				if (binding?.type !== "Identifier") return;
 				reportFlow(node.right, targetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
 			},
@@ -188,12 +204,12 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				reportFlow(
 					node.value,
 					targetFromAnnotation(node.typeAnnotation),
-					`property \`${sourceKeyName(context.sourceCode, node.key)}\``,
+					`property \`${getSourceKeyName(context.sourceCode, node.key)}\``,
 				);
 			},
 			ReturnStatement(node): void {
 				if (node.argument === null) return;
-				const owner = enclosingFunction(node);
+				const owner = getEnclosingFunction(node);
 				reportFlow(
 					node.argument,
 					targetFromAnnotation(owner?.returnType),

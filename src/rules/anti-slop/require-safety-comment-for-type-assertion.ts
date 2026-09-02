@@ -9,19 +9,29 @@
 // directive rules.
 
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	EXPRESSION_STATEMENT,
+	isBindingIdentifier,
+	isProgram,
+	isTsTypeReference,
+	PROPERTY_DEFINITION,
+	RETURN_STATEMENT,
+	THROW_STATEMENT,
+	VARIABLE_DECLARATION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type TypeAssertion = ESTree.TSAsExpression | ESTree.TSTypeAssertion;
 
-type SourceCodeComment = ReturnType<SourceCode["getCommentsBefore"]>[number];
+type SourceCodeComment = ESTree.Comment;
 
 const COMMENT_OWNER_KINDS = new Set([
-	"ExpressionStatement",
-	"PropertyDefinition",
-	"ReturnStatement",
-	"ThrowStatement",
-	"VariableDeclaration",
+	EXPRESSION_STATEMENT,
+	PROPERTY_DEFINITION,
+	RETURN_STATEMENT,
+	THROW_STATEMENT,
+	VARIABLE_DECLARATION,
 ]);
 
 const SAFETY_COMMENT = /\bSAFETY\s*:/u;
@@ -32,8 +42,8 @@ const DIRECTIVE_VALUE_SEPARATOR = /\s/u;
 
 function isConstAssertion(node: TypeAssertion): boolean {
 	return (
-		node.typeAnnotation.type === "TSTypeReference" &&
-		node.typeAnnotation.typeName.type === "Identifier" &&
+		isTsTypeReference(node.typeAnnotation) &&
+		isBindingIdentifier(node.typeAnnotation.typeName) &&
 		node.typeAnnotation.typeName.name === "const"
 	);
 }
@@ -64,7 +74,7 @@ function hasSafetyComment(sourceCode: SourceCode, node: TypeAssertion): boolean 
 	let current: ESTree.Node = node;
 	while (true) {
 		if (sourceCode.getCommentsBefore(current).some(isSafetyJustification)) return true;
-		if (COMMENT_OWNER_KINDS.has(current.type) || current.parent.type === "Program") return false;
+		if (COMMENT_OWNER_KINDS.has(current.type) || isProgram(current.parent)) return false;
 		current = current.parent;
 	}
 }

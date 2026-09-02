@@ -1,49 +1,61 @@
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
+import {
+	BINARY_EXPRESSION,
+	IDENTIFIER,
+	isCallExpression,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isJsxAttribute,
+	isJsxIdentifier,
+	isMemberExpression,
+	LITERAL,
+	MEMBER_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	TEMPLATE_LITERAL,
+	UNARY_EXPRESSION,
+} from "./oxc-utilities";
+
 import type { ESTree } from "oxlint-plugin-utilities";
 
 const SIMPLE_BINARY_OPERATORS = new Set(["%", "*", "**", "+", "-", "/"]);
 
 export function isComponentDeclaration(node: ESTree.Node): boolean {
-	return node.type === "FunctionDeclaration" && node.id !== null && isUppercaseName(node.id.name);
+	return isFunctionDeclarationRaw(node) && node.id !== null && isUppercaseName(node.id.name);
 }
 
 export function isMemoCall(node: ESTree.Node): boolean {
-	if (node.type !== "CallExpression") return false;
-	if (node.callee.type === "Identifier") return node.callee.name === "memo";
+	if (!isCallExpression(node)) return false;
+	if (isIdentifierName(node.callee)) return node.callee.name === "memo";
 
 	return (
-		node.callee.type === "MemberExpression" &&
-		node.callee.object.type === "Identifier" &&
+		isMemberExpression(node.callee) &&
+		isIdentifierName(node.callee.object) &&
 		node.callee.object.name === "React" &&
-		node.callee.property.type === "Identifier" &&
+		isIdentifierName(node.callee.property) &&
 		node.callee.property.name === "memo"
 	);
 }
 
 export function isReactComponentHigherOrderCall({ callee }: ESTree.CallExpression): boolean {
-	if (callee.type === "Identifier") return callee.name === "forwardRef" || callee.name === "memo";
+	if (isIdentifierName(callee)) return callee.name === "forwardRef" || callee.name === "memo";
 
 	return (
-		callee.type === "MemberExpression" &&
-		callee.object.type === "Identifier" &&
+		isMemberExpression(callee) &&
+		isIdentifierName(callee.object) &&
 		callee.object.name === "React" &&
-		callee.property.type === "Identifier" &&
+		isIdentifierName(callee.property) &&
 		(callee.property.name === "forwardRef" || callee.property.name === "memo")
 	);
 }
 
 export function getJSXAttributeName({ name }: ESTree.JSXAttribute): string | undefined {
-	return name.type === "JSXIdentifier" ? name.name : name.name.name;
+	return isJsxIdentifier(name) ? name.name : name.name.name;
 }
 
 export function hasJSXIdentifierAttribute(node: ESTree.JSXElement, attributeName: string): boolean {
 	for (const attribute of node.openingElement.attributes) {
-		if (
-			attribute.type === "JSXAttribute" &&
-			attribute.name.type === "JSXIdentifier" &&
-			attribute.name.name === attributeName
-		) {
+		if (isJsxAttribute(attribute) && isJsxIdentifier(attribute.name) && attribute.name.name === attributeName) {
 			return true;
 		}
 	}
@@ -53,40 +65,37 @@ export function hasJSXIdentifierAttribute(node: ESTree.JSXElement, attributeName
 
 function pushSimpleExpressionChildren(node: ESTree.Node, nodes: Array<ESTree.Node>): boolean {
 	switch (node.type) {
-		case "BinaryExpression": {
+		case BINARY_EXPRESSION: {
 			if (!SIMPLE_BINARY_OPERATORS.has(node.operator)) return false;
 			nodes.push(node.right, node.left);
 			return true;
 		}
 
-		case "Identifier":
-		case "Literal": {
+		case IDENTIFIER:
+		case LITERAL:
 			return true;
-		}
 
-		case "MemberExpression": {
+		case MEMBER_EXPRESSION: {
 			if (node.computed) return false;
 			nodes.push(node.object);
 			return true;
 		}
 
-		case "ParenthesizedExpression": {
+		case PARENTHESIZED_EXPRESSION: {
 			nodes.push(node.expression);
 			return true;
 		}
 
-		case "TemplateLiteral": {
+		case TEMPLATE_LITERAL:
 			return node.expressions.length === 0;
-		}
 
-		case "UnaryExpression": {
+		case UNARY_EXPRESSION: {
 			nodes.push(node.argument);
 			return true;
 		}
 
-		default: {
+		default:
 			return false;
-		}
 	}
 }
 

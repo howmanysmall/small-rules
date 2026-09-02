@@ -1,5 +1,12 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isArrayExpression,
+	isIdentifierName,
+	isObjectExpression,
+	isSpreadElement,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -27,7 +34,7 @@ function getFunctionHookName(node: NamedFunctionNode): string | undefined {
 
 function getVariableDeclaratorName(node: ESTree.VariableDeclarator): string | undefined {
 	/* v8 ignore next -- hook arrow functions are only tracked from identifier variable declarators. @preserve */
-	return node.id.type === "Identifier" ? node.id.name : undefined;
+	return isIdentifierName(node.id) ? node.id.name : undefined;
 }
 
 function isHookFunction(node: NamedFunctionNode): boolean {
@@ -36,7 +43,7 @@ function isHookFunction(node: NamedFunctionNode): boolean {
 }
 
 function isHookArrowFunction({ parent }: ESTree.ArrowFunctionExpression): boolean {
-	if (parent.type !== "VariableDeclarator") return false;
+	if (!isVariableDeclarator(parent)) return false;
 
 	const name = getVariableDeclaratorName(parent);
 	return name !== undefined && isHookName(name);
@@ -56,9 +63,7 @@ function getLatestArrayInitializer(
 function getArrayInitializerFromVariable(variable: ScopeVariable): ESTree.ArrayExpression | undefined {
 	for (let index = variable.defs.length - 1; index >= 0; index -= 1) {
 		const definition = variable.defs[index];
-		if (definition?.node.type !== "VariableDeclarator" || definition.node.init?.type !== "ArrayExpression") {
-			continue;
-		}
+		if (!isVariableDeclarator(definition?.node) || !isArrayExpression(definition.node.init)) continue;
 
 		return definition.node.init;
 	}
@@ -69,8 +74,8 @@ function getArrayInitializerFromVariable(variable: ScopeVariable): ESTree.ArrayE
 function hasObjectInitializer(variable: ScopeVariable): boolean {
 	for (let index = variable.defs.length - 1; index >= 0; index -= 1) {
 		const definition = variable.defs[index];
-		if (definition?.node.type !== "VariableDeclarator") continue;
-		if (definition.node.init?.type === "ObjectExpression") return true;
+		if (!isVariableDeclarator(definition?.node)) continue;
+		if (isObjectExpression(definition.node.init)) return true;
 	}
 
 	return false;
@@ -97,13 +102,13 @@ function countSpreadElement(
 	sourceCode: SourceCode,
 	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
 ): number {
-	if (node.argument.type === "Identifier") {
+	if (isIdentifierName(node.argument)) {
 		const initializer = getResolvedArrayInitializer(sourceCode, node, node.argument.name, arrayInitializersByName);
 		if (initializer === undefined) return 1;
 		return countReturnElements(initializer, sourceCode, arrayInitializersByName);
 	}
 
-	if (node.argument.type === "ArrayExpression") {
+	if (isArrayExpression(node.argument)) {
 		return countReturnElements(node.argument, sourceCode, arrayInitializersByName);
 	}
 
@@ -123,7 +128,7 @@ function countReturnElements(
 			continue;
 		}
 
-		if (element.type === "SpreadElement") {
+		if (isSpreadElement(element)) {
 			count += countSpreadElement(element, sourceCode, arrayInitializersByName);
 			continue;
 		}
@@ -145,7 +150,7 @@ function getArrayInitializer(
 	node: ESTree.VariableDeclarator,
 ): undefined | { init: ESTree.ArrayExpression; name: string } {
 	const name = getVariableDeclaratorName(node);
-	if (name === undefined || node.init?.type !== "ArrayExpression") return undefined;
+	if (name === undefined || !isArrayExpression(node.init)) return undefined;
 	return { name, init: node.init };
 }
 
@@ -176,9 +181,7 @@ function popArrayInitializer(
 
 	initializers.pop();
 	/* v8 ignore next -- each tracked name has one initializer in parser enter/exit order. @preserve */
-	if (initializers.length === 0) {
-		arrayInitializersByName.delete(name);
-	}
+	if (initializers.length === 0) arrayInitializersByName.delete(name);
 }
 
 const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", {
@@ -212,9 +215,9 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		}
 
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
-			if (hookDepth === 0 || node.argument === null || node.argument.type === "ObjectExpression") return;
+			if (hookDepth === 0 || node.argument === null || isObjectExpression(node.argument)) return;
 
-			if (node.argument.type === "Identifier") {
+			if (isIdentifierName(node.argument)) {
 				if (shouldAllowIdentifierReturn(sourceCode, node.argument)) return;
 
 				const initializer = getResolvedArrayInitializer(
@@ -230,7 +233,7 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 				return;
 			}
 
-			if (node.argument.type !== "ArrayExpression") return;
+			if (!isArrayExpression(node.argument)) return;
 
 			const count = countReturnElements(node.argument, sourceCode, arrayInitializersByName);
 			if (count > MAX_RETURN_ELEMENTS) reportTooManyReturnValues(node);

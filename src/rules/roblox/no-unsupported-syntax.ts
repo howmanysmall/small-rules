@@ -8,6 +8,7 @@
 // property.
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isIdentifierName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, VisitorWithHooks } from "oxlint-plugin-utilities";
 
@@ -52,7 +53,7 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 				if (
 					checks.prototype &&
 					!node.computed &&
-					node.property.type === "Identifier" &&
+					isIdentifierName(node.property) &&
 					node.property.name === "prototype"
 				) {
 					context.report({ messageId: "prototype", node: node.property });

@@ -6,7 +6,7 @@
 // adapted imports; descendant expansion relies on the isNode filter instead of
 // a redundant record guard.
 
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import { isNode, isProgram, isTsConditionalType, isTsInferType, isTsMappedType } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -18,9 +18,7 @@ function appendChildNodes(value: PropertyDescriptor["value"], pending: Array<EST
 	if (!Array.isArray(value)) return;
 	for (const child of value) {
 		/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
-		if (isNode(child)) {
-			pending.push(child);
-		}
+		if (isNode(child)) pending.push(child);
 	}
 }
 
@@ -30,9 +28,7 @@ function appendDescendants(
 	pending: Array<ESTree.Node>,
 ): void {
 	const keys = visitorKeys[node.type];
-	if (keys === undefined) {
-		return;
-	}
+	if (keys === undefined) return;
 	const childKeys = new Set(keys);
 	for (const [key, value] of Object.entries(node)) {
 		if (childKeys.has(key)) appendChildNodes(value, pending);
@@ -46,11 +42,9 @@ function collectInferTypeParameterNames(
 ): void {
 	let pending: Array<ESTree.Node> = [node];
 	while (pending.length > 0) {
-		const next: Array<ESTree.Node> = [];
+		const next = new Array<ESTree.Node>();
 		for (const current of pending) {
-			if (current.type === "TSInferType") {
-				names.add(current.typeParameter.name.name);
-			}
+			if (isTsInferType(current)) names.add(current.typeParameter.name.name);
 			appendDescendants(current, visitorKeys, next);
 		}
 		pending = next;
@@ -58,20 +52,17 @@ function collectInferTypeParameterNames(
 }
 
 function collectTypeParameterNames(node: ESTree.Node, names: Set<string>): void {
-	if (!("typeParameters" in node)) {
-		return;
-	}
+	if (!("typeParameters" in node)) return;
 	const parameters = node.typeParameters?.params;
-	if (parameters === undefined) {
-		return;
-	}
+	if (parameters === undefined) return;
+
 	for (const parameter of parameters) {
 		names.add(parameter.name.name);
 	}
 }
 
 function collectMappedTypeParameterName(node: ESTree.Node, descendant: ESTree.Node, names: Set<string>): void {
-	if (node.type === "TSMappedType" && (descendant === node.nameType || descendant === node.typeAnnotation)) {
+	if (isTsMappedType(node) && (descendant === node.nameType || descendant === node.typeAnnotation)) {
 		names.add(node.key.name);
 	}
 }
@@ -82,7 +73,7 @@ function collectConditionalInferTypeParameterNames(
 	visitorKeys: SourceCode["visitorKeys"],
 	names: Set<string>,
 ): void {
-	if (node.type === "TSConditionalType" && descendant === node.trueType) {
+	if (isTsConditionalType(node) && descendant === node.trueType) {
 		collectInferTypeParameterNames(node.extendsType, visitorKeys, names);
 	}
 }
@@ -94,7 +85,7 @@ export function lexicalTypeParameterNames(
 	const names = new Set<string>();
 	let descendant = node;
 	let current = node;
-	while (current.type !== "Program") {
+	while (!isProgram(current)) {
 		collectTypeParameterNames(current, names);
 		collectMappedTypeParameterName(current, descendant, names);
 		collectConditionalInferTypeParameterNames(current, descendant, visitorKeys, names);

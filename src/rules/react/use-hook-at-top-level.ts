@@ -1,7 +1,18 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyFunction, isComponentName, isIdentifierName } from "$oxc-utilities/oxc-utilities";
+import {
+	isAnyFunction,
+	isComponentName,
+	isFunctionDeclaration,
+	isIdentifierName,
+	isImportSpecifier,
+	isMemberExpression,
+	isMethodDefinition,
+	isProperty,
+	isTryStatement,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -37,21 +48,20 @@ function getOptions(value: RuleOptions): UseHookAtTopLevelOptions {
 }
 
 function isComponentOrHook(node: CallbackFunction): boolean {
-	if ((node.type === "FunctionDeclaration" || node.type === "FunctionExpression") && node.id !== null) {
+	if (isFunctionDeclaration(node) && node.id !== null) {
 		return isComponentName(node.id.name) || isReactHookName(node.id.name);
 	}
 
 	const { parent } = node;
-
-	if (parent.type === "VariableDeclarator" && isIdentifierName(parent.id)) {
+	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) {
 		return isComponentName(parent.id.name) || isReactHookName(parent.id.name);
 	}
 
-	if (parent.type === "Property" && isIdentifierName(parent.key)) {
+	if (isProperty(parent) && isIdentifierName(parent.key)) {
 		return isComponentName(parent.key.name) || isReactHookName(parent.key.name);
 	}
 
-	if (parent.type === "MethodDefinition" && isIdentifierName(parent.key)) {
+	if (isMethodDefinition(parent) && isIdentifierName(parent.key)) {
 		return isComponentName(parent.key.name) || isReactHookName(parent.key.name);
 	}
 
@@ -72,7 +82,7 @@ function isInFinallyBlock(node: ESTree.Node): boolean {
 	for (let depth = 0; depth < maxDepth && current !== null; depth += 1) {
 		if (isAnyFunction(current)) break;
 
-		if (current.type === "TryStatement") {
+		if (isTryStatement(current)) {
 			let checkNode: ESTree.Node | null = node;
 			while (checkNode !== null && checkNode !== current) {
 				if (checkNode === current.finalizer) {
@@ -90,9 +100,9 @@ function isInFinallyBlock(node: ESTree.Node): boolean {
 	return inFinallyBlock;
 }
 
-function isRecursiveCall(node: ESTree.CallExpression, functionName: string | undefined): boolean {
+function isRecursiveCall(node: ESTree.CallExpression, functionName?: string): boolean {
 	if (functionName === undefined) return false;
-	return node.callee.type === "Identifier" && "name" in node.callee && node.callee.name === functionName;
+	return isIdentifierName(node.callee) && node.callee.name === functionName;
 }
 
 function makeContext(overrides: Partial<ControlFlowContext>, depth: number): ControlFlowContext {
@@ -109,8 +119,7 @@ function makeContext(overrides: Partial<ControlFlowContext>, depth: number): Con
 }
 
 function getFunctionName(node: CallbackFunction): string | undefined {
-	if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") return node.id?.name ?? undefined;
-	return undefined;
+	return isFunctionDeclaration(node) ? (node.id?.name ?? undefined) : undefined;
 }
 
 function getIdentifierNameFromExpression(node: ESTree.Expression): string | undefined {
@@ -128,7 +137,7 @@ function shouldIgnoreHookImportSource(
 	const memberSourceDecision = getMemberHookSourceDecision(node, importSources);
 	if (memberSourceDecision !== undefined) return memberSourceDecision;
 
-	const importSource = node.callee.type === "Identifier" ? importSourceMap.get(hookName) : undefined;
+	const importSource = isIdentifierName(node.callee) ? importSourceMap.get(hookName) : undefined;
 	if (importSource !== undefined && importSources[importSource] === false) return true;
 	if (importSource !== undefined && importSources[importSource] === true) return false;
 
@@ -139,7 +148,7 @@ function getMemberHookSourceDecision(
 	node: ESTree.CallExpression,
 	importSources: Record<string, boolean>,
 ): boolean | undefined {
-	if (node.callee.type !== "MemberExpression") return undefined;
+	if (!isMemberExpression(node.callee)) return undefined;
 
 	const objectName = getIdentifierNameFromExpression(node.callee.object);
 	if (objectName !== undefined && importSources[objectName] === false) return true;
@@ -190,9 +199,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			functionNameStack.push(currentFunctionName);
 
 			const functionName = getFunctionName(node);
-			if (functionName !== undefined) {
-				currentFunctionName = functionName;
-			}
+			if (functionName !== undefined) currentFunctionName = functionName;
 
 			if (current?.isComponentOrHook === true) {
 				pushContext(makeContext({ functionDepth: depth, inNestedFunction: true }, depth));
@@ -204,6 +211,20 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 		function handleFunctionExit(): void {
 			if (getCurrentContext() !== undefined) popContext();
 			currentFunctionName = functionNameStack.pop();
+		}
+
+		function yesConditional(): void {
+			updateContext({ inConditional: true });
+		}
+		function noConditional(): void {
+			updateContext({ inConditional: false });
+		}
+
+		function noLoop(): void {
+			updateContext({ inLoop: false });
+		}
+		function yesLoop(): void {
+			updateContext({ inLoop: true });
 		}
 
 		return {
@@ -272,51 +293,29 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				}
 			},
 
-			ConditionalExpression(): void {
-				updateContext({ inConditional: true });
-			},
-			"ConditionalExpression:exit"(): void {
-				updateContext({ inConditional: false });
-			},
+			ConditionalExpression: yesConditional,
+			"ConditionalExpression:exit": noConditional,
 
-			DoWhileStatement(): void {
-				updateContext({ inLoop: true });
-			},
-			"DoWhileStatement:exit"(): void {
-				updateContext({ inLoop: false });
-			},
+			DoWhileStatement: yesLoop,
+			"DoWhileStatement:exit": noLoop,
 
-			ForInStatement(): void {
-				updateContext({ inLoop: true });
-			},
-			"ForInStatement:exit"(): void {
-				updateContext({ inLoop: false });
-			},
+			ForInStatement: yesLoop,
+			"ForInStatement:exit": noLoop,
 
-			ForOfStatement(): void {
-				updateContext({ inLoop: true });
-			},
-			"ForOfStatement:exit"(): void {
-				updateContext({ inLoop: false });
-			},
+			ForOfStatement: yesLoop,
+			"ForOfStatement:exit": noLoop,
 
-			ForStatement(): void {
-				updateContext({ inLoop: true });
-			},
-			"ForStatement:exit"(): void {
-				updateContext({ inLoop: false });
-			},
+			ForStatement: yesLoop,
+			"ForStatement:exit": noLoop,
 
 			FunctionDeclaration: handleFunctionEnter,
 			"FunctionDeclaration:exit": handleFunctionExit,
+
 			FunctionExpression: handleFunctionEnter,
 			"FunctionExpression:exit": handleFunctionExit,
-			IfStatement(): void {
-				updateContext({ inConditional: true });
-			},
-			"IfStatement:exit"(): void {
-				updateContext({ inConditional: false });
-			},
+
+			IfStatement: yesConditional,
+			"IfStatement:exit": noConditional,
 
 			ImportDeclaration(node): void {
 				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
@@ -327,7 +326,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 
 				const source = node.source.value;
 				for (const specifier of node.specifiers) {
-					if (specifier.type !== "ImportSpecifier") continue;
+					if (!isImportSpecifier(specifier)) continue;
 					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. */
 					if (!isIdentifierName(specifier.imported)) continue;
 					if (isReactHookName(specifier.imported.name)) {
@@ -336,23 +335,15 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				}
 			},
 
-			LogicalExpression(): void {
-				updateContext({ inConditional: true });
-			},
-			"LogicalExpression:exit"(): void {
-				updateContext({ inConditional: false });
-			},
+			LogicalExpression: yesConditional,
+			"LogicalExpression:exit": noConditional,
 
 			"ReturnStatement:exit"(): void {
 				updateContext({ afterEarlyReturn: true });
 			},
 
-			SwitchStatement(): void {
-				updateContext({ inConditional: true });
-			},
-			"SwitchStatement:exit"(): void {
-				updateContext({ inConditional: false });
-			},
+			SwitchStatement: yesConditional,
+			"SwitchStatement:exit": noConditional,
 
 			TryStatement(): void {
 				updateContext({ inTryBlock: true });
@@ -361,12 +352,8 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				updateContext({ inTryBlock: false });
 			},
 
-			WhileStatement(): void {
-				updateContext({ inLoop: true });
-			},
-			"WhileStatement:exit"(): void {
-				updateContext({ inLoop: false });
-			},
+			WhileStatement: yesLoop,
+			"WhileStatement:exit": noLoop,
 		};
 	},
 	meta: {

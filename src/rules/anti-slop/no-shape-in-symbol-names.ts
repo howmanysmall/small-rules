@@ -10,6 +10,7 @@
 // oxlint-disable small-rules/no-shape-in-symbol-names -- what?
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isJsxMemberExpression, isMemberExpression, isTsQualifiedName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -33,9 +34,9 @@ function isExternalMemberPropertyIdentifier(node: IdentifierNode): boolean {
 	const { parent } = node;
 
 	return (
-		(parent.type === "MemberExpression" && !parent.computed && parent.property === node) ||
-		(parent.type === "JSXMemberExpression" && parent.property === node) ||
-		(parent.type === "TSQualifiedName" && parent.right === node)
+		(isMemberExpression(parent) && !parent.computed && parent.property === node) ||
+		(isJsxMemberExpression(parent) && parent.property === node) ||
+		(isTsQualifiedName(parent) && parent.right === node)
 	);
 }
 

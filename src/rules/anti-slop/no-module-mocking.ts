@@ -8,6 +8,14 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isAnyLiteral,
+	isBindingIdentifier,
+	isImportDeclaration,
+	isImportSpecifier,
+	isSuper,
+	isV8IntrinsicExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -19,12 +27,17 @@ function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierRe
 
 function isFrameworkImport(variable: Variable): boolean {
 	return variable.defs.some((definition) => {
-		if (definition.type !== "ImportBinding" || definition.parent?.type !== "ImportDeclaration") return false;
-		if (definition.node.type !== "ImportSpecifier") return false;
-		const importedName =
-			definition.node.imported.type === "Identifier"
-				? definition.node.imported.name
-				: definition.node.imported.value;
+		if (
+			definition.type !== "ImportBinding" ||
+			!isImportDeclaration(definition.parent) ||
+			!isImportSpecifier(definition.node)
+		) {
+			return false;
+		}
+
+		const importedName = isBindingIdentifier(definition.node.imported)
+			? definition.node.imported.name
+			: definition.node.imported.value;
 		return (
 			(definition.parent.source.value === "vitest" && importedName === "vi") ||
 			(definition.parent.source.value === "@jest/globals" && importedName === "jest")
@@ -36,7 +49,7 @@ function isTestFrameworkObject(
 	sourceCode: SourceCode,
 	expression: ESTree.Expression,
 ): expression is ESTree.IdentifierReference {
-	if (expression.type !== "Identifier") return false;
+	if (!isBindingIdentifier(expression)) return false;
 	if ((expression.name === "vi" || expression.name === "jest") && sourceCode.isGlobalReference(expression)) {
 		return true;
 	}
@@ -51,23 +64,22 @@ function isModuleMockCall(sourceCode: SourceCode, callee: ESTree.Expression): bo
 	if (!isTestFrameworkObject(sourceCode, callee.object)) return false;
 	if (callee.computed) {
 		return (
-			callee.property.type === "Literal" &&
+			isAnyLiteral(callee.property) &&
 			Predicate.isString(callee.property.value) &&
 			MODULE_MOCK_METHODS.has(callee.property.value)
 		);
 	}
-	return callee.property.type === "Identifier" && MODULE_MOCK_METHODS.has(callee.property.name);
+	return isBindingIdentifier(callee.property) && MODULE_MOCK_METHODS.has(callee.property.name);
 }
 
 const noModuleMocking = createRule("no-module-mocking", "anti-slop", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
+				const { callee } = node;
 				/* v8 ignore next -- Oxc's parser does not produce V8 intrinsic call expressions. @preserve */
-				if (node.callee.type === "Super" || node.callee.type === "V8IntrinsicExpression") return;
-				if (isModuleMockCall(context.sourceCode, node.callee)) {
-					context.report({ messageId: "moduleMock", node });
-				}
+				if (isSuper(callee) || isV8IntrinsicExpression(callee)) return;
+				if (isModuleMockCall(context.sourceCode, callee)) context.report({ messageId: "moduleMock", node });
 			},
 		};
 	},

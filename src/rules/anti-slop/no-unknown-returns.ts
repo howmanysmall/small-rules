@@ -6,6 +6,13 @@
 
 import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isBindingIdentifier,
+	isExportNamedDeclaration,
+	isTsTypeAliasDeclaration,
+	isTsTypeReference,
+	isTsUnknownKeyword,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -30,9 +37,8 @@ function enqueueContainedTypes(type: ESTree.TSType, nextTypes: Array<ESTree.TSTy
 			return true;
 		}
 
-		default: {
+		default:
 			return false;
-		}
 	}
 }
 
@@ -43,7 +49,7 @@ function enqueueTypeReference(
 	visitedAliases: Set<string>,
 	nextTypes: Array<ESTree.TSType>,
 ): void {
-	if (typeReference.typeName.type !== "Identifier") return;
+	if (!isBindingIdentifier(typeReference.typeName)) return;
 	const { name } = typeReference.typeName;
 	if (name === "Promise" || name === "PromiseLike") {
 		const value = typeReference.typeArguments?.params[0];
@@ -54,8 +60,10 @@ function enqueueTypeReference(
 
 	if ((typeReference.typeArguments?.params.length ?? 0) > 0) return;
 	if (shadowedAliases.has(name) || visitedAliases.has(name)) return;
+
 	const alias = aliases.get(name);
 	if (alias === undefined || alias.typeParameters) return;
+
 	visitedAliases.add(name);
 	nextTypes.push(alias.typeAnnotation);
 }
@@ -67,9 +75,10 @@ function typeContainsUnknown(
 	visitedAliases: Set<string>,
 	nextTypes: Array<ESTree.TSType>,
 ): boolean {
-	if (type.type === "TSUnknownKeyword") return true;
+	if (isTsUnknownKeyword(type)) return true;
 	if (enqueueContainedTypes(type, nextTypes)) return false;
-	if (type.type === "TSTypeReference") {
+
+	if (isTsTypeReference(type)) {
 		enqueueTypeReference(type, aliases, shadowedAliases, visitedAliases, nextTypes);
 	}
 	return false;
@@ -81,7 +90,7 @@ function containsUnknown(
 	shadowedAliases: ReadonlySet<string>,
 ): boolean {
 	let pendingTypes = [type];
-	let nextTypes: Array<ESTree.TSType> = [];
+	let nextTypes = new Array<ESTree.TSType>();
 	const visitedAliases = new Set<string>();
 
 	for (;;) {
@@ -104,8 +113,10 @@ const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {
 		function checkReturnType(node: FunctionWithReturnType): void {
 			const annotation = node.returnType;
 			if (!annotation) return;
+
 			const shadowedAliases = lexicalTypeParameterNames(node, context.sourceCode.visitorKeys);
 			if (!containsUnknown(annotation.typeAnnotation, aliases, shadowedAliases)) return;
+
 			context.report({ messageId: "unknownReturn", node: annotation.typeAnnotation });
 		}
 
@@ -116,8 +127,8 @@ const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {
 			Program(node): void {
 				aliases.clear();
 				for (const statement of node.body) {
-					const declaration = statement.type === "ExportNamedDeclaration" ? statement.declaration : statement;
-					if (declaration?.type === "TSTypeAliasDeclaration") aliases.set(declaration.id.name, declaration);
+					const declaration = isExportNamedDeclaration(statement) ? statement.declaration : statement;
+					if (isTsTypeAliasDeclaration(declaration)) aliases.set(declaration.id.name, declaration);
 				}
 			},
 			TSCallSignatureDeclaration: checkReturnType,

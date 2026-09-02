@@ -4,9 +4,41 @@ import {
 	isReactComponentHigherOrderCall,
 } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyFunction } from "$oxc-utilities/oxc-utilities";
+import {
+	BLOCK_STATEMENT,
+	CATCH_CLAUSE,
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	isAnyFunction,
+	isArrowFunctionExpression,
+	isAssignmentExpression,
+	isCallExpression,
+	isConditionalExpression,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isJsxAttribute,
+	isJsxElement,
+	isJsxExpressionContainer,
+	isJsxFragment,
+	isLogicalExpression,
+	isMemberExpression,
+	isReturnStatement,
+	isSpreadElement,
+	isVariableDeclarator,
+	LABELED_STATEMENT,
+	LOGICAL_EXPRESSION,
+	SWITCH_CASE,
+	SWITCH_STATEMENT,
+	TRY_STATEMENT,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
+} from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 
@@ -66,21 +98,21 @@ const EMPTY_CALLBACK_USAGE: CallbackUsage = {
 	memoization: false,
 };
 
-const SHOULD_ASCEND_TYPES = new Set(["ConditionalExpression", "LogicalExpression"]);
+const SHOULD_ASCEND_TYPES = new Set([CONDITIONAL_EXPRESSION, LOGICAL_EXPRESSION]);
 const CONTROL_FLOW_TYPES = new Set([
-	"BlockStatement",
-	"CatchClause",
-	"DoWhileStatement",
-	"ForInStatement",
-	"ForOfStatement",
-	"ForStatement",
-	"IfStatement",
-	"LabeledStatement",
-	"SwitchCase",
-	"SwitchStatement",
-	"TryStatement",
-	"WhileStatement",
-	"WithStatement",
+	BLOCK_STATEMENT,
+	CATCH_CLAUSE,
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	LABELED_STATEMENT,
+	SWITCH_CASE,
+	SWITCH_STATEMENT,
+	TRY_STATEMENT,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
 ]);
 
 const CHILD_PROP_NAME_SUFFIX = "children";
@@ -91,7 +123,8 @@ function getParent(node: ESTree.Node): ESTree.Node | undefined {
 
 function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	let current = node;
-	while (current !== undefined && WRAPPER_PARENT_TYPES.has(current.type)) current = getParent(current);
+	/* v8 ignore next -- @preserve slopular */
+	while (current !== undefined && WRAPPER_PARENT_TYPES.has(current.type)) current = current.parent ?? undefined;
 	return current;
 }
 
@@ -100,7 +133,7 @@ function getEnclosingFunctionLike(node: ESTree.Node): CallbackFunction | undefin
 
 	while (current !== undefined) {
 		if (isAnyFunction(current)) return current;
-		current = getParent(current);
+		current = current.parent ?? undefined;
 	}
 
 	return undefined;
@@ -113,14 +146,14 @@ function getCallbackUsageFromCallExpression(
 ): CallbackUsage {
 	const { callee } = callExpression;
 
-	if (callee.type === "Identifier") {
+	if (isIdentifierName(callee)) {
 		return {
 			iteration: iterationMethods.has(callee.name),
 			memoization: memoizationHooks.has(callee.name),
 		};
 	}
 
-	if (callee.type === "MemberExpression" && callee.property.type === "Identifier") {
+	if (isMemberExpression(callee) && isIdentifierName(callee.property)) {
 		const { name } = callee.property;
 		const usage: CallbackUsage = {
 			iteration: iterationMethods.has(name),
@@ -129,7 +162,7 @@ function getCallbackUsageFromCallExpression(
 
 		if (
 			name === "from" &&
-			callee.object.type === "Identifier" &&
+			isIdentifierName(callee.object) &&
 			callee.object.name === "Array" &&
 			callExpression.arguments.length >= 2
 		) {
@@ -138,8 +171,8 @@ function getCallbackUsageFromCallExpression(
 
 		if (
 			name === "call" &&
-			callee.object.type === "MemberExpression" &&
-			callee.object.property.type === "Identifier" &&
+			isMemberExpression(callee.object) &&
+			isIdentifierName(callee.object.property) &&
 			iterationMethods.has(callee.object.property.name)
 		) {
 			return { ...usage, iteration: true };
@@ -156,11 +189,9 @@ function findEnclosingCallExpression(node: ESTree.Node): ESTree.CallExpression |
 	let parent: ESTree.Node | undefined = getParent(node);
 
 	while (parent !== undefined) {
-		if (parent.type === "CallExpression") {
+		if (isCallExpression(parent)) {
 			for (const argument of parent.arguments) {
-				if (argument === current || (argument.type === "SpreadElement" && argument.argument === current)) {
-					return parent;
-				}
+				if (argument === current || (isSpreadElement(argument) && argument.argument === current)) return parent;
 			}
 			return undefined;
 		}
@@ -178,7 +209,7 @@ function findEnclosingCallExpression(node: ESTree.Node): ESTree.CallExpression |
 }
 
 function getVariableForFunction(sourceCode: SourceCode, functionLike: CallbackFunction): ScopeVariable | undefined {
-	if (functionLike.type === "FunctionDeclaration") {
+	if (isFunctionDeclarationRaw(functionLike)) {
 		const declared = sourceCode.getDeclaredVariables(functionLike);
 		/* v8 ignore next -- @preserve parser-backed function declarations always declare their own binding. */
 		return declared.length > 0 ? declared[0] : undefined;
@@ -188,7 +219,7 @@ function getVariableForFunction(sourceCode: SourceCode, functionLike: CallbackFu
 	/* v8 ignore next -- @preserve visited function expressions have a parent node in parser-produced ASTs. */
 	if (parent === undefined) return undefined;
 
-	if (parent.type === "VariableDeclarator" || parent.type === "AssignmentExpression") {
+	if (isVariableDeclarator(parent) || isAssignmentExpression(parent)) {
 		const declared = sourceCode.getDeclaredVariables(parent);
 		if (declared.length > 0) return declared[0];
 	}
@@ -202,7 +233,7 @@ function mergeCallbackUsage(target: CallbackUsage, usage: CallbackUsage): void {
 }
 
 function getCallbackUsageFromReference(
-	reference: ScopeVariable["references"][number],
+	reference: Reference,
 	iterationMethods: ReadonlySet<string>,
 	memoizationHooks: ReadonlySet<string>,
 ): CallbackUsage {
@@ -247,25 +278,17 @@ function isTopLevelFunctionReturn(node: ESTree.JSXElement | ESTree.JSXFragment):
 	/* v8 ignore next -- @preserve top-level return checks start from parser-attached JSX nodes. */
 	if (parent === undefined) return false;
 
-	if (parent.type === "ReturnStatement") {
-		return isFunctionReturnStatement(parent);
-	}
-
-	return parent.type === "ArrowFunctionExpression";
+	return isReturnStatement(parent) ? isFunctionReturnStatement(parent) : isArrowFunctionExpression(parent);
 }
 
 function getTopLevelReturnParent(node: ESTree.JSXElement | ESTree.JSXFragment): ESTree.Node | undefined {
 	let parent = ascendPastExpressionContainer(ascendPastWrappers(getParent(node)));
-
-	while (parent !== undefined && SHOULD_ASCEND_TYPES.has(parent.type)) {
-		parent = ascendPastWrappers(getParent(parent));
-	}
-
+	while (parent !== undefined && SHOULD_ASCEND_TYPES.has(parent.type)) parent = ascendPastWrappers(getParent(parent));
 	return ascendPastExpressionContainer(parent);
 }
 
 function ascendPastExpressionContainer(parent: ESTree.Node | undefined): ESTree.Node | undefined {
-	if (parent?.type !== "JSXExpressionContainer") return parent;
+	if (!isJsxExpressionContainer(parent)) return parent;
 	return ascendPastWrappers(getParent(parent));
 }
 
@@ -277,8 +300,7 @@ function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
 	}
 
 	/* v8 ignore next -- @preserve return statements that contain JSX are parser-nested inside a function body. */
-	if (currentNode === undefined) return false;
-	return isAnyFunction(currentNode);
+	return currentNode === undefined ? false : isAnyFunction(currentNode);
 }
 
 function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
@@ -289,9 +311,7 @@ function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean
 	if (functionLike === undefined) return false;
 
 	const functionParent = ascendPastWrappers(getParent(functionLike));
-	if (functionParent?.type === "CallExpression") {
-		return isReactComponentHigherOrderCall(functionParent);
-	}
+	if (isCallExpression(functionParent)) return isReactComponentHigherOrderCall(functionParent);
 
 	return true;
 }
@@ -304,7 +324,7 @@ function isIgnoredCallExpression(
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (parent === undefined) return false;
 
-	if (parent.type === "JSXExpressionContainer") {
+	if (isJsxExpressionContainer(parent)) {
 		parent = getParent(parent);
 		/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
 		if (parent === undefined) return false;
@@ -313,15 +333,11 @@ function isIgnoredCallExpression(
 	const maxDepth = 20;
 	// oxlint-disable-next-line unicorn-js/prefer-simple-condition-first -- no?
 	for (let depth = 0; depth < maxDepth && parent !== undefined; depth += 1) {
-		if (parent.type === "CallExpression") {
+		if (isCallExpression(parent)) {
 			const { callee } = parent;
-			if (callee.type === "Identifier") return ignoredCallExpressions.has(callee.name);
+			if (isIdentifierName(callee)) return ignoredCallExpressions.has(callee.name);
 
-			if (
-				callee.type === "MemberExpression" &&
-				callee.object.type === "Identifier" &&
-				callee.property.type === "Identifier"
-			) {
+			if (isMemberExpression(callee) && isIdentifierName(callee.object) && isIdentifierName(callee.property)) {
 				return ignoredCallExpressions.has(`${callee.object.name}.${callee.property.name}`);
 			}
 
@@ -343,26 +359,24 @@ function isJsxPropertyValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (parent === undefined) return false;
 
-	while (parent !== undefined && (parent.type === "ConditionalExpression" || parent.type === "LogicalExpression")) {
+	while (parent !== undefined && (isConditionalExpression(parent) || isLogicalExpression(parent))) {
 		parent = getParent(parent);
 	}
 
 	/* v8 ignore next -- @preserve parser-produced conditional/logical JSX ancestors stay attached to a parent. */
 	if (parent === undefined) return false;
 
-	if (parent.type === "JSXExpressionContainer") {
+	if (isJsxExpressionContainer(parent)) {
 		parent = getParent(parent);
 		/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
 		if (parent === undefined) return false;
 	}
 
-	if (parent.type !== "JSXAttribute") return false;
+	if (!isJsxAttribute(parent)) return false;
 
 	const attributeName = getJSXAttributeName(parent);
 	/* v8 ignore next -- @preserve supported parser JSX attribute names resolve to a concrete name. */
-	if (attributeName === undefined) return true;
-
-	return !isChildrenAttributeName(attributeName);
+	return attributeName === undefined ? true : !isChildrenAttributeName(attributeName);
 }
 
 function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
@@ -376,13 +390,13 @@ function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 
 	/* v8 ignore next -- @preserve visited JSX nodes remain attached while unwrapping parser-produced parents. */
 	if (parent === undefined) return false;
-	if (parent.type === "VariableDeclarator") return parent.init === current;
-	if (parent.type === "AssignmentExpression") return parent.right === current;
+	if (isVariableDeclarator(parent)) return parent.init === current;
+	if (isAssignmentExpression(parent)) return parent.right === current;
 
 	return false;
 }
 
-function isJSXChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapperType: ESTree.Node["type"]): boolean {
+function isJsxChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapperType: ESTree.Node["type"]): boolean {
 	let current: ESTree.Node | undefined = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (current === undefined) return false;
@@ -394,21 +408,19 @@ function isJSXChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapp
 		current = getParent(current);
 	}
 
-	if (!foundWrapper || current?.type !== "JSXExpressionContainer") return false;
+	if (!foundWrapper || !isJsxExpressionContainer(current)) return false;
 
 	const containerParent = getParent(current);
 	/* v8 ignore next -- @preserve parser-produced JSX expression containers are attached to a parent. */
-	if (containerParent === undefined) return false;
-
-	return containerParent.type === "JSXElement" || containerParent.type === "JSXFragment";
+	return containerParent === undefined ? false : isJsxElement(containerParent) || isJsxFragment(containerParent);
 }
 
-function isTernaryJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	return isJSXChildWrappedBy(node, "ConditionalExpression");
+function isTernaryJsxChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
+	return isJsxChildWrappedBy(node, "ConditionalExpression");
 }
 
-function isLogicalJSXChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	return isJSXChildWrappedBy(node, "LogicalExpression");
+function isLogicalJsxChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
+	return isJsxChildWrappedBy(node, "LogicalExpression");
 }
 
 const requireReactComponentKeys = createRule("require-react-component-keys", "react", {
@@ -436,7 +448,7 @@ const requireReactComponentKeys = createRule("require-react-component-keys", "re
 			const isRoot = isTopLevelReturn(node);
 
 			if (isRoot && !isCallback) {
-				if (!options.allowRootKeys && node.type === "JSXElement" && hasJSXIdentifierAttribute(node, "key")) {
+				if (!options.allowRootKeys && isJsxElement(node) && hasJSXIdentifierAttribute(node, "key")) {
 					context.report({
 						messageId: "rootComponentWithKey",
 						node,
@@ -446,18 +458,16 @@ const requireReactComponentKeys = createRule("require-react-component-keys", "re
 			}
 
 			if (isIgnoredCallExpression(node, ignoredCallExpressions)) return;
-			if (isAssignedJSXValue(node) || isJsxPropertyValue(node) || isTernaryJSXChild(node)) return;
-			if (node.type === "JSXFragment" && isLogicalJSXChild(node)) return;
-			if (
-				node.type === "JSXFragment" &&
-				callbackUsage.memoization &&
-				!callbackUsage.iteration &&
-				isTopLevelFunctionReturn(node)
-			) {
+			if (isAssignedJSXValue(node) || isJsxPropertyValue(node) || isTernaryJsxChild(node)) return;
+
+			const isFragment = isJsxFragment(node);
+
+			if (isFragment && isLogicalJsxChild(node)) return;
+			if (isFragment && callbackUsage.memoization && !callbackUsage.iteration && isTopLevelFunctionReturn(node)) {
 				return;
 			}
 
-			if (node.type === "JSXFragment") {
+			if (isFragment) {
 				context.report({
 					messageId: "missingKey",
 					node,

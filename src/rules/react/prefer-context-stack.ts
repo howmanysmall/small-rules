@@ -7,6 +7,13 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
+import {
+	isJsxElement,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxMemberExpression,
+	isJsxText,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -17,23 +24,21 @@ const CONTEXT_STACK_COMPONENT = {
 };
 const JSX_EXTENSIONS = new Set([".jsx", ".tsx"]);
 
-function isProviderElement(node: ESTree.JSXElement): boolean {
-	return (
-		node.openingElement.name.type === "JSXMemberExpression" && node.openingElement.name.property.name === "Provider"
-	);
+function isProviderElement({ openingElement }: ESTree.JSXElement): boolean {
+	return isJsxMemberExpression(openingElement.name) && openingElement.name.property.name === "Provider";
 }
 
 function getMeaningfulChildren(node: ESTree.JSXElement): ReadonlyArray<ESTree.JSXChild> {
 	return node.children.filter((child) => {
-		if (child.type === "JSXText") return child.value.trim().length > 0;
-		if (child.type === "JSXExpressionContainer") return child.expression.type !== "JSXEmptyExpression";
+		if (isJsxText(child)) return child.value.trim().length > 0;
+		if (isJsxExpressionContainer(child)) return !isJsxEmptyExpression(child.expression);
 		return true;
 	});
 }
 
 function isNestedProviderInChain(node: ESTree.JSXElement): boolean {
 	const { parent } = node;
-	if (parent.type !== "JSXElement" || !isProviderElement(parent)) return false;
+	if (!isJsxElement(parent) || !isProviderElement(parent)) return false;
 
 	const meaningfulChildren = getMeaningfulChildren(parent);
 	return meaningfulChildren.length === 1 && meaningfulChildren[0] === node;
@@ -50,7 +55,7 @@ function collectProviderChain(node: ESTree.JSXElement): ReadonlyArray<ESTree.JSX
 		if (meaningfulChildren.length !== 1) break;
 
 		const [child] = meaningfulChildren;
-		if (child?.type !== "JSXElement" || !isProviderElement(child)) break;
+		if (!isJsxElement(child) || !isProviderElement(child)) break;
 
 		chain.push(child);
 		current = child;
@@ -69,7 +74,7 @@ function hasOnlySafeWrapperChildren(node: ESTree.JSXElement, nextProvider: ESTre
 		}
 
 		/* v8 ignore next -- @preserve provider-chain children are only the next provider plus parser whitespace. */
-		if (child.type === "JSXText" && child.value.trim() === "") continue;
+		if (isJsxText(child) && child.value.trim().length === 0) continue;
 		return false;
 	}
 

@@ -8,7 +8,12 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import { isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import {
+	isBlockStatement,
+	isCallExpression,
+	isExpressionStatement,
+	isNumericLiteral,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -69,7 +74,7 @@ function getCallbackBody(callback: CallbackFunction): ESTree.Node | undefined {
 
 function getCallbackBlockBody(callback: CallbackFunction): ESTree.BlockStatement | undefined {
 	const body = getCallbackBody(callback);
-	return body?.type === "BlockStatement" ? body : undefined;
+	return isBlockStatement(body) ? body : undefined;
 }
 
 function shouldCheckTest(
@@ -94,10 +99,9 @@ function getFirstStatementCall(callback: CallbackFunction): ESTree.CallExpressio
 	if (body === undefined) return undefined;
 
 	const [firstStatement] = body.body;
-	if (firstStatement?.type !== "ExpressionStatement" || firstStatement.expression.type !== "CallExpression") {
-		return undefined;
-	}
-	return firstStatement.expression;
+	return isExpressionStatement(firstStatement) && isCallExpression(firstStatement.expression)
+		? firstStatement.expression
+		: undefined;
 }
 
 function reportMissingAssertions(

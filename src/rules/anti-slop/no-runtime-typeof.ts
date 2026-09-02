@@ -7,23 +7,14 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isAnyFunction, isProgram, isTsTypePredicate } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-type RuntimeFunction = ESTree.ArrowFunctionExpression | ESTree.Function;
-
-function isRuntimeFunction(node: ESTree.Node): node is RuntimeFunction {
-	return (
-		node.type === "ArrowFunctionExpression" ||
-		node.type === "FunctionDeclaration" ||
-		node.type === "FunctionExpression"
-	);
-}
-
 function isInsideTypeGuard(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null = node.parent;
-	while (current !== null && current.type !== "Program") {
-		if (isRuntimeFunction(current)) return current.returnType?.typeAnnotation.type === "TSTypePredicate";
+	while (current !== null && !isProgram(current)) {
+		if (isAnyFunction(current)) return isTsTypePredicate(current.returnType?.typeAnnotation);
 		current = current.parent;
 	}
 	return false;

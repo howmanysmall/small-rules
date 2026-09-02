@@ -2,6 +2,16 @@ import { Predicate } from "effect";
 
 import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isArrowFunctionExpression,
+	isCallExpression,
+	isExportDefaultDeclaration,
+	isExportNamedDeclaration,
+	isFunctionDeclarationRaw,
+	isFunctionExpression,
+	isIdentifierName,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment } from "$oxc-utilities/react-utilities";
 
@@ -93,7 +103,7 @@ type RequireNamedEffectFunctionsMessageId =
 function resolveFunctionFromVariable(variable: ScopeVariable): ResolvedFunction | undefined {
 	for (const definition of variable.defs) {
 		const { node } = definition;
-		if (node.type === "FunctionDeclaration") {
+		if (isFunctionDeclarationRaw(node)) {
 			return {
 				isAsync: node.async,
 				node,
@@ -101,10 +111,10 @@ function resolveFunctionFromVariable(variable: ScopeVariable): ResolvedFunction 
 			};
 		}
 
-		if (node.type === "VariableDeclarator") {
+		if (isVariableDeclarator(node)) {
 			if (node.init === null) continue;
 
-			if (node.init.type === "ArrowFunctionExpression") {
+			if (isArrowFunctionExpression(node.init)) {
 				return {
 					isAsync: node.init.async,
 					node: node.init,
@@ -112,7 +122,7 @@ function resolveFunctionFromVariable(variable: ScopeVariable): ResolvedFunction 
 				};
 			}
 
-			if (node.init.type === "FunctionExpression") {
+			if (isFunctionExpression(node.init)) {
 				return {
 					isAsync: node.init.async,
 					node: node.init,
@@ -132,7 +142,7 @@ function isCallbackHookResult(sourceCode: SourceCode, identifier: ESTree.Identif
 
 	for (const definition of variable.defs) {
 		const { node } = definition;
-		if (node.type !== "VariableDeclarator" || node.init?.type !== "CallExpression") continue;
+		if (!isVariableDeclarator(node) || !isCallExpression(node.init)) continue;
 
 		const calleeHookName = getHookName(node.init);
 		if (calleeHookName === "useCallback" || calleeHookName === "useMemo") return true;
@@ -148,8 +158,8 @@ function isDeclarationRemovable(
 ): boolean {
 	if (variable.references.length !== 1) return false;
 
-	const parentType = declaration.parent.type;
-	if (parentType === "ExportNamedDeclaration" || parentType === "ExportDefaultDeclaration") return false;
+	const { parent } = declaration;
+	if (isExportNamedDeclaration(parent) || isExportDefaultDeclaration(parent)) return false;
 
 	return !hasAttachedComments(sourceCode, declaration);
 }
@@ -242,11 +252,8 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			node: ESTree.CallExpression,
 			functionExpression: ESTree.Function,
 		): void {
-			if (functionExpression.id === null) {
-				reportHookIssue(hookName, node, "anonymousFunction");
-			} else if (isRobloxTsMode) {
-				reportHookIssue(hookName, node, "functionExpression");
-			}
+			if (functionExpression.id === null) reportHookIssue(hookName, node, "anonymousFunction");
+			else if (isRobloxTsMode) reportHookIssue(hookName, node, "functionExpression");
 		}
 
 		function reportDeclarationReference(
@@ -279,15 +286,11 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 		): void {
 			const functionHasId = functionExpression.id !== null;
 
-			if (functionHasId && functionExpression.async) {
-				reportHookIssue(hookName, node, "asyncFunctionExpression");
-			} else if (functionHasId && isRobloxTsMode) {
-				reportHookIssue(hookName, node, "functionExpression");
-			} else if (!functionHasId && functionExpression.async) {
+			if (functionHasId && functionExpression.async) reportHookIssue(hookName, node, "asyncFunctionExpression");
+			else if (functionHasId && isRobloxTsMode) reportHookIssue(hookName, node, "functionExpression");
+			else if (!functionHasId && functionExpression.async) {
 				reportHookIssue(hookName, node, "asyncAnonymousFunction");
-			} else if (!functionHasId) {
-				reportHookIssue(hookName, node, "anonymousFunction");
-			}
+			} else if (!functionHasId) reportHookIssue(hookName, node, "anonymousFunction");
 		}
 
 		return {
@@ -298,23 +301,18 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				const [firstArgument] = node.arguments;
 				if (firstArgument === undefined) return;
 
-				if (firstArgument.type === "Identifier") {
+				if (isIdentifierName(firstArgument)) {
 					reportCallbackIdentifier(hookName, node, firstArgument);
 					return;
 				}
 
-				if (firstArgument.type === "ArrowFunctionExpression") {
-					if (firstArgument.async) {
-						reportHookIssue(hookName, node, "asyncArrowFunction");
-					} else {
-						reportHookIssue(hookName, node, "arrowFunction");
-					}
+				if (isArrowFunctionExpression(firstArgument)) {
+					if (firstArgument.async) reportHookIssue(hookName, node, "asyncArrowFunction");
+					else reportHookIssue(hookName, node, "arrowFunction");
 					return;
 				}
 
-				if (firstArgument.type === "FunctionExpression") {
-					reportInlineFunctionExpression(hookName, node, firstArgument);
-				}
+				if (isFunctionExpression(firstArgument)) reportInlineFunctionExpression(hookName, node, firstArgument);
 			},
 		} satisfies Visitor;
 	},

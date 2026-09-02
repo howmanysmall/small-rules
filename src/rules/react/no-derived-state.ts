@@ -10,10 +10,16 @@ type RuleContext = InferContextFromRule<typeof noDerivedState>;
 
 function reportDerivedStateEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
 	for (const reference of effect.functionReferences) {
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isStateCall(reference)) continue;
+		if (
+			!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode) ||
+			!analysis.isStateCall(reference)
+		) {
+			continue;
+		}
+
 		const callExpression = analysis.scope.getCallExpression(reference);
 		if (callExpression === undefined) continue;
+
 		const stateName = analysis.getStateName(reference);
 		if (stateName === undefined) continue;
 
@@ -39,8 +45,7 @@ const noDerivedState = createRule("no-derived-state", "react", {
 		return {
 			Program(): void {
 				for (const effect of analysis.effects) {
-					if (effect.cleanup !== undefined) continue;
-					if (effect.dependencyReferences === undefined) continue;
+					if (effect.cleanup !== undefined || effect.dependencyReferences === undefined) continue;
 
 					reportDerivedStateEffect(context, analysis, effect);
 				}

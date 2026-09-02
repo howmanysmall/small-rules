@@ -1,11 +1,12 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
+import { FOR_STATEMENT, isExpressionStatement } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 	const { parent } = node;
-	return parent.type === "ExpressionStatement" || (parent.type === "ForStatement" && parent.update === node);
+	return isExpressionStatement(parent) || (parent.type === FOR_STATEMENT && parent.update === node);
 }
 
 const noIncrementDecrement = createRule("no-increment-decrement", "general", {

@@ -2,8 +2,9 @@
 // primitive.
 import { Predicate } from "effect";
 
-import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

@@ -5,6 +5,7 @@
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
 import { isGlobalReflectMethodCall } from "$oxc-utilities/anti-slop/reflect-method";
 import { createRule } from "$oxc-utilities/create-rule";
+import { isSuper, isV8IntrinsicExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -12,9 +13,10 @@ const noReflectGet = createRule("no-reflect-get", "anti-slop", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
+				const { callee } = node;
 				/* v8 ignore next -- Oxc's parser does not produce V8 intrinsic call expressions. @preserve */
-				if (node.callee.type === "Super" || node.callee.type === "V8IntrinsicExpression") return;
-				if (isGlobalReflectMethodCall(context.sourceCode, node.callee, "get")) {
+				if (isSuper(callee) || isV8IntrinsicExpression(callee)) return;
+				if (isGlobalReflectMethodCall(context.sourceCode, callee, "get")) {
 					context.report({ messageId: "reflectGet", node });
 				}
 			},
