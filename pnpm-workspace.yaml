@@ -224,13 +224,13 @@ catalogs:
     "@stryker-mutator/vitest-runner": 10.0.0
     "@testing-library/react": 16.3.2
     "@testing-library/user-event": 14.6.1
-    "@vitest/coverage-v8": 4.1.11
+    "@vitest/coverage-v8": 5.0.0
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
     confbox: 0.2.4
     fast-check: 4.9.0
     jsdom: 29.1.1
-    vitest: 4.1.11
+    vitest: 5.0.0
     vitiate: 0.3.1
   tooling:
     "@oh-my-pi/pi-coding-agent": 17.3.7
