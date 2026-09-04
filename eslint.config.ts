@@ -11,7 +11,6 @@ const configuration = isentinel(
 			lua: false,
 			markdown: false,
 			oxfmtOptions: {
-				$schema: "node_modules/oxfmt/configuration_schema.json",
 				arrowParens: "always",
 				bracketSameLine: false,
 				bracketSpacing: true,
