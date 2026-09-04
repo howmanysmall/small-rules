@@ -518,6 +518,20 @@
 					}
 				}
 			}
+		},
+
+		{
+			// Theme stylesheet uses component-scoped selectors across disjoint
+			// subtrees (code resets, badges, cards); specificity ordering between
+			// unrelated components is intentional and has no cascade effect.
+			"includes": ["documentation/src/styles/custom.css"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noDescendingSpecificity": "off"
+					}
+				}
+			}
 		}
 
 		// package.json exception

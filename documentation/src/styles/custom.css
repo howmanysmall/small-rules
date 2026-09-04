@@ -2183,7 +2183,6 @@ main h3 {
 	letter-spacing: -0.01em !important;
 }
 
-/* biome-ignore lint/style/noDescendingSpecificity: intentional low-specificity base paragraph rule; class-scoped paragraph rules above are meant to win. */
 main p {
 	font-size: 1.0625rem;
 	line-height: 1.75;
