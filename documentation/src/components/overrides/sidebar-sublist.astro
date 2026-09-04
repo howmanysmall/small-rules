@@ -101,11 +101,14 @@ function containsCurrent(entries: ReadonlyArray<SidebarEntry>): boolean {
 			flex-shrink: 0;
 			transition: transform 0.2s ease-in-out;
 		}
+		[open] > summary .caret {
+			transform: rotateZ(90deg);
+		}
 		:global([dir="rtl"]) .caret {
 			transform: rotateZ(180deg);
 		}
-		[open] > summary .caret {
-			transform: rotateZ(90deg);
+		:global([dir="rtl"]) [open] > summary .caret {
+			transform: rotateZ(270deg);
 		}
 
 		a {

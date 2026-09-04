@@ -97,6 +97,9 @@ export function isTestCaseCall(node: ESTree.CallExpression): boolean {
 	return false;
 }
 
+// oxlint-disable-next-line jsdoc-js/require-description -- useless
+/** @knipignore -- Test-only function */
+// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- useless
 export function getTestCallback(node: ESTree.CallExpression): CallbackFunction | undefined {
 	/* v8 ignore next -- @preserve callers request callbacks only after identifying test case calls. */
 	return isTestCaseCall(node) ? getLastCallbackArgument(node) : undefined;

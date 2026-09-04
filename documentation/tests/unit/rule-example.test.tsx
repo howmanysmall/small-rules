@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { RuleExample } from "$components/rule-example";
 
@@ -9,20 +9,18 @@ const answerExample = "const answer = 42;";
 const basicExample = "example";
 const printExample = 'print("hello")';
 
-afterEach(() => {
+function restoreClipboardAndTimers(): void {
 	vi.useRealTimers();
-	if (clipboardDescriptor === undefined) {
-		Reflect.deleteProperty(navigator, "clipboard");
-	} else {
-		Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
-	}
-});
+	if (clipboardDescriptor === undefined) Reflect.deleteProperty(navigator, "clipboard");
+	else Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
+}
 
-describe("RuleExample", () => {
+describe("rule-example", () => {
 	it.each([
 		["pass", "Correct"],
 		["fail", "Incorrect"],
 	] as const)("renders the default %s state", (type, title) => {
+		expect.assertions(2);
 		const { container } = render(
 			<RuleExample type={type}>
 				<code>{basicExample}</code>
@@ -36,6 +34,7 @@ describe("RuleExample", () => {
 	});
 
 	it("renders a custom title", () => {
+		expect.assertions(1);
 		render(
 			<RuleExample title="Allowed callback" type="pass">
 				<code>{basicExample}</code>
@@ -48,6 +47,7 @@ describe("RuleExample", () => {
 	});
 
 	it("composes the rendered code child", () => {
+		expect.assertions(1);
 		const { container } = render(
 			<RuleExample type="fail">
 				<pre>
@@ -62,6 +62,7 @@ describe("RuleExample", () => {
 	});
 
 	it("copies the rendered code", async () => {
+		expect.assertions(1);
 		const user = userEvent.setup();
 		const writeText = vi.spyOn(navigator.clipboard, "writeText");
 		render(
@@ -78,6 +79,7 @@ describe("RuleExample", () => {
 	});
 
 	it("announces the copied state", async () => {
+		expect.assertions(2);
 		const user = userEvent.setup();
 		render(
 			<RuleExample type="pass">
@@ -93,27 +95,32 @@ describe("RuleExample", () => {
 	});
 
 	it("resets the copied state after 1.5 seconds", async () => {
+		expect.assertions(2);
 		vi.useFakeTimers();
 		Object.defineProperty(navigator, "clipboard", {
 			configurable: true,
-			value: { writeText: vi.fn().mockResolvedValue(undefined) },
+			value: { writeText: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) },
 		});
-		render(
-			<RuleExample type="pass">
-				<code>{basicExample}</code>
-			</RuleExample>,
-		);
-		const copyButton = screen.getByRole("button", { name: "Copy example" });
-		fireEvent.click(copyButton);
-		await act(async () => {
-			await Promise.resolve();
-		});
+		try {
+			render(
+				<RuleExample type="pass">
+					<code>{basicExample}</code>
+				</RuleExample>,
+			);
+			const copyButton = screen.getByRole("button", { name: "Copy example" });
+			fireEvent.click(copyButton);
+			await act(async () => {
+				await Promise.resolve();
+			});
 
-		act(function advanceCopiedTimer(): void {
-			vi.advanceTimersByTime(1_500);
-		});
+			act(function advanceCopiedTimer(): void {
+				vi.advanceTimersByTime(1_500);
+			});
 
-		expect(Object.hasOwn(copyButton.dataset, "copied")).toBe(false);
-		expect(copyButton.getAttribute("aria-label")).toBe("Copy example");
+			expect(Object.hasOwn(copyButton.dataset, "copied")).toBe(false);
+			expect(copyButton.getAttribute("aria-label")).toBe("Copy example");
+		} finally {
+			restoreClipboardAndTimers();
+		}
 	});
 });
