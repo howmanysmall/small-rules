@@ -1,5 +1,3 @@
-// oxlint-disable small-rules/prevent-abbreviations -- ok.
-
 import { argv } from "node:process";
 import { GLOB_SRC, GLOB_SRC_EXT, GLOB_TESTS } from "@isentinel/eslint-config";
 import { isentinel, translateRuleToOxlint } from "@isentinel/eslint-config/oxlint";
@@ -9,7 +7,6 @@ import type { OxlintRules } from "@isentinel/eslint-config/oxlint";
 
 type GetRecordValue<TRecord extends Record<string, unknown>> = TRecord[keyof TRecord];
 type DummyRule = NonNullable<GetRecordValue<OxlintRules>>;
-
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
 const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
 
@@ -658,7 +655,7 @@ const configuration = isentinel(
 			"vitest/prefer-called-once": "error",
 			"vitest/prefer-called-times": "error",
 			"vitest/prefer-describe-function-title": "off",
-			"vitest/prefer-expect-assertions": "error",
+			"vitest/prefer-expect-assertions": "off",
 			"vitest/prefer-expect-type-of": "error",
 			"vitest/prefer-import-in-mock": "error",
 			"vitest/prefer-importing-vitest-globals": "error",
@@ -683,6 +680,11 @@ const configuration = isentinel(
 		name: "small-rules/allow-default-export",
 		files: [FIXTURES_FILES, CONFIGURATION_FILES],
 		rules: { "import/no-default-export": "off" },
+	},
+	{
+		name: "small-rules-type-aware/allow-abbreviations",
+		files: [FIXTURES_FILES, CONFIGURATION_FILES],
+		rules: { "small-rules/prevent-abbreviations": "off" },
 	},
 	{
 		name: "small-rules/allow-null",

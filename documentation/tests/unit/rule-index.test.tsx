@@ -18,7 +18,7 @@ function showingRulesLabel(count: number): string {
 	return `Showing ${String(count)} ${count === 1 ? "rule" : "rules"}`;
 }
 
-describe("RuleIndex", () => {
+describe("rule-index", () => {
 	it("renders the complete catalog with accessible filter controls", () => {
 		expect.assertions(5);
 
