@@ -46,6 +46,7 @@ function createManifestFilteredRunner(): GitRunner {
 }
 describe("parseAddCommits", () => {
 	it("maps each rule to its first add commit", () => {
+		expect.assertions(4);
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
 
 		expect(adds.get("no-chain-state-updates")).toBe("aaaa1111");
@@ -55,12 +56,14 @@ describe("parseAddCommits", () => {
 	});
 
 	it("keeps the first occurrence when a rule appears in multiple commits", () => {
+		expect.assertions(1);
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
 
 		expect(adds.get("no-chain-state-updates")).toBe("aaaa1111");
 	});
 
 	it("ignores deeply nested paths and non-`.ts` files", () => {
+		expect.assertions(2);
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
 
 		expect(adds.has("subdir/nested/not-a-rule")).toBe(false);
@@ -70,6 +73,7 @@ describe("parseAddCommits", () => {
 
 describe("resolveNewness", () => {
 	it("marks rules new only when added in the latest release or unreleased", () => {
+		expect.assertions(3);
 		const newness = resolveNewness(
 			new Map([
 				["latest", "v2.14.0"],
@@ -79,36 +83,41 @@ describe("resolveNewness", () => {
 			"v2.14.0",
 		);
 
-		expect(newness.get("unreleased")).toEqual({ addedIn: undefined, isNew: true });
-		expect(newness.get("latest")).toEqual({ addedIn: "v2.14.0", isNew: true });
-		expect(newness.get("older")).toEqual({ addedIn: "v1.1.0", isNew: false });
+		expect(newness.get("unreleased")).toStrictEqual({ addedIn: undefined, isNew: true });
+		expect(newness.get("latest")).toStrictEqual({ addedIn: "v2.14.0", isNew: true });
+		expect(newness.get("older")).toStrictEqual({ addedIn: "v1.1.0", isNew: false });
 	});
 });
 
 describe("createRuleNewness", () => {
 	it("classifies rules against the latest release", () => {
+		expect.assertions(3);
 		const newness = createRuleNewness(createFakeRunner(RESPONSES));
 
-		expect(newness.get("no-print")).toEqual({ addedIn: "v1.1.0", isNew: false });
-		expect(newness.get("no-derived-state")).toEqual({ addedIn: "v2.14.0", isNew: true });
-		expect(newness.get("no-initialize-state")).toEqual({ addedIn: undefined, isNew: true });
+		expect(newness.get("no-print")).toStrictEqual({ addedIn: "v1.1.0", isNew: false });
+		expect(newness.get("no-derived-state")).toStrictEqual({ addedIn: "v2.14.0", isNew: true });
+		expect(newness.get("no-initialize-state")).toStrictEqual({ addedIn: undefined, isNew: true });
 	});
 
 	it("runs one tag lookup per distinct add commit", () => {
-		const calls: Array<ReadonlyArray<string>> = [];
+		expect.assertions(1);
+		const calls = new Array<ReadonlyArray<string>>();
 		const runner = createRecordingRunner(calls);
 
 		createRuleNewness(runner);
 
+		// oxlint-disable-next-line vitest/no-conditional-in-test -- it is FINE.
 		const containsCalls = calls.filter((call) => call[0] === "tag" && call[1] === "--contains");
 		expect(containsCalls).toHaveLength(3);
 	});
 
 	it("returns an empty map when no release tags exist", () => {
-		expect(createRuleNewness(() => "")).toEqual(new Map());
+		expect.assertions(1);
+		expect(createRuleNewness(() => "")).toStrictEqual(new Map());
 	});
 
 	it("drops rules absent from the manifest", () => {
+		expect.assertions(1);
 		const newness = createRuleNewness(createManifestFilteredRunner());
 
 		expect(newness.has("not-a-real-rule")).toBe(false);
@@ -117,6 +126,7 @@ describe("createRuleNewness", () => {
 
 describe("getRuleNewnessWith", () => {
 	it("returns an empty map and warns when git is unavailable", () => {
+		expect.assertions(2);
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {
 			// purposefully empty
 		});

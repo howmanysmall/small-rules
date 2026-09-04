@@ -9,8 +9,9 @@ const categorySummaryPattern = /Browse all \d+ rules in this category\./u;
 const noWarnNamePattern = /No Warn/u;
 const ruleIndexCountPattern = /^Showing \d+ rules$/u;
 
-describe("RelatedRules", () => {
+describe("related-rules", () => {
 	it("links a rule to its documented semantic counterpart", () => {
+		expect.assertions(3);
 		render(<RelatedRules rule="no-print" />);
 
 		const section = screen.getByRole("region", { name: "Related Rules" });
@@ -26,8 +27,9 @@ describe("RelatedRules", () => {
 	});
 });
 
-describe("RuleCategoryPage", () => {
+describe("rule-category-page", () => {
 	it("introduces the selected category before its rule index", () => {
+		expect.assertions(3);
 		render(<RuleCategoryPage category="general" />);
 
 		expect(
@@ -38,8 +40,9 @@ describe("RuleCategoryPage", () => {
 	});
 });
 
-describe("RuleSummary", () => {
+describe("rule-summary", () => {
 	it("renders the rule id and generated description by default", () => {
+		expect.assertions(2);
 		render(<RuleSummary rule="no-print" />);
 
 		expect(screen.getByText("small-rules/no-print")).toBeInstanceOf(HTMLElement);
@@ -47,6 +50,7 @@ describe("RuleSummary", () => {
 	});
 
 	it("composes custom summary content when provided", () => {
+		expect.assertions(2);
 		render(
 			<RuleSummary rule="no-print">
 				<p>{"Project-specific guidance."}</p>

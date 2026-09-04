@@ -134,6 +134,10 @@ describe("prefer-expect-assertions", () => {
 				errors: [{ messageId: "haveExpectAssertions" }],
 			},
 			{
+				code: "it('works', () => { expect(value).toBe(1); }, 500);",
+				errors: [{ messageId: "haveExpectAssertions" }],
+			},
+			{
 				code: "test.each([1, 2])('works', (value) => { expect(value).toBe(1); });",
 				errors: [
 					{

@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -515,6 +515,20 @@
 				"rules": {
 					"correctness": {
 						"noUndeclaredDependencies": "off"
+					}
+				}
+			}
+		},
+
+		{
+			// Theme stylesheet uses component-scoped selectors across disjoint
+			// subtrees (code resets, badges, cards); specificity ordering between
+			// unrelated components is intentional and has no cascade effect.
+			"includes": ["documentation/src/styles/custom.css"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noDescendingSpecificity": "off"
 					}
 				}
 			}

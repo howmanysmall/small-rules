@@ -30,8 +30,9 @@ const complexOption = {
 	type: "Array<HookConfiguration>",
 } satisfies ObjectOption;
 
-describe("RuleOptionsTable", () => {
+describe("rule-options-table", () => {
 	it("renders inline and expandable option metadata", async () => {
+		expect.assertions(9);
 		const user = userEvent.setup();
 		const { container } = render(<RuleOptionsTable options={[inlineOption, complexOption]} />);
 
@@ -53,6 +54,7 @@ describe("RuleOptionsTable", () => {
 	});
 
 	it("copies a complex default and announces success", async () => {
+		expect.assertions(3);
 		const user = userEvent.setup();
 		const writeText = vi.spyOn(navigator.clipboard, "writeText");
 		render(<RuleOptionsTable options={[complexOption]} />);

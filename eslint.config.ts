@@ -1,5 +1,3 @@
-// oxlint-disable small-rules/prevent-abbreviations -- configuration file
-
 import { isentinel } from "@isentinel/eslint-config";
 import { configs as astroConfigs } from "eslint-plugin-astro";
 
@@ -13,7 +11,6 @@ const configuration = isentinel(
 			lua: false,
 			markdown: false,
 			oxfmtOptions: {
-				$schema: "node_modules/oxfmt/configuration_schema.json",
 				arrowParens: "always",
 				bracketSameLine: false,
 				bracketSpacing: true,
