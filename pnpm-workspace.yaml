@@ -50,6 +50,7 @@ minimumReleaseAgeExclude:
   - "@opencode-ai/protocol"
   - "@opencode-ai/schema"
   - "@opencode-ai/sdk"
+  - "@opencode-ai/util"
   - "@oxfmt/binding-android-arm-eabi"
   - "@oxfmt/binding-android-arm64"
   - "@oxfmt/binding-darwin-arm64"
@@ -236,7 +237,7 @@ catalogs:
     vitiate: 0.3.1
   tooling:
     "@oh-my-pi/pi-coding-agent": 18.1.10
-    "@opencode-ai/plugin": 0.0.0-beta-17519
+    "@opencode-ai/plugin": 0.0.0-beta-19086
     jiti: 2.7.0
     jscpd: 5.1.2
     pncat: 0.13.3
