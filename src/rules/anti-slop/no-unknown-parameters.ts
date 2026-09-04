@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-unknown-parameters.ts@d3f6ae4676a0a313b4779249cf7f1bac42645b8d by Dillon Mulroy.
+// Vendored from src/rules/no-unknown-parameters.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -13,7 +13,7 @@ import {
 	functionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isBindingIdentifier, isTsTypePredicate } from "$oxc-utilities/oxc-utilities";
+import { isBindingIdentifier, isTsTypeAnnotation, isTsTypePredicate } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -46,7 +46,7 @@ const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 			const validatedName = validatedParameterName(node);
 			for (const parameter of node.params) {
 				const annotation = functionParameterTypeAnnotation(parameter);
-				if (annotation === null || annotation === undefined) continue;
+				if (!isTsTypeAnnotation(annotation)) continue;
 				if (!containsUnknownType(annotation.typeAnnotation)) continue;
 
 				const name = functionParameterBindingName(parameter, context.sourceCode);

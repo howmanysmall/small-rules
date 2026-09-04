@@ -15,7 +15,7 @@ This file is distributed in the published npm package. The same notices are embe
 ## 1. `anti-slop`
 
 - **Source:** <https://github.com/dmmulroy/anti-slop>
-- **Vendored commit:** `446268e5d15baa968eaec669ff65358d36ae6259`
+- **Vendored commit:** `e8c4880471b23ab7f216fba7b27d173a6ef07d4c`
 - **Copyright:** Copyright (c) 2026 Dillon Mulroy
 - **License:** MIT
 
@@ -68,7 +68,7 @@ SOFTWARE.
 ## 2. `anti-slop shared helpers`
 
 - **Source:** <https://github.com/dmmulroy/anti-slop>
-- **Vendored commit:** `446268e5d15baa968eaec669ff65358d36ae6259`
+- **Vendored commit:** `e8c4880471b23ab7f216fba7b27d173a6ef07d4c`
 - **Copyright:** Copyright (c) 2026 Dillon Mulroy
 - **License:** MIT
 
@@ -77,8 +77,10 @@ Vendored into `src/utilities/anti-slop/`, adapted rather than verbatim:
 | This project | Upstream |
 | --- | --- |
 | `dictionary-types.ts` | `src/shared/dictionary-types.ts` |
+| `function-parameters.ts` | `src/shared/function-parameters.ts` |
 | `lexical-type-parameters.ts` | `src/shared/lexical-type-parameters.ts` |
 | `reflect-method.ts` | `src/shared/reflect-method.ts` |
+| `type-alias-resolution.ts` | `src/shared/type-alias-resolution.ts` |
 
 ```text
 MIT License

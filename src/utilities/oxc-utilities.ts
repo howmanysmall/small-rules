@@ -7,6 +7,7 @@ import type { CallbackFunction } from "$oxc-types/missing-types";
 export type FixReturn = ReturnType<FixFunction>;
 export type NodeType = ESTree.Node["type"];
 
+export const ACCESSOR_PROPERTY = "AccessorProperty" as const satisfies NodeType;
 export const ARRAY_PATTERN = "ArrayPattern" as const satisfies NodeType;
 export const ASSIGNMENT_PATTERN = "AssignmentPattern" as const satisfies NodeType;
 export const OBJECT_PATTERN = "ObjectPattern" as const satisfies NodeType;
@@ -55,6 +56,7 @@ export const PROPERTY_DEFINITION = "PropertyDefinition" as const satisfies NodeT
 export const RETURN_STATEMENT = "ReturnStatement" as const satisfies NodeType;
 export const SEQUENCE_EXPRESSION = "SequenceExpression" as const satisfies NodeType;
 export const SPREAD_ELEMENT = "SpreadElement" as const satisfies NodeType;
+export const STATIC_BLOCK = "StaticBlock" as const satisfies NodeType;
 export const SWITCH_CASE = "SwitchCase" as const satisfies NodeType;
 export const SWITCH_STATEMENT = "SwitchStatement" as const satisfies NodeType;
 export const TAGGED_TEMPLATE_EXPRESSION = "TaggedTemplateExpression" as const satisfies NodeType;
@@ -72,10 +74,14 @@ export const TS_DECLARE_FUNCTION = "TSDeclareFunction" as const satisfies NodeTy
 export const TS_EMPTY_BODY_FUNCTION_EXPRESSION = "TSEmptyBodyFunctionExpression" as const satisfies NodeType;
 export const TS_FUNCTION_TYPE = "TSFunctionType" as const satisfies NodeType;
 export const TS_INSTANTIATION_EXPRESSION = "TSInstantiationExpression" as const satisfies NodeType;
+export const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
+export const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
 export const TS_INTERFACE_DECLARATION = "TSInterfaceDeclaration" as const satisfies NodeType;
 export const TS_INTERSECTION_TYPE = "TSIntersectionType" as const satisfies NodeType;
 export const TS_MAPPED_TYPE = "TSMappedType" as const satisfies NodeType;
 export const TS_METHOD_SIGNATURE = "TSMethodSignature" as const satisfies NodeType;
+export const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
+export const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
 export const TS_NEVER_KEYWORD = "TSNeverKeyword" as const satisfies NodeType;
 export const TS_NON_NULL_EXPRESSION = "TSNonNullExpression" as const satisfies NodeType;
 export const TS_NULL_KEYWORD = "TSNullKeyword" as const satisfies NodeType;
@@ -89,6 +95,7 @@ export const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType
 export const TS_TYPE_ASSERTION = "TSTypeAssertion" as const satisfies NodeType;
 export const TS_TYPE_LITERAL = "TSTypeLiteral" as const satisfies NodeType;
 export const TS_TYPE_OPERATOR = "TSTypeOperator" as const satisfies NodeType;
+export const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 export const TS_TYPE_REFERENCE = "TSTypeReference" as const satisfies NodeType;
 export const TS_UNDEFINED_KEYWORD = "TSUndefinedKeyword" as const satisfies NodeType;
 export const TS_UNION_TYPE = "TSUnionType" as const satisfies NodeType;
@@ -338,6 +345,18 @@ export function isTsNeverKeyword(node: ESTree.Node): node is ESTree.TSNeverKeywo
 	return node.type === TS_NEVER_KEYWORD;
 }
 
+/**
+ * Checks whether an AST node is an accessor property.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is an accessor property.
+ */
+export function isAccessorProperty(
+	node: ESTree.Node,
+): node is ESTree.AccessorProperty & { type: typeof ACCESSOR_PROPERTY } {
+	return node.type === ACCESSOR_PROPERTY;
+}
+
 export function isMethodDefinitionRaw(node?: ESTree.Node | null): node is ESTree.MethodDefinition {
 	return node?.type === METHOD_DEFINITION;
 }
@@ -369,12 +388,49 @@ export function isTsTypePredicate(node?: ESTree.Node | null): node is ESTree.TST
 	return node?.type === "TSTypePredicate";
 }
 
+/**
+ * Checks whether an AST node is a TypeScript type parameter.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a TypeScript type parameter.
+ */
+export function isTsTypeParameter(node: ESTree.Node): node is ESTree.TSTypeParameter {
+	return node.type === TS_TYPE_PARAMETER;
+}
+
 export function isProgram(node: ESTree.Node): node is ESTree.Program {
 	return node.type === "Program";
 }
 
 export function isTsMappedType(node: ESTree.Node): node is ESTree.TSMappedType {
 	return node.type === TS_MAPPED_TYPE;
+}
+/**
+ * Checks whether an AST node is a TypeScript module block.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a TypeScript module block.
+ */
+export function isTsModuleBlock(node: ESTree.Node): node is ESTree.TSModuleBlock {
+	return node.type === TS_MODULE_BLOCK;
+}
+/**
+ * Checks whether an AST node is a non-global TypeScript module declaration.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a namespace or module declaration.
+ */
+export function isTsModuleDeclaration(node: ESTree.Node): node is ESTree.TSModuleDeclaration {
+	return node.type === TS_MODULE_DECLARATION && !node.global;
+}
+/**
+ * Checks whether an AST node is a TypeScript global declaration.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a global declaration.
+ */
+export function isTsGlobalDeclaration(node: ESTree.Node): node is ESTree.TSGlobalDeclaration {
+	return node.type === TS_GLOBAL_DECLARATION && node.global;
 }
 export function isTsTypeLiteral(node: ESTree.Node): node is ESTree.TSTypeLiteral {
 	return node.type === TS_TYPE_LITERAL;
@@ -393,6 +449,15 @@ export function isTsObjectKeyword(node: ESTree.Node): node is ESTree.TSObjectKey
 }
 export function isImportDefaultSpecifier(node: ESTree.Node): node is ESTree.ImportDefaultSpecifier {
 	return node.type === "ImportDefaultSpecifier";
+}
+/**
+ * Checks whether an AST node is a TypeScript import-equals declaration.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is an import-equals declaration.
+ */
+export function isTsImportEqualsDeclaration(node: ESTree.Node): node is ESTree.TSImportEqualsDeclaration {
+	return node.type === TS_IMPORT_EQUALS_DECLARATION;
 }
 export function isTsUndefinedKeyword(node: ESTree.Node): node is ESTree.TSUndefinedKeyword {
 	return node.type === TS_UNDEFINED_KEYWORD;
@@ -434,7 +499,13 @@ export function isNamedGlobalCall(node: ESTree.CallExpression | ESTree.NewExpres
 	return isIdentifierNamed(node.callee, name);
 }
 
-export function isClassExpression(node: ESTree.Node): node is ESTree.Class {
+/**
+ * Checks whether an AST node is a class expression.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a class expression.
+ */
+export function isClassExpression(node: ESTree.Node): node is ESTree.Class & { type: typeof CLASS_EXPRESSION } {
 	return node.type === CLASS_EXPRESSION;
 }
 export function isClassBody(node: ESTree.Node): node is ESTree.ClassBody {
@@ -443,7 +514,13 @@ export function isClassBody(node: ESTree.Node): node is ESTree.ClassBody {
 export function isClass(node: ESTree.Node): node is ESTree.Class {
 	return node.type === "ClassDeclaration" || isClassExpression(node);
 }
-export function isClassDeclaration(node: ESTree.Node): node is ESTree.Class {
+/**
+ * Checks whether an AST node is a class declaration.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a class declaration.
+ */
+export function isClassDeclaration(node: ESTree.Node): node is ESTree.Class & { type: typeof CLASS_DECLARATION } {
 	return node.type === CLASS_DECLARATION;
 }
 export function isTsPropertySignature(node: ESTree.Node): node is ESTree.TSPropertySignature {
@@ -468,6 +545,44 @@ export function isFunctionDeclarationRaw(node?: ESTree.Node | null): node is EST
 }
 export function isFunctionDeclaration(node?: ESTree.Node | null): node is ESTree.Function {
 	return isFunctionDeclarationRaw(node) || isFunctionExpression(node);
+}
+
+/**
+ * Checks whether an AST node is a TypeScript declare function.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a TypeScript declare function.
+ */
+export function isTsDeclareFunction(node: ESTree.Node): node is ESTree.Function & { type: typeof TS_DECLARE_FUNCTION } {
+	return node.type === TS_DECLARE_FUNCTION;
+}
+
+/**
+ * Checks whether an AST node is a TypeScript empty-body function expression.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is an empty-body function expression.
+ */
+export function isTsEmptyBodyFunctionExpression(
+	node: ESTree.Node,
+): node is ESTree.Function & { type: typeof TS_EMPTY_BODY_FUNCTION_EXPRESSION } {
+	return node.type === TS_EMPTY_BODY_FUNCTION_EXPRESSION;
+}
+
+/**
+ * Checks whether an AST node is any function-like expression or declaration.
+ * Oxc represents both TypeScript-only kinds within `ESTree.Function`.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is function-like.
+ */
+export function isFunctionLike(node: ESTree.Node): node is ESTree.ArrowFunctionExpression | ESTree.Function {
+	return (
+		isArrowFunctionExpression(node) ||
+		isFunctionDeclaration(node) ||
+		isTsDeclareFunction(node) ||
+		isTsEmptyBodyFunctionExpression(node)
+	);
 }
 
 export function isCallbackFunction(node?: ESTree.Node | null): node is CallbackFunction {
@@ -602,6 +717,15 @@ export function isLabeledStatement(node: ESTree.Node): node is ESTree.LabeledSta
 }
 export function isBlockStatement(node?: ESTree.Node | null): node is ESTree.BlockStatement {
 	return node?.type === BLOCK_STATEMENT;
+}
+/**
+ * Checks whether an AST node is a static class block.
+ *
+ * @param node - AST node to check.
+ * @returns Whether the node is a static class block.
+ */
+export function isStaticBlock(node: ESTree.Node): node is ESTree.StaticBlock {
+	return node.type === STATIC_BLOCK;
 }
 export function isContinueStatement(node: ESTree.Node): node is ESTree.ContinueStatement {
 	return node.type === "ContinueStatement";

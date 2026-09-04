@@ -81,6 +81,14 @@ describe("no-unsafe-dictionary-type", () => {
 				code: "type Src<T> = T;\ntype A = { readonly [K in string]: Src<unknown> };",
 				errors: 1,
 			},
+			{
+				code: "function outer() { type Identity<T> = T; type A = Record<string, Identity<unknown>>; }",
+				errors: 1,
+			},
+			{
+				code: "function local() { type Record<K, V> = { key: K; value: V }; type A = Record<string, unknown>; } function global() { type A = Record<string, unknown>; }",
+				errors: 1,
+			},
 		],
 		valid: [
 			{
@@ -109,6 +117,10 @@ describe("no-unsafe-dictionary-type", () => {
 			"interface Escape { readonly id: string } interface Escape {} type A = Record<string, Escape>;",
 			"interface Owner { readonly id: string } type A = Record<string, object & Owner>;",
 			"type Wrap<T> = { readonly wrapped: T }; type Inner<T, U> = { readonly value: T } & Wrap<U>; type Outer<T, U> = Record<string, Inner<T, U>>; declare function f<T, U>(): Outer<T, U>;",
+			"type WithSchema<T extends Record<string, unknown>> = (schema: T) => void;",
+			"function run<T extends Record<string, unknown>>(input: T): T { return input; }",
+			"declare class Store<T extends Record<string, unknown>> { read(): T }",
+			"type Deep<T extends Readonly<Record<string, unknown>>> = T;",
 			"declare namespace NS { export type Deep<T> = T }\ntype Qualified = NS.Deep<unknown>;\nfunction use(v: NS.Deep<string>) {}",
 			"declare namespace NS { export type Dictionary = Record<string, Command> }\ntype Qualified = NS.Dictionary;",
 			"interface Indexed { [key: string]: Command }",

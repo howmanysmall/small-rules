@@ -54,55 +54,146 @@ function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
 	return collected;
 }
 
-describe("createTypeEnvironment", () => {
-	it("collects aliases, interfaces, and shadowed built-ins from module declarations", () => {
-		expect.assertions(5);
+describe("classifyUnsafeDictionary", () => {
+	it.each([
+		[
+			"caller and callee parameters with the same name",
+			"type Inner<T> = T; type Outer<T> = Record<string, Inner<T>>; let value: Outer<unknown>;",
+			"unknown",
+		],
+		[
+			"a structured explicit wrapper argument",
+			"type Identity<Value> = Value; type Outer<T> = Record<string, Identity<Readonly<T>>>; let value: Outer<unknown>;",
+			"unknown",
+		],
+		[
+			"a dependent generic default",
+			"type Select<T, U = T> = U; type Outer<T> = Record<string, Select<T>>; let value: Outer<unknown>;",
+			"unknown",
+		],
+		[
+			"multilevel generic forwarding",
+			"type Identity<T> = T; type Middle<T> = Identity<T>; type Outer<T> = Record<string, Middle<T>>; let value: Outer<unknown>;",
+			"unknown",
+		],
+		[
+			"a generic parameter named Readonly",
+			"type Outer<Readonly> = Record<string, Readonly>; let value: Outer<unknown>;",
+			"unknown",
+		],
+	])("resolves unsafe values through $1", (_name, code, expected) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		const target = findIdentifierReference(fixture.source, "Outer");
+
+		expect(classifyUnsafeDictionary(target, fixture.environment)?.unsafeValue).toBe(expected);
+	});
+
+	it.each([
+		[
+			"an unrelated alias",
+			"type T = Command; type Inner = Record<string, T>; type Outer<T> = Inner; let value: Outer<unknown>;",
+		],
+		[
+			"a captured alias cycle",
+			"type Identity<T> = T; type Cycle<T> = Identity<Cycle<T>>; type Outer<T> = Record<string, Cycle<T>>; let value: Outer<unknown>;",
+		],
+		[
+			"a nested mapped binder",
+			"interface Source { value: string } type Outer<T> = { [T in keyof Source]: T }; let value: Outer<unknown>;",
+		],
+	])("keeps $1 conservative and terminating", (_name, code) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		const target = findIdentifierReference(fixture.source, "Outer");
+
+		expect(classifyUnsafeDictionary(target, fixture.environment)).toBeUndefined();
+	});
+
+	it.each([
+		[
+			"merged empty interfaces",
+			"interface Empty {} interface Empty {} let value: Record<string, Empty>;",
+			"empty-object",
+		],
+		[
+			"an empty and populated merge",
+			"interface Empty {} interface Empty { value: string } let value: Record<string, Empty>;",
+			undefined,
+		],
+		[
+			"an extended interface",
+			"interface Owner {} interface Empty extends Owner {} let value: Record<string, Empty>;",
+			undefined,
+		],
+		[
+			"an alias competitor",
+			"interface Empty {} type Empty = Command; let value: Record<string, Empty>;",
+			undefined,
+		],
+		["a class competitor", "interface Empty {} class Empty {} let value: Record<string, Empty>;", undefined],
+	])("classifies $1 through visible declarations", (_name, code, expected) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		const record = findIdentifierReference(fixture.source, "Record");
+
+		expect(classifyUnsafeDictionary(record, fixture.environment)?.unsafeValue).toBe(expected);
+	});
+
+	it("uses local interface shadows for dictionary values", () => {
+		expect.assertions(2);
+
+		const empty = setup(
+			"interface Item { value: string } function run() { interface Item {} let value: Record<string, Item>; }",
+		);
+		const populated = setup(
+			"interface Item {} function run() { interface Item { value: string } let value: Record<string, Item>; }",
+		);
+
+		expect(
+			classifyUnsafeDictionary(findIdentifierReference(empty.source, "Record"), empty.environment)?.unsafeValue,
+		).toBe("empty-object");
+		expect(
+			classifyUnsafeDictionary(findIdentifierReference(populated.source, "Record"), populated.environment),
+		).toBeUndefined();
+	});
+
+	it("merges reopened namespace interfaces for dictionary values", () => {
+		expect.assertions(1);
+
+		const fixture = setup(
+			"namespace Owner { export interface Empty {} } namespace Owner { export interface Empty {} let value: Record<string, Empty>; }",
+		);
+
+		expect(
+			classifyUnsafeDictionary(findIdentifierReference(fixture.source, "Record"), fixture.environment)
+				?.unsafeValue,
+		).toBe("empty-object");
+	});
+
+	it("uses global fallback and module precedence for interface values", () => {
+		expect.assertions(2);
 
 		const fixture = setup(
 			[
-				'import { Record } from "./owner";',
-				"export default class Owner {}",
-				"export {};",
-				"export type Payload = unknown;",
-				"interface Box { readonly id: string }",
-				"interface Box { readonly width: number }",
+				"export {}; interface Item { module: string }",
+				"declare global { interface Item {} let inside: Record<string, Item>; }",
+				"let outside: Record<string, Item>;",
 			].join("\n"),
 		);
 
-		expect(fixture.environment.aliases.has("Payload")).toBe(true);
-		expect(fixture.environment.interfaces.get("Box")).toHaveLength(2);
-		expect(fixture.environment.shadowedBuiltIns.has("Record")).toBe(true);
-		expect(fixture.environment.shadowedBuiltIns.has("Partial")).toBe(false);
-		expect(fixture.environment.shadowedBuiltIns.has("Payload")).toBe(false);
+		expect(
+			classifyUnsafeDictionary(getNthNamedTypeReference(fixture.source, "Record", 0), fixture.environment)
+				?.unsafeValue,
+		).toBe("empty-object");
+		expect(
+			classifyUnsafeDictionary(getNthNamedTypeReference(fixture.source, "Record", 1), fixture.environment),
+		).toBeUndefined();
 	});
 
-	it("marks built-in names redeclared by classes, enums, functions, interfaces, and duplicate aliases", () => {
-		expect.assertions(8);
-
-		const classEnvironment = createTypeEnvironment(getProgram(parseCode("class Partial {}")));
-		const enumEnvironment = createTypeEnvironment(getProgram(parseCode("enum Record {}")));
-		const localEnumEnvironment = createTypeEnvironment(getProgram(parseCode("enum Local {}")));
-		const functionEnvironment = createTypeEnvironment(getProgram(parseCode("function Omit() {}")));
-		const interfaceEnvironment = createTypeEnvironment(getProgram(parseCode("interface Required {}")));
-		const duplicateAliasEnvironment = createTypeEnvironment(
-			getProgram(parseCode("type Readonly<T> = T; type Readonly<T> = T;")),
-		);
-		const anonymousSource = parseCode(["export default class {}", "export {};"].join("\n"));
-		const anonymousProgram = getProgram(anonymousSource);
-		const anonymousDefaultEnvironment = createTypeEnvironment(anonymousProgram);
-
-		expect(classEnvironment.shadowedBuiltIns.has("Partial")).toBe(true);
-		expect(enumEnvironment.shadowedBuiltIns.has("Record")).toBe(true);
-		expect(localEnumEnvironment.shadowedBuiltIns.has("Record")).toBe(false);
-		expect(functionEnvironment.shadowedBuiltIns.has("Omit")).toBe(true);
-		expect(interfaceEnvironment.shadowedBuiltIns.has("Required")).toBe(true);
-		expect(duplicateAliasEnvironment.shadowedBuiltIns.has("Readonly")).toBe(true);
-		expect(anonymousDefaultEnvironment.interfaces.size).toBe(0);
-		expect(anonymousDefaultEnvironment.aliases.size).toBe(0);
-	});
-});
-
-describe("classifyUnsafeDictionary", () => {
 	it.each([
 		["record values", "type A = Record<string, unknown>;", "unknown"],
 		["any index values", "type A = { [key: string]: any };", "any"],
@@ -362,7 +453,7 @@ interface TypeFixture {
 
 function setup(code: string): TypeFixture {
 	const source = parseCode(code);
-	return { environment: createTypeEnvironment(getProgram(source)), source };
+	return { environment: createTypeEnvironment(getProgram(source), source.visitorKeys), source };
 }
 
 function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
@@ -405,6 +496,155 @@ function clearIndexTypeAnnotations(literal: ESTree.TSTypeLiteral): ESTree.TSType
 }
 
 describe("classifyWideningTarget", () => {
+	it.each([
+		[
+			"a transparent generic key alias",
+			"type Key<Value> = Value; type Index<T> = Record<Key<T>, Command>; let value: Index<string>;",
+			"generic container",
+		],
+		[
+			"a structured broad union key",
+			"type Key<T> = T; type Index<T> = Record<Key<T | 'start'>, Command>; let value: Index<string>;",
+			"generic container",
+		],
+		[
+			"multilevel key forwarding",
+			"type Key<T> = T; type Middle<T> = Key<T>; type Index<T> = Record<Middle<T>, Command>; let value: Index<string>;",
+			"generic container",
+		],
+		[
+			"same-name key capture",
+			"type Key<T> = T; type Index<T> = Record<Key<T>, Command>; let value: Index<string>;",
+			"generic container",
+		],
+		["keyof any", "type Index<T> = Record<keyof any, T>; let value: Index<Command>;", "generic container"],
+	])("classifies $1 as broad", (_name, code, expected) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		const target = findIdentifierReference(fixture.source, "Index");
+
+		expect(classifyWideningTarget(target, fixture.environment)?.kind).toBe(expected);
+	});
+
+	it.each([
+		["any", "let value: Record<any, Command>;"],
+		["never", "let value: Record<never, Command>;"],
+		["an enum", "enum Key { Start } let value: Record<Key, Command>;"],
+		["a unique symbol", "declare const key: unique symbol; let value: Record<typeof key, Command>;"],
+	])("keeps %s Record keys finite or conservative", (_name, code) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+
+		expect(
+			classifyWideningTarget(findIdentifierReference(fixture.source, "Record"), fixture.environment),
+		).toBeUndefined();
+	});
+
+	it.each([
+		["a missing key", "const value: Record = {};", "open dictionary"],
+		["a string key", "const value: Record<string, Command> = {};", "open dictionary"],
+		["PropertyKey", "const value: Record<PropertyKey, Command> = {};", "open dictionary"],
+		["a mixed broad union", "const value: Record<string | 'start', Command> = {};", "open dictionary"],
+		["a literal union", "const value: Record<'start' | 'stop', Command> = {};", undefined],
+	])("classifies Record with %s from its key domain", (_name, code, expected) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
+			expected,
+		);
+	});
+
+	it.each([
+		["an alias to string", "type Key = string; const value: Record<Key, Command> = {};", "open dictionary"],
+		[
+			"a chained alias to string",
+			"type Broad = string; type Key = Broad; const value: Record<Key, Command> = {};",
+			"open dictionary",
+		],
+		[
+			"an alias to a literal union",
+			"type Key = 'start' | 'stop'; const value: Record<Key, Command> = {};",
+			undefined,
+		],
+		["a cyclic key alias", "type Key = Key; const value: Record<Key, Command> = {};", undefined],
+		[
+			"an ambiguous key alias",
+			"type Key = string; type Key = 'start'; const value: Record<Key, Command> = {};",
+			undefined,
+		],
+	])("classifies Record through %s", (_name, code, expected) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
+			expected,
+		);
+	});
+
+	it.each([
+		[
+			"a finite generic Record key",
+			"type Index<Key, Value> = Record<Key, Value>; const value: Index<'start', Command> = {};",
+			undefined,
+		],
+		[
+			"a substituted open dictionary",
+			"type Identity<Value> = Value; const value: Identity<Record<string, Command>> = {};",
+			"generic container",
+		],
+		[
+			"a finite Record body",
+			"type Index<Value> = Record<'start', Value>; const value: Index<Command> = {};",
+			undefined,
+		],
+	])("classifies generic alias with %s", (_name, code, expected) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
+			expected,
+		);
+	});
+
+	it("applies lexical Record shadows only where they are visible", () => {
+		expect.assertions(4);
+
+		const fixture = setup(
+			[
+				"function local() { type Record<K, V> = { key: K; value: V }; let value: Record<string, Command>; }",
+				"namespace Owner { type Record<K, V> = { key: K; value: V }; let value: Record<string, Command>; }",
+				"let sibling: Record<string, Command>;",
+				"let final: Record<string, Command>;",
+			].join("\n"),
+		);
+
+		expect(
+			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 0), fixture.environment),
+		).toBeUndefined();
+		expect(
+			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 1), fixture.environment),
+		).toBeUndefined();
+		expect(
+			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 2), fixture.environment)?.kind,
+		).toBe("open dictionary");
+		expect(
+			classifyWideningTarget(getNthNamedTypeReference(fixture.source, "Record", 3), fixture.environment)?.kind,
+		).toBe("open dictionary");
+	});
+
+	it("suppresses built-in classification for a competing global Record binding", () => {
+		expect.assertions(1);
+
+		const fixture = setup(
+			"export {}; declare global { interface Record<K, V> {} } const value: Record<string, Command> = {};",
+		);
+
+		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)).toBeUndefined();
+	});
+
 	it.each([
 		["unknown annotations", "const value: unknown = {};", "unknown"],
 		["object annotations", "const value: object = {};", "object"],
@@ -486,7 +726,7 @@ describe("classifyWideningTarget", () => {
 		);
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(unsubstitutedKey.source), unsubstitutedKey.environment),
-		).toBeUndefined();
+		).toStrictEqual({ kind: "open dictionary" });
 
 		const selfReferential = setup("type Id<T> = Id<T>; const value: Id<string> = {};");
 		expect(
@@ -549,7 +789,7 @@ describe("classifyWideningTarget", () => {
 		[
 			"mixed broad and narrow keys",
 			"type Mixed = { [K in string | Permission]: Command }; const mixed: Mixed = {};",
-			undefined,
+			"open dictionary",
 		],
 		[
 			"shadowed PropertyKey mapped keys",
@@ -602,4 +842,36 @@ describe("classifyWideningTarget", () => {
 
 		expect(classifyUnsafeDictionary(literal, fixture.environment)).toBeUndefined();
 	});
+
+	it("substitutes a generic Readonly value before recognizing built-in wrappers", () => {
+		expect.assertions(1);
+
+		const fixture = setup(
+			"type Index<Readonly> = Record<string, Readonly>; type Values = Index<unknown>; let values: Values;",
+		);
+		const values = findIdentifierReference(fixture.source, "Values");
+
+		expect(classifyUnsafeDictionary(values, fixture.environment)?.unsafeValue).toBe("unknown");
+	});
 });
+
+function getNthNamedTypeReference(source: HarnessSourceCode, name: string, index: number): ESTree.TSTypeReference {
+	const references = new Array<ESTree.TSTypeReference>();
+	traverseAst(source.ast, {
+		TSTypeReference(node: HarnessNode) {
+			if (
+				isNode(node) &&
+				node.type === "TSTypeReference" &&
+				node.typeName.type === "Identifier" &&
+				node.typeName.name === name
+			) {
+				references.push(node);
+			}
+		},
+	});
+	const reference = references[index];
+	if (reference !== undefined) return reference;
+	const error = new Error(`Type reference "${name}" at index ${index} not found.`);
+	Error.captureStackTrace(error, getNthNamedTypeReference);
+	throw error;
+}

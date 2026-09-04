@@ -28,8 +28,13 @@ describe("no-runtime-typeof", () => {
 				errors: [runtimeTypeof],
 			},
 			{ code: "const kind = typeof value;", options: [{ allowInTypeGuards: true }], errors: [runtimeTypeof] },
+			{ code: "if (typeof input === undefined) use(input);", errors: [runtimeTypeof] },
 		],
 		valid: [
+			'const isServer = typeof document === "undefined";',
+			'const hasStorage = typeof localStorage !== "undefined";',
+			'if (typeof globalThis.crypto === "undefined") throw new Error("no crypto");',
+			'const missing = "undefined" === typeof process;',
 			{
 				code: 'function isString(value: unknown): value is string { return typeof value === "string"; }',
 				options: [{ allowInTypeGuards: true }],

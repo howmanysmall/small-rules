@@ -1,16 +1,18 @@
-// Vendored from src/shared/lexical-type-parameters.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/shared/lexical-type-parameters.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
 // Modifications: replaced the upstream cast with repository type guards and
-// adapted imports; descendant expansion relies on the isNode filter instead of
-// a redundant record guard.
+// Reflect-based child access, made infer collection an append-only worklist,
+// pruned nested conditional ownership during infer collection, and added a
+// stop-exclusive owner boundary for alias substitutions.
 
 import { isNode, isProgram, isTsConditionalType, isTsInferType, isTsMappedType } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
-function appendChildNodes(value: PropertyDescriptor["value"], pending: Array<ESTree.Node>): void {
+// oxlint-disable-next-line small-rules/no-unknown-parameters -- visitor values are validated with isNode.
+function appendChildNodes(value: unknown, pending: Array<ESTree.Node>): void {
 	if (isNode(value)) {
 		pending.push(value);
 		return;
@@ -22,16 +24,23 @@ function appendChildNodes(value: PropertyDescriptor["value"], pending: Array<EST
 	}
 }
 
-function appendDescendants(
+/**
+ * Appends the visitor-key children of an AST node to a worklist.
+ *
+ * @param node - AST node whose direct children should be appended.
+ * @param visitorKeys - Parser visitor keys identifying child properties.
+ * @param pending - Append-only worklist that receives each child node.
+ */
+export function appendVisitorChildren(
 	node: ESTree.Node,
 	visitorKeys: SourceCode["visitorKeys"],
 	pending: Array<ESTree.Node>,
 ): void {
 	const keys = visitorKeys[node.type];
 	if (keys === undefined) return;
-	const childKeys = new Set(keys);
-	for (const [key, value] of Object.entries(node)) {
-		if (childKeys.has(key)) appendChildNodes(value, pending);
+	for (const key of keys) {
+		// oxlint-disable-next-line small-rules/no-reflect-get -- visitor keys are dynamic parser metadata.
+		appendChildNodes(Reflect.get(node, key), pending);
 	}
 }
 
@@ -40,14 +49,11 @@ function collectInferTypeParameterNames(
 	visitorKeys: SourceCode["visitorKeys"],
 	names: Set<string>,
 ): void {
-	let pending: Array<ESTree.Node> = [node];
-	while (pending.length > 0) {
-		const next = new Array<ESTree.Node>();
-		for (const current of pending) {
-			if (isTsInferType(current)) names.add(current.typeParameter.name.name);
-			appendDescendants(current, visitorKeys, next);
-		}
-		pending = next;
+	const pending: Array<ESTree.Node> = [node];
+	for (const current of pending) {
+		if (isTsConditionalType(current)) continue;
+		if (isTsInferType(current)) names.add(current.typeParameter.name.name);
+		appendVisitorChildren(current, visitorKeys, pending);
 	}
 }
 
@@ -81,11 +87,12 @@ function collectConditionalInferTypeParameterNames(
 export function lexicalTypeParameterNames(
 	node: ESTree.Node,
 	visitorKeys: SourceCode["visitorKeys"],
+	stopBefore?: ESTree.Node,
 ): ReadonlySet<string> {
 	const names = new Set<string>();
 	let descendant = node;
 	let current = node;
-	while (!isProgram(current)) {
+	while (current !== stopBefore && !isProgram(current)) {
 		collectTypeParameterNames(current, names);
 		collectMappedTypeParameterName(current, descendant, names);
 		collectConditionalInferTypeParameterNames(current, descendant, visitorKeys, names);

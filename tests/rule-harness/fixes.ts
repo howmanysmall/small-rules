@@ -1,3 +1,5 @@
+import { isFix } from "./types";
+
 import type { Fix, Fixer, Range } from "./types";
 
 export const fixer: Fixer = {
@@ -50,20 +52,14 @@ function collectFixes(fixResult: Fix | ReadonlyArray<Fix>): Array<Fix> {
 	const fixes = new Array<Fix>();
 	if (Array.isArray(fixResult)) {
 		for (const fix of fixResult) {
-			if (isFix(fix)) fixes.push(fix);
+			if (isFix.allows(fix)) fixes.push(fix);
 		}
 		return fixes;
 	}
-	if (isFix(fixResult)) fixes.push(fixResult);
+	if (isFix.allows(fixResult)) fixes.push(fixResult);
 	return fixes;
 }
 
 function createCollapsedRange(position: number): Range {
 	return [position, position];
-}
-
-function isFix(value: unknown): value is Fix {
-	if (typeof value !== "object" || value === null || !("range" in value) || !("text" in value)) return false;
-	if (!Array.isArray(value.range) || value.range.length !== 2) return false;
-	return typeof value.range[0] === "number" && typeof value.range[1] === "number" && typeof value.text === "string";
 }
