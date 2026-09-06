@@ -31,8 +31,8 @@ const configuration: KnipConfig = {
 			project: ["hooks/**/*.ts"],
 		},
 		".opencode": {
-			entry: [PLUGIN_PROJECT],
-			project: [PLUGIN_PROJECT],
+			entry: ["core/**/*.ts", "plugins/**/*.ts"],
+			project: ["core/**/*.ts", "plugins/**/*.ts"],
 		},
 		".opencode/packages/plugins/env-protection": {
 			entry: [PLUGIN_ENTRY],
