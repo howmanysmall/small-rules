@@ -3,7 +3,7 @@ import nodePath from "node:path";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
-	discoverLocalComponent,
+	createLocalComponentDiscoverer,
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
@@ -130,12 +130,10 @@ function getContextStackReplacement(
 const preferContextStack = createRule("prefer-context-stack", "react", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
-		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
-		const discoveredContextStack =
-			filename === "" ? { found: false } : discoverLocalComponent(filename, CONTEXT_STACK_COMPONENT);
+		const discoverContextStack = createLocalComponentDiscoverer(filename, CONTEXT_STACK_COMPONENT);
+		/* v8 ignore next -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const isContextStackDefinitionFile =
 			filename !== "" && inspectLocalComponentFile(filename, CONTEXT_STACK_COMPONENT).matches;
-		/* v8 ignore stop -- @preserve */
 		const contextStackIdentifiers = new Set<string>();
 
 		return {
@@ -153,12 +151,8 @@ const preferContextStack = createRule("prefer-context-stack", "react", {
 				if (isContextStackDefinitionFile || isNestedProviderInChain(node)) return;
 
 				const providerChain = collectProviderChain(node);
-				if (
-					providerChain === undefined ||
-					(contextStackIdentifiers.size === 0 && !discoveredContextStack.found)
-				) {
-					return;
-				}
+				if (providerChain === undefined) return;
+				if (contextStackIdentifiers.size === 0 && !discoverContextStack().found) return;
 
 				const canFix =
 					JSX_EXTENSIONS.has(nodePath.extname(filename)) &&
