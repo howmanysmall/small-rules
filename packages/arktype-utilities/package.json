@@ -1,0 +1,9 @@
+{
+	"name": "@small-rules/arktype-utilities",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"arktype": "catalog:runtime"
+	}
+}
