@@ -1,16 +1,18 @@
 import { vitiatePlugin } from "@vitiate/core";
-import { defineConfig } from "vitest/config";
+import { defineConfig, mergeConfig } from "vitest/config";
 
-const configuration = defineConfig({
-	plugins: [vitiatePlugin()],
-	resolve: { tsconfigPaths: true },
-	test: {
-		coverage: { enabled: false },
-		environment: "node",
-		include: ["tests/**/*.fuzz.ts"],
-		testTimeout: 30_000,
-		typecheck: { enabled: false },
-	},
-});
+import { sharedConfiguration } from "./vitest.config.ts";
+
+const configuration = mergeConfig(
+	sharedConfiguration,
+	defineConfig({
+		plugins: [vitiatePlugin()],
+		test: {
+			coverage: { enabled: false },
+			include: ["tests/**/*.fuzz.ts"],
+			typecheck: { enabled: false },
+		},
+	}),
+);
 
 export default configuration;
