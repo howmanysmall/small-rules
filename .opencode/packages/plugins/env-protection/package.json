@@ -1,0 +1,17 @@
+{
+	"name": "@opencode-plugins/env-protection",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@opencode-ai/schema": "catalog:tooling",
+		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime",
+		"zx": "catalog:scripts"
+	},
+	"devDependencies": {
+		"@opencode-ai/plugin": "catalog:tooling"
+	},
+	"peerDependencies": {
+		"@opencode-ai/plugin": "catalog:tooling"
+	}
+}
