@@ -245,8 +245,8 @@ catalogs:
     vitiate: 0.3.1
   tooling:
     "@oh-my-pi/pi-coding-agent": 18.1.12
-    "@opencode-ai/plugin": 0.0.0-beta-19086
-    "@opencode-ai/schema": 0.0.0-beta-19086
+    "@opencode-ai/plugin": 0.0.0-beta-19192
+    "@opencode-ai/schema": 0.0.0-beta-19192
     jiti: 2.7.0
     jscpd: 5.1.2
     pncat: 0.13.3
