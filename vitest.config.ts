@@ -19,11 +19,12 @@ const configuration = defineConfig({
 			enabled: !isFocusedRun && !isVitiateRun,
 			exclude: [
 				"documentation/**",
+				"packages/**/src/**/*.test.ts",
 				"src/index.ts",
 				"src/types/**/*.ts",
 				"src/utilities/prevent-abbreviations/types.ts",
 			],
-			include: ["src/**/*.ts"],
+			include: ["packages/*/src/**/*.ts", "src/**/*.ts"],
 			provider: "v8",
 			reporter: ["text", "html", "text-summary"],
 			reportOnFailure: false,
@@ -33,11 +34,20 @@ const configuration = defineConfig({
 		environment: "node",
 		fileParallelism: true,
 		globals: true,
-		include: isVitiateRun ? ["tests/**/*.fuzz.ts"] : ["tests/**/*.test.ts"],
 		isolate: false,
 		maxConcurrency: 64,
 		maxWorkers: workerCount,
 		pool: "forks",
+		// Packages own a vitest.config.ts; its `include` wins for its files.
+		projects: [
+			{
+				test: {
+					name: "small-rules",
+					include: isVitiateRun ? ["tests/**/*.fuzz.ts"] : ["tests/**/*.test.ts"],
+				},
+			},
+			"packages/*",
+		],
 		testTimeout: 30_000,
 		typecheck: {
 			checker: "tsgo",
