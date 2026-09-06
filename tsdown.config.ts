@@ -70,6 +70,11 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 			enabled: true,
 			level: "error",
 		},
+		treeshake: {
+			moduleSideEffects: false,
+			propertyReadSideEffects: false,
+			unknownGlobalSideEffects: false,
+		},
 		tsconfig: "tsconfig.lib.json",
 	};
 });
