@@ -6,4 +6,4 @@ export const isUndefined = type("undefined");
 
 export const isReadonlyArrayOfStrings = isString.array().readonly();
 
-export const isReadonlyRecordOfStrings = type("Record<string, string>").readonly();
+export const isReadonlyDictionaryOfStrings = type("Record<string, string>").readonly();
