@@ -1,5 +1,9 @@
 {
 	"name": "@small-rules/opencode",
 	"private": true,
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@small-rules/arktype-utilities": "workspace:*",
+		"arktype": "catalog:runtime"
+	}
 }

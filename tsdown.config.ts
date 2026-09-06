@@ -1,15 +1,18 @@
 import { readFile } from "node:fs/promises";
+import { isDictionaryOfStrings, isMaybeNull } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 import { defineConfig } from "tsdown";
 
 import { renderBundleBanner } from "./scripts/utilities/vendored-notices.ts";
 
-const isStringRecord = type("Record<string, string>").readonly();
+import type { UserConfig } from "tsdown";
+import type { Arrayable } from "type-fest";
+
 const isPackageJsonDependencies = type({
 	"+": "ignore",
-	"dependencies?": isStringRecord.or("null"),
-	"optionalDependencies?": isStringRecord.or("null"),
-	"peerDependencies?": isStringRecord.or("null"),
+	"dependencies?": isDictionaryOfStrings.or(isMaybeNull),
+	"optionalDependencies?": isDictionaryOfStrings.or(isMaybeNull),
+	"peerDependencies?": isDictionaryOfStrings.or(isMaybeNull),
 }).readonly();
 
 const ALWAYS_KEEP = new Set(["@small-rules/arktype-utilities", "oxlint-plugin-utilities"]);
@@ -36,7 +39,7 @@ const MATCH_ANYTHING = /.*/u;
 
 const VENDORED_NOTICE = renderBundleBanner();
 
-const configuration = defineConfig((inlineConfiguration) => {
+const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> => {
 	const bundleAll = "bundleAll" in inlineConfiguration && inlineConfiguration.bundleAll === true;
 
 	return {
@@ -56,7 +59,6 @@ const configuration = defineConfig((inlineConfiguration) => {
 		dts: {
 			incremental: true,
 			resolver: "oxc",
-			tsgo: true,
 		},
 		entry: "./src/index.ts",
 		fixedExtension: false,
