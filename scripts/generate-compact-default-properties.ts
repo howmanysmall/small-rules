@@ -1,15 +1,8 @@
 #!/usr/bin/env nub
 
 import { readFile, writeFile } from "node:fs/promises";
+import { isBoolean, isMaybeString, isNumber, isReadonlyArrayOfNumbers, isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
-
-import {
-	isBoolean,
-	isMaybeString,
-	isNumber,
-	isReadonlyArrayOfNumbers,
-	isString,
-} from "$script-utilities/arktype-utilities";
 
 const isCanonicalPropertyValue = isBoolean.or(isNumber).or(isReadonlyArrayOfNumbers).or(isString);
 type CanonicalPropertyValue = typeof isCanonicalPropertyValue.infer;

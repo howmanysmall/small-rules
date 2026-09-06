@@ -7,6 +7,6 @@
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"types": ["node"]
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["packages/*/src/**/*.ts", "src/**/*.ts"],
 	"exclude": ["dist", "node_modules"]
 }

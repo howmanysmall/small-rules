@@ -12,7 +12,9 @@ const isPackageJsonDependencies = type({
 	"peerDependencies?": isStringRecord.or("null"),
 }).readonly();
 
-const ALWAYS_KEEP = new Set(["oxlint-plugin-utilities"]);
+const ALWAYS_KEEP = new Set(["@small-rules/arktype-utilities", "oxlint-plugin-utilities"]);
+// Private workspace packages are unpublished, so inline them into dist.
+const ALWAYS_BUNDLE = ["@small-rules/arktype-utilities"];
 const NATIVE_NEVER_BUNDLE = ["oxc-resolver", /^@oxc-resolver\//u, "yuku-parser", /^@yuku-parser\//u] as const;
 
 async function getNeverBundleAsync(): Promise<Array<string>> {
@@ -50,7 +52,7 @@ const configuration = defineConfig((inlineConfiguration) => {
 					neverBundle: [...NATIVE_NEVER_BUNDLE],
 					onlyBundle: false,
 				}
-			: { neverBundle },
+			: { alwaysBundle: ALWAYS_BUNDLE, neverBundle },
 		dts: {
 			incremental: true,
 			resolver: "oxc",

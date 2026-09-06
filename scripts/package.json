@@ -5,6 +5,7 @@
 	"dependencies": {
 		"@cliffy/command": "catalog:scripts",
 		"@octokit/rest": "catalog:scripts",
+		"@small-rules/arktype-utilities": "workspace:*",
 		"@std/msgpack": "catalog:scripts",
 		"@std/path": "catalog:scripts",
 		"ansis": "catalog:scripts",
@@ -17,8 +18,6 @@
 		"mutative": "catalog:scripts",
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
-		"yaml": "catalog:scripts",
-		"yaml-diff-patch": "catalog:scripts",
 		"yuku-ast": "catalog:tooling",
 		"yuku-parser": "catalog:runtime",
 		"zx": "catalog:scripts"

@@ -14,6 +14,7 @@
 		"documentation/src/data/rule-examples.ts",
 		"documentation/src/data/rule-manifest.ts",
 		"documentation/src/utilities/extract-rule-examples.ts",
+		"packages/*/src/**/*.ts",
 		"scripts/utilities/roblox-yielding-members.ts",
 		"scripts/utilities/vendored-notices.ts",
 		"src/**/*.ts",

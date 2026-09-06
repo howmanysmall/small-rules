@@ -3,13 +3,13 @@
 import nodePath from "node:path";
 import { cwd } from "node:process";
 import { Command } from "@cliffy/command";
+import { isMaybeReadonlyArrayOfStrings, isString, isUndefined, isUnknown } from "@small-rules/arktype-utilities";
 import { bold, cyan, dim, green, red, yellow } from "ansis";
 import { type } from "arktype";
 import { argv, file, JSONC, write } from "bun";
 import { fdir } from "fdir";
 import { create } from "mutative";
 
-import { isMaybeReadonlyArrayOfStrings, isString, isUndefined, isUnknown } from "$script-utilities/arktype-utilities";
 import { editJsonc } from "$script-utilities/jsonc-utilities";
 
 const fdirZed = new fdir().glob("**/.zed/settings.json").withFullPaths();

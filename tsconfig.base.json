@@ -7,6 +7,7 @@
 		"module": "preserve",
 		"moduleResolution": "bundler",
 		"paths": {
+			"@small-rules/arktype-utilities": ["./packages/arktype-utilities/src/index.ts"],
 			"$oxc-generated/*": ["./src/generated/*"],
 			"$oxc-rules/*": ["./src/rules/*"],
 			"$oxc-types/*": ["./src/types/*"],

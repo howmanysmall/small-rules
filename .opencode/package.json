@@ -1,8 +1,5 @@
 {
 	"name": "@small-rules/opencode",
 	"private": true,
-	"type": "module",
-	"dependencies": {
-		"arktype": "catalog:runtime"
-	}
+	"type": "module"
 }

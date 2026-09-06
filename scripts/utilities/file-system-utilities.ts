@@ -1,7 +1,6 @@
 import { lstat } from "node:fs/promises";
+import { isMaybeNumber, isMaybeString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
-
-import { isMaybeNumber, isMaybeString } from "./arktype-utilities";
 
 const isNodeSystemError = type.instanceOf(Error).and({
 	"code?": isMaybeString,

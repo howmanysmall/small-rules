@@ -2,12 +2,6 @@
 // weird.
 
 import { readFile } from "node:fs/promises";
-import { type } from "arktype";
-import { consola } from "consola";
-import { Predicate } from "effect";
-
-import { getScriptName } from "$script-functions/get-script-name";
-
 import {
 	isMaybeNull,
 	isNullableString,
@@ -15,7 +9,13 @@ import {
 	isReadonlyDictionaryOfUnknowns,
 	isString,
 	isUnknown,
-} from "./arktype-utilities";
+} from "@small-rules/arktype-utilities";
+import { type } from "arktype";
+import { consola } from "consola";
+import { Predicate } from "effect";
+
+import { getScriptName } from "$script-functions/get-script-name";
+
 import { downloadGitHubFileAsync } from "./github-utilities";
 
 import type { Octokit } from "@octokit/rest";

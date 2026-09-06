@@ -4,9 +4,7 @@
 	"type": "module",
 	"dependencies": {
 		"@opencode-ai/schema": "catalog:tooling",
-		"arktype": "catalog:runtime",
-		"effect": "catalog:runtime",
-		"zx": "catalog:scripts"
+		"effect": "catalog:runtime"
 	},
 	"devDependencies": {
 		"@opencode-ai/plugin": "catalog:tooling"

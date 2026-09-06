@@ -330,12 +330,6 @@ catalogs:
     tinyexec:
       specifier: 1.3.1
       version: 1.3.1
-    yaml:
-      specifier: 2.9.0
-      version: 2.9.0
-    yaml-diff-patch:
-      specifier: 2.0.0
-      version: 2.0.0
     zx:
       specifier: 8.8.5
       version: 8.8.5
@@ -450,6 +444,9 @@ importers:
 
   .:
     dependencies:
+      '@small-rules/arktype-utilities':
+        specifier: workspace:*
+        version: link:packages/arktype-utilities
       arktype:
         specifier: catalog:runtime
         version: 2.2.3
@@ -690,26 +687,16 @@ importers:
         specifier: catalog:runtime
         version: 4.0.0-rc.112
 
-  .opencode:
-    dependencies:
-      arktype:
-        specifier: catalog:runtime
-        version: 2.2.3
+  .opencode: {}
 
   .opencode/packages/plugins/env-protection:
     dependencies:
       '@opencode-ai/schema':
         specifier: catalog:tooling
         version: 0.0.0-beta-19086
-      arktype:
-        specifier: catalog:runtime
-        version: 2.2.3
       effect:
         specifier: catalog:runtime
         version: 4.0.0-rc.112
-      zx:
-        specifier: catalog:scripts
-        version: 8.8.5
     devDependencies:
       '@opencode-ai/plugin':
         specifier: catalog:tooling
@@ -717,9 +704,6 @@ importers:
 
   .opencode/packages/plugins/run-hk-check-on-idle:
     dependencies:
-      consola:
-        specifier: catalog:scripts
-        version: 3.4.2
       effect:
         specifier: catalog:runtime
         version: 4.0.0-rc.112
@@ -830,6 +814,9 @@ importers:
       '@octokit/rest':
         specifier: catalog:scripts
         version: 22.0.1
+      '@small-rules/arktype-utilities':
+        specifier: workspace:*
+        version: link:../packages/arktype-utilities
       '@std/msgpack':
         specifier: catalog:scripts
         version: '@jsr/std__msgpack@1.0.3'
@@ -866,12 +853,6 @@ importers:
       type-fest:
         specifier: catalog:types
         version: 5.9.0
-      yaml:
-        specifier: catalog:scripts
-        version: 2.9.0
-      yaml-diff-patch:
-        specifier: catalog:scripts
-        version: 2.0.0
       yuku-ast:
         specifier: catalog:tooling
         version: 0.9.3
@@ -5826,10 +5807,6 @@ packages:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
     engines: {node: '>=18'}
 
-  chalk@4.1.2:
-    resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
-    engines: {node: '>=10'}
-
   chalk@5.6.2:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
@@ -6763,9 +6740,6 @@ packages:
     resolution: {integrity: sha512-sAjhj9ZhOxYCGiNMnZLaucOqf5ZeFnHNoKoAZiD9thhJ0N8RP85qJK759/97C/3L7NzzmGVB5uiX9AUpySZmUQ==}
     engines: {node: '>=6.0.0'}
 
-  fast-json-patch@3.1.1:
-    resolution: {integrity: sha512-vf6IHUX2SBcA+5/+4883dsIjpBTqmfBjmYiWK1savxQmFk4JfBMLa7ynTYOs1Rolp/T1betJxHiGD3g1Mn8lUQ==}
-
   fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
@@ -7022,10 +6996,6 @@ packages:
 
   h3@1.15.11:
     resolution: {integrity: sha512-L3THSe2MPeBwgIZVSH5zLdBBU90TOxarvhK9d04IDY2AmVS8j2Jz2LIWtwsGOU3lu2I5jCN7FNvVfY2+XyF+mg==}
-
-  has-flag@4.0.0:
-    resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
-    engines: {node: '>=8'}
 
   has-property-descriptors@1.0.2:
     resolution: {integrity: sha512-55JNKuIW+vq4Ke1BjOTjM2YctQIvCT7GFzHwmfZPGo5wnrgkid0YQtnAleFSqumZm4az3n2BS+erby5ipJdgrg==}
@@ -8198,10 +8168,6 @@ packages:
   onnxruntime-web@1.26.0-dev.20260416-b7804b056c:
     resolution: {integrity: sha512-MD6Ss4GSpQBo6zqoJzyT9LRbKYs7x/JVN23FT24EcEvlqF4VuzPOeH6X38orZPKHQDbprn7K+SBpu0/mj2CQiw==}
 
-  oppa@0.4.0:
-    resolution: {integrity: sha512-DFvM3+F+rB/igo3FRnkDWitjZgBH9qZAn68IacYHsqbZBKwuTA+LdD4zSJiQtgQpWq7M08we5FlGAVHz0yW7PQ==}
-    engines: {node: '>=10'}
-
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -9052,10 +9018,6 @@ packages:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
 
-  supports-color@7.2.0:
-    resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
-    engines: {node: '>=8'}
-
   svgo@4.1.0:
     resolution: {integrity: sha512-bkxnTg1kSU0guhIBmibA6UUhrQmPVA1XsQLN+ylCd+UWzbnLkySOcXpyk1mrl05f+pcaCx2eHb+sp6BgMZWX+Q==}
     engines: {node: '>=16'}
@@ -9788,11 +9750,6 @@ packages:
   yallist@5.0.0:
     resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
     engines: {node: '>=18'}
-
-  yaml-diff-patch@2.0.0:
-    resolution: {integrity: sha512-RhfIQPGcKSZhsUmsczXAeg5jNhWXk3tAmhl2kjfZthdyaL0XXXOpvRozUp22HvPStmZsHu8T30/UEfX9oIwGxw==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   yaml-eslint-parser@2.1.0:
     resolution: {integrity: sha512-1zo9KRfp6vIAXBEhWAz09ex3hUwh3T+/6dGbGteHvNseA0Uk4FgQnPES55klZ6cDzSy9FpgKS0D/CoLUvCCj4w==}
@@ -14919,11 +14876,6 @@ snapshots:
 
   chai@6.2.2: {}
 
-  chalk@4.1.2:
-    dependencies:
-      ansi-styles: 4.3.0
-      supports-color: 7.2.0
-
   chalk@5.6.2: {}
 
   change-case@5.4.4: {}
@@ -16038,8 +15990,6 @@ snapshots:
 
   fast-equals@6.0.2: {}
 
-  fast-json-patch@3.1.1: {}
-
   fast-json-stable-stringify@2.1.0: {}
 
   fast-levenshtein@2.0.6: {}
@@ -16319,8 +16269,6 @@ snapshots:
       radix3: 1.1.2
       ufo: 1.6.4
       uncrypto: 0.1.3
-
-  has-flag@4.0.0: {}
 
   has-property-descriptors@1.0.2:
     dependencies:
@@ -17852,10 +17800,6 @@ snapshots:
       protobufjs: 7.6.6
     optional: true
 
-  oppa@0.4.0:
-    dependencies:
-      chalk: 4.1.2
-
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -19050,10 +18994,6 @@ snapshots:
 
   supports-color@10.2.2: {}
 
-  supports-color@7.2.0:
-    dependencies:
-      has-flag: 4.0.0
-
   svgo@4.1.0:
     dependencies:
       commander: 11.1.0
@@ -19638,12 +19578,6 @@ snapshots:
 
   yallist@5.0.0: {}
 
-  yaml-diff-patch@2.0.0:
-    dependencies:
-      fast-json-patch: 3.1.1
-      oppa: 0.4.0
-      yaml: 2.9.0
-
   yaml-eslint-parser@2.1.0:
     dependencies:
       eslint-visitor-keys: 5.0.1
@@ -19874,8 +19808,6 @@ time:
   type-fest@5.9.0: '2026-08-30T23:58:44.656Z'
   vitest@5.0.0: '2026-09-03T12:24:30.312Z'
   vitiate@0.3.1: '2026-06-22T02:01:18.701Z'
-  yaml-diff-patch@2.0.0: '2022-08-24T12:38:34.933Z'
-  yaml@2.9.0: '2026-05-11T10:16:24.045Z'
   yuku-ast@0.9.3: '2026-08-27T04:54:42.373Z'
   yuku-parser@0.9.3: '2026-08-27T04:54:34.406Z'
   zx@8.8.5: '2025-10-19T13:48:42.492Z'
