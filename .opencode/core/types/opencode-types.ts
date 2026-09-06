@@ -1,6 +1,5 @@
+import { isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
-
-import { isString } from "./arktype-types";
 
 export const isFilePathInput = type({
 	"+": "ignore",

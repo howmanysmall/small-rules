@@ -8,6 +8,6 @@
 		"types": ["bun", "node"],
 		"sourceMap": false
 	},
-	"include": ["*.config.ts", "packages/*/src/**/*.ts", "scripts/**/*.ts"],
+	"include": ["*.config.ts", "packages/*/src/**/*.ts", "packages/*/vitest.config.ts", "scripts/**/*.ts"],
 	"exclude": ["dist", "node_modules"]
 }
