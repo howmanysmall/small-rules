@@ -1,15 +1,22 @@
 #!/usr/bin/env nub
 
 import { argv } from "node:process";
-import { Command, ValidationError } from "@cliffy/command";
+import { ValidationError } from "@cliffy/command";
+import { consola } from "consola";
 
 import { textDecoder } from "$script-constants/reused-classes";
+import { createBaseCommand } from "$script-functions/create-base-command";
+import { getScriptName } from "$script-functions/get-script-name";
 import { parseClasses, renderCatalog } from "$script-utilities/roblox-yielding-members";
 
-const command = new Command()
-	.name("generate-roblox-yielding-members")
-	.version("1.0.0")
-	.description("Generates the Roblox yielding-member catalog used by the no-async-in-system rule.")
+const name = getScriptName(true);
+const log = consola.withTag(name);
+
+const command = createBaseCommand(
+	name,
+	"1.0.1",
+	"Generates the Roblox yielding-member catalog used by the no-async-in-system rule.",
+)
 	.env("GITHUB_TOKEN=<value:string>", "The GitHub token environment variable.", { required: false })
 	.env("GITHUB_PAT=<value:string>", "Alternative GitHub token environment variable.", { required: false })
 	.env("GITHUB_PERSONAL_ACCESS_TOKEN=<value:string>", "Alternative GitHub token environment variable.", {
@@ -39,11 +46,10 @@ const command = new Command()
 		const json = JSON.parse(textDecoder.decode(bytes));
 		const generated = renderCatalog(parseClasses(json));
 		const { mkdir, writeFile } = await import("node:fs/promises");
-		// oxlint-disable-next-line unicorn/import-style -- what?
-		const nodePath = await import("node:path");
-		await mkdir(nodePath.dirname(output), { recursive: true });
+		const { dirname } = await import("@std/path");
+		await mkdir(dirname(output), { recursive: true });
 		await writeFile(output, generated, "utf8");
-		console.log(`Wrote ${generated.length} bytes to ${output}`);
+		log.success(`Wrote ${generated.length} bytes to ${output}`);
 	});
 
 await command.parse(argv.slice(2));

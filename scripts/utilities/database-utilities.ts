@@ -3,12 +3,25 @@
 
 import { readFile } from "node:fs/promises";
 import { type } from "arktype";
+import { consola } from "consola";
 import { Predicate } from "effect";
 
+import { getScriptName } from "$script-functions/get-script-name";
+
+import {
+	isMaybeNull,
+	isNullableString,
+	isReadonlyArrayOfStrings,
+	isReadonlyDictionaryOfUnknowns,
+	isString,
+	isUnknown,
+} from "./arktype-utilities";
 import { downloadGitHubFileAsync } from "./github-utilities";
 
 import type { Octokit } from "@octokit/rest";
 import type { UnknownRecord } from "type-fest";
+
+const log = consola.withTag(getScriptName(true));
 
 const DATABASE_URL = "https://github.com/rojo-rbx/rbx-dom/raw/master/rbx_reflection_database/database.msgpack";
 
@@ -99,9 +112,7 @@ export async function downloadDatabaseAsync(octokit: Octokit, existingFilePath?:
 
 	const response = await fetch(DATABASE_URL);
 	if (!response.ok) {
-		const error = new Error(`Failed to download database: ${response.status} ${response.statusText}`);
-		Error.captureStackTrace(error, downloadDatabaseAsync);
-		throw error;
+		throw new Error(`Failed to download database: ${response.status} ${response.statusText}`);
 	}
 
 	return new Uint8Array(await response.arrayBuffer());
@@ -112,7 +123,7 @@ const isEnumType = type("/^Enum\\.\\w+$/");
 const isDataType = isEnumType.or(isRobloxDataType);
 
 const isDatabaseProperty = type({
-	name: "string",
+	name: isString,
 	"+": "reject",
 	dataType: isDataType,
 	scriptability: isDatabaseScriptability,
@@ -121,32 +132,32 @@ const isDatabaseProperty = type({
 type DatabaseProperty = typeof isDatabaseProperty.infer;
 
 const isDatabaseClass = type({
-	name: "string",
+	name: isString,
 	"+": "reject",
-	defaultProperties: type("Record<string, unknown>").readonly(),
-	properties: type.Record("string", isDatabaseProperty).readonly(),
-	superclass: "string | null",
+	defaultProperties: isReadonlyDictionaryOfUnknowns,
+	properties: type.Record(isString, isDatabaseProperty).readonly(),
+	superclass: isNullableString,
 }).readonly();
 type DatabaseClass = typeof isDatabaseClass.infer;
 
 const isRawPropertyTuple = type([
-	"string",
+	isString,
 	isDatabaseScriptability,
-	type({ Enum: "string" }).or({ Value: isRobloxDataType }).readonly(),
-	isDatabasePropertyTag.array().readonly().or("null | undefined"),
-	"unknown",
+	type({ Enum: isString }).or({ Value: isRobloxDataType }).readonly(),
+	isDatabasePropertyTag.array().readonly().or(isMaybeNull),
+	isUnknown,
 ]).readonly();
 const isRawClassTuple = type([
-	"string",
-	type("string[]").readonly(),
-	"string | null",
-	type.Record("string", isRawPropertyTuple).readonly(),
-	type("Record<string, unknown>").readonly(),
+	isString,
+	isReadonlyArrayOfStrings,
+	isNullableString,
+	type.Record(isString, isRawPropertyTuple).readonly(),
+	isReadonlyDictionaryOfUnknowns,
 ]).readonly();
 
 const isRawDatabase = type([
 	type(["number", "number", "number", "number"]).readonly(),
-	type.Record("string", isRawClassTuple).readonly(),
+	type.Record(isString, isRawClassTuple).readonly(),
 	"unknown",
 ]).readonly();
 
@@ -188,8 +199,10 @@ function buildEnumLookup(rawEnums: unknown): EnumLookup {
 
 	for (const [enumType, rawEntry] of Object.entries(rawEnums)) {
 		if (!Array.isArray(rawEntry)) continue;
+
 		const [, items] = rawEntry;
 		if (!Predicate.isObject(items)) continue;
+
 		const reverse = new Map<number, string>();
 		for (const [name, value] of Object.entries(items)) if (Predicate.isNumber(value)) reverse.set(value, name);
 		lookup.set(enumType, reverse);
@@ -504,7 +517,7 @@ function extractClassDefaults(
 			continue;
 		}
 
-		if (!quiet) console.warn(`Skipping ${className}.${propertyName} (${dataType}) — no canonical value mapping`);
+		if (!quiet) log.info(`Skipping ${className}.${propertyName} (${dataType}) - no canonical value mapping`);
 	}
 
 	return hasDefaults ? classEntry : undefined;

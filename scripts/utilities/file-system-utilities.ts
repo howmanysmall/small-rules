@@ -1,10 +1,11 @@
 import { lstat } from "node:fs/promises";
 import { type } from "arktype";
 
-const isMaybeString = type("string | undefined");
+import { isMaybeNumber, isMaybeString } from "./arktype-utilities";
+
 const isNodeSystemError = type.instanceOf(Error).and({
 	"code?": isMaybeString,
-	"errno?": "number | undefined",
+	"errno?": isMaybeNumber,
 	"path?": isMaybeString,
 	"syscall?": isMaybeString,
 });

@@ -3,24 +3,30 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { type } from "arktype";
 
-type CanonicalPropertyValue = boolean | number | ReadonlyArray<number> | string;
+import {
+	isBoolean,
+	isMaybeString,
+	isNumber,
+	isReadonlyArrayOfNumbers,
+	isString,
+} from "$script-utilities/arktype-utilities";
 
-interface CanonicalDefaultProperty {
-	readonly enumType?: string;
-	readonly type: string;
-	readonly value: CanonicalPropertyValue;
-}
+const isCanonicalPropertyValue = isBoolean.or(isNumber).or(isReadonlyArrayOfNumbers).or(isString);
+type CanonicalPropertyValue = typeof isCanonicalPropertyValue.infer;
+
+const isCanonicalDefaultProperty = type({
+	"enumType?": isMaybeString,
+	type: isString,
+	value: isCanonicalPropertyValue,
+}).readonly();
+type CanonicalDefaultProperty = typeof isCanonicalDefaultProperty.infer;
+
+const isClasses = type.Record(isString, type.Record(isString, isCanonicalDefaultProperty)).readonly();
 
 const isDefaultProperties = type({
-	classes: type.Record(
-		"string",
-		type.Record("string", {
-			enumType: "string?",
-			type: "string",
-			value: "boolean | number | string | number[]",
-		}),
-	),
+	classes: isClasses,
 }).readonly();
+
 const defaultProperties = isDefaultProperties(JSON.parse(await readFile("src/default-properties.json", "utf8")));
 if (defaultProperties instanceof type.errors) throw new TypeError(defaultProperties.summary);
 
@@ -33,13 +39,9 @@ const valueTypeIndexes = new Map(
 function encodeValue(value: CanonicalDefaultProperty): ReadonlyArray<CanonicalPropertyValue | number> {
 	const valueType = value.type;
 	const valueTypeIndex = valueTypeIndexes.get(valueType);
-	if (valueTypeIndex === undefined) {
-		throw new TypeError(`Unknown canonical default property type: ${valueType}`);
-	}
+	if (valueTypeIndex === undefined) throw new TypeError(`Unknown canonical default property type: ${valueType}`);
 	if (valueType === "Enum") {
-		if (value.enumType === undefined) {
-			throw new TypeError("Invalid canonical enum default property value.");
-		}
+		if (value.enumType === undefined) throw new TypeError("Invalid canonical enum default property value.");
 		return [valueTypeIndex, value.enumType, value.value];
 	}
 	return [valueTypeIndex, value.value];
@@ -59,13 +61,15 @@ const valueIndexes = new Map(serializedValues.map((value, index) => [value, inde
 const classes: Record<string, Array<number>> = {};
 for (const [className, properties] of Object.entries(defaultProperties.classes)) {
 	const entries = new Array<number>();
+	let size = 0;
 	for (const [propertyName, value] of Object.entries(properties)) {
 		const propertyIndex = propertyIndexes.get(propertyName);
 		const valueIndex = valueIndexes.get(JSON.stringify(encodeValue(value)));
 		if (propertyIndex === undefined || valueIndex === undefined) {
 			throw new Error("Failed to index default property.");
 		}
-		entries.push(propertyIndex, valueIndex);
+		entries[size++] = propertyIndex;
+		entries[size++] = valueIndex;
 	}
 	classes[className] = entries;
 }

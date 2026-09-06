@@ -43,6 +43,12 @@
       "skillPath": "skills/dry-refactoring/SKILL.md",
       "computedHash": "2d234ed9be80b55e6c39cd7606951c4411e735dbd7e08e0faa68f10d83e0c85e"
     },
+    "effect-ts": {
+      "source": "effect-ts/skills",
+      "sourceType": "github",
+      "skillPath": "skills/effect-ts/SKILL.md",
+      "computedHash": "6bdb9b95aa83071eca2f67ae947b7d398a22e9e6e08f6cfa35de9516b03efa6e"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -162,6 +168,12 @@
       "sourceType": "github",
       "skillPath": "skills/tsdown/SKILL.md",
       "computedHash": "2183b9019058744215ab8b1261e34833653b5864da159bc022e3b9ad2f706aa5"
+    },
+    "turborepo": {
+      "source": "antfu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/turborepo/SKILL.md",
+      "computedHash": "fda851d916bbee5b78446b9a22510e7f38aefdfab57f93de6e0bccbb5b0b537a"
     },
     "vercel-composition-patterns": {
       "source": "vercel-labs/agent-skills",

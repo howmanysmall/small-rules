@@ -1,7 +1,13 @@
 #!/usr/bin/env nub
 
 import { argv } from "node:process";
-import { Command } from "@cliffy/command";
+import { consola } from "consola";
+
+import { createBaseCommand } from "$script-functions/create-base-command";
+import { getScriptName } from "$script-functions/get-script-name";
+
+const name = getScriptName(true);
+const log = consola.withTag(name);
 
 const allCreatableInstances = [
 	"accessory",
@@ -436,12 +442,11 @@ async function getLoadedClassesAsync(
 	return new Set(getRbxTsReactInstances());
 }
 
-const command = new Command()
-	.name("generate-default-properties")
-	.version("1.0.0")
-	.description(
-		"Generates a structured JSON map of Roblox class default properties for the useless-default Oxlint rule.",
-	)
+const command = createBaseCommand(
+	name,
+	"1.0.1",
+	"Generates a structured JSON map of Roblox class default properties for the useless-default Oxlint rule.",
+)
 	.env("GITHUB_TOKEN=<value:string>", "The GitHub token environment variable.", { required: false })
 	.env("GITHUB_PAT=<value:string>", "Alternative GitHub token environment variable.", { required: false })
 	.env("GITHUB_PERSONAL_ACCESS_TOKEN=<value:string>", "Alternative GitHub token environment variable.", {
@@ -503,11 +508,10 @@ const command = new Command()
 			if (output === undefined) console.log(json);
 			else {
 				const { mkdir, writeFile } = await import("node:fs/promises");
-				// oxlint-disable-next-line unicorn/import-style -- lol
-				const nodePath = await import("node:path");
-				await mkdir(nodePath.dirname(output), { recursive: true });
+				const { dirname } = await import("@std/path");
+				await mkdir(dirname(output), { recursive: true });
 				await writeFile(output, json, "utf8");
-				console.log(`Wrote ${json.length} bytes to ${output}`);
+				log.success(`Wrote ${json.length} bytes to ${output}`);
 			}
 		},
 	);

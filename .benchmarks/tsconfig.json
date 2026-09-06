@@ -1,0 +1,9 @@
+{
+	"extends": ["../tsconfig.base.json"],
+	"compilerOptions": {
+		"tsBuildInfoFile": "node_modules/.tmp/.tsbuildinfo.benchmarks",
+		"rootDir": "..",
+		"paths": {},
+		"types": ["bun", "node"]
+	}
+}

@@ -1,13 +1,8 @@
 {
-	"name": "opencode",
+	"name": "@small-rules/opencode",
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"@opencode-ai/plugin": "catalog:tooling"
-	},
-	"devDependencies": {
-		"@types/bun": "catalog:types",
-		"@types/node": "catalog:types",
-		"typescript": "catalog:types"
+		"arktype": "catalog:runtime"
 	}
 }

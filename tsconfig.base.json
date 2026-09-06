@@ -15,7 +15,9 @@
 			"$test/*": ["./tests/*"],
 
 			"$script-commands/*": ["./scripts/commands/*"],
+			"$script-classes/*": ["./scripts/classes/*"],
 			"$script-constants/*": ["./scripts/constants/*"],
+			"$script-functions/*": ["./scripts/functions/*"],
 			"$script-types/*": ["./scripts/types/*"],
 			"$script-utilities/*": ["./scripts/utilities/*"],
 

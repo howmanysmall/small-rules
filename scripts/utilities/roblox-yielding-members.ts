@@ -1,3 +1,4 @@
+// oxlint-disable small-rules/no-unknown-parameters -- is literally unknown
 import { Predicate } from "effect";
 
 import type { JsonObject, JsonValue } from "type-fest";
@@ -8,30 +9,28 @@ interface RobloxClass {
 	readonly superclass: string;
 }
 
-type RobloxApiValue = ReturnType<typeof JSON.parse>;
-
 export interface YieldingMemberCatalog {
 	readonly classes: ReadonlySet<string>;
 	readonly instanceMembers: ReadonlyArray<string>;
 	readonly yieldingMembers: ReadonlyMap<string, ReadonlyArray<string>>;
 }
 
-function isRecord(value: RobloxApiValue): value is JsonObject {
+function isRecord(value: unknown): value is JsonObject {
 	return Predicate.isObject(value);
 }
 
-function parseClass(value: RobloxApiValue): RobloxClass | undefined {
+function parseClass(value: unknown): RobloxClass | undefined {
 	if (!isRecord(value) || !Predicate.isString(value.Name) || !Predicate.isString(value.Superclass)) return undefined;
 	if (!Array.isArray(value.Members)) return undefined;
 	return { name: value.Name, members: value.Members, superclass: value.Superclass };
 }
 
-function isYieldingFunction(value: RobloxApiValue): value is JsonObject & { readonly Name: string } {
+function isYieldingFunction(value: unknown): value is JsonObject & { readonly Name: string } {
 	if (!isRecord(value) || value.MemberType !== "Function" || !Predicate.isString(value.Name)) return false;
 	return Array.isArray(value.Tags) && value.Tags.some((tag) => tag === "Yields" || tag === "CanYield");
 }
 
-export function parseClasses(value: RobloxApiValue): ReadonlyMap<string, RobloxClass> {
+export function parseClasses(value: unknown): ReadonlyMap<string, RobloxClass> {
 	if (!isRecord(value) || !Array.isArray(value.Classes)) throw new TypeError("Roblox API dump has no Classes array.");
 
 	const classes = new Map<string, RobloxClass>();
