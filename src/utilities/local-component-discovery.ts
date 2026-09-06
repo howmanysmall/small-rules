@@ -388,10 +388,7 @@ export function addLocalComponentImportIdentifiers(
 	}
 }
 
-export function discoverLocalComponent(
-	sourceFile: string,
-	definition: LocalComponentDefinition,
-): LocalComponentDiscovery {
+function discoverLocalComponent(sourceFile: string, definition: LocalComponentDefinition): LocalComponentDiscovery {
 	const projectRoot = getProjectRootFromDirectory(nodePath.dirname(sourceFile));
 	if (projectRoot === undefined) return { found: false };
 

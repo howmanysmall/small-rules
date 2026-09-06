@@ -7,7 +7,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 
 import {
 	addLocalComponentImportIdentifiers,
-	discoverLocalComponent,
+	createLocalComponentDiscoverer,
 	inspectRelativeLocalComponentImport,
 	MAX_REGEX_CACHE_SIZE,
 } from "$oxc-utilities/local-component-discovery";
@@ -16,7 +16,11 @@ import { createRuleTester } from "./rule-testers";
 
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
 
-import type { LocalComponentDefinition, LocalComponentInspection } from "$oxc-utilities/local-component-discovery";
+import type {
+	LocalComponentDefinition,
+	LocalComponentDiscovery,
+	LocalComponentInspection,
+} from "$oxc-utilities/local-component-discovery";
 
 const COMPONENT_NAME = "Button";
 const MATCHING_INSPECTION: LocalComponentInspection = { importStyle: "default", matches: true };
@@ -798,6 +802,10 @@ describe("discoverLocalComponent", () => {
 
 function cleanupProjectFixture(project: string): void {
 	rmSync(project, { force: true, recursive: true });
+}
+
+function discoverLocalComponent(sourceFile: string, definition: LocalComponentDefinition): LocalComponentDiscovery {
+	return createLocalComponentDiscoverer(sourceFile, definition)();
 }
 
 function createComponentDefinition(): LocalComponentDefinition {
