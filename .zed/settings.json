@@ -269,23 +269,6 @@
 				}
 			}
 		},
-		"dependi": {
-			"initialization_options": {
-				"cache": { "ttl_secs": 3600 },
-				"diagnostics": { "enabled": true },
-				"ignore": ["internal-*", "test-pkg"],
-				"inlay_hints": {
-					"enabled": true,
-					"show_up_to_date": true
-				},
-				"security": {
-					"enabled": true,
-					"min_severity": "low",
-					"show_diagnostics": true,
-					"show_in_hints": true
-				}
-			}
-		},
 		"eslint": {
 			"binary": {
 				"env": {
