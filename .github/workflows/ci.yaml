@@ -80,7 +80,7 @@ jobs:
 
       - if: steps.changes.outputs.changed == 'true'
         name: actionlint
-        run: actionlint -ignore 'specifying action "\$\/\.github\/[^"]*" in invalid format' -ignore 'reusable workflow call "\$\/\.github\/[^"]*" at "uses" is not following the format'
+        run: actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format'
 
       - if: steps.changes.outputs.changed == 'true'
         name: pinact

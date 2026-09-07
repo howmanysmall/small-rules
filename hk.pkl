@@ -169,7 +169,7 @@ hooks {
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
         check =
-          "actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format' {{files}}"
+          "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
@@ -238,7 +238,7 @@ hooks {
       ["workflow-security"] {
         check =
           """
-          actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format'
+          actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format'
           zizmor --no-progress .github
           pinact run -fix=false -no-api $(find .github/workflows .github/actions -name '*.yaml' -o -name '*.yml')
           """
@@ -361,7 +361,7 @@ hooks {
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
         check =
-          "actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format' {{files}}"
+          "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
@@ -482,7 +482,7 @@ hooks {
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
         check =
-          "actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format' {{files}}"
+          "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
