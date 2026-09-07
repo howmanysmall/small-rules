@@ -1,5 +1,5 @@
 {
-	"name": "omp",
+	"name": "@small-rules/omp",
 	"private": true,
 	"type": "module",
 	"dependencies": {

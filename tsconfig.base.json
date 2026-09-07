@@ -7,6 +7,7 @@
 		"module": "preserve",
 		"moduleResolution": "bundler",
 		"paths": {
+			"@small-rules/arktype-utilities": ["./packages/arktype-utilities/src/index.ts"],
 			"$oxc-generated/*": ["./src/generated/*"],
 			"$oxc-rules/*": ["./src/rules/*"],
 			"$oxc-types/*": ["./src/types/*"],
@@ -15,7 +16,9 @@
 			"$test/*": ["./tests/*"],
 
 			"$script-commands/*": ["./scripts/commands/*"],
+			"$script-classes/*": ["./scripts/classes/*"],
 			"$script-constants/*": ["./scripts/constants/*"],
+			"$script-functions/*": ["./scripts/functions/*"],
 			"$script-types/*": ["./scripts/types/*"],
 			"$script-utilities/*": ["./scripts/utilities/*"],
 

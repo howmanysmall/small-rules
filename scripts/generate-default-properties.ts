@@ -1,8 +1,16 @@
 #!/usr/bin/env nub
 
 import { argv } from "node:process";
-import { Command } from "@cliffy/command";
+import { consola } from "consola";
 
+import { createBaseCommand } from "$script-functions/create-base-command";
+import { getScriptName } from "$script-functions/get-script-name";
+import { compactDefaultProperties } from "$script-utilities/compact-default-properties";
+
+const name = getScriptName(true);
+const log = consola.withTag(name);
+
+// just `Lowercase<keyof typeof CreatableInstances>`
 const allCreatableInstances = [
 	"accessory",
 	"accessorydescription",
@@ -51,6 +59,7 @@ const allCreatableInstances = [
 	"audiospeechtotext",
 	"audiotexttospeech",
 	"audiotremolo",
+	"audiowindsynthesizer",
 	"aurorascript",
 	"avatarabilityrules",
 	"avataraccessoryrules",
@@ -100,6 +109,7 @@ const allCreatableInstances = [
 	"configuration",
 	"controllermanager",
 	"controllerpartsensor",
+	"controlstate",
 	"cornerwedgepart",
 	"curveanimation",
 	"customlog",
@@ -155,6 +165,7 @@ const allCreatableInstances = [
 	"imagehandleadornment",
 	"imagelabel",
 	"inputaction",
+	"inputactionlabel",
 	"inputbinding",
 	"inputcontext",
 	"intconstrainedvalue",
@@ -192,12 +203,12 @@ const allCreatableInstances = [
 	"particleemitter",
 	"partoperation",
 	"path2d",
+	"path3d",
 	"pathfindinglink",
 	"pathfindingmodifier",
 	"pitchshiftsoundeffect",
 	"plane",
 	"planeconstraint",
-	"pluginaction",
 	"plugincapabilities",
 	"pointlight",
 	"pose",
@@ -210,7 +221,6 @@ const allCreatableInstances = [
 	"relativegui",
 	"remoteevent",
 	"remotefunction",
-	"renderingtest",
 	"reverbsoundeffect",
 	"rigidconstraint",
 	"rocketpropulsion",
@@ -245,6 +255,8 @@ const allCreatableInstances = [
 	"spotlight",
 	"springconstraint",
 	"startergear",
+	"statemachinedefinition",
+	"statemachinetransitiondefinition",
 	"stringvalue",
 	"studioattachment",
 	"studiocallout",
@@ -266,6 +278,7 @@ const allCreatableInstances = [
 	"textbox",
 	"textbutton",
 	"textchannel",
+	"textchannelwindow",
 	"textchatcommand",
 	"textchatmessageproperties",
 	"textgenerator",
@@ -307,6 +320,7 @@ const allCreatableInstances = [
 	"videodisplay",
 	"videoframe",
 	"videoplayer",
+	"viewportcamera",
 	"viewportframe",
 	"visualizationmode",
 	"visualizationmodecategory",
@@ -324,16 +338,15 @@ const allCreatableInstances = [
 ] as const;
 
 const excludedClassNames = new Set([
-	"accessory",
 	"accessorydescription",
 	"accoutrement",
 	"actor",
 	"aircontroller",
 	"animationrigdata",
 	"annotation",
-	"atmosphere",
 	"atmospheresensor",
 	"audiosearchparams",
+	"audiowindsynthesizer",
 	"backpack",
 	"bindableevent",
 	"bindablefunction",
@@ -341,9 +354,9 @@ const excludedClassNames = new Set([
 	"bubblechatmessageproperties",
 	"buoyancysensor",
 	"climbcontroller",
-	"clouds",
 	"controllermanager",
 	"controllerpartsensor",
+	"controlstate",
 	"datastoregetoptions",
 	"datastoreincrementoptions",
 	"datastoreoptions",
@@ -373,6 +386,7 @@ const excludedClassNames = new Set([
 	"negateoperation",
 	"operationgraph",
 	"partoperation",
+	"path3d",
 	"pathfindinglink",
 	"pathfindingmodifier",
 	"plane",
@@ -387,6 +401,8 @@ const excludedClassNames = new Set([
 	"snap",
 	"spawnlocation",
 	"startergear",
+	"statemachinedefinition",
+	"statemachinetransitiondefinition",
 	"studioattachment",
 	"studiocallout",
 	"surfaceselection",
@@ -436,18 +452,19 @@ async function getLoadedClassesAsync(
 	return new Set(getRbxTsReactInstances());
 }
 
-const command = new Command()
-	.name("generate-default-properties")
-	.version("1.0.0")
-	.description(
-		"Generates a structured JSON map of Roblox class default properties for the useless-default Oxlint rule.",
-	)
+const command = createBaseCommand(
+	name,
+	"2.0.0",
+	"Generates the compact Roblox default-property catalog used by no-useless-default.",
+)
 	.env("GITHUB_TOKEN=<value:string>", "The GitHub token environment variable.", { required: false })
 	.env("GITHUB_PAT=<value:string>", "Alternative GitHub token environment variable.", { required: false })
 	.env("GITHUB_PERSONAL_ACCESS_TOKEN=<value:string>", "Alternative GitHub token environment variable.", {
 		required: false,
 	})
-	.option("-o, --output <output-path:string>", "Write JSON output to a file instead of stdout.")
+	.option("-o, --output <output-path:string>", "Generated JSON output path.", {
+		default: "src/generated/default-properties.json",
+	})
 	.option("-p, --pretty", "Pretty-print JSON with indentation.")
 	.option("--force-latest", "Force use of the latest database version.", {
 		conflicts: ["file-path"],
@@ -499,16 +516,12 @@ const command = new Command()
 				version: 1,
 			};
 
-			const json = JSON.stringify(outputData, undefined, pretty ? 2 : undefined);
-			if (output === undefined) console.log(json);
-			else {
-				const { mkdir, writeFile } = await import("node:fs/promises");
-				// oxlint-disable-next-line unicorn/import-style -- lol
-				const nodePath = await import("node:path");
-				await mkdir(nodePath.dirname(output), { recursive: true });
-				await writeFile(output, json, "utf8");
-				console.log(`Wrote ${json.length} bytes to ${output}`);
-			}
+			const json = JSON.stringify(compactDefaultProperties(outputData), undefined, pretty ? 2 : undefined);
+			const { mkdir, writeFile } = await import("node:fs/promises");
+			const { dirname } = await import("@std/path");
+			await mkdir(dirname(output), { recursive: true });
+			await writeFile(output, json, "utf8");
+			log.success(`Wrote ${json.length} bytes to ${output}`);
 		},
 	);
 

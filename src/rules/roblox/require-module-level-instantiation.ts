@@ -1,7 +1,7 @@
+import { isReadonlyDictionaryOfStrings } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 import { Predicate } from "effect";
 
-import { isReadonlyRecordOfStrings } from "$oxc-utilities/arktype-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -12,7 +12,7 @@ interface TrackedInstantiation {
 }
 
 const isValidConfiguration = type({
-	classes: isReadonlyRecordOfStrings,
+	classes: isReadonlyDictionaryOfStrings,
 }).readonly();
 
 type Options = InferContextFromRule<typeof requireModuleLevelInstantiation>["options"][0];

@@ -63,6 +63,7 @@ const configuration = isentinel(
 				useTabs: true,
 			},
 		},
+		ignores: ["!**/.opencode", "!**/.opencode/**"],
 		jsdoc: true,
 		jsonc: true,
 		markdown: false,
