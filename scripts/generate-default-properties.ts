@@ -5,6 +5,7 @@ import { consola } from "consola";
 
 import { createBaseCommand } from "$script-functions/create-base-command";
 import { getScriptName } from "$script-functions/get-script-name";
+import { compactDefaultProperties } from "$script-utilities/compact-default-properties";
 
 const name = getScriptName(true);
 const log = consola.withTag(name);
@@ -453,15 +454,17 @@ async function getLoadedClassesAsync(
 
 const command = createBaseCommand(
 	name,
-	"1.0.1",
-	"Generates a structured JSON map of Roblox class default properties for the useless-default Oxlint rule.",
+	"2.0.0",
+	"Generates the compact Roblox default-property catalog used by no-useless-default.",
 )
 	.env("GITHUB_TOKEN=<value:string>", "The GitHub token environment variable.", { required: false })
 	.env("GITHUB_PAT=<value:string>", "Alternative GitHub token environment variable.", { required: false })
 	.env("GITHUB_PERSONAL_ACCESS_TOKEN=<value:string>", "Alternative GitHub token environment variable.", {
 		required: false,
 	})
-	.option("-o, --output <output-path:string>", "Write JSON output to a file instead of stdout.")
+	.option("-o, --output <output-path:string>", "Generated JSON output path.", {
+		default: "src/generated/default-properties.json",
+	})
 	.option("-p, --pretty", "Pretty-print JSON with indentation.")
 	.option("--force-latest", "Force use of the latest database version.", {
 		conflicts: ["file-path"],
@@ -513,15 +516,12 @@ const command = createBaseCommand(
 				version: 1,
 			};
 
-			const json = JSON.stringify(outputData, undefined, pretty ? 2 : undefined);
-			if (output === undefined) console.log(json);
-			else {
-				const { mkdir, writeFile } = await import("node:fs/promises");
-				const { dirname } = await import("@std/path");
-				await mkdir(dirname(output), { recursive: true });
-				await writeFile(output, json, "utf8");
-				log.success(`Wrote ${json.length} bytes to ${output}`);
-			}
+			const json = JSON.stringify(compactDefaultProperties(outputData), undefined, pretty ? 2 : undefined);
+			const { mkdir, writeFile } = await import("node:fs/promises");
+			const { dirname } = await import("@std/path");
+			await mkdir(dirname(output), { recursive: true });
+			await writeFile(output, json, "utf8");
+			log.success(`Wrote ${json.length} bytes to ${output}`);
 		},
 	);
 
