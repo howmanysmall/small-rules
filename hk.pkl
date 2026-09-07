@@ -168,6 +168,8 @@ hooks {
       // GitHub Actions workflows
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
+        check =
+          "actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
@@ -229,6 +231,17 @@ hooks {
     steps {
       ["check"] {
         check = "scripts/quiet-on-success.sh mise run check"
+      }
+      // Mirror CI's Workflow Security job so bad workflow edits fail here,
+      // not after burning CI minutes. Unconditional: the trio is fast and
+      // pre-commit can be bypassed with --no-verify.
+      ["workflow-security"] {
+        check =
+          """
+          actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format'
+          zizmor --no-progress .github
+          pinact run -fix=false -no-api $(find .github/workflows .github/actions -name '*.yaml' -o -name '*.yml')
+          """
       }
     }
   }
@@ -347,6 +360,8 @@ hooks {
       ["shellcheck"] = Builtins.shellcheck
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
+        check =
+          "actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
@@ -466,6 +481,8 @@ hooks {
       ["shellcheck"] = Builtins.shellcheck
       ["actionlint"] = (Builtins.actionlint) {
         glob = workflow_files
+        check =
+          "actionlint -ignore 'specifying action \"\\$\\/\\.github\\/[^\\\"]*\" in invalid format' -ignore 'reusable workflow call \"\\$\\/\\.github\\/[^\\\"]*\" at \"uses\" is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files

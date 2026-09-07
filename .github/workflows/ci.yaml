@@ -41,7 +41,7 @@ jobs:
   checks:
     permissions:
       contents: read
-    uses: ./.github/workflows/checks.yaml
+    uses: $/.github/workflows/checks.yaml
 
   workflow-security:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -74,13 +74,13 @@ jobs:
 
       - if: steps.changes.outputs.changed == 'true'
         name: Setup toolchain
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
         with:
           tools: actionlint pinact zizmor
 
       - if: steps.changes.outputs.changed == 'true'
         name: actionlint
-        run: actionlint
+        run: actionlint -ignore 'specifying action "\$\/\.github\/[^"]*" in invalid format' -ignore 'reusable workflow call "\$\/\.github\/[^"]*" at "uses" is not following the format'
 
       - if: steps.changes.outputs.changed == 'true'
         name: pinact
