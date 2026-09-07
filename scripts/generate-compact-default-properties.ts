@@ -4,7 +4,13 @@ import { readFile, writeFile } from "node:fs/promises";
 import { isBoolean, isMaybeString, isNumber, isReadonlyArrayOfNumbers, isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
-const isCanonicalPropertyValue = isBoolean.or(isNumber).or(isReadonlyArrayOfNumbers).or(isString);
+const isInfinite = type("'inf' | '-inf'");
+
+const isCanonicalPropertyValue = isBoolean
+	.or(isNumber)
+	.or(isReadonlyArrayOfNumbers)
+	.or(isString)
+	.or(type([isInfinite, isInfinite]).readonly());
 type CanonicalPropertyValue = typeof isCanonicalPropertyValue.infer;
 
 const isCanonicalDefaultProperty = type({
