@@ -440,6 +440,9 @@ overrides:
 
 packageExtensionsChecksum: sha256-IYEPq/kgepgTYfr3V+wsdmeZaO6hxaAgHmmdiq4cQV0=
 
+patchedDependencies:
+  '@stryker-mutator/vitest-runner@10.0.0': b7157218d24126e49a3f706bce1c78da0124bc8941dc52aa8dbb97153b5ea46d
+
 importers:
 
   .:
@@ -501,7 +504,7 @@ importers:
         version: 10.0.0(@types/node@26.4.1)(vitest@5.0.0)
       '@stryker-mutator/vitest-runner':
         specifier: catalog:test
-        version: 10.0.0(@stryker-mutator/core@10.0.0(@types/node@26.4.1)(vitest@5.0.0))(vitest@5.0.0)
+        version: 10.0.0(patch_hash=b7157218d24126e49a3f706bce1c78da0124bc8941dc52aa8dbb97153b5ea46d)(@stryker-mutator/core@10.0.0(@types/node@26.4.1)(vitest@5.0.0))(vitest@5.0.0)
       '@stylistic/eslint-plugin':
         specifier: catalog:lint
         version: 5.10.0(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
@@ -2763,12 +2766,12 @@ packages:
   '@isaacs/string-locale-compare@1.1.0':
     resolution: {integrity: sha512-SQ7Kzhh9+D+ZW9MA0zkYv3VXhIDNx+LzM6EJ+/65I3QY+enU6Itte7E5XX7EWrqLW2FN4n06GWzBnPoC3th2aQ==}
 
-  '@isentinel/dict-rbxts@1.0.21':
-    resolution: {integrity: sha512-I5gO11EBTNF4Zbi3S6sPRy9RkcuAqaf8DE6g8G0iDLdJxcPCxjFsGFJeeEJz9R/yklyiMSyM7Pz2GwgHrxH0/g==}
+  '@isentinel/dict-rbxts@1.0.22':
+    resolution: {integrity: sha512-df4xpwV0nX9dEcpsYldRz0cYCxjLIi/4ATC6oVuTZ/2JJjcWfj+bciKJV71T9MtiUF6tTF7tL/gFUKHwB7VzBQ==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.14':
-    resolution: {integrity: sha512-fMH9b0NHjf6rTbOtE0HMRHv/T1Oa1blSjSXR/z0h30FTcG0jwZDXDYPj7bmbJXutUptUa88gq0f7p9RKbS0z3Q==}
+  '@isentinel/dict-roblox@1.0.15':
+    resolution: {integrity: sha512-YCX8PRL2y63fAvm1VsshGLXAwxpocyfVaHNqwKZREZNiTMPTMEbVDpjbaoU+iCAf8e8GY/SLQp9XC0RwTWCcJA==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.46':
@@ -12083,9 +12086,9 @@ snapshots:
 
   '@isaacs/string-locale-compare@1.1.0': {}
 
-  '@isentinel/dict-rbxts@1.0.21': {}
+  '@isentinel/dict-rbxts@1.0.22': {}
 
-  '@isentinel/dict-roblox@1.0.14': {}
+  '@isentinel/dict-roblox@1.0.15': {}
 
   '@isentinel/eslint-config@6.0.0-beta.46(3695dd7e0b564d36fc92c3606adb4e19)':
     dependencies:
@@ -12095,8 +12098,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.5.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.81.0(oxlint-tsgolint@7.0.2001))
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.21
-      '@isentinel/dict-roblox': 1.0.14
+      '@isentinel/dict-rbxts': 1.0.22
+      '@isentinel/dict-roblox': 1.0.15
       '@oxlint/plugins': 1.78.0
       '@pobammer-ts/small-rules': link:plugins
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
@@ -14012,7 +14015,7 @@ snapshots:
       '@stryker-mutator/api': 10.0.0
       '@stryker-mutator/instrumenter': 10.0.0
       '@stryker-mutator/util': 10.0.0
-      '@stryker-mutator/vitest-runner': 10.0.0(@stryker-mutator/core@10.0.0(@types/node@26.4.1)(vitest@5.0.0))(vitest@5.0.0)
+      '@stryker-mutator/vitest-runner': 10.0.0(patch_hash=b7157218d24126e49a3f706bce1c78da0124bc8941dc52aa8dbb97153b5ea46d)(@stryker-mutator/core@10.0.0(@types/node@26.4.1)(vitest@5.0.0))(vitest@5.0.0)
       ajv: 8.20.0
       chalk: 5.6.2
       commander: 14.0.3
@@ -14059,7 +14062,7 @@ snapshots:
 
   '@stryker-mutator/util@10.0.0': {}
 
-  '@stryker-mutator/vitest-runner@10.0.0(@stryker-mutator/core@10.0.0(@types/node@26.4.1)(vitest@5.0.0))(vitest@5.0.0)':
+  '@stryker-mutator/vitest-runner@10.0.0(patch_hash=b7157218d24126e49a3f706bce1c78da0124bc8941dc52aa8dbb97153b5ea46d)(@stryker-mutator/core@10.0.0(@types/node@26.4.1)(vitest@5.0.0))(vitest@5.0.0)':
     dependencies:
       '@stryker-mutator/api': 10.0.0
       '@stryker-mutator/core': 10.0.0(@types/node@26.4.1)(vitest@5.0.0)

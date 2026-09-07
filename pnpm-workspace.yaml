@@ -145,6 +145,13 @@ overrides:
   "@vitiate/core>@swc/core": 1.15.41
   vite: ^8
 
+# Vitest 5 matches `testNamePattern` against `task.fullTestName`, which joins suite names with
+# " > ". The runner builds its per-mutant filter by joining them with " ", so the regex matches
+# nothing for any test inside a `describe` and every mutant runs zero tests and is reported
+# "Survived". Drop this once upstream supports Vitest 5.
+patchedDependencies:
+  "@stryker-mutator/vitest-runner@10.0.0": patches/@stryker-mutator__vitest-runner@10.0.0.patch
+
 catalogs:
   benchmark:
     "@faker-js/faker": 10.6.0

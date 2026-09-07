@@ -15,7 +15,7 @@ coverage
 *.lcov
 /reports/
 .stryker-tmp/
-.vitiate/
+.vitiate/corpus/
 .swc/
 
 # jscpd reports
