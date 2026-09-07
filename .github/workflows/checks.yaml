@@ -19,10 +19,10 @@ jobs:
           persist-credentials: false
 
       - name: Setup toolchain
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
 
       - name: Install dependencies
-        uses: ./.github/actions/install
+        uses: $/.github/actions/install
 
       - name: Restore ESLint cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -80,12 +80,12 @@ jobs:
           persist-credentials: false
 
       - name: Setup toolchain
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
         with:
           tools: bun node pnpm ni
 
       - name: Install dependencies
-        uses: ./.github/actions/install
+        uses: $/.github/actions/install
 
       - name: Type check documentation
         run: node --run check
@@ -98,7 +98,7 @@ jobs:
           path: ~/.cache/ms-playwright
 
       - name: Install Chromium
-        run: pnpm --filter docs exec playwright install --with-deps chromium
+        run: pnpm --filter @small-rules/documentation exec playwright install --with-deps chromium
 
       - name: Build documentation
         run: node --run build
@@ -124,10 +124,10 @@ jobs:
           persist-credentials: false
 
       - name: Setup toolchain
-        uses: ./.github/actions/setup
+        uses: $/.github/actions/setup
 
       - name: Install dependencies
-        uses: ./.github/actions/install
+        uses: $/.github/actions/install
 
       - name: Run tests
         run: node --run test -- --reporter github-actions --reporter dot
