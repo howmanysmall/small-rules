@@ -1,29 +1,32 @@
-import { env } from "node:process";
+import { argv, env } from "node:process";
 import { defineConfig, mergeConfig } from "vitest/config";
 
 import { sharedConfiguration } from "./vitest.shared.config.ts";
 import fuzzConfiguration from "./vitest.vitiate.config.ts";
 
-/**
- * Vitiate's supervisor respawns Vitest once per fuzz target, but the
- * `--config` it passes comes from `getConfigFile()`, main-process state
- * that never reaches the pool worker doing the respawn. The child starts
- * with no `--config` and auto-discovers this file, so it has to turn
- * itself into the fuzz config or it finds no test files and exits 1.
- *
- * `vitiate regression` is driven by `--config` alone and never lands here.
- */
+// vitiate respawns vitest per fuzz target without forwarding --config, so the
+// child auto-discovers this file and has to become the fuzz config.
 const isFuzzRun = env.VITIATE_FUZZ === "1" || env.VITIATE_OPTIMIZE === "1" || env.VITIATE_SUPERVISOR === "1";
+
+const NARROWING_FLAGS = new Set(["--changed", "--project", "--related", "--shard", "--testNamePattern", "-t"]);
+const TEST_FILE_ARGUMENT = /\.(?:fuzz|test)\.[cm]?tsx?$/u;
+
+function isFocusedRun(cliArguments: ReadonlyArray<string>): boolean {
+	return cliArguments.some((argument) => {
+		if (argument.startsWith("-")) return NARROWING_FLAGS.has(argument.split("=", 1)[0] ?? argument);
+		return argument.startsWith("tests/") || TEST_FILE_ARGUMENT.test(argument);
+	});
+}
+
+const enabled = !isFocusedRun(argv.slice(2));
 
 const testConfiguration = mergeConfig(
 	sharedConfiguration,
 	defineConfig({
 		test: {
-			// Coverage is a run-level option, so it lives here rather than in a
-			// project. Opt in with `--coverage` (see the `test` script) instead
-			// of guessing from argv.
 			coverage: {
 				clean: true,
+				enabled,
 				exclude: [
 					"documentation/**",
 					"packages/**/src/**/*.test.ts",
@@ -46,9 +49,6 @@ const testConfiguration = mergeConfig(
 					},
 				},
 				{
-					// Type-level assertions run as their own project so a `tsgo`
-					// failure is reported separately instead of doubling every
-					// runtime test file in the summary.
 					test: {
 						name: "types",
 						typecheck: {
@@ -60,8 +60,6 @@ const testConfiguration = mergeConfig(
 						},
 					},
 				},
-				// Referenced projects keep their own config; `extends` does not
-				// apply to them.
 				"documentation",
 				"packages/*",
 			],
