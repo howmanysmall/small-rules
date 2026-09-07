@@ -46,6 +46,18 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.19.0] - 2026-09-07
+
+## Fixed
+
+- **prefer-expect-assertions**: Checks the callback in test calls with trailing timeout arguments, including `it("works", () => {}, 500)` ([43a6a57](https://github.com/howmanysmall/small-rules/commit/43a6a577784368a1225ff1d06c6415e4eeaafeb0)).
+- **prefer-context-stack**, **prefer-local-portal-component**, and **prefer-padding-components**: Local component discovery ignores build output and `.gitignore` paths and no longer fails linting when directories disappear or cannot be read ([#56](https://github.com/howmanysmall/small-rules/pull/56)).
+
+## Changed
+
+- **no-useless-default**: Refreshes Roblox instance defaults, adding supported defaults for classes such as `Accessory`, `Atmosphere`, `Clouds`, `InputActionLabel`, `TextChannelWindow`, and `ViewportCamera`, while removing `PluginAction` and `RenderingTest` metadata ([db68291](https://github.com/howmanysmall/small-rules/commit/db68291f712511292e109e00b229880e4e4bc87f)).
+- **no-async-in-system**: Refreshes the Roblox yielding-member metadata used to identify calls that yield in synchronous systems ([4a6357](https://github.com/howmanysmall/small-rules/commit/4a6357ddb7e4b6cd4787066d57172a827d43dcf)).
+
 ## [2.18.0] - 2026-08-31
 
 ## 🔧 Changed
