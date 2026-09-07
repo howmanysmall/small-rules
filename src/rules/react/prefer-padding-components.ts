@@ -5,7 +5,7 @@ import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
-	discoverLocalComponent,
+	createLocalComponentDiscoverer,
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
@@ -206,11 +206,9 @@ function isJsxIdentifier(node: ESTree.JSXElementName): node is ESTree.JSXIdentif
 const preferPaddingComponents = createRule("prefer-padding-components", "react", {
 	create(context): Visitor {
 		const { filename } = context;
+		const discoverDirectionalPadding = createLocalComponentDiscoverer(filename, DIRECTIONAL_PADDING_COMPONENT);
+		const discoverEqualPadding = createLocalComponentDiscoverer(filename, EQUAL_PADDING_COMPONENT);
 		/* v8 ignore start -- @preserve rule execution supplies a filename before local component discovery. */
-		const discoveredDirectionalPadding =
-			filename === "" ? { found: false } : discoverLocalComponent(filename, DIRECTIONAL_PADDING_COMPONENT);
-		const discoveredEqualPadding =
-			filename === "" ? { found: false } : discoverLocalComponent(filename, EQUAL_PADDING_COMPONENT);
 		const isDirectionalPaddingDefinitionFile =
 			filename !== "" && inspectLocalComponentFile(filename, DIRECTIONAL_PADDING_COMPONENT).matches;
 		const isEqualPaddingDefinitionFile =
@@ -260,10 +258,10 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 				if (isDefinitionFile) return;
 				const componentIdentifiers =
 					messageId === "preferEqualPadding" ? equalPaddingIdentifiers : directionalPaddingIdentifiers;
-				const discoveredComponent =
-					messageId === "preferEqualPadding" ? discoveredEqualPadding : discoveredDirectionalPadding;
+				const discoverComponent =
+					messageId === "preferEqualPadding" ? discoverEqualPadding : discoverDirectionalPadding;
 
-				if (componentIdentifiers.size === 0 && !discoveredComponent.found) return;
+				if (componentIdentifiers.size === 0 && !discoverComponent().found) return;
 
 				const canFix = JSX_EXTENSIONS.has(nodePath.extname(filename)) && componentIdentifiers.size === 1;
 				const [componentIdentifier] = [...componentIdentifiers];
