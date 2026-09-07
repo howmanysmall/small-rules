@@ -7,8 +7,12 @@ export const isUndefined = type("undefined");
 export const isUnknown = type("unknown");
 export const isNull = type("null");
 
+export const isInteger = type("number % 1");
+
 export const isMaybeString = isString.or(isUndefined);
 export const isNullableString = isString.or(isNull);
+
+export const isMaybeBoolean = isBoolean.or(isUndefined);
 
 export const isMaybeNumber = isNumber.or(isUndefined);
 
