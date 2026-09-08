@@ -1,0 +1,20 @@
+{
+	"mcpServers": {
+		"astro-docs": {
+			"type": "http",
+			"url": "https://mcp.docs.astro.build/mcp"
+		},
+		"chrome-devtools": {
+			"args": ["scripts/get-chrome-path.sh", "--serve"],
+			"command": "bash"
+		},
+		"hk": {
+			"args": ["x", "--", "hk", "mcp", "--root", "."],
+			"command": "mise"
+		},
+		"gh-grep": {
+			"type": "http",
+			"url": "https://mcp.grep.app"
+		}
+	}
+}
