@@ -46,6 +46,12 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [2.19.1] - 2026-09-08
+
+## Fixed
+
+- Fixed package installation by bundling the private `@small-rules/arktype-utilities` package instead of publishing it as a runtime dependency - by @howmanysmall in [#58](https://github.com/howmanysmall/small-rules/pull/58)
+
 ## [2.19.0] - 2026-09-07
 
 ## Fixed
