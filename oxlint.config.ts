@@ -771,6 +771,11 @@ const configuration = isentinel(
 			"small-rules/require-react-display-names": ["error", { environment: "standard" }],
 		},
 	},
+	{
+		name: "small-rules/codex",
+		files: [`.codex/**/${GLOB_SRC}`],
+		rules: { "no-void": "off" },
+	},
 );
 
 export default configuration;
