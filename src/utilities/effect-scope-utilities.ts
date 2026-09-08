@@ -1,9 +1,25 @@
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	FUNCTION_DECLARATION,
+	FUNCTION_EXPRESSION,
+	isAwaitExpression,
+	isCallExpression,
+	isIdentifierReference,
+	isIfStatement,
+	isMemberExpression,
+	isNode,
+	isUnaryExpression,
+	isVariableDeclarator,
+	OBJECT_EXPRESSION,
+	PROPERTY,
+	SEQUENCE_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 
-const CONTAINER_PARENT_TYPES = new Set(["ArrayExpression", "ObjectExpression", "Property", "SequenceExpression"]);
-const FUNCTION_NODE_TYPES = new Set(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
+const CONTAINER_PARENT_TYPES = new Set([ARRAY_EXPRESSION, OBJECT_EXPRESSION, PROPERTY, SEQUENCE_EXPRESSION]);
+const FUNCTION_NODE_TYPES = new Set([ARROW_FUNCTION_EXPRESSION, FUNCTION_DECLARATION, FUNCTION_EXPRESSION]);
 
 export interface EffectScopeAnalysis {
 	readonly callExpressions: ReadonlyArray<ESTree.CallExpression>;
@@ -152,8 +168,8 @@ function traverseAll(state: EffectScopeAnalysisState, root: ESTree.Node, result:
 
 function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: TraversalResult): void {
 	if (node === root) return;
-	if (node.type === "CallExpression") result.callExpressions.push(node);
-	else if (node.type === "IfStatement") result.ifStatements.push(node);
+	if (isCallExpression(node)) result.callExpressions.push(node);
+	else if (isIfStatement(node)) result.ifStatements.push(node);
 }
 
 function indexReferences(state: EffectScopeAnalysisState): void {
@@ -197,10 +213,6 @@ function pushChildren(
 		if (!childKeys.has(key) || (key === "arguments" && !includeArguments)) continue;
 		pushChildValue(value, worklist);
 	}
-}
-
-function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {
-	return node.type === "Identifier";
 }
 
 function getReference(state: EffectScopeAnalysisState, identifier: ESTree.IdentifierReference): Reference | undefined {
@@ -251,12 +263,12 @@ function ascend(
 function computeCallExpression(reference: Reference): ESTree.CallExpression | undefined {
 	let current: ESTree.Node = reference.identifier.parent;
 	while (true) {
-		if (current.type === "CallExpression") {
+		if (isCallExpression(current)) {
 			let node: ESTree.Node = reference.identifier;
-			while (node.parent.type === "MemberExpression") node = node.parent;
+			while (isMemberExpression(node.parent)) node = node.parent;
 			/* v8 ignore next -- refs in member chains always resolve to the call's callee (probed across the rule corpus). @preserve */
 			if (current.callee === node) return current;
-		} else if (current.type === "MemberExpression") {
+		} else if (isMemberExpression(current)) {
 			current = current.parent;
 			continue;
 		}
@@ -287,8 +299,8 @@ function isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
 	let current = node;
 	while (current !== within) {
 		if (
-			current.type === "AwaitExpression" ||
-			(current.type === "UnaryExpression" && current.operator === "void") ||
+			isAwaitExpression(current) ||
+			(isUnaryExpression(current) && current.operator === "void") ||
 			FUNCTION_NODE_TYPES.has(current.type)
 		) {
 			return false;
@@ -318,7 +330,7 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 			const parent: ESTree.Node | null = node.parent;
 			/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
 			if (parent === null) return false;
-			if (parent.type === "VariableDeclarator" && parent.init === node) return true;
+			if (isVariableDeclarator(parent) && parent.init === node) return true;
 			if (CONTAINER_PARENT_TYPES.has(parent.type)) {
 				node = parent;
 				continue;

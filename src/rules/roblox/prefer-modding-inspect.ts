@@ -1,5 +1,13 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
+import {
+	getTypeAnnotationFromBinding,
+	isAnyLiteral,
+	isIdentifierName,
+	isObjectExpression,
+	isProperty,
+	isTsLiteralType,
+	isTsTypeReference,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
 
@@ -7,15 +15,13 @@ const RECORD_TYPE_NAMES = new Set(["ReadonlyRecord", "Record"]);
 
 function isRecordTypeReference(typeRef: ESTree.TSType): typeRef is ESTree.TSTypeReference {
 	return (
-		typeRef.type === "TSTypeReference" &&
-		typeRef.typeName.type === "Identifier" &&
-		RECORD_TYPE_NAMES.has(typeRef.typeName.name)
+		isTsTypeReference(typeRef) && isIdentifierName(typeRef.typeName) && RECORD_TYPE_NAMES.has(typeRef.typeName.name)
 	);
 }
 
 function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TSType | undefined {
 	/* v8 ignore next -- @preserve VariableDeclarator visitor checks Identifier before calling this helper. */
-	if (node.id.type !== "Identifier") return undefined;
+	if (!isIdentifierName(node.id)) return undefined;
 
 	const bindingAnnotation = getTypeAnnotationFromBinding(node.id);
 	if (bindingAnnotation === undefined) return undefined;
@@ -29,18 +35,18 @@ function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TST
 	const [enumType, secondParameter] = typeArguments.params;
 	/* v8 ignore next -- @preserve the length check above guarantees both Record parameters exist. */
 	if (enumType === undefined || secondParameter === undefined) return undefined;
-	if (secondParameter.type !== "TSLiteralType") return undefined;
-	if (secondParameter.literal.type !== "Literal" || secondParameter.literal.value !== true) return undefined;
+	if (!isTsLiteralType(secondParameter)) return undefined;
+	if (!isAnyLiteral(secondParameter.literal) || secondParameter.literal.value !== true) return undefined;
 
 	return enumType;
 }
 
-function isTrueObjectExpression(node: ESTree.Expression | null | undefined): boolean {
-	if (node?.type !== "ObjectExpression") return false;
+function isTrueObjectExpression(node?: ESTree.Expression | null): boolean {
+	if (!isObjectExpression(node)) return false;
 
 	for (const property of node.properties) {
-		if (property.type !== "Property") return false;
-		if (property.value.type !== "Literal" || property.value.value !== true) return false;
+		if (!isProperty(property)) return false;
+		if (!isAnyLiteral(property.value) || property.value.value !== true) return false;
 	}
 
 	return true;
@@ -52,7 +58,7 @@ const preferModdingInspect = createRule("prefer-modding-inspect", "roblox", {
 
 		return {
 			VariableDeclarator(node): void {
-				if (node.id.type !== "Identifier") return;
+				if (!isIdentifierName(node.id)) return;
 				const idName = node.id.name;
 				if (!isTrueObjectExpression(node.init)) return;
 

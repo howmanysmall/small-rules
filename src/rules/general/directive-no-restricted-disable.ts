@@ -12,9 +12,7 @@ const directiveNoRestrictedDisable = createRule("directive-no-restricted-disable
 		if (restrictedRules.length === 0) return {};
 
 		const restrictedRuleMatcher = ignore();
-		for (const restrictedRule of restrictedRules) {
-			restrictedRuleMatcher.add(restrictedRule);
-		}
+		for (const restrictedRule of restrictedRules) restrictedRuleMatcher.add(restrictedRule);
 
 		for (const area of disabledArea.areas) {
 			if (area.ruleId === undefined || restrictedRuleMatcher.ignores(area.ruleId)) {

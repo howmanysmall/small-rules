@@ -3,6 +3,12 @@ import { Predicate } from "effect";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	isIdentifierName,
+	isImportDefaultSpecifier,
+	isImportNamespaceSpecifier,
+	isMemberExpression,
+} from "$oxc-utilities/oxc-utilities";
+import {
 	ENVIRONMENT_SCHEMA,
 	getReactSourcesFromOptions,
 	isReactImportDefinition,
@@ -21,7 +27,7 @@ function isReactNamespaceSource(variable: ScopeVariable | undefined, reactSource
 	for (const definition of variable.defs) {
 		if (!isReactImportDefinition(definition, reactSources)) continue;
 		/* v8 ignore next -- React namespace checks only reach default or namespace import definitions. @preserve */
-		if (definition.node.type === "ImportDefaultSpecifier" || definition.node.type === "ImportNamespaceSpecifier") {
+		if (isImportDefaultSpecifier(definition.node) || isImportNamespaceSpecifier(definition.node)) {
 			return true;
 		}
 	}
@@ -48,12 +54,11 @@ const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react"
 		return {
 			CallExpression(node): void {
 				const { callee } = node;
-				if (callee.type !== "MemberExpression" || callee.computed) return;
-				if (callee.object.type !== "Identifier" || callee.property.type !== "Identifier") return;
+				if (!isMemberExpression(callee) || callee.computed) return;
+				if (!isIdentifierName(callee.object) || !isIdentifierName(callee.property)) return;
 
 				const propertyName = callee.property.name;
-				if (!HOOK_NAME_PATTERN.test(propertyName)) return;
-				if (allowedHooks.has(propertyName)) return;
+				if (!HOOK_NAME_PATTERN.test(propertyName) || allowedHooks.has(propertyName)) return;
 
 				const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
 				if (!isReactNamespaceSource(variable, reactSources)) return;

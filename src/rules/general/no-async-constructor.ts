@@ -1,6 +1,5 @@
-import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
+import { isCallbackFunction, unwrapExpression } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";

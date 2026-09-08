@@ -10,9 +10,7 @@ const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable",
 			if (directive === undefined) continue;
 
 			const { kind } = directive;
-			if (!isDisableDirectiveKind(kind)) {
-				continue;
-			}
+			if (!isDisableDirectiveKind(kind)) continue;
 			if (directive.value === undefined || directive.value === "") {
 				context.report({
 					data: { kind },

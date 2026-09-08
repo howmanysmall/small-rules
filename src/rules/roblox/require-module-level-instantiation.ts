@@ -3,6 +3,12 @@ import { type } from "arktype";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isIdentifierName,
+	isImportDefaultSpecifier,
+	isImportSpecifier,
+	isMemberExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -33,11 +39,11 @@ function isModuleScope(scope: null | Scope): boolean {
 	return scope?.type === "module" || scope?.type === "global";
 }
 
-function getImportedClassName(specifier: ESTree.ImportDeclaration["specifiers"][number]): string | undefined {
-	if (specifier.type === "ImportDefaultSpecifier") return specifier.local.name;
+function getImportedClassName(specifier: ESTree.ImportDeclarationSpecifier): string | undefined {
+	if (isImportDefaultSpecifier(specifier)) return specifier.local.name;
 
-	if (specifier.type !== "ImportSpecifier") return undefined;
-	if (specifier.imported.type === "Identifier") return specifier.imported.name;
+	if (!isImportSpecifier(specifier)) return undefined;
+	if (isIdentifierName(specifier.imported)) return specifier.imported.name;
 	/* v8 ignore start -- @preserve TypeScript import specifiers provide identifier imported names here. */
 	if (Predicate.isString(specifier.imported.value)) return specifier.imported.value;
 	return undefined;
@@ -49,7 +55,7 @@ function getTrackedInstantiation(
 	localBindings: ReadonlyMap<string, string>,
 	trackedClasses: ReadonlyMap<string, string>,
 ): TrackedInstantiation | undefined {
-	if (node.callee.type === "Identifier") {
+	if (isIdentifierName(node.callee)) {
 		const className = localBindings.get(node.callee.name);
 		if (className === undefined) return undefined;
 
@@ -61,7 +67,7 @@ function getTrackedInstantiation(
 		return { className, importSource };
 	}
 
-	if (node.callee.type === "MemberExpression" && node.callee.property.type === "Identifier") {
+	if (isMemberExpression(node.callee) && isIdentifierName(node.callee.property)) {
 		const className = node.callee.property.name;
 		const importSource = trackedClasses.get(className);
 		if (importSource === undefined) return undefined;

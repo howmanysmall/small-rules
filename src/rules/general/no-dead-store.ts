@@ -1,5 +1,35 @@
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isAnyFunction,
+	isAnyLiteral,
+	isArrayExpression,
+	isArrowFunctionExpression,
+	isAssignmentExpression,
+	isAssignmentPattern,
+	isBindingIdentifier,
+	isBlockStatement,
+	isBreakStatement,
+	isConditionalExpression,
+	isContinueStatement,
+	isFunctionDeclaration,
+	isFunctionExpression,
+	isIfStatement,
+	isLogicalExpression,
+	isLoopNode,
+	isObjectExpression,
+	isObjectPattern,
+	isProgram,
+	isRestElement,
+	isReturnStatement,
+	isSwitchCase,
+	isSwitchStatement,
+	isThrowStatement,
+	isTryStatement,
+	isUnaryExpression,
+	isUpdateExpression,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -17,17 +47,9 @@ interface VariableUsage {
 	readonly writeExpression: ESTree.Expression | undefined;
 }
 
-const LOOP_STATEMENT_TYPES = new Set([
-	"DoWhileStatement",
-	"ForInStatement",
-	"ForOfStatement",
-	"ForStatement",
-	"WhileStatement",
-]);
-
 function statementTransfersControl(node: ESTree.Node): boolean {
 	let current = node;
-	while (current.type === "BlockStatement") {
+	while (isBlockStatement(current)) {
 		/* v8 ignore next -- @preserve callers only inspect non-empty consequent blocks. */
 		const last = current.body.at(-1);
 		/* v8 ignore next -- @preserve non-empty consequent blocks always have a final statement. */
@@ -35,30 +57,24 @@ function statementTransfersControl(node: ESTree.Node): boolean {
 		current = last;
 	}
 	return (
-		current.type === "BreakStatement" ||
-		current.type === "ContinueStatement" ||
-		current.type === "ReturnStatement" ||
-		current.type === "ThrowStatement"
+		isBreakStatement(current) ||
+		isContinueStatement(current) ||
+		isReturnStatement(current) ||
+		isThrowStatement(current)
 	);
 }
 
 function executionRoot(node: ESTree.Node): ESTree.Node {
 	let current = node;
 	while (current.parent !== null) {
-		if (
-			current.type === "ArrowFunctionExpression" ||
-			current.type === "FunctionDeclaration" ||
-			current.type === "FunctionExpression"
-		) {
-			return current;
-		}
+		if (isAnyFunction(current)) return current;
 		current = current.parent;
 	}
 	return current;
 }
 
 function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
-	if (parent.type === "IfStatement") {
+	if (isIfStatement(parent)) {
 		if (parent.consequent === current) {
 			return {
 				arm: "then",
@@ -67,7 +83,7 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 			};
 		}
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
-	} else if (parent.type === "ConditionalExpression") {
+	} else if (isConditionalExpression(parent)) {
 		if (parent.consequent === current) return { arm: "then", complete: true, control: parent };
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	}
@@ -75,17 +91,16 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 }
 
 function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
-	if (parent.type !== "BlockStatement" && parent.type !== "SwitchCase") return [];
-	const siblings: ReadonlyArray<ESTree.Node> = parent.type === "BlockStatement" ? parent.body : parent.consequent;
+	const blockStatement = isBlockStatement(parent);
+	if (!blockStatement && !isSwitchCase(parent)) return [];
+
+	const siblings: ReadonlyArray<ESTree.Node> = blockStatement ? parent.body : parent.consequent;
 	const index = siblings.indexOf(current);
 	if (index <= 0) return [];
-	const steps: Array<BranchStep> = [];
+
+	const steps = new Array<BranchStep>();
 	for (const sibling of siblings.slice(0, index)) {
-		if (
-			sibling.type === "IfStatement" &&
-			sibling.alternate === null &&
-			statementTransfersControl(sibling.consequent)
-		) {
+		if (isIfStatement(sibling) && sibling.alternate === null && statementTransfersControl(sibling.consequent)) {
 			steps.push({ arm: "else", complete: true, control: sibling });
 		}
 	}
@@ -95,16 +110,16 @@ function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyA
 function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
 	const conditionalStep = conditionalBranchStep(current, parent);
 	if (conditionalStep !== undefined) return conditionalStep;
-	if (parent.type === "LogicalExpression" && parent.right === current) {
+	if (isLogicalExpression(parent) && parent.right === current) {
 		return { arm: "right", complete: false, control: parent };
 	}
-	if (LOOP_STATEMENT_TYPES.has(parent.type) && "body" in parent && parent.body === current) {
-		return { arm: "body", complete: false, control: parent };
-	}
-	if (current.type === "SwitchCase" && parent.type === "SwitchStatement") {
+	if (isLoopNode(parent) && parent.body === current) return { arm: "body", complete: false, control: parent };
+
+	if (isSwitchCase(current) && isSwitchStatement(parent)) {
 		return { arm: `case:${current.range[0]}`, complete: false, control: parent };
 	}
-	if (parent.type === "TryStatement") {
+
+	if (isTryStatement(parent)) {
 		if (parent.block === current) return { arm: "try", complete: false, control: parent };
 		if (parent.handler === current) return { arm: "catch", complete: false, control: parent };
 	}
@@ -112,7 +127,7 @@ function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | und
 }
 
 function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchStep> {
-	const path: Array<BranchStep> = [];
+	const path = new Array<BranchStep>();
 	let current = node;
 	while (current !== root && current.parent !== null) {
 		const step = branchStep(current, current.parent);
@@ -137,7 +152,7 @@ function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 
 function assignmentReadsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const { parent } = write.node;
-	if (parent.type !== "AssignmentExpression") return false;
+	if (!isAssignmentExpression(parent)) return false;
 	// Compound assignments (+=, -=, etc.) always read the previous value of the
 	// left-hand side, even when the right-hand side doesn't reference the
 	// variable.
@@ -222,15 +237,15 @@ function usageObservesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<
 }
 
 function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
-	const loops: Array<ESTree.Node> = [];
+	const loops = new Array<ESTree.Node>();
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
-		if (LOOP_STATEMENT_TYPES.has(current.type)) loops.push(current);
+		if (isLoopNode(current)) loops.push(current);
 		else if (
-			current.type === "Program" ||
-			current.type === "ArrowFunctionExpression" ||
-			current.type === "FunctionDeclaration" ||
-			current.type === "FunctionExpression"
+			isProgram(current) ||
+			isArrowFunctionExpression(current) ||
+			isFunctionDeclaration(current) ||
+			isFunctionExpression(current)
 		) {
 			break;
 		}
@@ -246,10 +261,10 @@ function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): bool
 	while (current !== null) {
 		for (const loop of writeLoops) if (loop === current) return true;
 		if (
-			current.type === "Program" ||
-			current.type === "ArrowFunctionExpression" ||
-			current.type === "FunctionDeclaration" ||
-			current.type === "FunctionExpression"
+			isProgram(current) ||
+			isArrowFunctionExpression(current) ||
+			isFunctionDeclaration(current) ||
+			isFunctionExpression(current)
 		) {
 			break;
 		}
@@ -282,8 +297,8 @@ function checkObservation(
 		if (usage.isWrite && isGuaranteedOverwrite(referencePath, currentPath, coveredPaths)) return false;
 		return undefined;
 	}
-	if (isReadAcrossLoop(usage, write, root)) return true;
-	return undefined;
+
+	return isReadAcrossLoop(usage, write, root) ? true : undefined;
 }
 
 function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
@@ -300,7 +315,7 @@ function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsa
 }
 
 function isBasicInitializer(node: ESTree.Expression): boolean {
-	if (node.type === "Literal") {
+	if (isAnyLiteral(node)) {
 		return (
 			node.value === null ||
 			node.value === false ||
@@ -311,22 +326,17 @@ function isBasicInitializer(node: ESTree.Expression): boolean {
 			node.value === 1
 		);
 	}
-	if (node.type === "Identifier") return node.name === "undefined";
-	if (node.type === "ArrayExpression") return node.elements.length === 0;
-	if (node.type === "ObjectExpression") return node.properties.length === 0;
-	if (node.type === "UnaryExpression") return node.operator === "void" || isBasicInitializer(node.argument);
+	if (isBindingIdentifier(node)) return node.name === "undefined";
+	if (isArrayExpression(node)) return node.elements.length === 0;
+	if (isObjectExpression(node)) return node.properties.length === 0;
+	if (isUnaryExpression(node)) return node.operator === "void" || isBasicInitializer(node.argument);
 	return false;
 }
 
 function destructuringHasRest(node: ESTree.Node): boolean {
 	let current = node;
-	while (current.parent !== null && current.parent.type !== "VariableDeclarator") {
-		if (
-			current.parent.type === "ObjectPattern" &&
-			current.parent.properties.some((property) => property.type === "RestElement")
-		) {
-			return true;
-		}
+	while (current.parent !== null && !isVariableDeclarator(current.parent)) {
+		if (isObjectPattern(current.parent) && current.parent.properties.some(isRestElement)) return true;
 		current = current.parent;
 	}
 	return false;
@@ -340,7 +350,7 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 	let current: ESTree.Node = usage.node;
 	while (current.parent !== null) {
 		const parent: ESTree.Node = current.parent;
-		if (parent.type === "TryStatement" && parent.block === current) {
+		if (isTryStatement(parent) && parent.block === current) {
 			const handlers = [parent.handler?.body, parent.finalizer].filter(
 				(node): node is ESTree.BlockStatement => node !== null && node !== undefined,
 			);
@@ -360,14 +370,19 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 }
 
 function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
-	if (!usage.isWrite || variable.scope.block.type === "Program" || variable.name.startsWith("_")) return false;
+	if (!usage.isWrite || isProgram(variable.scope.block) || variable.name.startsWith("_")) return false;
+
 	const { parent } = usage.node;
-	if (parent.type === "AssignmentPattern" || parent.type === "UpdateExpression") return false;
-	if (parent.type === "AssignmentExpression" && parent.right.type === "Literal" && parent.right.value === null) {
+	if (
+		isAssignmentPattern(parent) ||
+		isUpdateExpression(parent) ||
+		(isAssignmentExpression(parent) && isAnyLiteral(parent.right) && parent.right.value === null) ||
+		destructuringHasRest(usage.node) ||
+		(usage.init && usage.writeExpression !== undefined && isBasicInitializer(usage.writeExpression))
+	) {
 		return false;
 	}
-	if (destructuringHasRest(usage.node)) return false;
-	if (usage.init && usage.writeExpression !== undefined && isBasicInitializer(usage.writeExpression)) return false;
+
 	return !isTryWriteReadByHandler(usage, variable);
 }
 
@@ -388,7 +403,7 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 	for (const definition of variable.defs) {
 		if (
 			definition.type !== "Variable" ||
-			definition.node.type !== "VariableDeclarator" ||
+			!isVariableDeclarator(definition.node) ||
 			definition.node.init === null ||
 			usages.some((usage) => usage.node.range[0] === definition.name.range[0])
 		) {
@@ -411,6 +426,7 @@ const noDeadStore = createRule("no-dead-store", "general", {
 			Program(): void {
 				forEachScopeVariable(context.sourceCode, (variable): void => {
 					if (isCaptured(variable)) return;
+
 					const usages = getVariableUsages(variable);
 					for (const usage of usages) {
 						if (!shouldCheck(usage, variable) || valueIsObserved(usage, usages)) continue;

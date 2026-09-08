@@ -42,7 +42,6 @@ function reportAdjustStateEffect(
 
 		// Avoid overlap with no-derived-state
 		const isSomeArgumentsProperties = analysis.scope.getArgumentUpstreamReferences(reference).some(analysis.isProp);
-
 		if (isSomeArgumentsProperties) continue;
 
 		const stateName = analysis.getStateName(reference);

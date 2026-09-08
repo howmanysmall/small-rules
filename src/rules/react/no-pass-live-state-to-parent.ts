@@ -15,9 +15,7 @@ function getComponentDisplayName(
 ): string {
 	const name = analysis.getComponentName(containingNode);
 	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
-	if (name !== undefined && name !== "") {
-		return `"${name}"`;
-	}
+	if (name !== undefined && name.length > 0) return `"${name}"`;
 	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
 	return isInCustomHook ? "this custom hook" : "this component";
 }
@@ -30,13 +28,11 @@ function reportPassLiveStateEffect(context: RuleContext, analysis: ReactEffectAn
 	for (const reference of effect.functionReferences) {
 		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
 		if (!analysis.isPropCall(reference)) continue;
+
 		const callExpression = analysis.scope.getCallExpression(reference);
 		if (callExpression === undefined) continue;
 
-		const stateReferences = analysis.scope
-			.getArgumentUpstreamReferences(reference)
-			.filter((upstreamReference) => analysis.isState(upstreamReference));
-
+		const stateReferences = analysis.scope.getArgumentUpstreamReferences(reference).filter(analysis.isState);
 		if (stateReferences.length === 0) continue;
 
 		const containingNode = analysis.findEnclosingReactNode(effect.node);

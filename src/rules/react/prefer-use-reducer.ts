@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment, isHookCall } from "$oxc-utilities/lint-utilities";
+import { isBlockStatement, isVariableDeclaration } from "$oxc-utilities/oxc-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -7,12 +8,12 @@ import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilit
 const RELATED_USE_STATE_THRESHOLD = 5;
 type Context = InferContextFromRule<typeof preferUseReducer>;
 
-function reportExcessiveUseState(context: Context, esTreeNode: ESTree.Node, componentName: string): void {
+function reportExcessiveUseState(context: Context, node: ESTree.Node, componentName: string): void {
 	/* v8 ignore next -- @preserve rule visitors call this helper only with function block bodies. */
-	if (esTreeNode.type !== "BlockStatement") return;
+	if (!isBlockStatement(node)) return;
 	let useStateCount = 0;
-	for (const statement of esTreeNode.body) {
-		if (statement.type !== "VariableDeclaration") continue;
+	for (const statement of node.body) {
+		if (!isVariableDeclaration(statement)) continue;
 		for (const declarator of statement.declarations) {
 			if (isHookCall(declarator.init, "useState")) useStateCount += 1;
 		}
@@ -22,7 +23,7 @@ function reportExcessiveUseState(context: Context, esTreeNode: ESTree.Node, comp
 	context.report({
 		data: { componentName, useStateCount: String(useStateCount) },
 		messageId: "excessiveUseState",
-		node: esTreeNode,
+		node,
 	});
 }
 

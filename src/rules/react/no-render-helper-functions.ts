@@ -1,26 +1,44 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
+import {
+	CHAIN_EXPRESSION,
+	getTypeAnnotationFromBinding,
+	isArrowFunctionExpression,
+	isFunctionDeclaration,
+	isFunctionExpression,
+	isIdentifierName,
+	isJsxElement,
+	isJsxFragment,
+	isReturnStatement,
+	isTsQualifiedName,
+	isTsTypeReference,
+	isVariableDeclarator,
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+} from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const REACT_NODE_TYPE_NAMES = new Set(["JSXElement", "ReactElement", "ReactNode"]);
 const WRAPPER_PARENT_TYPES = new Set([
-	"ChainExpression",
-	"ParenthesizedExpression",
-	"TSAsExpression",
-	"TSInstantiationExpression",
-	"TSNonNullExpression",
-	"TSSatisfiesExpression",
-	"TSTypeAssertion",
+	CHAIN_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
 ]);
 
 const HOOK_PATTERN = /^use[A-Z]/u;
 
-type ScopeVariable = ReturnType<SourceCode["getDeclaredVariables"]>[number];
 type WrapperParent =
 	| ESTree.ChainExpression
 	| ESTree.ParenthesizedExpression
@@ -35,12 +53,12 @@ function isHookName(name: string): boolean {
 }
 
 function isReactNodeTypeAnnotation(node?: ESTree.TSType): boolean {
-	if (node?.type !== "TSTypeReference") return false;
+	if (!isTsTypeReference(node)) return false;
 
 	const { typeName } = node;
-	if (typeName.type === "Identifier") return REACT_NODE_TYPE_NAMES.has(typeName.name);
+	if (isIdentifierName(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.name);
 	/* v8 ignore next -- @preserve TSTypeReference type names are identifiers or qualified names in parser output. */
-	if (typeName.type === "TSQualifiedName") return REACT_NODE_TYPE_NAMES.has(typeName.right.name);
+	if (isTsQualifiedName(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.right.name);
 
 	/* v8 ignore next -- @preserve TSTypeReference type names are identifiers or qualified names in parser output. */
 	return false;
@@ -51,12 +69,7 @@ function getReturnTypeAnnotation({ returnType }: CallbackFunction): ESTree.TSTyp
 }
 
 function hasJsxReturn(node: CallbackFunction): boolean {
-	if (
-		node.type === "ArrowFunctionExpression" &&
-		(node.body.type === "JSXElement" || node.body.type === "JSXFragment")
-	) {
-		return true;
-	}
+	if (isArrowFunctionExpression(node) && (isJsxElement(node.body) || isJsxFragment(node.body))) return true;
 
 	/* v8 ignore next -- @preserve declared function overloads have no runtime body and are not visited as callbacks. */
 	if (node.body === null) return false;
@@ -64,8 +77,7 @@ function hasJsxReturn(node: CallbackFunction): boolean {
 	let foundJsx = false;
 
 	walkAstSlop(node.body, (child) => {
-		if (foundJsx) return;
-		if (child.type !== "ReturnStatement") return;
+		if (foundJsx || !isReturnStatement(child)) return;
 
 		const { argument } = child;
 		if (argument !== null && (argument.type === "JSXElement" || argument.type === "JSXFragment")) foundJsx = true;
@@ -136,8 +148,8 @@ function isWrapperParent(node: ESTree.Node): node is WrapperParent {
 	return WRAPPER_PARENT_TYPES.has(node.type);
 }
 
-function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunction): ScopeVariable | undefined {
-	if (node.type === "FunctionDeclaration") {
+function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunction): undefined | Variable {
+	if (isFunctionDeclaration(node)) {
 		const declared = sourceCode.getDeclaredVariables(node);
 		/* v8 ignore next -- @preserve named function declarations always declare one function variable. */
 		return declared.length > 0 ? declared[0] : undefined;
@@ -145,7 +157,7 @@ function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunct
 
 	const { parent } = node;
 	/* v8 ignore next -- @preserve non-declaration callbacks reach this helper only from variable declarators. */
-	if (parent.type !== "VariableDeclarator") return undefined;
+	if (!isVariableDeclarator(parent)) return undefined;
 
 	const declared = sourceCode.getDeclaredVariables(parent);
 	/* v8 ignore next -- @preserve identifier variable declarators always declare one variable. */
@@ -193,8 +205,7 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 
 		function checkVariableDeclaratorExit(node: CallbackFunction, parent: ESTree.VariableDeclarator): void {
 			const variableName = getBindingIdentifierName(parent.id);
-			if (shouldSkipVariableName(variableName)) return;
-			if (isCallbackReferenceFunction(node, context.sourceCode)) return;
+			if (shouldSkipVariableName(variableName) || isCallbackReferenceFunction(node, context.sourceCode)) return;
 
 			const typeAnnotation = getTypeAnnotationFromBinding(parent.id);
 			const hasReactNodeAnnotation =
@@ -209,7 +220,7 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 		}
 
 		function checkReturnStatementExit(node: CallbackFunction): void {
-			const variableName = node.type === "FunctionExpression" ? node.id?.name : undefined;
+			const variableName = isFunctionExpression(node) ? node.id?.name : undefined;
 			if (shouldSkipVariableName(variableName)) return;
 
 			const returnTypeAnnotation = getReturnTypeAnnotation(node);
@@ -231,14 +242,12 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 
 			if (componentDepth > 0 || isInlineCallback(node)) return;
 
-			if (parent.type === "VariableDeclarator") {
+			if (isVariableDeclarator(parent)) {
 				checkVariableDeclaratorExit(node, parent);
 				return;
 			}
 
-			if (parent.type === "ReturnStatement") {
-				checkReturnStatementExit(node);
-			}
+			if (isReturnStatement(parent)) checkReturnStatementExit(node);
 		}
 
 		return {

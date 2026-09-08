@@ -3,6 +3,15 @@ import { Predicate } from "effect";
 import { parse } from "yuku-parser";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isBindingIdentifier,
+	isExpressionStatement,
+	isReturnStatement,
+	isSequenceExpression,
+	isThrowStatement,
+	isUnaryExpression,
+	LITERAL,
+} from "$oxc-utilities/oxc-utilities";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
 
@@ -102,17 +111,17 @@ function couldBeJsCode(input: string): boolean {
 }
 
 function isReturnOrThrowExclusion(statement: ESTree.Statement): boolean {
-	if (statement.type !== "ReturnStatement" && statement.type !== "ThrowStatement") return false;
-	return statement.argument?.type === "Identifier";
+	if (!isReturnStatement(statement) && !isThrowStatement(statement)) return false;
+	return isBindingIdentifier(statement.argument);
 }
 
 function isUnaryPlusMinus(expression: ESTree.Expression): boolean {
-	return expression.type === "UnaryExpression" && (expression.operator === "-" || expression.operator === "+");
+	return isUnaryExpression(expression) && (expression.operator === "-" || expression.operator === "+");
 }
 
-function isExcludedLiteral(expression: { type: string; value?: unknown }): boolean {
+function isExcludedLiteral(expression: ESTree.Node): boolean {
 	return (
-		expression.type === "Literal" && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value))
+		expression.type === LITERAL && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value))
 	);
 }
 
@@ -129,12 +138,12 @@ function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.
 }
 
 function isExpressionExclusion(statement: ESTree.Statement, codeText: string): boolean {
-	if (statement.type !== "ExpressionStatement") return false;
+	if (!isExpressionStatement(statement)) return false;
 
 	const { expression } = statement;
 	return (
-		expression.type === "Identifier" ||
-		expression.type === "SequenceExpression" ||
+		isBindingIdentifier(expression) ||
+		isSequenceExpression(expression) ||
 		isUnaryPlusMinus(expression) ||
 		isExcludedLiteral(expression) ||
 		!codeText.trimEnd().endsWith(";")

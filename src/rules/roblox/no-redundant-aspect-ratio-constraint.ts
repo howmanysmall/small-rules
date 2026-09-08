@@ -1,44 +1,56 @@
 import { readFileSync } from "node:fs";
 import { Predicate } from "effect";
 
-import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction } from "$oxc-utilities/oxc-utilities";
+import {
+	isAnyLiteral,
+	isBlockStatement,
+	isCallbackFunction,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isImportDeclaration,
+	isJsxAttribute,
+	isJsxElement,
+	isJsxExpressionContainer,
+	isJsxFragment,
+	isJsxIdentifier,
+	isReturnStatement,
+	isVariableDeclarator,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";
 
-import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 
 const REDUNDANT_ELEMENT_NAME = "uiaspectratioconstraint";
 const REDUNDANT_CONSTANT_NAME = "UI_ASPECT_RATIO_CONSTRAINT";
 
 const KNOWN_COMPONENTS = new Set(["ButtonSpritesheet", "GenericSpritesheet", "LabelSpritesheet"]);
 
-type ScopeVariable = Scope["set"] extends Map<string, infer VariableType> ? VariableType : never;
-
 function getJSXElementName({ openingElement }: ESTree.JSXElement): string | undefined {
 	const { name } = openingElement;
-	return name.type === "JSXIdentifier" ? name.name : undefined;
+	return isJsxIdentifier(name) ? name.name : undefined;
 }
 
 function hasAspectRatioConstraintInSubtree(node: ESTree.Node): boolean {
 	let found = false;
 	walkAst(node, (child) => {
 		if (found) return;
-		if (child.type === "JSXElement" && getJSXElementName(child) === REDUNDANT_ELEMENT_NAME) found = true;
+		if (isJsxElement(child) && getJSXElementName(child) === REDUNDANT_ELEMENT_NAME) found = true;
 	});
 	return found;
 }
 
 function getFunctionComponentName(node: ESTree.Node): string | undefined {
-	if (node.type === "FunctionDeclaration") return node.id?.name;
+	if (isFunctionDeclarationRaw(node)) return node.id?.name;
 
 	/* v8 ignore next -- @preserve only named declarations and assigned function expressions are inspected as components. */
 	if (isCallbackFunction(node)) {
 		const { parent } = node;
 		/* v8 ignore next -- @preserve assigned function components have identifier variable declarator parents. */
-		if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
+		if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
 	}
 
 	/* v8 ignore next -- @preserve only named function declarations and assigned arrow functions can reach this helper. */
@@ -46,18 +58,17 @@ function getFunctionComponentName(node: ESTree.Node): string | undefined {
 }
 
 function getArrowExpressionBody(node: ESTree.ArrowFunctionExpression): ESTree.Expression | undefined {
-	if (node.body.type === "BlockStatement") return undefined;
-	return unwrapExpression(node.body);
+	return isBlockStatement(node.body) ? undefined : unwrapExpression(node.body);
 }
 
-function getImportSourceFromVariable(variable: ScopeVariable): string | undefined {
+function getImportSourceFromVariable(variable: Variable): string | undefined {
 	for (const definition of variable.defs) {
 		/* v8 ignore start -- @preserve imported component variables only carry import binding definitions here. */
 		if (definition.type !== "ImportBinding") continue;
 		/* v8 ignore stop -- @preserve */
 		const { parent } = definition.node;
 		/* v8 ignore start -- @preserve import binding definitions have ImportDeclaration parents. */
-		if (parent?.type === "ImportDeclaration" && Predicate.isString(parent.source.value)) return parent.source.value;
+		if (isImportDeclaration(parent) && Predicate.isString(parent.source.value)) return parent.source.value;
 		/* v8 ignore stop -- @preserve */
 	}
 
@@ -91,17 +102,13 @@ function importedFileHasConstraint(importSource: string, sourceFile: string): bo
 
 function hasScaledFalseAttribute(node: ESTree.JSXElement): boolean {
 	for (const attribute of node.openingElement.attributes) {
-		if (
-			attribute.type !== "JSXAttribute" ||
-			attribute.name.type !== "JSXIdentifier" ||
-			attribute.name.name !== "scaled"
-		) {
+		if (!isJsxAttribute(attribute) || !isJsxIdentifier(attribute.name) || attribute.name.name !== "scaled") {
 			continue;
 		}
 
 		if (
-			attribute.value?.type === "JSXExpressionContainer" &&
-			attribute.value.expression.type === "Literal" &&
+			isJsxExpressionContainer(attribute.value) &&
+			isAnyLiteral(attribute.value.expression) &&
 			attribute.value.expression.value === false
 		) {
 			return true;
@@ -112,8 +119,8 @@ function hasScaledFalseAttribute(node: ESTree.JSXElement): boolean {
 }
 
 function isRedundantAspectRatioChild(node: ESTree.JSXChild): boolean {
-	if (node.type === "JSXElement") return getJSXElementName(node) === REDUNDANT_ELEMENT_NAME;
-	if (node.type === "JSXExpressionContainer" && node.expression.type === "Identifier") {
+	if (isJsxElement(node)) return getJSXElementName(node) === REDUNDANT_ELEMENT_NAME;
+	if (isJsxExpressionContainer(node) && isIdentifierName(node.expression)) {
 		return node.expression.name === REDUNDANT_CONSTANT_NAME;
 	}
 
@@ -150,11 +157,7 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 			ArrowFunctionExpression(node): void {
 				const name = getFunctionComponentName(node);
 				const body = getArrowExpressionBody(node);
-				if (
-					name === undefined ||
-					body === undefined ||
-					(body.type !== "JSXElement" && body.type !== "JSXFragment")
-				) {
+				if (name === undefined || body === undefined || (!isJsxElement(body) && !isJsxFragment(body))) {
 					return;
 				}
 
@@ -167,7 +170,7 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 				if (name === undefined || node.body?.body.length !== 1) return;
 
 				const [statement] = node.body.body;
-				if (statement?.type !== "ReturnStatement" || statement.argument === null) return;
+				if (!isReturnStatement(statement) || statement.argument === null) return;
 
 				const hasConstraint = hasAspectRatioConstraintInSubtree(statement.argument);
 				if (hasConstraint) protectedComponents.add(name);

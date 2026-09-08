@@ -8,7 +8,17 @@ import {
 	isMemberExpression,
 	isObjectExpression,
 	isStringLiteral,
+	isTsAsExpression,
+	isTsImportType,
+	isTsIndexedAccessType,
+	isTsInterfaceDeclaration,
+	isTsIntersectionType,
 	isTsQualifiedName,
+	isTsSatisfiesExpression,
+	isTsTypeAliasDeclaration,
+	isTsTypeAssertion,
+	isTsTypeReference,
+	isTsUnionType,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { isObjectPropertyKey } from "$oxc-utilities/prevent-abbreviations/scope";
@@ -33,9 +43,9 @@ function isExternalPackageImport(definition: Definition | undefined): boolean {
 
 function getRootTypeName(typeName: ESTree.TSTypeName): ESTree.IdentifierReference | undefined {
 	let current = typeName;
-	while (current.type === "TSQualifiedName") current = current.left;
+	while (isTsQualifiedName(current)) current = current.left;
 	/* v8 ignore next -- @preserve TSTypeReference cannot use a this expression as its type name in parsed source. */
-	return current.type === "Identifier" ? current : undefined;
+	return isIdentifierName(current) ? current : undefined;
 }
 
 function isExternalType(typeAnnotation: ESTree.TSType, sourceCode: SourceCode): boolean {
@@ -48,10 +58,10 @@ function isExternalTypeNode(
 	visitedDeclarations: Set<object>,
 ): boolean {
 	let current = typeAnnotation;
-	while (current.type === "TSIndexedAccessType") current = current.objectType;
+	while (isTsIndexedAccessType(current)) current = current.objectType;
 
-	if (current.type === "TSImportType") return isExternalModuleSpecifier(current.source.value);
-	if (current.type === "TSTypeReference") {
+	if (isTsImportType(current)) return isExternalModuleSpecifier(current.source.value);
+	if (isTsTypeReference(current)) {
 		const rootTypeName = getRootTypeName(current.typeName);
 		/* v8 ignore next -- @preserve parsed TSTypeReference names always resolve to an identifier root. */
 		if (rootTypeName === undefined) return false;
@@ -64,7 +74,7 @@ function isExternalTypeNode(
 			visitedDeclarations,
 		);
 	}
-	if (current.type === "TSUnionType" || current.type === "TSIntersectionType") {
+	if (isTsUnionType(current) || isTsIntersectionType(current)) {
 		return current.types.some((member) => isExternalTypeNode(member, sourceCode, visitedDeclarations));
 	}
 
@@ -87,12 +97,12 @@ function isExternalNamedType(
 	}
 
 	const declaration = definition.node;
-	if (declaration.type === "TSTypeAliasDeclaration") {
+	if (isTsTypeAliasDeclaration(declaration)) {
 		if (visitedDeclarations.has(declaration)) return false;
 		visitedDeclarations.add(declaration);
 		return isExternalTypeNode(declaration.typeAnnotation, sourceCode, visitedDeclarations);
 	}
-	if (declaration.type === "TSInterfaceDeclaration") {
+	if (isTsInterfaceDeclaration(declaration)) {
 		return declaration.extends.some((heritage) =>
 			isExternalInterfaceHeritage(heritage, sourceCode, visitedDeclarations),
 		);
@@ -125,9 +135,7 @@ function getContextualType(objectExpression: ESTree.ObjectExpression): ESTree.TS
 		return getTypeAnnotationFromBinding(parent.id)?.typeAnnotation;
 	}
 	if (
-		(parent.type === "TSAsExpression" ||
-			parent.type === "TSSatisfiesExpression" ||
-			parent.type === "TSTypeAssertion") &&
+		(isTsAsExpression(parent) || isTsSatisfiesExpression(parent) || isTsTypeAssertion(parent)) &&
 		parent.expression === objectExpression
 	) {
 		return parent.typeAnnotation;

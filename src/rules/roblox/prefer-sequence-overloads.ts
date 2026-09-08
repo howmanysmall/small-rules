@@ -1,5 +1,12 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isNamedGlobalCall, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import {
+	isArrayExpression,
+	isIdentifierName,
+	isNamedGlobalCall,
+	isNewExpression,
+	isNumericLiteral,
+	isSpreadElement,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -14,15 +21,14 @@ function getSequenceKeypointName(sequenceName: string): string | undefined {
 }
 
 function getKeypointValue(node: ESTree.Expression, keypointName: string, time: number): ESTree.Expression | undefined {
-	if (node.type !== "NewExpression") return undefined;
-	if (!isNamedGlobalCall(node, keypointName)) return undefined;
+	if (!isNewExpression(node) || !isNamedGlobalCall(node, keypointName)) return undefined;
 	if (node.arguments.length !== 2) return undefined;
 
 	const [timeArgument, valueArgument] = node.arguments;
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (timeArgument === undefined || timeArgument.type === "SpreadElement") return undefined;
+	if (timeArgument === undefined || isSpreadElement(timeArgument)) return undefined;
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (valueArgument === undefined || valueArgument.type === "SpreadElement") return undefined;
+	if (valueArgument === undefined || isSpreadElement(valueArgument)) return undefined;
 	return isNumericLiteralValue(timeArgument, time) ? valueArgument : undefined;
 }
 
@@ -40,9 +46,9 @@ function getDirectArgumentReplacement(
 
 	const [firstArgument, secondArgument] = node.arguments;
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (firstArgument === undefined || firstArgument.type === "SpreadElement") return undefined;
+	if (firstArgument === undefined || isSpreadElement(firstArgument)) return undefined;
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
-	if (secondArgument === undefined || secondArgument.type === "SpreadElement") return undefined;
+	if (secondArgument === undefined || isSpreadElement(secondArgument)) return undefined;
 
 	const firstText = context.sourceCode.getText(firstArgument);
 	const secondText = context.sourceCode.getText(secondArgument);
@@ -63,14 +69,14 @@ function getKeypointArrayReplacement(
 	if (node.arguments.length !== 1) return undefined;
 
 	const [onlyArgument] = node.arguments;
-	if (onlyArgument === undefined || onlyArgument.type === "SpreadElement") return undefined;
-	if (onlyArgument.type !== "ArrayExpression" || onlyArgument.elements.length !== 2) return undefined;
+	if (onlyArgument === undefined || isSpreadElement(onlyArgument)) return undefined;
+	if (!isArrayExpression(onlyArgument) || onlyArgument.elements.length !== 2) return undefined;
 
 	const [firstElement, secondElement] = onlyArgument.elements;
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (firstElement === undefined || secondElement === undefined) return undefined;
 	if (firstElement === null || secondElement === null) return undefined;
-	if (firstElement.type === "SpreadElement" || secondElement.type === "SpreadElement") return undefined;
+	if (isSpreadElement(firstElement) || isSpreadElement(secondElement)) return undefined;
 
 	const firstValue = getKeypointValue(firstElement, keypointName, 0);
 	const secondValue = getKeypointValue(secondElement, keypointName, 1);
@@ -91,7 +97,7 @@ const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox"
 	createOnce(context): Visitor {
 		return {
 			NewExpression(node): void {
-				if (node.callee.type !== "Identifier") return;
+				if (!isIdentifierName(node.callee)) return;
 
 				const sequenceName = node.callee.name;
 				const keypointName = getSequenceKeypointName(sequenceName);

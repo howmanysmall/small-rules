@@ -1,7 +1,8 @@
 import { Predicate } from "effect";
 
-import { forEachScopeVariable, getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";

@@ -2,6 +2,13 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	IDENTIFIER,
+	isCallExpression,
+	isIdentifierName,
+	isMemberExpression,
+	isSpreadElement,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
@@ -29,11 +36,11 @@ function isLengthOfTwo<TValue>(array: ReadonlyArray<TValue>): array is readonly 
 }
 
 function isStaticMemberExpression(node: ESTree.Expression): node is ESTree.StaticMemberExpression {
-	return node.type === "MemberExpression" && !node.computed;
+	return isMemberExpression(node) && !node.computed;
 }
 
 function isWorldQueryCall(node: ESTree.Node, queryType: QueryType): node is ESTree.CallExpression {
-	if (node.type !== "CallExpression") return false;
+	if (!isCallExpression(node)) return false;
 
 	const { callee } = node;
 	if (!isStaticMemberExpression(callee) || callee.property.name !== queryType || !isLengthOfTwo(node.arguments)) {
@@ -41,7 +48,7 @@ function isWorldQueryCall(node: ESTree.Node, queryType: QueryType): node is ESTr
 	}
 
 	const [entity, component] = node.arguments;
-	return entity.type !== "SpreadElement" && component.type !== "SpreadElement";
+	return !isSpreadElement(entity) && !isSpreadElement(component);
 }
 
 function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: QueryType): undefined | WorldQueryCall {
@@ -52,21 +59,19 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	if (declarator === undefined) return undefined;
 
 	const { id, init } = declarator;
-	if (init === null || id.type !== "Identifier" || !isWorldQueryCall(init, queryType)) return undefined;
+	if (init === null || !isIdentifierName(id) || !isWorldQueryCall(init, queryType)) return undefined;
 
 	const { callee } = init;
 	/* v8 ignore next 3 -- @preserve isWorldQueryCall already narrows the callee to a static member expression. */
-	if (!isStaticMemberExpression(callee)) {
-		return undefined;
-	}
+	if (!isStaticMemberExpression(callee)) return undefined;
 
 	const [entityNode, componentNode] = init.arguments;
 	/* v8 ignore next 8 -- @preserve isWorldQueryCall already requires exactly two non-spread arguments. */
 	if (
 		entityNode === undefined ||
 		componentNode === undefined ||
-		entityNode.type === "SpreadElement" ||
-		componentNode.type === "SpreadElement"
+		isSpreadElement(entityNode) ||
+		isSpreadElement(componentNode)
 	) {
 		return undefined;
 	}
@@ -110,7 +115,7 @@ function isLogicalAndExpression(value: InspectableNode): boolean {
 }
 
 function isIdentifierReference(value: InspectableNode): value is ESTree.IdentifierReference {
-	return Predicate.isObject(value) && value.type === "Identifier" && Predicate.isString(value.name);
+	return Predicate.isObject(value) && value.type === IDENTIFIER && Predicate.isString(value.name);
 }
 
 function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierReference): boolean {

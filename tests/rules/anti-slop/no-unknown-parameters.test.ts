@@ -19,6 +19,18 @@ describe("no-unknown-parameters", () => {
 			{ code: "declare function save(value: unknown): void;", errors: [unknownParameter] },
 			{ code: "function save({ id }: unknown) {}", errors: [unknownParameter] },
 			{
+				code: "function handle(input: string | unknown) {}",
+				errors: [unknownParameter],
+			},
+			{
+				code: "function handle(input: (string | unknown)) {}",
+				errors: [unknownParameter],
+			},
+			{
+				code: "export function parse({ value }: unknown = {}): void {}",
+				errors: [{ data: { parameter: "{ value }" }, messageId: "unknownParameter" }],
+			},
+			{
 				code: "declare function isNode(value: unknown, other: unknown): value is Node;",
 				errors: [{ data: { parameter: "other" }, messageId: "unknownParameter" }],
 			},
@@ -46,6 +58,12 @@ describe("no-unknown-parameters", () => {
 			"function save(cause: unknown = input) {}",
 			"function save(...cause: unknown[]) {}",
 			"type Constructor = new (cause: unknown) => Error;",
+			"function enrich(cause: Error | unknown) {}",
+			"function isString(value: string | unknown): value is string { return true; }",
+			"const isString = (value: string | unknown): value is string => true;",
+			"declare function isString(value: string | unknown): value is string;",
+			"type Guards = { isString(value: string | unknown): value is string };",
+			"function isString(value: string | (number | unknown)): value is string { return true; }",
 			"function handle(input: User) {}",
 			"function save(value) {}",
 			"function save(...values) {}",

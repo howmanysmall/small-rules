@@ -1,7 +1,8 @@
 import { Predicate } from "effect";
 
-import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -26,9 +27,7 @@ function normalizeAdditionalHoistableComponents(rawOptions: Context["options"][0
 
 	const { additionalHoistableComponents } = rawOptions;
 	/* v8 ignore start -- @preserve rule schema rejects non-array additionalHoistableComponents values. */
-	if (!isStringArray(additionalHoistableComponents)) {
-		return new Set();
-	}
+	if (!isStringArray(additionalHoistableComponents)) return new Set();
 	/* v8 ignore stop -- @preserve */
 
 	return new Set(additionalHoistableComponents);
@@ -39,9 +38,7 @@ function normalizeAdditionalStaticFactories(rawOptions: Context["options"][0]): 
 
 	const { additionalStaticFactories } = rawOptions;
 	/* v8 ignore start -- @preserve rule schema rejects non-array additionalStaticFactories values. */
-	if (!isStringArray(additionalStaticFactories)) {
-		return new Set();
-	}
+	if (!isStringArray(additionalStaticFactories)) return new Set();
 	/* v8 ignore stop -- @preserve */
 
 	return new Set(additionalStaticFactories);

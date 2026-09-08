@@ -1,5 +1,20 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isLiteral } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	CALL_EXPRESSION,
+	IDENTIFIER,
+	isAssignmentExpression,
+	isBindingIdentifier,
+	isExpressionStatement,
+	isLiteral,
+	isMemberExpression,
+	isMethodDefinition,
+	isSpreadElement,
+	isThisExpression,
+	LITERAL,
+	MEMBER_EXPRESSION,
+	OBJECT_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -7,7 +22,7 @@ function appendSimpleArrayElements(node: ESTree.ArrayExpression, worklist: Array
 	for (const element of node.elements) {
 		/* v8 ignore next -- @preserve array holes are covered as literal-preserving elements. */
 		if (element === null) continue;
-		if (element.type === "SpreadElement") return false;
+		if (isSpreadElement(element)) return false;
 		worklist.push(element);
 	}
 	return true;
@@ -15,7 +30,7 @@ function appendSimpleArrayElements(node: ESTree.ArrayExpression, worklist: Array
 
 function appendSimpleObjectProperties(node: ESTree.ObjectExpression, worklist: Array<ESTree.Expression>): boolean {
 	for (const property of node.properties) {
-		if (property.type === "SpreadElement" || property.computed) return false;
+		if (isSpreadElement(property) || property.computed) return false;
 		worklist.push(property.value);
 	}
 	return true;
@@ -23,32 +38,28 @@ function appendSimpleObjectProperties(node: ESTree.ObjectExpression, worklist: A
 
 function appendSimpleLiteralChildren(node: ESTree.Expression, worklist: Array<ESTree.Expression>): boolean {
 	switch (node.type) {
-		case "ArrayExpression": {
+		case ARRAY_EXPRESSION:
 			return appendSimpleArrayElements(node, worklist);
-		}
 
-		case "CallExpression": {
-			if (node.callee.type !== "MemberExpression") return false;
+		case CALL_EXPRESSION: {
+			if (!isMemberExpression(node.callee)) return false;
 			worklist.push(node.callee.object);
 			return true;
 		}
 
-		case "Literal": {
+		case LITERAL:
 			return true;
-		}
 
-		case "MemberExpression": {
+		case MEMBER_EXPRESSION: {
 			worklist.push(node.object);
 			return true;
 		}
 
-		case "ObjectExpression": {
+		case OBJECT_EXPRESSION:
 			return appendSimpleObjectProperties(node, worklist);
-		}
 
-		default: {
+		default:
 			return false;
-		}
 	}
 }
 
@@ -71,7 +82,7 @@ function isSimpleLiteral(node: ESTree.Expression | undefined): boolean {
 
 function isStaticMemberExpression(node: ESTree.MemberExpression): boolean {
 	let current: ESTree.Expression = node;
-	while (current.type === "MemberExpression") {
+	while (isMemberExpression(current)) {
 		if (current.computed && !isLiteral(current.property)) return false;
 		current = current.object;
 	}
@@ -80,9 +91,9 @@ function isStaticMemberExpression(node: ESTree.MemberExpression): boolean {
 
 function isConstructor(node: ESTree.ClassElement): node is ESTree.MethodDefinition {
 	return (
-		node.type === "MethodDefinition" &&
+		isMethodDefinition(node) &&
 		node.kind === "constructor" &&
-		node.key.type === "Identifier" &&
+		isBindingIdentifier(node.key) &&
 		node.key.name === "constructor"
 	);
 }
@@ -90,17 +101,17 @@ function isConstructor(node: ESTree.ClassElement): node is ESTree.MethodDefiniti
 function isConstructorLiteralAssignment(statement: ESTree.Statement): statement is ESTree.ExpressionStatement & {
 	readonly expression: ESTree.AssignmentExpression;
 } {
-	if (statement.type !== "ExpressionStatement") return false;
+	if (!isExpressionStatement(statement)) return false;
 
 	const { expression } = statement;
-	if (expression.type !== "AssignmentExpression") return false;
+	if (!isAssignmentExpression(expression)) return false;
 
 	const { left } = expression;
-	if (left.type !== "MemberExpression" || left.object.type !== "ThisExpression") return false;
+	if (!isMemberExpression(left) || !isThisExpression(left.object)) return false;
 
 	const { property } = left;
 	return (
-		(property.type === "Identifier" || isLiteral(property)) &&
+		(property.type === IDENTIFIER || isLiteral(property)) &&
 		isSimpleLiteral(expression.right) &&
 		isStaticMemberExpression(left)
 	);
@@ -139,12 +150,8 @@ const preferClassProperties = createRule("prefer-class-properties", "general", {
 		}
 
 		return {
-			ClassDeclaration(node): void {
-				reportConstructorAssignments(node);
-			},
-			ClassExpression(node): void {
-				reportConstructorAssignments(node);
-			},
+			ClassDeclaration: reportConstructorAssignments,
+			ClassExpression: reportConstructorAssignments,
 		} satisfies Visitor;
 	},
 	meta: {

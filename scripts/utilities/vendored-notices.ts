@@ -161,7 +161,7 @@ const NOTICES_URL = "https://github.com/howmanysmall/small-rules/blob/main/THIRD
 export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 	{
 		name: "anti-slop",
-		commit: "446268e5d15baa968eaec669ff65358d36ae6259",
+		commit: "e8c4880471b23ab7f216fba7b27d173a6ef07d4c",
 		copyright: "Copyright (c) 2026 Dillon Mulroy",
 		directory: "src/rules/anti-slop/",
 		files: [
@@ -193,13 +193,15 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 	},
 	{
 		name: "anti-slop shared helpers",
-		commit: "446268e5d15baa968eaec669ff65358d36ae6259",
+		commit: "e8c4880471b23ab7f216fba7b27d173a6ef07d4c",
 		copyright: "Copyright (c) 2026 Dillon Mulroy",
 		directory: "src/utilities/anti-slop/",
 		files: [
 			{ local: "dictionary-types.ts", upstream: "src/shared/dictionary-types.ts" },
+			{ local: "function-parameters.ts", upstream: "src/shared/function-parameters.ts" },
 			{ local: "lexical-type-parameters.ts", upstream: "src/shared/lexical-type-parameters.ts" },
 			{ local: "reflect-method.ts", upstream: "src/shared/reflect-method.ts" },
+			{ local: "type-alias-resolution.ts", upstream: "src/shared/type-alias-resolution.ts" },
 		],
 		license: "MIT",
 		source: "https://github.com/dmmulroy/anti-slop",

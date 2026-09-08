@@ -2,7 +2,7 @@ import { Predicate } from "effect";
 
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentName, isFunction } from "$oxc-utilities/oxc-utilities";
+import { isAnyFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -78,7 +78,7 @@ function getComponentNameFromCallParent(callExpression: ESTree.CallExpression): 
 
 function countDestructuredProperties(node: ESTree.Node): number | undefined {
 	/* v8 ignore next -- callers only pass function-like component nodes. @preserve */
-	if (!isFunction(node)) return undefined;
+	if (!isAnyFunction(node)) return undefined;
 
 	const [firstParameter] = node.params;
 	if (!firstParameter) return undefined;
@@ -108,7 +108,7 @@ interface BodyAnalysis {
 
 function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>): BodyAnalysis {
 	/* v8 ignore next -- callers only analyze function-like component nodes. @preserve */
-	if (!isFunction(node)) return { maxJsxDepth: 0, nullLiterals: new Array<ESTree.Node>(), stateHookCount: 0 };
+	if (!isAnyFunction(node)) return { maxJsxDepth: 0, nullLiterals: new Array<ESTree.Node>(), stateHookCount: 0 };
 
 	/* v8 ignore next 3 -- @preserve implemented function nodes in this visitor have parser bodies. */
 	if (node.body === null) {

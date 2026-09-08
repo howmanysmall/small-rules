@@ -1,5 +1,14 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isNamedGlobalCall } from "$oxc-utilities/oxc-utilities";
+import {
+	BINARY_EXPRESSION,
+	IDENTIFIER,
+	isBinaryExpression,
+	isNamedGlobalCall,
+	isPrivateIdentifier,
+	isSpreadElement,
+	LITERAL,
+	UNARY_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 import { isNumber } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -11,17 +20,13 @@ interface ArgumentsCollection {
 	readonly scaleYText: string;
 }
 
-function isPrivateIdentifier(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.PrivateIdentifier {
-	return node.type === "PrivateIdentifier";
-}
-
 function isAllowedBinaryOperator(operator: ESTree.BinaryOperator): boolean {
 	return operator === "+" || operator === "-" || operator === "*" || operator === "/" || operator === "%";
 }
 
 function isValidBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpression {
 	return (
-		node.type === "BinaryExpression" &&
+		isBinaryExpression(node) &&
 		isAllowedBinaryOperator(node.operator) &&
 		!isPrivateIdentifier(node.left) &&
 		!isPrivateIdentifier(node.right)
@@ -30,7 +35,7 @@ function isValidBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpres
 
 function reconstructText(node: ESTree.Expression): string | undefined {
 	switch (node.type) {
-		case "BinaryExpression": {
+		case BINARY_EXPRESSION: {
 			if (!isValidBinaryExpression(node)) return undefined;
 
 			const { left, right } = node;
@@ -41,13 +46,13 @@ function reconstructText(node: ESTree.Expression): string | undefined {
 			return `${leftText} ${node.operator} ${rightText}`;
 		}
 
-		case "Identifier":
+		case IDENTIFIER:
 			return node.name;
 
-		case "Literal":
+		case LITERAL:
 			return isNumber(node.value) ? String(node.value) : undefined;
 
-		case "UnaryExpression": {
+		case UNARY_EXPRESSION: {
 			const argumentText = reconstructText(node.argument);
 			if (argumentText === undefined) return undefined;
 			if (node.operator !== "+" && node.operator !== "-") return undefined;
@@ -84,7 +89,7 @@ function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, 
 
 function evaluateExpression(node: ESTree.Expression): number | undefined {
 	switch (node.type) {
-		case "BinaryExpression": {
+		case BINARY_EXPRESSION: {
 			/* v8 ignore start -- @preserve collectArguments rejects unsupported binary operators before evaluation. */
 			if (!isValidBinaryExpression(node)) return undefined;
 			/* v8 ignore stop -- @preserve */
@@ -97,13 +102,13 @@ function evaluateExpression(node: ESTree.Expression): number | undefined {
 			return evaluateBinaryOperation(node.operator, leftValue, rightValue);
 		}
 
-		case "Identifier":
+		case IDENTIFIER:
 			return undefined;
 
-		case "Literal":
+		case LITERAL:
 			return Number(node.value);
 
-		case "UnaryExpression": {
+		case UNARY_EXPRESSION: {
 			const argumentValue = evaluateExpression(node.argument);
 			if (argumentValue === undefined) return undefined;
 			if (node.operator === "+") return argumentValue;
@@ -130,10 +135,10 @@ function collectArguments(
 		offsetXNode === undefined ||
 		scaleYNode === undefined ||
 		offsetYNode === undefined ||
-		scaleXNode.type === "SpreadElement" ||
-		offsetXNode.type === "SpreadElement" ||
-		scaleYNode.type === "SpreadElement" ||
-		offsetYNode.type === "SpreadElement"
+		isSpreadElement(scaleXNode) ||
+		isSpreadElement(offsetXNode) ||
+		isSpreadElement(scaleYNode) ||
+		isSpreadElement(offsetYNode)
 	) {
 		return undefined;
 	}
@@ -171,10 +176,10 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 					offsetXNode === undefined ||
 					scaleYNode === undefined ||
 					offsetYNode === undefined ||
-					scaleXNode.type === "SpreadElement" ||
-					offsetXNode.type === "SpreadElement" ||
-					scaleYNode.type === "SpreadElement" ||
-					offsetYNode.type === "SpreadElement"
+					isSpreadElement(scaleXNode) ||
+					isSpreadElement(offsetXNode) ||
+					isSpreadElement(scaleYNode) ||
+					isSpreadElement(offsetYNode)
 				) {
 					return;
 				}

@@ -3,6 +3,7 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
+	isArrowFunctionExpression,
 	isIdentifierName,
 	isJsxIdentifier,
 	isMemberExpression,
@@ -169,10 +170,10 @@ function createIsSafeNameForVariable(
 	const avoidArgumentsInArrowParameter =
 		definition.type === "Parameter" &&
 		variable.scope.type === "function" &&
-		variable.scope.block.type === "ArrowFunctionExpression";
+		isArrowFunctionExpression(variable.scope.block);
 	const shouldAvoidArguments = avoidArgumentsReplacement || avoidArgumentsInArrowParameter;
 
-	return (name, scopes) => {
+	return function isSafeNameForVariable(name, scopes): boolean {
 		if (!isSafeGeneratedName(name, scopes)) return false;
 		if (shouldAvoidArguments && name === "arguments") return false;
 		return true;

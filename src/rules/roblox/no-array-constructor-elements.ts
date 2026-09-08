@@ -1,9 +1,10 @@
 import { Predicate } from "effect";
 
-import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
+	getMemberPropertyName,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isAssignmentPattern,
@@ -22,6 +23,7 @@ import {
 	isUnaryExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
+	unwrapExpression,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";

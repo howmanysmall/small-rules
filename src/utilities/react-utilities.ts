@@ -1,7 +1,15 @@
 import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { getImportedName } from "$oxc-utilities/oxc-utilities";
+import {
+	getImportedName,
+	isIdentifierName,
+	isImportDeclaration,
+	isImportDefaultSpecifier,
+	isImportNamespaceSpecifier,
+	isImportSpecifier,
+	isMemberExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -49,7 +57,7 @@ export function forEachReactNamedImport(
 	if (!isReactImport(node, reactSources)) return;
 
 	for (const specifier of node.specifiers) {
-		if (specifier.type === "ImportDefaultSpecifier" || specifier.type === "ImportNamespaceSpecifier") {
+		if (isImportDefaultSpecifier(specifier) || isImportNamespaceSpecifier(specifier)) {
 			reactNamespaces.add(specifier.local.name);
 			continue;
 		}
@@ -69,7 +77,7 @@ export function getEnvironment(value: ReactOptions | undefined): Environment {
 
 function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
 	/* v8 ignore next -- parser import bindings retain their ImportDeclaration parent. @preserve */
-	return node.parent?.type === "ImportDeclaration" ? node.parent : undefined;
+	return isImportDeclaration(node.parent) ? node.parent : undefined;
 }
 
 export function isReactImportDefinition(
@@ -95,7 +103,7 @@ export function isReactNamedImport(
 	for (const definition of variable.defs) {
 		if (!isReactImportDefinition(definition, reactSources)) continue;
 		/* v8 ignore next -- named-import scope lookups expose ImportSpecifier definitions here. @preserve */
-		if (definition.node.type !== "ImportSpecifier") continue;
+		if (!isImportSpecifier(definition.node)) continue;
 		if (getImportedName(definition.node) === importedName) return true;
 	}
 
@@ -112,9 +120,7 @@ export function isReactNamespaceImport(
 	for (const definition of variable.defs) {
 		if (!isReactImportDefinition(definition, reactSources)) continue;
 		/* v8 ignore next -- React namespace checks only reach default or namespace import definitions. @preserve */
-		if (definition.node.type === "ImportDefaultSpecifier" || definition.node.type === "ImportNamespaceSpecifier") {
-			return true;
-		}
+		if (isImportDefaultSpecifier(definition.node) || isImportNamespaceSpecifier(definition.node)) return true;
 	}
 
 	return false;
@@ -126,12 +132,12 @@ export function isReactImportedCall(
 	importedNames: ReadonlySet<string>,
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	if (callee.type === "Identifier") {
+	if (isIdentifierName(callee)) {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
 		if (variable === undefined) return false;
 
 		return variable.defs.some((definition) => {
-			if (definition.type !== "ImportBinding" || definition.node.type !== "ImportSpecifier") return false;
+			if (definition.type !== "ImportBinding" || !isImportSpecifier(definition.node)) return false;
 			const importDeclaration = getImportDeclarationParent(definition.node);
 			if (importDeclaration === undefined || !reactSources.has(importDeclaration.source.value)) {
 				return false;
@@ -141,8 +147,8 @@ export function isReactImportedCall(
 		});
 	}
 
-	if (callee.type !== "MemberExpression" || callee.computed) return false;
-	if (callee.object.type !== "Identifier" || callee.property.type !== "Identifier") return false;
+	if (!isMemberExpression(callee) || callee.computed) return false;
+	if (!isIdentifierName(callee.object) || !isIdentifierName(callee.property)) return false;
 
 	const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
 	return isReactNamespaceImport(variable, reactSources) && importedNames.has(callee.property.name);

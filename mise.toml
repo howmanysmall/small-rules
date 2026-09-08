@@ -9,6 +9,7 @@ experimental = true
 auto_install = false
 lockfile = true
 provenance_api_failures_fatal = false
+cargo.binstall_native = true
 
 [tools]
 "github:howmanysmall/pullhook" = "latest"

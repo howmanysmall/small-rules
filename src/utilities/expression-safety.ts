@@ -1,31 +1,31 @@
-import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import {
 	isArrayExpression,
 	isBinaryExpression,
+	isBindingIdentifier,
 	isConditionalExpression,
 	isLiteral,
 	isLogicalExpression,
 	isMemberExpression,
 	isObjectExpression,
+	isPrivateIdentifier,
 	isSequenceExpression,
+	isSpreadElement,
+	isSuper,
 	isTemplateLiteral,
 	isThisExpression,
 	isUnaryExpression,
+	unwrapExpression,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
 function isComputedPropertyKeySafe(key: ESTree.PropertyKey): boolean {
-	if (key.type === "Identifier") return true;
-	if (key.type === "PrivateIdentifier") return true;
-	return isExpressionSideEffectSafe(key);
+	return isBindingIdentifier(key) || isPrivateIdentifier(key) || isExpressionSideEffectSafe(key);
 }
 
 export function isExpressionSideEffectSafe(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-
-	if (unwrapped.type === "Identifier") return true;
-	if (isThisExpression(unwrapped)) return true;
+	if (isBindingIdentifier(unwrapped) || isThisExpression(unwrapped)) return true;
 
 	if (isMemberExpression(unwrapped)) return isMemberSideEffectSafe(unwrapped);
 	if (isUnaryExpression(unwrapped)) {
@@ -42,7 +42,7 @@ export function isExpressionSideEffectSafe(expression: ESTree.Expression): boole
 }
 
 function isMemberSideEffectSafe(expression: ESTree.MemberExpression): boolean {
-	if (expression.optional || expression.object.type === "Super") return false;
+	if (expression.optional || isSuper(expression.object)) return false;
 	if (!isExpressionSideEffectSafe(expression.object)) return false;
 	return !expression.computed || isExpressionSideEffectSafe(expression.property);
 }
@@ -62,8 +62,7 @@ function isConditionalSideEffectSafe(expression: ESTree.ConditionalExpression): 
 function isArraySideEffectSafe(expression: ESTree.ArrayExpression): boolean {
 	for (const element of expression.elements) {
 		if (element === null) continue;
-		if (element.type === "SpreadElement") return false;
-		if (!isExpressionSideEffectSafe(element)) return false;
+		if (isSpreadElement(element) || !isExpressionSideEffectSafe(element)) return false;
 	}
 
 	return true;
@@ -71,7 +70,7 @@ function isArraySideEffectSafe(expression: ESTree.ArrayExpression): boolean {
 
 function isObjectSideEffectSafe(expression: ESTree.ObjectExpression): boolean {
 	for (const property of expression.properties) {
-		if (property.type === "SpreadElement" || property.kind !== "init" || property.method) return false;
+		if (isSpreadElement(property) || property.kind !== "init" || property.method) return false;
 		if (property.computed && !isComputedPropertyKeySafe(property.key)) return false;
 		if (!isExpressionSideEffectSafe(property.value)) return false;
 	}

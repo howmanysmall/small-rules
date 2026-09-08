@@ -1,5 +1,15 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getImportedName, isReactNamedCall } from "$oxc-utilities/oxc-utilities";
+import {
+	getImportedName,
+	isCallExpression,
+	isExportDefaultDeclaration,
+	isExportNamedDeclaration,
+	isIdentifierName,
+	isImportSpecifier,
+	isMemberExpression,
+	isReactNamedCall,
+	isVariableDeclaration,
+} from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactImport } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -21,8 +31,7 @@ interface DisplayNameReportContext {
 }
 
 function getVariableName(node: ESTree.VariableDeclarator): string | undefined {
-	if (node.id.type !== "Identifier") return undefined;
-	return node.id.name;
+	return isIdentifierName(node.id) ? node.id.name : undefined;
 }
 
 function isMemoCall(
@@ -38,11 +47,15 @@ function isCreateContextCall(
 	createContextIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 ): boolean {
-	if (node.callee.type === "Identifier") return createContextIdentifiers.has(node.callee.name);
-	if (node.callee.type !== "MemberExpression") return false;
-	if (node.callee.property.type !== "Identifier") return false;
-	if (node.callee.property.name !== "createContext") return false;
-	if (node.callee.object.type !== "Identifier") return false;
+	if (isIdentifierName(node.callee)) return createContextIdentifiers.has(node.callee.name);
+	if (
+		!isMemberExpression(node.callee) ||
+		!isIdentifierName(node.callee.property) ||
+		node.callee.property.name !== "createContext" ||
+		!isIdentifierName(node.callee.object)
+	) {
+		return false;
+	}
 	return reactNamespaces.has(node.callee.object.name);
 }
 
@@ -50,7 +63,7 @@ function isNodeInExport(node: ESTree.Node): boolean {
 	let current: ESTree.Node | null | undefined = node;
 
 	while (current !== null) {
-		if (current.type === "ExportNamedDeclaration" || current.type === "ExportDefaultDeclaration") return true;
+		if (isExportNamedDeclaration(current) || isExportDefaultDeclaration(current)) return true;
 		current = current.parent;
 	}
 
@@ -59,10 +72,8 @@ function isNodeInExport(node: ESTree.Node): boolean {
 
 function isVariableDeclarationExported(node: ESTree.VariableDeclarator): boolean {
 	/* v8 ignore next -- @preserve VariableDeclarator nodes always have VariableDeclaration parents in parser output. */
-	if (node.parent.type !== "VariableDeclaration") return false;
-	return (
-		node.parent.parent.type === "ExportNamedDeclaration" || node.parent.parent.type === "ExportDefaultDeclaration"
-	);
+	if (!isVariableDeclaration(node.parent)) return false;
+	return isExportNamedDeclaration(node.parent.parent) || isExportDefaultDeclaration(node.parent.parent);
 }
 
 function hasExportReference(sourceCode: SourceCode, node: ESTree.VariableDeclarator, variableName: string): boolean {
@@ -112,13 +123,13 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 		return {
 			'AssignmentExpression[left.type="MemberExpression"]'({ left }: ESTree.AssignmentExpression): void {
 				/* v8 ignore next -- @preserve visitor selector restricts left to MemberExpression. */
-				if (left.type !== "MemberExpression") return;
+				if (!isMemberExpression(left)) return;
 
 				const { property } = left;
-				if (property.type !== "Identifier" || property.name !== "displayName") return;
+				if (!isIdentifierName(property) || property.name !== "displayName") return;
 
 				const { object } = left;
-				if (object.type !== "Identifier") return;
+				if (!isIdentifierName(object)) return;
 
 				const trackedVariable = trackedVariables.get(object.name);
 				if (trackedVariable === undefined) return;
@@ -126,7 +137,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 				trackedVariable.hasDisplayName = true;
 			},
 			ExportDefaultDeclaration(node): void {
-				if (node.declaration.type === "CallExpression") {
+				if (isCallExpression(node.declaration)) {
 					if (isMemoCall(node.declaration, memoIdentifiers, reactNamespaces)) {
 						context.report({
 							messageId: "directMemoExport",
@@ -145,15 +156,14 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 					return;
 				}
 
-				if (node.declaration.type !== "Identifier") return;
-				defaultExportedNames.add(node.declaration.name);
+				if (isIdentifierName(node.declaration)) defaultExportedNames.add(node.declaration.name);
 			},
 			ExportNamedDeclaration(node): void {
 				for (const specifier of node.specifiers) {
 					if (
-						specifier.exported.type !== "Identifier" ||
+						!isIdentifierName(specifier.exported) ||
 						specifier.exported.name !== "default" ||
-						specifier.local.type !== "Identifier"
+						!isIdentifierName(specifier.local)
 					) {
 						continue;
 					}
@@ -166,7 +176,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 
 				for (const specifier of node.specifiers) {
 					const { name } = specifier.local;
-					if (specifier.type === "ImportSpecifier") {
+					if (isImportSpecifier(specifier)) {
 						const importedName = getImportedName(specifier);
 						if (importedName === "memo") memoIdentifiers.add(name);
 						else if (importedName === "createContext") createContextIdentifiers.add(name);
@@ -194,7 +204,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 				}
 			},
 			VariableDeclarator(node): void {
-				if (node.init?.type !== "CallExpression") return;
+				if (!isCallExpression(node.init)) return;
 
 				const variableName = getVariableName(node);
 				if (variableName === undefined) return;

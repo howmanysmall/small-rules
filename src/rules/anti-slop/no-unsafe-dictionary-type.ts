@@ -1,47 +1,76 @@
-// Vendored from src/rules/no-unsafe-dictionary-type.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/rules/no-unsafe-dictionary-type.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
 // aliases. Ancestor suppression checks the same root shapes this rule visits
 // (type references, literals, and mapped types) rather than upstream's larger
-// type-node kind table; classification outcomes are unchanged.
+// type-node kind table. Type-parameter constraints are excluded iteratively.
 
 import {
 	classifyUnsafeDictionary,
 	classifyUnsafeDictionaryValue,
 	createTypeEnvironment,
 } from "$oxc-utilities/anti-slop/dictionary-types";
+import { visibleTypeAlias } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isBindingIdentifier,
+	isProgram,
+	isTsMappedType,
+	isTsTypeAliasDeclaration,
+	isTsTypeLiteral,
+	isTsTypeParameter,
+	isTsTypeReference,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 import type { TypeEnvironment, UnsafeDictionary } from "$oxc-utilities/anti-slop/dictionary-types";
 
 function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironment): boolean {
-	if (type.type !== "TSTypeReference" || (type.typeArguments?.params.length ?? 0) > 0) return false;
-	if (type.typeName.type !== "Identifier") return false;
-	if (!environment.aliases.has(type.typeName.name)) return false;
-	let current: ESTree.Node = type.parent;
-	while (current.type !== "Program") {
-		if (current.type === "TSTypeAliasDeclaration") return false;
-		current = current.parent;
+	if (!isTsTypeReference(type) || (type.typeArguments?.params.length ?? 0) > 0) return false;
+	if (
+		!isBindingIdentifier(type.typeName) ||
+		visibleTypeAlias(type.typeName.name, type, environment.typeAliases) === undefined
+	) {
+		return false;
+	}
+
+	let { parent } = type;
+	while (!isProgram(parent)) {
+		if (isTsTypeAliasDeclaration(parent)) return false;
+		({ parent } = parent);
 	}
 	return true;
 }
 
+function isInsideTypeParameterConstraint(node: ESTree.TSType): boolean {
+	let child: ESTree.Node = node;
+	let { parent } = child;
+	while (!isProgram(parent)) {
+		if (isTsTypeParameter(parent) && parent.constraint === child) return true;
+		child = parent;
+		({ parent } = child);
+	}
+	return false;
+}
+
 function reportableUnsafeDictionary(type: ESTree.TSType, environment: TypeEnvironment): undefined | UnsafeDictionary {
+	if (isInsideTypeParameterConstraint(type)) return undefined;
 	if (isPlainAliasConsumerUse(type, environment)) return undefined;
+
 	const unsafe = classifyUnsafeDictionary(type, environment);
 	if (unsafe === undefined) return undefined;
-	let current: ESTree.Node = type.parent;
-	while (current.type !== "Program") {
+
+	let { parent } = type;
+	while (!isProgram(parent)) {
 		let ancestorClassified: undefined | UnsafeDictionary;
-		if (current.type === "TSMappedType" || current.type === "TSTypeLiteral" || current.type === "TSTypeReference") {
-			ancestorClassified = classifyUnsafeDictionary(current, environment);
+		if (isTsMappedType(parent) || isTsTypeLiteral(parent) || isTsTypeReference(parent)) {
+			ancestorClassified = classifyUnsafeDictionary(parent, environment);
 		}
 		if (ancestorClassified !== undefined) return undefined;
-		current = current.parent;
+		({ parent } = parent);
 	}
 	return unsafe;
 }
@@ -53,19 +82,20 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 		function reportIfUnsafe(type: ESTree.TSType): void {
 			/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
 			if (environment === undefined) return;
+
 			const unsafe = reportableUnsafeDictionary(type, environment);
 			if (unsafe === undefined) return;
+
 			context.report({ data: { value: unsafe.unsafeValue }, messageId: "unsafeDictionary", node: type });
 		}
 
 		return {
 			Program(node): void {
-				environment = createTypeEnvironment(node);
+				environment = createTypeEnvironment(node, context.sourceCode.visitorKeys);
 			},
 			TSIndexSignature(node): void {
 				/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
-				if (environment === undefined) return;
-				if (node.parent.type === "TSTypeLiteral") return;
+				if (environment === undefined || isTsTypeLiteral(node.parent)) return;
 				const unsafe = classifyUnsafeDictionaryValue(node.typeAnnotation.typeAnnotation, environment);
 				if (unsafe !== undefined) {
 					context.report({

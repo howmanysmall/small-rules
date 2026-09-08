@@ -2,22 +2,23 @@ import { Predicate } from "effect";
 
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
+import { isCallbackFunction, isCallExpression, isIdentifierName, isVariableDeclarator } from "./oxc-utilities";
+
 import type { ESTree } from "oxlint-plugin-utilities";
 
 export function isHookCall(node: ESTree.Node | null, hookName: ReadonlySet<string> | string): boolean {
 	return (
-		node?.type === "CallExpression" &&
-		node.callee.type === "Identifier" &&
+		isCallExpression(node) &&
+		isIdentifierName(node.callee) &&
 		(Predicate.isString(hookName) ? node.callee.name === hookName : hookName.has(node.callee.name))
 	);
 }
 
 export function isComponentAssignment(node: ESTree.Node): boolean {
 	return (
-		node.type === "VariableDeclarator" &&
-		node.id.type === "Identifier" &&
+		isVariableDeclarator(node) &&
+		isIdentifierName(node.id) &&
 		isUppercaseName(node.id.name) &&
-		node.init !== null &&
-		(node.init.type === "ArrowFunctionExpression" || node.init.type === "FunctionExpression")
+		isCallbackFunction(node.init)
 	);
 }

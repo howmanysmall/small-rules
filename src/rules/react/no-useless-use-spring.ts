@@ -1,5 +1,13 @@
-import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isIdentifierName,
+	isMemberExpression,
+	isObjectExpression,
+	isProperty,
+	isSpreadElement,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind } from "$oxc-utilities/react-hook-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -27,7 +35,7 @@ function objectHasFromAndTo(objectExpression: ESTree.ObjectExpression): boolean 
 	let hasTo = false;
 
 	for (const property of objectExpression.properties) {
-		if (property.type !== "Property" || property.computed || property.key.type !== "Identifier") continue;
+		if (!isProperty(property) || property.computed || !isIdentifierName(property.key)) continue;
 
 		if (property.key.name === "from") hasFrom = true;
 		// oxlint-disable-next-line unicorn-js/prefer-else-if -- what?
@@ -44,8 +52,8 @@ function objectExpressionMatches(
 	predicate: (objectExpression: ESTree.ObjectExpression) => boolean,
 ): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (unwrapped.type === "ObjectExpression") return predicate(unwrapped);
-	if (unwrapped.type !== "Identifier") return false;
+	if (isObjectExpression(unwrapped)) return predicate(unwrapped);
+	if (!isIdentifierName(unwrapped)) return false;
 
 	const variable = getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name);
 	if (variable === undefined || !isModuleLevelScope(variable.scope) || isImportBinding(variable)) return false;
@@ -55,7 +63,7 @@ function objectExpressionMatches(
 		if (initializer === undefined) continue;
 
 		const normalizedInitializer = unwrapExpression(initializer);
-		if (normalizedInitializer.type !== "ObjectExpression") continue;
+		if (!isObjectExpression(normalizedInitializer)) continue;
 
 		if (predicate(normalizedInitializer)) return true;
 	}
@@ -86,12 +94,12 @@ function areDependenciesNonUpdating(kind: DependenciesKind, options: NormalizedO
 }
 
 function isSpringHookCall({ callee }: ESTree.CallExpression, options: NormalizedOptions): boolean {
-	if (callee.type === "Identifier") return options.springHooks.has(callee.name);
+	if (isIdentifierName(callee)) return options.springHooks.has(callee.name);
 
-	if (callee.type === "MemberExpression" && !callee.computed) {
+	if (isMemberExpression(callee) && !callee.computed) {
 		const { property } = callee;
 		/* v8 ignore next -- non-computed member calls have identifier properties in supported parser output. @preserve */
-		if (property.type === "Identifier") return options.springHooks.has(property.name);
+		if (isIdentifierName(property)) return options.springHooks.has(property.name);
 	}
 
 	return false;
@@ -111,7 +119,7 @@ const noUselessUseSpring = createRule("no-useless-use-spring", "react", {
 				if (!isSpringHookCall(node, normalized) || node.arguments.length === 0) return;
 
 				const [configArgument] = node.arguments;
-				if (configArgument === undefined || configArgument.type === "SpreadElement") return;
+				if (configArgument === undefined || isSpreadElement(configArgument)) return;
 
 				const seen = new Set<ESTree.Node>();
 				if (

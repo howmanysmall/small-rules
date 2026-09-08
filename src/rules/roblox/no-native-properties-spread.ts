@@ -1,5 +1,16 @@
-import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isIdentifierName,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxIdentifier,
+	isMemberExpression,
+	isObjectExpression,
+	isSpreadElement,
+	isVariableDeclarator,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -18,7 +29,7 @@ type SpreadReportTarget =
 	  };
 
 function getJsxAttributeName(name: ESTree.JSXAttributeName): string | undefined {
-	return name.type === "JSXIdentifier" ? name.name : name.name.name;
+	return isJsxIdentifier(name) ? name.name : name.name.name;
 }
 
 function isNativePropertiesPropertyName(name: string): boolean {
@@ -26,28 +37,28 @@ function isNativePropertiesPropertyName(name: string): boolean {
 }
 
 function getVariableInitializer(definition: ScopeVariable["defs"][number]): ESTree.Expression | undefined {
-	if (definition.type !== "Variable" || definition.node.type !== "VariableDeclarator") return undefined;
+	if (definition.type !== "Variable" || !isVariableDeclarator(definition.node)) return undefined;
 	return definition.node.init ?? undefined;
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
 	let currentExpression = unwrapExpression(expression);
 
-	while (currentExpression.type === "MemberExpression") {
+	while (isMemberExpression(currentExpression)) {
 		const objectExpression = unwrapExpression(currentExpression.object);
-		if (objectExpression.type === "Identifier") return objectExpression;
-		if (objectExpression.type !== "MemberExpression") return undefined;
+		if (isIdentifierName(objectExpression)) return objectExpression;
+		if (!isMemberExpression(objectExpression)) return undefined;
 		currentExpression = objectExpression;
 	}
 
 	/* v8 ignore next -- @preserve unwrapExpression yields identifiers only for non-member roots here. */
-	return currentExpression.type === "Identifier" ? currentExpression : undefined;
+	return isIdentifierName(currentExpression) ? currentExpression : undefined;
 }
 
 function shouldReportSpreadArgument(sourceCode: SourceCode, argument: ESTree.Expression): boolean {
 	const unwrappedArgument = unwrapExpression(argument);
 	/* v8 ignore next -- @preserve parser spread arguments are identifiers or member expressions in targeted JSX cases. */
-	if (unwrappedArgument.type === "ObjectExpression") return true;
+	if (isObjectExpression(unwrappedArgument)) return true;
 
 	const rootIdentifier = getRootIdentifier(unwrappedArgument);
 	if (rootIdentifier === undefined) return false;
@@ -67,8 +78,8 @@ function resolveObjectExpression(
 	if (seen.has(unwrappedExpression)) return undefined;
 	seen.add(unwrappedExpression);
 
-	if (unwrappedExpression.type === "ObjectExpression") return unwrappedExpression;
-	if (unwrappedExpression.type !== "Identifier") return undefined;
+	if (isObjectExpression(unwrappedExpression)) return unwrappedExpression;
+	if (!isIdentifierName(unwrappedExpression)) return undefined;
 
 	const variable = getVariableByName(sourceCode.getScope(unwrappedExpression), unwrappedExpression.name);
 	if (variable === undefined || isModuleLevelScope(variable.scope)) return undefined;
@@ -90,8 +101,7 @@ const noNativePropertiesSpread = createRule("no-native-properties-spread", "robl
 
 		function reportStaticSpreads(objectExpression: ESTree.ObjectExpression, target: SpreadReportTarget): void {
 			for (const property of objectExpression.properties) {
-				if (property.type !== "SpreadElement") continue;
-				if (!shouldReportSpreadArgument(sourceCode, property.argument)) continue;
+				if (!isSpreadElement(property) || !shouldReportSpreadArgument(sourceCode, property.argument)) continue;
 
 				const source = sourceCode.getText(property.argument);
 				context.report({
@@ -108,11 +118,11 @@ const noNativePropertiesSpread = createRule("no-native-properties-spread", "robl
 				if (propertyName === undefined || !isNativePropertiesPropertyName(propertyName)) return;
 
 				const { value } = node;
-				if (value?.type !== "JSXExpressionContainer") return;
+				if (!isJsxExpressionContainer(value)) return;
 
 				const { expression } = value;
 				/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
-				if (expression.type === "JSXEmptyExpression") return;
+				if (isJsxEmptyExpression(expression)) return;
 
 				const objectExpression = resolveObjectExpression(sourceCode, expression, new Set<ESTree.Node>());
 				if (objectExpression === undefined) return;

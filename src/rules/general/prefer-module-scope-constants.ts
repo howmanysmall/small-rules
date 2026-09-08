@@ -1,4 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import { isIdentifierName, isProgram } from "$oxc-utilities/oxc-utilities";
 
 import type { Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -11,7 +12,7 @@ function isTopScope(scope: Scope): boolean {
 	if (scope.upper?.type === "global") {
 		const { block } = scope.upper;
 		/* v8 ignore next -- @preserve script wrapper scopes are the only non-module top scopes represented under global Program scopes. */
-		if (block.type === "Program" && block.sourceType === "script") return true;
+		if (isProgram(block) && block.sourceType === "script") return true;
 	}
 
 	return false;
@@ -30,7 +31,7 @@ const preferModuleScopeConstants = createRule("prefer-module-scope-constants", "
 			},
 			VariableDeclarator(node): void {
 				const { id } = node;
-				if (id.type !== "Identifier" || !SCREAMING_SNAKE_CASE.test(id.name)) return;
+				if (!isIdentifierName(id) || !SCREAMING_SNAKE_CASE.test(id.name)) return;
 
 				if (!inConstDeclaration) {
 					context.report({

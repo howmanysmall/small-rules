@@ -29,6 +29,29 @@
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
+import {
+	isAnyLiteral,
+	isArrayExpression,
+	isArrayPattern,
+	isArrowFunctionExpression,
+	isBlockStatement,
+	isCallbackFunction,
+	isCallExpression,
+	isFunctionDeclaration,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isIdentifierNamed,
+	isImportDeclaration,
+	isImportDefaultSpecifier,
+	isImportNamespaceSpecifier,
+	isImportSpecifier,
+	isMemberExpression,
+	isNode,
+	isObjectExpression,
+	isReturnStatement,
+	isTemplateLiteral,
+	isVariableDeclarator,
+} from "./oxc-utilities";
 
 import type { ESTree, Reference, Scope, SourceCode, Variable } from "oxlint-plugin-utilities";
 
@@ -192,10 +215,8 @@ function resolveEffectFunction(
 	node: ESTree.CallExpression,
 ): EffectFunctionNode | undefined {
 	const [callback] = node.arguments;
-	if (callback?.type === "ArrowFunctionExpression" || callback?.type === "FunctionExpression") {
-		return callback;
-	}
-	if (callback?.type !== "Identifier") return undefined;
+	if (isCallbackFunction(callback)) return callback;
+	if (!isIdentifierName(callback)) return undefined;
 
 	const reference = state.scope.getReference(callback);
 	const definition = reference?.resolved?.defs[0];
@@ -205,11 +226,7 @@ function resolveEffectFunction(
 	const definitionNode = getDefinitionValueNode(definition.node);
 	if (definitionNode === undefined) return undefined;
 
-	return definitionNode.type === "ArrowFunctionExpression" ||
-		definitionNode.type === "FunctionExpression" ||
-		definitionNode.type === "BlockStatement"
-		? definitionNode
-		: undefined;
+	return isCallbackFunction(definitionNode) || isBlockStatement(definitionNode) ? definitionNode : undefined;
 	/* v8 ignore stop */
 }
 
@@ -218,19 +235,16 @@ function getDependencyReferences(
 	node: ESTree.CallExpression,
 ): ReadonlyArray<Reference> | undefined {
 	const [, dependenciesArray] = node.arguments;
-	if (dependenciesArray?.type !== "ArrayExpression") return undefined;
+	if (!isArrayExpression(dependenciesArray)) return undefined;
 	return state.scope.getDownstreamReferences(dependenciesArray);
 }
 
 function getEffectCleanup(functionNode: EffectFunctionNode): ESTree.ReturnStatement | undefined {
-	if (functionNode.type !== "ArrowFunctionExpression" && functionNode.type !== "FunctionExpression") {
-		return undefined;
-	}
-	if (functionNode.body?.type !== "BlockStatement") return undefined;
+	if (!isCallbackFunction(functionNode) || !isBlockStatement(functionNode.body)) return undefined;
 	const { body } = functionNode.body;
 	for (let index = body.length - 1; index >= 0; index -= 1) {
 		const statement = body[index];
-		if (statement?.type === "ReturnStatement" && statement.argument !== null) return statement;
+		if (isReturnStatement(statement) && statement.argument !== null) return statement;
 	}
 	return undefined;
 }
@@ -253,39 +267,40 @@ function isUppercaseStart(name: string): boolean {
 
 function isFunctionalComponent(node: ESTree.Node): boolean {
 	const isFunctionalComponentDeclaration =
-		node.type === "FunctionDeclaration" ||
-		(node.type === "VariableDeclarator" &&
-			(node.init?.type === "ArrowFunctionExpression" || node.init?.type === "CallExpression"));
-	if (!isFunctionalComponentDeclaration || node.id?.type !== "Identifier") return false;
+		isFunctionDeclarationRaw(node) ||
+		(isVariableDeclarator(node) && (isArrowFunctionExpression(node.init) || isCallExpression(node.init)));
+	if (!isFunctionalComponentDeclaration || !isIdentifierName(node.id)) return false;
 	return isUppercaseStart(node.id.name);
 }
 
 function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	function isWrappedInline(candidate: ESTree.Node): boolean {
-		if (candidate.type !== "VariableDeclarator" || candidate.init?.type !== "CallExpression") return false;
+		if (!isVariableDeclarator(candidate) || !isCallExpression(candidate.init)) return false;
 		/* v8 ignore next -- non-Identifier HOC callees never reach the pure-HOC check in tests. @preserve */
-		if (candidate.init.callee.type !== "Identifier" || KNOWN_PURE_HOCS.has(candidate.init.callee.name)) {
-			return false;
-		}
-		const [firstArgument] = candidate.init.arguments;
+		if (!isIdentifierName(candidate.init.callee) || KNOWN_PURE_HOCS.has(candidate.init.callee.name)) return false;
 		/* v8 ignore start -- @preserve the arrow arm is exercised by the memo/withRouter cases; the FunctionExpression arm never executes (probed). */
-		return firstArgument?.type === "ArrowFunctionExpression" || firstArgument?.type === "FunctionExpression";
+		return isCallbackFunction(candidate.init.arguments[0]);
 		/* v8 ignore stop */
 	}
 
 	function isWrappedSeparately(candidate: ESTree.Node): boolean {
-		if (candidate.type !== "VariableDeclarator") return false;
+		if (!isVariableDeclarator(candidate)) return false;
 		const { id } = candidate;
 		/* v8 ignore next -- VariableDeclarator ids from the parser are always identifiers. @preserve */
-		if (id.type !== "Identifier") return false;
+		if (!isIdentifierName(id)) return false;
+
 		const variable = getVariableByName(state, id);
 		/* v8 ignore start -- @preserve separately-wrapped HOC references are always call arguments of an identifier callee (probed). */
 		return (
 			variable?.references.some((candidateRef) => {
 				const { parent } = candidateRef.identifier;
-				if (parent.type !== "CallExpression") return false;
-				if (parent.arguments.every((argument) => argument !== candidateRef.identifier)) return false;
-				return parent.callee.type === "Identifier" && !KNOWN_PURE_HOCS.has(parent.callee.name);
+				if (
+					!isCallExpression(parent) ||
+					parent.arguments.every((argument) => argument !== candidateRef.identifier)
+				) {
+					return false;
+				}
+				return isIdentifierName(parent.callee) && !KNOWN_PURE_HOCS.has(parent.callee.name);
 			}) ?? false
 		);
 		/* v8 ignore stop */
@@ -296,28 +311,28 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 
 function isCustomHook(node: ESTree.Node): node is ReactOwner {
 	if (
-		node.type !== "FunctionDeclaration" &&
-		(node.type !== "VariableDeclarator" ||
-			node.init === null ||
-			(node.init.type !== "ArrowFunctionExpression" && node.init.type !== "FunctionExpression"))
+		(!isFunctionDeclarationRaw(node) &&
+			(!isVariableDeclarator(node) || node.init === null || isCallbackFunction(node.init))) ||
+		/* v8 ignore next -- function/variable declarations from the parser always carry identifier ids. @preserve */
+		!isIdentifierName(node.id)
 	) {
 		return false;
 	}
-	/* v8 ignore next -- function/variable declarations from the parser always carry identifier ids. @preserve */
-	if (node.id?.type !== "Identifier") return false;
 	const { name } = node.id;
 	const third = name.charAt(3);
 	return name.startsWith("use") && name.length > 3 && third === third.toUpperCase();
 }
 
 function isUseState(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
-	if (node.type === "MemberExpression" && isReactMemberCall(state, node, USE_STATE_HOOK_NAME)) return true;
-	if (node.type !== "Identifier") return false;
+	if (isMemberExpression(node) && isReactMemberCall(state, node, USE_STATE_HOOK_NAME)) return true;
+	if (!isIdentifierName(node)) return false;
 	// Support passing `ref.identifier` directly for convenience.
 	const { parent } = node;
-	if (parent.type === "MemberExpression" && isReactMemberCall(state, parent, USE_STATE_HOOK_NAME)) return true;
-	if (node.name === USE_STATE_HOOK_NAME) return true;
-	return isBindingImportedCall(state, node, USE_STATE_HOOK_NAME);
+	return (
+		(isMemberExpression(parent) && isReactMemberCall(state, parent, USE_STATE_HOOK_NAME)) ||
+		node.name === USE_STATE_HOOK_NAME ||
+		isBindingImportedCall(state, node, USE_STATE_HOOK_NAME)
+	);
 }
 
 // isUseRef is exercised through isRefCall (e.g. videoRef.current.play() in the
@@ -325,36 +340,37 @@ function isUseState(state: ReactEffectAnalysisState, node: ESTree.Node): boolean
 // non-member identifier shapes are unreachable from isRef's callee positions.
 /* v8 ignore start -- @preserve reachable member-callee arms are covered via isRefCall; identifier shapes never reach here. */
 function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
-	if (node.type === "MemberExpression") {
-		return isReactMemberCall(state, node, USE_REF_HOOK_NAME);
-	}
-	if (node.type !== "Identifier") return false;
+	if (isMemberExpression(node)) return isReactMemberCall(state, node, USE_REF_HOOK_NAME);
+	if (!isIdentifierName(node)) return false;
+
 	const { parent } = node;
-	if (parent.type === "MemberExpression" && isReactMemberCall(state, parent, USE_REF_HOOK_NAME)) return true;
-	if (node.name === USE_REF_HOOK_NAME) return true;
-	return isBindingImportedCall(state, node, USE_REF_HOOK_NAME);
+	return (
+		(isMemberExpression(parent) && isReactMemberCall(state, parent, USE_REF_HOOK_NAME)) ||
+		node.name === USE_REF_HOOK_NAME ||
+		isBindingImportedCall(state, node, USE_REF_HOOK_NAME)
+	);
 }
 /* v8 ignore stop */
 
 function isUseEffect(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	/* v8 ignore next -- isUseEffect is only called with CallExpression nodes from the program call index. @preserve */
-	if (node.type !== "CallExpression") return false;
-	if (node.callee.type === "Identifier") {
+	if (!isCallExpression(node)) return false;
+	if (isIdentifierName(node.callee)) {
 		if (node.callee.name === EFFECT_HOOK_NAME) return true;
 		return isBindingImportedCall(state, node.callee, EFFECT_HOOK_NAME);
 	}
-	return node.callee.type === "MemberExpression" && isReactMemberCall(state, node.callee, EFFECT_HOOK_NAME);
+	return isMemberExpression(node.callee) && isReactMemberCall(state, node.callee, EFFECT_HOOK_NAME);
 }
 
 function isReactMemberCall(state: ReactEffectAnalysisState, node: ESTree.MemberExpression, name: string): boolean {
-	if (node.computed || node.object.type !== "Identifier" || node.property.type !== "Identifier") return false;
+	if (node.computed || !isIdentifierName(node.object) || !isIdentifierName(node.property)) return false;
 	if (node.object.name === "React" && node.property.name === name) return true;
 	return node.property.name === name && isReactNamespaceImport(state, node.object);
 }
 
 function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.Node): undefined | Variable {
 	/* v8 ignore start -- @preserve callers only pass identifier-shaped nodes from parser-valid ASTs. */
-	if (identifier.type !== "Identifier") return undefined;
+	if (!isIdentifierName(identifier)) return undefined;
 	/* v8 ignore stop */
 	const { name } = identifier;
 	const scope = state.sourceCode.getScope(identifier);
@@ -386,14 +402,14 @@ function matchesNamedImport(
 	if (definition.type !== "ImportBinding") return false;
 	/* v8 ignore start -- @preserve ImportBinding definitions are always parented by an ImportDeclaration. */
 	const importDeclaration = definition.node.parent;
-	if (importDeclaration?.type !== "ImportDeclaration") return false;
+	if (!isImportDeclaration(importDeclaration)) return false;
 	if (!reactSources.has(importDeclaration.source.value)) return false;
-	if (definition.node.type !== "ImportSpecifier") return false;
+	if (!isImportSpecifier(definition.node)) return false;
 	/* v8 ignore stop */
 	const { imported } = definition.node;
-	if (imported.type === "Identifier" && imported.name === importedName) return true;
+	if (isIdentifierName(imported) && imported.name === importedName) return true;
 	/* v8 ignore next -- string-literal import specifiers are a parser edge case not produced by the yuku parser. @preserve */
-	if (imported.type === "Literal" && imported.value === importedName) return true;
+	if (isAnyLiteral(imported) && imported.value === importedName) return true;
 	return false;
 }
 
@@ -402,19 +418,17 @@ function isReactNamespaceImportVariable(variable: undefined | Variable, reactSou
 	if (variable === undefined) return false;
 	for (const definition of variable.defs) {
 		if (definition.type !== "ImportBinding") continue;
+
 		const importDeclaration = definition.node.parent;
-		if (importDeclaration?.type !== "ImportDeclaration") continue;
-		if (!reactSources.has(importDeclaration.source.value)) continue;
-		if (definition.node.type === "ImportDefaultSpecifier" || definition.node.type === "ImportNamespaceSpecifier") {
-			return true;
-		}
+		if (!isImportDeclaration(importDeclaration) || !reactSources.has(importDeclaration.source.value)) continue;
+		if (isImportDefaultSpecifier(definition.node) || isImportNamespaceSpecifier(definition.node)) return true;
 	}
 	return false;
 	/* v8 ignore stop */
 }
 function isBindingImportedCall(state: ReactEffectAnalysisState, node: ESTree.Node, importedName: string): boolean {
 	/* v8 ignore next -- callers only pass identifier-shaped callees to isBindingImportedCall. @preserve */
-	if (node.type !== "Identifier") return false;
+	if (!isIdentifierName(node)) return false;
 	/* v8 ignore next -- isBindingImportedCall is only reached for identifiers that the caller already matched by name, so a bare identifier without a scope variable is unreachable here. @preserve */
 	const variable = getVariableByName(state, node);
 	return isReactNamedImportVariable(variable, importedName, state.reactSources);
@@ -429,14 +443,14 @@ function isState(state: ReactEffectAnalysisState, reference: Reference): boolean
 	const elements = getStateElements(state, reference);
 	if (elements === undefined) return false;
 	const [stateElement] = elements;
-	return stateElement?.type === "Identifier" && stateElement.name === reference.identifier.name;
+	return isIdentifierName(stateElement) && stateElement.name === reference.identifier.name;
 }
 
 function isStateSetter(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	const elements = getStateElements(state, reference);
 	if (elements === undefined) return false;
 	const [, setterElement] = elements;
-	return setterElement?.type === "Identifier" && setterElement.name === reference.identifier.name;
+	return isIdentifierName(setterElement) && setterElement.name === reference.identifier.name;
 }
 
 function getStateElements(
@@ -446,19 +460,17 @@ function getStateElements(
 	const definition = reference.resolved?.defs.find((candidate) =>
 		isUseStateVariableDefinition(state, candidate.node),
 	);
-	if (definition?.node.type !== "VariableDeclarator" || definition.node.id.type !== "ArrayPattern") {
-		return undefined;
-	}
+	if (!isVariableDeclarator(definition?.node) || !isArrayPattern(definition.node.id)) return undefined;
 	const { elements } = definition.node.id;
 	return elements.length !== 1 && elements.length !== 2 ? undefined : elements;
 }
 
 function isUseStateVariableDefinition(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	return (
-		node.type === "VariableDeclarator" &&
-		node.init?.type === "CallExpression" &&
+		isVariableDeclarator(node) &&
+		isCallExpression(node.init) &&
 		isUseState(state, node.init.callee) &&
-		node.id.type === "ArrayPattern"
+		isArrayPattern(node.id)
 	);
 }
 
@@ -481,14 +493,9 @@ function isConstant(reference: Reference): boolean {
 	// react-effect-utilities.test.ts.
 	/* v8 ignore start -- @preserve all four literal-shape arms are covered by the constant-leaf test cases; the collector folds the chain. */
 	return (reference.resolved?.defs ?? []).some((definition) => {
-		if (definition.node.type !== "VariableDeclarator") return false;
+		if (!isVariableDeclarator(definition.node)) return false;
 		const { init } = definition.node;
-		return (
-			init?.type === "Literal" ||
-			init?.type === "TemplateLiteral" ||
-			init?.type === "ArrayExpression" ||
-			init?.type === "ObjectExpression"
-		);
+		return isAnyLiteral(init) || isTemplateLiteral(init) || isArrayExpression(init) || isObjectExpression(init);
 	});
 	/* v8 ignore stop */
 }
@@ -499,9 +506,11 @@ function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	/* v8 ignore start -- @preserve both guard arms are covered by the isRefCall corpus cases; the collector attributes them to the some() call. */
 	return (
 		reference.resolved?.defs.some((definition) => {
-			if (definition.node.type !== "VariableDeclarator") return false;
-			if (definition.node.init?.type !== "CallExpression") return false;
-			return isUseRef(state, definition.node.init.callee);
+			return (
+				isVariableDeclarator(definition.node) &&
+				isCallExpression(definition.node.init) &&
+				isUseRef(state, definition.node.init.callee)
+			);
 		}) ?? false
 	);
 	/* v8 ignore stop */
@@ -509,11 +518,7 @@ function isRef(state: ReactEffectAnalysisState, reference: Reference): boolean {
 
 function isRefCurrent(reference: Reference): boolean {
 	const { parent } = reference.identifier;
-	return (
-		parent.type === "MemberExpression" &&
-		parent.property.type === "Identifier" &&
-		parent.property.name === "current"
-	);
+	return isMemberExpression(parent) && isIdentifierNamed(parent.property, "current");
 }
 
 function isStateCall(state: ReactEffectAnalysisState, reference: Reference): boolean {
@@ -532,11 +537,11 @@ function isRefCall(state: ReactEffectAnalysisState, reference: Reference): boole
 
 function getStateName(state: ReactEffectAnalysisState, reference: Reference): string | undefined {
 	const declaration = getUseStateDeclaration(state, reference);
-	if (declaration?.id.type !== "ArrayPattern") return undefined;
+	if (!isArrayPattern(declaration?.id)) return undefined;
 	const [first, second] = declaration.id.elements;
-	const firstName = first?.type === "Identifier" ? first.name : undefined;
+	const firstName = isIdentifierName(first) ? first.name : undefined;
 	/* v8 ignore next -- state-call setters are always the second ArrayPattern element, an Identifier (probed). @preserve */
-	const secondName = second?.type === "Identifier" ? second.name : undefined;
+	const secondName = isIdentifierName(second) ? second.name : undefined;
 	return firstName ?? secondName;
 }
 
@@ -550,7 +555,7 @@ function getUseStateDeclaration(
 	if (upstreamIdentifier === undefined) return undefined;
 	/* v8 ignore stop */
 	let result: ESTree.Node = upstreamIdentifier;
-	while (result.type !== "VariableDeclarator") {
+	while (!isVariableDeclarator(result)) {
 		const parent: ESTree.Node | null = result.parent;
 		if (parent === null) return undefined;
 		result = parent;
@@ -560,15 +565,12 @@ function getUseStateDeclaration(
 
 function getDeclaringNode(node: ESTree.Node): ESTree.Node {
 	// Parameter definitions point at the function node, not the parameter.
-	if (node.type !== "ArrowFunctionExpression") return node;
+	if (!isArrowFunctionExpression(node)) return node;
 	const { parent } = node;
-	return parent.type === "CallExpression" ? parent.parent : parent;
+	return isCallExpression(parent) ? parent.parent : parent;
 }
 
-function findEnclosingReactNode(
-	state: ReactEffectAnalysisState,
-	node: ESTree.Node | null | undefined,
-): ReactOwner | undefined {
+function findEnclosingReactNode(state: ReactEffectAnalysisState, node?: ESTree.Node | null): ReactOwner | undefined {
 	/* v8 ignore next -- rules always pass the effect call node, never null. @preserve */
 	if (node === null || node === undefined) return undefined;
 	if (isFunctionalComponent(node) || isFunctionalHOC(state, node) || isCustomHook(node)) return toReactOwner(node);
@@ -581,31 +583,22 @@ function getComponentName(node: ReactOwner | undefined): string | undefined {
 	/* v8 ignore next 2 -- rules only call getComponentName with a resolved owner; the undefined guard is unreachable. @preserve */
 	if (node === undefined) return undefined;
 	/* v8 ignore next 2 -- findEnclosingReactNode only yields FunctionDeclaration or VariableDeclarator owners. @preserve */
-	if (node.type !== "FunctionDeclaration" && node.type !== "VariableDeclarator") {
-		return undefined;
-	}
-	if (node.type === "FunctionDeclaration") {
+	if (!isFunctionDeclarationRaw(node) && !isVariableDeclarator(node)) return undefined;
+
+	if (isFunctionDeclarationRaw(node)) {
 		const { id } = node;
 		/* v8 ignore next 2 -- component FunctionDeclarations always carry an identifier. @preserve */
 		return id === null ? undefined : id.name;
 	}
-	const id: ESTree.BindingPattern | null = node.id;
+
+	const { id } = node;
 	/* v8 ignore next 2 -- component VariableDeclarators always carry an identifier. @preserve */
-	if (id === null) return undefined;
-	/* v8 ignore next 2 -- component VariableDeclarator ids are always identifiers. @preserve */
-	if (id.type !== "Identifier") return undefined;
-	return id.name;
+	return isIdentifierName(id) ? id.name : undefined;
 }
 
 function toReactOwner(node: ESTree.Node): ReactOwner | undefined {
-	if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
-		return node;
-	}
+	if (isFunctionDeclaration(node)) return node;
 	/* v8 ignore start -- @preserve toReactOwner is only called with nodes already matched as components/HOCs/custom hooks; the fallback never executes. */
-	return node.type === "VariableDeclarator" ? node : undefined;
+	return isVariableDeclarator(node) ? node : undefined;
 	/* v8 ignore stop */
-}
-
-function isNode(value: unknown): value is ESTree.Node {
-	return typeof value === "object" && value !== null && "type" in value;
 }

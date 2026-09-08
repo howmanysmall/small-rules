@@ -1,11 +1,48 @@
 import { getDeclarationRemovalRange, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	ARRAY_EXPRESSION,
+	BINARY_EXPRESSION,
+	CALL_EXPRESSION,
+	CHAIN_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	IDENTIFIER,
+	isAnyLiteral,
 	isBindingIdentifier,
+	isBlockStatement,
 	isCallbackFunction,
+	isCallExpression,
+	isChainExpression,
+	isClassExpression,
 	isExportNamedDeclaration,
+	isNewExpression,
+	isParenthesizedExpression,
+	isProgram,
+	isProperty,
+	isTsAsExpression,
+	isTsInstantiationExpression,
+	isTsNonNullExpression,
+	isTsSatisfiesExpression,
+	isTsTypeAssertion,
 	isVariableDeclaration,
 	isVariableDeclarator,
+	JSX_ELEMENT,
+	JSX_FRAGMENT,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	SEQUENCE_EXPRESSION,
+	SPREAD_ELEMENT,
+	TEMPLATE_LITERAL,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+	UNARY_EXPRESSION,
+	unwrapParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
@@ -62,14 +99,14 @@ function collectAllScopes(root: Scope): Array<Scope> {
 }
 
 function isFunctionLikeInitializer(node: ESTree.Node): boolean {
-	return isCallbackFunction(node) || node.type === "ClassExpression";
+	return isCallbackFunction(node) || isClassExpression(node);
 }
 
 const OBJECT_LIKE_INITIALIZER_TYPES: ReadonlySet<ESTree.Node["type"]> = new Set([
-	"ArrayExpression",
-	"ObjectExpression",
-	"JSXElement",
-	"JSXFragment",
+	ARRAY_EXPRESSION,
+	OBJECT_EXPRESSION,
+	JSX_ELEMENT,
+	JSX_FRAGMENT,
 ] as const);
 
 function isObjectLikeInitializer(
@@ -78,7 +115,7 @@ function isObjectLikeInitializer(
 	sourceCode: SourceCode,
 ): boolean {
 	if (OBJECT_LIKE_INITIALIZER_TYPES.has(initializer.type)) return true;
-	if (initializer.type !== "CallExpression" && initializer.type !== "NewExpression") return false;
+	if (!isCallExpression(initializer) && !isNewExpression(initializer)) return false;
 
 	const candidateText = sourceCode.getText(initializer.callee);
 	for (const pattern of patterns) if (pattern.test(candidateText)) return true;
@@ -86,7 +123,7 @@ function isObjectLikeInitializer(
 }
 
 function isStatementContainer(node: ESTree.Node): node is ESTree.BlockStatement | ESTree.Program {
-	return node.type === "Program" || node.type === "BlockStatement";
+	return isProgram(node) || isBlockStatement(node);
 }
 
 function getCallRootIdentifierName(node: ESTree.Node): string | undefined {
@@ -94,30 +131,28 @@ function getCallRootIdentifierName(node: ESTree.Node): string | undefined {
 	while (true) {
 		/* v8 ignore next 10 -- @preserve CallExpression/NewExpression callees do not expose TS wrapper nodes after parser normalization. */
 		switch (current.type) {
-			case "ChainExpression":
-			case "ParenthesizedExpression":
-			case "TSAsExpression":
-			case "TSInstantiationExpression":
-			case "TSNonNullExpression":
-			case "TSSatisfiesExpression":
-			case "TSTypeAssertion": {
+			case CHAIN_EXPRESSION:
+			case PARENTHESIZED_EXPRESSION:
+			case TS_AS_EXPRESSION:
+			case TS_INSTANTIATION_EXPRESSION:
+			case TS_NON_NULL_EXPRESSION:
+			case TS_SATISFIES_EXPRESSION:
+			case TS_TYPE_ASSERTION: {
 				current = current.expression;
 				break;
 			}
 
-			case "Identifier": {
+			case IDENTIFIER:
 				return current.name;
-			}
 
-			case "MemberExpression": {
+			case MEMBER_EXPRESSION: {
 				current = current.object;
 				break;
 			}
 
-			default: {
+			default:
 				/* v8 ignore next -- @preserve only handled expression nodes can appear as relocatable static call roots. */
 				return undefined;
-			}
 		}
 	}
 }
@@ -147,7 +182,7 @@ function appendRelocatableCallChildren(
 function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, worklist: Array<ESTree.Node>): boolean {
 	for (const property of node.properties) {
 		/* v8 ignore next -- @preserve spread object properties are rejected by static-expression analysis before relocation checks. */
-		if (property.type !== "Property") return false;
+		if (!isProperty(property)) return false;
 		if (property.computed) worklist.push(property.key);
 		worklist.push(property.value);
 	}
@@ -161,67 +196,62 @@ function appendRelocatableChildren(
 ): boolean {
 	/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
 	if (
-		node.type === "ChainExpression" ||
-		node.type === "ParenthesizedExpression" ||
-		node.type === "TSAsExpression" ||
-		node.type === "TSInstantiationExpression" ||
-		node.type === "TSNonNullExpression" ||
-		node.type === "TSSatisfiesExpression" ||
-		node.type === "TSTypeAssertion"
+		isChainExpression(node) ||
+		isParenthesizedExpression(node) ||
+		isTsAsExpression(node) ||
+		isTsInstantiationExpression(node) ||
+		isTsNonNullExpression(node) ||
+		isTsSatisfiesExpression(node) ||
+		isTsTypeAssertion(node)
 	) {
 		worklist.push(node.expression);
 		return true;
 	}
 
 	switch (node.type) {
-		case "ArrayExpression": {
+		case ARRAY_EXPRESSION:
 			return appendRelocatableArrayElements(node, worklist);
-		}
 
-		case "BinaryExpression":
-		case "LogicalExpression": {
+		case BINARY_EXPRESSION:
+		case LOGICAL_EXPRESSION: {
 			worklist.push(node.left, node.right);
 			return true;
 		}
 
-		case "CallExpression":
-		case "NewExpression": {
+		case CALL_EXPRESSION:
+		case NEW_EXPRESSION:
 			return appendRelocatableCallChildren(node, staticGlobalFactories, worklist);
-		}
 
-		case "ConditionalExpression": {
+		case CONDITIONAL_EXPRESSION: {
 			worklist.push(node.test, node.consequent, node.alternate);
 			return true;
 		}
 
-		case "MemberExpression": {
+		case MEMBER_EXPRESSION: {
 			worklist.push(node.object);
 			if (node.computed) worklist.push(node.property);
 			return true;
 		}
 
-		case "ObjectExpression": {
+		case OBJECT_EXPRESSION:
 			return appendRelocatableObjectProperties(node, worklist);
-		}
 
-		case "SequenceExpression":
-		case "SpreadElement": {
+		case SEQUENCE_EXPRESSION:
+		case SPREAD_ELEMENT:
 			return false;
-		}
 
-		case "TemplateLiteral": {
+		case TEMPLATE_LITERAL: {
 			for (const expression of node.expressions) worklist.push(expression);
 			return true;
 		}
 
-		case "UnaryExpression": {
+		case UNARY_EXPRESSION: {
 			worklist.push(node.argument);
 			return true;
 		}
 
-		default: {
+		default:
 			return true;
-		}
 	}
 }
 
@@ -239,7 +269,7 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 }
 
 function isAutoInlineSafeInitializer(sourceCode: SourceCode, node: ESTree.Expression): boolean {
-	if (node.type === "Literal") return true;
+	if (isAnyLiteral(node)) return true;
 
 	const seen = new Set<ESTree.Node>();
 	return (
@@ -249,9 +279,7 @@ function isAutoInlineSafeInitializer(sourceCode: SourceCode, node: ESTree.Expres
 }
 
 function getInlineInitializerText(sourceCode: SourceCode, initializer: ESTree.Expression): string {
-	let current = initializer;
-	while (current.type === "ParenthesizedExpression") current = current.expression;
-	return sourceCode.getText(current);
+	return sourceCode.getText(unwrapParenthesis(initializer));
 }
 
 function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree.VariableDeclaration): boolean {
@@ -262,10 +290,7 @@ function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree
 	const { body } = parent;
 	for (let index = 0; index < body.length; index += 1) {
 		const statement = body[index];
-		if (statement === first) {
-			const nextStatement = body[index + 1];
-			return nextStatement === second;
-		}
+		if (statement === first) return body[index + 1] === second;
 	}
 
 	/* v8 ignore next -- @preserve ESTree parent/body invariant: a declaration parented by a statement container is present in that container body. */
@@ -335,9 +360,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 
 			const declarationNode = variableDefinition.parent;
 			/* v8 ignore next -- @preserve ESLint variable definitions for Variable defs are parented by their VariableDeclaration. */
-			if (declarationNode === null || !isVariableDeclaration(declarationNode)) {
-				return undefined;
-			}
+			if (declarationNode === null || !isVariableDeclaration(declarationNode)) return undefined;
 			if (declarationNode.kind !== "const" || declarationNode.declarations.length !== 1) return undefined;
 			if (isExportNamedDeclaration(declarationNode.parent)) return undefined;
 
@@ -412,7 +435,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 					names: fixableConstants.map((constant) => constant.name).join(", "),
 				},
 				fix(fixer): Array<Fix> {
-					const fixes: Array<Fix> = [];
+					const fixes = new Array<Fix>();
 					let size = 0;
 
 					for (const constant of fixableConstants) {
@@ -437,9 +460,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				const programScope = sourceCode.getScope(programNode);
 				const allScopes = collectAllScopes(programScope);
 
-				for (const scope of allScopes) {
-					inspectScope(scope);
-				}
+				for (const scope of allScopes) inspectScope(scope);
 			},
 		} satisfies Visitor;
 	},
