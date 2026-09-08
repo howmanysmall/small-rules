@@ -20,9 +20,9 @@ export const BINARY_EXPRESSION = "BinaryExpression" as const satisfies NodeType;
 export const BLOCK_STATEMENT = "BlockStatement" as const satisfies NodeType;
 export const BREAK_STATEMENT = "BreakStatement" as const satisfies NodeType;
 export const CLASS_DECLARATION = "ClassDeclaration" as const satisfies NodeType;
-export const IMPORT_DECLARATION = "ImportDeclaration" as const satisfies NodeType;
-export const TS_ENUM_DECLARATION = "TSEnumDeclaration" as const satisfies NodeType;
-export const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies NodeType;
+const IMPORT_DECLARATION = "ImportDeclaration" as const satisfies NodeType;
+const TS_ENUM_DECLARATION = "TSEnumDeclaration" as const satisfies NodeType;
+const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies NodeType;
 export const CALL_EXPRESSION = "CallExpression" as const satisfies NodeType;
 export const CATCH_CLAUSE = "CatchClause" as const satisfies NodeType;
 export const CHAIN_EXPRESSION = "ChainExpression" as const satisfies NodeType;
@@ -46,17 +46,17 @@ export const LOGICAL_EXPRESSION = "LogicalExpression" as const satisfies NodeTyp
 export const SUPER = "Super" as const satisfies NodeType;
 export const THIS_EXPRESSION = "ThisExpression" as const satisfies NodeType;
 export const MEMBER_EXPRESSION = "MemberExpression" as const satisfies NodeType;
-export const METHOD_DEFINITION = "MethodDefinition" as const satisfies NodeType;
+const METHOD_DEFINITION = "MethodDefinition" as const satisfies NodeType;
 export const NEW_EXPRESSION = "NewExpression" as const satisfies NodeType;
 export const OBJECT_EXPRESSION = "ObjectExpression" as const satisfies NodeType;
 export const PARENTHESIZED_EXPRESSION = "ParenthesizedExpression" as const satisfies NodeType;
-export const PRIVATE_IDENTIFIER = "PrivateIdentifier" as const satisfies NodeType;
+const PRIVATE_IDENTIFIER = "PrivateIdentifier" as const satisfies NodeType;
 export const PROPERTY = "Property" as const satisfies NodeType;
 export const PROPERTY_DEFINITION = "PropertyDefinition" as const satisfies NodeType;
 export const RETURN_STATEMENT = "ReturnStatement" as const satisfies NodeType;
 export const SEQUENCE_EXPRESSION = "SequenceExpression" as const satisfies NodeType;
 export const SPREAD_ELEMENT = "SpreadElement" as const satisfies NodeType;
-export const STATIC_BLOCK = "StaticBlock" as const satisfies NodeType;
+const STATIC_BLOCK = "StaticBlock" as const satisfies NodeType;
 export const SWITCH_CASE = "SwitchCase" as const satisfies NodeType;
 export const SWITCH_STATEMENT = "SwitchStatement" as const satisfies NodeType;
 export const TAGGED_TEMPLATE_EXPRESSION = "TaggedTemplateExpression" as const satisfies NodeType;
@@ -74,14 +74,14 @@ export const TS_DECLARE_FUNCTION = "TSDeclareFunction" as const satisfies NodeTy
 export const TS_EMPTY_BODY_FUNCTION_EXPRESSION = "TSEmptyBodyFunctionExpression" as const satisfies NodeType;
 export const TS_FUNCTION_TYPE = "TSFunctionType" as const satisfies NodeType;
 export const TS_INSTANTIATION_EXPRESSION = "TSInstantiationExpression" as const satisfies NodeType;
-export const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
-export const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
+const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
+const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
 export const TS_INTERFACE_DECLARATION = "TSInterfaceDeclaration" as const satisfies NodeType;
 export const TS_INTERSECTION_TYPE = "TSIntersectionType" as const satisfies NodeType;
 export const TS_MAPPED_TYPE = "TSMappedType" as const satisfies NodeType;
 export const TS_METHOD_SIGNATURE = "TSMethodSignature" as const satisfies NodeType;
-export const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
-export const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
+const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
+const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
 export const TS_NEVER_KEYWORD = "TSNeverKeyword" as const satisfies NodeType;
 export const TS_NON_NULL_EXPRESSION = "TSNonNullExpression" as const satisfies NodeType;
 export const TS_NULL_KEYWORD = "TSNullKeyword" as const satisfies NodeType;
@@ -91,11 +91,11 @@ export const TS_SATISFIES_EXPRESSION = "TSSatisfiesExpression" as const satisfie
 export const TS_STRING_KEYWORD = "TSStringKeyword" as const satisfies NodeType;
 export const TS_SYMBOL_KEYWORD = "TSSymbolKeyword" as const satisfies NodeType;
 export const TS_TUPLE_TYPE = "TSTupleType" as const satisfies NodeType;
-export const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
+const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
 export const TS_TYPE_ASSERTION = "TSTypeAssertion" as const satisfies NodeType;
 export const TS_TYPE_LITERAL = "TSTypeLiteral" as const satisfies NodeType;
 export const TS_TYPE_OPERATOR = "TSTypeOperator" as const satisfies NodeType;
-export const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
+const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 export const TS_TYPE_REFERENCE = "TSTypeReference" as const satisfies NodeType;
 export const TS_UNDEFINED_KEYWORD = "TSUndefinedKeyword" as const satisfies NodeType;
 export const TS_UNION_TYPE = "TSUnionType" as const satisfies NodeType;
@@ -547,35 +547,23 @@ export function isFunctionDeclaration(node?: ESTree.Node | null): node is ESTree
 	return isFunctionDeclarationRaw(node) || isFunctionExpression(node);
 }
 
-/**
- * Checks whether an AST node is a TypeScript declare function.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a TypeScript declare function.
- */
-export function isTsDeclareFunction(node: ESTree.Node): node is ESTree.Function & { type: typeof TS_DECLARE_FUNCTION } {
+// oxlint-disable-next-line jsdoc-js/require-description -- useless
+/** @knipignore -- Test-only */
+// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- useless.
+export function isTsDeclareFunction(node: ESTree.Node): node is ESTree.Function & { type: "TSDeclareFunction" } {
 	return node.type === TS_DECLARE_FUNCTION;
 }
 
-/**
- * Checks whether an AST node is a TypeScript empty-body function expression.
- *
- * @param node - AST node to check.
- * @returns Whether the node is an empty-body function expression.
- */
+// oxlint-disable-next-line jsdoc-js/require-description -- useless
+/** @knipignore -- Test-only */
+// oxlint-disable-next-line jsdoc/require-returns -- useless.
 export function isTsEmptyBodyFunctionExpression(
+	// oxlint-disable-next-line jsdoc/require-param -- useless
 	node: ESTree.Node,
 ): node is ESTree.Function & { type: typeof TS_EMPTY_BODY_FUNCTION_EXPRESSION } {
 	return node.type === TS_EMPTY_BODY_FUNCTION_EXPRESSION;
 }
 
-/**
- * Checks whether an AST node is any function-like expression or declaration.
- * Oxc represents both TypeScript-only kinds within `ESTree.Function`.
- *
- * @param node - AST node to check.
- * @returns Whether the node is function-like.
- */
 export function isFunctionLike(node: ESTree.Node): node is ESTree.ArrowFunctionExpression | ESTree.Function {
 	return (
 		isArrowFunctionExpression(node) ||
