@@ -16,6 +16,9 @@ url = "https://mcp.context7.com/mcp"
 args = ["mcp", "--root", "."]
 command = "hk"
 
+[mcp_servers.fallow]
+command = "fallow-mcp"
+
 [features.multi_agent_v2]
 max_concurrent_threads_per_session = 1000
 

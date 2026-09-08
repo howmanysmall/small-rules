@@ -29,7 +29,7 @@
 		".opencode/**"
 	],
 
-	// Same list knip carried, plus the packages fallow cannot see through a
+	// Packages fallow cannot see through a
 	// config string (`publint` in tsdown.config.ts), a CLI invocation, an Astro
 	// integration, or an ambient type-only import in
 	// documentation/src/types/satteri-optional-peers.d.ts (hast, mdast).
@@ -37,16 +37,13 @@
 		"@arethetypeswrong/core",
 		"@astrojs/markdown-satteri",
 		"@fast-check/vitest",
-		"@mitata/counters",
 		"@total-typescript/ts-reset",
 		"babel-plugin-react-compiler",
-		"eslint-plugin-pnpm",
 		"fast-check",
 		"hast",
 		"jiti",
 		"mdast",
 		"mdast-util-directive",
-		"oxlint-plugin-*",
 		"publint",
 		"sfw",
 		"sharp"
@@ -63,33 +60,29 @@
 		"unused-types": "error",
 		"unused-dependencies": "error",
 		"unused-dev-dependencies": "error",
+		"unused-optional-dependencies": "error",
 		"unused-enum-members": "error",
 		"unlisted-dependencies": "error",
 		"unresolved-imports": "error",
 		"duplicate-exports": "error",
 		"circular-dependencies": "error",
 		"re-export-cycle": "error",
-		"unused-dependency-overrides": "warn",
-		"stale-suppressions": "warn"
+		"type-only-dependencies": "error",
+		"test-only-dependencies": "error",
+		"unused-dependency-overrides": "error",
+		"stale-suppressions": "error"
 	},
 
-	"overrides": [
-		{
-			"files": ["tests/**", "**/*.test.ts", "**/*.fuzz.ts"],
-			"rules": { "unused-exports": "off", "unused-types": "off" }
-		}
-	],
-
-	// Mirrors the retired .jscpd.json thresholds (5 lines / 60 tokens). CSS
+	// Detect clones of at least 5 lines / 50 tokens, capped at 0.5%. CSS
 	// @font-face unicode-range blocks and the vendored anti-slop rules are
 	// duplicated by nature, so they stay out of the percentage.
 	"duplicates": {
 		"mode": "mild",
 		"minLines": 5,
-		"minTokens": 60,
-		"threshold": 1.5,
+		"minTokens": 50,
+		"threshold": 0.5,
 		"ignoreDefaults": true,
-		"ignore": ["documentation/src/styles/**", "src/rules/anti-slop/**", "tests/fixtures/**"]
+		"ignore": ["documentation/src/styles/custom.css", "src/rules/anti-slop/**", "tests/fixtures/**"]
 	},
 
 	"audit": {

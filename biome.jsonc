@@ -387,6 +387,11 @@
 			}
 		},
 
+		{
+			"includes": [".fallowrc.jsonc"],
+			"json": { "formatter": { "trailingCommas": "none" } }
+		},
+
 		// JSON Files
 		{
 			"includes": [],
