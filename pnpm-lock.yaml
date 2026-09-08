@@ -447,9 +447,6 @@ importers:
 
   .:
     dependencies:
-      '@small-rules/arktype-utilities':
-        specifier: workspace:*
-        version: link:packages/arktype-utilities
       arktype:
         specifier: catalog:runtime
         version: 2.2.3
@@ -496,6 +493,9 @@ importers:
       '@isentinel/eslint-config':
         specifier: catalog:lint
         version: 6.0.0-beta.46(3695dd7e0b564d36fc92c3606adb4e19)
+      '@small-rules/arktype-utilities':
+        specifier: workspace:*
+        version: link:packages/arktype-utilities
       '@stryker-mutator/api':
         specifier: catalog:test
         version: 10.0.0
