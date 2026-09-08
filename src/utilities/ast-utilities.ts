@@ -1,3 +1,5 @@
+import { isNode } from "$oxc-utilities/oxc-utilities";
+
 import type { ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 export type ScopeVariable = Scope["set"] extends Map<string, infer VariableType> ? VariableType : never;
@@ -14,6 +16,35 @@ export function getVariableByName(scope: null | Scope, name: string): ScopeVaria
 
 export function pushChildScopes(scopes: Array<Scope>, scope: Scope): void {
 	for (const child of scope.childScopes) scopes.push(child);
+}
+
+const AST_NODE_KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
+export const STOP_NODE_TRAVERSAL = Symbol("STOP_NODE_TRAVERSAL");
+
+function pushNodeChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
+	for (const [key, value] of Object.entries(node)) {
+		if (AST_NODE_KEYS_TO_SKIP.has(key)) continue;
+		if (Array.isArray(value)) {
+			for (const child of value) {
+				if (isNode(child)) worklist.push(child);
+			}
+			continue;
+		}
+		if (isNode(value)) worklist.push(value);
+	}
+}
+
+export function forEachNode(
+	root: ESTree.Node,
+	visit: (node: ESTree.Node) => boolean | typeof STOP_NODE_TRAVERSAL | undefined | void,
+): void {
+	const worklist: Array<ESTree.Node> = [root];
+	for (const current of worklist) {
+		const result = visit(current);
+		if (result === STOP_NODE_TRAVERSAL) break;
+		if (result === false) continue;
+		pushNodeChildren(current, worklist);
+	}
 }
 
 export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable: ScopeVariable) => void): void {

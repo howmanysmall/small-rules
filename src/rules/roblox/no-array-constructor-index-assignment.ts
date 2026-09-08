@@ -1,6 +1,4 @@
-import { Predicate } from "effect";
-
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { forEachNode, hasShadowedBinding, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAssignmentExpression,
@@ -36,40 +34,20 @@ interface Candidate {
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
 }
 
-const VISITOR_KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
-
 function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {
 	return node.type === "Identifier";
 }
 
-function isNode(value: unknown): value is ESTree.Node {
-	return Predicate.isObject(value) && Predicate.isString(value.type);
-}
-
-function pushNodeChildren(node: ESTree.Node, stack: Array<unknown>): void {
-	for (const [key, value] of Object.entries(node)) {
-		if (VISITOR_KEYS_TO_SKIP.has(key)) continue;
-		if (value !== null && value !== undefined) stack.push(value);
-	}
-}
-
 function containsArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
-	const stack: Array<unknown> = [node];
-
-	while (stack.length > 0) {
-		const current = stack.pop();
-		if (Array.isArray(current)) {
-			for (const child of current) stack.push(child);
-			continue;
+	let containsReference = false;
+	forEachNode(node, (current) => {
+		if (current.type === "Identifier" && current.name === arrayIdentifierName) {
+			containsReference = true;
+			return STOP_NODE_TRAVERSAL;
 		}
-		if (!Predicate.isObject(current)) continue;
-
-		if (!isNode(current)) continue;
-		if (current.type === "Identifier" && current.name === arrayIdentifierName) return true;
-		pushNodeChildren(current, stack);
-	}
-
-	return false;
+		return true;
+	});
+	return containsReference;
 }
 
 function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {

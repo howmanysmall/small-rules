@@ -1,7 +1,7 @@
 import { Predicate } from "effect";
 
 import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
-import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { forEachNode, getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getMemberPropertyName,
@@ -14,7 +14,6 @@ import {
 	isImportDeclaration,
 	isImportSpecifier,
 	isMemberExpression,
-	isNode,
 	isObjectExpression,
 	isProperty,
 	isReturnStatement,
@@ -40,8 +39,6 @@ import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const DEFAULT_SYSTEM_TYPE_NAMES = ["PlanckSystem", "System", "SystemFunction", "SystemReturn", "SystemTableLike"];
-const KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
-
 type ScopeVariable = ReturnType<SourceCode["getDeclaredVariables"]>[number];
 
 interface ImportBinding {
@@ -90,29 +87,6 @@ function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQu
 function isRecognizedType(typeNode: ESTree.Node | null | undefined, systemTypeNames: ReadonlySet<string>): boolean {
 	const typeName = getReferencedTypeName(typeNode);
 	return typeName !== undefined && systemTypeNames.has(typeName);
-}
-
-function pushChildren(node: ESTree.Node, stack: Array<unknown>): void {
-	for (const [key, value] of Object.entries(node)) {
-		if (KEYS_TO_SKIP.has(key)) continue;
-		if (value !== null && value !== undefined) stack.push(value);
-	}
-}
-
-function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | undefined | void): void {
-	const stack: Array<unknown> = [root];
-	while (stack.length > 0) {
-		const current = stack.pop();
-		if (Array.isArray(current)) {
-			for (const child of current) stack.push(child);
-			continue;
-		}
-		if (!Predicate.isObject(current)) continue;
-		/* v8 ignore next -- @preserve parser object fields are arrays or AST nodes. */
-		if (!isNode(current)) continue;
-		if (visit(current) === false) continue;
-		pushChildren(current, stack);
-	}
 }
 
 function getPropertyName(property: ESTree.ObjectPropertyKind): string | undefined {

@@ -18,15 +18,10 @@ import {
 	isLogicalExpression,
 	isMemberExpression,
 	isNode,
-	isParenthesizedExpression,
 	isProperty,
 	isSpreadElement,
 	isTransparentDependencyExpression,
 	isTransparentExpressionNode,
-	isTsAsExpression,
-	isTsNonNullExpression,
-	isTsSatisfiesExpression,
-	isTsTypeAssertion,
 	isUnaryExpression,
 	isVariableDeclarator,
 	OBJECT_EXPRESSION,
@@ -186,47 +181,29 @@ function getHookName({ callee }: ESTree.CallExpression): string | undefined {
 	return undefined;
 }
 
+function unwrapDependencyExpression(node: ESTree.Node): ESTree.Node {
+	let current = node;
+	while (isTransparentDependencyExpression(current)) current = current.expression;
+	return current;
+}
+
 function getMemberExpressionDepth(node: ESTree.Node): number {
 	let depth = 0;
-	let current: ESTree.Node = node;
+	let current = unwrapDependencyExpression(node);
 
-	while (true) {
-		if (
-			isChainExpression(current) ||
-			isParenthesizedExpression(current) ||
-			isTsAsExpression(current) ||
-			isTsNonNullExpression(current) ||
-			isTsSatisfiesExpression(current) ||
-			isTsTypeAssertion(current)
-		) {
-			current = current.expression;
-			continue;
-		}
-		if (!isMemberExpression(current)) break;
+	while (isMemberExpression(current)) {
 		depth += 1;
-		current = current.object;
+		current = unwrapDependencyExpression(current.object);
 	}
 
 	return depth;
 }
 
 function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
-	let current: ESTree.Node = node;
+	let current = unwrapDependencyExpression(node);
 
-	while (true) {
-		if (
-			isChainExpression(current) ||
-			isParenthesizedExpression(current) ||
-			isTsAsExpression(current) ||
-			isTsNonNullExpression(current) ||
-			isTsSatisfiesExpression(current) ||
-			isTsTypeAssertion(current)
-		) {
-			current = current.expression;
-			continue;
-		}
-		if (!isMemberExpression(current)) break;
-		current = current.object;
+	while (isMemberExpression(current)) {
+		current = unwrapDependencyExpression(current.object);
 	}
 
 	return isIdentifierName(current) ? current : undefined;

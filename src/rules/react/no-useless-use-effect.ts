@@ -11,11 +11,7 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
-interface NoUselessUseEffectOptions {
-	readonly environment?: Environment;
-	readonly hooks?: ReadonlyArray<string>;
-	readonly propertyCallbackPrefixes?: ReadonlyArray<string>;
-	readonly refHooks?: ReadonlyArray<string>;
+interface ReportOptions {
 	readonly reportAdjustState?: boolean;
 	readonly reportDerivedState?: boolean;
 	readonly reportDuplicateDeps?: boolean;
@@ -30,6 +26,13 @@ interface NoUselessUseEffectOptions {
 	readonly reportNotifyParent?: boolean;
 	readonly reportPassRefToParent?: boolean;
 	readonly reportResetState?: boolean;
+}
+
+interface NoUselessUseEffectOptions extends ReportOptions {
+	readonly environment?: Environment;
+	readonly hooks?: ReadonlyArray<string>;
+	readonly propertyCallbackPrefixes?: ReadonlyArray<string>;
+	readonly refHooks?: ReadonlyArray<string>;
 	readonly stateHooks?: ReadonlyArray<string>;
 }
 
@@ -38,27 +41,13 @@ const DEFAULT_PROPERTY_CALLBACK_PREFIXES = ["on"] as const satisfies ReadonlyArr
 const DEFAULT_REF_HOOKS = ["useRef"] as const satisfies ReadonlyArray<string>;
 const DEFAULT_STATE_HOOKS = ["useState", "useReducer"] as const satisfies ReadonlyArray<string>;
 
-interface NormalizedOptions {
+type NormalizedOptions = Required<ReportOptions> & {
 	readonly environment: Environment;
 	readonly hooks: ReadonlySet<string>;
 	readonly propertyCallbackPrefixes: ReadonlySet<string>;
 	readonly refHooks: ReadonlySet<string>;
-	readonly reportAdjustState: boolean;
-	readonly reportDerivedState: boolean;
-	readonly reportDuplicateDeps: boolean;
-	readonly reportEffectChain: boolean;
-	readonly reportEmptyEffect: boolean;
-	readonly reportEventFlag: boolean;
-	readonly reportEventSpecificLogic: boolean;
-	readonly reportExternalStore: boolean;
-	readonly reportInitializeState: boolean;
-	readonly reportLogOnly: boolean;
-	readonly reportMixedDerivedState: boolean;
-	readonly reportNotifyParent: boolean;
-	readonly reportPassRefToParent: boolean;
-	readonly reportResetState: boolean;
 	readonly stateHooks: ReadonlySet<string>;
-}
+};
 
 interface FunctionContext {
 	readonly functionId: number;

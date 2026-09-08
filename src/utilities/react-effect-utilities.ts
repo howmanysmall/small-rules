@@ -119,6 +119,16 @@ export function getReactEffectAnalysis(sourceCode: SourceCode, environment: Envi
 	return analysis;
 }
 
+export function isSynchronousStateCall(
+	analysis: ReactEffectAnalysis,
+	effect: ReactEffect,
+	reference: Reference,
+): boolean {
+	return (
+		analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode) && analysis.isStateCall(reference)
+	);
+}
+
 function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environment): ReactEffectAnalysis {
 	const scope = getEffectScopeAnalysis(sourceCode);
 	const reactSources = getReactSourcesForEnvironment(environment);
