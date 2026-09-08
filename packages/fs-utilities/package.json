@@ -1,5 +1,5 @@
 {
-	"name": "@small-rules/arktype-utilities",
+	"name": "@small-rules/fs-utilities",
 	"version": "0.0.0",
 	"private": true,
 	"sideEffects": false,
@@ -15,6 +15,7 @@
 		"arktype": "catalog:runtime"
 	},
 	"devDependencies": {
+		"@small-rules/arktype-utilities": "workspace:*",
 		"vitest": "catalog:test"
 	}
 }

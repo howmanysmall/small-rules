@@ -6,6 +6,7 @@
 		"@cliffy/command": "catalog:scripts",
 		"@octokit/rest": "catalog:scripts",
 		"@small-rules/arktype-utilities": "workspace:*",
+		"@small-rules/fs-utilities": "workspace:*",
 		"@std/msgpack": "catalog:scripts",
 		"@std/path": "catalog:scripts",
 		"ansis": "catalog:scripts",
