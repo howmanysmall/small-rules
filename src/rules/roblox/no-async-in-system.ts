@@ -1,14 +1,39 @@
 import { Predicate } from "effect";
 
 import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
+import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getMemberPropertyName,
-	getVariableByName,
-	hasShadowedBinding,
+	isAnyFunction,
+	isAnyLiteral,
+	isBlockStatement,
+	isCallExpression,
+	isClassDeclaration,
+	isIdentifierName,
+	isImportDeclaration,
+	isImportSpecifier,
+	isMemberExpression,
+	isNode,
+	isObjectExpression,
+	isProperty,
+	isReturnStatement,
+	isSpreadElement,
+	isStringLiteral,
+	isTsEnumDeclaration,
+	isTsInterfaceDeclaration,
+	isTsNullKeyword,
+	isTsQualifiedName,
+	isTsSatisfiesExpression,
+	isTsTypeAliasDeclaration,
+	isTsTypeAnnotation,
+	isTsTypeReference,
+	isTsUndefinedKeyword,
+	isTsUnionType,
+	isVariableDeclaration,
+	isVariableDeclarator,
 	unwrapExpression,
-} from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -35,8 +60,8 @@ interface SynchronousCallbackConfig {
 }
 
 function getTypeName(typeNode: ESTree.Node, allowQualified: boolean): string | undefined {
-	if (typeNode.type === "Identifier") return typeNode.name;
-	if (allowQualified && typeNode.type === "TSQualifiedName") return typeNode.right.name;
+	if (isIdentifierName(typeNode)) return typeNode.name;
+	if (allowQualified && isTsQualifiedName(typeNode)) return typeNode.right.name;
 	return undefined;
 }
 
@@ -44,19 +69,21 @@ function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQu
 	if (typeNode === null || typeNode === undefined) return undefined;
 
 	let referencedType = typeNode;
-	while (referencedType.type === "TSTypeAnnotation") referencedType = referencedType.typeAnnotation;
+	while (isTsTypeAnnotation(referencedType)) referencedType = referencedType.typeAnnotation;
 
-	if (referencedType.type === "TSUnionType") {
+	if (isTsUnionType(referencedType)) {
 		let referencedTypeName: string | undefined;
 		for (const unionType of referencedType.types) {
-			if (unionType.type === "TSUndefinedKeyword" || unionType.type === "TSNullKeyword") continue;
+			if (isTsUndefinedKeyword(unionType) || isTsNullKeyword(unionType)) continue;
+
 			const unionTypeName = getReferencedTypeName(unionType, allowQualified);
 			if (unionTypeName === undefined || referencedTypeName !== undefined) return undefined;
+
 			referencedTypeName = unionTypeName;
 		}
 		return referencedTypeName;
 	}
-	if (referencedType.type !== "TSTypeReference") return undefined;
+	if (!isTsTypeReference(referencedType)) return undefined;
 	return getTypeName(referencedType.typeName, allowQualified);
 }
 
@@ -88,15 +115,13 @@ function forEachNode(root: ESTree.Node, visit: (node: ESTree.Node) => boolean | 
 	}
 }
 
-function getPropertyName(property: ESTree.ObjectExpression["properties"][number]): string | undefined {
-	if (property.type !== "Property") return undefined;
-	if (property.computed) {
-		return property.key.type === "Literal" && Predicate.isString(property.key.value)
-			? property.key.value
-			: undefined;
-	}
-	if (property.key.type === "Identifier") return property.key.name;
-	return property.key.type === "Literal" && Predicate.isString(property.key.value) ? property.key.value : undefined;
+function getPropertyName(property: ESTree.ObjectPropertyKind): string | undefined {
+	if (!isProperty(property)) return undefined;
+
+	if (property.computed) return isStringLiteral(property.key) ? property.key.value : undefined;
+	if (isIdentifierName(property.key)) return property.key.name;
+
+	return isAnyLiteral(property.key) && Predicate.isString(property.key.value) ? property.key.value : undefined;
 }
 
 function addSystemPropertyFunction(
@@ -105,18 +130,18 @@ function addSystemPropertyFunction(
 	systemFunctions: Set<CallbackFunction>,
 ): void {
 	for (const property of object.properties) {
-		if (getPropertyName(property) !== "system" || property.type !== "Property") continue;
+		if (getPropertyName(property) !== "system" || !isProperty(property)) continue;
 		if (isAnyFunction(property.value)) systemFunctions.add(property.value);
-		else if (property.value.type === "Identifier") {
+		else if (isIdentifierName(property.value)) {
 			const systemFunction = namedFunctions.get(property.value.name);
 			if (systemFunction !== undefined) systemFunctions.add(systemFunction);
 		}
 	}
 }
 
-function getImportedName(specifier: ESTree.ImportDeclaration["specifiers"][number]): string | undefined {
-	if (specifier.type !== "ImportSpecifier") return undefined;
-	return specifier.imported.type === "Identifier" ? specifier.imported.name : specifier.imported.value;
+function getImportedName(specifier: ESTree.ImportDeclarationSpecifier): string | undefined {
+	if (!isImportSpecifier(specifier)) return undefined;
+	return isIdentifierName(specifier.imported) ? specifier.imported.name : specifier.imported.value;
 }
 
 function collectImportBindings(
@@ -125,11 +150,13 @@ function collectImportBindings(
 ): ReadonlyMap<ScopeVariable, ImportBinding> {
 	const bindings = new Map<ScopeVariable, ImportBinding>();
 	for (const statement of program.body) {
-		if (statement.type !== "ImportDeclaration" || !Predicate.isString(statement.source.value)) continue;
+		if (!isImportDeclaration(statement) || !Predicate.isString(statement.source.value)) continue;
+
 		const variables = sourceCode.getDeclaredVariables(statement);
 		for (const specifier of statement.specifiers) {
 			const imported = getImportedName(specifier);
 			if (imported === undefined) continue;
+
 			const variable = variables.find((candidate) => candidate.name === specifier.local.name);
 			/* v8 ignore else -- @preserve each import specifier declares its local binding. */
 			if (variable !== undefined) bindings.set(variable, { imported, source: statement.source.value });
@@ -141,22 +168,23 @@ function collectImportBindings(
 function getMemberChain(expression: ESTree.Expression): MemberChain | undefined {
 	const path = new Array<string>();
 	let current = unwrapExpression(expression);
-	while (current.type === "MemberExpression") {
+	while (isMemberExpression(current)) {
 		const propertyName = getMemberPropertyName(current);
 		if (propertyName === undefined) return undefined;
+
 		path.unshift(propertyName);
 		current = unwrapExpression(current.object);
 	}
-	return current.type === "Identifier" ? { path, root: current } : undefined;
+	return isIdentifierName(current) ? { path, root: current } : undefined;
 }
 
 function pathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
 	return left.length === right.length && left.every((part, index) => part === right[index]);
 }
 
-function getCalleePath(callee: ESTree.CallExpression["callee"]): ReadonlyArray<string> | undefined {
-	if (callee.type === "Identifier") return [callee.name];
-	if (callee.type !== "MemberExpression") return undefined;
+function getCalleePath(callee: ESTree.Expression): ReadonlyArray<string> | undefined {
+	if (isIdentifierName(callee)) return [callee.name];
+	if (!isMemberExpression(callee)) return undefined;
 	const chain = getMemberChain(callee);
 	return chain === undefined ? undefined : [chain.root.name, ...chain.path];
 }
@@ -183,7 +211,7 @@ function collectConfiguredCallbackTypes(
 	types: Map<ScopeVariable, string>,
 ): void {
 	forEachNode(program, (node) => {
-		if (node.type !== "CallExpression" || node.callee.type !== "MemberExpression") return;
+		if (!isCallExpression(node) || !isMemberExpression(node.callee)) return;
 
 		const chain = getMemberChain(node.callee);
 		if (chain === undefined) return;
@@ -202,10 +230,10 @@ function collectConfiguredCallbackTypes(
 			}
 
 			const callback = node.arguments[configuration.callbackArgumentIndex];
-			if (callback === undefined || callback.type === "SpreadElement" || !isAnyFunction(callback)) continue;
+			if (callback === undefined || isSpreadElement(callback) || !isAnyFunction(callback)) continue;
 
 			const parameter = callback.params[configuration.parameterIndex];
-			if (parameter?.type !== "Identifier") continue;
+			if (!isIdentifierName(parameter)) continue;
 
 			const variable = getIdentifierVariable(sourceCode, parameter);
 			/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
@@ -221,13 +249,12 @@ function collectAnnotatedTypes(
 	types: Map<ScopeVariable, string>,
 ): void {
 	forEachNode(program, (node) => {
-		if (node.type === "VariableDeclarator" && node.id.type === "Identifier") {
-			const identifierName = node.id.name;
+		if (isVariableDeclarator(node) && isIdentifierName(node.id)) {
+			const { name } = node.id;
 			const className = getReferencedTypeName(node.id.typeAnnotation, false);
 			if (className === undefined || declaredTypeNames.has(className)) return;
-			const variable = sourceCode
-				.getDeclaredVariables(node)
-				.find((candidate) => candidate.name === identifierName);
+
+			const variable = sourceCode.getDeclaredVariables(node).find((candidate) => candidate.name === name);
 			/* v8 ignore else -- @preserve identifier variable declarations always expose their declared variable. */
 			if (variable !== undefined) types.set(variable, className);
 			return;
@@ -236,11 +263,13 @@ function collectAnnotatedTypes(
 		const variables = new Map(sourceCode.getDeclaredVariables(node).map((variable) => [variable.name, variable]));
 
 		for (const parameter of node.params) {
-			if (parameter.type !== "Identifier") continue;
-			const parameterName = parameter.name;
+			if (!isIdentifierName(parameter)) continue;
+
+			const { name } = parameter;
 			const className = getReferencedTypeName(parameter.typeAnnotation, false);
 			if (className === undefined || declaredTypeNames.has(className)) continue;
-			const variable = variables.get(parameterName);
+
+			const variable = variables.get(name);
 			/* v8 ignore else -- @preserve identifier parameters always appear in their function's declared variables. */
 			if (variable !== undefined) types.set(variable, className);
 		}
@@ -250,15 +279,15 @@ function collectAnnotatedTypes(
 function collectDeclaredTypeNames(program: ESTree.Program): ReadonlySet<string> {
 	const names = new Set<string>();
 	forEachNode(program, (node) => {
-		if (node.type === "ImportDeclaration") {
+		if (isImportDeclaration(node)) {
 			for (const specifier of node.specifiers) names.add(specifier.local.name);
 			return false;
 		}
 		if (
-			(node.type === "TSInterfaceDeclaration" ||
-				node.type === "TSTypeAliasDeclaration" ||
-				node.type === "ClassDeclaration" ||
-				node.type === "TSEnumDeclaration") &&
+			(isTsInterfaceDeclaration(node) ||
+				isTsTypeAliasDeclaration(node) ||
+				isClassDeclaration(node) ||
+				isTsEnumDeclaration(node)) &&
 			node.id !== null
 		) {
 			names.add(node.id.name);
@@ -274,11 +303,13 @@ function getConstInitializer(
 ): ESTree.Expression | undefined {
 	const variable = getIdentifierVariable(sourceCode, identifier);
 	if (variable?.defs.length !== 1) return undefined;
+
 	const [definition] = variable.defs;
-	if (definition?.node.type !== "VariableDeclarator") return undefined;
+	if (!isVariableDeclarator(definition?.node)) return undefined;
+
 	const declaration = definition.node.parent;
 	/* v8 ignore next -- @preserve variable declarator definitions always have variable declaration parents. */
-	if (declaration.type !== "VariableDeclaration" || declaration.kind !== "const") return undefined;
+	if (!isVariableDeclaration(declaration) || declaration.kind !== "const") return undefined;
 	/* v8 ignore next -- @preserve a referenced variable declarator definition always has an initializer. */
 	return definition.node.init ?? undefined;
 }
@@ -289,11 +320,13 @@ function getReferencedFunction(
 ): CallbackFunction | undefined {
 	const variable = getIdentifierVariable(sourceCode, identifier);
 	if (variable?.defs.length !== 1) return undefined;
+
 	const [definition] = variable.defs;
 	/* v8 ignore next -- @preserve guarded by length check above */
 	if (definition === undefined) return undefined;
 	if (isAnyFunction(definition.node)) return definition.node;
-	if (definition.node.type !== "VariableDeclarator" || definition.node.init === null) return undefined;
+
+	if (!isVariableDeclarator(definition.node) || definition.node.init === null) return undefined;
 	const initializer = unwrapExpression(definition.node.init);
 	return isAnyFunction(initializer) ? initializer : undefined;
 }
@@ -301,7 +334,7 @@ function getReferencedFunction(
 function getReferencedCallback(expression: ESTree.Expression, sourceCode: SourceCode): CallbackFunction | undefined {
 	const current = unwrapExpression(expression);
 	if (isAnyFunction(current)) return current;
-	return current.type === "Identifier" ? getReferencedFunction(current, sourceCode) : undefined;
+	return isIdentifierName(current) ? getReferencedFunction(current, sourceCode) : undefined;
 }
 
 function getExpressionClass(
@@ -312,19 +345,19 @@ function getExpressionClass(
 	visited: Set<ESTree.Expression>,
 ): string | undefined {
 	const current = unwrapExpression(expression);
-	if (current.type === "Identifier") return getIdentifierClass(current, sourceCode, imports, types, visited);
+	if (isIdentifierName(current)) return getIdentifierClass(current, sourceCode, imports, types, visited);
 	if (
-		current.type !== "CallExpression" ||
-		current.callee.type !== "MemberExpression" ||
+		!isCallExpression(current) ||
+		!isMemberExpression(current.callee) ||
 		getMemberPropertyName(current.callee) !== "GetService" ||
-		current.callee.object.type !== "Identifier" ||
+		!isIdentifierName(current.callee.object) ||
 		current.callee.object.name !== "game" ||
 		hasShadowedBinding(sourceCode, current.callee.object, "game")
 	) {
 		return undefined;
 	}
 	const [serviceName] = current.arguments;
-	return serviceName?.type === "Literal" && Predicate.isString(serviceName.value) ? serviceName.value : undefined;
+	return isStringLiteral(serviceName) ? serviceName.value : undefined;
 }
 
 function getIdentifierClass(
@@ -338,11 +371,14 @@ function getIdentifierClass(
 	if (variable !== undefined) {
 		const annotatedType = types.get(variable);
 		if (annotatedType !== undefined) return annotatedType;
+
 		const binding = imports.get(variable);
 		if (binding?.source === "@rbxts/services") return binding.imported;
 	}
+
 	const initializer = getConstInitializer(identifier, sourceCode);
 	if (initializer === undefined || visited.has(initializer)) return undefined;
+
 	visited.add(initializer);
 	return getExpressionClass(initializer, sourceCode, imports, types, visited);
 }
@@ -353,9 +389,11 @@ function isRobloxYieldingCall(
 	imports: ReadonlyMap<ScopeVariable, ImportBinding>,
 	types: ReadonlyMap<ScopeVariable, string>,
 ): boolean {
-	if (node.callee.type !== "MemberExpression") return false;
+	if (!isMemberExpression(node.callee)) return false;
+
 	const memberName = getMemberPropertyName(node.callee);
 	if (memberName === undefined) return false;
+
 	const className = getExpressionClass(node.callee.object, sourceCode, imports, types, new Set());
 	return className !== undefined && classHasYieldingMember(className, memberName);
 }
@@ -364,14 +402,16 @@ function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: Sour
 	const returnedFunctions = new Set<CallbackFunction>();
 	/* v8 ignore next -- @preserve system functions always have a body with the current parser */
 	if (systemFunction.body === null) return returnedFunctions;
-	if (systemFunction.body.type !== "BlockStatement") {
+
+	if (!isBlockStatement(systemFunction.body)) {
 		const returnedFunction = getReferencedCallback(systemFunction.body, sourceCode);
 		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
 		return returnedFunctions;
 	}
 	forEachNode(systemFunction.body, (node) => {
 		if (isAnyFunction(node)) return false;
-		if (node.type !== "ReturnStatement" || node.argument === null) return true;
+		if (!isReturnStatement(node) || node.argument === null) return true;
+
 		const returnedFunction = getReferencedCallback(node.argument, sourceCode);
 		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
 		return false;
@@ -387,11 +427,13 @@ function getSynchronousCallbacks(
 	const callbacks = new Set<CallbackFunction>();
 	const calleePath = getCalleePath(call.callee);
 	if (calleePath === undefined) return callbacks;
+
 	for (const configuration of configurations) {
 		if (!pathsEqual(calleePath, configuration.calleePath)) continue;
+
 		for (const argumentIndex of configuration.callbackArgumentIndexes) {
 			const argument = call.arguments[argumentIndex];
-			if (argument === undefined || argument.type === "SpreadElement") continue;
+			if (argument === undefined || isSpreadElement(argument)) continue;
 
 			const callback = getReferencedCallback(argument, sourceCode);
 			if (callback !== undefined) callbacks.add(callback);
@@ -416,7 +458,8 @@ function reportYieldingCalls(
 		visitedFunctions.add(activeFunction);
 		forEachNode(activeFunction.body, (node) => {
 			if (node !== activeFunction && isAnyFunction(node)) return false;
-			if (node.type !== "CallExpression") return true;
+			if (!isCallExpression(node)) return true;
+
 			if (isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
 			for (const callback of getSynchronousCallbacks(node, sourceCode, synchronousCallbacks)) {
 				inspectActiveFunction(callback);
@@ -459,16 +502,16 @@ const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 						if (isRecognizedType(node.returnType, systemTypeNames)) systemFunctions.add(node);
 						return;
 					}
-					if (node.type === "VariableDeclarator" && node.id.type === "Identifier") {
+					if (isVariableDeclarator(node) && isIdentifierName(node.id)) {
 						if (!isRecognizedType(node.id.typeAnnotation, systemTypeNames) || node.init === null) return;
 						if (isAnyFunction(node.init)) systemFunctions.add(node.init);
-						else if (node.init.type === "ObjectExpression") typedSystemObjects.push(node.init);
+						else if (isObjectExpression(node.init)) typedSystemObjects.push(node.init);
 						return;
 					}
 					if (
-						node.type === "TSSatisfiesExpression" &&
+						isTsSatisfiesExpression(node) &&
 						isRecognizedType(node.typeAnnotation, systemTypeNames) &&
-						node.expression.type === "ObjectExpression"
+						isObjectExpression(node.expression)
 					) {
 						typedSystemObjects.push(node.expression);
 					}

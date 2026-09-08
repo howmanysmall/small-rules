@@ -50,8 +50,8 @@ const noChainStateUpdates = createRule("no-chain-state-updates", "react", {
 					if (effect.dependencyReferences === undefined) continue;
 
 					const isSomeDependenciesState = effect.dependencyReferences
-						.flatMap((reference) => analysis.scope.getUpstreamReferences(reference))
-						.some((reference) => analysis.isState(reference));
+						.flatMap(analysis.scope.getUpstreamReferences)
+						.some(analysis.isState);
 
 					reportChainStateUpdatesEffect(context, analysis, effect, isSomeDependenciesState);
 				}

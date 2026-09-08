@@ -1,6 +1,7 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isBlockStatement, isExpressionStatement, isIfStatement } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -14,13 +15,13 @@ function getMaximumStatements(value: RuleOptions): number {
 }
 
 function isLonelyIfStatement(statement: ESTree.Statement): statement is ESTree.IfStatement {
-	return statement.type === "IfStatement" && statement.alternate === null;
+	return isIfStatement(statement) && statement.alternate === null;
 }
 
-function isOffendingConsequent(consequent: ESTree.IfStatement["consequent"], maximumStatements: number): boolean {
+function isOffendingConsequent(consequent: ESTree.Statement, maximumStatements: number): boolean {
 	return (
-		(consequent.type === "ExpressionStatement" && maximumStatements === 0) ||
-		(consequent.type === "BlockStatement" && consequent.body.length > maximumStatements)
+		(isExpressionStatement(consequent) && maximumStatements === 0) ||
+		(isBlockStatement(consequent) && consequent.body.length > maximumStatements)
 	);
 }
 
@@ -52,7 +53,7 @@ const preferEarlyReturn = createRule("prefer-early-return", "general", {
 
 		return {
 			ArrowFunctionExpression(node): void {
-				if (node.body.type === "BlockStatement") checkFunctionBody(node.body);
+				if (isBlockStatement(node.body)) checkFunctionBody(node.body);
 			},
 			FunctionDeclaration: onFunction,
 			FunctionExpression: onFunction,

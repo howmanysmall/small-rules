@@ -1,7 +1,7 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
+import { isBlockStatement, isReturnStatement, isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
 import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getEnvironment, getReactSources } from "$oxc-utilities/react-utilities";
@@ -65,11 +65,11 @@ function getMemoCallbackExpression(node: ESTree.CallExpression): ESTree.Expressi
 	/* v8 ignore next -- @preserve callback functions supplied to useMemo have bodies in parsed source. */
 	if (body === null) return undefined;
 
-	if (body.type !== "BlockStatement") return body;
+	if (!isBlockStatement(body)) return body;
 	if (body.body.length !== 1) return undefined;
 
 	const [statement] = body.body;
-	return statement?.type === "ReturnStatement" ? (statement.argument ?? undefined) : undefined;
+	return isReturnStatement(statement) ? (statement.argument ?? undefined) : undefined;
 }
 
 function dependenciesAreNonUpdating(dependenciesKind: DependenciesKind, options: NormalizedOptions): boolean {
@@ -93,11 +93,8 @@ function dependenciesAreNonUpdating(dependenciesKind: DependenciesKind, options:
 		}
 
 		/* v8 ignore next 4 -- @preserve options normalization and schema restrict dependencyMode to known values. */
-		default: {
-			const error = new Error(`Unknown dependency mode: ${String(options.dependencyMode)}`);
-			Error.captureStackTrace(error, dependenciesAreNonUpdating);
-			throw error;
-		}
+		default:
+			throw new Error(`Unknown dependency mode: ${String(options.dependencyMode)}`);
 	}
 }
 

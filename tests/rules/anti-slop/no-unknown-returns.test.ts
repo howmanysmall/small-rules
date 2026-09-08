@@ -29,6 +29,18 @@ describe("no-unknown-returns", () => {
 				code: "type Item = unknown; type Fallback<Input> = Input extends infer Item ? string : () => Item;",
 				errors: [unknownReturn],
 			},
+			{
+				code: "function outer() { type Result = unknown; function load(): Result { return input; } }",
+				errors: [unknownReturn],
+			},
+			{
+				code: "type Identity<T> = T; function load(): Identity<unknown> { return input; }",
+				errors: [unknownReturn],
+			},
+			{
+				code: "type Identity<T> = T; type Wrapped<T> = Promise<Identity<T>>; function load(): Wrapped<unknown> { return promise; }",
+				errors: [unknownReturn],
+			},
 		],
 		valid: [
 			{
@@ -42,6 +54,9 @@ describe("no-unknown-returns", () => {
 			"declare function make(): Record<string, Command>; function use(value: Record<string, Command>) {}",
 			"function load(): Promise<string> { return promise; }",
 			"function load(): PromiseLike { return input; }",
+			"type Identity<T> = T; function load(): Identity<User> { return user; }",
+			"type Value = unknown; function outer() { type Value = User; function load(): Value { return user; } }",
+			"function load<Promise>(): Promise<unknown> { return input; }",
 			[
 				"export default class Registry {}",
 				"export {};",

@@ -1,26 +1,31 @@
 import { Predicate } from "effect";
 
-import { getVariableByName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import {
+	isAnyLiteral,
+	isAssignmentPattern,
+	isBindingIdentifier,
+	isTsNumberKeyword,
+	isTsTypeAnnotation,
+	isTsTypeReference,
+	isVariableDeclarator,
+	unwrapExpression,
+	unwrapParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
+import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnnotation | undefined): boolean {
 	/* v8 ignore next -- @preserve callers use undefined to mean no type annotation. */
 	if (typeAnnotation === undefined) return false;
 
 	let current = typeAnnotation;
-	while (current.type === "TSTypeAnnotation") current = current.typeAnnotation;
-	if (current.type === "TSNumberKeyword") return true;
+	while (isTsTypeAnnotation(current)) current = current.typeAnnotation;
+	if (isTsNumberKeyword(current)) return true;
 
-	return (
-		current.type === "TSTypeReference" &&
-		current.typeName.type === "Identifier" &&
-		current.typeName.name === "Number"
-	);
+	return isTsTypeReference(current) && isBindingIdentifier(current.typeName) && current.typeName.name === "Number";
 }
 
 function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
@@ -30,10 +35,10 @@ function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier)
 
 function isKnownNonNumberLiteral(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	return unwrapped.type === "Literal" && !Predicate.isNumber(unwrapped.value);
+	return isAnyLiteral(unwrapped) && !Predicate.isNumber(unwrapped.value);
 }
 
-function isKnownNonNumberDefinition(definition: ScopeVariable["defs"][number]): boolean {
+function isKnownNonNumberDefinition(definition: Definition): boolean {
 	if (definition.type === "Parameter") {
 		const identifier = definition.name;
 
@@ -42,15 +47,15 @@ function isKnownNonNumberDefinition(definition: ScopeVariable["defs"][number]): 
 		}
 
 		const { parent } = identifier;
-		return parent.type === "AssignmentPattern" && isKnownNonNumberLiteral(parent.right);
+		return isAssignmentPattern(parent) && isKnownNonNumberLiteral(parent.right);
 	}
 
 	/* v8 ignore next -- @preserve scope definitions reaching identifier expressions are parameters or variables. */
-	if (definition.type !== "Variable" || definition.node.type !== "VariableDeclarator") return false;
+	if (definition.type !== "Variable" || !isVariableDeclarator(definition.node)) return false;
 
 	const { id, init } = definition.node;
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- false flag
-	if (id.type === "Identifier" && id.typeAnnotation !== undefined && id.typeAnnotation !== null) {
+	if (isBindingIdentifier(id) && id.typeAnnotation !== undefined && id.typeAnnotation !== null) {
 		return !isNumberTypeAnnotation(id.typeAnnotation);
 	}
 
@@ -66,8 +71,7 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 }
 
 function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	let current = expression;
-	while (current.type === "ParenthesizedExpression") current = current.expression;
+	const current = unwrapParenthesis(expression);
 
 	if (current.type === "TSAsExpression" || current.type === "TSTypeAssertion") {
 		return !isNumberTypeAnnotation(current.typeAnnotation);

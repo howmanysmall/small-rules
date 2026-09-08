@@ -1,8 +1,16 @@
 import { Predicate } from "effect";
 
-import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction, isUseMemoCall } from "$oxc-utilities/oxc-utilities";
+import {
+	isCallbackFunction,
+	isCallExpression,
+	isFunctionDeclaration,
+	isIdentifierName,
+	isUseMemoCall,
+	isVariableDeclarator,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
 import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";
@@ -55,10 +63,6 @@ function normalizeOptions(raw: RuleOptions): NormalizedOptions {
 			: DEFAULT_MAX_HELPER_TRACE_DEPTH;
 
 	return { constructors, environment, maxHelperTraceDepth };
-}
-
-function isCallExpression(node: ESTree.Node | null): node is ESTree.CallExpression {
-	return node?.type === "CallExpression";
 }
 
 function isInsideUseMemoCallback(
@@ -123,11 +127,11 @@ function resolveDefinitionToFunctionIds(
 	if (definition.type !== "Variable") return new Set<number>();
 
 	const { node } = definition;
-	if (node.type !== "VariableDeclarator" || node.init === null) return new Set<number>();
+	if (!isVariableDeclarator(node) || node.init === null) return new Set<number>();
 
 	const initializer = unwrapExpression(node.init);
 	if (isCallbackFunction(initializer)) return getFunctionIdSet(initializer, functionInfosByNode);
-	if (initializer.type !== "Identifier") return new Set<number>();
+	if (!isIdentifierName(initializer)) return new Set<number>();
 
 	const aliasVariable = getVariableByName(sourceCode.getScope(initializer), initializer.name);
 	if (aliasVariable === undefined) return new Set<number>();
@@ -139,7 +143,7 @@ function resolveFunctionNameDefinition(
 	functionInfosByNode: ReadonlyMap<CallbackFunction, FunctionInfo>,
 ): ReadonlySet<number> {
 	/* v8 ignore next -- @preserve FunctionName definitions are backed by function declarations in parser scopes. */
-	if (node.type !== "FunctionDeclaration") return new Set<number>();
+	if (!isFunctionDeclaration(node)) return new Set<number>();
 	return getFunctionIdSet(node, functionInfosByNode);
 }
 
@@ -302,14 +306,13 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			"ArrowFunctionExpression:exit": exitFunction,
 
 			CallExpression(node): void {
-				if (node.callee.type === "Identifier") recordFunctionCall(node.callee);
-
+				if (isIdentifierName(node.callee)) recordFunctionCall(node.callee);
 				if (!isUseMemoCall(node, memoIdentifiers, reactNamespaces)) return;
 
 				const [callback] = node.arguments;
 				if (callback === undefined) return;
 
-				if (callback.type === "Identifier") {
+				if (isIdentifierName(callback)) {
 					useMemoCallbackIdentifiers.push(callback);
 					return;
 				}
@@ -328,7 +331,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			},
 
 			NewExpression(node): void {
-				if (node.callee.type !== "Identifier") return;
+				if (!isIdentifierName(node.callee)) return;
 
 				const constructorName = node.callee.name;
 				if (!options.constructors.has(constructorName)) return;

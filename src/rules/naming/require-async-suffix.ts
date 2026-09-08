@@ -1,13 +1,22 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isCallbackFunction,
+	isCallExpression,
+	isFunctionExpression,
+	isIdentifierName,
+	isNewExpression,
+	isObjectExpression,
+	isTsSatisfiesExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isExternallyConstrainedProperty({ parent }: ESTree.ObjectProperty): boolean {
 	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
-	if (parent.type !== "ObjectExpression") return false;
+	if (!isObjectExpression(parent)) return false;
 	const { parent: grandparent } = parent;
-	if (grandparent.type === "TSSatisfiesExpression") return true;
-	if (grandparent.type === "CallExpression" || grandparent.type === "NewExpression") {
+	if (isTsSatisfiesExpression(grandparent)) return true;
+	if (isCallExpression(grandparent) || isNewExpression(grandparent)) {
 		return grandparent.arguments.some((argument) => argument === parent);
 	}
 	return false;
@@ -29,23 +38,21 @@ const requireAsyncSuffix = createRule("require-async-suffix", "naming", {
 				reportIfNotSkipped(node.id);
 			},
 			MethodDefinition(node): void {
-				if (!node.value.async || node.key.type !== "Identifier" || node.override === true) return;
+				if (!node.value.async || !isIdentifierName(node.key) || node.override === true) return;
 				reportIfNotSkipped(node.key);
 			},
 			Property(node): void {
-				if (!node.method || node.value.type !== "FunctionExpression" || !node.value.async) return;
-				if (node.key.type !== "Identifier" || isExternallyConstrainedProperty(node)) return;
+				if (!node.method || !isFunctionExpression(node.value) || !node.value.async) return;
+				if (!isIdentifierName(node.key) || isExternallyConstrainedProperty(node)) return;
 				reportIfNotSkipped(node.key);
 			},
 			PropertyDefinition(node): void {
-				if (node.value?.type !== "ArrowFunctionExpression" && node.value?.type !== "FunctionExpression") return;
-				if (!node.value.async || node.key.type !== "Identifier" || node.override === true) return;
+				if (!isCallbackFunction(node.value)) return;
+				if (!node.value.async || !isIdentifierName(node.key) || node.override === true) return;
 				reportIfNotSkipped(node.key);
 			},
 			VariableDeclarator(node): void {
-				if (node.id.type !== "Identifier") return;
-				if (node.init?.type !== "ArrowFunctionExpression" && node.init?.type !== "FunctionExpression") return;
-				if (!node.init.async) return;
+				if (!isIdentifierName(node.id) || !isCallbackFunction(node.init) || !node.init.async) return;
 				reportIfNotSkipped(node.id);
 			},
 		} satisfies Visitor;

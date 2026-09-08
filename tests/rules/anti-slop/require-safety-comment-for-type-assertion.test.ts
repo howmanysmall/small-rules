@@ -37,6 +37,20 @@ describe("require-safety-comment-for-type-assertion", () => {
 				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Trailing.",
 				errors: [missingSafetyComment],
 			},
+			{ code: "// SAFETY:\nconst id = value as UserId;", errors: [missingSafetyComment] },
+			{ code: "// SAFETY:   \nconst id = value as UserId;", errors: [missingSafetyComment] },
+			{ code: "const id = /* SAFETY: */ value as UserId;", errors: [missingSafetyComment] },
+			{ code: "export const id = value as UserId;", errors: [missingSafetyComment] },
+			{ code: "function load(value = input as User) {}", errors: [missingSafetyComment] },
+			{
+				code: "const userId = value as UserId;",
+				options: [{ markers: [] }],
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// This is not a safety justification.\nexport const id = value as UserId;",
+				errors: [missingSafetyComment],
+			},
 		],
 		valid: [
 			{
@@ -57,6 +71,37 @@ describe("require-safety-comment-for-type-assertion", () => {
 			},
 			{
 				code: "// oxlint-disable-next-line no-console, typescript/no-unsafe-type-assertion -- Shape verified above.\nconst user = value as User;",
+			},
+			"// SAFETY: The parser established the exported UserId invariant.\nexport const id = value as UserId;",
+			"/* SAFETY:\n * The parser established the exported UserId invariant.\n */\nexport const id = value as UserId;",
+		],
+	});
+
+	ts.run("require-safety-comment-for-type-assertion custom markers", rule, {
+		invalid: [
+			{
+				code: "// SAFETY: This marker is not configured.\nconst value = input as User;",
+				options: [{ markers: ["INVARIANT"] }],
+				errors: [{ data: { marker: "INVARIANT" }, messageId: "missingSafetyComment" }],
+			},
+			{
+				code: "// INVARIANT:   \nconst value = input as User;",
+				options: [{ markers: ["INVARIANT"] }],
+				errors: [{ data: { marker: "INVARIANT" }, messageId: "missingSafetyComment" }],
+			},
+		],
+		valid: [
+			{
+				code: "// INVARIANT: The caller parsed this value.\nconst value = input as User;",
+				options: [{ markers: ["INVARIANT"] }],
+			},
+			{
+				code: "// SAFETY: The caller parsed this value.\nconst value = input as User;",
+				options: [{ markers: ["INVARIANT", "SAFETY"] }],
+			},
+			{
+				code: "// SAFE+: The caller parsed this value.\nconst value = input as User;",
+				options: [{ markers: ["SAFE+"] }],
 			},
 		],
 	});

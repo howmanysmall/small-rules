@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-chained-type-assertions.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/rules/no-chained-type-assertions.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -8,9 +8,18 @@
 // departure: `allowedTargets` exempts a single `as unknown/any/never as T`
 // bridge when `T` is a listed identifier (e.g. `vector`, `Vector3`).
 
-import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isConstAssertion, isTypeAssertionExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	isBindingIdentifier,
+	isConstAssertion,
+	isParenthesizedExpression,
+	isTsAnyKeyword,
+	isTsNeverKeyword,
+	isTsTypeReference,
+	isTsUnknownKeyword,
+	isTypeAssertionExpression,
+	unwrapParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, VisitorWithHooks } from "oxlint-plugin-utilities";
 
@@ -20,7 +29,7 @@ function isOutermostAssertionInChain(node: TypeAssertionExpression): boolean {
 	let current: ESTree.Expression = node;
 	let { parent } = node;
 
-	while (parent.type === "ParenthesizedExpression" && parent.expression === current) {
+	while (isParenthesizedExpression(parent) && parent.expression === current) {
 		current = parent;
 		({ parent } = parent);
 	}
@@ -29,11 +38,11 @@ function isOutermostAssertionInChain(node: TypeAssertionExpression): boolean {
 }
 
 function isTopType(type: ESTree.TSType): boolean {
-	return type.type === "TSUnknownKeyword" || type.type === "TSAnyKeyword" || type.type === "TSNeverKeyword";
+	return isTsUnknownKeyword(type) || isTsAnyKeyword(type) || isTsNeverKeyword(type);
 }
 
-function typeReferenceName(type: ESTree.TSType): string | undefined {
-	return type.type === "TSTypeReference" && type.typeName.type === "Identifier" ? type.typeName.name : undefined;
+function getTypeReferenceName(type: ESTree.TSType): string | undefined {
+	return isTsTypeReference(type) && isBindingIdentifier(type.typeName) ? type.typeName.name : undefined;
 }
 
 const EMPTY_TARGETS: ReadonlyArray<string> = [];
@@ -54,7 +63,7 @@ function isForbiddenAssertionChain(node: TypeAssertionExpression, allowedTargets
 	if (!hasNonConstAssertion || assertionCount <= 1) return false;
 	if (assertionCount !== 2 || innerType === undefined || !isTopType(innerType)) return true;
 
-	const target = typeReferenceName(node.typeAnnotation);
+	const target = getTypeReferenceName(node.typeAnnotation);
 	return target === undefined || !allowedTargets.includes(target);
 }
 

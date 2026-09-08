@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isTsTypeAnnotation } from "$oxc-utilities/oxc-utilities";
+import { isTsTypeAnnotationUnknown } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -13,7 +13,7 @@ function getBannedTypeName(typeName: ESTree.Node): string | undefined {
 
 function getTypeAnnotationFromId(node: ESTree.VariableDeclarator): ESTree.TSTypeAnnotation | undefined {
 	const { typeAnnotation } = node.id;
-	return isTsTypeAnnotation(typeAnnotation) ? typeAnnotation : undefined;
+	return isTsTypeAnnotationUnknown(typeAnnotation) ? typeAnnotation : undefined;
 }
 
 const banReactFc = createRule("ban-react-fc", "react", {

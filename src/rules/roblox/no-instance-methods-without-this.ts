@@ -1,7 +1,13 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import {
+	isFunctionExpression,
+	isIdentifierName,
+	isNode,
+	isSuper,
+	isThisExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -23,7 +29,7 @@ function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOpt
 
 	// Skip TypeScript overload signatures and abstract methods: both have no
 	// body to inspect.
-	if (node.value.type !== "FunctionExpression") return false;
+	if (!isFunctionExpression(node.value)) return false;
 
 	const accessibility = node.accessibility ?? "public";
 	if (accessibility === "private" && !options.checkPrivate) return false;
@@ -49,7 +55,7 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	if (visited.has(currentNode)) return false;
 
 	visited.add(currentNode);
-	if (currentNode.type === "ThisExpression" || currentNode.type === "Super") return true;
+	if (isThisExpression(currentNode) || isSuper(currentNode)) return true;
 	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
 	if (!Predicate.isObject(currentNode)) return false;
 
@@ -61,7 +67,7 @@ function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
 }
 
 function getMethodName(node: ESTree.MethodDefinition): string {
-	return node.key.type === "Identifier" ? node.key.name : "unknown";
+	return isIdentifierName(node.key) ? node.key.name : "unknown";
 }
 
 const noInstanceMethodsWithoutThis = createRule("no-instance-methods-without-this", "roblox", {

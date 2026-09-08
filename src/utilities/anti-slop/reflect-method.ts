@@ -1,10 +1,11 @@
-// Vendored from src/shared/reflect-method.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/shared/reflect-method.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted imports to oxlint-plugin-utilities and local path aliases.
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { isAnyLiteral, isIdentifierNamed } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
 
@@ -13,7 +14,7 @@ function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierRe
 }
 
 function isGlobalReflect(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	if (expression.type !== "Identifier" || expression.name !== "Reflect") return false;
+	if (!isIdentifierNamed(expression, "Reflect")) return false;
 	if (sourceCode.isGlobalReference(expression)) return true;
 	const variable = resolveVariable(sourceCode, expression);
 	return variable === undefined || variable.defs.length === 0;
@@ -34,6 +35,6 @@ export function isGlobalReflectMethodCall(
 	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
 	if (!isGlobalReflect(sourceCode, callee.object)) return false;
 	return callee.computed
-		? callee.property.type === "Literal" && callee.property.value === methodName
-		: callee.property.type === "Identifier" && callee.property.name === methodName;
+		? isAnyLiteral(callee.property) && callee.property.value === methodName
+		: isIdentifierNamed(callee.property, methodName);
 }

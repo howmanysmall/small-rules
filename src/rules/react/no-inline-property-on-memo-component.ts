@@ -1,6 +1,18 @@
 import { isMemoCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isJsxOpeningExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	isIdentifierName,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxIdentifier,
+	isJsxOpeningElement,
+	JSX_ELEMENT,
+	JSX_FRAGMENT,
+	OBJECT_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -12,22 +24,22 @@ const enum InlinePropertyType {
 }
 
 function getOpeningElementName(node: ESTree.JSXOpeningElement): string | undefined {
-	return node.name.type === "JSXIdentifier" ? node.name.name : undefined;
+	return isJsxIdentifier(node.name) ? node.name.name : undefined;
 }
 function getInlinePropertyType(node: ESTree.Expression): InlinePropertyType | undefined {
 	switch (node.type) {
-		case "ArrayExpression":
+		case ARRAY_EXPRESSION:
 			return InlinePropertyType.Array;
 
-		case "ArrowFunctionExpression":
-		case "FunctionExpression":
+		case ARROW_FUNCTION_EXPRESSION:
+		case FUNCTION_EXPRESSION:
 			return InlinePropertyType.Function;
 
-		case "JSXElement":
-		case "JSXFragment":
+		case JSX_ELEMENT:
+		case JSX_FRAGMENT:
 			return InlinePropertyType.Jsx;
 
-		case "ObjectExpression":
+		case OBJECT_EXPRESSION:
 			return InlinePropertyType.Object;
 
 		default:
@@ -41,16 +53,11 @@ const noInlinePropertyOnMemoComponent = createRule("no-inline-property-on-memo-c
 
 		return {
 			JSXAttribute(node): void {
-				if (
-					node.value?.type !== "JSXExpressionContainer" ||
-					node.value.expression.type === "JSXEmptyExpression"
-				) {
-					return;
-				}
+				if (!isJsxExpressionContainer(node.value) || isJsxEmptyExpression(node.value.expression)) return;
 
 				const openingElement = node.parent;
 				/* v8 ignore next -- JSXAttribute visitors are reached with JSXOpeningElement parents. @preserve */
-				if (!isJsxOpeningExpression(openingElement)) return;
+				if (!isJsxOpeningElement(openingElement)) return;
 
 				const componentName = getOpeningElementName(openingElement);
 				if (componentName === undefined || !memoizedComponentNames.has(componentName)) return;
@@ -65,7 +72,7 @@ const noInlinePropertyOnMemoComponent = createRule("no-inline-property-on-memo-c
 				});
 			},
 			VariableDeclarator(node): void {
-				if (node.id.type === "Identifier" && node.init !== null && isMemoCall(node.init)) {
+				if (isIdentifierName(node.id) && node.init !== null && isMemoCall(node.init)) {
 					memoizedComponentNames.add(node.id.name);
 				}
 			},

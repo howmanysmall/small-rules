@@ -1,4 +1,12 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isArrowFunctionExpression,
+	isBindingIdentifier,
+	isFunctionExpression,
+	isMemberExpression,
+	isMethodDefinition,
+	isThisExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -109,11 +117,11 @@ const noRecursive = createRule("no-recursive", "general", {
 				let calleeName: string | undefined;
 				let isThisMethodCall = false;
 
-				if (node.callee.type === "Identifier") calleeName = node.callee.name;
+				if (isBindingIdentifier(node.callee)) calleeName = node.callee.name;
 				else if (
-					node.callee.type === "MemberExpression" &&
-					node.callee.object.type === "ThisExpression" &&
-					node.callee.property.type === "Identifier"
+					isMemberExpression(node.callee) &&
+					isThisExpression(node.callee.object) &&
+					isBindingIdentifier(node.callee.property)
 				) {
 					calleeName = node.callee.property.name;
 					isThisMethodCall = true;
@@ -161,15 +169,14 @@ const noRecursive = createRule("no-recursive", "general", {
 			FunctionExpression(node): void {
 				if (node.id) registerFunction(node.id.name);
 				const { parent } = node;
-				if (parent.type === "MethodDefinition" && parent.key.type === "Identifier") {
-					pushFunction(parent.key.name);
-				} else pushFunction(undefined);
+				if (isMethodDefinition(parent) && isBindingIdentifier(parent.key)) pushFunction(parent.key.name);
+				else pushFunction(undefined);
 			},
 			"FunctionExpression:exit": popFunction,
 
 			MethodDefinition(node): void {
 				const className = findEnclosingClassName();
-				if (className !== undefined && node.key.type === "Identifier") {
+				if (className !== undefined && isBindingIdentifier(node.key)) {
 					const methods = classMethods.get(className);
 					methods?.add(node.key.name);
 					registerFunction(node.key.name);
@@ -193,9 +200,9 @@ const noRecursive = createRule("no-recursive", "general", {
 
 			VariableDeclarator(node): void {
 				if (
-					node.id.type !== "Identifier" ||
+					!isBindingIdentifier(node.id) ||
 					node.init === null ||
-					(node.init.type !== "FunctionExpression" && node.init.type !== "ArrowFunctionExpression")
+					(!isFunctionExpression(node.init) && !isArrowFunctionExpression(node.init))
 				) {
 					return;
 				}
@@ -204,9 +211,9 @@ const noRecursive = createRule("no-recursive", "general", {
 			},
 			"VariableDeclarator:exit"(node): void {
 				if (
-					node.id.type !== "Identifier" ||
+					!isBindingIdentifier(node.id) ||
 					node.init === null ||
-					(node.init.type !== "FunctionExpression" && node.init.type !== "ArrowFunctionExpression")
+					(!isFunctionExpression(node.init) && !isArrowFunctionExpression(node.init))
 				) {
 					return;
 				}

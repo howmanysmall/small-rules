@@ -1,8 +1,13 @@
 // oxlint-disable small-rules/no-unknown-parameters small-rules/no-unsafe-dictionary-type -- this is a types file.
+
+import { type } from "arktype";
+
 type TestSourceType = "commonjs" | "module" | "script" | "unambiguous";
 
 export type TestLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
-export type Range = [number, number];
+
+const isRange = type(["number", "number"]);
+export type Range = typeof isRange.infer;
 
 export interface Position {
 	column: number;
@@ -205,10 +210,11 @@ export interface RuntimeSuggestion {
 	messageId?: string;
 }
 
-export interface Fix {
-	range: Range;
-	text: string;
-}
+export const isFix = type({
+	range: isRange,
+	text: "string",
+}).readonly();
+export type Fix = typeof isFix.infer;
 
 export interface Fixer {
 	insertTextAfter: (node: RangeLike, text: string) => Fix;

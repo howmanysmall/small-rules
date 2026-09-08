@@ -1,9 +1,30 @@
 import { Predicate } from "effect";
 
 import defaultProperties from "$oxc-generated/default-properties.json";
-import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isNumericLiteral, isStringLiteral } from "$oxc-utilities/oxc-utilities";
+import {
+	IDENTIFIER,
+	isAnyLiteral,
+	isAssignmentExpression,
+	isBooleanLiteral,
+	isCallExpression,
+	isExpressionStatement,
+	isIdentifierName,
+	isIdentifierNamed,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxIdentifier,
+	isJsxSpreadAttribute,
+	isMemberExpression,
+	isNewExpression,
+	isNumericLiteral,
+	isReturnStatement,
+	isSpreadElement,
+	isStringLiteral,
+	isUnaryExpression,
+	isVariableDeclaration,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";
@@ -104,9 +125,11 @@ function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalVa
 	const [valueTypeIndex] = encodedValue;
 	/* v8 ignore next -- @preserve generated compact values always start with a numeric type index. */
 	if (!Predicate.isNumber(valueTypeIndex)) return undefined;
+
 	const valueType = canonicalValueTypes[valueTypeIndex];
 	/* v8 ignore next -- @preserve the generator only emits indexes from canonicalValueTypes. */
 	if (valueType === undefined) return undefined;
+
 	const candidate =
 		valueType === "Enum"
 			? { enumType: encodedValue[1], type: valueType, value: encodedValue[2] }
@@ -139,6 +162,7 @@ function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<st
 			const valueIndex = entries[index + 1];
 			/* v8 ignore next -- @preserve the generator emits complete property/value index pairs. */
 			if (propertyIndex === undefined || valueIndex === undefined) continue;
+
 			const propertyName = defaultProperties.properties[propertyIndex];
 			const encodedValue = defaultProperties.values[valueIndex];
 			/* v8 ignore next -- @preserve generated indexes always reference existing dictionary entries. */
@@ -162,19 +186,8 @@ interface DefaultPropertyMatch {
 	readonly value: CanonicalValue;
 }
 
-function isIdentifierNamed(
-	node: ESTree.Node,
-	name: string,
-): node is ESTree.Node & { readonly name: string; readonly type: "Identifier" } {
-	return node.type === "Identifier" && node.name === name;
-}
-
-function isBooleanLiteral(node: ESTree.Expression): node is ESTree.BooleanLiteral {
-	return node.type === "Literal" && typeof node.value === "boolean";
-}
-
 function getIntrinsicClassName(node: ESTree.JSXElementName): string | undefined {
-	if (node.type !== "JSXIdentifier") return undefined;
+	if (!isJsxIdentifier(node)) return undefined;
 
 	const className = intrinsicClassNamesByTagName.get(node.name.toLowerCase());
 	if (className === undefined || node.name === className) return undefined;
@@ -183,15 +196,14 @@ function getIntrinsicClassName(node: ESTree.JSXElementName): string | undefined 
 }
 
 function getJsxAttributeName(node: ESTree.JSXAttributeName): string | undefined {
-	if (node.type !== "JSXIdentifier") return undefined;
-	return node.name;
+	return isJsxIdentifier(node) ? node.name : undefined;
 }
 
 function getJsxAttributeExpression({ value }: ESTree.JSXAttribute): ESTree.Expression | undefined {
 	if (value === null) return undefined;
-	if (value.type === "Literal") return value;
+	if (isAnyLiteral(value)) return value;
 	/* v8 ignore next -- @preserve Oxc only produces JSXEmptyExpression here for rejected parse-error cases. */
-	if (value.type !== "JSXExpressionContainer" || value.expression.type === "JSXEmptyExpression") return undefined;
+	if (!isJsxExpressionContainer(value) || isJsxEmptyExpression(value.expression)) return undefined;
 	return value.expression;
 }
 
@@ -221,7 +233,7 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 
 	switch (value.type) {
 		case "bool":
-			return typeof value.value === "boolean";
+			return Predicate.isBoolean(value.value);
 
 		case "CFrame": {
 			return (
@@ -270,10 +282,10 @@ function isCanonicalValue(value: unknown): value is CanonicalValue {
 
 function getTrackedInstanceClassName(node: ESTree.Expression): string | undefined {
 	const expression = unwrapExpression(node);
-	if (expression.type !== "NewExpression" || !isIdentifierNamed(expression.callee, "Instance")) return undefined;
+	if (!isNewExpression(expression) || !isIdentifierNamed(expression.callee, "Instance")) return undefined;
 
 	const [firstArgument] = expression.arguments;
-	if (firstArgument === undefined || firstArgument.type === "SpreadElement" || !isStringLiteral(firstArgument)) {
+	if (firstArgument === undefined || isSpreadElement(firstArgument) || !isStringLiteral(firstArgument)) {
 		return undefined;
 	}
 
@@ -305,7 +317,7 @@ function containsIdentifierReference(
 	if (!isIdentifierSearchObject(value) || visitedValues.has(value)) return false;
 
 	visitedValues.add(value);
-	if (value.type === "Identifier" && value.name === identifierName) return true;
+	if (value.type === IDENTIFIER && value.name === identifierName) return true;
 
 	for (const nestedValue of Object.values(value)) {
 		if (containsIdentifierReference(nestedValue, identifierName, visitedValues)) return true;
@@ -318,23 +330,23 @@ function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefin
 	const path = new Array<string>();
 	let current: ESTree.Expression = node;
 
-	while (current.type === "MemberExpression") {
-		if (current.computed || current.property.type !== "Identifier") return undefined;
+	while (isMemberExpression(current)) {
+		if (current.computed || !isIdentifierName(current.property)) return undefined;
 
 		path.unshift(current.property.name);
 
 		const { object } = current;
-		if (object.type === "Identifier") {
+		if (isIdentifierName(object)) {
 			path.unshift(object.name);
 			return path;
 		}
 
 		/* v8 ignore next -- @preserve member paths inspected by default-value matching are identifier-rooted member chains. */
-		if (object.type !== "MemberExpression") return undefined;
+		if (!isMemberExpression(object)) return undefined;
 		current = object;
 	}
 
-	if (current.type === "Identifier") {
+	if (isIdentifierName(current)) {
 		path.unshift(current.name);
 		return path;
 	}
@@ -374,7 +386,7 @@ function extractNumberValue(node: ESTree.Expression): number | undefined {
 	if (isNumericLiteral(node)) return node.value;
 	if (isMathHuge(node)) return Number.POSITIVE_INFINITY;
 
-	if (node.type !== "UnaryExpression") return undefined;
+	if (!isUnaryExpression(node)) return undefined;
 	if (node.operator !== "+" && node.operator !== "-") return undefined;
 
 	const argumentValue = extractNumberValue(node.argument);
@@ -389,12 +401,7 @@ function extractPair(
 	if (argumentsList.length !== 2) return undefined;
 
 	const [first, second] = argumentsList;
-	if (
-		first === undefined ||
-		second === undefined ||
-		first.type === "SpreadElement" ||
-		second.type === "SpreadElement"
-	) {
+	if (first === undefined || second === undefined || isSpreadElement(first) || isSpreadElement(second)) {
 		return undefined;
 	}
 
@@ -411,9 +418,9 @@ function extractTriple(
 		first === undefined ||
 		second === undefined ||
 		third === undefined ||
-		first.type === "SpreadElement" ||
-		second.type === "SpreadElement" ||
-		third.type === "SpreadElement"
+		isSpreadElement(first) ||
+		isSpreadElement(second) ||
+		isSpreadElement(third)
 	) {
 		return undefined;
 	}
@@ -439,10 +446,10 @@ function extractQuadruple(
 		second === undefined ||
 		third === undefined ||
 		fourth === undefined ||
-		first.type === "SpreadElement" ||
-		second.type === "SpreadElement" ||
-		third.type === "SpreadElement" ||
-		fourth.type === "SpreadElement"
+		isSpreadElement(first) ||
+		isSpreadElement(second) ||
+		isSpreadElement(third) ||
+		isSpreadElement(fourth)
 	) {
 		return undefined;
 	}
@@ -456,13 +463,13 @@ function extractVectorComponents<TValue extends ReadonlyArray<number>>(
 	zeroValue: TValue,
 	extractor: (parameters: ESTree.NewExpression["arguments"]) => TValue | undefined,
 ): TValue | undefined {
-	if (node.type === "MemberExpression") {
+	if (isMemberExpression(node)) {
 		const path = getMemberPath(node);
 		if (path?.length === 2 && path[0] === className && path[1] === "zero") return zeroValue;
 		return undefined;
 	}
 
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, className)) return undefined;
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, className)) return undefined;
 	if (node.arguments.length === 0) return zeroValue;
 
 	return extractor(node.arguments);
@@ -506,7 +513,7 @@ function extractVector3Value(node: ESTree.Expression): readonly [x: number, y: n
 }
 
 function extractUDimValue(node: ESTree.Expression): readonly [scale: number, offset: number] | undefined {
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "UDim")) return undefined;
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "UDim")) return undefined;
 	if (node.arguments.length === 0) return [0, 0];
 
 	return extractNumberPair(node.arguments);
@@ -533,7 +540,7 @@ function extractNumberQuadruple(
 function extractUDim2Value(
 	node: ESTree.Expression,
 ): readonly [scaleX: number, offsetX: number, scaleY: number, offsetY: number] | undefined {
-	if (node.type === "CallExpression") {
+	if (isCallExpression(node)) {
 		const path = getMemberPath(node.callee);
 		const components = extractNumberPair(node.arguments);
 		if (path === undefined || components === undefined) return undefined;
@@ -544,7 +551,7 @@ function extractUDim2Value(
 		return undefined;
 	}
 
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "UDim2")) return undefined;
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "UDim2")) return undefined;
 	if (node.arguments.length === 0) return [0, 0, 0, 0];
 
 	return extractNumberQuadruple(node.arguments);
@@ -553,7 +560,7 @@ function extractUDim2Value(
 function extractRectValue(
 	node: ESTree.Expression,
 ): readonly [minimumX: number, minimumY: number, maximumX: number, maximumY: number] | undefined {
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Rect")) return undefined;
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "Rect")) return undefined;
 	if (node.arguments.length === 0) return [0, 0, 0, 0];
 
 	return extractNumberQuadruple(node.arguments);
@@ -572,7 +579,7 @@ function extractRGBFromComponents(
 }
 
 function extractColor3Value(node: ESTree.Expression): readonly [red: number, green: number, blue: number] | undefined {
-	if (node.type === "CallExpression") {
+	if (isCallExpression(node)) {
 		const path = getMemberPath(node.callee);
 		const components = extractTriple(node.arguments);
 		if (components === undefined || path?.length !== 2 || path[0] !== "Color3" || path[1] !== "fromRGB") {
@@ -586,7 +593,7 @@ function extractColor3Value(node: ESTree.Expression): readonly [red: number, gre
 		return [Math.fround(red / 255), Math.fround(green / 255), Math.fround(blue / 255)];
 	}
 
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "Color3")) return undefined;
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "Color3")) return undefined;
 	if (node.arguments.length === 0) return [0, 0, 0];
 
 	const components = extractTriple(node.arguments);
@@ -613,7 +620,7 @@ function extractCFrameValue(
 			r22: number,
 	  ]
 	| undefined {
-	if (node.type !== "NewExpression" || !isIdentifierNamed(node.callee, "CFrame")) return undefined;
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "CFrame")) return undefined;
 	if (node.arguments.length === 0) return [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1];
 
 	const position = extractNumberTriple(node.arguments);
@@ -721,6 +728,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			const previousToken = sourceCode.getTokenBefore(statementNode);
 			const nextToken = sourceCode.getTokenAfter(statementNode);
 			if (hasCommentsAroundNode(statementNode)) return undefined;
+
 			/* v8 ignore next 3 -- @preserve SourceCode reports adjacent comments through getCommentsBefore/After before this defensive token-between check. */
 			if (previousToken !== null && sourceCode.commentsExistBetween(previousToken, statementNode)) {
 				return undefined;
@@ -746,11 +754,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			node: ESTree.JSXOpeningElement,
 			attribute: ESTree.JSXAttribute,
 		): ((fixer: Fixer) => Fix) | undefined {
-			if (
-				node.attributes.some((openingElementAttribute) => openingElementAttribute.type === "JSXSpreadAttribute")
-			) {
-				return undefined;
-			}
+			if (node.attributes.some(isJsxSpreadAttribute)) return undefined;
 
 			const previousToken = sourceCode.getTokenBefore(attribute);
 			/* v8 ignore next -- @preserve JSX attributes always have a preceding token in their opening element. */
@@ -772,10 +776,10 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 		): void {
 			if (
 				assignmentExpression.operator !== "=" ||
-				assignmentExpression.left.type !== "MemberExpression" ||
+				!isMemberExpression(assignmentExpression.left) ||
 				assignmentExpression.left.computed ||
-				assignmentExpression.left.object.type !== "Identifier" ||
-				assignmentExpression.left.property.type !== "Identifier"
+				!isIdentifierName(assignmentExpression.left.object) ||
+				!isIdentifierName(assignmentExpression.left.property)
 			) {
 				return;
 			}
@@ -813,7 +817,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 		): void {
 			for (const [identifierName] of trackedInstances) {
 				for (const argument of callExpression.arguments) {
-					if (argument.type === "SpreadElement") continue;
+					if (isSpreadElement(argument)) continue;
 					/* v8 ignore next -- @preserve call-expression escape checks are only needed for arguments that reference tracked instances. */
 					if (!containsIdentifierReference(argument, identifierName)) continue;
 
@@ -827,12 +831,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			assignmentExpression: ESTree.AssignmentExpression,
 			trackedInstances: Map<string, TrackedInstance>,
 		): void {
-			if (
-				assignmentExpression.left.type !== "Identifier" &&
-				assignmentExpression.left.type !== "MemberExpression"
-			) {
-				return;
-			}
+			if (!isIdentifierName(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
 
 			for (const [identifierName] of trackedInstances) {
 				/* v8 ignore next -- @preserve escape assignments only clear tracked instances when the right-hand side references them. */
@@ -856,27 +855,24 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 
 		function inspectStatementNodes(statementNodes: ReadonlyArray<ESTree.Node>): void {
 			const trackedInstances = new Map<string, TrackedInstance>();
-
-			for (const statementNode of statementNodes) {
-				inspectStatementNode(statementNode, trackedInstances);
-			}
+			for (const statementNode of statementNodes) inspectStatementNode(statementNode, trackedInstances);
 		}
 
 		function inspectStatementNode(
 			statementNode: ESTree.Node,
 			trackedInstances: Map<string, TrackedInstance>,
 		): void {
-			if (statementNode.type === "ExpressionStatement") {
+			if (isExpressionStatement(statementNode)) {
 				inspectExpressionStatement(statementNode, trackedInstances);
 				return;
 			}
 
-			if (statementNode.type === "ReturnStatement") {
+			if (isReturnStatement(statementNode)) {
 				clearTrackedInstancesForReturnStatement(statementNode, trackedInstances);
 				return;
 			}
 
-			if (statementNode.type === "VariableDeclaration") trackConstInstances(statementNode, trackedInstances);
+			if (isVariableDeclaration(statementNode)) trackConstInstances(statementNode, trackedInstances);
 		}
 
 		function inspectExpressionStatement(
@@ -885,15 +881,13 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 		): void {
 			const expression = unwrapExpression(statementNode.expression);
 
-			if (expression.type === "AssignmentExpression") {
+			if (isAssignmentExpression(expression)) {
 				reportUselessDefaultAssignment(statementNode, expression, trackedInstances);
 				clearTrackedInstancesForEscapeAssignment(expression, trackedInstances);
 				return;
 			}
 
-			if (expression.type === "CallExpression") {
-				clearTrackedInstancesForCallExpression(expression, trackedInstances);
-			}
+			if (isCallExpression(expression)) clearTrackedInstancesForCallExpression(expression, trackedInstances);
 		}
 
 		function trackConstInstances(
@@ -903,7 +897,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			if (statementNode.kind !== "const") return;
 
 			for (const declaration of statementNode.declarations) {
-				if (declaration.id.type !== "Identifier" || declaration.init === null) continue;
+				if (!isIdentifierName(declaration.id) || declaration.init === null) continue;
 
 				const className = getTrackedInstanceClassName(declaration.init);
 				if (className === undefined) continue;
@@ -921,7 +915,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 				if (className === undefined) return;
 
 				for (const attribute of node.attributes) {
-					if (attribute.type === "JSXSpreadAttribute") continue;
+					if (isJsxSpreadAttribute(attribute)) continue;
 
 					const propertyName = getJsxAttributeName(attribute.name);
 					if (propertyName === undefined || isIgnoredPropertyName(propertyName)) continue;

@@ -8,22 +8,23 @@ import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effe
 
 type RuleContext = InferContextFromRule<typeof noExternalStoreSubscription>;
 
-function getBodySetters(analysis: ReactEffectAnalysis, effect: ReactEffect): ReadonlyArray<Reference> {
+function getBodySetters({ isStateCall, scope }: ReactEffectAnalysis, effect: ReactEffect): ReadonlyArray<Reference> {
 	return effect.functionReferences.filter((reference) => {
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) {
-			return false;
-		}
-		return analysis.isStateCall(reference);
+		if (!scope.isSynchronousWithin(reference.identifier, effect.functionNode)) return false;
+		return isStateCall(reference);
 	});
 }
 
-function collectCleanupReferences(analysis: ReactEffectAnalysis, cleanupArgument: ESTree.Expression): Array<Reference> {
-	const cleanupReferences = [...analysis.scope.getDownstreamReferences(cleanupArgument)];
+function collectCleanupReferences(
+	{ scope }: ReactEffectAnalysis,
+	cleanupArgument: ESTree.Expression,
+): Array<Reference> {
+	const cleanupReferences = [...scope.getDownstreamReferences(cleanupArgument)];
 
 	// Manual descend because `descend` skips arguments.
-	for (const callExpression of analysis.scope.getDescendantCallExpressions(cleanupArgument)) {
+	for (const callExpression of scope.getDescendantCallExpressions(cleanupArgument)) {
 		for (const argument of callExpression.arguments) {
-			for (const argumentReference of analysis.scope.getDownstreamReferences(argument)) {
+			for (const argumentReference of scope.getDownstreamReferences(argument)) {
 				cleanupReferences.push(argumentReference);
 			}
 		}

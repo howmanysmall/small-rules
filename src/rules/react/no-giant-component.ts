@@ -3,7 +3,7 @@ import { Predicate } from "effect";
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import { isCallbackFunction, isFunctionDeclaration, isNode, isVariableDeclarator } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -19,12 +19,7 @@ interface ComponentDetails {
 	readonly nameNode: ESTree.Node;
 }
 function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | undefined {
-	if (
-		node.type !== "FunctionDeclaration" ||
-		!isComponentDeclaration(node) ||
-		node.id === null ||
-		node.body === null
-	) {
+	if (!isFunctionDeclaration(node) || !isComponentDeclaration(node) || node.id === null || node.body === null) {
 		return undefined;
 	}
 
@@ -35,11 +30,11 @@ function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | u
 }
 
 function getComponentAssignmentDetails(node: ESTree.Node): ComponentDetails | undefined {
-	if (node.type !== "VariableDeclarator" || !isComponentAssignment(node) || node.init === null) return undefined;
+	if (!isVariableDeclarator(node) || !isComponentAssignment(node) || node.init === null) return undefined;
 	/* v8 ignore next -- component assignments require identifier declarators. @preserve */
 	if (!("name" in node.id) || !Predicate.isString(node.id.name)) return undefined;
 	/* v8 ignore next -- component assignments require function initializers. @preserve */
-	if (node.init.type !== "ArrowFunctionExpression" && node.init.type !== "FunctionExpression") return undefined;
+	if (!isCallbackFunction(node.init)) return undefined;
 	/* v8 ignore next -- function initializers have parser-produced node bodies. @preserve */
 	if (!isNode(node.init.body)) return undefined;
 

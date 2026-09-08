@@ -261,9 +261,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 		if (directive === undefined) continue;
 
 		const { kind } = directive;
-		if (!isDisableOrEnableDirectiveKind(kind)) {
-			continue;
-		}
+		if (!isDisableOrEnableDirectiveKind(kind)) continue;
 
 		const { start } = comment.loc;
 

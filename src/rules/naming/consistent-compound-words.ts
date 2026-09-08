@@ -2,6 +2,12 @@ import { Predicate } from "effect";
 
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isExportSpecifier,
+	isMethodDefinitionRaw,
+	isProperty,
+	isPropertyDefinitionRaw,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -172,9 +178,9 @@ function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {
 	/* v8 ignore next -- Identifier visitors always have parents in parser ASTs. @preserve */
 	if (parent === null) return false;
 	return (
-		(parent.type === "Property" && parent.key === node && !parent.computed) ||
-		(parent.type === "PropertyDefinition" && parent.key === node && !parent.computed) ||
-		(parent.type === "MethodDefinition" && parent.key === node && !parent.computed)
+		(isProperty(parent) && parent.key === node && !parent.computed) ||
+		(isPropertyDefinitionRaw(parent) && parent.key === node && !parent.computed) ||
+		(isMethodDefinitionRaw(parent) && parent.key === node && !parent.computed)
 	);
 }
 
@@ -197,7 +203,7 @@ const consistentCompoundWords = createRule("consistent-compound-words", "naming"
 				if (
 					!options.checkProperties ||
 					node.name === "__proto__" ||
-					node.parent.type === "ExportSpecifier" ||
+					isExportSpecifier(node.parent) ||
 					!shouldReportPropertyIdentifier(node)
 				) {
 					return;

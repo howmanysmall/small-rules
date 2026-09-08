@@ -5,10 +5,30 @@ import { type } from "arktype";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isAnyFunction,
+	isAwaitExpression,
+	isBreakStatement,
+	isCallExpression,
+	isContinueStatement,
+	isForOfStatement,
+	isIdentifierName,
+	isIfStatement,
+	isLabeledStatement,
+	isLoopNode,
+	isMemberExpression,
+	isReturnStatement,
+	isSwitchCase,
+	isSwitchStatement,
+	isTryStatement,
+	isYieldExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
+
+import type { LoopNode } from "$oxc-utilities/oxc-utilities";
 
 const NOT_ALL = "not all execution paths";
 
@@ -38,21 +58,6 @@ interface OpenerStackEntry {
 	readonly node: ESTree.Node;
 	readonly opener: string;
 }
-
-type LoopLikeStatement =
-	| ESTree.DoWhileStatement
-	| ESTree.ForInStatement
-	| ESTree.ForOfStatement
-	| ESTree.ForStatement
-	| ESTree.WhileStatement;
-
-const LOOP_NODE_TYPES = new Set<string>([
-	"DoWhileStatement",
-	"ForInStatement",
-	"ForOfStatement",
-	"ForStatement",
-	"WhileStatement",
-]);
 
 interface ControlFlowContext {
 	readonly asyncContext: boolean;
@@ -92,11 +97,11 @@ function getBranchesWithOpener(
 }
 
 function getCallName({ callee }: ESTree.CallExpression): string | undefined {
-	if (callee.type === "Identifier") return callee.name;
+	if (isIdentifierName(callee)) return callee.name;
 
-	if (callee.type === "MemberExpression") {
-		const object = callee.object.type === "Identifier" ? callee.object.name : undefined;
-		const property = callee.property.type === "Identifier" ? callee.property.name : undefined;
+	if (isMemberExpression(callee)) {
+		const object = isIdentifierName(callee.object) ? callee.object.name : undefined;
+		const property = isIdentifierName(callee.property) ? callee.property.name : undefined;
 		if (object !== undefined && property !== undefined) return `${object}.${property}`;
 	}
 
@@ -138,23 +143,13 @@ function formatOpenerList(openers: ReadonlyArray<string>): string {
 	return openers.join("' or '");
 }
 
-function isLoopLikeStatement(node?: ESTree.Node): node is LoopLikeStatement {
-	/* v8 ignore next -- @preserve loop resolver callers either pass a parent node or have already stopped traversal. */
-	if (!node) return false;
-	return LOOP_NODE_TYPES.has(node.type);
-}
-
-function isSwitchStatement(node?: ESTree.Node): node is ESTree.SwitchStatement {
-	return node?.type === "SwitchStatement";
-}
-
 function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node): ESTree.Statement | undefined {
 	/* v8 ignore next -- @preserve ESTree break/continue labels are parser-produced identifiers. */
-	if (label.type !== "Identifier") return undefined;
+	if (!isIdentifierName(label)) return undefined;
 	let current: ESTree.Node | undefined = startingNode;
 
 	while (current) {
-		if (current.type === "LabeledStatement" && current.label.name === label.name) return current.body;
+		if (isLabeledStatement(current) && current.label.name === label.name) return current.body;
 		/* v8 ignore next -- @preserve parser-produced labeled statements keep parent links during traversal. */
 		current = current.parent ?? undefined;
 	}
@@ -166,14 +161,14 @@ function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node
 function resolveTargetLoop(
 	statement: ESTree.BreakStatement | ESTree.ContinueStatement,
 	allowSwitchTermination: boolean,
-): LoopLikeStatement | undefined {
+): LoopNode | undefined {
 	const labeledBody = statement.label ? findLabeledStatementBody(statement.label, statement.parent) : undefined;
 
-	if (labeledBody) return isLoopLikeStatement(labeledBody) ? labeledBody : undefined;
+	if (labeledBody) return isLoopNode(labeledBody) ? labeledBody : undefined;
 
 	let current: ESTree.Node | undefined = statement.parent;
 	while (current) {
-		if (isLoopLikeStatement(current)) return current;
+		if (isLoopNode(current)) return current;
 		if (allowSwitchTermination && isSwitchStatement(current)) return undefined;
 		/* v8 ignore next -- @preserve parser-produced break/continue statements keep parent links until a target. */
 		current = current.parent ?? undefined;
@@ -183,11 +178,11 @@ function resolveTargetLoop(
 	return undefined;
 }
 
-function resolveBreakTargetLoop(statement: ESTree.BreakStatement): LoopLikeStatement | undefined {
+function resolveBreakTargetLoop(statement: ESTree.BreakStatement): LoopNode | undefined {
 	return resolveTargetLoop(statement, true);
 }
 
-function resolveContinueTargetLoop(statement: ESTree.ContinueStatement): LoopLikeStatement | undefined {
+function resolveContinueTargetLoop(statement: ESTree.ContinueStatement): LoopNode | undefined {
 	return resolveTargetLoop(statement, false);
 }
 
@@ -248,7 +243,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		}
 
 		const openerStack = new Array<OpenerStackEntry>();
-		const loopStack = new Array<LoopLikeStatement>();
+		const loopStack = new Array<LoopNode>();
 		let stackIndexCounter = 0;
 		const functionStacks = new Array<Array<OpenerStackEntry>>();
 
@@ -381,13 +376,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onFunctionEnter(node: ESTree.Node): void {
 			/* v8 ignore if -- @preserve this handler is only registered for function-like visitor keys. */
-			if (
-				node.type !== "FunctionDeclaration" &&
-				node.type !== "FunctionExpression" &&
-				node.type !== "ArrowFunctionExpression"
-			) {
-				return;
-			}
+			if (!isAnyFunction(node)) return;
 
 			functionStacks.push([...openerStack]);
 			openerStack.length = 0;
@@ -424,7 +413,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onIfStatementEnter(ifNode: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for IfStatement visitor keys. */
-			if (ifNode.type !== "IfStatement") return;
+			if (!isIfStatement(ifNode)) return;
 			pushContext({ inConditional: true });
 			saveSnapshot(ifNode);
 		}
@@ -432,7 +421,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
 		function onIfStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for IfStatement visitor keys. */
-			if (node.type !== "IfStatement") return;
+			if (!isIfStatement(node)) return;
 			popContext();
 
 			const originalStack = stackSnapshots.get(node);
@@ -464,40 +453,32 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			branchStacks.delete(node);
 		}
 
-		function onIfConsequentExit(node: ESTree.Node): void {
-			const consequentNode = node;
-			const { parent } = consequentNode;
+		function onIfConsequentExit({ parent }: ESTree.Node): void {
+			/* v8 ignore next -- @preserve consequent exit selector only runs for IfStatement consequents. */
+			if (!isIfStatement(parent)) return;
+			recordBranchSnapshot(parent);
 
-			/* v8 ignore else -- @preserve consequent exit selector only runs for IfStatement consequents. */
-			if (parent?.type === "IfStatement") {
-				recordBranchSnapshot(parent);
-
-				const originalStack = stackSnapshots.get(parent);
-				/* v8 ignore next -- @preserve consequent exits are paired with IfStatement enter snapshots. */
-				if (!originalStack) return;
-
-				restoreOpenerStack(originalStack);
-			}
+			const originalStack = stackSnapshots.get(parent);
+			/* v8 ignore next -- @preserve consequent exits are paired with IfStatement enter snapshots. */
+			if (!originalStack) return;
+			restoreOpenerStack(originalStack);
 		}
 
-		function onIfAlternateExit(node: ESTree.Node): void {
-			const alternateNode = node;
-			const { parent } = alternateNode;
-
+		function onIfAlternateExit({ parent }: ESTree.Node): void {
 			/* v8 ignore else -- @preserve alternate exit selector only runs for IfStatement alternates. */
-			if (parent?.type === "IfStatement") recordBranchSnapshot(parent);
+			if (isIfStatement(parent)) recordBranchSnapshot(parent);
 		}
 
 		function onTryStatementEnter(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for TryStatement visitor keys. */
-			if (node.type !== "TryStatement") return;
+			if (!isTryStatement(node)) return;
 			saveSnapshot(node);
 		}
 
 		// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
 		function onTryStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for TryStatement visitor keys. */
-			if (node.type !== "TryStatement") return;
+			if (!isTryStatement(node)) return;
 			const originalStack = stackSnapshots.get(node);
 			const branches = branchStacks.get(node);
 
@@ -557,7 +538,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const { parent } = node;
 
 			/* v8 ignore else -- @preserve try branch exit selectors only run for TryStatement children. */
-			if (parent.type === "TryStatement") {
+			if (isTryStatement(parent)) {
 				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
@@ -586,14 +567,14 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onSwitchStatementEnter(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for SwitchStatement visitor keys. */
-			if (node.type !== "SwitchStatement") return;
+			if (!isSwitchStatement(node)) return;
 			pushContext({ inConditional: true });
 			saveSnapshot(node);
 		}
 
 		function onSwitchStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for SwitchStatement visitor keys. */
-			if (node.type !== "SwitchStatement") return;
+			if (!isSwitchStatement(node)) return;
 			popContext();
 
 			const originalStack = stackSnapshots.get(node);
@@ -621,11 +602,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onSwitchCaseExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for SwitchCase visitor keys. */
-			if (node.type !== "SwitchCase") return;
+			if (!isSwitchCase(node)) return;
 			const { parent } = node;
 
 			/* v8 ignore else -- @preserve switch case exit selector only runs for SwitchStatement cases. */
-			if (parent.type === "SwitchStatement") {
+			if (isSwitchStatement(parent)) {
 				recordBranchSnapshot(parent);
 
 				const originalStack = stackSnapshots.get(parent);
@@ -638,7 +619,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onLoopEnter(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for loop-like visitor keys. */
-			if (!isLoopLikeStatement(node)) return;
+			if (!isLoopNode(node)) return;
 			loopStack.push(node);
 			pushContext({ inLoop: true });
 		}
@@ -660,7 +641,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
-				const statementType = statementNode.type === "ReturnStatement" ? "return" : "throw";
+				const statementType = isReturnStatement(statementNode) ? "return" : "throw";
 
 				context.report({
 					data: {
@@ -675,12 +656,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		}
 
 		function onBreakContinue(node: ESTree.Node): void {
-			if ((node.type !== "BreakStatement" && node.type !== "ContinueStatement") || openerStack.length === 0) {
-				return;
-			}
+			if (openerStack.length === 0 || (!isBreakStatement(node) && !isContinueStatement(node))) return;
 
-			const targetLoop =
-				node.type === "ContinueStatement" ? resolveContinueTargetLoop(node) : resolveBreakTargetLoop(node);
+			const targetLoop = isContinueStatement(node)
+				? resolveContinueTargetLoop(node)
+				: resolveBreakTargetLoop(node);
 
 			if (!targetLoop) return;
 
@@ -691,7 +671,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
-				const statementType = node.type === "BreakStatement" ? "break" : "continue";
+				const statementType = isBreakStatement(node) ? "break" : "continue";
 				const lineNumber = node.loc.start.line;
 
 				context.report({
@@ -817,9 +797,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onAsyncYield(node: ESTree.Node): void {
 			/* v8 ignore if -- @preserve this handler is only registered for await/yield/for-of visitor keys. */
-			if (node.type !== "AwaitExpression" && node.type !== "YieldExpression" && node.type !== "ForOfStatement") {
-				return;
-			}
+			if (!isAwaitExpression(node) && !isYieldExpression(node) && !isForOfStatement(node)) return;
 			for (const { config, opener } of openerStack) {
 				if (config.requireSync !== true) continue;
 
@@ -827,7 +805,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
 				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
 
-				const asyncType = node.type === "YieldExpression" ? "yield" : "await";
+				const asyncType = isYieldExpression(node) ? "yield" : "await";
 
 				context.report({
 					data: { asyncType, closer, opener },
@@ -839,7 +817,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onCallExpression(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for CallExpression visitor keys. */
-			if (node.type !== "CallExpression") return;
+			if (!isCallExpression(node)) return;
 			const callName = getCallName(node);
 			if (callName === undefined || callName === "") return;
 

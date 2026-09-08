@@ -1,5 +1,39 @@
 // oxlint-disable better-max-params/better-max-params -- nobody cares lol
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isCallExpression,
+	isIdentifierName,
+	isMemberExpression,
+	isObjectExpression,
+	isTsOptionalType,
+	isTsQualifiedName,
+	isTsRestType,
+	isTsTypeAnnotation,
+	isTsTypeQuery,
+	isTsTypeReference,
+	TS_ANY_KEYWORD,
+	TS_ARRAY_TYPE,
+	TS_BIG_INT_KEYWORD,
+	TS_BOOLEAN_KEYWORD,
+	TS_CONDITIONAL_TYPE,
+	TS_FUNCTION_TYPE,
+	TS_INTERFACE_DECLARATION,
+	TS_INTERSECTION_TYPE,
+	TS_MAPPED_TYPE,
+	TS_METHOD_SIGNATURE,
+	TS_NEVER_KEYWORD,
+	TS_NULL_KEYWORD,
+	TS_NUMBER_KEYWORD,
+	TS_STRING_KEYWORD,
+	TS_SYMBOL_KEYWORD,
+	TS_TUPLE_TYPE,
+	TS_TYPE_LITERAL,
+	TS_TYPE_REFERENCE,
+	TS_UNDEFINED_KEYWORD,
+	TS_UNION_TYPE,
+	TS_UNKNOWN_KEYWORD,
+	TS_VOID_KEYWORD,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -25,31 +59,32 @@ const DEFAULT_CONFIGURATION: ComplexityConfig = {
 type RuleOptions = InferContextFromRule<typeof enforceIanitorCheckType>["options"][0];
 
 function isIanitorValidator({ callee }: ESTree.CallExpression): boolean {
-	if (callee.type !== "MemberExpression") return false;
-	return callee.object.type === "Identifier" && callee.object.name === "Ianitor";
+	if (!isMemberExpression(callee)) return false;
+	return isIdentifierName(callee.object) && callee.object.name === "Ianitor";
 }
 
 function unwrapReadonlyType(typeNode: ESTree.Node): ESTree.Node {
-	if (typeNode.type !== "TSTypeReference") return typeNode;
+	if (!isTsTypeReference(typeNode)) return typeNode;
 
 	const { typeArguments, typeName } = typeNode;
-	if (typeName.type !== "Identifier" || typeName.name !== "Readonly") return typeNode;
+	if (!isIdentifierName(typeName) || typeName.name !== "Readonly") return typeNode;
 
 	return typeArguments?.params[0] ?? typeNode;
 }
 
+function hasBothTypeArguments(left: ESTree.TSTypeName, right: ESTree.IdentifierName): boolean {
+	return !isIdentifierName(left) || left.name !== "Ianitor" || right.name !== "Static";
+}
+
 function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined {
 	const currentType = unwrapReadonlyType(typeNode);
-	if (currentType.type !== "TSTypeReference") return undefined;
+	if (!isTsTypeReference(currentType)) return undefined;
 
 	const { typeArguments, typeName } = currentType;
-	if (typeName.type !== "TSQualifiedName") return undefined;
-
-	const { left, right } = typeName;
-	if (left.type !== "Identifier" || left.name !== "Ianitor" || right.name !== "Static") return undefined;
+	if (!isTsQualifiedName(typeName) || hasBothTypeArguments(typeName.left, typeName.right)) return undefined;
 
 	const first = typeArguments?.params[0];
-	if (first?.type !== "TSTypeQuery") return undefined;
+	if (!isTsTypeQuery(first)) return undefined;
 
 	const { exprName } = first;
 	return exprName.type === "Identifier" ? exprName.name : undefined;
@@ -57,20 +92,17 @@ function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined
 
 function hasIanitorStaticType(typeNode: ESTree.Node): boolean {
 	const currentType = unwrapReadonlyType(typeNode);
-	if (currentType.type !== "TSTypeReference") return false;
+	if (!isTsTypeReference(currentType)) return false;
 
 	const { typeArguments, typeName } = currentType;
-	if (typeName.type !== "TSQualifiedName") return false;
+	if (!isTsQualifiedName(typeName) || hasBothTypeArguments(typeName.left, typeName.right)) return false;
 
-	const { left, right } = typeName;
-	if (left.type !== "Identifier" || left.name !== "Ianitor" || right.name !== "Static") return false;
-
-	return typeArguments?.params[0]?.type === "TSTypeQuery";
+	return isTsTypeQuery(typeArguments?.params[0]);
 }
 
 function calculateIanitorComplexity(node: ESTree.CallExpression): number {
 	const { callee } = node;
-	if (callee.type !== "MemberExpression" || callee.property.type !== "Identifier") return 0;
+	if (!isMemberExpression(callee) || !isIdentifierName(callee.property)) return 0;
 
 	const method = callee.property.name;
 	switch (method) {
@@ -88,7 +120,7 @@ function calculateIanitorComplexity(node: ESTree.CallExpression): number {
 		case "interface":
 		case "strictInterface": {
 			const [firstArgument] = node.arguments;
-			return firstArgument?.type === "ObjectExpression" ? 10 + firstArgument.properties.length * 3 : 0;
+			return isObjectExpression(firstArgument) ? 10 + firstArgument.properties.length * 3 : 0;
 		}
 
 		case "intersection":
@@ -106,8 +138,7 @@ function calculateIanitorComplexity(node: ESTree.CallExpression): number {
 
 function addScore(current: number, addition: number, config: ComplexityConfig, ceiling: number): number {
 	const nextScore = current + addition;
-	if (!config.performanceMode) return nextScore;
-	return Math.min(nextScore, ceiling);
+	return config.performanceMode ? Math.min(nextScore, ceiling) : nextScore;
 }
 
 function addStructuralScore(
@@ -142,7 +173,7 @@ function addNestedTypeAnnotationScores(
 		if (!("typeAnnotation" in member)) continue;
 		const { typeAnnotation } = member;
 		/* v8 ignore next -- @preserve parser-produced type members either omit annotations or use TSTypeAnnotation. */
-		if (typeAnnotation?.type !== "TSTypeAnnotation") continue;
+		if (!isTsTypeAnnotation(typeAnnotation)) continue;
 		score = addStructuralScore(
 			score,
 			typeAnnotation.typeAnnotation,
@@ -219,12 +250,12 @@ function calculateStructuralComplexity(
 	const nextDepth = depth + 1;
 
 	switch (node.type) {
-		case "TSAnyKeyword":
-		case "TSNeverKeyword":
-		case "TSUnknownKeyword":
+		case TS_ANY_KEYWORD:
+		case TS_NEVER_KEYWORD:
+		case TS_UNKNOWN_KEYWORD:
 			break;
 
-		case "TSArrayType": {
+		case TS_ARRAY_TYPE: {
 			/* v8 ignore else -- @preserve parser-produced TSArrayType nodes always supply elementType. */
 			if ("elementType" in node) {
 				const { elementType } = node;
@@ -243,19 +274,19 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSBigIntKeyword":
-		case "TSBooleanKeyword":
-		case "TSNullKeyword":
-		case "TSNumberKeyword":
-		case "TSStringKeyword":
-		case "TSSymbolKeyword":
-		case "TSUndefinedKeyword":
-		case "TSVoidKeyword": {
+		case TS_BIG_INT_KEYWORD:
+		case TS_BOOLEAN_KEYWORD:
+		case TS_NULL_KEYWORD:
+		case TS_NUMBER_KEYWORD:
+		case TS_STRING_KEYWORD:
+		case TS_SYMBOL_KEYWORD:
+		case TS_UNDEFINED_KEYWORD:
+		case TS_VOID_KEYWORD: {
 			score = 1;
 			break;
 		}
 
-		case "TSConditionalType": {
+		case TS_CONDITIONAL_TYPE: {
 			const { checkType, extendsType, falseType, trueType } = node;
 			score = addScore(
 				addScore(
@@ -282,8 +313,8 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSFunctionType":
-		case "TSMethodSignature": {
+		case TS_FUNCTION_TYPE:
+		case TS_METHOD_SIGNATURE: {
 			score = 2;
 			const { params: parameters } = node;
 			for (const parameter of parameters) {
@@ -291,7 +322,7 @@ function calculateStructuralComplexity(
 				if (!("typeAnnotation" in parameter)) continue;
 				const { typeAnnotation } = parameter;
 				/* v8 ignore next -- @preserve parser-produced function type params either omit annotations or use TSTypeAnnotation. */
-				if (typeAnnotation?.type !== "TSTypeAnnotation") continue;
+				if (!isTsTypeAnnotation(typeAnnotation)) continue;
 				score = addScore(
 					score,
 					calculateStructuralComplexity(
@@ -311,7 +342,7 @@ function calculateStructuralComplexity(
 			if ("returnType" in node) {
 				const { returnType } = node;
 				/* v8 ignore else -- @preserve type-checkable function and method signatures carry return annotations here. */
-				if (returnType?.type === "TSTypeAnnotation") {
+				if (isTsTypeAnnotation(returnType)) {
 					score = addScore(
 						score,
 						calculateStructuralComplexity(
@@ -330,7 +361,7 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSInterfaceDeclaration": {
+		case TS_INTERFACE_DECLARATION: {
 			score = config.interfacePenalty;
 			const { body, extends: extendsClause } = node;
 			if (extendsClause.length > 0) {
@@ -351,12 +382,12 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSIntersectionType": {
+		case TS_INTERSECTION_TYPE: {
 			score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 3, 0);
 			break;
 		}
 
-		case "TSMappedType": {
+		case TS_MAPPED_TYPE: {
 			const { constraint, typeAnnotation } = node;
 			/* v8 ignore else -- @preserve parser-produced mapped types always supply a constraint. */
 			score = addStructuralScore(5, constraint, nextDepth, config, cache, depthMultiplierCache, ceiling);
@@ -374,18 +405,18 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSTupleType": {
+		case TS_TUPLE_TYPE: {
 			const { elementTypes } = node;
 			score = 1;
 			for (const element of elementTypes) {
-				if (element.type === "TSRestType" || element.type === "TSOptionalType") continue;
+				if (isTsRestType(element) || isTsOptionalType(element)) continue;
 				score = addStructuralScore(score, element, nextDepth, config, cache, depthMultiplierCache, ceiling);
 			}
 			score = addScore(score, 1.5 * elementTypes.length, config, ceiling);
 			break;
 		}
 
-		case "TSTypeLiteral": {
+		case TS_TYPE_LITERAL: {
 			const { members } = node;
 			score = 2 + members.length * 0.5;
 			score = addNestedTypeAnnotationScores(
@@ -400,7 +431,7 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSTypeReference": {
+		case TS_TYPE_REFERENCE: {
 			score = 2;
 			const { typeArguments } = node;
 			const parameters = typeArguments?.params ?? [];
@@ -419,7 +450,7 @@ function calculateStructuralComplexity(
 			break;
 		}
 
-		case "TSUnionType": {
+		case TS_UNION_TYPE: {
 			score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 2, -1);
 			break;
 		}
@@ -478,7 +509,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 
 				for (const [node, data] of variableDeclaratorsToCheck) {
 					const { id } = node;
-					if (id.type === "Identifier" && ianitorStaticVariables.has(id.name)) continue;
+					if (isIdentifierName(id) && ianitorStaticVariables.has(id.name)) continue;
 
 					context.report({
 						data: { score: data.complexity.toFixed(1) },
@@ -528,11 +559,11 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 
 			VariableDeclarator(node): void {
 				const { id, init } = node;
-				if (init?.type !== "CallExpression" || !isIanitorValidator(init)) return;
+				if (!isCallExpression(init) || !isIanitorValidator(init)) return;
 
 				hasIanitorReference = true;
 				// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
-				if (id.type === "Identifier" && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
+				if (isIdentifierName(id) && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
 
 				const complexity = calculateIanitorComplexity(init);
 				if (complexity < config.baseThreshold) return;

@@ -1,24 +1,30 @@
-import { Predicate } from "effect";
-
-import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	getMemberPropertyName,
+	isBinaryExpression,
+	isCallExpression,
+	isIdentifierName,
+	isIdentifierNamed,
+	isMemberExpression,
+	isNewExpression,
+	isNumericLiteral,
+	isSpreadElement,
+	isThisExpression,
+	unwrapExpression,
+	unwrapParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-function isSimpleReceiver({ type }: ESTree.Expression): boolean {
+function isSimpleReceiver(expression: ESTree.Expression): boolean {
 	return (
-		type === "Identifier" ||
-		type === "MemberExpression" ||
-		type === "CallExpression" ||
-		type === "NewExpression" ||
-		type === "ThisExpression"
+		isIdentifierName(expression) ||
+		isMemberExpression(expression) ||
+		isCallExpression(expression) ||
+		isNewExpression(expression) ||
+		isThisExpression(expression)
 	);
-}
-
-function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Expression {
-	let current = expression;
-	while (current.type === "ParenthesizedExpression") current = current.expression;
-	return current;
 }
 
 function isLiteral(expression: ESTree.Expression): boolean {
@@ -27,7 +33,7 @@ function isLiteral(expression: ESTree.Expression): boolean {
 
 function getReciprocalDivisor(expression: ESTree.Expression): number | undefined {
 	const literal = unwrapExpression(expression);
-	if (literal.type !== "Literal" || !Predicate.isNumber(literal.value)) return undefined;
+	if (!isNumericLiteral(literal)) return undefined;
 
 	const { value } = literal;
 	if (value <= 0 || value >= 1) return undefined;
@@ -37,7 +43,7 @@ function getReciprocalDivisor(expression: ESTree.Expression): number | undefined
 }
 
 function getReceiverText(sourceCode: SourceCode, receiver: ESTree.Expression): string {
-	const receiverText = sourceCode.getText(stripParenthesizedExpression(receiver));
+	const receiverText = sourceCode.getText(unwrapParenthesis(receiver));
 	return isSimpleReceiver(unwrapExpression(receiver)) ? receiverText : `(${receiverText})`;
 }
 
@@ -48,18 +54,13 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 				if (node.optional) return;
 
 				const callee = unwrapExpression(node.callee);
-				if (
-					callee.type !== "MemberExpression" ||
-					callee.optional ||
-					getMemberPropertyName(callee) !== "floor"
-				) {
+				if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "floor") {
 					return;
 				}
 
 				const object = unwrapExpression(callee.object);
 				if (
-					object.type !== "Identifier" ||
-					object.name !== "math" ||
+					!isIdentifierNamed(object, "math") ||
 					hasShadowedBinding(context.sourceCode, object, "math") ||
 					node.arguments.length !== 1
 				) {
@@ -67,17 +68,17 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 				}
 
 				const [argument] = node.arguments;
-				if (argument === undefined || argument.type === "SpreadElement") return;
+				if (argument === undefined || isSpreadElement(argument)) return;
 
 				const expression = unwrapExpression(argument);
-				if (expression.type !== "BinaryExpression") return;
+				if (!isBinaryExpression(expression)) return;
 
 				let receiver: ESTree.Expression;
 				let divisorText: string;
 
 				if (expression.operator === "/") {
 					receiver = expression.left;
-					divisorText = context.sourceCode.getText(stripParenthesizedExpression(expression.right));
+					divisorText = context.sourceCode.getText(unwrapParenthesis(expression.right));
 				} else if (expression.operator === "*") {
 					const rightDivisor = getReciprocalDivisor(expression.right);
 					if (rightDivisor !== undefined && !isLiteral(expression.left)) {

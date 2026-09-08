@@ -7,7 +7,13 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import { isFunction, isNumericLiteral } from "$oxc-utilities/oxc-utilities";
+import {
+	isAnyFunction,
+	isBlockStatement,
+	isCallExpression,
+	isExpressionStatement,
+	isNumericLiteral,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -68,7 +74,7 @@ function getCallbackBody(callback: CallbackFunction): ESTree.Node | undefined {
 
 function getCallbackBlockBody(callback: CallbackFunction): ESTree.BlockStatement | undefined {
 	const body = getCallbackBody(callback);
-	return body?.type === "BlockStatement" ? body : undefined;
+	return isBlockStatement(body) ? body : undefined;
 }
 
 function shouldCheckTest(
@@ -93,10 +99,9 @@ function getFirstStatementCall(callback: CallbackFunction): ESTree.CallExpressio
 	if (body === undefined) return undefined;
 
 	const [firstStatement] = body.body;
-	if (firstStatement?.type !== "ExpressionStatement" || firstStatement.expression.type !== "CallExpression") {
-		return undefined;
-	}
-	return firstStatement.expression;
+	return isExpressionStatement(firstStatement) && isCallExpression(firstStatement.expression)
+		? firstStatement.expression
+		: undefined;
 }
 
 function reportMissingAssertions(
@@ -216,7 +221,7 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 			CallExpression(node): void {
 				if (!isTestCaseCall(node)) return;
 
-				const callback = node.arguments.findLast(isFunction);
+				const callback = node.arguments.findLast(isAnyFunction);
 				/* v8 ignore next -- @preserve test-case calls without callbacks have no assertion behavior to check. */
 				if (callback === undefined) return;
 

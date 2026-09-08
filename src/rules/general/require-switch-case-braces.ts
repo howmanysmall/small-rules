@@ -1,6 +1,7 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isBlockStatement } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -21,9 +22,7 @@ function shouldReportSwitchCaseBraces(node: ESTree.SwitchCase, metric: SwitchCas
 	if (consequentCount === 0) return false;
 
 	const [firstStatement] = node.consequent;
-	if (firstStatement === undefined || (consequentCount === 1 && firstStatement.type === "BlockStatement")) {
-		return false;
-	}
+	if (firstStatement === undefined || (consequentCount === 1 && isBlockStatement(firstStatement))) return false;
 
 	if (metric === "statements") return consequentCount > 1;
 

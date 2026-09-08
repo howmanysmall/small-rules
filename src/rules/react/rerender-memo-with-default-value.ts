@@ -1,7 +1,17 @@
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import {
+	isArrayExpression,
+	isAssignmentPattern,
+	isCallbackFunction,
+	isFunctionDeclaration,
+	isNode,
+	isObjectExpression,
+	isObjectPattern,
+	isProperty,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -9,14 +19,14 @@ type Context = InferContextFromRule<typeof rerenderMemoWithDefaultValue>;
 type ObjectPatternProperty = ESTree.ObjectPattern["properties"][number];
 
 function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): void {
-	if (defaultValue.type === "ObjectExpression" && defaultValue.properties.length === 0) {
+	if (isObjectExpression(defaultValue) && defaultValue.properties.length === 0) {
 		context.report({
 			messageId: "emptyObjectDefault",
 			node: defaultValue,
 		});
 	}
 
-	if (defaultValue.type === "ArrayExpression" && defaultValue.elements.length === 0) {
+	if (isArrayExpression(defaultValue) && defaultValue.elements.length === 0) {
 		context.report({
 			messageId: "emptyArrayDefault",
 			node: defaultValue,
@@ -26,14 +36,14 @@ function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): v
 
 function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTree.ParamPattern>): void {
 	for (const parameter of parameters) {
-		if (parameter.type === "AssignmentPattern" && parameter.left.type === "ObjectPattern") {
+		if (isAssignmentPattern(parameter) && isObjectPattern(parameter.left)) {
 			checkObjectPatternDefaults(context, parameter.left);
 			/* v8 ignore next -- @preserve assignment pattern defaults are parser expression nodes. */
 			if (isNode(parameter.right)) reportEmptyDefaultValue(context, parameter.right);
 			continue;
 		}
 
-		if (parameter.type !== "ObjectPattern") continue;
+		if (!isObjectPattern(parameter)) continue;
 		checkObjectPatternDefaults(context, parameter);
 	}
 }
@@ -46,21 +56,21 @@ function checkObjectPatternDefaults(context: Context, pattern: ESTree.ObjectPatt
 }
 
 function getPropertyDefaultValue(property: ObjectPatternProperty): ESTree.Node | undefined {
-	if (property.type !== "Property" || property.value.type !== "AssignmentPattern") return undefined;
-	const defaultValue = property.value.right;
+	if (!isProperty(property) || !isAssignmentPattern(property.value)) return undefined;
+	const { right } = property.value;
 	/* v8 ignore next -- @preserve object pattern defaults are parser expression nodes. */
-	return isNode(defaultValue) ? defaultValue : undefined;
+	return isNode(right) ? right : undefined;
 }
 
 function getComponentDeclarationParameters(node: ESTree.Node): ReadonlyArray<ESTree.ParamPattern> | undefined {
-	if (node.type !== "FunctionDeclaration" || !isComponentDeclaration(node)) return undefined;
+	if (!isFunctionDeclaration(node) || !isComponentDeclaration(node)) return undefined;
 	return [...node.params];
 }
 function getComponentAssignmentParameters(node: ESTree.Node): ReadonlyArray<ESTree.ParamPattern> | undefined {
 	/* v8 ignore next -- @preserve isComponentAssignment already proves a function initializer. */
-	if (node.type !== "VariableDeclarator" || !isComponentAssignment(node) || node.init === null) return undefined;
+	if (!isVariableDeclarator(node) || !isComponentAssignment(node) || node.init === null) return undefined;
 	/* v8 ignore next -- @preserve isComponentAssignment already proves a function initializer. */
-	if (node.init.type !== "ArrowFunctionExpression" && node.init.type !== "FunctionExpression") return undefined;
+	if (!isCallbackFunction(node.init)) return undefined;
 	return [...node.init.params];
 }
 

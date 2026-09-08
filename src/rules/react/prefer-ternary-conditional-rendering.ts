@@ -1,6 +1,5 @@
-import { unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
+import { isExpressionNode, unwrapExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

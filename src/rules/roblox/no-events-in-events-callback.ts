@@ -1,5 +1,38 @@
-import { getMemberPropertyName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	ARRAY_EXPRESSION,
+	ARRAY_PATTERN,
+	ARROW_FUNCTION_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	ASSIGNMENT_PATTERN,
+	CHAIN_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	getMemberPropertyName,
+	IDENTIFIER,
+	isAnyLiteral,
+	isArrayPattern,
+	isAssignmentPattern,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isImportDefaultSpecifier,
+	isImportSpecifier,
+	isMemberExpression,
+	isObjectPattern,
+	isRestElement,
+	isSpreadElement,
+	isTsParameterProperty,
+	MEMBER_EXPRESSION,
+	OBJECT_EXPRESSION,
+	OBJECT_PATTERN,
+	PARENTHESIZED_EXPRESSION,
+	REST_ELEMENT,
+	SEQUENCE_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_TYPE_ASSERTION,
+} from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -43,12 +76,12 @@ function unwrapNode(node: ESTree.Node): ESTree.Node {
 	while (true) {
 		/* v8 ignore next -- @preserve wrapper variants are parser-shape defensive cases. */
 		switch (current.type) {
-			case "ChainExpression":
-			case "ParenthesizedExpression":
-			case "TSAsExpression":
-			case "TSInstantiationExpression":
-			case "TSNonNullExpression":
-			case "TSTypeAssertion": {
+			case CHAIN_EXPRESSION:
+			case PARENTHESIZED_EXPRESSION:
+			case TS_AS_EXPRESSION:
+			case TS_INSTANTIATION_EXPRESSION:
+			case TS_NON_NULL_EXPRESSION:
+			case TS_TYPE_ASSERTION: {
 				current = current.expression;
 				continue;
 			}
@@ -63,8 +96,8 @@ function getRootIdentifierName(node: ESTree.Node): string | undefined {
 
 	while (true) {
 		const unwrapped = unwrapNode(current);
-		if (unwrapped.type === "Identifier") return unwrapped.name;
-		if (unwrapped.type !== "MemberExpression") return undefined;
+		if (isIdentifierName(unwrapped)) return unwrapped.name;
+		if (!isMemberExpression(unwrapped)) return undefined;
 		current = unwrapped.object;
 	}
 }
@@ -74,7 +107,7 @@ function getConnectCallback(
 	eventsIdentifiers: ReadonlySet<string>,
 ): CallbackFunction | undefined {
 	const unwrappedCallee = unwrapNode(node.callee);
-	if (unwrappedCallee.type !== "MemberExpression") return undefined;
+	if (!isMemberExpression(unwrappedCallee)) return undefined;
 	if (getMemberPropertyName(unwrappedCallee) !== "connect") return undefined;
 
 	const rootIdentifier = getRootIdentifierName(unwrappedCallee.object);
@@ -84,8 +117,8 @@ function getConnectCallback(
 	if (!callbackArgument) return undefined;
 
 	switch (callbackArgument.type) {
-		case "ArrowFunctionExpression":
-		case "FunctionExpression":
+		case ARROW_FUNCTION_EXPRESSION:
+		case FUNCTION_EXPRESSION:
 			return callbackArgument;
 
 		default:
@@ -95,7 +128,7 @@ function getConnectCallback(
 
 function isEventsMethodCall(node: ESTree.CallExpression, eventsIdentifiers: ReadonlySet<string>): boolean {
 	const unwrappedCallee = unwrapNode(node.callee);
-	if (unwrappedCallee.type !== "MemberExpression") return false;
+	if (!isMemberExpression(unwrappedCallee)) return false;
 
 	const rootIdentifier = getRootIdentifierName(unwrappedCallee);
 	return rootIdentifier === undefined ? false : eventsIdentifiers.has(rootIdentifier);
@@ -139,7 +172,7 @@ function appendObjectPatternValuesInReverse(
 		const property = properties[index];
 		/* v8 ignore next -- @preserve object patterns do not permit elisions. */
 		if (!property) continue;
-		patterns.push(property.type === "RestElement" ? property.argument : property.value);
+		patterns.push(isRestElement(property) ? property.argument : property.value);
 	}
 }
 
@@ -153,27 +186,27 @@ function markPatternValues(pattern: ESTree.Node, state: CallbackState): boolean 
 		if (!current) continue;
 
 		switch (current.type) {
-			case "ArrayPattern": {
+			case ARRAY_PATTERN: {
 				appendArrayPatternElementsInReverse(patterns, current.elements);
 				break;
 			}
 
-			case "AssignmentPattern": {
+			case ASSIGNMENT_PATTERN: {
 				patterns.push(current.left);
 				break;
 			}
 
-			case "Identifier": {
+			case IDENTIFIER: {
 				if (markAsPlayerValue(current.name, state)) changed = true;
 				break;
 			}
 
-			case "ObjectPattern": {
+			case OBJECT_PATTERN: {
 				appendObjectPatternValuesInReverse(patterns, current.properties);
 				break;
 			}
 
-			case "RestElement": {
+			case REST_ELEMENT: {
 				patterns.push(current.argument);
 				break;
 			}
@@ -196,7 +229,7 @@ function markBindingPattern(
 	if (kind === TaintKind.None) return false;
 	/* v8 ignore stop -- @preserve */
 
-	if (pattern.type === "Identifier") {
+	if (isIdentifierName(pattern)) {
 		if (kind === TaintKind.Value) return markAsPlayerValue(pattern.name, state);
 		return markAsPlayerContainer(pattern.name, state);
 	}
@@ -205,17 +238,17 @@ function markBindingPattern(
 }
 
 function markAssignmentTarget(target: ESTree.Node, kind: TaintKind, state: CallbackState): boolean {
-	if (target.type === "MemberExpression" || kind === TaintKind.None) return false;
+	if (isMemberExpression(target) || kind === TaintKind.None) return false;
 
 	/* v8 ignore next -- @preserve assignment targets are limited to handled pattern nodes. */
 	if (
-		target.type === "ArrayPattern" ||
-		target.type === "AssignmentPattern" ||
-		target.type === "Identifier" ||
-		target.type === "ObjectPattern" ||
-		target.type === "RestElement"
+		isArrayPattern(target) ||
+		isAssignmentPattern(target) ||
+		isIdentifierName(target) ||
+		isObjectPattern(target) ||
+		isRestElement(target)
 	) {
-		if (target.type === "Identifier") {
+		if (isIdentifierName(target)) {
 			if (kind === TaintKind.Value) return markAsPlayerValue(target.name, state);
 			return markAsPlayerContainer(target.name, state);
 		}
@@ -235,30 +268,30 @@ function classifyNodeTaint(node: ESTree.Node, state: CallbackState): TaintKind {
 		const unwrapped = unwrapNode(current);
 
 		switch (unwrapped.type) {
-			case "ArrayExpression":
+			case ARRAY_EXPRESSION:
 				return classifyArrayTaint(unwrapped, state);
 
-			case "AssignmentExpression": {
+			case ASSIGNMENT_EXPRESSION: {
 				current = unwrapped.right;
 				continue;
 			}
 
-			case "ConditionalExpression":
+			case CONDITIONAL_EXPRESSION:
 				return classifyConditionalTaint(unwrapped, state);
 
-			case "Identifier": {
+			case IDENTIFIER: {
 				if (state.playerValues.has(unwrapped.name)) return TaintKind.Value;
 				if (state.playerContainers.has(unwrapped.name)) return TaintKind.Container;
 				return TaintKind.None;
 			}
 
-			case "MemberExpression":
+			case MEMBER_EXPRESSION:
 				return classifyMemberTaint(unwrapped, state);
 
-			case "ObjectExpression":
+			case OBJECT_EXPRESSION:
 				return classifyObjectTaint(unwrapped, state);
 
-			case "SequenceExpression": {
+			case SEQUENCE_EXPRESSION: {
 				const lastExpression = unwrapped.expressions.at(-1);
 				/* v8 ignore next -- @preserve parser sequence expressions have at least one expression. */
 				if (lastExpression === undefined) return TaintKind.None;
@@ -276,7 +309,7 @@ function classifyArrayTaint(node: ESTree.ArrayExpression, state: CallbackState):
 	for (const element of node.elements) {
 		if (element === null) continue;
 
-		const value = element.type === "SpreadElement" ? element.argument : element;
+		const value = isSpreadElement(element) ? element.argument : element;
 		if (classifyNodeTaint(value, state) !== TaintKind.None) return TaintKind.Container;
 	}
 
@@ -297,7 +330,7 @@ function classifyMemberTaint(node: ESTree.MemberExpression, state: CallbackState
 function classifyObjectTaint(node: ESTree.ObjectExpression, state: CallbackState): TaintKind {
 	for (const property of node.properties) {
 		/* v8 ignore next -- @preserve object expressions only expose properties and spreads here. */
-		const value = property.type === "SpreadElement" ? property.argument : property.value;
+		const value = isSpreadElement(property) ? property.argument : property.value;
 		if (classifyNodeTaint(value, state) !== TaintKind.None) return TaintKind.Container;
 	}
 
@@ -306,7 +339,7 @@ function classifyObjectTaint(node: ESTree.ObjectExpression, state: CallbackState
 
 function seedPlayerValueFromParameter(parameter: ESTree.Node, state: CallbackState): void {
 	/* v8 ignore start -- @preserve Events.connect callbacks cannot declare constructor parameter properties. */
-	if (parameter.type === "TSParameterProperty") {
+	if (isTsParameterProperty(parameter)) {
 		markPatternValues(parameter.parameter, state);
 		return;
 	}
@@ -330,7 +363,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 		}
 
 		function onFunctionEnter(node: CallbackFunction): void {
-			if (node.type !== "FunctionDeclaration") {
+			if (!isFunctionDeclarationRaw(node)) {
 				const callbackState = callbackStateByFunction.get(node);
 				if (callbackState) {
 					functionStack.push({ callbackDepth: 0, callbackState });
@@ -387,7 +420,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 				const [firstArgument] = node.arguments;
 				if (
 					!firstArgument ||
-					firstArgument.type === "SpreadElement" ||
+					isSpreadElement(firstArgument) ||
 					classifyNodeTaint(firstArgument, currentCallbackState) !== TaintKind.Value
 				) {
 					return;
@@ -410,19 +443,19 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 
 				for (const specifier of node.specifiers) {
 					const { name } = specifier.local;
-					if (specifier.type === "ImportDefaultSpecifier") {
+					if (isImportDefaultSpecifier(specifier)) {
 						if (name === "Events") trackedEventsIdentifiers.add(name);
 						continue;
 					}
 
-					if (specifier.type !== "ImportSpecifier") continue;
+					if (!isImportSpecifier(specifier)) continue;
 
-					if (specifier.imported.type === "Identifier" && specifier.imported.name === "Events") {
+					if (isIdentifierName(specifier.imported) && specifier.imported.name === "Events") {
 						trackedEventsIdentifiers.add(name);
 						continue;
 					}
 
-					if (specifier.imported.type === "Literal" && specifier.imported.value === "Events") {
+					if (isAnyLiteral(specifier.imported) && specifier.imported.value === "Events") {
 						trackedEventsIdentifiers.add(name);
 					}
 				}

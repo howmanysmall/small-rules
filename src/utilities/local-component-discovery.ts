@@ -3,6 +3,7 @@ import nodePath from "node:path";
 import { Predicate } from "effect";
 import ignore from "ignore";
 
+import { isIdentifierName, isImportDefaultSpecifier, isImportSpecifier } from "./oxc-utilities";
 import { resolveRelativeImport } from "./resolve-import";
 
 import type { Ignore } from "ignore";
@@ -344,10 +345,7 @@ export function inspectLocalComponentFile(
 	const importStyle = getImportStyle(text, definition.componentName);
 	if (importStyle === undefined) return { importStyle: undefined, matches: false };
 
-	return {
-		importStyle,
-		matches: true,
-	};
+	return { importStyle, matches: true };
 }
 
 export function inspectRelativeLocalComponentImport(
@@ -375,15 +373,15 @@ export function addLocalComponentImportIdentifiers(
 	if (!inspection.matches) return;
 
 	for (const specifier of node.specifiers) {
-		if (specifier.type === "ImportDefaultSpecifier") {
+		if (isImportDefaultSpecifier(specifier)) {
 			identifiers.add(specifier.local.name);
 			continue;
 		}
 
-		if (specifier.type !== "ImportSpecifier") continue;
+		if (!isImportSpecifier(specifier)) continue;
 
 		const { imported } = specifier;
-		const importedName = imported.type === "Identifier" ? imported.name : imported.value;
+		const importedName = isIdentifierName(imported) ? imported.name : imported.value;
 		if (importedName === componentName) identifiers.add(specifier.local.name);
 	}
 }

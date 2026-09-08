@@ -1,29 +1,37 @@
-import { getMemberPropertyName, hasShadowedBinding, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	getMemberPropertyName,
+	isCallExpression,
+	isIdentifierName,
+	isMemberExpression,
+	isNewExpression,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isTableCreateBase(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (unwrapped.type !== "CallExpression" || unwrapped.optional) return false;
+	if (!isCallExpression(unwrapped) || unwrapped.optional) return false;
 
 	const callee = unwrapExpression(unwrapped.callee);
-	if (callee.type !== "MemberExpression" || callee.optional || getMemberPropertyName(callee) !== "create") {
+	if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "create") {
 		return false;
 	}
 
 	const target = unwrapExpression(callee.object);
-	if (target.type !== "Identifier" || target.name !== "table") return false;
+	if (!isIdentifierName(target) || target.name !== "table") return false;
 	return !hasShadowedBinding(sourceCode, target, "table");
 }
 
 function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (unwrapped.type !== "NewExpression") return false;
+	if (!isNewExpression(unwrapped)) return false;
 	if (unwrapped.arguments.length !== 1 && unwrapped.arguments.length !== 2) return false;
 
 	const callee = unwrapExpression(unwrapped.callee);
-	if (callee.type !== "Identifier" || callee.name !== "Array") return false;
+	if (!isIdentifierName(callee) || callee.name !== "Array") return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
 
@@ -34,7 +42,7 @@ const noTableCreateMap = createRule("no-table-create-map", "roblox", {
 				if (node.optional) return;
 
 				const callee = unwrapExpression(node.callee);
-				if (callee.type !== "MemberExpression" || callee.optional || getMemberPropertyName(callee) !== "map") {
+				if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "map") {
 					return;
 				}
 

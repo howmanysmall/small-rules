@@ -1,15 +1,28 @@
-// Vendored from src/rules/no-object-parameters.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/rules/no-object-parameters.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
-// Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
+// Modifications: adapted to the local createRule API and path aliases; uses
+// repository AST guards, shared function-parameter parsing with range-trimmed
+// binding names, and the shared iterative lexical alias resolver.
 
-import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
+import {
+	functionParameterBindingName,
+	functionParameterTypeAnnotation,
+} from "$oxc-utilities/anti-slop/function-parameters";
+import { createTypeAliasEnvironment, resolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
+import {
+	isTsObjectKeyword,
+	isTsParenthesizedType,
+	isTsTypeAnnotation,
+	isTsUnionType,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-type Parameter = ESTree.ParamPattern;
+import type { TypeAliasEnvironment } from "$oxc-utilities/anti-slop/type-alias-resolution";
+
 type ParameterOwner =
 	| ESTree.ArrowFunctionExpression
 	| ESTree.Function
@@ -18,114 +31,33 @@ type ParameterOwner =
 	| ESTree.TSConstructSignatureDeclaration
 	| ESTree.TSFunctionType
 	| ESTree.TSMethodSignature;
-
-function parameterAnnotation(parameter: Parameter): ESTree.TSTypeAnnotation | undefined {
-	let current = parameter;
-	while (current.type === "TSParameterProperty" || current.type === "RestElement") {
-		if (current.type === "TSParameterProperty") {
-			current = current.parameter;
-			continue;
-		}
-		if (current.typeAnnotation?.type === "TSTypeAnnotation") {
-			return current.typeAnnotation;
-		}
-		current = current.argument;
-	}
-	if (current.type === "AssignmentPattern") {
-		return current.typeAnnotation ?? current.left.typeAnnotation ?? undefined;
-	}
-	return current.typeAnnotation ?? undefined;
-}
-
-function parameterName(parameter: Parameter, annotation: ESTree.TSTypeAnnotation, sourceText: string): string {
-	if (parameter.type === "Identifier") {
-		return parameter.name;
-	}
-	// Yuku parameter nodes span their type annotation, so trimming the annotation
-	// text always yields the displayed name; upstream kept a foreign-parser
-	// branch.
-	return sourceText.slice(0, sourceText.length - (annotation.range[1] - annotation.range[0])).trimEnd();
-}
-
-function aliasName(type: ESTree.TSType): string | undefined {
-	if (
-		type.type !== "TSTypeReference" ||
-		type.typeName.type !== "Identifier" ||
-		(type.typeArguments?.params.length ?? 0) > 0
-	) {
-		return undefined;
-	}
-	return type.typeName.name;
-}
-
-function enqueueNestedTypes(type: ESTree.TSType, pending: Array<ESTree.TSType>): boolean {
-	if (type.type === "TSParenthesizedType") {
-		pending.push(type.typeAnnotation);
-		return true;
-	}
-	if (type.type === "TSUnionType") {
-		for (const member of type.types) {
-			pending.push(member);
-		}
-		return true;
-	}
-	return false;
-}
-
 const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 	createOnce(context): Visitor {
-		const aliases = new Map<string, ESTree.TSType>();
+		let environment: TypeAliasEnvironment;
 
-		function enqueueAlias(
-			type: ESTree.TSType,
-			shadowedAliases: ReadonlySet<string>,
-			visitedAliases: Set<string>,
-			pending: Array<ESTree.TSType>,
-		): void {
-			const name = aliasName(type);
-			if (name === undefined || visitedAliases.has(name) || shadowedAliases.has(name)) {
-				return;
-			}
-			visitedAliases.add(name);
-			const alias = aliases.get(name);
-			if (alias !== undefined) {
-				pending.push(alias);
-			}
-		}
-
-		function resolvesToObject(type: ESTree.TSType, shadowedAliases: ReadonlySet<string>): boolean {
-			const visitedAliases = new Set<string>();
-			let pending: Array<ESTree.TSType> = [type];
-
-			while (pending.length > 0) {
-				const next: Array<ESTree.TSType> = [];
-				for (const current of pending) {
-					if (current.type === "TSObjectKeyword") {
-						return true;
-					}
-					if (enqueueNestedTypes(current, next)) {
-						continue;
-					}
-					enqueueAlias(current, shadowedAliases, visitedAliases, next);
+		function resolvesToObject(type: ESTree.TSType): boolean {
+			return resolvedTypeMatches(type, environment, (resolved, enqueue) => {
+				if (isTsObjectKeyword(resolved)) return true;
+				if (isTsParenthesizedType(resolved)) {
+					enqueue(resolved.typeAnnotation);
+					return false;
 				}
-				pending = next;
-			}
-			return false;
+				if (isTsUnionType(resolved)) {
+					for (const member of resolved.types) enqueue(member);
+				}
+				return false;
+			});
 		}
 
 		function checkParameters(node: ParameterOwner): void {
-			const shadowedAliases = lexicalTypeParameterNames(node, context.sourceCode.visitorKeys);
 			for (const parameter of node.params) {
-				const annotation = parameterAnnotation(parameter);
-				if (
-					annotation?.type !== "TSTypeAnnotation" ||
-					!resolvesToObject(annotation.typeAnnotation, shadowedAliases)
-				) {
+				const annotation = functionParameterTypeAnnotation(parameter);
+				if (!isTsTypeAnnotation(annotation) || !resolvesToObject(annotation.typeAnnotation)) {
 					continue;
 				}
 				context.report({
 					data: {
-						parameter: parameterName(parameter, annotation, context.sourceCode.getText(parameter)),
+						parameter: functionParameterBindingName(parameter, context.sourceCode),
 					},
 					messageId: "objectParameter",
 					node: annotation.typeAnnotation,
@@ -138,17 +70,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 			FunctionDeclaration: checkParameters,
 			FunctionExpression: checkParameters,
 			Program(node): void {
-				aliases.clear();
-				for (const statement of node.body) {
-					/* v8 ignore next -- This discriminated AST normalization has both forms covered by parser fixtures. @preserve */
-					const declaration = statement.type === "ExportNamedDeclaration" ? statement.declaration : statement;
-					if (
-						declaration?.type === "TSTypeAliasDeclaration" &&
-						(declaration.typeParameters?.params.length ?? 0) === 0
-					) {
-						aliases.set(declaration.id.name, declaration.typeAnnotation);
-					}
-				}
+				environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
 			},
 			TSCallSignatureDeclaration: checkParameters,
 			TSConstructorType: checkParameters,

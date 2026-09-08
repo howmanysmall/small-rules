@@ -1,6 +1,23 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
-import { isExpressionNode } from "$oxc-utilities/oxc-utilities";
+import {
+	CALL_EXPRESSION,
+	IDENTIFIER,
+	isAnyLiteral,
+	isCallExpression,
+	isExpressionNode,
+	isExpressionStatement,
+	isIdentifierName,
+	isIdentifierNamed,
+	isMemberExpression,
+	isPrivateIdentifier,
+	isSuper,
+	isThisExpression,
+	LITERAL,
+	MEMBER_EXPRESSION,
+	SUPER,
+	THIS_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -15,23 +32,23 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 	if (left.type !== right.type) return false;
 
 	switch (left.type) {
-		case "CallExpression":
-			return right.type === "CallExpression" && sourceCode.getText(left) === sourceCode.getText(right);
+		case CALL_EXPRESSION:
+			return isCallExpression(right) && sourceCode.getText(left) === sourceCode.getText(right);
 
-		case "Identifier":
-			return right.type === "Identifier" && left.name === right.name;
+		case IDENTIFIER:
+			return isIdentifierName(right) && left.name === right.name;
 
-		case "Literal":
-			return right.type === "Literal" && left.value === right.value && left.raw === right.raw;
+		case LITERAL:
+			return isAnyLiteral(right) && left.value === right.value && left.raw === right.raw;
 
-		case "MemberExpression":
-			return right.type === "MemberExpression" && areEquivalentMembers(left, right, sourceCode);
+		case MEMBER_EXPRESSION:
+			return isMemberExpression(right) && areEquivalentMembers(left, right, sourceCode);
 
-		case "Super":
-			return right.type === "Super";
+		case SUPER:
+			return isSuper(right);
 
-		case "ThisExpression":
-			return right.type === "ThisExpression";
+		case THIS_EXPRESSION:
+			return isThisExpression(right);
 
 		default:
 			return false;
@@ -45,6 +62,7 @@ function areEquivalentMembers(
 ): boolean {
 	if (left.computed !== right.computed || left.optional !== right.optional) return false;
 	if (!areEquivalentTargets(left.object, right.object, sourceCode)) return false;
+
 	return left.computed
 		? areEquivalentComputedProperties(left.property, right.property, sourceCode)
 		: areEquivalentStaticProperties(left.property, right.property);
@@ -62,31 +80,30 @@ function areEquivalentStaticProperties(
 	left: ESTree.Expression | ESTree.PrivateIdentifier,
 	right: ESTree.Expression | ESTree.PrivateIdentifier,
 ): boolean {
-	if (left.type === "PrivateIdentifier" || right.type === "PrivateIdentifier") {
-		return left.type === "PrivateIdentifier" && right.type === "PrivateIdentifier" && left.name === right.name;
-	}
+	const leftIsPrivate = isPrivateIdentifier(left);
+	const rightIsPrivate = isPrivateIdentifier(right);
+	if (leftIsPrivate || rightIsPrivate) return leftIsPrivate && rightIsPrivate && left.name === right.name;
 
-	return right.type === "Identifier" && left.type === "Identifier" && left.name === right.name;
+	return isIdentifierName(right) && isIdentifierName(left) && left.name === right.name;
 }
 
 function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean): boolean {
 	switch (node.type) {
-		case "Identifier":
-		case "ThisExpression":
+		case IDENTIFIER:
+		case THIS_EXPRESSION:
 			return true;
 
-		case "Literal":
+		case LITERAL:
 			return allowLiteralRoot;
 
-		case "MemberExpression": {
+		case MEMBER_EXPRESSION: {
 			if (node.optional || !isSafeMemberAccess(node.object, false)) return false;
 			if (node.computed) {
 				/* v8 ignore next -- @preserve computed member properties are expressions in parser output. */
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
-			// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
-			return node.property.type === "Identifier" || node.property.type === "PrivateIdentifier";
+			return isIdentifierName(node.property) || isPrivateIdentifier(node.property);
 		}
 
 		default:
@@ -99,16 +116,13 @@ function isSafeFixTarget(node: ESTree.Expression): boolean {
 }
 
 function isSizeCall(node: ESTree.Expression): node is SizeCallExpression {
-	if (node.type !== "CallExpression") return false;
-	/* v8 ignore next -- @preserve optional call chains are wrapped before they can be used as assignment indexes. */
-	if (node.optional) return false;
-	if (node.arguments.length > 0) return false;
-	if (node.callee.type !== "MemberExpression") return false;
-	/* v8 ignore next -- @preserve optional member chains are wrapped before they can be used as assignment indexes. */
-	if (node.callee.optional) return false;
-	if (node.callee.computed) return false;
-	if (node.callee.property.type !== "Identifier") return false;
-	return node.callee.property.name === "size";
+	return (
+		isCallExpression(node) &&
+		node.arguments.length === 0 &&
+		isMemberExpression(node.callee) &&
+		!node.callee.computed &&
+		isIdentifierNamed(node.callee.property, "size")
+	);
 }
 
 function getAppendTarget(
@@ -116,7 +130,7 @@ function getAppendTarget(
 	sourceCode: SourceCode,
 	environment: Environment,
 ): ESTree.MemberExpression | undefined {
-	if (node.operator !== "=" || node.left.type !== "MemberExpression" || !node.left.computed) return undefined;
+	if (node.operator !== "=" || !isMemberExpression(node.left) || !node.left.computed) return undefined;
 
 	if (environment === "roblox-ts" && isSizeCall(node.left.property)) {
 		return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode)
@@ -127,10 +141,10 @@ function getAppendTarget(
 	if (environment === "standard") {
 		const { property } = node.left;
 		if (
-			property.type === "MemberExpression" &&
+			isMemberExpression(property) &&
 			!property.optional &&
 			!property.computed &&
-			property.property.type === "Identifier" &&
+			isIdentifierName(property.property) &&
 			property.property.name === "length"
 		) {
 			return areEquivalentTargets(node.left.object, property.object, sourceCode) ? node.left : undefined;
@@ -152,7 +166,7 @@ const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 				const target = getAppendTarget(node, sourceCode, environment);
 				if (target === undefined) return;
 
-				const expressionStatement = node.parent.type === "ExpressionStatement" ? node.parent : undefined;
+				const expressionStatement = isExpressionStatement(node.parent) ? node.parent : undefined;
 				const shouldAutofix =
 					allowAutofix && expressionStatement !== undefined && isSafeFixTarget(target.object);
 

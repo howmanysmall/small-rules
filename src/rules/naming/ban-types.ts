@@ -1,6 +1,7 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isIdentifierName, isTsQualifiedName } from "$oxc-utilities/oxc-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -41,9 +42,9 @@ function normalizeBannedTypes(rawOptions: RuleOptions): ReadonlyMap<string, Bann
 }
 
 function getReferencedTypeName(typeNameNode: ESTree.TSTypeName): string | undefined {
-	if (typeNameNode.type === "Identifier") return typeNameNode.name;
+	if (isIdentifierName(typeNameNode)) return typeNameNode.name;
 	/* v8 ignore next -- TSQualifiedName is the only other parser-produced TSTypeName variant. @preserve */
-	if (typeNameNode.type === "TSQualifiedName") return typeNameNode.right.name;
+	if (isTsQualifiedName(typeNameNode)) return typeNameNode.right.name;
 	/* v8 ignore next -- ESTree TSTypeName is currently only Identifier or TSQualifiedName. @preserve */
 	return undefined;
 }

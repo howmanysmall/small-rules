@@ -1,8 +1,17 @@
 import { Predicate } from "effect";
 
-import { getMemberPropertyName, getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction, isComponentName } from "$oxc-utilities/oxc-utilities";
+import {
+	getMemberPropertyName,
+	isCallbackFunction,
+	isClassExpression,
+	isComponentName,
+	isIdentifierName,
+	isMemberExpression,
+	isSpreadElement,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
 	getReactSourcesFromOptions,
@@ -22,14 +31,15 @@ function isReactCreateElementCall(
 	{ callee }: ESTree.CallExpression,
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	if (callee.type === "Identifier") {
+	if (isIdentifierName(callee)) {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
 		return isReactNamedImport(variable, "createElement", reactSources);
 	}
 
-	if (callee.type !== "MemberExpression") return false;
-	if (callee.computed || getMemberPropertyName(callee) !== "createElement") return false;
-	if (callee.object.type !== "Identifier") return false;
+	if (!isMemberExpression(callee) || callee.computed || getMemberPropertyName(callee) !== "createElement") {
+		return false;
+	}
+	if (!isIdentifierName(callee.object)) return false;
 
 	const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
 	return isReactNamespaceImport(variable, reactSources);
@@ -48,11 +58,11 @@ function isStaticComponentVariable(variable: ScopeVariable, name: string): boole
 		/* v8 ignore next -- module component bindings are imports, functions, classes, or variables. @preserve */
 		if (definition.type !== "Variable") continue;
 		/* v8 ignore next -- parser variable definitions are backed by VariableDeclarator nodes. @preserve */
-		if (definition.node.type !== "VariableDeclarator") continue;
+		if (!isVariableDeclarator(definition.node)) continue;
 
 		const initializer = definition.node.init ?? undefined;
 		if (initializer === undefined) continue;
-		if (isCallbackFunction(initializer) || initializer.type === "ClassExpression") return true;
+		if (isCallbackFunction(initializer) || isClassExpression(initializer)) return true;
 	}
 
 	return false;
@@ -75,8 +85,8 @@ function getMemberRootIdentifier(node: ESTree.MemberExpression): ESTree.Identifi
 
 	while (true) {
 		if (current.computed) return undefined;
-		if (current.object.type === "Identifier") return current.object;
-		if (current.object.type !== "MemberExpression") return undefined;
+		if (isIdentifierName(current.object)) return current.object;
+		if (!isMemberExpression(current.object)) return undefined;
 		current = current.object;
 	}
 }
@@ -84,10 +94,12 @@ function getMemberRootIdentifier(node: ESTree.MemberExpression): ESTree.Identifi
 function getStaticMemberName(node: ESTree.MemberExpression): string | undefined {
 	/* v8 ignore next -- callers reject computed member roots before static-name inspection. @preserve */
 	if (node.computed) return undefined;
+
 	const propertyName = getMemberPropertyName(node);
 	/* v8 ignore next -- non-computed parser members expose a static property name here. @preserve */
 	if (propertyName === undefined) return undefined;
-	if (node.object.type !== "MemberExpression") return propertyName;
+
+	if (!isMemberExpression(node.object)) return propertyName;
 	/* v8 ignore next -- @preserve member roots are validated before recursive static-name checks. */
 	return getStaticMemberName(node.object) === undefined ? undefined : propertyName;
 }
@@ -116,10 +128,10 @@ function isStaticElementArgument(
 	argument: ESTree.CallExpression["arguments"][number],
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	if (argument.type === "SpreadElement") return false;
+	if (isSpreadElement(argument)) return false;
 	if (isStringElementName(argument)) return true;
-	if (argument.type === "Identifier") return isStaticIdentifierElement(sourceCode, argument, reactSources);
-	if (argument.type === "MemberExpression") return isStaticMemberElement(sourceCode, argument, reactSources);
+	if (isIdentifierName(argument)) return isStaticIdentifierElement(sourceCode, argument, reactSources);
+	if (isMemberExpression(argument)) return isStaticMemberElement(sourceCode, argument, reactSources);
 	return false;
 }
 

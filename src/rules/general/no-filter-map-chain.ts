@@ -1,5 +1,5 @@
-import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

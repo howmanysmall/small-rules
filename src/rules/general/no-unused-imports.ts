@@ -1,10 +1,11 @@
 // oxlint-disable small-rules/prevent-abbreviations -- `jsdoc` is valid.
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { isAnyImportSpecifier } from "$oxc-utilities/oxc-utilities";
 
 import type { Comment, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-type AnyImportSpecifier = ESTree.ImportDefaultSpecifier | ESTree.ImportNamespaceSpecifier | ESTree.ImportSpecifier;
+import type { AnyImportSpecifier } from "$oxc-utilities/oxc-utilities";
 
 interface ImportInfo {
 	readonly identifierName: string;
@@ -17,14 +18,6 @@ const JSDOC_INLINE_LINK_IDENTIFIER_PATTERN = /\{@(?:link|linkcode|linkplain|see)
 const JSDOC_TYPE_IDENTIFIER_PATTERN =
 	/[@{](?:type|typedef|param|returns?|template|augments|extends|implements)\s+(?<annotation>[^}]*)/gu;
 const JSDOC_ANNOTATION_IDENTIFIER_PATTERN = /\b(?<identifier>\w+)\b/gu;
-
-function isImportSpecifier(node: ESTree.Node): node is AnyImportSpecifier {
-	return (
-		node.type === "ImportDefaultSpecifier" ||
-		node.type === "ImportNamespaceSpecifier" ||
-		node.type === "ImportSpecifier"
-	);
-}
 
 function collectJsDocumentIdentifiers(comments: ReadonlyArray<Comment>): Set<string> {
 	const identifiers = new Set<string>();
@@ -117,7 +110,7 @@ const noUnusedImports = createRule("no-unused-imports", "general", {
 				scopeReference ??= node;
 				for (const specifier of node.specifiers) {
 					/* v8 ignore next -- @preserve ImportDeclaration.specifiers contains only import specifier nodes. */
-					if (!isImportSpecifier(specifier)) continue;
+					if (!isAnyImportSpecifier(specifier)) continue;
 					imports.push({
 						identifierName: specifier.local.name,
 						parent: node,

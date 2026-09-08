@@ -1,19 +1,23 @@
-// Vendored from src/rules/no-conditional-empty-object-spread.ts@446268e5d15baa968eaec669ff65358d36ae6259 by Dillon Mulroy.
+// Vendored from src/rules/no-conditional-empty-object-spread.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities).
 
-import { unwrapParenthesis } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isEmptyObjectExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	isConditionalExpression,
+	isEmptyObjectExpression,
+	isObjectExpression,
+	unwrapParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isConditionalEmptyObjectSpread(node: ESTree.Expression): boolean {
 	const conditional = unwrapParenthesis(node);
 	return (
-		conditional.type === "ConditionalExpression" &&
+		isConditionalExpression(conditional) &&
 		(isEmptyObjectExpression(conditional.consequent) || isEmptyObjectExpression(conditional.alternate))
 	);
 }
@@ -22,7 +26,7 @@ const noConditionalEmptyObjectSpread = createRule("no-conditional-empty-object-s
 	createOnce(context): Visitor {
 		return {
 			SpreadElement(node): void {
-				if (node.parent.type !== "ObjectExpression" || !isConditionalEmptyObjectSpread(node.argument)) return;
+				if (!isObjectExpression(node.parent) || !isConditionalEmptyObjectSpread(node.argument)) return;
 				context.report({ messageId: "avoid", node });
 			},
 		};

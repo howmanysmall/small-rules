@@ -1,4 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import { isJsxIdentifier } from "$oxc-utilities/oxc-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -6,7 +7,7 @@ const noUnderscoreReactProperties = createRule("no-underscore-react-props", "rea
 	createOnce(context): Visitor {
 		return {
 			JSXAttribute(node): void {
-				if (node.name.type !== "JSXIdentifier" || !node.name.name.startsWith("_")) return;
+				if (!isJsxIdentifier(node.name) || !node.name.name.startsWith("_")) return;
 
 				context.report({
 					data: { propName: node.name.name },

@@ -1,4 +1,5 @@
-import { getVariableByName, unwrapExpression } from "$oxc-utilities/ast-utilities";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
