@@ -49,6 +49,12 @@
       "skillPath": "skills/effect-ts/SKILL.md",
       "computedHash": "6bdb9b95aa83071eca2f67ae947b7d398a22e9e6e08f6cfa35de9516b03efa6e"
     },
+    "fallow": {
+      "source": "fallow-rs/fallow-skills",
+      "sourceType": "github",
+      "skillPath": "fallow/skills/fallow/SKILL.md",
+      "computedHash": "76724470a1997a7aef4d8dfb15020b9c82829a28285653459d7a5ef669de0c2b"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
