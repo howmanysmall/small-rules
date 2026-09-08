@@ -1,7 +1,7 @@
 // hk configuration - https://hk.jdx.dev/
-amends "package://github.com/jdx/hk/releases/download/v1.55.0/hk@1.55.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v1.58.1/hk@1.58.1#/Config.pkl"
 
-import "package://github.com/jdx/hk/releases/download/v1.55.0/hk@1.55.0#/Builtins.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.58.1/hk@1.58.1#/Builtins.pkl"
 
 exclude =
   List(
@@ -173,7 +173,9 @@ hooks {
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
-        prefix = "GH_TOKEN=\"$(gh auth token)\""
+        check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
+        check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
+        fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
       ["pinact"] {
         glob = workflow_action_files
@@ -365,7 +367,9 @@ hooks {
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
-        prefix = "GH_TOKEN=\"$(gh auth token)\""
+        check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
+        check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
+        fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
       ["pinact"] {
         glob = workflow_action_files
@@ -486,6 +490,7 @@ hooks {
       }
       ["zizmor"] = (Builtins.zizmor) {
         glob = zizmor_files
+        check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
