@@ -483,10 +483,12 @@ const configuration = isentinel(
 			},
 		},
 		ignores: [
-			"**/{dist,do-not-sync-ever,node_modules}/**",
+			"!**/.opencode",
+			"!**/.opencode/**",
 			"**/*.js",
-			"scripts/dupes-viewer.html",
+			"**/{dist,do-not-sync-ever,node_modules}/**",
 			"scripts/clis/**/*.ts",
+			"scripts/dupes-viewer.html",
 			"src/generated/**",
 		],
 		options: {
@@ -610,8 +612,18 @@ const configuration = isentinel(
 		},
 	},
 	{
+		name: "small-rules/benchmarks",
+		files: [`.benchmarks/${GLOB_SRC}`],
+		rules: {
+			"node/no-top-level-await": "off",
+			"small-rules/no-runtime-typeof": "off",
+			"small-rules/require-safety-comment-for-type-assertion": "off",
+			"typescript/no-unsafe-type-assertion": "off",
+		},
+	},
+	{
 		name: "small-rules/vitest",
-		files: GLOB_TESTS,
+		files: GLOB_TESTS.filter((glob) => !glob.includes(".bench.")),
 		plugins: ["vitest"],
 		rules: {
 			"max-lines": "off",

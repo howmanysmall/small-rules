@@ -2,14 +2,20 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { argv } from "node:process";
-import { Command } from "@cliffy/command";
+import { consola } from "consola";
 
+import { createBaseCommand } from "$script-functions/create-base-command";
+import { getScriptName } from "$script-functions/get-script-name";
 import { renderNoticesMarkdown } from "$script-utilities/vendored-notices";
 
-const command = new Command()
-	.name("generate-third-party-notices")
-	.version("1.0.0")
-	.description("Generates THIRD-PARTY-NOTICES.md from the vendored-component catalog.")
+const name = getScriptName(true);
+const log = consola.withTag(name);
+
+const command = createBaseCommand(
+	name,
+	"1.0.1",
+	"Generates THIRD-PARTY-NOTICES.md from the vendored-component catalog.",
+)
 	.option("-o, --output <output-path:string>", "Generated Markdown output path.", {
 		default: "THIRD-PARTY-NOTICES.md",
 	})
@@ -20,7 +26,7 @@ const command = new Command()
 		if (check === true) {
 			const existing = await readFile(output, "utf8").catch(() => undefined);
 			if (existing === generated) {
-				console.log(`${output} is up to date.`);
+				log.info(`${output} is up to date.`);
 				return;
 			}
 
@@ -30,7 +36,7 @@ const command = new Command()
 		}
 
 		await writeFile(output, generated, "utf8");
-		console.log(`Wrote ${generated.length} bytes to ${output}`);
+		log.success(`Wrote ${generated.length} bytes to ${output}`);
 	});
 
 await command.parse(argv.slice(2));

@@ -1,4 +1,4 @@
-#!/usr/bin/env nub
+#!/usr/bin/env bun
 
 import nodePath from "node:path";
 import { argv, exit } from "node:process";
@@ -28,11 +28,7 @@ async function runJsonAsync(command: string, parameters: ReadonlyArray<string>):
 		const { exitCode, stdout } = await $({ cwd: repositoryRoot })`${[command, ...parameters]}`.nothrow().quiet();
 
 		const output = stdout.trim();
-		if (output.length === 0) {
-			const error = new Error(`${command} did not print JSON output`);
-			Error.captureStackTrace(error, runJsonAsync);
-			throw error;
-		}
+		if (output.length === 0) throw new Error(`${command} did not print JSON output`);
 
 		try {
 			return {
@@ -40,12 +36,10 @@ async function runJsonAsync(command: string, parameters: ReadonlyArray<string>):
 				output: JSON.parse(output),
 			};
 		} catch (error) {
-			const exception = new Error(
+			throw new Error(
 				`Failed to parse ${command} JSON output: ${error instanceof Error ? error.message : String(error)}\n${output}`,
 				{ cause: error },
 			);
-			Error.captureStackTrace(exception, runJsonAsync);
-			throw exception;
 		}
 		// oxlint-disable-next-line no-useless-catch sonar/no-useless-catch -- not useless.
 	} catch (error) {

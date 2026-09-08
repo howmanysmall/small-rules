@@ -20,7 +20,7 @@ betterleaks = "latest"
 bun = "latest"
 communique = "latest"
 git-cliff = "latest"
-hk = "1.55.0"
+hk = "1.58.1"
 ni = "latest"
 node = "24"
 pinact = "latest"
@@ -88,7 +88,7 @@ run = "gh workflow run 'Deploy Documentation' --ref main"
 
 [tasks.documentation]
 description = "Run the documentation build plus unit and Chromium browser tests."
-run = "pnpm --filter docs exec playwright install chromium && pnpm --filter docs run build && pnpm --filter docs run test:unit && pnpm --filter docs run test:browser"
+run = "pnpm --filter @small-rules/documentation exec playwright install chromium && pnpm --filter @small-rules/documentation run build && pnpm --filter @small-rules/documentation run test:unit && pnpm --filter @small-rules/documentation run test:browser"
 
 [tasks.dry-release]
 alias = "dr"

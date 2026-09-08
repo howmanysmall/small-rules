@@ -3,34 +3,35 @@
 import nodePath from "node:path";
 import { cwd } from "node:process";
 import { Command } from "@cliffy/command";
+import { isMaybeReadonlyArrayOfStrings, isString, isUndefined, isUnknown } from "@small-rules/arktype-utilities";
+import { bold, cyan, dim, green, red, yellow } from "ansis";
 import { type } from "arktype";
 import { argv, file, JSONC, write } from "bun";
 import { fdir } from "fdir";
 import { create } from "mutative";
-import { bold, cyan, dim, green, red, yellow } from "picocolors";
 
 import { editJsonc } from "$script-utilities/jsonc-utilities";
 
 const fdirZed = new fdir().glob("**/.zed/settings.json").withFullPaths();
 
 const isZedSettingsJson = type({
-	"[string]": "unknown",
-	"language_servers?": type("string[]").readonly().or("undefined"),
+	"[string]": isUnknown,
+	"language_servers?": isMaybeReadonlyArrayOfStrings,
 	"languages?": type
 		.Record(
-			"string",
+			isString,
 			type({
-				"[string]": "unknown",
-				"language_servers?": "string[] | undefined",
+				"[string]": isUnknown,
+				"language_servers?": isMaybeReadonlyArrayOfStrings,
 			}).readonly(),
 		)
 		.readonly()
-		.or("undefined"),
+		.or(isUndefined),
 }).readonly();
 
 const isSettingsJson = type({
-	content: "string",
-	filePath: "string",
+	content: isString,
+	filePath: isString,
 }).readonly();
 type SettingsJson = typeof isSettingsJson.infer;
 
@@ -273,21 +274,21 @@ function printDryRunHeader(scanRoot: string, count: number): void {
 	console.log(`${yellow("⚠")}  ${bold("DRY RUN")}${dim(" — no files will be modified")}`);
 	console.log();
 	console.log(`${dim("🔍")} Scanning from ${cyan(scanRoot)}`);
-	console.log(`${dim("📁")} Found ${bold(String(count))} ${count === 1 ? "file" : "files"} with tsgo references`);
+	console.log(`${dim("📁")} Found ${bold(count)} ${count === 1 ? "file" : "files"} with tsgo references`);
 	console.log();
 }
 
 function printSummary(changedCount: number, scannedCount: number, dryRun: boolean): void {
 	if (changedCount === 0) {
-		console.log(`${green("✓")} All ${bold(String(scannedCount))} files already clean. Nothing to do.`);
+		console.log(`${green("✓")} All ${bold(scannedCount)} files already clean. Nothing to do.`);
 		return;
 	}
 
 	if (dryRun) {
 		console.log(`${dim("───")} ${bold("Summary")} ${dim("───")}`);
-		console.log(`${yellow(String(changedCount))} ${changedCount === 1 ? "file would" : "files would"} be modified`);
+		console.log(`${yellow(changedCount)} ${changedCount === 1 ? "file would" : "files would"} be modified`);
 		console.log(`${dim("No files were actually written")} ${yellow("(--dry-run)")}`);
-	} else console.log(`${green("✓")} ${bold(String(changedCount))} ${changedCount === 1 ? "file" : "files"} modified`);
+	} else console.log(`${green("✓")} ${bold(changedCount)} ${changedCount === 1 ? "file" : "files"} modified`);
 }
 
 const command = new Command()

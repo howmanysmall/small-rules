@@ -1,9 +1,9 @@
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 
+import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 import { Predicate } from "effect";
 
-import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "$oxc-utilities/arktype-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyFunction,

@@ -1,0 +1,32 @@
+diff --git a/dist/src/stryker-setup.js b/dist/src/stryker-setup.js
+index aecfacbe47b285c272c47e54b3d66a716adfdc41..7180ad6480ff54d50215227bbbefb560480ed84a 100644
+--- a/dist/src/stryker-setup.js
++++ b/dist/src/stryker-setup.js
+@@ -63,7 +63,10 @@ function collectTestName({ name, suite, }) {
+         nameParts.unshift(currentSuite.name);
+         currentSuite = currentSuite.suite;
+     }
+-    return nameParts.join(' ').trim();
++    // PATCHED: Vitest 5 matches `testNamePattern` against `task.fullTestName`, which joins
++    // suite names with ' > '. Joining with ' ' makes the filter regex match nothing for any
++    // test inside a `describe`, so every mutant runs zero tests and is reported Survived.
++    return nameParts.filter((part) => part !== undefined && part !== '').join(' > ').trim();
+ }
+ function toRawTestId(test) {
+     return `${test.file?.filepath ?? 'unknown.js'}#${collectTestName(test)}`;
+diff --git a/dist/src/test-helpers.js b/dist/src/test-helpers.js
+index 56cc786f30c524ae18ce87eef1a67fdf26b703c5..bbb76c3b5336421d163c04a13c781d70d805966e 100644
+--- a/dist/src/test-helpers.js
++++ b/dist/src/test-helpers.js
+@@ -8,7 +8,10 @@ export function collectTestName({ name, suite, }) {
+         nameParts.unshift(currentSuite.name);
+         currentSuite = currentSuite.suite;
+     }
+-    return nameParts.join(' ').trim();
++    // PATCHED: Vitest 5 matches `testNamePattern` against `task.fullTestName`, which joins
++    // suite names with ' > '. Joining with ' ' makes the filter regex match nothing for any
++    // test inside a `describe`, so every mutant runs zero tests and is reported Survived.
++    return nameParts.filter((part) => part !== undefined && part !== '').join(' > ').trim();
+ }
+ export function toRawTestId(test) {
+     return `${test.file?.filepath ?? 'unknown.js'}#${collectTestName(test)}`;

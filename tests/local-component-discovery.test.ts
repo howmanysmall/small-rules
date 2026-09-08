@@ -1,12 +1,13 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
+import nodeProcess from "node:process";
 import { describe, expect, it } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import {
 	addLocalComponentImportIdentifiers,
-	discoverLocalComponent,
+	createLocalComponentDiscoverer,
 	inspectRelativeLocalComponentImport,
 	MAX_REGEX_CACHE_SIZE,
 } from "$oxc-utilities/local-component-discovery";
@@ -15,13 +16,20 @@ import { createRuleTester } from "./rule-testers";
 
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
 
-import type { LocalComponentDefinition, LocalComponentInspection } from "$oxc-utilities/local-component-discovery";
+import type {
+	LocalComponentDefinition,
+	LocalComponentDiscovery,
+	LocalComponentInspection,
+} from "$oxc-utilities/local-component-discovery";
 
 const COMPONENT_NAME = "Button";
 const MATCHING_INSPECTION: LocalComponentInspection = { importStyle: "default", matches: true };
 const NON_MATCHING_INSPECTION: LocalComponentInspection = { importStyle: undefined, matches: false };
 
 const MESSAGES = { found: "found identifier" };
+// Windows ignores POSIX directory modes, and root reads a `0o000` directory
+// anyway, so the unreadable-directory case cannot be staged there.
+const CANNOT_REVOKE_DIRECTORY_ACCESS = nodeProcess.platform === "win32" || nodeProcess.getuid?.() === 0;
 
 function createCollectorRule(inspection: LocalComponentInspection): CreateRule<readonly [], "found", readonly []> {
 	return defineRule({
@@ -671,6 +679,102 @@ describe("discoverLocalComponent", () => {
 		cleanupProjectFixture(project);
 	});
 
+	it("should ignore component candidates in gitignored directories", () => {
+		expect.assertions(1);
+
+		// Arrange
+		const project = createProjectFixture("gitignored-directory", {
+			".gitignore": "generated/\n",
+			"generated/button.tsx": "export default function Button() { return null; }\n",
+			"src/button.tsx": "export default function Button() { return null; }\n",
+			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+
+		// Act
+		const discovery = discoverLocalComponent(
+			nodePath.join(project, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
+
+		// Assert
+		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
+
+		cleanupProjectFixture(project);
+	});
+
+	it("should let a nested gitignore negation re-include a component", () => {
+		expect.assertions(1);
+
+		// Arrange
+		const project = createProjectFixture("gitignore-negation", {
+			".gitignore": "button.tsx\n",
+			"src/.gitignore": "!button.tsx\n",
+			"src/button.tsx": "export default function Button() { return null; }\n",
+			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+
+		// Act
+		const discovery = discoverLocalComponent(
+			nodePath.join(project, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
+
+		// Assert
+		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
+
+		cleanupProjectFixture(project);
+	});
+
+	it("should not index symbolic links to component files", () => {
+		expect.assertions(1);
+
+		// Arrange
+		const project = createProjectFixture("symlinked-component", {
+			"src/button.tsx": "export default function Button() { return null; }\n",
+			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		symlinkSync(nodePath.join(project, "src", "button.tsx"), nodePath.join(project, "src", "alias.tsx"));
+
+		// Act
+		const discovery = discoverLocalComponent(nodePath.join(project, "src", "screen.tsx"), {
+			componentName: COMPONENT_NAME,
+			fileNames: ["alias", "button"],
+		});
+
+		// Assert
+		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
+
+		cleanupProjectFixture(project);
+	});
+
+	it.skipIf(CANNOT_REVOKE_DIRECTORY_ACCESS)(
+		"should skip directories it cannot read instead of failing the lint",
+		() => {
+			expect.assertions(1);
+
+			// Arrange
+			const project = createProjectFixture("unreadable-directory", {
+				"locked/placeholder.txt": "unreadable\n",
+				"src/button.tsx": "export default function Button() { return null; }\n",
+				"src/screen.tsx": "export function Screen() { return null; }\n",
+			});
+			const lockedDirectory = nodePath.join(project, "locked");
+			chmodSync(lockedDirectory, 0o000);
+
+			// Act
+			const discovery = discoverLocalComponent(
+				nodePath.join(project, "src", "screen.tsx"),
+				createComponentDefinition(),
+			);
+
+			// Assert
+			expect(discovery).toMatchObject({ found: true, importSource: "./button" });
+
+			chmodSync(lockedDirectory, 0o755);
+			cleanupProjectFixture(project);
+		},
+	);
+
 	it("should return not found when multiple matching component files exist", () => {
 		expect.assertions(1);
 
@@ -698,6 +802,10 @@ describe("discoverLocalComponent", () => {
 
 function cleanupProjectFixture(project: string): void {
 	rmSync(project, { force: true, recursive: true });
+}
+
+function discoverLocalComponent(sourceFile: string, definition: LocalComponentDefinition): LocalComponentDiscovery {
+	return createLocalComponentDiscoverer(sourceFile, definition)();
 }
 
 function createComponentDefinition(): LocalComponentDefinition {

@@ -1,5 +1,20 @@
 {
 	"classes": {
+		"Accessory": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AttachmentPoint": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"AccessoryType": {
+				"enumType": "AccessoryType",
+				"type": "Enum",
+				"value": "Unknown"
+			}
+		},
 		"AdGui": {
 			"Archivable": {
 				"type": "bool",
@@ -13,22 +28,26 @@
 			}
 		},
 		"AlignOrientation": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"AlignType": {
 				"enumType": "AlignType",
 				"type": "Enum",
 				"value": "AllAxes"
 			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
 			"CFrame": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
 			},
 			"MaxAngularVelocity": {
 				"type": "number",
@@ -58,17 +77,9 @@
 			"RigidityEnabled": {
 				"type": "bool",
 				"value": false
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"AlignPosition": {
-			"ApplyAtCenterOfMass": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -76,6 +87,14 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
+			"ApplyAtCenterOfMass": {
+				"type": "bool",
+				"value": false
 			},
 			"ForceLimitMode": {
 				"enumType": "ForceLimitMode",
@@ -119,17 +138,9 @@
 			"RigidityEnabled": {
 				"type": "bool",
 				"value": false
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"AngularVelocity": {
-			"AngularVelocity": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -137,6 +148,14 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
+			"AngularVelocity": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
 			},
 			"MaxTorque": {
 				"type": "number",
@@ -150,10 +169,6 @@
 				"enumType": "ActuatorRelativeTo",
 				"type": "Enum",
 				"value": "World"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"Animation": {
@@ -163,14 +178,6 @@
 			}
 		},
 		"AnimationConstraint": {
-			"AngularDamping": {
-				"type": "number",
-				"value": 1
-			},
-			"AngularStrength": {
-				"type": "number",
-				"value": 1
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -178,6 +185,18 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
+			"AngularDamping": {
+				"type": "number",
+				"value": 1
+			},
+			"AngularStrength": {
+				"type": "number",
+				"value": 1
 			},
 			"IsKinematic": {
 				"type": "bool",
@@ -202,10 +221,6 @@
 			"Transform": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"AnimationController": {
@@ -266,6 +281,36 @@
 			"Visible": {
 				"type": "bool",
 				"value": true
+			}
+		},
+		"Atmosphere": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Color": {
+				"type": "Color3",
+				"value": [0.7843000292778015, 0.666700005531311, 0.4235000014305115]
+			},
+			"Decay": {
+				"type": "Color3",
+				"value": [0.36079999804496765, 0.2353000044822693, 0.05490000173449516]
+			},
+			"Density": {
+				"type": "number",
+				"value": 0.39500001072883606
+			},
+			"Glare": {
+				"type": "number",
+				"value": 0
+			},
+			"Haze": {
+				"type": "number",
+				"value": 0
+			},
+			"Offset": {
+				"type": "number",
+				"value": 0
 			}
 		},
 		"Attachment": {
@@ -372,14 +417,14 @@
 			}
 		},
 		"AudioDeviceInput": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
 			"AccessType": {
 				"enumType": "AccessModifierType",
 				"type": "Enum",
 				"value": "Deny"
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
 			},
 			"Muted": {
 				"type": "bool",
@@ -441,11 +486,11 @@
 			}
 		},
 		"AudioEmitter": {
-			"AcousticSimulationEnabled": {
+			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"Archivable": {
+			"AcousticSimulationEnabled": {
 				"type": "bool",
 				"value": true
 			},
@@ -457,6 +502,11 @@
 				"enumType": "SimulationMode",
 				"type": "Enum",
 				"value": "Default"
+			},
+			"DistanceAttenuationMode": {
+				"enumType": "DistanceAttenuationMode",
+				"type": "Enum",
+				"value": "Custom"
 			},
 			"OcclusionEnabled": {
 				"enumType": "SimulationMode",
@@ -601,11 +651,11 @@
 			}
 		},
 		"AudioListener": {
-			"AcousticSimulationEnabled": {
+			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"Archivable": {
+			"AcousticSimulationEnabled": {
 				"type": "bool",
 				"value": true
 			},
@@ -895,6 +945,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"LimitsEnabled": {
 				"type": "bool",
 				"value": false
@@ -922,10 +976,6 @@
 			"UpperAngle": {
 				"type": "number",
 				"value": 45
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"Beam": {
@@ -992,59 +1042,11 @@
 			}
 		},
 		"BillboardGui": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
 			"AutoLocalize": {
-				"type": "bool",
-				"value": true
-			},
-			"Brightness": {
-				"type": "number",
-				"value": 1
-			},
-			"ClipsDescendants": {
-				"type": "bool",
-				"value": false
-			},
-			"DistanceLowerLimit": {
-				"type": "number",
-				"value": 0
-			},
-			"DistanceUpperLimit": {
-				"type": "number",
-				"value": -1
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
-			"ExtentsOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"ExtentsOffsetWorldSpace": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"LightInfluence": {
-				"type": "number",
-				"value": 0
-			},
-			"MaxDistance": {
-				"type": "number",
-				"value": "inf"
-			},
-			"ResetOnSpawn": {
 				"type": "bool",
 				"value": true
 			},
@@ -1072,6 +1074,59 @@
 				"type": "bool",
 				"value": false
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"ResetOnSpawn": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndexBehavior": {
+				"enumType": "ZIndexBehavior",
+				"type": "Enum",
+				"value": "Global"
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"Brightness": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"DistanceLowerLimit": {
+				"type": "number",
+				"value": 0
+			},
+			"DistanceUpperLimit": {
+				"type": "number",
+				"value": -1
+			},
+			"ExtentsOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ExtentsOffsetWorldSpace": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"LightInfluence": {
+				"type": "number",
+				"value": 0
+			},
+			"MaxDistance": {
+				"type": "number",
+				"value": "inf"
+			},
 			"Size": {
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
@@ -1087,11 +1142,6 @@
 			"StudsOffsetWorldSpace": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
-			},
-			"ZIndexBehavior": {
-				"enumType": "ZIndexBehavior",
-				"type": "Enum",
-				"value": "Global"
 			}
 		},
 		"BlockMesh": {
@@ -1149,13 +1199,13 @@
 			}
 		},
 		"BodyAngularVelocity": {
-			"AngularVelocity": {
-				"type": "Vector3",
-				"value": [0, 2, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"AngularVelocity": {
+				"type": "Vector3",
+				"value": [0, 2, 0]
 			},
 			"MaxTorque": {
 				"type": "Vector3",
@@ -1330,39 +1380,13 @@
 			}
 		},
 		"BoxHandleAdornment": {
-			"AdornCullingMode": {
-				"enumType": "AdornCullingMode",
-				"type": "Enum",
-				"value": "Automatic"
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
 			"Color3": {
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
-			},
-			"Shading": {
-				"enumType": "AdornShading",
-				"type": "Enum",
-				"value": "Default"
-			},
-			"Size": {
-				"type": "Vector3",
-				"value": [1, 1, 1]
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
 			},
 			"Transparency": {
 				"type": "number",
@@ -1372,9 +1396,35 @@
 				"type": "bool",
 				"value": true
 			},
+			"AdornCullingMode": {
+				"enumType": "AdornCullingMode",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
 			"ZIndex": {
 				"type": "number",
 				"value": -1
+			},
+			"Shading": {
+				"enumType": "AdornShading",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"Size": {
+				"type": "Vector3",
+				"value": [1, 1, 1]
 			}
 		},
 		"BrickColorValue": {
@@ -1437,14 +1487,6 @@
 			}
 		},
 		"CanvasGroup": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -1452,6 +1494,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -1487,19 +1561,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"GroupColor3": {
-				"type": "Color3",
-				"value": [1, 1, 1]
-			},
-			"GroupTransparency": {
-				"type": "number",
-				"value": 0
-			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -1517,30 +1578,6 @@
 				"value": 0
 			},
 			"Selectable": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
 				"type": "bool",
 				"value": false
 			},
@@ -1564,6 +1601,14 @@
 			"ZIndex": {
 				"type": "number",
 				"value": 1
+			},
+			"GroupColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"GroupTransparency": {
+				"type": "number",
+				"value": 0
 			}
 		},
 		"CharacterMesh": {
@@ -1586,21 +1631,21 @@
 				"type": "bool",
 				"value": true
 			},
-			"Depth": {
-				"type": "number",
-				"value": 0.15000000596046448
-			},
 			"Enabled": {
 				"type": "bool",
 				"value": true
 			},
-			"Mix": {
-				"type": "number",
-				"value": 0.5
-			},
 			"Priority": {
 				"type": "number",
 				"value": 0
+			},
+			"Depth": {
+				"type": "number",
+				"value": 0.15000000596046448
+			},
+			"Mix": {
+				"type": "number",
+				"value": 0.5
 			},
 			"Rate": {
 				"type": "number",
@@ -1615,6 +1660,28 @@
 			"MaxActivationDistance": {
 				"type": "number",
 				"value": 32
+			}
+		},
+		"Clouds": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Color": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"Cover": {
+				"type": "number",
+				"value": 0.5
+			},
+			"Density": {
+				"type": "number",
+				"value": 0.699999988079071
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
 			}
 		},
 		"Color3Value": {
@@ -1632,6 +1699,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
 			"Brightness": {
 				"type": "number",
 				"value": 0
@@ -1639,10 +1710,6 @@
 			"Contrast": {
 				"type": "number",
 				"value": 0
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
 			},
 			"Saturation": {
 				"type": "number",
@@ -1684,19 +1751,19 @@
 				"type": "bool",
 				"value": true
 			},
-			"Attack": {
-				"type": "number",
-				"value": 0.10000000149011612
-			},
 			"Enabled": {
 				"type": "bool",
 				"value": true
 			},
-			"GainMakeup": {
+			"Priority": {
 				"type": "number",
 				"value": 0
 			},
-			"Priority": {
+			"Attack": {
+				"type": "number",
+				"value": 0.10000000149011612
+			},
+			"GainMakeup": {
 				"type": "number",
 				"value": 0
 			},
@@ -1714,6 +1781,22 @@
 			}
 		},
 		"ConeHandleAdornment": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Color3": {
+				"type": "Color3",
+				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			},
+			"Transparency": {
+				"type": "number",
+				"value": 0
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
 			"AdornCullingMode": {
 				"enumType": "AdornCullingMode",
 				"type": "Enum",
@@ -1723,17 +1806,17 @@
 				"type": "bool",
 				"value": false
 			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
 			"CFrame": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"Color3": {
-				"type": "Color3",
-				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": -1
 			},
 			"Height": {
 				"type": "number",
@@ -1751,22 +1834,6 @@
 				"enumType": "AdornShading",
 				"type": "Enum",
 				"value": "Default"
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"Transparency": {
-				"type": "number",
-				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": -1
 			}
 		},
 		"Configuration": {
@@ -1776,13 +1843,13 @@
 			}
 		},
 		"CornerWedgePart": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -2000,6 +2067,22 @@
 			}
 		},
 		"CylinderHandleAdornment": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Color3": {
+				"type": "Color3",
+				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			},
+			"Transparency": {
+				"type": "number",
+				"value": 0
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
 			"AdornCullingMode": {
 				"enumType": "AdornCullingMode",
 				"type": "Enum",
@@ -2009,21 +2092,21 @@
 				"type": "bool",
 				"value": false
 			},
-			"Angle": {
-				"type": "number",
-				"value": 360
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
 			"CFrame": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"Color3": {
-				"type": "Color3",
-				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": -1
+			},
+			"Angle": {
+				"type": "number",
+				"value": 360
 			},
 			"Height": {
 				"type": "number",
@@ -2041,22 +2124,6 @@
 				"enumType": "AdornShading",
 				"type": "Enum",
 				"value": "Default"
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"Transparency": {
-				"type": "number",
-				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": -1
 			}
 		},
 		"CylinderMesh": {
@@ -2078,10 +2145,74 @@
 			}
 		},
 		"CylindricalConstraint": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"ActuatorType": {
 				"enumType": "ActuatorType",
 				"type": "Enum",
 				"value": "None"
+			},
+			"LimitsEnabled": {
+				"type": "bool",
+				"value": false
+			},
+			"LinearResponsiveness": {
+				"type": "number",
+				"value": 45
+			},
+			"LowerLimit": {
+				"type": "number",
+				"value": 0
+			},
+			"MotorMaxAcceleration": {
+				"type": "number",
+				"value": "inf"
+			},
+			"MotorMaxForce": {
+				"type": "number",
+				"value": 0
+			},
+			"Restitution": {
+				"type": "number",
+				"value": 0
+			},
+			"ServoMaxForce": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "number",
+				"value": 0.15000000596046448
+			},
+			"SoftlockServoUponReachingTarget": {
+				"type": "bool",
+				"value": false
+			},
+			"Speed": {
+				"type": "number",
+				"value": 0
+			},
+			"TargetPosition": {
+				"type": "number",
+				"value": 0
+			},
+			"UpperLimit": {
+				"type": "number",
+				"value": 5
+			},
+			"Velocity": {
+				"type": "number",
+				"value": 0
 			},
 			"AngularActuatorType": {
 				"enumType": "ActuatorType",
@@ -2108,51 +2239,19 @@
 				"type": "number",
 				"value": 0
 			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
 			"InclinationAngle": {
 				"type": "number",
 				"value": 0
-			},
-			"LimitsEnabled": {
-				"type": "bool",
-				"value": false
-			},
-			"LinearResponsiveness": {
-				"type": "number",
-				"value": 45
 			},
 			"LowerAngle": {
 				"type": "number",
 				"value": -45
 			},
-			"LowerLimit": {
-				"type": "number",
-				"value": 0
-			},
-			"MotorMaxAcceleration": {
-				"type": "number",
-				"value": "inf"
-			},
 			"MotorMaxAngularAcceleration": {
 				"type": "number",
 				"value": 500000
 			},
-			"MotorMaxForce": {
-				"type": "number",
-				"value": 0
-			},
 			"MotorMaxTorque": {
-				"type": "number",
-				"value": 0
-			},
-			"Restitution": {
 				"type": "number",
 				"value": 0
 			},
@@ -2160,59 +2259,32 @@
 				"type": "bool",
 				"value": false
 			},
-			"ServoMaxForce": {
-				"type": "number",
-				"value": 0
-			},
 			"ServoMaxTorque": {
 				"type": "number",
 				"value": 0
-			},
-			"Size": {
-				"type": "number",
-				"value": 0.15000000596046448
 			},
 			"SoftlockAngularServoUponReachingTarget": {
 				"type": "bool",
 				"value": false
 			},
-			"SoftlockServoUponReachingTarget": {
-				"type": "bool",
-				"value": false
-			},
-			"Speed": {
-				"type": "number",
-				"value": 0
-			},
 			"TargetAngle": {
-				"type": "number",
-				"value": 0
-			},
-			"TargetPosition": {
 				"type": "number",
 				"value": 0
 			},
 			"UpperAngle": {
 				"type": "number",
 				"value": 45
-			},
-			"UpperLimit": {
-				"type": "number",
-				"value": 5
-			},
-			"Velocity": {
-				"type": "number",
-				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"Decal": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Face": {
+				"enumType": "NormalId",
+				"type": "Enum",
+				"value": "Front"
 			},
 			"AutoLocalize": {
 				"type": "bool",
@@ -2222,10 +2294,13 @@
 				"type": "Color3",
 				"value": [1, 1, 1]
 			},
-			"Face": {
-				"enumType": "NormalId",
-				"type": "Enum",
-				"value": "Front"
+			"EmissiveStrength": {
+				"type": "number",
+				"value": 1
+			},
+			"EmissiveTint": {
+				"type": "Color3",
+				"value": [1, 1, 1]
 			},
 			"Rotation": {
 				"type": "number",
@@ -2394,13 +2469,13 @@
 				"type": "bool",
 				"value": true
 			},
-			"Level": {
-				"type": "number",
-				"value": 0.75
-			},
 			"Priority": {
 				"type": "number",
 				"value": 0
+			},
+			"Level": {
+				"type": "number",
+				"value": 0.75
 			}
 		},
 		"DoubleConstrainedValue": {
@@ -2418,13 +2493,17 @@
 			}
 		},
 		"DragDetector": {
-			"ApplyAtCenterOfMass": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"MaxActivationDistance": {
+				"type": "number",
+				"value": 32
+			},
+			"ApplyAtCenterOfMass": {
+				"type": "bool",
+				"value": false
 			},
 			"DragFrame": {
 				"type": "CFrame",
@@ -2448,10 +2527,6 @@
 				"enumType": "KeyCode",
 				"type": "Enum",
 				"value": "LeftControl"
-			},
-			"MaxActivationDistance": {
-				"type": "number",
-				"value": 32
 			},
 			"MaxDragAngle": {
 				"type": "number",
@@ -2524,6 +2599,14 @@
 				"type": "bool",
 				"value": true
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Priority": {
+				"type": "number",
+				"value": 0
+			},
 			"Delay": {
 				"type": "number",
 				"value": 1
@@ -2532,17 +2615,9 @@
 				"type": "number",
 				"value": 0
 			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
 			"Feedback": {
 				"type": "number",
 				"value": 0.5
-			},
-			"Priority": {
-				"type": "number",
-				"value": 0
 			},
 			"WetLevel": {
 				"type": "number",
@@ -2558,6 +2633,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"Priority": {
+				"type": "number",
+				"value": 0
+			},
 			"HighGain": {
 				"type": "number",
 				"value": 0
@@ -2569,10 +2648,6 @@
 			"MidGain": {
 				"type": "number",
 				"value": -10
-			},
-			"Priority": {
-				"type": "number",
-				"value": 0
 			}
 		},
 		"EulerRotationCurve": {
@@ -2651,21 +2726,21 @@
 				"type": "bool",
 				"value": true
 			},
-			"Depth": {
-				"type": "number",
-				"value": 0.44999998807907104
-			},
 			"Enabled": {
 				"type": "bool",
 				"value": true
 			},
-			"Mix": {
-				"type": "number",
-				"value": 0.8500000238418579
-			},
 			"Priority": {
 				"type": "number",
 				"value": 0
+			},
+			"Depth": {
+				"type": "number",
+				"value": 0.44999998807907104
+			},
+			"Mix": {
+				"type": "number",
+				"value": 0.8500000238418579
 			},
 			"Rate": {
 				"type": "number",
@@ -2687,6 +2762,14 @@
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
 			},
+			"Transparency": {
+				"type": "number",
+				"value": 0
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
 			"CycleOffset": {
 				"type": "number",
 				"value": 0
@@ -2699,17 +2782,9 @@
 				"type": "Vector2",
 				"value": [1, 1]
 			},
-			"Transparency": {
-				"type": "number",
-				"value": 0
-			},
 			"Velocity": {
 				"type": "number",
 				"value": 2
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
 			},
 			"WireRadius": {
 				"type": "number",
@@ -2733,14 +2808,6 @@
 			}
 		},
 		"Frame": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -2748,6 +2815,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -2783,11 +2882,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -2808,30 +2902,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
-				"type": "bool",
-				"value": false
-			},
 			"SelectionOrder": {
 				"type": "number",
 				"value": 0
@@ -2845,11 +2915,6 @@
 				"type": "Enum",
 				"value": "RelativeXY"
 			},
-			"Style": {
-				"enumType": "FrameStyle",
-				"type": "Enum",
-				"value": "Custom"
-			},
 			"Visible": {
 				"type": "bool",
 				"value": true
@@ -2857,6 +2922,11 @@
 			"ZIndex": {
 				"type": "number",
 				"value": 1
+			},
+			"Style": {
+				"enumType": "FrameStyle",
+				"type": "Enum",
+				"value": "Custom"
 			}
 		},
 		"GeneratedFolder": {
@@ -2874,11 +2944,6 @@
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
 			},
-			"Style": {
-				"enumType": "HandlesStyle",
-				"type": "Enum",
-				"value": "Resize"
-			},
 			"Transparency": {
 				"type": "number",
 				"value": 0
@@ -2886,6 +2951,11 @@
 			"Visible": {
 				"type": "bool",
 				"value": true
+			},
+			"Style": {
+				"enumType": "HandlesStyle",
+				"type": "Enum",
+				"value": "Resize"
 			}
 		},
 		"HapticEffect": {
@@ -2943,6 +3013,18 @@
 			}
 		},
 		"HingeConstraint": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"ActuatorType": {
 				"enumType": "ActuatorType",
 				"type": "Enum",
@@ -2959,14 +3041,6 @@
 			"AngularVelocity": {
 				"type": "number",
 				"value": 0
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
 			},
 			"LimitsEnabled": {
 				"type": "bool",
@@ -3007,10 +3081,6 @@
 			"UpperAngle": {
 				"type": "number",
 				"value": 45
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"Humanoid": {
@@ -3594,6 +3664,38 @@
 			}
 		},
 		"ImageButton": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
 			"Active": {
 				"type": "bool",
 				"value": true
@@ -3601,18 +3703,6 @@
 			"AnchorPoint": {
 				"type": "Vector2",
 				"value": [0, 0]
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"AutoButtonColor": {
-				"type": "bool",
-				"value": true
-			},
-			"AutoLocalize": {
-				"type": "bool",
-				"value": true
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -3648,6 +3738,64 @@
 				"type": "bool",
 				"value": false
 			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"AutoButtonColor": {
+				"type": "bool",
+				"value": true
+			},
+			"Modal": {
+				"type": "bool",
+				"value": false
+			},
+			"Selected": {
+				"type": "bool",
+				"value": false
+			},
+			"Style": {
+				"enumType": "ButtonStyle",
+				"type": "Enum",
+				"value": "Custom"
+			},
 			"ImageColor3": {
 				"type": "Color3",
 				"value": [1, 1, 1]
@@ -3664,85 +3812,15 @@
 				"type": "number",
 				"value": 0
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
-			"Interactable": {
-				"type": "bool",
-				"value": true
-			},
-			"LayoutOrder": {
-				"type": "number",
-				"value": 0
-			},
-			"Modal": {
-				"type": "bool",
-				"value": false
-			},
-			"Position": {
-				"type": "UDim2",
-				"value": [0, 0, 0, 0]
-			},
 			"ResampleMode": {
 				"enumType": "ResamplerMode",
 				"type": "Enum",
 				"value": "Default"
 			},
-			"Rotation": {
-				"type": "number",
-				"value": 0
-			},
 			"ScaleType": {
 				"enumType": "ScaleType",
 				"type": "Enum",
 				"value": "Stretch"
-			},
-			"Selectable": {
-				"type": "bool",
-				"value": true
-			},
-			"Selected": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionOrder": {
-				"type": "number",
-				"value": 0
-			},
-			"Size": {
-				"type": "UDim2",
-				"value": [0, 0, 0, 0]
-			},
-			"SizeConstraint": {
-				"enumType": "SizeConstraint",
-				"type": "Enum",
-				"value": "RelativeXY"
 			},
 			"SliceCenter": {
 				"type": "Rect",
@@ -3752,53 +3830,19 @@
 				"type": "number",
 				"value": 1
 			},
-			"Style": {
-				"enumType": "ButtonStyle",
-				"type": "Enum",
-				"value": "Custom"
-			},
 			"TileSize": {
 				"type": "UDim2",
 				"value": [1, 0, 1, 0]
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
 		"ImageHandleAdornment": {
-			"AdornCullingMode": {
-				"enumType": "AdornCullingMode",
-				"type": "Enum",
-				"value": "Automatic"
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
 			"Color3": {
 				"type": "Color3",
 				"value": [0.9490196704864502, 0.9529412388801575, 0.9529412388801575]
-			},
-			"Size": {
-				"type": "Vector2",
-				"value": [1, 1]
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
 			},
 			"Transparency": {
 				"type": "number",
@@ -3808,20 +3852,33 @@
 				"type": "bool",
 				"value": true
 			},
-			"ZIndex": {
-				"type": "number",
-				"value": -1
-			}
-		},
-		"ImageLabel": {
-			"Active": {
+			"AdornCullingMode": {
+				"enumType": "AdornCullingMode",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"AlwaysOnTop": {
 				"type": "bool",
 				"value": false
 			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": -1
+			},
+			"Size": {
+				"type": "Vector2",
+				"value": [1, 1]
+			}
+		},
+		"ImageLabel": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -3829,6 +3886,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -3864,27 +3953,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"ImageColor3": {
-				"type": "Color3",
-				"value": [1, 1, 1]
-			},
-			"ImageRectOffset": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
-			"ImageRectSize": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
-			"ImageTransparency": {
-				"type": "number",
-				"value": 0
-			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -3897,45 +3965,11 @@
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
 			},
-			"ResampleMode": {
-				"enumType": "ResamplerMode",
-				"type": "Enum",
-				"value": "Default"
-			},
 			"Rotation": {
 				"type": "number",
 				"value": 0
 			},
-			"ScaleType": {
-				"enumType": "ScaleType",
-				"type": "Enum",
-				"value": "Stretch"
-			},
 			"Selectable": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
 				"type": "bool",
 				"value": false
 			},
@@ -3952,6 +3986,40 @@
 				"type": "Enum",
 				"value": "RelativeXY"
 			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"ImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ImageRectOffset": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"ImageRectSize": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"ImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"ResampleMode": {
+				"enumType": "ResamplerMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"ScaleType": {
+				"enumType": "ScaleType",
+				"type": "Enum",
+				"value": "Stretch"
+			},
 			"SliceCenter": {
 				"type": "Rect",
 				"value": [0, 0, 0, 0]
@@ -3963,14 +4031,6 @@
 			"TileSize": {
 				"type": "UDim2",
 				"value": [1, 0, 1, 0]
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
 		"InputAction": {
@@ -3988,6 +4048,157 @@
 				"value": "Bool"
 			}
 		},
+		"InputActionLabel": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"ImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"TextColor3": {
+				"type": "Color3",
+				"value": [0.10588236153125763, 0.16470588743686676, 0.20784315466880798]
+			},
+			"TextSize": {
+				"type": "number",
+				"value": 8
+			},
+			"TextTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"TextWrapped": {
+				"type": "bool",
+				"value": false
+			},
+			"TextXAlignment": {
+				"enumType": "TextXAlignment",
+				"type": "Enum",
+				"value": "Center"
+			},
+			"TextYAlignment": {
+				"enumType": "TextYAlignment",
+				"type": "Enum",
+				"value": "Center"
+			}
+		},
 		"InputBinding": {
 			"Archivable": {
 				"type": "bool",
@@ -3996,31 +4207,35 @@
 			"Backward": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"ClampMagnitudeToOne": {
 				"type": "bool",
 				"value": true
 			},
+			"DisplayName": {
+				"type": "string",
+				"value": ""
+			},
 			"Down": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"Forward": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"KeyCode": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"Left": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"PointerIndex": {
 				"type": "number",
@@ -4033,7 +4248,7 @@
 			"PrimaryModifier": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"ReleasedThreshold": {
 				"type": "number",
@@ -4046,7 +4261,7 @@
 			"Right": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"Scale": {
 				"type": "number",
@@ -4055,7 +4270,7 @@
 			"SecondaryModifier": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"Type": {
 				"enumType": "InputBindingType",
@@ -4065,7 +4280,7 @@
 			"Up": {
 				"enumType": "KeyCode",
 				"type": "Enum",
-				"value": "Unknown"
+				"value": "None"
 			},
 			"Vector2Scale": {
 				"type": "Vector2",
@@ -4119,10 +4334,6 @@
 			}
 		},
 		"LineForce": {
-			"ApplyAtCenterOfMass": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -4130,6 +4341,14 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
+			"ApplyAtCenterOfMass": {
+				"type": "bool",
+				"value": false
 			},
 			"InverseSquareLaw": {
 				"type": "bool",
@@ -4146,45 +4365,16 @@
 			"ReactionForceEnabled": {
 				"type": "bool",
 				"value": false
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"LineHandleAdornment": {
-			"AdornCullingMode": {
-				"enumType": "AdornCullingMode",
-				"type": "Enum",
-				"value": "Automatic"
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
 			"Color3": {
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
-			},
-			"Length": {
-				"type": "number",
-				"value": 5
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"Thickness": {
-				"type": "number",
-				"value": 1
 			},
 			"Transparency": {
 				"type": "number",
@@ -4194,9 +4384,34 @@
 				"type": "bool",
 				"value": true
 			},
+			"AdornCullingMode": {
+				"enumType": "AdornCullingMode",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
 			"ZIndex": {
 				"type": "number",
 				"value": -1
+			},
+			"Length": {
+				"type": "number",
+				"value": 5
+			},
+			"Thickness": {
+				"type": "number",
+				"value": 1
 			}
 		},
 		"LinearVelocity": {
@@ -4207,6 +4422,10 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
 			},
 			"ForceLimitMode": {
 				"enumType": "ForceLimitMode",
@@ -4266,10 +4485,6 @@
 				"enumType": "VelocityConstraintMode",
 				"type": "Enum",
 				"value": "Vector"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"LocalizationTable": {
@@ -4302,14 +4517,14 @@
 			}
 		},
 		"MaterialVariant": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
 			"AlphaMode": {
 				"enumType": "AlphaMode",
 				"type": "Enum",
 				"value": "Opaque"
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
 			},
 			"BaseMaterial": {
 				"enumType": "Material",
@@ -4335,13 +4550,13 @@
 			}
 		},
 		"MeshPart": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -4415,10 +4630,6 @@
 				"type": "Color3",
 				"value": [163, 162, 165]
 			},
-			"DoubleSided": {
-				"type": "bool",
-				"value": false
-			},
 			"EnableFluidForces": {
 				"type": "bool",
 				"value": true
@@ -4484,11 +4695,6 @@
 				"type": "number",
 				"value": 0
 			},
-			"RenderFidelity": {
-				"enumType": "RenderFidelity",
-				"type": "Enum",
-				"value": "Automatic"
-			},
 			"RightParamA": {
 				"type": "number",
 				"value": -0.5
@@ -4544,6 +4750,15 @@
 			"Velocity": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
+			},
+			"DoubleSided": {
+				"type": "bool",
+				"value": false
+			},
+			"RenderFidelity": {
+				"enumType": "RenderFidelity",
+				"type": "Enum",
+				"value": "Automatic"
 			}
 		},
 		"Model": {
@@ -4575,13 +4790,13 @@
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"DesiredAngle": {
-				"type": "number",
-				"value": 0
-			},
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"DesiredAngle": {
+				"type": "number",
+				"value": 0
 			},
 			"MaxVelocity": {
 				"type": "number",
@@ -4601,13 +4816,13 @@
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"DesiredAngle": {
-				"type": "number",
-				"value": 0
-			},
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"DesiredAngle": {
+				"type": "number",
+				"value": 0
 			},
 			"MaxVelocity": {
 				"type": "number",
@@ -4671,13 +4886,13 @@
 				"type": "Enum",
 				"value": "Linear"
 			},
-			"Value": {
-				"type": "number",
-				"value": 0
-			},
 			"Weight": {
 				"type": "number",
 				"value": 1
+			},
+			"Value": {
+				"type": "number",
+				"value": 0
 			}
 		},
 		"NumberValue": {
@@ -4707,13 +4922,13 @@
 			}
 		},
 		"Part": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -4791,11 +5006,6 @@
 				"type": "bool",
 				"value": true
 			},
-			"FormFactor": {
-				"enumType": "FormFactor",
-				"type": "Enum",
-				"value": "Brick"
-			},
 			"FrontParamA": {
 				"type": "number",
 				"value": -0.5
@@ -4883,11 +5093,6 @@
 				"type": "Vector3",
 				"value": [0, 0, 0]
 			},
-			"Shape": {
-				"enumType": "PartType",
-				"type": "Enum",
-				"value": "Block"
-			},
 			"Size": {
 				"type": "Vector3",
 				"value": [4, 1.2000000476837158, 2]
@@ -4917,16 +5122,26 @@
 			"Velocity": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
+			},
+			"FormFactor": {
+				"enumType": "FormFactor",
+				"type": "Enum",
+				"value": "Brick"
+			},
+			"Shape": {
+				"enumType": "PartType",
+				"type": "Enum",
+				"value": "Block"
 			}
 		},
 		"ParticleEmitter": {
-			"Acceleration": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Acceleration": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
 			},
 			"Brightness": {
 				"type": "number",
@@ -5071,13 +5286,13 @@
 				"type": "bool",
 				"value": true
 			},
-			"Octave": {
-				"type": "number",
-				"value": 1.25
-			},
 			"Priority": {
 				"type": "number",
 				"value": 0
+			},
+			"Octave": {
+				"type": "number",
+				"value": 1.25
 			}
 		},
 		"PlaneConstraint": {
@@ -5092,12 +5307,6 @@
 			"Visible": {
 				"type": "bool",
 				"value": false
-			}
-		},
-		"PluginAction": {
-			"Archivable": {
-				"type": "bool",
-				"value": true
 			}
 		},
 		"PointLight": {
@@ -5117,21 +5326,16 @@
 				"type": "bool",
 				"value": true
 			},
-			"Range": {
-				"type": "number",
-				"value": 8
-			},
 			"Shadows": {
 				"type": "bool",
 				"value": false
+			},
+			"Range": {
+				"type": "number",
+				"value": 8
 			}
 		},
 		"PrismaticConstraint": {
-			"ActuatorType": {
-				"enumType": "ActuatorType",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -5139,6 +5343,15 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
+			"ActuatorType": {
+				"enumType": "ActuatorType",
+				"type": "Enum",
+				"value": "None"
 			},
 			"LimitsEnabled": {
 				"type": "bool",
@@ -5191,10 +5404,6 @@
 			"Velocity": {
 				"type": "number",
 				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"ProceduralModel": {
@@ -5218,13 +5427,13 @@
 			}
 		},
 		"ProximityPrompt": {
-			"ActionText": {
-				"type": "string",
-				"value": "Interact"
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"ActionText": {
+				"type": "string",
+				"value": "Interact"
 			},
 			"AutoLocalize": {
 				"type": "bool",
@@ -5284,6 +5493,22 @@
 			}
 		},
 		"PyramidHandleAdornment": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Color3": {
+				"type": "Color3",
+				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			},
+			"Transparency": {
+				"type": "number",
+				"value": 0
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
 			"AdornCullingMode": {
 				"enumType": "AdornCullingMode",
 				"type": "Enum",
@@ -5293,17 +5518,17 @@
 				"type": "bool",
 				"value": false
 			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
 			"CFrame": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"Color3": {
-				"type": "Color3",
-				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": -1
 			},
 			"Height": {
 				"type": "number",
@@ -5321,22 +5546,6 @@
 			"Size": {
 				"type": "number",
 				"value": 1
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"Transparency": {
-				"type": "number",
-				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": -1
 			}
 		},
 		"RayValue": {
@@ -5357,69 +5566,18 @@
 				"value": true
 			}
 		},
-		"RenderingTest": {
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
-			"ComparisonDiffThreshold": {
-				"type": "number",
-				"value": 10
-			},
-			"ComparisonMethod": {
-				"enumType": "RenderingTestComparisonMethod",
-				"type": "Enum",
-				"value": "psnr"
-			},
-			"ComparisonPsnrThreshold": {
-				"type": "number",
-				"value": 50
-			},
-			"Description": {
-				"type": "string",
-				"value": ""
-			},
-			"FieldOfView": {
-				"type": "number",
-				"value": 70
-			},
-			"PerfTest": {
-				"type": "bool",
-				"value": false
-			},
-			"QualityAuto": {
-				"type": "bool",
-				"value": false
-			},
-			"QualityLevel": {
-				"type": "number",
-				"value": 21
-			},
-			"RenderingTestFrameCount": {
-				"type": "number",
-				"value": 20
-			},
-			"ShouldSkip": {
-				"type": "bool",
-				"value": false
-			},
-			"Ticket": {
-				"type": "string",
-				"value": ""
-			},
-			"Timeout": {
-				"type": "number",
-				"value": 30
-			}
-		},
 		"ReverbSoundEffect": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Priority": {
+				"type": "number",
+				"value": 0
 			},
 			"DecayTime": {
 				"type": "number",
@@ -5436,14 +5594,6 @@
 			"DryLevel": {
 				"type": "number",
 				"value": -6
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
-			"Priority": {
-				"type": "number",
-				"value": 0
 			},
 			"WetLevel": {
 				"type": "number",
@@ -5519,6 +5669,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"Length": {
 				"type": "number",
 				"value": 5
@@ -5538,10 +5692,6 @@
 			"Thickness": {
 				"type": "number",
 				"value": 0.10000000149011612
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"RopeConstraint": {
@@ -5552,6 +5702,10 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
 			},
 			"Length": {
 				"type": "number",
@@ -5564,10 +5718,6 @@
 			"Thickness": {
 				"type": "number",
 				"value": 0.10000000149011612
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			},
 			"WinchEnabled": {
 				"type": "bool",
@@ -5613,10 +5763,6 @@
 				"type": "bool",
 				"value": true
 			},
-			"BaseAngle": {
-				"type": "number",
-				"value": 0
-			},
 			"C0": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -5628,6 +5774,10 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"BaseAngle": {
+				"type": "number",
+				"value": 0
 			}
 		},
 		"RotateV": {
@@ -5635,10 +5785,6 @@
 				"type": "bool",
 				"value": true
 			},
-			"BaseAngle": {
-				"type": "number",
-				"value": 0
-			},
 			"C0": {
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -5650,6 +5796,10 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"BaseAngle": {
+				"type": "number",
+				"value": 0
 			}
 		},
 		"RotationCurve": {
@@ -5666,32 +5816,6 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
-			},
-			"ClipToDeviceSafeArea": {
-				"type": "bool",
-				"value": true
-			},
-			"DisplayOrder": {
-				"type": "number",
-				"value": 0
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
-			"ResetOnSpawn": {
-				"type": "bool",
-				"value": true
-			},
-			"SafeAreaCompatibility": {
-				"enumType": "SafeAreaCompatibility",
-				"type": "Enum",
-				"value": "FullscreenExtension"
-			},
-			"ScreenInsets": {
-				"enumType": "ScreenInsets",
-				"type": "Enum",
-				"value": "CoreUISafeInsets"
 			},
 			"SelectionBehaviorDown": {
 				"enumType": "SelectionBehavior",
@@ -5717,21 +5841,39 @@
 				"type": "bool",
 				"value": false
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"ResetOnSpawn": {
+				"type": "bool",
+				"value": true
+			},
 			"ZIndexBehavior": {
 				"enumType": "ZIndexBehavior",
 				"type": "Enum",
 				"value": "Global"
+			},
+			"ClipToDeviceSafeArea": {
+				"type": "bool",
+				"value": true
+			},
+			"DisplayOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"SafeAreaCompatibility": {
+				"enumType": "SafeAreaCompatibility",
+				"type": "Enum",
+				"value": "FullscreenExtension"
+			},
+			"ScreenInsets": {
+				"enumType": "ScreenInsets",
+				"type": "Enum",
+				"value": "CoreUISafeInsets"
 			}
 		},
 		"ScrollingFrame": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -5740,10 +5882,37 @@
 				"type": "bool",
 				"value": true
 			},
-			"AutomaticCanvasSize": {
-				"enumType": "AutomaticSize",
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
 				"type": "Enum",
-				"value": "None"
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": true
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -5771,14 +5940,6 @@
 				"type": "number",
 				"value": 1
 			},
-			"CanvasPosition": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
-			"CanvasSize": {
-				"type": "UDim2",
-				"value": [0, 0, 2, 0]
-			},
 			"ClipsDescendants": {
 				"type": "bool",
 				"value": true
@@ -5786,21 +5947,6 @@
 			"Draggable": {
 				"type": "bool",
 				"value": false
-			},
-			"ElasticBehavior": {
-				"enumType": "ElasticBehavior",
-				"type": "Enum",
-				"value": "WhenScrollable"
-			},
-			"HorizontalScrollBarInset": {
-				"enumType": "ScrollBarInset",
-				"type": "Enum",
-				"value": "None"
-			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
 			},
 			"Interactable": {
 				"type": "bool",
@@ -5817,6 +5963,54 @@
 			"Rotation": {
 				"type": "number",
 				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"AutomaticCanvasSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"CanvasPosition": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"CanvasSize": {
+				"type": "UDim2",
+				"value": [0, 0, 2, 0]
+			},
+			"ElasticBehavior": {
+				"enumType": "ElasticBehavior",
+				"type": "Enum",
+				"value": "WhenScrollable"
+			},
+			"HorizontalScrollBarInset": {
+				"enumType": "ScrollBarInset",
+				"type": "Enum",
+				"value": "None"
 			},
 			"ScrollBarImageColor3": {
 				"type": "Color3",
@@ -5839,47 +6033,6 @@
 				"type": "bool",
 				"value": true
 			},
-			"Selectable": {
-				"type": "bool",
-				"value": true
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
-				"type": "bool",
-				"value": true
-			},
-			"SelectionOrder": {
-				"type": "number",
-				"value": 0
-			},
-			"Size": {
-				"type": "UDim2",
-				"value": [0, 0, 0, 0]
-			},
-			"SizeConstraint": {
-				"enumType": "SizeConstraint",
-				"type": "Enum",
-				"value": "RelativeXY"
-			},
 			"VerticalScrollBarInset": {
 				"enumType": "ScrollBarInset",
 				"type": "Enum",
@@ -5889,24 +6042,16 @@
 				"enumType": "VerticalScrollBarPosition",
 				"type": "Enum",
 				"value": "Right"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
 		"Seat": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -5980,18 +6125,9 @@
 				"type": "Color3",
 				"value": [163, 162, 165]
 			},
-			"Disabled": {
-				"type": "bool",
-				"value": false
-			},
 			"EnableFluidForces": {
 				"type": "bool",
 				"value": true
-			},
-			"FormFactor": {
-				"enumType": "FormFactor",
-				"type": "Enum",
-				"value": "Brick"
 			},
 			"FrontParamA": {
 				"type": "number",
@@ -6080,11 +6216,6 @@
 				"type": "Vector3",
 				"value": [0, 0, 0]
 			},
-			"Shape": {
-				"enumType": "PartType",
-				"type": "Enum",
-				"value": "Block"
-			},
 			"Size": {
 				"type": "Vector3",
 				"value": [4, 1.2000000476837158, 2]
@@ -6114,6 +6245,20 @@
 			"Velocity": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
+			},
+			"FormFactor": {
+				"enumType": "FormFactor",
+				"type": "Enum",
+				"value": "Brick"
+			},
+			"Shape": {
+				"enumType": "PartType",
+				"type": "Enum",
+				"value": "Block"
+			},
+			"Disabled": {
+				"type": "bool",
+				"value": false
 			}
 		},
 		"SelectionBox": {
@@ -6124,6 +6269,14 @@
 			"Color3": {
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
+			},
+			"Transparency": {
+				"type": "number",
+				"value": 0
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
 			},
 			"LineThickness": {
 				"type": "number",
@@ -6136,14 +6289,6 @@
 			"SurfaceTransparency": {
 				"type": "number",
 				"value": 1
-			},
-			"Transparency": {
-				"type": "number",
-				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
 			}
 		},
 		"SelectionPartLasso": {
@@ -6173,10 +6318,6 @@
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
 			},
-			"Point": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
 			"Transparency": {
 				"type": "number",
 				"value": 0
@@ -6184,6 +6325,10 @@
 			"Visible": {
 				"type": "bool",
 				"value": true
+			},
+			"Point": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
 			}
 		},
 		"SelectionSphere": {
@@ -6195,14 +6340,6 @@
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
 			},
-			"SurfaceColor3": {
-				"type": "Color3",
-				"value": [0.05098039656877518, 0.4117647409439087, 0.6745098233222961]
-			},
-			"SurfaceTransparency": {
-				"type": "number",
-				"value": 1
-			},
 			"Transparency": {
 				"type": "number",
 				"value": 0
@@ -6210,6 +6347,14 @@
 			"Visible": {
 				"type": "bool",
 				"value": true
+			},
+			"SurfaceColor3": {
+				"type": "Color3",
+				"value": [0.05098039656877518, 0.4117647409439087, 0.6745098233222961]
+			},
+			"SurfaceTransparency": {
+				"type": "number",
+				"value": 1
 			}
 		},
 		"Shirt": {
@@ -6289,11 +6434,11 @@
 			}
 		},
 		"Sound": {
-			"AcousticSimulationEnabled": {
+			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"Archivable": {
+			"AcousticSimulationEnabled": {
 				"type": "bool",
 				"value": true
 			},
@@ -6372,11 +6517,6 @@
 				"type": "bool",
 				"value": true
 			},
-			"MeshType": {
-				"enumType": "MeshType",
-				"type": "Enum",
-				"value": "Head"
-			},
 			"Offset": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
@@ -6388,42 +6528,21 @@
 			"VertexColor": {
 				"type": "Vector3",
 				"value": [1, 1, 1]
+			},
+			"MeshType": {
+				"enumType": "MeshType",
+				"type": "Enum",
+				"value": "Head"
 			}
 		},
 		"SphereHandleAdornment": {
-			"AdornCullingMode": {
-				"enumType": "AdornCullingMode",
-				"type": "Enum",
-				"value": "Automatic"
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
 			"Color3": {
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
-			},
-			"Radius": {
-				"type": "number",
-				"value": 1
-			},
-			"Shading": {
-				"enumType": "AdornShading",
-				"type": "Enum",
-				"value": "Default"
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
 			},
 			"Transparency": {
 				"type": "number",
@@ -6433,16 +6552,38 @@
 				"type": "bool",
 				"value": true
 			},
+			"AdornCullingMode": {
+				"enumType": "AdornCullingMode",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
 			"ZIndex": {
 				"type": "number",
 				"value": -1
+			},
+			"Radius": {
+				"type": "number",
+				"value": 1
+			},
+			"Shading": {
+				"enumType": "AdornShading",
+				"type": "Enum",
+				"value": "Default"
 			}
 		},
 		"SpotLight": {
-			"Angle": {
-				"type": "number",
-				"value": 90
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -6459,6 +6600,14 @@
 				"type": "bool",
 				"value": true
 			},
+			"Shadows": {
+				"type": "bool",
+				"value": false
+			},
+			"Angle": {
+				"type": "number",
+				"value": 90
+			},
 			"Face": {
 				"enumType": "NormalId",
 				"type": "Enum",
@@ -6467,16 +6616,20 @@
 			"Range": {
 				"type": "number",
 				"value": 16
-			},
-			"Shadows": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"SpringConstraint": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
 			},
 			"Coils": {
 				"type": "number",
@@ -6485,10 +6638,6 @@
 			"Damping": {
 				"type": "number",
 				"value": 0
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
 			},
 			"FreeLength": {
 				"type": "number",
@@ -6521,10 +6670,6 @@
 			"Thickness": {
 				"type": "number",
 				"value": 0.10000000149011612
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"StringValue": {
@@ -6598,14 +6743,14 @@
 			}
 		},
 		"SurfaceAppearance": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
 			"AlphaMode": {
 				"enumType": "AlphaMode",
 				"type": "Enum",
 				"value": "Overlay"
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
 			},
 			"Color": {
 				"type": "Color3",
@@ -6626,56 +6771,11 @@
 			}
 		},
 		"SurfaceGui": {
-			"Active": {
-				"type": "bool",
-				"value": true
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
 			"AutoLocalize": {
-				"type": "bool",
-				"value": true
-			},
-			"Brightness": {
-				"type": "number",
-				"value": 1
-			},
-			"CanvasSize": {
-				"type": "Vector2",
-				"value": [800, 600]
-			},
-			"ClipsDescendants": {
-				"type": "bool",
-				"value": false
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
-			"Face": {
-				"enumType": "NormalId",
-				"type": "Enum",
-				"value": "Front"
-			},
-			"LightInfluence": {
-				"type": "number",
-				"value": 0
-			},
-			"MaxDistance": {
-				"type": "number",
-				"value": 0
-			},
-			"PixelsPerStud": {
-				"type": "number",
-				"value": 50
-			},
-			"ResetOnSpawn": {
 				"type": "bool",
 				"value": true
 			},
@@ -6703,6 +6803,56 @@
 				"type": "bool",
 				"value": false
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"ResetOnSpawn": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndexBehavior": {
+				"enumType": "ZIndexBehavior",
+				"type": "Enum",
+				"value": "Global"
+			},
+			"Active": {
+				"type": "bool",
+				"value": true
+			},
+			"Face": {
+				"enumType": "NormalId",
+				"type": "Enum",
+				"value": "Front"
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"Brightness": {
+				"type": "number",
+				"value": 1
+			},
+			"CanvasSize": {
+				"type": "Vector2",
+				"value": [800, 600]
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"LightInfluence": {
+				"type": "number",
+				"value": 0
+			},
+			"MaxDistance": {
+				"type": "number",
+				"value": 0
+			},
+			"PixelsPerStud": {
+				"type": "number",
+				"value": 50
+			},
 			"SizingMode": {
 				"enumType": "SurfaceGuiSizingMode",
 				"type": "Enum",
@@ -6712,21 +6862,12 @@
 				"type": "number",
 				"value": 0
 			},
-			"ZIndexBehavior": {
-				"enumType": "ZIndexBehavior",
-				"type": "Enum",
-				"value": "Global"
-			},
 			"ZOffset": {
 				"type": "number",
 				"value": 0
 			}
 		},
 		"SurfaceLight": {
-			"Angle": {
-				"type": "number",
-				"value": 90
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -6743,6 +6884,14 @@
 				"type": "bool",
 				"value": true
 			},
+			"Shadows": {
+				"type": "bool",
+				"value": false
+			},
+			"Angle": {
+				"type": "number",
+				"value": 90
+			},
 			"Face": {
 				"enumType": "NormalId",
 				"type": "Enum",
@@ -6751,21 +6900,9 @@
 			"Range": {
 				"type": "number",
 				"value": 16
-			},
-			"Shadows": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"TextBox": {
-			"Active": {
-				"type": "bool",
-				"value": true
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -6773,6 +6910,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": true
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -6800,10 +6969,6 @@
 				"type": "number",
 				"value": 1
 			},
-			"ClearTextOnFocus": {
-				"type": "bool",
-				"value": true
-			},
 			"ClipsDescendants": {
 				"type": "bool",
 				"value": false
@@ -6812,11 +6977,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -6824,6 +6984,43 @@
 			"LayoutOrder": {
 				"type": "number",
 				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"ClearTextOnFocus": {
+				"type": "bool",
+				"value": true
 			},
 			"LineHeight": {
 				"type": "number",
@@ -6849,62 +7046,13 @@
 				"type": "string",
 				"value": ""
 			},
-			"Position": {
-				"type": "UDim2",
-				"value": [0, 0, 0, 0]
-			},
 			"RichText": {
 				"type": "bool",
 				"value": false
 			},
-			"Rotation": {
-				"type": "number",
-				"value": 0
-			},
-			"Selectable": {
-				"type": "bool",
-				"value": true
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionOrder": {
-				"type": "number",
-				"value": 0
-			},
 			"ShowNativeInput": {
 				"type": "bool",
 				"value": true
-			},
-			"Size": {
-				"type": "UDim2",
-				"value": [0, 0, 0, 0]
-			},
-			"SizeConstraint": {
-				"enumType": "SizeConstraint",
-				"type": "Enum",
-				"value": "RelativeXY"
 			},
 			"Text": {
 				"type": "string",
@@ -6961,17 +7109,41 @@
 				"enumType": "TextYAlignment",
 				"type": "Enum",
 				"value": "Center"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
 		"TextButton": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
 			"Active": {
 				"type": "bool",
 				"value": true
@@ -6979,18 +7151,6 @@
 			"AnchorPoint": {
 				"type": "Vector2",
 				"value": [0, 0]
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"AutoButtonColor": {
-				"type": "bool",
-				"value": true
-			},
-			"AutoLocalize": {
-				"type": "bool",
-				"value": true
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -7026,11 +7186,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -7039,29 +7194,9 @@
 				"type": "number",
 				"value": 0
 			},
-			"LineHeight": {
-				"type": "number",
-				"value": 1
-			},
-			"MaxVisibleGraphemes": {
-				"type": "number",
-				"value": -1
-			},
-			"Modal": {
-				"type": "bool",
-				"value": false
-			},
-			"OpenTypeFeatures": {
-				"type": "string",
-				"value": ""
-			},
 			"Position": {
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
-			},
-			"RichText": {
-				"type": "bool",
-				"value": false
 			},
 			"Rotation": {
 				"type": "number",
@@ -7070,34 +7205,6 @@
 			"Selectable": {
 				"type": "bool",
 				"value": true
-			},
-			"Selected": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
-				"type": "bool",
-				"value": false
 			},
 			"SelectionOrder": {
 				"type": "number",
@@ -7112,10 +7219,46 @@
 				"type": "Enum",
 				"value": "RelativeXY"
 			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"AutoButtonColor": {
+				"type": "bool",
+				"value": true
+			},
+			"Modal": {
+				"type": "bool",
+				"value": false
+			},
+			"Selected": {
+				"type": "bool",
+				"value": false
+			},
 			"Style": {
 				"enumType": "ButtonStyle",
 				"type": "Enum",
 				"value": "Custom"
+			},
+			"LineHeight": {
+				"type": "number",
+				"value": 1
+			},
+			"MaxVisibleGraphemes": {
+				"type": "number",
+				"value": -1
+			},
+			"OpenTypeFeatures": {
+				"type": "string",
+				"value": ""
+			},
+			"RichText": {
+				"type": "bool",
+				"value": false
 			},
 			"Text": {
 				"type": "string",
@@ -7168,47 +7311,9 @@
 				"enumType": "TextYAlignment",
 				"type": "Enum",
 				"value": "Center"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
-		"TextGenerator": {
-			"Archivable": {
-				"type": "bool",
-				"value": true
-			},
-			"Seed": {
-				"type": "number",
-				"value": 0
-			},
-			"SystemPrompt": {
-				"type": "string",
-				"value": ""
-			},
-			"Temperature": {
-				"type": "number",
-				"value": 0.699999988079071
-			},
-			"TopP": {
-				"type": "number",
-				"value": 0.8999999761581421
-			}
-		},
-		"TextLabel": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
+		"TextChannelWindow": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -7216,6 +7321,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -7251,11 +7388,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -7264,25 +7396,9 @@
 				"type": "number",
 				"value": 0
 			},
-			"LineHeight": {
-				"type": "number",
-				"value": 1
-			},
-			"MaxVisibleGraphemes": {
-				"type": "number",
-				"value": -1
-			},
-			"OpenTypeFeatures": {
-				"type": "string",
-				"value": ""
-			},
 			"Position": {
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
-			},
-			"RichText": {
-				"type": "bool",
-				"value": false
 			},
 			"Rotation": {
 				"type": "number",
@@ -7291,6 +7407,63 @@
 			"Selectable": {
 				"type": "bool",
 				"value": false
+			},
+			"SelectionOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Size": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"SizeConstraint": {
+				"enumType": "SizeConstraint",
+				"type": "Enum",
+				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"UseDefaultFont": {
+				"type": "bool",
+				"value": true
+			}
+		},
+		"TextGenerator": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"Seed": {
+				"type": "number",
+				"value": 0
+			},
+			"SystemPrompt": {
+				"type": "string",
+				"value": ""
+			},
+			"Temperature": {
+				"type": "number",
+				"value": 0.699999988079071
+			},
+			"TopP": {
+				"type": "number",
+				"value": 0.8999999761581421
+			}
+		},
+		"TextLabel": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"AutoLocalize": {
+				"type": "bool",
+				"value": true
 			},
 			"SelectionBehaviorDown": {
 				"enumType": "SelectionBehavior",
@@ -7316,6 +7489,68 @@
 				"type": "bool",
 				"value": false
 			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
+			},
+			"AutomaticSize": {
+				"enumType": "AutomaticSize",
+				"type": "Enum",
+				"value": "None"
+			},
+			"BackgroundColor3": {
+				"type": "Color3",
+				"value": [0.6392157077789307, 0.6352941393852234, 0.6470588445663452]
+			},
+			"BackgroundTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"BorderColor3": {
+				"type": "Color3",
+				"value": [0.10588235408067703, 0.16470588743686676, 0.2078431397676468]
+			},
+			"BorderMode": {
+				"enumType": "BorderMode",
+				"type": "Enum",
+				"value": "Outline"
+			},
+			"BorderSizePixel": {
+				"type": "number",
+				"value": 1
+			},
+			"ClipsDescendants": {
+				"type": "bool",
+				"value": false
+			},
+			"Draggable": {
+				"type": "bool",
+				"value": false
+			},
+			"Interactable": {
+				"type": "bool",
+				"value": true
+			},
+			"LayoutOrder": {
+				"type": "number",
+				"value": 0
+			},
+			"Position": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
+			},
+			"Rotation": {
+				"type": "number",
+				"value": 0
+			},
+			"Selectable": {
+				"type": "bool",
+				"value": false
+			},
 			"SelectionOrder": {
 				"type": "number",
 				"value": 0
@@ -7328,6 +7563,30 @@
 				"enumType": "SizeConstraint",
 				"type": "Enum",
 				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"LineHeight": {
+				"type": "number",
+				"value": 1
+			},
+			"MaxVisibleGraphemes": {
+				"type": "number",
+				"value": -1
+			},
+			"OpenTypeFeatures": {
+				"type": "string",
+				"value": ""
+			},
+			"RichText": {
+				"type": "bool",
+				"value": false
 			},
 			"Text": {
 				"type": "string",
@@ -7380,20 +7639,17 @@
 				"enumType": "TextYAlignment",
 				"type": "Enum",
 				"value": "Center"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
 		"Texture": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Face": {
+				"enumType": "NormalId",
+				"type": "Enum",
+				"value": "Front"
 			},
 			"AutoLocalize": {
 				"type": "bool",
@@ -7403,30 +7659,17 @@
 				"type": "Color3",
 				"value": [1, 1, 1]
 			},
-			"Face": {
-				"enumType": "NormalId",
-				"type": "Enum",
-				"value": "Front"
-			},
-			"OffsetStudsU": {
+			"EmissiveStrength": {
 				"type": "number",
-				"value": 0
+				"value": 1
 			},
-			"OffsetStudsV": {
-				"type": "number",
-				"value": 0
+			"EmissiveTint": {
+				"type": "Color3",
+				"value": [1, 1, 1]
 			},
 			"Rotation": {
 				"type": "number",
 				"value": 0
-			},
-			"StudsPerTileU": {
-				"type": "number",
-				"value": 2
-			},
-			"StudsPerTileV": {
-				"type": "number",
-				"value": 2
 			},
 			"Transparency": {
 				"type": "number",
@@ -7443,12 +7686,38 @@
 			"ZIndex": {
 				"type": "number",
 				"value": 1
+			},
+			"OffsetStudsU": {
+				"type": "number",
+				"value": 0
+			},
+			"OffsetStudsV": {
+				"type": "number",
+				"value": 0
+			},
+			"StudsPerTileU": {
+				"type": "number",
+				"value": 2
+			},
+			"StudsPerTileV": {
+				"type": "number",
+				"value": 2
 			}
 		},
 		"Tool": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"LevelOfDetail": {
+				"enumType": "ModelLevelOfDetail",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"ModelStreamingMode": {
+				"enumType": "ModelStreamingMode",
+				"type": "Enum",
+				"value": "Default"
 			},
 			"CanBeDropped": {
 				"type": "bool",
@@ -7462,19 +7731,9 @@
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"LevelOfDetail": {
-				"enumType": "ModelLevelOfDetail",
-				"type": "Enum",
-				"value": "Automatic"
-			},
 			"ManualActivationOnly": {
 				"type": "bool",
 				"value": false
-			},
-			"ModelStreamingMode": {
-				"enumType": "ModelStreamingMode",
-				"type": "Enum",
-				"value": "Default"
 			},
 			"RequiresHandle": {
 				"type": "bool",
@@ -7494,6 +7753,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"RelativeTo": {
 				"enumType": "ActuatorRelativeTo",
 				"type": "Enum",
@@ -7502,16 +7765,20 @@
 			"Torque": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"TorsionSpringConstraint": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
 			},
 			"Coils": {
 				"type": "number",
@@ -7520,10 +7787,6 @@
 			"Damping": {
 				"type": "number",
 				"value": 0.009999999776482582
-			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
 			},
 			"LimitEnabled": {
 				"type": "bool",
@@ -7552,10 +7815,6 @@
 			"Stiffness": {
 				"type": "number",
 				"value": 100
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"Trail": {
@@ -7610,6 +7869,14 @@
 				"type": "bool",
 				"value": true
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
+			"Priority": {
+				"type": "number",
+				"value": 0
+			},
 			"Depth": {
 				"type": "number",
 				"value": 1
@@ -7618,27 +7885,19 @@
 				"type": "number",
 				"value": 0.5
 			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
 			"Frequency": {
 				"type": "number",
 				"value": 5
-			},
-			"Priority": {
-				"type": "number",
-				"value": 0
 			}
 		},
 		"TrussPart": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -8013,22 +8272,10 @@
 				"type": "bool",
 				"value": true
 			},
-			"CellPadding": {
-				"type": "UDim2",
-				"value": [0, 5, 0, 5]
-			},
-			"CellSize": {
-				"type": "UDim2",
-				"value": [0, 100, 0, 100]
-			},
 			"FillDirection": {
 				"enumType": "FillDirection",
 				"type": "Enum",
 				"value": "Horizontal"
-			},
-			"FillDirectionMaxCells": {
-				"type": "number",
-				"value": 0
 			},
 			"HorizontalAlignment": {
 				"enumType": "HorizontalAlignment",
@@ -8040,15 +8287,27 @@
 				"type": "Enum",
 				"value": "Name"
 			},
-			"StartCorner": {
-				"enumType": "StartCorner",
-				"type": "Enum",
-				"value": "TopLeft"
-			},
 			"VerticalAlignment": {
 				"enumType": "VerticalAlignment",
 				"type": "Enum",
 				"value": "Top"
+			},
+			"CellPadding": {
+				"type": "UDim2",
+				"value": [0, 5, 0, 5]
+			},
+			"CellSize": {
+				"type": "UDim2",
+				"value": [0, 100, 0, 100]
+			},
+			"FillDirectionMaxCells": {
+				"type": "number",
+				"value": 0
+			},
+			"StartCorner": {
+				"enumType": "StartCorner",
+				"type": "Enum",
+				"value": "TopLeft"
 			}
 		},
 		"UIListLayout": {
@@ -8066,6 +8325,16 @@
 				"type": "Enum",
 				"value": "Left"
 			},
+			"SortOrder": {
+				"enumType": "SortOrder",
+				"type": "Enum",
+				"value": "Name"
+			},
+			"VerticalAlignment": {
+				"enumType": "VerticalAlignment",
+				"type": "Enum",
+				"value": "Top"
+			},
 			"HorizontalFlex": {
 				"enumType": "UIFlexAlignment",
 				"type": "Enum",
@@ -8079,16 +8348,6 @@
 			"Padding": {
 				"type": "UDim",
 				"value": [0, 0]
-			},
-			"SortOrder": {
-				"enumType": "SortOrder",
-				"type": "Enum",
-				"value": "Name"
-			},
-			"VerticalAlignment": {
-				"enumType": "VerticalAlignment",
-				"type": "Enum",
-				"value": "Top"
 			},
 			"VerticalFlex": {
 				"enumType": "UIFlexAlignment",
@@ -8123,11 +8382,31 @@
 			}
 		},
 		"UIPageLayout": {
-			"Animated": {
+			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"Archivable": {
+			"FillDirection": {
+				"enumType": "FillDirection",
+				"type": "Enum",
+				"value": "Horizontal"
+			},
+			"HorizontalAlignment": {
+				"enumType": "HorizontalAlignment",
+				"type": "Enum",
+				"value": "Left"
+			},
+			"SortOrder": {
+				"enumType": "SortOrder",
+				"type": "Enum",
+				"value": "Name"
+			},
+			"VerticalAlignment": {
+				"enumType": "VerticalAlignment",
+				"type": "Enum",
+				"value": "Top"
+			},
+			"Animated": {
 				"type": "bool",
 				"value": true
 			},
@@ -8145,19 +8424,9 @@
 				"type": "Enum",
 				"value": "Back"
 			},
-			"FillDirection": {
-				"enumType": "FillDirection",
-				"type": "Enum",
-				"value": "Horizontal"
-			},
 			"GamepadInputEnabled": {
 				"type": "bool",
 				"value": true
-			},
-			"HorizontalAlignment": {
-				"enumType": "HorizontalAlignment",
-				"type": "Enum",
-				"value": "Left"
 			},
 			"Padding": {
 				"type": "UDim",
@@ -8167,11 +8436,6 @@
 				"type": "bool",
 				"value": true
 			},
-			"SortOrder": {
-				"enumType": "SortOrder",
-				"type": "Enum",
-				"value": "Name"
-			},
 			"TouchInputEnabled": {
 				"type": "bool",
 				"value": true
@@ -8179,11 +8443,6 @@
 			"TweenTime": {
 				"type": "number",
 				"value": 1
-			},
-			"VerticalAlignment": {
-				"enumType": "VerticalAlignment",
-				"type": "Enum",
-				"value": "Top"
 			}
 		},
 		"UIScale": {
@@ -8213,9 +8472,22 @@
 				"type": "bool",
 				"value": true
 			},
+			"Inset": {
+				"type": "bool",
+				"value": false
+			},
+			"Mode": {
+				"enumType": "ApplyShadowMode",
+				"type": "Enum",
+				"value": "Shape"
+			},
 			"Offset": {
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
+			},
+			"ShowBehindParent": {
+				"type": "bool",
+				"value": true
 			},
 			"Spread": {
 				"type": "UDim2",
@@ -8245,14 +8517,14 @@
 			}
 		},
 		"UIStroke": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
 			"ApplyStrokeMode": {
 				"enumType": "ApplyStrokeMode",
 				"type": "Enum",
 				"value": "Contextual"
-			},
-			"Archivable": {
-				"type": "bool",
-				"value": true
 			},
 			"BorderOffset": {
 				"type": "UDim",
@@ -8304,27 +8576,10 @@
 				"type": "Enum",
 				"value": "Vertical"
 			},
-			"FillEmptySpaceColumns": {
-				"type": "bool",
-				"value": false
-			},
-			"FillEmptySpaceRows": {
-				"type": "bool",
-				"value": false
-			},
 			"HorizontalAlignment": {
 				"enumType": "HorizontalAlignment",
 				"type": "Enum",
 				"value": "Left"
-			},
-			"MajorAxis": {
-				"enumType": "TableMajorAxis",
-				"type": "Enum",
-				"value": "RowMajor"
-			},
-			"Padding": {
-				"type": "UDim2",
-				"value": [0, 0, 0, 0]
 			},
 			"SortOrder": {
 				"enumType": "SortOrder",
@@ -8335,6 +8590,23 @@
 				"enumType": "VerticalAlignment",
 				"type": "Enum",
 				"value": "Top"
+			},
+			"FillEmptySpaceColumns": {
+				"type": "bool",
+				"value": false
+			},
+			"FillEmptySpaceRows": {
+				"type": "bool",
+				"value": false
+			},
+			"MajorAxis": {
+				"enumType": "TableMajorAxis",
+				"type": "Enum",
+				"value": "RowMajor"
+			},
+			"Padding": {
+				"type": "UDim2",
+				"value": [0, 0, 0, 0]
 			}
 		},
 		"UITextSizeConstraint": {
@@ -8360,6 +8632,10 @@
 				"type": "bool",
 				"value": true
 			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
 			"LimitsEnabled": {
 				"type": "bool",
 				"value": false
@@ -8375,10 +8651,6 @@
 			"Restitution": {
 				"type": "number",
 				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"ValueCurve": {
@@ -8404,10 +8676,6 @@
 			}
 		},
 		"VectorForce": {
-			"ApplyAtCenterOfMass": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -8415,6 +8683,14 @@
 			"Enabled": {
 				"type": "bool",
 				"value": true
+			},
+			"Visible": {
+				"type": "bool",
+				"value": false
+			},
+			"ApplyAtCenterOfMass": {
+				"type": "bool",
+				"value": false
 			},
 			"Force": {
 				"type": "Vector3",
@@ -8424,20 +8700,16 @@
 				"enumType": "ActuatorRelativeTo",
 				"type": "Enum",
 				"value": "Attachment0"
-			},
-			"Visible": {
-				"type": "bool",
-				"value": false
 			}
 		},
 		"VehicleSeat": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -8511,10 +8783,6 @@
 				"type": "Color3",
 				"value": [163, 162, 165]
 			},
-			"Disabled": {
-				"type": "bool",
-				"value": false
-			},
 			"EnableFluidForces": {
 				"type": "bool",
 				"value": true
@@ -8536,10 +8804,6 @@
 				"enumType": "InputType",
 				"type": "Enum",
 				"value": "NoInput"
-			},
-			"HeadsUpDisplay": {
-				"type": "bool",
-				"value": true
 			},
 			"LeftParamA": {
 				"type": "number",
@@ -8575,10 +8839,6 @@
 			"MaterialVariant": {
 				"type": "string",
 				"value": ""
-			},
-			"MaxSpeed": {
-				"type": "number",
-				"value": 25
 			},
 			"PivotOffset": {
 				"type": "CFrame",
@@ -8618,22 +8878,6 @@
 				"type": "Vector3",
 				"value": [4, 1.2000000476837158, 2]
 			},
-			"Steer": {
-				"type": "number",
-				"value": 0
-			},
-			"SteerFloat": {
-				"type": "number",
-				"value": 0
-			},
-			"Throttle": {
-				"type": "number",
-				"value": 0
-			},
-			"ThrottleFloat": {
-				"type": "number",
-				"value": 0
-			},
 			"TopParamA": {
 				"type": "number",
 				"value": -0.5
@@ -8652,21 +8896,49 @@
 				"type": "Enum",
 				"value": "NoInput"
 			},
-			"Torque": {
-				"type": "number",
-				"value": 10
-			},
 			"Transparency": {
 				"type": "number",
 				"value": 0
 			},
-			"TurnSpeed": {
-				"type": "number",
-				"value": 1
-			},
 			"Velocity": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
+			},
+			"Disabled": {
+				"type": "bool",
+				"value": false
+			},
+			"HeadsUpDisplay": {
+				"type": "bool",
+				"value": true
+			},
+			"MaxSpeed": {
+				"type": "number",
+				"value": 25
+			},
+			"Steer": {
+				"type": "number",
+				"value": 0
+			},
+			"SteerFloat": {
+				"type": "number",
+				"value": 0
+			},
+			"Throttle": {
+				"type": "number",
+				"value": 0
+			},
+			"ThrottleFloat": {
+				"type": "number",
+				"value": 0
+			},
+			"Torque": {
+				"type": "number",
+				"value": 10
+			},
+			"TurnSpeed": {
+				"type": "number",
+				"value": 1
 			}
 		},
 		"VelocityMotor": {
@@ -8682,6 +8954,10 @@
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
+			"Enabled": {
+				"type": "bool",
+				"value": true
+			},
 			"CurrentAngle": {
 				"type": "number",
 				"value": 0
@@ -8690,24 +8966,12 @@
 				"type": "number",
 				"value": 0
 			},
-			"Enabled": {
-				"type": "bool",
-				"value": true
-			},
 			"MaxVelocity": {
 				"type": "number",
 				"value": 0
 			}
 		},
 		"VideoDisplay": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -8715,6 +8979,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -8750,11 +9046,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -8767,45 +9058,11 @@
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
 			},
-			"ResampleMode": {
-				"enumType": "ResamplerMode",
-				"type": "Enum",
-				"value": "Default"
-			},
 			"Rotation": {
 				"type": "number",
 				"value": 0
 			},
-			"ScaleType": {
-				"enumType": "ScaleType",
-				"type": "Enum",
-				"value": "Stretch"
-			},
 			"Selectable": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
 				"type": "bool",
 				"value": false
 			},
@@ -8821,6 +9078,24 @@
 				"enumType": "SizeConstraint",
 				"type": "Enum",
 				"value": "RelativeXY"
+			},
+			"Visible": {
+				"type": "bool",
+				"value": true
+			},
+			"ZIndex": {
+				"type": "number",
+				"value": 1
+			},
+			"ResampleMode": {
+				"enumType": "ResamplerMode",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"ScaleType": {
+				"enumType": "ScaleType",
+				"type": "Enum",
+				"value": "Stretch"
 			},
 			"TileSize": {
 				"type": "UDim2",
@@ -8841,25 +9116,9 @@
 			"VideoTransparency": {
 				"type": "number",
 				"value": 0
-			},
-			"Visible": {
-				"type": "bool",
-				"value": true
-			},
-			"ZIndex": {
-				"type": "number",
-				"value": 1
 			}
 		},
 		"VideoFrame": {
-			"Active": {
-				"type": "bool",
-				"value": false
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -8867,6 +9126,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -8902,83 +9193,23 @@
 				"type": "bool",
 				"value": false
 			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
-			},
-			"InternalVideoUsage": {
-				"enumType": "InternalVideoUsage",
-				"type": "Enum",
-				"value": "Default"
 			},
 			"LayoutOrder": {
 				"type": "number",
 				"value": 0
 			},
-			"Looped": {
-				"type": "bool",
-				"value": false
-			},
-			"MaximumResolution": {
-				"enumType": "VideoSampleSize",
-				"type": "Enum",
-				"value": "Full"
-			},
-			"Playing": {
-				"type": "bool",
-				"value": false
-			},
 			"Position": {
 				"type": "UDim2",
 				"value": [0, 0, 0, 0]
-			},
-			"RollOffMaxDistance": {
-				"type": "number",
-				"value": 10000
-			},
-			"RollOffMinDistance": {
-				"type": "number",
-				"value": 1
-			},
-			"RollOffMode": {
-				"enumType": "RollOffMode",
-				"type": "Enum",
-				"value": "Inverse"
 			},
 			"Rotation": {
 				"type": "number",
 				"value": 0
 			},
 			"Selectable": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
 				"type": "bool",
 				"value": false
 			},
@@ -8995,19 +9226,50 @@
 				"type": "Enum",
 				"value": "RelativeXY"
 			},
-			"TimePosition": {
-				"type": "number",
-				"value": 0
-			},
 			"Visible": {
 				"type": "bool",
 				"value": true
 			},
-			"Volume": {
+			"ZIndex": {
 				"type": "number",
 				"value": 1
 			},
-			"ZIndex": {
+			"InternalVideoUsage": {
+				"enumType": "InternalVideoUsage",
+				"type": "Enum",
+				"value": "Default"
+			},
+			"Looped": {
+				"type": "bool",
+				"value": false
+			},
+			"MaximumResolution": {
+				"enumType": "VideoSampleSize",
+				"type": "Enum",
+				"value": "Full"
+			},
+			"Playing": {
+				"type": "bool",
+				"value": false
+			},
+			"RollOffMaxDistance": {
+				"type": "number",
+				"value": 10000
+			},
+			"RollOffMinDistance": {
+				"type": "number",
+				"value": 1
+			},
+			"RollOffMode": {
+				"enumType": "RollOffMode",
+				"type": "Enum",
+				"value": "Inverse"
+			},
+			"TimePosition": {
+				"type": "number",
+				"value": 0
+			},
+			"Volume": {
 				"type": "number",
 				"value": 1
 			}
@@ -9044,19 +9306,50 @@
 				"value": 1
 			}
 		},
-		"ViewportFrame": {
-			"Active": {
+		"ViewportCamera": {
+			"Archivable": {
+				"type": "bool",
+				"value": true
+			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [
+					0, 20, 20, 1, 0, 0, 0, 0.7071068286895752, 0.7071068286895752, 0, -0.7071068286895752,
+					0.7071068286895752
+				]
+			},
+			"CameraType": {
+				"enumType": "CameraType",
+				"type": "Enum",
+				"value": "Fixed"
+			},
+			"FieldOfView": {
+				"type": "number",
+				"value": 70
+			},
+			"FieldOfViewMode": {
+				"enumType": "FieldOfViewMode",
+				"type": "Enum",
+				"value": "Vertical"
+			},
+			"Focus": {
+				"type": "CFrame",
+				"value": [0, 0, -5, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"HeadLocked": {
+				"type": "bool",
+				"value": true
+			},
+			"HeadScale": {
+				"type": "number",
+				"value": 1
+			},
+			"VRTiltAndRollEnabled": {
 				"type": "bool",
 				"value": false
-			},
-			"Ambient": {
-				"type": "Color3",
-				"value": [0.7843137383460999, 0.7843137383460999, 0.7843137383460999]
-			},
-			"AnchorPoint": {
-				"type": "Vector2",
-				"value": [0, 0]
-			},
+			}
+		},
+		"ViewportFrame": {
 			"Archivable": {
 				"type": "bool",
 				"value": true
@@ -9064,6 +9357,38 @@
 			"AutoLocalize": {
 				"type": "bool",
 				"value": true
+			},
+			"SelectionBehaviorDown": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorLeft": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorRight": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionBehaviorUp": {
+				"enumType": "SelectionBehavior",
+				"type": "Enum",
+				"value": "Escape"
+			},
+			"SelectionGroup": {
+				"type": "bool",
+				"value": false
+			},
+			"Active": {
+				"type": "bool",
+				"value": false
+			},
+			"AnchorPoint": {
+				"type": "Vector2",
+				"value": [0, 0]
 			},
 			"AutomaticSize": {
 				"enumType": "AutomaticSize",
@@ -9099,19 +9424,6 @@
 				"type": "bool",
 				"value": false
 			},
-			"ImageColor3": {
-				"type": "Color3",
-				"value": [1, 1, 1]
-			},
-			"ImageTransparency": {
-				"type": "number",
-				"value": 0
-			},
-			"InputSink": {
-				"enumType": "InputSink",
-				"type": "Enum",
-				"value": "None"
-			},
 			"Interactable": {
 				"type": "bool",
 				"value": true
@@ -9119,14 +9431,6 @@
 			"LayoutOrder": {
 				"type": "number",
 				"value": 0
-			},
-			"LightColor": {
-				"type": "Color3",
-				"value": [0.5490196347236633, 0.5490196347236633, 0.5490196347236633]
-			},
-			"LightDirection": {
-				"type": "Vector3",
-				"value": [-1, -1, -1]
 			},
 			"Position": {
 				"type": "UDim2",
@@ -9137,30 +9441,6 @@
 				"value": 0
 			},
 			"Selectable": {
-				"type": "bool",
-				"value": false
-			},
-			"SelectionBehaviorDown": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorLeft": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorRight": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionBehaviorUp": {
-				"enumType": "SelectionBehavior",
-				"type": "Enum",
-				"value": "Escape"
-			},
-			"SelectionGroup": {
 				"type": "bool",
 				"value": false
 			},
@@ -9184,16 +9464,36 @@
 			"ZIndex": {
 				"type": "number",
 				"value": 1
+			},
+			"Ambient": {
+				"type": "Color3",
+				"value": [0.7843137383460999, 0.7843137383460999, 0.7843137383460999]
+			},
+			"ImageColor3": {
+				"type": "Color3",
+				"value": [1, 1, 1]
+			},
+			"ImageTransparency": {
+				"type": "number",
+				"value": 0
+			},
+			"LightColor": {
+				"type": "Color3",
+				"value": [0.5490196347236633, 0.5490196347236633, 0.5490196347236633]
+			},
+			"LightDirection": {
+				"type": "Vector3",
+				"value": [-1, -1, -1]
 			}
 		},
 		"WedgePart": {
-			"Anchored": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
+			},
+			"Anchored": {
+				"type": "bool",
+				"value": false
 			},
 			"AudioCanCollide": {
 				"type": "bool",
@@ -9270,11 +9570,6 @@
 			"EnableFluidForces": {
 				"type": "bool",
 				"value": true
-			},
-			"FormFactor": {
-				"enumType": "FormFactor",
-				"type": "Enum",
-				"value": "Brick"
 			},
 			"FrontParamA": {
 				"type": "number",
@@ -9392,6 +9687,11 @@
 			"Velocity": {
 				"type": "Vector3",
 				"value": [0, 0, 0]
+			},
+			"FormFactor": {
+				"enumType": "FormFactor",
+				"type": "Enum",
+				"value": "Brick"
 			}
 		},
 		"Weld": {
@@ -9433,38 +9733,13 @@
 			}
 		},
 		"WireframeHandleAdornment": {
-			"AdornCullingMode": {
-				"enumType": "AdornCullingMode",
-				"type": "Enum",
-				"value": "Automatic"
-			},
-			"AlwaysOnTop": {
-				"type": "bool",
-				"value": false
-			},
 			"Archivable": {
 				"type": "bool",
 				"value": true
 			},
-			"CFrame": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
 			"Color3": {
 				"type": "Color3",
 				"value": [0.05098039284348488, 0.4117647111415863, 0.6745098233222961]
-			},
-			"Scale": {
-				"type": "Vector3",
-				"value": [1, 1, 1]
-			},
-			"SizeRelativeOffset": {
-				"type": "Vector3",
-				"value": [0, 0, 0]
-			},
-			"Thickness": {
-				"type": "number",
-				"value": 1
 			},
 			"Transparency": {
 				"type": "number",
@@ -9474,9 +9749,34 @@
 				"type": "bool",
 				"value": true
 			},
+			"AdornCullingMode": {
+				"enumType": "AdornCullingMode",
+				"type": "Enum",
+				"value": "Automatic"
+			},
+			"AlwaysOnTop": {
+				"type": "bool",
+				"value": false
+			},
+			"CFrame": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"SizeRelativeOffset": {
+				"type": "Vector3",
+				"value": [0, 0, 0]
+			},
 			"ZIndex": {
 				"type": "number",
 				"value": -1
+			},
+			"Scale": {
+				"type": "Vector3",
+				"value": [1, 1, 1]
+			},
+			"Thickness": {
+				"type": "number",
+				"value": 1
 			}
 		},
 		"WorldModel": {
@@ -9493,6 +9793,10 @@
 				"enumType": "ModelStreamingMode",
 				"type": "Enum",
 				"value": "Default"
+			},
+			"UseWorkspaceCollisionGroups": {
+				"type": "bool",
+				"value": false
 			}
 		},
 		"WrapDeformer": {
@@ -9514,6 +9818,14 @@
 				"type": "bool",
 				"value": true
 			},
+			"CageOrigin": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
+			"ImportOrigin": {
+				"type": "CFrame",
+				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			},
 			"AutoSkin": {
 				"enumType": "WrapLayerAutoSkin",
 				"type": "Enum",
@@ -9523,17 +9835,9 @@
 				"type": "CFrame",
 				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
-			"CageOrigin": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-			},
 			"Enabled": {
 				"type": "bool",
 				"value": true
-			},
-			"ImportOrigin": {
-				"type": "CFrame",
-				"value": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 			},
 			"Order": {
 				"type": "number",

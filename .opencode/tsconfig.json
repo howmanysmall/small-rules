@@ -1,8 +1,23 @@
 {
-	"extends": "../tsconfig.node.json",
 	"compilerOptions": {
-		"tsBuildInfoFile": "../node_modules/.tsbuildinfo-opencode"
+		"target": "ES2022",
+		"jsx": "preserve",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"paths": {
+			"$plugins/*": ["./packages/plugins/*"],
+			"$schemas/*": ["./core/schemas/*"],
+			"$types/*": ["./core/types/*"],
+			"$utilities/*": ["./core/utilities/*"]
+		},
+		"resolveJsonModule": true,
+		"types": ["bun", "node"],
+		"strict": true,
+		"declaration": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true
 	},
-	"include": ["plugin/**/*.ts"],
-	"exclude": ["node_modules"]
+	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": ["**/node_modules*/**", "**/dist/**", "**/scripts/**"]
 }

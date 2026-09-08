@@ -4,7 +4,7 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	addLocalComponentImportIdentifiers,
-	discoverLocalComponent,
+	createLocalComponentDiscoverer,
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
@@ -117,11 +117,9 @@ function getPortalReplacement(
 const preferLocalPortalComponent = createRule("prefer-local-portal-component", "react", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
-		/* v8 ignore start -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
-		const discoveredPortal =
-			filename === "" ? { found: false } : discoverLocalComponent(filename, PORTAL_COMPONENT);
+		const discoverPortal = createLocalComponentDiscoverer(filename, PORTAL_COMPONENT);
+		/* v8 ignore next -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const isPortalDefinitionFile = filename !== "" && inspectLocalComponentFile(filename, PORTAL_COMPONENT).matches;
-		/* v8 ignore stop -- @preserve */
 		const availablePortalIdentifiers = new Set<string>();
 
 		return {
@@ -129,7 +127,7 @@ const preferLocalPortalComponent = createRule("prefer-local-portal-component", "
 				if (isPortalDefinitionFile) return;
 				if (!isPortalFactoryCall(sourceCode, node) || node.arguments.length !== 2) return;
 
-				const hasAvailablePortal = availablePortalIdentifiers.size > 0 || discoveredPortal.found;
+				const hasAvailablePortal = availablePortalIdentifiers.size > 0 || discoverPortal().found;
 				if (!hasAvailablePortal) return;
 
 				const canFix = JSX_EXTENSIONS.has(nodePath.extname(filename)) && availablePortalIdentifiers.size === 1;

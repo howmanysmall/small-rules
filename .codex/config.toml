@@ -1,4 +1,5 @@
 features.hooks = true
+model_context_window = 372000
 
 [mcp_servers.astro-docs]
 url = "https://mcp.docs.astro.build/mcp"

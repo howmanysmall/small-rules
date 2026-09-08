@@ -1,0 +1,15 @@
+{
+	"name": "@opencode-plugins/env-protection",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@opencode-ai/schema": "catalog:tooling",
+		"effect": "catalog:runtime"
+	},
+	"devDependencies": {
+		"@opencode-ai/plugin": "catalog:tooling"
+	},
+	"peerDependencies": {
+		"@opencode-ai/plugin": "catalog:tooling"
+	}
+}

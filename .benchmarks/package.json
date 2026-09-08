@@ -1,0 +1,14 @@
+{
+	"name": "@small-rules/benchmarks",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime"
+	},
+	"devDependencies": {
+		"@faker-js/faker": "catalog:benchmark",
+		"@mitata/counters": "catalog:benchmark",
+		"mitata": "catalog:benchmark"
+	}
+}
