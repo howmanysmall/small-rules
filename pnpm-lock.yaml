@@ -672,6 +672,28 @@ importers:
         specifier: catalog:benchmark
         version: 1.0.34
 
+  .codex:
+    dependencies:
+      '@small-rules/arktype-utilities':
+        specifier: workspace:*
+        version: link:../packages/arktype-utilities
+      arktype:
+        specifier: catalog:runtime
+        version: 2.2.3
+      effect:
+        specifier: catalog:runtime
+        version: 4.0.0-rc.112
+      type-fest:
+        specifier: catalog:types
+        version: 5.9.0
+    devDependencies:
+      '@total-typescript/ts-reset':
+        specifier: catalog:types
+        version: 0.6.1
+      '@types/bun':
+        specifier: catalog:types
+        version: 1.4.1
+
   .omp:
     dependencies:
       '@oh-my-pi/pi-coding-agent':

@@ -1,0 +1,100 @@
+{
+	"lsp": {
+		"biome": {
+			"command": ["mise", "x", "--", "node", "--run", "biome", "--", "lsp-proxy"],
+			"extensions": [
+				".astro",
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".html",
+				".js",
+				".json",
+				".jsonc",
+				".jsx",
+				".mjs",
+				".mts",
+				".scss",
+				".svelte",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"priority": 100
+		},
+		"oxfmt": {
+			"command": ["node", "--run", "oxfmt", "--", "--lsp"],
+			"extensions": [
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".handlebars",
+				".hbs",
+				".htm",
+				".html",
+				".js",
+				".json",
+				".json5",
+				".jsonc",
+				".jsx",
+				".less",
+				".mdx",
+				".mjs",
+				".mts",
+				".sass",
+				".scss",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"priority": 100
+		},
+		"oxlint": {
+			"command": ["node", "--run", "oxlint", "--", "--lsp"],
+			"extensions": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
+			"priority": 100
+		},
+		"react-doctor": {
+			"command": ["node", "--run", "react-doctor", "--", "experimental-lsp"],
+			"extensions": [".js", ".jsx", ".ts", ".tsx"],
+			"priority": 100
+		},
+		"rumdl": {
+			"command": ["mise", "x", "--", "rumdl", "server"],
+			"extensions": [
+				".md",
+				".markdown",
+				".mdown",
+				".mkdn",
+				".mkd",
+				".mdwn",
+				".mdtxt",
+				".mdtext",
+				".text",
+				".Rmd"
+			],
+			"priority": 100
+		},
+		"tombi": {
+			"command": ["mise", "x", "--", "tombi", "lsp"],
+			"extensions": [".toml"],
+			"priority": 100
+		},
+		"tsgo": {
+			"command": ["node", "--run", "tsgo", "--", "--lsp", "--stdio"],
+			"extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"],
+			"priority": 200
+		},
+		"typescript": {
+			"disabled": true
+		}
+	}
+}

@@ -31,7 +31,11 @@
 			"$pages/*": ["./documentation/src/pages/*"],
 			"$styles/*": ["./documentation/src/styles/*"],
 			"$types/*": ["./documentation/src/types/*"],
-			"$utilities/*": ["./documentation/src/utilities/*"]
+			"$utilities/*": ["./documentation/src/utilities/*"],
+
+			"$codex-functions/*": ["${configDir}/core/functions/*"],
+			"$codex-types/*": ["${configDir}/core/types/*"],
+			"$codex-utilities/*": ["${configDir}/core/utilities/*"]
 		},
 		"resolveJsonModule": true,
 		"allowImportingTsExtensions": true,

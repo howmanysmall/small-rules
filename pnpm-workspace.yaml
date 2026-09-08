@@ -133,6 +133,7 @@ lockfile: true
 
 packages:
   - .benchmarks
+  - .codex
   - .omp
   - .opencode
   - .opencode/packages/plugins/*
