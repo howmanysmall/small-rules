@@ -443,7 +443,7 @@
 		},
 
 		{
-			"includes": ["*.config.{ts,mjs}"],
+			"includes": ["*.config.{ts,mjs}", ".codex/hooks/**/*.ts"],
 			"linter": {
 				"rules": {
 					"style": {

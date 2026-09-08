@@ -55,12 +55,12 @@
 				".yaml",
 				".yml"
 			],
-			"priority": 100
+			"priority": 99
 		},
 		"oxlint": {
 			"command": ["node", "--run", "oxlint", "--", "--lsp"],
 			"extensions": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
-			"priority": 100
+			"priority": 101
 		},
 		"react-doctor": {
 			"command": ["node", "--run", "react-doctor", "--", "experimental-lsp"],

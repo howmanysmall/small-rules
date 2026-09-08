@@ -19,6 +19,14 @@ command = "hk"
 [features.multi_agent_v2]
 max_concurrent_threads_per_session = 1000
 
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "bun .codex/hooks/fallow-gate.ts"
+timeout = 600
+
 [[hooks.PostToolUse]]
 matcher = "apply_patch"
 
