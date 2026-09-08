@@ -40,14 +40,7 @@
 	},
 
 	"files": {
-		"includes": [
-			"**",
-			"!**/package.json",
-			"!**/*.js",
-			"!**/*-lock.{json,yaml}",
-			"!scripts/dupes-viewer.html",
-			"!scripts/clis/**/*.ts"
-		]
+		"includes": ["**", "!**/package.json", "!**/*.js", "!**/*-lock.{json,yaml}", "!scripts/clis/**/*.ts"]
 	},
 
 	"formatter": {

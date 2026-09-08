@@ -95,7 +95,7 @@ const rules: OxlintRules = {
 	"jsdoc/check-tag-names": [
 		"error",
 		{
-			definedTags: ["knipignore"],
+			definedTags: ["expected-unused"],
 			jsxTags: false,
 			typed: false,
 		},
@@ -461,7 +461,7 @@ const configuration = isentinel(
 						options: { trailingComma: "all" },
 					},
 					{
-						files: ["biome.jsonc", ".oxlintrc.json", "knip.jsonc"],
+						files: ["biome.jsonc", ".oxlintrc.json", ".fallowrc.jsonc"],
 						options: { trailingComma: "none" },
 					},
 					{
@@ -488,7 +488,6 @@ const configuration = isentinel(
 			"**/*.js",
 			"**/{dist,do-not-sync-ever,node_modules}/**",
 			"scripts/clis/**/*.ts",
-			"scripts/dupes-viewer.html",
 			"src/generated/**",
 		],
 		options: {
@@ -505,7 +504,7 @@ const configuration = isentinel(
 		settings: {
 			jsdoc: {
 				tagNamePreference: {
-					knipignore: "knipignore",
+					"expected-unused": "expected-unused",
 				},
 			},
 			react: { version: "19.2.8" },

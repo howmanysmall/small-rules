@@ -86,6 +86,27 @@ hooks {
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
 
+      // fallow — changed-code quality gate (dead code, duplication, health).
+      // Gates on `new-only`, so inherited findings on touched files report but
+      // do not block. Runs once per commit, not per file.
+      ["fallow"] {
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.css",
+            "package.json",
+          )
+        check = "fallow audit --quiet --gate-marker hk"
+      }
+
       // JS/TS pipeline — isentinel-lint + biome + oxfmt
       ["isentinel-lint"] {
         glob =
@@ -293,6 +314,23 @@ hooks {
         glob = List("package.json", "pnpm-workspace.yaml")
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
+      }
+      ["fallow"] {
+        glob =
+          List(
+            "*.js",
+            "*.jsx",
+            "*.ts",
+            "*.tsx",
+            "*.mjs",
+            "*.cjs",
+            "*.mts",
+            "*.cts",
+            "*.astro",
+            "*.css",
+            "package.json",
+          )
+        check = "fallow audit --quiet --gate-marker hk"
       }
       ["isentinel-lint"] {
         glob =

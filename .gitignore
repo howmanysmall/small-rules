@@ -18,10 +18,8 @@ coverage
 .vitiate/corpus/
 .swc/
 
-# jscpd reports
+# duplication and analysis reports
 /report/
-jscpd-report/
-jscpd-report.html
 
 # logs
 logs

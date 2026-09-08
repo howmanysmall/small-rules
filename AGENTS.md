@@ -33,7 +33,10 @@ You **MUST** follow these guidelines. There is NO exception.
 | `nr type-check:agent` | Run `tsgo` for type checking |
 | `nr format` | Format with `biome check --fix` + `oxfmt` |
 | `nr format:check` | Check formatting without modifying |
-| `nr knip` | Detect unused files, exports, dependencies |
+| `nr fallow:dead-code` | Detect unused files, exports, types, dependencies |
+| `nr fallow:dupes` | Detect duplicated and structurally-similar code |
+| `nr fallow:audit` | Gate the current changeset before a commit or PR |
+| `nr fallow:health` | Rank complexity hotspots and refactoring targets |
 | `nr test:mutation` | Run Stryker mutation testing (thresholds: break at 70%) |
 | `nr test:fuzz` | Run vitiate regression from stored corpus |
 | `nr test:fuzz:run` | Run vitiate fuzz testing (10 second default) |
@@ -132,6 +135,7 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 - `tsconfig.json` - Solution config referencing the library, test, and Node tooling projects
 - `tsconfig.lib.json`, `tsconfig.test.json`, `tsconfig.node.json` - Focused configs for package source, tests, and Bun-enabled repository tooling
 - `biome.jsonc` - Linting + formatting (tabs, 120 width, double quotes)
+- `.fallowrc.jsonc` - fallow entry points, ignores, rule severities, and duplication thresholds (replaces knip, jscpd, and similarity-ts)
 - `mise.toml` - Tool versions and task definitions (ci, check, release)
 - `pnpm-workspace.yaml` - Package manager config (catalogs, trust policy, resolution mode)
 - `stryker.config.mjs` - Mutation testing config, mutates `src/` excluding types/index
@@ -144,7 +148,7 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 
 `checks.yaml` runs two jobs:
 
-- **Validate** — sequential Biome, Oxlint, type-check (`tsgo`), Knip, and minified build on one runner
+- **Validate** — sequential Biome, Oxlint, type-check (`tsgo`), fallow dead-code, fallow dupes, and minified build on one runner
 - **Test** — Vitest with compact `--reporter github-actions --reporter dot` output
 
 `.github/workflows/release.yaml` — Triggered by `v*.*.*` tags or manually with `dry_run`. Does **not** re-run CI: it waits for the matching main-branch CI run for the tag SHA, then publishes via NPM Trusted Publishing (OIDC). The real publish build is `prepublishOnly` only; dry runs still build explicitly. `communique` generates the documentation and GitHub Release notes, with `git-cliff` as the fallback.
@@ -184,7 +188,7 @@ Single-context: one root `CONTEXT.md` and `docs/adr/` for ADRs. See `docs/agents
 
 Before any `git commit` or `git push`, run `fallow audit --format json --quiet --explain --gate-marker agent`. If the verdict is `fail`, fix the reported findings before retrying. Treat JSON runtime errors like `{ "error": true, ... }` as non-blocking.
 
-Audit defaults to `gate=new-only`: only findings introduced by the current changeset affect the verdict. Inherited findings on touched files are reported under `attribution` and annotated with `introduced: false`, but do not block the commit. Set `[audit] gate = "all"` in `fallow.toml` to gate every finding in changed files.
+Audit defaults to `gate=new-only`: only findings introduced by the current changeset affect the verdict. Inherited findings on touched files are reported under `attribution` and annotated with `introduced: false`, but do not block the commit. Set `"audit": { "gate": "all" }` in `.fallowrc.jsonc` to gate every finding in changed files.
 
 For non-skill agents, treat the task map below as the local onboarding source: run the listed fallow command before destructive edits, before commits, and before pull request handoff.
 

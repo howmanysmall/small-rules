@@ -1,0 +1,98 @@
+{
+	"$schema": "./node_modules/fallow/schema.json",
+
+	// Entry points that no import graph reaches: tool configs, standalone Bun
+	// scripts, fuzz corpora, and the Starlight component overrides that
+	// astro.config.ts references by string path.
+	"entry": [
+		"src/index.ts",
+		"src/reset.d.ts",
+		"*.config.ts",
+		"scripts/*.ts",
+		"tests/**/*.fuzz.ts",
+		"documentation/src/components/overrides/*.astro",
+		"documentation/src/styles/custom.css"
+	],
+
+	// `plugins/` is the built bundle consumed through the pnpm `link:./plugins`
+	// override, not source. The dot-directories hold agent/benchmark tooling
+	// that fallow cannot traverse (hidden directories are never walked), so
+	// ignoring them silences the workspace diagnostics instead of half-analyzing
+	// them. Analyze one directly with `fallow --root .benchmarks` when needed.
+	"ignorePatterns": [
+		"tests/fixtures/**",
+		"plugins/**",
+		"src/generated/**",
+		".benchmarks/**",
+		".codex/**",
+		".omp/**",
+		".opencode/**"
+	],
+
+	// Same list knip carried, plus the packages fallow cannot see through a
+	// config string (`publint` in tsdown.config.ts), a CLI invocation, an Astro
+	// integration, or an ambient type-only import in
+	// documentation/src/types/satteri-optional-peers.d.ts (hast, mdast).
+	"ignoreDependencies": [
+		"@arethetypeswrong/core",
+		"@astrojs/markdown-satteri",
+		"@fast-check/vitest",
+		"@mitata/counters",
+		"@total-typescript/ts-reset",
+		"babel-plugin-react-compiler",
+		"eslint-plugin-pnpm",
+		"fast-check",
+		"hast",
+		"jiti",
+		"mdast",
+		"mdast-util-directive",
+		"oxlint-plugin-*",
+		"publint",
+		"sfw",
+		"sharp"
+	],
+
+	// pnpm-workspace.yaml pins vite ^8 for a transitive consumer.
+	"ignoreDependencyOverrides": [{ "package": "vite", "source": "pnpm-workspace.yaml" }],
+
+	"ignoreExportsUsedInFile": true,
+
+	"rules": {
+		"unused-files": "error",
+		"unused-exports": "error",
+		"unused-types": "error",
+		"unused-dependencies": "error",
+		"unused-dev-dependencies": "error",
+		"unused-enum-members": "error",
+		"unlisted-dependencies": "error",
+		"unresolved-imports": "error",
+		"duplicate-exports": "error",
+		"circular-dependencies": "error",
+		"re-export-cycle": "error",
+		"unused-dependency-overrides": "warn",
+		"stale-suppressions": "warn"
+	},
+
+	"overrides": [
+		{
+			"files": ["tests/**", "**/*.test.ts", "**/*.fuzz.ts"],
+			"rules": { "unused-exports": "off", "unused-types": "off" }
+		}
+	],
+
+	// Mirrors the retired .jscpd.json thresholds (5 lines / 60 tokens). CSS
+	// @font-face unicode-range blocks and the vendored anti-slop rules are
+	// duplicated by nature, so they stay out of the percentage.
+	"duplicates": {
+		"mode": "mild",
+		"minLines": 5,
+		"minTokens": 60,
+		"threshold": 1.5,
+		"ignoreDefaults": true,
+		"ignore": ["documentation/src/styles/**", "src/rules/anti-slop/**", "tests/fixtures/**"]
+	},
+
+	"audit": {
+		"gate": "new-only"
+	}
+}

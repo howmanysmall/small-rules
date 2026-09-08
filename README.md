@@ -16,7 +16,7 @@
 [![ESLint](https://img.shields.io/badge/linter-ESLint-4B32C3?logo=eslint)](https://eslint.org)
 [![Biome](https://img.shields.io/badge/formatter-Biome-609d6c?logo=biome)](https://biomejs.dev)
 [![oxfmt](https://img.shields.io/badge/formatter-oxfmt-f9801b?logo=oxlint)](https://github.com/oxc-project/oxc)
-[![knip](https://img.shields.io/badge/code%20quality-knip-f97316?logo=knip)](https://knip.dev)
+[![fallow](https://img.shields.io/badge/code%20quality-fallow-6aa84f)](https://docs.fallow.tools)
 
 </div>
 
