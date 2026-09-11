@@ -15,6 +15,10 @@
 		"gh-grep": {
 			"type": "http",
 			"url": "https://mcp.grep.app"
+		},
+		"fallow": {
+			"command": "node",
+			"args": ["--run", "fallow-mcp"]
 		}
 	}
 }

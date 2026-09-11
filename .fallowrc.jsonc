@@ -1,9 +1,5 @@
 {
-	"$schema": "./node_modules/fallow/schema.json",
-
-	// Entry points that no import graph reaches: tool configs, standalone Bun
-	// scripts, fuzz corpora, and the Starlight component overrides that
-	// astro.config.ts references by string path.
+	"$schema": "node_modules/fallow/schema.json",
 	"entry": [
 		"src/index.ts",
 		"src/reset.d.ts",
@@ -13,47 +9,34 @@
 		"documentation/src/components/overrides/*.astro",
 		"documentation/src/styles/custom.css"
 	],
-
-	// `plugins/` is the built bundle consumed through the pnpm `link:./plugins`
-	// override, not source. The dot-directories hold agent/benchmark tooling
-	// that fallow cannot traverse (hidden directories are never walked), so
-	// ignoring them silences the workspace diagnostics instead of half-analyzing
-	// them. Analyze one directly with `fallow --root .benchmarks` when needed.
 	"ignorePatterns": [
 		"tests/fixtures/**",
 		"plugins/**",
 		"src/generated/**",
 		".benchmarks/**",
 		".codex/**",
+		".opencode/**",
 		".omp/**",
-		".opencode/**"
+		"tests/rule-harness/**"
 	],
-
-	// Packages fallow cannot see through a
-	// config string (`publint` in tsdown.config.ts), a CLI invocation, an Astro
-	// integration, or an ambient type-only import in
-	// documentation/src/types/satteri-optional-peers.d.ts (hast, mdast).
 	"ignoreDependencies": [
 		"@arethetypeswrong/core",
 		"@astrojs/markdown-satteri",
 		"@fast-check/vitest",
+		"@isentinel/hooks",
 		"@total-typescript/ts-reset",
 		"babel-plugin-react-compiler",
 		"fast-check",
 		"hast",
 		"jiti",
-		"mdast",
 		"mdast-util-directive",
+		"mdast",
 		"publint",
 		"sfw",
 		"sharp"
 	],
-
-	// pnpm-workspace.yaml pins vite ^8 for a transitive consumer.
 	"ignoreDependencyOverrides": [{ "package": "vite", "source": "pnpm-workspace.yaml" }],
-
 	"ignoreExportsUsedInFile": true,
-
 	"rules": {
 		"unused-files": "error",
 		"unused-exports": "error",
@@ -72,19 +55,19 @@
 		"unused-dependency-overrides": "error",
 		"stale-suppressions": "error"
 	},
-
-	// Detect clones of at least 5 lines / 50 tokens, capped at 0.5%. CSS
-	// @font-face unicode-range blocks and the vendored anti-slop rules are
-	// duplicated by nature, so they stay out of the percentage.
 	"duplicates": {
 		"mode": "mild",
 		"minLines": 5,
 		"minTokens": 50,
 		"threshold": 0.5,
 		"ignoreDefaults": true,
-		"ignore": ["documentation/src/styles/custom.css", "src/rules/anti-slop/**", "tests/fixtures/**"]
+		"ignore": [
+			"documentation/src/styles/custom.css",
+			"src/rules/anti-slop/**",
+			"tests/fixtures/**",
+			"scripts/utilities/casing-utilities.ts"
+		]
 	},
-
 	"audit": {
 		"gate": "new-only"
 	}
