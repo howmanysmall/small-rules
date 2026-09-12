@@ -59,7 +59,7 @@ const rules: OxlintRules = {
 			],
 		},
 	],
-	complexity: "off",
+	complexity: ["error", {max: 20}],
 	curly: ["error", "multi-line"],
 	"default-case": "off",
 	// this is literally not true -- it just worsens performance!

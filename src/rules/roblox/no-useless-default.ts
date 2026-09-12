@@ -1,3 +1,5 @@
+import { isBoolean, isString } from "@small-rules/arktype-utilities";
+import { type } from "arktype";
 import { Predicate } from "effect";
 
 import defaultProperties from "$oxc-generated/default-properties.json";
@@ -29,57 +31,65 @@ import {
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";
 
-type CanonicalNumericComponent = "-inf" | "inf" | number;
+const isCanonicalNumericComponent = type("'-inf' | 'inf' | number");
+type CanonicalNumericComponent = typeof isCanonicalNumericComponent.infer;
 
-type Vector2CanonicalValue = readonly [x: CanonicalNumericComponent, y: CanonicalNumericComponent];
-type Vector3CanonicalValue = readonly [
-	x: CanonicalNumericComponent,
-	y: CanonicalNumericComponent,
-	z: CanonicalNumericComponent,
-];
-type UDimCanonicalValue = readonly [scale: CanonicalNumericComponent, offset: CanonicalNumericComponent];
-type UDim2CanonicalValue = readonly [
-	scaleX: CanonicalNumericComponent,
-	offsetX: CanonicalNumericComponent,
-	scaleY: CanonicalNumericComponent,
-	offsetY: CanonicalNumericComponent,
-];
-type RectCanonicalValue = readonly [
-	minimumX: CanonicalNumericComponent,
-	minimumY: CanonicalNumericComponent,
-	maximumX: CanonicalNumericComponent,
-	maximumY: CanonicalNumericComponent,
-];
-type Color3CanonicalValue = readonly [red: number, green: number, blue: number];
-type CFrameCanonicalValue = readonly [
-	x: CanonicalNumericComponent,
-	y: CanonicalNumericComponent,
-	z: CanonicalNumericComponent,
-	r00: CanonicalNumericComponent,
-	r01: CanonicalNumericComponent,
-	r02: CanonicalNumericComponent,
-	r10: CanonicalNumericComponent,
-	r11: CanonicalNumericComponent,
-	r12: CanonicalNumericComponent,
-	r20: CanonicalNumericComponent,
-	r21: CanonicalNumericComponent,
-	r22: CanonicalNumericComponent,
-];
+const isCanonicalValue = type({
+	enumType: isString,
+	type: "'Enum'",
+	value: isString,
+})
+	.or({
+		type: "'bool'",
+		value: isBoolean,
+	})
+	.or({
+		type: "'CFrame'",
+		value: type([
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+		]).readonly(),
+	})
+	.or({
+		type: "'Color3' | 'Vector3'",
+		value: type([isCanonicalNumericComponent, isCanonicalNumericComponent, isCanonicalNumericComponent]).readonly(),
+	})
+	.or({
+		type: "'number'",
+		value: isCanonicalNumericComponent,
+	})
+	.or({
+		type: "'Rect' | 'UDim2'",
+		value: type([
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+			isCanonicalNumericComponent,
+		]).readonly(),
+	})
+	.or({
+		type: "'string'",
+		value: isString,
+	})
+	.or({
+		type: "'UDim' | 'Vector2'",
+		value: type([isCanonicalNumericComponent, isCanonicalNumericComponent]).readonly(),
+	})
+	.readonly();
 
 // oxlint-disable-next-line jsdoc/empty-tags -- worthless rule.
 /** @internal Exported only because it appears in `isDefaultValue`'s signature; not part of the published surface. */
-export type CanonicalValue =
-	| { readonly enumType: string; readonly type: "Enum"; readonly value: string }
-	| { readonly type: "bool"; readonly value: boolean }
-	| { readonly type: "CFrame"; readonly value: CFrameCanonicalValue }
-	| { readonly type: "Color3"; readonly value: Color3CanonicalValue }
-	| { readonly type: "number"; readonly value: CanonicalNumericComponent }
-	| { readonly type: "Rect"; readonly value: RectCanonicalValue }
-	| { readonly type: "string"; readonly value: string }
-	| { readonly type: "UDim2"; readonly value: UDim2CanonicalValue }
-	| { readonly type: "UDim"; readonly value: UDimCanonicalValue }
-	| { readonly type: "Vector2"; readonly value: Vector2CanonicalValue }
-	| { readonly type: "Vector3"; readonly value: Vector3CanonicalValue };
+export type CanonicalValue = typeof isCanonicalValue.infer;
 
 const ignoredJsxPropertyNames = new Set(["Name", "Parent"]);
 const ignoredJsxPropertyNamesLowercase = new Set(
@@ -96,7 +106,7 @@ function createDefaultPropertyLookupEntries(
 
 	for (const [propertyName, propertyValue] of Object.entries(properties)) {
 		/* v8 ignore next -- @preserve generated default-properties entries are canonical value records. */
-		if (!isCanonicalValue(propertyValue)) continue;
+		if (!isCanonicalValue.allows(propertyValue)) continue;
 		const lowercasePropertyName = propertyName.toLowerCase();
 		/* v8 ignore next -- @preserve generated default-properties do not contain duplicate property names differing only by case. */
 		if (propertyLookupEntries.has(lowercasePropertyName)) continue;
@@ -135,7 +145,7 @@ function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalVa
 			? { enumType: encodedValue[1], type: valueType, value: encodedValue[2] }
 			: { type: valueType, value: encodedValue[1] };
 	/* v8 ignore next -- @preserve generated compact values originate from validated canonical values. */
-	return isCanonicalValue(candidate) ? candidate : undefined;
+	return isCanonicalValue.allows(candidate) ? candidate : undefined;
 }
 
 const intrinsicJsxDefaultOverrides = new Map<string, ReadonlyMap<string, DefaultPropertyMatch>>([
@@ -221,63 +231,6 @@ function getPropertyMatch(className: string, propertyName: string): DefaultPrope
 
 function isIgnoredPropertyName(propertyName: string): boolean {
 	return ignoredJsxPropertyNamesLowercase.has(propertyName.toLowerCase());
-}
-
-function isCanonicalNumericComponent(value: unknown): value is CanonicalNumericComponent {
-	return Predicate.isNumber(value) || value === "inf" || value === "-inf";
-}
-
-function isCanonicalValue(value: unknown): value is CanonicalValue {
-	/* v8 ignore next -- @preserve generated default-properties entries are canonical value records. */
-	if (!Predicate.isObject(value) || !Predicate.isString(value.type) || !("value" in value)) return false;
-
-	switch (value.type) {
-		case "bool":
-			return Predicate.isBoolean(value.value);
-
-		case "CFrame": {
-			return (
-				Array.isArray(value.value) &&
-				value.value.length === 12 &&
-				value.value.every(isCanonicalNumericComponent)
-			);
-		}
-
-		case "Color3": {
-			return Array.isArray(value.value) && value.value.length === 3 && value.value.every(Predicate.isNumber);
-		}
-
-		case "Enum":
-			return Predicate.isString(value.enumType) && Predicate.isString(value.value);
-
-		case "number":
-			return isCanonicalNumericComponent(value.value);
-
-		case "Rect":
-		case "UDim2": {
-			return (
-				Array.isArray(value.value) && value.value.length === 4 && value.value.every(isCanonicalNumericComponent)
-			);
-		}
-
-		case "string":
-			return Predicate.isString(value.value);
-
-		case "UDim":
-		case "Vector2": {
-			return (
-				Array.isArray(value.value) && value.value.length === 2 && value.value.every(isCanonicalNumericComponent)
-			);
-		}
-
-		case "Vector3": {
-			return (
-				Array.isArray(value.value) && value.value.length === 3 && value.value.every(isCanonicalNumericComponent)
-			);
-		}
-	}
-	/* v8 ignore next -- generated default-properties JSON only contains the canonical type tags handled above. @preserve */
-	return false;
 }
 
 function getTrackedInstanceClassName(node: ESTree.Expression): string | undefined {
@@ -640,70 +593,107 @@ function extractEnumValue(node: ESTree.Expression): undefined | { readonly enumT
 	return { enumType, value };
 }
 
+type GetCanonicalValue<TType extends CanonicalValue["type"]> = Extract<CanonicalValue, { type: TType }>;
+
+type IsDefaultValues = {
+	readonly [TType in CanonicalValue["type"]]: (
+		node: ESTree.Expression,
+		canonicalValue: GetCanonicalValue<TType>,
+	) => boolean;
+};
+type CanonicalValue2d = GetCanonicalValue<"UDim" | "Vector2">;
+type CanonicalValue3d = GetCanonicalValue<"Color3" | "Vector3">;
+type CanonicalValue4d = GetCanonicalValue<"Rect" | "UDim2">;
+
+const IS_DEFAULT_VALUES = {
+	bool(node: ESTree.Expression, canonicalValue: CanonicalValue): boolean {
+		return isBooleanLiteral(node) && node.value === canonicalValue.value;
+	},
+	CFrame(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"CFrame">): boolean {
+		const actual = extractCFrameValue(node);
+		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
+	},
+	Color3(node: ESTree.Expression, canonicalValue: CanonicalValue3d): boolean {
+		const actual = extractColor3Value(node);
+		return (
+			actual !== undefined &&
+			actual[0] === canonicalValue.value[0] &&
+			actual[1] === canonicalValue.value[1] &&
+			actual[2] === canonicalValue.value[2]
+		);
+	},
+	Enum(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"Enum">): boolean {
+		const actual = extractEnumValue(node);
+		return (
+			actual !== undefined && actual.enumType === canonicalValue.enumType && actual.value === canonicalValue.value
+		);
+	},
+	number(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"number">): boolean {
+		const actual = extractNumberValue(node);
+		return actual !== undefined && matchesComponentValue(canonicalValue.value, actual);
+	},
+	Rect(node: ESTree.Expression, canonicalValue: CanonicalValue4d): boolean {
+		const actual = extractRectValue(node);
+		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
+	},
+	string(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"string">): boolean {
+		return isStringLiteral(node) && node.value === canonicalValue.value;
+	},
+	UDim(node: ESTree.Expression, canonicalValue: CanonicalValue2d): boolean {
+		const actual = extractUDimValue(node);
+		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
+	},
+	UDim2(node: ESTree.Expression, canonicalValue: CanonicalValue4d): boolean {
+		const actual = extractUDim2Value(node);
+		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
+	},
+	Vector2(node: ESTree.Expression, canonicalValue: CanonicalValue2d): boolean {
+		const actual = extractVector2Value(node);
+		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
+	},
+	Vector3(node: ESTree.Expression, canonicalValue: CanonicalValue3d): boolean {
+		const actual = extractVector3Value(node);
+		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
+	},
+} satisfies IsDefaultValues;
+
 // oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- I hate you lol
 /** @internal Exported for unit tests; not part of the published surface. */
 // oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- shut up
 export function isDefaultValue(node: ESTree.Expression, canonicalValue: CanonicalValue): boolean {
 	switch (canonicalValue.type) {
 		case "bool":
-			return isBooleanLiteral(node) && node.value === canonicalValue.value;
+			return IS_DEFAULT_VALUES.bool(node, canonicalValue);
 
-		case "CFrame": {
-			const actual = extractCFrameValue(node);
-			return actual !== undefined && matchesTuple(canonicalValue.value, actual);
-		}
+		case "CFrame":
+			return IS_DEFAULT_VALUES.CFrame(node, canonicalValue);
 
-		case "Color3": {
-			const actual = extractColor3Value(node);
-			return (
-				actual !== undefined &&
-				actual[0] === canonicalValue.value[0] &&
-				actual[1] === canonicalValue.value[1] &&
-				actual[2] === canonicalValue.value[2]
-			);
-		}
+		case "Color3":
+			return IS_DEFAULT_VALUES.Color3(node, canonicalValue);
 
-		case "Enum": {
-			const actual = extractEnumValue(node);
-			return (
-				actual !== undefined &&
-				actual.enumType === canonicalValue.enumType &&
-				actual.value === canonicalValue.value
-			);
-		}
+		case "Enum":
+			return IS_DEFAULT_VALUES.Enum(node, canonicalValue);
 
-		case "number": {
-			const actual = extractNumberValue(node);
-			return actual !== undefined && matchesComponentValue(canonicalValue.value, actual);
-		}
+		case "number":
+			return IS_DEFAULT_VALUES.number(node, canonicalValue);
 
-		case "Rect": {
-			const actual = extractRectValue(node);
-			return actual !== undefined && matchesTuple(canonicalValue.value, actual);
-		}
+		case "Rect":
+			return IS_DEFAULT_VALUES.Rect(node, canonicalValue);
 
 		case "string":
-			return isStringLiteral(node) && node.value === canonicalValue.value;
+			return IS_DEFAULT_VALUES.string(node, canonicalValue);
 
-		case "UDim": {
-			const actual = extractUDimValue(node);
-			return actual !== undefined && matchesTuple(canonicalValue.value, actual);
-		}
+		case "UDim":
+			return IS_DEFAULT_VALUES.UDim(node, canonicalValue);
 
-		case "UDim2": {
-			const actual = extractUDim2Value(node);
-			return actual !== undefined && matchesTuple(canonicalValue.value, actual);
-		}
+		case "UDim2":
+			return IS_DEFAULT_VALUES.UDim2(node, canonicalValue);
 
-		case "Vector2": {
-			const actual = extractVector2Value(node);
-			return actual !== undefined && matchesTuple(canonicalValue.value, actual);
-		}
+		case "Vector2":
+			return IS_DEFAULT_VALUES.Vector2(node, canonicalValue);
 
-		case "Vector3": {
-			const actual = extractVector3Value(node);
-			return actual !== undefined && matchesTuple(canonicalValue.value, actual);
-		}
+		case "Vector3":
+			return IS_DEFAULT_VALUES.Vector3(node, canonicalValue);
 
 		default:
 			return false;

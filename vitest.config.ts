@@ -36,7 +36,7 @@ const testConfiguration = mergeConfig(
 				],
 				include: ["packages/*/src/**/*.ts", "src/**/*.ts"],
 				provider: "v8",
-				reporter: ["text", "html", "text-summary"],
+				reporter: ["text", "html", "text-summary", "json", "json-summary"],
 				reportOnFailure: true,
 				reportsDirectory: "./coverage",
 				thresholds: { 100: true },
