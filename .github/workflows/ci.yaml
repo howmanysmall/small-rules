@@ -7,6 +7,7 @@ on:
     paths: &ci-paths
       - "*.config.ts"
       - ".github/actions/**"
+      - .github/workflows/bundle-size.yaml
       - .github/workflows/checks.yaml
       - .github/workflows/ci.yaml
       - .github/workflows/docs.yaml

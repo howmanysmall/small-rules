@@ -1,0 +1,122 @@
+name: Bundle Size
+
+on:
+  pull_request:
+    paths:
+      - "*.config.ts"
+      - .github/actions/**
+      - .github/workflows/bundle-size.yaml
+      - mise.lock
+      - mise.toml
+      - package.json
+      - "packages/**"
+      - "patches/**"
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - "scripts/**"
+      - "src/**/*.json"
+      - "src/**/*.ts"
+      - "src/**/*.tsx"
+      - "tsconfig*.json"
+
+permissions: {}
+
+concurrency:
+  group: bundle-size-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    name: Compare bundle size
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+        with:
+          tools: node pnpm
+
+      - name: Install pull request dependencies
+        uses: $/.github/actions/install
+
+      - id: pull-request
+        name: Build pull request
+        run: |
+          node --run prepublishOnly
+          printf 'bytes=%s\n' "$(wc -c < dist/index.js | tr -d ' ')" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Install base dependencies
+        uses: $/.github/actions/install
+
+      - id: base
+        name: Build base
+        run: |
+          node --run prepublishOnly
+          printf 'bytes=%s\n' "$(wc -c < dist/index.js | tr -d ' ')" >> "$GITHUB_OUTPUT"
+
+      - id: report
+        name: Create report
+        run: |
+          format_bytes() {
+            local bytes="$1"
+            if (( bytes >= 1000000 )); then
+              awk -v bytes="$bytes" 'BEGIN { printf "%.2f MB", bytes / 1000000 }'
+            elif (( bytes >= 1000 )); then
+              awk -v bytes="$bytes" 'BEGIN { printf "%.2f kB", bytes / 1000 }'
+            else
+              printf '%d B' "$bytes"
+            fi
+          }
+
+          difference=$((PULL_REQUEST_BYTES - BASE_BYTES))
+          if (( difference > 0 )); then
+            difference_text="+$(format_bytes "$difference")"
+          elif (( difference < 0 )); then
+            difference_text="-$(format_bytes "$((-difference))")"
+          else
+            difference_text="0 B"
+          fi
+
+          percentage="$(awk -v difference="$difference" -v base="$BASE_BYTES" 'BEGIN { printf "%+.2f%%", difference / base * 100 }')"
+          report="$(printf "## Bundle size\n\n| Artifact | Base | Pull request | Change |\n|:--|--:|--:|--:|\n| \`dist/index.js\` | %s | %s | %s (%s) |\n\n<sub>Raw, uncompressed bytes from the minified \`prepublishOnly\` build.</sub>" "$(format_bytes "$BASE_BYTES")" "$(format_bytes "$PULL_REQUEST_BYTES")" "$difference_text" "$percentage")"
+
+          printf '%s\n' "$report" >> "$GITHUB_STEP_SUMMARY"
+          {
+            printf 'body<<BUNDLE_SIZE_REPORT\n'
+            printf '%s\n' "$report"
+            printf 'BUNDLE_SIZE_REPORT\n'
+          } >> "$GITHUB_OUTPUT"
+        env:
+          BASE_BYTES: ${{ steps.base.outputs.bytes }}
+          PULL_REQUEST_BYTES: ${{ steps.pull-request.outputs.bytes }}
+
+      - if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+        name: Update pull request comment
+        run: |
+          marker='<!-- bundle-size-report -->'
+          comment_body="$(printf '%s\n%s' "$marker" "$BUNDLE_SIZE_REPORT")"
+          comment_id="$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/$PULL_REQUEST_NUMBER/comments" --jq '[.[][] | select(.body | startswith("<!-- bundle-size-report -->"))][0].id // empty')"
+
+          if [[ -n "$comment_id" ]]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -f body="$comment_body" >/dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PULL_REQUEST_NUMBER/comments" -f body="$comment_body" >/dev/null
+          fi
+        env:
+          BUNDLE_SIZE_REPORT: ${{ steps.report.outputs.body }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+    timeout-minutes: 10
