@@ -184,7 +184,7 @@ Single-context: one root `CONTEXT.md` and `docs/adr/` for ADRs. See `docs/agents
 ---
 
 <!-- fallow:setup-hooks:start -->
-## Fallow local gate
+## Fallow Local Gate
 
 Before any `git commit` or `git push`, run `fallow audit --format json --quiet --explain --gate-marker agent`. If the verdict is `fail`, fix the reported findings before retrying. Treat JSON runtime errors like `{ "error": true, ... }` as non-blocking.
 
@@ -192,7 +192,7 @@ Audit defaults to `gate=new-only`: only findings introduced by the current chang
 
 For non-skill agents, treat the task map below as the local onboarding source: run the listed fallow command before destructive edits, before commits, and before pull request handoff.
 
-## Fallow task map
+## Fallow Task Map
 
 | When the agent is about to... | Run |
 |---|---|
