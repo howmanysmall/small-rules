@@ -38,7 +38,7 @@ import {
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-interface ComplexityConfig {
+interface ComplexityConfiguration {
 	readonly baseThreshold: number;
 	readonly errorThreshold: number;
 	readonly interfacePenalty: number;
@@ -50,7 +50,7 @@ interface ComplexityCache {
 	readonly visitedNodes: WeakSet<object>;
 }
 
-const DEFAULT_CONFIGURATION: ComplexityConfig = {
+const DEFAULT_CONFIGURATION: ComplexityConfiguration = {
 	baseThreshold: 10,
 	errorThreshold: 25,
 	interfacePenalty: 20,
@@ -137,7 +137,7 @@ function calculateIanitorComplexity(node: ESTree.CallExpression): number {
 	}
 }
 
-function addScore(current: number, addition: number, config: ComplexityConfig, ceiling: number): number {
+function addScore(current: number, addition: number, config: ComplexityConfiguration, ceiling: number): number {
 	const nextScore = current + addition;
 	return config.performanceMode ? Math.min(nextScore, ceiling) : nextScore;
 }
@@ -146,7 +146,7 @@ function addStructuralScore(
 	current: number,
 	node: ESTree.Node,
 	depth: number,
-	config: ComplexityConfig,
+	config: ComplexityConfiguration,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -164,7 +164,7 @@ function addNestedTypeAnnotationScores(
 	current: number,
 	members: ReadonlyArray<ESTree.Node>,
 	depth: number,
-	config: ComplexityConfig,
+	config: ComplexityConfiguration,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -192,7 +192,7 @@ function addTypeUnionScores(
 	score: number,
 	node: ESTree.Node,
 	nextDepth: number,
-	config: ComplexityConfig,
+	config: ComplexityConfiguration,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -233,7 +233,7 @@ function getDepthMultiplier(depth: number, cache: Map<number, number>): number {
 interface StructuralScoringArguments {
 	readonly cache: ComplexityCache;
 	readonly ceiling: number;
-	readonly config: ComplexityConfig;
+	readonly config: ComplexityConfiguration;
 	readonly depthMultiplierCache: Map<number, number>;
 	readonly nextDepth: number;
 }
@@ -452,7 +452,7 @@ function scoreTypeReference({ typeArguments }: ESTree.TSTypeReference, scoring: 
 function calculateStructuralComplexity(
 	node: ESTree.Node,
 	depth: number,
-	config: ComplexityConfig,
+	config: ComplexityConfiguration,
 	cache: ComplexityCache,
 	depthMultiplierCache: Map<number, number>,
 	ceiling: number,
@@ -557,14 +557,14 @@ function calculateStructuralComplexity(
 const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox", {
 	create(context): Visitor {
 		const rawOptions: RuleOptions = context.options[0];
-		const config: ComplexityConfig = { ...DEFAULT_CONFIGURATION, ...rawOptions };
+		const configuration: ComplexityConfiguration = { ...DEFAULT_CONFIGURATION, ...rawOptions };
 		const cache: ComplexityCache = {
 			nodeCache: new WeakMap(),
 			visitedNodes: new WeakSet(),
 		};
 		const ianitorStaticVariables = new Set<string>();
 		const depthMultiplierCache = new Map<number, number>();
-		const complexityCeiling = config.errorThreshold * 2;
+		const complexityCeiling = configuration.errorThreshold * 2;
 		let hasIanitorReference = false;
 		const interfacesToCheck = new Map<ESTree.TSInterfaceDeclaration, { complexity: number }>();
 		const typeAliasesToCheck = new Map<ESTree.TSTypeAliasDeclaration, { complexity: number }>();
@@ -611,13 +611,13 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 				const complexity = calculateStructuralComplexity(
 					node,
 					0,
-					config,
+					configuration,
 					cache,
 					depthMultiplierCache,
 					complexityCeiling,
 				);
 				/* v8 ignore else -- @preserve top-level depth scoring keeps interface checks below threshold today. */
-				if (complexity < config.interfacePenalty) return;
+				if (complexity < configuration.interfacePenalty) return;
 
 				/* v8 ignore next -- @preserve top-level depth scoring keeps interface checks below threshold today. */
 				interfacesToCheck.set(node, { complexity });
@@ -634,13 +634,13 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 				const complexity = calculateStructuralComplexity(
 					node.typeAnnotation,
 					0,
-					config,
+					configuration,
 					cache,
 					depthMultiplierCache,
 					complexityCeiling,
 				);
 				/* v8 ignore else -- @preserve top-level depth scoring keeps type alias checks below threshold today. */
-				if (complexity < config.baseThreshold) return;
+				if (complexity < configuration.baseThreshold) return;
 
 				/* v8 ignore next -- @preserve top-level depth scoring keeps type alias checks below threshold today. */
 				typeAliasesToCheck.set(node, { complexity });
@@ -655,7 +655,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 				if (isIdentifierName(id) && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
 
 				const complexity = calculateIanitorComplexity(init);
-				if (complexity < config.baseThreshold) return;
+				if (complexity < configuration.baseThreshold) return;
 
 				variableDeclaratorsToCheck.set(node, { complexity });
 			},
