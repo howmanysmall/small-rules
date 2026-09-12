@@ -1,16 +1,32 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import { isIdentifierName, isIdentifierNamed, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import {
 	describeEffectOwner,
 	getReactEffectAnalysis,
 	getReportableEffectCall,
 } from "$oxc-utilities/react-effect-utilities";
-import { getEnvironment } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
 
 import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
 type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
+
+function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boolean {
+	return function isUseHook(node: ESTree.Node): boolean {
+		/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
+		if (!isIdentifierName(node) && !isMemberExpression(node)) return false;
+		return (
+			isIdentifierNamed(node, hookName) ||
+			(isIdentifierNamed(node.object, "React") && isIdentifierNamed(node.property, hookName))
+		);
+		/* v8 ignore stop */
+	};
+}
+
+const isUseState = createIsUseHook("useState");
+const isUseRef = createIsUseHook("useRef");
 
 function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): ReadonlyArray<Reference> {
 	const dataArguments = new Array<Reference>();
@@ -85,12 +101,7 @@ const noPassDataToParent = createRule("no-pass-data-to-parent", "react", {
 			{
 				additionalProperties: false,
 				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 				},
 				type: "object",
 			},
@@ -98,30 +109,5 @@ const noPassDataToParent = createRule("no-pass-data-to-parent", "react", {
 		type: "suggestion",
 	},
 });
-
-function isUseState(node: ESTree.Node): boolean {
-	/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
-	if (node.type !== "Identifier" && node.type !== "MemberExpression") return false;
-	if (node.type === "Identifier") return node.name === "useState";
-	return (
-		node.object.type === "Identifier" &&
-		node.object.name === "React" &&
-		node.property.type === "Identifier" &&
-		node.property.name === "useState"
-	);
-	/* v8 ignore stop */
-}
-function isUseRef(node: ESTree.Node): boolean {
-	/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
-	if (node.type !== "Identifier" && node.type !== "MemberExpression") return false;
-	if (node.type === "Identifier") return node.name === "useRef";
-	return (
-		node.object.type === "Identifier" &&
-		node.object.name === "React" &&
-		node.property.type === "Identifier" &&
-		node.property.name === "useRef"
-	);
-	/* v8 ignore stop */
-}
 
 export default noPassDataToParent;
