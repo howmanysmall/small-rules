@@ -348,6 +348,26 @@ function seedPlayerValueFromParameter(parameter: ESTree.Node, state: CallbackSta
 	markPatternValues(parameter, state);
 }
 
+function isEventsImportedSpecifier(specifier: ESTree.ImportSpecifier): boolean {
+	if (isIdentifierName(specifier.imported)) return specifier.imported.name === "Events";
+	return isAnyLiteral(specifier.imported) && specifier.imported.value === "Events";
+}
+
+function trackEventsSpecifier(
+	specifier: ESTree.ImportDeclaration["specifiers"][number],
+	trackedEventsIdentifiers: Set<string>,
+): void {
+	const { name } = specifier.local;
+	if (isImportDefaultSpecifier(specifier)) {
+		if (name === "Events") trackedEventsIdentifiers.add(name);
+		return;
+	}
+
+	if (!isImportSpecifier(specifier)) return;
+
+	if (isEventsImportedSpecifier(specifier)) trackedEventsIdentifiers.add(name);
+}
+
 const noEventsInEventsCallback = createRule("no-events-in-events-callback", "roblox", {
 	create(context): Visitor {
 		const allowedImportPaths = normalizeImportPaths(context.options[0]);
@@ -441,24 +461,7 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 				const importSource = node.source.value;
 				if (!allowedImportPaths.has(importSource)) return;
 
-				for (const specifier of node.specifiers) {
-					const { name } = specifier.local;
-					if (isImportDefaultSpecifier(specifier)) {
-						if (name === "Events") trackedEventsIdentifiers.add(name);
-						continue;
-					}
-
-					if (!isImportSpecifier(specifier)) continue;
-
-					if (isIdentifierName(specifier.imported) && specifier.imported.name === "Events") {
-						trackedEventsIdentifiers.add(name);
-						continue;
-					}
-
-					if (isAnyLiteral(specifier.imported) && specifier.imported.value === "Events") {
-						trackedEventsIdentifiers.add(name);
-					}
-				}
+				for (const specifier of node.specifiers) trackEventsSpecifier(specifier, trackedEventsIdentifiers);
 			},
 
 			VariableDeclarator(node): void {

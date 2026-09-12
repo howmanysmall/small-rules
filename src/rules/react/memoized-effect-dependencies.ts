@@ -1,14 +1,44 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
-import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	isArrayExpression,
+	isArrayPattern,
+	isAssignmentPattern,
+	isCallExpression,
+	isClassDeclaration,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isMemberExpression,
+	isRestElement,
+	isSpreadElement,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
+import {
+	ENVIRONMENT_SCHEMA,
+	forEachReactNamedImport,
+	getReactSources,
+	isEnvironment,
+	ROBLOX_TS,
+} from "$oxc-utilities/react-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
 
 type Mode = "aggressive" | "definite" | "moderate";
-type Stability = "memoized" | "unknown" | "unmemoized";
+const enum Stability {
+	Memoized = 1,
+	Unknown = 2,
+	Unmemoized = 3,
+}
 
 const DEFAULT_EFFECT_HOOKS = new Map<string, number>([
 	["useEffect", 1],
@@ -20,12 +50,12 @@ const STABLE_HOOKS_WHOLE = new Set(["useBinding", "useRef"]);
 const STABLE_HOOKS_INDEX1 = new Set(["useReducer", "useState", "useTransition"]);
 const STABLE_HOOKS = new Set([...STABLE_HOOKS_WHOLE, ...STABLE_HOOKS_INDEX1]);
 const UNMEMOIZED_INLINE_TYPES = new Set([
-	"ArrayExpression",
-	"ArrowFunctionExpression",
-	"ClassExpression",
-	"FunctionExpression",
-	"NewExpression",
-	"ObjectExpression",
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
 ]);
 
 function isMode(value: unknown): value is Mode {
@@ -33,17 +63,17 @@ function isMode(value: unknown): value is Mode {
 }
 
 function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: ReadonlySet<string>): string | undefined {
-	if (callee.computed || callee.object.type !== "Identifier" || !reactNamespaces.has(callee.object.name)) {
+	if (callee.computed || !isIdentifierName(callee.object) || !reactNamespaces.has(callee.object.name)) {
 		return undefined;
 	}
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
-	return callee.property.type === "Identifier" ? callee.property.name : undefined;
+	return isIdentifierName(callee.property) ? callee.property.name : undefined;
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
 	let current = unwrapExpression(expression);
-	while (current.type === "MemberExpression") current = unwrapExpression(current.object);
-	return current.type === "Identifier" ? current : undefined;
+	while (isMemberExpression(current)) current = unwrapExpression(current.object);
+	return isIdentifierName(current) ? current : undefined;
 }
 
 function isUnmemoizedInline(node: ESTree.Node): boolean {
@@ -53,9 +83,9 @@ function isUnmemoizedInline(node: ESTree.Node): boolean {
 function getPatternElementName(element: ESTree.ArrayPattern["elements"][number]): string | undefined {
 	/* v8 ignore next -- @preserve stable hook matching only asks about occupied dependency binding slots. */
 	if (element === null) return undefined;
-	if (element.type === "Identifier") return element.name;
-	if (element.type === "AssignmentPattern" && element.left.type === "Identifier") return element.left.name;
-	if (element.type === "RestElement" && element.argument.type === "Identifier") return element.argument.name;
+	if (isIdentifierName(element)) return element.name;
+	if (isAssignmentPattern(element) && isIdentifierName(element.left)) return element.left.name;
+	if (isRestElement(element) && isIdentifierName(element.argument)) return element.argument.name;
 	return undefined;
 }
 
@@ -67,6 +97,49 @@ function isIdentifierAtArrayIndex(pattern: ESTree.ArrayPattern, identifierName: 
 
 function isModuleScope(variable: Variable): boolean {
 	return variable.scope.type === "module" || variable.scope.type === "global";
+}
+
+const enum StableKind {
+	Index1 = 1,
+	Whole = 2,
+}
+
+function lookupStableKind(name: string): StableKind | undefined {
+	if (STABLE_HOOKS_WHOLE.has(name)) return StableKind.Whole;
+	/* v8 ignore next -- @preserve stableHookIdentifiers is populated only from STABLE_HOOKS. */
+	if (STABLE_HOOKS_INDEX1.has(name)) return StableKind.Index1;
+	/* v8 ignore next -- @preserve stableHookIdentifiers is populated only from STABLE_HOOKS. */
+	return undefined;
+}
+
+function isFunctionOrClassDeclaration(node: ESTree.Node): boolean {
+	return isFunctionDeclarationRaw(node) || isClassDeclaration(node);
+}
+
+function isNonConstVariableDeclaration(parent: ESTree.Node): boolean {
+	return isVariableDeclaration(parent) && parent.kind !== "const";
+}
+
+function getFallbackStability(mode: Mode): Stability {
+	return mode === "definite" ? Stability.Unknown : Stability.Unmemoized;
+}
+
+function isStableIndex1Binding(
+	stableKind: StableKind | undefined,
+	id: ESTree.BindingPattern,
+	variableName: string,
+): boolean {
+	return stableKind === StableKind.Index1 && isArrayPattern(id) && isIdentifierAtArrayIndex(id, variableName, 1);
+}
+
+function getUnwrappedInit(node: ESTree.VariableDeclarator): ESTree.Expression | undefined {
+	/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
+	if (node.init === null) return undefined;
+	return unwrapExpression(node.init);
+}
+
+function shouldForceUnmemoized(mode: Mode, result: Stability): boolean {
+	return mode === "aggressive" && result !== Stability.Memoized;
 }
 
 function registerConfiguredEffectHooks(rawOptions: UnknownRecord, effectHooks: Map<string, number>): void {
@@ -87,7 +160,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		const options = Predicate.isObject(rawOptions) ? rawOptions : {};
 		const mode: Mode = "mode" in options && isMode(options.mode) ? options.mode : "definite";
 		const environment =
-			"environment" in options && isEnvironment(options.environment) ? options.environment : "roblox-ts";
+			"environment" in options && isEnvironment(options.environment) ? options.environment : ROBLOX_TS;
 
 		const effectHookNameToIndex = new Map(DEFAULT_EFFECT_HOOKS);
 		registerConfiguredEffectHooks(options, effectHookNameToIndex);
@@ -137,77 +210,80 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		}
 
 		function isMemoHookCall({ callee }: ESTree.CallExpression): boolean {
-			if (callee.type === "Identifier") return memoHookIdentifiers.has(callee.name);
-			if (callee.type === "MemberExpression") {
+			if (isIdentifierName(callee)) return memoHookIdentifiers.has(callee.name);
+			if (isMemberExpression(callee)) {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				return hookName !== undefined && MEMO_HOOKS.has(hookName);
 			}
 			return false;
 		}
 
-		function getStableHookKind({ callee }: ESTree.CallExpression): "index1" | "whole" | undefined {
-			if (callee.type === "Identifier") {
-				const importedName = stableHookIdentifiers.get(callee.name);
-				if (importedName === undefined) return undefined;
-				if (STABLE_HOOKS_WHOLE.has(importedName)) return "whole";
-				/* v8 ignore next -- @preserve stableHookIdentifiers is populated only from STABLE_HOOKS. */
-				if (STABLE_HOOKS_INDEX1.has(importedName)) return "index1";
-				/* v8 ignore next -- @preserve stableHookIdentifiers is populated only from STABLE_HOOKS. */
-				return undefined;
-			}
-			if (callee.type === "MemberExpression") {
-				const hookName = getMemberHookName(callee, reactNamespaces);
-				if (hookName === undefined) return undefined;
-				if (STABLE_HOOKS_WHOLE.has(hookName)) return "whole";
-				/* v8 ignore next -- @preserve member stable hooks come only from STABLE_HOOKS. */
-				if (STABLE_HOOKS_INDEX1.has(hookName)) return "index1";
-			}
+		function getStableIdentifierKind(name: string): StableKind | undefined {
+			const importedName = stableHookIdentifiers.get(name);
+			if (importedName === undefined) return undefined;
+			return lookupStableKind(importedName);
+		}
+
+		function getStableMemberKind(callee: ESTree.MemberExpression): StableKind | undefined {
+			const hookName = getMemberHookName(callee, reactNamespaces);
+			if (hookName === undefined) return undefined;
+			return lookupStableKind(hookName);
+		}
+
+		function getStableHookKind({ callee }: ESTree.CallExpression): StableKind | undefined {
+			if (isIdentifierName(callee)) return getStableIdentifierKind(callee.name);
+			if (isMemberExpression(callee)) return getStableMemberKind(callee);
 			return undefined;
 		}
 
+		function getDeclaratorStability(node: ESTree.VariableDeclarator, variableName: string): Stability {
+			if (isNonConstVariableDeclaration(node.parent)) return getFallbackStability(mode);
+
+			const init = getUnwrappedInit(node);
+			/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
+			if (init === undefined) return Stability.Unknown;
+			if (isUnmemoizedInline(init)) return Stability.Unmemoized;
+
+			if (isCallExpression(init)) return getCallInitializerStability(init, node.id, variableName);
+
+			return Stability.Unknown;
+		}
+
 		function getDefinitionStability(definition: Definition, variableName: string): Stability {
-			if (definition.type === "Parameter") return "unknown";
+			if (definition.type === "Parameter") return Stability.Unknown;
 			/* v8 ignore next -- @preserve imports are module scoped and returned before definition inspection. */
-			if (definition.type === "ImportBinding") return "memoized";
+			if (definition.type === "ImportBinding") return Stability.Memoized;
 
 			const { node } = definition;
-			if (node.type === "FunctionDeclaration" || node.type === "ClassDeclaration") return "unmemoized";
-			if (node.type !== "VariableDeclarator") return "unknown";
+			if (isFunctionOrClassDeclaration(node)) return Stability.Unmemoized;
+			if (!isVariableDeclarator(node)) return Stability.Unknown;
 
-			const declarationParent = node.parent;
-			if (declarationParent.type === "VariableDeclaration" && declarationParent.kind !== "const") {
-				return mode === "definite" ? "unknown" : "unmemoized";
-			}
-
-			/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
-			const init = node.init === null ? undefined : unwrapExpression(node.init);
-			/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
-			if (init === undefined) return "unknown";
-			if (isUnmemoizedInline(init)) return "unmemoized";
-
-			if (init.type === "CallExpression") return getCallInitializerStability(init, node.id, variableName);
-
-			return "unknown";
+			return getDeclaratorStability(node, variableName);
 		}
 
 		function getCallInitializerStability(
 			init: ESTree.CallExpression,
-			id: ESTree.VariableDeclarator["id"],
+			id: ESTree.BindingPattern,
 			variableName: string,
 		): Stability {
-			if (isMemoHookCall(init)) return "memoized";
+			if (isMemoHookCall(init)) return Stability.Memoized;
 
 			const stableKind = getStableHookKind(init);
-			if (stableKind === "whole") return "memoized";
-			if (
-				stableKind === "index1" &&
-				id.type === "ArrayPattern" &&
-				isIdentifierAtArrayIndex(id, variableName, 1)
-			) {
-				return "memoized";
+			if (stableKind === StableKind.Whole) return Stability.Memoized;
+			if (isStableIndex1Binding(stableKind, id, variableName)) return Stability.Memoized;
+
+			return getFallbackStability(mode);
+		}
+
+		function scanDefinitionStabilities(variable: Variable): Stability {
+			let sawMemoized = false;
+			for (const definition of variable.defs) {
+				const stability = getDefinitionStability(definition, variable.name);
+				if (stability === Stability.Unmemoized) return Stability.Unmemoized;
+				if (stability === Stability.Memoized) sawMemoized = true;
 			}
 
-			return mode === "definite" ? "unknown" : "unmemoized";
+			return sawMemoized ? Stability.Memoized : Stability.Unknown;
 		}
 
 		function getVariableStability(variable: Variable): Stability {
@@ -215,42 +291,52 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			if (cached !== undefined) return cached;
 
 			if (isModuleScope(variable)) {
-				variableStabilityCache.set(variable, "memoized");
-				return "memoized";
+				variableStabilityCache.set(variable, Stability.Memoized);
+				return Stability.Memoized;
 			}
 
-			let sawMemoized = false;
-			for (const definition of variable.defs) {
-				const stability = getDefinitionStability(definition, variable.name);
-				if (stability === "unmemoized") {
-					variableStabilityCache.set(variable, "unmemoized");
-					return "unmemoized";
-				}
-				if (stability === "memoized") sawMemoized = true;
-			}
-
-			let result: Stability = sawMemoized ? "memoized" : "unknown";
-			if (mode === "aggressive" && result !== "memoized") result = "unmemoized";
+			const scanned = scanDefinitionStabilities(variable);
+			const result = shouldForceUnmemoized(mode, scanned) ? Stability.Unmemoized : scanned;
 
 			variableStabilityCache.set(variable, result);
 			return result;
 		}
 
+		function reportUnmemoizedDependency(name: string, node: ESTree.Node): void {
+			context.report({
+				data: { name },
+				messageId: "unmemoizedDependency",
+				node,
+			});
+		}
+
+		function handleDependencyElement(element: ESTree.ArrayExpressionElement): void {
+			if (element === null) return;
+			if (isSpreadElement(element)) {
+				if (mode === "definite") return;
+				reportUnmemoizedDependency(sourceCode.getText(element.argument), element.argument);
+				return;
+			}
+
+			if (classifyDependency(element) !== Stability.Unmemoized) return;
+			reportUnmemoizedDependency(sourceCode.getText(element), element);
+		}
+
 		function classifyDependency(node: ESTree.Expression): Stability {
 			const unwrapped = unwrapExpression(node);
-			if (isUnmemoizedInline(unwrapped)) return "unmemoized";
-			if (unwrapped.type === "CallExpression") return mode === "definite" ? "unknown" : "unmemoized";
+			if (isUnmemoizedInline(unwrapped)) return Stability.Unmemoized;
+			if (isCallExpression(unwrapped)) return mode === "definite" ? Stability.Unknown : Stability.Unmemoized;
 
 			const rootIdentifier = getRootIdentifier(unwrapped);
-			if (rootIdentifier === undefined) return "unknown";
+			if (rootIdentifier === undefined) return Stability.Unknown;
 
 			const variable = resolveVariable(rootIdentifier);
-			return variable === undefined ? "unknown" : getVariableStability(variable);
+			return variable === undefined ? Stability.Unknown : getVariableStability(variable);
 		}
 
 		function getDependenciesIndex({ callee }: ESTree.CallExpression): number | undefined {
-			if (callee.type === "Identifier") return effectHookIdentifiers.get(callee.name);
-			if (callee.type === "MemberExpression") {
+			if (isIdentifierName(callee)) return effectHookIdentifiers.get(callee.name);
+			if (isMemberExpression(callee)) {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				return hookName === undefined ? undefined : effectHookNameToIndex.get(hookName);
 			}
@@ -263,32 +349,9 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 				if (dependenciesIndex === undefined) return;
 
 				const dependenciesArgument = node.arguments[dependenciesIndex];
-				if (dependenciesArgument?.type !== "ArrayExpression") return;
+				if (!isArrayExpression(dependenciesArgument)) return;
 
-				for (const element of dependenciesArgument.elements) {
-					if (element === null) continue;
-					if (element.type === "SpreadElement") {
-						if (mode === "definite") continue;
-						const spreadTarget = element.argument;
-						const spreadName = sourceCode.getText(spreadTarget);
-						context.report({
-							data: { name: spreadName },
-							messageId: "unmemoizedDependency",
-							node: spreadTarget,
-						});
-						continue;
-					}
-
-					const stability = classifyDependency(element);
-					if (stability !== "unmemoized") continue;
-
-					const name = sourceCode.getText(element);
-					context.report({
-						data: { name },
-						messageId: "unmemoizedDependency",
-						node: element,
-					});
-				}
+				for (const element of dependenciesArgument.elements) handleDependencyElement(element);
 			},
 			ImportDeclaration(node): void {
 				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
@@ -316,12 +379,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			{
 				additionalProperties: false,
 				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 					hooks: {
 						default: Array.from(DEFAULT_EFFECT_HOOKS, ([name, dependenciesIndex]) => ({
 							name,
@@ -346,10 +404,10 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 						type: "array",
 					},
 					mode: {
-						default: "definite",
+						default: "definite" satisfies Mode,
 						description:
 							"Strictness for memoization detection: definite (only obvious), moderate (unknown calls and non-const), aggressive (any non-module).",
-						enum: ["aggressive", "definite", "moderate"],
+						enum: ["aggressive", "definite", "moderate"] satisfies ReadonlyArray<Mode>,
 						type: "string",
 					},
 				},

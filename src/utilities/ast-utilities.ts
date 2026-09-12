@@ -1,10 +1,10 @@
 import { isNode } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
+import type { ESTree, Scope, SourceCode, Variable } from "oxlint-plugin-utilities";
 
-export type ScopeVariable = Scope["set"] extends Map<string, infer VariableType> ? VariableType : never;
+export type ScopeVariable = Variable;
 
-export function getVariableByName(scope: null | Scope, name: string): ScopeVariable | undefined {
+export function getVariableByName(scope: null | Scope, name: string): undefined | Variable {
 	let currentScope = scope;
 	while (currentScope !== null) {
 		const variable = currentScope.set.get(name);
@@ -21,16 +21,14 @@ export function pushChildScopes(scopes: Array<Scope>, scope: Scope): void {
 const AST_NODE_KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
 export const STOP_NODE_TRAVERSAL = Symbol("STOP_NODE_TRAVERSAL");
 
-function pushNodeChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
+function pushNodeChildren(node: ESTree.Node, workList: Array<ESTree.Node>): void {
 	for (const [key, value] of Object.entries(node)) {
 		if (AST_NODE_KEYS_TO_SKIP.has(key)) continue;
 		if (Array.isArray(value)) {
-			for (const child of value) {
-				if (isNode(child)) worklist.push(child);
-			}
+			for (const child of value) if (isNode(child)) workList.push(child);
 			continue;
 		}
-		if (isNode(value)) worklist.push(value);
+		if (isNode(value)) workList.push(value);
 	}
 }
 
@@ -38,16 +36,16 @@ export function forEachNode(
 	root: ESTree.Node,
 	visit: (node: ESTree.Node) => boolean | typeof STOP_NODE_TRAVERSAL | undefined | void,
 ): void {
-	const worklist: Array<ESTree.Node> = [root];
-	for (const current of worklist) {
+	const workList: Array<ESTree.Node> = [root];
+	for (const current of workList) {
 		const result = visit(current);
 		if (result === STOP_NODE_TRAVERSAL) break;
 		if (result === false) continue;
-		pushNodeChildren(current, worklist);
+		pushNodeChildren(current, workList);
 	}
 }
 
-export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable: ScopeVariable) => void): void {
+export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable: Variable) => void): void {
 	const scopes = [sourceCode.getScope(sourceCode.ast)];
 	for (const scope of scopes) {
 		pushChildScopes(scopes, scope);

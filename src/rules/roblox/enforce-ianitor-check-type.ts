@@ -3,6 +3,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallExpression,
 	isIdentifierName,
+	isIdentifierNamed,
 	isMemberExpression,
 	isObjectExpression,
 	isTsOptionalType,
@@ -67,13 +68,13 @@ function unwrapReadonlyType(typeNode: ESTree.Node): ESTree.Node {
 	if (!isTsTypeReference(typeNode)) return typeNode;
 
 	const { typeArguments, typeName } = typeNode;
-	if (!isIdentifierName(typeName) || typeName.name !== "Readonly") return typeNode;
+	if (!isIdentifierNamed(typeName, "Readonly")) return typeNode;
 
 	return typeArguments?.params[0] ?? typeNode;
 }
 
 function hasBothTypeArguments(left: ESTree.TSTypeName, right: ESTree.IdentifierName): boolean {
-	return !isIdentifierName(left) || left.name !== "Ianitor" || right.name !== "Static";
+	return !isIdentifierNamed(left, "Ianitor") || right.name !== "Static";
 }
 
 function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined {
@@ -87,7 +88,7 @@ function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined
 	if (!isTsTypeQuery(first)) return undefined;
 
 	const { exprName } = first;
-	return exprName.type === "Identifier" ? exprName.name : undefined;
+	return isIdentifierName(exprName) ? exprName.name : undefined;
 }
 
 function hasIanitorStaticType(typeNode: ESTree.Node): boolean {
@@ -229,7 +230,224 @@ function getDepthMultiplier(depth: number, cache: Map<number, number>): number {
 	return computed;
 }
 
-// oxlint-disable-next-line sonar/cognitive-complexity -- do not care.
+interface StructuralScoringArguments {
+	readonly cache: ComplexityCache;
+	readonly ceiling: number;
+	readonly config: ComplexityConfig;
+	readonly depthMultiplierCache: Map<number, number>;
+	readonly nextDepth: number;
+}
+
+function scoreArrayType(node: ESTree.Node, scoring: StructuralScoringArguments): number {
+	/* v8 ignore else -- @preserve parser-produced TSArrayType nodes always supply elementType. */
+	if ("elementType" in node) {
+		const { elementType } = node;
+		return addScore(
+			calculateStructuralComplexity(
+				elementType,
+				scoring.nextDepth,
+				scoring.config,
+				scoring.cache,
+				scoring.depthMultiplierCache,
+				scoring.ceiling,
+			),
+			1,
+			scoring.config,
+			scoring.ceiling,
+		);
+	}
+
+	/* v8 ignore next -- @preserve parser-produced TSArrayType nodes always supply elementType. */
+	return 1;
+}
+
+function scoreConditionalType(
+	{ checkType, extendsType, falseType, trueType }: ESTree.TSConditionalType,
+	{ cache, ceiling, config, depthMultiplierCache, nextDepth }: StructuralScoringArguments,
+): number {
+	let score = addScore(
+		addScore(
+			3,
+			calculateStructuralComplexity(checkType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+			config,
+			ceiling,
+		),
+		calculateStructuralComplexity(extendsType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+		config,
+		ceiling,
+	);
+	score = addScore(
+		addScore(
+			score,
+			calculateStructuralComplexity(trueType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+			config,
+			ceiling,
+		),
+		calculateStructuralComplexity(falseType, nextDepth, config, cache, depthMultiplierCache, ceiling),
+		config,
+		ceiling,
+	);
+	return score;
+}
+
+function addFunctionParameterScore(
+	current: number,
+	parameter: ESTree.Node,
+	scoring: StructuralScoringArguments,
+): number {
+	/* v8 ignore next -- @preserve type-checkable function type parameters carry type annotations in this suite. */
+	if (!("typeAnnotation" in parameter)) return current;
+	const { typeAnnotation } = parameter;
+	/* v8 ignore next -- @preserve parser-produced function type params either omit annotations or use TSTypeAnnotation. */
+	if (!isTsTypeAnnotation(typeAnnotation)) return current;
+	return addScore(
+		current,
+		calculateStructuralComplexity(
+			typeAnnotation.typeAnnotation,
+			scoring.nextDepth,
+			scoring.config,
+			scoring.cache,
+			scoring.depthMultiplierCache,
+			scoring.ceiling,
+		),
+		scoring.config,
+		scoring.ceiling,
+	);
+}
+
+function addFunctionReturnScore(current: number, node: ESTree.Node, scoring: StructuralScoringArguments): number {
+	/* v8 ignore else -- @preserve parser-produced function and method type nodes expose returnType. */
+	if (!("returnType" in node)) return current;
+	const { returnType } = node;
+	/* v8 ignore else -- @preserve type-checkable function and method signatures carry return annotations here. */
+	if (!isTsTypeAnnotation(returnType)) return current;
+	return addScore(
+		current,
+		calculateStructuralComplexity(
+			returnType.typeAnnotation,
+			scoring.nextDepth,
+			scoring.config,
+			scoring.cache,
+			scoring.depthMultiplierCache,
+			scoring.ceiling,
+		),
+		scoring.config,
+		scoring.ceiling,
+	);
+}
+
+function scoreFunctionType(
+	node: ESTree.TSFunctionType | ESTree.TSMethodSignature,
+	scoring: StructuralScoringArguments,
+): number {
+	const { params: parameters } = node;
+	let score = 2;
+	for (const parameter of parameters) score = addFunctionParameterScore(score, parameter, scoring);
+
+	return addFunctionReturnScore(score, node, scoring);
+}
+
+function scoreInterfaceDeclaration(node: ESTree.TSInterfaceDeclaration, scoring: StructuralScoringArguments): number {
+	const { body, extends: extendsClause } = node;
+	let score = scoring.config.interfacePenalty;
+	if (extendsClause.length > 0) {
+		score = addScore(score, extendsClause.length * 5, scoring.config, scoring.ceiling);
+	}
+
+	const members = body.body;
+	score = addScore(score, members.length * 2, scoring.config, scoring.ceiling);
+	return addNestedTypeAnnotationScores(
+		score,
+		members,
+		scoring.nextDepth,
+		scoring.config,
+		scoring.cache,
+		scoring.depthMultiplierCache,
+		scoring.ceiling,
+	);
+}
+
+function scoreMappedType(node: ESTree.TSMappedType, scoring: StructuralScoringArguments): number {
+	const { constraint, typeAnnotation } = node;
+	/* v8 ignore else -- @preserve parser-produced mapped types always supply a constraint. */
+	let score = addStructuralScore(
+		5,
+		constraint,
+		scoring.nextDepth,
+		scoring.config,
+		scoring.cache,
+		scoring.depthMultiplierCache,
+		scoring.ceiling,
+	);
+	if (typeAnnotation !== null) {
+		score = addStructuralScore(
+			score,
+			typeAnnotation,
+			scoring.nextDepth,
+			scoring.config,
+			scoring.cache,
+			scoring.depthMultiplierCache,
+			scoring.ceiling,
+		);
+	}
+	return score;
+}
+
+function isSkippedTupleElement(element: ESTree.Node): boolean {
+	return isTsRestType(element) || isTsOptionalType(element);
+}
+
+function scoreTupleType(node: ESTree.TSTupleType, scoring: StructuralScoringArguments): number {
+	const { elementTypes } = node;
+	let score = 1;
+	for (const element of elementTypes) {
+		if (isSkippedTupleElement(element)) continue;
+		score = addStructuralScore(
+			score,
+			element,
+			scoring.nextDepth,
+			scoring.config,
+			scoring.cache,
+			scoring.depthMultiplierCache,
+			scoring.ceiling,
+		);
+	}
+	return addScore(score, 1.5 * elementTypes.length, scoring.config, scoring.ceiling);
+}
+
+function scoreTypeLiteral(node: ESTree.TSTypeLiteral, scoring: StructuralScoringArguments): number {
+	const { members } = node;
+	const baseScore = 2 + members.length * 0.5;
+	return addNestedTypeAnnotationScores(
+		baseScore,
+		members,
+		scoring.nextDepth,
+		scoring.config,
+		scoring.cache,
+		scoring.depthMultiplierCache,
+		scoring.ceiling,
+	);
+}
+
+function scoreTypeReference(node: ESTree.TSTypeReference, scoring: StructuralScoringArguments): number {
+	const { typeArguments } = node;
+	const parameters = typeArguments?.params ?? [];
+	let score = 2;
+	for (const parameter of parameters) {
+		score = addStructuralScore(
+			score,
+			parameter,
+			scoring.nextDepth,
+			scoring.config,
+			scoring.cache,
+			scoring.depthMultiplierCache,
+			scoring.ceiling,
+			2,
+		);
+	}
+	return score;
+}
+
 function calculateStructuralComplexity(
 	node: ESTree.Node,
 	depth: number,
@@ -248,6 +466,13 @@ function calculateStructuralComplexity(
 
 	let score = 0;
 	const nextDepth = depth + 1;
+	const scoring: StructuralScoringArguments = {
+		cache,
+		ceiling,
+		config,
+		depthMultiplierCache,
+		nextDepth,
+	};
 
 	switch (node.type) {
 		case TS_ANY_KEYWORD:
@@ -256,21 +481,7 @@ function calculateStructuralComplexity(
 			break;
 
 		case TS_ARRAY_TYPE: {
-			/* v8 ignore else -- @preserve parser-produced TSArrayType nodes always supply elementType. */
-			if ("elementType" in node) {
-				const { elementType } = node;
-				score = addScore(
-					calculateStructuralComplexity(elementType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-					1,
-					config,
-					ceiling,
-				);
-				break;
-			}
-
-			/* v8 ignore next -- @preserve parser-produced TSArrayType nodes always supply elementType. */
-			score = 1;
-			/* v8 ignore next -- @preserve parser-produced TSArrayType nodes always take the elementType branch. */
+			score = scoreArrayType(node, scoring);
 			break;
 		}
 
@@ -287,98 +498,18 @@ function calculateStructuralComplexity(
 		}
 
 		case TS_CONDITIONAL_TYPE: {
-			const { checkType, extendsType, falseType, trueType } = node;
-			score = addScore(
-				addScore(
-					3,
-					calculateStructuralComplexity(checkType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-					config,
-					ceiling,
-				),
-				calculateStructuralComplexity(extendsType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-				config,
-				ceiling,
-			);
-			score = addScore(
-				addScore(
-					score,
-					calculateStructuralComplexity(trueType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-					config,
-					ceiling,
-				),
-				calculateStructuralComplexity(falseType, nextDepth, config, cache, depthMultiplierCache, ceiling),
-				config,
-				ceiling,
-			);
+			score = scoreConditionalType(node, scoring);
 			break;
 		}
 
 		case TS_FUNCTION_TYPE:
 		case TS_METHOD_SIGNATURE: {
-			score = 2;
-			const { params: parameters } = node;
-			for (const parameter of parameters) {
-				/* v8 ignore next -- @preserve type-checkable function type parameters carry type annotations in this suite. */
-				if (!("typeAnnotation" in parameter)) continue;
-				const { typeAnnotation } = parameter;
-				/* v8 ignore next -- @preserve parser-produced function type params either omit annotations or use TSTypeAnnotation. */
-				if (!isTsTypeAnnotation(typeAnnotation)) continue;
-				score = addScore(
-					score,
-					calculateStructuralComplexity(
-						typeAnnotation.typeAnnotation,
-						nextDepth,
-						config,
-						cache,
-						depthMultiplierCache,
-						ceiling,
-					),
-					config,
-					ceiling,
-				);
-			}
-
-			/* v8 ignore else -- @preserve parser-produced function and method type nodes expose returnType. */
-			if ("returnType" in node) {
-				const { returnType } = node;
-				/* v8 ignore else -- @preserve type-checkable function and method signatures carry return annotations here. */
-				if (isTsTypeAnnotation(returnType)) {
-					score = addScore(
-						score,
-						calculateStructuralComplexity(
-							returnType.typeAnnotation,
-							nextDepth,
-							config,
-							cache,
-							depthMultiplierCache,
-							ceiling,
-						),
-						config,
-						ceiling,
-					);
-				}
-			}
+			score = scoreFunctionType(node, scoring);
 			break;
 		}
 
 		case TS_INTERFACE_DECLARATION: {
-			score = config.interfacePenalty;
-			const { body, extends: extendsClause } = node;
-			if (extendsClause.length > 0) {
-				score = addScore(score, extendsClause.length * 5, config, ceiling);
-			}
-
-			const members = body.body;
-			score = addScore(score, members.length * 2, config, ceiling);
-			score = addNestedTypeAnnotationScores(
-				score,
-				members,
-				nextDepth,
-				config,
-				cache,
-				depthMultiplierCache,
-				ceiling,
-			);
+			score = scoreInterfaceDeclaration(node, scoring);
 			break;
 		}
 
@@ -388,65 +519,22 @@ function calculateStructuralComplexity(
 		}
 
 		case TS_MAPPED_TYPE: {
-			const { constraint, typeAnnotation } = node;
-			/* v8 ignore else -- @preserve parser-produced mapped types always supply a constraint. */
-			score = addStructuralScore(5, constraint, nextDepth, config, cache, depthMultiplierCache, ceiling);
-			if (typeAnnotation !== null) {
-				score = addStructuralScore(
-					score,
-					typeAnnotation,
-					nextDepth,
-					config,
-					cache,
-					depthMultiplierCache,
-					ceiling,
-				);
-			}
+			score = scoreMappedType(node, scoring);
 			break;
 		}
 
 		case TS_TUPLE_TYPE: {
-			const { elementTypes } = node;
-			score = 1;
-			for (const element of elementTypes) {
-				if (isTsRestType(element) || isTsOptionalType(element)) continue;
-				score = addStructuralScore(score, element, nextDepth, config, cache, depthMultiplierCache, ceiling);
-			}
-			score = addScore(score, 1.5 * elementTypes.length, config, ceiling);
+			score = scoreTupleType(node, scoring);
 			break;
 		}
 
 		case TS_TYPE_LITERAL: {
-			const { members } = node;
-			score = 2 + members.length * 0.5;
-			score = addNestedTypeAnnotationScores(
-				score,
-				members,
-				nextDepth,
-				config,
-				cache,
-				depthMultiplierCache,
-				ceiling,
-			);
+			score = scoreTypeLiteral(node, scoring);
 			break;
 		}
 
 		case TS_TYPE_REFERENCE: {
-			score = 2;
-			const { typeArguments } = node;
-			const parameters = typeArguments?.params ?? [];
-			for (const parameter of parameters) {
-				score = addStructuralScore(
-					score,
-					parameter,
-					nextDepth,
-					config,
-					cache,
-					depthMultiplierCache,
-					ceiling,
-					2,
-				);
-			}
+			score = scoreTypeReference(node, scoring);
 			break;
 		}
 

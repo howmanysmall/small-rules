@@ -4,7 +4,7 @@ import { type } from "arktype";
 import { minimatch, Minimatch } from "minimatch";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName, isIdentifierName, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { MinimatchOptions } from "minimatch";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -108,32 +108,52 @@ const noRestrictedPropertyAssignment = createRule("no-restricted-property-assign
 	create(context): Visitor {
 		const { checkComputed, isAllowedFile, restrictions } = getEffectiveOptions(context);
 
+		function isReportableMember(
+			node: ESTree.Node,
+		): node is ESTree.MemberExpression & { readonly object: ESTree.IdentifierName } {
+			if (isAllowedFile || !isMemberExpression(node)) return false;
+			if (!checkComputed && node.computed) return false;
+			return isIdentifierName(node.object);
+		}
+
+		function reportRestrictionMatch(
+			objectName: string,
+			property: string,
+			restriction: CompiledRestriction,
+			reportNode: ESTree.Node,
+		): void {
+			if (restriction.message === undefined) {
+				context.report({
+					data: { object: objectName, property },
+					messageId: "restricted",
+					node: reportNode,
+				});
+			} else {
+				context.report({
+					data: { message: restriction.message },
+					messageId: "restrictedCustom",
+					node: reportNode,
+				});
+			}
+		}
+
+		function findMatchingRestriction(objectName: string, property: string): CompiledRestriction | undefined {
+			for (const restriction of restrictions) {
+				if (!restriction.matchesObject(objectName)) continue;
+				if (restriction.matchesProperty(property)) return restriction;
+			}
+			return undefined;
+		}
+
 		function reportIfRestricted(node: ESTree.Node, reportNode: ESTree.Node): void {
-			if (isAllowedFile || !isMemberExpression(node)) return;
-			if ((!checkComputed && node.computed) || node.object.type !== "Identifier") return;
+			if (!isReportableMember(node)) return;
 
 			const property = getMemberPropertyName(node);
 			if (property === undefined) return;
 
-			for (const restriction of restrictions) {
-				if (!restriction.matchesObject(node.object.name)) continue;
-				if (restriction.matchesProperty(property)) {
-					if (restriction.message === undefined) {
-						context.report({
-							data: { object: node.object.name, property },
-							messageId: "restricted",
-							node: reportNode,
-						});
-					} else {
-						context.report({
-							data: { message: restriction.message },
-							messageId: "restrictedCustom",
-							node: reportNode,
-						});
-					}
-					return;
-				}
-			}
+			const restriction = findMatchingRestriction(node.object.name, property);
+			if (restriction === undefined) return;
+			reportRestrictionMatch(node.object.name, property, restriction, reportNode);
 		}
 
 		return {

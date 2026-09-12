@@ -7,22 +7,31 @@ import {
 	FUNCTION_DECLARATION,
 	FUNCTION_EXPRESSION,
 	isAnyFunction,
+	isAnyLiteral,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isBinaryExpression,
 	isCallbackFunction,
+	isCallExpression,
 	isChainExpression,
 	isConditionalExpression,
+	isExportNamedDeclaration,
 	isFunctionDeclarationRaw,
 	isIdentifierName,
+	isIdentifierNamed,
 	isLogicalExpression,
 	isMemberExpression,
 	isNode,
+	isParenthesizedExpression,
+	isProgram,
 	isProperty,
 	isSpreadElement,
+	isTemplateLiteral,
 	isTransparentDependencyExpression,
 	isTransparentExpressionNode,
+	isTsNonNullExpression,
 	isUnaryExpression,
+	isVariableDeclaration,
 	isVariableDeclarator,
 	OBJECT_EXPRESSION,
 	TS_AS_EXPRESSION,
@@ -173,10 +182,8 @@ const GLOBAL_BUILTINS = new Set([
 ]);
 
 function getHookName({ callee }: ESTree.CallExpression): string | undefined {
-	if (callee.type === "Identifier") return callee.name;
-	if (callee.type === "MemberExpression" && callee.property.type === "Identifier") {
-		return callee.property.name;
-	}
+	if (isIdentifierName(callee)) return callee.name;
+	if (isMemberExpression(callee) && isIdentifierName(callee.property)) return callee.property.name;
 
 	return undefined;
 }
@@ -201,12 +208,32 @@ function getMemberExpressionDepth(node: ESTree.Node): number {
 
 function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 	let current = unwrapDependencyExpression(node);
-
-	while (isMemberExpression(current)) {
-		current = unwrapDependencyExpression(current.object);
-	}
-
+	while (isMemberExpression(current)) current = unwrapDependencyExpression(current.object);
 	return isIdentifierName(current) ? current : undefined;
+}
+
+function isBinaryOrLogicalExpression(node: ESTree.Node): node is ESTree.BinaryExpression | ESTree.LogicalExpression {
+	return isBinaryExpression(node) || isLogicalExpression(node);
+}
+
+function queueIdentifierChildren(current: ESTree.Node, nodes: Array<ESTree.Node>): void {
+	if (isMemberExpression(current)) {
+		nodes.push(current.object);
+		return;
+	}
+	if (isTransparentDependencyExpression(current)) {
+		nodes.push(current.expression);
+		return;
+	}
+	if (isBinaryOrLogicalExpression(current)) {
+		nodes.push(current.right, current.left);
+		return;
+	}
+	if (isUnaryExpression(current)) {
+		nodes.push(current.argument);
+		return;
+	}
+	if (isConditionalExpression(current)) nodes.push(current.alternate, current.consequent, current.test);
 }
 
 function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
@@ -222,25 +249,7 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 			names.push(current.name);
 			continue;
 		}
-		if (isMemberExpression(current)) {
-			nodes.push(current.object);
-			continue;
-		}
-		if (isTransparentDependencyExpression(current)) {
-			nodes.push(current.expression);
-			continue;
-		}
-		if (isBinaryExpression(current) || isLogicalExpression(current)) {
-			nodes.push(current.right, current.left);
-			continue;
-		}
-		if (isUnaryExpression(current)) {
-			nodes.push(current.argument);
-			continue;
-		}
-		if (isConditionalExpression(current)) {
-			nodes.push(current.alternate, current.consequent, current.test);
-		}
+		queueIdentifierChildren(current, nodes);
 	}
 
 	return names;
@@ -260,32 +269,44 @@ function isExpression(
 	return TS_RUNTIME_EXPRESSIONS.has(node.type);
 }
 
+function tryUnwrapPathWrapper(node: ESTree.Node): ESTree.Node | undefined {
+	if (isChainExpression(node) || isParenthesizedExpression(node) || isExpression(node)) return node.expression;
+	return undefined;
+}
+
+function getBaseDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
+	if (isIdentifierName(node)) return node.name;
+	return sourceCode.getText(node);
+}
+
+function appendMemberSegment(path: string, member: ESTree.MemberExpression, sourceCode: SourceCode): string {
+	if (member.computed) return `${path}[${sourceCode.getText(member.property)}]`;
+	/* v8 ignore next -- @preserve non-computed dependency member properties are parser-provided identifiers. */
+	const propertyName = isIdentifierName(member.property) ? member.property.name : "";
+	return `${path}${member.optional ? "?." : "."}${propertyName}`;
+}
+
 function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
 	const members = new Array<ESTree.MemberExpression>();
 	let current = node;
 
 	while (true) {
-		if (current.type === "ChainExpression" || current.type === "ParenthesizedExpression" || isExpression(current)) {
-			current = current.expression;
+		const unwrapped = tryUnwrapPathWrapper(current);
+		if (unwrapped !== undefined) {
+			current = unwrapped;
 			continue;
 		}
-		if (current.type !== "MemberExpression") break;
+		if (!isMemberExpression(current)) break;
 		members.push(current);
 		current = current.object;
 	}
 
-	let path = current.type === "Identifier" ? current.name : sourceCode.getText(current);
+	let path = getBaseDependencyPath(current, sourceCode);
 	for (let index = members.length - 1; index >= 0; index -= 1) {
 		const member = members[index];
 		/* v8 ignore next -- @preserve index is bounded by members.length. */
 		if (member === undefined) continue;
-		if (member.computed) {
-			path += `[${sourceCode.getText(member.property)}]`;
-			continue;
-		}
-		/* v8 ignore next -- @preserve non-computed dependency member properties are parser-provided identifiers. */
-		const propertyName = member.property.type === "Identifier" ? member.property.name : "";
-		path += `${member.optional ? "?." : "."}${propertyName}`;
+		path = appendMemberSegment(path, member, sourceCode);
 	}
 
 	return path;
@@ -300,7 +321,7 @@ function isStableBindingPattern(
 	patternType: "ObjectPattern",
 ): node is ESTree.VariableDeclarator & { readonly id: ESTree.ObjectPattern };
 function isStableBindingPattern(node: ESTree.Node, patternType: "ArrayPattern" | "ObjectPattern"): boolean {
-	return node.type === "VariableDeclarator" && node.id.type === patternType;
+	return isVariableDeclarator(node) && node.id.type === patternType;
 }
 
 function isStableArrayIndex(
@@ -314,7 +335,7 @@ function isStableArrayIndex(
 	const { elements } = node.id;
 	let index = 0;
 	for (const element of elements) {
-		const name = element?.type === "Identifier" ? element.name : undefined;
+		const name = isIdentifierName(element) ? element.name : undefined;
 		if (name === identifierName) return stableResult.has(index);
 
 		index += 1;
@@ -332,7 +353,7 @@ function isStableObjectProperty(
 	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ObjectPattern")) return false;
 
 	for (const property of node.id.properties) {
-		if (property.type !== "Property") continue;
+		if (!isProperty(property)) continue;
 
 		const valueIdentifier = getBindingPropertyValueIdentifier(property);
 		if (valueIdentifier?.name !== identifierName) continue;
@@ -350,7 +371,7 @@ function isStableHookValue(
 	identifierName: string,
 	stableHooks: Map<string, StableResult>,
 ): boolean {
-	if (init?.type !== "CallExpression") return false;
+	if (!isCallExpression(init)) return false;
 
 	const hookName = getHookName(init);
 	if (hookName === undefined) return false;
@@ -364,42 +385,34 @@ function isStableHookValue(
 }
 
 function isReactJoinBindingsCall(init: ESTree.Expression | null): boolean {
-	if (init?.type !== "CallExpression") return false;
+	if (!isCallExpression(init)) return false;
 
 	const { callee } = init;
 	return (
-		callee.type === "MemberExpression" &&
-		callee.object.type === "Identifier" &&
-		callee.object.name === "React" &&
-		callee.property.type === "Identifier" &&
-		callee.property.name === "joinBindings"
+		isMemberExpression(callee) &&
+		isIdentifierNamed(callee.object, "React") &&
+		isIdentifierNamed(callee.property, "joinBindings")
 	);
 }
 
 function isMapMethodCall(init: ESTree.Expression | null): boolean {
-	if (init?.type !== "CallExpression") return false;
+	if (!isCallExpression(init)) return false;
 
 	const { callee } = init;
-	return (
-		callee.type === "MemberExpression" && callee.property.type === "Identifier" && callee.property.name === "map"
-	);
+	return isMemberExpression(callee) && isIdentifierNamed(callee.property, "map");
 }
 
 function isLiteralInitializer(init: ESTree.Expression | null): boolean {
-	return (
-		init?.type === "Literal" ||
-		init?.type === "TemplateLiteral" ||
-		(init?.type === "UnaryExpression" && init.argument.type === "Literal")
-	);
+	return isAnyLiteral(init) || isTemplateLiteral(init) || (isUnaryExpression(init) && isAnyLiteral(init.argument));
 }
 
 function isModuleLevelVariable(variable: VariableLike, node: ESTree.Node): boolean {
 	const variableDefinition = variable.defs.find((matchedDefinition) => matchedDefinition.node === node);
 	/* v8 ignore next -- @preserve variable definitions passed here are matched VariableDeclarator definitions. */
-	if (variableDefinition?.node.type !== "VariableDeclarator") return false;
+	if (!isVariableDeclarator(variableDefinition?.node)) return false;
 
 	const declarationParent = variableDefinition.node.parent.parent;
-	return declarationParent?.type === "Program" || declarationParent?.type === "ExportNamedDeclaration";
+	return isProgram(declarationParent) || isExportNamedDeclaration(declarationParent);
 }
 
 function isStableVariableDefinition(
@@ -409,10 +422,10 @@ function isStableVariableDefinition(
 	stableHooks: Map<string, StableResult>,
 ): boolean {
 	if (STABLE_VALUE_TYPES.has(type)) return true;
-	if (type !== "Variable" || node.type !== "VariableDeclarator") return false;
+	if (type !== "Variable" || !isVariableDeclarator(node)) return false;
 
 	const { parent } = node;
-	if (parent.type !== "VariableDeclaration" || parent.kind !== "const") return false;
+	if (!isVariableDeclaration(parent) || parent.kind !== "const") return false;
 
 	const { init } = node;
 	return (
@@ -448,14 +461,14 @@ function findTopmostMemberExpression(node: ESTree.Node, parent?: ESTree.Node): E
 	let current: ESTree.Node = node;
 
 	while (currentParent) {
-		if (currentParent.type === "CallExpression" && currentParent.callee === current) {
-			if (current.type === "MemberExpression") return current.object;
+		if (isCallExpression(currentParent) && currentParent.callee === current) {
+			if (isMemberExpression(current)) return current.object;
 			break;
 		}
 
-		const isMemberParent = currentParent.type === "MemberExpression" && currentParent.object === current;
-		const isChainParent = currentParent.type === "ChainExpression";
-		const isNonNullParent = currentParent.type === "TSNonNullExpression";
+		const isMemberParent = isMemberExpression(currentParent) && currentParent.object === current;
+		const isChainParent = isChainExpression(currentParent);
+		const isNonNullParent = isTsNonNullExpression(currentParent);
 
 		/* v8 ignore next -- @preserve captured member chains stop at member, chain, or non-null parents before this guard. */
 		if (!isMemberParent && !isChainParent && !isNonNullParent) {
@@ -626,6 +639,16 @@ function visitChildNodes(current: ESTree.Node, sourceCode: SourceCode, visit: (n
 	}
 }
 
+function visitMemberExpressionChildren(current: ESTree.MemberExpression, visit: (node: ESTree.Node) => void): void {
+	visit(current.object);
+	if (current.computed) visit(current.property);
+}
+
+function visitPropertyChildren(current: ESTree.ObjectProperty, visit: (node: ESTree.Node) => void): void {
+	if (current.computed) visit(current.key);
+	visit(current.value);
+}
+
 function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArray<CaptureInfo> {
 	const captures = new Array<CaptureInfo>();
 	const captureSet = new Set<string>();
@@ -657,8 +680,7 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 		}
 
 		if (isMemberExpression(current)) {
-			visit(current.object);
-			if (current.computed) visit(current.property);
+			visitMemberExpressionChildren(current, visit);
 			return;
 		}
 
@@ -668,8 +690,7 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 		}
 
 		if (isProperty(current)) {
-			if (current.computed) visit(current.key);
-			visit(current.value);
+			visitPropertyChildren(current, visit);
 			return;
 		}
 
@@ -820,7 +841,7 @@ function reportMissingDependenciesArray(
 
 function getRootIdentifierName(node: ESTree.Node): string | undefined {
 	const rootIdentifier = getRootIdentifier(node);
-	return rootIdentifier?.type === "Identifier" ? rootIdentifier.name : undefined;
+	return isIdentifierName(rootIdentifier) ? rootIdentifier.name : undefined;
 }
 
 function getMatchingCapture(captures: ReadonlyArray<CaptureInfo>, dependency: DependencyInfo): CaptureInfo | undefined {
@@ -1041,65 +1062,89 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 			return isCallbackFunctionNode(resolved) ? resolved : undefined;
 		}
 
+		function resolveHookInvocation(node: ESTree.CallExpression):
+			| undefined
+			| {
+					readonly closureArgument: ESTree.Node;
+					readonly closureFunction: CallbackFunction;
+					readonly hookConfig: HookConfig;
+			  } {
+			const hookName = getHookName(node);
+			if (hookName === undefined || hookName === "") return undefined;
+
+			const hookConfig = hookConfigs.get(hookName);
+			if (hookConfig === undefined) return undefined;
+
+			const closureArgument = node.arguments[hookConfig.closureIndex];
+			if (closureArgument === undefined) return undefined;
+
+			const closureFunction = resolveClosureFunction(closureArgument, node);
+			if (closureFunction === undefined) return undefined;
+
+			return { closureArgument, closureFunction, hookConfig };
+		}
+
+		function collectNonSelfCaptures(
+			closureFunction: CallbackFunction,
+			node: ESTree.CallExpression,
+		): ReadonlyArray<CaptureInfo> {
+			return collectCaptures(closureFunction, context.sourceCode).filter(
+				(capture) => !isSelfReferenceCapture(capture, node),
+			);
+		}
+
+		function processHookDependencies(
+			node: ESTree.CallExpression,
+			closureFunction: CallbackFunction,
+			closureArgument: ESTree.Node,
+			dependenciesArgument: ESTree.Node | undefined,
+		): void {
+			if (dependenciesArgument === undefined && resolvedOptions.reportMissingDependenciesArray) {
+				const captures = collectNonSelfCaptures(closureFunction, node);
+				const requiredCaptures = getRequiredCaptures(captures, stableHooks);
+
+				reportMissingDependenciesArray(context, node, closureArgument, requiredCaptures);
+				return;
+			}
+
+			if (dependenciesArgument === undefined || !isArrayExpression(dependenciesArgument)) return;
+			const dependenciesArray = dependenciesArgument;
+			const captures = collectNonSelfCaptures(closureFunction, node);
+
+			const dependencies = parseDependencies(dependenciesArray, context.sourceCode);
+
+			if (resolvedOptions.reportUnnecessaryDependencies || resolvedOptions.reportUnnecessaryStableDependencies) {
+				reportUnnecessaryDependencies(
+					context,
+					dependencies,
+					captures,
+					dependenciesArray,
+					stableHooks,
+					resolvedOptions.reportUnnecessaryDependencies,
+					resolvedOptions.reportUnnecessaryStableDependencies,
+				);
+			}
+
+			const missingCaptures = collectMissingCaptures(
+				captures,
+				dependencies,
+				stableHooks,
+				resolvedOptions.resolveExpressionDependencies,
+			);
+			reportMissingCaptures(context, dependenciesArray, dependencies, missingCaptures);
+			reportUnstableDependencies(context, captures, dependencies, stableHooks);
+		}
+
 		return {
 			CallExpression(node): void {
-				const hookName = getHookName(node);
-				if (hookName === undefined || hookName === "") return;
-
-				const hookConfig = hookConfigs.get(hookName);
-				if (!hookConfig) return;
-
-				const { closureIndex, dependenciesIndex } = hookConfig;
-				const parameters = node.arguments;
-
-				const closureArgument = parameters[closureIndex];
-				if (closureArgument === undefined) return;
-
-				const closureFunction = resolveClosureFunction(closureArgument, node);
-				if (!closureFunction) return;
-
-				const dependenciesArgument = parameters[dependenciesIndex];
-				if (!dependenciesArgument && resolvedOptions.reportMissingDependenciesArray) {
-					const captures = collectCaptures(closureFunction, context.sourceCode).filter(
-						(capture) => !isSelfReferenceCapture(capture, node),
-					);
-					const requiredCaptures = getRequiredCaptures(captures, stableHooks);
-
-					reportMissingDependenciesArray(context, node, closureArgument, requiredCaptures);
-					return;
-				}
-
-				if (!dependenciesArgument || !isArrayExpression(dependenciesArgument)) return;
-				const dependenciesArray = dependenciesArgument;
-				const captures = collectCaptures(closureFunction, context.sourceCode).filter(
-					(capture) => !isSelfReferenceCapture(capture, node),
+				const invocation = resolveHookInvocation(node);
+				if (invocation === undefined) return;
+				processHookDependencies(
+					node,
+					invocation.closureFunction,
+					invocation.closureArgument,
+					node.arguments[invocation.hookConfig.dependenciesIndex],
 				);
-
-				const dependencies = parseDependencies(dependenciesArray, context.sourceCode);
-
-				if (
-					resolvedOptions.reportUnnecessaryDependencies ||
-					resolvedOptions.reportUnnecessaryStableDependencies
-				) {
-					reportUnnecessaryDependencies(
-						context,
-						dependencies,
-						captures,
-						dependenciesArray,
-						stableHooks,
-						resolvedOptions.reportUnnecessaryDependencies,
-						resolvedOptions.reportUnnecessaryStableDependencies,
-					);
-				}
-
-				const missingCaptures = collectMissingCaptures(
-					captures,
-					dependencies,
-					stableHooks,
-					resolvedOptions.resolveExpressionDependencies,
-				);
-				reportMissingCaptures(context, dependenciesArray, dependencies, missingCaptures);
-				reportUnstableDependencies(context, captures, dependencies, stableHooks);
 			},
 		};
 	},

@@ -6,6 +6,8 @@ import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	BLOCK_STATEMENT,
+	CATCH_CLAUSE,
 	isAnyFunction,
 	isAwaitExpression,
 	isBreakStatement,
@@ -31,6 +33,7 @@ import type { Writable } from "type-fest";
 import type { LoopNode } from "$oxc-utilities/oxc-utilities";
 
 const NOT_ALL = "not all execution paths";
+const CLOSER = "closer" as const;
 
 const isPairConfiguration = type({
 	"alternatives?": isReadonlyArrayOfStrings.or(isUndefined),
@@ -190,6 +193,13 @@ function cloneEntry(value: OpenerStackEntry): OpenerStackEntry {
 	return { ...value, loopAncestors: [...value.loopAncestors] };
 }
 
+function isNewBranchOpener(entry: OpenerStackEntry, originalStack: ReadonlyArray<OpenerStackEntry>): boolean {
+	return originalStack.every(({ index }) => index !== entry.index);
+}
+function isBreakOrContinueStatement(node: ESTree.Node): node is ESTree.BreakStatement | ESTree.ContinueStatement {
+	return isBreakStatement(node) || isContinueStatement(node);
+}
+
 const messages = {
 	asyncViolation: "Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)",
 	conditionalOpener: "Conditional opener '{{opener}}' at {{location}} may not have matching closer on all paths",
@@ -335,7 +345,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		function getCloserLabel(config: PairConfiguration): string {
 			const validClosers = getValidClosers(config);
 			/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
-			return validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
+			return validClosers.length === 1 ? (validClosers[0] ?? CLOSER) : validClosers.join("' or '");
 		}
 
 		function reportUnpairedEntry(entry: OpenerStackEntry, paths: string): void {
@@ -418,7 +428,46 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			saveSnapshot(ifNode);
 		}
 
-		// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
+		function reportNewOpenersInBranches(
+			originalStack: Array<OpenerStackEntry>,
+			branches: Array<Array<OpenerStackEntry>>,
+		): void {
+			for (const branchStack of branches) {
+				for (const entry of branchStack) {
+					if (isNewBranchOpener(entry, originalStack)) reportUnpairedEntry(entry, "conditional branch");
+				}
+			}
+		}
+
+		function retainOpenersInAllBranches(
+			originalStack: Array<OpenerStackEntry>,
+			branches: Array<Array<OpenerStackEntry>>,
+		): void {
+			openerStack.length = 0;
+			for (const opener of originalStack) {
+				if (!isOpenerInAllBranches(opener, branches)) continue;
+				openerStack.push(opener);
+			}
+		}
+
+		function retainCommonOpeners(
+			originalStack: Array<OpenerStackEntry>,
+			branches: Array<Array<OpenerStackEntry>>,
+		): void {
+			reportPartiallyClosedOpeners(originalStack, branches, NOT_ALL);
+			retainOpenersInAllBranches(originalStack, branches);
+		}
+
+		function mergeIfBranches(
+			node: ESTree.IfStatement,
+			originalStack: Array<OpenerStackEntry>,
+			branches: Array<Array<OpenerStackEntry>>,
+		): void {
+			reportNewOpenersInBranches(originalStack, branches);
+			if (node.alternate === null) restoreOpenerStack(originalStack);
+			else retainCommonOpeners(originalStack, branches);
+		}
+
 		function onIfStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for IfStatement visitor keys. */
 			if (!isIfStatement(node)) return;
@@ -429,24 +478,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 			/* v8 ignore else -- @preserve if exits are paired with enter snapshots and branch snapshots. */
 			if (originalStack && branches && branches.length > 0) {
-				const hasCompleteElse = node.alternate !== null;
-
-				for (const branchStack of branches) {
-					for (const entry of branchStack) {
-						const wasInOriginal = originalStack.some(({ index }) => index === entry.index);
-						if (!wasInOriginal) reportUnpairedEntry(entry, "conditional branch");
-					}
-				}
-
-				if (hasCompleteElse) {
-					reportPartiallyClosedOpeners(originalStack, branches, NOT_ALL);
-
-					openerStack.length = 0;
-					for (const opener of originalStack) {
-						if (!isOpenerInAllBranches(opener, branches)) continue;
-						openerStack.push(opener);
-					}
-				} else restoreOpenerStack(originalStack);
+				mergeIfBranches(node, originalStack, branches);
 			}
 
 			stackSnapshots.delete(node);
@@ -475,7 +507,48 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			saveSnapshot(node);
 		}
 
-		// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
+		function isPartiallyClosedTryOpener(
+			opener: OpenerStackEntry,
+			branches: Array<Array<OpenerStackEntry>>,
+		): boolean {
+			const branchesWithOpener = getBranchesWithOpener(opener, branches);
+			if (branchesWithOpener.length === 0 || branchesWithOpener.length >= branches.length) return false;
+			return resolvedOptions.allowConditionalClosers === false;
+		}
+
+		function reportTryPartialOpener(opener: OpenerStackEntry): void {
+			const validClosers = getValidClosers(opener.config);
+			/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
+			const closer = validClosers.length === 1 ? (validClosers[0] ?? CLOSER) : validClosers.join("' or '");
+
+			context.report({
+				data: {
+					closer,
+					opener: opener.opener,
+					paths: NOT_ALL,
+				},
+				messageId: "unpairedOpener",
+				node: opener.node,
+			});
+		}
+
+		function reportPartiallyClosedTryOpeners(
+			originalStack: Array<OpenerStackEntry>,
+			branches: Array<Array<OpenerStackEntry>>,
+		): void {
+			for (const opener of originalStack) {
+				if (isPartiallyClosedTryOpener(opener, branches)) reportTryPartialOpener(opener);
+			}
+		}
+
+		function mergeTryBranches(
+			originalStack: Array<OpenerStackEntry>,
+			branches: Array<Array<OpenerStackEntry>>,
+		): void {
+			reportPartiallyClosedTryOpeners(originalStack, branches);
+			retainOpenersInAllBranches(originalStack, branches);
+		}
+
 		function onTryStatementExit(node: ESTree.Node): void {
 			/* v8 ignore next -- @preserve this handler is only registered for TryStatement visitor keys. */
 			if (!isTryStatement(node)) return;
@@ -489,40 +562,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			}
 
 			/* v8 ignore else -- @preserve try exits with recorded branches are paired with enter snapshots. */
-			if (originalStack && branches && branches.length > 0) {
-				for (const opener of originalStack) {
-					const branchesWithOpener = branches.filter((branchStack) =>
-						branchStack.some((entry) => entry.index === opener.index),
-					);
-
-					if (
-						branchesWithOpener.length > 0 &&
-						branchesWithOpener.length < branches.length &&
-						resolvedOptions.allowConditionalClosers === false
-					) {
-						const validClosers = getValidClosers(opener.config);
-						/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
-						const closer =
-							validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
-
-						context.report({
-							data: {
-								closer,
-								opener: opener.opener,
-								paths: NOT_ALL,
-							},
-							messageId: "unpairedOpener",
-							node: opener.node,
-						});
-					}
-				}
-
-				openerStack.length = 0;
-				for (const opener of originalStack) {
-					if (!isOpenerInAllBranches(opener, branches)) continue;
-					openerStack.push(opener);
-				}
-			}
+			if (originalStack && branches && branches.length > 0) mergeTryBranches(originalStack, branches);
 
 			stackSnapshots.delete(node);
 			branchStacks.delete(node);
@@ -550,7 +590,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		}
 
 		function onTryBlockExit(node: ESTree.Node): void {
-			onTryBranchExit(node, "BlockStatement");
+			onTryBranchExit(node, BLOCK_STATEMENT);
 		}
 
 		function onCatchClauseEnter(): void {
@@ -558,7 +598,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		}
 
 		function onCatchClauseExit(node: ESTree.Node): void {
-			onTryBranchExit(node, "CatchClause");
+			onTryBranchExit(node, CATCH_CLAUSE);
 		}
 
 		function onFinallyBlockEnter(): void {
@@ -639,7 +679,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			for (const { config, node, opener } of openerStack) {
 				const validClosers = getValidClosers(config);
 				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
-				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
+				const closer = validClosers.length === 1 ? (validClosers[0] ?? CLOSER) : validClosers.join("' or '");
 
 				const statementType = isReturnStatement(statementNode) ? "return" : "throw";
 
@@ -655,35 +695,44 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			}
 		}
 
+		function resolveBreakContinueTarget(
+			node: ESTree.BreakStatement | ESTree.ContinueStatement,
+		): LoopNode | undefined {
+			if (isContinueStatement(node)) return resolveContinueTargetLoop(node);
+			return resolveBreakTargetLoop(node);
+		}
+
+		function reportBreakContinueEntry(
+			entry: OpenerStackEntry,
+			statement: ESTree.BreakStatement | ESTree.ContinueStatement,
+			targetLoop: LoopNode,
+		): void {
+			if (entry.loopAncestors.every((loopNode) => loopNode !== targetLoop)) return;
+
+			const validClosers = getValidClosers(entry.config);
+			/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
+			const closer = validClosers.length === 1 ? (validClosers[0] ?? CLOSER) : validClosers.join("' or '");
+
+			const statementType = isBreakStatement(statement) ? "break" : "continue";
+
+			context.report({
+				data: {
+					closer,
+					opener: entry.opener,
+					paths: `${statementType} at line ${statement.loc.start.line}`,
+				},
+				messageId: "unpairedOpener",
+				node: entry.node,
+			});
+		}
+
 		function onBreakContinue(node: ESTree.Node): void {
-			if (openerStack.length === 0 || (!isBreakStatement(node) && !isContinueStatement(node))) return;
+			if (openerStack.length === 0 || !isBreakOrContinueStatement(node)) return;
 
-			const targetLoop = isContinueStatement(node)
-				? resolveContinueTargetLoop(node)
-				: resolveBreakTargetLoop(node);
+			const targetLoop = resolveBreakContinueTarget(node);
+			if (targetLoop === undefined) return;
 
-			if (!targetLoop) return;
-
-			for (const { config, loopAncestors, node: openerNode, opener } of openerStack) {
-				if (loopAncestors.every((loopNode) => loopNode !== targetLoop)) continue;
-
-				const validClosers = getValidClosers(config);
-				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
-				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
-
-				const statementType = isBreakStatement(node) ? "break" : "continue";
-				const lineNumber = node.loc.start.line;
-
-				context.report({
-					data: {
-						closer,
-						opener,
-						paths: `${statementType} at line ${lineNumber}`,
-					},
-					messageId: "unpairedOpener",
-					node: openerNode,
-				});
-			}
+			for (const entry of openerStack) reportBreakContinueEntry(entry, node, targetLoop);
 		}
 
 		function handleOpener(node: ESTree.CallExpression, opener: string, pairConfiguration: PairConfiguration): void {
@@ -721,38 +770,63 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			openerStack.push(entry);
 		}
 
+		function reportUnmatchedCloser(node: ESTree.CallExpression, closer: string): void {
+			if (yieldingAutoClosed && !yieldingReportedFirst) {
+				yieldingReportedFirst = true;
+				return;
+			}
+
+			if (openerStack.length === 0) {
+				context.report({
+					data: { closer },
+					messageId: "unpairedCloser",
+					node,
+				});
+				return;
+			}
+
+			// oxlint-disable-next-line typescript/no-non-null-assertion -- openerStack length was checked above.
+			const topEntry = openerStack.at(-1)!;
+			const expectedClosers = getExpectedClosersForOpener(topEntry.opener);
+			const closerDescription = formatOpenerList(expectedClosers);
+
+			context.report({
+				data: {
+					closer,
+					expected: closerDescription,
+				},
+				messageId: "unexpectedCloser",
+				node,
+			});
+		}
+
+		function reportWrongOrderCloser(
+			node: ESTree.CallExpression,
+			closer: string,
+			matchingEntry: OpenerStackEntry,
+			matchingIndex: number,
+		): void {
+			if (matchingIndex === openerStack.length - 1) return;
+			const topEntry = openerStack.at(-1);
+			/* v8 ignore else -- @preserve a non-last matching index implies a top stack entry exists. */
+			if (topEntry) {
+				context.report({
+					data: {
+						actual: topEntry.opener,
+						closer,
+						expected: matchingEntry.opener,
+					},
+					messageId: "wrongOrder",
+					node,
+				});
+			}
+		}
+
 		function handleCloser(node: ESTree.CallExpression, closer: string): void {
 			const matchingIndex = openerStack.findLastIndex((entry) => getValidClosers(entry.config).includes(closer));
 
 			if (matchingIndex === -1) {
-				if (yieldingAutoClosed && !yieldingReportedFirst) {
-					yieldingReportedFirst = true;
-					return;
-				}
-
-				if (openerStack.length === 0) {
-					context.report({
-						data: { closer },
-						messageId: "unpairedCloser",
-						node,
-					});
-					return;
-				}
-
-				// oxlint-disable-next-line typescript/no-non-null-assertion -- openerStack length was checked above.
-				const topEntry = openerStack.at(-1)!;
-				const expectedClosers = getExpectedClosersForOpener(topEntry.opener);
-				const closerDescription = formatOpenerList(expectedClosers);
-
-				context.report({
-					data: {
-						closer,
-						expected: closerDescription,
-					},
-					messageId: "unexpectedCloser",
-					node,
-				});
-
+				reportUnmatchedCloser(node, closer);
 				return;
 			}
 
@@ -760,22 +834,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			/* v8 ignore next -- @preserve findLastIndex returned a valid index into openerStack. */
 			if (!matchingEntry) return;
 
-			if (matchingIndex !== openerStack.length - 1) {
-				const topEntry = openerStack.at(-1);
-				/* v8 ignore else -- @preserve a non-last matching index implies a top stack entry exists. */
-				if (topEntry) {
-					context.report({
-						data: {
-							actual: topEntry.opener,
-							closer,
-							expected: matchingEntry.opener,
-						},
-						messageId: "wrongOrder",
-						node,
-					});
-				}
-			}
-
+			reportWrongOrderCloser(node, closer, matchingEntry, matchingIndex);
 			openerStack.splice(matchingIndex, 1);
 		}
 
@@ -786,7 +845,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			const validClosers = getValidClosers(openerEntry.config);
 			/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
-			const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
+			const closer = validClosers.length === 1 ? (validClosers[0] ?? CLOSER) : validClosers.join("' or '");
 
 			context.report({
 				data: { closer, yieldingFunction },
@@ -803,7 +862,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 				const validClosers = getValidClosers(config);
 				/* v8 ignore next -- @preserve configured pairs always provide at least one closer label. */
-				const closer = validClosers.length === 1 ? (validClosers[0] ?? "closer") : validClosers.join("' or '");
+				const closer = validClosers.length === 1 ? (validClosers[0] ?? CLOSER) : validClosers.join("' or '");
 
 				const asyncType = isYieldExpression(node) ? "yield" : "await";
 
@@ -966,7 +1025,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 									type: "array",
 								},
 							},
-							required: ["opener", "closer"],
+							required: ["opener", CLOSER],
 							type: "object",
 						},
 						minItems: 1,

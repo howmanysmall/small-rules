@@ -170,50 +170,123 @@ function getIdentifierVariable(
 	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
 }
 
+interface CallbackParameterConfiguration {
+	readonly callbackArgumentIndex: number;
+	readonly className: string;
+	readonly imported: string;
+	readonly memberPath: ReadonlyArray<string>;
+	readonly parameterIndex: number;
+	readonly source: string;
+}
+
+function isMatchingConfiguration(
+	binding: ImportBinding,
+	chainPath: ReadonlyArray<string>,
+	configuration: CallbackParameterConfiguration,
+): boolean {
+	if (binding.source !== configuration.source) return false;
+	if (binding.imported !== configuration.imported) return false;
+	return pathsEqual(chainPath, configuration.memberPath);
+}
+
+function tryRecordConfiguredCallback(
+	node: ESTree.CallExpression,
+	configuration: CallbackParameterConfiguration,
+	sourceCode: SourceCode,
+	types: Map<ScopeVariable, string>,
+): void {
+	const callback = node.arguments[configuration.callbackArgumentIndex];
+	if (callback === undefined || isSpreadElement(callback) || !isAnyFunction(callback)) return;
+
+	const parameter = callback.params[configuration.parameterIndex];
+	if (!isIdentifierName(parameter)) return;
+
+	const variable = getIdentifierVariable(sourceCode, parameter);
+	/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
+	if (variable !== undefined) types.set(variable, configuration.className);
+}
+
+function processConfiguredCall(
+	node: ESTree.CallExpression,
+	sourceCode: SourceCode,
+	imports: ReadonlyMap<ScopeVariable, ImportBinding>,
+	configurations: ReadonlyArray<CallbackParameterConfiguration>,
+	types: Map<ScopeVariable, string>,
+): void {
+	if (!isMemberExpression(node.callee)) return;
+
+	const chain = getMemberChain(node.callee);
+	if (chain === undefined) return;
+
+	const rootVariable = getIdentifierVariable(sourceCode, chain.root);
+	const binding = rootVariable === undefined ? undefined : imports.get(rootVariable);
+	if (binding === undefined) return;
+
+	for (const configuration of configurations) {
+		if (!isMatchingConfiguration(binding, chain.path, configuration)) continue;
+		tryRecordConfiguredCallback(node, configuration, sourceCode, types);
+	}
+}
+
 function collectConfiguredCallbackTypes(
 	program: ESTree.Program,
 	sourceCode: SourceCode,
 	imports: ReadonlyMap<ScopeVariable, ImportBinding>,
-	configurations: ReadonlyArray<{
-		readonly callbackArgumentIndex: number;
-		readonly className: string;
-		readonly imported: string;
-		readonly memberPath: ReadonlyArray<string>;
-		readonly parameterIndex: number;
-		readonly source: string;
-	}>,
+	configurations: ReadonlyArray<CallbackParameterConfiguration>,
 	types: Map<ScopeVariable, string>,
 ): void {
 	forEachNode(program, (node) => {
-		if (!isCallExpression(node) || !isMemberExpression(node.callee)) return;
+		if (!isCallExpression(node)) return;
 
-		const chain = getMemberChain(node.callee);
-		if (chain === undefined) return;
-
-		const rootVariable = getIdentifierVariable(sourceCode, chain.root);
-		const binding = rootVariable === undefined ? undefined : imports.get(rootVariable);
-		if (binding === undefined) return;
-
-		for (const configuration of configurations) {
-			if (
-				binding.source !== configuration.source ||
-				binding.imported !== configuration.imported ||
-				!pathsEqual(chain.path, configuration.memberPath)
-			) {
-				continue;
-			}
-
-			const callback = node.arguments[configuration.callbackArgumentIndex];
-			if (callback === undefined || isSpreadElement(callback) || !isAnyFunction(callback)) continue;
-
-			const parameter = callback.params[configuration.parameterIndex];
-			if (!isIdentifierName(parameter)) continue;
-
-			const variable = getIdentifierVariable(sourceCode, parameter);
-			/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
-			if (variable !== undefined) types.set(variable, configuration.className);
-		}
+		processConfiguredCall(node, sourceCode, imports, configurations, types);
 	});
+}
+
+function recordVariableDeclaratorType(
+	node: ESTree.VariableDeclarator,
+	sourceCode: SourceCode,
+	declaredTypeNames: ReadonlySet<string>,
+	types: Map<ScopeVariable, string>,
+): void {
+	if (!isIdentifierName(node.id)) return;
+
+	const { name } = node.id;
+	const className = getReferencedTypeName(node.id.typeAnnotation, false);
+	if (className === undefined || declaredTypeNames.has(className)) return;
+
+	const variable = sourceCode.getDeclaredVariables(node).find((candidate) => candidate.name === name);
+	/* v8 ignore else -- @preserve identifier variable declarations always expose their declared variable. */
+	if (variable !== undefined) types.set(variable, className);
+}
+
+function recordSingleParameterType(
+	parameter: ESTree.Node,
+	variables: ReadonlyMap<string, ScopeVariable>,
+	declaredTypeNames: ReadonlySet<string>,
+	types: Map<ScopeVariable, string>,
+): void {
+	if (!isIdentifierName(parameter)) return;
+
+	const { name } = parameter;
+	const className = getReferencedTypeName(parameter.typeAnnotation, false);
+	if (className === undefined || declaredTypeNames.has(className)) return;
+
+	const variable = variables.get(name);
+	/* v8 ignore else -- @preserve identifier parameters always appear in their function's declared variables. */
+	if (variable !== undefined) types.set(variable, className);
+}
+
+function recordFunctionParameterTypes(
+	node: CallbackFunction,
+	sourceCode: SourceCode,
+	declaredTypeNames: ReadonlySet<string>,
+	types: Map<ScopeVariable, string>,
+): void {
+	const variables = new Map(sourceCode.getDeclaredVariables(node).map((variable) => [variable.name, variable]));
+
+	for (const parameter of node.params) {
+		recordSingleParameterType(parameter, variables, declaredTypeNames, types);
+	}
 }
 
 function collectAnnotatedTypes(
@@ -223,30 +296,12 @@ function collectAnnotatedTypes(
 	types: Map<ScopeVariable, string>,
 ): void {
 	forEachNode(program, (node) => {
-		if (isVariableDeclarator(node) && isIdentifierName(node.id)) {
-			const { name } = node.id;
-			const className = getReferencedTypeName(node.id.typeAnnotation, false);
-			if (className === undefined || declaredTypeNames.has(className)) return;
-
-			const variable = sourceCode.getDeclaredVariables(node).find((candidate) => candidate.name === name);
-			/* v8 ignore else -- @preserve identifier variable declarations always expose their declared variable. */
-			if (variable !== undefined) types.set(variable, className);
+		if (isVariableDeclarator(node)) {
+			recordVariableDeclaratorType(node, sourceCode, declaredTypeNames, types);
 			return;
 		}
 		if (!isAnyFunction(node)) return;
-		const variables = new Map(sourceCode.getDeclaredVariables(node).map((variable) => [variable.name, variable]));
-
-		for (const parameter of node.params) {
-			if (!isIdentifierName(parameter)) continue;
-
-			const { name } = parameter;
-			const className = getReferencedTypeName(parameter.typeAnnotation, false);
-			if (className === undefined || declaredTypeNames.has(className)) continue;
-
-			const variable = variables.get(name);
-			/* v8 ignore else -- @preserve identifier parameters always appear in their function's declared variables. */
-			if (variable !== undefined) types.set(variable, className);
-		}
+		recordFunctionParameterTypes(node, sourceCode, declaredTypeNames, types);
 	});
 }
 
@@ -447,6 +502,45 @@ function reportYieldingCalls(
 	for (const activeFunction of activeFunctions) inspectActiveFunction(activeFunction);
 }
 
+interface SystemDiscoveryState {
+	readonly namedFunctions: Map<string, CallbackFunction>;
+	readonly systemFunctions: Set<CallbackFunction>;
+	readonly systemTypeNames: ReadonlySet<string>;
+	readonly typedSystemObjects: Array<ESTree.ObjectExpression>;
+}
+
+function recordSystemFunction(node: CallbackFunction, state: SystemDiscoveryState): void {
+	if (node.id !== null) state.namedFunctions.set(node.id.name, node);
+	if (isRecognizedType(node.returnType, state.systemTypeNames)) state.systemFunctions.add(node);
+}
+
+function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDiscoveryState): void {
+	if (!isIdentifierName(node.id)) return;
+	if (!isRecognizedType(node.id.typeAnnotation, state.systemTypeNames)) return;
+	if (node.init === null) return;
+	if (isAnyFunction(node.init)) state.systemFunctions.add(node.init);
+	else if (isObjectExpression(node.init)) state.typedSystemObjects.push(node.init);
+}
+
+function recordSystemSatisfies(node: ESTree.Node, state: SystemDiscoveryState): void {
+	if (!isTsSatisfiesExpression(node)) return;
+	if (!isRecognizedType(node.typeAnnotation, state.systemTypeNames)) return;
+	if (!isObjectExpression(node.expression)) return;
+	state.typedSystemObjects.push(node.expression);
+}
+
+function classifySystemNode(node: ESTree.Node, state: SystemDiscoveryState): void {
+	if (isAnyFunction(node)) {
+		recordSystemFunction(node, state);
+		return;
+	}
+	if (isVariableDeclarator(node)) {
+		recordSystemDeclarator(node, state);
+		return;
+	}
+	recordSystemSatisfies(node, state);
+}
+
 const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 	create(context): Visitor {
 		const additionalSystemTypeNames = context.options[0]?.additionalSystemTypeNames ?? [];
@@ -471,24 +565,12 @@ const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 				);
 
 				forEachNode(program, (node) => {
-					if (isAnyFunction(node)) {
-						if (node.id !== null) namedFunctions.set(node.id.name, node);
-						if (isRecognizedType(node.returnType, systemTypeNames)) systemFunctions.add(node);
-						return;
-					}
-					if (isVariableDeclarator(node) && isIdentifierName(node.id)) {
-						if (!isRecognizedType(node.id.typeAnnotation, systemTypeNames) || node.init === null) return;
-						if (isAnyFunction(node.init)) systemFunctions.add(node.init);
-						else if (isObjectExpression(node.init)) typedSystemObjects.push(node.init);
-						return;
-					}
-					if (
-						isTsSatisfiesExpression(node) &&
-						isRecognizedType(node.typeAnnotation, systemTypeNames) &&
-						isObjectExpression(node.expression)
-					) {
-						typedSystemObjects.push(node.expression);
-					}
+					classifySystemNode(node, {
+						namedFunctions,
+						systemFunctions,
+						systemTypeNames,
+						typedSystemObjects,
+					});
 				});
 
 				for (const object of typedSystemObjects) {

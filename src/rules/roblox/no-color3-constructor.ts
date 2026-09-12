@@ -42,6 +42,34 @@ function collectNumericComponents(parameters: ReadonlyArray<ESTree.Node>): Numer
 	return [allZero, components];
 }
 
+function isShortColor3Call(parameters: ReadonlyArray<ESTree.Node>): boolean {
+	return parameters.length < 3;
+}
+
+function reportUnknownColor3(
+	parameters: ReadonlyArray<ESTree.Node>,
+	reportUnknownComponents: boolean,
+	report: (messageId: "onlyZeroArgs" | "useFromRGB") => void,
+): void {
+	if (!reportUnknownComponents) return;
+	report(isShortColor3Call(parameters) ? "useFromRGB" : "onlyZeroArgs");
+}
+
+function reportNumericColor3(
+	parameters: ReadonlyArray<ESTree.Node>,
+	collected: NumericComponentCollection,
+	reportWithFix: (messageId: "onlyZeroArgs" | "useFromRGB", text: string) => void,
+): void {
+	if (isShortColor3Call(parameters)) {
+		// oxlint-disable-next-line prefer-destructuring -- wtf do you want
+		const [red, green = 0] = collected[1];
+		reportWithFix("useFromRGB", `Color3.fromRGB(${red}, ${green}, 0)`);
+		return;
+	}
+
+	if (!collected[0]) reportWithFix("onlyZeroArgs", `Color3.fromRGB(${collected[1].join(", ")})`);
+}
+
 const noColor3Constructor = createRule("no-color3-constructor", "roblox", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
@@ -55,33 +83,15 @@ const noColor3Constructor = createRule("no-color3-constructor", "roblox", {
 
 				const collected = collectNumericComponents(parameters);
 				if (!collected) {
-					if (options.reportUnknownComponents) {
-						context.report({
-							messageId: parameters.length < 3 ? "useFromRGB" : "onlyZeroArgs",
-							node,
-						});
-					}
-					return;
-				}
-
-				if (parameters.length < 3) {
-					// oxlint-disable-next-line prefer-destructuring -- wtf do you want
-					const [red, green = 0] = collected[1];
-					context.report({
-						fix: (fixer) => fixer.replaceText(node, `Color3.fromRGB(${red}, ${green}, 0)`),
-						messageId: "useFromRGB",
-						node,
+					reportUnknownColor3(parameters, options.reportUnknownComponents, (messageId) => {
+						context.report({ messageId, node });
 					});
 					return;
 				}
 
-				if (!collected[0]) {
-					context.report({
-						fix: (fixer) => fixer.replaceText(node, `Color3.fromRGB(${collected[1].join(", ")})`),
-						messageId: "onlyZeroArgs",
-						node,
-					});
-				}
+				reportNumericColor3(parameters, collected, (messageId, text) => {
+					context.report({ fix: (fixer) => fixer.replaceText(node, text), messageId, node });
+				});
 			},
 		} satisfies Visitor;
 	},

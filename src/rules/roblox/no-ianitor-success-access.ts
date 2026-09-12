@@ -1,6 +1,15 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	isCallExpression,
+	isIdentifierName,
+	isIdentifierNamed,
+	isMemberExpression,
+	isObjectPattern,
+	isProperty,
+	isVariableDeclarator,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -14,18 +23,18 @@ interface ResultVariable {
 
 function isIanitorFactoryCall(expression: ESTree.Expression): boolean {
 	const unwrapped = unwrapExpression(expression);
-	if (unwrapped.type !== "CallExpression") return false;
+	if (!isCallExpression(unwrapped)) return false;
 
 	const callee = unwrapExpression(unwrapped.callee);
-	if (callee.type !== "MemberExpression" || callee.computed) return false;
+	if (!isMemberExpression(callee) || callee.computed) return false;
 
 	const object = unwrapExpression(callee.object);
-	return object.type === "Identifier" && object.name === "Ianitor" && callee.property.type === "Identifier";
+	return isIdentifierNamed(object, "Ianitor") && isIdentifierName(callee.property);
 }
 
 function isFromIanitorCheckVariable(scopeVariable: ScopeVariable): boolean {
 	for (const { node } of scopeVariable.defs) {
-		if (node.type !== "VariableDeclarator") continue;
+		if (!isVariableDeclarator(node)) continue;
 
 		const { init } = node;
 		if (init !== null && isIanitorFactoryCall(init)) return true;
@@ -36,9 +45,9 @@ function isFromIanitorCheckVariable(scopeVariable: ScopeVariable): boolean {
 
 function isCallToIanitorCheck(node: ESTree.CallExpression, sourceCode: SourceCode): boolean {
 	const unwrappedCallee = unwrapExpression(node.callee);
-	if (unwrappedCallee.type === "CallExpression") return isIanitorFactoryCall(unwrappedCallee);
+	if (isCallExpression(unwrappedCallee)) return isIanitorFactoryCall(unwrappedCallee);
 
-	if (unwrappedCallee.type === "Identifier") {
+	if (isIdentifierName(unwrappedCallee)) {
 		const variable = getVariableByName(sourceCode.getScope(node), unwrappedCallee.name);
 		return variable !== undefined && isFromIanitorCheckVariable(variable);
 	}
@@ -50,7 +59,7 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 	let hasSuccess = false;
 
 	for (const property of objectPattern.properties) {
-		if (property.type !== "Property" || property.key.type !== "Identifier") continue;
+		if (!isProperty(property) || !isIdentifierName(property.key)) continue;
 		const { name } = property.key;
 		if (name === "error" || name === "value") return false;
 		/* v8 ignore next -- @preserve success-only object patterns reach this path from parser Property keys. */
@@ -63,13 +72,30 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 function findSuccessPropertyKey(objectPattern: ESTree.ObjectPattern): ESTree.Node | undefined {
 	for (const property of objectPattern.properties) {
 		/* v8 ignore next -- @preserve isDestructuringSuccessOnly filters to an identifier success property. */
-		if (property.type === "Property" && property.key.type === "Identifier" && property.key.name === "success") {
-			return property.key;
-		}
+		if (isProperty(property) && isIdentifierNamed(property.key, "success")) return property.key;
 	}
 
 	/* v8 ignore next -- @preserve isDestructuringSuccessOnly proves a success key before this helper is called. */
 	return undefined;
+}
+
+function isFactoryCheckDeclarator(id: ESTree.Node, init: ESTree.CallExpression): boolean {
+	return isIdentifierName(id) && isIanitorFactoryCall(init);
+}
+
+function isSuccessOnlyDestructuring(id: ESTree.Node, init: ESTree.CallExpression, sourceCode: SourceCode): boolean {
+	return isObjectPattern(id) && isCallToIanitorCheck(init, sourceCode) && isDestructuringSuccessOnly(id);
+}
+
+function isStoredCheckResult(
+	id: ESTree.Node,
+	init: ESTree.CallExpression,
+	ianitorCheckVariables: ReadonlySet<string>,
+): boolean {
+	if (!isIdentifierName(id)) return false;
+
+	const callee = unwrapExpression(init.callee);
+	return isIdentifierName(callee) && ianitorCheckVariables.has(callee.name);
 }
 
 const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox", {
@@ -84,20 +110,31 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 			if (result !== undefined) result.referencedFully = true;
 		}
 
+		function reportSuccessOnlyDestructuring(objectPattern: ESTree.ObjectPattern): void {
+			const keyNode = findSuccessPropertyKey(objectPattern);
+			/* v8 ignore next -- @preserve isDestructuringSuccessOnly already proves the key exists. */
+			if (keyNode !== undefined) {
+				context.report({
+					messageId: "preferCreateGuard",
+					node: keyNode,
+				});
+			}
+		}
+
 		return {
 			CallExpression(node): void {
 				for (const argument of node.arguments) {
-					if (argument.type !== "Identifier") continue;
+					if (!isIdentifierName(argument)) continue;
 					const result = ianitorResultVariables.get(argument.name);
 					if (result !== undefined) result.referencedFully = true;
 				}
 			},
 
 			MemberExpression({ computed, object, property }): void {
-				if (computed || property.type !== "Identifier") return;
+				if (computed || !isIdentifierName(property)) return;
 				const unwrapped = unwrapExpression(object);
 
-				if (unwrapped.type === "CallExpression" && property.name === "success") {
+				if (isCallExpression(unwrapped) && property.name === "success") {
 					if (isCallToIanitorCheck(unwrapped, sourceCode)) {
 						context.report({
 							messageId: "preferCreateGuard",
@@ -108,7 +145,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 				}
 
 				/* v8 ignore next -- @preserve non-call member objects are only tracked when they are identifiers. */
-				if (unwrapped.type === "Identifier") {
+				if (isIdentifierName(unwrapped)) {
 					const result = ianitorResultVariables.get(unwrapped.name);
 					if (result !== undefined) result.properties.add(property.name);
 				}
@@ -131,7 +168,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 			},
 
 			ReturnStatement({ argument }): void {
-				if (argument?.type !== "Identifier") return;
+				if (!isIdentifierName(argument)) return;
 				markResultFullyUsed(argument.name);
 			},
 
@@ -139,33 +176,18 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 				if (init === null) return;
 
 				const unwrappedInit = unwrapExpression(init);
-				if (unwrappedInit.type !== "CallExpression") return;
+				if (!isCallExpression(unwrappedInit)) return;
 
-				if (id.type === "Identifier" && isIanitorFactoryCall(unwrappedInit)) {
+				if (isIdentifierName(id) && isFactoryCheckDeclarator(id, unwrappedInit)) {
 					ianitorCheckVariables.add(id.name);
 					return;
 				}
 
-				if (
-					id.type === "ObjectPattern" &&
-					isCallToIanitorCheck(unwrappedInit, sourceCode) &&
-					isDestructuringSuccessOnly(id)
-				) {
-					const keyNode = findSuccessPropertyKey(id);
-					/* v8 ignore next -- @preserve isDestructuringSuccessOnly already proves the key exists. */
-					if (keyNode !== undefined) {
-						context.report({
-							messageId: "preferCreateGuard",
-							node: keyNode,
-						});
-					}
+				if (isObjectPattern(id) && isSuccessOnlyDestructuring(id, unwrappedInit, sourceCode)) {
+					reportSuccessOnlyDestructuring(id);
 				}
 
-				if (
-					id.type === "Identifier" &&
-					unwrappedInit.callee.type === "Identifier" &&
-					ianitorCheckVariables.has(unwrappedInit.callee.name)
-				) {
+				if (isIdentifierName(id) && isStoredCheckResult(id, unwrappedInit, ianitorCheckVariables)) {
 					ianitorResultVariables.set(id.name, {
 						firstSuccessNode: id,
 						properties: new Set(),

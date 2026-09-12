@@ -710,6 +710,19 @@ export function isDefaultValue(node: ESTree.Expression, canonicalValue: Canonica
 	}
 }
 
+function isBooleanShorthandDefault(attribute: ESTree.JSXAttribute, propertyMatch: DefaultPropertyMatch): boolean {
+	return attribute.value === null && propertyMatch.value.type === "bool" && propertyMatch.value.value;
+}
+
+function isDefaultAttributeValue(attribute: ESTree.JSXAttribute, propertyMatch: DefaultPropertyMatch): boolean {
+	const expression = getJsxAttributeExpression(attribute);
+	return expression !== undefined && isDefaultValue(expression, propertyMatch.value);
+}
+
+function isUselessDefaultAttribute(attribute: ESTree.JSXAttribute, propertyMatch: DefaultPropertyMatch): boolean {
+	return isBooleanShorthandDefault(attribute, propertyMatch) || isDefaultAttributeValue(attribute, propertyMatch);
+}
+
 const noUselessDefault = createRule("no-useless-default", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -906,6 +919,47 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			}
 		}
 
+		function getUselessPropertyMatch(
+			attribute: ESTree.JSXAttribute,
+			className: string,
+		): DefaultPropertyMatch | undefined {
+			const propertyName = getJsxAttributeName(attribute.name);
+			if (propertyName === undefined || isIgnoredPropertyName(propertyName)) return undefined;
+
+			const propertyMatch = getPropertyMatch(className, propertyName);
+			if (propertyMatch === undefined || !isUselessDefaultAttribute(attribute, propertyMatch)) {
+				return undefined;
+			}
+
+			return propertyMatch;
+		}
+
+		function reportUselessJsxAttribute(
+			node: ESTree.JSXOpeningElement,
+			attribute: ESTree.JSXAttribute,
+			className: string,
+		): void {
+			const propertyMatch = getUselessPropertyMatch(attribute, className);
+			if (propertyMatch === undefined) return;
+
+			const fix = createJsxAttributeRemovalFix(node, attribute);
+			if (fix === undefined) {
+				context.report({
+					data: { className, propertyName: propertyMatch.propertyName },
+					messageId: "uselessDefault",
+					node: attribute,
+				});
+				return;
+			}
+
+			context.report({
+				data: { className, propertyName: propertyMatch.propertyName },
+				fix,
+				messageId: "uselessDefault",
+				node: attribute,
+			});
+		}
+
 		return {
 			BlockStatement(node): void {
 				inspectStatementNodes(node.body);
@@ -916,39 +970,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 
 				for (const attribute of node.attributes) {
 					if (isJsxSpreadAttribute(attribute)) continue;
-
-					const propertyName = getJsxAttributeName(attribute.name);
-					if (propertyName === undefined || isIgnoredPropertyName(propertyName)) continue;
-
-					const propertyMatch = getPropertyMatch(className, propertyName);
-					if (propertyMatch === undefined) continue;
-
-					const expression = getJsxAttributeExpression(attribute);
-					const isBooleanShorthandMatch =
-						attribute.value === null && propertyMatch.value.type === "bool" && propertyMatch.value.value;
-					if (
-						!isBooleanShorthandMatch &&
-						(expression === undefined || !isDefaultValue(expression, propertyMatch.value))
-					) {
-						continue;
-					}
-
-					const fix = createJsxAttributeRemovalFix(node, attribute);
-					if (fix === undefined) {
-						context.report({
-							data: { className, propertyName: propertyMatch.propertyName },
-							messageId: "uselessDefault",
-							node: attribute,
-						});
-						continue;
-					}
-
-					context.report({
-						data: { className, propertyName: propertyMatch.propertyName },
-						fix,
-						messageId: "uselessDefault",
-						node: attribute,
-					});
+					reportUselessJsxAttribute(node, attribute, className);
 				}
 			},
 			Program(node): void {

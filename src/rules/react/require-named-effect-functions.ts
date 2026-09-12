@@ -13,7 +13,7 @@ import {
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
-import { isEnvironment } from "$oxc-utilities/react-utilities";
+import { isEnvironment, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, Fix, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -42,7 +42,7 @@ type RuleOptions = InferContextFromRule<typeof requireNamedEffectFunctions>["opt
 
 function isHookConfiguration(value: unknown): value is HookConfig {
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
-	return Predicate.isObject(value) && Predicate.isString(value.name) && typeof value.allowAsync === "boolean";
+	return Predicate.isObject(value) && Predicate.isString(value.name) && Predicate.isBoolean(value.allowAsync);
 }
 
 function parseOptions(rawOptions: RuleOptions): EffectFunctionOptions {
@@ -50,11 +50,11 @@ function parseOptions(rawOptions: RuleOptions): EffectFunctionOptions {
 	const inlineFunctionDeclarations = Predicate.isObject(rawOptions) && rawOptions.inlineFunctionDeclarations;
 
 	if (!Predicate.isObject(rawOptions)) {
-		return { environment: "roblox-ts", hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
+		return { environment: ROBLOX_TS, hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
 	}
 
 	/* v8 ignore next -- @preserve rule schema restricts environment to known values when provided. */
-	const environment: Environment = isEnvironment(rawOptions.environment) ? rawOptions.environment : "roblox-ts";
+	const environment: Environment = isEnvironment(rawOptions.environment) ? rawOptions.environment : ROBLOX_TS;
 
 	const rawHooks = rawOptions.hooks;
 	/* v8 ignore next -- @preserve array check branches are both exercised; V8 branch tracking miscounts one. */
@@ -169,7 +169,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 		const { environment, hooks, inlineFunctionDeclarations, sloptor } = parseOptions(context.options[0]);
 		const hookAsyncConfig = new Map(hooks.map((hookConfig) => [hookConfig.name, hookConfig.allowAsync]));
 		const effectHooks = new Set(hookAsyncConfig.keys());
-		const isRobloxTsMode = environment === "roblox-ts" && !sloptor;
+		const isRobloxTsMode = environment === ROBLOX_TS && !sloptor;
 
 		function isAsyncAllowed(hookName: string): boolean {
 			const result = hookAsyncConfig.get(hookName);
@@ -217,6 +217,35 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			reportResolvedIdentifier(hookName, node, identifier, resolved, variable);
 		}
 
+		function reportArrowIdentifier(hookName: string, node: ESTree.CallExpression, isAsync: boolean): void {
+			if (isAsync) {
+				if (!isAsyncAllowed(hookName)) {
+					reportHookIssue(hookName, node, "identifierReferencesAsyncArrow");
+				}
+				return;
+			}
+			reportHookIssue(hookName, node, "identifierReferencesArrow");
+		}
+
+		function reportFunctionDeclarationIdentifier(
+			hookName: string,
+			node: ESTree.CallExpression,
+			identifier: ESTree.IdentifierReference,
+			declaration: ESTree.Function,
+			variable: ScopeVariable,
+			isAsync: boolean,
+		): void {
+			if (isAsync) {
+				if (!isAsyncAllowed(hookName)) {
+					reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
+				}
+				return;
+			}
+			if (!isRobloxTsMode && inlineFunctionDeclarations) {
+				reportDeclarationReference(hookName, node, identifier, declaration, variable);
+			}
+		}
+
 		function reportResolvedIdentifier(
 			hookName: string,
 			node: ESTree.CallExpression,
@@ -225,11 +254,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			variable: ScopeVariable,
 		): void {
 			if (resolved.type === "arrow") {
-				if (resolved.isAsync && !isAsyncAllowed(hookName)) {
-					reportHookIssue(hookName, node, "identifierReferencesAsyncArrow");
-				} else if (!resolved.isAsync) {
-					reportHookIssue(hookName, node, "identifierReferencesArrow");
-				}
+				reportArrowIdentifier(hookName, node, resolved.isAsync);
 				return;
 			}
 
@@ -238,13 +263,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				return;
 			}
 
-			if (resolved.isAsync) {
-				if (!isAsyncAllowed(hookName)) {
-					reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
-				}
-			} else if (!isRobloxTsMode && inlineFunctionDeclarations) {
-				reportDeclarationReference(hookName, node, identifier, resolved.node, variable);
-			}
+			reportFunctionDeclarationIdentifier(hookName, node, identifier, resolved.node, variable, resolved.isAsync);
 		}
 
 		function reportResolvedFunctionExpression(
@@ -354,10 +373,10 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				additionalProperties: false,
 				properties: {
 					environment: {
-						default: "roblox-ts",
+						default: ROBLOX_TS,
 						description:
 							"Environment mode: 'roblox-ts' only allows identifiers, 'standard' allows both identifiers and named function expressions",
-						enum: ["roblox-ts", "standard"],
+						enum: [ROBLOX_TS, STANDARD],
 						type: "string",
 					},
 					hooks: {

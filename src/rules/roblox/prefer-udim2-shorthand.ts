@@ -160,6 +160,24 @@ function collectArguments(
 	return { offsetXText, offsetYText, scaleXText, scaleYText };
 }
 
+function areConcreteUDim2Arguments(
+	parameters: ReadonlyArray<ESTree.Expression | ESTree.SpreadElement>,
+): parameters is readonly [ESTree.Expression, ESTree.Expression, ESTree.Expression, ESTree.Expression] {
+	if (parameters.length !== 4) return false;
+
+	const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = parameters;
+	return (
+		scaleXNode !== undefined &&
+		offsetXNode !== undefined &&
+		scaleYNode !== undefined &&
+		offsetYNode !== undefined &&
+		!isSpreadElement(scaleXNode) &&
+		!isSpreadElement(offsetXNode) &&
+		!isSpreadElement(scaleYNode) &&
+		!isSpreadElement(offsetYNode)
+	);
+}
+
 const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 	create(context): Visitor {
 		return {
@@ -169,21 +187,13 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 				const collected = collectArguments(node.arguments);
 				if (collected === undefined) return;
 
-				const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = node.arguments;
 				/* v8 ignore start -- @preserve collectArguments already rejects missing or spread arguments. */
-				if (
-					scaleXNode === undefined ||
-					offsetXNode === undefined ||
-					scaleYNode === undefined ||
-					offsetYNode === undefined ||
-					isSpreadElement(scaleXNode) ||
-					isSpreadElement(offsetXNode) ||
-					isSpreadElement(scaleYNode) ||
-					isSpreadElement(offsetYNode)
-				) {
+				if (!areConcreteUDim2Arguments(node.arguments)) {
 					return;
 				}
 				/* v8 ignore stop -- @preserve */
+
+				const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = node.arguments;
 
 				const scaleX = evaluateExpression(scaleXNode);
 				const offsetX = evaluateExpression(offsetXNode);

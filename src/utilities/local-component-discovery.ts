@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
-import { Predicate } from "effect";
+import { String as EffectString, Predicate } from "effect";
 import ignore from "ignore";
 
 import { isIdentifierName, isImportDefaultSpecifier, isImportSpecifier } from "./oxc-utilities";
@@ -157,16 +157,6 @@ function getProjectRootFromDirectory(startDirectory: string): string | undefined
 	}
 }
 
-/**
- * Reads the `.gitignore` of a directory that has just been listed.
- *
- * The listing already says whether the file is there, so the common case of a
- * directory without one costs no syscall at all.
- *
- * @param directory - The directory that was listed.
- * @param entries - That directory's entries.
- * @returns The layer, or `undefined` when there is no `.gitignore` to read.
- */
 function readGitignoreLayer(directory: string, entries: ReadonlyArray<Dirent>): GitignoreLayer | undefined {
 	if (entries.every((entry) => entry.name !== ".gitignore" || !entry.isFile())) return undefined;
 
@@ -179,16 +169,6 @@ function readGitignoreLayer(directory: string, entries: ReadonlyArray<Dirent>): 
 	}
 }
 
-/**
- * Applies the collected `.gitignore` layers to an entry, honoring git
- * precedence: the layer nearest the entry decides, so a nested negation can
- * re-include what an outer layer ignored.
- *
- * @param layers - The layers from the root down to the entry's own directory.
- * @param entryPath - The absolute path of the entry being tested.
- * @param isDirectory - Whether the entry is a directory.
- * @returns Whether git would ignore the entry.
- */
 function isGitIgnored(layers: ReadonlyArray<GitignoreLayer>, entryPath: string, isDirectory: boolean): boolean {
 	for (let index = layers.length - 1; index >= 0; index -= 1) {
 		const layer = layers[index];
@@ -207,16 +187,6 @@ function isGitIgnored(layers: ReadonlyArray<GitignoreLayer>, entryPath: string, 
 	return false;
 }
 
-/**
- * Lists a directory, treating any failure as an empty listing.
- *
- * The index is best-effort, and a concurrent build can delete a directory
- * between the moment its parent is listed and the moment it is visited.
- * Linting a source file must not fail because of that.
- *
- * @param directory - The directory to list.
- * @returns The entries, or nothing when the directory could not be read.
- */
 function readDirectoryEntries(directory: string): ReadonlyArray<Dirent> {
 	try {
 		return readdirSync(directory, { withFileTypes: true });
@@ -225,31 +195,39 @@ function readDirectoryEntries(directory: string): ReadonlyArray<Dirent> {
 	}
 }
 
-/**
- * Decides whether the walk should look at an entry at all, before any of the
- * per-project `.gitignore` rules are consulted.
- *
- * @param entryName - The name of the entry within its directory.
- * @returns Whether the entry is skipped outright.
- */
 function isSkippedEntryName(entryName: string): boolean {
 	if (entryName.startsWith(".")) return entryName !== ".storybook";
 	return IGNORED_DIRECTORIES.has(entryName.toLowerCase());
 }
 
-/**
- * Decides whether a walked entry belongs in the component index.
- *
- * @param entry - An entry of a walked directory that is not a directory.
- * @returns Whether the entry is a component file worth indexing.
- */
 function isIndexableComponentFile(entry: Dirent): boolean {
-	// Symbolic links are neither files nor directories here, so they are
-	// skipped along with sockets and pipes; that keeps link cycles and
-	// duplicate component paths out of the index.
-	if (!entry.isFile()) return false;
-	if (entry.name.endsWith(".d.ts")) return false;
+	if (!entry.isFile() || entry.name.endsWith(".d.ts")) return false;
 	return COMPONENT_EXTENSIONS.has(nodePath.extname(entry.name));
+}
+
+function isWalkableEntry(entry: Dirent, isDirectory: boolean): boolean {
+	return isDirectory || isIndexableComponentFile(entry);
+}
+
+function resolveWalkLayers(
+	directory: string,
+	entries: ReadonlyArray<Dirent>,
+	inheritedLayers: ReadonlyArray<GitignoreLayer>,
+): ReadonlyArray<GitignoreLayer> {
+	const ownLayer = readGitignoreLayer(directory, entries);
+	return ownLayer === undefined ? inheritedLayers : [...inheritedLayers, ownLayer];
+}
+
+function entryFullPathIfVisible(
+	entry: Dirent,
+	directory: string,
+	layers: ReadonlyArray<GitignoreLayer>,
+	isDirectory: boolean,
+): string | undefined {
+	if (!isWalkableEntry(entry, isDirectory)) return undefined;
+
+	const fullPath = nodePath.join(directory, entry.name);
+	return isGitIgnored(layers, fullPath, isDirectory) ? undefined : fullPath;
 }
 
 function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyArray<string>> {
@@ -267,20 +245,14 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 
 	function visit(directory: string, inheritedLayers: ReadonlyArray<GitignoreLayer>): void {
 		const entries = readDirectoryEntries(directory);
-		const ownLayer = readGitignoreLayer(directory, entries);
-		const layers = ownLayer === undefined ? inheritedLayers : [...inheritedLayers, ownLayer];
+		const layers = resolveWalkLayers(directory, entries, inheritedLayers);
 
 		for (const entry of entries) {
 			if (isSkippedEntryName(entry.name)) continue;
 
-			// Matching an entry against the `.gitignore` layers is the most
-			// expensive check here, so it runs last: only directories and files
-			// that would actually be indexed ever reach it.
 			const isDirectory = entry.isDirectory();
-			if (!isDirectory && !isIndexableComponentFile(entry)) continue;
-
-			const fullPath = nodePath.join(directory, entry.name);
-			if (isGitIgnored(layers, fullPath, isDirectory)) continue;
+			const fullPath = entryFullPathIfVisible(entry, directory, layers, isDirectory);
+			if (fullPath === undefined) continue;
 
 			if (isDirectory) visit(fullPath, layers);
 			else addComponentFile(entry, fullPath);
@@ -297,9 +269,9 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 }
 
 function toImportSource(sourceFile: string, targetFile: string): string {
-	let importSource = normalizePathSeparator(nodePath.relative(nodePath.dirname(sourceFile), targetFile));
-	importSource = importSource.replace(SOURCE_EXTENSION_PATTERN, "");
-	importSource = importSource.replace(INDEX_SUFFIX_PATTERN, "");
+	let importSource = normalizePathSeparator(nodePath.relative(nodePath.dirname(sourceFile), targetFile))
+		.replace(SOURCE_EXTENSION_PATTERN, "")
+		.replace(INDEX_SUFFIX_PATTERN, "");
 
 	if (!importSource.startsWith(".")) importSource = `./${importSource}`;
 	return importSource;
@@ -330,7 +302,7 @@ export function inspectLocalComponentFile(
 	}
 
 	const baseName = nodePath.basename(filePath, extension).toLowerCase();
-	const fileNames = definition.fileNames.map((fileName) => fileName.toLowerCase());
+	const fileNames = definition.fileNames.map(EffectString.toLowerCase);
 	if (!fileNames.includes(baseName)) return { importStyle: undefined, matches: false };
 
 	const text = getFileText(filePath);
@@ -415,17 +387,6 @@ function discoverLocalComponent(sourceFile: string, definition: LocalComponentDe
 	};
 }
 
-/**
- * Defers {@link discoverLocalComponent} until a rule needs the answer.
- *
- * The first discovery in a project indexes its source tree, so rules should
- * only ask once they have found a node worth reporting; a file with no such
- * node then never pays for the walk.
- *
- * @param sourceFile - The linted file; an empty name resolves nothing.
- * @param definition - The component to look for.
- * @returns A memoized accessor for the discovery result.
- */
 export function createLocalComponentDiscoverer(
 	sourceFile: string,
 	definition: LocalComponentDefinition,
