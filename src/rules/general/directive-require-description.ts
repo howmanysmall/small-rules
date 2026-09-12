@@ -1,5 +1,3 @@
-import { Predicate } from "effect";
-
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getOptionalStringArrayProperty,
@@ -64,10 +62,7 @@ const directiveRequireDescription = createRule("directive-require-description", 
 			// // oxlint-enable in line comments, so check those directly.
 			if (comment.type !== "Line") return;
 
-			const { value } = comment;
-			if (!Predicate.isString(value)) return;
-
-			const text = value.trim();
+			const text = comment.value.trim();
 			const kind = getOxlintLineKind(text);
 			if (kind === undefined || !isReportableLineText(kind, text)) return;
 

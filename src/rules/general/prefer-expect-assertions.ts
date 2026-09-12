@@ -223,7 +223,12 @@ function shouldPreferAssertionsCount(
 	hasIndeterminate: boolean,
 	deterministic: number,
 ): boolean {
-	return !hasIndeterminate && isExpectHasAssertionsCall(assertionCall) && assertionCall.arguments.length === 0 && deterministic > 0;
+	return (
+		!hasIndeterminate &&
+		isExpectHasAssertionsCall(assertionCall) &&
+		assertionCall.arguments.length === 0 &&
+		deterministic > 0
+	);
 }
 
 function reportPreferAssertionsCount(

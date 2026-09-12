@@ -408,6 +408,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			if (enclosingDeclarator === undefined) return undefined;
 
 			const enclosingDeclaration = enclosingDeclarator.parent;
+			/* v8 ignore next -- @preserve declarator parents are always VariableDeclarations (mistyped) */
 			if (!isVariableDeclaration(enclosingDeclaration)) return undefined;
 			if (enclosingDeclaration.kind !== "const") return undefined;
 			return enclosingDeclaration;
@@ -418,8 +419,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			scopeVariable: ScopeVariable,
 		): undefined | UselessConstantCandidate {
 			const declarator = getSingleConstDeclarator(scopeVariable);
-			if (declarator === undefined) return undefined;
-			if (isSkippedInitializer(declarator.initializer)) return undefined;
+			if (declarator === undefined || isSkippedInitializer(declarator.initializer)) return undefined;
 
 			const referenceIdentifier = getSingleUseIdentifier(scope, scopeVariable);
 			if (referenceIdentifier === undefined) return undefined;

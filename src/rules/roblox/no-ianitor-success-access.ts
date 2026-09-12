@@ -87,13 +87,7 @@ function isSuccessOnlyDestructuring(id: ESTree.Node, init: ESTree.CallExpression
 	return isObjectPattern(id) && isCallToIanitorCheck(init, sourceCode) && isDestructuringSuccessOnly(id);
 }
 
-function isStoredCheckResult(
-	id: ESTree.Node,
-	init: ESTree.CallExpression,
-	ianitorCheckVariables: ReadonlySet<string>,
-): boolean {
-	if (!isIdentifierName(id)) return false;
-
+function isStoredCheckResult(init: ESTree.CallExpression, ianitorCheckVariables: ReadonlySet<string>): boolean {
 	const callee = unwrapExpression(init.callee);
 	return isIdentifierName(callee) && ianitorCheckVariables.has(callee.name);
 }
@@ -187,7 +181,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 					reportSuccessOnlyDestructuring(id);
 				}
 
-				if (isIdentifierName(id) && isStoredCheckResult(id, unwrappedInit, ianitorCheckVariables)) {
+				if (isIdentifierName(id) && isStoredCheckResult(unwrappedInit, ianitorCheckVariables)) {
 					ianitorResultVariables.set(id.name, {
 						firstSuccessNode: id,
 						properties: new Set(),

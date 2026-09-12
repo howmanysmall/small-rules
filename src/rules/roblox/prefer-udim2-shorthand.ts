@@ -13,7 +13,10 @@ import { isNumber } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
+type ConcreteUDim2Arguments = readonly [ESTree.Expression, ESTree.Expression, ESTree.Expression, ESTree.Expression];
+
 interface ArgumentsCollection {
+	readonly nodes: ConcreteUDim2Arguments;
 	readonly offsetXText: string;
 	readonly offsetYText: string;
 	readonly scaleXText: string;
@@ -157,25 +160,13 @@ function collectArguments(
 		return undefined;
 	}
 
-	return { offsetXText, offsetYText, scaleXText, scaleYText };
-}
-
-function areConcreteUDim2Arguments(
-	parameters: ReadonlyArray<ESTree.Expression | ESTree.SpreadElement>,
-): parameters is readonly [ESTree.Expression, ESTree.Expression, ESTree.Expression, ESTree.Expression] {
-	if (parameters.length !== 4) return false;
-
-	const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = parameters;
-	return (
-		scaleXNode !== undefined &&
-		offsetXNode !== undefined &&
-		scaleYNode !== undefined &&
-		offsetYNode !== undefined &&
-		!isSpreadElement(scaleXNode) &&
-		!isSpreadElement(offsetXNode) &&
-		!isSpreadElement(scaleYNode) &&
-		!isSpreadElement(offsetYNode)
-	);
+	return {
+		nodes: [scaleXNode, offsetXNode, scaleYNode, offsetYNode],
+		offsetXText,
+		offsetYText,
+		scaleXText,
+		scaleYText,
+	};
 }
 
 const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
@@ -187,13 +178,7 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 				const collected = collectArguments(node.arguments);
 				if (collected === undefined) return;
 
-				/* v8 ignore start -- @preserve collectArguments already rejects missing or spread arguments. */
-				if (!areConcreteUDim2Arguments(node.arguments)) {
-					return;
-				}
-				/* v8 ignore stop -- @preserve */
-
-				const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = node.arguments;
+				const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = collected.nodes;
 
 				const scaleX = evaluateExpression(scaleXNode);
 				const offsetX = evaluateExpression(offsetXNode);

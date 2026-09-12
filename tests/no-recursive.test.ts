@@ -86,6 +86,8 @@ describe("no-recursive", () => {
 			"function empty() {}",
 			// Non-recursive method
 			'class Greeter { sayHi() { return "hi"; } }',
+			// Calls that cannot be `this`-method recursion
+			"function foo() { helper.method(); getHandler()(); this[0](); }",
 			// Non-recursive async
 			"async function noop() { return null; }",
 			// Non-recursive generator

@@ -289,6 +289,14 @@ describe("no-async-in-system", () => {
 				const system: SystemFunction = () => Events.general.friendUpdated.connect(({ player }) => player.IsFriendsWithAsync(userId));`,
 				options: inferredPlayerOptions,
 			},
+			{
+				code: `import { Other } from "server/network";
+				Other.general.friendUpdated.connect((value) => value);`,
+				options: inferredPlayerOptions,
+			},
+			"let runner: SystemFunction;\nconst { point } = location;",
+			"const descriptor = { system: 1 } satisfies UnknownConfig;",
+			"const runner = (() => updateWorld()) satisfies SystemFunction;",
 			`function customSystem(): CustomSystemResult {
 				return () => loadCharacterAsync();
 			}`,

@@ -137,6 +137,7 @@ function collectNextAssignment(
 	foundAssignments: Array<FoundAssignment>,
 ): boolean {
 	const statement = statements[scanIndex];
+	/* v8 ignore next -- scanIndex is always below statements.length from the scanning loop. @preserve */
 	if (statement === undefined) return false;
 
 	const assignment = getArrayIndexAssignment(statement, arrayIdentifierName, expectedIndex);
@@ -156,8 +157,8 @@ function getCandidate(
 
 	const { declaration, declarator } = header;
 	if (!isEmptyArrayInitializer(declarator.init, sourceCode)) return undefined;
-
 	if (!isBindingIdentifier(declarator.id)) return undefined;
+
 	const arrayIdentifierName = declarator.id.name;
 
 	const foundAssignments = collectSequentialAssignments(statements, index + 1, arrayIdentifierName);

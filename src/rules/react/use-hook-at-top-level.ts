@@ -191,9 +191,8 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			return shouldIgnoreHookImportSource(hookName, node, importSources, importSourceMap);
 		}
 
-		function shouldSkipHook(hookName: string | undefined, node: ESTree.CallExpression): boolean {
-			if (hookName === undefined) return true;
-			return shouldIgnoreHook(hookName, node);
+		function getActiveHookName(node: ESTree.CallExpression): string | undefined {
+			return isHookCall(node) ? getHookName(node) : undefined;
 		}
 
 		function isActiveHookContext(
@@ -201,6 +200,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			node: ESTree.CallExpression,
 		): current is ControlFlowContext {
 			if (current === undefined) return false;
+			/* v8 ignore next -- @preserve pushed contexts always set isComponentOrHook or inNestedFunction. */
 			if (!current.isComponentOrHook && !current.inNestedFunction) return false;
 			if (isInFinallyBlock(node)) return false;
 			return true;
@@ -295,10 +295,9 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			ArrowFunctionExpression: handleFunctionEnter,
 			"ArrowFunctionExpression:exit": handleFunctionExit,
 			CallExpression(node): void {
-				if (!isHookCall(node)) return;
-
-				const hookName = getHookName(node);
-				if (shouldSkipHook(hookName, node)) return;
+				const hookName = getActiveHookName(node);
+				if (hookName === undefined) return;
+				if (shouldIgnoreHook(hookName, node)) return;
 
 				const current = getCurrentContext();
 				if (!isActiveHookContext(current, node)) return;

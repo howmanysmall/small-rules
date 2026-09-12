@@ -388,6 +388,7 @@ function isFloatingPair(
 
 function isFloatingEquality(node: ESTree.Node, isFloating: (expression: ESTree.Expression) => boolean): boolean {
 	if (!isBinaryExpression(node) || !EQUALITY_OPERATORS.has(node.operator)) return false;
+	/* v8 ignore next -- @preserve private-identifier operands only occur with `in`, which the operator check above rejects. */
 	if (!isComparableBinary(node)) return false;
 	return isFloating(node.left) || isFloating(node.right);
 }

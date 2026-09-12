@@ -316,10 +316,10 @@ function addFunctionParameterScore(
 }
 
 function addFunctionReturnScore(current: number, node: ESTree.Node, scoring: StructuralScoringArguments): number {
-	/* v8 ignore else -- @preserve parser-produced function and method type nodes expose returnType. */
+	/* v8 ignore next -- @preserve parser-produced function and method type nodes expose returnType. */
 	if (!("returnType" in node)) return current;
 	const { returnType } = node;
-	/* v8 ignore else -- @preserve type-checkable function and method signatures carry return annotations here. */
+	/* v8 ignore next -- @preserve type-checkable function and method signatures carry return annotations here. */
 	if (!isTsTypeAnnotation(returnType)) return current;
 	return addScore(
 		current,
@@ -347,8 +347,10 @@ function scoreFunctionType(
 	return addFunctionReturnScore(score, node, scoring);
 }
 
-function scoreInterfaceDeclaration(node: ESTree.TSInterfaceDeclaration, scoring: StructuralScoringArguments): number {
-	const { body, extends: extendsClause } = node;
+function scoreInterfaceDeclaration(
+	{ body, extends: extendsClause }: ESTree.TSInterfaceDeclaration,
+	scoring: StructuralScoringArguments,
+): number {
 	let score = scoring.config.interfacePenalty;
 	if (extendsClause.length > 0) {
 		score = addScore(score, extendsClause.length * 5, scoring.config, scoring.ceiling);
@@ -367,8 +369,10 @@ function scoreInterfaceDeclaration(node: ESTree.TSInterfaceDeclaration, scoring:
 	);
 }
 
-function scoreMappedType(node: ESTree.TSMappedType, scoring: StructuralScoringArguments): number {
-	const { constraint, typeAnnotation } = node;
+function scoreMappedType(
+	{ constraint, typeAnnotation }: ESTree.TSMappedType,
+	scoring: StructuralScoringArguments,
+): number {
 	/* v8 ignore else -- @preserve parser-produced mapped types always supply a constraint. */
 	let score = addStructuralScore(
 		5,
@@ -397,8 +401,7 @@ function isSkippedTupleElement(element: ESTree.Node): boolean {
 	return isTsRestType(element) || isTsOptionalType(element);
 }
 
-function scoreTupleType(node: ESTree.TSTupleType, scoring: StructuralScoringArguments): number {
-	const { elementTypes } = node;
+function scoreTupleType({ elementTypes }: ESTree.TSTupleType, scoring: StructuralScoringArguments): number {
 	let score = 1;
 	for (const element of elementTypes) {
 		if (isSkippedTupleElement(element)) continue;
@@ -415,8 +418,7 @@ function scoreTupleType(node: ESTree.TSTupleType, scoring: StructuralScoringArgu
 	return addScore(score, 1.5 * elementTypes.length, scoring.config, scoring.ceiling);
 }
 
-function scoreTypeLiteral(node: ESTree.TSTypeLiteral, scoring: StructuralScoringArguments): number {
-	const { members } = node;
+function scoreTypeLiteral({ members }: ESTree.TSTypeLiteral, scoring: StructuralScoringArguments): number {
 	const baseScore = 2 + members.length * 0.5;
 	return addNestedTypeAnnotationScores(
 		baseScore,
@@ -429,8 +431,7 @@ function scoreTypeLiteral(node: ESTree.TSTypeLiteral, scoring: StructuralScoring
 	);
 }
 
-function scoreTypeReference(node: ESTree.TSTypeReference, scoring: StructuralScoringArguments): number {
-	const { typeArguments } = node;
+function scoreTypeReference({ typeArguments }: ESTree.TSTypeReference, scoring: StructuralScoringArguments): number {
 	const parameters = typeArguments?.params ?? [];
 	let score = 2;
 	for (const parameter of parameters) {
