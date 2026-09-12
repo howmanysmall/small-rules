@@ -135,7 +135,7 @@ hooks {
       // do not block. Runs once per commit, not per file.
       ["fallow"] {
         glob = FALLOW_FILES
-        check = "fallow audit --quiet --gate-marker hk"
+        check = "mise run fallow:audit-hk"
       }
 
       // JS/TS pipeline — isentinel-lint + biome + oxfmt
@@ -336,7 +336,7 @@ hooks {
       }
       ["fallow"] {
         glob = FALLOW_FILES
-        check = "fallow audit --quiet --gate-marker hk"
+        check = "mise run fallow:audit-hk"
       }
       ["isentinel-lint"] {
         glob = ISENTINEL_FILES

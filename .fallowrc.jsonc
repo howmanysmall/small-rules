@@ -63,7 +63,7 @@
 		"maxUnitSize": 60,
 		"coverage": "coverage/coverage-final.json",
 		"coverageRoot": null,
-		"ignore": ["scripts/**"],
+		"ignore": ["scripts/**", "*.config.ts"],
 		"ownership": {
 			"botPatterns": [
 				"*\\[bot\\]*",

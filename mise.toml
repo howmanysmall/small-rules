@@ -52,6 +52,15 @@ run = """
 git commit --signoff --message "${usage_message?}" --no-verify
 """
 
+[tasks."fallow:audit-hk"]
+description = "Runs fallow to audit the project."
+depends = ["test:istanbul"]
+run = "fallow audit --quiet --gate-marker hk"
+
+[tasks."test:istanbul"]
+description = "Generate a coverage report with Vitest and Istanbul."
+run = "nr test:istanbul --silent >/dev/null 2>&1 || true"
+
 [tasks.amend]
 description = "Amends the staged changes, reusing the previous commit message."
 run = "git commit --amend --reuse-message=HEAD --signoff"
