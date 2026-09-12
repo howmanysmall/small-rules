@@ -15,7 +15,7 @@ exclude =
     "do-not-sync-ever",
   )
 display_skip_reasons = List()
-terminal_progress = false
+terminal_progress = true
 
 local ISENTINEL_FILES =
   List(
