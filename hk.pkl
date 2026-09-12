@@ -231,7 +231,9 @@ hooks {
       }
 
       // Markdown — rumdl lint + fmt
-      ["vale"] = Builtins.vale
+      ["vale"] = (Builtins.vale) {
+        glob = MARKDOWN_FILES
+      }
       ["rumdl"] = (Builtins.rumdl) {
         glob = MARKDOWN_FILES
         exclude = List(".agents/skills/**/SKILL.md")

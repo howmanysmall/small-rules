@@ -59,7 +59,34 @@ run = "fallow audit --quiet --gate-marker hk"
 
 [tasks."test:istanbul"]
 description = "Generate a coverage report with Vitest and Istanbul."
-run = "nr test:istanbul --silent >/dev/null 2>&1 || true"
+sources = [
+	"src/**",
+	"tests/**",
+	"packages/**",
+	"documentation/**",
+	"scripts/**",
+	".github/workflows/**",
+	"*.config.*",
+	"vitest*.ts",
+	"tsconfig*.json",
+	"package.json",
+	"pnpm-lock.yaml",
+	"pnpm-workspace.yaml",
+	"THIRD-PARTY-NOTICES.md",
+	"!**/node_modules/**",
+	"!**/dist/**",
+	"!**/coverage/**",
+	"!**/.cache/**",
+	"!**/.astro/**",
+	"!**/*.tsbuildinfo",
+	"!documentation/test-results/**",
+]
+outputs = [".cache/istanbul/coverage-final.json"]
+cache = { enabled = true, command_inputs = ["pwd"] }
+run = """
+rm -f .cache/istanbul/coverage-final.json
+nr test:istanbul --silent >/dev/null 2>&1 || test -s .cache/istanbul/coverage-final.json
+"""
 
 [tasks.amend]
 description = "Amends the staged changes, reusing the previous commit message."
