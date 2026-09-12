@@ -12,18 +12,11 @@ import {
 	isBlockStatement,
 	isCallbackFunction,
 	isCallExpression,
-	isChainExpression,
 	isClassExpression,
 	isExportNamedDeclaration,
 	isNewExpression,
-	isParenthesizedExpression,
 	isProgram,
 	isProperty,
-	isTsAsExpression,
-	isTsInstantiationExpression,
-	isTsNonNullExpression,
-	isTsSatisfiesExpression,
-	isTsTypeAssertion,
 	isVariableDeclaration,
 	isVariableDeclarator,
 	JSX_ELEMENT,
@@ -46,8 +39,9 @@ import {
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
-import type { ESTree, Fix, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Fix, Reference, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
 const SCREAMING_SNAKE_CASE = /^[A-Z][A-Z0-9_]*$/u;
@@ -79,8 +73,6 @@ interface UselessConstantCandidate {
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
-
-type ScopeVariable = Scope["variables"][number];
 
 function collectAllScopes(root: Scope): Array<Scope> {
 	const scopes = new Array<Scope>();
@@ -189,22 +181,40 @@ function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, workli
 	return true;
 }
 
+const TRANSPARENT_EXPRESSIONS = new Set([
+	CHAIN_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+] satisfies ReadonlyArray<NodeType>);
+type TransparentExpression =
+	| ESTree.ChainExpression
+	| ESTree.ParenthesizedExpression
+	| ESTree.TSAsExpression
+	| ESTree.TSInstantiationExpression
+	| ESTree.TSNonNullExpression
+	| ESTree.TSSatisfiesExpression
+	| ESTree.TSTypeAssertion;
+function isTransparentExpression(node: ESTree.Node): node is TransparentExpression {
+	return TRANSPARENT_EXPRESSIONS.has(node.type);
+}
+
+function unwrapTransparentExpression(node: ESTree.Node): ESTree.Node | undefined {
+	/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
+	return isTransparentExpression(node) ? node.expression : undefined;
+}
+
 function appendRelocatableChildren(
 	node: ESTree.Node,
 	staticGlobalFactories: ReadonlySet<string>,
 	worklist: Array<ESTree.Node>,
 ): boolean {
-	/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
-	if (
-		isChainExpression(node) ||
-		isParenthesizedExpression(node) ||
-		isTsAsExpression(node) ||
-		isTsInstantiationExpression(node) ||
-		isTsNonNullExpression(node) ||
-		isTsSatisfiesExpression(node) ||
-		isTsTypeAssertion(node)
-	) {
-		worklist.push(node.expression);
+	const unwrapped = unwrapTransparentExpression(node);
+	if (unwrapped !== undefined) {
+		worklist.push(unwrapped);
 		return true;
 	}
 
@@ -347,7 +357,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 		const ignoreCallPatterns = rawOptions?.ignoreCallPatterns ?? OBJECT_CONSTRUCTOR_PATTERNS;
 		const ignoredCallPatternMatchers = ignoreCallPatterns.map((pattern) => new RegExp(pattern, "u"));
 
-		function getSingleReadOnlyReference(scope: Scope, scopeVariable: ScopeVariable): Reference | undefined {
+		function getSingleReadOnlyReference(scope: Scope, scopeVariable: Variable): Reference | undefined {
 			let readOnlyReference: Reference | undefined;
 			let readOnlyCount = 0;
 			for (const scopeReference of scopeVariable.references) {
@@ -368,7 +378,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			return readOnlyReference;
 		}
 
-		function getSingleConstDeclarator(scopeVariable: ScopeVariable): SingleConstDeclarator | undefined {
+		function getSingleConstDeclarator(scopeVariable: Variable): SingleConstDeclarator | undefined {
 			if (!SCREAMING_SNAKE_CASE.test(scopeVariable.name)) return undefined;
 
 			const [variableDefinition] = scopeVariable.defs;
@@ -390,10 +400,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			);
 		}
 
-		function getSingleUseIdentifier(
-			scope: Scope,
-			scopeVariable: ScopeVariable,
-		): ESTree.BindingIdentifier | undefined {
+		function getSingleUseIdentifier(scope: Scope, scopeVariable: Variable): ESTree.BindingIdentifier | undefined {
 			const readOnlyReference = getSingleReadOnlyReference(scope, scopeVariable);
 			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) {
 				return undefined;
@@ -416,7 +423,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 
 		function getUselessConstantCandidate(
 			scope: Scope,
-			scopeVariable: ScopeVariable,
+			scopeVariable: Variable,
 		): undefined | UselessConstantCandidate {
 			const declarator = getSingleConstDeclarator(scopeVariable);
 			if (declarator === undefined || isSkippedInitializer(declarator.initializer)) return undefined;

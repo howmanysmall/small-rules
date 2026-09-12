@@ -57,6 +57,17 @@ const DEFAULT_CONFIGURATION: ComplexityConfiguration = {
 	performanceMode: true,
 };
 
+const PRIMITIVE_KEYWORD_TYPES = new Set<string>([
+	TS_BIG_INT_KEYWORD,
+	TS_BOOLEAN_KEYWORD,
+	TS_NULL_KEYWORD,
+	TS_NUMBER_KEYWORD,
+	TS_STRING_KEYWORD,
+	TS_SYMBOL_KEYWORD,
+	TS_UNDEFINED_KEYWORD,
+	TS_VOID_KEYWORD,
+]);
+
 type RuleOptions = InferContextFromRule<typeof enforceIanitorCheckType>["options"][0];
 
 function isIanitorValidator({ callee }: ESTree.CallExpression): boolean {
@@ -475,77 +486,69 @@ function calculateStructuralComplexity(
 		nextDepth,
 	};
 
-	switch (node.type) {
-		case TS_ANY_KEYWORD:
-		case TS_NEVER_KEYWORD:
-		case TS_UNKNOWN_KEYWORD:
-			break;
+	if (PRIMITIVE_KEYWORD_TYPES.has(node.type)) {
+		score = 1;
+	} else {
+		switch (node.type) {
+			case TS_ANY_KEYWORD:
+			case TS_NEVER_KEYWORD:
+			case TS_UNKNOWN_KEYWORD:
+				break;
 
-		case TS_ARRAY_TYPE: {
-			score = scoreArrayType(node, scoring);
-			break;
+			case TS_ARRAY_TYPE: {
+				score = scoreArrayType(node, scoring);
+				break;
+			}
+
+			case TS_CONDITIONAL_TYPE: {
+				score = scoreConditionalType(node, scoring);
+				break;
+			}
+
+			case TS_FUNCTION_TYPE:
+			case TS_METHOD_SIGNATURE: {
+				score = scoreFunctionType(node, scoring);
+				break;
+			}
+
+			case TS_INTERFACE_DECLARATION: {
+				score = scoreInterfaceDeclaration(node, scoring);
+				break;
+			}
+
+			case TS_INTERSECTION_TYPE: {
+				score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 3, 0);
+				break;
+			}
+
+			case TS_MAPPED_TYPE: {
+				score = scoreMappedType(node, scoring);
+				break;
+			}
+
+			case TS_TUPLE_TYPE: {
+				score = scoreTupleType(node, scoring);
+				break;
+			}
+
+			case TS_TYPE_LITERAL: {
+				score = scoreTypeLiteral(node, scoring);
+				break;
+			}
+
+			case TS_TYPE_REFERENCE: {
+				score = scoreTypeReference(node, scoring);
+				break;
+			}
+
+			case TS_UNION_TYPE: {
+				score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 2, -1);
+				break;
+			}
+
+			default:
+				score = 1;
 		}
-
-		case TS_BIG_INT_KEYWORD:
-		case TS_BOOLEAN_KEYWORD:
-		case TS_NULL_KEYWORD:
-		case TS_NUMBER_KEYWORD:
-		case TS_STRING_KEYWORD:
-		case TS_SYMBOL_KEYWORD:
-		case TS_UNDEFINED_KEYWORD:
-		case TS_VOID_KEYWORD: {
-			score = 1;
-			break;
-		}
-
-		case TS_CONDITIONAL_TYPE: {
-			score = scoreConditionalType(node, scoring);
-			break;
-		}
-
-		case TS_FUNCTION_TYPE:
-		case TS_METHOD_SIGNATURE: {
-			score = scoreFunctionType(node, scoring);
-			break;
-		}
-
-		case TS_INTERFACE_DECLARATION: {
-			score = scoreInterfaceDeclaration(node, scoring);
-			break;
-		}
-
-		case TS_INTERSECTION_TYPE: {
-			score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 3, 0);
-			break;
-		}
-
-		case TS_MAPPED_TYPE: {
-			score = scoreMappedType(node, scoring);
-			break;
-		}
-
-		case TS_TUPLE_TYPE: {
-			score = scoreTupleType(node, scoring);
-			break;
-		}
-
-		case TS_TYPE_LITERAL: {
-			score = scoreTypeLiteral(node, scoring);
-			break;
-		}
-
-		case TS_TYPE_REFERENCE: {
-			score = scoreTypeReference(node, scoring);
-			break;
-		}
-
-		case TS_UNION_TYPE: {
-			score = addTypeUnionScores(score, node, nextDepth, config, cache, depthMultiplierCache, ceiling, 2, -1);
-			break;
-		}
-
-		default:
-			score = 1;
 	}
 
 	score *= getDepthMultiplier(depth, depthMultiplierCache);
