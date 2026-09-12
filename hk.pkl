@@ -273,8 +273,23 @@ hooks {
 
   ["pre-push"] {
     steps {
-      ["check"] {
-        check = "scripts/quiet-on-success.sh mise run check"
+      ["lint"] {
+        check = "mise run lint"
+      }
+      ["type-check"] {
+        check = "mise run type-check"
+      }
+      ["dead-code"] {
+        check = "mise run dead-code"
+      }
+      ["duplicates"] {
+        check = "mise run duplicates"
+      }
+      ["build"] {
+        check = "mise run build"
+      }
+      ["test"] {
+        check = "mise run test"
       }
       // Mirror CI's Workflow Security job so bad workflow edits fail here,
       // not after burning CI minutes. Unconditional: the trio is fast and
