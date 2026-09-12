@@ -604,6 +604,35 @@ function getComponentName(node: ReactOwner | undefined): string | undefined {
 	return isIdentifierName(id) ? id.name : undefined;
 }
 
+export interface EffectOwnerDisplay {
+	readonly containingNode: ReactOwner | undefined;
+	readonly displayName: string;
+	readonly isInCustomHook: boolean;
+}
+
+export function getReportableEffectCall(
+	analysis: ReactEffectAnalysis,
+	effect: ReactEffect,
+	reference: Reference,
+	isReportableReference: (candidate: Reference) => boolean,
+): ESTree.CallExpression | undefined {
+	/* v8 ignore next -- effect traversal skips call arguments, so no non-synchronous prop-call reference is ever collected. @preserve */
+	if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) return undefined;
+	if (!isReportableReference(reference)) return undefined;
+	return analysis.scope.getCallExpression(reference);
+}
+
+export function describeEffectOwner(analysis: ReactEffectAnalysis, effect: ReactEffect): EffectOwnerDisplay {
+	const containingNode = analysis.findEnclosingReactNode(effect.node);
+	const isInCustomHook = containingNode !== undefined && analysis.isCustomHook(containingNode);
+	const fallback = isInCustomHook ? "this custom hook" : "this component";
+	const name = analysis.getComponentName(containingNode);
+	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
+	if (name !== undefined && name.length > 0) return { containingNode, displayName: `"${name}"`, isInCustomHook };
+	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
+	return { containingNode, displayName: fallback, isInCustomHook };
+}
+
 function toReactOwner(node: ESTree.Node): ReactOwner | undefined {
 	if (isFunctionDeclaration(node)) return node;
 	/* v8 ignore start -- @preserve toReactOwner is only called with nodes already matched as components/HOCs/custom hooks; the fallback never executes. */
