@@ -97,6 +97,7 @@
 		"@e18e/eslint-plugin": "catalog:lint",
 		"@fast-check/vitest": "catalog:test",
 		"@isentinel/eslint-config": "catalog:lint",
+		"@isentinel/hooks": "catalog:tooling",
 		"@small-rules/arktype-utilities": "workspace:*",
 		"@stryker-mutator/api": "catalog:test",
 		"@stryker-mutator/core": "catalog:test",

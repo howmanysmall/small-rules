@@ -252,6 +252,7 @@ catalogs:
     vitest: 5.0.0
     vitiate: 0.3.1
   tooling:
+    "@isentinel/hooks": 1.6.0
     "@oh-my-pi/pi-coding-agent": 18.1.12
     "@opencode-ai/plugin": 0.0.0-beta-19192
     "@opencode-ai/schema": 0.0.0-beta-19192
