@@ -20,6 +20,9 @@ const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies No
 const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
 const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 
+export const IMPORT_EXPRESSION = "ImportExpression" as const satisfies NodeType;
+export const META_PROPERTY = "MetaProperty" as const satisfies NodeType;
+
 export const ACCESSOR_PROPERTY = "AccessorProperty" as const satisfies NodeType;
 export const ARRAY_EXPRESSION = "ArrayExpression" as const satisfies NodeType;
 export const ARRAY_PATTERN = "ArrayPattern" as const satisfies NodeType;

@@ -205,6 +205,8 @@ function validateFields(extractionContext: ExtractionContext, objectFields: Read
 	}
 }
 
+// oxlint-disable-next-line jsdoc-js/convert-to-jsdoc-comments -- shut up
+// fallow-ignore-next-line complexity
 function extractCaseExample(
 	testCase: ObjectExpression,
 	kind: "invalid" | "valid",
@@ -299,6 +301,8 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 	return fields;
 }
 
+// oxlint-disable-next-line jsdoc-js/convert-to-jsdoc-comments -- shut up
+// fallow-ignore-next-line complexity
 function findField(object: ObjectExpression, name: string): ObjectField | undefined {
 	for (const property of object.properties) {
 		if (property.type !== "Property" || property.computed || property.kind !== "init" || property.method) continue;
@@ -320,6 +324,8 @@ function getStaticKey(key: PropertyKey, context: ExtractionContext): string {
 	throw new ExtractionError(context, key.start, "object keys must be static strings.");
 }
 
+// oxlint-disable-next-line jsdoc-js/convert-to-jsdoc-comments -- shut up
+// fallow-ignore-next-line complexity
 function evaluateStatic(node: Expression, context: ExtractionContext): StaticValue {
 	if (isStaticLiteral(node)) return node.value;
 	if (node.type === "TemplateLiteral") return evaluateTemplate(node, context);
