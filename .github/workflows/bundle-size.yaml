@@ -31,6 +31,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout pull request
@@ -119,4 +120,5 @@ jobs:
           BUNDLE_SIZE_REPORT: ${{ steps.report.outputs.body }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+        continue-on-error: true
     timeout-minutes: 10
