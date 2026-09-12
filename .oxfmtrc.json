@@ -7,7 +7,7 @@
 	"endOfLine": "lf",
 	"htmlWhitespaceSensitivity": "css",
 	"ignorePatterns": [
-		"**/*.{md,toml,js,yaml,toml}",
+		"**/*.{md,toml,js,yaml,yml,toml}",
 		"**/do-not-sync-ever/**",
 		".tsbuildinfo*",
 		"**/*-lock.json",

@@ -61,7 +61,7 @@
 		"maxCrap": 30,
 		"crapRefactorBand": 5,
 		"maxUnitSize": 60,
-		"coverage": "coverage/coverage-final.json",
+		"coverage": ".cache/istanbul/coverage-final.json",
 		"coverageRoot": null,
 		"ignore": ["scripts/**", "*.config.ts"],
 		"ownership": {
