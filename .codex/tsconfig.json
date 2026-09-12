@@ -1,0 +1,8 @@
+{
+	"extends": "../tsconfig.node.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "${configDir}/../node_modules/.tsbuildinfo-codex"
+	},
+	"include": ["${configDir}/../packages/*/src/**/*.ts", "${configDir}/**/*.ts", "${configDir}/**/*.json"],
+	"exclude": ["node_modules"]
+}

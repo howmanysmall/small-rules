@@ -23,13 +23,8 @@ interface NamedFunctionNode {
 	readonly id: IdentifierLike | null;
 }
 
-function isHookName(name: string): boolean {
-	return HOOK_PATTERN.test(name);
-}
-
 function getFunctionHookName(node: NamedFunctionNode): string | undefined {
-	if (node.id === null) return undefined;
-	return node.id.name;
+	return node.id?.name ?? undefined;
 }
 
 function getVariableDeclaratorName(node: ESTree.VariableDeclarator): string | undefined {
@@ -39,14 +34,14 @@ function getVariableDeclaratorName(node: ESTree.VariableDeclarator): string | un
 
 function isHookFunction(node: NamedFunctionNode): boolean {
 	const name = getFunctionHookName(node);
-	return name !== undefined && isHookName(name);
+	return name !== undefined && HOOK_PATTERN.test(name);
 }
 
 function isHookArrowFunction({ parent }: ESTree.ArrowFunctionExpression): boolean {
 	if (!isVariableDeclarator(parent)) return false;
 
 	const name = getVariableDeclaratorName(parent);
-	return name !== undefined && isHookName(name);
+	return name !== undefined && HOOK_PATTERN.test(name);
 }
 
 function getLatestArrayInitializer(
@@ -214,29 +209,30 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 			});
 		}
 
+		function reportIfTooManyElements(node: ESTree.ReturnStatement, array: ESTree.ArrayExpression): void {
+			const count = countReturnElements(array, sourceCode, arrayInitializersByName);
+			if (count > MAX_RETURN_ELEMENTS) reportTooManyReturnValues(node);
+		}
+
+		function checkIdentifierReturn(
+			node: ESTree.ReturnStatement,
+			identifier: ESTree.Node & { readonly name: string },
+		): void {
+			if (shouldAllowIdentifierReturn(sourceCode, identifier)) return;
+
+			const initializer = getResolvedArrayInitializer(sourceCode, node, identifier.name, arrayInitializersByName);
+			if (initializer !== undefined) reportIfTooManyElements(node, initializer);
+		}
+
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
 			if (hookDepth === 0 || node.argument === null || isObjectExpression(node.argument)) return;
 
 			if (isIdentifierName(node.argument)) {
-				if (shouldAllowIdentifierReturn(sourceCode, node.argument)) return;
-
-				const initializer = getResolvedArrayInitializer(
-					sourceCode,
-					node,
-					node.argument.name,
-					arrayInitializersByName,
-				);
-				if (initializer === undefined) return;
-
-				const count = countReturnElements(initializer, sourceCode, arrayInitializersByName);
-				if (count > MAX_RETURN_ELEMENTS) reportTooManyReturnValues(node);
+				checkIdentifierReturn(node, node.argument);
 				return;
 			}
 
-			if (!isArrayExpression(node.argument)) return;
-
-			const count = countReturnElements(node.argument, sourceCode, arrayInitializersByName);
-			if (count > MAX_RETURN_ELEMENTS) reportTooManyReturnValues(node);
+			if (isArrayExpression(node.argument)) reportIfTooManyElements(node, node.argument);
 		}
 
 		return {

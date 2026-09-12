@@ -5,8 +5,10 @@ import {
 } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	AWAIT_EXPRESSION,
 	BLOCK_STATEMENT,
 	CATCH_CLAUSE,
+	CHAIN_EXPRESSION,
 	CONDITIONAL_EXPRESSION,
 	DO_WHILE_STATEMENT,
 	FOR_IN_STATEMENT,
@@ -20,6 +22,7 @@ import {
 	isConditionalExpression,
 	isFunctionDeclarationRaw,
 	isIdentifierName,
+	isIdentifierNamed,
 	isJsxAttribute,
 	isJsxElement,
 	isJsxExpressionContainer,
@@ -31,18 +34,25 @@ import {
 	isVariableDeclarator,
 	LABELED_STATEMENT,
 	LOGICAL_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	SEQUENCE_EXPRESSION,
+	SPREAD_ELEMENT,
 	SWITCH_CASE,
 	SWITCH_STATEMENT,
 	TRY_STATEMENT,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
 	WHILE_STATEMENT,
 	WITH_STATEMENT,
 } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Reference, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-
-type ScopeVariable = Scope["set"] extends Map<string, infer VariableType> ? VariableType : never;
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 interface ReactKeysOptions {
 	readonly allowRootKeys?: boolean;
@@ -70,22 +80,22 @@ const DEFAULT_OPTIONS: Required<ReactKeysOptions> = {
 };
 
 const WRAPPER_PARENT_TYPES = new Set([
-	"ChainExpression",
-	"ParenthesizedExpression",
-	"TSAsExpression",
-	"TSInstantiationExpression",
-	"TSNonNullExpression",
-	"TSSatisfiesExpression",
-	"TSTypeAssertion",
+	CHAIN_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
 ]);
 
 const ARGUMENT_WRAPPER_TYPES = new Set([
 	...WRAPPER_PARENT_TYPES,
-	"AwaitExpression",
-	"ConditionalExpression",
-	"LogicalExpression",
-	"SequenceExpression",
-	"SpreadElement",
+	AWAIT_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	LOGICAL_EXPRESSION,
+	SEQUENCE_EXPRESSION,
+	SPREAD_ELEMENT,
 ]);
 
 interface CallbackUsage {
@@ -160,12 +170,7 @@ function getCallbackUsageFromCallExpression(
 			memoization: memoizationHooks.has(name),
 		};
 
-		if (
-			name === "from" &&
-			isIdentifierName(callee.object) &&
-			callee.object.name === "Array" &&
-			callExpression.arguments.length >= 2
-		) {
+		if (name === "from" && isIdentifierNamed(callee.object, "Array") && callExpression.arguments.length >= 2) {
 			return { ...usage, iteration: true };
 		}
 
@@ -208,7 +213,7 @@ function findEnclosingCallExpression(node: ESTree.Node): ESTree.CallExpression |
 	return undefined;
 }
 
-function getVariableForFunction(sourceCode: SourceCode, functionLike: CallbackFunction): ScopeVariable | undefined {
+function getVariableForFunction(sourceCode: SourceCode, functionLike: CallbackFunction): undefined | Variable {
 	if (isFunctionDeclarationRaw(functionLike)) {
 		const declared = sourceCode.getDeclaredVariables(functionLike);
 		/* v8 ignore next -- @preserve parser-backed function declarations always declare their own binding. */
@@ -396,7 +401,7 @@ function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 	return false;
 }
 
-function isJsxChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapperType: ESTree.Node["type"]): boolean {
+function isJsxChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapperType: NodeType): boolean {
 	let current: ESTree.Node | undefined = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (current === undefined) return false;
@@ -416,11 +421,23 @@ function isJsxChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapp
 }
 
 function isTernaryJsxChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	return isJsxChildWrappedBy(node, "ConditionalExpression");
+	return isJsxChildWrappedBy(node, CONDITIONAL_EXPRESSION);
 }
 
 function isLogicalJsxChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	return isJsxChildWrappedBy(node, "LogicalExpression");
+	return isJsxChildWrappedBy(node, LOGICAL_EXPRESSION);
+}
+
+function isCallbackContext(usage: CallbackUsage): boolean {
+	return usage.iteration || usage.memoization;
+}
+
+function isRootWithoutCallback(isRoot: boolean, isCallback: boolean): boolean {
+	return isRoot && !isCallback;
+}
+
+function isExemptElement(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
+	return isAssignedJSXValue(node) || isJsxPropertyValue(node) || isTernaryJsxChild(node);
 }
 
 const requireReactComponentKeys = createRule("require-react-component-keys", "react", {
@@ -438,36 +455,46 @@ const requireReactComponentKeys = createRule("require-react-component-keys", "re
 		const iterationMethods = new Set(options.iterationMethods);
 		const memoizationHooks = new Set(options.memoizationHooks);
 
-		function checkElement(node: ESTree.JSXElement | ESTree.JSXFragment): void {
+		function resolveCallbackUsage(node: ESTree.JSXElement | ESTree.JSXFragment): CallbackUsage {
 			const functionLike = getEnclosingFunctionLike(node);
-			const callbackUsage =
-				functionLike === undefined
-					? EMPTY_CALLBACK_USAGE
-					: getFunctionCallbackUsage(context.sourceCode, functionLike, iterationMethods, memoizationHooks);
-			const isCallback = callbackUsage.iteration || callbackUsage.memoization;
+			return functionLike === undefined
+				? EMPTY_CALLBACK_USAGE
+				: getFunctionCallbackUsage(context.sourceCode, functionLike, iterationMethods, memoizationHooks);
+		}
+
+		function reportRootKeyIfNeeded(node: ESTree.JSXElement | ESTree.JSXFragment): void {
+			if (options.allowRootKeys || !isJsxElement(node) || !hasJSXIdentifierAttribute(node, "key")) return;
+			context.report({
+				messageId: "rootComponentWithKey",
+				node,
+			});
+		}
+
+		function shouldSkipFragment(
+			node: ESTree.JSXElement | ESTree.JSXFragment,
+			callbackUsage: CallbackUsage,
+		): boolean {
+			if (!isJsxFragment(node)) return false;
+			return (
+				isLogicalJsxChild(node) ||
+				(callbackUsage.memoization && !callbackUsage.iteration && isTopLevelFunctionReturn(node))
+			);
+		}
+
+		function checkElement(node: ESTree.JSXElement | ESTree.JSXFragment): void {
+			const callbackUsage = resolveCallbackUsage(node);
+			const isCallback = isCallbackContext(callbackUsage);
 			const isRoot = isTopLevelReturn(node);
 
-			if (isRoot && !isCallback) {
-				if (!options.allowRootKeys && isJsxElement(node) && hasJSXIdentifierAttribute(node, "key")) {
-					context.report({
-						messageId: "rootComponentWithKey",
-						node,
-					});
-				}
+			if (isRootWithoutCallback(isRoot, isCallback)) {
+				reportRootKeyIfNeeded(node);
 				return;
 			}
 
 			if (isIgnoredCallExpression(node, ignoredCallExpressions)) return;
-			if (isAssignedJSXValue(node) || isJsxPropertyValue(node) || isTernaryJsxChild(node)) return;
+			if (isExemptElement(node) || shouldSkipFragment(node, callbackUsage)) return;
 
-			const isFragment = isJsxFragment(node);
-
-			if (isFragment && isLogicalJsxChild(node)) return;
-			if (isFragment && callbackUsage.memoization && !callbackUsage.iteration && isTopLevelFunctionReturn(node)) {
-				return;
-			}
-
-			if (isFragment) {
+			if (isJsxFragment(node)) {
 				context.report({
 					messageId: "missingKey",
 					node,

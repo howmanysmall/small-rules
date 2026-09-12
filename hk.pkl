@@ -17,39 +17,83 @@ exclude =
 display_skip_reasons = List()
 terminal_progress = false
 
-local binary_excludes =
+local ISENTINEL_FILES =
   List(
-    "*.png",
-    "*.jpg",
-    "*.jpeg",
-    "*.gif",
-    "*.webp",
-    "*.ico",
-    "*.woff",
-    "*.woff2",
-    "*.ttf",
-    "*.eot",
-    "*.pdf",
-    "*.zip",
-    "*.tar",
-    "*.gz",
-    "*.mp4",
-    "*.mov",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.cjsx",
+    "**/*.cts",
+    "**/*.ctsx",
+    "**/*.mjs",
+    "**/*.mjsx",
+    "**/*.mts",
+    "**/*.mtsx",
+    "**/*.lua",
+    "**/*.luau",
+    "**/*.css",
+    "**/*.less",
+    "**/*.scss",
+    "**/*.pcss",
+    "**/*.postcss",
+    "**/*.json",
+    "**/*.json5",
+    "**/*.jsonc",
+    "**/*.toml",
+    "**/*.yml",
+    "**/*.yaml",
+  )
+local FALLOW_FILES =
+  List(
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mjs",
+    "**/*.cjs",
+    "**/*.mts",
+    "**/*.cts",
+    "**/*.astro",
+    "**/*.css",
+    "**/package.json",
+  )
+local SHERIF_FILES = List("**/package.json", "pnpm-workspace.yaml")
+
+local BINARY_EXCLUDES =
+  List(
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.gif",
+    "**/*.webp",
+    "**/*.ico",
+    "**/*.woff",
+    "**/*.woff2",
+    "**/*.ttf",
+    "**/*.eot",
+    "**/*.pdf",
+    "**/*.zip",
+    "**/*.tar",
+    "**/*.gz",
+    "**/*.mp4",
+    "**/*.mov",
   )
 
-local workflow_files =
+local WORKFLOW_FILES =
   List(
     ".github/workflows/**/*.yml",
     ".github/workflows/**/*.yaml",
   )
-local workflow_action_files =
+local WORKFLOW_ACTION_FILES =
   List(
     ".github/workflows/**/*.yml",
     ".github/workflows/**/*.yaml",
     ".github/actions/**/action.yml",
     ".github/actions/**/action.yaml",
   )
-local zizmor_files =
+local ZIZMOR_FILES =
   List(
     ".github/workflows/**/*.yml",
     ".github/workflows/**/*.yaml",
@@ -57,8 +101,8 @@ local zizmor_files =
     ".github/actions/**/action.yaml",
     ".github/dependabot.yml",
   )
-local markdown_files = List("**/*.md", "**/*.markdown", "**/*.mdx")
-local toml_files = List("**/*.toml")
+local MARKDOWN_FILES = List("**/*.md", "**/*.markdown", "**/*.mdx")
+local TOML_FILES = List("**/*.toml")
 
 hooks {
   ["pre-commit"] {
@@ -67,40 +111,36 @@ hooks {
     steps {
       // Tier 1 — Universal checks
       ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["newlines"] = (Builtins.newlines) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["check-merge-conflict"] = (Builtins.check_merge_conflict) {}
       ["check-case-conflict"] = (Builtins.check_case_conflict) {}
       ["check-symlinks"] = (Builtins.check_symlinks) {}
       ["mixed-line-ending"] = (Builtins.mixed_line_ending) {}
       ["detect-private-key"] = (Builtins.detect_private_key) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["betterleaks"] = Builtins.betterleaks
       ["sherif"] {
-        glob = List("package.json", "pnpm-workspace.yaml")
+        glob = SHERIF_FILES
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
 
+      // fallow — changed-code quality gate (dead code, duplication, health).
+      // Gates on `new-only`, so inherited findings on touched files report but
+      // do not block. Runs once per commit, not per file.
+      ["fallow"] {
+        glob = FALLOW_FILES
+        check = "mise run fallow:audit-hk"
+      }
+
       // JS/TS pipeline — isentinel-lint + biome + oxfmt
       ["isentinel-lint"] {
-        glob =
-          List(
-            "*.js",
-            "*.jsx",
-            "*.ts",
-            "*.tsx",
-            "*.mjs",
-            "*.cjs",
-            "*.mts",
-            "*.cts",
-            "*.astro",
-            "*.mdx",
-          )
+        glob = ISENTINEL_FILES
         check = "node --run isentinel-lint -- {{files}}"
         fix = "node --run isentinel-lint -- --fix {{files}}"
         check_first = true
@@ -167,18 +207,18 @@ hooks {
 
       // GitHub Actions workflows
       ["actionlint"] = (Builtins.actionlint) {
-        glob = workflow_files
+        glob = WORKFLOW_FILES
         check =
           "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
-        glob = zizmor_files
+        glob = ZIZMOR_FILES
         check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
       ["pinact"] {
-        glob = workflow_action_files
+        glob = WORKFLOW_ACTION_FILES
         check = new CommandSpec {
           command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
           effect = "read"
@@ -191,9 +231,11 @@ hooks {
       }
 
       // Markdown — rumdl lint + fmt
-      ["vale"] = Builtins.vale
+      ["vale"] = (Builtins.vale) {
+        glob = MARKDOWN_FILES
+      }
       ["rumdl"] = (Builtins.rumdl) {
-        glob = markdown_files
+        glob = MARKDOWN_FILES
         exclude = List(".agents/skills/**/SKILL.md")
         check = "rumdl check {{files}}"
         fix =
@@ -207,7 +249,7 @@ hooks {
 
       // TOML — tombi lint + format
       ["tombi"] = (Builtins.tombi) {
-        glob = toml_files
+        glob = TOML_FILES
         check = "tombi lint {{files}} && tombi format --check {{files}}"
         fix =
           """
@@ -276,38 +318,30 @@ hooks {
   ["check"] {
     steps {
       ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["newlines"] = (Builtins.newlines) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["check-merge-conflict"] = (Builtins.check_merge_conflict) {}
       ["check-case-conflict"] = (Builtins.check_case_conflict) {}
       ["check-symlinks"] = (Builtins.check_symlinks) {}
       ["mixed-line-ending"] = (Builtins.mixed_line_ending) {}
       ["detect-private-key"] = (Builtins.detect_private_key) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["betterleaks"] = Builtins.betterleaks
       ["sherif"] {
-        glob = List("package.json", "pnpm-workspace.yaml")
+        glob = SHERIF_FILES
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
+      ["fallow"] {
+        glob = FALLOW_FILES
+        check = "mise run fallow:audit-hk"
+      }
       ["isentinel-lint"] {
-        glob =
-          List(
-            "*.js",
-            "*.jsx",
-            "*.ts",
-            "*.tsx",
-            "*.mjs",
-            "*.cjs",
-            "*.mts",
-            "*.cts",
-            "*.astro",
-            "*.mdx",
-          )
+        glob = ISENTINEL_FILES
         check = "node --run isentinel-lint -- {{files}}"
         batch = true
       }
@@ -361,18 +395,18 @@ hooks {
       }
       ["shellcheck"] = Builtins.shellcheck
       ["actionlint"] = (Builtins.actionlint) {
-        glob = workflow_files
+        glob = WORKFLOW_FILES
         check =
           "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
-        glob = zizmor_files
+        glob = ZIZMOR_FILES
         check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
       ["pinact"] {
-        glob = workflow_action_files
+        glob = WORKFLOW_ACTION_FILES
         check = new CommandSpec {
           command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
           effect = "read"
@@ -380,12 +414,12 @@ hooks {
       }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
-        glob = markdown_files
+        glob = MARKDOWN_FILES
         exclude = List(".agents/skills/**/SKILL.md")
         check = "rumdl check {{files}}"
       }
       ["tombi"] = (Builtins.tombi) {
-        glob = toml_files
+        glob = TOML_FILES
         check = "tombi lint {{files}} && tombi format --check {{files}}"
       }
     }
@@ -396,37 +430,25 @@ hooks {
     stash = "git"
     steps {
       ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["newlines"] = (Builtins.newlines) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["check-case-conflict"] = (Builtins.check_case_conflict) {}
       ["check-symlinks"] = (Builtins.check_symlinks) {}
       ["mixed-line-ending"] = (Builtins.mixed_line_ending) {}
       ["detect-private-key"] = (Builtins.detect_private_key) {
-        exclude = binary_excludes
+        exclude = BINARY_EXCLUDES
       }
       ["betterleaks"] = Builtins.betterleaks
       ["sherif"] {
-        glob = List("package.json", "pnpm-workspace.yaml")
+        glob = SHERIF_FILES
         check = "sherif -r root-package-private-field -r root-package-dependencies"
         fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
       }
       ["isentinel-lint"] {
-        glob =
-          List(
-            "*.js",
-            "*.jsx",
-            "*.ts",
-            "*.tsx",
-            "*.mjs",
-            "*.cjs",
-            "*.mts",
-            "*.cts",
-            "*.astro",
-            "*.mdx",
-          )
+        glob = ISENTINEL_FILES
         check = "node --run isentinel-lint -- {{files}}"
         fix = "node --run isentinel-lint -- --fix {{files}}"
         batch = true
@@ -484,18 +506,18 @@ hooks {
       }
       ["shellcheck"] = Builtins.shellcheck
       ["actionlint"] = (Builtins.actionlint) {
-        glob = workflow_files
+        glob = WORKFLOW_FILES
         check =
           "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
       }
       ["zizmor"] = (Builtins.zizmor) {
-        glob = zizmor_files
+        glob = ZIZMOR_FILES
         check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
         fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
       }
       ["pinact"] {
-        glob = workflow_action_files
+        glob = WORKFLOW_ACTION_FILES
         fix = new CommandSpec {
           command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
           effect = "write"
@@ -503,7 +525,7 @@ hooks {
       }
       ["vale"] = Builtins.vale
       ["rumdl"] = (Builtins.rumdl) {
-        glob = markdown_files
+        glob = MARKDOWN_FILES
         exclude = List(".agents/skills/**/SKILL.md")
         fix =
           """
@@ -512,7 +534,7 @@ hooks {
           """
       }
       ["tombi"] = (Builtins.tombi) {
-        glob = toml_files
+        glob = TOML_FILES
         fix =
           """
           tombi lint {{files}}

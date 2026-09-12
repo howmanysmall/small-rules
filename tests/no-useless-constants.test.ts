@@ -309,6 +309,7 @@ describe("no-useless-constants", () => {
 				"function render(OFFSET_X) {\n  const CONFIG = { x: OFFSET_X };\n  return CONFIG;\n}",
 				"function render() {\n  const OFFSET_X = 42;\n  console.log(OFFSET_X);\n}",
 				"const TITLE_OFFSET = 225;\nlet textNative = { Offset: TITLE_OFFSET };",
+				"let TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
 			],
 		});
 	});

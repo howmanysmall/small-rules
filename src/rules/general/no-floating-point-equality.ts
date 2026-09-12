@@ -2,7 +2,27 @@ import { Predicate } from "effect";
 
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	getMemberPropertyName,
+	isAnyLiteral,
+	isBinaryExpression,
+	isCallExpression,
+	isIdentifierName,
+	isImportDeclaration,
+	isImportDefaultSpecifier,
+	isImportNamespaceSpecifier,
+	isImportSpecifier,
+	isLogicalExpression,
+	isMemberExpression,
+	isNumericLiteral,
+	isPrivateIdentifier,
+	isSpreadElement,
+	isSwitchCase,
+	isUnaryExpression,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -44,19 +64,22 @@ function isExactDecimal(raw: string): boolean {
 }
 
 function numericLiteralValue(node: ESTree.Node): number | undefined {
-	if (node.type === "Literal" && Predicate.isNumber(node.value)) return node.value;
-	if (node.type !== "UnaryExpression" || (node.operator !== "+" && node.operator !== "-")) return undefined;
-	const value = node.argument.type === "Literal" ? node.argument.value : undefined;
+	if (isNumericLiteral(node)) return node.value;
+	if (!isUnaryExpression(node) || (node.operator !== "+" && node.operator !== "-")) return undefined;
+
+	const value = isAnyLiteral(node.argument) ? node.argument.value : undefined;
 	if (!Predicate.isNumber(value)) return undefined;
+
 	return node.operator === "-" ? -value : value;
 }
 
-function constantNumericValue(node: ESTree.Node): number | undefined {
+function getConstantNumericValue(node: ESTree.Node): number | undefined {
 	const literalValue = numericLiteralValue(node);
 	if (literalValue !== undefined) return literalValue;
-	if (node.type !== "BinaryExpression" || node.left.type === "PrivateIdentifier") return undefined;
-	const left = constantNumericValue(node.left);
-	const right = constantNumericValue(node.right);
+	if (!isBinaryExpression(node) || isPrivateIdentifier(node.left)) return undefined;
+
+	const left = getConstantNumericValue(node.left);
+	const right = getConstantNumericValue(node.right);
 	if (left === undefined || right === undefined) return undefined;
 	if (node.operator === "+") return left + right;
 	if (node.operator === "-") return left - right;
@@ -88,9 +111,9 @@ function getConstInitializer(variable: Variable): ESTree.Expression | undefined 
 	const [definition] = variable.defs;
 	if (
 		definition?.type !== "Variable" ||
-		definition.node.type !== "VariableDeclarator" ||
+		!isVariableDeclarator(definition.node) ||
 		definition.node.init === null ||
-		definition.parent?.type !== "VariableDeclaration" ||
+		!isVariableDeclaration(definition.parent) ||
 		definition.parent.kind !== "const"
 	) {
 		return undefined;
@@ -103,7 +126,7 @@ function binaryIsFloating(
 	variables: ReadonlyMap<ESTree.Node, Variable>,
 	visited: Set<Variable>,
 ): boolean {
-	const value = constantNumericValue(node);
+	const value = getConstantNumericValue(node);
 	if (value !== undefined && Number.isSafeInteger(value)) return false;
 	if (node.operator === "/") {
 		return (
@@ -130,11 +153,13 @@ function resolveFloatingExpressionRoot(
 			current = unwrapped;
 			continue;
 		}
-		if (current.type !== "Identifier") return current;
+		if (!isIdentifierName(current)) return current;
 		const variable = variables.get(current);
 		if (variable === undefined || visited.has(variable)) return undefined;
+
 		const initializer = getConstInitializer(variable);
 		if (initializer === undefined) return undefined;
+
 		visited.add(variable);
 		current = initializer;
 	}
@@ -147,21 +172,18 @@ function isFloatingExpression(
 ): boolean {
 	const current = resolveFloatingExpressionRoot(node, variables, visited);
 	if (current === undefined) return false;
-	if (current.type === "Literal" && Predicate.isNumber(current.value)) {
+	if (isNumericLiteral(current)) {
 		const raw = String(current.raw);
 		return (raw.includes(".") || EXPONENT_PATTERN.test(raw)) && !isExactDecimal(raw);
 	}
-	if (current.type === "UnaryExpression") {
+
+	if (isUnaryExpression(current)) {
 		return (
 			(current.operator === "+" || current.operator === "-") &&
 			isFloatingExpression(current.argument, variables, visited)
 		);
 	}
-	return (
-		current.type === "BinaryExpression" &&
-		isComparableBinary(current) &&
-		binaryIsFloating(current, variables, visited)
-	);
+	return isBinaryExpression(current) && isComparableBinary(current) && binaryIsFloating(current, variables, visited);
 }
 
 function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {
@@ -172,78 +194,119 @@ function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {
 	return variables;
 }
 
-function importedName(specifier: ESTree.ImportSpecifier): string {
-	return specifier.imported.type === "Identifier" ? specifier.imported.name : specifier.imported.value;
+function getImportedName(specifier: ESTree.ImportSpecifier): string {
+	return isIdentifierName(specifier.imported) ? specifier.imported.name : specifier.imported.value;
 }
 
 function collectImportedSpecifier(
 	assertions: Map<string, ImportedAssertionKind>,
 	source: string,
-	specifier: ESTree.ImportDeclaration["specifiers"][number],
+	specifier: ESTree.ImportDeclarationSpecifier,
 ): void {
 	const { name } = specifier.local;
-	if (EXPECT_MODULES.has(source) && specifier.type === "ImportSpecifier" && importedName(specifier) === "expect") {
+	if (EXPECT_MODULES.has(source) && isImportSpecifier(specifier) && getImportedName(specifier) === "expect") {
 		assertions.set(name, "expect");
 	}
+
 	if (!ASSERT_MODULES.has(source)) return;
-	if (specifier.type === "ImportDefaultSpecifier" || specifier.type === "ImportNamespaceSpecifier") {
-		assertions.set(name, "assert");
-	} else if (EXACT_ASSERTION_METHODS.has(importedName(specifier))) {
-		assertions.set(name, "function");
-	}
+	if (isImportDefaultSpecifier(specifier) || isImportNamespaceSpecifier(specifier)) assertions.set(name, "assert");
+	else if (EXACT_ASSERTION_METHODS.has(getImportedName(specifier))) assertions.set(name, "function");
 }
 
 function collectImportedAssertions(program: ESTree.Program): Map<string, ImportedAssertionKind> {
 	const assertions = new Map<string, ImportedAssertionKind>();
 	for (const statement of program.body) {
-		if (statement.type !== "ImportDeclaration" || !Predicate.isString(statement.source.value)) continue;
-		const source = statement.source.value;
-		for (const specifier of statement.specifiers) {
-			collectImportedSpecifier(assertions, source, specifier);
-		}
+		if (!isImportDeclaration(statement)) continue;
+
+		const { value } = statement.source;
+		for (const specifier of statement.specifiers) collectImportedSpecifier(assertions, value, specifier);
 	}
 	return assertions;
 }
 
-function expressionArgument(node: ESTree.CallExpression, index: number): ESTree.Expression | undefined {
+function getExpressionArgument(node: ESTree.CallExpression, index: number): ESTree.Expression | undefined {
 	const argument = node.arguments[index];
-	return argument === undefined || argument.type === "SpreadElement" ? undefined : argument;
+	return isSpreadElement(argument) ? undefined : argument;
+}
+
+function getCallPairArguments(
+	node: ESTree.CallExpression,
+): readonly [ESTree.Expression, ESTree.Expression] | undefined {
+	const actual = getExpressionArgument(node, 0);
+	const expected = getExpressionArgument(node, 1);
+	if (actual === undefined || expected === undefined) return undefined;
+	return [actual, expected];
+}
+
+function getFunctionAssertionOperands(
+	node: ESTree.CallExpression,
+	imports: ReadonlyMap<string, ImportedAssertionKind>,
+): readonly [ESTree.Expression, ESTree.Expression] | undefined {
+	if (!isIdentifierName(node.callee)) return undefined;
+	if (imports.get(node.callee.name) !== "function") return undefined;
+	return getCallPairArguments(node);
+}
+
+function getAssertMethodOperands(
+	node: ESTree.CallExpression,
+	imports: ReadonlyMap<string, ImportedAssertionKind>,
+): readonly [ESTree.Expression, ESTree.Expression] | undefined {
+	if (!isMemberExpression(node.callee)) return undefined;
+	const method = getMemberPropertyName(node.callee);
+	if (method === undefined) return undefined;
+	if (!EXACT_ASSERTION_METHODS.has(method)) return undefined;
+	if (!isIdentifierName(node.callee.object)) return undefined;
+	if (imports.get(node.callee.object.name) !== "assert") return undefined;
+	return getCallPairArguments(node);
+}
+
+function unwrapNotReceiver(receiver: ESTree.Expression): ESTree.Expression {
+	if (isMemberExpression(receiver) && getMemberPropertyName(receiver) === "not") return receiver.object;
+	return receiver;
+}
+
+function isExpectCallReceiver(
+	receiver: ESTree.Expression,
+	imports: ReadonlyMap<string, ImportedAssertionKind>,
+): receiver is ESTree.CallExpression {
+	if (!isCallExpression(receiver)) return false;
+	if (!isIdentifierName(receiver.callee)) return false;
+	return imports.get(receiver.callee.name) === "expect";
+}
+
+function getExpectPairArguments(
+	receiver: ESTree.CallExpression,
+	node: ESTree.CallExpression,
+): readonly [ESTree.Expression, ESTree.Expression] | undefined {
+	const actual = getExpressionArgument(receiver, 0);
+	const expected = getExpressionArgument(node, 0);
+	if (actual === undefined || expected === undefined) return undefined;
+	return [actual, expected];
+}
+
+function getExpectAssertionOperands(
+	node: ESTree.CallExpression,
+	imports: ReadonlyMap<string, ImportedAssertionKind>,
+): readonly [ESTree.Expression, ESTree.Expression] | undefined {
+	if (!isMemberExpression(node.callee)) return undefined;
+	const method = getMemberPropertyName(node.callee);
+	if (method === undefined || !EXACT_EXPECT_MATCHERS.has(method)) return undefined;
+
+	const receiver = unwrapNotReceiver(node.callee.object);
+	return isExpectCallReceiver(receiver, imports) ? getExpectPairArguments(receiver, node) : undefined;
 }
 
 function assertionOperands(
 	node: ESTree.CallExpression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (node.callee.type === "Identifier" && imports.get(node.callee.name) === "function") {
-		const actual = expressionArgument(node, 0);
-		const expected = expressionArgument(node, 1);
-		return actual === undefined || expected === undefined ? undefined : [actual, expected];
-	}
-	if (node.callee.type !== "MemberExpression") return undefined;
-	const method = getMemberPropertyName(node.callee);
-	if (
-		method !== undefined &&
-		EXACT_ASSERTION_METHODS.has(method) &&
-		node.callee.object.type === "Identifier" &&
-		imports.get(node.callee.object.name) === "assert"
-	) {
-		const actual = expressionArgument(node, 0);
-		const expected = expressionArgument(node, 1);
-		return actual === undefined || expected === undefined ? undefined : [actual, expected];
-	}
-	if (method === undefined || !EXACT_EXPECT_MATCHERS.has(method)) return undefined;
-	let receiver = node.callee.object;
-	if (receiver.type === "MemberExpression" && getMemberPropertyName(receiver) === "not") receiver = receiver.object;
-	if (
-		receiver.type !== "CallExpression" ||
-		receiver.callee.type !== "Identifier" ||
-		imports.get(receiver.callee.name) !== "expect"
-	) {
-		return undefined;
-	}
-	const actual = expressionArgument(receiver, 0);
-	const expected = expressionArgument(node, 0);
-	return actual === undefined || expected === undefined ? undefined : [actual, expected];
+	const functionOperands = getFunctionAssertionOperands(node, imports);
+	if (functionOperands !== undefined) return functionOperands;
+
+	const assertOperands = getAssertMethodOperands(node, imports);
+	if (assertOperands !== undefined) return assertOperands;
+
+	return getExpectAssertionOperands(node, imports);
 }
 
 function comparisonOrientations(node: ComparableBinaryExpression): readonly [OrientedComparison, OrientedComparison] {
@@ -255,13 +318,39 @@ function comparisonOrientations(node: ComparableBinaryExpression): readonly [Ori
 }
 
 function isComparableBinary(node: ESTree.Expression): node is ComparableBinaryExpression {
-	return node.type === "BinaryExpression" && node.left.type !== "PrivateIdentifier";
+	return isBinaryExpression(node) && !isPrivateIdentifier(node.left);
 }
+
+const WHITESPACE = /\s+/gu;
 
 function nodesAreEquivalent(left: ESTree.Node, right: ESTree.Node, sourceCode: SourceCode): boolean {
 	return (
 		left.type === right.type &&
-		sourceCode.getText(left).replaceAll(/\s+/gu, "") === sourceCode.getText(right).replaceAll(/\s+/gu, "")
+		sourceCode.getText(left).replaceAll(WHITESPACE, "") === sourceCode.getText(right).replaceAll(/\s+/gu, "")
+	);
+}
+
+function isAndOperator(
+	node: ESTree.LogicalExpression,
+	left: ComparableBinaryExpression,
+	right: ComparableBinaryExpression,
+): boolean {
+	return (
+		node.operator === "&&" &&
+		(left.operator === "<=" || left.operator === ">=") &&
+		(right.operator === "<=" || right.operator === ">=")
+	);
+}
+
+function isOrOperator(
+	node: ESTree.LogicalExpression,
+	left: ComparableBinaryExpression,
+	right: ComparableBinaryExpression,
+): boolean {
+	return (
+		node.operator === "||" &&
+		(left.operator === "<" || left.operator === ">") &&
+		(right.operator === "<" || right.operator === ">")
 	);
 }
 
@@ -269,27 +358,77 @@ function indirectComparisonOperands(
 	node: ESTree.LogicalExpression,
 	sourceCode: SourceCode,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (!isComparableBinary(node.left) || !isComparableBinary(node.right)) return undefined;
-	const accepted =
-		(node.operator === "&&" &&
-			(node.left.operator === "<=" || node.left.operator === ">=") &&
-			(node.right.operator === "<=" || node.right.operator === ">=")) ||
-		(node.operator === "||" &&
-			(node.left.operator === "<" || node.left.operator === ">") &&
-			(node.right.operator === "<" || node.right.operator === ">"));
+	const { left, right } = node;
+	if (!isComparableBinary(left) || !isComparableBinary(right)) return undefined;
+
+	const accepted = isAndOperator(node, left, right) || isOrOperator(node, left, right);
 	if (!accepted) return undefined;
-	for (const left of comparisonOrientations(node.left)) {
-		for (const right of comparisonOrientations(node.right)) {
+
+	for (const leftComparison of comparisonOrientations(left)) {
+		for (const rightComparison of comparisonOrientations(right)) {
 			if (
-				left.above !== right.above &&
-				nodesAreEquivalent(left.expression, right.expression, sourceCode) &&
-				nodesAreEquivalent(left.threshold, right.threshold, sourceCode)
+				leftComparison.above !== rightComparison.above &&
+				nodesAreEquivalent(leftComparison.expression, rightComparison.expression, sourceCode) &&
+				nodesAreEquivalent(leftComparison.threshold, rightComparison.threshold, sourceCode)
 			) {
-				return [left.expression, left.threshold];
+				return [leftComparison.expression, leftComparison.threshold];
 			}
 		}
 	}
 	return undefined;
+}
+
+function isFloatingPair(
+	operands: readonly [ESTree.Expression, ESTree.Expression] | undefined,
+	isFloating: (expression: ESTree.Expression) => boolean,
+): boolean {
+	if (operands === undefined) return false;
+	return isFloating(operands[0]) || isFloating(operands[1]);
+}
+
+function isFloatingEquality(node: ESTree.Node, isFloating: (expression: ESTree.Expression) => boolean): boolean {
+	if (!isBinaryExpression(node) || !EQUALITY_OPERATORS.has(node.operator)) return false;
+	/* v8 ignore next -- @preserve private-identifier operands only occur with `in`, which the operator check above rejects. */
+	if (!isComparableBinary(node)) return false;
+	return isFloating(node.left) || isFloating(node.right);
+}
+
+function isFloatingIndirectComparison(
+	node: ESTree.Node,
+	sourceCode: SourceCode,
+	isFloating: (expression: ESTree.Expression) => boolean,
+): boolean {
+	if (!isLogicalExpression(node)) return false;
+	return isFloatingPair(indirectComparisonOperands(node, sourceCode), isFloating);
+}
+
+function isFloatingSwitchTest(node: ESTree.Node, isFloating: (expression: ESTree.Expression) => boolean): boolean {
+	if (!isSwitchCase(node)) return false;
+	if (node.test === null) return false;
+	return isFloating(node.test);
+}
+
+function isFloatingAssertion(
+	node: ESTree.Node,
+	imports: ReadonlyMap<string, ImportedAssertionKind>,
+	isFloating: (expression: ESTree.Expression) => boolean,
+): boolean {
+	if (!isCallExpression(node)) return false;
+	return isFloatingPair(assertionOperands(node, imports), isFloating);
+}
+
+function shouldReportFloatNode(
+	node: ESTree.Node,
+	sourceCode: SourceCode,
+	imports: ReadonlyMap<string, ImportedAssertionKind>,
+	isFloating: (expression: ESTree.Expression) => boolean,
+): boolean {
+	return (
+		isFloatingEquality(node, isFloating) ||
+		isFloatingIndirectComparison(node, sourceCode, isFloating) ||
+		isFloatingSwitchTest(node, isFloating) ||
+		isFloatingAssertion(node, imports, isFloating)
+	);
 }
 
 const noFloatingPointEquality = createRule("no-floating-point-equality", "general", {
@@ -302,19 +441,9 @@ const noFloatingPointEquality = createRule("no-floating-point-equality", "genera
 					return isFloatingExpression(node, variables, new Set());
 				}
 				walkAst(program, (node): void => {
-					let report = false;
-					if (node.type === "BinaryExpression" && EQUALITY_OPERATORS.has(node.operator)) {
-						report =
-							node.left.type !== "PrivateIdentifier" && (isFloating(node.left) || isFloating(node.right));
-					} else if (node.type === "LogicalExpression") {
-						const operands = indirectComparisonOperands(node, context.sourceCode);
-						report = operands !== undefined && (isFloating(operands[0]) || isFloating(operands[1]));
-					} else if (node.type === "SwitchCase" && node.test !== null) report = isFloating(node.test);
-					else if (node.type === "CallExpression") {
-						const operands = assertionOperands(node, imports);
-						report = operands !== undefined && (isFloating(operands[0]) || isFloating(operands[1]));
+					if (shouldReportFloatNode(node, context.sourceCode, imports, isFloating)) {
+						context.report({ messageId: "exactFloatComparison", node });
 					}
-					if (report) context.report({ messageId: "exactFloatComparison", node });
 				});
 			},
 		};

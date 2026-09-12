@@ -1,5 +1,7 @@
 import { getRuleNewness } from "$data/rule-newness";
 
+import type { Writable } from "type-fest";
+
 import type { RuleFactCategory } from "$data/rule-facts";
 import type { RuleNewness } from "$data/rule-newness";
 
@@ -30,13 +32,7 @@ export function createRuleIndexCategories(
 		key: category.key,
 		label: category.label,
 		rules: category.rules.map((rule) => {
-			let fixability: string | undefined;
-			if (rule.fixable === undefined) {
-				if (rule.hasSuggestions === true) fixability = "Editor suggestions";
-			} else {
-				fixability = rule.hasSuggestions === true ? "Automatic fix and editor suggestions" : "Automatic fix";
-			}
-
+			const fixability = getFixability(rule);
 			const ruleNewness = newness.get(rule.name);
 			const isNew = ruleNewness?.isNew === true;
 			const ruleDetails = {
@@ -51,8 +47,7 @@ export function createRuleIndexCategories(
 
 			if (fixability === undefined && !isNew) return ruleDetails;
 
-			type MutableRule = { -readonly [Key in keyof Rule]: Rule[Key] };
-			const newRule: MutableRule = { ...ruleDetails };
+			const newRule: Writable<Rule> = { ...ruleDetails };
 			if (fixability !== undefined) newRule.fixability = fixability;
 			if (isNew) {
 				newRule.addedIn = ruleNewness.addedIn;
@@ -61,4 +56,14 @@ export function createRuleIndexCategories(
 			return newRule;
 		}),
 	}));
+}
+
+function getFixability(rule: RuleFactCategory["rules"][number]): string | undefined {
+	if (rule.fixable === undefined) {
+		if (rule.hasSuggestions === true) return "Editor suggestions";
+	} else {
+		return rule.hasSuggestions === true ? "Automatic fix and editor suggestions" : "Automatic fix";
+	}
+
+	return undefined;
 }

@@ -47,10 +47,8 @@ export function containsUnknownType(type: ESTree.TSType): boolean {
 			continue;
 		}
 		if (isTsUnionType(current)) {
-			for (const member of current.types) {
-				// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
-				pending.push(member);
-			}
+			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
+			for (const member of current.types) pending.push(member);
 		}
 	}
 	return false;
@@ -64,7 +62,7 @@ export function containsUnknownType(type: ESTree.TSType): boolean {
  *   properties, rest elements, and assignment patterns as needed.
  * @returns The annotation, or `undefined` if the parameter is unannotated.
  */
-export function functionParameterTypeAnnotation(parameter: FunctionParameter): ESTree.TSTypeAnnotation | undefined {
+export function getFunctionParameterTypeAnnotation(parameter: FunctionParameter): ESTree.TSTypeAnnotation | undefined {
 	let current: ESTree.ParamPattern = parameter;
 	while (isTsParameterProperty(current) || isRestElement(current)) {
 		if (isTsParameterProperty(current)) {
@@ -85,12 +83,12 @@ export function functionParameterTypeAnnotation(parameter: FunctionParameter): E
  * and default value.
  *
  * @param parameter - A function parameter, unwrapped as in
- *   {@linkcode functionParameterTypeAnnotation}.
+ *   {@linkcode getFunctionParameterTypeAnnotation}.
  * @param sourceCode - Source text access for parameters whose binding is a
  *   destructuring pattern.
  * @returns The parameter's displayed binding, e.g. `value` or `{ value }`.
  */
-export function functionParameterBindingName(parameter: FunctionParameter, sourceCode: SourceCodeWithText): string {
+export function getFunctionParameterBindingName(parameter: FunctionParameter, sourceCode: SourceCodeWithText): string {
 	let current: ESTree.ParamPattern = parameter;
 	while (true) {
 		if (isTsParameterProperty(current)) {
@@ -108,7 +106,7 @@ export function functionParameterBindingName(parameter: FunctionParameter, sourc
 		if (isBindingIdentifier(current)) return current.name;
 
 		const sourceText = sourceCode.getText(current);
-		const annotation = functionParameterTypeAnnotation(current);
+		const annotation = getFunctionParameterTypeAnnotation(current);
 		if (!isTsTypeAnnotation(annotation)) return sourceText;
 
 		// Yuku parameter nodes span their type annotation, so trimming the

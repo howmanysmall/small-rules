@@ -1,5 +1,3 @@
-import { Predicate } from "effect";
-
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -10,6 +8,7 @@ import {
 	isIdentifierName,
 	isMemberExpression,
 	isSpreadElement,
+	isStringLiteral,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import {
@@ -20,9 +19,7 @@ import {
 } from "$oxc-utilities/react-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
+import type { Definition, ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 const REACT_FRAGMENT = "Fragment";
 
@@ -45,24 +42,26 @@ function isReactCreateElementCall(
 	return isReactNamespaceImport(variable, reactSources);
 }
 
-function isStringElementName(node: ESTree.Expression): boolean {
-	return node.type === "Literal" && Predicate.isString(node.value);
+function isClassOrFunctionName(definition: Definition): boolean {
+	return definition.type === "FunctionName" || definition.type === "ClassName";
+}
+function isVariable(definition: Definition, node: Definition["node"]): node is ESTree.VariableDeclarator {
+	return definition.type === "Variable" && isVariableDeclarator(node);
 }
 
-function isStaticComponentVariable(variable: ScopeVariable, name: string): boolean {
+function isStaticComponentVariable(variable: Variable, name: string): boolean {
 	if (isImportBinding(variable)) return isComponentName(name) || name === REACT_FRAGMENT;
 	if (!isModuleLevelScope(variable.scope) || (name !== REACT_FRAGMENT && !isComponentName(name))) return false;
 
 	for (const definition of variable.defs) {
-		if (definition.type === "FunctionName" || definition.type === "ClassName") return true;
+		if (isClassOrFunctionName(definition)) return true;
 		/* v8 ignore next -- module component bindings are imports, functions, classes, or variables. @preserve */
-		if (definition.type !== "Variable") continue;
-		/* v8 ignore next -- parser variable definitions are backed by VariableDeclarator nodes. @preserve */
-		if (!isVariableDeclarator(definition.node)) continue;
+		if (!isVariable(definition, definition.node)) continue;
 
 		const initializer = definition.node.init ?? undefined;
-		if (initializer === undefined) continue;
-		if (isCallbackFunction(initializer) || isClassExpression(initializer)) return true;
+		if (initializer !== undefined && (isCallbackFunction(initializer) || isClassExpression(initializer))) {
+			return true;
+		}
 	}
 
 	return false;
@@ -125,11 +124,11 @@ function isStaticMemberElement(
 
 function isStaticElementArgument(
 	sourceCode: SourceCode,
-	argument: ESTree.CallExpression["arguments"][number],
+	argument: ESTree.Argument,
 	reactSources: ReadonlySet<string>,
 ): boolean {
 	if (isSpreadElement(argument)) return false;
-	if (isStringElementName(argument)) return true;
+	if (isStringLiteral(argument)) return true;
 	if (isIdentifierName(argument)) return isStaticIdentifierElement(sourceCode, argument, reactSources);
 	if (isMemberExpression(argument)) return isStaticMemberElement(sourceCode, argument, reactSources);
 	return false;

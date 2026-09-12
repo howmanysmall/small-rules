@@ -9,18 +9,13 @@ function isAsciiIdentifierStart(codePoint: number): boolean {
 	);
 }
 
-// oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- Stupid rule
-/** @internal Exported for unit tests; not part of the published surface. */
-// oxlint-disable-next-line sonar/cognitive-complexity jsdoc/require-returns jsdoc/require-param -- optimization
-export function isIdentifierStartCodePoint(codePoint: number): boolean {
-	if (codePoint < 0xc0) return isAsciiIdentifierStart(codePoint);
-	if (codePoint >= 0x3001 && codePoint <= 0xd7ff) return true;
+function isNonAsciiLowerIdentifierStart(codePoint: number): boolean {
 	if (codePoint <= 0x02ff) return codePoint !== 0x00d7 && codePoint !== 0x00f7;
 	if (codePoint <= 0x1fff) return codePoint >= 0x0370 && codePoint !== 0x037e;
-	if (codePoint <= 0x218f) {
-		return (codePoint >= 0x200c && codePoint <= 0x200d) || codePoint >= 0x2070;
-	}
+	return (codePoint >= 0x200c && codePoint <= 0x200d) || codePoint >= 0x2070;
+}
 
+function isNonAsciiUpperIdentifierStart(codePoint: number): boolean {
 	if (codePoint <= 0x2fef) return codePoint >= 0x2c00;
 	if (codePoint <= 0xfaff) return codePoint >= 0xf900;
 	if (codePoint <= 0xfdff) return codePoint >= 0xfc00;
@@ -30,6 +25,16 @@ export function isIdentifierStartCodePoint(codePoint: number): boolean {
 	}
 
 	return codePoint >= 0xff66 && codePoint <= 0xffdc;
+}
+
+// oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- Stupid rule
+/** @internal Exported for unit tests; not part of the published surface. */
+// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- optimization
+export function isIdentifierStartCodePoint(codePoint: number): boolean {
+	if (codePoint < 0xc0) return isAsciiIdentifierStart(codePoint);
+	if (codePoint >= 0x3001 && codePoint <= 0xd7ff) return true;
+	if (codePoint <= 0x218f) return isNonAsciiLowerIdentifierStart(codePoint);
+	return isNonAsciiUpperIdentifierStart(codePoint);
 }
 
 // oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- Stupid rule

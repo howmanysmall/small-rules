@@ -1,24 +1,16 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
+import {
+	describeEffectOwner,
+	getReactEffectAnalysis,
+	getReportableEffectCall,
+} from "$oxc-utilities/react-effect-utilities";
 import { getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
 
-import type { ReactEffect, ReactEffectAnalysis, ReactOwner } from "$oxc-utilities/react-effect-utilities";
+import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
 type RuleContext = InferContextFromRule<typeof noPassLiveStateToParent>;
-
-function getComponentDisplayName(
-	analysis: ReactEffectAnalysis,
-	containingNode: ReactOwner | undefined,
-	isInCustomHook: boolean,
-): string {
-	const name = analysis.getComponentName(containingNode);
-	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
-	if (name !== undefined && name.length > 0) return `"${name}"`;
-	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
-	return isInCustomHook ? "this custom hook" : "this component";
-}
 
 function getStateNames(stateReferences: ReadonlyArray<Reference>): string {
 	return stateReferences.map((stateReference) => `"${stateReference.identifier.name}"`).join(" and ");
@@ -26,24 +18,22 @@ function getStateNames(stateReferences: ReadonlyArray<Reference>): string {
 
 function reportPassLiveStateEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
 	for (const reference of effect.functionReferences) {
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isPropCall(reference)) continue;
-
-		const callExpression = analysis.scope.getCallExpression(reference);
+		const callExpression = getReportableEffectCall(analysis, effect, reference, (candidate) => {
+			return analysis.isPropCall(candidate);
+		});
 		if (callExpression === undefined) continue;
 
 		const stateReferences = analysis.scope.getArgumentUpstreamReferences(reference).filter(analysis.isState);
 		if (stateReferences.length === 0) continue;
 
-		const containingNode = analysis.findEnclosingReactNode(effect.node);
-		const isInCustomHook = containingNode !== undefined && analysis.isCustomHook(containingNode);
+		const owner = describeEffectOwner(analysis, effect);
 
 		context.report({
 			data: {
-				name: getComponentDisplayName(analysis, containingNode, isInCustomHook),
+				name: owner.displayName,
 				state: getStateNames(stateReferences),
 			},
-			messageId: isInCustomHook
+			messageId: owner.isInCustomHook
 				? "avoidPassingLiveStateToParentInHook"
 				: "avoidPassingLiveStateToParentInComponent",
 			node: callExpression,

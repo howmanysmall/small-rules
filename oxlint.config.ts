@@ -5,10 +5,11 @@ import { ALL_REACT_DOCTOR_RULES } from "oxlint-plugin-react-doctor";
 
 import type { OxlintRules } from "@isentinel/eslint-config/oxlint";
 
-type GetRecordValue<TRecord extends Record<string, unknown>> = TRecord[keyof TRecord];
-type DummyRule = NonNullable<GetRecordValue<OxlintRules>>;
+type DummyRule = NonNullable<OxlintRules[keyof OxlintRules]>;
+
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
 const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
+const SCRIPT_FILES = `scripts/${GLOB_SRC}`;
 
 const reactDoctorRules = Object.fromEntries(
 	Object.entries(ALL_REACT_DOCTOR_RULES).map(([key, value]) => {
@@ -59,7 +60,7 @@ const rules: OxlintRules = {
 			],
 		},
 	],
-	complexity: "off",
+	complexity: ["error", { max: 20 }],
 	curly: ["error", "multi-line"],
 	"default-case": "off",
 	// this is literally not true -- it just worsens performance!
@@ -87,7 +88,15 @@ const rules: OxlintRules = {
 	"import/no-unassigned-import": [
 		"error",
 		{
-			allow: ["**/*.css", "**/*.scss", "**/*.less", "**/*.sass", "@total-typescript/ts-reset"],
+			allow: [
+				"**/*.css",
+				"**/*.scss",
+				"**/*.less",
+				"**/*.sass",
+				"@total-typescript/ts-reset",
+				"@dotenvx/dotenvx",
+				"@dotenvx/dotenvx/config",
+			],
 		},
 	],
 	"import/prefer-default-export": "off",
@@ -95,7 +104,7 @@ const rules: OxlintRules = {
 	"jsdoc/check-tag-names": [
 		"error",
 		{
-			definedTags: ["knipignore"],
+			definedTags: ["expected-unused"],
 			jsxTags: false,
 			typed: false,
 		},
@@ -437,12 +446,11 @@ const configuration = isentinel(
 				endOfLine: "lf",
 				htmlWhitespaceSensitivity: "css",
 				ignorePatterns: [
-					"**/*.{md,toml,js,snap,toml}",
+					"**/*.{md,toml,js,yaml,yml,toml}",
 					"**/do-not-sync-ever/**",
 					".tsbuildinfo*",
-					"**/*-lock.{json,yaml}",
+					"**/*-lock.json",
 					"**/ses_*.json",
-					"**/*.yaml",
 				],
 				insertFinalNewline: true,
 				jsdoc: false,
@@ -450,18 +458,11 @@ const configuration = isentinel(
 				objectWrap: "preserve",
 				overrides: [
 					{
-						files: ["**/*.{yaml,yml}"],
-						options: {
-							tabWidth: 2,
-							useTabs: false,
-						},
-					},
-					{
 						files: ["**/*.jsonc"],
 						options: { trailingComma: "all" },
 					},
 					{
-						files: ["biome.jsonc", ".oxlintrc.json", "knip.jsonc"],
+						files: ["biome.jsonc", ".oxlintrc.json", ".fallowrc.jsonc"],
 						options: { trailingComma: "none" },
 					},
 					{
@@ -475,6 +476,87 @@ const configuration = isentinel(
 				semi: true,
 				singleAttributePerLine: false,
 				singleQuote: false,
+				sortImports: {
+					customGroups: [
+						{
+							elementNamePattern: [
+								"react",
+								"react-dom",
+								"react-**",
+								"next",
+								"next/**",
+								"vue",
+								"vue-**",
+								"@vue/**",
+								"svelte",
+								"svelte/**",
+								"@sveltejs/**",
+								"solid-js",
+								"@solidjs/**",
+							],
+							groupName: "framework",
+							modifiers: ["value"],
+							selector: "external",
+						},
+						{
+							elementNamePattern: [
+								"vitest",
+								"@vitest/**",
+								"jest",
+								"@jest/**",
+								"@testing-library/**",
+								"msw",
+								"msw/**",
+								"playwright",
+								"@playwright/**",
+								"cypress",
+								"@cypress/**",
+							],
+							groupName: "testing",
+							modifiers: ["value"],
+							selector: "external",
+						},
+					],
+					groups: [
+						"side_effect",
+						"side_effect_style",
+						{ newlinesBetween: true },
+
+						"value-builtin",
+						"framework",
+						"testing",
+						"value-external",
+						{ newlinesBetween: true },
+
+						["value-internal", "value-subpath"],
+						{ newlinesBetween: true },
+
+						["value-parent", "value-sibling", "value-index"],
+						{ newlinesBetween: true },
+
+						"style",
+						{ newlinesBetween: true },
+
+						["type-builtin", "type-external"],
+						{ newlinesBetween: true },
+
+						["type-internal", "type-subpath"],
+						{ newlinesBetween: true },
+
+						["type-parent", "type-sibling", "type-index"],
+						"type-import",
+						{ newlinesBetween: true },
+
+						"unknown",
+					],
+					ignoreCase: true,
+					internalPattern: ["$", "~/"],
+					newlinesBetween: false,
+					order: "asc",
+					partitionByComment: false,
+					partitionByNewline: false,
+					sortSideEffects: false,
+				},
 				sortPackageJson: false,
 				sortTailwindcss: true,
 				tabWidth: 4,
@@ -488,7 +570,6 @@ const configuration = isentinel(
 			"**/*.js",
 			"**/{dist,do-not-sync-ever,node_modules}/**",
 			"scripts/clis/**/*.ts",
-			"scripts/dupes-viewer.html",
 			"src/generated/**",
 		],
 		options: {
@@ -505,7 +586,7 @@ const configuration = isentinel(
 		settings: {
 			jsdoc: {
 				tagNamePreference: {
-					knipignore: "knipignore",
+					"expected-unused": "expected-unused",
 				},
 			},
 			react: { version: "19.2.8" },
@@ -529,6 +610,11 @@ const configuration = isentinel(
 				},
 			],
 		},
+	},
+	{
+		name: "small-rules/no-complexity",
+		files: [SCRIPT_FILES, `tests/${GLOB_SRC}`],
+		rules: { complexity: "off" },
 	},
 	{
 		name: "small-rules/react-doctor",
@@ -596,12 +682,12 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/allow-top-level-await",
-		files: ["documentation/**/*.astro", "scripts/**/*.{ts,tsx}", CONFIGURATION_FILES],
+		files: ["documentation/**/*.astro", SCRIPT_FILES, CONFIGURATION_FILES],
 		rules: { "node/no-top-level-await": "off" },
 	},
 	{
 		name: "small-rules/allow-console",
-		files: ["scripts/**/*.{ts,tsx}", CONFIGURATION_FILES],
+		files: [SCRIPT_FILES, CONFIGURATION_FILES],
 		rules: { "no-console": "off" },
 	},
 	{
@@ -770,6 +856,11 @@ const configuration = isentinel(
 			],
 			"small-rules/require-react-display-names": ["error", { environment: "standard" }],
 		},
+	},
+	{
+		name: "small-rules/codex",
+		files: [`.codex/**/${GLOB_SRC}`],
+		rules: { "no-void": "off" },
 	},
 );
 

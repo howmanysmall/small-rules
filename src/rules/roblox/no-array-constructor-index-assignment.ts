@@ -1,11 +1,10 @@
-import { Predicate } from "effect";
-
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { forEachNode, hasShadowedBinding, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAssignmentExpression,
 	isBindingIdentifier,
 	isExpressionStatement,
+	isIdentifierNamed,
 	isMemberExpression,
 	isNewExpression,
 	isNumericLiteral,
@@ -36,45 +35,21 @@ interface Candidate {
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
 }
 
-const VISITOR_KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
-
-function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {
-	return node.type === "Identifier";
-}
-
-function isNode(value: unknown): value is ESTree.Node {
-	return Predicate.isObject(value) && Predicate.isString(value.type);
-}
-
-function pushNodeChildren(node: ESTree.Node, stack: Array<unknown>): void {
-	for (const [key, value] of Object.entries(node)) {
-		if (VISITOR_KEYS_TO_SKIP.has(key)) continue;
-		if (value !== null && value !== undefined) stack.push(value);
-	}
-}
-
 function containsArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
-	const stack: Array<unknown> = [node];
-
-	while (stack.length > 0) {
-		const current = stack.pop();
-		if (Array.isArray(current)) {
-			for (const child of current) stack.push(child);
-			continue;
+	let containsReference = false;
+	forEachNode(node, (current) => {
+		if (isIdentifierNamed(current, arrayIdentifierName)) {
+			containsReference = true;
+			return STOP_NODE_TRAVERSAL;
 		}
-		if (!Predicate.isObject(current)) continue;
-
-		if (!isNode(current)) continue;
-		if (current.type === "Identifier" && current.name === arrayIdentifierName) return true;
-		pushNodeChildren(current, stack);
-	}
-
-	return false;
+		return true;
+	});
+	return containsReference;
 }
 
 function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
 	const callee = unwrapExpression(node.callee);
-	if (!isIdentifierReference(callee) || callee.name !== "Array") return false;
+	if (!isIdentifierNamed(callee, "Array")) return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
 
@@ -92,17 +67,26 @@ function getArrayIndexAssignment(
 	if (!isMemberExpression(left) || !left.computed) return undefined;
 
 	const { object, property } = left;
-	if (!isIdentifierReference(object) || object.name !== arrayIdentifierName) return undefined;
+	if (!isIdentifierNamed(object, arrayIdentifierName)) return undefined;
 	if (!isNumericLiteral(property) || property.value !== expectedIndex) return undefined;
 
 	return { expression, statement };
 }
 
-function getCandidate(
+function isEmptyArrayInitializer(
+	init: ESTree.VariableDeclarator["init"],
 	sourceCode: SourceCode,
-	statements: ReadonlyArray<ProgramStatement>,
-	index: number,
-): Candidate | undefined {
+): init is ESTree.NewExpression {
+	if (!isNewExpression(init) || init.arguments.length > 0) return false;
+	return isGlobalArrayConstructor(sourceCode, init);
+}
+
+interface SingleDeclarator {
+	readonly declaration: ESTree.VariableDeclaration;
+	readonly declarator: ESTree.VariableDeclarator;
+}
+
+function getSingleDeclarator(statements: ReadonlyArray<ProgramStatement>, index: number): SingleDeclarator | undefined {
 	const declaration = statements[index];
 	if (declaration === undefined || !isVariableDeclaration(declaration) || declaration.declarations.length !== 1) {
 		return undefined;
@@ -114,16 +98,16 @@ function getCandidate(
 		return undefined;
 	}
 
-	const { init } = declarator;
-	if (!isNewExpression(init) || init.arguments.length > 0 || !isGlobalArrayConstructor(sourceCode, init)) {
-		return undefined;
-	}
+	return { declaration, declarator };
+}
 
-	if (!isBindingIdentifier(declarator.id)) return undefined;
-	const arrayIdentifierName = declarator.id.name;
-
+function collectSequentialAssignments(
+	statements: ReadonlyArray<ProgramStatement>,
+	startIndex: number,
+	arrayIdentifierName: string,
+): Array<FoundAssignment> {
 	const foundAssignments = new Array<FoundAssignment>();
-	let scanIndex = index + 1;
+	let scanIndex = startIndex;
 	let expectedIndex = 0;
 
 	while (scanIndex < statements.length) {
@@ -131,9 +115,7 @@ function getCandidate(
 		/* v8 ignore next -- scanIndex is bounded by statements.length. @preserve */
 		if (statement === undefined) break;
 
-		const assignment = getArrayIndexAssignment(statement, arrayIdentifierName, expectedIndex);
-		if (assignment !== undefined) {
-			foundAssignments.push(assignment);
+		if (collectNextAssignment(statements, scanIndex, arrayIdentifierName, expectedIndex, foundAssignments)) {
 			expectedIndex += 1;
 			scanIndex += 1;
 			continue;
@@ -143,6 +125,43 @@ function getCandidate(
 
 		scanIndex += 1;
 	}
+
+	return foundAssignments;
+}
+
+function collectNextAssignment(
+	statements: ReadonlyArray<ProgramStatement>,
+	scanIndex: number,
+	arrayIdentifierName: string,
+	expectedIndex: number,
+	foundAssignments: Array<FoundAssignment>,
+): boolean {
+	const statement = statements[scanIndex];
+	/* v8 ignore next -- scanIndex is always below statements.length from the scanning loop. @preserve */
+	if (statement === undefined) return false;
+
+	const assignment = getArrayIndexAssignment(statement, arrayIdentifierName, expectedIndex);
+	if (assignment === undefined) return false;
+
+	foundAssignments.push(assignment);
+	return true;
+}
+
+function getCandidate(
+	sourceCode: SourceCode,
+	statements: ReadonlyArray<ProgramStatement>,
+	index: number,
+): Candidate | undefined {
+	const header = getSingleDeclarator(statements, index);
+	if (header === undefined) return undefined;
+
+	const { declaration, declarator } = header;
+	if (!isEmptyArrayInitializer(declarator.init, sourceCode)) return undefined;
+	if (!isBindingIdentifier(declarator.id)) return undefined;
+
+	const arrayIdentifierName = declarator.id.name;
+
+	const foundAssignments = collectSequentialAssignments(statements, index + 1, arrayIdentifierName);
 
 	if (foundAssignments.length === 0) return undefined;
 
@@ -163,6 +182,64 @@ function getCandidate(
 	};
 }
 
+function buildNewDeclarationText(declarationText: string, initText: string, literalText: string): string {
+	const initOffset = declarationText.indexOf(initText);
+	/* v8 ignore next -- source text for an initializer must be inside its own declaration. @preserve */
+	if (initOffset === -1) return declarationText;
+
+	return `${declarationText.slice(0, initOffset)}${literalText}${declarationText.slice(initOffset + initText.length)}`;
+}
+
+function computeMoveStart(declarationStart: number, sourceCode: SourceCode): number {
+	if (declarationStart <= 0) return declarationStart;
+	return sourceCode.text[declarationStart - 1] === "\n" ? declarationStart - 1 : declarationStart;
+}
+
+function stripLeadingNewline(moveStart: number, declarationStart: number, textAfterDeclaration: string): string {
+	if (moveStart === declarationStart && textAfterDeclaration.startsWith("\n")) return textAfterDeclaration.slice(1);
+	return textAfterDeclaration;
+}
+
+function createMovedDeclarationFix(
+	fixer: Fixer,
+	sourceCode: SourceCode,
+	{ declaration, declarator, lastAssignmentStatement }: Candidate,
+	literalText: string,
+	textBetween: string,
+): ReturnType<Fixer["replaceTextRange"]> {
+	const { init } = declarator;
+	const [declarationStart] = declaration.range;
+	const [, lastAssignmentEnd] = lastAssignmentStatement.range;
+
+	const moveStart = computeMoveStart(declarationStart, sourceCode);
+	const adjustedTextBetween = stripLeadingNewline(moveStart, declarationStart, textBetween);
+	const declarationText = sourceCode.getText(declaration);
+	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
+	const initText = init === null ? "" : sourceCode.getText(init);
+	const newDeclarationText = buildNewDeclarationText(declarationText, initText, literalText);
+
+	return fixer.replaceTextRange([moveStart, lastAssignmentEnd], `${adjustedTextBetween}${newDeclarationText}`);
+}
+
+function computeRemoveStart(sourceCode: SourceCode, candidate: Candidate): number {
+	const [, declarationEnd] = candidate.declaration.range;
+	const [firstAssignmentStart] = candidate.firstAssignmentStatement.range;
+
+	let removeStart = firstAssignmentStart;
+	while (removeStart > declarationEnd) {
+		const previousCharacter = sourceCode.text[removeStart - 1];
+		if (previousCharacter === " " || previousCharacter === "\t") {
+			removeStart -= 1;
+			continue;
+		}
+
+		if (previousCharacter === "\n") removeStart -= 1;
+		break;
+	}
+
+	return removeStart;
+}
+
 function createFix(
 	fixer: Fixer,
 	sourceCode: SourceCode,
@@ -177,44 +254,18 @@ function createFix(
 		fixer.replaceText(init, literalText),
 	];
 
-	const [declarationStart] = declaration.range;
 	const [, declarationEnd] = declaration.range;
 	const [firstAssignmentStart] = firstAssignmentStatement.range;
 	const [, lastAssignmentEnd] = lastAssignmentStatement.range;
 
 	const textBetween = sourceCode.text.slice(declarationEnd, firstAssignmentStart);
 	if (textBetween.trim().length > 0) {
-		let moveStart = declarationStart;
-		if (moveStart > 0 && sourceCode.text[moveStart - 1] === "\n") moveStart -= 1;
-
-		let textAfterDeclaration = textBetween;
-		if (moveStart === declarationStart && textAfterDeclaration.startsWith("\n")) {
-			textAfterDeclaration = textAfterDeclaration.slice(1);
-		}
-
-		const declarationText = sourceCode.getText(declaration);
-		const initText = sourceCode.getText(init);
-		const initOffset = declarationText.indexOf(initText);
-		/* v8 ignore next -- source text for an initializer must be inside its own declaration. @preserve */
-		const newDeclarationText =
-			initOffset === -1
-				? declarationText
-				: `${declarationText.slice(0, initOffset)}${literalText}${declarationText.slice(initOffset + initText.length)}`;
-
-		return [fixer.replaceTextRange([moveStart, lastAssignmentEnd], `${textAfterDeclaration}${newDeclarationText}`)];
+		const candidate = { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement };
+		return [createMovedDeclarationFix(fixer, sourceCode, candidate, literalText, textBetween)];
 	}
 
-	let removeStart = firstAssignmentStart;
-	while (removeStart > declarationEnd) {
-		const previousCharacter = sourceCode.text[removeStart - 1];
-		if (previousCharacter === " " || previousCharacter === "\t") {
-			removeStart -= 1;
-			continue;
-		}
-
-		if (previousCharacter === "\n") removeStart -= 1;
-		break;
-	}
+	const candidate = { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement };
+	const removeStart = computeRemoveStart(sourceCode, candidate);
 
 	fixes.push(fixer.removeRange([removeStart, lastAssignmentEnd]));
 

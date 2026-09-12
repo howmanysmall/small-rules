@@ -39,12 +39,11 @@ const strictComponentBoundaries = createRule("strict-component-boundaries", "rea
 		return {
 			ImportDeclaration(node): void {
 				const importSource = node.source.value;
-				if (!Predicate.isString(importSource) || !importSource.startsWith(".")) return;
-				if (allowPatterns.some((regexp) => regexp.test(importSource))) return;
+				if (!importSource.startsWith(".") || allowPatterns.some((regexp) => regexp.test(importSource))) return;
 
 				const { filename } = context;
 				/* v8 ignore next -- @preserve import-boundary checks run with a concrete filename from Oxlint. */
-				if (filename === "") return;
+				if (filename.length === 0) return;
 
 				const resolved = resolveRelativeImport(importSource, filename);
 				if (!resolved.found) return;

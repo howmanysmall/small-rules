@@ -136,7 +136,7 @@ function getTraversal(state: EffectScopeAnalysisState, root: ESTree.Node): Trave
 	return traversal;
 }
 
-function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: TraversalResult): void {
+function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: TraversalResult, all = false): void {
 	const worklist: Array<ESTree.Node> = [root];
 	while (worklist.length > 0) {
 		const node = worklist.pop();
@@ -147,22 +147,7 @@ function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: Tr
 			if (reference !== undefined) result.references.push(reference);
 		}
 		recordDescendantNode(node, root, result);
-		pushChildren(state, node, worklist, false);
-	}
-}
-
-function traverseAll(state: EffectScopeAnalysisState, root: ESTree.Node, result: TraversalResult): void {
-	const worklist: Array<ESTree.Node> = [root];
-	while (worklist.length > 0) {
-		const node = worklist.pop();
-		/* v8 ignore next -- the loop guard ensures pop never returns undefined. @preserve */
-		if (node === undefined) break;
-		if (isIdentifierReference(node)) {
-			const reference = getReference(state, node);
-			if (reference !== undefined) result.references.push(reference);
-		}
-		recordDescendantNode(node, root, result);
-		pushChildren(state, node, worklist, true);
+		pushChildren(state, node, worklist, all);
 	}
 }
 
@@ -174,9 +159,9 @@ function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: Trav
 
 function indexReferences(state: EffectScopeAnalysisState): void {
 	const result: TraversalResult = { callExpressions: [], ifStatements: [], references: [] };
-	traverseAll(state, state.sourceCode.ast, result);
+	traverse(state, state.sourceCode.ast, result, true);
 	for (const reference of result.references) {
-		/* v8 ignore next -- traverseAll only collects identifier-shaped references. @preserve */
+		/* v8 ignore next -- traverse only collects identifier-shaped references. @preserve */
 		if (isIdentifierReference(reference.identifier)) {
 			state.referenceByIdentifier.set(reference.identifier, reference);
 		}
@@ -187,7 +172,7 @@ function collectProgramCallExpressions(
 	state: EffectScopeAnalysisState,
 	callExpressions: Array<ESTree.CallExpression>,
 ): void {
-	traverseAll(state, state.sourceCode.ast, { callExpressions, ifStatements: [], references: [] });
+	traverse(state, state.sourceCode.ast, { callExpressions, ifStatements: [], references: [] }, true);
 }
 
 function pushChildValue(value: PropertyDescriptor["value"], worklist: Array<ESTree.Node>): void {

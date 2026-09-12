@@ -191,6 +191,70 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			return shouldIgnoreHookImportSource(hookName, node, importSources, importSourceMap);
 		}
 
+		function getActiveHookName(node: ESTree.CallExpression): string | undefined {
+			return isHookCall(node) ? getHookName(node) : undefined;
+		}
+
+		function isActiveHookContext(
+			current: ControlFlowContext | undefined,
+			node: ESTree.CallExpression,
+		): current is ControlFlowContext {
+			if (current === undefined) return false;
+			/* v8 ignore next -- @preserve pushed contexts always set isComponentOrHook or inNestedFunction. */
+			if (!current.isComponentOrHook && !current.inNestedFunction) return false;
+			if (isInFinallyBlock(node)) return false;
+			return true;
+		}
+
+		function reportHookViolation(node: ESTree.CallExpression, current: ControlFlowContext): void {
+			if (isRecursiveCall(node, currentFunctionName)) {
+				context.report({
+					messageId: "recursiveHookCall",
+					node,
+				});
+				return;
+			}
+
+			if (current.inNestedFunction) {
+				context.report({
+					messageId: "nestedFunction",
+					node,
+				});
+				return;
+			}
+
+			if (current.inConditional) {
+				context.report({
+					messageId: "conditionalHook",
+					node,
+				});
+				return;
+			}
+
+			if (current.inLoop) {
+				context.report({
+					messageId: "loopHook",
+					node,
+				});
+				return;
+			}
+
+			if (current.inTryBlock) {
+				context.report({
+					messageId: "tryBlockHook",
+					node,
+				});
+				return;
+			}
+
+			if (current.afterEarlyReturn) {
+				context.report({
+					messageId: "afterEarlyReturn",
+					node,
+				});
+			}
+		}
+
 		function handleFunctionEnter(node: CallbackFunction): void {
 			const current = getCurrentContext();
 			const depth = current === undefined ? 0 : current.functionDepth + 1;
@@ -231,66 +295,14 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			ArrowFunctionExpression: handleFunctionEnter,
 			"ArrowFunctionExpression:exit": handleFunctionExit,
 			CallExpression(node): void {
-				if (!isHookCall(node)) return;
-
-				const hookName = getHookName(node);
-				if (hookName === undefined || shouldIgnoreHook(hookName, node)) return;
+				const hookName = getActiveHookName(node);
+				if (hookName === undefined) return;
+				if (shouldIgnoreHook(hookName, node)) return;
 
 				const current = getCurrentContext();
-				if (
-					current === undefined ||
-					(!current.isComponentOrHook && !current.inNestedFunction) ||
-					isInFinallyBlock(node)
-				) {
-					return;
-				}
+				if (!isActiveHookContext(current, node)) return;
 
-				if (isRecursiveCall(node, currentFunctionName)) {
-					context.report({
-						messageId: "recursiveHookCall",
-						node,
-					});
-					return;
-				}
-
-				if (current.inNestedFunction) {
-					context.report({
-						messageId: "nestedFunction",
-						node,
-					});
-					return;
-				}
-
-				if (current.inConditional) {
-					context.report({
-						messageId: "conditionalHook",
-						node,
-					});
-					return;
-				}
-
-				if (current.inLoop) {
-					context.report({
-						messageId: "loopHook",
-						node,
-					});
-					return;
-				}
-
-				if (current.inTryBlock) {
-					context.report({
-						messageId: "tryBlockHook",
-						node,
-					});
-					return;
-				}
-
-				if (current.afterEarlyReturn) {
-					context.report({
-						messageId: "afterEarlyReturn",
-						node,
-					});
-				}
+				reportHookViolation(node, current);
 			},
 
 			ConditionalExpression: yesConditional,

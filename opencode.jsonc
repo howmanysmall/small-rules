@@ -247,6 +247,10 @@
 				"disabled": true,
 				"type": "local",
 			},
+			"fallow": {
+				"command": ["node", "--run", "fallow-mcp"],
+				"type": "local",
+			},
 		},
 	},
 	"permissions": [

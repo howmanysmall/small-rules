@@ -11,32 +11,32 @@ import {
 	isMemberExpression,
 } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
+import type { Definition, ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
 
-import type { ScopeVariable } from "./ast-utilities";
-
-export type Environment = "roblox-ts" | "standard";
+export const ROBLOX_TS = "roblox-ts" as const;
+export const STANDARD = "standard" as const;
+export type Environment = typeof ROBLOX_TS | typeof STANDARD;
 
 export interface ReactOptions {
 	readonly environment?: unknown;
 }
 
 export const ENVIRONMENT_SCHEMA = {
-	default: "roblox-ts",
+	default: ROBLOX_TS,
 	description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-	enum: ["roblox-ts", "standard"] as const,
+	enum: [ROBLOX_TS, STANDARD] as const,
 	type: "string",
 };
 
 export function isEnvironment(value: unknown): value is Environment {
-	return value === "roblox-ts" || value === "standard";
+	return value === ROBLOX_TS || value === STANDARD;
 }
 
 const STANDARD_REACT_SOURCES = new Set<string>(["react", "react-dom"]);
 const ROBLOX_TS_REACT_SOURCES = new Set<string>(["@rbxts/react", "@rbxts/roact"]);
 
 export function getReactSources(environment: Environment): ReadonlySet<string> {
-	if (environment === "standard") return STANDARD_REACT_SOURCES;
+	if (environment === STANDARD) return STANDARD_REACT_SOURCES;
 	return ROBLOX_TS_REACT_SOURCES;
 }
 
@@ -71,8 +71,8 @@ export function forEachReactNamedImport(
 }
 
 export function getEnvironment(value: ReactOptions | undefined): Environment {
-	if (!Predicate.isObject(value) || value.environment !== "standard") return "roblox-ts";
-	return "standard";
+	if (!Predicate.isObject(value) || value.environment !== STANDARD) return ROBLOX_TS;
+	return STANDARD;
 }
 
 function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
@@ -80,10 +80,7 @@ function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration
 	return isImportDeclaration(node.parent) ? node.parent : undefined;
 }
 
-export function isReactImportDefinition(
-	definition: ScopeVariable["defs"][number],
-	reactSources: ReadonlySet<string>,
-): boolean {
+export function isReactImportDefinition(definition: Definition, reactSources: ReadonlySet<string>): boolean {
 	if (definition.type !== "ImportBinding") return false;
 
 	const importDeclaration = getImportDeclarationParent(definition.node);
@@ -94,7 +91,7 @@ export function isReactImportDefinition(
 }
 
 export function isReactNamedImport(
-	variable: ScopeVariable | undefined,
+	variable: undefined | Variable,
 	importedName: string,
 	reactSources: ReadonlySet<string>,
 ): boolean {
@@ -110,10 +107,7 @@ export function isReactNamedImport(
 	return false;
 }
 
-export function isReactNamespaceImport(
-	variable: ScopeVariable | undefined,
-	reactSources: ReadonlySet<string>,
-): boolean {
+export function isReactNamespaceImport(variable: undefined | Variable, reactSources: ReadonlySet<string>): boolean {
 	/* v8 ignore next -- Idc */
 	if (variable === undefined) return false;
 

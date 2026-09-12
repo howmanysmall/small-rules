@@ -12,18 +12,12 @@ import {
 	isBlockStatement,
 	isCallbackFunction,
 	isCallExpression,
-	isChainExpression,
 	isClassExpression,
 	isExportNamedDeclaration,
 	isNewExpression,
-	isParenthesizedExpression,
 	isProgram,
 	isProperty,
-	isTsAsExpression,
-	isTsInstantiationExpression,
-	isTsNonNullExpression,
-	isTsSatisfiesExpression,
-	isTsTypeAssertion,
+	isTransparentExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
 	JSX_ELEMENT,
@@ -46,7 +40,7 @@ import {
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
-import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Fix, Reference, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
@@ -79,8 +73,6 @@ interface UselessConstantCandidate {
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
-
-type ScopeVariable = Scope["variables"][number];
 
 function collectAllScopes(root: Scope): Array<Scope> {
 	const scopes = new Array<Scope>();
@@ -189,22 +181,19 @@ function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, workli
 	return true;
 }
 
+function unwrapTransparentExpression(node: ESTree.Node): ESTree.Node | undefined {
+	/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
+	return isTransparentExpression(node) ? node.expression : undefined;
+}
+
 function appendRelocatableChildren(
 	node: ESTree.Node,
 	staticGlobalFactories: ReadonlySet<string>,
 	worklist: Array<ESTree.Node>,
 ): boolean {
-	/* v8 ignore next -- @preserve the current parser path does not emit ParenthesizedExpression nodes. */
-	if (
-		isChainExpression(node) ||
-		isParenthesizedExpression(node) ||
-		isTsAsExpression(node) ||
-		isTsInstantiationExpression(node) ||
-		isTsNonNullExpression(node) ||
-		isTsSatisfiesExpression(node) ||
-		isTsTypeAssertion(node)
-	) {
-		worklist.push(node.expression);
+	const unwrapped = unwrapTransparentExpression(node);
+	if (unwrapped !== undefined) {
+		worklist.push(unwrapped);
 		return true;
 	}
 
@@ -311,6 +300,35 @@ function findEnclosingConstDeclarator(node: ESTree.Node): ESTree.VariableDeclara
 	return undefined;
 }
 
+interface SingleConstDeclarator {
+	readonly declarationNode: ESTree.VariableDeclaration;
+	readonly declaratorId: ESTree.BindingIdentifier;
+	readonly initializer: ESTree.Expression;
+}
+
+interface DeclaratorParts {
+	readonly id: ESTree.BindingIdentifier;
+	readonly init: ESTree.Expression;
+}
+
+function getDeclaratorParts(node: ESTree.Node): DeclaratorParts | undefined {
+	/* v8 ignore next -- @preserve ESLint Variable defs for this scope variable point at binding variable declarators. */
+	if (!isVariableDeclarator(node) || !isBindingIdentifier(node.id)) return undefined;
+	const { init } = node;
+	/* v8 ignore next -- @preserve reported runtime VariableDeclarators for const bindings always have initializers. */
+	if (init === null) return undefined;
+	return { id: node.id, init };
+}
+
+function getSingleDeclaration(parent: ESTree.Node | null): ESTree.VariableDeclaration | undefined {
+	/* v8 ignore next -- @preserve ESLint variable definitions for Variable defs are parented by their VariableDeclaration. */
+	if (parent === null || !isVariableDeclaration(parent)) return undefined;
+	if (parent.kind !== "const") return undefined;
+	if (parent.declarations.length !== 1) return undefined;
+	if (isExportNamedDeclaration(parent.parent)) return undefined;
+	return parent;
+}
+
 const noUselessConstants = createRule("no-useless-constants", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -318,11 +336,8 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 		const ignoreCallPatterns = rawOptions?.ignoreCallPatterns ?? OBJECT_CONSTRUCTOR_PATTERNS;
 		const ignoredCallPatternMatchers = ignoreCallPatterns.map((pattern) => new RegExp(pattern, "u"));
 
-		function getSingleReadOnlyReference(
-			scope: Scope,
-			scopeVariable: ScopeVariable,
-		): Scope["references"][number] | undefined {
-			let readOnlyReference: Scope["references"][number] | undefined;
+		function getSingleReadOnlyReference(scope: Scope, scopeVariable: Variable): Reference | undefined {
+			let readOnlyReference: Reference | undefined;
 			let readOnlyCount = 0;
 			for (const scopeReference of scopeVariable.references) {
 				if (!scopeReference.isReadOnly()) continue;
@@ -342,48 +357,69 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			return readOnlyReference;
 		}
 
-		function getUselessConstantCandidate(
-			scope: Scope,
-			scopeVariable: ScopeVariable,
-		): undefined | UselessConstantCandidate {
-			const { name } = scopeVariable;
-			if (!SCREAMING_SNAKE_CASE.test(name)) return undefined;
+		function getSingleConstDeclarator(scopeVariable: Variable): SingleConstDeclarator | undefined {
+			if (!SCREAMING_SNAKE_CASE.test(scopeVariable.name)) return undefined;
 
 			const [variableDefinition] = scopeVariable.defs;
 			if (variableDefinition?.type !== "Variable") return undefined;
 
-			const declaratorNode = variableDefinition.node;
-			/* v8 ignore next -- @preserve ESLint Variable defs for this scope variable point at binding variable declarators. */
-			if (!isVariableDeclarator(declaratorNode) || !isBindingIdentifier(declaratorNode.id)) return undefined;
-			/* v8 ignore next -- @preserve reported runtime VariableDeclarators for const bindings always have initializers. */
-			if (declaratorNode.init === null) return undefined;
+			const parts = getDeclaratorParts(variableDefinition.node);
+			if (parts === undefined) return undefined;
 
-			const declarationNode = variableDefinition.parent;
-			/* v8 ignore next -- @preserve ESLint variable definitions for Variable defs are parented by their VariableDeclaration. */
-			if (declarationNode === null || !isVariableDeclaration(declarationNode)) return undefined;
-			if (declarationNode.kind !== "const" || declarationNode.declarations.length !== 1) return undefined;
-			if (isExportNamedDeclaration(declarationNode.parent)) return undefined;
+			const declarationNode = getSingleDeclaration(variableDefinition.parent);
+			if (declarationNode === undefined) return undefined;
 
-			const initializer = declaratorNode.init;
-			if (isFunctionLikeInitializer(initializer)) return undefined;
-			if (isObjectLikeInitializer(initializer, ignoredCallPatternMatchers, sourceCode)) return undefined;
+			return { declarationNode, declaratorId: parts.id, initializer: parts.init };
+		}
 
+		function isSkippedInitializer(initializer: ESTree.Expression): boolean {
+			return (
+				isFunctionLikeInitializer(initializer) ||
+				isObjectLikeInitializer(initializer, ignoredCallPatternMatchers, sourceCode)
+			);
+		}
+
+		function getSingleUseIdentifier(scope: Scope, scopeVariable: Variable): ESTree.BindingIdentifier | undefined {
 			const readOnlyReference = getSingleReadOnlyReference(scope, scopeVariable);
-			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) return undefined;
+			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) {
+				return undefined;
+			}
+			return readOnlyReference.identifier;
+		}
 
-			const enclosingDeclarator = findEnclosingConstDeclarator(readOnlyReference.identifier);
+		function getEnclosingConstDeclaration(
+			identifier: ESTree.BindingIdentifier,
+		): ESTree.VariableDeclaration | undefined {
+			const enclosingDeclarator = findEnclosingConstDeclarator(identifier);
 			if (enclosingDeclarator === undefined) return undefined;
 
 			const enclosingDeclaration = enclosingDeclarator.parent;
-			if (!isVariableDeclaration(enclosingDeclaration) || enclosingDeclaration.kind !== "const") return undefined;
+			/* v8 ignore next -- @preserve declarator parents are always VariableDeclarations (mistyped) */
+			if (!isVariableDeclaration(enclosingDeclaration)) return undefined;
+			if (enclosingDeclaration.kind !== "const") return undefined;
+			return enclosingDeclaration;
+		}
+
+		function getUselessConstantCandidate(
+			scope: Scope,
+			scopeVariable: Variable,
+		): undefined | UselessConstantCandidate {
+			const declarator = getSingleConstDeclarator(scopeVariable);
+			if (declarator === undefined || isSkippedInitializer(declarator.initializer)) return undefined;
+
+			const referenceIdentifier = getSingleUseIdentifier(scope, scopeVariable);
+			if (referenceIdentifier === undefined) return undefined;
+
+			const enclosingDeclaration = getEnclosingConstDeclaration(referenceIdentifier);
+			if (enclosingDeclaration === undefined) return undefined;
 
 			return {
-				name,
-				declarationNode,
+				name: scopeVariable.name,
+				declarationNode: declarator.declarationNode,
 				enclosingDeclaration,
-				initializer,
-				referenceIdentifier: readOnlyReference.identifier,
-				reportNode: declaratorNode.id,
+				initializer: declarator.initializer,
+				referenceIdentifier,
+				reportNode: declarator.declaratorId,
 			};
 		}
 

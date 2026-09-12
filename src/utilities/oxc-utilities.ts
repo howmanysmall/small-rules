@@ -7,25 +7,36 @@ import type { CallbackFunction } from "$oxc-types/missing-types";
 export type FixReturn = ReturnType<FixFunction>;
 export type NodeType = ESTree.Node["type"];
 
+const IMPORT_DECLARATION = "ImportDeclaration" as const satisfies NodeType;
+const METHOD_DEFINITION = "MethodDefinition" as const satisfies NodeType;
+export const PRIVATE_IDENTIFIER = "PrivateIdentifier" as const satisfies NodeType;
+const STATIC_BLOCK = "StaticBlock" as const satisfies NodeType;
+const TS_ENUM_DECLARATION = "TSEnumDeclaration" as const satisfies NodeType;
+const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
+const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
+const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
+const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
+const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies NodeType;
+const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
+const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
+
+export const IMPORT_EXPRESSION = "ImportExpression" as const satisfies NodeType;
+export const META_PROPERTY = "MetaProperty" as const satisfies NodeType;
+
 export const ACCESSOR_PROPERTY = "AccessorProperty" as const satisfies NodeType;
-export const ARRAY_PATTERN = "ArrayPattern" as const satisfies NodeType;
-export const ASSIGNMENT_PATTERN = "AssignmentPattern" as const satisfies NodeType;
-export const OBJECT_PATTERN = "ObjectPattern" as const satisfies NodeType;
-export const REST_ELEMENT = "RestElement" as const satisfies NodeType;
 export const ARRAY_EXPRESSION = "ArrayExpression" as const satisfies NodeType;
+export const ARRAY_PATTERN = "ArrayPattern" as const satisfies NodeType;
 export const ARROW_FUNCTION_EXPRESSION = "ArrowFunctionExpression" as const satisfies NodeType;
 export const ASSIGNMENT_EXPRESSION = "AssignmentExpression" as const satisfies NodeType;
+export const ASSIGNMENT_PATTERN = "AssignmentPattern" as const satisfies NodeType;
 export const AWAIT_EXPRESSION = "AwaitExpression" as const satisfies NodeType;
 export const BINARY_EXPRESSION = "BinaryExpression" as const satisfies NodeType;
 export const BLOCK_STATEMENT = "BlockStatement" as const satisfies NodeType;
 export const BREAK_STATEMENT = "BreakStatement" as const satisfies NodeType;
-export const CLASS_DECLARATION = "ClassDeclaration" as const satisfies NodeType;
-const IMPORT_DECLARATION = "ImportDeclaration" as const satisfies NodeType;
-const TS_ENUM_DECLARATION = "TSEnumDeclaration" as const satisfies NodeType;
-const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies NodeType;
 export const CALL_EXPRESSION = "CallExpression" as const satisfies NodeType;
 export const CATCH_CLAUSE = "CatchClause" as const satisfies NodeType;
 export const CHAIN_EXPRESSION = "ChainExpression" as const satisfies NodeType;
+export const CLASS_DECLARATION = "ClassDeclaration" as const satisfies NodeType;
 export const CLASS_EXPRESSION = "ClassExpression" as const satisfies NodeType;
 export const CONDITIONAL_EXPRESSION = "ConditionalExpression" as const satisfies NodeType;
 export const DO_WHILE_STATEMENT = "DoWhileStatement" as const satisfies NodeType;
@@ -38,29 +49,29 @@ export const FUNCTION_EXPRESSION = "FunctionExpression" as const satisfies NodeT
 export const IDENTIFIER = "Identifier" as const satisfies NodeType;
 export const IF_STATEMENT = "IfStatement" as const satisfies NodeType;
 export const JSX_ELEMENT = "JSXElement" as const satisfies NodeType;
+export const JSX_EMPTY_EXPRESSION = "JSXEmptyExpression" as const satisfies NodeType;
 export const JSX_EXPRESSION_CONTAINER = "JSXExpressionContainer" as const satisfies NodeType;
 export const JSX_FRAGMENT = "JSXFragment" as const satisfies NodeType;
 export const LABELED_STATEMENT = "LabeledStatement" as const satisfies NodeType;
 export const LITERAL = "Literal" as const satisfies NodeType;
 export const LOGICAL_EXPRESSION = "LogicalExpression" as const satisfies NodeType;
-export const SUPER = "Super" as const satisfies NodeType;
-export const THIS_EXPRESSION = "ThisExpression" as const satisfies NodeType;
 export const MEMBER_EXPRESSION = "MemberExpression" as const satisfies NodeType;
-const METHOD_DEFINITION = "MethodDefinition" as const satisfies NodeType;
 export const NEW_EXPRESSION = "NewExpression" as const satisfies NodeType;
 export const OBJECT_EXPRESSION = "ObjectExpression" as const satisfies NodeType;
+export const OBJECT_PATTERN = "ObjectPattern" as const satisfies NodeType;
 export const PARENTHESIZED_EXPRESSION = "ParenthesizedExpression" as const satisfies NodeType;
-const PRIVATE_IDENTIFIER = "PrivateIdentifier" as const satisfies NodeType;
 export const PROPERTY = "Property" as const satisfies NodeType;
 export const PROPERTY_DEFINITION = "PropertyDefinition" as const satisfies NodeType;
+export const REST_ELEMENT = "RestElement" as const satisfies NodeType;
 export const RETURN_STATEMENT = "ReturnStatement" as const satisfies NodeType;
 export const SEQUENCE_EXPRESSION = "SequenceExpression" as const satisfies NodeType;
 export const SPREAD_ELEMENT = "SpreadElement" as const satisfies NodeType;
-const STATIC_BLOCK = "StaticBlock" as const satisfies NodeType;
+export const SUPER = "Super" as const satisfies NodeType;
 export const SWITCH_CASE = "SwitchCase" as const satisfies NodeType;
 export const SWITCH_STATEMENT = "SwitchStatement" as const satisfies NodeType;
 export const TAGGED_TEMPLATE_EXPRESSION = "TaggedTemplateExpression" as const satisfies NodeType;
 export const TEMPLATE_LITERAL = "TemplateLiteral" as const satisfies NodeType;
+export const THIS_EXPRESSION = "ThisExpression" as const satisfies NodeType;
 export const THROW_STATEMENT = "ThrowStatement" as const satisfies NodeType;
 export const TRY_STATEMENT = "TryStatement" as const satisfies NodeType;
 export const TS_ANY_KEYWORD = "TSAnyKeyword" as const satisfies NodeType;
@@ -74,14 +85,10 @@ export const TS_DECLARE_FUNCTION = "TSDeclareFunction" as const satisfies NodeTy
 export const TS_EMPTY_BODY_FUNCTION_EXPRESSION = "TSEmptyBodyFunctionExpression" as const satisfies NodeType;
 export const TS_FUNCTION_TYPE = "TSFunctionType" as const satisfies NodeType;
 export const TS_INSTANTIATION_EXPRESSION = "TSInstantiationExpression" as const satisfies NodeType;
-const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
-const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
 export const TS_INTERFACE_DECLARATION = "TSInterfaceDeclaration" as const satisfies NodeType;
 export const TS_INTERSECTION_TYPE = "TSIntersectionType" as const satisfies NodeType;
 export const TS_MAPPED_TYPE = "TSMappedType" as const satisfies NodeType;
 export const TS_METHOD_SIGNATURE = "TSMethodSignature" as const satisfies NodeType;
-const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
-const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
 export const TS_NEVER_KEYWORD = "TSNeverKeyword" as const satisfies NodeType;
 export const TS_NON_NULL_EXPRESSION = "TSNonNullExpression" as const satisfies NodeType;
 export const TS_NULL_KEYWORD = "TSNullKeyword" as const satisfies NodeType;
@@ -91,11 +98,9 @@ export const TS_SATISFIES_EXPRESSION = "TSSatisfiesExpression" as const satisfie
 export const TS_STRING_KEYWORD = "TSStringKeyword" as const satisfies NodeType;
 export const TS_SYMBOL_KEYWORD = "TSSymbolKeyword" as const satisfies NodeType;
 export const TS_TUPLE_TYPE = "TSTupleType" as const satisfies NodeType;
-const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
 export const TS_TYPE_ASSERTION = "TSTypeAssertion" as const satisfies NodeType;
 export const TS_TYPE_LITERAL = "TSTypeLiteral" as const satisfies NodeType;
 export const TS_TYPE_OPERATOR = "TSTypeOperator" as const satisfies NodeType;
-const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 export const TS_TYPE_REFERENCE = "TSTypeReference" as const satisfies NodeType;
 export const TS_UNDEFINED_KEYWORD = "TSUndefinedKeyword" as const satisfies NodeType;
 export const TS_UNION_TYPE = "TSUnionType" as const satisfies NodeType;
@@ -108,7 +113,6 @@ export const VARIABLE_DECLARATOR = "VariableDeclarator" as const satisfies NodeT
 export const WHILE_STATEMENT = "WhileStatement" as const satisfies NodeType;
 export const WITH_STATEMENT = "WithStatement" as const satisfies NodeType;
 export const YIELD_EXPRESSION = "YieldExpression" as const satisfies NodeType;
-
 const COMPONENT_NAME_PATTERN = /^[A-Z]/v;
 const KEY_OF_NODE = new Set(["end", "loc", "parent", "range", "start", "type"]);
 
@@ -176,8 +180,8 @@ export function isTsSymbolKeyword(value: ESTree.Node): value is ESTree.TSSymbolK
 	return value.type === TS_SYMBOL_KEYWORD;
 }
 
-export function isIdentifierNamed(node: ESTree.Node, name: string): node is ESTree.IdentifierName {
-	return node.type === IDENTIFIER && node.name === name;
+export function isIdentifierNamed(node: ESTree.Node | null | undefined, name: string): node is ESTree.IdentifierName {
+	return node?.type === IDENTIFIER && node.name === name;
 }
 
 export function getNamespacedCallNames(
@@ -253,7 +257,7 @@ export function isJsxAttribute(node: ESTree.Node): node is ESTree.JSXAttribute {
 	return node.type === "JSXAttribute";
 }
 export function isJsxEmptyExpression(node?: ESTree.Node | null): node is ESTree.JSXEmptyExpression {
-	return node?.type === "JSXEmptyExpression";
+	return node?.type === JSX_EMPTY_EXPRESSION;
 }
 export function isJsxText(node: ESTree.Node): node is ESTree.JSXText {
 	return node.type === "JSXText";
@@ -311,12 +315,12 @@ export function isAssignmentExpression(node: ESTree.Node): node is ESTree.Assign
 	return node.type === ASSIGNMENT_EXPRESSION;
 }
 
-export function isUnaryExpression(node: ESTree.Node): node is ESTree.UnaryExpression {
-	return node.type === UNARY_EXPRESSION;
+export function isUnaryExpression(node?: ESTree.Node | null): node is ESTree.UnaryExpression {
+	return node?.type === UNARY_EXPRESSION;
 }
 
-export function isSpreadElement(node: ESTree.Node): node is ESTree.SpreadElement {
-	return node.type === SPREAD_ELEMENT;
+export function isSpreadElement(node?: ESTree.Node | null): node is ESTree.SpreadElement {
+	return node?.type === SPREAD_ELEMENT;
 }
 
 export function isBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpression {
@@ -344,13 +348,6 @@ export function isTsAnyKeyword(node: ESTree.Node): node is ESTree.TSAnyKeyword {
 export function isTsNeverKeyword(node: ESTree.Node): node is ESTree.TSNeverKeyword {
 	return node.type === TS_NEVER_KEYWORD;
 }
-
-/**
- * Checks whether an AST node is an accessor property.
- *
- * @param node - AST node to check.
- * @returns Whether the node is an accessor property.
- */
 export function isAccessorProperty(
 	node: ESTree.Node,
 ): node is ESTree.AccessorProperty & { type: typeof ACCESSOR_PROPERTY } {
@@ -387,48 +384,23 @@ export function isTsUnionType(node: ESTree.Node): node is ESTree.TSUnionType {
 export function isTsTypePredicate(node?: ESTree.Node | null): node is ESTree.TSTypePredicate {
 	return node?.type === "TSTypePredicate";
 }
-
-/**
- * Checks whether an AST node is a TypeScript type parameter.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a TypeScript type parameter.
- */
 export function isTsTypeParameter(node: ESTree.Node): node is ESTree.TSTypeParameter {
 	return node.type === TS_TYPE_PARAMETER;
 }
 
-export function isProgram(node: ESTree.Node): node is ESTree.Program {
-	return node.type === "Program";
+export function isProgram(node?: ESTree.Node | null): node is ESTree.Program {
+	return node?.type === "Program";
 }
 
 export function isTsMappedType(node: ESTree.Node): node is ESTree.TSMappedType {
 	return node.type === TS_MAPPED_TYPE;
 }
-/**
- * Checks whether an AST node is a TypeScript module block.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a TypeScript module block.
- */
 export function isTsModuleBlock(node: ESTree.Node): node is ESTree.TSModuleBlock {
 	return node.type === TS_MODULE_BLOCK;
 }
-/**
- * Checks whether an AST node is a non-global TypeScript module declaration.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a namespace or module declaration.
- */
 export function isTsModuleDeclaration(node: ESTree.Node): node is ESTree.TSModuleDeclaration {
 	return node.type === TS_MODULE_DECLARATION && !node.global;
 }
-/**
- * Checks whether an AST node is a TypeScript global declaration.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a global declaration.
- */
 export function isTsGlobalDeclaration(node: ESTree.Node): node is ESTree.TSGlobalDeclaration {
 	return node.type === TS_GLOBAL_DECLARATION && node.global;
 }
@@ -450,12 +422,6 @@ export function isTsObjectKeyword(node: ESTree.Node): node is ESTree.TSObjectKey
 export function isImportDefaultSpecifier(node: ESTree.Node): node is ESTree.ImportDefaultSpecifier {
 	return node.type === "ImportDefaultSpecifier";
 }
-/**
- * Checks whether an AST node is a TypeScript import-equals declaration.
- *
- * @param node - AST node to check.
- * @returns Whether the node is an import-equals declaration.
- */
 export function isTsImportEqualsDeclaration(node: ESTree.Node): node is ESTree.TSImportEqualsDeclaration {
 	return node.type === TS_IMPORT_EQUALS_DECLARATION;
 }
@@ -476,20 +442,17 @@ export function isParenthesizedExpression(node?: ESTree.Node | null): node is ES
 export function isChainExpression(node: ESTree.Node): node is ESTree.ChainExpression {
 	return node.type === "ChainExpression";
 }
-export function isTsInstantiationExpression(node: ESTree.Node): node is ESTree.TSInstantiationExpression {
-	return node.type === "TSInstantiationExpression";
-}
 
 export function isImportNamespaceSpecifier(node: ESTree.Node): node is ESTree.ImportNamespaceSpecifier {
 	return node.type === "ImportNamespaceSpecifier";
 }
 
-export function isVariableDeclaration(node: ESTree.Node): node is ESTree.VariableDeclaration {
-	return node.type === VARIABLE_DECLARATION;
+export function isVariableDeclaration(node?: ESTree.Node | null): node is ESTree.VariableDeclaration {
+	return node?.type === VARIABLE_DECLARATION;
 }
 
-export function isExportNamedDeclaration(node: ESTree.Node): node is ESTree.ExportNamedDeclaration {
-	return node.type === "ExportNamedDeclaration";
+export function isExportNamedDeclaration(node?: ESTree.Node | null): node is ESTree.ExportNamedDeclaration {
+	return node?.type === "ExportNamedDeclaration";
 }
 export function isExportDefaultDeclaration(node: ESTree.Node): node is ESTree.ExportDefaultDeclaration {
 	return node.type === "ExportDefaultDeclaration";
@@ -498,13 +461,6 @@ export function isExportDefaultDeclaration(node: ESTree.Node): node is ESTree.Ex
 export function isNamedGlobalCall(node: ESTree.CallExpression | ESTree.NewExpression, name: string): boolean {
 	return isIdentifierNamed(node.callee, name);
 }
-
-/**
- * Checks whether an AST node is a class expression.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a class expression.
- */
 export function isClassExpression(node: ESTree.Node): node is ESTree.Class & { type: typeof CLASS_EXPRESSION } {
 	return node.type === CLASS_EXPRESSION;
 }
@@ -514,12 +470,6 @@ export function isClassBody(node: ESTree.Node): node is ESTree.ClassBody {
 export function isClass(node: ESTree.Node): node is ESTree.Class {
 	return node.type === "ClassDeclaration" || isClassExpression(node);
 }
-/**
- * Checks whether an AST node is a class declaration.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a class declaration.
- */
 export function isClassDeclaration(node: ESTree.Node): node is ESTree.Class & { type: typeof CLASS_DECLARATION } {
 	return node.type === CLASS_DECLARATION;
 }
@@ -546,21 +496,14 @@ export function isFunctionDeclarationRaw(node?: ESTree.Node | null): node is EST
 export function isFunctionDeclaration(node?: ESTree.Node | null): node is ESTree.Function {
 	return isFunctionDeclarationRaw(node) || isFunctionExpression(node);
 }
-
-// oxlint-disable-next-line jsdoc-js/require-description -- useless
-/** @knipignore -- Test-only */
-// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- useless.
 export function isTsDeclareFunction(node: ESTree.Node): node is ESTree.Function & { type: "TSDeclareFunction" } {
 	return node.type === TS_DECLARE_FUNCTION;
 }
 
-// oxlint-disable-next-line jsdoc-js/require-description -- useless
-/** @knipignore -- Test-only */
-// oxlint-disable-next-line jsdoc/require-returns -- useless.
-export function isTsEmptyBodyFunctionExpression(
-	// oxlint-disable-next-line jsdoc/require-param -- useless
-	node: ESTree.Node,
-): node is ESTree.Function & { type: typeof TS_EMPTY_BODY_FUNCTION_EXPRESSION } {
+interface TSEmptyBodyFunctionExpression extends ESTree.Function {
+	readonly type: typeof TS_EMPTY_BODY_FUNCTION_EXPRESSION;
+}
+export function isTsEmptyBodyFunctionExpression(node: ESTree.Node): node is TSEmptyBodyFunctionExpression {
 	return node.type === TS_EMPTY_BODY_FUNCTION_EXPRESSION;
 }
 
@@ -576,7 +519,7 @@ export function isFunctionLike(node: ESTree.Node): node is ESTree.ArrowFunctionE
 export function isCallbackFunction(node?: ESTree.Node | null): node is CallbackFunction {
 	return isArrowFunctionExpression(node) || isFunctionExpression(node);
 }
-export function isAnyFunction(node: ESTree.Node): node is CallbackFunction {
+export function isAnyFunction(node?: ESTree.Node | null): node is CallbackFunction {
 	return isArrowFunctionExpression(node) || isFunctionDeclaration(node);
 }
 
@@ -590,8 +533,8 @@ export function isTsIndexedAccessType(node: ESTree.Node): node is ESTree.TSIndex
 	return node.type === "TSIndexedAccessType";
 }
 
-export function isNewExpression(node: ESTree.Node): node is ESTree.NewExpression {
-	return node.type === NEW_EXPRESSION;
+export function isNewExpression(node?: ESTree.Node | null): node is ESTree.NewExpression {
+	return node?.type === NEW_EXPRESSION;
 }
 
 export function isArrayExpression(node?: ESTree.Node | null): node is ESTree.ArrayExpression {
@@ -706,12 +649,6 @@ export function isLabeledStatement(node: ESTree.Node): node is ESTree.LabeledSta
 export function isBlockStatement(node?: ESTree.Node | null): node is ESTree.BlockStatement {
 	return node?.type === BLOCK_STATEMENT;
 }
-/**
- * Checks whether an AST node is a static class block.
- *
- * @param node - AST node to check.
- * @returns Whether the node is a static class block.
- */
 export function isStaticBlock(node: ESTree.Node): node is ESTree.StaticBlock {
 	return node.type === STATIC_BLOCK;
 }
@@ -799,6 +736,12 @@ export function unwrapExpression(expression: ESTree.Expression): ESTree.Expressi
 	}
 }
 
+export function isNotEmptyStatement(
+	statement: ESTree.Statement,
+): statement is Exclude<ESTree.Statement, ESTree.EmptyStatement> {
+	return statement.type !== "EmptyStatement";
+}
+
 export function unwrapParenthesis(expression: ESTree.Expression): ESTree.Expression {
 	let current = expression;
 	while (isParenthesizedExpression(current)) current = current.expression;
@@ -839,21 +782,21 @@ export function isTransparentExpressionNode(node: ESTree.Node): node is Transpar
 }
 
 const TRANSPARENT_DEPENDENCY_EXPRESSION_TYPES = new Set<NodeType>([
+	...TRANSPARENT_EXPRESSION_TYPES,
 	CHAIN_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
-	TS_AS_EXPRESSION,
-	TS_NON_NULL_EXPRESSION,
-	TS_SATISFIES_EXPRESSION,
-	TS_TYPE_ASSERTION,
 ] satisfies ReadonlyArray<NodeType>);
 
-type TransparentDependencyExpression =
-	| ESTree.ChainExpression
-	| ESTree.ParenthesizedExpression
-	| ESTree.TSAsExpression
-	| ESTree.TSNonNullExpression
-	| ESTree.TSSatisfiesExpression
-	| ESTree.TSTypeAssertion;
+type TransparentDependencyExpression = ESTree.ChainExpression | TransparentExpressionNode;
 export function isTransparentDependencyExpression(node: ESTree.Node): node is TransparentDependencyExpression {
 	return TRANSPARENT_DEPENDENCY_EXPRESSION_TYPES.has(node.type);
+}
+
+const TRANSPARENT_EXPRESSIONS = new Set([
+	...TRANSPARENT_DEPENDENCY_EXPRESSION_TYPES,
+	TS_INSTANTIATION_EXPRESSION,
+] satisfies ReadonlyArray<NodeType>);
+type TransparentExpression = ESTree.TSInstantiationExpression | TransparentDependencyExpression;
+
+export function isTransparentExpression(node: ESTree.Node): node is TransparentExpression {
+	return TRANSPARENT_EXPRESSIONS.has(node.type);
 }

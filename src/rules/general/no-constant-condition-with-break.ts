@@ -23,10 +23,15 @@ import {
 	IF_STATEMENT,
 	isAnyFunction,
 	isBindingIdentifier,
+	isCallExpression,
+	isConditionalExpression,
 	isLabeledStatement,
+	isLogicalExpression,
 	isLoopNode,
 	isMemberExpression,
+	isPrivateIdentifier,
 	isProgram,
+	isSequenceExpression,
 	isSpreadElement,
 	isSwitchStatement,
 	isVariableDeclaration,
@@ -133,6 +138,14 @@ function addCallArgumentsToPending(
 	for (const argument of parameters) pending.push(isSpreadElement(argument) ? argument.argument : argument);
 }
 
+function onBinaryExpression(
+	expression: ESTree.BinaryExpression | ESTree.PrivateInExpression,
+	pending: Array<ESTree.Expression>,
+): void {
+	if (!isPrivateIdentifier(expression.left)) pending.push(expression.left);
+	pending.push(expression.right);
+}
+
 function addExpressionChildrenToPending(expression: ESTree.Expression, pending: Array<ESTree.Expression>): void {
 	switch (expression.type) {
 		case ARRAY_EXPRESSION: {
@@ -153,8 +166,7 @@ function addExpressionChildrenToPending(expression: ESTree.Expression, pending: 
 		}
 
 		case BINARY_EXPRESSION: {
-			if (expression.left.type !== "PrivateIdentifier") pending.push(expression.left);
-			pending.push(expression.right);
+			onBinaryExpression(expression, pending);
 			break;
 		}
 
@@ -217,7 +229,7 @@ function expressionContainsConfiguredLoopExit(
 		if (current === undefined) continue;
 
 		const unwrapped = unwrapExpression(current);
-		if (unwrapped.type === "CallExpression" && isConfiguredLoopExitCall(unwrapped, loopExitCalls)) return true;
+		if (isCallExpression(unwrapped) && isConfiguredLoopExitCall(unwrapped, loopExitCalls)) return true;
 		addExpressionChildrenToPending(unwrapped, pending);
 	}
 
@@ -227,7 +239,7 @@ function expressionContainsConfiguredLoopExit(
 function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
 	let unwrapped = unwrapExpression(expression);
 
-	while (unwrapped.type === "SequenceExpression") {
+	while (isSequenceExpression(unwrapped)) {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
 		if (!lastExpression) return NON_CONSTANT_VALUE;
@@ -311,20 +323,15 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResult {
 	let unwrapped = unwrapExpression(expression);
 
-	while (unwrapped.type === "SequenceExpression") {
+	while (isSequenceExpression(unwrapped)) {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
 		if (!lastExpression) return NON_CONSTANT_BOOLEAN;
 		unwrapped = unwrapExpression(lastExpression);
 	}
 
-	if (unwrapped.type === "ConditionalExpression") {
-		return getConditionalConstantBoolean(unwrapped);
-	}
-
-	if (unwrapped.type === "LogicalExpression") {
-		return getLogicalConstantBoolean(unwrapped);
-	}
+	if (isConditionalExpression(unwrapped)) return getConditionalConstantBoolean(unwrapped);
+	if (isLogicalExpression(unwrapped)) return getLogicalConstantBoolean(unwrapped);
 
 	const value = getConstantValue(unwrapped);
 	if (!value.constant) return NON_CONSTANT_BOOLEAN;

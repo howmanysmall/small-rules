@@ -1,21 +1,81 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getNamespacedCallNames, isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	BINARY_EXPRESSION,
+	BLOCK_STATEMENT,
+	CALL_EXPRESSION,
+	CHAIN_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	FUNCTION_DECLARATION,
+	FUNCTION_EXPRESSION,
+	getNamespacedCallNames,
+	IDENTIFIER,
+	IF_STATEMENT,
+	isAnyFunction,
+	isAnyLiteral,
+	isArrayExpression,
+	isArrayPattern,
+	isArrowFunctionExpression,
+	isAssignmentPattern,
+	isBlockStatement,
+	isCallbackFunction,
+	isCallExpression,
+	isChainExpression,
+	isExpressionStatement,
+	isFunctionDeclaration,
+	isFunctionDeclarationRaw,
+	isIdentifierName,
+	isIdentifierNamed,
+	isIfStatement,
+	isMemberExpression,
+	isNode,
+	isNotEmptyStatement,
+	isObjectExpression,
+	isObjectPattern,
+	isProperty,
+	isReturnStatement,
+	isSpreadElement,
+	isSwitchStatement,
+	isTryStatement,
+	isUnaryExpression,
+	isVariableDeclarator,
+	LABELED_STATEMENT,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	OBJECT_EXPRESSION,
+	PRIVATE_IDENTIFIER,
+	RETURN_STATEMENT,
+	SWITCH_STATEMENT,
+	TEMPLATE_LITERAL,
+	TRY_STATEMENT,
+	UNARY_EXPRESSION,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
+} from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
-import { forEachReactNamedImport, getReactSources, isEnvironment } from "$oxc-utilities/react-utilities";
+import {
+	ENVIRONMENT_SCHEMA,
+	forEachReactNamedImport,
+	getReactSources,
+	isEnvironment,
+	ROBLOX_TS,
+} from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
-interface NoUselessUseEffectOptions {
-	readonly environment?: Environment;
-	readonly hooks?: ReadonlyArray<string>;
-	readonly propertyCallbackPrefixes?: ReadonlyArray<string>;
-	readonly refHooks?: ReadonlyArray<string>;
+interface ReportOptions {
 	readonly reportAdjustState?: boolean;
 	readonly reportDerivedState?: boolean;
 	readonly reportDuplicateDeps?: boolean;
@@ -30,7 +90,14 @@ interface NoUselessUseEffectOptions {
 	readonly reportNotifyParent?: boolean;
 	readonly reportPassRefToParent?: boolean;
 	readonly reportResetState?: boolean;
-	readonly stateHooks?: ReadonlyArray<string>;
+}
+
+interface NoUselessUseEffectOptions extends ReportOptions {
+	readonly environment?: Environment | undefined;
+	readonly hooks?: ReadonlyArray<string> | undefined;
+	readonly propertyCallbackPrefixes?: ReadonlyArray<string> | undefined;
+	readonly refHooks?: ReadonlyArray<string> | undefined;
+	readonly stateHooks?: ReadonlyArray<string> | undefined;
 }
 
 const DEFAULT_HOOKS = ["useEffect", "useLayoutEffect", "useInsertionEffect"] as const satisfies ReadonlyArray<string>;
@@ -38,27 +105,13 @@ const DEFAULT_PROPERTY_CALLBACK_PREFIXES = ["on"] as const satisfies ReadonlyArr
 const DEFAULT_REF_HOOKS = ["useRef"] as const satisfies ReadonlyArray<string>;
 const DEFAULT_STATE_HOOKS = ["useState", "useReducer"] as const satisfies ReadonlyArray<string>;
 
-interface NormalizedOptions {
+type NormalizedOptions = Required<ReportOptions> & {
 	readonly environment: Environment;
 	readonly hooks: ReadonlySet<string>;
 	readonly propertyCallbackPrefixes: ReadonlySet<string>;
 	readonly refHooks: ReadonlySet<string>;
-	readonly reportAdjustState: boolean;
-	readonly reportDerivedState: boolean;
-	readonly reportDuplicateDeps: boolean;
-	readonly reportEffectChain: boolean;
-	readonly reportEmptyEffect: boolean;
-	readonly reportEventFlag: boolean;
-	readonly reportEventSpecificLogic: boolean;
-	readonly reportExternalStore: boolean;
-	readonly reportInitializeState: boolean;
-	readonly reportLogOnly: boolean;
-	readonly reportMixedDerivedState: boolean;
-	readonly reportNotifyParent: boolean;
-	readonly reportPassRefToParent: boolean;
-	readonly reportResetState: boolean;
 	readonly stateHooks: ReadonlySet<string>;
-}
+};
 
 interface FunctionContext {
 	readonly functionId: number;
@@ -102,41 +155,55 @@ interface EffectAnalysisState {
 	readonly statements: ReadonlyArray<ESTree.Statement>;
 }
 
-function normalizeOptions(raw: NoUselessUseEffectOptions | undefined): NormalizedOptions {
-	if (raw === undefined) {
-		return {
-			environment: "roblox-ts",
-			hooks: new Set(DEFAULT_HOOKS),
-			propertyCallbackPrefixes: new Set(DEFAULT_PROPERTY_CALLBACK_PREFIXES),
-			refHooks: new Set(DEFAULT_REF_HOOKS),
-			reportAdjustState: true,
-			reportDerivedState: true,
-			reportDuplicateDeps: true,
-			reportEffectChain: true,
-			reportEmptyEffect: true,
-			reportEventFlag: true,
-			reportEventSpecificLogic: true,
-			reportExternalStore: true,
-			reportInitializeState: true,
-			reportLogOnly: true,
-			reportMixedDerivedState: true,
-			reportNotifyParent: true,
-			reportPassRefToParent: true,
-			reportResetState: true,
-			stateHooks: new Set(DEFAULT_STATE_HOOKS),
-		};
-	}
+const NORMALIZED_OPTIONS = {
+	environment: ROBLOX_TS,
+	hooks: new Set(DEFAULT_HOOKS),
+	propertyCallbackPrefixes: new Set(DEFAULT_PROPERTY_CALLBACK_PREFIXES),
+	refHooks: new Set(DEFAULT_REF_HOOKS),
+	reportAdjustState: true,
+	reportDerivedState: true,
+	reportDuplicateDeps: true,
+	reportEffectChain: true,
+	reportEmptyEffect: true,
+	reportEventFlag: true,
+	reportEventSpecificLogic: true,
+	reportExternalStore: true,
+	reportInitializeState: true,
+	reportLogOnly: true,
+	reportMixedDerivedState: true,
+	reportNotifyParent: true,
+	reportPassRefToParent: true,
+	reportResetState: true,
+	stateHooks: new Set(DEFAULT_STATE_HOOKS),
+} satisfies NormalizedOptions;
+
+function getEnvironment(raw: NoUselessUseEffectOptions): Environment {
+	return isEnvironment(raw.environment) ? raw.environment : ROBLOX_TS;
+}
+function getHooks(raw: NoUselessUseEffectOptions): ReadonlySet<string> {
+	return new Set(isStringArray(raw.hooks) ? raw.hooks : DEFAULT_HOOKS);
+}
+function getRefHooks(raw: NoUselessUseEffectOptions): ReadonlySet<string> {
+	return new Set(isStringArray(raw.refHooks) ? raw.refHooks : DEFAULT_REF_HOOKS);
+}
+function getStateHooks(raw: NoUselessUseEffectOptions): ReadonlySet<string> {
+	return new Set(isStringArray(raw.stateHooks) ? raw.stateHooks : DEFAULT_STATE_HOOKS);
+}
+function getPropertyCallbackPrefixes(raw: NoUselessUseEffectOptions): ReadonlySet<string> {
+	return new Set(
+		isStringArray(raw.propertyCallbackPrefixes) ? raw.propertyCallbackPrefixes : DEFAULT_PROPERTY_CALLBACK_PREFIXES,
+	);
+}
+
+function normalizeOptions(raw?: NoUselessUseEffectOptions): NormalizedOptions {
+	if (raw === undefined) return NORMALIZED_OPTIONS;
 
 	/* v8 ignore next -- schema defaults public options; fallbacks defend direct rule calls. @preserve */
 	return {
-		environment: isEnvironment(raw.environment) ? raw.environment : "roblox-ts",
-		hooks: new Set(isStringArray(raw.hooks) ? raw.hooks : DEFAULT_HOOKS),
-		propertyCallbackPrefixes: new Set(
-			isStringArray(raw.propertyCallbackPrefixes)
-				? raw.propertyCallbackPrefixes
-				: DEFAULT_PROPERTY_CALLBACK_PREFIXES,
-		),
-		refHooks: new Set(isStringArray(raw.refHooks) ? raw.refHooks : DEFAULT_REF_HOOKS),
+		environment: getEnvironment(raw),
+		hooks: getHooks(raw),
+		propertyCallbackPrefixes: getPropertyCallbackPrefixes(raw),
+		refHooks: getRefHooks(raw),
 		reportAdjustState: raw.reportAdjustState ?? true,
 		reportDerivedState: raw.reportDerivedState ?? true,
 		reportDuplicateDeps: raw.reportDuplicateDeps ?? true,
@@ -151,15 +218,12 @@ function normalizeOptions(raw: NoUselessUseEffectOptions | undefined): Normalize
 		reportNotifyParent: raw.reportNotifyParent ?? true,
 		reportPassRefToParent: raw.reportPassRefToParent ?? true,
 		reportResetState: raw.reportResetState ?? true,
-		stateHooks: new Set(isStringArray(raw.stateHooks) ? raw.stateHooks : DEFAULT_STATE_HOOKS),
+		stateHooks: getStateHooks(raw),
 	};
 }
 
-function getNonComputedCalleePropertyName(callee: ESTree.CallExpression["callee"]): string | undefined {
-	if (callee.type !== "MemberExpression" || callee.computed || callee.property.type !== "Identifier") {
-		return undefined;
-	}
-
+function getNonComputedCalleePropertyName(callee: ESTree.Expression): string | undefined {
+	if (!isMemberExpression(callee) || callee.computed || !isIdentifierName(callee.property)) return undefined;
 	return callee.property.name;
 }
 
@@ -169,7 +233,7 @@ function isHookCall(
 	reactNamespaces: ReadonlySet<string>,
 	hookNames: ReadonlySet<string>,
 ): boolean {
-	if (callee.type === "Identifier") return hookIdentifiers.has(callee.name);
+	if (isIdentifierName(callee)) return hookIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
 	if (memberNames !== undefined) {
@@ -180,18 +244,16 @@ function isHookCall(
 }
 
 function getFunctionName(node: CallbackFunction): string | undefined {
-	if ((node.type === "FunctionDeclaration" || node.type === "FunctionExpression") && node.id !== null) {
-		return node.id.name;
-	}
+	if (isFunctionDeclaration(node) && node.id !== null) return node.id.name;
 
 	const { parent } = node;
-	if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") return parent.id.name;
+	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
 
 	if (
 		"key" in parent &&
 		(!("computed" in parent) || !parent.computed) &&
 		isNode(parent.key) &&
-		parent.key.type === "Identifier"
+		isIdentifierName(parent.key)
 	) {
 		return parent.key.name;
 	}
@@ -204,48 +266,69 @@ function isCustomHookName(name: string | undefined): boolean {
 }
 
 function isReturnWithoutArgument(statement: ESTree.Statement): boolean {
-	if (statement.type === "ReturnStatement") return statement.argument === null;
-	if (statement.type !== "BlockStatement" || statement.body.length !== 1) return false;
+	if (isReturnStatement(statement)) return statement.argument === null;
+	if (!isBlockStatement(statement) || statement.body.length !== 1) return false;
 	const [inner] = statement.body;
-	return inner?.type === "ReturnStatement" && inner.argument === null;
+	return isReturnStatement(inner) && inner.argument === null;
 }
 
 function pushStatementBody(statement: ESTree.Statement, stack: Array<ESTree.Node>): void {
 	/* v8 ignore else -- callers pass only body-bearing statement kinds. @preserve */
 	if ("body" in statement && isNode(statement.body)) {
-		if (statement.body.type === "BlockStatement") {
+		if (isBlockStatement(statement.body)) {
 			for (const subStatement of statement.body.body) stack.push(subStatement);
 		} else stack.push(statement.body);
 	}
 }
 
-// oxlint-disable-next-line sonar/cognitive-complexity -- lol.
+const BODY_STATEMENTS: ReadonlySet<NodeType> = new Set([
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	LABELED_STATEMENT,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
+] satisfies ReadonlyArray<NodeType>);
+type BodyStatement =
+	| ESTree.DoWhileStatement
+	| ESTree.ForInStatement
+	| ESTree.ForOfStatement
+	| ESTree.ForStatement
+	| ESTree.LabeledStatement
+	| ESTree.WhileStatement
+	| ESTree.WithStatement;
+function isBodyStatement(node: ESTree.Node): node is BodyStatement {
+	return BODY_STATEMENTS.has(node.type);
+}
+function onTryStatement(current: ESTree.TryStatement, stack: Array<ESTree.Node>): void {
+	for (const statement of current.block.body) stack.push(statement);
+	if (current.handler !== null) {
+		for (const statement of current.handler.body.body) stack.push(statement);
+	}
+	if (current.finalizer !== null) {
+		for (const statement of current.finalizer.body) stack.push(statement);
+	}
+}
+
 function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node>): void {
-	if (current.type === "BlockStatement") {
+	if (isBlockStatement(current)) {
 		for (const statement of current.body) stack.push(statement);
 		return;
 	}
 
-	if (current.type === "IfStatement") {
+	if (isIfStatement(current)) {
 		stack.push(current.consequent);
 		if (current.alternate !== null) stack.push(current.alternate);
 		return;
 	}
 
-	if (
-		current.type === "DoWhileStatement" ||
-		current.type === "ForInStatement" ||
-		current.type === "ForOfStatement" ||
-		current.type === "ForStatement" ||
-		current.type === "LabeledStatement" ||
-		current.type === "WhileStatement" ||
-		current.type === "WithStatement"
-	) {
+	if (isBodyStatement(current)) {
 		pushStatementBody(current, stack);
 		return;
 	}
 
-	if (current.type === "SwitchStatement") {
+	if (isSwitchStatement(current)) {
 		for (const switchCase of current.cases) {
 			for (const statement of switchCase.consequent) stack.push(statement);
 		}
@@ -253,15 +336,7 @@ function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node
 	}
 
 	/* v8 ignore next -- try-body cleanup traversal is covered; V8 leaves a synthetic alternate branch here. @preserve */
-	if (current.type === "TryStatement") {
-		for (const statement of current.block.body) stack.push(statement);
-		if (current.handler !== null) {
-			for (const statement of current.handler.body.body) stack.push(statement);
-		}
-		if (current.finalizer !== null) {
-			for (const statement of current.finalizer.body) stack.push(statement);
-		}
-	}
+	if (isTryStatement(current)) onTryStatement(current, stack);
 }
 
 function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
@@ -274,32 +349,32 @@ function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
 
 		switch (current.type) {
 			/* v8 ignore next -- statement-only traversal never pushes arrow expressions. @preserve */
-			case "ArrowFunctionExpression":
+			case ARROW_FUNCTION_EXPRESSION:
 				continue;
 
-			case "FunctionDeclaration":
+			case FUNCTION_DECLARATION:
 				continue;
 
 			/* v8 ignore next -- statement-only traversal never pushes function expressions. @preserve */
-			case "FunctionExpression":
+			case FUNCTION_EXPRESSION:
 				continue;
 
-			case "ReturnStatement": {
+			case RETURN_STATEMENT: {
 				if (current.argument !== null) return true;
 				continue;
 			}
 
-			case "BlockStatement":
-			case "DoWhileStatement":
-			case "ForInStatement":
-			case "ForOfStatement":
-			case "ForStatement":
-			case "IfStatement":
-			case "LabeledStatement":
-			case "SwitchStatement":
-			case "TryStatement":
-			case "WhileStatement":
-			case "WithStatement": {
+			case BLOCK_STATEMENT:
+			case DO_WHILE_STATEMENT:
+			case FOR_IN_STATEMENT:
+			case FOR_OF_STATEMENT:
+			case FOR_STATEMENT:
+			case IF_STATEMENT:
+			case LABELED_STATEMENT:
+			case SWITCH_STATEMENT:
+			case TRY_STATEMENT:
+			case WHILE_STATEMENT:
+			case WITH_STATEMENT: {
 				pushReturnSearchChildren(current, stack);
 				continue;
 			}
@@ -316,7 +391,7 @@ function stripLeadingGuard(statements: ReadonlyArray<ESTree.Statement>): Readonl
 	if (statements.length === 0) return statements;
 
 	const [first] = statements;
-	if (first?.type !== "IfStatement" || first.alternate !== null || !isReturnWithoutArgument(first.consequent)) {
+	if (!isIfStatement(first) || first.alternate !== null || !isReturnWithoutArgument(first.consequent)) {
 		return statements;
 	}
 
@@ -324,49 +399,46 @@ function stripLeadingGuard(statements: ReadonlyArray<ESTree.Statement>): Readonl
 }
 
 function unwrapChainExpression(expression: ESTree.Expression): ESTree.Expression {
-	if (expression.type === "ChainExpression") return expression.expression;
+	if (isChainExpression(expression)) return expression.expression;
 	return expression;
 }
 
 function getCallExpressionFromStatement(statement: ESTree.Statement): ESTree.CallExpression | undefined {
-	if (statement.type !== "ExpressionStatement") return undefined;
+	if (!isExpressionStatement(statement)) return undefined;
 	const expression = unwrapChainExpression(statement.expression);
-	return expression.type === "CallExpression" ? expression : undefined;
+	return isCallExpression(expression) ? expression : undefined;
 }
 
 function isStateSetterCall(
 	callExpression: ESTree.CallExpression,
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): boolean {
-	return callExpression.callee.type === "Identifier" && stateSetterIdentifiers.has(callExpression.callee.name);
+	return isIdentifierName(callExpression.callee) && stateSetterIdentifiers.has(callExpression.callee.name);
 }
 
 function isFalseLiteral(node: ESTree.Node): boolean {
-	return node.type === "Literal" && node.value === false;
+	return isAnyLiteral(node) && node.value === false;
 }
 
 function isConstantLiteral(node: ESTree.Node): boolean {
 	/* v8 ignore next -- isResetValue handles literals before this helper is called. @preserve */
-	if (node.type === "Literal") return true;
+	if (isAnyLiteral(node)) return true;
 
 	return (
-		node.type === "UnaryExpression" &&
-		node.operator === "void" &&
-		node.argument.type === "Literal" &&
-		node.argument.value === 0
+		isUnaryExpression(node) && node.operator === "void" && isAnyLiteral(node.argument) && node.argument.value === 0
 	);
 }
 
 function isEmptyArrayExpression(node: ESTree.Node): boolean {
-	return node.type === "ArrayExpression" && node.elements.length === 0;
+	return isArrayExpression(node) && node.elements.length === 0;
 }
 
 function isEmptyObjectExpression(node: ESTree.Node): boolean {
-	return node.type === "ObjectExpression" && node.properties.length === 0;
+	return isObjectExpression(node) && node.properties.length === 0;
 }
 
 function isResetValue(node: ESTree.Node): boolean {
-	if (node.type === "Literal") {
+	if (isAnyLiteral(node)) {
 		const { value } = node;
 		return value === "" || value === 0 || value === false || value === null;
 	}
@@ -379,7 +451,7 @@ function getResetFlagNameFromStatement(
 	stateSetterToValue: ReadonlyMap<string, string>,
 ): string | undefined {
 	const callExpression = getCallExpressionFromStatement(statement);
-	if (callExpression?.callee.type !== "Identifier") return undefined;
+	if (!isIdentifierName(callExpression?.callee)) return undefined;
 
 	const flagName = stateSetterToValue.get(callExpression.callee.name);
 	if (flagName === undefined || callExpression.arguments.length !== 1) return undefined;
@@ -399,20 +471,11 @@ function getSideEffectCall(
 }
 
 function isNegativeFlagTest(test: ESTree.Expression, flagName: string): boolean {
-	return (
-		test.type === "UnaryExpression" &&
-		test.operator === "!" &&
-		test.argument.type === "Identifier" &&
-		test.argument.name === flagName
-	);
-}
-
-function isPositiveFlagTest(test: ESTree.Expression, flagName: string): boolean {
-	return test.type === "Identifier" && test.name === flagName;
+	return isUnaryExpression(test) && test.operator === "!" && isIdentifierNamed(test.argument, flagName);
 }
 
 function getStatementsFromConsequent(consequent: ESTree.Statement): ReadonlyArray<ESTree.Statement> {
-	if (consequent.type === "BlockStatement") return consequent.body;
+	if (isBlockStatement(consequent)) return consequent.body;
 	return [consequent];
 }
 
@@ -422,7 +485,7 @@ function matchGuardedEventFlagPattern(
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): string | undefined {
 	const [guard, first, second] = statements;
-	if (first === undefined || second === undefined || guard?.type !== "IfStatement") return undefined;
+	if (first === undefined || second === undefined || !isIfStatement(guard)) return undefined;
 	/* v8 ignore next -- @preserve all tests pass IfStatements without an alternate branch. */
 	if (guard.alternate !== null) return undefined;
 
@@ -445,7 +508,7 @@ function matchPositiveEventFlagPattern(
 	stateSetterToValue: ReadonlyMap<string, string>,
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): string | undefined {
-	if (statement.type !== "IfStatement" || statement.alternate !== null) return undefined;
+	if (!isIfStatement(statement) || statement.alternate !== null) return undefined;
 
 	const consequentStatements = getStatementsFromConsequent(statement.consequent);
 	const [first, second] = consequentStatements;
@@ -454,13 +517,13 @@ function matchPositiveEventFlagPattern(
 	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
 	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
 	if (firstFlag !== undefined && secondFlag === undefined) {
-		if (!isPositiveFlagTest(statement.test, firstFlag)) return undefined;
+		if (!isIdentifierNamed(statement.test, firstFlag)) return undefined;
 		/* v8 ignore next -- no-side-effect positive flag exits are covered as non-event-flag valid behavior. @preserve */
 		return getSideEffectCall(second, stateSetterIdentifiers) === undefined ? undefined : firstFlag;
 	}
 
 	if (secondFlag === undefined || firstFlag !== undefined) return undefined;
-	if (!isPositiveFlagTest(statement.test, secondFlag)) return undefined;
+	if (!isIdentifierNamed(statement.test, secondFlag)) return undefined;
 	/* v8 ignore next -- no-side-effect positive flag exits are covered as non-event-flag valid behavior. @preserve */
 	return getSideEffectCall(first, stateSetterIdentifiers) === undefined ? undefined : secondFlag;
 }
@@ -488,18 +551,18 @@ function matchEventFlagPattern(
 type ExpressionSearchNode = ESTree.Expression | ESTree.PrivateIdentifier;
 
 const EXPRESSION_SEARCH_NODE_TYPES = new Set([
-	"ArrayExpression",
-	"BinaryExpression",
-	"CallExpression",
-	"ChainExpression",
-	"ConditionalExpression",
-	"Identifier",
-	"LogicalExpression",
-	"MemberExpression",
-	"ObjectExpression",
-	"PrivateIdentifier",
-	"TemplateLiteral",
-	"UnaryExpression",
+	ARRAY_EXPRESSION,
+	BINARY_EXPRESSION,
+	CALL_EXPRESSION,
+	CHAIN_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	IDENTIFIER,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	OBJECT_EXPRESSION,
+	PRIVATE_IDENTIFIER,
+	TEMPLATE_LITERAL,
+	UNARY_EXPRESSION,
 ]);
 
 function isExpressionSearchNode(node: ESTree.Node): node is ExpressionSearchNode {
@@ -508,13 +571,13 @@ function isExpressionSearchNode(node: ESTree.Node): node is ExpressionSearchNode
 
 function pushArrayExpressionChildren(current: ESTree.ArrayExpression, stack: Array<ExpressionSearchNode>): void {
 	for (const element of current.elements) {
-		if (element !== null && element.type !== "SpreadElement") stack.push(element);
+		if (element !== null && !isSpreadElement(element)) stack.push(element);
 	}
 }
 
 function pushCallExpressionChildren(current: ESTree.CallExpression, stack: Array<ExpressionSearchNode>): void {
 	stack.push(current.callee);
-	for (const argument of current.arguments) if (argument.type !== "SpreadElement") stack.push(argument);
+	for (const argument of current.arguments) if (!isSpreadElement(argument)) stack.push(argument);
 }
 
 function pushMemberExpressionChildren(current: ESTree.MemberExpression, stack: Array<ExpressionSearchNode>): void {
@@ -523,48 +586,57 @@ function pushMemberExpressionChildren(current: ESTree.MemberExpression, stack: A
 }
 
 function pushObjectExpressionChildren(current: ESTree.ObjectExpression, stack: Array<ExpressionSearchNode>): void {
-	for (const property of current.properties) if (property.type === "Property") stack.push(property.value);
+	for (const property of current.properties) if (isProperty(property)) stack.push(property.value);
 }
 
 function pushExpressionSearchChildren(current: ExpressionSearchNode, stack: Array<ExpressionSearchNode>): void {
 	switch (current.type) {
-		case "ArrayExpression": {
+		case ARRAY_EXPRESSION: {
 			pushArrayExpressionChildren(current, stack);
 			break;
 		}
-		case "BinaryExpression":
-		case "LogicalExpression": {
+
+		case BINARY_EXPRESSION:
+		case LOGICAL_EXPRESSION: {
 			stack.push(current.left, current.right);
 			break;
 		}
-		case "CallExpression": {
+
+		case CALL_EXPRESSION: {
 			pushCallExpressionChildren(current, stack);
 			break;
 		}
-		case "ChainExpression": {
+
+		case CHAIN_EXPRESSION: {
 			stack.push(current.expression);
 			break;
 		}
-		case "ConditionalExpression": {
+
+		case CONDITIONAL_EXPRESSION: {
 			stack.push(current.test, current.consequent, current.alternate);
 			break;
 		}
-		case "MemberExpression": {
+
+		case MEMBER_EXPRESSION: {
 			pushMemberExpressionChildren(current, stack);
 			break;
 		}
-		case "ObjectExpression": {
+
+		case OBJECT_EXPRESSION: {
 			pushObjectExpressionChildren(current, stack);
 			break;
 		}
-		case "TemplateLiteral": {
+
+		case TEMPLATE_LITERAL: {
 			for (const expression of current.expressions) stack.push(expression);
 			break;
 		}
-		case "UnaryExpression": {
+
+		case UNARY_EXPRESSION: {
 			stack.push(current.argument);
 			break;
 		}
+
 		default:
 	}
 }
@@ -579,7 +651,7 @@ function expressionContainsIdentifier(node: ESTree.Expression): boolean {
 		if (current === undefined || visited.has(current)) continue;
 		visited.add(current);
 
-		if (current.type === "Identifier") return true;
+		if (isIdentifierName(current)) return true;
 		pushExpressionSearchChildren(current, stack);
 	}
 
@@ -593,7 +665,7 @@ function countMatchingCalls(
 	let count = 0;
 
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
+		if (isIfStatement(statement)) {
 			if (statement.alternate !== null) return undefined;
 
 			const innerStatements = getStatementsFromConsequent(statement.consequent);
@@ -620,7 +692,7 @@ function countSetterCalls(
 		if (!isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
 
 		return callExpression.arguments.some((argument) =>
-			argument.type === "SpreadElement" ? false : expressionContainsIdentifier(argument),
+			isSpreadElement(argument) ? false : expressionContainsIdentifier(argument),
 		);
 	});
 }
@@ -641,8 +713,7 @@ function hasPrefix(value: string, prefixes: ReadonlySet<string>): boolean {
 }
 
 function unwrapParameter(parameter: ESTree.ParamPattern): ESTree.ParamPattern {
-	if (parameter.type === "AssignmentPattern") return parameter.left;
-	return parameter;
+	return isAssignmentPattern(parameter) ? parameter.left : parameter;
 }
 
 function buildFunctionContext(
@@ -661,15 +732,15 @@ function buildFunctionContext(
 	if (firstParameter === undefined) return context;
 
 	const parameter = unwrapParameter(firstParameter);
-	if (parameter.type === "Identifier") {
+	if (isIdentifierName(parameter)) {
 		context.propertyObjectName = parameter.name;
 		return context;
 	}
 
-	if (parameter.type !== "ObjectPattern") return context;
+	if (!isObjectPattern(parameter)) return context;
 
 	for (const property of parameter.properties) {
-		if (property.type !== "Property") continue;
+		if (!isProperty(property)) continue;
 
 		const propertyName = getBindingPropertyKeyName(property);
 		if (propertyName === undefined || !hasPrefix(propertyName, propertyCallbackPrefixes)) continue;
@@ -686,7 +757,7 @@ function isPropertyCallbackCall(
 	functionContext: FunctionContext,
 	propertyCallbackPrefixes: ReadonlySet<string>,
 ): boolean {
-	if (callee.type === "Identifier") return functionContext.propertyCallbackIdentifiers.has(callee.name);
+	if (isIdentifierName(callee)) return functionContext.propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
 	if (memberNames !== undefined) {
@@ -702,32 +773,25 @@ function isPropertyCallbackCall(
 
 function hasDependencyIdentifier(callExpression: ESTree.CallExpression, name: string): boolean {
 	const [, dependencyArgument] = callExpression.arguments;
-	if (dependencyArgument?.type !== "ArrayExpression") return false;
+	if (!isArrayExpression(dependencyArgument)) return false;
 
-	for (const element of dependencyArgument.elements) {
-		if (element?.type === "Identifier" && element.name === name) return true;
-	}
-
+	for (const element of dependencyArgument.elements) if (isIdentifierNamed(element, name)) return true;
 	return false;
 }
 
 function getDependencyIdentifiers(callExpression: ESTree.CallExpression): Set<string> {
 	const identifiers = new Set<string>();
 	const [, dependencyArgument] = callExpression.arguments;
-	if (dependencyArgument?.type !== "ArrayExpression") return identifiers;
+	if (!isArrayExpression(dependencyArgument)) return identifiers;
 
-	for (const element of dependencyArgument.elements) {
-		if (element?.type === "Identifier") identifiers.add(element.name);
-	}
-
+	for (const element of dependencyArgument.elements) if (isIdentifierName(element)) identifiers.add(element.name);
 	return identifiers;
 }
 
 function isEmptyDependencyArray(callExpression: ESTree.CallExpression): boolean {
 	const [, dependencyArgument] = callExpression.arguments;
 	if (dependencyArgument === undefined) return true;
-	if (dependencyArgument.type !== "ArrayExpression") return false;
-	return dependencyArgument.elements.length === 0;
+	return isArrayExpression(dependencyArgument) && dependencyArgument.elements.length === 0;
 }
 
 function hasOnlyNestedStatementsMatching(
@@ -737,7 +801,7 @@ function hasOnlyNestedStatementsMatching(
 	if (statements.length === 0) return false;
 
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
+		if (isIfStatement(statement)) {
 			if (statement.alternate !== null) return false;
 			if (!hasOnlyNestedStatementsMatching(getStatementsFromConsequent(statement.consequent), matches)) {
 				return false;
@@ -758,7 +822,7 @@ function collectSetterCalls(
 	const setters = new Set<string>();
 
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
+		if (isIfStatement(statement)) {
 			const innerStatements = getStatementsFromConsequent(statement.consequent);
 			for (const setter of collectSetterCalls(innerStatements, stateSetterIdentifiers)) setters.add(setter);
 			continue;
@@ -768,7 +832,7 @@ function collectSetterCalls(
 		if (
 			callExpression !== undefined &&
 			isStateSetterCall(callExpression, stateSetterIdentifiers) &&
-			callExpression.callee.type === "Identifier"
+			isIdentifierName(callExpression.callee)
 		) {
 			setters.add(callExpression.callee.name);
 		}
@@ -781,7 +845,7 @@ function isAllowedPropertyCallbackCall(
 	{ callee }: ESTree.CallExpression,
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
-	if (callee.type === "Identifier") return propertyCallbackIdentifiers.has(callee.name);
+	if (isIdentifierName(callee)) return propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
 	return memberNames !== undefined && propertyCallbackIdentifiers.has(memberNames.objectName);
@@ -793,7 +857,7 @@ function hasNonSetterSideEffect(
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
+		if (isIfStatement(statement)) {
 			const innerStatements = getStatementsFromConsequent(statement.consequent);
 			if (hasNonSetterSideEffect(innerStatements, stateSetterIdentifiers, propertyCallbackIdentifiers)) {
 				return true;
@@ -830,7 +894,7 @@ function hasOnlySetterCallsWithArgument(
 
 function isConstantValue(node: ESTree.Node): boolean {
 	return (
-		(node.type === "Literal" && node.value !== null && !Predicate.isObject(node.value)) ||
+		(isAnyLiteral(node) && node.value !== null && !Predicate.isObject(node.value)) ||
 		isEmptyArrayExpression(node) ||
 		isEmptyObjectExpression(node)
 	);
@@ -874,11 +938,10 @@ function hasExternalStorePattern(statements: ReadonlyArray<ESTree.Statement>): b
 
 function isRefCurrentArgument(argument: ESTree.Node, referenceIdentifiers: ReadonlySet<string>): boolean {
 	return (
-		argument.type === "MemberExpression" &&
+		isMemberExpression(argument) &&
 		!argument.computed &&
-		argument.object.type === "Identifier" &&
-		argument.property.type === "Identifier" &&
-		argument.property.name === "current" &&
+		isIdentifierName(argument.object) &&
+		isIdentifierNamed(argument.property, "current") &&
 		referenceIdentifiers.has(argument.object.name)
 	);
 }
@@ -889,7 +952,7 @@ function passesRefCurrentToCallback(
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
 	return (
-		callExpression.callee.type === "Identifier" &&
+		isIdentifierName(callExpression.callee) &&
 		propertyCallbackIdentifiers.has(callExpression.callee.name) &&
 		callExpression.arguments.some((argument) => isRefCurrentArgument(argument, referenceIdentifiers))
 	);
@@ -901,7 +964,7 @@ function hasRefPassedToParent(
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
+		if (isIfStatement(statement)) {
 			const innerStatements = getStatementsFromConsequent(statement.consequent);
 			if (hasRefPassedToParent(innerStatements, referenceIdentifiers, propertyCallbackIdentifiers)) return true;
 			continue;
@@ -928,7 +991,7 @@ function collectIdentifiers(node: ESTree.Node): Set<string> {
 		if (current === undefined || visited.has(current)) continue;
 		visited.add(current);
 
-		if (current.type === "Identifier") {
+		if (isIdentifierName(current)) {
 			identifiers.add(current.name);
 			continue;
 		}
@@ -941,7 +1004,7 @@ function collectIdentifiers(node: ESTree.Node): Set<string> {
 
 function getAlternateStatements(statement: ESTree.IfStatement): ReadonlyArray<ESTree.Statement> {
 	if (statement.alternate === null) return [];
-	return statement.alternate.type === "BlockStatement" ? statement.alternate.body : [statement.alternate];
+	return isBlockStatement(statement.alternate) ? statement.alternate.body : [statement.alternate];
 }
 
 function hasPropertyDependencyInCondition(
@@ -970,7 +1033,7 @@ function hasConditionalSetterBasedOnProperty(
 	dependencyIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type !== "IfStatement") continue;
+		if (!isIfStatement(statement)) continue;
 
 		if (
 			hasPropertyDependencyInCondition(statement, stateValueIdentifiers, dependencyIdentifiers) &&
@@ -1022,9 +1085,10 @@ function isEventSideEffectCall(statement: ESTree.Statement, stateSetterIdentifie
 	const call = getCallExpressionFromStatement(statement);
 	if (call === undefined || isStateSetterCall(call, stateSetterIdentifiers)) return false;
 
-	if (call.callee.type === "Identifier") return hasEventPrefix(call.callee.name);
-	if (call.callee.type !== "MemberExpression" || call.callee.computed) return false;
-	if (call.callee.property.type !== "Identifier") return false;
+	if (isIdentifierName(call.callee)) return hasEventPrefix(call.callee.name);
+	if (!isMemberExpression(call.callee) || call.callee.computed || !isIdentifierName(call.callee.property)) {
+		return false;
+	}
 	return hasEventPrefix(call.callee.property.name);
 }
 
@@ -1039,7 +1103,7 @@ function hasEventSpecificLogic(
 	stateValueIdentifiers: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type !== "IfStatement") continue;
+		if (!isIfStatement(statement)) continue;
 
 		if (
 			hasStateInCondition(statement, stateValueIdentifiers) &&
@@ -1072,14 +1136,13 @@ function getOwnerStateKey(ownerFunctionId: number, stateValue: string): string {
 }
 
 function getFunctionBody(node: CallbackFunction): ESTree.BlockStatement | undefined {
-	if (node.body?.type === "BlockStatement") return node.body;
-	return undefined;
+	return isBlockStatement(node.body) ? node.body : undefined;
 }
 
 function isBlockBodyArrow(
 	node: ESTree.ArrowFunctionExpression,
 ): node is ESTree.ArrowFunctionExpression & { body: ESTree.BlockStatement } {
-	return node.body.type === "BlockStatement";
+	return isBlockStatement(node.body);
 }
 
 function isBlockBodyFunction(node: ESTree.Function): node is ESTree.Function & { body: ESTree.FunctionBody } {
@@ -1169,9 +1232,8 @@ function hasCallerNamePrefix(name: string): boolean {
 
 function isConsoleSideEffect(callee: ESTree.MemberExpression): boolean {
 	return (
-		callee.object.type === "Identifier" &&
-		callee.object.name === "console" &&
-		callee.property.type === "Identifier" &&
+		isIdentifierNamed(callee.object, "console") &&
+		isIdentifierName(callee.property) &&
 		(callee.property.name === "log" ||
 			callee.property.name === "warn" ||
 			callee.property.name === "error" ||
@@ -1192,13 +1254,13 @@ function isRealExternalCall(
 ): boolean {
 	const { callee } = call;
 	if (isStateSetterCall(call, setterIds)) return false;
-	if (callee.type === "Identifier") {
+	if (isIdentifierName(callee)) {
 		if (callbackIds.has(callee.name)) return false;
 		return KNOWN_EXTERNAL_PATTERNS.has(callee.name) || hasCallerNamePrefix(callee.name);
 	}
 
-	if (callee.type !== "MemberExpression" || callee.computed || callee.property.type !== "Identifier") return false;
-	if (callee.object.type === "Identifier" && callbackIds.has(callee.object.name)) return false;
+	if (!isMemberExpression(callee) || callee.computed || !isIdentifierName(callee.property)) return false;
+	if (isIdentifierName(callee.object) && callbackIds.has(callee.object.name)) return false;
 	return isConsoleSideEffect(callee) || hasMemberSideEffectMethod(callee.property.name);
 }
 
@@ -1208,18 +1270,28 @@ function hasRealExternalSideEffect(
 	callbackIds: ReadonlySet<string>,
 ): boolean {
 	for (const statement of statements) {
-		if (statement.type === "IfStatement") {
+		if (isIfStatement(statement)) {
 			const inner = getStatementsFromConsequent(statement.consequent);
 			if (hasRealExternalSideEffect(inner, setterIds, callbackIds)) return true;
 			continue;
 		}
 
 		const call = getCallExpressionFromStatement(statement);
-		if (call === undefined) continue;
-		if (isRealExternalCall(call, setterIds, callbackIds)) return true;
+		if (call !== undefined && isRealExternalCall(call, setterIds, callbackIds)) return true;
 	}
 
 	return false;
+}
+
+function isValidEffectInfo(effectInfo?: EffectInfo): effectInfo is EffectInfo {
+	return effectInfo !== undefined && effectInfo.depIdentifiers.size > 0;
+}
+function isValidCandidate(effectInfo: EffectInfo, candidate?: EffectInfo): candidate is EffectInfo {
+	return candidate !== undefined && candidate.ownerFunctionId === effectInfo.ownerFunctionId;
+}
+
+function hasSideEffectOrCleanup(effectInfo: EffectInfo): boolean {
+	return effectInfo.hasNonSetterSideEffect || effectInfo.hasReturnWithCleanup;
 }
 
 const PROGRAM_FUNCTION_ID = 0;
@@ -1257,45 +1329,30 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 		}
 
 		function recordStateSetter(node: ESTree.VariableDeclarator): void {
-			if (
-				node.init?.type !== "CallExpression" ||
-				!isStateHookCall(node.init) ||
-				node.id.type !== "ArrayPattern"
-			) {
-				return;
-			}
+			if (!isCallExpression(node.init) || !isStateHookCall(node.init) || !isArrayPattern(node.id)) return;
 
 			const { elements } = node.id;
 			if (elements.length < 2) return;
 
 			const [, setterElement] = elements;
-			if (setterElement === null || setterElement === undefined || setterElement.type !== "Identifier") return;
+			if (setterElement === null || setterElement === undefined || !isIdentifierName(setterElement)) return;
 			stateSetterIdentifiers.add(setterElement.name);
 
 			const [stateElement] = elements;
-			if (stateElement?.type === "Identifier") {
+			if (isIdentifierName(stateElement)) {
 				stateValueIdentifiers.add(stateElement.name);
 				stateSetterToValue.set(setterElement.name, stateElement.name);
 			}
 		}
 
 		function recordRef(node: ESTree.VariableDeclarator): void {
-			if (
-				node.init?.type !== "CallExpression" ||
-				!isReferenceHookCall(node.init) ||
-				node.id.type !== "Identifier"
-			) {
-				return;
-			}
+			if (!isCallExpression(node.init) || !isReferenceHookCall(node.init) || !isIdentifierName(node.id)) return;
 			refIdentifiers.add(node.id.name);
 		}
 
 		function recordNamedFunction(node: ESTree.VariableDeclarator): void {
-			if (node.id.type !== "Identifier" || node.init === null) return;
-
-			if (node.init.type === "FunctionExpression" || node.init.type === "ArrowFunctionExpression") {
-				namedFunctions.set(node.id.name, node.init);
-			}
+			if (!isIdentifierName(node.id) || node.init === null) return;
+			if (isCallbackFunction(node.init)) namedFunctions.set(node.id.name, node.init);
 		}
 
 		function enterFunction(node: CallbackFunction): void {
@@ -1311,7 +1368,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				),
 			);
 
-			if (node.type === "FunctionDeclaration" && node.id !== null) {
+			if (isFunctionDeclarationRaw(node) && node.id !== null) {
 				namedFunctions.set(node.id.name, node);
 			}
 		}
@@ -1338,6 +1395,19 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			);
 		}
 
+		function getFlagName(statements: ReadonlyArray<ESTree.Statement>): string | undefined {
+			return options.reportEventFlag
+				? matchEventFlagPattern(statements, stateSetterToValue, stateSetterIdentifiers)
+				: undefined;
+		}
+
+		function hasEmptyEffect(statements: ReadonlyArray<ESTree.Statement>): boolean {
+			return (
+				options.reportEmptyEffect &&
+				(statements.length === 0 || (statements[0] !== undefined && isReturnWithoutArgument(statements[0])))
+			);
+		}
+
 		function getEffectReportMessage(state: EffectAnalysisState): EffectReportMessageId | undefined {
 			const {
 				coreStatements,
@@ -1348,20 +1418,13 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				node,
 				statements,
 			} = state;
-			const flagName = options.reportEventFlag
-				? matchEventFlagPattern(statements, stateSetterToValue, stateSetterIdentifiers)
-				: undefined;
+			const flagName = getFlagName(statements);
 			const hasPropertyDependency = [...dependencyIdentifiers].some(
 				(id) => !stateValueIdentifiers.has(id) && !stateSetterIdentifiers.has(id),
 			);
 
 			const checks: ReadonlyArray<readonly [boolean, EffectReportMessageId]> = [
-				[
-					options.reportEmptyEffect &&
-						(statements.length === 0 ||
-							(statements[0] !== undefined && isReturnWithoutArgument(statements[0]))),
-					"emptyEffect",
-				],
+				[hasEmptyEffect(statements), "emptyEffect"],
 				[
 					options.reportInitializeState &&
 						isEmptyDependencyArray(node) &&
@@ -1427,7 +1490,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 		function analyzeEffect(
 			node: ESTree.CallExpression,
 			statements: ReadonlyArray<ESTree.Statement>,
-			body: ESTree.BlockStatement | undefined,
+			body?: ESTree.BlockStatement,
 		): void {
 			const functionContext = functionContextStack.at(-1);
 			const coreStatements = stripLeadingGuard(statements);
@@ -1472,7 +1535,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			const stateSetByEffect = buildStateSetByEffect();
 
 			for (const effect of componentEffects) {
-				if (effect.hasNonSetterSideEffect || effect.hasReturnWithCleanup) continue;
+				if (hasSideEffectOrCleanup(effect)) continue;
 
 				for (const dependency of effect.depIdentifiers) {
 					const ownerStateKey = getOwnerStateKey(effect.ownerFunctionId, dependency);
@@ -1534,15 +1597,12 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 		function getDuplicateEffectIndices(index: number, reported: ReadonlySet<number>): ReadonlyArray<number> {
 			const effect = componentEffects[index];
 			/* v8 ignore next -- index is produced by iterating componentEffects.entries(). @preserve */
-			if (effect === undefined || effect.depIdentifiers.size === 0) return [];
+			if (!isValidEffectInfo(effect)) return [];
 
 			const duplicates = [index];
 			for (let jndex = index + 1; jndex < componentEffects.length; jndex += 1) {
 				const candidate = componentEffects[jndex];
-				if (reported.has(jndex)) continue;
-				/* v8 ignore next -- componentEffects is a dense array in this rule. @preserve */
-				if (candidate === undefined) continue;
-				if (candidate.ownerFunctionId !== effect.ownerFunctionId) continue;
+				if (reported.has(jndex) || !isValidCandidate(effect, candidate)) continue;
 				if (areDependenciesIdentical(effect.depIdentifiers, candidate.depIdentifiers)) duplicates.push(jndex);
 			}
 			return duplicates;
@@ -1562,26 +1622,21 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			if (namedFunction === undefined || namedFunction.async) return;
 
 			const body = getFunctionBody(namedFunction);
-			if (body === undefined) return;
-
-			const statements = body.body.filter((statement) => statement.type !== "EmptyStatement");
-			analyzeEffect(node, statements, body);
+			if (body !== undefined) analyzeEffect(node, body.body.filter(isNotEmptyStatement), body);
 		}
 
 		function analyzeInlineEffectCallback(node: ESTree.CallExpression, callback: CallbackFunction): void {
 			if (callback.async) return;
 
-			if (callback.type === "ArrowFunctionExpression") {
+			if (isArrowFunctionExpression(callback)) {
 				if (!isBlockBodyArrow(callback)) return;
-				const statements = callback.body.body.filter((statement) => statement.type !== "EmptyStatement");
-				analyzeEffect(node, statements, callback.body);
+				analyzeEffect(node, callback.body.body.filter(isNotEmptyStatement), callback.body);
 				return;
 			}
 
 			/* v8 ignore next -- parser-produced function callbacks have block bodies. @preserve */
 			if (!isBlockBodyFunction(callback)) return;
-			const statements = callback.body.body.filter((statement) => statement.type !== "EmptyStatement");
-			analyzeEffect(node, statements, callback.body);
+			analyzeEffect(node, callback.body.body.filter(isNotEmptyStatement), callback.body);
 		}
 
 		return {
@@ -1593,13 +1648,12 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				const [callback] = node.arguments;
 				if (callback === undefined) return;
 
-				if (callback.type === "Identifier") {
+				if (isIdentifierName(callback)) {
 					analyzeNamedEffectCallback(node, callback.name);
 					return;
 				}
 
-				if (!isAnyFunction(callback)) return;
-				analyzeInlineEffectCallback(node, callback);
+				if (isAnyFunction(callback)) analyzeInlineEffectCallback(node, callback);
 			},
 			FunctionDeclaration: enterFunction,
 			"FunctionDeclaration:exit": exitFunction,
@@ -1661,12 +1715,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			{
 				additionalProperties: false,
 				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 					hooks: {
 						default: [...DEFAULT_HOOKS],
 						description: "Effect hook names checked for avoidable effect patterns.",

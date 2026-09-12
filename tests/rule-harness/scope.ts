@@ -185,17 +185,25 @@ function defineFunctionDeclaration(node: HarnessNode, scope: HarnessScope, state
 	visitFunctionLike(node, scope, state);
 }
 
-function defineClassDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
-	const id = getNodeProperty(node, "id");
-	if (id === undefined || !Predicate.isString(id.name)) return;
-	const variable = defineVariable(scope, id.name, id, {
-		name: id,
-		node,
-		parent: node.parent ?? null,
-		type: "ClassName",
-	});
-	registerDeclaredVariable(state, node, variable);
+type DefineType = (node: HarnessNode, scope: HarnessScope, state: ScopeState) => void;
+
+function createDefineType(type: string): DefineType {
+	return function defineType(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
+		const id = getNodeProperty(node, "id");
+		if (id === undefined || !Predicate.isString(id.name)) return;
+		const variable = defineVariable(scope, id.name, id, {
+			name: id,
+			node,
+			parent: node.parent ?? null,
+			type,
+		});
+		registerDeclaredVariable(state, node, variable);
+	};
 }
+
+const defineClassDeclaration = createDefineType("ClassName");
+const defineTSEnumDeclaration = createDefineType("TSEnumName");
+const defineTypeDeclaration = createDefineType("TypeName");
 
 function visitClassLike(node: HarnessNode, parentScope: HarnessScope, state: ScopeState): void {
 	const classScope = createScope("class", parentScope, node);
@@ -209,30 +217,6 @@ function visitClassLike(node: HarnessNode, parentScope: HarnessScope, state: Sco
 			type: "ClassName",
 		});
 	}
-}
-
-function defineTSEnumDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
-	const id = getNodeProperty(node, "id");
-	if (id === undefined || !Predicate.isString(id.name)) return;
-	const variable = defineVariable(scope, id.name, id, {
-		name: id,
-		node,
-		parent: node.parent ?? null,
-		type: "TSEnumName",
-	});
-	registerDeclaredVariable(state, node, variable);
-}
-
-function defineTypeDeclaration(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
-	const id = getNodeProperty(node, "id");
-	if (id === undefined || !Predicate.isString(id.name)) return;
-	const variable = defineVariable(scope, id.name, id, {
-		name: id,
-		node,
-		parent: node.parent ?? null,
-		type: "TypeName",
-	});
-	registerDeclaredVariable(state, node, variable);
 }
 
 function visitFunctionLike(node: HarnessNode, parentScope: HarnessScope, state: ScopeState): void {
