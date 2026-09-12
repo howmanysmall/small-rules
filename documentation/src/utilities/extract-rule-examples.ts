@@ -186,17 +186,8 @@ function getCaseArrays(cases: ObjectExpression, context: ExtractionContext): Arr
 	return caseArrays;
 }
 
-function extractCaseExample(
-	testCase: ObjectExpression,
-	kind: "invalid" | "valid",
-	runnerLanguage: string,
-	extractionContext: ExtractionContext,
-): RuleExample | undefined {
-	const documentationValue = findField(testCase, "documentation")?.property.value;
-	if (documentationValue?.type !== "ObjectExpression") return undefined;
-
-	const fields = getObjectFields(testCase, extractionContext);
-	for (const field of fields) {
+function validateFields(extractionContext: ExtractionContext, objectFields: ReadonlyArray<ObjectField>): void {
+	for (const field of objectFields) {
 		if (!CASE_FIELD_NAMES.has(field.key)) {
 			throw new ExtractionError(
 				extractionContext,
@@ -212,6 +203,19 @@ function extractCaseExample(
 			);
 		}
 	}
+}
+
+function extractCaseExample(
+	testCase: ObjectExpression,
+	kind: "invalid" | "valid",
+	runnerLanguage: string,
+	extractionContext: ExtractionContext,
+): RuleExample | undefined {
+	const documentationValue = findField(testCase, "documentation")?.property.value;
+	if (documentationValue?.type !== "ObjectExpression") return undefined;
+
+	const fields = getObjectFields(testCase, extractionContext);
+	validateFields(extractionContext, fields);
 
 	const documentation = evaluateDocumentation(documentationValue, extractionContext);
 	const code = evaluateRequiredString(fields, "code", extractionContext);

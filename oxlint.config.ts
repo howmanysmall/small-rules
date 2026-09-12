@@ -5,10 +5,11 @@ import { ALL_REACT_DOCTOR_RULES } from "oxlint-plugin-react-doctor";
 
 import type { OxlintRules } from "@isentinel/eslint-config/oxlint";
 
-type GetRecordValue<TRecord extends Record<string, unknown>> = TRecord[keyof TRecord];
-type DummyRule = NonNullable<GetRecordValue<OxlintRules>>;
+type DummyRule = NonNullable<OxlintRules[keyof OxlintRules]>;
+
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
 const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
+const SCRIPT_FILES = `scripts/${GLOB_SRC}`;
 
 const reactDoctorRules = Object.fromEntries(
 	Object.entries(ALL_REACT_DOCTOR_RULES).map(([key, value]) => {
@@ -611,6 +612,11 @@ const configuration = isentinel(
 		},
 	},
 	{
+		name: "small-rules/no-complexity",
+		files: [SCRIPT_FILES, `tests/${GLOB_SRC}`],
+		rules: { complexity: "off" },
+	},
+	{
 		name: "small-rules/react-doctor",
 		files: [GLOB_SRC],
 		jsPlugins: [{ name: "react-doctor", specifier: "oxlint-plugin-react-doctor" }],
@@ -676,12 +682,12 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/allow-top-level-await",
-		files: ["documentation/**/*.astro", "scripts/**/*.{ts,tsx}", CONFIGURATION_FILES],
+		files: ["documentation/**/*.astro", SCRIPT_FILES, CONFIGURATION_FILES],
 		rules: { "node/no-top-level-await": "off" },
 	},
 	{
 		name: "small-rules/allow-console",
-		files: ["scripts/**/*.{ts,tsx}", CONFIGURATION_FILES],
+		files: [SCRIPT_FILES, CONFIGURATION_FILES],
 		rules: { "no-console": "off" },
 	},
 	{

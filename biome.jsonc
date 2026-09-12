@@ -536,6 +536,17 @@
 					}
 				}
 			}
+		},
+
+		{
+			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", ".codex/hooks/*.{ts,tsx}"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"noExcessiveCognitiveComplexity": "off"
+					}
+				}
+			}
 		}
 
 		// package.json exception
