@@ -158,6 +158,12 @@
 			"a11y": { "preset": "none" },
 
 			"complexity": {
+				"noExcessiveCognitiveComplexity": {
+					"level": "error",
+					"options": {
+						"maxAllowedComplexity": 15
+					}
+				},
 				"noDivRegex": "error",
 				"noExcessiveNestedTestSuites": "error",
 				"noForEach": "error",

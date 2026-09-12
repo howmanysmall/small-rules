@@ -55,6 +55,29 @@
 		"unused-dependency-overrides": "error",
 		"stale-suppressions": "error"
 	},
+	"health": {
+		"maxCyclomatic": 20,
+		"maxCognitive": 15,
+		"maxCrap": 30,
+		"crapRefactorBand": 5,
+		"maxUnitSize": 60,
+		"coverage": null,
+		"coverageRoot": null,
+		"ignore": [],
+		"ownership": {
+			"botPatterns": [
+				"*\\[bot\\]*",
+				"dependabot*",
+				"renovate*",
+				"github-actions*",
+				"svc-*",
+				"*-service-account*"
+			],
+			"emailMode": "handle"
+		},
+		"suggestInlineSuppression": true
+	},
+	"overrides": [],
 	"duplicates": {
 		"mode": "mild",
 		"minLines": 5,

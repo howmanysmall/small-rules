@@ -27,7 +27,7 @@ matcher = "^Bash$"
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
-command = "bun .codex/hooks/fallow-gate.ts"
+command = "bun run .codex/hooks/fallow-gate.ts"
 timeout = 600
 
 [[hooks.PostToolUse]]

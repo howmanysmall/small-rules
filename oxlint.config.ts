@@ -87,7 +87,15 @@ const rules: OxlintRules = {
 	"import/no-unassigned-import": [
 		"error",
 		{
-			allow: ["**/*.css", "**/*.scss", "**/*.less", "**/*.sass", "@total-typescript/ts-reset"],
+			allow: [
+				"**/*.css",
+				"**/*.scss",
+				"**/*.less",
+				"**/*.sass",
+				"@total-typescript/ts-reset",
+				"@dotenvx/dotenvx",
+				"@dotenvx/dotenvx/config",
+			],
 		},
 	],
 	"import/prefer-default-export": "off",
