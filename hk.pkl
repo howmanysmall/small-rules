@@ -63,22 +63,22 @@ local SHERIF_FILES = List("**/package.json", "pnpm-workspace.yaml")
 
 local BINARY_EXCLUDES =
   List(
-    "*.png",
-    "*.jpg",
-    "*.jpeg",
-    "*.gif",
-    "*.webp",
-    "*.ico",
-    "*.woff",
-    "*.woff2",
-    "*.ttf",
-    "*.eot",
-    "*.pdf",
-    "*.zip",
-    "*.tar",
-    "*.gz",
-    "*.mp4",
-    "*.mov",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.gif",
+    "**/*.webp",
+    "**/*.ico",
+    "**/*.woff",
+    "**/*.woff2",
+    "**/*.ttf",
+    "**/*.eot",
+    "**/*.pdf",
+    "**/*.zip",
+    "**/*.tar",
+    "**/*.gz",
+    "**/*.mp4",
+    "**/*.mov",
   )
 
 local WORKFLOW_FILES =

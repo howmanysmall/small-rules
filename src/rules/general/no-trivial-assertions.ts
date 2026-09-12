@@ -4,9 +4,29 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	getMemberPropertyName,
+	isAnyLiteral,
+	isCallExpression,
+	isIdentifierName,
+	isIdentifierNamed,
+	isMemberExpression,
+	isSpreadElement,
+	isTransparentExpression,
+	isUnaryExpression,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 type ConstantPrimitive = bigint | boolean | null | number | string | undefined;
 type PredicateKind = "defined" | "falsy" | "null" | "truthy" | "undefined";
@@ -26,13 +46,13 @@ function getConstantTypeName(value: ConstantPrimitive): string {
 }
 
 const FRESH_REFERENCE_TYPES = new Set([
-	"ArrayExpression",
-	"ArrowFunctionExpression",
-	"ClassExpression",
-	"FunctionExpression",
-	"NewExpression",
-	"ObjectExpression",
-]);
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+] satisfies ReadonlyArray<NodeType>);
 
 // Identity-only matchers: freshly-created values never pass `toBe`.
 // `toStrictEqual` is deep equality and must not use the fresh-identity path.
@@ -50,11 +70,11 @@ const ASSERT_STRICT_METHODS = new Set(["deepStrictEqual", "notDeepStrictEqual", 
 const ASSERT_LOOSE_METHODS = new Set(["deepEqual", "equal", "notDeepEqual", "notEqual"]);
 
 function isFreshReferenceExpression(node: ESTree.Node): boolean {
-	return (node.type === "Literal" && "regex" in node) || FRESH_REFERENCE_TYPES.has(node.type);
+	return (isAnyLiteral(node) && "regex" in node) || FRESH_REFERENCE_TYPES.has(node.type);
 }
 
 function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {
-	if (node.type !== "Literal") return undefined;
+	if (!isAnyLiteral(node)) return undefined;
 	if (node.value === null) return { value: null };
 	if (Predicate.isString(node.value) || Predicate.isNumber(node.value) || Predicate.isBoolean(node.value)) {
 		return { value: node.value };
@@ -66,17 +86,7 @@ function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {
 
 function unwrapNode(node: ESTree.Node): ESTree.Node {
 	let current = node;
-	while (
-		current.type === "ChainExpression" ||
-		current.type === "ParenthesizedExpression" ||
-		current.type === "TSAsExpression" ||
-		current.type === "TSInstantiationExpression" ||
-		current.type === "TSNonNullExpression" ||
-		current.type === "TSSatisfiesExpression" ||
-		current.type === "TSTypeAssertion"
-	) {
-		current = current.expression;
-	}
+	while (isTransparentExpression(current)) current = current.expression;
 	return current;
 }
 
@@ -110,9 +120,9 @@ function resolveIdentifierConstant(
 	const [definition] = variable?.defs ?? [];
 	if (
 		definition?.type !== "Variable" ||
-		definition.node.type !== "VariableDeclarator" ||
+		!isVariableDeclarator(definition.node) ||
 		definition.node.init === null ||
-		definition.parent?.type !== "VariableDeclaration" ||
+		!isVariableDeclaration(definition.parent) ||
 		definition.parent.kind !== "const"
 	) {
 		return undefined;
@@ -131,10 +141,8 @@ function resolveConstantPrimitive(
 
 	const literal = constantFromLiteral(expression);
 	if (literal !== undefined) return literal;
-	if (expression.type === "UnaryExpression") return resolveUnaryConstant(sourceCode, expression, seen);
-	if (expression.type === "Identifier") {
-		return resolveIdentifierConstant(sourceCode, expression, seen);
-	}
+	if (isUnaryExpression(expression)) return resolveUnaryConstant(sourceCode, expression, seen);
+	if (isIdentifierName(expression)) return resolveIdentifierConstant(sourceCode, expression, seen);
 	return undefined;
 }
 
@@ -156,30 +164,27 @@ function constantsEqual(_strict: boolean, left: ConstantPrimitive, right: Consta
 	return Object.is(left, right);
 }
 
-function isExpectCall(node: ESTree.CallExpression): boolean {
-	return node.callee.type === "Identifier" && node.callee.name === "expect";
-}
-
 function getExpectReceiver(node: ESTree.CallExpression): ESTree.CallExpression | undefined {
-	if (node.callee.type !== "MemberExpression") return undefined;
+	if (!isMemberExpression(node.callee)) return undefined;
 	let receiver = node.callee.object;
-	if (receiver.type === "MemberExpression" && getMemberPropertyName(receiver) === "not") {
+	if (isMemberExpression(receiver) && getMemberPropertyName(receiver) === "not") {
 		receiver = receiver.object;
 	}
-	if (receiver.type !== "CallExpression" || !isExpectCall(receiver)) return undefined;
+	if (!isCallExpression(receiver) || !isIdentifierNamed(receiver.callee, "expect")) return undefined;
 	return receiver;
 }
 
 function isNegatedMatcher(node: ESTree.CallExpression): boolean {
 	/* v8 ignore next -- callers only pass MemberExpression matcher callees. @preserve */
-	if (node.callee.type !== "MemberExpression") return false;
+	if (!isMemberExpression(node.callee)) return false;
+
 	const { object } = node.callee;
-	return object.type === "MemberExpression" && getMemberPropertyName(object) === "not";
+	return isMemberExpression(object) && getMemberPropertyName(object) === "not";
 }
 
 function firstExpressionArgument(node: ESTree.CallExpression, index: number): ESTree.Node | undefined {
 	const argument = node.arguments[index];
-	if (argument === undefined || argument.type === "SpreadElement") return undefined;
+	if (argument === undefined || isSpreadElement(argument)) return undefined;
 	return unwrapNode(argument);
 }
 
@@ -215,9 +220,11 @@ function reportComparisonAssertion(
 		});
 		return;
 	}
+
 	const actualConstant = resolveConstantPrimitive(context.sourceCode, actual, new Set());
 	const expectedConstant = resolveConstantPrimitive(context.sourceCode, expected, new Set());
 	if (actualConstant === undefined || expectedConstant === undefined) return;
+
 	const equal = constantsEqual(strict, actualConstant.value, expectedConstant.value);
 	if (equal !== negated) context.report({ messageId: "issue", node: actual });
 }
@@ -225,12 +232,15 @@ function reportComparisonAssertion(
 function reportTrivialExpect(context: Context, node: ESTree.CallExpression): void {
 	const receiver = getExpectReceiver(node);
 	/* v8 ignore next -- getExpectReceiver only succeeds for MemberExpression matchers. @preserve */
-	if (receiver === undefined || node.callee.type !== "MemberExpression") return;
+	if (receiver === undefined || !isMemberExpression(node.callee)) return;
+
 	const matcher = getMemberPropertyName(node.callee);
 	/* v8 ignore next -- MemberExpression matchers always expose a property name here. @preserve */
 	if (matcher === undefined) return;
+
 	const actual = firstExpressionArgument(receiver, 0);
 	if (actual === undefined) return;
+
 	const negated = isNegatedMatcher(node);
 
 	const predicate = PREDICATE_MATCHERS.get(matcher);
@@ -251,8 +261,8 @@ function reportTrivialExpect(context: Context, node: ESTree.CallExpression): voi
 }
 
 function reportTrivialAssert(context: Context, node: ESTree.CallExpression): void {
-	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "Identifier") return;
-	if (node.callee.object.name !== "assert") return;
+	if (!isMemberExpression(node.callee) || !isIdentifierNamed(node.callee.object, "assert")) return;
+
 	const method = getMemberPropertyName(node.callee);
 	/* v8 ignore next -- assert.* MemberExpressions expose a property name. @preserve */
 	if (method === undefined) return;

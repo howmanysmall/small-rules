@@ -439,9 +439,6 @@ export function isParenthesizedExpression(node?: ESTree.Node | null): node is ES
 export function isChainExpression(node: ESTree.Node): node is ESTree.ChainExpression {
 	return node.type === "ChainExpression";
 }
-export function isTsInstantiationExpression(node: ESTree.Node): node is ESTree.TSInstantiationExpression {
-	return node.type === "TSInstantiationExpression";
-}
 
 export function isImportNamespaceSpecifier(node: ESTree.Node): node is ESTree.ImportNamespaceSpecifier {
 	return node.type === "ImportNamespaceSpecifier";
@@ -782,21 +779,21 @@ export function isTransparentExpressionNode(node: ESTree.Node): node is Transpar
 }
 
 const TRANSPARENT_DEPENDENCY_EXPRESSION_TYPES = new Set<NodeType>([
+	...TRANSPARENT_EXPRESSION_TYPES,
 	CHAIN_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
-	TS_AS_EXPRESSION,
-	TS_NON_NULL_EXPRESSION,
-	TS_SATISFIES_EXPRESSION,
-	TS_TYPE_ASSERTION,
 ] satisfies ReadonlyArray<NodeType>);
 
-type TransparentDependencyExpression =
-	| ESTree.ChainExpression
-	| ESTree.ParenthesizedExpression
-	| ESTree.TSAsExpression
-	| ESTree.TSNonNullExpression
-	| ESTree.TSSatisfiesExpression
-	| ESTree.TSTypeAssertion;
+type TransparentDependencyExpression = ESTree.ChainExpression | TransparentExpressionNode;
 export function isTransparentDependencyExpression(node: ESTree.Node): node is TransparentDependencyExpression {
 	return TRANSPARENT_DEPENDENCY_EXPRESSION_TYPES.has(node.type);
+}
+
+const TRANSPARENT_EXPRESSIONS = new Set([
+	...TRANSPARENT_DEPENDENCY_EXPRESSION_TYPES,
+	TS_INSTANTIATION_EXPRESSION,
+] satisfies ReadonlyArray<NodeType>);
+type TransparentExpression = ESTree.TSInstantiationExpression | TransparentDependencyExpression;
+
+export function isTransparentExpression(node: ESTree.Node): node is TransparentExpression {
+	return TRANSPARENT_EXPRESSIONS.has(node.type);
 }

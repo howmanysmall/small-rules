@@ -17,6 +17,7 @@ import {
 	isNewExpression,
 	isProgram,
 	isProperty,
+	isTransparentExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
 	JSX_ELEMENT,
@@ -41,7 +42,6 @@ import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilit
 
 import type { ESTree, Fix, Reference, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
 const SCREAMING_SNAKE_CASE = /^[A-Z][A-Z0-9_]*$/u;
@@ -179,27 +179,6 @@ function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, workli
 		worklist.push(property.value);
 	}
 	return true;
-}
-
-const TRANSPARENT_EXPRESSIONS = new Set([
-	CHAIN_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
-	TS_AS_EXPRESSION,
-	TS_INSTANTIATION_EXPRESSION,
-	TS_NON_NULL_EXPRESSION,
-	TS_SATISFIES_EXPRESSION,
-	TS_TYPE_ASSERTION,
-] satisfies ReadonlyArray<NodeType>);
-type TransparentExpression =
-	| ESTree.ChainExpression
-	| ESTree.ParenthesizedExpression
-	| ESTree.TSAsExpression
-	| ESTree.TSInstantiationExpression
-	| ESTree.TSNonNullExpression
-	| ESTree.TSSatisfiesExpression
-	| ESTree.TSTypeAssertion;
-function isTransparentExpression(node: ESTree.Node): node is TransparentExpression {
-	return TRANSPARENT_EXPRESSIONS.has(node.type);
 }
 
 function unwrapTransparentExpression(node: ESTree.Node): ESTree.Node | undefined {
