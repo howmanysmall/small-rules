@@ -7,6 +7,10 @@
 // uses getVariableByName, and evidence follows const chains iteratively.
 // Explicit binding, annotation, and assertion barriers are respected. Parent
 // suppression climbs parser-preserved transparent expression wrappers.
+// Diverged from upstream: the CallExpression type-guard branch (upstream
+// f171955 "prevent known values from entering type guards") is removed.
+// Re-validating an already-typed value with a local `(value: unknown)`
+// predicate is idiomatic defensive runtime validation, not evidence loss.
 
 import {
 	classifyUnsafeDictionaryValue,
@@ -15,7 +19,6 @@ import {
 	isKnownEvidenceExpression,
 } from "$oxc-utilities/anti-slop/dictionary-types";
 import {
-	containsUnknownType,
 	getFunctionParameterBindingName,
 	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
@@ -27,7 +30,6 @@ import {
 	isAnyLiteral,
 	isBindingIdentifier,
 	isBlockStatement,
-	isCallExpression,
 	isFunctionLike,
 	isIdentifierName,
 	isIdentifierReference,
@@ -36,15 +38,12 @@ import {
 	isParenthesizedExpression,
 	isPrivateIdentifier,
 	isProgram,
-	isSpreadElement,
 	isTsAsExpression,
 	isTsNonNullExpression,
 	isTsSatisfiesExpression,
 	isTsTypeAssertion,
-	isTsTypePredicate,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	unwrapExpression,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -53,11 +52,6 @@ import type { TypeEnvironment, WideningTarget } from "$oxc-utilities/anti-slop/d
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 type FunctionExpression = ESTree.ArrowFunctionExpression | ESTree.Function;
-
-interface PredicateSubject {
-	argumentIndex: number;
-	parameter: ESTree.ParamPattern;
-}
 
 function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): ScopeVariable | undefined {
 	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
@@ -98,10 +92,6 @@ function hasStableInitializer(
 	return declarator.init !== null && isStableConstVariable(variable, declarator);
 }
 
-function hasInformativeReturnType(returnType: ESTree.TSType | undefined, environment: TypeEnvironment): boolean {
-	return returnType !== undefined && hasInformativeType(returnType, environment);
-}
-
 function getAssertionEvidence(expression: ESTree.Expression, environment: TypeEnvironment): boolean | undefined {
 	return isTsAsExpression(expression) || isTsTypeAssertion(expression)
 		? hasInformativeType(expression.typeAnnotation, environment)
@@ -133,37 +123,6 @@ function hasKnownEvidence(
 		const evidence = getAssertionEvidence(currentExpression, environment);
 		if (evidence !== undefined) return evidence;
 	}
-}
-
-function getLocalFunctionForCall(sourceCode: SourceCode, callee: ESTree.Expression): FunctionExpression | undefined {
-	const unwrapped = unwrapExpression(callee);
-	if (isFunctionLike(unwrapped)) return unwrapped;
-	if (!isIdentifierReference(unwrapped)) return undefined;
-
-	const variable = resolveVariable(sourceCode, unwrapped);
-	if (variable?.defs.length !== 1) return undefined;
-
-	const [definition] = variable.defs;
-	/* v8 ignore next -- A one-element definitions array has a first item. @preserve */
-	if (definition === undefined) return undefined;
-
-	if (definition.type === "FunctionName") {
-		const { node } = definition;
-		/* v8 ignore next -- FunctionName definitions own function-like nodes. @preserve */
-		if (!isFunctionLike(node)) return undefined;
-		return node;
-	}
-
-	if (definition.type !== "Variable" || !isVariableDeclarator(definition.node)) return undefined;
-	if (isBindingIdentifier(definition.node.id) && definition.node.id.typeAnnotation !== null) {
-		// The explicit binding contract hides initializer-only predicate details.
-		return undefined;
-	}
-
-	const initializer = definition.node.init;
-	if (initializer === null) return undefined;
-	const unwrappedInitializer = unwrapExpression(initializer);
-	return isFunctionLike(unwrappedInitializer) ? unwrappedInitializer : undefined;
 }
 
 function getVariableTypeAnnotation(
@@ -203,54 +162,6 @@ function unwrapCallArgumentExpression(expression: ESTree.Expression): ESTree.Exp
 		current = current.expression;
 	}
 	return current;
-}
-
-function hasKnownCallArgumentEvidence(
-	sourceCode: SourceCode,
-	expression: ESTree.Expression,
-	environment: TypeEnvironment,
-): boolean {
-	const visitedVariables = new Set<ScopeVariable>();
-	let current = expression;
-	for (;;) {
-		current = unwrapCallArgumentExpression(current);
-		const assertionEvidence = getAssertionEvidence(current, environment);
-		if (assertionEvidence !== undefined) return assertionEvidence;
-
-		if (isCallExpression(current)) {
-			const owner = getLocalFunctionForCall(sourceCode, current.callee);
-			return hasInformativeReturnType(owner?.returnType?.typeAnnotation, environment);
-		}
-
-		if (!isIdentifierReference(current)) return isKnownEvidenceExpression(current);
-
-		const variable = resolveVariable(sourceCode, current);
-		if (!isUnvisitedVariable(variable, visitedVariables)) return false;
-
-		const annotation = getVariableTypeAnnotation(sourceCode, variable);
-		if (annotation !== undefined) return hasInformativeType(annotation.typeAnnotation, environment);
-
-		const declarator = getVariableDeclarator(variable);
-		if (!hasStableInitializer(variable, declarator)) return false;
-		visitedVariables.add(variable);
-		current = declarator.init;
-	}
-}
-
-function getTypePredicateSubject(sourceCode: SourceCode, owner: FunctionExpression): PredicateSubject | undefined {
-	const predicate = owner.returnType?.typeAnnotation;
-	if (!isTsTypePredicate(predicate) || !isBindingIdentifier(predicate.parameterName)) return undefined;
-
-	const predicateParameterName = predicate.parameterName.name;
-	let argumentIndex = 0;
-	for (const parameter of owner.params) {
-		if (isBindingIdentifier(parameter) && parameter.name === "this") continue;
-		if (getFunctionParameterBindingName(parameter, sourceCode) === predicateParameterName) {
-			return { argumentIndex, parameter };
-		}
-		argumentIndex += 1;
-	}
-	return undefined;
 }
 
 function annotationTarget(
@@ -379,33 +290,6 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				const binding = getVariableDeclarator(variable)?.id;
 				if (!isIdentifierName(binding)) return;
 				reportFlow(node.right, targetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
-			},
-			CallExpression(node): void {
-				/* v8 ignore next -- The Program visitor initializes this first. @preserve */
-				if (environment === undefined) return;
-
-				const owner = getLocalFunctionForCall(context.sourceCode, node.callee);
-				if (owner === undefined) return;
-
-				const subject = getTypePredicateSubject(context.sourceCode, owner);
-				if (subject === undefined) return;
-
-				const { argumentIndex, parameter } = subject;
-				const argument = node.arguments[argumentIndex];
-				if (argument === undefined || isSpreadElement(argument)) return;
-
-				const annotation = getFunctionParameterTypeAnnotation(parameter);
-				if (annotation === undefined || !containsUnknownType(annotation.typeAnnotation)) return;
-				if (!hasKnownCallArgumentEvidence(context.sourceCode, argument, environment)) return;
-
-				context.report({
-					data: {
-						subject: `argument for parameter \`${getFunctionParameterBindingName(parameter, context.sourceCode)}\` of \`${functionName(context.sourceCode, owner)}\``,
-						target: "unknown",
-					},
-					messageId: "widening",
-					node: argument,
-				});
 			},
 			Program(node): void {
 				environment = createTypeEnvironment(node, context.sourceCode.visitorKeys);
