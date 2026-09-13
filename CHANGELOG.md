@@ -46,6 +46,18 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.0.0] - 2026-09-13
+
+## ⚠️ Breaking Changes
+- Node.js 20 is no longer supported; Node.js `>=22.12.0` is required - by @howmanysmall in [#60](https://github.com/howmanysmall/small-rules/pull/60)
+
+## 🐞 Fixed
+- **no-runtime-typeof**: Allows `typeof value === "undefined"` existence probes without reporting them - by @howmanysmall in [#60](https://github.com/howmanysmall/small-rules/pull/60)
+- **no-shape-in-symbol-names**: Stops reporting external member properties such as `nodePart.Shape`, JSX member properties, and TypeScript qualified names - by @howmanysmall [<samp>(f5be6)</samp>](https://github.com/howmanysmall/small-rules/commit/f5be69ceb353cd2b648a1f282cca4677e14867fc)
+
+## 🔧 Changed
+- **no-known-value-widening**, **no-object-parameters**, **no-unknown-parameters**, and **no-unknown-returns**: Expand type and alias resolution, so more broad contracts and unknown boundaries are reported - by @howmanysmall in [#60](https://github.com/howmanysmall/small-rules/pull/60)
+
 ## [2.19.1] - 2026-09-08
 
 ## Fixed
