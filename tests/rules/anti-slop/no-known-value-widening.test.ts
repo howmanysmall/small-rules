@@ -169,100 +169,15 @@ describe("no-known-value-widening", () => {
 			},
 			{ code: "const value: unknown = 1;", errors: [widening] },
 			{ code: "const value: object = [];", errors: [widening] },
+			{ code: "const source = ('known'); const value: unknown = source;", errors: [widening] },
+			{
+				code: "function f(other: number, known: string) { const value: unknown = known; }",
+				errors: [widening],
+			},
 			{ code: "const source: unknown = {}; const value: unknown = source;", errors: 1 },
 			{ code: "const source = {} as unknown; const value: unknown = source;", errors: 1 },
 			{ code: "const value = (({} as unknown)! as object);", errors: 1 },
 			{ code: "const other = (({} as unknown) satisfies unknown) as object;", errors: 1 },
-			{
-				code: "function isString(value: unknown): value is string { return true; } isString('known');",
-				errors: [
-					{
-						data: {
-							subject: "argument for parameter `value` of `isString`",
-							target: "unknown",
-						},
-						messageId: "widening",
-					},
-				],
-			},
-			{
-				code: [
-					"function isString(value: unknown): value is string { return true; }",
-					"const known = 'known';",
-					"isString(known);",
-				].join("\n"),
-				errors: [widening],
-			},
-			{
-				code: "function isString(value: string | unknown): value is string { return true; } isString('known');",
-				errors: [widening],
-			},
-			{
-				code: "function isString(value: unknown): value is string { return true; } function check(known: string): boolean { return isString(known); }",
-				errors: [widening],
-			},
-			{
-				code: "const isString = (value: unknown): value is string => true; const known: string = getValue(); isString(known);",
-				errors: [widening],
-			},
-			{
-				code: "type User = { readonly id: string }; function isUser(value: unknown): value is User { return true; } function parse(): User { return { id: 'known' }; } const user = parse(); isUser(user);",
-				errors: [widening],
-			},
-			{
-				code: "const guard = function(value: unknown): value is string { return true; }; guard('known');",
-				errors: [widening],
-			},
-			{
-				code: "const guard = function named(value: unknown): value is string { return true; }; guard('known');",
-				errors: [widening],
-			},
-			{
-				code: "(function(value: unknown): value is string { return true; })('known');",
-				errors: [widening],
-			},
-			{
-				code: "function guard(skip: boolean, value: unknown): value is string { return true; } guard(false, 'known');",
-				errors: [
-					{
-						data: { subject: "argument for parameter `value` of `guard`", target: "unknown" },
-						messageId: "widening",
-					},
-				],
-			},
-			{
-				code: "function guard(this: unknown, value: unknown): value is string { return true; } guard('known');",
-				errors: [
-					{
-						data: { subject: "argument for parameter `value` of `guard`", target: "unknown" },
-						messageId: "widening",
-					},
-				],
-			},
-			{
-				code: "function guard(value: unknown): value is string { return true; } const source = 'known'; const alias = source; guard(alias);",
-				errors: [widening],
-			},
-			{
-				code: "function guard(value: unknown): value is string { return true; } declare const input: unknown; guard(input as string);",
-				errors: [widening],
-			},
-			{
-				code: "function guard(value: unknown): value is string { return true; } declare const input: unknown; guard(<string>input);",
-				errors: [widening],
-			},
-			{
-				code: "function guard(value: unknown): value is string { return true; } declare const input: string; function read(): string { return input; } guard(read());",
-				errors: [widening],
-			},
-			{
-				code: "function guard(value: unknown): value is string { return true; } declare const input: string; const read = (): string => input; guard(read());",
-				errors: [widening],
-			},
-			{
-				code: "function guard(value: unknown): value is string { return true; } guard(('known' satisfies string));",
-				errors: [widening],
-			},
 		],
 		valid: [
 			{
@@ -360,6 +275,30 @@ describe("no-known-value-widening", () => {
 			"const guard: (value: string) => boolean = (value: unknown): value is string => true; guard('known');",
 			"function source() {} const value: unknown = source;",
 			"let guard; guard('known');",
+			"function check({ known }: { known: string }) { const value: unknown = known; }",
+			"var dup: string; var dup: string; const value: unknown = dup;",
+			"function isString(value: unknown): value is string { return true; } isString('known');",
+			[
+				"function isString(value: unknown): value is string { return true; }",
+				"const known = 'known';",
+				"isString(known);",
+			].join("\n"),
+			"function isString(value: string | unknown): value is string { return true; } isString('known');",
+			"function isString(value: unknown): value is string { return true; } function check(known: string): boolean { return isString(known); }",
+			"const isString = (value: unknown): value is string => true; const known: string = getValue(); isString(known);",
+			"type User = { readonly id: string }; function isUser(value: unknown): value is User { return true; } function parse(): User { return { id: 'known' }; } const user = parse(); isUser(user);",
+			"const guard = function(value: unknown): value is string { return true; }; guard('known');",
+			"const guard = function named(value: unknown): value is string { return true; }; guard('known');",
+			"(function(value: unknown): value is string { return true; })('known');",
+			"function guard(skip: boolean, value: unknown): value is string { return true; } guard(false, 'known');",
+			"function guard(this: unknown, value: unknown): value is string { return true; } guard('known');",
+			"function guard(value: unknown): value is string { return true; } const source = 'known'; const alias = source; guard(alias);",
+			"function guard(value: unknown): value is string { return true; } declare const input: unknown; guard(input as string);",
+			"function guard(value: unknown): value is string { return true; } declare const input: unknown; guard(<string>input);",
+			"function guard(value: unknown): value is string { return true; } declare const input: string; function read(): string { return input; } guard(read());",
+			"function guard(value: unknown): value is string { return true; } declare const input: string; const read = (): string => input; guard(read());",
+			"function guard(value: unknown): value is string { return true; } guard(('known' satisfies string));",
+			"function isValid(value: unknown): value is string { return true; } function story(properties: string): boolean { return isValid(properties); }",
 		],
 	});
 });
