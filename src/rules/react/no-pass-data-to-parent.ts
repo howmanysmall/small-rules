@@ -1,12 +1,32 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { getEnvironment } from "$oxc-utilities/react-utilities";
+import { isIdentifierName, isIdentifierNamed, isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	describeEffectOwner,
+	getReactEffectAnalysis,
+	getReportableEffectCall,
+} from "$oxc-utilities/react-effect-utilities";
+import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
 
-import type { ReactEffect, ReactEffectAnalysis, ReactOwner } from "$oxc-utilities/react-effect-utilities";
+import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
 type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
+
+function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boolean {
+	return function isUseHook(node: ESTree.Node): boolean {
+		/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
+		if (!isIdentifierName(node) && !isMemberExpression(node)) return false;
+		return (
+			isIdentifierNamed(node, hookName) ||
+			(isIdentifierNamed(node.object, "React") && isIdentifierNamed(node.property, hookName))
+		);
+		/* v8 ignore stop */
+	};
+}
+
+const isUseState = createIsUseHook("useState");
+const isUseRef = createIsUseHook("useRef");
 
 function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): ReadonlyArray<Reference> {
 	const dataArguments = new Array<Reference>();
@@ -28,39 +48,24 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 	return dataArguments;
 }
 
-function getComponentDisplayName(
-	analysis: ReactEffectAnalysis,
-	containingNode: ReactOwner | undefined,
-	isInCustomHook: boolean,
-): string {
-	const name = analysis.getComponentName(containingNode);
-	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
-	if (name !== undefined && name.length > 0) return `"${name}"`;
-	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
-	return isInCustomHook ? "this custom hook" : "this component";
-}
-
 function reportPassDataEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
 	for (const reference of effect.functionReferences) {
-		/* v8 ignore next -- effect traversal skips call arguments, so no non-synchronous prop-call reference is ever collected. @preserve */
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isPropCall(reference) || analysis.isRefCall(reference)) continue;
-
-		const callExpression = analysis.scope.getCallExpression(reference);
+		const callExpression = getReportableEffectCall(analysis, effect, reference, (candidate) => {
+			return analysis.isPropCall(candidate) && !analysis.isRefCall(candidate);
+		});
 		if (callExpression === undefined) continue;
 
 		const dataArguments = getDataArguments(analysis, reference);
 		if (dataArguments.length === 0) continue;
 
-		const containingNode = analysis.findEnclosingReactNode(effect.node);
-		const isInCustomHook = containingNode !== undefined && analysis.isCustomHook(containingNode);
+		const owner = describeEffectOwner(analysis, effect);
 
 		context.report({
 			data: {
-				name: getComponentDisplayName(analysis, containingNode, isInCustomHook),
+				name: owner.displayName,
 				data: dataArguments.map((dataReference) => `"${dataReference.identifier.name}"`).join(" and "),
 			},
-			messageId: isInCustomHook ? "avoidPassingDataToParentInHook" : "avoidPassingDataToParentInComponent",
+			messageId: owner.isInCustomHook ? "avoidPassingDataToParentInHook" : "avoidPassingDataToParentInComponent",
 			node: callExpression,
 		});
 	}
@@ -96,12 +101,7 @@ const noPassDataToParent = createRule("no-pass-data-to-parent", "react", {
 			{
 				additionalProperties: false,
 				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 				},
 				type: "object",
 			},
@@ -109,30 +109,5 @@ const noPassDataToParent = createRule("no-pass-data-to-parent", "react", {
 		type: "suggestion",
 	},
 });
-
-function isUseState(node: ESTree.Node): boolean {
-	/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
-	if (node.type !== "Identifier" && node.type !== "MemberExpression") return false;
-	if (node.type === "Identifier") return node.name === "useState";
-	return (
-		node.object.type === "Identifier" &&
-		node.object.name === "React" &&
-		node.property.type === "Identifier" &&
-		node.property.name === "useState"
-	);
-	/* v8 ignore stop */
-}
-function isUseRef(node: ESTree.Node): boolean {
-	/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
-	if (node.type !== "Identifier" && node.type !== "MemberExpression") return false;
-	if (node.type === "Identifier") return node.name === "useRef";
-	return (
-		node.object.type === "Identifier" &&
-		node.object.name === "React" &&
-		node.property.type === "Identifier" &&
-		node.property.name === "useRef"
-	);
-	/* v8 ignore stop */
-}
 
 export default noPassDataToParent;

@@ -6,11 +6,17 @@ import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
 	isAnyLiteral,
 	isAssignmentPattern,
+	isBinaryExpression,
 	isBindingIdentifier,
+	isIdentifierName,
+	isSequenceExpression,
+	isTsAsExpression,
 	isTsNumberKeyword,
 	isTsTypeAnnotation,
+	isTsTypeAssertion,
 	isTsTypeReference,
 	isVariableDeclarator,
+	PRIVATE_IDENTIFIER,
 	unwrapExpression,
 	unwrapParenthesis,
 } from "$oxc-utilities/oxc-utilities";
@@ -23,14 +29,15 @@ function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnn
 
 	let current = typeAnnotation;
 	while (isTsTypeAnnotation(current)) current = current.typeAnnotation;
-	if (isTsNumberKeyword(current)) return true;
-
-	return isTsTypeReference(current) && isBindingIdentifier(current.typeName) && current.typeName.name === "Number";
+	return (
+		isTsNumberKeyword(current) ||
+		(isTsTypeReference(current) && isBindingIdentifier(current.typeName) && current.typeName.name === "Number")
+	);
 }
 
 function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
 	/* v8 ignore next -- @preserve binary expressions cannot contain PrivateIdentifier operands in this parser shape. */
-	return node.type !== "PrivateIdentifier";
+	return node.type !== PRIVATE_IDENTIFIER;
 }
 
 function isKnownNonNumberLiteral(expression: ESTree.Expression): boolean {
@@ -73,48 +80,78 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const current = unwrapParenthesis(expression);
 
-	if (current.type === "TSAsExpression" || current.type === "TSTypeAssertion") {
-		return !isNumberTypeAnnotation(current.typeAnnotation);
-	}
+	if (isTsAsExpression(current) || isTsTypeAssertion(current)) return !isNumberTypeAnnotation(current.typeAnnotation);
 
 	/* v8 ignore next -- @preserve literal non-number cases are covered by direct literal tests. */
 	if (isKnownNonNumberLiteral(current)) return true;
 
 	const unwrapped = unwrapExpression(current);
-	return unwrapped.type === "Identifier" && isKnownNonNumberIdentifier(sourceCode, unwrapped);
+	return isIdentifierName(unwrapped) && isKnownNonNumberIdentifier(sourceCode, unwrapped);
 }
 
 function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression): string {
 	return sourceCode.getText(unwrapExpression(expression));
 }
 
-function stripParenthesizedExpression(expression: ESTree.Expression): ESTree.Expression {
-	let current = expression;
-	while (current.type === "ParenthesizedExpression") current = current.expression;
-	return current;
-}
-
 function getMathArgumentText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	const unwrapped = stripParenthesizedExpression(expression);
-	if (unwrapped.type === "SequenceExpression") return `(${sourceCode.getText(unwrapped)})`;
+	const unwrapped = unwrapParenthesis(expression);
+	if (isSequenceExpression(unwrapped)) return `(${sourceCode.getText(unwrapped)})`;
 	return sourceCode.getText(unwrapped);
 }
 
 type MathMethod = "max" | "min";
 
+interface BranchMatchOptions {
+	readonly alternateText: string;
+	readonly consequentText: string;
+	readonly isGreaterOrEqual: boolean;
+	readonly isLessOrEqual: boolean;
+	readonly leftText: string;
+	readonly rightText: string;
+}
+
+function isMinBranchMatch({
+	alternateText,
+	consequentText,
+	isGreaterOrEqual,
+	isLessOrEqual,
+	leftText,
+	rightText,
+}: BranchMatchOptions): boolean {
+	if (isGreaterOrEqual && leftText === alternateText && rightText === consequentText) return true;
+	return isLessOrEqual && leftText === consequentText && rightText === alternateText;
+}
+
+function isMaxBranchMatch({
+	alternateText,
+	consequentText,
+	isGreaterOrEqual,
+	isLessOrEqual,
+	leftText,
+	rightText,
+}: BranchMatchOptions): boolean {
+	if (isGreaterOrEqual && leftText === consequentText && rightText === alternateText) return true;
+	return isLessOrEqual && leftText === alternateText && rightText === consequentText;
+}
+
+function hasComparableNumberOperands(
+	sourceCode: SourceCode,
+	left: ESTree.Expression,
+	right: ESTree.Expression,
+): boolean {
+	if (!isExpressionSideEffectSafe(left) || !isExpressionSideEffectSafe(right)) return false;
+	return !isKnownNonNumberExpression(sourceCode, left) && !isKnownNonNumberExpression(sourceCode, right);
+}
+
 function getPreferredMathMethod(sourceCode: SourceCode, node: ESTree.ConditionalExpression): MathMethod | undefined {
-	if (node.test.type !== "BinaryExpression") return undefined;
+	if (!isBinaryExpression(node.test)) return undefined;
 
 	const { alternate, consequent, test } = node;
 	const { left, operator, right } = test;
 	/* v8 ignore next -- @preserve binary expressions cannot contain PrivateIdentifier operands in this parser shape. */
 	if (!isExpressionOperand(left) || !isExpressionOperand(right)) return undefined;
 
-	/* v8 ignore next -- @preserve side-effecting operands are rejected before reporting. */
-	if (!isExpressionSideEffectSafe(left) || !isExpressionSideEffectSafe(right)) return undefined;
-	if (isKnownNonNumberExpression(sourceCode, left) || isKnownNonNumberExpression(sourceCode, right)) {
-		return undefined;
-	}
+	if (!hasComparableNumberOperands(sourceCode, left, right)) return undefined;
 
 	const leftText = getComparableText(sourceCode, left);
 	const rightText = getComparableText(sourceCode, right);
@@ -124,20 +161,17 @@ function getPreferredMathMethod(sourceCode: SourceCode, node: ESTree.Conditional
 	const isGreaterOrEqual = operator === ">" || operator === ">=";
 	const isLessOrEqual = operator === "<" || operator === "<=";
 
-	if (
-		(isGreaterOrEqual && leftText === alternateText && rightText === consequentText) ||
-		(isLessOrEqual && leftText === consequentText && rightText === alternateText)
-	) {
-		return "min";
-	}
+	const branchMatchOptions: BranchMatchOptions = {
+		alternateText,
+		consequentText,
+		isGreaterOrEqual,
+		isLessOrEqual,
+		leftText,
+		rightText,
+	};
 
-	if (
-		(isGreaterOrEqual && leftText === consequentText && rightText === alternateText) ||
-		(isLessOrEqual && leftText === alternateText && rightText === consequentText)
-	) {
-		return "max";
-	}
-
+	if (isMinBranchMatch(branchMatchOptions)) return "min";
+	if (isMaxBranchMatch(branchMatchOptions)) return "max";
 	return undefined;
 }
 
@@ -150,7 +184,7 @@ const preferMathMinMax = createRule("prefer-math-min-max", "roblox", {
 				if (hasShadowedBinding(sourceCode, node, "math")) return;
 
 				const method = getPreferredMathMethod(sourceCode, node);
-				if (method === undefined || node.test.type !== "BinaryExpression") return;
+				if (method === undefined || !isBinaryExpression(node.test)) return;
 
 				const { left, right } = node.test;
 				/* v8 ignore next -- @preserve getPreferredMathMethod already rejected non-expression operands. */

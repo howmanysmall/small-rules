@@ -2,7 +2,17 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isNamedGlobalCall, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	getMemberPropertyName,
+	isIdentifierName,
+	isJsxAttribute,
+	isJsxIdentifier,
+	isMemberExpression,
+	isNamedGlobalCall,
+	isNewExpression,
+	isStringLiteral,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -38,7 +48,7 @@ const EMPTY_OPTIONS: NormalizedOptions = {
 type RuleOptions = NonNullable<InferContextFromRule<typeof banInstances>["options"][0]>;
 
 function getJsxAttributeName(name: ESTree.JSXAttributeName): string | undefined {
-	return name.type === "JSXIdentifier" ? name.name : name.name.name;
+	return isJsxIdentifier(name) ? name.name : name.name.name;
 }
 
 function normalizeClassBans(rawBans: RuleOptions["bannedInstances"]): Map<string, BannedClassEntry> {
@@ -120,9 +130,32 @@ function getInstanceClassName(node: ESTree.NewExpression): string | undefined {
 	if (!isNamedGlobalCall(node, "Instance")) return undefined;
 
 	const [firstArgument] = node.arguments;
-	if (firstArgument?.type !== "Literal" || !Predicate.isString(firstArgument.value)) return undefined;
+	return isStringLiteral(firstArgument) ? firstArgument.value : undefined;
+}
 
-	return firstArgument.value;
+function isLowercaseJsxTag(name: ESTree.JSXElementName): name is ESTree.JSXIdentifier {
+	if (!isJsxIdentifier(name)) return false;
+
+	const firstCharacter = name.name.charAt(0);
+	return firstCharacter === firstCharacter.toLowerCase();
+}
+
+function reportJsxBannedAttributes(
+	attributes: ESTree.JSXOpeningElement["attributes"],
+	bannedPropertiesForClass: ReadonlyMap<string, BannedPropertyEntry>,
+	className: string,
+	reportBannedProperty: (node: ESTree.Node, className: string, entry: BannedPropertyEntry) => void,
+): void {
+	for (const attribute of attributes) {
+		if (!isJsxAttribute(attribute)) continue;
+
+		const propertyName = getJsxAttributeName(attribute.name);
+		/* v8 ignore next -- @preserve JSXAttribute names are JSXIdentifier names in this visitor branch. */
+		if (propertyName === undefined) continue;
+
+		const propertyEntry = bannedPropertiesForClass.get(propertyName.toLowerCase());
+		if (propertyEntry !== undefined) reportBannedProperty(attribute, className, propertyEntry);
+	}
 }
 
 const banInstances = createRule("ban-instances", "roblox", {
@@ -135,7 +168,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 		const trackedVariables = new Map<ScopeVariable, TrackedVariable>();
 
 		function reportBannedClass(node: ESTree.Node, entry: BannedClassEntry): void {
-			if (entry.message !== "") {
+			if (entry.message.length > 0) {
 				context.report({
 					data: { className: entry.originalName, customMessage: entry.message },
 					messageId: "bannedInstanceCustom",
@@ -152,7 +185,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 		}
 
 		function reportBannedProperty(node: ESTree.Node, className: string, entry: BannedPropertyEntry): void {
-			if (entry.message !== "") {
+			if (entry.message.length > 0) {
 				context.report({
 					data: { className, customMessage: entry.message, propertyName: entry.propertyName },
 					messageId: "bannedPropertyCustom",
@@ -169,10 +202,10 @@ const banInstances = createRule("ban-instances", "roblox", {
 		}
 
 		function recordTrackedVariable(node: ESTree.VariableDeclarator): void {
-			if (node.id.type !== "Identifier" || node.init === null) return;
+			if (!isIdentifierName(node.id) || node.init === null) return;
 
 			const initializer = unwrapExpression(node.init);
-			if (initializer.type !== "NewExpression") return;
+			if (!isNewExpression(initializer)) return;
 
 			const className = getInstanceClassName(initializer);
 			if (className === undefined) return;
@@ -202,13 +235,13 @@ const banInstances = createRule("ban-instances", "roblox", {
 
 		return {
 			AssignmentExpression(node): void {
-				if (node.left.type !== "MemberExpression") return;
+				if (!isMemberExpression(node.left)) return;
 
 				const propertyName = getMemberPropertyName(node.left);
 				if (propertyName === undefined) return;
 
 				const objectExpression = unwrapExpression(node.left.object);
-				if (objectExpression.type !== "Identifier") return;
+				if (!isIdentifierName(objectExpression)) return;
 
 				const trackedVariable = getTrackedVariable(objectExpression);
 				if (trackedVariable === undefined) return;
@@ -222,12 +255,9 @@ const banInstances = createRule("ban-instances", "roblox", {
 				}
 			},
 			JSXOpeningElement(node): void {
-				if (node.name.type !== "JSXIdentifier") return;
+				if (!isLowercaseJsxTag(node.name)) return;
 
 				const { name } = node.name;
-				const firstCharacter = name.charAt(0);
-				if (firstCharacter !== firstCharacter.toLowerCase()) return;
-
 				const classNameKey = name.toLowerCase();
 				const entry = bannedClasses.get(classNameKey);
 				if (entry !== undefined) reportBannedClass(node, entry);
@@ -235,16 +265,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 				const bannedPropertiesForClass = bannedProperties.get(classNameKey);
 				if (bannedPropertiesForClass === undefined) return;
 
-				for (const attribute of node.attributes) {
-					if (attribute.type !== "JSXAttribute") continue;
-
-					const propertyName = getJsxAttributeName(attribute.name);
-					/* v8 ignore next -- @preserve JSXAttribute names are JSXIdentifier names in this visitor branch. */
-					if (propertyName === undefined) continue;
-
-					const propertyEntry = bannedPropertiesForClass.get(propertyName.toLowerCase());
-					if (propertyEntry !== undefined) reportBannedProperty(attribute, name, propertyEntry);
-				}
+				reportJsxBannedAttributes(node.attributes, bannedPropertiesForClass, name, reportBannedProperty);
 			},
 			NewExpression(node): void {
 				const className = getInstanceClassName(node);

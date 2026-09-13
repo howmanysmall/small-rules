@@ -13,6 +13,7 @@ import {
 	isCallExpression,
 	isExpressionStatement,
 	isNumericLiteral,
+	isSpreadElement,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -196,7 +197,7 @@ function validateAssertionCall(
 	}
 
 	const [firstArgument] = assertionCall.arguments;
-	if (firstArgument === undefined || firstArgument.type === "SpreadElement" || !isNumericLiteral(firstArgument)) {
+	if (firstArgument === undefined || isSpreadElement(firstArgument) || !isNumericLiteral(firstArgument)) {
 		context.report({
 			messageId: "assertionsRequiresNumberArgument",
 			node: assertionCall,
@@ -211,6 +212,57 @@ function validateAssertionCall(
 			node: assertionCall,
 		});
 	}
+}
+
+function isAssertionGuardCall(call: ESTree.CallExpression | undefined): call is ESTree.CallExpression {
+	return call !== undefined && (isExpectAssertionsCall(call) || isExpectHasAssertionsCall(call));
+}
+
+function shouldPreferAssertionsCount(
+	assertionCall: ESTree.CallExpression,
+	hasIndeterminate: boolean,
+	deterministic: number,
+): boolean {
+	return (
+		!hasIndeterminate &&
+		isExpectHasAssertionsCall(assertionCall) &&
+		assertionCall.arguments.length === 0 &&
+		deterministic > 0
+	);
+}
+
+function reportPreferAssertionsCount(
+	context: RuleContext,
+	callback: CallbackFunction,
+	assertionCall: ESTree.CallExpression,
+	deterministic: number,
+): void {
+	/* v8 ignore next -- @preserve first assertion calls are already known to be inside a block body. */
+	const blockBody = getCallbackBlockBody(callback);
+	/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
+	const [firstStatement] = blockBody?.body ?? [];
+	/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
+	if (firstStatement === undefined) return;
+	context.report({
+		data: { count: String(deterministic) },
+		fix(fixer): Fix {
+			return fixer.replaceText(firstStatement, `expect.assertions(${deterministic});`);
+		},
+		messageId: "preferAssertionsCount",
+		node: assertionCall,
+	});
+}
+
+function handleAssertionGuard(
+	context: RuleContext,
+	callback: CallbackFunction,
+	assertionCall: ESTree.CallExpression,
+	deterministic: number,
+	hasIndeterminate: boolean,
+): void {
+	validateAssertionCall(context, assertionCall, deterministic, hasIndeterminate);
+	if (!shouldPreferAssertionsCount(assertionCall, hasIndeterminate, deterministic)) return;
+	reportPreferAssertionsCount(context, callback, assertionCall, deterministic);
 }
 
 const preferExpectAssertions = createRule("prefer-expect-assertions", "general", {
@@ -245,35 +297,8 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 				}
 
 				const assertionCall = getFirstStatementCall(callback);
-				if (
-					assertionCall !== undefined &&
-					(isExpectAssertionsCall(assertionCall) || isExpectHasAssertionsCall(assertionCall))
-				) {
-					validateAssertionCall(context, assertionCall, deterministic, hasIndeterminate);
-
-					if (
-						!hasIndeterminate &&
-						isExpectHasAssertionsCall(assertionCall) &&
-						assertionCall.arguments.length === 0 &&
-						deterministic > 0
-					) {
-						/* v8 ignore next -- @preserve first assertion calls are already known to be inside a block body. */
-						const blockBody = getCallbackBlockBody(callback);
-						/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
-						const [firstStatement] = blockBody?.body ?? [];
-						/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
-						if (firstStatement !== undefined) {
-							context.report({
-								data: { count: String(deterministic) },
-								fix(fixer): Fix {
-									return fixer.replaceText(firstStatement, `expect.assertions(${deterministic});`);
-								},
-								messageId: "preferAssertionsCount",
-								node: assertionCall,
-							});
-						}
-					}
-
+				if (isAssertionGuardCall(assertionCall)) {
+					handleAssertionGuard(context, callback, assertionCall, deterministic, hasIndeterminate);
 					return;
 				}
 

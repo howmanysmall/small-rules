@@ -1,0 +1,124 @@
+{
+	"[css]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true
+	},
+	"[github-actions-workflow]": {
+		"editor.defaultFormatter": "redhat.vscode-yaml",
+		"editor.formatOnSave": true
+	},
+	"[gitignore]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true
+	},
+	"[json]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true,
+		"editor.quickSuggestions": { "strings": true },
+		"editor.suggest.insertMode": "replace"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true,
+		"editor.quickSuggestions": { "strings": true },
+		"editor.suggest.insertMode": "replace"
+	},
+	"[snippets]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true,
+		"editor.quickSuggestions": { "strings": true },
+		"editor.suggest.insertMode": "replace"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true
+	},
+	"[yaml]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.formatOnSave": true
+	},
+
+	"shfmt.executableArgs": ["-bn", "-ci", "-sr"],
+
+	"editor.acceptSuggestionOnCommitCharacter": true,
+	"editor.acceptSuggestionOnEnter": "on",
+	"editor.codeActionsOnSave": {
+		"source.addMissingImports": "always",
+		"source.biome": "never",
+		"source.fixAll.biome": "never",
+		"source.fixAll.eslint": "explicit",
+		"source.fixAll.oxc": "explicit",
+		"source.fixAll.rumdl": "always",
+		"source.organizeImports": "never",
+		"source.organizeImports.biome": "never"
+	},
+	"editor.formatOnSave": true,
+	"editor.quickSuggestions": {
+		"comments": false,
+		"other": true,
+		"strings": true
+	},
+	"editor.suggest.snippetsPreventQuickSuggestions": false,
+
+	"eslint.format.enable": true,
+	"eslint.run": "onType",
+	"eslint.runtime": "node",
+	"eslint.validate": [
+		"typescript",
+		"typescriptreact",
+		"markdown",
+		"json",
+		"jsonc",
+		"yaml",
+		"toml",
+		"luau",
+		"gitignore",
+		"snippets"
+	],
+
+	"evenBetterToml.schema.enabled": true,
+
+	"files.eol": "\n",
+	"github.copilot.chat.commitMessageGeneration.instructions": [
+		{
+			"text": "Strictly follow Conventional Commits: `<type>(<scope>): <subject>`. Types: feat, fix, refactor, docs, style, test, chore, perf, build, ci, revert. Scopes: benchmarks, classes, commands, components, constants, contexts, functions, hooks, logging, meta, prompts, providers, types, utilities, validators, deps, release, repo. Rules: Use imperative mood, lowercase subject start, no trailing period, and 72 char limit."
+		}
+	],
+
+	"js/ts.inlayHints.enumMemberValues.enabled": false,
+	"js/ts.inlayHints.functionLikeReturnTypes.enabled": false,
+	"js/ts.inlayHints.variableTypes.enabled": false,
+	"js/ts.preferences.autoImportFileExcludePatterns": [],
+	"js/ts.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?os$"],
+	"js/ts.suggest.autoImports": true,
+	"js/ts.tsdk.path": "node_modules\\@typescript\\native-preview",
+	"js/ts.updateImportsOnFileMove.enabled": "always",
+
+	"mise.configureExtensionsAutomatically": false,
+
+	"oxc.configPath": "oxlint.config.ts",
+	"oxc.disableNestedConfig": true,
+	"oxc.enable.oxfmt": false,
+	"oxc.enable.oxlint": true,
+	"oxc.fixKind": "safe_fix",
+	"oxc.lint.run": "onType",
+	"oxc.requireConfig": true,
+	"oxc.typeAware": true,
+	"oxc.unusedDisableDirectives": "deny",
+	"terminal.integrated.enableFileLinks": "on",
+
+	"json.schemaDownload.trustedDomains": {
+		"https://schemastore.azurewebsites.net/": true,
+		"https://raw.githubusercontent.com/microsoft/vscode/": true,
+		"https://raw.githubusercontent.com/devcontainers/spec/": true,
+		"https://www.schemastore.org/": true,
+		"https://json.schemastore.org/": true,
+		"https://json-schema.org/": true,
+		"https://developer.microsoft.com/json-schemas/": true,
+		"https://0hirume.github.io/": true
+	}
+}

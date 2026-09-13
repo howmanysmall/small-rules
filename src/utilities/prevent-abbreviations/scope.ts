@@ -7,7 +7,7 @@ import {
 	isExportNamedDeclaration,
 	isExportSpecifier,
 	isFunctionDeclaration,
-	isIdentifierName,
+	isIdentifierNamed,
 	isImportDeclaration,
 	isImportDefaultSpecifier,
 	isImportNamespaceSpecifier,
@@ -104,8 +104,7 @@ function isShorthandPropertyAssignmentPatternLeft(identifier: BroadIdentifier): 
 	if (!isAssignmentPattern(parent) || parent.left !== identifier) return false;
 
 	const property = parent.parent;
-	if (!isProperty(property)) return false;
-	return property.shorthand;
+	return isProperty(property) && property.shorthand;
 }
 
 export function isDefaultOrNamespaceImportName(identifier: BroadIdentifier): boolean {
@@ -113,20 +112,15 @@ export function isDefaultOrNamespaceImportName(identifier: BroadIdentifier): boo
 	if (!hasName(identifier)) return false;
 
 	const { parent } = identifier;
-	if (
-		(isImportDefaultSpecifier(parent) && parent.local === identifier) ||
-		(isImportNamespaceSpecifier(parent) && parent.local === identifier)
-	) {
-		return true;
-	}
-
-	if (isImportSpecifier(parent) && parent.local === identifier) {
-		const { imported } = parent;
-		if (isIdentifierName(imported) && imported.name === "default") return true;
-	}
 
 	return (
-		isVariableDeclarator(parent) && parent.id === identifier && parent.init !== null && isStaticRequire(parent.init)
+		(isImportDefaultSpecifier(parent) && parent.local === identifier) ||
+		(isImportNamespaceSpecifier(parent) && parent.local === identifier) ||
+		(isImportSpecifier(parent) && parent.local === identifier && isIdentifierNamed(parent.imported, "default")) ||
+		(isVariableDeclarator(parent) &&
+			parent.id === identifier &&
+			parent.init !== null &&
+			isStaticRequire(parent.init))
 	);
 }
 
@@ -194,24 +188,11 @@ export function shouldReportIdentifierAsProperty(identifier: BroadIdentifier): b
 		if (isAssignmentExpression(parentParent) && parentParent.left === parent) return true;
 	}
 
-	if (
-		isProperty(parent) &&
-		parent.key === identifier &&
-		!parent.computed &&
-		!parent.shorthand &&
-		(isObjectExpression(parent.parent) || isObjectPattern(parent.parent))
-	) {
-		return true;
-	}
-
-	if (isTsPropertySignature(parent) && parent.key === identifier && !parent.computed) {
-		return true;
-	}
-
-	if (isExportSpecifier(parent) && parent.exported === identifier && parent.local !== identifier) return true;
-
 	return (
-		(isMethodDefinition(parent) || isPropertyDefinition(parent)) && parent.key === identifier && !parent.computed
+		isObjectPropertyKey(identifier) ||
+		(isTsPropertySignature(parent) && parent.key === identifier && !parent.computed) ||
+		(isExportSpecifier(parent) && parent.exported === identifier && parent.local !== identifier) ||
+		((isMethodDefinition(parent) || isPropertyDefinition(parent)) && parent.key === identifier && !parent.computed)
 	);
 }
 

@@ -2,38 +2,13 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isIdentifierName,
-	isImportDefaultSpecifier,
-	isImportNamespaceSpecifier,
-	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
-import {
-	ENVIRONMENT_SCHEMA,
-	getReactSourcesFromOptions,
-	isReactImportDefinition,
-} from "$oxc-utilities/react-utilities";
+import { isIdentifierName, isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactNamespaceImport } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-
 const HOOK_NAME_PATTERN = /^use[A-Z]/v;
-
-function isReactNamespaceSource(variable: ScopeVariable | undefined, reactSources: ReadonlySet<string>): boolean {
-	if (variable === undefined) return false;
-
-	for (const definition of variable.defs) {
-		if (!isReactImportDefinition(definition, reactSources)) continue;
-		/* v8 ignore next -- React namespace checks only reach default or namespace import definitions. @preserve */
-		if (isImportDefaultSpecifier(definition.node) || isImportNamespaceSpecifier(definition.node)) {
-			return true;
-		}
-	}
-
-	return false;
-}
 
 type RuleOptions = InferContextFromRule<typeof preferDirectHookImports>["options"][0];
 interface NormalizedOptions {
@@ -61,7 +36,7 @@ const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react"
 				if (!HOOK_NAME_PATTERN.test(propertyName) || allowedHooks.has(propertyName)) return;
 
 				const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
-				if (!isReactNamespaceSource(variable, reactSources)) return;
+				if (!isReactNamespaceImport(variable, reactSources)) return;
 
 				context.report({
 					data: { hookName: propertyName },

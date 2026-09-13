@@ -62,8 +62,11 @@ jobs:
       - name: Type Check
         run: node --run type-check
 
-      - name: Knip
-        run: node --run knip:production
+      - name: Dead code
+        run: node --run fallow:dead-code
+
+      - name: Duplication
+        run: node --run fallow:dupes
 
       - name: Build
         run: node --run build -- --minify && test -f dist/index.js

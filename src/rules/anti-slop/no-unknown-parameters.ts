@@ -9,8 +9,8 @@
 
 import {
 	containsUnknownType,
-	functionParameterBindingName,
-	functionParameterTypeAnnotation,
+	getFunctionParameterBindingName,
+	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isBindingIdentifier, isTsTypeAnnotation, isTsTypePredicate } from "$oxc-utilities/oxc-utilities";
@@ -45,11 +45,10 @@ const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 		function checkParameters(node: ParameterOwner): void {
 			const validatedName = validatedParameterName(node);
 			for (const parameter of node.params) {
-				const annotation = functionParameterTypeAnnotation(parameter);
-				if (!isTsTypeAnnotation(annotation)) continue;
-				if (!containsUnknownType(annotation.typeAnnotation)) continue;
+				const annotation = getFunctionParameterTypeAnnotation(parameter);
+				if (!isTsTypeAnnotation(annotation) || !containsUnknownType(annotation.typeAnnotation)) continue;
 
-				const name = functionParameterBindingName(parameter, context.sourceCode);
+				const name = getFunctionParameterBindingName(parameter, context.sourceCode);
 				if (name === "cause" || name === validatedName) continue;
 
 				context.report({

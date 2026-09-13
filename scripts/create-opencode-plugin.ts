@@ -2,6 +2,7 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { argv, cwd } from "node:process";
+import { existsAsync } from "@small-rules/fs-utilities";
 import { dirname, join } from "@std/path";
 import { consola } from "consola";
 import { exec } from "tinyexec";
@@ -9,7 +10,6 @@ import { exec } from "tinyexec";
 import { createBaseCommand } from "$script-functions/create-base-command";
 import { getScriptName } from "$script-functions/get-script-name";
 import { toCamelCase, toKebabCase } from "$script-utilities/casing-utilities";
-import { existsAsync } from "$script-utilities/file-system-utilities";
 
 import type { ArgumentValue } from "@cliffy/command";
 import type { PackageJson } from "type-fest";

@@ -16,8 +16,19 @@ url = "https://mcp.context7.com/mcp"
 args = ["mcp", "--root", "."]
 command = "hk"
 
+[mcp_servers.fallow]
+command = "fallow-mcp"
+
 [features.multi_agent_v2]
 max_concurrent_threads_per_session = 1000
+
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "bun run .codex/hooks/fallow-gate.ts"
+timeout = 600
 
 [[hooks.PostToolUse]]
 matcher = "apply_patch"
@@ -26,3 +37,12 @@ matcher = "apply_patch"
 type = "command"
 command = "bash scripts/quiet-on-success.sh bash -c 'set -euo pipefail; bash scripts/format-lint-relevant.sh; bash scripts/test-relevant.sh'"
 timeout = 600
+
+[[hooks.PostToolUse]]
+matcher = "apply_patch"
+
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "bun run .codex/hooks/react-doctor.ts"
+timeout = 600
+statusMessage = "Running React Doctor"

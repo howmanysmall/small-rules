@@ -16,8 +16,8 @@ import {
 } from "$oxc-utilities/anti-slop/dictionary-types";
 import {
 	containsUnknownType,
-	functionParameterBindingName,
-	functionParameterTypeAnnotation,
+	getFunctionParameterBindingName,
+	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -26,8 +26,10 @@ import {
 	isAnyFunction,
 	isAnyLiteral,
 	isBindingIdentifier,
+	isBlockStatement,
 	isCallExpression,
 	isFunctionLike,
+	isIdentifierName,
 	isIdentifierReference,
 	isMethodDefinition,
 	isObjectExpression,
@@ -81,7 +83,26 @@ function isStableConstVariable(variable: ScopeVariable, declarator: ESTree.Varia
 	);
 }
 
-function assertionEvidence(expression: ESTree.Expression, environment: TypeEnvironment): boolean | undefined {
+function isUnvisitedVariable(
+	variable: ScopeVariable | undefined,
+	visited: Set<ScopeVariable>,
+): variable is ScopeVariable {
+	return variable !== undefined && !visited.has(variable);
+}
+
+function hasStableInitializer(
+	variable: ScopeVariable,
+	declarator: ESTree.VariableDeclarator | undefined,
+): declarator is ESTree.VariableDeclarator & { init: ESTree.Expression } {
+	if (declarator === undefined) return false;
+	return declarator.init !== null && isStableConstVariable(variable, declarator);
+}
+
+function hasInformativeReturnType(returnType: ESTree.TSType | undefined, environment: TypeEnvironment): boolean {
+	return returnType !== undefined && hasInformativeType(returnType, environment);
+}
+
+function getAssertionEvidence(expression: ESTree.Expression, environment: TypeEnvironment): boolean | undefined {
 	return isTsAsExpression(expression) || isTsTypeAssertion(expression)
 		? hasInformativeType(expression.typeAnnotation, environment)
 		: undefined;
@@ -99,38 +120,40 @@ function hasKnownEvidence(
 		if (!isIdentifierReference(currentExpression)) return false;
 
 		const variable = resolveVariable(sourceCode, currentExpression);
-		if (variable === undefined || visitedVariables.has(variable)) return false;
-		const annotation = variableTypeAnnotation(sourceCode, variable);
+		if (!isUnvisitedVariable(variable, visitedVariables)) return false;
+
+		const annotation = getVariableTypeAnnotation(sourceCode, variable);
 		if (annotation !== undefined) return hasInformativeType(annotation.typeAnnotation, environment);
 
 		const declarator = getVariableDeclarator(variable);
-		if (declarator === undefined) return false;
-
-		const { init: initializer } = declarator;
-		if (initializer === null || !isStableConstVariable(variable, declarator)) return false;
+		if (!hasStableInitializer(variable, declarator)) return false;
 
 		visitedVariables.add(variable);
-		currentExpression = unwrapCallArgumentExpression(initializer);
-		const evidence = assertionEvidence(currentExpression, environment);
+		currentExpression = unwrapCallArgumentExpression(declarator.init);
+		const evidence = getAssertionEvidence(currentExpression, environment);
 		if (evidence !== undefined) return evidence;
 	}
 }
 
-function localFunctionForCall(sourceCode: SourceCode, callee: ESTree.Expression): FunctionExpression | undefined {
+function getLocalFunctionForCall(sourceCode: SourceCode, callee: ESTree.Expression): FunctionExpression | undefined {
 	const unwrapped = unwrapExpression(callee);
 	if (isFunctionLike(unwrapped)) return unwrapped;
 	if (!isIdentifierReference(unwrapped)) return undefined;
 
 	const variable = resolveVariable(sourceCode, unwrapped);
 	if (variable?.defs.length !== 1) return undefined;
+
 	const [definition] = variable.defs;
 	/* v8 ignore next -- A one-element definitions array has a first item. @preserve */
 	if (definition === undefined) return undefined;
+
 	if (definition.type === "FunctionName") {
+		const { node } = definition;
 		/* v8 ignore next -- FunctionName definitions own function-like nodes. @preserve */
-		if (!isFunctionLike(definition.node)) return undefined;
-		return definition.node;
+		if (!isFunctionLike(node)) return undefined;
+		return node;
 	}
+
 	if (definition.type !== "Variable" || !isVariableDeclarator(definition.node)) return undefined;
 	if (isBindingIdentifier(definition.node.id) && definition.node.id.typeAnnotation !== null) {
 		// The explicit binding contract hides initializer-only predicate details.
@@ -143,7 +166,10 @@ function localFunctionForCall(sourceCode: SourceCode, callee: ESTree.Expression)
 	return isFunctionLike(unwrappedInitializer) ? unwrappedInitializer : undefined;
 }
 
-function variableTypeAnnotation(sourceCode: SourceCode, variable: ScopeVariable): ESTree.TSTypeAnnotation | undefined {
+function getVariableTypeAnnotation(
+	sourceCode: SourceCode,
+	variable: ScopeVariable,
+): ESTree.TSTypeAnnotation | undefined {
 	if (variable.defs.length !== 1) return undefined;
 	const [definition] = variable.defs;
 	/* v8 ignore next -- A one-element definitions array has a first item. @preserve */
@@ -160,15 +186,15 @@ function variableTypeAnnotation(sourceCode: SourceCode, variable: ScopeVariable)
 	if (!isFunctionLike(definition.node)) return undefined;
 
 	for (const parameter of definition.node.params) {
-		if (functionParameterBindingName(parameter, sourceCode) === variable.name) {
-			return functionParameterTypeAnnotation(parameter);
+		if (getFunctionParameterBindingName(parameter, sourceCode) === variable.name) {
+			return getFunctionParameterTypeAnnotation(parameter);
 		}
 	}
 	return undefined;
 }
 
-function hasInformativeType(type: ESTree.TSType, environment: TypeEnvironment): boolean {
-	return classifyUnsafeDictionaryValue(type, environment) === undefined;
+function hasInformativeType(tsType: ESTree.TSType, environment: TypeEnvironment): boolean {
+	return classifyUnsafeDictionaryValue(tsType, environment) === undefined;
 }
 
 function unwrapCallArgumentExpression(expression: ESTree.Expression): ESTree.Expression {
@@ -188,35 +214,30 @@ function hasKnownCallArgumentEvidence(
 	let current = expression;
 	for (;;) {
 		current = unwrapCallArgumentExpression(current);
-		if (isTsAsExpression(current) || isTsTypeAssertion(current)) {
-			return hasInformativeType(current.typeAnnotation, environment);
-		}
+		const assertionEvidence = getAssertionEvidence(current, environment);
+		if (assertionEvidence !== undefined) return assertionEvidence;
+
 		if (isCallExpression(current)) {
-			const owner = localFunctionForCall(sourceCode, current.callee);
-			const returnType = owner?.returnType?.typeAnnotation;
-			return returnType !== undefined && hasInformativeType(returnType, environment);
+			const owner = getLocalFunctionForCall(sourceCode, current.callee);
+			return hasInformativeReturnType(owner?.returnType?.typeAnnotation, environment);
 		}
+
 		if (!isIdentifierReference(current)) return isKnownEvidenceExpression(current);
 
 		const variable = resolveVariable(sourceCode, current);
-		if (variable === undefined || visitedVariables.has(variable)) return false;
-		const annotation = variableTypeAnnotation(sourceCode, variable);
+		if (!isUnvisitedVariable(variable, visitedVariables)) return false;
+
+		const annotation = getVariableTypeAnnotation(sourceCode, variable);
 		if (annotation !== undefined) return hasInformativeType(annotation.typeAnnotation, environment);
 
 		const declarator = getVariableDeclarator(variable);
-		if (
-			declarator?.init === null ||
-			declarator?.init === undefined ||
-			!isStableConstVariable(variable, declarator)
-		) {
-			return false;
-		}
+		if (!hasStableInitializer(variable, declarator)) return false;
 		visitedVariables.add(variable);
 		current = declarator.init;
 	}
 }
 
-function typePredicateSubject(sourceCode: SourceCode, owner: FunctionExpression): PredicateSubject | undefined {
+function getTypePredicateSubject(sourceCode: SourceCode, owner: FunctionExpression): PredicateSubject | undefined {
 	const predicate = owner.returnType?.typeAnnotation;
 	if (!isTsTypePredicate(predicate) || !isBindingIdentifier(predicate.parameterName)) return undefined;
 
@@ -224,7 +245,7 @@ function typePredicateSubject(sourceCode: SourceCode, owner: FunctionExpression)
 	let argumentIndex = 0;
 	for (const parameter of owner.params) {
 		if (isBindingIdentifier(parameter) && parameter.name === "this") continue;
-		if (functionParameterBindingName(parameter, sourceCode) === predicateParameterName) {
+		if (getFunctionParameterBindingName(parameter, sourceCode) === predicateParameterName) {
 			return { argumentIndex, parameter };
 		}
 		argumentIndex += 1;
@@ -317,8 +338,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			if (destination === undefined) return;
 			if (isDictionaryAccumulatorTarget(destination) && isEmptyObjectExpression(expression)) return;
 			/* v8 ignore next -- A destination requires the initialized environment. @preserve */
-			if (environment === undefined) return;
-			if (!hasKnownEvidence(context.sourceCode, expression, environment)) return;
+			if (environment === undefined || !hasKnownEvidence(context.sourceCode, expression, environment)) return;
 
 			context.report({
 				data: { subject, target: destination.kind },
@@ -335,8 +355,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 		return {
 			AccessorProperty(node): void {
 				/* v8 ignore next -- Visitor keys guarantee AccessorProperty nodes. @preserve */
-				if (!isAccessorProperty(node)) return;
-				if (node.value === null) return;
+				if (!isAccessorProperty(node) || node.value === null) return;
 				reportFlow(
 					node.value,
 					targetFromAnnotation(node.typeAnnotation),
@@ -344,7 +363,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				);
 			},
 			ArrowFunctionExpression(node): void {
-				if (node.body.type === "BlockStatement") return;
+				if (isBlockStatement(node.body)) return;
 				reportFlow(
 					node.body,
 					targetFromAnnotation(node.returnType),
@@ -352,33 +371,36 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				);
 			},
 			AssignmentExpression(node): void {
-				if (node.operator !== "=" || node.left.type !== "Identifier") return;
+				if (node.operator !== "=" || !isIdentifierName(node.left)) return;
+
 				const variable = resolveVariable(context.sourceCode, node.left);
 				if (variable === undefined) return;
 
 				const binding = getVariableDeclarator(variable)?.id;
-				if (binding?.type !== "Identifier") return;
+				if (!isIdentifierName(binding)) return;
 				reportFlow(node.right, targetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
 			},
 			CallExpression(node): void {
 				/* v8 ignore next -- The Program visitor initializes this first. @preserve */
 				if (environment === undefined) return;
-				const owner = localFunctionForCall(context.sourceCode, node.callee);
+
+				const owner = getLocalFunctionForCall(context.sourceCode, node.callee);
 				if (owner === undefined) return;
 
-				const subject = typePredicateSubject(context.sourceCode, owner);
+				const subject = getTypePredicateSubject(context.sourceCode, owner);
 				if (subject === undefined) return;
+
 				const { argumentIndex, parameter } = subject;
 				const argument = node.arguments[argumentIndex];
 				if (argument === undefined || isSpreadElement(argument)) return;
 
-				const annotation = functionParameterTypeAnnotation(parameter);
+				const annotation = getFunctionParameterTypeAnnotation(parameter);
 				if (annotation === undefined || !containsUnknownType(annotation.typeAnnotation)) return;
 				if (!hasKnownCallArgumentEvidence(context.sourceCode, argument, environment)) return;
 
 				context.report({
 					data: {
-						subject: `argument for parameter \`${functionParameterBindingName(parameter, context.sourceCode)}\` of \`${functionName(context.sourceCode, owner)}\``,
+						subject: `argument for parameter \`${getFunctionParameterBindingName(parameter, context.sourceCode)}\` of \`${functionName(context.sourceCode, owner)}\``,
 						target: "unknown",
 					},
 					messageId: "widening",
@@ -411,12 +433,11 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			},
 			TSTypeAssertion(node): void {
 				/* v8 ignore next -- The Program visitor initializes this before descendants run. @preserve */
-				if (environment === undefined) return;
-				if (hasParentAssertion(node)) return;
+				if (environment === undefined || hasParentAssertion(node)) return;
 				reportFlow(node.expression, classifyWideningTarget(node.typeAnnotation, environment), "assertion");
 			},
 			VariableDeclarator(node): void {
-				if (node.init === null || node.id.type !== "Identifier") return;
+				if (node.init === null || !isIdentifierName(node.id)) return;
 				reportFlow(node.init, targetFromAnnotation(node.id.typeAnnotation), `binding \`${node.id.name}\``);
 			},
 		};

@@ -31,9 +31,9 @@ icon = "tool"
 command = "nr format"
 
 [[actions]]
-name = "Run Knip"
+name = "Run Fallow"
 icon = "tool"
-command = "nr knip"
+command = "nr fallow:dead-code"
 
 [[actions]]
 name = "Start Docs"

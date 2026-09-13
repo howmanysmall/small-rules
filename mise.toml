@@ -12,7 +12,6 @@ provenance_api_failures_fatal = false
 cargo.binstall_native = true
 
 [tools]
-"cargo:similarity-ts" = "latest"
 "github:howmanysmall/pullhook" = "latest"
 "npm:sherif" = "latest"
 actionlint = "latest"
@@ -25,7 +24,7 @@ ni = "latest"
 node = "24"
 pinact = "latest"
 pkl = "latest"
-pnpm = "12.3.1"
+pnpm = "12.4.1"
 rumdl = "latest"
 shellcheck = "latest"
 shfmt = "latest"
@@ -53,17 +52,53 @@ run = """
 git commit --signoff --message "${usage_message?}" --no-verify
 """
 
+[tasks."fallow:audit-hk"]
+description = "Runs fallow to audit the project."
+depends = ["test:istanbul"]
+run = "fallow audit --quiet --gate-marker hk"
+
+[tasks."test:istanbul"]
+description = "Generate a coverage report with Vitest and Istanbul."
+sources = [
+	"src/**",
+	"tests/**",
+	"packages/**",
+	"documentation/**",
+	"scripts/**",
+	".github/workflows/**",
+	"*.config.*",
+	"vitest*.ts",
+	"tsconfig*.json",
+	"package.json",
+	"pnpm-lock.yaml",
+	"pnpm-workspace.yaml",
+	"THIRD-PARTY-NOTICES.md",
+	"!**/node_modules/**",
+	"!**/dist/**",
+	"!**/coverage/**",
+	"!**/.cache/**",
+	"!**/.astro/**",
+	"!**/*.tsbuildinfo",
+	"!documentation/test-results/**",
+]
+outputs = [".cache/istanbul/coverage-final.json"]
+cache = { enabled = true, command_inputs = ["pwd"] }
+run = """
+rm -f .cache/istanbul/coverage-final.json
+nr test:istanbul --silent >/dev/null 2>&1 || test -s .cache/istanbul/coverage-final.json
+"""
+
 [tasks.amend]
 description = "Amends the staged changes, reusing the previous commit message."
 run = "git commit --amend --reuse-message=HEAD --signoff"
 
 [tasks.build]
-description = "Build the package into dist using tsdown."
+description = "Build the  package into dist using tsdown."
 run = "node --run build"
 
 [tasks.check]
 description = "Run all local validation checks except dependency installation. Mirrors release validation before artifact checks."
-depends = ["lint", "type-check", "knip", "build", "test"]
+depends = ["lint", "type-check", "dead-code", "duplicates", "build", "test"]
 
 [tasks.ci]
 description = "Install dependencies, then run package and documentation validation in parallel."
@@ -80,6 +115,10 @@ arg <message> {
 run = """
 git commit --signoff --message "${usage_message?}"
 """
+
+[tasks.dead-code]
+description = "Detect unused files, exports, types, and dependencies with fallow."
+run = "node --run fallow:dead-code"
 
 [tasks.deploy-docs]
 alias = "dd"
@@ -98,21 +137,16 @@ run = "gh workflow run release.yaml --ref main -f dry_run=true"
 
 [tasks.duplicates]
 alias = "dupes"
-description = "Detect duplicated/structurally-similar code in src with similarity-ts (AST-based jscpd replacement)."
-run = "similarity-ts --threshold 0.85 --min-lines 5 --print src"
+description = "Detect duplicated and structurally-similar code with fallow (replaces jscpd and similarity-ts)."
+run = "node --run fallow:dupes"
 
-[tasks.duplicates-ui]
-alias = "dupes-ui"
-description = "Run similarity-ts and open a readable duplicate report in the browser."
-run = "similarity-ts --threshold 0.85 --min-lines 5 --print src | bun scripts/dupes-viewer.ts --open"
+[tasks.health]
+description = "Rank complexity hotspots and refactoring targets with fallow."
+run = "node --run fallow:health"
 
 [tasks.install]
 description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
 run = "ni"
-
-[tasks.knip]
-description = "Detect unused files, exports, and dependencies with Knip."
-run = "node --run knip"
 
 [tasks.lint]
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."

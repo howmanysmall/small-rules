@@ -146,12 +146,35 @@ function isProtectedComponentUsage(
 	);
 }
 
+function isReportableUsageElement(
+	usage: ESTree.JSXElement,
+	protectedComponents: ReadonlySet<string>,
+	moduleScope: Scope | undefined,
+	filename: string,
+): boolean {
+	const componentName = getJSXElementName(usage);
+	if (componentName === undefined) return false;
+	if (!isProtectedComponentUsage(componentName, protectedComponents, moduleScope, filename)) return false;
+	return !hasScaledFalseAttribute(usage);
+}
+
 const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-constraint", "roblox", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
 		const protectedComponents = new Set<string>();
 		const jsxUsages = new Array<ESTree.JSXElement>();
 		let scopeReference: ESTree.ImportDeclaration | undefined;
+
+		function reportRedundantChildren(usage: ESTree.JSXElement): void {
+			for (const child of usage.children) {
+				if (isRedundantAspectRatioChild(child)) {
+					context.report({
+						messageId: "redundantAspectRatioConstraint",
+						node: child,
+					});
+				}
+			}
+		}
 
 		return {
 			ArrowFunctionExpression(node): void {
@@ -185,29 +208,12 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 			},
 
 			"Program:exit"(): void {
-				let moduleScope: ReturnType<typeof sourceCode.getScope> | undefined;
+				let moduleScope: Scope | undefined;
 				if (scopeReference !== undefined) moduleScope = sourceCode.getScope(scopeReference);
 
 				for (const usage of jsxUsages) {
-					const componentName = getJSXElementName(usage);
-					if (componentName === undefined) continue;
-
-					const protectedUsage = isProtectedComponentUsage(
-						componentName,
-						protectedComponents,
-						moduleScope,
-						filename,
-					);
-					if (!protectedUsage || hasScaledFalseAttribute(usage)) continue;
-
-					for (const child of usage.children) {
-						if (isRedundantAspectRatioChild(child)) {
-							context.report({
-								messageId: "redundantAspectRatioConstraint",
-								node: child,
-							});
-						}
-					}
+					if (!isReportableUsageElement(usage, protectedComponents, moduleScope, filename)) continue;
+					reportRedundantChildren(usage);
 				}
 			},
 		} satisfies Visitor;

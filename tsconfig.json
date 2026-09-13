@@ -1,9 +1,13 @@
 {
 	"extends": "./tsconfig.base.json",
 	"references": [
+		{ "path": "./.codex" },
+		{ "path": "./.omp" },
+		{ "path": "./packages/arktype-utilities" },
+		{ "path": "./packages/fs-utilities" },
 		{ "path": "./tsconfig.lib.json" },
-		{ "path": "./tsconfig.test.json" },
-		{ "path": "./tsconfig.node.json" }
+		{ "path": "./tsconfig.node.json" },
+		{ "path": "./tsconfig.test.json" }
 	],
 	"files": [],
 	"include": []

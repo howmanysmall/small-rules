@@ -33,6 +33,44 @@ type FunctionWithReturnType =
 	| ESTree.TSFunctionType
 	| ESTree.TSMethodSignature;
 
+function isIdentifierTypeReference(
+	type: ESTree.TSType,
+): type is ESTree.TSTypeReference & { typeName: ESTree.BindingIdentifier } {
+	return isTsTypeReference(type) && isBindingIdentifier(type.typeName);
+}
+
+function isPromiseLikeName(name: string): boolean {
+	return name === "Promise" || name === "PromiseLike";
+}
+
+function enqueueWrappedType(resolved: ESTree.TSType, enqueue: (child: ESTree.TSType) => void): boolean {
+	if (isTsParenthesizedType(resolved)) {
+		enqueue(resolved.typeAnnotation);
+		return true;
+	}
+	if (isTsUnionType(resolved)) {
+		for (const member of resolved.types) enqueue(member);
+		return true;
+	}
+	return false;
+}
+
+function isUnshadowedPromiseReference(
+	type: ESTree.TSType,
+	environment: TypeAliasEnvironment,
+): type is ESTree.TSTypeReference & { typeName: ESTree.BindingIdentifier } {
+	if (!isIdentifierTypeReference(type) || !isPromiseLikeName(type.typeName.name)) return false;
+	return !hasVisibleTypeBinding(type.typeName.name, type, environment);
+}
+
+function enqueuePromiseValue(
+	resolved: ESTree.TSTypeReference & { typeName: ESTree.BindingIdentifier },
+	enqueue: (child: ESTree.TSType) => void,
+): void {
+	const value = resolved.typeArguments?.params[0];
+	if (value !== undefined) enqueue(value);
+}
+
 const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {
 	createOnce(context): Visitor {
 		let environment: TypeAliasEnvironment;
@@ -40,22 +78,10 @@ const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {
 		function resolvesToUnknown(type: ESTree.TSType): boolean {
 			return resolvedTypeMatches(type, environment, (resolved, enqueue) => {
 				if (isTsUnknownKeyword(resolved)) return true;
-				if (isTsParenthesizedType(resolved)) {
-					enqueue(resolved.typeAnnotation);
-					return false;
-				}
-				if (isTsUnionType(resolved)) {
-					for (const member of resolved.types) enqueue(member);
-					return false;
-				}
-				if (!isTsTypeReference(resolved) || !isBindingIdentifier(resolved.typeName)) return false;
+				if (enqueueWrappedType(resolved, enqueue)) return false;
+				if (!isUnshadowedPromiseReference(resolved, environment)) return false;
 
-				const { name } = resolved.typeName;
-				if (name !== "Promise" && name !== "PromiseLike") return false;
-				if (hasVisibleTypeBinding(name, resolved, environment)) return false;
-
-				const value = resolved.typeArguments?.params[0];
-				if (value !== undefined) enqueue(value);
+				enqueuePromiseValue(resolved, enqueue);
 				return false;
 			});
 		}

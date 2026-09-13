@@ -186,17 +186,8 @@ function getCaseArrays(cases: ObjectExpression, context: ExtractionContext): Arr
 	return caseArrays;
 }
 
-function extractCaseExample(
-	testCase: ObjectExpression,
-	kind: "invalid" | "valid",
-	runnerLanguage: string,
-	extractionContext: ExtractionContext,
-): RuleExample | undefined {
-	const documentationValue = findField(testCase, "documentation")?.property.value;
-	if (documentationValue?.type !== "ObjectExpression") return undefined;
-
-	const fields = getObjectFields(testCase, extractionContext);
-	for (const field of fields) {
+function validateFields(extractionContext: ExtractionContext, objectFields: ReadonlyArray<ObjectField>): void {
+	for (const field of objectFields) {
 		if (!CASE_FIELD_NAMES.has(field.key)) {
 			throw new ExtractionError(
 				extractionContext,
@@ -212,6 +203,21 @@ function extractCaseExample(
 			);
 		}
 	}
+}
+
+// oxlint-disable-next-line jsdoc-js/convert-to-jsdoc-comments -- shut up
+// fallow-ignore-next-line complexity
+function extractCaseExample(
+	testCase: ObjectExpression,
+	kind: "invalid" | "valid",
+	runnerLanguage: string,
+	extractionContext: ExtractionContext,
+): RuleExample | undefined {
+	const documentationValue = findField(testCase, "documentation")?.property.value;
+	if (documentationValue?.type !== "ObjectExpression") return undefined;
+
+	const fields = getObjectFields(testCase, extractionContext);
+	validateFields(extractionContext, fields);
 
 	const documentation = evaluateDocumentation(documentationValue, extractionContext);
 	const code = evaluateRequiredString(fields, "code", extractionContext);
@@ -295,6 +301,8 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 	return fields;
 }
 
+// oxlint-disable-next-line jsdoc-js/convert-to-jsdoc-comments -- shut up
+// fallow-ignore-next-line complexity
 function findField(object: ObjectExpression, name: string): ObjectField | undefined {
 	for (const property of object.properties) {
 		if (property.type !== "Property" || property.computed || property.kind !== "init" || property.method) continue;
@@ -316,6 +324,8 @@ function getStaticKey(key: PropertyKey, context: ExtractionContext): string {
 	throw new ExtractionError(context, key.start, "object keys must be static strings.");
 }
 
+// oxlint-disable-next-line jsdoc-js/convert-to-jsdoc-comments -- shut up
+// fallow-ignore-next-line complexity
 function evaluateStatic(node: Expression, context: ExtractionContext): StaticValue {
 	if (isStaticLiteral(node)) return node.value;
 	if (node.type === "TemplateLiteral") return evaluateTemplate(node, context);

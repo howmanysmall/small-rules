@@ -1,7 +1,30 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isNode, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_DECLARATION,
+	CLASS_EXPRESSION,
+	FUNCTION_DECLARATION,
+	FUNCTION_EXPRESSION,
+	getMemberPropertyName,
+	isArrayPattern,
+	isCallExpression,
+	isIdentifierName,
+	isIdentifierNamed,
+	isMemberExpression,
+	isNode,
+	isSpreadElement,
+	isVariableDeclaration,
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 const ALL_MUTATION_METHODS = new Set([
 	"add",
@@ -20,11 +43,11 @@ const ALL_MUTATION_METHODS = new Set([
 ]);
 const ITERATOR_METHODS = new Set(["entries", "keys", "values"]);
 const SKIPPED_NODE_TYPES = new Set([
-	"ArrowFunctionExpression",
-	"ClassDeclaration",
-	"ClassExpression",
-	"FunctionDeclaration",
-	"FunctionExpression",
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_DECLARATION,
+	CLASS_EXPRESSION,
+	FUNCTION_DECLARATION,
+	FUNCTION_EXPRESSION,
 ]);
 
 interface LoopContext {
@@ -40,32 +63,41 @@ interface MutationCall {
 	readonly property: ESTree.Node;
 }
 
+const NO_NAME = new Set<NodeType>([
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+]);
+type NoName =
+	| ESTree.ParenthesizedExpression
+	| ESTree.TSAsExpression
+	| ESTree.TSNonNullExpression
+	| ESTree.TSSatisfiesExpression
+	| ESTree.TSTypeAssertion;
+function isNoName(node: ESTree.Node): node is NoName {
+	return NO_NAME.has(node.type);
+}
+
 function getIdentifierName(node?: ESTree.Node | null): string | undefined {
 	let current = node;
 	while (current !== null && current !== undefined) {
-		if (current.type === "Identifier") return current.name;
-		if (
-			current.type !== "ParenthesizedExpression" &&
-			current.type !== "TSAsExpression" &&
-			current.type !== "TSNonNullExpression" &&
-			current.type !== "TSSatisfiesExpression" &&
-			current.type !== "TSTypeAssertion"
-		) {
-			return undefined;
-		}
+		if (isIdentifierName(current)) return current.name;
+		if (!isNoName(current)) return undefined;
 		current = current.expression;
 	}
 	return undefined;
 }
 
 function getFirstArrayPatternName(node: ESTree.Node): string | undefined {
-	if (node.type !== "ArrayPattern") return undefined;
+	if (!isArrayPattern(node)) return undefined;
 	return getIdentifierName(node.elements[0] ?? undefined);
 }
 
 function getLoopBinding(loop: ESTree.ForOfStatement): ESTree.Node | undefined {
 	/* v8 ignore if -- only called after const VariableDeclaration binding checks. @preserve */
-	if (loop.left.type === "VariableDeclaration") {
+	if (isVariableDeclaration(loop.left)) {
 		const [declarator] = loop.left.declarations;
 		/* v8 ignore next -- const for-of always has a declarator. @preserve */
 		return declarator?.id;
@@ -75,17 +107,15 @@ function getLoopBinding(loop: ESTree.ForOfStatement): ESTree.Node | undefined {
 }
 
 function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
-	return loop.left.type === "VariableDeclaration" && loop.left.kind === "const";
+	return isVariableDeclaration(loop.left) && loop.left.kind === "const";
 }
 
 function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
 	const node = unwrapExpression(right);
-	if (node.type === "Identifier") return { name: node.name, method: "direct" };
+	if (isIdentifierName(node)) return { name: node.name, method: "direct" };
 
-	if (node.type !== "CallExpression" || node.callee.type !== "MemberExpression" || node.arguments.length > 0) {
-		return undefined;
-	}
-	if (node.callee.optional || node.callee.object.type !== "Identifier") return undefined;
+	if (!isCallExpression(node) || !isMemberExpression(node.callee) || node.arguments.length > 0) return undefined;
+	if (node.callee.optional || !isIdentifierName(node.callee.object)) return undefined;
 
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;
@@ -137,7 +167,7 @@ function buildLoopContext(loop: ESTree.ForOfStatement): LoopContext | undefined 
 function argumentMatchesName(call: ESTree.CallExpression, name: string | undefined): boolean {
 	if (name === undefined) return false;
 	const [argument] = call.arguments;
-	return argument !== undefined && argument.type !== "SpreadElement" && getIdentifierName(argument) === name;
+	return argument !== undefined && !isSpreadElement(argument) && getIdentifierName(argument) === name;
 }
 
 function pushChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
@@ -146,9 +176,7 @@ function pushChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
 		if (Array.isArray(value)) {
 			/* v8 ignore next -- AST child arrays only contain nodes or null pattern holes. @preserve */
 			for (const item of value) if (isNode(item)) worklist.push(item);
-		} else if (isNode(value)) {
-			worklist.push(value);
-		}
+		} else if (isNode(value)) worklist.push(value);
 	}
 }
 
@@ -157,15 +185,10 @@ function collectMutationCalls(body: ESTree.Node, iterableName: string): Array<Mu
 	const worklist: Array<ESTree.Node> = [body];
 	for (const current of worklist) {
 		if (SKIPPED_NODE_TYPES.has(current.type)) continue;
-		if (current.type === "CallExpression" && current.callee.type === "MemberExpression") {
+		if (isCallExpression(current) && isMemberExpression(current.callee)) {
 			const method = getMemberPropertyName(current.callee);
 			const object = unwrapExpression(current.callee.object);
-			if (
-				method !== undefined &&
-				ALL_MUTATION_METHODS.has(method) &&
-				object.type === "Identifier" &&
-				object.name === iterableName
-			) {
+			if (method !== undefined && ALL_MUTATION_METHODS.has(method) && isIdentifierNamed(object, iterableName)) {
 				mutations.push({ call: current, method, property: current.callee.property });
 			}
 		}

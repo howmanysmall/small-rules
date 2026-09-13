@@ -7,8 +7,8 @@
 // binding names, and the shared iterative lexical alias resolver.
 
 import {
-	functionParameterBindingName,
-	functionParameterTypeAnnotation,
+	getFunctionParameterBindingName,
+	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { createTypeAliasEnvironment, resolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -51,13 +51,13 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 
 		function checkParameters(node: ParameterOwner): void {
 			for (const parameter of node.params) {
-				const annotation = functionParameterTypeAnnotation(parameter);
+				const annotation = getFunctionParameterTypeAnnotation(parameter);
 				if (!isTsTypeAnnotation(annotation) || !resolvesToObject(annotation.typeAnnotation)) {
 					continue;
 				}
 				context.report({
 					data: {
-						parameter: functionParameterBindingName(parameter, context.sourceCode),
+						parameter: getFunctionParameterBindingName(parameter, context.sourceCode),
 					},
 					messageId: "objectParameter",
 					node: annotation.typeAnnotation,

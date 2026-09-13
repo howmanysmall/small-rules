@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
+import { getReactEffectAnalysis, isSynchronousStateCall } from "$oxc-utilities/react-effect-utilities";
 import { getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -10,12 +10,7 @@ type RuleContext = InferContextFromRule<typeof noDerivedState>;
 
 function reportDerivedStateEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
 	for (const reference of effect.functionReferences) {
-		if (
-			!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode) ||
-			!analysis.isStateCall(reference)
-		) {
-			continue;
-		}
+		if (!isSynchronousStateCall(analysis, effect, reference)) continue;
 
 		const callExpression = analysis.scope.getCallExpression(reference);
 		if (callExpression === undefined) continue;

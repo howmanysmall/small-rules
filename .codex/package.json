@@ -1,0 +1,21 @@
+{
+	"name": "@small-rules/codex",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Codex hooks",
+	"license": "UNLICENSED",
+	"type": "module",
+	"dependencies": {
+		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime",
+		"tinyexec": "catalog:scripts",
+		"type-fest": "catalog:types",
+		"zx": "catalog:scripts"
+	},
+	"devDependencies": {
+		"@small-rules/arktype-utilities": "workspace:*",
+		"@small-rules/fs-utilities": "workspace:*",
+		"@total-typescript/ts-reset": "catalog:types",
+		"@types/bun": "catalog:types"
+	}
+}

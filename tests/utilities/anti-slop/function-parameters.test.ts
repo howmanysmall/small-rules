@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	containsUnknownType,
-	functionParameterBindingName,
-	functionParameterTypeAnnotation,
+	getFunctionParameterBindingName,
+	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { traverseAst } from "$test/rule-harness/ast";
@@ -34,11 +34,7 @@ function firstFunction(source: HarnessSourceCode): ESTree.Function {
 			}
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("FunctionDeclaration not found.");
-		Error.captureStackTrace(error, firstFunction);
-		throw error;
-	}
+	if (found === undefined) throw new Error("FunctionDeclaration not found.");
 	return found;
 }
 
@@ -51,11 +47,7 @@ function firstArrow(source: HarnessSourceCode): ESTree.ArrowFunctionExpression {
 			}
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("ArrowFunctionExpression not found.");
-		Error.captureStackTrace(error, firstArrow);
-		throw error;
-	}
+	if (found === undefined) throw new Error("ArrowFunctionExpression not found.");
 	return found;
 }
 
@@ -68,11 +60,7 @@ function firstTSFunctionType(source: HarnessSourceCode): ESTree.TSFunctionType {
 			}
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("TSFunctionType not found.");
-		Error.captureStackTrace(error, firstTSFunctionType);
-		throw error;
-	}
+	if (found === undefined) throw new Error("TSFunctionType not found.");
 	return found;
 }
 
@@ -85,11 +73,7 @@ function firstParameterProperty(source: HarnessSourceCode): ESTree.TSParameterPr
 			}
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("TSParameterProperty not found.");
-		Error.captureStackTrace(error, firstParameterProperty);
-		throw error;
-	}
+	if (found === undefined) throw new Error("TSParameterProperty not found.");
 	return found;
 }
 
@@ -103,11 +87,7 @@ function firstTypeAnnotation(code: string): ESTree.TSType {
 			}
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("TSTypeAnnotation not found.");
-		Error.captureStackTrace(error, firstTypeAnnotation);
-		throw error;
-	}
+	if (found === undefined) throw new Error("TSTypeAnnotation not found.");
 	return found.typeAnnotation;
 }
 
@@ -116,15 +96,11 @@ function requireParameter(
 	index: number,
 ): ESTree.ParamPattern {
 	const parameter = owner.params[index];
-	if (parameter === undefined) {
-		const error = new Error(`Expected parameter at index ${index}.`);
-		Error.captureStackTrace(error, requireParameter);
-		throw error;
-	}
+	if (parameter === undefined) throw new Error(`Expected parameter at index ${index}.`);
 	return parameter;
 }
 
-describe("functionParameterTypeAnnotation", () => {
+describe("getFunctionParameterTypeAnnotation", () => {
 	it.each([
 		["identifier", "function f(value: string): void {}", "TSStringKeyword"],
 		["rest element", "function f(...values: string[]): void {}", "TSArrayType"],
@@ -136,7 +112,7 @@ describe("functionParameterTypeAnnotation", () => {
 		const source = parseCode(code);
 		const parameter = requireParameter(firstFunction(source), 0);
 
-		expect(functionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe(expectedType);
+		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe(expectedType);
 	});
 
 	it.each([
@@ -149,7 +125,7 @@ describe("functionParameterTypeAnnotation", () => {
 		const source = parseCode(code);
 		const parameter = requireParameter(firstFunction(source), 0);
 
-		expect(functionParameterTypeAnnotation(parameter)).toBeUndefined();
+		expect(getFunctionParameterTypeAnnotation(parameter)).toBeUndefined();
 	});
 
 	it("extracts the annotation through a parameter property wrapper", () => {
@@ -158,7 +134,7 @@ describe("functionParameterTypeAnnotation", () => {
 		const source = parseCode("class C { constructor(public value: string) {} }");
 		const parameter = firstParameterProperty(source);
 
-		expect(functionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
+		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 
 	it("extracts the annotation from an arrow function parameter", () => {
@@ -167,7 +143,7 @@ describe("functionParameterTypeAnnotation", () => {
 		const source = parseCode("const f = (value: string) => {};");
 		const parameter = requireParameter(firstArrow(source), 0);
 
-		expect(functionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
+		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 
 	it("extracts the annotation from a function type parameter", () => {
@@ -176,11 +152,11 @@ describe("functionParameterTypeAnnotation", () => {
 		const source = parseCode("type F = (value: string) => void;");
 		const parameter = requireParameter(firstTSFunctionType(source), 0);
 
-		expect(functionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
+		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 });
 
-describe("functionParameterBindingName", () => {
+describe("getFunctionParameterBindingName", () => {
 	it.each([
 		["simple parameter", "function f(value: string): void {}", "value"],
 		["default-value parameter", 'function f(value: string = "default"): void {}', "value"],
@@ -194,7 +170,7 @@ describe("functionParameterBindingName", () => {
 		const source = parseCode(code);
 		const parameter = requireParameter(firstFunction(source), 0);
 
-		expect(functionParameterBindingName(parameter, source)).toBe(expected);
+		expect(getFunctionParameterBindingName(parameter, source)).toBe(expected);
 	});
 
 	it("returns the parameter property binding name", () => {
@@ -203,7 +179,7 @@ describe("functionParameterBindingName", () => {
 		const source = parseCode("class C { constructor(public value: string) {} }");
 		const parameter = firstParameterProperty(source);
 
-		expect(functionParameterBindingName(parameter, source)).toBe("value");
+		expect(getFunctionParameterBindingName(parameter, source)).toBe("value");
 	});
 });
 

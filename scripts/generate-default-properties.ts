@@ -440,7 +440,7 @@ async function getLoadedClassesAsync(
 	if (classes !== undefined && classes.length > 0) return new Set(classes.map(toLowerCase));
 
 	if (loadClassesFrom !== undefined && loadClassesFrom.length > 0) {
-		const { existsAsync } = await import("$script-utilities/file-system-utilities");
+		const { existsAsync } = await import("@small-rules/fs-utilities");
 		const directoryExists = await existsAsync(loadClassesFrom);
 		if (directoryExists) {
 			const { scanDirectoryAsync, ScanType } = await import("$script-utilities/instance-utilities");

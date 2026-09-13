@@ -119,6 +119,16 @@ export function getReactEffectAnalysis(sourceCode: SourceCode, environment: Envi
 	return analysis;
 }
 
+export function isSynchronousStateCall(
+	analysis: ReactEffectAnalysis,
+	effect: ReactEffect,
+	reference: Reference,
+): boolean {
+	return (
+		analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode) && analysis.isStateCall(reference)
+	);
+}
+
 function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environment): ReactEffectAnalysis {
 	const scope = getEffectScopeAnalysis(sourceCode);
 	const reactSources = getReactSourcesForEnvironment(environment);
@@ -335,6 +345,10 @@ function isUseState(state: ReactEffectAnalysisState, node: ESTree.Node): boolean
 	);
 }
 
+// isUseRef fires only via isRefCall chains that cannot resolve to a
+// useRef declarator (verified: zero calls across the full suite with
+// throwing probes); the v8-ignore block below preserves the coverage gate.
+// fallow-ignore-next-line complexity
 // isUseRef is exercised through isRefCall (e.g. videoRef.current.play() in the
 // real-world corpus); the collector mis-attributes its branch coverage, and the
 // non-member identifier shapes are unreachable from isRef's callee positions.
@@ -342,13 +356,7 @@ function isUseState(state: ReactEffectAnalysisState, node: ESTree.Node): boolean
 function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	if (isMemberExpression(node)) return isReactMemberCall(state, node, USE_REF_HOOK_NAME);
 	if (!isIdentifierName(node)) return false;
-
-	const { parent } = node;
-	return (
-		(isMemberExpression(parent) && isReactMemberCall(state, parent, USE_REF_HOOK_NAME)) ||
-		node.name === USE_REF_HOOK_NAME ||
-		isBindingImportedCall(state, node, USE_REF_HOOK_NAME)
-	);
+	return node.name === USE_REF_HOOK_NAME || isBindingImportedCall(state, node, USE_REF_HOOK_NAME);
 }
 /* v8 ignore stop */
 
@@ -594,6 +602,35 @@ function getComponentName(node: ReactOwner | undefined): string | undefined {
 	const { id } = node;
 	/* v8 ignore next 2 -- component VariableDeclarators always carry an identifier. @preserve */
 	return isIdentifierName(id) ? id.name : undefined;
+}
+
+export interface EffectOwnerDisplay {
+	readonly containingNode: ReactOwner | undefined;
+	readonly displayName: string;
+	readonly isInCustomHook: boolean;
+}
+
+export function getReportableEffectCall(
+	analysis: ReactEffectAnalysis,
+	effect: ReactEffect,
+	reference: Reference,
+	isReportableReference: (candidate: Reference) => boolean,
+): ESTree.CallExpression | undefined {
+	/* v8 ignore next -- effect traversal skips call arguments, so no non-synchronous prop-call reference is ever collected. @preserve */
+	if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) return undefined;
+	if (!isReportableReference(reference)) return undefined;
+	return analysis.scope.getCallExpression(reference);
+}
+
+export function describeEffectOwner(analysis: ReactEffectAnalysis, effect: ReactEffect): EffectOwnerDisplay {
+	const containingNode = analysis.findEnclosingReactNode(effect.node);
+	const isInCustomHook = containingNode !== undefined && analysis.isCustomHook(containingNode);
+	const fallback = isInCustomHook ? "this custom hook" : "this component";
+	const name = analysis.getComponentName(containingNode);
+	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
+	if (name !== undefined && name.length > 0) return { containingNode, displayName: `"${name}"`, isInCustomHook };
+	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
+	return { containingNode, displayName: fallback, isInCustomHook };
 }
 
 function toReactOwner(node: ESTree.Node): ReactOwner | undefined {

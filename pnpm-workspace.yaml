@@ -133,6 +133,7 @@ lockfile: true
 
 packages:
   - .benchmarks
+  - .codex
   - .omp
   - .opencode
   - .opencode/packages/plugins/*
@@ -205,7 +206,7 @@ catalogs:
     eslint-plugin-sonarjs: 4.2.0
     eslint-plugin-unicorn: 74.0.0
     eslint-plugin-unused-imports: 4.4.1
-    knip: 6.34.0
+    fallow: 3.23.0
     oxfmt: 0.66.0
     oxlint: 1.81.0
     oxlint-plugin-react-doctor: 0.9.13
@@ -242,6 +243,7 @@ catalogs:
     "@stryker-mutator/vitest-runner": 10.0.0
     "@testing-library/react": 16.3.2
     "@testing-library/user-event": 14.6.1
+    "@vitest/coverage-istanbul": 5.0.0
     "@vitest/coverage-v8": 5.0.0
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
@@ -251,11 +253,11 @@ catalogs:
     vitest: 5.0.0
     vitiate: 0.3.1
   tooling:
+    "@isentinel/hooks": 1.6.0
     "@oh-my-pi/pi-coding-agent": 18.1.12
     "@opencode-ai/plugin": 0.0.0-beta-19192
     "@opencode-ai/schema": 0.0.0-beta-19192
     jiti: 2.7.0
-    jscpd: 5.1.2
     pncat: 0.13.3
     sfw: 2.0.6
     skills: 1.5.23

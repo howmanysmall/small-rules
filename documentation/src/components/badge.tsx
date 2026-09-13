@@ -78,10 +78,10 @@ const badgeDefinitions = {
 } satisfies Readonly<Record<BadgeVariant, BadgeDefinition>>;
 
 export function Badge({ variant }: BadgeProperties): ReactNode {
-	const definition = badgeDefinitions[variant];
+	const { icon, label, title } = badgeDefinitions[variant];
 
 	return (
-		<span className={`badge badge--${variant}`} title={definition.title}>
+		<span className={`badge badge--${variant}`} title={title}>
 			<svg
 				aria-hidden="true"
 				fill="none"
@@ -91,9 +91,9 @@ export function Badge({ variant }: BadgeProperties): ReactNode {
 				strokeWidth="2"
 				viewBox="0 0 24 24"
 			>
-				{definition.icon}
+				{icon}
 			</svg>
-			{definition.label}
+			{label}
 		</span>
 	);
 }

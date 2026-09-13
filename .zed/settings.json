@@ -81,7 +81,7 @@
 				}
 			],
 			"hard_tabs": true,
-			"language_servers": ["knip", "astro-language-server", "biome", "..."]
+			"language_servers": ["astro-language-server", "biome", "..."]
 		},
 		"CSS": {
 			"code_actions_on_format": {

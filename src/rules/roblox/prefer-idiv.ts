@@ -2,6 +2,7 @@ import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getMemberPropertyName,
+	isAnyLiteral,
 	isBinaryExpression,
 	isCallExpression,
 	isIdentifierName,
@@ -28,7 +29,7 @@ function isSimpleReceiver(expression: ESTree.Expression): boolean {
 }
 
 function isLiteral(expression: ESTree.Expression): boolean {
-	return unwrapExpression(expression).type === "Literal";
+	return isAnyLiteral(unwrapExpression(expression));
 }
 
 function getReciprocalDivisor(expression: ESTree.Expression): number | undefined {
@@ -47,6 +48,55 @@ function getReceiverText(sourceCode: SourceCode, receiver: ESTree.Expression): s
 	return isSimpleReceiver(unwrapExpression(receiver)) ? receiverText : `(${receiverText})`;
 }
 
+function isMathFloorCallee(callee: ESTree.Expression): callee is ESTree.MemberExpression {
+	return isMemberExpression(callee) && !callee.optional && getMemberPropertyName(callee) === "floor";
+}
+
+function isUnshadowedMathReference(sourceCode: SourceCode, object: ESTree.Expression): boolean {
+	return isIdentifierNamed(object, "math") && !hasShadowedBinding(sourceCode, object, "math");
+}
+
+function getSingleCallArgument(node: ESTree.CallExpression): ESTree.Expression | undefined {
+	if (node.arguments.length !== 1) return undefined;
+
+	const [argument] = node.arguments;
+	if (argument === undefined || isSpreadElement(argument)) return undefined;
+
+	return argument;
+}
+
+interface IdivTarget {
+	readonly divisorText: string;
+	readonly receiver: ESTree.Expression;
+}
+
+function getSlashIdivTarget(sourceCode: SourceCode, expression: ESTree.BinaryExpression): IdivTarget | undefined {
+	if (expression.operator !== "/") return undefined;
+
+	return {
+		divisorText: sourceCode.getText(unwrapParenthesis(expression.right)),
+		receiver: expression.left,
+	};
+}
+
+function getStarIdivTarget(expression: ESTree.BinaryExpression): IdivTarget | undefined {
+	if (expression.operator !== "*") return undefined;
+
+	const rightDivisor = getReciprocalDivisor(expression.right);
+	if (rightDivisor !== undefined && !isLiteral(expression.left)) {
+		return { divisorText: String(rightDivisor), receiver: expression.left };
+	}
+
+	const leftDivisor = getReciprocalDivisor(expression.left);
+	if (leftDivisor === undefined || isLiteral(expression.right)) return undefined;
+
+	return { divisorText: String(leftDivisor), receiver: expression.right };
+}
+
+function getIntegerDivisionTarget(sourceCode: SourceCode, expression: ESTree.BinaryExpression): IdivTarget | undefined {
+	return getSlashIdivTarget(sourceCode, expression) ?? getStarIdivTarget(expression);
+}
+
 const preferIdiv = createRule("prefer-idiv", "roblox", {
 	createOnce(context): Visitor {
 		return {
@@ -54,50 +104,25 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 				if (node.optional) return;
 
 				const callee = unwrapExpression(node.callee);
-				if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "floor") {
-					return;
-				}
+				if (!isMathFloorCallee(callee)) return;
 
 				const object = unwrapExpression(callee.object);
-				if (
-					!isIdentifierNamed(object, "math") ||
-					hasShadowedBinding(context.sourceCode, object, "math") ||
-					node.arguments.length !== 1
-				) {
-					return;
-				}
+				if (!isUnshadowedMathReference(context.sourceCode, object)) return;
 
-				const [argument] = node.arguments;
-				if (argument === undefined || isSpreadElement(argument)) return;
+				const argument = getSingleCallArgument(node);
+				if (argument === undefined) return;
 
 				const expression = unwrapExpression(argument);
 				if (!isBinaryExpression(expression)) return;
 
-				let receiver: ESTree.Expression;
-				let divisorText: string;
-
-				if (expression.operator === "/") {
-					receiver = expression.left;
-					divisorText = context.sourceCode.getText(unwrapParenthesis(expression.right));
-				} else if (expression.operator === "*") {
-					const rightDivisor = getReciprocalDivisor(expression.right);
-					if (rightDivisor !== undefined && !isLiteral(expression.left)) {
-						receiver = expression.left;
-						divisorText = String(rightDivisor);
-					} else {
-						const leftDivisor = getReciprocalDivisor(expression.left);
-						if (leftDivisor === undefined || isLiteral(expression.right)) return;
-
-						receiver = expression.right;
-						divisorText = String(leftDivisor);
-					}
-				} else return;
+				const target = getIntegerDivisionTarget(context.sourceCode, expression);
+				if (target === undefined) return;
 
 				context.report({
 					fix: (fixer) =>
 						fixer.replaceText(
 							node,
-							`${getReceiverText(context.sourceCode, receiver)}.idiv(${divisorText})`,
+							`${getReceiverText(context.sourceCode, target.receiver)}.idiv(${target.divisorText})`,
 						),
 					messageId: "useIdiv",
 					node,

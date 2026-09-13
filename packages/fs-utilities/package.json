@@ -1,0 +1,21 @@
+{
+	"name": "@small-rules/fs-utilities",
+	"version": "0.0.0",
+	"private": true,
+	"sideEffects": false,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"arktype": "catalog:runtime"
+	},
+	"devDependencies": {
+		"@small-rules/arktype-utilities": "workspace:*",
+		"vitest": "catalog:test"
+	}
+}

@@ -31,39 +31,68 @@ const enum Color {
 	Black = 2,
 }
 
+function markCycleParticipants(path: Array<string>, neighbor: string, inCycle: Set<string>): void {
+	const cycleStart = path.lastIndexOf(neighbor);
+	for (let index = cycleStart; index < path.length; index += 1) {
+		const cycleNode = path[index];
+		/* v8 ignore next -- cycleStart is found from an existing path entry. @preserve */
+		if (cycleNode !== undefined) inCycle.add(cycleNode);
+	}
+}
+
 function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet<string> {
 	const color = new Map<string, Color>();
 	const inCycle = new Set<string>();
 
 	for (const name of callGraph.keys()) color.set(name, Color.White);
 
-	function dfs(node: string, path: Array<string>): void {
+	function visitNeighbor(neighbor: string, path: Array<string>): void {
+		const neighborColor = color.get(neighbor);
+		if (neighborColor === Color.Gray) {
+			markCycleParticipants(path, neighbor, inCycle);
+			/* v8 ignore start -- idk man @preserve */
+		} else if (neighborColor === Color.White) depthFirstSearch(neighbor, path);
+		/* v8 ignore stop -- idk man @preserve */
+	}
+
+	function depthFirstSearch(node: string, path: Array<string>): void {
 		color.set(node, Color.Gray);
 		path.push(node);
 
 		/* v8 ignore next -- registered call graph nodes always have an adjacency set. @preserve */
 		const graph = callGraph.get(node) ?? [];
-		for (const neighbor of graph) {
-			const neighborColor = color.get(neighbor);
-			if (neighborColor === Color.Gray) {
-				const cycleStart = path.lastIndexOf(neighbor);
-				for (let index = cycleStart; index < path.length; index += 1) {
-					const cycleNode = path[index];
-					/* v8 ignore next -- cycleStart is found from an existing path entry. @preserve */
-					if (cycleNode !== undefined) inCycle.add(cycleNode);
-				}
-				/* v8 ignore start -- idk man @preserve */
-			} else if (neighborColor === Color.White) dfs(neighbor, path);
-			/* v8 ignore stop -- idk man @preserve */
-		}
+		for (const neighbor of graph) visitNeighbor(neighbor, path);
 
 		path.pop();
 		color.set(node, Color.Black);
 	}
 
-	for (const name of callGraph.keys()) if (color.get(name) === Color.White) dfs(name, []);
+	for (const name of callGraph.keys()) if (color.get(name) === Color.White) depthFirstSearch(name, []);
 
 	return inCycle;
+}
+
+function getDirectCalleeName(callee: ESTree.Expression): string | undefined {
+	return isBindingIdentifier(callee) ? callee.name : undefined;
+}
+
+function getThisMethodCalleeName(callee: ESTree.Expression): string | undefined {
+	if (!isMemberExpression(callee) || !isThisExpression(callee.object)) return undefined;
+	if (!isBindingIdentifier(callee.property)) return undefined;
+	return callee.property.name;
+}
+
+interface ResolvedCallee {
+	readonly calleeName: string;
+	readonly isThisMethodCall: boolean;
+}
+
+function resolveCallee(node: ESTree.CallExpression): ResolvedCallee | undefined {
+	const direct = getDirectCalleeName(node.callee);
+	if (direct !== undefined) return { calleeName: direct, isThisMethodCall: false };
+	const method = getThisMethodCalleeName(node.callee);
+	if (method !== undefined) return { calleeName: method, isThisMethodCall: true };
+	return undefined;
 }
 
 const noRecursive = createRule("no-recursive", "general", {
@@ -105,6 +134,25 @@ const noRecursive = createRule("no-recursive", "general", {
 			return undefined;
 		}
 
+		function isLocalThisMethod(calleeName: string): boolean {
+			const className = findEnclosingClassName();
+			if (className === undefined) return false;
+			const methods = classMethods.get(className);
+			/* v8 ignore next -- named class entries are initialized before MethodDefinition visits. @preserve */
+			return methods?.has(calleeName) === true;
+		}
+
+		function isLocalCallee(calleeName: string, isThisMethodCall: boolean, node: ESTree.CallExpression): boolean {
+			if (isThisMethodCall) return isLocalThisMethod(calleeName);
+			const scope = sourceCode.getScope(node);
+			return isResolvedInScope(calleeName, scope);
+		}
+
+		function recordLocalCall(caller: string, calleeName: string, node: ESTree.CallExpression): void {
+			callGraph.get(caller)?.add(calleeName);
+			callSites.push({ callee: calleeName, caller, node });
+		}
+
 		return {
 			ArrowFunctionExpression(): void {
 				pushFunction(undefined);
@@ -114,39 +162,12 @@ const noRecursive = createRule("no-recursive", "general", {
 				const caller = getEnclosingFunctionName();
 				if (caller === undefined) return;
 
-				let calleeName: string | undefined;
-				let isThisMethodCall = false;
+				const resolved = resolveCallee(node);
+				if (resolved === undefined) return;
 
-				if (isBindingIdentifier(node.callee)) calleeName = node.callee.name;
-				else if (
-					isMemberExpression(node.callee) &&
-					isThisExpression(node.callee.object) &&
-					isBindingIdentifier(node.callee.property)
-				) {
-					calleeName = node.callee.property.name;
-					isThisMethodCall = true;
-				}
-
-				if (calleeName === undefined) return;
-
-				let isLocal = false;
-
-				if (isThisMethodCall) {
-					const className = findEnclosingClassName();
-					if (className !== undefined) {
-						const methods = classMethods.get(className);
-						/* v8 ignore next -- named class entries are initialized before MethodDefinition visits. @preserve */
-						if (methods?.has(calleeName) === true) isLocal = true;
-					}
-				} else {
-					const scope = sourceCode.getScope(node);
-					isLocal = isResolvedInScope(calleeName, scope);
-				}
-
-				if (isLocal) {
-					callGraph.get(caller)?.add(calleeName);
-					callSites.push({ callee: calleeName, caller, node });
-				}
+				const { calleeName, isThisMethodCall } = resolved;
+				if (!isLocalCallee(calleeName, isThisMethodCall, node)) return;
+				recordLocalCall(caller, calleeName, node);
 			},
 
 			ClassDeclaration(node): void {

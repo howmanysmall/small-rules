@@ -207,6 +207,19 @@ function modeEmitsDelimiter(mode: TransformMode): boolean {
 	);
 }
 
+function hasCamelCaseBoundary(previousCode: number, code: number, nextCode: number): boolean {
+	return (
+		isAsciiUpperCode(code) &&
+		(isAsciiLowerCode(previousCode) || (isAsciiUpperCode(previousCode) && isAsciiLowerCode(nextCode)))
+	);
+}
+
+function getLineBreakLength(value: string, index: number, code: number): number {
+	if (code === LINE_FEED) return 1;
+	if (code !== CARRIAGE_RETURN) return 0;
+	return value.charCodeAt(index + 1) === LINE_FEED ? 2 : 1;
+}
+
 function transformCasing(value: string, mode: TransformMode, delimiter: string): string {
 	let result = "";
 	let hasLineOutput = false;
@@ -217,8 +230,9 @@ function transformCasing(value: string, mode: TransformMode, delimiter: string):
 	for (let index = 0; index < value.length; index += 1) {
 		const code = value.charCodeAt(index);
 
-		if (code === LINE_FEED || code === CARRIAGE_RETURN) {
-			if (code === CARRIAGE_RETURN && value.charCodeAt(index + 1) === LINE_FEED) {
+		const lineBreakLength = getLineBreakLength(value, index, code);
+		if (lineBreakLength > 0) {
+			if (lineBreakLength === 2) {
 				result += "\r\n";
 				index += 1;
 			} else result += value[index];
@@ -238,13 +252,8 @@ function transformCasing(value: string, mode: TransformMode, delimiter: string):
 
 		const valueAtIndex = value.charAt(index);
 
-		const isUpper = isAsciiUpperCode(code);
-		const nextCode = value.charCodeAt(index + 1);
 		const hasCamelBoundary =
-			isUpper &&
-			hasLineOutput &&
-			!pendingDelimiter &&
-			(isAsciiLowerCode(previousCode) || (isAsciiUpperCode(previousCode) && isAsciiLowerCode(nextCode)));
+			hasLineOutput && !pendingDelimiter && hasCamelCaseBoundary(previousCode, code, value.charCodeAt(index + 1));
 
 		if (hasLineOutput && (pendingDelimiter || hasCamelBoundary)) {
 			if (modeEmitsDelimiter(mode)) result += delimiter;
@@ -271,8 +280,9 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 	for (let index = 0; index < value.length; index += 1) {
 		const code = value.charCodeAt(index);
 
-		if (code === LINE_FEED || code === CARRIAGE_RETURN) {
-			if (code === CARRIAGE_RETURN && value.charCodeAt(index + 1) === LINE_FEED) {
+		const lineBreakLength = getLineBreakLength(value, index, code);
+		if (lineBreakLength > 0) {
+			if (lineBreakLength === 2) {
 				outputIndex = matchesStringAt(value, outputIndex, "\r\n");
 				index += 1;
 			} else {
@@ -293,13 +303,8 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 			continue;
 		}
 
-		const isUpper = isAsciiUpperCode(code);
-		const nextCode = value.charCodeAt(index + 1);
 		const hasCamelBoundary =
-			isUpper &&
-			hasLineOutput &&
-			!pendingDelimiter &&
-			(isAsciiLowerCode(previousCode) || (isAsciiUpperCode(previousCode) && isAsciiLowerCode(nextCode)));
+			hasLineOutput && !pendingDelimiter && hasCamelCaseBoundary(previousCode, code, value.charCodeAt(index + 1));
 
 		if (hasLineOutput && (pendingDelimiter || hasCamelBoundary)) {
 			if (modeEmitsDelimiter(mode)) {

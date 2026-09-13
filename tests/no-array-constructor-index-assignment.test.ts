@@ -19,6 +19,11 @@ describe("no-array-constructor-index-assignment", () => {
 				errors: [{ messageId: "preferArrayLiteral" }],
 			},
 			{
+				code: "foo(); const values = new Array<number>(); const other = compute(); values[0] = other;",
+				output: "foo();  const other = compute(); const values = [other];",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
 				code: "const values = new Array<number>();\nvalues[0] = 1;\nvalues[1] = 2;",
 				output: "const values = [1, 2];",
 				errors: [{ messageId: "preferArrayLiteral" }],

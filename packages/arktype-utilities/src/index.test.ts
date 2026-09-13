@@ -6,9 +6,11 @@ import {
 	isBoolean,
 	isDictionaryOfStrings,
 	isDictionaryOfUnknowns,
+	isFalse,
 	isMaybeNull,
 	isMaybeNumber,
 	isMaybeReadonlyArrayOfStrings,
+	isMaybeReadonlyDictionaryOfStrings,
 	isMaybeString,
 	isNull,
 	isNullableString,
@@ -18,6 +20,7 @@ import {
 	isReadonlyDictionaryOfStrings,
 	isReadonlyDictionaryOfUnknowns,
 	isString,
+	isTrue,
 	isUndefined,
 	isUnknown,
 } from "./index.ts";
@@ -28,6 +31,22 @@ describe("primitive validators", () => {
 
 		expect(isBoolean.allows(true)).toBe(true);
 		expect(isBoolean.allows("true")).toBe(false);
+	});
+
+	it("isTrue accepts true and rejects everything else", () => {
+		expect.assertions(3);
+
+		expect(isTrue.allows(true)).toBe(true);
+		expect(isTrue.allows(false)).toBe(false);
+		expect(isTrue.allows("true")).toBe(false);
+	});
+
+	it("isFalse accepts false and rejects everything else", () => {
+		expect.assertions(3);
+
+		expect(isFalse.allows(false)).toBe(true);
+		expect(isFalse.allows(true)).toBe(false);
+		expect(isFalse.allows("false")).toBe(false);
 	});
 
 	it("isNumber accepts numbers and rejects strings", () => {
@@ -96,6 +115,15 @@ describe("optional and nullable validators", () => {
 
 		expect(isMaybeNull.allows(null)).toBe(true);
 		expect(isMaybeNull.allows(undefined)).toBe(true);
+	});
+
+	it("isMaybeReadonlyDictionaryOfStrings accepts accepts string records and rejects non-string records or undefined", () => {
+		expect.assertions(4);
+
+		expect(isMaybeReadonlyDictionaryOfStrings.allows({ a: "b" })).toBe(true);
+		expect(isMaybeReadonlyDictionaryOfStrings.allows({ a: 1 })).toBe(false);
+		expect(isMaybeReadonlyDictionaryOfStrings.allows(undefined)).toBe(true);
+		expect(isMaybeReadonlyDictionaryOfStrings.allows(null)).toBe(false);
 	});
 });
 

@@ -1,9 +1,53 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
+	BINARY_EXPRESSION,
+	CALL_EXPRESSION,
+	CHAIN_EXPRESSION,
+	CLASS_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	IDENTIFIER,
+	IMPORT_EXPRESSION,
+	isIdentifierName,
+	isIdentifierNamed,
+	isMemberExpression,
+	isPrivateIdentifier,
+	isProperty,
+	isSpreadElement,
+	isUnaryExpression,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	LITERAL,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	META_PROPERTY,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	SEQUENCE_EXPRESSION,
+	SUPER,
+	TAGGED_TEMPLATE_EXPRESSION,
+	TEMPLATE_LITERAL,
+	THIS_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+	UNARY_EXPRESSION,
+	unwrapExpression,
+	UPDATE_EXPRESSION,
+	YIELD_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 export interface StaticExpressionOptions {
 	readonly staticCallsRequireFactories?: boolean;
@@ -40,39 +84,39 @@ export const DEFAULT_STATIC_GLOBAL_FACTORIES: ReadonlyArray<string> = [
 
 const STATIC_UNARY_OPERATORS = new Set(["!", "+", "-", "typeof", "void", "~"]);
 
-const VALID_EXPRESSIONS = new Set<ESTree.Expression["type"]>([
-	"ArrayExpression",
-	"ArrowFunctionExpression",
-	"AssignmentExpression",
-	"AwaitExpression",
-	"BinaryExpression",
-	"CallExpression",
-	"ChainExpression",
-	"ClassExpression",
-	"ConditionalExpression",
-	"FunctionExpression",
-	"Identifier",
-	"ImportExpression",
-	"Literal",
-	"LogicalExpression",
-	"MemberExpression",
-	"MetaProperty",
-	"NewExpression",
-	"ObjectExpression",
-	"ParenthesizedExpression",
-	"SequenceExpression",
-	"Super",
-	"TaggedTemplateExpression",
-	"TemplateLiteral",
-	"ThisExpression",
-	"TSAsExpression",
-	"TSInstantiationExpression",
-	"TSNonNullExpression",
-	"TSSatisfiesExpression",
-	"TSTypeAssertion",
-	"UnaryExpression",
-	"UpdateExpression",
-	"YieldExpression",
+const VALID_EXPRESSIONS = new Set<NodeType>([
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
+	BINARY_EXPRESSION,
+	CALL_EXPRESSION,
+	CHAIN_EXPRESSION,
+	CLASS_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	FUNCTION_EXPRESSION,
+	IDENTIFIER,
+	IMPORT_EXPRESSION,
+	LITERAL,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	META_PROPERTY,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	SEQUENCE_EXPRESSION,
+	SUPER,
+	TAGGED_TEMPLATE_EXPRESSION,
+	TEMPLATE_LITERAL,
+	THIS_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+	UNARY_EXPRESSION,
+	UPDATE_EXPRESSION,
+	YIELD_EXPRESSION,
 ]);
 
 function isExpression(node: ESTree.Node): node is ESTree.Expression {
@@ -99,10 +143,10 @@ export function getConstInitializer(definition: Definition): ESTree.Expression |
 
 	const { node } = definition;
 	/* v8 ignore next -- @preserve Variable definitions from the parser always point at VariableDeclarator nodes. */
-	if (node.type !== "VariableDeclarator") return undefined;
+	if (!isVariableDeclarator(node)) return undefined;
 
 	const { parent } = node;
-	if (parent.type !== "VariableDeclaration" || parent.kind !== "const") return undefined;
+	if (!isVariableDeclaration(parent) || parent.kind !== "const") return undefined;
 
 	return node.init ?? undefined;
 }
@@ -146,13 +190,10 @@ export function isExplicitUndefinedExpression(
 	if (seen.has(unwrapped)) return false;
 	seen.add(unwrapped);
 
-	if (
-		(unwrapped.type === "Identifier" && unwrapped.name === "undefined") ||
-		(unwrapped.type === "UnaryExpression" && unwrapped.operator === "void")
-	) {
+	if (isIdentifierNamed(unwrapped, "undefined") || (isUnaryExpression(unwrapped) && unwrapped.operator === "void")) {
 		return true;
 	}
-	if (unwrapped.type !== "Identifier") return false;
+	if (!isIdentifierName(unwrapped)) return false;
 
 	const initializer = getConstInitializerForIdentifier(sourceCode, unwrapped);
 	return initializer === undefined ? false : isExplicitUndefinedExpression(sourceCode, initializer, seen);
@@ -164,7 +205,7 @@ function isStaticMemberProperty(
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	if (property.type === "Identifier") return true;
+	if (isIdentifierName(property)) return true;
 	/* v8 ignore next -- @preserve PrivateIdentifier cannot be produced as a valid computed member property expression. */
 	if (!isExpression(property)) return false;
 	return isStaticExpression(sourceCode, property, seen, options);
@@ -172,8 +213,8 @@ function isStaticMemberProperty(
 
 function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
 	let unwrapped = unwrapExpression(callee);
-	while (unwrapped.type === "MemberExpression") unwrapped = unwrapExpression(unwrapped.object);
-	return unwrapped.type === "Identifier" ? unwrapped.name : undefined;
+	while (isMemberExpression(unwrapped)) unwrapped = unwrapExpression(unwrapped.object);
+	return isIdentifierName(unwrapped) ? unwrapped.name : undefined;
 }
 
 function isStaticCallCallee(
@@ -188,17 +229,17 @@ function isStaticCallCallee(
 	}
 
 	const unwrapped = unwrapExpression(callee);
-	if (unwrapped.type === "Identifier") return isStaticIdentifier(sourceCode, unwrapped, seen, options);
-	if (unwrapped.type !== "MemberExpression" || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
+	if (isIdentifierName(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
+	if (!isMemberExpression(unwrapped) || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
 		return false;
 	}
 	if (unwrapped.computed) return isStaticExpression(sourceCode, unwrapped.property, seen, options);
-	return unwrapped.property.type === "Identifier";
+	return isIdentifierName(unwrapped.property);
 }
 
 function checkStaticCallOrNewExpression(
 	sourceCode: SourceCode,
-	parameters: ReadonlyArray<ESTree.CallExpression["arguments"][number]>,
+	parameters: ReadonlyArray<ESTree.Argument>,
 	callee: ESTree.Expression,
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
@@ -206,7 +247,32 @@ function checkStaticCallOrNewExpression(
 	if (!isStaticCallCallee(sourceCode, callee, seen, options)) return false;
 
 	return parameters.every(
-		(argument) => argument.type !== "SpreadElement" && isStaticExpression(sourceCode, argument, seen, options),
+		(argument) => !isSpreadElement(argument) && isStaticExpression(sourceCode, argument, seen, options),
+	);
+}
+
+function isStaticConditionalExpression(
+	sourceCode: SourceCode,
+	node: ESTree.ConditionalExpression,
+	seen: Set<ESTree.Node>,
+	options: StaticExpressionOptions,
+): boolean {
+	return (
+		isStaticExpression(sourceCode, node.test, seen, options) &&
+		isStaticExpression(sourceCode, node.consequent, seen, options) &&
+		isStaticExpression(sourceCode, node.alternate, seen, options)
+	);
+}
+
+function isStaticMemberAccess(
+	sourceCode: SourceCode,
+	node: ESTree.MemberExpression,
+	seen: Set<ESTree.Node>,
+	options: StaticExpressionOptions,
+): boolean {
+	return (
+		isStaticExpression(sourceCode, node.object, seen, options) &&
+		(!node.computed || isStaticMemberProperty(sourceCode, node.property, seen, options))
 	);
 }
 
@@ -221,11 +287,11 @@ export function isStaticExpression(
 	seen.add(unwrapped);
 
 	switch (unwrapped.type) {
-		case "ArrayExpression":
+		case ARRAY_EXPRESSION:
 			return isStaticArrayExpression(sourceCode, unwrapped, seen, options);
 
-		case "BinaryExpression":
-		case "LogicalExpression": {
+		case BINARY_EXPRESSION:
+		case LOGICAL_EXPRESSION: {
 			/* v8 ignore next -- @preserve Parser-produced binary and logical left operands are expressions. */
 			if (!isExpression(unwrapped.left)) return false;
 			return (
@@ -234,47 +300,40 @@ export function isStaticExpression(
 			);
 		}
 
-		case "CallExpression":
+		case CALL_EXPRESSION:
 			return checkStaticCallOrNewExpression(sourceCode, unwrapped.arguments, unwrapped.callee, seen, options);
 
-		case "ConditionalExpression": {
-			return (
-				isStaticExpression(sourceCode, unwrapped.test, seen, options) &&
-				isStaticExpression(sourceCode, unwrapped.consequent, seen, options) &&
-				isStaticExpression(sourceCode, unwrapped.alternate, seen, options)
-			);
+		case CONDITIONAL_EXPRESSION: {
+			return isStaticConditionalExpression(sourceCode, unwrapped, seen, options);
 		}
 
-		case "Identifier":
+		case IDENTIFIER:
 			return isStaticIdentifier(sourceCode, unwrapped, seen, options);
 
-		case "Literal":
+		case LITERAL:
 			return true;
 
-		case "MemberExpression": {
-			return (
-				isStaticExpression(sourceCode, unwrapped.object, seen, options) &&
-				(!unwrapped.computed || isStaticMemberProperty(sourceCode, unwrapped.property, seen, options))
-			);
+		case MEMBER_EXPRESSION: {
+			return isStaticMemberAccess(sourceCode, unwrapped, seen, options);
 		}
 
-		case "NewExpression":
+		case NEW_EXPRESSION:
 			return checkStaticCallOrNewExpression(sourceCode, unwrapped.arguments, unwrapped.callee, seen, options);
 
-		case "ObjectExpression":
+		case OBJECT_EXPRESSION:
 			return isStaticObjectExpression(sourceCode, unwrapped, seen, options);
 
-		case "SequenceExpression": {
+		case SEQUENCE_EXPRESSION: {
 			return (
 				unwrapped.expressions.length > 0 &&
 				unwrapped.expressions.every((expression_) => isStaticExpression(sourceCode, expression_, seen, options))
 			);
 		}
 
-		case "TemplateLiteral":
+		case TEMPLATE_LITERAL:
 			return unwrapped.expressions.length === 0;
 
-		case "UnaryExpression": {
+		case UNARY_EXPRESSION: {
 			return (
 				STATIC_UNARY_OPERATORS.has(unwrapped.operator) &&
 				isStaticExpression(sourceCode, unwrapped.argument, seen, options)
@@ -306,8 +365,8 @@ function isStaticIdentifier(
 	return false;
 }
 
-function isExpressionKey(key: ESTree.ObjectProperty["key"]): key is ESTree.Expression {
-	return key.type !== "PrivateIdentifier" && key.type !== "Identifier";
+function isExpressionKey(key: ESTree.PropertyKey): key is ESTree.Expression {
+	return !isPrivateIdentifier(key) && !isIdentifierName(key);
 }
 
 export function isStaticObjectExpression(
@@ -317,7 +376,7 @@ export function isStaticObjectExpression(
 	options: StaticExpressionOptions,
 ): boolean {
 	for (const property of objectExpression.properties) {
-		if (property.type !== "Property" || property.kind !== "init") return false;
+		if (!isProperty(property) || property.kind !== "init") return false;
 
 		if (
 			(property.computed &&
@@ -339,7 +398,7 @@ export function isStaticArrayExpression(
 ): boolean {
 	for (const element of elements) {
 		if (element === null) return false;
-		if (element.type === "SpreadElement" || !isStaticExpression(sourceCode, element, seen, options)) return false;
+		if (isSpreadElement(element) || !isStaticExpression(sourceCode, element, seen, options)) return false;
 	}
 	return true;
 }

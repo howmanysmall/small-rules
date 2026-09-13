@@ -40,14 +40,7 @@
 	},
 
 	"files": {
-		"includes": [
-			"**",
-			"!**/package.json",
-			"!**/*.js",
-			"!**/*-lock.{json,yaml}",
-			"!scripts/dupes-viewer.html",
-			"!scripts/clis/**/*.ts"
-		]
+		"includes": ["**", "!**/package.json", "!**/*.js", "!**/*-lock.{json,yaml}", "!scripts/clis/**/*.ts"]
 	},
 
 	"formatter": {
@@ -165,6 +158,12 @@
 			"a11y": { "preset": "none" },
 
 			"complexity": {
+				"noExcessiveCognitiveComplexity": {
+					"level": "error",
+					"options": {
+						"maxAllowedComplexity": 15
+					}
+				},
 				"noDivRegex": "error",
 				"noExcessiveNestedTestSuites": "error",
 				"noForEach": "error",
@@ -394,6 +393,11 @@
 			}
 		},
 
+		{
+			"includes": [".fallowrc.jsonc"],
+			"json": { "formatter": { "trailingCommas": "none" } }
+		},
+
 		// JSON Files
 		{
 			"includes": [],
@@ -443,7 +447,7 @@
 		},
 
 		{
-			"includes": ["*.config.{ts,mjs}"],
+			"includes": ["*.config.{ts,mjs}", ".codex/hooks/**/*.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -529,6 +533,17 @@
 				"rules": {
 					"style": {
 						"noDescendingSpecificity": "off"
+					}
+				}
+			}
+		},
+
+		{
+			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", ".codex/hooks/*.{ts,tsx}"],
+			"linter": {
+				"rules": {
+					"complexity": {
+						"noExcessiveCognitiveComplexity": "off"
 					}
 				}
 			}

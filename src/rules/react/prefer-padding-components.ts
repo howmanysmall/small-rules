@@ -8,12 +8,25 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import {
+	isAnyLiteral,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxIdentifier,
+	isJsxSpreadAttribute,
+	isJsxText,
+	JSX_ELEMENT,
+	JSX_EMPTY_EXPRESSION,
+	JSX_EXPRESSION_CONTAINER,
+	JSX_FRAGMENT,
+	LITERAL,
+	unwrapExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";
 
-type MessageIds = "preferDirectionalPadding" | "preferEqualPadding";
+type MessageId = "preferDirectionalPadding" | "preferEqualPadding";
 
 const IGNORED_COMPARISON_KEYS = new Set(["end", "loc", "parent", "range", "start"]);
 const JSX_EXTENSIONS = new Set([".jsx", ".tsx"]);
@@ -46,10 +59,7 @@ function isStructuralRecord(value: StructuralValue): value is StructuralRecord {
 
 function areStructurallyEqual(left: StructuralValue, right: StructuralValue): boolean {
 	if (Object.is(left, right)) return true;
-
-	if (isStructuralArray(left)) {
-		return Array.isArray(right) && areArraysStructurallyEqual(left, right);
-	}
+	if (isStructuralArray(left)) return Array.isArray(right) && areArraysStructurallyEqual(left, right);
 
 	/* v8 ignore next -- parser-produced ESTree nodes are records, not native arrays. @preserve */
 	if (Array.isArray(right)) return false;
@@ -91,8 +101,8 @@ function areRecordsStructurallyEqual(left: StructuralRecord, right: StructuralRe
 
 function hasMeaningfulChildren(node: ESTree.JSXElement): boolean {
 	for (const child of node.children) {
-		if (child.type === "JSXText" && child.value.trim() === "") continue;
-		if (child.type === "JSXExpressionContainer" && child.expression.type === "JSXEmptyExpression") continue;
+		if (isJsxText(child) && child.value.trim().length === 0) continue;
+		if (isJsxExpressionContainer(child) && isJsxEmptyExpression(child.expression)) continue;
 
 		return true;
 	}
@@ -104,11 +114,11 @@ function getComparableAttributeNode({ value }: ESTree.JSXAttribute): ESTree.Expr
 	/* v8 ignore next -- collectPaddingAttributes rejects padding attributes without values. @preserve */
 	if (value === null) return undefined;
 
-	if (value.type === "JSXExpressionContainer") {
+	if (isJsxExpressionContainer(value)) {
 		switch (value.expression.type) {
-			case "JSXElement":
-			case "JSXEmptyExpression":
-			case "JSXFragment":
+			case JSX_ELEMENT:
+			case JSX_EMPTY_EXPRESSION:
+			case JSX_FRAGMENT:
 				return undefined;
 
 			default:
@@ -116,27 +126,27 @@ function getComparableAttributeNode({ value }: ESTree.JSXAttribute): ESTree.Expr
 		}
 	}
 
-	return value.type === "Literal" ? value : undefined;
+	return isAnyLiteral(value) ? value : undefined;
 }
 
 function collectPaddingAttributes(node: ESTree.JSXOpeningElement): PaddingAttributes | undefined {
-	const attributes = new Map<string, ESTree.JSXAttribute>();
+	const paddingAttributes = new Map<string, ESTree.JSXAttribute>();
 
 	for (const attribute of node.attributes) {
-		if (attribute.type === "JSXSpreadAttribute" || attribute.name.type !== "JSXIdentifier") return undefined;
+		if (isJsxSpreadAttribute(attribute) || !isJsxIdentifier(attribute.name)) return undefined;
 
-		const attributeName = attribute.name.name;
-		if (!PADDING_ATTRIBUTE_NAMES.has(attributeName) || attributes.has(attributeName) || attribute.value === null) {
+		const { name } = attribute.name;
+		if (!PADDING_ATTRIBUTE_NAMES.has(name) || paddingAttributes.has(name) || attribute.value === null) {
 			return undefined;
 		}
 
-		attributes.set(attributeName, attribute);
+		paddingAttributes.set(name, attribute);
 	}
 
-	const paddingBottom = attributes.get("PaddingBottom");
-	const paddingLeft = attributes.get("PaddingLeft");
-	const paddingRight = attributes.get("PaddingRight");
-	const paddingTop = attributes.get("PaddingTop");
+	const paddingBottom = paddingAttributes.get("PaddingBottom");
+	const paddingLeft = paddingAttributes.get("PaddingLeft");
+	const paddingRight = paddingAttributes.get("PaddingRight");
+	const paddingTop = paddingAttributes.get("PaddingTop");
 	if (
 		paddingBottom === undefined ||
 		paddingLeft === undefined ||
@@ -154,8 +164,8 @@ function getAttributeValueText({ value }: ESTree.JSXAttribute, sourceCode: Sourc
 	if (value === null) return undefined;
 
 	switch (value.type) {
-		case "JSXExpressionContainer":
-		case "Literal":
+		case JSX_EXPRESSION_CONTAINER:
+		case LITERAL:
 			return sourceCode.getText(value);
 
 		/* v8 ignore next -- comparable attributes exclude JSX/direct non-literal values before fixes. @preserve */
@@ -166,28 +176,28 @@ function getAttributeValueText({ value }: ESTree.JSXAttribute, sourceCode: Sourc
 
 function getPaddingReplacement(
 	componentName: string,
-	kind: MessageIds,
-	attributes: PaddingAttributes,
+	messageId: MessageId,
+	paddingAttributes: PaddingAttributes,
 	sourceCode: SourceCode,
 ): string | undefined {
-	const topValue = getAttributeValueText(attributes.paddingTop, sourceCode);
+	const topValue = getAttributeValueText(paddingAttributes.paddingTop, sourceCode);
 	/* v8 ignore next -- reported padding has a comparable top value that can be printed. @preserve */
 	if (topValue === undefined) return undefined;
 
-	if (kind === "preferEqualPadding") return `<${componentName} padding=${topValue} />`;
+	if (messageId === "preferEqualPadding") return `<${componentName} padding=${topValue} />`;
 
-	const leftValue = getAttributeValueText(attributes.paddingLeft, sourceCode);
+	const leftValue = getAttributeValueText(paddingAttributes.paddingLeft, sourceCode);
 	/* v8 ignore next -- directional reports require a comparable left value that can be printed. @preserve */
 	if (leftValue === undefined) return undefined;
 
 	return `<${componentName} horizontal=${topValue} vertical=${leftValue} />`;
 }
 
-function getPaddingMessageId(attributes: PaddingAttributes): MessageIds | undefined {
-	const bottom = getComparableAttributeNode(attributes.paddingBottom);
-	const left = getComparableAttributeNode(attributes.paddingLeft);
-	const right = getComparableAttributeNode(attributes.paddingRight);
-	const top = getComparableAttributeNode(attributes.paddingTop);
+function getPaddingMessageId(paddingAttributes: PaddingAttributes): MessageId | undefined {
+	const bottom = getComparableAttributeNode(paddingAttributes.paddingBottom);
+	const left = getComparableAttributeNode(paddingAttributes.paddingLeft);
+	const right = getComparableAttributeNode(paddingAttributes.paddingRight);
+	const top = getComparableAttributeNode(paddingAttributes.paddingTop);
 	if (bottom === undefined || left === undefined || right === undefined || top === undefined) return undefined;
 
 	const allEqual =
@@ -197,10 +207,6 @@ function getPaddingMessageId(attributes: PaddingAttributes): MessageIds | undefi
 	const horizontalEqual = areStructurallyEqual(top, bottom);
 	const verticalEqual = areStructurallyEqual(left, right);
 	return horizontalEqual && verticalEqual ? "preferDirectionalPadding" : undefined;
-}
-
-function isJsxIdentifier(node: ESTree.JSXElementName): node is ESTree.JSXIdentifier {
-	return node.type === "JSXIdentifier";
 }
 
 const preferPaddingComponents = createRule("prefer-padding-components", "react", {
@@ -216,6 +222,52 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 		/* v8 ignore stop -- @preserve */
 		const directionalPaddingIdentifiers = new Set<string>();
 		const equalPaddingIdentifiers = new Set<string>();
+
+		function isDefinitionFileFor(isPreferEqualPadding: boolean): boolean {
+			return isPreferEqualPadding ? isEqualPaddingDefinitionFile : isDirectionalPaddingDefinitionFile;
+		}
+
+		function getIdentifiersFor(isPreferEqualPadding: boolean): ReadonlySet<string> {
+			return isPreferEqualPadding ? equalPaddingIdentifiers : directionalPaddingIdentifiers;
+		}
+
+		function isUnfounded(componentIdentifiers: ReadonlySet<string>, isPreferEqualPadding: boolean): boolean {
+			const discoverComponent = isPreferEqualPadding ? discoverEqualPadding : discoverDirectionalPadding;
+			return componentIdentifiers.size === 0 && !discoverComponent().found;
+		}
+
+		function getReplacement(
+			componentIdentifiers: ReadonlySet<string>,
+			messageId: MessageId,
+			attributes: PaddingAttributes,
+		): string | undefined {
+			const canFix = JSX_EXTENSIONS.has(nodePath.extname(filename)) && componentIdentifiers.size === 1;
+			const [componentIdentifier] = [...componentIdentifiers];
+			return canFix && componentIdentifier !== undefined
+				? getPaddingReplacement(componentIdentifier, messageId, attributes, context.sourceCode)
+				: undefined;
+		}
+
+		function handleReport(
+			componentIdentifiers: ReadonlySet<string>,
+			messageId: MessageId,
+			attributes: PaddingAttributes,
+			node: ESTree.JSXElement,
+		): void {
+			const replacement = getReplacement(componentIdentifiers, messageId, attributes);
+			if (replacement !== undefined) {
+				context.report({
+					fix(fixer) {
+						return fixer.replaceText(node, replacement);
+					},
+					messageId,
+					node,
+				});
+				return;
+			}
+
+			context.report({ messageId, node });
+		}
 
 		return {
 			ImportDeclaration(node): void {
@@ -243,45 +295,21 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 				if (hasMeaningfulChildren(node)) return;
 
 				const { openingElement } = node;
-				if (!isJsxIdentifier(openingElement.name)) return;
-				if (openingElement.name.name !== "uipadding") return;
+				if (!isJsxIdentifier(openingElement.name) || openingElement.name.name !== "uipadding") return;
 
 				const attributes = collectPaddingAttributes(openingElement);
 				if (attributes === undefined) return;
 
 				const messageId = getPaddingMessageId(attributes);
 				if (messageId === undefined) return;
-				const isDefinitionFile =
-					messageId === "preferEqualPadding"
-						? isEqualPaddingDefinitionFile
-						: isDirectionalPaddingDefinitionFile;
-				if (isDefinitionFile) return;
-				const componentIdentifiers =
-					messageId === "preferEqualPadding" ? equalPaddingIdentifiers : directionalPaddingIdentifiers;
-				const discoverComponent =
-					messageId === "preferEqualPadding" ? discoverEqualPadding : discoverDirectionalPadding;
 
-				if (componentIdentifiers.size === 0 && !discoverComponent().found) return;
+				const isPreferEqualPadding = messageId === "preferEqualPadding";
 
-				const canFix = JSX_EXTENSIONS.has(nodePath.extname(filename)) && componentIdentifiers.size === 1;
-				const [componentIdentifier] = [...componentIdentifiers];
-				const replacement =
-					canFix && componentIdentifier !== undefined
-						? getPaddingReplacement(componentIdentifier, messageId, attributes, context.sourceCode)
-						: undefined;
+				if (isDefinitionFileFor(isPreferEqualPadding)) return;
 
-				if (replacement !== undefined) {
-					context.report({
-						fix(fixer) {
-							return fixer.replaceText(node, replacement);
-						},
-						messageId,
-						node,
-					});
-					return;
-				}
-
-				context.report({ messageId, node });
+				const componentIdentifiers = getIdentifiersFor(isPreferEqualPadding);
+				if (isUnfounded(componentIdentifiers, isPreferEqualPadding)) return;
+				handleReport(componentIdentifiers, messageId, attributes, node);
 			},
 		} satisfies Visitor;
 	},

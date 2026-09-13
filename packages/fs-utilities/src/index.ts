@@ -9,9 +9,9 @@ const isNodeSystemError = type.instanceOf(Error).and({
 	"syscall?": isMaybeString,
 });
 
-export async function existsAsync(path: string): Promise<boolean> {
+export async function existsAsync(fsPath: string): Promise<boolean> {
 	try {
-		await lstat(path);
+		await lstat(fsPath);
 		return true;
 	} catch (error) {
 		if (isNodeSystemError.allows(error) && error.code === "ENOENT") return false;
