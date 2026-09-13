@@ -46,6 +46,12 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.0.1] - 2026-09-13
+
+## 🐞 Fixed
+
+- **no-known-value-widening**: Stops reporting known arguments passed to local type-guard functions, including literals, aliases, assertions, and typed return values - by @howmanysmall in [#61](https://github.com/howmanysmall/small-rules/pull/61)
+
 ## [3.0.0] - 2026-09-13
 
 ## ⚠️ Breaking Changes
