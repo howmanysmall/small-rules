@@ -6,18 +6,28 @@
 // aliases. Adopted configurable markers and non-empty justification text.
 // Local departure: a described Oxlint directive that disables
 // `typescript/no-unsafe-type-assertion` still counts as justification.
+// Local departure: an unbraced control-flow body may take its justification
+// from the leading comment of the enclosing statement.
 
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	DO_WHILE_STATEMENT,
 	EXPRESSION_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
 	isBindingIdentifier,
 	isExportNamedDeclaration,
 	isProgram,
 	isTsTypeReference,
+	LABELED_STATEMENT,
 	PROPERTY_DEFINITION,
 	RETURN_STATEMENT,
 	THROW_STATEMENT,
 	VARIABLE_DECLARATION,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, VisitorWithHooks } from "oxlint-plugin-utilities";
@@ -32,6 +42,17 @@ const COMMENT_OWNER_KINDS = new Set([
 	RETURN_STATEMENT,
 	THROW_STATEMENT,
 	VARIABLE_DECLARATION,
+]);
+
+const UNBRACED_BODY_PARENT_KINDS = new Set([
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	LABELED_STATEMENT,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
 ]);
 
 const DEFAULT_SAFETY_MARKERS = ["SAFETY"] as const satisfies readonly [string, ...Array<string>];
@@ -85,11 +106,22 @@ function hasJustifyingCommentBefore(sourceCode: SourceCode, owner: ESTree.Node, 
 	return sourceCode.getCommentsBefore(owner).some((comment) => commentJustifiesAssertion(comment, pattern));
 }
 
+/**
+ * Whether a statement occupies a control-flow body slot directly (an
+ * unbraced `if`/loop/label/`with` body) and cannot host a leading comment.
+ *
+ * @param node - Statement whose parent decides where the comment lives.
+ * @returns Whether the enclosing statement must carry the justification.
+ */
+function isUnbracedControlBody(node: ESTree.Node): boolean {
+	return node.parent !== null && UNBRACED_BODY_PARENT_KINDS.has(node.parent.type);
+}
+
 function hasSafetyComment(sourceCode: SourceCode, node: TypeAssertion, pattern: RegExp): boolean {
 	let current: ESTree.Node = node;
 	while (true) {
 		if (hasJustifyingCommentBefore(sourceCode, current, pattern)) return true;
-		if (COMMENT_OWNER_KINDS.has(current.type)) {
+		if (COMMENT_OWNER_KINDS.has(current.type) && !isUnbracedControlBody(current)) {
 			return (
 				isExportNamedDeclaration(current.parent) &&
 				current.parent.declaration === current &&
