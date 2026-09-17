@@ -46,6 +46,13 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.0.2] - 2026-09-17
+
+## 🐞 Fixed
+
+- **require-safety-comment-for-type-assertion**: Accepts a safety comment on the enclosing control-flow statement for assertions in unbraced `if`, loop, label, and `with` bodies [#62](https://github.com/howmanysmall/small-rules/pull/62).
+- **directive-require-description**: Ignores line comments with non-string values instead of throwing while inspecting directives [#62](https://github.com/howmanysmall/small-rules/pull/62).
+
 ## [3.0.1] - 2026-09-13
 
 ## 🐞 Fixed
