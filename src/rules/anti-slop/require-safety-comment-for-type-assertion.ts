@@ -6,6 +6,8 @@
 // aliases. Adopted configurable markers and non-empty justification text.
 // Local departure: a described Oxlint directive that disables
 // `typescript/no-unsafe-type-assertion` still counts as justification.
+// Local departure: an unbraced control-flow body may take its justification
+// from the leading comment of the enclosing statement.
 
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -14,6 +16,7 @@ import {
 	isExportNamedDeclaration,
 	isProgram,
 	isTsTypeReference,
+	isUnbracedControlBody,
 	PROPERTY_DEFINITION,
 	RETURN_STATEMENT,
 	THROW_STATEMENT,
@@ -89,7 +92,7 @@ function hasSafetyComment(sourceCode: SourceCode, node: TypeAssertion, pattern: 
 	let current: ESTree.Node = node;
 	while (true) {
 		if (hasJustifyingCommentBefore(sourceCode, current, pattern)) return true;
-		if (COMMENT_OWNER_KINDS.has(current.type)) {
+		if (COMMENT_OWNER_KINDS.has(current.type) && !isUnbracedControlBody(current)) {
 			return (
 				isExportNamedDeclaration(current.parent) &&
 				current.parent.declaration === current &&

@@ -16,6 +16,10 @@ describe("require-safety-comment-for-type-assertion", () => {
 			{ code: "const userId = <UserId>value;", errors: [missingSafetyComment] },
 			{ code: "const userId = value as UserId; // SAFETY: Too late.", errors: [missingSafetyComment] },
 			{ code: "function load() { return value as User; }", errors: [missingSafetyComment] },
+			{
+				code: "// SAFETY: This whole module trusts the API dump shape.\nfunction load() { return value as User; }",
+				errors: [missingSafetyComment],
+			},
 			{ code: "// This cast seems fine.\nconst id = value as UserId;", errors: [missingSafetyComment] },
 			{
 				code: "// oxlint-disable-next-line typescript/no-non-null-assertion -- Unrelated suppression.\nconst user = value as User;",
@@ -62,6 +66,8 @@ describe("require-safety-comment-for-type-assertion", () => {
 			"// SAFETY: The parser validated this value.\nconsume(value as User);",
 			"class Owner { // SAFETY: Construction validated this value.\nuser = value as User; }",
 			"function load() { // SAFETY: The parser validated this value.\nreturn value as User; }",
+			"async function load() {\n\t// SAFETY: The API dump shape is stable enough to trust.\n\tif (!validate) return (await value.json()) as ApiDump;\n}",
+			"// SAFETY: The parser validated every item in this list.\nfor (const item of items) consume(item as User);",
 			"// SAFETY: This error has a verified owner.\nthrow value as Error;",
 			{
 				code: "// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.\nconst node = value as ESTree.Node;",
