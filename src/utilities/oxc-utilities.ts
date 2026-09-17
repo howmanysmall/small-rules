@@ -696,6 +696,28 @@ export function isLoopNode(node: ESTree.Node): node is LoopNode {
 	return LOOP_TYPES.has(node.type);
 }
 
+const UNBRACED_BODY_PARENT_TYPES = new Set<NodeType>([
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	LABELED_STATEMENT,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
+] satisfies ReadonlyArray<NodeType>);
+
+/**
+ * Whether a statement sits directly in a control-flow body slot (an unbraced
+ * `if`/loop/label/`with` body) and cannot host its own leading comment.
+ *
+ * @param node - Statement whose parent decides where the comment lives.
+ * @returns Whether the enclosing statement must carry the justification.
+ */
+export function isUnbracedControlBody(node: ESTree.Node): boolean {
+	return node.parent !== null && UNBRACED_BODY_PARENT_TYPES.has(node.parent.type);
+}
+
 export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): boolean {
 	return (
 		isTsTypeReference(typeAnnotation) &&
