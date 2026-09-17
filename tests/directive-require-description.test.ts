@@ -1,8 +1,10 @@
-import { describe } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import rule from "$oxc-rules/general/directive-require-description";
 
 import { js, ts } from "./rule-testers";
+
+import type { Comment, SourceCode } from "oxlint-plugin-utilities";
 
 describe("directive-require-description", () => {
 	ts.run("directive-require-description (typescript)", rule, {
@@ -84,5 +86,40 @@ describe("directive-require-description", () => {
 				code: "/* global process */\nconsole.log(process.pid);",
 			},
 		],
+	});
+
+	function createLineComment(): Comment {
+		return {
+			end: 18,
+			loc: { end: { column: 18, line: 1 }, start: { column: 0, line: 1 } },
+			range: [0, 18],
+			start: 0,
+			type: "Line",
+			value: "oxlint-disable",
+		};
+	}
+
+	it("should ignore line comments without string values", () => {
+		expect.assertions(1);
+
+		const lineComment = createLineComment();
+		Object.assign(lineComment, { value: null });
+
+		const stub = {
+			getAllComments: (): Array<Comment> => [lineComment],
+		} satisfies Pick<SourceCode, "getAllComments">;
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Test stub only provides getAllComments from SourceCode.
+		const stubSourceCode = stub as SourceCode;
+		const stubContext = {
+			options: [],
+			report: (): void => {
+				throw new Error("Unexpected report for non-string comment value.");
+			},
+			sourceCode: stubSourceCode,
+		};
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion, small-rules/no-chained-type-assertions -- Test stub only provides options, report, and sourceCode from Context.
+		const context = stubContext as unknown as Parameters<typeof rule.create>[0];
+
+		expect(() => rule.create(context)).not.toThrow();
 	});
 });
