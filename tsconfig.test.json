@@ -17,6 +17,7 @@
 		"packages/*/src/**/*.ts",
 		"scripts/utilities/roblox-yielding-members.ts",
 		"scripts/utilities/compact-default-properties.ts",
+		"scripts/utilities/sync-tsconfig-references.ts",
 		"scripts/utilities/vendored-notices.ts",
 		"src/**/*.ts",
 		"tests/**/*.ts",

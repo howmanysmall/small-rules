@@ -32,6 +32,8 @@ export const isReadonlyArrayOfNumbers = isArrayOfNumbers.readonly();
 export const isMaybeReadonlyArrayOfStrings = isReadonlyArrayOfStrings.or(isUndefined);
 
 export const isDictionaryOfUnknowns = type.Record(isString, isUnknown);
+export type DictionaryOfUnknowns = typeof isDictionaryOfUnknowns.infer;
+
 export const isReadonlyDictionaryOfUnknowns = type.Record(isString, isUnknown).readonly();
 
 export const isDictionaryOfStrings = type.Record(isString, isString);
