@@ -34,7 +34,7 @@ const configuration = isentinel(
 						options: { trailingComma: "all" },
 					},
 					{
-						files: ["biome.jsonc", ".oxlintrc.json", ".fallowrc.jsonc"],
+						files: ["biome.jsonc", ".oxlintrc.json"],
 						options: { trailingComma: "none" },
 					},
 					{

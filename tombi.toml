@@ -49,3 +49,7 @@ catalog = {
 		"https://www.schemastore.org/api/json/catalog.json",
 	]
 }
+
+[[schemas]]
+path = "node_modules/fallow/schema.json"
+include = ["fallow.toml"]
