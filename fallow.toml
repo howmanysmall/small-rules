@@ -27,11 +27,8 @@ ignoreDependencies = [
 	"babel-plugin-react-compiler",
 	"fast-check",
 	"hast",
-	"jiti",
 	"mdast-util-directive",
 	"mdast",
-	"publint",
-	"sfw",
 	"sharp"
 ]
 ignoreExportsUsedInFile = true
