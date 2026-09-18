@@ -4,12 +4,14 @@ export const isBoolean = type("boolean");
 export const isTrue = type("true");
 export const isFalse = type("false");
 
-export const isNumber = type("number");
-export const isString = type("string");
 export const isUndefined = type("undefined");
 export const isUnknown = type("unknown");
 export const isNull = type("null");
 
+export const isString = type("string");
+export const isNonEmptyString = type("string > 0");
+
+export const isNumber = type("number");
 export const isInteger = type("number % 1");
 
 export const isMaybeString = isString.or(isUndefined);

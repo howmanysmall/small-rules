@@ -12,6 +12,7 @@ import {
 	isMaybeReadonlyArrayOfStrings,
 	isMaybeReadonlyDictionaryOfStrings,
 	isMaybeString,
+	isNonEmptyString,
 	isNull,
 	isNullableString,
 	isNumber,
@@ -61,6 +62,14 @@ describe("primitive validators", () => {
 
 		expect(isString.allows("hi")).toBe(true);
 		expect(isString.allows(1)).toBe(false);
+	});
+
+	it("isNonEmptyString accepts non-empty strings and rejects empty strings", () => {
+		expect.assertions(3);
+
+		expect(isNonEmptyString.allows("hi")).toBe(true);
+		expect(isNonEmptyString.allows("")).toBe(false);
+		expect(isNonEmptyString.allows(undefined)).toBe(false);
 	});
 
 	it("isUndefined accepts undefined and rejects null", () => {
