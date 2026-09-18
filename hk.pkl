@@ -62,27 +62,23 @@ local LUAU_FILES = List("**/*.lua", "**/*.luau")
 local PACKAGE_JSON_FILES = List("**/package.json")
 
 local BIOME_FILES =
-  ECMA_FILES
-    + MDX_FILES
-    + ASTRO_FILES
-    + GRAPHQL_FILES
+  ASTRO_FILES
     + CSS_FILES
+    + ECMA_FILES
+    + GRAPHQL_FILES
     + JSON_FILES
+    + MDX_FILES
     + List("**/*.svg")
 local ISENTINEL_FILES =
-  ECMA_FILES
-    + TOML_FILES
-    + ASTRO_FILES
+  ASTRO_FILES
     + CSS_EXTENDED_FILES
+    + ECMA_FILES
     + JSON_FILES
-    + YAML_FILES
     + LUAU_FILES
+    + TOML_FILES
+    + YAML_FILES
     + List("**/*.json5")
-local FALLOW_FILES =
-  ECMA_FILES
-    + ASTRO_FILES
-    + CSS_FILES
-    + PACKAGE_JSON_FILES
+local FALLOW_FILES = ASTRO_FILES + CSS_FILES + ECMA_FILES + PACKAGE_JSON_FILES
 local SHERIF_FILES = PACKAGE_JSON_FILES + List("pnpm-workspace.yaml")
 
 local WORKFLOW_FILES =
