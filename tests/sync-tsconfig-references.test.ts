@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 
 import { findStaleReferencesAsync, syncTsconfigReferencesAsync } from "../scripts/utilities/sync-tsconfig-references";
 
@@ -187,19 +187,21 @@ describe("sync-tsconfig-references", () => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync();
+			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 
 			const staleReferences = await findStaleReferencesAsync(rootDirectory);
-			expect(staleReferences).toStrictEqual([]);
 
-			await rm(rootDirectory, { force: true, recursive: true });
+			expect(staleReferences).toStrictEqual([]);
 		});
 
 		it("reports the solution when a workspace project is missing from its references", async () => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync({ omitBetaFromSolution: true });
+			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 
 			const staleReferences = await findStaleReferencesAsync(rootDirectory);
+
 			expect(staleReferences).toStrictEqual([
 				{
 					actualReferences: SOLUTION_REFERENCES_WITHOUT_BETA,
@@ -207,16 +209,16 @@ describe("sync-tsconfig-references", () => {
 					path: TSCONFIG_JSON,
 				},
 			]);
-
-			await rm(rootDirectory, { force: true, recursive: true });
 		});
 
 		it("reports a package tsconfig whose references tsgo cannot build", async () => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync({ illegalPackageReferences: true });
+			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 
 			const staleReferences = await findStaleReferencesAsync(rootDirectory);
+
 			expect(staleReferences).toStrictEqual([
 				{
 					actualReferences: ["../beta"],
@@ -224,8 +226,6 @@ describe("sync-tsconfig-references", () => {
 					path: "packages/alpha/tsconfig.json",
 				},
 			]);
-
-			await rm(rootDirectory, { force: true, recursive: true });
 		});
 
 		it("leaves every file untouched while checking", async () => {
@@ -235,6 +235,7 @@ describe("sync-tsconfig-references", () => {
 				illegalPackageReferences: true,
 				omitBetaFromSolution: true,
 			});
+			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 			const solutionPath = nodePath.join(rootDirectory, TSCONFIG_JSON);
 			const alphaPath = nodePath.join(rootDirectory, "packages/alpha/tsconfig.json");
 
@@ -245,8 +246,6 @@ describe("sync-tsconfig-references", () => {
 			expect(staleReferences).toHaveLength(2);
 			await expect(readFile(solutionPath, "utf8")).resolves.toBe(solutionBefore);
 			await expect(readFile(alphaPath, "utf8")).resolves.toBe(alphaBefore);
-
-			await rm(rootDirectory, { force: true, recursive: true });
 		});
 	});
 
@@ -255,28 +254,28 @@ describe("sync-tsconfig-references", () => {
 			expect.assertions(2);
 
 			const rootDirectory = await createWorkspaceAsync({ omitBetaFromSolution: true });
+			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 
 			const staleReferences = await syncTsconfigReferencesAsync(rootDirectory);
+
 			expect(staleReferences.map(({ path }) => path)).toStrictEqual([TSCONFIG_JSON]);
 			await expect(readFile(nodePath.join(rootDirectory, TSCONFIG_JSON), "utf8")).resolves.toBe(
 				`${SOLUTION_AFTER_SYNC}\n`,
 			);
-
-			await rm(rootDirectory, { force: true, recursive: true });
 		});
 
 		it("removes package references tsgo cannot build without disturbing other keys", async () => {
 			expect.assertions(2);
 
 			const rootDirectory = await createWorkspaceAsync({ illegalPackageReferences: true });
+			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 
 			const staleReferences = await syncTsconfigReferencesAsync(rootDirectory);
+
 			expect(staleReferences.map(({ path }) => path)).toStrictEqual(["packages/alpha/tsconfig.json"]);
 			await expect(readFile(nodePath.join(rootDirectory, "packages/alpha/tsconfig.json"), "utf8")).resolves.toBe(
 				`${PACKAGE_TSCONFIG_AFTER_SYNC}\n`,
 			);
-
-			await rm(rootDirectory, { force: true, recursive: true });
 		});
 	});
 });

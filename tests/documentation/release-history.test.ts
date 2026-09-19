@@ -20,6 +20,7 @@ describe("documentation release history", () => {
 
 	it("sorts populated release entries by semantic version", () => {
 		expect.assertions(1);
+
 		const history = createReleaseHistory([
 			{ id: "v2.7.1", body: "Patch notes" },
 			{ id: "v3.0.0", body: "Major notes" },

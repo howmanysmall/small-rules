@@ -38,6 +38,7 @@ describe("toPascalCase", () => {
 		// oxlint-disable-next-line unicorn/prefer-code-point -- slop rule
 		const separator = String.fromCharCode(0);
 		const value = `phase${separator}2${separator}complete`;
+
 		expect(toPascalCase(value)).toBe("Phase_2Complete");
 	});
 });

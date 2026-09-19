@@ -106,6 +106,7 @@ describe("parseDirectiveComment", () => {
 		const tsComment = comment("oxlint-disable-line no-console", {
 			loc: { end: lineColumn(2, 10), start: lineColumn(1, 0) },
 		});
+
 		expect(parseDirectiveComment(tsComment)).toBeUndefined();
 	});
 

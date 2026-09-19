@@ -45,22 +45,26 @@ describe("third-party notices", () => {
 
 	it("reproduces every copyright line and source in the bundle banner", () => {
 		expect.assertions(1);
+
 		expect(componentsMissingAttribution).toStrictEqual([]);
 	});
 
 	it("reproduces every permission notice in the bundle banner", () => {
 		expect.assertions(1);
+
 		expect(componentsMissingPermission).toStrictEqual([]);
 	});
 
 	it("emits the banner as a legal comment so minification cannot drop it", () => {
 		expect.assertions(2);
+
 		expect(BANNER.startsWith("/*!")).toBe(true);
 		expect(BANNER.endsWith("*/")).toBe(true);
 	});
 
 	it("substitutes the copyright line into every license template", () => {
 		expect.assertions(1);
+
 		expect(componentsMissingCopyright).toStrictEqual([]);
 	});
 
@@ -74,6 +78,7 @@ describe("third-party notices", () => {
 
 	it("describes at least one vendored component", () => {
 		expect.assertions(1);
+
 		expect(VENDORED_COMPONENTS.length).toBeGreaterThan(0);
 	});
 });

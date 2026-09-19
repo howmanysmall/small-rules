@@ -1,8 +1,9 @@
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import { gunzipSync } from "node:zlib";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 import { type } from "arktype";
 import { parseYAML } from "confbox";
 import { $ } from "zx";
@@ -73,6 +74,7 @@ describe("release workflow", () => {
 	// Catches two tag pushes racing into a double or cancelled publish.
 	it("serializes all releases through one never-cancelling concurrency group", () => {
 		expect.assertions(2);
+
 		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
 
 		expect(workflow.concurrency?.group).toBeDefined();
@@ -82,6 +84,7 @@ describe("release workflow", () => {
 	// Catches npm publish, which drops provenance and leaks catalog: refs.
 	it("publishes with provenance through pnpm", () => {
 		expect.assertions(2);
+
 		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
 		const publishStep = workflow.jobs?.publish?.steps?.find(
 			({ name }) => name === "Publish to NPM (Trusted Publishing)",
@@ -94,12 +97,14 @@ describe("release workflow", () => {
 	// A tag commit is validated on main; re-running checks doubles the bill.
 	it("does not rerun CI checks for a tag already validated on main", () => {
 		expect.assertions(1);
+
 		expect(RELEASE_YAML).not.toContain("uses: ./.github/workflows/checks.yaml");
 	});
 
 	// Catches publishing a commit that CI never validated.
 	it("waits for the matching main-branch CI run before publishing", () => {
 		expect.assertions(2);
+
 		expect(RELEASE_YAML).toContain('gh run list --workflow ci.yaml --commit "$GITHUB_SHA"');
 		expect(RELEASE_YAML).toContain('gh run watch "$CI_RUN_ID" --exit-status');
 	});
@@ -108,6 +113,7 @@ describe("release workflow", () => {
 	// publishes, or the documentation deployment from main misses them.
 	it("commits release notes to main before publishing the tag", () => {
 		expect.assertions(3);
+
 		const worktreeIndex = RELEASE_YAML.indexOf("git worktree add");
 		const publishIndex = RELEASE_YAML.indexOf("pnpm publish --provenance");
 
@@ -119,6 +125,7 @@ describe("release workflow", () => {
 	// Catches a dry run mutating the repository, which CI cannot surface.
 	it("keeps dry runs read-only", () => {
 		expect.assertions(2);
+
 		expect(RELEASE_YAML).toContain("env.DRY_RUN != 'true'");
 		expect(RELEASE_YAML).not.toContain("env.DRY_RUN == 'true'\n        run: git");
 	});
@@ -127,6 +134,7 @@ describe("release workflow", () => {
 	// stale output.
 	it("uses prepublishOnly as the single real-release build", () => {
 		expect.assertions(3);
+
 		const manifest = isPackageScripts.assert(JSON.parse(PACKAGE_JSON));
 
 		expect(manifest.scripts?.prepublishOnly).toBeDefined();
@@ -135,16 +143,15 @@ describe("release workflow", () => {
 	});
 
 	it("resolves catalog dependencies to registry-compatible versions", async () => {
-		expect.assertions(1);
-		const destination = mkdtempSync(nodePath.join(tmpdir(), "small-rules-pack-"));
+		expect.assertions(2);
 
-		try {
-			await $({ stdio: "ignore" })`pnpm pack --pack-destination ${destination}`;
-			const archive = readdirSync(destination).join("");
-			const manifest = readPackageManifest(nodePath.join(destination, archive));
-			expect(manifest).not.toContain("catalog:");
-		} finally {
-			rmSync(destination, { force: true, recursive: true });
-		}
+		const destination = mkdtempSync(nodePath.join(tmpdir(), "small-rules-pack-"));
+		onTestFinished(async () => rm(destination, { force: true, recursive: true }));
+
+		await $`pnpm pack --pack-destination ${destination}`;
+		const archives = readdirSync(destination).filter((name) => name.endsWith(".tgz"));
+
+		expect(archives).toHaveLength(1);
+		expect(readPackageManifest(nodePath.join(destination, archives[0]!))).not.toContain("catalog:");
 	});
 });

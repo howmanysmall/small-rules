@@ -30,6 +30,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);
+
 				expect(isIdentifierStartCodePoint(value)).toBe(expected);
 			}, 10000);
 		});
@@ -50,6 +51,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);
+
 				expect(isIdentifierStartCodePoint(value)).toBe(expected);
 			}, 10000);
 		});
@@ -66,6 +68,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);
+
 				expect(isIdentifierPartCodePoint(value)).toBe(expected);
 			}, 10000);
 		});
@@ -76,6 +79,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);
+
 				expect(isIdentifierPartCodePoint(value)).toBe(expected);
 			}, 10000);
 		});
@@ -89,6 +93,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		])("accepts $label", ({ name }) => {
 			it(`should return true for "${name}"`, () => {
 				expect.assertions(1);
+
 				expect(isValidIdentifier(name)).toBe(true);
 			}, 10000);
 		});
@@ -101,6 +106,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		])("rejects $label", ({ name }) => {
 			it(`should return false for "${name}"`, () => {
 				expect.assertions(1);
+
 				expect(isValidIdentifier(name)).toBe(false);
 			}, 10000);
 		});

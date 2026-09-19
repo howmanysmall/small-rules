@@ -194,6 +194,7 @@ describe("ast node guards", () => {
 		expect.assertions(2);
 
 		const source = parseCode(code);
+
 		expect(acceptedTypes.every((type) => guard(findNode(source, type)))).toBe(true);
 		expect(guard(findNode(source, rejectedType))).toBe(false);
 	});

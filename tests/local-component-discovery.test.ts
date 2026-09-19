@@ -1,8 +1,9 @@
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import nodeProcess from "node:process";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import {
@@ -178,6 +179,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Arrange
 		const project = createProjectFixture("unresolved-import");
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
 		const filename = nodePath.join(project, "src", "screen.tsx");
 
 		const node = {
@@ -197,8 +201,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should ignore non-relative import sources and missing filenames", () => {
@@ -208,6 +210,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("non-relative-import", {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const bareImportNode = {
@@ -240,8 +245,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 		// Assert
 		expect(bareInspection).toStrictEqual(NON_MATCHING_INSPECTION);
 		expect(missingFilenameInspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should reject relative imports resolved to non-component extensions", () => {
@@ -251,6 +254,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("json-import", {
 			"src/button.json": '{ "Button": true }\n',
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -270,8 +276,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should ignore component files inside ignored directories", () => {
@@ -281,6 +285,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("ignored-directory", {
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 			"tests/button.tsx": "export default function Button() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -300,8 +307,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should reject matching files that do not export the component", () => {
@@ -311,6 +316,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("missing-export", {
 			"src/button.tsx": "const Button = () => null;\nexport { somethingElse };\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -330,8 +338,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should reject component files whose basename is not configured", () => {
@@ -341,6 +347,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("wrong-basename", {
 			"src/card.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -360,8 +369,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should reject matching files that never mention the component name", () => {
@@ -372,35 +379,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "export default function Link() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
-
-		const node = {
-			source: { value: "./button" },
-			specifiers: [],
-			type: "ImportDeclaration",
-		};
-
-		// Act
-		const inspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility
-			// contract
-			node,
-			nodePath.join(project, "src", "screen.tsx"),
-			createComponentDefinition(),
-		);
-
-		// Assert
-		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
-	});
-
-	it("should reject relative imports resolved to declaration files", () => {
-		expect.assertions(1);
-
-		// Arrange
-		const project = createProjectFixture("declaration-file", {
-			"src/button.d.ts": "export default function Button(): null;\n",
-			"src/screen.tsx": "export function Screen() { return null; }\n",
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -420,8 +400,37 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
+	});
 
-		cleanupProjectFixture(project);
+	it("should reject relative imports resolved to declaration files", () => {
+		expect.assertions(1);
+
+		// Arrange
+		const project = createProjectFixture("declaration-file", {
+			"src/button.d.ts": "export default function Button(): null;\n",
+			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
+
+		const node = {
+			source: { value: "./button" },
+			specifiers: [],
+			type: "ImportDeclaration",
+		};
+
+		// Act
+		const inspection = inspectRelativeLocalComponentImport(
+			// @ts-expect-error -- Minimal ESTree shape for the public utility
+			// contract
+			node,
+			nodePath.join(project, "src", "screen.tsx"),
+			createComponentDefinition(),
+		);
+
+		// Assert
+		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
 	it("should report named import style for named component exports", () => {
@@ -431,6 +440,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("named-export", {
 			"src/button.tsx": "export function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -450,8 +462,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual({ importStyle: "named", matches: true });
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should require configured markers before matching a local component file", () => {
@@ -461,6 +471,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("markers", {
 			"src/button.tsx": "export default function Button() { return <frame />; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -497,8 +510,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 		// Assert
 		expect(matchingInspection).toStrictEqual(MATCHING_INSPECTION);
 		expect(nonMatchingInspection).toStrictEqual(NON_MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should keep matching after the regex cache evicts older entries", () => {
@@ -508,6 +519,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 		const project = createProjectFixture("regex-cache", {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		const node = {
@@ -537,8 +551,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 
 		// Assert
 		expect(inspection).toStrictEqual(MATCHING_INSPECTION);
-
-		cleanupProjectFixture(project);
 	});
 });
 
@@ -554,11 +566,10 @@ describe("discoverLocalComponent", () => {
 			nodePath.join(directory, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
+		onTestFinished(async () => rm(directory, { force: true, recursive: true }));
 
 		// Assert
 		expect(discovery).toStrictEqual({ found: false });
-
-		rmSync(directory, { force: true, recursive: true });
 	});
 
 	it("should return a sibling import source without the file extension", () => {
@@ -568,6 +579,9 @@ describe("discoverLocalComponent", () => {
 		const project = createProjectFixture("sibling-component", {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		// Act
@@ -582,8 +596,6 @@ describe("discoverLocalComponent", () => {
 			importSource: "./button",
 			importStyle: "default",
 		});
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should ignore indexed component candidates in ignored directories", () => {
@@ -595,6 +607,9 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 			"tests/button.tsx": "export default function Button() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		// Act
@@ -608,8 +623,6 @@ describe("discoverLocalComponent", () => {
 			found: true,
 			importSource: "./button",
 		});
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should reuse the cached project file index on repeated discovery", () => {
@@ -620,6 +633,9 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
 		const sourceFile = nodePath.join(project, "src", "screen.tsx");
 
 		// Act
@@ -629,8 +645,6 @@ describe("discoverLocalComponent", () => {
 		// Assert
 		expect(firstDiscovery).toMatchObject({ found: true, importSource: "./button" });
 		expect(secondDiscovery).toMatchObject({ found: true, importSource: "./button" });
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should ignore declaration files while indexing project components", () => {
@@ -641,6 +655,9 @@ describe("discoverLocalComponent", () => {
 			"src/button.d.ts": "export default function Button(): null;\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
 
 		// Act
 		const discovery = discoverLocalComponent(
@@ -650,8 +667,6 @@ describe("discoverLocalComponent", () => {
 
 		// Assert
 		expect(discovery).toStrictEqual({ found: false });
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should remove a trailing index segment from the discovered import source", () => {
@@ -661,6 +676,9 @@ describe("discoverLocalComponent", () => {
 		const project = createProjectFixture("index-component", {
 			"src/components/button/index.tsx": "export default function Button() { return null; }\n",
 			"src/screens/example.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 
 		// Act
@@ -675,8 +693,6 @@ describe("discoverLocalComponent", () => {
 			importSource: "../components/button",
 			importStyle: "default",
 		});
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should ignore component candidates in gitignored directories", () => {
@@ -689,6 +705,9 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
 
 		// Act
 		const discovery = discoverLocalComponent(
@@ -698,8 +717,6 @@ describe("discoverLocalComponent", () => {
 
 		// Assert
 		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should let a nested gitignore negation re-include a component", () => {
@@ -712,6 +729,9 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
 
 		// Act
 		const discovery = discoverLocalComponent(
@@ -721,8 +741,6 @@ describe("discoverLocalComponent", () => {
 
 		// Assert
 		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
-
-		cleanupProjectFixture(project);
 	});
 
 	it("should not index symbolic links to component files", () => {
@@ -732,6 +750,9 @@ describe("discoverLocalComponent", () => {
 		const project = createProjectFixture("symlinked-component", {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
+		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
 		});
 		symlinkSync(nodePath.join(project, "src", "button.tsx"), nodePath.join(project, "src", "alias.tsx"));
 
@@ -743,8 +764,6 @@ describe("discoverLocalComponent", () => {
 
 		// Assert
 		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
-
-		cleanupProjectFixture(project);
 	});
 
 	it.skipIf(CANNOT_REVOKE_DIRECTORY_ACCESS)(
@@ -760,6 +779,10 @@ describe("discoverLocalComponent", () => {
 			});
 			const lockedDirectory = nodePath.join(project, "locked");
 			chmodSync(lockedDirectory, 0o000);
+			onTestFinished(() => {
+				chmodSync(lockedDirectory, 0o755);
+				cleanupProjectFixture(project);
+			});
 
 			// Act
 			const discovery = discoverLocalComponent(
@@ -767,11 +790,7 @@ describe("discoverLocalComponent", () => {
 				createComponentDefinition(),
 			);
 
-			// Assert
 			expect(discovery).toMatchObject({ found: true, importSource: "./button" });
-
-			chmodSync(lockedDirectory, 0o755);
-			cleanupProjectFixture(project);
 		},
 	);
 
@@ -784,6 +803,9 @@ describe("discoverLocalComponent", () => {
 			"src/fallback/button.tsx": "export default function Button() { return null; }\n",
 			"src/screens/example.tsx": "export function Screen() { return null; }\n",
 		});
+		onTestFinished(() => {
+			cleanupProjectFixture(project);
+		});
 
 		// Act
 		const discovery = discoverLocalComponent(
@@ -793,8 +815,6 @@ describe("discoverLocalComponent", () => {
 
 		// Assert
 		expect(discovery).toStrictEqual({ found: false });
-
-		cleanupProjectFixture(project);
 	});
 });
 

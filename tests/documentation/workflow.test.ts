@@ -270,6 +270,7 @@ describe("documentation validation workflow", () => {
 	// so CI must select it.
 	it("triggers validation for documentation changes", () => {
 		expect.assertions(2);
+
 		expect(ciPushPaths()).toContain("documentation/**");
 		expect(ciPullRequestPaths()).toContain("documentation/**");
 	});
@@ -282,6 +283,7 @@ describe("documentation deployment workflow", () => {
 	// must wait for publish and require a tag ref.
 	it("releases docs only for version tags, after publish succeeds", () => {
 		expect.assertions(4);
+
 		expect(releaseTags()).toContain("v*.*.*");
 		expect(deployCondition()).toContain("refs/tags/");
 		expect(deployNeeds()).toContain("publish");
@@ -292,6 +294,7 @@ describe("documentation deployment workflow", () => {
 	// The missing call is its only trace.
 	it("is never called by ordinary CI", () => {
 		expect.assertions(1);
+
 		expect(ciJobsCallingDocs()).toStrictEqual([]);
 	});
 
@@ -300,7 +303,9 @@ describe("documentation deployment workflow", () => {
 	// pull_request are untrusted for a deploy target.
 	it("is callable for releases, not for pull requests", () => {
 		expect.assertions(3);
+
 		const triggers = docsTriggers();
+
 		expect(triggers.call).toBeDefined();
 		expect(triggers.push).toBeUndefined();
 		expect(triggers.pullRequest).toBeUndefined();
@@ -312,6 +317,7 @@ describe("documentation deployment workflow", () => {
 	// plus pages write and id-token write.
 	it("deploys to GitHub Pages with only the permissions Pages requires", () => {
 		expect.assertions(1);
+
 		expect(deployEffectivePermissions()).toStrictEqual({ contents: "read", "id-token": "write", pages: "write" });
 	});
 
@@ -320,7 +326,9 @@ describe("documentation deployment workflow", () => {
 	// on every checkout.
 	it("never persists checkout credentials", () => {
 		expect.assertions(2);
+
 		const audit = checkoutAudit();
+
 		expect(audit.leaking).toStrictEqual([]);
 		expect(audit.total).toBeGreaterThan(0);
 	});
@@ -330,6 +338,7 @@ describe("documentation deployment workflow", () => {
 	// Oracle: least privilege; only the Pages deploy job may hold write scopes.
 	it("grants validation workflows no write access", () => {
 		expect.assertions(1);
+
 		expect(writeViolations()).toStrictEqual([]);
 	});
 });

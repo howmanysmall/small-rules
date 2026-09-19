@@ -966,7 +966,9 @@ describe("prevent-abbreviations", () => {
 			const propsReplacement = getShorthandReplacement("PanelProps", options.shorthandConfiguration);
 
 			expect(textReplacement?.replaced).toBe("TextLabel");
+
 			assert.ok(textReplacement !== undefined);
+
 			expect(literalReplacement).toBeUndefined();
 			expect(propsReplacement?.replaced).toBe("PanelProperties");
 			expect(getShorthandReplacement("Btn2", options.shorthandConfiguration)?.replaced).toBe("Button2");

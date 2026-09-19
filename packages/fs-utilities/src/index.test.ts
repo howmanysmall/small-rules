@@ -19,6 +19,7 @@ describe("existsAsync", () => {
 		expect.assertions(1);
 
 		const result = await existsAsync(existingFilePath);
+
 		expect(result).toBe(true);
 	});
 
@@ -28,6 +29,7 @@ describe("existsAsync", () => {
 		const missingPath = path.join(tmpdir(), `small-rules-fs-utilities-missing-${randomUUID()}`);
 
 		const result = await existsAsync(missingPath);
+
 		expect(result).toBe(false);
 	});
 
@@ -47,6 +49,7 @@ describe("isFileAccessibleAsync", () => {
 		expect.assertions(1);
 
 		const result = await isFileAccessibleAsync(existingFilePath);
+
 		expect(result).toBe(true);
 	});
 
@@ -56,6 +59,7 @@ describe("isFileAccessibleAsync", () => {
 		const missingPath = path.join(tmpdir(), `small-rules-fs-utilities-inaccessible-${randomUUID()}`);
 
 		const result = await isFileAccessibleAsync(missingPath);
+
 		expect(result).toBe(false);
 	});
 });

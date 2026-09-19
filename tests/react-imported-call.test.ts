@@ -74,6 +74,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import { useEffect as effect } from "react"; effect(() => {});');
+
 		expect(isEffectCall(source, "effect")).toBe(true);
 	});
 
@@ -81,6 +82,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode("useEffect(() => {});");
+
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
@@ -88,6 +90,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import { useEffect } from "preact/hooks"; useEffect(() => {});');
+
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
@@ -95,6 +98,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React(() => {});');
+
 		expect(isEffectCall(source, "React")).toBe(false);
 	});
 
@@ -102,6 +106,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode("const useEffect = () => {}; useEffect(() => {});");
+
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
@@ -109,6 +114,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React.useEffect(() => {});');
+
 		expect(isEffectCall(source, "useEffect")).toBe(true);
 	});
 
@@ -116,6 +122,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React["useEffect"](() => {});');
+
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
@@ -123,6 +130,7 @@ describe("isReactImportedCall", () => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; getReact().useEffect(() => {});');
+
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 });

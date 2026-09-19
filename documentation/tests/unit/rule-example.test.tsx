@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 
 import { RuleExample } from "$components/rule-example";
 
@@ -21,6 +21,7 @@ describe("rule-example", () => {
 		["fail", "Incorrect"],
 	] as const)("renders the default %s state", (type, title) => {
 		expect.assertions(2);
+
 		const { container } = render(
 			<RuleExample type={type}>
 				<code>{basicExample}</code>
@@ -35,6 +36,7 @@ describe("rule-example", () => {
 
 	it("renders a custom title", () => {
 		expect.assertions(1);
+
 		render(
 			<RuleExample title="Allowed callback" type="pass">
 				<code>{basicExample}</code>
@@ -48,6 +50,7 @@ describe("rule-example", () => {
 
 	it("composes the rendered code child", () => {
 		expect.assertions(1);
+
 		const { container } = render(
 			<RuleExample type="fail">
 				<pre>
@@ -63,6 +66,7 @@ describe("rule-example", () => {
 
 	it("copies the rendered code", async () => {
 		expect.assertions(1);
+
 		const user = userEvent.setup();
 		const writeText = vi.spyOn(navigator.clipboard, "writeText");
 		render(
@@ -80,6 +84,7 @@ describe("rule-example", () => {
 
 	it("announces the copied state", async () => {
 		expect.assertions(2);
+
 		const user = userEvent.setup();
 		render(
 			<RuleExample type="pass">
@@ -96,31 +101,31 @@ describe("rule-example", () => {
 
 	it("resets the copied state after 1.5 seconds", async () => {
 		expect.assertions(2);
+
 		vi.useFakeTimers();
+		onTestFinished(restoreClipboardAndTimers);
+
 		Object.defineProperty(navigator, "clipboard", {
 			configurable: true,
 			value: { writeText: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) },
 		});
-		try {
-			render(
-				<RuleExample type="pass">
-					<code>{basicExample}</code>
-				</RuleExample>,
-			);
-			const copyButton = screen.getByRole("button", { name: "Copy example" });
-			fireEvent.click(copyButton);
-			await act(async () => {
-				await Promise.resolve();
-			});
 
-			act(function advanceCopiedTimer(): void {
-				vi.advanceTimersByTime(1_500);
-			});
+		render(
+			<RuleExample type="pass">
+				<code>{basicExample}</code>
+			</RuleExample>,
+		);
+		const copyButton = screen.getByRole("button", { name: "Copy example" });
+		fireEvent.click(copyButton);
+		await act(async () => {
+			await Promise.resolve();
+		});
 
-			expect(Object.hasOwn(copyButton.dataset, "copied")).toBe(false);
-			expect(copyButton.getAttribute("aria-label")).toBe("Copy example");
-		} finally {
-			restoreClipboardAndTimers();
-		}
+		act(function advanceCopiedTimer(): void {
+			vi.advanceTimersByTime(1_500);
+		});
+
+		expect(Object.hasOwn(copyButton.dataset, "copied")).toBe(false);
+		expect(copyButton.getAttribute("aria-label")).toBe("Copy example");
 	});
 });
