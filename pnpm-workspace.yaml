@@ -210,7 +210,7 @@ catalogs:
     oxfmt: 0.68.0
     oxlint: 1.83.0
     oxlint-plugin-react-doctor: 0.9.14
-    oxlint-tsgolint: 7.0.2001
+    oxlint-tsgolint: 7.0.2002
     react-doctor: 0.9.14
   release:
     bumpp: 12.3.0

@@ -322,8 +322,8 @@ catalogs:
       specifier: 0.9.14
       version: 0.9.14
     oxlint-tsgolint:
-      specifier: 7.0.2001
-      version: 7.0.2001
+      specifier: 7.0.2002
+      version: 7.0.2002
     react-doctor:
       specifier: 0.9.14
       version: 0.9.14
@@ -546,13 +546,13 @@ importers:
         version: 21.2.0
       '@e18e/eslint-plugin':
         specifier: catalog:lint
-        version: 0.8.0(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2001))
+        version: 0.8.0(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))
       '@fast-check/vitest':
         specifier: catalog:test
         version: 0.4.1(vitest@5.0.1)
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.0.0-beta.46(073b3e7c9a7479cb8655b57ed933d91f)
+        version: 6.0.0-beta.46(be380e2a71c1489677d53e9cf6f94465)
       '@isentinel/hooks':
         specifier: catalog:tooling
         version: 1.6.0(@typescript/native-preview@7.0.0-dev.20260707.2)(@typescript/typescript6@6.0.2)(jiti@2.7.0)(supports-color@10.2.2)
@@ -627,7 +627,7 @@ importers:
         version: 7.6.2(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
       eslint-plugin-flawless:
         specifier: catalog:lint
-        version: 1.12.3(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxc-parser@0.147.0)(oxfmt@0.68.0)(oxlint@1.83.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2)
+        version: 1.12.3(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxc-parser@0.147.0)(oxfmt@0.68.0)(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))(supports-color@10.2.2)
       eslint-plugin-jsdoc:
         specifier: catalog:lint
         version: 64.3.6(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
@@ -678,13 +678,13 @@ importers:
         version: 0.68.0
       oxlint:
         specifier: catalog:lint
-        version: 1.83.0(oxlint-tsgolint@7.0.2001)
+        version: 1.83.0(oxlint-tsgolint@7.0.2002)
       oxlint-plugin-react-doctor:
         specifier: catalog:lint
         version: 0.9.14
       oxlint-tsgolint:
         specifier: catalog:lint
-        version: 7.0.2001
+        version: 7.0.2002
       pncat:
         specifier: catalog:tooling
         version: 0.13.3
@@ -693,7 +693,7 @@ importers:
         version: 0.3.24
       react-doctor:
         specifier: catalog:lint
-        version: 0.9.14(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.214.0(@opentelemetry/api@1.9.1))(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint-tsgolint@7.0.2001)(react@19.2.7)(supports-color@10.2.2)
+        version: 0.9.14(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.214.0(@opentelemetry/api@1.9.1))(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint-tsgolint@7.0.2002)(react@19.2.7)(supports-color@10.2.2)
       sfw:
         specifier: catalog:tooling
         version: 2.0.6
@@ -4174,33 +4174,33 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@oxlint-tsgolint/darwin-arm64@7.0.2001':
-    resolution: {integrity: sha512-CUJEdbSZ54+Xy9OXqOhWLTKZKV0BBiV7C2i/ygyVmXtkUNXx5YCzN8DpSSshTAKktoL7S+tnQ/ftFG/i7X896w==}
+  '@oxlint-tsgolint/darwin-arm64@7.0.2002':
+    resolution: {integrity: sha512-E3yYb/tI+5M3SqGgKwrwUD0nmjA2FMGD1xFbma46qi8Y7+nPTlGY6bZk/hqxijc9Vda/tdtUxQ2d5zGIEX9qlg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@oxlint-tsgolint/darwin-x64@7.0.2001':
-    resolution: {integrity: sha512-pXfBb5BqONCcgrXQNUZWXgiYmRSWJzd97S8i41VVOh6ut0tyo+cJ5FKFpczDHxiVNfj/3e7c9B4MtztNdpIVCw==}
+  '@oxlint-tsgolint/darwin-x64@7.0.2002':
+    resolution: {integrity: sha512-qEaMySdvzs8faaJwMO4dFtPFCa+degFCz+HbkFQ0REcIJqJ16KmC0smt30FAI9TeEHCoAtz6sU/6acJvi4uaxg==}
     cpu: [x64]
     os: [darwin]
 
-  '@oxlint-tsgolint/linux-arm64@7.0.2001':
-    resolution: {integrity: sha512-roP7zujb/QDPzDwEKsFFpzNHHy91/Y7oX9vQXk78ekyZtcQj1QXDIMH33gjDdHBfRl4K9pZ36xhRgrP4Zr+R8A==}
+  '@oxlint-tsgolint/linux-arm64@7.0.2002':
+    resolution: {integrity: sha512-bqPObCNIR6tDQSc0Xn9Nu7EfWRXFB+qFzADRl/q6YA8zT9YUg3pGUbmicV2hV91uLpiot74so9ocGjx35SaX6w==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxlint-tsgolint/linux-x64@7.0.2001':
-    resolution: {integrity: sha512-UDezNqdECVmngu2TPnjaS1YoAmcTaBoI5lV9vk3VahBxoi+I5r9k3iJTT7qZoYWOXTD/7T7bNcwRgrocR6BscQ==}
+  '@oxlint-tsgolint/linux-x64@7.0.2002':
+    resolution: {integrity: sha512-E5CcRALAYdiQMbdYjEqlLOiYuEdt21RtXiyxIoD8bfypdfkpWppacijKOR4i0DtLXFRVwCGQggZBWk5bOIpU1A==}
     cpu: [x64]
     os: [linux]
 
-  '@oxlint-tsgolint/win32-arm64@7.0.2001':
-    resolution: {integrity: sha512-uJZhqB6pdXLuN+AD1F5082byyQti/NPmJA77GtcFlmT2HzRelqbNls3SaIqxpjdFgvSBF9g0yOKGBkGFg7kX8Q==}
+  '@oxlint-tsgolint/win32-arm64@7.0.2002':
+    resolution: {integrity: sha512-L+ul0ZFDiz/ZmTwCQ1J/qS7S6s45ktiaFqb+ZIzx+1sSdtdRxm8/H0+p4VDQYrCKBFzKNb6VjUlm48bNEe3BUg==}
     cpu: [arm64]
     os: [win32]
 
-  '@oxlint-tsgolint/win32-x64@7.0.2001':
-    resolution: {integrity: sha512-FkDRm8hx9OwzGQqyWG1tO5QrTLRApff9DzSgpz9QZau37BR8d1VYKOxMLGf6shPZntJFoTwIIJYT68VndYDCog==}
+  '@oxlint-tsgolint/win32-x64@7.0.2002':
+    resolution: {integrity: sha512-zkZeJfo4UmYiCzj77u85eCDpdxOiQiSAsV6j9Pvj5e7Vu5+MvwLtK1xmVutE77tJmUJ3eBOSXHR6WgY4AwHHGQ==}
     cpu: [x64]
     os: [win32]
 
@@ -8826,8 +8826,8 @@ packages:
     peerDependencies:
       typescript: '>=5 <8'
 
-  oxlint-tsgolint@7.0.2001:
-    resolution: {integrity: sha512-KjK/XLcXr1DSyonKhsuFqJRiuKqcyG9j3LJ8nkOsrLzGvodBPqzHOKauy10asLMDI0sUpvb+1sxlzff3udZvfg==}
+  oxlint-tsgolint@7.0.2002:
+    resolution: {integrity: sha512-rQAj2RAQM57nCwTd3PhtnAkREGW2StqI47tzudNlJF8WwGommM7rVpeP4O1O8/ZiuDZ9f2GnTESzLHGTluwkvQ==}
     hasBin: true
 
   oxlint@1.81.0:
@@ -11931,23 +11931,23 @@ snapshots:
 
   '@discoveryjs/json-ext@1.1.0': {}
 
-  '@e18e/eslint-plugin@0.5.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2001))':
+  '@e18e/eslint-plugin@0.5.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))':
     dependencies:
       empathic: 2.0.1
       module-replacements: 3.3.0
       semver: 7.8.5
     optionalDependencies:
       eslint: 10.10.0(jiti@2.7.0)(supports-color@10.2.2)
-      oxlint: 1.83.0(oxlint-tsgolint@7.0.2001)
+      oxlint: 1.83.0(oxlint-tsgolint@7.0.2002)
 
-  '@e18e/eslint-plugin@0.8.0(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2001))':
+  '@e18e/eslint-plugin@0.8.0(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))':
     dependencies:
       empathic: 2.0.1
       module-replacements: 3.3.0
       semver: 7.8.5
     optionalDependencies:
       eslint: 10.10.0(jiti@2.7.0)(supports-color@10.2.2)
-      oxlint: 1.83.0(oxlint-tsgolint@7.0.2001)
+      oxlint: 1.83.0(oxlint-tsgolint@7.0.2002)
 
   '@effect/opentelemetry@4.0.0-rc.112(@opentelemetry/api-logs@0.220.0)(@opentelemetry/api@1.9.0)(@opentelemetry/resources@2.10.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.220.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.10.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.6.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.43.0)(effect@4.0.0-rc.112)':
     dependencies:
@@ -12701,12 +12701,12 @@ snapshots:
 
   '@isentinel/dict-roblox@1.0.16': {}
 
-  '@isentinel/eslint-config@6.0.0-beta.46(073b3e7c9a7479cb8655b57ed933d91f)':
+  '@isentinel/eslint-config@6.0.0-beta.46(be380e2a71c1489677d53e9cf6f94465)':
     dependencies:
       '@antfu/install-pkg': 2.0.1
       '@clack/prompts': 1.7.0
       '@cspell/eslint-plugin': 10.0.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
-      '@e18e/eslint-plugin': 0.5.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2001))
+      '@e18e/eslint-plugin': 0.5.1(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
       '@isentinel/dict-rbxts': 1.0.23
@@ -12751,7 +12751,7 @@ snapshots:
       local-pkg: 1.2.1
       oxfmt: 0.63.0
       oxlint-plugin-eslint: 1.78.0
-      oxlint-plugin-oxlint-comments: 0.1.0(oxlint-tsgolint@7.0.2001)
+      oxlint-plugin-oxlint-comments: 0.1.0(oxlint-tsgolint@7.0.2002)
       prettier: 3.9.6
       semver: 7.8.5
       toml-eslint-parser: 1.0.3
@@ -12765,8 +12765,8 @@ snapshots:
       eslint-plugin-react-jsx: 5.18.8(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
       eslint-plugin-react-naming-convention: 5.18.8(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
       eslint-plugin-react-x: 5.18.8(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
-      oxlint: 1.83.0(oxlint-tsgolint@7.0.2001)
-      oxlint-tsgolint: 7.0.2001
+      oxlint: 1.83.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint: 7.0.2002
     transitivePeerDependencies:
       - '@eslint/json'
       - oxc-parser
@@ -14038,22 +14038,22 @@ snapshots:
   '@oxfmt/binding-win32-x64-msvc@0.68.0':
     optional: true
 
-  '@oxlint-tsgolint/darwin-arm64@7.0.2001':
+  '@oxlint-tsgolint/darwin-arm64@7.0.2002':
     optional: true
 
-  '@oxlint-tsgolint/darwin-x64@7.0.2001':
+  '@oxlint-tsgolint/darwin-x64@7.0.2002':
     optional: true
 
-  '@oxlint-tsgolint/linux-arm64@7.0.2001':
+  '@oxlint-tsgolint/linux-arm64@7.0.2002':
     optional: true
 
-  '@oxlint-tsgolint/linux-x64@7.0.2001':
+  '@oxlint-tsgolint/linux-x64@7.0.2002':
     optional: true
 
-  '@oxlint-tsgolint/win32-arm64@7.0.2001':
+  '@oxlint-tsgolint/win32-arm64@7.0.2002':
     optional: true
 
-  '@oxlint-tsgolint/win32-x64@7.0.2001':
+  '@oxlint-tsgolint/win32-x64@7.0.2002':
     optional: true
 
   '@oxlint/binding-android-arm-eabi@1.81.0':
@@ -16762,7 +16762,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-flawless@1.12.3(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxc-parser@0.147.0)(oxfmt@0.68.0)(oxlint@1.83.0(oxlint-tsgolint@7.0.2001))(supports-color@10.2.2):
+  eslint-plugin-flawless@1.12.3(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxc-parser@0.147.0)(oxfmt@0.68.0)(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))(supports-color@10.2.2):
     dependencies:
       '@eslint-react/core': 5.10.0(@typescript/typescript6@6.0.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
       '@oxlint/plugins': 1.78.0
@@ -16776,7 +16776,7 @@ snapshots:
     optionalDependencies:
       oxc-parser: 0.147.0
       oxfmt: 0.68.0
-      oxlint: 1.83.0(oxlint-tsgolint@7.0.2001)
+      oxlint: 1.83.0(oxlint-tsgolint@7.0.2002)
     transitivePeerDependencies:
       - supports-color
 
@@ -19262,11 +19262,11 @@ snapshots:
 
   oxlint-plugin-eslint@1.78.0: {}
 
-  oxlint-plugin-oxlint-comments@0.1.0(oxlint-tsgolint@7.0.2001):
+  oxlint-plugin-oxlint-comments@0.1.0(oxlint-tsgolint@7.0.2002):
     dependencies:
       escape-string-regexp: 4.0.0
       ignore: 7.0.9
-      oxlint: 1.83.0(oxlint-tsgolint@7.0.2001)
+      oxlint: 1.83.0(oxlint-tsgolint@7.0.2002)
     transitivePeerDependencies:
       - oxlint-tsgolint
       - vite-plus
@@ -19286,16 +19286,16 @@ snapshots:
       type-fest: 5.7.0
       typescript: '@typescript/typescript6@6.0.2'
 
-  oxlint-tsgolint@7.0.2001:
+  oxlint-tsgolint@7.0.2002:
     optionalDependencies:
-      '@oxlint-tsgolint/darwin-arm64': 7.0.2001
-      '@oxlint-tsgolint/darwin-x64': 7.0.2001
-      '@oxlint-tsgolint/linux-arm64': 7.0.2001
-      '@oxlint-tsgolint/linux-x64': 7.0.2001
-      '@oxlint-tsgolint/win32-arm64': 7.0.2001
-      '@oxlint-tsgolint/win32-x64': 7.0.2001
+      '@oxlint-tsgolint/darwin-arm64': 7.0.2002
+      '@oxlint-tsgolint/darwin-x64': 7.0.2002
+      '@oxlint-tsgolint/linux-arm64': 7.0.2002
+      '@oxlint-tsgolint/linux-x64': 7.0.2002
+      '@oxlint-tsgolint/win32-arm64': 7.0.2002
+      '@oxlint-tsgolint/win32-x64': 7.0.2002
 
-  oxlint@1.81.0(oxlint-tsgolint@7.0.2001):
+  oxlint@1.81.0(oxlint-tsgolint@7.0.2002):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.81.0
       '@oxlint/binding-android-arm64': 1.81.0
@@ -19316,9 +19316,9 @@ snapshots:
       '@oxlint/binding-win32-arm64-msvc': 1.81.0
       '@oxlint/binding-win32-ia32-msvc': 1.81.0
       '@oxlint/binding-win32-x64-msvc': 1.81.0
-      oxlint-tsgolint: 7.0.2001
+      oxlint-tsgolint: 7.0.2002
 
-  oxlint@1.83.0(oxlint-tsgolint@7.0.2001):
+  oxlint@1.83.0(oxlint-tsgolint@7.0.2002):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.83.0
       '@oxlint/binding-android-arm64': 1.83.0
@@ -19339,7 +19339,7 @@ snapshots:
       '@oxlint/binding-win32-arm64-msvc': 1.83.0
       '@oxlint/binding-win32-ia32-msvc': 1.83.0
       '@oxlint/binding-win32-x64-msvc': 1.83.0
-      oxlint-tsgolint: 7.0.2001
+      oxlint-tsgolint: 7.0.2002
 
   p-event@6.0.1:
     dependencies:
@@ -19713,7 +19713,7 @@ snapshots:
       chart.js: 4.5.1
       react: 19.2.7
 
-  react-doctor@0.9.14(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.214.0(@opentelemetry/api@1.9.1))(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint-tsgolint@7.0.2001)(react@19.2.7)(supports-color@10.2.2):
+  react-doctor@0.9.14(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.214.0(@opentelemetry/api@1.9.1))(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint-tsgolint@7.0.2002)(react@19.2.7)(supports-color@10.2.2):
     dependencies:
       '@astrojs/compiler': 4.0.0
       '@sentry/node': 10.72.0(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.214.0(@opentelemetry/api@1.9.1))(supports-color@10.2.2)
@@ -19727,7 +19727,7 @@ snapshots:
       magicast: 0.5.4
       oxc-parser: 0.148.0
       oxc-resolver: 11.24.2
-      oxlint: 1.81.0(oxlint-tsgolint@7.0.2001)
+      oxlint: 1.81.0(oxlint-tsgolint@7.0.2002)
       oxlint-plugin-react-doctor: 0.9.14
       playwright-core: 1.62.1
       prompts: 2.4.2
@@ -21281,7 +21281,7 @@ time:
   oxfmt@0.68.0: '2026-09-14T12:15:29.920Z'
   oxlint-plugin-react-doctor@0.9.14: '2026-09-12T11:39:14.846Z'
   oxlint-plugin-utilities@1.1.0: '2026-06-29T22:19:53.396Z'
-  oxlint-tsgolint@7.0.2001: '2026-07-21T14:33:13.210Z'
+  oxlint-tsgolint@7.0.2002: '2026-09-18T04:01:58.202Z'
   oxlint@1.83.0: '2026-09-14T12:12:38.627Z'
   pncat@0.13.3: '2026-09-02T12:18:13.409Z'
   publint@0.3.24: '2026-08-19T06:40:11.452Z'
