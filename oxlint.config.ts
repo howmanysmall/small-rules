@@ -587,6 +587,13 @@ const configuration = isentinel(
 		},
 		spellCheck: false,
 		stylistic: true,
+		test: {
+			vitest: {
+				extended: true,
+				files: GLOB_TESTS.filter((glob) => !glob.includes(".bench.")),
+				typecheck: true,
+			},
+		},
 		type: "package",
 	},
 	{
@@ -705,6 +712,8 @@ const configuration = isentinel(
 		files: GLOB_TESTS.filter((glob) => !glob.includes(".bench.")),
 		plugins: ["vitest"],
 		rules: {
+			"flawless/no-conditional-in-test": "off",
+			"flawless/prefer-expect-assertions-count": "off",
 			"max-lines": "off",
 			"max-lines-per-function": "off",
 			"no-console": "error",
