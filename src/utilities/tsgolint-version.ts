@@ -23,6 +23,7 @@ const isPluginSettings = type({
 }).readonly();
 
 export const isLintSettings = type({
+	"+": "ignore",
 	"small-rules?": isPluginSettings.or(isUndefined),
 }).readonly();
 export type LintSettings = typeof isLintSettings.infer;
