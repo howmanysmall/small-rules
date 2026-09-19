@@ -166,7 +166,7 @@
 	"peerDependencies": {
 		"typescript": ">=5 <8"
 	},
-	"packageManager": "pnpm@12.4.2",
+	"packageManager": "pnpm@12.5.0",
 	"engines": {
 		"node": ">=22.12.0"
 	},

@@ -1,4 +1,3 @@
-"$schema" = "node_modules/fallow/schema.json"
 entry = [
 	"src/index.ts",
 	"src/reset.d.ts",
@@ -6,7 +5,8 @@ entry = [
 	"scripts/*.ts",
 	"tests/**/*.fuzz.ts",
 	"documentation/src/components/overrides/*.astro",
-	"documentation/src/styles/custom.css"
+	"documentation/src/styles/custom.css",
+	"tools/vite-configuration/src/setup.ts"
 ]
 ignorePatterns = [
 	"tests/fixtures/**",
