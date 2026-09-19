@@ -53,3 +53,8 @@ catalog = {
 [[schemas]]
 path = "node_modules/fallow/schema.json"
 include = ["fallow.toml"]
+
+[[schemas]]
+path = "https://mise.jdx.dev/schema/mise.json"
+include = ["mise*.toml"]
+strict = false
