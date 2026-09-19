@@ -11,5 +11,14 @@ import RulePage from "$components/rule-page.astro";
 			claim. A nearby <code>SAFETY:</code> comment records the invariant that makes that claim legitimate;{" "}
 			<code>as const</code> is exempt because it does not claim an unrelated runtime shape.
 		</p>
+		<p>
+			I also count a described disable of <code>typescript/no-unsafe-type-assertion</code> as justification,
+			because I don't want you to write the same sentence twice. That only works if the disable actually covers
+			the diagnostic. <code>oxlint-tsgolint@7.0.2002</code> narrowed the report onto the <code>as Type</code>{" "}
+			syntax, so a <code>disable-next-line</code> above a multi-line object is unused while the <code>as</code>{" "}
+			still fails. Tell the rule which world you're in with <code>settings["small-rules"].tsgolintVersion</code>.
+			If you omit it, I look at <code>node_modules/oxlint-tsgolint</code>, then <code>pnpm-workspace.yaml</code>,
+			then <code>package.json</code>.
+		</p>
 	</Fragment>
 </RulePage>

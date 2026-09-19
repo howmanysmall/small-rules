@@ -43,7 +43,7 @@ describe("isExpressionSideEffectSafe", () => {
 		expect.assertions(1);
 
 		// Arrange
-		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Parser types include this object-key union member, but source syntax cannot build it.
+		// SAFETY: PrivateIdentifier object keys are not constructible in source.
 		const expression = {
 			properties: [
 				{
@@ -56,6 +56,7 @@ describe("isExpressionSideEffectSafe", () => {
 				},
 			],
 			type: "ObjectExpression",
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Parser types include this object-key union member, but source syntax cannot build it.
 		} as ESTree.Expression;
 
 		// Act
