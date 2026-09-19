@@ -27,27 +27,26 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 	return found;
 }
 
+function extractStringProperty<TObject extends Record<string, unknown>>(
+	object: TObject,
+	key: keyof TObject,
+): string | undefined {
+	const value = object[key];
+	return Predicate.isString(value) ? value : undefined;
+}
+
 function calleeName(callee: HarnessValue): string | undefined {
 	if (!Predicate.isObject(callee)) return undefined;
 	const { type } = callee;
-	if (type === "Identifier") {
-		const { name } = callee;
-		return Predicate.isString(name) ? name : undefined;
-	}
+
+	if (type === "Identifier") return extractStringProperty(callee, "name");
 	if (type !== "MemberExpression") return undefined;
 
 	const { property } = callee;
 	if (!Predicate.isObject(property)) return undefined;
 
-	if (property.type === "Identifier") {
-		const { name } = property;
-		return Predicate.isString(name) ? name : undefined;
-	}
-
-	if (property.type === "Literal") {
-		const { value } = property;
-		return Predicate.isString(value) ? value : undefined;
-	}
+	if (property.type === "Identifier") return extractStringProperty(property, "name");
+	if (property.type === "Literal") return extractStringProperty(property, "value");
 
 	return undefined;
 }
