@@ -8,6 +8,7 @@
 	"htmlWhitespaceSensitivity": "css",
 	"ignorePatterns": [
 		"**/*.{md,toml,js,yaml,yml,toml}",
+		"tests/fixtures/*/{invalid-*,*-invalid}/*.json",
 		"**/do-not-sync-ever/**",
 		".tsbuildinfo*",
 		"**/*-lock.json",

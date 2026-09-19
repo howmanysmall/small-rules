@@ -1,0 +1,7 @@
+{
+	"name": "catalog-only",
+	"type": "commonjs",
+	"devDependencies": {
+		"oxlint-tsgolint": "catalog:lint"
+	}
+}

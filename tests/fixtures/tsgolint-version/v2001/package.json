@@ -1,0 +1,7 @@
+{
+	"name": "v2001",
+	"type": "commonjs",
+	"devDependencies": {
+		"oxlint-tsgolint": "7.0.2001"
+	}
+}

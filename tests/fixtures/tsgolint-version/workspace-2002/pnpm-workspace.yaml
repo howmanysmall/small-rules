@@ -1,0 +1,6 @@
+packages:
+  - .
+
+catalogs:
+  lint:
+    oxlint-tsgolint: 7.0.2002
