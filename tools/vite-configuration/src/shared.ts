@@ -1,4 +1,5 @@
 import { availableParallelism } from "node:os";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 const cpuCount = availableParallelism();
@@ -12,7 +13,9 @@ export const sharedConfiguration = defineConfig({
 		globals: true,
 		isolate: false,
 		maxWorkers: workerCount,
+		passWithNoTests: true,
 		pool: "forks",
+		setupFiles: [fileURLToPath(new URL("setup.ts", import.meta.url))],
 		testTimeout: 30_000,
 	},
 });

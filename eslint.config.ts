@@ -165,7 +165,12 @@ const configuration = isentinel(
 			"unicorn/no-non-function-verb-prefix": "off",
 		},
 		spellCheck: false,
-		test: { vitest: true },
+		test: {
+			vitest: {
+				extended: true,
+				typecheck: true,
+			},
+		},
 		toml: {
 			overrides: {
 				"toml/array-bracket-spacing": "off",

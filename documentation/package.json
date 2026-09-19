@@ -33,6 +33,7 @@
 	"devDependencies": {
 		"@astrojs/check": "catalog:frontend",
 		"@playwright/test": "catalog:test",
+		"@small-rules/vite-configuration": "catalog:test",
 		"@testing-library/react": "catalog:test",
 		"@testing-library/user-event": "catalog:test",
 		"@total-typescript/ts-reset": "catalog:types",

@@ -5,5 +5,5 @@ runs:
   using: composite
   steps:
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: pnpm install --frozen-lockfile --trust-lockfile=false
       shell: bash

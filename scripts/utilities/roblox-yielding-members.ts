@@ -44,10 +44,12 @@ export function parseClasses(value: unknown): ReadonlyMap<string, RobloxClass> {
 export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxClass>): YieldingMemberCatalog {
 	const directMembers = new Map<string, ReadonlyArray<string>>();
 	for (const [className, classDefinition] of classes) {
-		directMembers.set(
-			className,
-			classDefinition.members.filter(isYieldingFunction).map((member) => member.Name),
-		);
+		const members = new Array<string>();
+		for (const member of classDefinition.members) {
+			if (!isYieldingFunction(member)) continue;
+			members.push(member.Name);
+		}
+		directMembers.set(className, members);
 	}
 
 	const cache = new Map<string, ReadonlyArray<string>>();
@@ -86,22 +88,32 @@ export function catalogHasYieldingMember(
 	);
 }
 
+function getSharedMemberGroups(memberGroupCounts: ReadonlyMap<string, number>): ReadonlyArray<string> {
+	const sharedMemberGroups = new Array<string>();
+	let size = 0;
+
+	for (const [memberGroup, count] of memberGroupCounts) {
+		if (count <= 1) continue;
+		sharedMemberGroups[size++] = memberGroup;
+	}
+
+	return sharedMemberGroups.toSorted((left, right) => left.localeCompare(right));
+}
+
 export function renderCatalog(classes: ReadonlyMap<string, RobloxClass>): string {
 	const catalog = createYieldingMemberCatalog(classes);
 	const classNames = [...catalog.classes].toSorted();
 	const yieldingMembers = [...catalog.yieldingMembers].toSorted(
 		([left], [right]) => classNames.indexOf(left) - classNames.indexOf(right),
 	);
+
 	const memberGroupCounts = new Map<string, number>();
 	for (const [, members] of yieldingMembers) {
 		const memberGroup = members.join(",");
 		memberGroupCounts.set(memberGroup, (memberGroupCounts.get(memberGroup) ?? 0) + 1);
 	}
 
-	const sharedMemberGroups = [...memberGroupCounts]
-		.filter(([, count]) => count > 1)
-		.map(([memberGroup]) => memberGroup)
-		.toSorted((left, right) => left.localeCompare(right));
+	const sharedMemberGroups = getSharedMemberGroups(memberGroupCounts);
 	const sharedMemberGroupIndexes = new Map(sharedMemberGroups.map((memberGroup, index) => [memberGroup, index]));
 	const yieldingMemberEntries = yieldingMembers
 		.map(([className, members]) => {
