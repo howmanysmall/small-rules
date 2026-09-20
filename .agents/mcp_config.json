@@ -11,12 +11,12 @@
 		"gh-grep": {
 			"serverUrl": "https://mcp.grep.app"
 		},
+		"lsp": {
+			"args": ["lsp-mcp-server"],
+			"command": "nlx"
+		},
 		"npm-registry": {
 			"command": "npm-registry-mcp"
-		},
-		"lsp": {
-			"command": "nlx",
-			"args": ["lsp-mcp-server"]
 		}
 	}
 }

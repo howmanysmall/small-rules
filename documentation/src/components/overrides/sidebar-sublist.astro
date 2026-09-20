@@ -92,6 +92,8 @@ function containsCurrent(entries: ReadonlyArray<SidebarEntry>): boolean {
 			padding: 0.2em var(--sl-sidebar-item-padding-inline);
 			line-height: 1.4;
 			cursor: pointer;
+			-webkit-user-select: none;
+			/* biome-ignore lint/nursery/useBaseline: WebKit covered by the -webkit- prefix above */
 			user-select: none;
 		}
 		summary::marker,

@@ -101,6 +101,26 @@ const rules: OxlintRules = {
 	],
 	"import/prefer-default-export": "off",
 	"init-declarations": "off",
+	"jsdoc-js/convert-to-jsdoc-comments": [
+		"warn",
+		{
+			allowedPrefixes: [
+				"@ts-",
+				"istanbul ",
+				"c8 ",
+				"v8 ",
+				"eslint",
+				"jshint",
+				"jslint",
+				"globals",
+				"exported",
+				"jscs",
+				"oxlint-",
+				"prettier-",
+				"biome-ignore ",
+			],
+		},
+	],
 	"jsdoc/check-tag-names": [
 		"error",
 		{

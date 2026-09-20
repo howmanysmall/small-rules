@@ -285,6 +285,12 @@
 				"workingDirectories": [{ "directory": "." }]
 			}
 		},
+		"fallow": {
+			"binary": {
+				"arguments": ["--run", "fallow-lsp"],
+				"path": "node"
+			}
+		},
 		"oxlint": {
 			"initialization_options": {
 				"settings": {
@@ -292,12 +298,6 @@
 					"fixKind": "safe_fix",
 					"typeAware": true
 				}
-			}
-		},
-		"fallow": {
-			"binary": {
-				"arguments": ["--run", "fallow-lsp"],
-				"path": "node"
 			}
 		},
 		"typescript-ls": {

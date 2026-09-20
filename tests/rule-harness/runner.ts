@@ -34,6 +34,7 @@ function runRuleTests(
 	const normalizedCases = normalizeCases(cases, defaults);
 	const execute = createRuleExecutor(ruleName, rule);
 
+	// biome-ignore lint/nursery/useValidTestTitle: it is a string lol
 	describe(ruleName, () => {
 		for (const testCase of normalizedCases) registerCase(testCase, execute);
 	});
@@ -57,6 +58,7 @@ function registerCase(testCase: NormalizedCase, execute: (testCase: NormalizedCa
 		it[SKIP_TEST_KEY](name, run);
 		return;
 	}
+	// biome-ignore lint/nursery/useValidTestTitle: it is a string lol
 	it(name, run);
 }
 

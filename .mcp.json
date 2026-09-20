@@ -8,17 +8,17 @@
 			"args": ["scripts/get-chrome-path.sh", "--serve"],
 			"command": "bash"
 		},
-		"hk": {
-			"args": ["x", "--", "hk", "mcp", "--root", "."],
-			"command": "mise"
+		"fallow": {
+			"args": ["--run", "fallow-mcp"],
+			"command": "node"
 		},
 		"gh-grep": {
 			"type": "http",
 			"url": "https://mcp.grep.app"
 		},
-		"fallow": {
-			"command": "node",
-			"args": ["--run", "fallow-mcp"]
+		"hk": {
+			"args": ["x", "--", "hk", "mcp", "--root", "."],
+			"command": "mise"
 		}
 	}
 }

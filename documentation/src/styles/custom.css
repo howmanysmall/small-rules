@@ -205,12 +205,14 @@ header.header .site-title img {
 	letter-spacing: -0.022rem;
 	background: linear-gradient(to right, var(--sl-color-text) 0 54%, var(--sl-color-accent) 54%);
 	-webkit-background-clip: text;
+	/* biome-ignore lint/nursery/useBaseline: firefox users are lesser beings istg */
 	background-clip: text;
 }
 
 :root[data-theme="dark"] .header .site-title > :where(span) {
 	background: linear-gradient(to right, #e8f4f8 0 54%, #7ed0e6 54%);
 	-webkit-background-clip: text;
+	/* biome-ignore lint/nursery/useBaseline: firefox users are lesser beings istg */
 	background-clip: text;
 }
 
@@ -1874,6 +1876,7 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 	font-size: var(--type-body-small);
 	line-height: 1.55;
 	color: var(--sl-color-text-muted);
+	/* biome-ignore lint/nursery/useBaseline: die firefox */
 	text-wrap: pretty;
 }
 
@@ -2305,6 +2308,7 @@ main p {
 
 nav.sidebar,
 #starlight__sidebar {
+	/* biome-ignore lint/nursery/useBaseline: opt-out only; browsers without scroll anchoring already behave this way */
 	overflow-anchor: none;
 }
 
@@ -2344,6 +2348,7 @@ nav.sidebar a {
 	line-height: 1.35;
 	hyphens: manual;
 	word-break: normal;
+	/* biome-ignore lint/nursery/useBaseline: die firefox */
 	text-wrap: pretty;
 	overflow-wrap: break-word;
 }

@@ -12,6 +12,7 @@ function isMarkdownRouteProperties(value: unknown): value is MarkdownRouteProper
 	return typeof value === "object" && value !== null && "body" in value && typeof value.body === "string";
 }
 
+// biome-ignore lint/nursery/useConsistentFunctionStyle: Astro
 export const getStaticPaths = (async (): Promise<GetStaticPathsResult> => {
 	const entries = await getCollection("docs");
 	const staticPaths: GetStaticPathsResult = [];
