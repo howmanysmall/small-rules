@@ -1,0 +1,22 @@
+---
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+
+import { toTsConfigSource } from "$utilities/oxlint-config";
+
+interface Props {
+	/** The `.oxlintrc.json` file contents. The `oxlint.config.ts` tab is derived from it. */
+	readonly json: string;
+}
+
+const { json } = Astro.props;
+const ts = toTsConfigSource(json);
+---
+
+<Tabs syncKey="oxlint-config">
+	<TabItem label=".oxlintrc.json" icon="seti:json">
+		<Code code={json} lang="json" />
+	</TabItem>
+	<TabItem label="oxlint.config.ts" icon="seti:typescript">
+		<Code code={ts} lang="ts" />
+	</TabItem>
+</Tabs>

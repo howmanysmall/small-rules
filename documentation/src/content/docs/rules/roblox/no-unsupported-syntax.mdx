@@ -3,6 +3,7 @@ title: "No Unsupported Syntax"
 ---
 
 import RulePage from "$components/rule-page.astro";
+import OxlintConfigTabs from "$components/oxlint-config-tabs.astro";
 
 <RulePage rule="no-unsupported-syntax">
 	<Fragment slot="rationale">
@@ -38,13 +39,13 @@ return nil
     		element. If you're on sloptor, turn that check off:
     	</p>
 
-```json
-{
+<OxlintConfigTabs
+	json={`{
 	"rules": {
 		"small-rules/no-unsupported-syntax": ["error", { "spreadDestructuring": false }]
 	}
-}
-```
+}`}
+/>
 
     	<p>
     		The other four stay on. If your compiler ever grows support for one of them (somehow),
