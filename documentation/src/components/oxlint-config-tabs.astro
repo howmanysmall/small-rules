@@ -4,7 +4,10 @@ import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 import { toTsConfigSource } from "$utilities/oxlint-config";
 
 interface Props {
-	/** The `.oxlintrc.json` file contents. The `oxlint.config.ts` tab is derived from it. */
+	/**
+	 * The `.oxlintrc.json` file contents. The `oxlint.config.ts` tab is derived
+	 * from it.
+	 */
 	readonly json: string;
 }
 
