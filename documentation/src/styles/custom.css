@@ -393,48 +393,69 @@ starlight-link-card:hover {
 }
 
 .badge--new {
-	color: var(--sl-color-accent);
-	background: color-mix(in oklch, var(--sl-color-accent) 12%, transparent);
-	border-color: color-mix(in oklch, var(--sl-color-accent) 40%, transparent);
+	color: #ca8a04;
+	background: color-mix(in oklch, #facc15 22%, transparent);
+	border-color: color-mix(in oklch, #facc15 45%, transparent);
+}
+
+:root[data-theme="dark"] .badge--new {
+	color: #facc15;
 }
 
 .badge--error {
-	color: var(--code-fail);
-	background: color-mix(in oklch, var(--code-fail) 10%, transparent);
-	border-color: color-mix(in oklch, var(--code-fail) 30%, transparent);
+	color: #e11d48;
+	background: color-mix(in oklch, #e11d48 18%, transparent);
+	border-color: color-mix(in oklch, #e11d48 42%, transparent);
+}
+
+:root[data-theme="dark"] .badge--error {
+	color: #fb7185;
 }
 
 .badge--caution,
 .badge--roblox {
-	color: #b45309;
-	background: color-mix(in oklch, #f59e0b 12%, transparent);
-	border-color: color-mix(in oklch, #f59e0b 30%, transparent);
+	color: #c2410c;
+	background: color-mix(in oklch, #fb923c 20%, transparent);
+	border-color: color-mix(in oklch, #fb923c 45%, transparent);
 }
 
 :root[data-theme="dark"] .badge--caution,
 :root[data-theme="dark"] .badge--roblox {
-	color: #fbbf24;
+	color: #fb923c;
 }
 
 .badge--success,
 .badge--fixable {
-	color: var(--code-pass);
-	background: color-mix(in oklch, var(--code-pass) 10%, transparent);
-	border-color: color-mix(in oklch, var(--code-pass) 30%, transparent);
+	color: #059669;
+	background: color-mix(in oklch, #10b981 18%, transparent);
+	border-color: color-mix(in oklch, #10b981 42%, transparent);
+}
+
+:root[data-theme="dark"] .badge--success,
+:root[data-theme="dark"] .badge--fixable {
+	color: #34d399;
 }
 
 .badge--note,
-.badge--suggestion,
-.badge--updated {
-	color: #6d28d9;
-	background: color-mix(in oklch, #8b5cf6 10%, transparent);
-	border-color: color-mix(in oklch, #8b5cf6 30%, transparent);
+.badge--suggestion {
+	color: #0369a1;
+	background: color-mix(in oklch, #38bdf8 20%, transparent);
+	border-color: color-mix(in oklch, #38bdf8 45%, transparent);
 }
 
 :root[data-theme="dark"] .badge--note,
-:root[data-theme="dark"] .badge--suggestion,
+:root[data-theme="dark"] .badge--suggestion {
+	color: #7dd3fc;
+}
+
+.badge--updated {
+	color: #6d28d9;
+	background: color-mix(in oklch, #8b5cf6 18%, transparent);
+	border-color: color-mix(in oklch, #8b5cf6 42%, transparent);
+}
+
 :root[data-theme="dark"] .badge--updated {
-	color: #a78bfa;
+	color: #c4b5fd;
 }
 
 .sidebar-content .sl-badge {
@@ -1754,8 +1775,8 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 .rule-index-card-heading {
 	display: flex;
 	gap: var(--space-3);
-	align-items: center;
-	justify-content: space-between;
+	align-items: flex-start;
+	justify-content: flex-start;
 }
 
 .rule-index-card-category,
@@ -1769,6 +1790,7 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 .rule-index-card-category {
 	flex-shrink: 0;
 	padding: var(--space-1) var(--space-2);
+	margin-left: auto;
 	color: var(--sl-color-text-muted);
 	white-space: nowrap;
 	background: var(--surface-muted);
@@ -1776,42 +1798,62 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 	border-radius: var(--pill-radius);
 }
 
-.rule-index-card-new {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.25em 0.6em;
-	font-family: var(--sl-font-mono);
+.rule-index-card li.rule-index-card-trait-new,
+.rule-index-card li.rule-index-card-trait-updated {
 	font-size: 0.68rem;
 	font-weight: 600;
-	line-height: 1;
-	color: var(--sl-color-accent);
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	white-space: nowrap;
-	background: color-mix(in oklch, var(--sl-color-accent) 12%, transparent);
-	border: 1px solid color-mix(in oklch, var(--sl-color-accent) 40%, transparent);
-	border-radius: var(--pill-radius);
+	letter-spacing: 0.06em;
 }
 
-.rule-index-card-updated {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.25em 0.6em;
-	font-family: var(--sl-font-mono);
-	font-size: 0.68rem;
-	font-weight: 600;
-	line-height: 1;
+.rule-index-card li.rule-index-card-trait-new {
+	color: #ca8a04;
+	background: color-mix(in oklch, #facc15 22%, transparent);
+	border-color: color-mix(in oklch, #facc15 45%, transparent);
+}
+
+:root[data-theme="dark"] .rule-index-card li.rule-index-card-trait-new {
+	color: #facc15;
+}
+
+.rule-index-card li.rule-index-card-trait-updated {
 	color: #6d28d9;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	white-space: nowrap;
-	background: color-mix(in oklch, #8b5cf6 10%, transparent);
-	border: 1px solid color-mix(in oklch, #8b5cf6 30%, transparent);
-	border-radius: var(--pill-radius);
+	background: color-mix(in oklch, #8b5cf6 18%, transparent);
+	border-color: color-mix(in oklch, #8b5cf6 42%, transparent);
 }
 
-:root[data-theme="dark"] .rule-index-card-updated {
-	color: #a78bfa;
+:root[data-theme="dark"] .rule-index-card li.rule-index-card-trait-updated {
+	color: #c4b5fd;
+}
+
+.rule-index-card li.rule-index-card-trait-problem {
+	color: #e11d48;
+	background: color-mix(in oklch, #e11d48 18%, transparent);
+	border-color: color-mix(in oklch, #e11d48 42%, transparent);
+}
+
+:root[data-theme="dark"] .rule-index-card li.rule-index-card-trait-problem {
+	color: #fb7185;
+}
+
+.rule-index-card li.rule-index-card-trait-suggestion {
+	color: #0369a1;
+	background: color-mix(in oklch, #38bdf8 20%, transparent);
+	border-color: color-mix(in oklch, #38bdf8 45%, transparent);
+}
+
+:root[data-theme="dark"] .rule-index-card li.rule-index-card-trait-suggestion {
+	color: #7dd3fc;
+}
+
+.rule-index-card li.rule-index-card-trait-fixable {
+	color: #059669;
+	background: color-mix(in oklch, #10b981 18%, transparent);
+	border-color: color-mix(in oklch, #10b981 42%, transparent);
+}
+
+:root[data-theme="dark"] .rule-index-card li.rule-index-card-trait-fixable {
+	color: #34d399;
 }
 
 .rule-index-card code {
@@ -1843,6 +1885,12 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 	margin: 0;
 	list-style: none;
 	border-top: 1px solid var(--border);
+}
+
+/* Starlight gives every non-first li inside Markdown content a top margin;
+the traits row uses gap for spacing instead. */
+.rule-index-card ul > li + li {
+	margin-top: 0;
 }
 
 .rule-index-card li {

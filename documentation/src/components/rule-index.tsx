@@ -62,7 +62,7 @@ export function RuleIndex({ categories, mode }: Readonly<RuleIndexProperties>): 
 
 			<div className="rule-index-grid">
 				{visibleRules.map((rule) => (
-					<RuleIndexCard key={rule.path} rule={rule} />
+					<RuleIndexCard key={rule.path} rule={rule} showCategory={mode === "catalog"} />
 				))}
 			</div>
 

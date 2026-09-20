@@ -8,12 +8,10 @@ type RuleIndexRule = RuleIndexCategory["rules"][number];
 
 export interface RuleIndexCardProperties {
 	rule: RuleIndexRule;
+	showCategory?: boolean | undefined;
 }
 
-export function RuleIndexCard({ rule }: Readonly<RuleIndexCardProperties>): ReactNode {
-	const showNew = rule.isNew === true;
-	const showUpdated = !showNew && rule.isUpdated === true;
-
+export function RuleIndexCard({ rule, showCategory }: Readonly<RuleIndexCardProperties>): ReactNode {
 	return (
 		<a
 			className="rule-index-card"
@@ -23,17 +21,27 @@ export function RuleIndexCard({ rule }: Readonly<RuleIndexCardProperties>): Reac
 		>
 			<div className="rule-index-card-heading">
 				<h2>{rule.title}</h2>
-				{showNew && (
-					<span
-						className="rule-index-card-new"
+				{showCategory === true && <span className="rule-index-card-category">{rule.categoryLabel}</span>}
+			</div>
+			<code>{rule.name}</code>
+			<p>{rule.description}</p>
+			<ul aria-label="Rule characteristics">
+				<li
+					className={`rule-index-card-trait rule-index-card-trait-${rule.type === "problem" ? "problem" : "suggestion"}`}
+				>
+					{rule.type === "problem" ? "Problem" : "Suggestion"}
+				</li>
+				{rule.isNew === true && (
+					<li
+						className="rule-index-card-trait rule-index-card-trait-new"
 						title={rule.addedIn === undefined ? "Not yet in a release" : `Added in ${rule.addedIn}`}
 					>
 						{"New"}
-					</span>
+					</li>
 				)}
-				{showUpdated && (
-					<span
-						className="rule-index-card-updated"
+				{rule.isNew !== true && rule.isUpdated === true && (
+					<li
+						className="rule-index-card-trait rule-index-card-trait-updated"
 						title={
 							rule.updatedIn === undefined
 								? "Recently updated, not yet in a release"
@@ -41,16 +49,10 @@ export function RuleIndexCard({ rule }: Readonly<RuleIndexCardProperties>): Reac
 						}
 					>
 						{"Updated"}
-					</span>
+					</li>
 				)}
-				<span className="rule-index-card-category">{rule.categoryLabel}</span>
-			</div>
-			<code>{rule.name}</code>
-			<p>{rule.description}</p>
-			<ul aria-label="Rule characteristics">
-				<li className="rule-index-card-trait">{rule.type === "problem" ? "Problem" : "Suggestion"}</li>
 				{rule.fixability === undefined ? undefined : (
-					<li className="rule-index-card-trait">{rule.fixability}</li>
+					<li className="rule-index-card-trait rule-index-card-trait-fixable">{rule.fixability}</li>
 				)}
 			</ul>
 		</a>

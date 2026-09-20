@@ -101,7 +101,7 @@ describe("rule-index", () => {
 	});
 
 	it("renders a category listing without catalog filters", () => {
-		expect.assertions(3);
+		expect.assertions(4);
 
 		const robloxCategory = catalogCategories.filter((category) => category.key === "roblox");
 
@@ -112,6 +112,15 @@ describe("rule-index", () => {
 		expect(screen.getByText(showingRulesLabel(robloxRuleCount)).textContent).toBe(
 			showingRulesLabel(robloxRuleCount),
 		);
+		expect(document.querySelector(".rule-index-card-category")).toBeNull();
+	});
+
+	it("shows the category pill only in the full catalog", () => {
+		expect.assertions(1);
+
+		render(<RuleIndex categories={catalogCategories} mode="catalog" />);
+
+		expect(document.querySelectorAll(".rule-index-card-category").length).toBeGreaterThan(0);
 	});
 });
 
@@ -168,8 +177,8 @@ describe("rule-index freshness", () => {
 
 		render(<RuleIndex categories={categories} mode="catalog" />);
 
-		const newPill = screen.getByText("New", { selector: ".rule-index-card-new" });
-		const updatedPill = screen.getByText("Updated", { selector: ".rule-index-card-updated" });
+		const newPill = screen.getByText("New", { selector: "li.rule-index-card-trait-new" });
+		const updatedPill = screen.getByText("Updated", { selector: "li.rule-index-card-trait-updated" });
 
 		expect(newPill.getAttribute("title")).toBe("Added in v3.0.2");
 		expect(updatedPill.getAttribute("title")).toBe("Recently updated, not yet in a release");
@@ -186,9 +195,9 @@ describe("rule-index freshness", () => {
 
 		render(<RuleIndex categories={categories} mode="catalog" />);
 
-		expect(screen.getByText("Updated", { selector: ".rule-index-card-updated" }).getAttribute("title")).toBe(
-			"Updated in v3.0.2",
-		);
+		expect(
+			screen.getByText("Updated", { selector: "li.rule-index-card-trait-updated" }).getAttribute("title"),
+		).toBe("Updated in v3.0.2");
 	});
 
 	it("shows unreleased wording for new rules not yet in a release", () => {
@@ -201,7 +210,7 @@ describe("rule-index freshness", () => {
 
 		render(<RuleIndex categories={categories} mode="catalog" />);
 
-		expect(screen.getByText("New", { selector: ".rule-index-card-new" }).getAttribute("title")).toBe(
+		expect(screen.getByText("New", { selector: "li.rule-index-card-trait-new" }).getAttribute("title")).toBe(
 			"Not yet in a release",
 		);
 	});
