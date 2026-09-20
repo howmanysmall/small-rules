@@ -264,8 +264,12 @@ function getObjectSchemaType(schema: SchemaRecord): string {
 }
 
 function getSchemaType(schema: SchemaRecord): string {
-	if (schema.const !== undefined) return JSON.stringify(schema.const);
-	if (isJsonArray(schema.enum)) return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
+	if (schema.const !== undefined) {
+		return JSON.stringify(schema.const);
+	}
+	if (isJsonArray(schema.enum)) {
+		return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
+	}
 	if (isJsonArray(schema.oneOf)) {
 		return schema.oneOf.map((entry) => (isSchemaRecord(entry) ? getSchemaType(entry) : "unknown")).join(" | ");
 	}
@@ -280,8 +284,12 @@ function getSchemaType(schema: SchemaRecord): string {
 		}
 		return `Array<${isSchemaRecord(schema.items) ? getSchemaType(schema.items) : "unknown"}>`;
 	}
-	if (typeNames.includes("object")) return getObjectSchemaType(schema);
-	if (typeNames.length > 0) return joinTypes(typeNames);
+	if (typeNames.includes("object")) {
+		return getObjectSchemaType(schema);
+	}
+	if (typeNames.length > 0) {
+		return joinTypes(typeNames);
+	}
 
 	return "unknown";
 }
@@ -344,11 +352,23 @@ function createPlaceholder(schema: SchemaInput, hint?: string): JsonValue {
 	if (explicitPlaceholder !== undefined) return explicitPlaceholder;
 
 	const typeNames = getSchemaTypeNames(schema);
-	if (typeNames.includes("array")) return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
+	if (typeNames.includes("array")) {
+		return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
+	}
+
 	if (typeNames.includes("boolean")) return false;
-	if (typeNames.includes("integer") || typeNames.includes("number")) return createNumberPlaceholder(schema);
-	if (typeNames.includes("object")) return createObjectPlaceholder(schema, hint);
-	if (typeNames.includes("string")) return createStringPlaceholder(hint);
+	if (typeNames.includes("integer") || typeNames.includes("number")) {
+		return createNumberPlaceholder(schema);
+	}
+
+	if (typeNames.includes("object")) {
+		return createObjectPlaceholder(schema, hint);
+	}
+
+	if (typeNames.includes("string")) {
+		return createStringPlaceholder(hint);
+	}
+
 	return {};
 }
 
@@ -408,9 +428,11 @@ function getSchemaSummary(schema: SchemaInput): string {
 		if (schema.length === 0) return "This rule does not accept options.";
 		return "This rule accepts one options object after the severity.";
 	}
+
 	if (isSchemaRecord(schema) && schema.type === "array") {
 		return "This rule accepts positional array options after the severity.";
 	}
+
 	return "This rule exposes a custom options schema.";
 }
 

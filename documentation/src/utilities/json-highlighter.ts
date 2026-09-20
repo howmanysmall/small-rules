@@ -36,7 +36,7 @@ function classifyToken(text: string): string | undefined {
 	return "json-punctuation";
 }
 
-function isKey(raw: Array<HighlightToken>, index: number): boolean {
+function isKey(raw: ReadonlyArray<HighlightToken>, index: number): boolean {
 	let lookahead = index + 1;
 	while (lookahead < raw.length) {
 		const current: HighlightToken | undefined = raw[lookahead];
@@ -47,20 +47,28 @@ function isKey(raw: Array<HighlightToken>, index: number): boolean {
 	return token?.text === ":";
 }
 
-export function tokenizeJson(json: string): Array<HighlightToken> {
+function getRaw(json: string): ReadonlyArray<HighlightToken> {
 	const raw = new Array<HighlightToken>();
+	let size = 0;
 
 	for (const match of json.matchAll(JSON_TOKEN)) {
 		const [text] = match;
 		const className = classifyToken(text);
-		raw.push({ className, text });
+		raw[size++] = { className, text };
 	}
 
+	return raw;
+}
+
+export function tokenizeJson(json: string): Array<HighlightToken> {
+	const raw = getRaw(json);
 	const result = new Array<HighlightToken>();
+	let size = 0;
+
 	for (const token of raw) {
 		if (token.className === "json-string" && isKey(raw, raw.indexOf(token))) {
-			result.push({ className: "json-key", text: token.text });
-		} else result.push(token);
+			result[size++] = { className: "json-key", text: token.text };
+		} else result[size++] = token;
 	}
 
 	return result;

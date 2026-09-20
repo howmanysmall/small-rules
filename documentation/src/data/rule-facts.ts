@@ -101,7 +101,7 @@ export function getRuleEntry(ruleName: RuleName): RuleManifestEntry | undefined 
 }
 
 function createRuleFactCategory(category: RuleCategoryManifest): RuleFactCategory {
-	const rules = category.rules.map((entry) => getRuleFacts(entry.name));
+	const rules = category.rules.map(({ name }) => getRuleFacts(name));
 
 	return {
 		key: category.key,

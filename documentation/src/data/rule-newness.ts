@@ -80,7 +80,9 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
 			continue;
 		}
 		const ruleName = nodePath.basename(line, ".ts");
-		if (!addedInByRule.has(ruleName)) addedInByRule.set(ruleName, currentCommit);
+		if (!addedInByRule.has(ruleName)) {
+			addedInByRule.set(ruleName, currentCommit);
+		}
 	}
 
 	return addedInByRule;
@@ -149,7 +151,11 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 	const manifestRules = new Set(
 		ruleManifest.categories.flatMap((category) => category.rules.map((entry) => entry.name)),
 	);
-	for (const ruleName of newness.keys()) if (!manifestRules.has(ruleName)) newness.delete(ruleName);
+
+	for (const ruleName of newness.keys()) {
+		if (!manifestRules.has(ruleName)) newness.delete(ruleName);
+	}
+
 	return newness;
 }
 

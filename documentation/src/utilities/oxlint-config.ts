@@ -25,7 +25,9 @@ export function isJsonValue(value: unknown): value is JsonValue {
 
 	if (!Predicate.isReadonlyObject(value)) return false;
 
-	for (const subValue of Object.values(value)) if (!isJsonValue(subValue)) return false;
+	for (const subValue of Object.values(value)) {
+		if (!isJsonValue(subValue)) return false;
+	}
 	return true;
 }
 

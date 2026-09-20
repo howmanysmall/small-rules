@@ -55,7 +55,9 @@ const PATH_SEPARATOR_REGEXP = /[\\/]/u;
 function parseReleaseVersion(id: string): ReleaseVersion {
 	const match = RELEASE_VERSION_REGEXP.exec(id);
 	const groups = match?.groups;
-	if (groups === undefined) throw new ReleaseFilenameError(id);
+	if (groups === undefined) {
+		throw new ReleaseFilenameError(id);
+	}
 
 	const { major, minor, patch } = groups;
 	return { major: Number(major), minor: Number(minor), patch: Number(patch), tag: id };
@@ -73,7 +75,10 @@ function getReleaseId(entry: CollectionReleaseEntry): string {
 }
 
 export function getReleaseContentEntry(entry: CollectionReleaseEntry): ReleaseContentEntry {
-	if (entry.body !== undefined) return { id: getReleaseId(entry), body: entry.body };
+	if (entry.body !== undefined) {
+		return { id: getReleaseId(entry), body: entry.body };
+	}
+
 	throw new Error(`Release "${entry.id}" is missing its Markdown body.`);
 }
 
@@ -87,7 +92,9 @@ function compareReleaseHistoryEntries(left: ReleaseHistoryEntry, right: ReleaseH
 
 export function createReleaseHistory(releaseEntries: ReadonlyArray<ReleaseContentEntry>): ReleaseHistory {
 	const entries = releaseEntries.map(createReleaseHistoryEntry).toSorted(compareReleaseHistoryEntries);
-	if (entries.length === 0) return { emptyState: releaseHistoryEmptyState, entries: [], kind: "empty" };
+	if (entries.length === 0) {
+		return { emptyState: releaseHistoryEmptyState, entries: [], kind: "empty" };
+	}
 
 	return { entries, kind: "populated" };
 }
