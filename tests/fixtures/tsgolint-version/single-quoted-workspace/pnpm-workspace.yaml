@@ -1,3 +1,4 @@
 catalogs:
   lint:
-    oxlint-tsgolint: 7.0.2002
+    # eslint-disable-next-line yaml/plain-scalar, oxfmt/oxfmt, yaml/quotes -- no
+    oxlint-tsgolint: '7.0.2002'
