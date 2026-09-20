@@ -67,6 +67,34 @@ Some rules accept options for customization. Pass them as an array where the fir
 
 <Aside type="note">Not all rules accept options. Check the individual rule pages for available configuration.</Aside>
 
+## Plugin settings
+
+Some behavior cannot be expressed per rule. Oxlint exposes a top-level `settings` object for that, keyed by plugin name:
+
+```json
+{
+	"jsPlugins": ["@pobammer-ts/small-rules"],
+	"settings": {
+		"small-rules": {
+			"tsgolintVersion": "7.0.2002"
+		}
+	}
+}
+```
+
+| Setting           | Type     | Required | Behavior                                                                                                                                                    |
+| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tsgolintVersion` | `string` | Optional | Tells `small-rules/require-safety-comment-for-type-assertion` which `oxlint-tsgolint` diagnostic range to expect for `typescript/no-unsafe-type-assertion`. |
+
+`oxlint-tsgolint@7.0.2002` narrowed the report onto the `as Type` syntax. Older versions report the containing statement, so a `disable-next-line` above a multi-line object covers the diagnostic there but not on newer versions. Set `tsgolintVersion` to `"7.0.2002"` or later to require the disable to cover the assertion line itself.
+
+When you omit `tsgolintVersion`, the rule infers it in this order: `node_modules/oxlint-tsgolint` installed version, then `pnpm-workspace.yaml`, then `package.json`. Invalid settings fall back to inference.
+
+<Aside type="note">
+	Only `small-rules/require-safety-comment-for-type-assertion` reads settings today. Nothing else in this plugin needs
+	it.
+</Aside>
+
 ## Override files
 
 Use oxlint's `overrides` field when a rule makes sense for application code but not for tests or generated files:
