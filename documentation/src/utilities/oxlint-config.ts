@@ -13,15 +13,20 @@ function createIndent(depth: number): string {
 	return INDENT.repeat(depth);
 }
 
-function isJsonValue(value: unknown): value is JsonValue {
+export function isJsonValue(value: unknown): value is JsonValue {
 	if (value === null || Predicate.isBoolean(value) || Predicate.isNumber(value) || Predicate.isString(value)) {
 		return true;
 	}
+
 	if (Array.isArray(value)) {
-		return value.every(isJsonValue);
+		for (const subValue of value) if (!isJsonValue(subValue)) return false;
+		return true;
 	}
+
 	if (!Predicate.isReadonlyObject(value)) return false;
-	return Object.values(value).every(isJsonValue);
+
+	for (const subValue of Object.values(value)) if (!isJsonValue(subValue)) return false;
+	return true;
 }
 
 function isJsonArray(value: JsonValue): value is ReadonlyArray<JsonValue> {
@@ -81,10 +86,19 @@ function renderObject(fields: JsonRecord, depth: number): string {
 	return `{\n${body},\n${padding}}`;
 }
 
-export function toTsConfigSource(jsonText: string): string {
+function parseJsonValue(jsonText: string): JsonValue {
 	const parsed: unknown = JSON.parse(jsonText);
 	if (!isJsonValue(parsed)) {
 		throw new TypeError("Expected the configuration text to parse as a JSON value.");
 	}
-	return `${CONFIG_HEADER}\n\nexport default defineConfig(${renderValue(parsed, 0)});`;
+
+	return parsed;
+}
+
+export function formatJsonSource(jsonText: string): string {
+	return `${JSON.stringify(parseJsonValue(jsonText), undefined, INDENT)}\n`;
+}
+
+export function toTsConfigSource(jsonText: string): string {
+	return `${CONFIG_HEADER}\n\nexport default defineConfig(${renderValue(parseJsonValue(jsonText), 0)});`;
 }

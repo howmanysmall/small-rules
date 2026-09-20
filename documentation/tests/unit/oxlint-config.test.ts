@@ -1,6 +1,28 @@
 import { describe, expect, it } from "vitest";
 
-import { toTsConfigSource } from "$utilities/oxlint-config";
+import { formatJsonSource, toTsConfigSource } from "$utilities/oxlint-config";
+
+describe("formatJsonSource", () => {
+	it("restores tab indentation when MDX strips it", () => {
+		expect.assertions(1);
+
+		expect(
+			formatJsonSource('{"jsPlugins":["@pobammer-ts/small-rules"],"rules":{"small-rules/no-print":"error"}}'),
+		).toBe(
+			[
+				"{",
+				'\t"jsPlugins": [',
+				'\t\t"@pobammer-ts/small-rules"',
+				"\t],",
+				'\t"rules": {',
+				'\t\t"small-rules/no-print": "error"',
+				"\t}",
+				"}",
+				"",
+			].join("\n"),
+		);
+	});
+});
 
 describe("toTsConfigSource", () => {
 	it("converts a plugin registration block to a defineConfig module", () => {
