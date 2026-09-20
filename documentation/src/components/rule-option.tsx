@@ -23,10 +23,10 @@ const labels = {
 } as const;
 
 export function RuleOption({ highlightedType, option }: Readonly<RuleOptionProperties>): ReactNode {
-	const detailIdPrefix = useId();
+	const prefixDetailId = useId();
 	const [copyStatus, setCopyStatus] = useState<"copied" | "failed" | undefined>();
 	const [isExpanded, setIsExpanded] = useState(false);
-	const detailId = `${detailIdPrefix}-${option.name}-default`;
+	const detailId = `${prefixDetailId}-${option.name}-default`;
 
 	function toggleDefault(): void {
 		setIsExpanded((currentValue) => !currentValue);

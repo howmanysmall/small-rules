@@ -1,6 +1,7 @@
 import { Predicate } from "effect";
 
-type JsonValue = boolean | null | number | ReadonlyArray<JsonValue> | string | { readonly [key: string]: JsonValue };
+type PrimitiveJsonValue = boolean | null | number | string;
+type JsonValue = PrimitiveJsonValue | ReadonlyArray<JsonValue> | { readonly [key: string]: JsonValue };
 
 type JsonRecord = Readonly<Record<string, JsonValue>>;
 
@@ -13,10 +14,12 @@ function createIndent(depth: number): string {
 	return INDENT.repeat(depth);
 }
 
+function isPrimitiveJsonValue(value: unknown): value is PrimitiveJsonValue {
+	return value === null || Predicate.isBoolean(value) || Predicate.isNumber(value) || Predicate.isString(value);
+}
+
 export function isJsonValue(value: unknown): value is JsonValue {
-	if (value === null || Predicate.isBoolean(value) || Predicate.isNumber(value) || Predicate.isString(value)) {
-		return true;
-	}
+	if (isPrimitiveJsonValue(value)) return true;
 
 	if (Array.isArray(value)) {
 		for (const subValue of value) if (!isJsonValue(subValue)) return false;
