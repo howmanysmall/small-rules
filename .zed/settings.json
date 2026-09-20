@@ -294,6 +294,12 @@
 				}
 			}
 		},
+		"fallow": {
+			"binary": {
+				"arguments": ["--run", "fallow-lsp"],
+				"path": "node"
+			}
+		},
 		"typescript-ls": {
 			"binary": {
 				"arguments": ["--run", "tsgo", "--", "--lsp", "--stdio"],
