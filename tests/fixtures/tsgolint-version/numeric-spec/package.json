@@ -1,0 +1,7 @@
+{
+	"name": "numeric-spec",
+	"type": "commonjs",
+	"devDependencies": {
+		"oxlint-tsgolint": 7
+	}
+}

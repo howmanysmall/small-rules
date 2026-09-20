@@ -5,7 +5,7 @@ import { getJSXAttributeName, isSimpleExpression } from "$oxc-utilities/componen
 import type { ESTree } from "oxlint-plugin-utilities";
 
 function namespacedAttributeFixture(): ESTree.JSXAttribute {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
+	// SAFETY: Utility tests build minimal AST nodes for parser-shape branches.
 	return {
 		name: {
 			name: { name: "key", type: "JSXIdentifier" },
@@ -13,14 +13,16 @@ function namespacedAttributeFixture(): ESTree.JSXAttribute {
 			type: "JSXNamespacedName",
 		},
 		type: "JSXAttribute",
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
 	} as ESTree.JSXAttribute;
 }
 
 function parenthesizedExpressionFixture(): ESTree.ParenthesizedExpression {
-	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
+	// SAFETY: Utility tests build minimal AST nodes for parser-shape branches.
 	return {
 		expression: { name: "value", type: "Identifier" },
 		type: "ParenthesizedExpression",
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
 	} as ESTree.ParenthesizedExpression;
 }
 

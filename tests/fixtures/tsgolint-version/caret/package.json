@@ -1,0 +1,7 @@
+{
+	"name": "caret",
+	"type": "commonjs",
+	"dependencies": {
+		"oxlint-tsgolint": "^7.0.2002"
+	}
+}

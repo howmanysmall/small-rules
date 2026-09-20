@@ -1,5 +1,7 @@
 # Ignore node.js for the future
 **/node_modules/**
+!tests/fixtures/tsgolint-version/**/node_modules/
+!tests/fixtures/tsgolint-version/**/node_modules/**
 **/do-not-sync-ever/**
 .pnpm-store/
 **/.astro/**

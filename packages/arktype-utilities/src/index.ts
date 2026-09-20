@@ -39,6 +39,7 @@ export const isReadonlyDictionaryOfUnknowns = type.Record(isString, isUnknown).r
 export const isDictionaryOfStrings = type.Record(isString, isString);
 export const isReadonlyDictionaryOfStrings = isDictionaryOfStrings.readonly();
 export const isMaybeReadonlyDictionaryOfStrings = isReadonlyDictionaryOfStrings.or(isUndefined);
+export type MaybeReadonlyDictionaryOfStrings = typeof isMaybeReadonlyDictionaryOfStrings.infer;
 
 // Unexported and redeclared ArkType types
 export type UndeclaredKeyBehavior = "delete" | "ignore" | "reject";

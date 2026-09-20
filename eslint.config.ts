@@ -212,8 +212,21 @@ const configuration = isentinel(
 		},
 	},
 	{
+		name: "small-rules/fixture-package-json",
+		files: ["tests/fixtures/tsgolint-version/*/package.json"],
+		rules: {
+			"package-json/valid-devDependencies": "off",
+		},
+	},
+	{
 		name: "small-rules/ignores",
-		ignores: ["{.omo,.rumdl_cache}/**", ".github/workflows/react-doctor.yml", "**/*.js"],
+		ignores: [
+			"{.omo,.rumdl_cache}/**",
+			".github/workflows/react-doctor.yml",
+			"**/*.js",
+			"tests/fixtures/*/{invalid-*,*-invalid}/*.json",
+			"tests/fixtures/tsgolint-version/json-array/package.json",
+		],
 	},
 	{
 		name: "small-rules/block-no-unsafe-string-replacement",
