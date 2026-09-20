@@ -1,0 +1,7 @@
+{
+	"name": "workspace-2002",
+	"type": "commonjs",
+	"devDependencies": {
+		"oxlint-tsgolint": "catalog:lint"
+	}
+}

@@ -2,8 +2,8 @@
 import type { RuleName } from "$data/rule-options";
 import { getRuleOptionsDocumentation } from "$data/rule-options";
 import { highlightTypeScriptAsync } from "$utilities/highlight-type";
-import { Code } from "@astrojs/starlight/components";
 import { RuleOptionsTable } from "./rule-options-table";
+import OxlintConfigTabs from "./oxlint-config-tabs.astro";
 
 interface Props {
 	readonly rule: RuleName;
@@ -30,5 +30,5 @@ const highlightedTypes = Object.fromEntries(
 )}
 
 <div class="rule-options-config">
-	<Code code={documentation.config} lang="json" meta='frame="none"' />
+	<OxlintConfigTabs json={documentation.config} />
 </div>

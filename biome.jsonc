@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -54,7 +54,8 @@
 			"**",
 			"!**/*.js",
 			"!**/{dist,do-not-sync-ever,garbage,node_modules}/**",
-			"!documentation/src/components/rule-index-data.ts"
+			"!documentation/src/components/rule-index-data.ts",
+			"!tests/fixtures/tsgolint-version/**/*.yaml"
 		],
 		"indentStyle": "tab",
 		"indentWidth": 4,

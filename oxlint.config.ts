@@ -590,6 +590,7 @@ const configuration = isentinel(
 				},
 			},
 			react: { version: "19.2.8" },
+			"small-rules": { tsgolintVersion: "7.0.2002" },
 			vitest: { typecheck: true },
 		},
 		spellCheck: false,

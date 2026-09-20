@@ -5,17 +5,19 @@ description: "Configure small-rules in your oxlint setup."
 
 import { Aside } from "@astrojs/starlight/components";
 
+import OxlintConfigTabs from "$components/oxlint-config-tabs.astro";
+
 ## Add the plugin
 
-I keep the plugin registration separate from the rules themselves so I can add or remove the rules I actually want. Register it in your `.oxlintrc.json`:
+I keep the plugin registration separate from the rules themselves so I can add or remove the rules I actually want. Register it in your Oxlint configuration file:
 
-Register the plugin in your `.oxlintrc.json`:
+Register the plugin in your Oxlint configuration file:
 
-```json
-{
+<OxlintConfigTabs
+	json={`{
 	"jsPlugins": ["@pobammer-ts/small-rules"]
-}
-```
+}`}
+/>
 
 ## Choose rule severity
 
@@ -29,15 +31,15 @@ Each rule can be set to one of three severity levels:
 | `"warn"`  | Shows a warning but does not fail |
 | `"off"`   | Disables the rule                 |
 
-```json
-{
+<OxlintConfigTabs
+	json={`{
 	"rules": {
 		"small-rules/no-print": "error",
 		"small-rules/prefer-early-return": "warn",
 		"small-rules/no-useless-constants": "off"
 	}
-}
-```
+}`}
+/>
 
 ## Pass rule options
 
@@ -45,8 +47,8 @@ Most rules do not need configuration. When one does, pass the severity first and
 
 Some rules accept options for customization. Pass them as an array where the first element is the severity and the second is an options object:
 
-```json
-{
+<OxlintConfigTabs
+	json={`{
 	"rules": {
 		"small-rules/ban-instances": [
 			"error",
@@ -62,10 +64,49 @@ Some rules accept options for customization. Pass them as an array where the fir
 			}
 		]
 	}
-}
-```
+}`}
+/>
 
 <Aside type="note">Not all rules accept options. Check the individual rule pages for available configuration.</Aside>
+
+## Plugin settings
+
+Some behavior cannot be expressed per rule. Oxlint exposes a top-level `settings` object for that, keyed by plugin name:
+
+<OxlintConfigTabs
+	json={`{
+	"jsPlugins": ["@pobammer-ts/small-rules"],
+	"settings": {
+		"small-rules": {
+			"tsgolintVersion": "7.0.2002"
+		}
+	}
+}`}
+/>
+
+| Setting           | Type     | Default  | Used by                                                                                                              |
+| ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `tsgolintVersion` | `string` | inferred | [require-safety-comment-for-type-assertion](/small-rules/rules/anti-slop/require-safety-comment-for-type-assertion/) |
+
+### tsgolintVersion
+
+I use this setting to decide where a suppression comment has to sit to count as justification for a type assertion.
+
+- Before `7.0.2002`, the linter reports the containing statement, so a `disable-next-line` comment above the statement covers the diagnostic.
+- On `7.0.2002` and later, the linter reports the `as` expression itself, so the comment has to cover the assertion line instead.
+
+When you omit the setting, I infer the version in this order:
+
+1. The installed version in `node_modules/oxlint-tsgolint`
+2. The catalog entry in `pnpm-workspace.yaml`
+3. The version range in `package.json`
+
+I ignore invalid values and fall back to the same inference.
+
+<Aside type="note">
+	Only `small-rules/require-safety-comment-for-type-assertion` reads settings today. Nothing else in this plugin needs
+	it.
+</Aside>
 
 ## Override files
 
@@ -73,8 +114,8 @@ Use oxlint's `overrides` field when a rule makes sense for application code but 
 
 Use oxlint's `overrides` field to apply different rules to different file patterns:
 
-```json
-{
+<OxlintConfigTabs
+	json={`{
 	"overrides": [
 		{
 			"files": ["**/*.test.ts"],
@@ -83,8 +124,8 @@ Use oxlint's `overrides` field to apply different rules to different file patter
 			}
 		}
 	]
-}
-```
+}`}
+/>
 
 ## Disable a rule inline
 
@@ -114,8 +155,8 @@ For most roblox-ts projects, I would start with a small set of rules that catch 
 
 For most roblox-ts projects, start with this baseline:
 
-```json
-{
+<OxlintConfigTabs
+	json={`{
 	"jsPlugins": ["@pobammer-ts/small-rules"],
 	"rules": {
 		"small-rules/no-print": "error",
@@ -126,5 +167,5 @@ For most roblox-ts projects, start with this baseline:
 		"small-rules/no-unused-imports": "error",
 		"small-rules/prefer-early-return": "warn"
 	}
-}
-```
+}`}
+/>

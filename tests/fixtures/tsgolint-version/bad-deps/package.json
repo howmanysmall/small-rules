@@ -1,0 +1,5 @@
+{
+	"name": "bad-deps",
+	"type": "commonjs",
+	"devDependencies": "oxlint-tsgolint"
+}

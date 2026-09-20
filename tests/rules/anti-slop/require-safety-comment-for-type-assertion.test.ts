@@ -1,9 +1,15 @@
+import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
 import { ts } from "$test/rule-testers";
 
 const missingSafetyComment = { messageId: "missingSafetyComment" };
+const tsgolint2001 = { "small-rules": { tsgolintVersion: "7.0.2001" } };
+const tsgolint2002 = { "small-rules": { tsgolintVersion: "7.0.2002" } };
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "tsgolint-version");
+
+const multilineObjectAssertion = ["const user = {", "	name: value,", "} as User;"].join("\n");
 
 describe("require-safety-comment-for-type-assertion", () => {
 	ts.run("require-safety-comment-for-type-assertion", rule, {
@@ -40,6 +46,35 @@ describe("require-safety-comment-for-type-assertion", () => {
 			{
 				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Trailing.",
 				errors: [missingSafetyComment],
+				settings: tsgolint2001,
+			},
+			{
+				code: [
+					"// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Shape verified above.",
+					multilineObjectAssertion,
+				].join("\n"),
+				errors: [missingSafetyComment],
+				settings: tsgolint2002,
+			},
+			{
+				filename: nodePath.join(FIXTURES, "v2002", "file.ts"),
+				code: [
+					"// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Shape verified above.",
+					multilineObjectAssertion,
+				].join("\n"),
+				errors: [missingSafetyComment],
+			},
+			{
+				filename: nodePath.join(FIXTURES, "v2002", "file.ts"),
+				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Settings override the installed version.",
+				errors: [missingSafetyComment],
+				settings: tsgolint2001,
+			},
+			{
+				filename: nodePath.join(FIXTURES, "no-tsgolint", "file.ts"),
+				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Invalid settings fall back to statement range.",
+				errors: [missingSafetyComment],
+				settings: { "small-rules": "7.0.2002" },
 			},
 			{ code: "// SAFETY:\nconst id = value as UserId;", errors: [missingSafetyComment] },
 			{ code: "// SAFETY:   \nconst id = value as UserId;", errors: [missingSafetyComment] },
@@ -80,6 +115,53 @@ describe("require-safety-comment-for-type-assertion", () => {
 			},
 			"// SAFETY: The parser established the exported UserId invariant.\nexport const id = value as UserId;",
 			"/* SAFETY:\n * The parser established the exported UserId invariant.\n */\nexport const id = value as UserId;",
+			{
+				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Shape verified above.",
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Shape verified above.",
+					multilineObjectAssertion,
+				].join("\n"),
+				settings: tsgolint2001,
+			},
+			{
+				code: "/* oxlint-disable typescript/no-unsafe-type-assertion -- Shape verified above. */\nconst user = value as User;",
+				settings: tsgolint2002,
+			},
+			{
+				code: ["// SAFETY: Shape verified above.", multilineObjectAssertion].join("\n"),
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"const user = {",
+					"	name: value,",
+					"// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Shape verified above.",
+					"} as User;",
+				].join("\n"),
+				settings: tsgolint2002,
+			},
+			{
+				filename: nodePath.join(FIXTURES, "v2002", "file.ts"),
+				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Installed tsgolint reports on as.",
+			},
+			{
+				filename: nodePath.join(FIXTURES, "v2001", "file.ts"),
+				code: [
+					"// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Installed tsgolint reports on the statement.",
+					multilineObjectAssertion,
+				].join("\n"),
+			},
+			{
+				filename: nodePath.join(FIXTURES, "workspace-2002", "file.ts"),
+				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Catalog version reports on as.",
+			},
+			{
+				filename: nodePath.join(FIXTURES, "installed-2002", "file.ts"),
+				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- node_modules wins over package.json.",
+			},
 		],
 	});
 

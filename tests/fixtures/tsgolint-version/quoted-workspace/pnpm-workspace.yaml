@@ -1,0 +1,4 @@
+catalogs:
+  lint:
+    # eslint-disable-next-line yaml/plain-scalar -- no
+    oxlint-tsgolint: "7.0.2002"
