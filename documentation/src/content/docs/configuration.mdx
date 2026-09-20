@@ -82,13 +82,24 @@ Some behavior cannot be expressed per rule. Oxlint exposes a top-level `settings
 }
 ```
 
-| Setting           | Type     | Required | Behavior                                                                                                                                                    |
-| ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tsgolintVersion` | `string` | Optional | Tells `small-rules/require-safety-comment-for-type-assertion` which `oxlint-tsgolint` diagnostic range to expect for `typescript/no-unsafe-type-assertion`. |
+| Setting           | Type     | Default  | Used by                                                                                                              |
+| ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `tsgolintVersion` | `string` | inferred | [require-safety-comment-for-type-assertion](/small-rules/rules/anti-slop/require-safety-comment-for-type-assertion/) |
 
-`oxlint-tsgolint@7.0.2002` narrowed the report onto the `as Type` syntax. Older versions report the containing statement, so a `disable-next-line` above a multi-line object covers the diagnostic there but not on newer versions. Set `tsgolintVersion` to `"7.0.2002"` or later to require the disable to cover the assertion line itself.
+### tsgolintVersion
 
-When you omit `tsgolintVersion`, the rule infers it in this order: `node_modules/oxlint-tsgolint` installed version, then `pnpm-workspace.yaml`, then `package.json`. Invalid settings fall back to inference.
+I use this setting to decide where a suppression comment has to sit to count as justification for a type assertion.
+
+- Before `7.0.2002`, the linter reports the containing statement, so a `disable-next-line` comment above the statement covers the diagnostic.
+- On `7.0.2002` and later, the linter reports the `as` expression itself, so the comment has to cover the assertion line instead.
+
+When you omit the setting, I infer the version in this order:
+
+1. The installed version in `node_modules/oxlint-tsgolint`
+2. The catalog entry in `pnpm-workspace.yaml`
+3. The version range in `package.json`
+
+I ignore invalid values and fall back to the same inference.
 
 <Aside type="note">
 	Only `small-rules/require-safety-comment-for-type-assertion` reads settings today. Nothing else in this plugin needs
