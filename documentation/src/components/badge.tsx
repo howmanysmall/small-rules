@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 type BadgeVariant = "error" | "fixable" | "new" | "roblox" | "suggestion";
 
 interface BadgeProperties {
-	readonly variant: BadgeVariant;
+	variant: BadgeVariant;
 }
 
 interface BadgeDefinition {
@@ -77,7 +77,7 @@ const badgeDefinitions = {
 	},
 } satisfies Readonly<Record<BadgeVariant, BadgeDefinition>>;
 
-export function Badge({ variant }: BadgeProperties): ReactNode {
+export function Badge({ variant }: Readonly<BadgeProperties>): ReactNode {
 	const { icon, label, title } = badgeDefinitions[variant];
 
 	return (

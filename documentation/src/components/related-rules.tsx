@@ -13,8 +13,8 @@ interface RelatedRulesProperties {
 }
 
 interface RelatedRuleLinkProperties {
-	readonly counterpart: RuleFacts;
-	readonly relation: RuleRelation;
+	counterpart: RuleFacts;
+	relation: RuleRelation;
 }
 
 function getCounterpartName(relation: RuleRelation, ruleName: RuleName): RuleName {
@@ -43,7 +43,7 @@ function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties)
 	);
 }
 
-export function RelatedRules({ rule }: RelatedRulesProperties): ReactNode {
+export function RelatedRules({ rule }: Readonly<RelatedRulesProperties>): ReactNode {
 	const relations = getRelatedRules(rule).map((relation) => ({
 		counterpart: getRuleFacts(getCounterpartName(relation, rule)),
 		relation,

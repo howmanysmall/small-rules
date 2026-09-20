@@ -3,9 +3,9 @@ import { Icon } from "./icon";
 import type { ReactNode } from "react";
 
 interface PageHeaderProperties {
-	readonly kicker?: string | undefined;
-	readonly subtitle?: string | undefined;
-	readonly title: string;
+	kicker?: string | undefined;
+	subtitle?: string | undefined;
+	title: string;
 }
 
 const HERO_ORBS = (
@@ -17,7 +17,7 @@ const HERO_ORBS = (
 );
 const SPARKLES = <Icon name="sparkles" size={14} />;
 
-export function PageHeader({ kicker, subtitle, title }: PageHeaderProperties): ReactNode {
+export function PageHeader({ kicker, subtitle, title }: Readonly<PageHeaderProperties>): ReactNode {
 	let kickerElement: ReactNode;
 	if (kicker !== undefined && kicker.length > 0) {
 		kickerElement = (

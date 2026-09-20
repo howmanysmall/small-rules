@@ -7,10 +7,10 @@ import type { RuleIndexCategory } from "./rule-index-data";
 type RuleIndexRule = RuleIndexCategory["rules"][number];
 
 export interface RuleIndexCardProperties {
-	readonly rule: RuleIndexRule;
+	rule: RuleIndexRule;
 }
 
-export function RuleIndexCard({ rule }: RuleIndexCardProperties): ReactNode {
+export function RuleIndexCard({ rule }: Readonly<RuleIndexCardProperties>): ReactNode {
 	return (
 		<a
 			className="rule-index-card"

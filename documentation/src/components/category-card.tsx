@@ -7,10 +7,10 @@ import type { ReactNode } from "react";
 import type { RuleCategoryKey } from "$data/rule-manifest";
 
 interface CategoryCardProperties {
-	readonly category: RuleCategoryKey;
-	readonly count: number;
-	readonly description: string;
-	readonly label: string;
+	category: RuleCategoryKey;
+	count: number;
+	description: string;
+	label: string;
 }
 
 const CARD_GLOW = <span aria-hidden="true" className="category-card-glow" />;
@@ -21,7 +21,7 @@ const BROWSE_RULES = (
 	</span>
 );
 
-export function CategoryCard({ category, count, description, label }: CategoryCardProperties): ReactNode {
+export function CategoryCard({ category, count, description, label }: Readonly<CategoryCardProperties>): ReactNode {
 	return (
 		<a className="category-card" data-category={category} href={`${siteBasePath}rules/${category}/`}>
 			{CARD_GLOW}

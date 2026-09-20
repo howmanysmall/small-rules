@@ -5,10 +5,10 @@ import type { PropsWithChildren, ReactNode } from "react";
 import type { RuleName } from "$data/rule-manifest";
 
 interface RuleSummaryProperties {
-	readonly rule: RuleName;
+	rule: RuleName;
 }
 
-export function RuleSummary({ rule, children }: PropsWithChildren<RuleSummaryProperties>): ReactNode {
+export function RuleSummary({ rule, children }: Readonly<PropsWithChildren<RuleSummaryProperties>>): ReactNode {
 	const { description } = getRuleFacts(rule);
 
 	return (

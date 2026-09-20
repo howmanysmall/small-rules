@@ -4,9 +4,9 @@ import { HeroGrid } from "./hero-grid";
 import type { ReactNode } from "react";
 
 interface HeroSplashProperties {
-	readonly kicker?: string | undefined;
-	readonly subtitle?: string | undefined;
-	readonly title: string;
+	kicker?: string | undefined;
+	subtitle?: string | undefined;
+	title: string;
 }
 
 const PREVIEW_CHROME = (
@@ -61,7 +61,7 @@ export function HeroSplash({
 	kicker = "Oxlint plugin for roblox-ts",
 	subtitle,
 	title,
-}: HeroSplashProperties): ReactNode {
+}: Readonly<HeroSplashProperties>): ReactNode {
 	return (
 		<section className="hero-splash">
 			<HeroGrid preview={HERO_PREVIEW}>

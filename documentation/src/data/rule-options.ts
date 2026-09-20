@@ -1,6 +1,7 @@
 import { Predicate } from "effect";
 
 import smallRules from "$small-rules";
+import { isJsonValue } from "$utilities/oxlint-config";
 
 import type { RuleName } from "./rule-manifest";
 
@@ -38,20 +39,6 @@ export interface RuleOptionsDocumentation {
 	readonly config: string;
 	readonly options: ReadonlyArray<ObjectOption>;
 	readonly schemaSummary: string;
-}
-
-function isJsonValue(value: unknown): value is JsonValue {
-	if (value === null || Predicate.isBoolean(value) || Predicate.isNumber(value) || Predicate.isString(value)) {
-		return true;
-	}
-	if (Array.isArray(value)) {
-		for (const subValue of value) if (!isJsonValue(subValue)) return false;
-		return true;
-	}
-	if (!Predicate.isReadonlyObject(value)) return false;
-
-	for (const subValue of Object.values(value)) if (!isJsonValue(subValue)) return false;
-	return true;
 }
 
 function isSchemaRecord(value: SchemaInput): value is SchemaRecord {

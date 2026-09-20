@@ -875,6 +875,24 @@ h1#_top > code {
 	border-radius: 0 !important;
 }
 
+.oxlint-config-tabs [role="tab"]::before {
+	flex-shrink: 0;
+	width: 1rem;
+	height: 1rem;
+	content: "";
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+.oxlint-config-tabs .tab:first-child [role="tab"]::before {
+	background-image: url("../assets/oxlint-json.svg");
+}
+
+.oxlint-config-tabs .tab:last-child [role="tab"]::before {
+	background-image: url("../assets/oxlint-ts.svg");
+}
+
 .RuleExample-content .expressive-code .copy {
 	display: none !important;
 }
