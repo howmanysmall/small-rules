@@ -22,11 +22,7 @@ const highlightedTypes = Object.fromEntries(
 <p>{documentation.schemaSummary}</p>
 
 {documentation.options.length > 0 && (
-	<RuleOptionsTable
-		highlightedTypes={highlightedTypes}
-		options={documentation.options}
-		client:visible={true}
-	/>
+	<RuleOptionsTable highlightedTypes={highlightedTypes} options={documentation.options} client:visible={true} />
 )}
 
 <div class="rule-options-config">
