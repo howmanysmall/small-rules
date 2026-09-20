@@ -257,8 +257,8 @@
 				"type": "local",
 			},
 			"paper": {
-				"type": "remote",
-				"url": "http://127.0.0.1:29979/mcp",
+				"command": ["bash", "scripts/start-paper-mcp.sh"],
+				"type": "local",
 			},
 		},
 	},
