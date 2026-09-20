@@ -424,14 +424,16 @@ starlight-link-card:hover {
 }
 
 .badge--note,
-.badge--suggestion {
+.badge--suggestion,
+.badge--updated {
 	color: #6d28d9;
 	background: color-mix(in oklch, #8b5cf6 10%, transparent);
 	border-color: color-mix(in oklch, #8b5cf6 30%, transparent);
 }
 
 :root[data-theme="dark"] .badge--note,
-:root[data-theme="dark"] .badge--suggestion {
+:root[data-theme="dark"] .badge--suggestion,
+:root[data-theme="dark"] .badge--updated {
 	color: #a78bfa;
 }
 
@@ -447,6 +449,16 @@ starlight-link-card:hover {
 	background: color-mix(in oklch, var(--sl-color-accent) 12%, transparent);
 	border: 1px solid color-mix(in oklch, var(--sl-color-accent) 40%, transparent);
 	border-radius: var(--pill-radius);
+}
+
+.sidebar-content .sl-badge.tip {
+	color: #6d28d9;
+	background: color-mix(in oklch, #8b5cf6 10%, transparent);
+	border-color: color-mix(in oklch, #8b5cf6 30%, transparent);
+}
+
+:root[data-theme="dark"] .sidebar-content .sl-badge.tip {
+	color: #a78bfa;
 }
 
 .sl-markdown-content :not(pre) > code:not(:where(.not-content *)),
@@ -1779,6 +1791,27 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 	background: color-mix(in oklch, var(--sl-color-accent) 12%, transparent);
 	border: 1px solid color-mix(in oklch, var(--sl-color-accent) 40%, transparent);
 	border-radius: var(--pill-radius);
+}
+
+.rule-index-card-updated {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25em 0.6em;
+	font-family: var(--sl-font-mono);
+	font-size: 0.68rem;
+	font-weight: 600;
+	line-height: 1;
+	color: #6d28d9;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	white-space: nowrap;
+	background: color-mix(in oklch, #8b5cf6 10%, transparent);
+	border: 1px solid color-mix(in oklch, #8b5cf6 30%, transparent);
+	border-radius: var(--pill-radius);
+}
+
+:root[data-theme="dark"] .rule-index-card-updated {
+	color: #a78bfa;
 }
 
 .rule-index-card code {

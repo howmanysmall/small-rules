@@ -13,9 +13,11 @@ interface Rule {
 	readonly description: string;
 	readonly fixability?: string;
 	readonly isNew?: boolean | undefined;
+	readonly isUpdated?: boolean | undefined;
 	readonly path: string;
 	readonly title: string;
 	readonly type: RuleFactCategory["rules"][number]["type"];
+	readonly updatedIn?: string | undefined;
 }
 
 export interface RuleIndexCategory {
@@ -35,6 +37,7 @@ export function createRuleIndexCategories(
 			const fixability = getFixability(rule);
 			const ruleNewness = newness.get(rule.name);
 			const isNew = ruleNewness?.isNew === true;
+			const isUpdated = !isNew && ruleNewness?.isUpdated === true;
 			const ruleDetails = {
 				name: rule.name,
 				category: rule.category,
@@ -45,13 +48,16 @@ export function createRuleIndexCategories(
 				type: rule.type,
 			};
 
-			if (fixability === undefined && !isNew) return ruleDetails;
+			if (fixability === undefined && !isNew && !isUpdated) return ruleDetails;
 
 			const newRule: Writable<Rule> = { ...ruleDetails };
 			if (fixability !== undefined) newRule.fixability = fixability;
 			if (isNew) {
 				newRule.addedIn = ruleNewness.addedIn;
 				newRule.isNew = true;
+			} else if (isUpdated) {
+				newRule.isUpdated = true;
+				newRule.updatedIn = ruleNewness.updatedIn;
 			}
 			return newRule;
 		}),

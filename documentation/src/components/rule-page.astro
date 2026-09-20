@@ -19,10 +19,13 @@ const facts = getRuleFacts(rule);
 const entry = getRuleEntry(rule);
 const exampleExemption = entry?.exampleExemption;
 const newness = getRuleNewness().get(rule);
+const showNew = newness?.isNew === true;
+const showUpdated = !showNew && newness?.isUpdated === true;
 ---
 
 <div class="rule-badges" aria-label="Rule characteristics">
-	{newness?.isNew === true && <Badge variant="new" />}
+	{showNew && <Badge variant="new" />}
+	{showUpdated && <Badge variant="updated" />}
 	<Badge variant={facts.type === "problem" ? "error" : "suggestion"} />
 	{facts.fixable !== undefined && <Badge variant="fixable" />}
 	{facts.category === "roblox" && <Badge variant="roblox" />}

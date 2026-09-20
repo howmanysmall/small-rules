@@ -11,6 +11,9 @@ export interface RuleIndexCardProperties {
 }
 
 export function RuleIndexCard({ rule }: Readonly<RuleIndexCardProperties>): ReactNode {
+	const showNew = rule.isNew === true;
+	const showUpdated = !showNew && rule.isUpdated === true;
+
 	return (
 		<a
 			className="rule-index-card"
@@ -20,12 +23,24 @@ export function RuleIndexCard({ rule }: Readonly<RuleIndexCardProperties>): Reac
 		>
 			<div className="rule-index-card-heading">
 				<h2>{rule.title}</h2>
-				{rule.isNew === true && (
+				{showNew && (
 					<span
 						className="rule-index-card-new"
 						title={rule.addedIn === undefined ? "Not yet in a release" : `Added in ${rule.addedIn}`}
 					>
 						{"New"}
+					</span>
+				)}
+				{showUpdated && (
+					<span
+						className="rule-index-card-updated"
+						title={
+							rule.updatedIn === undefined
+								? "Recently updated, not yet in a release"
+								: `Updated in ${rule.updatedIn}`
+						}
+					>
+						{"Updated"}
 					</span>
 				)}
 				<span className="rule-index-card-category">{rule.categoryLabel}</span>

@@ -114,3 +114,95 @@ describe("rule-index", () => {
 		);
 	});
 });
+
+describe("rule-index freshness", () => {
+	it("marks index entries as new with their release tag", () => {
+		expect.assertions(2);
+
+		const categories = createRuleIndexCategories(
+			ruleFactCategories.values(),
+			new Map([["no-print", { addedIn: "v3.0.2", isNew: true, isUpdated: false, updatedIn: "v3.0.2" }]]),
+		);
+		const noPrint = categories.flatMap((category) => category.rules).find((rule) => rule.name === "no-print");
+
+		expect(noPrint?.isNew).toBe(true);
+		expect(noPrint?.addedIn).toBe("v3.0.2");
+	});
+
+	it("marks index entries as updated with their release tag", () => {
+		expect.assertions(2);
+
+		const categories = createRuleIndexCategories(
+			ruleFactCategories.values(),
+			new Map([["no-print", { addedIn: "v1.1.0", isNew: false, isUpdated: true, updatedIn: "v3.0.2" }]]),
+		);
+		const noPrint = categories.flatMap((category) => category.rules).find((rule) => rule.name === "no-print");
+
+		expect(noPrint?.isUpdated).toBe(true);
+		expect(noPrint?.updatedIn).toBe("v3.0.2");
+	});
+
+	it("prefers new over updated for index entries", () => {
+		expect.assertions(2);
+
+		const categories = createRuleIndexCategories(
+			ruleFactCategories.values(),
+			new Map([["no-print", { addedIn: "v3.0.2", isNew: true, isUpdated: true, updatedIn: "v3.0.2" }]]),
+		);
+		const noPrint = categories.flatMap((category) => category.rules).find((rule) => rule.name === "no-print");
+
+		expect(noPrint?.isNew).toBe(true);
+		expect(noPrint?.isUpdated).toBeUndefined();
+	});
+
+	it("renders new and updated pills with release tooltips", () => {
+		expect.assertions(3);
+
+		const categories = createRuleIndexCategories(
+			ruleFactCategories.values(),
+			new Map([
+				["no-print", { addedIn: "v3.0.2", isNew: true, isUpdated: false, updatedIn: "v3.0.2" }],
+				["no-warn", { addedIn: "v1.1.0", isNew: false, isUpdated: true, updatedIn: undefined }],
+			]),
+		);
+
+		render(<RuleIndex categories={categories} mode="catalog" />);
+
+		const newPill = screen.getByText("New", { selector: ".rule-index-card-new" });
+		const updatedPill = screen.getByText("Updated", { selector: ".rule-index-card-updated" });
+
+		expect(newPill.getAttribute("title")).toBe("Added in v3.0.2");
+		expect(updatedPill.getAttribute("title")).toBe("Recently updated, not yet in a release");
+		expect(updatedPill.textContent).toBe("Updated");
+	});
+
+	it("shows the release tag for updates shipped in a release", () => {
+		expect.assertions(1);
+
+		const categories = createRuleIndexCategories(
+			ruleFactCategories.values(),
+			new Map([["no-warn", { addedIn: "v1.1.0", isNew: false, isUpdated: true, updatedIn: "v3.0.2" }]]),
+		);
+
+		render(<RuleIndex categories={categories} mode="catalog" />);
+
+		expect(screen.getByText("Updated", { selector: ".rule-index-card-updated" }).getAttribute("title")).toBe(
+			"Updated in v3.0.2",
+		);
+	});
+
+	it("shows unreleased wording for new rules not yet in a release", () => {
+		expect.assertions(1);
+
+		const categories = createRuleIndexCategories(
+			ruleFactCategories.values(),
+			new Map([["no-print", { addedIn: undefined, isNew: true, isUpdated: false, updatedIn: undefined }]]),
+		);
+
+		render(<RuleIndex categories={categories} mode="catalog" />);
+
+		expect(screen.getByText("New", { selector: ".rule-index-card-new" }).getAttribute("title")).toBe(
+			"Not yet in a release",
+		);
+	});
+});
