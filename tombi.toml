@@ -58,3 +58,7 @@ include = ["fallow.toml"]
 path = "https://mise.jdx.dev/schema/mise.json"
 include = ["mise*.toml"]
 strict = false
+
+[[schemas]]
+path = ".schemas/wt.schema.json"
+include = [".config/wt.toml"]
