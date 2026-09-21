@@ -256,6 +256,10 @@
 				"disabled": true,
 				"type": "local",
 			},
+			"openrouter-mcp": {
+				"type": "remote",
+				"url": "https://mcp.openrouter.ai/mcp",
+			},
 			"paper": {
 				"type": "remote",
 				"url": "http://127.0.0.1:29979/mcp",
