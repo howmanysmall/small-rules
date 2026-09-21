@@ -1,0 +1,191 @@
+{
+	"$defs": {
+		"commandConfig": {
+			"description": "A hook or alias command in one of three TOML forms. A string is a single command (`pre-start = \"npm ci\"`). A table runs named commands concurrently (`[post-start]` with `server = \"npm run dev\"`). A pipeline array runs steps in sequence (`pre-start = [\"npm ci\", { build = \"npm run build\" }]`), equivalently written as repeated `[[hook]]` blocks. Within a step, multiple keys run concurrently; a failing step aborts the rest of the pipeline. Names cannot contain colons. Values are minijinja templates (see https://worktrunk.dev/hook/#template-variables); `pre-*` hooks block on failure while `post-*` hooks run in the background. Project commands prompt for approval on first run.",
+			"oneOf": [
+				{
+					"description": "Single unnamed command, e.g. `pre-start = \"npm ci\"`.",
+					"type": "string"
+				},
+				{
+					"additionalProperties": {
+						"type": "string"
+					},
+					"description": "Named commands running concurrently, e.g. `[post-start]` with `server = \"npm run dev\"`. One key is a single named step; multiple keys run together.",
+					"propertyNames": {
+						"description": "Hook command names cannot contain colons (breaks log-spec parsing).",
+						"pattern": "^[^:]*$"
+					},
+					"type": "object"
+				},
+				{
+					"description": "Pipeline: steps run in sequence. Each entry is a command string (anonymous step) or a named table (one key serial, several keys concurrent). Equivalently written as repeated `[[hook]]` blocks.",
+					"items": {
+						"oneOf": [
+							{
+								"description": "Anonymous pipeline step.",
+								"type": "string"
+							},
+							{
+								"additionalProperties": {
+									"type": "string"
+								},
+								"description": "Named pipeline step: one key runs serially, several keys run concurrently.",
+								"propertyNames": {
+									"description": "Hook command names cannot contain colons (breaks log-spec parsing).",
+									"pattern": "^[^:]*$"
+								},
+								"type": "object"
+							}
+						]
+					},
+					"type": "array"
+				}
+			],
+			"title": "CommandConfig"
+		}
+	},
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"additionalProperties": false,
+	"description": "Project configuration for Worktrunk, stored at `.config/wt.toml` and checked into git. Shared team settings: lifecycle hooks, dev-server URL, forge, commit-message append fragment, copy-ignored excludes, and project aliases.\n\nSource: https://github.com/max-sixty/worktrunk/tree/main (src/config/project.rs, src/config/hooks.rs, src/config/commands.rs). Docs: https://worktrunk.dev/config/ (project configuration), https://worktrunk.dev/hook/ (hook types, forms, template variables). Starter file: `wt config create --project`.",
+	"properties": {
+		"aliases": {
+			"additionalProperties": {
+				"$ref": "#/$defs/commandConfig"
+			},
+			"description": "Command templates that run as `wt <name>`, shared with teammates. Each value takes the same three hook forms. All hook template variables are available (e.g. `{{ branch }}`, `{{ worktree_path }}`). For personal aliases use the user config `[aliases]` section instead. See https://worktrunk.dev/extending/#aliases.",
+			"type": "object"
+		},
+		"ci": {
+			"additionalProperties": false,
+			"deprecated": true,
+			"description": "Deprecated: use `[forge]` instead. `wt config update` moves `platform` to `[forge]`. Aliased at runtime — `[forge].platform` takes precedence where both are set.",
+			"properties": {
+				"platform": {
+					"description": "Deprecated alias for `[forge].platform`. Same accepted values.",
+					"enum": ["github", "gitlab", "gitea", "azure-devops"],
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"commit": {
+			"additionalProperties": false,
+			"description": "Project-wide commit-message settings shared across teammates. Only `generation.template-append` is honored from the project file; the LLM command and the main prompt template stay in user config.",
+			"properties": {
+				"generation": {
+					"additionalProperties": false,
+					"description": "Commit-message generation settings shared across the team.",
+					"properties": {
+						"template-append": {
+							"description": "Text appended to the commit and squash prompts inside a `<project-guidance>` block. Rendered with the same minijinja context as the main template (`{{ branch }}`, `{{ git_diff }}`, …). The first time the fragment is used (and whenever it changes), `wt` prompts the user to approve it — the same one-shot gate as project-defined hooks.",
+							"type": "string"
+						}
+					},
+					"type": "object"
+				}
+			},
+			"type": "object"
+		},
+		"forge": {
+			"additionalProperties": false,
+			"description": "Names the forge explicitly, for a remote whose hostname carries no forge name for detection to read (a Forgejo instance at `forge.example.com`, a company git server). Detection otherwise reads `github`, `gitlab`, or `gitea` anywhere in the host, plus the Azure DevOps service domains. A repository's own `[forge]` wins over user-config `[projects]` entries, field by field.",
+			"properties": {
+				"hostname": {
+					"description": "API hostname for GitHub Enterprise or self-hosted GitLab. Only needed when the remote URL uses an SSH host alias that does not resolve to the real API hostname.",
+					"type": "string"
+				},
+				"platform": {
+					"description": "Forge platform. Picks the forge CLI (`gh`, `glab`, `tea`, or `az`) for the `wt switch pr:` shortcut and `wt list --full` CI status. When unset, the platform is detected from the remote URL.",
+					"enum": ["github", "gitlab", "gitea", "azure-devops"],
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"list": {
+			"additionalProperties": false,
+			"description": "Project-level settings for `wt list` output. Only `url` belongs here; list display defaults (full, branches, columns, …) are user config.",
+			"properties": {
+				"url": {
+					"description": "URL template for dev-server links shown in `wt list`. Example: \"http://localhost:{{ branch | hash_port }}\". Available filters: `sanitize`, `hash_port`. Shown dimmed when the port is not listening.",
+					"type": "string"
+				}
+			},
+			"type": "object"
+		},
+		"post-commit": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "CI triggers, notifications, background linting. Runs after committing. Background."
+		},
+		"post-create": {
+			"$ref": "#/$defs/commandConfig",
+			"deprecated": true,
+			"description": "Deprecated alias for `post-start`. Both names load, but `wt config update` renames this to `post-start`. Prefer `post-start` in new config."
+		},
+		"post-merge": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Deployment, notifications, installing updated binaries. Runs in the target branch worktree if it exists, otherwise the primary worktree. Background."
+		},
+		"post-remove": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Stopping dev servers, removing containers, notifying external systems. The active worktree is gone, so it runs in the primary worktree; template variables still reference the removed worktree. Background."
+		},
+		"post-start": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Runs once when a new worktree is created, in the background. Use for dev servers, long builds, file watchers, and `wt step copy-ignored`. Prefer over `pre-start` unless a later step needs the work completed first."
+		},
+		"post-switch": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Triggers on all switch results: creating, switching to existing, or staying on current. Background; output goes to hook logs (`wt config state logs`)."
+		},
+		"pre-commit": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Formatters, linters, type checking. Runs before any Worktrunk commit (`wt step commit`, `wt step squash`, and the commit `wt merge` makes). Blocking and fail-fast. During `wt merge` the blocking hooks run pre-commit → pre-merge → pre-remove."
+		},
+		"pre-create": {
+			"$ref": "#/$defs/commandConfig",
+			"deprecated": true,
+			"description": "Deprecated alias for `pre-start`. Both names load, but `wt config update` renames this to `pre-start`. Prefer `pre-start` in new config."
+		},
+		"pre-merge": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Tests, security scans, build verification. Runs after rebase, before merge to target. Blocking and fail-fast."
+		},
+		"pre-remove": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Cleanup before worktree deletion: saving test artifacts, backing up state. Runs in the worktree being removed. Blocking and fail-fast."
+		},
+		"pre-start": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Runs once when a new worktree is created, blocking `post-start`/`--execute` until complete. Use for dependency install and env-file generation. Blocking and fail-fast."
+		},
+		"pre-switch": {
+			"$ref": "#/$defs/commandConfig",
+			"description": "Runs in the source worktree before switching — creating, switching to existing, or staying on current. Blocking and fail-fast: failure aborts the switch."
+		},
+		"step": {
+			"additionalProperties": false,
+			"description": "Configuration for `wt step` subcommands.",
+			"properties": {
+				"copy-ignored": {
+					"additionalProperties": false,
+					"description": "Additional excludes for `wt step copy-ignored`. Built-in excludes (VCS metadata and tool-state directories) always apply; user-config and project-config exclusions are combined.",
+					"properties": {
+						"exclude": {
+							"description": "Gitignore-style patterns to exclude, e.g. [\".cache/\", \".turbo/\"].",
+							"items": {
+								"type": "string"
+							},
+							"type": "array"
+						}
+					},
+					"type": "object"
+				}
+			},
+			"type": "object"
+		}
+	},
+	"title": "Worktrunk project configuration",
+	"type": "object"
+}
