@@ -3,9 +3,9 @@ import { Icon } from "./icon";
 import type { ReactNode } from "react";
 
 interface HeroCopyProperties {
-	readonly kicker: string;
-	readonly subtitle?: string | undefined;
-	readonly title: string;
+	kicker: string;
+	subtitle?: string | undefined;
+	title: string;
 }
 
 const HERO_ACTIONS = (
@@ -27,7 +27,7 @@ const HERO_ACTIONS = (
 );
 const SPARKLES = <Icon name="sparkles" size={14} />;
 
-export function HeroCopy({ kicker, subtitle, title }: HeroCopyProperties): ReactNode {
+export function HeroCopy({ kicker, subtitle, title }: Readonly<HeroCopyProperties>): ReactNode {
 	return (
 		<div className="hero-copy">
 			<span className="hero-kicker hero-kicker--static">

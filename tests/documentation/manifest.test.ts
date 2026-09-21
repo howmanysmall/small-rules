@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { ruleManifest } from "$data/rule-manifest";
 import smallRules from "$small-rules";
-
-import { ruleManifest } from "../../documentation/src/data/rule-manifest";
 
 function getManifestRuleNames(): ReadonlyArray<string> {
 	return ruleManifest.categories.flatMap((category) => category.rules.map((entry) => entry.name));
@@ -17,6 +16,7 @@ describe("rule manifest integrity", () => {
 
 	it("registers each rule exactly once", () => {
 		expect.assertions(1);
+
 		const names = getManifestRuleNames();
 
 		expect(new Set(names).size).toBe(names.length);
@@ -24,17 +24,22 @@ describe("rule manifest integrity", () => {
 
 	it("keeps category keys unique", () => {
 		expect.assertions(1);
+
 		const keys = ruleManifest.categories.map((category) => category.key);
 
 		expect(new Set(keys).size).toBe(keys.length);
 	});
 
-	it("keeps every category label and description nonblank", () => {
-		expect.hasAssertions();
+	const allCategoriesForEach = ruleManifest.categories.map((category) => [
+		category.key,
+		category.description,
+		category.label,
+	]);
 
-		for (const category of ruleManifest.categories) {
-			expect(category.description.trim(), `${category.key} description`).not.toBe("");
-			expect(category.label.trim(), `${category.key} label`).not.toBe("");
-		}
+	it.each(allCategoriesForEach)("keeps category %s unique", (key, description, label) => {
+		expect.assertions(2);
+
+		expect(description.trim(), `${key} description`).not.toBe("");
+		expect(label.trim(), `${key} label`).not.toBe("");
 	});
 });

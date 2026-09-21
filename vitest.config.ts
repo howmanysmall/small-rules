@@ -1,7 +1,7 @@
 import { argv, env } from "node:process";
+import { sharedConfiguration } from "@small-rules/vite-configuration";
 import { defineConfig, mergeConfig } from "vitest/config";
 
-import { sharedConfiguration } from "./vitest.shared.config.ts";
 import fuzzConfiguration from "./vitest.vitiate.config.ts";
 
 // vitiate respawns vitest per fuzz target without forwarding --config, so the

@@ -12,12 +12,12 @@ const RESET_BUTTON = (
 );
 
 export interface RuleIndexFiltersProperties {
-	readonly categories: ReadonlyArray<RuleIndexCategory>;
-	readonly onCategoryChange: (event: ChangeEvent<HTMLSelectElement>) => void;
-	readonly onQueryChange: (event: ChangeEvent<HTMLInputElement>) => void;
-	readonly onReset: (event: SyntheticEvent<HTMLFormElement>) => void;
-	readonly query: string;
-	readonly selectedCategory: string;
+	categories: ReadonlyArray<RuleIndexCategory>;
+	onCategoryChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+	onQueryChange: (event: ChangeEvent<HTMLInputElement>) => void;
+	onReset: (event: SyntheticEvent<HTMLFormElement>) => void;
+	query: string;
+	selectedCategory: string;
 }
 
 export function RuleIndexFilters({
@@ -27,7 +27,7 @@ export function RuleIndexFilters({
 	onReset,
 	query,
 	selectedCategory,
-}: RuleIndexFiltersProperties): ReactNode {
+}: Readonly<RuleIndexFiltersProperties>): ReactNode {
 	const filtersRef = useRef<HTMLFormElement>(null);
 	const searchId = useId();
 	const categoryId = useId();

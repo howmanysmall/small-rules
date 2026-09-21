@@ -5,12 +5,12 @@ import type { ReactNode } from "react";
 import type { IconName } from "./icon";
 
 interface FeatureCardProperties {
-	readonly description: string;
-	readonly icon: IconName;
-	readonly title: string;
+	description: string;
+	icon: IconName;
+	title: string;
 }
 
-export function FeatureCard({ description, icon, title }: FeatureCardProperties): ReactNode {
+export function FeatureCard({ description, icon, title }: Readonly<FeatureCardProperties>): ReactNode {
 	return (
 		<div className="feature-card">
 			<div className="feature-card-icon">

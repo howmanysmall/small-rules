@@ -135,12 +135,12 @@ describe("createContainsDetector utility", () => {
 		}, 5000);
 
 		it("does not leak state across repeated scan calls", () => {
-			expect.assertions(10);
+			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, [/var/u]);
-			for (let iteration = 0; iteration < 10; iteration += 1) {
-				expect(detector.scan("var x = 1")).toBe(1);
-			}
+			const results = Array.from({ length: 10 }, () => detector.scan("var x = 1"));
+
+			expect(results).toStrictEqual(Array.from({ length: 10 }).fill(1));
 		}, 5000);
 	});
 });

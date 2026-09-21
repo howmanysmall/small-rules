@@ -111,24 +111,21 @@ function resolveFunctionFromVariable(variable: ScopeVariable): ResolvedFunction 
 			};
 		}
 
-		if (isVariableDeclarator(node)) {
-			if (node.init === null) continue;
+		if (!isVariableDeclarator(node) || node.init === null) continue;
+		if (isArrowFunctionExpression(node.init)) {
+			return {
+				isAsync: node.init.async,
+				node: node.init,
+				type: "arrow",
+			};
+		}
 
-			if (isArrowFunctionExpression(node.init)) {
-				return {
-					isAsync: node.init.async,
-					node: node.init,
-					type: "arrow",
-				};
-			}
-
-			if (isFunctionExpression(node.init)) {
-				return {
-					isAsync: node.init.async,
-					node: node.init,
-					type: "function-expression",
-				};
-			}
+		if (isFunctionExpression(node.init)) {
+			return {
+				isAsync: node.init.async,
+				node: node.init,
+				type: "function-expression",
+			};
 		}
 	}
 

@@ -1,7 +1,7 @@
 import type React from "react";
 
 interface RuleOptionIconProperties {
-	readonly kind: "check" | "chevron" | "copy";
+	kind: "check" | "chevron" | "copy";
 }
 
 const CHECK_ICON = (
@@ -21,7 +21,7 @@ const COPY_ICON = (
 	</svg>
 );
 
-export function RuleOptionIcon({ kind }: RuleOptionIconProperties): React.ReactNode {
+export function RuleOptionIcon({ kind }: Readonly<RuleOptionIconProperties>): React.ReactNode {
 	if (kind === "check") return CHECK_ICON;
 	if (kind === "chevron") return CHEVRON_ICON;
 	return COPY_ICON;

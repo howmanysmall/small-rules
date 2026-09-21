@@ -1,0 +1,26 @@
+{
+	"name": "@small-rules/vite-configuration",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Shared Vitest configuration, setup, and matcher types.",
+	"license": "UNLICENSED",
+	"type": "module",
+	"exports": {
+		".": "./src/shared.ts",
+		"./package.json": "./package.json"
+	},
+	"main": "./src/shared.ts",
+	"types": "./src/shared.ts",
+	"scripts": {
+		"typecheck": "tsgo --build"
+	},
+	"dependencies": {
+		"jest-extended": "catalog:test",
+		"vitest": "catalog:test"
+	},
+	"devDependencies": {
+		"@small-rules/vite-configuration": "catalog:test",
+		"@types/node": "catalog:types",
+		"@typescript/native-preview": "catalog:types"
+	}
+}

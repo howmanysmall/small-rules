@@ -20,9 +20,9 @@ export type IconName =
 	| "x";
 
 interface IconProperties {
-	readonly name: IconName;
-	readonly className?: string | undefined;
-	readonly size?: number | undefined;
+	name: IconName;
+	className?: string | undefined;
+	size?: number | undefined;
 }
 
 const ARROW_RIGHT_ICON = (
@@ -137,7 +137,7 @@ const iconContents = {
 	x: X_ICON,
 } satisfies Readonly<Record<IconName, ReactNode>>;
 
-export function Icon({ name, className, size = 24 }: IconProperties): ReactNode {
+export function Icon({ name, className, size = 24 }: Readonly<IconProperties>): ReactNode {
 	const isFilled = name === "github";
 	const strokeWidth = name === "check" || name === "x" ? 2.5 : 1.75;
 

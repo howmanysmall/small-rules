@@ -14,11 +14,13 @@ describe("badge", () => {
 	it.each([
 		["error", "Error", "This rule reports problems and fails the lint run."],
 		["new", "New", "This rule was added in the most recent release."],
+		["updated", "Updated", "This rule was updated in the most recent release."],
 		["suggestion", "Suggestion", "This rule reports suggestions and does not fail the lint run."],
 		["fixable", "Auto-fixable", "This rule includes an automatic code fix."],
 		["roblox", "Roblox", "This rule is specific to Roblox / Luau patterns."],
 	] as const)("renders the %s rule metadata", (variant, label, title) => {
 		expect.assertions(2);
+
 		const { container } = render(<Badge variant={variant} />);
 
 		expect(screen.getByText(label).getAttribute("title")).toBe(title);
@@ -29,6 +31,7 @@ describe("badge", () => {
 describe("category-card", () => {
 	it("links to the category and exposes its summary", () => {
 		expect.assertions(4);
+
 		render(
 			<CategoryCard
 				category="react"
@@ -39,6 +42,7 @@ describe("category-card", () => {
 		);
 
 		const link = screen.getByRole("link", { name: reactHeadingName });
+
 		expect(link.getAttribute("href")).toBe("/small-rules/rules/react/");
 		expect(within(link).getByRole("heading", { name: "React" }).textContent).toBe("React");
 		expect(within(link).getByText("18").textContent).toBe("18");
@@ -51,6 +55,7 @@ describe("category-card", () => {
 describe("feature-card", () => {
 	it("renders a feature as a titled description", () => {
 		expect.assertions(2);
+
 		render(<FeatureCard description="Runs directly in Oxlint." icon="bolt" title="Oxlint native" />);
 
 		expect(screen.getByRole("heading", { name: "Oxlint native" }).textContent).toBe("Oxlint native");
@@ -61,10 +66,12 @@ describe("feature-card", () => {
 describe("icon", () => {
 	it("renders decorative SVGs at the requested size", () => {
 		expect.assertions(4);
+
 		// oxlint-disable-next-line react/forbid-component-props -- whatever!
 		const { container } = render(<Icon className="example-icon" name="search" size={20} />);
 
 		const icon = container.querySelector("svg");
+
 		expect(icon?.getAttribute("aria-hidden")).toBe("true");
 		expect(icon?.getAttribute("height")).toBe("20");
 		expect(icon?.getAttribute("width")).toBe("20");
@@ -75,6 +82,7 @@ describe("icon", () => {
 describe("hero-splash", () => {
 	it("presents the documentation entry points and configuration preview", () => {
 		expect.assertions(6);
+
 		render(<HeroSplash subtitle="Focused rules for strict projects." title="Small rules, big impact." />);
 
 		expect(screen.getByText("Oxlint plugin for roblox-ts").textContent).toBe("Oxlint plugin for roblox-ts");
@@ -95,6 +103,7 @@ describe("hero-splash", () => {
 
 	it("accepts a custom kicker and omits an absent subtitle", () => {
 		expect.assertions(2);
+
 		const { container } = render(<HeroSplash kicker="Custom docs" subtitle="" title="Small rules" />);
 
 		expect(screen.getByText("Custom docs").textContent).toBe("Custom docs");
@@ -105,6 +114,7 @@ describe("hero-splash", () => {
 describe("page-header", () => {
 	it("renders optional context with the page title", () => {
 		expect.assertions(3);
+
 		render(<PageHeader kicker="Rule index" subtitle="Browse every rule." title="Rules" />);
 
 		expect(screen.getByRole("heading", { name: "Rules", level: 1 }).textContent).toBe("Rules");
@@ -114,6 +124,7 @@ describe("page-header", () => {
 
 	it("omits empty optional context", () => {
 		expect.assertions(3);
+
 		const { container } = render(<PageHeader kicker="" subtitle="" title="Rules" />);
 
 		expect(screen.getByRole("heading", { name: "Rules", level: 1 }).textContent).toBe("Rules");

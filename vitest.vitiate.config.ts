@@ -1,7 +1,6 @@
+import { sharedConfiguration } from "@small-rules/vite-configuration";
 import { vitiatePlugin } from "@vitiate/core";
 import { defineConfig, mergeConfig } from "vitest/config";
-
-import { sharedConfiguration } from "./vitest.shared.config.ts";
 
 const configuration = mergeConfig(
 	sharedConfiguration,

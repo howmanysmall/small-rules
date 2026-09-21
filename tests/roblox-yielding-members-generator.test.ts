@@ -69,6 +69,7 @@ describe("roblox yielding-member catalog generation", () => {
 		);
 
 		const yieldingMemberGroup = "IntersectAsync,SubtractAsync,UnionAsync";
+
 		expect(rendered.split(yieldingMemberGroup)).toHaveLength(2);
 		expect(rendered.split("WedgePart")).toHaveLength(2);
 	});

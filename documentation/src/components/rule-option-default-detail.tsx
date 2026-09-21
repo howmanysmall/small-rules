@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 import type { DefaultValueDocumentation } from "$data/rule-options";
 
 interface RuleOptionDefaultDetailProperties {
-	readonly defaultValue: DefaultValueDocumentation;
-	readonly detailId: string;
-	readonly isExpanded: boolean;
+	defaultValue: DefaultValueDocumentation;
+	detailId: string;
+	isExpanded: boolean;
 }
 
 const DETAIL = <div className="rule-option__detail-label">{"Default JSON"}</div>;
@@ -16,7 +16,7 @@ export function RuleOptionDefaultDetail({
 	defaultValue,
 	detailId,
 	isExpanded,
-}: RuleOptionDefaultDetailProperties): ReactNode {
+}: Readonly<RuleOptionDefaultDetailProperties>): ReactNode {
 	if (defaultValue.kind !== "complex") return undefined;
 
 	const tokens = tokenizeJson(defaultValue.displayValue);

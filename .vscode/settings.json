@@ -42,8 +42,6 @@
 		"editor.formatOnSave": true
 	},
 
-	"shfmt.executableArgs": ["-bn", "-ci", "-sr"],
-
 	"editor.acceptSuggestionOnCommitCharacter": true,
 	"editor.acceptSuggestionOnEnter": "on",
 	"editor.codeActionsOnSave": {
@@ -98,6 +96,17 @@
 	"js/ts.tsdk.path": "node_modules\\@typescript\\native-preview",
 	"js/ts.updateImportsOnFileMove.enabled": "always",
 
+	"json.schemaDownload.trustedDomains": {
+		"https://0hirume.github.io/": true,
+		"https://developer.microsoft.com/json-schemas/": true,
+		"https://json-schema.org/": true,
+		"https://json.schemastore.org/": true,
+		"https://raw.githubusercontent.com/devcontainers/spec/": true,
+		"https://raw.githubusercontent.com/microsoft/vscode/": true,
+		"https://schemastore.azurewebsites.net/": true,
+		"https://www.schemastore.org/": true
+	},
+
 	"mise.configureExtensionsAutomatically": false,
 
 	"oxc.configPath": "oxlint.config.ts",
@@ -109,16 +118,7 @@
 	"oxc.requireConfig": true,
 	"oxc.typeAware": true,
 	"oxc.unusedDisableDirectives": "deny",
-	"terminal.integrated.enableFileLinks": "on",
 
-	"json.schemaDownload.trustedDomains": {
-		"https://schemastore.azurewebsites.net/": true,
-		"https://raw.githubusercontent.com/microsoft/vscode/": true,
-		"https://raw.githubusercontent.com/devcontainers/spec/": true,
-		"https://www.schemastore.org/": true,
-		"https://json.schemastore.org/": true,
-		"https://json-schema.org/": true,
-		"https://developer.microsoft.com/json-schemas/": true,
-		"https://0hirume.github.io/": true
-	}
+	"shfmt.executableArgs": ["-bn", "-ci", "-sr"],
+	"terminal.integrated.enableFileLinks": "on"
 }

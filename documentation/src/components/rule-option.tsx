@@ -9,8 +9,8 @@ import type { ReactNode } from "react";
 import type { ObjectOption } from "$data/rule-options";
 
 interface RuleOptionProperties {
-	readonly highlightedType?: string | undefined;
-	readonly option: ObjectOption;
+	highlightedType?: string | undefined;
+	option: ObjectOption;
 }
 
 const labels = {
@@ -22,11 +22,11 @@ const labels = {
 	required: "Required",
 } as const;
 
-export function RuleOption({ highlightedType, option }: RuleOptionProperties): ReactNode {
-	const detailIdPrefix = useId();
+export function RuleOption({ highlightedType, option }: Readonly<RuleOptionProperties>): ReactNode {
+	const prefixDetailId = useId();
 	const [copyStatus, setCopyStatus] = useState<"copied" | "failed" | undefined>();
 	const [isExpanded, setIsExpanded] = useState(false);
-	const detailId = `${detailIdPrefix}-${option.name}-default`;
+	const detailId = `${prefixDetailId}-${option.name}-default`;
 
 	function toggleDefault(): void {
 		setIsExpanded((currentValue) => !currentValue);

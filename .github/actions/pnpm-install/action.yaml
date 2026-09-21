@@ -41,7 +41,7 @@ runs:
     - name: Install dependencies
       run: |
         for attempt in 1 2 3; do
-          if pnpm install --frozen-lockfile --prefer-offline; then
+          if pnpm install --frozen-lockfile --prefer-offline --trust-lockfile=false; then
             break
           fi
           if [ "$attempt" = "3" ]; then

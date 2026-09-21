@@ -1,8 +1,23 @@
-import { isentinel } from "@isentinel/eslint-config";
+import { GLOB_PACKAGE_JSON, isentinel } from "@isentinel/eslint-config";
 import { configs as astroConfigs } from "eslint-plugin-astro";
+
+const BANNED_DEPENDENCIES = {
+	allowed: ["@typescript/native-preview"] satisfies ReadonlyArray<string>,
+	modules: [] satisfies ReadonlyArray<string>,
+	presets: ["microutilities", "native", "preferred"] satisfies ReadonlyArray<string>,
+};
 
 const configuration = isentinel(
 	{
+		e18e: {
+			modernization: true,
+			moduleReplacements: true,
+			nodeMajor: 24,
+			overrides: {
+				"e18e/ban-dependencies": ["error", BANNED_DEPENDENCIES],
+			},
+			performanceImprovements: true,
+		},
 		formatters: {
 			css: true,
 			graphql: true,
@@ -34,7 +49,7 @@ const configuration = isentinel(
 						options: { trailingComma: "all" },
 					},
 					{
-						files: ["biome.jsonc", ".oxlintrc.json", ".fallowrc.jsonc"],
+						files: ["biome.jsonc", ".oxlintrc.json"],
 						options: { trailingComma: "none" },
 					},
 					{
@@ -150,7 +165,12 @@ const configuration = isentinel(
 			"unicorn/no-non-function-verb-prefix": "off",
 		},
 		spellCheck: false,
-		test: { vitest: true },
+		test: {
+			vitest: {
+				extended: true,
+				typecheck: true,
+			},
+		},
 		toml: {
 			overrides: {
 				"toml/array-bracket-spacing": "off",
@@ -212,6 +232,13 @@ const configuration = isentinel(
 		name: "small-rules/block-no-unsafe-string-replacement",
 		files: ["src/**"],
 		rules: { "unicorn/no-unsafe-string-replacement": "off" },
+	},
+	{
+		name: "small-rules/dependencies",
+		files: [GLOB_PACKAGE_JSON],
+		rules: {
+			"e18e/ban-dependencies": ["error", BANNED_DEPENDENCIES],
+		},
 	},
 );
 

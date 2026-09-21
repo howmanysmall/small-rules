@@ -107,6 +107,7 @@ function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 describe("documented rule examples", () => {
 	it("extracts one fail and one pass example for each non-exempt rule", () => {
 		expect.assertions(1);
+
 		const violations = getRuleExampleCoverage()
 			.filter(isMissingRequiredExamples)
 			.map(({ name }) => name);
@@ -116,6 +117,7 @@ describe("documented rule examples", () => {
 
 	it("rejects blank example exemptions", () => {
 		expect.assertions(1);
+
 		const blankExemptions = getRuleExampleCoverage()
 			.filter(({ exemption }) => exemption?.trim() === "")
 			.map(({ name }) => name);

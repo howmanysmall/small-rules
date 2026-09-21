@@ -35,15 +35,15 @@ interface DocumentationMetadata {
 export interface RuleExample {
 	readonly id: string;
 	readonly code: string;
-	readonly errors?: StaticValue;
-	readonly filename?: string;
+	readonly errors?: StaticValue | undefined;
+	readonly filename?: string | undefined;
 	readonly kind: "invalid" | "valid";
-	readonly language?: string;
-	readonly options?: StaticValue;
-	readonly output?: StaticValue;
-	readonly settings?: StaticValue;
-	readonly sourceType?: string;
-	readonly suggestions?: StaticValue;
+	readonly language?: string | undefined;
+	readonly options?: StaticValue | undefined;
+	readonly output?: StaticValue | undefined;
+	readonly settings?: StaticValue | undefined;
+	readonly sourceType?: string | undefined;
+	readonly suggestions?: StaticValue | undefined;
 	readonly title: string;
 }
 

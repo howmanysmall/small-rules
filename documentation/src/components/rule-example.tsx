@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type { PropsWithChildren, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 
 const PASS_STATUS_ICON = (
 	<svg
@@ -51,12 +51,11 @@ const COPY_ICON = (
 );
 
 interface RuleExampleProperties {
-	readonly title?: string | undefined;
-	readonly type: "fail" | "pass";
-	readonly children: ReactNode;
+	title?: string | undefined;
+	type: "fail" | "pass";
 }
 
-export function RuleExample({ title, type, children }: RuleExampleProperties): ReactNode {
+export function RuleExample({ title, type, children }: Readonly<PropsWithChildren<RuleExampleProperties>>): ReactNode {
 	const [copied, setCopied] = useState(false);
 	const isPass = type === "pass";
 	const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");

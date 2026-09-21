@@ -285,6 +285,12 @@
 				"workingDirectories": [{ "directory": "." }]
 			}
 		},
+		"fallow": {
+			"binary": {
+				"arguments": ["--run", "fallow-lsp"],
+				"path": "node"
+			}
+		},
 		"oxlint": {
 			"initialization_options": {
 				"settings": {

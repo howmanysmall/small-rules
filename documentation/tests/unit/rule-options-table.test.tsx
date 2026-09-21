@@ -33,6 +33,7 @@ const complexOption = {
 describe("rule-options-table", () => {
 	it("renders inline and expandable option metadata", async () => {
 		expect.assertions(9);
+
 		const user = userEvent.setup();
 		const { container } = render(<RuleOptionsTable options={[inlineOption, complexOption]} />);
 
@@ -44,6 +45,7 @@ describe("rule-options-table", () => {
 
 		const disclosure = screen.getByRole("button", { name: "1 hook" });
 		const detail = container.querySelector<HTMLElement>(".rule-option__detail");
+
 		expect(disclosure.getAttribute("aria-expanded")).toBe("false");
 		expect(detail?.hidden).toBe(true);
 
@@ -55,6 +57,7 @@ describe("rule-options-table", () => {
 
 	it("copies a complex default and announces success", async () => {
 		expect.assertions(3);
+
 		const user = userEvent.setup();
 		const writeText = vi.spyOn(navigator.clipboard, "writeText");
 		render(<RuleOptionsTable options={[complexOption]} />);

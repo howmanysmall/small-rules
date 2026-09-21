@@ -7,10 +7,10 @@ import type { ReactNode } from "react";
 import type { RuleCategoryKey } from "$data/rule-manifest";
 
 interface RuleCategoryPageProperties {
-	readonly category: RuleCategoryKey;
+	category: RuleCategoryKey;
 }
 
-export function RuleCategoryPage({ category: categoryKey }: RuleCategoryPageProperties): ReactNode {
+export function RuleCategoryPage({ category: categoryKey }: Readonly<RuleCategoryPageProperties>): ReactNode {
 	const category = getRuleFactCategory(categoryKey);
 	const categories = createRuleIndexCategories([category]);
 

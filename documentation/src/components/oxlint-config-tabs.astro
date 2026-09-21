@@ -1,7 +1,7 @@
 ---
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 
-import { toTsConfigSource } from "$utilities/oxlint-config";
+import { formatJsonSource, toTsConfigSource } from "$utilities/oxlint-config";
 
 interface Props {
 	/**
@@ -12,14 +12,17 @@ interface Props {
 }
 
 const { json } = Astro.props;
+const formattedJson = formatJsonSource(json);
 const ts = toTsConfigSource(json);
 ---
 
-<Tabs syncKey="oxlint-config">
-	<TabItem label=".oxlintrc.json" icon="seti:json">
-		<Code code={json} lang="json" />
-	</TabItem>
-	<TabItem label="oxlint.config.ts" icon="seti:typescript">
-		<Code code={ts} lang="ts" />
-	</TabItem>
-</Tabs>
+<div class="oxlint-config-tabs">
+	<Tabs syncKey="oxlint-config">
+		<TabItem label=".oxlintrc.json">
+			<Code code={formattedJson} lang="json" />
+		</TabItem>
+		<TabItem label="oxlint.config.ts">
+			<Code code={ts} lang="ts" />
+		</TabItem>
+	</Tabs>
+</div>

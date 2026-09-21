@@ -163,7 +163,7 @@ playwrightIt("keeps build-only code out of browser assets", async ({ page }) => 
 	});
 
 	await page.goto(`${baseUrl}${rulePath}`);
-	await page.waitForLoadState("networkidle");
+	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
 	const browserCode = scriptBodies.join("\n");
 	for (const forbiddenText of [
 		"yuku-parser",

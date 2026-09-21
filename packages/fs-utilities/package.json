@@ -9,13 +9,15 @@
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:agent": "nr test --reporter agent"
 	},
 	"dependencies": {
 		"arktype": "catalog:runtime"
 	},
 	"devDependencies": {
 		"@small-rules/arktype-utilities": "workspace:*",
+		"@small-rules/vite-configuration": "catalog:test",
 		"vitest": "catalog:test"
 	}
 }

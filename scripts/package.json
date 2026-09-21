@@ -20,8 +20,7 @@
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",
-		"yuku-parser": "catalog:runtime",
-		"zx": "catalog:scripts"
+		"yuku-parser": "catalog:runtime"
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "catalog:types"

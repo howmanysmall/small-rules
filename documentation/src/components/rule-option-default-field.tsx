@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 import type { ObjectOption } from "$data/rule-options";
 
 interface RuleOptionDefaultFieldProperties {
-	readonly copyLabel: string;
-	readonly copyStatus?: "copied" | "failed" | undefined;
-	readonly detailId: string;
-	readonly isExpanded: boolean;
-	readonly onCopy: () => void;
-	readonly onToggle: () => void;
-	readonly option: ObjectOption;
+	copyLabel: string;
+	copyStatus?: "copied" | "failed" | undefined;
+	detailId: string;
+	isExpanded: boolean;
+	onCopy: () => void;
+	onToggle: () => void;
+	option: ObjectOption;
 }
 
 const DEFAULT = <dt>{"Default"}</dt>;
@@ -24,7 +24,7 @@ export function RuleOptionDefaultField({
 	onCopy,
 	onToggle,
 	option,
-}: RuleOptionDefaultFieldProperties): ReactNode {
+}: Readonly<RuleOptionDefaultFieldProperties>): ReactNode {
 	return (
 		<div className="rule-option__field rule-option__field--default">
 			{DEFAULT}

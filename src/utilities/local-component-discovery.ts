@@ -116,10 +116,13 @@ function getFileText(filePath: string): string {
 function getImportStyle(text: string, componentName: string): "default" | "named" | undefined {
 	const escapedName = escapeRegExp(componentName);
 	const hasNamedExport =
+		// biome-ignore lint/nursery/useValidTestTitle: regexp
 		cachedRegex(`\\bexport\\s+(?:const|function|class)\\s+${escapedName}\\b`, "u").test(text) ||
+		// biome-ignore lint/nursery/useValidTestTitle: regexp
 		cachedRegex(`\\bexport\\s*\\{[^}]*\\b${escapedName}\\b[^}]*\\}`, "u").test(text);
 	if (hasNamedExport) return "named";
 
+	// biome-ignore lint/nursery/useValidTestTitle: regexp
 	return DEFAULT_EXPORT_PATTERN.test(text) && cachedRegex(`\\b${escapedName}\\b`, "u").test(text)
 		? "default"
 		: undefined;
@@ -127,6 +130,7 @@ function getImportStyle(text: string, componentName: string): "default" | "named
 
 function hasExpectedMarkers(text: string, markers: ReadonlyArray<string>): boolean {
 	for (const marker of markers) {
+		// biome-ignore lint/nursery/useValidTestTitle: regexp
 		if (!cachedRegex(`\\b${escapeRegExp(marker)}\\b`, "u").test(text)) return false;
 	}
 
@@ -306,6 +310,7 @@ export function inspectLocalComponentFile(
 	if (!fileNames.includes(baseName)) return { importStyle: undefined, matches: false };
 
 	const text = getFileText(filePath);
+	// biome-ignore lint/nursery/useValidTestTitle: regexp
 	if (!cachedRegex(`\\b${escapeRegExp(definition.componentName)}\\b`, "u").test(text)) {
 		return { importStyle: undefined, matches: false };
 	}

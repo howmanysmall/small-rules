@@ -1,13 +1,9 @@
+import type { Writable } from "type-fest";
+
 export interface InlineSegment {
 	readonly bold: boolean;
 	readonly code: boolean;
 	readonly text: string;
-}
-
-interface MutableSegment {
-	bold: boolean;
-	code: boolean;
-	text: string;
 }
 
 function createFlags(length: number): Array<boolean> {
@@ -21,8 +17,10 @@ function markCodeSpans(text: string, code: Array<boolean>, drop: Array<boolean>)
 			index += 1;
 			continue;
 		}
+
 		const close = text.indexOf("`", index + 1);
 		if (close === -1) return;
+
 		drop[index] = true;
 		drop[close] = true;
 		code.fill(true, index + 1, close);
@@ -37,11 +35,14 @@ function markBoldSpans(text: string, code: ReadonlyArray<boolean>, bold: Array<b
 			index += 1;
 			continue;
 		}
+
 		let close = index + 2;
 		while (close < text.length - 1 && (code[close] === true || !text.startsWith("**", close))) {
 			close += 1;
 		}
+
 		if (close >= text.length - 1) return;
+
 		drop[index] = true;
 		drop[index + 1] = true;
 		drop[close] = true;
@@ -58,15 +59,18 @@ function collectSegments(
 	drop: ReadonlyArray<boolean>,
 ): Array<InlineSegment> {
 	const segments = new Array<InlineSegment>();
-	let current: MutableSegment | undefined;
+	let size = 0;
+
+	let current: undefined | Writable<InlineSegment>;
 	for (let position = 0; position < text.length; position += 1) {
 		if (drop[position] === true) continue;
+
 		const isCode = code[position] === true;
 		const isBold = bold[position] === true;
 		if (current?.code === isCode && current.bold === isBold) current.text += text.charAt(position);
 		else {
 			current = { bold: isBold, code: isCode, text: text.charAt(position) };
-			segments.push(current);
+			segments[size++] = current;
 		}
 	}
 	return segments;

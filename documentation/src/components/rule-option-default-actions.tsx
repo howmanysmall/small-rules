@@ -3,14 +3,14 @@ import { RuleOptionIcon } from "./rule-option-icon";
 import type { ReactNode } from "react";
 
 interface RuleOptionDefaultActionsProperties {
-	readonly name: string;
-	readonly copyLabel: string;
-	readonly copyStatus?: "copied" | "failed" | undefined;
-	readonly detailId: string;
-	readonly isExpanded: boolean;
-	readonly onCopy: () => void;
-	readonly onToggle: () => void;
-	readonly summary: string;
+	name: string;
+	copyLabel: string;
+	copyStatus?: "copied" | "failed" | undefined;
+	detailId: string;
+	isExpanded: boolean;
+	onCopy: () => void;
+	onToggle: () => void;
+	summary: string;
 }
 
 const CHEVRON = <RuleOptionIcon kind="chevron" />;
@@ -24,7 +24,7 @@ export function RuleOptionDefaultActions({
 	onCopy,
 	onToggle,
 	summary,
-}: RuleOptionDefaultActionsProperties): ReactNode {
+}: Readonly<RuleOptionDefaultActionsProperties>): ReactNode {
 	let copyStatusText = "";
 	if (copyStatus !== undefined) copyStatusText = copyLabel;
 

@@ -60,6 +60,7 @@ describe("rule page routes", () => {
 
 	it("does not contain orphan rule pages", () => {
 		expect.assertions(1);
+
 		const expectedRulePagePaths = getExpectedRulePagePaths();
 
 		expect(
@@ -71,6 +72,7 @@ describe("rule page routes", () => {
 
 	it("binds exactly one RulePage wrapper per page to the route's rule", () => {
 		expect.assertions(2);
+
 		const expectedRulePagePaths = getExpectedRulePagePaths();
 		const mismatches = getRulePageSources().filter((source) => isRulePageMismatch(source, expectedRulePagePaths));
 
@@ -84,6 +86,7 @@ describe("rule page routes", () => {
 
 	it("provides an all-rules page and one landing page per category", () => {
 		expect.assertions(1);
+
 		const indexPaths = [
 			nodePath.join(rulePagesDirectory, "index.mdx"),
 			...ruleManifest.categories.map((category) => nodePath.join(rulePagesDirectory, category.key, "index.mdx")),

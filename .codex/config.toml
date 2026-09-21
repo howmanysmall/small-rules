@@ -17,7 +17,8 @@ args = ["mcp", "--root", "."]
 command = "hk"
 
 [mcp_servers.fallow]
-command = "fallow-mcp"
+args = ["--run", "fallow-mcp"]
+command = "node"
 
 [features.multi_agent_v2]
 max_concurrent_threads_per_session = 1000

@@ -6,14 +6,9 @@ describe("isStringArray", () => {
 	it("should reject arrays containing non-string items", () => {
 		expect.assertions(1);
 
-		// Arrange
 		const value = ["valid", 1];
 
-		// Act
-		const result = isStringArray(value);
-
-		// Assert
-		expect(result).toBe(false);
+		expect(isStringArray(value)).toBe(false);
 	});
 });
 
@@ -21,13 +16,8 @@ describe("isStringRecord", () => {
 	it("should reject records containing non-string values", () => {
 		expect.assertions(1);
 
-		// Arrange
 		const value = { name: "valid", count: 1 };
 
-		// Act
-		const result = isStringRecord(value);
-
-		// Assert
-		expect(result).toBe(false);
+		expect(isStringRecord(value)).toBe(false);
 	});
 });

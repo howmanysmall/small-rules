@@ -219,31 +219,37 @@ describe("classifyUnsafeDictionary", () => {
 		expect(classified?.unsafeValue).toBe(unsafeValue);
 	});
 
-	it("keeps concrete, intersected-with-evidence, and shadowed dictionaries safe", () => {
-		expect.assertions(6);
-
-		const cases = [
-			"type Commands = Record<string, Command>;",
+	it.each([
+		["concrete dictionary value", "type Commands = Record<string, Command>;"],
+		[
+			"value intersected with evidence",
 			"interface Owner { readonly id: string } type A = Record<string, unknown & Owner>;",
-			"import { Record } from './local'; type A = Record<string, unknown>;",
+		],
+		["shadowed Record import", "import { Record } from './local'; type A = Record<string, unknown>;"],
+		[
+			"shadowed NonNullable alias",
 			"type NonNullable<T> = { value: T }; type A = Record<string, NonNullable<unknown>>;",
+		],
+		[
+			"value inheriting from evidence interface",
 			"interface Owner { readonly id: string } interface Child extends Owner {} type A = Record<string, Child>;",
-			"type Safe = Index<Command>; type Index<T> = Record<string, T>;",
-		];
-		for (const code of cases) {
-			const fixture = setup(code);
-			expect(checkReportedInConcrete(fixture.source, fixture.environment)).toBe(false);
-		}
+		],
+		["indirect Record alias", "type Safe = Index<Command>; type Index<T> = Record<string, T>;"],
+	])("keeps %s safe", (_, code) => {
+		expect.assertions(1);
+
+		const fixture = setup(code);
+
+		expect(checkReportedInConcrete(fixture.source, fixture.environment)).toBe(false);
 	});
 
-	it("propagates unsafe values through Pick and Omit of an unsafe dictionary", () => {
-		expect.assertions(2);
+	it.each(["Pick", "Omit"] as const)("propagates unsafe values through %s of an unsafe dictionary", (wrapper) => {
+		expect.assertions(1);
 
-		for (const wrapper of ["Pick", "Omit"]) {
-			const fixture = setup(`type Source = Record<string, unknown>; type A = ${wrapper}<Source, never>;`);
-			const pickReference = getNthTypeReference(fixture.source, 1);
-			expect(classifyUnsafeDictionary(pickReference, fixture.environment)).toBeDefined();
-		}
+		const fixture = setup(`type Source = Record<string, unknown>; type A = ${wrapper}<Source, never>;`);
+		const pickReference = getNthTypeReference(fixture.source, 1);
+
+		expect(classifyUnsafeDictionary(pickReference, fixture.environment)).toBeDefined();
 	});
 
 	// Catches a recursive alias hanging or silently exempting an
@@ -267,20 +273,24 @@ describe("classifyUnsafeDictionaryValue", () => {
 
 		const plainUnknown = setup("type A = Record<string, unknown>;");
 		const recordValue = requireFirstOfType(collectTypes(plainUnknown.source), "TSUnknownKeyword");
+
 		expect(classifyUnsafeDictionaryValue(recordValue, plainUnknown.environment)?.unsafeValue).toBe("unknown");
 
 		const wrapped = setup("type A = { [key: string]: Required<unknown> };");
 		const wrappedValue = requireFirstOfType(collectTypes(wrapped.source), "TSUnknownKeyword");
+
 		expect(classifyUnsafeDictionaryValue(wrappedValue, wrapped.environment)?.unsafeValue).toBe("unknown");
 
 		const ownerIntersection = setup(
 			"interface Owner { readonly id: string } type A = Record<string, unknown & Owner>;",
 		);
 		const intersection = requireFirstOfType(collectTypes(ownerIntersection.source), "TSIntersectionType");
+
 		expect(classifyUnsafeDictionaryValue(intersection, ownerIntersection.environment)).toBeUndefined();
 
 		const anyIntersection = setup("interface Owner { readonly id: string } type A = Record<string, any & Owner>;");
 		const anyIntersectionType = requireFirstOfType(collectTypes(anyIntersection.source), "TSIntersectionType");
+
 		expect(classifyUnsafeDictionaryValue(anyIntersectionType, anyIntersection.environment)?.unsafeValue).toBe(
 			"any",
 		);
@@ -289,6 +299,7 @@ describe("classifyUnsafeDictionaryValue", () => {
 			"interface Brand { readonly __brand?: never } type A = Record<string, Brand>;",
 		);
 		const brandReference = findIdentifierReference(optionalNeverInterface.source, "Brand");
+
 		expect(classifyUnsafeDictionaryValue(brandReference, optionalNeverInterface.environment)?.unsafeValue).toBe(
 			"empty-object",
 		);
@@ -297,6 +308,7 @@ describe("classifyUnsafeDictionaryValue", () => {
 			"interface Escape {} interface Escape { readonly id: string } type A = Record<string, Escape>;",
 		);
 		const escapeReference = findIdentifierReference(mergedInterfaces.source, "Escape");
+
 		expect(classifyUnsafeDictionaryValue(escapeReference, mergedInterfaces.environment)).toBeUndefined();
 	});
 
@@ -304,11 +316,13 @@ describe("classifyUnsafeDictionaryValue", () => {
 		expect.assertions(2);
 
 		const qualified = setup("declare namespace NS { export type Value = unknown } const value: NS.Value = input;");
+
 		expect(
 			classifyUnsafeDictionaryValue(getFirstAnnotationTarget(qualified.source), qualified.environment),
 		).toBeUndefined();
 
 		const unapplied = setup("type Value<T> = T; const value: Value = input;");
+
 		expect(
 			classifyUnsafeDictionaryValue(getFirstAnnotationTarget(unapplied.source), unapplied.environment),
 		).toBeUndefined();
@@ -319,9 +333,7 @@ function requireFirstOfType(types: ReadonlyArray<ESTree.TSType>, nodeType: strin
 	for (const candidate of types) {
 		if (candidate.type === nodeType) return candidate;
 	}
-	const error = new Error(`Node of type "${nodeType}" not found.`);
-	Error.captureStackTrace(error, requireFirstOfType);
-	throw error;
+	throw new Error(`Node of type "${nodeType}" not found.`);
 }
 
 function findIdentifierReference(source: HarnessSourceCode, name: string): ESTree.TSTypeReference {
@@ -338,11 +350,7 @@ function findIdentifierReference(source: HarnessSourceCode, name: string): ESTre
 			}
 		},
 	});
-	if (found === undefined) {
-		const error = new Error(`Reference "${name}" not found.`);
-		Error.captureStackTrace(error, findIdentifierReference);
-		throw error;
-	}
+	if (found === undefined) throw new Error(`Reference "${name}" not found.`);
 	return found;
 }
 
@@ -354,11 +362,7 @@ function getNthTypeReference(source: HarnessSourceCode, index: number): ESTree.T
 		},
 	});
 	const reference = references[index];
-	if (reference === undefined) {
-		const error = new Error(`Type reference at index ${index} not found.`);
-		Error.captureStackTrace(error, getNthTypeReference);
-		throw error;
-	}
+	if (reference === undefined) throw new Error(`Type reference at index ${index} not found.`);
 	return reference;
 }
 
@@ -463,11 +467,7 @@ function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
 			if (isNode(node) && node.type === "TSTypeAnnotation") found ??= node.typeAnnotation;
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("Type annotation not found.");
-		Error.captureStackTrace(error, getFirstAnnotationTarget);
-		throw error;
-	}
+	if (found === undefined) throw new Error("Type annotation not found.");
 	return found;
 }
 
@@ -478,11 +478,7 @@ function getFirstTypeLiteral(source: HarnessSourceCode): ESTree.TSTypeLiteral {
 			if (isNode(node) && node.type === "TSTypeLiteral") found ??= node;
 		},
 	});
-	if (found === undefined) {
-		const error = new Error("Type literal not found.");
-		Error.captureStackTrace(error, getFirstTypeLiteral);
-		throw error;
-	}
+	if (found === undefined) throw new Error("Type literal not found.");
 	return found;
 }
 
@@ -552,6 +548,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
 			expected,
 		);
@@ -579,6 +576,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
 			expected,
 		);
@@ -604,6 +602,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
 			expected,
 		);
@@ -656,6 +655,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)).toStrictEqual({
 			kind,
 		});
@@ -665,11 +665,13 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(5);
 
 		const emptyLiteral = setup("const value: {} = {};");
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(emptyLiteral.source), emptyLiteral.environment),
 		).toBeUndefined();
 
 		const namedObjectAlias = setup("type Commands = { readonly start: Command }; const commands: Commands = {};");
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(namedObjectAlias.source), namedObjectAlias.environment),
 		).toBeUndefined();
@@ -677,11 +679,13 @@ describe("classifyWideningTarget", () => {
 		const finiteMappedAlias = setup(
 			"type Levels = { readonly [Level in Permission]: number }; const levels: Levels = {};",
 		);
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(finiteMappedAlias.source), finiteMappedAlias.environment),
 		).toBeUndefined();
 
 		const nonDictionaryGeneric = setup("type Box<Value> = Value; const value: Box<string> = {};");
+
 		expect(
 			classifyWideningTarget(
 				getFirstAnnotationTarget(nonDictionaryGeneric.source),
@@ -692,6 +696,7 @@ describe("classifyWideningTarget", () => {
 		const shadowedRecord = setup(
 			"type Record<K, V> = { key: K; value: V }; const value: Record<string, unknown> = {};",
 		);
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(shadowedRecord.source), shadowedRecord.environment),
 		).toBeUndefined();
@@ -701,6 +706,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(5);
 
 		const symbolKey = setup("type Levels = { readonly [Level in symbol]: number }; const levels: Levels = {};");
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(symbolKey.source), symbolKey.environment)).toStrictEqual(
 			{
 				kind: "open dictionary",
@@ -708,6 +714,7 @@ describe("classifyWideningTarget", () => {
 		);
 
 		const unionKey = setup("type Ranges = { [K in string | number]: number }; const ranges: Ranges = {};");
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(unionKey.source), unionKey.environment)).toStrictEqual({
 			kind: "open dictionary",
 		});
@@ -715,6 +722,7 @@ describe("classifyWideningTarget", () => {
 		const substitutedKey = setup(
 			"type Inner<K = string> = { [X in K]: number }; type Names = Inner; const names: Names = {};",
 		);
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(substitutedKey.source), substitutedKey.environment),
 		).toStrictEqual({
@@ -724,11 +732,13 @@ describe("classifyWideningTarget", () => {
 		const unsubstitutedKey = setup(
 			"type Key<T> = T; type Names2 = { [K in Key<string>]: number }; const names2: Names2 = {};",
 		);
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(unsubstitutedKey.source), unsubstitutedKey.environment),
 		).toStrictEqual({ kind: "open dictionary" });
 
 		const selfReferential = setup("type Id<T> = Id<T>; const value: Id<string> = {};");
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(selfReferential.source), selfReferential.environment),
 		).toBeUndefined();
@@ -738,6 +748,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const genericDictionary = setup("type Index<T> = Record<string, T>; const commands: Index<Command> = {};");
+
 		expect(
 			classifyWideningTarget(getFirstAnnotationTarget(genericDictionary.source), genericDictionary.environment),
 		).toStrictEqual({ kind: "generic container" });
@@ -763,6 +774,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
+
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
 			expected,
 		);
@@ -772,6 +784,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup("type Index<T> = Record<string, T>; const value: Index = {};");
+
 		expect(classifyUnsafeDictionary(getFirstAnnotationTarget(fixture.source), fixture.environment)).toBeUndefined();
 	});
 
@@ -813,6 +826,7 @@ describe("classifyWideningTarget", () => {
 
 		const fixture = setup(code);
 		const target = classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment);
+
 		expect(target?.kind).toStrictEqual(expected);
 	});
 
@@ -831,6 +845,7 @@ describe("classifyWideningTarget", () => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
+
 		expect(checkDictionaryReported(fixture.source, fixture.environment)).toBe(expectUnsafe);
 	});
 
@@ -869,9 +884,9 @@ function getNthNamedTypeReference(source: HarnessSourceCode, name: string, index
 			}
 		},
 	});
+
 	const reference = references[index];
 	if (reference !== undefined) return reference;
-	const error = new Error(`Type reference "${name}" at index ${index} not found.`);
-	Error.captureStackTrace(error, getNthNamedTypeReference);
-	throw error;
+
+	throw new Error(`Type reference "${name}" at index ${index} not found.`);
 }

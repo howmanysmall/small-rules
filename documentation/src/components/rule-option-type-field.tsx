@@ -5,14 +5,14 @@ interface RuleOptionTypeFieldProperties {
 	 * Build-time Shiki-highlighted HTML for the type, or undefined to fall back
 	 * to plain text.
 	 */
-	readonly highlightedType: string | undefined;
+	highlightedType: string | undefined;
 	/** Raw type string (used as fallback when highlighting is unavailable). */
-	readonly type: string;
+	type: string;
 }
 
 const TYPE_LABEL = <dt>{"Type"}</dt>;
 
-export function RuleOptionTypeField({ highlightedType, type }: RuleOptionTypeFieldProperties): ReactNode {
+export function RuleOptionTypeField({ highlightedType, type }: Readonly<RuleOptionTypeFieldProperties>): ReactNode {
 	return (
 		<div className="rule-option__field">
 			{TYPE_LABEL}

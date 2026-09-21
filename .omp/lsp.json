@@ -1,11 +1,8 @@
 {
 	"servers": {
-		"typescript-language-server": {
-			"disabled": true
-		},
 		"biome": {
-			"command": "node",
 			"args": ["--run", "biome", "--", "lsp-proxy"],
+			"command": "node",
 			"fileTypes": [
 				".astro",
 				".cjs",
@@ -26,13 +23,13 @@
 				".yaml",
 				".yml"
 			],
+			"isLinter": true,
 			"languageId": "biome",
-			"rootMarkers": ["biome.json", "biome.jsonc", ".git"],
-			"isLinter": true
+			"rootMarkers": ["biome.json", "biome.jsonc", ".git"]
 		},
 		"oxfmt": {
-			"command": "node",
 			"args": ["--run", "oxfmt", "--", "--lsp"],
+			"command": "node",
 			"fileTypes": [
 				".cjs",
 				".css",
@@ -58,58 +55,61 @@
 				".yaml",
 				".yml"
 			],
+			"isLinter": true,
 			"languageId": "oxfmt",
-			"rootMarkers": [".oxfmtrc.json", ".git"],
-			"isLinter": true
+			"rootMarkers": [".oxfmtrc.json", ".git"]
 		},
 		"oxlint": {
-			"command": "node",
 			"args": ["--run", "oxlint", "--", "--lsp"],
-			"fileTypes": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
-			"languageId": "oxlint",
-			"rootMarkers": [".oxlintrc.json", ".git"],
-			"isLinter": true
-		},
-		"rumdl": {
-			"command": "rumdl",
-			"args": ["server"],
-			"fileTypes": [".md", ".markdown", ".mdown", ".mkdn", ".mkd", ".mdwn", ".mdtxt", ".mdtext", ".text", ".Rmd"],
-			"languageId": "markdown",
-			"rootMarkers": [".git"]
-		},
-		"tombi": {
-			"command": "tombi",
-			"args": ["lsp"],
-			"fileTypes": [".toml"],
-			"languageId": "toml",
-			"rootMarkers": ["Cargo.toml", "pyproject.toml", ".git"]
-		},
-		"vscode-html-language-server": {
-			"command": "vscode-html-language-server",
-			"args": ["--stdio"],
-			"fileTypes": [".html", ".htm"],
-			"languageId": "html",
-			"rootMarkers": [".git"]
-		},
-		"vscode-json-language-server": {
-			"command": "vscode-json-language-server",
-			"args": ["--stdio"],
-			"fileTypes": [".json", ".jsonc"],
-			"languageId": "json",
-			"rootMarkers": ["package.json", "tsconfig.json", ".git"]
-		},
-		"typescript": {
 			"command": "node",
-			"args": ["--run", "tsgo", "--", "--lsp", "--stdio"],
-			"fileTypes": [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"],
-			"languageId": "typescript",
-			"rootMarkers": ["tsconfig.json", "package.json", ".git"]
+			"fileTypes": [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts", ".jsx", ".tsx", ".vue", ".svelte", ".astro"],
+			"isLinter": true,
+			"languageId": "oxlint",
+			"rootMarkers": [".oxlintrc.json", ".git"]
 		},
 		"pkl-lsp": {
 			"command": "pkl-lsp",
 			"fileTypes": [".pkl"],
 			"languageId": "pkl",
 			"rootMarkers": ["hk.pkl", "*.pkl", ".git"]
+		},
+		"rumdl": {
+			"args": ["server"],
+			"command": "rumdl",
+			"fileTypes": [".md", ".markdown", ".mdown", ".mkdn", ".mkd", ".mdwn", ".mdtxt", ".mdtext", ".text", ".Rmd"],
+			"languageId": "markdown",
+			"rootMarkers": [".git"]
+		},
+		"tombi": {
+			"args": ["lsp"],
+			"command": "tombi",
+			"fileTypes": [".toml"],
+			"languageId": "toml",
+			"rootMarkers": ["Cargo.toml", "pyproject.toml", ".git"]
+		},
+		"typescript": {
+			"args": ["--run", "tsgo", "--", "--lsp", "--stdio"],
+			"command": "node",
+			"fileTypes": [".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"],
+			"languageId": "typescript",
+			"rootMarkers": ["tsconfig.json", "package.json", ".git"]
+		},
+		"typescript-language-server": {
+			"disabled": true
+		},
+		"vscode-html-language-server": {
+			"args": ["--stdio"],
+			"command": "vscode-html-language-server",
+			"fileTypes": [".html", ".htm"],
+			"languageId": "html",
+			"rootMarkers": [".git"]
+		},
+		"vscode-json-language-server": {
+			"args": ["--stdio"],
+			"command": "vscode-json-language-server",
+			"fileTypes": [".json", ".jsonc"],
+			"languageId": "json",
+			"rootMarkers": ["package.json", "tsconfig.json", ".git"]
 		}
 	}
 }

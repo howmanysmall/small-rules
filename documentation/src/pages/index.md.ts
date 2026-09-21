@@ -10,7 +10,9 @@ export const GET: APIRoute = async (): Promise<Response> => {
 	const entry = entries.find(({ id }) => id === "" || id === "index");
 
 	const body = entry?.body;
-	if (body === undefined || body.length === 0) return createMarkdownResponse({ body: "", status: 404 });
+	if (body === undefined || body.length === 0) {
+		return createMarkdownResponse({ body: "", status: 404 });
+	}
 
 	return createMarkdownResponse({ body });
 };

@@ -1,10 +1,33 @@
 import { describe, expect, it } from "vitest";
 
-import { toTsConfigSource } from "$utilities/oxlint-config";
+import { formatJsonSource, toTsConfigSource } from "$utilities/oxlint-config";
+
+describe("formatJsonSource", () => {
+	it("restores tab indentation when MDX strips it", () => {
+		expect.assertions(1);
+
+		expect(
+			formatJsonSource('{"jsPlugins":["@pobammer-ts/small-rules"],"rules":{"small-rules/no-print":"error"}}'),
+		).toBe(
+			[
+				"{",
+				'\t"jsPlugins": [',
+				'\t\t"@pobammer-ts/small-rules"',
+				"\t],",
+				'\t"rules": {',
+				'\t\t"small-rules/no-print": "error"',
+				"\t}",
+				"}",
+				"",
+			].join("\n"),
+		);
+	});
+});
 
 describe("toTsConfigSource", () => {
 	it("converts a plugin registration block to a defineConfig module", () => {
 		expect.assertions(1);
+
 		expect(toTsConfigSource(["{", '\t"jsPlugins": ["@pobammer-ts/small-rules"]', "}"].join("\n"))).toBe(
 			[
 				'import { defineConfig } from "oxlint";',
@@ -18,6 +41,7 @@ describe("toTsConfigSource", () => {
 
 	it("keeps quotes on keys that are not valid identifiers", () => {
 		expect.assertions(1);
+
 		expect(
 			toTsConfigSource(
 				[
@@ -45,6 +69,7 @@ describe("toTsConfigSource", () => {
 
 	it("expands arrays containing objects while keeping short primitive arrays inline", () => {
 		expect.assertions(1);
+
 		expect(
 			toTsConfigSource(
 				[
@@ -80,6 +105,7 @@ describe("toTsConfigSource", () => {
 
 	it("expands primitive arrays that exceed the inline width limit", () => {
 		expect.assertions(1);
+
 		expect(
 			toTsConfigSource(
 				[
@@ -126,6 +152,7 @@ describe("toTsConfigSource", () => {
 
 	it("renders numbers, booleans, and null primitives", () => {
 		expect.assertions(1);
+
 		expect(
 			toTsConfigSource(
 				[
@@ -165,6 +192,7 @@ describe("toTsConfigSource", () => {
 
 	it("renders empty objects and arrays compactly", () => {
 		expect.assertions(1);
+
 		expect(toTsConfigSource('{"settings": {}, "overrides": []}')).toBe(
 			[
 				'import { defineConfig } from "oxlint";',
@@ -179,6 +207,7 @@ describe("toTsConfigSource", () => {
 
 	it("throws on invalid JSON", () => {
 		expect.assertions(1);
+
 		expect(() => toTsConfigSource("{oops")).toThrow(SyntaxError);
 	});
 });

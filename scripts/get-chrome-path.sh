@@ -2,15 +2,15 @@
 
 set -euo pipefail
 
-error() {
+function error() {
 	printf '%s\n' "$*" >&2
 }
 
-first_executable_in_path() {
+function get-first-executable-in-path() {
 	local candidate
 
 	for candidate in "$@"; do
-		if command -v "${candidate}" >/dev/null 2>&1; then
+		if command -v "${candidate}" > /dev/null 2>&1; then
 			command -v "${candidate}"
 			return 0
 		fi
@@ -19,7 +19,7 @@ first_executable_in_path() {
 	return 1
 }
 
-first_existing_file() {
+function get-first-existing-file() {
 	local candidate
 
 	for candidate in "$@"; do
@@ -32,8 +32,8 @@ first_existing_file() {
 	return 1
 }
 
-resolve_macos_chrome() {
-	first_existing_file \
+function resolve-macos-chrome() {
+	get-first-existing-file \
 		"$HOME/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta" \
 		"/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta" \
 		"$HOME/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary" \
@@ -46,8 +46,8 @@ resolve_macos_chrome() {
 		"/Applications/Chromium.app/Contents/MacOS/Chromium"
 }
 
-resolve_linux_chrome() {
-	first_executable_in_path \
+function resolve-linux-chrome() {
+	get-first-executable-in-path \
 		google-chrome-beta \
 		google-chrome-stable \
 		google-chrome \
@@ -57,11 +57,11 @@ resolve_linux_chrome() {
 		chrome
 }
 
-resolve_windows_chrome() {
+function resolve-windows-chrome() {
 	local candidate
-	local cmd_output
+	local commandOutput
 
-	if ! command -v cmd.exe >/dev/null 2>&1; then
+	if ! command -v cmd.exe > /dev/null 2>&1; then
 		return 1
 	fi
 
@@ -78,9 +78,9 @@ resolve_windows_chrome() {
 		'%LocalAppData%\Google\Chrome\Application\chrome.exe' \
 		'%LocalAppData%\Google\Chrome Dev\Application\chrome.exe' \
 		'%LocalAppData%\Google\Chrome SxS\Application\chrome.exe'; do
-		if cmd_output="$(cmd.exe /c "if exist \"${candidate}\" (echo ${candidate}) else exit /b 1" 2>/dev/null)"; then
-			cmd_output="${cmd_output%$'\r'}"
-			printf '%s\n' "${cmd_output}"
+		if commandOutput="$(cmd.exe /c "if exist \"${candidate}\" (echo ${candidate}) else exit /b 1" 2> /dev/null)"; then
+			commandOutput="${commandOutput%$'\r'}"
+			printf '%s\n' "${commandOutput}"
 			return 0
 		fi
 	done
@@ -88,7 +88,7 @@ resolve_windows_chrome() {
 	return 1
 }
 
-resolve_chrome_path() {
+function resolve-chrome-path() {
 	local override
 	local path
 	local platform
@@ -100,34 +100,34 @@ resolve_chrome_path() {
 		fi
 	done
 
-	platform="$(uname -s 2>/dev/null || printf '%s' "${OS:-}")"
+	platform="$(uname -s 2> /dev/null || printf '%s' "${OS:-}")"
 
 	case "${platform}" in
-	Darwin)
-		if path="$(resolve_macos_chrome)"; then
-			printf '%s\n' "${path}"
-			return 0
-		fi
-		;;
-	Linux)
-		if path="$(resolve_linux_chrome)"; then
-			printf '%s\n' "${path}"
-			return 0
-		fi
-		;;
-	MINGW* | MSYS* | CYGWIN* | Windows_NT)
-		if path="$(resolve_windows_chrome)"; then
-			printf '%s\n' "${path}"
-			return 0
-		fi
-		;;
-	*)
-		error "Unsupported platform: ${platform}"
-		return 1
-		;;
+		Darwin)
+			if path="$(resolve-macos-chrome)"; then
+				printf '%s\n' "${path}"
+				return 0
+			fi
+			;;
+		Linux)
+			if path="$(resolve-linux-chrome)"; then
+				printf '%s\n' "${path}"
+				return 0
+			fi
+			;;
+		MINGW* | MSYS* | CYGWIN* | Windows_NT)
+			if path="$(resolve-windows-chrome)"; then
+				printf '%s\n' "${path}"
+				return 0
+			fi
+			;;
+		*)
+			error "Unsupported platform: ${platform}"
+			return 1
+			;;
 	esac
 
-	if path="$(first_executable_in_path \
+	if path="$(get-first-executable-in-path \
 		google-chrome-beta \
 		google-chrome-stable \
 		google-chrome \
@@ -142,22 +142,22 @@ resolve_chrome_path() {
 	return 1
 }
 
-chrome_path="$(resolve_chrome_path)" || {
+chromePath="$(resolve-chrome-path)" || {
 	error "Unable to locate a Chrome executable."
 	error "Set CHROME_PATH to override, or install Google Chrome / Chromium."
 	exit 1
 }
 
 case "${1:---serve}" in
---print-path)
-	printf '%s\n' "${chrome_path}"
-	;;
---serve | --launch)
-	shift || true
-	exec bunx --bun chrome-devtools-mcp@latest --executablePath "${chrome_path}" "$@"
-	;;
-*)
-	error "Usage: $0 [--print-path|--serve]"
-	exit 1
-	;;
+	--print-path)
+		printf '%s\n' "${chromePath}"
+		;;
+	--serve | --launch)
+		shift || true
+		exec nlx chrome-devtools-mcp@latest --no-usage-statistics --executablePath "${chromePath}" "$@"
+		;;
+	*)
+		error "Usage: $0 [--print-path|--serve]"
+		exit 1
+		;;
 esac

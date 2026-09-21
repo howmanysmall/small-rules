@@ -15,6 +15,17 @@ export interface RuleNewness {
 	 * True when the rule was added in the latest release or is not yet released.
 	 */
 	readonly isNew: boolean;
+	/**
+	 * True when the rule is not new but was last modified in the latest
+	 * release or has unreleased modifications.
+	 */
+	readonly isUpdated: boolean;
+	/**
+	 * First release tag containing the last modification commit, e.g.
+	 * "v3.0.2". Undefined when the latest modification is unreleased. Equals
+	 * `addedIn` when the rule was never modified after it was added.
+	 */
+	readonly updatedIn: string | undefined;
 }
 
 export type GitRunner = (parameters: ReadonlyArray<string>) => string;
@@ -54,15 +65,16 @@ function firstLine(output: string): string | undefined {
 }
 
 /**
- * Parses `git log --reverse --diff-filter=A --format=__COMMIT__%H --name-only
- * -- src/rules/` output into a map of rule name (filename minus `.ts`) to the
- * first commit that added it.
+ * Maps rule names to the first commit seen for them in a `git log
+ * --format=__COMMIT__%H --name-only -- src/rules/` stream. Feed it a
+ * reverse-chronological log (oldest first) to get first-add commits, or a
+ * newest-first log to get last-modification commits.
  *
  * @param logOutput - Raw git log output.
- * @returns Map of rule name to first add commit sha.
+ * @returns Map of rule name to first seen commit sha.
  */
-export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> {
-	const addedInByRule = new Map<string, string>();
+function parseTouchedRules(logOutput: string): Map<string, string> {
+	const touchedByRule = new Map<string, string>();
 	let currentCommit: string | undefined;
 
 	for (const line of logOutput.split("\n")) {
@@ -70,6 +82,7 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
 			currentCommit = line.slice(COMMIT_MARKER.length);
 			continue;
 		}
+
 		const relativePath = line.slice(RULE_DIRECTORY.length);
 		if (
 			currentCommit === undefined ||
@@ -79,38 +92,78 @@ export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> 
 		) {
 			continue;
 		}
+
 		const ruleName = nodePath.basename(line, ".ts");
-		if (!addedInByRule.has(ruleName)) addedInByRule.set(ruleName, currentCommit);
+		if (!touchedByRule.has(ruleName)) {
+			touchedByRule.set(ruleName, currentCommit);
+		}
 	}
 
-	return addedInByRule;
+	return touchedByRule;
 }
 
 /**
- * Classifies each rule as "new". A rule is new when it was added in the latest
- * release or added after it (not yet released). This single expression is the
- * entire freshness policy.
+ * Parses `git log --reverse --diff-filter=A --format=__COMMIT__%H --name-only
+ * -- src/rules/` output into a map of rule name (filename minus `.ts`) to the
+ * first commit that added it.
+ *
+ * @param logOutput - Raw git log output.
+ * @returns Map of rule name to first add commit sha.
+ */
+export function parseAddCommits(logOutput: string): ReadonlyMap<string, string> {
+	return parseTouchedRules(logOutput);
+}
+
+/**
+ * Parses `git log --format=__COMMIT__%H --name-only -- src/rules/` output
+ * (newest first) into a map of rule name to the most recent commit touching
+ * it.
+ *
+ * @param logOutput - Raw git log output, newest first.
+ * @returns Map of rule name to last modification commit sha.
+ */
+export function parseLastModuleCommits(logOutput: string): ReadonlyMap<string, string> {
+	return parseTouchedRules(logOutput);
+}
+
+/**
+ * Classifies each rule as "new" or "recently updated". A rule is new when it
+ * was added in the latest release or added after it (not yet released). A
+ * rule is updated when it is not new but was last modified in the latest
+ * release or modified after it (not yet released). New takes precedence over
+ * updated.
  *
  * @param addedInByRule - Rule name to first containing release (undefined = unreleased).
+ * @param updatedInByRule - Rule name to last-mod containing release (undefined = unreleased).
  * @param latestTag - The most recent release tag.
  * @returns Map of rule name to newness classification.
  */
 export function resolveNewness(
 	addedInByRule: ReadonlyMap<string, string | undefined>,
+	updatedInByRule: ReadonlyMap<string, string | undefined>,
 	latestTag: string,
 ): ReadonlyMap<string, RuleNewness> {
 	return new Map(
-		Array.from(addedInByRule, ([ruleName, addedIn]) => [
-			ruleName,
-			{ addedIn, isNew: addedIn === undefined || addedIn === latestTag },
-		]),
+		Array.from(addedInByRule, ([ruleName, addedIn]) => {
+			const updatedIn = updatedInByRule.has(ruleName) ? updatedInByRule.get(ruleName) : addedIn;
+			const isNew = addedIn === undefined || addedIn === latestTag;
+			return [
+				ruleName,
+				{
+					addedIn,
+					isNew,
+					isUpdated: !isNew && (updatedIn === undefined || updatedIn === latestTag),
+					updatedIn,
+				},
+			];
+		}),
 	);
 }
 
 /**
  * Derives rule newness from git history. Runs one `tag --contains` call per
- * distinct add commit. Returns an empty map when no release tags exist (e.g.
- * Shallow clones)..
+ * distinct add or last-mod commit. Returns an empty map when no release tags
+ * exist (e.g. Shallow clones).
  *
  * @param run - Git command runner.
  * @returns Map of rule name to newness classification, filtered to manifest rules.
@@ -131,8 +184,12 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 		]),
 	);
 
+	const lastModuleByRule = parseLastModuleCommits(
+		run(["log", `--format=${COMMIT_MARKER}%H`, "--name-only", "--", RULE_DIRECTORY]),
+	);
+
 	const firstReleaseByCommit = new Map<string, string | undefined>();
-	const commitSet = new Set(addedInByRule.values());
+	const commitSet = new Set([...addedInByRule.values(), ...lastModuleByRule.values()]);
 	for (const commit of commitSet) {
 		firstReleaseByCommit.set(
 			commit,
@@ -145,11 +202,20 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 		addedInWithRelease.set(ruleName, firstReleaseByCommit.get(commit));
 	}
 
-	const newness = new Map(resolveNewness(addedInWithRelease, latestTag));
+	const updatedInWithRelease = new Map<string, string | undefined>();
+	for (const [ruleName, commit] of lastModuleByRule) {
+		updatedInWithRelease.set(ruleName, firstReleaseByCommit.get(commit));
+	}
+
+	const newness = new Map(resolveNewness(addedInWithRelease, updatedInWithRelease, latestTag));
 	const manifestRules = new Set(
 		ruleManifest.categories.flatMap((category) => category.rules.map((entry) => entry.name)),
 	);
-	for (const ruleName of newness.keys()) if (!manifestRules.has(ruleName)) newness.delete(ruleName);
+
+	for (const ruleName of newness.keys()) {
+		if (!manifestRules.has(ruleName)) newness.delete(ruleName);
+	}
+
 	return newness;
 }
 
@@ -179,7 +245,7 @@ export function getRuleNewnessWith(run: GitRunner): ReadonlyMap<string, RuleNewn
 		try {
 			cachedNewness = createRuleNewness(run);
 		} catch {
-			console.warn("[rule-newness] git history unavailable; New badges disabled");
+			console.warn("[rule-newness] git history unavailable; New and Updated badges disabled");
 			cachedNewness = new Map();
 		}
 	}

@@ -298,6 +298,7 @@ describe("rule-testers fixes and suggestions", () => {
 describe("rule-testers configuration validation", () => {
 	it("should reject legacy parser configuration", () => {
 		expect.assertions(1);
+
 		const legacyLanguageOptionsKey = ["language", "Options"].join("");
 		const legacyParserKey = ["pars", "er"].join("");
 		const parserCase = {
@@ -316,6 +317,7 @@ describe("rule-testers configuration validation", () => {
 
 	it("should reject non-JSON options", () => {
 		expect.assertions(1);
+
 		expect(() => {
 			js.run("reject-non-json-options", reportProgramRule, {
 				invalid: [

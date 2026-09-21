@@ -8,8 +8,8 @@ import type { ChangeEvent, ReactNode, SyntheticEvent } from "react";
 import type { RuleIndexCategory } from "./rule-index-data";
 
 export interface RuleIndexProperties {
-	readonly categories: ReadonlyArray<RuleIndexCategory>;
-	readonly mode: "catalog" | "category";
+	categories: ReadonlyArray<RuleIndexCategory>;
+	mode: "catalog" | "category";
 }
 
 const EMPTY_STATE = (
@@ -18,7 +18,7 @@ const EMPTY_STATE = (
 	</p>
 );
 
-export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactNode {
+export function RuleIndex({ categories, mode }: Readonly<RuleIndexProperties>): ReactNode {
 	const [query, setQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("");
 	const rules = categories.flatMap((category) => category.rules);
@@ -62,7 +62,7 @@ export function RuleIndex({ categories, mode }: RuleIndexProperties): ReactNode 
 
 			<div className="rule-index-grid">
 				{visibleRules.map((rule) => (
-					<RuleIndexCard key={rule.path} rule={rule} />
+					<RuleIndexCard key={rule.path} rule={rule} showCategory={mode === "catalog"} />
 				))}
 			</div>
 

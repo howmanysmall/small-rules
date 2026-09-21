@@ -101,6 +101,26 @@ const rules: OxlintRules = {
 	],
 	"import/prefer-default-export": "off",
 	"init-declarations": "off",
+	"jsdoc-js/convert-to-jsdoc-comments": [
+		"warn",
+		{
+			allowedPrefixes: [
+				"@ts-",
+				"istanbul ",
+				"c8 ",
+				"v8 ",
+				"eslint",
+				"jshint",
+				"jslint",
+				"globals",
+				"exported",
+				"jscs",
+				"oxlint-",
+				"prettier-",
+				"biome-ignore ",
+			],
+		},
+	],
 	"jsdoc/check-tag-names": [
 		"error",
 		{
@@ -204,14 +224,7 @@ const rules: OxlintRules = {
 	],
 	"small-rules/no-array-constructor-index-assignment": "error",
 	"small-rules/no-array-size-assignment": ["error", { allowAutofix: false }],
-	"small-rules/no-async-in-system": [
-		"error",
-		{
-			additionalSystemTypeNames: [],
-			callbackParameterTypes: [],
-			synchronousCallbacks: [],
-		},
-	],
+	"small-rules/no-async-in-system": "off",
 	"small-rules/no-cascading-set-state": "off",
 	"small-rules/no-chain-state-updates": "off",
 	"small-rules/no-chained-type-assertions": "error",
@@ -229,7 +242,7 @@ const rules: OxlintRules = {
 	"small-rules/no-event-handler": "off",
 	"small-rules/no-events-in-events-callback": "off",
 	"small-rules/no-external-store-subscription": "off",
-	"small-rules/no-filter-map-chain": "off",
+	"small-rules/no-filter-map-chain": "error",
 	"small-rules/no-floating-point-equality": "error",
 	"small-rules/no-giant-component": "off",
 	"small-rules/no-god-components": "off",
@@ -260,7 +273,7 @@ const rules: OxlintRules = {
 	"small-rules/no-static-react-create-element": "error",
 	"small-rules/no-table-create-map": "off",
 	"small-rules/no-task-wait": "off",
-	"small-rules/no-trivial-assertions": "off",
+	"small-rules/no-trivial-assertions": "error",
 	"small-rules/no-underscore-react-props": "off",
 	"small-rules/no-unknown-parameters": "error",
 	"small-rules/no-unknown-returns": "error",
@@ -462,7 +475,7 @@ const configuration = isentinel(
 						options: { trailingComma: "all" },
 					},
 					{
-						files: ["biome.jsonc", ".oxlintrc.json", ".fallowrc.jsonc"],
+						files: ["biome.jsonc", ".oxlintrc.json"],
 						options: { trailingComma: "none" },
 					},
 					{
@@ -595,6 +608,13 @@ const configuration = isentinel(
 		},
 		spellCheck: false,
 		stylistic: true,
+		test: {
+			vitest: {
+				extended: true,
+				files: GLOB_TESTS.filter((glob) => !glob.includes(".bench.")),
+				typecheck: true,
+			},
+		},
 		type: "package",
 	},
 	{
@@ -713,10 +733,13 @@ const configuration = isentinel(
 		files: GLOB_TESTS.filter((glob) => !glob.includes(".bench.")),
 		plugins: ["vitest"],
 		rules: {
+			"flawless/no-conditional-in-test": "off",
+			"flawless/prefer-expect-assertions-count": "off",
 			"max-lines": "off",
 			"max-lines-per-function": "off",
 			"no-console": "error",
 			"no-non-null-assertion": "off",
+			"small-rules/no-filter-map-chain": "off",
 			"small-rules/prefer-expect-assertions": [
 				"error",
 				{
@@ -834,7 +857,29 @@ const configuration = isentinel(
 			"react/jsx-max-depth": ["error", { max: 3 }],
 			"small-rules/ban-react-fc": "error",
 			"small-rules/memoized-effect-dependencies": "error",
+			"small-rules/no-adjust-state-on-prop-change": "error",
+			"small-rules/no-cascading-set-state": "error",
+			"small-rules/no-chain-state-updates": "error",
+			"small-rules/no-derived-state": "error",
+			"small-rules/no-event-handler": "error",
+			"small-rules/no-external-store-subscription": "error",
+			"small-rules/no-giant-component": "error",
+			"small-rules/no-god-components": "off",
+			"small-rules/no-initialize-state": "error",
+			"small-rules/no-inline-property-on-memo-component": "error",
+			"small-rules/no-pass-data-to-parent": "error",
+			"small-rules/no-pass-live-state-to-parent": "error",
+			"small-rules/no-render-helper-functions": "error",
+			"small-rules/no-reset-all-state-on-prop-change": "error",
 			"small-rules/no-static-react-create-element": ["error", { environment: "standard" }],
+			"small-rules/no-underscore-react-props": "error",
+			"small-rules/no-unused-use-memo": "error",
+			"small-rules/no-use-memo-simple-expression": "error",
+			"small-rules/no-useless-default": "error",
+			"small-rules/no-useless-use-effect": "error",
+			"small-rules/no-useless-use-memo": "error",
+			"small-rules/prefer-constant-dispatch": "error",
+			"small-rules/prefer-direct-hook-imports": "error",
 			"small-rules/prefer-hoisted-jsx-elements": [
 				"error",
 				{
@@ -844,6 +889,8 @@ const configuration = isentinel(
 				},
 			],
 			"small-rules/prefer-hoisted-jsx-object-properties": "error",
+			"small-rules/prefer-use-reducer": "error",
+			"small-rules/react-hooks-strict-return": "error",
 			"small-rules/require-named-effect-functions": [
 				"error",
 				{
@@ -856,6 +903,9 @@ const configuration = isentinel(
 				},
 			],
 			"small-rules/require-react-display-names": ["error", { environment: "standard" }],
+			"small-rules/rerender-memo-with-default-value": "error",
+			"small-rules/use-exhaustive-dependencies": "error",
+			"small-rules/use-hook-at-top-level": "error",
 		},
 	},
 	{
