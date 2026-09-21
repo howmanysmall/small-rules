@@ -68,10 +68,8 @@ mise-install = "mise install"
 
 [[pre-start]]
 deps = "mise exec -- nci"
+allow = "mise exec -- direnv allow"
 copy = "wt step copy-ignored"
 
-[[post-start]]
-allow = "mise exec -- direnv allow"
-
 [step.copy-ignored]
-exclude = ["node_modules/"]
+exclude = ["node_modules/", ".cache/", "coverage/", "dist/"]
