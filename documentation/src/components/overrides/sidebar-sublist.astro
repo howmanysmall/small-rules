@@ -1,6 +1,6 @@
 ---
-import InlineMarkdownText from "$components/inline-markdown-text.astro";
-import { Badge, Icon } from "@astrojs/starlight/components";
+import SidebarEntryLabel from "$components/overrides/sidebar-entry-label.astro";
+import { Icon } from "@astrojs/starlight/components";
 import SidebarRestorePoint from "@astrojs/starlight/components/SidebarRestorePoint.astro";
 
 import type { StarlightRouteData } from "@astrojs/starlight/route-data";
@@ -29,23 +29,13 @@ function containsCurrent(entries: ReadonlyArray<SidebarEntry>): boolean {
 				class:list={[{ large: !nested }, entry.attrs.class]}
 				{...entry.attrs}
 			>
-				<span>
-					<InlineMarkdownText text={entry.label} />
-				</span>
-				{entry.badge && (
-					<Badge class={entry.badge.class} text={entry.badge.text} variant={entry.badge.variant} />
-				)}
+				<SidebarEntryLabel badge={entry.badge} label={entry.label} />
 			</a>
 		) : (
 			<details open={containsCurrent(entry.entries) || !entry.collapsed}>
 				<summary>
 					<span class="group-label">
-						<span class="large">
-							<InlineMarkdownText text={entry.label} />
-						</span>
-						{entry.badge && (
-							<Badge class={entry.badge.class} text={entry.badge.text} variant={entry.badge.variant} />
-						)}
+						<SidebarEntryLabel badge={entry.badge} label={entry.label} large={true} />
 					</span>
 					<Icon class="caret" name="right-caret" size="1.25rem" />
 				</summary>

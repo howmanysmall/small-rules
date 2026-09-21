@@ -11,6 +11,56 @@ export interface RuleIndexCardProperties {
 	showCategory?: boolean | undefined;
 }
 
+interface RuleTrait {
+	readonly className: string;
+	readonly label: string;
+	readonly title?: string | undefined;
+}
+
+function getRuleTypeTrait(type: RuleIndexRule["type"]): RuleTrait {
+	return {
+		className: `rule-index-card-trait rule-index-card-trait-${type}`,
+		label: type === "problem" ? "Problem" : "Suggestion",
+	};
+}
+
+function getRuleFreshnessTrait(rule: RuleIndexRule): RuleTrait | undefined {
+	if (rule.isNew === true) {
+		return {
+			className: "rule-index-card-trait rule-index-card-trait-new",
+			label: "New",
+			title: rule.addedIn === undefined ? "Not yet in a release" : `Added in ${rule.addedIn}`,
+		};
+	}
+
+	if (rule.isUpdated === true) {
+		return {
+			className: "rule-index-card-trait rule-index-card-trait-updated",
+			label: "Updated",
+			title:
+				rule.updatedIn === undefined
+					? "Recently updated, not yet in a release"
+					: `Updated in ${rule.updatedIn}`,
+		};
+	}
+
+	return undefined;
+}
+
+function getRuleFixabilityTrait(rule: RuleIndexRule): RuleTrait | undefined {
+	if (rule.fixability === undefined) return undefined;
+	return { className: "rule-index-card-trait rule-index-card-trait-fixable", label: rule.fixability };
+}
+
+function getRuleTraits(rule: RuleIndexRule): ReadonlyArray<RuleTrait> {
+	const traits = [getRuleTypeTrait(rule.type)];
+	const freshness = getRuleFreshnessTrait(rule);
+	const fixability = getRuleFixabilityTrait(rule);
+	if (freshness !== undefined) traits.push(freshness);
+	if (fixability !== undefined) traits.push(fixability);
+	return traits;
+}
+
 export function RuleIndexCard({ rule, showCategory }: Readonly<RuleIndexCardProperties>): ReactNode {
 	return (
 		<a
@@ -26,34 +76,11 @@ export function RuleIndexCard({ rule, showCategory }: Readonly<RuleIndexCardProp
 			<code>{rule.name}</code>
 			<p>{rule.description}</p>
 			<ul aria-label="Rule characteristics">
-				<li
-					className={`rule-index-card-trait rule-index-card-trait-${rule.type === "problem" ? "problem" : "suggestion"}`}
-				>
-					{rule.type === "problem" ? "Problem" : "Suggestion"}
-				</li>
-				{rule.isNew === true && (
-					<li
-						className="rule-index-card-trait rule-index-card-trait-new"
-						title={rule.addedIn === undefined ? "Not yet in a release" : `Added in ${rule.addedIn}`}
-					>
-						{"New"}
+				{getRuleTraits(rule).map((trait) => (
+					<li key={trait.className} className={trait.className} title={trait.title}>
+						{trait.label}
 					</li>
-				)}
-				{rule.isNew !== true && rule.isUpdated === true && (
-					<li
-						className="rule-index-card-trait rule-index-card-trait-updated"
-						title={
-							rule.updatedIn === undefined
-								? "Recently updated, not yet in a release"
-								: `Updated in ${rule.updatedIn}`
-						}
-					>
-						{"Updated"}
-					</li>
-				)}
-				{rule.fixability === undefined ? undefined : (
-					<li className="rule-index-card-trait rule-index-card-trait-fixable">{rule.fixability}</li>
-				)}
+				))}
 			</ul>
 		</a>
 	);

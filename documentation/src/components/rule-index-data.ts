@@ -33,35 +33,41 @@ export function createRuleIndexCategories(
 	return Array.from(categories, (category): RuleIndexCategory => ({
 		key: category.key,
 		label: category.label,
-		rules: category.rules.map((rule) => {
-			const fixability = getFixability(rule);
-			const ruleNewness = newness.get(rule.name);
-			const isNew = ruleNewness?.isNew === true;
-			const isUpdated = !isNew && ruleNewness?.isUpdated === true;
-			const ruleDetails = {
-				name: rule.name,
-				category: rule.category,
-				categoryLabel: rule.categoryLabel,
-				description: rule.description,
-				path: rule.path,
-				title: rule.title,
-				type: rule.type,
-			};
-
-			if (fixability === undefined && !isNew && !isUpdated) return ruleDetails;
-
-			const newRule: Writable<Rule> = { ...ruleDetails };
-			if (fixability !== undefined) newRule.fixability = fixability;
-			if (isNew) {
-				newRule.addedIn = ruleNewness.addedIn;
-				newRule.isNew = true;
-			} else if (isUpdated) {
-				newRule.isUpdated = true;
-				newRule.updatedIn = ruleNewness.updatedIn;
-			}
-			return newRule;
-		}),
+		rules: category.rules.map((rule) => createRuleIndexRule(rule, newness.get(rule.name))),
 	}));
+}
+
+function createRuleIndexRule(rule: RuleFactCategory["rules"][number], newness: RuleNewness | undefined): Rule {
+	const newRule: Writable<Rule> = {
+		name: rule.name,
+		category: rule.category,
+		categoryLabel: rule.categoryLabel,
+		description: rule.description,
+		path: rule.path,
+		title: rule.title,
+		type: rule.type,
+	};
+
+	addFixability(newRule, getFixability(rule));
+	addFreshness(newRule, newness);
+	return newRule;
+}
+
+function addFixability(rule: Writable<Rule>, fixability: string | undefined): void {
+	if (fixability !== undefined) rule.fixability = fixability;
+}
+
+function addFreshness(rule: Writable<Rule>, newness: RuleNewness | undefined): void {
+	if (newness?.isNew === true) {
+		rule.addedIn = newness.addedIn;
+		rule.isNew = true;
+		return;
+	}
+
+	if (newness?.isUpdated === true) {
+		rule.isUpdated = true;
+		rule.updatedIn = newness.updatedIn;
+	}
 }
 
 function getFixability(rule: RuleFactCategory["rules"][number]): string | undefined {
