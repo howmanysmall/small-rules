@@ -1,0 +1,19 @@
+---
+title: "Prefer Membership Filter In Jecs"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="prefer-membership-filter-in-jecs">
+	<Fragment slot="rationale">
+		<p>
+			`query()` returns component values in argument order. When a loop does not consume one of those values,
+			putting the component in `with()` makes its membership-only role explicit. This is a clarity rule, not a
+			generated-code performance claim.
+		</p>
+		<p>
+			The rule handles direct query chains only. It leaves stored queries and rest bindings alone, and it
+			withholds a fix when moving a component expression could change evaluation order or side effects.
+		</p>
+	</Fragment>
+</RulePage>

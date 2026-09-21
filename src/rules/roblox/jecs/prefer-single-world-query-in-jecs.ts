@@ -16,7 +16,7 @@ import type { UnknownRecord } from "type-fest";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 type QueryType = "get" | "has";
-type Context = InferContextFromRule<typeof preferSingleWorldQuery>;
+type Context = InferContextFromRule<typeof preferSingleWorldQueryInJecs>;
 
 interface WorldQueryCall {
 	readonly componentNode: ESTree.Expression;
@@ -254,7 +254,7 @@ function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	reportCombinedQuery(calls, context, fixedCode, "preferSingleHas", firstCall);
 }
 
-const preferSingleWorldQuery = createRule("prefer-single-world-query", "roblox", {
+const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-jecs", "roblox/jecs", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		let currentGetBuffer = new Array<WorldQueryCall>();
@@ -320,4 +320,4 @@ const preferSingleWorldQuery = createRule("prefer-single-world-query", "roblox",
 	},
 });
 
-export default preferSingleWorldQuery;
+export default preferSingleWorldQueryInJecs;

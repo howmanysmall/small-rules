@@ -22,11 +22,12 @@ const BROWSE_RULES = (
 );
 
 export function CategoryCard({ category, count, description, label }: Readonly<CategoryCardProperties>): ReactNode {
+	const icon = category === "roblox/jecs" ? "roblox" : category;
 	return (
 		<a className="category-card" data-category={category} href={`${siteBasePath}rules/${category}/`}>
 			{CARD_GLOW}
 			<div className="category-card-icon">
-				<Icon name={category} size={22} />
+				<Icon name={icon} size={22} />
 			</div>
 			<div className="category-card-body">
 				<div className="category-card-head">

@@ -1,0 +1,19 @@
+---
+title: "No Discarded Rejection"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-discarded-rejection">
+	<Fragment slot="rationale">
+		<p>
+			An empty rejection handler turns a failed Promise into a successful Promise whose value is `undefined`. That
+			hides the failure without recording it or providing a fallback.
+		</p>
+		<p>
+			The rule warns on the explicit no-op forms and never inserts a rethrow. It only follows Promises whose
+			native origin is visible through syntax and scope analysis. If suppression is intentional, use an
+			`oxlint-disable` directive with a reason.
+		</p>
+	</Fragment>
+</RulePage>

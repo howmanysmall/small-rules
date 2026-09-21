@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-const DOCS_URL_PATTERN = /^https:\/\/docs\.howmanysmall\.com\/small-rules\/rules\/[a-z-]+\/[a-z0-9-]+\/$/u;
+const DOCS_URL_PATTERN =
+	/^https:\/\/docs\.howmanysmall\.com\/small-rules\/rules\/[a-z-]+(?:\/[a-z-]+)?\/[a-z0-9-]+\/$/u;
 const KEBAB_CASE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u;
 
 interface RuleLike {

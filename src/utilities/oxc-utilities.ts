@@ -589,8 +589,8 @@ export function isTsParameterProperty(node: ESTree.Node): node is ESTree.TSParam
 
 type RestElement = ESTree.AssignmentTargetRest | ESTree.BindingRestElement | ESTree.FormalParameterRest;
 
-export function isRestElement(node: ESTree.Node): node is RestElement {
-	return node.type === REST_ELEMENT;
+export function isRestElement(node?: ESTree.Node | null): node is RestElement {
+	return node?.type === REST_ELEMENT;
 }
 
 export function isArrayPattern(node?: ESTree.Node | null): node is ESTree.ArrayPattern {
