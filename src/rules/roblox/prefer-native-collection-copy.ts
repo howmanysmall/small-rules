@@ -16,6 +16,7 @@ import {
 	isIdentifierNamed,
 	isMemberExpression,
 	isNewExpression,
+	isSpreadElement,
 	isVariableDeclaration,
 } from "$oxc-utilities/oxc-utilities";
 
@@ -38,10 +39,15 @@ function getEmptyCollectionDeclaration(
 ): EmptyCollectionDeclaration | undefined {
 	if (!isVariableDeclaration(statement) || statement.declarations.length !== 1) return undefined;
 	const [declarator] = statement.declarations;
-	if (declarator === undefined || !isIdentifierName(declarator.id) || !isNewExpression(declarator.init)) {
+	if (
+		declarator === undefined ||
+		!isIdentifierName(declarator.id) ||
+		!isNewExpression(declarator.init) ||
+		declarator.init.arguments.length > 0
+	) {
 		return undefined;
 	}
-	if (declarator.init.arguments.length > 0) return undefined;
+
 	const kind = getNativeCollectionKind(sourceCode, declarator.init);
 	return kind === undefined
 		? undefined
@@ -77,23 +83,33 @@ function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.Varia
 	if (call.arguments.length !== 2 || !isArrayPattern(loopDeclarator.id) || loopDeclarator.id.elements.length !== 2) {
 		return false;
 	}
+
 	const [keyBinding, valueBinding] = loopDeclarator.id.elements;
 	const [keyArgument, valueArgument] = call.arguments;
 	if (keyBinding === null || valueBinding === null || keyArgument === undefined || valueArgument === undefined) {
 		return false;
 	}
-	if (!isIdentifierName(keyBinding) || !isIdentifierName(valueBinding)) return false;
-	if (keyArgument.type === "SpreadElement" || valueArgument.type === "SpreadElement") return false;
+
+	if (
+		!isIdentifierName(keyBinding) ||
+		!isIdentifierName(valueBinding) ||
+		isSpreadElement(keyArgument) ||
+		isSpreadElement(valueArgument)
+	) {
+		return false;
+	}
+
 	return isIdentifierNamed(keyArgument, keyBinding.name) && isIdentifierNamed(valueArgument, valueBinding.name);
 }
 
 function isSetCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
 	if (!isMemberExpression(call.callee) || !isIdentifierNamed(call.callee.property, "add")) return false;
 	if (call.arguments.length !== 1 || !isIdentifierName(loopDeclarator.id)) return false;
+
 	const [valueArgument] = call.arguments;
 	/* v8 ignore next -- the length check proves the element exists. @preserve */
 	if (valueArgument === undefined) return false;
-	return valueArgument.type !== "SpreadElement" && isIdentifierNamed(valueArgument, loopDeclarator.id.name);
+	return !isSpreadElement(valueArgument) && isIdentifierNamed(valueArgument, loopDeclarator.id.name);
 }
 
 function isMatchingCopyLoop(
@@ -115,14 +131,20 @@ function isMatchingCopyLoop(
 	return destination.kind === "Map" ? isMapCopyCall(call, loopDeclarator) : isSetCopyCall(call, loopDeclarator);
 }
 
+interface CopyCandidate {
+	readonly declaration: EmptyCollectionDeclaration;
+	readonly loop: ESTree.ForOfStatement;
+}
+
 function getCopyCandidate(
 	statements: ReadonlyArray<ProgramStatement>,
 	index: number,
 	sourceCode: SourceCode,
-): undefined | { readonly declaration: EmptyCollectionDeclaration; readonly loop: ESTree.ForOfStatement } {
+): CopyCandidate | undefined {
 	const current = statements[index];
 	const next = statements[index + 1];
 	if (current === undefined || next === undefined || !isForOfStatement(next)) return undefined;
+
 	const declaration = getEmptyCollectionDeclaration(current, sourceCode);
 	if (declaration === undefined || !isMatchingCopyLoop(next, declaration, sourceCode)) return undefined;
 	return { declaration, loop: next };
@@ -164,13 +186,13 @@ const preferNativeCollectionCopy = createRule("prefer-native-collection-copy", "
 			}
 		}
 
+		function onStatement(node: ESTree.BlockStatement | ESTree.Program): void {
+			inspectStatements(node.body);
+		}
+
 		return {
-			BlockStatement(node): void {
-				inspectStatements(node.body);
-			},
-			Program(node): void {
-				inspectStatements(node.body);
-			},
+			BlockStatement: onStatement,
+			Program: onStatement,
 		} satisfies Visitor;
 	},
 	meta: {

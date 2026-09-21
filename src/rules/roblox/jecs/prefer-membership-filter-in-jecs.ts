@@ -2,11 +2,13 @@ import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	isAnyLiteral,
 	isArrayPattern,
 	isCallExpression,
 	isIdentifierName,
 	isMemberExpression,
 	isRestElement,
+	isSpreadElement,
 	isVariableDeclaration,
 } from "$oxc-utilities/oxc-utilities";
 
@@ -48,11 +50,13 @@ function getDirectQueryChain(sourceCode: SourceCode, expression: ESTree.Expressi
 	while (true) {
 		const matched = getStaticMethodCall(current);
 		if (matched === undefined) return undefined;
+
 		if (matched.method === "query") {
 			return isJecsWorldExpression(sourceCode, matched.object)
 				? { queryCall: matched.call, withCall }
 				: undefined;
 		}
+
 		if (matched.method !== "with" && matched.method !== "without") return undefined;
 		if (matched.method === "with") withCall ??= matched.call;
 		current = matched.object;
@@ -60,7 +64,7 @@ function getDirectQueryChain(sourceCode: SourceCode, expression: ESTree.Expressi
 }
 
 function isSafeToMove(expression: ESTree.Expression): boolean {
-	return isIdentifierName(expression) || expression.type === "Literal";
+	return isIdentifierName(expression) || isAnyLiteral(expression);
 }
 
 function getBindingVariables(
@@ -72,10 +76,12 @@ function getBindingVariables(
 	const scope = sourceCode.getScope(node.body);
 	for (const element of pattern.elements) {
 		if (element === null || !isIdentifierName(element)) continue;
+
 		const variable = getVariableByName(scope, element.name);
 		/* v8 ignore next -- each identifier in the loop binding declares a scoped variable. @preserve */
 		if (variable !== undefined) variables.set(element.name, variable);
 	}
+
 	return variables;
 }
 
@@ -85,6 +91,7 @@ function isUnusedBinding(
 ): boolean {
 	if (element === undefined) return true;
 	if (!isIdentifierName(element)) return false;
+
 	/* v8 ignore next -- loop binding identifiers are present in the collected variable map. @preserve */
 	return variables.get(element.name)?.references.every((reference) => reference.isWrite()) ?? false;
 }
@@ -96,20 +103,24 @@ function collectBindings(
 ): Pick<MembershipCandidate, "movedArguments" | "retainedArguments" | "retainedElements"> | undefined {
 	const [entityElement] = pattern.elements;
 	if (entityElement === null || entityElement === undefined || !isIdentifierName(entityElement)) return undefined;
+
 	const retainedArguments = new Array<ESTree.Expression>();
 	const movedArguments = new Array<ESTree.Expression>();
 	const retainedElements: Array<ESTree.BindingPattern> = [entityElement];
+
 	for (let index = 0; index < chain.queryCall.arguments.length; index += 1) {
 		const argument = chain.queryCall.arguments[index];
 		/* v8 ignore next -- array iteration indices always address an existing element. @preserve */
-		if (argument === undefined || argument.type === "SpreadElement") return undefined;
+		if (argument === undefined || isSpreadElement(argument)) return undefined;
 		const binding = pattern.elements[index + 1] ?? undefined;
 		/* v8 ignore next -- outer candidate validation already rejects rest bindings. @preserve */
 		if (binding !== undefined && isRestElement(binding)) return undefined;
+
 		if (isUnusedBinding(binding, variables)) {
 			movedArguments.push(argument);
 			continue;
 		}
+
 		/* v8 ignore next -- an absent binding is classified as unused above. @preserve */
 		if (binding === undefined) return undefined;
 		retainedArguments.push(argument);
@@ -120,15 +131,21 @@ function collectBindings(
 
 function getCandidate(sourceCode: SourceCode, node: ESTree.ForOfStatement): MembershipCandidate | undefined {
 	if (!isVariableDeclaration(node.left) || node.left.declarations.length !== 1) return undefined;
+
 	const [declarator] = node.left.declarations;
 	if (declarator === undefined || !isArrayPattern(declarator.id)) return undefined;
+
 	const pattern = declarator.id;
-	if (pattern.elements.some((element) => element !== null && isRestElement(element))) return undefined;
+	if (pattern.elements.some(isRestElement)) return undefined;
+
 	const chain = getDirectQueryChain(sourceCode, node.right);
 	if (chain === undefined || chain.queryCall.arguments.length < 2) return undefined;
+
 	const collected = collectBindings(pattern, chain, getBindingVariables(sourceCode, node, pattern));
-	if (collected === undefined) return undefined;
-	if (collected.movedArguments.length === 0 || collected.retainedArguments.length === 0) return undefined;
+	if (collected === undefined || collected.movedArguments.length === 0 || collected.retainedArguments.length === 0) {
+		return undefined;
+	}
+
 	const [firstQueryArgument] = chain.queryCall.arguments;
 	const lastQueryArgument = chain.queryCall.arguments.at(-1);
 	/* v8 ignore next -- query candidates require at least two arguments. @preserve */
@@ -136,32 +153,35 @@ function getCandidate(sourceCode: SourceCode, node: ESTree.ForOfStatement): Memb
 	return { chain, firstQueryArgument, lastQueryArgument, pattern, ...collected };
 }
 
-function argumentText(sourceCode: SourceCode, arguments_: ReadonlyArray<ESTree.Expression>): string {
-	return arguments_.map((argument) => sourceCode.getText(argument)).join(", ");
+function getArgumentText(getText: SourceCode["getText"], parameters: ReadonlyArray<ESTree.Expression>): string {
+	return parameters.map((argument) => getText(argument)).join(", ");
 }
 
-function createFixes(candidate: MembershipCandidate, sourceCode: SourceCode, fixer: Fixer): Array<Fix> {
+function createFixes(candidate: MembershipCandidate, { getText }: SourceCode, fixer: Fixer): Array<Fix> {
 	const fixes = [
 		fixer.replaceText(
 			candidate.pattern,
-			`[${candidate.retainedElements.map((element) => sourceCode.getText(element)).join(", ")}]`,
+			`[${candidate.retainedElements.map((element) => getText(element)).join(", ")}]`,
 		),
 		fixer.replaceTextRange(
 			[candidate.firstQueryArgument.range[0], candidate.lastQueryArgument.range[1]],
-			argumentText(sourceCode, candidate.retainedArguments),
+			getArgumentText(getText, candidate.retainedArguments),
 		),
 	];
-	const movedText = argumentText(sourceCode, candidate.movedArguments);
+
+	const movedText = getArgumentText(getText, candidate.movedArguments);
 	const { chain } = candidate;
-	if (chain.withCall === undefined) fixes.push(fixer.insertTextAfter(chain.queryCall, `.with(${movedText})`));
+	if (chain.withCall === undefined) fixes[2] = fixer.insertTextAfter(chain.queryCall, `.with(${movedText})`);
 	else {
 		const [firstWithArgument] = chain.withCall.arguments;
 		if (firstWithArgument === undefined) {
-			fixes.push(
-				fixer.replaceTextRange([chain.withCall.callee.range[1], chain.withCall.range[1]], `(${movedText})`),
+			fixes[2] = fixer.replaceTextRange(
+				[chain.withCall.callee.range[1], chain.withCall.range[1]],
+				`(${movedText})`,
 			);
-		} else fixes.push(fixer.insertTextBefore(firstWithArgument, `${movedText}, `));
+		} else fixes[2] = fixer.insertTextBefore(firstWithArgument, `${movedText}, `);
 	}
+
 	return fixes;
 }
 
@@ -172,6 +192,7 @@ const preferMembershipFilterInJecs = createRule("prefer-membership-filter-in-jec
 			ForOfStatement(node): void {
 				const candidate = getCandidate(sourceCode, node);
 				if (candidate === undefined) return;
+
 				if (candidate.movedArguments.every(isSafeToMove)) {
 					context.report({
 						fix: (fixer) => createFixes(candidate, sourceCode, fixer),

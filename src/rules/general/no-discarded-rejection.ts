@@ -32,16 +32,19 @@ function isUndefinedExpression(sourceCode: SourceCode, expression: ESTree.Expres
 }
 
 function isDiscardingHandler(sourceCode: SourceCode, handler: ESTree.Expression): boolean {
-	if (!isCallbackFunction(handler)) return false;
-	if (handler.params.some((parameter) => !isIdentifierName(parameter))) return false;
+	if (!isCallbackFunction(handler) || handler.params.some((parameter) => !isIdentifierName(parameter))) return false;
+
 	const { body } = handler;
 	/* v8 ignore next -- callback expressions always have a body. @preserve */
 	if (body === null) return false;
+
 	if (!isBlockStatement(body)) return isUndefinedExpression(sourceCode, body);
 	if (body.body.length === 0) return true;
 	if (body.body.length !== 1) return false;
+
 	const [statement] = body.body;
 	if (!isReturnStatement(statement)) return false;
+
 	return statement.argument === null || isUndefinedExpression(sourceCode, statement.argument);
 }
 
