@@ -31,6 +31,7 @@ shfmt = "latest"
 tombi = "latest"
 vale = "latest"
 zizmor = "latest"
+direnv = "latest"
 
 [tasks]
 backtickify = '''
