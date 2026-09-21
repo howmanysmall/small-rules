@@ -5,6 +5,7 @@
 	"dependencies": {
 		"@cliffy/command": "catalog:scripts",
 		"@octokit/rest": "catalog:scripts",
+		"@openrouter/sdk": "catalog:scripts",
 		"@small-rules/arktype-utilities": "workspace:*",
 		"@small-rules/fs-utilities": "workspace:*",
 		"@std/msgpack": "catalog:scripts",
