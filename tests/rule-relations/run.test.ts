@@ -296,13 +296,23 @@ describe("createAllRulePairs", () => {
 });
 
 describe("readGeneratedEdges", () => {
-	it("reads the committed relation document", () => {
-		expect.assertions(2);
+	it("reads relation identities and reasons from a document", () => {
+		expect.assertions(1);
 
-		const edges = readGeneratedEdges("documentation/src/data/generated/rule-relations.json");
+		const directory = mkdtempSync(nodePath.join(tmpdir(), "rule-relations-edges-"));
+		onTestFinished(() => {
+			rmSync(directory, { force: true, recursive: true });
+		});
+		const filePath = nodePath.join(directory, "relations.json");
+		writeFileSync(
+			filePath,
+			'{"edges":[{"from":"no-print","kind":"related","reason":"Structured logging.","to":"no-warn"}]}',
+			"utf8",
+		);
 
-		expect(edges.length).toBeGreaterThan(0);
-		expect(edges).toContainEqual(expect.objectContaining({ from: "no-print", to: "no-warn" }));
+		expect(readGeneratedEdges(filePath)).toStrictEqual([
+			{ from: "no-print", kind: "related", reason: "Structured logging.", to: "no-warn" },
+		]);
 	});
 
 	it("rejects documents with malformed edges", () => {

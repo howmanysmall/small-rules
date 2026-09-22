@@ -2,13 +2,12 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { RelatedRules } from "$components/related-rules";
+import { RelationReason } from "$components/relation-reason";
 import { RuleCategoryPage } from "$components/rule-category-page";
 import { RuleSummary } from "$components/rule-summary";
 
 const categorySummaryPattern = /Browse all \d+ rules in this category\./u;
 const directiveDisableEnablePairNamePattern = /Directive Disable Enable Pair/u;
-const directiveNoRestrictedDisableNamePattern = /Directive No Restricted Disable/u;
-const directiveNoUnlimitedDisableNamePattern = /Directive No Unlimited Disable/u;
 const directiveNoUseNamePattern = /Directive No Use/u;
 const noWarnNamePattern = /No Warn/u;
 const preferConstantDispatchNamePattern = /Prefer Constant Dispatch/u;
@@ -36,10 +35,9 @@ describe("related-rules", () => {
 	it("renders backticked identifiers in relation reasons as inline code", () => {
 		expect.assertions(3);
 
-		render(<RelatedRules rule="directive-no-use" />);
-
-		const section = screen.getByRole("region", { name: "Related Rules" });
-		const link = within(section).getByRole("link", { name: directiveNoUnlimitedDisableNamePattern });
+		const { container: link } = render(
+			<RelationReason reason="`directive-no-use` supersedes `directive-no-unlimited-disable`." />,
+		);
 
 		expect(link.textContent).not.toContain("`");
 		expect(within(link).getByText("directive-no-use", { selector: "code" })).toBeInstanceOf(HTMLElement);
@@ -51,10 +49,9 @@ describe("related-rules", () => {
 	it("highlights bare rule ids in relation reasons as inline code", () => {
 		expect.assertions(3);
 
-		render(<RelatedRules rule="directive-no-use" />);
-
-		const section = screen.getByRole("region", { name: "Related Rules" });
-		const link = within(section).getByRole("link", { name: directiveNoRestrictedDisableNamePattern });
+		const { container: link } = render(
+			<RelationReason reason="directive-no-use supersedes directive-no-restricted-disable." />,
+		);
 
 		expect(link.textContent).not.toContain("`");
 		expect(within(link).getByText("directive-no-restricted-disable", { selector: "code" })).toBeInstanceOf(
