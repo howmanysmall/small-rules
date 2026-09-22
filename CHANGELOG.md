@@ -46,6 +46,17 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.1.0] - 2026-09-22
+
+## Added
+- Added `no-discarded-rejection`, `no-has-before-remove-in-jecs`, `prefer-membership-filter-in-jecs`, and `prefer-native-collection-copy`, plus the renamed `prefer-single-world-query-in-jecs` rule ([#66](https://github.com/howmanysmall/small-rules/pull/66)).
+
+## Fixed
+- Updated `require-safety-comment-for-type-assertion` for `oxlint-tsgolint` 7.0.2002 assertion diagnostic ranges ([#64](https://github.com/howmanysmall/small-rules/pull/64)).
+
+## Breaking Changes
+- Renamed `prefer-single-world-query` to `prefer-single-world-query-in-jecs`; update rule configuration references ([#66](https://github.com/howmanysmall/small-rules/pull/66)).
+
 ## [3.0.2] - 2026-09-17
 
 ## 🐞 Fixed
