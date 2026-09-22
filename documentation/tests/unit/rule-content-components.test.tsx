@@ -7,6 +7,8 @@ import { RuleSummary } from "$components/rule-summary";
 
 const categorySummaryPattern = /Browse all \d+ rules in this category\./u;
 const directiveDisableEnablePairNamePattern = /Directive Disable Enable Pair/u;
+const directiveNoRestrictedDisableNamePattern = /Directive No Restricted Disable/u;
+const directiveNoUnlimitedDisableNamePattern = /Directive No Unlimited Disable/u;
 const directiveNoUseNamePattern = /Directive No Use/u;
 const noWarnNamePattern = /No Warn/u;
 const preferConstantDispatchNamePattern = /Prefer Constant Dispatch/u;
@@ -29,6 +31,36 @@ describe("related-rules", () => {
 				"Same banned-global factory: raw print/warn output should become structured Log calls.",
 			),
 		).toBeInstanceOf(HTMLElement);
+	});
+
+	it("renders backticked identifiers in relation reasons as inline code", () => {
+		expect.assertions(3);
+
+		render(<RelatedRules rule="directive-no-use" />);
+
+		const section = screen.getByRole("region", { name: "Related Rules" });
+		const link = within(section).getByRole("link", { name: directiveNoUnlimitedDisableNamePattern });
+
+		expect(link.textContent).not.toContain("`");
+		expect(within(link).getByText("directive-no-use", { selector: "code" })).toBeInstanceOf(HTMLElement);
+		expect(within(link).getByText("directive-no-unlimited-disable", { selector: "code" })).toBeInstanceOf(
+			HTMLElement,
+		);
+	});
+
+	it("highlights bare rule ids in relation reasons as inline code", () => {
+		expect.assertions(3);
+
+		render(<RelatedRules rule="directive-no-use" />);
+
+		const section = screen.getByRole("region", { name: "Related Rules" });
+		const link = within(section).getByRole("link", { name: directiveNoRestrictedDisableNamePattern });
+
+		expect(link.textContent).not.toContain("`");
+		expect(within(link).getByText("directive-no-restricted-disable", { selector: "code" })).toBeInstanceOf(
+			HTMLElement,
+		);
+		expect(within(link).getByText("directive-no-use", { selector: "code" })).toBeInstanceOf(HTMLElement);
 	});
 
 	it("labels supersedes relations from the superseded rule's page and leads with directed relations", () => {

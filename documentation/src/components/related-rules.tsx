@@ -2,6 +2,8 @@ import { getRuleFacts } from "$data/rule-facts";
 import { getRelatedRules, isDirectedKind } from "$data/rule-relations";
 import { siteBasePath } from "$utilities/site-base-path";
 
+import { RelationReason } from "./relation-reason";
+
 import type { ReactNode } from "react";
 
 import type { RuleFacts } from "$data/rule-facts";
@@ -9,7 +11,7 @@ import type { RuleName } from "$data/rule-manifest";
 import type { DirectedRuleRelationKind, RuleRelation, RuleRelationKind } from "$data/rule-relations";
 
 interface RelatedRulesProperties {
-	readonly rule: RuleName;
+	rule: RuleName;
 }
 
 interface RelatedRuleLinkProperties {
@@ -61,11 +63,11 @@ const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 function renderRelatedRule({ counterpart, relation, viewedFrom }: RelatedRuleLinkProperties): ReactNode {
 	return (
 		<a key={counterpart.name} className="related-rule" href={`${siteBasePath}${counterpart.path}/`}>
-			<span className="related-rule-heading">
-				<strong>{counterpart.title}</strong>
-				<span className="related-rule-kind">{formatRelationKind(relation, viewedFrom)}</span>
+			<span className="related-rule-kind">{formatRelationKind(relation, viewedFrom)}</span>
+			<strong className="related-rule-title">{counterpart.title}</strong>
+			<span className="related-rule-reason">
+				<RelationReason reason={relation.reason} />
 			</span>
-			<span>{relation.reason}</span>
 		</a>
 	);
 }
