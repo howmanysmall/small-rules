@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compactDefaultProperties } from "../../scripts/utilities/compact-default-properties";
+import { compactDefaultProperties } from "$script-utilities/compact-default-properties";
 
 const canonical = {
 	classes: {

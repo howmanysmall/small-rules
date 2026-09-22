@@ -1,12 +1,12 @@
 import { getRuleFacts } from "$data/rule-facts";
-import { getRelatedRules } from "$data/rule-relations";
+import { getRelatedRules, isDirectedKind } from "$data/rule-relations";
 import { siteBasePath } from "$utilities/site-base-path";
 
 import type { ReactNode } from "react";
 
 import type { RuleFacts } from "$data/rule-facts";
 import type { RuleName } from "$data/rule-manifest";
-import type { RuleRelation } from "$data/rule-relations";
+import type { DirectedRuleRelationKind, RuleRelation, RuleRelationKind } from "$data/rule-relations";
 
 interface RelatedRulesProperties {
 	readonly rule: RuleName;
@@ -15,28 +15,55 @@ interface RelatedRulesProperties {
 interface RelatedRuleLinkProperties {
 	counterpart: RuleFacts;
 	relation: RuleRelation;
+	viewedFrom: RuleName;
 }
 
 function getCounterpartName(relation: RuleRelation, ruleName: RuleName): RuleName {
 	return relation.from === ruleName ? relation.to : relation.from;
 }
 
-function formatRelationKind(kind: string): string {
-	return kind
-		.split("-")
-		.map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
-		.join(" ");
+const forwardRelationLabels = {
+	"depends-on": "Depends on",
+	overlaps: "Overlaps",
+	related: "Related",
+	supersedes: "Supersedes",
+} satisfies Record<RuleRelationKind, string>;
+
+const inverseRelationLabels = {
+	"depends-on": "Depended on by",
+	supersedes: "Superseded by",
+} satisfies Record<DirectedRuleRelationKind, string>;
+
+const relationKindOrder = {
+	"depends-on": 1,
+	overlaps: 2,
+	related: 3,
+	supersedes: 0,
+} satisfies Record<RuleRelationKind, number>;
+
+const collator = new Intl.Collator();
+
+function compareRelatedRules(left: RelatedRuleLinkProperties, right: RelatedRuleLinkProperties): number {
+	return (
+		relationKindOrder[left.relation.kind] - relationKindOrder[right.relation.kind] ||
+		collator.compare(left.counterpart.title, right.counterpart.title)
+	);
+}
+
+function formatRelationKind(relation: RuleRelation, viewedFrom: RuleName): string {
+	if (isDirectedKind(relation.kind) && relation.from !== viewedFrom) return inverseRelationLabels[relation.kind];
+	return forwardRelationLabels[relation.kind];
 }
 
 // biome-ignore lint/correctness/useUniqueElementIds: preserve
 const relatedRulesHeading = <h2 id="related-rules">{"Related Rules"}</h2>;
 
-function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties): ReactNode {
+function renderRelatedRule({ counterpart, relation, viewedFrom }: RelatedRuleLinkProperties): ReactNode {
 	return (
 		<a key={counterpart.name} className="related-rule" href={`${siteBasePath}${counterpart.path}/`}>
 			<span className="related-rule-heading">
 				<strong>{counterpart.title}</strong>
-				<span className="related-rule-kind">{formatRelationKind(relation.kind)}</span>
+				<span className="related-rule-kind">{formatRelationKind(relation, viewedFrom)}</span>
 			</span>
 			<span>{relation.reason}</span>
 		</a>
@@ -44,10 +71,13 @@ function renderRelatedRule({ counterpart, relation }: RelatedRuleLinkProperties)
 }
 
 export function RelatedRules({ rule }: Readonly<RelatedRulesProperties>): ReactNode {
-	const relations = getRelatedRules(rule).map((relation) => ({
-		counterpart: getRuleFacts(getCounterpartName(relation, rule)),
-		relation,
-	}));
+	const relations = getRelatedRules(rule)
+		.map((relation) => ({
+			counterpart: getRuleFacts(getCounterpartName(relation, rule)),
+			relation,
+			viewedFrom: rule,
+		}))
+		.toSorted(compareRelatedRules);
 
 	if (relations.length === 0) return undefined;
 	const relatedRuleLinks = relations.map(renderRelatedRule);

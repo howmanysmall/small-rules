@@ -5,7 +5,8 @@ import {
 	createYieldingMemberCatalog,
 	parseClasses,
 	renderCatalog,
-} from "../scripts/utilities/roblox-yielding-members";
+} from "$script-utilities/roblox-yielding-members";
+
 import { classHasYieldingMember } from "../src/generated/roblox-yielding-members";
 
 const apiDump = {

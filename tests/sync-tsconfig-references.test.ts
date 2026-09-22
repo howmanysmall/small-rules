@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import { describe, expect, it, onTestFinished } from "vitest";
 
-import { findStaleReferencesAsync, syncTsconfigReferencesAsync } from "../scripts/utilities/sync-tsconfig-references";
+import { findStaleReferencesAsync, syncTsconfigReferencesAsync } from "$script-utilities/sync-tsconfig-references";
 
 // Bugs these tests guard: the solution `tsconfig.json` silently missing a
 // workspace project (a stale `tsgo --build` graph), package tsconfigs declaring
