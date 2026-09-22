@@ -10,10 +10,29 @@ import type {
 	SendChatCompletionRequestRequest,
 } from "@openrouter/sdk/models/operations";
 
-import type { DecisionTransport, NoulAnswer, NoulQuestion, ReasonWriter } from "./types";
+import type { DecisionTransport, NoulAnswer, NoulQuestion, ReasonWriter, RelationUsage } from "./types";
 
 interface DecisionApiResponse {
 	readonly answers: unknown;
+	readonly usage?:
+		| undefined
+		| {
+				readonly cost?: number | undefined;
+				readonly inputTokens: number;
+				readonly outputTokens: number;
+		  };
+}
+
+interface ReasonApiResponse {
+	readonly choices: unknown;
+	readonly usage?:
+		| undefined
+		| {
+				readonly completionTokens: number;
+				readonly cost?: null | number | undefined;
+				readonly promptTokens: number;
+				readonly totalTokens: number;
+		  };
 }
 
 interface ReasonApiRequest extends SendChatCompletionRequestRequest {
@@ -24,7 +43,8 @@ interface ReasonApiRequest extends SendChatCompletionRequestRequest {
 }
 
 type CreateDecisionAsync = (request: CreateApiAlphaDecisionsRequest) => Promise<DecisionApiResponse>;
-type SendChatAsync<TResult> = (request: ReasonApiRequest) => Promise<TResult>;
+type SendChatAsync = (request: ReasonApiRequest) => Promise<ReasonApiResponse>;
+type OnUsage = (usage: RelationUsage) => void;
 
 const isNoulAnswersResponse = type({
 	"+": "delete",
@@ -59,7 +79,10 @@ function toDecisionQuestions(questions: Readonly<Record<string, NoulQuestion>>):
 	return Object.fromEntries(Object.entries(questions).map(([key, question]) => [key, toDecisionQuestion(question)]));
 }
 
-export function createOpenRouterDecisionTransport(createDecisionAsync: CreateDecisionAsync): DecisionTransport {
+export function createOpenRouterDecisionTransport(
+	createDecisionAsync: CreateDecisionAsync,
+	onUsage?: OnUsage,
+): DecisionTransport {
 	return {
 		decide: async (options): Promise<Readonly<Record<string, NoulAnswer>>> => {
 			const response = await createDecisionAsync({
@@ -69,18 +92,30 @@ export function createOpenRouterDecisionTransport(createDecisionAsync: CreateDec
 					state: { ...options.state },
 				},
 			});
+
+			onUsage?.({
+				cost: response.usage?.cost,
+				inputTokens: response.usage?.inputTokens,
+				outputTokens: response.usage?.outputTokens,
+				phase: "judgments",
+				totalTokens:
+					response.usage === undefined ? undefined : response.usage.inputTokens + response.usage.outputTokens,
+			});
+
 			const parsed = isNoulAnswersResponse(response);
 			if (parsed instanceof type.errors) {
 				throw new TypeError(`OpenRouter Decisions returned a non-noul answer: ${parsed.summary}`);
 			}
+
 			return parsed.answers;
 		},
 	};
 }
 
-export function createOpenRouterReasonWriter<TResult>(
+export function createOpenRouterReasonWriter(
 	reasonModel: string,
-	sendChatAsync: SendChatAsync<TResult>,
+	sendChatAsync: SendChatAsync,
+	onUsage?: OnUsage,
 ): ReasonWriter {
 	return {
 		writeReason: async (options): Promise<string> => {
@@ -92,12 +127,25 @@ export function createOpenRouterReasonWriter<TResult>(
 					temperature: 0,
 				},
 			});
+
+			onUsage?.({
+				cost: response.usage?.cost ?? undefined,
+				inputTokens: response.usage?.promptTokens,
+				outputTokens: response.usage?.completionTokens,
+				phase: "reasons",
+				totalTokens: response.usage?.totalTokens,
+			});
+
 			const parsed = isReasonResponse(response);
 			if (parsed instanceof type.errors) {
 				throw new TypeError("OpenRouter returned no textual relation reason.");
 			}
+
 			const [choice] = parsed.choices;
-			if (choice === undefined) throw new TypeError("OpenRouter returned no textual relation reason.");
+			if (choice === undefined) {
+				throw new TypeError("OpenRouter returned no textual relation reason.");
+			}
+
 			return choice.message.content.trim();
 		},
 	};

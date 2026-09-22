@@ -5,7 +5,7 @@ import { describe, expect, it, onTestFinished } from "vitest";
 
 import { createJudgmentCache } from "$script-utilities/rule-relations/cache";
 import { judgmentPromptVersion, judgmentThresholds } from "$script-utilities/rule-relations/constants";
-import { evaluatePairs } from "$script-utilities/rule-relations/eval-fixture";
+import { evaluatePairs } from "$script-utilities/rule-relations/evaluation";
 import {
 	createAllRulePairs,
 	judgeRulePairsAsync,
@@ -20,6 +20,7 @@ import type {
 	NoulAnswer,
 	PairJudgments,
 	ReasonWriter,
+	RelationProgress,
 	RuleCard,
 } from "$script-utilities/rule-relations/types";
 
@@ -96,9 +97,10 @@ function createFakeReasonWriter(reason: (from: RuleName, to: RuleName) => string
 
 describe("judgeRulePairs", () => {
 	it("judges both directions once and reuses the cache afterwards", async () => {
-		expect.assertions(4);
+		expect.assertions(6);
 
 		const calls = new Array<string>();
+		const progress = new Array<RelationProgress>();
 		const desired = new Map([
 			[getJudgmentKey("no-print", "no-warn"), createJudgments({ exists: 0.9 })],
 			[getJudgmentKey("no-warn", "no-print"), createJudgments({ exists: 0.85 })],
@@ -114,6 +116,9 @@ describe("judgeRulePairs", () => {
 			cache,
 			cards: cardFixtures,
 			decisionModel: "test-model",
+			onProgress: (update) => {
+				progress.push(update);
+			},
 			pairs: [{ left: "no-print", right: "no-warn" }],
 			promptVersion: judgmentPromptVersion,
 			transport,
@@ -126,14 +131,17 @@ describe("judgeRulePairs", () => {
 		expect(calls).toHaveLength(2);
 		expect(second.get(getJudgmentKey("no-print", "no-warn"))).toStrictEqual(createJudgments({ exists: 0.9 }));
 		expect(calls).toHaveLength(2);
+		expect(progress).toContainEqual({ cached: 0, completed: 2, phase: "judgments", total: 2 });
+		expect(progress.at(-1)).toStrictEqual({ cached: 2, completed: 2, phase: "judgments", total: 2 });
 	});
 });
 
 describe("regenerateRelations", () => {
 	it("writes fresh relations with reasons and evidence", async () => {
-		expect.assertions(5);
+		expect.assertions(6);
 
 		const calls = new Array<string>();
+		const progress = new Array<RelationProgress>();
 		const desired = new Map([
 			[getJudgmentKey("no-error", "no-print"), createJudgments()],
 			[getJudgmentKey("no-error", "no-warn"), createJudgments({ exists: 0.1 })],
@@ -151,6 +159,9 @@ describe("regenerateRelations", () => {
 			judgmentCache: undefined,
 			judgmentPromptVersion,
 			maxRelationsPerRule: 8,
+			onProgress: (update) => {
+				progress.push(update);
+			},
 			pairs: [
 				{ left: "no-print", right: "no-warn" },
 				{ left: "no-error", right: "no-print" },
@@ -172,6 +183,7 @@ describe("regenerateRelations", () => {
 		expect(related?.reason).toBe("Both no-print and no-warn matter.");
 		expect(related?.evidence?.forward.exists).toBeCloseTo(0.9);
 		expect(result.resolutions.get(getPairKey("no-print", "no-error"))?.type).toBe("relation");
+		expect(progress.at(-1)).toStrictEqual({ cached: 0, completed: 2, phase: "reasons", total: 2 });
 	});
 
 	it("keeps untouched relations and drops re-judged ones", async () => {

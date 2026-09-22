@@ -6,7 +6,7 @@ import {
 } from "$script-utilities/rule-relations/openrouter";
 
 import type { RuleName } from "$data/rule-manifest";
-import type { RuleCard } from "$script-utilities/rule-relations/types";
+import type { RelationUsage, RuleCard } from "$script-utilities/rule-relations/types";
 
 const noPrintCard: RuleCard = {
 	name: "no-print",
@@ -34,13 +34,22 @@ const noWarnCard: RuleCard = {
 
 describe("openRouter relation adapters", () => {
 	it("returns only noul answers from the Decisions API", async () => {
-		expect.assertions(2);
+		expect.assertions(3);
 
 		let requestedModel: string | undefined;
-		const transport = createOpenRouterDecisionTransport(async (request) => {
-			requestedModel = request.decisionsRequest.model;
-			return { answers: { exists__no_warn: { noul: 0.9, type: "noul" } } };
-		});
+		const usage = new Array<RelationUsage>();
+		const transport = createOpenRouterDecisionTransport(
+			async (request) => {
+				requestedModel = request.decisionsRequest.model;
+				return {
+					answers: { exists__no_warn: { noul: 0.9, type: "noul" } },
+					usage: { cost: 0.012, inputTokens: 100, outputTokens: 20 },
+				};
+			},
+			(update) => {
+				usage.push(update);
+			},
+		);
 		const answers = await transport.decide({
 			model: "~typesafe/jev-latest",
 			questions: {
@@ -55,6 +64,9 @@ describe("openRouter relation adapters", () => {
 
 		expect(requestedModel).toBe("~typesafe/jev-latest");
 		expect(answers).toStrictEqual({ exists__no_warn: { noul: 0.9, type: "noul" } });
+		expect(usage).toStrictEqual([
+			{ cost: 0.012, inputTokens: 100, outputTokens: 20, phase: "judgments", totalTokens: 120 },
+		]);
 	});
 
 	it("rejects a Decisions response containing another answer type", async () => {
@@ -70,13 +82,23 @@ describe("openRouter relation adapters", () => {
 	});
 
 	it("uses the configured reason model and returns trimmed text", async () => {
-		expect.assertions(2);
+		expect.assertions(3);
 
 		let requestedModel = "";
-		const writer = createOpenRouterReasonWriter("anthropic/claude-sonnet-5", async (request) => {
-			requestedModel = request.chatRequest.model;
-			return { choices: [{ message: { content: "  Both rules replace Roblox logging globals.  " } }] };
-		});
+		const usage = new Array<RelationUsage>();
+		const writer = createOpenRouterReasonWriter(
+			"anthropic/claude-sonnet-5",
+			async (request) => {
+				requestedModel = request.chatRequest.model;
+				return {
+					choices: [{ message: { content: "  Both rules replace Roblox logging globals.  " } }],
+					usage: { completionTokens: 8, cost: 0.003, promptTokens: 40, totalTokens: 48 },
+				};
+			},
+			(update) => {
+				usage.push(update);
+			},
+		);
 		const reason = await writer.writeReason({
 			left: noPrintCard,
 			relation: {
@@ -89,5 +111,8 @@ describe("openRouter relation adapters", () => {
 
 		expect(requestedModel).toBe("anthropic/claude-sonnet-5");
 		expect(reason).toBe("Both rules replace Roblox logging globals.");
+		expect(usage).toStrictEqual([
+			{ cost: 0.003, inputTokens: 40, outputTokens: 8, phase: "reasons", totalTokens: 48 },
+		]);
 	});
 });

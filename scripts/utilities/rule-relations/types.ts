@@ -104,6 +104,21 @@ export interface ReasonWriter {
 	}) => Promise<string>;
 }
 
+export interface RelationProgress {
+	readonly cached: number;
+	readonly completed: number;
+	readonly phase: "judgments" | "reasons";
+	readonly total: number;
+}
+
+export interface RelationUsage {
+	readonly cost?: number | undefined;
+	readonly inputTokens?: number | undefined;
+	readonly outputTokens?: number | undefined;
+	readonly phase: RelationProgress["phase"];
+	readonly totalTokens?: number | undefined;
+}
+
 export interface ReviewFinding {
 	readonly concern: string;
 	readonly left: RuleName;

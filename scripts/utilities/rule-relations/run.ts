@@ -19,6 +19,7 @@ import type {
 	PairJudgments,
 	ReasonWriter,
 	RelationDraft,
+	RelationProgress,
 	RelationResolution,
 	ReviewFinding,
 	RuleCard,
@@ -32,6 +33,8 @@ interface FreshRelation {
 	readonly strength: number;
 }
 
+type OnProgress = (progress: RelationProgress) => void;
+
 interface RegenerateOptions {
 	readonly allNames: ReadonlyArray<string>;
 	readonly batchSize: number;
@@ -41,6 +44,7 @@ interface RegenerateOptions {
 	readonly judgmentCache: JudgmentCache | undefined;
 	readonly judgmentPromptVersion: number;
 	readonly maxRelationsPerRule: number;
+	readonly onProgress?: OnProgress | undefined;
 	readonly pairs: ReadonlyArray<UnorderedRulePair>;
 	readonly reasonCache: ReasonCache | undefined;
 	readonly reasonModel: string;
@@ -67,6 +71,7 @@ interface ResolutionResult {
 }
 
 interface ReasonOutcome {
+	readonly cached: boolean;
 	readonly fresh: FreshRelation;
 	readonly problems: ReadonlyArray<string>;
 	readonly reason: string;
@@ -101,6 +106,7 @@ export function createAllRulePairs(names: ReadonlyArray<RuleName>): ReadonlyArra
 	for (let leftIndex = 0; leftIndex < names.length; leftIndex += 1) {
 		const left = names[leftIndex];
 		if (left === undefined) continue;
+
 		for (let rightIndex = leftIndex + 1; rightIndex < names.length; rightIndex += 1) {
 			const right = names[rightIndex];
 			if (right !== undefined) pairs[length++] = { left, right };
@@ -114,6 +120,7 @@ interface JudgeOptions {
 	readonly cache: JudgmentCache | undefined;
 	readonly cards: ReadonlyMap<RuleName, RuleCard>;
 	readonly decisionModel: string;
+	readonly onProgress?: OnProgress | undefined;
 	readonly pairs: ReadonlyArray<UnorderedRulePair>;
 	readonly promptVersion: number;
 	readonly transport: DecisionTransport;
@@ -123,6 +130,8 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 	const judgments = new Map<string, PairJudgments>();
 	const pendingBySource = new Map<RuleName, Array<RuleCard>>();
 	const seenDirections = new Set<string>();
+	let cachedCount = 0;
+	let completed = 0;
 
 	function registerDirection(source: RuleName, candidateName: RuleName): void {
 		const judgmentKey = getJudgmentKey(source, candidateName);
@@ -147,6 +156,8 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 		const cached = options.cache?.get(cacheKey);
 		if (cached !== undefined) {
 			judgments.set(judgmentKey, cached);
+			completed += 1;
+			cachedCount += 1;
 			return;
 		}
 
@@ -159,6 +170,8 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 		registerDirection(pair.left, pair.right);
 		registerDirection(pair.right, pair.left);
 	}
+	const total = seenDirections.size;
+	options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 
 	const requests = [...pendingBySource].flatMap(([sourceName, candidates]) =>
 		chunkValues(candidates, options.batchSize).map(async (candidatesChunk) => {
@@ -191,6 +204,8 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 					pairJudgments,
 				);
 			}
+			completed += interpreted.size;
+			options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 		}),
 	);
 	await Promise.all(requests);
@@ -244,7 +259,12 @@ interface WriteOptions {
 	readonly right: RuleCard;
 	readonly writer: ReasonWriter;
 }
-async function writeRelationReasonAsync(options: WriteOptions): Promise<string> {
+interface WrittenReason {
+	readonly cached: boolean;
+	readonly reason: string;
+}
+
+async function writeRelationReasonAsync(options: WriteOptions): Promise<WrittenReason> {
 	const cacheKey = createCacheKey({
 		left: options.left,
 		model: options.model,
@@ -254,7 +274,9 @@ async function writeRelationReasonAsync(options: WriteOptions): Promise<string> 
 	});
 
 	const cached = options.cache?.get(cacheKey);
-	if (cached !== undefined) return cached;
+	if (cached !== undefined) {
+		return { cached: true, reason: cached };
+	}
 
 	const reason = await options.writer.writeReason({
 		left: options.left,
@@ -262,7 +284,7 @@ async function writeRelationReasonAsync(options: WriteOptions): Promise<string> 
 		right: options.right,
 	});
 	options.cache?.set(cacheKey, reason);
-	return reason;
+	return { cached: false, reason };
 }
 
 async function createReasonOutcomeAsync(fresh: FreshRelation, options: RegenerateOptions): Promise<ReasonOutcome> {
@@ -272,7 +294,7 @@ async function createReasonOutcomeAsync(fresh: FreshRelation, options: Regenerat
 		throw new Error(`Missing rule card for ${fresh.relation.from} ↔ ${fresh.relation.to}.`);
 	}
 
-	const reason = await writeRelationReasonAsync({
+	const written = await writeRelationReasonAsync({
 		cache: options.reasonCache,
 		left,
 		model: options.reasonModel,
@@ -283,9 +305,10 @@ async function createReasonOutcomeAsync(fresh: FreshRelation, options: Regenerat
 	});
 
 	return {
+		cached: written.cached,
 		fresh,
-		problems: validateReason({ allNames: options.allNames, reason, relation: fresh.relation }),
-		reason,
+		problems: validateReason({ allNames: options.allNames, reason: written.reason, relation: fresh.relation }),
+		reason: written.reason,
 	};
 }
 
@@ -315,6 +338,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 		cache: options.judgmentCache,
 		cards: options.cards,
 		decisionModel: options.decisionModel,
+		onProgress: options.onProgress,
 		pairs: options.pairs,
 		promptVersion: options.judgmentPromptVersion,
 		transport: options.transport,
@@ -361,7 +385,24 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 	);
 
 	const reviews = [...resolved.reviews];
-	const outcomes = await Promise.all(freshRelations.map(async (fresh) => createReasonOutcomeAsync(fresh, options)));
+	let cachedReasons = 0;
+	let completedReasons = 0;
+	const totalReasons = freshRelations.length;
+	options.onProgress?.({ cached: cachedReasons, completed: completedReasons, phase: "reasons", total: totalReasons });
+	const outcomes = await Promise.all(
+		freshRelations.map(async (fresh) => {
+			const outcome = await createReasonOutcomeAsync(fresh, options);
+			completedReasons += 1;
+			if (outcome.cached) cachedReasons += 1;
+			options.onProgress?.({
+				cached: cachedReasons,
+				completed: completedReasons,
+				phase: "reasons",
+				total: totalReasons,
+			});
+			return outcome;
+		}),
+	);
 
 	for (const outcome of outcomes) {
 		if (outcome.problems.length > 0) {
