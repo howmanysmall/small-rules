@@ -18,6 +18,7 @@
 		"jsonc-parser": "catalog:scripts",
 		"just-diff": "catalog:scripts",
 		"mutative": "catalog:scripts",
+		"pretty-ms": "catalog:scripts",
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",
