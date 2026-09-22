@@ -28,6 +28,7 @@ import noAsyncConstructor from "$oxc-rules/general/no-async-constructor";
 import noCommentedCode from "$oxc-rules/general/no-commented-code";
 import noConstantConditionWithBreak from "$oxc-rules/general/no-constant-condition-with-break";
 import noDeadStore from "$oxc-rules/general/no-dead-store";
+import noDiscardedRejection from "$oxc-rules/general/no-discarded-rejection";
 import noError from "$oxc-rules/general/no-error";
 import noFilterMapChain from "$oxc-rules/general/no-filter-map-chain";
 import noFloatingPointEquality from "$oxc-rules/general/no-floating-point-equality";
@@ -101,6 +102,9 @@ import useExhaustiveDependencies from "$oxc-rules/react/use-exhaustive-dependenc
 import useHookAtTopLevel from "$oxc-rules/react/use-hook-at-top-level";
 import banInstances from "$oxc-rules/roblox/ban-instances";
 import enforceIanitorCheckType from "$oxc-rules/roblox/enforce-ianitor-check-type";
+import noHasBeforeRemoveInJecs from "$oxc-rules/roblox/jecs/no-has-before-remove-in-jecs";
+import preferMembershipFilterInJecs from "$oxc-rules/roblox/jecs/prefer-membership-filter-in-jecs";
+import preferSingleWorldQueryInJecs from "$oxc-rules/roblox/jecs/prefer-single-world-query-in-jecs";
 import noArrayConstructorElements from "$oxc-rules/roblox/no-array-constructor-elements";
 import noArrayConstructorIndexAssignment from "$oxc-rules/roblox/no-array-constructor-index-assignment";
 import noArraySizeAssignment from "$oxc-rules/roblox/no-array-size-assignment";
@@ -121,8 +125,8 @@ import noWarn from "$oxc-rules/roblox/no-warn";
 import preferIdiv from "$oxc-rules/roblox/prefer-idiv";
 import preferMathMinMax from "$oxc-rules/roblox/prefer-math-min-max";
 import preferModdingInspect from "$oxc-rules/roblox/prefer-modding-inspect";
+import preferNativeCollectionCopy from "$oxc-rules/roblox/prefer-native-collection-copy";
 import preferSequenceOverloads from "$oxc-rules/roblox/prefer-sequence-overloads";
-import preferSingleWorldQuery from "$oxc-rules/roblox/prefer-single-world-query";
 import preferUDim2Shorthand from "$oxc-rules/roblox/prefer-udim2-shorthand";
 import requireModuleLevelInstantiation from "$oxc-rules/roblox/require-module-level-instantiation";
 
@@ -160,6 +164,7 @@ const smallRules = definePlugin({
 		"no-constant-condition-with-break": noConstantConditionWithBreak,
 		"no-dead-store": noDeadStore,
 		"no-derived-state": noDerivedState,
+		"no-discarded-rejection": noDiscardedRejection,
 		"no-error": noError,
 		"no-event-handler": noEventHandler,
 		"no-events-in-events-callback": noEventsInEventsCallback,
@@ -168,6 +173,7 @@ const smallRules = definePlugin({
 		"no-floating-point-equality": noFloatingPointEquality,
 		"no-giant-component": noGiantComponent,
 		"no-god-components": noGodComponents,
+		"no-has-before-remove-in-jecs": noHasBeforeRemoveInJecs,
 		"no-ianitor-in-function-body": noIanitorInFunctionBody,
 		"no-ianitor-success-access": noIanitorSuccessAccess,
 		"no-identity-map": noIdentityMap,
@@ -228,12 +234,14 @@ const smallRules = definePlugin({
 		"prefer-idiv": preferIdiv,
 		"prefer-local-portal-component": preferLocalPortalComponent,
 		"prefer-math-min-max": preferMathMinMax,
+		"prefer-membership-filter-in-jecs": preferMembershipFilterInJecs,
 		"prefer-modding-inspect": preferModdingInspect,
 		"prefer-module-scope-constants": preferModuleScopeConstants,
+		"prefer-native-collection-copy": preferNativeCollectionCopy,
 		"prefer-padding-components": preferPaddingComponents,
 		"prefer-pascal-case-enums": preferPascalCaseEnums,
 		"prefer-sequence-overloads": preferSequenceOverloads,
-		"prefer-single-world-query": preferSingleWorldQuery,
+		"prefer-single-world-query-in-jecs": preferSingleWorldQueryInJecs,
 		"prefer-singular-enums": preferSingularEnums,
 		"prefer-ternary-conditional-rendering": preferTernaryConditionalRendering,
 		"prefer-udim2-shorthand": preferUDim2Shorthand,

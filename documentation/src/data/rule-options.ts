@@ -152,6 +152,9 @@ const objectPlaceholders = new Map<string, JsonValue>([
 
 function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 	switch (ruleName) {
+		case "no-discarded-rejection": {
+			return "warn";
+		}
 		case "prevent-abbreviations": {
 			return "error";
 		}

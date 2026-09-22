@@ -1,0 +1,19 @@
+---
+title: "Prefer Native Collection Copy"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="prefer-native-collection-copy">
+	<Fragment slot="rationale">
+		<p>
+			A loop that inserts every `Map` or `Set` value unchanged is a shallow copy written the long way.
+			`table.clone` states that operation directly.
+		</p>
+		<p>
+			The rule only reports when syntax and scope analysis prove that both collections have the same native kind.
+			It skips opaque iterables, weak collections, conversions, filtering, and transformed values. A report may
+			omit its fix when `table` is shadowed or attached comments make deleting the loop unsafe.
+		</p>
+	</Fragment>
+</RulePage>

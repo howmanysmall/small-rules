@@ -1491,7 +1491,9 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 }
 
 .category-card[data-category="roblox"],
-:root[data-theme="dark"] .category-card[data-category="roblox"] {
+.category-card[data-category="roblox/jecs"],
+:root[data-theme="dark"] .category-card[data-category="roblox"],
+:root[data-theme="dark"] .category-card[data-category="roblox/jecs"] {
 	background: var(--card-bg);
 }
 
@@ -1531,7 +1533,8 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 .category-card[data-category="react"]::after {
 	background: var(--sl-color-accent);
 }
-.category-card[data-category="roblox"]::after {
+.category-card[data-category="roblox"]::after,
+.category-card[data-category="roblox/jecs"]::after {
 	background: var(--sl-color-accent);
 }
 .category-card[data-category="naming"]::after {
@@ -1573,12 +1576,14 @@ main:has(> .content-panel .hero-splash) > .content-panel:first-child {
 	background: color-mix(in oklch, var(--sl-color-accent) 10%, transparent);
 	border-color: color-mix(in oklch, var(--sl-color-accent) 25%, transparent);
 }
-.category-card[data-category="roblox"] .category-card-icon {
+.category-card[data-category="roblox"] .category-card-icon,
+.category-card[data-category="roblox/jecs"] .category-card-icon {
 	color: #e11d48;
 	background: color-mix(in oklch, #e11d48 10%, transparent);
 	border-color: color-mix(in oklch, #e11d48 25%, transparent);
 }
-:root[data-theme="dark"] .category-card[data-category="roblox"] .category-card-icon {
+:root[data-theme="dark"] .category-card[data-category="roblox"] .category-card-icon,
+:root[data-theme="dark"] .category-card[data-category="roblox/jecs"] .category-card-icon {
 	color: #fb7185;
 }
 .category-card[data-category="naming"] .category-card-icon {
