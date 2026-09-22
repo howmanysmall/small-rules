@@ -243,6 +243,7 @@ catalogs:
   scripts:
     "@cliffy/command": npm:@jsr/cliffy__command@1.3.1
     "@octokit/rest": 22.0.1
+    "@openrouter/sdk": 1.3.8
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     "@std/path": npm:@jsr/std__path@1.1.6
     ansis: 4.4.0
@@ -251,6 +252,7 @@ catalogs:
     jsonc-parser: 3.3.1
     just-diff: 6.0.2
     mutative: 1.3.0
+    pretty-ms: 9.3.1
     tinyexec: 1.3.1
     zx: 8.8.5
   test:

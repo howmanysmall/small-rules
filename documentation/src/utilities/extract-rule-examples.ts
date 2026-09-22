@@ -2,7 +2,7 @@ import { Predicate } from "effect";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
 
-import { ExtractionError } from "$classes/extraction-error";
+import { ExtractionError } from "../classes/extraction-error";
 
 import type {
 	ArrayExpression,
@@ -16,7 +16,7 @@ import type {
 	TemplateLiteral,
 } from "yuku-parser";
 
-import type { ExtractionContext } from "$classes/extraction-error";
+import type { ExtractionContext } from "../classes/extraction-error";
 
 type StaticValue =
 	| boolean

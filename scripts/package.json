@@ -5,6 +5,7 @@
 	"dependencies": {
 		"@cliffy/command": "catalog:scripts",
 		"@octokit/rest": "catalog:scripts",
+		"@openrouter/sdk": "catalog:scripts",
 		"@small-rules/arktype-utilities": "workspace:*",
 		"@small-rules/fs-utilities": "workspace:*",
 		"@std/msgpack": "catalog:scripts",
@@ -17,6 +18,7 @@
 		"jsonc-parser": "catalog:scripts",
 		"just-diff": "catalog:scripts",
 		"mutative": "catalog:scripts",
+		"pretty-ms": "catalog:scripts",
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",

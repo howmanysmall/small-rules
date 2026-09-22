@@ -326,44 +326,70 @@ starlight-link-card:hover {
 .related-rules {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-	gap: 0.75rem;
-	margin: 1rem 0;
+	gap: var(--space-4);
+	margin: var(--space-4) 0;
 }
 
 .related-rule {
 	display: flex;
 	flex-direction: column;
-	gap: 0.55rem;
-	padding: 1rem;
+	gap: var(--space-3);
+	align-items: flex-start;
+	min-width: 0;
+	padding: var(--space-5);
 	color: var(--sl-color-text);
 	text-decoration: none;
 	background: var(--card-bg);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	transition:
-		border-color 0.2s var(--spring),
-		transform 0.2s var(--spring);
+		background-color 0.3s var(--spring),
+		border-color 0.3s var(--spring),
+		transform 0.3s var(--spring);
 }
 
 .related-rule:hover {
 	color: var(--sl-color-text);
+	background: var(--card-bg-hover);
 	border-color: var(--sl-color-accent);
-	transform: translateY(-1px);
-}
-
-.related-rule-heading {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	align-items: baseline;
-	justify-content: space-between;
+	transform: translateY(-2px);
 }
 
 .related-rule-kind {
-	font-size: var(--sl-text-xs);
+	padding: var(--space-1) var(--space-2);
+	font-family: var(--sl-font-mono);
+	font-size: var(--type-caption);
 	font-weight: 600;
+	line-height: 1.4;
 	color: var(--sl-color-accent-high);
-	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	white-space: nowrap;
+	background: color-mix(in oklch, var(--sl-color-accent) 10%, transparent);
+	border: 1px solid color-mix(in oklch, var(--sl-color-accent) 30%, transparent);
+	border-radius: var(--pill-radius);
+}
+
+.related-rule-title {
+	font-family: var(--font-display);
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--sl-color-text);
+}
+
+.related-rule-reason {
+	font-size: 0.85rem;
+	line-height: 1.55;
+	color: var(--sl-color-text-muted);
+}
+
+.related-rule-reason code {
+	font-family: var(--sl-font-mono);
+	font-size: 0.92em;
+	font-weight: 500;
+	color: var(--sl-color-accent-high);
+	overflow-wrap: anywhere;
 }
 
 .badge {

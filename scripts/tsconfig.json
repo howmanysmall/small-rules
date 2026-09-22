@@ -3,5 +3,19 @@
 	"compilerOptions": {
 		"tsBuildInfoFile": "../node_modules/.tsbuildinfo-scripts"
 	},
-	"include": ["../packages/*/src/**/*.ts", "**/*.ts"]
+	"include": [
+		"../documentation/src/classes/extraction-error.ts",
+		"../documentation/src/data/generated/rule-relations.json",
+		"../documentation/src/data/rule-examples.ts",
+		"../documentation/src/data/rule-facts.ts",
+		"../documentation/src/data/rule-manifest.ts",
+		"../documentation/src/data/rule-options.ts",
+		"../documentation/src/data/rule-relations.overrides.ts",
+		"../documentation/src/data/rule-relations.ts",
+		"../documentation/src/utilities/extract-rule-examples.ts",
+		"../documentation/src/utilities/oxlint-config.ts",
+		"../packages/*/src/**/*.ts",
+		"../src/**/*.ts",
+		"**/*.ts"
+	]
 }

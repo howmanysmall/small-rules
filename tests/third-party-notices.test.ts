@@ -6,7 +6,7 @@ import {
 	renderLicenseText,
 	renderNoticesMarkdown,
 	VENDORED_COMPONENTS,
-} from "../scripts/utilities/vendored-notices";
+} from "$script-utilities/vendored-notices";
 
 const BANNER = renderBundleBanner();
 

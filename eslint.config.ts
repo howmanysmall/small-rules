@@ -151,7 +151,7 @@ const configuration = isentinel(
 				useTabs: true,
 			},
 		},
-		ignores: ["!**/.opencode", "!**/.opencode/**"],
+		ignores: ["!**/.opencode", "!**/.opencode/**", "documentation/src/data/generated/*.json"],
 		jsdoc: true,
 		jsonc: true,
 		markdown: false,

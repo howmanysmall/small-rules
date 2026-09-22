@@ -363,6 +363,9 @@ catalogs:
     '@octokit/rest':
       specifier: 22.0.1
       version: 22.0.1
+    '@openrouter/sdk':
+      specifier: 1.3.8
+      version: 1.3.8
     '@std/msgpack':
       specifier: npm:@jsr/std__msgpack@1.0.3
       version: 1.0.3
@@ -387,6 +390,9 @@ catalogs:
     mutative:
       specifier: 1.3.0
       version: 1.3.0
+    pretty-ms:
+      specifier: 9.3.1
+      version: 9.3.1
     tinyexec:
       specifier: 1.3.1
       version: 1.3.1
@@ -968,6 +974,9 @@ importers:
       '@octokit/rest':
         specifier: catalog:scripts
         version: 22.0.1
+      '@openrouter/sdk':
+        specifier: catalog:scripts
+        version: 1.3.8
       '@small-rules/arktype-utilities':
         specifier: workspace:*
         version: link:../packages/arktype-utilities
@@ -1004,6 +1013,9 @@ importers:
       mutative:
         specifier: catalog:scripts
         version: 1.3.0
+      pretty-ms:
+        specifier: catalog:scripts
+        version: 9.3.1
       tinyexec:
         specifier: catalog:scripts
         version: 1.3.1
@@ -2966,12 +2978,12 @@ packages:
   '@isaacs/string-locale-compare@1.1.0':
     resolution: {integrity: sha512-SQ7Kzhh9+D+ZW9MA0zkYv3VXhIDNx+LzM6EJ+/65I3QY+enU6Itte7E5XX7EWrqLW2FN4n06GWzBnPoC3th2aQ==}
 
-  '@isentinel/dict-rbxts@1.0.23':
-    resolution: {integrity: sha512-vSH8tgBITZNjYxw49aD8IXk2liqO9Rpu/lUk3MIQvp0RKBg5OQSmrNRvy7XKFk481XUkMaA9rAwmfJIV11HuWw==}
+  '@isentinel/dict-rbxts@1.0.24':
+    resolution: {integrity: sha512-UnBvOYjv6pV1cr5Gi9GqwCRfP62QFuhW+N/TsmcfGrwJzfoHCzU6AwONZQNzg1JTE9SH5zAIVM+vjUWZzCf1sA==}
     engines: {node: '>=22'}
 
-  '@isentinel/dict-roblox@1.0.16':
-    resolution: {integrity: sha512-L4EMB+7V57qljfBbqctWBgq4ywLJ9mS7gj0t44bAZ9OCjJaieNuY2LADNsOgOgy7nQqo/jK2/JSZuLPJmcsDww==}
+  '@isentinel/dict-roblox@1.0.17':
+    resolution: {integrity: sha512-TkHs9srgpspvO61G99tMM0Hb3nKkuFcIHGqiVDclkBN7Wn8Z5uFlKggYtZrjL+WyOvvgNcvFH1yKI8SWjFp50Q==}
     engines: {node: '>=20.18.0'}
 
   '@isentinel/eslint-config@6.0.0-beta.46':
@@ -3426,6 +3438,9 @@ packages:
 
   '@opencode-ai/util@0.0.0-beta-19271':
     resolution: {integrity: sha512-7QYgjPtnNH5Nn4OS8tsb5Tcn9XnrRJHOyzMdry6ss0VkjNz9OB0A+dnEhG05SzSTSXOO2wHhzxBVV3v02b2siw==}
+
+  '@openrouter/sdk@1.3.8':
+    resolution: {integrity: sha512-hwLKi+iEjW97trBMPZklZbdEVfIz3kQEQziE40Yp+HqQY2duk/P64zG5RPb/7F84A4G2u7OSfXLhDPdk4POhOg==}
 
   '@opentelemetry/api-logs@0.214.0':
     resolution: {integrity: sha512-40lSJeqYO8Uz2Yj7u94/SJWE/wONa7rmMKjI1ZcIjgf3MHNHv1OZUCrCETGuaRF62d5pQD1wKIW+L4lmSMTzZA==}
@@ -12736,9 +12751,9 @@ snapshots:
 
   '@isaacs/string-locale-compare@1.1.0': {}
 
-  '@isentinel/dict-rbxts@1.0.23': {}
+  '@isentinel/dict-rbxts@1.0.24': {}
 
-  '@isentinel/dict-roblox@1.0.16': {}
+  '@isentinel/dict-roblox@1.0.17': {}
 
   '@isentinel/eslint-config@6.0.0-beta.46(e00d0e2376268b2d93b42a4ee78a0850)':
     dependencies:
@@ -12748,8 +12763,8 @@ snapshots:
       '@e18e/eslint-plugin': 0.8.1(eslint@10.11.0(jiti@2.7.0)(supports-color@10.2.2))(oxlint@1.83.0(oxlint-tsgolint@7.0.2002))
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.11.0(jiti@2.7.0)(supports-color@10.2.2))
       '@eslint/markdown': 8.0.3(supports-color@10.2.2)
-      '@isentinel/dict-rbxts': 1.0.23
-      '@isentinel/dict-roblox': 1.0.16
+      '@isentinel/dict-rbxts': 1.0.24
+      '@isentinel/dict-roblox': 1.0.17
       '@oxlint/plugins': 1.78.0
       '@pobammer-ts/small-rules': link:plugins
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.11.0(jiti@2.7.0)(supports-color@10.2.2))
@@ -13476,6 +13491,10 @@ snapshots:
       - redis
       - supports-color
       - utf-8-validate
+
+  '@openrouter/sdk@1.3.8':
+    dependencies:
+      zod: 4.5.1
 
   '@opentelemetry/api-logs@0.214.0':
     dependencies:
@@ -21270,6 +21289,7 @@ time:
   '@oh-my-pi/pi-coding-agent@18.2.6': '2026-09-18T18:17:53.560Z'
   '@opencode-ai/plugin@0.0.0-beta-19271': '2026-09-07T21:39:59.552Z'
   '@opencode-ai/schema@0.0.0-beta-19271': '2026-09-07T21:33:46.005Z'
+  '@openrouter/sdk@1.3.8': '2026-09-20T04:54:23.071Z'
   '@playwright/test@1.63.0': '2026-09-04T22:44:00.304Z'
   '@stryker-mutator/api@10.0.0': '2026-08-14T16:51:10.145Z'
   '@stryker-mutator/core@10.0.0': '2026-08-14T16:51:22.686Z'
@@ -21338,6 +21358,7 @@ time:
   oxlint-tsgolint@7.0.2002: '2026-09-18T04:01:58.202Z'
   oxlint@1.83.0: '2026-09-14T12:12:38.627Z'
   pncat@0.13.4: '2026-09-18T23:40:25.144Z'
+  pretty-ms@9.3.1: '2026-08-28T12:32:04.471Z'
   publint@0.3.24: '2026-08-19T06:40:11.452Z'
   react-doctor@0.9.14: '2026-09-12T11:40:17.189Z'
   react-dom@19.2.7: '2026-06-01T18:01:02.438Z'

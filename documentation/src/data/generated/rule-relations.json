@@ -1,0 +1,317 @@
+{
+	"edges": [
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.73,
+						"probabilities": {
+							"0": 0.03,
+							"1": 0.12,
+							"2": 0.85
+						},
+						"score": 1.82,
+						"type": "score"
+					},
+					"backwardReplaces": 0.1,
+					"backwardRequires": 0.82,
+					"duplicates": 0.52,
+					"forwardReplaces": 0.39,
+					"forwardRequires": 0.34
+				},
+				"left": "directive-disable-enable-pair",
+				"right": "directive-no-aggregating-enable",
+				"strength": 0.85
+			},
+			"from": "directive-no-aggregating-enable",
+			"kind": "depends-on",
+			"reason": "`directive-no-aggregating-enable` depends on `directive-disable-enable-pair`: each disable needs its own enable comment, not one aggregated enable.",
+			"to": "directive-disable-enable-pair"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.72,
+						"probabilities": {
+							"0": 0.05,
+							"1": 0.09,
+							"2": 0.86
+						},
+						"score": 1.81,
+						"type": "score"
+					},
+					"backwardReplaces": 0.07,
+					"backwardRequires": 0.39,
+					"duplicates": 0.17,
+					"forwardReplaces": 0.1,
+					"forwardRequires": 0.3
+				},
+				"left": "directive-no-duplicate-disable",
+				"right": "directive-no-unused-enable",
+				"strength": 0.86
+			},
+			"from": "directive-no-duplicate-disable",
+			"kind": "related",
+			"reason": "`directive-no-duplicate-disable` flags redundant disables, while `directive-no-unused-enable` flags enables matching no disable, keeping directive pairs tidy.",
+			"to": "directive-no-unused-enable"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.87,
+						"probabilities": {
+							"0": 0.01,
+							"1": 0.07,
+							"2": 0.92
+						},
+						"score": 1.92,
+						"type": "score"
+					},
+					"backwardReplaces": 0.18,
+					"backwardRequires": 0.5,
+					"duplicates": 0.8,
+					"forwardReplaces": 0.2,
+					"forwardRequires": 0.44
+				},
+				"left": "no-adjust-state-on-prop-change",
+				"right": "no-derived-state",
+				"strength": 0.92
+			},
+			"from": "no-adjust-state-on-prop-change",
+			"kind": "overlaps",
+			"reason": "`no-adjust-state-on-prop-change` overlaps `no-derived-state`: an effect that sets state from a prop is derived state too, so both can flag the same code.",
+			"to": "no-derived-state"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.62,
+						"probabilities": {
+							"0": 0.06,
+							"1": 0.13,
+							"2": 0.81
+						},
+						"score": 1.75,
+						"type": "score"
+					},
+					"backwardReplaces": 0.06,
+					"backwardRequires": 0.29,
+					"duplicates": 0.52,
+					"forwardReplaces": 0.08,
+					"forwardRequires": 0.22
+				},
+				"left": "no-adjust-state-on-prop-change",
+				"right": "no-initialize-state",
+				"strength": 0.81
+			},
+			"from": "no-adjust-state-on-prop-change",
+			"kind": "related",
+			"reason": "`no-adjust-state-on-prop-change` and `no-initialize-state` are siblings: both flag state writes in effects, one triggered by prop changes, the other by mount.",
+			"to": "no-initialize-state"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.7,
+						"probabilities": {
+							"0": 0.01,
+							"1": 0.19,
+							"2": 0.8
+						},
+						"score": 1.8,
+						"type": "score"
+					},
+					"backwardReplaces": 0.34,
+					"backwardRequires": 0.47,
+					"duplicates": 0.82,
+					"forwardReplaces": 0.07,
+					"forwardRequires": 0.39
+				},
+				"left": "no-event-handler",
+				"right": "no-useless-use-effect",
+				"strength": 0.8
+			},
+			"from": "no-event-handler",
+			"kind": "overlaps",
+			"reason": "`no-event-handler` overlaps with `no-useless-use-effect`, which also flags event logic routed through state, so one effect may be reported by both rules.",
+			"to": "no-useless-use-effect"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.79,
+						"probabilities": {
+							"0": 0.01,
+							"1": 0.12,
+							"2": 0.87
+						},
+						"score": 1.86,
+						"type": "score"
+					},
+					"backwardReplaces": 0.39,
+					"backwardRequires": 0.52,
+					"duplicates": 0.84,
+					"forwardReplaces": 0.07,
+					"forwardRequires": 0.42
+				},
+				"left": "no-external-store-subscription",
+				"right": "no-useless-use-effect",
+				"strength": 0.87
+			},
+			"from": "no-external-store-subscription",
+			"kind": "overlaps",
+			"reason": "`no-external-store-subscription` overlaps `no-useless-use-effect`, whose `reportExternalStore` check flags the same pattern, risking duplicate reports.",
+			"to": "no-useless-use-effect"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.68,
+						"probabilities": {
+							"0": 0.06,
+							"1": 0.1,
+							"2": 0.84
+						},
+						"score": 1.79,
+						"type": "score"
+					},
+					"backwardReplaces": 0.26,
+					"backwardRequires": 0.51,
+					"duplicates": 0.44,
+					"forwardReplaces": 0.13,
+					"forwardRequires": 0.39
+				},
+				"left": "no-object-parameters",
+				"right": "no-unknown-parameters",
+				"strength": 0.84
+			},
+			"from": "no-object-parameters",
+			"kind": "related",
+			"reason": "`no-object-parameters` complements `no-unknown-parameters`: together they ban `object` and `unknown` parameters, requiring named types parsed at boundaries.",
+			"to": "no-unknown-parameters"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.86,
+						"probabilities": {
+							"0": 0.01,
+							"1": 0.08,
+							"2": 0.91
+						},
+						"score": 1.91,
+						"type": "score"
+					},
+					"backwardReplaces": 0.45,
+					"backwardRequires": 0.5,
+					"duplicates": 0.86,
+					"forwardReplaces": 0.09,
+					"forwardRequires": 0.42
+				},
+				"left": "no-pass-live-state-to-parent",
+				"right": "no-useless-use-effect",
+				"strength": 0.91
+			},
+			"from": "no-pass-live-state-to-parent",
+			"kind": "overlaps",
+			"reason": "`no-pass-live-state-to-parent` overlaps `no-useless-use-effect`'s `reportNotifyParent` check, so enabling both can double-report parent-notification effects.",
+			"to": "no-useless-use-effect"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.83,
+						"probabilities": {
+							"0": 0.04,
+							"1": 0.04,
+							"2": 0.92
+						},
+						"score": 1.89,
+						"type": "score"
+					},
+					"backwardReplaces": 0.06,
+					"backwardRequires": 0.3,
+					"duplicates": 0.15,
+					"forwardReplaces": 0.1,
+					"forwardRequires": 0.23
+				},
+				"left": "no-reflect-apply",
+				"right": "no-reflect-get",
+				"strength": 0.92
+			},
+			"from": "no-reflect-apply",
+			"kind": "related",
+			"reason": "Enable no-reflect-get alongside no-reflect-apply: it bans Reflect.get for property reads just as this rule bans Reflect.apply for function calls.",
+			"to": "no-reflect-get"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.59,
+						"probabilities": {
+							"0": 0.07,
+							"1": 0.13,
+							"2": 0.8
+						},
+						"score": 1.73,
+						"type": "score"
+					},
+					"backwardReplaces": 0.09,
+					"backwardRequires": 0.52,
+					"duplicates": 0.41,
+					"forwardReplaces": 0.15,
+					"forwardRequires": 0.3
+				},
+				"left": "no-unknown-returns",
+				"right": "no-widen-then-assert",
+				"strength": 0.8
+			},
+			"from": "no-unknown-returns",
+			"kind": "related",
+			"reason": "`no-unknown-returns` complements `no-widen-then-assert`: together they keep types precise, banning unknown returns and local widen-then-assert round trips.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.67,
+						"probabilities": {
+							"0": 0.05,
+							"1": 0.13,
+							"2": 0.82
+						},
+						"score": 1.78,
+						"type": "score"
+					},
+					"backwardReplaces": 0.13,
+					"backwardRequires": 0.52,
+					"duplicates": 0.45,
+					"forwardReplaces": 0.18,
+					"forwardRequires": 0.29
+				},
+				"left": "no-unknown-type-aliases",
+				"right": "no-widen-then-assert",
+				"strength": 0.82
+			},
+			"from": "no-unknown-type-aliases",
+			"kind": "related",
+			"reason": "`no-unknown-type-aliases` keeps `unknown` explicit at boundaries and pairs with `no-widen-then-assert`, which stops widening known locals then asserting back.",
+			"to": "no-widen-then-assert"
+		}
+	],
+	"generator": "scripts/regenerate-relations.ts",
+	"models": {
+		"decisions": "~typesafe/jev-latest",
+		"reasons": "z-ai/glm-5.3-flash"
+	}
+}

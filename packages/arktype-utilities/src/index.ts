@@ -26,6 +26,9 @@ export const isMaybeNull = isNull.or(isUndefined);
 export const isArrayOfStrings = isString.array();
 export const isReadonlyArrayOfStrings = isArrayOfStrings.readonly();
 
+export const isArrayOfUnknowns = isUnknown.array();
+export const isReadonlyArrayOfUnknowns = isArrayOfUnknowns.readonly();
+
 export const isArrayOfNumbers = isNumber.array();
 export const isReadonlyArrayOfNumbers = isArrayOfNumbers.readonly();
 
