@@ -47,10 +47,14 @@ export function resolvePairRelation({
 	] satisfies ReadonlyArray<DirectedCandidate>;
 
 	const accepted = directedCandidates.filter((candidate) => candidate.score >= thresholds.accept);
-	if (accepted.length > 1) return { concern: "conflicting directed judgments", strength, type: "review" };
+	if (accepted.length > 1) {
+		return { concern: "conflicting directed judgments", strength, type: "review" };
+	}
 
 	const [directed] = accepted;
-	if (directed !== undefined) return { relation: directed.relation, strength: directed.score, type: "relation" };
+	if (directed !== undefined) {
+		return { relation: directed.relation, strength: directed.score, type: "relation" };
+	}
 
 	const duplicates = Math.max(forward.duplicates, backward.duplicates);
 	if (duplicates >= thresholds.accept) {
@@ -62,7 +66,9 @@ export function resolvePairRelation({
 		return { relation: { from: left, kind: "related", to: right }, strength: exists, type: "relation" };
 	}
 
-	if (strength >= thresholds.review) return { concern: "near-threshold judgments", strength, type: "review" };
+	if (strength >= thresholds.review) {
+		return { concern: "near-threshold judgments", strength, type: "review" };
+	}
 	return { type: "none" };
 }
 
@@ -80,12 +86,13 @@ export function applyRelationCap(
 
 	const counts = new Map<RuleName, number>();
 	const kept = new Array<ScoredRelation>();
+	let size = 0;
 	for (const scored of ordered) {
 		const { from, to } = scored.relation;
 		if ((counts.get(from) ?? 0) >= maxPerRule || (counts.get(to) ?? 0) >= maxPerRule) continue;
 		counts.set(from, (counts.get(from) ?? 0) + 1);
 		counts.set(to, (counts.get(to) ?? 0) + 1);
-		kept.push(scored);
+		kept[size++] = scored;
 	}
 	return kept;
 }

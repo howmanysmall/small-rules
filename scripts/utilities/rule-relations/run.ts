@@ -1,3 +1,4 @@
+import { isReadonlyArrayOfUnknowns } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
 import { createCacheKey } from "./cache";
@@ -55,7 +56,10 @@ interface RegenerationResult {
 	readonly reviews: ReadonlyArray<ReviewFinding>;
 }
 
-const isRelationDocumentInput = type({ edges: "unknown[]" });
+const isRelationDocumentInput = type({
+	"+": "delete",
+	edges: isReadonlyArrayOfUnknowns,
+}).readonly();
 
 interface ResolutionResult {
 	readonly resolutions: ReadonlyMap<string, RelationResolution>;
@@ -75,33 +79,37 @@ interface CappedRelations {
 
 function chunkValues<TValue>(values: ReadonlyArray<TValue>, size: number): ReadonlyArray<ReadonlyArray<TValue>> {
 	const chunks = new Array<ReadonlyArray<TValue>>();
-	for (let index = 0; index < values.length; index += size) chunks.push(values.slice(index, index + size));
+	let length = 0;
+	for (let index = 0; index < values.length; index += size) chunks[length++] = values.slice(index, index + size);
 	return chunks;
 }
 
-function getJudgmentCacheKey(options: {
+interface JudgmentCacheKeyOptions {
 	readonly candidate: RuleCard;
 	readonly decisionModel: string;
 	readonly promptVersion: number;
 	readonly source: RuleCard;
-}): string {
+}
+
+function getJudgmentCacheKey(options: JudgmentCacheKeyOptions): string {
 	return createCacheKey(options);
 }
 
 export function createAllRulePairs(names: ReadonlyArray<RuleName>): ReadonlyArray<UnorderedRulePair> {
 	const pairs = new Array<UnorderedRulePair>();
+	let length = 0;
 	for (let leftIndex = 0; leftIndex < names.length; leftIndex += 1) {
 		const left = names[leftIndex];
 		if (left === undefined) continue;
 		for (let rightIndex = leftIndex + 1; rightIndex < names.length; rightIndex += 1) {
 			const right = names[rightIndex];
-			if (right !== undefined) pairs.push({ left, right });
+			if (right !== undefined) pairs[length++] = { left, right };
 		}
 	}
 	return pairs;
 }
 
-export async function judgeRulePairsAsync(options: {
+interface JudgeOptions {
 	readonly batchSize: number;
 	readonly cache: JudgmentCache | undefined;
 	readonly cards: ReadonlyMap<RuleName, RuleCard>;
@@ -109,7 +117,9 @@ export async function judgeRulePairsAsync(options: {
 	readonly pairs: ReadonlyArray<UnorderedRulePair>;
 	readonly promptVersion: number;
 	readonly transport: DecisionTransport;
-}): Promise<ReadonlyMap<string, PairJudgments>> {
+}
+
+export async function judgeRulePairsAsync(options: JudgeOptions): Promise<ReadonlyMap<string, PairJudgments>> {
 	const judgments = new Map<string, PairJudgments>();
 	const pendingBySource = new Map<RuleName, Array<RuleCard>>();
 	const seenDirections = new Set<string>();
@@ -120,9 +130,13 @@ export async function judgeRulePairsAsync(options: {
 		seenDirections.add(judgmentKey);
 
 		const sourceCard = options.cards.get(source);
-		if (sourceCard === undefined) throw new Error(`Missing rule card for "${source}".`);
+		if (sourceCard === undefined) {
+			throw new Error(`Missing rule card for "${source}".`);
+		}
 		const candidate = options.cards.get(candidateName);
-		if (candidate === undefined) throw new Error(`Missing rule card for "${candidateName}".`);
+		if (candidate === undefined) {
+			throw new Error(`Missing rule card for "${candidateName}".`);
+		}
 
 		const cacheKey = getJudgmentCacheKey({
 			candidate,
@@ -149,16 +163,23 @@ export async function judgeRulePairsAsync(options: {
 	const requests = [...pendingBySource].flatMap(([sourceName, candidates]) =>
 		chunkValues(candidates, options.batchSize).map(async (candidatesChunk) => {
 			const source = options.cards.get(sourceName);
-			if (source === undefined) throw new Error(`Missing rule card for "${sourceName}".`);
+			if (source === undefined) {
+				throw new Error(`Missing rule card for "${sourceName}".`);
+			}
+
 			const answers = await options.transport.decide({
 				model: options.decisionModel,
 				questions: createPairJudgmentQuestions(candidatesChunk),
 				state: source,
 			});
+
 			const interpreted = interpretJudgmentAnswers(answers, candidatesChunk);
 			for (const [candidateName, pairJudgments] of interpreted) {
 				const candidate = options.cards.get(candidateName);
-				if (candidate === undefined) throw new Error(`Missing rule card for "${candidateName}".`);
+				if (candidate === undefined) {
+					throw new Error(`Missing rule card for "${candidateName}".`);
+				}
+
 				judgments.set(getJudgmentKey(sourceName, candidateName), pairJudgments);
 				options.cache?.set(
 					getJudgmentCacheKey({
@@ -177,11 +198,12 @@ export async function judgeRulePairsAsync(options: {
 	return judgments;
 }
 
-export function resolveJudgedPairs(options: {
+interface ResolveOptions {
 	readonly judgments: ReadonlyMap<string, PairJudgments>;
 	readonly pairs: ReadonlyArray<UnorderedRulePair>;
 	readonly thresholds: JudgmentThresholds;
-}): ResolutionResult {
+}
+export function resolveJudgedPairs(options: ResolveOptions): ResolutionResult {
 	const resolutions = new Map<string, RelationResolution>();
 	const reviews = new Array<ReviewFinding>();
 
@@ -213,7 +235,7 @@ export function resolveJudgedPairs(options: {
 	return { resolutions, reviews };
 }
 
-async function writeRelationReasonAsync(options: {
+interface WriteOptions {
 	readonly cache: ReasonCache | undefined;
 	readonly left: RuleCard;
 	readonly model: string;
@@ -221,7 +243,8 @@ async function writeRelationReasonAsync(options: {
 	readonly relation: RelationDraft;
 	readonly right: RuleCard;
 	readonly writer: ReasonWriter;
-}): Promise<string> {
+}
+async function writeRelationReasonAsync(options: WriteOptions): Promise<string> {
 	const cacheKey = createCacheKey({
 		left: options.left,
 		model: options.model,
@@ -229,6 +252,7 @@ async function writeRelationReasonAsync(options: {
 		relation: options.relation,
 		right: options.right,
 	});
+
 	const cached = options.cache?.get(cacheKey);
 	if (cached !== undefined) return cached;
 
@@ -257,6 +281,7 @@ async function createReasonOutcomeAsync(fresh: FreshRelation, options: Regenerat
 		right,
 		writer: options.reasonWriter,
 	});
+
 	return {
 		fresh,
 		problems: validateReason({ allNames: options.allNames, reason, relation: fresh.relation }),
@@ -280,6 +305,7 @@ function selectCappedRelations(
 			if (fresh !== undefined) freshRelations.push(fresh);
 		} else edges.push(retained);
 	}
+
 	return { edges, freshRelations };
 }
 
@@ -301,6 +327,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 	const scored = new Array<ScoredRelation>();
 	for (const resolution of resolved.resolutions.values()) {
 		if (resolution.type !== "relation") continue;
+
 		const forward = judgments.get(getJudgmentKey(resolution.relation.from, resolution.relation.to));
 		const backward = judgments.get(getJudgmentKey(resolution.relation.to, resolution.relation.from));
 		if (forward === undefined || backward === undefined) {
@@ -361,9 +388,11 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 
 export function readGeneratedEdges(relativePath: string): ReadonlyArray<GeneratedEdge> {
 	const sourceText = readRepositoryFile(relativePath);
-	if (sourceText === "") throw new Error(`Missing relation document "${relativePath}".`);
+	if (sourceText === "") {
+		throw new Error(`Missing relation document "${relativePath}".`);
+	}
 
-	const parsed: unknown = JSON.parse(sourceText);
+	const parsed = JSON.parse(sourceText);
 	const document = isRelationDocumentInput(parsed);
 	if (document instanceof type.errors) {
 		throw new TypeError(`Relation document "${relativePath}" has no edge list.`);
@@ -371,8 +400,11 @@ export function readGeneratedEdges(relativePath: string): ReadonlyArray<Generate
 
 	const edges = new Array<GeneratedEdge>();
 	for (const value of document.edges) {
-		if (!isGeneratedEdge(value)) throw new TypeError(`Invalid relation edge in "${relativePath}".`);
-		edges.push(value);
+		const result = isGeneratedEdge(value);
+		if (result instanceof type.errors) {
+			throw new TypeError(`Invalid relation edge in "${relativePath}" - ${result.summary}`);
+		}
+		edges.push(result);
 	}
 	return edges;
 }

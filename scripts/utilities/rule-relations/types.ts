@@ -63,10 +63,12 @@ export interface NoulQuestion {
 	readonly type: "noul";
 }
 
-export interface NoulAnswer {
-	readonly noul: number;
-	readonly type: "noul";
-}
+export const isNoulAnswer = type({
+	"+": "reject",
+	noul: isNumber,
+	type: "'noul'",
+}).readonly();
+export type NoulAnswer = typeof isNoulAnswer.infer;
 
 interface DecideOptions {
 	readonly model: string;

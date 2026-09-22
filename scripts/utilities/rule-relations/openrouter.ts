@@ -1,7 +1,8 @@
-import { isNumber, isString } from "@small-rules/arktype-utilities";
+import { isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
 import { createReasonMessages } from "./reasons";
+import { isNoulAnswer } from "./types";
 
 import type { DecisionsRequest } from "@openrouter/sdk/models";
 import type {
@@ -26,10 +27,9 @@ type CreateDecisionAsync = (request: CreateApiAlphaDecisionsRequest) => Promise<
 type SendChatAsync<TResult> = (request: ReasonApiRequest) => Promise<TResult>;
 
 const isNoulAnswersResponse = type({
-	answers: {
-		"[string]": { noul: isNumber, type: "'noul'" },
-	},
-});
+	"+": "delete",
+	answers: type.Record(isString, isNoulAnswer).readonly(),
+}).readonly();
 
 const isReasonMessage = type({
 	"+": "delete",

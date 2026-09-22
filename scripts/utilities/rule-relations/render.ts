@@ -1,48 +1,36 @@
-import { isRuleName, isRuleRelationKind } from "$data/rule-relations";
+import { isNumber, isString, isUndefined } from "@small-rules/arktype-utilities";
+import { type } from "arktype";
+
+import { isRuleName } from "$data/rule-relations";
 
 import { relationGeneratorPath } from "./constants";
 import { compareStrings, isPairJudgments } from "./types";
 
 import type { RuleName } from "$data/rule-manifest";
-import type { RuleRelationKind } from "$data/rule-relations";
 
-import type { PairJudgments } from "./types";
+export const isRelationEvidence = type({
+	"+": "reject",
+	backward: isPairJudgments,
+	forward: isPairJudgments,
+	strength: isNumber,
+}).readonly();
+export type RelationEvidence = typeof isRelationEvidence.infer;
 
-export interface RelationEvidence {
-	readonly backward: PairJudgments;
-	readonly forward: PairJudgments;
-	readonly strength: number;
-}
+const isRuleNameArkType = isString
+	.narrow((data, context) => {
+		if (isRuleName(data)) return true;
+		return context.reject(`Invalid rule name: ${data}`);
+	})
+	.as<RuleName>();
 
-export interface GeneratedEdge {
-	readonly evidence?: RelationEvidence | undefined;
-	readonly from: RuleName;
-	readonly kind: RuleRelationKind;
-	readonly reason: string;
-	readonly to: RuleName;
-}
-
-function isRelationEvidence(value: unknown): value is RelationEvidence {
-	return (
-		typeof value === "object" &&
-		value !== null &&
-		"backward" in value &&
-		isPairJudgments.allows(value.backward) &&
-		"forward" in value &&
-		isPairJudgments.allows(value.forward) &&
-		"strength" in value &&
-		typeof value.strength === "number"
-	);
-}
-
-export function isGeneratedEdge(value: unknown): value is GeneratedEdge {
-	if (typeof value !== "object" || value === null) return false;
-	if (!("from" in value) || typeof value.from !== "string" || !isRuleName(value.from)) return false;
-	if (!("to" in value) || typeof value.to !== "string" || !isRuleName(value.to)) return false;
-	if (!("kind" in value) || typeof value.kind !== "string" || !isRuleRelationKind(value.kind)) return false;
-	if (!("reason" in value) || typeof value.reason !== "string") return false;
-	return !("evidence" in value) || value.evidence === undefined || isRelationEvidence(value.evidence);
-}
+export const isGeneratedEdge = type({
+	"evidence?": isRelationEvidence.or(isUndefined),
+	from: isRuleNameArkType,
+	kind: '"overlaps" | "depends-on" | "supersedes" | "related"',
+	reason: isString,
+	to: isRuleNameArkType,
+}).readonly();
+export type GeneratedEdge = typeof isGeneratedEdge.infer;
 
 export interface RelationModels {
 	readonly decisions: string;

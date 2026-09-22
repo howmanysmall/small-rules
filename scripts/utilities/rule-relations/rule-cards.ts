@@ -30,13 +30,20 @@ function replaceMarkdownLinks(value: string): string {
 	let cursor = 0;
 	while (cursor < value.length) {
 		const labelStart = value.indexOf("[", cursor);
-		if (labelStart === -1) return result + value.slice(cursor);
+		if (labelStart === -1) {
+			return result + value.slice(cursor);
+		}
+
 		const labelEnd = value.indexOf("](", labelStart + 1);
 		const linkEnd = labelEnd === -1 ? -1 : value.indexOf(")", labelEnd + 2);
-		if (labelEnd === -1 || linkEnd === -1) return result + value.slice(cursor);
+		if (labelEnd === -1 || linkEnd === -1) {
+			return result + value.slice(cursor);
+		}
+
 		result += value.slice(cursor, labelStart) + value.slice(labelStart + 1, labelEnd);
 		cursor = linkEnd + 1;
 	}
+
 	return result;
 }
 
@@ -45,12 +52,19 @@ function stripDelimitedSections(value: string, opening: string, closing: string)
 	let cursor = 0;
 	while (cursor < value.length) {
 		const sectionStart = value.indexOf(opening, cursor);
-		if (sectionStart === -1) return result + value.slice(cursor);
+		if (sectionStart === -1) {
+			return result + value.slice(cursor);
+		}
+
 		const sectionEnd = value.indexOf(closing, sectionStart + opening.length);
-		if (sectionEnd === -1) return result + value.slice(cursor);
+		if (sectionEnd === -1) {
+			return result + value.slice(cursor);
+		}
+
 		result += `${value.slice(cursor, sectionStart)} `;
 		cursor = sectionEnd + closing.length;
 	}
+
 	return result;
 }
 
@@ -76,7 +90,9 @@ function toCardExamples(name: RuleName): ReadonlyArray<RuleCardExample> {
 
 function buildRuleCard(category: RuleCategoryKey, name: RuleName): RuleCard {
 	const { meta } = smallRules.rules[name];
-	if (meta === undefined) throw new Error(`Rule "${name}" is missing metadata.`);
+	if (meta === undefined) {
+		throw new Error(`Rule "${name}" is missing metadata.`);
+	}
 
 	const rationaleSource = readRepositoryFile(`documentation/src/content/docs/rules/${category}/${name}.mdx`);
 	const ruleSource = readRepositoryFile(`src/rules/${category}/${name}.ts`);

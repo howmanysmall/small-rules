@@ -12,8 +12,6 @@ interface CheckOptions {
 }
 
 export function checkRelationsDocument(options: CheckOptions): ReadonlyArray<string> {
-	const problems = new Array<string>();
-
 	let relations: ReadonlyArray<RuleRelation>;
 	try {
 		relations = parseGeneratedRelations(options.edges);
@@ -21,17 +19,20 @@ export function checkRelationsDocument(options: CheckOptions): ReadonlyArray<str
 		return [error instanceof Error ? error.message : "Unreadable relation document."];
 	}
 
+	const problems = new Array<string>();
+	let size = 0;
+
 	const seenPinPairs = new Set<string>();
 	for (const pin of options.pins) {
 		const pairKey = getPairKey(pin.from, pin.to);
-		if (seenPinPairs.has(pairKey)) problems.push(`Duplicate pin for ${pin.from} ↔ ${pin.to}.`);
+		if (seenPinPairs.has(pairKey)) problems[size++] = `Duplicate pin for ${pin.from} ↔ ${pin.to}.`;
 		seenPinPairs.add(pairKey);
 	}
 
 	const deniedPairs = new Set(options.denylist.map((pair) => getPairKey(pair.from, pair.to)));
 	for (const pin of options.pins) {
 		if (deniedPairs.has(getPairKey(pin.from, pin.to))) {
-			problems.push(`Pin for ${pin.from} ↔ ${pin.to} is also on the denylist.`);
+			problems[size++] = `Pin for ${pin.from} ↔ ${pin.to} is also on the denylist.`;
 		}
 	}
 
@@ -43,7 +44,7 @@ export function checkRelationsDocument(options: CheckOptions): ReadonlyArray<str
 
 	for (const [name, count] of counts) {
 		if (count > options.maxRelationsPerRule) {
-			problems.push(`Rule "${name}" has ${count} relations (maximum ${options.maxRelationsPerRule}).`);
+			problems[size++] = `Rule "${name}" has ${count} relations (maximum ${options.maxRelationsPerRule}).`;
 		}
 	}
 
