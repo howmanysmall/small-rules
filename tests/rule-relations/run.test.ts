@@ -5,7 +5,7 @@ import { describe, expect, it, onTestFinished } from "vitest";
 
 import { createJudgmentCache } from "$script-utilities/rule-relations/cache";
 import { judgmentPromptVersion, judgmentThresholds } from "$script-utilities/rule-relations/constants";
-import { evaluatePairs } from "$script-utilities/rule-relations/evaluation";
+import { compareRelationBaseline } from "$script-utilities/rule-relations/evaluation";
 import {
 	createAllRulePairs,
 	judgeRulePairsAsync,
@@ -307,32 +307,35 @@ describe("readGeneratedEdges", () => {
 	});
 });
 
-describe("evaluatePairs", () => {
-	it("scores resolutions against the evaluation fixture", () => {
+describe("compareRelationBaseline", () => {
+	it("explains what changed from the previous generated relation file", () => {
 		expect.assertions(1);
 
-		const report = evaluatePairs({
-			expectedNegatives: [{ left: "ban-react-fc", right: "no-task-wait" }],
-			expectedPositives: [{ kind: "related", pair: { left: "no-print", right: "no-warn" } }],
-			resolutions: new Map([
-				[getPairKey("ban-react-fc", "no-task-wait"), { type: "none" }],
-				[
-					getPairKey("no-print", "no-warn"),
-					{
-						relation: { from: "no-print", kind: "overlaps", to: "no-warn" },
-						strength: 0.9,
-						type: "relation",
-					},
-				],
-			]),
+		const comparison = compareRelationBaseline({
+			current: [
+				{ from: "no-print", kind: "overlaps", reason: "Current.", to: "no-warn" },
+				{ from: "no-error", kind: "related", reason: "Added.", to: "no-warn" },
+			],
+			previous: [
+				{ from: "no-print", kind: "related", reason: "Previous.", to: "no-warn" },
+				{ from: "no-error", kind: "related", reason: "Removed.", to: "no-print" },
+			],
 		});
 
-		expect(report).toStrictEqual({
-			falseNegatives: 0,
-			falsePositives: 0,
-			kindMismatches: 1,
-			trueNegatives: 1,
-			truePositives: 1,
+		expect(comparison).toStrictEqual({
+			added: [{ from: "no-error", kind: "related", to: "no-warn" }],
+			changed: [
+				{
+					current: { from: "no-print", kind: "overlaps", to: "no-warn" },
+					previous: { from: "no-print", kind: "related", to: "no-warn" },
+				},
+			],
+			currentRelationCount: 2,
+			description:
+				"Compares this run with the generated relation file that existed before it. This measures output stability, not correctness.",
+			previousRelationCount: 2,
+			removed: [{ from: "no-error", kind: "related", to: "no-print" }],
+			unchangedRelationCount: 0,
 		});
 	});
 });

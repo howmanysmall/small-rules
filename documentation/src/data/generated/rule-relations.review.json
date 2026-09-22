@@ -1,10 +1,12 @@
 {
-	"evaluation": {
-		"falseNegatives": 0,
-		"falsePositives": 0,
-		"kindMismatches": 0,
-		"trueNegatives": 0,
-		"truePositives": 47
+	"changesSincePreviousRun": {
+		"added": [],
+		"changed": [],
+		"currentRelationCount": 47,
+		"description": "Compares this run with the generated relation file that existed before it. This measures output stability, not correctness.",
+		"previousRelationCount": 47,
+		"removed": [],
+		"unchangedRelationCount": 47
 	},
 	"reviews": [
 		{

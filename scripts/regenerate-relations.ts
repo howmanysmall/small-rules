@@ -21,7 +21,7 @@ import {
 	maxRelationsPerRule,
 	reasonPromptVersion,
 } from "$script-utilities/rule-relations/constants";
-import { evaluatePairs } from "$script-utilities/rule-relations/evaluation";
+import { compareRelationBaseline } from "$script-utilities/rule-relations/evaluation";
 import {
 	createOpenRouterDecisionTransport,
 	createOpenRouterReasonWriter,
@@ -116,13 +116,9 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				throw new Error(problems.join("\n"));
 			}
 
-			const evaluation = evaluatePairs({
-				expectedNegatives: [],
-				expectedPositives: existingEdges.map((edge) => ({
-					kind: edge.kind,
-					pair: { left: edge.from, right: edge.to },
-				})),
-				resolutions: result.resolutions,
+			const changesSincePreviousRun = compareRelationBaseline({
+				current: result.edges,
+				previous: existingEdges,
 			});
 			const outputDirectory = nodePath.dirname(nodePath.join(repositoryRoot, generatedRelationDocumentPath));
 			mkdirSync(outputDirectory, { recursive: true });
@@ -136,12 +132,14 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			);
 			writeFileSync(
 				nodePath.join(repositoryRoot, reviewReportPath),
-				`${JSON.stringify({ evaluation, reviews: result.reviews }, undefined, "\t")}\n`,
+				`${JSON.stringify({ changesSincePreviousRun, reviews: result.reviews }, undefined, "\t")}\n`,
 				"utf8",
 			);
 
 			log.success(`wrote ${result.edges.length} relations and ${result.reviews.length} review findings`);
-			log.info(`evaluation (no reviewed negative corpus): ${JSON.stringify(evaluation)}`);
+			log.info(
+				`changes since previous run: ${changesSincePreviousRun.unchangedRelationCount} unchanged, ${changesSincePreviousRun.added.length} added, ${changesSincePreviousRun.removed.length} removed, ${changesSincePreviousRun.changed.length} changed`,
+			);
 		} finally {
 			const summary = formatRelationRunSummary({
 				elapsedMilliseconds: performance.now() - startedAt,
