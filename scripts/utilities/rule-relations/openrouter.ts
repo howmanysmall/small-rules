@@ -2,7 +2,7 @@ import { isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
 import { createReasonMessages } from "./reasons";
-import { isNoulAnswer } from "./types";
+import { isNoulAnswer, isScoreAnswer } from "./types";
 
 import type { DecisionsRequest } from "@openrouter/sdk/models";
 import type {
@@ -10,7 +10,7 @@ import type {
 	SendChatCompletionRequestRequest,
 } from "@openrouter/sdk/models/operations";
 
-import type { DecisionTransport, NoulAnswer, NoulQuestion, ReasonWriter, RelationUsage } from "./types";
+import type { DecisionAnswer, DecisionQuestion, DecisionTransport, ReasonWriter, RelationUsage } from "./types";
 
 interface DecisionApiResponse {
 	readonly answers: unknown;
@@ -46,9 +46,9 @@ type CreateDecisionAsync = (request: CreateApiAlphaDecisionsRequest) => Promise<
 type SendChatAsync = (request: ReasonApiRequest) => Promise<ReasonApiResponse>;
 type OnUsage = (usage: RelationUsage) => void;
 
-const isNoulAnswersResponse = type({
+const isDecisionAnswersResponse = type({
 	"+": "delete",
-	answers: type.Record(isString, isNoulAnswer).readonly(),
+	answers: type.Record(isString, isNoulAnswer.or(isScoreAnswer)).readonly(),
 }).readonly();
 
 const isReasonMessage = type({
@@ -64,18 +64,18 @@ const isReasonResponse = type({
 	choices: isReasonChoice.array().readonly(),
 }).readonly();
 
-function toDecisionQuestion(question: NoulQuestion): DecisionsRequest["questions"][string] {
-	return {
-		criteria: question.criteria,
-		instructions: {
-			candidate: { ...question.instructions.candidate },
-			question: question.instructions.question,
-		},
-		type: "noul",
+function toDecisionQuestion(question: DecisionQuestion): DecisionsRequest["questions"][string] {
+	const instructions = {
+		candidate: { ...question.instructions.candidate },
+		question: question.instructions.question,
 	};
+
+	return question.type === "score"
+		? { criteria: [...question.criteria], instructions, type: "score" }
+		: { criteria: question.criteria, instructions, type: "noul" };
 }
 
-function toDecisionQuestions(questions: Readonly<Record<string, NoulQuestion>>): DecisionsRequest["questions"] {
+function toDecisionQuestions(questions: Readonly<Record<string, DecisionQuestion>>): DecisionsRequest["questions"] {
 	return Object.fromEntries(Object.entries(questions).map(([key, question]) => [key, toDecisionQuestion(question)]));
 }
 
@@ -84,7 +84,7 @@ export function createOpenRouterDecisionTransport(
 	onUsage?: OnUsage,
 ): DecisionTransport {
 	return {
-		decide: async (options): Promise<Readonly<Record<string, NoulAnswer>>> => {
+		decide: async (options): Promise<Readonly<Record<string, DecisionAnswer>>> => {
 			const response = await createDecisionAsync({
 				decisionsRequest: {
 					model: options.model,
@@ -102,9 +102,9 @@ export function createOpenRouterDecisionTransport(
 					response.usage === undefined ? undefined : response.usage.inputTokens + response.usage.outputTokens,
 			});
 
-			const parsed = isNoulAnswersResponse(response);
+			const parsed = isDecisionAnswersResponse(response);
 			if (parsed instanceof type.errors) {
-				throw new TypeError(`OpenRouter Decisions returned a non-noul answer: ${parsed.summary}`);
+				throw new TypeError(`OpenRouter Decisions returned an invalid judgment: ${parsed.summary}`);
 			}
 
 			return parsed.answers;

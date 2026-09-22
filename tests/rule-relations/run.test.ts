@@ -12,12 +12,14 @@ import {
 	readGeneratedEdges,
 	regenerateRelationsAsync,
 } from "$script-utilities/rule-relations/run";
-import { getJudgmentKey, getPairKey, judgmentDimensions } from "$script-utilities/rule-relations/types";
+import { getPairKey, judgmentDimensions } from "$script-utilities/rule-relations/types";
+
+import { createJudgments } from "./fixtures";
 
 import type { RuleName } from "$data/rule-manifest";
 import type {
+	DecisionAnswer,
 	DecisionTransport,
-	NoulAnswer,
 	PairJudgments,
 	ReasonWriter,
 	RelationProgress,
@@ -69,22 +71,19 @@ const cardFixtures: ReadonlyMap<RuleName, RuleCard> = new Map<RuleName, RuleCard
 	],
 ]);
 
-function createJudgments(overrides: Partial<PairJudgments> = {}): PairJudgments {
-	return { duplicates: 0, exists: 0, replaces: 0, requires: 0, ...overrides };
-}
-
 function createFakeTransport(desired: ReadonlyMap<string, PairJudgments>, calls: Array<string>): DecisionTransport {
 	return {
-		decide: async (options): Promise<Readonly<Record<string, NoulAnswer>>> => {
+		decide: async (options): Promise<Readonly<Record<string, DecisionAnswer>>> => {
 			calls.push(options.state.name);
-			const answers: Record<string, NoulAnswer> = {};
+			const answers: Record<string, DecisionAnswer> = {};
 			for (const [questionId, question] of Object.entries(options.questions)) {
 				const dimension = judgmentDimensions.find((entry) => questionId.startsWith(`${entry}__`));
-				const judgments = desired.get(getJudgmentKey(options.state.name, question.instructions.candidate.name));
-				if (dimension === undefined || judgments === undefined) {
+				const judgments = desired.get(getPairKey(options.state.name, question.instructions.candidate.name));
+				if (judgments === undefined) {
 					throw new Error(`Unexpected question "${questionId}".`);
 				}
-				answers[questionId] = { noul: judgments[dimension], type: "noul" };
+				if (question.type === "score") answers[questionId] = judgments.assessment;
+				else if (dimension !== undefined) answers[questionId] = { noul: judgments[dimension], type: "noul" };
 			}
 			return answers;
 		},
@@ -96,15 +95,12 @@ function createFakeReasonWriter(reason: (from: RuleName, to: RuleName) => string
 }
 
 describe("judgeRulePairs", () => {
-	it("judges both directions once and reuses the cache afterwards", async () => {
-		expect.assertions(6);
+	it("judges each unordered pair once and can repeat offline from cache", async () => {
+		expect.assertions(5);
 
 		const calls = new Array<string>();
 		const progress = new Array<RelationProgress>();
-		const desired = new Map([
-			[getJudgmentKey("no-print", "no-warn"), createJudgments({ exists: 0.9 })],
-			[getJudgmentKey("no-warn", "no-print"), createJudgments({ exists: 0.85 })],
-		]);
+		const desired = new Map([[getPairKey("no-print", "no-warn"), createJudgments()]]);
 		const directory = mkdtempSync(nodePath.join(tmpdir(), "rule-relations-run-"));
 		onTestFinished(() => {
 			rmSync(directory, { force: true, recursive: true });
@@ -119,20 +115,29 @@ describe("judgeRulePairs", () => {
 			onProgress: (update) => {
 				progress.push(update);
 			},
-			pairs: [{ left: "no-print", right: "no-warn" }],
+			pairs: [
+				{ left: "no-warn", right: "no-print" },
+				{ left: "no-print", right: "no-warn" },
+			],
 			promptVersion: judgmentPromptVersion,
 			transport,
 		};
 
 		const first = await judgeRulePairsAsync(options);
-		const second = await judgeRulePairsAsync(options);
+		const second = await judgeRulePairsAsync({
+			...options,
+			transport: {
+				decide: async () => {
+					throw new Error("Network unavailable");
+				},
+			},
+		});
 
-		expect(first.size).toBe(2);
-		expect(calls).toHaveLength(2);
-		expect(second.get(getJudgmentKey("no-print", "no-warn"))).toStrictEqual(createJudgments({ exists: 0.9 }));
-		expect(calls).toHaveLength(2);
-		expect(progress).toContainEqual({ cached: 0, completed: 2, phase: "judgments", total: 2 });
-		expect(progress.at(-1)).toStrictEqual({ cached: 2, completed: 2, phase: "judgments", total: 2 });
+		expect(first.size).toBe(1);
+		expect(second.get(getPairKey("no-print", "no-warn"))).toStrictEqual(createJudgments());
+		expect(first).toStrictEqual(second);
+		expect(progress).toContainEqual({ cached: 0, completed: 1, phase: "judgments", total: 1 });
+		expect(progress.at(-1)).toStrictEqual({ cached: 1, completed: 1, phase: "judgments", total: 1 });
 	});
 });
 
@@ -143,12 +148,14 @@ describe("regenerateRelations", () => {
 		const calls = new Array<string>();
 		const progress = new Array<RelationProgress>();
 		const desired = new Map([
-			[getJudgmentKey("no-error", "no-print"), createJudgments()],
-			[getJudgmentKey("no-error", "no-warn"), createJudgments({ exists: 0.1 })],
-			[getJudgmentKey("no-print", "no-error"), createJudgments({ replaces: 0.9 })],
-			[getJudgmentKey("no-print", "no-warn"), createJudgments({ exists: 0.9 })],
-			[getJudgmentKey("no-warn", "no-error"), createJudgments()],
-			[getJudgmentKey("no-warn", "no-print"), createJudgments({ exists: 0.85 })],
+			[getPairKey("no-error", "no-print"), createJudgments({ backwardReplaces: 0.9 })],
+			[
+				getPairKey("no-error", "no-warn"),
+				createJudgments({
+					assessment: { probabilities: { "0": 0.9, "1": 0.1, "2": 0 }, score: 0.1, type: "score" },
+				}),
+			],
+			[getPairKey("no-print", "no-warn"), createJudgments()],
 		]);
 		const result = await regenerateRelationsAsync({
 			allNames: ["no-error", "no-print", "no-warn"],
@@ -164,7 +171,7 @@ describe("regenerateRelations", () => {
 			},
 			pairs: [
 				{ left: "no-print", right: "no-warn" },
-				{ left: "no-error", right: "no-print" },
+				{ left: "no-print", right: "no-error" },
 				{ left: "no-error", right: "no-warn" },
 			],
 			reasonCache: undefined,
@@ -181,7 +188,7 @@ describe("regenerateRelations", () => {
 		expect(result.edges).toHaveLength(2);
 		expect(supersedes).toMatchObject({ from: "no-print", to: "no-error" });
 		expect(related?.reason).toBe("Both no-print and no-warn matter.");
-		expect(related?.evidence?.forward.exists).toBeCloseTo(0.9);
+		expect(related?.evidence).toMatchObject({ judgments: { assessment: { probabilities: { "2": 0.9 } } } });
 		expect(result.resolutions.get(getPairKey("no-print", "no-error"))?.type).toBe("relation");
 		expect(progress.at(-1)).toStrictEqual({ cached: 0, completed: 2, phase: "reasons", total: 2 });
 	});
@@ -191,8 +198,12 @@ describe("regenerateRelations", () => {
 
 		const calls = new Array<string>();
 		const desired = new Map([
-			[getJudgmentKey("no-error", "no-print"), createJudgments({ exists: 0.1 })],
-			[getJudgmentKey("no-print", "no-error"), createJudgments()],
+			[
+				getPairKey("no-error", "no-print"),
+				createJudgments({
+					assessment: { probabilities: { "0": 0.9, "1": 0.1, "2": 0 }, score: 0.1, type: "score" },
+				}),
+			],
 		]);
 		const result = await regenerateRelationsAsync({
 			allNames: ["no-error", "no-print", "no-warn"],
@@ -222,13 +233,14 @@ describe("regenerateRelations", () => {
 		expect.assertions(4);
 
 		const nearThresholdJudgments = new Map([
-			[getJudgmentKey("no-print", "no-warn"), createJudgments({ exists: 0.6 })],
-			[getJudgmentKey("no-warn", "no-print"), createJudgments()],
+			[
+				getPairKey("no-print", "no-warn"),
+				createJudgments({
+					assessment: { probabilities: { "0": 0.1, "1": 0.3, "2": 0.6 }, score: 1.5, type: "score" },
+				}),
+			],
 		]);
-		const rejectedJudgments = new Map([
-			[getJudgmentKey("no-print", "no-warn"), createJudgments({ exists: 0.9 })],
-			[getJudgmentKey("no-warn", "no-print"), createJudgments()],
-		]);
+		const rejectedJudgments = new Map([[getPairKey("no-print", "no-warn"), createJudgments()]]);
 		const nearThreshold = await regenerateRelationsAsync({
 			allNames: ["no-error", "no-print", "no-warn"],
 			batchSize: 10,
@@ -265,7 +277,7 @@ describe("regenerateRelations", () => {
 		});
 
 		expect(nearThreshold.edges).toHaveLength(0);
-		expect(nearThreshold.reviews[0]?.concern).toBe("near-threshold judgments");
+		expect(nearThreshold.reviews[0]).toMatchObject({ left: "no-print", right: "no-warn", strength: 0.6 });
 		expect(rejected.edges).toHaveLength(0);
 		expect(rejected.reviews[0]?.concern).toContain("reason");
 	});
@@ -275,7 +287,7 @@ describe("createAllRulePairs", () => {
 	it("creates each unordered pair exactly once", () => {
 		expect.assertions(1);
 
-		expect(createAllRulePairs(["no-error", "no-print", "no-warn"])).toStrictEqual([
+		expect(createAllRulePairs(["no-warn", "no-error", "no-print", "no-error"])).toStrictEqual([
 			{ left: "no-error", right: "no-print" },
 			{ left: "no-error", right: "no-warn" },
 			{ left: "no-print", right: "no-warn" },

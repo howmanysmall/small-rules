@@ -8,13 +8,13 @@ import { compareStrings, isPairJudgments } from "./types";
 
 import type { RuleName } from "$data/rule-manifest";
 
-export const isRelationEvidence = type({
+const isLegacyJudgments = type({ duplicates: isNumber, exists: isNumber, replaces: isNumber, requires: isNumber });
+const isLegacyEvidence = type({
 	"+": "reject",
-	backward: isPairJudgments,
-	forward: isPairJudgments,
+	backward: isLegacyJudgments,
+	forward: isLegacyJudgments,
 	strength: isNumber,
 }).readonly();
-export type RelationEvidence = typeof isRelationEvidence.infer;
 
 const isRuleNameArkType = isString
 	.narrow((data, context) => {
@@ -23,8 +23,17 @@ const isRuleNameArkType = isString
 	})
 	.as<RuleName>();
 
+export const isRelationEvidence = type({
+	"+": "reject",
+	judgments: isPairJudgments,
+	left: isRuleNameArkType,
+	right: isRuleNameArkType,
+	strength: isNumber,
+}).readonly();
+export type RelationEvidence = typeof isRelationEvidence.infer;
+
 export const isGeneratedEdge = type({
-	"evidence?": isRelationEvidence.or(isUndefined),
+	"evidence?": isRelationEvidence.or(isLegacyEvidence).or(isUndefined),
 	from: isRuleNameArkType,
 	kind: '"overlaps" | "depends-on" | "supersedes" | "related"',
 	reason: isString,

@@ -9,41 +9,25 @@ interface DirectedCandidate {
 	readonly score: number;
 }
 
-function getPairStrength(forward: PairJudgments, backward: PairJudgments): number {
-	return Math.max(
-		forward.duplicates,
-		forward.exists,
-		forward.replaces,
-		forward.requires,
-		backward.duplicates,
-		backward.exists,
-		backward.replaces,
-		backward.requires,
-	);
-}
-
 interface ResolveOptions {
-	readonly backward: PairJudgments;
-	readonly forward: PairJudgments;
+	readonly judgments: PairJudgments;
 	readonly left: RuleName;
 	readonly right: RuleName;
 	readonly thresholds: JudgmentThresholds;
 }
 
-export function resolvePairRelation({
-	backward,
-	forward,
-	left,
-	right,
-	thresholds,
-}: ResolveOptions): RelationResolution {
-	const strength = getPairStrength(forward, backward);
+export function resolvePairRelation({ judgments, left, right, thresholds }: ResolveOptions): RelationResolution {
+	if (judgments.assessment.probabilities["0"] >= thresholds.accept) return { type: "none" };
+	const strength = judgments.assessment.probabilities["2"];
+	if (strength < thresholds.accept) {
+		return { concern: "relationship needs review", strength, type: "review" };
+	}
 
 	const directedCandidates = [
-		{ relation: { from: left, kind: "supersedes", to: right }, score: forward.replaces },
-		{ relation: { from: right, kind: "supersedes", to: left }, score: backward.replaces },
-		{ relation: { from: left, kind: "depends-on", to: right }, score: forward.requires },
-		{ relation: { from: right, kind: "depends-on", to: left }, score: backward.requires },
+		{ relation: { from: left, kind: "supersedes", to: right }, score: judgments.forwardReplaces },
+		{ relation: { from: right, kind: "supersedes", to: left }, score: judgments.backwardReplaces },
+		{ relation: { from: left, kind: "depends-on", to: right }, score: judgments.forwardRequires },
+		{ relation: { from: right, kind: "depends-on", to: left }, score: judgments.backwardRequires },
 	] satisfies ReadonlyArray<DirectedCandidate>;
 
 	const accepted = directedCandidates.filter((candidate) => candidate.score >= thresholds.accept);
@@ -53,23 +37,22 @@ export function resolvePairRelation({
 
 	const [directed] = accepted;
 	if (directed !== undefined) {
-		return { relation: directed.relation, strength: directed.score, type: "relation" };
+		return { relation: directed.relation, strength, type: "relation" };
 	}
 
-	const duplicates = Math.max(forward.duplicates, backward.duplicates);
-	if (duplicates >= thresholds.accept) {
-		return { relation: { from: left, kind: "overlaps", to: right }, strength: duplicates, type: "relation" };
+	if (directedCandidates.some((candidate) => candidate.score >= thresholds.review)) {
+		return { concern: "uncertain relation kind or direction", strength, type: "review" };
 	}
 
-	const exists = Math.max(forward.exists, backward.exists);
-	if (exists >= thresholds.accept) {
-		return { relation: { from: left, kind: "related", to: right }, strength: exists, type: "relation" };
+	if (judgments.duplicates >= thresholds.accept) {
+		return { relation: { from: left, kind: "overlaps", to: right }, strength, type: "relation" };
 	}
 
-	if (strength >= thresholds.review) {
-		return { concern: "near-threshold judgments", strength, type: "review" };
+	if (judgments.duplicates >= thresholds.review) {
+		return { concern: "uncertain diagnostic overlap", strength, type: "review" };
 	}
-	return { type: "none" };
+
+	return { relation: { from: left, kind: "related", to: right }, strength, type: "relation" };
 }
 
 export function applyRelationCap(
@@ -90,9 +73,11 @@ export function applyRelationCap(
 	for (const scored of ordered) {
 		const { from, to } = scored.relation;
 		if ((counts.get(from) ?? 0) >= maxPerRule || (counts.get(to) ?? 0) >= maxPerRule) continue;
+
 		counts.set(from, (counts.get(from) ?? 0) + 1);
 		counts.set(to, (counts.get(to) ?? 0) + 1);
 		kept[size++] = scored;
 	}
+
 	return kept;
 }

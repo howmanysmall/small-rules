@@ -1,14 +1,13 @@
-import { isNumber } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
 import type { RuleName } from "$data/rule-manifest";
 import type { RuleRelationKind } from "$data/rule-relations";
+import type { RuleExample } from "$utilities/extract-rule-examples";
 
-export interface RuleCardExample {
-	readonly code: string;
-	readonly kind: "invalid" | "valid";
-	readonly title: string;
-}
+export type RuleCardExample = Pick<
+	RuleExample,
+	"code" | "filename" | "kind" | "language" | "options" | "output" | "settings" | "title"
+>;
 
 export interface RuleCard {
 	readonly name: RuleName;
@@ -29,26 +28,49 @@ function defineJudgmentDimensions<const TDimensions extends ReadonlyArray<string
 }
 
 export const enum JudgmentDimension {
+	BackwardReplaces = "backwardReplaces",
+	BackwardRequires = "backwardRequires",
 	Duplicates = "duplicates",
-	Exists = "exists",
-	Replaces = "replaces",
-	Requires = "requires",
+	ForwardReplaces = "forwardReplaces",
+	ForwardRequires = "forwardRequires",
 }
 const allJudgmentDimensions = [
 	JudgmentDimension.Duplicates,
-	JudgmentDimension.Exists,
-	JudgmentDimension.Replaces,
-	JudgmentDimension.Requires,
+	JudgmentDimension.ForwardReplaces,
+	JudgmentDimension.BackwardReplaces,
+	JudgmentDimension.ForwardRequires,
+	JudgmentDimension.BackwardRequires,
 ];
 export const isJudgmentDimension = type.enumerated(...allJudgmentDimensions);
 
 export const judgmentDimensions = defineJudgmentDimensions(allJudgmentDimensions);
 
+const isProbability = type("0 <= number <= 1");
+// Three values rounded to hundredths allow 3 × 0.005 rounding error.
+const isAssessmentProbabilities = type({
+	"0": isProbability,
+	"1": isProbability,
+	"2": isProbability,
+	"+": "reject",
+}).narrow((value) => Math.abs(value["0"] + value["1"] + value["2"] - 1) <= 0.015 + Number.EPSILON);
+
+export const isScoreAnswer = type({
+	"+": "delete",
+	"confidence?": isProbability,
+	probabilities: isAssessmentProbabilities,
+	score: "0 <= number <= 2",
+	type: "'score'",
+}).readonly();
+export type ScoreAnswer = typeof isScoreAnswer.infer;
+
 export const isPairJudgments = type({
-	[JudgmentDimension.Duplicates]: isNumber,
-	[JudgmentDimension.Exists]: isNumber,
-	[JudgmentDimension.Replaces]: isNumber,
-	[JudgmentDimension.Requires]: isNumber,
+	"+": "reject",
+	assessment: isScoreAnswer,
+	[JudgmentDimension.BackwardReplaces]: isProbability,
+	[JudgmentDimension.BackwardRequires]: isProbability,
+	[JudgmentDimension.Duplicates]: isProbability,
+	[JudgmentDimension.ForwardReplaces]: isProbability,
+	[JudgmentDimension.ForwardRequires]: isProbability,
 }).readonly();
 export type PairJudgments = typeof isPairJudgments.infer;
 
@@ -63,21 +85,30 @@ export interface NoulQuestion {
 	readonly type: "noul";
 }
 
+export interface ScoreQuestion {
+	readonly criteria: ReadonlyArray<string>;
+	readonly instructions: { readonly candidate: RuleCard; readonly question: string };
+	readonly type: "score";
+}
+
+export type DecisionQuestion = NoulQuestion | ScoreQuestion;
+
 export const isNoulAnswer = type({
 	"+": "reject",
-	noul: isNumber,
+	noul: isProbability,
 	type: "'noul'",
 }).readonly();
 export type NoulAnswer = typeof isNoulAnswer.infer;
+export type DecisionAnswer = NoulAnswer | ScoreAnswer;
 
 interface DecideOptions {
 	readonly model: string;
-	readonly questions: Readonly<Record<string, NoulQuestion>>;
+	readonly questions: Readonly<Record<string, DecisionQuestion>>;
 	readonly state: RuleCard;
 }
 
 export interface DecisionTransport {
-	readonly decide: (options: DecideOptions) => Promise<Readonly<Record<string, NoulAnswer>>>;
+	readonly decide: (options: DecideOptions) => Promise<Readonly<Record<string, DecisionAnswer>>>;
 }
 
 export interface UnorderedRulePair {
@@ -130,10 +161,6 @@ export type RelationResolution =
 	| { readonly concern: string; readonly strength: number; readonly type: "review" }
 	| { readonly relation: RelationDraft; readonly strength: number; readonly type: "relation" }
 	| { readonly type: "none" };
-
-export function getJudgmentKey(source: string, candidate: string): string {
-	return `${source}->${candidate}`;
-}
 
 export function getPairKey(from: string, to: string): string {
 	return [from, to].toSorted().join(":");

@@ -14,8 +14,10 @@ import { createReasonMessages, validateReason } from "$script-utilities/rule-rel
 import { createRelationDocument, renderRelationDocument } from "$script-utilities/rule-relations/render";
 import { checkRelationsDocument } from "$script-utilities/rule-relations/validate";
 
+import { createJudgments } from "./fixtures";
+
 import type { RuleRelation } from "$data/rule-relations";
-import type { PairJudgments, RuleCard } from "$script-utilities/rule-relations/types";
+import type { RuleCard } from "$script-utilities/rule-relations/types";
 
 const cacheKeyPattern = /^[0-9a-f]{64}$/u;
 
@@ -62,11 +64,12 @@ const relatedDraft = {
 	to: "no-warn",
 } satisfies RuleRelation;
 
-const judgmentsFixture = { duplicates: 0.1, exists: 0.9, replaces: 0.2, requires: 0.3 } satisfies PairJudgments;
+const judgmentsFixture = createJudgments();
 
 const evidenceFixture = {
-	backward: judgmentsFixture,
-	forward: judgmentsFixture,
+	judgments: judgmentsFixture,
+	left: "no-print",
+	right: "no-warn",
 	strength: 0.9,
 } satisfies NonNullable<Parameters<typeof createRelationDocument>[0]["edges"][number]["evidence"]>;
 

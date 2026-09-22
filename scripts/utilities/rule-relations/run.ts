@@ -7,7 +7,7 @@ import { validateReason } from "./reasons";
 import { isGeneratedEdge } from "./render";
 import { readRepositoryFile } from "./repository";
 import { applyRelationCap, resolvePairRelation } from "./resolve";
-import { getJudgmentKey, getPairKey } from "./types";
+import { getPairKey } from "./types";
 
 import type { RuleName } from "$data/rule-manifest";
 
@@ -54,8 +54,9 @@ interface RegenerateOptions {
 	readonly transport: DecisionTransport;
 }
 
-interface RegenerationResult {
+export interface RegenerationResult {
 	readonly edges: ReadonlyArray<GeneratedEdge>;
+	readonly judgments: ReadonlyMap<string, PairJudgments>;
 	readonly resolutions: ReadonlyMap<string, RelationResolution>;
 	readonly reviews: ReadonlyArray<ReviewFinding>;
 }
@@ -85,7 +86,9 @@ interface CappedRelations {
 function chunkValues<TValue>(values: ReadonlyArray<TValue>, size: number): ReadonlyArray<ReadonlyArray<TValue>> {
 	const chunks = new Array<ReadonlyArray<TValue>>();
 	let length = 0;
-	for (let index = 0; index < values.length; index += size) chunks[length++] = values.slice(index, index + size);
+	for (let index = 0; index < values.length; index += size) {
+		chunks[length++] = values.slice(index, index + size);
+	}
 	return chunks;
 }
 
@@ -100,18 +103,25 @@ function getJudgmentCacheKey(options: JudgmentCacheKeyOptions): string {
 	return createCacheKey(options);
 }
 
+function orderPair(pair: UnorderedRulePair): UnorderedRulePair {
+	return pair.left < pair.right ? pair : { left: pair.right, right: pair.left };
+}
+
 export function createAllRulePairs(names: ReadonlyArray<RuleName>): ReadonlyArray<UnorderedRulePair> {
+	const ordered = [...new Set(names)].toSorted();
+
 	const pairs = new Array<UnorderedRulePair>();
 	let length = 0;
-	for (let leftIndex = 0; leftIndex < names.length; leftIndex += 1) {
-		const left = names[leftIndex];
+	for (let leftIndex = 0; leftIndex < ordered.length; leftIndex += 1) {
+		const left = ordered[leftIndex];
 		if (left === undefined) continue;
 
-		for (let rightIndex = leftIndex + 1; rightIndex < names.length; rightIndex += 1) {
-			const right = names[rightIndex];
+		for (let rightIndex = leftIndex + 1; rightIndex < ordered.length; rightIndex += 1) {
+			const right = ordered[rightIndex];
 			if (right !== undefined) pairs[length++] = { left, right };
 		}
 	}
+
 	return pairs;
 }
 
@@ -129,19 +139,21 @@ interface JudgeOptions {
 export async function judgeRulePairsAsync(options: JudgeOptions): Promise<ReadonlyMap<string, PairJudgments>> {
 	const judgments = new Map<string, PairJudgments>();
 	const pendingBySource = new Map<RuleName, Array<RuleCard>>();
-	const seenDirections = new Set<string>();
+	const seenPairs = new Set<string>();
 	let cachedCount = 0;
 	let completed = 0;
 
-	function registerDirection(source: RuleName, candidateName: RuleName): void {
-		const judgmentKey = getJudgmentKey(source, candidateName);
-		if (seenDirections.has(judgmentKey)) return;
-		seenDirections.add(judgmentKey);
+	function registerPair(source: RuleName, candidateName: RuleName): void {
+		const judgmentKey = getPairKey(source, candidateName);
+		if (seenPairs.has(judgmentKey)) return;
+
+		seenPairs.add(judgmentKey);
 
 		const sourceCard = options.cards.get(source);
 		if (sourceCard === undefined) {
 			throw new Error(`Missing rule card for "${source}".`);
 		}
+
 		const candidate = options.cards.get(candidateName);
 		if (candidate === undefined) {
 			throw new Error(`Missing rule card for "${candidateName}".`);
@@ -162,15 +174,18 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 		}
 
 		const pending = pendingBySource.get(source);
-		if (pending === undefined) pendingBySource.set(source, [candidate]);
-		else pending.push(candidate);
+		if (pending === undefined) {
+			pendingBySource.set(source, [candidate]);
+		} else {
+			pending.push(candidate);
+		}
 	}
 
-	for (const pair of options.pairs) {
-		registerDirection(pair.left, pair.right);
-		registerDirection(pair.right, pair.left);
+	for (const entry of options.pairs) {
+		const pair = orderPair(entry);
+		registerPair(pair.left, pair.right);
 	}
-	const total = seenDirections.size;
+	const total = seenPairs.size;
 	options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 
 	const requests = [...pendingBySource].flatMap(([sourceName, candidates]) =>
@@ -193,7 +208,7 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 					throw new Error(`Missing rule card for "${candidateName}".`);
 				}
 
-				judgments.set(getJudgmentKey(sourceName, candidateName), pairJudgments);
+				judgments.set(getPairKey(sourceName, candidateName), pairJudgments);
 				options.cache?.set(
 					getJudgmentCacheKey({
 						candidate,
@@ -204,6 +219,7 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 					pairJudgments,
 				);
 			}
+
 			completed += interpreted.size;
 			options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 		}),
@@ -222,21 +238,21 @@ export function resolveJudgedPairs(options: ResolveOptions): ResolutionResult {
 	const resolutions = new Map<string, RelationResolution>();
 	const reviews = new Array<ReviewFinding>();
 
-	for (const pair of options.pairs) {
-		const forward = options.judgments.get(getJudgmentKey(pair.left, pair.right));
-		const backward = options.judgments.get(getJudgmentKey(pair.right, pair.left));
-		if (forward === undefined || backward === undefined) {
+	for (const entry of options.pairs) {
+		const pair = orderPair(entry);
+		const judgments = options.judgments.get(getPairKey(pair.left, pair.right));
+		if (judgments === undefined) {
 			throw new Error(`Missing judgments for ${pair.left} ↔ ${pair.right}.`);
 		}
 
 		const resolution = resolvePairRelation({
-			backward,
-			forward,
+			judgments,
 			left: pair.left,
 			right: pair.right,
 			thresholds: options.thresholds,
 		});
 		resolutions.set(getPairKey(pair.left, pair.right), resolution);
+
 		if (resolution.type === "review") {
 			reviews.push({
 				concern: resolution.concern,
@@ -352,14 +368,14 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 	for (const resolution of resolved.resolutions.values()) {
 		if (resolution.type !== "relation") continue;
 
-		const forward = judgments.get(getJudgmentKey(resolution.relation.from, resolution.relation.to));
-		const backward = judgments.get(getJudgmentKey(resolution.relation.to, resolution.relation.from));
-		if (forward === undefined || backward === undefined) {
+		const pair = orderPair({ left: resolution.relation.from, right: resolution.relation.to });
+		const pairJudgments = judgments.get(getPairKey(pair.left, pair.right));
+		if (pairJudgments === undefined) {
 			throw new Error(`Missing judgments for ${resolution.relation.from} ↔ ${resolution.relation.to}.`);
 		}
 
 		const fresh = {
-			evidence: { backward, forward, strength: resolution.strength },
+			evidence: { judgments: pairJudgments, left: pair.left, right: pair.right, strength: resolution.strength },
 			relation: resolution.relation,
 			strength: resolution.strength,
 		} satisfies FreshRelation;
@@ -424,7 +440,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 		});
 	}
 
-	return { edges, resolutions: resolved.resolutions, reviews };
+	return { edges, judgments, resolutions: resolved.resolutions, reviews };
 }
 
 export function readGeneratedEdges(relativePath: string): ReadonlyArray<GeneratedEdge> {

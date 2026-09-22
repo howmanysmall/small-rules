@@ -4,6 +4,16 @@ import { ruleManifest } from "$data/rule-manifest";
 import { buildRuleCards } from "$script-utilities/rule-relations/rule-cards";
 
 describe("buildRuleCards", () => {
+	it("keeps the configuration that makes a documented example invalid", () => {
+		expect.assertions(1);
+
+		const example = buildRuleCards()
+			.get("ban-instances")
+			?.examples.find((entry) => entry.kind === "invalid");
+
+		expect(example).toMatchObject({ options: [{ bannedInstances: ["Part"] }] });
+	});
+
 	it("builds a card for every manifest rule", () => {
 		expect.assertions(2);
 

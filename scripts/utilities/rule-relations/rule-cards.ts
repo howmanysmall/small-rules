@@ -74,6 +74,7 @@ function extractSharedUtilities(sourceText: string): ReadonlyArray<string> {
 		const specifier = match.groups?.utility;
 		if (specifier !== undefined) utilities.add(specifier);
 	}
+
 	return [...utilities].toSorted(compareStrings);
 }
 
@@ -84,7 +85,16 @@ function toCardExamples(name: RuleName): ReadonlyArray<RuleCardExample> {
 			.filter((example) => example.kind === kind)
 			.toSorted((left, right) => compareStrings(left.id, right.id))
 			.slice(0, maxExamplesPerKind)
-			.map((example) => ({ code: example.code, kind: example.kind, title: example.title })),
+			.map(({ code, filename, kind: exampleKind, language, options, output, settings, title }) => ({
+				code,
+				filename,
+				kind: exampleKind,
+				language,
+				options,
+				output,
+				settings,
+				title,
+			})),
 	);
 }
 
@@ -117,5 +127,6 @@ export function buildRuleCards(): ReadonlyMap<RuleName, RuleCard> {
 			cards.set(entry.name, buildRuleCard(category.key, entry.name));
 		}
 	}
+
 	return cards;
 }

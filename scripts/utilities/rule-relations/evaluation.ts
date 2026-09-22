@@ -36,6 +36,7 @@ export function compareRelationBaseline(options: CompareOptions): RelationBaseli
 	const currentByPair = new Map(options.current.map((edge) => [getPairKey(edge.from, edge.to), edge]));
 	const previousByPair = new Map(options.previous.map((edge) => [getPairKey(edge.from, edge.to), edge]));
 	const pairKeys = new Set([...currentByPair.keys(), ...previousByPair.keys()]);
+
 	const added = new Array<RelationIdentity>();
 	const changed = new Array<RelationChange>();
 	const removed = new Array<RelationIdentity>();
@@ -48,7 +49,9 @@ export function compareRelationBaseline(options: CompareOptions): RelationBaseli
 			if (previous !== undefined) removed.push(toIdentity(previous));
 		} else if (previous === undefined) added.push(toIdentity(current));
 		else if (isSameRelation(current, previous)) unchangedRelationCount += 1;
-		else changed.push({ current: toIdentity(current), previous: toIdentity(previous) });
+		else {
+			changed.push({ current: toIdentity(current), previous: toIdentity(previous) });
+		}
 	}
 
 	return {

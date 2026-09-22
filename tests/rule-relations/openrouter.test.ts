@@ -33,7 +33,35 @@ const noWarnCard: RuleCard = {
 };
 
 describe("openRouter relation adapters", () => {
-	it("returns only noul answers from the Decisions API", async () => {
+	it.each([
+		{ "0": 0.93, "1": 0.05, "2": 0.01 },
+		{ "0": 0.93, "1": 0.06, "2": 0.02 },
+	])("preserves API probabilities rounded to two decimal places: %j", async (probabilities) => {
+		expect.assertions(1);
+
+		const transport = createOpenRouterDecisionTransport(async () => ({
+			answers: { assessment: { probabilities, score: 0.08, type: "score" } },
+		}));
+		const answers = await transport.decide({ model: "test", questions: {}, state: noPrintCard });
+
+		expect(answers.assessment).toMatchObject({ probabilities });
+	});
+
+	it.each([
+		{ probabilities: { "0": 0.1, "1": 0.1, "2": 1.2 }, score: 2, type: "score" },
+		{ probabilities: { "0": 0.2, "1": 0.2, "2": 0.2 }, score: 1, type: "score" },
+		{ probabilities: { "0": 0.2, "1": 0.8 }, score: 1, type: "score" },
+		{ noul: -0.1, type: "noul" },
+		{ noul: 1.1, type: "noul" },
+	])("rejects malformed probability evidence: %j", async (answer) => {
+		expect.assertions(1);
+
+		const transport = createOpenRouterDecisionTransport(async () => ({ answers: { assessment: answer } }));
+
+		await expect(transport.decide({ model: "test", questions: {}, state: noPrintCard })).rejects.toThrow(TypeError);
+	});
+
+	it("returns score distributions and noul answers from the Decisions API", async () => {
 		expect.assertions(3);
 
 		let requestedModel: string | undefined;
@@ -42,7 +70,10 @@ describe("openRouter relation adapters", () => {
 			async (request) => {
 				requestedModel = request.decisionsRequest.model;
 				return {
-					answers: { exists__no_warn: { noul: 0.9, type: "noul" } },
+					answers: {
+						assessment: { probabilities: { "0": 0.02, "1": 0.08, "2": 0.9 }, score: 1.88, type: "score" },
+						overlaps: { noul: 0.1, type: "noul" },
+					},
 					usage: { cost: 0.012, inputTokens: 100, outputTokens: 20 },
 				};
 			},
@@ -53,7 +84,12 @@ describe("openRouter relation adapters", () => {
 		const answers = await transport.decide({
 			model: "~typesafe/jev-latest",
 			questions: {
-				exists__no_warn: {
+				assessment: {
+					criteria: ["Unrelated", "Review", "Publish"],
+					instructions: { candidate: noWarnCard, question: "Should these be linked?" },
+					type: "score",
+				},
+				overlaps: {
 					criteria: { false: "Different concerns.", true: "Same concern." },
 					instructions: { candidate: noWarnCard, question: "Are these related?" },
 					type: "noul",
@@ -63,22 +99,23 @@ describe("openRouter relation adapters", () => {
 		});
 
 		expect(requestedModel).toBe("~typesafe/jev-latest");
-		expect(answers).toStrictEqual({ exists__no_warn: { noul: 0.9, type: "noul" } });
+		expect(answers).toMatchObject({
+			assessment: { probabilities: { "0": 0.02, "1": 0.08, "2": 0.9 }, score: 1.88 },
+			overlaps: { noul: 0.1 },
+		});
 		expect(usage).toStrictEqual([
 			{ cost: 0.012, inputTokens: 100, outputTokens: 20, phase: "judgments", totalTokens: 120 },
 		]);
 	});
 
-	it("rejects a Decisions response containing another answer type", async () => {
+	it("rejects a score without its publication probabilities", async () => {
 		expect.assertions(1);
 
 		const transport = createOpenRouterDecisionTransport(async () => ({
 			answers: { exists__no_warn: { type: "score", value: 0.9 } },
 		}));
 
-		await expect(transport.decide({ model: "test", questions: {}, state: noPrintCard })).rejects.toThrow(
-			"non-noul",
-		);
+		await expect(transport.decide({ model: "test", questions: {}, state: noPrintCard })).rejects.toThrow(TypeError);
 	});
 
 	it("uses the configured reason model and returns trimmed text", async () => {

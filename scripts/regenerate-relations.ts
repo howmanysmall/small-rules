@@ -21,13 +21,13 @@ import {
 	maxRelationsPerRule,
 	reasonPromptVersion,
 } from "$script-utilities/rule-relations/constants";
-import { compareRelationBaseline } from "$script-utilities/rule-relations/evaluation";
 import {
 	createOpenRouterDecisionTransport,
 	createOpenRouterReasonWriter,
 } from "$script-utilities/rule-relations/openrouter";
 import { renderRelationDocument } from "$script-utilities/rule-relations/render";
 import { repositoryRoot } from "$script-utilities/rule-relations/repository";
+import { createRelationReviewReport } from "$script-utilities/rule-relations/review";
 import { buildRuleCards } from "$script-utilities/rule-relations/rule-cards";
 import { createAllRulePairs, readGeneratedEdges, regenerateRelationsAsync } from "$script-utilities/rule-relations/run";
 import { compareStrings } from "$script-utilities/rule-relations/types";
@@ -116,10 +116,14 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				throw new Error(problems.join("\n"));
 			}
 
-			const changesSincePreviousRun = compareRelationBaseline({
-				current: result.edges,
+			const report = createRelationReviewReport({
+				cards,
+				denylist: relationDenylist,
+				pins: relationPins,
 				previous: existingEdges,
+				result,
 			});
+			const { changesSincePreviousRun, modelJudgments, qualityEvaluation } = report;
 			const outputDirectory = nodePath.dirname(nodePath.join(repositoryRoot, generatedRelationDocumentPath));
 			mkdirSync(outputDirectory, { recursive: true });
 			writeFileSync(
@@ -132,11 +136,24 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			);
 			writeFileSync(
 				nodePath.join(repositoryRoot, reviewReportPath),
-				`${JSON.stringify({ changesSincePreviousRun, reviews: result.reviews }, undefined, "\t")}\n`,
+				`${JSON.stringify({ ...report, judgmentPromptVersion, models: { decisions: decisionModel, reasons: reasonModel }, thresholds: judgmentThresholds }, undefined, "\t")}\n`,
 				"utf8",
 			);
 
 			log.success(`wrote ${result.edges.length} relations and ${result.reviews.length} review findings`);
+			log.info(
+				`Jev verdicts: ${modelJudgments.acceptedCount} accepted, ${modelJudgments.rejectedCount} rejected, ${modelJudgments.needsReview.length} need review; ${modelJudgments.capped.length} accepted links omitted by the cap`,
+			);
+			log.info(
+				`manual checks: ${qualityEvaluation.matchedPairCount}/${qualityEvaluation.checkedPairCount} agree (${qualityEvaluation.positiveLabelCount} pins, ${qualityEvaluation.negativeLabelCount} denials)`,
+			);
+			for (const disagreement of qualityEvaluation.disagreements) {
+				const actual =
+					disagreement.actual.type === "relation"
+						? `${disagreement.actual.relation.from} ${disagreement.actual.relation.kind} ${disagreement.actual.relation.to}`
+						: disagreement.actual.type;
+				log.warn(`override disagreement: ${disagreement.pair.from} ↔ ${disagreement.pair.to}; Jev: ${actual}`);
+			}
 			log.info(
 				`changes since previous run: ${changesSincePreviousRun.unchangedRelationCount} unchanged, ${changesSincePreviousRun.added.length} added, ${changesSincePreviousRun.removed.length} removed, ${changesSincePreviousRun.changed.length} changed`,
 			);
