@@ -1,395 +1,996 @@
 {
 	"edges": [
 		{
-			"from": "ban-react-fc",
-			"kind": "related",
-			"reason": "Render helpers should become real components; FC annotations are the wrong way to type them.",
-			"to": "no-render-helper-functions"
+			"evidence": {
+				"backward": {
+					"duplicates": 0.8,
+					"exists": 0.62,
+					"replaces": 0.07,
+					"requires": 0.12
+				},
+				"forward": {
+					"duplicates": 0.75,
+					"exists": 0.54,
+					"replaces": 0.29,
+					"requires": 0.11
+				},
+				"strength": 0.8
+			},
+			"from": "ban-instances",
+			"kind": "overlaps",
+			"reason": "`ban-instances` overlaps `no-new-instance-in-use-memo`: a banned class constructed inside useMemo can be flagged by both rules, so expect duplicate reports.",
+			"to": "no-new-instance-in-use-memo"
 		},
 		{
-			"from": "ban-react-fc",
-			"kind": "related",
-			"reason": "Both protect React debug/profile identity: ban FC types, require displayName on memo/context exports.",
-			"to": "require-react-display-names"
-		},
-		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.38,
+					"exists": 0.81,
+					"replaces": 0.07,
+					"requires": 0.21
+				},
+				"forward": {
+					"duplicates": 0.5,
+					"exists": 0.78,
+					"replaces": 0.11,
+					"requires": 0.14
+				},
+				"strength": 0.81
+			},
 			"from": "directive-disable-enable-pair",
 			"kind": "related",
-			"reason": "Both police block-scoped disable/enable directive shape rather than line directives.",
-			"to": "directive-no-aggregating-enable"
-		},
-		{
-			"from": "directive-disable-enable-pair",
-			"kind": "related",
-			"reason": "Paired disable/enable blocks are the lifecycle counterpart of unused enable cleanup.",
-			"to": "directive-no-unused-enable"
-		},
-		{
-			"from": "directive-no-duplicate-disable",
-			"kind": "related",
-			"reason": "Duplicate disables and unlimited disables are adjacent directive hygiene checks.",
-			"to": "directive-no-unlimited-disable"
-		},
-		{
-			"from": "directive-no-restricted-disable",
-			"kind": "related",
-			"reason": "Restricted-rule disables and description-required disables both constrain when suppressions are allowed.",
-			"to": "directive-require-description"
-		},
-		{
-			"from": "directive-no-unlimited-disable",
-			"kind": "related",
-			"reason": "Blanket disables and undescribed disables are the two broadest suppression-quality failures.",
-			"to": "directive-require-description"
-		},
-		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "Banning block directives entirely removes the surface the other directive-* rules refine.",
-			"to": "directive-disable-enable-pair"
-		},
-		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "If block directives are forbidden, aggregating enable checks never apply.",
-			"to": "directive-no-aggregating-enable"
-		},
-		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "If block directives are forbidden, duplicate-disable checks never apply.",
+			"reason": "`directive-disable-enable-pair` complements `directive-no-duplicate-disable`: one demands a matching enable, the other bans redundant re-disables.",
 			"to": "directive-no-duplicate-disable"
 		},
 		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "If block directives are forbidden, restricted-disable policy is moot for blocks.",
-			"to": "directive-no-restricted-disable"
-		},
-		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "If block directives are forbidden, unlimited-disable checks never apply.",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.39,
+					"exists": 0.84,
+					"replaces": 0.07,
+					"requires": 0.18
+				},
+				"forward": {
+					"duplicates": 0.47,
+					"exists": 0.79,
+					"replaces": 0.11,
+					"requires": 0.38
+				},
+				"strength": 0.84
+			},
+			"from": "directive-disable-enable-pair",
+			"kind": "related",
+			"reason": "`directive-disable-enable-pair` complements `directive-no-unlimited-disable`: together they keep disables named and re-enabled, limiting suppression scope.",
 			"to": "directive-no-unlimited-disable"
 		},
 		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "If block directives are forbidden, unused-enable cleanup never applies.",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.24,
+					"exists": 0.82,
+					"replaces": 0.06,
+					"requires": 0.11
+				},
+				"forward": {
+					"duplicates": 0.18,
+					"exists": 0.86,
+					"replaces": 0.08,
+					"requires": 0.15
+				},
+				"strength": 0.86
+			},
+			"from": "directive-no-duplicate-disable",
+			"kind": "related",
+			"reason": "`directive-no-duplicate-disable` and `directive-no-unused-enable` complement each other: one flags repeated disables, the other flags unmatched enables.",
 			"to": "directive-no-unused-enable"
 		},
 		{
-			"from": "directive-no-use",
-			"kind": "supersedes",
-			"reason": "If block directives are forbidden, description requirements never apply to them.",
-			"to": "directive-require-description"
-		},
-		{
-			"from": "enforce-ianitor-check-type",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.18,
+					"exists": 0.74,
+					"replaces": 0.08,
+					"requires": 0.1
+				},
+				"forward": {
+					"duplicates": 0.27,
+					"exists": 0.8,
+					"replaces": 0.11,
+					"requires": 0.36
+				},
+				"strength": 0.8
+			},
+			"from": "directive-no-restricted-disable",
 			"kind": "related",
-			"reason": "Ianitor type annotations, hoist-to-module creation, and success-only access form one validator family.",
-			"to": "no-ianitor-in-function-body"
+			"reason": "directive-no-restricted-disable complements directive-no-unlimited-disable: the latter bans blanket disables, while this rule bans disabling configured rules.",
+			"to": "directive-no-unlimited-disable"
 		},
 		{
-			"from": "enforce-ianitor-check-type",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.79,
+					"exists": 0.79,
+					"replaces": 0.41,
+					"requires": 0.14
+				},
+				"forward": {
+					"duplicates": 0.8,
+					"exists": 0.76,
+					"replaces": 0.2,
+					"requires": 0.21
+				},
+				"strength": 0.8
+			},
+			"from": "directive-no-restricted-disable",
+			"kind": "overlaps",
+			"reason": "directive-no-restricted-disable overlaps with directive-no-use, which can also flag the same disable comments since it bans block directives more broadly.",
+			"to": "directive-no-use"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.14,
+					"exists": 0.79,
+					"replaces": 0.06,
+					"requires": 0.33
+				},
+				"forward": {
+					"duplicates": 0.16,
+					"exists": 0.87,
+					"replaces": 0.08,
+					"requires": 0.14
+				},
+				"strength": 0.87
+			},
+			"from": "directive-no-unlimited-disable",
 			"kind": "related",
-			"reason": "Annotated Check<T> validators and success-only result access are complementary Ianitor API hygiene.",
-			"to": "no-ianitor-success-access"
+			"reason": "`directive-no-unlimited-disable` requires named disables, giving `directive-no-unused-enable` precise disable/enable pairs to spot unnecessary enables.",
+			"to": "directive-no-unused-enable"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.77,
+					"exists": 0.8,
+					"replaces": 0.47,
+					"requires": 0.26
+				},
+				"forward": {
+					"duplicates": 0.37,
+					"exists": 0.69,
+					"replaces": 0.14,
+					"requires": 0.2
+				},
+				"strength": 0.8
+			},
+			"from": "directive-no-unlimited-disable",
+			"kind": "related",
+			"reason": "Enabling `directive-no-use` makes `directive-no-unlimited-disable` redundant for block comments, since it bans all block disables, even named ones.",
+			"to": "directive-no-use"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.51,
+					"exists": 0.83,
+					"replaces": 0.16,
+					"requires": 0.21
+				},
+				"forward": {
+					"duplicates": 0.52,
+					"exists": 0.84,
+					"replaces": 0.08,
+					"requires": 0.47
+				},
+				"strength": 0.84
+			},
 			"from": "memoized-effect-dependencies",
 			"kind": "related",
-			"reason": "Unstable effect deps and effect anti-patterns are complementary effect-quality checks.",
-			"to": "no-useless-use-effect"
-		},
-		{
-			"from": "memoized-effect-dependencies",
-			"kind": "related",
-			"reason": "One requires deps present/correct; the other requires unstable deps be memoized.",
+			"reason": "`memoized-effect-dependencies` complements `use-exhaustive-dependencies` by checking that declared dependencies are memoized, not just present.",
 			"to": "use-exhaustive-dependencies"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.48,
+					"exists": 0.8,
+					"replaces": 0.08,
+					"requires": 0.11
+				},
+				"forward": {
+					"duplicates": 0.44,
+					"exists": 0.78,
+					"replaces": 0.11,
+					"requires": 0.11
+				},
+				"strength": 0.8
+			},
 			"from": "no-adjust-state-on-prop-change",
-			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's adjustState check. Enable one to avoid duplicate diagnostics.",
-			"to": "no-useless-use-effect"
+			"kind": "related",
+			"reason": "Both target misplaced state: `no-adjust-state-on-prop-change` stops prop-to-state syncing, `no-pass-live-state-to-parent` stops state-to-parent echoing.",
+			"to": "no-pass-live-state-to-parent"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.38,
+					"exists": 0.83,
+					"replaces": 0.09,
+					"requires": 0.18
+				},
+				"forward": {
+					"duplicates": 0.39,
+					"exists": 0.84,
+					"replaces": 0.28,
+					"requires": 0.1
+				},
+				"strength": 0.84
+			},
 			"from": "no-array-constructor-elements",
 			"kind": "related",
-			"reason": "Element-form constructors and index-assignment fill patterns are adjacent Array construction smells.",
+			"reason": "`no-array-constructor-elements` collapses push() fills to literals, while `no-array-constructor-index-assignment` does the same for index-assignment fills.",
 			"to": "no-array-constructor-index-assignment"
 		},
 		{
-			"from": "no-array-constructor-elements",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.31,
+					"exists": 0.8,
+					"replaces": 0.11,
+					"requires": 0.11
+				},
+				"forward": {
+					"duplicates": 0.3,
+					"exists": 0.81,
+					"replaces": 0.06,
+					"requires": 0.14
+				},
+				"strength": 0.81
+			},
+			"from": "no-array-size-assignment",
 			"kind": "related",
-			"reason": "Constructor initialization and size/length append assignment are both roblox-ts array construction style.",
-			"to": "no-array-size-assignment"
+			"reason": "no-array-size-assignment steers appends to array.push(value), while no-increment-decrement's array[size++] = value exemption keeps size-based appends viable.",
+			"to": "no-increment-decrement"
 		},
 		{
-			"from": "no-array-constructor-elements",
-			"kind": "related",
-			"reason": "Both discourage constructor-based array setup before map/transform work in roblox-ts.",
-			"to": "no-table-create-map"
-		},
-		{
-			"from": "no-array-constructor-index-assignment",
-			"kind": "related",
-			"reason": "Index fills and size/length appends are two non-push ways to build arrays that should collapse to literals/push.",
-			"to": "no-array-size-assignment"
-		},
-		{
-			"from": "no-async-in-system",
-			"kind": "related",
-			"reason": "Both ban yielding/wait-style control flow where synchronous execution is required.",
-			"to": "no-task-wait"
-		},
-		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.54,
+					"exists": 0.81,
+					"replaces": 0.27,
+					"requires": 0.14
+				},
+				"forward": {
+					"duplicates": 0.59,
+					"exists": 0.76,
+					"replaces": 0.13,
+					"requires": 0.17
+				},
+				"strength": 0.81
+			},
 			"from": "no-cascading-set-state",
 			"kind": "related",
-			"reason": "Both attack effect bodies that manage state as a sequence of imperative updates.",
-			"to": "no-useless-use-effect"
-		},
-		{
-			"from": "no-cascading-set-state",
-			"kind": "related",
-			"reason": "Cascading setState in effects is the runtime symptom prefer-use-reducer is meant to prevent.",
+			"reason": "`no-cascading-set-state` flags cascading state updates that `prefer-use-reducer` prevents by suggesting `useReducer` for related state.",
 			"to": "prefer-use-reducer"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.72,
+					"exists": 0.83,
+					"replaces": 0.26,
+					"requires": 0.13
+				},
+				"forward": {
+					"duplicates": 0.79,
+					"exists": 0.84,
+					"replaces": 0.35,
+					"requires": 0.16
+				},
+				"strength": 0.84
+			},
+			"from": "no-chain-state-updates",
+			"kind": "related",
+			"reason": "`no-chain-state-updates` flags effects that set other state, while `no-derived-state` targets the common case where that state mirrors a computable value.",
+			"to": "no-derived-state"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.74,
+					"exists": 0.83,
+					"replaces": 0.72,
+					"requires": 0.22
+				},
+				"forward": {
+					"duplicates": 0.81,
+					"exists": 0.82,
+					"replaces": 0.09,
+					"requires": 0.21
+				},
+				"strength": 0.81
+			},
 			"from": "no-chain-state-updates",
 			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's effectChain check. Enable one to avoid duplicate diagnostics.",
+			"reason": "no-chain-state-updates overlaps with no-useless-use-effect's derived-state and effect-chain checks, so enabling both can report the same effect twice.",
 			"to": "no-useless-use-effect"
 		},
 		{
-			"from": "no-derived-state",
-			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's derivedState/mixedDerivedState checks. Enable one to avoid duplicate diagnostics.",
-			"to": "no-useless-use-effect"
-		},
-		{
-			"from": "no-error",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.27,
+					"exists": 0.79,
+					"replaces": 0.06,
+					"requires": 0.1
+				},
+				"forward": {
+					"duplicates": 0.27,
+					"exists": 0.83,
+					"replaces": 0.09,
+					"requires": 0.14
+				},
+				"strength": 0.83
+			},
+			"from": "no-chained-type-assertions",
 			"kind": "related",
-			"reason": "Both push error handling toward throw-based control flow instead of free global failure helpers.",
-			"to": "require-throw-error-capture"
+			"reason": "`no-chained-type-assertions` complements `no-runtime-typeof` by also pushing validation to the boundary: where typeof checks are banned, chained casts are too.",
+			"to": "no-runtime-typeof"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.26,
+					"exists": 0.79,
+					"replaces": 0.05,
+					"requires": 0.12
+				},
+				"forward": {
+					"duplicates": 0.31,
+					"exists": 0.81,
+					"replaces": 0.1,
+					"requires": 0.12
+				},
+				"strength": 0.81
+			},
+			"from": "no-chained-type-assertions",
+			"kind": "related",
+			"reason": "Both force parsing at the boundary: `no-chained-type-assertions` bans `as unknown as T` bridges, while `no-unknown-type-aliases` bans aliases hiding `unknown`.",
+			"to": "no-unknown-type-aliases"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.69,
+					"exists": 0.83,
+					"replaces": 0.17,
+					"requires": 0.18
+				},
+				"forward": {
+					"duplicates": 0.66,
+					"exists": 0.84,
+					"replaces": 0.39,
+					"requires": 0.15
+				},
+				"strength": 0.84
+			},
+			"from": "no-chained-type-assertions",
+			"kind": "related",
+			"reason": "`no-chained-type-assertions` flags inline `as` chains; `no-widen-then-assert` catches the same evidence-discard trick split across a widened local binding.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.83,
+					"exists": 0.83,
+					"replaces": 0.1,
+					"requires": 0.13
+				},
+				"forward": {
+					"duplicates": 0.8,
+					"exists": 0.74,
+					"replaces": 0.12,
+					"requires": 0.16
+				},
+				"strength": 0.83
+			},
+			"from": "no-chained-type-assertions",
+			"kind": "overlaps",
+			"reason": "no-chained-type-assertions bans chains outright, but require-safety-comment-for-type-assertion still wants a SAFETY comment on each single assertion it allows.",
+			"to": "require-safety-comment-for-type-assertion"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.74,
+					"exists": 0.83,
+					"replaces": 0.63,
+					"requires": 0.24
+				},
+				"forward": {
+					"duplicates": 0.81,
+					"exists": 0.82,
+					"replaces": 0.12,
+					"requires": 0.23
+				},
+				"strength": 0.81
+			},
 			"from": "no-event-handler",
 			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's eventFlag/eventSpecificLogic checks. Enable one to avoid duplicate diagnostics.",
+			"reason": "no-event-handler overlaps with no-useless-use-effect: both flag effects that stand in for event handlers, the latter also covering event flags.",
 			"to": "no-useless-use-effect"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.75,
+					"exists": 0.85,
+					"replaces": 0.78,
+					"requires": 0.22
+				},
+				"forward": {
+					"duplicates": 0.83,
+					"exists": 0.8,
+					"replaces": 0.1,
+					"requires": 0.16
+				},
+				"strength": 0.83
+			},
 			"from": "no-external-store-subscription",
 			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's externalStore check. Enable one to avoid duplicate diagnostics.",
+			"reason": "`no-external-store-subscription` overlaps the `reportExternalStore` check in `no-useless-use-effect`, so enable only one to avoid duplicate diagnostics.",
 			"to": "no-useless-use-effect"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.9,
+					"exists": 0.78,
+					"replaces": 0.78,
+					"requires": 0.21
+				},
+				"forward": {
+					"duplicates": 0.88,
+					"exists": 0.85,
+					"replaces": 0.13,
+					"requires": 0.19
+				},
+				"strength": 0.9
+			},
 			"from": "no-giant-component",
 			"kind": "overlaps",
-			"reason": "Line-count giants and multi-metric god components both target oversized React components.",
+			"reason": "no-giant-component's fixed 300-line check overlaps no-god-components' maxLines limit (200 by default), so enabling the latter largely covers the former.",
 			"to": "no-god-components"
 		},
 		{
-			"from": "no-god-components",
-			"kind": "related",
-			"reason": "God-component scoring includes state-hook pressure that prefer-use-reducer also addresses.",
-			"to": "prefer-use-reducer"
-		},
-		{
-			"from": "no-ianitor-in-function-body",
-			"kind": "related",
-			"reason": "Both prevent recreating expensive Ianitor validator machinery on hot paths.",
-			"to": "no-ianitor-success-access"
-		},
-		{
-			"from": "no-ianitor-in-function-body",
-			"kind": "related",
-			"reason": "Both require expensive configured constructions to live at module scope.",
-			"to": "require-module-level-instantiation"
-		},
-		{
-			"from": "no-initialize-state",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.85,
+					"exists": 0.75,
+					"replaces": 0.45,
+					"requires": 0.14
+				},
+				"forward": {
+					"duplicates": 0.8,
+					"exists": 0.8,
+					"replaces": 0.17,
+					"requires": 0.27
+				},
+				"strength": 0.85
+			},
+			"from": "no-inline-property-on-memo-component",
 			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's initializeState check. Enable one to avoid duplicate diagnostics.",
-			"to": "no-useless-use-effect"
-		},
-		{
-			"from": "no-inline-property-on-memo-component",
-			"kind": "related",
-			"reason": "Spreading property bags is a Roblox-specific form of the inline-unstable-props problem.",
-			"to": "no-native-properties-spread"
-		},
-		{
-			"from": "no-inline-property-on-memo-component",
-			"kind": "related",
-			"reason": "Hoisting static JSX object props is the structural fix for inline memo props.",
+			"reason": "`no-inline-property-on-memo-component` overlaps `prefer-hoisted-jsx-object-properties` on static inline object props; hoisting them satisfies both rules.",
 			"to": "prefer-hoisted-jsx-object-properties"
 		},
 		{
-			"from": "no-inline-property-on-memo-component",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.43,
+					"exists": 0.82,
+					"replaces": 0.11,
+					"requires": 0.17
+				},
+				"forward": {
+					"duplicates": 0.42,
+					"exists": 0.82,
+					"replaces": 0.4,
+					"requires": 0.1
+				},
+				"strength": 0.82
+			},
+			"from": "no-known-value-widening",
 			"kind": "related",
-			"reason": "Inline props and empty default object/array props both defeat memo by identity churn.",
-			"to": "rerender-memo-with-default-value"
+			"reason": "no-known-value-widening flags known values widened by broad `object` annotations, while `no-object-parameters` targets `object` only in function parameters.",
+			"to": "no-object-parameters"
 		},
 		{
-			"from": "no-native-properties-spread",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.35,
+					"exists": 0.77,
+					"replaces": 0.08,
+					"requires": 0.14
+				},
+				"forward": {
+					"duplicates": 0.31,
+					"exists": 0.82,
+					"replaces": 0.24,
+					"requires": 0.11
+				},
+				"strength": 0.82
+			},
+			"from": "no-known-value-widening",
 			"kind": "related",
-			"reason": "Both stop per-render table/object copies from invalidating memoized Roblox UI.",
-			"to": "prefer-hoisted-jsx-object-properties"
+			"reason": "Both police `unknown`: `no-known-value-widening` stops known values being widened to it, while `no-unknown-parameters` bans it as a parameter type.",
+			"to": "no-unknown-parameters"
 		},
 		{
-			"from": "no-new-instance-in-use-memo",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.44,
+					"exists": 0.82,
+					"replaces": 0.12,
+					"requires": 0.16
+				},
+				"forward": {
+					"duplicates": 0.44,
+					"exists": 0.8,
+					"replaces": 0.21,
+					"requires": 0.12
+				},
+				"strength": 0.82
+			},
+			"from": "no-known-value-widening",
 			"kind": "related",
-			"reason": "Memoizing Instance construction is a Roblox-specific useMemo correctness concern.",
-			"to": "no-useless-use-memo"
+			"reason": "`no-known-value-widening` pairs with `no-unknown-type-aliases` to keep `unknown` explicit at boundaries rather than annotating or aliasing it away.",
+			"to": "no-unknown-type-aliases"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.59,
+					"exists": 0.81,
+					"replaces": 0.14,
+					"requires": 0.16
+				},
+				"forward": {
+					"duplicates": 0.51,
+					"exists": 0.85,
+					"replaces": 0.18,
+					"requires": 0.13
+				},
+				"strength": 0.85
+			},
+			"from": "no-known-value-widening",
+			"kind": "related",
+			"reason": "`no-known-value-widening` flags known values widened into `unknown` or open dictionaries, while `no-unsafe-dictionary-type` bans those dictionary contracts.",
+			"to": "no-unsafe-dictionary-type"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.52,
+					"exists": 0.81,
+					"replaces": 0.17,
+					"requires": 0.32
+				},
+				"forward": {
+					"duplicates": 0.64,
+					"exists": 0.86,
+					"replaces": 0.34,
+					"requires": 0.12
+				},
+				"strength": 0.86
+			},
+			"from": "no-known-value-widening",
+			"kind": "related",
+			"reason": "`no-known-value-widening` flags the widening annotation alone, while `no-widen-then-assert` needs the later assertion, so both fire on widen-then-assert flows.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.2,
+					"exists": 0.83,
+					"replaces": 0.08,
+					"requires": 0.11
+				},
+				"forward": {
+					"duplicates": 0.39,
+					"exists": 0.82,
+					"replaces": 0.09,
+					"requires": 0.12
+				},
+				"strength": 0.83
+			},
+			"from": "no-object-parameters",
+			"kind": "related",
+			"reason": "no-object-parameters complements no-unsafe-dictionary-type: both close the object escape hatch, one in function parameters and one in dictionary value types.",
+			"to": "no-unsafe-dictionary-type"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.27,
+					"exists": 0.77,
+					"replaces": 0.1,
+					"requires": 0.17
+				},
+				"forward": {
+					"duplicates": 0.3,
+					"exists": 0.83,
+					"replaces": 0.1,
+					"requires": 0.15
+				},
+				"strength": 0.83
+			},
+			"from": "no-object-parameters",
+			"kind": "related",
+			"reason": "`no-object-parameters` complements `no-widen-then-assert`: both push parsing to the boundary, one for signatures, the other for local widen-then-assert flows.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.6,
+					"exists": 0.87,
+					"replaces": 0.16,
+					"requires": 0.14
+				},
+				"forward": {
+					"duplicates": 0.76,
+					"exists": 0.86,
+					"replaces": 0.68,
+					"requires": 0.18
+				},
+				"strength": 0.87
+			},
 			"from": "no-pass-data-to-parent",
-			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's notifyParent check. Enable one to avoid duplicate diagnostics.",
-			"to": "no-useless-use-effect"
+			"kind": "related",
+			"reason": "`no-pass-data-to-parent` flags non-state payloads passed up in effects; `no-pass-live-state-to-parent` covers the child's own state, so enable both.",
+			"to": "no-pass-live-state-to-parent"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.81,
+					"exists": 0.82,
+					"replaces": 0.65,
+					"requires": 0.23
+				},
+				"forward": {
+					"duplicates": 0.86,
+					"exists": 0.83,
+					"replaces": 0.1,
+					"requires": 0.26
+				},
+				"strength": 0.86
+			},
 			"from": "no-pass-live-state-to-parent",
 			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's notifyParent check. Enable one to avoid duplicate diagnostics.",
+			"reason": "`no-pass-live-state-to-parent` overlaps `no-useless-use-effect`'s `reportNotifyParent` check; both can flag the same effect, so expect duplicate reports.",
 			"to": "no-useless-use-effect"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.13,
+					"exists": 0.93,
+					"replaces": 0.16,
+					"requires": 0.15
+				},
+				"forward": {
+					"duplicates": 0.15,
+					"exists": 0.93,
+					"replaces": 0.33,
+					"requires": 0.14
+				},
+				"strength": 0.93
+			},
 			"from": "no-print",
 			"kind": "related",
-			"reason": "Same banned-global factory: raw print/warn output should become structured Log calls.",
+			"reason": "`no-print` and `no-warn` are companion rules banning the two raw Luau output globals (print, warn) in favor of Log, so enable or disable them together.",
 			"to": "no-warn"
 		},
 		{
-			"from": "no-redundant-aspect-ratio-constraint",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.13,
+					"exists": 0.88,
+					"replaces": 0.08,
+					"requires": 0.08
+				},
+				"forward": {
+					"duplicates": 0.16,
+					"exists": 0.87,
+					"replaces": 0.07,
+					"requires": 0.09
+				},
+				"strength": 0.88
+			},
+			"from": "no-reflect-apply",
 			"kind": "related",
-			"reason": "Default-prop noise and redundant aspect-ratio constraints both strip useless Roblox UI declarations.",
-			"to": "no-useless-default"
+			"reason": "Like `no-reflect-apply`, `no-reflect-get` targets the same Reflect bypass pattern, so teams adopting one should enable the other for consistent typed access.",
+			"to": "no-reflect-get"
 		},
 		{
-			"from": "no-redundant-aspect-ratio-constraint",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.21,
+					"exists": 0.81,
+					"replaces": 0.12,
+					"requires": 0.1
+				},
+				"forward": {
+					"duplicates": 0.23,
+					"exists": 0.8,
+					"replaces": 0.1,
+					"requires": 0.2
+				},
+				"strength": 0.81
+			},
+			"from": "no-reflect-get",
 			"kind": "related",
-			"reason": "Padding component preference and redundant aspect-ratio constraints both simplify Roblox UI layout markup.",
-			"to": "prefer-padding-components"
+			"reason": "Pair these rules: no-reflect-get bans Reflect.get and no-runtime-typeof bans typeof checks, both favoring parsing dynamic input into domain types.",
+			"to": "no-runtime-typeof"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.73,
+					"exists": 0.82,
+					"replaces": 0.77,
+					"requires": 0.14
+				},
+				"forward": {
+					"duplicates": 0.86,
+					"exists": 0.82,
+					"replaces": 0.1,
+					"requires": 0.18
+				},
+				"strength": 0.86
+			},
 			"from": "no-reset-all-state-on-prop-change",
 			"kind": "overlaps",
-			"reason": "This focused rule overlaps no-useless-use-effect's resetState check. Enable one to avoid duplicate diagnostics.",
+			"reason": "`no-reset-all-state-on-prop-change` overlaps with `no-useless-use-effect`'s reset-state report; both suggest the `key` fix, so enable just one.",
 			"to": "no-useless-use-effect"
 		},
 		{
-			"from": "no-static-react-create-element",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.41,
+					"exists": 0.85,
+					"replaces": 0.13,
+					"requires": 0.2
+				},
+				"forward": {
+					"duplicates": 0.36,
+					"exists": 0.85,
+					"replaces": 0.15,
+					"requires": 0.19
+				},
+				"strength": 0.85
+			},
+			"from": "no-runtime-typeof",
 			"kind": "related",
-			"reason": "Static createElement should be JSX; static JSX trees should then be hoisted when fully constant.",
-			"to": "prefer-hoisted-jsx-elements"
+			"reason": "Pair `no-runtime-typeof` with `no-unknown-returns`: decoding values at the boundary instead of `typeof` checks also avoids returning `unknown` to callers.",
+			"to": "no-unknown-returns"
 		},
 		{
-			"from": "no-unused-use-memo",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.32,
+					"exists": 0.85,
+					"replaces": 0.11,
+					"requires": 0.2
+				},
+				"forward": {
+					"duplicates": 0.32,
+					"exists": 0.85,
+					"replaces": 0.14,
+					"requires": 0.18
+				},
+				"strength": 0.85
+			},
+			"from": "no-runtime-typeof",
 			"kind": "related",
-			"reason": "Standalone unused memos, trivial memos, and fully-static memos are one wasteful-useMemo family.",
-			"to": "no-use-memo-simple-expression"
+			"reason": "`no-runtime-typeof` and `no-unknown-type-aliases` complement each other: keep `unknown` visible at the boundary, then decode it instead of typeof-narrowing.",
+			"to": "no-unknown-type-aliases"
 		},
 		{
-			"from": "no-unused-use-memo",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.35,
+					"exists": 0.8,
+					"replaces": 0.11,
+					"requires": 0.19
+				},
+				"forward": {
+					"duplicates": 0.29,
+					"exists": 0.83,
+					"replaces": 0.1,
+					"requires": 0.15
+				},
+				"strength": 0.83
+			},
+			"from": "no-runtime-typeof",
 			"kind": "related",
-			"reason": "Unused memos and static-value memos both pay hook cost for no preserved value.",
-			"to": "no-useless-use-memo"
+			"reason": "Enable `no-runtime-typeof` alongside `no-widen-then-assert`; both reject flows that discard type evidence, pushing you to parse boundary input once instead.",
+			"to": "no-widen-then-assert"
 		},
 		{
-			"from": "no-use-memo-simple-expression",
-			"kind": "overlaps",
-			"reason": "Trivial expressions and fully-static expressions can both be flagged as pointless memos.",
-			"to": "no-useless-use-memo"
-		},
-		{
-			"from": "no-useless-constants",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.34,
+					"exists": 0.9,
+					"replaces": 0.07,
+					"requires": 0.17
+				},
+				"forward": {
+					"duplicates": 0.38,
+					"exists": 0.89,
+					"replaces": 0.08,
+					"requires": 0.14
+				},
+				"strength": 0.9
+			},
+			"from": "no-unknown-parameters",
 			"kind": "related",
-			"reason": "One inlines single-use constants; the other places SCREAMING_SNAKE constants at module scope.",
-			"to": "prefer-module-scope-constants"
+			"reason": "Pair these rules to keep `unknown` out of signatures: `no-unknown-parameters` guards inputs, `no-unknown-returns` guards outputs; decode at the boundary.",
+			"to": "no-unknown-returns"
 		},
 		{
-			"from": "no-useless-default",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.25,
+					"exists": 0.87,
+					"replaces": 0.1,
+					"requires": 0.16
+				},
+				"forward": {
+					"duplicates": 0.5,
+					"exists": 0.86,
+					"replaces": 0.12,
+					"requires": 0.13
+				},
+				"strength": 0.87
+			},
+			"from": "no-unknown-parameters",
 			"kind": "related",
-			"reason": "Redundant default props and UDim2 constructor shorthands are Roblox UI prop-hygiene checks.",
-			"to": "prefer-udim2-shorthand"
+			"reason": "`no-unknown-parameters` and `no-unknown-type-aliases` work together to keep `unknown` visible only at boundaries, catching it in signatures and aliases alike.",
+			"to": "no-unknown-type-aliases"
 		},
 		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.35,
+					"exists": 0.82,
+					"replaces": 0.1,
+					"requires": 0.2
+				},
+				"forward": {
+					"duplicates": 0.36,
+					"exists": 0.83,
+					"replaces": 0.13,
+					"requires": 0.14
+				},
+				"strength": 0.83
+			},
+			"from": "no-unknown-parameters",
+			"kind": "related",
+			"reason": "Enable both: `no-unknown-parameters` keeps `unknown` out of signatures, while `no-widen-then-assert` stops widening known locals just to assert them back.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.29,
+					"exists": 0.88,
+					"replaces": 0.1,
+					"requires": 0.15
+				},
+				"forward": {
+					"duplicates": 0.56,
+					"exists": 0.87,
+					"replaces": 0.16,
+					"requires": 0.18
+				},
+				"strength": 0.88
+			},
+			"from": "no-unknown-returns",
+			"kind": "related",
+			"reason": "`no-unknown-returns` complements `no-unknown-type-aliases`: one bans `unknown` return contracts, the other bans aliases that resolve to `unknown`.",
+			"to": "no-unknown-type-aliases"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.45,
+					"exists": 0.82,
+					"replaces": 0.13,
+					"requires": 0.16
+				},
+				"forward": {
+					"duplicates": 0.45,
+					"exists": 0.86,
+					"replaces": 0.14,
+					"requires": 0.16
+				},
+				"strength": 0.86
+			},
+			"from": "no-unknown-type-aliases",
+			"kind": "related",
+			"reason": "Pair `no-unknown-type-aliases` with `no-widen-then-assert`: keep `unknown` explicit at boundaries, not hidden in aliases or widened then asserted back.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.59,
+					"exists": 0.76,
+					"replaces": 0.07,
+					"requires": 0.2
+				},
+				"forward": {
+					"duplicates": 0.6,
+					"exists": 0.81,
+					"replaces": 0.12,
+					"requires": 0.23
+				},
+				"strength": 0.81
+			},
 			"from": "no-useless-use-effect",
 			"kind": "related",
-			"reason": "Static spring configs are the spring-specific cousin of useless static memos/effects.",
-			"to": "no-useless-use-spring"
+			"reason": "`no-useless-use-effect` removes effects that shouldn't exist; `use-exhaustive-dependencies` then keeps the remaining ones' dependency arrays complete.",
+			"to": "use-exhaustive-dependencies"
 		},
 		{
-			"from": "no-useless-use-effect",
-			"kind": "related",
-			"reason": "Named effect callbacks improve the same effect-debugging surface these anti-patterns pollute.",
-			"to": "require-named-effect-functions"
-		},
-		{
+			"evidence": {
+				"backward": {
+					"duplicates": 0.16,
+					"exists": 0.82,
+					"replaces": 0.07,
+					"requires": 0.11
+				},
+				"forward": {
+					"duplicates": 0.21,
+					"exists": 0.79,
+					"replaces": 0.16,
+					"requires": 0.1
+				},
+				"strength": 0.82
+			},
 			"from": "no-useless-use-memo",
 			"kind": "related",
-			"reason": "Both ban hook wrappers whose values are static enough to leave the hook entirely.",
+			"reason": "no-useless-use-memo flags static useMemo values; no-useless-use-spring applies the same static-input logic to useSpring, so align their staticGlobalFactories.",
 			"to": "no-useless-use-spring"
 		},
 		{
-			"from": "prefer-constant-dispatch",
-			"kind": "depends-on",
-			"reason": "Constant action objects only matter once related state is modeled with useReducer.",
-			"to": "prefer-use-reducer"
-		},
-		{
-			"from": "prefer-context-stack",
+			"evidence": {
+				"backward": {
+					"duplicates": 0.2,
+					"exists": 0.82,
+					"replaces": 0.11,
+					"requires": 0.11
+				},
+				"forward": {
+					"duplicates": 0.17,
+					"exists": 0.7,
+					"replaces": 0.11,
+					"requires": 0.13
+				},
+				"strength": 0.82
+			},
+			"from": "prefer-hoisted-jsx-object-properties",
 			"kind": "related",
-			"reason": "Local wrapper components for nested providers/portals/padding are the same composition move.",
-			"to": "prefer-local-portal-component"
-		},
-		{
-			"from": "prefer-context-stack",
-			"kind": "related",
-			"reason": "Context stacks and padding wrappers both collapse repeated JSX boilerplate into local components.",
-			"to": "prefer-padding-components"
-		},
-		{
-			"from": "prefer-hoisted-jsx-elements",
-			"kind": "related",
-			"reason": "Whole static elements and static prop objects are the two halves of JSX hoistability.",
-			"to": "prefer-hoisted-jsx-object-properties"
-		},
-		{
-			"from": "prefer-idiv",
-			"kind": "related",
-			"reason": "Both rewrite simple math patterns to clearer/faster Luau builtins (idiv vs min/max).",
-			"to": "prefer-math-min-max"
-		},
-		{
-			"from": "prefer-local-portal-component",
-			"kind": "related",
-			"reason": "Prefer named local UI wrappers over repeating low-level createPortal/uipadding patterns.",
-			"to": "prefer-padding-components"
-		},
-		{
-			"from": "prefer-pascal-case-enums",
-			"kind": "related",
-			"reason": "Both enforce enum identifier conventions (casing and grammatical number).",
-			"to": "prefer-singular-enums"
-		},
-		{
-			"from": "react-hooks-strict-return",
-			"kind": "related",
-			"reason": "Both enforce hooks-rules-of-hooks style discipline at the component/hook boundary.",
-			"to": "use-hook-at-top-level"
-		},
-		{
-			"from": "require-named-effect-functions",
-			"kind": "related",
-			"reason": "Dependency correctness pairs with requiring readable named effect callbacks.",
-			"to": "use-exhaustive-dependencies"
+			"reason": "`prefer-hoisted-jsx-object-properties` complements `rerender-memo-with-default-value`: it hoists JSX prop objects while the latter hoists empty prop defaults.",
+			"to": "rerender-memo-with-default-value"
 		}
 	],
-	"generator": "scripts/regenerate-relations.ts"
+	"generator": "scripts/regenerate-relations.ts",
+	"models": {
+		"decisions": "~typesafe/jev-latest",
+		"reasons": "z-ai/glm-5.3-flash"
+	}
 }

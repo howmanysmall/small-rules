@@ -1,0 +1,1679 @@
+{
+	"evaluation": {
+		"falseNegatives": 39,
+		"falsePositives": 0,
+		"kindMismatches": 6,
+		"trueNegatives": 30,
+		"truePositives": 26
+	},
+	"reviews": [
+		{
+			"concern": "near-threshold judgments",
+			"left": "array-type-generic",
+			"right": "no-array-constructor-elements",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "ban-instances",
+			"right": "no-color3-constructor",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "ban-instances",
+			"right": "no-redundant-aspect-ratio-constraint",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "ban-instances",
+			"right": "require-module-level-instantiation",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "ban-react-fc",
+			"right": "require-named-effect-functions",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "ban-types",
+			"right": "no-conditional-empty-object-spread",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "consistent-compound-words",
+			"right": "prevent-abbreviations",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-disable-enable-pair",
+			"right": "directive-no-restricted-disable",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-disable-enable-pair",
+			"right": "directive-no-use",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-disable-enable-pair",
+			"right": "directive-require-description",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-disable-enable-pair",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "directive-no-duplicate-disable",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "directive-no-restricted-disable",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "directive-no-unlimited-disable",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "directive-no-unused-enable",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "directive-no-use",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "directive-require-description",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-aggregating-enable",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-duplicate-disable",
+			"right": "directive-no-restricted-disable",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-duplicate-disable",
+			"right": "directive-no-use",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-duplicate-disable",
+			"right": "directive-require-description",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-duplicate-disable",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-restricted-disable",
+			"right": "directive-no-unused-enable",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-restricted-disable",
+			"right": "directive-require-description",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-restricted-disable",
+			"right": "no-warn",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-restricted-disable",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-unlimited-disable",
+			"right": "directive-require-description",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-unlimited-disable",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-unused-enable",
+			"right": "directive-no-use",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-unused-enable",
+			"right": "directive-require-description",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-unused-enable",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-use",
+			"right": "directive-require-description",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-use",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-require-description",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "enforce-ianitor-check-type",
+			"right": "no-ianitor-in-function-body",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "enforce-ianitor-check-type",
+			"right": "no-ianitor-success-access",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "enforce-ianitor-check-type",
+			"right": "no-runtime-typeof",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "isolated-functions",
+			"right": "require-named-effect-functions",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-adjust-state-on-prop-change",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-chain-state-updates",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-derived-state",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-event-handler",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-new-instance-in-use-memo",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-unused-use-memo",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-use-memo-simple-expression",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-useless-use-effect",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "no-useless-use-memo",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "require-named-effect-functions",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "memoized-effect-dependencies",
+			"right": "use-hook-at-top-level",
+			"strength": 0.56
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-cascading-set-state",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-event-handler",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-external-store-subscription",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-pass-data-to-parent",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "require-named-effect-functions",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-constructor-elements",
+			"right": "no-array-size-assignment",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-constructor-elements",
+			"right": "no-table-create-map",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-constructor-index-assignment",
+			"right": "no-array-size-assignment",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-constructor-index-assignment",
+			"right": "no-table-create-map",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-size-assignment",
+			"right": "no-loop-iterable-mutation",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-size-assignment",
+			"right": "no-table-create-map",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-array-size-assignment",
+			"right": "no-variadic-spread",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-async-in-system",
+			"right": "no-task-wait",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-async-in-system",
+			"right": "require-paired-calls",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "no-chain-state-updates",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "no-derived-state",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "no-external-store-subscription",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "no-initialize-state",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "no-useless-use-effect",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "require-named-effect-functions",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-cascading-set-state",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "no-external-store-subscription",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "no-initialize-state",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "no-pass-data-to-parent",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "no-pass-live-state-to-parent",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "prefer-use-reducer",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "require-named-effect-functions",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chain-state-updates",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chained-type-assertions",
+			"right": "no-object-parameters",
+			"strength": 0.69
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chained-type-assertions",
+			"right": "no-reflect-get",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chained-type-assertions",
+			"right": "no-unknown-parameters",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chained-type-assertions",
+			"right": "no-unknown-returns",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-chained-type-assertions",
+			"right": "no-unsafe-dictionary-type",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-color3-constructor",
+			"right": "no-new-instance-in-use-memo",
+			"strength": 0.56
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-color3-constructor",
+			"right": "prefer-sequence-overloads",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-color3-constructor",
+			"right": "prefer-udim2-shorthand",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-dead-store",
+			"right": "no-restricted-property-assignment",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-dead-store",
+			"right": "no-unused-imports",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-dead-store",
+			"right": "no-unused-use-memo",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-dead-store",
+			"right": "no-use-of-empty-return-value",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-dead-store",
+			"right": "no-useless-constants",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-event-handler",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-external-store-subscription",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-initialize-state",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-pass-data-to-parent",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-pass-live-state-to-parent",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-unused-use-memo",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-use-memo-simple-expression",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "no-useless-use-memo",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "require-named-effect-functions",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-derived-state",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-error",
+			"right": "no-warn",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-error",
+			"right": "require-throw-error-capture",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-event-handler",
+			"right": "no-external-store-subscription",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-event-handler",
+			"right": "no-initialize-state",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-event-handler",
+			"right": "no-pass-data-to-parent",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-event-handler",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-event-handler",
+			"right": "require-named-effect-functions",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-event-handler",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-external-store-subscription",
+			"right": "no-initialize-state",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-external-store-subscription",
+			"right": "no-pass-data-to-parent",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-external-store-subscription",
+			"right": "no-pass-live-state-to-parent",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-external-store-subscription",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-external-store-subscription",
+			"right": "require-named-effect-functions",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-external-store-subscription",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-filter-map-chain",
+			"right": "no-identity-map",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-filter-map-chain",
+			"right": "no-table-create-map",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-god-components",
+			"right": "no-render-helper-functions",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-god-components",
+			"right": "no-useless-use-effect",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-god-components",
+			"right": "prefer-early-return",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-god-components",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-god-components",
+			"right": "use-hook-at-top-level",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-ianitor-in-function-body",
+			"right": "no-native-properties-spread",
+			"strength": 0.56
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-ianitor-in-function-body",
+			"right": "no-useless-use-memo",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-ianitor-in-function-body",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-ianitor-in-function-body",
+			"right": "prefer-module-scope-constants",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-ianitor-in-function-body",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-ianitor-success-access",
+			"right": "no-table-create-map",
+			"strength": 0.56
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-increment-decrement",
+			"right": "no-restricted-property-assignment",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-initialize-state",
+			"right": "no-pass-data-to-parent",
+			"strength": 0.69
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-initialize-state",
+			"right": "no-pass-live-state-to-parent",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-initialize-state",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-initialize-state",
+			"right": "require-named-effect-functions",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-initialize-state",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-initialize-state",
+			"right": "use-hook-at-top-level",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "no-native-properties-spread",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "no-new-instance-in-use-memo",
+			"strength": 0.69
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "no-unused-use-memo",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "no-use-memo-simple-expression",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "no-useless-use-memo",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "prefer-constant-dispatch",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "require-named-effect-functions",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-inline-property-on-memo-component",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-instance-methods-without-this",
+			"right": "no-print",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-known-value-widening",
+			"right": "no-reflect-apply",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-known-value-widening",
+			"right": "no-reflect-get",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-known-value-widening",
+			"right": "no-runtime-typeof",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-known-value-widening",
+			"right": "no-shape-in-symbol-names",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-known-value-widening",
+			"right": "prefer-modding-inspect",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-known-value-widening",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-module-mocking",
+			"right": "no-reflect-apply",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-native-properties-spread",
+			"right": "no-useless-constants",
+			"strength": 0.69
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-native-properties-spread",
+			"right": "no-useless-use-memo",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-native-properties-spread",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-native-properties-spread",
+			"right": "prefer-hoisted-jsx-object-properties",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-native-properties-spread",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-new-instance-in-use-memo",
+			"right": "no-unused-use-memo",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-new-instance-in-use-memo",
+			"right": "no-use-memo-simple-expression",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-new-instance-in-use-memo",
+			"right": "no-useless-use-memo",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-new-instance-in-use-memo",
+			"right": "require-module-level-instantiation",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-new-instance-in-use-memo",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-new-instance-in-use-memo",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-object-parameters",
+			"right": "no-reflect-apply",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-object-parameters",
+			"right": "no-reflect-get",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-object-parameters",
+			"right": "no-shape-in-symbol-names",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-object-parameters",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-pass-data-to-parent",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-pass-data-to-parent",
+			"right": "require-named-effect-functions",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-pass-data-to-parent",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-pass-live-state-to-parent",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-pass-live-state-to-parent",
+			"right": "require-named-effect-functions",
+			"strength": 0.73
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-pass-live-state-to-parent",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-print",
+			"right": "require-module-level-instantiation",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-recursive",
+			"right": "no-variadic-spread",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-recursive",
+			"right": "use-hook-at-top-level",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-apply",
+			"right": "no-runtime-typeof",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-apply",
+			"right": "no-unknown-parameters",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-apply",
+			"right": "no-unknown-returns",
+			"strength": 0.65
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-get",
+			"right": "no-unknown-parameters",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-get",
+			"right": "no-unknown-returns",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-get",
+			"right": "no-unknown-type-aliases",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-get",
+			"right": "no-unsafe-dictionary-type",
+			"strength": 0.77
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reflect-get",
+			"right": "no-widen-then-assert",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-render-helper-functions",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reset-all-state-on-prop-change",
+			"right": "require-named-effect-functions",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-reset-all-state-on-prop-change",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-runtime-typeof",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-shape-in-symbol-names",
+			"right": "no-unknown-returns",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-shape-in-symbol-names",
+			"right": "no-unknown-type-aliases",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-shape-in-symbol-names",
+			"right": "prevent-abbreviations",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-static-react-create-element",
+			"right": "prefer-direct-hook-imports",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-static-react-create-element",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-task-wait",
+			"right": "require-paired-calls",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unknown-parameters",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unknown-returns",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.69
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unknown-type-aliases",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unsafe-dictionary-type",
+			"right": "no-widen-then-assert",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unsafe-dictionary-type",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unused-imports",
+			"right": "only-type-imports",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unused-use-memo",
+			"right": "no-use-memo-simple-expression",
+			"strength": 0.74
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unused-use-memo",
+			"right": "no-useless-use-effect",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unused-use-memo",
+			"right": "no-useless-use-memo",
+			"strength": 0.76
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-unused-use-memo",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-use-memo-simple-expression",
+			"right": "no-useless-use-effect",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-use-memo-simple-expression",
+			"right": "no-useless-use-spring",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-use-memo-simple-expression",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.66
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-constants",
+			"right": "no-useless-use-memo",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-constants",
+			"right": "prefer-constant-dispatch",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-constants",
+			"right": "prefer-hoisted-jsx-object-properties",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-constants",
+			"right": "prefer-module-scope-constants",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-effect",
+			"right": "no-useless-use-memo",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-effect",
+			"right": "require-named-effect-functions",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-effect",
+			"right": "use-hook-at-top-level",
+			"strength": 0.67
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-memo",
+			"right": "prefer-constant-dispatch",
+			"strength": 0.72
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-memo",
+			"right": "prefer-hoisted-jsx-object-properties",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-memo",
+			"right": "prefer-module-scope-constants",
+			"strength": 0.75
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-memo",
+			"right": "require-module-level-instantiation",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-memo",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-memo",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.68
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-spring",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-spring",
+			"right": "prefer-hoisted-jsx-object-properties",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-useless-use-spring",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.69
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-warn",
+			"right": "require-module-level-instantiation",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-constant-dispatch",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-constant-dispatch",
+			"right": "prefer-hoisted-jsx-object-properties",
+			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-constant-dispatch",
+			"right": "prefer-module-scope-constants",
+			"strength": 0.64
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-constant-dispatch",
+			"right": "prefer-use-reducer",
+			"strength": 0.6
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-constant-dispatch",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.71
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-context-stack",
+			"right": "prefer-local-portal-component",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-context-stack",
+			"right": "prefer-padding-components",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-early-return",
+			"right": "use-hook-at-top-level",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-hoisted-jsx-elements",
+			"right": "require-module-level-instantiation",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-hoisted-jsx-elements",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.63
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-local-portal-component",
+			"right": "prefer-padding-components",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-module-scope-constants",
+			"right": "prefer-pascal-case-enums",
+			"strength": 0.58
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-module-scope-constants",
+			"right": "require-module-level-instantiation",
+			"strength": 0.62
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-pascal-case-enums",
+			"right": "prefer-singular-enums",
+			"strength": 0.7
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-sequence-overloads",
+			"right": "prefer-udim2-shorthand",
+			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "require-named-effect-functions",
+			"right": "rerender-memo-with-default-value",
+			"strength": 0.55
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "require-named-effect-functions",
+			"right": "use-exhaustive-dependencies",
+			"strength": 0.79
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "require-named-effect-functions",
+			"right": "use-hook-at-top-level",
+			"strength": 0.56
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "use-exhaustive-dependencies",
+			"right": "use-hook-at-top-level",
+			"strength": 0.78
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (192).",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-useless-use-effect",
+			"strength": 0.88
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (163).",
+			"left": "directive-disable-enable-pair",
+			"right": "directive-no-unused-enable",
+			"strength": 0.87
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (180).",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-derived-state",
+			"strength": 0.87
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (163).",
+			"left": "no-object-parameters",
+			"right": "no-unknown-returns",
+			"strength": 0.87
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (178).",
+			"left": "no-use-memo-simple-expression",
+			"right": "no-useless-use-memo",
+			"strength": 0.87
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (197).",
+			"left": "no-object-parameters",
+			"right": "no-runtime-typeof",
+			"strength": 0.86
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (171).",
+			"left": "no-object-parameters",
+			"right": "no-unknown-parameters",
+			"strength": 0.86
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (169).",
+			"left": "no-runtime-typeof",
+			"right": "no-unknown-parameters",
+			"strength": 0.86
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (170).",
+			"left": "no-unknown-returns",
+			"right": "no-unsafe-dictionary-type",
+			"strength": 0.86
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (167).",
+			"left": "no-unknown-type-aliases",
+			"right": "no-unsafe-dictionary-type",
+			"strength": 0.86
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (161).",
+			"left": "no-object-parameters",
+			"right": "no-unknown-type-aliases",
+			"strength": 0.85
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (185).",
+			"left": "no-unknown-parameters",
+			"right": "no-unsafe-dictionary-type",
+			"strength": 0.85
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (174).",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-reset-all-state-on-prop-change",
+			"strength": 0.84
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (189).",
+			"left": "no-useless-use-memo",
+			"right": "prefer-hoisted-jsx-elements",
+			"strength": 0.84
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (166).",
+			"left": "prefer-hoisted-jsx-elements",
+			"right": "prefer-hoisted-jsx-object-properties",
+			"strength": 0.84
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (179).",
+			"left": "directive-disable-enable-pair",
+			"right": "directive-no-aggregating-enable",
+			"strength": 0.83
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (170).",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-initialize-state",
+			"strength": 0.83
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (204).",
+			"left": "no-ianitor-in-function-body",
+			"right": "no-ianitor-success-access",
+			"strength": 0.83
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (195).",
+			"left": "no-ianitor-in-function-body",
+			"right": "require-module-level-instantiation",
+			"strength": 0.83
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (171).",
+			"left": "no-pass-data-to-parent",
+			"right": "no-useless-use-effect",
+			"strength": 0.83
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (185).",
+			"left": "no-unknown-returns",
+			"right": "no-widen-then-assert",
+			"strength": 0.83
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (165).",
+			"left": "no-adjust-state-on-prop-change",
+			"right": "no-chain-state-updates",
+			"strength": 0.82
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (180).",
+			"left": "no-god-components",
+			"right": "prefer-use-reducer",
+			"strength": 0.82
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (176).",
+			"left": "no-known-value-widening",
+			"right": "no-unknown-returns",
+			"strength": 0.82
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (272).",
+			"left": "no-runtime-typeof",
+			"right": "no-unsafe-dictionary-type",
+			"strength": 0.82
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (201).",
+			"left": "directive-no-duplicate-disable",
+			"right": "directive-no-unlimited-disable",
+			"strength": 0.81
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (172).",
+			"left": "no-chained-type-assertions",
+			"right": "no-known-value-widening",
+			"strength": 0.81
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (190).",
+			"left": "no-event-handler",
+			"right": "no-pass-live-state-to-parent",
+			"strength": 0.81
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (191).",
+			"left": "memoized-effect-dependencies",
+			"right": "no-inline-property-on-memo-component",
+			"strength": 0.8
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (198).",
+			"left": "no-chain-state-updates",
+			"right": "no-event-handler",
+			"strength": 0.8
+		},
+		{
+			"concern": "reason rejected: Reason exceeds 160 characters (171).",
+			"left": "no-widen-then-assert",
+			"right": "require-safety-comment-for-type-assertion",
+			"strength": 0.8
+		}
+	]
+}
