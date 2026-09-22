@@ -28,7 +28,7 @@ const showUpdated = !showNew && newness?.isUpdated === true;
 	{showUpdated && <Badge variant="updated" />}
 	<Badge variant={facts.type === "problem" ? "error" : "suggestion"} />
 	{facts.fixable !== undefined && <Badge variant="fixable" />}
-	{facts.category === "roblox" && <Badge variant="roblox" />}
+	{facts.category.startsWith("roblox") && <Badge variant="roblox" />}
 </div>
 
 <RuleSummary rule={rule} />

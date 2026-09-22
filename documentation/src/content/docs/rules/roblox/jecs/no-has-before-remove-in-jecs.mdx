@@ -1,0 +1,18 @@
+---
+title: "No Has Before Remove In Jecs"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-has-before-remove-in-jecs">
+	<Fragment slot="rationale">
+		<p>
+			Jecs already allows `World.remove` when the entity does not have the component. A matching `World.has` guard
+			adds branching without changing that result.
+		</p>
+		<p>
+			The rule follows `world()` imports from `@rbxts/jecs`; it does not infer a World from a variable named
+			`world`. It reports matching guards even when repeated argument evaluation prevents a safe fix.
+		</p>
+	</Fragment>
+</RulePage>

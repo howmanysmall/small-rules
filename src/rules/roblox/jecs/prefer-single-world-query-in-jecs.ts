@@ -10,13 +10,11 @@ import {
 	isSpreadElement,
 } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
 
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-
 type QueryType = "get" | "has";
-type Context = InferContextFromRule<typeof preferSingleWorldQuery>;
+type Context = InferContextFromRule<typeof preferSingleWorldQueryInJecs>;
 
 interface WorldQueryCall {
 	readonly componentNode: ESTree.Expression;
@@ -129,6 +127,7 @@ function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierRefere
 	while (current !== parent) {
 		/* v8 ignore next -- @preserve parser-provided reference ancestor chains expose parent links up to the checked parent. */
 		if (!isNodeWithParent(current)) break;
+
 		const currentParent: InspectableNode = current.parent;
 		/* v8 ignore next -- @preserve direct logical-and parents are handled before walking ancestors. */
 		if (isLogicalAndExpression(currentParent)) return true;
@@ -138,7 +137,7 @@ function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierRefere
 	return false;
 }
 
-function isReadReferenceInAndExpression(reference: ScopeVariable["references"][number]): boolean {
+function isReadReferenceInAndExpression(reference: Reference): boolean {
 	if (reference.isWrite()) return false;
 	const { identifier } = reference;
 	/* v8 ignore next -- @preserve ESLint scope references for reads expose identifier reference nodes. */
@@ -193,16 +192,19 @@ function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 
 	const [firstCall] = calls;
 	/* v8 ignore next 3 -- @preserve length guard above guarantees a first call. */
-	if (firstCall === undefined) {
-		return;
-	}
+	if (firstCall === undefined) return;
 
 	const { sourceCode } = context;
 	const worldText = sourceCode.getText(firstCall.worldNode);
 	const entityText = sourceCode.getText(firstCall.entityNode);
 
-	const variableNames = calls.map((call) => call.variableName);
-	const componentTexts = calls.map((call) => sourceCode.getText(call.componentNode));
+	const variableNames = new Array<string>();
+	const componentTexts = new Array<string>();
+
+	for (const { componentNode, variableName } of calls) {
+		variableNames.push(variableName);
+		componentTexts.push(sourceCode.getText(componentNode));
+	}
 
 	/* v8 ignore next -- @preserve processGetCalls only receives groups with at least two query variables. */
 	const destructuring = variableNames.length === 1 ? variableNames[0] : `[${variableNames.join(", ")}]`;
@@ -248,13 +250,12 @@ function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 
 	const worldText = sourceCode.getText(firstCall.worldNode);
 	const entityText = sourceCode.getText(firstCall.entityNode);
-	const componentTexts = calls.map((call) => sourceCode.getText(call.componentNode));
-	const componentArguments = componentTexts.join(", ");
+	const componentArguments = calls.map((call) => sourceCode.getText(call.componentNode)).join(", ");
 	const fixedCode = `const hasAll = ${worldText}.has(${entityText}, ${componentArguments});`;
 	reportCombinedQuery(calls, context, fixedCode, "preferSingleHas", firstCall);
 }
 
-const preferSingleWorldQuery = createRule("prefer-single-world-query", "roblox", {
+const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-jecs", "roblox/jecs", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 		let currentGetBuffer = new Array<WorldQueryCall>();
@@ -320,4 +321,4 @@ const preferSingleWorldQuery = createRule("prefer-single-world-query", "roblox",
 	},
 });
 
-export default preferSingleWorldQuery;
+export default preferSingleWorldQueryInJecs;

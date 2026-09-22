@@ -1,7 +1,7 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
-export type RuleCategoryKey = "anti-slop" | "general" | "naming" | "react" | "roblox";
+export type RuleCategoryKey = "anti-slop" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
 
 export interface RuleManifestEntry {
 	readonly name: RuleName;
@@ -78,6 +78,16 @@ export const ruleManifest = defineRuleManifest({
 			],
 		},
 		{
+			key: "roblox/jecs",
+			description: "Rules for Jecs worlds, queries, and component operations in Roblox projects.",
+			label: "Jecs Rules",
+			rules: [
+				{ name: "no-has-before-remove-in-jecs" },
+				{ name: "prefer-membership-filter-in-jecs" },
+				{ name: "prefer-single-world-query-in-jecs" },
+			],
+		},
+		{
 			key: "roblox",
 			description: "Rules for Roblox instances, Ianitor, Color3, UDim2, and other Roblox APIs.",
 			label: "Roblox & Luau Rules",
@@ -104,8 +114,8 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "prefer-idiv" },
 				{ name: "prefer-math-min-max" },
 				{ name: "prefer-modding-inspect" },
+				{ name: "prefer-native-collection-copy" },
 				{ name: "prefer-sequence-overloads" },
-				{ name: "prefer-single-world-query" },
 				{ name: "prefer-udim2-shorthand" },
 				{ name: "require-module-level-instantiation" },
 			],
@@ -166,6 +176,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-constant-condition-with-break" },
 				{ name: "isolated-functions" },
 				{ name: "no-dead-store" },
+				{ name: "no-discarded-rejection" },
 				{ name: "no-error" },
 				{ name: "no-filter-map-chain" },
 				{ name: "no-floating-point-equality" },

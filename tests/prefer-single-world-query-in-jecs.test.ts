@@ -1,11 +1,11 @@
 import { describe } from "vitest";
 
-import rule from "$oxc-rules/roblox/prefer-single-world-query";
+import rule from "$oxc-rules/roblox/jecs/prefer-single-world-query-in-jecs";
 
 import { ts } from "./rule-testers";
 
-describe("prefer-single-world-query", () => {
-	ts.run("prefer-single-world-query", rule, {
+describe("prefer-single-world-query-in-jecs", () => {
+	ts.run("prefer-single-world-query-in-jecs", rule, {
 		invalid: [
 			// Basic get case: two world.get calls on same world and entity
 			{
