@@ -62,7 +62,7 @@
 		"generate:third-party-notices": "bun run scripts/generate-third-party-notices.ts",
 		"hooks:install": "hk install --mise",
 		"hooks:validate": "hk validate",
-		"isentinel-lint": "isentinel-lint",
+		"isentinel-lint": "NODE_OPTIONS=\"${NODE_OPTIONS:-} --max-old-space-size=6144\" isentinel-lint --concurrency=off",
 		"jiti": "jiti",
 		"lint": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- $a && node --run biome -- check --no-errors-on-unmatched $a' _",
 		"lint:agent": "bash -c 'a=$(bash scripts/get-defaults.sh \"$@\"); node --run isentinel-lint -- --agents $a && node --run biome -- check --no-errors-on-unmatched --reporter concise $a' _",
