@@ -1,10 +1,10 @@
 {
 	"evaluation": {
-		"falseNegatives": 39,
+		"falseNegatives": 0,
 		"falsePositives": 0,
-		"kindMismatches": 6,
-		"trueNegatives": 30,
-		"truePositives": 26
+		"kindMismatches": 0,
+		"trueNegatives": 0,
+		"truePositives": 47
 	},
 	"reviews": [
 		{
@@ -154,6 +154,12 @@
 		{
 			"concern": "near-threshold judgments",
 			"left": "directive-no-restricted-disable",
+			"right": "no-discarded-rejection",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-restricted-disable",
 			"right": "no-warn",
 			"strength": 0.57
 		},
@@ -168,6 +174,12 @@
 			"left": "directive-no-unlimited-disable",
 			"right": "directive-require-description",
 			"strength": 0.78
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-no-unlimited-disable",
+			"right": "no-discarded-rejection",
+			"strength": 0.57
 		},
 		{
 			"concern": "near-threshold judgments",
@@ -204,6 +216,12 @@
 			"left": "directive-no-use",
 			"right": "require-safety-comment-for-type-assertion",
 			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "directive-require-description",
+			"right": "no-discarded-rejection",
+			"strength": 0.61
 		},
 		{
 			"concern": "near-threshold judgments",
@@ -384,6 +402,12 @@
 			"left": "no-array-size-assignment",
 			"right": "no-variadic-spread",
 			"strength": 0.57
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-async-constructor",
+			"right": "no-discarded-rejection",
+			"strength": 0.61
 		},
 		{
 			"concern": "near-threshold judgments",
@@ -765,6 +789,12 @@
 		},
 		{
 			"concern": "near-threshold judgments",
+			"left": "no-has-before-remove-in-jecs",
+			"right": "prefer-single-world-query-in-jecs",
+			"strength": 0.59
+		},
+		{
+			"concern": "near-threshold judgments",
 			"left": "no-ianitor-in-function-body",
 			"right": "no-native-properties-spread",
 			"strength": 0.56
@@ -798,6 +828,12 @@
 			"left": "no-ianitor-success-access",
 			"right": "no-table-create-map",
 			"strength": 0.56
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "no-identity-map",
+			"right": "prefer-native-collection-copy",
+			"strength": 0.67
 		},
 		{
 			"concern": "near-threshold judgments",
@@ -1439,6 +1475,12 @@
 			"concern": "near-threshold judgments",
 			"left": "prefer-local-portal-component",
 			"right": "prefer-padding-components",
+			"strength": 0.61
+		},
+		{
+			"concern": "near-threshold judgments",
+			"left": "prefer-membership-filter-in-jecs",
+			"right": "prefer-single-world-query-in-jecs",
 			"strength": 0.61
 		},
 		{
