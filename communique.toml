@@ -135,7 +135,7 @@ they previously suppressed that no longer fire.
 """
 
 [defaults]
-model = "openai/gpt-5.6-luna"
+model = "~openai/gpt-luna-latest"
 max_tokens = 16384
 repo = "howmanysmall/small-rules"
 provider = "openai"
