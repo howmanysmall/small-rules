@@ -195,19 +195,53 @@ async function readOptionalFileAsync(path: string): Promise<string | undefined> 
 	}
 }
 
-async function saveAsync(context: Context, tag: string, documentPath: string, notes: string): Promise<void> {
-	if (context.dryRun) return;
-	if (context.targets.has("documentation")) await writeFile(documentPath, notes);
-	if (context.octokit === undefined) return;
+interface SaveResult {
+	readonly changed: boolean;
+	readonly previous: string | undefined;
+}
 
+async function saveDocumentationAsync(context: Context, tag: string, notes: string): Promise<SaveResult> {
+	const documentPath = nodePath.join(context.rootDirectory, RELEASES_DIRECTORY, `${tag}.md`);
+	const previous = await readOptionalFileAsync(documentPath);
+	if (previous === notes) return { changed: false, previous };
+
+	if (!context.dryRun) await writeFile(documentPath, notes);
+	return { changed: true, previous };
+}
+
+async function saveGitHubReleaseAsync(
+	octokit: Octokit,
+	context: Context,
+	tag: string,
+	notes: string,
+): Promise<SaveResult> {
 	const { owner, repository } = context.defaults;
-	const release = await context.octokit.rest.repos.getReleaseByTag({ owner, repo: repository, tag });
-	await context.octokit.rest.repos.updateRelease({
-		body: notes,
-		owner,
-		release_id: release.data.id,
-		repo: repository,
-	});
+	const { data } = await octokit.rest.repos.getReleaseByTag({ owner, repo: repository, tag });
+	const previous = data.body ?? undefined;
+	if (previous === notes) return { changed: false, previous };
+
+	if (!context.dryRun) {
+		await octokit.rest.repos.updateRelease({ body: notes, owner, release_id: data.id, repo: repository });
+	}
+
+	return { changed: true, previous };
+}
+
+/**
+ * Compares the notes against each selected target separately, so a target
+ * that is already current never hides one that is stale.
+ *
+ * @param context - The run configuration.
+ * @param tag - The release being saved.
+ * @param notes - The regenerated release notes.
+ * @returns The first changed target's result, or an unchanged result.
+ */
+async function saveAsync(context: Context, tag: string, notes: string): Promise<SaveResult> {
+	const results = new Array<SaveResult>();
+	if (context.targets.has("documentation")) results.push(await saveDocumentationAsync(context, tag, notes));
+	if (context.octokit !== undefined) results.push(await saveGitHubReleaseAsync(context.octokit, context, tag, notes));
+
+	return results.find(({ changed }) => changed) ?? { changed: false, previous: undefined };
 }
 
 async function regenerateAsync(context: Context, tag: string, label: string): Promise<Outcome> {
@@ -232,22 +266,21 @@ async function regenerateAsync(context: Context, tag: string, label: string): Pr
 	}
 
 	const notes = await readFile(outputPath, "utf8");
-	const documentPath = nodePath.join(context.rootDirectory, RELEASES_DIRECTORY, `${tag}.md`);
-	const before = await readOptionalFileAsync(documentPath);
-	if (before === notes) {
-		progress.stop(`${prefix} ${dim("unchanged")}`);
-		return "unchanged";
-	}
-
+	let saved: SaveResult;
 	try {
-		await saveAsync(context, tag, documentPath, notes);
+		saved = await saveAsync(context, tag, notes);
 	} catch (error) {
 		progress.error(`${prefix} ${red("failed to save")}`);
 		log.message(dim(String(error)));
 		return "failed";
 	}
 
-	progress.stop(`${prefix} ${formatChanges(before, notes)} ${dim(getReleaseTitle(notes) ?? tag)}`);
+	if (!saved.changed) {
+		progress.stop(`${prefix} ${dim("unchanged")}`);
+		return "unchanged";
+	}
+
+	progress.stop(`${prefix} ${formatChanges(saved.previous, notes)} ${dim(getReleaseTitle(notes) ?? tag)}`);
 	return "changed";
 }
 
