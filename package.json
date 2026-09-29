@@ -74,6 +74,7 @@
 		"references:check": "bun run scripts/sync-tsconfig-references.ts --check",
 		"references:sync": "bun run scripts/sync-tsconfig-references.ts",
 		"release": "bumpp",
+		"release-notes:regenerate": "bun run scripts/regenerate-release-notes.ts",
 		"sfw": "sfw",
 		"skills": "skills",
 		"test": "vitest run",

@@ -3,11 +3,13 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
+		"@clack/prompts": "catalog:scripts",
 		"@cliffy/command": "catalog:scripts",
 		"@octokit/rest": "catalog:scripts",
 		"@openrouter/sdk": "catalog:scripts",
 		"@small-rules/arktype-utilities": "workspace:*",
 		"@small-rules/fs-utilities": "workspace:*",
+		"@small-rules/release-notes": "workspace:*",
 		"@std/msgpack": "catalog:scripts",
 		"@std/path": "catalog:scripts",
 		"ansis": "catalog:scripts",

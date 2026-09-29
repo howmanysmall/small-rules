@@ -15,6 +15,7 @@
 		"../documentation/src/utilities/extract-rule-examples.ts",
 		"../documentation/src/utilities/oxlint-config.ts",
 		"../packages/*/src/**/*.ts",
+		"../tools/release-notes/src/**/*.ts",
 		"../src/**/*.ts",
 		"**/*.ts"
 	]

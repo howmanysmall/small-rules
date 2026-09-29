@@ -40,6 +40,7 @@ You **MUST** follow these guidelines. There is NO exception.
 | `nr test:mutation` | Run Stryker mutation testing (thresholds: break at 70%) |
 | `nr test:fuzz` | Run vitiate regression from stored corpus |
 | `nr test:fuzz:run` | Run vitiate fuzz testing (10 second default) |
+| `nr release-notes:regenerate` | Interactively regenerate committed release notes with the `communique.toml` model |
 
 Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined in `mise.toml`.
 
