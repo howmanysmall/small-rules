@@ -71,7 +71,7 @@ function fail(message: string): never {
 	exit(1);
 }
 
-function isPresent(value: string | undefined): value is string {
+function isPresent(value?: string): value is string {
 	return value !== undefined && value !== "";
 }
 
@@ -80,7 +80,7 @@ async function succeedsAsync(command: string, parameters: ReadonlyArray<string>)
 	return result.exitCode === 0;
 }
 
-async function resolveGitHubTokenAsync(token: string | undefined): Promise<string | undefined> {
+async function resolveGitHubTokenAsync(token?: string): Promise<string | undefined> {
 	if (isPresent(token)) return token;
 
 	const result = await exec("gh", ["auth", "token"], { throwOnError: false });
@@ -88,10 +88,7 @@ async function resolveGitHubTokenAsync(token: string | undefined): Promise<strin
 	return output !== "" && result.exitCode === 0 ? output : undefined;
 }
 
-async function resolveCredentialsAsync(
-	apiKey: string | undefined,
-	githubToken: string | undefined,
-): Promise<Credentials> {
+async function resolveCredentialsAsync(apiKey?: string, githubToken?: string): Promise<Credentials> {
 	if (!(await succeedsAsync("communique", ["--version"]))) {
 		fail("communique is not on PATH. Run `mise install` first.");
 	}
