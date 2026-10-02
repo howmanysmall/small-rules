@@ -12,7 +12,7 @@
 	"main": "./src/shared.ts",
 	"types": "./src/shared.ts",
 	"scripts": {
-		"typecheck": "tsgo --build"
+		"type-check": "tsgo --build"
 	},
 	"dependencies": {
 		"jest-extended": "catalog:test",
