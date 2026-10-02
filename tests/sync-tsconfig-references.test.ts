@@ -54,8 +54,6 @@ const ROOT_CONFIGURATION = `{
 const SOLUTION_SYNCED = `{
 	"extends": "./tsconfig.base.json",
 	"references": [
-		{ "path": "./.codex" },
-		{ "path": "./.omp" },
 		{ "path": "./packages/alpha" },
 		{ "path": "./packages/beta" },
 		{ "path": "./tsconfig.lib.json" },
@@ -69,8 +67,6 @@ const SOLUTION_SYNCED = `{
 const SOLUTION_MISSING_BETA = `{
 	"extends": "./tsconfig.base.json",
 	"references": [
-		{ "path": "./.codex" },
-		{ "path": "./.omp" },
 		{ "path": "./packages/alpha" },
 		{ "path": "./tsconfig.lib.json" },
 		{ "path": "./tsconfig.node.json" },
@@ -85,12 +81,6 @@ const SOLUTION_MISSING_BETA = `{
 const SOLUTION_AFTER_SYNC = `{
 	"extends": "./tsconfig.base.json",
 	"references": [
-		{
-			"path": "./.codex"
-		},
-		{
-			"path": "./.omp"
-		},
 		{
 			"path": "./packages/alpha"
 		},
@@ -112,8 +102,6 @@ const SOLUTION_AFTER_SYNC = `{
 }`;
 
 const EXPECTED_SOLUTION_REFERENCES = [
-	"./.codex",
-	"./.omp",
 	"./packages/alpha",
 	"./packages/beta",
 	"./tsconfig.lib.json",
@@ -122,8 +110,6 @@ const EXPECTED_SOLUTION_REFERENCES = [
 ];
 
 const SOLUTION_REFERENCES_WITHOUT_BETA = [
-	"./.codex",
-	"./.omp",
 	"./packages/alpha",
 	"./tsconfig.lib.json",
 	"./tsconfig.node.json",
@@ -168,10 +154,6 @@ async function createWorkspaceAsync(options: FixtureOptions = {}): Promise<strin
 	await writeAsync(rootDirectory, "packages/beta/tsconfig.json", PACKAGE_TSCONFIG);
 	// A directory with a tsconfig but no manifest is not a workspace project.
 	await writeAsync(rootDirectory, "packages/not-a-project/tsconfig.json", PACKAGE_TSCONFIG);
-	await writeAsync(rootDirectory, ".codex/package.json", manifestFor("@small-rules/codex"));
-	await writeAsync(rootDirectory, ".codex/tsconfig.json", PACKAGE_TSCONFIG);
-	await writeAsync(rootDirectory, ".omp/package.json", manifestFor("@small-rules/omp"));
-	await writeAsync(rootDirectory, ".omp/tsconfig.json", PACKAGE_TSCONFIG);
 	// Workspace packages that are not part of the `tsgo --build` solution.
 	await writeAsync(rootDirectory, "documentation/package.json", manifestFor("@small-rules/documentation"));
 	await writeAsync(rootDirectory, "documentation/tsconfig.json", PACKAGE_TSCONFIG);

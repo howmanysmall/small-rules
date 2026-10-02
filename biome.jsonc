@@ -524,7 +524,7 @@
 		},
 
 		{
-			"includes": ["*.config.{ts,mjs}", ".codex/hooks/**/*.ts"],
+			"includes": ["*.config.{ts,mjs}"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -616,7 +616,7 @@
 		},
 
 		{
-			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", ".codex/hooks/*.{ts,tsx}"],
+			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
 			"linter": {
 				"rules": {
 					"complexity": {

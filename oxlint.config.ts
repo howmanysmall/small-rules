@@ -912,11 +912,6 @@ const configuration = isentinel(
 			"small-rules/use-hook-at-top-level": "error",
 		},
 	},
-	{
-		name: "small-rules/codex",
-		files: [`.codex/**/${GLOB_SRC}`],
-		rules: { "no-void": "off" },
-	},
 );
 
 export default configuration;
