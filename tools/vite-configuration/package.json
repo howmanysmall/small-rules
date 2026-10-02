@@ -19,7 +19,7 @@
 		"vitest": "catalog:test"
 	},
 	"devDependencies": {
-		"@small-rules/vite-configuration": "catalog:test",
+		"@small-rules/vite-configuration": "workspace:*",
 		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:types"
 	}
