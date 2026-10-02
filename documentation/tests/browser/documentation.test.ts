@@ -155,16 +155,17 @@ playwrightIt("shows copy controls on a touch viewport", async ({ browser }) => {
 });
 
 playwrightIt("keeps build-only code out of browser assets", async ({ page }) => {
-	const scriptBodies: Array<string> = [];
-	page.on("response", async (response) => {
+	const scriptBodies: Array<Promise<string>> = [];
+	page.on("response", (response) => {
 		if (response.request().resourceType() === "script") {
-			scriptBodies.push(await response.text());
+			scriptBodies.push(response.text());
 		}
 	});
 
 	await page.goto(`${baseUrl}${rulePath}`);
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
-	const browserCode = scriptBodies.join("\n");
+	const resolvedScriptBodies = await Promise.all(scriptBodies);
+	const browserCode = resolvedScriptBodies.join("\n");
 	for (const forbiddenText of [
 		"yuku-parser",
 		"vitest",
