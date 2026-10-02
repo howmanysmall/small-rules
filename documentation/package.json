@@ -42,7 +42,7 @@
 		"babel-plugin-react-compiler": "catalog:build",
 		"get-tsconfig": "catalog:build",
 		"jsdom": "catalog:test",
-		"typescript": "catalog:types",
+		"typescript": "catalog:tooling",
 		"vitest": "catalog:test"
 	}
 }

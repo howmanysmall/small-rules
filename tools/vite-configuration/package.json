@@ -21,6 +21,6 @@
 	"devDependencies": {
 		"@small-rules/vite-configuration": "workspace:*",
 		"@types/node": "catalog:types",
-		"@typescript/native-preview": "catalog:types"
+		"@typescript/native-preview": "catalog:tooling"
 	}
 }
