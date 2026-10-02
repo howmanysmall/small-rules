@@ -23,6 +23,8 @@
 		"packages/*/src/**/*.ts",
 		"packages/*/vitest.config.ts",
 		"scripts/**/*.ts",
+		"tools/release-notes/src/**/*.ts",
+		"tools/release-notes/vitest.config.ts",
 		"src/**/*.ts"
 	],
 	"exclude": ["dist", "node_modules"]

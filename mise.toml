@@ -66,6 +66,7 @@ sources = [
 	"packages/**",
 	"documentation/**",
 	"scripts/**",
+	"tools/**",
 	".github/workflows/**",
 	"*.config.*",
 	"vitest*.ts",

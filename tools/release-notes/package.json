@@ -1,0 +1,25 @@
+{
+	"name": "@small-rules/release-notes",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Helpers for regenerating committed communique release notes.",
+	"sideEffects": false,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"test:agent": "nr test --reporter agent"
+	},
+	"dependencies": {
+		"@small-rules/arktype-utilities": "workspace:*",
+		"arktype": "catalog:runtime",
+		"smol-toml": "catalog:scripts"
+	},
+	"devDependencies": {
+		"@small-rules/vite-configuration": "catalog:test",
+		"vitest": "catalog:test"
+	}
+}
