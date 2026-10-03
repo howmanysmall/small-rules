@@ -96,64 +96,49 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 }
 
 function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: string): string {
-	try {
-		const scope = sourceCode.getScope(node);
-		const names = new Set(scope.variables.map((variable) => variable.name));
+	const scope = sourceCode.getScope(node);
+	const names = new Set(scope.variables.map((variable) => variable.name));
 
-		// Catch clause parameters may not appear in scope.variables, so walk
-		// ancestors
-		let current: ESTree.Node | null = node.parent;
-		while (current !== null) {
-			if (isCatchClause(current) && isIdentifierName(current.param)) names.add(current.param.name);
-			current = current.parent;
-		}
-
-		if (!names.has(base)) return base;
-		for (let index = 2; index < 100; index += 1) {
-			const candidate = `${base}${index}`;
-			/* v8 ignore next -- @preserve generated names below error99 are enough for lint fixes. */
-			if (!names.has(candidate)) return candidate;
-		}
-	} catch {
-		/* scope API unavailable — fall back to base name */
+	// Catch clause parameters may not appear in scope.variables, so walk
+	// ancestors
+	let current: ESTree.Node | null = node.parent;
+	while (current !== null) {
+		if (isCatchClause(current) && isIdentifierName(current.param)) names.add(current.param.name);
+		current = current.parent;
 	}
 
-	/* v8 ignore start -- @preserve generated names below error99 are enough for lint fixes. */
+	if (!names.has(base)) return base;
+	for (let index = 2; index < 100; index += 1) {
+		const candidate = `${base}${index}`;
+		/* v8 ignore next -- @preserve generated names below error99 are enough for lint fixes. */
+		if (!names.has(candidate)) return candidate;
+	}
+
+	/* v8 ignore next -- @preserve generated names below error99 are enough for lint fixes. */
 	return base;
-	/* v8 ignore stop -- @preserve */
 }
 
 function resolveImportSource(sourceCode: SourceCode, node: ESTree.IdentifierReference): string | undefined {
-	try {
-		let scope: null | Scope = sourceCode.getScope(node);
-		while (scope !== null) {
-			const variable = scope.set.get(node.name);
-			if (variable !== undefined) {
-				const importBinding = variable.defs.find((definition) => definition.type === "ImportBinding");
-				if (isImportDeclaration(importBinding?.parent)) return importBinding.parent.source.value;
-				return undefined;
-			}
-
-			scope = scope.upper;
+	let scope: null | Scope = sourceCode.getScope(node);
+	while (scope !== null) {
+		const variable = scope.set.get(node.name);
+		if (variable !== undefined) {
+			const importBinding = variable.defs.find((definition) => definition.type === "ImportBinding");
+			if (isImportDeclaration(importBinding?.parent)) return importBinding.parent.source.value;
+			return undefined;
 		}
-	} catch {
-		/* scope API unavailable */
+
+		scope = scope.upper;
 	}
 
-	/* v8 ignore start -- @preserve scope lookup failures fall back to unresolved imports. */
 	return undefined;
-	/* v8 ignore stop -- @preserve */
 }
 
 function isDeclaredLocally(sourceCode: SourceCode, node: ESTree.IdentifierReference): boolean {
-	try {
-		let scope: null | Scope = sourceCode.getScope(node);
-		while (scope !== null) {
-			if (scope.set.has(node.name)) return true;
-			scope = scope.upper;
-		}
-	} catch {
-		/* scope API unavailable */
+	let scope: null | Scope = sourceCode.getScope(node);
+	while (scope !== null) {
+		if (scope.set.has(node.name)) return true;
+		scope = scope.upper;
 	}
 
 	return false;

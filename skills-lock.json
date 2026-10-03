@@ -7,12 +7,6 @@
       "skillPath": "skills/animate/SKILL.md",
       "computedHash": "7598d33e7f60dd5c24531eaaa897621cc3bdb48e8050324211627973bc59c4ce"
     },
-    "animate-expo": {
-      "source": "emilkowalski/skills",
-      "sourceType": "github",
-      "skillPath": "skills/animate-expo/SKILL.md",
-      "computedHash": "5de09593d564091f9db60aabede7bed760251e118548272050a247c653c417d2"
-    },
     "animation-vocabulary": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

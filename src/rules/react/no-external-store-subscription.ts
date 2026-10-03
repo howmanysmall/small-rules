@@ -44,8 +44,8 @@ function collectCleanupVariables(
 	for (const cleanupReference of cleanupReferences) {
 		for (const upstreamReference of analysis.scope.getUpstreamReferences(cleanupReference)) {
 			// `resolved` is typed `Variable | null`, but the harness exposes
-			// unresolved bindings as `undefined`; the cast makes the runtime
-			// shape visible to lint.
+			// unresolved bindings as `undefined`; the widened annotation makes
+			// the runtime shape visible to lint.
 			const resolved: null | undefined | Variable = upstreamReference.resolved;
 			// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
 			if (resolved === null || resolved === undefined) continue;
