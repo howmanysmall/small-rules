@@ -33,7 +33,7 @@
 	"devDependencies": {
 		"@astrojs/check": "catalog:frontend",
 		"@playwright/test": "catalog:test",
-		"@small-rules/vite-configuration": "catalog:test",
+		"@small-rules/vite-configuration": "workspace:*",
 		"@testing-library/react": "catalog:test",
 		"@testing-library/user-event": "catalog:test",
 		"@total-typescript/ts-reset": "catalog:types",
@@ -42,7 +42,7 @@
 		"babel-plugin-react-compiler": "catalog:build",
 		"get-tsconfig": "catalog:build",
 		"jsdom": "catalog:test",
-		"typescript": "catalog:types",
+		"typescript": "catalog:tooling",
 		"vitest": "catalog:test"
 	}
 }

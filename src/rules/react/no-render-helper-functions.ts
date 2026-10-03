@@ -2,12 +2,17 @@ import { createRule } from "$oxc-utilities/create-rule";
 import {
 	CHAIN_EXPRESSION,
 	getTypeAnnotationFromBinding,
+	isArrayExpression,
 	isArrowFunctionExpression,
+	isCallExpression,
 	isFunctionDeclaration,
 	isFunctionExpression,
 	isIdentifierName,
+	isJsxAttribute,
 	isJsxElement,
+	isJsxExpressionContainer,
 	isJsxFragment,
+	isProperty,
 	isReturnStatement,
 	isTsQualifiedName,
 	isTsTypeReference,
@@ -52,6 +57,10 @@ function isHookName(name: string): boolean {
 	return HOOK_PATTERN.test(name);
 }
 
+function shouldSkipVariableName(variableName?: string): boolean {
+	return variableName === undefined || isUppercaseName(variableName) || isHookName(variableName);
+}
+
 function isReactNodeTypeAnnotation(node?: ESTree.TSType): boolean {
 	if (!isTsTypeReference(node)) return false;
 
@@ -80,28 +89,24 @@ function hasJsxReturn(node: CallbackFunction): boolean {
 		if (foundJsx || !isReturnStatement(child)) return;
 
 		const { argument } = child;
-		if (argument !== null && (argument.type === "JSXElement" || argument.type === "JSXFragment")) foundJsx = true;
+		if (argument !== null && (isJsxElement(argument) || isJsxFragment(argument))) foundJsx = true;
 	});
 
 	return foundJsx;
 }
 
 function isInlineCallback({ parent }: CallbackFunction): boolean {
-	return (
-		parent.type === "CallExpression" ||
-		parent.type === "JSXExpressionContainer" ||
-		parent.type === "ArrayExpression"
-	);
+	return isCallExpression(parent) || isJsxExpressionContainer(parent) || isArrayExpression(parent);
 }
 
 function getVariableDeclaratorFunctionName(node: ESTree.Node): string | undefined {
-	if (node.parent?.type !== "VariableDeclarator" || node.parent.id.type !== "Identifier") return undefined;
+	if (!isVariableDeclarator(node.parent) || !isIdentifierName(node.parent.id)) return undefined;
 	return node.parent.id.name;
 }
 
 function getBindingIdentifierName(binding: ESTree.BindingPattern): string | undefined {
 	/* v8 ignore next -- @preserve destructured default callback declarations are ignored by this rule. */
-	return binding.type === "Identifier" ? binding.name : undefined;
+	return isIdentifierName(binding) ? binding.name : undefined;
 }
 
 function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
@@ -115,15 +120,15 @@ function isPropertyValueReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
 	const parent = ascendPastWrappers(node.parent ?? undefined);
 	/* v8 ignore next -- @preserve scope references always have parents in parser-produced ASTs. */
-	return parent?.type === "Property" && unwrapReferenceValue(parent.value) === node;
+	return isProperty(parent) && unwrapReferenceValue(parent.value) === node;
 }
 
 function isJsxAttributeValueReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
 	const parent = ascendPastWrappers(node.parent ?? undefined);
 	return (
-		parent?.type === "JSXExpressionContainer" &&
-		parent.parent.type === "JSXAttribute" &&
+		isJsxExpressionContainer(parent) &&
+		isJsxAttribute(parent.parent) &&
 		unwrapReferenceValue(parent.expression) === node
 	);
 }
@@ -131,7 +136,7 @@ function isJsxAttributeValueReference(node: ESTree.Node): boolean {
 function isCallArgumentReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
 	const parent = ascendPastWrappers(node.parent ?? undefined);
-	if (parent?.type !== "CallExpression") return false;
+	if (!isCallExpression(parent)) return false;
 
 	return parent.arguments.some((argument) => unwrapReferenceValue(argument) === node);
 }
@@ -197,10 +202,6 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 				messageId: "noRenderHelper",
 				node,
 			});
-		}
-
-		function shouldSkipVariableName(variableName: string | undefined): boolean {
-			return variableName === undefined || isUppercaseName(variableName) || isHookName(variableName);
 		}
 
 		function checkVariableDeclaratorExit(node: CallbackFunction, parent: ESTree.VariableDeclarator): void {

@@ -13,9 +13,8 @@ ignorePatterns = [
 	"plugins/**",
 	"src/generated/**",
 	".benchmarks/**",
-	".codex/**",
 	".opencode/**",
-	".omp/**",
+
 	"tests/rule-harness/**"
 ]
 ignoreDependencies = [

@@ -16,7 +16,7 @@
 		"arktype": "catalog:runtime"
 	},
 	"devDependencies": {
-		"@small-rules/vite-configuration": "catalog:test",
+		"@small-rules/vite-configuration": "workspace:*",
 		"vitest": "catalog:test"
 	}
 }

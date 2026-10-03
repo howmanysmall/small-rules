@@ -1,0 +1,34 @@
+title = "small-rules secret scanning"
+description = "Extends the built-in ruleset with the repo's known false positives. Passed explicitly with --config; betterleaks does not auto-discover this file."
+
+# The pre-push hook scans full history for a new ref, so every historical false
+# positive in the repository blocks the first push of any new branch.
+#
+# This must stay above the [extend] table. TOML binds bare keys to the most
+# recently opened table, so a filter written after [extend] becomes
+# `extend.filter` and is silently dropped from the resolved config.
+filter = '''
+// `password` used as an identifier in a test fixture or a documented example,
+// holding the literal placeholder "secret". Not a credential.
+matchesAny(
+	attributes["path"],
+	[
+		`(^|/)tests/consistent-compound-words\.test\.ts$`,
+		`(^|/)documentation/src/data/generated/rule-relations\.review\.json$`,
+	],
+) && finding["secret"] == "secret"
+||
+// A lockfile entry whose dependency name ends in "password", such as
+// `'@inquirer/password': 5.1.1(@types/node@25.9.3)`. The rule captures the
+// resolved version string, which is not a credential.
+//
+// Path is repo-relative in `git` scans and absolute in `dir` scans, so every
+// pattern anchors on a separator rather than the start of the string.
+matchesAny(attributes["path"], [`(^|/)[\w.-]*lock\.ya?ml$`]) &&
+matchesAny(finding["secret"], [`^\d+\.\d+\.\d+`])
+'''
+
+[extend]
+# Required. Without this the file replaces the built-in ruleset instead of
+# layering onto it, and every scan would report zero findings.
+useDefault = true

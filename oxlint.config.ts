@@ -588,6 +588,7 @@ const configuration = isentinel(
 			"**/{dist,do-not-sync-ever,node_modules}/**",
 			"scripts/clis/**/*.ts",
 			"src/generated/**",
+			".mise/**",
 		],
 		options: {
 			denyWarnings: true,
@@ -911,11 +912,6 @@ const configuration = isentinel(
 			"small-rules/use-exhaustive-dependencies": "error",
 			"small-rules/use-hook-at-top-level": "error",
 		},
-	},
-	{
-		name: "small-rules/codex",
-		files: [`.codex/**/${GLOB_SRC}`],
-		rules: { "no-void": "off" },
 	},
 );
 

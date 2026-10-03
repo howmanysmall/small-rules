@@ -25,7 +25,7 @@ const PROJECT_PARENTS = ["packages"] as const;
 /**
  * Workspace packages outside the project parents that `tsgo --build` covers.
  */
-const STANDALONE_PROJECTS = [".codex", ".omp", "tools/release-notes"] as const;
+const STANDALONE_PROJECTS = ["tools/release-notes"] as const;
 
 /**
  * Root configurations the solution references in addition to workspace

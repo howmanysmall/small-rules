@@ -189,6 +189,11 @@ function resolveContinueTargetLoop(statement: ESTree.ContinueStatement): LoopNod
 	return resolveTargetLoop(statement, false);
 }
 
+function resolveBreakContinueTarget(node: ESTree.BreakStatement | ESTree.ContinueStatement): LoopNode | undefined {
+	if (isContinueStatement(node)) return resolveContinueTargetLoop(node);
+	return resolveBreakTargetLoop(node);
+}
+
 function cloneEntry(value: OpenerStackEntry): OpenerStackEntry {
 	return { ...value, loopAncestors: [...value.loopAncestors] };
 }
@@ -693,13 +698,6 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 					node,
 				});
 			}
-		}
-
-		function resolveBreakContinueTarget(
-			node: ESTree.BreakStatement | ESTree.ContinueStatement,
-		): LoopNode | undefined {
-			if (isContinueStatement(node)) return resolveContinueTargetLoop(node);
-			return resolveBreakTargetLoop(node);
 		}
 
 		function reportBreakContinueEntry(

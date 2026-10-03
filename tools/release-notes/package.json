@@ -19,7 +19,7 @@
 		"smol-toml": "catalog:scripts"
 	},
 	"devDependencies": {
-		"@small-rules/vite-configuration": "catalog:test",
+		"@small-rules/vite-configuration": "workspace:*",
 		"vitest": "catalog:test"
 	}
 }

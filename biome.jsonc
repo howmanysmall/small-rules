@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -40,7 +40,15 @@
 	},
 
 	"files": {
-		"includes": ["**", "!**/package.json", "!**/*.js", "!**/*-lock.{json,yaml}", "!scripts/clis/**/*.ts"]
+		"includes": [
+			"**",
+			"!**/package.json",
+			"!**/*.js",
+			"!**/*-lock.{json,yaml}",
+			"!scripts/clis/**/*.ts",
+			"!**/.opencode/goals",
+			"!.mise"
+		]
 	},
 
 	"formatter": {
@@ -215,7 +223,7 @@
 
 			"nursery": {
 				"noAstroSetHtmlDirective": "error",
-				"noBaseToString": "error",
+				"noBaseToString": "off",
 				"noBunModules": "error",
 				"noComponentHookFactories": "error",
 				"noConditionalExpect": "off",
@@ -524,7 +532,7 @@
 		},
 
 		{
-			"includes": ["*.config.{ts,mjs}", ".codex/hooks/**/*.ts"],
+			"includes": ["*.config.{ts,mjs}"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -616,7 +624,7 @@
 		},
 
 		{
-			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", ".codex/hooks/*.{ts,tsx}"],
+			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
 			"linter": {
 				"rules": {
 					"complexity": {

@@ -19,6 +19,14 @@
 		"hk": {
 			"args": ["x", "--", "hk", "mcp", "--root", "."],
 			"command": "mise"
+		},
+		"openrouter-mcp": {
+			"type": "http",
+			"url": "https://mcp.openrouter.ai/mcp"
+		},
+		"paper": {
+			"type": "http",
+			"url": "http://127.0.0.1:29979/mcp"
 		}
 	}
 }

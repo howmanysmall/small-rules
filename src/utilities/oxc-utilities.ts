@@ -303,8 +303,8 @@ export function isExportSpecifier(node: ESTree.Node): node is ESTree.ExportSpeci
 	return node.type === "ExportSpecifier";
 }
 
-export function isProperty(node: ESTree.Node): node is ESTree.ObjectProperty {
-	return node.type === PROPERTY;
+export function isProperty(node?: ESTree.Node | null): node is ESTree.ObjectProperty {
+	return node?.type === PROPERTY;
 }
 
 export function isMemberExpression(node: ESTree.Node): node is ESTree.MemberExpression {

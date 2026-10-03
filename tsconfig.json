@@ -1,14 +1,24 @@
 {
 	"extends": "./tsconfig.base.json",
 	"references": [
-		{ "path": "./.codex" },
-		{ "path": "./.omp" },
-		{ "path": "./packages/arktype-utilities" },
-		{ "path": "./packages/fs-utilities" },
-		{ "path": "./tsconfig.lib.json" },
-		{ "path": "./tsconfig.node.json" },
-		{ "path": "./tsconfig.test.json" },
-		{ "path": "./tools/release-notes" }
+		{
+			"path": "./packages/arktype-utilities"
+		},
+		{
+			"path": "./packages/fs-utilities"
+		},
+		{
+			"path": "./tools/release-notes"
+		},
+		{
+			"path": "./tsconfig.lib.json"
+		},
+		{
+			"path": "./tsconfig.node.json"
+		},
+		{
+			"path": "./tsconfig.test.json"
+		}
 	],
 	"files": [],
 	"include": []
