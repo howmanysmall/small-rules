@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.2.0] - 2026-10-03
+
+## Changed
+- No user-facing changes.
+
 ## [3.1.0] - 2026-09-22
 
 ## Added
