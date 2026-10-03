@@ -181,6 +181,7 @@ catalogs:
     vitiate: 0.3.1
   tooling:
     "@isentinel/hooks": 1.6.0
+    "@mdx-js/language-server": 0.6.4
     "@opencode-ai/plugin": 0.0.0-beta-19271
     "@opencode-ai/schema": 0.0.0-beta-19271
     "@typescript/native-preview": 7.0.0-dev.20260707.2
