@@ -7,15 +7,15 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="ban-types">
 	<Fragment slot="rationale">
 		<p>
-			`Omit&lt;T, K&gt;` doesn't check that the keys you name exist on `T`. Misspell one, or
-			rename the property later, and `Omit` keeps compiling while leaving the property in.{" "}
-			`Except` from <a href="https://github.com/sindresorhus/type-fest">type-fest</a> requires{" "}
-			`K` to be a key of `T`, so the same mistake is a type error.
+			`Omit&lt;T, K&gt;` doesn't check that the keys you name exist on `T`. Misspell one, or rename the property
+			later, and `Omit` keeps compiling while leaving the property in. `Except` from{" "}
+			<a href="https://github.com/sindresorhus/type-fest">type-fest</a> requires `K` to be a key of `T`, so the
+			same mistake is a type error.
 		</p>
 		<p>
-			That's the only type banned by default. Use `bannedTypes` to add your own: an array bans the
-			names outright, and an object maps each banned name to the type you'd rather people reach for. Your entries
-			are added to the default, so `Omit` stays banned.
+			That's the only type banned by default. Use `bannedTypes` to add your own: an array bans the names outright,
+			and an object maps each banned name to the type you'd rather people reach for. Your entries are added to the
+			default, so `Omit` stays banned.
 		</p>
 	</Fragment>
 </RulePage>

@@ -41,6 +41,26 @@ function injectContextualMenuScript(): string {
     copyButton.className = "contextual-menu__button";
     copyButton.setAttribute("title", "Copy page markdown");
     copyButton.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Copy page</span>';
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    // Swap the label at once, then blur it in, so the change reads as one word becoming another.
+    function setCopyLabel(text) {
+      var label = copyButton.querySelector("span");
+      if (!label) return;
+      if (!copyButton.style.minWidth) copyButton.style.minWidth = copyButton.offsetWidth + "px";
+      label.textContent = text;
+      if (typeof label.animate !== "function") return;
+      label.animate(
+        reduceMotion.matches
+          ? [{ opacity: 0.6 }, { opacity: 1 }]
+          : [
+              { filter: "blur(2px)", opacity: 0.6 },
+              { filter: "blur(0)", opacity: 1 },
+            ],
+        { duration: 150, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+      );
+    }
+
     copyButton.addEventListener("click", function () {
       var markdownUrl = markdownUrlForPath(window.location.pathname);
       fetch(markdownUrl)
@@ -53,16 +73,16 @@ function injectContextualMenuScript(): string {
         })
         .then(function () {
           copyButton.setAttribute("title", "Copied!");
-          copyButton.querySelector("span").textContent = "Copied!";
+          setCopyLabel("Copied!");
           window.setTimeout(function () {
             copyButton.setAttribute("title", "Copy page markdown");
-            copyButton.querySelector("span").textContent = "Copy page";
+            setCopyLabel("Copy page");
           }, 2000);
         })
         .catch(function () {
-          copyButton.querySelector("span").textContent = "Failed";
+          setCopyLabel("Failed");
           window.setTimeout(function () {
-            copyButton.querySelector("span").textContent = "Copy page";
+            setCopyLabel("Copy page");
           }, 2000);
         });
     });

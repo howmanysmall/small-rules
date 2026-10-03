@@ -808,9 +808,8 @@ main .page-title-row > h1 {
 }
 
 .RuleExample-copy {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+	display: inline-grid;
+	place-items: center;
 	width: 1.75rem;
 	height: 1.75rem;
 	padding: 0;
@@ -840,6 +839,37 @@ main .page-title-row > h1 {
 .RuleExample-copy[data-copied] {
 	color: var(--ink);
 	opacity: 1;
+}
+
+/* Both icons stay in the DOM so the swap to the check is a crossfade, not a cut. */
+.RuleExample-copy-icon {
+	grid-area: 1 / 1;
+	transition:
+		opacity 150ms var(--ease-out),
+		scale 150ms var(--ease-out),
+		filter 150ms var(--ease-out);
+}
+
+.RuleExample-copy-icon--check,
+.RuleExample-copy[data-copied] .RuleExample-copy-icon--copy {
+	opacity: 0;
+	filter: blur(2px);
+	scale: 0.9;
+}
+
+.RuleExample-copy[data-copied] .RuleExample-copy-icon--check {
+	opacity: 1;
+	filter: none;
+	scale: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.RuleExample-copy-icon,
+	.RuleExample-copy-icon--check,
+	.RuleExample-copy[data-copied] .RuleExample-copy-icon--copy {
+		filter: none;
+		scale: none;
+	}
 }
 
 @media (hover: none), (pointer: coarse) {
@@ -1065,10 +1095,39 @@ main .page-title-row > h1 {
 	margin-top: 1rem;
 	background: var(--well);
 	border: 1px solid var(--rule);
+	transition:
+		opacity 200ms var(--ease-out),
+		display 200ms allow-discrete;
 }
 
 .rule-option__detail[hidden] {
 	display: none;
+	opacity: 0;
+}
+
+@starting-style {
+	.rule-option__detail {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.rule-option__detail {
+		transition:
+			opacity 200ms var(--ease-out),
+			translate 200ms var(--ease-out),
+			display 200ms allow-discrete;
+	}
+
+	.rule-option__detail[hidden] {
+		translate: 0 -4px;
+	}
+
+	@starting-style {
+		.rule-option__detail {
+			translate: 0 -4px;
+		}
+	}
 }
 
 .rule-option__detail pre {

@@ -8,11 +8,9 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			Pick one suffix for test files and every tool only needs one pattern: the test runner's include glob, the
-			editor's file nesting, the coverage excludes. Having both `.spec` and `.test` also
-			means someone has to decide which one each new file gets. I picked `.test`.
+			editor's file nesting, the coverage excludes. Having both `.spec` and `.test` also means someone has to
+			decide which one each new file gets. I picked `.test`.
 		</p>
-		<p>
-			It only looks at the file name, and only flags `.spec.ts` and `.spec.tsx`.
-		</p>
+		<p>It only looks at the file name, and only flags `.spec.ts` and `.spec.tsx`.</p>
 	</Fragment>
 </RulePage>

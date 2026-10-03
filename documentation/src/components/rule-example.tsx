@@ -36,6 +36,7 @@ const FAIL_STATUS_ICON = (
 const COPY_ICON = (
 	<svg
 		aria-hidden="true"
+		className="RuleExample-copy-icon RuleExample-copy-icon--copy"
 		fill="none"
 		height="14"
 		stroke="currentColor"
@@ -47,6 +48,23 @@ const COPY_ICON = (
 	>
 		<rect height="13" rx="2" ry="2" width="13" x="9" y="9" />
 		<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+	</svg>
+);
+
+const CHECK_ICON = (
+	<svg
+		aria-hidden="true"
+		className="RuleExample-copy-icon RuleExample-copy-icon--check"
+		fill="none"
+		height="14"
+		stroke="currentColor"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		strokeWidth="2"
+		viewBox="0 0 24 24"
+		width="14"
+	>
+		<path d="m5 12 4 4L19 6" />
 	</svg>
 );
 
@@ -101,6 +119,7 @@ export function RuleExample({ title, type, children }: Readonly<PropsWithChildre
 			onClick={handleCopyExample}
 		>
 			{COPY_ICON}
+			{CHECK_ICON}
 		</button>
 	);
 	const badge = (
