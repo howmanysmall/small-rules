@@ -94,7 +94,7 @@ export default defineConfig({
 					},
 					themes: [syntaxLightTheme, syntaxDarkTheme],
 				},
-				favicon: "/favicon.svg?v=2",
+				favicon: "/favicon.svg?v=3",
 				plugins: [],
 				sidebar: [
 					{
