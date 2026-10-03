@@ -4,6 +4,14 @@ amends "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Config.pk
 import "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Builtins.pkl"
 
 min_hk_version = "2.4.0"
+jobs = 2
+fail_fast = true
+
+env {
+  ["LINT_MAX_WORKERS"] = "1"
+  ["RAYON_NUM_THREADS"] = "2"
+  ["GOMAXPROCS"] = "2"
+}
 
 exclude =
   List(
@@ -11,320 +19,423 @@ exclude =
     "dist",
     "coverage",
     "report",
+    "reports",
     ".git",
+    ".mise",
     ".repos",
     ".stryker-tmp",
+    ".vitiate",
+    ".agents/skills",
     "do-not-sync-ever",
-    "**/*.png",
-    "**/*.jpg",
-    "**/*.jpeg",
-    "**/*.gif",
-    "**/*.webp",
-    "**/*.ico",
-    "**/*.woff",
-    "**/*.woff2",
-    "**/*.ttf",
-    "**/*.eot",
-    "**/*.pdf",
-    "**/*.zip",
-    "**/*.tar",
-    "**/*.gz",
-    "**/*.mp4",
-    "**/*.mov",
-    "pnpm-lock.yaml",
+    // Minified output of `build:local`.
+    "plugins/small-rules.js",
+    "**/*.tsbuildinfo",
   )
-display_skip_reasons = List()
-terminal_progress = true
 
-local ECMA_FILES =
-  List(
-    "**/*.cjs",
-    "**/*.cjsx",
-    "**/*.cts",
-    "**/*.ctsx",
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.mjs",
-    "**/*.mjsx",
-    "**/*.mts",
-    "**/*.mtsx",
-    "**/*.ts",
-    "**/*.tsx",
-  )
+local ECMA_FILES = List("**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}")
 local ASTRO_FILES = List("**/*.astro")
-local MDX_FILES = List("**/*.mdx")
-local CSS_FILES = List("**/*.css")
-local CSS_EXTENDED_FILES = CSS_FILES + List("**/*.less", "**/*.pcss", "**/*.postcss", "**/*.scss")
-local MARKDOWN_FILES = MDX_FILES + List("**/*.md", "**/*.markdown")
-local TOML_FILES = List("**/*.toml")
-local GRAPHQL_FILES = List("**/*.graphql", "**/*.graphqls", "**/*.gql")
-local JSON_FILES = List("**/*.json", "**/*.jsonc")
-local YAML_FILES = List("**/*.yaml", "**/*.yml")
-local LUAU_FILES = List("**/*.lua", "**/*.luau")
-local PACKAGE_JSON_FILES = List("**/package.json")
-
-local BIOME_FILES =
-  ASTRO_FILES
-    + CSS_FILES
-    + ECMA_FILES
-    + GRAPHQL_FILES
-    + JSON_FILES
-    + MDX_FILES
-    + List("**/*.svg")
-local ISENTINEL_FILES =
-  ASTRO_FILES
-    + CSS_EXTENDED_FILES
-    + ECMA_FILES
-    + JSON_FILES
-    + LUAU_FILES
-    + TOML_FILES
-    + YAML_FILES
-    + List("**/*.json5")
-local FALLOW_FILES = ASTRO_FILES + CSS_FILES + ECMA_FILES + PACKAGE_JSON_FILES
-local SHERIF_FILES = PACKAGE_JSON_FILES + List("pnpm-workspace.yaml")
-
-local WORKFLOW_FILES =
+local MARKDOWN_FILES = List("**/*.{md,markdown,mdx}")
+local WORKFLOW_FILES = List(".github/workflows/**/*.{yml,yaml}")
+local ACTION_FILES = WORKFLOW_FILES + List(".github/actions/**/action.{yml,yaml}")
+local GENERATED_DATA =
   List(
-    ".github/workflows/**/*.yml",
-    ".github/workflows/**/*.yaml",
+    "**/*-lock.{json,yaml}",
+    "mise.lock",
+    "skills-lock.json",
+    "patches/**",
+    // communique writes these on release.
+    "documentation/src/content/releases/**",
   )
-local WORKFLOW_ACTION_FILES =
-  WORKFLOW_FILES + List(".github/actions/**/action.yml", ".github/actions/**/action.yaml")
-local ZIZMOR_FILES = WORKFLOW_ACTION_FILES + List(".github/dependabot.yml")
 
-local pullhook = new Step {
-  check = "pullhook run"
-}
-
-// Shared steps. hk materializes the check, fix, and pre-commit hooks from
-// these: check only checks, fix fixes without staging, and pre-commit fixes,
-// stages, and stashes with git.
-local linters = new Mapping<String, Step> {
-  ["trailing-whitespace"] = Builtins.trailing_whitespace
-  ["newlines"] = Builtins.newlines
-  ["check-merge-conflict"] = Builtins.check_merge_conflict
-  ["check-case-conflict"] = Builtins.check_case_conflict
-  ["check-symlinks"] = Builtins.check_symlinks
-  ["mixed-line-ending"] = Builtins.mixed_line_ending
-  ["detect-private-key"] = Builtins.detect_private_key
-  ["betterleaks"] = Builtins.betterleaks
-  ["sherif"] {
-    glob = SHERIF_FILES
-    check = "sherif -r root-package-private-field -r root-package-dependencies"
-    fix = "sherif --fix --no-install -r root-package-private-field -r root-package-dependencies"
+// isentinel-lint and biome need the whole file list in one process: each
+// invocation repays ESLint's or Biome's startup cost.
+local fileChecks = new Mapping<String, Step> {
+  ["type-check"] {
+    glob =
+      ECMA_FILES
+        + ASTRO_FILES
+        + List("**/tsconfig*.json", "**/package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml")
+    exclusive = true
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("node", "--run", "type-check")
+      }
+      effect = "write"
+    }
+  }
+  ["isentinel-lint"] {
+    glob =
+      ECMA_FILES
+        + ASTRO_FILES
+        + List("**/*.{json,jsonc,json5,yaml,yml,toml,css,scss,less,pcss,postcss,lua,luau}")
+    exclude = GENERATED_DATA
+    depends = List("type-check")
+    batch = false
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("node", "--run", "isentinel-lint", "--", "{{files}}")
+      }
+      effect = "write"
+    }
+    fix = new CommandSpec {
+      command = new Command {
+        argv = List("node", "--run", "isentinel-lint", "--", "--fix", "{{files}}")
+      }
+      effect = "write"
+    }
+  }
+  ["biome"] = (Builtins.biome) {
+    glob =
+      ECMA_FILES
+        + ASTRO_FILES
+        + List("**/*.{json,jsonc,css,html,graphql,graphqls,gql,grit,svg,mdx}")
+    exclude = GENERATED_DATA
+    batch = false
+  }
+  // .astro is intentionally left out: oxfmt does not support it.
+  ["oxfmt"] = (Builtins.oxfmt) {
+    glob = ECMA_FILES + List("**/*.{json,jsonc,json5,code-workspace,mdx}")
+    exclude = GENERATED_DATA
   }
   // tsconfig project references are derived from each package.json, and a
   // missing one is silent: tsgo --build still resolves the import through
   // the root node_modules and skips the project.
   ["tsconfig-references"] {
-    glob = List("**/package.json", "**/tsconfig.json")
-    check = "node --run references:check"
-    fix = "node --run references:sync"
-  }
-
-  // JS/TS pipeline — isentinel-lint + biome + oxfmt.
-  // Nothing here batches: isentinel-lint pays ESLint's startup cost on every
-  // invocation, so one invocation over all files beats N batches that each
-  // repay it. Same for biome/oxfmt, whose startups would just add node
-  // invocations. A single-file change is one batch either way.
-  ["isentinel-lint"] {
-    glob = ISENTINEL_FILES
-    check = "node --run isentinel-lint -- {{files}}"
-    fix = "node --run isentinel-lint -- --fix {{files}}"
-    check_first = true
-    batch = false
-  }
-  ["biome-js"] = (Builtins.biome) {
-    glob = BIOME_FILES
-    check = "node --run biome -- check --no-errors-on-unmatched {{files}}"
-    fix = "node --run biome -- check --write --no-errors-on-unmatched {{files}}"
-    check_first = true
-    batch = false
-  }
-
-  // Biome non-JS — css, html, grit
-  ["biome-non-js"] = (Builtins.biome) {
-    glob = List("*.css", "*.html", "*.grit")
-    check = "node --run biome -- check --no-errors-on-unmatched {{files}}"
-    fix = "node --run biome -- check --write --no-errors-on-unmatched {{files}}"
-    check_first = true
-    batch = false
-  }
-
-  // Single oxfmt step for every file type it handles.
-  // Note: .astro is intentionally excluded. oxfmt does not support it.
-  ["oxfmt"] = (Builtins.oxfmt) {
-    glob =
-      List(
-        "*.js",
-        "*.jsx",
-        "*.ts",
-        "*.tsx",
-        "*.mjs",
-        "*.cjs",
-        "*.mts",
-        "*.cts",
-        "*.json",
-        "*.jsonc",
-        "*.json5",
-        "*.code-workspace",
-        "*.mdx",
-      )
-    exclude = List("skills-lock.json")
-    check = "node --run oxfmt -- --no-error-on-unmatched-pattern --check {{files}}"
-    fix = "node --run oxfmt -- --no-error-on-unmatched-pattern {{files}}"
-    check_first = true
-  }
-
-  // Pkl — hk and other typed config files
-  ["pkl-format"] = (Builtins.pkl_format) {
-    glob = List("*.pkl")
-    check_first = true
-  }
-
-  // Shell scripts
-  ["shfmt"] {
-    glob = List("**/*.sh", "**/*.bash", "**/*.ksh")
-    check = "shfmt -bn -ci -sr -d {{files}}"
-    fix = "shfmt -bn -ci -sr -w {{files}}"
-    check_first = true
-  }
-  ["shfmt-detected-shell"] {
-    types = List("shell")
-    exclude = List("**/*.sh", "**/*.bash", "**/*.fish", "**/*.ksh")
-    check = "shfmt -bn -ci -sr -d {{files}}"
-    fix = "shfmt -bn -ci -sr -w {{files}}"
-    check_first = true
-  }
-  ["shellcheck"] {
-    glob = List("**/*.sh", "**/*.bash", "**/*.ksh", "**/*.dash", "**/*.zsh")
-    check = "shellcheck {{files}}"
-  }
-  ["shellcheck-detected-shell"] {
-    types = List("shell")
-    exclude = List("**/*.sh", "**/*.bash", "**/*.dash", "**/*.fish", "**/*.ksh", "**/*.zsh")
-    check = "shellcheck {{files}}"
-  }
-
-  // GitHub Actions workflows
-  ["actionlint"] = (Builtins.actionlint) {
-    glob = WORKFLOW_FILES
-    check =
-      "actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format' {{files}}"
-  }
-  ["zizmor"] = (Builtins.zizmor) {
-    glob = ZIZMOR_FILES
-    check = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
-    check_diff = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
-    fix = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
-  }
-  ["pinact"] {
-    glob = WORKFLOW_ACTION_FILES
+    glob = List("**/package.json", "**/tsconfig*.json")
     check = new CommandSpec {
-      command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
+      command = new Command {
+        argv = List("node", "--run", "references:check")
+      }
       effect = "read"
     }
     fix = new CommandSpec {
-      command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run {{files}}"
+      command = new Command {
+        argv = List("node", "--run", "references:sync")
+      }
       effect = "write"
     }
-    check_first = true
   }
-
-  // Markdown — rumdl lint + fmt
+  ["sherif"] = (Builtins.sherif) {
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("sherif", "-r", "root-package-private-field", "-r", "root-package-dependencies")
+      }
+      effect = "read"
+    }
+    fix = null
+  }
+  ["shellcheck"] = (Builtins.shellcheck) {
+    batch = false
+    exclude = List(".claude/hooks/fallow-gate.sh")
+  }
+  ["shfmt"] = (Builtins.shfmt) {
+    batch = false
+    check_diff = (Builtins.shfmt.check_diff) {
+      command = new Command {
+        argv = List("shfmt", "-d", "--apply-ignore", "-bn", "-ci", "-sr", "{{files}}")
+      }
+    }
+    check_list_files = (Builtins.shfmt.check_list_files) {
+      command = new Command {
+        argv = List("shfmt", "-l", "--apply-ignore", "-bn", "-ci", "-sr", "{{files}}")
+      }
+    }
+    fix = (Builtins.shfmt.fix) {
+      command = new Command {
+        argv = List("shfmt", "-w", "--apply-ignore", "-bn", "-ci", "-sr", "{{files}}")
+      }
+    }
+  }
+  ["actionlint"] = (Builtins.actionlint) {
+    glob = WORKFLOW_FILES
+    check = new CommandSpec {
+      command = new Command {
+        argv =
+          List(
+            "actionlint",
+            "-ignore",
+            "specifying action .[$]/.github/.*. in invalid format",
+            "-ignore",
+            "reusable workflow call .[$]/.github/.*. at .uses. is not following the format",
+            "{{files}}",
+          )
+      }
+      effect = "read"
+    }
+  }
+  // zizmor and pinact read a GitHub token for their online checks, which only
+  // a shell can fetch.
+  ["zizmor"] = (Builtins.zizmor) {
+    glob = ACTION_FILES + List(".github/dependabot.yml")
+    check = new CommandSpec {
+      command = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
+      effect = "read"
+    }
+    fix = new CommandSpec {
+      command = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
+      effect = "write"
+    }
+  }
+  ["pinact"] {
+    glob = ACTION_FILES
+    check = new CommandSpec {
+      command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify --check {{files}}"
+      effect = "read"
+    }
+    fix = new CommandSpec {
+      command = "PINACT_GITHUB_TOKEN=\"$(gh auth token)\" pinact run --verify {{files}}"
+      effect = "write"
+    }
+  }
+  ["tombi"] = Builtins.tombi
+  ["tombi-format"] = Builtins.tombi_format
+  ["pkl-format"] = Builtins.pkl_format
+  ["rumdl"] = (Builtins.rumdl) {
+    glob = MARKDOWN_FILES
+    exclude = GENERATED_DATA
+  }
   ["vale"] = (Builtins.vale) {
     glob = MARKDOWN_FILES
   }
-  ["rumdl"] = (Builtins.rumdl) {
-    glob = MARKDOWN_FILES
-    exclude = List(".agents/skills/**/SKILL.md")
-    check = "rumdl check {{files}}"
-    fix =
-      """
-      rumdl check --fix {{files}}
-      rumdl fmt {{files}}
-      """
-    check_first = true
+  ["betterleaks"] {
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("betterleaks", "git", "--pre-commit", "--staged", "--redact", "--no-banner")
+      }
+      effect = "read"
+    }
   }
-
-  // TOML — tombi lint + format
-  ["tombi"] = (Builtins.tombi) {
-    glob = TOML_FILES
-    check = "tombi lint {{files}} && tombi format --check {{files}}"
-    fix =
-      """
-      tombi lint {{files}}
-      tombi format {{files}}
-      """
-    check_first = true
+  ["merge-conflicts"] = Builtins.check_merge_conflict
+  ["case-conflicts"] = Builtins.check_case_conflict
+  ["symlinks"] = Builtins.check_symlinks
+  ["destroyed-symlinks"] {
+    glob = "**/*"
+    allow_symlinks = true
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("hk", "util", "destroyed-symlinks", "{{files}}")
+      }
+      effect = "read"
+    }
+  }
+  ["executable-shebangs"] = Builtins.check_executables_have_shebangs
+  ["shebang-executables"] {
+    types = List("text")
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("hk", "util", "check-shebang-scripts-are-executable", "{{files}}")
+      }
+      effect = "read"
+    }
+  }
+  ["private-keys"] = Builtins.detect_private_key
+  ["large-files"] = (Builtins.check_added_large_files) {
+    allow_binary = true
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("hk", "util", "check-added-large-files", "--maxkb", "1024", "{{files}}")
+      }
+      effect = "read"
+    }
+  }
+  ["trailing-whitespace"] = (Builtins.trailing_whitespace) {
+    // rumdl preserves Markdown hard breaks while checking whitespace.
+    exclude = GENERATED_DATA + MARKDOWN_FILES
+  }
+  ["final-newline"] = (Builtins.newlines) {
+    exclude = GENERATED_DATA
+  }
+  ["line-endings"] = (Builtins.mixed_line_ending) {
+    exclude = GENERATED_DATA
+  }
+  ["byte-order-marker"] = (Builtins.byte_order_marker) {
+    exclude = GENERATED_DATA
   }
 }
 
-steps = linters
+steps = fileChecks
+
+local pullhook = new Step {
+  check = new CommandSpec {
+    command = new Command {
+      argv = List("pullhook", "run")
+    }
+    effect = "write"
+  }
+}
 
 hooks {
   ["commit-msg"] {
     steps {
       ["commitlint"] {
-        check =
-          "node --run commitlint -- --strict --config commitlint.config.ts --edit {{commit_msg_file}}"
+        check = new CommandSpec {
+          command = new Command {
+            argv =
+              List(
+                "commitlint",
+                "--strict",
+                "--config",
+                "commitlint.config.ts",
+                "--edit",
+                "{{commit_msg_file}}",
+              )
+          }
+          effect = "read"
+        }
       }
     }
   }
-
-  ["pre-push"] {
+  ["fix"] {
     steps {
-      ["type-check"] {
-        check = "mise run type-check"
+      ["sherif"] = (Builtins.sherif) {
+        exclusive = true
+        fix = new CommandSpec {
+          command = new Command {
+            argv =
+              List(
+                "sherif",
+                "--fix",
+                "--no-install",
+                "-r",
+                "root-package-private-field",
+                "-r",
+                "root-package-dependencies",
+              )
+          }
+          effect = "write"
+        }
       }
-      // fallow — changed-code quality gate (dead code, duplication, health).
-      // Gates on `new-only`, so inherited findings on touched files report but
-      // do not block. Runs once per commit, not per file.
-      ["fallow"] {
-        glob = FALLOW_FILES
-        check = "mise run fallow:audit-hk"
+    }
+  }
+  ["pre-push"] {
+    fix = false
+    stage = false
+    steps = (fileChecks) {
+      ["type-check"] { glob = null }
+      ["betterleaks"] {
+        stdin = "{{hook_stdin}}"
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("bash", "scripts/betterleaks-pre-push.sh")
+          }
+          effect = "read"
+        }
       }
-      ["lint"] {
-        check = "mise run lint"
+      // Changed-code quality gate (dead code, duplication, health). Gates on
+      // `new-only`, so inherited findings on touched files report but do not
+      // block.
+      ["fallow-audit"] {
+        exclusive = true
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("mise", "run", "fallow:audit-hk")
+          }
+          effect = "write"
+        }
       }
       ["dead-code"] {
-        check = "mise run dead-code"
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("fallow", "dead-code")
+          }
+          effect = "write"
+        }
       }
       ["duplicates"] {
-        check = "mise run duplicates"
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("fallow", "dupes")
+          }
+          effect = "write"
+        }
+      }
+      ["unit-tests"] {
+        depends = List("type-check")
+        exclusive = true
+        env { ["CI"] = "1" }
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("node", "--run", "test")
+          }
+          effect = "write"
+        }
       }
       ["build"] {
-        check = "mise run build"
-      }
-      ["test"] {
-        check = "mise run test"
-      }
-      // Mirror CI's Workflow Security job so bad workflow edits fail here,
-      // not after burning CI minutes. Unconditional: the trio is fast and
-      // pre-commit can be bypassed with --no-verify.
-      ["workflow-security"] {
-        check =
-          """
-          actionlint -ignore 'specifying action .[$]/.github/.*. in invalid format' -ignore 'reusable workflow call .[$]/.github/.*. at .uses. is not following the format'
-          zizmor --no-progress .github
-          pinact run -fix=false -no-api $(find .github/workflows .github/actions -name '*.yaml' -o -name '*.yml')
-          """
+        depends = List("unit-tests")
+        exclusive = true
+        env { ["CI"] = "1" }
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("node", "--run", "build")
+          }
+          effect = "write"
+        }
       }
     }
   }
-
+  ["reports"] {
+    steps {
+      ["documentation"] {
+        profiles = List("documentation")
+        env {
+          ["CI"] = "1"
+        }
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("mise", "run", "documentation")
+          }
+          effect = "write"
+        }
+      }
+      ["health"] {
+        profiles = List("health")
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("fallow", "health", "--hotspots", "--targets", "--report-only")
+          }
+          effect = "write"
+        }
+      }
+      ["security"] {
+        profiles = List("security")
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("fallow", "security")
+          }
+          effect = "write"
+        }
+      }
+      ["dependency-audit"] {
+        profiles = List("dependency-audit")
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("pnpm", "audit", "--prod")
+          }
+          effect = "read"
+        }
+      }
+      ["mutation"] {
+        profiles = List("mutation")
+        exclusive = true
+        check = new CommandSpec {
+          command = new Command {
+            argv = List("node", "--run", "test:mutation")
+          }
+          effect = "write"
+        }
+      }
+    }
+  }
   ["post-merge"] {
     steps {
       ["pullhook"] = pullhook
     }
   }
-
   ["post-checkout"] {
     steps {
       ["pullhook"] = pullhook
     }
   }
-
   ["post-rewrite"] {
     steps {
       ["pullhook"] = pullhook
