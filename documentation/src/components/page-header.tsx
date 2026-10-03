@@ -1,5 +1,3 @@
-import { Icon } from "./icon";
-
 import type { ReactNode } from "react";
 
 interface PageHeaderProperties {
@@ -8,24 +6,10 @@ interface PageHeaderProperties {
 	title: string;
 }
 
-const HERO_ORBS = (
-	<div aria-hidden="true" className="hero-orbs">
-		<span className="hero-orb hero-orb--1" />
-		<span className="hero-orb hero-orb--2" />
-		<span className="hero-orb hero-orb--3" />
-	</div>
-);
-const SPARKLES = <Icon name="sparkles" size={14} />;
-
 export function PageHeader({ kicker, subtitle, title }: Readonly<PageHeaderProperties>): ReactNode {
 	let kickerElement: ReactNode;
 	if (kicker !== undefined && kicker.length > 0) {
-		kickerElement = (
-			<span className="hero-kicker hero-kicker--static">
-				{SPARKLES}
-				<span>{kicker}</span>
-			</span>
-		);
+		kickerElement = <p className="hero-kicker">{kicker}</p>;
 	}
 
 	let subtitleElement: ReactNode;
@@ -35,8 +19,7 @@ export function PageHeader({ kicker, subtitle, title }: Readonly<PageHeaderPrope
 
 	return (
 		<section className="hero-splash hero-splash--compact">
-			{HERO_ORBS}
-			<div className="hero-copy hero-copy--centered">
+			<div className="hero-copy">
 				{kickerElement}
 				<h1 className="hero-title hero-title--compact">{title}</h1>
 				{subtitleElement}

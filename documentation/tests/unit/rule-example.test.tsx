@@ -17,8 +17,8 @@ function restoreClipboardAndTimers(): void {
 
 describe("rule-example", () => {
 	it.each([
-		["pass", "Correct"],
-		["fail", "Incorrect"],
+		["pass", "Allowed"],
+		["fail", "Flagged"],
 	] as const)("renders the default %s state", (type, title) => {
 		expect.assertions(2);
 

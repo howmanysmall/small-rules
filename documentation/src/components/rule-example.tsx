@@ -58,7 +58,7 @@ interface RuleExampleProperties {
 export function RuleExample({ title, type, children }: Readonly<PropsWithChildren<RuleExampleProperties>>): ReactNode {
 	const [copied, setCopied] = useState(false);
 	const isPass = type === "pass";
-	const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
+	const displayTitle = title ?? (isPass ? "Allowed" : "Flagged");
 	const statusIcon = isPass ? PASS_STATUS_ICON : FAIL_STATUS_ICON;
 
 	useEffect(

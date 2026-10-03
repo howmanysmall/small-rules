@@ -15,6 +15,10 @@ playwrightIt("renders the custom homepage sections", async ({ page }) => {
 	await playwrightExpect(page.locator(".hero-preview code")).toContainText('"@pobammer-ts/small-rules"');
 	await playwrightExpect(page.locator(".category-card")).toHaveCount(ruleManifest.categories.length);
 	await playwrightExpect(page.locator(".feature-card")).toHaveCount(3);
+	await playwrightExpect(page.locator(".overprint")).toHaveCount(1);
+	await playwrightExpect(page.locator(".overprint")).toHaveText(
+		String(ruleManifest.categories.reduce((total, category) => total + category.rules.length, 0)),
+	);
 	await playwrightExpect(page.getByRole("link", { name: "Get started" })).toHaveAttribute(
 		"href",
 		"/small-rules/quick-start/",

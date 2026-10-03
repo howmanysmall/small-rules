@@ -8,7 +8,7 @@ import { getTsconfig } from "get-tsconfig";
 
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
 import contextualMenu from "./src/integrations/contextual-menu";
-import motion from "./src/integrations/motion";
+import { syntaxDarkTheme, syntaxLightTheme } from "./src/utilities/syntax-themes";
 
 import type { AstroIntegration } from "astro";
 
@@ -72,46 +72,29 @@ export default defineConfig({
 					PageTitle: "./src/components/overrides/page-title.astro",
 					Sidebar: "./src/components/overrides/sidebar.astro",
 				},
-				customCss: ["./src/styles/custom.css"],
+				customCss: [
+					"@fontsource-variable/ibm-plex-sans",
+					"@fontsource-variable/newsreader/opsz.css",
+					"@fontsource-variable/newsreader/opsz-italic.css",
+					"@fontsource/ibm-plex-mono/400.css",
+					"@fontsource/ibm-plex-mono/500.css",
+					"./src/styles/custom.css",
+				],
 				description: "Oxlint-native rules for TypeScript, React, and roblox-ts",
 				editLink: {
 					baseUrl: "https://github.com/howmanysmall/small-rules/edit/main/documentation/",
 				},
 				expressiveCode: {
 					styleOverrides: {
-						borderColor: "var(--glass-border)",
-						borderRadius: "0.5rem",
+						borderColor: "var(--rule)",
+						borderRadius: "0",
 						borderWidth: "1px",
+						codeFontFamily: "var(--font-mono)",
+						uiFontFamily: "var(--font-sans)",
 					},
-					themes: ["github-light", "dracula"],
+					themes: [syntaxLightTheme, syntaxDarkTheme],
 				},
 				favicon: "/favicon.svg?v=2",
-				head: [
-					{
-						attrs: {
-							as: "font",
-							crossorigin: "anonymous",
-							href: "/small-rules/fonts/geist-latin-wght-normal.woff2",
-							rel: "preload",
-							type: "font/woff2",
-						},
-						tag: "link",
-					},
-					{
-						attrs: {
-							as: "font",
-							crossorigin: "anonymous",
-							href: "/small-rules/fonts/ibm-plex-sans-latin-wght-normal.woff2",
-							rel: "preload",
-							type: "font/woff2",
-						},
-						tag: "link",
-					},
-				],
-				logo: {
-					replacesTitle: false,
-					src: "./src/assets/new-logo.svg",
-				},
 				plugins: [],
 				sidebar: [
 					{
@@ -145,7 +128,6 @@ export default defineConfig({
 			}),
 		),
 		ensureAstroIntegration(contextualMenu()),
-		ensureAstroIntegration(motion()),
 	],
 	site: "https://docs.howmanysmall.com",
 	vite: {

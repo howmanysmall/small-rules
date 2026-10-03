@@ -1,5 +1,3 @@
-import { Icon } from "./icon";
-
 import type { ReactNode } from "react";
 
 interface HeroCopyProperties {
@@ -11,8 +9,7 @@ interface HeroCopyProperties {
 const HERO_ACTIONS = (
 	<div className="hero-actions">
 		<a className="hero-cta hero-cta--primary" href="/small-rules/quick-start/">
-			<Icon name="rocket" size={16} />
-			<span>{"Get started"}</span>
+			{"Get started"}
 		</a>
 		<a
 			className="hero-cta hero-cta--ghost"
@@ -20,20 +17,15 @@ const HERO_ACTIONS = (
 			rel="noopener noreferrer"
 			target="_blank"
 		>
-			<Icon name="github" size={16} />
-			<span>{"View on GitHub"}</span>
+			{"View on GitHub"}
 		</a>
 	</div>
 );
-const SPARKLES = <Icon name="sparkles" size={14} />;
 
 export function HeroCopy({ kicker, subtitle, title }: Readonly<HeroCopyProperties>): ReactNode {
 	return (
 		<div className="hero-copy">
-			<span className="hero-kicker hero-kicker--static">
-				{SPARKLES}
-				<span>{kicker}</span>
-			</span>
+			<p className="hero-kicker">{kicker}</p>
 			<h1 className="hero-title">{title}</h1>
 			{subtitle === undefined || subtitle.length === 0 ? undefined : <p className="hero-subtitle">{subtitle}</p>}
 			{HERO_ACTIONS}
