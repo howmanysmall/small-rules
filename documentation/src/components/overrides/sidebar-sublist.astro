@@ -21,30 +21,30 @@ function containsCurrent(entries: ReadonlyArray<SidebarEntry>): boolean {
 
 <ul class:list={{ "top-level": !nested }}>
 	{sublist.map((entry) => (
-	<li>
-		{entry.type === "link" ? (
-			<a
-				aria-current={entry.isCurrent ? "page" : undefined}
-				href={entry.href}
-				class:list={[{ large: !nested }, entry.attrs.class]}
-				{...entry.attrs}
-			>
-				<SidebarEntryLabel badge={entry.badge} label={entry.label} />
-			</a>
-		) : (
-			<details open={containsCurrent(entry.entries) || !entry.collapsed}>
-				<summary>
-					<span class="group-label">
-						<SidebarEntryLabel badge={entry.badge} label={entry.label} large={true} />
-					</span>
-					<Icon class="caret" name="right-caret" size="1.25rem" />
-				</summary>
-				<SidebarRestorePoint />
-				<Astro.self nested={true} sublist={entry.entries} />
-			</details>
-		)}
-	</li>
-))}
+		<li>
+			{entry.type === "link" ? (
+				<a
+					aria-current={entry.isCurrent ? "page" : undefined}
+					href={entry.href}
+					class:list={[{ large: !nested }, entry.attrs.class]}
+					{...entry.attrs}
+				>
+					<SidebarEntryLabel badge={entry.badge} label={entry.label} />
+				</a>
+			) : (
+				<details open={containsCurrent(entry.entries) || !entry.collapsed}>
+					<summary>
+						<span class="group-label">
+							<SidebarEntryLabel badge={entry.badge} label={entry.label} large={true} />
+						</span>
+						<Icon class="caret" name="right-caret" size="1.25rem" />
+					</summary>
+					<SidebarRestorePoint />
+					<Astro.self nested={true} sublist={entry.entries} />
+				</details>
+			)}
+		</li>
+	))}
 </ul>
 
 <style>

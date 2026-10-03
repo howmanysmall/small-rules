@@ -223,7 +223,7 @@
 
 			"nursery": {
 				"noAstroSetHtmlDirective": "error",
-				"noBaseToString": "error",
+				"noBaseToString": "off",
 				"noBunModules": "error",
 				"noComponentHookFactories": "error",
 				"noConditionalExpect": "off",

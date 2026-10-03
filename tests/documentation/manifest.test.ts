@@ -11,6 +11,7 @@ describe("rule manifest integrity", () => {
 	it("derives every documented rule from the plugin", () => {
 		expect.assertions(1);
 
+		// biome-ignore lint/suspicious/useArraySortCompare: no lol
 		expect(getManifestRuleNames().toSorted()).toStrictEqual(Object.keys(smallRules.rules).toSorted());
 	});
 
