@@ -255,24 +255,24 @@ function getBranchCandidate(child: ESTree.JSXChild): BranchCandidate | undefined
 	};
 }
 
+function getNextBranchCandidate(
+	children: ReadonlyArray<ESTree.JSXChild>,
+	startIndex: number,
+): BranchCandidate | undefined {
+	let nextIndex = startIndex;
+	while (nextIndex < children.length) {
+		const whitespaceCandidate = children[nextIndex];
+		if (whitespaceCandidate === undefined || !isWhitespaceText(whitespaceCandidate)) break;
+		nextIndex += 1;
+	}
+
+	const child = children[nextIndex];
+	return child === undefined ? undefined : getBranchCandidate(child);
+}
+
 const preferTernaryConditionalRendering = createRule("prefer-ternary-conditional-rendering", "react", {
 	create(context): Visitor {
 		const { sourceCode } = context;
-
-		function getNextBranchCandidate(
-			children: ReadonlyArray<ESTree.JSXChild>,
-			startIndex: number,
-		): BranchCandidate | undefined {
-			let nextIndex = startIndex;
-			while (nextIndex < children.length) {
-				const whitespaceCandidate = children[nextIndex];
-				if (whitespaceCandidate === undefined || !isWhitespaceText(whitespaceCandidate)) break;
-				nextIndex += 1;
-			}
-
-			const child = children[nextIndex];
-			return child === undefined ? undefined : getBranchCandidate(child);
-		}
 
 		function reportComplementaryBranches(firstBranch: BranchCandidate, secondBranch: BranchCandidate): void {
 			const complement = getComplementMatch(firstBranch.condition, secondBranch.condition, sourceCode);

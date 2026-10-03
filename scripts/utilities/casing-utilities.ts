@@ -452,7 +452,6 @@ function getSegment({ segment }: SegmentData): string {
 }
 
 function getCharacters(value: string): Array<string> {
-	// oxlint-disable-next-line unicorn/prefer-spread -- not the same.
 	if (ASCII_ONLY_REGEXP.test(value)) return value.split("");
 	return Array.from(graphemeSegmenter.segment(value), getSegment);
 }

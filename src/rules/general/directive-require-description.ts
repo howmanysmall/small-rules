@@ -14,24 +14,24 @@ const DESCRIPTION_SEPARATOR = /\s-{2,}\s/u;
 // oxlint-disable-next-line unicorn/prefer-string-raw -- arktype
 const OXLINT_LINE_DIRECTIVE = regex("^(?<kind>oxlint-disable|oxlint-enable)(?:\\s|$)", "u");
 
+function hasInlineDescription(text: string): boolean {
+	return DESCRIPTION_SEPARATOR.test(text);
+}
+
+function getOxlintLineKind(text: string): string | undefined {
+	const match = OXLINT_LINE_DIRECTIVE.exec(text);
+	const kind = match?.groups.kind;
+	/* v8 ignore next -- OXLINT_LINE_DIRECTIVE only matches disable/enable directive kinds. @preserve */
+	if (kind === undefined || !isDisableOrEnableDirectiveKind(kind)) return undefined;
+	return kind;
+}
+
 const directiveRequireDescription = createRule("directive-require-description", "general", {
 	create(context): Visitor {
 		const ignoreKinds: ReadonlySet<string> = new Set(getOptionalStringArrayProperty(context.options[0], "ignore"));
 
 		function isSkippedKind(kind: string): boolean {
 			return !isDisableOrEnableDirectiveKind(kind) || ignoreKinds.has(kind);
-		}
-
-		function hasInlineDescription(text: string): boolean {
-			return DESCRIPTION_SEPARATOR.test(text);
-		}
-
-		function getOxlintLineKind(text: string): string | undefined {
-			const match = OXLINT_LINE_DIRECTIVE.exec(text);
-			const kind = match?.groups.kind;
-			/* v8 ignore next -- OXLINT_LINE_DIRECTIVE only matches disable/enable directive kinds. @preserve */
-			if (kind === undefined || !isDisableOrEnableDirectiveKind(kind)) return undefined;
-			return kind;
 		}
 
 		function reportMissingDescription(kind: string, location: Comment["loc"]): void {

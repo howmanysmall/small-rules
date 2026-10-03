@@ -283,16 +283,16 @@ function isFunctionalComponent(node: ESTree.Node): boolean {
 	return isUppercaseStart(node.id.name);
 }
 
-function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
-	function isWrappedInline(candidate: ESTree.Node): boolean {
-		if (!isVariableDeclarator(candidate) || !isCallExpression(candidate.init)) return false;
-		/* v8 ignore next -- non-Identifier HOC callees never reach the pure-HOC check in tests. @preserve */
-		if (!isIdentifierName(candidate.init.callee) || KNOWN_PURE_HOCS.has(candidate.init.callee.name)) return false;
-		/* v8 ignore start -- @preserve the arrow arm is exercised by the memo/withRouter cases; the FunctionExpression arm never executes (probed). */
-		return isCallbackFunction(candidate.init.arguments[0]);
-		/* v8 ignore stop */
-	}
+function isWrappedInline(candidate: ESTree.Node): boolean {
+	if (!isVariableDeclarator(candidate) || !isCallExpression(candidate.init)) return false;
+	/* v8 ignore next -- non-Identifier HOC callees never reach the pure-HOC check in tests. @preserve */
+	if (!isIdentifierName(candidate.init.callee) || KNOWN_PURE_HOCS.has(candidate.init.callee.name)) return false;
+	/* v8 ignore start -- @preserve the arrow arm is exercised by the memo/withRouter cases; the FunctionExpression arm never executes (probed). */
+	return isCallbackFunction(candidate.init.arguments[0]);
+	/* v8 ignore stop */
+}
 
+function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	function isWrappedSeparately(candidate: ESTree.Node): boolean {
 		if (!isVariableDeclarator(candidate)) return false;
 		const { id } = candidate;

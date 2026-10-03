@@ -299,31 +299,31 @@ function isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
 	return true;
 }
 
+function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefined {
+	let current = node;
+	while (current !== null && current !== undefined) {
+		if (FUNCTION_NODE_TYPES.has(current.type)) return current;
+		current = current.parent;
+	}
+	return undefined;
+}
+
+function isAliasRef(candidateReference: Reference): boolean {
+	let node: ESTree.Node = candidateReference.identifier;
+	for (;;) {
+		const parent: ESTree.Node | null = node.parent;
+		/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
+		if (parent === null) return false;
+		if (isVariableDeclarator(parent) && parent.init === node) return true;
+		if (CONTAINER_PARENT_TYPES.has(parent.type)) {
+			node = parent;
+			continue;
+		}
+		return false;
+	}
+}
+
 function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference: Reference): ReadonlyArray<Reference> {
-	function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefined {
-		let current = node;
-		while (current !== null && current !== undefined) {
-			if (FUNCTION_NODE_TYPES.has(current.type)) return current;
-			current = current.parent;
-		}
-		return undefined;
-	}
-
-	function isAliasRef(candidateReference: Reference): boolean {
-		let node: ESTree.Node = candidateReference.identifier;
-		for (;;) {
-			const parent: ESTree.Node | null = node.parent;
-			/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
-			if (parent === null) return false;
-			if (isVariableDeclarator(parent) && parent.init === node) return true;
-			if (CONTAINER_PARENT_TYPES.has(parent.type)) {
-				node = parent;
-				continue;
-			}
-			return false;
-		}
-	}
-
 	const callExpressionRefs = new Array<Reference>();
 	const visited = new Set<Reference>();
 	ascend(

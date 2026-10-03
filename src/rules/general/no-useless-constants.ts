@@ -328,6 +328,30 @@ function getSingleDeclaration(parent: ESTree.Node | null): ESTree.VariableDeclar
 	if (isExportNamedDeclaration(parent.parent)) return undefined;
 	return parent;
 }
+function getSingleConstDeclarator(scopeVariable: Variable): SingleConstDeclarator | undefined {
+	if (!SCREAMING_SNAKE_CASE.test(scopeVariable.name)) return undefined;
+
+	const [variableDefinition] = scopeVariable.defs;
+	if (variableDefinition?.type !== "Variable") return undefined;
+
+	const parts = getDeclaratorParts(variableDefinition.node);
+	if (parts === undefined) return undefined;
+
+	const declarationNode = getSingleDeclaration(variableDefinition.parent);
+	if (declarationNode === undefined) return undefined;
+
+	return { declarationNode, declaratorId: parts.id, initializer: parts.init };
+}
+function getEnclosingConstDeclaration(identifier: ESTree.BindingIdentifier): ESTree.VariableDeclaration | undefined {
+	const enclosingDeclarator = findEnclosingConstDeclarator(identifier);
+	if (enclosingDeclarator === undefined) return undefined;
+
+	const enclosingDeclaration = enclosingDeclarator.parent;
+	/* v8 ignore next -- @preserve declarator parents are always VariableDeclarations (mistyped) */
+	if (!isVariableDeclaration(enclosingDeclaration)) return undefined;
+	if (enclosingDeclaration.kind !== "const") return undefined;
+	return enclosingDeclaration;
+}
 
 const noUselessConstants = createRule("no-useless-constants", "general", {
 	create(context): Visitor {
@@ -357,21 +381,6 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			return readOnlyReference;
 		}
 
-		function getSingleConstDeclarator(scopeVariable: Variable): SingleConstDeclarator | undefined {
-			if (!SCREAMING_SNAKE_CASE.test(scopeVariable.name)) return undefined;
-
-			const [variableDefinition] = scopeVariable.defs;
-			if (variableDefinition?.type !== "Variable") return undefined;
-
-			const parts = getDeclaratorParts(variableDefinition.node);
-			if (parts === undefined) return undefined;
-
-			const declarationNode = getSingleDeclaration(variableDefinition.parent);
-			if (declarationNode === undefined) return undefined;
-
-			return { declarationNode, declaratorId: parts.id, initializer: parts.init };
-		}
-
 		function isSkippedInitializer(initializer: ESTree.Expression): boolean {
 			return (
 				isFunctionLikeInitializer(initializer) ||
@@ -385,19 +394,6 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				return undefined;
 			}
 			return readOnlyReference.identifier;
-		}
-
-		function getEnclosingConstDeclaration(
-			identifier: ESTree.BindingIdentifier,
-		): ESTree.VariableDeclaration | undefined {
-			const enclosingDeclarator = findEnclosingConstDeclarator(identifier);
-			if (enclosingDeclarator === undefined) return undefined;
-
-			const enclosingDeclaration = enclosingDeclarator.parent;
-			/* v8 ignore next -- @preserve declarator parents are always VariableDeclarations (mistyped) */
-			if (!isVariableDeclaration(enclosingDeclaration)) return undefined;
-			if (enclosingDeclaration.kind !== "const") return undefined;
-			return enclosingDeclaration;
 		}
 
 		function getUselessConstantCandidate(
