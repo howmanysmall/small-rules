@@ -5,7 +5,7 @@ import { Badge } from "$components/badge";
 import { CategoryCard } from "$components/category-card";
 import { FeatureCard } from "$components/feature-card";
 import { HeroSplash } from "$components/hero-splash";
-import { Icon } from "$components/icon";
+import { Overprint } from "$components/overprint";
 import { PageHeader } from "$components/page-header";
 
 const reactHeadingName = /React/u;
@@ -56,26 +56,34 @@ describe("feature-card", () => {
 	it("renders a feature as a titled description", () => {
 		expect.assertions(2);
 
-		render(<FeatureCard description="Runs directly in Oxlint." icon="bolt" title="Oxlint native" />);
+		render(<FeatureCard description="Runs directly in Oxlint." title="Oxlint native" />);
 
 		expect(screen.getByRole("heading", { name: "Oxlint native" }).textContent).toBe("Oxlint native");
 		expect(screen.getByText("Runs directly in Oxlint.").textContent).toBe("Runs directly in Oxlint.");
 	});
 });
 
-describe("icon", () => {
-	it("renders decorative SVGs at the requested size", () => {
-		expect.assertions(4);
+describe("overprint", () => {
+	it("prints the numeral once for readers and mirrors it for the riso halo", () => {
+		expect.assertions(2);
 
-		// oxlint-disable-next-line react/forbid-component-props -- whatever!
-		const { container } = render(<Icon className="example-icon" name="search" size={20} />);
+		render(<Overprint value={129} />);
 
-		const icon = container.querySelector("svg");
+		const numeral = screen.getByText("129");
 
-		expect(icon?.getAttribute("aria-hidden")).toBe("true");
-		expect(icon?.getAttribute("height")).toBe("20");
-		expect(icon?.getAttribute("width")).toBe("20");
-		expect(icon?.classList.contains("example-icon")).toBe(true);
+		expect(numeral.classList.contains("overprint")).toBe(true);
+		expect(numeral.dataset.value).toBe("129");
+	});
+
+	it.each([
+		[129, false],
+		[130, true],
+	] as const)("sets %i in the sans face only when it has a zero", (value, isSans) => {
+		expect.assertions(1);
+
+		const { container } = render(<Overprint value={value} />);
+
+		expect(container.querySelector(".overprint")?.classList.contains("overprint--sans")).toBe(isSans);
 	});
 });
 

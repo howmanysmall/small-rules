@@ -9,38 +9,31 @@ interface HeroSplashProperties {
 	title: string;
 }
 
-const PREVIEW_CHROME = (
-	<div className="hero-preview-chrome">
-		<span className="hero-preview-dot hero-preview-dot--r" />
-		<span className="hero-preview-dot hero-preview-dot--y" />
-		<span className="hero-preview-dot hero-preview-dot--g" />
-		<span className="hero-preview-name">{".oxlintrc.json"}</span>
-	</div>
-);
+const PREVIEW_CAPTION = <figcaption className="hero-preview-name">{"fig. 1 — .oxlintrc.json"}</figcaption>;
 
 const CONFIGURATION_PREVIEW = (
 	<pre className="hero-preview-code">
 		<code>
 			<span className="t-k">{"{"}</span>
 			{"\n\t"}
-			<span className="t-s">{'"jsPlugins"'}</span>
+			<span className="t-p">{'"jsPlugins"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-a">{"["}</span>
 			<span className="t-s">{'"@pobammer-ts/small-rules"'}</span>
 			<span className="t-a">{"]"}</span>
 			<span className="t-k">{","}</span>
 			{"\n\t"}
-			<span className="t-s">{'"rules"'}</span>
+			<span className="t-p">{'"rules"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-k">{"{"}</span>
 			{"\n\t\t"}
-			<span className="t-s">{'"small-rules/ban-react-fc"'}</span>
+			<span className="t-p">{'"small-rules/ban-react-fc"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-s">{'"error"'}</span>
 			<span className="t-k">{","}</span>
 			{"\n\t\t"}
-			<span className="t-s">{'"small-rules/no-print"'}</span>
+			<span className="t-p">{'"small-rules/no-print"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-s">{'"error"'}</span>
 			<span className="t-k">{","}</span>
 			{"\n\t\t"}
-			<span className="t-s">{'"small-rules/prefer-early-return"'}</span>
+			<span className="t-p">{'"small-rules/prefer-early-return"'}</span>
 			<span className="t-k">{":"}</span> <span className="t-s">{'"warn"'}</span>
 			{"\n\t"}
 			<span className="t-k">{"}"}</span>
@@ -51,10 +44,10 @@ const CONFIGURATION_PREVIEW = (
 );
 
 const HERO_PREVIEW = (
-	<div aria-label="Code preview" className="hero-preview">
-		{PREVIEW_CHROME}
+	<figure aria-label="Code preview" className="hero-preview">
+		{PREVIEW_CAPTION}
 		{CONFIGURATION_PREVIEW}
-	</div>
+	</figure>
 );
 
 export function HeroSplash({

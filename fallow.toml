@@ -5,6 +5,7 @@ entry = [
 	"scripts/*.ts",
 	"tests/**/*.fuzz.ts",
 	"documentation/src/components/overrides/*.astro",
+	"documentation/src/route-data/*.ts",
 	"documentation/src/styles/custom.css",
 	"tools/vite-configuration/src/setup.ts"
 ]
@@ -21,6 +22,9 @@ ignoreDependencies = [
 	"@arethetypeswrong/core",
 	"@astrojs/markdown-satteri",
 	"@fast-check/vitest",
+	"@fontsource-variable/ibm-plex-sans",
+	"@fontsource-variable/newsreader",
+	"@fontsource/ibm-plex-mono",
 	"@isentinel/hooks",
 	"@total-typescript/ts-reset",
 	"babel-plugin-react-compiler",

@@ -7,146 +7,146 @@ tableOfContents: false
 import { CategoryCard } from "$components/category-card";
 import { FeatureCard } from "$components/feature-card";
 import { HeroSplash } from "$components/hero-splash";
-import { Icon } from "$components/icon";
+import { Overprint } from "$components/overprint";
 import { ruleFactCategories, ruleFactCounts } from "$data/rule-facts";
 
 <HeroSplash
-	kicker="Oxlint-native linting"
+	kicker="An oxlint plugin for roblox-ts"
 	title="small-rules"
 	subtitle={`${ruleFactCounts.totalRules} source-backed rules for React Luau, Ianitor lifecycle, Roblox UI conventions, and TypeScript quality.`}
 />
 
-<div class="home-proof reveal">
-	<p class="home-proof-copy">
-		I made these rules for the roblox-ts problems I keep seeing in real code, with fixes for the repetitive cleanup
-		that does not need a review comment.
-	</p>
-	<ul class="home-proof-grid">
-		<li class="home-proof-item">
-			<span class="home-proof-value">{ruleFactCounts.totalRules}</span>
-			<span class="home-proof-label">rules</span>
-		</li>
-		<li class="home-proof-item">
-			<span class="home-proof-value">{ruleFactCounts.fixableRules}</span>
-			<span class="home-proof-label">fixable</span>
-		</li>
-		<li class="home-proof-item">
-			<span class="home-proof-value">{ruleFactCounts.totalCategories}</span>
-			<span class="home-proof-label">categories</span>
-		</li>
-		<li class="home-proof-item">
-			<span class="home-proof-value">native</span>
-			<span class="home-proof-label">oxlint plugin</span>
-		</li>
-	</ul>
-</div>
-
-<div class="section-header reveal">
-	<span class="section-eyebrow">
-		<Icon name="rocket" size={12} /> Start here
-	</span>
-	<h2>Start with the part you need</h2>
-	<p>
-		Install the plugin, copy a small config, then browse the rule pages when you want to tighten a particular part
-		of the codebase.
-	</p>
-</div>
-
-<div class="home-start-links reveal">
-	<a class="home-start-link" href="/small-rules/quick-start/">
-		<span class="home-start-index">1</span>
-		<span class="home-start-body">
-			<span class="home-start-title">Quick Start</span>
-			<span class="home-start-desc">Install the plugin, register it in oxlint, and run a first pass.</span>
-		</span>
-		<span class="home-start-arrow">→</span>
-	</a>
-	<a class="home-start-link" href="/small-rules/configuration/">
-		<span class="home-start-index">2</span>
-		<span class="home-start-body">
-			<span class="home-start-title">Configuration</span>
-			<span class="home-start-desc">
-				Choose which rules should block CI and which ones should stay advisory while you try them out.
-			</span>
-		</span>
-		<span class="home-start-arrow">→</span>
-	</a>
-	<a class="home-start-link" href="/small-rules/changelog/">
-		<span class="home-start-index">3</span>
-		<span class="home-start-body">
-			<span class="home-start-title">Changelog</span>
-			<span class="home-start-desc">Check rule additions and behavior changes before you upgrade.</span>
-		</span>
-		<span class="home-start-arrow">→</span>
-	</a>
-</div>
-
-<div class="section-header reveal">
-	<span class="section-eyebrow">
-		<Icon name="search" size={12} /> Browse
-	</span>
-	<h2>Pick the part of the codebase you want to harden</h2>
-	<p>
-		The catalog builds these counts from the current rule metadata, so the numbers have somewhere to go when the
-		plugin changes.
-	</p>
-</div>
-
-<div class="category-grid reveal">
-	{Array.from(ruleFactCategories.values()).map((category) => (
-		<CategoryCard
-			category={category.key}
-			count={category.count}
-			description={category.description}
-			label={category.label}
-		/>
-	))}
-</div>
-
-<div class="section-header reveal">
-	<span class="section-eyebrow">
-		<Icon name="sparkles" size={12} /> Why it exists
-	</span>
-	<h2>Rules for the gaps I care about</h2>
-	<p>
-		Oxlint handles the general linting work. I use this plugin for roblox-ts APIs, React Luau patterns, Ianitor
-		lifecycle code, and the repeated mistakes that are specific to those ecosystems.
-	</p>
-</div>
-
-<div class="feature-grid reveal">
-	<FeatureCard
-		icon="bolt"
-		title="Oxlint-native"
-		description="Uses the oxlint plugin API directly, so these rules run in oxlint instead of going through an ESLint compatibility layer."
-	/>
-	<FeatureCard
-		icon="puzzle"
-		title="Roblox-aware"
-		description="Checks React Luau patterns, Ianitor lifecycle code, UI conventions, and Roblox APIs that a general TypeScript linter cannot know about."
-	/>
-	<FeatureCard
-		icon="wand"
-		title="Fixes where they help"
-		description={`${ruleFactCounts.fixableRules} rules currently have fixes or fixer suggestions for cleanup that is usually mechanical.`}
-	/>
-</div>
-
-<div class="bottom-cta reveal">
-	<div class="bottom-cta-copy">
-		<span class="bottom-cta-kicker">Start enforcing</span>
-		<h2>Give the review comments somewhere else to go.</h2>
-		<p>
-			Pick the rules that match your standards and let oxlint catch the mechanical stuff before it reaches review.
+<section class="note-row note-row--readouts home-proof reveal not-content">
+	<div class="note-margin">
+		<h2>In numbers</h2>
+		<p>Counted from the rule metadata when the site builds, so they change when the plugin does.</p>
+	</div>
+	<div class="note-body">
+		<p class="home-proof-copy">
+			I made these rules for the roblox-ts problems I keep seeing in real code, with fixes for the repetitive
+			cleanup that does not need a review comment.
 		</p>
 	</div>
-	<div class="bottom-cta-actions">
-		<a href="/small-rules/quick-start/" class="bottom-cta-action bottom-cta-action--primary">
-			<span>Open quick start</span>
-			<Icon name="arrow-right" size={18} />
-		</a>
-		<a href="/small-rules/introduction/" class="bottom-cta-action bottom-cta-action--secondary">
-			See how it works
-		</a>
+	<dl class="readouts">
+		<div class="readout readout--lead">
+			<dt>Rules</dt>
+			<dd>
+				<Overprint value={ruleFactCounts.totalRules} />
+			</dd>
+		</div>
+		<div class="readout">
+			<dt>With fixes</dt>
+			<dd>{ruleFactCounts.fixableRules}</dd>
+		</div>
+		<div class="readout">
+			<dt>Categories</dt>
+			<dd>{ruleFactCounts.totalCategories}</dd>
+		</div>
+		<div class="readout">
+			<dt>Runs in</dt>
+			<dd>oxlint</dd>
+		</div>
+	</dl>
+</section>
+
+<section class="note-row reveal not-content">
+	<div class="note-margin">
+		<h2>Start here</h2>
+		<p>
+			Install the plugin, copy a small config, then browse the rule pages when you want to tighten one part of the
+			codebase.
+		</p>
 	</div>
-</div>
+	<ol class="note-body home-start-links">
+		<li>
+			<a class="home-start-link" href="/small-rules/quick-start/">
+				<span class="home-start-index">1</span>
+				<span class="home-start-body">
+					<span class="home-start-title">Quick start</span>
+					<span class="home-start-desc">
+						Install the plugin, register it in oxlint, and run a first pass.
+					</span>
+				</span>
+			</a>
+		</li>
+		<li>
+			<a class="home-start-link" href="/small-rules/configuration/">
+				<span class="home-start-index">2</span>
+				<span class="home-start-body">
+					<span class="home-start-title">Configuration</span>
+					<span class="home-start-desc">
+						Choose which rules should block CI and which ones should stay advisory while you try them out.
+					</span>
+				</span>
+			</a>
+		</li>
+		<li>
+			<a class="home-start-link" href="/small-rules/changelog/">
+				<span class="home-start-index">3</span>
+				<span class="home-start-body">
+					<span class="home-start-title">Changelog</span>
+					<span class="home-start-desc">Check rule additions and behavior changes before you upgrade.</span>
+				</span>
+			</a>
+		</li>
+	</ol>
+</section>
+
+<section class="note-row reveal not-content">
+	<div class="note-margin">
+		<h2>Browse by category</h2>
+		<p>Each category is a part of the codebase you might want to harden. The number is how many rules it has.</p>
+	</div>
+	<div class="note-body category-grid">
+		{Array.from(ruleFactCategories.values()).map((category) => (
+			<CategoryCard
+				category={category.key}
+				count={category.count}
+				description={category.description}
+				label={category.label}
+			/>
+		))}
+	</div>
+</section>
+
+<section class="note-row reveal not-content">
+	<div class="note-margin">
+		<h2>Why it exists</h2>
+		<p>
+			Oxlint handles the general linting work. This plugin covers roblox-ts APIs, React Luau patterns, Ianitor
+			lifecycle code, and the mistakes that are specific to those ecosystems.
+		</p>
+	</div>
+	<div class="note-body feature-grid">
+		<FeatureCard
+			title="Oxlint-native"
+			description="Uses the oxlint plugin API directly, so these rules run in oxlint instead of going through an ESLint compatibility layer."
+		/>
+		<FeatureCard
+			title="Roblox-aware"
+			description="Checks React Luau patterns, Ianitor lifecycle code, UI conventions, and Roblox APIs that a general TypeScript linter cannot know about."
+		/>
+		<FeatureCard
+			title="Fixes where they help"
+			description={`${ruleFactCounts.fixableRules} rules currently have fixes or fixer suggestions for cleanup that is usually mechanical.`}
+		/>
+	</div>
+</section>
+
+<section class="bottom-cta reveal not-content">
+	<p class="bottom-cta-kicker">Start enforcing</p>
+	<div class="bottom-cta-copy">
+		<p>
+			Pick the rules that match your standards, and let oxlint catch the mechanical things before they reach
+			review.
+		</p>
+		<div class="bottom-cta-actions">
+			<a href="/small-rules/quick-start/" class="bottom-cta-action bottom-cta-action--primary">
+				Open quick start
+			</a>
+			<a href="/small-rules/introduction/" class="bottom-cta-action bottom-cta-action--secondary">
+				See how it works
+			</a>
+		</div>
+	</div>
+</section>

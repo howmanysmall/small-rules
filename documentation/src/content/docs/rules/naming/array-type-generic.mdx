@@ -4,4 +4,17 @@ title: "Array Type Generic"
 
 import RulePage from "$components/rule-page.astro";
 
-<RulePage rule="array-type-generic" />
+<RulePage rule="array-type-generic">
+	<Fragment slot="rationale">
+		<p>
+			`Array&lt;T&gt;` and `ReadonlyArray&lt;T&gt;` read like every other generic type in the codebase. The
+			bracket form doesn't: you have to stop and work out what `readonly string[][]` means, and as soon as the
+			element type is a union or a function you need parentheses. Forget them and `A | B[]` quietly means
+			something else.
+		</p>
+		<p>
+			The fix rewrites nested arrays from the outside in, so `readonly string[][]` becomes{" "}
+			`ReadonlyArray&lt;Array&lt;string&gt;&gt;`. Arrays written inside a tuple type are left alone.
+		</p>
+	</Fragment>
+</RulePage>

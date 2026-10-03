@@ -4,4 +4,16 @@ title: "Prefer Pascal Case Enums"
 
 import RulePage from "$components/rule-page.astro";
 
-<RulePage rule="prefer-pascal-case-enums" />
+<RulePage rule="prefer-pascal-case-enums">
+	<Fragment slot="rationale">
+		<p>
+			Enums are types, and types are PascalCase. The members follow suit, so you write `Direction.Up` instead of
+			`Direction.UP` or `direction.up`. That's also how Roblox's own enums look, like `Enum.KeyCode.LeftShift` and
+			`Enum.Material.SmoothPlastic`, so your enums read like the ones you use next to them.
+		</p>
+		<p>
+			Member names that start with a digit, or that use characters outside ASCII, are skipped, because there's no
+			PascalCase spelling to suggest.
+		</p>
+	</Fragment>
+</RulePage>

@@ -83,6 +83,11 @@ export function getRuleFacts(ruleName: RuleName): RuleFacts {
 	throw new Error(`Rule "${ruleName}" is missing from the rule manifest.`);
 }
 
+export function findRuleFactsByPath(path: string): RuleFacts | undefined {
+	for (const facts of ruleFacts.values()) if (facts.path === path) return facts;
+	return undefined;
+}
+
 export function getRuleEntry(ruleName: RuleName): RuleManifestEntry | undefined {
 	let ruleManifestEntry: RuleManifestEntry | undefined;
 

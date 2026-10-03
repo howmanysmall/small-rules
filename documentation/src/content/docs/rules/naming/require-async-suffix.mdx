@@ -4,4 +4,17 @@ title: "Require Async Suffix"
 
 import RulePage from "$components/rule-page.astro";
 
-<RulePage rule="require-async-suffix" />
+<RulePage rule="require-async-suffix">
+	<Fragment slot="rationale">
+		<p>
+			An async function returns a promise, and nothing at the call site tells you that unless the name does. With
+			the suffix, `loadProfileAsync()` without an `await` in front of it stands out on its own, and you don't have
+			to hover the function to find out.
+		</p>
+		<p>
+			It backs off where you don't get to pick the name: methods marked `override`, and methods on an object you
+			pass straight into a call, a `new`, or a `satisfies`, since that shape is someone else's. Anything else you
+			need to keep, put in `except`.
+		</p>
+	</Fragment>
+</RulePage>

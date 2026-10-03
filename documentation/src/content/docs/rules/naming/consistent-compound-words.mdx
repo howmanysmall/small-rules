@@ -4,4 +4,17 @@ title: "Consistent Compound Words"
 
 import RulePage from "$components/rule-page.astro";
 
-<RulePage rule="consistent-compound-words" />
+<RulePage rule="consistent-compound-words">
+	<Fragment slot="rationale">
+		<p>
+			A lot of words that used to be two words are one word now: `callback`, `database`, `timeout`, `username`.
+			When half a codebase writes `timeOut` and the other half writes `timeout`, a search for one misses the
+			other, and autocomplete offers you both. This picks the closed spelling and sticks to it.
+		</p>
+		<p>
+			By default it only checks the names you declare: variables, functions, classes, and parameters. Property
+			names often come from someone else's API, so `checkProperties` and `checkShorthandProperties` are off until
+			you turn them on. Add your own pairs with `replacements`.
+		</p>
+	</Fragment>
+</RulePage>

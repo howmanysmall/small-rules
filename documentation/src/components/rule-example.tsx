@@ -36,6 +36,7 @@ const FAIL_STATUS_ICON = (
 const COPY_ICON = (
 	<svg
 		aria-hidden="true"
+		className="RuleExample-copy-icon RuleExample-copy-icon--copy"
 		fill="none"
 		height="14"
 		stroke="currentColor"
@@ -50,6 +51,23 @@ const COPY_ICON = (
 	</svg>
 );
 
+const CHECK_ICON = (
+	<svg
+		aria-hidden="true"
+		className="RuleExample-copy-icon RuleExample-copy-icon--check"
+		fill="none"
+		height="14"
+		stroke="currentColor"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		strokeWidth="2"
+		viewBox="0 0 24 24"
+		width="14"
+	>
+		<path d="m5 12 4 4L19 6" />
+	</svg>
+);
+
 interface RuleExampleProperties {
 	title?: string | undefined;
 	type: "fail" | "pass";
@@ -58,7 +76,7 @@ interface RuleExampleProperties {
 export function RuleExample({ title, type, children }: Readonly<PropsWithChildren<RuleExampleProperties>>): ReactNode {
 	const [copied, setCopied] = useState(false);
 	const isPass = type === "pass";
-	const displayTitle = title ?? (isPass ? "Correct" : "Incorrect");
+	const displayTitle = title ?? (isPass ? "Allowed" : "Flagged");
 	const statusIcon = isPass ? PASS_STATUS_ICON : FAIL_STATUS_ICON;
 
 	useEffect(
@@ -101,6 +119,7 @@ export function RuleExample({ title, type, children }: Readonly<PropsWithChildre
 			onClick={handleCopyExample}
 		>
 			{COPY_ICON}
+			{CHECK_ICON}
 		</button>
 	);
 	const badge = (
