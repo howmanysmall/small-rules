@@ -5,6 +5,7 @@ entry = [
 	"scripts/*.ts",
 	"tests/**/*.fuzz.ts",
 	"documentation/src/components/overrides/*.astro",
+	"documentation/src/route-data/*.ts",
 	"documentation/src/styles/custom.css",
 	"tools/vite-configuration/src/setup.ts"
 ]

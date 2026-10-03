@@ -18,7 +18,7 @@ import RulePage from "$components/rule-page.astro";
 			syntax, so a <code>disable-next-line</code> above a multi-line object is unused while the <code>as</code>{" "}
 			still fails. Tell the rule which world you're in with{" "}
 			<a href="/small-rules/configuration/#plugin-settings">
-				<code>settings["small-rules"].tsgolintVersion</code>
+				<code>{'settings["small-rules"].tsgolintVersion'}</code>
 			</a>
 			. If you omit it, I look at <code>node_modules/oxlint-tsgolint</code>, then <code>pnpm-workspace.yaml</code>
 			, then <code>package.json</code>.

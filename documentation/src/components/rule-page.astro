@@ -2,6 +2,7 @@
 import { getRuleEntry, getRuleFacts } from "$data/rule-facts";
 import type { RuleName } from "$data/rule-manifest";
 import { getRuleNewness } from "$data/rule-newness";
+import { getRulePageSections } from "$data/rule-page-sections";
 import { Badge } from "./badge";
 import { RelatedRules } from "./related-rules";
 import RuleDiagnostics from "./rule-diagnostics.astro";
@@ -21,6 +22,9 @@ const exampleExemption = entry?.exampleExemption;
 const newness = getRuleNewness().get(rule);
 const showNew = newness?.isNew === true;
 const showUpdated = !showNew && newness?.isUpdated === true;
+const sections = new Set(
+	getRulePageSections(rule, { hasRationale: Astro.slots.has("rationale") }).map((section) => section.slug),
+);
 ---
 
 <div class="rule-badges" aria-label="Rule characteristics">
@@ -33,14 +37,14 @@ const showUpdated = !showNew && newness?.isUpdated === true;
 
 <RuleSummary rule={rule} />
 
-{Astro.slots.has("rationale") && (
+{sections.has("rationale") && (
 	<section aria-labelledby="rationale">
 		<h2 id="rationale">{"Rationale"}</h2>
 		<slot name="rationale" />
 	</section>
 )}
 
-<RuleDiagnostics messages={facts.messages} />
+{sections.has("diagnostic-messages") && <RuleDiagnostics messages={facts.messages} />}
 
 <section aria-labelledby="configuration">
 	<h2 id="configuration">Configuration</h2>
@@ -49,4 +53,4 @@ const showUpdated = !showNew && newness?.isUpdated === true;
 
 <RuleExamples rule={rule} exemption={exampleExemption} />
 
-<RelatedRules rule={rule} />
+{sections.has("related-rules") && <RelatedRules rule={rule} />}

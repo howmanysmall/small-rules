@@ -96,6 +96,7 @@ export default defineConfig({
 				},
 				favicon: "/favicon.svg?v=3",
 				plugins: [],
+				routeMiddleware: "./src/route-data/rule-table-of-contents.ts",
 				sidebar: [
 					{
 						items: [
