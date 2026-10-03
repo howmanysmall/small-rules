@@ -1,7 +1,9 @@
 // hk configuration - https://hk.jdx.dev/
-amends "package://github.com/jdx/hk/releases/download/v1.58.1/hk@1.58.1#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Config.pkl"
 
-import "package://github.com/jdx/hk/releases/download/v1.58.1/hk@1.58.1#/Builtins.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Builtins.pkl"
+
+min_hk_version = "2.4.0"
 
 exclude =
   List(
@@ -94,8 +96,9 @@ local pullhook = new Step {
   check = "pullhook run"
 }
 
-// One shared step mapping for the check, fix, and pre-commit hooks.
-// Each hook below assigns it wholesale instead of redefining every step.
+// Shared steps. hk materializes the check, fix, and pre-commit hooks from
+// these: check only checks, fix fixes without staging, and pre-commit fixes,
+// stages, and stashes with git.
 local linters = new Mapping<String, Step> {
   ["trailing-whitespace"] = Builtins.trailing_whitespace
   ["newlines"] = Builtins.newlines
@@ -257,23 +260,9 @@ local linters = new Mapping<String, Step> {
   }
 }
 
+steps = linters
+
 hooks {
-  ["pre-commit"] {
-    fix = true
-    stash = "git"
-    steps = linters
-  }
-
-  ["check"] {
-    steps = linters
-  }
-
-  ["fix"] {
-    fix = true
-    stash = "git"
-    steps = linters
-  }
-
   ["commit-msg"] {
     steps {
       ["commitlint"] {

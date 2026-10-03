@@ -588,6 +588,7 @@ const configuration = isentinel(
 			"**/{dist,do-not-sync-ever,node_modules}/**",
 			"scripts/clis/**/*.ts",
 			"src/generated/**",
+			".mise/**",
 		],
 		options: {
 			denyWarnings: true,

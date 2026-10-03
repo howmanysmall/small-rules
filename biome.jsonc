@@ -40,7 +40,15 @@
 	},
 
 	"files": {
-		"includes": ["**", "!**/package.json", "!**/*.js", "!**/*-lock.{json,yaml}", "!scripts/clis/**/*.ts"]
+		"includes": [
+			"**",
+			"!**/package.json",
+			"!**/*.js",
+			"!**/*-lock.{json,yaml}",
+			"!scripts/clis/**/*.ts",
+			"!**/.opencode/goals",
+			"!.mise"
+		]
 	},
 
 	"formatter": {
