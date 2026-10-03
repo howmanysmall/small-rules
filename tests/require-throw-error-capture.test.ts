@@ -315,6 +315,18 @@ describe("require-throw-error-capture", () => {
 				options: [{ allow: [{ name: "ValidationError", from: "file", path: "src/errors.ts" }] }],
 				errors: [error],
 			},
+			{
+				code: ["function foo() {", "\tthrow new ValidationError('bad');", "}"].join("\n"),
+				output: [
+					"function foo() {",
+					"\tconst error = new ValidationError('bad');",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"}",
+				].join("\n"),
+				options: [{ allow: [{ name: "ValidationError", from: "package", package: "@cliffy/command" }] }],
+				errors: [error],
+			},
 		],
 		valid: [
 			// Already using `captureStackTrace` pattern
