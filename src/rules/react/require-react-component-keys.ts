@@ -428,6 +428,14 @@ function isLogicalJsxChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 	return isJsxChildWrappedBy(node, LOGICAL_EXPRESSION);
 }
 
+function shouldSkipFragment(node: ESTree.JSXElement | ESTree.JSXFragment, callbackUsage: CallbackUsage): boolean {
+	if (!isJsxFragment(node)) return false;
+	return (
+		isLogicalJsxChild(node) ||
+		(callbackUsage.memoization && !callbackUsage.iteration && isTopLevelFunctionReturn(node))
+	);
+}
+
 function isCallbackContext(usage: CallbackUsage): boolean {
 	return usage.iteration || usage.memoization;
 }
@@ -468,17 +476,6 @@ const requireReactComponentKeys = createRule("require-react-component-keys", "re
 				messageId: "rootComponentWithKey",
 				node,
 			});
-		}
-
-		function shouldSkipFragment(
-			node: ESTree.JSXElement | ESTree.JSXFragment,
-			callbackUsage: CallbackUsage,
-		): boolean {
-			if (!isJsxFragment(node)) return false;
-			return (
-				isLogicalJsxChild(node) ||
-				(callbackUsage.memoization && !callbackUsage.iteration && isTopLevelFunctionReturn(node))
-			);
 		}
 
 		function checkElement(node: ESTree.JSXElement | ESTree.JSXFragment): void {
