@@ -156,6 +156,10 @@ function getMemberHookSourceDecision(
 	return undefined;
 }
 
+function getActiveHookName(node: ESTree.CallExpression): string | undefined {
+	return isHookCall(node) ? getHookName(node) : undefined;
+}
+
 const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 	create(context): Visitor {
 		const config = getOptions(context.options[0]);
@@ -189,10 +193,6 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			if (ignoreHooks?.includes(hookName) === true) return true;
 
 			return shouldIgnoreHookImportSource(hookName, node, importSources, importSourceMap);
-		}
-
-		function getActiveHookName(node: ESTree.CallExpression): string | undefined {
-			return isHookCall(node) ? getHookName(node) : undefined;
 		}
 
 		function isActiveHookContext(

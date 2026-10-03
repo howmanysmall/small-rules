@@ -713,6 +713,76 @@ function isUselessDefaultAttribute(attribute: ESTree.JSXAttribute, propertyMatch
 	return isBooleanShorthandDefault(attribute, propertyMatch) || isDefaultAttributeValue(attribute, propertyMatch);
 }
 
+function clearTrackedInstancesForCallExpression(
+	callExpression: ESTree.CallExpression,
+	trackedInstances: Map<string, TrackedInstance>,
+): void {
+	for (const [identifierName] of trackedInstances) {
+		for (const argument of callExpression.arguments) {
+			if (isSpreadElement(argument)) continue;
+			/* v8 ignore next -- @preserve call-expression escape checks are only needed for arguments that reference tracked instances. */
+			if (!containsIdentifierReference(argument, identifierName)) continue;
+
+			trackedInstances.delete(identifierName);
+			break;
+		}
+	}
+}
+
+function clearTrackedInstancesForEscapeAssignment(
+	assignmentExpression: ESTree.AssignmentExpression,
+	trackedInstances: Map<string, TrackedInstance>,
+): void {
+	if (!isIdentifierName(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
+
+	for (const [identifierName] of trackedInstances) {
+		/* v8 ignore next -- @preserve escape assignments only clear tracked instances when the right-hand side references them. */
+		if (!containsIdentifierReference(assignmentExpression.right, identifierName)) continue;
+		trackedInstances.delete(identifierName);
+	}
+}
+
+function clearTrackedInstancesForReturnStatement(
+	returnStatement: ESTree.ReturnStatement,
+	trackedInstances: Map<string, TrackedInstance>,
+): void {
+	if (returnStatement.argument === null) return;
+
+	for (const [identifierName] of trackedInstances) {
+		/* v8 ignore next -- @preserve return statements only clear tracked instances when returning the tracked value. */
+		if (!containsIdentifierReference(returnStatement.argument, identifierName)) continue;
+		trackedInstances.delete(identifierName);
+	}
+}
+
+function trackConstInstances(
+	statementNode: ESTree.VariableDeclaration,
+	trackedInstances: Map<string, TrackedInstance>,
+): void {
+	if (statementNode.kind !== "const") return;
+
+	for (const declaration of statementNode.declarations) {
+		if (!isIdentifierName(declaration.id) || declaration.init === null) continue;
+
+		const className = getTrackedInstanceClassName(declaration.init);
+		if (className === undefined) continue;
+
+		trackedInstances.set(declaration.id.name, { className });
+	}
+}
+
+function getUselessPropertyMatch(attribute: ESTree.JSXAttribute, className: string): DefaultPropertyMatch | undefined {
+	const propertyName = getJsxAttributeName(attribute.name);
+	if (propertyName === undefined || isIgnoredPropertyName(propertyName)) return undefined;
+
+	const propertyMatch = getPropertyMatch(className, propertyName);
+	if (propertyMatch === undefined || !isUselessDefaultAttribute(attribute, propertyMatch)) {
+		return undefined;
+	}
+
+	return propertyMatch;
+}
+
 const noUselessDefault = createRule("no-useless-default", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -814,48 +884,6 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			});
 		}
 
-		function clearTrackedInstancesForCallExpression(
-			callExpression: ESTree.CallExpression,
-			trackedInstances: Map<string, TrackedInstance>,
-		): void {
-			for (const [identifierName] of trackedInstances) {
-				for (const argument of callExpression.arguments) {
-					if (isSpreadElement(argument)) continue;
-					/* v8 ignore next -- @preserve call-expression escape checks are only needed for arguments that reference tracked instances. */
-					if (!containsIdentifierReference(argument, identifierName)) continue;
-
-					trackedInstances.delete(identifierName);
-					break;
-				}
-			}
-		}
-
-		function clearTrackedInstancesForEscapeAssignment(
-			assignmentExpression: ESTree.AssignmentExpression,
-			trackedInstances: Map<string, TrackedInstance>,
-		): void {
-			if (!isIdentifierName(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
-
-			for (const [identifierName] of trackedInstances) {
-				/* v8 ignore next -- @preserve escape assignments only clear tracked instances when the right-hand side references them. */
-				if (!containsIdentifierReference(assignmentExpression.right, identifierName)) continue;
-				trackedInstances.delete(identifierName);
-			}
-		}
-
-		function clearTrackedInstancesForReturnStatement(
-			returnStatement: ESTree.ReturnStatement,
-			trackedInstances: Map<string, TrackedInstance>,
-		): void {
-			if (returnStatement.argument === null) return;
-
-			for (const [identifierName] of trackedInstances) {
-				/* v8 ignore next -- @preserve return statements only clear tracked instances when returning the tracked value. */
-				if (!containsIdentifierReference(returnStatement.argument, identifierName)) continue;
-				trackedInstances.delete(identifierName);
-			}
-		}
-
 		function inspectStatementNodes(statementNodes: ReadonlyArray<ESTree.Node>): void {
 			const trackedInstances = new Map<string, TrackedInstance>();
 			for (const statementNode of statementNodes) inspectStatementNode(statementNode, trackedInstances);
@@ -891,37 +919,6 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			}
 
 			if (isCallExpression(expression)) clearTrackedInstancesForCallExpression(expression, trackedInstances);
-		}
-
-		function trackConstInstances(
-			statementNode: ESTree.VariableDeclaration,
-			trackedInstances: Map<string, TrackedInstance>,
-		): void {
-			if (statementNode.kind !== "const") return;
-
-			for (const declaration of statementNode.declarations) {
-				if (!isIdentifierName(declaration.id) || declaration.init === null) continue;
-
-				const className = getTrackedInstanceClassName(declaration.init);
-				if (className === undefined) continue;
-
-				trackedInstances.set(declaration.id.name, { className });
-			}
-		}
-
-		function getUselessPropertyMatch(
-			attribute: ESTree.JSXAttribute,
-			className: string,
-		): DefaultPropertyMatch | undefined {
-			const propertyName = getJsxAttributeName(attribute.name);
-			if (propertyName === undefined || isIgnoredPropertyName(propertyName)) return undefined;
-
-			const propertyMatch = getPropertyMatch(className, propertyName);
-			if (propertyMatch === undefined || !isUselessDefaultAttribute(attribute, propertyMatch)) {
-				return undefined;
-			}
-
-			return propertyMatch;
 		}
 
 		function reportUselessJsxAttribute(
