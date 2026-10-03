@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+
+# betterleaks does not auto-discover .betterleaks.toml, so the config path is
+# passed explicitly. Without it the scan runs on the built-in ruleset only and
+# every historical false positive fails the first push of a new branch.
+betterleaks_config=.betterleaks.toml
+
 status=0
 while read -r local_ref local_sha remote_ref remote_sha extra; do
 	if [[ -z ${local_ref} ]]; then
@@ -25,7 +32,7 @@ while read -r local_ref local_sha remote_ref remote_sha extra; do
 		range=${local_commit}
 	fi
 
-	if betterleaks git --redact --no-banner --log-opts="${range}"; then
+	if betterleaks git --config "${betterleaks_config}" --redact --no-banner --log-opts="${range}"; then
 		continue
 	else
 		status=$?

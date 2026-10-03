@@ -200,7 +200,17 @@ local fileChecks = new Mapping<String, Step> {
   ["betterleaks"] {
     check = new CommandSpec {
       command = new Command {
-        argv = List("betterleaks", "git", "--pre-commit", "--staged", "--redact", "--no-banner")
+        argv =
+          List(
+            "betterleaks",
+            "git",
+            "--config",
+            ".betterleaks.toml",
+            "--pre-commit",
+            "--staged",
+            "--redact",
+            "--no-banner",
+          )
       }
       effect = "read"
     }
