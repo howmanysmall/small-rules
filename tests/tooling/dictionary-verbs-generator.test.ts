@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { DICTIONARY_VERBS } from "$oxc-generated/dictionary-verbs";
 import { getCandidateWords, isPrimarilyVerb, renderDictionaryVerbs } from "$script-utilities/dictionary-verbs";
-
-import { DICTIONARY_VERBS } from "../../src/generated/dictionary-verbs";
 
 describe("dictionary verb generation", () => {
 	it("selects words missing from the programming list", () => {
