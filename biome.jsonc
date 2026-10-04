@@ -311,7 +311,7 @@
 				"useDomNodeTextContent": "error",
 				"useDomQuerySelector": "error",
 				"useExhaustiveSwitchCases": "error",
-				"useExpect": "error",
+				"useExpect": "off",
 				"useExplicitReturnType": "error",
 				"useExplicitType": "off",
 				"useFlatMathMinMax": "error",

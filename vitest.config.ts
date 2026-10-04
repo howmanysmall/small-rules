@@ -24,6 +24,9 @@ const testConfiguration = mergeConfig(
 	sharedConfiguration,
 	defineConfig({
 		test: {
+			benchmark: {
+				include: ["tests/**/*.bench.ts"],
+			},
 			coverage: {
 				clean: true,
 				enabled,
@@ -52,6 +55,7 @@ const testConfiguration = mergeConfig(
 				{
 					test: {
 						name: "types",
+						benchmark: { exclude: ["**/*"] },
 						typecheck: {
 							checker: "tsgo",
 							enabled: true,

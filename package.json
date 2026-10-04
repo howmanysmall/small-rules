@@ -80,6 +80,7 @@
 		"skills": "skills",
 		"test": "vitest run",
 		"test:agent": "vitest run --reporter agent",
+		"test:bench": "vitest bench",
 		"test:fuzz": "vitiate regression --config vitest.vitiate.config.ts",
 		"test:fuzz:run": "vitiate fuzz --fuzz-time 10 --config vitest.vitiate.config.ts",
 		"test:istanbul": "nr test:agent --coverage.provider=istanbul --coverage.reporter=json --coverage.reportsDirectory=.cache/istanbul",
