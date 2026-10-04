@@ -375,7 +375,7 @@ function getFixablePropertyReplacement(
 	return undefined;
 }
 
-const preventAbbreviations = createRule("prevent-abbreviations", "naming", {
+const preventAbbreviations = createRule("prevent-abbreviations", "english", {
 	create(context): Visitor {
 		const options = prepareOptions(context.options[0]);
 		const filenameWithExtension = context.physicalFilename;

@@ -127,19 +127,22 @@ export const ruleManifest = defineRuleManifest({
 			rules: [
 				{ name: "array-type-generic" },
 				{ name: "ban-types" },
-				{ name: "consistent-compound-words" },
 				{ name: "no-spec-file-extension" },
 				{ name: "prefer-pascal-case-enums" },
-				{ name: "prefer-singular-enums" },
-				{ name: "prevent-abbreviations" },
 				{ name: "require-async-suffix" },
 			],
 		},
 		{
 			key: "english",
-			description: "Rules for reading code as English, such as verb-first function names.",
+			description:
+				"Rules for English in identifiers: spelling, plurals, abbreviations, and verb-first function names.",
 			label: "English",
-			rules: [{ name: "starts-with-verb" }],
+			rules: [
+				{ name: "consistent-compound-words" },
+				{ name: "prefer-singular-enums" },
+				{ name: "prevent-abbreviations" },
+				{ name: "starts-with-verb" },
+			],
 		},
 		{
 			key: "anti-slop",

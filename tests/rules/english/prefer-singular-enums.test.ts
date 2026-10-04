@@ -1,6 +1,6 @@
 import { describe } from "vitest";
 
-import rule from "$oxc-rules/naming/prefer-singular-enums";
+import rule from "$oxc-rules/english/prefer-singular-enums";
 import { ts } from "$test/rule-testers";
 
 import type { RuleTestError } from "$test/rule-testers";

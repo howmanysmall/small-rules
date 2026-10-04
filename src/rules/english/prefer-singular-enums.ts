@@ -126,7 +126,7 @@ function isPlural(identifier: string): boolean {
 	return lastToken !== undefined && isPluralWord(lastToken.lowercased, lastToken.original);
 }
 
-const preferSingularEnums = createRule("prefer-singular-enums", "naming", {
+const preferSingularEnums = createRule("prefer-singular-enums", "english", {
 	createOnce(context): Visitor {
 		return {
 			TSEnumDeclaration({ id }): void {

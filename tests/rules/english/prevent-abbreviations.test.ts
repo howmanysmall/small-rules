@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, expect, it } from "vitest";
 
-import rule from "$oxc-rules/naming/prevent-abbreviations";
+import rule from "$oxc-rules/english/prevent-abbreviations";
 import {
 	getMessage,
 	getNameReplacements,
