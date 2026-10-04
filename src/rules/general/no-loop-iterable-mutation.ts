@@ -19,7 +19,7 @@ import {
 	TS_NON_NULL_EXPRESSION,
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -111,7 +111,7 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 }
 
 function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
-	const node = unwrapExpression(right);
+	const node = stripExpressionWrappers(right);
 	if (isIdentifierName(node)) return { name: node.name, method: "direct" };
 
 	if (!isCallExpression(node) || !isMemberExpression(node.callee) || node.arguments.length > 0) return undefined;
@@ -187,7 +187,7 @@ function collectMutationCalls(body: ESTree.Node, iterableName: string): Array<Mu
 		if (SKIPPED_NODE_TYPES.has(current.type)) continue;
 		if (isCallExpression(current) && isMemberExpression(current.callee)) {
 			const method = getMemberPropertyName(current.callee);
-			const object = unwrapExpression(current.callee.object);
+			const object = stripExpressionWrappers(current.callee.object);
 			if (method !== undefined && ALL_MUTATION_METHODS.has(method) && isIdentifierNamed(object, iterableName)) {
 				mutations.push({ call: current, method, property: current.callee.property });
 			}

@@ -36,7 +36,7 @@ import {
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
 	UNARY_EXPRESSION,
-	unwrapParenthesis,
+	stripParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
@@ -268,7 +268,7 @@ function isAutoInlineSafeInitializer(sourceCode: SourceCode, node: ESTree.Expres
 }
 
 function getInlineInitializerText(sourceCode: SourceCode, initializer: ESTree.Expression): string {
-	return sourceCode.getText(unwrapParenthesis(initializer));
+	return sourceCode.getText(stripParenthesis(initializer));
 }
 
 function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree.VariableDeclaration): boolean {

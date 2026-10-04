@@ -18,7 +18,7 @@ import {
 	isTsTypeReference,
 	isTsUnknownKeyword,
 	isTypeAssertionExpression,
-	unwrapParenthesis,
+	stripParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, VisitorWithHooks } from "oxlint-plugin-utilities";
@@ -57,7 +57,7 @@ function isForbiddenAssertionChain(node: TypeAssertionExpression, allowedTargets
 		assertionCount += 1;
 		hasNonConstAssertion ||= !isConstAssertion(current);
 		if (assertionCount === 2) innerType = current.typeAnnotation;
-		current = unwrapParenthesis(current.expression);
+		current = stripParenthesis(current.expression);
 	}
 
 	if (!hasNonConstAssertion || assertionCount <= 1) return false;

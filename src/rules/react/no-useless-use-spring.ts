@@ -6,7 +6,7 @@ import {
 	isObjectExpression,
 	isProperty,
 	isSpreadElement,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind } from "$oxc-utilities/react-hook-utilities";
 import {
@@ -51,7 +51,7 @@ function objectExpressionMatches(
 	expression: ESTree.Expression,
 	predicate: (objectExpression: ESTree.ObjectExpression) => boolean,
 ): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (isObjectExpression(unwrapped)) return predicate(unwrapped);
 	if (!isIdentifierName(unwrapped)) return false;
 
@@ -62,7 +62,7 @@ function objectExpressionMatches(
 		const initializer = getConstInitializer(definition);
 		if (initializer === undefined) continue;
 
-		const normalizedInitializer = unwrapExpression(initializer);
+		const normalizedInitializer = stripExpressionWrappers(initializer);
 		if (!isObjectExpression(normalizedInitializer)) continue;
 
 		if (predicate(normalizedInitializer)) return true;

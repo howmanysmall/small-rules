@@ -10,7 +10,7 @@ import {
 	isNumericLiteral,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -48,7 +48,7 @@ function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): bool
 }
 
 function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
-	const callee = unwrapExpression(node.callee);
+	const callee = stripExpressionWrappers(node.callee);
 	if (!isIdentifierNamed(callee, "Array")) return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }

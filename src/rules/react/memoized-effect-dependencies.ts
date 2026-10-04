@@ -20,7 +20,7 @@ import {
 	isVariableDeclarator,
 	NEW_EXPRESSION,
 	OBJECT_EXPRESSION,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
@@ -71,8 +71,8 @@ function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: Rea
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
-	let current = unwrapExpression(expression);
-	while (isMemberExpression(current)) current = unwrapExpression(current.object);
+	let current = stripExpressionWrappers(expression);
+	while (isMemberExpression(current)) current = stripExpressionWrappers(current.object);
 	return isIdentifierName(current) ? current : undefined;
 }
 
@@ -135,7 +135,7 @@ function isStableIndex1Binding(
 function getUnwrappedInit(node: ESTree.VariableDeclarator): ESTree.Expression | undefined {
 	/* v8 ignore next -- @preserve no-initializer declarators are intentionally treated as unknown. */
 	if (node.init === null) return undefined;
-	return unwrapExpression(node.init);
+	return stripExpressionWrappers(node.init);
 }
 
 function shouldForceUnmemoized(mode: Mode, result: Stability): boolean {
@@ -323,7 +323,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		}
 
 		function classifyDependency(node: ESTree.Expression): Stability {
-			const unwrapped = unwrapExpression(node);
+			const unwrapped = stripExpressionWrappers(node);
 			if (isUnmemoizedInline(unwrapped)) return Stability.Unmemoized;
 			if (isCallExpression(unwrapped)) return mode === "definite" ? Stability.Unknown : Stability.Unmemoized;
 

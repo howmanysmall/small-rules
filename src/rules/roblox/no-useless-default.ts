@@ -25,7 +25,7 @@ import {
 	isStringLiteral,
 	isUnaryExpression,
 	isVariableDeclaration,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
@@ -234,7 +234,7 @@ function isIgnoredPropertyName(propertyName: string): boolean {
 }
 
 function getTrackedInstanceClassName(node: ESTree.Expression): string | undefined {
-	const expression = unwrapExpression(node);
+	const expression = stripExpressionWrappers(node);
 	if (!isNewExpression(expression) || !isIdentifierNamed(expression.callee, "Instance")) return undefined;
 
 	const [firstArgument] = expression.arguments;
@@ -910,7 +910,7 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			statementNode: ESTree.ExpressionStatement,
 			trackedInstances: Map<string, TrackedInstance>,
 		): void {
-			const expression = unwrapExpression(statementNode.expression);
+			const expression = stripExpressionWrappers(statementNode.expression);
 
 			if (isAssignmentExpression(expression)) {
 				reportUselessDefaultAssignment(statementNode, expression, trackedInstances);

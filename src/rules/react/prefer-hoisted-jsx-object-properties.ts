@@ -14,7 +14,7 @@ import {
 	JSX_EXPRESSION_CONTAINER,
 	JSX_FRAGMENT,
 	PARENTHESIZED_EXPRESSION,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -102,7 +102,7 @@ function reportHoistableObjectProperties(context: Context, objectExpression: EST
 	for (const property of objectExpression.properties) {
 		/* v8 ignore next -- @preserve spread props are dynamic and already make the containing object non-static. */
 		if (!isProperty(property)) continue;
-		const value = unwrapExpression(property.value);
+		const value = stripExpressionWrappers(property.value);
 		if (isObjectExpression(value)) reportHoistableObjectProperties(context, value);
 	}
 }
@@ -114,7 +114,7 @@ const preferHoistedJsxObjectProperties = createRule("prefer-hoisted-jsx-object-p
 				const expression = getAttributeExpression(node);
 				if (expression === undefined) return;
 
-				const unwrapped = unwrapExpression(expression);
+				const unwrapped = stripExpressionWrappers(expression);
 				if (!isObjectExpression(unwrapped)) return;
 
 				const openingElement = node.parent;

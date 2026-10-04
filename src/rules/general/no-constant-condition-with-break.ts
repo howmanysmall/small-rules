@@ -42,12 +42,12 @@ import {
 	OBJECT_EXPRESSION,
 	RETURN_STATEMENT,
 	SEQUENCE_EXPRESSION,
+	stripExpressionWrappers,
 	SWITCH_STATEMENT,
 	TAGGED_TEMPLATE_EXPRESSION,
 	TEMPLATE_LITERAL,
 	TRY_STATEMENT,
 	UNARY_EXPRESSION,
-	unwrapExpression,
 	UPDATE_EXPRESSION,
 	VARIABLE_DECLARATION,
 	WHILE_STATEMENT,
@@ -101,7 +101,7 @@ function normalizeLoopExitCalls(options: NoConstantConditionWithBreakOptions | u
 }
 
 function getNodePath(node: ESTree.Expression): string | undefined {
-	const unwrapped = unwrapExpression(node);
+	const unwrapped = stripExpressionWrappers(node);
 
 	if (isBindingIdentifier(unwrapped)) return unwrapped.name;
 	if (!isMemberExpression(unwrapped)) return undefined;
@@ -228,7 +228,7 @@ function expressionContainsConfiguredLoopExit(
 		/* v8 ignore next -- @preserve index is bounded by pending.length. */
 		if (current === undefined) continue;
 
-		const unwrapped = unwrapExpression(current);
+		const unwrapped = stripExpressionWrappers(current);
 		if (isCallExpression(unwrapped) && isConfiguredLoopExitCall(unwrapped, loopExitCalls)) return true;
 		addExpressionChildrenToPending(unwrapped, pending);
 	}
@@ -237,13 +237,13 @@ function expressionContainsConfiguredLoopExit(
 }
 
 function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
-	let unwrapped = unwrapExpression(expression);
+	let unwrapped = stripExpressionWrappers(expression);
 
 	while (isSequenceExpression(unwrapped)) {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
 		if (!lastExpression) return NON_CONSTANT_VALUE;
-		unwrapped = unwrapExpression(lastExpression);
+		unwrapped = stripExpressionWrappers(lastExpression);
 	}
 
 	switch (unwrapped.type) {
@@ -321,13 +321,13 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 }
 
 function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResult {
-	let unwrapped = unwrapExpression(expression);
+	let unwrapped = stripExpressionWrappers(expression);
 
 	while (isSequenceExpression(unwrapped)) {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
 		if (!lastExpression) return NON_CONSTANT_BOOLEAN;
-		unwrapped = unwrapExpression(lastExpression);
+		unwrapped = stripExpressionWrappers(lastExpression);
 	}
 
 	if (isConditionalExpression(unwrapped)) return getConditionalConstantBoolean(unwrapped);

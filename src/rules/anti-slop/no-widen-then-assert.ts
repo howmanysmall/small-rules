@@ -36,6 +36,8 @@ import {
 	isTsUnknownKeyword,
 	isVariableDeclaration,
 	isVariableDeclarator,
+	stripParenthesis,
+	stripParenthesizedType,
 	TS_ARRAY_TYPE,
 	TS_CONSTRUCTOR_TYPE,
 	TS_DECLARE_FUNCTION,
@@ -47,8 +49,6 @@ import {
 	TS_TUPLE_TYPE,
 	TS_TYPE_LITERAL,
 	TS_TYPE_OPERATOR,
-	unwrapParenthesis,
-	unwrapParenthesizedType,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -84,19 +84,19 @@ function getTypeReferenceName(type: ESTree.TSTypeReference): string | undefined 
 }
 
 function isUnknownOrAnyType(type: ESTree.TSType): boolean {
-	const unwrapped = unwrapParenthesizedType(type);
+	const unwrapped = stripParenthesizedType(type);
 	return isTsAnyKeyword(unwrapped) || isTsUnknownKeyword(unwrapped);
 }
 
 function isBroadRecordKeyType(type: ESTree.TSType): boolean {
-	const unwrapped = unwrapParenthesizedType(type);
+	const unwrapped = stripParenthesizedType(type);
 	if (isTsNumberKeyword(unwrapped) || isTsStringKeyword(unwrapped) || isTsSymbolKeyword(unwrapped)) return true;
 	if (isTsUnionType(unwrapped)) return unwrapped.types.every(isBroadRecordKeyType);
 	return isTsTypeReference(unwrapped) && getTypeReferenceName(unwrapped) === "PropertyKey";
 }
 
 function isBroadRecordType(type: ESTree.TSType): boolean {
-	const unwrapped = unwrapParenthesizedType(type);
+	const unwrapped = stripParenthesizedType(type);
 
 	if (isTsTypeReference(unwrapped)) {
 		if (getTypeReferenceName(unwrapped) === "Readonly") {
@@ -131,20 +131,20 @@ function isBroadRecordType(type: ESTree.TSType): boolean {
 }
 
 function getBroadTypeKind(type: ESTree.TSType): BroadTypeKind | undefined {
-	const unwrapped = unwrapParenthesizedType(type);
+	const unwrapped = stripParenthesizedType(type);
 	if (isTsAnyKeyword(unwrapped) || isTsUnknownKeyword(unwrapped)) return "top";
 	if (isTsObjectKeyword(unwrapped)) return "object";
 	return isBroadRecordType(unwrapped) ? "record" : undefined;
 }
 
 function assertedExpression(node: ESTree.TSAsExpression | ESTree.TSTypeAssertion): ESTree.Expression {
-	return unwrapParenthesis(node.expression);
+	return stripParenthesis(node.expression);
 }
 
 function assertionFromExpression(
 	expression: ESTree.Expression,
 ): ESTree.TSAsExpression | ESTree.TSTypeAssertion | undefined {
-	const unwrapped = unwrapParenthesis(expression);
+	const unwrapped = stripParenthesis(expression);
 	return isTsAsExpression(unwrapped) || isTsTypeAssertion(unwrapped) ? unwrapped : undefined;
 }
 
@@ -155,13 +155,13 @@ function normalizedTypeText(sourceText: string, type: ESTree.TSType): string {
 function typesHaveSameSyntax(sourceText: string, left: ESTree.TSType | undefined, right: ESTree.TSType): boolean {
 	return (
 		left !== undefined &&
-		normalizedTypeText(sourceText, unwrapParenthesizedType(left)) ===
-			normalizedTypeText(sourceText, unwrapParenthesizedType(right))
+		normalizedTypeText(sourceText, stripParenthesizedType(left)) ===
+			normalizedTypeText(sourceText, stripParenthesizedType(right))
 	);
 }
 
 function isDefinitelyObjectType(type: ESTree.TSType): boolean {
-	const unwrapped = unwrapParenthesizedType(type);
+	const unwrapped = stripParenthesizedType(type);
 	switch (unwrapped.type) {
 		case TS_ARRAY_TYPE:
 		case TS_CONSTRUCTOR_TYPE:
@@ -186,7 +186,7 @@ function isDefinitelyObjectType(type: ESTree.TSType): boolean {
 }
 
 function isDefinitelyNarrowerRecordType(type: ESTree.TSType): boolean {
-	const unwrapped = unwrapParenthesizedType(type);
+	const unwrapped = stripParenthesizedType(type);
 	if (isTsTypeLiteral(unwrapped)) return unwrapped.members.some((member) => !isTsIndexSignature(member));
 	if (!isTsTypeReference(unwrapped)) return false;
 
@@ -235,7 +235,7 @@ function annotationOfType(node: MaybeAnnotated): ESTree.TSTypeAnnotation | undef
 }
 
 function directKnownValueEvidence(expression: ESTree.Expression): KnownValueEvidence | undefined {
-	const unwrapped = unwrapParenthesis(expression);
+	const unwrapped = stripParenthesis(expression);
 	if (isTsAsExpression(unwrapped) || isTsTypeAssertion(unwrapped)) {
 		/* v8 ignore next -- The broad-assertion path is retained for malformed/intermediate ASTs. @preserve */
 		if (getBroadTypeKind(unwrapped.typeAnnotation) !== undefined) return undefined;
@@ -293,7 +293,7 @@ function knownValueEvidence(
 		const directEvidence = directKnownValueEvidence(currentExpression);
 		if (directEvidence !== undefined) return directEvidence;
 
-		const unwrapped = unwrapParenthesis(currentExpression);
+		const unwrapped = stripParenthesis(currentExpression);
 		if (!isBindingIdentifier(unwrapped)) return undefined;
 
 		const variable = resolveVariable(sourceCode, unwrapped);

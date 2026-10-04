@@ -12,8 +12,8 @@ import {
 	isNumericLiteral,
 	isSpreadElement,
 	isThisExpression,
-	unwrapExpression,
-	unwrapParenthesis,
+	stripExpressionWrappers,
+	stripParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -29,11 +29,11 @@ function isSimpleReceiver(expression: ESTree.Expression): boolean {
 }
 
 function isLiteral(expression: ESTree.Expression): boolean {
-	return isAnyLiteral(unwrapExpression(expression));
+	return isAnyLiteral(stripExpressionWrappers(expression));
 }
 
 function getReciprocalDivisor(expression: ESTree.Expression): number | undefined {
-	const literal = unwrapExpression(expression);
+	const literal = stripExpressionWrappers(expression);
 	if (!isNumericLiteral(literal)) return undefined;
 
 	const { value } = literal;
@@ -44,8 +44,8 @@ function getReciprocalDivisor(expression: ESTree.Expression): number | undefined
 }
 
 function getReceiverText(sourceCode: SourceCode, receiver: ESTree.Expression): string {
-	const receiverText = sourceCode.getText(unwrapParenthesis(receiver));
-	return isSimpleReceiver(unwrapExpression(receiver)) ? receiverText : `(${receiverText})`;
+	const receiverText = sourceCode.getText(stripParenthesis(receiver));
+	return isSimpleReceiver(stripExpressionWrappers(receiver)) ? receiverText : `(${receiverText})`;
 }
 
 function isMathFloorCallee(callee: ESTree.Expression): callee is ESTree.MemberExpression {
@@ -74,7 +74,7 @@ function getSlashIdivTarget(sourceCode: SourceCode, expression: ESTree.BinaryExp
 	if (expression.operator !== "/") return undefined;
 
 	return {
-		divisorText: sourceCode.getText(unwrapParenthesis(expression.right)),
+		divisorText: sourceCode.getText(stripParenthesis(expression.right)),
 		receiver: expression.left,
 	};
 }
@@ -103,16 +103,16 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 			CallExpression(node): void {
 				if (node.optional) return;
 
-				const callee = unwrapExpression(node.callee);
+				const callee = stripExpressionWrappers(node.callee);
 				if (!isMathFloorCallee(callee)) return;
 
-				const object = unwrapExpression(callee.object);
+				const object = stripExpressionWrappers(callee.object);
 				if (!isUnshadowedMathReference(context.sourceCode, object)) return;
 
 				const argument = getSingleCallArgument(node);
 				if (argument === undefined) return;
 
-				const expression = unwrapExpression(argument);
+				const expression = stripExpressionWrappers(argument);
 				if (!isBinaryExpression(expression)) return;
 
 				const target = getIntegerDivisionTarget(context.sourceCode, expression);

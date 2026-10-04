@@ -3,7 +3,7 @@ import {
 	getMemberPropertyName,
 	isIdentifierNamed,
 	isMemberExpression,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -32,7 +32,7 @@ const noVariadicSpread = createRule("no-variadic-spread", "general", {
 
 				for (const argument of node.arguments) {
 					if (argument.type !== "SpreadElement") continue;
-					if (unwrapExpression(argument.argument).type === "ArrayExpression") continue;
+					if (stripExpressionWrappers(argument.argument).type === "ArrayExpression") continue;
 					context.report({ data: { method }, messageId: "noVariadicSpread", node: argument });
 				}
 			},

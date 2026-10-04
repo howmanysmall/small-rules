@@ -1,6 +1,6 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
@@ -44,14 +44,14 @@ function isConstantMemberExpression(sourceCode: SourceCode, memberExpression: ES
 
 	while (current.type === "MemberExpression") {
 		if (current.computed) return false;
-		current = unwrapExpression(current.object);
+		current = stripExpressionWrappers(current.object);
 	}
 
 	return current.type === "Identifier" && resolvesToModuleScopeBinding(sourceCode, current);
 }
 
 function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 
 	switch (unwrapped.type) {
 		case "Identifier":
@@ -67,7 +67,7 @@ function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expr
 			return unwrapped.expressions.length === 0;
 
 		case "UnaryExpression":
-			return unwrapped.operator === "-" && unwrapExpression(unwrapped.argument).type === "Literal";
+			return unwrapped.operator === "-" && stripExpressionWrappers(unwrapped.argument).type === "Literal";
 
 		default:
 			return false;
@@ -158,7 +158,7 @@ const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 				const [firstArgument] = node.arguments;
 				if (firstArgument === undefined || firstArgument.type === "SpreadElement") return;
 
-				const actionObject = unwrapExpression(firstArgument);
+				const actionObject = stripExpressionWrappers(firstArgument);
 				if (actionObject.type !== "ObjectExpression") return;
 				if (!shouldReportActionObject(sourceCode, actionObject)) return;
 

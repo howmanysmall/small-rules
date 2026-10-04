@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -7,13 +7,13 @@ const noFilterMapChain = createRule("no-filter-map-chain", "general", {
 	create(context): Visitor {
 		return {
 			CallExpression(node): void {
-				const mapCallee = unwrapExpression(node.callee);
+				const mapCallee = stripExpressionWrappers(node.callee);
 				if (mapCallee.type !== "MemberExpression" || getMemberPropertyName(mapCallee) !== "map") return;
 
-				const filterCall = unwrapExpression(mapCallee.object);
+				const filterCall = stripExpressionWrappers(mapCallee.object);
 				if (filterCall.type !== "CallExpression") return;
 
-				const filterCallee = unwrapExpression(filterCall.callee);
+				const filterCallee = stripExpressionWrappers(filterCall.callee);
 				if (filterCallee.type !== "MemberExpression" || getMemberPropertyName(filterCallee) !== "filter") {
 					return;
 				}

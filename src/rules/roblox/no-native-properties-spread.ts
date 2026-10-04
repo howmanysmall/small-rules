@@ -9,7 +9,7 @@ import {
 	isObjectExpression,
 	isSpreadElement,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
@@ -42,10 +42,10 @@ function getVariableInitializer(definition: ScopeVariable["defs"][number]): ESTr
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
-	let currentExpression = unwrapExpression(expression);
+	let currentExpression = stripExpressionWrappers(expression);
 
 	while (isMemberExpression(currentExpression)) {
-		const objectExpression = unwrapExpression(currentExpression.object);
+		const objectExpression = stripExpressionWrappers(currentExpression.object);
 		if (isIdentifierName(objectExpression)) return objectExpression;
 		if (!isMemberExpression(objectExpression)) return undefined;
 		currentExpression = objectExpression;
@@ -56,7 +56,7 @@ function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierRefe
 }
 
 function shouldReportSpreadArgument(sourceCode: SourceCode, argument: ESTree.Expression): boolean {
-	const unwrappedArgument = unwrapExpression(argument);
+	const unwrappedArgument = stripExpressionWrappers(argument);
 	/* v8 ignore next -- @preserve parser spread arguments are identifiers or member expressions in targeted JSX cases. */
 	if (isObjectExpression(unwrappedArgument)) return true;
 
@@ -74,7 +74,7 @@ function resolveObjectExpression(
 	expression: ESTree.Expression,
 	seen: Set<ESTree.Node>,
 ): ESTree.ObjectExpression | undefined {
-	const unwrappedExpression = unwrapExpression(expression);
+	const unwrappedExpression = stripExpressionWrappers(expression);
 	if (seen.has(unwrappedExpression)) return undefined;
 	seen.add(unwrappedExpression);
 

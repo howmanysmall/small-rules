@@ -17,8 +17,8 @@ import {
 	isTsTypeReference,
 	isVariableDeclarator,
 	PRIVATE_IDENTIFIER,
-	unwrapExpression,
-	unwrapParenthesis,
+	stripExpressionWrappers,
+	stripParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -41,7 +41,7 @@ function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier)
 }
 
 function isKnownNonNumberLiteral(expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	return isAnyLiteral(unwrapped) && !Predicate.isNumber(unwrapped.value);
 }
 
@@ -78,23 +78,23 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 }
 
 function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	const current = unwrapParenthesis(expression);
+	const current = stripParenthesis(expression);
 
 	if (isTsAsExpression(current) || isTsTypeAssertion(current)) return !isNumberTypeAnnotation(current.typeAnnotation);
 
 	/* v8 ignore next -- @preserve literal non-number cases are covered by direct literal tests. */
 	if (isKnownNonNumberLiteral(current)) return true;
 
-	const unwrapped = unwrapExpression(current);
+	const unwrapped = stripExpressionWrappers(current);
 	return isIdentifierName(unwrapped) && isKnownNonNumberIdentifier(sourceCode, unwrapped);
 }
 
 function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	return sourceCode.getText(unwrapExpression(expression));
+	return sourceCode.getText(stripExpressionWrappers(expression));
 }
 
 function getMathArgumentText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	const unwrapped = unwrapParenthesis(expression);
+	const unwrapped = stripParenthesis(expression);
 	if (isSequenceExpression(unwrapped)) return `(${sourceCode.getText(unwrapped)})`;
 	return sourceCode.getText(unwrapped);
 }

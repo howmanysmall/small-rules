@@ -20,7 +20,7 @@ import {
 	JSX_EXPRESSION_CONTAINER,
 	JSX_FRAGMENT,
 	LITERAL,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -122,7 +122,7 @@ function getComparableAttributeNode({ value }: ESTree.JSXAttribute): ESTree.Expr
 				return undefined;
 
 			default:
-				return unwrapExpression(value.expression);
+				return stripExpressionWrappers(value.expression);
 		}
 	}
 

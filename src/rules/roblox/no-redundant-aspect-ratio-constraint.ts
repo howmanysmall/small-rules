@@ -16,7 +16,7 @@ import {
 	isJsxIdentifier,
 	isReturnStatement,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
@@ -58,7 +58,7 @@ function getFunctionComponentName(node: ESTree.Node): string | undefined {
 }
 
 function getArrowExpressionBody(node: ESTree.ArrowFunctionExpression): ESTree.Expression | undefined {
-	return isBlockStatement(node.body) ? undefined : unwrapExpression(node.body);
+	return isBlockStatement(node.body) ? undefined : stripExpressionWrappers(node.body);
 }
 
 function getImportSourceFromVariable(variable: Variable): string | undefined {
@@ -78,7 +78,7 @@ function getImportSourceFromVariable(variable: Variable): string | undefined {
 
 const importedFileCache = new Map<string, boolean>();
 
-function importedFileHasConstraint(importSource: string, sourceFile: string): boolean {
+function doesImportedFileHaveConstraint(importSource: string, sourceFile: string): boolean {
 	if (!importSource.startsWith(".")) return false;
 
 	const resolved = resolveRelativeImport(importSource, sourceFile);
@@ -142,7 +142,7 @@ function isProtectedComponentUsage(
 	const importSource = getImportSourceFromVariable(variable);
 	return (
 		importSource !== undefined &&
-		(importedFileHasConstraint(importSource, filename) || KNOWN_COMPONENTS.has(componentName))
+		(doesImportedFileHaveConstraint(importSource, filename) || KNOWN_COMPONENTS.has(componentName))
 	);
 }
 

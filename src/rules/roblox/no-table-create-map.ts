@@ -6,31 +6,31 @@ import {
 	isIdentifierName,
 	isMemberExpression,
 	isNewExpression,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isTableCreateBase(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped) || unwrapped.optional) return false;
 
-	const callee = unwrapExpression(unwrapped.callee);
+	const callee = stripExpressionWrappers(unwrapped.callee);
 	if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "create") {
 		return false;
 	}
 
-	const target = unwrapExpression(callee.object);
+	const target = stripExpressionWrappers(callee.object);
 	if (!isIdentifierName(target) || target.name !== "table") return false;
 	return !hasShadowedBinding(sourceCode, target, "table");
 }
 
 function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (!isNewExpression(unwrapped)) return false;
 	if (unwrapped.arguments.length !== 1 && unwrapped.arguments.length !== 2) return false;
 
-	const callee = unwrapExpression(unwrapped.callee);
+	const callee = stripExpressionWrappers(unwrapped.callee);
 	if (!isIdentifierName(callee) || callee.name !== "Array") return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
@@ -41,12 +41,12 @@ const noTableCreateMap = createRule("no-table-create-map", "roblox", {
 			CallExpression(node): void {
 				if (node.optional) return;
 
-				const callee = unwrapExpression(node.callee);
+				const callee = stripExpressionWrappers(node.callee);
 				if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "map") {
 					return;
 				}
 
-				const base = unwrapExpression(callee.object);
+				const base = stripExpressionWrappers(callee.object);
 				if (!isTableCreateBase(context.sourceCode, base) && !isArrayConstructorBase(context.sourceCode, base)) {
 					return;
 				}

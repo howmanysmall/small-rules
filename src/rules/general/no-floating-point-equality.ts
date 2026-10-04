@@ -21,7 +21,7 @@ import {
 	isUnaryExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
@@ -148,7 +148,7 @@ function resolveFloatingExpressionRoot(
 ): ESTree.Expression | undefined {
 	let current = node;
 	while (true) {
-		const unwrapped = unwrapExpression(current);
+		const unwrapped = stripExpressionWrappers(current);
 		if (unwrapped !== current) {
 			current = unwrapped;
 			continue;

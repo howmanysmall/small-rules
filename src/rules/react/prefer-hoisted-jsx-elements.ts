@@ -2,7 +2,7 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -179,7 +179,7 @@ function isStaticJavaScriptXmlChild(
 	if (child.expression.type === "Identifier") {
 		const initializer = getModuleConstInitializer(context.sourceCode, child.expression);
 		if (initializer !== undefined) {
-			const unwrappedInitializer = unwrapExpression(initializer);
+			const unwrappedInitializer = stripExpressionWrappers(initializer);
 			if (unwrappedInitializer.type === "JSXElement" || unwrappedInitializer.type === "JSXFragment") {
 				return isStaticJavaScriptXmlNode(
 					context,

@@ -11,7 +11,7 @@ import {
 	isNewExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
@@ -60,7 +60,7 @@ function isJecsNamespaceVariable(variable: undefined | Variable): boolean {
 }
 
 function isJecsWorldFactoryCall(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped)) return false;
 
 	const { callee } = unwrapped;
@@ -74,7 +74,7 @@ function isJecsWorldFactoryCall(sourceCode: SourceCode, expression: ESTree.Expre
 }
 
 export function isJecsWorldExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (!isIdentifierName(unwrapped)) return false;
 
 	const initializer = getSingleConstantInitializer(getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name));
@@ -86,7 +86,7 @@ function isGlobalNativeConstructor(
 	expression: ESTree.Expression,
 	name: "Map" | "Promise" | "Set",
 ): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	return isIdentifierNamed(unwrapped, name) && !hasShadowedBinding(sourceCode, unwrapped, name);
 }
 
@@ -97,7 +97,7 @@ function getNativeCollectionKindAtDepth(
 ): NativeCollectionKind | undefined {
 	if (depth >= MAX_ALIAS_DEPTH) return undefined;
 
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (isNewExpression(unwrapped)) {
 		if (isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Map")) return "Map";
 		if (isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Set")) return "Set";
@@ -122,7 +122,7 @@ function isNativePromiseExpressionAtDepth(
 	depth: number,
 ): boolean {
 	if (depth >= MAX_ALIAS_DEPTH) return false;
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (isNewExpression(unwrapped)) {
 		return isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Promise");
 	}

@@ -9,13 +9,13 @@ import {
 	isConditionalExpression,
 	isEmptyObjectExpression,
 	isObjectExpression,
-	unwrapParenthesis,
+	stripParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 function isConditionalEmptyObjectSpread(node: ESTree.Expression): boolean {
-	const conditional = unwrapParenthesis(node);
+	const conditional = stripParenthesis(node);
 	return (
 		isConditionalExpression(conditional) &&
 		(isEmptyObjectExpression(conditional.consequent) || isEmptyObjectExpression(conditional.alternate))

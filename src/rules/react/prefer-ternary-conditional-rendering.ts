@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionNode, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import { isExpressionNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -55,8 +55,8 @@ function areEquivalentOperand(left: BinaryOperand, right: BinaryOperand, sourceC
 }
 
 function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expression, sourceCode: SourceCode): boolean {
-	const normalizedLeft = unwrapExpression(left);
-	const normalizedRight = unwrapExpression(right);
+	const normalizedLeft = stripExpressionWrappers(left);
+	const normalizedRight = stripExpressionWrappers(right);
 	if (normalizedLeft.type !== normalizedRight.type) return false;
 
 	switch (normalizedLeft.type) {
@@ -168,13 +168,13 @@ function areEquivalentStaticMemberProperty(left: BinaryOperand, right: BinaryOpe
 }
 
 function getNegatedExpression(expression: ESTree.Expression): ESTree.Expression | undefined {
-	const normalized = unwrapExpression(expression);
+	const normalized = stripExpressionWrappers(expression);
 	if (normalized.type !== "UnaryExpression" || normalized.operator !== "!") return undefined;
-	return unwrapExpression(normalized.argument);
+	return stripExpressionWrappers(normalized.argument);
 }
 
 function getStrictComparison(expression: ESTree.Expression): StrictComparison | undefined {
-	const normalized = unwrapExpression(expression);
+	const normalized = stripExpressionWrappers(expression);
 	if (normalized.type !== "BinaryExpression") return undefined;
 	if (normalized.operator !== "===" && normalized.operator !== "!==") return undefined;
 
@@ -186,7 +186,7 @@ function getStrictComparison(expression: ESTree.Expression): StrictComparison | 
 }
 
 function isSafeAtom(expression: ESTree.Expression): boolean {
-	const normalized = unwrapExpression(expression);
+	const normalized = stripExpressionWrappers(expression);
 	return normalized.type === "Identifier" || normalized.type === "ThisExpression" || normalized.type === "Literal";
 }
 

@@ -730,13 +730,13 @@ export function isEmptyObjectExpression(node: ESTree.Expression): boolean {
 	return isObjectExpression(node) && node.properties.length === 0;
 }
 
-export function unwrapParenthesizedType(type: ESTree.TSType): ESTree.TSType {
+export function stripParenthesizedType(type: ESTree.TSType): ESTree.TSType {
 	let current = type;
 	while (isTsParenthesizedType(current)) current = current.typeAnnotation;
 	return current;
 }
 
-export function unwrapExpression(expression: ESTree.Expression): ESTree.Expression {
+export function stripExpressionWrappers(expression: ESTree.Expression): ESTree.Expression {
 	let current: ESTree.Expression = expression;
 
 	while (true) {
@@ -764,7 +764,7 @@ export function isNotEmptyStatement(
 	return statement.type !== "EmptyStatement";
 }
 
-export function unwrapParenthesis(expression: ESTree.Expression): ESTree.Expression {
+export function stripParenthesis(expression: ESTree.Expression): ESTree.Expression {
 	let current = expression;
 	while (isParenthesizedExpression(current)) current = current.expression;
 	return current;

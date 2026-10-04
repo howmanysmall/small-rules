@@ -39,7 +39,7 @@ import {
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
 	UNARY_EXPRESSION,
-	unwrapExpression,
+	stripExpressionWrappers,
 	UPDATE_EXPRESSION,
 	YIELD_EXPRESSION,
 } from "$oxc-utilities/oxc-utilities";
@@ -186,7 +186,7 @@ export function isExplicitUndefinedExpression(
 	expression: ESTree.Expression,
 	seen: Set<ESTree.Node>,
 ): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (seen.has(unwrapped)) return false;
 	seen.add(unwrapped);
 
@@ -212,8 +212,8 @@ function isStaticMemberProperty(
 }
 
 function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
-	let unwrapped = unwrapExpression(callee);
-	while (isMemberExpression(unwrapped)) unwrapped = unwrapExpression(unwrapped.object);
+	let unwrapped = stripExpressionWrappers(callee);
+	while (isMemberExpression(unwrapped)) unwrapped = stripExpressionWrappers(unwrapped.object);
 	return isIdentifierName(unwrapped) ? unwrapped.name : undefined;
 }
 
@@ -228,7 +228,7 @@ function isStaticCallCallee(
 		if (factoryRootName === undefined || !options.staticGlobalFactories.has(factoryRootName)) return false;
 	}
 
-	const unwrapped = unwrapExpression(callee);
+	const unwrapped = stripExpressionWrappers(callee);
 	if (isIdentifierName(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
 	if (!isMemberExpression(unwrapped) || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
 		return false;
@@ -282,7 +282,7 @@ export function isStaticExpression(
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (seen.has(unwrapped)) return false;
 	seen.add(unwrapped);
 

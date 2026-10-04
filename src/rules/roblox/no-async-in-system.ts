@@ -31,7 +31,7 @@ import {
 	isTsUnionType,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -141,13 +141,13 @@ function collectImportBindings(
 
 function getMemberChain(expression: ESTree.Expression): MemberChain | undefined {
 	const path = new Array<string>();
-	let current = unwrapExpression(expression);
+	let current = stripExpressionWrappers(expression);
 	while (isMemberExpression(current)) {
 		const propertyName = getMemberPropertyName(current);
 		if (propertyName === undefined) return undefined;
 
 		path.unshift(propertyName);
-		current = unwrapExpression(current.object);
+		current = stripExpressionWrappers(current.object);
 	}
 	return isIdentifierName(current) ? { path, root: current } : undefined;
 }
@@ -356,12 +356,12 @@ function getReferencedFunction(
 	if (isAnyFunction(definition.node)) return definition.node;
 
 	if (!isVariableDeclarator(definition.node) || definition.node.init === null) return undefined;
-	const initializer = unwrapExpression(definition.node.init);
+	const initializer = stripExpressionWrappers(definition.node.init);
 	return isAnyFunction(initializer) ? initializer : undefined;
 }
 
 function getReferencedCallback(expression: ESTree.Expression, sourceCode: SourceCode): CallbackFunction | undefined {
-	const current = unwrapExpression(expression);
+	const current = stripExpressionWrappers(expression);
 	if (isAnyFunction(current)) return current;
 	return isIdentifierName(current) ? getReferencedFunction(current, sourceCode) : undefined;
 }
@@ -373,7 +373,7 @@ function getExpressionClass(
 	types: ReadonlyMap<ScopeVariable, string>,
 	visited: Set<ESTree.Expression>,
 ): string | undefined {
-	const current = unwrapExpression(expression);
+	const current = stripExpressionWrappers(expression);
 	if (isIdentifierName(current)) return getIdentifierClass(current, sourceCode, imports, types, visited);
 	if (
 		!isCallExpression(current) ||
