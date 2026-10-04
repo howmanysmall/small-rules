@@ -1,6 +1,6 @@
 import { Predicate } from "effect";
 
-import { isKeyOfNode, isNode, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import { isKeyOfNode, isNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -130,7 +130,7 @@ export function classifyDependencies<TOptions extends object>(
 	if (argument === undefined) return DependenciesKind.MissingOrOmitted;
 	if (argument.type === "SpreadElement") return DependenciesKind.DynamicOrUnknown;
 
-	const expression = unwrapExpression(argument);
+	const expression = stripExpressionWrappers(argument);
 	if (expression.type !== "ArrayExpression") return DependenciesKind.DynamicOrUnknown;
 	if (expression.elements.length === 0) return DependenciesKind.EmptyArray;
 	if (isStaticArrayExpression(sourceCode, expression, seen, options)) return DependenciesKind.StaticArray;

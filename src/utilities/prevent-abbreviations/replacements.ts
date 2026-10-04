@@ -1,6 +1,6 @@
 import { Predicate } from "effect";
 
-import { evilTernary } from "$oxc-utilities/evil-ternary-utilities";
+import { chooseWithEvilTernary } from "$oxc-utilities/evil-ternary-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import {
@@ -267,7 +267,7 @@ function normalizeAllowList(options: RawOptions | undefined): Map<string, boolea
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const configuredAllowList = normalizeBooleanRecord(normalizedOptions?.allowList);
 	const extendDefaultAllowList = normalizeBooleanOption(normalizedOptions?.extendDefaultAllowList, true);
-	const mergedAllowList = evilTernary(
+	const mergedAllowList = chooseWithEvilTernary(
 		extendDefaultAllowList,
 		configuredAllowList === undefined ? DEFAULT_ALLOW_LIST : { ...DEFAULT_ALLOW_LIST, ...configuredAllowList },
 		configuredAllowList ?? {},
@@ -314,7 +314,7 @@ function normalizeReplacements(options: RawOptions | undefined): Map<string, Map
 		const mergedForName =
 			configuredOverride === false
 				? {}
-				: evilTernary(configuredOverride === undefined, baseReplacements, {
+				: chooseWithEvilTernary(configuredOverride === undefined, baseReplacements, {
 						...baseReplacements,
 						...configuredOverride,
 					});

@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction, unwrapExpression } from "$oxc-utilities/oxc-utilities";
+import { isCallbackFunction, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -37,7 +37,7 @@ function isPromiseChainCall(node: ESTree.CallExpression): boolean {
 }
 
 function isAsyncIife({ callee }: ESTree.CallExpression): boolean {
-	const unwrapped = unwrapExpression(callee);
+	const unwrapped = stripExpressionWrappers(callee);
 	return isCallbackFunction(unwrapped) && unwrapped.async;
 }
 

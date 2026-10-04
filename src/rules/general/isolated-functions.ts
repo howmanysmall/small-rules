@@ -187,7 +187,7 @@ function getCommentReason(
 	return undefined;
 }
 
-function reasonForIsolatedFunction(
+function getReasonForIsolatedFunction(
 	sourceCode: SourceCode,
 	node: ESTree.Node,
 	options: RuleOptions,
@@ -341,7 +341,7 @@ const isolatedFunctions = createRule("isolated-functions", "general", {
 		function checkFunctionNode(node: ESTree.Node): void {
 			/* v8 ignore next -- registered only on function visitor keys. @preserve */
 			if (!isFunctionNode(node)) return;
-			const reason = reasonForIsolatedFunction(context.sourceCode, node, options);
+			const reason = getReasonForIsolatedFunction(context.sourceCode, node, options);
 			if (reason === undefined) return;
 			reportIsolatedFunction(context, node, reason, options, checked);
 		}

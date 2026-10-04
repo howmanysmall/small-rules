@@ -131,7 +131,7 @@ function getParent(node: ESTree.Node): ESTree.Node | undefined {
 	return node.parent ?? undefined;
 }
 
-function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
+function skipWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	let current = node;
 	/* v8 ignore next -- @preserve slopular */
 	while (current !== undefined && WRAPPER_PARENT_TYPES.has(current.type)) current = current.parent ?? undefined;
@@ -287,21 +287,23 @@ function isTopLevelFunctionReturn(node: ESTree.JSXElement | ESTree.JSXFragment):
 }
 
 function getTopLevelReturnParent(node: ESTree.JSXElement | ESTree.JSXFragment): ESTree.Node | undefined {
-	let parent = ascendPastExpressionContainer(ascendPastWrappers(getParent(node)));
-	while (parent !== undefined && SHOULD_ASCEND_TYPES.has(parent.type)) parent = ascendPastWrappers(getParent(parent));
-	return ascendPastExpressionContainer(parent);
+	let parent = skipExpressionContainer(skipWrappers(getParent(node)));
+	while (parent !== undefined && SHOULD_ASCEND_TYPES.has(parent.type)) {
+		parent = skipWrappers(getParent(parent));
+	}
+	return skipExpressionContainer(parent);
 }
 
-function ascendPastExpressionContainer(parent: ESTree.Node | undefined): ESTree.Node | undefined {
+function skipExpressionContainer(parent?: ESTree.Node): ESTree.Node | undefined {
 	if (!isJsxExpressionContainer(parent)) return parent;
-	return ascendPastWrappers(getParent(parent));
+	return skipWrappers(getParent(parent));
 }
 
 function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
-	let currentNode: ESTree.Node | undefined = ascendPastWrappers(getParent(parent));
+	let currentNode: ESTree.Node | undefined = skipWrappers(getParent(parent));
 
 	while (currentNode !== undefined && CONTROL_FLOW_TYPES.has(currentNode.type)) {
-		currentNode = ascendPastWrappers(getParent(currentNode));
+		currentNode = skipWrappers(getParent(currentNode));
 	}
 
 	/* v8 ignore next -- @preserve return statements that contain JSX are parser-nested inside a function body. */
@@ -315,7 +317,7 @@ function isTopLevelReturn(node: ESTree.JSXElement | ESTree.JSXFragment): boolean
 	/* v8 ignore next -- @preserve a top-level JSX function return implies an enclosing function-like node. */
 	if (functionLike === undefined) return false;
 
-	const functionParent = ascendPastWrappers(getParent(functionLike));
+	const functionParent = skipWrappers(getParent(functionLike));
 	if (isCallExpression(functionParent)) return isReactComponentHigherOrderCall(functionParent);
 
 	return true;

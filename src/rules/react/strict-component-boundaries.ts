@@ -7,7 +7,7 @@ import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
-function pathSegmentsFromSource(source: string): ReadonlyArray<string> {
+function getPathSegmentsFromSource(source: string): ReadonlyArray<string> {
 	return source.split("/").filter((part) => !part.startsWith("."));
 }
 function countParentTraversals(pathDiff: string): number {
@@ -49,7 +49,7 @@ const strictComponentBoundaries = createRule("strict-component-boundaries", "rea
 				if (!resolved.found) return;
 
 				const pathDifference = nodePath.relative(filename, resolved.path).replaceAll("\\", "/");
-				const pathParts = pathSegmentsFromSource(pathDifference);
+				const pathParts = getPathSegmentsFromSource(pathDifference);
 				const traversals = countParentTraversals(pathDifference);
 
 				if (

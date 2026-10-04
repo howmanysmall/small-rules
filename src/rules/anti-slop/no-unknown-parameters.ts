@@ -33,7 +33,7 @@ type ParameterOwner =
  * @param node - Function-like node whose return type may contain a predicate.
  * @returns The predicate's parameter name, if it names one.
  */
-function validatedParameterName(node: ParameterOwner): string | undefined {
+function getValidatedParameterName(node: ParameterOwner): string | undefined {
 	const predicate = node.returnType?.typeAnnotation;
 	if (!isTsTypePredicate(predicate)) return undefined;
 	/* v8 ignore next -- `this`-based predicates do not name a parameter. @preserve */
@@ -43,7 +43,7 @@ function validatedParameterName(node: ParameterOwner): string | undefined {
 const noUnknownParameters = createRule("no-unknown-parameters", "anti-slop", {
 	createOnce(context): Visitor {
 		function checkParameters(node: ParameterOwner): void {
-			const validatedName = validatedParameterName(node);
+			const validatedName = getValidatedParameterName(node);
 			for (const parameter of node.params) {
 				const annotation = getFunctionParameterTypeAnnotation(parameter);
 				if (!isTsTypeAnnotation(annotation) || !containsUnknownType(annotation.typeAnnotation)) continue;

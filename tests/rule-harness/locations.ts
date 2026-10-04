@@ -17,14 +17,14 @@ export function createRange(start: number, end: number): Range {
 	return [start, end];
 }
 
-export function locationForRange(index: LocationIndex, range: Range): SourceLocation {
+export function getLocationForRange(index: LocationIndex, range: Range): SourceLocation {
 	return {
-		end: positionForIndex(index, range[1]),
-		start: positionForIndex(index, range[0]),
+		end: getPositionForIndex(index, range[1]),
+		start: getPositionForIndex(index, range[0]),
 	};
 }
 
-function positionForIndex(index: LocationIndex, offset: number): Position {
+function getPositionForIndex(index: LocationIndex, offset: number): Position {
 	let low = 0;
 	let high = index.lineStarts.length - 1;
 

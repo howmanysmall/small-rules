@@ -11,7 +11,7 @@
 // private namespaces by concrete parent block; recognizes import-equals and
 // module competitors; and isolates concrete string-literal module blocks.
 
-import { appendVisitorChildren, lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
+import { appendVisitorChildren, getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import {
 	isBlockStatement,
 	isClassDeclaration,
@@ -118,7 +118,7 @@ function isTypeScope(node: ESTree.Node): boolean {
 	);
 }
 
-function enclosingTypeScope(node: ESTree.Node, program: ESTree.Program): ESTree.Node {
+function getEnclosingTypeScope(node: ESTree.Node, program: ESTree.Program): ESTree.Node {
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null && current !== program) {
 		if (isTypeScope(current)) return current;
@@ -131,13 +131,13 @@ function createNamespaceScopeKey(programFallback: boolean): NamespaceScopeKey {
 	return { blocks: new Set(), children: new Map(), programFallback };
 }
 
-function moduleBindingName(module: ESTree.TSModuleDeclaration): string | undefined {
+function getModuleBindingName(module: ESTree.TSModuleDeclaration): string | undefined {
 	let current: ESTree.Node = module.id;
 	while (isTsQualifiedName(current)) current = current.left;
 	return isIdentifierName(current) ? current.name : undefined;
 }
 
-function namespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArray<string> | undefined {
+function getNamespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArray<string> | undefined {
 	const reversed = new Array<string>();
 	let current: ESTree.Node = module.id;
 	while (isTsQualifiedName(current)) {
@@ -149,7 +149,7 @@ function namespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArray<s
 	return reversed.toReversed();
 }
 
-function childNamespaceScope(parent: NamespaceScopeKey, name: string): NamespaceScopeKey {
+function getChildNamespaceScope(parent: NamespaceScopeKey, name: string): NamespaceScopeKey {
 	const existing = parent.children.get(name);
 	if (existing !== undefined) return existing;
 	const created = createNamespaceScopeKey(false);
@@ -157,7 +157,7 @@ function childNamespaceScope(parent: NamespaceScopeKey, name: string): Namespace
 	return created;
 }
 
-function privateNamespaceRoot(block: ESTree.TSModuleBlock, scopes: NamespaceScopes): NamespaceScopeKey {
+function getPrivateNamespaceRoot(block: ESTree.TSModuleBlock, scopes: NamespaceScopes): NamespaceScopeKey {
 	const existing = scopes.privateRoots.get(block);
 	if (existing !== undefined) return existing;
 	const created = createNamespaceScopeKey(false);
@@ -165,16 +165,16 @@ function privateNamespaceRoot(block: ESTree.TSModuleBlock, scopes: NamespaceScop
 	return created;
 }
 
-function namespaceScopeBase(
+function getNamespaceScopeBase(
 	module: ESTree.TSModuleDeclaration,
 	lexicalScope: ESTree.Node,
 	scopes: NamespaceScopes,
 ): NamespaceScopeKey {
 	if (!isTsModuleBlock(lexicalScope)) return scopes.root;
 	const parent = scopes.byBlock.get(lexicalScope);
-	if (parent === undefined) return privateNamespaceRoot(lexicalScope, scopes);
+	if (parent === undefined) return getPrivateNamespaceRoot(lexicalScope, scopes);
 	if (isExportNamedDeclaration(module.parent) || scopes.ambientBlocks.has(lexicalScope)) return parent;
-	return privateNamespaceRoot(lexicalScope, scopes);
+	return getPrivateNamespaceRoot(lexicalScope, scopes);
 }
 
 function registerGlobalScope({ body }: ESTree.TSGlobalDeclaration, scopes: NamespaceScopes): void {
@@ -188,20 +188,24 @@ function registerNamespaceScope(
 	lexicalScope: ESTree.Node,
 	scopes: NamespaceScopes,
 ): void {
-	const names = namespaceNameParts(module);
+	const names = getNamespaceNameParts(module);
 	const body: unknown = module.body;
 	if (!isNode(body) || !isTsModuleBlock(body)) return;
 	if (module.declare || (isTsModuleBlock(lexicalScope) && scopes.ambientBlocks.has(lexicalScope))) {
 		scopes.ambientBlocks.add(body);
 	}
 	if (names === undefined) return;
-	let scope = namespaceScopeBase(module, lexicalScope, scopes);
-	for (const name of names) scope = childNamespaceScope(scope, name);
+	let scope = getNamespaceScopeBase(module, lexicalScope, scopes);
+	for (const name of names) scope = getChildNamespaceScope(scope, name);
 	scope.blocks.add(body);
 	scopes.byBlock.set(body, scope);
 }
 
-function bindingScope({ parent }: ESTree.Node, lexicalScope: ESTree.Node, scopes: NamespaceScopes): TypeBindingScope {
+function getBindingScope(
+	{ parent }: ESTree.Node,
+	lexicalScope: ESTree.Node,
+	scopes: NamespaceScopes,
+): TypeBindingScope {
 	if (!isTsModuleBlock(lexicalScope)) return lexicalScope;
 	const namespaceScope = scopes.byBlock.get(lexicalScope);
 	if (namespaceScope === undefined) return lexicalScope;
@@ -211,7 +215,7 @@ function bindingScope({ parent }: ESTree.Node, lexicalScope: ESTree.Node, scopes
 	return lexicalScope;
 }
 
-function declaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | undefined {
+function getDeclaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | undefined {
 	if (isTsTypeAliasDeclaration(node)) return { name: node.id.name, alias: node, interface: undefined };
 	if (isTsInterfaceDeclaration(node)) return { name: node.id.name, alias: undefined, interface: node };
 	if (isTsEnumDeclaration(node) || isClassDeclaration(node) || isClassExpression(node)) {
@@ -222,7 +226,7 @@ function declaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | undefined
 	}
 	if (isTsImportEqualsDeclaration(node)) return { name: node.id.name, alias: undefined, interface: undefined };
 	if (isTsModuleDeclaration(node)) {
-		const name = moduleBindingName(node);
+		const name = getModuleBindingName(node);
 		return name === undefined ? undefined : { name, alias: undefined, interface: undefined };
 	}
 	return undefined;
@@ -243,13 +247,13 @@ function collectTypeBindings(
 	};
 	const pending: Array<ESTree.Node> = [program];
 	for (const node of pending) {
-		const lexicalScope = enclosingTypeScope(node, program);
+		const lexicalScope = getEnclosingTypeScope(node, program);
 		if (isTsGlobalDeclaration(node)) registerGlobalScope(node, scopes);
 		if (isTsModuleDeclaration(node)) registerNamespaceScope(node, lexicalScope, scopes);
-		const declared = declaredTypeBinding(node);
+		const declared = getDeclaredTypeBinding(node);
 		if (declared !== undefined) {
 			const bindings = bindingsByName.get(declared.name) ?? [];
-			const scope = isClassExpression(node) ? node : bindingScope(node, lexicalScope, scopes);
+			const scope = isClassExpression(node) ? node : getBindingScope(node, lexicalScope, scopes);
 			bindings.push({ name: declared.name, alias: declared.alias, interface: declared.interface, scope });
 			bindingsByName.set(declared.name, bindings);
 			if (declared.alias !== undefined) aliases.push(declared.alias);
@@ -262,7 +266,7 @@ function isNamespaceScopeKey(scope: TypeBindingScope): scope is NamespaceScopeKe
 	return "blocks" in scope;
 }
 
-function scopeDistance(scope: TypeBindingScope, node: ESTree.Node): number | undefined {
+function getScopeDistance(scope: TypeBindingScope, node: ESTree.Node): number | undefined {
 	let current: ESTree.Node | null = node;
 	let distance = 0;
 	while (current !== null) {
@@ -278,7 +282,7 @@ function scopeDistance(scope: TypeBindingScope, node: ESTree.Node): number | und
 	return undefined;
 }
 
-function nearestTypeBindings(
+function getNearestTypeBindings(
 	name: string,
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
@@ -287,7 +291,7 @@ function nearestTypeBindings(
 	let nearestDistance = Number.POSITIVE_INFINITY;
 	let nearest: Array<TypeBinding> = [];
 	for (const candidate of candidates) {
-		const distance = scopeDistance(candidate.scope, use);
+		const distance = getScopeDistance(candidate.scope, use);
 		if (distance === undefined || distance > nearestDistance) continue;
 		if (distance === nearestDistance) {
 			nearest.push(candidate);
@@ -333,13 +337,13 @@ export function createTypeAliasEnvironment(
  * @param environment - Program type environment containing the use site.
  * @returns The visible alias, or undefined when absent or ambiguous.
  */
-export function visibleTypeAlias(
+export function getVisibleTypeAlias(
 	name: string,
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ESTree.TSTypeAliasDeclaration | undefined {
-	if (lexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
-	const bindings = nearestTypeBindings(name, use, environment);
+	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
+	const bindings = getNearestTypeBindings(name, use, environment);
 	return bindings.length === 1 ? bindings[0]?.alias : undefined;
 }
 
@@ -351,13 +355,13 @@ export function visibleTypeAlias(
  * @param environment - Program type environment containing the use site.
  * @returns The merged declarations, or undefined when absent or competing.
  */
-export function visibleInterfaceDeclarations(
+export function getVisibleInterfaceDeclarations(
 	name: string,
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined {
-	if (lexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
-	const bindings = nearestTypeBindings(name, use, environment);
+	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
+	const bindings = getNearestTypeBindings(name, use, environment);
 	if (bindings.length === 0) return undefined;
 	const declarations = new Array<ESTree.TSInterfaceDeclaration>();
 	for (const binding of bindings) {
@@ -377,8 +381,8 @@ export function visibleInterfaceDeclarations(
  */
 export function hasVisibleTypeBinding(name: string, use: ESTree.Node, environment: TypeAliasEnvironment): boolean {
 	return (
-		lexicalTypeParameterNames(use, environment.visitorKeys).has(name) ||
-		nearestTypeBindings(name, use, environment).length > 0
+		getLexicalTypeParameterNames(use, environment.visitorKeys).has(name) ||
+		getNearestTypeBindings(name, use, environment).length > 0
 	);
 }
 
@@ -386,7 +390,7 @@ function typeReferenceName(type: ESTree.TSTypeReference): string | undefined {
 	return isIdentifierName(type.typeName) ? type.typeName.name : undefined;
 }
 
-function aliasSubstitutions(
+function getAliasSubstitutions(
 	alias: ESTree.TSTypeAliasDeclaration,
 	reference: ESTree.TSTypeReference,
 	caller: TypeResolution,
@@ -412,14 +416,14 @@ function aliasSubstitutions(
 	return { owner: alias, parameters: next };
 }
 
-function visibleSubstitution(
+function getVisibleSubstitution(
 	name: string,
 	resolution: TypeResolution,
 	environment: TypeAliasEnvironment,
 ): Substitution | undefined {
 	const { owner, parameters } = resolution[resolutionContext].environment;
 	if (owner === undefined) return undefined;
-	if (lexicalTypeParameterNames(resolution.type, environment.visitorKeys, owner).has(name)) return undefined;
+	if (getLexicalTypeParameterNames(resolution.type, environment.visitorKeys, owner).has(name)) return undefined;
 	return parameters.get(name);
 }
 
@@ -461,7 +465,7 @@ export function resolveTypeReference(
 	if (!isTsTypeReference(resolution.type)) return undefined;
 	const name = typeReferenceName(resolution.type);
 	if (name === undefined) return undefined;
-	const substitution = visibleSubstitution(name, resolution, environment);
+	const substitution = getVisibleSubstitution(name, resolution, environment);
 	if (substitution !== undefined && (resolution.type.typeArguments?.params.length ?? 0) === 0) {
 		return {
 			[resolutionContext]: {
@@ -471,12 +475,12 @@ export function resolveTypeReference(
 			type: substitution.type,
 		};
 	}
-	const alias = visibleTypeAlias(name, resolution.type, environment);
+	const alias = getVisibleTypeAlias(name, resolution.type, environment);
 	if (alias === undefined || resolution[resolutionContext].resolving.has(alias)) return undefined;
 	const resolving = new Set<ESTree.TSTypeAliasDeclaration>([alias]);
 	const previouslyResolving = resolution[resolutionContext].resolving;
 	for (const resolvingAlias of previouslyResolving) resolving.add(resolvingAlias);
-	const substitutions = aliasSubstitutions(alias, resolution.type, resolution, resolving);
+	const substitutions = getAliasSubstitutions(alias, resolution.type, resolution, resolving);
 	if (substitutions === undefined) return undefined;
 	return { [resolutionContext]: { environment: substitutions, resolving }, type: alias.typeAnnotation };
 }
@@ -489,7 +493,7 @@ export function resolveTypeReference(
  * @param matcher - Behavioral matcher that may enqueue transparent children.
  * @returns Whether the type or an enqueued child matches.
  */
-export function resolvedTypeMatches(
+export function getResolvedTypeMatches(
 	type: ESTree.TSType,
 	environment: TypeAliasEnvironment,
 	matcher: ResolvedTypeMatcher,

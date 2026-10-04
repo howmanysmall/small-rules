@@ -21,6 +21,7 @@
 		"documentation/src/utilities/extract-rule-examples.ts",
 		"documentation/src/utilities/oxlint-config.ts",
 		"packages/*/src/**/*.ts",
+		"scripts/utilities/dictionary-verbs.ts",
 		"scripts/utilities/roblox-yielding-members.ts",
 		"scripts/utilities/compact-default-properties.ts",
 		"scripts/utilities/rule-relations/**/*.ts",

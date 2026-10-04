@@ -277,17 +277,17 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			currentFunctionName = functionNameStack.pop();
 		}
 
-		function yesConditional(): void {
+		function enterConditional(): void {
 			updateContext({ inConditional: true });
 		}
-		function noConditional(): void {
+		function exitConditional(): void {
 			updateContext({ inConditional: false });
 		}
 
-		function noLoop(): void {
+		function exitLoop(): void {
 			updateContext({ inLoop: false });
 		}
-		function yesLoop(): void {
+		function enterLoop(): void {
 			updateContext({ inLoop: true });
 		}
 
@@ -305,20 +305,20 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				reportHookViolation(node, current);
 			},
 
-			ConditionalExpression: yesConditional,
-			"ConditionalExpression:exit": noConditional,
+			ConditionalExpression: enterConditional,
+			"ConditionalExpression:exit": exitConditional,
 
-			DoWhileStatement: yesLoop,
-			"DoWhileStatement:exit": noLoop,
+			DoWhileStatement: enterLoop,
+			"DoWhileStatement:exit": exitLoop,
 
-			ForInStatement: yesLoop,
-			"ForInStatement:exit": noLoop,
+			ForInStatement: enterLoop,
+			"ForInStatement:exit": exitLoop,
 
-			ForOfStatement: yesLoop,
-			"ForOfStatement:exit": noLoop,
+			ForOfStatement: enterLoop,
+			"ForOfStatement:exit": exitLoop,
 
-			ForStatement: yesLoop,
-			"ForStatement:exit": noLoop,
+			ForStatement: enterLoop,
+			"ForStatement:exit": exitLoop,
 
 			FunctionDeclaration: handleFunctionEnter,
 			"FunctionDeclaration:exit": handleFunctionExit,
@@ -326,8 +326,8 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			FunctionExpression: handleFunctionEnter,
 			"FunctionExpression:exit": handleFunctionExit,
 
-			IfStatement: yesConditional,
-			"IfStatement:exit": noConditional,
+			IfStatement: enterConditional,
+			"IfStatement:exit": exitConditional,
 
 			ImportDeclaration(node): void {
 				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
@@ -347,15 +347,15 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				}
 			},
 
-			LogicalExpression: yesConditional,
-			"LogicalExpression:exit": noConditional,
+			LogicalExpression: enterConditional,
+			"LogicalExpression:exit": exitConditional,
 
 			"ReturnStatement:exit"(): void {
 				updateContext({ afterEarlyReturn: true });
 			},
 
-			SwitchStatement: yesConditional,
-			"SwitchStatement:exit": noConditional,
+			SwitchStatement: enterConditional,
+			"SwitchStatement:exit": exitConditional,
 
 			TryStatement(): void {
 				updateContext({ inTryBlock: true });
@@ -364,8 +364,8 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				updateContext({ inTryBlock: false });
 			},
 
-			WhileStatement: yesLoop,
-			"WhileStatement:exit": noLoop,
+			WhileStatement: enterLoop,
+			"WhileStatement:exit": exitLoop,
 		};
 	},
 	meta: {

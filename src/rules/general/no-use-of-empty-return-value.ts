@@ -20,7 +20,7 @@ import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
 
 type FunctionLike = ESTree.ArrowFunctionExpression | ESTree.Function;
 
-function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
+function isValueUsedByParent(parent: ESTree.Node, child: ESTree.Node): boolean {
 	let currentParent = parent;
 	let currentChild = child;
 
@@ -43,10 +43,10 @@ function parentUsesValue(parent: ESTree.Node, child: ESTree.Node): boolean {
 }
 
 function callReturnValueIsUsed(callExpression: ESTree.CallExpression): boolean {
-	return parentUsesValue(callExpression.parent, callExpression);
+	return isValueUsedByParent(callExpression.parent, callExpression);
 }
 
-function functionFromVariable(variable: Variable): FunctionLike | undefined {
+function getFunctionFromVariable(variable: Variable): FunctionLike | undefined {
 	if (variable.defs.length !== 1) return undefined;
 
 	const [definition] = variable.defs;
@@ -94,7 +94,7 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				const resolved = reference?.resolved ?? getVariableByName(scope, node.callee.name);
 				if (resolved === undefined) return;
 
-				const functionNode = functionFromVariable(resolved);
+				const functionNode = getFunctionFromVariable(resolved);
 				if (functionNode !== undefined) callExpressionsToCheck.set(node.callee, functionNode);
 			},
 			FunctionDeclaration: enterFunction,

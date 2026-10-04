@@ -1,4 +1,10 @@
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import {
+	isCallExpression,
+	isNewExpression,
+	isNode,
+	isObjectExpression,
+	isTsSatisfiesExpression,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Scope, SourceCode, Variable } from "oxlint-plugin-utilities";
 
@@ -109,5 +115,25 @@ export function hasAttachedComments(sourceCode: SourceCode, node: ESTree.Node): 
 		if (commentStartLine === nodeEndLine || commentStartLine === nodeEndLine + 1) return true;
 	}
 
+	return false;
+}
+
+/**
+ * Checks whether an object property's name is dictated by its consumer, such
+ * as an object passed to a call or checked with `satisfies`.
+ *
+ * @param property - The object property to check.
+ * @returns Whether the property name is constrained by external code.
+ */
+export function isExternallyConstrainedProperty({ parent }: ESTree.Node): boolean {
+	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
+	if (!isObjectExpression(parent)) return false;
+
+	const { parent: grandparent } = parent;
+	if (isTsSatisfiesExpression(grandparent)) return true;
+
+	if (isCallExpression(grandparent) || isNewExpression(grandparent)) {
+		return grandparent.arguments.some((argument) => argument === parent);
+	}
 	return false;
 }

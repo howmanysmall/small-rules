@@ -641,7 +641,7 @@ function pushExpressionSearchChildren(current: ExpressionSearchNode, stack: Arra
 	}
 }
 
-function expressionContainsIdentifier(node: ESTree.Expression): boolean {
+function containsIdentifier(node: ESTree.Expression): boolean {
 	const stack: Array<ExpressionSearchNode> = [node];
 	const visited = new Set<ESTree.Node>();
 
@@ -692,7 +692,7 @@ function countSetterCalls(
 		if (!isStateSetterCall(callExpression, stateSetterIdentifiers)) return false;
 
 		return callExpression.arguments.some((argument) =>
-			isSpreadElement(argument) ? false : expressionContainsIdentifier(argument),
+			isSpreadElement(argument) ? false : containsIdentifier(argument),
 		);
 	});
 }

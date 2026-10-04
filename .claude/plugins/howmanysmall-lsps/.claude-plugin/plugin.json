@@ -1,6 +1,8 @@
 {
 	"author": {
-		"name": "HowManySmall"
+		"email": "contact@howmanysmall.com",
+		"name": "Anna",
+		"url": "howmanysmall.com"
 	},
 	"description": "Project language servers for Astro, TypeScript, JavaScript, shell, YAML, Markdown, TOML, and web formats",
 	"lspServers": "./.lsp.json",

@@ -138,7 +138,7 @@ function normalizeLocalRef(ref: string): string {
 	return ref.replace(/^\$\//u, "").replace(/^\.\//u, "");
 }
 
-function effectivePermissions(top?: Permissions, job?: Permissions): Permissions {
+function getEffectivePermissions(top?: Permissions, job?: Permissions): Permissions {
 	return { ...top, ...job };
 }
 
@@ -184,7 +184,7 @@ function getDocsTriggers(): DocsTriggers {
 
 function getDeployEffectivePermissions(): Permissions {
 	const docs = loadDocs();
-	return effectivePermissions(docs.permissions, docs.jobs?.deploy?.permissions);
+	return getEffectivePermissions(docs.permissions, docs.jobs?.deploy?.permissions);
 }
 
 interface AuditCandidate extends CheckoutFinding {
@@ -261,19 +261,19 @@ function writeViolations(): ReadonlyArray<WriteViolation> {
 
 	const ciJobs = Object.entries(ci.jobs ?? {});
 	for (const [job, definition] of ciJobs) {
-		collect("ci", job, effectivePermissions(ci.permissions, definition.permissions));
+		collect("ci", job, getEffectivePermissions(ci.permissions, definition.permissions));
 	}
 
 	const checksJobs = Object.entries(checks.jobs ?? {});
 	for (const [job, definition] of checksJobs) {
-		collect("checks", job, effectivePermissions(checks.permissions, definition.permissions));
+		collect("checks", job, getEffectivePermissions(checks.permissions, definition.permissions));
 	}
 
 	const docs = loadDocs();
 	const docsJobs = Object.entries(docs.jobs ?? {});
 	for (const [job, definition] of docsJobs) {
 		if (definition === undefined) continue;
-		collect("docs", job, effectivePermissions(docs.permissions, definition.permissions));
+		collect("docs", job, getEffectivePermissions(docs.permissions, definition.permissions));
 	}
 	return violations;
 }

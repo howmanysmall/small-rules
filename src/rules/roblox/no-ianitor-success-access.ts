@@ -8,7 +8,7 @@ import {
 	isObjectPattern,
 	isProperty,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -22,13 +22,13 @@ interface ResultVariable {
 }
 
 function isIanitorFactoryCall(expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped)) return false;
 
-	const callee = unwrapExpression(unwrapped.callee);
+	const callee = stripExpressionWrappers(unwrapped.callee);
 	if (!isMemberExpression(callee) || callee.computed) return false;
 
-	const object = unwrapExpression(callee.object);
+	const object = stripExpressionWrappers(callee.object);
 	return isIdentifierNamed(object, "Ianitor") && isIdentifierName(callee.property);
 }
 
@@ -44,7 +44,7 @@ function isFromIanitorCheckVariable(scopeVariable: ScopeVariable): boolean {
 }
 
 function isCallToIanitorCheck(node: ESTree.CallExpression, sourceCode: SourceCode): boolean {
-	const unwrappedCallee = unwrapExpression(node.callee);
+	const unwrappedCallee = stripExpressionWrappers(node.callee);
 	if (isCallExpression(unwrappedCallee)) return isIanitorFactoryCall(unwrappedCallee);
 
 	if (isIdentifierName(unwrappedCallee)) {
@@ -88,7 +88,7 @@ function isSuccessOnlyDestructuring(id: ESTree.Node, init: ESTree.CallExpression
 }
 
 function isStoredCheckResult(init: ESTree.CallExpression, ianitorCheckVariables: ReadonlySet<string>): boolean {
-	const callee = unwrapExpression(init.callee);
+	const callee = stripExpressionWrappers(init.callee);
 	return isIdentifierName(callee) && ianitorCheckVariables.has(callee.name);
 }
 
@@ -126,7 +126,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 
 			MemberExpression({ computed, object, property }): void {
 				if (computed || !isIdentifierName(property)) return;
-				const unwrapped = unwrapExpression(object);
+				const unwrapped = stripExpressionWrappers(object);
 
 				if (isCallExpression(unwrapped) && property.name === "success") {
 					if (isCallToIanitorCheck(unwrapped, sourceCode)) {
@@ -169,7 +169,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 			VariableDeclarator({ id, init }): void {
 				if (init === null) return;
 
-				const unwrappedInit = unwrapExpression(init);
+				const unwrappedInit = stripExpressionWrappers(init);
 				if (!isCallExpression(unwrappedInit)) return;
 
 				if (isIdentifierName(id) && isFactoryCheckDeclarator(id, unwrappedInit)) {

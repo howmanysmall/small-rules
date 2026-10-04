@@ -6,7 +6,7 @@
 // repository AST guards and the shared iterative lexical alias resolver;
 // enqueues parenthesized types preserved by yuku-parser and union members.
 
-import { createTypeAliasEnvironment, resolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
+import { createTypeAliasEnvironment, getResolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isTsParenthesizedType, isTsUnionType, isTsUnknownKeyword } from "$oxc-utilities/oxc-utilities";
 
@@ -18,8 +18,8 @@ const noUnknownTypeAliases = createRule("no-unknown-type-aliases", "anti-slop", 
 	createOnce(context): Visitor {
 		let environment: TypeAliasEnvironment;
 
-		function resolvesToUnknown(type: ESTree.TSType): boolean {
-			return resolvedTypeMatches(type, environment, (resolved, enqueue) => {
+		function doesTypeResolveToUnknown(type: ESTree.TSType): boolean {
+			return getResolvedTypeMatches(type, environment, (resolved, enqueue) => {
 				if (isTsUnknownKeyword(resolved)) return true;
 				if (isTsParenthesizedType(resolved)) {
 					enqueue(resolved.typeAnnotation);
@@ -37,7 +37,7 @@ const noUnknownTypeAliases = createRule("no-unknown-type-aliases", "anti-slop", 
 				environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
 			},
 			TSTypeAliasDeclaration(node): void {
-				if (!resolvesToUnknown(node.typeAnnotation)) return;
+				if (!doesTypeResolveToUnknown(node.typeAnnotation)) return;
 				context.report({ data: { alias: node.id.name }, messageId: "unknownAlias", node: node.id });
 			},
 		};

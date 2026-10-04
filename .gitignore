@@ -52,6 +52,7 @@ hk.local.pkl
 /DESIGN.md
 
 .eslintcache*
+.vitest
 
 .agents/skills/animate-expo/
 .agents/skills/animate/

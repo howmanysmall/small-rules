@@ -23,7 +23,7 @@ import {
 	isUnaryExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -82,7 +82,7 @@ function isIdentifier(
 }
 
 function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
-	const callee = unwrapExpression(node.callee);
+	const callee = stripExpressionWrappers(node.callee);
 	if (!isIdentifier(callee) || callee.name !== "Array") return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
@@ -155,7 +155,7 @@ function isReadonlyArrayAnnotation(typeAnnotation: ESTree.TSTypeAnnotation | und
 }
 
 function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (isLiteral(unwrapped) && "value" in unwrapped) return !Predicate.isNumber(unwrapped.value);
 
 	if (
@@ -181,7 +181,7 @@ function getPushCallForIdentifier(
 	expression: ESTree.Expression,
 	identifierName: string,
 ): ESTree.CallExpression | undefined {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped) || unwrapped.optional) return undefined;
 	if (!isMemberExpression(unwrapped.callee) || unwrapped.callee.optional) return undefined;
 	if (!isIdentifier(unwrapped.callee.object) || unwrapped.callee.object.name !== identifierName) {

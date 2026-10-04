@@ -184,7 +184,7 @@ function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {
 	);
 }
 
-const consistentCompoundWords = createRule("consistent-compound-words", "naming", {
+const consistentCompoundWords = createRule("consistent-compound-words", "english", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
 

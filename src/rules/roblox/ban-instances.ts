@@ -11,7 +11,7 @@ import {
 	isNamedGlobalCall,
 	isNewExpression,
 	isStringLiteral,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
@@ -204,7 +204,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 		function recordTrackedVariable(node: ESTree.VariableDeclarator): void {
 			if (!isIdentifierName(node.id) || node.init === null) return;
 
-			const initializer = unwrapExpression(node.init);
+			const initializer = stripExpressionWrappers(node.init);
 			if (!isNewExpression(initializer)) return;
 
 			const className = getInstanceClassName(initializer);
@@ -240,7 +240,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 				const propertyName = getMemberPropertyName(node.left);
 				if (propertyName === undefined) return;
 
-				const objectExpression = unwrapExpression(node.left.object);
+				const objectExpression = stripExpressionWrappers(node.left.object);
 				if (!isIdentifierName(objectExpression)) return;
 
 				const trackedVariable = getTrackedVariable(objectExpression);

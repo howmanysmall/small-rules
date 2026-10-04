@@ -6,8 +6,9 @@ import { defineConfig } from "astro/config";
 import { Predicate } from "effect";
 import { getTsconfig } from "get-tsconfig";
 
+import { ruleRedirects, SITE_BASE } from "./src/data/rule-redirects";
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
-import contextualMenu from "./src/integrations/contextual-menu";
+import createContextualMenuIntegration from "./src/integrations/contextual-menu";
 import { syntaxDarkTheme, syntaxLightTheme } from "./src/utilities/syntax-themes";
 
 import type { AstroIntegration } from "astro";
@@ -64,7 +65,7 @@ function getAliases(): Record<string, string> {
 }
 
 export default defineConfig({
-	base: "/small-rules",
+	base: SITE_BASE,
 	integrations: [
 		ensureAstroIntegration(
 			starlight({
@@ -128,8 +129,9 @@ export default defineConfig({
 				},
 			}),
 		),
-		ensureAstroIntegration(contextualMenu()),
+		ensureAstroIntegration(createContextualMenuIntegration()),
 	],
+	redirects: ruleRedirects,
 	site: "https://docs.howmanysmall.com",
 	vite: {
 		build: {

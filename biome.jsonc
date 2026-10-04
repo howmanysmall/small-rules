@@ -47,6 +47,7 @@
 			"!**/*-lock.{json,yaml}",
 			"!scripts/clis/**/*.ts",
 			"!**/.opencode/goals",
+			"!src/generated/**",
 			"!.mise"
 		]
 	},
@@ -311,7 +312,7 @@
 				"useDomNodeTextContent": "error",
 				"useDomQuerySelector": "error",
 				"useExhaustiveSwitchCases": "error",
-				"useExpect": "error",
+				"useExpect": "off",
 				"useExplicitReturnType": "error",
 				"useExplicitType": "off",
 				"useFlatMathMinMax": "error",

@@ -15,6 +15,10 @@ import noUnknownTypeAliases from "$oxc-rules/anti-slop/no-unknown-type-aliases";
 import noUnsafeDictionaryType from "$oxc-rules/anti-slop/no-unsafe-dictionary-type";
 import noWidenThenAssert from "$oxc-rules/anti-slop/no-widen-then-assert";
 import requireSafetyCommentForTypeAssertion from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
+import consistentCompoundWords from "$oxc-rules/english/consistent-compound-words";
+import preferSingularEnums from "$oxc-rules/english/prefer-singular-enums";
+import preventAbbreviations from "$oxc-rules/english/prevent-abbreviations";
+import startsWithVerb from "$oxc-rules/english/starts-with-verb";
 import directiveDisableEnablePair from "$oxc-rules/general/directive-disable-enable-pair";
 import directiveNoAggregatingEnable from "$oxc-rules/general/directive-no-aggregating-enable";
 import directiveNoDuplicateDisable from "$oxc-rules/general/directive-no-duplicate-disable";
@@ -53,11 +57,8 @@ import requireThrowErrorCapture from "$oxc-rules/general/require-throw-error-cap
 import requireUnicodeRegex from "$oxc-rules/general/require-unicode-regex";
 import arrayTypeGeneric from "$oxc-rules/naming/array-type-generic";
 import banTypes from "$oxc-rules/naming/ban-types";
-import consistentCompoundWords from "$oxc-rules/naming/consistent-compound-words";
 import noSpecFileExtension from "$oxc-rules/naming/no-spec-file-extension";
 import preferPascalCaseEnums from "$oxc-rules/naming/prefer-pascal-case-enums";
-import preferSingularEnums from "$oxc-rules/naming/prefer-singular-enums";
-import preventAbbreviations from "$oxc-rules/naming/prevent-abbreviations";
 import requireAsyncSuffix from "$oxc-rules/naming/require-async-suffix";
 import banReactFc from "$oxc-rules/react/ban-react-fc";
 import memoizedEffectDependencies from "$oxc-rules/react/memoized-effect-dependencies";
@@ -259,6 +260,7 @@ const smallRules = definePlugin({
 		"require-throw-error-capture": requireThrowErrorCapture,
 		"require-unicode-regex": requireUnicodeRegex,
 		"rerender-memo-with-default-value": rerenderMemoWithDefaultValue,
+		"starts-with-verb": startsWithVerb,
 		"strict-component-boundaries": strictComponentBoundaries,
 		"use-exhaustive-dependencies": useExhaustiveDependencies,
 		"use-hook-at-top-level": useHookAtTopLevel,

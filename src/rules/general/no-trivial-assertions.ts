@@ -146,7 +146,7 @@ function resolveConstantPrimitive(
 	return undefined;
 }
 
-function predicateHolds(predicate: PredicateKind, value: ConstantPrimitive): boolean {
+function holdsPredicate(predicate: PredicateKind, value: ConstantPrimitive): boolean {
 	if (predicate === "truthy") return !isFalsyConstant(value);
 	if (predicate === "falsy") return isFalsyConstant(value);
 	if (predicate === "defined") return value !== undefined;
@@ -154,7 +154,7 @@ function predicateHolds(predicate: PredicateKind, value: ConstantPrimitive): boo
 	return value === null;
 }
 
-function freshReferencePredicateHolds(predicate: PredicateKind): boolean {
+function holdsForFreshReference(predicate: PredicateKind): boolean {
 	return predicate === "truthy" || predicate === "defined";
 }
 
@@ -182,7 +182,7 @@ function isNegatedMatcher(node: ESTree.CallExpression): boolean {
 	return isMemberExpression(object) && getMemberPropertyName(object) === "not";
 }
 
-function firstExpressionArgument(node: ESTree.CallExpression, index: number): ESTree.Node | undefined {
+function getFirstExpressionArgument(node: ESTree.CallExpression, index: number): ESTree.Node | undefined {
 	const argument = node.arguments[index];
 	if (argument === undefined || isSpreadElement(argument)) return undefined;
 	return unwrapNode(argument);
@@ -195,11 +195,11 @@ function reportPredicateAssertion(
 	negated: boolean,
 ): void {
 	const constant = resolveConstantPrimitive(context.sourceCode, actual, new Set());
-	if (constant !== undefined && predicateHolds(predicate, constant.value) !== negated) {
+	if (constant !== undefined && holdsPredicate(predicate, constant.value) !== negated) {
 		context.report({ messageId: "issue", node: actual });
 		return;
 	}
-	if (isFreshReferenceExpression(actual) && freshReferencePredicateHolds(predicate) !== negated) {
+	if (isFreshReferenceExpression(actual) && holdsForFreshReference(predicate) !== negated) {
 		context.report({ messageId: "freshPredicate", node: actual });
 	}
 }
@@ -238,7 +238,7 @@ function reportTrivialExpect(context: Context, node: ESTree.CallExpression): voi
 	/* v8 ignore next -- MemberExpression matchers always expose a property name here. @preserve */
 	if (matcher === undefined) return;
 
-	const actual = firstExpressionArgument(receiver, 0);
+	const actual = getFirstExpressionArgument(receiver, 0);
 	if (actual === undefined) return;
 
 	const negated = isNegatedMatcher(node);
@@ -252,7 +252,7 @@ function reportTrivialExpect(context: Context, node: ESTree.CallExpression): voi
 	const isIdentity = IDENTITY_MATCHERS.has(matcher);
 	if (!isIdentity && !DEEP_MATCHERS.has(matcher)) return;
 
-	const expected = firstExpressionArgument(node, 0);
+	const expected = getFirstExpressionArgument(node, 0);
 	if (expected === undefined) return;
 
 	// Only identity matchers get the fresh-reference hint; deep matchers only
@@ -267,7 +267,7 @@ function reportTrivialAssert(context: Context, node: ESTree.CallExpression): voi
 	/* v8 ignore next -- assert.* MemberExpressions expose a property name. @preserve */
 	if (method === undefined) return;
 
-	const left = firstExpressionArgument(node, 0);
+	const left = getFirstExpressionArgument(node, 0);
 	if (left === undefined) return;
 
 	if (method === "ok" || method === "notOk") {
@@ -279,7 +279,7 @@ function reportTrivialAssert(context: Context, node: ESTree.CallExpression): voi
 		return;
 	}
 
-	const right = firstExpressionArgument(node, 1);
+	const right = getFirstExpressionArgument(node, 1);
 	if (right === undefined) return;
 
 	const isStrict = ASSERT_STRICT_METHODS.has(method);

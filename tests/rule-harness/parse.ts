@@ -133,10 +133,10 @@ function rejectLegacyLanguageOptions(input: BaseRuleCase): void {
 
 function resolveLanguage(input: BaseRuleCase, defaults: RuleRunnerDefaults): TestLanguage {
 	if (input.language !== undefined) return input.language;
-	return defaults.language ?? languageFromFilename(input.filename);
+	return defaults.language ?? getLanguageFromFilename(input.filename);
 }
 
-function languageFromFilename(filename = ""): TestLanguage {
+function getLanguageFromFilename(filename = ""): TestLanguage {
 	if (filename.endsWith(".d.ts")) return "dts";
 	if (filename.endsWith(".tsx")) return "tsx";
 	if (filename.endsWith(".ts")) return "ts";

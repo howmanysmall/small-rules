@@ -8,7 +8,7 @@ import {
 	createCacheKey,
 	createJudgmentCache,
 	createReasonCache,
-	stableStringify,
+	toStringStable,
 } from "$script-utilities/rule-relations/cache";
 import { createReasonMessages, validateReason } from "$script-utilities/rule-relations/reasons";
 import { createRelationDocument, renderRelationDocument } from "$script-utilities/rule-relations/render";
@@ -107,7 +107,7 @@ describe("stableStringify", () => {
 			["a", 1],
 		]);
 
-		expect(stableStringify({ a: 1, nested: { x: 1, y: 2 } })).toBe(stableStringify(reorderedObject));
+		expect(toStringStable({ a: 1, nested: { x: 1, y: 2 } })).toBe(toStringStable(reorderedObject));
 		expect(createCacheKey({ a: 1, b: 2 })).toBe(createCacheKey(reorderedPair));
 	});
 

@@ -6,7 +6,7 @@ import { ts } from "$test/rule-testers";
 const widening = { messageId: "widening" };
 
 const prelude = "type Command = () => void;\nconst startCommand = () => {};";
-function withPrelude(code: string): string {
+function prependPrelude(code: string): string {
 	return `${prelude}\n${code}`;
 }
 
@@ -28,99 +28,101 @@ describe("no-known-value-widening", () => {
 			{ code: 'const value = <unknown>{ id: "one" };', errors: [widening] },
 			{ code: 'const value = <object><unknown>{ id: "one" };', errors: 1 },
 			{
-				code: withPrelude("const commands: Record<string, Command> = { start: startCommand };"),
+				code: prependPrelude("const commands: Record<string, Command> = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands: { [key: string]: Command } = { start: startCommand };"),
+				code: prependPrelude("const commands: { [key: string]: Command } = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands: { [K in string]: Command } = { start: startCommand };"),
+				code: prependPrelude("const commands: { [K in string]: Command } = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands: { start: Command } = { start: startCommand };"),
+				code: prependPrelude("const commands: { start: Command } = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"const source = { start: startCommand }; const commands: Record<string, Command> = source;",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Open = Record<string, Command>; const source = { start: startCommand }; const commands: Open = source;",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Open = Readonly<Record<string, Command>>; const source = { start: startCommand }; const commands: Open = source;",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Open = { [key: string]: Command }; const source = { start: startCommand }; const commands: Open = source;",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Open = { [key in string]: Command }; const source = { start: startCommand }; const commands: Open = source;",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"function outer() { type Open = Record<string, Command>; const commands: Open = { start: startCommand }; }",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Index<T> = Record<string, T>; const commands: Index<Command> = { start: startCommand };",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Index<T> = Record<string, T>; type CommandsByName = Index<Command>; const commands: CommandsByName = { start: startCommand };",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Index<T = Command> = Record<string, T>; const commands: Index = { start: startCommand };",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"type Identity<T> = T; const commands: Identity<Record<string, Command>> = { start: startCommand };",
 				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("type Key = string; const commands: Record<Key, Command> = { start: startCommand };"),
+				code: prependPrelude(
+					"type Key = string; const commands: Record<Key, Command> = { start: startCommand };",
+				),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands: Record<PropertyKey, Command> = { start: startCommand };"),
+				code: prependPrelude("const commands: Record<PropertyKey, Command> = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands: Record<string | 'start', Command> = { start: startCommand };"),
+				code: prependPrelude("const commands: Record<string | 'start', Command> = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("class Registry { commands: Record<string, Command> = { start: startCommand }; }"),
+				code: prependPrelude("class Registry { commands: Record<string, Command> = { start: startCommand }; }"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude(
+				code: prependPrelude(
 					"class Registry { accessor commands: Record<string, Command> = { start: startCommand }; }",
 				),
 				errors: [
@@ -131,23 +133,25 @@ describe("no-known-value-widening", () => {
 				],
 			},
 			{
-				code: withPrelude("let commands: Record<string, Command>; commands = { start: startCommand };"),
+				code: prependPrelude("let commands: Record<string, Command>; commands = { start: startCommand };"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("function create(): Record<string, Command> { return { start: startCommand }; }"),
+				code: prependPrelude("function create(): Record<string, Command> { return { start: startCommand }; }"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("function create(): { start: Command } { return { start: startCommand }; }"),
+				code: prependPrelude("function create(): { start: Command } { return { start: startCommand }; }"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands = { start: startCommand } as Record<string, Command>;"),
+				code: prependPrelude("const commands = { start: startCommand } as Record<string, Command>;"),
 				errors: [widening],
 			},
 			{
-				code: withPrelude("const commands = ({ start: startCommand } as Record<string, Command>) as object;"),
+				code: prependPrelude(
+					"const commands = ({ start: startCommand } as Record<string, Command>) as object;",
+				),
 				errors: 1,
 			},
 			{ code: 'const value = ({ id: "one" } as unknown)!;', errors: [widening] },
@@ -188,49 +192,49 @@ describe("no-known-value-widening", () => {
 				].join("\n"),
 				documentation: { id: "pass", title: "satisfies keeps the known keys" },
 			},
-			withPrelude("const commands: Record<string, Command> = {};"),
-			withPrelude("type Index<T> = Record<string, T>; const commands: Index<Command> = {};"),
-			withPrelude("class Registry { commands: Record<string, Command> = {}; }"),
-			withPrelude("class Registry { accessor commands: Record<string, Command> = {}; }"),
-			withPrelude("let commands: Record<string, Command>; commands = {};"),
-			withPrelude("function create(): Record<string, Command> { return {}; }"),
-			withPrelude("const create = (): Record<string, Command> => ({});"),
-			withPrelude("const commands = {} as Record<string, Command>;"),
-			withPrelude("const commands = <Record<string, Command>>{};"),
-			withPrelude("const commands = { start: startCommand };"),
-			withPrelude("const commands = { start: startCommand } as const;"),
-			withPrelude("const commands = { start: startCommand } as const satisfies Record<string, Command>;"),
-			withPrelude(
+			prependPrelude("const commands: Record<string, Command> = {};"),
+			prependPrelude("type Index<T> = Record<string, T>; const commands: Index<Command> = {};"),
+			prependPrelude("class Registry { commands: Record<string, Command> = {}; }"),
+			prependPrelude("class Registry { accessor commands: Record<string, Command> = {}; }"),
+			prependPrelude("let commands: Record<string, Command>; commands = {};"),
+			prependPrelude("function create(): Record<string, Command> { return {}; }"),
+			prependPrelude("const create = (): Record<string, Command> => ({});"),
+			prependPrelude("const commands = {} as Record<string, Command>;"),
+			prependPrelude("const commands = <Record<string, Command>>{};"),
+			prependPrelude("const commands = { start: startCommand };"),
+			prependPrelude("const commands = { start: startCommand } as const;"),
+			prependPrelude("const commands = { start: startCommand } as const satisfies Record<string, Command>;"),
+			prependPrelude(
 				"interface Commands { readonly start: Command } const commands: Commands = { start: startCommand };",
 			),
-			withPrelude(
+			prependPrelude(
 				"type Commands = { readonly start: Command }; const commands: Commands = { start: startCommand };",
 			),
-			withPrelude(
+			prependPrelude(
 				"type PermissionLevels = { readonly [Level in Permission]: number }; const levels: PermissionLevels = { admin: 1 };",
 			),
-			withPrelude(
+			prependPrelude(
 				"type Diet = 'vegan' | 'omnivore'; const labels: Record<Diet, string> = { vegan: 'V', omnivore: 'O' };",
 			),
-			withPrelude(
+			prependPrelude(
 				"type Diet = 'vegan' | 'omnivore'; type Labels = Record<Diet, string>; const labels: Labels = { vegan: 'V', omnivore: 'O' };",
 			),
-			withPrelude(
+			prependPrelude(
 				"type Diet = 'vegan' | 'omnivore'; const labels: Readonly<Record<Diet, string>> = { vegan: 'V', omnivore: 'O' };",
 			),
-			withPrelude("const labels: Record<'a' | 'b', number> = { a: 1, b: 2 };"),
-			withPrelude(
+			prependPrelude("const labels: Record<'a' | 'b', number> = { a: 1, b: 2 };"),
+			prependPrelude(
 				"type Index<Key extends PropertyKey, Value> = Record<Key, Value>; const commands: Index<'start', Command> = { start: startCommand };",
 			),
-			withPrelude("function create() { return { start: startCommand }; }"),
-			withPrelude(
+			prependPrelude("function create() { return { start: startCommand }; }"),
+			prependPrelude(
 				"interface Commands { readonly start: Command } function create(): Commands { return { start: startCommand }; }",
 			),
-			withPrelude(
+			prependPrelude(
 				"declare function make(): Record<string, Command>; const commands: Record<string, Command> = make();",
 			),
-			withPrelude("declare const load: () => object; const value: unknown = load();"),
-			withPrelude("import { Commands } from './types'; const commands: Commands = { start: startCommand };"),
+			prependPrelude("declare const load: () => object; const value: unknown = load();"),
+			prependPrelude("import { Commands } from './types'; const commands: Commands = { start: startCommand };"),
 			'let source = { id: "one" }; const value: unknown = source;',
 			"value.prop = 1;",
 			"leaked = 1;",
@@ -271,7 +275,7 @@ describe("no-known-value-widening", () => {
 			"function guard(value: unknown): value is string { return true; } function known() {} guard(known);",
 			"function guard(value: unknown): value is string { return true; } try {} catch (error) { guard(error); }",
 			"function guard(value: unknown): value is string { return true; } function check({ known }: { known: string }) { guard(known); }",
-			withPrelude("class Registry { accessor commands: Record<string, Command>; }"),
+			prependPrelude("class Registry { accessor commands: Record<string, Command>; }"),
 			"const guard: (value: string) => boolean = (value: unknown): value is string => true; guard('known');",
 			"function source() {} const value: unknown = source;",
 			"let guard; guard('known');",

@@ -164,7 +164,7 @@ function areAllVariablesUsedInAndExpressions(calls: ReadonlyArray<WorldQueryCall
 
 const ONLY_WHITESPACE_SEMICOLON = /^[\s;]*$/u;
 
-function callsAreConsecutive(
+function areCallsConsecutive(
 	previousCall: undefined | WorldQueryCall,
 	currentCall: WorldQueryCall,
 	sourceCode: SourceCode,
@@ -283,7 +283,7 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 				const getCall = extractWorldQueryCall(node, "get");
 				if (getCall !== undefined) {
 					const lastCall = currentGetBuffer.at(-1);
-					if (lastCall !== undefined && !callsAreConsecutive(lastCall, getCall, sourceCode)) flushGetBuffer();
+					if (lastCall !== undefined && !areCallsConsecutive(lastCall, getCall, sourceCode)) flushGetBuffer();
 					currentGetBuffer.push(getCall);
 
 					flushHasBuffer();
@@ -293,7 +293,7 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 				const hasCall = extractWorldQueryCall(node, "has");
 				if (hasCall !== undefined) {
 					const lastCall = currentHasBuffer.at(-1);
-					if (lastCall !== undefined && !callsAreConsecutive(lastCall, hasCall, sourceCode)) flushHasBuffer();
+					if (lastCall !== undefined && !areCallsConsecutive(lastCall, hasCall, sourceCode)) flushHasBuffer();
 					currentHasBuffer.push(hasCall);
 
 					flushGetBuffer();

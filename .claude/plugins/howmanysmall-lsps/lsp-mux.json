@@ -1,0 +1,141 @@
+{
+	"routes": {
+		"textDocument/formatting": {
+			"servers": ["oxfmt", "biome"]
+		},
+		"textDocument/rangeFormatting": {
+			"servers": ["oxfmt", "biome"]
+		}
+	},
+	"servers": [
+		{
+			"args": ["--stdio"],
+			"command": "astro-ls",
+			"extensions": [".astro"],
+			"name": "astro"
+		},
+		{
+			"args": ["--lsp", "--stdio"],
+			"command": "tsgo",
+			"extensions": [".ts", ".tsx"],
+			"name": "typescript",
+			"rootMarkers": ["tsconfig.json", "jsconfig.json"]
+		},
+		{
+			"args": ["--stdio"],
+			"command": "yaml-language-server",
+			"extensions": [".yaml", ".yml"],
+			"name": "yaml"
+		},
+		{
+			"args": ["--lsp"],
+			"command": "oxlint",
+			"extensions": [".astro", ".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".svelte", ".ts", ".tsx", ".vue"],
+			"name": "oxlint",
+			"rootMarkers": [".oxlintrc.json", "oxlint.config.ts"]
+		},
+		{
+			"args": ["--stdio"],
+			"command": "vscode-eslint-language-server",
+			"extensions": [
+				".cjs",
+				".cts",
+				".js",
+				".json",
+				".json5",
+				".jsonc",
+				".jsx",
+				".mjs",
+				".mts",
+				".ts",
+				".tsx",
+				".yaml",
+				".yml"
+			],
+			"name": "eslint",
+			"rootMarkers": ["eslint.config.ts", "eslint.config.js", "eslint.config.mjs", "eslint.config.cjs"],
+			"settings": {
+				"codeAction": {
+					"disableRuleComment": { "enable": true, "location": "separateLine" },
+					"showDocumentation": { "enable": true }
+				},
+				"codeActionOnSave": { "mode": "all" },
+				"experimental": {},
+				"format": false,
+				"nodePath": null,
+				"onIgnoredFiles": "off",
+				"options": {},
+				"packageManager": "pnpm",
+				"problems": { "shortenToSingleLine": false },
+				"quiet": false,
+				"rulesCustomizations": [],
+				"run": "onType",
+				"useESLintClass": false,
+				"useFlatConfig": true,
+				"validate": "on",
+				"workingDirectory": { "mode": "auto" }
+			}
+		},
+		{
+			"args": ["lsp-proxy"],
+			"command": "biome",
+			"extensions": [
+				".astro",
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".html",
+				".js",
+				".json",
+				".jsonc",
+				".jsx",
+				".mjs",
+				".mts",
+				".scss",
+				".svelte",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"name": "biome",
+			"rootMarkers": ["biome.json", "biome.jsonc"]
+		},
+		{
+			"args": ["--lsp"],
+			"command": "oxfmt",
+			"extensions": [
+				".cjs",
+				".css",
+				".cts",
+				".gql",
+				".graphql",
+				".handlebars",
+				".hbs",
+				".htm",
+				".html",
+				".js",
+				".json",
+				".json5",
+				".jsonc",
+				".jsx",
+				".less",
+				".mdx",
+				".mjs",
+				".mts",
+				".sass",
+				".scss",
+				".ts",
+				".tsx",
+				".vue",
+				".yaml",
+				".yml"
+			],
+			"name": "oxfmt",
+			"rootMarkers": [".oxfmtrc.json", ".oxfmtrc.jsonc"]
+		}
+	]
+}

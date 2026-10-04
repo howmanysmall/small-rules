@@ -9,7 +9,7 @@ import {
 	isIdentifierName,
 	isUseMemoCall,
 	isVariableDeclarator,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
@@ -129,7 +129,7 @@ function resolveDefinitionToFunctionIds(
 	const { node } = definition;
 	if (!isVariableDeclarator(node) || node.init === null) return new Set<number>();
 
-	const initializer = unwrapExpression(node.init);
+	const initializer = stripExpressionWrappers(node.init);
 	if (isCallbackFunction(initializer)) return getFunctionIdSet(initializer, functionInfosByNode);
 	if (!isIdentifierName(initializer)) return new Set<number>();
 

@@ -25,7 +25,7 @@ const rootDirectory = join(cwd(), ".opencode");
 const monorepoDirectory = join(rootDirectory, "packages", "plugins");
 const pluginsDirectory = join(rootDirectory, "plugins");
 
-async function safeCreateFileAsync(filePath: string, contents: string, forceOverwrite = false): Promise<boolean> {
+async function createFileSafelyAsync(filePath: string, contents: string, forceOverwrite = false): Promise<boolean> {
 	await mkdir(dirname(filePath), { recursive: true });
 
 	if (!forceOverwrite) {
@@ -82,9 +82,9 @@ async function createPluginAsync(name: string, forceOverwrite = false): Promise<
 
 	const packageJson = `${JSON.stringify(getPackageJson(name), undefined, "\t")}\n`;
 	const booleans = await Promise.all([
-		safeCreateFileAsync(join(pluginDirectory, "package.json"), packageJson, forceOverwrite),
-		safeCreateFileAsync(join(pluginDirectory, "plugin", "index.ts"), getPluginSource(name), forceOverwrite),
-		safeCreateFileAsync(
+		createFileSafelyAsync(join(pluginDirectory, "package.json"), packageJson, forceOverwrite),
+		createFileSafelyAsync(join(pluginDirectory, "plugin", "index.ts"), getPluginSource(name), forceOverwrite),
+		createFileSafelyAsync(
 			join(pluginsDirectory, `${name}.ts`),
 			`export { default } from "$plugins/${name}/plugin";
 `,

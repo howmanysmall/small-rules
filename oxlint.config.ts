@@ -363,6 +363,12 @@ const rules: OxlintRules = {
 	],
 	"small-rules/require-unicode-regex": "error",
 	"small-rules/rerender-memo-with-default-value": "off",
+	"small-rules/starts-with-verb": [
+		"error",
+		{
+			allowList: ["increment", "decrement"],
+		},
+	],
 	"small-rules/strict-component-boundaries": ["error", { allow: [] }],
 	"small-rules/use-exhaustive-dependencies": "off",
 	"small-rules/use-hook-at-top-level": "off",
@@ -663,7 +669,11 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/disable-stupid-rule",
-		files: ["src/rules/react/no-adjust-state-on-prop-change.ts"],
+		files: [
+			// The file name is the Astro integration id, not the factory.
+			"documentation/src/integrations/contextual-menu.ts",
+			"src/rules/react/no-adjust-state-on-prop-change.ts",
+		],
 		rules: { "sonar/file-name-differ-from-class": "off" },
 	},
 	{

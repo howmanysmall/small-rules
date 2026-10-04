@@ -14,7 +14,7 @@ import {
 	isTemplateLiteral,
 	isThisExpression,
 	isUnaryExpression,
-	unwrapExpression,
+	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
@@ -24,7 +24,7 @@ function isComputedPropertyKeySafe(key: ESTree.PropertyKey): boolean {
 }
 
 export function isExpressionSideEffectSafe(expression: ESTree.Expression): boolean {
-	const unwrapped = unwrapExpression(expression);
+	const unwrapped = stripExpressionWrappers(expression);
 	if (isBindingIdentifier(unwrapped) || isThisExpression(unwrapped)) return true;
 
 	if (isMemberExpression(unwrapped)) return isMemberSideEffectSafe(unwrapped);

@@ -12,7 +12,7 @@ import {
 	classifyUnsafeDictionaryValue,
 	createTypeEnvironment,
 } from "$oxc-utilities/anti-slop/dictionary-types";
-import { visibleTypeAlias } from "$oxc-utilities/anti-slop/type-alias-resolution";
+import { getVisibleTypeAlias } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBindingIdentifier,
@@ -32,7 +32,7 @@ function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironme
 	if (!isTsTypeReference(type) || (type.typeArguments?.params.length ?? 0) > 0) return false;
 	if (
 		!isBindingIdentifier(type.typeName) ||
-		visibleTypeAlias(type.typeName.name, type, environment.typeAliases) === undefined
+		getVisibleTypeAlias(type.typeName.name, type, environment.typeAliases) === undefined
 	) {
 		return false;
 	}
@@ -56,7 +56,10 @@ function isInsideTypeParameterConstraint(node: ESTree.TSType): boolean {
 	return false;
 }
 
-function reportableUnsafeDictionary(type: ESTree.TSType, environment: TypeEnvironment): undefined | UnsafeDictionary {
+function getReportableUnsafeDictionary(
+	type: ESTree.TSType,
+	environment: TypeEnvironment,
+): undefined | UnsafeDictionary {
 	if (isInsideTypeParameterConstraint(type)) return undefined;
 	if (isPlainAliasConsumerUse(type, environment)) return undefined;
 
@@ -83,7 +86,7 @@ const noUnsafeDictionaryType = createRule("no-unsafe-dictionary-type", "anti-slo
 			/* v8 ignore next -- Program visitors initialize rule state before child visitors run. @preserve */
 			if (environment === undefined) return;
 
-			const unsafe = reportableUnsafeDictionary(type, environment);
+			const unsafe = getReportableUnsafeDictionary(type, environment);
 			if (unsafe === undefined) return;
 
 			context.report({ data: { value: unsafe.unsafeValue }, messageId: "unsafeDictionary", node: type });

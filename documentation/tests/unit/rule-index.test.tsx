@@ -8,13 +8,13 @@ import { ruleFactCategories } from "$data/rule-facts";
 
 const catalogCategories = createRuleIndexCategories(ruleFactCategories.values());
 const catalogRuleCount = catalogCategories.flatMap((category) => category.rules).length;
-const namingRuleCount = catalogCategories.find((category) => category.key === "naming")?.rules.length ?? 0;
+const englishRuleCount = catalogCategories.find((category) => category.key === "english")?.rules.length ?? 0;
 const robloxRuleCount = catalogCategories.find((category) => category.key === "roblox")?.rules.length ?? 0;
 const noPrintPattern = /No Print/u;
 const banReactFcPattern = /Ban React Fc/u;
 const preventAbbreviationsPattern = /Prevent Abbreviations/u;
 
-function showingRulesLabel(count: number): string {
+function getShowingRulesLabel(count: number): string {
 	return `Showing ${String(count)} ${count === 1 ? "rule" : "rules"}`;
 }
 
@@ -57,13 +57,13 @@ describe("rule-index", () => {
 		const user = userEvent.setup();
 		render(<RuleIndex categories={catalogCategories} mode="catalog" />);
 
-		await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "naming");
+		await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "english");
 
-		expect(screen.getByText(showingRulesLabel(namingRuleCount)).textContent).toBe(
-			showingRulesLabel(namingRuleCount),
+		expect(screen.getByText(getShowingRulesLabel(englishRuleCount)).textContent).toBe(
+			getShowingRulesLabel(englishRuleCount),
 		);
 		expect(screen.getByRole("link", { name: preventAbbreviationsPattern }).getAttribute("href")).toContain(
-			"/rules/naming/prevent-abbreviations/",
+			"/rules/english/prevent-abbreviations/",
 		);
 		expect(screen.queryByRole("link", { name: noPrintPattern })).toBeNull();
 	});
@@ -109,8 +109,8 @@ describe("rule-index", () => {
 
 		expect(screen.queryByRole("searchbox", { name: "Search rules" })).toBeNull();
 		expect(screen.queryByRole("combobox", { name: "Category" })).toBeNull();
-		expect(screen.getByText(showingRulesLabel(robloxRuleCount)).textContent).toBe(
-			showingRulesLabel(robloxRuleCount),
+		expect(screen.getByText(getShowingRulesLabel(robloxRuleCount)).textContent).toBe(
+			getShowingRulesLabel(robloxRuleCount),
 		);
 		expect(document.querySelector(".rule-index-card-category")).toBeNull();
 	});

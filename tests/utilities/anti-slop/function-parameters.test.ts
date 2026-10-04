@@ -25,7 +25,7 @@ function parseCode(code: string): HarnessSourceCode {
 	});
 }
 
-function firstFunction(source: HarnessSourceCode): ESTree.Function {
+function findFirstFunction(source: HarnessSourceCode): ESTree.Function {
 	let found: ESTree.Function | undefined;
 	traverseAst(source.ast, {
 		FunctionDeclaration(node: HarnessNode) {
@@ -38,7 +38,7 @@ function firstFunction(source: HarnessSourceCode): ESTree.Function {
 	return found;
 }
 
-function firstArrow(source: HarnessSourceCode): ESTree.ArrowFunctionExpression {
+function findFirstArrow(source: HarnessSourceCode): ESTree.ArrowFunctionExpression {
 	let found: ESTree.ArrowFunctionExpression | undefined;
 	traverseAst(source.ast, {
 		ArrowFunctionExpression(node: HarnessNode) {
@@ -51,7 +51,7 @@ function firstArrow(source: HarnessSourceCode): ESTree.ArrowFunctionExpression {
 	return found;
 }
 
-function firstTSFunctionType(source: HarnessSourceCode): ESTree.TSFunctionType {
+function findFirstTSFunctionType(source: HarnessSourceCode): ESTree.TSFunctionType {
 	let found: ESTree.TSFunctionType | undefined;
 	traverseAst(source.ast, {
 		TSFunctionType(node: HarnessNode) {
@@ -64,7 +64,7 @@ function firstTSFunctionType(source: HarnessSourceCode): ESTree.TSFunctionType {
 	return found;
 }
 
-function firstParameterProperty(source: HarnessSourceCode): ESTree.TSParameterProperty {
+function findFirstParameterProperty(source: HarnessSourceCode): ESTree.TSParameterProperty {
 	let found: ESTree.TSParameterProperty | undefined;
 	traverseAst(source.ast, {
 		TSParameterProperty(node: HarnessNode) {
@@ -77,7 +77,7 @@ function firstParameterProperty(source: HarnessSourceCode): ESTree.TSParameterPr
 	return found;
 }
 
-function firstTypeAnnotation(code: string): ESTree.TSType {
+function findFirstTypeAnnotation(code: string): ESTree.TSType {
 	const source = parseCode(code);
 	let found: ESTree.TSTypeAnnotation | undefined;
 	traverseAst(source.ast, {
@@ -110,7 +110,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(firstFunction(source), 0);
+		const parameter = requireParameter(findFirstFunction(source), 0);
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe(expectedType);
 	});
@@ -123,7 +123,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(firstFunction(source), 0);
+		const parameter = requireParameter(findFirstFunction(source), 0);
 
 		expect(getFunctionParameterTypeAnnotation(parameter)).toBeUndefined();
 	});
@@ -132,7 +132,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode("class C { constructor(public value: string) {} }");
-		const parameter = firstParameterProperty(source);
+		const parameter = findFirstParameterProperty(source);
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
@@ -141,7 +141,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode("const f = (value: string) => {};");
-		const parameter = requireParameter(firstArrow(source), 0);
+		const parameter = requireParameter(findFirstArrow(source), 0);
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
@@ -150,7 +150,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect.assertions(1);
 
 		const source = parseCode("type F = (value: string) => void;");
-		const parameter = requireParameter(firstTSFunctionType(source), 0);
+		const parameter = requireParameter(findFirstTSFunctionType(source), 0);
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
@@ -168,7 +168,7 @@ describe("getFunctionParameterBindingName", () => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
-		const parameter = requireParameter(firstFunction(source), 0);
+		const parameter = requireParameter(findFirstFunction(source), 0);
 
 		expect(getFunctionParameterBindingName(parameter, source)).toBe(expected);
 	});
@@ -177,7 +177,7 @@ describe("getFunctionParameterBindingName", () => {
 		expect.assertions(1);
 
 		const source = parseCode("class C { constructor(public value: string) {} }");
-		const parameter = firstParameterProperty(source);
+		const parameter = findFirstParameterProperty(source);
 
 		expect(getFunctionParameterBindingName(parameter, source)).toBe("value");
 	});
@@ -195,7 +195,7 @@ describe("containsUnknownType", () => {
 	])("detects unknown in %s", (_name, code, expectedRootType, expected) => {
 		expect.assertions(2);
 
-		const type = firstTypeAnnotation(code);
+		const type = findFirstTypeAnnotation(code);
 
 		expect(type.type).toBe(expectedRootType);
 		expect(containsUnknownType(type)).toBe(expected);

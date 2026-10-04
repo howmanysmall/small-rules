@@ -8,11 +8,11 @@ interface RuleLike {
 	readonly meta?: { readonly docs?: { readonly url?: string } };
 }
 
-function unconfigurableRuleNames<RuleEntry extends RuleLike>(rules: Record<string, RuleEntry>): Array<string> {
+function getUnconfigurableRuleNames<RuleEntry extends RuleLike>(rules: Record<string, RuleEntry>): Array<string> {
 	return Object.keys(rules).filter((name) => !KEBAB_CASE_PATTERN.test(name));
 }
 
-function rulesWithoutDocsUrl<RuleEntry extends RuleLike>(rules: Record<string, RuleEntry>): Array<string> {
+function getRulesWithoutDocsUrl<RuleEntry extends RuleLike>(rules: Record<string, RuleEntry>): Array<string> {
 	return Object.entries(rules)
 		.filter(([, rule]) => rule.meta?.docs?.url === undefined || !DOCS_URL_PATTERN.test(rule.meta.docs.url))
 		.map(([name]) => name);
@@ -42,7 +42,7 @@ describe("small-rules plugin", () => {
 
 			const smallRules = await import("$small-rules");
 
-			expect(unconfigurableRuleNames(smallRules.default.rules)).toStrictEqual([]);
+			expect(getUnconfigurableRuleNames(smallRules.default.rules)).toStrictEqual([]);
 		}, 30_000);
 
 		// Catches a rule bypassing createRule and shipping without a docs URL.
@@ -51,7 +51,7 @@ describe("small-rules plugin", () => {
 
 			const smallRules = await import("$small-rules");
 
-			expect(rulesWithoutDocsUrl(smallRules.default.rules)).toStrictEqual([]);
+			expect(getRulesWithoutDocsUrl(smallRules.default.rules)).toStrictEqual([]);
 		}, 30_000);
 	});
 });

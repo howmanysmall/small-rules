@@ -1,11 +1,13 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
-export type RuleCategoryKey = "anti-slop" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
+export type RuleCategoryKey = "anti-slop" | "english" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
 
 export interface RuleManifestEntry {
 	readonly name: RuleName;
 	readonly exampleExemption?: string | undefined;
+	/** Categories this rule used to live in, each redirected to its page. */
+	readonly movedFrom?: ReadonlyArray<RuleCategoryKey> | undefined;
 }
 
 export interface RuleCategoryManifest {
@@ -127,12 +129,21 @@ export const ruleManifest = defineRuleManifest({
 			rules: [
 				{ name: "array-type-generic" },
 				{ name: "ban-types" },
-				{ name: "consistent-compound-words" },
 				{ name: "no-spec-file-extension" },
 				{ name: "prefer-pascal-case-enums" },
-				{ name: "prefer-singular-enums" },
-				{ name: "prevent-abbreviations" },
 				{ name: "require-async-suffix" },
+			],
+		},
+		{
+			key: "english",
+			description:
+				"Rules for English in identifiers: spelling, plurals, abbreviations, and verb-first function names.",
+			label: "English",
+			rules: [
+				{ name: "consistent-compound-words", movedFrom: ["naming"] },
+				{ name: "prefer-singular-enums", movedFrom: ["naming"] },
+				{ name: "prevent-abbreviations", movedFrom: ["naming"] },
+				{ name: "starts-with-verb" },
 			],
 		},
 		{

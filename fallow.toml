@@ -4,6 +4,7 @@ entry = [
 	"*.config.ts",
 	"scripts/*.ts",
 	"tests/**/*.fuzz.ts",
+	"tests/**/*.bench.ts",
 	"documentation/src/components/overrides/*.astro",
 	"documentation/src/route-data/*.ts",
 	"documentation/src/styles/custom.css",

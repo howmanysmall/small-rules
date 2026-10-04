@@ -8,14 +8,14 @@ import { compareStrings, isPairJudgments } from "./types";
 import type { PairJudgments } from "./types";
 
 // oxlint-disable-next-line small-rules/no-unknown-parameters -- literally "unknown" in the sense it is not known
-export function stableStringify(value: unknown): string {
+export function toStringStable(value: unknown): string {
 	if (Array.isArray(value)) {
-		return `[${value.map((entry) => stableStringify(entry)).join(",")}]`;
+		return `[${value.map((entry) => toStringStable(entry)).join(",")}]`;
 	}
 	if (Predicate.isObjectKeyword(value)) {
 		const entries = Object.entries(value).toSorted(([left], [right]) => compareStrings(left, right));
 		const stringBuilder = entries.map(
-			([key, entryValue]) => `${JSON.stringify(key)}:${stableStringify(entryValue)}`,
+			([key, entryValue]) => `${JSON.stringify(key)}:${toStringStable(entryValue)}`,
 		);
 		return `{${stringBuilder.join(",")}}`;
 	}
@@ -24,7 +24,7 @@ export function stableStringify(value: unknown): string {
 
 // oxlint-disable-next-line small-rules/no-unknown-parameters -- literally "unknown" in the sense it is not known
 export function createCacheKey(value: unknown): string {
-	return createHash("sha256").update(stableStringify(value)).digest("hex");
+	return createHash("sha256").update(toStringStable(value)).digest("hex");
 }
 
 export interface JudgmentCache {

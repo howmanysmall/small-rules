@@ -47,7 +47,7 @@ export function getTsgoLintVersionFromSettings(lintSettings: LintSettings): stri
 	return lintSettings[PLUGIN_SETTINGS_KEY]?.tsgolintVersion;
 }
 
-export function inferTsgoLintVersion(fromDirectory: string): string | undefined {
+export function determineTsgoLintVersion(fromDirectory: string): string | undefined {
 	const root = getProjectRoot(fromDirectory);
 	if (root === undefined) return undefined;
 
@@ -56,7 +56,7 @@ export function inferTsgoLintVersion(fromDirectory: string): string | undefined 
 
 	const version =
 		getVersionFromInstalledPackage(root) ??
-		versionFromWorkspaceCatalog(root) ??
+		getVersionFromWorkspaceCatalog(root) ??
 		getVersionFromPackageManifest(root);
 	inferredVersionCache.set(root, version);
 	return version;
@@ -67,10 +67,10 @@ export function resolveTsgoLintVersion(
 	fromDirectory: string,
 ): string | undefined {
 	const fromSettings = lintSettings === undefined ? undefined : getTsgoLintVersionFromSettings(lintSettings);
-	return fromSettings ?? inferTsgoLintVersion(fromDirectory);
+	return fromSettings ?? determineTsgoLintVersion(fromDirectory);
 }
 
-export function usesAssertionSyntaxDiagnosticRange(version?: string): boolean {
+export function checkAssertionSyntaxDiagnosticRange(version?: string): boolean {
 	if (version === undefined) return false;
 
 	const parsed = parseDottedVersion(version);
@@ -102,7 +102,7 @@ function getVersionFromInstalledPackage(root: string): string | undefined {
 	return readInstalledManifest(nodePath.join(root, "node_modules", TSGOLINT_PACKAGE, PACKAGE_MANIFEST))?.version;
 }
 
-function versionFromWorkspaceCatalog(root: string): string | undefined {
+function getVersionFromWorkspaceCatalog(root: string): string | undefined {
 	const text = readText(nodePath.join(root, WORKSPACE_MANIFEST));
 	if (text === undefined) return undefined;
 

@@ -62,7 +62,7 @@ interface DiffOperation {
 	readonly operation: Operation;
 }
 
-function* lcsDiff(oldLines: ReadonlyArray<string>, newLines: ReadonlyArray<string>): Generator<DiffOperation> {
+function* getLcsDiff(oldLines: ReadonlyArray<string>, newLines: ReadonlyArray<string>): Generator<DiffOperation> {
 	const oldRowCount = oldLines.length;
 	const newColumnCount = newLines.length;
 	const size = (oldRowCount + 1) * (newColumnCount + 1);
@@ -171,7 +171,7 @@ function countLines(operations: ReadonlyArray<DiffOperation>, upTo: number): Lin
 function formatDiff(filePath: string, oldContent: string, newContent: string): string {
 	const oldLines = oldContent.split("\n");
 	const newLines = newContent.split("\n");
-	const operations = [...lcsDiff(oldLines, newLines)];
+	const operations = [...getLcsDiff(oldLines, newLines)];
 	const regions = collectRegions(operations);
 
 	if (regions.length === 0) return "";

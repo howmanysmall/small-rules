@@ -10,7 +10,7 @@ import {
 	getFunctionParameterBindingName,
 	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
-import { createTypeAliasEnvironment, resolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
+import { createTypeAliasEnvironment, getResolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isTsObjectKeyword,
@@ -35,8 +35,8 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 	createOnce(context): Visitor {
 		let environment: TypeAliasEnvironment;
 
-		function resolvesToObject(type: ESTree.TSType): boolean {
-			return resolvedTypeMatches(type, environment, (resolved, enqueue) => {
+		function doesTypeResolveToObject(type: ESTree.TSType): boolean {
+			return getResolvedTypeMatches(type, environment, (resolved, enqueue) => {
 				if (isTsObjectKeyword(resolved)) return true;
 				if (isTsParenthesizedType(resolved)) {
 					enqueue(resolved.typeAnnotation);
@@ -52,7 +52,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 		function checkParameters(node: ParameterOwner): void {
 			for (const parameter of node.params) {
 				const annotation = getFunctionParameterTypeAnnotation(parameter);
-				if (!isTsTypeAnnotation(annotation) || !resolvesToObject(annotation.typeAnnotation)) {
+				if (!isTsTypeAnnotation(annotation) || !doesTypeResolveToObject(annotation.typeAnnotation)) {
 					continue;
 				}
 				context.report({

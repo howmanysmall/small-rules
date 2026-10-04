@@ -4,11 +4,11 @@ import {
 	continueTypeResolution,
 	createTypeAliasEnvironment,
 	createTypeResolution,
+	getResolvedTypeMatches,
+	getVisibleInterfaceDeclarations,
+	getVisibleTypeAlias,
 	hasVisibleTypeBinding,
-	resolvedTypeMatches,
 	resolveTypeReference,
-	visibleInterfaceDeclarations,
-	visibleTypeAlias,
 } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { traverseAst } from "$test/rule-harness/ast";
@@ -33,9 +33,7 @@ function parseCode(code: string): HarnessSourceCode {
 
 function getProgram(source: HarnessSourceCode): ESTree.Program {
 	if (isNode(source.ast) && source.ast.type === "Program") return source.ast;
-	const error = new Error("Source AST is not a program node.");
-	Error.captureStackTrace(error, getProgram);
-	throw error;
+	throw new Error("Source AST is not a program node.");
 }
 
 function findTypeReference(source: HarnessSourceCode, name: string): ESTree.TSTypeReference {
@@ -58,9 +56,7 @@ function findNthTypeReference(source: HarnessSourceCode, name: string, index: nu
 	});
 	const reference = found[index];
 	if (reference === undefined) {
-		const error = new Error(`Type reference "${name}" at index ${index} not found.`);
-		Error.captureStackTrace(error, findNthTypeReference);
-		throw error;
+		throw new Error(`Type reference "${name}" at index ${index} not found.`);
 	}
 	return reference;
 }
@@ -75,18 +71,16 @@ function findQualifiedTypeReference(source: HarnessSourceCode): ESTree.TSTypeRef
 		},
 	});
 	if (found === undefined) {
-		const error = new Error("Qualified type reference not found.");
-		Error.captureStackTrace(error, findQualifiedTypeReference);
-		throw error;
+		throw new Error("Qualified type reference not found.");
 	}
 	return found;
 }
 
-function annotationType(alias: ESTree.TSTypeAliasDeclaration | undefined): string | undefined {
+function getAnnotationType(alias?: ESTree.TSTypeAliasDeclaration): string | undefined {
 	return alias?.typeAnnotation.type;
 }
 
-const matchesUnknown: ResolvedTypeMatcher = (resolved, enqueue) => {
+const matchesUnknown: ResolvedTypeMatcher = function matchesUnknown(resolved, enqueue) {
 	if (resolved.type === "TSUnknownKeyword") return true;
 	if (resolved.type === "TSParenthesizedType") {
 		enqueue(resolved.typeAnnotation);
@@ -111,10 +105,10 @@ const matchesUnknown: ResolvedTypeMatcher = (resolved, enqueue) => {
 	return false;
 };
 
-function resolvesReferenceToUnknown(code: string, name: string, index = 0): boolean {
+function doesReferenceResolveToUnknown(code: string, name: string, index = 0): boolean {
 	const source = parseCode(code);
 	const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
-	return resolvedTypeMatches(findNthTypeReference(source, name, index), environment, matchesUnknown);
+	return getResolvedTypeMatches(findNthTypeReference(source, name, index), environment, matchesUnknown);
 }
 
 describe("visibleTypeAlias", () => {
@@ -133,7 +127,7 @@ describe("visibleTypeAlias", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const use = findTypeReference(source, "Payload");
-		const alias = visibleTypeAlias("Payload", use, environment);
+		const alias = getVisibleTypeAlias("Payload", use, environment);
 
 		expect(environment.aliases.map((candidate) => candidate.id.name).toSorted()).toStrictEqual([
 			"Duplicate",
@@ -146,7 +140,7 @@ describe("visibleTypeAlias", () => {
 				.map((candidate) => candidate.typeAnnotation.type)
 				.toSorted(),
 		).toStrictEqual(["TSNumberKeyword", "TSStringKeyword"]);
-		expect(annotationType(alias)).toBe("TSUnknownKeyword");
+		expect(getAnnotationType(alias)).toBe("TSUnknownKeyword");
 	});
 
 	it("hoists an alias throughout its enclosing block", () => {
@@ -155,9 +149,9 @@ describe("visibleTypeAlias", () => {
 		const source = parseCode("function run() { let value: Local; type Local = string; }");
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const use = findTypeReference(source, "Local");
-		const alias = visibleTypeAlias("Local", use, environment);
+		const alias = getVisibleTypeAlias("Local", use, environment);
 
-		expect(annotationType(alias)).toBe("TSStringKeyword");
+		expect(getAnnotationType(alias)).toBe("TSStringKeyword");
 	});
 
 	it("hoists a module alias declared after its use", () => {
@@ -166,9 +160,9 @@ describe("visibleTypeAlias", () => {
 		const source = parseCode("let value: Local; type Local = string;");
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const use = findTypeReference(source, "Local");
-		const alias = visibleTypeAlias("Local", use, environment);
+		const alias = getVisibleTypeAlias("Local", use, environment);
 
-		expect(annotationType(alias)).toBe("TSStringKeyword");
+		expect(getAnnotationType(alias)).toBe("TSStringKeyword");
 	});
 
 	it.each([
@@ -204,11 +198,11 @@ describe("visibleTypeAlias", () => {
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const nestedUse = findNthTypeReference(source, "Item", 0);
 		const outerUse = findNthTypeReference(source, "Item", 1);
-		const nestedAlias = visibleTypeAlias("Item", nestedUse, environment);
-		const outerAlias = visibleTypeAlias("Item", outerUse, environment);
+		const nestedAlias = getVisibleTypeAlias("Item", nestedUse, environment);
+		const outerAlias = getVisibleTypeAlias("Item", outerUse, environment);
 
-		expect(annotationType(nestedAlias)).toBe("TSNumberKeyword");
-		expect(annotationType(outerAlias)).toBe("TSStringKeyword");
+		expect(getAnnotationType(nestedAlias)).toBe("TSNumberKeyword");
+		expect(getAnnotationType(outerAlias)).toBe("TSStringKeyword");
 	});
 
 	it("treats equal-distance duplicate bindings as ambiguous", () => {
@@ -218,7 +212,7 @@ describe("visibleTypeAlias", () => {
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const use = findTypeReference(source, "Choice");
 
-		expect(visibleTypeAlias("Choice", use, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Choice", use, environment)).toBeUndefined();
 		expect(hasVisibleTypeBinding("Choice", use, environment)).toBe(true);
 	});
 
@@ -237,7 +231,7 @@ describe("visibleTypeAlias", () => {
 		const use = findTypeReference(source, "Record");
 
 		expect(hasVisibleTypeBinding("Record", use, environment)).toBe(true);
-		expect(visibleTypeAlias("Record", use, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Record", use, environment)).toBeUndefined();
 	});
 
 	it.each([
@@ -292,7 +286,7 @@ describe("visibleTypeAlias", () => {
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const use = findTypeReference(source, "Identity");
 
-		expect(visibleTypeAlias("Identity", use, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Identity", use, environment)).toBeUndefined();
 		expect(hasVisibleTypeBinding("Identity", use, environment)).toBe(true);
 	});
 
@@ -307,9 +301,9 @@ describe("visibleTypeAlias", () => {
 		const outside = findNthTypeReference(source, "Record", 1);
 
 		expect(hasVisibleTypeBinding("Record", inside, environment)).toBe(true);
-		expect(visibleTypeAlias("Record", inside, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Record", inside, environment)).toBeUndefined();
 		expect(hasVisibleTypeBinding("Record", outside, environment)).toBe(false);
-		expect(visibleTypeAlias("Record", outside, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Record", outside, environment)).toBeUndefined();
 	});
 
 	it("does not invent a type binding for an anonymous class expression", () => {
@@ -327,10 +321,10 @@ describe("visibleTypeAlias", () => {
 		const source = parseCode("export {}; let before: Shared; declare global { type Shared = unknown; }");
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 		const use = findTypeReference(source, "Shared");
-		const alias = visibleTypeAlias("Shared", use, environment);
+		const alias = getVisibleTypeAlias("Shared", use, environment);
 
 		expect(hasVisibleTypeBinding("Shared", use, environment)).toBe(true);
-		expect(annotationType(alias)).toBe("TSUnknownKeyword");
+		expect(getAnnotationType(alias)).toBe("TSUnknownKeyword");
 	});
 
 	it("hoists a competing binding from a same-file global augmentation", () => {
@@ -341,14 +335,14 @@ describe("visibleTypeAlias", () => {
 		const use = findTypeReference(source, "Shared");
 
 		expect(hasVisibleTypeBinding("Shared", use, environment)).toBe(true);
-		expect(visibleTypeAlias("Shared", use, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Shared", use, environment)).toBeUndefined();
 	});
 
 	it("lets a module alias shadow a same-name global binding", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"export {}; type Shared = unknown; declare global { interface Shared {} } let value: Shared;",
 				"Shared",
 			),
@@ -366,18 +360,18 @@ describe("visibleTypeAlias", () => {
 			].join("\n"),
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
-		const inside = visibleTypeAlias("Shared", findNthTypeReference(source, "Shared", 0), environment);
-		const outside = visibleTypeAlias("Shared", findNthTypeReference(source, "Shared", 1), environment);
+		const inside = getVisibleTypeAlias("Shared", findNthTypeReference(source, "Shared", 0), environment);
+		const outside = getVisibleTypeAlias("Shared", findNthTypeReference(source, "Shared", 1), environment);
 
-		expect(annotationType(inside)).toBe("TSUnknownKeyword");
-		expect(annotationType(outside)).toBe("TSStringKeyword");
+		expect(getAnnotationType(inside)).toBe("TSUnknownKeyword");
+		expect(getAnnotationType(outside)).toBe("TSStringKeyword");
 	});
 
 	it("propagates global ambientness through reopened nested namespaces", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"export {}; declare global {",
 					"namespace A { namespace B { type Shared = unknown; } }",
@@ -393,7 +387,7 @@ describe("visibleTypeAlias", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"namespace Owner { export type Shared = unknown; } namespace Owner { let value: Shared; }",
 				"Shared",
 			),
@@ -408,14 +402,14 @@ describe("visibleTypeAlias", () => {
 		const use = findTypeReference(source, "Private");
 
 		expect(hasVisibleTypeBinding("Private", use, environment)).toBe(false);
-		expect(visibleTypeAlias("Private", use, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Private", use, environment)).toBeUndefined();
 	});
 
 	it("keeps a private namespace alias visible in its own block", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown("namespace Owner { type Private = unknown; let value: Private; }", "Private"),
+			doesReferenceResolveToUnknown("namespace Owner { type Private = unknown; let value: Private; }", "Private"),
 		).toBe(true);
 	});
 
@@ -434,14 +428,14 @@ describe("visibleTypeAlias", () => {
 		const use = findTypeReference(source, "Shared");
 
 		expect(hasVisibleTypeBinding("Shared", use, environment)).toBe(true);
-		expect(visibleTypeAlias("Shared", use, environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Shared", use, environment)).toBeUndefined();
 	});
 
 	it("shares exported aliases across reopened nested namespaces", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"namespace A { export namespace B { export type Shared = unknown; } }",
 					"namespace A { export namespace B { let value: Shared; } }",
@@ -455,7 +449,7 @@ describe("visibleTypeAlias", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"namespace A {",
 					"namespace B { export type Shared = unknown; }",
@@ -478,14 +472,14 @@ describe("visibleTypeAlias", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleTypeAlias("Shared", findTypeReference(source, "Shared"), environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Shared", findTypeReference(source, "Shared"), environment)).toBeUndefined();
 	});
 
 	it("merges qualified private namespace paths within one parent block", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"namespace Parent {",
 					"namespace A.B { export type Shared = unknown; }",
@@ -505,15 +499,15 @@ describe("visibleTypeAlias", () => {
 			"namespace A { export namespace B { export type FromNested = unknown; let qualified: FromQualified; } }",
 		].join("\n");
 
-		expect(resolvesReferenceToUnknown(code, "FromNested")).toBe(true);
-		expect(resolvesReferenceToUnknown(code, "FromQualified")).toBe(true);
+		expect(doesReferenceResolveToUnknown(code, "FromNested")).toBe(true);
+		expect(doesReferenceResolveToUnknown(code, "FromQualified")).toBe(true);
 	});
 
 	it("implicitly shares members across ambient identifier namespaces", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"declare namespace Ambient { type Shared = unknown; } declare namespace Ambient { let value: Shared; }",
 				"Shared",
 			),
@@ -528,7 +522,7 @@ describe("visibleTypeAlias", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleTypeAlias("Shared", findTypeReference(source, "Shared"), environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Shared", findTypeReference(source, "Shared"), environment)).toBeUndefined();
 	});
 
 	it("isolates identifier namespaces nested in string-literal modules", () => {
@@ -542,14 +536,14 @@ describe("visibleTypeAlias", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleTypeAlias("Shared", findTypeReference(source, "Shared"), environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Shared", findTypeReference(source, "Shared"), environment)).toBeUndefined();
 	});
 
 	it("merges reopened namespaces within one string-literal ambient module", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					'declare module "pkg" {',
 					"namespace A { type X = unknown; }",
@@ -572,7 +566,7 @@ describe("visibleTypeAlias", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleTypeAlias("X", findTypeReference(source, "X"), environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("X", findTypeReference(source, "X"), environment)).toBeUndefined();
 	});
 
 	it("does not invent a binding for a bodyless string-literal ambient module", () => {
@@ -595,8 +589,8 @@ describe("visibleTypeAlias", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleTypeAlias("Global", findTypeReference(source, "Global"), environment)).toBeUndefined();
-		expect(visibleTypeAlias("Local", findTypeReference(source, "Local"), environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Global", findTypeReference(source, "Global"), environment)).toBeUndefined();
+		expect(getVisibleTypeAlias("Local", findTypeReference(source, "Local"), environment)).toBeUndefined();
 	});
 });
 
@@ -607,7 +601,7 @@ describe("visibleInterfaceDeclarations", () => {
 		const source = parseCode("interface Item {} interface Item { value: string } let item: Item;");
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleInterfaceDeclarations("Item", findTypeReference(source, "Item"), environment)).toHaveLength(2);
+		expect(getVisibleInterfaceDeclarations("Item", findTypeReference(source, "Item"), environment)).toHaveLength(2);
 	});
 
 	it("uses the nearest lexical interface declaration", () => {
@@ -617,11 +611,11 @@ describe("visibleInterfaceDeclarations", () => {
 			"interface Item { outer: string } function run() { interface Item { local: string } let local: Item; } let outer: Item;",
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
-		const local = visibleInterfaceDeclarations("Item", findNthTypeReference(source, "Item", 0), environment);
-		const outer = visibleInterfaceDeclarations("Item", findNthTypeReference(source, "Item", 1), environment);
+		const local = getVisibleInterfaceDeclarations("Item", findNthTypeReference(source, "Item", 0), environment);
+		const outer = getVisibleInterfaceDeclarations("Item", findNthTypeReference(source, "Item", 1), environment);
 
-		expect(interfacePropertyNames(local)).toStrictEqual(["local"]);
-		expect(interfacePropertyNames(outer)).toStrictEqual(["outer"]);
+		expect(getInterfacePropertyNames(local)).toStrictEqual(["local"]);
+		expect(getInterfacePropertyNames(outer)).toStrictEqual(["outer"]);
 	});
 
 	it("lets a type parameter shadow an interface", () => {
@@ -630,7 +624,7 @@ describe("visibleInterfaceDeclarations", () => {
 		const source = parseCode("interface Item {} function run<Item>(value: Item): void {}");
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleInterfaceDeclarations("Item", findTypeReference(source, "Item"), environment)).toBeUndefined();
+		expect(getVisibleInterfaceDeclarations("Item", findTypeReference(source, "Item"), environment)).toBeUndefined();
 	});
 
 	it.each([
@@ -642,7 +636,7 @@ describe("visibleInterfaceDeclarations", () => {
 		const source = parseCode(code);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleInterfaceDeclarations("Item", findTypeReference(source, "Item"), environment)).toBeUndefined();
+		expect(getVisibleInterfaceDeclarations("Item", findTypeReference(source, "Item"), environment)).toBeUndefined();
 	});
 
 	it("merges exported interfaces across reopened namespaces", () => {
@@ -653,9 +647,9 @@ describe("visibleInterfaceDeclarations", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(visibleInterfaceDeclarations("Shared", findTypeReference(source, "Shared"), environment)).toHaveLength(
-			2,
-		);
+		expect(
+			getVisibleInterfaceDeclarations("Shared", findTypeReference(source, "Shared"), environment),
+		).toHaveLength(2);
 	});
 
 	it("keeps private interfaces isolated across reopened namespaces", () => {
@@ -665,7 +659,7 @@ describe("visibleInterfaceDeclarations", () => {
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
 		expect(
-			visibleInterfaceDeclarations("Private", findTypeReference(source, "Private"), environment),
+			getVisibleInterfaceDeclarations("Private", findTypeReference(source, "Private"), environment),
 		).toBeUndefined();
 	});
 
@@ -676,9 +670,13 @@ describe("visibleInterfaceDeclarations", () => {
 			"export {}; declare global { interface Shared { global: string } } let outside: Shared;",
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
-		const declarations = visibleInterfaceDeclarations("Shared", findTypeReference(source, "Shared"), environment);
+		const declarations = getVisibleInterfaceDeclarations(
+			"Shared",
+			findTypeReference(source, "Shared"),
+			environment,
+		);
 
-		expect(interfacePropertyNames(declarations)).toStrictEqual(["global"]);
+		expect(getInterfacePropertyNames(declarations)).toStrictEqual(["global"]);
 	});
 
 	it("prefers global bindings inside and module bindings outside an augmentation", () => {
@@ -692,15 +690,25 @@ describe("visibleInterfaceDeclarations", () => {
 			].join("\n"),
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
-		const inside = visibleInterfaceDeclarations("Shared", findNthTypeReference(source, "Shared", 0), environment);
-		const outside = visibleInterfaceDeclarations("Shared", findNthTypeReference(source, "Shared", 1), environment);
+		const inside = getVisibleInterfaceDeclarations(
+			"Shared",
+			findNthTypeReference(source, "Shared", 0),
+			environment,
+		);
+		const outside = getVisibleInterfaceDeclarations(
+			"Shared",
+			findNthTypeReference(source, "Shared", 1),
+			environment,
+		);
 
-		expect(interfacePropertyNames(inside)).toStrictEqual(["global"]);
-		expect(interfacePropertyNames(outside)).toStrictEqual(["module"]);
+		expect(getInterfacePropertyNames(inside)).toStrictEqual(["global"]);
+		expect(getInterfacePropertyNames(outside)).toStrictEqual(["module"]);
 	});
 });
 
-function interfacePropertyNames(declarations: ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined): Array<string> {
+function getInterfacePropertyNames(
+	declarations: ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined,
+): Array<string> {
 	const names = new Array<string>();
 	const visibleDeclarations = declarations ?? [];
 	for (const declaration of visibleDeclarations) {
@@ -737,20 +745,20 @@ describe("resolvedTypeMatches", () => {
 	])("resolves unknown through %s", (_name, code, referenceName, index) => {
 		expect.assertions(1);
 
-		expect(resolvesReferenceToUnknown(code, referenceName, index)).toBe(true);
+		expect(doesReferenceResolveToUnknown(code, referenceName, index)).toBe(true);
 	});
 
 	it("does not resolve a generic alias missing a required argument", () => {
 		expect.assertions(1);
 
-		expect(resolvesReferenceToUnknown("type Identity<T> = T; let value: Identity;", "Identity")).toBe(false);
+		expect(doesReferenceResolveToUnknown("type Identity<T> = T; let value: Identity;", "Identity")).toBe(false);
 	});
 
 	it("does not substitute a type-parameter reference that has type arguments", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"type T = unknown; type Identity<T> = T<string>; let value: Identity<number>;",
 				"Identity",
 			),
@@ -760,7 +768,7 @@ describe("resolvedTypeMatches", () => {
 	it("preserves substitutions when the matcher enqueues parenthesized union members", () => {
 		expect.assertions(1);
 
-		expect(resolvesReferenceToUnknown("type Maybe<T> = (string | T); let value: Maybe<unknown>;", "Maybe")).toBe(
+		expect(doesReferenceResolveToUnknown("type Maybe<T> = (string | T); let value: Maybe<unknown>;", "Maybe")).toBe(
 			true,
 		);
 	});
@@ -769,7 +777,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"type Result = string;",
 					"function run() { type Local = unknown; type Result = Local; let value: Result; }",
@@ -787,20 +795,20 @@ describe("resolvedTypeMatches", () => {
 		);
 		const environment = createTypeAliasEnvironment(getProgram(source), source.visitorKeys);
 
-		expect(resolvedTypeMatches(findQualifiedTypeReference(source), environment, matchesUnknown)).toBe(false);
+		expect(getResolvedTypeMatches(findQualifiedTypeReference(source), environment, matchesUnknown)).toBe(false);
 	});
 
 	it("terminates a self-referential alias without a match", () => {
 		expect.assertions(1);
 
-		expect(resolvesReferenceToUnknown("type Cycle = Cycle; let value: Cycle;", "Cycle", 1)).toBe(false);
+		expect(doesReferenceResolveToUnknown("type Cycle = Cycle; let value: Cycle;", "Cycle", 1)).toBe(false);
 	});
 
 	it("does not leak caller substitutions into an unrelated alias", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"type T = string; type Inner = T; type Outer<T> = Inner; let value: Outer<unknown>;",
 				"Outer",
 			),
@@ -810,17 +818,19 @@ describe("resolvedTypeMatches", () => {
 	it("lets a nested function type parameter shadow an outer substitution", () => {
 		expect.assertions(2);
 
-		expect(resolvesReferenceToUnknown("type Outer<T> = <T>() => T; let value: Outer<unknown>;", "Outer")).toBe(
+		expect(doesReferenceResolveToUnknown("type Outer<T> = <T>() => T; let value: Outer<unknown>;", "Outer")).toBe(
 			false,
 		);
-		expect(resolvesReferenceToUnknown("type Outer<T> = () => T; let value: Outer<unknown>;", "Outer")).toBe(true);
+		expect(doesReferenceResolveToUnknown("type Outer<T> = () => T; let value: Outer<unknown>;", "Outer")).toBe(
+			true,
+		);
 	});
 
 	it("lets a mapped type parameter shadow an outer substitution", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"interface Source { value: string } type Outer<T> = { [T in keyof Source]: T }; let value: Outer<unknown>;",
 				"Outer",
 			),
@@ -831,7 +841,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"type Outer<T> = T extends infer T ? T : never; let value: Outer<unknown>;",
 				"Outer",
 			),
@@ -842,7 +852,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"type Outer<T> = T extends (unknown extends infer T ? unknown : never) ? T : never;",
 					"type Result = Outer<unknown>;",
@@ -856,7 +866,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"type Outer<T> = T extends unknown ? (unknown extends infer T ? T : never) : never;",
 					"type Result = Outer<unknown>;",
@@ -870,7 +880,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				[
 					"type Outer<T> = T extends { value: infer T } ? T : never;",
 					"type Result = Outer<{ value: unknown }> ;",
@@ -884,7 +894,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown("type Identity<T> = T; let value: Identity<Identity<unknown>>;", "Identity"),
+			doesReferenceResolveToUnknown("type Identity<T> = T; let value: Identity<Identity<unknown>>;", "Identity"),
 		).toBe(true);
 	});
 
@@ -897,14 +907,14 @@ describe("resolvedTypeMatches", () => {
 	])("terminates a %s alias cycle", (_name, code, referenceName, index) => {
 		expect.assertions(1);
 
-		expect(resolvesReferenceToUnknown(code, referenceName, index)).toBe(false);
+		expect(doesReferenceResolveToUnknown(code, referenceName, index)).toBe(false);
 	});
 
 	it("captures caller substitutions in forwarded explicit arguments", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown(
+			doesReferenceResolveToUnknown(
 				"type Identity<T> = T; type Outer<T> = Identity<T>; let value: Outer<unknown>;",
 				"Outer",
 			),
@@ -914,7 +924,7 @@ describe("resolvedTypeMatches", () => {
 	it("captures earlier parameters in dependent defaults", () => {
 		expect.assertions(1);
 
-		expect(resolvesReferenceToUnknown("type Select<T, U = T> = U; let value: Select<unknown>;", "Select")).toBe(
+		expect(doesReferenceResolveToUnknown("type Select<T, U = T> = U; let value: Select<unknown>;", "Select")).toBe(
 			true,
 		);
 	});
@@ -923,7 +933,7 @@ describe("resolvedTypeMatches", () => {
 		expect.assertions(1);
 
 		expect(
-			resolvesReferenceToUnknown("type Identity<T = string> = T; let value: Identity<unknown>;", "Identity"),
+			doesReferenceResolveToUnknown("type Identity<T = string> = T; let value: Identity<unknown>;", "Identity"),
 		).toBe(true);
 	});
 });
@@ -955,7 +965,7 @@ describe("type resolution", () => {
 	});
 });
 
-function firstTypeArgument(type: ESTree.TSType): ESTree.TSType | undefined {
+function getFirstTypeArgument(type: ESTree.TSType): ESTree.TSType | undefined {
 	if (type.type !== "TSTypeReference") return undefined;
 	return type.typeArguments?.params[0];
 }
@@ -965,7 +975,7 @@ function resolveFirstTypeArgument(
 	environment: ReturnType<typeof createTypeAliasEnvironment>,
 ): TypeResolution | undefined {
 	if (resolution === undefined) return undefined;
-	const argument = firstTypeArgument(resolution.type);
+	const argument = getFirstTypeArgument(resolution.type);
 	if (argument === undefined) return undefined;
 	return resolveTypeReference(continueTypeResolution(resolution, argument), environment);
 }

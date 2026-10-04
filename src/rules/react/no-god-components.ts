@@ -297,14 +297,14 @@ const noGodComponents = createRule("no-god-components", "react", {
 			reportBodyAnalysis(node, name, analysis);
 		}
 
-		function maybeCheckFunction(node: ESTree.Node): void {
+		function checkFunctionIfNamed(node: ESTree.Node): void {
 			const name = getComponentNameFromFunction(node);
 			if (name === undefined || name.length === 0) return;
 			checkComponent(node, name);
 		}
 
 		return {
-			ArrowFunctionExpression: maybeCheckFunction,
+			ArrowFunctionExpression: checkFunctionIfNamed,
 			CallExpression(node): void {
 				if (!isReactComponentHigherOrderCall(node)) return;
 
@@ -319,11 +319,11 @@ const noGodComponents = createRule("no-god-components", "react", {
 			},
 			FunctionDeclaration(node): void {
 				/* v8 ignore next -- this handler is only registered for FunctionDeclaration nodes. @preserve */
-				if (isFunctionDeclarationRaw(node)) maybeCheckFunction(node);
+				if (isFunctionDeclarationRaw(node)) checkFunctionIfNamed(node);
 			},
 			FunctionExpression(node): void {
 				/* v8 ignore next -- this handler is only registered for FunctionExpression nodes. @preserve */
-				if (isFunctionExpression(node)) maybeCheckFunction(node);
+				if (isFunctionExpression(node)) checkFunctionIfNamed(node);
 			},
 		} satisfies Visitor;
 	},
