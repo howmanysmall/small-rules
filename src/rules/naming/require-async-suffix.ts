@@ -1,26 +1,8 @@
+import { isExternallyConstrainedProperty } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isCallbackFunction,
-	isCallExpression,
-	isFunctionExpression,
-	isIdentifierName,
-	isNewExpression,
-	isObjectExpression,
-	isTsSatisfiesExpression,
-} from "$oxc-utilities/oxc-utilities";
+import { isCallbackFunction, isFunctionExpression, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
-
-function isExternallyConstrainedProperty({ parent }: ESTree.ObjectProperty): boolean {
-	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
-	if (!isObjectExpression(parent)) return false;
-	const { parent: grandparent } = parent;
-	if (isTsSatisfiesExpression(grandparent)) return true;
-	if (isCallExpression(grandparent) || isNewExpression(grandparent)) {
-		return grandparent.arguments.some((argument) => argument === parent);
-	}
-	return false;
-}
 
 const requireAsyncSuffix = createRule("require-async-suffix", "naming", {
 	create(context): Visitor {
