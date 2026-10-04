@@ -1,29 +1,34 @@
 import { programming } from "verb-corpus";
 
-const ALLOW_LIST = [
+const AUXILIARY_VERBS = [
+	"am",
 	"are",
+	"be",
+	"been",
+	"being",
 	"can",
 	"could",
 	"did",
-	"error",
-	"from",
+	"does",
+	"had",
 	"has",
-	"info",
+	"have",
+	"having",
 	"is",
 	"may",
 	"might",
 	"must",
-	"next",
-	"noop",
-	"off",
-	"on",
-	"over",
+	"needs",
+	"ought",
 	"shall",
 	"should",
-	"to",
+	"was",
+	"were",
 	"will",
 	"would",
 ] satisfies ReadonlyArray<string>;
+
+const ALLOW_LIST = ["error", "from", "info", "next", "noop", "off", "on", "over", "to"] satisfies ReadonlyArray<string>;
 
 interface StartsWithVerbOptions {
 	readonly extraAllowList?: ReadonlyArray<string> | undefined;
@@ -33,6 +38,7 @@ interface StartsWithVerbOptions {
 type StartsWithTuple = readonly [doesStartWith: boolean, prefix: string];
 
 const BASE_ALLOW = new Set<string>(programming);
+for (const verb of AUXILIARY_VERBS) BASE_ALLOW.add(verb);
 for (const verb of ALLOW_LIST) BASE_ALLOW.add(verb);
 
 const BASE_DENY = new Set<string>(["file", "string"] satisfies ReadonlyArray<string>);

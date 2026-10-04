@@ -25,6 +25,38 @@ describe("startsWithVerb", () => {
 		expect(startsWithVerb("errorHandler", {})).toStrictEqual([true, "error"]);
 	});
 
+	it.each([
+		["amLoading", "am"],
+		["areEqual", "are"],
+		["beVisible", "be"],
+		["beenCalled", "been"],
+		["beingDragged", "being"],
+		["canEdit", "can"],
+		["couldRetry", "could"],
+		["didMount", "did"],
+		["doesExist", "does"],
+		["hadFocus", "had"],
+		["hasItems", "has"],
+		["haveChanged", "have"],
+		["havingFocus", "having"],
+		["isVisible", "is"],
+		["mayRetry", "may"],
+		["mightFail", "might"],
+		["mustRefresh", "must"],
+		["needsUpdate", "needs"],
+		["oughtToRetry", "ought"],
+		["shallContinue", "shall"],
+		["shouldRender", "should"],
+		["wasCancelled", "was"],
+		["wereChanged", "were"],
+		["willUnmount", "will"],
+		["wouldOverflow", "would"],
+	])("should accept the auxiliary verb prefix in %s", (name, prefix) => {
+		expect.assertions(1);
+
+		expect(startsWithVerb(name, {})).toStrictEqual([true, prefix]);
+	});
+
 	it("should reject prefixes that are not verbs", () => {
 		expect.assertions(2);
 
