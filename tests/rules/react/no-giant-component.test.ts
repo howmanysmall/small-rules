@@ -1,0 +1,47 @@
+import { describe } from "vitest";
+
+import rule from "$oxc-rules/react/no-giant-component";
+import { tsx } from "$test/rule-testers";
+
+function buildComponentBody(innerLineCount: number): string {
+	const lines = Array.from<string>({ length: innerLineCount });
+	for (let index = 0; index < innerLineCount; index += 1) {
+		lines[index] = `  call${index}();`;
+	}
+	return lines.join("\n");
+}
+
+const componentJustUnder = `function JustUnder() {\n${buildComponentBody(298)}\n}`;
+const componentOverThreshold = `function Giant() {\n${buildComponentBody(299)}\n}`;
+const arrowOverThreshold = `const GiantArrow = () => {\n${buildComponentBody(299)}\n};`;
+const functionExpressionOverThreshold = `const GiantExpr = function() {\n${buildComponentBody(299)}\n};`;
+
+describe("no-giant-component", () => {
+	tsx.run("no-giant-component", rule, {
+		invalid: [
+			{
+				code: componentOverThreshold,
+				errors: [{ messageId: "giantComponent" }],
+			},
+			{
+				code: arrowOverThreshold,
+				errors: [{ messageId: "giantComponent" }],
+			},
+			{
+				code: functionExpressionOverThreshold,
+				errors: [{ messageId: "giantComponent" }],
+			},
+		],
+		valid: [
+			"function SmallComponent() {\n  return <frame />;\n}",
+			"const SmallArrow = () => {\n  return <frame />;\n};",
+			"const SmallExpr = function() {\n  return <frame />;\n};",
+			"function helperFunction() {\n  return 42;\n}",
+			"const helperArrow = () => 42;",
+			"const notAFunction = 42;",
+			{
+				code: componentJustUnder,
+			},
+		],
+	});
+});

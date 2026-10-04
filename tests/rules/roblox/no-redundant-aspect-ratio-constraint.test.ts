@@ -1,0 +1,381 @@
+import nodePath from "node:path";
+import { describe } from "vitest";
+
+import rule from "$oxc-rules/roblox/no-redundant-aspect-ratio-constraint";
+import { tsx } from "$test/rule-testers";
+
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "no-redundant-aspect-ratio-constraint");
+const WITH_CONSTRAINT = nodePath.join(FIXTURES, "with-constraint");
+const WITHOUT_CONSTRAINT = nodePath.join(FIXTURES, "without-constraint");
+
+describe("no-redundant-aspect-ratio-constraint", () => {
+	tsx.run("no-redundant-aspect-ratio-constraint", rule, {
+		invalid: [
+			{
+				code: `
+const UI_ASPECT_RATIO_CONSTRAINT = <uiaspectratioconstraint AspectRatio={1.5} />;
+
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return (
+		<imagelabel>
+						{children}
+						<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		{UI_ASPECT_RATIO_CONSTRAINT}
+			</LabelSpritesheet>
+		);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+				documentation: { id: "fail", title: "duplicate aspect ratio constraint" },
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+			},
+			{
+				code: `
+const LabelSpritesheet = ({ children }: { children?: React.ReactNode }) => (
+	<imagelabel>
+		{children}
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</imagelabel>
+);
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+			},
+			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { LabelSpritesheet } from "../components/label-spritesheet";
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+			},
+			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { LabelSpritesheet } from "../components/label-spritesheet";
+
+const UI_ASPECT_RATIO_CONSTRAINT = <uiaspectratioconstraint AspectRatio={1.5} />;
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uigradient Color={gradient} />
+		{UI_ASPECT_RATIO_CONSTRAINT}
+		<textlabel Text="hello" />
+	</LabelSpritesheet>
+);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+			},
+			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { GenericSpritesheet } from "../components/generic-spritesheet";
+
+const view = (
+	<GenericSpritesheet imageType={0}>
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</GenericSpritesheet>
+);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon" scaled={true}>
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+				errors: [{ messageId: "redundantAspectRatioConstraint" }],
+			},
+		],
+		valid: [
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uigradient Color={gradient} />
+		<textlabel Text="hello" />
+			</LabelSpritesheet>
+		);
+`,
+				documentation: { id: "pass", title: "non-redundant layout constraint" },
+			},
+			{
+				code: `
+const LabelSpritesheet = ({ children }: { children?: React.ReactNode }) => {
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+};
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+const LabelSpritesheet = () => 1;
+
+const view = (
+	<LabelSpritesheet>
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	const ratio = 1.5;
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={ratio} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return;
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet() {
+	return null;
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+const LabelSpritesheet = ({ children }: { children?: React.ReactNode }) => (
+	<imagelabel>{children}</imagelabel>
+);
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return <imagelabel>{children}</imagelabel>;
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { LabelSpritesheet } from "../components/label-spritesheet";
+
+const view = (
+	<LabelSpritesheet sprite="icon">
+		<uigradient Color={gradient} />
+		<textlabel Text="hello" />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { RegularLabel } from "../components/label-spritesheet";
+
+const view = (
+	<RegularLabel sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</RegularLabel>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { RegularLabel } from "@components/label-spritesheet";
+
+const view = (
+	<RegularLabel sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</RegularLabel>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { MissingSpritesheet } from "../components/missing-spritesheet";
+
+const view = (
+	<MissingSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</MissingSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+const UI_ASPECT_RATIO_CONSTRAINT = <uiaspectratioconstraint AspectRatio={1.5} />;
+
+const view = (
+	<SomeOtherComponent>
+		{UI_ASPECT_RATIO_CONSTRAINT}
+	</SomeOtherComponent>
+);
+`,
+			},
+			{
+				code: `
+const view = (
+	<Layout.LabelSpritesheet sprite="icon">
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</Layout.LabelSpritesheet>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { GenericSpritesheet } from "../components/generic-spritesheet";
+
+const view = (
+	<GenericSpritesheet imageType={0}>
+		<textlabel Text="hello" />
+	</GenericSpritesheet>
+);
+`,
+			},
+			{
+				code: `
+function LabelSpritesheet({ children }: { children?: React.ReactNode }) {
+	return (
+		<imagelabel>
+			{children}
+			<uiaspectratioconstraint AspectRatio={1.5} />
+		</imagelabel>
+	);
+}
+
+const view = (
+	<LabelSpritesheet sprite="icon" scaled={false}>
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITH_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { LabelSpritesheet } from "../components/label-spritesheet";
+
+const view = (
+	<LabelSpritesheet sprite="icon" scaled={false}>
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</LabelSpritesheet>
+);
+`,
+			},
+			{
+				filename: nodePath.join(WITHOUT_CONSTRAINT, "src", "screens", "example.tsx"),
+				code: `
+import { GenericSpritesheet } from "../components/generic-spritesheet";
+
+const view = (
+	<GenericSpritesheet imageType={0} scaled={false}>
+		<uiaspectratioconstraint AspectRatio={1.5} />
+	</GenericSpritesheet>
+);
+`,
+			},
+		],
+	});
+});

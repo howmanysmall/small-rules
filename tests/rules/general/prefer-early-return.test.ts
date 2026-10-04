@@ -1,0 +1,96 @@
+import { describe } from "vitest";
+
+import rule from "$oxc-rules/general/prefer-early-return";
+import { js } from "$test/rule-testers";
+
+const error = {
+	message:
+		"Function body is wrapped in a single conditional without an else branch. This increases nesting depth and cognitive load. Invert the condition and return early: if (!condition) return; then place the main logic at the top level.",
+};
+
+describe("prefer-early-return", () => {
+	js.run("prefer-early-return", rule, {
+		invalid: [
+			// Default maximumStatements = 1, so 2+ statements triggers
+			{
+				code: [
+					"function foo() {",
+					"  if (something) {",
+					"    doSomething();",
+					"    doSomethingElse();",
+					"  }",
+					"}",
+				].join("\n"),
+				errors: [
+					{
+						message:
+							"Function body is wrapped in a single conditional without an else branch. This increases nesting depth and cognitive load. Invert the condition and return early: if (!condition) return; then place the main logic at the top level.",
+					},
+				],
+				documentation: { id: "fail", title: "Function body needs guard clause" },
+			},
+			// MaximumStatements = 0 means even 1 statement triggers
+			{
+				code: "function foo() { if (something) doSomething(); }",
+				options: [{ maximumStatements: 0 }],
+				errors: [error],
+			},
+			{
+				code: "function foo() { if (something) { doSomething(); } }",
+				options: [{ maximumStatements: 0 }],
+				errors: [error],
+			},
+			// Function expressions
+			{
+				code: "var foo = function() { if (something) { doSomething(); doSomethingElse(); } }",
+				errors: [error],
+			},
+			// Arrow functions
+			{
+				code: "var foo = () => { if (something) { doSomething(); doSomethingElse(); } }",
+				errors: [error],
+			},
+			// Callback functions
+			{
+				code: "callback(function() { if (something) { doSomething(); doSomethingElse(); } })",
+				errors: [error],
+			},
+		],
+		valid: [
+			// Already using early return pattern
+			{
+				code: [
+					"function foo() {",
+					"  if (!something) {",
+					"    return;",
+					"  }",
+					"  doSomething();",
+					"  doSomethingElse();",
+					"}",
+				].join("\n"),
+				documentation: { id: "pass", title: "Early return guard clause" },
+			},
+			// Only 1 statement (default max is 1)
+			{ code: "function foo() { if (something) { doSomething(); } }" },
+			// Expression statement without block
+			{ code: "function foo() { if (something) doSomething(); }" },
+			// 2 statements but max is 2
+			{
+				code: "function foo() { if (something) { doSomething(); doSomethingElse(); } }",
+				options: [{ maximumStatements: 2 }],
+			},
+			// Has other statements after the if
+			{ code: "function foo() { if (something) { doSomething(); doSomethingElse(); } someOtherThing(); }" },
+			// Has else clause
+			{
+				code: "function foo() { if (something) { doSomething(); doSomethingElse(); } else { doAnotherThing(); } }",
+			},
+			// Function expressions
+			{ code: "var foo = function() { if (something) { doSomething(); } }" },
+			// Arrow functions
+			{ code: "var foo = () => { if (something) { doSomething(); } }" },
+			// Arrow function with expression body
+			{ code: "var foo = () => 'bar'" },
+		],
+	});
+});

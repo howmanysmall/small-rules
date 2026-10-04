@@ -27,7 +27,7 @@ You **MUST** follow these guidelines. There is NO exception.
 | `ni -D cowsay` | Add a dev dependency |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
 | `nr test:agent` | Run all Vitest unit tests |
-| `nr test:agent -- tests/no-print.test.ts` | Run a single test file |
+| `nr test:agent -- tests/rules/roblox/no-print.test.ts` | Run a single test file |
 | `nr test:agent -t "no-print"` | Run tests matching a pattern |
 | `nr lint:agent` | Run oxlint then biome check |
 | `nr type-check:agent` | Run `tsgo` for type checking |
@@ -52,7 +52,7 @@ Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md
 
 Third-party code copied into this repo (currently `src/rules/anti-slop/`, from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)) is described in exactly one place: `VENDORED_COMPONENTS` in [`scripts/utilities/vendored-notices.ts`](scripts/utilities/vendored-notices.ts). Add an entry there, add the provenance header to each vendored file, then run `nr generate:third-party-notices`.
 
-`THIRD-PARTY-NOTICES.md` and the `dist/index.js` legal banner are both generated from that catalog - never hand-edit either. The `//` headers in the sources are stripped by minification, so the notices file and the banner are what actually satisfy the upstream license. `tests/third-party-notices.test.ts` fails on drift. Full procedure in [`docs/vendoring.md`](docs/vendoring.md).
+`THIRD-PARTY-NOTICES.md` and the `dist/index.js` legal banner are both generated from that catalog - never hand-edit either. The `//` headers in the sources are stripped by minification, so the notices file and the banner are what actually satisfy the upstream license. `tests/tooling/third-party-notices.test.ts` fails on drift. Full procedure in [`docs/vendoring.md`](docs/vendoring.md).
 
 ## Code Architecture
 
@@ -96,7 +96,7 @@ Shared type definitions, reexports from `oxlint-plugin-utilities`, and missing E
 
 ## Testing
 
-Tests live in `tests/*.test.ts`, one per rule plus `index.test.ts` for plugin metadata.
+Tests mirror `src/`: `tests/rules/<category>/<rule>.test.ts` (one per rule), `tests/utilities/` (shared helpers), `tests/tooling/` (release, vendoring, and repo scripts), `tests/documentation/`, `tests/rule-relations/`, and `tests/fuzz/*.fuzz.ts`. `tests/index.test.ts` covers plugin metadata. `tests/fixtures/` holds on-disk fixture projects, and `tests/rule-testers.ts` plus `tests/rule-harness/` are the harness (import them as `$test/rule-testers`).
 
 Tests use the repo-owned Oxc/Vitest rule harness in `tests/rule-testers.ts`. Preconfigured runners:
 
@@ -112,7 +112,7 @@ Test pattern:
 ```ts
 import { describe } from "vitest";
 import rule from "$oxc-rules/roblox/no-print";
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 describe("no-print", () => {
   js.run("no-print", rule, {

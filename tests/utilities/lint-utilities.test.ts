@@ -1,0 +1,33 @@
+import { describe } from "vitest";
+import { defineRule } from "oxlint-plugin-utilities";
+
+import { isHookCall } from "$oxc-utilities/lint-utilities";
+import { createRuleTester } from "$test/rule-testers";
+
+import type { Visitor } from "oxlint-plugin-utilities";
+
+const tester = createRuleTester({ language: "js", sourceType: "module" });
+
+describe("lint utilities", () => {
+	const messages = {
+		hook: "hook",
+	};
+
+	const rule = defineRule({
+		create(context): Visitor {
+			const hooks = new Set(["useEffect", "useMemo"]);
+
+			return {
+				CallExpression(node): void {
+					if (isHookCall(node, hooks)) context.report({ messageId: "hook", node });
+				},
+			} satisfies Visitor;
+		},
+		meta: { messages, schema: [], type: "problem" },
+	});
+
+	tester.run("lint-utilities", rule, {
+		invalid: [{ code: "useEffect();", errors: [{ messageId: "hook" }] }],
+		valid: ["useReducer();"],
+	});
+});

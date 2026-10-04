@@ -1,0 +1,467 @@
+import { describe } from "vitest";
+
+import rule from "$oxc-rules/general/no-useless-constants";
+import { ts, tsx } from "$test/rule-testers";
+
+describe("no-useless-constants", () => {
+	describe("autofix coverage", () => {
+		ts.run("no-useless-constants", rule, {
+			invalid: [
+				{
+					code: "const TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: "const TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
+					documentation: { id: "fail", title: "Inline adjacent constant" },
+				},
+			],
+			valid: [
+				{
+					code: "const TEXT_NATIVE = { Offset: 225 };",
+					documentation: { id: "pass", title: "Already inlined constant" },
+				},
+			],
+		});
+
+		ts.run("remains idempotent after autofix", rule, {
+			invalid: [],
+			valid: ["const TEXT_NATIVE = { Offset: 225 };"],
+		});
+
+		tsx.run("remains idempotent after JSX autofix", rule, {
+			invalid: [],
+			valid: [
+				"const TITLE_CHILDREN = { child: <uigradient Color={new ColorSequence(Color3.fromRGB(191, 88, 255), Color3.fromRGB(191, 88, 255))} Rotation={90} /> };",
+			],
+		});
+	});
+
+	describe("guards and report-only cases", () => {
+		ts.run("auto-fixes non-adjacent primitive literal constant", rule, {
+			invalid: [
+				{
+					code: "const TITLE_OFFSET = 225;\nconst MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: "const MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes non-adjacent primitive literal across function", rule, {
+			invalid: [
+				{
+					code: "const REWARDS_GRID_CAPACITY = 32;\nconst BASE_ITEM_BOX_NATIVE_PROPERTIES_CONFIG_2 = { LayoutOrder: 3 };\nfunction renderAutoFillReward() { return null; }\nconst REWARDS_AUTO_FILL_CONFIGURATION = {\n  capacity: REWARDS_GRID_CAPACITY,\n  renderEmpty: renderAutoFillReward,\n};",
+					output: "const BASE_ITEM_BOX_NATIVE_PROPERTIES_CONFIG_2 = { LayoutOrder: 3 };\nfunction renderAutoFillReward() { return null; }\nconst REWARDS_AUTO_FILL_CONFIGURATION = {\n  capacity: 32,\n  renderEmpty: renderAutoFillReward,\n};",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes non-adjacent static Roblox factory initializer", rule, {
+			invalid: [
+				{
+					code: "const TITLE_TEXT_GRADIENT = new ColorSequence([\n  new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),\n  new ColorSequenceKeypoint(1, Color3.fromRGB(251, 120, 255)),\n]);\nconst MIDDLE = 42;\nexport const STYLE = {\n  title: { Color: TITLE_TEXT_GRADIENT },\n};",
+					output: "const MIDDLE = 42;\nexport const STYLE = {\n  title: { Color: new ColorSequence([\n  new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),\n  new ColorSequenceKeypoint(1, Color3.fromRGB(251, 120, 255)),\n]) },\n};",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes non-adjacent static factory with binary argument", rule, {
+			invalid: [
+				{
+					code: "const TITLE_PADDING = new UDim(0, 1 + 2);\nconst MIDDLE = 42;\nconst STYLE = { padding: TITLE_PADDING };",
+					output: "const MIDDLE = 42;\nconst STYLE = { padding: new UDim(0, 1 + 2) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes non-adjacent static factory with conditional argument", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(true ? 255 : 128, 120, 255);\nconst MIDDLE = 42;\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const MIDDLE = 42;\nconst STYLE = { color: Color3.fromRGB(true ? 255 : 128, 120, 255) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes non-adjacent static factory with object argument", rule, {
+			invalid: [
+				{
+					code: "const TWEEN_INFO = new TweenInfo({ Time: 1, DelayTime: 0 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					output: "const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ Time: 1, DelayTime: 0 }) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: 'const TWEEN_INFO = new TweenInfo({ ["Time"]: 1 });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };',
+					output: 'const MIDDLE = 42;\nconst STYLE = { tween: new TweenInfo({ ["Time"]: 1 }) };',
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes wrapped static factory initializers", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80));\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) as Color3;\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) as Color3 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80)!;\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80)! };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) satisfies Color3;\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) satisfies Color3 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_COLOR = Color3.fromRGB<number>(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: Color3.fromRGB<number>(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_COLOR = Color3?.fromRGB(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: Color3?.fromRGB(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_COLOR = <Color3>Color3.fromRGB(255, 120, 80);\nconst STYLE = { color: TITLE_COLOR };",
+					output: "const STYLE = { color: <Color3>Color3.fromRGB(255, 120, 80) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		{
+			const templateExpression = String.raw({ raw: ["`", "{Color3.fromRGB(255, 120, 80)}`"] }, "$");
+
+			ts.run("auto-fixes static factory expression containers", rule, {
+				invalid: [
+					{
+						code: `const TITLE_TEXT = ${templateExpression};\nconst STYLE = { text: TITLE_TEXT };`,
+						output: `const STYLE = { text: ${templateExpression} };`,
+						errors: [{ messageId: "uselessConstant" }],
+					},
+					{
+						code: "const TITLE_SIZE = +UDim2.fromOffset(1, 2).X.Offset;\nconst STYLE = { size: TITLE_SIZE };",
+						output: "const STYLE = { size: +UDim2.fromOffset(1, 2).X.Offset };",
+						errors: [{ messageId: "uselessConstant" }],
+					},
+					{
+						code: 'const TITLE_ANCHOR = Vector2["yAxis"];\nconst STYLE = { anchor: TITLE_ANCHOR };',
+						output: 'const STYLE = { anchor: Vector2["yAxis"] };',
+						errors: [{ messageId: "uselessConstant" }],
+					},
+					{
+						code: "const TITLE_COLOR = Color3.fromRGB(255, 120, 80) ?? Color3.fromRGB(90, 90, 90);\nconst STYLE = { color: TITLE_COLOR };",
+						output: "const STYLE = { color: Color3.fromRGB(255, 120, 80) ?? Color3.fromRGB(90, 90, 90) };",
+						errors: [{ messageId: "uselessConstant" }],
+					},
+				],
+				valid: [],
+			});
+		}
+
+		ts.run("auto-fixes static factory arrays with safe elements", rule, {
+			invalid: [
+				{
+					code: "const COLOR_SEQUENCE = new ColorSequence([ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0))]);\nconst STYLE = { color: COLOR_SEQUENCE };",
+					output: "const STYLE = { color: new ColorSequence([ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0))]) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("reports unsafe inline expression shapes without autofix", rule, {
+			invalid: [
+				{
+					code: "const TITLE_COLOR = (Color3.fromRGB(255, 120, 80), Color3.fromRGB(90, 90, 90));\nconst STYLE = { color: TITLE_COLOR };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "const TITLE_COLOR = new ColorSequence([, ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 90, 90))]);\nconst STYLE = { color: TITLE_COLOR };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("auto-fixes multiple same-scope constants in one pass", rule, {
+			invalid: [
+				{
+					code: "const TITLE_TEXT_GRADIENT = new ColorSequence(Color3.fromRGB(255, 255, 255));\nconst OUTLINE_GRADIENT = new ColorSequence(Color3.fromRGB(252, 178, 255));\nexport const STYLE = {\n  title: { Color: TITLE_TEXT_GRADIENT },\n  outline: { Color: OUTLINE_GRADIENT },\n};",
+					output: "export const STYLE = {\n  title: { Color: new ColorSequence(Color3.fromRGB(255, 255, 255)) },\n  outline: { Color: new ColorSequence(Color3.fromRGB(252, 178, 255)) },\n};",
+					errors: [{ messageId: "uselessConstants" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("reports non-adjacent non-literal constant without autofix", rule, {
+			invalid: [
+				{
+					code: "const TITLE_OFFSET = getOffset();\nconst MIDDLE = 42;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("reports non-adjacent imported factory call without autofix", rule, {
+			invalid: [
+				{
+					code: 'import { makeGradient } from "styles";\nconst TITLE_GRADIENT = makeGradient(1);\nconst MIDDLE = 42;\nconst STYLE = { gradient: TITLE_GRADIENT };',
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "const TWEEN_INFO = new TweenInfo({ ...defaults });\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "const TWEEN_INFO = new TweenInfo(...defaults);\nconst MIDDLE = 42;\nconst STYLE = { tween: TWEEN_INFO };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("reports comment-attached constant without autofix", rule, {
+			invalid: [
+				{
+					code: "// important note\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "const TITLE_OFFSET = 225;\n// keep with offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "const TITLE_OFFSET = /* keep */ 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "const TITLE_OFFSET = 225; // keep offset\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: "// file note\n\nconst TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: "// file note\n\nconst TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_OFFSET = 225;\n\n// detached note\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+					output: "// detached note\nconst TEXT_NATIVE = { Offset: 225 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };\n\n// file note",
+					output: "const TEXT_NATIVE = { Offset: 225 };\n\n// file note",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+	});
+
+	describe("local scope handling", () => {
+		ts.run("reports local ALL_CAPS constant inside function body", rule, {
+			invalid: [
+				{
+					code: "function render() {\n  const OFFSET_X = 42;\n  const CONFIG = { x: OFFSET_X };\n  return CONFIG;\n}",
+					output: "function render() {\n  const CONFIG = { x: 42 };\n  return CONFIG;\n}",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("skips local ALL_CAPS constant referenced outside const initializer", rule, {
+			invalid: [],
+			valid: [
+				"function render(OFFSET_X) {\n  const CONFIG = { x: OFFSET_X };\n  return CONFIG;\n}",
+				"function render() {\n  const OFFSET_X = 42;\n  console.log(OFFSET_X);\n}",
+				"const TITLE_OFFSET = 225;\nlet textNative = { Offset: TITLE_OFFSET };",
+				"let TITLE_OFFSET = 225;\nconst TEXT_NATIVE = { Offset: TITLE_OFFSET };",
+			],
+		});
+	});
+
+	describe("cross-scope guard", () => {
+		ts.run("skips module-level constant used inside function body", rule, {
+			invalid: [],
+			valid: [
+				"const SPRING_OPTIONS = { dampingRatio: 0.6, frequency: 10 };\nfunction render() {\n  const CONFIG = { spring: SPRING_OPTIONS };\n  return CONFIG;\n}",
+			],
+		});
+
+		tsx.run("skips module-level spring config used inside React component body", rule, {
+			invalid: [],
+			valid: [
+				"const SPRING_CONFIG = { dampingRatio: 0.55, frequency: 0.154 };\nexport default function Component() {\n  const positionY = useEasyRippleSpring(0.037, SPRING_CONFIG);\n  return positionY;\n}",
+			],
+		});
+
+		tsx.run("skips module-level constant used inside React component", rule, {
+			invalid: [],
+			valid: [
+				"const POSITION_SPRING_OPTIONS = { dampingRatio: 0.6, frequency: 10 };\nexport default function HudLeft() {\n  const result = useSpring(POSITION_SPRING_OPTIONS);\n  return <frame />;\n}",
+			],
+		});
+	});
+
+	describe("no-false-positive guards", () => {
+		ts.run("skips exported constants", rule, {
+			invalid: [],
+			valid: [
+				"export const TITLE_GRADIENT = new ColorSequence(Color3.fromRGB(225, 225, 128), Color3.fromRGB(196, 196, 64));",
+			],
+		});
+
+		ts.run("skips constants referenced more than once", rule, {
+			invalid: [],
+			valid: [
+				"const TITLE_GRADIENT = new ColorSequence(Color3.fromRGB(225, 225, 128), Color3.fromRGB(196, 196, 64));\nconst FIRST_USE = { Color: TITLE_GRADIENT };\nconst SECOND_USE = { Color: TITLE_GRADIENT };",
+			],
+		});
+
+		ts.run("skips constants with write references", rule, {
+			invalid: [],
+			valid: ["const TITLE_OFFSET = 225;\nTITLE_OFFSET = 128;"],
+		});
+
+		ts.run("skips script global constants", rule, {
+			invalid: [],
+			valid: [{ code: "const TITLE_OFFSET = 225;", sourceType: "script" }],
+		});
+
+		ts.run("skips non-ALL_CAPS names", rule, {
+			invalid: [],
+			valid: [
+				"const titleGradient = new ColorSequence(Color3.fromRGB(225, 225, 128), Color3.fromRGB(196, 196, 64));\nconst wrapper = { Color: titleGradient };",
+			],
+		});
+
+		ts.run("skips destructuring patterns", rule, {
+			invalid: [],
+			valid: ["const { TITLE_GRADIENT } = getStyles();\nconst WRAPPER = { Color: TITLE_GRADIENT };"],
+		});
+
+		ts.run("skips multi-declarator declarations", rule, {
+			invalid: [],
+			valid: [
+				"const TITLE_GRADIENT = new ColorSequence(Color3.fromRGB(225, 225, 128), Color3.fromRGB(196, 196, 64)), OTHER = 42;\nconst WRAPPER = { Color: TITLE_GRADIENT };",
+			],
+		});
+
+		tsx.run("skips reused JSX element constants", rule, {
+			invalid: [],
+			valid: [
+				"const UI_GRADIENT = <uigradient Color={new ColorSequence(Color3.fromRGB(191, 88, 255))} />;\nconst FIRST_SLOT = { child: UI_GRADIENT };\nconst SECOND_SLOT = { child: UI_GRADIENT };",
+			],
+		});
+
+		ts.run("skips function initializer constants", rule, {
+			invalid: [],
+			valid: ["const HANDLER = () => {};\nconst WRAPPER = { callback: HANDLER };"],
+		});
+
+		ts.run("skips class initializer constants", rule, {
+			invalid: [],
+			valid: ["const HANDLER = class { render() {} };\nconst WRAPPER = { value: HANDLER };"],
+		});
+
+		ts.run("skips shadowed constants", rule, {
+			invalid: [],
+			valid: [
+				"const TITLE_GRADIENT = new ColorSequence(Color3.fromRGB(225, 225, 128), Color3.fromRGB(196, 196, 64));\nfunction render() { const TITLE_GRADIENT = new ColorSequence(Color3.fromRGB(0, 0, 0)); return { Color: TITLE_GRADIENT }; }",
+			],
+		});
+	});
+
+	describe("object allocation guard", () => {
+		ts.run("skips object literal constant", rule, {
+			invalid: [],
+			valid: [
+				"const POSITION_SPRING_OPTIONS = { dampingRatio: 0.6, frequency: 10 };\nconst CONFIG = { spring: POSITION_SPRING_OPTIONS };",
+			],
+		});
+
+		ts.run("skips array literal constant", rule, {
+			invalid: [],
+			valid: ["const EMPTY_MOB_IDS = [];\nconst HIDDEN = { mobIds: EMPTY_MOB_IDS };"],
+		});
+
+		ts.run("skips new Array constant", rule, {
+			invalid: [],
+			valid: [
+				"const EMPTY_MOB_IDS: ReadonlyArray<MobId> = new Array<MobId>();\nconst HIDDEN = { mobIds: EMPTY_MOB_IDS };",
+			],
+		});
+
+		ts.run("reports same-scope Roblox datatype constructor constant", rule, {
+			invalid: [
+				{
+					code: "const SHADOW_POSITION = UDim2.fromScale(-0.7, 0.7);\nconst SHADOW_NATIVE_PROPERTIES = { Position: SHADOW_POSITION };",
+					output: "const SHADOW_NATIVE_PROPERTIES = { Position: UDim2.fromScale(-0.7, 0.7) };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("reports same-scope Roblox datatype member constant", rule, {
+			invalid: [
+				{
+					code: "const SHADOW_ANCHOR = Vector2.yAxis;\nconst SHADOW_NATIVE_PROPERTIES = { AnchorPoint: SHADOW_ANCHOR };",
+					output: "const SHADOW_NATIVE_PROPERTIES = { AnchorPoint: Vector2.yAxis };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("skips configured call pattern", rule, {
+			invalid: [],
+			valid: [
+				{
+					code: "const SHADOW_POSITION = UDim2.fromScale(-0.7, 0.7);\nconst SHADOW_NATIVE_PROPERTIES = { Position: SHADOW_POSITION };",
+					options: [{ ignoreCallPatterns: [String.raw`^UDim2\b`] }],
+				},
+			],
+		});
+
+		tsx.run("skips JSX element constant", rule, {
+			invalid: [],
+			valid: [
+				"const UI_CORNER = <uicorner CornerRadius={new UDim(1, 0)} />;\nconst FILL_FRAME = <frame>{UI_CORNER}</frame>;",
+			],
+		});
+	});
+});
