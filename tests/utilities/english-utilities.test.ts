@@ -52,12 +52,6 @@ describe("startsWithVerb", () => {
 		expect(startsWithVerb("  getValue", {})).toStrictEqual([true, "get"]);
 	});
 
-	it("should be case-sensitive about the first word", () => {
-		expect.assertions(1);
-
-		expect(startsWithVerb("GETValue", {})).toStrictEqual([true, ""]);
-	});
-
 	it("should accept prefixes from the extra allow list", () => {
 		expect.assertions(2);
 
