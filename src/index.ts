@@ -15,6 +15,7 @@ import noUnknownTypeAliases from "$oxc-rules/anti-slop/no-unknown-type-aliases";
 import noUnsafeDictionaryType from "$oxc-rules/anti-slop/no-unsafe-dictionary-type";
 import noWidenThenAssert from "$oxc-rules/anti-slop/no-widen-then-assert";
 import requireSafetyCommentForTypeAssertion from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
+import startsWithVerb from "$oxc-rules/english/starts-with-verb";
 import directiveDisableEnablePair from "$oxc-rules/general/directive-disable-enable-pair";
 import directiveNoAggregatingEnable from "$oxc-rules/general/directive-no-aggregating-enable";
 import directiveNoDuplicateDisable from "$oxc-rules/general/directive-no-duplicate-disable";
@@ -259,6 +260,7 @@ const smallRules = definePlugin({
 		"require-throw-error-capture": requireThrowErrorCapture,
 		"require-unicode-regex": requireUnicodeRegex,
 		"rerender-memo-with-default-value": rerenderMemoWithDefaultValue,
+		"starts-with-verb": startsWithVerb,
 		"strict-component-boundaries": strictComponentBoundaries,
 		"use-exhaustive-dependencies": useExhaustiveDependencies,
 		"use-hook-at-top-level": useHookAtTopLevel,

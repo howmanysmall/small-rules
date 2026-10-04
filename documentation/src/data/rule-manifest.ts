@@ -1,7 +1,7 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
-export type RuleCategoryKey = "anti-slop" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
+export type RuleCategoryKey = "anti-slop" | "english" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
 
 export interface RuleManifestEntry {
 	readonly name: RuleName;
@@ -134,6 +134,12 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "prevent-abbreviations" },
 				{ name: "require-async-suffix" },
 			],
+		},
+		{
+			key: "english",
+			description: "Rules for reading code as English, such as verb-first function names.",
+			label: "English",
+			rules: [{ name: "starts-with-verb" }],
 		},
 		{
 			key: "anti-slop",

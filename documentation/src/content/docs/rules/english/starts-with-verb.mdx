@@ -1,0 +1,20 @@
+---
+title: "Starts With Verb"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="starts-with-verb">
+	<Fragment slot="rationale">
+		<p>
+			A function does something, so its name should say what. `getUserProfile()` reads as an action at the call
+			site; `userProfile()` reads like a value, and you have to check whether it is one.
+		</p>
+		<p>
+			Names with no lowercase prefix, such as `UserProfile` components, are left alone. It also backs off where
+			you don't get to pick the name: `override` members, getters and setters, constructors, computed keys, and
+			methods on an object you pass straight into a call, a `new`, or a `satisfies`. Add your own words with
+			`allowList`, and reject words with `denyList`.
+		</p>
+	</Fragment>
+</RulePage>
