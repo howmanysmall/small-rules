@@ -57,6 +57,47 @@ describe("startsWithVerb", () => {
 		expect(startsWithVerb(name, {})).toStrictEqual([true, prefix]);
 	});
 
+	it.each([
+		["throwsError", "throws"],
+		["emitsChange", "emits"],
+		["matchesPattern", "matches"],
+		["appliesPatch", "applies"],
+		["goesAway", "goes"],
+	])("should accept the third-person singular verb prefix in %s", (name, prefix) => {
+		expect.assertions(1);
+
+		expect(startsWithVerb(name, {})).toStrictEqual([true, prefix]);
+	});
+
+	it("should reject plural nouns whose singular is not a verb", () => {
+		expect.assertions(2);
+
+		expect(startsWithVerb("itemsCount", {})).toStrictEqual([false, "items"]);
+		expect(startsWithVerb("seriesName", {})).toStrictEqual([false, "series"]);
+	});
+
+	it("should apply the deny lists to the base form of a third-person verb", () => {
+		expect.assertions(2);
+
+		expect(startsWithVerb("filesList", {})).toStrictEqual([false, "files"]);
+		expect(startsWithVerb("throwsError", { extraDenyList: ["throw"] })).toStrictEqual([false, "throws"]);
+	});
+
+	it("should accept the third-person form of a verb from the extra allow list", () => {
+		expect.assertions(1);
+
+		expect(startsWithVerb("foosBar", { extraAllowList: ["foo"] })).toStrictEqual([true, "foos"]);
+	});
+
+	it.each(["decrement", "dequeue", "increment", "tokenize", "unmount", "upsert"])(
+		"should accept the programming verb %s",
+		(name) => {
+			expect.assertions(1);
+
+			expect(startsWithVerb(name, {})).toStrictEqual([true, name]);
+		},
+	);
+
 	it("should reject prefixes that are not verbs", () => {
 		expect.assertions(2);
 

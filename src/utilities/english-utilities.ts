@@ -9,7 +9,6 @@ const AUXILIARY_VERBS = [
 	"can",
 	"could",
 	"did",
-	"does",
 	"had",
 	"has",
 	"have",
@@ -18,7 +17,6 @@ const AUXILIARY_VERBS = [
 	"may",
 	"might",
 	"must",
-	"needs",
 	"ought",
 	"shall",
 	"should",
@@ -26,6 +24,17 @@ const AUXILIARY_VERBS = [
 	"were",
 	"will",
 	"would",
+] satisfies ReadonlyArray<string>;
+
+// Programming jargon that general English dictionaries only know as nouns, if
+// at all.
+const PROGRAMMING_VERBS = [
+	"decrement",
+	"dequeue",
+	"increment",
+	"tokenize",
+	"unmount",
+	"upsert",
 ] satisfies ReadonlyArray<string>;
 
 const ALLOW_LIST = [
@@ -50,6 +59,7 @@ type StartsWithTuple = readonly [doesStartWith: boolean, prefix: string];
 
 const BASE_ALLOW = new Set<string>(complete);
 for (const verb of AUXILIARY_VERBS) BASE_ALLOW.add(verb);
+for (const verb of PROGRAMMING_VERBS) BASE_ALLOW.add(verb);
 for (const verb of ALLOW_LIST) BASE_ALLOW.add(verb);
 
 const BASE_DENY = new Set<string>(["file", "string"] satisfies ReadonlyArray<string>);
@@ -71,6 +81,30 @@ function getLowercasePrefix(functionName: string): string {
 	return (index === length ? functionName : functionName.slice(0, index)).trim();
 }
 
+function isAllowed(word: string, extraAllowList: ReadonlyArray<string>): boolean {
+	return BASE_ALLOW.has(word) || extraAllowList.includes(word);
+}
+
+function isDenied(word: string, extraDenyList: ReadonlyArray<string>): boolean {
+	return BASE_DENY.has(word) || extraDenyList.includes(word);
+}
+
+function getThirdPersonBase(word: string, extraAllowList: ReadonlyArray<string>): string | undefined {
+	if (word.endsWith("ies")) {
+		const base = `${word.slice(0, -3)}y`;
+		if (isAllowed(base, extraAllowList)) return base;
+	}
+	if (word.endsWith("es")) {
+		const base = word.slice(0, -2);
+		if (isAllowed(base, extraAllowList)) return base;
+	}
+	if (word.endsWith("s")) {
+		const base = word.slice(0, -1);
+		if (isAllowed(base, extraAllowList)) return base;
+	}
+	return undefined;
+}
+
 export function startsWithVerb(
 	functionName: string,
 	{ extraAllowList = EMPTY_LIST, extraDenyList = EMPTY_LIST }: StartsWithVerbOptions,
@@ -78,6 +112,9 @@ export function startsWithVerb(
 	const prefix = getLowercasePrefix(functionName);
 	if (prefix.length === 0) return NO_PREFIX;
 
-	if (BASE_DENY.has(prefix) || extraDenyList.includes(prefix)) return [false, prefix];
-	return [BASE_ALLOW.has(prefix) || extraAllowList.includes(prefix), prefix];
+	if (isDenied(prefix, extraDenyList)) return [false, prefix];
+	if (isAllowed(prefix, extraAllowList)) return [true, prefix];
+
+	const base = getThirdPersonBase(prefix, extraAllowList);
+	return [base !== undefined && !isDenied(base, extraDenyList), prefix];
 }

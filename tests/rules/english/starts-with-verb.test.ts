@@ -18,11 +18,11 @@ describe("starts-with-verb", () => {
 				errors: [{ data: { name: "data", prefix: "data" }, messageId: "notVerb" }],
 			},
 			{
-				code: "const amount = function (): number { return 1; };",
+				code: "const quantity = function (): number { return 1; };",
 				errors: notVerbErrors,
 			},
 			{
-				code: ["class Store {", "\tpublic amount(): number {", "\t\treturn 1;", "\t}", "}"].join("\n"),
+				code: ["class Store {", "\tpublic quantity(): number {", "\t\treturn 1;", "\t}", "}"].join("\n"),
 				errors: notVerbErrors,
 			},
 			{
@@ -86,6 +86,9 @@ describe("starts-with-verb", () => {
 			"function doesExist(): boolean { return true; }",
 			"const wasCancelled = (): boolean => true;",
 			["class Store {", "\tpublic needsUpdate(): boolean {", "\t\treturn true;", "\t}", "}"].join("\n"),
+			"function throwsUnavailableSourceCode(): never { throw new Error(''); }",
+			["let functionDepth = 0;", "function increment(): void {", "\tfunctionDepth += 1;", "}"].join("\n"),
+			["let functionDepth = 0;", "function decrement(): void {", "\tfunctionDepth -= 1;", "}"].join("\n"),
 			"function UserProfile(): undefined { return undefined; }",
 			"export default function (): void {}",
 			"const amount = 1;",
