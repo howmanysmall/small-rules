@@ -85,7 +85,7 @@ function ensureUnicodeFlag(flags: string): string {
 	return flags.includes("u") || flags.includes("v") ? flags : `${flags}u`;
 }
 
-function cachedRegex(pattern: string, flags: string): RegExp {
+function getCachedRegex(pattern: string, flags: string): RegExp {
 	const cacheKey = `${flags}:${pattern}`;
 	const cached = regexCache.get(cacheKey);
 	if (cached !== undefined) return cached;
@@ -116,18 +116,18 @@ function getFileText(filePath: string): string {
 function getImportStyle(text: string, componentName: string): "default" | "named" | undefined {
 	const escapedName = escapeRegExp(componentName);
 	const hasNamedExport =
-		cachedRegex(`\\bexport\\s+(?:const|function|class)\\s+${escapedName}\\b`, "u").test(text) ||
-		cachedRegex(`\\bexport\\s*\\{[^}]*\\b${escapedName}\\b[^}]*\\}`, "u").test(text);
+		getCachedRegex(`\\bexport\\s+(?:const|function|class)\\s+${escapedName}\\b`, "u").test(text) ||
+		getCachedRegex(`\\bexport\\s*\\{[^}]*\\b${escapedName}\\b[^}]*\\}`, "u").test(text);
 	if (hasNamedExport) return "named";
 
-	return DEFAULT_EXPORT_PATTERN.test(text) && cachedRegex(`\\b${escapedName}\\b`, "u").test(text)
+	return DEFAULT_EXPORT_PATTERN.test(text) && getCachedRegex(`\\b${escapedName}\\b`, "u").test(text)
 		? "default"
 		: undefined;
 }
 
 function hasExpectedMarkers(text: string, markers: ReadonlyArray<string>): boolean {
 	for (const marker of markers) {
-		if (!cachedRegex(`\\b${escapeRegExp(marker)}\\b`, "u").test(text)) return false;
+		if (!getCachedRegex(`\\b${escapeRegExp(marker)}\\b`, "u").test(text)) return false;
 	}
 
 	return true;
@@ -218,7 +218,7 @@ function resolveWalkLayers(
 	return ownLayer === undefined ? inheritedLayers : [...inheritedLayers, ownLayer];
 }
 
-function entryFullPathIfVisible(
+function getEntryFullPathIfVisible(
 	entry: Dirent,
 	directory: string,
 	layers: ReadonlyArray<GitignoreLayer>,
@@ -251,7 +251,7 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 			if (isSkippedEntryName(entry.name)) continue;
 
 			const isDirectory = entry.isDirectory();
-			const fullPath = entryFullPathIfVisible(entry, directory, layers, isDirectory);
+			const fullPath = getEntryFullPathIfVisible(entry, directory, layers, isDirectory);
 			if (fullPath === undefined) continue;
 
 			if (isDirectory) visit(fullPath, layers);
@@ -306,7 +306,7 @@ export function inspectLocalComponentFile(
 	if (!fileNames.includes(baseName)) return { importStyle: undefined, matches: false };
 
 	const text = getFileText(filePath);
-	if (!cachedRegex(`\\b${escapeRegExp(definition.componentName)}\\b`, "u").test(text)) {
+	if (!getCachedRegex(`\\b${escapeRegExp(definition.componentName)}\\b`, "u").test(text)) {
 		return { importStyle: undefined, matches: false };
 	}
 

@@ -6,17 +6,17 @@ import {
 	isValidIdentifier,
 } from "$oxc-utilities/prevent-abbreviations/identifier";
 
-function asciiCodePoint(value: string): number {
+function getAsciiCodePoint(value: string): number {
 	return value.codePointAt(0) ?? 0;
 }
 
 describe("prevent-abbreviations identifier utilities", () => {
 	describe("isIdentifierStartCodePoint behavior", () => {
 		describe.each([
-			{ expected: true, label: "ASCII letters A-Z", value: asciiCodePoint("A") },
-			{ expected: true, label: "ASCII letters A-Z", value: asciiCodePoint("Z") },
-			{ expected: true, label: "dollar sign", value: asciiCodePoint("$") },
-			{ expected: true, label: "underscore", value: asciiCodePoint("_") },
+			{ expected: true, label: "ASCII letters A-Z", value: getAsciiCodePoint("A") },
+			{ expected: true, label: "ASCII letters A-Z", value: getAsciiCodePoint("Z") },
+			{ expected: true, label: "dollar sign", value: getAsciiCodePoint("$") },
+			{ expected: true, label: "underscore", value: getAsciiCodePoint("_") },
 			{ expected: true, label: "CJK punctuation range 0x3001", value: 0x30_01 },
 			{ expected: true, label: "extended Latin start range 0x00C0", value: 0x00_c0 },
 			{ expected: true, label: "extended Latin start range 0x0370", value: 0x03_70 },
@@ -36,7 +36,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 		});
 
 		describe.each([
-			{ expected: false, label: "ASCII exclamation mark", value: asciiCodePoint("!") },
+			{ expected: false, label: "ASCII exclamation mark", value: getAsciiCodePoint("!") },
 			{ expected: false, label: "non-spacing stroke 0x00D7", value: 0x00_d7 },
 			{ expected: false, label: "non-spacing middle dot 0x00F7", value: 0x00_f7 },
 			{ expected: false, label: "extended Greek 0x037E", value: 0x03_7e },
@@ -59,12 +59,12 @@ describe("prevent-abbreviations identifier utilities", () => {
 
 	describe("isIdentifierPartCodePoint behavior", () => {
 		describe.each([
-			{ expected: true, label: "digit", value: asciiCodePoint("9") },
+			{ expected: true, label: "digit", value: getAsciiCodePoint("9") },
 			{ expected: true, label: "format effector 0x200C", value: 0x20_0c },
 			{ expected: true, label: "format effector 0x200D", value: 0x20_0d },
 			{ expected: true, label: "extended Greek 0x0300", value: 0x03_00 },
 			{ expected: true, label: "spacing combining 0x2030", value: 0x20_30 },
-			{ expected: true, label: "letter A", value: asciiCodePoint("A") },
+			{ expected: true, label: "letter A", value: getAsciiCodePoint("A") },
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);
@@ -74,8 +74,8 @@ describe("prevent-abbreviations identifier utilities", () => {
 		});
 
 		describe.each([
-			{ expected: false, label: "ASCII exclamation mark", value: asciiCodePoint("!") },
-			{ expected: false, label: "plain space", value: asciiCodePoint(" ") },
+			{ expected: false, label: "ASCII exclamation mark", value: getAsciiCodePoint("!") },
+			{ expected: false, label: "plain space", value: getAsciiCodePoint(" ") },
 		])("$label", ({ expected, value }) => {
 			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
 				expect.assertions(1);

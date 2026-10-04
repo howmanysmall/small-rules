@@ -164,7 +164,7 @@ function unwrapCallArgumentExpression(expression: ESTree.Expression): ESTree.Exp
 	return current;
 }
 
-function annotationTarget(
+function getAnnotationTarget(
 	annotation: ESTree.TSTypeAnnotation | null | undefined,
 	environment: TypeEnvironment,
 ): undefined | WideningTarget {
@@ -189,7 +189,7 @@ function getSourceKeyName(sourceCode: SourceCode, key: ESTree.PropertyKey): stri
 
 const ANONYMOUS = "anonymous function";
 
-function functionName(sourceCode: SourceCode, owner?: FunctionExpression): string {
+function getFunctionName(sourceCode: SourceCode, owner?: FunctionExpression): string {
 	/* v8 ignore next 3 -- top-level returns only occur in script sources this suite does not exercise. @preserve */
 	if (owner === undefined) return ANONYMOUS;
 	if (owner.id !== null) return owner.id.name;
@@ -258,9 +258,9 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			});
 		}
 
-		function targetFromAnnotation(annotation?: ESTree.TSTypeAnnotation | null): undefined | WideningTarget {
+		function getTargetFromAnnotation(annotation?: ESTree.TSTypeAnnotation | null): undefined | WideningTarget {
 			/* v8 ignore next -- the environment is always built by the Program visitor first. @preserve */
-			return environment === undefined ? undefined : annotationTarget(annotation, environment);
+			return environment === undefined ? undefined : getAnnotationTarget(annotation, environment);
 		}
 
 		return {
@@ -269,7 +269,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				if (!isAccessorProperty(node) || node.value === null) return;
 				reportFlow(
 					node.value,
-					targetFromAnnotation(node.typeAnnotation),
+					getTargetFromAnnotation(node.typeAnnotation),
 					`property \`${getSourceKeyName(context.sourceCode, node.key)}\``,
 				);
 			},
@@ -277,8 +277,8 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				if (isBlockStatement(node.body)) return;
 				reportFlow(
 					node.body,
-					targetFromAnnotation(node.returnType),
-					`return value of \`${functionName(context.sourceCode, node)}\``,
+					getTargetFromAnnotation(node.returnType),
+					`return value of \`${getFunctionName(context.sourceCode, node)}\``,
 				);
 			},
 			AssignmentExpression(node): void {
@@ -289,7 +289,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 
 				const binding = getVariableDeclarator(variable)?.id;
 				if (!isIdentifierName(binding)) return;
-				reportFlow(node.right, targetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
+				reportFlow(node.right, getTargetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
 			},
 			Program(node): void {
 				environment = createTypeEnvironment(node, context.sourceCode.visitorKeys);
@@ -298,7 +298,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				if (node.value === null) return;
 				reportFlow(
 					node.value,
-					targetFromAnnotation(node.typeAnnotation),
+					getTargetFromAnnotation(node.typeAnnotation),
 					`property \`${getSourceKeyName(context.sourceCode, node.key)}\``,
 				);
 			},
@@ -307,8 +307,8 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				const owner = getEnclosingFunction(node);
 				reportFlow(
 					node.argument,
-					targetFromAnnotation(owner?.returnType),
-					`return value of \`${functionName(context.sourceCode, owner)}\``,
+					getTargetFromAnnotation(owner?.returnType),
+					`return value of \`${getFunctionName(context.sourceCode, owner)}\``,
 				);
 			},
 			TSAsExpression(node): void {
@@ -322,7 +322,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 			},
 			VariableDeclarator(node): void {
 				if (node.init === null || !isIdentifierName(node.id)) return;
-				reportFlow(node.init, targetFromAnnotation(node.id.typeAnnotation), `binding \`${node.id.name}\``);
+				reportFlow(node.init, getTargetFromAnnotation(node.id.typeAnnotation), `binding \`${node.id.name}\``);
 			},
 		};
 	},

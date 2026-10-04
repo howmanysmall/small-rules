@@ -29,6 +29,7 @@ import {
 	PARENTHESIZED_EXPRESSION,
 	SEQUENCE_EXPRESSION,
 	SPREAD_ELEMENT,
+	stripParenthesis,
 	TEMPLATE_LITERAL,
 	TS_AS_EXPRESSION,
 	TS_INSTANTIATION_EXPRESSION,
@@ -36,7 +37,6 @@ import {
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
 	UNARY_EXPRESSION,
-	stripParenthesis,
 } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 

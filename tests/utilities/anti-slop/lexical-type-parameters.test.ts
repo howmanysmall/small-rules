@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
+import { getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import { isNode } from "$oxc-utilities/oxc-utilities";
 import { traverseAst } from "$test/rule-harness/ast";
 import { parseCase } from "$test/rule-harness/parse";
@@ -55,13 +55,13 @@ function findMappedTypeAnnotation(source: HarnessSourceCode): ESTree.TSType {
 	return found;
 }
 
-describe("lexicalTypeParameterNames", () => {
+describe("getLexicalTypeParameterNames", () => {
 	it("stops descending when the node type has no visitor keys", () => {
 		expect.assertions(1);
 
 		const source = parseCode("type Handler<Value> = Value extends { readonly item: infer Item } ? Item : never;");
 		const conditional = findConditionalType(source);
-		const names = lexicalTypeParameterNames(conditional.trueType, {});
+		const names = getLexicalTypeParameterNames(conditional.trueType, {});
 
 		expect([...names]).toStrictEqual(["Value"]);
 	});
@@ -71,7 +71,7 @@ describe("lexicalTypeParameterNames", () => {
 
 		const source = parseCode("type Handler<Value> = Value extends { readonly item: infer Item } ? Item : never;");
 		const conditional = findConditionalType(source);
-		const names = lexicalTypeParameterNames(conditional.trueType, source.visitorKeys);
+		const names = getLexicalTypeParameterNames(conditional.trueType, source.visitorKeys);
 
 		expect([...names].toSorted()).toStrictEqual(["Item", "Value"]);
 	});
@@ -81,7 +81,7 @@ describe("lexicalTypeParameterNames", () => {
 
 		const source = parseCode("type Mappers<Key extends string> = { [Target in Key]: () => void };");
 		const annotation = findMappedTypeAnnotation(source);
-		const names = lexicalTypeParameterNames(annotation, source.visitorKeys);
+		const names = getLexicalTypeParameterNames(annotation, source.visitorKeys);
 
 		expect([...names].toSorted()).toStrictEqual(["Key", "Target"]);
 	});

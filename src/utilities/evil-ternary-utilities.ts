@@ -1,3 +1,3 @@
-export function evilTernary<TValue>(conditional: boolean, trueValue: TValue, falseValue: TValue): TValue {
+export function chooseWithEvilTernary<TValue>(conditional: boolean, trueValue: TValue, falseValue: TValue): TValue {
 	return conditional ? trueValue : falseValue;
 }

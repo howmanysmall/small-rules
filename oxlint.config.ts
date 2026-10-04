@@ -669,7 +669,11 @@ const configuration = isentinel(
 	},
 	{
 		name: "small-rules/disable-stupid-rule",
-		files: ["src/rules/react/no-adjust-state-on-prop-change.ts"],
+		files: [
+			// The file name is the Astro integration id, not the factory.
+			"documentation/src/integrations/contextual-menu.ts",
+			"src/rules/react/no-adjust-state-on-prop-change.ts",
+		],
 		rules: { "sonar/file-name-differ-from-class": "off" },
 	},
 	{

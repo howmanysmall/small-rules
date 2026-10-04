@@ -59,7 +59,7 @@ const COMMIT_MARKER = "__COMMIT__";
  * @param output - Command output.
  * @returns First non-empty line, or undefined.
  */
-function firstLine(output: string): string | undefined {
+function getFirstLine(output: string): string | undefined {
 	const line = output.split("\n", 1)[0]?.trim();
 	return line === "" ? undefined : line;
 }
@@ -169,7 +169,7 @@ export function resolveNewness(
  * @returns Map of rule name to newness classification, filtered to manifest rules.
  */
 export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewness> {
-	const latestTag = firstLine(run(["tag", "--list", "v*", "--sort=-version:refname"]));
+	const latestTag = getFirstLine(run(["tag", "--list", "v*", "--sort=-version:refname"]));
 	if (latestTag === undefined) return new Map();
 
 	const addedInByRule = parseAddCommits(
@@ -193,7 +193,7 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 	for (const commit of commitSet) {
 		firstReleaseByCommit.set(
 			commit,
-			firstLine(run(["tag", "--contains", commit, "--list", "v*", "--sort=version:refname"])),
+			getFirstLine(run(["tag", "--contains", commit, "--list", "v*", "--sort=version:refname"])),
 		);
 	}
 

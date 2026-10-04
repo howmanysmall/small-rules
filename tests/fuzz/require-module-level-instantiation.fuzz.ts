@@ -11,7 +11,7 @@ const IMPORT_STYLES: ReadonlyArray<"default" | "named" | "renamed"> = ["default"
 const NESTED_SCOPES: ReadonlyArray<"arrow" | "function" | "method"> = ["arrow", "function", "method"];
 const execute = createRuleExecutor("require-module-level-instantiation", rule);
 
-function bytesToHex(bytes: Uint8Array): string {
+function convertBytesToHex(bytes: Uint8Array): string {
 	return Buffer.from(bytes).toString("hex");
 }
 
@@ -51,9 +51,9 @@ fuzz(
 		const importStyle = provider.pickValue(IMPORT_STYLES);
 		const nested = provider.consumeBoolean();
 		const tracked = provider.consumeBoolean();
-		const className = `Tracked${bytesToHex(provider.consumeBytes(12))}`;
-		const localName = importStyle === "named" ? className : `Local${bytesToHex(provider.consumeBytes(12))}`;
-		const importSource = `@fuzz/source-${bytesToHex(provider.consumeBytes(16))}`;
+		const className = `Tracked${convertBytesToHex(provider.consumeBytes(12))}`;
+		const localName = importStyle === "named" ? className : `Local${convertBytesToHex(provider.consumeBytes(12))}`;
+		const importSource = `@fuzz/source-${convertBytesToHex(provider.consumeBytes(16))}`;
 		const configuredSource = tracked ? importSource : `${importSource}-untracked`;
 		const configuredClassName = importStyle === "default" ? localName : className;
 		const importDeclaration = createImportDeclaration(importStyle, className, localName, importSource);

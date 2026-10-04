@@ -27,12 +27,12 @@ const FILENAME = nodePath.join(
 );
 const execute = createRuleExecutor("prefer-padding-components", rule);
 
-function bytesToHex(bytes: Uint8Array): string {
+function convertBytesToHex(bytes: Uint8Array): string {
 	return Buffer.from(bytes).toString("hex");
 }
 
 function createExpression(provider: FuzzedDataProvider, prefix: string): string {
-	let expression = `${prefix}${bytesToHex(provider.consumeBytes(12))}`;
+	let expression = `${prefix}${convertBytesToHex(provider.consumeBytes(12))}`;
 	const depth = provider.consumeIntegralInRange(0, 6);
 
 	for (let index = 0; index < depth; index += 1) {
@@ -71,7 +71,7 @@ function createCase(code: string): NormalizedValidCase {
 	};
 }
 
-function expectedMessageId(mode: "directional" | "equal" | "unequal"): string | undefined {
+function getExpectedMessageId(mode: "directional" | "equal" | "unequal"): string | undefined {
 	if (mode === "equal") return "preferEqualPadding";
 	if (mode === "directional") return "preferDirectionalPadding";
 	return undefined;
@@ -100,7 +100,7 @@ export function Example() {
 	return <uipadding PaddingBottom={${first}} PaddingLeft={${paddingLeft}} PaddingRight={${paddingRight}} PaddingTop={${first}} />;
 }`;
 		const result = execute(createCase(code));
-		const messageId = expectedMessageId(mode);
+		const messageId = getExpectedMessageId(mode);
 
 		expect(result.diagnostics.map((diagnostic) => diagnostic.messageId)).toStrictEqual(
 			messageId === undefined ? [] : [messageId],

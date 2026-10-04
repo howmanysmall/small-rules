@@ -15,11 +15,11 @@ import {
 	isSpreadElement,
 	isVariableDeclaration,
 	PARENTHESIZED_EXPRESSION,
+	stripExpressionWrappers,
 	TS_AS_EXPRESSION,
 	TS_NON_NULL_EXPRESSION,
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
-	stripExpressionWrappers,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -164,7 +164,7 @@ function buildLoopContext(loop: ESTree.ForOfStatement): LoopContext | undefined 
 	};
 }
 
-function argumentMatchesName(call: ESTree.CallExpression, name: string | undefined): boolean {
+function hasArgumentNamed(call: ESTree.CallExpression, name: string | undefined): boolean {
 	if (name === undefined) return false;
 	const [argument] = call.arguments;
 	return argument !== undefined && !isSpreadElement(argument) && getIdentifierName(argument) === name;
@@ -202,17 +202,17 @@ function isAllowedMutation(
 	loopContext: LoopContext,
 	mutations: ReadonlyArray<MutationCall>,
 ): boolean {
-	if (method === "delete" && argumentMatchesName(call, loopContext.deleteArgumentName)) return true;
+	if (method === "delete" && hasArgumentNamed(call, loopContext.deleteArgumentName)) return true;
 
 	if (
-		(method === "add" && argumentMatchesName(call, loopContext.addArgumentName)) ||
-		(method === "set" && argumentMatchesName(call, loopContext.setKeyName))
+		(method === "add" && hasArgumentNamed(call, loopContext.addArgumentName)) ||
+		(method === "set" && hasArgumentNamed(call, loopContext.setKeyName))
 	) {
 		const hasEarlierDelete = mutations.some(
 			(other) =>
 				other.call.range[0] < call.range[0] &&
 				other.method === "delete" &&
-				argumentMatchesName(other.call, loopContext.deleteArgumentName),
+				hasArgumentNamed(other.call, loopContext.deleteArgumentName),
 		);
 		return !hasEarlierDelete;
 	}

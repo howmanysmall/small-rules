@@ -26,7 +26,7 @@ const DIRECTIVE_KINDS: ReadonlyArray<string> = [
 
 const DIRECTIVE_WHITESPACE: ReadonlyArray<string> = [" ", "  ", "\t", "\t "];
 
-function bytesToHex(bytes: Uint8Array): string {
+function convertBytesToHex(bytes: Uint8Array): string {
 	return Buffer.from(bytes).toString("hex");
 }
 
@@ -54,8 +54,8 @@ fuzz(
 	(data): void => {
 		const provider = new FuzzedDataProvider(data);
 		const kind = provider.pickValue(DIRECTIVE_KINDS);
-		const value = `rule-${bytesToHex(provider.consumeBytes(24))}`;
-		const description = `reason-${bytesToHex(provider.consumeBytes(24))}`;
+		const value = `rule-${convertBytesToHex(provider.consumeBytes(24))}`;
+		const description = `reason-${convertBytesToHex(provider.consumeBytes(24))}`;
 		const whitespace = provider.pickValue(DIRECTIVE_WHITESPACE);
 		const comment = createComment(`${whitespace}${kind}${whitespace}${value} -- ${description}${whitespace}`);
 
@@ -89,8 +89,8 @@ fuzz(
 	"locates generated rule identifiers exactly",
 	(data): void => {
 		const provider = new FuzzedDataProvider(data);
-		const ruleId = `scope/rule-${bytesToHex(provider.consumeBytes(24))}`;
-		const otherRuleId = `other-${bytesToHex(provider.consumeBytes(24))}`;
+		const ruleId = `scope/rule-${convertBytesToHex(provider.consumeBytes(24))}`;
+		const otherRuleId = `other-${convertBytesToHex(provider.consumeBytes(24))}`;
 		const startLine = provider.consumeIntegralInRange(1, 10_000);
 		const startColumn = provider.consumeIntegralInRange(0, 200);
 		const laterLine = provider.consumeBoolean();

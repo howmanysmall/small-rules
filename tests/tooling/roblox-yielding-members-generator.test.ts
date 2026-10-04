@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	catalogHasYieldingMember,
 	createYieldingMemberCatalog,
+	hasYieldingMemberInCatalog,
 	parseClasses,
 	renderCatalog,
 } from "$script-utilities/roblox-yielding-members";
@@ -31,10 +31,10 @@ describe("roblox yielding-member catalog generation", () => {
 
 		const catalog = createYieldingMemberCatalog(parseClasses(apiDump));
 
-		expect(catalogHasYieldingMember(catalog, "Players", "GetFriendsAsync")).toBe(true);
-		expect(catalogHasYieldingMember(catalog, "Players", "WaitForChild")).toBe(true);
-		expect(catalogHasYieldingMember(catalog, "ServiceProvider", "WaitForChild")).toBe(true);
-		expect(catalogHasYieldingMember(catalog, "Players", "GetAsync")).toBe(false);
+		expect(hasYieldingMemberInCatalog(catalog, "Players", "GetFriendsAsync")).toBe(true);
+		expect(hasYieldingMemberInCatalog(catalog, "Players", "WaitForChild")).toBe(true);
+		expect(hasYieldingMemberInCatalog(catalog, "ServiceProvider", "WaitForChild")).toBe(true);
+		expect(hasYieldingMemberInCatalog(catalog, "Players", "GetAsync")).toBe(false);
 	});
 
 	it("stores each yielding declaration only on its declaring class", () => {

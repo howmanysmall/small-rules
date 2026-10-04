@@ -286,7 +286,7 @@ function appendMemberSegment(path: string, member: ESTree.MemberExpression, sour
 	return `${path}${member.optional ? "?." : "."}${propertyName}`;
 }
 
-function nodeToSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
+function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
 	const members = new Array<ESTree.MemberExpression>();
 	let current = node;
 
@@ -620,7 +620,7 @@ function getCaptureInfo(
 		depth: getMemberExpressionDepth(depthNode),
 		forceDependency: isComputedPropertyIdentifier(current),
 		node: depthNode,
-		usagePath: nodeToSafeDependencyPath(depthNode, sourceCode),
+		usagePath: toSafeDependencyPath(depthNode, sourceCode),
 		variable,
 	};
 }
@@ -709,7 +709,7 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 
 		const actualNode = isSpreadElement(element) ? element.argument : element;
 
-		const name = nodeToSafeDependencyPath(actualNode, sourceCode);
+		const name = toSafeDependencyPath(actualNode, sourceCode);
 		const depth = getMemberExpressionDepth(actualNode);
 
 		dependencies.push({
@@ -884,7 +884,7 @@ function reportUnnecessaryDependencies(
 	}
 }
 
-function dependencyCoversCapture(
+function coversCapture(
 	dependency: DependencyInfo,
 	capture: CaptureInfo,
 	resolveExpressionDependencies: boolean,
@@ -912,11 +912,7 @@ function collectMissingCaptures(
 	for (const capture of getRequiredCaptures(captures, stableHooks)) {
 		/* v8 ignore next -- @preserve required captures are collected from identifier-rooted expressions. */
 		if (getRootIdentifierName(capture.node) === undefined) continue;
-		if (
-			dependencies.some((dependency) =>
-				dependencyCoversCapture(dependency, capture, resolveExpressionDependencies),
-			)
-		) {
+		if (dependencies.some((dependency) => coversCapture(dependency, capture, resolveExpressionDependencies))) {
 			continue;
 		}
 		missingCaptures.push(capture);

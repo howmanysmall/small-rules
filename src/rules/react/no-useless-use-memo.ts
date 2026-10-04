@@ -72,7 +72,7 @@ function getMemoCallbackExpression(node: ESTree.CallExpression): ESTree.Expressi
 	return isReturnStatement(statement) ? (statement.argument ?? undefined) : undefined;
 }
 
-function dependenciesAreNonUpdating(dependenciesKind: DependenciesKind, options: NormalizedOptions): boolean {
+function areDependenciesNonUpdating(dependenciesKind: DependenciesKind, options: NormalizedOptions): boolean {
 	switch (options.dependencyMode) {
 		case DependencyMode.Aggressive:
 			return true;
@@ -129,7 +129,7 @@ const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 					staticOptions,
 					isStaticArrayExpression,
 				);
-				if (!dependenciesAreNonUpdating(dependencies, options)) return;
+				if (!areDependenciesNonUpdating(dependencies, options)) return;
 
 				context.report({
 					messageId: "uselessUseMemo",

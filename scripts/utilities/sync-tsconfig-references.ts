@@ -60,7 +60,7 @@ async function readProjectAsync(rootDirectory: string, directory: string): Promi
 	return directory;
 }
 
-function localeCompare(stringA: string, stringB: string): number {
+function compareUsingLocale(stringA: string, stringB: string): number {
 	return stringA.localeCompare(stringB);
 }
 
@@ -75,7 +75,7 @@ async function findProjectsAsync(rootDirectory: string): Promise<ReadonlyArray<s
 	for (const standalone of STANDALONE_PROJECTS) candidates[size++] = standalone;
 
 	const projects = await Promise.all(
-		candidates.toSorted(localeCompare).map(async (directory) => readProjectAsync(rootDirectory, directory)),
+		candidates.toSorted(compareUsingLocale).map(async (directory) => readProjectAsync(rootDirectory, directory)),
 	);
 	return projects.filter((project) => project !== undefined);
 }
@@ -85,7 +85,7 @@ async function readReferencesAsync(filePath: string): Promise<ReadonlyArray<stri
 	if (!isTsConfig.allows(parsed)) return [];
 
 	const { references = [] } = isTsConfig.assert(parsed);
-	return references.map((reference) => reference.path ?? "").toSorted(localeCompare);
+	return references.map((reference) => reference.path ?? "").toSorted(compareUsingLocale);
 }
 
 async function writeReferencesAsync(filePath: string, referencePaths: ReadonlyArray<string>): Promise<void> {
@@ -123,7 +123,7 @@ async function collectConfigurationFilesAsync(rootDirectory: string): Promise<Re
 		{
 			expectedReferences: [...projects, ...ROOT_CONFIGURATION_FILES]
 				.map((directory) => `./${directory}`)
-				.toSorted(localeCompare),
+				.toSorted(compareUsingLocale),
 			path: TSCONFIG_JSON,
 		},
 	];

@@ -11,10 +11,10 @@ import {
 	continueTypeResolution,
 	createTypeAliasEnvironment,
 	createTypeResolution,
-	hasVisibleTypeBinding,
-	resolveTypeReference,
 	getVisibleInterfaceDeclarations,
 	getVisibleTypeAlias,
+	hasVisibleTypeBinding,
+	resolveTypeReference,
 } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import {
 	isAnyLiteral,
@@ -124,18 +124,18 @@ function isEffectivelyEmptyInterface(declarations: ReadonlyArray<ESTree.TSInterf
 	);
 }
 
-function unsafeGetUnionValue(
+function getUnsafeUnionValue(
 	resolution: TypeResolution,
 	type: ESTree.TSUnionType,
 	environment: TypeEnvironment,
 ): undefined | UnsafeValueKind {
 	for (const member of type.types) {
-		if (unsafeDirectValue(continueTypeResolution(resolution, member), environment) !== undefined) return "union";
+		if (getUnsafeDirectValue(continueTypeResolution(resolution, member), environment) !== undefined) return "union";
 	}
 	return undefined;
 }
 
-function unsafeGetIntersectionValue(
+function getUnsafeIntersectionValue(
 	resolution: TypeResolution,
 	type: ESTree.TSIntersectionType,
 	environment: TypeEnvironment,
@@ -143,7 +143,7 @@ function unsafeGetIntersectionValue(
 	let firstUnsafe: undefined | UnsafeValueKind;
 	let allUnsafe = type.types.length > 0;
 	for (const member of type.types) {
-		const unsafe = unsafeDirectValue(continueTypeResolution(resolution, member), environment);
+		const unsafe = getUnsafeDirectValue(continueTypeResolution(resolution, member), environment);
 		if (unsafe === "any") return "any";
 		if (unsafe === undefined) allUnsafe = false;
 		else firstUnsafe ??= unsafe;
@@ -151,7 +151,7 @@ function unsafeGetIntersectionValue(
 	return allUnsafe ? firstUnsafe : undefined;
 }
 
-function unsafeGetReferenceValue(
+function getUnsafeReferenceValue(
 	resolution: TypeResolution,
 	type: ESTree.TSTypeReference,
 	environment: TypeEnvironment,
@@ -159,27 +159,27 @@ function unsafeGetReferenceValue(
 	const name = getTypeReferenceName(type);
 	if (name === undefined) return undefined;
 	const resolved = resolveTypeReference(resolution, environment.typeAliases);
-	if (resolved !== undefined) return unsafeDirectValue(resolved, environment);
+	if (resolved !== undefined) return getUnsafeDirectValue(resolved, environment);
 	if (TRANSPARENT_WRAPPERS.has(name) && isBuiltIn(name, type, environment)) {
 		const wrapped = type.typeArguments?.params[0];
 		return wrapped === undefined
 			? undefined
-			: unsafeDirectValue(continueTypeResolution(resolution, wrapped), environment);
+			: getUnsafeDirectValue(continueTypeResolution(resolution, wrapped), environment);
 	}
 	const declarations = getVisibleInterfaceDeclarations(name, type, environment.typeAliases);
 	return declarations !== undefined && isEffectivelyEmptyInterface(declarations) ? "empty-object" : undefined;
 }
 
-function unsafeDirectValue(resolution: TypeResolution, environment: TypeEnvironment): undefined | UnsafeValueKind {
+function getUnsafeDirectValue(resolution: TypeResolution, environment: TypeEnvironment): undefined | UnsafeValueKind {
 	const unwrapped = unwrapTransparentResolution(resolution);
 	if (isTsUnknownKeyword(unwrapped.type)) return "unknown";
 	if (isTsAnyKeyword(unwrapped.type)) return "any";
 	if (isTsObjectKeyword(unwrapped.type)) return "object";
 	if (isTsTypeLiteral(unwrapped.type) && isEffectivelyEmptyTypeLiteral(unwrapped.type)) return "empty-object";
-	if (isTsUnionType(unwrapped.type)) return unsafeGetUnionValue(unwrapped, unwrapped.type, environment);
-	if (isTsIntersectionType(unwrapped.type)) return unsafeGetIntersectionValue(unwrapped, unwrapped.type, environment);
+	if (isTsUnionType(unwrapped.type)) return getUnsafeUnionValue(unwrapped, unwrapped.type, environment);
+	if (isTsIntersectionType(unwrapped.type)) return getUnsafeIntersectionValue(unwrapped, unwrapped.type, environment);
 	return isTsTypeReference(unwrapped.type)
-		? unsafeGetReferenceValue(unwrapped, unwrapped.type, environment)
+		? getUnsafeReferenceValue(unwrapped, unwrapped.type, environment)
 		: undefined;
 }
 
@@ -260,7 +260,7 @@ export function classifyUnsafeDictionaryValue(
 	valueType: ESTree.TSType,
 	environment: TypeEnvironment,
 ): undefined | UnsafeDictionary {
-	const unsafeValue = unsafeDirectValue(createTypeResolution(valueType), environment);
+	const unsafeValue = getUnsafeDirectValue(createTypeResolution(valueType), environment);
 	return unsafeValue === undefined ? undefined : { kind: "unsafe-dictionary", unsafeValue };
 }
 
@@ -270,7 +270,7 @@ export function classifyUnsafeDictionary(
 ): undefined | UnsafeDictionary {
 	const valueTypes = getDictionaryValueTypes(createTypeResolution(type), environment);
 	for (const valueType of valueTypes) {
-		const unsafeValue = unsafeDirectValue(valueType, environment);
+		const unsafeValue = getUnsafeDirectValue(valueType, environment);
 		if (unsafeValue !== undefined) return { kind: "unsafe-dictionary", unsafeValue };
 	}
 	return undefined;
@@ -334,7 +334,7 @@ function classifyNonReferenceWidening(
 	return undefined;
 }
 
-function genericAliasTarget(
+function getGenericAliasTarget(
 	alias: ESTree.TSTypeAliasDeclaration | undefined,
 	target: undefined | WideningTarget,
 	allowed: boolean,
@@ -357,7 +357,7 @@ function classifyWideningReferenceResolution(
 	const resolved = resolveTypeReference(resolution, environment.typeAliases);
 	if (resolved !== undefined) {
 		const target = classifyWideningResolution(resolved, environment, true, false);
-		return genericAliasTarget(alias, target, genericContainerAllowed);
+		return getGenericAliasTarget(alias, target, genericContainerAllowed);
 	}
 	if (TRANSPARENT_WRAPPERS.has(name) && isBuiltIn(name, type, environment)) {
 		const wrapped = type.typeArguments?.params[0];

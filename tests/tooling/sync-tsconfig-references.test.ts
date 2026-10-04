@@ -127,7 +127,7 @@ async function writeAsync(rootDirectory: string, relativePath: string, contents:
 	await writeFile(filePath, `${contents}\n`, "utf8");
 }
 
-function manifestFor(name: string): string {
+function getManifestFor(name: string): string {
 	return `{
 	"name": "${name}"
 }`;
@@ -144,20 +144,20 @@ async function createWorkspaceAsync(options: FixtureOptions = {}): Promise<strin
 	await writeAsync(rootDirectory, "tsconfig.lib.json", ROOT_CONFIGURATION);
 	await writeAsync(rootDirectory, "tsconfig.node.json", ROOT_CONFIGURATION);
 	await writeAsync(rootDirectory, "tsconfig.test.json", ROOT_CONFIGURATION);
-	await writeAsync(rootDirectory, "packages/alpha/package.json", manifestFor("@small-rules/alpha"));
+	await writeAsync(rootDirectory, "packages/alpha/package.json", getManifestFor("@small-rules/alpha"));
 	await writeAsync(
 		rootDirectory,
 		"packages/alpha/tsconfig.json",
 		options.illegalPackageReferences === true ? PACKAGE_TSCONFIG_WITH_ILLEGAL_REFERENCES : PACKAGE_TSCONFIG,
 	);
-	await writeAsync(rootDirectory, "packages/beta/package.json", manifestFor("@small-rules/beta"));
+	await writeAsync(rootDirectory, "packages/beta/package.json", getManifestFor("@small-rules/beta"));
 	await writeAsync(rootDirectory, "packages/beta/tsconfig.json", PACKAGE_TSCONFIG);
 	// A directory with a tsconfig but no manifest is not a workspace project.
 	await writeAsync(rootDirectory, "packages/not-a-project/tsconfig.json", PACKAGE_TSCONFIG);
 	// Workspace packages that are not part of the `tsgo --build` solution.
-	await writeAsync(rootDirectory, "documentation/package.json", manifestFor("@small-rules/documentation"));
+	await writeAsync(rootDirectory, "documentation/package.json", getManifestFor("@small-rules/documentation"));
 	await writeAsync(rootDirectory, "documentation/tsconfig.json", PACKAGE_TSCONFIG);
-	await writeAsync(rootDirectory, "scripts/package.json", manifestFor("@small-rules/scripts"));
+	await writeAsync(rootDirectory, "scripts/package.json", getManifestFor("@small-rules/scripts"));
 	await writeAsync(rootDirectory, "scripts/tsconfig.json", PACKAGE_TSCONFIG);
 
 	return rootDirectory;

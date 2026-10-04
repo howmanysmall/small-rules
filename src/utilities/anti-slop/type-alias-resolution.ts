@@ -11,7 +11,7 @@
 // private namespaces by concrete parent block; recognizes import-equals and
 // module competitors; and isolates concrete string-literal module blocks.
 
-import { appendVisitorChildren, lexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
+import { appendVisitorChildren, getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import {
 	isBlockStatement,
 	isClassDeclaration,
@@ -342,7 +342,7 @@ export function getVisibleTypeAlias(
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ESTree.TSTypeAliasDeclaration | undefined {
-	if (lexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
+	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
 	const bindings = getNearestTypeBindings(name, use, environment);
 	return bindings.length === 1 ? bindings[0]?.alias : undefined;
 }
@@ -360,7 +360,7 @@ export function getVisibleInterfaceDeclarations(
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined {
-	if (lexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
+	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
 	const bindings = getNearestTypeBindings(name, use, environment);
 	if (bindings.length === 0) return undefined;
 	const declarations = new Array<ESTree.TSInterfaceDeclaration>();
@@ -381,7 +381,7 @@ export function getVisibleInterfaceDeclarations(
  */
 export function hasVisibleTypeBinding(name: string, use: ESTree.Node, environment: TypeAliasEnvironment): boolean {
 	return (
-		lexicalTypeParameterNames(use, environment.visitorKeys).has(name) ||
+		getLexicalTypeParameterNames(use, environment.visitorKeys).has(name) ||
 		getNearestTypeBindings(name, use, environment).length > 0
 	);
 }
@@ -423,7 +423,7 @@ function getVisibleSubstitution(
 ): Substitution | undefined {
 	const { owner, parameters } = resolution[resolutionContext].environment;
 	if (owner === undefined) return undefined;
-	if (lexicalTypeParameterNames(resolution.type, environment.visitorKeys, owner).has(name)) return undefined;
+	if (getLexicalTypeParameterNames(resolution.type, environment.visitorKeys, owner).has(name)) return undefined;
 	return parameters.get(name);
 }
 

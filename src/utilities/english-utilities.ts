@@ -111,6 +111,7 @@ const PROGRAMMING_VERBS = [
 	"sanitize",
 	"scale",
 	"scan",
+	"score",
 	"seed",
 	"shutdown",
 	"singularize",

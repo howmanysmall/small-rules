@@ -109,7 +109,7 @@ function injectContextualMenuScript(): string {
 `;
 }
 
-export default function contextualMenu(): AstroIntegration {
+export default function createContextualMenuIntegration(): AstroIntegration {
 	return {
 		name: "contextual-menu",
 		hooks: {

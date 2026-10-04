@@ -76,7 +76,7 @@ export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxC
 	return { classes: new Set(classes.keys()), instanceMembers, yieldingMembers };
 }
 
-export function catalogHasYieldingMember(
+export function hasYieldingMemberInCatalog(
 	catalog: YieldingMemberCatalog,
 	className: string,
 	memberName: string,

@@ -51,11 +51,11 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 		if (neighborColor === Color.Gray) {
 			markCycleParticipants(path, neighbor, inCycle);
 			/* v8 ignore start -- idk man @preserve */
-		} else if (neighborColor === Color.White) depthFirstSearch(neighbor, path);
+		} else if (neighborColor === Color.White) searchDepthFirst(neighbor, path);
 		/* v8 ignore stop -- idk man @preserve */
 	}
 
-	function depthFirstSearch(node: string, path: Array<string>): void {
+	function searchDepthFirst(node: string, path: Array<string>): void {
 		color.set(node, Color.Gray);
 		path.push(node);
 
@@ -67,7 +67,7 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 		color.set(node, Color.Black);
 	}
 
-	for (const name of callGraph.keys()) if (color.get(name) === Color.White) depthFirstSearch(name, []);
+	for (const name of callGraph.keys()) if (color.get(name) === Color.White) searchDepthFirst(name, []);
 
 	return inCycle;
 }

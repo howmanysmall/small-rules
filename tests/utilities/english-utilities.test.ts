@@ -108,6 +108,7 @@ describe("startsWithVerb", () => {
 		"hydrate",
 		"increment",
 		"mount",
+		"score",
 		"tokenize",
 		"unmount",
 		"upsert",

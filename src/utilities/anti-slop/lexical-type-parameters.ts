@@ -84,7 +84,7 @@ function collectConditionalInferTypeParameterNames(
 	}
 }
 
-export function lexicalTypeParameterNames(
+export function getLexicalTypeParameterNames(
 	node: ESTree.Node,
 	visitorKeys: SourceCode["visitorKeys"],
 	stopBefore?: ESTree.Node,

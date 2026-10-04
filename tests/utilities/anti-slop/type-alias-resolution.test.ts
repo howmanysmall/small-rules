@@ -614,8 +614,8 @@ describe("visibleInterfaceDeclarations", () => {
 		const local = getVisibleInterfaceDeclarations("Item", findNthTypeReference(source, "Item", 0), environment);
 		const outer = getVisibleInterfaceDeclarations("Item", findNthTypeReference(source, "Item", 1), environment);
 
-		expect(interfacePropertyNames(local)).toStrictEqual(["local"]);
-		expect(interfacePropertyNames(outer)).toStrictEqual(["outer"]);
+		expect(getInterfacePropertyNames(local)).toStrictEqual(["local"]);
+		expect(getInterfacePropertyNames(outer)).toStrictEqual(["outer"]);
 	});
 
 	it("lets a type parameter shadow an interface", () => {
@@ -676,7 +676,7 @@ describe("visibleInterfaceDeclarations", () => {
 			environment,
 		);
 
-		expect(interfacePropertyNames(declarations)).toStrictEqual(["global"]);
+		expect(getInterfacePropertyNames(declarations)).toStrictEqual(["global"]);
 	});
 
 	it("prefers global bindings inside and module bindings outside an augmentation", () => {
@@ -701,12 +701,14 @@ describe("visibleInterfaceDeclarations", () => {
 			environment,
 		);
 
-		expect(interfacePropertyNames(inside)).toStrictEqual(["global"]);
-		expect(interfacePropertyNames(outside)).toStrictEqual(["module"]);
+		expect(getInterfacePropertyNames(inside)).toStrictEqual(["global"]);
+		expect(getInterfacePropertyNames(outside)).toStrictEqual(["module"]);
 	});
 });
 
-function interfacePropertyNames(declarations: ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined): Array<string> {
+function getInterfacePropertyNames(
+	declarations: ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined,
+): Array<string> {
 	const names = new Array<string>();
 	const visibleDeclarations = declarations ?? [];
 	for (const declaration of visibleDeclarations) {

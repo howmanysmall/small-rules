@@ -8,7 +8,7 @@ import { getTsconfig } from "get-tsconfig";
 
 import { ruleRedirects, SITE_BASE } from "./src/data/rule-redirects";
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
-import contextualMenu from "./src/integrations/contextual-menu";
+import createContextualMenuIntegration from "./src/integrations/contextual-menu";
 import { syntaxDarkTheme, syntaxLightTheme } from "./src/utilities/syntax-themes";
 
 import type { AstroIntegration } from "astro";
@@ -129,7 +129,7 @@ export default defineConfig({
 				},
 			}),
 		),
-		ensureAstroIntegration(contextualMenu()),
+		ensureAstroIntegration(createContextualMenuIntegration()),
 	],
 	redirects: ruleRedirects,
 	site: "https://docs.howmanysmall.com",

@@ -47,7 +47,7 @@ interface VariableUsage {
 	readonly writeExpression: ESTree.Expression | undefined;
 }
 
-function statementTransfersControl(node: ESTree.Node): boolean {
+function transfersControl(node: ESTree.Node): boolean {
 	let current = node;
 	while (isBlockStatement(current)) {
 		/* v8 ignore next -- @preserve callers only inspect non-empty consequent blocks. */
@@ -64,7 +64,7 @@ function statementTransfersControl(node: ESTree.Node): boolean {
 	);
 }
 
-function executionRoot(node: ESTree.Node): ESTree.Node {
+function getExecutionRoot(node: ESTree.Node): ESTree.Node {
 	let current = node;
 	while (current.parent !== null) {
 		if (isAnyFunction(current)) return current;
@@ -73,12 +73,12 @@ function executionRoot(node: ESTree.Node): ESTree.Node {
 	return current;
 }
 
-function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
+function getConditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
 	if (isIfStatement(parent)) {
 		if (parent.consequent === current) {
 			return {
 				arm: "then",
-				complete: parent.alternate !== null || statementTransfersControl(parent.consequent),
+				complete: parent.alternate !== null || transfersControl(parent.consequent),
 				control: parent,
 			};
 		}
@@ -90,7 +90,7 @@ function conditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Branc
 	return undefined;
 }
 
-function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
+function getImplicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
 	const blockStatement = isBlockStatement(parent);
 	if (!blockStatement && !isSwitchCase(parent)) return [];
 
@@ -100,7 +100,7 @@ function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyA
 
 	const steps = new Array<BranchStep>();
 	for (const sibling of siblings.slice(0, index)) {
-		if (isIfStatement(sibling) && sibling.alternate === null && statementTransfersControl(sibling.consequent)) {
+		if (isIfStatement(sibling) && sibling.alternate === null && transfersControl(sibling.consequent)) {
 			steps.push({ arm: "else", complete: true, control: sibling });
 		}
 	}
@@ -108,7 +108,7 @@ function implicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyA
 }
 
 function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
-	const conditionalStep = conditionalBranchStep(current, parent);
+	const conditionalStep = getConditionalBranchStep(current, parent);
 	if (conditionalStep !== undefined) return conditionalStep;
 	if (isLogicalExpression(parent) && parent.right === current) {
 		return { arm: "right", complete: false, control: parent };
@@ -132,7 +132,7 @@ function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchS
 	while (current !== root && current.parent !== null) {
 		const step = branchStep(current, current.parent);
 		if (step !== undefined) path.push(step);
-		for (const elseStep of implicitElseSteps(current, current.parent)) path.push(elseStep);
+		for (const elseStep of getImplicitElseSteps(current, current.parent)) path.push(elseStep);
 		current = current.parent;
 	}
 	return path;
@@ -142,7 +142,7 @@ function branchArm(path: ReadonlyArray<BranchStep>, control: ESTree.Node): strin
 	return path.find((step) => step.control === control)?.arm;
 }
 
-function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArray<BranchStep>): boolean {
+function arePathsCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArray<BranchStep>): boolean {
 	for (const step of left) {
 		const rightArm = branchArm(right, step.control);
 		if (rightArm !== undefined && rightArm !== step.arm) return false;
@@ -150,7 +150,7 @@ function pathsAreCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 	return true;
 }
 
-function assignmentReadsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
+function readsPreviousValue(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
 	const { parent } = write.node;
 	if (!isAssignmentExpression(parent)) return false;
 	// Compound assignments (+=, -=, etc.) always read the previous value of the
@@ -212,14 +212,14 @@ function isGuaranteedOverwrite(
 	if (extraSteps.length === 0) return true;
 	if (extraSteps.some((step) => !step.complete)) return false;
 
-	function currentArm(step: BranchStep): string | undefined {
+	function getCurrentArm(step: BranchStep): string | undefined {
 		return branchArm(currentPath, step.control);
 	}
 
 	/* v8 ignore next -- @preserve unreachable: extra steps are filtered to controls absent from the current path. */
 	if (
 		extraSteps.some((step) => {
-			const arm = currentArm(step);
+			const arm = getCurrentArm(step);
 			/* v8 ignore next -- @preserve extra steps cannot reference controls in the current path, so the arm check cannot hold. */
 			return arm !== undefined && arm !== step.arm;
 		})
@@ -232,8 +232,8 @@ function isGuaranteedOverwrite(
 	return mergeCoveredPaths(coveredPaths);
 }
 
-function usageObservesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
-	return (usage.isRead && !usage.isWrite) || (usage.isWrite && assignmentReadsPreviousValue(usage, usages));
+function observesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
+	return (usage.isRead && !usage.isWrite) || (usage.isWrite && readsPreviousValue(usage, usages));
 }
 
 function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
@@ -274,7 +274,9 @@ function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): bool
 }
 
 function isReadAcrossLoop(usage: VariableUsage, write: VariableUsage, root: ESTree.Node): boolean {
-	return usage.isRead && !usage.isWrite && executionRoot(usage.node) === root && hasCommonLoopAncestor(write, usage);
+	return (
+		usage.isRead && !usage.isWrite && getExecutionRoot(usage.node) === root && hasCommonLoopAncestor(write, usage)
+	);
 }
 
 function checkObservation(
@@ -289,11 +291,11 @@ function checkObservation(
 		if (usage.node.range[0] < write.node.range[0] && isReadAcrossLoop(usage, write, root)) return true;
 		return undefined;
 	}
-	if (executionRoot(usage.node) !== root) return undefined;
+	if (getExecutionRoot(usage.node) !== root) return undefined;
 
 	const referencePath = branchPath(usage.node, root);
-	if (pathsAreCompatible(currentPath, referencePath)) {
-		if (usageObservesPreviousValue(usage, usages)) return true;
+	if (arePathsCompatible(currentPath, referencePath)) {
+		if (observesPreviousValue(usage, usages)) return true;
 		if (usage.isWrite && isGuaranteedOverwrite(referencePath, currentPath, coveredPaths)) return false;
 		return undefined;
 	}
@@ -302,7 +304,7 @@ function checkObservation(
 }
 
 function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsage>): boolean {
-	const root = executionRoot(write.node);
+	const root = getExecutionRoot(write.node);
 	const currentPath = branchPath(write.node, root);
 	const coveredPaths = new Array<ReadonlyArray<BranchStep>>();
 
@@ -333,7 +335,7 @@ function isBasicInitializer(node: ESTree.Expression): boolean {
 	return false;
 }
 
-function destructuringHasRest(node: ESTree.Node): boolean {
+function hasRestInDestructuring(node: ESTree.Node): boolean {
 	let current = node;
 	while (current.parent !== null && !isVariableDeclarator(current.parent)) {
 		if (isObjectPattern(current.parent) && current.parent.properties.some(isRestElement)) return true;
@@ -377,7 +379,7 @@ function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
 		isAssignmentPattern(parent) ||
 		isUpdateExpression(parent) ||
 		(isAssignmentExpression(parent) && isAnyLiteral(parent.right) && parent.right.value === null) ||
-		destructuringHasRest(usage.node) ||
+		hasRestInDestructuring(usage.node) ||
 		(usage.init && usage.writeExpression !== undefined && isBasicInitializer(usage.writeExpression))
 	) {
 		return false;
@@ -387,8 +389,8 @@ function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
 }
 
 function isCaptured(variable: Variable): boolean {
-	const roots = new Set(variable.references.map((reference) => executionRoot(reference.identifier)));
-	for (const definition of variable.defs) roots.add(executionRoot(definition.name));
+	const roots = new Set(variable.references.map((reference) => getExecutionRoot(reference.identifier)));
+	for (const definition of variable.defs) roots.add(getExecutionRoot(definition.name));
 	return variable.references.some((reference) => reference.isRead()) && roots.size > 1;
 }
 

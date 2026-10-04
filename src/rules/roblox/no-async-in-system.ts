@@ -152,7 +152,7 @@ function getMemberChain(expression: ESTree.Expression): MemberChain | undefined 
 	return isIdentifierName(current) ? { path, root: current } : undefined;
 }
 
-function pathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
+function arePathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
 	return left.length === right.length && left.every((part, index) => part === right[index]);
 }
 
@@ -186,7 +186,7 @@ function isMatchingConfiguration(
 ): boolean {
 	if (binding.source !== configuration.source) return false;
 	if (binding.imported !== configuration.imported) return false;
-	return pathsEqual(chainPath, configuration.memberPath);
+	return arePathsEqual(chainPath, configuration.memberPath);
 }
 
 function tryRecordConfiguredCallback(
@@ -458,7 +458,7 @@ function getSynchronousCallbacks(
 	if (calleePath === undefined) return callbacks;
 
 	for (const configuration of configurations) {
-		if (!pathsEqual(calleePath, configuration.calleePath)) continue;
+		if (!arePathsEqual(calleePath, configuration.calleePath)) continue;
 
 		for (const argumentIndex of configuration.callbackArgumentIndexes) {
 			const argument = call.arguments[argumentIndex];
