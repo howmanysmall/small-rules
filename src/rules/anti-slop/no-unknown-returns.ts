@@ -8,8 +8,8 @@
 
 import {
 	createTypeAliasEnvironment,
+	getResolvedTypeMatches,
 	hasVisibleTypeBinding,
-	resolvedTypeMatches,
 } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -75,11 +75,12 @@ const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {
 	createOnce(context): Visitor {
 		let environment: TypeAliasEnvironment;
 
-		function resolvesToUnknown(type: ESTree.TSType): boolean {
-			return resolvedTypeMatches(type, environment, (resolved, enqueue) => {
+		function doesTypeResolveToUnknown(type: ESTree.TSType): boolean {
+			return getResolvedTypeMatches(type, environment, (resolved, enqueue) => {
 				if (isTsUnknownKeyword(resolved)) return true;
-				if (enqueueWrappedType(resolved, enqueue)) return false;
-				if (!isUnshadowedPromiseReference(resolved, environment)) return false;
+				if (enqueueWrappedType(resolved, enqueue) || !isUnshadowedPromiseReference(resolved, environment)) {
+					return false;
+				}
 
 				enqueuePromiseValue(resolved, enqueue);
 				return false;
@@ -88,9 +89,7 @@ const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {
 
 		function checkReturnType(node: FunctionWithReturnType): void {
 			const annotation = node.returnType;
-			if (!annotation) return;
-
-			if (!resolvesToUnknown(annotation.typeAnnotation)) return;
+			if (!annotation || !doesTypeResolveToUnknown(annotation.typeAnnotation)) return;
 
 			context.report({ messageId: "unknownReturn", node: annotation.typeAnnotation });
 		}

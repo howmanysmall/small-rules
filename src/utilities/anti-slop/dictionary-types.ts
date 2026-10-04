@@ -13,8 +13,8 @@ import {
 	createTypeResolution,
 	hasVisibleTypeBinding,
 	resolveTypeReference,
-	visibleInterfaceDeclarations,
-	visibleTypeAlias,
+	getVisibleInterfaceDeclarations,
+	getVisibleTypeAlias,
 } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import {
 	isAnyLiteral,
@@ -166,7 +166,7 @@ function unsafeGetReferenceValue(
 			? undefined
 			: unsafeDirectValue(continueTypeResolution(resolution, wrapped), environment);
 	}
-	const declarations = visibleInterfaceDeclarations(name, type, environment.typeAliases);
+	const declarations = getVisibleInterfaceDeclarations(name, type, environment.typeAliases);
 	return declarations !== undefined && isEffectivelyEmptyInterface(declarations) ? "empty-object" : undefined;
 }
 
@@ -353,7 +353,7 @@ function classifyWideningReferenceResolution(
 ): undefined | WideningTarget {
 	const name = getTypeReferenceName(type);
 	if (name === undefined) return undefined;
-	const alias = visibleTypeAlias(name, type, environment.typeAliases);
+	const alias = getVisibleTypeAlias(name, type, environment.typeAliases);
 	const resolved = resolveTypeReference(resolution, environment.typeAliases);
 	if (resolved !== undefined) {
 		const target = classifyWideningResolution(resolved, environment, true, false);
