@@ -63,7 +63,7 @@ function isExactDecimal(raw: string): boolean {
 	return denominator % 5n !== 0n;
 }
 
-function numericLiteralValue(node: ESTree.Node): number | undefined {
+function getNumericLiteralValue(node: ESTree.Node): number | undefined {
 	if (isNumericLiteral(node)) return node.value;
 	if (!isUnaryExpression(node) || (node.operator !== "+" && node.operator !== "-")) return undefined;
 
@@ -74,7 +74,7 @@ function numericLiteralValue(node: ESTree.Node): number | undefined {
 }
 
 function getConstantNumericValue(node: ESTree.Node): number | undefined {
-	const literalValue = numericLiteralValue(node);
+	const literalValue = getNumericLiteralValue(node);
 	if (literalValue !== undefined) return literalValue;
 	if (!isBinaryExpression(node) || isPrivateIdentifier(node.left)) return undefined;
 
@@ -90,9 +90,9 @@ function getConstantNumericValue(node: ESTree.Node): number | undefined {
 	return undefined;
 }
 
-function divisionIsInexact(node: ESTree.BinaryExpression): boolean {
-	const numerator = numericLiteralValue(node.left);
-	const denominator = numericLiteralValue(node.right);
+function isDivisionInexact(node: ESTree.BinaryExpression): boolean {
+	const numerator = getNumericLiteralValue(node.left);
+	const denominator = getNumericLiteralValue(node.right);
 	if (
 		numerator === undefined ||
 		denominator === undefined ||
@@ -121,7 +121,7 @@ function getConstInitializer(variable: Variable): ESTree.Expression | undefined 
 	return definition.node.init;
 }
 
-function binaryIsFloating(
+function isBinaryFloating(
 	node: ESTree.BinaryExpression,
 	variables: ReadonlyMap<ESTree.Node, Variable>,
 	visited: Set<Variable>,
@@ -130,7 +130,7 @@ function binaryIsFloating(
 	if (value !== undefined && Number.isSafeInteger(value)) return false;
 	if (node.operator === "/") {
 		return (
-			divisionIsInexact(node) ||
+			isDivisionInexact(node) ||
 			isFloatingExpression(node.left, variables, visited) ||
 			isFloatingExpression(node.right, variables, visited)
 		);
@@ -183,7 +183,7 @@ function isFloatingExpression(
 			isFloatingExpression(current.argument, variables, visited)
 		);
 	}
-	return isBinaryExpression(current) && isComparableBinary(current) && binaryIsFloating(current, variables, visited);
+	return isBinaryExpression(current) && isComparableBinary(current) && isBinaryFloating(current, variables, visited);
 }
 
 function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {
@@ -296,7 +296,7 @@ function getExpectAssertionOperands(
 	return isExpectCallReceiver(receiver, imports) ? getExpectPairArguments(receiver, node) : undefined;
 }
 
-function assertionOperands(
+function getAssertionOperands(
 	node: ESTree.CallExpression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
@@ -309,7 +309,7 @@ function assertionOperands(
 	return getExpectAssertionOperands(node, imports);
 }
 
-function comparisonOrientations(node: ComparableBinaryExpression): readonly [OrientedComparison, OrientedComparison] {
+function getOrientedComparisons(node: ComparableBinaryExpression): readonly [OrientedComparison, OrientedComparison] {
 	const above = node.operator === ">" || node.operator === ">=";
 	return [
 		{ above, expression: node.left, threshold: node.right },
@@ -323,7 +323,7 @@ function isComparableBinary(node: ESTree.Expression): node is ComparableBinaryEx
 
 const WHITESPACE = /\s+/gu;
 
-function nodesAreEquivalent(left: ESTree.Node, right: ESTree.Node, sourceCode: SourceCode): boolean {
+function areNodesEquivalent(left: ESTree.Node, right: ESTree.Node, sourceCode: SourceCode): boolean {
 	return (
 		left.type === right.type &&
 		sourceCode.getText(left).replaceAll(WHITESPACE, "") === sourceCode.getText(right).replaceAll(/\s+/gu, "")
@@ -354,7 +354,7 @@ function isOrOperator(
 	);
 }
 
-function indirectComparisonOperands(
+function getIndirectComparisonOperands(
 	node: ESTree.LogicalExpression,
 	sourceCode: SourceCode,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
@@ -364,12 +364,12 @@ function indirectComparisonOperands(
 	const accepted = isAndOperator(node, left, right) || isOrOperator(node, left, right);
 	if (!accepted) return undefined;
 
-	for (const leftComparison of comparisonOrientations(left)) {
-		for (const rightComparison of comparisonOrientations(right)) {
+	for (const leftComparison of getOrientedComparisons(left)) {
+		for (const rightComparison of getOrientedComparisons(right)) {
 			if (
 				leftComparison.above !== rightComparison.above &&
-				nodesAreEquivalent(leftComparison.expression, rightComparison.expression, sourceCode) &&
-				nodesAreEquivalent(leftComparison.threshold, rightComparison.threshold, sourceCode)
+				areNodesEquivalent(leftComparison.expression, rightComparison.expression, sourceCode) &&
+				areNodesEquivalent(leftComparison.threshold, rightComparison.threshold, sourceCode)
 			) {
 				return [leftComparison.expression, leftComparison.threshold];
 			}
@@ -399,7 +399,7 @@ function isFloatingIndirectComparison(
 	isFloating: (expression: ESTree.Expression) => boolean,
 ): boolean {
 	if (!isLogicalExpression(node)) return false;
-	return isFloatingPair(indirectComparisonOperands(node, sourceCode), isFloating);
+	return isFloatingPair(getIndirectComparisonOperands(node, sourceCode), isFloating);
 }
 
 function isFloatingSwitchTest(node: ESTree.Node, isFloating: (expression: ESTree.Expression) => boolean): boolean {
@@ -414,7 +414,7 @@ function isFloatingAssertion(
 	isFloating: (expression: ESTree.Expression) => boolean,
 ): boolean {
 	if (!isCallExpression(node)) return false;
-	return isFloatingPair(assertionOperands(node, imports), isFloating);
+	return isFloatingPair(getAssertionOperands(node, imports), isFloating);
 }
 
 function shouldReportFloatNode(

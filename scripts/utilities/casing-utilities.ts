@@ -196,7 +196,7 @@ function matchTransformedCharacter(
 	return value.charCodeAt(outputIndex) === code ? outputIndex + 1 : -1;
 }
 
-function modeEmitsDelimiter(mode: TransformMode): boolean {
+function doesModeEmitDelimiter(mode: TransformMode): boolean {
 	return (
 		mode === TransformMode.DelimitedLower ||
 		mode === TransformMode.DelimitedUpper ||
@@ -256,7 +256,7 @@ function transformCasing(value: string, mode: TransformMode, delimiter: string):
 			hasLineOutput && !pendingDelimiter && hasCamelCaseBoundary(previousCode, code, value.charCodeAt(index + 1));
 
 		if (hasLineOutput && (pendingDelimiter || hasCamelBoundary)) {
-			if (modeEmitsDelimiter(mode)) result += delimiter;
+			if (doesModeEmitDelimiter(mode)) result += delimiter;
 			capitalizeNext = true;
 		}
 
@@ -307,7 +307,7 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 			hasLineOutput && !pendingDelimiter && hasCamelCaseBoundary(previousCode, code, value.charCodeAt(index + 1));
 
 		if (hasLineOutput && (pendingDelimiter || hasCamelBoundary)) {
-			if (modeEmitsDelimiter(mode)) {
+			if (doesModeEmitDelimiter(mode)) {
 				outputIndex = matchesStringAt(value, outputIndex, delimiter);
 				if (outputIndex === -1) return false;
 			}

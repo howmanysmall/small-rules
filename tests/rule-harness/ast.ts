@@ -4,7 +4,7 @@ import { Predicate } from "effect";
 import { CHILD_KEYS } from "yuku-ast";
 
 import { HarnessError } from "./harness-error";
-import { locationForRange } from "./locations";
+import { getLocationForRange } from "./locations";
 
 import type { UnknownRecord } from "type-fest";
 
@@ -62,7 +62,7 @@ function attachNodeMetadata(node: UnknownRecord, parent: HarnessNode | null, loc
 
 	normalizeMethodDefinitionKind(node);
 	node.parent = parent;
-	node.loc = locationForRange(locationIndex, range);
+	node.loc = getLocationForRange(locationIndex, range);
 
 	if (!isHarnessNode(node)) return;
 

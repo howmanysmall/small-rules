@@ -1,4 +1,4 @@
-import { createRange, locationForRange } from "./locations";
+import { createRange, getLocationForRange } from "./locations";
 
 import type { LocationIndex } from "./locations";
 import type { HarnessComment, HarnessToken } from "./types";
@@ -54,7 +54,7 @@ export function createComments(
 		if (!isRawComment(comment)) continue;
 		const range = createRange(comment.start, comment.end);
 		comments[size++] = {
-			loc: locationForRange(locationIndex, range),
+			loc: getLocationForRange(locationIndex, range),
 			range,
 			type: comment.type,
 			value: comment.value,
@@ -63,6 +63,7 @@ export function createComments(
 	return comments;
 }
 
+// oxlint-disable-next-line small-rules/starts-with-verb -- describes what it does.
 export function tokenize(
 	text: string,
 	comments: ReadonlyArray<HarnessComment>,
@@ -88,7 +89,7 @@ export function tokenize(
 		const tokenEnd = readTokenEnd(text, index);
 		const range = createRange(index, tokenEnd);
 		tokens[size++] = {
-			loc: locationForRange(locationIndex, range),
+			loc: getLocationForRange(locationIndex, range),
 			range,
 			type: classifyToken(text.slice(index, tokenEnd)),
 			value: text.slice(index, tokenEnd),

@@ -34,8 +34,9 @@ export function createSourceCode(
 	return {
 		ast,
 		comments,
+		// oxlint-disable-next-line small-rules/starts-with-verb -- not in my control.
 		commentsExistBetween(left, right): boolean {
-			return commentsExistBetween(comments, left, right);
+			return doesCommentsExistBetween(comments, left, right);
 		},
 		getAllComments(): Array<HarnessComment> {
 			return [...comments];
@@ -99,7 +100,7 @@ function getScope(scopeManager: ScopeManager, node: HarnessNode): HarnessScope {
 	return scopeManager.globalScope;
 }
 
-function commentsExistBetween(comments: ReadonlyArray<HarnessComment>, left: RangeLike, right: RangeLike): boolean {
+function doesCommentsExistBetween(comments: ReadonlyArray<HarnessComment>, left: RangeLike, right: RangeLike): boolean {
 	return comments.some((comment) => comment.range[0] >= left.range[1] && comment.range[1] <= right.range[0]);
 }
 

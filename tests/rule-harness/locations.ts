@@ -17,7 +17,7 @@ export function createRange(start: number, end: number): Range {
 	return [start, end];
 }
 
-export function locationForRange(index: LocationIndex, range: Range): SourceLocation {
+export function getLocationForRange(index: LocationIndex, range: Range): SourceLocation {
 	return {
 		end: positionForIndex(index, range[1]),
 		start: positionForIndex(index, range[0]),
