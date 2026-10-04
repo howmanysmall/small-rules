@@ -89,14 +89,34 @@ describe("startsWithVerb", () => {
 		expect(startsWithVerb("foosBar", { extraAllowList: ["foo"] })).toStrictEqual([true, "foos"]);
 	});
 
-	it.each(["decrement", "dequeue", "increment", "tokenize", "unmount", "upsert"])(
-		"should accept the programming verb %s",
-		(name) => {
-			expect.assertions(1);
+	it.each(["amount", "route", "state", "total"])("should reject the noun-first word %s", (name) => {
+		expect.assertions(1);
 
-			expect(startsWithVerb(name, {})).toStrictEqual([true, name]);
-		},
-	);
+		expect(startsWithVerb(name, {})).toStrictEqual([false, name]);
+	});
+
+	it.each(["await", "throw"])("should accept the dictionary verb %s", (name) => {
+		expect.assertions(1);
+
+		expect(startsWithVerb(name, {})).toStrictEqual([true, name]);
+	});
+
+	it.each([
+		"cleanup",
+		"decrement",
+		"dequeue",
+		"hydrate",
+		"increment",
+		"mount",
+		"tokenize",
+		"unmount",
+		"upsert",
+		"yield",
+	])("should accept the programming verb %s", (name) => {
+		expect.assertions(1);
+
+		expect(startsWithVerb(name, {})).toStrictEqual([true, name]);
+	});
 
 	it("should reject prefixes that are not verbs", () => {
 		expect.assertions(2);

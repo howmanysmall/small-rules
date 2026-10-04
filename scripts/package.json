@@ -23,6 +23,7 @@
 		"pretty-ms": "catalog:scripts",
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
+		"verb-corpus": "catalog:scripts",
 		"yuku-ast": "catalog:tooling",
 		"yuku-parser": "catalog:runtime"
 	},

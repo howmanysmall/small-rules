@@ -146,7 +146,6 @@ catalogs:
     minimatch: 10.2.6
     oxc-resolver: 11.24.2
     oxlint-plugin-utilities: 1.1.0
-    verb-corpus: 3.5.0
     yuku-parser: 0.10.2
   scripts:
     "@clack/prompts": 1.8.1
@@ -164,6 +163,7 @@ catalogs:
     pretty-ms: 9.3.1
     smol-toml: 1.9.0
     tinyexec: 1.3.1
+    verb-corpus: 3.5.0
     zx: 8.8.5
   test:
     "@fast-check/vitest": 0.4.1
