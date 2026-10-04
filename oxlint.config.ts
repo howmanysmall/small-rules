@@ -363,6 +363,7 @@ const rules: OxlintRules = {
 	],
 	"small-rules/require-unicode-regex": "error",
 	"small-rules/rerender-memo-with-default-value": "off",
+	"small-rules/starts-with-verb": "error",
 	"small-rules/strict-component-boundaries": ["error", { allow: [] }],
 	"small-rules/use-exhaustive-dependencies": "off",
 	"small-rules/use-hook-at-top-level": "off",
