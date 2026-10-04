@@ -28,7 +28,18 @@ const AUXILIARY_VERBS = [
 	"would",
 ] satisfies ReadonlyArray<string>;
 
-const ALLOW_LIST = ["error", "from", "info", "next", "noop", "off", "on", "over", "to"] satisfies ReadonlyArray<string>;
+const ALLOW_LIST = [
+	"error",
+	"from",
+	"info",
+	"next",
+	"noop",
+	"noOperation",
+	"off",
+	"on",
+	"over",
+	"to",
+] satisfies ReadonlyArray<string>;
 
 interface StartsWithVerbOptions {
 	readonly extraAllowList?: ReadonlyArray<string> | undefined;
