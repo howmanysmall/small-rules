@@ -146,6 +146,8 @@ catalogs:
     minimatch: 10.2.6
     oxc-resolver: 11.24.2
     oxlint-plugin-utilities: 1.1.0
+    requireindex: 1.2.0
+    verb-corpus: 3.5.0
     yuku-parser: 0.10.2
   scripts:
     "@clack/prompts": 1.8.1

@@ -96,6 +96,8 @@
 		"minimatch": "catalog:runtime",
 		"oxc-resolver": "catalog:runtime",
 		"oxlint-plugin-utilities": "catalog:runtime",
+		"requireindex": "catalog:runtime",
+		"verb-corpus": "catalog:runtime",
 		"yuku-parser": "catalog:runtime"
 	},
 	"devDependencies": {
