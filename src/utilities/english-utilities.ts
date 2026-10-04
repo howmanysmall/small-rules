@@ -1,4 +1,4 @@
-import { programming } from "verb-corpus";
+import { complete } from "verb-corpus";
 
 const AUXILIARY_VERBS = [
 	"am",
@@ -48,7 +48,7 @@ interface StartsWithVerbOptions {
 
 type StartsWithTuple = readonly [doesStartWith: boolean, prefix: string];
 
-const BASE_ALLOW = new Set<string>(programming);
+const BASE_ALLOW = new Set<string>(complete);
 for (const verb of AUXILIARY_VERBS) BASE_ALLOW.add(verb);
 for (const verb of ALLOW_LIST) BASE_ALLOW.add(verb);
 
