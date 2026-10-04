@@ -63,7 +63,6 @@ export function createComments(
 	return comments;
 }
 
-// oxlint-disable-next-line small-rules/starts-with-verb -- describes what it does.
 export function tokenize(
 	text: string,
 	comments: ReadonlyArray<HarnessComment>,

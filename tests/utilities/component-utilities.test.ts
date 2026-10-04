@@ -4,7 +4,7 @@ import { getJSXAttributeName, isSimpleExpression } from "$oxc-utilities/componen
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
-function namespacedAttributeFixture(): ESTree.JSXAttribute {
+function getNamespacedAttributeFixture(): ESTree.JSXAttribute {
 	// SAFETY: Utility tests build minimal AST nodes for parser-shape branches.
 	return {
 		name: {
@@ -17,7 +17,7 @@ function namespacedAttributeFixture(): ESTree.JSXAttribute {
 	} as ESTree.JSXAttribute;
 }
 
-function parenthesizedExpressionFixture(): ESTree.ParenthesizedExpression {
+function getParenthesizedExpressionFixture(): ESTree.ParenthesizedExpression {
 	// SAFETY: Utility tests build minimal AST nodes for parser-shape branches.
 	return {
 		expression: { name: "value", type: "Identifier" },
@@ -32,7 +32,7 @@ describe("component utilities", () => {
 			expect.assertions(1);
 
 			// Arrange
-			const attribute = namespacedAttributeFixture();
+			const attribute = getNamespacedAttributeFixture();
 
 			// Act
 			const result = getJSXAttributeName(attribute);
@@ -47,7 +47,7 @@ describe("component utilities", () => {
 			expect.assertions(1);
 
 			// Arrange
-			const expression = parenthesizedExpressionFixture();
+			const expression = getParenthesizedExpressionFixture();
 
 			// Act
 			const result = isSimpleExpression(expression);

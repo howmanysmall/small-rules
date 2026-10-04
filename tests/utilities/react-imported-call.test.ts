@@ -19,7 +19,7 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 	traverseAst(source.ast, {
 		CallExpression(node: HarnessNode) {
 			if (found !== undefined) return;
-			if (calleeName(node.callee) === name) found = node;
+			if (getCalleeName(node.callee) === name) found = node;
 		},
 	});
 	if (found === undefined) throw new Error(`Call expression "${name}" not found.`);
@@ -34,7 +34,7 @@ function extractStringProperty<TObject extends Record<string, unknown>>(
 	return Predicate.isString(value) ? value : undefined;
 }
 
-function calleeName(callee: HarnessValue): string | undefined {
+function getCalleeName(callee: HarnessValue): string | undefined {
 	if (!Predicate.isObject(callee)) return undefined;
 	const { type } = callee;
 

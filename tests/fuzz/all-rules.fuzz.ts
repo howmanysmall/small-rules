@@ -53,8 +53,8 @@ function createCase(code: string, options: ReadonlyArray<unknown>, specFilename:
 }
 
 function createProgram(provider: FuzzedDataProvider): string {
-	const suffix = bytesToHex(provider.consumeBytes(12));
-	const text = bytesToHex(provider.consumeBytes(48));
+	const suffix = translateBytesToHex(provider.consumeBytes(12));
+	const text = translateBytesToHex(provider.consumeBytes(48));
 	const number = provider.consumeIntegralInRange(0, 10_000);
 	const reactSource = provider.consumeBoolean() ? "react" : "@rbxts/react";
 	const condition = provider.consumeBoolean() ? "true" : "false";
@@ -191,7 +191,7 @@ function createSchemaValue(schema: HarnessValue, provider: FuzzedDataProvider, s
 		case "object":
 			return createSchemaObject(resolvedSchema, provider, salt);
 		case "string":
-			return `fuzz${salt}${bytesToHex(provider.consumeBytes(12))}`;
+			return `fuzz${salt}${translateBytesToHex(provider.consumeBytes(12))}`;
 		default:
 			return false;
 	}
@@ -238,7 +238,7 @@ function createSchemaObject(schema: UnknownRecord, provider: FuzzedDataProvider,
 
 	const additionalProperties = getProperty(schema, "additionalProperties");
 	if (Predicate.isObject(additionalProperties) && provider.consumeBoolean()) {
-		const name = `fuzz${salt}${bytesToHex(provider.consumeBytes(8))}`;
+		const name = `fuzz${salt}${translateBytesToHex(provider.consumeBytes(8))}`;
 		result[name] = createSchemaValue(additionalProperties, provider, `${salt}additional`);
 	}
 
@@ -325,7 +325,7 @@ function isFix(value: Fix | ReadonlyArray<Fix>): value is Fix {
 	return !Array.isArray(value);
 }
 
-function bytesToHex(bytes: Uint8Array): string {
+function translateBytesToHex(bytes: Uint8Array): string {
 	return Buffer.from(bytes).toString("hex");
 }
 

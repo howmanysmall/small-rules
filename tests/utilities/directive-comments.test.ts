@@ -17,13 +17,13 @@ interface LineColumn {
 	line: number;
 }
 
-function lineColumn(line: number, column: number): LineColumn {
+function getLineColumn(line: number, column: number): LineColumn {
 	return { column, line };
 }
 
-function comment(value: string, overrides: Partial<Comment> = {}): Comment {
-	const start = overrides.loc?.start ?? lineColumn(1, 0);
-	const end = overrides.loc?.end ?? lineColumn(start.line, start.column + value.length + 2);
+function getComment(value: string, overrides: Partial<Comment> = {}): Comment {
+	const start = overrides.loc?.start ?? getLineColumn(1, 0);
+	const end = overrides.loc?.end ?? getLineColumn(start.line, start.column + value.length + 2);
 
 	return {
 		end: overrides.end ?? value.length + 2,
@@ -35,7 +35,7 @@ function comment(value: string, overrides: Partial<Comment> = {}): Comment {
 	};
 }
 
-function sourceCodeWithComments(comments: Array<Comment>): SourceCode {
+function getSourceCodeWithComments(comments: Array<Comment>): SourceCode {
 	const sourceCode = {
 		getAllComments: (): Array<Comment> => comments,
 	} satisfies Pick<SourceCode, "getAllComments">;
@@ -76,7 +76,7 @@ describe("parseDirectiveComment", () => {
 	it("should parse directive kind, value, and description", () => {
 		expect.assertions(1);
 
-		const result = parseDirectiveComment(comment("oxlint-disable no-console -- intentional debug log"));
+		const result = parseDirectiveComment(getComment("oxlint-disable no-console -- intentional debug log"));
 
 		expect(result).toMatchObject({
 			description: "intentional debug log",
@@ -88,7 +88,7 @@ describe("parseDirectiveComment", () => {
 	it("should parse directives without values and preserve descriptions", () => {
 		expect.assertions(1);
 
-		const result = parseDirectiveComment(comment("eslint-enable -- restore defaults"));
+		const result = parseDirectiveComment(getComment("eslint-enable -- restore defaults"));
 
 		expect(result).toMatchObject({
 			description: "restore defaults",
@@ -100,11 +100,11 @@ describe("parseDirectiveComment", () => {
 	it("should ignore unsupported directive text and invalid line comments", () => {
 		expect.assertions(3);
 
-		expect(parseDirectiveComment(comment("istanbul ignore next"))).toBeUndefined();
-		expect(parseDirectiveComment(comment("oxlint-disable no-console", { type: "Line" }))).toBeUndefined();
+		expect(parseDirectiveComment(getComment("istanbul ignore next"))).toBeUndefined();
+		expect(parseDirectiveComment(getComment("oxlint-disable no-console", { type: "Line" }))).toBeUndefined();
 
-		const tsComment = comment("oxlint-disable-line no-console", {
-			loc: { end: lineColumn(2, 10), start: lineColumn(1, 0) },
+		const tsComment = getComment("oxlint-disable-line no-console", {
+			loc: { end: getLineColumn(2, 10), start: getLineColumn(1, 0) },
 		});
 
 		expect(parseDirectiveComment(tsComment)).toBeUndefined();
@@ -113,7 +113,7 @@ describe("parseDirectiveComment", () => {
 	it("should ignore comments without string values", () => {
 		expect.assertions(2);
 
-		const directive = comment("oxlint-disable no-console");
+		const directive = getComment("oxlint-disable no-console");
 		Object.assign(directive, { value: null });
 
 		expect(parseDirectiveComment(directive)).toBeUndefined();
@@ -123,7 +123,7 @@ describe("parseDirectiveComment", () => {
 	it("should parse non-disable directive kinds", () => {
 		expect.assertions(1);
 
-		const result = parseDirectiveComment(comment("eslint-env node -- test runtime"));
+		const result = parseDirectiveComment(getComment("eslint-env node -- test runtime"));
 
 		expect(result).toMatchObject({
 			description: "test runtime",
@@ -137,76 +137,76 @@ describe("directive locations", () => {
 	it("should compare locations by line and column", () => {
 		expect.assertions(3);
 
-		expect(lte(lineColumn(1, 10), lineColumn(2, 0))).toBe(true);
-		expect(lte(lineColumn(2, 3), lineColumn(2, 3))).toBe(true);
-		expect(lte(lineColumn(2, 4), lineColumn(2, 3))).toBe(false);
+		expect(lte(getLineColumn(1, 10), getLineColumn(2, 0))).toBe(true);
+		expect(lte(getLineColumn(2, 3), getLineColumn(2, 3))).toBe(true);
+		expect(lte(getLineColumn(2, 4), getLineColumn(2, 3))).toBe(false);
 	});
 
 	it("should force a comment location to the start of its line", () => {
 		expect.assertions(1);
 
 		const location = {
-			end: lineColumn(7, 24),
-			start: lineColumn(7, 12),
+			end: getLineColumn(7, 24),
+			start: getLineColumn(7, 12),
 		};
 
 		expect(toForceLocation(location)).toStrictEqual({
-			end: lineColumn(7, 24),
-			start: lineColumn(7, 0),
+			end: getLineColumn(7, 24),
+			start: getLineColumn(7, 0),
 		});
 	});
 
 	it("should locate rule identifiers on the first directive line", () => {
 		expect.assertions(1);
 
-		const directive = comment("oxlint-disable no-console, no-alert", {
-			loc: { end: lineColumn(4, 42), start: lineColumn(4, 5) },
+		const directive = getComment("oxlint-disable no-console, no-alert", {
+			loc: { end: getLineColumn(4, 42), start: getLineColumn(4, 5) },
 		});
 
 		expect(toRuleIdLocation(directive, "no-alert")).toStrictEqual({
-			end: lineColumn(4, 42),
-			start: lineColumn(4, 34),
+			end: getLineColumn(4, 42),
+			start: getLineColumn(4, 34),
 		});
 	});
 
 	it("should locate rule identifiers on later directive lines", () => {
 		expect.assertions(1);
 
-		const directive = comment("oxlint-disable no-console,\n no-alert", {
-			loc: { end: lineColumn(6, 10), start: lineColumn(5, 2) },
+		const directive = getComment("oxlint-disable no-console,\n no-alert", {
+			loc: { end: getLineColumn(6, 10), start: getLineColumn(5, 2) },
 		});
 
 		expect(toRuleIdLocation(directive, "no-alert")).toStrictEqual({
-			end: lineColumn(6, 9),
-			start: lineColumn(6, 1),
+			end: getLineColumn(6, 9),
+			start: getLineColumn(6, 1),
 		});
 	});
 
 	it("should fall back to full comment locations when rule ids are absent", () => {
 		expect.assertions(2);
 
-		const directive = comment("oxlint-disable no-console");
+		const directive = getComment("oxlint-disable no-console");
 
 		expect(toRuleIdLocation(directive, undefined)).toStrictEqual({
-			end: lineColumn(1, 27),
-			start: lineColumn(1, 0),
+			end: getLineColumn(1, 27),
+			start: getLineColumn(1, 0),
 		});
 		expect(toRuleIdLocation(directive, "no-alert")).toStrictEqual({
-			end: lineColumn(1, 27),
-			start: lineColumn(1, 0),
+			end: getLineColumn(1, 27),
+			start: getLineColumn(1, 0),
 		});
 	});
 
 	it("should locate rule identifiers that contain regexp syntax", () => {
 		expect.assertions(1);
 
-		const directive = comment("oxlint-disable @scope/rule-name, react-hooks/exhaustive-deps", {
-			loc: { end: lineColumn(8, 64), start: lineColumn(8, 4) },
+		const directive = getComment("oxlint-disable @scope/rule-name, react-hooks/exhaustive-deps", {
+			loc: { end: getLineColumn(8, 64), start: getLineColumn(8, 4) },
 		});
 
 		expect(toRuleIdLocation(directive, "react-hooks/exhaustive-deps")).toStrictEqual({
-			end: lineColumn(8, 66),
-			start: lineColumn(8, 39),
+			end: getLineColumn(8, 66),
+			start: getLineColumn(8, 39),
 		});
 	});
 });
@@ -215,20 +215,20 @@ describe("computeDisabledArea", () => {
 	it("should track block disable and enable ranges", () => {
 		expect.assertions(1);
 
-		const disable = comment("oxlint-disable no-console", {
-			loc: { end: lineColumn(1, 30), start: lineColumn(1, 0) },
+		const disable = getComment("oxlint-disable no-console", {
+			loc: { end: getLineColumn(1, 30), start: getLineColumn(1, 0) },
 		});
-		const enable = comment("oxlint-enable no-console", {
-			loc: { end: lineColumn(3, 29), start: lineColumn(3, 0) },
+		const enable = getComment("oxlint-enable no-console", {
+			loc: { end: getLineColumn(3, 29), start: getLineColumn(3, 0) },
 		});
 
-		expect(computeDisabledArea(sourceCodeWithComments([disable, enable])).areas).toStrictEqual([
+		expect(computeDisabledArea(getSourceCodeWithComments([disable, enable])).areas).toStrictEqual([
 			{
 				comment: disable,
-				end: lineColumn(3, 0),
+				end: getLineColumn(3, 0),
 				kind: "block",
 				ruleId: "no-console",
-				start: lineColumn(1, 0),
+				start: getLineColumn(1, 0),
 			},
 		]);
 	});
@@ -236,29 +236,29 @@ describe("computeDisabledArea", () => {
 	it("should track disable-line and disable-next-line ranges", () => {
 		expect.assertions(1);
 
-		const disableLine = comment("oxlint-disable-line no-console", {
-			loc: { end: lineColumn(2, 35), start: lineColumn(2, 12) },
+		const disableLine = getComment("oxlint-disable-line no-console", {
+			loc: { end: getLineColumn(2, 35), start: getLineColumn(2, 12) },
 			type: "Line",
 		});
-		const disableNextLine = comment("oxlint-disable-next-line no-alert", {
-			loc: { end: lineColumn(4, 33), start: lineColumn(4, 0) },
+		const disableNextLine = getComment("oxlint-disable-next-line no-alert", {
+			loc: { end: getLineColumn(4, 33), start: getLineColumn(4, 0) },
 			type: "Line",
 		});
 
-		expect(computeDisabledArea(sourceCodeWithComments([disableLine, disableNextLine])).areas).toStrictEqual([
+		expect(computeDisabledArea(getSourceCodeWithComments([disableLine, disableNextLine])).areas).toStrictEqual([
 			{
 				comment: disableLine,
-				end: lineColumn(3, -1),
+				end: getLineColumn(3, -1),
 				kind: "line",
 				ruleId: "no-console",
-				start: lineColumn(2, 0),
+				start: getLineColumn(2, 0),
 			},
 			{
 				comment: disableNextLine,
-				end: lineColumn(6, -1),
+				end: getLineColumn(6, -1),
 				kind: "line",
 				ruleId: "no-alert",
-				start: lineColumn(5, 0),
+				start: getLineColumn(5, 0),
 			},
 		]);
 	});
@@ -266,16 +266,16 @@ describe("computeDisabledArea", () => {
 	it("should record duplicate whole-file disables and rule-specific disables", () => {
 		expect.assertions(1);
 
-		const first = comment("oxlint-disable", { loc: { end: lineColumn(1, 18), start: lineColumn(1, 0) } });
-		const second = comment("oxlint-disable no-console", {
-			loc: { end: lineColumn(2, 29), start: lineColumn(2, 0) },
+		const first = getComment("oxlint-disable", { loc: { end: getLineColumn(1, 18), start: getLineColumn(1, 0) } });
+		const second = getComment("oxlint-disable no-console", {
+			loc: { end: getLineColumn(2, 29), start: getLineColumn(2, 0) },
 		});
-		const third = comment("oxlint-disable no-console", {
-			loc: { end: lineColumn(3, 29), start: lineColumn(3, 0) },
+		const third = getComment("oxlint-disable no-console", {
+			loc: { end: getLineColumn(3, 29), start: getLineColumn(3, 0) },
 		});
 
 		expect(
-			computeDisabledArea(sourceCodeWithComments([first, second, third])).duplicateDisableDirectives,
+			computeDisabledArea(getSourceCodeWithComments([first, second, third])).duplicateDisableDirectives,
 		).toStrictEqual([
 			{ comment: second, ruleId: "no-console" },
 			{ comment: third, ruleId: "no-console" },
@@ -285,24 +285,26 @@ describe("computeDisabledArea", () => {
 	it("should record duplicate whole-file eslint disables", () => {
 		expect.assertions(1);
 
-		const first = comment("eslint-disable", { loc: { end: lineColumn(1, 16), start: lineColumn(1, 0) } });
-		const second = comment("eslint-disable", { loc: { end: lineColumn(2, 16), start: lineColumn(2, 0) } });
+		const first = getComment("eslint-disable", { loc: { end: getLineColumn(1, 16), start: getLineColumn(1, 0) } });
+		const second = getComment("eslint-disable", { loc: { end: getLineColumn(2, 16), start: getLineColumn(2, 0) } });
 
-		expect(computeDisabledArea(sourceCodeWithComments([first, second])).duplicateDisableDirectives).toStrictEqual([
-			{ comment: second, ruleId: undefined },
-		]);
+		expect(
+			computeDisabledArea(getSourceCodeWithComments([first, second])).duplicateDisableDirectives,
+		).toStrictEqual([{ comment: second, ruleId: undefined }]);
 	});
 
 	it("should record unused enable directives", () => {
 		expect.assertions(1);
 
-		const wholeEnable = comment("oxlint-enable", { loc: { end: lineColumn(1, 16), start: lineColumn(1, 0) } });
-		const ruleEnable = comment("oxlint-enable no-console", {
-			loc: { end: lineColumn(2, 27), start: lineColumn(2, 0) },
+		const wholeEnable = getComment("oxlint-enable", {
+			loc: { end: getLineColumn(1, 16), start: getLineColumn(1, 0) },
+		});
+		const ruleEnable = getComment("oxlint-enable no-console", {
+			loc: { end: getLineColumn(2, 27), start: getLineColumn(2, 0) },
 		});
 
 		expect(
-			computeDisabledArea(sourceCodeWithComments([wholeEnable, ruleEnable])).unusedEnableDirectives,
+			computeDisabledArea(getSourceCodeWithComments([wholeEnable, ruleEnable])).unusedEnableDirectives,
 		).toStrictEqual([
 			{ comment: wholeEnable, ruleId: undefined },
 			{ comment: ruleEnable, ruleId: "no-console" },
@@ -312,19 +314,19 @@ describe("computeDisabledArea", () => {
 	it("should count related disable directives for aggregating enables", () => {
 		expect.assertions(1);
 
-		const firstDisable = comment("oxlint-disable no-console", {
-			loc: { end: lineColumn(1, 29), start: lineColumn(1, 0) },
+		const firstDisable = getComment("oxlint-disable no-console", {
+			loc: { end: getLineColumn(1, 29), start: getLineColumn(1, 0) },
 		});
-		const secondDisable = comment("oxlint-disable no-alert", {
-			loc: { end: lineColumn(2, 27), start: lineColumn(2, 0) },
+		const secondDisable = getComment("oxlint-disable no-alert", {
+			loc: { end: getLineColumn(2, 27), start: getLineColumn(2, 0) },
 		});
-		const enable = comment("oxlint-enable no-console, no-alert", {
-			loc: { end: lineColumn(4, 38), start: lineColumn(4, 0) },
+		const enable = getComment("oxlint-enable no-console, no-alert", {
+			loc: { end: getLineColumn(4, 38), start: getLineColumn(4, 0) },
 		});
 
 		expect(
 			computeDisabledArea(
-				sourceCodeWithComments([firstDisable, secondDisable, enable]),
+				getSourceCodeWithComments([firstDisable, secondDisable, enable]),
 			).numberOfRelatedDisableDirectives.get(enable),
 		).toBe(2);
 	});
@@ -332,31 +334,31 @@ describe("computeDisabledArea", () => {
 	it("should support eslint line and next-line directives", () => {
 		expect.assertions(2);
 
-		const disableLine = comment("eslint-disable-line no-console", {
-			loc: { end: lineColumn(2, 35), start: lineColumn(2, 12) },
+		const disableLine = getComment("eslint-disable-line no-console", {
+			loc: { end: getLineColumn(2, 35), start: getLineColumn(2, 12) },
 			type: "Line",
 		});
-		const disableNextLine = comment("eslint-disable-next-line no-alert", {
-			loc: { end: lineColumn(4, 33), start: lineColumn(4, 0) },
+		const disableNextLine = getComment("eslint-disable-next-line no-alert", {
+			loc: { end: getLineColumn(4, 33), start: getLineColumn(4, 0) },
 			type: "Line",
 		});
 
-		const result = computeDisabledArea(sourceCodeWithComments([disableLine, disableNextLine]));
+		const result = computeDisabledArea(getSourceCodeWithComments([disableLine, disableNextLine]));
 
 		expect(result.areas).toStrictEqual([
 			{
 				comment: disableLine,
-				end: lineColumn(3, -1),
+				end: getLineColumn(3, -1),
 				kind: "line",
 				ruleId: "no-console",
-				start: lineColumn(2, 0),
+				start: getLineColumn(2, 0),
 			},
 			{
 				comment: disableNextLine,
-				end: lineColumn(6, -1),
+				end: getLineColumn(6, -1),
 				kind: "line",
 				ruleId: "no-alert",
-				start: lineColumn(5, 0),
+				start: getLineColumn(5, 0),
 			},
 		]);
 		expect(result.numberOfRelatedDisableDirectives.size).toBe(2);
@@ -365,32 +367,36 @@ describe("computeDisabledArea", () => {
 	it("should close matching eslint block directives and ignore mismatched enables", () => {
 		expect.assertions(2);
 
-		const disableAll = comment("eslint-disable", { loc: { end: lineColumn(1, 16), start: lineColumn(1, 0) } });
-		const disableRule = comment("eslint-disable no-console", {
-			loc: { end: lineColumn(2, 24), start: lineColumn(2, 0) },
+		const disableAll = getComment("eslint-disable", {
+			loc: { end: getLineColumn(1, 16), start: getLineColumn(1, 0) },
 		});
-		const enableRule = comment("eslint-enable no-alert", {
-			loc: { end: lineColumn(3, 23), start: lineColumn(3, 0) },
+		const disableRule = getComment("eslint-disable no-console", {
+			loc: { end: getLineColumn(2, 24), start: getLineColumn(2, 0) },
 		});
-		const enableAll = comment("eslint-enable", { loc: { end: lineColumn(4, 15), start: lineColumn(4, 0) } });
+		const enableRule = getComment("eslint-enable no-alert", {
+			loc: { end: getLineColumn(3, 23), start: getLineColumn(3, 0) },
+		});
+		const enableAll = getComment("eslint-enable", {
+			loc: { end: getLineColumn(4, 15), start: getLineColumn(4, 0) },
+		});
 
-		const result = computeDisabledArea(sourceCodeWithComments([disableAll, disableRule, enableRule, enableAll]));
+		const result = computeDisabledArea(getSourceCodeWithComments([disableAll, disableRule, enableRule, enableAll]));
 
 		expect(result.unusedEnableDirectives).toStrictEqual([{ comment: enableRule, ruleId: "no-alert" }]);
 		expect(result.areas).toStrictEqual([
 			{
 				comment: disableAll,
-				end: lineColumn(4, 0),
+				end: getLineColumn(4, 0),
 				kind: "block",
 				ruleId: undefined,
-				start: lineColumn(1, 0),
+				start: getLineColumn(1, 0),
 			},
 			{
 				comment: disableRule,
-				end: lineColumn(4, 0),
+				end: getLineColumn(4, 0),
 				kind: "block",
 				ruleId: "no-console",
-				start: lineColumn(2, 0),
+				start: getLineColumn(2, 0),
 			},
 		]);
 	});
@@ -398,21 +404,21 @@ describe("computeDisabledArea", () => {
 	it("should ignore directive comments that do not disable or enable rules", () => {
 		expect.assertions(1);
 
-		const unsupported = comment("istanbul ignore next", {
-			loc: { end: lineColumn(1, 21), start: lineColumn(1, 0) },
+		const unsupported = getComment("istanbul ignore next", {
+			loc: { end: getLineColumn(1, 21), start: getLineColumn(1, 0) },
 		});
-		const env = comment("eslint-env node", { loc: { end: lineColumn(1, 15), start: lineColumn(1, 0) } });
-		const disable = comment("oxlint-disable no-console", {
-			loc: { end: lineColumn(2, 29), start: lineColumn(2, 0) },
+		const env = getComment("eslint-env node", { loc: { end: getLineColumn(1, 15), start: getLineColumn(1, 0) } });
+		const disable = getComment("oxlint-disable no-console", {
+			loc: { end: getLineColumn(2, 29), start: getLineColumn(2, 0) },
 		});
 
-		expect(computeDisabledArea(sourceCodeWithComments([unsupported, env, disable])).areas).toStrictEqual([
+		expect(computeDisabledArea(getSourceCodeWithComments([unsupported, env, disable])).areas).toStrictEqual([
 			{
 				comment: disable,
 				end: undefined,
 				kind: "block",
 				ruleId: "no-console",
-				start: lineColumn(2, 0),
+				start: getLineColumn(2, 0),
 			},
 		]);
 	});
