@@ -2,11 +2,11 @@ import nodePath from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+	checkAssertionSyntaxDiagnosticRange,
+	determineTsgoLintVersion,
 	getTsgoLintVersionFromSettings,
-	inferTsgoLintVersion,
 	isLintSettings,
 	resolveTsgoLintVersion,
-	usesAssertionSyntaxDiagnosticRange,
 } from "$oxc-utilities/tsgolint-version";
 
 const FIXTURES = nodePath.join(import.meta.dirname, "..", "fixtures", "tsgolint-version");
@@ -46,15 +46,15 @@ describe("usesAssertionSyntaxDiagnosticRange", () => {
 	it("should treat 7.0.2002 as the first release that reports on assertion syntax", () => {
 		expect.assertions(9);
 
-		expect(usesAssertionSyntaxDiagnosticRange(undefined)).toBe(false);
-		expect(usesAssertionSyntaxDiagnosticRange("not-a-version")).toBe(false);
-		expect(usesAssertionSyntaxDiagnosticRange("7.0")).toBe(false);
-		expect(usesAssertionSyntaxDiagnosticRange("7.x.1")).toBe(false);
-		expect(usesAssertionSyntaxDiagnosticRange("6.9.9999")).toBe(false);
-		expect(usesAssertionSyntaxDiagnosticRange("7.0.2001")).toBe(false);
-		expect(usesAssertionSyntaxDiagnosticRange("7.0.2002")).toBe(true);
-		expect(usesAssertionSyntaxDiagnosticRange("7.1.0")).toBe(true);
-		expect(usesAssertionSyntaxDiagnosticRange("8.0.0")).toBe(true);
+		expect(checkAssertionSyntaxDiagnosticRange(undefined)).toBe(false);
+		expect(checkAssertionSyntaxDiagnosticRange("not-a-version")).toBe(false);
+		expect(checkAssertionSyntaxDiagnosticRange("7.0")).toBe(false);
+		expect(checkAssertionSyntaxDiagnosticRange("7.x.1")).toBe(false);
+		expect(checkAssertionSyntaxDiagnosticRange("6.9.9999")).toBe(false);
+		expect(checkAssertionSyntaxDiagnosticRange("7.0.2001")).toBe(false);
+		expect(checkAssertionSyntaxDiagnosticRange("7.0.2002")).toBe(true);
+		expect(checkAssertionSyntaxDiagnosticRange("7.1.0")).toBe(true);
+		expect(checkAssertionSyntaxDiagnosticRange("8.0.0")).toBe(true);
 	});
 });
 
@@ -62,39 +62,39 @@ describe("inferTsgolintVersion", () => {
 	it("should prefer the installed package, then the workspace catalog, then the manifest", () => {
 		expect.assertions(6);
 
-		expect(inferTsgoLintVersion(fixtureDirectory("installed-2002"))).toBe("7.0.2002");
-		expect(inferTsgoLintVersion(fixtureDirectory("workspace-2002"))).toBe("7.0.2002");
-		expect(inferTsgoLintVersion(fixtureDirectory("quoted-workspace"))).toBe("7.0.2002");
-		expect(inferTsgoLintVersion(fixtureDirectory("single-quoted-workspace"))).toBe("7.0.2002");
-		expect(inferTsgoLintVersion(fixtureDirectory("v2001"))).toBe("7.0.2001");
-		expect(inferTsgoLintVersion(fixtureDirectory("caret"))).toBe("7.0.2002");
+		expect(determineTsgoLintVersion(fixtureDirectory("installed-2002"))).toBe("7.0.2002");
+		expect(determineTsgoLintVersion(fixtureDirectory("workspace-2002"))).toBe("7.0.2002");
+		expect(determineTsgoLintVersion(fixtureDirectory("quoted-workspace"))).toBe("7.0.2002");
+		expect(determineTsgoLintVersion(fixtureDirectory("single-quoted-workspace"))).toBe("7.0.2002");
+		expect(determineTsgoLintVersion(fixtureDirectory("v2001"))).toBe("7.0.2001");
+		expect(determineTsgoLintVersion(fixtureDirectory("caret"))).toBe("7.0.2002");
 	});
 
 	it("should ignore unusable manifests and missing tsgolint metadata", () => {
 		expect.assertions(15);
 
-		expect(inferTsgoLintVersion(fixtureDirectory("invalid-json"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("invalid-installed"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("json-array"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("no-tsgolint"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("no-tsgolint"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("empty-workspace"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("non-string-version"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("bad-deps"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("numeric-spec"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("catalog-only"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("extra-deps"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("yaml-only"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("yaml-incomplete"))).toBeUndefined();
-		expect(inferTsgoLintVersion(fixtureDirectory("yaml-invalid"))).toBeUndefined();
-		expect(inferTsgoLintVersion(nodePath.parse(import.meta.dirname).root)).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("invalid-json"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("invalid-installed"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("json-array"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("no-tsgolint"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("no-tsgolint"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("empty-workspace"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("non-string-version"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("bad-deps"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("numeric-spec"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("catalog-only"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("extra-deps"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("yaml-only"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("yaml-incomplete"))).toBeUndefined();
+		expect(determineTsgoLintVersion(fixtureDirectory("yaml-invalid"))).toBeUndefined();
+		expect(determineTsgoLintVersion(nodePath.parse(import.meta.dirname).root)).toBeUndefined();
 	});
 
 	it("should reuse the cached version for a project root", () => {
 		expect.assertions(1);
 
-		const first = inferTsgoLintVersion(fixtureDirectory("v2002"));
-		const second = inferTsgoLintVersion(nodePath.join(fixtureDirectory("v2002"), "src"));
+		const first = determineTsgoLintVersion(fixtureDirectory("v2002"));
+		const second = determineTsgoLintVersion(nodePath.join(fixtureDirectory("v2002"), "src"));
 
 		expect(second).toBe(first);
 	});

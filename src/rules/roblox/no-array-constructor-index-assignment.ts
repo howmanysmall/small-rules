@@ -35,16 +35,16 @@ interface Candidate {
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
 }
 
-function containsArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
-	let containsReference = false;
+function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
+	let hasReference = false;
 	forEachNode(node, (current) => {
 		if (isIdentifierNamed(current, arrayIdentifierName)) {
-			containsReference = true;
+			hasReference = true;
 			return STOP_NODE_TRAVERSAL;
 		}
 		return true;
 	});
-	return containsReference;
+	return hasReference;
 }
 
 function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
@@ -121,7 +121,7 @@ function collectSequentialAssignments(
 			continue;
 		}
 
-		if (containsArrayReference(statement, arrayIdentifierName)) break;
+		if (hasArrayReference(statement, arrayIdentifierName)) break;
 
 		scanIndex += 1;
 	}

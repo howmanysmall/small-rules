@@ -30,9 +30,9 @@ import {
 	VARIABLE_DECLARATION,
 } from "$oxc-utilities/oxc-utilities";
 import {
+	checkAssertionSyntaxDiagnosticRange,
 	isLintSettings,
 	resolveTsgoLintVersion,
-	usesAssertionSyntaxDiagnosticRange,
 } from "$oxc-utilities/tsgolint-version";
 
 import type { ESTree, SourceCode, VisitorWithHooks } from "oxlint-plugin-utilities";
@@ -67,18 +67,18 @@ function isConstAssertion(node: TypeAssertion): boolean {
 	);
 }
 
-function configuredSafetyMarkers(markers?: ReadonlyArray<string>): readonly [string, ...Array<string>] {
+function getConfiguredSafetyMarkers(markers?: ReadonlyArray<string>): readonly [string, ...Array<string>] {
 	const [first, ...rest] = markers ?? [];
 	if (first === undefined) return DEFAULT_SAFETY_MARKERS;
 	return [first, ...rest];
 }
 
-function markerPattern(markers: ReadonlyArray<string>): RegExp {
+function getMarkerPattern(markers: ReadonlyArray<string>): RegExp {
 	const alternation = markers.map((marker) => marker.replaceAll(MARKER_ESCAPE, String.raw`\$&`)).join("|");
 	return new RegExp(String.raw`(?:^|[^\p{L}\p{N}_])(?:${alternation})\s*:\s*\S`, "u");
 }
 
-function parsedUnsafeAssertionDisable(comment: SourceCodeComment): DirectiveComment | undefined {
+function getParsedUnsafeAssertionDisable(comment: SourceCodeComment): DirectiveComment | undefined {
 	const parsed = parseDirectiveComment(comment);
 
 	if (
@@ -100,8 +100,8 @@ function valueHasUnsafeAssertionRule(value?: string): boolean {
 	return false;
 }
 
-function disablesUnsafeAssertionRule(comment: SourceCodeComment): boolean {
-	return parsedUnsafeAssertionDisable(comment) !== undefined;
+function isUnsafeAssertionDisabled(comment: SourceCodeComment): boolean {
+	return getParsedUnsafeAssertionDisable(comment) !== undefined;
 }
 
 function disableKindCoversLine(kind: string, comment: SourceCodeComment, line: number): boolean {
@@ -141,7 +141,7 @@ function hasCommentBeforeAncestors(
 function hasDisableCoveringAssertionLine(sourceCode: SourceCode, node: TypeAssertion): boolean {
 	const { line } = node.typeAnnotation.loc.start;
 	for (const comment of sourceCode.getAllComments()) {
-		const parsed = parsedUnsafeAssertionDisable(comment);
+		const parsed = getParsedUnsafeAssertionDisable(comment);
 		if (parsed !== undefined && disableKindCoversLine(parsed.kind, comment, line)) return true;
 	}
 	return false;
@@ -155,13 +155,13 @@ function hasSafetyComment(
 ): boolean {
 	if (hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value))) return true;
 	if (assertionSyntaxRange) return hasDisableCoveringAssertionLine(sourceCode, node);
-	return hasCommentBeforeAncestors(sourceCode, node, disablesUnsafeAssertionRule);
+	return hasCommentBeforeAncestors(sourceCode, node, isUnsafeAssertionDisabled);
 }
 
 const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-for-type-assertion", "anti-slop", {
 	createOnce(context): VisitorWithHooks {
 		let markers: readonly [string, ...Array<string>] = DEFAULT_SAFETY_MARKERS;
-		let pattern = markerPattern(markers);
+		let pattern = getMarkerPattern(markers);
 		let assertionSyntaxRange = false;
 
 		function checkAssertion(node: TypeAssertion): void {
@@ -173,10 +173,10 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 
 		return {
 			before(): void {
-				markers = configuredSafetyMarkers(context.options.at(0)?.markers);
-				pattern = markerPattern(markers);
+				markers = getConfiguredSafetyMarkers(context.options.at(0)?.markers);
+				pattern = getMarkerPattern(markers);
 				const settings = isLintSettings.allows(context.settings) ? context.settings : undefined;
-				assertionSyntaxRange = usesAssertionSyntaxDiagnosticRange(
+				assertionSyntaxRange = checkAssertionSyntaxDiagnosticRange(
 					resolveTsgoLintVersion(settings, nodePath.dirname(context.filename)),
 				);
 			},
