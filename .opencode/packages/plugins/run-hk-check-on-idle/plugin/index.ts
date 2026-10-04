@@ -1,5 +1,5 @@
 import { cwd } from "node:process";
-import { Plugin } from "@opencode-ai/plugin/effect";
+import { Plugin } from "@opencode/plugin/effect";
 import { Effect, Stream } from "effect";
 import { exec } from "tinyexec";
 

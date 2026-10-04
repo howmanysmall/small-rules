@@ -3,13 +3,13 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"@opencode-ai/schema": "catalog:tooling",
-		"effect": "catalog:runtime"
+		"@opencode/schema": "catalog:opencode2",
+		"effect": "catalog:opencode2"
 	},
 	"devDependencies": {
-		"@opencode-ai/plugin": "catalog:tooling"
+		"@opencode/plugin": "catalog:opencode2"
 	},
 	"peerDependencies": {
-		"@opencode-ai/plugin": "catalog:tooling"
+		"@opencode/plugin": "catalog:opencode2"
 	}
 }

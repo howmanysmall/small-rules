@@ -3,13 +3,13 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"effect": "catalog:runtime",
+		"effect": "catalog:opencode2",
 		"tinyexec": "catalog:scripts"
 	},
 	"devDependencies": {
-		"@opencode-ai/plugin": "catalog:tooling"
+		"@opencode/plugin": "catalog:opencode2"
 	},
 	"peerDependencies": {
-		"@opencode-ai/plugin": "catalog:tooling"
+		"@opencode/plugin": "catalog:opencode2"
 	}
 }
