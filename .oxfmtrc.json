@@ -7,6 +7,7 @@
 	"endOfLine": "lf",
 	"htmlWhitespaceSensitivity": "css",
 	"ignorePatterns": [
+		"src/generated/",
 		"**/*.{md,toml,js,yaml,yml,toml}",
 		"tests/fixtures/**/{invalid-*,*-invalid}/**/*.json",
 		"**/do-not-sync-ever/**",
