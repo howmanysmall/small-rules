@@ -6,6 +6,8 @@ export type RuleCategoryKey = "anti-slop" | "english" | "general" | "naming" | "
 export interface RuleManifestEntry {
 	readonly name: RuleName;
 	readonly exampleExemption?: string | undefined;
+	/** Categories this rule used to live in, each redirected to its page. */
+	readonly movedFrom?: ReadonlyArray<RuleCategoryKey> | undefined;
 }
 
 export interface RuleCategoryManifest {
@@ -138,9 +140,9 @@ export const ruleManifest = defineRuleManifest({
 				"Rules for English in identifiers: spelling, plurals, abbreviations, and verb-first function names.",
 			label: "English",
 			rules: [
-				{ name: "consistent-compound-words" },
-				{ name: "prefer-singular-enums" },
-				{ name: "prevent-abbreviations" },
+				{ name: "consistent-compound-words", movedFrom: ["naming"] },
+				{ name: "prefer-singular-enums", movedFrom: ["naming"] },
+				{ name: "prevent-abbreviations", movedFrom: ["naming"] },
 				{ name: "starts-with-verb" },
 			],
 		},
