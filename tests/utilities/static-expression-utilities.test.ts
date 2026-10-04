@@ -7,8 +7,7 @@ import {
 	isExplicitUndefinedExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-
-import { createRuleTester } from "./rule-testers";
+import { createRuleTester } from "$test/rule-testers";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

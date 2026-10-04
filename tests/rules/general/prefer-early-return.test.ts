@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/prefer-early-return";
-
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 const error = {
 	message:

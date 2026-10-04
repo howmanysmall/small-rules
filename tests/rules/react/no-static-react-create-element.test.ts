@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-static-react-create-element";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("no-static-react-create-element", () => {
 	tsx.run("no-static-react-create-element", rule, {

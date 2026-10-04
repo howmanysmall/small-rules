@@ -9,8 +9,7 @@ import noInitializeState from "$oxc-rules/react/no-initialize-state";
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
 import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-property-change";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 // Sanity check that runs the focused effect rules on common + valid real-world
 // code, as opposed to contrived test cases. Each snippet must pass all nine

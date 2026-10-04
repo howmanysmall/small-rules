@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-events-in-events-callback";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 const options = [{ eventsImportPaths: ["server/networking"] }];
 

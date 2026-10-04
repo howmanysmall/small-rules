@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-task-wait";
-
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 describe("no-task-wait", () => {
 	js.run("no-task-wait", rule, {

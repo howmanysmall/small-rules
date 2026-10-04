@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-pass-data-to-parent";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("no-pass-data-to-parent", () => {
 	tsx.run("no-pass-data-to-parent", rule, {

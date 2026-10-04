@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/ban-types";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("ban-types", () => {
 	ts.run("ban-types", rule, {

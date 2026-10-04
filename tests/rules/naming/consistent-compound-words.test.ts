@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/consistent-compound-words";
-
-import { js, ts } from "./rule-testers";
+import { js, ts } from "$test/rule-testers";
 
 describe("consistent-compound-words", () => {
 	js.run("consistent-compound-words", rule, {

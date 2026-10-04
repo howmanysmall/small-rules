@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/rerender-memo-with-default-value";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("rerender-memo-with-default-value", () => {
 	ts.run("rerender-memo-with-default-value", rule, {

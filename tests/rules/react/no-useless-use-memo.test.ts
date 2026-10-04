@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule, { DependencyMode } from "$oxc-rules/react/no-useless-use-memo";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-useless-use-memo", () => {
 	ts.run("no-useless-use-memo", rule, {

@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-unsupported-syntax";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-unsupported-syntax", () => {
 	ts.run("no-unsupported-syntax", rule, {

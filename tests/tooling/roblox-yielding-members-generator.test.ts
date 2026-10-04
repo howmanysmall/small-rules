@@ -7,7 +7,7 @@ import {
 	renderCatalog,
 } from "$script-utilities/roblox-yielding-members";
 
-import { classHasYieldingMember } from "../src/generated/roblox-yielding-members";
+import { classHasYieldingMember } from "../../src/generated/roblox-yielding-members";
 
 const apiDump = {
 	Classes: [

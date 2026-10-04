@@ -2,10 +2,9 @@ import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-redundant-aspect-ratio-constraint";
+import { tsx } from "$test/rule-testers";
 
-import { tsx } from "./rule-testers";
-
-const FIXTURES = nodePath.join(import.meta.dirname, "fixtures", "no-redundant-aspect-ratio-constraint");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "no-redundant-aspect-ratio-constraint");
 const WITH_CONSTRAINT = nodePath.join(FIXTURES, "with-constraint");
 const WITHOUT_CONSTRAINT = nodePath.join(FIXTURES, "without-constraint");
 

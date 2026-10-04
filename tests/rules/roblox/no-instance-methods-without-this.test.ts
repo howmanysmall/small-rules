@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-instance-methods-without-this";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("no-instance-methods-without-this", () => {
 	tsx.run("no-instance-methods-without-this", rule, {

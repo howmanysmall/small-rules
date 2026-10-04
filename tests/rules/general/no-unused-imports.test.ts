@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/no-unused-imports";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-unused-imports", () => {
 	ts.run("no-unused-imports", rule, {

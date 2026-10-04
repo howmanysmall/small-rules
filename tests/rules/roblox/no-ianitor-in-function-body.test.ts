@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-ianitor-in-function-body";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-ianitor-in-function-body", () => {
 	ts.run("no-ianitor-in-function-body", rule, {

@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/require-paired-calls";
-
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 describe("require-paired-calls", () => {
 	js.run("require-paired-calls", rule, {

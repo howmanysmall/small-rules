@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/jecs/no-has-before-remove-in-jecs";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-has-before-remove-in-jecs", () => {
 	ts.run("no-has-before-remove-in-jecs", rule, {

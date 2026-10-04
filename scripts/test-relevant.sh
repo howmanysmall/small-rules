@@ -37,7 +37,6 @@ while IFS= read -r -d '' record; do
 			category="${category%%/*}"
 			base="${path##*/}"
 			addTestIfPresent "tests/rules/${category}/${base%.ts}.test.ts"
-			addTestIfPresent "tests/${base%.ts}.test.ts"
 			;;
 		src/index.ts)
 			addTestIfPresent "tests/index.test.ts"

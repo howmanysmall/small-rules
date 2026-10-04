@@ -5,24 +5,23 @@ import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 import { Predicate } from "effect";
 
 import smallRules from "$small-rules";
-
-import { createRuleExecutor } from "./rule-harness/execute";
-import { applyFixes, fixer } from "./rule-harness/fixes";
-import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "./rule-harness/object";
-import { getRuleMeta, parseCase } from "./rule-harness/parse";
+import { createRuleExecutor } from "$test/rule-harness/execute";
+import { applyFixes, fixer } from "$test/rule-harness/fixes";
+import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "$test/rule-harness/object";
+import { getRuleMeta, parseCase } from "$test/rule-harness/parse";
 
 import type { UnknownRecord } from "type-fest";
 
-import type { HarnessValue } from "./rule-harness/object";
-import type { Fix, NormalizedValidCase, RuntimeDiagnostic } from "./rule-harness/types";
+import type { HarnessValue } from "$test/rule-harness/object";
+import type { Fix, NormalizedValidCase, RuntimeDiagnostic } from "$test/rule-harness/types";
 
 interface JsonObject {
 	[key: string]: JsonValue;
 }
 type JsonValue = Array<JsonValue> | boolean | JsonObject | number | string;
 
-const SOURCE_FILE = nodePath.join(import.meta.dirname, "fixtures", "fuzz-target.tsx");
-const SPEC_SOURCE_FILE = nodePath.join(import.meta.dirname, "fixtures", "fuzz-target.spec.tsx");
+const SOURCE_FILE = nodePath.join(import.meta.dirname, "..", "fixtures", "fuzz-target.tsx");
+const SPEC_SOURCE_FILE = nodePath.join(import.meta.dirname, "..", "fixtures", "fuzz-target.spec.tsx");
 
 for (const [ruleName, rule] of Object.entries(smallRules.rules)) {
 	const execute = createRuleExecutor(ruleName, rule);

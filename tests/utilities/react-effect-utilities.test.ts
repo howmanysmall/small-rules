@@ -11,8 +11,7 @@ import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
 import noDerivedState from "$oxc-rules/react/no-derived-state";
 import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subscription";
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("react-effect utilities branch coverage", () => {
 	// A non-CallExpression init on a local alias (leaf) passed to a prop

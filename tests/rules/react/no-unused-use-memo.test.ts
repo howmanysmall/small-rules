@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-unused-use-memo";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-unused-use-memo", () => {
 	ts.run("no-unused-use-memo", rule, {

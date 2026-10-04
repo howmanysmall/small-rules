@@ -5,12 +5,11 @@ import { describe, expect, it } from "vitest";
 import { Predicate } from "effect";
 
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
+import { traverseAst } from "$test/rule-harness/ast";
+import { parseCase } from "$test/rule-harness/parse";
 
-import { traverseAst } from "./rule-harness/ast";
-import { parseCase } from "./rule-harness/parse";
-
-import type { HarnessValue } from "./rule-harness/object";
-import type { HarnessNode, HarnessSourceCode } from "./rule-harness/types";
+import type { HarnessValue } from "$test/rule-harness/object";
+import type { HarnessNode, HarnessSourceCode } from "$test/rule-harness/types";
 
 const reactSources = new Set(["react"]);
 const effectNames = new Set(["useEffect"]);

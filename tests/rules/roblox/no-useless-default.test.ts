@@ -2,8 +2,7 @@ import { describe } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import rule, { isDefaultValue } from "$oxc-rules/roblox/no-useless-default";
-
-import { ts, tsx } from "./rule-testers";
+import { ts, tsx } from "$test/rule-testers";
 
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
 

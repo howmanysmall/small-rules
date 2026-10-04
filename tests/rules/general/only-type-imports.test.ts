@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/only-type-imports";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("only-type-imports", () => {
 	ts.run("only-type-imports", rule, {

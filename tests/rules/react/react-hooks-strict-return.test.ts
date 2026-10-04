@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/react-hooks-strict-return";
-
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 const errors = [{ messageId: "tooManyReturnValues" }];
 

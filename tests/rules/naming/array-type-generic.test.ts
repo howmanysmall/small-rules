@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/array-type-generic";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("array-type-generic", () => {
 	tsx.run("array-type-generic", rule, {

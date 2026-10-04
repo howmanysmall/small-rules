@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/require-unicode-regex";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("require-unicode-regex", () => {
 	ts.run("require-unicode-regex", rule, {

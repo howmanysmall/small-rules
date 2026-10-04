@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import rule from "$oxc-rules/general/directive-require-description";
-
-import { js, ts } from "./rule-testers";
+import { js, ts } from "$test/rule-testers";
 
 import type { Comment, SourceCode } from "oxlint-plugin-utilities";
 

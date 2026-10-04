@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/directive-no-unlimited-disable";
-
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 describe("directive-no-unlimited-disable", () => {
 	js.run("directive-no-unlimited-disable", rule, {

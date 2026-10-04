@@ -13,6 +13,7 @@ import {
 	isTsImportEqualsDeclaration,
 	isTsModuleBlock,
 	isTsModuleDeclaration,
+	isTsTypeAssertion,
 	isTsTypeParameter,
 } from "$oxc-utilities/oxc-utilities";
 import { traverseAst } from "$test/rule-harness/ast";
@@ -207,5 +208,25 @@ describe("ast node guards", () => {
 
 		expect(declarations.map(DISCRIMINANT_GUARDS.isTsModuleDeclaration)).toStrictEqual([true, false]);
 		expect(declarations.map(DISCRIMINANT_GUARDS.isTsGlobalDeclaration)).toStrictEqual([false, true]);
+	});
+});
+
+describe("isTsTypeAssertion", () => {
+	it("should recognize TypeScript type assertion nodes", () => {
+		expect.assertions(1);
+
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
+		const node = { type: "TSTypeAssertion" } as ESTree.Node;
+
+		expect(isTsTypeAssertion(node)).toBe(true);
+	});
+
+	it("does not treat as-expressions as angle-bracket type assertions", () => {
+		expect.assertions(1);
+
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
+		const node = { type: "TSAsExpression" } as ESTree.Node;
+
+		expect(isTsTypeAssertion(node)).toBe(false);
 	});
 });

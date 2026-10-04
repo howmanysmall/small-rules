@@ -2,8 +2,7 @@ import { describe } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { isHookCall } from "$oxc-utilities/lint-utilities";
-
-import { createRuleTester } from "./rule-testers";
+import { createRuleTester } from "$test/rule-testers";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/require-react-component-keys";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("require-react-component-keys", () => {
 	// And this test file intentionally passes the rule as-is for runtime

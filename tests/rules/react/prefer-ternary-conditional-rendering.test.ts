@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/prefer-ternary-conditional-rendering";
-
-import { jsx } from "./rule-testers";
+import { jsx } from "$test/rule-testers";
 
 describe("prefer-ternary-conditional-rendering", () => {
 	jsx.run("prefer-ternary-conditional-rendering", rule, {

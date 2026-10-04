@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-underscore-react-properties";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("no-underscore-react-props", () => {
 	tsx.run("no-underscore-react-props", rule, {

@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/jecs/prefer-membership-filter-in-jecs";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("prefer-membership-filter-in-jecs", () => {
 	ts.run("prefer-membership-filter-in-jecs", rule, {

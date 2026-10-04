@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/prefer-native-collection-copy";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("prefer-native-collection-copy", () => {
 	ts.run("prefer-native-collection-copy", rule, {

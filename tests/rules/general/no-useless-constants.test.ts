@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/no-useless-constants";
-
-import { ts, tsx } from "./rule-testers";
+import { ts, tsx } from "$test/rule-testers";
 
 describe("no-useless-constants", () => {
 	describe("autofix coverage", () => {

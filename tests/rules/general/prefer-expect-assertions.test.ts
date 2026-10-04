@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/prefer-expect-assertions";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("prefer-expect-assertions", () => {
 	ts.run("prefer-expect-assertions", rule, {

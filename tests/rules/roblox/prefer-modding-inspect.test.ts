@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/prefer-modding-inspect";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("prefer-modding-inspect", () => {
 	ts.run("prefer-modding-inspect", rule, {

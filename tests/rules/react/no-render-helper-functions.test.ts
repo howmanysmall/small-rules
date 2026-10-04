@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-render-helper-functions";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 describe("no-render-helper-functions", () => {
 	tsx.run("no-render-helper-functions", rule, {

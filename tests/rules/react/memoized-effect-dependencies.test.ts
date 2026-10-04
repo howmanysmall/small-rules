@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/memoized-effect-dependencies";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("memoized-effect-dependencies", () => {
 	ts.run("memoized-effect-dependencies", rule, {

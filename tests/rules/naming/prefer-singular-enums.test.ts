@@ -1,10 +1,9 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/prefer-singular-enums";
+import { ts } from "$test/rule-testers";
 
-import { ts } from "./rule-testers";
-
-import type { RuleTestError } from "./rule-testers";
+import type { RuleTestError } from "$test/rule-testers";
 
 function errorWithName(name: string): RuleTestError {
 	return { message: `Enum name "${name}" should be singular.` };

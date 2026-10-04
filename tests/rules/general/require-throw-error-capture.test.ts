@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/require-throw-error-capture";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 const error = {
 	messageId: "missingCaptureStackTrace" as const,

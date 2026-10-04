@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-ianitor-success-access";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-ianitor-success-access", () => {
 	ts.run("no-ianitor-success-access", rule, {

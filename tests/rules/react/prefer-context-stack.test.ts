@@ -2,10 +2,9 @@ import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/prefer-context-stack";
+import { tsx } from "$test/rule-testers";
 
-import { tsx } from "./rule-testers";
-
-const FIXTURES = nodePath.join(import.meta.dirname, "fixtures", "prefer-context-stack");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "prefer-context-stack");
 const WITH_CONTEXT_STACK = nodePath.join(FIXTURES, "with-context-stack");
 const WITHOUT_CONTEXT_STACK = nodePath.join(FIXTURES, "without-context-stack");
 const FIXTURE_ONLY_CONTEXT_STACK = nodePath.join(FIXTURES, "fixture-only");

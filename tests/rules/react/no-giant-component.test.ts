@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-giant-component";
-
-import { tsx } from "./rule-testers";
+import { tsx } from "$test/rule-testers";
 
 function buildComponentBody(innerLineCount: number): string {
 	const lines = Array.from<string>({ length: innerLineCount });

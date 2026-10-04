@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/directive-no-aggregating-enable";
-
-import { js } from "./rule-testers";
+import { js } from "$test/rule-testers";
 
 describe("directive-no-aggregating-enable", () => {
 	js.run("directive-no-aggregating-enable", rule, {

@@ -8,8 +8,7 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-
-import { createRuleTester } from "./rule-testers";
+import { createRuleTester } from "$test/rule-testers";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

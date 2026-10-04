@@ -1,8 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-array-constructor-index-assignment";
-
-import { ts } from "./rule-testers";
+import { ts } from "$test/rule-testers";
 
 describe("no-array-constructor-index-assignment", () => {
 	ts.run("no-array-constructor-index-assignment", rule, {

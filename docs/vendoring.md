@@ -48,7 +48,7 @@ follow from the entry.
 
 ## What Enforces This
 
-`tests/third-party-notices.test.ts` fails if `THIRD-PARTY-NOTICES.md` does not match what
+`tests/tooling/third-party-notices.test.ts` fails if `THIRD-PARTY-NOTICES.md` does not match what
 the catalog renders, if a listed file does not exist on disk, or if the banner loses a
 copyright line or permission grant. `node --run generate:third-party-notices -- --check`
 does the staleness half of that without writing, for hooks and CI.
