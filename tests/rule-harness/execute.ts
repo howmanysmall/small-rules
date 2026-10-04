@@ -146,9 +146,7 @@ function createUnsetSourceCode(): HarnessSourceCode {
 }
 
 function throwUnavailableSourceCode(): never {
-	const error = new HarnessError("sourceCode is unavailable before a test case starts.");
-	Error.captureStackTrace(error, throwUnavailableSourceCode);
-	throw error;
+	throw new HarnessError("sourceCode is unavailable before a test case starts.");
 }
 
 function createUnsetNode(): HarnessNode {
@@ -177,9 +175,9 @@ function runVisitor(visitor: HarnessValue, sourceCode: HarnessSourceCode): void 
 
 function runHook(visitor: HarnessValue, key: string): HarnessValue {
 	if (!Predicate.isObject(visitor)) return undefined;
+
 	const hook = getProperty(visitor, key);
-	if (!isHook(hook)) return undefined;
-	return hook();
+	return isHook(hook) ? hook() : undefined;
 }
 
 function isHook(value: HarnessValue): value is () => HarnessValue {
