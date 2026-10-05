@@ -1,7 +1,7 @@
+import { isIdentifier, isTsQualifiedName } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifier, isTsQualifiedName } from "$oxc-utilities/oxc-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";

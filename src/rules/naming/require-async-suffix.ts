@@ -1,6 +1,7 @@
+import { isCallbackFunction, isFunctionExpression, isIdentifier } from "@small-rules/oxlint-utilities";
+
 import { isExternallyConstrainedProperty } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction, isFunctionExpression, isIdentifier } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
