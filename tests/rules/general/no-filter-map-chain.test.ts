@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/no-filter-map-chain";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-filter-map-chain", () => {
 	ts.run("no-filter-map-chain", rule, {

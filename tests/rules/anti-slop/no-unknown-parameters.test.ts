@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/anti-slop/no-unknown-parameters";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 const unknownParameter = { messageId: "unknownParameter" };
 

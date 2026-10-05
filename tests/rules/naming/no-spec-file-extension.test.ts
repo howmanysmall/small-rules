@@ -2,7 +2,7 @@ import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/no-spec-file-extension";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "no-spec-file-extension");
 

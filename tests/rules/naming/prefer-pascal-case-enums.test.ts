@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/prefer-pascal-case-enums";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 interface RuleMessage {
 	message: string;

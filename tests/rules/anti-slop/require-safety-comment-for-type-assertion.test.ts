@@ -2,7 +2,7 @@ import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 const missingSafetyComment = { messageId: "missingSafetyComment" };
 const tsgolint2001 = { "small-rules": { tsgolintVersion: "7.0.2001" } };

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-adjust-state-on-prop-change";
-import { tsx } from "$test/rule-testers";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-adjust-state-on-prop-change", () => {
 	tsx.run("no-adjust-state-on-prop-change", rule, {

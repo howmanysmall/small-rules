@@ -7,13 +7,13 @@ import {
 	createTypeEnvironment,
 } from "$oxc-utilities/anti-slop/dictionary-types";
 import { isNode } from "$oxc-utilities/oxc-utilities";
-import { traverseAst } from "$test/rule-harness/ast";
-import { parseCase } from "$test/rule-harness/parse";
+import { traverseAst } from "@small-rules/rule-harness/ast";
+import { parseCase } from "@small-rules/rule-harness/parse";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
 import type { TypeEnvironment } from "$oxc-utilities/anti-slop/dictionary-types";
-import type { HarnessNode, HarnessSourceCode } from "$test/rule-harness/types";
+import type { HarnessNode, HarnessSourceCode } from "@small-rules/rule-harness/types";
 
 function parseCode(code: string): HarnessSourceCode {
 	return parseCase({

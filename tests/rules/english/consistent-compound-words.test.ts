@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/english/consistent-compound-words";
-import { js, ts } from "$test/rule-testers";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("consistent-compound-words", () => {
 	js.run("consistent-compound-words", rule, {

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-color3-constructor";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-color3-constructor", () => {
 	js.run("no-color3-constructor", rule, {

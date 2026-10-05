@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness";
 
-import rule from "$oxc-rules/react/prefer-constant-dispatch";
-import { tsx } from "$test/rule-testers";
+import rule from "$oxc-rules/react/prefer-constant-dispatch/rule-testers";
 
 const preferConstantDispatchError = [{ messageId: "preferConstantDispatch", suggestions: 1 }];
 

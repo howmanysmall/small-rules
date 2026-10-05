@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-native-properties-spread";
-import { tsx } from "$test/rule-testers";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-native-properties-spread", () => {
 	tsx.run("no-native-properties-spread", rule, {

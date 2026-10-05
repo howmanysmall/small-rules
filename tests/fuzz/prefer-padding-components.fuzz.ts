@@ -4,9 +4,9 @@ import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 
 import rule from "$oxc-rules/react/prefer-padding-components";
-import { createRuleExecutor } from "$test/rule-harness/execute";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 
-import type { NormalizedValidCase } from "$test/rule-harness/types";
+import type { NormalizedValidCase } from "@small-rules/rule-harness/types";
 
 const PADDING_MODES: ReadonlyArray<"directional" | "equal" | "unequal"> = ["directional", "equal", "unequal"];
 const EXPRESSION_WRAPPERS: ReadonlyArray<"array" | "object" | "parentheses" | "property"> = [

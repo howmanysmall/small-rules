@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness";
 
 import noAdjustStateOnPropChange from "$oxc-rules/react/no-adjust-state-on-prop-change";
 import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
@@ -8,8 +9,7 @@ import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subs
 import noInitializeState from "$oxc-rules/react/no-initialize-state";
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
-import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-property-change";
-import { tsx } from "$test/rule-testers";
+import noResetAllStateOnPropChange from "$oxc-rules/react/no-reset-all-state-on-property-change/rule-testers";
 
 // Sanity check that runs the focused effect rules on common + valid real-world
 // code, as opposed to contrived test cases. Each snippet must pass all nine

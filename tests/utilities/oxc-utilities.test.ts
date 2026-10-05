@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { traverseAst } from "@small-rules/rule-harness/ast";
+import { parseCase } from "@small-rules/rule-harness/parse";
 
 import {
 	isAccessorProperty,
@@ -16,12 +18,9 @@ import {
 	isTsTypeAssertion,
 	isTsTypeParameter,
 } from "$oxc-utilities/oxc-utilities";
-import { traverseAst } from "$test/rule-harness/ast";
-import { parseCase } from "$test/rule-harness/parse";
 
+import type { HarnessNode, HarnessSourceCode } from "@small-rules/rule-harness/types";
 import type { ESTree } from "oxlint-plugin-utilities";
-
-import type { HarnessNode, HarnessSourceCode } from "$test/rule-harness/types";
 
 type NodeGuard = (node: ESTree.Node) => boolean;
 

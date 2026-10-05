@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-array-constructor-elements";
-import { ts, tsx } from "$test/rule-testers";
+import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-array-constructor-elements", () => {
 	tsx.run("no-array-constructor-elements", rule, {

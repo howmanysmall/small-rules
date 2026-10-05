@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { fc } from "@fast-check/vitest";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 
 import smallRules from "$small-rules";
 import { PROPERTY_RUNS } from "$test/property-runs";
-import { createRuleExecutor } from "$test/rule-harness/execute";
 
 import { isValidProgram, runFixLoop } from "./support/fix-loop";
 import { FIXABLE_CASES } from "./support/fixable-cases";

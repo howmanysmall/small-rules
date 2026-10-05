@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-warn";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-warn", () => {
 	js.run("no-warn", rule, {

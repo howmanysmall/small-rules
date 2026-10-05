@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/require-module-level-instantiation";
-import { tsx } from "$test/rule-testers";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("require-module-level-instantiation", () => {
 	tsx.run("require-module-level-instantiation", rule, {

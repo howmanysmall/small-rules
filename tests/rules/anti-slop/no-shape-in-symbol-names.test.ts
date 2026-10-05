@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/anti-slop/no-shape-in-symbol-names";
-import { tsx } from "$test/rule-testers";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-shape-in-symbol-names", () => {
 	tsx.run("no-shape-in-symbol-names", rule, {

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness";
 
-import rule from "$oxc-rules/roblox/jecs/prefer-single-world-query-in-jecs";
-import { ts } from "$test/rule-testers";
+import rule from "$oxc-rules/roblox/jecs/prefer-single-world-query-in-jecs/rule-testers";
 
 describe("prefer-single-world-query-in-jecs", () => {
 	ts.run("prefer-single-world-query-in-jecs", rule, {

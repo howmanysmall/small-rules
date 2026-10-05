@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/directive-no-use";
-import { js, tsx } from "$test/rule-testers";
+import { js, tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("directive-no-use", () => {
 	describe("block directives", () => {

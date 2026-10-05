@@ -2,7 +2,7 @@ import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/strict-component-boundaries";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "strict-boundaries");
 const BASIC_APP = nodePath.join(FIXTURES, "basic-app", "app");

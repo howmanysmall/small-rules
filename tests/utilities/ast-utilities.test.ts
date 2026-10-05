@@ -2,7 +2,7 @@ import { describe } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { forEachNode, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

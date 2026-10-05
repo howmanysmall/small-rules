@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/general/directive-no-unused-enable";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("directive-no-unused-enable", () => {
 	js.run("directive-no-unused-enable", rule, {

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/prefer-sequence-overloads";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("prefer-sequence-overloads", () => {
 	js.run("prefer-sequence-overloads", rule, {

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/roblox/no-array-size-assignment";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-array-size-assignment", () => {
 	js.run("no-array-size-assignment", rule, {

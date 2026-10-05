@@ -12,7 +12,7 @@ import {
 	inspectRelativeLocalComponentImport,
 	MAX_REGEX_CACHE_SIZE,
 } from "$oxc-utilities/local-component-discovery";
-import { createRuleTester } from "$test/rule-testers";
+import { createRuleTester } from "@small-rules/rule-harness";
 
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
 

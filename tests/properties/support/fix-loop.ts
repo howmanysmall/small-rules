@@ -1,8 +1,8 @@
-import { applyFixes, fixer } from "$test/rule-harness/fixes";
-import { parseCase } from "$test/rule-harness/parse";
-import { isFix } from "$test/rule-harness/types";
+import { applyFixes, fixer } from "@small-rules/rule-harness/fixes";
+import { parseCase } from "@small-rules/rule-harness/parse";
+import { isFix } from "@small-rules/rule-harness/types";
 
-import type { createRuleExecutor } from "$test/rule-harness/execute";
+import type { createRuleExecutor } from "@small-rules/rule-harness/execute";
 import type {
 	Fix,
 	HarnessDefinition,
@@ -11,7 +11,7 @@ import type {
 	NormalizedValidCase,
 	Range,
 	RuntimeDiagnostic,
-} from "$test/rule-harness/types";
+} from "@small-rules/rule-harness/types";
 
 /** Oxlint stops re-running fixes after this many passes. */
 export const MAXIMUM_FIX_PASSES = 10;

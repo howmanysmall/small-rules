@@ -13,7 +13,7 @@ import {
 	walkAst,
 	walkAstSlop,
 } from "$oxc-utilities/react-hook-utilities";
-import { createRuleTester } from "$test/rule-testers";
+import { createRuleTester } from "@small-rules/rule-harness";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

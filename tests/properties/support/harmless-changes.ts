@@ -1,13 +1,12 @@
 import { fc } from "@fast-check/vitest";
+import { traverseAst } from "@small-rules/rule-harness/ast";
+import { applyFixes } from "@small-rules/rule-harness/fixes";
+import { parseCase } from "@small-rules/rule-harness/parse";
 import { Predicate } from "effect";
-
-import { traverseAst } from "$test/rule-harness/ast";
-import { applyFixes } from "$test/rule-harness/fixes";
-import { parseCase } from "$test/rule-harness/parse";
 
 import { isGeneratedIdentifier } from "./syntax";
 
-import type { Fix, HarnessNode, NormalizedValidCase, Range } from "$test/rule-harness/types";
+import type { Fix, HarnessNode, NormalizedValidCase, Range } from "@small-rules/rule-harness/types";
 
 /**
  * Text that can sit on its own line between two statements without changing

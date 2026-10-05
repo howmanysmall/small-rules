@@ -2,7 +2,7 @@ import nodePath from "node:path";
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/prefer-local-portal-component";
-import { tsx } from "$test/rule-testers";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "prefer-local-portal-component");
 const WITH_PORTAL = nodePath.join(FIXTURES, "with-portal");

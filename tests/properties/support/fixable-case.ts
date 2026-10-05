@@ -5,7 +5,7 @@ import { fillerArbitrary, frameArbitrary, wrapInFrames } from "./syntax";
 import type { Arbitrary } from "fast-check";
 
 import type smallRules from "$small-rules";
-import type { NormalizedValidCase, TestLanguage } from "$test/rule-harness/types";
+import type { NormalizedValidCase, TestLanguage } from "@small-rules/rule-harness/types";
 
 import type { Frame } from "./syntax";
 

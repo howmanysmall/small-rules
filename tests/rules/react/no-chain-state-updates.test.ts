@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/react/no-chain-state-updates";
-import { tsx } from "$test/rule-testers";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-chain-state-updates", () => {
 	tsx.run("no-chain-state-updates", rule, {

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness";
 
-import rule from "$oxc-rules/react/prefer-hoisted-jsx-elements";
-import { tsx } from "$test/rule-testers";
+import rule from "$oxc-rules/react/prefer-hoisted-jsx-elements/rule-testers";
 
 describe("prefer-hoisted-jsx-elements", () => {
 	tsx.run("prefer-hoisted-jsx-elements", rule, {

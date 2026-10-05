@@ -3,7 +3,7 @@ import { fc } from "@fast-check/vitest";
 
 import smallRules from "$small-rules";
 import { PROPERTY_RUNS } from "$test/property-runs";
-import { createRuleExecutor } from "$test/rule-harness/execute";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 
 import { isValidProgram } from "./support/fix-loop";
 import { FIXABLE_CASES } from "./support/fixable-cases";
@@ -14,7 +14,7 @@ import {
 	separateLines,
 } from "./support/harmless-changes";
 
-import type { RuleExecutionResult } from "$test/rule-harness/types";
+import type { RuleExecutionResult } from "@small-rules/rule-harness/types";
 
 // A change that rarely alters the program makes the property pass vacuously.
 const MINIMUM_ALTERED_RATIO = 0.5;

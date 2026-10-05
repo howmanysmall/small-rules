@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/anti-slop/no-object-parameters";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 const objectParameter = { messageId: "objectParameter" };
 const objectParameterSyntaxes = [

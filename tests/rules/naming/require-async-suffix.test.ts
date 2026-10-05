@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 
 import rule from "$oxc-rules/naming/require-async-suffix";
-import { ts } from "$test/rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 const missingAsyncSuffixErrors = [{ messageId: "missingAsyncSuffix" }];
 

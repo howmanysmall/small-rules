@@ -5,15 +5,15 @@ import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 import { Predicate } from "effect";
 
 import smallRules from "$small-rules";
-import { createRuleExecutor } from "$test/rule-harness/execute";
-import { applyFixes, fixer } from "$test/rule-harness/fixes";
-import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "$test/rule-harness/object";
-import { getRuleMeta, parseCase } from "$test/rule-harness/parse";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
+import { applyFixes, fixer } from "@small-rules/rule-harness/fixes";
+import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "@small-rules/rule-harness/object";
+import { getRuleMeta, parseCase } from "@small-rules/rule-harness/parse";
 
 import type { UnknownRecord } from "type-fest";
 
-import type { HarnessValue } from "$test/rule-harness/object";
-import type { Fix, NormalizedValidCase, RuntimeDiagnostic } from "$test/rule-harness/types";
+import type { HarnessValue } from "@small-rules/rule-harness/object";
+import type { Fix, NormalizedValidCase, RuntimeDiagnostic } from "@small-rules/rule-harness/types";
 
 interface JsonObject {
 	[key: string]: JsonValue;

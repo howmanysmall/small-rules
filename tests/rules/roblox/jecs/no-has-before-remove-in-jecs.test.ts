@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness";
 
-import rule from "$oxc-rules/roblox/jecs/no-has-before-remove-in-jecs";
-import { ts } from "$test/rule-testers";
+import rule from "$oxc-rules/roblox/jecs/no-has-before-remove-in-jecs/rule-testers";
 
 describe("no-has-before-remove-in-jecs", () => {
 	ts.run("no-has-before-remove-in-jecs", rule, {
