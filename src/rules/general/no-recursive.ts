@@ -1,4 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrowFunctionExpression,
 	isBindingIdentifier,
@@ -6,7 +5,9 @@ import {
 	isMemberExpression,
 	isMethodDefinition,
 	isThisExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 

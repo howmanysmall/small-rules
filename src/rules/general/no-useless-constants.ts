@@ -1,5 +1,3 @@
-import { getDeclarationRemovalRange, hasAttachedComments } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	BINARY_EXPRESSION,
@@ -29,7 +27,6 @@ import {
 	PARENTHESIZED_EXPRESSION,
 	SEQUENCE_EXPRESSION,
 	SPREAD_ELEMENT,
-	stripParenthesis,
 	TEMPLATE_LITERAL,
 	TS_AS_EXPRESSION,
 	TS_INSTANTIATION_EXPRESSION,
@@ -37,7 +34,11 @@ import {
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
 	UNARY_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getDeclarationRemovalRange, hasAttachedComments } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripParenthesis } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, Fix, Reference, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";

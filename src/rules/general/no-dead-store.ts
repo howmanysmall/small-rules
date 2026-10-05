@@ -1,5 +1,3 @@
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyFunction,
 	isAnyLiteral,
@@ -29,7 +27,10 @@ import {
 	isUnaryExpression,
 	isUpdateExpression,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
 

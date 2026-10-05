@@ -1,6 +1,7 @@
+import { FOR_STATEMENT, isExpressionStatement } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
-import { FOR_STATEMENT, isExpressionStatement } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

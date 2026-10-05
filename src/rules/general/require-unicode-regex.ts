@@ -1,7 +1,7 @@
+import { isAnyLiteral, isIdentifier, SPREAD_ELEMENT } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyLiteral, isIdentifier, SPREAD_ELEMENT } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

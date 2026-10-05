@@ -1,8 +1,5 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	BLOCK_STATEMENT,
-	getMemberPropertyName,
 	IDENTIFIER,
 	isArrowFunctionExpression,
 	isAssignmentPattern,
@@ -13,7 +10,11 @@ import {
 	isReturnStatement,
 	isSpreadElement,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";

@@ -1,10 +1,6 @@
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 
 import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "@small-rules/arktype-utilities";
-import { type } from "arktype";
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	BLOCK_STATEMENT,
 	CATCH_CLAUSE,
@@ -24,13 +20,16 @@ import {
 	isSwitchStatement,
 	isTryStatement,
 	isYieldExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { type } from "arktype";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { LoopNode } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
-
-import type { LoopNode } from "$oxc-utilities/oxc-utilities";
 
 const NOT_ALL = "not all execution paths";
 const CLOSER = "closer" as const;

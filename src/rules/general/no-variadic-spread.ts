@@ -1,10 +1,7 @@
+import { isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	getMemberPropertyName,
-	isIdentifierNamed,
-	isMemberExpression,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

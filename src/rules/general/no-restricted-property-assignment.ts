@@ -1,10 +1,11 @@
 import nodePath from "node:path";
 import { cwd } from "node:process";
+import { isIdentifier, isMemberExpression } from "@small-rules/oxlint-utilities";
 import { type } from "arktype";
 import { minimatch, Minimatch } from "minimatch";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isIdentifier, isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 
 import type { MinimatchOptions } from "minimatch";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";

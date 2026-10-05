@@ -1,8 +1,4 @@
 import nodePath from "node:path";
-import { Predicate } from "effect";
-import { parse } from "yuku-parser";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBindingIdentifier,
 	isExpressionStatement,
@@ -11,7 +7,11 @@ import {
 	isThrowStatement,
 	isUnaryExpression,
 	LITERAL,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+import { parse } from "yuku-parser";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
 

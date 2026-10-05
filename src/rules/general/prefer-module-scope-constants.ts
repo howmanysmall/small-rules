@@ -1,5 +1,6 @@
+import { isIdentifier, isProgram } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifier, isProgram } from "$oxc-utilities/oxc-utilities";
 
 import type { Scope, Visitor } from "oxlint-plugin-utilities";
 
