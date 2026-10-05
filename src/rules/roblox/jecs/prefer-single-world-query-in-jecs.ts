@@ -3,15 +3,23 @@ import { Predicate } from "effect";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	FOR_STATEMENT,
 	IDENTIFIER,
+	IF_STATEMENT,
 	isCallExpression,
 	isIdentifierName,
 	isMemberExpression,
 	isSpreadElement,
+	LOGICAL_EXPRESSION,
+	WHILE_STATEMENT,
 } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
+
+import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 type QueryType = "get" | "has";
 type Context = InferContextFromRule<typeof preferSingleWorldQueryInJecs>;
@@ -86,12 +94,12 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	};
 }
 
-const VALID_PARENT_TYPES = new Set<string>([
-	"ConditionalExpression",
-	"DoWhileStatement",
-	"ForStatement",
-	"IfStatement",
-	"WhileStatement",
+const VALID_PARENT_TYPES = new Set<NodeType>([
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	WHILE_STATEMENT,
 ]);
 
 function isNodeWithParent(value: InspectableNode): value is { readonly parent: InspectableNode } {
@@ -109,7 +117,7 @@ function getOperator(value: InspectableNode): string | undefined {
 }
 
 function isLogicalAndExpression(value: InspectableNode): boolean {
-	return getNodeType(value) === "LogicalExpression" && getOperator(value) === "&&";
+	return getNodeType(value) === LOGICAL_EXPRESSION && getOperator(value) === "&&";
 }
 
 function isIdentifierReference(value: InspectableNode): value is ESTree.IdentifierReference {

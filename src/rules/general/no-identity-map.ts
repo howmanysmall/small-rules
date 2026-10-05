@@ -1,6 +1,19 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
+import {
+	BLOCK_STATEMENT,
+	getMemberPropertyName,
+	IDENTIFIER,
+	isArrowFunctionExpression,
+	isAssignmentPattern,
+	isCallExpression,
+	isFunctionExpression,
+	isIdentifierName,
+	isMemberExpression,
+	isReturnStatement,
+	isSpreadElement,
+	isVariableDeclarator,
+} from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -10,8 +23,8 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 const DEFAULT_BINDING_PATTERNS: ReadonlyArray<string> = ["binding"];
 
 function getParameterName(parameterPattern: ESTree.ParamPattern): string | undefined {
-	if (parameterPattern.type === "Identifier") return parameterPattern.name;
-	if (parameterPattern.type === "AssignmentPattern" && parameterPattern.left.type === "Identifier") {
+	if (isIdentifierName(parameterPattern)) return parameterPattern.name;
+	if (isAssignmentPattern(parameterPattern) && isIdentifierName(parameterPattern.left)) {
 		return parameterPattern.left.name;
 	}
 	return undefined;
@@ -21,7 +34,7 @@ function isBlockReturningIdentity({ body }: ESTree.FunctionBody, parameterName: 
 	if (body.length !== 1) return false;
 
 	const [statement] = body;
-	if (statement?.type !== "ReturnStatement" || statement.argument?.type !== "Identifier") {
+	if (!isReturnStatement(statement) || !isIdentifierName(statement.argument)) {
 		return false;
 	}
 
@@ -37,16 +50,16 @@ function getSingleParameterName(callback: { readonly params: ReadonlyArray<ESTre
 }
 
 function isIdentityCallback(callback: ESTree.Expression): boolean {
-	if (callback.type === "ArrowFunctionExpression") {
+	if (isArrowFunctionExpression(callback)) {
 		const name = getSingleParameterName(callback);
 		if (name === undefined) return false;
 
 		const { body } = callback;
 		switch (body.type) {
-			case "BlockStatement":
+			case BLOCK_STATEMENT:
 				return isBlockReturningIdentity(body, name);
 
-			case "Identifier":
+			case IDENTIFIER:
 				return body.name === name;
 
 			default:
@@ -54,7 +67,7 @@ function isIdentityCallback(callback: ESTree.Expression): boolean {
 		}
 	}
 
-	if (callback.type === "FunctionExpression") {
+	if (isFunctionExpression(callback)) {
 		const name = getSingleParameterName(callback);
 		if (name === undefined || callback.body === null) return false;
 		return isBlockReturningIdentity(callback.body, name);
@@ -70,16 +83,16 @@ function isJoinBindingsCall(node: ESTree.CallExpression): boolean {
 
 function isBindingInitialization(variable: ScopeVariable): boolean {
 	for (const definition of variable.defs) {
-		if (definition.node.type !== "VariableDeclarator") continue;
+		if (!isVariableDeclarator(definition.node)) continue;
 
 		const { init } = definition.node;
-		if (init?.type !== "CallExpression") continue;
+		if (!isCallExpression(init)) continue;
 
 		const calleeName = getHookName(init);
 		if (
 			calleeName === "useBinding" ||
 			isJoinBindingsCall(init) ||
-			(init.callee.type === "MemberExpression" && getMemberPropertyName(init.callee) === "map")
+			(isMemberExpression(init.callee) && getMemberPropertyName(init.callee) === "map")
 		) {
 			return true;
 		}
@@ -92,7 +105,7 @@ function isLikelyBinding(
 	{ object }: ESTree.MemberExpression,
 	patterns: ReadonlyArray<string>,
 ): boolean {
-	if (object.type === "Identifier") {
+	if (isIdentifierName(object)) {
 		const lowerName = object.name.toLowerCase();
 		for (const pattern of patterns) if (lowerName.includes(pattern.toLowerCase())) return true;
 
@@ -101,8 +114,8 @@ function isLikelyBinding(
 	}
 
 	return (
-		object.type === "CallExpression" &&
-		((object.callee.type === "MemberExpression" && getMemberPropertyName(object.callee) === "map") ||
+		isCallExpression(object) &&
+		((isMemberExpression(object.callee) && getMemberPropertyName(object.callee) === "map") ||
 			isJoinBindingsCall(object))
 	);
 }
@@ -112,9 +125,9 @@ function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | unde
 
 	const { callee } = node;
 	if (
-		callee.type !== "MemberExpression" ||
+		!isMemberExpression(callee) ||
 		callee.computed ||
-		callee.property.type !== "Identifier" ||
+		!isIdentifierName(callee.property) ||
 		getMemberPropertyName(callee) !== "map" ||
 		node.arguments.length !== 1
 	) {
@@ -122,7 +135,7 @@ function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | unde
 	}
 
 	const [argument] = node.arguments;
-	if (argument === undefined || argument.type === "SpreadElement" || !isIdentityCallback(argument)) {
+	if (argument === undefined || isSpreadElement(argument) || !isIdentityCallback(argument)) {
 		return undefined;
 	}
 
@@ -131,9 +144,7 @@ function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | unde
 
 function isReceiverOfIdentityMap(node: ESTree.CallExpression): boolean {
 	const { parent } = node;
-	return (
-		parent.type === "MemberExpression" && parent.object === node && getIdentityMapCallee(parent.parent) === parent
-	);
+	return isMemberExpression(parent) && parent.object === node && getIdentityMapCallee(parent.parent) === parent;
 }
 
 const noIdentityMap = createRule("no-identity-map", "general", {
