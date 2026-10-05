@@ -13,18 +13,6 @@
 // predicate is idiomatic defensive runtime validation, not evidence loss.
 
 import {
-	classifyUnsafeDictionaryValue,
-	classifyWideningTarget,
-	createTypeEnvironment,
-	isKnownEvidenceExpression,
-} from "$oxc-utilities/anti-slop/dictionary-types";
-import {
-	getFunctionParameterBindingName,
-	getFunctionParameterTypeAnnotation,
-} from "$oxc-utilities/anti-slop/function-parameters";
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import {
 	isAccessorProperty,
 	isAnyFunction,
 	isAnyLiteral,
@@ -44,7 +32,20 @@ import {
 	isTsTypeAssertion,
 	isVariableDeclaration,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import {
+	classifyUnsafeDictionaryValue,
+	classifyWideningTarget,
+	createTypeEnvironment,
+	isKnownEvidenceExpression,
+} from "$oxc-utilities/anti-slop/dictionary-types";
+import {
+	getFunctionParameterBindingName,
+	getFunctionParameterTypeAnnotation,
+} from "$oxc-utilities/anti-slop/function-parameters";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

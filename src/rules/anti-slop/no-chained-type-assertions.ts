@@ -8,22 +8,21 @@
 // departure: `allowedTargets` exempts a single `as unknown/any/never as T`
 // bridge when `T` is a listed identifier (e.g. `vector`, `Vector3`).
 
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBindingIdentifier,
-	isConstAssertion,
 	isParenthesizedExpression,
 	isTsAnyKeyword,
 	isTsNeverKeyword,
 	isTsTypeReference,
 	isTsUnknownKeyword,
 	isTypeAssertionExpression,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
+import { createRule } from "$oxc-utilities/create-rule";
+import { isConstAssertion, stripParenthesis } from "$oxc-utilities/oxc-utilities";
+
+import type { TypeAssertionExpression } from "@small-rules/oxlint-utilities";
 import type { ESTree, VisitorWithHooks } from "oxlint-plugin-utilities";
-
-import type { TypeAssertionExpression } from "$oxc-utilities/oxc-utilities";
 
 function isOutermostAssertionInChain(node: TypeAssertionExpression): boolean {
 	let current: ESTree.Expression = node;

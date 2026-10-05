@@ -10,8 +10,9 @@
 // `Part.Shape` in Roblox, which is not within the author's control to rename.
 // oxlint-disable small-rules/no-shape-in-symbol-names -- what?
 
+import { isJsxMemberExpression, isMemberExpression, isTsQualifiedName } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isJsxMemberExpression, isMemberExpression, isTsQualifiedName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

@@ -6,8 +6,6 @@
 // aliases; variable resolution uses the shared getVariableByName helper
 // instead of upstream's scope-manager reference scan.
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARROW_FUNCTION_EXPRESSION,
 	FUNCTION_DECLARATION,
@@ -36,8 +34,6 @@ import {
 	isTsUnknownKeyword,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripParenthesis,
-	stripParenthesizedType,
 	TS_ARRAY_TYPE,
 	TS_CONSTRUCTOR_TYPE,
 	TS_DECLARE_FUNCTION,
@@ -49,7 +45,11 @@ import {
 	TS_TUPLE_TYPE,
 	TS_TYPE_LITERAL,
 	TS_TYPE_OPERATOR,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripParenthesis, stripParenthesizedType } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { Except } from "type-fest";

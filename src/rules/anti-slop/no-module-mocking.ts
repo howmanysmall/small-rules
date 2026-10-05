@@ -4,10 +4,6 @@
 //
 // Modifications: local API and path alias adaptation.
 
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyLiteral,
 	isBindingIdentifier,
@@ -15,7 +11,11 @@ import {
 	isImportSpecifier,
 	isSuper,
 	isV8IntrinsicExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 

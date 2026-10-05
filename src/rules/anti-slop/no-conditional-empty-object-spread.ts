@@ -4,13 +4,10 @@
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases ($oxc-utilities).
 
+import { isConditionalExpression, isEmptyObjectExpression, isObjectExpression } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isConditionalExpression,
-	isEmptyObjectExpression,
-	isObjectExpression,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+import { stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

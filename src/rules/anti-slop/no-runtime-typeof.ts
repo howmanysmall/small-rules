@@ -5,16 +5,16 @@
 // Modifications: local API and path alias adaptation. Existence probes of the
 // form `typeof x === "undefined"` are allowed, matching upstream.
 
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyFunction,
 	isBinaryExpression,
 	isProgram,
 	isStringLiteral,
 	isTsTypePredicate,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
