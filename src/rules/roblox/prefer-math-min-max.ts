@@ -1,8 +1,3 @@
-import { Predicate } from "effect";
-
-import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
 	isAnyLiteral,
 	isAssignmentPattern,
@@ -17,9 +12,13 @@ import {
 	isTsTypeReference,
 	isVariableDeclarator,
 	PRIVATE_IDENTIFIER,
-	stripExpressionWrappers,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import { stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

@@ -7,8 +7,9 @@
 // regex-literal detection moved from token inspection to the `regex` literal
 // property.
 
+import { isIdentifier } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifier } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, VisitorWithHooks } from "oxlint-plugin-utilities";
 

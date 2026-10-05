@@ -1,4 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARRAY_PATTERN,
@@ -8,7 +7,6 @@ import {
 	CHAIN_EXPRESSION,
 	CONDITIONAL_EXPRESSION,
 	FUNCTION_EXPRESSION,
-	getMemberPropertyName,
 	IDENTIFIER,
 	isAnyLiteral,
 	isArrayPattern,
@@ -32,12 +30,14 @@ import {
 	TS_INSTANTIATION_EXPRESSION,
 	TS_NON_NULL_EXPRESSION,
 	TS_TYPE_ASSERTION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
+import type { BindingName, CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
-
-import type { BindingName, CallbackFunction } from "$oxc-types/missing-types";
 
 interface Options {
 	readonly eventsImportPaths?: ReadonlyArray<string>;

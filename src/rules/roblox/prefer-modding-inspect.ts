@@ -1,22 +1,21 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getTypeAnnotationFromBinding,
 	isAnyLiteral,
 	isIdentifier,
 	isObjectExpression,
 	isProperty,
 	isTsLiteralType,
 	isTsTypeReference,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
 
 const RECORD_TYPE_NAMES = new Set(["ReadonlyRecord", "Record"]);
 
 function isRecordTypeReference(typeRef: ESTree.TSType): typeRef is ESTree.TSTypeReference {
-	return (
-		isTsTypeReference(typeRef) && isIdentifier(typeRef.typeName) && RECORD_TYPE_NAMES.has(typeRef.typeName.name)
-	);
+	return isTsTypeReference(typeRef) && isIdentifier(typeRef.typeName) && RECORD_TYPE_NAMES.has(typeRef.typeName.name);
 }
 
 function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TSType | undefined {

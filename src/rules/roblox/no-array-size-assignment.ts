@@ -1,5 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
-import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import {
 	CALL_EXPRESSION,
 	IDENTIFIER,
@@ -17,7 +15,10 @@ import {
 	MEMBER_EXPRESSION,
 	SUPER,
 	THIS_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";

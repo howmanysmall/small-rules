@@ -1,7 +1,3 @@
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	CONDITIONAL_EXPRESSION,
 	DO_WHILE_STATEMENT,
@@ -14,12 +10,15 @@ import {
 	isSpreadElement,
 	LOGICAL_EXPRESSION,
 	WHILE_STATEMENT,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
 
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
-
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 type QueryType = "get" | "has";
 type Context = InferContextFromRule<typeof preferSingleWorldQueryInJecs>;

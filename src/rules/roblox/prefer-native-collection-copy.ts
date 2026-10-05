@@ -1,11 +1,3 @@
-import { getNativeCollectionKind } from "$oxc-utilities/api-provenance";
-import {
-	forEachNode,
-	hasAttachedComments,
-	hasShadowedBinding,
-	STOP_NODE_TRAVERSAL,
-} from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrayPattern,
 	isBlockStatement,
@@ -18,7 +10,16 @@ import {
 	isNewExpression,
 	isSpreadElement,
 	isVariableDeclaration,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getNativeCollectionKind } from "$oxc-utilities/api-provenance";
+import {
+	forEachNode,
+	hasAttachedComments,
+	hasShadowedBinding,
+	STOP_NODE_TRAVERSAL,
+} from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

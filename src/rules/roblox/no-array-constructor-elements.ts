@@ -1,10 +1,4 @@
-import { Predicate } from "effect";
-
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
-	getMemberPropertyName,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isAssignmentPattern,
@@ -23,13 +17,17 @@ import {
 	isUnaryExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
 
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+
+import type { BindingName, FixReturn } from "@small-rules/oxlint-utilities";
 import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-import type { BindingName } from "$oxc-types/missing-types";
-import type { FixReturn } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
 interface NoArrayConstructorElementsOptions {

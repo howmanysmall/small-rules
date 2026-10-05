@@ -1,10 +1,4 @@
-import { Predicate } from "effect";
-
-import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
-import { forEachNode, getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
 	isAnyFunction,
 	isAnyLiteral,
 	isBlockStatement,
@@ -31,12 +25,16 @@ import {
 	isTsUnionType,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
 
+import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
+import { forEachNode, getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const DEFAULT_SYSTEM_TYPE_NAMES = ["PlanckSystem", "System", "SystemFunction", "SystemReturn", "SystemTableLike"];
 type ScopeVariable = ReturnType<SourceCode["getDeclaredVariables"]>[number];

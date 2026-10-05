@@ -1,7 +1,4 @@
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
 	isAnyLiteral,
 	isBinaryExpression,
 	isCallExpression,
@@ -12,9 +9,11 @@ import {
 	isNumericLiteral,
 	isSpreadElement,
 	isThisExpression,
-	stripExpressionWrappers,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

@@ -1,14 +1,14 @@
 import { isReadonlyDictionaryOfStrings } from "@small-rules/arktype-utilities";
-import { type } from "arktype";
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isIdentifier,
 	isImportDefaultSpecifier,
 	isImportSpecifier,
 	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { type } from "arktype";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
 

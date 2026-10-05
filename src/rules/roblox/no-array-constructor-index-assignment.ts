@@ -1,5 +1,3 @@
-import { forEachNode, hasShadowedBinding, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAssignmentExpression,
 	isBindingIdentifier,
@@ -10,8 +8,11 @@ import {
 	isNumericLiteral,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { forEachNode, hasShadowedBinding, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

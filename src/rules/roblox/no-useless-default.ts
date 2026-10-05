@@ -1,9 +1,4 @@
 import { isBoolean, isString } from "@small-rules/arktype-utilities";
-import { type } from "arktype";
-import { Predicate } from "effect";
-
-import defaultProperties from "$oxc-generated/default-properties.json";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	IDENTIFIER,
 	isAnyLiteral,
@@ -25,8 +20,13 @@ import {
 	isStringLiteral,
 	isUnaryExpression,
 	isVariableDeclaration,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { type } from "arktype";
+import { Predicate } from "effect";
+
+import defaultProperties from "$oxc-generated/default-properties.json";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";

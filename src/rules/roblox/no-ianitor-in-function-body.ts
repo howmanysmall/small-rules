@@ -1,5 +1,6 @@
+import { isCallExpression, isIdentifier, isMemberExpression } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallExpression, isIdentifier, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

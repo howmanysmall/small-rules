@@ -1,5 +1,5 @@
 // oxlint-disable better-max-params/better-max-params -- nobody cares lol
-import { createRule } from "$oxc-utilities/create-rule";
+
 import {
 	isCallExpression,
 	isIdentifier,
@@ -34,7 +34,9 @@ import {
 	TS_UNION_TYPE,
 	TS_UNKNOWN_KEYWORD,
 	TS_VOID_KEYWORD,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 

@@ -1,5 +1,3 @@
-import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBlockStatement,
 	isCallExpression,
@@ -10,7 +8,10 @@ import {
 	isLiteral,
 	isMemberExpression,
 	isSpreadElement,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

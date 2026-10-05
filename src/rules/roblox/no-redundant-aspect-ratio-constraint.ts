@@ -1,7 +1,4 @@
 import { readFileSync } from "node:fs";
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyLiteral,
 	isBlockStatement,
@@ -16,8 +13,11 @@ import {
 	isJsxIdentifier,
 	isReturnStatement,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 import { isImportBinding } from "$oxc-utilities/static-expression-utilities";

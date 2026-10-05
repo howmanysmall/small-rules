@@ -1,13 +1,8 @@
+import { isCallExpression, isIdentifier, isMemberExpression, isNewExpression } from "@small-rules/oxlint-utilities";
+
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	getMemberPropertyName,
-	isCallExpression,
-	isIdentifier,
-	isMemberExpression,
-	isNewExpression,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

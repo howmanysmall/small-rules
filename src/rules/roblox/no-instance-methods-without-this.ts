@@ -1,13 +1,7 @@
+import { isFunctionExpression, isIdentifier, isNode, isSuper, isThisExpression } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isFunctionExpression,
-	isIdentifier,
-	isNode,
-	isSuper,
-	isThisExpression,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 

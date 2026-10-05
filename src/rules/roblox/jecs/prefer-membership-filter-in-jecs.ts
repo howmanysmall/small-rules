@@ -1,6 +1,3 @@
-import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyLiteral,
 	isArrayPattern,
@@ -10,7 +7,11 @@ import {
 	isRestElement,
 	isSpreadElement,
 	isVariableDeclaration,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fix, Fixer, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
