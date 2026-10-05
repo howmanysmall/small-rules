@@ -233,9 +233,6 @@ catalogs:
     react-dom:
       specifier: 19.3.0
       version: 19.3.0
-    satteri:
-      specifier: 0.10.5
-      version: 0.10.5
     sharp:
       specifier: 0.35.5
       version: 0.35.5
@@ -879,9 +876,6 @@ importers:
       react-dom:
         specifier: catalog:frontend
         version: 19.3.0(react@19.3.0)
-      satteri:
-        specifier: catalog:frontend
-        version: 0.10.5
       sharp:
         specifier: catalog:frontend
         version: 0.35.5(@types/node@26.6.4)
@@ -20096,7 +20090,6 @@ time:
   react-doctor@0.9.14: '2026-09-12T11:40:17.189Z'
   react-dom@19.3.0: '2026-09-09T17:17:39.744Z'
   react@19.3.0: '2026-09-09T17:21:30.071Z'
-  satteri@0.10.5: '2026-08-19T20:38:24.126Z'
   sfw@2.0.6: '2026-05-22T16:42:22.828Z'
   sharp@0.35.5: '2026-09-27T13:46:24.509Z'
   shiki@4.5.0: '2026-10-01T06:46:31.760Z'

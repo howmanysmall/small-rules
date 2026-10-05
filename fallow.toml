@@ -27,9 +27,7 @@ ignoreDependencies = [
 	"@isentinel/hooks",
 	"@total-typescript/ts-reset",
 	"fast-check",
-	"hast",
-	"mdast-util-directive",
-	"mdast",
+	"oxc-transform-react",
 	"sharp"
 ]
 ignoreExportsUsedInFile = true

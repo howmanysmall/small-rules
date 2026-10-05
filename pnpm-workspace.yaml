@@ -116,7 +116,6 @@ catalogs:
     oxc-transform-react: 0.145.0
     react: 19.3.0
     react-dom: 19.3.0
-    satteri: 0.10.5
     sharp: 0.35.5
     shiki: 4.5.0
   lint:
