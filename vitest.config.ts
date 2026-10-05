@@ -32,19 +32,14 @@ const testConfiguration = mergeConfig(
 				clean: true,
 				enabled,
 				exclude: [
-					"documentation/**",
-					"packages/**/src/**/*.test.ts",
-					"tools/**/src/**/*.test.ts",
+					"**/*.test.ts",
 					"src/index.ts",
 					"src/types/**/*.ts",
 					"src/utilities/prevent-abbreviations/types.ts",
+					// Build and test tooling: nothing ships from these.
+					"tools/{lint-configurations,linter-utilities,rule-harness,vite-configuration}/**",
 				],
-				include: [
-					"packages/*/src/**/*.ts",
-					"src/**/*.ts",
-					"tools/local-rules/src/**/*.ts",
-					"tools/release-notes/src/**/*.ts",
-				],
+				include: ["src/**/*.ts", "{packages,tools}/*/src/**/*.ts"],
 				provider: "v8",
 				reporter: ["text", "html", "text-summary", "json", "json-summary"],
 				reportOnFailure: true,

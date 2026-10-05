@@ -1,15 +1,5 @@
-import { sharedConfiguration } from "@small-rules/vite-configuration";
-import { defineConfig, mergeConfig } from "vitest/config";
+import { createPackageConfiguration } from "@small-rules/vite-configuration";
 
-const configuration = mergeConfig(
-	sharedConfiguration,
-	defineConfig({
-		test: {
-			name: "fs-utilities",
-			include: ["src/**/*.test.ts"],
-			testTimeout: 5_000,
-		},
-	}),
-);
+const configuration = createPackageConfiguration("fs-utilities");
 
 export default configuration;

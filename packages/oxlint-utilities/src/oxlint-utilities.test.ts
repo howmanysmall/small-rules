@@ -7,9 +7,11 @@ import {
 	isAccessorProperty,
 	isClassDeclaration,
 	isClassExpression,
+	isConstAssertion,
 	isFunctionLike,
 	isNode,
 	isStaticBlock,
+	isTsAsExpression,
 	isTsDeclareFunction,
 	isTsEmptyBodyFunctionExpression,
 	isTsGlobalDeclaration,
@@ -256,5 +258,16 @@ describe("isUnbracedControlBody", () => {
 
 		expect(statements.map(isUnbracedControlBody)).toStrictEqual([true, false]);
 		expect(isUnbracedControlBody(findNode(source, "Program"))).toBe(false);
+	});
+});
+
+describe("isConstAssertion", () => {
+	it("is true only for an `as const` assertion", () => {
+		expect.assertions(1);
+
+		const source = parseCode("value as const;\nvalue as string;\nvalue as Values.Const;\nvalue as Constant;");
+		const assertions = findNodes(source, "TSAsExpression").filter(isTsAsExpression);
+
+		expect(assertions.map(isConstAssertion)).toStrictEqual([true, false, false, false]);
 	});
 });

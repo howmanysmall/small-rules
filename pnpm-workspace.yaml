@@ -80,6 +80,7 @@ overrides:
   "@isentinel/eslint-config>eslint-plugin-unicorn": catalog:lint
   "@isentinel/eslint-config>eslint-plugin-unused-imports": catalog:lint
   "@vitiate/core>@swc/core": 1.15.41
+  skills: link:../../../../GitHub/skills
   vite: ^8
 
 # Vitest 5 matches `testNamePattern` against `task.fullTestName`, which joins suite names with
