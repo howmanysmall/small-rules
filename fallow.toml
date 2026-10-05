@@ -26,7 +26,6 @@ ignoreDependencies = [
 	"@fontsource/ibm-plex-mono",
 	"@isentinel/hooks",
 	"@total-typescript/ts-reset",
-	"babel-plugin-react-compiler",
 	"fast-check",
 	"hast",
 	"mdast-util-directive",
