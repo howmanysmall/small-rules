@@ -1,0 +1,32 @@
+{
+	"name": "@small-rules/rule-harness",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Oxlint rule testing harness.",
+	"license": "UNLICENSED",
+	"type": "module",
+	"exports": {
+		"./create-rule-tester": "./src/runner.ts",
+		"./package.json": "./package.json",
+		"./rule-testers": "./src/rule-testers.ts",
+		"./types": "./src/types.ts"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"test:agent": "nr test --reporter agent",
+		"type-check": "tsgo --build"
+	},
+	"dependencies": {
+		"arktype": "catalog:runtime",
+		"effect": "catalog:runtime",
+		"oxlint-plugin-utilities": "catalog:runtime",
+		"type-fest": "catalog:types",
+		"yuku-ast": "catalog:tooling",
+		"yuku-parser": "catalog:runtime"
+	},
+	"devDependencies": {
+		"@small-rules/vite-configuration": "workspace:*",
+		"@types/node": "catalog:types",
+		"vitest": "catalog:test"
+	}
+}
