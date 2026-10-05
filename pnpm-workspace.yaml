@@ -150,11 +150,11 @@ catalogs:
     eslint-plugin-unicorn: 77.0.0
     eslint-plugin-unused-imports: 4.4.1
     fallow: 3.31.0
-    oxfmt: 0.71.0
-    oxlint: 1.86.0
-    oxlint-plugin-react-doctor: 0.9.14
+    oxfmt: 0.72.0
+    oxlint: 1.87.0
+    oxlint-plugin-react-doctor: 0.9.16
     oxlint-tsgolint: 7.0.2003
-    react-doctor: 0.9.14
+    react-doctor: 0.9.16
   opencode2:
     "@opencode/plugin": 2.0.22
     "@opencode/schema": 2.0.22
