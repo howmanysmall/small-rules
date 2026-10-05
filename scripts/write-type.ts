@@ -13,8 +13,10 @@ import type {
 	ParsedCommandLine,
 	Printer,
 	SourceFile,
+	Type,
 	TypeAliasDeclaration,
 	TypeChecker,
+	TypeNode,
 } from "typescript";
 
 const scriptName = getScriptName(true);
@@ -71,19 +73,40 @@ function findDeclaration(sourceFile: SourceFile, typeName: string): Declaration 
 	return undefined;
 }
 
+function createExpandedTypeNode(
+	type: Type,
+	declaration: TypeAliasDeclaration,
+	checker: TypeChecker,
+): TypeNode | undefined {
+	if (!type.isUnion()) {
+		return checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS);
+	}
+
+	const members = new Array<TypeNode>();
+	for (const member of type.types) {
+		const node = checker.typeToTypeNode(member, declaration, TYPE_FORMAT_FLAGS);
+		if (node !== undefined) members.push(node);
+	}
+	return factory.createUnionTypeNode(members);
+}
+
 function writeTypeAlias(
 	declaration: TypeAliasDeclaration,
 	checker: TypeChecker,
 	printer: Printer,
 	sourceFile: SourceFile,
+	shallow: boolean,
 ): string {
 	const type = checker.getTypeAtLocation(declaration.name);
-	const typeNode = checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS) ?? declaration.type;
+	const typeNode =
+		(shallow
+			? checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS)
+			: createExpandedTypeNode(type, declaration, checker)) ?? declaration.type;
 	const alias = factory.createTypeAliasDeclaration(undefined, declaration.name, declaration.typeParameters, typeNode);
 	return printer.printNode(EmitHint.Unspecified, alias, sourceFile).replace(TRAILING_SEMICOLON_REGEXP, "");
 }
 
-function writeType(filePath: string, typeName: string): string {
+function writeType(filePath: string, typeName: string, shallow: boolean): string {
 	const absolutePath = nodePath.resolve(cwd(), filePath);
 	const { fileNames, options } = resolveProjectOptions(absolutePath);
 	const program = typescript.createProgram({
@@ -98,17 +121,20 @@ function writeType(filePath: string, typeName: string): string {
 
 	if (typescript.isTypeAliasDeclaration(declaration)) {
 		const printer = typescript.createPrinter({ removeComments: true });
-		return writeTypeAlias(declaration, program.getTypeChecker(), printer, sourceFile);
+		return writeTypeAlias(declaration, program.getTypeChecker(), printer, sourceFile, shallow);
 	}
 
 	return declaration.getText(sourceFile);
 }
 
-const command = createBaseCommand(scriptName, "1.0.0", "Writes out a TypeScript type's entire definition.")
+const command = createBaseCommand(scriptName, "1.1.0", "Writes out a TypeScript type's entire definition.")
 	.argument("<file:file>", "The file containing the type to write out.")
 	.argument("<type-name:string>", "The name of the type to write out.")
-	.action((_, filePath, typeName) => {
-		console.log(writeType(filePath, typeName));
+	.option("-s, --shallow", "Keep nested type alias names instead of expanding unions into their members.", {
+		default: false,
+	})
+	.action(({ shallow }, filePath, typeName) => {
+		console.log(writeType(filePath, typeName, shallow));
 	});
 
 await command.parse(argv.slice(2));
