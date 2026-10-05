@@ -107,6 +107,35 @@ function isLikelyBinding(
 	);
 }
 
+function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | undefined {
+	if (node.type !== "CallExpression") return undefined;
+
+	const { callee } = node;
+	if (
+		callee.type !== "MemberExpression" ||
+		callee.computed ||
+		callee.property.type !== "Identifier" ||
+		getMemberPropertyName(callee) !== "map" ||
+		node.arguments.length !== 1
+	) {
+		return undefined;
+	}
+
+	const [argument] = node.arguments;
+	if (argument === undefined || argument.type === "SpreadElement" || !isIdentityCallback(argument)) {
+		return undefined;
+	}
+
+	return callee;
+}
+
+function isReceiverOfIdentityMap(node: ESTree.CallExpression): boolean {
+	const { parent } = node;
+	return (
+		parent.type === "MemberExpression" && parent.object === node && getIdentityMapCallee(parent.parent) === parent
+	);
+}
+
 const noIdentityMap = createRule("no-identity-map", "general", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -115,28 +144,34 @@ const noIdentityMap = createRule("no-identity-map", "general", {
 
 		return {
 			CallExpression(node): void {
-				const { callee } = node;
-				if (
-					callee.type !== "MemberExpression" ||
-					callee.computed ||
-					callee.property.type !== "Identifier" ||
-					getMemberPropertyName(callee) !== "map" ||
-					node.arguments.length !== 1
+				const callee = getIdentityMapCallee(node);
+				if (callee === undefined) return;
+
+				const messageId = isLikelyBinding(sourceCode, callee, bindingPatterns)
+					? "identityBindingMap"
+					: "identityArrayMap";
+
+				// The outermost identity map of a chain fixes the whole chain, so
+				// it settles in one pass instead of one pass per call.
+				if (isReceiverOfIdentityMap(node)) {
+					context.report({ messageId, node });
+					return;
+				}
+
+				let receiver = callee.object;
+				for (
+					let inner = getIdentityMapCallee(receiver);
+					inner !== undefined;
+					inner = getIdentityMapCallee(receiver)
 				) {
-					return;
+					receiver = inner.object;
 				}
 
-				const [argument] = node.arguments;
-				if (argument === undefined || argument.type === "SpreadElement" || !isIdentityCallback(argument)) {
-					return;
-				}
-
-				const binding = isLikelyBinding(sourceCode, callee, bindingPatterns);
 				context.report({
 					fix(fixer) {
-						return fixer.replaceText(node, sourceCode.getText(callee.object));
+						return fixer.replaceText(node, sourceCode.getText(receiver));
 					},
-					messageId: binding ? "identityBindingMap" : "identityArrayMap",
+					messageId,
 					node,
 				});
 			},

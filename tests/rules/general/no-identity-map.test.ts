@@ -73,6 +73,22 @@ mapped;
 				output: "binding.map(x => x + 1)",
 				errors: [{ messageId: "identityBindingMap" }],
 			},
+			// Catches chained identity maps needing one fix pass per call: Oxlint
+			// gives up after 10 passes, so long chains were never fully fixed.
+			{
+				code: "items.map((first) => first).map((second) => second).map((third) => third)",
+				output: "items",
+				errors: [
+					{ messageId: "identityBindingMap" },
+					{ messageId: "identityBindingMap" },
+					{ messageId: "identityArrayMap" },
+				],
+			},
+			{
+				code: "binding.map(x => x + 1).map(y => y).map(z => z)",
+				output: "binding.map(x => x + 1)",
+				errors: [{ messageId: "identityBindingMap" }, { messageId: "identityBindingMap" }],
+			},
 
 			{
 				code: "items.map(v => v)",
