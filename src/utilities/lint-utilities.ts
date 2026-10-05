@@ -1,6 +1,6 @@
 import {
-	isCallExpression,
 	isCallbackFunction,
+	isCallExpression,
 	isIdentifier,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";

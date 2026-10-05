@@ -16,9 +16,8 @@ import {
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
 
-import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
+import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 type RawRuleOptions = RuleContext["options"][0];

@@ -1,11 +1,6 @@
 import {
 	BINARY_EXPRESSION,
 	IDENTIFIER,
-	LITERAL,
-	MEMBER_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
-	TEMPLATE_LITERAL,
-	UNARY_EXPRESSION,
 	isCallExpression,
 	isFunctionDeclarationRaw,
 	isIdentifier,
@@ -13,6 +8,11 @@ import {
 	isJsxAttribute,
 	isJsxIdentifier,
 	isMemberExpression,
+	LITERAL,
+	MEMBER_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	TEMPLATE_LITERAL,
+	UNARY_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
 import { isUppercaseName } from "$oxc-utilities/string-utilities";

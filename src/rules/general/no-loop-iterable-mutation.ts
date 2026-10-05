@@ -1,9 +1,28 @@
-import { ARROW_FUNCTION_EXPRESSION, CLASS_DECLARATION, CLASS_EXPRESSION, FUNCTION_DECLARATION, FUNCTION_EXPRESSION, isArrayPattern, isCallExpression, isIdentifier, isIdentifierNamed, isMemberExpression, isNode, isSpreadElement, isVariableDeclaration, PARENTHESIZED_EXPRESSION, TS_AS_EXPRESSION, TS_NON_NULL_EXPRESSION, TS_SATISFIES_EXPRESSION, TS_TYPE_ASSERTION } from '@small-rules/oxlint-utilities';
-import type { NodeType } from '@small-rules/oxlint-utilities';
+import {
+	ARROW_FUNCTION_EXPRESSION,
+	CLASS_DECLARATION,
+	CLASS_EXPRESSION,
+	FUNCTION_DECLARATION,
+	FUNCTION_EXPRESSION,
+	isArrayPattern,
+	isCallExpression,
+	isIdentifier,
+	isIdentifierNamed,
+	isMemberExpression,
+	isNode,
+	isSpreadElement,
+	isVariableDeclaration,
+	PARENTHESIZED_EXPRESSION,
+	TS_AS_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+} from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 const ALL_MUTATION_METHODS = new Set([

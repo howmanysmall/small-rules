@@ -41,11 +41,14 @@ import {
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
-
-import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
+import {
+	getBindingPropertyKeyName,
+	getBindingPropertyValueIdentifier,
+	getHookName,
+} from "$oxc-utilities/react-hook-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
+import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 const UNSTABLE_VALUES = new Set<string>([
 	ARRAY_EXPRESSION,
@@ -180,13 +183,6 @@ const GLOBAL_BUILTINS = new Set([
 	"WeakSet",
 	"Window",
 ]);
-
-function getHookName({ callee }: ESTree.CallExpression): string | undefined {
-	if (isIdentifier(callee)) return callee.name;
-	if (isMemberExpression(callee) && isIdentifier(callee.property)) return callee.property.name;
-
-	return undefined;
-}
 
 function unwrapDependencyExpression(node: ESTree.Node): ESTree.Node {
 	let current = node;

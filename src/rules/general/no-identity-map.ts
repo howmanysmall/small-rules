@@ -122,7 +122,7 @@ function isLikelyBinding(
 }
 
 function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | undefined {
-	if (node.type !== "CallExpression") return undefined;
+	if (!isCallExpression(node)) return undefined;
 
 	const { callee } = node;
 	if (

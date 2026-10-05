@@ -1,11 +1,61 @@
-import { ARRAY_EXPRESSION, ARROW_FUNCTION_EXPRESSION, ASSIGNMENT_EXPRESSION, AWAIT_EXPRESSION, BINARY_EXPRESSION, BLOCK_STATEMENT, BREAK_STATEMENT, CALL_EXPRESSION, CLASS_EXPRESSION, CONDITIONAL_EXPRESSION, DO_WHILE_STATEMENT, EXPRESSION_STATEMENT, FOR_IN_STATEMENT, FOR_OF_STATEMENT, FOR_STATEMENT, FUNCTION_EXPRESSION, IDENTIFIER, IF_STATEMENT, isAnyFunction, isBindingIdentifier, isCallExpression, isConditionalExpression, isLabeledStatement, isLogicalExpression, isLoopNode, isMemberExpression, isPrivateIdentifier, isProgram, isSequenceExpression, isSpreadElement, isSwitchStatement, isVariableDeclaration, LITERAL, LOGICAL_EXPRESSION, MEMBER_EXPRESSION, NEW_EXPRESSION, OBJECT_EXPRESSION, RETURN_STATEMENT, SEQUENCE_EXPRESSION, SWITCH_STATEMENT, TAGGED_TEMPLATE_EXPRESSION, TEMPLATE_LITERAL, TRY_STATEMENT, UNARY_EXPRESSION, UPDATE_EXPRESSION, VARIABLE_DECLARATION, WHILE_STATEMENT, WITH_STATEMENT, YIELD_EXPRESSION } from '@small-rules/oxlint-utilities';
-import type { LoopNode } from '@small-rules/oxlint-utilities';
+import {
+	ARRAY_EXPRESSION,
+	ARROW_FUNCTION_EXPRESSION,
+	ASSIGNMENT_EXPRESSION,
+	AWAIT_EXPRESSION,
+	BINARY_EXPRESSION,
+	BLOCK_STATEMENT,
+	BREAK_STATEMENT,
+	CALL_EXPRESSION,
+	CLASS_EXPRESSION,
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	EXPRESSION_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	FUNCTION_EXPRESSION,
+	IDENTIFIER,
+	IF_STATEMENT,
+	isAnyFunction,
+	isBindingIdentifier,
+	isCallExpression,
+	isConditionalExpression,
+	isLabeledStatement,
+	isLogicalExpression,
+	isLoopNode,
+	isMemberExpression,
+	isPrivateIdentifier,
+	isProgram,
+	isSequenceExpression,
+	isSpreadElement,
+	isSwitchStatement,
+	isVariableDeclaration,
+	LITERAL,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	NEW_EXPRESSION,
+	OBJECT_EXPRESSION,
+	RETURN_STATEMENT,
+	SEQUENCE_EXPRESSION,
+	SWITCH_STATEMENT,
+	TAGGED_TEMPLATE_EXPRESSION,
+	TEMPLATE_LITERAL,
+	TRY_STATEMENT,
+	UNARY_EXPRESSION,
+	UPDATE_EXPRESSION,
+	VARIABLE_DECLARATION,
+	WHILE_STATEMENT,
+	WITH_STATEMENT,
+	YIELD_EXPRESSION,
+} from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
+import type { LoopNode } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { JsonValue } from "type-fest";
 

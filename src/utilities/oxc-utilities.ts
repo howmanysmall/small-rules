@@ -1,8 +1,8 @@
 import {
 	CHAIN_EXPRESSION,
-	IDENTIFIER,
 	isBindingIdentifier,
 	isCallExpression,
+	isIdentifier,
 	isIdentifierNamed,
 	isIdentifierReference,
 	isMemberExpression,
@@ -45,8 +45,8 @@ export function getNamespacedCallNames(
 	if (
 		!isMemberExpression(callee) ||
 		callee.computed ||
-		callee.object.type !== IDENTIFIER ||
-		callee.property.type !== IDENTIFIER
+		!isIdentifier(callee.object) ||
+		!isIdentifier(callee.property)
 	) {
 		return undefined;
 	}
@@ -60,8 +60,8 @@ export function isReactNamedCall(
 	reactNamespaces: ReadonlySet<string>,
 	name: string,
 ): boolean {
-	if (node.callee.type === IDENTIFIER) return identifiers.has(node.callee.name);
-	if (!isMemberExpression(node.callee) || node.callee.object.type !== IDENTIFIER) return false;
+	if (isIdentifier(node.callee)) return identifiers.has(node.callee.name);
+	if (!isMemberExpression(node.callee) || !isIdentifier(node.callee.object)) return false;
 	return reactNamespaces.has(node.callee.object.name) && getMemberPropertyName(node.callee) === name;
 }
 
@@ -74,7 +74,7 @@ export function isUseMemoCall(
 }
 
 export function getImportedName({ imported }: ESTree.ImportSpecifier): string | undefined {
-	return imported.type === IDENTIFIER ? imported.name : imported.value;
+	return isIdentifier(imported) ? imported.name : imported.value;
 }
 
 export function isStaticRequire(node: ESTree.Node): node is ESTree.CallExpression {

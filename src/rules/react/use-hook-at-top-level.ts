@@ -15,9 +15,8 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
-import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
+import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 interface ControlFlowContext {
 	readonly afterEarlyReturn: boolean;

@@ -1,4 +1,5 @@
-import { isAnyFunction, isLoopNode, type CallbackFunction } from "@small-rules/oxlint-utilities";
+import { isAnyFunction, isLoopNode } from '@small-rules/oxlint-utilities';
+import type { CallbackFunction } from '@small-rules/oxlint-utilities';
 
 import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
