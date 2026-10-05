@@ -417,7 +417,8 @@ describe("recognize (detector probability)", () => {
 
 		const detector = createKeywordsDetector(0.3, ["return"]);
 
-		// 1 - (1 - 0.3)^3 from the Detector doc contract, written out as a literal.
+		// 1 - (1 - 0.3)^3 from the Detector doc contract, written out as a
+		// literal.
 		expect(recognize(detector, "return return return")).toBeCloseTo(0.657, 10);
 	}, 5000);
 });

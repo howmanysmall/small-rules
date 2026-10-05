@@ -7,6 +7,22 @@
 	},
 	"colorize_brackets": true,
 	"context_servers": {
+		"chrome-devtools": {
+			"args": ["scripts/get-chrome-path.sh", "--serve"],
+			"command": "bash"
+		},
+		"fallow": {
+			"args": ["--run", "fallow-mcp"],
+			"command": "node",
+			"enabled": true,
+			"remote": false
+		},
+		"hk": {
+			"args": ["x", "--", "hk", "mcp", "--root", "."],
+			"command": "mise",
+			"enabled": true,
+			"remote": false
+		},
 		"jsr": {
 			"args": ["x", "--", "jsr-cli", "mcp"],
 			"command": "mise"
@@ -14,6 +30,12 @@
 		"npm": {
 			"args": ["x", "--", "npm-registry-mcp"],
 			"command": "mise"
+		},
+		"playwright": {
+			"args": ["x", "--", "nlx", "@playwright/mcp@latest"],
+			"command": "mise",
+			"enabled": true,
+			"remote": false
 		}
 	},
 	"edit_predictions": {

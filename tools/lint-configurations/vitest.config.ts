@@ -3,7 +3,7 @@ import { mergeConfig } from "vitest/config";
 
 const configuration = mergeConfig(sharedConfiguration, {
 	test: {
-		name: "arktype-utilities",
+		name: "lint-configurations",
 		include: ["src/**/*.test.ts"],
 		testTimeout: 5_000,
 	},

@@ -6,7 +6,6 @@ import { ts } from "$test/rule-testers";
 describe("prefer-membership-filter-in-jecs", () => {
 	ts.run("prefer-membership-filter-in-jecs", rule, {
 		invalid: [
-			// Catches queried component values that are fetched but never consumed.
 			{
 				code: [
 					'import { world } from "@rbxts/jecs";',

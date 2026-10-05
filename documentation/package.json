@@ -26,7 +26,6 @@
 		"effect": "catalog:runtime",
 		"react": "catalog:frontend",
 		"react-dom": "catalog:frontend",
-		"satteri": "catalog:frontend",
 		"sharp": "catalog:frontend",
 		"shiki": "catalog:frontend",
 		"type-fest": "catalog:types",
@@ -42,9 +41,9 @@
 		"@total-typescript/ts-reset": "catalog:types",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
-		"babel-plugin-react-compiler": "catalog:build",
 		"get-tsconfig": "catalog:build",
 		"jsdom": "catalog:test",
+		"oxc-transform-react": "catalog:frontend",
 		"typescript": "catalog:tooling",
 		"vitest": "catalog:test"
 	}

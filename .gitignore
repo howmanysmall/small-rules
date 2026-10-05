@@ -105,3 +105,8 @@ hk.local.pkl
 .agents/skills/wizard/
 .agents/skills/writing-for-agents/
 .agents/skills/pr/
+
+.agents/skills/.mise-skills.json
+.agents/skills/aube
+.agents/skills/communique
+.agents/skills/hk-*

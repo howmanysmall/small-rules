@@ -1,0 +1,26 @@
+diff --git a/dist/oxlint.mjs b/dist/oxlint.mjs
+index 913ee74f41216a825572614c686dafe6cc5c2db3..405959e65f4bc4d5be821c0e4a491a5b4aa7d40b 100644
+--- a/dist/oxlint.mjs
++++ b/dist/oxlint.mjs
+@@ -7757,11 +7757,7 @@ function oxlintOxfmt(options) {
+ 		specifier: resolveJsPluginSpecifier("eslint-plugin-oxfmt")
+ 	};
+ 	const jsFiles = oxfmtFiles?.flat() ?? ["**/*.{,c,m}js", "**/*.{,c,m}jsx"];
+-	const tsFiles = oxfmtFiles?.flat() ?? [
+-		"**/*.{,c,m}ts",
+-		"**/*.{,c,m}tsx",
+-		...componentExtensions.map((extension) => `**/*.${extension}`)
+-	];
++	const tsFiles = oxfmtFiles?.flat() ?? ["**/*.{,c,m}ts", "**/*.{,c,m}tsx"];
+ 	function createFragments(name, files) {
+ 		return [{
+ 			name,
+@@ -9548,7 +9544,7 @@ function isentinel(factoryOptions, ...userConfigs) {
+ 	if (Object.keys(rules).length > 0) {
+ 		const optionsFragments = createOxlintConfigs({
+ 			name: "isentinel/options-rules",
+-			files: [GLOB_SRC],
++			files: [GLOB_SRC, ...componentExtensions.map((extension) => `**/*.${extension}`)],
+ 			keepUnmappedOff: true,
+ 			rules
+ 		});

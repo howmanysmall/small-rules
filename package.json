@@ -108,6 +108,7 @@
 		"@commitlint/types": "catalog:commitlint",
 		"@e18e/eslint-plugin": "catalog:lint",
 		"@fast-check/vitest": "catalog:test",
+		"@howmanysmall/lint-configurations": "workspace:*",
 		"@isentinel/eslint-config": "catalog:lint",
 		"@isentinel/hooks": "catalog:tooling",
 		"@mdx-js/language-server": "catalog:tooling",
@@ -127,7 +128,7 @@
 		"@vitiate/core": "catalog:test",
 		"@vitiate/fuzzed-data-provider": "catalog:test",
 		"bumpp": "catalog:tooling",
-		"confbox": "catalog:test",
+		"confbox": "catalog:dev",
 		"eslint": "catalog:lint",
 		"eslint-plugin-antfu": "catalog:lint",
 		"eslint-plugin-astro": "catalog:lint",
@@ -173,7 +174,7 @@
 	"peerDependencies": {
 		"typescript": ">=5 <8"
 	},
-	"packageManager": "pnpm@12.8.2",
+	"packageManager": "pnpm@12.9.1",
 	"engines": {
 		"node": ">=22.12.0"
 	},

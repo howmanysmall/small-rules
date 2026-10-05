@@ -99,8 +99,8 @@ export function readCommuniqueDefaults(source: string): CommuniqueDefaults {
 	if (configuration instanceof type.errors) throw new TypeError(`communique.toml: ${configuration.summary}`);
 
 	const { model, repo } = configuration.defaults;
-	const [owner = "", repository = ""] = repo.split("/", 2);
-	return { model, owner, repository };
+	const separator = repo.indexOf("/");
+	return { model, owner: repo.slice(0, separator), repository: repo.slice(separator + 1) };
 }
 
 /**

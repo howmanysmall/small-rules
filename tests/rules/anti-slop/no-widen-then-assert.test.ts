@@ -98,7 +98,8 @@ describe("no-widen-then-assert", () => {
 				].join("\n"),
 				errors: [widenThenAssert],
 			},
-			// Object-widened bindings assert through every definitely-object shape.
+			// Object-widened bindings assert through every definitely-object
+			// shape.
 			{
 				code: [
 					"const pair = ['a', 1];",

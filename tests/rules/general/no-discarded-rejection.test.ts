@@ -6,7 +6,8 @@ import { ts } from "$test/rule-testers";
 describe("no-discarded-rejection", () => {
 	ts.run("no-discarded-rejection", rule, {
 		invalid: [
-			// Catches an explicit Promise rejection handler that erases the failure.
+			// Catches an explicit Promise rejection handler that erases the
+			// failure.
 			{
 				code: "Promise.resolve(request()).catch(() => undefined);",
 				errors: [{ messageId: "noDiscardedRejection" }],

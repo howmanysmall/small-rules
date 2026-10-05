@@ -7,13 +7,16 @@
 	"endOfLine": "lf",
 	"htmlWhitespaceSensitivity": "css",
 	"ignorePatterns": [
-		"src/generated/",
-		"**/*.{md,toml,js,yaml,yml,toml}",
-		"tests/fixtures/**/{invalid-*,*-invalid}/**/*.json",
-		"**/do-not-sync-ever/**",
-		".tsbuildinfo*",
 		"**/*-lock.json",
-		"**/ses_*.json"
+		"**/*.js",
+		"**/*.{md,toml,js,yaml,yml,toml}",
+		"**/.opencode/goals",
+		"**/do-not-sync-ever/**",
+		"**/generated/**",
+		"**/ses_*.json",
+		".mise/**",
+		".tsbuildinfo*",
+		"tests/fixtures/**/{invalid-*,*-invalid}/**/*.json"
 	],
 	"insertFinalNewline": true,
 	"jsdoc": false,

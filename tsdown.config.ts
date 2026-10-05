@@ -9,7 +9,14 @@ import type { Arrayable } from "type-fest";
 
 // Private workspace packages are unpublished, so inline them into dist.
 const ALWAYS_BUNDLE = ["@small-rules/arktype-utilities"];
-const NATIVE_NEVER_BUNDLE = ["oxc-resolver", /^@oxc-resolver\//u, "yuku-parser", /^@yuku-parser\//u] as const;
+const NATIVE_NEVER_BUNDLE = [
+	"oxc-resolver",
+	/^@oxc-resolver\//u,
+	"yuku-core",
+	/^@yuku-core\//u,
+	"yuku-parser",
+	/^@yuku-parser\//u,
+] as const;
 
 const MATCH_ANYTHING = /.*/u;
 const VENDORED_NOTICE = renderBundleBanner();

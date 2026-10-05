@@ -45,11 +45,17 @@ jobs:
             node --run biome -- ci --no-errors-on-unmatched "${changed_files[@]}"
           fi
 
-      - name: oxfmt
+      # isentinel-lint already runs oxfmt on everything else; .mdx is the only
+      # format neither it nor Biome covers.
+      - name: oxfmt (MDX)
         run: |
           mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
-          if ((${#changed_files[@]} > 0)); then
-            node --run oxfmt -- --no-error-on-unmatched-pattern --check "${changed_files[@]}"
+          mdx_files=()
+          for file in "${changed_files[@]}"; do
+            [[ $file == *.mdx ]] && mdx_files+=("$file")
+          done
+          if ((${#mdx_files[@]} > 0)); then
+            node --run oxfmt -- --no-error-on-unmatched-pattern --check "${mdx_files[@]}"
           fi
 
       - name: Lint

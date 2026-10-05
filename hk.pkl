@@ -92,9 +92,10 @@ local fileChecks = new Mapping<String, Step> {
     exclude = GENERATED_DATA
     batch = false
   }
-  // .astro is intentionally left out: oxfmt does not support it.
+  // isentinel-lint already runs oxfmt on everything else; .mdx is the only
+  // format neither it nor Biome covers.
   ["oxfmt"] = (Builtins.oxfmt) {
-    glob = ECMA_FILES + List("**/*.{json,jsonc,json5,code-workspace,mdx}")
+    glob = List("**/*.mdx")
     exclude = GENERATED_DATA
   }
   // tsconfig project references are derived from each package.json, and a

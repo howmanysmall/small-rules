@@ -47,7 +47,7 @@
 			"!**/*-lock.{json,yaml}",
 			"!scripts/clis/**/*.ts",
 			"!**/.opencode/goals",
-			"!src/generated/**",
+			"!src/generated",
 			"!.mise"
 		]
 	},
@@ -595,17 +595,6 @@
 			"linter": {
 				"domains": {
 					"react": "none"
-				}
-			}
-		},
-
-		{
-			"includes": ["documentation/src/types/satteri-optional-peers.d.ts"],
-			"linter": {
-				"rules": {
-					"correctness": {
-						"noUndeclaredDependencies": "off"
-					}
 				}
 			}
 		},
