@@ -9,6 +9,7 @@ import {
 	isCallExpression,
 	isFunctionDeclarationRaw,
 	isIdentifier,
+	isIdentifierNamed,
 	isJsxAttribute,
 	isJsxIdentifier,
 	isMemberExpression,
@@ -26,16 +27,13 @@ export function isComponentDeclaration(node: ESTree.Node): boolean {
 
 export function isMemoCall(node: ESTree.Node): boolean {
 	if (!isCallExpression(node)) return false;
-	// TODO: this should be `useIdentifierNamed`
-	if (isIdentifier(node.callee)) return node.callee.name === "memo";
+	if (isIdentifierNamed(node.callee, "memo")) return true;
 
 	return (
 		isMemberExpression(node.callee) &&
 		// TODO: this should be `useIdentifierNamed`
-		isIdentifier(node.callee.object) &&
-		node.callee.object.name === "React" &&
-		isIdentifier(node.callee.property) &&
-		node.callee.property.name === "memo"
+		isIdentifierNamed(node.callee.object, "React") &&
+		isIdentifierNamed(node.callee.property, "memo")
 	);
 }
 
@@ -44,8 +42,7 @@ export function isReactComponentHigherOrderCall({ callee }: ESTree.CallExpressio
 
 	return (
 		isMemberExpression(callee) &&
-		isIdentifier(callee.object) &&
-		callee.object.name === "React" &&
+		isIdentifierNamed(callee.object, "React") &&
 		isIdentifier(callee.property) &&
 		(callee.property.name === "forwardRef" || callee.property.name === "memo")
 	);
