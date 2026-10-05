@@ -1,15 +1,12 @@
 import { sharedConfiguration } from "@small-rules/vite-configuration";
-import { defineConfig, mergeConfig } from "vitest/config";
+import { mergeConfig } from "vitest/config";
 
-const configuration = mergeConfig(
-	sharedConfiguration,
-	defineConfig({
-		test: {
-			name: "arktype-utilities",
-			include: ["src/**/*.test.ts"],
-			testTimeout: 5_000,
-		},
-	}),
-);
+const configuration = mergeConfig(sharedConfiguration, {
+	test: {
+		name: "arktype-utilities",
+		include: ["src/**/*.test.ts"],
+		testTimeout: 5_000,
+	},
+});
 
 export default configuration;
