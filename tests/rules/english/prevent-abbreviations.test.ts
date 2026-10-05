@@ -1031,7 +1031,8 @@ describe("prevent-abbreviations", () => {
 		it("returns consistent results across repeated lookups and separately prepared configurations", () => {
 			expect.assertions(4);
 
-			// Catches a cached lookup returning a different answer than a fresh one.
+			// Catches a cached lookup returning a different answer than a fresh
+			// one.
 			const configuration = {
 				ignoreShorthands: ["Props"],
 				replacements: { res: { response: true, result: true } },

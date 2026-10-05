@@ -6,7 +6,8 @@ import { ts } from "$test/rule-testers";
 describe("prefer-native-collection-copy", () => {
 	ts.run("prefer-native-collection-copy", rule, {
 		invalid: [
-			// Catches a shallow Map copy being obscured by an allocation and loop.
+			// Catches a shallow Map copy being obscured by an allocation and
+			// loop.
 			{
 				code: [
 					"const current = new Map<number, NodePosition>(entries);",
