@@ -36,8 +36,8 @@
 	"scripts": {
 		"biome": "biome",
 		"build": "tsdown",
-		"build:local": "node --run build -- --minify --include-local",
-		"build:local:dev": "node --run build -- --include-local",
+		"build:local": "bun run scripts/build-local.ts",
+		"build:local:dev": "bun run scripts/build-local.ts --no-minify",
 		"changelog:version": "bun run scripts/ensure-unreleased.ts && git add CHANGELOG.md",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F '@small-rules/documentation' build",
