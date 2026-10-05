@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 
 import smallRules from "$small-rules";
+import { PROPERTY_RUNS } from "$test/property-runs";
 import { createRuleExecutor } from "$test/rule-harness/execute";
 
 import { isValidProgram, runFixLoop } from "./support/fix-loop";
 import { FIXABLE_CASES } from "./support/fixable-cases";
 
-const NUMBER_OF_RUNS = 100;
 // A generator that rarely triggers its rule makes the property pass
 // vacuously, so most generated programs must receive at least one fix.
 const MINIMUM_TRIGGER_RATIO = 0.5;
@@ -53,7 +53,7 @@ describe("fixable rules", () => {
 					// Assert
 					expect({ output, status }).toStrictEqual({ output, status: "settled" });
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			);
 
 			// Assert

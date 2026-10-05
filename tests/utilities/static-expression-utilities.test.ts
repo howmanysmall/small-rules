@@ -8,6 +8,7 @@ import {
 	isExplicitUndefinedExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
+import { PROPERTY_RUNS } from "$test/property-runs";
 import { createRuleExecutor } from "$test/rule-harness/execute";
 import { createRuleTester } from "$test/rule-testers";
 
@@ -582,7 +583,6 @@ const PRELUDE = [
 ].join("\n");
 
 const HOLE = "__dynamic__";
-const NUMBER_OF_RUNS = 100;
 
 const staticLeafArbitrary = fc.oneof(
 	fc.nat().map(String),
@@ -699,7 +699,7 @@ describe("isStaticExpression properties", () => {
 					// Assert
 					expect(messageIds).toStrictEqual(["static"]);
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			),
 		);
 
@@ -724,7 +724,7 @@ describe("isStaticExpression properties", () => {
 					// Assert
 					expect(messageIds).toStrictEqual(["dynamic"]);
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			),
 		);
 

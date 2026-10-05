@@ -1,0 +1,118 @@
+name: Deep Tests
+
+# Fuzzing and mutation testing take far too long for every pull request, so
+# they run here on a schedule. Pull requests still run the property tests at
+# their fixed run count and replay the fuzz corpus through `checks.yaml`.
+on:
+  schedule:
+    # Mondays at 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: deep-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fuzz:
+    name: Fuzz
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+
+      - name: Install dependencies
+        uses: $/.github/actions/install
+
+      - name: Fuzz every target
+        run: node --run test:fuzz:run
+
+      - if: failure()
+        name: Upload crashing inputs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          if-no-files-found: ignore
+          include-hidden-files: true
+          name: fuzz-crashes
+          path: .vitiate/
+          retention-days: 14
+    timeout-minutes: 90
+
+  mutation:
+    name: Mutation
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+
+      - name: Install dependencies
+        uses: $/.github/actions/install
+
+      # Stryker's incremental mode only re-tests mutants whose code or tests
+      # changed since the cached report.
+      - name: Restore incremental mutation report
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-stryker-incremental-${{ github.sha }}
+          path: reports/stryker-incremental.json
+          restore-keys: |
+            ${{ runner.os }}-stryker-incremental-
+
+      - name: Run mutation tests
+        run: node --run test:mutation
+
+      - if: always()
+        name: Upload mutation report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          if-no-files-found: ignore
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 14
+    timeout-minutes: 350
+
+  properties:
+    name: Property Tests
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+
+      - name: Install dependencies
+        uses: $/.github/actions/install
+
+      # Each run uses a fresh random seed, and fast-check prints the seed and
+      # shrunk counterexample of any failure.
+      - name: Run property tests
+        run: >-
+          node --run test --
+          --project small-rules
+          --testTimeout 1800000
+          --reporter github-actions --reporter dot
+          tests/properties tests/utilities
+        env:
+          PROPERTY_RUNS: "10000"
+    timeout-minutes: 60

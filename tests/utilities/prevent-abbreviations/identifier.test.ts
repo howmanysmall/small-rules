@@ -7,8 +7,7 @@ import {
 	isIdentifierStartCodePoint,
 	isValidIdentifier,
 } from "$oxc-utilities/prevent-abbreviations/identifier";
-
-const NUMBER_OF_RUNS = 100;
+import { PROPERTY_RUNS } from "$test/property-runs";
 
 // Random identifier-shaped names, plus the words strict module code reserves
 // for itself so the property meets them often.
@@ -172,7 +171,7 @@ describe("isValidIdentifier properties", () => {
 					// Assert
 					expect(declarable).toBe(true);
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			),
 		);
 

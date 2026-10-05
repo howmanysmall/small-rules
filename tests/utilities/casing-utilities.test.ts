@@ -2,14 +2,13 @@ import { describe, expect, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
+import { PROPERTY_RUNS } from "$test/property-runs";
 
 // Lowercase words of two or more letters: a one-letter word next to another
 // capital reads as part of an acronym, which camelCase cannot express.
 const camelCaseWordsArbitrary = fc.array(fc.stringMatching(/^[a-z]{2,}$/u), { minLength: 1 });
 
 const alphanumericNameArbitrary = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]*$/u);
-
-const NUMBER_OF_RUNS = 100;
 
 describe("toPascalCase", () => {
 	it("should return an empty string for blank input", () => {
@@ -78,7 +77,7 @@ describe("toPascalCase properties", () => {
 					// Assert
 					expect(pascalCase).toBe(words.map(capitalize).join(""));
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			),
 		);
 
@@ -99,7 +98,7 @@ describe("toPascalCase properties", () => {
 					// Assert
 					expect(pascalCase.toLowerCase()).toBe(name.toLowerCase());
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			),
 		);
 
@@ -124,7 +123,7 @@ describe("toPascalCase properties", () => {
 					// Assert
 					expect(twice).toBe(once);
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			),
 		);
 

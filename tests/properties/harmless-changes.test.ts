@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 
 import smallRules from "$small-rules";
+import { PROPERTY_RUNS } from "$test/property-runs";
 import { createRuleExecutor } from "$test/rule-harness/execute";
 
 import { isValidProgram } from "./support/fix-loop";
@@ -15,7 +16,6 @@ import {
 
 import type { RuleExecutionResult } from "$test/rule-harness/types";
 
-const NUMBER_OF_RUNS = 100;
 // A change that rarely alters the program makes the property pass vacuously.
 const MINIMUM_ALTERED_RATIO = 0.5;
 
@@ -81,7 +81,7 @@ describe("harmless changes", () => {
 					// Assert
 					expect(getMessageIds(separated)).toStrictEqual(getMessageIds(execute(original)));
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			);
 
 			// Assert
@@ -115,7 +115,7 @@ describe("harmless changes", () => {
 					// Assert
 					expect(getMessageIds(renamed)).toStrictEqual(getMessageIds(execute(original)));
 				}),
-				{ numRuns: NUMBER_OF_RUNS },
+				{ numRuns: PROPERTY_RUNS },
 			);
 
 			// Assert

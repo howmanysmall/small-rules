@@ -10,6 +10,7 @@ on:
       - .github/workflows/bundle-size.yaml
       - .github/workflows/checks.yaml
       - .github/workflows/ci.yaml
+      - .github/workflows/deep-tests.yaml
       - .github/workflows/docs.yaml
       - .github/workflows/release.yaml
       - ".ox*trc.json"
