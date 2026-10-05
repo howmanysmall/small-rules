@@ -1,6 +1,7 @@
 // oxlint-disable small-rules/prevent-abbreviations -- not here, lol.
 
 import nodePath from "node:path";
+import { fileURLToPath } from "node:url";
 import { GLOB_DTS, GLOB_SRC, GLOB_SRC_EXT, GLOB_TESTS } from "@isentinel/eslint-config";
 import { isentinel } from "@isentinel/eslint-config/oxlint";
 
@@ -569,7 +570,8 @@ export async function getOxlintAsync({
 		{
 			name: "small-rules/local-rules",
 			files: [`src/${GLOB_SRC}`],
-			jsPlugins: [{ name: "local", specifier: "@small-rules/local-rules" }],
+			// Resolved here: this package depends on it, the root does not.
+			jsPlugins: [{ name: "local", specifier: fileURLToPath(import.meta.resolve("@small-rules/local-rules")) }],
 			rules: { "local/prefer-node-type-constant": "error" },
 		},
 		{

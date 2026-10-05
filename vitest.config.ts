@@ -42,7 +42,7 @@ const testConfiguration = mergeConfig(
 				include: [
 					"packages/*/src/**/*.ts",
 					"src/**/*.ts",
-					"tools/local-rules/**/*.ts",
+					"tools/local-rules/src/**/*.ts",
 					"tools/release-notes/src/**/*.ts",
 				],
 				provider: "v8",
