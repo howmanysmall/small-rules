@@ -1,7 +1,8 @@
+import { isBlockStatement, isReturnStatement } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isBlockStatement, isReturnStatement, isUseMemoCall } from "$oxc-utilities/oxc-utilities";
+import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
 import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getEnvironment, getReactSources } from "$oxc-utilities/react-utilities";

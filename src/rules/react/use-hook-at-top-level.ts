@@ -1,9 +1,5 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyFunction,
-	isComponentName,
 	isFunctionDeclaration,
 	isIdentifier,
 	isImportSpecifier,
@@ -12,7 +8,11 @@ import {
 	isProperty,
 	isTryStatement,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";

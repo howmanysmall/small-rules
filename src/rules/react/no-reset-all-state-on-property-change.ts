@@ -1,4 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallbackFunction,
 	isCallExpression,
@@ -6,7 +5,9 @@ import {
 	isIdentifierNamed,
 	isMemberExpression,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 

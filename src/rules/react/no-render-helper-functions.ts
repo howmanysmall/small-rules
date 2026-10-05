@@ -1,7 +1,5 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	CHAIN_EXPRESSION,
-	getTypeAnnotationFromBinding,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isCallExpression,
@@ -24,7 +22,10 @@ import {
 	TS_NON_NULL_EXPRESSION,
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 

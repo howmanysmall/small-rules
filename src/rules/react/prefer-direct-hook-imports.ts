@@ -1,8 +1,8 @@
+import { isIdentifier, isMemberExpression } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifier, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactNamespaceImport } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 

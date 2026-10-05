@@ -1,5 +1,3 @@
-import { isMemoCall } from "$oxc-utilities/component-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -12,7 +10,10 @@ import {
 	JSX_ELEMENT,
 	JSX_FRAGMENT,
 	OBJECT_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isMemoCall } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

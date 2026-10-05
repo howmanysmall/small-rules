@@ -1,6 +1,3 @@
-import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 import {
 	isArrayExpression,
 	isAssignmentPattern,
@@ -11,7 +8,11 @@ import {
 	isObjectPattern,
 	isProperty,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 

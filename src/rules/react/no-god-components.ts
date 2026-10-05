@@ -1,5 +1,3 @@
-import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARROW_FUNCTION_EXPRESSION,
 	FUNCTION_DECLARATION,
@@ -10,7 +8,6 @@ import {
 	isAssignmentPattern,
 	isCallbackFunction,
 	isCallExpression,
-	isComponentName,
 	isExportDefaultDeclaration,
 	isFunctionDeclarationRaw,
 	isFunctionExpression,
@@ -22,7 +19,11 @@ import {
 	isProperty,
 	isTsLiteralType,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";

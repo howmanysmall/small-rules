@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -40,7 +37,10 @@ import {
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
 	VARIABLE_DECLARATOR,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";

@@ -1,5 +1,6 @@
+import { isTsTypeAnnotationUnknown } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isTsTypeAnnotationUnknown } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

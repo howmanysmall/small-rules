@@ -1,4 +1,13 @@
 import nodePath from "node:path";
+import {
+	isIdentifier,
+	isImportDeclaration,
+	isImportNamespaceSpecifier,
+	isImportSpecifier,
+	isJsxElement,
+	isJsxFragment,
+	isMemberExpression,
+} from "@small-rules/oxlint-utilities";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -8,15 +17,6 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import {
-	isIdentifier,
-	isImportDeclaration,
-	isImportNamespaceSpecifier,
-	isImportSpecifier,
-	isJsxElement,
-	isJsxFragment,
-	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -15,7 +12,6 @@ import {
 	FOR_STATEMENT,
 	FUNCTION_DECLARATION,
 	FUNCTION_EXPRESSION,
-	getNamespacedCallNames,
 	IDENTIFIER,
 	IF_STATEMENT,
 	isAnyFunction,
@@ -58,7 +54,11 @@ import {
 	UNARY_EXPRESSION,
 	WHILE_STATEMENT,
 	WITH_STATEMENT,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getNamespacedCallNames } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
@@ -69,10 +69,10 @@ import {
 } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
 interface ReportOptions {

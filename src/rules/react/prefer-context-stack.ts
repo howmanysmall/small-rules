@@ -1,4 +1,11 @@
 import nodePath from "node:path";
+import {
+	isJsxElement,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxMemberExpression,
+	isJsxText,
+} from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import {
@@ -7,13 +14,6 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import {
-	isJsxElement,
-	isJsxEmptyExpression,
-	isJsxExpressionContainer,
-	isJsxMemberExpression,
-	isJsxText,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

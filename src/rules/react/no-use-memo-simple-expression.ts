@@ -1,7 +1,8 @@
+import { isBlockStatement, isReturnStatement } from "@small-rules/oxlint-utilities";
+
 import { isSimpleExpression } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isHookCall } from "$oxc-utilities/lint-utilities";
-import { isBlockStatement, isReturnStatement } from "$oxc-utilities/oxc-utilities";
 import { getEffectCallback } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";

@@ -1,16 +1,15 @@
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallbackFunction,
 	isCallExpression,
 	isFunctionDeclaration,
 	isIdentifier,
-	isUseMemoCall,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isUseMemoCall, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
 import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";

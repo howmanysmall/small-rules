@@ -1,5 +1,6 @@
+import { isJsxIdentifier } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isJsxIdentifier } from "$oxc-utilities/oxc-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

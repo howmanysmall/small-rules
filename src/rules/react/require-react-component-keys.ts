@@ -1,10 +1,4 @@
 import {
-	getJSXAttributeName,
-	hasJSXIdentifierAttribute,
-	isReactComponentHigherOrderCall,
-} from "$oxc-utilities/component-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import {
 	AWAIT_EXPRESSION,
 	BLOCK_STATEMENT,
 	CATCH_CLAUSE,
@@ -47,12 +41,19 @@ import {
 	TS_TYPE_ASSERTION,
 	WHILE_STATEMENT,
 	WITH_STATEMENT,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
+import {
+	getJSXAttributeName,
+	hasJSXIdentifierAttribute,
+	isReactComponentHigherOrderCall,
+} from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Reference, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 interface ReactKeysOptions {
 	readonly allowRootKeys?: boolean;

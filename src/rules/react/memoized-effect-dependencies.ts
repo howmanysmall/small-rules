@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -20,8 +17,11 @@ import {
 	isVariableDeclarator,
 	NEW_EXPRESSION,
 	OBJECT_EXPRESSION,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
 	forEachReactNamedImport,

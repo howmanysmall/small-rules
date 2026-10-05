@@ -1,9 +1,9 @@
+import { isCallbackFunction, isFunctionDeclaration, isNode, isVariableDeclarator } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
-import { isCallbackFunction, isFunctionDeclaration, isNode, isVariableDeclarator } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

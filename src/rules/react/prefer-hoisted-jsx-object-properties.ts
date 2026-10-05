@@ -1,5 +1,3 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	isIdentifier,
@@ -14,17 +12,20 @@ import {
 	JSX_EXPRESSION_CONTAINER,
 	JSX_FRAGMENT,
 	PARENTHESIZED_EXPRESSION,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
 	isModuleLevelScope,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
 
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
 
 const STATIC_OPTIONS: StaticExpressionOptions = {

@@ -1,16 +1,16 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
 	isCallbackFunction,
 	isClassExpression,
-	isComponentName,
 	isIdentifier,
 	isMemberExpression,
 	isSpreadElement,
 	isStringLiteral,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, isComponentName } from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
 	getReactSourcesFromOptions,

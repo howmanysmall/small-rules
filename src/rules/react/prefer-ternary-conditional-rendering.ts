@@ -1,4 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	BINARY_EXPRESSION,
 	CALL_EXPRESSION,
@@ -23,10 +22,12 @@ import {
 	LITERAL,
 	LOGICAL_EXPRESSION,
 	MEMBER_EXPRESSION,
-	stripExpressionWrappers,
 	THIS_EXPRESSION,
 	UNARY_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

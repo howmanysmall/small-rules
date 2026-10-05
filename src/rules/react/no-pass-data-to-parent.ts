@@ -1,5 +1,6 @@
+import { isIdentifier, isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifier, isIdentifierNamed, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import {
 	describeEffectOwner,
 	getReactEffectAnalysis,

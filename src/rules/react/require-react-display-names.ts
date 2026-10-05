@@ -1,15 +1,15 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getImportedName,
 	isCallExpression,
 	isExportDefaultDeclaration,
 	isExportNamedDeclaration,
 	isIdentifier,
 	isImportSpecifier,
 	isMemberExpression,
-	isReactNamedCall,
 	isVariableDeclaration,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getImportedName, isReactNamedCall } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactImport } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";

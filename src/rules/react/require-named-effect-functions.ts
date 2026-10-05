@@ -1,7 +1,3 @@
-import { Predicate } from "effect";
-
-import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrowFunctionExpression,
 	isCallExpression,
@@ -11,7 +7,11 @@ import {
 	isFunctionExpression,
 	isIdentifier,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getDeclarationRemovalRange, getVariableByName, hasAttachedComments } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isEnvironment, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 

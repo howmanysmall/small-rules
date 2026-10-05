@@ -1,12 +1,13 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrayExpression,
 	isIdentifier,
 	isObjectExpression,
 	isSpreadElement,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

@@ -1,13 +1,14 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isIdentifier,
 	isMemberExpression,
 	isObjectExpression,
 	isProperty,
 	isSpreadElement,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind } from "$oxc-utilities/react-hook-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
