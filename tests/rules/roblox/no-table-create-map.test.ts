@@ -1,7 +1,7 @@
 import { describe } from "vitest";
-import { ts } from "@small-rules/rule-harness";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/roblox/no-table-create-map/rule-testers";
+import rule from "$oxc-rules/roblox/no-table-create-map";
 
 describe("no-table-create-map", () => {
 	ts.run("no-table-create-map", rule, {

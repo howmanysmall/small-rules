@@ -1,7 +1,7 @@
 import { describe } from "vitest";
-import { ts } from "@small-rules/rule-harness";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/react/prefer-use-reducer/rule-testers";
+import rule from "$oxc-rules/react/prefer-use-reducer";
 
 describe("prefer-use-reducer", () => {
 	ts.run("prefer-use-reducer", rule, {

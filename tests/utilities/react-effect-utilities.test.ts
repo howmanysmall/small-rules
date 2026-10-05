@@ -6,12 +6,12 @@
 // reach the internal branch arms that the focused rule tests cannot.
 //
 import { describe } from "vitest";
-import { tsx } from "@small-rules/rule-harness";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import noChainStateUpdates from "$oxc-rules/react/no-chain-state-updates";
 import noDerivedState from "$oxc-rules/react/no-derived-state";
 import noExternalStoreSubscription from "$oxc-rules/react/no-external-store-subscription";
-import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent/rule-testers";
+import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 
 describe("react-effect utilities branch coverage", () => {
 	// A non-CallExpression init on a local alias (leaf) passed to a prop

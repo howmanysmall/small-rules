@@ -1,7 +1,7 @@
 import { describe } from "vitest";
-import { ts } from "@small-rules/rule-harness";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/roblox/prefer-modding-inspect/rule-testers";
+import rule from "$oxc-rules/roblox/prefer-modding-inspect";
 
 describe("prefer-modding-inspect", () => {
 	ts.run("prefer-modding-inspect", rule, {

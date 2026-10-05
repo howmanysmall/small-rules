@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
-
-import { getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
-import { isNode } from "$oxc-utilities/oxc-utilities";
+import { isNode } from "@small-rules/oxlint-utilities";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
 
-import type { ESTree } from "oxlint-plugin-utilities";
+import { getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 
 import type { HarnessNode, HarnessSourceCode } from "@small-rules/rule-harness/types";
+import type { ESTree } from "oxlint-plugin-utilities";
 
 function parseCode(code: string): HarnessSourceCode {
 	return parseCase({

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
-import { tsx } from "@small-rules/rule-harness";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/react/prefer-direct-hook-imports/rule-testers";
+import rule from "$oxc-rules/react/prefer-direct-hook-imports";
 
 describe("prefer-direct-hook-imports", () => {
 	tsx.run("prefer-direct-hook-imports", rule, {

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
-import { tsx } from "@small-rules/rule-harness";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/roblox/ban-instances/rule-testers";
+import rule from "$oxc-rules/roblox/ban-instances";
 
 describe("ban-instances", () => {
 	tsx.run("ban-instances", rule, {

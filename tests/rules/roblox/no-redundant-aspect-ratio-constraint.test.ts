@@ -1,8 +1,8 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
-import { tsx } from "@small-rules/rule-harness";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/roblox/no-redundant-aspect-ratio-constraint/rule-testers";
+import rule from "$oxc-rules/roblox/no-redundant-aspect-ratio-constraint";
 
 const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "no-redundant-aspect-ratio-constraint");
 const WITH_CONSTRAINT = nodePath.join(FIXTURES, "with-constraint");
