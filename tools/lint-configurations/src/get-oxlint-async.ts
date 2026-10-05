@@ -832,7 +832,7 @@ export async function getOxlintAsync({
 		},
 		{
 			name: "small-rules/allow-complexity",
-			files: ["tests/rule-harness/**", "scripts/**"],
+			files: ["tools/rule-harness/**", "scripts/**"],
 			rules: { complexity: "off" },
 		},
 	);
