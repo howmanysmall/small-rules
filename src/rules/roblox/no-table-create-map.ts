@@ -3,7 +3,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getMemberPropertyName,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isNewExpression,
 	stripExpressionWrappers,
@@ -21,7 +21,7 @@ function isTableCreateBase(sourceCode: SourceCode, expression: ESTree.Expression
 	}
 
 	const target = stripExpressionWrappers(callee.object);
-	if (!isIdentifierName(target) || target.name !== "table") return false;
+	if (!isIdentifier(target) || target.name !== "table") return false;
 	return !hasShadowedBinding(sourceCode, target, "table");
 }
 
@@ -31,7 +31,7 @@ function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expre
 	if (unwrapped.arguments.length !== 1 && unwrapped.arguments.length !== 2) return false;
 
 	const callee = stripExpressionWrappers(unwrapped.callee);
-	if (!isIdentifierName(callee) || callee.name !== "Array") return false;
+	if (!isIdentifier(callee) || callee.name !== "Array") return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
 

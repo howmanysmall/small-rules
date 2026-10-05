@@ -8,7 +8,7 @@ import {
 	isAssignmentPattern,
 	isCallExpression,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isReturnStatement,
 	isSpreadElement,
@@ -23,8 +23,8 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 const DEFAULT_BINDING_PATTERNS: ReadonlyArray<string> = ["binding"];
 
 function getParameterName(parameterPattern: ESTree.ParamPattern): string | undefined {
-	if (isIdentifierName(parameterPattern)) return parameterPattern.name;
-	if (isAssignmentPattern(parameterPattern) && isIdentifierName(parameterPattern.left)) {
+	if (isIdentifier(parameterPattern)) return parameterPattern.name;
+	if (isAssignmentPattern(parameterPattern) && isIdentifier(parameterPattern.left)) {
 		return parameterPattern.left.name;
 	}
 	return undefined;
@@ -34,7 +34,7 @@ function isBlockReturningIdentity({ body }: ESTree.FunctionBody, parameterName: 
 	if (body.length !== 1) return false;
 
 	const [statement] = body;
-	if (!isReturnStatement(statement) || !isIdentifierName(statement.argument)) {
+	if (!isReturnStatement(statement) || !isIdentifier(statement.argument)) {
 		return false;
 	}
 
@@ -105,7 +105,7 @@ function isLikelyBinding(
 	{ object }: ESTree.MemberExpression,
 	patterns: ReadonlyArray<string>,
 ): boolean {
-	if (isIdentifierName(object)) {
+	if (isIdentifier(object)) {
 		const lowerName = object.name.toLowerCase();
 		for (const pattern of patterns) if (lowerName.includes(pattern.toLowerCase())) return true;
 
@@ -127,7 +127,7 @@ function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | unde
 	if (
 		!isMemberExpression(callee) ||
 		callee.computed ||
-		!isIdentifierName(callee.property) ||
+		!isIdentifier(callee.property) ||
 		getMemberPropertyName(callee) !== "map" ||
 		node.arguments.length !== 1
 	) {

@@ -22,7 +22,7 @@ import {
 	isArrowFunctionExpression,
 	isClassExpression,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isNewExpression,
 	isObjectExpression,
 	isParenthesizedExpression,
@@ -81,7 +81,7 @@ export function createTypeEnvironment(
 }
 
 function getTypeReferenceName(type: ESTree.TSTypeReference): string | undefined {
-	return isIdentifierName(type.typeName) ? type.typeName.name : undefined;
+	return isIdentifier(type.typeName) ? type.typeName.name : undefined;
 }
 
 function isBuiltIn(name: string, use: ESTree.TSTypeReference, environment: TypeEnvironment): boolean {

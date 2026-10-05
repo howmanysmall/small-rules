@@ -12,7 +12,7 @@ import {
 	FUNCTION_EXPRESSION,
 	IDENTIFIER,
 	IMPORT_EXPRESSION,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isProperty,
@@ -192,7 +192,7 @@ export function isExplicitUndefinedExpression(
 	if (isIdentifierNamed(unwrapped, "undefined") || (isUnaryExpression(unwrapped) && unwrapped.operator === "void")) {
 		return true;
 	}
-	if (!isIdentifierName(unwrapped)) return false;
+	if (!isIdentifier(unwrapped)) return false;
 
 	const initializer = getConstInitializerForIdentifier(sourceCode, unwrapped);
 	return initializer === undefined ? false : isExplicitUndefinedExpression(sourceCode, initializer, seen);
@@ -212,7 +212,7 @@ function isStaticMemberProperty(
 function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
 	let unwrapped = stripExpressionWrappers(callee);
 	while (isMemberExpression(unwrapped)) unwrapped = stripExpressionWrappers(unwrapped.object);
-	return isIdentifierName(unwrapped) ? unwrapped.name : undefined;
+	return isIdentifier(unwrapped) ? unwrapped.name : undefined;
 }
 
 function isStaticCallCallee(
@@ -227,12 +227,12 @@ function isStaticCallCallee(
 	}
 
 	const unwrapped = stripExpressionWrappers(callee);
-	if (isIdentifierName(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
+	if (isIdentifier(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
 	if (!isMemberExpression(unwrapped) || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
 		return false;
 	}
 	if (unwrapped.computed) return isStaticExpression(sourceCode, unwrapped.property, seen, options);
-	return isIdentifierName(unwrapped.property);
+	return isIdentifier(unwrapped.property);
 }
 
 function checkStaticCallOrNewExpression(

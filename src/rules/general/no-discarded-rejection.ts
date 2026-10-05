@@ -4,7 +4,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBlockStatement,
 	isCallbackFunction,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNumericLiteral,
@@ -32,7 +32,7 @@ function isUndefinedExpression(sourceCode: SourceCode, expression: ESTree.Expres
 }
 
 function isDiscardingHandler(sourceCode: SourceCode, handler: ESTree.Expression): boolean {
-	if (!isCallbackFunction(handler) || handler.params.some((parameter) => !isIdentifierName(parameter))) return false;
+	if (!isCallbackFunction(handler) || handler.params.some((parameter) => !isIdentifier(parameter))) return false;
 
 	const { body } = handler;
 	/* v8 ignore next -- callback expressions always have a body. @preserve */

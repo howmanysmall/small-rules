@@ -1,7 +1,7 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrayExpression,
-	isIdentifierName,
+	isIdentifier,
 	isNamedGlobalCall,
 	isNewExpression,
 	isNumericLiteral,
@@ -97,7 +97,7 @@ const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox"
 	createOnce(context): Visitor {
 		return {
 			NewExpression(node): void {
-				if (!isIdentifierName(node.callee)) return;
+				if (!isIdentifier(node.callee)) return;
 
 				const sequenceName = node.callee.name;
 				const keypointName = getSequenceKeypointName(sequenceName);

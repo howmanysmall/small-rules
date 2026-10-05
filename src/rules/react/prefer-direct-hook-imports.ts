@@ -2,7 +2,7 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifierName, isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import { isIdentifier, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactNamespaceImport } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
@@ -30,7 +30,7 @@ const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react"
 			CallExpression(node): void {
 				const { callee } = node;
 				if (!isMemberExpression(callee) || callee.computed) return;
-				if (!isIdentifierName(callee.object) || !isIdentifierName(callee.property)) return;
+				if (!isIdentifier(callee.object) || !isIdentifier(callee.property)) return;
 
 				const propertyName = callee.property.name;
 				if (!HOOK_NAME_PATTERN.test(propertyName) || allowedHooks.has(propertyName)) return;

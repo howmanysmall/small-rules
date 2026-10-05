@@ -5,7 +5,7 @@ import {
 	isAnyLiteral,
 	isBinaryExpression,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNewExpression,
@@ -20,7 +20,7 @@ import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isSimpleReceiver(expression: ESTree.Expression): boolean {
 	return (
-		isIdentifierName(expression) ||
+		isIdentifier(expression) ||
 		isMemberExpression(expression) ||
 		isCallExpression(expression) ||
 		isNewExpression(expression) ||

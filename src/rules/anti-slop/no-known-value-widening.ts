@@ -31,7 +31,7 @@ import {
 	isBindingIdentifier,
 	isBlockStatement,
 	isFunctionLike,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierReference,
 	isMethodDefinition,
 	isObjectExpression,
@@ -282,13 +282,13 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				);
 			},
 			AssignmentExpression(node): void {
-				if (node.operator !== "=" || !isIdentifierName(node.left)) return;
+				if (node.operator !== "=" || !isIdentifier(node.left)) return;
 
 				const variable = resolveVariable(context.sourceCode, node.left);
 				if (variable === undefined) return;
 
 				const binding = getVariableDeclarator(variable)?.id;
-				if (!isIdentifierName(binding)) return;
+				if (!isIdentifier(binding)) return;
 				reportFlow(node.right, getTargetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
 			},
 			Program(node): void {
@@ -321,7 +321,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				reportFlow(node.expression, classifyWideningTarget(node.typeAnnotation, environment), "assertion");
 			},
 			VariableDeclarator(node): void {
-				if (node.init === null || !isIdentifierName(node.id)) return;
+				if (node.init === null || !isIdentifier(node.id)) return;
 				reportFlow(node.init, getTargetFromAnnotation(node.id.typeAnnotation), `binding \`${node.id.name}\``);
 			},
 		};

@@ -1,7 +1,7 @@
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyLiteral, isIdentifierName, SPREAD_ELEMENT } from "$oxc-utilities/oxc-utilities";
+import { isAnyLiteral, isIdentifier, SPREAD_ELEMENT } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -13,7 +13,7 @@ function hasUnicodeFlag(flags: string): boolean {
 }
 
 function isIdentifierWithName(node: ESTree.Expression, name: string): node is ESTree.IdentifierReference {
-	return isIdentifierName(node) && node.name === name;
+	return isIdentifier(node) && node.name === name;
 }
 
 function getFlagsString(node: ESTree.Node): string | undefined {

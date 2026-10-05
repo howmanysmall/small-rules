@@ -4,7 +4,7 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getMemberPropertyName,
-	isIdentifierName,
+	isIdentifier,
 	isJsxAttribute,
 	isJsxIdentifier,
 	isMemberExpression,
@@ -202,7 +202,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 		}
 
 		function recordTrackedVariable(node: ESTree.VariableDeclarator): void {
-			if (!isIdentifierName(node.id) || node.init === null) return;
+			if (!isIdentifier(node.id) || node.init === null) return;
 
 			const initializer = stripExpressionWrappers(node.init);
 			if (!isNewExpression(initializer)) return;
@@ -241,7 +241,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 				if (propertyName === undefined) return;
 
 				const objectExpression = stripExpressionWrappers(node.left.object);
-				if (!isIdentifierName(objectExpression)) return;
+				if (!isIdentifier(objectExpression)) return;
 
 				const trackedVariable = getTrackedVariable(objectExpression);
 				if (trackedVariable === undefined) return;

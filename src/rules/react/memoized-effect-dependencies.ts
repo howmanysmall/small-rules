@@ -12,7 +12,7 @@ import {
 	isCallExpression,
 	isClassDeclaration,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isRestElement,
 	isSpreadElement,
@@ -63,17 +63,17 @@ function isMode(value: unknown): value is Mode {
 }
 
 function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: ReadonlySet<string>): string | undefined {
-	if (callee.computed || !isIdentifierName(callee.object) || !reactNamespaces.has(callee.object.name)) {
+	if (callee.computed || !isIdentifier(callee.object) || !reactNamespaces.has(callee.object.name)) {
 		return undefined;
 	}
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
-	return isIdentifierName(callee.property) ? callee.property.name : undefined;
+	return isIdentifier(callee.property) ? callee.property.name : undefined;
 }
 
 function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
 	let current = stripExpressionWrappers(expression);
 	while (isMemberExpression(current)) current = stripExpressionWrappers(current.object);
-	return isIdentifierName(current) ? current : undefined;
+	return isIdentifier(current) ? current : undefined;
 }
 
 function isUnmemoizedInline(node: ESTree.Node): boolean {
@@ -83,9 +83,9 @@ function isUnmemoizedInline(node: ESTree.Node): boolean {
 function getPatternElementName(element: ESTree.ArrayPattern["elements"][number]): string | undefined {
 	/* v8 ignore next -- @preserve stable hook matching only asks about occupied dependency binding slots. */
 	if (element === null) return undefined;
-	if (isIdentifierName(element)) return element.name;
-	if (isAssignmentPattern(element) && isIdentifierName(element.left)) return element.left.name;
-	if (isRestElement(element) && isIdentifierName(element.argument)) return element.argument.name;
+	if (isIdentifier(element)) return element.name;
+	if (isAssignmentPattern(element) && isIdentifier(element.left)) return element.left.name;
+	if (isRestElement(element) && isIdentifier(element.argument)) return element.argument.name;
 	return undefined;
 }
 
@@ -210,7 +210,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		}
 
 		function isMemoHookCall({ callee }: ESTree.CallExpression): boolean {
-			if (isIdentifierName(callee)) return memoHookIdentifiers.has(callee.name);
+			if (isIdentifier(callee)) return memoHookIdentifiers.has(callee.name);
 			if (isMemberExpression(callee)) {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				return hookName !== undefined && MEMO_HOOKS.has(hookName);
@@ -231,7 +231,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		}
 
 		function getStableHookKind({ callee }: ESTree.CallExpression): StableKind | undefined {
-			if (isIdentifierName(callee)) return getStableIdentifierKind(callee.name);
+			if (isIdentifier(callee)) return getStableIdentifierKind(callee.name);
 			if (isMemberExpression(callee)) return getStableMemberKind(callee);
 			return undefined;
 		}
@@ -335,7 +335,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		}
 
 		function getDependenciesIndex({ callee }: ESTree.CallExpression): number | undefined {
-			if (isIdentifierName(callee)) return effectHookIdentifiers.get(callee.name);
+			if (isIdentifier(callee)) return effectHookIdentifiers.get(callee.name);
 			if (isMemberExpression(callee)) {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				return hookName === undefined ? undefined : effectHookNameToIndex.get(hookName);

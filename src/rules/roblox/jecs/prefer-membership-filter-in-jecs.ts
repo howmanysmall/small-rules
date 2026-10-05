@@ -5,7 +5,7 @@ import {
 	isAnyLiteral,
 	isArrayPattern,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isRestElement,
 	isSpreadElement,
@@ -40,7 +40,7 @@ function getStaticMethodCall(expression: ESTree.Expression): StaticMethodCall | 
 		return undefined;
 	}
 	/* v8 ignore next -- a non-computed ESTree member property is an identifier. @preserve */
-	if (!isIdentifierName(expression.callee.property)) return undefined;
+	if (!isIdentifier(expression.callee.property)) return undefined;
 	return { call: expression, method: expression.callee.property.name, object: expression.callee.object };
 }
 
@@ -64,7 +64,7 @@ function getDirectQueryChain(sourceCode: SourceCode, expression: ESTree.Expressi
 }
 
 function isSafeToMove(expression: ESTree.Expression): boolean {
-	return isIdentifierName(expression) || isAnyLiteral(expression);
+	return isIdentifier(expression) || isAnyLiteral(expression);
 }
 
 function getBindingVariables(
@@ -75,7 +75,7 @@ function getBindingVariables(
 	const variables = new Map<string, Variable>();
 	const scope = sourceCode.getScope(node.body);
 	for (const element of pattern.elements) {
-		if (element === null || !isIdentifierName(element)) continue;
+		if (element === null || !isIdentifier(element)) continue;
 
 		const variable = getVariableByName(scope, element.name);
 		/* v8 ignore next -- each identifier in the loop binding declares a scoped variable. @preserve */
@@ -90,7 +90,7 @@ function isUnusedBinding(
 	variables: ReadonlyMap<string, Variable>,
 ): boolean {
 	if (element === undefined) return true;
-	if (!isIdentifierName(element)) return false;
+	if (!isIdentifier(element)) return false;
 
 	/* v8 ignore next -- loop binding identifiers are present in the collected variable map. @preserve */
 	return variables.get(element.name)?.references.every((reference) => reference.isWrite()) ?? false;
@@ -102,7 +102,7 @@ function collectBindings(
 	variables: ReadonlyMap<string, Variable>,
 ): Pick<MembershipCandidate, "movedArguments" | "retainedArguments" | "retainedElements"> | undefined {
 	const [entityElement] = pattern.elements;
-	if (entityElement === null || entityElement === undefined || !isIdentifierName(entityElement)) return undefined;
+	if (entityElement === null || entityElement === undefined || !isIdentifier(entityElement)) return undefined;
 
 	const retainedArguments = new Array<ESTree.Expression>();
 	const movedArguments = new Array<ESTree.Expression>();

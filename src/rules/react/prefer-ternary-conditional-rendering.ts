@@ -7,7 +7,7 @@ import {
 	isBinaryExpression,
 	isCallExpression,
 	isExpressionNode,
-	isIdentifierName,
+	isIdentifier,
 	isJsxElement,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
@@ -102,7 +102,7 @@ function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expressi
 		}
 
 		case IDENTIFIER:
-			return isIdentifierName(normalizedRight) && normalizedLeft.name === normalizedRight.name;
+			return isIdentifier(normalizedRight) && normalizedLeft.name === normalizedRight.name;
 
 		case LITERAL:
 			return isAnyLiteral(normalizedRight) && normalizedLeft.value === normalizedRight.value;
@@ -189,7 +189,7 @@ function areEquivalentMember(
 }
 
 function areEquivalentStaticMemberProperty(left: BinaryOperand, right: BinaryOperand): boolean {
-	if (isIdentifierName(left) && isIdentifierName(right)) return left.name === right.name;
+	if (isIdentifier(left) && isIdentifier(right)) return left.name === right.name;
 	return isPrivateIdentifier(left) && isPrivateIdentifier(right) && left.name === right.name;
 }
 
@@ -213,7 +213,7 @@ function getStrictComparison(expression: ESTree.Expression): StrictComparison | 
 
 function isSafeAtom(expression: ESTree.Expression): boolean {
 	const normalized = stripExpressionWrappers(expression);
-	return isIdentifierName(normalized) || isThisExpression(normalized) || isAnyLiteral(normalized);
+	return isIdentifier(normalized) || isThisExpression(normalized) || isAnyLiteral(normalized);
 }
 
 function isSafeOperand(operand: BinaryOperand): boolean {

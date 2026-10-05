@@ -1,7 +1,7 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isObjectExpression,
 	isProperty,
@@ -35,7 +35,7 @@ function objectHasFromAndTo(objectExpression: ESTree.ObjectExpression): boolean 
 	let hasTo = false;
 
 	for (const property of objectExpression.properties) {
-		if (!isProperty(property) || property.computed || !isIdentifierName(property.key)) continue;
+		if (!isProperty(property) || property.computed || !isIdentifier(property.key)) continue;
 
 		if (property.key.name === "from") hasFrom = true;
 		// oxlint-disable-next-line unicorn-js/prefer-else-if -- what?
@@ -53,7 +53,7 @@ function objectExpressionMatches(
 ): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
 	if (isObjectExpression(unwrapped)) return predicate(unwrapped);
-	if (!isIdentifierName(unwrapped)) return false;
+	if (!isIdentifier(unwrapped)) return false;
 
 	const variable = getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name);
 	if (variable === undefined || !isModuleLevelScope(variable.scope) || isImportBinding(variable)) return false;
@@ -94,12 +94,12 @@ function areDependenciesNonUpdating(kind: DependenciesKind, options: NormalizedO
 }
 
 function isSpringHookCall({ callee }: ESTree.CallExpression, options: NormalizedOptions): boolean {
-	if (isIdentifierName(callee)) return options.springHooks.has(callee.name);
+	if (isIdentifier(callee)) return options.springHooks.has(callee.name);
 
 	if (isMemberExpression(callee) && !callee.computed) {
 		const { property } = callee;
 		/* v8 ignore next -- non-computed member calls have identifier properties in supported parser output. @preserve */
-		if (isIdentifierName(property)) return options.springHooks.has(property.name);
+		if (isIdentifier(property)) return options.springHooks.has(property.name);
 	}
 
 	return false;

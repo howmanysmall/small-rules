@@ -14,7 +14,7 @@ import {
 	isExportDefaultDeclaration,
 	isFunctionDeclarationRaw,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isJsxElement,
 	isJsxFragment,
 	isMethodDefinition,
@@ -36,15 +36,15 @@ function getComponentNameFromFunction(node: ESTree.Node): string | undefined {
 
 	if (isCallbackFunction(node)) {
 		const { parent } = node;
-		if (isVariableDeclarator(parent) && isIdentifierName(parent.id) && isComponentName(parent.id.name)) {
+		if (isVariableDeclarator(parent) && isIdentifier(parent.id) && isComponentName(parent.id.name)) {
 			return parent.id.name;
 		}
 
-		if (isProperty(parent) && isIdentifierName(parent.key) && isComponentName(parent.key.name)) {
+		if (isProperty(parent) && isIdentifier(parent.key) && isComponentName(parent.key.name)) {
 			return parent.key.name;
 		}
 
-		if (isMethodDefinition(parent) && isIdentifierName(parent.key) && isComponentName(parent.key.name)) {
+		if (isMethodDefinition(parent) && isIdentifier(parent.key) && isComponentName(parent.key.name)) {
 			return parent.key.name;
 		}
 	}
@@ -54,11 +54,11 @@ function getComponentNameFromFunction(node: ESTree.Node): string | undefined {
 
 function getComponentNameFromCallParent(callExpression: ESTree.CallExpression): string | undefined {
 	const { parent } = callExpression;
-	if (isVariableDeclarator(parent) && isIdentifierName(parent.id) && isComponentName(parent.id.name)) {
+	if (isVariableDeclarator(parent) && isIdentifier(parent.id) && isComponentName(parent.id.name)) {
 		return parent.id.name;
 	}
 
-	if (isAssignmentExpression(parent) && isIdentifierName(parent.left) && isComponentName(parent.left.name)) {
+	if (isAssignmentExpression(parent) && isIdentifier(parent.left) && isComponentName(parent.left.name)) {
 		return parent.left.name;
 	}
 

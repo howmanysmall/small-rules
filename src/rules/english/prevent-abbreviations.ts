@@ -3,7 +3,7 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
-	isIdentifierName,
+	isIdentifier,
 	isJsxIdentifier,
 	isMemberExpression,
 	isProperty,
@@ -119,9 +119,9 @@ function getSpecialCaseReplacement(variable: VariableLike): string | undefined {
 	if (
 		isMemberExpression(init) &&
 		!init.computed &&
-		isIdentifierName(init.object) &&
+		isIdentifier(init.object) &&
 		init.object.name === "Players" &&
-		isIdentifierName(init.property) &&
+		isIdentifier(init.property) &&
 		init.property.name === "LocalPlayer"
 	) {
 		return "localPlayer";
@@ -196,7 +196,7 @@ function checkVariable(
 
 	const definitionName = definition.name;
 	/* v8 ignore next -- parser variable definitions in this rule expose identifier names. @preserve */
-	if (!isIdentifierName(definitionName)) return;
+	if (!isIdentifier(definitionName)) return;
 	if (shouldSkipVariable(definition, definitionName, options)) return;
 
 	const specialCaseReplacement = getSpecialCaseReplacement(variable);
@@ -257,7 +257,7 @@ function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (v
 		}
 		const definitionName = definition.name;
 		/* v8 ignore next -- parser class-name definitions expose identifier names. @preserve */
-		if (!isIdentifierName(definitionName)) {
+		if (!isIdentifier(definitionName)) {
 			variableChecker(variable);
 			return;
 		}

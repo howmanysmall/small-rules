@@ -1,5 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifierName, isProgram } from "$oxc-utilities/oxc-utilities";
+import { isIdentifier, isProgram } from "$oxc-utilities/oxc-utilities";
 
 import type { Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -31,7 +31,7 @@ const preferModuleScopeConstants = createRule("prefer-module-scope-constants", "
 			},
 			VariableDeclarator(node): void {
 				const { id } = node;
-				if (!isIdentifierName(id) || !SCREAMING_SNAKE_CASE.test(id.name)) return;
+				if (!isIdentifier(id) || !SCREAMING_SNAKE_CASE.test(id.name)) return;
 
 				if (!inConstDeclaration) {
 					context.report({

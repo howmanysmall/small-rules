@@ -9,7 +9,7 @@ import {
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import {
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isImportNamespaceSpecifier,
 	isImportSpecifier,
@@ -51,7 +51,7 @@ function isCreatePortalImport(variable?: ScopeVariable): boolean {
 
 		const { imported } = definition.node;
 		/* v8 ignore next -- @preserve createPortal imports are represented as identifier import specifiers by the parser. */
-		if (isIdentifierName(imported) && imported.name === "createPortal") return true;
+		if (isIdentifier(imported) && imported.name === "createPortal") return true;
 	}
 
 	return false;
@@ -74,16 +74,16 @@ function isPortalNamespaceImport(variable?: ScopeVariable): boolean {
 }
 
 function isPortalFactoryCall(sourceCode: SourceCode, { callee }: ESTree.CallExpression): boolean {
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		return isCreatePortalImport(getVariableByName(sourceCode.getScope(callee), callee.name));
 	}
 
 	if (
 		!isMemberExpression(callee) ||
 		callee.computed ||
-		!isIdentifierName(callee.property) ||
+		!isIdentifier(callee.property) ||
 		callee.property.name !== "createPortal" ||
-		!isIdentifierName(callee.object)
+		!isIdentifier(callee.object)
 	) {
 		return false;
 	}

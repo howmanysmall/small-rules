@@ -4,7 +4,7 @@ import {
 	isBlockStatement,
 	isCallExpression,
 	isExpressionStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isIfStatement,
 	isLiteral,
@@ -36,7 +36,7 @@ function doExpressionsMatch(sourceCode: SourceCode, left: ESTree.Expression, rig
 }
 
 function isStableExpression(expression: ESTree.Expression): boolean {
-	return isIdentifierName(expression) || isLiteral(expression);
+	return isIdentifier(expression) || isLiteral(expression);
 }
 
 interface RemovalGuard {

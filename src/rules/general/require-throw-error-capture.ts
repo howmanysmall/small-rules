@@ -8,7 +8,7 @@ import {
 	isBlockStatement,
 	isCatchClause,
 	isClassBody,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isMethodDefinitionRaw,
 	isNewExpression,
@@ -57,11 +57,11 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 }
 
 function getAssignedName({ parent }: ESTree.Node): string | undefined {
-	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
+	if (isVariableDeclarator(parent) && isIdentifier(parent.id)) return parent.id.name;
 	if (isPropertyDefinitionRaw(parent) || isMethodDefinitionRaw(parent)) {
 		if (isPrivateIdentifier(parent.key)) return `#${parent.key.name}`;
 		/* v8 ignore next -- @preserve class and object member keys are identifiers after private keys are handled. */
-		if (isIdentifierName(parent.key)) return parent.key.name;
+		if (isIdentifier(parent.key)) return parent.key.name;
 	}
 
 	return undefined;
@@ -108,7 +108,7 @@ function getUniqueVariableName(
 	// ancestors
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
-		if (isCatchClause(current) && isIdentifierName(current.param)) names.add(current.param.name);
+		if (isCatchClause(current) && isIdentifier(current.param)) names.add(current.param.name);
 		current = current.parent;
 	}
 
@@ -217,7 +217,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				if (!isNewExpression(argument)) return;
 
 				const { callee } = argument;
-				if (!isIdentifierName(callee) || !callee.name.endsWith("Error")) return;
+				if (!isIdentifier(callee) || !callee.name.endsWith("Error")) return;
 
 				if (isAllowedError(sourceCode, physicalFilename, callee, allowList)) return;
 

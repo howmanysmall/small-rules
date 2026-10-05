@@ -11,7 +11,7 @@ import {
 	isBooleanLiteral,
 	isCallExpression,
 	isExpressionStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
@@ -284,12 +284,12 @@ function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefin
 	let current: ESTree.Expression = node;
 
 	while (isMemberExpression(current)) {
-		if (current.computed || !isIdentifierName(current.property)) return undefined;
+		if (current.computed || !isIdentifier(current.property)) return undefined;
 
 		path.unshift(current.property.name);
 
 		const { object } = current;
-		if (isIdentifierName(object)) {
+		if (isIdentifier(object)) {
 			path.unshift(object.name);
 			return path;
 		}
@@ -299,7 +299,7 @@ function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefin
 		current = object;
 	}
 
-	if (isIdentifierName(current)) {
+	if (isIdentifier(current)) {
 		path.unshift(current.name);
 		return path;
 	}
@@ -733,7 +733,7 @@ function clearTrackedInstancesForEscapeAssignment(
 	assignmentExpression: ESTree.AssignmentExpression,
 	trackedInstances: Map<string, TrackedInstance>,
 ): void {
-	if (!isIdentifierName(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
+	if (!isIdentifier(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
 
 	for (const [identifierName] of trackedInstances) {
 		/* v8 ignore next -- @preserve escape assignments only clear tracked instances when the right-hand side references them. */
@@ -762,7 +762,7 @@ function trackConstInstances(
 	if (statementNode.kind !== "const") return;
 
 	for (const declaration of statementNode.declarations) {
-		if (!isIdentifierName(declaration.id) || declaration.init === null) continue;
+		if (!isIdentifier(declaration.id) || declaration.init === null) continue;
 
 		const className = getTrackedInstanceClassName(declaration.init);
 		if (className === undefined) continue;
@@ -851,8 +851,8 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 				assignmentExpression.operator !== "=" ||
 				!isMemberExpression(assignmentExpression.left) ||
 				assignmentExpression.left.computed ||
-				!isIdentifierName(assignmentExpression.left.object) ||
-				!isIdentifierName(assignmentExpression.left.property)
+				!isIdentifier(assignmentExpression.left.object) ||
+				!isIdentifier(assignmentExpression.left.property)
 			) {
 				return;
 			}

@@ -2,7 +2,7 @@ import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilit
 import {
 	getImportedName,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isImportDeclaration,
 	isImportNamespaceSpecifier,
@@ -64,18 +64,18 @@ function isJecsWorldFactoryCall(sourceCode: SourceCode, expression: ESTree.Expre
 	if (!isCallExpression(unwrapped)) return false;
 
 	const { callee } = unwrapped;
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		return isJecsWorldFactoryVariable(getVariableByName(sourceCode.getScope(callee), callee.name));
 	}
 	/* v8 ignore next -- remaining callable forms cannot identify the Jecs world factory. @preserve */
 	if (!isMemberExpression(callee) || callee.computed || !isIdentifierNamed(callee.property, "world")) return false;
-	if (!isIdentifierName(callee.object)) return false;
+	if (!isIdentifier(callee.object)) return false;
 	return isJecsNamespaceVariable(getVariableByName(sourceCode.getScope(callee.object), callee.object.name));
 }
 
 export function isJecsWorldExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
-	if (!isIdentifierName(unwrapped)) return false;
+	if (!isIdentifier(unwrapped)) return false;
 
 	const initializer = getSingleConstantInitializer(getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name));
 	return initializer !== undefined && isJecsWorldFactoryCall(sourceCode, initializer);
@@ -103,7 +103,7 @@ function getNativeCollectionKindAtDepth(
 		if (isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Set")) return "Set";
 		return undefined;
 	}
-	if (!isIdentifierName(unwrapped)) return undefined;
+	if (!isIdentifier(unwrapped)) return undefined;
 
 	const initializer = getSingleConstantInitializer(getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name));
 	return initializer === undefined ? undefined : getNativeCollectionKindAtDepth(sourceCode, initializer, depth + 1);
@@ -127,7 +127,7 @@ function isNativePromiseExpressionAtDepth(
 		return isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Promise");
 	}
 
-	if (isIdentifierName(unwrapped)) {
+	if (isIdentifier(unwrapped)) {
 		const variable = getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name);
 		const initializer = getSingleConstantInitializer(variable);
 		return initializer !== undefined && isNativePromiseExpressionAtDepth(sourceCode, initializer, depth + 1);
@@ -136,7 +136,7 @@ function isNativePromiseExpressionAtDepth(
 	if (!isCallExpression(unwrapped)) return false;
 
 	const { callee } = unwrapped;
-	if (!isMemberExpression(callee) || callee.computed || !isIdentifierName(callee.property)) return false;
+	if (!isMemberExpression(callee) || callee.computed || !isIdentifier(callee.property)) return false;
 
 	if (isGlobalNativeConstructor(sourceCode, callee.object, "Promise")) {
 		return PROMISE_FACTORY_METHODS.has(callee.property.name);

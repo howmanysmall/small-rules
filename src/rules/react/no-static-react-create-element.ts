@@ -5,7 +5,7 @@ import {
 	isCallbackFunction,
 	isClassExpression,
 	isComponentName,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isSpreadElement,
 	isStringLiteral,
@@ -28,7 +28,7 @@ function isReactCreateElementCall(
 	{ callee }: ESTree.CallExpression,
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
 		return isReactNamedImport(variable, "createElement", reactSources);
 	}
@@ -36,7 +36,7 @@ function isReactCreateElementCall(
 	if (!isMemberExpression(callee) || callee.computed || getMemberPropertyName(callee) !== "createElement") {
 		return false;
 	}
-	if (!isIdentifierName(callee.object)) return false;
+	if (!isIdentifier(callee.object)) return false;
 
 	const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
 	return isReactNamespaceImport(variable, reactSources);
@@ -84,7 +84,7 @@ function getMemberRootIdentifier(node: ESTree.MemberExpression): ESTree.Identifi
 
 	while (true) {
 		if (current.computed) return undefined;
-		if (isIdentifierName(current.object)) return current.object;
+		if (isIdentifier(current.object)) return current.object;
 		if (!isMemberExpression(current.object)) return undefined;
 		current = current.object;
 	}
@@ -129,7 +129,7 @@ function isStaticElementArgument(
 ): boolean {
 	if (isSpreadElement(argument)) return false;
 	if (isStringLiteral(argument)) return true;
-	if (isIdentifierName(argument)) return isStaticIdentifierElement(sourceCode, argument, reactSources);
+	if (isIdentifier(argument)) return isStaticIdentifierElement(sourceCode, argument, reactSources);
 	if (isMemberExpression(argument)) return isStaticMemberElement(sourceCode, argument, reactSources);
 	return false;
 }

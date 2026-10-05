@@ -228,7 +228,7 @@ export function hasName(
 	return node.type === IDENTIFIER && Predicate.isString(node.name);
 }
 
-export function isIdentifierName(node?: ESTree.Node | null): node is ESTree.IdentifierName {
+export function isIdentifier(node?: ESTree.Node | null): node is ESTree.IdentifierName {
 	return node?.type === IDENTIFIER;
 }
 
@@ -609,7 +609,7 @@ export function isStaticRequire(node: ESTree.Node): node is ESTree.CallExpressio
 	if (!isCallExpression(node) || node.optional) return false;
 
 	const { callee } = node;
-	if (!isIdentifierName(callee) || callee.name !== "require" || node.arguments.length !== 1) return false;
+	if (!isIdentifier(callee) || callee.name !== "require" || node.arguments.length !== 1) return false;
 
 	const [argument] = node.arguments;
 	return argument !== undefined && isStringLiteral(argument);

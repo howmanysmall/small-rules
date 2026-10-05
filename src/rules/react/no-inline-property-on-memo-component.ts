@@ -4,7 +4,7 @@ import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
 	FUNCTION_EXPRESSION,
-	isIdentifierName,
+	isIdentifier,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
 	isJsxIdentifier,
@@ -72,7 +72,7 @@ const noInlinePropertyOnMemoComponent = createRule("no-inline-property-on-memo-c
 				});
 			},
 			VariableDeclarator(node): void {
-				if (isIdentifierName(node.id) && node.init !== null && isMemoCall(node.init)) {
+				if (isIdentifier(node.id) && node.init !== null && isMemoCall(node.init)) {
 					memoizedComponentNames.add(node.id.name);
 				}
 			},

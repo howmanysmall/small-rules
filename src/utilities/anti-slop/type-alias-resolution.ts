@@ -17,7 +17,7 @@ import {
 	isClassDeclaration,
 	isClassExpression,
 	isExportNamedDeclaration,
-	isIdentifierName,
+	isIdentifier,
 	isImportDefaultSpecifier,
 	isImportNamespaceSpecifier,
 	isImportSpecifier,
@@ -134,7 +134,7 @@ function createNamespaceScopeKey(programFallback: boolean): NamespaceScopeKey {
 function getModuleBindingName(module: ESTree.TSModuleDeclaration): string | undefined {
 	let current: ESTree.Node = module.id;
 	while (isTsQualifiedName(current)) current = current.left;
-	return isIdentifierName(current) ? current.name : undefined;
+	return isIdentifier(current) ? current.name : undefined;
 }
 
 function getNamespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArray<string> | undefined {
@@ -144,7 +144,7 @@ function getNamespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArra
 		reversed.push(current.right.name);
 		current = current.left;
 	}
-	if (!isIdentifierName(current)) return undefined;
+	if (!isIdentifier(current)) return undefined;
 	reversed.push(current.name);
 	return reversed.toReversed();
 }
@@ -387,7 +387,7 @@ export function hasVisibleTypeBinding(name: string, use: ESTree.Node, environmen
 }
 
 function typeReferenceName(type: ESTree.TSTypeReference): string | undefined {
-	return isIdentifierName(type.typeName) ? type.typeName.name : undefined;
+	return isIdentifier(type.typeName) ? type.typeName.name : undefined;
 }
 
 function getAliasSubstitutions(

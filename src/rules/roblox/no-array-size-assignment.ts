@@ -7,7 +7,7 @@ import {
 	isCallExpression,
 	isExpressionNode,
 	isExpressionStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isPrivateIdentifier,
@@ -36,7 +36,7 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 			return isCallExpression(right) && sourceCode.getText(left) === sourceCode.getText(right);
 
 		case IDENTIFIER:
-			return isIdentifierName(right) && left.name === right.name;
+			return isIdentifier(right) && left.name === right.name;
 
 		case LITERAL:
 			return isAnyLiteral(right) && left.value === right.value && left.raw === right.raw;
@@ -84,7 +84,7 @@ function areEquivalentStaticProperties(
 	const rightIsPrivate = isPrivateIdentifier(right);
 	if (leftIsPrivate || rightIsPrivate) return leftIsPrivate && rightIsPrivate && left.name === right.name;
 
-	return isIdentifierName(right) && isIdentifierName(left) && left.name === right.name;
+	return isIdentifier(right) && isIdentifier(left) && left.name === right.name;
 }
 
 function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean): boolean {
@@ -103,7 +103,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
-			return isIdentifierName(node.property) || isPrivateIdentifier(node.property);
+			return isIdentifier(node.property) || isPrivateIdentifier(node.property);
 		}
 
 		default:
@@ -144,7 +144,7 @@ function getAppendTarget(
 			isMemberExpression(property) &&
 			!property.optional &&
 			!property.computed &&
-			isIdentifierName(property.property) &&
+			isIdentifier(property.property) &&
 			property.property.name === "length"
 		) {
 			return areEquivalentTargets(node.left.object, property.object, sourceCode) ? node.left : undefined;

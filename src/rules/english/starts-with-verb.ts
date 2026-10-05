@@ -1,7 +1,7 @@
 import { isExternallyConstrainedProperty } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { startsWithVerb as checkStartsWithVerb } from "$oxc-utilities/english-utilities";
-import { isCallbackFunction, isIdentifierName, isPrivateIdentifier } from "$oxc-utilities/oxc-utilities";
+import { isCallbackFunction, isIdentifier, isPrivateIdentifier } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, VisitorWithHooks } from "oxlint-plugin-utilities";
 
@@ -11,7 +11,7 @@ const EMPTY_LIST: ReadonlyArray<string> = [];
 
 function getMemberNameNode(key: ESTree.Node, computed: boolean): NameNode | undefined {
 	if (computed) return undefined;
-	return isIdentifierName(key) || isPrivateIdentifier(key) ? key : undefined;
+	return isIdentifier(key) || isPrivateIdentifier(key) ? key : undefined;
 }
 
 const startsWithVerb = createRule("starts-with-verb", "english", {
@@ -51,7 +51,7 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 				if (nameNode !== undefined) reportIfNotVerb(nameNode);
 			},
 			VariableDeclarator(node): void {
-				if (isIdentifierName(node.id) && isCallbackFunction(node.init)) reportIfNotVerb(node.id);
+				if (isIdentifier(node.id) && isCallbackFunction(node.init)) reportIfNotVerb(node.id);
 			},
 		};
 	},

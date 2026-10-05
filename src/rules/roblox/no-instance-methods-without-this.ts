@@ -3,7 +3,7 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isNode,
 	isSuper,
 	isThisExpression,
@@ -67,7 +67,7 @@ function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
 }
 
 function getMethodName(node: ESTree.MethodDefinition): string {
-	return isIdentifierName(node.key) ? node.key.name : "unknown";
+	return isIdentifier(node.key) ? node.key.name : "unknown";
 }
 
 const noInstanceMethodsWithoutThis = createRule("no-instance-methods-without-this", "roblox", {

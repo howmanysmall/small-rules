@@ -2,7 +2,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getMemberPropertyName,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 } from "$oxc-utilities/oxc-utilities";
 
@@ -15,7 +15,7 @@ function isPromiseDelayAwaitCall({ callee }: ESTree.CallExpression): boolean {
 
 	const delayCallee = callee.object.callee;
 	return !isMemberExpression(delayCallee) ||
-		!isIdentifierName(delayCallee.object) ||
+		!isIdentifier(delayCallee.object) ||
 		delayCallee.object.name !== "Promise"
 		? false
 		: getMemberPropertyName(delayCallee) === "delay";
@@ -32,7 +32,7 @@ const noTaskWait = createRule("no-task-wait", "roblox", {
 
 				const { callee } = node;
 				if (!isMemberExpression(callee)) return;
-				if (!isIdentifierName(callee.object) || callee.object.name !== "task") return;
+				if (!isIdentifier(callee.object) || callee.object.name !== "task") return;
 				if (getMemberPropertyName(callee) !== "wait") return;
 
 				context.report({ messageId: "noTaskWait", node });

@@ -2,7 +2,7 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
-	isIdentifierName,
+	isIdentifier,
 	isJsxElement,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
@@ -56,7 +56,7 @@ function isModuleConstDeclaration(
 	current: ESTree.Node,
 ): boolean {
 	/* v8 ignore next -- @preserve non-identifier module bindings cannot be referenced as JSX constants. */
-	if (!isIdentifierName(parent.id)) return false;
+	if (!isIdentifier(parent.id)) return false;
 	/* v8 ignore next -- @preserve walkable JSX parents are followed only through initializer positions. */
 	if (parent.init !== current) return false;
 

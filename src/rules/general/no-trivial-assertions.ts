@@ -12,7 +12,7 @@ import {
 	getMemberPropertyName,
 	isAnyLiteral,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isSpreadElement,
@@ -142,7 +142,7 @@ function resolveConstantPrimitive(
 	const literal = constantFromLiteral(expression);
 	if (literal !== undefined) return literal;
 	if (isUnaryExpression(expression)) return resolveUnaryConstant(sourceCode, expression, seen);
-	if (isIdentifierName(expression)) return resolveIdentifierConstant(sourceCode, expression, seen);
+	if (isIdentifier(expression)) return resolveIdentifierConstant(sourceCode, expression, seen);
 	return undefined;
 }
 

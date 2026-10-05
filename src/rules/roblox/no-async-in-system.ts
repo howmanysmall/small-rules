@@ -10,7 +10,7 @@ import {
 	isBlockStatement,
 	isCallExpression,
 	isClassDeclaration,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isImportSpecifier,
 	isMemberExpression,
@@ -57,7 +57,7 @@ interface SynchronousCallbackConfig {
 }
 
 function getTypeName(typeNode: ESTree.Node, allowQualified: boolean): string | undefined {
-	if (isIdentifierName(typeNode)) return typeNode.name;
+	if (isIdentifier(typeNode)) return typeNode.name;
 	if (allowQualified && isTsQualifiedName(typeNode)) return typeNode.right.name;
 	return undefined;
 }
@@ -93,7 +93,7 @@ function getPropertyName(property: ESTree.ObjectPropertyKind): string | undefine
 	if (!isProperty(property)) return undefined;
 
 	if (property.computed) return isStringLiteral(property.key) ? property.key.value : undefined;
-	if (isIdentifierName(property.key)) return property.key.name;
+	if (isIdentifier(property.key)) return property.key.name;
 
 	return isAnyLiteral(property.key) && Predicate.isString(property.key.value) ? property.key.value : undefined;
 }
@@ -106,7 +106,7 @@ function addSystemPropertyFunction(
 	for (const property of object.properties) {
 		if (getPropertyName(property) !== "system" || !isProperty(property)) continue;
 		if (isAnyFunction(property.value)) systemFunctions.add(property.value);
-		else if (isIdentifierName(property.value)) {
+		else if (isIdentifier(property.value)) {
 			const systemFunction = namedFunctions.get(property.value.name);
 			if (systemFunction !== undefined) systemFunctions.add(systemFunction);
 		}
@@ -115,7 +115,7 @@ function addSystemPropertyFunction(
 
 function getImportedName(specifier: ESTree.ImportDeclarationSpecifier): string | undefined {
 	if (!isImportSpecifier(specifier)) return undefined;
-	return isIdentifierName(specifier.imported) ? specifier.imported.name : specifier.imported.value;
+	return isIdentifier(specifier.imported) ? specifier.imported.name : specifier.imported.value;
 }
 
 function collectImportBindings(
@@ -149,7 +149,7 @@ function getMemberChain(expression: ESTree.Expression): MemberChain | undefined 
 		path.unshift(propertyName);
 		current = stripExpressionWrappers(current.object);
 	}
-	return isIdentifierName(current) ? { path, root: current } : undefined;
+	return isIdentifier(current) ? { path, root: current } : undefined;
 }
 
 function arePathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
@@ -157,7 +157,7 @@ function arePathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>
 }
 
 function getCalleePath(callee: ESTree.Expression): ReadonlyArray<string> | undefined {
-	if (isIdentifierName(callee)) return [callee.name];
+	if (isIdentifier(callee)) return [callee.name];
 	if (!isMemberExpression(callee)) return undefined;
 	const chain = getMemberChain(callee);
 	return chain === undefined ? undefined : [chain.root.name, ...chain.path];
@@ -199,7 +199,7 @@ function tryRecordConfiguredCallback(
 	if (callback === undefined || isSpreadElement(callback) || !isAnyFunction(callback)) return;
 
 	const parameter = callback.params[configuration.parameterIndex];
-	if (!isIdentifierName(parameter)) return;
+	if (!isIdentifier(parameter)) return;
 
 	const variable = getIdentifierVariable(sourceCode, parameter);
 	/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
@@ -248,7 +248,7 @@ function recordVariableDeclaratorType(
 	declaredTypeNames: ReadonlySet<string>,
 	types: Map<ScopeVariable, string>,
 ): void {
-	if (!isIdentifierName(node.id)) return;
+	if (!isIdentifier(node.id)) return;
 
 	const { name } = node.id;
 	const className = getReferencedTypeName(node.id.typeAnnotation, false);
@@ -265,7 +265,7 @@ function recordSingleParameterType(
 	declaredTypeNames: ReadonlySet<string>,
 	types: Map<ScopeVariable, string>,
 ): void {
-	if (!isIdentifierName(parameter)) return;
+	if (!isIdentifier(parameter)) return;
 
 	const { name } = parameter;
 	const className = getReferencedTypeName(parameter.typeAnnotation, false);
@@ -363,7 +363,7 @@ function getReferencedFunction(
 function getReferencedCallback(expression: ESTree.Expression, sourceCode: SourceCode): CallbackFunction | undefined {
 	const current = stripExpressionWrappers(expression);
 	if (isAnyFunction(current)) return current;
-	return isIdentifierName(current) ? getReferencedFunction(current, sourceCode) : undefined;
+	return isIdentifier(current) ? getReferencedFunction(current, sourceCode) : undefined;
 }
 
 function getExpressionClass(
@@ -374,12 +374,12 @@ function getExpressionClass(
 	visited: Set<ESTree.Expression>,
 ): string | undefined {
 	const current = stripExpressionWrappers(expression);
-	if (isIdentifierName(current)) return getIdentifierClass(current, sourceCode, imports, types, visited);
+	if (isIdentifier(current)) return getIdentifierClass(current, sourceCode, imports, types, visited);
 	if (
 		!isCallExpression(current) ||
 		!isMemberExpression(current.callee) ||
 		getMemberPropertyName(current.callee) !== "GetService" ||
-		!isIdentifierName(current.callee.object) ||
+		!isIdentifier(current.callee.object) ||
 		current.callee.object.name !== "game" ||
 		hasShadowedBinding(sourceCode, current.callee.object, "game")
 	) {
@@ -515,7 +515,7 @@ function recordSystemFunction(node: CallbackFunction, state: SystemDiscoveryStat
 }
 
 function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDiscoveryState): void {
-	if (!isIdentifierName(node.id)) return;
+	if (!isIdentifier(node.id)) return;
 	if (!isRecognizedType(node.id.typeAnnotation, state.systemTypeNames)) return;
 	if (node.init === null) return;
 	if (isAnyFunction(node.init)) state.systemFunctions.add(node.init);

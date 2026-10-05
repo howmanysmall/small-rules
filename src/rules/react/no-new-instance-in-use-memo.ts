@@ -6,7 +6,7 @@ import {
 	isCallbackFunction,
 	isCallExpression,
 	isFunctionDeclaration,
-	isIdentifierName,
+	isIdentifier,
 	isUseMemoCall,
 	isVariableDeclarator,
 	stripExpressionWrappers,
@@ -131,7 +131,7 @@ function resolveDefinitionToFunctionIds(
 
 	const initializer = stripExpressionWrappers(node.init);
 	if (isCallbackFunction(initializer)) return getFunctionIdSet(initializer, functionInfosByNode);
-	if (!isIdentifierName(initializer)) return new Set<number>();
+	if (!isIdentifier(initializer)) return new Set<number>();
 
 	const aliasVariable = getVariableByName(sourceCode.getScope(initializer), initializer.name);
 	if (aliasVariable === undefined) return new Set<number>();
@@ -306,13 +306,13 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			"ArrowFunctionExpression:exit": exitFunction,
 
 			CallExpression(node): void {
-				if (isIdentifierName(node.callee)) recordFunctionCall(node.callee);
+				if (isIdentifier(node.callee)) recordFunctionCall(node.callee);
 				if (!isUseMemoCall(node, memoIdentifiers, reactNamespaces)) return;
 
 				const [callback] = node.arguments;
 				if (callback === undefined) return;
 
-				if (isIdentifierName(callback)) {
+				if (isIdentifier(callback)) {
 					useMemoCallbackIdentifiers.push(callback);
 					return;
 				}
@@ -331,7 +331,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			},
 
 			NewExpression(node): void {
-				if (!isIdentifierName(node.callee)) return;
+				if (!isIdentifier(node.callee)) return;
 
 				const constructorName = node.callee.name;
 				if (!options.constructors.has(constructorName)) return;

@@ -9,7 +9,7 @@ import {
 	IDENTIFIER,
 	IF_STATEMENT,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isMemberExpression,
 	isSpreadElement,
 	LOGICAL_EXPRESSION,
@@ -65,7 +65,7 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	if (declarator === undefined) return undefined;
 
 	const { id, init } = declarator;
-	if (init === null || !isIdentifierName(id) || !isWorldQueryCall(init, queryType)) return undefined;
+	if (init === null || !isIdentifier(id) || !isWorldQueryCall(init, queryType)) return undefined;
 
 	const { callee } = init;
 	/* v8 ignore next 3 -- @preserve isWorldQueryCall already narrows the callee to a static member expression. */

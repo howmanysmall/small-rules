@@ -17,7 +17,7 @@ import {
 	isConditionalExpression,
 	isExportNamedDeclaration,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isLogicalExpression,
 	isMemberExpression,
@@ -182,8 +182,8 @@ const GLOBAL_BUILTINS = new Set([
 ]);
 
 function getHookName({ callee }: ESTree.CallExpression): string | undefined {
-	if (isIdentifierName(callee)) return callee.name;
-	if (isMemberExpression(callee) && isIdentifierName(callee.property)) return callee.property.name;
+	if (isIdentifier(callee)) return callee.name;
+	if (isMemberExpression(callee) && isIdentifier(callee.property)) return callee.property.name;
 
 	return undefined;
 }
@@ -209,7 +209,7 @@ function getMemberExpressionDepth(node: ESTree.Node): number {
 function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 	let current = unwrapDependencyExpression(node);
 	while (isMemberExpression(current)) current = unwrapDependencyExpression(current.object);
-	return isIdentifierName(current) ? current : undefined;
+	return isIdentifier(current) ? current : undefined;
 }
 
 function isBinaryOrLogicalExpression(node: ESTree.Node): node is ESTree.BinaryExpression | ESTree.LogicalExpression {
@@ -245,7 +245,7 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 		/* v8 ignore next -- @preserve loop condition guarantees a queued node. */
 		if (current === undefined) continue;
 
-		if (isIdentifierName(current)) {
+		if (isIdentifier(current)) {
 			names.push(current.name);
 			continue;
 		}
@@ -275,14 +275,14 @@ function tryUnwrapPathWrapper(node: ESTree.Node): ESTree.Node | undefined {
 }
 
 function getBaseDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
-	if (isIdentifierName(node)) return node.name;
+	if (isIdentifier(node)) return node.name;
 	return sourceCode.getText(node);
 }
 
 function appendMemberSegment(path: string, member: ESTree.MemberExpression, sourceCode: SourceCode): string {
 	if (member.computed) return `${path}[${sourceCode.getText(member.property)}]`;
 	/* v8 ignore next -- @preserve non-computed dependency member properties are parser-provided identifiers. */
-	const propertyName = isIdentifierName(member.property) ? member.property.name : "";
+	const propertyName = isIdentifier(member.property) ? member.property.name : "";
 	return `${path}${member.optional ? "?." : "."}${propertyName}`;
 }
 
@@ -335,7 +335,7 @@ function isStableArrayIndex(
 	const { elements } = node.id;
 	let index = 0;
 	for (const element of elements) {
-		const name = isIdentifierName(element) ? element.name : undefined;
+		const name = isIdentifier(element) ? element.name : undefined;
 		if (name === identifierName) return stableResult.has(index);
 
 		index += 1;
@@ -492,14 +492,14 @@ const IS_CEASE_BOUNDARY = new Set<string>([
 
 function isComputedPropertyIdentifier(identifier: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve capture metadata is only requested for Identifier nodes. */
-	if (!isIdentifierName(identifier)) return false;
+	if (!isIdentifier(identifier)) return false;
 	const { parent } = identifier;
 	return isProperty(parent) && parent.computed && parent.key === identifier;
 }
 
 function isInTypePosition(identifier: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve type-position checks are only requested for Identifier nodes. */
-	if (!isIdentifierName(identifier)) return false;
+	if (!isIdentifier(identifier)) return false;
 
 	/* v8 ignore next -- @preserve parser-provided identifiers have parent links inside the visited closure tree. */
 	let current: ESTree.Node | undefined = identifier.parent;
@@ -555,7 +555,7 @@ function isDeclaredInComponentBody(variable: VariableLike, closureNode: ESTree.N
 
 function resolveFunctionReference(identifier: ESTree.Node, scope: Scope): ESTree.Node | undefined {
 	/* v8 ignore next -- @preserve closure reference resolution is only requested for Identifier nodes. */
-	if (!isIdentifierName(identifier)) return undefined;
+	if (!isIdentifier(identifier)) return undefined;
 
 	let variable: undefined | Variable;
 	let currentScope: null | Scope = scope;
@@ -655,7 +655,7 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 
 	function visitIdentifier(current: ESTree.Node): void {
 		/* v8 ignore next -- @preserve visitIdentifier is only called after checking the node is an Identifier. */
-		if (!isIdentifierName(current)) return;
+		if (!isIdentifier(current)) return;
 
 		const { name } = current;
 		if (captureSet.has(name) || GLOBAL_BUILTINS.has(name) || isInTypePosition(current)) return;
@@ -672,7 +672,7 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 	}
 
 	function visit(current: ESTree.Node): void {
-		if (isIdentifierName(current)) visitIdentifier(current);
+		if (isIdentifier(current)) visitIdentifier(current);
 
 		if (isTransparentExpressionNode(current)) {
 			visit(current.expression);
@@ -841,7 +841,7 @@ function reportMissingDependenciesArray(
 
 function getRootIdentifierName(node: ESTree.Node): string | undefined {
 	const rootIdentifier = getRootIdentifier(node);
-	return isIdentifierName(rootIdentifier) ? rootIdentifier.name : undefined;
+	return isIdentifier(rootIdentifier) ? rootIdentifier.name : undefined;
 }
 
 function getMatchingCapture(captures: ReadonlyArray<CaptureInfo>, dependency: DependencyInfo): CaptureInfo | undefined {
@@ -890,7 +890,7 @@ function coversCapture(
 	resolveExpressionDependencies: boolean,
 ): boolean {
 	const dependencyRootIdentifier = getRootIdentifier(dependency.node);
-	if (isIdentifierName(dependencyRootIdentifier) && dependency.depth <= capture.depth) {
+	if (isIdentifier(dependencyRootIdentifier) && dependency.depth <= capture.depth) {
 		return dependencyRootIdentifier.name === getRootIdentifierName(capture.node);
 	}
 
@@ -1051,7 +1051,7 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 		): CallbackFunction | undefined {
 			if (isArrowFunctionExpression(closureArgument)) return closureArgument;
 
-			const canResolveClosure = isAnyFunction(closureArgument) || isIdentifierName(closureArgument);
+			const canResolveClosure = isAnyFunction(closureArgument) || isIdentifier(closureArgument);
 			if (!canResolveClosure) return undefined;
 
 			const resolved = resolveFunctionReference(closureArgument, getScope(callExpression));

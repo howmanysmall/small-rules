@@ -8,7 +8,7 @@ import {
 	getMemberPropertyName,
 	isArrayPattern,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNode,
@@ -83,7 +83,7 @@ function isNoName(node: ESTree.Node): node is NoName {
 function getIdentifierName(node?: ESTree.Node | null): string | undefined {
 	let current = node;
 	while (current !== null && current !== undefined) {
-		if (isIdentifierName(current)) return current.name;
+		if (isIdentifier(current)) return current.name;
 		if (!isNoName(current)) return undefined;
 		current = current.expression;
 	}
@@ -112,10 +112,10 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 
 function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
 	const node = stripExpressionWrappers(right);
-	if (isIdentifierName(node)) return { name: node.name, method: "direct" };
+	if (isIdentifier(node)) return { name: node.name, method: "direct" };
 
 	if (!isCallExpression(node) || !isMemberExpression(node.callee) || node.arguments.length > 0) return undefined;
-	if (node.callee.optional || !isIdentifierName(node.callee.object)) return undefined;
+	if (node.callee.optional || !isIdentifier(node.callee.object)) return undefined;
 
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;

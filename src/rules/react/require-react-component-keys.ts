@@ -21,7 +21,7 @@ import {
 	isCallExpression,
 	isConditionalExpression,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isJsxAttribute,
 	isJsxElement,
@@ -156,14 +156,14 @@ function getCallbackUsageFromCallExpression(
 ): CallbackUsage {
 	const { callee } = callExpression;
 
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		return {
 			iteration: iterationMethods.has(callee.name),
 			memoization: memoizationHooks.has(callee.name),
 		};
 	}
 
-	if (isMemberExpression(callee) && isIdentifierName(callee.property)) {
+	if (isMemberExpression(callee) && isIdentifier(callee.property)) {
 		const { name } = callee.property;
 		const usage: CallbackUsage = {
 			iteration: iterationMethods.has(name),
@@ -177,7 +177,7 @@ function getCallbackUsageFromCallExpression(
 		if (
 			name === "call" &&
 			isMemberExpression(callee.object) &&
-			isIdentifierName(callee.object.property) &&
+			isIdentifier(callee.object.property) &&
 			iterationMethods.has(callee.object.property.name)
 		) {
 			return { ...usage, iteration: true };
@@ -342,9 +342,9 @@ function isIgnoredCallExpression(
 	for (let depth = 0; depth < maxDepth && parent !== undefined; depth += 1) {
 		if (isCallExpression(parent)) {
 			const { callee } = parent;
-			if (isIdentifierName(callee)) return ignoredCallExpressions.has(callee.name);
+			if (isIdentifier(callee)) return ignoredCallExpressions.has(callee.name);
 
-			if (isMemberExpression(callee) && isIdentifierName(callee.object) && isIdentifierName(callee.property)) {
+			if (isMemberExpression(callee) && isIdentifier(callee.object) && isIdentifier(callee.property)) {
 				return ignoredCallExpressions.has(`${callee.object.name}.${callee.property.name}`);
 			}
 

@@ -4,7 +4,7 @@ import { type } from "arktype";
 import { minimatch, Minimatch } from "minimatch";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isIdentifierName, isMemberExpression } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName, isIdentifier, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { MinimatchOptions } from "minimatch";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -113,7 +113,7 @@ const noRestrictedPropertyAssignment = createRule("no-restricted-property-assign
 		): node is ESTree.MemberExpression & { readonly object: ESTree.IdentifierName } {
 			if (isAllowedFile || !isMemberExpression(node)) return false;
 			if (!checkComputed && node.computed) return false;
-			return isIdentifierName(node.object);
+			return isIdentifier(node.object);
 		}
 
 		function reportRestrictionMatch(

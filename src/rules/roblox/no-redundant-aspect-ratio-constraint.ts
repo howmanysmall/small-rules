@@ -7,7 +7,7 @@ import {
 	isBlockStatement,
 	isCallbackFunction,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isJsxAttribute,
 	isJsxElement,
@@ -50,7 +50,7 @@ function getFunctionComponentName(node: ESTree.Node): string | undefined {
 	if (isCallbackFunction(node)) {
 		const { parent } = node;
 		/* v8 ignore next -- @preserve assigned function components have identifier variable declarator parents. */
-		if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
+		if (isVariableDeclarator(parent) && isIdentifier(parent.id)) return parent.id.name;
 	}
 
 	/* v8 ignore next -- @preserve only named function declarations and assigned arrow functions can reach this helper. */
@@ -120,7 +120,7 @@ function hasScaledFalseAttribute(node: ESTree.JSXElement): boolean {
 
 function isRedundantAspectRatioChild(node: ESTree.JSXChild): boolean {
 	if (isJsxElement(node)) return getJSXElementName(node) === REDUNDANT_ELEMENT_NAME;
-	if (isJsxExpressionContainer(node) && isIdentifierName(node.expression)) {
+	if (isJsxExpressionContainer(node) && isIdentifier(node.expression)) {
 		return node.expression.name === REDUNDANT_CONSTANT_NAME;
 	}
 

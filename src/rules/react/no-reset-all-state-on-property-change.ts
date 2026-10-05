@@ -2,7 +2,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallbackFunction,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isVariableDeclarator,
@@ -130,7 +130,7 @@ function countUseStates(
 
 		return analysis.scope.getDescendantCallExpressions(currentNode).filter(({ callee }) => {
 			const memberExpression = isMemberExpression(callee);
-			if (!memberExpression && !isIdentifierName(callee)) return false;
+			if (!memberExpression && !isIdentifier(callee)) return false;
 
 			if (memberExpression) {
 				const { object, property } = callee;

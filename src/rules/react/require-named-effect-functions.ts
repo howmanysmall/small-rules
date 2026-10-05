@@ -9,7 +9,7 @@ import {
 	isExportNamedDeclaration,
 	isFunctionDeclarationRaw,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isVariableDeclarator,
 } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
@@ -317,7 +317,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				const [firstArgument] = node.arguments;
 				if (firstArgument === undefined) return;
 
-				if (isIdentifierName(firstArgument)) {
+				if (isIdentifier(firstArgument)) {
 					reportCallbackIdentifier(hookName, node, firstArgument);
 					return;
 				}

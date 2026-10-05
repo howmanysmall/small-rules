@@ -4,7 +4,7 @@ import {
 	isCallExpression,
 	isExportDefaultDeclaration,
 	isExportNamedDeclaration,
-	isIdentifierName,
+	isIdentifier,
 	isImportSpecifier,
 	isMemberExpression,
 	isReactNamedCall,
@@ -31,7 +31,7 @@ interface DisplayNameReportContext {
 }
 
 function getVariableName(node: ESTree.VariableDeclarator): string | undefined {
-	return isIdentifierName(node.id) ? node.id.name : undefined;
+	return isIdentifier(node.id) ? node.id.name : undefined;
 }
 
 function isMemoCall(
@@ -47,12 +47,12 @@ function isCreateContextCall(
 	createContextIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 ): boolean {
-	if (isIdentifierName(node.callee)) return createContextIdentifiers.has(node.callee.name);
+	if (isIdentifier(node.callee)) return createContextIdentifiers.has(node.callee.name);
 	if (
 		!isMemberExpression(node.callee) ||
-		!isIdentifierName(node.callee.property) ||
+		!isIdentifier(node.callee.property) ||
 		node.callee.property.name !== "createContext" ||
-		!isIdentifierName(node.callee.object)
+		!isIdentifier(node.callee.object)
 	) {
 		return false;
 	}
@@ -126,10 +126,10 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 				if (!isMemberExpression(left)) return;
 
 				const { property } = left;
-				if (!isIdentifierName(property) || property.name !== "displayName") return;
+				if (!isIdentifier(property) || property.name !== "displayName") return;
 
 				const { object } = left;
-				if (!isIdentifierName(object)) return;
+				if (!isIdentifier(object)) return;
 
 				const trackedVariable = trackedVariables.get(object.name);
 				if (trackedVariable === undefined) return;
@@ -156,14 +156,14 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 					return;
 				}
 
-				if (isIdentifierName(node.declaration)) defaultExportedNames.add(node.declaration.name);
+				if (isIdentifier(node.declaration)) defaultExportedNames.add(node.declaration.name);
 			},
 			ExportNamedDeclaration(node): void {
 				for (const specifier of node.specifiers) {
 					if (
-						!isIdentifierName(specifier.exported) ||
+						!isIdentifier(specifier.exported) ||
 						specifier.exported.name !== "default" ||
-						!isIdentifierName(specifier.local)
+						!isIdentifier(specifier.local)
 					) {
 						continue;
 					}

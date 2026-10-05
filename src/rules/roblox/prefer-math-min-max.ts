@@ -8,7 +8,7 @@ import {
 	isAssignmentPattern,
 	isBinaryExpression,
 	isBindingIdentifier,
-	isIdentifierName,
+	isIdentifier,
 	isSequenceExpression,
 	isTsAsExpression,
 	isTsNumberKeyword,
@@ -86,7 +86,7 @@ function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.E
 	if (isKnownNonNumberLiteral(current)) return true;
 
 	const unwrapped = stripExpressionWrappers(current);
-	return isIdentifierName(unwrapped) && isKnownNonNumberIdentifier(sourceCode, unwrapped);
+	return isIdentifier(unwrapped) && isKnownNonNumberIdentifier(sourceCode, unwrapped);
 }
 
 function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression): string {

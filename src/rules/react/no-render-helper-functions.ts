@@ -7,7 +7,7 @@ import {
 	isCallExpression,
 	isFunctionDeclaration,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isJsxAttribute,
 	isJsxElement,
 	isJsxExpressionContainer,
@@ -66,7 +66,7 @@ function isReactNodeTypeAnnotation(node?: ESTree.TSType): boolean {
 	if (!isTsTypeReference(node)) return false;
 
 	const { typeName } = node;
-	if (isIdentifierName(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.name);
+	if (isIdentifier(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.name);
 	/* v8 ignore next -- @preserve TSTypeReference type names are identifiers or qualified names in parser output. */
 	if (isTsQualifiedName(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.right.name);
 
@@ -101,13 +101,13 @@ function isInlineCallback({ parent }: CallbackFunction): boolean {
 }
 
 function getVariableDeclaratorFunctionName(node: ESTree.Node): string | undefined {
-	if (!isVariableDeclarator(node.parent) || !isIdentifierName(node.parent.id)) return undefined;
+	if (!isVariableDeclarator(node.parent) || !isIdentifier(node.parent.id)) return undefined;
 	return node.parent.id.name;
 }
 
 function getBindingIdentifierName(binding: ESTree.BindingPattern): string | undefined {
 	/* v8 ignore next -- @preserve destructured default callback declarations are ignored by this rule. */
-	return isIdentifierName(binding) ? binding.name : undefined;
+	return isIdentifier(binding) ? binding.name : undefined;
 }
 
 function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {

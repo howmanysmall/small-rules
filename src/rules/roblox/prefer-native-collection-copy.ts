@@ -12,7 +12,7 @@ import {
 	isCallExpression,
 	isExpressionStatement,
 	isForOfStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNewExpression,
@@ -41,7 +41,7 @@ function getEmptyCollectionDeclaration(
 	const [declarator] = statement.declarations;
 	if (
 		declarator === undefined ||
-		!isIdentifierName(declarator.id) ||
+		!isIdentifier(declarator.id) ||
 		!isNewExpression(declarator.init) ||
 		declarator.init.arguments.length > 0
 	) {
@@ -91,8 +91,8 @@ function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.Varia
 	}
 
 	if (
-		!isIdentifierName(keyBinding) ||
-		!isIdentifierName(valueBinding) ||
+		!isIdentifier(keyBinding) ||
+		!isIdentifier(valueBinding) ||
 		isSpreadElement(keyArgument) ||
 		isSpreadElement(valueArgument)
 	) {
@@ -104,7 +104,7 @@ function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.Varia
 
 function isSetCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
 	if (!isMemberExpression(call.callee) || !isIdentifierNamed(call.callee.property, "add")) return false;
-	if (call.arguments.length !== 1 || !isIdentifierName(loopDeclarator.id)) return false;
+	if (call.arguments.length !== 1 || !isIdentifier(loopDeclarator.id)) return false;
 
 	const [valueArgument] = call.arguments;
 	/* v8 ignore next -- the length check proves the element exists. @preserve */

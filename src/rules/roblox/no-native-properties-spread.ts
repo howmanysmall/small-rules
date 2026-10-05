@@ -1,7 +1,7 @@
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
-	isIdentifierName,
+	isIdentifier,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
 	isJsxIdentifier,
@@ -46,13 +46,13 @@ function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierRefe
 
 	while (isMemberExpression(currentExpression)) {
 		const objectExpression = stripExpressionWrappers(currentExpression.object);
-		if (isIdentifierName(objectExpression)) return objectExpression;
+		if (isIdentifier(objectExpression)) return objectExpression;
 		if (!isMemberExpression(objectExpression)) return undefined;
 		currentExpression = objectExpression;
 	}
 
 	/* v8 ignore next -- @preserve unwrapExpression yields identifiers only for non-member roots here. */
-	return isIdentifierName(currentExpression) ? currentExpression : undefined;
+	return isIdentifier(currentExpression) ? currentExpression : undefined;
 }
 
 function shouldReportSpreadArgument(sourceCode: SourceCode, argument: ESTree.Expression): boolean {
@@ -79,7 +79,7 @@ function resolveObjectExpression(
 	seen.add(unwrappedExpression);
 
 	if (isObjectExpression(unwrappedExpression)) return unwrappedExpression;
-	if (!isIdentifierName(unwrappedExpression)) return undefined;
+	if (!isIdentifier(unwrappedExpression)) return undefined;
 
 	const variable = getVariableByName(sourceCode.getScope(unwrappedExpression), unwrappedExpression.name);
 	if (variable === undefined || isModuleLevelScope(variable.scope)) return undefined;

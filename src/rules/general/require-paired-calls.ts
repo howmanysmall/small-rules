@@ -14,7 +14,7 @@ import {
 	isCallExpression,
 	isContinueStatement,
 	isForOfStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIfStatement,
 	isLabeledStatement,
 	isLoopNode,
@@ -100,11 +100,11 @@ function getBranchesWithOpener(
 }
 
 function getCallName({ callee }: ESTree.CallExpression): string | undefined {
-	if (isIdentifierName(callee)) return callee.name;
+	if (isIdentifier(callee)) return callee.name;
 
 	if (isMemberExpression(callee)) {
-		const object = isIdentifierName(callee.object) ? callee.object.name : undefined;
-		const property = isIdentifierName(callee.property) ? callee.property.name : undefined;
+		const object = isIdentifier(callee.object) ? callee.object.name : undefined;
+		const property = isIdentifier(callee.property) ? callee.property.name : undefined;
 		if (object !== undefined && property !== undefined) return `${object}.${property}`;
 	}
 
@@ -148,7 +148,7 @@ function formatOpenerList(openers: ReadonlyArray<string>): string {
 
 function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node): ESTree.Statement | undefined {
 	/* v8 ignore next -- @preserve ESTree break/continue labels are parser-produced identifiers. */
-	if (!isIdentifierName(label)) return undefined;
+	if (!isIdentifier(label)) return undefined;
 	let current: ESTree.Node | undefined = startingNode;
 
 	while (current) {
