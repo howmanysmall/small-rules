@@ -17,6 +17,7 @@ import {
 	isTsQualifiedName,
 	isTsTypeReference,
 	isVariableDeclarator,
+	JSX_ELEMENT,
 	PARENTHESIZED_EXPRESSION,
 	TS_AS_EXPRESSION,
 	TS_INSTANTIATION_EXPRESSION,
@@ -31,7 +32,7 @@ import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilit
 
 import type { CallbackFunction } from "$oxc-types/missing-types";
 
-const REACT_NODE_TYPE_NAMES = new Set(["JSXElement", "ReactElement", "ReactNode"]);
+const REACT_NODE_TYPE_NAMES = new Set([JSX_ELEMENT, "ReactElement", "ReactNode"]);
 const WRAPPER_PARENT_TYPES = new Set([
 	CHAIN_EXPRESSION,
 	PARENTHESIZED_EXPRESSION,

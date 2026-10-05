@@ -1,5 +1,32 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import {
+	BINARY_EXPRESSION,
+	CALL_EXPRESSION,
+	IDENTIFIER,
+	isAnyLiteral,
+	isBinaryExpression,
+	isCallExpression,
+	isExpressionNode,
+	isIdentifierName,
+	isJsxElement,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxFragment,
+	isJsxText,
+	isLogicalExpression,
+	isMemberExpression,
+	isPrivateIdentifier,
+	isSpreadElement,
+	isSuper,
+	isThisExpression,
+	isUnaryExpression,
+	LITERAL,
+	LOGICAL_EXPRESSION,
+	MEMBER_EXPRESSION,
+	stripExpressionWrappers,
+	THIS_EXPRESSION,
+	UNARY_EXPRESSION,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -24,7 +51,7 @@ interface ComplementMatch {
 }
 
 function canRender(node: ESTree.Node): node is JSXRenderable {
-	return node.type === "JSXElement" || node.type === "JSXFragment";
+	return isJsxElement(node) || isJsxFragment(node);
 }
 
 function areEquivalentExpressionOrSuper(
@@ -32,14 +59,16 @@ function areEquivalentExpressionOrSuper(
 	right: ESTree.Expression | ESTree.Super,
 	sourceCode: SourceCode,
 ): boolean {
-	if (left.type === "Super" || right.type === "Super") return left.type === "Super" && right.type === "Super";
+	const isLeftSuper = isSuper(left);
+	const isRightSuper = isSuper(right);
+	if (isLeftSuper || isRightSuper) return isLeftSuper && isRightSuper;
 
 	return areEquivalentExpression(left, right, sourceCode);
 }
 
 function areEquivalentArgument(left: ESTree.Argument, right: ESTree.Argument, sourceCode: SourceCode): boolean {
-	if (left.type === "SpreadElement" || right.type === "SpreadElement") {
-		if (left.type !== "SpreadElement" || right.type !== "SpreadElement") return false;
+	if (isSpreadElement(left) || isSpreadElement(right)) {
+		if (!isSpreadElement(left) || !isSpreadElement(right)) return false;
 		return areEquivalentExpression(left.argument, right.argument, sourceCode);
 	}
 
@@ -47,8 +76,10 @@ function areEquivalentArgument(left: ESTree.Argument, right: ESTree.Argument, so
 }
 
 function areEquivalentOperand(left: BinaryOperand, right: BinaryOperand, sourceCode: SourceCode): boolean {
-	if (left.type === "PrivateIdentifier" || right.type === "PrivateIdentifier") {
-		return left.type === "PrivateIdentifier" && right.type === "PrivateIdentifier" && left.name === right.name;
+	const isLeftPrivate = isPrivateIdentifier(left);
+	const isRightPrivate = isPrivateIdentifier(right);
+	if (isLeftPrivate || isRightPrivate) {
+		return isLeftPrivate && isRightPrivate && left.name === right.name;
 	}
 
 	return areEquivalentExpression(left, right, sourceCode);
@@ -60,46 +91,41 @@ function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expressi
 	if (normalizedLeft.type !== normalizedRight.type) return false;
 
 	switch (normalizedLeft.type) {
-		case "BinaryExpression": {
+		case BINARY_EXPRESSION: {
 			return (
-				normalizedRight.type === "BinaryExpression" &&
-				areEquivalentBinary(normalizedLeft, normalizedRight, sourceCode)
+				isBinaryExpression(normalizedRight) && areEquivalentBinary(normalizedLeft, normalizedRight, sourceCode)
 			);
 		}
 
-		case "CallExpression": {
-			return (
-				normalizedRight.type === "CallExpression" &&
-				areEquivalentCall(normalizedLeft, normalizedRight, sourceCode)
-			);
+		case CALL_EXPRESSION: {
+			return isCallExpression(normalizedRight) && areEquivalentCall(normalizedLeft, normalizedRight, sourceCode);
 		}
 
-		case "Identifier":
-			return normalizedRight.type === "Identifier" && normalizedLeft.name === normalizedRight.name;
+		case IDENTIFIER:
+			return isIdentifierName(normalizedRight) && normalizedLeft.name === normalizedRight.name;
 
-		case "Literal":
-			return normalizedRight.type === "Literal" && normalizedLeft.value === normalizedRight.value;
+		case LITERAL:
+			return isAnyLiteral(normalizedRight) && normalizedLeft.value === normalizedRight.value;
 
-		case "LogicalExpression": {
+		case LOGICAL_EXPRESSION: {
 			return (
-				normalizedRight.type === "LogicalExpression" &&
+				isLogicalExpression(normalizedRight) &&
 				areEquivalentLogical(normalizedLeft, normalizedRight, sourceCode)
 			);
 		}
 
-		case "MemberExpression": {
+		case MEMBER_EXPRESSION: {
 			return (
-				normalizedRight.type === "MemberExpression" &&
-				areEquivalentMember(normalizedLeft, normalizedRight, sourceCode)
+				isMemberExpression(normalizedRight) && areEquivalentMember(normalizedLeft, normalizedRight, sourceCode)
 			);
 		}
 
-		case "ThisExpression":
-			return normalizedRight.type === "ThisExpression";
+		case THIS_EXPRESSION:
+			return isThisExpression(normalizedRight);
 
-		case "UnaryExpression": {
+		case UNARY_EXPRESSION: {
 			return (
-				normalizedRight.type === "UnaryExpression" &&
+				isUnaryExpression(normalizedRight) &&
 				normalizedLeft.operator === normalizedRight.operator &&
 				areEquivalentExpression(normalizedLeft.argument, normalizedRight.argument, sourceCode)
 			);
@@ -163,19 +189,19 @@ function areEquivalentMember(
 }
 
 function areEquivalentStaticMemberProperty(left: BinaryOperand, right: BinaryOperand): boolean {
-	if (left.type === "Identifier" && right.type === "Identifier") return left.name === right.name;
-	return left.type === "PrivateIdentifier" && right.type === "PrivateIdentifier" && left.name === right.name;
+	if (isIdentifierName(left) && isIdentifierName(right)) return left.name === right.name;
+	return isPrivateIdentifier(left) && isPrivateIdentifier(right) && left.name === right.name;
 }
 
 function getNegatedExpression(expression: ESTree.Expression): ESTree.Expression | undefined {
 	const normalized = stripExpressionWrappers(expression);
-	if (normalized.type !== "UnaryExpression" || normalized.operator !== "!") return undefined;
+	if (!isUnaryExpression(normalized) || normalized.operator !== "!") return undefined;
 	return stripExpressionWrappers(normalized.argument);
 }
 
 function getStrictComparison(expression: ESTree.Expression): StrictComparison | undefined {
 	const normalized = stripExpressionWrappers(expression);
-	if (normalized.type !== "BinaryExpression") return undefined;
+	if (!isBinaryExpression(normalized)) return undefined;
 	if (normalized.operator !== "===" && normalized.operator !== "!==") return undefined;
 
 	return {
@@ -187,7 +213,7 @@ function getStrictComparison(expression: ESTree.Expression): StrictComparison | 
 
 function isSafeAtom(expression: ESTree.Expression): boolean {
 	const normalized = stripExpressionWrappers(expression);
-	return normalized.type === "Identifier" || normalized.type === "ThisExpression" || normalized.type === "Literal";
+	return isIdentifierName(normalized) || isThisExpression(normalized) || isAnyLiteral(normalized);
 }
 
 function isSafeOperand(operand: BinaryOperand): boolean {
@@ -237,15 +263,13 @@ function getComplementMatch(
 }
 
 function isWhitespaceText(child: ESTree.JSXChild): boolean {
-	return child.type === "JSXText" && child.value.trim() === "";
+	return isJsxText(child) && child.value.trim() === "";
 }
 
 function getBranchCandidate(child: ESTree.JSXChild): BranchCandidate | undefined {
-	if (child.type !== "JSXExpressionContainer") return undefined;
-	if (child.expression.type === "JSXEmptyExpression") return undefined;
-	if (child.expression.type !== "LogicalExpression") return undefined;
-	if (child.expression.operator !== "&&") return undefined;
-	if (!canRender(child.expression.right)) return undefined;
+	if (!isJsxExpressionContainer(child) || isJsxEmptyExpression(child.expression)) return undefined;
+	if (!isLogicalExpression(child.expression)) return undefined;
+	if (child.expression.operator !== "&&" || !canRender(child.expression.right)) return undefined;
 
 	return {
 		condition: child.expression.left,
