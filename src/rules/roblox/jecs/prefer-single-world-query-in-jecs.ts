@@ -162,6 +162,9 @@ function areAllVariablesUsedInAndExpressions(calls: ReadonlyArray<WorldQueryCall
 	);
 }
 
+// Jecs `world.get` accepts at most four components.
+const MAXIMUM_GET_COMPONENTS = 4;
+
 const ONLY_WHITESPACE_SEMICOLON = /^[\s;]*$/u;
 
 function areCallsConsecutive(
@@ -283,7 +286,12 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 				const getCall = extractWorldQueryCall(node, "get");
 				if (getCall !== undefined) {
 					const lastCall = currentGetBuffer.at(-1);
-					if (lastCall !== undefined && !areCallsConsecutive(lastCall, getCall, sourceCode)) flushGetBuffer();
+					if (
+						currentGetBuffer.length === MAXIMUM_GET_COMPONENTS ||
+						(lastCall !== undefined && !areCallsConsecutive(lastCall, getCall, sourceCode))
+					) {
+						flushGetBuffer();
+					}
 					currentGetBuffer.push(getCall);
 
 					flushHasBuffer();
