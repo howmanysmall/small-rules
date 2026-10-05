@@ -1,0 +1,8 @@
+{
+	"extends": "../../tsconfig.node.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/linter-utilities.tsbuildinfo",
+		"types": ["node"]
+	},
+	"include": ["src/**/*.ts"]
+}
