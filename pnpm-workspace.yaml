@@ -103,6 +103,9 @@ catalogs:
     "@commitlint/cli": 21.2.3
     "@commitlint/config-conventional": 21.2.3
     "@commitlint/types": 21.2.3
+  dev:
+    confbox: 0.3.1
+    empathic: 2.1.0
   frontend:
     "@astrojs/check": 0.9.10
     "@astrojs/markdown-satteri": 0.4.2
@@ -194,7 +197,6 @@ catalogs:
     "@vitest/coverage-v8": 5.0.3
     "@vitiate/core": 0.3.1
     "@vitiate/fuzzed-data-provider": 0.3.1
-    confbox: 0.3.1
     fast-check: 4.10.2
     jest-extended: 7.0.0
     jsdom: 29.1.1

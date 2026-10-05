@@ -673,6 +673,7 @@ const configuration = isentinel(
 			// The file name is the Astro integration id, not the factory.
 			"documentation/src/integrations/contextual-menu.ts",
 			"src/rules/react/no-adjust-state-on-prop-change.ts",
+			`**/*.config.${GLOB_SRC_EXT}`,
 		],
 		rules: { "sonar/file-name-differ-from-class": "off" },
 	},

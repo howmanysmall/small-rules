@@ -127,7 +127,7 @@
 		"@vitiate/core": "catalog:test",
 		"@vitiate/fuzzed-data-provider": "catalog:test",
 		"bumpp": "catalog:tooling",
-		"confbox": "catalog:test",
+		"confbox": "catalog:dev",
 		"eslint": "catalog:lint",
 		"eslint-plugin-antfu": "catalog:lint",
 		"eslint-plugin-astro": "catalog:lint",

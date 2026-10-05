@@ -196,6 +196,13 @@ catalogs:
     '@commitlint/types':
       specifier: 21.2.3
       version: 21.2.3
+  dev:
+    confbox:
+      specifier: 0.3.1
+      version: 0.3.1
+    empathic:
+      specifier: 2.1.0
+      version: 2.1.0
   frontend:
     '@astrojs/check':
       specifier: 0.9.10
@@ -454,9 +461,6 @@ catalogs:
     '@vitiate/fuzzed-data-provider':
       specifier: 0.3.1
       version: 0.3.1
-    confbox:
-      specifier: 0.3.1
-      version: 0.3.1
     fast-check:
       specifier: 4.10.2
       version: 4.10.2
@@ -658,7 +662,7 @@ importers:
         specifier: catalog:tooling
         version: 12.3.0
       confbox:
-        specifier: catalog:test
+        specifier: catalog:dev
         version: 0.3.1
       eslint:
         specifier: catalog:lint
@@ -1036,6 +1040,62 @@ importers:
       '@total-typescript/ts-reset':
         specifier: catalog:types
         version: 0.6.1
+
+  tools/lint-configurations:
+    dependencies:
+      '@howmanysmall/linter-utilities':
+        specifier: workspace:*
+        version: link:../linter-utilities
+      '@isentinel/eslint-config':
+        specifier: catalog:lint
+        version: 6.0.0-beta.46(90b667e82d7c4e7de6f9be3daeac5cb9)
+      oxlint-plugin-react-doctor:
+        specifier: catalog:lint
+        version: 0.9.14
+    devDependencies:
+      '@small-rules/vite-configuration':
+        specifier: workspace:*
+        version: link:../vite-configuration
+      '@types/node':
+        specifier: catalog:types
+        version: 26.6.4
+      '@typescript/native-preview':
+        specifier: catalog:tooling
+        version: 7.0.0-dev.20260707.2
+      eslint-plugin-sonarjs:
+        specifier: catalog:lint
+        version: 4.2.2(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))
+      oxlint:
+        specifier: catalog:lint
+        version: 1.86.0(oxlint-tsgolint@7.0.2003)
+      vitest:
+        specifier: catalog:test
+        version: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@26.6.4)(@vitest/coverage-istanbul@5.0.3)(@vitest/coverage-v8@5.0.3)(jsdom@29.1.1)(vite@8.2.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
+
+  tools/linter-utilities:
+    dependencies:
+      '@isentinel/eslint-config':
+        specifier: catalog:lint
+        version: 6.0.0-beta.46(90b667e82d7c4e7de6f9be3daeac5cb9)
+      '@small-rules/arktype-utilities':
+        specifier: workspace:*
+        version: link:../../packages/arktype-utilities
+      arktype:
+        specifier: catalog:runtime
+        version: 2.2.7
+      confbox:
+        specifier: catalog:dev
+        version: 0.3.1
+      empathic:
+        specifier: catalog:dev
+        version: 2.1.0
+    devDependencies:
+      '@types/node':
+        specifier: catalog:types
+        version: 26.6.4
+      '@typescript/native-preview':
+        specifier: catalog:tooling
+        version: 7.0.0-dev.20260707.2
 
   tools/release-notes:
     dependencies:
@@ -6744,6 +6804,10 @@ packages:
 
   empathic@2.0.1:
     resolution: {integrity: sha512-YGRs8knHhKHVShLkFET/rWAU8kmHbOV5LwN938RHI0pljAJ1Gf6SzXsSmRaEzcXTtOOmVqJ5+WtQPL5uigY50Q==}
+    engines: {node: '>=14'}
+
+  empathic@2.1.0:
+    resolution: {integrity: sha512-AnfC1ATldl49/cvZdLPDjBfrRNwbDO05aibiOtzQu3qtlbJtomNLhF30HEtn/7iBz50dlMECqATo3fG0LrdEgw==}
     engines: {node: '>=14'}
 
   enhanced-resolve@5.24.5:
@@ -15821,6 +15885,8 @@ snapshots:
 
   empathic@2.0.1: {}
 
+  empathic@2.1.0: {}
+
   enhanced-resolve@5.24.5:
     dependencies:
       graceful-fs: 4.2.11
@@ -20043,6 +20109,7 @@ time:
   consola@3.4.2: '2025-03-18T10:17:43.596Z'
   effect@4.0.0: '2026-10-01T03:11:28.537Z'
   effect@4.0.0-rc.112: '2026-08-25T00:41:14.148Z'
+  empathic@2.1.0: '2026-09-18T22:41:09.970Z'
   eslint-plugin-antfu@3.2.3: '2026-05-11T02:24:38.348Z'
   eslint-plugin-astro@3.2.1: '2026-09-17T02:54:46.351Z'
   eslint-plugin-better-max-params@1.0.0: '2025-08-20T09:01:00.860Z'
