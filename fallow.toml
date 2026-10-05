@@ -19,6 +19,7 @@ ignoreDependencies = [
 	"@fontsource-variable/newsreader",
 	"@fontsource/ibm-plex-mono",
 	"@isentinel/hooks",
+	"@small-rules/local-rules",
 	"@stylistic/eslint-plugin",
 	"@total-typescript/ts-reset",
 	"eslint-plugin-antfu",
@@ -92,7 +93,8 @@ ignore = [
 	"documentation/src/styles/custom.css",
 	"src/rules/anti-slop/**",
 	"tests/fixtures/**",
-	"scripts/utilities/casing-utilities.ts"
+	"scripts/utilities/casing-utilities.ts",
+	"tools/rule-harness/src/**"
 ]
 
 [audit]
