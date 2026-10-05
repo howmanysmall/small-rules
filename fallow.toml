@@ -15,7 +15,6 @@ ignoreDependencies = [
 	"@arethetypeswrong/core",
 	"@astrojs/markdown-satteri",
 	"@e18e/eslint-plugin",
-	"@fast-check/vitest",
 	"@fontsource-variable/ibm-plex-sans",
 	"@fontsource-variable/newsreader",
 	"@fontsource/ibm-plex-mono",
@@ -41,7 +40,6 @@ ignoreDependencies = [
 	"eslint-plugin-sonarjs",
 	"eslint-plugin-unicorn",
 	"eslint-plugin-unused-imports",
-	"fast-check",
 	"oxc-transform-react",
 	"sharp"
 ]
