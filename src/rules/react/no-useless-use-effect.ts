@@ -72,7 +72,7 @@ import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
 interface ReportOptions {

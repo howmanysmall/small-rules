@@ -53,7 +53,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Reference, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 
 interface ReactKeysOptions {
 	readonly allowRootKeys?: boolean;

@@ -17,7 +17,7 @@ import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 
 interface ControlFlowContext {
 	readonly afterEarlyReturn: boolean;

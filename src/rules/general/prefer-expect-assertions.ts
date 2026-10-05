@@ -18,7 +18,7 @@ import {
 
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 type RawRuleOptions = RuleContext["options"][0];

@@ -14,9 +14,9 @@ import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { getReactSources } from "$oxc-utilities/react-utilities";
 import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 

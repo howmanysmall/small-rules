@@ -31,7 +31,7 @@ import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 
 const REACT_NODE_TYPE_NAMES = new Set([JSX_ELEMENT, "ReactElement", "ReactNode"]);
 const WRAPPER_PARENT_TYPES = new Set([

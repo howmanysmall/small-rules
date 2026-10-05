@@ -45,7 +45,7 @@ import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$o
 
 import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 
 const UNSTABLE_VALUES = new Set<string>([
 	ARRAY_EXPRESSION,
