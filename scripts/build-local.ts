@@ -5,6 +5,8 @@ import { exit } from "node:process";
 import { stripVTControlCharacters as strip } from "node:util";
 import { gzipSync } from "node:zlib";
 import { bold, cyan, dim, green, red, yellow } from "ansis";
+import boxen from "boxen";
+import stringWidth from "fast-string-width";
 import prettyBytes from "pretty-bytes";
 import prettyMilliseconds from "pretty-ms";
 import { build } from "tsdown";
@@ -42,7 +44,12 @@ const ARTIFACTS: ReadonlyArray<Artifact> = [
 const CHECK_NAMES: ReadonlyArray<string> = ["attw", "publint"];
 
 const BYTES = new Intl.NumberFormat("en-US");
-const PERCENT = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const PERCENT = new Intl.NumberFormat("en-US", {
+	maximumFractionDigits: 2,
+	minimumFractionDigits: 2,
+	signDisplay: "exceptZero",
+	style: "percent",
+});
 
 async function getSizeAsync(path: string): Promise<number | undefined> {
 	try {
@@ -64,10 +71,9 @@ function formatDelta(current: number, previous?: number): string {
 	const delta = current - previous;
 	if (delta === 0) return dim("± 0 B");
 
-	const sign = delta > 0 ? "+" : "";
 	const arrow = delta > 0 ? "▲" : "▼";
-	const percent = previous === 0 ? "" : ` (${sign}${PERCENT.format((delta / previous) * 100)}%)`;
-	const text = `${arrow} ${sign}${prettyBytes(delta)}${percent}`;
+	const percent = previous === 0 ? "" : ` (${PERCENT.format(delta / previous)})`;
+	const text = `${arrow} ${prettyBytes(delta, { signed: true })}${percent}`;
 	return delta > 0 ? red(text) : green(text);
 }
 
@@ -75,18 +81,14 @@ function stringify(values: ReadonlyArray<unknown>): string {
 	return strip(values.map((value) => (value instanceof Error ? value.message : String(value))).join(" ")).trim();
 }
 
-function getVisibleWidth(text: string): number {
-	return strip(text).length;
-}
-
 function getMaxWidth(texts: ReadonlyArray<string>): number {
 	let width = 0;
-	for (const text of texts) width = Math.max(width, getVisibleWidth(text));
+	for (const text of texts) width = Math.max(width, stringWidth(text));
 	return width;
 }
 
 function padVisible(text: string, width: number): string {
-	return `${text}${" ".repeat(Math.max(0, width - getVisibleWidth(text)))}`;
+	return `${text}${" ".repeat(Math.max(0, width - stringWidth(text)))}`;
 }
 
 function createCapturingLogger(): CapturingLogger {
@@ -111,13 +113,6 @@ function createCapturingLogger(): CapturingLogger {
 	};
 
 	return { logger, logs };
-}
-
-function renderBox(lines: ReadonlyArray<string>, paint: (text: string) => string): string {
-	const width = getMaxWidth(lines);
-	const horizontal = "─".repeat(width + 2);
-	const body = lines.map((line) => `${paint("│")} ${padVisible(line, width)} ${paint("│")}`);
-	return [paint(`┌${horizontal}┐`), ...body, paint(`└${horizontal}┘`)].join("\n");
 }
 
 function describeChecks(successes: ReadonlyArray<string>): string {
@@ -188,7 +183,7 @@ const command = createBaseCommand(
 		if (failure !== undefined || logs.errors.length > 0) {
 			const messages = failure === undefined ? logs.errors : [...logs.errors, stringify([failure])];
 			const lines = [`${red("✗")} ${bold.red("Build failed")} ${dim("after")} ${duration}`, "", ...messages, ""];
-			console.error(renderBox(lines, red));
+			console.error(boxen(lines.join("\n"), { borderColor: "red", padding: { left: 1, right: 1 } }));
 			exit(1);
 		}
 
@@ -205,7 +200,7 @@ const command = createBaseCommand(
 			"",
 		];
 
-		console.log(renderBox(lines, cyan));
+		console.log(boxen(lines.join("\n"), { borderColor: "cyan", padding: { left: 1, right: 1 } }));
 		for (const warning of logs.warnings) console.warn(`${yellow("⚠")} ${warning}`);
 	});
 
