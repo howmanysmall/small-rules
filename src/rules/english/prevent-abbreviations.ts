@@ -3,7 +3,6 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
-	isArrowFunctionExpression,
 	isIdentifierName,
 	isJsxIdentifier,
 	isMemberExpression,
@@ -160,26 +159,6 @@ function computeSafeSamples(
 	return { droppedDiscouraged, safeSamples };
 }
 
-function createIsSafeNameForVariable(
-	definition: Definition,
-	variable: VariableLike,
-	isSafeGeneratedName: IsSafe,
-): IsSafe {
-	const avoidArgumentsReplacement =
-		definition.type === "Variable" && isVariableDeclarator(definition.node) && definition.node.init === null;
-	const avoidArgumentsInArrowParameter =
-		definition.type === "Parameter" &&
-		variable.scope.type === "function" &&
-		isArrowFunctionExpression(variable.scope.block);
-	const shouldAvoidArguments = avoidArgumentsReplacement || avoidArgumentsInArrowParameter;
-
-	return function isSafeNameForVariable(name, scopes): boolean {
-		if (!isSafeGeneratedName(name, scopes)) return false;
-		if (shouldAvoidArguments && name === "arguments") return false;
-		return true;
-	};
-}
-
 function tryReportFix(
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
 	message: { data: Record<string, string>; messageId: MessageIds },
@@ -220,8 +199,6 @@ function checkVariable(
 	if (!isIdentifierName(definitionName)) return;
 	if (shouldSkipVariable(definition, definitionName, options)) return;
 
-	const isSafeNameForVariable = createIsSafeNameForVariable(definition, variable, isSafeGeneratedName);
-
 	const specialCaseReplacement = getSpecialCaseReplacement(variable);
 	const variableReplacements =
 		specialCaseReplacement === undefined
@@ -235,7 +212,7 @@ function checkVariable(
 	const { droppedDiscouraged, safeSamples } = computeSafeSamples(
 		variableReplacements.samples,
 		scopes,
-		isSafeNameForVariable,
+		isSafeGeneratedName,
 		options,
 	);
 

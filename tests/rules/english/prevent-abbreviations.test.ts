@@ -342,6 +342,14 @@ describe("prevent-abbreviations", () => {
 					},
 				],
 			},
+			// Catches renaming to `arguments`, which strict module code cannot
+			// declare. Found by the isValidIdentifier property.
+			{
+				code: "const param = 1;\nuse(param);\nfunction run(param) { return param; }",
+				output: "const arguments_ = 1;\nuse(arguments_);\nfunction run(arguments_) { return arguments_; }",
+				options: [{ replacements: { param: { arguments: true, parameter: false } } }],
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
+			},
 			{
 				code: "const handler = (param) => param;",
 				options: [{ replacements: { param: { arguments: true } } }],

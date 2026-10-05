@@ -112,3 +112,14 @@ describe("prevent-abbreviations identifier utilities", () => {
 		});
 	});
 });
+
+describe("isValidIdentifier strict-mode names", () => {
+	it("should reject names that strict module code cannot declare", () => {
+		// Catches the fixer renaming a variable to `arguments`.
+		expect.assertions(3);
+
+		expect(isValidIdentifier("arguments")).toBe(false);
+		expect(isValidIdentifier("await")).toBe(false);
+		expect(isValidIdentifier("eval")).toBe(false);
+	});
+});
