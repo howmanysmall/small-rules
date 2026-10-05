@@ -27,6 +27,7 @@ export async function getEslintAsync(tsconfigPath: string): Promise<LintConfigur
 				},
 				performanceImprovements: true,
 			},
+			eslintPlugin: true,
 			formatters: {
 				css: true,
 				graphql: true,

@@ -39,7 +39,12 @@ const testConfiguration = mergeConfig(
 					"src/types/**/*.ts",
 					"src/utilities/prevent-abbreviations/types.ts",
 				],
-				include: ["packages/*/src/**/*.ts", "src/**/*.ts", "tools/release-notes/src/**/*.ts"],
+				include: [
+					"packages/*/src/**/*.ts",
+					"src/**/*.ts",
+					"tools/local-rules/**/*.ts",
+					"tools/release-notes/src/**/*.ts",
+				],
 				provider: "v8",
 				reporter: ["text", "html", "text-summary", "json", "json-summary"],
 				reportOnFailure: true,

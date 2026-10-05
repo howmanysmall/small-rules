@@ -567,6 +567,12 @@ export async function getOxlintAsync({
 			},
 		},
 		{
+			name: "small-rules/local-rules",
+			files: [`src/${GLOB_SRC}`],
+			jsPlugins: [{ name: "local", specifier: nodePath.join(rootDirectory, "tools/local-rules/index.ts") }],
+			rules: { "local/prefer-node-type-constant": "error" },
+		},
+		{
 			name: "small-rules/disable-stupid-rule",
 			files: [
 				// The file name is the Astro integration id, not the factory.
