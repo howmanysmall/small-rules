@@ -1,10 +1,40 @@
+import { compileFunction } from "node:vm";
 import { describe, expect, it } from "vitest";
+import { fc } from "@fast-check/vitest";
 
 import {
 	isIdentifierPartCodePoint,
 	isIdentifierStartCodePoint,
 	isValidIdentifier,
 } from "$oxc-utilities/prevent-abbreviations/identifier";
+
+const NUMBER_OF_RUNS = 100;
+
+// Random identifier-shaped names, plus the words strict module code reserves
+// for itself so the property meets them often.
+const bindingCandidateArbitrary = fc.oneof(
+	fc.stringMatching(/^[$A-Z_a-z][\w$]*$/u),
+	fc.constantFrom(
+		"arguments",
+		"await",
+		"break",
+		"class",
+		"const",
+		"enum",
+		"eval",
+		"implements",
+		"interface",
+		"let",
+		"package",
+		"private",
+		"protected",
+		"public",
+		"static",
+		"super",
+		"this",
+		"yield",
+	),
+);
 
 function getAsciiCodePoint(value: string): number {
 	return value.codePointAt(0) ?? 0;
@@ -115,7 +145,8 @@ describe("prevent-abbreviations identifier utilities", () => {
 
 describe("isValidIdentifier strict-mode names", () => {
 	it("should reject names that strict module code cannot declare", () => {
-		// Catches the fixer renaming a variable to `arguments`.
+		// Catches the fixer renaming a variable to `arguments`. Shrunk from the
+		// property below.
 		expect.assertions(3);
 
 		expect(isValidIdentifier("arguments")).toBe(false);
@@ -123,3 +154,47 @@ describe("isValidIdentifier strict-mode names", () => {
 		expect(isValidIdentifier("eval")).toBe(false);
 	});
 });
+
+describe("isValidIdentifier properties", () => {
+	it("should only accept names that strict module code can declare", () => {
+		// Catches the abbreviation fixer renaming a variable to a name, such
+		// as `arguments`, that a module then refuses to compile.
+		expect.hasAssertions();
+
+		const report = fc.defaultReportMessage(
+			fc.check(
+				fc.property(bindingCandidateArbitrary, (name) => {
+					fc.pre(isValidIdentifier(name));
+
+					// Act
+					const declarable = canDeclareInStrictCode(name);
+
+					// Assert
+					expect(declarable).toBe(true);
+				}),
+				{ numRuns: NUMBER_OF_RUNS },
+			),
+		);
+
+		// Assert
+		expect(report).toBeUndefined();
+	});
+});
+
+// Helpers
+
+/**
+ * V8 is the oracle: an async function body in strict mode rejects every name
+ * a module rejects as a binding, including `await`, `eval`, and `arguments`.
+ *
+ * @param name - The candidate binding name.
+ * @returns `true` when V8 compiles a declaration of it.
+ */
+function canDeclareInStrictCode(name: string): boolean {
+	try {
+		compileFunction(`"use strict"; return async function probe() { let ${name}; };`);
+		return true;
+	} catch {
+		return false;
+	}
+}

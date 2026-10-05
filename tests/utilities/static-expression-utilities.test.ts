@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fc } from "@fast-check/vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import {
@@ -7,6 +8,7 @@ import {
 	isExplicitUndefinedExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
+import { createRuleExecutor } from "$test/rule-harness/execute";
 import { createRuleTester } from "$test/rule-testers";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -136,6 +138,7 @@ describe("isStaticExpression checking", () => {
 				{ code: "const value = 'hello'; check(value);", errors: [{ messageId: "static" }] },
 				{ code: "const first = 1; const second = first; check(second);", errors: [{ messageId: "static" }] },
 				// Catches a constant used twice being taken for a self-reference.
+				// Shrunk from the classification property.
 				{ code: "const first = 1; check(first ? first : '');", errors: [{ messageId: "static" }] },
 				{
 					code: "const first = 1; const second = first + first; check([second, second]);",
@@ -565,3 +568,190 @@ describe("dEFAULT_STATIC_GLOBAL_FACTORIES Array", () => {
 		expect(DEFAULT_STATIC_GLOBAL_FACTORIES).toContain("Enum");
 	}, 100);
 });
+
+// Every program declares these bindings, so generated leaves can refer to
+// module constants, an import, mutable module state, and a function local.
+const PRELUDE = [
+	'import { imported } from "mod";',
+	"const first = 1;",
+	'const second = "second";',
+	"let mutable = 2;",
+	"let counter = 0;",
+	"function run() {",
+	"const localValue = 3;",
+].join("\n");
+
+const HOLE = "__dynamic__";
+const NUMBER_OF_RUNS = 100;
+
+const staticLeafArbitrary = fc.oneof(
+	fc.nat().map(String),
+	fc.string().map((text) => JSON.stringify(text)),
+	fc.stringMatching(/^[a-z ]*$/u).map((text) => `\`${text}\``),
+	fc.constantFrom("true", "false", "null", "first", "second", "imported", "Color3", "UDim2"),
+);
+
+const staticBinaryOperatorArbitrary = fc.constantFrom(
+	"+",
+	"-",
+	"*",
+	"/",
+	"%",
+	"**",
+	"===",
+	"!==",
+	"<",
+	">=",
+	"&&",
+	"||",
+	"??",
+	"&",
+	"|",
+	"<<",
+);
+
+const staticUnaryOperatorArbitrary = fc.constantFrom("!", "+", "-", "~", "typeof ", "void ");
+
+type StaticArbitraries = Record<"composite" | "expression", string>;
+
+const staticArbitraries = fc.letrec<StaticArbitraries>((tie) => ({
+	composite: fc.oneof(
+		fc
+			.tuple(staticUnaryOperatorArbitrary, tie("expression"))
+			.map(([operator, argument]) => `(${operator}(${argument}))`),
+		fc
+			.tuple(tie("expression"), staticBinaryOperatorArbitrary, tie("expression"))
+			.map(([left, operator, right]) => `(${left} ${operator} ${right})`),
+		fc.tuple(tie("expression"), tie("expression"), tie("expression")).map(([test, consequent, alternate]) => {
+			return `(${test} ? ${consequent} : ${alternate})`;
+		}),
+		fc.tuple(tie("expression"), tie("expression")).map(([head, tail]) => `(${head}, ${tail})`),
+		fc.array(tie("expression"), { size: "xsmall" }).map((elements) => `[${elements.join(", ")}]`),
+		tie("expression").map((value) => `({ value: ${value} }).value`),
+		tie("expression").map((value) => `({ value: ${value} })["value"]`),
+		fc.tuple(tie("expression"), tie("expression")).map(([red, green]) => `Color3.fromRGB(${red}, ${green}, 0)`),
+		fc.tuple(tie("expression"), tie("expression")).map(([scale, offset]) => `new UDim(${scale}, ${offset})`),
+		tie("expression").map((argument) => `imported(${argument})`),
+	),
+	expression: fc.oneof({ depthSize: "small", withCrossShrink: true }, staticLeafArbitrary, tie("composite")),
+}));
+
+const staticExpressionArbitrary = staticArbitraries.expression;
+
+type DynamicContextArbitraries = Record<"context" | "wrapped", string>;
+
+// Static trees with exactly one `HOLE` leaf, in any operand position.
+const dynamicContextArbitraries = fc.letrec<DynamicContextArbitraries>((tie) => ({
+	context: fc.oneof({ depthSize: "small", withCrossShrink: true }, fc.constant(HOLE), tie("wrapped")),
+	wrapped: fc.oneof(
+		fc.tuple(staticUnaryOperatorArbitrary, tie("context")).map(([operator, inner]) => `(${operator}(${inner}))`),
+		fc
+			.tuple(tie("context"), staticBinaryOperatorArbitrary, staticExpressionArbitrary)
+			.map(([left, operator, right]) => `(${left} ${operator} ${right})`),
+		fc
+			.tuple(staticExpressionArbitrary, staticBinaryOperatorArbitrary, tie("context"))
+			.map(([left, operator, right]) => `(${left} ${operator} ${right})`),
+		fc
+			.tuple(tie("context"), staticExpressionArbitrary, staticExpressionArbitrary, fc.nat({ max: 2 }))
+			.map(([inner, other, another, position]) => {
+				const operands = [other, another];
+				operands.splice(position, 0, inner);
+				return `(${operands[0]} ? ${operands[1]} : ${operands[2]})`;
+			}),
+		fc.tuple(staticExpressionArbitrary, tie("context")).map(([head, inner]) => `(${head}, ${inner})`),
+		fc
+			.tuple(fc.array(staticExpressionArbitrary, { size: "xsmall" }), tie("context"))
+			.map(([elements, inner]) => `[${[...elements, inner].join(", ")}]`),
+		tie("context").map((inner) => `({ value: ${inner} }).value`),
+		tie("context").map((inner) => `({ value: 1 })[${inner}]`),
+		tie("context").map((inner) => `({ [${inner}]: 1 })`),
+		tie("context").map((inner) => `Color3.fromRGB(${inner}, 0, 0)`),
+		tie("context").map((inner) => `new UDim(0, ${inner})`),
+	),
+}));
+
+const dynamicContextArbitrary = dynamicContextArbitraries.context;
+
+const dynamicLeafArbitrary = fc.constantFrom(
+	"counter++",
+	"mutable",
+	"localValue",
+	"unknownGlobal",
+	"(() => 1)",
+	toInterpolatingTemplate("first"),
+	"(delete ({ value: 1 }).value)",
+);
+
+describe("isStaticExpression properties", () => {
+	const classify = createRuleExecutor("static-expression", testRule);
+
+	it("should classify any tree of literals, module constants, and factory calls as static", () => {
+		// Catches a static expression being rejected because it is nested,
+		// combined, or reuses a module constant.
+		expect.hasAssertions();
+
+		const report = fc.defaultReportMessage(
+			fc.check(
+				fc.property(staticExpressionArbitrary, (expression) => {
+					// Act
+					const messageIds = classifyCheckedExpression(classify, expression);
+
+					// Assert
+					expect(messageIds).toStrictEqual(["static"]);
+				}),
+				{ numRuns: NUMBER_OF_RUNS },
+			),
+		);
+
+		// Assert
+		expect(report).toBeUndefined();
+	});
+
+	it("should classify a static tree as dynamic once any leaf is dynamic", () => {
+		// Catches one dynamic operand being overlooked inside an otherwise
+		// static expression, which would let rules hoist or inline it.
+		expect.hasAssertions();
+
+		const report = fc.defaultReportMessage(
+			fc.check(
+				fc.property(dynamicContextArbitrary, dynamicLeafArbitrary, (context, leaf) => {
+					// Act
+					const messageIds = classifyCheckedExpression(
+						classify,
+						context.replace(HOLE, () => leaf),
+					);
+
+					// Assert
+					expect(messageIds).toStrictEqual(["dynamic"]);
+				}),
+				{ numRuns: NUMBER_OF_RUNS },
+			),
+		);
+
+		// Assert
+		expect(report).toBeUndefined();
+	});
+});
+
+// Helpers
+
+function classifyCheckedExpression(
+	classify: ReturnType<typeof createRuleExecutor>,
+	expression: string,
+): ReadonlyArray<string | undefined> {
+	const code = `${PRELUDE}\ncheck(${expression});\n}`;
+	const { diagnostics } = classify({
+		code,
+		filename: "case.js",
+		kind: "valid",
+		language: "js",
+		options: [],
+		settings: {},
+		sourceType: "module",
+	});
+	return diagnostics.map(({ messageId }) => messageId);
+}
+
+function toInterpolatingTemplate(name: string): string {
+	return `\`\${${name}}\``;
+}
