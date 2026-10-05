@@ -1,8 +1,7 @@
 import { argv, env } from "node:process";
 import { sharedConfiguration } from "@small-rules/vite-configuration";
+import { vitiateConfiguration } from "@small-rules/vite-configuration/vitiate";
 import { defineConfig, mergeConfig } from "vitest/config";
-
-import fuzzConfiguration from "./vitest.vitiate.config.ts";
 
 // vitiate respawns vitest per fuzz target without forwarding --config, so the
 // child auto-discovers this file and has to become the fuzz config.
@@ -13,7 +12,9 @@ const TEST_FILE_ARGUMENT = /\.(?:fuzz|test)\.[cm]?tsx?$/u;
 
 function isFocusedRun(cliArguments: ReadonlyArray<string>): boolean {
 	return cliArguments.some((argument) => {
-		if (argument.startsWith("-")) return NARROWING_FLAGS.has(argument.split("=", 1)[0] ?? argument);
+		if (argument.startsWith("-")) {
+			return NARROWING_FLAGS.has(argument.split("=", 1)[0] ?? argument);
+		}
 		return argument.startsWith("tests/") || TEST_FILE_ARGUMENT.test(argument);
 	});
 }
@@ -73,6 +74,6 @@ const testConfiguration = mergeConfig(
 	}),
 );
 
-const configuration = isFuzzRun ? fuzzConfiguration : testConfiguration;
+const configuration = isFuzzRun ? vitiateConfiguration : testConfiguration;
 
 export default configuration;

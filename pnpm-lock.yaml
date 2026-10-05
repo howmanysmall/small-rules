@@ -1118,6 +1118,9 @@ importers:
 
   tools/vite-configuration:
     dependencies:
+      '@vitiate/core':
+        specifier: catalog:test
+        version: 0.3.1(@typescript/typescript6@6.0.2)(vite@8.2.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@5.0.3)
       jest-extended:
         specifier: catalog:test
         version: 7.0.0(@typescript/typescript6@6.0.2)
