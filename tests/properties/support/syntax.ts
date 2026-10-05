@@ -4,7 +4,7 @@ import type { Arbitrary } from "fast-check";
 
 // Plain dictionary words: none is a keyword, a Roblox global, or an
 // abbreviation that `prevent-abbreviations` would rename.
-export const wordArbitrary = fc.constantFrom(
+const WORDS = [
 	"anchor",
 	"banner",
 	"cargo",
@@ -28,7 +28,9 @@ export const wordArbitrary = fc.constantFrom(
 	"velvet",
 	"walnut",
 	"zephyr",
-);
+] as const;
+
+export const wordArbitrary = fc.constantFrom(...WORDS);
 
 export function capitalize(word: string): string {
 	return word.charAt(0).toUpperCase() + word.slice(1);
@@ -45,6 +47,23 @@ export const identifierArbitrary = fc
 
 /** A PascalCase identifier, suitable for components, classes, and types. */
 export const pascalIdentifierArbitrary = identifierArbitrary.map(capitalize);
+
+const CAPITALIZED_WORDS = WORDS.map(capitalize).join("|");
+const GENERATED_IDENTIFIER = new RegExp(
+	`^(?:${WORDS.join("|")}|${CAPITALIZED_WORDS})(?:${CAPITALIZED_WORDS})?\\d*$`,
+	"u",
+);
+
+/**
+ * Whether a name was built by these generators from dictionary words,
+ * optionally followed by a numeric suffix.
+ *
+ * @param name - A name read from a parsed program.
+ * @returns `true` for generated names.
+ */
+export function isGeneratedIdentifier(name: string): boolean {
+	return GENERATED_IDENTIFIER.test(name);
+}
 
 export const integerLiteralArbitrary = fc.nat().map(String);
 
