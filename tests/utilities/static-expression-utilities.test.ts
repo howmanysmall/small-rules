@@ -135,6 +135,12 @@ describe("isStaticExpression checking", () => {
 				{ code: "const value = 42; check(value);", errors: [{ messageId: "static" }] },
 				{ code: "const value = 'hello'; check(value);", errors: [{ messageId: "static" }] },
 				{ code: "const first = 1; const second = first; check(second);", errors: [{ messageId: "static" }] },
+				// Catches a constant used twice being taken for a self-reference.
+				{ code: "const first = 1; check(first ? first : '');", errors: [{ messageId: "static" }] },
+				{
+					code: "const first = 1; const second = first + first; check([second, second]);",
+					errors: [{ messageId: "static" }],
+				},
 			],
 			valid: [],
 		});
@@ -283,7 +289,17 @@ describe("negative cases — dynamic expressions", () => {
 	describe("objects with dynamic computed keys", () => {
 		tester.run("static-expression", testRule, {
 			invalid: [
-				{ code: "function run() { const key = 'a'; check({ [key]: 1 }); }", errors: [{ messageId: "static" }] },
+				// Catches a function-local key being treated as static, which let
+				// rules hoist the object out of the scope that defines the key.
+				{
+					code: "function run() { const key = 'a'; check({ [key]: 1 }); }",
+					errors: [{ messageId: "dynamic" }],
+				},
+				{ code: "check(({ value: 1 })[unknownGlobal]);", errors: [{ messageId: "dynamic" }] },
+				{
+					code: "function run(key) { const table = { a: 1 }; check(table[key]); }",
+					errors: [{ messageId: "dynamic" }],
+				},
 			],
 			valid: [],
 		});

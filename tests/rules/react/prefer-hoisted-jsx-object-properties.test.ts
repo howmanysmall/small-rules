@@ -150,6 +150,16 @@ const [view] = [<Component options={{ enabled: true }} />];
 			},
 		],
 		valid: [
+			// Catches hoisting an object that reads a prop through a computed
+			// member, which would leave the prop undefined at module scope.
+			{
+				code: `
+const table = { a: 1 };
+function View({ key }: { key: string }) {
+	return <Component options={{ value: table[key] }} />;
+}
+`,
+			},
 			{
 				code: `
 const PROPS = { enabled: true };

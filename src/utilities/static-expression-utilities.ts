@@ -15,7 +15,6 @@ import {
 	isIdentifierName,
 	isIdentifierNamed,
 	isMemberExpression,
-	isPrivateIdentifier,
 	isProperty,
 	isSpreadElement,
 	isUnaryExpression,
@@ -205,7 +204,6 @@ function isStaticMemberProperty(
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	if (isIdentifierName(property)) return true;
 	/* v8 ignore next -- @preserve PrivateIdentifier cannot be produced as a valid computed member property expression. */
 	if (!isExpression(property)) return false;
 	return isStaticExpression(sourceCode, property, seen, options);
@@ -283,9 +281,21 @@ export function isStaticExpression(
 	options: StaticExpressionOptions,
 ): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
+	// `seen` holds the expressions on the current path only, so a constant
+	// that refers back to itself is rejected while one used twice is not.
 	if (seen.has(unwrapped)) return false;
 	seen.add(unwrapped);
+	const result = classifyStaticExpression(sourceCode, unwrapped, seen, options);
+	seen.delete(unwrapped);
+	return result;
+}
 
+function classifyStaticExpression(
+	sourceCode: SourceCode,
+	unwrapped: ReturnType<typeof stripExpressionWrappers>,
+	seen: Set<ESTree.Node>,
+	options: StaticExpressionOptions,
+): boolean {
 	switch (unwrapped.type) {
 		case ARRAY_EXPRESSION:
 			return isStaticArrayExpression(sourceCode, unwrapped, seen, options);
@@ -359,14 +369,34 @@ function isStaticIdentifier(
 	for (const definition of variable.defs) {
 		const initializer = getConstInitializer(definition);
 		if (initializer === undefined) continue;
-		if (isStaticExpression(sourceCode, initializer, seen, options)) return true;
+		if (isStaticInitializer(sourceCode, initializer, seen, options)) return true;
 	}
 
 	return false;
 }
 
-function isExpressionKey(key: ESTree.PropertyKey): key is ESTree.Expression {
-	return !isPrivateIdentifier(key) && !isIdentifierName(key);
+// A module constant can be referenced many times, and constants can refer to
+// each other, so each initializer is classified once per options object.
+const initializerVerdictsByOptions = new WeakMap<StaticExpressionOptions, WeakMap<ESTree.Node, boolean>>();
+
+function isStaticInitializer(
+	sourceCode: SourceCode,
+	initializer: ESTree.Expression,
+	seen: Set<ESTree.Node>,
+	options: StaticExpressionOptions,
+): boolean {
+	let verdicts = initializerVerdictsByOptions.get(options);
+	if (verdicts === undefined) {
+		verdicts = new WeakMap();
+		initializerVerdictsByOptions.set(options, verdicts);
+	}
+
+	const cached = verdicts.get(initializer);
+	if (cached !== undefined) return cached;
+
+	const verdict = isStaticExpression(sourceCode, initializer, seen, options);
+	verdicts.set(initializer, verdict);
+	return verdict;
 }
 
 export function isStaticObjectExpression(
@@ -380,7 +410,7 @@ export function isStaticObjectExpression(
 
 		if (
 			(property.computed &&
-				isExpressionKey(property.key) &&
+				isExpression(property.key) &&
 				!isStaticExpression(sourceCode, property.key, seen, options)) ||
 			!isStaticExpression(sourceCode, property.value, seen, options)
 		) {
