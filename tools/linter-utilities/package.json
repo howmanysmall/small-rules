@@ -18,7 +18,8 @@
 		"@small-rules/arktype-utilities": "workspace:*",
 		"arktype": "catalog:runtime",
 		"confbox": "catalog:dev",
-		"empathic": "catalog:dev"
+		"empathic": "catalog:dev",
+		"type-fest": "catalog:types"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:types",

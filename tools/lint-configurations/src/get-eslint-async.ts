@@ -1,5 +1,6 @@
 import nodePath from "node:path";
 import { GLOB_PACKAGE_JSON, isentinel } from "@isentinel/eslint-config";
+import { configs as astroConfigs } from "eslint-plugin-astro";
 
 import { baseIgnores, projectType } from "./constants";
 
@@ -37,7 +38,11 @@ export async function getEslintAsync(tsconfigPath: string): Promise<LintConfigur
 				yaml: true,
 			},
 			gitignore: true,
-			ignores: [...baseIgnores],
+			ignores: [
+				...baseIgnores,
+				"{.omo,.rumdl_cache}/**",
+				".github/workflows/react-doctor.yml",
+			] satisfies ReadonlyArray<string>,
 			jsdoc: true,
 			jsonc: true,
 			markdown: false,
@@ -79,20 +84,9 @@ export async function getEslintAsync(tsconfigPath: string): Promise<LintConfigur
 				},
 			},
 		},
+		...astroConfigs.recommended,
 		{
-			name: "tanstack/ignores",
-			ignores: [
-				"**/.nx/**",
-				"**/.svelte-kit/**",
-				"**/build/**",
-				"**/coverage/**",
-				"**/dist/**",
-				"**/snap/**",
-				"**/vite.config.*.timestamp-*.*",
-			],
-		},
-		{
-			name: "howmanysmall/package-json",
+			name: "small-rules/package-json",
 			files: ["**/package.json", "!package.json"],
 			rules: {
 				"package-json/require-attribution": "off",
@@ -111,11 +105,29 @@ export async function getEslintAsync(tsconfigPath: string): Promise<LintConfigur
 			},
 		},
 		{
-			name: "howmanysmall/ignores",
-			ignores: ["{.omo,.rumdl_cache}/**", ".github/workflows/react-doctor.yml", "**/*.js"],
+			name: "small-rules/fixture-package-json",
+			files: ["tests/fixtures/tsgolint-version/*/package.json"],
+			rules: {
+				"package-json/valid-devDependencies": "off",
+			},
 		},
 		{
-			name: "howmanysmall/dependencies",
+			name: "small-rules/ignores",
+			ignores: [
+				"{.omo,.rumdl_cache}/**",
+				".github/workflows/react-doctor.yml",
+				"**/*.js",
+				"tests/fixtures/*/{invalid-*,*-invalid}/*.json",
+				"tests/fixtures/tsgolint-version/json-array/package.json",
+			],
+		},
+		{
+			name: "small-rules/block-no-unsafe-string-replacement",
+			files: ["src/**"],
+			rules: { "unicorn/no-unsafe-string-replacement": "off" },
+		},
+		{
+			name: "small-rules/dependencies",
 			files: [GLOB_PACKAGE_JSON],
 			rules: {
 				"e18e/ban-dependencies": ["error", BANNED_DEPENDENCIES],

@@ -1,4 +1,5 @@
 import type { OxfmtOptions } from "@isentinel/eslint-config";
+import type { UnknownRecord } from "type-fest";
 
 const DEFAULT_CONFIGURATION = {
 	arrowParens: "always",
@@ -129,6 +130,16 @@ const DEFAULT_CONFIGURATION = {
 	useTabs: true,
 } satisfies OxfmtOptions;
 
+// biome-ignore lint/style/noRestrictedTypes: Except will not work here.
+function deleteSchema<TObject extends UnknownRecord>(object: TObject): Omit<TObject, "$schema"> {
+	if ("$schema" in object) {
+		const { $schema, ...rest } = object;
+		return rest;
+	}
+
+	return object;
+}
+
 export async function getOxfmtConfigurationAsync(): Promise<OxfmtOptions> {
 	try {
 		const { up } = await import("empathic/find");
@@ -140,7 +151,7 @@ export async function getOxfmtConfigurationAsync(): Promise<OxfmtOptions> {
 		const jsonc = parseJSONC(await readFile(filePath, "utf8"));
 
 		const { isOxfmtConfiguration } = await import("./oxfmt-types.ts");
-		return isOxfmtConfiguration.allows(jsonc) ? jsonc : DEFAULT_CONFIGURATION;
+		return deleteSchema(isOxfmtConfiguration.allows(jsonc) ? jsonc : DEFAULT_CONFIGURATION);
 	} catch {
 		return DEFAULT_CONFIGURATION;
 	}

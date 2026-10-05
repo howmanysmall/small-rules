@@ -17,6 +17,7 @@
 	"dependencies": {
 		"@howmanysmall/linter-utilities": "workspace:*",
 		"@isentinel/eslint-config": "catalog:lint",
+		"eslint-plugin-astro": "catalog:lint",
 		"oxlint-plugin-react-doctor": "catalog:lint"
 	},
 	"devDependencies": {

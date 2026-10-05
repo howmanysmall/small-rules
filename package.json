@@ -108,6 +108,7 @@
 		"@commitlint/types": "catalog:commitlint",
 		"@e18e/eslint-plugin": "catalog:lint",
 		"@fast-check/vitest": "catalog:test",
+		"@howmanysmall/lint-configurations": "workspace:*",
 		"@isentinel/eslint-config": "catalog:lint",
 		"@isentinel/hooks": "catalog:tooling",
 		"@mdx-js/language-server": "catalog:tooling",

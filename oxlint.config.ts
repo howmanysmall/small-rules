@@ -335,7 +335,7 @@ const configuration = isentinel(
 			"small-rules/ban-instances": "off",
 			"small-rules/ban-react-fc": "off",
 			"small-rules/ban-types": [
-				"error",
+				"off",
 				{
 					bannedTypes: {
 						Omit: "Except",

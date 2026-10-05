@@ -2,10 +2,10 @@
 import nodePath from "node:path";
 import { GLOB_DTS, GLOB_SRC, GLOB_SRC_EXT, GLOB_TESTS } from "@isentinel/eslint-config";
 import { isentinel } from "@isentinel/eslint-config/oxlint";
-import { ALL_REACT_DOCTOR_RULES } from "oxlint-plugin-react-doctor";
 
 import { baseIgnores, projectType } from "./constants.ts";
 
+import type { OxfmtOptions } from "@isentinel/eslint-config";
 import type { OxlintConfig, OxlintFactoryOptions } from "@isentinel/eslint-config/oxlint";
 
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
@@ -61,15 +61,6 @@ const REACT_EFFECT_RESTRICTED_SYNTAX = [
 	},
 ] as const;
 
-const reactDoctorRules = Object.fromEntries(
-	Object.entries(ALL_REACT_DOCTOR_RULES).map(([key, value]) => {
-		if (key.includes("nextjs-") || key.includes("preact-") || key.includes("jsx-no-new-")) {
-			return [key, "off" as const];
-		}
-		return [key, value];
-	}),
-);
-
 type NoRestrictedSyntax = NonNullable<NonNullable<OxlintFactoryOptions["rules"]>["eslint-js/no-restricted-syntax"]>;
 
 interface ConfigurationOptions {
@@ -79,14 +70,30 @@ interface ConfigurationOptions {
 	readonly tsconfigPath: string;
 }
 
+async function getOxfmtOptionsAsync(): Promise<OxfmtOptions> {
+	const { getOxfmtConfigurationAsync } = await import("@howmanysmall/linter-utilities/configuration");
+	return getOxfmtConfigurationAsync();
+}
+
 export async function getOxlintAsync({
 	argv,
 	banUseEffect = true,
 	rootDirectory,
 	tsconfigPath,
 }: ConfigurationOptions): Promise<OxlintConfig> {
-	const { getOxfmtConfigurationAsync } = await import("@howmanysmall/linter-utilities/configuration");
-	const oxfmtOptions = await getOxfmtConfigurationAsync();
+	const [allReactDoctorRules, oxfmtOptions] = await Promise.all([
+		import("oxlint-plugin-react-doctor").then((library) => library.ALL_REACT_DOCTOR_RULES),
+		getOxfmtOptionsAsync(),
+	]);
+
+	const reactDoctorRules = Object.fromEntries(
+		Object.entries(allReactDoctorRules).map(([key, value]) => {
+			if (key.includes("nextjs-") || key.includes("preact-") || key.includes("jsx-no-new-")) {
+				return [key, "off" as const];
+			}
+			return [key, value];
+		}),
+	);
 
 	const noRestrictedSyntax: NoRestrictedSyntax = ["error", ...REACT_COMPILER_RESTRICTED_SYNTAX];
 	if (banUseEffect) {
