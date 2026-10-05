@@ -632,6 +632,9 @@ importers:
       '@small-rules/arktype-utilities':
         specifier: workspace:*
         version: link:packages/arktype-utilities
+      '@small-rules/rule-harness':
+        specifier: workspace:*
+        version: link:tools/rule-harness
       '@small-rules/vite-configuration':
         specifier: workspace:*
         version: link:tools/vite-configuration

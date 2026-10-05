@@ -6,8 +6,13 @@
 	"license": "UNLICENSED",
 	"type": "module",
 	"exports": {
-		"./create-rule-tester": "./src/runner.ts",
+		".": "./src/runner.ts",
+		"./ast": "./src/ast.ts",
+		"./execute": "./src/execute.ts",
+		"./fixes": "./src/fixes.ts",
+		"./object": "./src/object.ts",
 		"./package.json": "./package.json",
+		"./parse": "./src/parse.ts",
 		"./rule-testers": "./src/rule-testers.ts",
 		"./types": "./src/types.ts"
 	},

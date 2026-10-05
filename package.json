@@ -113,6 +113,7 @@
 		"@isentinel/hooks": "catalog:tooling",
 		"@mdx-js/language-server": "catalog:tooling",
 		"@small-rules/arktype-utilities": "workspace:*",
+		"@small-rules/rule-harness": "workspace:*",
 		"@small-rules/vite-configuration": "workspace:*",
 		"@stryker-mutator/api": "catalog:test",
 		"@stryker-mutator/core": "catalog:test",
