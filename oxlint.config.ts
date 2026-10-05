@@ -684,8 +684,6 @@ const configuration = isentinel(
 		files: ["documentation/**/*.astro"],
 		rules: {
 			"import/unambiguous": "off",
-			// oxfmt has no Astro parser; `componentExts` routes these files into its fragment anyway.
-			"oxfmt/oxfmt": "off",
 			"small-rules/no-unused-imports": "off",
 			"small-rules/prevent-abbreviations": "off",
 			"sonar/unused-import": "off",
