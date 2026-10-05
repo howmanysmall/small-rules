@@ -87,6 +87,7 @@ overrides:
 # nothing for any test inside a `describe` and every mutant runs zero tests and is reported
 # "Survived". Drop this once upstream supports Vitest 5.
 patchedDependencies:
+  "@isentinel/eslint-config@6.0.0-beta.46": patches/@isentinel__eslint-config@6.0.0-beta.46.patch
   "@stryker-mutator/vitest-runner@10.0.0": patches/@stryker-mutator__vitest-runner@10.0.0.patch
 
 catalogs:

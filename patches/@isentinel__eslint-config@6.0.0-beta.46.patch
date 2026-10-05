@@ -1,0 +1,13 @@
+diff --git a/dist/oxlint.mjs b/dist/oxlint.mjs
+index 913ee74f41216a825572614c686dafe6cc5c2db3..7e839d990af8937b6c5cb6aa8b2df33d4b49e69a 100644
+--- a/dist/oxlint.mjs
++++ b/dist/oxlint.mjs
+@@ -9548,7 +9548,7 @@ function isentinel(factoryOptions, ...userConfigs) {
+ 	if (Object.keys(rules).length > 0) {
+ 		const optionsFragments = createOxlintConfigs({
+ 			name: "isentinel/options-rules",
+-			files: [GLOB_SRC],
++			files: [GLOB_SRC, ...componentExtensions.map((extension) => `**/*.${extension}`)],
+ 			keepUnmappedOff: true,
+ 			rules
+ 		});
