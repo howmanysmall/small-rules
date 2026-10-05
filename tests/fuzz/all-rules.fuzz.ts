@@ -1,19 +1,18 @@
 import assert from "node:assert/strict";
 import nodePath from "node:path";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
+import { applyFixes, fixer } from "@small-rules/rule-harness/fixes";
+import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "@small-rules/rule-harness/object";
+import { getRuleMeta, parseCase } from "@small-rules/rule-harness/parse";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 import { Predicate } from "effect";
 
 import smallRules from "$small-rules";
-import { createRuleExecutor } from "@small-rules/rule-harness/execute";
-import { applyFixes, fixer } from "@small-rules/rule-harness/fixes";
-import { getArrayProperty, getObjectProperty, getProperty, getStringProperty } from "@small-rules/rule-harness/object";
-import { getRuleMeta, parseCase } from "@small-rules/rule-harness/parse";
-
-import type { UnknownRecord } from "type-fest";
 
 import type { HarnessValue } from "@small-rules/rule-harness/object";
 import type { Fix, NormalizedValidCase, RuntimeDiagnostic } from "@small-rules/rule-harness/types";
+import type { UnknownRecord } from "type-fest";
 
 interface JsonObject {
 	[key: string]: JsonValue;

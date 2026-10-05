@@ -1,10 +1,10 @@
 import nodePath from "node:path";
 import { expect } from "vitest";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 
 import rule from "$oxc-rules/react/prefer-padding-components";
-import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 
 import type { NormalizedValidCase } from "@small-rules/rule-harness/types";
 
