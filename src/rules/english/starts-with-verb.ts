@@ -1,7 +1,8 @@
+import { isCallbackFunction, isIdentifier, isPrivateIdentifier } from "@small-rules/oxlint-utilities";
+
 import { isExternallyConstrainedProperty } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { startsWithVerb as checkStartsWithVerb } from "$oxc-utilities/english-utilities";
-import { isCallbackFunction, isIdentifier, isPrivateIdentifier } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, VisitorWithHooks } from "oxlint-plugin-utilities";
 

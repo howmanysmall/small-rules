@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
 	isIdentifier,
@@ -10,7 +7,10 @@ import {
 	isStringLiteral,
 	isTsQualifiedName,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ANOTHER_NAME_MESSAGE,
 	DEFAULT_ALLOW_LIST,
