@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import {
@@ -13,7 +14,6 @@ import {
 	walkAst,
 	walkAstSlop,
 } from "$oxc-utilities/react-hook-utilities";
-import { createRuleTester } from "@small-rules/rule-harness";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/prefer-idiv";
-import { ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("prefer-idiv", () => {
 	ts.run("prefer-idiv", rule, {

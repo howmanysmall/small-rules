@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/directive-disable-enable-pair";
-import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("directive-disable-enable-pair", () => {
 	js.run("directive-disable-enable-pair", rule, {

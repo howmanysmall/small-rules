@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import {
@@ -8,7 +9,6 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import { createRuleTester } from "@small-rules/rule-harness";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

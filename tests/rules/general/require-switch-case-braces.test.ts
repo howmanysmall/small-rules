@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/require-switch-case-braces";
-import { js } from "@small-rules/rule-harness/rule-testers";
 
 const case3Input = [
 	"switch (value) {",

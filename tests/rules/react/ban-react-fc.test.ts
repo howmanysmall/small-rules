@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/ban-react-fc";
-import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("ban-react-fc", () => {
 	tsx.run("ban-react-fc", rule, {

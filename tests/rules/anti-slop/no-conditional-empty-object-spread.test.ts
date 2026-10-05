@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/anti-slop/no-conditional-empty-object-spread";
-import { ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-conditional-empty-object-spread", () => {
 	ts.run("no-conditional-empty-object-spread", rule, {

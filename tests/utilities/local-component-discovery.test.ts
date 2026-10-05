@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import nodeProcess from "node:process";
 import { describe, expect, it, onTestFinished } from "vitest";
+import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import {
@@ -12,7 +13,6 @@ import {
 	inspectRelativeLocalComponentImport,
 	MAX_REGEX_CACHE_SIZE,
 } from "$oxc-utilities/local-component-discovery";
-import { createRuleTester } from "@small-rules/rule-harness";
 
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
 

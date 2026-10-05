@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/require-react-display-names";
-import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("require-react-display-names", () => {
 	tsx.run("require-react-display-names", rule, {

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, expect, it } from "vitest";
+import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/english/prevent-abbreviations";
 import {
@@ -11,7 +12,6 @@ import {
 	isShorthandIgnored,
 	prepareOptions,
 } from "$oxc-utilities/prevent-abbreviations/replacements";
-import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 const MANY_REPLACEMENTS = Object.fromEntries(
 	Array.from({ length: 104 }, (_, index) => [`replacement${index.toString().padStart(3, "0")}`, true]),

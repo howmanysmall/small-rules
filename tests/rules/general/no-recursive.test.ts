@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import noRecursive from "$oxc-rules/general/no-recursive";
-import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-recursive", () => {
 	js.run("no-recursive", noRecursive, {

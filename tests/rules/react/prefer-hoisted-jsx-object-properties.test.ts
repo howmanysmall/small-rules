@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/prefer-hoisted-jsx-object-properties";
-import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("prefer-hoisted-jsx-object-properties", () => {
 	tsx.run("prefer-hoisted-jsx-object-properties", rule, {

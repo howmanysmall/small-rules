@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { jsx, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/use-exhaustive-dependencies";
-import { jsx, ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("use-exhaustive-dependencies", () => {
 	jsx.run("use-exhaustive-dependencies", rule, {

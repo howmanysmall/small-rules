@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-trivial-assertions";
-import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-trivial-assertions", () => {
 	js.run("no-trivial-assertions", rule, {

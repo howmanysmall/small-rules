@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-useless-use-effect";
-import { ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-useless-use-effect", () => {
 	ts.run("no-useless-use-effect", rule, {

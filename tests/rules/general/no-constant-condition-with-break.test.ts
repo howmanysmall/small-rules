@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-constant-condition-with-break";
-import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-constant-condition-with-break", () => {
 	js.run("no-constant-condition-with-break", rule, {

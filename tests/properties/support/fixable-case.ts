@@ -2,10 +2,10 @@ import { fc } from "@fast-check/vitest";
 
 import { fillerArbitrary, frameArbitrary, wrapInFrames } from "./syntax";
 
+import type { NormalizedValidCase, TestLanguage } from "@small-rules/rule-harness/types";
 import type { Arbitrary } from "fast-check";
 
 import type smallRules from "$small-rules";
-import type { NormalizedValidCase, TestLanguage } from "@small-rules/rule-harness/types";
 
 import type { Frame } from "./syntax";
 

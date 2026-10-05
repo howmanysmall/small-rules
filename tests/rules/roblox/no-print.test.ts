@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/no-print";
-import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-print", () => {
 	js.run("no-print", rule, {

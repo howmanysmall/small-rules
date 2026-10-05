@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/isolated-functions";
-import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("isolated-functions", () => {
 	js.run("isolated-functions", rule, {

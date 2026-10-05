@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/require-named-effect-functions";
-import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("require-named-effect-functions", () => {
 	tsx.run("require-named-effect-functions", rule, {

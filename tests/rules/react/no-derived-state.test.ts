@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-derived-state";
-import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-derived-state", () => {
 	tsx.run("no-derived-state", rule, {

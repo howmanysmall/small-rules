@@ -1,8 +1,8 @@
 import { describe } from "vitest";
+import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import rule, { isDefaultValue } from "$oxc-rules/roblox/no-useless-default";
-import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 import type { CreateRule, Visitor } from "oxlint-plugin-utilities";
 

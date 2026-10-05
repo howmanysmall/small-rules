@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { jsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-commented-code";
-import { jsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-commented-code", () => {
 	jsx.run("no-commented-code", rule, {

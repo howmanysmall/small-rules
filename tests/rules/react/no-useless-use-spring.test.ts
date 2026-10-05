@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-useless-use-spring";
-import { ts } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-useless-use-spring", () => {
 	ts.run("no-useless-use-spring", rule, {

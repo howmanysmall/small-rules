@@ -2,11 +2,11 @@
 // harness AST to the rule's ESTree SourceCode types for direct utility
 // coverage.
 import { describe, expect, it } from "vitest";
+import { traverseAst } from "@small-rules/rule-harness/ast";
+import { parseCase } from "@small-rules/rule-harness/parse";
 import { Predicate } from "effect";
 
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
-import { traverseAst } from "@small-rules/rule-harness/ast";
-import { parseCase } from "@small-rules/rule-harness/parse";
 
 import type { HarnessValue } from "@small-rules/rule-harness/object";
 import type { HarnessNode, HarnessSourceCode } from "@small-rules/rule-harness/types";

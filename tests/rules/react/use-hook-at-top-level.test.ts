@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { jsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/use-hook-at-top-level";
-import { jsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("use-hook-at-top-level", () => {
 	jsx.run("use-hook-at-top-level", rule, {

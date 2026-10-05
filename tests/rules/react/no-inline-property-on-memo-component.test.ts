@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-inline-property-on-memo-component";
-import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-inline-property-on-memo-component", () => {
 	tsx.run("no-inline-property-on-memo-component", rule, {

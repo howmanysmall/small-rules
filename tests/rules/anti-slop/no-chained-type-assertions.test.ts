@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/anti-slop/no-chained-type-assertions";
-import { ts } from "@small-rules/rule-harness/rule-testers";
 
 const chained = { messageId: "chained" };
 const vectorBridge = [{ allowedTargets: ["vector", "Vector3"] }] as const;
