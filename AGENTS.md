@@ -22,9 +22,9 @@ You **MUST** follow these guidelines. There is NO exception.
 | Command | What it does |
 |---------|-------------|
 | `pnpm install` | Install dependencies from the pnpm dependency graph |
-| `ni` | Install dependencies when `node_modules` exists |
-| `ni cowsay` | Add a dependency |
-| `ni -D cowsay` | Add a dev dependency |
+| `pnpm add` | Install dependencies when `node_modules` exists |
+| `pnpm add cowsay` | Add a dependency |
+| `pnpm add -D cowsay` | Add a dev dependency |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
 | `nr test:agent` | Run all Vitest unit tests |
 | `nr test:agent -- tests/rules/roblox/no-print.test.ts` | Run a single test file |
