@@ -151,15 +151,7 @@ local fileChecks = new Mapping<String, Step> {
     glob = WORKFLOW_FILES
     check = new CommandSpec {
       command = new Command {
-        argv =
-          List(
-            "actionlint",
-            "-ignore",
-            "specifying action .[$]/.github/.*. in invalid format",
-            "-ignore",
-            "reusable workflow call .[$]/.github/.*. at .uses. is not following the format",
-            "{{files}}",
-          )
+        argv = List("actionlint", "{{files}}")
       }
       effect = "read"
     }

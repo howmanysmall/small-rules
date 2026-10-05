@@ -1,0 +1,6 @@
+# actionlint doesn't understand the `$/` repository-relative `uses:` syntax yet.
+paths:
+  .github/workflows/**/*.{yml,yaml}:
+    ignore:
+      - specifying action .[$]/\.github/.*. in invalid format
+      - reusable workflow call .[$]/\.github/.*. at .uses. is not following the format
