@@ -95,9 +95,14 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 	return false;
 }
 
-function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: string): string {
-	const scope = sourceCode.getScope(node);
-	const names = new Set(scope.variables.map((variable) => variable.name));
+function getUniqueVariableName(
+	scope: Scope,
+	node: ESTree.Node,
+	base: string,
+	reservedNames: ReadonlySet<string>,
+): string {
+	const names = new Set(reservedNames);
+	for (const variable of scope.variables) names.add(variable.name);
 
 	// Catch clause parameters may not appear in scope.variables, so walk
 	// ancestors
@@ -199,6 +204,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const allowList = context.options[0]?.allow ?? [];
+		const namesReservedByFixes = new WeakMap<Scope, Set<string>>();
 
 		// oxlint-disable typescript/no-unnecessary-condition -- so dumb
 		/* v8 ignore next -- @preserve the rule harness and Oxlint provide a physical filename for rule execution. */
@@ -221,10 +227,20 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				const isMethod = isClassMethodContext(node);
 				const capturedName = isMethod ? `this.${functionName}` : functionName;
 
+				// A throw directly in a block declares its variable there, so
+				// other throws fixed in the same pass must pick another name.
+				const declaresInScope = isBlockStatement(node.parent);
+				const scope = sourceCode.getScope(node);
+				let reservedNames = namesReservedByFixes.get(scope);
+				if (reservedNames === undefined) {
+					reservedNames = new Set();
+					namesReservedByFixes.set(scope, reservedNames);
+				}
+				const variableName = getUniqueVariableName(scope, node, "error", reservedNames);
+				if (declaresInScope) reservedNames.add(variableName);
+
 				context.report({
 					fix(fixer): Fix {
-						const variableName = getUniqueVariableName(sourceCode, node, "error");
-
 						const replacement = [
 							`const ${variableName} = ${sourceCode.getText(argument)};`,
 							`Error.captureStackTrace(${variableName}, ${capturedName});`,

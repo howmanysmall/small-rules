@@ -23,6 +23,22 @@ describe("require-throw-error-capture", () => {
 				errors: [{ messageId: "missingCaptureStackTrace" }],
 				documentation: { id: "fail", title: "Missing stack trace capture" },
 			},
+			// Catches two fixes in one block both declaring `const error`, which
+			// no longer compiles. Shrunk from the fixes-settle property.
+			{
+				code: ["const anchor = () => {", "throw new Error();", "throw new Error();", "};"].join("\n"),
+				output: [
+					"const anchor = () => {",
+					"const error = new Error();",
+					"Error.captureStackTrace(error, anchor);",
+					"throw error;",
+					"const error2 = new Error();",
+					"Error.captureStackTrace(error2, anchor);",
+					"throw error2;",
+					"};",
+				].join("\n"),
+				errors: [error, error],
+			},
 			// TypeError subclass
 			{
 				code: ["function bar() {", "	throw new TypeError('invalid');", "}"].join("\n"),
