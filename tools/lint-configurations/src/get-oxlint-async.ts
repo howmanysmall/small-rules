@@ -605,7 +605,6 @@ export async function getOxlintAsync({
 				"max-lines": "off",
 				"max-lines-per-function": "off",
 				"no-console": "error",
-				"no-non-null-assertion": "off",
 				"small-rules/no-filter-map-chain": "off",
 				"small-rules/prefer-expect-assertions": [
 					"error",
@@ -615,6 +614,7 @@ export async function getOxlintAsync({
 					},
 				],
 				"small-rules/prevent-abbreviations": "off",
+				"typescript/no-non-null-assertion": "off",
 				"unicorn-js/no-incorrect-template-string-interpolation": "off",
 				"unicorn/no-null": "off",
 				"vitest/consistent-each-for": "error",
