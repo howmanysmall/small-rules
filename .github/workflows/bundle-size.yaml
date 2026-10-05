@@ -92,7 +92,7 @@ jobs:
           fi
 
           percentage="$(awk -v difference="$difference" -v base="$BASE_BYTES" 'BEGIN { printf "%+.2f%%", difference / base * 100 }')"
-          report="$(printf "## Bundle size\n\n| Artifact | Base | Pull request | Change |\n|:--|--:|--:|--:|\n| \`dist/index.js\` | %s | %s | %s (%s) |\n\n<sub>Raw, uncompressed bytes from the minified \`prepublishOnly\` build.</sub>" "$(format_bytes "$BASE_BYTES")" "$(format_bytes "$PULL_REQUEST_BYTES")" "$difference_text" "$percentage")"
+          report="$(printf "## Bundle size\n\n| Artifact | Base | Pull request | Change |\n|:--|--:|--:|--:|\n| \`dist/index.js\` | %s | %s | %s (%s) |\n\n<sub>Raw, uncompressed bytes from the minified \`prepublishOnly\` build. Measured for commit \`%s\` against base \`%s\`.</sub>" "$(format_bytes "$BASE_BYTES")" "$(format_bytes "$PULL_REQUEST_BYTES")" "$difference_text" "$percentage" "${HEAD_SHA:0:7}" "${BASE_SHA:0:7}")"
 
           printf '%s\n' "$report" >> "$GITHUB_STEP_SUMMARY"
           {
@@ -102,6 +102,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
         env:
           BASE_BYTES: ${{ steps.base.outputs.bytes }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PULL_REQUEST_BYTES: ${{ steps.pull-request.outputs.bytes }}
 
       - if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
