@@ -708,15 +708,6 @@ const configuration = isentinel(
 		},
 	},
 	{
-		name: "small-rules/allow-satteri-optional-peers",
-		files: ["documentation/src/types/satteri-optional-peers.d.ts"],
-		rules: {
-			"import/unambiguous": "off",
-			"small-rules/no-unused-imports": "off",
-			"typescript/no-redundant-type-constituents": "off",
-		},
-	},
-	{
 		name: "small-rules/allow-top-level-await",
 		files: ["documentation/**/*.astro", SCRIPT_FILES, CONFIGURATION_FILES],
 		rules: { "node/no-top-level-await": "off" },
