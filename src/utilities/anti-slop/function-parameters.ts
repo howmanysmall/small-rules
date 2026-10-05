@@ -18,7 +18,7 @@ import {
 	isTsTypeAnnotation,
 	isTsUnionType,
 	isTsUnknownKeyword,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 

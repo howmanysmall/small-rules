@@ -1,6 +1,4 @@
-import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import {
-	getImportedName,
 	isCallExpression,
 	isIdentifier,
 	isIdentifierNamed,
@@ -11,8 +9,10 @@ import {
 	isNewExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { getImportedName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
 

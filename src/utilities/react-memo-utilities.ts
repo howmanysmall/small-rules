@@ -3,7 +3,8 @@ import {
 	isIdentifierNamed,
 	isImportSpecifier,
 	isUnaryExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
 import { isReactImport } from "$oxc-utilities/react-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";

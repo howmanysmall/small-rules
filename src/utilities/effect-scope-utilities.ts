@@ -3,6 +3,9 @@ import {
 	ARROW_FUNCTION_EXPRESSION,
 	FUNCTION_DECLARATION,
 	FUNCTION_EXPRESSION,
+	OBJECT_EXPRESSION,
+	PROPERTY,
+	SEQUENCE_EXPRESSION,
 	isAwaitExpression,
 	isCallExpression,
 	isIdentifierReference,
@@ -11,10 +14,7 @@ import {
 	isNode,
 	isUnaryExpression,
 	isVariableDeclarator,
-	OBJECT_EXPRESSION,
-	PROPERTY,
-	SEQUENCE_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
 import type { Definition, ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 

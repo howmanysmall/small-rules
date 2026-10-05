@@ -1,10 +1,10 @@
+import { isNode } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
-import { isKeyOfNode, isNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { isKeyOfNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const SETTER_IDENTIFIER_PATTERN = /^set[A-Z]/u;
 

@@ -11,7 +11,6 @@
 // private namespaces by concrete parent block; recognizes import-equals and
 // module competitors; and isolates concrete string-literal module blocks.
 
-import { appendVisitorChildren, getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import {
 	isBlockStatement,
 	isClassDeclaration,
@@ -34,7 +33,9 @@ import {
 	isTsQualifiedName,
 	isTsTypeAliasDeclaration,
 	isTsTypeReference,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { appendVisitorChildren, getLexicalTypeParameterNames } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 

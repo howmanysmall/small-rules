@@ -1,9 +1,9 @@
-import { getMemberPropertyName, isAnyFunction, isLoopNode } from "$oxc-utilities/oxc-utilities";
+import { isAnyFunction, isLoopNode, type CallbackFunction } from "@small-rules/oxlint-utilities";
+
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 export interface ExpectCallCount {
 	readonly deterministic: number;

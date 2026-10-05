@@ -1,20 +1,20 @@
-import { isUppercaseName } from "$oxc-utilities/string-utilities";
-
 import {
 	BINARY_EXPRESSION,
 	IDENTIFIER,
+	LITERAL,
+	MEMBER_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	TEMPLATE_LITERAL,
+	UNARY_EXPRESSION,
 	isCallExpression,
 	isFunctionDeclarationRaw,
 	isIdentifier,
 	isJsxAttribute,
 	isJsxIdentifier,
 	isMemberExpression,
-	LITERAL,
-	MEMBER_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
-	TEMPLATE_LITERAL,
-	UNARY_EXPRESSION,
-} from "./oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
@@ -26,10 +26,12 @@ export function isComponentDeclaration(node: ESTree.Node): boolean {
 
 export function isMemoCall(node: ESTree.Node): boolean {
 	if (!isCallExpression(node)) return false;
+	// TODO: this should be `useIdentifierNamed`
 	if (isIdentifier(node.callee)) return node.callee.name === "memo";
 
 	return (
 		isMemberExpression(node.callee) &&
+		// TODO: this should be `useIdentifierNamed`
 		isIdentifier(node.callee.object) &&
 		node.callee.object.name === "React" &&
 		isIdentifier(node.callee.property) &&

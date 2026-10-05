@@ -14,8 +14,9 @@ import {
 	isTemplateLiteral,
 	isThisExpression,
 	isUnaryExpression,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 

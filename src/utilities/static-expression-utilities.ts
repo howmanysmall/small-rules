@@ -1,4 +1,3 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -12,14 +11,6 @@ import {
 	FUNCTION_EXPRESSION,
 	IDENTIFIER,
 	IMPORT_EXPRESSION,
-	isIdentifier,
-	isIdentifierNamed,
-	isMemberExpression,
-	isProperty,
-	isSpreadElement,
-	isUnaryExpression,
-	isVariableDeclaration,
-	isVariableDeclarator,
 	LITERAL,
 	LOGICAL_EXPRESSION,
 	MEMBER_EXPRESSION,
@@ -28,7 +19,6 @@ import {
 	OBJECT_EXPRESSION,
 	PARENTHESIZED_EXPRESSION,
 	SEQUENCE_EXPRESSION,
-	stripExpressionWrappers,
 	SUPER,
 	TAGGED_TEMPLATE_EXPRESSION,
 	TEMPLATE_LITERAL,
@@ -41,12 +31,23 @@ import {
 	UNARY_EXPRESSION,
 	UPDATE_EXPRESSION,
 	YIELD_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+	isIdentifier,
+	isIdentifierNamed,
+	isMemberExpression,
+	isProperty,
+	isSpreadElement,
+	isUnaryExpression,
+	isVariableDeclaration,
+	isVariableDeclarator,
+} from "@small-rules/oxlint-utilities";
 
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 export interface StaticExpressionOptions {
 	readonly staticCallsRequireFactories?: boolean;

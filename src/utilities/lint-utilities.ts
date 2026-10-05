@@ -1,8 +1,12 @@
+import {
+	isCallExpression,
+	isCallbackFunction,
+	isIdentifier,
+	isVariableDeclarator,
+} from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
-
-import { isCallbackFunction, isCallExpression, isIdentifier, isVariableDeclarator } from "./oxc-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 

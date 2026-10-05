@@ -1,6 +1,4 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
-	getTypeAnnotationFromBinding,
 	hasName,
 	isCallExpression,
 	isIdentifier,
@@ -20,7 +18,10 @@ import {
 	isTsTypeReference,
 	isTsUnionType,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { isObjectPropertyKey } from "$oxc-utilities/prevent-abbreviations/scope";
 
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";

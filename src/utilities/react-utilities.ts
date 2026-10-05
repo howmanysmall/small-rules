@@ -1,15 +1,15 @@
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
-	getImportedName,
 	isIdentifier,
 	isImportDeclaration,
 	isImportDefaultSpecifier,
 	isImportNamespaceSpecifier,
 	isImportSpecifier,
 	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getImportedName } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
 

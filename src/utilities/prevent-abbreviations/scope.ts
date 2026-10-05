@@ -1,4 +1,3 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	hasName,
 	isAssignmentExpression,
@@ -19,13 +18,15 @@ import {
 	isObjectPattern,
 	isProperty,
 	isPropertyDefinition,
-	isStaticRequire,
 	isStringLiteral,
 	isTsPropertySignature,
 	isTsTypeAliasDeclaration,
 	isVariableDeclaration,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { isStaticRequire } from "$oxc-utilities/oxc-utilities";
 
 import { isValidIdentifier } from "./identifier";
 

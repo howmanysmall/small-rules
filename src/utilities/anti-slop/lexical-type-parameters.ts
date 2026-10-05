@@ -7,7 +7,7 @@
 // pruned nested conditional ownership during infer collection, and added a
 // stop-exclusive owner boundary for alias substitutions.
 
-import { isNode, isProgram, isTsConditionalType, isTsInferType, isTsMappedType } from "$oxc-utilities/oxc-utilities";
+import { isNode, isProgram, isTsConditionalType, isTsInferType, isTsMappedType } from "@small-rules/oxlint-utilities";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 

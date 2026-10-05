@@ -1,3 +1,27 @@
+import {
+	isAnyLiteral,
+	isArrayExpression,
+	isArrayPattern,
+	isArrowFunctionExpression,
+	isBlockStatement,
+	isCallExpression,
+	isCallbackFunction,
+	isFunctionDeclaration,
+	isFunctionDeclarationRaw,
+	isIdentifier,
+	isIdentifierNamed,
+	isImportDeclaration,
+	isImportDefaultSpecifier,
+	isImportNamespaceSpecifier,
+	isImportSpecifier,
+	isMemberExpression,
+	isNode,
+	isObjectExpression,
+	isReturnStatement,
+	isTemplateLiteral,
+	isVariableDeclarator,
+} from "@small-rules/oxlint-utilities";
+
 // !
 // react-effect-utilities.ts
 //
@@ -29,29 +53,6 @@
 import { isReactImportedCall } from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
-import {
-	isAnyLiteral,
-	isArrayExpression,
-	isArrayPattern,
-	isArrowFunctionExpression,
-	isBlockStatement,
-	isCallbackFunction,
-	isCallExpression,
-	isFunctionDeclaration,
-	isFunctionDeclarationRaw,
-	isIdentifier,
-	isIdentifierNamed,
-	isImportDeclaration,
-	isImportDefaultSpecifier,
-	isImportNamespaceSpecifier,
-	isImportSpecifier,
-	isMemberExpression,
-	isNode,
-	isObjectExpression,
-	isReturnStatement,
-	isTemplateLiteral,
-	isVariableDeclarator,
-} from "./oxc-utilities";
 
 import type { ESTree, Reference, Scope, SourceCode, Variable } from "oxlint-plugin-utilities";
 

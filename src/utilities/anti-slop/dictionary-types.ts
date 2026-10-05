@@ -8,15 +8,6 @@
 // `keyof any` broad-key support; and keeps mapped-key walks iterative/no-cast.
 
 import {
-	continueTypeResolution,
-	createTypeAliasEnvironment,
-	createTypeResolution,
-	getVisibleInterfaceDeclarations,
-	getVisibleTypeAlias,
-	hasVisibleTypeBinding,
-	resolveTypeReference,
-} from "$oxc-utilities/anti-slop/type-alias-resolution";
-import {
 	isAnyLiteral,
 	isArrayExpression,
 	isArrowFunctionExpression,
@@ -48,7 +39,17 @@ import {
 	isTsUnionType,
 	isTsUnknownKeyword,
 	isUnaryExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import {
+	continueTypeResolution,
+	createTypeAliasEnvironment,
+	createTypeResolution,
+	getVisibleInterfaceDeclarations,
+	getVisibleTypeAlias,
+	hasVisibleTypeBinding,
+	resolveTypeReference,
+} from "$oxc-utilities/anti-slop/type-alias-resolution";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
