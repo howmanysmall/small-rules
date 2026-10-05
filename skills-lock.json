@@ -23,7 +23,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
-      "computedHash": "0cd14026efa0330083cbc7adf590976c162b60e02f696a8dcce96f0b4dab8a72"
+      "computedHash": "16554b785353aabf3880228755d317a3193a8359772f25ecb5f2a1f762d6e12d"
     },
     "break-ui": {
       "source": "emilkowalski/skills",
@@ -47,25 +47,25 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/codebase-design/SKILL.md",
-      "computedHash": "5a17552cc1482f1a40124bf4e6c9dbd90ac0dbb47e71c07d47369f9e5f2ae3b5"
+      "computedHash": "b2888e4f4e8c0af3bfd557575a64b905c44e6248c3101d72077816882b3a92b9"
     },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/diagnosing-bugs/SKILL.md",
-      "computedHash": "37b5e9c624513551da790b52864dc8c84bff996a6d03a380cc6facdcc0a88354"
+      "computedHash": "b35c6a6e37c61ca3169532fbab2300dea26f2ad190e1d2dac065800b8b2bb0aa"
     },
     "domain-modeling": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
-      "computedHash": "a11713c0ff7870efa3c331b2e273f09116158485246edc89ae5088eefd1b0b48"
+      "computedHash": "b3eb40152b81f0c98fd2095a023c019452dbdce56f7540cc67fece2972db8369"
     },
     "dry-refactoring": {
       "source": "kucherenko/jscpd",
       "sourceType": "github",
       "skillPath": "skills/dry-refactoring/SKILL.md",
-      "computedHash": "2d234ed9be80b55e6c39cd7606951c4411e735dbd7e08e0faa68f10d83e0c85e"
+      "computedHash": "3e8cddd827e782af26d85868073692fb99943a3642551d47f5354e3bf348a9a7"
     },
     "effect-ts": {
       "source": "effect-ts/skills",
@@ -83,13 +83,13 @@
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow/SKILL.md",
-      "computedHash": "8ef7f591f98a480a4b163b0ee67b3509bb881f29218c4d3f7fe59d6665cdddb4"
+      "computedHash": "8b888ef2980b7083255d2e96260e903170beee728a0ac2e3845e9bcc49b3a512"
     },
     "fallow-review": {
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow-review/SKILL.md",
-      "computedHash": "0c294cb25dc56c138be1d6376cc6ee85f6a58d2835170cbd1812b8f19a741bf7"
+      "computedHash": "e810da0733a890351c0e59f398123217679410d1aec0250ade0e92957561903e"
     },
     "find-animation-opportunities": {
       "source": "emilkowalski/skills",
@@ -137,7 +137,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
-      "computedHash": "2449db6ab1ded9581f69fcc56c1f64818112d05e271fd4c5da23c6523f9d3d9d"
+      "computedHash": "ac2c94885f34ff8492dc12aa4543182f661f32ea1722b8d6b6c2c7045af33ae3"
     },
     "migrate-pullhook-install": {
       "source": "howmanysmall/pullhook",
@@ -167,7 +167,7 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/pnpm/SKILL.md",
-      "computedHash": "2ec08c851c6f901d4ed72c21b826416ed074a487db65662b36249418afd728bf"
+      "computedHash": "d1bd6f4fd38ff1ba33b857223c58a832d1cd5b488163ba0d389db449be472603"
     },
     "pr": {
       "source": "mattpocock/skills",
