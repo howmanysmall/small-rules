@@ -1,6 +1,6 @@
 import { mergeConfig } from "vitest/config";
 
-import { sharedConfiguration } from "./shared";
+import { sharedConfiguration } from "./shared.ts";
 
 /**
  * Config used by Stryker's Vitest runner.

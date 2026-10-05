@@ -1,7 +1,7 @@
 import { vitiatePlugin } from "@vitiate/core";
 import { mergeConfig } from "vitest/config";
 
-import { sharedConfiguration } from "./shared";
+import { sharedConfiguration } from "./shared.ts";
 
 export const vitiateConfiguration = mergeConfig(sharedConfiguration, {
 	plugins: [vitiatePlugin()],
