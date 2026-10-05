@@ -31,7 +31,6 @@ export function isMemoCall(node: ESTree.Node): boolean {
 
 	return (
 		isMemberExpression(node.callee) &&
-		// TODO: this should be `useIdentifierNamed`
 		isIdentifierNamed(node.callee.object, "React") &&
 		isIdentifierNamed(node.callee.property, "memo")
 	);
