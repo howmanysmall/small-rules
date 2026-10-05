@@ -8,6 +8,9 @@
 			"path": "./packages/fs-utilities"
 		},
 		{
+			"path": "./packages/oxlint-utilities"
+		},
+		{
 			"path": "./tools/release-notes"
 		},
 		{

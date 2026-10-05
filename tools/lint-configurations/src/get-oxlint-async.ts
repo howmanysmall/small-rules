@@ -569,7 +569,7 @@ export async function getOxlintAsync({
 		{
 			name: "small-rules/local-rules",
 			files: [`src/${GLOB_SRC}`],
-			jsPlugins: [{ name: "local", specifier: nodePath.join(rootDirectory, "tools/local-rules/index.ts") }],
+			jsPlugins: [{ name: "local", specifier: "@small-rules/local-rules" }],
 			rules: { "local/prefer-node-type-constant": "error" },
 		},
 		{
