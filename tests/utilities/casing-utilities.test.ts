@@ -32,6 +32,15 @@ describe("toPascalCase", () => {
 		expect(toPascalCase(String.fromCharCode(0).repeat(2))).toBe("");
 	});
 
+	it("should join a one-letter word with the next one when they would read as an acronym", () => {
+		// Catches output that toPascalCase itself would rewrite, so it never
+		// counts as PascalCase.
+		expect.assertions(2);
+
+		expect(toPascalCase("aA")).toBe("Aa");
+		expect(toPascalCase("Aa")).toBe("Aa");
+	});
+
 	it("should separate words that start with digits", () => {
 		expect.assertions(1);
 

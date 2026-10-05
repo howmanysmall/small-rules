@@ -22,18 +22,36 @@ export function toPascalCase(value: string): string {
 
 	let result = "";
 	let wordStart = start;
+	let previousWordLength = 0;
 
 	for (let index = start; index <= length; index += 1) {
 		if (index !== length && marked.charCodeAt(index) !== 0) continue;
 		if (index > wordStart) {
 			const word = marked.slice(wordStart, index);
-			const firstByte = word.charCodeAt(0);
-
-			if (result.length > 0 && firstByte >= 48 && firstByte <= 57) result += "_";
-			result += word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+			// A one-letter word followed by one that does not go on with a letter
+			// reads back as a single acronym, so join them as one.
+			const joinsAcronym = previousWordLength === 1 && !startsWithDigit(word) && !hasLetterAt(word, 1);
+			result += formatWord(word, result.length > 0, joinsAcronym);
+			previousWordLength = joinsAcronym ? previousWordLength + word.length : word.length;
 		}
 		wordStart = index + 1;
 	}
 
 	return result;
+}
+
+function hasLetterAt(word: string, index: number): boolean {
+	const character = word.charAt(index);
+	return character.toLowerCase() !== character.toUpperCase();
+}
+
+function startsWithDigit(word: string): boolean {
+	const firstByte = word.charCodeAt(0);
+	return firstByte >= 48 && firstByte <= 57;
+}
+
+function formatWord(word: string, hasPreviousWord: boolean, joinsAcronym: boolean): string {
+	if (joinsAcronym) return word.toLowerCase();
+	const separator = hasPreviousWord && startsWithDigit(word) ? "_" : "";
+	return separator + word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
