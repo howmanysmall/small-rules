@@ -80,6 +80,7 @@ function planInsertion(program: ESTree.Program, { name, specifier }: ImportTarge
  * @param replacement - Replacement text, which uses `target.name`.
  * @param target - Name and module to import.
  * @param isDefiningModule - Whether this file is the module that exports the name.
+ * @param range - Source to replace, when it is not exactly `node`.
  * @returns The fix; it does nothing when the name already means something else.
  */
 export function createImportingFix(
@@ -88,16 +89,17 @@ export function createImportingFix(
 	replacement: string,
 	target: ImportTarget,
 	isDefiningModule: boolean,
+	range: readonly [number, number] = node.range,
 ): ImportingFix {
 	const variable = findVariable(sourceCode, node, target.name);
 	if (variable !== undefined) {
 		const isAvailable =
 			importsTarget(variable, target) || (isDefiningModule && !variable.defs.some(isImportDefinition));
-		return isAvailable ? (fixer): Fix => fixer.replaceText(node, replacement) : noFix;
+		return isAvailable ? (fixer): Fix => fixer.replaceTextRange([range[0], range[1]], replacement) : noFix;
 	}
 
 	const { position, text } = planInsertion(sourceCode.ast, target);
-	const [start, end] = node.range;
+	const [start, end] = range;
 	// An import that only comes after the code would have to move first.
 	if (position > start) return noFix;
 

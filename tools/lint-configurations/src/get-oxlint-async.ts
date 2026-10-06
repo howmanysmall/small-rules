@@ -575,7 +575,7 @@ export async function getOxlintAsync({
 			rules: {
 				"local/prefer-existing-guard": "error",
 				"local/prefer-node-type-constant": "error",
-				"local/prefer-shared-string-constant": "error",
+				"local/prefer-shared-string-constant": ["error", { ignoredProperties: ["type"] }],
 			},
 		},
 		{

@@ -15,13 +15,14 @@ import { createNodeTypeCatalog } from "./node-type-catalog.ts";
 import { oxlintUtilities } from "./oxlint-utilities-exports.ts";
 import { createProjectUsageCounter } from "./project-usage.ts";
 import { loadRepositoryUtilities, REPOSITORY_ROOT } from "./repository-utilities.ts";
-import { findSharedGuard, getChainTop } from "./shared-guard-search.ts";
+import { findSharedGuards, getChainTop } from "./shared-guard-search.ts";
 
 import type { CreateRule, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { ImportingFix } from "./import-fixes.ts";
 import type { NodeTypeCatalog } from "./node-type-catalog.ts";
 import type { CountUsage } from "./project-usage.ts";
+import type { FoundGuard } from "./shared-guard-search.ts";
 import type { UtilitiesIndex } from "./utilities-index.ts";
 
 type MessageIds = "addConstant" | "useConstant" | "useGuard" | "useGuardSuggestion";
@@ -45,6 +46,7 @@ interface GuardSuggestion {
 	readonly guard: string;
 	readonly guards: ReadonlyArray<string>;
 	readonly member: ESTree.MemberExpression;
+	readonly nodeType: string;
 	/** Whether the code reads `node?.type`, which is safe on a missing node. */
 	readonly optional: boolean;
 }
@@ -73,21 +75,23 @@ function getReadObjectText(sourceCode: SourceCode, member: ESTree.MemberExpressi
 
 /**
  * `node?.type` is safe on a missing node, so a guard only replaces it when the
- * guard is too. Several guards narrow to different types, so only a single one
- * is applied automatically.
+ * guard is too. Several guards narrow to different types, so only the sole
+ * guard, or the one named after the node type, is applied automatically.
  *
  * @param catalog - Known guards.
  * @param suggestion - Guards for the comparison.
  * @returns What to fix automatically and what to suggest.
  */
-function planGuardFix(catalog: NodeTypeCatalog, { guards, optional }: GuardSuggestion): GuardFixPlan {
+function planGuardFix(catalog: NodeTypeCatalog, { guards, nodeType, optional }: GuardSuggestion): GuardFixPlan {
 	const usable = guards.filter((guard) => !optional || catalog.isNullSafe(guard));
-	if (guards.length > 1) {
-		return { fixGuard: undefined, suggestedGuards: usable };
+	if (guards.length === 1) {
+		const [fixGuard] = usable;
+		return { fixGuard, suggestedGuards: [] };
 	}
 
-	const [fixGuard] = usable;
-	return { fixGuard, suggestedGuards: [] };
+	// `isIdentifier` is the guard for `Identifier`; the others are offered.
+	const exactGuard = usable.find((guard) => guard === `is${nodeType}`);
+	return { fixGuard: exactGuard, suggestedGuards: usable.filter((guard) => guard !== exactGuard) };
 }
 
 /**
@@ -128,7 +132,7 @@ function getGuardSuggestion(
 
 	const guards = catalog.getGuards(nodeType);
 	const [guard] = guards;
-	return guard === undefined ? undefined : { guard, guards, member, optional: isChainExpression(typeSide) };
+	return guard === undefined ? undefined : { guard, guards, member, nodeType, optional: isChainExpression(typeSide) };
 }
 
 export function createPreferNodeTypeConstantRule({
@@ -144,14 +148,21 @@ export function createPreferNodeTypeConstantRule({
 			const replacedByGuard = new Set<ESTree.StringLiteral>();
 			const found = new Array<ESTree.StringLiteral>();
 			const utilities = getUtilities();
+			const guardsByChain = new Map<ESTree.LogicalExpression, ReadonlyArray<FoundGuard>>();
 
-			function getText(node: ESTree.Node): string {
-				return sourceCode.getText(node);
+			function getChainGuards(top: ESTree.LogicalExpression): ReadonlyArray<FoundGuard> {
+				const cached = guardsByChain.get(top);
+				if (cached !== undefined) return cached;
+
+				const chainGuards = findSharedGuards(utilities, top, sourceCode);
+				guardsByChain.set(top, chainGuards);
+				return chainGuards;
 			}
 
 			function isCoveredBySharedGuard(node: ESTree.BinaryExpression): boolean {
 				const top = getChainTop(node);
-				return top !== undefined && findSharedGuard(utilities, top, getText) !== undefined;
+				if (top === undefined) return false;
+				return getChainGuards(top).some(({ range }) => range[0] <= node.range[0] && node.range[1] <= range[1]);
 			}
 
 			/** Records the inline node types a collector just put in `found`. */

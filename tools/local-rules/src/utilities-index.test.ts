@@ -62,6 +62,24 @@ describe("indexUtilities", () => {
 		});
 	});
 
+	it("knows the value of every exported string constant, node types included", () => {
+		expect.assertions(1);
+
+		const index = indexUtilities([{ source: UTILITIES_SOURCE, specifier: "@small-rules/example" }]);
+
+		expect({
+			IDENTIFIER: index.getConstantValue("IDENTIFIER"),
+			MUTABLE: index.getConstantValue("MUTABLE"),
+			PRIVATE: index.getConstantValue("PRIVATE"),
+			ROBLOX_TS: index.getConstantValue("ROBLOX_TS"),
+		}).toStrictEqual({
+			IDENTIFIER: "Identifier",
+			MUTABLE: undefined,
+			PRIVATE: undefined,
+			ROBLOX_TS: "roblox-ts",
+		});
+	});
+
 	it("indexes exported guards whose whole body is one logical chain", () => {
 		expect.assertions(1);
 

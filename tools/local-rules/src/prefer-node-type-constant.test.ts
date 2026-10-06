@@ -18,6 +18,8 @@ const catalog = createNodeTypeCatalog(
 		isBlockStatement: (node: ProbeNode): boolean => node.type === "BlockStatement",
 		isCallExpression: (node?: null | ProbeNode): boolean => node?.type === "CallExpression",
 		isIdentifierName: (node: ProbeNode): boolean => node.type === "Identifier",
+		isSelf: (node: ProbeNode): boolean => node.type === "ThisExpression",
+		isThisExpression: (node: ProbeNode): boolean => node.type === "ThisExpression",
 		RETURN_STATEMENT: "ReturnStatement",
 	}),
 );
@@ -51,7 +53,24 @@ describe("prefer-node-type-constant", () => {
 	ts.run("prefer-node-type-constant", rule, {
 		invalid: [
 			{
-				code: "if (value.type === IDENTIFIER && value.name === identifierName && isUsed(value)) {}",
+				code: 'if (value.type === "ThisExpression") {}',
+				output: prependImport("isThisExpression", "if (isThisExpression(value)) {}"),
+				errors: [
+					{
+						data: { guards: "isThisExpression, isSelf", replacement: "isThisExpression(value)" },
+						messageId: "useGuard",
+						suggestions: [
+							{
+								data: { replacement: "isSelf(value)" },
+								messageId: "useGuardSuggestion",
+								output: prependImport("isSelf", "if (isSelf(value)) {}"),
+							},
+						],
+					},
+				],
+			},
+			{
+				code: "if (value.type === IDENTIFIER && isUsed(value)) {}",
 				output: null,
 				errors: [
 					{
@@ -66,7 +85,7 @@ describe("prefer-node-type-constant", () => {
 								messageId: "useGuardSuggestion",
 								output: prependImport(
 									"isIdentifierName",
-									"if (isIdentifierName(value) && value.name === identifierName && isUsed(value)) {}",
+									"if (isIdentifierName(value) && isUsed(value)) {}",
 								),
 							},
 							{
@@ -74,7 +93,7 @@ describe("prefer-node-type-constant", () => {
 								messageId: "useGuardSuggestion",
 								output: prependImport(
 									"isBindingIdentifier",
-									"if (isBindingIdentifier(value) && value.name === identifierName && isUsed(value)) {}",
+									"if (isBindingIdentifier(value) && isUsed(value)) {}",
 								),
 							},
 						],
@@ -261,6 +280,7 @@ describe("prefer-node-type-constant", () => {
 			},
 		],
 		valid: [
+			"if (isUsed(value) && value.type === IDENTIFIER && value.name === identifierName) {}",
 			"if (value.type === IDENTIFIER && value.name === identifierName) {}",
 			'if (node.type === "TSInferType") {}',
 			"if (node.type === RETURN_STATEMENT) {}",

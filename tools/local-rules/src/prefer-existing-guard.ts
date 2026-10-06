@@ -9,7 +9,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 
 import { createImportingFix, noFix } from "./import-fixes.ts";
 import { loadRepositoryUtilities } from "./repository-utilities.ts";
-import { findSharedGuard } from "./shared-guard-search.ts";
+import { findSharedGuards } from "./shared-guard-search.ts";
 
 import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -45,18 +45,18 @@ export function createPreferExistingGuardRule(
 			}
 
 			/**
-			 * Reports the chain. The chain may evaluate an argument several
-			 * times and the guard only once, so a call among the arguments
-			 * turns the fix into a suggestion.
+			 * Reports the terms a guard replaces. They may evaluate an argument
+			 * several times and the guard only once, so a call among the
+			 * arguments turns the fix into a suggestion.
 			 *
 			 * @param node - Top of the chain.
-			 * @param found - The guard and what the chain passes to it.
+			 * @param found - The guard, what the terms pass to it, and their source.
 			 */
-			function reportGuard(node: ESTree.LogicalExpression, { guard, match }: FoundGuard): void {
+			function reportGuard(node: ESTree.LogicalExpression, { guard, match, range }: FoundGuard): void {
 				const argumentList = match.arguments.map(getText).join(", ");
 				const replacement = `${match.negated ? "!" : ""}${guard.name}(${argumentList})`;
 				const isDefiningModule = ownSpecifier === guard.specifier;
-				const fix = createImportingFix(sourceCode, node, replacement, guard, isDefiningModule);
+				const fix = createImportingFix(sourceCode, node, replacement, guard, isDefiningModule, range);
 				const isSafe = match.arguments.every(isSideEffectFree);
 				context.report({
 					data: { guard: guard.name, replacement, specifier: guard.specifier },
@@ -69,11 +69,9 @@ export function createPreferExistingGuardRule(
 
 			return {
 				LogicalExpression(node): void {
-					// Match whole chains: `a && b && c`, not the `a && b` in it.
+					// Search each chain once, from its top.
 					if (isLogicalExpression(node.parent) && node.parent.operator === node.operator) return;
-
-					const found = findSharedGuard(index, node, getText);
-					if (found !== undefined) reportGuard(node, found);
+					for (const found of findSharedGuards(index, node, sourceCode)) reportGuard(node, found);
 				},
 			} satisfies Visitor;
 		},

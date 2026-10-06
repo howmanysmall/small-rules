@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import { ts } from "@small-rules/rule-harness/rule-testers";
+import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 import preferSharedStringConstant, { createPreferSharedStringConstantRule } from "./prefer-shared-string-constant";
 import { indexUtilities } from "./utilities-index";
@@ -123,13 +123,74 @@ describe("prefer-shared-string-constant", () => {
 		],
 		valid: [
 			"if (options.environment === ROBLOX_TS) {}",
-			'const meta = { type: "standard" };',
 			'if (options.environment === "luau") {}',
-			'if (options.environment > "roblox-ts") {}',
 			"if (options.environment === `roblox-ts`) {}",
 			"switch (environment) { default: break; }",
 			"const holes = [, 1];",
+			'const environments = { "roblox-ts": 1, standard: 2 };',
+			'import { roblox } from "roblox-ts";',
+			'export * from "standard";',
+			'const loaded = import("standard");',
+			'type Environment = "roblox-ts" | "standard";',
+			'enum Environment { Standard = "standard" }',
+			'"standard";',
+			{ filename: "react-utilities.ts", code: 'export const ROBLOX_TS = "roblox-ts" as const;' },
+			{ code: 'const meta = { type: "standard" };', options: [{ ignoredProperties: ["type"] }] },
+			{ code: 'const meta = { "type": "standard" };', options: [{ ignoredProperties: ["type"] }] },
+			'class Environment { "standard" = 1; }',
 		],
+	});
+});
+
+describe("prefer-shared-string-constant in value positions", () => {
+	ts.run("prefer-shared-string-constant", rule, {
+		invalid: [
+			{
+				code: 'const options = { [kind]: "standard", 1: "roblox-ts" };',
+				options: [{ ignoredProperties: ["type"] }],
+				errors: [{ messageId: "useConstant" }, ROBLOX_TS_ERROR],
+			},
+			{
+				code: 'const lookup = { ["standard"]: 1 };',
+				errors: [{ messageId: "useConstant" }],
+			},
+			{
+				code: 'const environment = isStandard ? "standard" : "roblox-ts";',
+				output: [
+					'import { STANDARD } from "$oxc-utilities/react-utilities";',
+					'const environment = isStandard ? STANDARD : "roblox-ts";',
+				].join("\n"),
+				errors: [
+					{
+						data: { constant: "STANDARD", specifier: SPECIFIER, value: "standard" },
+						messageId: "useConstant",
+					},
+					ROBLOX_TS_ERROR,
+				],
+			},
+			{
+				code: 'const options = { environment: "roblox-ts", type: "standard" };',
+				errors: [ROBLOX_TS_ERROR, { messageId: "useConstant" }],
+			},
+			{
+				code: 'const options = { environment: "roblox-ts", type: "standard" };',
+				options: [{ ignoredProperties: ["type"] }],
+				errors: [ROBLOX_TS_ERROR],
+			},
+			{
+				code: 'function getEnvironment(environment = "roblox-ts") { return useEnvironment("standard"); }',
+				errors: [ROBLOX_TS_ERROR, { messageId: "useConstant" }],
+			},
+			{
+				code: 'const MODE = "roblox-ts";',
+				errors: [ROBLOX_TS_ERROR],
+			},
+			{
+				code: 'if (options.environment > "roblox-ts") {}',
+				errors: [ROBLOX_TS_ERROR],
+			},
+		],
+		valid: [],
 	});
 });
 
@@ -142,5 +203,12 @@ describe("prefer-shared-string-constant with the repository utilities", () => {
 			},
 		],
 		valid: ["if (options.environment === ROBLOX_TS) {}"],
+	});
+});
+
+describe("prefer-shared-string-constant in JSX", () => {
+	tsx.run("prefer-shared-string-constant", rule, {
+		invalid: [],
+		valid: ['const element = <Frame environment="standard" />;'],
 	});
 });

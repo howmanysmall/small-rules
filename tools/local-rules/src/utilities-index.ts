@@ -37,6 +37,8 @@ export interface SharedGuard extends SharedFunction {
 
 export interface UtilitiesIndex {
 	readonly getConstants: (value: string) => ReadonlyArray<SharedConstant>;
+	/** The value of an exported string constant, node type constants included. */
+	readonly getConstantValue: (name: string) => string | undefined;
 	readonly getFunction: (name: string) => SharedFunction | undefined;
 	readonly getGuards: () => ReadonlyArray<SharedGuard>;
 	/**
@@ -81,7 +83,7 @@ function stripTypeAssertions(expression: ESTree.Expression): ESTree.Expression {
 function collectConstants(
 	{ declarations, kind }: ESTree.VariableDeclaration,
 	specifier: string,
-	constants: Map<string, Array<SharedConstant>>,
+	{ constants, valuesByName }: IndexCollections,
 ): void {
 	if (kind !== "const") return;
 
@@ -89,7 +91,11 @@ function collectConstants(
 		if (init === null || !isIdentifier(id)) continue;
 
 		const value = stripTypeAssertions(init);
-		if (!isStringLiteral(value) || isNodeTypeName(value.value)) continue;
+		if (!isStringLiteral(value)) continue;
+
+		valuesByName.set(id.name, value.value);
+		// Node type constants belong to `prefer-node-type-constant`.
+		if (isNodeTypeName(value.value)) continue;
 
 		const constant = { name: id.name, specifier };
 		const existing = constants.get(value.value);
@@ -131,15 +137,16 @@ interface IndexCollections {
 	readonly constants: Map<string, Array<SharedConstant>>;
 	readonly functions: Map<string, SharedFunction>;
 	readonly guards: Array<SharedGuard>;
+	readonly valuesByName: Map<string, string>;
 }
 
 function indexDeclaration(
 	declaration: ESTree.Declaration | null,
 	specifier: string,
-	{ constants, functions, guards }: IndexCollections,
+	collections: IndexCollections,
 ): void {
 	if (isVariableDeclaration(declaration)) {
-		collectConstants(declaration, specifier, constants);
+		collectConstants(declaration, specifier, collections);
 		return;
 	}
 	if (!isFunctionDeclarationRaw(declaration)) return;
@@ -147,12 +154,17 @@ function indexDeclaration(
 	const sharedFunction = getSharedFunction(declaration, specifier);
 	if (sharedFunction === undefined) return;
 
-	functions.set(sharedFunction.name, sharedFunction);
-	if (isSharedGuard(sharedFunction)) guards.push(sharedFunction);
+	collections.functions.set(sharedFunction.name, sharedFunction);
+	if (isSharedGuard(sharedFunction)) collections.guards.push(sharedFunction);
 }
 
 export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesIndex {
-	const collections: IndexCollections = { constants: new Map(), functions: new Map(), guards: [] };
+	const collections: IndexCollections = {
+		constants: new Map(),
+		functions: new Map(),
+		guards: [],
+		valuesByName: new Map(),
+	};
 
 	const specifiersByFile = new Map<string, string>();
 	for (const { filename, source, specifier } of modules) {
@@ -165,9 +177,10 @@ export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesInd
 		}
 	}
 
-	const { constants, functions, guards } = collections;
+	const { constants, functions, guards, valuesByName } = collections;
 	return {
 		getConstants: (value) => constants.get(value) ?? NO_CONSTANTS,
+		getConstantValue: (name) => valuesByName.get(name),
 		getFunction: (name) => functions.get(name),
 		getGuards: () => guards,
 		getSpecifierOf: (filename) => specifiersByFile.get(nodePath.resolve(filename)),

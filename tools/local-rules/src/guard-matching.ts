@@ -1,4 +1,5 @@
 import {
+	isBinaryExpression,
 	isCallExpression,
 	isChainExpression,
 	isIdentifier,
@@ -6,6 +7,7 @@ import {
 	isMemberExpression,
 	isNode,
 	isSpreadElement,
+	isStringLiteral,
 	isUnaryExpression,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
@@ -25,12 +27,20 @@ type GetText = (node: ESTree.Node) => string;
 type Leaf = bigint | boolean | number | string | symbol | undefined;
 type FieldValue = ESTree.Node | Leaf | ReadonlyArray<ESTree.Node | undefined>;
 
-type GetFunction = (name: string) => SharedFunction | undefined;
-
-interface MatchState {
-	readonly bindings: Map<string, ESTree.Node>;
-	readonly getFunction: GetFunction;
+export interface GuardMatchContext {
+	/**
+	 * The value of a shared string constant, so `IDENTIFIER` matches
+	 * `"Identifier"`.
+	 */
+	readonly getConstantValue: (name: string) => string | undefined;
+	/** Shared single-return functions, to see through their calls. */
+	readonly getFunction: (name: string) => SharedFunction | undefined;
+	/** Source text of a node, to compare repeated arguments. */
 	readonly getText: GetText;
+}
+
+interface MatchState extends GuardMatchContext {
+	readonly bindings: Map<string, ESTree.Node>;
 	/** Whether the candidate is an inlined body, not the code. */
 	readonly inlined: boolean;
 	readonly parameters: ReadonlySet<string>;
@@ -40,15 +50,15 @@ interface MatchState {
 
 const NO_SUBSTITUTIONS: ReadonlyMap<string, ESTree.Node> = new Map();
 
-interface ChainOperators {
-	readonly candidate: string;
-	readonly negated: boolean;
-	readonly pattern: string;
-}
-
 const OPPOSITE_OPERATORS = new Map<string, string>([
 	["&&", "||"],
 	["||", "&&"],
+]);
+
+/** The comparison a negated comparison denies: `===` for `!==`. */
+const POSITIVE_EQUALITY = new Map<string, string>([
+	["!=", "=="],
+	["!==", "==="],
 ]);
 
 /** Position and parser bookkeeping rather than syntax. */
@@ -203,10 +213,24 @@ function matchMembers(
 	);
 }
 
+/**
+ * A string a node stands for: a string literal's value, or a shared constant's.
+ *
+ * @param node - Node to read.
+ * @param state - Shared constants.
+ * @returns The string, if the node is one.
+ */
+function getStringValue(node: ESTree.Node, state: MatchState): string | undefined {
+	if (isStringLiteral(node)) return node.value;
+	return isIdentifier(node) ? state.getConstantValue(node.name) : undefined;
+}
+
 function matchNodes(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchState): boolean {
 	if (isGuardParameter(pattern, state)) return bindParameter(pattern.name, candidate, state);
 
 	const aligned = alignNodes(pattern, candidate, state);
+	const patternValue = getStringValue(aligned.pattern, aligned.state);
+	if (patternValue !== undefined && patternValue === getStringValue(aligned.candidate, aligned.state)) return true;
 	if (aligned.pattern.type !== aligned.candidate.type) return false;
 	if (isMemberExpression(aligned.pattern) && !aligned.pattern.computed && isMemberExpression(aligned.candidate)) {
 		return matchMembers(aligned.pattern, aligned.candidate, aligned.state);
@@ -223,27 +247,49 @@ function matchFields(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchS
 }
 
 /**
- * One term of the chain; when negated, the code's term is `!` of the guard's.
+ * A term the code asserts as written: the guard's term itself, or a call to a
+ * shared function whose body is that term.
  *
  * @param pattern - Term of the guard's body.
- * @param candidate - Term of the code's chain.
- * @param negated - Whether the code checks the opposite.
+ * @param term - Term of the code's chain.
  * @param state - Bindings so far.
  * @returns Whether the terms match.
  */
+function matchPositiveTerm(pattern: ESTree.Expression, term: ESTree.Expression, state: MatchState): boolean {
+	return attempt(state, () => matchNodes(pattern, term, state)) || matchInlined(pattern, term, state);
+}
+
+/**
+ * A term the code asserts the opposite of: `!term`, or `a !== b` for the
+ * guard's `a === b`.
+ *
+ * @param pattern - Term of the guard's body.
+ * @param candidate - Term of the code's chain.
+ * @param state - Bindings so far.
+ * @returns Whether the code's term negates the guard's.
+ */
+function matchNegatedTerm(pattern: ESTree.Expression, candidate: ESTree.Expression, state: MatchState): boolean {
+	if (isUnaryExpression(candidate) && candidate.operator === "!") {
+		return matchPositiveTerm(pattern, candidate.argument, state);
+	}
+	return (
+		isBinaryExpression(pattern) &&
+		isBinaryExpression(candidate) &&
+		POSITIVE_EQUALITY.get(candidate.operator) === pattern.operator &&
+		attempt(
+			state,
+			() => matchNodes(pattern.left, candidate.left, state) && matchNodes(pattern.right, candidate.right, state),
+		)
+	);
+}
+
 function matchTerm(
 	pattern: ESTree.Expression,
 	candidate: ESTree.Expression,
 	negated: boolean,
 	state: MatchState,
 ): boolean {
-	const term = negated ? getNegatedOperand(candidate) : candidate;
-	if (term === undefined) return false;
-	return attempt(state, () => matchNodes(pattern, term, state)) || matchInlined(pattern, term, state);
-}
-
-function getNegatedOperand(candidate: ESTree.Expression): ESTree.Expression | undefined {
-	return isUnaryExpression(candidate) && candidate.operator === "!" ? candidate.argument : undefined;
+	return negated ? matchNegatedTerm(pattern, candidate, state) : matchPositiveTerm(pattern, candidate, state);
 }
 
 /**
@@ -287,30 +333,38 @@ function matchInlined(pattern: ESTree.Expression, term: ESTree.Expression, state
 	return matchNodes(pattern, inlined.body, { ...state, inlined: true, substitutions });
 }
 
-function matchChain(
-	pattern: ESTree.Expression,
-	candidate: ESTree.Expression,
-	operators: ChainOperators,
-	state: MatchState,
-): boolean {
-	if (isLogicalExpression(pattern) && pattern.operator === operators.pattern) {
-		return (
-			isLogicalExpression(candidate) &&
-			candidate.operator === operators.candidate &&
-			matchChain(pattern.left, candidate.left, operators, state) &&
-			matchChain(pattern.right, candidate.right, operators, state)
-		);
-	}
-	return matchTerm(pattern, candidate, operators.negated, state);
-}
-
-function flattenChain(node: ESTree.Expression, operator: string, terms: Array<ESTree.Expression>): void {
+/**
+ * The terms of a logical chain: `a`, `b` and `c` for `a && b && c`.
+ *
+ * @param node - Expression that may be a chain.
+ * @param operator - Operator that joins the terms.
+ * @param terms - Receives the terms in order.
+ */
+export function flattenChain(node: ESTree.Expression, operator: string, terms: Array<ESTree.Expression>): void {
 	if (isLogicalExpression(node) && node.operator === operator) {
 		flattenChain(node.left, operator, terms);
 		flattenChain(node.right, operator, terms);
 		return;
 	}
 	terms.push(node);
+}
+
+const guardTermsCache = new WeakMap<SharedGuard, ReadonlyArray<ESTree.Expression>>();
+
+/**
+ * The terms of a guard's body, flattened once per guard.
+ *
+ * @param guard - Guard whose body is a logical chain.
+ * @returns The body's terms in order.
+ */
+export function getGuardTerms(guard: SharedGuard): ReadonlyArray<ESTree.Expression> {
+	const cached = guardTermsCache.get(guard);
+	if (cached !== undefined) return cached;
+
+	const terms = new Array<ESTree.Expression>();
+	flattenChain(guard.body, guard.body.operator, terms);
+	guardTermsCache.set(guard, terms);
+	return terms;
 }
 
 /**
@@ -327,6 +381,18 @@ function isMovableTerm(term: ESTree.Expression, parameters: ReadonlySet<string>)
 		isCallExpression(term) &&
 		term.arguments.every((argument) => isIdentifier(argument) && parameters.has(argument.name))
 	);
+}
+
+function matchTermsInOrder(
+	patterns: ReadonlyArray<ESTree.Expression>,
+	candidates: ReadonlyArray<ESTree.Expression>,
+	negated: boolean,
+	state: MatchState,
+): boolean {
+	return patterns.every((pattern, index) => {
+		const candidate = candidates.at(index);
+		return candidate !== undefined && matchTerm(pattern, candidate, negated, state);
+	});
 }
 
 /**
@@ -361,55 +427,39 @@ function matchTermsInAnyOrder(
 	return false;
 }
 
-function matchBody(
-	guard: SharedGuard,
-	candidate: ESTree.LogicalExpression,
-	operators: ChainOperators,
-	state: MatchState,
-): boolean {
-	const patterns = new Array<ESTree.Expression>();
-	flattenChain(guard.body, operators.pattern, patterns);
-	if (patterns.some((term) => !isMovableTerm(term, state.parameters))) {
-		return matchChain(guard.body, candidate, operators, state);
-	}
-
-	const candidates = new Array<ESTree.Expression>();
-	flattenChain(candidate, operators.candidate, candidates);
-	return (
-		patterns.length === candidates.length && matchTermsInAnyOrder(patterns, candidates, operators.negated, state)
-	);
-}
-
 /**
- * Whether a logical chain repeats a guard's body, either as written or as its
- * negation by De Morgan's law.
+ * Whether consecutive terms of a chain repeat a guard's body, either as
+ * written or as its negation by De Morgan's law.
  *
  * @param guard - Guard whose body is a logical chain.
- * @param candidate - Top of a logical chain in the code.
- * @param getText - Source text of a node, to compare repeated arguments.
- * @param getFunction - Shared functions by name, to see through their calls.
- * @returns The guard's arguments when the chain repeats it.
+ * @param candidates - As many consecutive terms of the code's chain as the guard has.
+ * @param operator - The code chain's operator.
+ * @param context - Lookups into the code and the shared utilities.
+ * @returns The guard's arguments when the terms repeat it.
  */
 export function matchGuard(
 	guard: SharedGuard,
-	candidate: ESTree.LogicalExpression,
-	getText: GetText,
-	getFunction: GetFunction,
+	candidates: ReadonlyArray<ESTree.Expression>,
+	operator: string,
+	context: GuardMatchContext,
 ): GuardMatch | undefined {
 	const patternOperator = guard.body.operator;
-	const negated = candidate.operator !== patternOperator;
-	if (negated && OPPOSITE_OPERATORS.get(patternOperator) !== candidate.operator) return undefined;
+	const negated = operator !== patternOperator;
+	if (negated && OPPOSITE_OPERATORS.get(patternOperator) !== operator) return undefined;
 
 	const state: MatchState = {
+		...context,
 		bindings: new Map(),
-		getFunction,
-		getText,
 		inlined: false,
 		parameters: new Set(guard.parameters),
 		substitutions: NO_SUBSTITUTIONS,
 	};
-	const operators: ChainOperators = { candidate: candidate.operator, negated, pattern: patternOperator };
-	if (!matchBody(guard, candidate, operators, state)) return undefined;
+	const patterns = getGuardTerms(guard);
+	const isMovable = patterns.every((term) => isMovableTerm(term, state.parameters));
+	const matched = isMovable
+		? matchTermsInAnyOrder(patterns, candidates, negated, state)
+		: matchTermsInOrder(patterns, candidates, negated, state);
+	if (!matched) return undefined;
 
 	const matchedArguments = new Array<ESTree.Node>();
 	for (const parameter of guard.parameters) {
