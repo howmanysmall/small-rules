@@ -294,8 +294,8 @@ export function isBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpr
 	return node.type === BINARY_EXPRESSION;
 }
 
-export function isLogicalExpression(node: ESTree.Node): node is ESTree.LogicalExpression {
-	return node.type === LOGICAL_EXPRESSION;
+export function isLogicalExpression(node?: ESTree.Node | null): node is ESTree.LogicalExpression {
+	return node?.type === LOGICAL_EXPRESSION;
 }
 
 export function isConditionalExpression(node: ESTree.Node): node is ESTree.ConditionalExpression {
