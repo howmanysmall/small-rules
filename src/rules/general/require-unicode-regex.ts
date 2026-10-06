@@ -1,5 +1,4 @@
-import { isAnyLiteral, isIdentifier, SPREAD_ELEMENT } from "@small-rules/oxlint-utilities";
-import { Predicate } from "effect";
+import { isIdentifier, isNotSpread, isStringLiteral } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -17,12 +16,8 @@ function isIdentifierWithName(node: ESTree.Expression, name: string): node is ES
 }
 
 function getFlagsString(node: ESTree.Node): string | undefined {
-	if (!isAnyLiteral(node) || !Predicate.isString(node.value)) return undefined;
+	if (!isStringLiteral(node)) return undefined;
 	return node.value;
-}
-
-function isNotSpread(node: ESTree.Argument): node is ESTree.Expression {
-	return node.type !== SPREAD_ELEMENT;
 }
 
 const requireUnicodeRegex = createRule("require-unicode-regex", "general", {

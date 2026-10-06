@@ -179,8 +179,7 @@ const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 				if (firstArgument === undefined || isSpreadElement(firstArgument)) return;
 
 				const actionObject = stripExpressionWrappers(firstArgument);
-				if (!isObjectExpression(actionObject)) return;
-				if (!shouldReportActionObject(sourceCode, actionObject)) return;
+				if (!isObjectExpression(actionObject) || !shouldReportActionObject(sourceCode, actionObject)) return;
 
 				const program = getProgram(actionObject);
 				/* v8 ignore next -- action objects are visited only after parser parent links are established. @preserve */

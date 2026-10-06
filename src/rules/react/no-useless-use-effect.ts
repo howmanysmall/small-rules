@@ -69,7 +69,7 @@ import {
 } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 
-import type { NodeType,CallbackFunction } from "@small-rules/oxlint-utilities";
+import type { CallbackFunction, NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";

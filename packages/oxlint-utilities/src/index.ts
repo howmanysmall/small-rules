@@ -286,6 +286,9 @@ export function isUnaryExpression(node?: ESTree.Node | null): node is ESTree.Una
 export function isSpreadElement(node?: ESTree.Node | null): node is ESTree.SpreadElement {
 	return node?.type === SPREAD_ELEMENT;
 }
+export function isNotSpread(node: ESTree.Argument): node is ESTree.Expression {
+	return node.type !== SPREAD_ELEMENT;
+}
 
 export function isBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpression {
 	return node.type === BINARY_EXPRESSION;
