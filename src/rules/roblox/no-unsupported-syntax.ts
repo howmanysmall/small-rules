@@ -7,7 +7,7 @@
 // regex-literal detection moved from token inspection to the `regex` literal
 // property.
 
-import { isIdentifier } from "@small-rules/oxlint-utilities";
+import { isIdentifier, isRestElement } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -118,7 +118,7 @@ function reportRestElements(
 	members: ReadonlyArray<ESTree.Node | null>,
 ): void {
 	for (const member of members) {
-		if (member?.type !== "RestElement") continue;
+		if (!isRestElement(member)) continue;
 		context.report({ messageId: "spreadDestructuring", node: member });
 	}
 }

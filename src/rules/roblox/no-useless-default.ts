@@ -270,6 +270,7 @@ function containsIdentifierReference(
 	if (!isIdentifierSearchObject(value) || visitedValues.has(value)) return false;
 
 	visitedValues.add(value);
+	// oxlint-disable-next-line local/prefer-existing-guard -- cannot do this here unfortunately. Types make it complex.
 	if (value.type === IDENTIFIER && value.name === identifierName) return true;
 
 	for (const nestedValue of Object.values(value)) {
@@ -339,8 +340,7 @@ function extractNumberValue(node: ESTree.Expression): number | undefined {
 	if (isNumericLiteral(node)) return node.value;
 	if (isMathHuge(node)) return Number.POSITIVE_INFINITY;
 
-	if (!isUnaryExpression(node)) return undefined;
-	if (node.operator !== "+" && node.operator !== "-") return undefined;
+	if (!isUnaryExpression(node) || (node.operator !== "+" && node.operator !== "-")) return undefined;
 
 	const argumentValue = extractNumberValue(node.argument);
 	if (argumentValue === undefined) return undefined;

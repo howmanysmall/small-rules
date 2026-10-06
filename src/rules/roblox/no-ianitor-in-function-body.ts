@@ -1,4 +1,4 @@
-import { isCallExpression, isIdentifier, isMemberExpression } from "@small-rules/oxlint-utilities";
+import { isCallExpression, isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -11,7 +11,7 @@ function isIanitorMethodCall({ callee }: ESTree.CallExpression): boolean {
 	if (!isMemberExpression(innerCallee)) return false;
 
 	const { object } = innerCallee;
-	return isIdentifier(object) && object.name === "Ianitor";
+	return isIdentifierNamed(object, "Ianitor");
 }
 
 const noIanitorInFunctionBody = createRule("no-ianitor-in-function-body", "roblox", {

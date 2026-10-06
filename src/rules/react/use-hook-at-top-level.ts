@@ -2,6 +2,7 @@ import {
 	isAnyFunction,
 	isFunctionDeclaration,
 	isIdentifier,
+	isIdentifierNamed,
 	isImportSpecifier,
 	isMemberExpression,
 	isMethodDefinition,
@@ -101,7 +102,7 @@ function isInFinallyBlock(node: ESTree.Node): boolean {
 
 function isRecursiveCall(node: ESTree.CallExpression, functionName?: string): boolean {
 	if (functionName === undefined) return false;
-	return isIdentifier(node.callee) && node.callee.name === functionName;
+	return isIdentifierNamed(node.callee, functionName);
 }
 
 function makeContext(overrides: Partial<ControlFlowContext>, depth: number): ControlFlowContext {
