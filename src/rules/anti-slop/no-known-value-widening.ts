@@ -30,6 +30,7 @@ import {
 	isTsNonNullExpression,
 	isTsSatisfiesExpression,
 	isTsTypeAssertion,
+	isTypeAssertionExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
@@ -94,7 +95,7 @@ function hasStableInitializer(
 }
 
 function getAssertionEvidence(expression: ESTree.Expression, environment: TypeEnvironment): boolean | undefined {
-	return isTsAsExpression(expression) || isTsTypeAssertion(expression)
+	return isTypeAssertionExpression(expression)
 		? hasInformativeType(expression.typeAnnotation, environment)
 		: undefined;
 }
@@ -221,7 +222,7 @@ function hasParentAssertion(node: ESTree.Node): boolean {
 		current = parent;
 		({ parent } = current);
 	}
-	return parent !== null && (isTsAsExpression(parent) || isTsTypeAssertion(parent)) && parent.expression === current;
+	return parent !== null && isTypeAssertionExpression(parent) && parent.expression === current;
 }
 
 function unwrapExpressionParentheses(expression: ESTree.Expression): ESTree.Expression {

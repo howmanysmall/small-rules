@@ -6,6 +6,7 @@ import {
 	isMemberExpression,
 	isNumericLiteral,
 	isReturnStatement,
+	isSpreadElement,
 	isUnaryExpression,
 } from "@small-rules/oxlint-utilities";
 
@@ -60,11 +61,7 @@ const noDiscardedRejection = createRule("no-discarded-rejection", "general", {
 				}
 				if (!isNativePromiseExpression(sourceCode, callee.object)) return;
 				const [handler] = node.arguments;
-				if (
-					handler === undefined ||
-					handler.type === "SpreadElement" ||
-					!isDiscardingHandler(sourceCode, handler)
-				) {
+				if (handler === undefined || isSpreadElement(handler) || !isDiscardingHandler(sourceCode, handler)) {
 					return;
 				}
 				context.report({ messageId: "noDiscardedRejection", node: handler });
