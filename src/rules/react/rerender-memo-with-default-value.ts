@@ -2,9 +2,9 @@ import {
 	isArrayExpression,
 	isAssignmentPattern,
 	isCallbackFunction,
+	isEmptyObjectExpression,
 	isFunctionDeclaration,
 	isNode,
-	isObjectExpression,
 	isObjectPattern,
 	isProperty,
 	isVariableDeclarator,
@@ -20,7 +20,7 @@ type Context = InferContextFromRule<typeof rerenderMemoWithDefaultValue>;
 type ObjectPatternProperty = ESTree.ObjectPattern["properties"][number];
 
 function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): void {
-	if (isObjectExpression(defaultValue) && defaultValue.properties.length === 0) {
+	if (isEmptyObjectExpression(defaultValue)) {
 		context.report({
 			messageId: "emptyObjectDefault",
 			node: defaultValue,
