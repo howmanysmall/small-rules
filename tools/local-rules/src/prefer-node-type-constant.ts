@@ -1,6 +1,7 @@
 import nodePath from "node:path";
 import { defineRule } from "oxlint-plugin-utilities";
 
+import { getEnclosingFunctionName } from "./enclosing-function.ts";
 import {
 	collectArrayNodeTypes,
 	collectCaseNodeTypes,
@@ -25,7 +26,7 @@ export interface PreferNodeTypeConstantDependencies {
 	readonly countUsage: CountUsage;
 }
 
-const { isCallbackFunction, isFunctionDeclarationRaw, isIdentifier } = oxlintUtilities;
+const { isIdentifier } = oxlintUtilities;
 const WORD_BOUNDARY = /(?<=[a-z\d])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/gv;
 
 function toConstantName(nodeType: string): string {
@@ -36,14 +37,6 @@ interface GuardSuggestion {
 	readonly guard: string;
 	readonly guards: ReadonlyArray<string>;
 	readonly object: ESTree.Node;
-}
-
-function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
-	for (let current = node.parent; current !== null; current = current.parent) {
-		if (isFunctionDeclarationRaw(current)) return current.id?.name;
-		if (isCallbackFunction(current)) return undefined;
-	}
-	return undefined;
 }
 
 /**

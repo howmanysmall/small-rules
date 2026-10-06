@@ -572,7 +572,11 @@ export async function getOxlintAsync({
 			files: [`src/${GLOB_SRC}`],
 			// Resolved here: this package depends on it, the root does not.
 			jsPlugins: [{ name: "local", specifier: fileURLToPath(import.meta.resolve("@small-rules/local-rules")) }],
-			rules: { "local/prefer-node-type-constant": "error" },
+			rules: {
+				"local/prefer-existing-guard": "error",
+				"local/prefer-node-type-constant": "error",
+				"local/prefer-shared-string-constant": "error",
+			},
 		},
 		{
 			name: "small-rules/disable-stupid-rule",

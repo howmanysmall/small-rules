@@ -1,13 +1,13 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import nodePath from "node:path";
 import { ARRAY_EXPRESSION, BINARY_EXPRESSION, SWITCH_STATEMENT } from "@small-rules/oxlint-utilities";
 import { walk } from "yuku-ast";
 import { langFromPath, parse } from "yuku-parser";
 
 import { collectArrayNodeTypes, collectCaseNodeTypes, collectComparedNodeTypes } from "./inline-node-types.ts";
+import { isOfType, listBundledSources } from "./source-files.ts";
 
 import type { ESTree } from "oxlint-plugin-utilities";
-import type { Node as YukuNode } from "yuku-parser";
 
 /**
  * How many times a node type string is inlined across the bundle.
@@ -33,25 +33,6 @@ interface ProjectScan {
 	readonly totals: ReadonlyMap<string, number>;
 }
 
-// Declaration files and tests never reach the bundle.
-const BUNDLED_SOURCE = /(?<!\.d|\.test)\.tsx?$/v;
-
-/**
- * Yuku and Oxlint share the ESTree shape, so a yuku node of a given type is
- * also the Oxlint node of that type.
- *
- * @template TType - Node type to match.
- * @param node - Yuku node from the walk.
- * @param type - Node type to match.
- * @returns Whether `node` has that type.
- */
-function isOfType<TType extends ESTree.Node["type"]>(
-	node: YukuNode,
-	type: TType,
-): node is Extract<ESTree.Node, { type: TType }> & YukuNode {
-	return node.type === type;
-}
-
 export function countInlineNodeTypes(source: string, filename: string): Map<string, number> {
 	const { program } = parse(source, { lang: langFromPath(filename), sourceType: "module" });
 	const literals = new Array<ESTree.StringLiteral>();
@@ -73,10 +54,7 @@ function scanProject(directories: ReadonlyArray<string>, scannedAt: number): Pro
 	const totals = new Map<string, number>();
 
 	for (const directory of directories) {
-		const relativePaths = readdirSync(directory, { encoding: "utf8", recursive: true });
-		for (const relativePath of relativePaths) {
-			if (!BUNDLED_SOURCE.test(relativePath)) continue;
-
+		for (const relativePath of listBundledSources(directory)) {
 			const filePath = nodePath.resolve(directory, relativePath);
 			const counts = countInlineNodeTypes(readFileSync(filePath, "utf8"), filePath);
 			countsByFile.set(filePath, counts);
