@@ -1,6 +1,7 @@
 import { isStringLiteral } from "@small-rules/oxlint-utilities";
 import { defineRule } from "oxlint-plugin-utilities";
 
+import { createImportingFix } from "./import-fixes.ts";
 import { isEqualityOperator } from "./inline-node-types.ts";
 import { loadRepositoryUtilities } from "./repository-utilities.ts";
 
@@ -14,6 +15,8 @@ export function createPreferSharedStringConstantRule(
 	return defineRule({
 		create(context): Visitor {
 			const index = getIndex();
+			const { sourceCode } = context;
+			const ownSpecifier = index.getSpecifierOf(context.filename);
 
 			function check(node: ESTree.Node | null): void {
 				if (!isStringLiteral(node)) return;
@@ -23,6 +26,13 @@ export function createPreferSharedStringConstantRule(
 
 				context.report({
 					data: { constant: constant.name, specifier: constant.specifier, value: node.value },
+					fix: createImportingFix(
+						sourceCode,
+						node,
+						constant.name,
+						constant,
+						ownSpecifier === constant.specifier,
+					),
 					messageId: "useConstant",
 					node,
 				});
@@ -47,6 +57,7 @@ export function createPreferSharedStringConstantRule(
 				description:
 					"Prefer the string constants exported by shared utilities over repeating their values inline, so the bundle stores each string once",
 			},
+			fixable: "code",
 			messages: {
 				useConstant: 'Use `{{constant}}` from `{{specifier}}` instead of the inline "{{value}}" string.',
 			},

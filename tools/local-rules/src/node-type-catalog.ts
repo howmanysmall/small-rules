@@ -7,13 +7,17 @@ export interface NodeTypeCatalog {
 	readonly getGuards: (nodeType: string) => ReadonlyArray<string>;
 	readonly getNodeTypeOfConstant: (name: string) => string | undefined;
 	readonly isGuardName: (name: string) => boolean;
+	/**
+	 * Whether the guard answers `false` for a missing node instead of throwing.
+	 */
+	readonly isNullSafe: (name: string) => boolean;
 }
 
 interface ProbeNode {
 	readonly type: string;
 }
 
-type ProbedFunction = (node: ProbeNode) => boolean;
+type ProbedFunction = (node?: ProbeNode) => boolean;
 
 /** A `[name, value]` export pair, as `Object.entries` yields it. */
 export type ModuleExport = readonly [name: string, value: unknown];
@@ -81,6 +85,31 @@ function compareGuards(nodeType: string): (left: string, right: string) => numbe
 	};
 }
 
+interface GuardRegistry {
+	readonly guardNames: Set<string>;
+	readonly guardsByNodeType: Map<string, Array<string>>;
+	readonly nullSafeGuards: Set<string>;
+}
+
+function registerGuard(name: string, guard: ProbedFunction, registry: GuardRegistry): void {
+	const nodeType = getGuardedNodeType(guard);
+	if (nodeType === undefined) return;
+
+	registry.guardNames.add(name);
+	if (acceptsMissingNode(guard)) registry.nullSafeGuards.add(name);
+	const guards = registry.guardsByNodeType.get(nodeType);
+	if (guards === undefined) registry.guardsByNodeType.set(nodeType, [name]);
+	else guards.push(name);
+}
+
+function acceptsMissingNode(guard: ProbedFunction): boolean {
+	try {
+		return !guard(undefined);
+	} catch {
+		return false;
+	}
+}
+
 /**
  * Reads the node type constants and type guards a utilities module exports.
  *
@@ -90,8 +119,8 @@ function compareGuards(nodeType: string): (left: string, right: string) => numbe
 export function createNodeTypeCatalog(moduleExports: Iterable<ModuleExport>): NodeTypeCatalog {
 	const constantByNodeType = new Map<string, string>();
 	const nodeTypeByConstant = new Map<string, string>();
-	const guardsByNodeType = new Map<string, Array<string>>();
-	const guardNames = new Set<string>();
+	const registry: GuardRegistry = { guardNames: new Set(), guardsByNodeType: new Map(), nullSafeGuards: new Set() };
+	const { guardNames, guardsByNodeType, nullSafeGuards } = registry;
 
 	for (const [name, value] of moduleExports) {
 		if (Predicate.isString(value)) {
@@ -101,15 +130,7 @@ export function createNodeTypeCatalog(moduleExports: Iterable<ModuleExport>): No
 			continue;
 		}
 
-		if (!isProbedFunction(value) || !GUARD_NAME.test(name)) continue;
-
-		const nodeType = getGuardedNodeType(value);
-		if (nodeType === undefined) continue;
-
-		guardNames.add(name);
-		const guards = guardsByNodeType.get(nodeType);
-		if (guards === undefined) guardsByNodeType.set(nodeType, [name]);
-		else guards.push(name);
+		if (isProbedFunction(value) && GUARD_NAME.test(name)) registerGuard(name, value, registry);
 	}
 
 	for (const [nodeType, guards] of guardsByNodeType) guards.sort(compareGuards(nodeType));
@@ -119,5 +140,6 @@ export function createNodeTypeCatalog(moduleExports: Iterable<ModuleExport>): No
 		getGuards: (nodeType) => guardsByNodeType.get(nodeType) ?? NO_GUARDS,
 		getNodeTypeOfConstant: (name) => nodeTypeByConstant.get(name),
 		isGuardName: (name) => guardNames.has(name),
+		isNullSafe: (name) => nullSafeGuards.has(name),
 	};
 }

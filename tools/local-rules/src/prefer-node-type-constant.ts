@@ -2,12 +2,13 @@ import nodePath from "node:path";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { getEnclosingFunctionName } from "./enclosing-function.ts";
+import { createImportingFix, noFix } from "./import-fixes.ts";
 import {
 	collectArrayNodeTypes,
 	collectCaseNodeTypes,
 	collectComparedNodeTypes,
 	getNodeTypeLiteral,
-	getTypeReadObject,
+	getTypeReadMember,
 	isEqualityOperator,
 } from "./inline-node-types.ts";
 import { createNodeTypeCatalog } from "./node-type-catalog.ts";
@@ -16,13 +17,14 @@ import { createProjectUsageCounter } from "./project-usage.ts";
 import { loadRepositoryUtilities, REPOSITORY_ROOT } from "./repository-utilities.ts";
 import { findSharedGuard, getChainTop } from "./shared-guard-search.ts";
 
-import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { CreateRule, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
+import type { ImportingFix } from "./import-fixes.ts";
 import type { NodeTypeCatalog } from "./node-type-catalog.ts";
 import type { CountUsage } from "./project-usage.ts";
 import type { UtilitiesIndex } from "./utilities-index.ts";
 
-type MessageIds = "addConstant" | "useConstant" | "useGuard";
+type MessageIds = "addConstant" | "useConstant" | "useGuard" | "useGuardSuggestion";
 
 export interface PreferNodeTypeConstantDependencies {
 	readonly catalog: NodeTypeCatalog;
@@ -31,8 +33,9 @@ export interface PreferNodeTypeConstantDependencies {
 	readonly getUtilities: () => UtilitiesIndex;
 }
 
-const { isIdentifier } = oxlintUtilities;
+const { isChainExpression, isIdentifier } = oxlintUtilities;
 const WORD_BOUNDARY = /(?<=[a-z\d])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/gv;
+const TRAILING_ACCESS = /\??\.$/v;
 
 function toConstantName(nodeType: string): string {
 	return nodeType.replaceAll(WORD_BOUNDARY, "_").toUpperCase();
@@ -41,7 +44,50 @@ function toConstantName(nodeType: string): string {
 interface GuardSuggestion {
 	readonly guard: string;
 	readonly guards: ReadonlyArray<string>;
-	readonly object: ESTree.Node;
+	readonly member: ESTree.MemberExpression;
+	/** Whether the code reads `node?.type`, which is safe on a missing node. */
+	readonly optional: boolean;
+}
+
+interface GuardFixPlan {
+	/** The guard to apply automatically, when exactly one fits. */
+	readonly fixGuard: string | undefined;
+	/** Guards to offer instead, when several narrow differently. */
+	readonly suggestedGuards: ReadonlyArray<string>;
+}
+
+const UTILITIES_SPECIFIER = "@small-rules/oxlint-utilities";
+
+/**
+ * The source of the object a `.type` access reads, with any parentheses it
+ * has, so `(first, second).type` stays one argument.
+ *
+ * @param sourceCode - The file.
+ * @param member - The `.type` access.
+ * @returns Everything before `.type` or `?.type`.
+ */
+function getReadObjectText(sourceCode: SourceCode, member: ESTree.MemberExpression): string {
+	const text = sourceCode.text.slice(member.range[0], member.property.range[0]).trimEnd();
+	return text.replace(TRAILING_ACCESS, "").trimEnd();
+}
+
+/**
+ * `node?.type` is safe on a missing node, so a guard only replaces it when the
+ * guard is too. Several guards narrow to different types, so only a single one
+ * is applied automatically.
+ *
+ * @param catalog - Known guards.
+ * @param suggestion - Guards for the comparison.
+ * @returns What to fix automatically and what to suggest.
+ */
+function planGuardFix(catalog: NodeTypeCatalog, { guards, optional }: GuardSuggestion): GuardFixPlan {
+	const usable = guards.filter((guard) => !optional || catalog.isNullSafe(guard));
+	if (guards.length > 1) {
+		return { fixGuard: undefined, suggestedGuards: usable };
+	}
+
+	const [fixGuard] = usable;
+	return { fixGuard, suggestedGuards: [] };
 }
 
 /**
@@ -74,15 +120,15 @@ function getGuardSuggestion(
 	typeSide: ESTree.Node,
 	valueSide: ESTree.Node,
 ): GuardSuggestion | undefined {
-	const object = getTypeReadObject(typeSide);
-	if (object === undefined) return undefined;
+	const member = getTypeReadMember(typeSide);
+	if (member === undefined) return undefined;
 
 	const nodeType = getComparedNodeType(catalog, valueSide);
 	if (nodeType === undefined) return undefined;
 
 	const guards = catalog.getGuards(nodeType);
 	const [guard] = guards;
-	return guard === undefined ? undefined : { guard, guards, object };
+	return guard === undefined ? undefined : { guard, guards, member, optional: isChainExpression(typeSide) };
 }
 
 export function createPreferNodeTypeConstantRule({
@@ -116,19 +162,38 @@ export function createPreferNodeTypeConstantRule({
 				}
 			}
 
+			function createUtilitiesFix(node: ESTree.Node, replacement: string, name: string): ImportingFix {
+				return createImportingFix(
+					sourceCode,
+					node,
+					replacement,
+					{ name, specifier: UTILITIES_SPECIFIER },
+					false,
+				);
+			}
+
 			function reportGuard(node: ESTree.BinaryExpression): boolean {
 				const { left, right } = node;
 				const suggestion = getGuardSuggestion(catalog, left, right) ?? getGuardSuggestion(catalog, right, left);
 				if (suggestion === undefined || isInsideGuard(catalog, node)) return false;
 
 				const negation = node.operator.startsWith("!") ? "!" : "";
+				const objectText = getReadObjectText(sourceCode, suggestion.member);
+				function replaceWith(guard: string): string {
+					return `${negation}${guard}(${objectText})`;
+				}
+
+				const { fixGuard, suggestedGuards } = planGuardFix(catalog, suggestion);
 				context.report({
-					data: {
-						guards: suggestion.guards.join(", "),
-						replacement: `${negation}${suggestion.guard}(${sourceCode.getText(suggestion.object)})`,
-					},
+					data: { guards: suggestion.guards.join(", "), replacement: replaceWith(suggestion.guard) },
+					fix: fixGuard === undefined ? noFix : createUtilitiesFix(node, replaceWith(fixGuard), fixGuard),
 					messageId: "useGuard",
 					node,
+					suggest: suggestedGuards.map((guard) => ({
+						data: { replacement: replaceWith(guard) },
+						fix: createUtilitiesFix(node, replaceWith(guard), guard),
+						messageId: "useGuardSuggestion",
+					})),
 				});
 				return true;
 			}
@@ -137,7 +202,12 @@ export function createPreferNodeTypeConstantRule({
 				const nodeType = literal.value;
 				const constant = catalog.getConstant(nodeType);
 				if (constant !== undefined) {
-					context.report({ data: { constant, nodeType }, messageId: "useConstant", node: literal });
+					context.report({
+						data: { constant, nodeType },
+						fix: createUtilitiesFix(literal, constant, constant),
+						messageId: "useConstant",
+						node: literal,
+					});
 					return;
 				}
 
@@ -182,6 +252,8 @@ export function createPreferNodeTypeConstantRule({
 				description:
 					"Prefer the type guards and node type constants in `@small-rules/oxlint-utilities` over inline node type strings, so the bundle stores each string once",
 			},
+			fixable: "code",
+			hasSuggestions: true,
 			messages: {
 				addConstant:
 					'"{{nodeType}}" is inlined {{count}} times in the bundle. Export a shared `{{constant}}` from `@small-rules/oxlint-utilities` and use it instead.',
@@ -189,6 +261,7 @@ export function createPreferNodeTypeConstantRule({
 					'Use `{{constant}}` from `@small-rules/oxlint-utilities` instead of the inline "{{nodeType}}" string.',
 				useGuard:
 					"Use `{{replacement}}` from `@small-rules/oxlint-utilities` instead of comparing `.type` (guards: {{guards}}).",
+				useGuardSuggestion: "Use `{{replacement}}`.",
 			},
 			type: "suggestion",
 		},

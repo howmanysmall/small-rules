@@ -78,4 +78,13 @@ describe("createNodeTypeCatalog", () => {
 		expect(catalog.isGuardName("isFunctionLike")).toBe(false);
 		expect(catalog.isGuardName("getName")).toBe(false);
 	});
+
+	it("knows which guards accept a missing node", () => {
+		expect.assertions(2);
+
+		const catalog = createNodeTypeCatalog(Object.entries(UTILITIES));
+
+		expect(catalog.isNullSafe("isCallExpression")).toBe(true);
+		expect(catalog.isNullSafe("isIdentifierName")).toBe(false);
+	});
 });

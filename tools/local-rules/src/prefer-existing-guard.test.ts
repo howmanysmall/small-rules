@@ -58,6 +58,7 @@ describe("prefer-existing-guard", () => {
 		invalid: [
 			{
 				code: 'const isLength = isIdentifier(property.property) && property.property.name === "length";',
+				output: 'import { isNamedIdentifier } from "@small-rules/example";\nconst isLength = isNamedIdentifier(property.property, "length");',
 				errors: [
 					{
 						data: {
@@ -71,6 +72,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: 'const isLength = isIdentifierReference(target) && target.name === "length";',
+				output: 'import { isNamedIdentifier } from "@small-rules/example";\nconst isLength = isNamedIdentifier(target, "length");',
 				errors: [
 					{
 						data: {
@@ -83,7 +85,44 @@ describe("prefer-existing-guard", () => {
 				],
 			},
 			{
+				code: "const isText = isAnyLiteral(nodes[key]) && Predicate.isString(nodes[key].value);",
+				output: null,
+				errors: [{ messageId: "useGuard", suggestions: 1 }],
+			},
+			{
+				code: "const isText = isAnyLiteral(next()) && Predicate.isString(next().value);",
+				output: null,
+				errors: [
+					{
+						data: {
+							guard: "isStringLiteral",
+							replacement: "isStringLiteral(next())",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+						suggestions: [
+							{
+								data: { replacement: "isStringLiteral(next())" },
+								messageId: "useGuardSuggestion",
+								output: 'import { isStringLiteral } from "@small-rules/example";\nconst isText = isStringLiteral(next());',
+							},
+						],
+					},
+				],
+			},
+			{
+				code: "const isAssertion = isTsTypeAssertion(this) || isTsAsExpression(this);",
+				output: 'import { isTypeAssertionExpression } from "@small-rules/example";\nconst isAssertion = isTypeAssertionExpression(this);',
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
+				code: 'const isText = isAnyLiteral(nodes["first"]) && Predicate.isString(nodes["first"].value);',
+				output: 'import { isStringLiteral } from "@small-rules/example";\nconst isText = isStringLiteral(nodes["first"]);',
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
 				code: "const isOwned = hasOwner(target.field) && target.ok;",
+				output: 'import { isOwnedField } from "@small-rules/example";\nconst isOwned = isOwnedField(target);',
 				errors: [
 					{
 						data: {
@@ -97,6 +136,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: 'const isLength = target.type === IDENTIFIER && target.name === "length";',
+				output: 'import { isNamedIdentifier } from "@small-rules/example";\nconst isLength = isNamedIdentifier(target, "length");',
 				errors: [
 					{
 						data: {
@@ -110,6 +150,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: "const isAssertion = isTsTypeAssertion(current) || isTsAsExpression(current);",
+				output: 'import { isTypeAssertionExpression } from "@small-rules/example";\nconst isAssertion = isTypeAssertionExpression(current);',
 				errors: [
 					{
 						data: {
@@ -123,6 +164,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: "const isOther = !isTsTypeAssertion(current) && !isTsAsExpression(current);",
+				output: 'import { isTypeAssertionExpression } from "@small-rules/example";\nconst isOther = !isTypeAssertionExpression(current);',
 				errors: [
 					{
 						data: {
@@ -136,6 +178,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: "if (!isAnyLiteral(node) || !Predicate.isString(node.value)) throw new Error();",
+				output: 'import { isStringLiteral } from "@small-rules/example";\nif (!isStringLiteral(node)) throw new Error();',
 				errors: [
 					{
 						data: {
@@ -149,6 +192,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: "const isText = isAnyLiteral(member.object) && Predicate.isString(member.object.value);",
+				output: 'import { isStringLiteral } from "@small-rules/example";\nconst isText = isStringLiteral(member.object);',
 				errors: [
 					{
 						data: {
@@ -162,6 +206,7 @@ describe("prefer-existing-guard", () => {
 			},
 			{
 				code: 'const isUseMemo = callee.type === "Identifier" && callee.name === "useMemo";',
+				output: 'import { isIdentifierNamed } from "@small-rules/example";\nconst isUseMemo = isIdentifierNamed(callee, "useMemo");',
 				errors: [
 					{
 						data: {

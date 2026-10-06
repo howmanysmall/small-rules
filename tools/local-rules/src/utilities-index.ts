@@ -39,9 +39,18 @@ export interface UtilitiesIndex {
 	readonly getConstants: (value: string) => ReadonlyArray<SharedConstant>;
 	readonly getFunction: (name: string) => SharedFunction | undefined;
 	readonly getGuards: () => ReadonlyArray<SharedGuard>;
+	/**
+	 * The import specifier of the module at `filename`, if it is one of the
+	 * indexed modules.
+	 */
+	readonly getSpecifierOf: (filename: string) => string | undefined;
 }
 
 export interface UtilitiesModule {
+	/**
+	 * Where the module lives, to recognize it when it is the file being linted.
+	 */
+	readonly filename?: string;
 	readonly source: string;
 	/** What other files import the module as. */
 	readonly specifier: string;
@@ -145,7 +154,9 @@ function indexDeclaration(
 export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesIndex {
 	const collections: IndexCollections = { constants: new Map(), functions: new Map(), guards: [] };
 
-	for (const { source, specifier } of modules) {
+	const specifiersByFile = new Map<string, string>();
+	for (const { filename, source, specifier } of modules) {
+		if (filename !== undefined) specifiersByFile.set(nodePath.resolve(filename), specifier);
 		const { program } = parse(source, { lang: "ts", preserveParens: false, sourceType: "module" });
 		for (const statement of program.body) {
 			if (isOfType(statement, "ExportNamedDeclaration")) {
@@ -159,6 +170,7 @@ export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesInd
 		getConstants: (value) => constants.get(value) ?? NO_CONSTANTS,
 		getFunction: (name) => functions.get(name),
 		getGuards: () => guards,
+		getSpecifierOf: (filename) => specifiersByFile.get(nodePath.resolve(filename)),
 	};
 }
 
@@ -166,9 +178,10 @@ function readModules(locations: ReadonlyArray<UtilitiesLocation>): Array<Utiliti
 	const modules = new Array<UtilitiesModule>();
 	for (const { directory, toSpecifier } of locations) {
 		for (const relativePath of listBundledSources(directory)) {
-			const source = readFileSync(nodePath.join(directory, relativePath), "utf8");
+			const filename = nodePath.join(directory, relativePath);
+			const source = readFileSync(filename, "utf8");
 			const specifier = toSpecifier(relativePath.replaceAll(nodePath.sep, "/").replace(SOURCE_EXTENSION, ""));
-			modules.push({ source, specifier });
+			modules.push({ filename, source, specifier });
 		}
 	}
 	return modules;

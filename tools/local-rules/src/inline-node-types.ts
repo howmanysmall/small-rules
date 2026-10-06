@@ -17,17 +17,17 @@ export function isEqualityOperator(operator: string): boolean {
 }
 
 /**
- * The node whose `.type` an expression reads: `node` in `node.type` or
- * `node?.type`.
+ * The `.type` access an expression makes: `node.type` itself, or the access
+ * inside `node?.type`.
  *
  * @param node - Expression that may read a `.type` property.
- * @returns The object being read, or `undefined` for any other expression.
+ * @returns The member access, or `undefined` for any other expression.
  */
-export function getTypeReadObject(node: ESTree.Node): ESTree.Node | undefined {
+export function getTypeReadMember(node: ESTree.Node): ESTree.MemberExpression | undefined {
 	const member = isChainExpression(node) ? node.expression : node;
 	if (!isMemberExpression(member) || member.computed) return undefined;
 	if (!isIdentifierNamed(member.property, "type")) return undefined;
-	return member.object;
+	return member;
 }
 
 export function getNodeTypeLiteral(node: ESTree.Node | null): ESTree.StringLiteral | undefined {
@@ -41,7 +41,7 @@ export function getNodeTypeLiteral(node: ESTree.Node | null): ESTree.StringLiter
  * @returns Whether the expression produces a node type.
  */
 function producesNodeType(node: ESTree.Node): boolean {
-	return getTypeReadObject(node) !== undefined || isCallExpression(node);
+	return getTypeReadMember(node) !== undefined || isCallExpression(node);
 }
 
 export function collectComparedNodeTypes(
@@ -52,6 +52,7 @@ export function collectComparedNodeTypes(
 
 	const leftLiteral = getNodeTypeLiteral(left);
 	if (leftLiteral !== undefined && producesNodeType(right)) literals.push(leftLiteral);
+
 	const rightLiteral = getNodeTypeLiteral(right);
 	if (rightLiteral !== undefined && producesNodeType(left)) literals.push(rightLiteral);
 }
