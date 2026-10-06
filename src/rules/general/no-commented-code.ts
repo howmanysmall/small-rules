@@ -5,6 +5,7 @@ import {
 	isAnyLiteral,
 	isBindingIdentifier,
 	isExpressionStatement,
+	isNode,
 	isReturnStatement,
 	isSequenceExpression,
 	isThrowStatement,
@@ -127,7 +128,7 @@ function isExcludedLiteral(expression: ESTree.Node): boolean {
 }
 
 function isParsedStatement(value: unknown): value is ESTree.Statement {
-	return Predicate.isObject(value) && Predicate.isString(value.type);
+	return isNode(value);
 }
 
 function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.Statement> {
