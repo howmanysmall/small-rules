@@ -64,7 +64,7 @@ const noEventHandler = createRule("no-event-handler", "react", {
 			{
 				additionalProperties: false,
 				properties: {
-					environment: ENVIRONMENT_SCHEMA
+					environment: ENVIRONMENT_SCHEMA,
 				},
 				type: "object",
 			},
