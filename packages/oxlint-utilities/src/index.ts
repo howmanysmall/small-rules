@@ -689,7 +689,7 @@ export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): b
 	);
 }
 
-export function isEmptyObjectExpression(node: ESTree.Expression): boolean {
+export function isEmptyObjectExpression(node: ESTree.Node): boolean {
 	return isObjectExpression(node) && node.properties.length === 0;
 }
 
