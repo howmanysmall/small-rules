@@ -12,6 +12,7 @@ export const sharedConfiguration = defineConfig({
 	test: {
 		environment: "node",
 		fileParallelism: true,
+		fsModuleCache: true,
 		globals: true,
 		isolate: false,
 		maxWorkers: workerCount,
