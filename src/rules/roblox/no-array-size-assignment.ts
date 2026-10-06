@@ -19,7 +19,7 @@ import {
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
-import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -133,20 +133,19 @@ function getAppendTarget(
 ): ESTree.MemberExpression | undefined {
 	if (node.operator !== "=" || !isMemberExpression(node.left) || !node.left.computed) return undefined;
 
-	if (environment === "roblox-ts" && isSizeCall(node.left.property)) {
+	if (environment === ROBLOX_TS && isSizeCall(node.left.property)) {
 		return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode)
 			? node.left
 			: undefined;
 	}
 
-	if (environment === "standard") {
+	if (environment === STANDARD) {
 		const { property } = node.left;
 		if (
 			isMemberExpression(property) &&
 			!property.optional &&
 			!property.computed &&
-			isIdentifier(property.property) &&
-			property.property.name === "length"
+			isIdentifierNamed(property.property, "length")
 		) {
 			return areEquivalentTargets(node.left.object, property.object, sourceCode) ? node.left : undefined;
 		}
@@ -159,7 +158,7 @@ const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
-		const environment = options?.environment === "standard" ? "standard" : "roblox-ts";
+		const environment = options?.environment === STANDARD ? STANDARD : ROBLOX_TS;
 		const { sourceCode } = context;
 
 		return {
@@ -213,7 +212,7 @@ const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 					},
 					environment: {
 						...ENVIRONMENT_SCHEMA,
-						default: "roblox-ts",
+						default: ROBLOX_TS,
 						description:
 							"Array environment mode: 'roblox-ts' checks array[array.size()]; 'standard' checks array[array.length].",
 					},
