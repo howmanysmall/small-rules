@@ -1,4 +1,5 @@
 import {
+	isCallExpression,
 	isIdentifier,
 	isLogicalExpression,
 	isMemberExpression,
@@ -134,6 +135,25 @@ function matchNodes(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchSt
 	return true;
 }
 
+/**
+ * One term of the chain; when negated, the code's term is `!` of the guard's.
+ *
+ * @param pattern - Term of the guard's body.
+ * @param candidate - Term of the code's chain.
+ * @param negated - Whether the code checks the opposite.
+ * @param state - Bindings so far.
+ * @returns Whether the terms match.
+ */
+function matchTerm(
+	pattern: ESTree.Expression,
+	candidate: ESTree.Expression,
+	negated: boolean,
+	state: MatchState,
+): boolean {
+	if (!negated) return matchNodes(pattern, candidate, state);
+	return isUnaryExpression(candidate) && candidate.operator === "!" && matchNodes(pattern, candidate.argument, state);
+}
+
 function matchChain(
 	pattern: ESTree.Expression,
 	candidate: ESTree.Expression,
@@ -148,9 +168,86 @@ function matchChain(
 			matchChain(pattern.right, candidate.right, operators, state)
 		);
 	}
+	return matchTerm(pattern, candidate, operators.negated, state);
+}
 
-	if (!operators.negated) return matchNodes(pattern, candidate, state);
-	return isUnaryExpression(candidate) && candidate.operator === "!" && matchNodes(pattern, candidate.argument, state);
+function flattenChain(node: ESTree.Expression, operator: string, terms: Array<ESTree.Expression>): void {
+	if (isLogicalExpression(node) && node.operator === operator) {
+		flattenChain(node.left, operator, terms);
+		flattenChain(node.right, operator, terms);
+		return;
+	}
+	terms.push(node);
+}
+
+/**
+ * A term that only passes the guard's parameters to a call, like
+ * `isTsAsExpression(node)`, cannot depend on an earlier term having passed,
+ * so the chain's terms may appear in any order.
+ *
+ * @param term - Term of the guard's body.
+ * @param parameters - The guard's parameters.
+ * @returns Whether the term can move within its chain.
+ */
+function isMovableTerm(term: ESTree.Expression, parameters: ReadonlySet<string>): boolean {
+	return (
+		isCallExpression(term) &&
+		term.arguments.every((argument) => isIdentifier(argument) && parameters.has(argument.name))
+	);
+}
+
+/**
+ * Matches each code term to a different guard term, trying every pairing and
+ * undoing the bindings of a pairing that leads nowhere.
+ *
+ * @param patterns - Guard terms not yet paired.
+ * @param candidates - Code terms not yet paired.
+ * @param negated - Whether the code checks the opposite.
+ * @param state - Bindings so far.
+ * @returns Whether every code term pairs with a guard term.
+ */
+function matchTermsInAnyOrder(
+	patterns: ReadonlyArray<ESTree.Expression>,
+	candidates: ReadonlyArray<ESTree.Expression>,
+	negated: boolean,
+	state: MatchState,
+): boolean {
+	const [candidate, ...remainingCandidates] = candidates;
+	if (candidate === undefined) return true;
+
+	for (const [index, pattern] of patterns.entries()) {
+		const saved = new Map(state.bindings);
+		const remainingPatterns = patterns.toSpliced(index, 1);
+		if (
+			matchTerm(pattern, candidate, negated, state) &&
+			matchTermsInAnyOrder(remainingPatterns, remainingCandidates, negated, state)
+		) {
+			return true;
+		}
+
+		state.bindings.clear();
+		for (const [name, node] of saved) state.bindings.set(name, node);
+	}
+	return false;
+}
+
+function matchBody(
+	guard: SharedGuard,
+	candidate: ESTree.LogicalExpression,
+	operators: ChainOperators,
+	state: MatchState,
+): boolean {
+	const patterns = new Array<ESTree.Expression>();
+	flattenChain(guard.body, operators.pattern, patterns);
+	if (patterns.some((term) => !isMovableTerm(term, state.parameters))) {
+		return matchChain(guard.body, candidate, operators, state);
+	}
+
+	const candidates = new Array<ESTree.Expression>();
+	flattenChain(candidate, operators.candidate, candidates);
+	return (
+		patterns.length === candidates.length && matchTermsInAnyOrder(patterns, candidates, operators.negated, state)
+	);
 }
 
 /**
@@ -173,7 +270,7 @@ export function matchGuard(
 
 	const state: MatchState = { bindings: new Map(), getText, parameters: new Set(guard.parameters) };
 	const operators: ChainOperators = { candidate: candidate.operator, negated, pattern: patternOperator };
-	if (!matchChain(guard.body, candidate, operators, state)) return undefined;
+	if (!matchBody(guard, candidate, operators, state)) return undefined;
 
 	const matchedArguments = new Array<ESTree.Node>();
 	for (const parameter of guard.parameters) {

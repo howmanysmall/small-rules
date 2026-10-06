@@ -16,6 +16,9 @@ const index = indexUtilities([
 			"export function isFirstOrSecond(node: ESTree.Node, extra: unknown): boolean {",
 			"\treturn first(node) || second(node);",
 			"}",
+			"export function isTypeAssertionExpression(node: ESTree.Node): node is TypeAssertionExpression {",
+			"\treturn isTsAsExpression(node) || isTsTypeAssertion(node);",
+			"}",
 			"export function isListed(node: ESTree.Node): boolean {",
 			"\treturn includes([node, 1], node) && listed(node);",
 			"}",
@@ -29,6 +32,32 @@ const rule = createPreferExistingGuardRule(() => index);
 describe("prefer-existing-guard", () => {
 	ts.run("prefer-existing-guard", rule, {
 		invalid: [
+			{
+				code: "const isAssertion = isTsTypeAssertion(current) || isTsAsExpression(current);",
+				errors: [
+					{
+						data: {
+							guard: "isTypeAssertionExpression",
+							replacement: "isTypeAssertionExpression(current)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "const isOther = !isTsTypeAssertion(current) && !isTsAsExpression(current);",
+				errors: [
+					{
+						data: {
+							guard: "isTypeAssertionExpression",
+							replacement: "!isTypeAssertionExpression(current)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
 			{
 				code: "if (!isAnyLiteral(node) || !Predicate.isString(node.value)) throw new Error();",
 				errors: [
@@ -81,6 +110,9 @@ describe("prefer-existing-guard", () => {
 			"const unbound = first(node) || second(node);",
 			'const regex = callee.type === /Identifier/u && callee.name === "useMemo";',
 			"const nullish = first(node) ?? second(node);",
+			"const split = isTsTypeAssertion(left) || isTsAsExpression(right);",
+			"const repeated = isTsAsExpression(current) || isTsAsExpression(current);",
+			"const extended = isTsTypeAssertion(current) || isTsAsExpression(current) || isSatisfies(current);",
 			"const sparse = includes([node, , 1], node) && listed(node);",
 			[
 				"export function isStringLiteral(node) {",
