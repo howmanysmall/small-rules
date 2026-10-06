@@ -1,6 +1,5 @@
 import {
 	isAnyFunction,
-	isAnyLiteral,
 	isBlockStatement,
 	isCallExpression,
 	isClassDeclaration,
@@ -93,7 +92,7 @@ function getPropertyName(property: ESTree.ObjectPropertyKind): string | undefine
 	if (property.computed) return isStringLiteral(property.key) ? property.key.value : undefined;
 	if (isIdentifier(property.key)) return property.key.name;
 
-	return isAnyLiteral(property.key) && Predicate.isString(property.key.value) ? property.key.value : undefined;
+	return isStringLiteral(property.key) ? property.key.value : undefined;
 }
 
 function addSystemPropertyFunction(

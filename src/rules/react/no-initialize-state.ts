@@ -66,8 +66,7 @@ const noInitializeState = createRule("no-initialize-state", "react", {
 		schema: [
 			{
 				additionalProperties: false,
-				properties: {environment: ENVIRONMENT_SCHEMA,
-				},
+				properties: { environment: ENVIRONMENT_SCHEMA },
 				type: "object",
 			},
 		],
