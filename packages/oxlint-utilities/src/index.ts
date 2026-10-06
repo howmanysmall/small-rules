@@ -21,6 +21,7 @@ const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
 const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 
 export const ACCESSOR_PROPERTY = "AccessorProperty" as const satisfies NodeType;
+export const CONTINUE_STATEMENT = "ContinueStatement" as const satisfies NodeType;
 export const ARRAY_EXPRESSION = "ArrayExpression" as const satisfies NodeType;
 export const ARRAY_PATTERN = "ArrayPattern" as const satisfies NodeType;
 export const ARROW_FUNCTION_EXPRESSION = "ArrowFunctionExpression" as const satisfies NodeType;
@@ -274,8 +275,8 @@ export function isMemberExpression(node: ESTree.Node): node is ESTree.MemberExpr
 	return node.type === MEMBER_EXPRESSION;
 }
 
-export function isAssignmentExpression(node: ESTree.Node): node is ESTree.AssignmentExpression {
-	return node.type === ASSIGNMENT_EXPRESSION;
+export function isAssignmentExpression(node?: ESTree.Node | null): node is ESTree.AssignmentExpression {
+	return node?.type === ASSIGNMENT_EXPRESSION;
 }
 
 export function isUnaryExpression(node?: ESTree.Node | null): node is ESTree.UnaryExpression {
@@ -606,7 +607,7 @@ export function isStaticBlock(node: ESTree.Node): node is ESTree.StaticBlock {
 	return node.type === STATIC_BLOCK;
 }
 export function isContinueStatement(node: ESTree.Node): node is ESTree.ContinueStatement {
-	return node.type === "ContinueStatement";
+	return node.type === CONTINUE_STATEMENT;
 }
 export function isForOfStatement(node: ESTree.Node): node is ESTree.ForOfStatement {
 	return node.type === FOR_OF_STATEMENT;

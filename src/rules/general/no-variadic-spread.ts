@@ -1,4 +1,9 @@
-import { isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
+import {
+	isArrayExpression,
+	isIdentifierNamed,
+	isMemberExpression,
+	isSpreadElement,
+} from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -28,8 +33,9 @@ const noVariadicSpread = createRule("no-variadic-spread", "general", {
 				if (method === undefined) return;
 
 				for (const argument of node.arguments) {
-					if (argument.type !== "SpreadElement") continue;
-					if (stripExpressionWrappers(argument.argument).type === "ArrayExpression") continue;
+					if (!isSpreadElement(argument) || isArrayExpression(stripExpressionWrappers(argument.argument))) {
+						continue;
+					}
 					context.report({ data: { method }, messageId: "noVariadicSpread", node: argument });
 				}
 			},

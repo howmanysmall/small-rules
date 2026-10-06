@@ -1,10 +1,10 @@
 import {
 	ARRAY_EXPRESSION,
 	CALL_EXPRESSION,
-	IDENTIFIER,
 	isAssignmentExpression,
 	isBindingIdentifier,
 	isExpressionStatement,
+	isIdentifier,
 	isLiteral,
 	isMemberExpression,
 	isMethodDefinition,
@@ -112,7 +112,7 @@ function isConstructorLiteralAssignment(statement: ESTree.Statement): statement 
 
 	const { property } = left;
 	return (
-		(property.type === IDENTIFIER || isLiteral(property)) &&
+		(isIdentifier(property) || isLiteral(property)) &&
 		isSimpleLiteral(expression.right) &&
 		isStaticMemberExpression(left)
 	);

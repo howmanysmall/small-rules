@@ -1,12 +1,15 @@
 import nodePath from "node:path";
 import {
+	BREAK_STATEMENT,
+	CONTINUE_STATEMENT,
+	isAnyLiteral,
 	isBindingIdentifier,
 	isExpressionStatement,
 	isReturnStatement,
 	isSequenceExpression,
 	isThrowStatement,
 	isUnaryExpression,
-	LITERAL,
+	LABELED_STATEMENT,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 import { parse } from "yuku-parser";
@@ -17,7 +20,7 @@ import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript
 
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-const EXCLUDED_STATEMENTS = new Set(["BreakStatement", "ContinueStatement", "LabeledStatement"]);
+const EXCLUDED_STATEMENTS = new Set([BREAK_STATEMENT, CONTINUE_STATEMENT, LABELED_STATEMENT]);
 type ParseLanguage = "js" | "jsx" | "tsx";
 const LANG_BY_EXTENSION = new Map<string, ParseLanguage>([
 	[".jsx", "jsx"],
@@ -120,9 +123,7 @@ function isUnaryPlusMinus(expression: ESTree.Expression): boolean {
 }
 
 function isExcludedLiteral(expression: ESTree.Node): boolean {
-	return (
-		expression.type === LITERAL && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value))
-	);
+	return isAnyLiteral(expression) && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value));
 }
 
 function isParsedStatement(value: unknown): value is ESTree.Statement {
