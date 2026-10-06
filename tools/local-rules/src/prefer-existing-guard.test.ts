@@ -22,6 +22,30 @@ const index = indexUtilities([
 			"export function isListed(node: ESTree.Node): boolean {",
 			"\treturn includes([node, 1], node) && listed(node);",
 			"}",
+			"export function isNamedIdentifier(node: ESTree.Node | null | undefined, name: string): boolean {",
+			"\treturn node?.type === IDENTIFIER && node.name === name;",
+			"}",
+			"export function isIdentifier(node?: ESTree.Node | null): node is ESTree.IdentifierName {",
+			"\treturn node?.type === IDENTIFIER;",
+			"}",
+			"export function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {",
+			"\treturn node.type === IDENTIFIER;",
+			"}",
+			"export function isOwned(node: ESTree.Node): boolean {",
+			"\treturn owner(node) && node.owned;",
+			"}",
+			"export function isOwnedField(node: ESTree.Node): boolean {",
+			"\treturn owner(node.field) && node.ok;",
+			"}",
+			"export function hasOwner(value: ESTree.Node): boolean {",
+			"\treturn owner(value);",
+			"}",
+			"export function hasOwnedParent(node: ESTree.Node): boolean {",
+			"\treturn owner(node.parent);",
+			"}",
+			"export function isStrictReference(node: ESTree.Node): boolean {",
+			"\treturn node.type === REFERENCE && node.strict;",
+			"}",
 		].join("\n"),
 		specifier: "@small-rules/example",
 	},
@@ -32,6 +56,58 @@ const rule = createPreferExistingGuardRule(() => index);
 describe("prefer-existing-guard", () => {
 	ts.run("prefer-existing-guard", rule, {
 		invalid: [
+			{
+				code: 'const isLength = isIdentifier(property.property) && property.property.name === "length";',
+				errors: [
+					{
+						data: {
+							guard: "isNamedIdentifier",
+							replacement: 'isNamedIdentifier(property.property, "length")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: 'const isLength = isIdentifierReference(target) && target.name === "length";',
+				errors: [
+					{
+						data: {
+							guard: "isNamedIdentifier",
+							replacement: 'isNamedIdentifier(target, "length")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "const isOwned = hasOwner(target.field) && target.ok;",
+				errors: [
+					{
+						data: {
+							guard: "isOwnedField",
+							replacement: "isOwnedField(target)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: 'const isLength = target.type === IDENTIFIER && target.name === "length";',
+				errors: [
+					{
+						data: {
+							guard: "isNamedIdentifier",
+							replacement: 'isNamedIdentifier(target, "length")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
 			{
 				code: "const isAssertion = isTsTypeAssertion(current) || isTsAsExpression(current);",
 				errors: [
@@ -110,6 +186,12 @@ describe("prefer-existing-guard", () => {
 			"const unbound = first(node) || second(node);",
 			'const regex = callee.type === /Identifier/u && callee.name === "useMemo";',
 			"const nullish = first(node) ?? second(node);",
+			'const otherName = isIdentifier(left) && right.name === "length";',
+			'const unknownCall = isMaybeIdentifier(target) && target.name === "length";',
+			'const extraArgument = isIdentifier(target, other) && target.name === "length";',
+			'const spread = isIdentifier(...targets) && target.name === "length";',
+			"const looser = target?.type === REFERENCE && target.strict;",
+			"const parentOwned = hasOwnedParent(target) && target.owned;",
 			"const split = isTsTypeAssertion(left) || isTsAsExpression(right);",
 			"const repeated = isTsAsExpression(current) || isTsAsExpression(current);",
 			"const extended = isTsTypeAssertion(current) || isTsAsExpression(current) || isSatisfies(current);",

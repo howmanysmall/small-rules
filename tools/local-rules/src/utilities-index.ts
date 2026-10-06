@@ -22,16 +22,22 @@ export interface SharedConstant {
 	readonly specifier: string;
 }
 
-export interface SharedGuard {
+/** An exported function whose whole body is one `return` of an expression. */
+export interface SharedFunction {
 	readonly name: string;
-	/** The guard's whole body: one `&&` or `||` chain. */
-	readonly body: ESTree.LogicalExpression;
+	readonly body: ESTree.Expression;
 	readonly parameters: ReadonlyArray<string>;
 	readonly specifier: string;
 }
 
+export interface SharedGuard extends SharedFunction {
+	/** The guard's whole body: one `&&` or `||` chain. */
+	readonly body: ESTree.LogicalExpression;
+}
+
 export interface UtilitiesIndex {
 	readonly getConstants: (value: string) => ReadonlyArray<SharedConstant>;
+	readonly getFunction: (name: string) => SharedFunction | undefined;
 	readonly getGuards: () => ReadonlyArray<SharedGuard>;
 }
 
@@ -83,10 +89,10 @@ function collectConstants(
 	}
 }
 
-function getGuard(
+function getSharedFunction(
 	{ id, body, params: parameterPatterns }: ESTree.Function,
 	specifier: string,
-): SharedGuard | undefined {
+): SharedFunction | undefined {
 	if (id === null || body?.body.length !== 1) return undefined;
 
 	const parameters = new Array<string>();
@@ -97,9 +103,12 @@ function getGuard(
 
 	const [statement] = body.body;
 	if (!isReturnStatement(statement) || statement.argument === null) return undefined;
-	if (!isLogicalExpression(statement.argument)) return undefined;
 
 	return { name: id.name, body: statement.argument, parameters, specifier };
+}
+
+function isSharedGuard(sharedFunction: SharedFunction): sharedFunction is SharedGuard {
+	return isLogicalExpression(sharedFunction.body);
 }
 
 /**
@@ -109,29 +118,46 @@ function getGuard(
  * @param modules - Source text of each module with its import specifier.
  * @returns Lookups over the exported constants and guards.
  */
+interface IndexCollections {
+	readonly constants: Map<string, Array<SharedConstant>>;
+	readonly functions: Map<string, SharedFunction>;
+	readonly guards: Array<SharedGuard>;
+}
+
+function indexDeclaration(
+	declaration: ESTree.Declaration | null,
+	specifier: string,
+	{ constants, functions, guards }: IndexCollections,
+): void {
+	if (isVariableDeclaration(declaration)) {
+		collectConstants(declaration, specifier, constants);
+		return;
+	}
+	if (!isFunctionDeclarationRaw(declaration)) return;
+
+	const sharedFunction = getSharedFunction(declaration, specifier);
+	if (sharedFunction === undefined) return;
+
+	functions.set(sharedFunction.name, sharedFunction);
+	if (isSharedGuard(sharedFunction)) guards.push(sharedFunction);
+}
+
 export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesIndex {
-	const constants = new Map<string, Array<SharedConstant>>();
-	const guards = new Array<SharedGuard>();
+	const collections: IndexCollections = { constants: new Map(), functions: new Map(), guards: [] };
 
 	for (const { source, specifier } of modules) {
 		const { program } = parse(source, { lang: "ts", preserveParens: false, sourceType: "module" });
 		for (const statement of program.body) {
-			if (!isOfType(statement, "ExportNamedDeclaration")) continue;
-
-			const { declaration } = statement;
-			if (isVariableDeclaration(declaration)) {
-				collectConstants(declaration, specifier, constants);
-				continue;
+			if (isOfType(statement, "ExportNamedDeclaration")) {
+				indexDeclaration(statement.declaration, specifier, collections);
 			}
-			if (!isFunctionDeclarationRaw(declaration)) continue;
-
-			const guard = getGuard(declaration, specifier);
-			if (guard !== undefined) guards.push(guard);
 		}
 	}
 
+	const { constants, functions, guards } = collections;
 	return {
 		getConstants: (value) => constants.get(value) ?? NO_CONSTANTS,
+		getFunction: (name) => functions.get(name),
 		getGuards: () => guards,
 	};
 }

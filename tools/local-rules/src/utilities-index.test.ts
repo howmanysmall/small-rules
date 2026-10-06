@@ -73,6 +73,24 @@ describe("indexUtilities", () => {
 		]);
 	});
 
+	it("indexes every exported single-return function by name", () => {
+		expect.assertions(1);
+
+		const index = indexUtilities([{ source: UTILITIES_SOURCE, specifier: "@small-rules/example" }]);
+
+		expect({
+			isLonger: index.getFunction("isLonger"),
+			isPrivate: index.getFunction("isPrivate"),
+			isSingle: index.getFunction("isSingle")?.parameters,
+			isStringLiteral: index.getFunction("isStringLiteral")?.parameters,
+		}).toStrictEqual({
+			isLonger: undefined,
+			isPrivate: undefined,
+			isSingle: ["node"],
+			isStringLiteral: ["node"],
+		});
+	});
+
 	it("keeps constants from every module that exports the value", () => {
 		expect.assertions(1);
 

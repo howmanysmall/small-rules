@@ -1,16 +1,18 @@
 import {
 	isCallExpression,
+	isChainExpression,
 	isIdentifier,
 	isLogicalExpression,
 	isMemberExpression,
 	isNode,
+	isSpreadElement,
 	isUnaryExpression,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
-import type { SharedGuard } from "./utilities-index.ts";
+import type { SharedFunction, SharedGuard } from "./utilities-index.ts";
 
 export interface GuardMatch {
 	/** What the code passes for each guard parameter, in order. */
@@ -23,11 +25,20 @@ type GetText = (node: ESTree.Node) => string;
 type Leaf = bigint | boolean | number | string | symbol | undefined;
 type FieldValue = ESTree.Node | Leaf | ReadonlyArray<ESTree.Node | undefined>;
 
+type GetFunction = (name: string) => SharedFunction | undefined;
+
 interface MatchState {
 	readonly bindings: Map<string, ESTree.Node>;
+	readonly getFunction: GetFunction;
 	readonly getText: GetText;
+	/** Whether the candidate is an inlined body, not the code. */
+	readonly inlined: boolean;
 	readonly parameters: ReadonlySet<string>;
+	/** While inlined: parameters mapped to the code's arguments. */
+	readonly substitutions: ReadonlyMap<string, ESTree.Node>;
 }
+
+const NO_SUBSTITUTIONS: ReadonlyMap<string, ESTree.Node> = new Map();
 
 interface ChainOperators {
 	readonly candidate: string;
@@ -113,21 +124,97 @@ function matchValues(pattern: FieldValue, candidate: FieldValue, state: MatchSta
 	return pattern === candidate;
 }
 
+/**
+ * In an inlined body, the inlined function's parameter stands for the code's
+ * argument, which is matched as ordinary code from there on.
+ *
+ * @param candidate - Node of the inlined body.
+ * @param state - Current substitutions.
+ * @returns The code's argument, when `candidate` is a substituted parameter.
+ */
+function getSubstitution(candidate: ESTree.Node, state: MatchState): ESTree.Node | undefined {
+	return state.inlined && isIdentifier(candidate) ? state.substitutions.get(candidate.name) : undefined;
+}
+
+function isGuardParameter(pattern: ESTree.Node, state: MatchState): pattern is ESTree.IdentifierName {
+	return isIdentifier(pattern) && state.parameters.has(pattern.name);
+}
+
+/**
+ * Inside an inlined body, a guard parameter may only stand for one of the
+ * code's arguments, never for part of the inlined body itself.
+ *
+ * @param name - Guard parameter.
+ * @param candidate - Node the parameter lines up with.
+ * @param state - Bindings so far.
+ * @returns Whether the binding is consistent.
+ */
+function bindParameter(name: string, candidate: ESTree.Node, state: MatchState): boolean {
+	if (!state.inlined) return bind(name, candidate, state);
+	const substitution = getSubstitution(candidate, state);
+	return substitution !== undefined && bind(name, substitution, state);
+}
+
+interface NodePair {
+	readonly candidate: ESTree.Node;
+	readonly pattern: ESTree.Node;
+	readonly state: MatchState;
+}
+
+/**
+ * Lines the two sides up: a substituted parameter becomes the code's argument,
+ * and a guard's `node?.type` also covers code that reads `node.type`.
+ *
+ * @param pattern - Node of the guard's body.
+ * @param candidate - Node of the code or of an inlined body.
+ * @param state - Current substitutions.
+ * @returns The nodes to compare and the state to compare them in.
+ */
+function alignNodes(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchState): NodePair {
+	const substitution = getSubstitution(candidate, state);
+	const aligned =
+		substitution === undefined
+			? { candidate, state }
+			: { candidate: substitution, state: { ...state, inlined: false, substitutions: NO_SUBSTITUTIONS } };
+	const unchained = isChainExpression(pattern) && !isChainExpression(aligned.candidate);
+	return { ...aligned, pattern: unchained ? pattern.expression : pattern };
+}
+
+/**
+ * `node.name` names a property, not a guard parameter called `name`, so the
+ * property is compared by name.
+ *
+ * @param pattern - Non-computed member access in the guard's body.
+ * @param candidate - Member access of the same shape.
+ * @param state - Bindings so far.
+ * @returns Whether the accesses match.
+ */
+function matchMembers(
+	pattern: ESTree.PrivateFieldExpression | ESTree.StaticMemberExpression,
+	candidate: ESTree.MemberExpression,
+	state: MatchState,
+): boolean {
+	return (
+		!candidate.computed &&
+		(pattern.optional || !candidate.optional) &&
+		pattern.property.type === candidate.property.type &&
+		pattern.property.name === candidate.property.name &&
+		matchNodes(pattern.object, candidate.object, state)
+	);
+}
+
 function matchNodes(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchState): boolean {
-	if (isIdentifier(pattern) && state.parameters.has(pattern.name)) return bind(pattern.name, candidate, state);
-	if (pattern.type !== candidate.type) return false;
+	if (isGuardParameter(pattern, state)) return bindParameter(pattern.name, candidate, state);
 
-	// `node.name` names a property, not the guard's `name` parameter.
-	if (isMemberExpression(pattern) && !pattern.computed && isMemberExpression(candidate)) {
-		return (
-			!candidate.computed &&
-			pattern.optional === candidate.optional &&
-			pattern.property.type === candidate.property.type &&
-			pattern.property.name === candidate.property.name &&
-			matchNodes(pattern.object, candidate.object, state)
-		);
+	const aligned = alignNodes(pattern, candidate, state);
+	if (aligned.pattern.type !== aligned.candidate.type) return false;
+	if (isMemberExpression(aligned.pattern) && !aligned.pattern.computed && isMemberExpression(aligned.candidate)) {
+		return matchMembers(aligned.pattern, aligned.candidate, aligned.state);
 	}
+	return matchFields(aligned.pattern, aligned.candidate, aligned.state);
+}
 
+function matchFields(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchState): boolean {
 	const candidateFields = readFields(candidate);
 	for (const [key, value] of readFields(pattern)) {
 		if (!matchValues(value, candidateFields.get(key), state)) return false;
@@ -150,8 +237,54 @@ function matchTerm(
 	negated: boolean,
 	state: MatchState,
 ): boolean {
-	if (!negated) return matchNodes(pattern, candidate, state);
-	return isUnaryExpression(candidate) && candidate.operator === "!" && matchNodes(pattern, candidate.argument, state);
+	const term = negated ? getNegatedOperand(candidate) : candidate;
+	if (term === undefined) return false;
+	return attempt(state, () => matchNodes(pattern, term, state)) || matchInlined(pattern, term, state);
+}
+
+function getNegatedOperand(candidate: ESTree.Expression): ESTree.Expression | undefined {
+	return isUnaryExpression(candidate) && candidate.operator === "!" ? candidate.argument : undefined;
+}
+
+/**
+ * Runs one matching attempt, undoing any bindings it made if it fails.
+ *
+ * @param state - Bindings to protect.
+ * @param match - Matching step that may add bindings.
+ * @returns Whether the attempt matched.
+ */
+function attempt(state: MatchState, match: () => boolean): boolean {
+	const saved = new Map(state.bindings);
+	const matched = match();
+	if (!matched) {
+		state.bindings.clear();
+		for (const [name, node] of saved) state.bindings.set(name, node);
+	}
+	return matched;
+}
+
+/**
+ * A call to a shared single-return function stands for that function's body,
+ * so `isIdentifier(x)` matches a guard term `node?.type === IDENTIFIER`.
+ *
+ * @param pattern - Term of the guard's body.
+ * @param term - Term of the code's chain.
+ * @param state - Bindings so far.
+ * @returns Whether the inlined call matches the guard's term.
+ */
+function matchInlined(pattern: ESTree.Expression, term: ESTree.Expression, state: MatchState): boolean {
+	if (!isCallExpression(term) || !isIdentifier(term.callee)) return false;
+
+	const inlined = state.getFunction(term.callee.name);
+	if (inlined?.parameters.length !== term.arguments.length) return false;
+
+	const substitutions = new Map<string, ESTree.Node>();
+	for (const [index, parameter] of inlined.parameters.entries()) {
+		const argument = term.arguments.at(index);
+		if (argument === undefined || isSpreadElement(argument)) return false;
+		substitutions.set(parameter, argument);
+	}
+	return matchNodes(pattern, inlined.body, { ...state, inlined: true, substitutions });
 }
 
 function matchChain(
@@ -216,17 +349,14 @@ function matchTermsInAnyOrder(
 	if (candidate === undefined) return true;
 
 	for (const [index, pattern] of patterns.entries()) {
-		const saved = new Map(state.bindings);
 		const remainingPatterns = patterns.toSpliced(index, 1);
-		if (
-			matchTerm(pattern, candidate, negated, state) &&
-			matchTermsInAnyOrder(remainingPatterns, remainingCandidates, negated, state)
-		) {
-			return true;
-		}
-
-		state.bindings.clear();
-		for (const [name, node] of saved) state.bindings.set(name, node);
+		const paired = attempt(
+			state,
+			() =>
+				matchTerm(pattern, candidate, negated, state) &&
+				matchTermsInAnyOrder(remainingPatterns, remainingCandidates, negated, state),
+		);
+		if (paired) return true;
 	}
 	return false;
 }
@@ -257,18 +387,27 @@ function matchBody(
  * @param guard - Guard whose body is a logical chain.
  * @param candidate - Top of a logical chain in the code.
  * @param getText - Source text of a node, to compare repeated arguments.
+ * @param getFunction - Shared functions by name, to see through their calls.
  * @returns The guard's arguments when the chain repeats it.
  */
 export function matchGuard(
 	guard: SharedGuard,
 	candidate: ESTree.LogicalExpression,
 	getText: GetText,
+	getFunction: GetFunction,
 ): GuardMatch | undefined {
 	const patternOperator = guard.body.operator;
 	const negated = candidate.operator !== patternOperator;
 	if (negated && OPPOSITE_OPERATORS.get(patternOperator) !== candidate.operator) return undefined;
 
-	const state: MatchState = { bindings: new Map(), getText, parameters: new Set(guard.parameters) };
+	const state: MatchState = {
+		bindings: new Map(),
+		getFunction,
+		getText,
+		inlined: false,
+		parameters: new Set(guard.parameters),
+		substitutions: NO_SUBSTITUTIONS,
+	};
 	const operators: ChainOperators = { candidate: candidate.operator, negated, pattern: patternOperator };
 	if (!matchBody(guard, candidate, operators, state)) return undefined;
 

@@ -4,7 +4,7 @@ import { createUtilitiesIndexLoader } from "./utilities-index.ts";
 
 import type { UtilitiesIndex } from "./utilities-index.ts";
 
-const REPOSITORY_ROOT = nodePath.resolve(import.meta.dirname, "../../..");
+export const REPOSITORY_ROOT = nodePath.resolve(import.meta.dirname, "../../..");
 
 /** This repository's shared utility modules, re-read at most once a second. */
 export const loadRepositoryUtilities: () => UtilitiesIndex = createUtilitiesIndexLoader({

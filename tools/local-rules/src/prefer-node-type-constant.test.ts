@@ -3,6 +3,7 @@ import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import { createNodeTypeCatalog } from "./node-type-catalog";
 import preferNodeTypeConstant, { createPreferNodeTypeConstantRule } from "./prefer-node-type-constant";
+import { indexUtilities } from "./utilities-index";
 
 interface ProbeNode {
 	readonly type: string;
@@ -12,6 +13,7 @@ const catalog = createNodeTypeCatalog(
 	Object.entries({
 		BLOCK_STATEMENT: "BlockStatement",
 		CALL_EXPRESSION: "CallExpression",
+		IDENTIFIER: "Identifier",
 		isBindingIdentifier: (node: ProbeNode): boolean => node.type === "Identifier",
 		isCallExpression: (node?: null | ProbeNode): boolean => node?.type === "CallExpression",
 		isIdentifierName: (node: ProbeNode): boolean => node.type === "Identifier",
@@ -21,15 +23,39 @@ const catalog = createNodeTypeCatalog(
 /** Inline uses in other files of the bundle. */
 const OTHER_FILE_USAGE = new Map([["ContinueStatement", 1]]);
 
+const utilities = indexUtilities([
+	{
+		source: [
+			"export function isIdentifierNamed(node: ESTree.Node | null | undefined, name: string): boolean {",
+			"\treturn node?.type === IDENTIFIER && node.name === name;",
+			"}",
+		].join("\n"),
+		specifier: "@small-rules/example",
+	},
+]);
+
 const rule = createPreferNodeTypeConstantRule({
 	catalog,
 	countUsage: (nodeType, _filename, liveCounts) =>
 		(liveCounts.get(nodeType) ?? 0) + (OTHER_FILE_USAGE.get(nodeType) ?? 0),
+	getUtilities: () => utilities,
 });
 
 describe("prefer-node-type-constant", () => {
 	ts.run("prefer-node-type-constant", rule, {
 		invalid: [
+			{
+				code: "if (value.type === IDENTIFIER && value.name === identifierName && isUsed(value)) {}",
+				errors: [
+					{
+						data: {
+							guards: "isIdentifierName, isBindingIdentifier",
+							replacement: "isIdentifierName(value)",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
 			{
 				code: 'if (node.callee.type === "CallExpression") {}',
 				errors: [
@@ -128,6 +154,7 @@ describe("prefer-node-type-constant", () => {
 			},
 		],
 		valid: [
+			"if (value.type === IDENTIFIER && value.name === identifierName) {}",
 			'if (node.type === "TSInferType") {}',
 			"if (node.type === BLOCK_STATEMENT) {}",
 			"if (node.type === SOMETHING_ELSE) {}",

@@ -13,17 +13,22 @@ import {
 import { createNodeTypeCatalog } from "./node-type-catalog.ts";
 import { oxlintUtilities } from "./oxlint-utilities-exports.ts";
 import { createProjectUsageCounter } from "./project-usage.ts";
+import { loadRepositoryUtilities, REPOSITORY_ROOT } from "./repository-utilities.ts";
+import { findSharedGuard, getChainTop } from "./shared-guard-search.ts";
 
 import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
 
 import type { NodeTypeCatalog } from "./node-type-catalog.ts";
 import type { CountUsage } from "./project-usage.ts";
+import type { UtilitiesIndex } from "./utilities-index.ts";
 
 type MessageIds = "addConstant" | "useConstant" | "useGuard";
 
 export interface PreferNodeTypeConstantDependencies {
 	readonly catalog: NodeTypeCatalog;
 	readonly countUsage: CountUsage;
+	/** Shared guards: chains they cover go to `prefer-existing-guard`. */
+	readonly getUtilities: () => UtilitiesIndex;
 }
 
 const { isIdentifier } = oxlintUtilities;
@@ -83,6 +88,7 @@ function getGuardSuggestion(
 export function createPreferNodeTypeConstantRule({
 	catalog,
 	countUsage,
+	getUtilities,
 }: PreferNodeTypeConstantDependencies): CreateRule<undefined, MessageIds> {
 	return defineRule({
 		create(context): Visitor {
@@ -91,6 +97,16 @@ export function createPreferNodeTypeConstantRule({
 			const literals = new Array<ESTree.StringLiteral>();
 			const replacedByGuard = new Set<ESTree.StringLiteral>();
 			const found = new Array<ESTree.StringLiteral>();
+			const utilities = getUtilities();
+
+			function getText(node: ESTree.Node): string {
+				return sourceCode.getText(node);
+			}
+
+			function isCoveredBySharedGuard(node: ESTree.BinaryExpression): boolean {
+				const top = getChainTop(node);
+				return top !== undefined && findSharedGuard(utilities, top, getText) !== undefined;
+			}
 
 			/** Records the inline node types a collector just put in `found`. */
 			function record(): void {
@@ -148,7 +164,7 @@ export function createPreferNodeTypeConstantRule({
 					found.length = 0;
 					collectComparedNodeTypes(node, found);
 					record();
-					if (!reportGuard(node)) return;
+					if (!isCoveredBySharedGuard(node) && !reportGuard(node)) return;
 					for (const literal of found) replacedByGuard.add(literal);
 				},
 				"Program:exit"(): void {
@@ -179,8 +195,6 @@ export function createPreferNodeTypeConstantRule({
 	});
 }
 
-const REPOSITORY_ROOT = nodePath.resolve(import.meta.dirname, "../../..");
-
 const preferNodeTypeConstant = createPreferNodeTypeConstantRule({
 	catalog: createNodeTypeCatalog(Object.entries(oxlintUtilities)),
 	countUsage: createProjectUsageCounter({
@@ -190,6 +204,7 @@ const preferNodeTypeConstant = createPreferNodeTypeConstantRule({
 		],
 		maxAgeMilliseconds: 1000,
 	}),
+	getUtilities: loadRepositoryUtilities,
 });
 
 export default preferNodeTypeConstant;
