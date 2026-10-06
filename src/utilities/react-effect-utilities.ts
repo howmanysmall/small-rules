@@ -416,7 +416,7 @@ function matchesNamedImport(
 	if (!isImportSpecifier(definition.node)) return false;
 	/* v8 ignore stop */
 	const { imported } = definition.node;
-	if (isIdentifier(imported) && imported.name === importedName) return true;
+	if (isIdentifierNamed(imported, importedName)) return true;
 	/* v8 ignore next -- string-literal import specifiers are a parser edge case not produced by the yuku parser. @preserve */
 	if (isAnyLiteral(imported) && imported.value === importedName) return true;
 	return false;
@@ -452,14 +452,14 @@ function isState(state: ReactEffectAnalysisState, reference: Reference): boolean
 	const elements = getStateElements(state, reference);
 	if (elements === undefined) return false;
 	const [stateElement] = elements;
-	return isIdentifier(stateElement) && stateElement.name === reference.identifier.name;
+	return isIdentifierNamed(stateElement, reference.identifier.name);
 }
 
 function isStateSetter(state: ReactEffectAnalysisState, reference: Reference): boolean {
 	const elements = getStateElements(state, reference);
 	if (elements === undefined) return false;
 	const [, setterElement] = elements;
-	return isIdentifier(setterElement) && setterElement.name === reference.identifier.name;
+	return isIdentifierNamed(setterElement, reference.identifier.name);
 }
 
 function getStateElements(

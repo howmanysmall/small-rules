@@ -1,6 +1,7 @@
 import nodePath from "node:path";
 import {
 	isIdentifier,
+	isIdentifierNamed,
 	isImportDeclaration,
 	isImportNamespaceSpecifier,
 	isImportSpecifier,
@@ -51,7 +52,7 @@ function isCreatePortalImport(variable?: ScopeVariable): boolean {
 
 		const { imported } = definition.node;
 		/* v8 ignore next -- @preserve createPortal imports are represented as identifier import specifiers by the parser. */
-		if (isIdentifier(imported) && imported.name === "createPortal") return true;
+		if (isIdentifierNamed(imported, "createPortal")) return true;
 	}
 
 	return false;
