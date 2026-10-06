@@ -7,6 +7,7 @@ import {
 	isCallExpression,
 	isIdentifier,
 	isMemberExpression,
+	isNode,
 	isSpreadElement,
 	LOGICAL_EXPRESSION,
 	WHILE_STATEMENT,
@@ -107,7 +108,7 @@ function isNodeWithParent(value: InspectableNode): value is { readonly parent: I
 
 function getNodeType(value: InspectableNode): string | undefined {
 	/* v8 ignore next -- @preserve scope reference parents are parser nodes with string type tags. */
-	return Predicate.isObject(value) && Predicate.isString(value.type) ? value.type : undefined;
+	return isNode(value) ? value.type : undefined;
 }
 
 function getOperator(value: InspectableNode): string | undefined {

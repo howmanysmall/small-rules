@@ -30,7 +30,7 @@ import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
-import { ROBLOX_TS } from "$oxc-utilities/react-utilities";
+import { ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 
 import type { BindingName, FixReturn } from "@small-rules/oxlint-utilities";
 import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -390,7 +390,7 @@ function reportLengthArrayConstructor(
 	options: Required<NoArrayConstructorElementsOptions>,
 	lengthExpressionText: string,
 ): void {
-	if (options.environment === "roblox-ts") return;
+	if (options.environment === ROBLOX_TS) return;
 
 	context.report({
 		messageId: "avoidLengthConstructorInStandard",
@@ -580,10 +580,10 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 				additionalProperties: false,
 				properties: {
 					environment: {
-						default: "roblox-ts",
+						default: ROBLOX_TS,
 						description:
 							"Array constructor environment mode: 'roblox-ts' allows new Array(length); 'standard' reports it.",
-						enum: ["roblox-ts", "standard"],
+						enum: [ROBLOX_TS, STANDARD],
 						type: "string",
 					},
 					requireExplicitGenericOnNewArray: {

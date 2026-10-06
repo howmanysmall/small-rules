@@ -12,14 +12,12 @@
 // module competitors; and isolates concrete string-literal module blocks.
 
 import {
+	isAnyImportSpecifier,
 	isBlockStatement,
 	isClassDeclaration,
 	isClassExpression,
 	isExportNamedDeclaration,
 	isIdentifier,
-	isImportDefaultSpecifier,
-	isImportNamespaceSpecifier,
-	isImportSpecifier,
 	isNode,
 	isProgram,
 	isStaticBlock,
@@ -153,6 +151,7 @@ function getNamespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArra
 function getChildNamespaceScope(parent: NamespaceScopeKey, name: string): NamespaceScopeKey {
 	const existing = parent.children.get(name);
 	if (existing !== undefined) return existing;
+
 	const created = createNamespaceScopeKey(false);
 	parent.children.set(name, created);
 	return created;
@@ -161,6 +160,7 @@ function getChildNamespaceScope(parent: NamespaceScopeKey, name: string): Namesp
 function getPrivateNamespaceRoot(block: ESTree.TSModuleBlock, scopes: NamespaceScopes): NamespaceScopeKey {
 	const existing = scopes.privateRoots.get(block);
 	if (existing !== undefined) return existing;
+
 	const created = createNamespaceScopeKey(false);
 	scopes.privateRoots.set(block, created);
 	return created;
@@ -172,8 +172,12 @@ function getNamespaceScopeBase(
 	scopes: NamespaceScopes,
 ): NamespaceScopeKey {
 	if (!isTsModuleBlock(lexicalScope)) return scopes.root;
+
 	const parent = scopes.byBlock.get(lexicalScope);
-	if (parent === undefined) return getPrivateNamespaceRoot(lexicalScope, scopes);
+	if (parent === undefined) {
+		return getPrivateNamespaceRoot(lexicalScope, scopes);
+	}
+
 	if (isExportNamedDeclaration(module.parent) || scopes.ambientBlocks.has(lexicalScope)) return parent;
 	return getPrivateNamespaceRoot(lexicalScope, scopes);
 }
@@ -190,12 +194,14 @@ function registerNamespaceScope(
 	scopes: NamespaceScopes,
 ): void {
 	const names = getNamespaceNameParts(module);
-	const body: unknown = module.body;
+	const { body } = module;
 	if (!isNode(body) || !isTsModuleBlock(body)) return;
+
 	if (module.declare || (isTsModuleBlock(lexicalScope) && scopes.ambientBlocks.has(lexicalScope))) {
 		scopes.ambientBlocks.add(body);
 	}
 	if (names === undefined) return;
+
 	let scope = getNamespaceScopeBase(module, lexicalScope, scopes);
 	for (const name of names) scope = getChildNamespaceScope(scope, name);
 	scope.blocks.add(body);
@@ -208,8 +214,10 @@ function getBindingScope(
 	scopes: NamespaceScopes,
 ): TypeBindingScope {
 	if (!isTsModuleBlock(lexicalScope)) return lexicalScope;
+
 	const namespaceScope = scopes.byBlock.get(lexicalScope);
 	if (namespaceScope === undefined) return lexicalScope;
+
 	if ((parent !== null && isExportNamedDeclaration(parent)) || scopes.ambientBlocks.has(lexicalScope)) {
 		return namespaceScope;
 	}
@@ -217,19 +225,31 @@ function getBindingScope(
 }
 
 function getDeclaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | undefined {
-	if (isTsTypeAliasDeclaration(node)) return { name: node.id.name, alias: node, interface: undefined };
-	if (isTsInterfaceDeclaration(node)) return { name: node.id.name, alias: undefined, interface: node };
+	if (isTsTypeAliasDeclaration(node)) {
+		return { name: node.id.name, alias: node, interface: undefined };
+	}
+
+	if (isTsInterfaceDeclaration(node)) {
+		return { name: node.id.name, alias: undefined, interface: node };
+	}
+
 	if (isTsEnumDeclaration(node) || isClassDeclaration(node) || isClassExpression(node)) {
 		return node.id === null ? undefined : { name: node.id.name, alias: undefined, interface: undefined };
 	}
-	if (isImportSpecifier(node) || isImportDefaultSpecifier(node) || isImportNamespaceSpecifier(node)) {
+
+	if (isAnyImportSpecifier(node)) {
 		return { name: node.local.name, alias: undefined, interface: undefined };
 	}
-	if (isTsImportEqualsDeclaration(node)) return { name: node.id.name, alias: undefined, interface: undefined };
+
+	if (isTsImportEqualsDeclaration(node)) {
+		return { name: node.id.name, alias: undefined, interface: undefined };
+	}
+
 	if (isTsModuleDeclaration(node)) {
 		const name = getModuleBindingName(node);
 		return name === undefined ? undefined : { name, alias: undefined, interface: undefined };
 	}
+
 	return undefined;
 }
 
@@ -251,6 +271,7 @@ function collectTypeBindings(
 		const lexicalScope = getEnclosingTypeScope(node, program);
 		if (isTsGlobalDeclaration(node)) registerGlobalScope(node, scopes);
 		if (isTsModuleDeclaration(node)) registerNamespaceScope(node, lexicalScope, scopes);
+
 		const declared = getDeclaredTypeBinding(node);
 		if (declared !== undefined) {
 			const bindings = bindingsByName.get(declared.name) ?? [];
@@ -274,9 +295,8 @@ function getScopeDistance(scope: TypeBindingScope, node: ESTree.Node): number | 
 		if (isNamespaceScopeKey(scope)) {
 			if (isTsModuleBlock(current) && scope.blocks.has(current)) return distance;
 			if (scope.programFallback && isProgram(current)) return distance + 1;
-		} else if (current === scope) {
-			return distance;
-		}
+		} else if (current === scope) return distance;
+
 		current = current.parent;
 		distance += 1;
 	}
@@ -290,17 +310,20 @@ function getNearestTypeBindings(
 ): ReadonlyArray<TypeBinding> {
 	const candidates = environment.bindingsByName.get(name) ?? [];
 	let nearestDistance = Number.POSITIVE_INFINITY;
-	let nearest: Array<TypeBinding> = [];
+	let nearest = new Array<TypeBinding>();
 	for (const candidate of candidates) {
 		const distance = getScopeDistance(candidate.scope, use);
 		if (distance === undefined || distance > nearestDistance) continue;
+
 		if (distance === nearestDistance) {
 			nearest.push(candidate);
 			continue;
 		}
+
 		nearestDistance = distance;
 		nearest = [candidate];
 	}
+
 	return nearest;
 }
 
@@ -320,11 +343,14 @@ export function createTypeAliasEnvironment(
 		environmentsByVisitorKeys = new WeakMap();
 		environmentsByProgram.set(program, environmentsByVisitorKeys);
 	}
+
 	const cached = environmentsByVisitorKeys.get(visitorKeys);
 	if (cached !== undefined) return cached;
+
 	const bindingsByName = new Map<string, Array<TypeBinding>>();
-	const aliases: Array<ESTree.TSTypeAliasDeclaration> = [];
+	const aliases = new Array<ESTree.TSTypeAliasDeclaration>();
 	collectTypeBindings(program, visitorKeys, bindingsByName, aliases);
+
 	const environment = { aliases, bindingsByName, visitorKeys };
 	environmentsByVisitorKeys.set(visitorKeys, environment);
 	return environment;
@@ -344,6 +370,7 @@ export function getVisibleTypeAlias(
 	environment: TypeAliasEnvironment,
 ): ESTree.TSTypeAliasDeclaration | undefined {
 	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
+
 	const bindings = getNearestTypeBindings(name, use, environment);
 	return bindings.length === 1 ? bindings[0]?.alias : undefined;
 }
@@ -362,13 +389,16 @@ export function getVisibleInterfaceDeclarations(
 	environment: TypeAliasEnvironment,
 ): ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined {
 	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
+
 	const bindings = getNearestTypeBindings(name, use, environment);
 	if (bindings.length === 0) return undefined;
+
 	const declarations = new Array<ESTree.TSInterfaceDeclaration>();
 	for (const binding of bindings) {
 		if (binding.interface === undefined) return undefined;
 		declarations.push(binding.interface);
 	}
+
 	return declarations;
 }
 
@@ -397,17 +427,19 @@ function getAliasSubstitutions(
 	caller: TypeResolution,
 	resolving: ReadonlySet<ESTree.TSTypeAliasDeclaration>,
 ): SubstitutionEnvironment | undefined {
-	const parameters = alias.typeParameters?.params ?? [];
-	const arguments_ = reference.typeArguments?.params ?? [];
+	const typeParameters = alias.typeParameters?.params ?? [];
+	const typeArguments = reference.typeArguments?.params ?? [];
 	const next = new Map<string, Substitution>();
-	for (const [index, parameter] of parameters.entries()) {
-		const explicitArgument = arguments_[index];
+	for (const [index, parameter] of typeParameters.entries()) {
+		const explicitArgument = typeArguments[index];
 		const argument = explicitArgument ?? parameter.default;
 		if (argument === null) return undefined;
+
 		const environment =
 			explicitArgument === undefined
 				? { owner: alias, parameters: new Map(next) }
 				: caller[resolutionContext].environment;
+
 		next.set(parameter.name.name, {
 			environment,
 			resolving: explicitArgument === undefined ? resolving : caller[resolutionContext].resolving,
@@ -476,13 +508,17 @@ export function resolveTypeReference(
 			type: substitution.type,
 		};
 	}
+
 	const alias = getVisibleTypeAlias(name, resolution.type, environment);
 	if (alias === undefined || resolution[resolutionContext].resolving.has(alias)) return undefined;
+
 	const resolving = new Set<ESTree.TSTypeAliasDeclaration>([alias]);
 	const previouslyResolving = resolution[resolutionContext].resolving;
 	for (const resolvingAlias of previouslyResolving) resolving.add(resolvingAlias);
+
 	const substitutions = getAliasSubstitutions(alias, resolution.type, resolution, resolving);
 	if (substitutions === undefined) return undefined;
+
 	return { [resolutionContext]: { environment: substitutions, resolving }, type: alias.typeAnnotation };
 }
 

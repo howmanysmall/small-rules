@@ -1,7 +1,6 @@
 import {
-	isArrowFunctionExpression,
 	isBindingIdentifier,
-	isFunctionExpression,
+	isCallbackFunction,
 	isMemberExpression,
 	isMethodDefinition,
 	isThisExpression,
@@ -221,24 +220,12 @@ const noRecursive = createRule("no-recursive", "general", {
 			},
 
 			VariableDeclarator(node): void {
-				if (
-					!isBindingIdentifier(node.id) ||
-					node.init === null ||
-					(!isFunctionExpression(node.init) && !isArrowFunctionExpression(node.init))
-				) {
-					return;
-				}
+				if (!isBindingIdentifier(node.id) || !isCallbackFunction(node.init)) return;
 				registerFunction(node.id.name);
 				pushFunction(node.id.name);
 			},
 			"VariableDeclarator:exit"(node): void {
-				if (
-					!isBindingIdentifier(node.id) ||
-					node.init === null ||
-					(!isFunctionExpression(node.init) && !isArrowFunctionExpression(node.init))
-				) {
-					return;
-				}
+				if (!isBindingIdentifier(node.id) || !isCallbackFunction(node.init)) return;
 				popFunction();
 			},
 		};

@@ -21,17 +21,16 @@ import {
 	isProgram,
 	isTemplateLiteral,
 	isTsAnyKeyword,
-	isTsAsExpression,
 	isTsIndexSignature,
 	isTsNumberKeyword,
 	isTsObjectKeyword,
 	isTsStringKeyword,
 	isTsSymbolKeyword,
-	isTsTypeAssertion,
 	isTsTypeLiteral,
 	isTsTypeReference,
 	isTsUnionType,
 	isTsUnknownKeyword,
+	isTypeAssertionExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
 	TS_ARRAY_TYPE,
@@ -145,7 +144,7 @@ function getAssertionFromExpression(
 	expression: ESTree.Expression,
 ): ESTree.TSAsExpression | ESTree.TSTypeAssertion | undefined {
 	const unwrapped = stripParenthesis(expression);
-	return isTsAsExpression(unwrapped) || isTsTypeAssertion(unwrapped) ? unwrapped : undefined;
+	return isTypeAssertionExpression(unwrapped) ? unwrapped : undefined;
 }
 
 function getNormalizedTypeText(sourceText: string, type: ESTree.TSType): string {
@@ -236,7 +235,7 @@ function getTypeAnnotation(node: MaybeAnnotated): ESTree.TSTypeAnnotation | unde
 
 function getDirectKnownValueEvidence(expression: ESTree.Expression): KnownValueEvidence | undefined {
 	const unwrapped = stripParenthesis(expression);
-	if (isTsAsExpression(unwrapped) || isTsTypeAssertion(unwrapped)) {
+	if (isTypeAssertionExpression(unwrapped)) {
 		/* v8 ignore next -- The broad-assertion path is retained for malformed/intermediate ASTs. @preserve */
 		if (getBroadTypeKind(unwrapped.typeAnnotation) !== undefined) return undefined;
 		return { type: unwrapped.typeAnnotation };
@@ -332,11 +331,14 @@ function getWidenedBinding(
 	const boundary = getFunctionBoundary(declarator);
 	const declaredAnnotation = getTypeAnnotation(bindingId);
 	const declaredType = declaredAnnotation?.typeAnnotation;
+
 	const initializerAssertion = getAssertionFromExpression(declarator.init);
 	const initializerBroadKind =
 		initializerAssertion === undefined ? undefined : getBroadTypeKind(initializerAssertion.typeAnnotation);
+
 	const declaredBroadKind = declaredType === undefined ? undefined : getBroadTypeKind(declaredType);
 	const broadKind = declaredBroadKind ?? initializerBroadKind;
+
 	if (broadKind === undefined) return undefined;
 
 	const originalExpression =

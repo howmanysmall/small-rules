@@ -50,7 +50,7 @@ import {
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-import { isReactImportedCall } from "$oxc-utilities/react-utilities";
+import { isReactImportedCall, STANDARD } from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
 
@@ -196,7 +196,7 @@ function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environme
 
 function getReactSourcesForEnvironment(environment: Environment): ReadonlySet<string> {
 	// Same set as `react-utilities.getReactSources`.
-	if (environment === "standard") return new Set(["react", "react-dom"]);
+	if (environment === STANDARD) return new Set(["react", "react-dom"]);
 	return new Set(["@rbxts/react", "@rbxts/roact"]);
 }
 

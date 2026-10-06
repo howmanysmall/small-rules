@@ -29,6 +29,7 @@ import {
 	isEnvironment,
 	ROBLOX_TS,
 } from "$oxc-utilities/react-utilities";
+import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
 import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
@@ -96,7 +97,7 @@ function isIdentifierAtArrayIndex(pattern: ESTree.ArrayPattern, identifierName: 
 }
 
 function isModuleScope(variable: Variable): boolean {
-	return variable.scope.type === "module" || variable.scope.type === "global";
+	return isModuleLevelScope(variable.scope);
 }
 
 const enum StableKind {
