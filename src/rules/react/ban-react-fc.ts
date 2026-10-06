@@ -1,4 +1,10 @@
-import { isTsTypeAnnotationUnknown } from "@small-rules/oxlint-utilities";
+import {
+	isArrowFunctionExpression,
+	isIdentifier,
+	isTsQualifiedName,
+	isTsTypeAnnotationUnknown,
+	isTsTypeReference,
+} from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -7,8 +13,8 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 const BANNED_FC_NAMES = new Set(["FC", "FunctionComponent", "VFC", "VoidFunctionComponent"]);
 
 function getBannedTypeName(typeName: ESTree.Node): string | undefined {
-	if (typeName.type === "Identifier" && BANNED_FC_NAMES.has(typeName.name)) return typeName.name;
-	if (typeName.type === "TSQualifiedName" && BANNED_FC_NAMES.has(typeName.right.name)) return typeName.right.name;
+	if (isIdentifier(typeName) && BANNED_FC_NAMES.has(typeName.name)) return typeName.name;
+	if (isTsQualifiedName(typeName) && BANNED_FC_NAMES.has(typeName.right.name)) return typeName.right.name;
 	return undefined;
 }
 
@@ -26,9 +32,9 @@ const banReactFc = createRule("ban-react-fc", "react", {
 
 				const inner = typeAnnotation.typeAnnotation;
 				if (
-					inner.type !== "TSTypeReference" ||
+					!isTsTypeReference(inner) ||
 					getBannedTypeName(inner.typeName) === undefined ||
-					node.init?.type !== "ArrowFunctionExpression"
+					!isArrowFunctionExpression(node.init)
 				) {
 					return;
 				}
