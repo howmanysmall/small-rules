@@ -9,7 +9,7 @@ import type { Scope } from "effect";
 const environmentProtection = Plugin.define({
 	id: "env-protection",
 	effect(context): Effect.Effect<void, never, Scope.Scope> {
-		return Effect.gen(function* effect() {
+		return Effect.gen(function* runEffect() {
 			yield* context.tool.hook("execute.before", (event) => {
 				if (event.tool !== "read") return Effect.void;
 

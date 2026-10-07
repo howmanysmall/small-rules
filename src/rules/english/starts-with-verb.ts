@@ -35,6 +35,9 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 			FunctionDeclaration(node): void {
 				if (node.id !== null) reportIfNotVerb(node.id);
 			},
+			FunctionExpression(node): void {
+				if (node.id !== null) reportIfNotVerb(node.id);
+			},
 			MethodDefinition(node): void {
 				if (node.kind !== "method" || node.override === true) return;
 				const nameNode = getMemberNameNode(node.key, node.computed);
