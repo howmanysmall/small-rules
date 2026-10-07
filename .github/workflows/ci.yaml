@@ -80,14 +80,15 @@ jobs:
         with:
           tools: actionlint pinact zizmor
 
-      - if: steps.changes.outputs.changed == 'true'
-        name: actionlint
-        run: actionlint
+      - parallel:
+          - if: steps.changes.outputs.changed == 'true'
+            name: actionlint
+            run: actionlint
 
-      - if: steps.changes.outputs.changed == 'true'
-        name: pinact
-        run: pinact run
+          - if: steps.changes.outputs.changed == 'true'
+            name: pinact
+            run: pinact run
 
-      - if: steps.changes.outputs.changed == 'true'
-        name: zizmor
-        run: zizmor .github
+          - if: steps.changes.outputs.changed == 'true'
+            name: zizmor
+            run: zizmor .github
