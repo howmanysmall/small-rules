@@ -571,9 +571,6 @@ importers:
 
   .:
     dependencies:
-      '@small-rules/oxlint-utilities':
-        specifier: workspace:*
-        version: link:packages/oxlint-utilities
       arktype:
         specifier: catalog:runtime
         version: 2.2.7
@@ -632,6 +629,9 @@ importers:
       '@small-rules/arktype-utilities':
         specifier: workspace:*
         version: link:packages/arktype-utilities
+      '@small-rules/oxlint-utilities':
+        specifier: workspace:*
+        version: link:packages/oxlint-utilities
       '@small-rules/rule-harness':
         specifier: workspace:*
         version: link:tools/rule-harness
