@@ -7,10 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-known-value-widening">
 	<Fragment slot="rationale">
 		<p>
-			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. An explicit `unknown`,
-			`object`, open dictionary, or anonymous-object annotation can erase the useful evidence an object literal
-			already has. Prefer inference, or `satisfies` when you need to check the object against a wider
-			contract without throwing away its known keys.
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. A written `unknown`,
+			`object`, open map, or unnamed object type can wipe what an object you wrote still shows. Let the type be
+			what TS infers. Or use `satisfies` to check a wider contract and keep the known keys.
 		</p>
 	</Fragment>
 </RulePage>

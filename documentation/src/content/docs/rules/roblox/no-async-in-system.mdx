@@ -8,7 +8,7 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			Planck systems run synchronously. If you call a yielding Roblox API from inside a system function, it pauses
-			the entire world update mid-tick. Bad! We do not want this.
+			the entire world update mid-tick. Don't do this.
 		</p>
 		<p>
 			This catches any yielding call inside functions typed as `PlanckSystem`, `System`, `SystemFunction`,

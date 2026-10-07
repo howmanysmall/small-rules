@@ -7,12 +7,12 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-native-properties-spread">
 	<Fragment slot="rationale">
 		<p>
-			Spreading a static property bag into `nativeProperties` (or onto a JSX element through an intermediate
-			object) allocates a brand new table every single render. Pointless garbage if the bag never changes.
+			Spreading a static bag into `nativeProperties`, or onto a JSX tag through a temp object, builds a new table
+			on each render. Waste if the bag never changes.
 		</p>
 		<p>
-			This catches spreads where the source is a literal object or a module-level constant -- anything that's
-			deterministic. Inline the properties directly on the element instead and skip the copy.
+			This catches a spread from an object literal or a module-level constant, the kind that won't change. Put
+			the fields on the tag and skip the copy.
 		</p>
 	</Fragment>
 </RulePage>

@@ -7,7 +7,7 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="require-async-suffix">
 	<Fragment slot="rationale">
 		<p>
-			An async function returns a promise, and nothing at the call site tells you that unless the name does. With
+			An async function returns a promise, and nothing at the call site shows that unless the name does. With
 			the suffix, `loadProfileAsync()` without an `await` in front of it stands out on its own, and you don't have
 			to hover the function to find out.
 		</p>

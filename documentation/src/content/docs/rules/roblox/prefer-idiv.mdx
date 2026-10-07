@@ -7,13 +7,12 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="prefer-idiv">
 	<Fragment slot="rationale">
 		<p>
-			roblox-ts has a dedicated integer division operator, `x.idiv(y)`, that does exactly what `math.floor(x / y)`
-			does but compiles to `x // y` instead of a floor plus a division. Should be a bit faster, and it's clearer
-			about what you meant.
+			roblox-ts has `x.idiv(y)`. It does what `math.floor(x / y)` does, and it compiles to `x // y`. That skips a
+			floor call. It should be a bit faster, and it says what you meant.
 		</p>
 		<p>
-			Auto-fixes `math.floor(x / y)` to `x.idiv(y)`. Only fires when the divisor is a division expression, so it
-			won't touch anything weird.
+			Auto-fixes `math.floor(x / y)` to `x.idiv(y)`. It only reports when the right side is a division. It skips
+			odd cases.
 		</p>
 	</Fragment>
 </RulePage>

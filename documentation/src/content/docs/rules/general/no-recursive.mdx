@@ -7,14 +7,11 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-recursive">
 	<Fragment slot="rationale">
 		<p>
-			This lint flags recursion. Luau has no{" "}
-			<a href="https://github.com/luau-lang/luau/discussions/1183#discussioncomment-8719963">
-				tail-call optimization
-			</a>, which Roblox employees confirmed, so a recursive call can exhaust the stack. The National Aeronautics and
-			Space Administration's{" "}
-			<a href="http://web.eecs.umich.edu/~imarkov/10rules.pdf">Power of 10 rules for safety-critical code</a> also
-			ban direct or indirect recursion so each path is deterministic and bounded. This suits code where
-			performance and safety come first.
+			This lint flags a call that calls itself. Luau has no{" "}
+			<a href="https://github.com/luau-lang/luau/discussions/1183#discussioncomment-8719963">tail calls</a>. Roblox
+			staff said so. That call can fill the stack. The{" "}
+			<a href="http://web.eecs.umich.edu/~imarkov/10rules.pdf">Power of 10 rules</a> also ban that kind of call,
+			direct or not. Each path has a fixed bound. Use it when speed and safety come first.
 		</p>
 	</Fragment>
 </RulePage>

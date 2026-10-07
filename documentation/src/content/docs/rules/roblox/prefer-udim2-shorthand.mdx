@@ -8,8 +8,8 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			When you write `new UDim2(scaleX, 0, scaleY, 0)` those zeros are dead weight. Same story for `new UDim2(0,
-			offsetX, 0, offsetY)`. You are ONLY using scale, or ONLY using offset, and the constructor makes you spell
-			out all four anyway.
+			offsetX, 0, offsetY)`. You are using only scale, or only offset. The constructor makes you spell out all four
+			anyway.
 		</p>
 		<p>
 			`UDim2.fromScale(scaleX, scaleY)` and `UDim2.fromOffset(offsetX, offsetY)` say exactly what you meant

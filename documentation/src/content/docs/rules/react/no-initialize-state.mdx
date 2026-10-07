@@ -14,14 +14,14 @@ import RulePage from "$components/rule-page.astro";
 			which is a web-React problem.
 		</p>
 		<p>
-			The shape is a mount-only effect that synchronously sets state. You already have a place for initial values:
-			the `useState()` initializer. An effect that initializes state means the first frame renders without the
-			value, then the effect fires and it pops in a frame later. On the web that's also a hydration mismatch,
-			which is what the upstream link is about; roblox-ts has no server render, so that half doesn't apply here,
-			but the initial-value problem is identical.
+			It's a mount-only effect that synchronously sets state. You already have a place for initial values: the
+			`useState()` initializer. An effect that sets state means the first frame renders without the value. Then
+			the effect runs and it pops in a frame later. On the web that's also a hydration mismatch, which is what
+			the upstream link is about. roblox-ts has no server render, so that half doesn't apply here, but the
+			initial-value problem is the same.
 		</p>
 		<p>
-			The one legitimate case is async initialization, you can't await in an initializer, so the rule backs off
+			The one real case is async init. You can't await in an initializer, and the rule steps back
 			when the state write happens inside an async callback. That's the exception, not the rule.
 		</p>
 	</Fragment>
