@@ -33,7 +33,7 @@ const runHkCheck = Effect.fn("runHkCheck")(
 const runHkCheckOnIdle = Plugin.define({
 	id,
 	effect(context): Effect.Effect<void, never, Scope.Scope> {
-		return Effect.gen(function* effect() {
+		return Effect.gen(function* runEffect() {
 			yield* context.event.subscribe().pipe(
 				Stream.filter((event) => event.type === "session.idle"),
 				Stream.runForEach(runHkCheck),
