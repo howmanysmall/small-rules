@@ -12,7 +12,7 @@ Write the failing test, make it pass, then refactor. Coverage is 100% (`vitest.c
 
 ## Gates
 
-A change is done when all three pass:
+A change is done when all three pass on every file you touched:
 
 | Gate | Command |
 |------|---------|
@@ -20,7 +20,7 @@ A change is done when all three pass:
 | Unit tests with coverage | `nr test:agent` |
 | Type check (`tsgo`) | `nr type-check:agent` |
 
-The `:agent` variants emit compact output; use them instead of `lint`, `test`, and `type-check`. `nr` runs a `package.json` script (`@antfu/ni`). Run one test file with `nr test:agent -- tests/rules/roblox/no-print.test.ts`, or a name pattern with `nr test:agent -t "no-print"`.
+The `:agent` variants emit compact output; use them instead of `lint`, `test`, and `type-check`. A formatting failure is fixed by `nr format` (Biome, then oxfmt). Run one test file with `nr test:agent -- tests/rules/roblox/no-print.test.ts`, or a name pattern with `nr test:agent -t "no-print"`.
 
 ## Hot Paths
 
