@@ -8,11 +8,11 @@ import { Content as RootChangelog } from "../../../../CHANGELOG.md";
 
 <RootChangelog />
 
-## How Releases Work
+## How releases work
 
-`small-rules` uses [bumpp](https://github.com/antfu/bumpp) for versioning. Releases are triggered by pushing a `v*.*.*` tag to the repository.
+`small-rules` uses [bumpp](https://github.com/antfu/bumpp) for versioning. Pushing a `v*.*.*` tag to the repository triggers a release.
 
-Each release is published to NPM via Trusted Publishing (OIDC). `communique` writes the user-facing release notes, and `git-cliff` takes over if that generation fails.
+Each release publishes to npm through Trusted Publishing (OIDC). `communique` writes the user-facing release notes, and `git-cliff` takes over if that generation fails.
 
 <CardGrid>
 	<LinkCard
