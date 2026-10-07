@@ -92,7 +92,6 @@
 		"preversion": "if test -n \"$(git status --porcelain)\"; then echo 'Release requires a clean worktree.' >&2; exit 1; fi"
 	},
 	"dependencies": {
-		"@small-rules/oxlint-utilities": "workspace:*",
 		"arktype": "catalog:runtime",
 		"effect": "catalog:runtime",
 		"ignore": "catalog:runtime",
@@ -114,6 +113,7 @@
 		"@isentinel/hooks": "catalog:tooling",
 		"@mdx-js/language-server": "catalog:tooling",
 		"@small-rules/arktype-utilities": "workspace:*",
+		"@small-rules/oxlint-utilities": "workspace:*",
 		"@small-rules/rule-harness": "workspace:*",
 		"@small-rules/vite-configuration": "workspace:*",
 		"@stryker-mutator/api": "catalog:test",

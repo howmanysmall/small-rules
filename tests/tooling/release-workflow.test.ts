@@ -39,6 +39,16 @@ const isWorkflow = type({
 		.or("undefined"),
 }).readonly();
 
+const isDependencyMap = type("Record<string, string>").readonly().or("undefined");
+
+const isRuntimeDependencies = type({
+	"dependencies?": isDependencyMap,
+	"optionalDependencies?": isDependencyMap,
+	"peerDependencies?": isDependencyMap,
+}).readonly();
+
+const isWorkspacePackages = type({ name: "string" }).readonly().array().readonly();
+
 const isPackageScripts = type({
 	"scripts?": type({
 		"prepublish?": "string | undefined",
@@ -68,6 +78,31 @@ function readPackageManifest(archivePath: string): string {
 	const error = new Error("Packed archive does not contain package/package.json");
 	Error.captureStackTrace(error, readPackageManifest);
 	throw error;
+}
+
+async function packManifestAsync(): Promise<string> {
+	const destination = mkdtempSync(nodePath.join(tmpdir(), "small-rules-pack-"));
+	onTestFinished(async () => rm(destination, { force: true, recursive: true }));
+
+	await $`pnpm pack --pack-destination ${destination}`;
+	const archives = readdirSync(destination).filter((name) => name.endsWith(".tgz"));
+	if (archives.length !== 1) {
+		const error = new Error(`Expected one packed archive, found ${archives.length}`);
+		Error.captureStackTrace(error, packManifestAsync);
+		throw error;
+	}
+
+	return readPackageManifest(nodePath.join(destination, archives[0]!));
+}
+
+function getRuntimeDependencyNames(manifest: string): ReadonlyArray<string> {
+	const { dependencies, optionalDependencies, peerDependencies } = isRuntimeDependencies.assert(JSON.parse(manifest));
+	return [dependencies, optionalDependencies, peerDependencies].flatMap((map) => Object.keys(map ?? {}));
+}
+
+async function getWorkspacePackageNamesAsync(): Promise<ReadonlySet<string>> {
+	const { stdout } = await $`pnpm --recursive list --depth -1 --json`;
+	return new Set(isWorkspacePackages.assert(JSON.parse(stdout)).map(({ name }) => name));
 }
 
 describe("release workflow", () => {
@@ -143,15 +178,18 @@ describe("release workflow", () => {
 	});
 
 	it("resolves catalog dependencies to registry-compatible versions", async () => {
-		expect.assertions(2);
+		expect.assertions(1);
 
-		const destination = mkdtempSync(nodePath.join(tmpdir(), "small-rules-pack-"));
-		onTestFinished(async () => rm(destination, { force: true, recursive: true }));
+		await expect(packManifestAsync()).resolves.not.toContain("catalog:");
+	});
 
-		await $`pnpm pack --pack-destination ${destination}`;
-		const archives = readdirSync(destination).filter((name) => name.endsWith(".tgz"));
+	// Catches v3.3.0: a workspace package in dependencies packs as 0.0.0 and
+	// 404s for every consumer, because workspace packages are never published.
+	it("depends at runtime only on packages published to the registry", async () => {
+		expect.assertions(1);
 
-		expect(archives).toHaveLength(1);
-		expect(readPackageManifest(nodePath.join(destination, archives[0]!))).not.toContain("catalog:");
+		const [manifest, workspacePackages] = await Promise.all([packManifestAsync(), getWorkspacePackageNamesAsync()]);
+
+		expect(getRuntimeDependencyNames(manifest).filter((name) => workspacePackages.has(name))).toStrictEqual([]);
 	});
 });
