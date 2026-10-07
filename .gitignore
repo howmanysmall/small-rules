@@ -53,6 +53,7 @@ hk.local.pkl
 
 .eslintcache*
 .vitest
+.vale/styles
 
 .agents/skills/animate-expo/
 .agents/skills/animate/
