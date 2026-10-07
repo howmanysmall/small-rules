@@ -110,3 +110,5 @@ hk.local.pkl
 .agents/skills/aube
 .agents/skills/communique
 .agents/skills/hk-*
+.agents/skills/implement-spec/
+.agents/skills/retro/

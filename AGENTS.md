@@ -1,220 +1,23 @@
-# Agents Guide
+`@pobammer-ts/small-rules` is an Oxlint-native lint plugin: general TypeScript rules plus Roblox-specific ones. Scripts run with `nr <script>` and mise tasks with `mise run <task>`; `package.json` and `mise.toml` are the index of commands.
 
-This file provides guidance to agents when working with code in this repository.
+## Workflow
 
-## What Is This?
+1. Read [`CODING_STANDARDS.md`](CODING_STANDARDS.md) before the first edit under `src/`, `tests/`, `tools/`, `scripts/`, or `packages/`.
+2. Red first: write the failing test, then the change that turns it green. Done when the gates in `CODING_STANDARDS.md` pass.
+3. Pre-flight the hooks with `hk run check --safe <changed files>`. Done when every step passes.
+4. Commit with `mise run commit '<message>'` (Conventional Commits, signed off). Done when the hooks and the fallow gate below are green.
 
-An Oxlint-native lint plugin (`@pobammer-ts/small-rules`) providing many custom rules for TypeScript projects. The rules target both general and Roblox-specific patterns: React Luau components, Ianitor life cycle, `useReducer` patterns, Roblox UI element conventions, and general TypeScript quality.
+## Pointers
 
-## Rules
-
-You **MUST** follow these guidelines. There is NO exception.
-
-- You are NEVER to cast. This codebase is strongly typed. The `defineRule` function can infer options without manual type annotations. Do NOT do it.
-- You MUST use `nr lint:agent [files...]` to run the linter. There is no exception to failing lint checks.
-- You MUST use `nr test:agent` to run Vitest unit tests. There is no exception to failing tests.
-- You MUST have 100% coverage in Vitest.
-- You MUST use `nr type-check:agent` to run type checking. There is no exception to failing type checks.
-- You MUST always use TDD.
-
-## Commands
-
-| Command | What it does |
-|---------|-------------|
-| `pnpm install` | Install dependencies from the pnpm dependency graph |
-| `pnpm add` | Install dependencies when `node_modules` exists |
-| `pnpm add cowsay` | Add a dependency |
-| `pnpm add -D cowsay` | Add a dev dependency |
-| `nr build` | Bundle to `dist/index.js` via `tsdown` |
-| `nr test:agent` | Run all Vitest unit tests |
-| `nr test:agent -- tests/rules/roblox/no-print.test.ts` | Run a single test file |
-| `nr test:agent -t "no-print"` | Run tests matching a pattern |
-| `nr lint:agent` | Run oxlint then biome check |
-| `nr type-check:agent` | Run `tsgo` for type checking |
-| `nr format` | Format with `biome check --fix` + `oxfmt` |
-| `nr format:check` | Check formatting without modifying |
-| `nr fallow:dead-code` | Detect unused files, exports, types, dependencies |
-| `nr fallow:dupes` | Detect duplicated and structurally-similar code |
-| `nr fallow:audit` | Gate the current changeset before a commit or PR |
-| `nr fallow:health` | Rank complexity hotspots and refactoring targets |
-| `nr test:mutation` | Run Stryker mutation testing (thresholds: break at 70%) |
-| `nr test:fuzz` | Run vitiate regression from stored corpus |
-| `nr test:fuzz:run` | Run vitiate fuzz testing (10 second default) |
-| `nr release-notes:regenerate` | Interactively regenerate committed release notes with the `communique.toml` model |
-
-Run commands via `nr <script>` (provided by `@antfu/ni`). Mise tasks are defined in `mise.toml`.
-
-## Performance Guidelines
-
-Hot-path rules for AST visitors are documented in [`docs/hot-path-conventions.md`](docs/hot-path-conventions.md). Per-node allocation, stateful regex `g` flags, recursive walks, and pop-based traversal are the common pitfalls — adheres to ADR-0001.
-
-## Vendored Code
-
-Third-party code copied into this repo (currently `src/rules/anti-slop/`, from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)) is described in exactly one place: `VENDORED_COMPONENTS` in [`scripts/utilities/vendored-notices.ts`](scripts/utilities/vendored-notices.ts). Add an entry there, add the provenance header to each vendored file, then run `nr generate:third-party-notices`.
-
-`THIRD-PARTY-NOTICES.md` and the `dist/index.js` legal banner are both generated from that catalog - never hand-edit either. The `//` headers in the sources are stripped by minification, so the notices file and the banner are what actually satisfy the upstream license. `tests/tooling/third-party-notices.test.ts` fails on drift. Full procedure in [`docs/vendoring.md`](docs/vendoring.md).
-
-## Code Architecture
-
-### Entry Point - `src/index.ts`
-
-Uses `definePlugin` from `oxlint-plugin-utilities` to register all rules. Each rule is imported from `$oxc-rules/<category>/<rule-name>` and mapped by kebab-case key. Rules are exported as a default export.
-
-### Rules - `src/rules/*/*.ts`
-
-Each file is a single rule, grouped under `src/rules/<category>/`. Rules are created with:
-
-- **`defineRule()`** - standard oxlint rule factory from `oxlint-plugin-utilities`. Receives `context` (with `report()`, `options`, `sourceCode`) and returns a `Visitor` object keyed by AST node type.
-- **`createBannedGlobalCallRule()`** - convenience factory for banning global function calls (e.g. `print()`, `error()`, `warn()`). Takes `name`, `message`, `alternative`, `messageId`.
-- **Meta** includes: `docs.description`, `messages` (map of `messageId` → template string), `schema` (JSON Schema for options), `type` ("problem" | "suggestion"), `fixable` (optional, for auto-fixable rules).
-- Path alias `$oxc-rules/*` → `src/rules/*`
-
-### Utilities - `src/utilities/*.ts`
-
-Shared helpers used across rules:
-
-- `banned-global-call-rule.ts` - Factory for simple global call bans
-- `oxc-utilities.ts` - ESTree node type guards (`isCallExpression`, `isIdentifierNamed`, `isStringLiteral`, etc.)
-- `ast-utilities.ts` - AST traversal helpers (e.g. `getMemberPropertyName`)
-- `component-utilities.ts` - React component detection
-- `react-utilities.ts`, `react-hook-utilities.ts`, `react-memo-utilities.ts` - React-specific analysis
-- `jest-utilities.ts` - Jest/Vitest matcher and assertion pattern detection
-- `directive-comments.ts` - ESLint-style directive comment parsing
-- `expression-safety.ts` - Side-effect-free expression checking
-- `casing-utilities.ts` - Case convention checks
-- `static-expression-utilities.ts` - Constant expression evaluation
-- `local-component-discovery.ts` - Finding locally-defined React components
-- `recognizers/` - Pattern detectors for code style analysis (`camelCase`, keywords, code footprints)
-- `prevent-abbreviations/` - Abbreviation detection and rule logic
-- Path alias `$oxc-utilities/*` → `src/utilities/*`
-
-### Types - `src/types/*.ts`
-
-Shared type definitions, reexports from `oxlint-plugin-utilities`, and missing ESTree type workarounds.
-
-- Path alias `$oxc-types/*` → `src/types/*`
-
-## Testing
-
-Tests mirror `src/`: `tests/rules/<category>/<rule>.test.ts` (one per rule), `tests/utilities/` (shared helpers), `tests/tooling/` (release, vendoring, and repo scripts), `tests/documentation/`, `tests/rule-relations/`, `tests/properties/` (fast-check rule properties), and `tests/fuzz/*.fuzz.ts`. `tests/index.test.ts` covers plugin metadata. `tests/fixtures/` holds on-disk fixture projects, and `tests/rule-testers.ts` plus `tests/rule-harness/` are the harness (import them as `$test/rule-testers`).
-
-A new fixable rule needs a program generator in `tests/properties/support/fixable-cases-*.ts`; `tests/properties/fixes-settle.test.ts` fails until it has one. Property tests take their run count from `PROPERTY_RUNS` in `tests/property-runs.ts` so the scheduled deep run can raise it.
-
-Tests use the repo-owned Oxc/Vitest rule harness in `tests/rule-testers.ts`. Preconfigured runners:
-
-- `js` - plain JavaScript
-- `jsx` - JSX
-- `ts` - TypeScript
-- `tsx` - TypeScript + JSX
-
-|The harness parses with `yuku-parser`, runs rules directly in Vitest, and supports both `create` and `createOnce`. It does not support the legacy rule tester, `languageOptions.parser`, parser objects, or non-JSON options/settings.
-
-Test pattern:
-
-```ts
-import { describe } from "vitest";
-import rule from "$oxc-rules/roblox/no-print";
-import { js } from "@small-rules/rule-harness/rule-testers";
-
-describe("no-print", () => {
-  js.run("no-print", rule, {
-    invalid: [
-      { code: "print('Hello');", errors: [{ messageId: "noPrint" }] },
-    ],
-    valid: ["Log.info('Hello');"],
-  });
-});
-```
-
-`invalid` cases specify code strings with expected `messageId` (or multiple). `valid` cases are just code strings that should not trigger.
-
-Documented examples (`documentation: { id, title }`) are rendered verbatim on the docs site. Multi-statement snippets must use real newlines via `.join("\n")` arrays — single-line multi-statement code collapses into one unreadable line. `tests/documentation-rule-coverage.test.ts` enforces this.
-
-When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, run `cd documentation && pnpm exec vitest run tests/unit` (CI job `checks / Documentation`). Never hardcode category counts such as `"Showing N rules"` in docs tests — derive them from the catalog/manifest so the next rule addition cannot break CI.
-
-## Key Configuration Files
-
-- `tsconfig.base.json` - Shared strict compiler policy and path aliases
-- `tsconfig.json` - Solution config referencing the library, test, and Node tooling projects
-- `tsconfig.lib.json`, `tsconfig.test.json`, `tsconfig.node.json` - Focused configs for package source, tests, and Bun-enabled repository tooling
-- `biome.jsonc` - Linting + formatting (tabs, 120 width, double quotes)
-- `.fallowrc.jsonc` - fallow entry points, ignores, rule severities, and duplication thresholds (replaces knip, jscpd, and similarity-ts)
-- `mise.toml` - Tool versions and task definitions (ci, check, release)
-- `pnpm-workspace.yaml` - Package manager config (catalogs, trust policy, resolution mode)
-- `stryker.config.mjs` - Mutation testing config, mutates `src/` excluding types/index
-- `vitest.config.ts` - Test config (forks pool, 30s timeout, coverage via v8, tsgo typechecker)
-- `codebook.toml` - Custom dictionary with Roblox-specific terms
-
-## CI Pipeline
-
-`.github/workflows/ci.yaml` runs on push/PR to main (path-filtered) and calls the reusable `checks.yaml` workflow.
-
-`checks.yaml` runs two jobs:
-
-- **Validate** — sequential Biome, Oxlint, type-check (`tsgo`), fallow dead-code, fallow dupes, and minified build on one runner
-- **Test** — Vitest with compact `--reporter github-actions --reporter dot` output
-
-`.github/workflows/deep-tests.yaml` — Weekly and manual only: property tests at 10,000 runs, real fuzzing (`test:fuzz:run`), and Stryker mutation testing, all too slow for every pull request.
-
-`.github/workflows/release.yaml` — Triggered by `v*.*.*` tags or manually with `dry_run`. Does **not** re-run CI: it waits for the matching main-branch CI run for the tag SHA, then publishes via NPM Trusted Publishing (OIDC). The real publish build is `prepublishOnly` only; dry runs still build explicitly. `communique` generates the documentation and GitHub Release notes, with `git-cliff` as the fallback.
-
-## Release Flow
-
-1. `mise run release` - runs local check, then `nr release` (`bumpp` bumps version, commits, tags, pushes)
-2. Tag push triggers `release.yaml`, which waits for the existing successful CI run for that commit
-3. Or `mise run dr` to trigger a dry run on GitHub Actions for validation
-
-## `hk`
-
-- Before changing files, inspect the project with `hk mcp` or `hk run check --safe --format json`.
-- Scope checks to the files you changed. For exact filenames, write a NUL-delimited list and use `--files0-from`; use `--cd` instead of changing hk's process-wide directory.
-- Inspect each planned command's effect. Prefer `--safe`; never run an unknown or destructive command without explicit user approval.
-- Consume normalized diagnostics from JSON/JSONL, preserve raw tool output for debugging, and review the resulting diff after fixes.
-- Use `hk run check --safe --format jsonl` for streaming lifecycle events. A final summary is emitted even when a step fails.
-
-## Agent Skills
-
-### Issue Tracker
-
-Issues are tracked in GitHub Issues on `howmanysmall/small-rules`. See `docs/agents/issue-tracker.md`.
-
-### Triage Labels
-
-Five canonical triage roles, label names equal to role names: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain Docs
-
-Single-context: one root `CONTEXT.md` and `docs/adr/` for ADRs. See `docs/agents/domain.md`.
-
----
+| Before you... | Read |
+|---|---|
+| add or change a rule, or find where something lives | [`docs/architecture.md`](docs/architecture.md) |
+| copy third-party code into the repo | [`docs/vendoring.md`](docs/vendoring.md) |
+| delete, trace, audit, or rank code | [`docs/agents/fallow.md`](docs/agents/fallow.md) |
+| release, debug CI, or run the deep tests | [`docs/release.md`](docs/release.md) |
+| file, read, or triage an issue | [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) and [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md) |
+| name a domain concept | [`GLOSSARY.md`](GLOSSARY.md); to explore the domain, [`docs/agents/domain.md`](docs/agents/domain.md) |
 
 <!-- fallow:setup-hooks:start -->
-## Fallow Local Gate
-
-Before any `git commit` or `git push`, run `fallow audit --format json --quiet --explain --gate-marker agent`. If the verdict is `fail`, fix the reported findings before retrying. Treat JSON runtime errors like `{ "error": true, ... }` as non-blocking.
-
-Audit defaults to `gate=new-only`: only findings introduced by the current changeset affect the verdict. Inherited findings on touched files are reported under `attribution` and annotated with `introduced: false`, but do not block the commit. Set `[audit] gate = "all"` in `fallow.toml` to gate every finding in changed files.
-
-For non-skill agents, treat the task map below as the local onboarding source: run the listed fallow command before destructive edits, before commits, and before pull request handoff.
-
-## Fallow Task Map
-
-| When the agent is about to... | Run |
-|---|---|
-| delete an "unused" export or file | `fallow dead-code --trace <file>:<export>` |
-| prove a TypeScript symbol's exact consumers before refactoring | `fallow dead-code --type-aware --symbol-impact <file>:<export-or-class.method>` |
-| find how one module reaches another | `fallow trace --path <from> <to>` (Reports `reachable: false` instead of failing when no import path exists; type-only hops are reported, not skipped.) |
-| delete an "unused" dependency | `fallow dead-code --trace-dependency <name>` |
-| commit or open a PR | `fallow audit --base <ref>` |
-| read a diff before approving it | `fallow review --base <ref> --brief` (orientation, never gates: deterministic and always exit 0, unlike the audit row) |
-| prioritize refactoring | `fallow health --hotspots --targets` |
-| ask who owns code | `fallow health --ownership` |
-| check untested-but-reachable code | `fallow health --coverage-gaps` |
-| consolidate duplication | `fallow dupes --trace dup:<fingerprint>` |
-| find feature flags | `fallow flags` |
-| check which architecture rules apply to a file before changing it | `fallow guard <files>` |
-| surface security candidates | `fallow security` |
-| understand a finding | `fallow explain <issue-type>` |
-| scope a monorepo | `--workspace <glob> / --changed-workspaces <ref>` (global flags, prefix any command) |
-
+`fallow audit` gates every `git commit` and `git push`; the command, its verdict, and the task map are in [`docs/agents/fallow.md`](docs/agents/fallow.md).
 <!-- fallow:setup-hooks:end -->
