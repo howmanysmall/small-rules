@@ -8,7 +8,7 @@ Where things live and the convention each location carries. `src/` is the plugin
 
 ## Rules - `src/rules/<category>/<rule-name>.ts`
 
-One rule per file. Every rule is built with `createRule(name, category, rule)` from `$oxc-utilities/create-rule`, which wraps an `oxlint-plugin-utilities` `CreateRule` or `CreateOnceRule` and injects `meta.docs.url`. `create(context)` returns a `Visitor` keyed by AST node type; `context` carries `report()`, `options`, and `sourceCode`. `meta` holds `docs.description`, `messages` (`messageId` → template string), `schema` (the option type is inferred from it), `type` (`"problem"` or `"suggestion"`), and `fixable` for auto-fixable rules.
+One rule per file. Every rule is built with `createRule(name, category, rule)` from `$oxc-utilities/create-rule`, which wraps an `oxlint-plugin-utilities` `CreateRule` or `CreateOnceRule` and injects `meta.docs.url`; the option type is inferred from `meta.schema`.
 
 `createBannedGlobalCallRule({ name, alternative, category, message, messageId, ruleName })` from `src/utilities/banned-global-call-rule.ts` builds the simple global-call bans such as `no-print` and `no-warn`.
 
@@ -22,7 +22,7 @@ Ambient declarations only: a module augmentation for `oxlint-plugin-utilities` a
 
 ## TypeScript Layout
 
-Path aliases come from `tsconfig.base.json`: `$oxc-rules/*` → `src/rules/*`, `$oxc-utilities/*` → `src/utilities/*`, `$oxc-types/*` → `src/types/*`, `$oxc-generated/*` → `src/generated/*`, `$test/*` → `tests/*`.
+The `$oxc-*` and `$test/*` path aliases are defined in the `paths` block of `tsconfig.base.json`.
 
 `tsconfig.json` is a solution file over `tsconfig.lib.json`, `tsconfig.test.json`, and `tsconfig.node.json`. Project references are derived from each `package.json`, and a missing one is silent: `tsgo --build` resolves the import through the root `node_modules` and skips the project. `nr references:check` catches it and `nr references:sync` repairs it.
 
