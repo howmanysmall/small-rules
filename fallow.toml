@@ -76,7 +76,14 @@ maxCrap = 30
 crapRefactorBand = 5
 maxUnitSize = 60
 coverage = ".cache/istanbul/coverage-final.json"
-ignore = ["scripts/**", "*.config.ts"]
+# Tests and the rule harness are outside Istanbul coverage, so CRAP there is an estimate.
+# The harness is an AST type switch, and it is already ignored for duplication.
+ignore = [
+	"scripts/**",
+	"*.config.ts",
+	"tests/**",
+	"tools/rule-harness/**",
+]
 suggestInlineSuppression = true
 
 [health.ownership]
