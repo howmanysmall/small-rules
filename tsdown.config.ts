@@ -48,6 +48,7 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 				}
 			: { alwaysBundle: ALWAYS_BUNDLE },
 		dts: {
+			generator: "tsgo",
 			incremental: true,
 			resolver: "oxc",
 		},
