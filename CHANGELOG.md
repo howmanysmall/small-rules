@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.3.1] - 2026-10-07
+
+## Fixed
+- Fixed plugin installation by bundling the private workspace utility instead of declaring it as a runtime dependency - [#79](https://github.com/howmanysmall/small-rules/pull/79)
+
 ## [3.3.0] - 2026-10-07
 
 ## Added
