@@ -17,15 +17,15 @@ import RulePage from "$components/rule-page.astro";
 			By "external state" I mean state that React doesn't own. You can read it and subscribe to it, but you can't
 			derive it from props or other state. On the web that's browser APIs or your store. roblox-ts has no `window`
 			or `navigator`, so in practice it's stores: `store.get()` to read, `store.subscribe()` to listen,
-			`store.unsubscribe()` to clean up. The examples here use a store instead of the online-status
-			code from the React docs.
+			`store.unsubscribe()` to clean up. The examples here use a store instead of the online-status code from the
+			React docs.
 		</p>
 		<p>
-			The rule doesn't actually check that you subscribed to anything, though. It keys off this pattern: the effect
-			body synchronously writes state, and the cleanup references the same setter. That's the
-			subscribe/unsubscribe pair, but it also flags effects that just reset state in their cleanup, with no
-			store in sight. Treat the diagnostic as "this looks like an external store" and check whether there's a real
-			store before reaching for `useSyncExternalStore`.
+			The rule doesn't actually check that you subscribed to anything, though. It keys off this pattern: the
+			effect body synchronously writes state, and the cleanup references the same setter. That's the
+			subscribe/unsubscribe pair, but it also flags effects that just reset state in their cleanup, with no store
+			in sight. Treat the diagnostic as "this looks like an external store" and check whether there's a real store
+			before reaching for `useSyncExternalStore`.
 		</p>
 	</Fragment>
 </RulePage>

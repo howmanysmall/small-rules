@@ -16,13 +16,13 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			It's a mount-only effect that synchronously sets state. You already have a place for initial values: the
 			`useState()` initializer. An effect that sets state means the first frame renders without the value. Then
-			the effect runs and it pops in a frame later. On the web that's also a hydration mismatch, which is what
-			the upstream link is about. roblox-ts has no server render, so that half doesn't apply here, but the
+			the effect runs and it pops in a frame later. On the web that's also a hydration mismatch, which is what the
+			upstream link is about. roblox-ts has no server render, so that half doesn't apply here, but the
 			initial-value problem is the same.
 		</p>
 		<p>
-			The one real case is async init. You can't await in an initializer, and the rule steps back
-			when the state write happens inside an async callback. That's the exception, not the rule.
+			The one real case is async init. You can't await in an initializer, and the rule steps back when the state
+			write happens inside an async callback. That's the exception, not the rule.
 		</p>
 	</Fragment>
 </RulePage>

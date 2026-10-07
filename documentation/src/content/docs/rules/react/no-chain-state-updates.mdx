@@ -14,15 +14,15 @@ import RulePage from "$components/rule-page.astro";
 			React docs.
 		</p>
 		<p>
-			This flags an effect that depends on state and then writes different state. State A changes, the
-			effect runs, it sets state B, you render again. That's a chain, and chains are how one input change becomes
-			four renders. If B happens to be in another effect's dependencies, the chain keeps going.
+			This flags an effect that depends on state and then writes different state. State A changes, the effect
+			runs, it sets state B, you render again. That's a chain, and chains are how one input change becomes four
+			renders. If B happens to be in another effect's dependencies, the chain keeps going.
 		</p>
 		<p>
 			The chain exists because someone wanted a computed value but reached for an effect instead of computing
-			during render. Set both states where the change starts, or derive the follow-on value during render and
-			skip that extra step. A fetch-then-set chain can be on purpose, so
-			treat it as a nudge to look rather than a verdict.
+			during render. Set both states where the change starts, or derive the follow-on value during render and skip
+			that extra step. A fetch-then-set chain can be on purpose, so treat it as a nudge to look rather than a
+			verdict.
 		</p>
 	</Fragment>
 </RulePage>

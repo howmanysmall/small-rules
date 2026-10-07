@@ -8,8 +8,8 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			This lint flags a call that calls itself. Luau has no{" "}
-			<a href="https://github.com/luau-lang/luau/discussions/1183#discussioncomment-8719963">tail calls</a>. Roblox
-			staff said so. That call can fill the stack. The{" "}
+			<a href="https://github.com/luau-lang/luau/discussions/1183#discussioncomment-8719963">tail calls</a>.
+			Roblox staff said so. That call can fill the stack. The{" "}
 			<a href="http://web.eecs.umich.edu/~imarkov/10rules.pdf">Power of 10 rules</a> also ban that kind of call,
 			direct or not. Each path has a fixed bound. Use it when speed and safety come first.
 		</p>
