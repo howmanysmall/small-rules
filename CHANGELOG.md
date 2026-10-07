@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.3.2] - 2026-10-07
+
+## Fixed
+- **starts-with-verb**: Named function expressions with non-verb names now report a diagnostic. [#82](https://github.com/howmanysmall/small-rules/pull/82)
+
 ## [3.3.1] - 2026-10-07
 
 ## Fixed
