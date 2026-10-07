@@ -7,9 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="prefer-singular-enums">
 	<Fragment slot="rationale">
 		<p>
-			A value typed as an enum holds one member at a time. A variable of type `Direction` is one direction, so
-			`Directions.Up` reads as if it came out of a list. Roblox's enums are singular too: `Enum.KeyCode`, not
-			`Enum.KeyCodes`.
+			A value of an enum type is one member at a time. A variable of type `Direction` is one direction, so{" "}
+			<code>Directions.Up</code> reads as if it came out of a list. Roblox's enums are singular too:{" "}
+			<code>Enum.KeyCode</code>, not <code>Enum.KeyCodes</code>.
 		</p>
 		<p>
 			It knows the irregular plurals, like `people` and `children`, and it leaves alone words that only look

@@ -8,13 +8,13 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			`btn`, `cb`, `ctx`, `evt`: every abbreviation is one more thing a reader has to expand in their head, and
-			not everyone expands them the same way. Spell the word out. When there's one obvious replacement, the rule
-			can rename it for you everywhere it's used. When there's more than one, like `e`, which could be `error` or
+			not everyone expands them the same way. Spell the word out. When there's one clear replacement, the rule can
+			rename it for you everywhere it's used. When there's more than one, like `e`, which could be `error` or
 			`event`, it lists them and lets you pick.
 		</p>
 		<p>
 			Properties aren't checked by default, since a lot of them belong to Roblox or to a library and you can't
-			rename them. Names imported from packages are left alone for the same reason. If your team really does treat
+			rename them. The rule leaves names imported from packages alone for the same reason. If your team does treat
 			a short name as a word, add it to `allowList`.
 		</p>
 	</Fragment>
