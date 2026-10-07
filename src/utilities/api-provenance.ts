@@ -84,10 +84,14 @@ export function isJecsWorldExpression(sourceCode: SourceCode, expression: ESTree
 function isGlobalNativeConstructor(
 	sourceCode: SourceCode,
 	expression: ESTree.Expression,
-	name: "Map" | "Promise" | "Set",
+	name: "Array" | "Map" | "Promise" | "Set",
 ): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
 	return isIdentifierNamed(unwrapped, name) && !hasShadowedBinding(sourceCode, unwrapped, name);
+}
+
+export function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
+	return isGlobalNativeConstructor(sourceCode, node.callee, "Array");
 }
 
 function getNativeCollectionKindAtDepth(

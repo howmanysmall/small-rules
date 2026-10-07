@@ -5,6 +5,7 @@ import {
 	isNewExpression,
 } from "@small-rules/oxlint-utilities";
 
+import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -30,9 +31,7 @@ function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expre
 	if (!isNewExpression(unwrapped)) return false;
 	if (unwrapped.arguments.length !== 1 && unwrapped.arguments.length !== 2) return false;
 
-	const callee = stripExpressionWrappers(unwrapped.callee);
-	if (!isIdentifierNamed(callee, "Array")) return false;
-	return !hasShadowedBinding(sourceCode, callee, "Array");
+	return isGlobalArrayConstructor(sourceCode, unwrapped);
 }
 
 const noTableCreateMap = createRule("no-table-create-map", "roblox", {

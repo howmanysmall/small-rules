@@ -25,7 +25,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -78,12 +78,6 @@ const DEFAULT_OPTIONS: Required<NoArrayConstructorElementsOptions> = {
 	environment: ROBLOX_TS,
 	requireExplicitGenericOnNewArray: true,
 };
-
-function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
-	const callee = stripExpressionWrappers(node.callee);
-	if (!isIdentifierNamed(callee, "Array")) return false;
-	return !hasShadowedBinding(sourceCode, callee, "Array");
-}
 
 function extractElementTypeFromArrayAnnotation(typeNode: ESTree.TSType, sourceCode: SourceCode): string | undefined {
 	if (!isTsTypeReference(typeNode)) return undefined;
