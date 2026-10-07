@@ -7,9 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="ban-instances">
 	<Fragment slot="rationale">
 		<p>
-			Some Roblox Instances are just useless and actively break things. I ban `UITextSizeConstraint` because it
-			breaks high resolution displays, and `UISizeConstraint.MaxSize` because it breaks scaling. This rule is how
-			I keep that out of the codebase.
+			Some Roblox Instances are just useless and actively break things. The ban list starts with
+			`UITextSizeConstraint` because it breaks high resolution displays, and `UISizeConstraint.MaxSize` because it
+			breaks scaling. This rule is how that stays out of the codebase.
 		</p>
 		<p>
 			You list the classes you hate and the rule flags any `new`, variable, or JSX element that uses them. Works

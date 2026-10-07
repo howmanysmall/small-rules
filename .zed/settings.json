@@ -182,7 +182,16 @@
 		},
 		"MDX": {
 			"format_on_save": "on",
-			"language_servers": ["oxfmt", "rumdl", "wakatime", "codebook", "harper-ls", "discord_presence", "..."],
+			"language_servers": [
+				"oxfmt",
+				"rumdl",
+				"wakatime",
+				"codebook",
+				"harper-ls",
+				"discord_presence",
+				"vale",
+				"..."
+			],
 			"prettier": { "allowed": false }
 		},
 		"Markdown": {
@@ -191,7 +200,7 @@
 				"language_server": { "name": "rumdl" }
 			},
 			"hard_tabs": true,
-			"language_servers": ["!knip", "codebook", "harper-ls", "rumdl", "wakatime"],
+			"language_servers": ["!knip", "codebook", "harper-ls", "rumdl", "wakatime", "vale"],
 			"prettier": { "allowed": false },
 			"show_whitespaces": "none",
 			"soft_wrap": "editor_width",

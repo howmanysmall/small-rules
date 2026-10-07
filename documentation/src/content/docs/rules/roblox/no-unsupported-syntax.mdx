@@ -9,17 +9,17 @@ import OxlintConfigTabs from "$components/oxlint-config-tabs.astro";
 	<Fragment slot="rationale">
 		<p>
 			This is a port from the official
-			[roblox-ts ESLint plugin](https://github.com/roblox-ts/eslint-plugin-roblox-ts). It bans you
-			from writing TypeScript that roblox-ts cannot turn into Luau, like `globalThis`, labeled
-			statements, `.prototype`, regex literals, and (sometimes) rest elements in destructuring
+			[roblox-ts lint plugin](https://github.com/roblox-ts/eslint-plugin-roblox-ts). It bans you
+			from writing TypeScript that roblox-ts can't turn into Luau, like `globalThis`, labeled
+			statements, `.prototype`, regular expression literals, and rest elements in destructuring
 			patterns all get flagged on by default.
 		</p>
 		<p>
 			Every check is individually configurable, though, because not every Roblox-side compiler shares the same
-			limits. The one that matters to me is `spreadDestructuring`: <strong>sloptor supports it</strong>, so running
+			limits. The one that matters here is `spreadDestructuring`: <strong>sloptor supports it</strong>, so running
 			this rule with the default settings against sloptor code is wrong.
 		</p>
-		<p>This is valid with sloptor!</p>
+		<p>This is valid with sloptor.</p>
 
 ```ts
 const array = [1, 2, 3, 4, 5];
@@ -35,7 +35,7 @@ return nil
 ```
 
     	<p>
-    		Even the hole in the middle survives, the rest is `table.move`'d to a fresh table, starting after the skipped
+    		Even the skip in the middle stays, and the rest is `table.move`'d to a fresh table, starting after the skipped
     		element. If you're on sloptor, turn that check off:
     	</p>
 
@@ -48,8 +48,8 @@ return nil
 />
 
     	<p>
-    		The other four stay on. If your compiler ever grows support for one of them (somehow),
-            toggle need to disable the whole rule.
+    		The other four stay on. If your compiler ever grows support for one of them, you still have to turn the
+            whole rule off.
     	</p>
     </Fragment>
 

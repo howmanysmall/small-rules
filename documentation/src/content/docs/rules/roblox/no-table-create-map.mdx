@@ -7,9 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-table-create-map">
 	<Fragment slot="rationale">
 		<p>
-			I see this pattern way too often and it annoys me every time. `table.create(...).map(...)` allocates an
-			intermediate table, throws away the function allocation when `.map()` returns, and allocates *another* table
-			for the result. Two allocations where one would do. Dumb.
+			This pattern shows up too often. `table.create(...).map(...)` allocates an intermediate table, throws away
+			the function allocation when `.map()` returns, and allocates *another* table for the result. Two allocations
+			for a job that needs one.
 		</p>
 		<ul>
 			<li>

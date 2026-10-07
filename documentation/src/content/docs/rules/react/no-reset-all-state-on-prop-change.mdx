@@ -20,8 +20,8 @@ import RulePage from "$components/rule-page.astro";
 		</p>
 		<p>
 			React already has the primitive for this: pass the prop as `key` and the component remounts with fresh
-			state, no effect required. It only works at the component boundary though, which is why the rule skips
-			custom hooks, a hook can't receive a `key`.
+			state. You don't need an effect. It only works at the component boundary. The rule skips custom functions
+			you write, since those can't take a `key`.
 		</p>
 	</Fragment>
 </RulePage>

@@ -13,6 +13,7 @@ cargo.binstall_native = true
 
 [tools]
 "github:howmanysmall/pullhook" = "latest"
+"github:vale-cli/vale-ls" = "latest"
 "npm:sherif" = "latest"
 actionlint = "latest"
 betterleaks = "latest"

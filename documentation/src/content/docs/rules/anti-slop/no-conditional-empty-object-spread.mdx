@@ -9,13 +9,13 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>'s{" "}
-			`no-conditional-empty-object-spread` — I wanted his ban on using `{}` as a no-op to hide omission. Credit
-			for the pattern is his.
+			`no-conditional-empty-object-spread`. The port exists for his ban on using `{}` as a no-op to hide omission.
+			Credit for the pattern is his.
 		</p>
 		<ul>
 			<li>
-				**Intent is hidden:** `{...cond ? {} : { prop: value }}` reads as a merge when you mean an optional
-				field. You have to puzzle out which branch is the empty one.
+				**Hidden intent:** `{...cond ? {} : { prop: value }}` reads as a merge when you mean an optional field.
+				You have to puzzle out which branch is the empty one.
 			</li>
 			<li>
 				**Clarity over brevity:** building the object and assigning the field only when present keeps the type
@@ -24,10 +24,10 @@ import RulePage from "$components/rule-page.astro";
 			</li>
 			<li>
 				**Scope matters:** the rule only flags object spreads. Array spreads like `{[...(cond ? {} : other)]}`
-				are fine — different semantics.
+				are fine, and the semantics differ.
 			</li>
 		</ul>
-		<p>I'd rather you write it as two statements — you probably won't need the ternary at all:</p>
+		<p>I'd rather you write it as two statements. You probably won't need the ternary at all:</p>
 		<Code code={`const obj: { prop?: string } = { ...base };\nif (condition) obj.prop = value;`} lang="ts" />
 	</Fragment>
 </RulePage>

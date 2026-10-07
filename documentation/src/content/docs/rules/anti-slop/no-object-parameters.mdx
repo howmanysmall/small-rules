@@ -7,9 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-object-parameters">
 	<Fragment slot="rationale">
 		<p>
-			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. `object` says that a
-			value is non-primitive but says nothing useful about its contract. Accept the owner type you need and parse
-			external input before this function is called.
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. `object` excludes `null`
+			and the scalar types, and says nothing useful about the value's contract. Accept the owner type you need,
+			and parse external input before you call this function.
 		</p>
 	</Fragment>
 </RulePage>

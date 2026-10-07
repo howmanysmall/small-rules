@@ -7,7 +7,7 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="prefer-singular-enums">
 	<Fragment slot="rationale">
 		<p>
-			A value typed as an enum holds one member at a time. A variable of type `Direction` is one direction, so
+			A value of an enum type is one member at a time. A variable of type `Direction` is one direction, so
 			`Directions.Up` reads as if it came out of a list. Roblox's enums are singular too: `Enum.KeyCode`, not
 			`Enum.KeyCodes`.
 		</p>

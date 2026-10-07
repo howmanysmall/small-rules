@@ -9,12 +9,11 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			`Array&lt;T&gt;` and `ReadonlyArray&lt;T&gt;` read like every other generic type in the codebase. The
 			bracket form doesn't: you have to stop and work out what `readonly string[][]` means, and as soon as the
-			element type is a union or a function you need parentheses. Forget them and `A | B[]` quietly means
-			something else.
+			element type is a union or a function you need parentheses. Forget them and `A | B[]` means something else.
 		</p>
 		<p>
 			The fix rewrites nested arrays from the outside in, so `readonly string[][]` becomes{" "}
-			`ReadonlyArray&lt;Array&lt;string&gt;&gt;`. Arrays written inside a tuple type are left alone.
+			`ReadonlyArray&lt;Array&lt;string&gt;&gt;`. The rule leaves arrays written inside a tuple type alone.
 		</p>
 	</Fragment>
 </RulePage>

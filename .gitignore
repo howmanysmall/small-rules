@@ -53,6 +53,13 @@ hk.local.pkl
 
 .eslintcache*
 .vitest
+.vale/styles/*
+!.vale/styles/config/
+.vale/styles/config/*
+!.vale/styles/config/vocabularies/
+.vale/styles/config/vocabularies/*
+!.vale/styles/config/vocabularies/Project/
+!.vale/styles/config/vocabularies/Project/accept.txt
 
 .agents/skills/animate-expo/
 .agents/skills/animate/

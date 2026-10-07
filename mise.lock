@@ -422,6 +422,66 @@ checksum = "sha256:89089232002d3c6eaa5a033f015985fab3e16aea6ca0d633bf609ac34bffa
 url = "https://github.com/howmanysmall/pullhook/releases/download/v1.1.1/pullhook-x86_64-pc-windows-msvc.zip"
 url_api = "https://api.github.com/repos/howmanysmall/pullhook/releases/assets/419689296"
 
+[[tools."github:vale-cli/vale-ls"]]
+version = "0.6.0"
+backend = "github:vale-cli/vale-ls"
+specifiers = ["latest"]
+
+[tools."github:vale-cli/vale-ls"."platforms.linux-arm64"]
+checksum = "sha256:52365d397d2935d5e2865b381689efcbf4bde00df29e787d35214868f92cca17"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-aarch64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603872206"
+
+[tools."github:vale-cli/vale-ls"."platforms.linux-arm64-musl"]
+checksum = "sha256:52365d397d2935d5e2865b381689efcbf4bde00df29e787d35214868f92cca17"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-aarch64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603872206"
+
+[tools."github:vale-cli/vale-ls"."platforms.linux-x64"]
+checksum = "sha256:1cf1c3dc56554b2fbf9df8795fa99e1cbf6abf76ab99e801346ee683ad18bc73"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603871987"
+
+[tools."github:vale-cli/vale-ls"."platforms.linux-x64-baseline"]
+checksum = "sha256:1cf1c3dc56554b2fbf9df8795fa99e1cbf6abf76ab99e801346ee683ad18bc73"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603871987"
+
+[tools."github:vale-cli/vale-ls"."platforms.linux-x64-musl"]
+checksum = "sha256:1cf1c3dc56554b2fbf9df8795fa99e1cbf6abf76ab99e801346ee683ad18bc73"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603871987"
+
+[tools."github:vale-cli/vale-ls"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:1cf1c3dc56554b2fbf9df8795fa99e1cbf6abf76ab99e801346ee683ad18bc73"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603871987"
+
+[tools."github:vale-cli/vale-ls"."platforms.macos-arm64"]
+checksum = "sha256:ff0ffde21a5f5505aa1fc5eeb31accc4b3867c4968df5ff1d8e7d86d970c754e"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-aarch64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603872041"
+
+[tools."github:vale-cli/vale-ls"."platforms.macos-x64"]
+checksum = "sha256:af4885d9d844b327a2fdc42a1bae899a84fb51b5ac8b59081d00ad1eb418015a"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603874337"
+
+[tools."github:vale-cli/vale-ls"."platforms.macos-x64-baseline"]
+checksum = "sha256:af4885d9d844b327a2fdc42a1bae899a84fb51b5ac8b59081d00ad1eb418015a"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603874337"
+
+[tools."github:vale-cli/vale-ls"."platforms.windows-x64"]
+checksum = "sha256:1489bd362333b8a26b1442fb2709da9ef5e998c116ccad06dc45f3e89030f20c"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-pc-windows-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603881738"
+
+[tools."github:vale-cli/vale-ls"."platforms.windows-x64-baseline"]
+checksum = "sha256:1489bd362333b8a26b1442fb2709da9ef5e998c116ccad06dc45f3e89030f20c"
+url = "https://github.com/vale-cli/vale-ls/releases/download/v0.6.0/vale-ls-x86_64-pc-windows-gnu.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale-ls/releases/assets/603881738"
+
 [[tools.hk]]
 version = "2.5.0"
 backend = "packslip:github.com/jdx/hk"

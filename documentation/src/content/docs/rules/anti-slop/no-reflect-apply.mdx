@@ -8,8 +8,8 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. `Reflect.apply` bypasses
-			the function type that would normally document and check the call. Call the typed function directly, or put
-			genuinely dynamic dispatch behind a named interface.
+			the function type that would normally document and check the call. Call the typed function directly. When
+			the callee or the argument list is only known at runtime, put that call behind a named interface.
 		</p>
 	</Fragment>
 </RulePage>

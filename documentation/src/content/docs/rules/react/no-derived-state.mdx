@@ -11,7 +11,7 @@ import RulePage from "$components/rule-page.astro";
 			[`eslint-plugin-react-you-might-not-need-an-effect/no-derived-state`](https://github.com/nickjvandyke/eslint-plugin-react-you-might-not-need-an-effect/blob/2fc3560bbd24898b883e6e8fa31e8c5429b02753/src/rules/no-derived-state.ts).
 			The upstream rule points at the ["Updating state based on props or
 			state"](https://react.dev/learn/you-might-not-need-an-effect#updating-state-based-on-props-or-state) section
-			of the React docs, so that's where the intent comes from.
+			of the React docs.
 		</p>
 		<p>
 			This catches state that's just a copy of something you could compute: an effect sets state whose value comes
@@ -20,8 +20,8 @@ import RulePage from "$components/rule-page.astro";
 		</p>
 		<p>
 			Just compute it during render. If the computation is expensive, memoize it, but the common case on Roblox is
-			a cheap calculation and the memo is the overhead. Killing the state copy also kills the whole class of "why
-			is my label stale" bugs.
+			a cheap calculation and the memo is the overhead. Dropping the state copy also drops the whole class of "why
+			is the label stale" bugs.
 		</p>
 	</Fragment>
 </RulePage>

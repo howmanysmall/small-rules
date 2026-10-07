@@ -65,7 +65,7 @@
       "source": "kucherenko/jscpd",
       "sourceType": "github",
       "skillPath": "skills/dry-refactoring/SKILL.md",
-      "computedHash": "3e8cddd827e782af26d85868073692fb99943a3642551d47f5354e3bf348a9a7"
+      "computedHash": "19627dbe7cd77278269ec93a4f514e2709687cb442ca1ea5136ac16b97df41bc"
     },
     "effect-ts": {
       "source": "effect-ts/skills",
@@ -83,7 +83,7 @@
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow/SKILL.md",
-      "computedHash": "d8495ec147ad5b04f56a8964965cb3a81b8a718033707d419e583425fe478e81"
+      "computedHash": "317ea41e6adc578a52b97216c0415b0ec539c79180c379219130470b66663213"
     },
     "fallow-review": {
       "source": "fallow-rs/fallow-skills",
