@@ -2,7 +2,7 @@
 
 Visitors fire once per matching AST node, per file, per lint run. Per-node allocation and re-computation is where rules rot. These conventions apply to everything under `src/rules/` and `src/utilities/`.
 
-See also [ADR-0001](./adr/0001-append-only-worklist-traversal.md) (worklist traversal) and the glossary in [CONTEXT.md](../CONTEXT.md) (worklist, dead branch, coverage pragma, unkillable mutant, variadic spread).
+See also [ADR-0001](./adr/0001-append-only-worklist-traversal.md) (worklist traversal) and the glossary in [GLOSSARY.md](../GLOSSARY.md) (worklist, dead branch, coverage pragma, unkillable mutant, variadic spread).
 
 ## 1. Hoist allocations out of visitors
 

@@ -6,7 +6,7 @@ Never cast. Types flow from their source: `createRule` infers a rule's option ty
 
 ## Tests First
 
-Red first: write the failing test, make it green, then refactor. Coverage is 100% (`vitest.config.ts` sets the threshold). A coverage pragma (`/* v8 ignore */`) marks a dead branch; design the branch away. `CONTEXT.md` defines both terms.
+Red first: write the failing test, make it green, then refactor. Coverage is 100% (`vitest.config.ts` sets the threshold). A coverage pragma (`/* v8 ignore */`) marks a dead branch; design the branch away. `GLOSSARY.md` defines both terms.
 
 ## Gates
 
