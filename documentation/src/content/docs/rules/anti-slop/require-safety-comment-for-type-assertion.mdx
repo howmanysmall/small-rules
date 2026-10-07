@@ -14,12 +14,12 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			A comment that turns off `typescript/no-unsafe-type-assertion` also counts as justification, so you don't
 			write the same sentence twice. That only works when the comment actually covers the diagnostic.{" "}
-			<code>oxlint-tsgolint@7.0.2002</code> narrowed the report onto the `as Type` syntax, so a{" "}
-			<code>disable-next-line</code> on the line preceding a multi-line object does nothing while the `as` still
-			fails. Tell the rule which world you're in with{" "}
+			`oxlint-tsgolint@7.0.2002` narrowed the report onto the `as Type` syntax, so a `disable-next-line` on the
+			line preceding a multi-line object does nothing while the `as` still fails. Tell the rule which world you're
+			in with{" "}
 			<a href="/small-rules/configuration/#plugin-settings">`{'settings["small-rules"].tsgolintVersion'}`</a>. If
-			you omit it, the lookup checks <code>node_modules/oxlint-tsgolint</code> and <code>pnpm-workspace.yaml</code>.
-			It also checks <code>package.json</code>.
+			you omit it, the lookup checks `node_modules/oxlint-tsgolint` and `pnpm-workspace.yaml`. It also checks
+			`package.json`.
 		</p>
 	</Fragment>
 </RulePage>

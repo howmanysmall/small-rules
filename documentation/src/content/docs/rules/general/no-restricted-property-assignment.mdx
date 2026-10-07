@@ -13,7 +13,7 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			This blocks assignment and update expressions such as `x.prop = y` and `x.prop++` on matched objects. Reads
 			are fine, and only writes get flagged. The object has to be a direct identifier like `_G`.{" "}
-			<code>container._G.__DEV__</code> won't match because the rule only looks at the root name.
+			`container._G.__DEV__` won't match because the rule only looks at the root name.
 		</p>
 		<p>
 			The rule checks computed keys by default, so `_G["__DEV__"] = true` gets caught. Set `checkComputed` to

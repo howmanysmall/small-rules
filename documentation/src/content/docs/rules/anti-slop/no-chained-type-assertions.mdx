@@ -9,12 +9,12 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>'s{" "}
 			`no-chained-type-assertions` rule. It guards against the same casts that fabricate evidence. Credit for the
-			rule idea goes to its original author. This port matches the local checker, with three additions:
+			rule idea goes to its original author. This port matches the local checker and adds three cases.
 		</p>
 		<ul>
 			<li>
-				**Fabricated evidence:** the second <code>as</code>, written as a keyword or as an angle-bracket assertion,
-				narrows nothing. It only discards whatever the first one claimed. <code>value as string as number</code>
+				**Fabricated evidence:** the second `as`, written as a keyword or as an angle-bracket assertion,
+				narrows nothing. It only discards whatever the first one claimed. `value as string as number`
 				proves neither type.
 			</li>
 			<li>
@@ -34,8 +34,8 @@ import RulePage from "$components/rule-page.astro";
     		</li>
     	</ul>
     	<p>
-    		Where I differ is the `as const` allowance. I allow `as const as const`, because const is idempotent and
-    		there's nothing for the second assertion to discard. I also let you name specific identifier targets for one
+    		The `as const` allowance is the local difference. The rule allows `as const as const`, because const is idempotent
+    		and there's nothing for the second assertion to discard. You can also name specific identifier targets for one
     		`as unknown as T` bridge via `allowedTargets`. That's for nominal twins like Roblox `vector` / `Vector3`, not
     		a free pass: `as unknown as string` still flags. Everything else with two non-const assertions is a problem.
     	</p>
