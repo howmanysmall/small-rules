@@ -7,7 +7,7 @@
 // regex-literal detection moved from token inspection to the `regex` literal
 // property.
 
-import { isIdentifier, isRestElement } from "@small-rules/oxlint-utilities";
+import { isIdentifierNamed, isRestElement } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -51,12 +51,7 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 				if (checks.regexLiterals && "regex" in node) context.report({ messageId: "regexLiteral", node });
 			},
 			MemberExpression(node) {
-				if (
-					checks.prototype &&
-					!node.computed &&
-					isIdentifier(node.property) &&
-					node.property.name === "prototype"
-				) {
+				if (checks.prototype && !node.computed && isIdentifierNamed(node.property, "prototype")) {
 					context.report({ messageId: "prototype", node: node.property });
 				}
 			},

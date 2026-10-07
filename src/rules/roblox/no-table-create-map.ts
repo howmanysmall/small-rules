@@ -1,4 +1,9 @@
-import { isCallExpression, isIdentifier, isMemberExpression, isNewExpression } from "@small-rules/oxlint-utilities";
+import {
+	isCallExpression,
+	isIdentifierNamed,
+	isMemberExpression,
+	isNewExpression,
+} from "@small-rules/oxlint-utilities";
 
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -16,7 +21,7 @@ function isTableCreateBase(sourceCode: SourceCode, expression: ESTree.Expression
 	}
 
 	const target = stripExpressionWrappers(callee.object);
-	if (!isIdentifier(target) || target.name !== "table") return false;
+	if (!isIdentifierNamed(target, "table")) return false;
 	return !hasShadowedBinding(sourceCode, target, "table");
 }
 
@@ -26,7 +31,7 @@ function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expre
 	if (unwrapped.arguments.length !== 1 && unwrapped.arguments.length !== 2) return false;
 
 	const callee = stripExpressionWrappers(unwrapped.callee);
-	if (!isIdentifier(callee) || callee.name !== "Array") return false;
+	if (!isIdentifierNamed(callee, "Array")) return false;
 	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
 

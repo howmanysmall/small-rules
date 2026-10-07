@@ -19,7 +19,6 @@ import {
 	isParenthesizedExpression,
 	isTemplateLiteral,
 	isTsAnyKeyword,
-	isTsAsExpression,
 	isTsIndexSignature,
 	isTsIntersectionType,
 	isTsMappedType,
@@ -32,12 +31,12 @@ import {
 	isTsSatisfiesExpression,
 	isTsStringKeyword,
 	isTsSymbolKeyword,
-	isTsTypeAssertion,
 	isTsTypeLiteral,
 	isTsTypeOperator,
 	isTsTypeReference,
 	isTsUnionType,
 	isTsUnknownKeyword,
+	isTypeAssertionExpression,
 	isUnaryExpression,
 } from "@small-rules/oxlint-utilities";
 
@@ -397,8 +396,7 @@ export function isKnownEvidenceExpression(expression: ESTree.Expression): boolea
 	let current = expression;
 	while (
 		isParenthesizedExpression(current) ||
-		isTsAsExpression(current) ||
-		isTsTypeAssertion(current) ||
+		isTypeAssertionExpression(current) ||
 		isTsNonNullExpression(current) ||
 		isTsSatisfiesExpression(current)
 	) {

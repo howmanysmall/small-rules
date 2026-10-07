@@ -14,7 +14,7 @@
 import {
 	isAnyImportSpecifier,
 	isBlockStatement,
-	isClassDeclaration,
+	isClass,
 	isClassExpression,
 	isExportNamedDeclaration,
 	isIdentifier,
@@ -233,7 +233,7 @@ function getDeclaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | undefi
 		return { name: node.id.name, alias: undefined, interface: node };
 	}
 
-	if (isTsEnumDeclaration(node) || isClassDeclaration(node) || isClassExpression(node)) {
+	if (isTsEnumDeclaration(node) || isClass(node)) {
 		return node.id === null ? undefined : { name: node.id.name, alias: undefined, interface: undefined };
 	}
 

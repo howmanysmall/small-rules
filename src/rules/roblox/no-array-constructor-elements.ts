@@ -1,12 +1,11 @@
 import {
+	isAnyFunction,
 	isArrayExpression,
 	isArrayPattern,
-	isArrowFunctionExpression,
 	isAssignmentPattern,
 	isCallExpression,
 	isClass,
 	isExpressionStatement,
-	isFunctionDeclaration,
 	isIdentifier,
 	isIdentifierNamed,
 	isLiteral,
@@ -76,7 +75,7 @@ interface NoArrayConstructorElementsContext {
 }
 
 const DEFAULT_OPTIONS: Required<NoArrayConstructorElementsOptions> = {
-	environment: "roblox-ts",
+	environment: ROBLOX_TS,
 	requireExplicitGenericOnNewArray: true,
 };
 
@@ -160,8 +159,7 @@ function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolea
 	if (
 		isArrayExpression(unwrapped) ||
 		isObjectExpression(unwrapped) ||
-		isArrowFunctionExpression(unwrapped) ||
-		isFunctionDeclaration(unwrapped) ||
+		isAnyFunction(unwrapped) ||
 		isClass(unwrapped)
 	) {
 		return true;
@@ -183,7 +181,7 @@ function getPushCallForIdentifier(
 	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped) || unwrapped.optional) return undefined;
 	if (!isMemberExpression(unwrapped.callee) || unwrapped.callee.optional) return undefined;
-	if (!isIdentifier(unwrapped.callee.object) || unwrapped.callee.object.name !== identifierName) {
+	if (!isIdentifierNamed(unwrapped.callee.object, identifierName)) {
 		return undefined;
 	}
 

@@ -85,7 +85,7 @@ function areEquivalentStaticProperties(
 	const rightIsPrivate = isPrivateIdentifier(right);
 	if (leftIsPrivate || rightIsPrivate) return leftIsPrivate && rightIsPrivate && left.name === right.name;
 
-	return isIdentifier(right) && isIdentifier(left) && left.name === right.name;
+	return isIdentifier(right) && isIdentifierNamed(left, right.name);
 }
 
 function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean): boolean {

@@ -2,9 +2,9 @@ import {
 	ARRAY_EXPRESSION,
 	CALL_EXPRESSION,
 	isAssignmentExpression,
-	isBindingIdentifier,
 	isExpressionStatement,
 	isIdentifier,
+	isIdentifierNamed,
 	isLiteral,
 	isMemberExpression,
 	isMethodDefinition,
@@ -91,12 +91,7 @@ function isStaticMemberExpression(node: ESTree.MemberExpression): boolean {
 }
 
 function isConstructor(node: ESTree.ClassElement): node is ESTree.MethodDefinition {
-	return (
-		isMethodDefinition(node) &&
-		node.kind === "constructor" &&
-		isBindingIdentifier(node.key) &&
-		node.key.name === "constructor"
-	);
+	return isMethodDefinition(node) && node.kind === "constructor" && isIdentifierNamed(node.key, "constructor");
 }
 
 function isConstructorLiteralAssignment(statement: ESTree.Statement): statement is ESTree.ExpressionStatement & {

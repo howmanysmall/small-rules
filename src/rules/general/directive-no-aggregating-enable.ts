@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, toForceLocation } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -29,7 +30,7 @@ const directiveNoAggregatingEnable = createRule("directive-no-aggregating-enable
 				"'{{kind}}' comment enables rules for multiple disable directives. Please move '{{kind}}' after each disable directive.",
 		},
 		schema: [],
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 

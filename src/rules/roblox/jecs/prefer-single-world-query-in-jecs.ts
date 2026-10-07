@@ -2,7 +2,6 @@ import {
 	CONDITIONAL_EXPRESSION,
 	DO_WHILE_STATEMENT,
 	FOR_STATEMENT,
-	IDENTIFIER,
 	IF_STATEMENT,
 	isCallExpression,
 	isIdentifier,
@@ -121,7 +120,7 @@ function isLogicalAndExpression(value: InspectableNode): boolean {
 }
 
 function isIdentifierReference(value: InspectableNode): value is ESTree.IdentifierReference {
-	return Predicate.isObject(value) && value.type === IDENTIFIER && Predicate.isString(value.name);
+	return isNode(value) && isIdentifier(value) && Predicate.isString(value.name);
 }
 
 function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierReference): boolean {

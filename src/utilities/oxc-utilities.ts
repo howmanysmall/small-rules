@@ -4,7 +4,6 @@ import {
 	isCallExpression,
 	isIdentifier,
 	isIdentifierNamed,
-	isIdentifierReference,
 	isMemberExpression,
 	isParenthesizedExpression,
 	isStringLiteral,
@@ -88,11 +87,7 @@ export function isStaticRequire(node: ESTree.Node): node is ESTree.CallExpressio
 }
 
 export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): boolean {
-	return (
-		isTsTypeReference(typeAnnotation) &&
-		isIdentifierReference(typeAnnotation.typeName) &&
-		typeAnnotation.typeName.name === "const"
-	);
+	return isTsTypeReference(typeAnnotation) && isIdentifierNamed(typeAnnotation.typeName, "const");
 }
 
 export function stripParenthesizedType(type: ESTree.TSType): ESTree.TSType {

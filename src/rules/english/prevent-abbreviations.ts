@@ -1,6 +1,7 @@
 import {
 	hasName,
 	isIdentifier,
+	isIdentifierNamed,
 	isJsxIdentifier,
 	isMemberExpression,
 	isProperty,
@@ -119,10 +120,8 @@ function getSpecialCaseReplacement(variable: VariableLike): string | undefined {
 	if (
 		isMemberExpression(init) &&
 		!init.computed &&
-		isIdentifier(init.object) &&
-		init.object.name === "Players" &&
-		isIdentifier(init.property) &&
-		init.property.name === "LocalPlayer"
+		isIdentifierNamed(init.object, "Players") &&
+		isIdentifierNamed(init.property, "LocalPlayer")
 	) {
 		return "localPlayer";
 	}

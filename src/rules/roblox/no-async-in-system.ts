@@ -4,6 +4,7 @@ import {
 	isCallExpression,
 	isClassDeclaration,
 	isIdentifier,
+	isIdentifierNamed,
 	isImportDeclaration,
 	isImportSpecifier,
 	isMemberExpression,
@@ -376,8 +377,7 @@ function getExpressionClass(
 		!isCallExpression(current) ||
 		!isMemberExpression(current.callee) ||
 		getMemberPropertyName(current.callee) !== "GetService" ||
-		!isIdentifier(current.callee.object) ||
-		current.callee.object.name !== "game" ||
+		!isIdentifierNamed(current.callee.object, "game") ||
 		hasShadowedBinding(sourceCode, current.callee.object, "game")
 	) {
 		return undefined;

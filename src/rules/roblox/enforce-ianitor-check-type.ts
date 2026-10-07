@@ -74,7 +74,7 @@ type RuleOptions = InferContextFromRule<typeof enforceIanitorCheckType>["options
 
 function isIanitorValidator({ callee }: ESTree.CallExpression): boolean {
 	if (!isMemberExpression(callee)) return false;
-	return isIdentifier(callee.object) && callee.object.name === "Ianitor";
+	return isIdentifierNamed(callee.object, "Ianitor");
 }
 
 function unwrapReadonlyType(typeNode: ESTree.Node): ESTree.Node {

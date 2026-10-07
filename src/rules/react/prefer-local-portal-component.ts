@@ -82,8 +82,7 @@ function isPortalFactoryCall(sourceCode: SourceCode, { callee }: ESTree.CallExpr
 	if (
 		!isMemberExpression(callee) ||
 		callee.computed ||
-		!isIdentifier(callee.property) ||
-		callee.property.name !== "createPortal" ||
+		!isIdentifierNamed(callee.property, "createPortal") ||
 		!isIdentifier(callee.object)
 	) {
 		return false;

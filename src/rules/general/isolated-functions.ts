@@ -4,8 +4,7 @@ import {
 	isAnyFunction,
 	isAnyLiteral,
 	isCallExpression,
-	isClassDeclaration,
-	isClassExpression,
+	isClass,
 	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
@@ -307,7 +306,7 @@ function pushChildNodes(sourceCode: SourceCode, node: ESTree.Node, worklist: Arr
 
 function pushClassBoundaryChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	/* v8 ignore next -- only invoked for ClassDeclaration/ClassExpression nodes. @preserve */
-	if (!isClassDeclaration(node) && !isClassExpression(node)) return;
+	if (!isClass(node)) return;
 	if (node.superClass !== null) worklist.push(node.superClass);
 	for (const element of node.body.body) {
 		if ("computed" in element && element.computed) worklist.push(element.key);

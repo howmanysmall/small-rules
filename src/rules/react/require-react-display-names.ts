@@ -3,6 +3,7 @@ import {
 	isExportDefaultDeclaration,
 	isExportNamedDeclaration,
 	isIdentifier,
+	isIdentifierNamed,
 	isImportSpecifier,
 	isMemberExpression,
 	isVariableDeclaration,
@@ -50,8 +51,7 @@ function isCreateContextCall(
 	if (isIdentifier(node.callee)) return createContextIdentifiers.has(node.callee.name);
 	if (
 		!isMemberExpression(node.callee) ||
-		!isIdentifier(node.callee.property) ||
-		node.callee.property.name !== "createContext" ||
+		!isIdentifierNamed(node.callee.property, "createContext") ||
 		!isIdentifier(node.callee.object)
 	) {
 		return false;
@@ -126,7 +126,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 				if (!isMemberExpression(left)) return;
 
 				const { property } = left;
-				if (!isIdentifier(property) || property.name !== "displayName") return;
+				if (!isIdentifierNamed(property, "displayName")) return;
 
 				const { object } = left;
 				if (!isIdentifier(object)) return;
@@ -160,11 +160,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 			},
 			ExportNamedDeclaration(node): void {
 				for (const specifier of node.specifiers) {
-					if (
-						!isIdentifier(specifier.exported) ||
-						specifier.exported.name !== "default" ||
-						!isIdentifier(specifier.local)
-					) {
+					if (!isIdentifierNamed(specifier.exported, "default") || !isIdentifier(specifier.local)) {
 						continue;
 					}
 

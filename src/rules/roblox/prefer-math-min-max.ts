@@ -4,6 +4,7 @@ import {
 	isBinaryExpression,
 	isBindingIdentifier,
 	isIdentifier,
+	isIdentifierNamed,
 	isPrivateIdentifier,
 	isSequenceExpression,
 	isTsNumberKeyword,
@@ -27,10 +28,7 @@ function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnn
 
 	let current = typeAnnotation;
 	while (isTsTypeAnnotation(current)) current = current.typeAnnotation;
-	return (
-		isTsNumberKeyword(current) ||
-		(isTsTypeReference(current) && isBindingIdentifier(current.typeName) && current.typeName.name === "Number")
-	);
+	return isTsNumberKeyword(current) || (isTsTypeReference(current) && isIdentifierNamed(current.typeName, "Number"));
 }
 
 function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {

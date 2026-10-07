@@ -11,7 +11,7 @@ import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isUseMemoCall, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
-import { getReactSources } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getReactSources, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
@@ -53,7 +53,7 @@ function normalizeOptions(raw: RuleOptions): NormalizedOptions {
 	const constructors =
 		Predicate.isObject(raw) && isStringArray(raw.constructors) ? new Set(raw.constructors) : DEFAULT_CONSTRUCTORS;
 
-	const environment = Predicate.isObject(raw) && raw.environment === "standard" ? "standard" : "roblox-ts";
+	const environment = Predicate.isObject(raw) && raw.environment === STANDARD ? STANDARD : ROBLOX_TS;
 
 	const candidateDepth = Predicate.isObject(raw) ? raw.maxHelperTraceDepth : undefined;
 	const maxHelperTraceDepth =
@@ -393,12 +393,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 						items: { type: "string" },
 						type: "array",
 					},
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 					maxHelperTraceDepth: {
 						default: 4,
 						description:

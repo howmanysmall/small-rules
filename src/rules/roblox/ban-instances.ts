@@ -12,6 +12,7 @@ import { Predicate } from "effect";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -113,12 +114,7 @@ function normalizeOptions(rawOptions: RuleOptions | undefined): NormalizedOption
 function getEnclosingFunctionScope(scope: Scope): Scope {
 	let currentScope = scope;
 
-	while (
-		currentScope.upper !== null &&
-		currentScope.type !== "function" &&
-		currentScope.type !== "module" &&
-		currentScope.type !== "global"
-	) {
+	while (currentScope.upper !== null && currentScope.type !== "function" && !isModuleLevelScope(currentScope)) {
 		currentScope = currentScope.upper;
 	}
 

@@ -7,6 +7,7 @@ import {
 	isDisableOrEnableDirectiveKind,
 	parseDirectiveComment,
 } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Comment, Visitor } from "oxlint-plugin-utilities";
 
@@ -104,7 +105,7 @@ const directiveRequireDescription = createRule("directive-require-description", 
 				type: "object" as const,
 			},
 		],
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 

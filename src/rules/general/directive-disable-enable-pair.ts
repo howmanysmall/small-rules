@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, lte, toRuleIdLocation } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -45,7 +46,7 @@ const directiveDisableEnablePair = createRule("directive-disable-enable-pair", "
 				type: "object" as const,
 			},
 		],
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 

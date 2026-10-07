@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, toRuleIdLocation } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -30,7 +31,7 @@ const directiveNoUnusedEnable = createRule("directive-no-unused-enable", "genera
 				"'{{ruleId}}' rule is disabled but never reported. Please remove unnecessary '{{kind}}' comment.",
 		},
 		schema: [],
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 
