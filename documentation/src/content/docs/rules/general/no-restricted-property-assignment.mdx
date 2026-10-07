@@ -11,14 +11,14 @@ import RulePage from "$components/rule-page.astro";
 			= bar` or `_G.__DEV__`? Maybe not.
 		</p>
 		<p>
-			This blocks assignment and update expressions -- `x.prop = y`, `x.prop++` -- to matched objects. Reads are
-			fine, only writes get flagged. The object has to be a direct identifier like `_G`; `container._G.__DEV__`
-			won't match because the rule only looks at the root name.
+			This blocks assignment and update expressions such as `x.prop = y` and `x.prop++` on matched objects. Reads
+			are fine, and only writes get flagged. The object has to be a direct identifier like `_G`.{" "}
+			<code>container._G.__DEV__</code> won't match because the rule only looks at the root name.
 		</p>
 		<p>
-			Computed keys are checked by default, so `_G["__DEV__"] = true` gets caught. Set `checkComputed` to `false`
-			to skip those. Glob patterns work for both the object and property names, so you can ban a whole family at
-			once. `allowFiles` exempts files by name or glob when you genuinely need the write somewhere.
+			The rule checks computed keys by default, so `_G["__DEV__"] = true` gets caught. Set `checkComputed` to
+			`false` to skip those. Glob patterns work for both the object and property names, so you can ban a whole
+			family at once. `allowFiles` exempts files by name or glob when you do need the write somewhere.
 		</p>
 	</Fragment>
 </RulePage>
