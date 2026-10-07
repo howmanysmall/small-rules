@@ -8,29 +8,37 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>'s{" "}
-			`no-chained-type-assertions` — I wanted the same guard against casts that fabricate evidence. Credit for the
-			rule idea is his; the port here just matches my checker and my one carve-out.
+			`no-chained-type-assertions` rule. It guards against the same casts that fabricate evidence. Credit for the
+			rule idea goes to its original author. This port matches the local checker, with three additions:
 		</p>
 		<ul>
 			<li>
-				**Fabricated evidence:** the second `as` (or angle-bracket) doesn't narrow anything — it just discards
-				whatever the first one claimed. `value as string as number` proves neither.
+				**Fabricated evidence:** the second <code>as</code>, written as a keyword or as an angle-bracket assertion,
+				narrows nothing. It only discards whatever the first one claimed. <code>value as string as number</code>
+				proves neither type.
 			</li>
 			<li>
 				**Boundary parsing over brute-forcing:** when you see `as unknown as T` or `as any as T` the input is
-				probably untrusted. I'd rather you validate it at the boundary with a guard or schema and keep the
-				precise type from there. Almost never worth papering over.
+				probably untrusted. I'd rather you check it at the boundary with a guard or schema, then keep the precise
+				type from there. The cast hides a wrong assumption about the input instead of correcting it, so it's
+				seldom the right fix.
 			</li>
 			<li>
-				**Parenthesized chains count:** `(value as string) as number` is the same trick with parens. The rule
-				unwraps them, so you can't hide it.
-			</li>
-		</ul>
-		<p>
-			Where I differ is I allow `as const as const`. It's idempotent — it doesn't widen or narrow, so there's
-			nothing to discard. I also let you name specific identifier targets for a single `as unknown as T` bridge
-			via `allowedTargets`. That's for nominal twins like Roblox `vector` / `Vector3`, not a free pass: `as
-			unknown as string` still flags. Everything else with two non-const assertions is a problem.
-		</p>
-	</Fragment>
+				**Parenthesized chains count:** wrapping the first assertion in parens doesn't change anything:
+
+    			```ts
+    			(value as string) as number;
+    			```
+
+    			The rule unwraps them, so you can't hide it.
+    		</li>
+    	</ul>
+    	<p>
+    		Where I differ is the `as const` allowance. I allow `as const as const`, because const is idempotent and
+    		there's nothing for the second assertion to discard. I also let you name specific identifier targets for one
+    		`as unknown as T` bridge via `allowedTargets`. That's for nominal twins like Roblox `vector` / `Vector3`, not
+    		a free pass: `as unknown as string` still flags. Everything else with two non-const assertions is a problem.
+    	</p>
+    </Fragment>
+
 </RulePage>

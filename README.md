@@ -30,7 +30,7 @@
 ni -D @pobammer-ts/small-rules
 ```
 
-> Requires [Oxlint](https://oxc.rs) **v1.69.0+**, TypeScript **5 – <8**, and Node.js **≥20.19** or **≥22.12**.
+> Requires [Oxlint](https://oxc.rs) **v1.69.0+**, TypeScript **5 - <8**, and Node.js **≥20.19** or **≥22.12**.
 
 ## Configuration
 
@@ -46,7 +46,7 @@ Register the plugin in your `.oxlintrc.json` and enable the rules you want:
 }
 ```
 
-All rules are namespaced under `small-rules/`. Pick the subset that fits your project — there is no bulk opt-in.
+Enable rules as `small-rules/<rule-name>`. Pick the subset that fits your project - there is no bulk opt-in yet.
 
 ## Rules
 
