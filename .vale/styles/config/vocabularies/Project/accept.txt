@@ -1,2 +1,3 @@
 # React hooks, not the alex false positive.
 (?i)\bhooks?\b
+(?i)\bGod\b
