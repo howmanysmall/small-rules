@@ -46,6 +46,15 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.3.0] - 2026-10-07
+
+## Added
+- Add the recommended `starts-with-verb` rule for function and method names [#73](https://github.com/howmanysmall/small-rules/pull/73).
+
+## Fixed
+- Fix `no-async-in-system` detection of quoted `system` properties and make `prefer-single-world-query-in-jecs` respect Jecs's four-component limit [740a2](https://github.com/howmanysmall/small-rules/commit/740a2b923f80320006a6d2f9e3430cd1c5658c91) [b8f9b](https://github.com/howmanysmall/small-rules/commit/b8f9b9ba16cc93c9e88f2731d8103adfd1fdfe5f).
+- Make `no-identity-map` remove chained identity maps in one fix, `require-throw-error-capture` use distinct names for same-block fixes, and `prevent-abbreviations` avoid invalid strict-mode names [55850](https://github.com/howmanysmall/small-rules/commit/55850db59971a70935c357a6025706ea551d3edb) [87209c](https://github.com/howmanysmall/small-rules/commit/87209cf) [63be6](https://github.com/howmanysmall/small-rules/commit/63be6f53557b115be8f942ff2eb15e7d270e1f5f).
+
 ## [3.2.0] - 2026-10-03
 
 ## Changed
