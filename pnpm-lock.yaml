@@ -1233,6 +1233,9 @@ importers:
       '@small-rules/vite-configuration':
         specifier: workspace:*
         version: link:../vite-configuration
+      '@total-typescript/ts-reset':
+        specifier: catalog:types
+        version: 0.6.1
       '@types/node':
         specifier: catalog:types
         version: 26.6.4
