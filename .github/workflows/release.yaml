@@ -83,6 +83,29 @@ jobs:
             exit 1
           fi
 
+      - id: wait-for-ci
+        if: ${{ env.DRY_RUN != 'true' }}
+        name: Wait for CI
+        run: |
+          CI_RUN_ID=""
+          for _ in $(seq 1 60); do
+            CI_RUN_ID=$(gh run list --workflow ci.yaml --commit "$GITHUB_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+            if [ -n "$CI_RUN_ID" ]; then
+              break
+            fi
+            sleep 5
+          done
+          if [ -z "$CI_RUN_ID" ]; then
+            echo "::error title=CI run not found::No main-branch CI run found for $GITHUB_SHA" >&2
+            exit 1
+          fi
+          gh run watch "$CI_RUN_ID" --exit-status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Poll CI while the toolchain installs and release notes generate;
+        # nothing that writes to main, npm, or GitHub runs before the wait.
+        background: true
+
       - name: Setup toolchain
         uses: $/.github/actions/setup
         with:
@@ -106,25 +129,6 @@ jobs:
       - name: Install dependencies
         uses: $/.github/actions/install
 
-      - if: ${{ env.DRY_RUN != 'true' }}
-        name: Wait for CI
-        run: |
-          CI_RUN_ID=""
-          for _ in $(seq 1 60); do
-            CI_RUN_ID=$(gh run list --workflow ci.yaml --commit "$GITHUB_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-            if [ -n "$CI_RUN_ID" ]; then
-              break
-            fi
-            sleep 5
-          done
-          if [ -z "$CI_RUN_ID" ]; then
-            echo "::error title=CI run not found::No main-branch CI run found for $GITHUB_SHA" >&2
-            exit 1
-          fi
-          gh run watch "$CI_RUN_ID" --exit-status
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - if: ${{ env.DRY_RUN == 'true' }}
         name: Dry-run package build
         run: node --run build -- --minify
@@ -142,6 +146,9 @@ jobs:
           COMMUNIQUE_OPENROUTER_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
+
+      - name: Wait for CI to pass before publishing
+        wait: wait-for-ci
 
       - if: ${{ env.DRY_RUN != 'true' }}
         name: Commit release notes to main

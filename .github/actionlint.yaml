@@ -1,6 +1,10 @@
 # actionlint doesn't understand the `$/` repository-relative `uses:` syntax yet.
+# It also predates `parallel`, `background`, and `wait` steps
+# (https://github.com/rhysd/actionlint/issues/693).
 paths:
   .github/workflows/**/*.{yml,yaml}:
     ignore:
       - specifying action .[$]/\.github/.*. in invalid format
       - reusable workflow call .[$]/\.github/.*. at .uses. is not following the format
+      - step must run script with "run" section or run action with "uses" section
+      - unexpected key "background" for step

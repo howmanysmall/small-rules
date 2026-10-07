@@ -38,44 +38,45 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Biome
-        run: |
-          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
-          if ((${#changed_files[@]} > 0)); then
-            node --run biome -- ci --no-errors-on-unmatched "${changed_files[@]}"
-          fi
+      - parallel:
+          - name: Biome
+            run: |
+              mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+              if ((${#changed_files[@]} > 0)); then
+                node --run biome -- ci --no-errors-on-unmatched "${changed_files[@]}"
+              fi
 
-      # isentinel-lint already runs oxfmt on everything else; .mdx is the only
-      # format neither it nor Biome covers.
-      - name: oxfmt (MDX)
-        run: |
-          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
-          mdx_files=()
-          for file in "${changed_files[@]}"; do
-            [[ $file == *.mdx ]] && mdx_files+=("$file")
-          done
-          if ((${#mdx_files[@]} > 0)); then
-            node --run oxfmt -- --no-error-on-unmatched-pattern --check "${mdx_files[@]}"
-          fi
+          # isentinel-lint already runs oxfmt on everything else; .mdx is the only
+          # format neither it nor Biome covers.
+          - name: oxfmt (MDX)
+            run: |
+              mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+              mdx_files=()
+              for file in "${changed_files[@]}"; do
+                [[ $file == *.mdx ]] && mdx_files+=("$file")
+              done
+              if ((${#mdx_files[@]} > 0)); then
+                node --run oxfmt -- --no-error-on-unmatched-pattern --check "${mdx_files[@]}"
+              fi
 
-      - name: Lint
-        run: |
-          mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
-          if ((${#changed_files[@]} > 0)); then
-            node --run isentinel-lint -- "${changed_files[@]}"
-          fi
+          - name: Lint
+            run: |
+              mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
+              if ((${#changed_files[@]} > 0)); then
+                node --run isentinel-lint -- "${changed_files[@]}"
+              fi
 
-      - name: Type Check
-        run: node --run type-check
+          - name: Type Check
+            run: node --run type-check
 
-      - name: Dead code
-        run: node --run fallow:dead-code
+          - name: Dead code
+            run: node --run fallow:dead-code
 
-      - name: Duplication
-        run: node --run fallow:dupes
+          - name: Duplication
+            run: node --run fallow:dupes
 
-      - name: Build
-        run: node --run build -- --minify && test -f dist/index.js
+          - name: Build
+            run: node --run build -- --minify && test -f dist/index.js
 
   documentation:
     name: Documentation
@@ -96,18 +97,22 @@ jobs:
       - name: Install dependencies
         uses: $/.github/actions/install
 
-      - name: Type check documentation
-        run: node --run check
-        working-directory: documentation
-
       - name: Restore Chromium cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-${{ runner.arch }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
           path: ~/.cache/ms-playwright
 
-      - name: Install Chromium
+      # Only the browser tests need Chromium, so install it while the Astro
+      # steps run. They stay sequential because they share `.astro/` and `dist/`.
+      - id: install-chromium
+        name: Install Chromium
         run: pnpm --filter @small-rules/documentation exec playwright install --with-deps chromium
+        background: true
+
+      - name: Type check documentation
+        run: node --run check
+        working-directory: documentation
 
       - name: Build documentation
         run: node --run build
@@ -116,6 +121,9 @@ jobs:
       - name: Test React components
         run: node --run test:unit
         working-directory: documentation
+
+      - name: Wait for Chromium
+        wait: install-chromium
 
       - name: Test documentation in Chromium
         run: node --run test:browser
@@ -138,8 +146,9 @@ jobs:
       - name: Install dependencies
         uses: $/.github/actions/install
 
-      - name: Run tests
-        run: node --run test -- --reporter github-actions --reporter dot
+      - parallel:
+          - name: Run tests
+            run: node --run test -- --reporter github-actions --reporter dot
 
-      - name: Run fuzz regressions
-        run: node --run test:fuzz
+          - name: Run fuzz regressions
+            run: node --run test:fuzz
