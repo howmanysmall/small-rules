@@ -22,6 +22,10 @@ describe("starts-with-verb", () => {
 				errors: notVerbErrors,
 			},
 			{
+				code: ["function createWrapper(): void {", "\treturn function memoized(): void {};", "}"].join("\n"),
+				errors: [{ data: { name: "memoized", prefix: "memoized" }, messageId: "notVerb" }],
+			},
+			{
 				code: ["class Store {", "\tpublic quantity(): number {", "\t\treturn 1;", "\t}", "}"].join("\n"),
 				errors: notVerbErrors,
 			},
@@ -82,6 +86,7 @@ describe("starts-with-verb", () => {
 			},
 			"const handleClick = (): void => {};",
 			"const isVisible = function (): boolean { return true; };",
+			"const getValue = function getInner(): number { return 1; };",
 			"function shouldRender(): boolean { return true; }",
 			"function doesExist(): boolean { return true; }",
 			"const wasCancelled = (): boolean => true;",
