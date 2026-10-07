@@ -142,6 +142,8 @@ jobs:
 
       - name: Setup toolchain
         uses: $/.github/actions/setup
+        with:
+          tools: bun node pnpm vale
 
       - name: Install dependencies
         uses: $/.github/actions/install
