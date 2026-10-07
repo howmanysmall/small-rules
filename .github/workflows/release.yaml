@@ -137,7 +137,11 @@ jobs:
         name: Generate release notes
         run: |
           RELEASE_NOTES="$RUNNER_TEMP/release-notes.md"
-          if ! communique generate "$GITHUB_REF_NAME" --changelog --output "$RELEASE_NOTES"; then
+          # RELEASE_BASELINE (repository variable) names the previous tag when
+          # communique's auto-detection is wrong, e.g. to skip a broken release.
+          # Empty means auto-detect.
+          echo "Release baseline: ${RELEASE_BASELINE:-auto}"
+          if ! communique generate "$GITHUB_REF_NAME" ${RELEASE_BASELINE:+"$RELEASE_BASELINE"} --changelog --output "$RELEASE_NOTES"; then
             echo "::warning title=communique failed::Falling back to git-cliff release notes."
             git-cliff --current --strip all --output "$RELEASE_NOTES"
           fi
@@ -146,6 +150,7 @@ jobs:
           COMMUNIQUE_OPENROUTER_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.COMMUNIQUE_OPENROUTER_API_KEY }}
+          RELEASE_BASELINE: ${{ vars.RELEASE_BASELINE }}
 
       - name: Wait for CI to pass before publishing
         wait: wait-for-ci
