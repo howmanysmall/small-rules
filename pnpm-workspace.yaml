@@ -137,14 +137,14 @@ catalogs:
     eslint-plugin-eslint-plugin: 7.6.2
     eslint-plugin-flawless: 1.14.1
     eslint-plugin-jest-extended: 3.0.1
-    eslint-plugin-jsdoc: 65.0.2
+    eslint-plugin-jsdoc: 65.1.0
     eslint-plugin-n: 18.4.1
-    eslint-plugin-oxfmt: 0.26.0
+    eslint-plugin-oxfmt: 0.27.0
     eslint-plugin-perfectionist: 5.12.1
     eslint-plugin-pnpm: 1.9.1
-    eslint-plugin-react-jsx: 5.24.0
-    eslint-plugin-react-naming-convention: 5.24.0
-    eslint-plugin-react-x: 5.24.0
+    eslint-plugin-react-jsx: 5.24.6
+    eslint-plugin-react-naming-convention: 5.24.6
+    eslint-plugin-react-x: 5.24.6
     eslint-plugin-roblox-ts: 1.4.1
     eslint-plugin-sonarjs: 4.2.2
     eslint-plugin-unicorn: 77.0.0
@@ -152,9 +152,9 @@ catalogs:
     fallow: 3.31.0
     oxfmt: 0.72.0
     oxlint: 1.87.0
-    oxlint-plugin-react-doctor: 0.9.16
+    oxlint-plugin-react-doctor: 0.9.17
     oxlint-tsgolint: 7.0.2003
-    react-doctor: 0.9.16
+    react-doctor: 0.9.17
   opencode2:
     "@opencode/plugin": 2.0.22
     "@opencode/schema": 2.0.22
@@ -207,7 +207,7 @@ catalogs:
     vitest: 5.0.3
     vitiate: 0.3.1
   tooling:
-    "@isentinel/hooks": 1.6.0
+    "@isentinel/hooks": 1.7.0
     "@mdx-js/language-server": 0.6.4
     "@typescript/native-preview": 7.0.0-dev.20260707.2
     bumpp: 12.3.0
