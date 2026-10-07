@@ -1,9 +1,33 @@
+import {
+	ARRAY_EXPRESSION,
+	isAnyLiteral,
+	isIdentifier,
+	isJsxElement,
+	isJsxEmptyExpression,
+	isJsxExpressionContainer,
+	isJsxFragment,
+	isJsxIdentifier,
+	isJsxMemberExpression,
+	isJsxSpreadAttribute,
+	isJsxText,
+	isProgram,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	OBJECT_EXPRESSION,
+	PARENTHESIZED_EXPRESSION,
+	PROPERTY,
+	TS_AS_EXPRESSION,
+	TS_INSTANTIATION_EXPRESSION,
+	TS_NON_NULL_EXPRESSION,
+	TS_SATISFIES_EXPRESSION,
+	TS_TYPE_ASSERTION,
+} from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getEnvironment, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
 	getConstInitializer,
@@ -46,8 +70,8 @@ function normalizeAdditionalStaticFactories(rawOptions: Context["options"][0]): 
 
 function getJavaScriptXmlElementRootName(name: ESTree.JSXElementName): string | undefined {
 	let current = name;
-	while (current.type === "JSXMemberExpression") current = current.object;
-	return current.type === "JSXIdentifier" ? current.name : undefined;
+	while (isJsxMemberExpression(current)) current = current.object;
+	return isJsxIdentifier(current) ? current.name : undefined;
 }
 
 function isStableModuleComponentName(context: Context, node: ESTree.JSXElement, name: string): boolean {
@@ -75,7 +99,7 @@ function isHoistableJavaScriptXmlElementName(
 	environment: Environment,
 ): boolean {
 	const { name } = node.openingElement;
-	if (name.type === "JSXIdentifier") {
+	if (isJsxIdentifier(name)) {
 		const firstCharacter = name.name.charAt(0);
 		if (firstCharacter !== "" && firstCharacter === firstCharacter.toLowerCase()) return true;
 	}
@@ -84,7 +108,7 @@ function isHoistableJavaScriptXmlElementName(
 	if (rootName === undefined) return false;
 
 	const variable = getVariableByName(context.sourceCode.getScope(node), rootName);
-	const isMemberName = name.type === "JSXMemberExpression";
+	const isMemberName = isJsxMemberExpression(name);
 	if (additionalComponents.has(rootName)) {
 		if (variable === undefined) return !isMemberName;
 		return isMemberName
@@ -92,7 +116,7 @@ function isHoistableJavaScriptXmlElementName(
 			: isStableModuleComponentName(context, node, rootName);
 	}
 
-	if (environment !== "standard") return false;
+	if (environment !== STANDARD) return false;
 	return isMemberName
 		? isImportedJavaScriptXmlNamespace(context, node, rootName)
 		: isStableModuleComponentName(context, node, rootName);
@@ -106,20 +130,20 @@ function isStaticAttributeValue(
 	environment: Environment,
 ): boolean {
 	if (
-		environment === "roblox-ts" &&
-		attribute.name.type === "JSXIdentifier" &&
+		environment === ROBLOX_TS &&
+		isJsxIdentifier(attribute.name) &&
 		(attribute.name.name === "Event" || attribute.name.name === "Change")
 	) {
 		return false;
 	}
 
 	const { value } = attribute;
-	if (value === null || value.type === "Literal") return true;
+	if (value === null || isAnyLiteral(value)) return true;
 	/* v8 ignore next -- @preserve parser JSX attributes have non-empty expression containers here. */
-	if (value.type !== "JSXExpressionContainer" || value.expression.type === "JSXEmptyExpression") return false;
+	if (!isJsxExpressionContainer(value) || isJsxEmptyExpression(value.expression)) return false;
 
 	if (isExplicitUndefinedExpression(context.sourceCode, value.expression, new Set())) {
-		return environment === "standard";
+		return environment === STANDARD;
 	}
 
 	return isStaticExpression(context.sourceCode, value.expression, seen, staticOptions);
@@ -134,7 +158,7 @@ function hasStaticAttributes(
 ): boolean {
 	for (const attribute of node.attributes) {
 		if (
-			attribute.type === "JSXSpreadAttribute" ||
+			isJsxSpreadAttribute(attribute) ||
 			!isStaticAttributeValue(context, attribute, new Set(seen), staticOptions, environment)
 		) {
 			return false;
@@ -152,8 +176,8 @@ function isStaticJavaScriptXmlChild(
 	staticOptions: StaticExpressionOptions,
 	environment: Environment,
 ): boolean {
-	if (child.type === "JSXText") return environment === "standard" || child.value.trim().length === 0;
-	if (child.type === "JSXElement" || child.type === "JSXFragment") {
+	if (isJsxText(child)) return environment === STANDARD || child.value.trim().length === 0;
+	if (isJsxElement(child) || isJsxFragment(child)) {
 		return isStaticJavaScriptXmlNode(
 			context,
 			child,
@@ -163,9 +187,9 @@ function isStaticJavaScriptXmlChild(
 			environment,
 		);
 	}
-	if (child.type !== "JSXExpressionContainer") return false;
-	if (child.expression.type === "JSXEmptyExpression") return true;
-	if (child.expression.type === "JSXElement" || child.expression.type === "JSXFragment") {
+	if (!isJsxExpressionContainer(child)) return false;
+	if (isJsxEmptyExpression(child.expression)) return true;
+	if (isJsxElement(child.expression) || isJsxFragment(child.expression)) {
 		return isStaticJavaScriptXmlNode(
 			context,
 			child.expression,
@@ -176,11 +200,11 @@ function isStaticJavaScriptXmlChild(
 		);
 	}
 
-	if (child.expression.type === "Identifier") {
+	if (isIdentifier(child.expression)) {
 		const initializer = getModuleConstInitializer(context.sourceCode, child.expression);
 		if (initializer !== undefined) {
 			const unwrappedInitializer = stripExpressionWrappers(initializer);
-			if (unwrappedInitializer.type === "JSXElement" || unwrappedInitializer.type === "JSXFragment") {
+			if (isJsxElement(unwrappedInitializer) || isJsxFragment(unwrappedInitializer)) {
 				return isStaticJavaScriptXmlNode(
 					context,
 					unwrappedInitializer,
@@ -226,7 +250,7 @@ function isStaticJavaScriptXmlNode(
 	if (seen.has(node)) return false;
 	seen.add(node);
 
-	if (node.type === "JSXFragment") {
+	if (isJsxFragment(node)) {
 		return hasStaticChildren(context, node, seen, additionalComponents, staticOptions, environment);
 	}
 
@@ -246,9 +270,9 @@ function hasStaticJavaScriptXmlAncestor(
 ): boolean {
 	// oxlint-disable-next-line flawless/prefer-parameter-destructuring -- rule conflict.
 	let { parent } = node;
-	while (parent.type !== "Program") {
+	while (!isProgram(parent)) {
 		if (
-			(parent.type === "JSXElement" || parent.type === "JSXFragment") &&
+			(isJsxElement(parent) || isJsxFragment(parent)) &&
 			isStaticJavaScriptXmlNode(context, parent, new Set(), additionalComponents, staticOptions, environment)
 		) {
 			return true;
@@ -261,21 +285,22 @@ function hasStaticJavaScriptXmlAncestor(
 
 function isTransparentExpressionWrapper(parent: ESTree.Node, child: ESTree.Node): boolean {
 	switch (parent.type) {
-		case "ParenthesizedExpression":
-		case "TSAsExpression":
-		case "TSInstantiationExpression":
-		case "TSNonNullExpression":
-		case "TSSatisfiesExpression":
-		case "TSTypeAssertion":
+		case PARENTHESIZED_EXPRESSION:
+		case TS_AS_EXPRESSION:
+		case TS_INSTANTIATION_EXPRESSION:
+		case TS_NON_NULL_EXPRESSION:
+		case TS_SATISFIES_EXPRESSION:
+		case TS_TYPE_ASSERTION:
 			return parent.expression === child;
+
 		default:
 			return false;
 	}
 }
 
 function isTransparentJavaScriptXmlContainer(parent: ESTree.Node, child: ESTree.Node): boolean {
-	if (parent.type === "JSXElement" || parent.type === "JSXFragment") return true;
-	return parent.type === "JSXExpressionContainer" && parent.expression === child;
+	if (isJsxElement(parent) || isJsxFragment(parent)) return true;
+	return isJsxExpressionContainer(parent) && parent.expression === child;
 }
 
 function isTransparentInitializerParent(parent: ESTree.Node, child: ESTree.Node): boolean {
@@ -284,11 +309,11 @@ function isTransparentInitializerParent(parent: ESTree.Node, child: ESTree.Node)
 	}
 
 	switch (parent.type) {
-		case "ArrayExpression":
-		case "ObjectExpression":
+		case ARRAY_EXPRESSION:
+		case OBJECT_EXPRESSION:
 			return true;
 
-		case "Property":
+		case PROPERTY:
 			return parent.value === child;
 
 		default:
@@ -307,11 +332,11 @@ function isAssignedToModuleConst(context: Context, node: JavaScriptXmlNode): boo
 		parent = nextParent;
 	}
 
-	if (parent.type !== "VariableDeclarator" || parent.id.type !== "Identifier" || parent.init !== current) {
+	if (!isVariableDeclarator(parent) || !isIdentifier(parent.id) || parent.init !== current) {
 		return false;
 	}
 	/* v8 ignore next -- @preserve VariableDeclarator nodes are parented by VariableDeclaration nodes. */
-	if (parent.parent.type !== "VariableDeclaration") return false;
+	if (!isVariableDeclaration(parent.parent)) return false;
 	if (parent.parent.kind !== "const") return false;
 
 	const variable = getVariableByName(context.sourceCode.getScope(current), parent.id.name);
@@ -333,7 +358,7 @@ const preferHoistedJsxElements = createRule("prefer-hoisted-jsx-elements", "reac
 		const additionalComponents = normalizeAdditionalHoistableComponents(rawOptions);
 		const additionalStaticFactories = normalizeAdditionalStaticFactories(rawOptions);
 		const environment = getEnvironment(rawOptions);
-		const defaultStaticFactories = environment === "roblox-ts" ? DEFAULT_STATIC_GLOBAL_FACTORIES : [];
+		const defaultStaticFactories = environment === ROBLOX_TS ? DEFAULT_STATIC_GLOBAL_FACTORIES : [];
 
 		const staticOptions: StaticExpressionOptions = {
 			staticCallsRequireFactories: true,

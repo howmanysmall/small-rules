@@ -1,23 +1,23 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyFunction,
-	isComponentName,
 	isFunctionDeclaration,
-	isIdentifierName,
+	isIdentifier,
+	isIdentifierNamed,
 	isImportSpecifier,
 	isMemberExpression,
 	isMethodDefinition,
 	isProperty,
 	isTryStatement,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 interface ControlFlowContext {
 	readonly afterEarlyReturn: boolean;
@@ -53,15 +53,15 @@ function isComponentOrHook(node: CallbackFunction): boolean {
 	}
 
 	const { parent } = node;
-	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) {
+	if (isVariableDeclarator(parent) && isIdentifier(parent.id)) {
 		return isComponentName(parent.id.name) || isReactHookName(parent.id.name);
 	}
 
-	if (isProperty(parent) && isIdentifierName(parent.key)) {
+	if (isProperty(parent) && isIdentifier(parent.key)) {
 		return isComponentName(parent.key.name) || isReactHookName(parent.key.name);
 	}
 
-	if (isMethodDefinition(parent) && isIdentifierName(parent.key)) {
+	if (isMethodDefinition(parent) && isIdentifier(parent.key)) {
 		return isComponentName(parent.key.name) || isReactHookName(parent.key.name);
 	}
 
@@ -102,7 +102,7 @@ function isInFinallyBlock(node: ESTree.Node): boolean {
 
 function isRecursiveCall(node: ESTree.CallExpression, functionName?: string): boolean {
 	if (functionName === undefined) return false;
-	return isIdentifierName(node.callee) && node.callee.name === functionName;
+	return isIdentifierNamed(node.callee, functionName);
 }
 
 function makeContext(overrides: Partial<ControlFlowContext>, depth: number): ControlFlowContext {
@@ -123,7 +123,7 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 }
 
 function getIdentifierNameFromExpression(node: ESTree.Expression): string | undefined {
-	return isIdentifierName(node) ? node.name : undefined;
+	return isIdentifier(node) ? node.name : undefined;
 }
 
 function shouldIgnoreHookImportSource(
@@ -137,7 +137,7 @@ function shouldIgnoreHookImportSource(
 	const memberSourceDecision = getMemberHookSourceDecision(node, importSources);
 	if (memberSourceDecision !== undefined) return memberSourceDecision;
 
-	const importSource = isIdentifierName(node.callee) ? importSourceMap.get(hookName) : undefined;
+	const importSource = isIdentifier(node.callee) ? importSourceMap.get(hookName) : undefined;
 	if (importSource !== undefined && importSources[importSource] === false) return true;
 	if (importSource !== undefined && importSources[importSource] === true) return false;
 
@@ -340,7 +340,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				for (const specifier of node.specifiers) {
 					if (!isImportSpecifier(specifier)) continue;
 					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. */
-					if (!isIdentifierName(specifier.imported)) continue;
+					if (!isIdentifier(specifier.imported)) continue;
 					if (isReactHookName(specifier.imported.name)) {
 						importSourceMap.set(specifier.local.name, source);
 					}

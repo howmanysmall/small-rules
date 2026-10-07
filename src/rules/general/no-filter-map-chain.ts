@@ -1,3 +1,5 @@
+import { isCallExpression, isMemberExpression } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
@@ -8,13 +10,13 @@ const noFilterMapChain = createRule("no-filter-map-chain", "general", {
 		return {
 			CallExpression(node): void {
 				const mapCallee = stripExpressionWrappers(node.callee);
-				if (mapCallee.type !== "MemberExpression" || getMemberPropertyName(mapCallee) !== "map") return;
+				if (!isMemberExpression(mapCallee) || getMemberPropertyName(mapCallee) !== "map") return;
 
 				const filterCall = stripExpressionWrappers(mapCallee.object);
-				if (filterCall.type !== "CallExpression") return;
+				if (!isCallExpression(filterCall)) return;
 
 				const filterCallee = stripExpressionWrappers(filterCall.callee);
-				if (filterCallee.type !== "MemberExpression" || getMemberPropertyName(filterCallee) !== "filter") {
+				if (!isMemberExpression(filterCallee) || getMemberPropertyName(filterCallee) !== "filter") {
 					return;
 				}
 

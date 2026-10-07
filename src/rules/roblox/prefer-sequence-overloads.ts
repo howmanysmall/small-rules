@@ -1,12 +1,13 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrayExpression,
-	isIdentifierName,
+	isIdentifier,
 	isNamedGlobalCall,
 	isNewExpression,
 	isNumericLiteral,
 	isSpreadElement,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -15,9 +16,9 @@ function isNumericLiteralValue(node: ESTree.Node, value: number): node is ESTree
 }
 
 function getSequenceKeypointName(sequenceName: string): string | undefined {
-	if (sequenceName === "ColorSequence") return "ColorSequenceKeypoint";
-	if (sequenceName === "NumberSequence") return "NumberSequenceKeypoint";
-	return undefined;
+	return sequenceName === "ColorSequence" || sequenceName === "NumberSequence"
+		? `${sequenceName}Keypoint`
+		: undefined;
 }
 
 function getKeypointValue(node: ESTree.Expression, keypointName: string, time: number): ESTree.Expression | undefined {
@@ -97,7 +98,7 @@ const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox"
 	createOnce(context): Visitor {
 		return {
 			NewExpression(node): void {
-				if (!isIdentifierName(node.callee)) return;
+				if (!isIdentifier(node.callee)) return;
 
 				const sequenceName = node.callee.name;
 				const keypointName = getSequenceKeypointName(sequenceName);

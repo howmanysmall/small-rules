@@ -4,7 +4,7 @@ import {
 	getReactEffectAnalysis,
 	getReportableEffectCall,
 } from "$oxc-utilities/react-effect-utilities";
-import { getEnvironment } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
 
@@ -68,14 +68,7 @@ const noPassLiveStateToParent = createRule("no-pass-live-state-to-parent", "reac
 		schema: [
 			{
 				additionalProperties: false,
-				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
-				},
+				properties: { environment: ENVIRONMENT_SCHEMA },
 				type: "object",
 			},
 		],

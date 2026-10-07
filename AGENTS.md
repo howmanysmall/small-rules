@@ -22,9 +22,9 @@ You **MUST** follow these guidelines. There is NO exception.
 | Command | What it does |
 |---------|-------------|
 | `pnpm install` | Install dependencies from the pnpm dependency graph |
-| `ni` | Install dependencies when `node_modules` exists |
-| `ni cowsay` | Add a dependency |
-| `ni -D cowsay` | Add a dev dependency |
+| `pnpm add` | Install dependencies when `node_modules` exists |
+| `pnpm add cowsay` | Add a dependency |
+| `pnpm add -D cowsay` | Add a dev dependency |
 | `nr build` | Bundle to `dist/index.js` via `tsdown` |
 | `nr test:agent` | Run all Vitest unit tests |
 | `nr test:agent -- tests/rules/roblox/no-print.test.ts` | Run a single test file |
@@ -96,7 +96,9 @@ Shared type definitions, reexports from `oxlint-plugin-utilities`, and missing E
 
 ## Testing
 
-Tests mirror `src/`: `tests/rules/<category>/<rule>.test.ts` (one per rule), `tests/utilities/` (shared helpers), `tests/tooling/` (release, vendoring, and repo scripts), `tests/documentation/`, `tests/rule-relations/`, and `tests/fuzz/*.fuzz.ts`. `tests/index.test.ts` covers plugin metadata. `tests/fixtures/` holds on-disk fixture projects, and `tests/rule-testers.ts` plus `tests/rule-harness/` are the harness (import them as `$test/rule-testers`).
+Tests mirror `src/`: `tests/rules/<category>/<rule>.test.ts` (one per rule), `tests/utilities/` (shared helpers), `tests/tooling/` (release, vendoring, and repo scripts), `tests/documentation/`, `tests/rule-relations/`, `tests/properties/` (fast-check rule properties), and `tests/fuzz/*.fuzz.ts`. `tests/index.test.ts` covers plugin metadata. `tests/fixtures/` holds on-disk fixture projects, and `tests/rule-testers.ts` plus `tests/rule-harness/` are the harness (import them as `$test/rule-testers`).
+
+A new fixable rule needs a program generator in `tests/properties/support/fixable-cases-*.ts`; `tests/properties/fixes-settle.test.ts` fails until it has one. Property tests take their run count from `PROPERTY_RUNS` in `tests/property-runs.ts` so the scheduled deep run can raise it.
 
 Tests use the repo-owned Oxc/Vitest rule harness in `tests/rule-testers.ts`. Preconfigured runners:
 
@@ -112,7 +114,7 @@ Test pattern:
 ```ts
 import { describe } from "vitest";
 import rule from "$oxc-rules/roblox/no-print";
-import { js } from "$test/rule-testers";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 describe("no-print", () => {
   js.run("no-print", rule, {
@@ -151,6 +153,8 @@ When adding or removing a rule from `documentation/src/data/rule-manifest.ts`, r
 
 - **Validate** — sequential Biome, Oxlint, type-check (`tsgo`), fallow dead-code, fallow dupes, and minified build on one runner
 - **Test** — Vitest with compact `--reporter github-actions --reporter dot` output
+
+`.github/workflows/deep-tests.yaml` — Weekly and manual only: property tests at 10,000 runs, real fuzzing (`test:fuzz:run`), and Stryker mutation testing, all too slow for every pull request.
 
 `.github/workflows/release.yaml` — Triggered by `v*.*.*` tags or manually with `dry_run`. Does **not** re-run CI: it waits for the matching main-branch CI run for the tag SHA, then publishes via NPM Trusted Publishing (OIDC). The real publish build is `prepublishOnly` only; dry runs still build explicitly. `communique` generates the documentation and GitHub Release notes, with `git-cliff` as the fallback.
 

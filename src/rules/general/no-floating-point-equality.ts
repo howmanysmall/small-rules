@@ -1,13 +1,8 @@
-import { Predicate } from "effect";
-
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
 	isAnyLiteral,
 	isBinaryExpression,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isImportDefaultSpecifier,
 	isImportNamespaceSpecifier,
@@ -21,8 +16,12 @@ import {
 	isUnaryExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -153,7 +152,7 @@ function resolveFloatingExpressionRoot(
 			current = unwrapped;
 			continue;
 		}
-		if (!isIdentifierName(current)) return current;
+		if (!isIdentifier(current)) return current;
 		const variable = variables.get(current);
 		if (variable === undefined || visited.has(variable)) return undefined;
 
@@ -195,7 +194,7 @@ function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {
 }
 
 function getImportedName(specifier: ESTree.ImportSpecifier): string {
-	return isIdentifierName(specifier.imported) ? specifier.imported.name : specifier.imported.value;
+	return isIdentifier(specifier.imported) ? specifier.imported.name : specifier.imported.value;
 }
 
 function collectImportedSpecifier(
@@ -242,7 +241,7 @@ function getFunctionAssertionOperands(
 	node: ESTree.CallExpression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (!isIdentifierName(node.callee)) return undefined;
+	if (!isIdentifier(node.callee)) return undefined;
 	if (imports.get(node.callee.name) !== "function") return undefined;
 	return getCallPairArguments(node);
 }
@@ -255,7 +254,7 @@ function getAssertMethodOperands(
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined) return undefined;
 	if (!EXACT_ASSERTION_METHODS.has(method)) return undefined;
-	if (!isIdentifierName(node.callee.object)) return undefined;
+	if (!isIdentifier(node.callee.object)) return undefined;
 	if (imports.get(node.callee.object.name) !== "assert") return undefined;
 	return getCallPairArguments(node);
 }
@@ -270,7 +269,7 @@ function isExpectCallReceiver(
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): receiver is ESTree.CallExpression {
 	if (!isCallExpression(receiver)) return false;
-	if (!isIdentifierName(receiver.callee)) return false;
+	if (!isIdentifier(receiver.callee)) return false;
 	return imports.get(receiver.callee.name) === "expect";
 }
 

@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -15,7 +12,6 @@ import {
 	FOR_STATEMENT,
 	FUNCTION_DECLARATION,
 	FUNCTION_EXPRESSION,
-	getNamespacedCallNames,
 	IDENTIFIER,
 	IF_STATEMENT,
 	isAnyFunction,
@@ -31,7 +27,7 @@ import {
 	isExpressionStatement,
 	isFunctionDeclaration,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isIfStatement,
 	isMemberExpression,
@@ -58,7 +54,11 @@ import {
 	UNARY_EXPRESSION,
 	WHILE_STATEMENT,
 	WITH_STATEMENT,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getNamespacedCallNames } from "$oxc-utilities/oxc-utilities";
 import { getBindingPropertyKeyName, getBindingPropertyValueIdentifier } from "$oxc-utilities/react-hook-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
@@ -69,10 +69,9 @@ import {
 } from "$oxc-utilities/react-utilities";
 import { isNonEmptyString, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { CallbackFunction, NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
 interface ReportOptions {
@@ -223,7 +222,7 @@ function normalizeOptions(raw?: NoUselessUseEffectOptions): NormalizedOptions {
 }
 
 function getNonComputedCalleePropertyName(callee: ESTree.Expression): string | undefined {
-	if (!isMemberExpression(callee) || callee.computed || !isIdentifierName(callee.property)) return undefined;
+	if (!isMemberExpression(callee) || callee.computed || !isIdentifier(callee.property)) return undefined;
 	return callee.property.name;
 }
 
@@ -233,7 +232,7 @@ function isHookCall(
 	reactNamespaces: ReadonlySet<string>,
 	hookNames: ReadonlySet<string>,
 ): boolean {
-	if (isIdentifierName(callee)) return hookIdentifiers.has(callee.name);
+	if (isIdentifier(callee)) return hookIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
 	if (memberNames !== undefined) {
@@ -247,13 +246,13 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 	if (isFunctionDeclaration(node) && node.id !== null) return node.id.name;
 
 	const { parent } = node;
-	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
+	if (isVariableDeclarator(parent) && isIdentifier(parent.id)) return parent.id.name;
 
 	if (
 		"key" in parent &&
 		(!("computed" in parent) || !parent.computed) &&
 		isNode(parent.key) &&
-		isIdentifierName(parent.key)
+		isIdentifier(parent.key)
 	) {
 		return parent.key.name;
 	}
@@ -413,7 +412,7 @@ function isStateSetterCall(
 	callExpression: ESTree.CallExpression,
 	stateSetterIdentifiers: ReadonlySet<string>,
 ): boolean {
-	return isIdentifierName(callExpression.callee) && stateSetterIdentifiers.has(callExpression.callee.name);
+	return isIdentifier(callExpression.callee) && stateSetterIdentifiers.has(callExpression.callee.name);
 }
 
 function isFalseLiteral(node: ESTree.Node): boolean {
@@ -451,7 +450,7 @@ function getResetFlagNameFromStatement(
 	stateSetterToValue: ReadonlyMap<string, string>,
 ): string | undefined {
 	const callExpression = getCallExpressionFromStatement(statement);
-	if (!isIdentifierName(callExpression?.callee)) return undefined;
+	if (!isIdentifier(callExpression?.callee)) return undefined;
 
 	const flagName = stateSetterToValue.get(callExpression.callee.name);
 	if (flagName === undefined || callExpression.arguments.length !== 1) return undefined;
@@ -651,7 +650,7 @@ function containsIdentifier(node: ESTree.Expression): boolean {
 		if (current === undefined || visited.has(current)) continue;
 		visited.add(current);
 
-		if (isIdentifierName(current)) return true;
+		if (isIdentifier(current)) return true;
 		pushExpressionSearchChildren(current, stack);
 	}
 
@@ -732,7 +731,7 @@ function buildFunctionContext(
 	if (firstParameter === undefined) return context;
 
 	const parameter = unwrapParameter(firstParameter);
-	if (isIdentifierName(parameter)) {
+	if (isIdentifier(parameter)) {
 		context.propertyObjectName = parameter.name;
 		return context;
 	}
@@ -757,7 +756,7 @@ function isPropertyCallbackCall(
 	functionContext: FunctionContext,
 	propertyCallbackPrefixes: ReadonlySet<string>,
 ): boolean {
-	if (isIdentifierName(callee)) return functionContext.propertyCallbackIdentifiers.has(callee.name);
+	if (isIdentifier(callee)) return functionContext.propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
 	if (memberNames !== undefined) {
@@ -784,7 +783,7 @@ function getDependencyIdentifiers(callExpression: ESTree.CallExpression): Set<st
 	const [, dependencyArgument] = callExpression.arguments;
 	if (!isArrayExpression(dependencyArgument)) return identifiers;
 
-	for (const element of dependencyArgument.elements) if (isIdentifierName(element)) identifiers.add(element.name);
+	for (const element of dependencyArgument.elements) if (isIdentifier(element)) identifiers.add(element.name);
 	return identifiers;
 }
 
@@ -832,7 +831,7 @@ function collectSetterCalls(
 		if (
 			callExpression !== undefined &&
 			isStateSetterCall(callExpression, stateSetterIdentifiers) &&
-			isIdentifierName(callExpression.callee)
+			isIdentifier(callExpression.callee)
 		) {
 			setters.add(callExpression.callee.name);
 		}
@@ -845,7 +844,7 @@ function isAllowedPropertyCallbackCall(
 	{ callee }: ESTree.CallExpression,
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
-	if (isIdentifierName(callee)) return propertyCallbackIdentifiers.has(callee.name);
+	if (isIdentifier(callee)) return propertyCallbackIdentifiers.has(callee.name);
 
 	const memberNames = getNamespacedCallNames(callee);
 	return memberNames !== undefined && propertyCallbackIdentifiers.has(memberNames.objectName);
@@ -940,7 +939,7 @@ function isRefCurrentArgument(argument: ESTree.Node, referenceIdentifiers: Reado
 	return (
 		isMemberExpression(argument) &&
 		!argument.computed &&
-		isIdentifierName(argument.object) &&
+		isIdentifier(argument.object) &&
 		isIdentifierNamed(argument.property, "current") &&
 		referenceIdentifiers.has(argument.object.name)
 	);
@@ -952,7 +951,7 @@ function passesRefCurrentToCallback(
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
 	return (
-		isIdentifierName(callExpression.callee) &&
+		isIdentifier(callExpression.callee) &&
 		propertyCallbackIdentifiers.has(callExpression.callee.name) &&
 		callExpression.arguments.some((argument) => isRefCurrentArgument(argument, referenceIdentifiers))
 	);
@@ -991,7 +990,7 @@ function collectIdentifiers(node: ESTree.Node): Set<string> {
 		if (current === undefined || visited.has(current)) continue;
 		visited.add(current);
 
-		if (isIdentifierName(current)) {
+		if (isIdentifier(current)) {
 			identifiers.add(current.name);
 			continue;
 		}
@@ -1085,8 +1084,8 @@ function isEventSideEffectCall(statement: ESTree.Statement, stateSetterIdentifie
 	const call = getCallExpressionFromStatement(statement);
 	if (call === undefined || isStateSetterCall(call, stateSetterIdentifiers)) return false;
 
-	if (isIdentifierName(call.callee)) return hasEventPrefix(call.callee.name);
-	if (!isMemberExpression(call.callee) || call.callee.computed || !isIdentifierName(call.callee.property)) {
+	if (isIdentifier(call.callee)) return hasEventPrefix(call.callee.name);
+	if (!isMemberExpression(call.callee) || call.callee.computed || !isIdentifier(call.callee.property)) {
 		return false;
 	}
 	return hasEventPrefix(call.callee.property.name);
@@ -1233,7 +1232,7 @@ function hasCallerNamePrefix(name: string): boolean {
 function isConsoleSideEffect(callee: ESTree.MemberExpression): boolean {
 	return (
 		isIdentifierNamed(callee.object, "console") &&
-		isIdentifierName(callee.property) &&
+		isIdentifier(callee.property) &&
 		(callee.property.name === "log" ||
 			callee.property.name === "warn" ||
 			callee.property.name === "error" ||
@@ -1254,13 +1253,13 @@ function isRealExternalCall(
 ): boolean {
 	const { callee } = call;
 	if (isStateSetterCall(call, setterIds)) return false;
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		if (callbackIds.has(callee.name)) return false;
 		return KNOWN_EXTERNAL_PATTERNS.has(callee.name) || hasCallerNamePrefix(callee.name);
 	}
 
-	if (!isMemberExpression(callee) || callee.computed || !isIdentifierName(callee.property)) return false;
-	if (isIdentifierName(callee.object) && callbackIds.has(callee.object.name)) return false;
+	if (!isMemberExpression(callee) || callee.computed || !isIdentifier(callee.property)) return false;
+	if (isIdentifier(callee.object) && callbackIds.has(callee.object.name)) return false;
 	return isConsoleSideEffect(callee) || hasMemberSideEffectMethod(callee.property.name);
 }
 
@@ -1335,23 +1334,23 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			if (elements.length < 2) return;
 
 			const [, setterElement] = elements;
-			if (setterElement === null || setterElement === undefined || !isIdentifierName(setterElement)) return;
+			if (setterElement === null || setterElement === undefined || !isIdentifier(setterElement)) return;
 			stateSetterIdentifiers.add(setterElement.name);
 
 			const [stateElement] = elements;
-			if (isIdentifierName(stateElement)) {
+			if (isIdentifier(stateElement)) {
 				stateValueIdentifiers.add(stateElement.name);
 				stateSetterToValue.set(setterElement.name, stateElement.name);
 			}
 		}
 
 		function recordRef(node: ESTree.VariableDeclarator): void {
-			if (!isCallExpression(node.init) || !isReferenceHookCall(node.init) || !isIdentifierName(node.id)) return;
+			if (!isCallExpression(node.init) || !isReferenceHookCall(node.init) || !isIdentifier(node.id)) return;
 			refIdentifiers.add(node.id.name);
 		}
 
 		function recordNamedFunction(node: ESTree.VariableDeclarator): void {
-			if (!isIdentifierName(node.id) || node.init === null) return;
+			if (!isIdentifier(node.id) || node.init === null) return;
 			if (isCallbackFunction(node.init)) namedFunctions.set(node.id.name, node.init);
 		}
 
@@ -1648,7 +1647,7 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				const [callback] = node.arguments;
 				if (callback === undefined) return;
 
-				if (isIdentifierName(callback)) {
+				if (isIdentifier(callback)) {
 					analyzeNamedEffectCallback(node, callback.name);
 					return;
 				}

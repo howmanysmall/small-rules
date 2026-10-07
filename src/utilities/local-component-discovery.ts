@@ -1,9 +1,9 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
+import { isIdentifier, isImportDefaultSpecifier, isImportSpecifier } from "@small-rules/oxlint-utilities";
 import { String as EffectString, Predicate } from "effect";
 import ignore from "ignore";
 
-import { isIdentifierName, isImportDefaultSpecifier, isImportSpecifier } from "./oxc-utilities";
 import { resolveRelativeImport } from "./resolve-import";
 
 import type { Ignore } from "ignore";
@@ -353,7 +353,7 @@ export function addLocalComponentImportIdentifiers(
 		if (!isImportSpecifier(specifier)) continue;
 
 		const { imported } = specifier;
-		const importedName = isIdentifierName(imported) ? imported.name : imported.value;
+		const importedName = isIdentifier(imported) ? imported.name : imported.value;
 		if (importedName === componentName) identifiers.add(specifier.local.name);
 	}
 }

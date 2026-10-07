@@ -1,6 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { getEnvironment } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -66,14 +66,7 @@ const noInitializeState = createRule("no-initialize-state", "react", {
 		schema: [
 			{
 				additionalProperties: false,
-				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
-				},
+				properties: { environment: ENVIRONMENT_SCHEMA },
 				type: "object",
 			},
 		],

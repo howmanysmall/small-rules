@@ -1,15 +1,16 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isObjectPattern,
 	isProperty,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -29,7 +30,7 @@ function isIanitorFactoryCall(expression: ESTree.Expression): boolean {
 	if (!isMemberExpression(callee) || callee.computed) return false;
 
 	const object = stripExpressionWrappers(callee.object);
-	return isIdentifierNamed(object, "Ianitor") && isIdentifierName(callee.property);
+	return isIdentifierNamed(object, "Ianitor") && isIdentifier(callee.property);
 }
 
 function isFromIanitorCheckVariable(scopeVariable: ScopeVariable): boolean {
@@ -47,7 +48,7 @@ function isCallToIanitorCheck(node: ESTree.CallExpression, sourceCode: SourceCod
 	const unwrappedCallee = stripExpressionWrappers(node.callee);
 	if (isCallExpression(unwrappedCallee)) return isIanitorFactoryCall(unwrappedCallee);
 
-	if (isIdentifierName(unwrappedCallee)) {
+	if (isIdentifier(unwrappedCallee)) {
 		const variable = getVariableByName(sourceCode.getScope(node), unwrappedCallee.name);
 		return variable !== undefined && isFromIanitorCheckVariable(variable);
 	}
@@ -59,7 +60,7 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 	let hasSuccess = false;
 
 	for (const property of objectPattern.properties) {
-		if (!isProperty(property) || !isIdentifierName(property.key)) continue;
+		if (!isProperty(property) || !isIdentifier(property.key)) continue;
 		const { name } = property.key;
 		if (name === "error" || name === "value") return false;
 		/* v8 ignore next -- @preserve success-only object patterns reach this path from parser Property keys. */
@@ -80,7 +81,7 @@ function findSuccessPropertyKey(objectPattern: ESTree.ObjectPattern): ESTree.Nod
 }
 
 function isFactoryCheckDeclarator(id: ESTree.Node, init: ESTree.CallExpression): boolean {
-	return isIdentifierName(id) && isIanitorFactoryCall(init);
+	return isIdentifier(id) && isIanitorFactoryCall(init);
 }
 
 function isSuccessOnlyDestructuring(id: ESTree.Node, init: ESTree.CallExpression, sourceCode: SourceCode): boolean {
@@ -89,7 +90,7 @@ function isSuccessOnlyDestructuring(id: ESTree.Node, init: ESTree.CallExpression
 
 function isStoredCheckResult(init: ESTree.CallExpression, ianitorCheckVariables: ReadonlySet<string>): boolean {
 	const callee = stripExpressionWrappers(init.callee);
-	return isIdentifierName(callee) && ianitorCheckVariables.has(callee.name);
+	return isIdentifier(callee) && ianitorCheckVariables.has(callee.name);
 }
 
 const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox", {
@@ -118,14 +119,14 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 		return {
 			CallExpression(node): void {
 				for (const argument of node.arguments) {
-					if (!isIdentifierName(argument)) continue;
+					if (!isIdentifier(argument)) continue;
 					const result = ianitorResultVariables.get(argument.name);
 					if (result !== undefined) result.referencedFully = true;
 				}
 			},
 
 			MemberExpression({ computed, object, property }): void {
-				if (computed || !isIdentifierName(property)) return;
+				if (computed || !isIdentifier(property)) return;
 				const unwrapped = stripExpressionWrappers(object);
 
 				if (isCallExpression(unwrapped) && property.name === "success") {
@@ -139,7 +140,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 				}
 
 				/* v8 ignore next -- @preserve non-call member objects are only tracked when they are identifiers. */
-				if (isIdentifierName(unwrapped)) {
+				if (isIdentifier(unwrapped)) {
 					const result = ianitorResultVariables.get(unwrapped.name);
 					if (result !== undefined) result.properties.add(property.name);
 				}
@@ -162,7 +163,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 			},
 
 			ReturnStatement({ argument }): void {
-				if (!isIdentifierName(argument)) return;
+				if (!isIdentifier(argument)) return;
 				markResultFullyUsed(argument.name);
 			},
 
@@ -172,7 +173,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 				const unwrappedInit = stripExpressionWrappers(init);
 				if (!isCallExpression(unwrappedInit)) return;
 
-				if (isIdentifierName(id) && isFactoryCheckDeclarator(id, unwrappedInit)) {
+				if (isIdentifier(id) && isFactoryCheckDeclarator(id, unwrappedInit)) {
 					ianitorCheckVariables.add(id.name);
 					return;
 				}
@@ -181,7 +182,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 					reportSuccessOnlyDestructuring(id);
 				}
 
-				if (isIdentifierName(id) && isStoredCheckResult(unwrappedInit, ianitorCheckVariables)) {
+				if (isIdentifier(id) && isStoredCheckResult(unwrappedInit, ianitorCheckVariables)) {
 					ianitorResultVariables.set(id.name, {
 						firstSuccessNode: id,
 						properties: new Set(),

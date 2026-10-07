@@ -1,26 +1,25 @@
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
 	isAnyLiteral,
 	isBinaryExpression,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNewExpression,
 	isNumericLiteral,
 	isSpreadElement,
 	isThisExpression,
-	stripExpressionWrappers,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isSimpleReceiver(expression: ESTree.Expression): boolean {
 	return (
-		isIdentifierName(expression) ||
+		isIdentifier(expression) ||
 		isMemberExpression(expression) ||
 		isCallExpression(expression) ||
 		isNewExpression(expression) ||

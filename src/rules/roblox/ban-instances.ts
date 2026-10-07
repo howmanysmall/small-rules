@@ -1,18 +1,18 @@
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
-	isIdentifierName,
+	isIdentifier,
 	isJsxAttribute,
 	isJsxIdentifier,
 	isMemberExpression,
 	isNamedGlobalCall,
 	isNewExpression,
 	isStringLiteral,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
@@ -114,12 +114,7 @@ function normalizeOptions(rawOptions: RuleOptions | undefined): NormalizedOption
 function getEnclosingFunctionScope(scope: Scope): Scope {
 	let currentScope = scope;
 
-	while (
-		currentScope.upper !== null &&
-		currentScope.type !== "function" &&
-		currentScope.type !== "module" &&
-		currentScope.type !== "global"
-	) {
+	while (currentScope.upper !== null && currentScope.type !== "function" && !isModuleLevelScope(currentScope)) {
 		currentScope = currentScope.upper;
 	}
 
@@ -202,7 +197,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 		}
 
 		function recordTrackedVariable(node: ESTree.VariableDeclarator): void {
-			if (!isIdentifierName(node.id) || node.init === null) return;
+			if (!isIdentifier(node.id) || node.init === null) return;
 
 			const initializer = stripExpressionWrappers(node.init);
 			if (!isNewExpression(initializer)) return;
@@ -241,7 +236,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 				if (propertyName === undefined) return;
 
 				const objectExpression = stripExpressionWrappers(node.left.object);
-				if (!isIdentifierName(objectExpression)) return;
+				if (!isIdentifier(objectExpression)) return;
 
 				const trackedVariable = getTrackedVariable(objectExpression);
 				if (trackedVariable === undefined) return;

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-cascading-set-state";
-import { ts } from "$test/rule-testers";
 
 describe("no-cascading-set-state", () => {
 	ts.run("no-cascading-set-state", rule, {

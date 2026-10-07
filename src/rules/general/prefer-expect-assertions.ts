@@ -1,3 +1,11 @@
+import {
+	isAnyFunction,
+	isBlockStatement,
+	isCallExpression,
+	isExpressionStatement,
+	isNumericLiteral,
+	isSpreadElement,
+} from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
@@ -7,18 +15,9 @@ import {
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
 } from "$oxc-utilities/jest-utilities";
-import {
-	isAnyFunction,
-	isBlockStatement,
-	isCallExpression,
-	isExpressionStatement,
-	isNumericLiteral,
-	isSpreadElement,
-} from "$oxc-utilities/oxc-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
 type RawRuleOptions = RuleContext["options"][0];

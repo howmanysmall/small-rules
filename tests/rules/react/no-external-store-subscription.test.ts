@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-external-store-subscription";
-import { tsx } from "$test/rule-testers";
 
 describe("no-external-store-subscription", () => {
 	tsx.run("no-external-store-subscription", rule, {

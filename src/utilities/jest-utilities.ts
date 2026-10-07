@@ -1,9 +1,21 @@
-import { getMemberPropertyName, isAnyFunction, isLoopNode } from "$oxc-utilities/oxc-utilities";
+import {
+	isAnyFunction,
+	isCallExpression,
+	isConditionalExpression,
+	isIdentifier,
+	isIdentifierNamed,
+	isIfStatement,
+	isLoopNode,
+	isMemberExpression,
+	isSwitchCase,
+	isTryStatement,
+} from "@small-rules/oxlint-utilities";
+
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 export interface ExpectCallCount {
 	readonly deterministic: number;
@@ -20,18 +32,18 @@ interface ExpectContext {
 }
 
 function isTestIdentifier(node: ESTree.Node): node is ESTree.IdentifierName {
-	return node.type === "Identifier" && (node.name === "it" || node.name === "test");
+	return isIdentifier(node) && (node.name === "it" || node.name === "test");
 }
 
 function isTestModifierCall(node: ESTree.CallExpression): boolean {
-	if (node.callee.type !== "MemberExpression" || !isTestIdentifier(node.callee.object)) return false;
+	if (!isMemberExpression(node.callee) || !isTestIdentifier(node.callee.object)) return false;
 
 	const propertyName = getMemberPropertyName(node.callee);
 	return propertyName === "only" || propertyName === "skip";
 }
 
 function isEachFactoryCall(node: ESTree.CallExpression): boolean {
-	if (node.callee.type !== "MemberExpression" || !isTestIdentifier(node.callee.object)) return false;
+	if (!isMemberExpression(node.callee) || !isTestIdentifier(node.callee.object)) return false;
 
 	return getMemberPropertyName(node.callee) === "each";
 }
@@ -67,10 +79,10 @@ function getExpectContext(currentParent: ESTree.Node, root: ESTree.Node): Expect
 		hasIndeterminate:
 			isAnyFunction(currentParent) ||
 			isLoopNode(currentParent) ||
-			currentParent.type === "ConditionalExpression" ||
-			currentParent.type === "IfStatement" ||
-			currentParent.type === "SwitchCase" ||
-			(currentParent.type === "TryStatement" && currentParent.handler !== null),
+			isConditionalExpression(currentParent) ||
+			isIfStatement(currentParent) ||
+			isSwitchCase(currentParent) ||
+			(isTryStatement(currentParent) && currentParent.handler !== null),
 		hasLoop: isLoopNode(currentParent),
 	};
 
@@ -80,9 +92,9 @@ function getExpectContext(currentParent: ESTree.Node, root: ESTree.Node): Expect
 }
 
 export function isTestCaseCall(node: ESTree.CallExpression): boolean {
-	if (node.callee.type === "Identifier") return isTestIdentifier(node.callee);
+	if (isIdentifier(node.callee)) return isTestIdentifier(node.callee);
 	if (isTestModifierCall(node)) return true;
-	if (node.callee.type === "CallExpression") return isEachFactoryCall(node.callee);
+	if (isCallExpression(node.callee)) return isEachFactoryCall(node.callee);
 	return false;
 }
 
@@ -94,24 +106,20 @@ export function getTestCallback(node: ESTree.CallExpression): CallbackFunction |
 }
 
 export function isExpectAssertionsCall({ callee }: ESTree.CallExpression): boolean {
-	if (callee.type !== "MemberExpression" || callee.object.type !== "Identifier" || callee.object.name !== "expect") {
-		return false;
-	}
+	if (!isMemberExpression(callee) || !isIdentifierNamed(callee.object, "expect")) return false;
 	return getMemberPropertyName(callee) === "assertions";
 }
 
 export function isExpectHasAssertionsCall({ callee }: ESTree.CallExpression): boolean {
-	if (callee.type !== "MemberExpression" || callee.object.type !== "Identifier" || callee.object.name !== "expect") {
-		return false;
-	}
+	if (!isMemberExpression(callee) || !isIdentifierNamed(callee.object, "expect")) return false;
 	return getMemberPropertyName(callee) === "hasAssertions";
 }
 
-function isExpectCall(node: ESTree.CallExpression, additionalAssertionFunctions: ReadonlyArray<string> = []): boolean {
-	return (
-		node.callee.type === "Identifier" &&
-		(node.callee.name === "expect" || additionalAssertionFunctions.includes(node.callee.name))
-	);
+function isExpectCall(
+	{ callee }: ESTree.CallExpression,
+	additionalAssertionFunctions: ReadonlyArray<string> = [],
+): boolean {
+	return isIdentifier(callee) && (callee.name === "expect" || additionalAssertionFunctions.includes(callee.name));
 }
 
 export function countExpectCalls(
@@ -125,7 +133,7 @@ export function countExpectCalls(
 	let indeterminate = 0;
 
 	walkAst(body, (child): void => {
-		if (child.type !== "CallExpression" || !isExpectCall(child, additionalAssertionFunctions)) return;
+		if (!isCallExpression(child) || !isExpectCall(child, additionalAssertionFunctions)) return;
 
 		const expectContext = getExpectContext(child.parent, body);
 		if (expectContext.hasLoop) hasExpectInLoop = true;

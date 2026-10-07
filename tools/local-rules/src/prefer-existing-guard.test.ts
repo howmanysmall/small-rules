@@ -1,0 +1,331 @@
+import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
+
+import preferExistingGuard, { createPreferExistingGuardRule } from "./prefer-existing-guard";
+import { indexUtilities } from "./utilities-index";
+
+const index = indexUtilities([
+	{
+		source: [
+			'export const IDENTIFIER = "Identifier" as const satisfies NodeType;',
+			"export function isStringLiteral(node?: ESTree.Node | null): node is ESTree.StringLiteral {",
+			"\treturn isAnyLiteral(node) && Predicate.isString(node.value);",
+			"}",
+			"export function isIdentifierNamed(node: ESTree.Node, name: string): boolean {",
+			'\treturn node.type === "Identifier" && node.name === name;',
+			"}",
+			"export function isFirstOrSecond(node: ESTree.Node, extra: unknown): boolean {",
+			"\treturn first(node) || second(node);",
+			"}",
+			"export function isTypeAssertionExpression(node: ESTree.Node): node is TypeAssertionExpression {",
+			"\treturn isTsAsExpression(node) || isTsTypeAssertion(node);",
+			"}",
+			"export function isListed(node: ESTree.Node): boolean {",
+			"\treturn includes([node, 1], node) && listed(node);",
+			"}",
+			"export function isNamedIdentifier(node: ESTree.Node | null | undefined, name: string): boolean {",
+			"\treturn node?.type === IDENTIFIER && node.name === name;",
+			"}",
+			"export function isIdentifier(node?: ESTree.Node | null): node is ESTree.IdentifierName {",
+			"\treturn node?.type === IDENTIFIER;",
+			"}",
+			"export function isIdentifierReference(node: ESTree.Node): node is ESTree.IdentifierReference {",
+			"\treturn node.type === IDENTIFIER;",
+			"}",
+			"export function isOwned(node: ESTree.Node): boolean {",
+			"\treturn owner(node) && node.owned;",
+			"}",
+			"export function isOwnedField(node: ESTree.Node): boolean {",
+			"\treturn owner(node.field) && node.ok;",
+			"}",
+			"export function hasOwner(value: ESTree.Node): boolean {",
+			"\treturn owner(value);",
+			"}",
+			"export function hasOwnedParent(node: ESTree.Node): boolean {",
+			"\treturn owner(node.parent);",
+			"}",
+			"export function isStrictReference(node: ESTree.Node): boolean {",
+			"\treturn node.type === REFERENCE && node.strict;",
+			"}",
+		].join("\n"),
+		specifier: "@small-rules/example",
+	},
+]);
+
+const rule = createPreferExistingGuardRule(() => index);
+
+describe("prefer-existing-guard", () => {
+	ts.run("prefer-existing-guard", rule, {
+		invalid: [
+			{
+				code: 'const isLength = isIdentifier(property.property) && property.property.name === "length";',
+				output: 'import { isNamedIdentifier } from "@small-rules/example";\nconst isLength = isNamedIdentifier(property.property, "length");',
+				errors: [
+					{
+						data: {
+							guard: "isNamedIdentifier",
+							replacement: 'isNamedIdentifier(property.property, "length")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: 'const isLength = isIdentifierReference(target) && target.name === "length";',
+				output: 'import { isIdentifierNamed } from "@small-rules/example";\nconst isLength = isIdentifierNamed(target, "length");',
+				errors: [
+					{
+						data: {
+							guard: "isIdentifierNamed",
+							replacement: 'isIdentifierNamed(target, "length")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "const isText = isAnyLiteral(nodes[key]) && Predicate.isString(nodes[key].value);",
+				output: null,
+				errors: [{ messageId: "useGuard", suggestions: 1 }],
+			},
+			{
+				code: "const isText = isAnyLiteral(next()) && Predicate.isString(next().value);",
+				output: null,
+				errors: [
+					{
+						data: {
+							guard: "isStringLiteral",
+							replacement: "isStringLiteral(next())",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+						suggestions: [
+							{
+								data: { replacement: "isStringLiteral(next())" },
+								messageId: "useGuardSuggestion",
+								output: 'import { isStringLiteral } from "@small-rules/example";\nconst isText = isStringLiteral(next());',
+							},
+						],
+					},
+				],
+			},
+			{
+				code: "const isAssertion = isTsTypeAssertion(this) || isTsAsExpression(this);",
+				output: 'import { isTypeAssertionExpression } from "@small-rules/example";\nconst isAssertion = isTypeAssertionExpression(this);',
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
+				code: 'const isText = isAnyLiteral(nodes["first"]) && Predicate.isString(nodes["first"].value);',
+				output: 'import { isStringLiteral } from "@small-rules/example";\nconst isText = isStringLiteral(nodes["first"]);',
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
+				code: "const isOwned = hasOwner(target.field) && target.ok;",
+				output: 'import { isOwnedField } from "@small-rules/example";\nconst isOwned = isOwnedField(target);',
+				errors: [
+					{
+						data: {
+							guard: "isOwnedField",
+							replacement: "isOwnedField(target)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: 'const isLength = target.type === IDENTIFIER && target.name === "length";',
+				output: 'import { isIdentifierNamed } from "@small-rules/example";\nconst isLength = isIdentifierNamed(target, "length");',
+				errors: [
+					{
+						data: {
+							guard: "isIdentifierNamed",
+							replacement: 'isIdentifierNamed(target, "length")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "const isAssertion = isTsTypeAssertion(current) || isTsAsExpression(current);",
+				output: 'import { isTypeAssertionExpression } from "@small-rules/example";\nconst isAssertion = isTypeAssertionExpression(current);',
+				errors: [
+					{
+						data: {
+							guard: "isTypeAssertionExpression",
+							replacement: "isTypeAssertionExpression(current)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "const isOther = !isTsTypeAssertion(current) && !isTsAsExpression(current);",
+				output: 'import { isTypeAssertionExpression } from "@small-rules/example";\nconst isOther = !isTypeAssertionExpression(current);',
+				errors: [
+					{
+						data: {
+							guard: "isTypeAssertionExpression",
+							replacement: "!isTypeAssertionExpression(current)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "if (!isAnyLiteral(node) || !Predicate.isString(node.value)) throw new Error();",
+				output: 'import { isStringLiteral } from "@small-rules/example";\nif (!isStringLiteral(node)) throw new Error();',
+				errors: [
+					{
+						data: {
+							guard: "isStringLiteral",
+							replacement: "!isStringLiteral(node)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: "const isText = isAnyLiteral(member.object) && Predicate.isString(member.object.value);",
+				output: 'import { isStringLiteral } from "@small-rules/example";\nconst isText = isStringLiteral(member.object);',
+				errors: [
+					{
+						data: {
+							guard: "isStringLiteral",
+							replacement: "isStringLiteral(member.object)",
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: 'const isUseMemo = callee.type === "Identifier" && callee.name === "useMemo";',
+				output: 'import { isIdentifierNamed } from "@small-rules/example";\nconst isUseMemo = isIdentifierNamed(callee, "useMemo");',
+				errors: [
+					{
+						data: {
+							guard: "isIdentifierNamed",
+							replacement: 'isIdentifierNamed(callee, "useMemo")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+		],
+		valid: [
+			"const isText = isStringLiteral(node);",
+			"const mixed = isAnyLiteral(left) && Predicate.isString(right.value);",
+			"const either = isAnyLiteral(node) || Predicate.isString(node.value);",
+			"const halfNegated = !isAnyLiteral(node) || Predicate.isString(node.value);",
+			"const reordered = Predicate.isString(node.value) && isAnyLiteral(node);",
+			"const different = isAnyLiteral(node) && Predicate.isNumber(node.value);",
+			'const computed = isAnyLiteral(node) && Predicate.isString(node["value"]);',
+			"const unbound = first(node) || second(node);",
+			'const regex = callee.type === /Identifier/u && callee.name === "useMemo";',
+			"const nullish = first(node) ?? second(node);",
+			'const otherName = isIdentifier(left) && right.name === "length";',
+			'const unknownCall = isMaybeIdentifier(target) && target.name === "length";',
+			'const extraArgument = isIdentifier(target, other) && target.name === "length";',
+			'const spread = isIdentifier(...targets) && target.name === "length";',
+			"const looser = target?.type === REFERENCE && target.strict;",
+			"const parentOwned = hasOwnedParent(target) && target.owned;",
+			"const split = isTsTypeAssertion(left) || isTsAsExpression(right);",
+			"const repeated = isTsAsExpression(current) || isTsAsExpression(current);",
+			"const sparse = includes([node, , 1], node) && listed(node);",
+			[
+				"export function isStringLiteral(node) {",
+				"\treturn isAnyLiteral(node) && Predicate.isString(node.value);",
+				"}",
+			].join("\n"),
+		],
+	});
+});
+
+describe("prefer-existing-guard with the repository utilities", () => {
+	ts.run("prefer-existing-guard", preferExistingGuard, {
+		invalid: [
+			{
+				code: "if (!isAnyLiteral(node) || !Predicate.isString(node.value)) throw new Error();",
+				errors: [{ messageId: "useGuard" }],
+			},
+		],
+		valid: ["if (!isStringLiteral(node)) throw new Error();"],
+	});
+});
+
+function prependExampleImport(name: string, ...lines: ReadonlyArray<string>): string {
+	return [`import { ${name} } from "@small-rules/example";`, ...lines].join("\n");
+}
+
+describe("prefer-existing-guard inside longer chains", () => {
+	ts.run("prefer-existing-guard", rule, {
+		invalid: [
+			{
+				code: [
+					"function isExpectCall(callee) {",
+					'\treturn callee.type !== "MemberExpression" || callee.object.type !== "Identifier" || callee.object.name !== "expect";',
+					"}",
+				].join("\n"),
+				output: prependExampleImport(
+					"isIdentifierNamed",
+					"function isExpectCall(callee) {",
+					'\treturn callee.type !== "MemberExpression" || !isIdentifierNamed(callee.object, "expect");',
+					"}",
+				),
+				errors: [
+					{
+						data: {
+							guard: "isIdentifierNamed",
+							replacement: '!isIdentifierNamed(callee.object, "expect")',
+							specifier: "@small-rules/example",
+						},
+						messageId: "useGuard",
+					},
+				],
+			},
+			{
+				code: 'const isNamed = target.type === "Identifier" && target.name === "first" && isUsed(target);',
+				output: prependExampleImport(
+					"isIdentifierNamed",
+					'const isNamed = isIdentifierNamed(target, "first") && isUsed(target);',
+				),
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
+				code: 'const isNamed = target?.type === "Identifier" && target.name === "first";',
+				output: prependExampleImport(
+					"isNamedIdentifier",
+					'const isNamed = isNamedIdentifier(target, "first");',
+				),
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
+				code: "const longer = isAnyLiteral(node) && Predicate.isString(node.value) && extra;",
+				output: prependExampleImport("isStringLiteral", "const longer = isStringLiteral(node) && extra;"),
+				errors: [{ messageId: "useGuard" }],
+			},
+			{
+				code: "const extended = isTsTypeAssertion(current) || isTsAsExpression(current) || isSatisfies(current);",
+				output: prependExampleImport(
+					"isTypeAssertionExpression",
+					"const extended = isTypeAssertionExpression(current) || isSatisfies(current);",
+				),
+				errors: [{ messageId: "useGuard" }],
+			},
+		],
+		valid: [
+			'const isNamed = isUsed(target) && target.type === "Identifier" /* note */ && target.name === "first";',
+			'const isOther = target.type !== "Identifier" || target.name === "first";',
+			// `!=` coerces where the guard's `===` does not.
+			'const isOther = target.type != "Identifier" || target.name != "first";',
+		],
+	});
+});

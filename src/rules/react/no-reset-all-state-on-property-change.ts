@@ -1,12 +1,13 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallbackFunction,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
@@ -130,7 +131,7 @@ function countUseStates(
 
 		return analysis.scope.getDescendantCallExpressions(currentNode).filter(({ callee }) => {
 			const memberExpression = isMemberExpression(callee);
-			if (!memberExpression && !isIdentifierName(callee)) return false;
+			if (!memberExpression && !isIdentifier(callee)) return false;
 
 			if (memberExpression) {
 				const { object, property } = callee;

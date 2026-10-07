@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-error";
-import { js } from "$test/rule-testers";
 
 describe("no-error", () => {
 	js.run("no-error", rule, {

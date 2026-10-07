@@ -14,7 +14,7 @@ import {
 	OBJECT_EXPRESSION,
 	PROPERTY,
 	SEQUENCE_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
 import type { Definition, ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 

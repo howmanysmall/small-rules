@@ -1,8 +1,8 @@
 import { describe } from "vitest";
+import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { isHookCall } from "$oxc-utilities/lint-utilities";
-import { createRuleTester } from "$test/rule-testers";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

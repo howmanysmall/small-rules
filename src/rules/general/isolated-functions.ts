@@ -1,8 +1,29 @@
+import {
+	CLASS_DECLARATION,
+	FUNCTION_DECLARATION,
+	isAnyFunction,
+	isAnyLiteral,
+	isCallExpression,
+	isClass,
+	isIdentifier,
+	isIdentifierNamed,
+	isMemberExpression,
+	isMethodDefinitionRaw,
+	isNode,
+	isObjectExpression,
+	isProperty,
+	isStringLiteral,
+	isSuper,
+	isThisExpression,
+	isTsTypeQuery,
+	isTsTypeReference,
+	PROPERTY,
+} from "@small-rules/oxlint-utilities";
 import { String as EffectString, Predicate } from "effect";
 
 import { pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isAnyFunction, isNode } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -29,13 +50,13 @@ const COMMENTABLE_PARENT_TYPES = new Set([
 	"ExportDefaultDeclaration",
 	"ExportNamedDeclaration",
 	"MethodDefinition",
-	"Property",
+	PROPERTY,
 	"VariableDeclaration",
 	"VariableDeclarator",
 ]);
 
-const NESTED_FUNCTION_CUTOFF_TYPES = new Set(["FunctionDeclaration", "FunctionExpression"]);
-const CLASS_TYPES = new Set(["ClassDeclaration", "ClassExpression"]);
+const NESTED_FUNCTION_CUTOFF_TYPES = new Set([FUNCTION_DECLARATION, "FunctionExpression"]);
+const CLASS_TYPES = new Set([CLASS_DECLARATION, "ClassExpression"]);
 const LEADING_JSDOC_STAR_PATTERN = /(?:\*\s*)*/u;
 
 function parseGlobalMode(value: GlobalModeOption | undefined): GlobalMode | undefined {
@@ -71,47 +92,44 @@ function parseOptions(rawOptions: RawOptions): RuleOptions {
 	return { comments, functions, overrideGlobals, selectors };
 }
 
-function isFunctionNode(node: ESTree.Node): node is FunctionNode {
-	return isAnyFunction(node);
-}
-
 function getObjectPropertyName(node: ESTree.Node): string | undefined {
 	/* v8 ignore next -- callers only pass Property nodes from object literals. @preserve */
-	if (node.type !== "Property" && node.type !== "MethodDefinition") return undefined;
-	if (node.computed && node.key.type !== "Literal") return undefined;
-	if (node.key.type === "Identifier") return node.key.name;
-	if (node.key.type === "Literal" && Predicate.isString(node.key.value)) return node.key.value;
+	if (!isProperty(node) && !isMethodDefinitionRaw(node)) return undefined;
+
+	if (node.computed && !isAnyLiteral(node.key)) return undefined;
+	if (isIdentifier(node.key)) return node.key.name;
+	if (isStringLiteral(node.key)) return node.key.value;
 	return undefined;
 }
 
 function isMethodCallNamed(node: ESTree.CallExpression, objectName: string, methodName: string): boolean {
-	if (node.callee.type !== "MemberExpression" || node.callee.computed || node.callee.optional) return false;
-	if (node.callee.object.type !== "Identifier" || node.callee.object.name !== objectName) return false;
+	if (!isMemberExpression(node.callee) || node.callee.computed || node.callee.optional) return false;
+	if (!isIdentifierNamed(node.callee.object, objectName)) return false;
 	return getMemberPropertyName(node.callee) === methodName;
 }
 
 function getDefaultArgumentCallReason(node: ESTree.Node): string | undefined {
 	const { parent } = node;
-	if (parent?.type !== "CallExpression" || parent.arguments[0] !== node) return undefined;
+	if (!isCallExpression(parent) || parent.arguments[0] !== node) return undefined;
 	if (isMethodCallNamed(parent, "browser", "execute")) return 'callee of method named "browser.execute"';
 	if (isMethodCallNamed(parent, "page", "evaluate")) return 'callee of method named "page.evaluate"';
 	return undefined;
 }
 
 function getScriptingObjectName(call: ESTree.CallExpression): string | undefined {
-	if (call.callee.type !== "MemberExpression" || call.callee.computed || call.callee.optional) return undefined;
+	if (!isMemberExpression(call.callee) || call.callee.computed || call.callee.optional) return undefined;
 	if (getMemberPropertyName(call.callee) !== "executeScript") return undefined;
 	const scripting = call.callee.object;
-	if (scripting.type !== "MemberExpression" || scripting.computed || scripting.optional) return undefined;
+	if (!isMemberExpression(scripting) || scripting.computed || scripting.optional) return undefined;
 	if (getMemberPropertyName(scripting) !== "scripting") return undefined;
-	if (scripting.object.type !== "Identifier" || !SCRIPTING_OBJECTS.has(scripting.object.name)) return undefined;
+	if (!isIdentifier(scripting.object) || !SCRIPTING_OBJECTS.has(scripting.object.name)) return undefined;
 	return scripting.object.name;
 }
 
 function getExecuteScriptPropertyReason(node: ESTree.Node): string | undefined {
 	const property = node.parent;
 	if (
-		property?.type !== "Property" ||
+		!isProperty(property) ||
 		property.kind !== "init" ||
 		property.value !== node ||
 		getObjectPropertyName(property) !== "func"
@@ -120,9 +138,9 @@ function getExecuteScriptPropertyReason(node: ESTree.Node): string | undefined {
 	}
 	const objectExpression = property.parent;
 	/* v8 ignore next -- Property parents in this path are ObjectExpression nodes. @preserve */
-	if (objectExpression.type !== "ObjectExpression") return undefined;
+	if (!isObjectExpression(objectExpression)) return undefined;
 	const call = objectExpression.parent;
-	if (call.type !== "CallExpression" || call.arguments[0] !== objectExpression) return undefined;
+	if (!isCallExpression(call) || call.arguments[0] !== objectExpression) return undefined;
 	const scriptingObjectName = getScriptingObjectName(call);
 	if (scriptingObjectName === undefined) return undefined;
 	return `property "func" passed to "${scriptingObjectName}.scripting.executeScript"`;
@@ -139,14 +157,14 @@ function isCallArgument(call: ESTree.CallExpression, node: ESTree.Node): boolean
 function getConfiguredFunctionReason(node: ESTree.Node, functions: ReadonlySet<string>): string | undefined {
 	if (functions.size === 0) return undefined;
 	const { parent } = node;
-	if (parent?.type !== "CallExpression" || !isCallArgument(parent, node)) return undefined;
-	if (parent.callee.type !== "Identifier" || !functions.has(parent.callee.name)) return undefined;
+	if (!isCallExpression(parent) || !isCallArgument(parent, node)) return undefined;
+	if (!isIdentifier(parent.callee) || !functions.has(parent.callee.name)) return undefined;
 	return `callee of function named ${JSON.stringify(parent.callee.name)}`;
 }
 
 function canCommentApplyToParent(node: ESTree.Node, parent: ESTree.Node | null): boolean {
 	if (parent === null || !COMMENTABLE_PARENT_TYPES.has(parent.type)) return false;
-	if (parent.type === "Property" || parent.type === "MethodDefinition") return parent.value === node;
+	if (isProperty(parent) || isMethodDefinitionRaw(parent)) return parent.value === node;
 	return true;
 }
 
@@ -201,7 +219,7 @@ function getReasonForIsolatedFunction(
 }
 
 function isTypePositionIdentifier({ parent }: ESTree.Node): boolean {
-	return parent !== null && (parent.type === "TSTypeReference" || parent.type === "TSTypeQuery");
+	return parent !== null && (isTsTypeReference(parent) || isTsTypeQuery(parent));
 }
 
 function isScopeInside(inner: Scope, outer: Scope): boolean {
@@ -288,7 +306,7 @@ function pushChildNodes(sourceCode: SourceCode, node: ESTree.Node, worklist: Arr
 
 function pushClassBoundaryChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	/* v8 ignore next -- only invoked for ClassDeclaration/ClassExpression nodes. @preserve */
-	if (node.type !== "ClassDeclaration" && node.type !== "ClassExpression") return;
+	if (!isClass(node)) return;
 	if (node.superClass !== null) worklist.push(node.superClass);
 	for (const element of node.body.body) {
 		if ("computed" in element && element.computed) worklist.push(element.key);
@@ -307,11 +325,11 @@ function reportThisAndSuper(context: Context, root: FunctionNode, reason: string
 	const worklist: Array<ESTree.Node> = [root];
 	for (const node of worklist) {
 		if (shouldSkipNestedNode(node, root, worklist)) continue;
-		if (node.type === "ThisExpression") {
+		if (isThisExpression(node)) {
 			context.report({ data: { reason }, messageId: "thisExpression", node });
 			continue;
 		}
-		if (node.type === "Super") {
+		if (isSuper(node)) {
 			context.report({ data: { reason }, messageId: "super", node });
 			continue;
 		}
@@ -340,7 +358,7 @@ const isolatedFunctions = createRule("isolated-functions", "general", {
 
 		function checkFunctionNode(node: ESTree.Node): void {
 			/* v8 ignore next -- registered only on function visitor keys. @preserve */
-			if (!isFunctionNode(node)) return;
+			if (!isAnyFunction(node)) return;
 			const reason = getReasonForIsolatedFunction(context.sourceCode, node, options);
 			if (reason === undefined) return;
 			reportIsolatedFunction(context, node, reason, options, checked);
@@ -357,7 +375,7 @@ const isolatedFunctions = createRule("isolated-functions", "general", {
 			Object.assign(visitor, {
 				[selector]: (node: ESTree.Node): void => {
 					/* v8 ignore next -- selectors may match non-function nodes. @preserve */
-					if (!isFunctionNode(node)) return;
+					if (!isAnyFunction(node)) return;
 					reportIsolatedFunction(context, node, reason, options, checked);
 				},
 			});

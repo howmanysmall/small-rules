@@ -1,9 +1,4 @@
 import { isBoolean, isString } from "@small-rules/arktype-utilities";
-import { type } from "arktype";
-import { Predicate } from "effect";
-
-import defaultProperties from "$oxc-generated/default-properties.json";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	IDENTIFIER,
 	isAnyLiteral,
@@ -11,7 +6,7 @@ import {
 	isBooleanLiteral,
 	isCallExpression,
 	isExpressionStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
@@ -25,8 +20,13 @@ import {
 	isStringLiteral,
 	isUnaryExpression,
 	isVariableDeclaration,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { type } from "arktype";
+import { Predicate } from "effect";
+
+import defaultProperties from "$oxc-generated/default-properties.json";
+import { createRule } from "$oxc-utilities/create-rule";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";
@@ -270,6 +270,7 @@ function containsIdentifierReference(
 	if (!isIdentifierSearchObject(value) || visitedValues.has(value)) return false;
 
 	visitedValues.add(value);
+	// oxlint-disable-next-line local/prefer-existing-guard -- cannot do this here unfortunately. Types make it complex.
 	if (value.type === IDENTIFIER && value.name === identifierName) return true;
 
 	for (const nestedValue of Object.values(value)) {
@@ -284,12 +285,12 @@ function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefin
 	let current: ESTree.Expression = node;
 
 	while (isMemberExpression(current)) {
-		if (current.computed || !isIdentifierName(current.property)) return undefined;
+		if (current.computed || !isIdentifier(current.property)) return undefined;
 
 		path.unshift(current.property.name);
 
 		const { object } = current;
-		if (isIdentifierName(object)) {
+		if (isIdentifier(object)) {
 			path.unshift(object.name);
 			return path;
 		}
@@ -299,7 +300,7 @@ function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefin
 		current = object;
 	}
 
-	if (isIdentifierName(current)) {
+	if (isIdentifier(current)) {
 		path.unshift(current.name);
 		return path;
 	}
@@ -339,8 +340,7 @@ function extractNumberValue(node: ESTree.Expression): number | undefined {
 	if (isNumericLiteral(node)) return node.value;
 	if (isMathHuge(node)) return Number.POSITIVE_INFINITY;
 
-	if (!isUnaryExpression(node)) return undefined;
-	if (node.operator !== "+" && node.operator !== "-") return undefined;
+	if (!isUnaryExpression(node) || (node.operator !== "+" && node.operator !== "-")) return undefined;
 
 	const argumentValue = extractNumberValue(node.argument);
 	if (argumentValue === undefined) return undefined;
@@ -733,7 +733,7 @@ function clearTrackedInstancesForEscapeAssignment(
 	assignmentExpression: ESTree.AssignmentExpression,
 	trackedInstances: Map<string, TrackedInstance>,
 ): void {
-	if (!isIdentifierName(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
+	if (!isIdentifier(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
 
 	for (const [identifierName] of trackedInstances) {
 		/* v8 ignore next -- @preserve escape assignments only clear tracked instances when the right-hand side references them. */
@@ -762,7 +762,7 @@ function trackConstInstances(
 	if (statementNode.kind !== "const") return;
 
 	for (const declaration of statementNode.declarations) {
-		if (!isIdentifierName(declaration.id) || declaration.init === null) continue;
+		if (!isIdentifier(declaration.id) || declaration.init === null) continue;
 
 		const className = getTrackedInstanceClassName(declaration.init);
 		if (className === undefined) continue;
@@ -851,8 +851,8 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 				assignmentExpression.operator !== "=" ||
 				!isMemberExpression(assignmentExpression.left) ||
 				assignmentExpression.left.computed ||
-				!isIdentifierName(assignmentExpression.left.object) ||
-				!isIdentifierName(assignmentExpression.left.property)
+				!isIdentifier(assignmentExpression.left.object) ||
+				!isIdentifier(assignmentExpression.left.property)
 			) {
 				return;
 			}

@@ -1,7 +1,6 @@
-import { Predicate } from "effect";
+import { isIdentifier, isStringLiteral } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyLiteral, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -79,9 +78,9 @@ function toPascalCase(value: string): string | undefined {
 const IS_INTEGER = /^\d/u;
 
 function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
-	if (isIdentifierName(node.id)) return node.id.name;
+	if (isIdentifier(node.id)) return node.id.name;
 	/* v8 ignore next -- @preserve TypeScript enum literal member names are parser string literals here. */
-	if (!isAnyLiteral(node.id) || !Predicate.isString(node.id.value)) return undefined;
+	if (!isStringLiteral(node.id)) return undefined;
 	return IS_INTEGER.test(node.id.value) ? undefined : node.id.value;
 }
 

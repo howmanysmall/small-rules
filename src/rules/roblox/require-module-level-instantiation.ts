@@ -1,14 +1,14 @@
 import { isReadonlyDictionaryOfStrings } from "@small-rules/arktype-utilities";
+import {
+	isIdentifier,
+	isImportDefaultSpecifier,
+	isImportSpecifier,
+	isMemberExpression,
+} from "@small-rules/oxlint-utilities";
 import { type } from "arktype";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isIdentifierName,
-	isImportDefaultSpecifier,
-	isImportSpecifier,
-	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -43,7 +43,7 @@ function getImportedClassName(specifier: ESTree.ImportDeclarationSpecifier): str
 	if (isImportDefaultSpecifier(specifier)) return specifier.local.name;
 
 	if (!isImportSpecifier(specifier)) return undefined;
-	if (isIdentifierName(specifier.imported)) return specifier.imported.name;
+	if (isIdentifier(specifier.imported)) return specifier.imported.name;
 	/* v8 ignore start -- @preserve TypeScript import specifiers provide identifier imported names here. */
 	if (Predicate.isString(specifier.imported.value)) return specifier.imported.value;
 	return undefined;
@@ -55,7 +55,7 @@ function getTrackedInstantiation(
 	localBindings: ReadonlyMap<string, string>,
 	trackedClasses: ReadonlyMap<string, string>,
 ): TrackedInstantiation | undefined {
-	if (isIdentifierName(node.callee)) {
+	if (isIdentifier(node.callee)) {
 		const className = localBindings.get(node.callee.name);
 		if (className === undefined) return undefined;
 
@@ -67,7 +67,7 @@ function getTrackedInstantiation(
 		return { className, importSource };
 	}
 
-	if (isMemberExpression(node.callee) && isIdentifierName(node.callee.property)) {
+	if (isMemberExpression(node.callee) && isIdentifier(node.callee.property)) {
 		const className = node.callee.property.name;
 		const importSource = trackedClasses.get(className);
 		if (importSource === undefined) return undefined;

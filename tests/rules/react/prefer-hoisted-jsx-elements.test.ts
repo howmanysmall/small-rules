@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/prefer-hoisted-jsx-elements";
-import { tsx } from "$test/rule-testers";
 
 describe("prefer-hoisted-jsx-elements", () => {
 	tsx.run("prefer-hoisted-jsx-elements", rule, {
@@ -292,6 +292,16 @@ function View() {
 			},
 		],
 		valid: [
+			// Catches hoisting an element that reads a prop through a computed
+			// member, which would leave the prop undefined at module scope.
+			{
+				code: `
+const table = { a: 1 };
+function View({ key }: { key: string }) {
+	return <frame Size={table[key]} />;
+}
+`,
+			},
 			{
 				code: `
 function View() {

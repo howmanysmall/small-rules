@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-use-of-empty-return-value";
-import { js, ts } from "$test/rule-testers";
 
 describe("no-use-of-empty-return-value", () => {
 	js.run("no-use-of-empty-return-value", rule, {

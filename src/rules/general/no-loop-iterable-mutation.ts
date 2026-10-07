@@ -1,30 +1,29 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARROW_FUNCTION_EXPRESSION,
 	CLASS_DECLARATION,
 	CLASS_EXPRESSION,
 	FUNCTION_DECLARATION,
 	FUNCTION_EXPRESSION,
-	getMemberPropertyName,
 	isArrayPattern,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNode,
 	isSpreadElement,
 	isVariableDeclaration,
 	PARENTHESIZED_EXPRESSION,
-	stripExpressionWrappers,
 	TS_AS_EXPRESSION,
 	TS_NON_NULL_EXPRESSION,
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
-
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 const ALL_MUTATION_METHODS = new Set([
 	"add",
@@ -83,7 +82,7 @@ function isNoName(node: ESTree.Node): node is NoName {
 function getIdentifierName(node?: ESTree.Node | null): string | undefined {
 	let current = node;
 	while (current !== null && current !== undefined) {
-		if (isIdentifierName(current)) return current.name;
+		if (isIdentifier(current)) return current.name;
 		if (!isNoName(current)) return undefined;
 		current = current.expression;
 	}
@@ -112,10 +111,10 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 
 function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
 	const node = stripExpressionWrappers(right);
-	if (isIdentifierName(node)) return { name: node.name, method: "direct" };
+	if (isIdentifier(node)) return { name: node.name, method: "direct" };
 
 	if (!isCallExpression(node) || !isMemberExpression(node.callee) || node.arguments.length > 0) return undefined;
-	if (node.callee.optional || !isIdentifierName(node.callee.object)) return undefined;
+	if (node.callee.optional || !isIdentifier(node.callee.object)) return undefined;
 
 	const method = getMemberPropertyName(node.callee);
 	if (method === undefined || !ITERATOR_METHODS.has(method)) return undefined;

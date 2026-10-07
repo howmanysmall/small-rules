@@ -13,6 +13,29 @@
 // predicate is idiomatic defensive runtime validation, not evidence loss.
 
 import {
+	isAccessorProperty,
+	isAnyFunction,
+	isAnyLiteral,
+	isBindingIdentifier,
+	isBlockStatement,
+	isFunctionLike,
+	isIdentifier,
+	isIdentifierReference,
+	isMethodDefinition,
+	isObjectExpression,
+	isParenthesizedExpression,
+	isPrivateIdentifier,
+	isProgram,
+	isTsAsExpression,
+	isTsNonNullExpression,
+	isTsSatisfiesExpression,
+	isTsTypeAssertion,
+	isTypeAssertionExpression,
+	isVariableDeclaration,
+	isVariableDeclarator,
+} from "@small-rules/oxlint-utilities";
+
+import {
 	classifyUnsafeDictionaryValue,
 	classifyWideningTarget,
 	createTypeEnvironment,
@@ -24,27 +47,6 @@ import {
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isAccessorProperty,
-	isAnyFunction,
-	isAnyLiteral,
-	isBindingIdentifier,
-	isBlockStatement,
-	isFunctionLike,
-	isIdentifierName,
-	isIdentifierReference,
-	isMethodDefinition,
-	isObjectExpression,
-	isParenthesizedExpression,
-	isPrivateIdentifier,
-	isProgram,
-	isTsAsExpression,
-	isTsNonNullExpression,
-	isTsSatisfiesExpression,
-	isTsTypeAssertion,
-	isVariableDeclaration,
-	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -93,7 +95,7 @@ function hasStableInitializer(
 }
 
 function getAssertionEvidence(expression: ESTree.Expression, environment: TypeEnvironment): boolean | undefined {
-	return isTsAsExpression(expression) || isTsTypeAssertion(expression)
+	return isTypeAssertionExpression(expression)
 		? hasInformativeType(expression.typeAnnotation, environment)
 		: undefined;
 }
@@ -220,7 +222,7 @@ function hasParentAssertion(node: ESTree.Node): boolean {
 		current = parent;
 		({ parent } = current);
 	}
-	return parent !== null && (isTsAsExpression(parent) || isTsTypeAssertion(parent)) && parent.expression === current;
+	return parent !== null && isTypeAssertionExpression(parent) && parent.expression === current;
 }
 
 function unwrapExpressionParentheses(expression: ESTree.Expression): ESTree.Expression {
@@ -282,13 +284,13 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				);
 			},
 			AssignmentExpression(node): void {
-				if (node.operator !== "=" || !isIdentifierName(node.left)) return;
+				if (node.operator !== "=" || !isIdentifier(node.left)) return;
 
 				const variable = resolveVariable(context.sourceCode, node.left);
 				if (variable === undefined) return;
 
 				const binding = getVariableDeclarator(variable)?.id;
-				if (!isIdentifierName(binding)) return;
+				if (!isIdentifier(binding)) return;
 				reportFlow(node.right, getTargetFromAnnotation(binding.typeAnnotation), `binding \`${binding.name}\``);
 			},
 			Program(node): void {
@@ -321,7 +323,7 @@ const noKnownValueWidening = createRule("no-known-value-widening", "anti-slop", 
 				reportFlow(node.expression, classifyWideningTarget(node.typeAnnotation, environment), "assertion");
 			},
 			VariableDeclarator(node): void {
-				if (node.init === null || !isIdentifierName(node.id)) return;
+				if (node.init === null || !isIdentifier(node.id)) return;
 				reportFlow(node.init, getTargetFromAnnotation(node.id.typeAnnotation), `binding \`${node.id.name}\``);
 			},
 		};

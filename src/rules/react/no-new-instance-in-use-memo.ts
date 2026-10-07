@@ -1,23 +1,22 @@
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isCallbackFunction,
 	isCallExpression,
 	isFunctionDeclaration,
-	isIdentifierName,
-	isUseMemoCall,
+	isIdentifier,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isUseMemoCall, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
-import { getReactSources } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getReactSources, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 import { isNumber, isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
@@ -54,7 +53,7 @@ function normalizeOptions(raw: RuleOptions): NormalizedOptions {
 	const constructors =
 		Predicate.isObject(raw) && isStringArray(raw.constructors) ? new Set(raw.constructors) : DEFAULT_CONSTRUCTORS;
 
-	const environment = Predicate.isObject(raw) && raw.environment === "standard" ? "standard" : "roblox-ts";
+	const environment = Predicate.isObject(raw) && raw.environment === STANDARD ? STANDARD : ROBLOX_TS;
 
 	const candidateDepth = Predicate.isObject(raw) ? raw.maxHelperTraceDepth : undefined;
 	const maxHelperTraceDepth =
@@ -131,7 +130,7 @@ function resolveDefinitionToFunctionIds(
 
 	const initializer = stripExpressionWrappers(node.init);
 	if (isCallbackFunction(initializer)) return getFunctionIdSet(initializer, functionInfosByNode);
-	if (!isIdentifierName(initializer)) return new Set<number>();
+	if (!isIdentifier(initializer)) return new Set<number>();
 
 	const aliasVariable = getVariableByName(sourceCode.getScope(initializer), initializer.name);
 	if (aliasVariable === undefined) return new Set<number>();
@@ -306,13 +305,13 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			"ArrowFunctionExpression:exit": exitFunction,
 
 			CallExpression(node): void {
-				if (isIdentifierName(node.callee)) recordFunctionCall(node.callee);
+				if (isIdentifier(node.callee)) recordFunctionCall(node.callee);
 				if (!isUseMemoCall(node, memoIdentifiers, reactNamespaces)) return;
 
 				const [callback] = node.arguments;
 				if (callback === undefined) return;
 
-				if (isIdentifierName(callback)) {
+				if (isIdentifier(callback)) {
 					useMemoCallbackIdentifiers.push(callback);
 					return;
 				}
@@ -331,7 +330,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			},
 
 			NewExpression(node): void {
-				if (!isIdentifierName(node.callee)) return;
+				if (!isIdentifier(node.callee)) return;
 
 				const constructorName = node.callee.name;
 				if (!options.constructors.has(constructorName)) return;
@@ -394,12 +393,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 						items: { type: "string" },
 						type: "array",
 					},
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 					maxHelperTraceDepth: {
 						default: 4,
 						description:

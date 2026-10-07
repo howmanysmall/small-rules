@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -29,7 +30,7 @@ const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable",
 			unexpected: "Unexpected unlimited '{{kind}}' comment. Specify some rule names to disable.",
 		},
 		schema: [],
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 

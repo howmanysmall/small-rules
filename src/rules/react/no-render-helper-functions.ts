@@ -1,13 +1,11 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	CHAIN_EXPRESSION,
-	getTypeAnnotationFromBinding,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isCallExpression,
 	isFunctionDeclaration,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isJsxAttribute,
 	isJsxElement,
 	isJsxExpressionContainer,
@@ -17,21 +15,24 @@ import {
 	isTsQualifiedName,
 	isTsTypeReference,
 	isVariableDeclarator,
+	JSX_ELEMENT,
 	PARENTHESIZED_EXPRESSION,
 	TS_AS_EXPRESSION,
 	TS_INSTANTIATION_EXPRESSION,
 	TS_NON_NULL_EXPRESSION,
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { CallbackFunction } from "$oxc-types/missing-types";
-
-const REACT_NODE_TYPE_NAMES = new Set(["JSXElement", "ReactElement", "ReactNode"]);
+const REACT_NODE_TYPE_NAMES = new Set([JSX_ELEMENT, "ReactElement", "ReactNode"]);
 const WRAPPER_PARENT_TYPES = new Set([
 	CHAIN_EXPRESSION,
 	PARENTHESIZED_EXPRESSION,
@@ -65,7 +66,7 @@ function isReactNodeTypeAnnotation(node?: ESTree.TSType): boolean {
 	if (!isTsTypeReference(node)) return false;
 
 	const { typeName } = node;
-	if (isIdentifierName(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.name);
+	if (isIdentifier(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.name);
 	/* v8 ignore next -- @preserve TSTypeReference type names are identifiers or qualified names in parser output. */
 	if (isTsQualifiedName(typeName)) return REACT_NODE_TYPE_NAMES.has(typeName.right.name);
 
@@ -100,13 +101,13 @@ function isInlineCallback({ parent }: CallbackFunction): boolean {
 }
 
 function getVariableDeclaratorFunctionName(node: ESTree.Node): string | undefined {
-	if (!isVariableDeclarator(node.parent) || !isIdentifierName(node.parent.id)) return undefined;
+	if (!isVariableDeclarator(node.parent) || !isIdentifier(node.parent.id)) return undefined;
 	return node.parent.id.name;
 }
 
 function getBindingIdentifierName(binding: ESTree.BindingPattern): string | undefined {
 	/* v8 ignore next -- @preserve destructured default callback declarations are ignored by this rule. */
-	return isIdentifierName(binding) ? binding.name : undefined;
+	return isIdentifier(binding) ? binding.name : undefined;
 }
 
 function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {

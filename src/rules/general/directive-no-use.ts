@@ -4,6 +4,7 @@ import {
 	parseDirectiveComment,
 	toForceLocation,
 } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -44,7 +45,7 @@ const directiveNoUse = createRule("directive-no-use", "general", {
 				type: "object" as const,
 			},
 		],
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 

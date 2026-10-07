@@ -29,7 +29,8 @@
 		"scripts/utilities/vendored-notices.ts",
 		"src/**/*.ts",
 		"tests/**/*.ts",
-		"tests/**/*.tsx"
+		"tests/**/*.tsx",
+		"tools/local-rules/**/*.ts"
 	],
 	"exclude": ["**/{do-not-sync-ever,node_modules}/**", "{coverage,dist,plugins}/**"]
 }

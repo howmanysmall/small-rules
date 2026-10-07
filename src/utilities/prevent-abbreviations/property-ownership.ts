@@ -1,9 +1,7 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
-	getTypeAnnotationFromBinding,
 	hasName,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isMemberExpression,
 	isObjectExpression,
@@ -20,7 +18,10 @@ import {
 	isTsTypeReference,
 	isTsUnionType,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { isObjectPropertyKey } from "$oxc-utilities/prevent-abbreviations/scope";
 
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
@@ -45,7 +46,7 @@ function getRootTypeName(typeName: ESTree.TSTypeName): ESTree.IdentifierReferenc
 	let current = typeName;
 	while (isTsQualifiedName(current)) current = current.left;
 	/* v8 ignore next -- @preserve TSTypeReference cannot use a this expression as its type name in parsed source. */
-	return isIdentifierName(current) ? current : undefined;
+	return isIdentifier(current) ? current : undefined;
 }
 
 function isExternalType(typeAnnotation: ESTree.TSType, sourceCode: SourceCode): boolean {
@@ -146,7 +147,7 @@ function getContextualType(objectExpression: ESTree.ObjectExpression): ESTree.TS
 function resolveRootObjectIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 	let current = node;
 	while (true) {
-		if (isIdentifierName(current)) return current;
+		if (isIdentifier(current)) return current;
 		if (isMemberExpression(current)) {
 			current = current.object;
 			continue;
@@ -170,7 +171,7 @@ function isImportedObjectPropertyAccess(node: ESTree.IdentifierName, sourceCode:
 
 	if (objectNode === undefined) return false;
 
-	const rootNode = isIdentifierName(objectNode) ? objectNode : resolveRootObjectIdentifier(objectNode);
+	const rootNode = isIdentifier(objectNode) ? objectNode : resolveRootObjectIdentifier(objectNode);
 	if (rootNode === undefined || !hasName(rootNode)) return false;
 
 	return getVariableByName(sourceCode.getScope(node), rootNode.name)?.defs[0]?.type === "ImportBinding";
@@ -181,7 +182,7 @@ function isExternalCallProperty(objectExpression: ESTree.ObjectExpression, sourc
 	if (!isCallExpression(callExpression)) return false;
 
 	const { callee } = callExpression;
-	if (!isIdentifierName(callee)) return false;
+	if (!isIdentifier(callee)) return false;
 
 	const definition = getVariableByName(sourceCode.getScope(callee), callee.name)?.defs[0];
 	return isExternalPackageImport(definition);

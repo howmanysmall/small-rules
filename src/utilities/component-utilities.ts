@@ -1,11 +1,10 @@
-import { isUppercaseName } from "$oxc-utilities/string-utilities";
-
 import {
 	BINARY_EXPRESSION,
 	IDENTIFIER,
 	isCallExpression,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
+	isIdentifierNamed,
 	isJsxAttribute,
 	isJsxIdentifier,
 	isMemberExpression,
@@ -14,7 +13,9 @@ import {
 	PARENTHESIZED_EXPRESSION,
 	TEMPLATE_LITERAL,
 	UNARY_EXPRESSION,
-} from "./oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
@@ -26,25 +27,22 @@ export function isComponentDeclaration(node: ESTree.Node): boolean {
 
 export function isMemoCall(node: ESTree.Node): boolean {
 	if (!isCallExpression(node)) return false;
-	if (isIdentifierName(node.callee)) return node.callee.name === "memo";
+	if (isIdentifierNamed(node.callee, "memo")) return true;
 
 	return (
 		isMemberExpression(node.callee) &&
-		isIdentifierName(node.callee.object) &&
-		node.callee.object.name === "React" &&
-		isIdentifierName(node.callee.property) &&
-		node.callee.property.name === "memo"
+		isIdentifierNamed(node.callee.object, "React") &&
+		isIdentifierNamed(node.callee.property, "memo")
 	);
 }
 
 export function isReactComponentHigherOrderCall({ callee }: ESTree.CallExpression): boolean {
-	if (isIdentifierName(callee)) return callee.name === "forwardRef" || callee.name === "memo";
+	if (isIdentifier(callee)) return callee.name === "forwardRef" || callee.name === "memo";
 
 	return (
 		isMemberExpression(callee) &&
-		isIdentifierName(callee.object) &&
-		callee.object.name === "React" &&
-		isIdentifierName(callee.property) &&
+		isIdentifierNamed(callee.object, "React") &&
+		isIdentifier(callee.property) &&
 		(callee.property.name === "forwardRef" || callee.property.name === "memo")
 	);
 }

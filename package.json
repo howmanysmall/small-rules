@@ -36,8 +36,8 @@
 	"scripts": {
 		"biome": "biome",
 		"build": "tsdown",
-		"build:local": "node --run build -- --minify --include-local",
-		"build:local:dev": "node --run build -- --include-local",
+		"build:local": "bun run scripts/build-local.ts",
+		"build:local:dev": "bun run scripts/build-local.ts --no-minify",
 		"changelog:version": "bun run scripts/ensure-unreleased.ts && git add CHANGELOG.md",
 		"commitlint": "commitlint",
 		"docs:build": "nr -F '@small-rules/documentation' build",
@@ -92,6 +92,7 @@
 		"preversion": "if test -n \"$(git status --porcelain)\"; then echo 'Release requires a clean worktree.' >&2; exit 1; fi"
 	},
 	"dependencies": {
+		"@small-rules/oxlint-utilities": "workspace:*",
 		"arktype": "catalog:runtime",
 		"effect": "catalog:runtime",
 		"ignore": "catalog:runtime",
@@ -113,6 +114,7 @@
 		"@isentinel/hooks": "catalog:tooling",
 		"@mdx-js/language-server": "catalog:tooling",
 		"@small-rules/arktype-utilities": "workspace:*",
+		"@small-rules/rule-harness": "workspace:*",
 		"@small-rules/vite-configuration": "workspace:*",
 		"@stryker-mutator/api": "catalog:test",
 		"@stryker-mutator/core": "catalog:test",

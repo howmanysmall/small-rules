@@ -7,17 +7,18 @@
 // binding names, and the shared iterative lexical alias resolver.
 
 import {
+	isTsObjectKeyword,
+	isTsParenthesizedType,
+	isTsTypeAnnotation,
+	isTsUnionType,
+} from "@small-rules/oxlint-utilities";
+
+import {
 	getFunctionParameterBindingName,
 	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { createTypeAliasEnvironment, getResolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isTsObjectKeyword,
-	isTsParenthesizedType,
-	isTsTypeAnnotation,
-	isTsUnionType,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

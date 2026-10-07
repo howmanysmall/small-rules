@@ -15,11 +15,11 @@ ignoreDependencies = [
 	"@arethetypeswrong/core",
 	"@astrojs/markdown-satteri",
 	"@e18e/eslint-plugin",
-	"@fast-check/vitest",
 	"@fontsource-variable/ibm-plex-sans",
 	"@fontsource-variable/newsreader",
 	"@fontsource/ibm-plex-mono",
 	"@isentinel/hooks",
+	"@small-rules/local-rules",
 	"@stylistic/eslint-plugin",
 	"@total-typescript/ts-reset",
 	"eslint-plugin-antfu",
@@ -41,7 +41,6 @@ ignoreDependencies = [
 	"eslint-plugin-sonarjs",
 	"eslint-plugin-unicorn",
 	"eslint-plugin-unused-imports",
-	"fast-check",
 	"oxc-transform-react",
 	"sharp"
 ]
@@ -77,7 +76,14 @@ maxCrap = 30
 crapRefactorBand = 5
 maxUnitSize = 60
 coverage = ".cache/istanbul/coverage-final.json"
-ignore = ["scripts/**", "*.config.ts"]
+# Tests and the rule harness are outside Istanbul coverage, so CRAP there is an estimate.
+# The harness is an AST type switch, and it is already ignored for duplication.
+ignore = [
+	"scripts/**",
+	"*.config.ts",
+	"tests/**",
+	"tools/rule-harness/**",
+]
 suggestInlineSuppression = true
 
 [health.ownership]
@@ -94,7 +100,8 @@ ignore = [
 	"documentation/src/styles/custom.css",
 	"src/rules/anti-slop/**",
 	"tests/fixtures/**",
-	"scripts/utilities/casing-utilities.ts"
+	"scripts/utilities/casing-utilities.ts",
+	"tools/rule-harness/src/**"
 ]
 
 [audit]

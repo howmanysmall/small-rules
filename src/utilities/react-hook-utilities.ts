@@ -1,16 +1,25 @@
-import { Predicate } from "effect";
+import {
+	isArrayExpression,
+	isAssignmentPattern,
+	isCallbackFunction,
+	isCallExpression,
+	isIdentifier,
+	isMemberExpression,
+	isNode,
+	isSpreadElement,
+	isStringLiteral,
+} from "@small-rules/oxlint-utilities";
 
-import { isKeyOfNode, isNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { isKeyOfNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
+import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
-
-import type { CallbackFunction } from "$oxc-types/missing-types";
 
 const SETTER_IDENTIFIER_PATTERN = /^set[A-Z]/u;
 
 export function getHookName({ callee }: ESTree.CallExpression): string | undefined {
-	if (callee.type === "Identifier") return callee.name;
-	if (callee.type === "MemberExpression" && callee.property.type === "Identifier") return callee.property.name;
+	if (isIdentifier(callee)) return callee.name;
+	if (isMemberExpression(callee) && isIdentifier(callee.property)) return callee.property.name;
 	return undefined;
 }
 
@@ -23,9 +32,7 @@ export function isSetterIdentifier(name: string): boolean {
 
 export function getEffectCallback(callExpression: ESTree.CallExpression): CallbackFunction | undefined {
 	const [callback] = callExpression.arguments;
-	return callback?.type === "ArrowFunctionExpression" || callback?.type === "FunctionExpression"
-		? callback
-		: undefined;
+	return isCallbackFunction(callback) ? callback : undefined;
 }
 
 export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
@@ -84,16 +91,16 @@ function pushSlopValue(value: PropertyDescriptor["value"], parent: ESTree.Node, 
 }
 
 export function getBindingPropertyKeyName({ key }: ESTree.BindingProperty): string | undefined {
-	if (key.type === "Identifier") return key.name;
-	if (key.type === "Literal" && Predicate.isString(key.value)) return key.value;
+	if (isIdentifier(key)) return key.name;
+	if (isStringLiteral(key)) return key.value;
 	return undefined;
 }
 
 export function getBindingPropertyValueIdentifier({
 	value,
 }: ESTree.BindingProperty): ESTree.BindingIdentifier | undefined {
-	if (value.type === "Identifier") return value;
-	if (value.type === "AssignmentPattern" && value.left.type === "Identifier") return value.left;
+	if (isIdentifier(value)) return value;
+	if (isAssignmentPattern(value) && isIdentifier(value.left)) return value.left;
 	return undefined;
 }
 
@@ -101,7 +108,7 @@ export function countSetStateCalls(node: ESTree.Node): number {
 	let count = 0;
 
 	walkAst(node, (child) => {
-		if (child.type !== "CallExpression" || child.callee.type !== "Identifier") return;
+		if (!isCallExpression(child) || !isIdentifier(child.callee)) return;
 		if (isSetterIdentifier(child.callee.name)) count += 1;
 	});
 
@@ -128,10 +135,10 @@ export function classifyDependencies<TOptions extends object>(
 	isStaticArrayExpression: IsStaticArrayExpression<TOptions>,
 ): DependenciesKind {
 	if (argument === undefined) return DependenciesKind.MissingOrOmitted;
-	if (argument.type === "SpreadElement") return DependenciesKind.DynamicOrUnknown;
+	if (isSpreadElement(argument)) return DependenciesKind.DynamicOrUnknown;
 
 	const expression = stripExpressionWrappers(argument);
-	if (expression.type !== "ArrayExpression") return DependenciesKind.DynamicOrUnknown;
+	if (!isArrayExpression(expression)) return DependenciesKind.DynamicOrUnknown;
 	if (expression.elements.length === 0) return DependenciesKind.EmptyArray;
 	if (isStaticArrayExpression(sourceCode, expression, seen, options)) return DependenciesKind.StaticArray;
 

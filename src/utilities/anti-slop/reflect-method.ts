@@ -4,8 +4,9 @@
 //
 // Modifications: adapted imports to oxlint-plugin-utilities and local path aliases.
 
+import { isAnyLiteral, isIdentifierNamed } from "@small-rules/oxlint-utilities";
+
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { isAnyLiteral, isIdentifierNamed } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
 

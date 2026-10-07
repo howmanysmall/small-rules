@@ -1,4 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARRAY_PATTERN,
@@ -8,13 +7,12 @@ import {
 	CHAIN_EXPRESSION,
 	CONDITIONAL_EXPRESSION,
 	FUNCTION_EXPRESSION,
-	getMemberPropertyName,
 	IDENTIFIER,
 	isAnyLiteral,
 	isArrayPattern,
 	isAssignmentPattern,
 	isFunctionDeclarationRaw,
-	isIdentifierName,
+	isIdentifier,
 	isImportDefaultSpecifier,
 	isImportSpecifier,
 	isMemberExpression,
@@ -32,12 +30,14 @@ import {
 	TS_INSTANTIATION_EXPRESSION,
 	TS_NON_NULL_EXPRESSION,
 	TS_TYPE_ASSERTION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
+import type { BindingName, CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
-
-import type { BindingName, CallbackFunction } from "$oxc-types/missing-types";
 
 interface Options {
 	readonly eventsImportPaths?: ReadonlyArray<string>;
@@ -96,7 +96,7 @@ function getRootIdentifierName(node: ESTree.Node): string | undefined {
 
 	while (true) {
 		const unwrapped = unwrapNode(current);
-		if (isIdentifierName(unwrapped)) return unwrapped.name;
+		if (isIdentifier(unwrapped)) return unwrapped.name;
 		if (!isMemberExpression(unwrapped)) return undefined;
 		current = unwrapped.object;
 	}
@@ -229,7 +229,7 @@ function markBindingPattern(
 	if (kind === TaintKind.None) return false;
 	/* v8 ignore stop -- @preserve */
 
-	if (isIdentifierName(pattern)) {
+	if (isIdentifier(pattern)) {
 		if (kind === TaintKind.Value) return markAsPlayerValue(pattern.name, state);
 		return markAsPlayerContainer(pattern.name, state);
 	}
@@ -244,11 +244,11 @@ function markAssignmentTarget(target: ESTree.Node, kind: TaintKind, state: Callb
 	if (
 		isArrayPattern(target) ||
 		isAssignmentPattern(target) ||
-		isIdentifierName(target) ||
+		isIdentifier(target) ||
 		isObjectPattern(target) ||
 		isRestElement(target)
 	) {
-		if (isIdentifierName(target)) {
+		if (isIdentifier(target)) {
 			if (kind === TaintKind.Value) return markAsPlayerValue(target.name, state);
 			return markAsPlayerContainer(target.name, state);
 		}
@@ -349,7 +349,7 @@ function seedPlayerValueFromParameter(parameter: ESTree.Node, state: CallbackSta
 }
 
 function isEventsImportedSpecifier(specifier: ESTree.ImportSpecifier): boolean {
-	if (isIdentifierName(specifier.imported)) return specifier.imported.name === "Events";
+	if (isIdentifier(specifier.imported)) return specifier.imported.name === "Events";
 	return isAnyLiteral(specifier.imported) && specifier.imported.value === "Events";
 }
 

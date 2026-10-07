@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/anti-slop/no-unknown-type-aliases";
-import { ts } from "$test/rule-testers";
 
 const unknownAlias = { messageId: "unknownAlias" };
 

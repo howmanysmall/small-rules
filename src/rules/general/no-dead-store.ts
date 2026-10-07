@@ -1,10 +1,7 @@
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAnyFunction,
 	isAnyLiteral,
 	isArrayExpression,
-	isArrowFunctionExpression,
 	isAssignmentExpression,
 	isAssignmentPattern,
 	isBindingIdentifier,
@@ -12,7 +9,6 @@ import {
 	isBreakStatement,
 	isConditionalExpression,
 	isContinueStatement,
-	isFunctionDeclaration,
 	isFunctionExpression,
 	isIfStatement,
 	isLogicalExpression,
@@ -29,7 +25,10 @@ import {
 	isUnaryExpression,
 	isUpdateExpression,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -241,12 +240,7 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
 		if (isLoopNode(current)) loops.push(current);
-		else if (
-			isProgram(current) ||
-			isArrowFunctionExpression(current) ||
-			isFunctionDeclaration(current) ||
-			isFunctionExpression(current)
-		) {
+		else if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) {
 			break;
 		}
 		current = current.parent;
@@ -260,14 +254,7 @@ function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): bool
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- giga coal
 	while (current !== null) {
 		for (const loop of writeLoops) if (loop === current) return true;
-		if (
-			isProgram(current) ||
-			isArrowFunctionExpression(current) ||
-			isFunctionDeclaration(current) ||
-			isFunctionExpression(current)
-		) {
-			break;
-		}
+		if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) break;
 		current = current.parent;
 	}
 	return false;

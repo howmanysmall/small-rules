@@ -14,13 +14,10 @@
 // pnpm-workspace.yaml, or package.json.
 
 import nodePath from "node:path";
-
-import { createRule } from "$oxc-utilities/create-rule";
-import { parseDirectiveComment } from "$oxc-utilities/directive-comments";
 import {
 	EXPRESSION_STATEMENT,
-	isBindingIdentifier,
 	isExportNamedDeclaration,
+	isIdentifierNamed,
 	isProgram,
 	isTsTypeReference,
 	isUnbracedControlBody,
@@ -28,7 +25,10 @@ import {
 	RETURN_STATEMENT,
 	THROW_STATEMENT,
 	VARIABLE_DECLARATION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { parseDirectiveComment } from "$oxc-utilities/directive-comments";
 import {
 	checkAssertionSyntaxDiagnosticRange,
 	isLintSettings,
@@ -60,11 +60,7 @@ const OXLINT_DISABLE_NEXT_LINE = "oxlint-disable-next-line";
 const COMMA_REGEXP = /[\s,]+/u;
 
 function isConstAssertion(node: TypeAssertion): boolean {
-	return (
-		isTsTypeReference(node.typeAnnotation) &&
-		isBindingIdentifier(node.typeAnnotation.typeName) &&
-		node.typeAnnotation.typeName.name === "const"
-	);
+	return isTsTypeReference(node.typeAnnotation) && isIdentifierNamed(node.typeAnnotation.typeName, "const");
 }
 
 function getConfiguredSafetyMarkers(markers?: ReadonlyArray<string>): readonly [string, ...Array<string>] {

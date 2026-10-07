@@ -1,12 +1,13 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isArrayExpression,
-	isIdentifierName,
+	isIdentifier,
 	isObjectExpression,
 	isSpreadElement,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -29,7 +30,7 @@ function getFunctionHookName(node: NamedFunctionNode): string | undefined {
 
 function getVariableDeclaratorName(node: ESTree.VariableDeclarator): string | undefined {
 	/* v8 ignore next -- hook arrow functions are only tracked from identifier variable declarators. @preserve */
-	return isIdentifierName(node.id) ? node.id.name : undefined;
+	return isIdentifier(node.id) ? node.id.name : undefined;
 }
 
 function isHookFunction(node: NamedFunctionNode): boolean {
@@ -97,7 +98,7 @@ function countSpreadElement(
 	sourceCode: SourceCode,
 	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
 ): number {
-	if (isIdentifierName(node.argument)) {
+	if (isIdentifier(node.argument)) {
 		const initializer = getResolvedArrayInitializer(sourceCode, node, node.argument.name, arrayInitializersByName);
 		if (initializer === undefined) return 1;
 		return countReturnElements(initializer, sourceCode, arrayInitializersByName);
@@ -227,7 +228,7 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
 			if (hookDepth === 0 || node.argument === null || isObjectExpression(node.argument)) return;
 
-			if (isIdentifierName(node.argument)) {
+			if (isIdentifier(node.argument)) {
 				checkIdentifierReturn(node, node.argument);
 				return;
 			}

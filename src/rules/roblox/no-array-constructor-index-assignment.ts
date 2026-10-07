@@ -1,5 +1,3 @@
-import { forEachNode, hasShadowedBinding, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isAssignmentExpression,
 	isBindingIdentifier,
@@ -10,8 +8,11 @@ import {
 	isNumericLiteral,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
+import { forEachNode, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -45,12 +46,6 @@ function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): bool
 		return true;
 	});
 	return hasReference;
-}
-
-function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
-	const callee = stripExpressionWrappers(node.callee);
-	if (!isIdentifierNamed(callee, "Array")) return false;
-	return !hasShadowedBinding(sourceCode, callee, "Array");
 }
 
 function getArrayIndexAssignment(

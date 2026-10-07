@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-event-handler";
-import { tsx } from "$test/rule-testers";
 
 describe("no-event-handler", () => {
 	tsx.run("no-event-handler", rule, {

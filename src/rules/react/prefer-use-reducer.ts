@@ -1,6 +1,7 @@
+import { isBlockStatement, isVariableDeclaration } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
 import { isComponentAssignment, isHookCall } from "$oxc-utilities/lint-utilities";
-import { isBlockStatement, isVariableDeclaration } from "$oxc-utilities/oxc-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";

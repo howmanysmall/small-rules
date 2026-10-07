@@ -1,8 +1,4 @@
-import { createRuleTester } from "./rule-harness/runner";
-
-export { createRuleTester } from "./rule-harness/runner";
-
-export type { RuleCaseDocumentation, RuleTestError } from "./rule-harness/types";
+import { createRuleTester } from "./runner";
 
 export const js = createRuleTester({ language: "js", sourceType: "module" });
 export const jsx = createRuleTester({ language: "jsx", sourceType: "module" });

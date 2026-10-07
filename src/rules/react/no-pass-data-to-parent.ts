@@ -1,5 +1,6 @@
+import { isIdentifier, isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifierName, isIdentifierNamed, isMemberExpression } from "$oxc-utilities/oxc-utilities";
 import {
 	describeEffectOwner,
 	getReactEffectAnalysis,
@@ -16,7 +17,7 @@ type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
 function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boolean {
 	return function isUseHook(node: ESTree.Node): boolean {
 		/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
-		if (!isIdentifierName(node) && !isMemberExpression(node)) return false;
+		if (!isIdentifier(node) && !isMemberExpression(node)) return false;
 		return (
 			isIdentifierNamed(node, hookName) ||
 			(isIdentifierNamed(node.object, "React") && isIdentifierNamed(node.property, hookName))

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/enforce-ianitor-check-type";
-import { ts } from "$test/rule-testers";
 
 describe("enforce-ianitor-check-type", () => {
 	ts.run("enforce-ianitor-check-type", rule, {

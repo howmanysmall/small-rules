@@ -1,17 +1,17 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	hasName,
-	isArrowFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
+	isIdentifierNamed,
 	isJsxIdentifier,
 	isMemberExpression,
 	isProperty,
 	isStringLiteral,
 	isTsQualifiedName,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ANOTHER_NAME_MESSAGE,
 	DEFAULT_ALLOW_LIST,
@@ -120,10 +120,8 @@ function getSpecialCaseReplacement(variable: VariableLike): string | undefined {
 	if (
 		isMemberExpression(init) &&
 		!init.computed &&
-		isIdentifierName(init.object) &&
-		init.object.name === "Players" &&
-		isIdentifierName(init.property) &&
-		init.property.name === "LocalPlayer"
+		isIdentifierNamed(init.object, "Players") &&
+		isIdentifierNamed(init.property, "LocalPlayer")
 	) {
 		return "localPlayer";
 	}
@@ -158,26 +156,6 @@ function computeSafeSamples(
 	}
 
 	return { droppedDiscouraged, safeSamples };
-}
-
-function createIsSafeNameForVariable(
-	definition: Definition,
-	variable: VariableLike,
-	isSafeGeneratedName: IsSafe,
-): IsSafe {
-	const avoidArgumentsReplacement =
-		definition.type === "Variable" && isVariableDeclarator(definition.node) && definition.node.init === null;
-	const avoidArgumentsInArrowParameter =
-		definition.type === "Parameter" &&
-		variable.scope.type === "function" &&
-		isArrowFunctionExpression(variable.scope.block);
-	const shouldAvoidArguments = avoidArgumentsReplacement || avoidArgumentsInArrowParameter;
-
-	return function isSafeNameForVariable(name, scopes): boolean {
-		if (!isSafeGeneratedName(name, scopes)) return false;
-		if (shouldAvoidArguments && name === "arguments") return false;
-		return true;
-	};
 }
 
 function tryReportFix(
@@ -217,10 +195,8 @@ function checkVariable(
 
 	const definitionName = definition.name;
 	/* v8 ignore next -- parser variable definitions in this rule expose identifier names. @preserve */
-	if (!isIdentifierName(definitionName)) return;
+	if (!isIdentifier(definitionName)) return;
 	if (shouldSkipVariable(definition, definitionName, options)) return;
-
-	const isSafeNameForVariable = createIsSafeNameForVariable(definition, variable, isSafeGeneratedName);
 
 	const specialCaseReplacement = getSpecialCaseReplacement(variable);
 	const variableReplacements =
@@ -235,7 +211,7 @@ function checkVariable(
 	const { droppedDiscouraged, safeSamples } = computeSafeSamples(
 		variableReplacements.samples,
 		scopes,
-		isSafeNameForVariable,
+		isSafeGeneratedName,
 		options,
 	);
 
@@ -280,7 +256,7 @@ function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (v
 		}
 		const definitionName = definition.name;
 		/* v8 ignore next -- parser class-name definitions expose identifier names. @preserve */
-		if (!isIdentifierName(definitionName)) {
+		if (!isIdentifier(definitionName)) {
 			variableChecker(variable);
 			return;
 		}

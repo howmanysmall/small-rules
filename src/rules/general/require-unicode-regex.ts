@@ -1,7 +1,6 @@
-import { Predicate } from "effect";
+import { isIdentifierNamed, isNotSpread, isStringLiteral } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyLiteral, isIdentifierName, SPREAD_ELEMENT } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -12,24 +11,15 @@ function hasUnicodeFlag(flags: string): boolean {
 	return flags.includes(FLAG_U) || flags.includes(FLAG_V);
 }
 
-function isIdentifierWithName(node: ESTree.Expression, name: string): node is ESTree.IdentifierReference {
-	return isIdentifierName(node) && node.name === name;
-}
-
 function getFlagsString(node: ESTree.Node): string | undefined {
-	if (!isAnyLiteral(node) || !Predicate.isString(node.value)) return undefined;
-	return node.value;
-}
-
-function isNotSpread(node: ESTree.Argument): node is ESTree.Expression {
-	return node.type !== SPREAD_ELEMENT;
+	return isStringLiteral(node) ? node.value : undefined;
 }
 
 const requireUnicodeRegex = createRule("require-unicode-regex", "general", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
-				if (!isIdentifierWithName(node.callee, "regex")) return;
+				if (!isIdentifierNamed(node.callee, "regex")) return;
 
 				if (node.arguments.length < 2) {
 					context.report({ messageId: "requireUnicodeFlag", node });

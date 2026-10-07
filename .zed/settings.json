@@ -386,6 +386,10 @@
 						"parameterTypes": { "enabled": false },
 						"propertyDeclarationTypes": { "enabled": false },
 						"variableTypes": { "enabled": false }
+					},
+					"preferences": {
+						"autoImportFileExcludePatterns": ["**/node_modules/typescript"],
+						"autoImportSpecifierExcludeRegexes": ["^typescript(/.*)?$"]
 					}
 				}
 			}

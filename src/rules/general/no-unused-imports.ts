@@ -1,11 +1,11 @@
 // oxlint-disable small-rules/prevent-abbreviations -- `jsdoc` is valid.
 
+import { isAnyImportSpecifier } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAnyImportSpecifier } from "$oxc-utilities/oxc-utilities";
 
+import type { AnyImportSpecifier } from "@small-rules/oxlint-utilities";
 import type { Comment, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-import type { AnyImportSpecifier } from "$oxc-utilities/oxc-utilities";
 
 interface ImportInfo {
 	readonly identifierName: string;

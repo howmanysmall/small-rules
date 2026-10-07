@@ -1,11 +1,12 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isTsArrayType,
 	isTsParenthesizedType,
 	isTsRestType,
 	isTsTupleType,
 	isTsTypeOperator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 

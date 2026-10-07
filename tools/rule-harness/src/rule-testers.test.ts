@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
-import { createRuleTester, js, ts, tsx } from "$test/rule-testers";
+import { js, ts, tsx } from "./rule-testers";
+import { createRuleTester } from "./runner";
 
 import type { Fix } from "oxlint-plugin-utilities";
 
-import type { RuleCaseDocumentation } from "$test/rule-testers";
+import type { RuleCaseDocumentation } from "./types";
 
 const reportProgramRule = defineRule({
 	create(context) {

@@ -1,4 +1,14 @@
 import nodePath from "node:path";
+import {
+	isIdentifier,
+	isIdentifierNamed,
+	isImportDeclaration,
+	isImportNamespaceSpecifier,
+	isImportSpecifier,
+	isJsxElement,
+	isJsxFragment,
+	isMemberExpression,
+} from "@small-rules/oxlint-utilities";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -8,15 +18,6 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
-import {
-	isIdentifierName,
-	isImportDeclaration,
-	isImportNamespaceSpecifier,
-	isImportSpecifier,
-	isJsxElement,
-	isJsxFragment,
-	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -51,7 +52,7 @@ function isCreatePortalImport(variable?: ScopeVariable): boolean {
 
 		const { imported } = definition.node;
 		/* v8 ignore next -- @preserve createPortal imports are represented as identifier import specifiers by the parser. */
-		if (isIdentifierName(imported) && imported.name === "createPortal") return true;
+		if (isIdentifierNamed(imported, "createPortal")) return true;
 	}
 
 	return false;
@@ -74,16 +75,15 @@ function isPortalNamespaceImport(variable?: ScopeVariable): boolean {
 }
 
 function isPortalFactoryCall(sourceCode: SourceCode, { callee }: ESTree.CallExpression): boolean {
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		return isCreatePortalImport(getVariableByName(sourceCode.getScope(callee), callee.name));
 	}
 
 	if (
 		!isMemberExpression(callee) ||
 		callee.computed ||
-		!isIdentifierName(callee.property) ||
-		callee.property.name !== "createPortal" ||
-		!isIdentifierName(callee.object)
+		!isIdentifierNamed(callee.property, "createPortal") ||
+		!isIdentifier(callee.object)
 	) {
 		return false;
 	}

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-initialize-state";
-import { tsx } from "$test/rule-testers";
 
 describe("no-initialize-state", () => {
 	tsx.run("no-initialize-state", rule, {

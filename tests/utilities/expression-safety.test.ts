@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
-import { createRuleTester } from "$test/rule-testers";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

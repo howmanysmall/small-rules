@@ -1,13 +1,4 @@
 import nodePath from "node:path";
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
-import {
-	addLocalComponentImportIdentifiers,
-	createLocalComponentDiscoverer,
-	inspectLocalComponentFile,
-	inspectRelativeLocalComponentImport,
-} from "$oxc-utilities/local-component-discovery";
 import {
 	isAnyLiteral,
 	isJsxEmptyExpression,
@@ -20,8 +11,17 @@ import {
 	JSX_EXPRESSION_CONTAINER,
 	JSX_FRAGMENT,
 	LITERAL,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import {
+	addLocalComponentImportIdentifiers,
+	createLocalComponentDiscoverer,
+	inspectLocalComponentFile,
+	inspectRelativeLocalComponentImport,
+} from "$oxc-utilities/local-component-discovery";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";

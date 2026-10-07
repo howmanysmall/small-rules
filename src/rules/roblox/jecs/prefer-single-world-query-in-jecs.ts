@@ -1,15 +1,22 @@
+import {
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	isCallExpression,
+	isIdentifier,
+	isMemberExpression,
+	isNode,
+	isSpreadElement,
+	LOGICAL_EXPRESSION,
+	WHILE_STATEMENT,
+} from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	IDENTIFIER,
-	isCallExpression,
-	isIdentifierName,
-	isMemberExpression,
-	isSpreadElement,
-} from "$oxc-utilities/oxc-utilities";
 
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
 
@@ -57,7 +64,7 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	if (declarator === undefined) return undefined;
 
 	const { id, init } = declarator;
-	if (init === null || !isIdentifierName(id) || !isWorldQueryCall(init, queryType)) return undefined;
+	if (init === null || !isIdentifier(id) || !isWorldQueryCall(init, queryType)) return undefined;
 
 	const { callee } = init;
 	/* v8 ignore next 3 -- @preserve isWorldQueryCall already narrows the callee to a static member expression. */
@@ -86,12 +93,12 @@ function extractWorldQueryCall(node: ESTree.VariableDeclaration, queryType: Quer
 	};
 }
 
-const VALID_PARENT_TYPES = new Set<string>([
-	"ConditionalExpression",
-	"DoWhileStatement",
-	"ForStatement",
-	"IfStatement",
-	"WhileStatement",
+const VALID_PARENT_TYPES = new Set<NodeType>([
+	CONDITIONAL_EXPRESSION,
+	DO_WHILE_STATEMENT,
+	FOR_STATEMENT,
+	IF_STATEMENT,
+	WHILE_STATEMENT,
 ]);
 
 function isNodeWithParent(value: InspectableNode): value is { readonly parent: InspectableNode } {
@@ -100,7 +107,7 @@ function isNodeWithParent(value: InspectableNode): value is { readonly parent: I
 
 function getNodeType(value: InspectableNode): string | undefined {
 	/* v8 ignore next -- @preserve scope reference parents are parser nodes with string type tags. */
-	return Predicate.isObject(value) && Predicate.isString(value.type) ? value.type : undefined;
+	return isNode(value) ? value.type : undefined;
 }
 
 function getOperator(value: InspectableNode): string | undefined {
@@ -109,11 +116,11 @@ function getOperator(value: InspectableNode): string | undefined {
 }
 
 function isLogicalAndExpression(value: InspectableNode): boolean {
-	return getNodeType(value) === "LogicalExpression" && getOperator(value) === "&&";
+	return getNodeType(value) === LOGICAL_EXPRESSION && getOperator(value) === "&&";
 }
 
 function isIdentifierReference(value: InspectableNode): value is ESTree.IdentifierReference {
-	return Predicate.isObject(value) && value.type === IDENTIFIER && Predicate.isString(value.name);
+	return isNode(value) && isIdentifier(value) && Predicate.isString(value.name);
 }
 
 function isIdentifierDirectlyInAndExpression(identifier: ESTree.IdentifierReference): boolean {
@@ -161,6 +168,9 @@ function areAllVariablesUsedInAndExpressions(calls: ReadonlyArray<WorldQueryCall
 		checkVariableUsedInAndExpression(call.variableName, call.variableDeclaration, sourceCode),
 	);
 }
+
+// Jecs `world.get` accepts at most four components.
+const MAXIMUM_GET_COMPONENTS = 4;
 
 const ONLY_WHITESPACE_SEMICOLON = /^[\s;]*$/u;
 
@@ -283,7 +293,12 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 				const getCall = extractWorldQueryCall(node, "get");
 				if (getCall !== undefined) {
 					const lastCall = currentGetBuffer.at(-1);
-					if (lastCall !== undefined && !areCallsConsecutive(lastCall, getCall, sourceCode)) flushGetBuffer();
+					if (
+						currentGetBuffer.length === MAXIMUM_GET_COMPONENTS ||
+						(lastCall !== undefined && !areCallsConsecutive(lastCall, getCall, sourceCode))
+					) {
+						flushGetBuffer();
+					}
 					currentGetBuffer.push(getCall);
 
 					flushHasBuffer();

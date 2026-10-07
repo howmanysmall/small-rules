@@ -1,13 +1,14 @@
-import { Predicate } from "effect";
-
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isExportSpecifier,
 	isMethodDefinitionRaw,
 	isProperty,
 	isPropertyDefinitionRaw,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -127,7 +128,7 @@ function parseReplacements(raw: RawOptions["replacements"] | undefined, extendDe
 			merged.delete(key);
 			continue;
 		}
-		if (Predicate.isString(value) && value.length > 0) merged.set(key, value);
+		if (isNonEmptyString(value)) merged.set(key, value);
 	}
 	return merged;
 }
@@ -170,7 +171,7 @@ function getNameReplacement(
 
 function isShorthandPropertyValue(node: ESTree.Node): boolean {
 	const { parent } = node;
-	return parent?.type === "Property" && parent.shorthand && parent.value === node;
+	return isProperty(parent) && parent.shorthand && parent.value === node;
 }
 
 function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {

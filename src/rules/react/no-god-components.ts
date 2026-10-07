@@ -1,5 +1,3 @@
-import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARROW_FUNCTION_EXPRESSION,
 	FUNCTION_DECLARATION,
@@ -10,11 +8,10 @@ import {
 	isAssignmentPattern,
 	isCallbackFunction,
 	isCallExpression,
-	isComponentName,
 	isExportDefaultDeclaration,
 	isFunctionDeclarationRaw,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isJsxElement,
 	isJsxFragment,
 	isMethodDefinition,
@@ -22,7 +19,11 @@ import {
 	isProperty,
 	isTsLiteralType,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -36,15 +37,15 @@ function getComponentNameFromFunction(node: ESTree.Node): string | undefined {
 
 	if (isCallbackFunction(node)) {
 		const { parent } = node;
-		if (isVariableDeclarator(parent) && isIdentifierName(parent.id) && isComponentName(parent.id.name)) {
+		if (isVariableDeclarator(parent) && isIdentifier(parent.id) && isComponentName(parent.id.name)) {
 			return parent.id.name;
 		}
 
-		if (isProperty(parent) && isIdentifierName(parent.key) && isComponentName(parent.key.name)) {
+		if (isProperty(parent) && isIdentifier(parent.key) && isComponentName(parent.key.name)) {
 			return parent.key.name;
 		}
 
-		if (isMethodDefinition(parent) && isIdentifierName(parent.key) && isComponentName(parent.key.name)) {
+		if (isMethodDefinition(parent) && isIdentifier(parent.key) && isComponentName(parent.key.name)) {
 			return parent.key.name;
 		}
 	}
@@ -54,11 +55,11 @@ function getComponentNameFromFunction(node: ESTree.Node): string | undefined {
 
 function getComponentNameFromCallParent(callExpression: ESTree.CallExpression): string | undefined {
 	const { parent } = callExpression;
-	if (isVariableDeclarator(parent) && isIdentifierName(parent.id) && isComponentName(parent.id.name)) {
+	if (isVariableDeclarator(parent) && isIdentifier(parent.id) && isComponentName(parent.id.name)) {
 		return parent.id.name;
 	}
 
-	if (isAssignmentExpression(parent) && isIdentifierName(parent.left) && isComponentName(parent.left.name)) {
+	if (isAssignmentExpression(parent) && isIdentifier(parent.left) && isComponentName(parent.left.name)) {
 		return parent.left.name;
 	}
 

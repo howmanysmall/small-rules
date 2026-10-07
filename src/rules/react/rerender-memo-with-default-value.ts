@@ -1,17 +1,18 @@
-import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 import {
 	isArrayExpression,
 	isAssignmentPattern,
 	isCallbackFunction,
+	isEmptyObjectExpression,
 	isFunctionDeclaration,
 	isNode,
-	isObjectExpression,
 	isObjectPattern,
 	isProperty,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -19,7 +20,7 @@ type Context = InferContextFromRule<typeof rerenderMemoWithDefaultValue>;
 type ObjectPatternProperty = ESTree.ObjectPattern["properties"][number];
 
 function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): void {
-	if (isObjectExpression(defaultValue) && defaultValue.properties.length === 0) {
+	if (isEmptyObjectExpression(defaultValue)) {
 		context.report({
 			messageId: "emptyObjectDefault",
 			node: defaultValue,

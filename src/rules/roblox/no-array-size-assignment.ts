@@ -1,5 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
-import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import {
 	CALL_EXPRESSION,
 	IDENTIFIER,
@@ -7,7 +5,7 @@ import {
 	isCallExpression,
 	isExpressionNode,
 	isExpressionStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isPrivateIdentifier,
@@ -17,8 +15,11 @@ import {
 	MEMBER_EXPRESSION,
 	SUPER,
 	THIS_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
-import { ENVIRONMENT_SCHEMA } from "$oxc-utilities/react-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
+import { ENVIRONMENT_SCHEMA, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -36,7 +37,7 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 			return isCallExpression(right) && sourceCode.getText(left) === sourceCode.getText(right);
 
 		case IDENTIFIER:
-			return isIdentifierName(right) && left.name === right.name;
+			return isIdentifier(right) && left.name === right.name;
 
 		case LITERAL:
 			return isAnyLiteral(right) && left.value === right.value && left.raw === right.raw;
@@ -84,7 +85,7 @@ function areEquivalentStaticProperties(
 	const rightIsPrivate = isPrivateIdentifier(right);
 	if (leftIsPrivate || rightIsPrivate) return leftIsPrivate && rightIsPrivate && left.name === right.name;
 
-	return isIdentifierName(right) && isIdentifierName(left) && left.name === right.name;
+	return isIdentifier(right) && isIdentifierNamed(left, right.name);
 }
 
 function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean): boolean {
@@ -103,7 +104,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;
 			}
 
-			return isIdentifierName(node.property) || isPrivateIdentifier(node.property);
+			return isIdentifier(node.property) || isPrivateIdentifier(node.property);
 		}
 
 		default:
@@ -132,20 +133,19 @@ function getAppendTarget(
 ): ESTree.MemberExpression | undefined {
 	if (node.operator !== "=" || !isMemberExpression(node.left) || !node.left.computed) return undefined;
 
-	if (environment === "roblox-ts" && isSizeCall(node.left.property)) {
+	if (environment === ROBLOX_TS && isSizeCall(node.left.property)) {
 		return areEquivalentTargets(node.left.object, node.left.property.callee.object, sourceCode)
 			? node.left
 			: undefined;
 	}
 
-	if (environment === "standard") {
+	if (environment === STANDARD) {
 		const { property } = node.left;
 		if (
 			isMemberExpression(property) &&
 			!property.optional &&
 			!property.computed &&
-			isIdentifierName(property.property) &&
-			property.property.name === "length"
+			isIdentifierNamed(property.property, "length")
 		) {
 			return areEquivalentTargets(node.left.object, property.object, sourceCode) ? node.left : undefined;
 		}
@@ -158,7 +158,7 @@ const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
-		const environment = options?.environment === "standard" ? "standard" : "roblox-ts";
+		const environment = options?.environment === STANDARD ? STANDARD : ROBLOX_TS;
 		const { sourceCode } = context;
 
 		return {
@@ -212,7 +212,7 @@ const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 					},
 					environment: {
 						...ENVIRONMENT_SCHEMA,
-						default: "roblox-ts",
+						default: ROBLOX_TS,
 						description:
 							"Array environment mode: 'roblox-ts' checks array[array.size()]; 'standard' checks array[array.length].",
 					},

@@ -2,6 +2,7 @@ import ignore from "ignore";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { computeDisabledArea, toRuleIdLocation } from "$oxc-utilities/directive-comments";
+import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -38,7 +39,7 @@ const directiveNoRestrictedDisable = createRule("directive-no-restricted-disable
 			type: "array" as const,
 			uniqueItems: true,
 		},
-		type: "suggestion" as const,
+		type: MESSAGE_ID_SUGGESTION,
 	},
 });
 

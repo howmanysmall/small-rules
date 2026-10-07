@@ -1,7 +1,7 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
-import { getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
@@ -37,14 +37,7 @@ const noUnusedUseMemo = createRule("no-unused-use-memo", "react", {
 		schema: [
 			{
 				additionalProperties: false,
-				properties: {
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
-				},
+				properties: { environment: ENVIRONMENT_SCHEMA },
 				type: "object",
 			},
 		],

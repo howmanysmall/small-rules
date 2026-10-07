@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, expect, it } from "vitest";
+import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/english/prevent-abbreviations";
 import {
@@ -11,7 +12,6 @@ import {
 	isShorthandIgnored,
 	prepareOptions,
 } from "$oxc-utilities/prevent-abbreviations/replacements";
-import { ts, tsx } from "$test/rule-testers";
 
 const MANY_REPLACEMENTS = Object.fromEntries(
 	Array.from({ length: 104 }, (_, index) => [`replacement${index.toString().padStart(3, "0")}`, true]),
@@ -341,6 +341,14 @@ describe("prevent-abbreviations", () => {
 						messageId: "suggestion",
 					},
 				],
+			},
+			// Catches renaming to `arguments`, which strict module code cannot
+			// declare. Found by the isValidIdentifier property.
+			{
+				code: "const param = 1;\nuse(param);\nfunction run(param) { return param; }",
+				output: "const arguments_ = 1;\nuse(arguments_);\nfunction run(arguments_) { return arguments_; }",
+				options: [{ replacements: { param: { arguments: true, parameter: false } } }],
+				errors: [{ messageId: "replace" }, { messageId: "replace" }],
 			},
 			{
 				code: "const handler = (param) => param;",

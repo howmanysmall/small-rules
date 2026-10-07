@@ -7,8 +7,9 @@
 // regex-literal detection moved from token inspection to the `regex` literal
 // property.
 
+import { isIdentifierNamed, isRestElement } from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isIdentifierName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, VisitorWithHooks } from "oxlint-plugin-utilities";
 
@@ -50,12 +51,7 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 				if (checks.regexLiterals && "regex" in node) context.report({ messageId: "regexLiteral", node });
 			},
 			MemberExpression(node) {
-				if (
-					checks.prototype &&
-					!node.computed &&
-					isIdentifierName(node.property) &&
-					node.property.name === "prototype"
-				) {
+				if (checks.prototype && !node.computed && isIdentifierNamed(node.property, "prototype")) {
 					context.report({ messageId: "prototype", node: node.property });
 				}
 			},
@@ -117,7 +113,7 @@ function reportRestElements(
 	members: ReadonlyArray<ESTree.Node | null>,
 ): void {
 	for (const member of members) {
-		if (member?.type !== "RestElement") continue;
+		if (!isRestElement(member)) continue;
 		context.report({ messageId: "spreadDestructuring", node: member });
 	}
 }

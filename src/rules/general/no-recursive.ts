@@ -1,12 +1,12 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	isArrowFunctionExpression,
 	isBindingIdentifier,
-	isFunctionExpression,
+	isCallbackFunction,
 	isMemberExpression,
 	isMethodDefinition,
 	isThisExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Scope, Visitor } from "oxlint-plugin-utilities";
 
@@ -220,24 +220,12 @@ const noRecursive = createRule("no-recursive", "general", {
 			},
 
 			VariableDeclarator(node): void {
-				if (
-					!isBindingIdentifier(node.id) ||
-					node.init === null ||
-					(!isFunctionExpression(node.init) && !isArrowFunctionExpression(node.init))
-				) {
-					return;
-				}
+				if (!isBindingIdentifier(node.id) || !isCallbackFunction(node.init)) return;
 				registerFunction(node.id.name);
 				pushFunction(node.id.name);
 			},
 			"VariableDeclarator:exit"(node): void {
-				if (
-					!isBindingIdentifier(node.id) ||
-					node.init === null ||
-					(!isFunctionExpression(node.init) && !isArrowFunctionExpression(node.init))
-				) {
-					return;
-				}
+				if (!isBindingIdentifier(node.id) || !isCallbackFunction(node.init)) return;
 				popFunction();
 			},
 		};

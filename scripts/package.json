@@ -14,20 +14,25 @@
 		"@std/path": "catalog:scripts",
 		"ansis": "catalog:scripts",
 		"arktype": "catalog:runtime",
+		"boxen": "catalog:scripts",
 		"consola": "catalog:scripts",
 		"effect": "catalog:runtime",
+		"fast-string-width": "catalog:scripts",
 		"fdir": "catalog:scripts",
 		"jsonc-parser": "catalog:scripts",
 		"just-diff": "catalog:scripts",
 		"mutative": "catalog:scripts",
+		"pretty-bytes": "catalog:scripts",
 		"pretty-ms": "catalog:scripts",
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
+		"typescript": "catalog:tooling",
 		"verb-corpus": "catalog:scripts",
 		"yuku-ast": "catalog:tooling",
 		"yuku-parser": "catalog:runtime"
 	},
 	"devDependencies": {
-		"@total-typescript/ts-reset": "catalog:types"
+		"@total-typescript/ts-reset": "catalog:types",
+		"tsdown": "catalog:build"
 	}
 }

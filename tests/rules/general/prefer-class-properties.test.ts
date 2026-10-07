@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/prefer-class-properties";
-import { js } from "$test/rule-testers";
 
 const classPropertyErrors = [
 	{

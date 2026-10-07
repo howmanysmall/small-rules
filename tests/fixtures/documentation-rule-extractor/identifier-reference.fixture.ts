@@ -1,4 +1,4 @@
-import { ts } from "../../rule-testers";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 declare const rule: unknown;
 declare const sharedCode: string;

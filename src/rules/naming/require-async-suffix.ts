@@ -1,6 +1,7 @@
+import { isCallbackFunction, isFunctionExpression, isIdentifier } from "@small-rules/oxlint-utilities";
+
 import { isExternallyConstrainedProperty } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction, isFunctionExpression, isIdentifierName } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -20,21 +21,21 @@ const requireAsyncSuffix = createRule("require-async-suffix", "naming", {
 				reportIfNotSkipped(node.id);
 			},
 			MethodDefinition(node): void {
-				if (!node.value.async || !isIdentifierName(node.key) || node.override === true) return;
+				if (!node.value.async || !isIdentifier(node.key) || node.override === true) return;
 				reportIfNotSkipped(node.key);
 			},
 			Property(node): void {
 				if (!node.method || !isFunctionExpression(node.value) || !node.value.async) return;
-				if (!isIdentifierName(node.key) || isExternallyConstrainedProperty(node)) return;
+				if (!isIdentifier(node.key) || isExternallyConstrainedProperty(node)) return;
 				reportIfNotSkipped(node.key);
 			},
 			PropertyDefinition(node): void {
 				if (!isCallbackFunction(node.value)) return;
-				if (!node.value.async || !isIdentifierName(node.key) || node.override === true) return;
+				if (!node.value.async || !isIdentifier(node.key) || node.override === true) return;
 				reportIfNotSkipped(node.key);
 			},
 			VariableDeclarator(node): void {
-				if (!isIdentifierName(node.id) || !isCallbackFunction(node.init) || !node.init.async) return;
+				if (!isIdentifier(node.id) || !isCallbackFunction(node.init) || !node.init.async) return;
 				reportIfNotSkipped(node.id);
 			},
 		} satisfies Visitor;

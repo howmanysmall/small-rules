@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/anti-slop/no-reflect-get";
-import { ts } from "$test/rule-testers";
 
 describe("no-reflect-get", () => {
 	ts.run("no-reflect-get", rule, {

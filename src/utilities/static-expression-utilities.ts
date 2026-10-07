@@ -1,4 +1,3 @@
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -12,10 +11,9 @@ import {
 	FUNCTION_EXPRESSION,
 	IDENTIFIER,
 	IMPORT_EXPRESSION,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
-	isPrivateIdentifier,
 	isProperty,
 	isSpreadElement,
 	isUnaryExpression,
@@ -29,7 +27,6 @@ import {
 	OBJECT_EXPRESSION,
 	PARENTHESIZED_EXPRESSION,
 	SEQUENCE_EXPRESSION,
-	stripExpressionWrappers,
 	SUPER,
 	TAGGED_TEMPLATE_EXPRESSION,
 	TEMPLATE_LITERAL,
@@ -42,12 +39,15 @@ import {
 	UNARY_EXPRESSION,
 	UPDATE_EXPRESSION,
 	YIELD_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { Definition, ESTree, Scope, SourceCode } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 export interface StaticExpressionOptions {
 	readonly staticCallsRequireFactories?: boolean;
@@ -193,7 +193,7 @@ export function isExplicitUndefinedExpression(
 	if (isIdentifierNamed(unwrapped, "undefined") || (isUnaryExpression(unwrapped) && unwrapped.operator === "void")) {
 		return true;
 	}
-	if (!isIdentifierName(unwrapped)) return false;
+	if (!isIdentifier(unwrapped)) return false;
 
 	const initializer = getConstInitializerForIdentifier(sourceCode, unwrapped);
 	return initializer === undefined ? false : isExplicitUndefinedExpression(sourceCode, initializer, seen);
@@ -205,7 +205,6 @@ function isStaticMemberProperty(
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	if (isIdentifierName(property)) return true;
 	/* v8 ignore next -- @preserve PrivateIdentifier cannot be produced as a valid computed member property expression. */
 	if (!isExpression(property)) return false;
 	return isStaticExpression(sourceCode, property, seen, options);
@@ -214,7 +213,7 @@ function isStaticMemberProperty(
 function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
 	let unwrapped = stripExpressionWrappers(callee);
 	while (isMemberExpression(unwrapped)) unwrapped = stripExpressionWrappers(unwrapped.object);
-	return isIdentifierName(unwrapped) ? unwrapped.name : undefined;
+	return isIdentifier(unwrapped) ? unwrapped.name : undefined;
 }
 
 function isStaticCallCallee(
@@ -229,12 +228,12 @@ function isStaticCallCallee(
 	}
 
 	const unwrapped = stripExpressionWrappers(callee);
-	if (isIdentifierName(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
+	if (isIdentifier(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
 	if (!isMemberExpression(unwrapped) || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
 		return false;
 	}
 	if (unwrapped.computed) return isStaticExpression(sourceCode, unwrapped.property, seen, options);
-	return isIdentifierName(unwrapped.property);
+	return isIdentifier(unwrapped.property);
 }
 
 function checkStaticCallOrNewExpression(
@@ -283,9 +282,21 @@ export function isStaticExpression(
 	options: StaticExpressionOptions,
 ): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
+	// `seen` holds the expressions on the current path only, so a constant
+	// that refers back to itself is rejected while one used twice is not.
 	if (seen.has(unwrapped)) return false;
 	seen.add(unwrapped);
+	const result = classifyStaticExpression(sourceCode, unwrapped, seen, options);
+	seen.delete(unwrapped);
+	return result;
+}
 
+function classifyStaticExpression(
+	sourceCode: SourceCode,
+	unwrapped: ReturnType<typeof stripExpressionWrappers>,
+	seen: Set<ESTree.Node>,
+	options: StaticExpressionOptions,
+): boolean {
 	switch (unwrapped.type) {
 		case ARRAY_EXPRESSION:
 			return isStaticArrayExpression(sourceCode, unwrapped, seen, options);
@@ -359,14 +370,34 @@ function isStaticIdentifier(
 	for (const definition of variable.defs) {
 		const initializer = getConstInitializer(definition);
 		if (initializer === undefined) continue;
-		if (isStaticExpression(sourceCode, initializer, seen, options)) return true;
+		if (isStaticInitializer(sourceCode, initializer, seen, options)) return true;
 	}
 
 	return false;
 }
 
-function isExpressionKey(key: ESTree.PropertyKey): key is ESTree.Expression {
-	return !isPrivateIdentifier(key) && !isIdentifierName(key);
+// A module constant can be referenced many times, and constants can refer to
+// each other, so each initializer is classified once per options object.
+const initializerVerdictsByOptions = new WeakMap<StaticExpressionOptions, WeakMap<ESTree.Node, boolean>>();
+
+function isStaticInitializer(
+	sourceCode: SourceCode,
+	initializer: ESTree.Expression,
+	seen: Set<ESTree.Node>,
+	options: StaticExpressionOptions,
+): boolean {
+	let verdicts = initializerVerdictsByOptions.get(options);
+	if (verdicts === undefined) {
+		verdicts = new WeakMap();
+		initializerVerdictsByOptions.set(options, verdicts);
+	}
+
+	const cached = verdicts.get(initializer);
+	if (cached !== undefined) return cached;
+
+	const verdict = isStaticExpression(sourceCode, initializer, seen, options);
+	verdicts.set(initializer, verdict);
+	return verdict;
 }
 
 export function isStaticObjectExpression(
@@ -380,7 +411,7 @@ export function isStaticObjectExpression(
 
 		if (
 			(property.computed &&
-				isExpressionKey(property.key) &&
+				isExpression(property.key) &&
 				!isStaticExpression(sourceCode, property.key, seen, options)) ||
 			!isStaticExpression(sourceCode, property.value, seen, options)
 		) {

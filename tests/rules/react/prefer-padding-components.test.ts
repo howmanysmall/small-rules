@@ -1,8 +1,8 @@
 import nodePath from "node:path";
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/prefer-padding-components";
-import { tsx } from "$test/rule-testers";
 
 const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "prefer-padding-components");
 const WITH_COMPONENTS = nodePath.join(FIXTURES, "with-components");

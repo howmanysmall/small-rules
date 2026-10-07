@@ -1,11 +1,11 @@
 import { expect } from "vitest";
+import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 import { fuzz } from "@vitiate/core";
 import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 
 import rule from "$oxc-rules/roblox/require-module-level-instantiation";
-import { createRuleExecutor } from "$test/rule-harness/execute";
 
-import type { NormalizedValidCase } from "$test/rule-harness/types";
+import type { NormalizedValidCase } from "@small-rules/rule-harness/types";
 
 const IMPORT_STYLES: ReadonlyArray<"default" | "named" | "renamed"> = ["default", "named", "renamed"];
 const NESTED_SCOPES: ReadonlyArray<"arrow" | "function" | "method"> = ["arrow", "function", "method"];

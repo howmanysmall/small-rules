@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/anti-slop/no-module-mocking";
-import { ts } from "$test/rule-testers";
 
 describe("no-module-mocking", () => {
 	ts.run("no-module-mocking", rule, {

@@ -1,25 +1,24 @@
-import { Predicate } from "effect";
-
-import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
 	isAnyLiteral,
 	isAssignmentPattern,
 	isBinaryExpression,
 	isBindingIdentifier,
-	isIdentifierName,
+	isIdentifier,
+	isIdentifierNamed,
+	isPrivateIdentifier,
 	isSequenceExpression,
-	isTsAsExpression,
 	isTsNumberKeyword,
 	isTsTypeAnnotation,
-	isTsTypeAssertion,
 	isTsTypeReference,
+	isTypeAssertionExpression,
 	isVariableDeclarator,
-	PRIVATE_IDENTIFIER,
-	stripExpressionWrappers,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import { stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -29,15 +28,12 @@ function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnn
 
 	let current = typeAnnotation;
 	while (isTsTypeAnnotation(current)) current = current.typeAnnotation;
-	return (
-		isTsNumberKeyword(current) ||
-		(isTsTypeReference(current) && isBindingIdentifier(current.typeName) && current.typeName.name === "Number")
-	);
+	return isTsNumberKeyword(current) || (isTsTypeReference(current) && isIdentifierNamed(current.typeName, "Number"));
 }
 
 function isExpressionOperand(node: ESTree.Expression | ESTree.PrivateIdentifier): node is ESTree.Expression {
 	/* v8 ignore next -- @preserve binary expressions cannot contain PrivateIdentifier operands in this parser shape. */
-	return node.type !== PRIVATE_IDENTIFIER;
+	return !isPrivateIdentifier(node);
 }
 
 function isKnownNonNumberLiteral(expression: ESTree.Expression): boolean {
@@ -80,13 +76,13 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const current = stripParenthesis(expression);
 
-	if (isTsAsExpression(current) || isTsTypeAssertion(current)) return !isNumberTypeAnnotation(current.typeAnnotation);
+	if (isTypeAssertionExpression(current)) return !isNumberTypeAnnotation(current.typeAnnotation);
 
 	/* v8 ignore next -- @preserve literal non-number cases are covered by direct literal tests. */
 	if (isKnownNonNumberLiteral(current)) return true;
 
 	const unwrapped = stripExpressionWrappers(current);
-	return isIdentifierName(unwrapped) && isKnownNonNumberIdentifier(sourceCode, unwrapped);
+	return isIdentifier(unwrapped) && isKnownNonNumberIdentifier(sourceCode, unwrapped);
 }
 
 function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression): string {
@@ -95,8 +91,8 @@ function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression
 
 function getMathArgumentText(sourceCode: SourceCode, expression: ESTree.Expression): string {
 	const unwrapped = stripParenthesis(expression);
-	if (isSequenceExpression(unwrapped)) return `(${sourceCode.getText(unwrapped)})`;
-	return sourceCode.getText(unwrapped);
+	const text = sourceCode.getText(unwrapped);
+	return isSequenceExpression(unwrapped) ? `(${text})` : text;
 }
 
 type MathMethod = "max" | "min";

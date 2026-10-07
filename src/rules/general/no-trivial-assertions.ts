@@ -1,18 +1,14 @@
 // oxlint-disable unicorn/no-null -- assertion constants include the null
 // primitive.
-import { Predicate } from "effect";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
 	CLASS_EXPRESSION,
 	FUNCTION_EXPRESSION,
-	getMemberPropertyName,
 	isAnyLiteral,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isSpreadElement,
@@ -22,11 +18,15 @@ import {
 	isVariableDeclarator,
 	NEW_EXPRESSION,
 	OBJECT_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
 
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
+
+import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-import type { NodeType } from "$oxc-utilities/oxc-utilities";
 
 type ConstantPrimitive = bigint | boolean | null | number | string | undefined;
 type PredicateKind = "defined" | "falsy" | "null" | "truthy" | "undefined";
@@ -142,7 +142,7 @@ function resolveConstantPrimitive(
 	const literal = constantFromLiteral(expression);
 	if (literal !== undefined) return literal;
 	if (isUnaryExpression(expression)) return resolveUnaryConstant(sourceCode, expression, seen);
-	if (isIdentifierName(expression)) return resolveIdentifierConstant(sourceCode, expression, seen);
+	if (isIdentifier(expression)) return resolveIdentifierConstant(sourceCode, expression, seen);
 	return undefined;
 }
 

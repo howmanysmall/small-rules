@@ -8,13 +8,6 @@
 // type-node kind table. Type-parameter constraints are excluded iteratively.
 
 import {
-	classifyUnsafeDictionary,
-	classifyUnsafeDictionaryValue,
-	createTypeEnvironment,
-} from "$oxc-utilities/anti-slop/dictionary-types";
-import { getVisibleTypeAlias } from "$oxc-utilities/anti-slop/type-alias-resolution";
-import { createRule } from "$oxc-utilities/create-rule";
-import {
 	isBindingIdentifier,
 	isProgram,
 	isTsMappedType,
@@ -22,7 +15,15 @@ import {
 	isTsTypeLiteral,
 	isTsTypeParameter,
 	isTsTypeReference,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import {
+	classifyUnsafeDictionary,
+	classifyUnsafeDictionaryValue,
+	createTypeEnvironment,
+} from "$oxc-utilities/anti-slop/dictionary-types";
+import { getVisibleTypeAlias } from "$oxc-utilities/anti-slop/type-alias-resolution";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

@@ -1,8 +1,8 @@
 import { cwd } from "node:process";
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-restricted-property-assignment";
-import { js } from "$test/rule-testers";
 
 describe("no-restricted-property-assignment", () => {
 	js.run("no-restricted-property-assignment", rule, {

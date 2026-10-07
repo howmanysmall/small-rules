@@ -1,13 +1,7 @@
+import { isFunctionExpression, isIdentifier, isNode, isSuper, isThisExpression } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	isFunctionExpression,
-	isIdentifierName,
-	isNode,
-	isSuper,
-	isThisExpression,
-} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -67,7 +61,7 @@ function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
 }
 
 function getMethodName(node: ESTree.MethodDefinition): string {
-	return isIdentifierName(node.key) ? node.key.name : "unknown";
+	return isIdentifier(node.key) ? node.key.name : "unknown";
 }
 
 const noInstanceMethodsWithoutThis = createRule("no-instance-methods-without-this", "roblox", {

@@ -6,9 +6,10 @@
 // repository AST guards and the shared iterative lexical alias resolver;
 // enqueues parenthesized types preserved by yuku-parser and union members.
 
+import { isTsParenthesizedType, isTsUnionType, isTsUnknownKeyword } from "@small-rules/oxlint-utilities";
+
 import { createTypeAliasEnvironment, getResolvedTypeMatches } from "$oxc-utilities/anti-slop/type-alias-resolution";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isTsParenthesizedType, isTsUnionType, isTsUnknownKeyword } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

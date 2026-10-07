@@ -1,3 +1,23 @@
+import {
+	IDENTIFIER,
+	isAnyLiteral,
+	isArrayPattern,
+	isCallExpression,
+	isIdentifier,
+	isImportDeclaration,
+	isMemberExpression,
+	isObjectExpression,
+	isProgram,
+	isProperty,
+	isSpreadElement,
+	isVariableDeclaration,
+	isVariableDeclarator,
+	LITERAL,
+	MEMBER_EXPRESSION,
+	TEMPLATE_LITERAL,
+	UNARY_EXPRESSION,
+} from "@small-rules/oxlint-utilities";
+
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -16,10 +36,10 @@ function isModuleScopeConst(variable: ScopeVariable): boolean {
 
 		const declarator = definition.node;
 		/* v8 ignore next -- variable definitions are backed by VariableDeclarator nodes in parser scope data. @preserve */
-		if (declarator.type !== "VariableDeclarator") continue;
+		if (!isVariableDeclarator(declarator)) continue;
 
 		const declaration = declarator.parent;
-		if (declaration.type === "VariableDeclaration" && declaration.kind === "const") return true;
+		if (isVariableDeclaration(declaration) && declaration.kind === "const") return true;
 	}
 
 	return false;
@@ -42,32 +62,32 @@ function resolvesToModuleScopeBinding(sourceCode: SourceCode, identifier: ESTree
 function isConstantMemberExpression(sourceCode: SourceCode, memberExpression: ESTree.MemberExpression): boolean {
 	let current: ESTree.Expression = memberExpression;
 
-	while (current.type === "MemberExpression") {
+	while (isMemberExpression(current)) {
 		if (current.computed) return false;
 		current = stripExpressionWrappers(current.object);
 	}
 
-	return current.type === "Identifier" && resolvesToModuleScopeBinding(sourceCode, current);
+	return isIdentifier(current) && resolvesToModuleScopeBinding(sourceCode, current);
 }
 
 function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
 
 	switch (unwrapped.type) {
-		case "Identifier":
+		case IDENTIFIER:
 			return resolvesToConstantIdentifier(sourceCode, unwrapped);
 
-		case "Literal":
+		case LITERAL:
 			return true;
 
-		case "MemberExpression":
+		case MEMBER_EXPRESSION:
 			return isConstantMemberExpression(sourceCode, unwrapped);
 
-		case "TemplateLiteral":
+		case TEMPLATE_LITERAL:
 			return unwrapped.expressions.length === 0;
 
-		case "UnaryExpression":
-			return unwrapped.operator === "-" && stripExpressionWrappers(unwrapped.argument).type === "Literal";
+		case UNARY_EXPRESSION:
+			return unwrapped.operator === "-" && isAnyLiteral(stripExpressionWrappers(unwrapped.argument));
 
 		default:
 			return false;
@@ -76,7 +96,7 @@ function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expr
 
 function shouldReportActionObject(sourceCode: SourceCode, objectExpression: ESTree.ObjectExpression): boolean {
 	for (const property of objectExpression.properties) {
-		if (property.type !== "Property") return false;
+		if (!isProperty(property)) return false;
 		if (property.kind !== "init" || property.computed) return false;
 		if (!isConstantDispatchValue(sourceCode, property.value)) return false;
 	}
@@ -88,14 +108,14 @@ function getTrackedDispatchVariable(
 	sourceCode: SourceCode,
 	variableDeclarator: ESTree.VariableDeclarator,
 ): ScopeVariable | undefined {
-	if (variableDeclarator.id.type !== "ArrayPattern") return undefined;
-	if (variableDeclarator.init?.type !== "CallExpression") return undefined;
+	if (!isArrayPattern(variableDeclarator.id)) return undefined;
+	if (!isCallExpression(variableDeclarator.init)) return undefined;
 	if (getHookName(variableDeclarator.init) !== "useReducer") return undefined;
 
 	// oxlint-disable-next-line prefer-destructuring -- ugly.
 	const dispatchElement = variableDeclarator.id.elements[1];
 	if (dispatchElement === undefined || dispatchElement === null) return undefined;
-	if (dispatchElement.type !== "Identifier") return undefined;
+	if (!isIdentifier(dispatchElement)) return undefined;
 
 	return getVariableByName(sourceCode.getScope(dispatchElement), dispatchElement.name);
 }
@@ -105,7 +125,7 @@ function getProgram(node: ESTree.Node): ESTree.Program | undefined {
 
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- conflicting lint
 	while (current !== undefined) {
-		if (current.type === "Program") return current;
+		if (isProgram(current)) return current;
 		current = current.parent;
 	}
 
@@ -125,7 +145,7 @@ function getDeclarationInsertionFix(
 
 	let lastImport: ESTree.ImportDeclaration | undefined;
 	for (const statement of body) {
-		if (statement.type === "ImportDeclaration") {
+		if (isImportDeclaration(statement)) {
 			lastImport = statement;
 			continue;
 		}
@@ -150,17 +170,16 @@ const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 
 		return {
 			CallExpression(node): void {
-				if (node.callee.type !== "Identifier") return;
+				if (!isIdentifier(node.callee)) return;
 
 				const dispatchVariable = getVariableByName(sourceCode.getScope(node.callee), node.callee.name);
 				if (dispatchVariable === undefined || !trackedDispatchVariables.has(dispatchVariable)) return;
 
 				const [firstArgument] = node.arguments;
-				if (firstArgument === undefined || firstArgument.type === "SpreadElement") return;
+				if (firstArgument === undefined || isSpreadElement(firstArgument)) return;
 
 				const actionObject = stripExpressionWrappers(firstArgument);
-				if (actionObject.type !== "ObjectExpression") return;
-				if (!shouldReportActionObject(sourceCode, actionObject)) return;
+				if (!isObjectExpression(actionObject) || !shouldReportActionObject(sourceCode, actionObject)) return;
 
 				const program = getProgram(actionObject);
 				/* v8 ignore next -- action objects are visited only after parser parent links are established. @preserve */

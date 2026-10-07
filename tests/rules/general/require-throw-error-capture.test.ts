@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/require-throw-error-capture";
-import { ts } from "$test/rule-testers";
 
 const error = {
 	messageId: "missingCaptureStackTrace" as const,
@@ -22,6 +22,22 @@ describe("require-throw-error-capture", () => {
 				].join("\n"),
 				errors: [{ messageId: "missingCaptureStackTrace" }],
 				documentation: { id: "fail", title: "Missing stack trace capture" },
+			},
+			// Catches two fixes in one block both declaring `const error`, which
+			// no longer compiles. Shrunk from the fixes-settle property.
+			{
+				code: ["const anchor = () => {", "throw new Error();", "throw new Error();", "};"].join("\n"),
+				output: [
+					"const anchor = () => {",
+					"const error = new Error();",
+					"Error.captureStackTrace(error, anchor);",
+					"throw error;",
+					"const error2 = new Error();",
+					"Error.captureStackTrace(error2, anchor);",
+					"throw error2;",
+					"};",
+				].join("\n"),
+				errors: [error, error],
 			},
 			// TypeError subclass
 			{

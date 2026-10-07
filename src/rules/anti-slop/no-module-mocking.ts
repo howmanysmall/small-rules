@@ -4,18 +4,17 @@
 //
 // Modifications: local API and path alias adaptation.
 
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	isAnyLiteral,
 	isBindingIdentifier,
 	isImportDeclaration,
 	isImportSpecifier,
+	isStringLiteral,
 	isSuper,
 	isV8IntrinsicExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -63,11 +62,7 @@ function isModuleMockCall(sourceCode: SourceCode, callee: ESTree.Expression): bo
 	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
 	if (!isTestFrameworkObject(sourceCode, callee.object)) return false;
 	if (callee.computed) {
-		return (
-			isAnyLiteral(callee.property) &&
-			Predicate.isString(callee.property.value) &&
-			MODULE_MOCK_METHODS.has(callee.property.value)
-		);
+		return isStringLiteral(callee.property) && MODULE_MOCK_METHODS.has(callee.property.value);
 	}
 	return isBindingIdentifier(callee.property) && MODULE_MOCK_METHODS.has(callee.property.name);
 }

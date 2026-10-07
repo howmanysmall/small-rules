@@ -150,11 +150,11 @@ catalogs:
     eslint-plugin-unicorn: 77.0.0
     eslint-plugin-unused-imports: 4.4.1
     fallow: 3.31.0
-    oxfmt: 0.71.0
-    oxlint: 1.86.0
-    oxlint-plugin-react-doctor: 0.9.14
+    oxfmt: 0.72.0
+    oxlint: 1.87.0
+    oxlint-plugin-react-doctor: 0.9.16
     oxlint-tsgolint: 7.0.2003
-    react-doctor: 0.9.14
+    react-doctor: 0.9.16
   opencode2:
     "@opencode/plugin": 2.0.22
     "@opencode/schema": 2.0.22
@@ -176,11 +176,14 @@ catalogs:
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     "@std/path": npm:@jsr/std__path@1.1.6
     ansis: 4.4.0
+    boxen: 9.0.0
     consola: 3.4.2
+    fast-string-width: 3.0.2
     fdir: 6.5.0
     jsonc-parser: 3.3.1
     just-diff: 6.0.2
     mutative: 1.3.0
+    pretty-bytes: 7.2.0
     pretty-ms: 9.3.1
     smol-toml: 1.9.0
     tinyexec: 1.3.1

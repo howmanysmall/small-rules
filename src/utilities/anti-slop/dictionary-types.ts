@@ -8,27 +8,17 @@
 // `keyof any` broad-key support; and keeps mapped-key walks iterative/no-cast.
 
 import {
-	continueTypeResolution,
-	createTypeAliasEnvironment,
-	createTypeResolution,
-	getVisibleInterfaceDeclarations,
-	getVisibleTypeAlias,
-	hasVisibleTypeBinding,
-	resolveTypeReference,
-} from "$oxc-utilities/anti-slop/type-alias-resolution";
-import {
 	isAnyLiteral,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isClassExpression,
 	isFunctionExpression,
-	isIdentifierName,
+	isIdentifier,
 	isNewExpression,
 	isObjectExpression,
 	isParenthesizedExpression,
 	isTemplateLiteral,
 	isTsAnyKeyword,
-	isTsAsExpression,
 	isTsIndexSignature,
 	isTsIntersectionType,
 	isTsMappedType,
@@ -41,14 +31,24 @@ import {
 	isTsSatisfiesExpression,
 	isTsStringKeyword,
 	isTsSymbolKeyword,
-	isTsTypeAssertion,
 	isTsTypeLiteral,
 	isTsTypeOperator,
 	isTsTypeReference,
 	isTsUnionType,
 	isTsUnknownKeyword,
+	isTypeAssertionExpression,
 	isUnaryExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import {
+	continueTypeResolution,
+	createTypeAliasEnvironment,
+	createTypeResolution,
+	getVisibleInterfaceDeclarations,
+	getVisibleTypeAlias,
+	hasVisibleTypeBinding,
+	resolveTypeReference,
+} from "$oxc-utilities/anti-slop/type-alias-resolution";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
@@ -81,7 +81,7 @@ export function createTypeEnvironment(
 }
 
 function getTypeReferenceName(type: ESTree.TSTypeReference): string | undefined {
-	return isIdentifierName(type.typeName) ? type.typeName.name : undefined;
+	return isIdentifier(type.typeName) ? type.typeName.name : undefined;
 }
 
 function isBuiltIn(name: string, use: ESTree.TSTypeReference, environment: TypeEnvironment): boolean {
@@ -396,8 +396,7 @@ export function isKnownEvidenceExpression(expression: ESTree.Expression): boolea
 	let current = expression;
 	while (
 		isParenthesizedExpression(current) ||
-		isTsAsExpression(current) ||
-		isTsTypeAssertion(current) ||
+		isTypeAssertionExpression(current) ||
 		isTsNonNullExpression(current) ||
 		isTsSatisfiesExpression(current)
 	) {

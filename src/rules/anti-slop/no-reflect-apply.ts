@@ -4,9 +4,10 @@
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path aliases.
 
+import { isSuper, isV8IntrinsicExpression } from "@small-rules/oxlint-utilities";
+
 import { isGlobalReflectMethodCall } from "$oxc-utilities/anti-slop/reflect-method";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isSuper, isV8IntrinsicExpression } from "$oxc-utilities/oxc-utilities";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 

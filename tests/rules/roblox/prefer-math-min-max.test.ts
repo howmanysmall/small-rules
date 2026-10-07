@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/prefer-math-min-max";
-import { ts } from "$test/rule-testers";
 
 describe("prefer-math-min-max", () => {
 	ts.run("prefer-math-min-max", rule, {

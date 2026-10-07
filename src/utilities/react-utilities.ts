@@ -1,15 +1,15 @@
-import { Predicate } from "effect";
-
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import {
-	getImportedName,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isImportDefaultSpecifier,
 	isImportNamespaceSpecifier,
 	isImportSpecifier,
 	isMemberExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getImportedName } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
 
@@ -126,7 +126,7 @@ export function isReactImportedCall(
 	importedNames: ReadonlySet<string>,
 	reactSources: ReadonlySet<string>,
 ): boolean {
-	if (isIdentifierName(callee)) {
+	if (isIdentifier(callee)) {
 		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
 		if (variable === undefined) return false;
 
@@ -142,7 +142,7 @@ export function isReactImportedCall(
 	}
 
 	if (!isMemberExpression(callee) || callee.computed) return false;
-	if (!isIdentifierName(callee.object) || !isIdentifierName(callee.property)) return false;
+	if (!isIdentifier(callee.object) || !isIdentifier(callee.property)) return false;
 
 	const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
 	return isReactNamespaceImport(variable, reactSources) && importedNames.has(callee.property.name);

@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-loop-iterable-mutation";
-import { js, ts } from "$test/rule-testers";
 
 describe("no-loop-iterable-mutation", () => {
 	js.run("no-loop-iterable-mutation", rule, {

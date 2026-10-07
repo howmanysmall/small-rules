@@ -1,11 +1,10 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	CALL_EXPRESSION,
-	IDENTIFIER,
 	isAssignmentExpression,
-	isBindingIdentifier,
 	isExpressionStatement,
+	isIdentifier,
+	isIdentifierNamed,
 	isLiteral,
 	isMemberExpression,
 	isMethodDefinition,
@@ -14,7 +13,9 @@ import {
 	LITERAL,
 	MEMBER_EXPRESSION,
 	OBJECT_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -90,12 +91,7 @@ function isStaticMemberExpression(node: ESTree.MemberExpression): boolean {
 }
 
 function isConstructor(node: ESTree.ClassElement): node is ESTree.MethodDefinition {
-	return (
-		isMethodDefinition(node) &&
-		node.kind === "constructor" &&
-		isBindingIdentifier(node.key) &&
-		node.key.name === "constructor"
-	);
+	return isMethodDefinition(node) && node.kind === "constructor" && isIdentifierNamed(node.key, "constructor");
 }
 
 function isConstructorLiteralAssignment(statement: ESTree.Statement): statement is ESTree.ExpressionStatement & {
@@ -111,7 +107,7 @@ function isConstructorLiteralAssignment(statement: ESTree.Statement): statement 
 
 	const { property } = left;
 	return (
-		(property.type === IDENTIFIER || isLiteral(property)) &&
+		(isIdentifier(property) || isLiteral(property)) &&
 		isSimpleLiteral(expression.right) &&
 		isStaticMemberExpression(left)
 	);

@@ -1,13 +1,14 @@
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
-	getMemberPropertyName,
 	isCallExpression,
-	isIdentifierName,
+	isIdentifierNamed,
 	isMemberExpression,
 	isNewExpression,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -21,7 +22,7 @@ function isTableCreateBase(sourceCode: SourceCode, expression: ESTree.Expression
 	}
 
 	const target = stripExpressionWrappers(callee.object);
-	if (!isIdentifierName(target) || target.name !== "table") return false;
+	if (!isIdentifierNamed(target, "table")) return false;
 	return !hasShadowedBinding(sourceCode, target, "table");
 }
 
@@ -30,9 +31,7 @@ function isArrayConstructorBase(sourceCode: SourceCode, expression: ESTree.Expre
 	if (!isNewExpression(unwrapped)) return false;
 	if (unwrapped.arguments.length !== 1 && unwrapped.arguments.length !== 2) return false;
 
-	const callee = stripExpressionWrappers(unwrapped.callee);
-	if (!isIdentifierName(callee) || callee.name !== "Array") return false;
-	return !hasShadowedBinding(sourceCode, callee, "Array");
+	return isGlobalArrayConstructor(sourceCode, unwrapped);
 }
 
 const noTableCreateMap = createRule("no-table-create-map", "roblox", {

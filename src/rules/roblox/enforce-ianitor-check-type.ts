@@ -1,8 +1,8 @@
 // oxlint-disable better-max-params/better-max-params -- nobody cares lol
-import { createRule } from "$oxc-utilities/create-rule";
+
 import {
 	isCallExpression,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isObjectExpression,
@@ -34,7 +34,9 @@ import {
 	TS_UNION_TYPE,
 	TS_UNKNOWN_KEYWORD,
 	TS_VOID_KEYWORD,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -72,7 +74,7 @@ type RuleOptions = InferContextFromRule<typeof enforceIanitorCheckType>["options
 
 function isIanitorValidator({ callee }: ESTree.CallExpression): boolean {
 	if (!isMemberExpression(callee)) return false;
-	return isIdentifierName(callee.object) && callee.object.name === "Ianitor";
+	return isIdentifierNamed(callee.object, "Ianitor");
 }
 
 function unwrapReadonlyType(typeNode: ESTree.Node): ESTree.Node {
@@ -99,7 +101,7 @@ function extractIanitorStaticVariable(typeNode: ESTree.Node): string | undefined
 	if (!isTsTypeQuery(first)) return undefined;
 
 	const { exprName } = first;
-	return isIdentifierName(exprName) ? exprName.name : undefined;
+	return isIdentifier(exprName) ? exprName.name : undefined;
 }
 
 function hasIanitorStaticType(typeNode: ESTree.Node): boolean {
@@ -114,7 +116,7 @@ function hasIanitorStaticType(typeNode: ESTree.Node): boolean {
 
 function calculateIanitorComplexity(node: ESTree.CallExpression): number {
 	const { callee } = node;
-	if (!isMemberExpression(callee) || !isIdentifierName(callee.property)) return 0;
+	if (!isMemberExpression(callee) || !isIdentifier(callee.property)) return 0;
 
 	const method = callee.property.name;
 	switch (method) {
@@ -601,7 +603,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 
 				for (const [node, data] of variableDeclaratorsToCheck) {
 					const { id } = node;
-					if (isIdentifierName(id) && ianitorStaticVariables.has(id.name)) continue;
+					if (isIdentifier(id) && ianitorStaticVariables.has(id.name)) continue;
 
 					context.report({
 						data: { score: data.complexity.toFixed(1) },
@@ -655,7 +657,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 
 				hasIanitorReference = true;
 				// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
-				if (isIdentifierName(id) && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
+				if (isIdentifier(id) && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
 
 				const complexity = calculateIanitorComplexity(init);
 				if (complexity < configuration.baseThreshold) return;

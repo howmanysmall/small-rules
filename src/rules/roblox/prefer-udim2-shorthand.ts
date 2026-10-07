@@ -1,4 +1,3 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	BINARY_EXPRESSION,
 	IDENTIFIER,
@@ -8,7 +7,9 @@ import {
 	isSpreadElement,
 	LITERAL,
 	UNARY_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { isNumber } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";

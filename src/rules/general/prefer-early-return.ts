@@ -1,7 +1,7 @@
+import { isBlockStatement, isExpressionStatement, isIfStatement } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isBlockStatement, isExpressionStatement, isIfStatement } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 

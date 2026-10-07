@@ -1,7 +1,8 @@
 import { describe } from "vitest";
+import { createRuleTester } from "@small-rules/rule-harness";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/prefer-module-scope-constants";
-import { createRuleTester, js } from "$test/rule-testers";
 
 const script = createRuleTester({ language: "js", sourceType: "script" });
 

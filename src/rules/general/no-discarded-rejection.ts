@@ -1,16 +1,18 @@
-import { isNativePromiseExpression } from "$oxc-utilities/api-provenance";
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBlockStatement,
 	isCallbackFunction,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
 	isNumericLiteral,
 	isReturnStatement,
+	isSpreadElement,
 	isUnaryExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isNativePromiseExpression } from "$oxc-utilities/api-provenance";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -32,7 +34,7 @@ function isUndefinedExpression(sourceCode: SourceCode, expression: ESTree.Expres
 }
 
 function isDiscardingHandler(sourceCode: SourceCode, handler: ESTree.Expression): boolean {
-	if (!isCallbackFunction(handler) || handler.params.some((parameter) => !isIdentifierName(parameter))) return false;
+	if (!isCallbackFunction(handler) || handler.params.some((parameter) => !isIdentifier(parameter))) return false;
 
 	const { body } = handler;
 	/* v8 ignore next -- callback expressions always have a body. @preserve */
@@ -59,11 +61,7 @@ const noDiscardedRejection = createRule("no-discarded-rejection", "general", {
 				}
 				if (!isNativePromiseExpression(sourceCode, callee.object)) return;
 				const [handler] = node.arguments;
-				if (
-					handler === undefined ||
-					handler.type === "SpreadElement" ||
-					!isDiscardingHandler(sourceCode, handler)
-				) {
+				if (handler === undefined || isSpreadElement(handler) || !isDiscardingHandler(sourceCode, handler)) {
 					return;
 				}
 				context.report({ messageId: "noDiscardedRejection", node: handler });

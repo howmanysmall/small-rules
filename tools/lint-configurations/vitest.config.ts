@@ -1,12 +1,5 @@
-import { sharedConfiguration } from "@small-rules/vite-configuration";
-import { mergeConfig } from "vitest/config";
+import { createPackageConfiguration } from "@small-rules/vite-configuration";
 
-const configuration = mergeConfig(sharedConfiguration, {
-	test: {
-		name: "lint-configurations",
-		include: ["src/**/*.test.ts"],
-		testTimeout: 5_000,
-	},
-});
+const configuration = createPackageConfiguration("lint-configurations");
 
 export default configuration;

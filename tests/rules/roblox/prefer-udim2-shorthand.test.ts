@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/prefer-udim2-shorthand";
-import { js } from "$test/rule-testers";
 
 describe("prefer-udim2-shorthand", () => {
 	js.run("prefer-udim2-shorthand", rule, {

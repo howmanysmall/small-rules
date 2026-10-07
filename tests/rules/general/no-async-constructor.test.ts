@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/no-async-constructor";
-import { tsx } from "$test/rule-testers";
 
 describe("no-async-constructor", () => {
 	tsx.run("no-async-constructor", rule, {

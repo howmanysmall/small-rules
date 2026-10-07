@@ -1,23 +1,27 @@
 import nodePath from "node:path";
-import { Predicate } from "effect";
-import { parse } from "yuku-parser";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
+	BREAK_STATEMENT,
+	CONTINUE_STATEMENT,
+	isAnyLiteral,
 	isBindingIdentifier,
 	isExpressionStatement,
+	isNode,
 	isReturnStatement,
 	isSequenceExpression,
 	isThrowStatement,
 	isUnaryExpression,
-	LITERAL,
-} from "$oxc-utilities/oxc-utilities";
+	LABELED_STATEMENT,
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+import { parse } from "yuku-parser";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { hasCodeLines } from "$oxc-utilities/recognizers/code-recognizer";
 import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript-footprint";
 
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-const EXCLUDED_STATEMENTS = new Set(["BreakStatement", "ContinueStatement", "LabeledStatement"]);
+const EXCLUDED_STATEMENTS = new Set([BREAK_STATEMENT, CONTINUE_STATEMENT, LABELED_STATEMENT]);
 type ParseLanguage = "js" | "jsx" | "tsx";
 const LANG_BY_EXTENSION = new Map<string, ParseLanguage>([
 	[".jsx", "jsx"],
@@ -120,13 +124,11 @@ function isUnaryPlusMinus(expression: ESTree.Expression): boolean {
 }
 
 function isExcludedLiteral(expression: ESTree.Node): boolean {
-	return (
-		expression.type === LITERAL && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value))
-	);
+	return isAnyLiteral(expression) && (Predicate.isString(expression.value) || Predicate.isNumber(expression.value));
 }
 
 function isParsedStatement(value: unknown): value is ESTree.Statement {
-	return Predicate.isObject(value) && Predicate.isString(value.type);
+	return isNode(value);
 }
 
 function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.Statement> {

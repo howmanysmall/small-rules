@@ -7,18 +7,19 @@
 // only unwraps unshadowed built-in Promise and PromiseLike references.
 
 import {
-	createTypeAliasEnvironment,
-	getResolvedTypeMatches,
-	hasVisibleTypeBinding,
-} from "$oxc-utilities/anti-slop/type-alias-resolution";
-import { createRule } from "$oxc-utilities/create-rule";
-import {
 	isBindingIdentifier,
 	isTsParenthesizedType,
 	isTsTypeReference,
 	isTsUnionType,
 	isTsUnknownKeyword,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import {
+	createTypeAliasEnvironment,
+	getResolvedTypeMatches,
+	hasVisibleTypeBinding,
+} from "$oxc-utilities/anti-slop/type-alias-resolution";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

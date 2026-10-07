@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
+import { traverseAst } from "@small-rules/rule-harness/ast";
+import { parseCase } from "@small-rules/rule-harness/parse";
 
 import {
+	getTypeAnnotationFromBinding,
 	isAccessorProperty,
 	isClassDeclaration,
 	isClassExpression,
+	isConstAssertion,
 	isFunctionLike,
 	isNode,
 	isStaticBlock,
+	isTsAsExpression,
 	isTsDeclareFunction,
 	isTsEmptyBodyFunctionExpression,
 	isTsGlobalDeclaration,
@@ -15,13 +20,12 @@ import {
 	isTsModuleDeclaration,
 	isTsTypeAssertion,
 	isTsTypeParameter,
-} from "$oxc-utilities/oxc-utilities";
-import { traverseAst } from "$test/rule-harness/ast";
-import { parseCase } from "$test/rule-harness/parse";
+	isUnbracedControlBody,
+	isVariableDeclarator,
+} from ".";
 
+import type { HarnessNode, HarnessSourceCode } from "@small-rules/rule-harness/types";
 import type { ESTree } from "oxlint-plugin-utilities";
-
-import type { HarnessNode, HarnessSourceCode } from "$test/rule-harness/types";
 
 type NodeGuard = (node: ESTree.Node) => boolean;
 
@@ -228,5 +232,42 @@ describe("isTsTypeAssertion", () => {
 		const node = { type: "TSAsExpression" } as ESTree.Node;
 
 		expect(isTsTypeAssertion(node)).toBe(false);
+	});
+});
+
+describe("getTypeAnnotationFromBinding", () => {
+	it("returns the annotation of an annotated binding and nothing for a bare one", () => {
+		expect.assertions(1);
+
+		const source = parseCode('const annotated: string = "";\nconst bare = 1;');
+		const declarators = findNodes(source, "VariableDeclarator").filter(isVariableDeclarator);
+
+		expect(declarators.map(({ id }) => getTypeAnnotationFromBinding(id)?.type)).toStrictEqual([
+			"TSTypeAnnotation",
+			undefined,
+		]);
+	});
+});
+
+describe("isUnbracedControlBody", () => {
+	it("is true only for a statement that is itself a control-flow body", () => {
+		expect.assertions(2);
+
+		const source = parseCode("if (ready) run();\nif (ready) { stop(); }");
+		const statements = findNodes(source, "ExpressionStatement");
+
+		expect(statements.map(isUnbracedControlBody)).toStrictEqual([true, false]);
+		expect(isUnbracedControlBody(findNode(source, "Program"))).toBe(false);
+	});
+});
+
+describe("isConstAssertion", () => {
+	it("is true only for an `as const` assertion", () => {
+		expect.assertions(1);
+
+		const source = parseCode("value as const;\nvalue as string;\nvalue as Values.Const;\nvalue as Constant;");
+		const assertions = findNodes(source, "TSAsExpression").filter(isTsAsExpression);
+
+		expect(assertions.map(isConstAssertion)).toStrictEqual([true, false, false, false]);
 	});
 });

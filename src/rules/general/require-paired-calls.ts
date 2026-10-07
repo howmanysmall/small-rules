@@ -1,10 +1,6 @@
 // oxlint-disable react-doctor/js-set-map-lookups -- out of my control.
 
 import { isBoolean, isReadonlyArrayOfStrings, isString, isUndefined } from "@small-rules/arktype-utilities";
-import { type } from "arktype";
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	BLOCK_STATEMENT,
 	CATCH_CLAUSE,
@@ -14,7 +10,7 @@ import {
 	isCallExpression,
 	isContinueStatement,
 	isForOfStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIfStatement,
 	isLabeledStatement,
 	isLoopNode,
@@ -24,13 +20,16 @@ import {
 	isSwitchStatement,
 	isTryStatement,
 	isYieldExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { type } from "arktype";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
+import type { LoopNode } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
-
-import type { LoopNode } from "$oxc-utilities/oxc-utilities";
 
 const NOT_ALL = "not all execution paths";
 const CLOSER = "closer" as const;
@@ -100,11 +99,11 @@ function getBranchesWithOpener(
 }
 
 function getCallName({ callee }: ESTree.CallExpression): string | undefined {
-	if (isIdentifierName(callee)) return callee.name;
+	if (isIdentifier(callee)) return callee.name;
 
 	if (isMemberExpression(callee)) {
-		const object = isIdentifierName(callee.object) ? callee.object.name : undefined;
-		const property = isIdentifierName(callee.property) ? callee.property.name : undefined;
+		const object = isIdentifier(callee.object) ? callee.object.name : undefined;
+		const property = isIdentifier(callee.property) ? callee.property.name : undefined;
 		if (object !== undefined && property !== undefined) return `${object}.${property}`;
 	}
 
@@ -148,7 +147,7 @@ function formatOpenerList(openers: ReadonlyArray<string>): string {
 
 function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node): ESTree.Statement | undefined {
 	/* v8 ignore next -- @preserve ESTree break/continue labels are parser-produced identifiers. */
-	if (!isIdentifierName(label)) return undefined;
+	if (!isIdentifier(label)) return undefined;
 	let current: ESTree.Node | undefined = startingNode;
 
 	while (current) {

@@ -111,9 +111,13 @@ export const DEFAULT_IGNORE = ["i18n", "l10n"];
 
 export const WORD_SPLIT_PATTERN = /(?=[A-Z])|(?<=[_.-])/u;
 
+// Also covers `arguments`, `await`, and `eval`: strict module code cannot
+// declare them, even where they are not keywords.
 export const TYPESCRIPT_RESERVED_WORDS = new Set([
 	"any",
+	"arguments",
 	"as",
+	"await",
 	"boolean",
 	"break",
 	"case",
@@ -129,6 +133,7 @@ export const TYPESCRIPT_RESERVED_WORDS = new Set([
 	"do",
 	"else",
 	"enum",
+	"eval",
 	"export",
 	"extends",
 	"false",

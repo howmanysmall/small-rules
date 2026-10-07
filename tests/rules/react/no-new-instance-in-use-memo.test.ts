@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/no-new-instance-in-use-memo";
-import { ts } from "$test/rule-testers";
 
 describe("no-new-instance-in-use-memo", () => {
 	ts.run("no-new-instance-in-use-memo", rule, {

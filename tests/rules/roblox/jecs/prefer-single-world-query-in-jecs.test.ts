@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/roblox/jecs/prefer-single-world-query-in-jecs";
-import { ts } from "$test/rule-testers";
 
 describe("prefer-single-world-query-in-jecs", () => {
 	ts.run("prefer-single-world-query-in-jecs", rule, {
@@ -42,6 +42,23 @@ const componentD = world.get(entity, ComponentD);
 const [componentA, componentB, componentC, componentD] = world.get(entity, ComponentA, ComponentB, ComponentC, ComponentD);
 `,
 				errors: [{ messageId: "preferSingleGet" }],
+			},
+			// Catches merging past the four components Jecs get accepts, which
+			// leaves the fifth variable undefined.
+			{
+				code: `
+const componentA = world.get(entity, ComponentA);
+const componentB = world.get(entity, ComponentB);
+const componentC = world.get(entity, ComponentC);
+const componentD = world.get(entity, ComponentD);
+const componentE = world.get(entity, ComponentE);
+const componentF = world.get(entity, ComponentF);
+`,
+				output: `
+const [componentA, componentB, componentC, componentD] = world.get(entity, ComponentA, ComponentB, ComponentC, ComponentD);
+const [componentE, componentF] = world.get(entity, ComponentE, ComponentF);
+`,
+				errors: [{ messageId: "preferSingleGet" }, { messageId: "preferSingleGet" }],
 			},
 			// Method call on world object
 			{

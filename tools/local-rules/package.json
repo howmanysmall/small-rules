@@ -1,0 +1,30 @@
+{
+	"name": "@small-rules/local-rules",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Local Oxlint rules.",
+	"license": "UNLICENSED",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"test:agent": "nr test --reporter agent",
+		"type-check": "tsgo --build"
+	},
+	"dependencies": {
+		"@small-rules/oxlint-utilities": "workspace:*",
+		"effect": "catalog:runtime",
+		"oxlint-plugin-utilities": "catalog:runtime",
+		"yuku-ast": "catalog:tooling",
+		"yuku-parser": "catalog:runtime"
+	},
+	"devDependencies": {
+		"@small-rules/rule-harness": "workspace:*",
+		"@small-rules/vite-configuration": "workspace:*",
+		"@types/node": "catalog:types",
+		"vitest": "catalog:test"
+	}
+}

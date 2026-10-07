@@ -1,16 +1,17 @@
-import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	isBlockStatement,
 	isCallExpression,
 	isExpressionStatement,
-	isIdentifierName,
+	isIdentifier,
 	isIdentifierNamed,
 	isIfStatement,
 	isLiteral,
 	isMemberExpression,
 	isSpreadElement,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+
+import { isJecsWorldExpression } from "$oxc-utilities/api-provenance";
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -36,7 +37,7 @@ function doExpressionsMatch(sourceCode: SourceCode, left: ESTree.Expression, rig
 }
 
 function isStableExpression(expression: ESTree.Expression): boolean {
-	return isIdentifierName(expression) || isLiteral(expression);
+	return isIdentifier(expression) || isLiteral(expression);
 }
 
 interface RemovalGuard {

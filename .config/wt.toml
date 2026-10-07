@@ -60,16 +60,20 @@
 #
 # Aliases defined here are shared with teammates. For personal aliases, use the user config (https://worktrunk.dev/config/#user-aliases) `[aliases]` section instead.
 
+# Copy first: `.envrc` and `mise.local.toml` are gitignored, so they only
+# exist in a new worktree once this step has run.
 [[pre-start]]
-mise = "mise trust"
+copy = "wt step copy-ignored"
+
+[[pre-start]]
+mise = "mise trust --all --quiet"
 
 [[pre-start]]
 mise-install = "mise install"
 
 [[pre-start]]
 deps = "mise exec -- nci"
-allow = "mise exec -- direnv allow"
-copy = "wt step copy-ignored"
+allow = "[ ! -f .envrc ] || mise exec -- direnv allow"
 
 [step.copy-ignored]
 exclude = ["node_modules/", ".cache/", "coverage/", "dist/"]

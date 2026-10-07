@@ -1,35 +1,39 @@
-import { Predicate } from "effect";
-
-import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
-import { createRule } from "$oxc-utilities/create-rule";
-import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import {
-	getMemberPropertyName,
+	isAnyFunction,
 	isArrayExpression,
-	isArrowFunctionExpression,
+	isArrayPattern,
 	isAssignmentPattern,
 	isCallExpression,
 	isClass,
 	isExpressionStatement,
-	isFunctionDeclaration,
+	isIdentifier,
+	isIdentifierNamed,
 	isLiteral,
 	isMemberExpression,
 	isNewExpression,
 	isObjectExpression,
+	isObjectPattern,
 	isPropertyDefinition,
+	isSpreadElement,
 	isTemplateLiteral,
 	isTsAsExpression,
 	isTsTypeAssertion,
+	isTsTypeReference,
 	isUnaryExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
-	stripExpressionWrappers,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
 
+import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
+import { createRule } from "$oxc-utilities/create-rule";
+import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
+
+import type { BindingName, FixReturn } from "@small-rules/oxlint-utilities";
 import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-import type { BindingName } from "$oxc-types/missing-types";
-import type { FixReturn } from "$oxc-utilities/oxc-utilities";
 import type { Environment } from "$oxc-utilities/react-utilities";
 
 interface NoArrayConstructorElementsOptions {
@@ -71,24 +75,12 @@ interface NoArrayConstructorElementsContext {
 }
 
 const DEFAULT_OPTIONS: Required<NoArrayConstructorElementsOptions> = {
-	environment: "roblox-ts",
+	environment: ROBLOX_TS,
 	requireExplicitGenericOnNewArray: true,
 };
 
-function isIdentifier(
-	node: BindingName | ESTree.Expression | ESTree.TSTypeName,
-): node is ESTree.BindingIdentifier | ESTree.IdentifierReference {
-	return node.type === "Identifier";
-}
-
-function isGlobalArrayConstructor(sourceCode: SourceCode, node: ESTree.NewExpression): boolean {
-	const callee = stripExpressionWrappers(node.callee);
-	if (!isIdentifier(callee) || callee.name !== "Array") return false;
-	return !hasShadowedBinding(sourceCode, callee, "Array");
-}
-
 function extractElementTypeFromArrayAnnotation(typeNode: ESTree.TSType, sourceCode: SourceCode): string | undefined {
-	if (typeNode.type !== "TSTypeReference") return undefined;
+	if (!isTsTypeReference(typeNode)) return undefined;
 	if (!isIdentifier(typeNode.typeName)) return undefined;
 	if (typeNode.typeName.name !== "Array" && typeNode.typeName.name !== "ReadonlyArray") return undefined;
 	if (typeNode.typeArguments?.params.length !== 1) return undefined;
@@ -107,9 +99,9 @@ function hasArrayAnnotationInAssignmentPatternText(assignmentText: string): bool
 function getBindingTypeAnnotation(bindingName: BindingName): ESTree.TSTypeAnnotation | undefined {
 	if (isIdentifier(bindingName)) return bindingName.typeAnnotation ?? undefined;
 	/* v8 ignore next -- @preserve parser currently exposes contextual annotations on identifiers and object patterns here. */
-	if (bindingName.type === "ArrayPattern") return bindingName.typeAnnotation ?? undefined;
+	if (isArrayPattern(bindingName)) return bindingName.typeAnnotation ?? undefined;
 	/* v8 ignore next -- @preserve parser currently exposes contextual annotations on identifiers and object patterns here. */
-	if (bindingName.type === "ObjectPattern") return bindingName.typeAnnotation ?? undefined;
+	if (isObjectPattern(bindingName)) return bindingName.typeAnnotation ?? undefined;
 	/* v8 ignore next -- @preserve callers pass parser binding nodes that can carry contextual annotations. */
 	return undefined;
 }
@@ -150,7 +142,7 @@ function hasContextualArrayAnnotation(node: ESTree.NewExpression, sourceCode: So
 function isReadonlyArrayAnnotation(typeAnnotation: ESTree.TSTypeAnnotation | undefined): boolean {
 	if (typeAnnotation === undefined) return false;
 	const { typeAnnotation: annotationType } = typeAnnotation;
-	if (annotationType.type !== "TSTypeReference" || !isIdentifier(annotationType.typeName)) return false;
+	if (!isTsTypeReference(annotationType) || !isIdentifier(annotationType.typeName)) return false;
 	return annotationType.typeName.name === "ReadonlyArray";
 }
 
@@ -161,8 +153,7 @@ function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolea
 	if (
 		isArrayExpression(unwrapped) ||
 		isObjectExpression(unwrapped) ||
-		isArrowFunctionExpression(unwrapped) ||
-		isFunctionDeclaration(unwrapped) ||
+		isAnyFunction(unwrapped) ||
 		isClass(unwrapped)
 	) {
 		return true;
@@ -184,7 +175,7 @@ function getPushCallForIdentifier(
 	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped) || unwrapped.optional) return undefined;
 	if (!isMemberExpression(unwrapped.callee) || unwrapped.callee.optional) return undefined;
-	if (!isIdentifier(unwrapped.callee.object) || unwrapped.callee.object.name !== identifierName) {
+	if (!isIdentifierNamed(unwrapped.callee.object, identifierName)) {
 		return undefined;
 	}
 
@@ -210,7 +201,7 @@ function buildArrayLiteralFromArguments(argumentsList: ReadonlyArray<ESTree.Argu
 	let size = 0;
 
 	for (const argument of argumentsList) {
-		if (argument.type === "SpreadElement") {
+		if (isSpreadElement(argument)) {
 			parts[size++] = `...${sourceCode.getText(argument.argument)}`;
 			continue;
 		}
@@ -301,15 +292,15 @@ function reportMultiArgumentArrayConstructor(
 	/* v8 ignore next -- @preserve caller routes here only when arguments.length > 1. */
 	if (firstArgument === undefined) return;
 	if (
-		firstArgument.type !== "SpreadElement" &&
-		options.environment === "roblox-ts" &&
+		!isSpreadElement(firstArgument) &&
+		options.environment === ROBLOX_TS &&
 		!isDefinitelyNonNumericExpression(firstArgument)
 	) {
 		return;
 	}
 
 	const literalText = buildArrayLiteralFromArguments(node.arguments, context.sourceCode);
-	const hasSpread = node.arguments.some((argument) => argument.type === "SpreadElement");
+	const hasSpread = node.arguments.some(isSpreadElement);
 
 	if (!hasSpread) {
 		context.report({
@@ -346,7 +337,7 @@ function reportSingleArgumentArrayConstructor(
 	/* v8 ignore next -- @preserve caller routes here only when arguments.length === 1. */
 	if (firstArgument === undefined) return;
 
-	if (firstArgument.type === "SpreadElement") {
+	if (isSpreadElement(firstArgument)) {
 		reportSpreadArrayConstructor(context, node, sourceCode.getText(firstArgument.argument));
 		return;
 	}
@@ -391,7 +382,7 @@ function reportLengthArrayConstructor(
 	options: Required<NoArrayConstructorElementsOptions>,
 	lengthExpressionText: string,
 ): void {
-	if (options.environment === "roblox-ts") return;
+	if (options.environment === ROBLOX_TS) return;
 
 	context.report({
 		messageId: "avoidLengthConstructorInStandard",
@@ -477,7 +468,7 @@ function appendPushArguments(
 ): boolean {
 	let hasUnsafeArgument = false;
 	for (const argument of pushCall.arguments) {
-		if (argument.type === "SpreadElement") {
+		if (isSpreadElement(argument)) {
 			hasUnsafeArgument = true;
 			argumentParts.push(`...${sourceCode.getText(argument.argument)}`);
 			continue;
@@ -581,10 +572,10 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 				additionalProperties: false,
 				properties: {
 					environment: {
-						default: "roblox-ts",
+						default: ROBLOX_TS,
 						description:
 							"Array constructor environment mode: 'roblox-ts' allows new Array(length); 'standard' reports it.",
-						enum: ["roblox-ts", "standard"],
+						enum: [ROBLOX_TS, STANDARD],
 						type: "string",
 					},
 					requireExplicitGenericOnNewArray: {

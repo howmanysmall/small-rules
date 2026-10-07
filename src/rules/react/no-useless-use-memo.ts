@@ -1,10 +1,11 @@
+import { isBlockStatement, isReturnStatement } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isBlockStatement, isReturnStatement, isUseMemoCall } from "$oxc-utilities/oxc-utilities";
+import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
 import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
-import { getEnvironment, getReactSources } from "$oxc-utilities/react-utilities";
+import { ENVIRONMENT_SCHEMA, getEnvironment, getReactSources } from "$oxc-utilities/react-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
 	isStaticArrayExpression,
@@ -159,12 +160,7 @@ const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 						enum: [DependencyMode.EmptyOrOmitted, DependencyMode.Aggressive, DependencyMode.NonUpdating],
 						type: "string",
 					},
-					environment: {
-						default: "roblox-ts",
-						description: "The React environment: 'roblox-ts' uses @rbxts/react, 'standard' uses react.",
-						enum: ["roblox-ts", "standard"],
-						type: "string",
-					},
+					environment: ENVIRONMENT_SCHEMA,
 					staticGlobalFactories: {
 						default: DEFAULT_STATIC_GLOBAL_FACTORIES,
 						description: "Global constructors and factories whose calls are treated as static values.",

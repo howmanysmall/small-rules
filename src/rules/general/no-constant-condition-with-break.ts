@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARRAY_EXPRESSION,
 	ARROW_FUNCTION_EXPRESSION,
@@ -18,7 +15,6 @@ import {
 	FOR_OF_STATEMENT,
 	FOR_STATEMENT,
 	FUNCTION_EXPRESSION,
-	getMemberPropertyName,
 	IDENTIFIER,
 	IF_STATEMENT,
 	isAnyFunction,
@@ -42,7 +38,6 @@ import {
 	OBJECT_EXPRESSION,
 	RETURN_STATEMENT,
 	SEQUENCE_EXPRESSION,
-	stripExpressionWrappers,
 	SWITCH_STATEMENT,
 	TAGGED_TEMPLATE_EXPRESSION,
 	TEMPLATE_LITERAL,
@@ -53,13 +48,16 @@ import {
 	WHILE_STATEMENT,
 	WITH_STATEMENT,
 	YIELD_EXPRESSION,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
+import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
+import type { LoopNode } from "@small-rules/oxlint-utilities";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { JsonValue } from "type-fest";
-
-import type { LoopNode } from "$oxc-utilities/oxc-utilities";
 
 interface NoConstantConditionWithBreakOptions {
 	readonly loopExitCalls?: ReadonlyArray<string>;

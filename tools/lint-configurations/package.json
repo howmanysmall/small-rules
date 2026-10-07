@@ -21,6 +21,7 @@
 		"oxlint-plugin-react-doctor": "catalog:lint"
 	},
 	"devDependencies": {
+		"@small-rules/local-rules": "workspace:*",
 		"@small-rules/vite-configuration": "workspace:*",
 		"@types/node": "catalog:types",
 		"@typescript/native-preview": "catalog:tooling",

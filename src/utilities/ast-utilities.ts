@@ -4,7 +4,7 @@ import {
 	isNode,
 	isObjectExpression,
 	isTsSatisfiesExpression,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
 
 import type { ESTree, Scope, SourceCode, Variable } from "oxlint-plugin-utilities";
 

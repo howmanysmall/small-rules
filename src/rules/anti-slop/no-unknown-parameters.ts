@@ -7,13 +7,14 @@
 // assertion predicate return type is allowed. Union and parenthesized unknown
 // detection is provided by the shared function-parameters helper.
 
+import { isBindingIdentifier, isTsTypeAnnotation, isTsTypePredicate } from "@small-rules/oxlint-utilities";
+
 import {
 	containsUnknownType,
 	getFunctionParameterBindingName,
 	getFunctionParameterTypeAnnotation,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isBindingIdentifier, isTsTypeAnnotation, isTsTypePredicate } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

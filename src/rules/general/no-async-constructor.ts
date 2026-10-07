@@ -1,5 +1,22 @@
+import {
+	isAssignmentExpression,
+	isAwaitExpression,
+	isBlockStatement,
+	isCallbackFunction,
+	isCallExpression,
+	isClassBody,
+	isExpressionStatement,
+	isFunctionExpression,
+	isIdentifier,
+	isMemberExpression,
+	isMethodDefinition,
+	isParenthesizedExpression,
+	isThisExpression,
+	isVariableDeclarator,
+} from "@small-rules/oxlint-utilities";
+
 import { createRule } from "$oxc-utilities/create-rule";
-import { isCallbackFunction, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -23,8 +40,8 @@ function getAsyncMethodNames(classBody: ESTree.ClassBody): ReadonlySet<string> {
 	const asyncMethods = new Set<string>();
 
 	for (const element of classBody.body) {
-		if (element.type !== "MethodDefinition" || element.kind !== "method" || !element.value.async) continue;
-		if (element.key.type !== "Identifier") continue;
+		if (!isMethodDefinition(element) || element.kind !== "method" || !element.value.async) continue;
+		if (!isIdentifier(element.key)) continue;
 		asyncMethods.add(element.key.name);
 	}
 
@@ -32,7 +49,7 @@ function getAsyncMethodNames(classBody: ESTree.ClassBody): ReadonlySet<string> {
 }
 
 function isPromiseChainCall(node: ESTree.CallExpression): boolean {
-	if (node.callee.type !== "MemberExpression" || node.callee.property.type !== "Identifier") return false;
+	if (!isMemberExpression(node.callee) || !isIdentifier(node.callee.property)) return false;
 	return PROMISE_CHAIN_METHODS.has(node.callee.property.name);
 }
 
@@ -45,11 +62,7 @@ function getThisAsyncMethodName(
 	{ callee }: ESTree.CallExpression,
 	asyncMethods: ReadonlySet<string>,
 ): string | undefined {
-	if (
-		callee.type !== "MemberExpression" ||
-		callee.object.type !== "ThisExpression" ||
-		callee.property.type !== "Identifier"
-	) {
+	if (!isMemberExpression(callee) || !isThisExpression(callee.object) || !isIdentifier(callee.property)) {
 		return undefined;
 	}
 	return asyncMethods.has(callee.property.name) ? callee.property.name : undefined;
@@ -57,26 +70,26 @@ function getThisAsyncMethodName(
 
 function isAssignedToThisProperty(node: ESTree.Node): boolean {
 	const { parent } = node;
-	if (parent?.type !== "AssignmentExpression" || parent.right !== node) return false;
-	return parent.left.type === "MemberExpression" && parent.left.object.type === "ThisExpression";
+	if (!isAssignmentExpression(parent) || parent.right !== node) return false;
+	return isMemberExpression(parent.left) && isThisExpression(parent.left.object);
 }
 
 function getLocalVariableAssignment(node: ESTree.Node): string | undefined {
 	const { parent } = node;
-	if (parent?.type !== "VariableDeclarator" || parent.init !== node) return undefined;
-	return parent.id.type === "Identifier" ? parent.id.name : undefined;
+	if (!isVariableDeclarator(parent) || parent.init !== node) return undefined;
+	return isIdentifier(parent.id) ? parent.id.name : undefined;
 }
 
 function isNonIifeFunction(node: ESTree.Node): boolean {
 	if (!isCallbackFunction(node)) return false;
 	if (
-		node.parent.type === "ParenthesizedExpression" &&
-		node.parent.parent.type === "CallExpression" &&
+		isParenthesizedExpression(node.parent) &&
+		isCallExpression(node.parent.parent) &&
 		node.parent.parent.callee === node.parent
 	) {
 		return false;
 	}
-	return node.parent.type !== "CallExpression" || node.parent.callee !== node;
+	return !isCallExpression(node.parent) || node.parent.callee !== node;
 }
 
 function isInsideSkippedFunction(node: ESTree.Node, constructorBody: ESTree.BlockStatement): boolean {
@@ -100,7 +113,7 @@ function getAsyncMethodViolation(
 	const methodName = getThisAsyncMethodName(node, asyncMethods);
 	if (methodName === undefined || isAssignedToThisProperty(node)) return undefined;
 
-	if (node.parent.type === "ExpressionStatement") {
+	if (isExpressionStatement(node.parent)) {
 		return {
 			data: { methodName },
 			messageId: "unhandledAsyncCall",
@@ -128,12 +141,12 @@ function findConstructorViolations(
 	function handleChild(child: ESTree.Node): void {
 		if (child !== constructorBody && isInsideSkippedFunction(child, constructorBody)) return;
 
-		if (child.type === "AwaitExpression") {
+		if (isAwaitExpression(child)) {
 			violations[size++] = { messageId: "awaitInConstructor", node: child };
 			return;
 		}
 
-		if (child.type !== "CallExpression") return;
+		if (!isCallExpression(child)) return;
 
 		if (isPromiseChainCall(child)) violations[size++] = { messageId: "promiseChainInConstructor", node: child };
 		if (isAsyncIife(child)) violations[size++] = { messageId: "asyncIifeInConstructor", node: child };
@@ -160,9 +173,9 @@ const noAsyncConstructor = createRule("no-async-constructor", "general", {
 			"MethodDefinition[kind='constructor']"(node: ESTree.MethodDefinition): void {
 				/* v8 ignore next -- parser-produced constructor methods are function expressions with block bodies inside class bodies. @preserve */
 				if (
-					node.value.type !== "FunctionExpression" ||
-					node.value.body?.type !== "BlockStatement" ||
-					node.parent.type !== "ClassBody"
+					!isFunctionExpression(node.value) ||
+					!isBlockStatement(node.value.body) ||
+					!isClassBody(node.parent)
 				) {
 					return;
 				}

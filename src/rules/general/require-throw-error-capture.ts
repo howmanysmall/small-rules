@@ -1,6 +1,3 @@
-import { Predicate } from "effect";
-
-import { createRule } from "$oxc-utilities/create-rule";
 import {
 	ARROW_FUNCTION_EXPRESSION,
 	FUNCTION_DECLARATION,
@@ -8,14 +5,17 @@ import {
 	isBlockStatement,
 	isCatchClause,
 	isClassBody,
-	isIdentifierName,
+	isIdentifier,
 	isImportDeclaration,
 	isMethodDefinitionRaw,
 	isNewExpression,
 	isPrivateIdentifier,
 	isPropertyDefinitionRaw,
 	isVariableDeclarator,
-} from "$oxc-utilities/oxc-utilities";
+} from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
+
+import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -57,11 +57,11 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 }
 
 function getAssignedName({ parent }: ESTree.Node): string | undefined {
-	if (isVariableDeclarator(parent) && isIdentifierName(parent.id)) return parent.id.name;
+	if (isVariableDeclarator(parent) && isIdentifier(parent.id)) return parent.id.name;
 	if (isPropertyDefinitionRaw(parent) || isMethodDefinitionRaw(parent)) {
 		if (isPrivateIdentifier(parent.key)) return `#${parent.key.name}`;
 		/* v8 ignore next -- @preserve class and object member keys are identifiers after private keys are handled. */
-		if (isIdentifierName(parent.key)) return parent.key.name;
+		if (isIdentifier(parent.key)) return parent.key.name;
 	}
 
 	return undefined;
@@ -95,15 +95,20 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 	return false;
 }
 
-function getUniqueVariableName(sourceCode: SourceCode, node: ESTree.Node, base: string): string {
-	const scope = sourceCode.getScope(node);
-	const names = new Set(scope.variables.map((variable) => variable.name));
+function getUniqueVariableName(
+	scope: Scope,
+	node: ESTree.Node,
+	base: string,
+	reservedNames: ReadonlySet<string>,
+): string {
+	const names = new Set(reservedNames);
+	for (const variable of scope.variables) names.add(variable.name);
 
 	// Catch clause parameters may not appear in scope.variables, so walk
 	// ancestors
 	let current: ESTree.Node | null = node.parent;
 	while (current !== null) {
-		if (isCatchClause(current) && isIdentifierName(current.param)) names.add(current.param.name);
+		if (isCatchClause(current) && isIdentifier(current.param)) names.add(current.param.name);
 		current = current.parent;
 	}
 
@@ -199,6 +204,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const allowList = context.options[0]?.allow ?? [];
+		const namesReservedByFixes = new WeakMap<Scope, Set<string>>();
 
 		// oxlint-disable typescript/no-unnecessary-condition -- so dumb
 		/* v8 ignore next -- @preserve the rule harness and Oxlint provide a physical filename for rule execution. */
@@ -211,7 +217,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				if (!isNewExpression(argument)) return;
 
 				const { callee } = argument;
-				if (!isIdentifierName(callee) || !callee.name.endsWith("Error")) return;
+				if (!isIdentifier(callee) || !callee.name.endsWith("Error")) return;
 
 				if (isAllowedError(sourceCode, physicalFilename, callee, allowList)) return;
 
@@ -221,10 +227,20 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				const isMethod = isClassMethodContext(node);
 				const capturedName = isMethod ? `this.${functionName}` : functionName;
 
+				// A throw directly in a block declares its variable there, so
+				// other throws fixed in the same pass must pick another name.
+				const declaresInScope = isBlockStatement(node.parent);
+				const scope = sourceCode.getScope(node);
+				let reservedNames = namesReservedByFixes.get(scope);
+				if (reservedNames === undefined) {
+					reservedNames = new Set();
+					namesReservedByFixes.set(scope, reservedNames);
+				}
+				const variableName = getUniqueVariableName(scope, node, "error", reservedNames);
+				if (declaresInScope) reservedNames.add(variableName);
+
 				context.report({
 					fix(fixer): Fix {
-						const variableName = getUniqueVariableName(sourceCode, node, "error");
-
 						const replacement = [
 							`const ${variableName} = ${sourceCode.getText(argument)};`,
 							`Error.captureStackTrace(${variableName}, ${capturedName});`,

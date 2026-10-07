@@ -1,7 +1,7 @@
 import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/english/starts-with-verb";
-import { ts } from "$test/rule-testers";
 
 const notVerbErrors = [{ messageId: "notVerb" }];
 
