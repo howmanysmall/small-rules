@@ -5,6 +5,9 @@ on:
     branches:
       - main
     paths: &ci-paths
+      - "**/*.markdown"
+      - "**/*.md"
+      - "**/*.mdx"
       - "*.config.ts"
       - ".github/actions/**"
       - .github/workflows/bundle-size.yaml
@@ -14,6 +17,7 @@ on:
       - .github/workflows/docs.yaml
       - .github/workflows/release.yaml
       - ".ox*trc.json"
+      - .vale.ini
       - biome.jsonc
       - "documentation/**"
       - hk.pkl
@@ -44,6 +48,29 @@ jobs:
     permissions:
       contents: read
     uses: $/.github/workflows/checks.yaml
+
+  vale:
+    name: Vale
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+        with:
+          tools: vale
+
+      # Styles live in gitignored `.vale/styles`; `Packages` in `.vale.ini` is the source.
+      - name: Sync styles
+        run: vale sync
+
+      - name: Lint prose
+        run: vale --no-color .
 
   workflow-security:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
