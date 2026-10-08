@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-module-mocking.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
+// Vendored from src/rules/no-module-mocking.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -13,16 +13,12 @@ import {
 	isV8IntrinsicExpression,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getReferencedVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 const MODULE_MOCK_METHODS = new Set(["doMock", "mock", "unstable_mockModule"]);
-
-function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): undefined | Variable {
-	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
-}
 
 function isFrameworkImport(variable: Variable): boolean {
 	return variable.defs.some((definition) => {
@@ -52,7 +48,7 @@ function isTestFrameworkObject(
 	if ((expression.name === "vi" || expression.name === "jest") && sourceCode.isGlobalReference(expression)) {
 		return true;
 	}
-	const variable = resolveVariable(sourceCode, expression);
+	const variable = getReferencedVariable(sourceCode, expression);
 	return variable === undefined
 		? expression.name === "vi" || expression.name === "jest"
 		: variable.defs.length === 0 || isFrameworkImport(variable);

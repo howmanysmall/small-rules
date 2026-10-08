@@ -1,0 +1,16 @@
+---
+title: "No Reduce Accumulator Copy"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-reduce-accumulator-copy">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>. A reduce that copies its
+			accumulator on each step does more work as the result grows. That turns a linear pass into quadratic work.
+			Build a new accumulator in the reduce call, change it in place, and return it. Pair this rule with Oxc's
+			<code>no-accumulating-spread</code>, which catches the spread form.
+		</p>
+	</Fragment>
+</RulePage>

@@ -20,6 +20,17 @@ export function getVariableByName(scope: null | Scope, name: string): undefined 
 	return undefined;
 }
 
+export function getReferencedVariable(
+	sourceCode: SourceCode,
+	identifier: ESTree.IdentifierReference,
+): undefined | Variable {
+	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
+}
+
+export function hasUninitializedWrite(variable: Variable): boolean {
+	return variable.references.some((reference) => reference.isWrite() && !reference.init);
+}
+
 export function pushChildScopes(scopes: Array<Scope>, scope: Scope): void {
 	for (const child of scope.childScopes) scopes.push(child);
 }

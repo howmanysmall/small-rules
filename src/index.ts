@@ -5,6 +5,7 @@ import noConditionalEmptyObjectSpread from "$oxc-rules/anti-slop/no-conditional-
 import noKnownValueWidening from "$oxc-rules/anti-slop/no-known-value-widening";
 import noModuleMocking from "$oxc-rules/anti-slop/no-module-mocking";
 import noObjectParameters from "$oxc-rules/anti-slop/no-object-parameters";
+import noReduceAccumulatorCopy from "$oxc-rules/anti-slop/no-reduce-accumulator-copy";
 import noReflectApply from "$oxc-rules/anti-slop/no-reflect-apply";
 import noReflectGet from "$oxc-rules/anti-slop/no-reflect-get";
 import noRuntimeTypeof from "$oxc-rules/anti-slop/no-runtime-typeof";
@@ -192,6 +193,7 @@ const smallRules = definePlugin({
 		"no-pass-live-state-to-parent": noPassLiveStateToParent,
 		"no-print": noPrint,
 		"no-recursive": noRecursive,
+		"no-reduce-accumulator-copy": noReduceAccumulatorCopy,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
 		"no-reflect-apply": noReflectApply,
 		"no-reflect-get": noReflectGet,
