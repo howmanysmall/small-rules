@@ -9,9 +9,10 @@
 // Local departure: an unbraced control-flow body may take its justification
 // from the leading comment of the enclosing statement.
 // Local departure: oxlint-tsgolint 7.0.2002 reports on assertion syntax, so a
-// disable must cover that line. `settings["small-rules"].tsgolintVersion`
-// selects the range; when it is absent the rule infers from node_modules,
-// pnpm-workspace.yaml, or package.json.
+// same-line or block disable must cover that line. A `disable-next-line` on
+// the line before `as` counts even when it sits inside the asserted expression.
+// `settings["small-rules"].tsgolintVersion` selects the range; when it is
+// absent the rule infers from node_modules, pnpm-workspace.yaml, or package.json.
 
 import nodePath from "node:path";
 import {
@@ -134,11 +135,17 @@ function hasCommentBeforeAncestors(
 	}
 }
 
-function hasDisableCoveringAssertionLine(sourceCode: SourceCode, node: TypeAssertion): boolean {
+function hasDisableCoveringAssertionLine(
+	sourceCode: SourceCode,
+	node: TypeAssertion,
+	assertionSyntaxRange: boolean,
+): boolean {
 	const { line } = node.typeAnnotation.loc.start;
 	for (const comment of sourceCode.getAllComments()) {
 		const parsed = getParsedUnsafeAssertionDisable(comment);
-		if (parsed !== undefined && disableKindCoversLine(parsed.kind, comment, line)) return true;
+		if (parsed === undefined) continue;
+		if (!assertionSyntaxRange && parsed.kind !== OXLINT_DISABLE_NEXT_LINE) continue;
+		if (disableKindCoversLine(parsed.kind, comment, line)) return true;
 	}
 	return false;
 }
@@ -150,7 +157,8 @@ function hasSafetyComment(
 	assertionSyntaxRange: boolean,
 ): boolean {
 	if (hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value))) return true;
-	if (assertionSyntaxRange) return hasDisableCoveringAssertionLine(sourceCode, node);
+	if (hasDisableCoveringAssertionLine(sourceCode, node, assertionSyntaxRange)) return true;
+	if (assertionSyntaxRange) return false;
 	return hasCommentBeforeAncestors(sourceCode, node, isUnsafeAssertionDisabled);
 }
 
