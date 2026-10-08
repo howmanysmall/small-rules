@@ -1,4 +1,4 @@
-// Vendored from src/shared/type-alias-resolution.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
+// Vendored from src/shared/type-alias-resolution.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //

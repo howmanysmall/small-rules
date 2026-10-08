@@ -331,6 +331,7 @@ export async function getOxlintAsync({
 				"small-rules/no-pass-data-to-parent": ["error", { environment: "standard" }],
 				"small-rules/no-pass-live-state-to-parent": ["error", { environment: "standard" }],
 				"small-rules/no-print": "off",
+				"small-rules/no-reduce-accumulator-copy": "error",
 				"small-rules/no-redundant-aspect-ratio-constraint": "off",
 				"small-rules/no-reflect-apply": "error",
 				"small-rules/no-reflect-get": "error",

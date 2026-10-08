@@ -1,4 +1,4 @@
-// Vendored from src/shared/reflect-method.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
+// Vendored from src/shared/reflect-method.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -6,19 +6,12 @@
 
 import { isAnyLiteral, isIdentifierNamed } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 
-import type { ESTree, SourceCode, Variable } from "oxlint-plugin-utilities";
-
-function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): undefined | Variable {
-	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
-}
+import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
 function isGlobalReflect(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
-	if (!isIdentifierNamed(expression, "Reflect")) return false;
-	if (sourceCode.isGlobalReference(expression)) return true;
-	const variable = resolveVariable(sourceCode, expression);
-	return variable === undefined || variable.defs.length === 0;
+	return isIdentifierNamed(expression, "Reflect") && !hasShadowedBinding(sourceCode, expression, "Reflect");
 }
 
 /**

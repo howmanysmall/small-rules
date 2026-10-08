@@ -15,7 +15,7 @@ This file is distributed in the published npm package. The same notices are embe
 ## 1. `anti-slop`
 
 - **Source:** <https://github.com/dmmulroy/anti-slop>
-- **Vendored commit:** `e8c4880471b23ab7f216fba7b27d173a6ef07d4c`
+- **Vendored commit:** `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b`
 - **Copyright:** Copyright (c) 2026 Dillon Mulroy
 - **License:** MIT
 
@@ -28,6 +28,7 @@ Vendored into `src/rules/anti-slop/`, adapted rather than verbatim:
 | `no-known-value-widening.ts` | `src/rules/no-known-value-widening.ts` |
 | `no-module-mocking.ts` | `src/rules/no-module-mocking.ts` |
 | `no-object-parameters.ts` | `src/rules/no-object-parameters.ts` |
+| `no-reduce-accumulator-copy.ts` | `src/rules/no-reduce-accumulator-copy.ts` |
 | `no-reflect-apply.ts` | `src/rules/no-reflect-apply.ts` |
 | `no-reflect-get.ts` | `src/rules/no-reflect-get.ts` |
 | `no-runtime-typeof.ts` | `src/rules/no-runtime-typeof.ts` |
@@ -68,7 +69,7 @@ SOFTWARE.
 ## 2. `anti-slop shared helpers`
 
 - **Source:** <https://github.com/dmmulroy/anti-slop>
-- **Vendored commit:** `e8c4880471b23ab7f216fba7b27d173a6ef07d4c`
+- **Vendored commit:** `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b`
 - **Copyright:** Copyright (c) 2026 Dillon Mulroy
 - **License:** MIT
 
