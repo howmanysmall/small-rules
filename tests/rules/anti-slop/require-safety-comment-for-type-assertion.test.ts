@@ -144,6 +144,14 @@ describe("require-safety-comment-for-type-assertion", () => {
 				settings: tsgolint2002,
 			},
 			{
+				code: [
+					"export const isBunFile = type({",
+					'	writer: "Function",',
+					"	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- slopware",
+					"}).readonly() as unknown as Type<BunFile>;",
+				].join("\n"),
+			},
+			{
 				filename: nodePath.join(FIXTURES, "v2002", "file.ts"),
 				code: "const user = value as User; // oxlint-disable-line typescript/no-unsafe-type-assertion -- Installed tsgolint reports on as.",
 			},
