@@ -71,7 +71,7 @@
       "source": "effect-ts/skills",
       "sourceType": "github",
       "skillPath": "skills/effect-ts/SKILL.md",
-      "computedHash": "6bdb9b95aa83071eca2f67ae947b7d398a22e9e6e08f6cfa35de9516b03efa6e"
+      "computedHash": "cb225ba5dda169883dfee680fba6c570c89245ba19242a9bc5c3f2ac8218a55f"
     },
     "emil-design-eng": {
       "source": "emilkowalski/skills",
@@ -83,13 +83,13 @@
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow/SKILL.md",
-      "computedHash": "317ea41e6adc578a52b97216c0415b0ec539c79180c379219130470b66663213"
+      "computedHash": "c7baa2dbba998101c9df373359035e21cbc7af8d978859ff3dd6edeed0e0bfff"
     },
     "fallow-review": {
       "source": "fallow-rs/fallow-skills",
       "sourceType": "github",
       "skillPath": "fallow/skills/fallow-review/SKILL.md",
-      "computedHash": "e810da0733a890351c0e59f398123217679410d1aec0250ade0e92957561903e"
+      "computedHash": "738d0db6764123300ac05cc73572dcad0f6836f039b26f3a1913d4b8b80d7bbb"
     },
     "find-animation-opportunities": {
       "source": "emilkowalski/skills",
