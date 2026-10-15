@@ -1,9 +1,9 @@
-// Vendored from src/rules/no-widen-then-assert.ts@e8c4880471b23ab7f216fba7b27d173a6ef07d4c by Dillon Mulroy.
+// Vendored from src/rules/no-widen-then-assert.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
 // Modifications: adapted to oxlint-plugin-utilities createRule API and local path
-// aliases; variable resolution uses the shared getVariableByName helper
+// aliases; variable resolution uses the shared getReferencedVariable helper
 // instead of upstream's scope-manager reference scan.
 
 import {
@@ -46,7 +46,7 @@ import {
 	TS_TYPE_OPERATOR,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getReferencedVariable, hasUninitializedWrite } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { stripParenthesis, stripParenthesizedType } from "$oxc-utilities/oxc-utilities";
 
@@ -209,20 +209,11 @@ function getFunctionBoundary(node: ESTree.Node): ESTree.Node | undefined {
 	return undefined;
 }
 
-function resolveVariable(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): ScopeVariable | undefined {
-	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
-}
-
 function variableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator | undefined {
 	for (const definition of variable.defs) {
 		if (definition.type === "Variable" && isVariableDeclarator(definition.node)) return definition.node;
 	}
 	return undefined;
-}
-
-function hasUninitializedWrite(variable: ScopeVariable): boolean {
-	/* v8 ignore next -- Const bindings cannot receive an uninitialized write in valid TypeScript. @preserve */
-	return variable.references.some((reference) => reference.isWrite() && !reference.init);
 }
 
 interface MaybeAnnotated {
@@ -295,7 +286,7 @@ function getKnownValueEvidence(
 		const unwrapped = stripParenthesis(currentExpression);
 		if (!isBindingIdentifier(unwrapped)) return undefined;
 
-		const variable = resolveVariable(sourceCode, unwrapped);
+		const variable = getReferencedVariable(sourceCode, unwrapped);
 		if (variable === undefined || seenVariables.has(variable)) return undefined;
 
 		const annotatedIdentifier = variable.identifiers.find(
@@ -370,7 +361,7 @@ const noWidenThenAssert = createRule("no-widen-then-assert", "anti-slop", {
 			const expression = getAssertedExpression(node);
 			if (!isBindingIdentifier(expression)) return;
 
-			const variable = resolveVariable(sourceCode, expression);
+			const variable = getReferencedVariable(sourceCode, expression);
 			if (variable === undefined) return;
 
 			const widened = getWidenedBinding(sourceCode, variable);

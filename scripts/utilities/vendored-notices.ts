@@ -161,7 +161,7 @@ const NOTICES_URL = "https://github.com/howmanysmall/small-rules/blob/main/THIRD
 export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 	{
 		name: "anti-slop",
-		commit: "e8c4880471b23ab7f216fba7b27d173a6ef07d4c",
+		commit: "c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b",
 		copyright: "Copyright (c) 2026 Dillon Mulroy",
 		directory: "src/rules/anti-slop/",
 		files: [
@@ -173,6 +173,7 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 			{ local: "no-known-value-widening.ts", upstream: "src/rules/no-known-value-widening.ts" },
 			{ local: "no-module-mocking.ts", upstream: "src/rules/no-module-mocking.ts" },
 			{ local: "no-object-parameters.ts", upstream: "src/rules/no-object-parameters.ts" },
+			{ local: "no-reduce-accumulator-copy.ts", upstream: "src/rules/no-reduce-accumulator-copy.ts" },
 			{ local: "no-reflect-apply.ts", upstream: "src/rules/no-reflect-apply.ts" },
 			{ local: "no-reflect-get.ts", upstream: "src/rules/no-reflect-get.ts" },
 			{ local: "no-runtime-typeof.ts", upstream: "src/rules/no-runtime-typeof.ts" },
@@ -193,7 +194,7 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 	},
 	{
 		name: "anti-slop shared helpers",
-		commit: "e8c4880471b23ab7f216fba7b27d173a6ef07d4c",
+		commit: "c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b",
 		copyright: "Copyright (c) 2026 Dillon Mulroy",
 		directory: "src/utilities/anti-slop/",
 		files: [

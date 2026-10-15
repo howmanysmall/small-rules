@@ -156,6 +156,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-known-value-widening" },
 				{ name: "no-module-mocking" },
 				{ name: "no-object-parameters" },
+				{ name: "no-reduce-accumulator-copy" },
 				{ name: "no-reflect-apply" },
 				{ name: "no-reflect-get" },
 				{ name: "no-runtime-typeof" },
