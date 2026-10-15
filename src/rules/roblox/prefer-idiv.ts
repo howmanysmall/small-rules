@@ -1,31 +1,22 @@
 import {
 	isAnyLiteral,
 	isBinaryExpression,
-	isCallExpression,
-	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
-	isNewExpression,
 	isNumericLiteral,
 	isSpreadElement,
-	isThisExpression,
 } from "@small-rules/oxlint-utilities";
 
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
+import {
+	getMemberPropertyName,
+	getReceiverText,
+	stripExpressionWrappers,
+	stripParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-function isSimpleReceiver(expression: ESTree.Expression): boolean {
-	return (
-		isIdentifier(expression) ||
-		isMemberExpression(expression) ||
-		isCallExpression(expression) ||
-		isNewExpression(expression) ||
-		isThisExpression(expression)
-	);
-}
 
 function isLiteral(expression: ESTree.Expression): boolean {
 	return isAnyLiteral(stripExpressionWrappers(expression));
@@ -40,11 +31,6 @@ function getReciprocalDivisor(expression: ESTree.Expression): number | undefined
 
 	const divisor = 1 / value;
 	return Number.isInteger(divisor) ? divisor : undefined;
-}
-
-function getReceiverText(sourceCode: SourceCode, receiver: ESTree.Expression): string {
-	const receiverText = sourceCode.getText(stripParenthesis(receiver));
-	return isSimpleReceiver(stripExpressionWrappers(receiver)) ? receiverText : `(${receiverText})`;
 }
 
 function isMathFloorCallee(callee: ESTree.Expression): callee is ESTree.MemberExpression {

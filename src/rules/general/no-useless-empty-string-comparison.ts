@@ -1,11 +1,11 @@
 import { isStringLiteral } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { getReceiverText } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 const EQUALITY_OPERATORS = new Set(["!=", "!==", "==", "==="]);
-const NEGATED_OPERATORS = new Set(["!=", "!=="]);
 
 function isEmptyStringLiteral(node: ESTree.Node): boolean {
 	return isStringLiteral(node) && node.value === "";
@@ -17,13 +17,17 @@ const noUselessEmptyStringComparison = createRule("no-useless-empty-string-compa
 			BinaryExpression(node): void {
 				if (!EQUALITY_OPERATORS.has(node.operator)) return;
 
-				const operand = isEmptyStringLiteral(node.left) ? node.right : node.left;
-				if (operand === node.left && !isEmptyStringLiteral(node.right)) return;
+				const leftIsEmpty = isEmptyStringLiteral(node.left);
+				if (!leftIsEmpty && !isEmptyStringLiteral(node.right)) return;
 
-				const text = context.sourceCode.getText(operand);
+				const receiver = getReceiverText(context.sourceCode, leftIsEmpty ? node.right : node.left);
+				const replacement = `${receiver}.length ${node.operator} 0`;
 				context.report({
-					data: { replacement: NEGATED_OPERATORS.has(node.operator) ? text : `!${text}` },
-					messageId: "emptyStringComparison",
+					data: { replacement },
+					fix(fixer) {
+						return fixer.replaceText(node, replacement);
+					},
+					messageId: "useLengthComparison",
 					node,
 				});
 			},
@@ -34,8 +38,9 @@ const noUselessEmptyStringComparison = createRule("no-useless-empty-string-compa
 			description: "Disallow equality comparisons against an empty-string literal.",
 			recommended: true,
 		},
+		fixable: "code",
 		messages: {
-			emptyStringComparison: "Use `{{replacement}}` instead of comparing to an empty string.",
+			useLengthComparison: "Use `{{replacement}}` instead of comparing the string to ''.",
 		},
 		schema: [],
 		type: "problem",
