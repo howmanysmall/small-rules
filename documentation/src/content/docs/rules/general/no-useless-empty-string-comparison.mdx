@@ -2,6 +2,40 @@
 title: "No Useless Empty String Comparison"
 ---
 
+import { Code } from "@astrojs/starlight/components";
 import RulePage from "$components/rule-page.astro";
 
-<RulePage rule="no-useless-empty-string-comparison" />
+<RulePage rule="no-useless-empty-string-comparison">
+	<Fragment slot="rationale">
+		<p>
+			An empty string is the only falsy string. So `value === ""` and `!value` agree on every string, and the
+			falsy check is shorter and reads as a question about content, not equality. In the negated form, `value !==
+			""` is just `value` in a boolean position.
+		</p>
+		<ul>
+			<li>
+				**Fewer tokens, same meaning:** `if (!name)` says what you mean. `if (name === "")` makes the reader
+				check the literal to see that it's empty and not `" "` or `"0"`.
+			</li>
+			<li>
+				**Nullish values count as empty:** `!value` is also true for `null` and `undefined`. When `value` is a
+				plain `string`, that changes nothing. When it is `string | undefined`, the equality check treats
+				`undefined` as "not empty", which is almost never what you wanted.
+			</li>
+			<li>
+				**Trimmed checks read better too:** `value.trim() === ""` becomes `!value.trim()`. Both allocate the
+				trimmed copy, so there is no cost either way.
+			</li>
+		</ul>
+		<p>
+			The rule flags `==`, `===`, `!=`, and `!==` when either side is an empty string literal. The diagnostic
+			suggests the replacement built from the other operand, so `count.trim() !== ""` reports `count.trim()`.
+		</p>
+		<Code code={`if (!name) return;\nif (name.trim()) submit(name);`} lang="ts" />
+		<p>
+			If you do need the comparison to distinguish `""` from `undefined`, use `value === undefined` or a `typeof`
+			check, which this rule leaves alone. Comparisons against other strings, template literals, and `String()`
+			calls aren't reported.
+		</p>
+	</Fragment>
+</RulePage>
