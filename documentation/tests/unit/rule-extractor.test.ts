@@ -1,13 +1,20 @@
 import { readFileSync } from "node:fs";
 import nodePath from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { extractRuleExamples } from "$utilities/extract-rule-examples";
 
 import type { RuleExample } from "$utilities/extract-rule-examples";
 
-const fixtureDirectory = fileURLToPath(new URL("../fixtures/documentation-rule-extractor", import.meta.url));
+const fixtureDirectory = nodePath.join(
+	import.meta.dirname,
+	"..",
+	"..",
+	"..",
+	"tests",
+	"fixtures",
+	"documentation-rule-extractor",
+);
 
 function extractFixture(fixtureName: string): ReturnType<typeof extractRuleExamples> {
 	const relativePath = `tests/fixtures/documentation-rule-extractor/${fixtureName}`;

@@ -8,5 +8,5 @@
 		"types": ["node"]
 	},
 	"include": ["packages/*/src/**/*.ts", "src/**/*.ts"],
-	"exclude": ["dist", "node_modules"]
+	"exclude": ["**/*.bench.ts", "**/*.test.ts", "dist", "node_modules"]
 }

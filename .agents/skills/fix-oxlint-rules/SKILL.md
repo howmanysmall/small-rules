@@ -16,7 +16,7 @@ project-specific commands.
 
 Use this skill when:
 
-- `nr test:agent tests/<rule>.test.ts` fails.
+- `nr test:agent src/rules/<category>/<rule>.test.ts` fails.
 - `nr type-check` fails on a rule.
 - The failure looks like AST narrowing, bad detection logic, broken fixer
   output, wrong `messageId`, or missing rule metadata.
@@ -33,11 +33,11 @@ Do not use this skill for:
 
 | Goal | Command |
 | --- | --- |
-| Reproduce one rule test | `nr test:agent -- tests/<rule>.test.ts` |
-| Lint the touched rule files | `nr lint:agent src/rules/<category>/<rule>.ts tests/<rule>.test.ts` |
+| Reproduce one rule test | `nr test:agent -- src/rules/<category>/<rule>.test.ts` |
+| Lint the touched rule files | `nr lint:agent src/rules/<category>/<rule>.ts src/rules/<category>/<rule>.test.ts` |
 | Check type errors | `nr type-check` |
 | Find rule wiring | `rg -n "<rule-name>" src tests` |
-| Inspect test expectations | `sed -n '1,260p' tests/<rule>.test.ts` |
+| Inspect test expectations | `sed -n '1,260p' src/rules/<category>/<rule>.test.ts` |
 
 ## Procedure
 
@@ -61,7 +61,7 @@ Do not use this skill for:
 6. Change the smallest correct artifact:
    rule, test, or both.
 7. Rerun the focused test.
-8. Run `nr lint:agent src/rules/<category>/<rule>.ts tests/<rule>.test.ts`.
+8. Run `nr lint:agent src/rules/<category>/<rule>.ts src/rules/<category>/<rule>.test.ts`.
 9. Rerun `nr type-check`.
 10. Stop there unless the specific failure shows a wider plugin surface needs verification.
 
@@ -81,7 +81,7 @@ Do not use this skill for:
 
 For `no-identity-map`:
 
-1. Run `nr test:agent tests/no-identity-map.test.ts`.
+1. Run `nr test:agent src/rules/general/no-identity-map.test.ts`.
 2. Read the local rule and test side by side.
 3. Check for:
    missing `fixable: "code"`, computed-member handling, and narrowed AST values
@@ -89,7 +89,7 @@ For `no-identity-map`:
 4. If the local rule is intentionally stricter or safer than upstream, update
    the test instead of flattenening the rule back to the port.
 5. Rerun the focused test, then run
-   `nr lint:agent src/rules/general/no-identity-map.ts tests/no-identity-map.test.ts`,
+   `nr lint:agent src/rules/general/no-identity-map.ts src/rules/general/no-identity-map.test.ts`,
    then rerun `nr type-check`.
 
 ## Common Mistakes
@@ -99,13 +99,13 @@ For `no-identity-map`:
   bundling, not rule correctness).
 - Running the full `nr test:agent` suite when a single rule test is enough.
 - Bundling unrelated cleanup into the same rule fix.
-- Stopping after `nr test:agent tests/<rule>.test.ts` without checking the targeted
+- Stopping after `nr test:agent src/rules/<category>/<rule>.test.ts` without checking the targeted
   lint command and `type-check`.
 - Assuming the port is always correct without judging repo intent.
 - Assuming the failing test is always correct without judging rule precision.
 
 ## References
 
-- `tests/rule-testers.ts`
+- `@small-rules/rule-harness/rule-testers`
 - `src/rules/`
 - `tsconfig.json`

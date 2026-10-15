@@ -2,7 +2,7 @@
 
 ## Workflow
 
-1. Read [`CODING_STANDARDS.md`](CODING_STANDARDS.md) before the first edit under `src/`, `tests/`, `tools/`, `scripts/`, or `packages/`.
+1. Read [`CODING_STANDARDS.md`](CODING_STANDARDS.md) before the first edit under `src/`, `tests/`, `tools/`, `scripts/`, `packages/`, or `documentation/tests/`.
 2. Red first: write the failing test, then the change that turns it green. Done when the gates in `CODING_STANDARDS.md` pass.
 3. Pre-flight the hooks with `hk run check --safe <changed files>`. Done when every step passes.
 4. Commit with `mise run commit '<message>'` (Conventional Commits, signed off). Done when the hooks and the fallow gate below are green.

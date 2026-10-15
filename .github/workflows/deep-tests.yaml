@@ -112,7 +112,7 @@ jobs:
           --project small-rules
           --testTimeout 1800000
           --reporter github-actions --reporter dot
-          tests/properties tests/utilities
+          tests/properties src/utilities
         env:
           PROPERTY_RUNS: "10000"
     timeout-minutes: 60

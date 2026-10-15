@@ -505,7 +505,7 @@
 		},
 
 		{
-			"includes": ["tests/**/*.test.ts"],
+			"includes": ["**/*.test.ts"],
 			"linter": {
 				"rules": {
 					"performance": {
@@ -614,7 +614,7 @@
 		},
 
 		{
-			"includes": ["scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+			"includes": ["**/*.test.ts", "scripts/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
 			"linter": {
 				"rules": {
 					"complexity": {

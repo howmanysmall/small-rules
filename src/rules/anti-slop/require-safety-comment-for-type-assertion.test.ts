@@ -7,7 +7,7 @@ import rule from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion
 const missingSafetyComment = { messageId: "missingSafetyComment" };
 const tsgolint2001 = { "small-rules": { tsgolintVersion: "7.0.2001" } };
 const tsgolint2002 = { "small-rules": { tsgolintVersion: "7.0.2002" } };
-const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "tsgolint-version");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "..", "tests", "fixtures", "tsgolint-version");
 
 const multilineObjectAssertion = ["const user = {", "	name: value,", "} as User;"].join("\n");
 

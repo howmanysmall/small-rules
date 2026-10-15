@@ -9,7 +9,7 @@ import {
 	resolveTsgoLintVersion,
 } from "$oxc-utilities/tsgolint-version";
 
-const FIXTURES = nodePath.join(import.meta.dirname, "..", "fixtures", "tsgolint-version");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "tests", "fixtures", "tsgolint-version");
 
 function getFixtureDirectory(name: string): string {
 	return nodePath.join(FIXTURES, name);

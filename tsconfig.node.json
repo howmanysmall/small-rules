@@ -27,5 +27,5 @@
 		"tools/release-notes/vitest.config.ts",
 		"src/**/*.ts"
 	],
-	"exclude": ["dist", "node_modules"]
+	"exclude": ["**/*.bench.ts", "**/*.test.ts", "dist", "node_modules"]
 }

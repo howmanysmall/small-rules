@@ -16,7 +16,7 @@ export const strykerConfiguration = mergeConfig(sharedConfiguration, {
 	test: {
 		name: "small-rules",
 		coverage: { enabled: false },
-		include: ["tests/**/*.test.ts"],
+		include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
 		// Stryker swaps the active mutant between runs, so each file needs a
 		// fresh module registry.
 		isolate: true,

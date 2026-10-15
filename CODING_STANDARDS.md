@@ -18,7 +18,7 @@ A change is done when all three pass on every file you touched:
 | Unit tests with coverage | `nr test:agent` |
 | Type check (`tsgo`) | `nr type-check:agent` |
 
-Use the `:agent` variants; they emit compact output. `nr format` (Biome, then oxfmt) fixes a formatting failure. Run one test file with `nr test:agent -- tests/rules/roblox/no-print.test.ts`, or a name pattern with `nr test:agent -t "no-print"`.
+Use the `:agent` variants; they emit compact output. `nr format` (Biome, then oxfmt) fixes a formatting failure. Run one test file with `nr test:agent -- src/rules/roblox/no-print.test.ts`, or a name pattern with `nr test:agent -t "no-print"`.
 
 ## Hot Paths
 
@@ -26,7 +26,7 @@ Before editing anything under `src/rules/` or `src/utilities/`, read [`docs/hot-
 
 ## Test Conventions
 
-A rule's test is `tests/rules/<category>/<rule>.test.ts`. Import a runner (`js`, `jsx`, `ts`, or `tsx`) from `@small-rules/rule-harness/rule-testers`; options and settings are plain JSON.
+A test sits next to the file it covers: a rule's test is `src/rules/<category>/<rule>.test.ts`, and a script's is beside it in `scripts/`. Import a runner (`js`, `jsx`, `ts`, or `tsx`) from `@small-rules/rule-harness/rule-testers`; options and settings are plain JSON.
 
 ```ts
 import { describe } from "vitest";
@@ -42,7 +42,7 @@ describe("no-print", () => {
 });
 ```
 
-Documented examples (`documentation: { id, title }` on a case) render verbatim on the docs site. Write a multi-statement snippet as an array joined with `"\n"`; `tests/documentation/rule-examples.test.ts` fails on a single-line multi-statement example.
+Documented examples (`documentation: { id, title }` on a case) render verbatim on the docs site. Write a multi-statement snippet as an array joined with `"\n"`; `documentation/tests/unit/rule-examples.test.ts` fails on a single-line multi-statement example.
 
 A new fixable rule needs a program generator in `tests/properties/support/fixable-cases-*.ts`; `tests/properties/fixes-settle.test.ts` fails until it has one. Property tests take their run count from `PROPERTY_RUNS` in `tests/property-runs.ts` so the weekly deep run can raise it.
 

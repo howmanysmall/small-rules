@@ -9,11 +9,11 @@ description: Use when creating a new Oxlint JS plugin rule from scratch, or port
 
 When this skill is active, you MUST follow this order:
 
-1. Create or port the test file in `tests/`.
+1. Create or port the test file beside the rule in `src/rules/<category>/`.
 2. Add the initial valid/invalid cases, including one documented fail example
    and one documented pass example unless a reasoned exemption is necessary.
 3. Only then implement the rule in `src/rules/<category>/`.
-4. Register the rule in `src/index.ts` and update `tests/index.test.ts`.
+4. Register the rule in `src/index.ts` and update `src/index.test.ts`.
 5. Add the rule to the documentation manifest and create its MDX page under
    `documentation/src/content/docs/rules/`.
 6. Run the targeted rule test, documentation coverage test, and
@@ -27,7 +27,7 @@ When this skill is active, you MUST follow this order:
 YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS. YOU **MUST** ALWAYS USE TDD. NO. EXCEPTIONS.
 
 If you catch yourself drafting `src/rules/<category>/{rule-name}.ts` before drafting
-`tests/{rule-name}.test.ts`, STOP at once. That is the wrong workflow for this
+`src/rules/<category>/{rule-name}.test.ts`, STOP at once. That is the wrong workflow for this
 skill.
 
 ### Forbidden Behavior
@@ -54,7 +54,7 @@ in this repo and are registered in `src/index.ts`.
 
 **Nonnegotiable workflow for new rules: TDD is required.**
 
-- Write or port the tests first in `tests/`.
+- Write or port the tests first beside the rule in `src/rules/<category>/`.
 - Only after the tests exist should you implement the rule.
 - Then run the rule tests and iterate until they pass.
 
@@ -221,8 +221,11 @@ The Rust-side skip-if-no-nodes plan is still forward-looking.
 ```text
 src/
 ├── index.ts                  ← registers all rules via definePlugin
+├── index.test.ts             ← hardcoded expectedRuleNames list
 ├── rules/
-│   └── {rule-name}.ts        ← one file per rule
+│   └── {category}/
+│       ├── {rule-name}.ts      ← one file per rule
+│       └── {rule-name}.test.ts ← its tests, beside it
 ├── types/
 │   └── ...                   ← shared type definitions
 └── utilities/
@@ -243,9 +246,9 @@ src/
     └── recognizers/
 
 tests/
-├── index.test.ts             ← hardcoded expectedRuleNames list
-├── rule-testers.ts           ← preconfigured RuleTester instances
-└── {rule-name}.test.ts       ← one test file per rule
+├── properties/               ← fast-check suites across all rules
+├── fuzz/                     ← fuzz targets
+└── fixtures/                 ← on-disk fixture projects
 ```
 
 ---
@@ -375,7 +378,7 @@ const smallRules = definePlugin({
 export default smallRules;
 ```
 
-**Also add the rule name to `tests/index.test.ts`** — the `expectedRuleNames`
+**Also add the rule name to `src/index.test.ts`** — the `expectedRuleNames`
 array and `toHaveLength` assertion in that file must be kept in sync with
 `src/index.ts`, or `nr test:agent` will fail.
 
@@ -420,7 +423,7 @@ Documented `code` is rendered verbatim on the docs site. Multi-statement
 examples must use real newlines via `.join("\n")` arrays — never a single-line
 string with multiple statements (the page will show one collapsed line).
 Short single-statement bodies like `if (flag) doThing();` are fine as one line.
-`tests/documentation-rule-coverage.test.ts` fails the build if a documented
+`documentation/tests/unit/rule-examples.test.ts` fails the build if a documented
 example is a multi-statement one-liner.
 
 ### 2. Add the Rule to the Documentation Manifest
@@ -465,7 +468,7 @@ when the rule needs explanation beyond those generated sections.
 Run the rule test and the documentation coverage test together:
 
 ```sh
-nr test:agent tests/my-rule.test.ts tests/documentation-rule-coverage.test.ts
+nr test:agent src/rules/general/my-rule.test.ts documentation/tests/unit/rule-examples.test.ts
 ```
 
 Also run the documentation package unit tests when you change the manifest or
@@ -721,10 +724,10 @@ Testing is required for every new rule and every ported rule.
 the rule against those tests. Do not start by writing the rule implementation.
 
 Do NOT recreate `new RuleTester()` like in the example below; use the
-preconfigured testers from `tests/rule-testers.ts`.
+preconfigured testers from `@small-rules/rule-harness/rule-testers`.
 
 ```ts
-// tests/my-rule.test.ts
+// src/rules/general/my-rule.test.ts
 import { describe } from "vitest";
 import myRule from "$oxc-rules/<category>/my-rule";
 import { ts } from "./rule-testers";
@@ -748,7 +751,7 @@ describe("my-rule", () => {
 });
 ```
 
-Run: `nr test:agent tests/my-rule.test.ts`
+Run: `nr test:agent src/rules/general/my-rule.test.ts`
 
 Do not place rule tests anywhere else.
 
@@ -837,9 +840,9 @@ Rules that omit `schema` need `schema: []` added explicitly.
 
 Required.
 
-This step is TDD-gated: write or port the tests first in `tests/`, then
+This step is TDD-gated: write or port the tests first beside the rule in `src/rules/<category>/`, then
 implement the rule, register it in `src/index.ts`, and add the name to
-`tests/index.test.ts`.
+`src/index.test.ts`.
 
 If the tests do not exist yet, do not proceed to the implementation step.
 
@@ -883,17 +886,17 @@ Please create new utility functions / modules to reduce duplicated code.
 ## Verification Checklist
 
 - [ ] Rule file at `src/rules/<category>/{rule-name}.ts`
-- [ ] Tests at `tests/{rule-name}.test.ts`
+- [ ] Tests at `src/rules/{category}/{rule-name}.test.ts`
 - [ ] Tests were written or ported before the rule implementation (required; do not skip)
 - [ ] I did not output implementation-first code for a new rule
 - [ ] `create` vs `createOnce` chosen deliberately per the decision guide
 - [ ] Per-file state (if any) initialized in `before`, not at top of `createOnce`
 - [ ] Registered in `src/index.ts`
-- [ ] **Added to `tests/index.test.ts`** — this file has a hardcoded
+- [ ] **Added to `src/index.test.ts`** — this file has a hardcoded
       `expectedRuleNames` array and length assertion that MUST be updated when
       adding a rule, or `nr test:agent` will fail.
 - [ ] Exactly one documented failing case and one documented passing case in
-      `tests/{rule-name}.test.ts`, or a reasoned manifest `exampleExemption`
+      `src/rules/{category}/{rule-name}.test.ts`, or a reasoned manifest `exampleExemption`
 - [ ] Added to the correct category in
       `documentation/src/data/rule-manifest.ts`
 - [ ] Thin rule page created at
@@ -901,7 +904,7 @@ Please create new utility functions / modules to reduce duplicated code.
 - [ ] Did **not** hardcode docs catalog/category rule counts; counts come from
       the manifest/catalog (see "Never Hardcode Catalog Counts")
 - [ ] Targeted rule and documentation coverage tests pass
-      (`nr test:agent tests/{rule-name}.test.ts tests/documentation-rule-coverage.test.ts`)
+      (`nr test:agent src/rules/{category}/{rule-name}.test.ts documentation/tests/unit/rule-examples.test.ts`)
 - [ ] Documentation package unit tests pass
       (`cd documentation && pnpm exec vitest run tests/unit`)
 - [ ] `meta.fixable` set if the rule emits fixes

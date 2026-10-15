@@ -33,6 +33,7 @@
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "catalog:types",
-		"tsdown": "catalog:build"
+		"tsdown": "catalog:build",
+		"vitest": "catalog:test"
 	}
 }

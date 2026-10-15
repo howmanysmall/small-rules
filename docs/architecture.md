@@ -1,6 +1,6 @@
 # Architecture
 
-Where things live and the convention each location carries. `src/` is the plugin, `tests/` mirrors it, and `tools/` and `packages/` hold the workspace packages both of them import.
+Where things live and the convention each location carries. `src/` is the plugin, and `tools/` and `packages/` hold the workspace packages it imports. Every package keeps its tests next to its source.
 
 ## Entry Point - `src/index.ts`
 
@@ -26,9 +26,9 @@ The `$oxc-*` and `$test/*` path aliases are defined in the `paths` block of `tsc
 
 `tsconfig.json` is a solution file over `tsconfig.lib.json`, `tsconfig.test.json`, and `tsconfig.node.json`. Project references are derived from each `package.json`, and a missing one is silent: `tsgo --build` resolves the import through the root `node_modules` and skips the project. `nr references:check` catches it and `nr references:sync` repairs it.
 
-## Tests - `tests/`
+## Tests
 
-Tests mirror `src/`: `tests/rules/<category>/<rule>.test.ts` (one per rule), `tests/utilities/` (shared helpers), `tests/tooling/` (release, vendoring, and repo scripts), `tests/documentation/`, `tests/rule-relations/`, `tests/properties/` (fast-check rule properties), and `tests/fuzz/*.fuzz.ts`. `tests/index.test.ts` covers plugin metadata, and `tests/fixtures/` holds on-disk fixture projects. The rule harness is the workspace package `@small-rules/rule-harness` in `tools/rule-harness`; how to write a rule test is in [`CODING_STANDARDS.md`](../CODING_STANDARDS.md).
+A test sits beside the file it covers as `<name>.test.ts`: `src/rules/<category>/<rule>.test.ts` (one per rule), `src/utilities/`, `src/index.test.ts` (plugin metadata), `scripts/utilities/` (generators, vendoring, and `rule-relations/`), and `documentation/tests/unit/` (docs site). The root `tests/` holds only what belongs to no single file: `tests/properties/` (fast-check rule properties), `tests/fuzz/*.fuzz.ts`, `tests/workflows/` (GitHub workflow checks), and `tests/fixtures/` (on-disk fixture projects). The rule harness is the workspace package `@small-rules/rule-harness` in `tools/rule-harness`; how to write a rule test is in [`CODING_STANDARDS.md`](../CODING_STANDARDS.md).
 
 ## Quality Thresholds
 

@@ -13,6 +13,11 @@ import type { OxlintConfig, OxlintRules } from "@isentinel/eslint-config/oxlint"
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
 const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
 const SCRIPT_FILES = `scripts/${GLOB_SRC}`;
+// Resolved here: this package depends on it, the root does not.
+const LOCAL_RULES_PLUGIN = {
+	name: "local",
+	specifier: fileURLToPath(import.meta.resolve("@small-rules/local-rules")),
+};
 
 interface ConfigurationOptions {
 	readonly argv?: ReadonlyArray<string> | undefined;
@@ -572,12 +577,23 @@ export async function getOxlintAsync({
 		{
 			name: "small-rules/local-rules",
 			files: [`src/${GLOB_SRC}`],
-			// Resolved here: this package depends on it, the root does not.
-			jsPlugins: [{ name: "local", specifier: fileURLToPath(import.meta.resolve("@small-rules/local-rules")) }],
+			jsPlugins: [LOCAL_RULES_PLUGIN],
 			rules: {
 				"local/prefer-existing-guard": "error",
 				"local/prefer-node-type-constant": "error",
 				"local/prefer-shared-string-constant": ["error", { ignoredProperties: ["type"] }],
+			},
+		},
+		{
+			// Tests sit beside their rules in `src/`, but their cases are input
+			// code, not rule source.
+			name: "small-rules/local-rules-tests",
+			files: GLOB_TESTS,
+			jsPlugins: [LOCAL_RULES_PLUGIN],
+			rules: {
+				"local/prefer-existing-guard": "off",
+				"local/prefer-node-type-constant": "off",
+				"local/prefer-shared-string-constant": "off",
 			},
 		},
 		{

@@ -4,7 +4,7 @@ import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/prefer-padding-components";
 
-const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "prefer-padding-components");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "..", "tests", "fixtures", "prefer-padding-components");
 const WITH_COMPONENTS = nodePath.join(FIXTURES, "with-components");
 const WITHOUT_COMPONENTS = nodePath.join(FIXTURES, "without-components");
 const FIXTURE_ONLY_COMPONENTS = nodePath.join(FIXTURES, "fixture-only");

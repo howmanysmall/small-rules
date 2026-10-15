@@ -9,13 +9,14 @@ const isFuzzRun = env.VITIATE_FUZZ === "1" || env.VITIATE_OPTIMIZE === "1" || en
 
 const NARROWING_FLAGS = new Set(["--changed", "--project", "--related", "--shard", "--testNamePattern", "-t"]);
 const TEST_FILE_ARGUMENT = /\.(?:fuzz|test)\.[cm]?tsx?$/u;
+const TEST_ROOTS = ["documentation/", "scripts/", "src/", "tests/"];
 
 function isFocusedRun(cliArguments: ReadonlyArray<string>): boolean {
 	return cliArguments.some((argument) => {
 		if (argument.startsWith("-")) {
 			return NARROWING_FLAGS.has(argument.split("=", 1)[0] ?? argument);
 		}
-		return argument.startsWith("tests/") || TEST_FILE_ARGUMENT.test(argument);
+		return TEST_ROOTS.some((root) => argument.startsWith(root)) || TEST_FILE_ARGUMENT.test(argument);
 	});
 }
 
@@ -26,13 +27,13 @@ const testConfiguration = mergeConfig(
 	defineConfig({
 		test: {
 			benchmark: {
-				include: ["tests/**/*.bench.ts"],
+				include: ["{scripts,src,tests}/**/*.bench.ts"],
 			},
 			coverage: {
 				clean: true,
 				enabled,
 				exclude: [
-					"**/*.test.ts",
+					"**/*.{bench,test}.ts",
 					"src/index.ts",
 					"src/types/**/*.ts",
 					"src/utilities/prevent-abbreviations/types.ts",
@@ -50,7 +51,7 @@ const testConfiguration = mergeConfig(
 				{
 					test: {
 						name: "small-rules",
-						include: ["tests/**/*.test.ts"],
+						include: ["{scripts,src,tests}/**/*.test.ts"],
 					},
 				},
 				{
@@ -60,7 +61,7 @@ const testConfiguration = mergeConfig(
 						typecheck: {
 							checker: "tsgo",
 							enabled: true,
-							include: ["tests/**/*.test.ts", "tests/**/*.test-d.ts"],
+							include: ["{scripts,src,tests}/**/*.test.ts", "{scripts,src,tests}/**/*.test-d.ts"],
 							only: true,
 							tsconfig: "./tsconfig.test.json",
 						},

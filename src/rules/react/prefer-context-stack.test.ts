@@ -4,7 +4,7 @@ import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/prefer-context-stack";
 
-const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "prefer-context-stack");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "..", "tests", "fixtures", "prefer-context-stack");
 const WITH_CONTEXT_STACK = nodePath.join(FIXTURES, "with-context-stack");
 const WITHOUT_CONTEXT_STACK = nodePath.join(FIXTURES, "without-context-stack");
 const FIXTURE_ONLY_CONTEXT_STACK = nodePath.join(FIXTURES, "fixture-only");

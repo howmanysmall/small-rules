@@ -23,6 +23,7 @@
 		"packages/*/src/**/*.ts",
 		"scripts/utilities/dictionary-verbs.ts",
 		"scripts/utilities/roblox-yielding-members.ts",
+		"scripts/**/*.test.ts",
 		"scripts/utilities/compact-default-properties.ts",
 		"scripts/utilities/rule-relations/**/*.ts",
 		"scripts/utilities/sync-tsconfig-references.ts",
