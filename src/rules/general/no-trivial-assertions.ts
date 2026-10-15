@@ -38,6 +38,7 @@ interface ResolvedConstant {
 type Context = InferContextFromRule<typeof noTrivialAssertions>;
 
 function isFalsyConstant(value: ConstantPrimitive): boolean {
+	// oxlint-disable-next-line small-rules/no-useless-empty-string-comparison -- value is a primitive union, not a string.
 	return value === false || value === 0 || value === "" || value === null || value === undefined || value === 0n;
 }
 

@@ -286,7 +286,7 @@ ${sections.join("\n")}`;
 function prefixLines(block: string): string {
 	return block
 		.split("\n")
-		.map((line) => (line === "" ? " *" : ` * ${line}`))
+		.map((line) => (line.length === 0 ? " *" : ` * ${line}`))
 		.join("\n");
 }
 

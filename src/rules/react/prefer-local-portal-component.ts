@@ -119,7 +119,8 @@ const preferLocalPortalComponent = createRule("prefer-local-portal-component", "
 		const { filename, sourceCode } = context;
 		const discoverPortal = createLocalComponentDiscoverer(filename, PORTAL_COMPONENT);
 		/* v8 ignore next -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
-		const isPortalDefinitionFile = filename !== "" && inspectLocalComponentFile(filename, PORTAL_COMPONENT).matches;
+		const isPortalDefinitionFile =
+			filename.length > 0 && inspectLocalComponentFile(filename, PORTAL_COMPONENT).matches;
 		const availablePortalIdentifiers = new Set<string>();
 
 		return {

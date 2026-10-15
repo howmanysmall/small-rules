@@ -32,7 +32,7 @@ export function RelationReason({ reason }: Readonly<RelationReasonProperties>): 
 
 		const parts = segment.text.split(RULE_ID_REGEXP);
 		for (const [index, part] of parts.entries()) {
-			if (part === "") continue;
+			if (part.length === 0) continue;
 			nodes.push(index % 2 === 1 ? <code key={`code-${String(codeIndex++)}`}>{part}</code> : part);
 		}
 	}

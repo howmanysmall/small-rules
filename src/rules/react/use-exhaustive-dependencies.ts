@@ -1062,7 +1062,7 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 					readonly hookConfig: HookConfig;
 			  } {
 			const hookName = getHookName(node);
-			if (hookName === undefined || hookName === "") return undefined;
+			if (hookName === undefined || hookName.length === 0) return undefined;
 
 			const hookConfig = hookConfigs.get(hookName);
 			if (hookConfig === undefined) return undefined;

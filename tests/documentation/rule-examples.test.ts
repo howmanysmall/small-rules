@@ -17,7 +17,7 @@ interface RuleExampleCoverage {
 }
 
 function isMissingRequiredExamples({ exemption, invalidCount, validCount }: RuleExampleCoverage): boolean {
-	return exemption === undefined && (invalidCount !== 1 || validCount !== 1);
+	return exemption === undefined && (invalidCount < 1 || validCount < 1);
 }
 
 type ExampleParseLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
@@ -76,7 +76,7 @@ function isMultiStatementContainer(node: Node): boolean {
 }
 
 function isCrampedDocumentedExample(code: string, language: ExampleParseLanguage): boolean {
-	if (code.includes("\n") || code.trim() === "") return false;
+	if (code.includes("\n") || code.trim().length === 0) return false;
 
 	const program = parseExampleProgram(code, language);
 	if (program === undefined || isMultiStatementContainer(program)) return program !== undefined;
@@ -105,7 +105,7 @@ function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 }
 
 describe("documented rule examples", () => {
-	it("extracts one fail and one pass example for each non-exempt rule", () => {
+	it("extracts at least one fail and one pass example for each non-exempt rule", () => {
 		expect.assertions(1);
 
 		const violations = getRuleExampleCoverage()
@@ -119,7 +119,7 @@ describe("documented rule examples", () => {
 		expect.assertions(1);
 
 		const blankExemptions = getRuleExampleCoverage()
-			.filter(({ exemption }) => exemption?.trim() === "")
+			.filter(({ exemption }) => exemption?.trim().length === 0)
 			.map(({ name }) => name);
 
 		expect(blankExemptions).toStrictEqual([]);

@@ -26,7 +26,7 @@ export function RuleIndex({ categories, mode }: Readonly<RuleIndexProperties>): 
 	const visibleRules = rules.filter(
 		(rule) =>
 			`${rule.name} ${rule.title} ${rule.description}`.toLowerCase().includes(normalizedQuery) &&
-			(selectedCategory === "" || rule.category === selectedCategory),
+			(selectedCategory.length === 0 || rule.category === selectedCategory),
 	);
 
 	function handleCategoryChange(event: ChangeEvent<HTMLSelectElement>): void {

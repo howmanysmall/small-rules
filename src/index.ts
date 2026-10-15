@@ -45,6 +45,7 @@ import noTrivialAssertions from "$oxc-rules/general/no-trivial-assertions";
 import noUnusedImports from "$oxc-rules/general/no-unused-imports";
 import noUseOfEmptyReturnValue from "$oxc-rules/general/no-use-of-empty-return-value";
 import noUselessConstants from "$oxc-rules/general/no-useless-constants";
+import noUselessEmptyStringComparison from "$oxc-rules/general/no-useless-empty-string-comparison";
 import noVariadicSpread from "$oxc-rules/general/no-variadic-spread";
 import onlyTypeImports from "$oxc-rules/general/only-type-imports";
 import preferClassProperties from "$oxc-rules/general/prefer-class-properties";
@@ -217,6 +218,7 @@ const smallRules = definePlugin({
 		"no-use-of-empty-return-value": noUseOfEmptyReturnValue,
 		"no-useless-constants": noUselessConstants,
 		"no-useless-default": noUselessDefault,
+		"no-useless-empty-string-comparison": noUselessEmptyStringComparison,
 		"no-useless-use-effect": noUselessUseEffect,
 		"no-useless-use-memo": noUselessUseMemo,
 		"no-useless-use-spring": noUselessUseSpring,

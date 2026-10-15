@@ -266,7 +266,7 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 		const { start } = comment.loc;
 
 		const ruleIds =
-			directive.value !== undefined && directive.value !== "" ? directive.value.split(DELIMITER) : undefined;
+			directive.value !== undefined && directive.value.length > 0 ? directive.value.split(DELIMITER) : undefined;
 
 		switch (kind) {
 			case ESLINT_DISABLE:

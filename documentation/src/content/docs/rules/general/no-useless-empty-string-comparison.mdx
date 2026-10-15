@@ -1,0 +1,42 @@
+---
+title: "No Useless Empty String Comparison"
+---
+
+import { Code } from "@astrojs/starlight/components";
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-useless-empty-string-comparison">
+	<Fragment slot="rationale">
+		<p>
+			`value === ""` compares a string to one literal. `value.length === 0` checks that the string is empty. The
+			length form only compiles when `value` is a string. TypeScript then catches a `string | undefined` that the
+			literal comparison would treat as non-empty.
+		</p>
+		<ul>
+			<li>
+				**Says what it checks:** a reader of `name === ""` has to look inside the quotes to see that the literal
+				is empty and not `" "` or `"0"`. `name.length === 0` puts that in the identifier.
+			</li>
+			<li>**Keeps the polarity:** `value !== ""` becomes `value.length > 0`, the form unicorn's explicit-length-check
+				also asks for.</li>
+			<li>
+				**No falsy shortcut:** `!value` is shorter, but it also accepts `null`, `undefined`, and anything else
+				falsy, and in the trimmed form it benchmarks slower than either comparison. The length check is as fast
+				as the literal comparison it replaces.
+			</li>
+		</ul>
+		<p>
+			The rule reports `===` and `!==` against an empty string literal and offers the `.length` form as a
+			suggestion you apply by hand. The rewrite parenthesizes compound operands, so `(a || b) === ""` becomes `(a
+			|| b).length === 0`. The rule reports loose `==` and `!=` without a rewrite, because `0 == ""` and `false ==
+			""` are true and a length check would flip them.
+		</p>
+		<Code code={`if (name.length === 0) return;\nif (name.trim().length !== 0) submit(name);`} lang="ts" />
+		<p>
+			The rule has no type information. On a `string | undefined` operand, `.length` throws where `=== ""`
+			returned false. That is why the autofix is off by default. Set `allowAutofix` to `true` once your strict
+			comparisons are known to be plain strings, and the fixer rewrites them under `oxlint --fix`. Comparisons
+			against non-empty strings, template literals, and `String()` calls aren't reported.
+		</p>
+	</Fragment>
+</RulePage>
