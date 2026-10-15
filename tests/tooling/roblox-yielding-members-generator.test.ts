@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
 import {
 	createYieldingMemberCatalog,
 	hasYieldingMemberInCatalog,
 	parseClasses,
 	renderCatalog,
 } from "$script-utilities/roblox-yielding-members";
-
-import { classHasYieldingMember } from "../../src/generated/roblox-yielding-members";
 
 const apiDump = {
 	Classes: [
