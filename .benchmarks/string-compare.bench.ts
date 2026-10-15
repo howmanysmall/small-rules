@@ -23,11 +23,38 @@ for (let index = 0; index < length; index += 1) {
 
 summary(() => {
 	barplot(() => {
-		bench('.trim() === ""', () => {
-			for (const value of strings) do_not_optimize(value.trim() === "");
+		bench('string.trim() === ""', () => {
+			const array = new Array<string>();
+			let size = 0;
+
+			for (const value of strings) {
+				if (value.trim() === "") continue;
+				array[size++] = value;
+			}
+
+			do_not_optimize(array);
 		});
-		bench(".trim().length === 0", () => {
-			for (const value of strings) do_not_optimize(value.trim().length === 0);
+		bench("string.trim().length === 0", () => {
+			const array = new Array<string>();
+			let size = 0;
+
+			for (const value of strings) {
+				if (value.trim().length === 0) continue;
+				array[size++] = value;
+			}
+
+			do_not_optimize(array);
+		});
+		bench("!string.trim()", () => {
+			const array = new Array<string>();
+			let size = 0;
+
+			for (const value of strings) {
+				if (!value.trim()) continue;
+				array[size++] = value;
+			}
+
+			do_not_optimize(array);
 		});
 	});
 });
