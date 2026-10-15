@@ -199,6 +199,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-unused-imports" },
 				{ name: "no-use-of-empty-return-value" },
 				{ name: "no-useless-constants" },
+				{ name: "no-useless-empty-string-comparison" },
 				{ name: "no-variadic-spread" },
 				{ name: "only-type-imports" },
 				{ name: "prefer-class-properties" },
