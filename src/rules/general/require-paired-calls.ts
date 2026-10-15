@@ -875,7 +875,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			/* v8 ignore next -- @preserve this handler is only registered for CallExpression visitor keys. */
 			if (!isCallExpression(node)) return;
 			const callName = getCallName(node);
-			if (callName === undefined || callName === "") return;
+			if (callName === undefined || callName.length === 0) return;
 
 			const openerConfig = findPairConfig(callName, true);
 			if (openerConfig) {

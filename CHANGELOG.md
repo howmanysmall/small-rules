@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.3.3] - 2026-10-12
+
+## Fixed
+- **require-safety-comment-for-type-assertion**: A described `oxlint-disable-next-line typescript/no-unsafe-type-assertion` immediately before `as` now counts as justification, including when the comment is inside the asserted expression [#85](https://github.com/howmanysmall/small-rules/pull/85).
+
 ## [3.3.2] - 2026-10-07
 
 ## Fixed

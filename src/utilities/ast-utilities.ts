@@ -1,8 +1,11 @@
 import {
+	isArrayExpression,
 	isCallExpression,
 	isNewExpression,
 	isNode,
 	isObjectExpression,
+	isProperty,
+	isSpreadElement,
 	isTsSatisfiesExpression,
 } from "@small-rules/oxlint-utilities";
 
@@ -129,9 +132,29 @@ export function hasAttachedComments(sourceCode: SourceCode, node: ESTree.Node): 
 	return false;
 }
 
+function isExternalRoot(outer: ESTree.Node, current: ESTree.Node): boolean | undefined {
+	if (isTsSatisfiesExpression(outer)) return true;
+	if (isCallExpression(outer) || isNewExpression(outer)) {
+		return outer.arguments.some((argument) => argument === current);
+	}
+	return undefined;
+}
+
+function getClimbTarget(outer: ESTree.Node, current: ESTree.Node): ESTree.Node | undefined {
+	if (isProperty(outer)) {
+		if (outer.value !== current) return undefined;
+		return outer.parent;
+	}
+	if (isArrayExpression(outer) || isSpreadElement(outer)) return outer;
+	return undefined;
+}
+
 /**
  * Checks whether an object property's name is dictated by its consumer, such
  * as an object passed to a call or checked with `satisfies`.
+ *
+ * Nested objects and arrays inside an externally constrained object are also
+ * constrained because the outer API dictates their keys.
  *
  * @param property - The object property to check.
  * @returns Whether the property name is constrained by external code.
@@ -140,11 +163,15 @@ export function isExternallyConstrainedProperty({ parent }: ESTree.Node): boolea
 	/* v8 ignore next -- Property visitors are reached with ObjectExpression parents. @preserve */
 	if (!isObjectExpression(parent)) return false;
 
-	const { parent: grandparent } = parent;
-	if (isTsSatisfiesExpression(grandparent)) return true;
-
-	if (isCallExpression(grandparent) || isNewExpression(grandparent)) {
-		return grandparent.arguments.some((argument) => argument === parent);
+	let current: ESTree.Node = parent;
+	while (true) {
+		const outer: ESTree.Node | null = current.parent;
+		/* v8 ignore next -- climbable Object/Array/Property chains always terminate in a call, satisfies, or non-climbable wrapper before the parent chain ends. @preserve */
+		if (outer === null) return false;
+		const root = isExternalRoot(outer, current);
+		if (root !== undefined) return root;
+		const target = getClimbTarget(outer, current);
+		if (target === undefined) return false;
+		current = target;
 	}
-	return false;
 }

@@ -64,7 +64,7 @@ const banTypes = createRule("ban-types", "naming", {
 				const bannedTypeEntry = bannedTypes.get(referencedTypeName.toLowerCase());
 				if (bannedTypeEntry === undefined) return;
 
-				if (bannedTypeEntry.replacementName !== undefined && bannedTypeEntry.replacementName !== "") {
+				if (bannedTypeEntry.replacementName !== undefined && bannedTypeEntry.replacementName.length > 0) {
 					context.report({
 						data: {
 							replacementName: bannedTypeEntry.replacementName,

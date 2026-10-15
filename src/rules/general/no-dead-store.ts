@@ -309,6 +309,7 @@ function isBasicInitializer(node: ESTree.Expression): boolean {
 			node.value === null ||
 			node.value === false ||
 			node.value === true ||
+			// oxlint-disable-next-line small-rules/no-useless-empty-string-comparison -- value is a literal union, not a string.
 			node.value === "" ||
 			node.value === -1 ||
 			node.value === 0 ||

@@ -78,6 +78,14 @@ describe("starts-with-verb", () => {
 				].join("\n"),
 				errors: notVerbErrors,
 			},
+			{
+				code: ["const handlers = {", "\t[{ item: (): number => 1 }]: 1,", "};"].join("\n"),
+				errors: notVerbErrors,
+			},
+			{
+				code: ["({", "\titem: (): number => 1,", "})();"].join("\n"),
+				errors: notVerbErrors,
+			},
 		],
 		valid: [
 			{
@@ -124,6 +132,35 @@ describe("starts-with-verb", () => {
 			["defineVisitor({", "\titem(): number {", "\t\treturn 1;", "\t},", "});"].join("\n"),
 			["new Visitor({", "\titem: (): number => 1,", "});"].join("\n"),
 			["const visitor = {", "\titem(): number {", "\t\treturn 1;", "\t},", "} satisfies Visitor;"].join("\n"),
+			[
+				"build({",
+				"\tbuild: {",
+				"\t\tlib: {",
+				"\t\t\tfileName: (): string => 'sw.js',",
+				"\t\t},",
+				"\t},",
+				"});",
+			].join("\n"),
+			["new Visitor({", "\tnested: {", "\t\titem: (): number => 1,", "\t},", "});"].join("\n"),
+			[
+				"const visitor = {",
+				"\tnested: {",
+				"\t\titem(): number {",
+				"\t\t\treturn 1;",
+				"\t\t},",
+				"\t},",
+				"} satisfies Visitor;",
+			].join("\n"),
+			["build({", "\tplugins: [{", "\t\tfileName: (): string => 'sw.js',", "\t}],", "});"].join("\n"),
+			[
+				"build(...[{",
+				"\tbuild: {",
+				"\t\tlib: {",
+				"\t\t\tfileName: (): string => 'sw.js',",
+				"\t\t},",
+				"\t},",
+				"}]);",
+			].join("\n"),
 			{
 				code: "function userName(): string { return ''; }",
 				options: [{ allowList: ["user"] }],

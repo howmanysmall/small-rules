@@ -2,11 +2,14 @@ import {
 	CHAIN_EXPRESSION,
 	isBindingIdentifier,
 	isCallExpression,
+	isChainExpression,
 	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
+	isNewExpression,
 	isParenthesizedExpression,
 	isStringLiteral,
+	isThisExpression,
 	isTsParenthesizedType,
 	isTsTypeAnnotationUnknown,
 	isTsTypeReference,
@@ -19,7 +22,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import type { TypeAssertionExpression } from "@small-rules/oxlint-utilities";
-import type { ESTree } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
 const COMPONENT_NAME_PATTERN = /^[A-Z]/v;
 
@@ -122,6 +125,30 @@ export function stripParenthesis(expression: ESTree.Expression): ESTree.Expressi
 	let current = expression;
 	while (isParenthesizedExpression(current)) current = current.expression;
 	return current;
+}
+
+function isSimpleReceiver(expression: ESTree.Expression): boolean {
+	return (
+		isIdentifier(expression) ||
+		isMemberExpression(expression) ||
+		isCallExpression(expression) ||
+		isChainExpression(expression) ||
+		isNewExpression(expression) ||
+		isThisExpression(expression)
+	);
+}
+
+/**
+ * Source text for an expression that a member access will follow.
+ *
+ * @param sourceCode - The file the expression belongs to.
+ * @param receiver - The expression that becomes the receiver.
+ * @returns The expression text, parenthesized unless it already binds tighter than `.`.
+ */
+export function getReceiverText(sourceCode: SourceCode, receiver: ESTree.Expression): string {
+	const expression = stripParenthesis(receiver);
+	const text = sourceCode.getText(expression);
+	return isSimpleReceiver(expression) ? text : `(${text})`;
 }
 
 export function getMemberPropertyName(node: ESTree.MemberExpression): string | undefined {

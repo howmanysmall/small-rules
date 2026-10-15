@@ -72,7 +72,7 @@ function fail(message: string): never {
 }
 
 function isPresent(value?: string): value is string {
-	return value !== undefined && value !== "";
+	return value !== undefined && value.length > 0;
 }
 
 async function succeedsAsync(command: string, parameters: ReadonlyArray<string>): Promise<boolean> {
@@ -85,7 +85,7 @@ async function resolveGitHubTokenAsync(token?: string): Promise<string | undefin
 
 	const result = await exec("gh", ["auth", "token"], { throwOnError: false });
 	const output = result.stdout.trim();
-	return output !== "" && result.exitCode === 0 ? output : undefined;
+	return output.length > 0 && result.exitCode === 0 ? output : undefined;
 }
 
 async function resolveCredentialsAsync(apiKey?: string, githubToken?: string): Promise<Credentials> {
@@ -258,7 +258,7 @@ async function regenerateAsync(context: Context, tag: string, label: string): Pr
 	if (result.exitCode !== 0) {
 		progress.error(`${prefix} ${red("communique failed")}`);
 		const details = (result.stderr || result.stdout).trim();
-		if (details !== "") log.message(dim(details));
+		if (details.length > 0) log.message(dim(details));
 		return "failed";
 	}
 

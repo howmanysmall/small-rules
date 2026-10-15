@@ -12,7 +12,7 @@ const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable",
 
 			const { kind } = directive;
 			if (!isDisableDirectiveKind(kind)) continue;
-			if (directive.value === undefined || directive.value === "") {
+			if (directive.value === undefined || directive.value.length === 0) {
 				context.report({
 					data: { kind },
 					loc: toForceLocation(directive.comment.loc),

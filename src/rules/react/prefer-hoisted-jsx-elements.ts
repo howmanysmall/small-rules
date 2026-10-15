@@ -101,7 +101,7 @@ function isHoistableJavaScriptXmlElementName(
 	const { name } = node.openingElement;
 	if (isJsxIdentifier(name)) {
 		const firstCharacter = name.name.charAt(0);
-		if (firstCharacter !== "" && firstCharacter === firstCharacter.toLowerCase()) return true;
+		if (firstCharacter.length > 0 && firstCharacter === firstCharacter.toLowerCase()) return true;
 	}
 
 	const rootName = getJavaScriptXmlElementRootName(name);

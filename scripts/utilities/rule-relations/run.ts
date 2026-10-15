@@ -445,7 +445,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 
 export function readGeneratedEdges(relativePath: string): ReadonlyArray<GeneratedEdge> {
 	const sourceText = readRepositoryFile(relativePath);
-	if (sourceText === "") {
+	if (sourceText.length === 0) {
 		throw new Error(`Missing relation document "${relativePath}".`);
 	}
 

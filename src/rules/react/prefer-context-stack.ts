@@ -138,7 +138,7 @@ const preferContextStack = createRule("prefer-context-stack", "react", {
 		const discoverContextStack = createLocalComponentDiscoverer(filename, CONTEXT_STACK_COMPONENT);
 		/* v8 ignore next -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const isContextStackDefinitionFile =
-			filename !== "" && inspectLocalComponentFile(filename, CONTEXT_STACK_COMPONENT).matches;
+			filename.length > 0 && inspectLocalComponentFile(filename, CONTEXT_STACK_COMPONENT).matches;
 		const contextStackIdentifiers = new Set<string>();
 
 		return {
