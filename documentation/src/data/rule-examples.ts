@@ -9,27 +9,18 @@ import type { RuleExample } from "../utilities/extract-rule-examples";
 import type { RuleName } from "./rule-manifest";
 
 const workingDirectory = cwd();
-const testsDirectory = nodePath.resolve(
-	workingDirectory,
-	nodePath.basename(workingDirectory) === "documentation" ? "../tests" : "tests",
-);
-const IGNORED_TEST_ROOTS = new Set(["do-not-sync-ever", "fixtures"]);
+const repositoryRoot = nodePath.basename(workingDirectory) === "documentation" ? ".." : ".";
+const RULES_DIRECTORY = "src/rules";
+const rulesDirectory = nodePath.resolve(workingDirectory, repositoryRoot, RULES_DIRECTORY);
 
-function isCollectedTestFile(relativePath: string): boolean {
-	if (!relativePath.endsWith(".test.ts")) return false;
-
-	const [root] = relativePath.split("/", 1);
-	return root !== undefined && !IGNORED_TEST_ROOTS.has(root);
-}
-
-const testFileRelativePaths = readdirSync(testsDirectory, { encoding: "utf8", recursive: true })
-	.filter(isCollectedTestFile)
+const testFileRelativePaths = readdirSync(rulesDirectory, { encoding: "utf8", recursive: true })
+	.filter((relativePath) => relativePath.endsWith(".test.ts"))
 	.toSorted();
 const examplesByRuleName = new Map<string, Array<RuleExample>>();
 
 for (const testFileRelativePath of testFileRelativePaths) {
-	const relativePath = `tests/${testFileRelativePath}`;
-	const sourceText = readFileSync(nodePath.join(testsDirectory, testFileRelativePath), "utf8");
+	const relativePath = `${RULES_DIRECTORY}/${testFileRelativePath}`;
+	const sourceText = readFileSync(nodePath.join(rulesDirectory, testFileRelativePath), "utf8");
 	for (const extraction of extractRuleExamples(sourceText, relativePath)) {
 		const examples = examplesByRuleName.get(extraction.ruleName) ?? new Array<RuleExample>();
 		examplesByRuleName.set(extraction.ruleName, examples);

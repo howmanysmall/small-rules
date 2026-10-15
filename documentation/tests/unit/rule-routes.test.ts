@@ -1,11 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { getRulePath, ruleManifest } from "$data/rule-manifest";
 
-const docsContentDirectory = fileURLToPath(new URL("../../documentation/src/content/docs", import.meta.url));
+const docsContentDirectory = nodePath.join(import.meta.dirname, "..", "..", "src", "content", "docs");
 const rulePagesDirectory = nodePath.join(docsContentDirectory, "rules");
 const RULE_PAGE_PROPS = /<RulePage\s+rule="(?<name>[^"]+)"/gu;
 

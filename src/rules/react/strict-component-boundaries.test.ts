@@ -4,7 +4,7 @@ import { js } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/strict-component-boundaries";
 
-const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "strict-boundaries");
+const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "..", "tests", "fixtures", "strict-boundaries");
 const BASIC_APP = nodePath.join(FIXTURES, "basic-app", "app");
 
 const errors = [

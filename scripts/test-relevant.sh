@@ -29,17 +29,11 @@ while IFS= read -r -d '' record; do
 	esac
 
 	case "${path}" in
-		tests/*.test.ts | tests/*.spec.ts)
+		scripts/*.test.ts | src/*.test.ts | tests/*.test.ts)
 			addTestIfPresent "${path}"
 			;;
-		src/rules/*/*.ts)
-			category="${path#src/rules/*/}"
-			category="${category%%/*}"
-			base="${path##*/}"
-			addTestIfPresent "tests/rules/${category}/${base%.ts}.test.ts"
-			;;
-		src/index.ts)
-			addTestIfPresent "tests/index.test.ts"
+		scripts/*.ts | src/*.ts)
+			addTestIfPresent "${path%.ts}.test.ts"
 			;;
 	esac
 done < <(git status --porcelain=v1 -z --untracked-files=all)

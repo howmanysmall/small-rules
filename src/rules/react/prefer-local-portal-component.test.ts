@@ -4,7 +4,15 @@ import { tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/react/prefer-local-portal-component";
 
-const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "fixtures", "prefer-local-portal-component");
+const FIXTURES = nodePath.join(
+	import.meta.dirname,
+	"..",
+	"..",
+	"..",
+	"tests",
+	"fixtures",
+	"prefer-local-portal-component",
+);
 const WITH_PORTAL = nodePath.join(FIXTURES, "with-portal");
 const AMBIGUOUS_PORTAL = nodePath.join(FIXTURES, "ambiguous-portal");
 const FIXTURE_ONLY_PORTAL = nodePath.join(FIXTURES, "fixture-only");

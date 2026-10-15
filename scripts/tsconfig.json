@@ -18,5 +18,6 @@
 		"../tools/release-notes/src/**/*.ts",
 		"../src/**/*.ts",
 		"**/*.ts"
-	]
+	],
+	"exclude": ["**/*.bench.ts", "**/*.test.ts", "node_modules"]
 }

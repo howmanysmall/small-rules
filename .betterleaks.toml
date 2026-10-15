@@ -10,9 +10,14 @@ description = "Extends the built-in ruleset with the repo's known false positive
 filter = '''
 // `password` used as an identifier in a test fixture or a documented example,
 // holding the literal placeholder "secret". Not a credential.
+//
+// The rule test is listed at both its current path and its pre-move path
+// under `tests/`: a new ref is scanned across all history, so the older
+// commits still carry the finding under the old path.
 matchesAny(
 	attributes["path"],
 	[
+		`(^|/)src/rules/english/consistent-compound-words\.test\.ts$`,
 		`(^|/)tests/consistent-compound-words\.test\.ts$`,
 		`(^|/)documentation/src/data/generated/rule-relations\.review\.json$`,
 	],

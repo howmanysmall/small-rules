@@ -29,8 +29,8 @@ pad. A three-line release note is a correct release note.
 ## Research before writing
 
 Do not paraphrase commit subjects. For every rule change, read the rule source in `src/rules/`
-and the added or changed cases in `tests/`. The test fixtures are the ground truth for what
-now passes and what now reports. Use them to write the concrete before/after. If you cannot
+and the added or changed cases in its sibling `.test.ts` file. The test cases are the ground
+truth for what now passes and what now reports. Use them to write the concrete before/after. If you cannot
 determine the observable effect from the source and tests, describe the change narrowly rather
 than guessing at a benefit.
 
@@ -123,7 +123,7 @@ conventions.
 
 Repository layout worth reading when researching a change:
 - `src/rules/<category>/<rule-name>.ts` is one rule per file, keyed by its kebab-case name.
-- `tests/rules/<category>/<rule-name>.test.ts` holds the `valid` and `invalid` cases for that rule. A case moved
+- `src/rules/<category>/<rule-name>.test.ts` holds the `valid` and `invalid` cases for that rule. A case moved
   from `invalid` to `valid` is a fixed false positive; the reverse is a fixed false negative.
 - `src/utilities/` holds shared AST helpers. Changes here are internal unless a rule's reported
   output moved.
