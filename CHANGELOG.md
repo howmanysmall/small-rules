@@ -46,6 +46,15 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.4.0] - 2026-10-15
+
+## Added
+- Add **no-reduce-accumulator-copy** to flag copying reducer accumulators each iteration [#86](https://github.com/howmanysmall/small-rules/pull/86).
+- Add **no-useless-empty-string-comparison**, with suggestions for strict comparisons and diagnostics for loose comparisons [#88](https://github.com/howmanysmall/small-rules/pull/88).
+
+## Fixed
+- **starts-with-verb** no longer reports callback property names nested inside externally constrained objects [#87](https://github.com/howmanysmall/small-rules/pull/87).
+
 ## [3.3.3] - 2026-10-12
 
 ## Fixed
