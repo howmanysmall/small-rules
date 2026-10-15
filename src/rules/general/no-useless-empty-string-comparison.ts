@@ -29,7 +29,7 @@ const noUselessEmptyStringComparison = createRule("no-useless-empty-string-compa
 				}
 
 				const receiver = getReceiverText(context.sourceCode, leftIsEmpty ? node.right : node.left);
-				const replacement = `${receiver}.length ${node.operator} 0`;
+				const replacement = node.operator === "===" ? `${receiver}.length === 0` : `${receiver}.length > 0`;
 				const [options] = context.options;
 				if (isAllowAutofixOption(options) && options.allowAutofix) {
 					context.report({

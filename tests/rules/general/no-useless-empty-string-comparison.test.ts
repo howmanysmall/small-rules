@@ -17,7 +17,7 @@ describe("no-useless-empty-string-comparison", () => {
 						],
 					},
 				],
-				documentation: { id: "fail-strict-equality", title: "Strict equality against an empty string" },
+				documentation: { id: "fail", title: "Equality against an empty string" },
 			},
 			{
 				code: "if ('' === value) flag = true;",
@@ -29,7 +29,6 @@ describe("no-useless-empty-string-comparison", () => {
 						],
 					},
 				],
-				documentation: { id: "fail-yoda", title: "The literal on the left is reported too" },
 			},
 			{
 				code: "if (value !== '') flag = true;",
@@ -37,16 +36,14 @@ describe("no-useless-empty-string-comparison", () => {
 					{
 						messageId: "useLengthComparison",
 						suggestions: [
-							{ messageId: "suggestLengthComparison", output: "if (value.length !== 0) flag = true;" },
+							{ messageId: "suggestLengthComparison", output: "if (value.length > 0) flag = true;" },
 						],
 					},
 				],
-				documentation: { id: "fail-inequality", title: "Inequality keeps its operator" },
 			},
 			{
 				code: "if (value == '') flag = true;",
 				errors: [{ messageId: "looseEmptyStringComparison" }],
-				documentation: { id: "fail-loose", title: "Loose equality is reported without a rewrite" },
 			},
 			{
 				code: "if (value != '') flag = true;",
@@ -62,7 +59,6 @@ describe("no-useless-empty-string-comparison", () => {
 						],
 					},
 				],
-				documentation: { id: "fail-parenthesized", title: "Compound operands stay parenthesized" },
 			},
 			{
 				code: "if ((value as string) === '') flag = true;",
@@ -97,11 +93,10 @@ describe("no-useless-empty-string-comparison", () => {
 				output: "if (value.length === 0) flag = true;",
 				options: [{ allowAutofix: true }],
 				errors: [{ messageId: "useLengthComparison" }],
-				documentation: { id: "fail-autofix", title: "Autofix with allowAutofix" },
 			},
 			{
 				code: "if (value.trim() !== '') flag = true;",
-				output: "if (value.trim().length !== 0) flag = true;",
+				output: "if (value.trim().length > 0) flag = true;",
 				options: [{ allowAutofix: true }],
 				errors: [{ messageId: "useLengthComparison" }],
 			},
@@ -120,11 +115,10 @@ describe("no-useless-empty-string-comparison", () => {
 		valid: [
 			{
 				code: "if (value.length === 0) flag = true;",
-				documentation: { id: "pass-length", title: "Length comparison" },
+				documentation: { id: "pass", title: "Length comparison" },
 			},
 			{
 				code: "if (value === 'hello') flag = true;",
-				documentation: { id: "pass-non-empty", title: "Comparison against a non-empty string" },
 			},
 			"if (value > '') flag = true;",
 			"if (count === 0) flag = true;",

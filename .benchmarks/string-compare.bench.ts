@@ -1,5 +1,3 @@
-#!/usr/bin/env bun
-
 import { faker } from "@faker-js/faker";
 import { barplot, bench, do_not_optimize, run, summary } from "mitata";
 
@@ -28,6 +26,7 @@ summary(() => {
 			let size = 0;
 
 			for (const value of strings) {
+				// oxlint-disable-next-line small-rules/no-useless-empty-string-comparison -- no.
 				if (value.trim() === "") continue;
 				array[size++] = value;
 			}

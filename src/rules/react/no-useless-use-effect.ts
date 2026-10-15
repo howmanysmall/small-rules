@@ -439,6 +439,7 @@ function isEmptyObjectExpression(node: ESTree.Node): boolean {
 function isResetValue(node: ESTree.Node): boolean {
 	if (isAnyLiteral(node)) {
 		const { value } = node;
+		// oxlint-disable-next-line small-rules/no-useless-empty-string-comparison -- value is a literal union, not a string.
 		return value === "" || value === 0 || value === false || value === null;
 	}
 

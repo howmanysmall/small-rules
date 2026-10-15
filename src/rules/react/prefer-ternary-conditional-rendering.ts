@@ -264,7 +264,7 @@ function getComplementMatch(
 }
 
 function isWhitespaceText(child: ESTree.JSXChild): boolean {
-	return isJsxText(child) && child.value.trim() === "";
+	return isJsxText(child) && child.value.trim().length === 0;
 }
 
 function getBranchCandidate(child: ESTree.JSXChild): BranchCandidate | undefined {

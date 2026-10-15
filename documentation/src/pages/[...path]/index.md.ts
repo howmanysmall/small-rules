@@ -19,7 +19,7 @@ export const getStaticPaths = (async (): Promise<GetStaticPathsResult> => {
 	let size = 0;
 
 	for (const entry of entries) {
-		if (entry.id === "") continue;
+		if (entry.id.length === 0) continue;
 		staticPaths[size++] = {
 			params: { path: entry.id },
 			// oxlint-disable-next-line small-rules/prevent-abbreviations -- bruh.

@@ -61,7 +61,7 @@ const COMMIT_MARKER = "__COMMIT__";
  */
 function getFirstLine(output: string): string | undefined {
 	const line = output.split("\n", 1)[0]?.trim();
-	return line === "" ? undefined : line;
+	return line === undefined || line.length === 0 ? undefined : line;
 }
 
 /**

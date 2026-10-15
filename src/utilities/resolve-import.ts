@@ -25,5 +25,5 @@ export function resolveRelativeImport(importSource: string, sourceFile: string):
 	if (!importSource.startsWith(".")) return NOT_FOUND;
 
 	const { path } = resolver.sync(nodePath.dirname(sourceFile), importSource);
-	return path === undefined || path === "" ? NOT_FOUND : { found: true, path };
+	return path === undefined || path.length === 0 ? NOT_FOUND : { found: true, path };
 }
