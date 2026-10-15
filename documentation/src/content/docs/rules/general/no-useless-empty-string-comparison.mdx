@@ -17,10 +17,7 @@ import RulePage from "$components/rule-page.astro";
 				**Says what it checks:** a reader of `name === ""` has to look inside the quotes to see that the literal
 				is empty and not `" "` or `"0"`. `name.length === 0` puts that in the identifier.
 			</li>
-			<li>
-				**Keeps the operator:** `value !== ""` becomes `value.length !== 0`. The branch keeps its polarity. The
-				autofix never has to guess what you meant by a loose `==`.
-			</li>
+			<li>**Keeps the operator:** `value !== ""` becomes `value.length !== 0`. The branch keeps its polarity.</li>
 			<li>
 				**No falsy shortcut:** `!value` is shorter, but it also accepts `null`, `undefined`, and anything else
 				falsy, and in the trimmed form it benchmarks slower than either comparison. The length check is as fast
@@ -28,15 +25,17 @@ import RulePage from "$components/rule-page.astro";
 			</li>
 		</ul>
 		<p>
-			The rule flags `==`, `===`, `!=`, and `!==` when either side is an empty string literal. The autofix
-			rewrites the comparison in place and parenthesizes compound operands, so `(a || b) === ""` becomes `(a ||
-			b).length === 0`.
+			The rule reports `===` and `!==` against an empty string literal and offers the `.length` form as a
+			suggestion you apply by hand. The rewrite parenthesizes compound operands, so `(a || b) === ""` becomes `(a
+			|| b).length === 0`. The rule reports loose `==` and `!=` without a rewrite, because `0 == ""` and `false ==
+			""` are true and a length check would flip them.
 		</p>
 		<Code code={`if (name.length === 0) return;\nif (name.trim().length !== 0) submit(name);`} lang="ts" />
 		<p>
-			Comparisons against non-empty strings, template literals, and `String()` calls aren't reported. The rule has
-			no type information, so a loose `==` against a non-string still gets rewritten. Switch to `===` or check the
-			type first when that matters.
+			The rule has no type information. On a `string | undefined` operand, `.length` throws where `=== ""`
+			returned false. That is why the autofix is off by default. Set `allowAutofix` to `true` once your strict
+			comparisons are known to be plain strings, and the fixer rewrites them under `oxlint --fix`. Comparisons
+			against non-empty strings, template literals, and `String()` calls aren't reported.
 		</p>
 	</Fragment>
 </RulePage>

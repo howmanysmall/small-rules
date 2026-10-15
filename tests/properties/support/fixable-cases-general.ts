@@ -328,6 +328,7 @@ const arrayTypeGeneric = defineFixableCase({
 
 const noUselessEmptyStringComparison = defineFixableCase({
 	language: "ts",
+	options: [{ allowAutofix: true }],
 	render: ({ operand, operator, side, wrap }, id) => {
 		const comparison = side === "left" ? `'' ${operator} ${operand}` : `${operand} ${operator} ''`;
 		return { statements: [wrap === "if" ? `if (${comparison}) {}` : `const flagged${id} = ${comparison};`] };
@@ -335,7 +336,7 @@ const noUselessEmptyStringComparison = defineFixableCase({
 	rule: "no-useless-empty-string-comparison",
 	trigger: fc.record({
 		operand: primaryArbitrary,
-		operator: fc.constantFrom("==", "!=", "===", "!=="),
+		operator: fc.constantFrom("===", "!=="),
 		side: fc.constantFrom("left", "right"),
 		wrap: fc.constantFrom("if", "const"),
 	}),

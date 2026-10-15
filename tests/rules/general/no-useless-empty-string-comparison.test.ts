@@ -8,52 +8,112 @@ describe("no-useless-empty-string-comparison", () => {
 		invalid: [
 			{
 				code: "if (value === '') flag = true;",
-				output: "if (value.length === 0) flag = true;",
-				errors: [{ data: { replacement: "value.length === 0" }, messageId: "useLengthComparison" }],
+				errors: [
+					{
+						data: { replacement: "value.length === 0" },
+						messageId: "useLengthComparison",
+						suggestions: [
+							{ messageId: "suggestLengthComparison", output: "if (value.length === 0) flag = true;" },
+						],
+					},
+				],
 				documentation: { id: "fail-strict-equality", title: "Strict equality against an empty string" },
 			},
 			{
 				code: "if ('' === value) flag = true;",
-				output: "if (value.length === 0) flag = true;",
-				errors: [{ messageId: "useLengthComparison" }],
+				errors: [
+					{
+						messageId: "useLengthComparison",
+						suggestions: [
+							{ messageId: "suggestLengthComparison", output: "if (value.length === 0) flag = true;" },
+						],
+					},
+				],
 				documentation: { id: "fail-yoda", title: "The literal on the left is reported too" },
 			},
 			{
 				code: "if (value !== '') flag = true;",
-				output: "if (value.length !== 0) flag = true;",
-				errors: [{ messageId: "useLengthComparison" }],
+				errors: [
+					{
+						messageId: "useLengthComparison",
+						suggestions: [
+							{ messageId: "suggestLengthComparison", output: "if (value.length !== 0) flag = true;" },
+						],
+					},
+				],
 				documentation: { id: "fail-inequality", title: "Inequality keeps its operator" },
 			},
 			{
 				code: "if (value == '') flag = true;",
-				output: "if (value.length == 0) flag = true;",
-				errors: [{ messageId: "useLengthComparison" }],
+				errors: [{ messageId: "looseEmptyStringComparison" }],
+				documentation: { id: "fail-loose", title: "Loose equality is reported without a rewrite" },
 			},
 			{
-				code: "if (value.trim() === '') flag = true;",
-				output: "if (value.trim().length === 0) flag = true;",
-				errors: [{ messageId: "useLengthComparison" }],
-				documentation: { id: "fail-trim", title: "Trimmed comparison" },
+				code: "if (value != '') flag = true;",
+				errors: [{ messageId: "looseEmptyStringComparison" }],
 			},
 			{
 				code: "if ((a || b) === '') flag = true;",
-				output: "if ((a || b).length === 0) flag = true;",
-				errors: [{ messageId: "useLengthComparison" }],
+				errors: [
+					{
+						messageId: "useLengthComparison",
+						suggestions: [
+							{ messageId: "suggestLengthComparison", output: "if ((a || b).length === 0) flag = true;" },
+						],
+					},
+				],
 				documentation: { id: "fail-parenthesized", title: "Compound operands stay parenthesized" },
 			},
 			{
 				code: "if ((value as string) === '') flag = true;",
-				output: "if ((value as string).length === 0) flag = true;",
-				errors: [{ messageId: "useLengthComparison" }],
+				errors: [
+					{
+						messageId: "useLengthComparison",
+						suggestions: [
+							{
+								messageId: "suggestLengthComparison",
+								output: "if ((value as string).length === 0) flag = true;",
+							},
+						],
+					},
+				],
 			},
 			{
 				code: "if ((await load()) === '') flag = true;",
-				output: "if ((await load()).length === 0) flag = true;",
+				errors: [
+					{
+						messageId: "useLengthComparison",
+						suggestions: [
+							{
+								messageId: "suggestLengthComparison",
+								output: "if ((await load()).length === 0) flag = true;",
+							},
+						],
+					},
+				],
+			},
+			{
+				code: "if (value === '') flag = true;",
+				output: "if (value.length === 0) flag = true;",
+				options: [{ allowAutofix: true }],
 				errors: [{ messageId: "useLengthComparison" }],
+				documentation: { id: "fail-autofix", title: "Autofix with allowAutofix" },
+			},
+			{
+				code: "if (value.trim() !== '') flag = true;",
+				output: "if (value.trim().length !== 0) flag = true;",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "useLengthComparison" }],
+			},
+			{
+				code: "if (value == '') flag = true;",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "looseEmptyStringComparison" }],
 			},
 			{
 				code: "if (a === '' && b === 'hello') flag = true;",
 				output: "if (a.length === 0 && b === 'hello') flag = true;",
+				options: [{ allowAutofix: true }],
 				errors: [{ messageId: "useLengthComparison" }],
 			},
 		],
