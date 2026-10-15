@@ -354,6 +354,7 @@ export async function getOxlintAsync({
 				"small-rules/no-use-memo-simple-expression": "error",
 				"small-rules/no-useless-constants": "error",
 				"small-rules/no-useless-default": "off",
+				"small-rules/no-useless-empty-string-comparison": "error",
 				"small-rules/no-useless-use-effect": ["error", { environment: "standard" }],
 				"small-rules/no-useless-use-memo": ["error", { environment: "standard" }],
 				"small-rules/no-useless-use-spring": "off",
