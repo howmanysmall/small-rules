@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
 
-import { ruleExamples } from "../../documentation/src/data/rule-examples";
-import { ruleManifest } from "../../documentation/src/data/rule-manifest";
+import { ruleExamples } from "$data/rule-examples";
+import { ruleManifest } from "$data/rule-manifest";
 
 import type { Node, Program } from "yuku-parser";
 
-import type { RuleExample } from "../../documentation/src/utilities/extract-rule-examples";
+import type { RuleExample } from "$utilities/extract-rule-examples";
 
 interface RuleExampleCoverage {
 	readonly name: string;

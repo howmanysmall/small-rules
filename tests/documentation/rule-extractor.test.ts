@@ -3,9 +3,9 @@ import nodePath from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { extractRuleExamples } from "../../documentation/src/utilities/extract-rule-examples";
+import { extractRuleExamples } from "$utilities/extract-rule-examples";
 
-import type { RuleExample } from "../../documentation/src/utilities/extract-rule-examples";
+import type { RuleExample } from "$utilities/extract-rule-examples";
 
 const fixtureDirectory = fileURLToPath(new URL("../fixtures/documentation-rule-extractor", import.meta.url));
 

@@ -1,7 +1,7 @@
 import { ruleExamples } from "$data/rule-examples";
 import { formatRuleTitle, ruleManifest } from "$data/rule-manifest";
+import smallRules from "$small-rules";
 
-import smallRules from "../../../src/index";
 import { readRepositoryFile } from "./repository";
 import { compareStrings } from "./types";
 
