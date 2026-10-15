@@ -336,6 +336,6 @@
 		{ "action": "webfetch", "effect": "allow", "resource": "*" },
 		{ "action": "websearch", "effect": "allow", "resource": "*" },
 	],
-	"plugins": ["@nick-vi/opencode-type-inject", "@mohak34/opencode-notifier@latest", "opencode-goal-plugin"],
+	"plugins": ["@mohak34/opencode-notifier@latest", "opencode-goal-plugin"],
 	"shell": "fish",
 }
