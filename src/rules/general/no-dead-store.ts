@@ -339,7 +339,8 @@ function rangeContains(container: ESTree.Node, node: ESTree.Node): boolean {
 function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): boolean {
 	let current: ESTree.Node = usage.node;
 	while (current.parent !== null) {
-		const parent = current.parent;
+		// eslint-disable-next-line flawless/no-redundant-type-annotation -- incorrect.
+		const parent: ESTree.Node | null = current.parent;
 		if (isTryStatement(parent) && parent.block === current) {
 			const handlers = [parent.handler?.body, parent.finalizer].filter(
 				(node): node is ESTree.BlockStatement => node !== null && node !== undefined,

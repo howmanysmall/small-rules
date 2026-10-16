@@ -138,7 +138,8 @@ function assertSuggestions(
 	expect(actual.suggestions).toHaveLength(expected.length);
 	// oxlint-disable-next-line unicorn-js/no-for-loop -- lol.
 	for (let index = 0; index < expected.length; index += 1) {
-		const expectedSuggestion = expected[index];
+		// eslint-disable-next-line flawless/no-redundant-type-annotation -- incorrect.
+		const expectedSuggestion: RuleTestSuggestion | undefined = expected[index];
 		const actualSuggestion = actual.suggestions[index];
 		if (expectedSuggestion === undefined || actualSuggestion === undefined) continue;
 		if (expectedSuggestion.messageId !== undefined) equal(actualSuggestion.messageId, expectedSuggestion.messageId);

@@ -120,6 +120,7 @@
 		"@stryker-mutator/core": "catalog:test",
 		"@stryker-mutator/vitest-runner": "catalog:test",
 		"@stylistic/eslint-plugin": "catalog:lint",
+		"@total-typescript/shoehorn": "catalog:test",
 		"@total-typescript/ts-reset": "catalog:types",
 		"@types/bun": "catalog:types",
 		"@types/node": "catalog:types",

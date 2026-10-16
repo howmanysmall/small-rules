@@ -132,28 +132,28 @@ catalogs:
     eslint-plugin-astro: 3.2.1
     eslint-plugin-better-max-params: 1.0.0
     eslint-plugin-comment-length: 2.3.1
-    eslint-plugin-de-morgan: 2.2.0
+    eslint-plugin-de-morgan: 2.2.1
     eslint-plugin-eslint-plugin: 7.6.2
     eslint-plugin-flawless: 1.14.1
     eslint-plugin-jest-extended: 3.0.1
-    eslint-plugin-jsdoc: 65.1.0
+    eslint-plugin-jsdoc: 65.3.6
     eslint-plugin-n: 18.4.1
-    eslint-plugin-oxfmt: 0.27.0
+    eslint-plugin-oxfmt: 0.28.0
     eslint-plugin-perfectionist: 5.12.1
     eslint-plugin-pnpm: 1.9.1
-    eslint-plugin-react-jsx: 5.24.6
-    eslint-plugin-react-naming-convention: 5.24.6
-    eslint-plugin-react-x: 5.24.6
+    eslint-plugin-react-jsx: 5.27.2
+    eslint-plugin-react-naming-convention: 5.27.2
+    eslint-plugin-react-x: 5.27.2
     eslint-plugin-roblox-ts: 1.4.1
     eslint-plugin-sonarjs: 4.2.2
-    eslint-plugin-unicorn: 77.0.0
+    eslint-plugin-unicorn: 78.0.0
     eslint-plugin-unused-imports: 4.4.1
-    fallow: 3.31.0
-    oxfmt: 0.72.0
-    oxlint: 1.87.0
-    oxlint-plugin-react-doctor: 0.9.17
-    oxlint-tsgolint: 7.0.2003
-    react-doctor: 0.9.17
+    fallow: 3.33.1
+    oxfmt: 0.73.0
+    oxlint: 1.88.0
+    oxlint-plugin-react-doctor: 0.9.18
+    oxlint-tsgolint: 7.0.2004
+    react-doctor: 0.9.18
   opencode2:
     "@opencode/plugin": 2.0.22
     "@opencode/schema": 2.0.22
@@ -196,6 +196,7 @@ catalogs:
     "@stryker-mutator/vitest-runner": 10.0.0
     "@testing-library/react": 16.3.3
     "@testing-library/user-event": 14.6.7
+    "@total-typescript/shoehorn": 0.1.2
     "@vitest/coverage-istanbul": 5.0.3
     "@vitest/coverage-v8": 5.0.3
     "@vitiate/core": 0.3.1
