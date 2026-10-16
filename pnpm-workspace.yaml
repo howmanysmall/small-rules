@@ -116,7 +116,7 @@ catalogs:
     "@fontsource-variable/newsreader": 5.3.0
     "@fontsource/ibm-plex-mono": 5.3.0
     astro: 7.3.5
-    oxc-transform-react: 0.145.0
+    oxc-transform-react: 0.154.0
     react: 19.3.1
     react-dom: 19.3.1
     sharp: 0.35.5
@@ -188,7 +188,7 @@ catalogs:
     zx: 8.8.5
   test:
     "@fast-check/vitest": 0.5.0
-    "@playwright/test": 1.63.0
+    "@playwright/test": 1.64.1
     "@stryker-mutator/api": 10.0.0
     "@stryker-mutator/core": 10.0.0
     "@stryker-mutator/vitest-runner": 10.0.0
