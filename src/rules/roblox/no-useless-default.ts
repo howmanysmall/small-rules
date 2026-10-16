@@ -659,7 +659,7 @@ const IS_DEFAULT_VALUES = {
 
 // oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- I hate you lol
 /** @internal Exported for unit tests; not part of the published surface. */
-// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- shut up
+// oxlint-disable-next-line jsdoc/require-returns -- shut up
 export function isDefaultValue(node: ESTree.Expression, canonicalValue: CanonicalValue): boolean {
 	switch (canonicalValue.type) {
 		case "bool":

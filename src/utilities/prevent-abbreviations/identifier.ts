@@ -29,7 +29,7 @@ function isNonAsciiUpperIdentifierStart(codePoint: number): boolean {
 
 // oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- Stupid rule
 /** @internal Exported for unit tests; not part of the published surface. */
-// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- optimization
+// oxlint-disable-next-line jsdoc/require-returns -- optimization
 export function isIdentifierStartCodePoint(codePoint: number): boolean {
 	if (codePoint < 0xc0) return isAsciiIdentifierStart(codePoint);
 	if (codePoint >= 0x3001 && codePoint <= 0xd7ff) return true;
@@ -39,7 +39,7 @@ export function isIdentifierStartCodePoint(codePoint: number): boolean {
 
 // oxlint-disable-next-line jsdoc-js/require-description jsdoc/empty-tags -- Stupid rule
 /** @internal Exported for unit tests; not part of the published surface. */
-// oxlint-disable-next-line jsdoc/require-returns jsdoc/require-param -- optimization
+// oxlint-disable-next-line jsdoc/require-returns -- optimization
 export function isIdentifierPartCodePoint(codePoint: number): boolean {
 	if (isIdentifierStartCodePoint(codePoint)) return true;
 	if (codePoint >= 48 && codePoint <= 57) return true;
