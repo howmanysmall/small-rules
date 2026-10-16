@@ -532,6 +532,77 @@ url = "https://github.com/jdx/hk/releases/download/v2.6.0/hk-x86_64-pc-windows-m
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 repository_ids = { repository = "922514152", owner = "216188" }
 
+[[tools.jactionlint]]
+version = "2.2.0"
+backend = "github:jdx/jactionlint"
+specifiers = ["latest"]
+
+[tools.jactionlint."platforms.linux-arm64"]
+checksum = "sha256:6d4c3831cc360b14550fb2f4605b4de9d2761515cd3fd5c1da718528b314647d"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875713"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.linux-arm64-musl"]
+checksum = "sha256:6d4c3831cc360b14550fb2f4605b4de9d2761515cd3fd5c1da718528b314647d"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875713"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.linux-x64"]
+checksum = "sha256:8137d5bfe266dd5e48d2af2306827785ce07c6988e04b1c3d6ad4776e97d27d2"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875708"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.linux-x64-baseline"]
+checksum = "sha256:8137d5bfe266dd5e48d2af2306827785ce07c6988e04b1c3d6ad4776e97d27d2"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875708"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.linux-x64-musl"]
+checksum = "sha256:8137d5bfe266dd5e48d2af2306827785ce07c6988e04b1c3d6ad4776e97d27d2"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875708"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:8137d5bfe266dd5e48d2af2306827785ce07c6988e04b1c3d6ad4776e97d27d2"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875708"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.macos-arm64"]
+checksum = "sha256:622b29b15a59618bc032163073209ffc434252e9a19eafd451e69207a50f266a"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875646"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.macos-x64"]
+checksum = "sha256:74efa76b1c200a2b7778c28e9aa0c3ba1c843863006a2f8916f252f8c048d42b"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875655"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.macos-x64-baseline"]
+checksum = "sha256:74efa76b1c200a2b7778c28e9aa0c3ba1c843863006a2f8916f252f8c048d42b"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875655"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.windows-x64"]
+checksum = "sha256:97300770d2bea28110736e34edfc9a21d80840090af64dc4b6116b6467f537a4"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875792"
+provenance = "github-attestations"
+
+[tools.jactionlint."platforms.windows-x64-baseline"]
+checksum = "sha256:97300770d2bea28110736e34edfc9a21d80840090af64dc4b6116b6467f537a4"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.2.0/jactionlint_2.2.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/640875792"
+provenance = "github-attestations"
+
 [[tools.ni]]
 version = "30.6.0"
 aube = { path = ".mise/locks/ni/30.6.0", digest = "sha256:b71563dcce8f3d0b62a41ae3b44333569923a86a6c47e70d99917885f190edda" }

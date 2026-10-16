@@ -33,6 +33,7 @@ shfmt = "latest"
 tombi = "latest"
 vale = "latest"
 zizmor = "latest"
+jactionlint = "latest"
 
 [tasks]
 backtickify = '''
