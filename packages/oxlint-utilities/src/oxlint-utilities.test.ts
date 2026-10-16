@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
 
@@ -195,7 +195,7 @@ function findNodes(source: HarnessSourceCode, type: ESTree.Node["type"]): Readon
 }
 
 describe("ast node guards", () => {
-	it.each(GUARD_CASES)("recognizes only $name", ({ acceptedTypes, code, guard, rejectedType }) => {
+	it.for(GUARD_CASES)("recognizes only $name", ({ acceptedTypes, code, guard, rejectedType }, { expect }) => {
 		expect.assertions(2);
 
 		const source = parseCode(code);
