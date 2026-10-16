@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -38,7 +38,7 @@ const tester = createRuleTester({ language: "js", sourceType: "module" });
 const templateExpressionCode = `check(\`${String.fromCharCode(36)}{value}\`);`;
 
 describe("isExpressionSideEffectSafe", () => {
-	it("should treat private identifier property keys as safe parser keys", () => {
+	it("should treat private identifier property keys as safe parser keys", ({ expect }) => {
 		expect.assertions(1);
 
 		// Arrange

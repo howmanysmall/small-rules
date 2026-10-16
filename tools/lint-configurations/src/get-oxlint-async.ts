@@ -535,6 +535,13 @@ export async function getOxlintAsync({
 			},
 		},
 		{
+			name: "small-rules/disable-slop-rules",
+			files: [GLOB_SRC],
+			rules: {
+				"jsdoc/require-param": "off",
+			},
+		},
+		{
 			name: "small-rules/native-id-length",
 			files: [GLOB_SRC],
 			rules: {

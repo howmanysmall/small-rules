@@ -44,7 +44,7 @@ describe("relationship publication gate", () => {
 		},
 	);
 
-	it("does not publish an unrelated pair because a speculative kind answer is high", () => {
+	it("does not publish an unrelated pair because a speculative kind answer is high", ({ expect }) => {
 		expect.assertions(1);
 
 		const result = resolvePairRelation({

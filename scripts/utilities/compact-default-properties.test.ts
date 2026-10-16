@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { compactDefaultProperties } from "$script-utilities/compact-default-properties";
 
@@ -17,7 +17,7 @@ const canonical = {
 };
 
 describe("compactDefaultProperties", () => {
-	it("sorts properties and deduplicates shared encoded values", () => {
+	it("sorts properties and deduplicates shared encoded values", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(compactDefaultProperties(canonical)).toStrictEqual({
@@ -36,7 +36,7 @@ describe("compactDefaultProperties", () => {
 		});
 	});
 
-	it("passes infinite components through untouched", () => {
+	it("passes infinite components through untouched", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(
@@ -59,7 +59,7 @@ describe("compactDefaultProperties", () => {
 		});
 	});
 
-	it("compacts an empty class map", () => {
+	it("compacts an empty class map", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(compactDefaultProperties({ classes: {} })).toStrictEqual({
@@ -70,7 +70,7 @@ describe("compactDefaultProperties", () => {
 		});
 	});
 
-	it("rejects unknown canonical value types", () => {
+	it("rejects unknown canonical value types", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() =>
@@ -80,7 +80,7 @@ describe("compactDefaultProperties", () => {
 		).toThrow(TypeError);
 	});
 
-	it("rejects enum values without an enum type", () => {
+	it("rejects enum values without an enum type", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() =>
@@ -90,7 +90,7 @@ describe("compactDefaultProperties", () => {
 		).toThrow(TypeError);
 	});
 
-	it("rejects values that fail canonical validation", () => {
+	it("rejects values that fail canonical validation", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(() => compactDefaultProperties({ classes: { Part: { Anchored: { type: "bool" } } } })).toThrow(

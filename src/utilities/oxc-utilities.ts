@@ -100,7 +100,7 @@ export function stripParenthesizedType(type: ESTree.TSType): ESTree.TSType {
 }
 
 export function stripExpressionWrappers(expression: ESTree.Expression): ESTree.Expression {
-	let current: ESTree.Expression = expression;
+	let current = expression;
 
 	while (true) {
 		switch (current.type) {

@@ -3,7 +3,7 @@ import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import nodeProcess from "node:process";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -114,7 +114,7 @@ describe("addLocalComponentImportIdentifiers accumulation", () => {
 });
 
 describe("addLocalComponentImportIdentifiers Oxc IdentifierName behavior", () => {
-	it("named imports with IdentifierName type do not match Identifier check", () => {
+	it("named imports with IdentifierName type do not match Identifier check", ({ expect }) => {
 		expect.assertions(3);
 
 		const identifiers = new Set<string>();
@@ -146,7 +146,7 @@ describe("addLocalComponentImportIdentifiers Oxc IdentifierName behavior", () =>
 });
 
 describe("addLocalComponentImportIdentifiers", () => {
-	it("should ignore namespace imports when collecting identifiers", () => {
+	it("should ignore namespace imports when collecting identifiers", ({ expect }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -173,7 +173,7 @@ describe("addLocalComponentImportIdentifiers", () => {
 });
 
 describe("inspectRelativeLocalComponentImport", () => {
-	it("should ignore unresolved relative imports", () => {
+	it("should ignore unresolved relative imports", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -202,7 +202,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should ignore non-relative import sources and missing filenames", () => {
+	it("should ignore non-relative import sources and missing filenames", ({ expect, onTestFinished }) => {
 		expect.assertions(2);
 
 		// Arrange
@@ -246,7 +246,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(missingFilenameInspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should reject relative imports resolved to non-component extensions", () => {
+	it("should reject relative imports resolved to non-component extensions", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -277,7 +277,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should ignore component files inside ignored directories", () => {
+	it("should ignore component files inside ignored directories", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -308,7 +308,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should reject matching files that do not export the component", () => {
+	it("should reject matching files that do not export the component", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -339,7 +339,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should reject component files whose basename is not configured", () => {
+	it("should reject component files whose basename is not configured", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -370,7 +370,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should reject matching files that never mention the component name", () => {
+	it("should reject matching files that never mention the component name", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -401,7 +401,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should reject relative imports resolved to declaration files", () => {
+	it("should reject relative imports resolved to declaration files", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -432,7 +432,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should report named import style for named component exports", () => {
+	it("should report named import style for named component exports", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -463,7 +463,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual({ importStyle: "named", matches: true });
 	});
 
-	it("should require configured markers before matching a local component file", () => {
+	it("should require configured markers before matching a local component file", ({ expect, onTestFinished }) => {
 		expect.assertions(2);
 
 		// Arrange
@@ -511,7 +511,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(nonMatchingInspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should keep matching after the regex cache evicts older entries", () => {
+	it("should keep matching after the regex cache evicts older entries", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -554,7 +554,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 });
 
 describe("discoverLocalComponent", () => {
-	it("should return not found when there is no project root", () => {
+	it("should return not found when there is no project root", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -571,7 +571,7 @@ describe("discoverLocalComponent", () => {
 		expect(discovery).toStrictEqual({ found: false });
 	});
 
-	it("should return a sibling import source without the file extension", () => {
+	it("should return a sibling import source without the file extension", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -597,7 +597,7 @@ describe("discoverLocalComponent", () => {
 		});
 	});
 
-	it("should ignore indexed component candidates in ignored directories", () => {
+	it("should ignore indexed component candidates in ignored directories", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -624,7 +624,7 @@ describe("discoverLocalComponent", () => {
 		});
 	});
 
-	it("should reuse the cached project file index on repeated discovery", () => {
+	it("should reuse the cached project file index on repeated discovery", ({ expect, onTestFinished }) => {
 		expect.assertions(2);
 
 		// Arrange
@@ -646,7 +646,7 @@ describe("discoverLocalComponent", () => {
 		expect(secondDiscovery).toMatchObject({ found: true, importSource: "./button" });
 	});
 
-	it("should ignore declaration files while indexing project components", () => {
+	it("should ignore declaration files while indexing project components", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -668,7 +668,7 @@ describe("discoverLocalComponent", () => {
 		expect(discovery).toStrictEqual({ found: false });
 	});
 
-	it("should remove a trailing index segment from the discovered import source", () => {
+	it("should remove a trailing index segment from the discovered import source", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -694,7 +694,7 @@ describe("discoverLocalComponent", () => {
 		});
 	});
 
-	it("should ignore component candidates in gitignored directories", () => {
+	it("should ignore component candidates in gitignored directories", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -718,7 +718,7 @@ describe("discoverLocalComponent", () => {
 		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
 	});
 
-	it("should let a nested gitignore negation re-include a component", () => {
+	it("should let a nested gitignore negation re-include a component", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -742,7 +742,7 @@ describe("discoverLocalComponent", () => {
 		expect(discovery).toMatchObject({ found: true, importSource: "./button" });
 	});
 
-	it("should not index symbolic links to component files", () => {
+	it("should not index symbolic links to component files", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange
@@ -767,7 +767,7 @@ describe("discoverLocalComponent", () => {
 
 	it.skipIf(CANNOT_REVOKE_DIRECTORY_ACCESS)(
 		"should skip directories it cannot read instead of failing the lint",
-		() => {
+		({ expect, onTestFinished }) => {
 			expect.assertions(1);
 
 			// Arrange
@@ -793,7 +793,7 @@ describe("discoverLocalComponent", () => {
 		},
 	);
 
-	it("should return not found when multiple matching component files exist", () => {
+	it("should return not found when multiple matching component files exist", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		// Arrange

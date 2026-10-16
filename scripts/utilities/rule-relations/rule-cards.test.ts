@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { ruleManifest } from "$data/rule-manifest";
 import { buildRuleCards } from "$script-utilities/rule-relations/rule-cards";
 
 describe("buildRuleCards", () => {
-	it("keeps the configuration that makes a documented example invalid", () => {
+	it("keeps the configuration that makes a documented example invalid", ({ expect }) => {
 		expect.assertions(1);
 
 		const example = buildRuleCards()
@@ -14,7 +14,7 @@ describe("buildRuleCards", () => {
 		expect(example).toMatchObject({ options: [{ bannedInstances: ["Part"] }] });
 	});
 
-	it("builds a card for every manifest rule", () => {
+	it("builds a card for every manifest rule", ({ expect }) => {
 		expect.assertions(2);
 
 		const cards = buildRuleCards();
@@ -24,7 +24,7 @@ describe("buildRuleCards", () => {
 		expect(cards.get("no-print")?.name).toBe("no-print");
 	});
 
-	it("captures the documented facts, examples, and rationale for no-print", () => {
+	it("captures the documented facts, examples, and rationale for no-print", ({ expect }) => {
 		expect.assertions(5);
 
 		const card = buildRuleCards().get("no-print");
@@ -36,7 +36,7 @@ describe("buildRuleCards", () => {
 		expect(card?.examples.length).toBeLessThanOrEqual(4);
 	});
 
-	it("records shared utilities from rule sources", () => {
+	it("records shared utilities from rule sources", ({ expect }) => {
 		expect.assertions(1);
 
 		const card = buildRuleCards().get("no-print");

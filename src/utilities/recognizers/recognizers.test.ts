@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { createCamelCaseDetector } from "$oxc-utilities/recognizers/camel-case-detector";
 import { createContainsDetector } from "$oxc-utilities/recognizers/contains-detector";
@@ -8,7 +8,7 @@ import { createKeywordsDetector } from "$oxc-utilities/recognizers/keywords-dete
 
 describe("createContainsDetector utility", () => {
 	describe("string patterns", () => {
-		it("finds a plain string pattern", () => {
+		it("finds a plain string pattern", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["for("]);
@@ -16,7 +16,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("for(let i=0;i<n;i++)")).toBe(1);
 		}, 5000);
 
-		it("is case-sensitive for string patterns", () => {
+		it("is case-sensitive for string patterns", ({ expect }) => {
 			expect.assertions(2);
 
 			const detector = createContainsDetector(0.5, ["import"]);
@@ -25,7 +25,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("Import 'x'")).toBe(0);
 		}, 5000);
 
-		it("finds multiple occurrences of the same pattern", () => {
+		it("finds multiple occurrences of the same pattern", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["this."]);
@@ -33,7 +33,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("this.x = this.y")).toBe(2);
 		}, 5000);
 
-		it("finds across multiple patterns", () => {
+		it("finds across multiple patterns", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["for(", "if("]);
@@ -41,7 +41,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("for(let i=0;i<n;i++){if(x)break}")).toBe(2);
 		}, 5000);
 
-		it("returns 0 when no pattern matches", () => {
+		it("returns 0 when no pattern matches", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["for("]);
@@ -49,7 +49,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("const x = 1")).toBe(0);
 		}, 5000);
 
-		it("treats an empty pattern as matching nothing", () => {
+		it("treats an empty pattern as matching nothing", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, [""]);
@@ -60,7 +60,7 @@ describe("createContainsDetector utility", () => {
 	});
 
 	describe("regex patterns", () => {
-		it("uses regex source against whitespace-compressed text", () => {
+		it("uses regex source against whitespace-compressed text", ({ expect }) => {
 			expect.assertions(2);
 
 			const detector = createContainsDetector(0.5, [/\breturn\b/u]);
@@ -69,7 +69,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("return(42)")).toBe(1);
 		}, 5000);
 
-		it("counts multiple regex matches in compressed text", () => {
+		it("counts multiple regex matches in compressed text", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, [/\bconst\b/gu]);
@@ -77,7 +77,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("const a = 1; const b = 2")).toBe(0);
 		}, 5000);
 
-		it("matches regex patterns without word boundaries in compressed text", () => {
+		it("matches regex patterns without word boundaries in compressed text", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, [/return/u]);
@@ -87,7 +87,7 @@ describe("createContainsDetector utility", () => {
 	});
 
 	describe("whitespace compression", () => {
-		it("matches patterns ignoring whitespace", () => {
+		it("matches patterns ignoring whitespace", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["for("]);
@@ -95,7 +95,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("for  (  let i=0;i<n;i++)")).toBe(1);
 		}, 5000);
 
-		it("compresses whitespace before matching", () => {
+		it("compresses whitespace before matching", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["if("]);
@@ -105,7 +105,7 @@ describe("createContainsDetector utility", () => {
 	});
 
 	describe("regex special characters in string patterns", () => {
-		it("escapes dots in string patterns literally", () => {
+		it("escapes dots in string patterns literally", ({ expect }) => {
 			expect.assertions(2);
 
 			const detector = createContainsDetector(0.5, ["this."]);
@@ -114,7 +114,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("thisX")).toBe(0);
 		}, 5000);
 
-		it("escapes parentheses in string patterns literally", () => {
+		it("escapes parentheses in string patterns literally", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, ["require("]);
@@ -124,7 +124,7 @@ describe("createContainsDetector utility", () => {
 	});
 
 	describe("lastIndex safety", () => {
-		it("resets lastIndex between scans", () => {
+		it("resets lastIndex between scans", ({ expect }) => {
 			expect.assertions(3);
 
 			const detector = createContainsDetector(0.5, ["const"]);
@@ -134,7 +134,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("const z = 3")).toBe(1);
 		}, 5000);
 
-		it("does not leak state across repeated scan calls", () => {
+		it("does not leak state across repeated scan calls", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createContainsDetector(0.5, [/var/u]);
@@ -147,7 +147,7 @@ describe("createContainsDetector utility", () => {
 
 describe("createEndWithDetector utility", () => {
 	describe("basic matching", () => {
-		it("detects line ending with semicolon", () => {
+		it("detects line ending with semicolon", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -155,7 +155,7 @@ describe("createEndWithDetector utility", () => {
 			expect(detector.scan("const x = 1;")).toBe(1);
 		}, 5000);
 
-		it("detects line ending with closing brace", () => {
+		it("detects line ending with closing brace", ({ expect }) => {
 			expect.assertions(2);
 
 			const detector = createEndWithDetector(0.95, ["}", "{"]);
@@ -164,7 +164,7 @@ describe("createEndWithDetector utility", () => {
 			expect(detector.scan("}")).toBe(1);
 		}, 5000);
 
-		it("returns 0 when line does not end with target", () => {
+		it("returns 0 when line does not end with target", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -174,7 +174,7 @@ describe("createEndWithDetector utility", () => {
 	});
 
 	describe("whitespace handling", () => {
-		it("skips trailing whitespace", () => {
+		it("skips trailing whitespace", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -182,7 +182,7 @@ describe("createEndWithDetector utility", () => {
 			expect(detector.scan("const x = 1;   ")).toBe(1);
 		}, 5000);
 
-		it("skips trailing tabs", () => {
+		it("skips trailing tabs", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -192,7 +192,7 @@ describe("createEndWithDetector utility", () => {
 	});
 
 	describe("comment marker handling", () => {
-		it("skips trailing comment markers", () => {
+		it("skips trailing comment markers", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -200,7 +200,7 @@ describe("createEndWithDetector utility", () => {
 			expect(detector.scan("const x = 1; */")).toBe(1);
 		}, 5000);
 
-		it("skips trailing asterisk", () => {
+		it("skips trailing asterisk", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -210,7 +210,7 @@ describe("createEndWithDetector utility", () => {
 	});
 
 	describe("empty and edge cases", () => {
-		it("returns 0 for empty string", () => {
+		it("returns 0 for empty string", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -218,7 +218,7 @@ describe("createEndWithDetector utility", () => {
 			expect(detector.scan("")).toBe(0);
 		}, 5000);
 
-		it("returns 0 for whitespace-only string", () => {
+		it("returns 0 for whitespace-only string", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createEndWithDetector(0.95, [";"]);
@@ -228,7 +228,7 @@ describe("createEndWithDetector utility", () => {
 	});
 
 	describe("multiple endings", () => {
-		it("matches any of the specified endings", () => {
+		it("matches any of the specified endings", ({ expect }) => {
 			expect.assertions(4);
 
 			const detector = createEndWithDetector(0.95, ["}", ";", "{"]);
@@ -243,7 +243,7 @@ describe("createEndWithDetector utility", () => {
 
 describe("createKeywordsDetector utility", () => {
 	describe("basic matching", () => {
-		it("counts keyword occurrences", () => {
+		it("counts keyword occurrences", ({ expect }) => {
 			expect.assertions(2);
 
 			const detector = createKeywordsDetector(0.3, ["const", "let", "var"]);
@@ -252,7 +252,7 @@ describe("createKeywordsDetector utility", () => {
 			expect(detector.scan("const x = 1; let y = 2")).toBe(2);
 		}, 5000);
 
-		it("returns 0 when no keyword matches", () => {
+		it("returns 0 when no keyword matches", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.3, ["const"]);
@@ -262,7 +262,7 @@ describe("createKeywordsDetector utility", () => {
 	});
 
 	describe("word boundary splitting", () => {
-		it("splits on spaces", () => {
+		it("splits on spaces", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.3, ["return"]);
@@ -270,7 +270,7 @@ describe("createKeywordsDetector utility", () => {
 			expect(detector.scan("return 42")).toBe(1);
 		}, 5000);
 
-		it("splits on parentheses", () => {
+		it("splits on parentheses", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.3, ["if"]);
@@ -278,7 +278,7 @@ describe("createKeywordsDetector utility", () => {
 			expect(detector.scan("if(x)")).toBe(1);
 		}, 5000);
 
-		it("splits on braces", () => {
+		it("splits on braces", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.3, ["else"]);
@@ -286,7 +286,7 @@ describe("createKeywordsDetector utility", () => {
 			expect(detector.scan("else{x}")).toBe(1);
 		}, 5000);
 
-		it("splits on tabs", () => {
+		it("splits on tabs", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.3, ["const"]);
@@ -296,7 +296,7 @@ describe("createKeywordsDetector utility", () => {
 	});
 
 	describe("multi-word lines", () => {
-		it("counts multiple keyword occurrences across split words", () => {
+		it("counts multiple keyword occurrences across split words", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.3, ["return"]);
@@ -304,7 +304,7 @@ describe("createKeywordsDetector utility", () => {
 			expect(detector.scan("return return")).toBe(2);
 		}, 5000);
 
-		it("does not match partial keywords embedded in other tokens", () => {
+		it("does not match partial keywords embedded in other tokens", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createKeywordsDetector(0.7, ["++"]);
@@ -316,7 +316,7 @@ describe("createKeywordsDetector utility", () => {
 
 describe("createCamelCaseDetector utility", () => {
 	describe("detection", () => {
-		it("detects camelCase pattern", () => {
+		it("detects camelCase pattern", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -324,7 +324,7 @@ describe("createCamelCaseDetector utility", () => {
 			expect(detector.scan("const myVariable = 1")).toBe(1);
 		}, 5000);
 
-		it("detects camelCase at different positions", () => {
+		it("detects camelCase at different positions", ({ expect }) => {
 			expect.assertions(2);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -333,7 +333,7 @@ describe("createCamelCaseDetector utility", () => {
 			expect(detector.scan("const fooBarBaz")).toBe(1);
 		}, 5000);
 
-		it("returns 0 for all-lowercase", () => {
+		it("returns 0 for all-lowercase", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -341,7 +341,7 @@ describe("createCamelCaseDetector utility", () => {
 			expect(detector.scan("const myvariable = 1")).toBe(0);
 		}, 5000);
 
-		it("returns 0 for all-uppercase with no lowercase prefix", () => {
+		it("returns 0 for all-uppercase with no lowercase prefix", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -349,7 +349,7 @@ describe("createCamelCaseDetector utility", () => {
 			expect(detector.scan("CONST")).toBe(0);
 		}, 5000);
 
-		it("detects space-to-uppercase transition as camelCase-like", () => {
+		it("detects space-to-uppercase transition as camelCase-like", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -359,7 +359,7 @@ describe("createCamelCaseDetector utility", () => {
 	});
 
 	describe("edge cases", () => {
-		it("returns 0 for empty string", () => {
+		it("returns 0 for empty string", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -367,7 +367,7 @@ describe("createCamelCaseDetector utility", () => {
 			expect(detector.scan("")).toBe(0);
 		}, 5000);
 
-		it("returns 0 for single character", () => {
+		it("returns 0 for single character", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -375,7 +375,7 @@ describe("createCamelCaseDetector utility", () => {
 			expect(detector.scan("a")).toBe(0);
 		}, 5000);
 
-		it("returns 0 for two lowercase characters", () => {
+		it("returns 0 for two lowercase characters", ({ expect }) => {
 			expect.assertions(1);
 
 			const detector = createCamelCaseDetector(0.5);
@@ -386,7 +386,7 @@ describe("createCamelCaseDetector utility", () => {
 });
 
 describe("recognize (detector probability)", () => {
-	it("returns 0 for zero matches", () => {
+	it("returns 0 for zero matches", ({ expect }) => {
 		expect.assertions(1);
 
 		const detector = createKeywordsDetector(0.5, ["xyz"]);
@@ -394,7 +394,7 @@ describe("recognize (detector probability)", () => {
 		expect(recognize(detector, "hello world")).toBe(0);
 	}, 5000);
 
-	it("returns probability for single match", () => {
+	it("returns probability for single match", ({ expect }) => {
 		expect.assertions(1);
 
 		const detector = createKeywordsDetector(0.5, ["const"]);
@@ -402,7 +402,7 @@ describe("recognize (detector probability)", () => {
 		expect(recognize(detector, "const x = 1")).toBeCloseTo(0.5, 10);
 	}, 5000);
 
-	it("increases probability for multiple matches", () => {
+	it("increases probability for multiple matches", ({ expect }) => {
 		expect.assertions(2);
 
 		const detector = createKeywordsDetector(0.5, ["const"]);
@@ -412,7 +412,7 @@ describe("recognize (detector probability)", () => {
 		expect(probability).toBeLessThan(1);
 	}, 5000);
 
-	it("compounds the documented probability for repeated matches", () => {
+	it("compounds the documented probability for repeated matches", ({ expect }) => {
 		expect.assertions(1);
 
 		const detector = createKeywordsDetector(0.3, ["return"]);

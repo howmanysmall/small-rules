@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { judgmentThresholds } from "$script-utilities/rule-relations/constants";
 import { resolvePairRelation } from "$script-utilities/rule-relations/resolve";
@@ -27,7 +27,7 @@ function createResult(judgments: PairJudgments): RegenerationResult {
 }
 
 describe("relation review report", () => {
-	it("checks negative labels against rejections and leaves unjudged pins unevaluated", () => {
+	it("checks negative labels against rejections and leaves unjudged pins unevaluated", ({ expect }) => {
 		expect.assertions(3);
 
 		const report = createRelationReviewReport({
@@ -52,7 +52,7 @@ describe("relation review report", () => {
 		expect(report.modelJudgments.rejectedCount).toBe(1);
 	});
 
-	it("does not invent evaluation labels when there are no manual decisions", () => {
+	it("does not invent evaluation labels when there are no manual decisions", ({ expect }) => {
 		expect.assertions(1);
 
 		const report = createRelationReviewReport({
@@ -66,7 +66,7 @@ describe("relation review report", () => {
 		expect(report.qualityEvaluation).toMatchObject({ checkedPairCount: 0, status: "not-measured" });
 	});
 
-	it("matches undirected pins in either order but detects reversed dependencies", () => {
+	it("matches undirected pins in either order but detects reversed dependencies", ({ expect }) => {
 		expect.assertions(2);
 
 		const base = { cards: new Map<RuleName, RuleCard>(), denylist: [], previous: [] };
@@ -85,7 +85,7 @@ describe("relation review report", () => {
 		expect(reversed.qualityEvaluation.disagreements).toHaveLength(1);
 	});
 
-	it("keeps rejected reasons in review rather than counting them as capped or unrelated", () => {
+	it("keeps rejected reasons in review rather than counting them as capped or unrelated", ({ expect }) => {
 		expect.assertions(4);
 
 		const report = createRelationReviewReport({
@@ -107,7 +107,7 @@ describe("relation review report", () => {
 		expect(report.modelJudgments.published).toHaveLength(0);
 	});
 
-	it("exposes a wrong directed prediction before a manual pin replaces it", () => {
+	it("exposes a wrong directed prediction before a manual pin replaces it", ({ expect }) => {
 		expect.assertions(3);
 
 		const report = createRelationReviewReport({

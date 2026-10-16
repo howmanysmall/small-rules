@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 import { createRuleTester } from "@small-rules/rule-harness";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
@@ -559,7 +559,7 @@ describe("new expression edge cases", () => {
 });
 
 describe("dEFAULT_STATIC_GLOBAL_FACTORIES Array", () => {
-	it("contains expected Roblox global factory names", () => {
+	it("contains expected Roblox global factory names", ({ expect }) => {
 		expect.assertions(5);
 
 		expect(DEFAULT_STATIC_GLOBAL_FACTORIES).toContain("Color3");
@@ -685,7 +685,7 @@ const dynamicLeafArbitrary = fc.constantFrom(
 describe("isStaticExpression properties", () => {
 	const classify = createRuleExecutor("static-expression", testRule);
 
-	it("should classify any tree of literals, module constants, and factory calls as static", () => {
+	it("should classify any tree of literals, module constants, and factory calls as static", ({ expect }) => {
 		// Catches a static expression being rejected because it is nested,
 		// combined, or reuses a module constant.
 		expect.hasAssertions();
@@ -707,7 +707,7 @@ describe("isStaticExpression properties", () => {
 		expect(report).toBeUndefined();
 	});
 
-	it("should classify a static tree as dynamic once any leaf is dynamic", () => {
+	it("should classify a static tree as dynamic once any leaf is dynamic", ({ expect }) => {
 		// Catches one dynamic operand being overlooked inside an otherwise
 		// static expression, which would let rules hoist or inline it.
 		expect.hasAssertions();

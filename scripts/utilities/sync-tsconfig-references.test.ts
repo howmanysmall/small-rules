@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 
 import { findStaleReferencesAsync, syncTsconfigReferencesAsync } from "$script-utilities/sync-tsconfig-references";
 
@@ -165,7 +165,7 @@ async function createWorkspaceAsync(options: FixtureOptions = {}): Promise<strin
 
 describe("sync-tsconfig-references", () => {
 	describe("findStaleReferencesAsync", () => {
-		it("reports no drift on a synced workspace", async () => {
+		it("reports no drift on a synced workspace", async ({ expect, onTestFinished }) => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync();
@@ -176,7 +176,10 @@ describe("sync-tsconfig-references", () => {
 			expect(staleReferences).toStrictEqual([]);
 		});
 
-		it("reports the solution when a workspace project is missing from its references", async () => {
+		it("reports the solution when a workspace project is missing from its references", async ({
+			expect,
+			onTestFinished,
+		}) => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync({ omitBetaFromSolution: true });
@@ -193,7 +196,7 @@ describe("sync-tsconfig-references", () => {
 			]);
 		});
 
-		it("reports a package tsconfig whose references tsgo cannot build", async () => {
+		it("reports a package tsconfig whose references tsgo cannot build", async ({ expect, onTestFinished }) => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync({ illegalPackageReferences: true });
@@ -210,7 +213,7 @@ describe("sync-tsconfig-references", () => {
 			]);
 		});
 
-		it("leaves every file untouched while checking", async () => {
+		it("leaves every file untouched while checking", async ({ expect, onTestFinished }) => {
 			expect.assertions(3);
 
 			const rootDirectory = await createWorkspaceAsync({
@@ -232,7 +235,7 @@ describe("sync-tsconfig-references", () => {
 	});
 
 	describe("syncTsconfigReferencesAsync", () => {
-		it("adds a missing workspace project to the solution", async () => {
+		it("adds a missing workspace project to the solution", async ({ expect, onTestFinished }) => {
 			expect.assertions(2);
 
 			const rootDirectory = await createWorkspaceAsync({ omitBetaFromSolution: true });
@@ -246,7 +249,10 @@ describe("sync-tsconfig-references", () => {
 			);
 		});
 
-		it("removes package references tsgo cannot build without disturbing other keys", async () => {
+		it("removes package references tsgo cannot build without disturbing other keys", async ({
+			expect,
+			onTestFinished,
+		}) => {
 			expect.assertions(2);
 
 			const rootDirectory = await createWorkspaceAsync({ illegalPackageReferences: true });

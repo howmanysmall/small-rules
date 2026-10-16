@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import noPrint from "$oxc-rules/roblox/no-print";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -18,13 +18,13 @@ function makeExampleRule(): CreateRule {
 
 describe("createRule", () => {
 	// Catches a rule's diagnostics linking to a 404.
-	it("publishes the documented docs URL for a registered rule", () => {
+	it("publishes the documented docs URL for a registered rule", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(noPrint.meta?.docs?.url).toBe("https://docs.howmanysmall.com/small-rules/rules/roblox/no-print/");
 	});
 
-	it("adds the docs URL without discarding the description", () => {
+	it("adds the docs URL without discarding the description", ({ expect }) => {
 		expect.assertions(2);
 
 		const decorated = createRule("example-rule", "general", makeExampleRule());
@@ -34,7 +34,7 @@ describe("createRule", () => {
 	});
 
 	// Catches registering a bare rule (meta is optional) crashing the plugin.
-	it("returns a rule without meta unchanged", () => {
+	it("returns a rule without meta unchanged", ({ expect }) => {
 		expect.assertions(2);
 
 		const bare: CreateRule = { create: () => ({}) };
@@ -45,7 +45,7 @@ describe("createRule", () => {
 	});
 
 	// Catches decorating one rule mutating the shared module object.
-	it("does not mutate the rule it decorates", () => {
+	it("does not mutate the rule it decorates", ({ expect }) => {
 		expect.assertions(1);
 
 		const original = makeExampleRule();

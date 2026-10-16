@@ -1,9 +1,11 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 
 import { createUtilitiesIndexLoader, indexUtilities } from "./utilities-index";
+
+import type { TestContext } from "vitest";
 
 const UTILITIES_SOURCE = [
 	'export const ROBLOX_TS = "roblox-ts" as const;',
@@ -44,7 +46,7 @@ const UTILITIES_SOURCE = [
 ].join("\n");
 
 describe("indexUtilities", () => {
-	it("indexes exported string constants by value, skipping node types", () => {
+	it("indexes exported string constants by value, skipping node types", ({ expect }) => {
 		expect.assertions(1);
 
 		const index = indexUtilities([{ source: UTILITIES_SOURCE, specifier: "@small-rules/example" }]);
@@ -62,7 +64,7 @@ describe("indexUtilities", () => {
 		});
 	});
 
-	it("knows the value of every exported string constant, node types included", () => {
+	it("knows the value of every exported string constant, node types included", ({ expect }) => {
 		expect.assertions(1);
 
 		const index = indexUtilities([{ source: UTILITIES_SOURCE, specifier: "@small-rules/example" }]);
@@ -80,7 +82,7 @@ describe("indexUtilities", () => {
 		});
 	});
 
-	it("indexes exported guards whose whole body is one logical chain", () => {
+	it("indexes exported guards whose whole body is one logical chain", ({ expect }) => {
 		expect.assertions(1);
 
 		const index = indexUtilities([{ source: UTILITIES_SOURCE, specifier: "@small-rules/example" }]);
@@ -91,7 +93,7 @@ describe("indexUtilities", () => {
 		]);
 	});
 
-	it("indexes every exported single-return function by name", () => {
+	it("indexes every exported single-return function by name", ({ expect }) => {
 		expect.assertions(1);
 
 		const index = indexUtilities([{ source: UTILITIES_SOURCE, specifier: "@small-rules/example" }]);
@@ -109,7 +111,7 @@ describe("indexUtilities", () => {
 		});
 	});
 
-	it("keeps constants from every module that exports the value", () => {
+	it("keeps constants from every module that exports the value", ({ expect }) => {
 		expect.assertions(1);
 
 		const index = indexUtilities([
@@ -124,7 +126,10 @@ describe("indexUtilities", () => {
 	});
 });
 
-function createDirectory(files: Readonly<Record<string, string>>): string {
+function createDirectory(
+	files: Readonly<Record<string, string>>,
+	onTestFinished: TestContext["onTestFinished"],
+): string {
 	const directory = mkdtempSync(nodePath.join(tmpdir(), "local-rules-utilities-"));
 	onTestFinished(() => {
 		rmSync(directory, { force: true, recursive: true });
@@ -138,16 +143,19 @@ function createDirectory(files: Readonly<Record<string, string>>): string {
 }
 
 describe("createUtilitiesIndexLoader", () => {
-	it("reads source files and names each module by its import specifier", () => {
+	it("reads source files and names each module by its import specifier", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
-		const directory = createDirectory({
-			"nested/mode.ts": 'export const MODE = "roblox-ts";',
-			"notes.md": 'export const NOTE = "roblox-ts";',
-			"react.test.ts": 'export const TESTED = "roblox-ts";',
-			"react.ts": 'export const ROBLOX_TS = "roblox-ts";',
-			"types.d.ts": 'export declare const DECLARED: "roblox-ts";',
-		});
+		const directory = createDirectory(
+			{
+				"nested/mode.ts": 'export const MODE = "roblox-ts";',
+				"notes.md": 'export const NOTE = "roblox-ts";',
+				"react.test.ts": 'export const TESTED = "roblox-ts";',
+				"react.ts": 'export const ROBLOX_TS = "roblox-ts";',
+				"types.d.ts": 'export declare const DECLARED: "roblox-ts";',
+			},
+			onTestFinished,
+		);
 		const loadIndex = createUtilitiesIndexLoader({
 			locations: [{ directory, toSpecifier: (relativePath) => `$utilities/${relativePath}` }],
 			maxAgeMilliseconds: 0,
@@ -163,10 +171,10 @@ describe("createUtilitiesIndexLoader", () => {
 		]);
 	});
 
-	it("reuses a recent index and rereads once it is older than the maximum age", () => {
+	it("reuses a recent index and rereads once it is older than the maximum age", ({ expect, onTestFinished }) => {
 		expect.assertions(3);
 
-		const directory = createDirectory({ "react.ts": 'export const ROBLOX_TS = "roblox-ts";' });
+		const directory = createDirectory({ "react.ts": 'export const ROBLOX_TS = "roblox-ts";' }, onTestFinished);
 		let now = 0;
 		const loadIndex = createUtilitiesIndexLoader({
 			locations: [{ directory, toSpecifier: (relativePath) => relativePath }],

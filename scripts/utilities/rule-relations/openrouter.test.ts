@@ -61,7 +61,7 @@ describe("openRouter relation adapters", () => {
 		await expect(transport.decide({ model: "test", questions: {}, state: noPrintCard })).rejects.toThrow(TypeError);
 	});
 
-	it("returns score distributions and noul answers from the Decisions API", async () => {
+	it("returns score distributions and noul answers from the Decisions API", async ({ expect }) => {
 		expect.assertions(3);
 
 		let requestedModel: string | undefined;
@@ -108,7 +108,7 @@ describe("openRouter relation adapters", () => {
 		]);
 	});
 
-	it("rejects a score without its publication probabilities", async () => {
+	it("rejects a score without its publication probabilities", async ({ expect }) => {
 		expect.assertions(1);
 
 		const transport = createOpenRouterDecisionTransport(async () => ({
@@ -118,7 +118,7 @@ describe("openRouter relation adapters", () => {
 		await expect(transport.decide({ model: "test", questions: {}, state: noPrintCard })).rejects.toThrow(TypeError);
 	});
 
-	it("uses the configured reason model and returns trimmed text", async () => {
+	it("uses the configured reason model and returns trimmed text", async ({ expect }) => {
 		expect.assertions(3);
 
 		let requestedModel = "";

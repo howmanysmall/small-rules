@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import {
 	getEnvironment,
@@ -8,7 +8,7 @@ import {
 } from "$oxc-utilities/react-utilities";
 
 describe("react utilities", () => {
-	it("recognizes supported environments", () => {
+	it("recognizes supported environments", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(isEnvironment("roblox-ts")).toBe(true);
@@ -17,7 +17,7 @@ describe("react utilities", () => {
 		expect(isEnvironment(undefined)).toBe(false);
 	});
 
-	it("defaults unknown options to roblox-ts", () => {
+	it("defaults unknown options to roblox-ts", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(getEnvironment(undefined)).toBe("roblox-ts");
@@ -26,7 +26,7 @@ describe("react utilities", () => {
 		expect(getReactSourcesFromOptions({ environment: "react" }).has("@rbxts/react")).toBe(true);
 	});
 
-	it("returns standard React sources for the standard environment", () => {
+	it("returns standard React sources for the standard environment", ({ expect }) => {
 		expect.assertions(5);
 
 		const sources = getReactSources("standard");

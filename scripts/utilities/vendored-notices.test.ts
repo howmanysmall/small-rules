@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import {
 	renderBundleBanner,
@@ -34,7 +34,7 @@ const vendoredPaths = VENDORED_COMPONENTS.flatMap(({ directory, files }) =>
 const expectedReadStatuses = vendoredPaths.map(() => "fulfilled");
 
 describe("third-party notices", () => {
-	it("keeps the notices file in sync with the catalog", async () => {
+	it("keeps the notices file in sync with the catalog", async ({ expect }) => {
 		expect.assertions(1);
 
 		const onDisk = await readFile("THIRD-PARTY-NOTICES.md", "utf8");
@@ -43,32 +43,32 @@ describe("third-party notices", () => {
 		expect(onDisk).toBe(renderNoticesMarkdown());
 	});
 
-	it("reproduces every copyright line and source in the bundle banner", () => {
+	it("reproduces every copyright line and source in the bundle banner", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(componentsMissingAttribution).toStrictEqual([]);
 	});
 
-	it("reproduces every permission notice in the bundle banner", () => {
+	it("reproduces every permission notice in the bundle banner", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(componentsMissingPermission).toStrictEqual([]);
 	});
 
-	it("emits the banner as a legal comment so minification cannot drop it", () => {
+	it("emits the banner as a legal comment so minification cannot drop it", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(BANNER.startsWith("/*!")).toBe(true);
 		expect(BANNER.endsWith("*/")).toBe(true);
 	});
 
-	it("substitutes the copyright line into every license template", () => {
+	it("substitutes the copyright line into every license template", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(componentsMissingCopyright).toStrictEqual([]);
 	});
 
-	it("lists only files that exist on disk", async () => {
+	it("lists only files that exist on disk", async ({ expect }) => {
 		expect.assertions(1);
 
 		const reads = await Promise.allSettled(vendoredPaths.map(async (path) => readFile(path, "utf8")));
@@ -76,7 +76,7 @@ describe("third-party notices", () => {
 		expect(reads.map((result) => result.status)).toStrictEqual(expectedReadStatuses);
 	});
 
-	it("describes at least one vendored component", () => {
+	it("describes at least one vendored component", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(VENDORED_COMPONENTS.length).toBeGreaterThan(0);

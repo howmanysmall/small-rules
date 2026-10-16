@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
 import {
@@ -25,7 +25,7 @@ const apiDump = {
 };
 
 describe("roblox yielding-member catalog generation", () => {
-	it("resolves direct and inherited yielding members", () => {
+	it("resolves direct and inherited yielding members", ({ expect }) => {
 		expect.assertions(4);
 
 		const catalog = createYieldingMemberCatalog(parseClasses(apiDump));
@@ -36,7 +36,7 @@ describe("roblox yielding-member catalog generation", () => {
 		expect(hasYieldingMemberInCatalog(catalog, "Players", "GetAsync")).toBe(false);
 	});
 
-	it("stores each yielding declaration only on its declaring class", () => {
+	it("stores each yielding declaration only on its declaring class", ({ expect }) => {
 		expect.assertions(3);
 
 		const catalog = createYieldingMemberCatalog(parseClasses(apiDump));
@@ -46,7 +46,7 @@ describe("roblox yielding-member catalog generation", () => {
 		expect(catalog.yieldingMembers.has("ServiceProvider")).toBe(false);
 	});
 
-	it("deduplicates repeated yielding-member groups in generated output", () => {
+	it("deduplicates repeated yielding-member groups in generated output", ({ expect }) => {
 		expect.assertions(2);
 
 		const rendered = renderCatalog(
@@ -74,7 +74,7 @@ describe("roblox yielding-member catalog generation", () => {
 		expect(rendered.split("WedgePart")).toHaveLength(2);
 	});
 
-	it("resolves generated universal instance members", () => {
+	it("resolves generated universal instance members", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(classHasYieldingMember("Player", "WaitForChild")).toBe(true);
@@ -82,7 +82,7 @@ describe("roblox yielding-member catalog generation", () => {
 		expect(classHasYieldingMember("ExternalPlayer", "WaitForChild")).toBe(false);
 	});
 
-	it("resolves class-specific yielding members through the memoized lookup", () => {
+	it("resolves class-specific yielding members through the memoized lookup", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(classHasYieldingMember("DataStore", "GetAsync")).toBe(true);

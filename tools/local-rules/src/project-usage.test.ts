@@ -1,12 +1,14 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 
 import { countInlineNodeTypes, createProjectUsageCounter } from "./project-usage";
 
+import type { TestContext } from "vitest";
+
 describe("countInlineNodeTypes", () => {
-	it("counts node type strings in type comparisons, type switches, and node type arrays", () => {
+	it("counts node type strings in type comparisons, type switches, and node type arrays", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = [
@@ -25,7 +27,7 @@ describe("countInlineNodeTypes", () => {
 		});
 	});
 
-	it("ignores strings that are not node type uses", () => {
+	it("ignores strings that are not node type uses", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = [
@@ -43,7 +45,7 @@ describe("countInlineNodeTypes", () => {
 		expect(countInlineNodeTypes(source, "case.ts").size).toBe(0);
 	});
 
-	it("parses TSX files", () => {
+	it("parses TSX files", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = 'const element = <A />;\nif (node.type === "JSXText") {}';
@@ -52,7 +54,7 @@ describe("countInlineNodeTypes", () => {
 	});
 });
 
-function createProject(files: Readonly<Record<string, string>>): string {
+function createProject(files: Readonly<Record<string, string>>, onTestFinished: TestContext["onTestFinished"]): string {
 	const directory = mkdtempSync(nodePath.join(tmpdir(), "local-rules-usage-"));
 	onTestFinished(() => {
 		rmSync(directory, { force: true, recursive: true });
@@ -66,17 +68,20 @@ function createProject(files: Readonly<Record<string, string>>): string {
 }
 
 describe("createProjectUsageCounter", () => {
-	it("totals bundled source files, using live counts for the file being linted", () => {
+	it("totals bundled source files, using live counts for the file being linted", ({ expect, onTestFinished }) => {
 		expect.assertions(3);
 
-		const root = createProject({
-			"other/c.ts": 'if (node.type === "ContinueStatement") {}',
-			"src/a.test.ts": 'if (node.type === "ContinueStatement") {}',
-			"src/a.ts": 'if (node.type === "ContinueStatement") {}',
-			"src/nested/b.tsx": 'switch (node.type) { case "ContinueStatement": break; }',
-			"src/notes.md": 'node.type === "ContinueStatement"',
-			"src/types.d.ts": 'declare const isContinue: typeof node.type === "ContinueStatement";',
-		});
+		const root = createProject(
+			{
+				"other/c.ts": 'if (node.type === "ContinueStatement") {}',
+				"src/a.test.ts": 'if (node.type === "ContinueStatement") {}',
+				"src/a.ts": 'if (node.type === "ContinueStatement") {}',
+				"src/nested/b.tsx": 'switch (node.type) { case "ContinueStatement": break; }',
+				"src/notes.md": 'node.type === "ContinueStatement"',
+				"src/types.d.ts": 'declare const isContinue: typeof node.type === "ContinueStatement";',
+			},
+			onTestFinished,
+		);
 		const countUsage = createProjectUsageCounter({
 			directories: [nodePath.join(root, "src"), nodePath.join(root, "other")],
 			maxAgeMilliseconds: 0,
@@ -90,10 +95,10 @@ describe("createProjectUsageCounter", () => {
 		).toBe(4);
 	});
 
-	it("reuses a recent scan and rescans once it is older than the maximum age", () => {
+	it("reuses a recent scan and rescans once it is older than the maximum age", ({ expect, onTestFinished }) => {
 		expect.assertions(3);
 
-		const root = createProject({ "src/a.ts": 'if (node.type === "ContinueStatement") {}' });
+		const root = createProject({ "src/a.ts": 'if (node.type === "ContinueStatement") {}' }, onTestFinished);
 		let now = 0;
 		const countUsage = createProjectUsageCounter({
 			directories: [nodePath.join(root, "src")],

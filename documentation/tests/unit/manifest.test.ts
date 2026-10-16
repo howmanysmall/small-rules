@@ -8,14 +8,14 @@ function getManifestRuleNames(): ReadonlyArray<string> {
 }
 
 describe("rule manifest integrity", () => {
-	it("derives every documented rule from the plugin", () => {
+	it("derives every documented rule from the plugin", ({ expect }) => {
 		expect.assertions(1);
 
 		// biome-ignore lint/suspicious/useArraySortCompare: no lol
 		expect(getManifestRuleNames().toSorted()).toStrictEqual(Object.keys(smallRules.rules).toSorted());
 	});
 
-	it("registers each rule exactly once", () => {
+	it("registers each rule exactly once", ({ expect }) => {
 		expect.assertions(1);
 
 		const names = getManifestRuleNames();
@@ -23,7 +23,7 @@ describe("rule manifest integrity", () => {
 		expect(new Set(names).size).toBe(names.length);
 	});
 
-	it("keeps category keys unique", () => {
+	it("keeps category keys unique", ({ expect }) => {
 		expect.assertions(1);
 
 		const keys = ruleManifest.categories.map((category) => category.key);

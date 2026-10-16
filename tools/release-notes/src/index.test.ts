@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 
 import {
 	compareReleaseTagsDescending,
@@ -20,14 +20,14 @@ import {
 
 describe("release-notes-utilities", () => {
 	describe("getReleaseTag", () => {
-		it("returns the tag for a release note file", () => {
+		it("returns the tag for a release note file", ({ expect }) => {
 			expect.assertions(2);
 
 			expect(getReleaseTag("v3.1.0.md")).toBe("v3.1.0");
 			expect(getReleaseTag("v4.0.0-beta.2.md")).toBe("v4.0.0-beta.2");
 		});
 
-		it("ignores files that are not release notes", () => {
+		it("ignores files that are not release notes", ({ expect }) => {
 			expect.assertions(4);
 
 			expect(getReleaseTag("README.md")).toBeUndefined();
@@ -38,7 +38,7 @@ describe("release-notes-utilities", () => {
 	});
 
 	describe("compareReleaseTagsDescending", () => {
-		it("orders numerically, newest first", () => {
+		it("orders numerically, newest first", ({ expect }) => {
 			expect.assertions(1);
 
 			const tags = ["v2.9.0", "v1.1.0", "v2.10.0", "v3.0.2", "v3.0.10"];
@@ -52,7 +52,7 @@ describe("release-notes-utilities", () => {
 			]);
 		});
 
-		it("places a prerelease after its stable release", () => {
+		it("places a prerelease after its stable release", ({ expect }) => {
 			expect.assertions(1);
 
 			const tags = ["v4.0.0-beta.1", "v4.0.0", "v4.0.0-beta.2", "v3.9.9"];
@@ -65,7 +65,7 @@ describe("release-notes-utilities", () => {
 			]);
 		});
 
-		it("falls back to reverse string order for tags that are not SemVer", () => {
+		it("falls back to reverse string order for tags that are not SemVer", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(["nightly", "v1.0.0", "canary"].toSorted(compareReleaseTagsDescending)).toStrictEqual([
@@ -75,7 +75,7 @@ describe("release-notes-utilities", () => {
 			]);
 		});
 
-		it("treats identical tags as equal", () => {
+		it("treats identical tags as equal", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(compareReleaseTagsDescending("v1.0.0", "v1.0.0")).toBe(0);
@@ -83,7 +83,7 @@ describe("release-notes-utilities", () => {
 	});
 
 	describe("listReleaseTagsAsync", () => {
-		it("lists only release note tags, newest first", async () => {
+		it("lists only release note tags, newest first", async ({ expect, onTestFinished }) => {
 			expect.assertions(1);
 
 			const directory = await mkdtemp(nodePath.join(tmpdir(), "release-notes-"));
@@ -97,7 +97,7 @@ describe("release-notes-utilities", () => {
 	});
 
 	describe("readCommuniqueDefaults", () => {
-		it("reads the default model and repository", () => {
+		it("reads the default model and repository", ({ expect }) => {
 			expect.assertions(1);
 
 			const toml = [
@@ -118,7 +118,7 @@ describe("release-notes-utilities", () => {
 			});
 		});
 
-		it("throws when the model or repository is missing", () => {
+		it("throws when the model or repository is missing", ({ expect }) => {
 			expect.assertions(3);
 
 			expect(() => readCommuniqueDefaults('[defaults]\nrepo = "a/b"\n')).toThrow(
@@ -128,7 +128,7 @@ describe("release-notes-utilities", () => {
 			expect(() => readCommuniqueDefaults('model = "m"\nrepo = "a/b"\n')).toThrow("communique.toml: defaults");
 		});
 
-		it("throws when the repository is not owner/name", () => {
+		it("throws when the repository is not owner/name", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(() => readCommuniqueDefaults('[defaults]\nmodel = "m"\nrepo = "small-rules"\n')).toThrow(
@@ -138,7 +138,7 @@ describe("release-notes-utilities", () => {
 	});
 
 	describe("getReleaseTitle", () => {
-		it("returns the first level-one heading", () => {
+		it("returns the first level-one heading", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(getReleaseTitle("\n# v3.1.0: New diagnostics\n\n## Added\n# Other\n")).toBe(
@@ -146,7 +146,7 @@ describe("release-notes-utilities", () => {
 			);
 		});
 
-		it("returns undefined without a level-one heading", () => {
+		it("returns undefined without a level-one heading", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(getReleaseTitle("## Added\n\n- thing\n")).toBeUndefined();
@@ -154,7 +154,7 @@ describe("release-notes-utilities", () => {
 	});
 
 	describe("countChangedLines", () => {
-		it("counts lines added and removed", () => {
+		it("counts lines added and removed", ({ expect }) => {
 			expect.assertions(1);
 
 			const before = ["# v1.0.0", "", "- old entry", "- kept"].join("\n");
@@ -163,13 +163,13 @@ describe("release-notes-utilities", () => {
 			expect(countChangedLines(before, after)).toStrictEqual({ added: 3, removed: 2 });
 		});
 
-		it("respects duplicate lines", () => {
+		it("respects duplicate lines", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(countChangedLines("a\na\nb", "a\nb\nb")).toStrictEqual({ added: 1, removed: 1 });
 		});
 
-		it("reports nothing for identical notes", () => {
+		it("reports nothing for identical notes", ({ expect }) => {
 			expect.assertions(1);
 
 			expect(countChangedLines("same\n", "same\n")).toStrictEqual({ added: 0, removed: 0 });

@@ -13,7 +13,7 @@ import { FIXABLE_CASES } from "./support/fixable-cases";
 const MINIMUM_TRIGGER_RATIO = 0.5;
 
 describe("fixable rules", () => {
-	it("should cover every rule that declares meta.fixable", () => {
+	it("should cover every rule that declares meta.fixable", ({ expect }) => {
 		// Catches a new fixable rule shipping without a settling property.
 		expect.assertions(1);
 

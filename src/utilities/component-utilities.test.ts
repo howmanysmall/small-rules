@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { getJSXAttributeName, isSimpleExpression } from "$oxc-utilities/component-utilities";
 
@@ -28,7 +28,7 @@ function getParenthesizedExpressionFixture(): ESTree.ParenthesizedExpression {
 
 describe("component utilities", () => {
 	describe("getJSXAttributeName", () => {
-		it("should return the local name for namespaced JSX attributes", () => {
+		it("should return the local name for namespaced JSX attributes", ({ expect }) => {
 			expect.assertions(1);
 
 			// Arrange
@@ -43,7 +43,7 @@ describe("component utilities", () => {
 	});
 
 	describe("isSimpleExpression", () => {
-		it("should unwrap parenthesized expressions", () => {
+		it("should unwrap parenthesized expressions", ({ expect }) => {
 			expect.assertions(1);
 
 			// Arrange

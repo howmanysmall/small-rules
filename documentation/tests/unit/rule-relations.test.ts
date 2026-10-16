@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import generatedRelationsDocument from "$data/generated/rule-relations.json";
 import { getRelatedRules, isDirectedKind, mergeRelations, parseGeneratedRelations } from "$data/rule-relations";
@@ -22,7 +22,7 @@ const pinnedFixture = {
 const denyFixture = { from: "no-warn", to: "no-print" } satisfies RuleRelationPair;
 
 describe("parseGeneratedRelations", () => {
-	it("parses the committed generated relation document", () => {
+	it("parses the committed generated relation document", ({ expect }) => {
 		expect.assertions(1);
 
 		const relations = parseGeneratedRelations(generatedRelationsDocument.edges);
@@ -30,7 +30,7 @@ describe("parseGeneratedRelations", () => {
 		expect(relations).toHaveLength(generatedRelationsDocument.edges.length);
 	});
 
-	it("rejects unknown relation kinds", () => {
+	it("rejects unknown relation kinds", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() =>
@@ -38,7 +38,7 @@ describe("parseGeneratedRelations", () => {
 		).toThrow('Unknown relation kind "best-friends" for no-print → no-warn.');
 	});
 
-	it("rejects unknown rule names", () => {
+	it("rejects unknown rule names", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() =>
@@ -46,7 +46,7 @@ describe("parseGeneratedRelations", () => {
 		).toThrow('Unknown rule name "no-such-rule".');
 	});
 
-	it("rejects self-relations", () => {
+	it("rejects self-relations", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() =>
@@ -54,7 +54,7 @@ describe("parseGeneratedRelations", () => {
 		).toThrow("Self-relation for no-print.");
 	});
 
-	it("rejects duplicate relations for the same rule pair", () => {
+	it("rejects duplicate relations for the same rule pair", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() =>
@@ -65,7 +65,7 @@ describe("parseGeneratedRelations", () => {
 		).toThrow("Duplicate relation for no-print ↔ no-warn.");
 	});
 
-	it("normalizes undirected endpoints into sorted order", () => {
+	it("normalizes undirected endpoints into sorted order", ({ expect }) => {
 		expect.assertions(2);
 
 		const [relation] = parseGeneratedRelations([
@@ -76,7 +76,7 @@ describe("parseGeneratedRelations", () => {
 		expect(relation?.to).toBe("no-warn");
 	});
 
-	it("preserves directed endpoint order", () => {
+	it("preserves directed endpoint order", ({ expect }) => {
 		expect.assertions(1);
 
 		const [relation] = parseGeneratedRelations([
@@ -88,7 +88,7 @@ describe("parseGeneratedRelations", () => {
 });
 
 describe("isDirectedKind", () => {
-	it("knows which relation kinds carry direction", () => {
+	it("knows which relation kinds carry direction", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(isDirectedKind("depends-on")).toBe(true);
@@ -99,31 +99,31 @@ describe("isDirectedKind", () => {
 });
 
 describe("mergeRelations", () => {
-	it("returns generated relations when no overrides apply", () => {
+	it("returns generated relations when no overrides apply", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(mergeRelations([generatedFixture], [], [])).toStrictEqual([generatedFixture]);
 	});
 
-	it("replaces a generated relation with a pinned relation for the same pair", () => {
+	it("replaces a generated relation with a pinned relation for the same pair", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(mergeRelations([generatedFixture], [pinnedFixture], [])).toStrictEqual([pinnedFixture]);
 	});
 
-	it("drops denied pairs in either endpoint order", () => {
+	it("drops denied pairs in either endpoint order", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(mergeRelations([generatedFixture], [], [denyFixture])).toStrictEqual([]);
 	});
 
-	it("keeps pinned relations even when the pair is on the denylist", () => {
+	it("keeps pinned relations even when the pair is on the denylist", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(mergeRelations([generatedFixture], [pinnedFixture], [denyFixture])).toStrictEqual([pinnedFixture]);
 	});
 
-	it("appends pinned relations for pairs without generated relations", () => {
+	it("appends pinned relations for pairs without generated relations", ({ expect }) => {
 		expect.assertions(2);
 
 		const extraPin = {
@@ -140,7 +140,7 @@ describe("mergeRelations", () => {
 });
 
 describe("getRelatedRules", () => {
-	it("returns the same relation from both endpoints", () => {
+	it("returns the same relation from both endpoints", ({ expect }) => {
 		expect.assertions(2);
 
 		const printedRelation = getRelatedRules("no-print").find((relation) => relation.to === "no-warn");
@@ -150,7 +150,7 @@ describe("getRelatedRules", () => {
 		expect(warnedRelation?.kind).toBe("related");
 	});
 
-	it("returns no relations for rules without curated relations", () => {
+	it("returns no relations for rules without curated relations", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getRelatedRules("no-underscore-react-props")).toStrictEqual([]);

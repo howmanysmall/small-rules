@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import nodePath from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { getRulePath, ruleManifest } from "$data/rule-manifest";
 
@@ -51,13 +51,13 @@ function getRulePageSources(): ReadonlyArray<RulePageSource> {
 }
 
 describe("rule page routes", () => {
-	it("keeps one authored MDX page per manifest rule", () => {
+	it("keeps one authored MDX page per manifest rule", ({ expect }) => {
 		expect.assertions(1);
 
 		expect([...getExpectedRulePagePaths().keys()].filter((path) => !existsSync(path))).toStrictEqual([]);
 	});
 
-	it("does not contain orphan rule pages", () => {
+	it("does not contain orphan rule pages", ({ expect }) => {
 		expect.assertions(1);
 
 		const expectedRulePagePaths = getExpectedRulePagePaths();
@@ -69,7 +69,7 @@ describe("rule page routes", () => {
 		).toStrictEqual([]);
 	});
 
-	it("binds exactly one RulePage wrapper per page to the route's rule", () => {
+	it("binds exactly one RulePage wrapper per page to the route's rule", ({ expect }) => {
 		expect.assertions(2);
 
 		const expectedRulePagePaths = getExpectedRulePagePaths();
@@ -83,7 +83,7 @@ describe("rule page routes", () => {
 		).toStrictEqual([]);
 	});
 
-	it("provides an all-rules page and one landing page per category", () => {
+	it("provides an all-rules page and one landing page per category", ({ expect }) => {
 		expect.assertions(1);
 
 		const indexPaths = [

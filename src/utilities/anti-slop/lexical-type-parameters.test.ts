@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { isNode } from "@small-rules/oxlint-utilities";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
@@ -55,7 +55,7 @@ function findMappedTypeAnnotation(source: HarnessSourceCode): ESTree.TSType {
 }
 
 describe("getLexicalTypeParameterNames", () => {
-	it("stops descending when the node type has no visitor keys", () => {
+	it("stops descending when the node type has no visitor keys", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("type Handler<Value> = Value extends { readonly item: infer Item } ? Item : never;");
@@ -65,7 +65,7 @@ describe("getLexicalTypeParameterNames", () => {
 		expect([...names]).toStrictEqual(["Value"]);
 	});
 
-	it("collects infer bindings through real visitor keys", () => {
+	it("collects infer bindings through real visitor keys", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("type Handler<Value> = Value extends { readonly item: infer Item } ? Item : never;");
@@ -75,7 +75,7 @@ describe("getLexicalTypeParameterNames", () => {
 		expect([...names].toSorted()).toStrictEqual(["Item", "Value"]);
 	});
 
-	it("collects mapped type key names from nested descendants", () => {
+	it("collects mapped type key names from nested descendants", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("type Mappers<Key extends string> = { [Target in Key]: () => void };");

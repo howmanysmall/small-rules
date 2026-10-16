@@ -143,7 +143,7 @@ describe("classifyUnsafeDictionary", () => {
 		expect(classifyUnsafeDictionary(record, fixture.environment)?.unsafeValue).toBe(expected);
 	});
 
-	it("uses local interface shadows for dictionary values", () => {
+	it("uses local interface shadows for dictionary values", ({ expect }) => {
 		expect.assertions(2);
 
 		const empty = setup(
@@ -161,7 +161,7 @@ describe("classifyUnsafeDictionary", () => {
 		).toBeUndefined();
 	});
 
-	it("merges reopened namespace interfaces for dictionary values", () => {
+	it("merges reopened namespace interfaces for dictionary values", ({ expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(
@@ -174,7 +174,7 @@ describe("classifyUnsafeDictionary", () => {
 		).toBe("empty-object");
 	});
 
-	it("uses global fallback and module precedence for interface values", () => {
+	it("uses global fallback and module precedence for interface values", ({ expect }) => {
 		expect.assertions(2);
 
 		const fixture = setup(
@@ -254,7 +254,7 @@ describe("classifyUnsafeDictionary", () => {
 
 	// Catches a recursive alias hanging or silently exempting an
 	// unknown-valued dictionary. Completion proves termination.
-	it("classifies a dictionary whose value type is a self-referential union and terminates", () => {
+	it("classifies a dictionary whose value type is a self-referential union and terminates", ({ expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup("type Cycle = Cycle | unknown; type A = Record<string, Cycle>;");
@@ -268,7 +268,7 @@ describe("classifyUnsafeDictionary", () => {
 });
 
 describe("classifyUnsafeDictionaryValue", () => {
-	it("classifies direct value types including intersections and wrappers", () => {
+	it("classifies direct value types including intersections and wrappers", ({ expect }) => {
 		expect.assertions(6);
 
 		const plainUnknown = setup("type A = Record<string, unknown>;");
@@ -312,7 +312,7 @@ describe("classifyUnsafeDictionaryValue", () => {
 		expect(classifyUnsafeDictionaryValue(escapeReference, mergedInterfaces.environment)).toBeUndefined();
 	});
 
-	it("leaves qualified references and generic aliases without arguments unclassified", () => {
+	it("leaves qualified references and generic aliases without arguments unclassified", ({ expect }) => {
 		expect.assertions(2);
 
 		const qualified = setup("declare namespace NS { export type Value = unknown } const value: NS.Value = input;");
@@ -608,7 +608,7 @@ describe("classifyWideningTarget", () => {
 		);
 	});
 
-	it("applies lexical Record shadows only where they are visible", () => {
+	it("applies lexical Record shadows only where they are visible", ({ expect }) => {
 		expect.assertions(4);
 
 		const fixture = setup(
@@ -634,7 +634,7 @@ describe("classifyWideningTarget", () => {
 		).toBe("open dictionary");
 	});
 
-	it("suppresses built-in classification for a competing global Record binding", () => {
+	it("suppresses built-in classification for a competing global Record binding", ({ expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(
@@ -661,7 +661,7 @@ describe("classifyWideningTarget", () => {
 		});
 	});
 
-	it("leaves empty literals, named contracts, and non-dictionary generics unclassified", () => {
+	it("leaves empty literals, named contracts, and non-dictionary generics unclassified", ({ expect }) => {
 		expect.assertions(5);
 
 		const emptyLiteral = setup("const value: {} = {};");
@@ -702,7 +702,7 @@ describe("classifyWideningTarget", () => {
 		).toBeUndefined();
 	});
 
-	it("classifies mapped aliases through broad key shapes and substitutions", () => {
+	it("classifies mapped aliases through broad key shapes and substitutions", ({ expect }) => {
 		expect.assertions(5);
 
 		const symbolKey = setup("type Levels = { readonly [Level in symbol]: number }; const levels: Levels = {};");
@@ -744,7 +744,7 @@ describe("classifyWideningTarget", () => {
 		).toBeUndefined();
 	});
 
-	it("classifies generic aliases only when their body resolves to a dictionary", () => {
+	it("classifies generic aliases only when their body resolves to a dictionary", ({ expect }) => {
 		expect.assertions(1);
 
 		const genericDictionary = setup("type Index<T> = Record<string, T>; const commands: Index<Command> = {};");
@@ -780,7 +780,7 @@ describe("classifyWideningTarget", () => {
 		);
 	});
 
-	it("does not classify dictionaries when a generic alias lacks its required argument", () => {
+	it("does not classify dictionaries when a generic alias lacks its required argument", ({ expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup("type Index<T> = Record<string, T>; const value: Index = {};");
@@ -849,7 +849,7 @@ describe("classifyWideningTarget", () => {
 		expect(checkDictionaryReported(fixture.source, fixture.environment)).toBe(expectUnsafe);
 	});
 
-	it("ignores index signatures with missing type annotations", () => {
+	it("ignores index signatures with missing type annotations", ({ expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup("type A = { [key: string]: unknown };");
@@ -858,7 +858,7 @@ describe("classifyWideningTarget", () => {
 		expect(classifyUnsafeDictionary(literal, fixture.environment)).toBeUndefined();
 	});
 
-	it("substitutes a generic Readonly value before recognizing built-in wrappers", () => {
+	it("substitutes a generic Readonly value before recognizing built-in wrappers", ({ expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(

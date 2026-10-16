@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { existsAsync, isFileAccessibleAsync } from "./index.ts";
 
@@ -15,7 +15,7 @@ const existingFilePath = fileURLToPath(new URL("../package.json", import.meta.ur
 const pathThroughFile = fileURLToPath(new URL("../package.json/child", import.meta.url));
 
 describe("existsAsync", () => {
-	it("returns true for an existing file", async () => {
+	it("returns true for an existing file", async ({ expect }) => {
 		expect.assertions(1);
 
 		const result = await existsAsync(existingFilePath);
@@ -23,7 +23,7 @@ describe("existsAsync", () => {
 		expect(result).toBe(true);
 	});
 
-	it("returns false for a missing path", async () => {
+	it("returns false for a missing path", async ({ expect }) => {
 		expect.assertions(1);
 
 		const missingPath = path.join(tmpdir(), `small-rules-fs-utilities-missing-${randomUUID()}`);
@@ -33,7 +33,7 @@ describe("existsAsync", () => {
 		expect(result).toBe(false);
 	});
 
-	it("rethrows failures that are not a missing path", async () => {
+	it("rethrows failures that are not a missing path", async ({ expect }) => {
 		expect.assertions(1);
 
 		await expect(existsAsync(pathThroughFile)).rejects.toMatchObject({ code: "ENOTDIR" });
@@ -45,7 +45,7 @@ describe("existsAsync", () => {
 // permission-denied — folds into `false`, because callers only use it to
 // skip candidate directories.
 describe("isFileAccessibleAsync", () => {
-	it("returns true for an existing file", async () => {
+	it("returns true for an existing file", async ({ expect }) => {
 		expect.assertions(1);
 
 		const result = await isFileAccessibleAsync(existingFilePath);
@@ -53,7 +53,7 @@ describe("isFileAccessibleAsync", () => {
 		expect(result).toBe(true);
 	});
 
-	it("returns false for a missing path", async () => {
+	it("returns false for a missing path", async ({ expect }) => {
 		expect.assertions(1);
 
 		const missingPath = path.join(tmpdir(), `small-rules-fs-utilities-inaccessible-${randomUUID()}`);

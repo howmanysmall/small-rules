@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 const DOCS_URL_PATTERN =
 	/^https:\/\/docs\.howmanysmall\.com\/small-rules\/rules\/[a-z-]+(?:\/[a-z-]+)?\/[a-z0-9-]+\/$/u;
@@ -20,7 +20,7 @@ function getRulesWithoutDocsUrl<RuleEntry extends RuleLike>(rules: Record<string
 
 describe("small-rules plugin", () => {
 	describe("plugin metadata", () => {
-		it("has the correct plugin name", async () => {
+		it("has the correct plugin name", async ({ expect }) => {
 			expect.assertions(1);
 
 			const smallRules = await import("$small-rules");
@@ -28,7 +28,7 @@ describe("small-rules plugin", () => {
 			expect(smallRules.default.meta?.name).toBe("small-rules");
 		}, 30_000);
 
-		it("registers at least one rule", async () => {
+		it("registers at least one rule", async ({ expect }) => {
 			expect.assertions(1);
 
 			const smallRules = await import("$small-rules");
@@ -37,7 +37,7 @@ describe("small-rules plugin", () => {
 		}, 30_000);
 
 		// Catches a rule registered under a name users cannot configure.
-		it("registers every rule under a kebab-case name users can configure", async () => {
+		it("registers every rule under a kebab-case name users can configure", async ({ expect }) => {
 			expect.assertions(1);
 
 			const smallRules = await import("$small-rules");
@@ -46,7 +46,7 @@ describe("small-rules plugin", () => {
 		}, 30_000);
 
 		// Catches a rule bypassing createRule and shipping without a docs URL.
-		it("advertises a docs URL on the documented docs site for every rule", async () => {
+		it("advertises a docs URL on the documented docs site for every rule", async ({ expect }) => {
 			expect.assertions(1);
 
 			const smallRules = await import("$small-rules");

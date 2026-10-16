@@ -127,7 +127,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)).toBeUndefined();
 	});
 
-	it("extracts the annotation through a parameter property wrapper", () => {
+	it("extracts the annotation through a parameter property wrapper", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("class C { constructor(public value: string) {} }");
@@ -136,7 +136,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 
-	it("extracts the annotation from an arrow function parameter", () => {
+	it("extracts the annotation from an arrow function parameter", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("const f = (value: string) => {};");
@@ -145,7 +145,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 
-	it("extracts the annotation from a function type parameter", () => {
+	it("extracts the annotation from a function type parameter", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("type F = (value: string) => void;");
@@ -172,7 +172,7 @@ describe("getFunctionParameterBindingName", () => {
 		expect(getFunctionParameterBindingName(parameter, source)).toBe(expected);
 	});
 
-	it("returns the parameter property binding name", () => {
+	it("returns the parameter property binding name", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("class C { constructor(public value: string) {} }");

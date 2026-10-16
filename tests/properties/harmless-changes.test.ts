@@ -41,7 +41,7 @@ const STRUCTURAL_RULES = new Set<string>([
 const STRUCTURAL_CASES = FIXABLE_CASES.filter(({ rule }) => STRUCTURAL_RULES.has(rule));
 
 describe("harmless changes", () => {
-	it("should cover every listed structural rule", () => {
+	it("should cover every listed structural rule", ({ expect }) => {
 		// Catches a listed rule silently dropping out of these properties.
 		expect.assertions(1);
 

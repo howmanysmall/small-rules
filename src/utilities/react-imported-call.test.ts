@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-unsafe-type-assertion -- Unit tests bridge the
 // harness AST to the rule's ESTree SourceCode types for direct utility
 // coverage.
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
 import { Predicate } from "effect";
@@ -68,7 +68,7 @@ function isEffectCall(source: HarnessSourceCode, name: string): boolean {
 }
 
 describe("isReactImportedCall", () => {
-	it("matches a named import by its imported name", () => {
+	it("matches a named import by its imported name", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('import { useEffect as effect } from "react"; effect(() => {});');
@@ -76,7 +76,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "effect")).toBe(true);
 	});
 
-	it("rejects an identifier with no binding", () => {
+	it("rejects an identifier with no binding", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("useEffect(() => {});");
@@ -84,7 +84,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
-	it("rejects an import from a non-react source", () => {
+	it("rejects an import from a non-react source", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('import { useEffect } from "preact/hooks"; useEffect(() => {});');
@@ -92,7 +92,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
-	it("rejects a default/namespace import used as a named callee", () => {
+	it("rejects a default/namespace import used as a named callee", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React(() => {});');
@@ -100,7 +100,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "React")).toBe(false);
 	});
 
-	it("rejects a non-imported identifier binding", () => {
+	it("rejects a non-imported identifier binding", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("const useEffect = () => {}; useEffect(() => {});");
@@ -108,7 +108,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
-	it("matches a namespace member call", () => {
+	it("matches a namespace member call", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React.useEffect(() => {});');
@@ -116,7 +116,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "useEffect")).toBe(true);
 	});
 
-	it("rejects a computed member call", () => {
+	it("rejects a computed member call", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; React["useEffect"](() => {});');
@@ -124,7 +124,7 @@ describe("isReactImportedCall", () => {
 		expect(isEffectCall(source, "useEffect")).toBe(false);
 	});
 
-	it("rejects a non-identifier member object", () => {
+	it("rejects a non-identifier member object", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('import * as React from "react"; getReact().useEffect(() => {});');

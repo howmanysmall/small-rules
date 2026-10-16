@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, onTestFinished, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { RuleExample } from "$components/rule-example";
 
@@ -34,7 +34,7 @@ describe("rule-example", () => {
 		expect(screen.getByText(title).textContent).toBe(title);
 	});
 
-	it("renders a custom title", () => {
+	it("renders a custom title", ({ expect }) => {
 		expect.assertions(1);
 
 		render(
@@ -48,7 +48,7 @@ describe("rule-example", () => {
 		expect(title.className).toBe("RuleExample-title");
 	});
 
-	it("composes the rendered code child", () => {
+	it("composes the rendered code child", ({ expect }) => {
 		expect.assertions(1);
 
 		const { container } = render(
@@ -64,7 +64,7 @@ describe("rule-example", () => {
 		expect(content?.textContent).toBe('print("hello")');
 	});
 
-	it("copies the rendered code", async () => {
+	it("copies the rendered code", async ({ expect }) => {
 		expect.assertions(1);
 
 		const user = userEvent.setup();
@@ -82,7 +82,7 @@ describe("rule-example", () => {
 		expect(writeText).toHaveBeenCalledWith(answerExample);
 	});
 
-	it("announces the copied state", async () => {
+	it("announces the copied state", async ({ expect }) => {
 		expect.assertions(2);
 
 		const user = userEvent.setup();
@@ -99,7 +99,7 @@ describe("rule-example", () => {
 		expect(copyButton.getAttribute("aria-label")).toBe("Example copied");
 	});
 
-	it("resets the copied state after 1.5 seconds", async () => {
+	it("resets the copied state after 1.5 seconds", async ({ expect, onTestFinished }) => {
 		expect.assertions(2);
 
 		vi.useFakeTimers();

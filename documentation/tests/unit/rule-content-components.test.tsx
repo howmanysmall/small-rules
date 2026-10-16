@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { RelatedRules } from "$components/related-rules";
 import { RelationReason } from "$components/relation-reason";
@@ -15,7 +15,7 @@ const preferUseReducerNamePattern = /Prefer Use Reducer/u;
 const ruleIndexCountPattern = /^Showing \d+ rules$/u;
 
 describe("related-rules", () => {
-	it("links a rule to its documented semantic counterpart", () => {
+	it("links a rule to its documented semantic counterpart", ({ expect }) => {
 		expect.assertions(3);
 
 		render(<RelatedRules rule="no-print" />);
@@ -32,7 +32,7 @@ describe("related-rules", () => {
 		).toBeInstanceOf(HTMLElement);
 	});
 
-	it("renders backticked identifiers in relation reasons as inline code", () => {
+	it("renders backticked identifiers in relation reasons as inline code", ({ expect }) => {
 		expect.assertions(3);
 
 		const { container: link } = render(
@@ -46,7 +46,7 @@ describe("related-rules", () => {
 		);
 	});
 
-	it("highlights bare rule ids in relation reasons as inline code", () => {
+	it("highlights bare rule ids in relation reasons as inline code", ({ expect }) => {
 		expect.assertions(3);
 
 		const { container: link } = render(
@@ -60,7 +60,9 @@ describe("related-rules", () => {
 		expect(within(link).getByText("directive-no-use", { selector: "code" })).toBeInstanceOf(HTMLElement);
 	});
 
-	it("labels supersedes relations from the superseded rule's page and leads with directed relations", () => {
+	it("labels supersedes relations from the superseded rule's page and leads with directed relations", ({
+		expect,
+	}) => {
 		expect.assertions(2);
 
 		render(<RelatedRules rule="directive-disable-enable-pair" />);
@@ -72,7 +74,7 @@ describe("related-rules", () => {
 		expect(within(section).getAllByRole("link")[0]?.textContent).toContain("Superseded by");
 	});
 
-	it("labels supersedes relations from the superseding rule's page", () => {
+	it("labels supersedes relations from the superseding rule's page", ({ expect }) => {
 		expect.assertions(1);
 
 		render(<RelatedRules rule="directive-no-use" />);
@@ -83,7 +85,7 @@ describe("related-rules", () => {
 		expect(within(link).getByText("Supersedes")).toBeInstanceOf(HTMLElement);
 	});
 
-	it("labels depends-on relations from the dependent rule's page", () => {
+	it("labels depends-on relations from the dependent rule's page", ({ expect }) => {
 		expect.assertions(1);
 
 		render(<RelatedRules rule="prefer-constant-dispatch" />);
@@ -94,7 +96,7 @@ describe("related-rules", () => {
 		expect(within(link).getByText("Depends on")).toBeInstanceOf(HTMLElement);
 	});
 
-	it("labels depends-on relations from the prerequisite rule's page", () => {
+	it("labels depends-on relations from the prerequisite rule's page", ({ expect }) => {
 		expect.assertions(1);
 
 		render(<RelatedRules rule="prefer-use-reducer" />);
@@ -107,7 +109,7 @@ describe("related-rules", () => {
 });
 
 describe("rule-category-page", () => {
-	it("introduces the selected category before its rule index", () => {
+	it("introduces the selected category before its rule index", ({ expect }) => {
 		expect.assertions(3);
 
 		render(<RuleCategoryPage category="general" />);
@@ -121,7 +123,7 @@ describe("rule-category-page", () => {
 });
 
 describe("rule-summary", () => {
-	it("renders the rule id and generated description by default", () => {
+	it("renders the rule id and generated description by default", ({ expect }) => {
 		expect.assertions(2);
 
 		render(<RuleSummary rule="no-print" />);
@@ -130,7 +132,7 @@ describe("rule-summary", () => {
 		expect(screen.getByText("Use Log instead of print().")).toBeInstanceOf(HTMLElement);
 	});
 
-	it("composes custom summary content when provided", () => {
+	it("composes custom summary content when provided", ({ expect }) => {
 		expect.assertions(2);
 
 		render(
