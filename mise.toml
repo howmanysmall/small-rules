@@ -15,13 +15,13 @@ cargo.binstall_native = true
 "github:howmanysmall/pullhook" = "latest"
 "github:vale-cli/vale-ls" = "latest"
 "npm:sherif" = "latest"
-actionlint = "latest"
 betterleaks = "latest"
 bun = "latest"
 communique = "latest"
 direnv = "latest"
 git-cliff = "latest"
 hk = "2.6.0"
+jactionlint = "latest"
 ni = "latest"
 node = "24"
 pinact = "latest"
@@ -32,8 +32,6 @@ shellcheck = "latest"
 shfmt = "latest"
 tombi = "latest"
 vale = "latest"
-zizmor = "latest"
-jactionlint = "latest"
 
 [tasks]
 backtickify = '''

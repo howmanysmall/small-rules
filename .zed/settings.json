@@ -453,6 +453,10 @@
 							".lefthook.yaml",
 							"lefthook.json",
 							".lefthook.json"
+						],
+						"https://raw.githubusercontent.com/jdx/jactionlint/main/schema/jactionlint-config.json": [
+							".github/jactionlint.yaml",
+							".github/jactionlint.yml"
 						]
 					}
 				}
