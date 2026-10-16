@@ -288,8 +288,8 @@ function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree
 }
 
 function findEnclosingConstDeclarator(node: ESTree.Node): ESTree.VariableDeclarator | undefined {
-	let current: ESTree.Node | null = node.parent;
-	let previous: ESTree.Node = node;
+	let current = node.parent;
+	let previous = node;
 
 	while (current !== null) {
 		if (isVariableDeclarator(current) && current.init === previous) return current;

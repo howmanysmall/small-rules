@@ -453,8 +453,8 @@ function isStableValue(
 }
 
 function findTopmostMemberExpression(node: ESTree.Node, parent?: ESTree.Node): ESTree.Node {
-	let currentParent: ESTree.Node | undefined = parent;
-	let current: ESTree.Node = node;
+	let currentParent = parent;
+	let current = node;
 
 	while (currentParent) {
 		if (isCallExpression(currentParent) && currentParent.callee === current) {

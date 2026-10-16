@@ -63,7 +63,7 @@ import type {
 import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
 
 function createIsSafeGeneratedName(scopeToNamesGeneratedByFixer: WeakMap<Scope, Set<string>>): IsSafe {
-	return function isSafeGeneratedName(name: string, scopes: ReadonlyArray<Scope>): boolean {
+	return function isSafeGeneratedName(name, scopes): boolean {
 		return scopes.every((scope) => {
 			const generatedNames = scopeToNamesGeneratedByFixer.get(scope);
 			return generatedNames === undefined || !generatedNames.has(name);

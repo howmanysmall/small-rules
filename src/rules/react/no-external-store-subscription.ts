@@ -69,7 +69,7 @@ function reportSharedCleanupSetters(
 	for (const reference of bodySetters) {
 		const sharesCleanupVariable = analysis.scope
 			.getUpstreamReferences(reference)
-			.some((upstreamReference: Reference) => {
+			.some((upstreamReference) => {
 				const resolved: null | undefined | Variable = upstreamReference.resolved;
 				// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
 				return resolved !== null && resolved !== undefined && cleanupVariables.has(resolved);

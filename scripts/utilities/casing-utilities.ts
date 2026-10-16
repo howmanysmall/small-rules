@@ -28,8 +28,8 @@ function toLowerCaseFast(value: string): string {
 	return value.toLowerCase();
 }
 
-let toUpperCaseLocale: (value: string) => string = toUpperCaseFast;
-let toLowerCaseLocale: (value: string) => string = toLowerCaseFast;
+let toUpperCaseLocale = toUpperCaseFast;
+let toLowerCaseLocale = toLowerCaseFast;
 let localeModeEnabled = false;
 
 export function setLocaleMode(enabled: boolean): void {

@@ -159,7 +159,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 		const options = Predicate.isObject(rawOptions) ? rawOptions : {};
-		const mode: Mode = "mode" in options && isMode(options.mode) ? options.mode : "definite";
+		const mode = "mode" in options && isMode(options.mode) ? options.mode : "definite";
 		const environment =
 			"environment" in options && isEnvironment(options.environment) ? options.environment : ROBLOX_TS;
 

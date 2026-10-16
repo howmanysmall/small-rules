@@ -7,7 +7,7 @@ import type { UtilitiesIndex } from "./utilities-index.ts";
 export const REPOSITORY_ROOT = nodePath.resolve(import.meta.dirname, "../../..");
 
 /** This repository's shared utility modules, re-read at most once a second. */
-export const loadRepositoryUtilities: () => UtilitiesIndex = createUtilitiesIndexLoader({
+export const loadRepositoryUtilities = createUtilitiesIndexLoader({
 	locations: [
 		{
 			directory: nodePath.join(REPOSITORY_ROOT, "packages/oxlint-utilities/src"),

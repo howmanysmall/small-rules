@@ -21,7 +21,7 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 const EQUALITY_OPERATORS = new Set(["!=", "!==", "==", "==="]);
 
 function isInsideTypeGuard(node: ESTree.Node): boolean {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	while (current !== null && !isProgram(current)) {
 		if (isAnyFunction(current)) return isTsTypePredicate(current.returnType?.typeAnnotation);
 		current = current.parent;

@@ -92,7 +92,7 @@ function renderObject(fields: JsonRecord, depth: number): string {
 }
 
 function parseJsonValue(jsonText: string): JsonValue {
-	const parsed: unknown = JSON.parse(jsonText);
+	const parsed = JSON.parse(jsonText);
 	if (!isJsonValue(parsed)) {
 		throw new TypeError("Expected the configuration text to parse as a JSON value.");
 	}

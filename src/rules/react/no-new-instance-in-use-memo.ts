@@ -69,7 +69,7 @@ function isInsideUseMemoCallback(
 	memoIdentifiers: ReadonlySet<string>,
 	reactNamespaces: ReadonlySet<string>,
 ): boolean {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 
 	while (current !== null) {
 		if (isCallbackFunction(current)) {

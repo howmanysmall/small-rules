@@ -282,7 +282,7 @@ function containsIdentifierReference(
 
 function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefined {
 	const path = new Array<string>();
-	let current: ESTree.Expression = node;
+	let current = node;
 
 	while (isMemberExpression(current)) {
 		if (current.computed || !isIdentifier(current.property)) return undefined;

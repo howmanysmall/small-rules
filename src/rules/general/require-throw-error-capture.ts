@@ -29,7 +29,7 @@ type ErrorSpecifier =
 	  };
 
 function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 
 	while (current !== null) {
 		switch (current.type) {
@@ -68,7 +68,7 @@ function getAssignedName({ parent }: ESTree.Node): string | undefined {
 }
 
 function isClassMethodContext(node: ESTree.Node): boolean {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	while (current !== null) {
 		switch (current.type) {
 			case ARROW_FUNCTION_EXPRESSION:
@@ -106,7 +106,7 @@ function getUniqueVariableName(
 
 	// Catch clause parameters may not appear in scope.variables, so walk
 	// ancestors
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	while (current !== null) {
 		if (isCatchClause(current) && isIdentifier(current.param)) names.add(current.param.name);
 		current = current.parent;

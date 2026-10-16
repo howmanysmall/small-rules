@@ -191,7 +191,7 @@ function defineFunctionDeclaration(node: HarnessNode, scope: HarnessScope, state
 type DefineType = (node: HarnessNode, scope: HarnessScope, state: ScopeState) => void;
 
 function createDefineType(type: string): DefineType {
-	return function defineType(node: HarnessNode, scope: HarnessScope, state: ScopeState): void {
+	return function defineType(node, scope, state): void {
 		const id = getNodeProperty(node, "id");
 		if (id === undefined || !Predicate.isString(id.name)) return;
 		const variable = defineVariable(scope, id.name, id, {
@@ -364,7 +364,7 @@ function registerDeclaredVariable(state: ScopeState, node: HarnessNode, variable
 }
 
 function getVariableScope(scope: HarnessScope): HarnessScope {
-	let current: HarnessScope = scope;
+	let current = scope;
 	while (
 		current.upper !== null &&
 		current.type !== "function" &&

@@ -237,7 +237,7 @@ function observesPreviousValue(usage: VariableUsage, usages: ReadonlyArray<Varia
 
 function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 	const loops = new Array<ESTree.Node>();
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	while (current !== null) {
 		if (isLoopNode(current)) loops.push(current);
 		else if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) {
@@ -339,7 +339,7 @@ function rangeContains(container: ESTree.Node, node: ESTree.Node): boolean {
 function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): boolean {
 	let current: ESTree.Node = usage.node;
 	while (current.parent !== null) {
-		const parent: ESTree.Node = current.parent;
+		const parent = current.parent;
 		if (isTryStatement(parent) && parent.block === current) {
 			const handlers = [parent.handler?.body, parent.finalizer].filter(
 				(node): node is ESTree.BlockStatement => node !== null && node !== undefined,
