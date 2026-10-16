@@ -8,6 +8,7 @@ import type { Scope } from "effect";
 const id = "run-hk-check-on-idle";
 
 const runHkCheck = Effect.fn("runHkCheck")(
+	// eslint-disable-next-line ts/no-shadow -- not a shadowing.
 	function* runHkCheck() {
 		const result = yield* Effect.tryPromise({
 			catch: (cause) => cause,
