@@ -108,6 +108,7 @@ jobs:
 
       - if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
         name: Update pull request comment
+        shell: bash
         run: |
           marker='<!-- bundle-size-report -->'
           comment_body="$(printf '%s\n%s' "$marker" "$BUNDLE_SIZE_REPORT")"

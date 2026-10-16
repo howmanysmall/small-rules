@@ -25,7 +25,7 @@
 		{
 			"changed": [".github/workflows/*.yaml", ".github/workflows/*.yml"],
 			"name": "validate GitHub workflows",
-			"run": "actionlint"
+			"run": "jactionlint"
 		}
 	]
 }
