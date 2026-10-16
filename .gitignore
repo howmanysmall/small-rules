@@ -119,3 +119,4 @@ hk.local.pkl
 .agents/skills/hk-*
 .agents/skills/implement-spec/
 .agents/skills/retro/
+.agents/skills/migrate-to-shoehorn/
