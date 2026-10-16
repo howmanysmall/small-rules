@@ -118,7 +118,7 @@ function isTypeScope(node: ESTree.Node): boolean {
 }
 
 function getEnclosingTypeScope(node: ESTree.Node, program: ESTree.Program): ESTree.Node {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	while (current !== null && current !== program) {
 		if (isTypeScope(current)) return current;
 		current = current.parent;

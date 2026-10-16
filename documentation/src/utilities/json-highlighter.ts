@@ -39,12 +39,11 @@ function classifyToken(text: string): string | undefined {
 function isKey(raw: ReadonlyArray<HighlightToken>, index: number): boolean {
 	let lookahead = index + 1;
 	while (lookahead < raw.length) {
-		const current: HighlightToken | undefined = raw[lookahead];
+		const current = raw[lookahead];
 		if (current === undefined || current.className !== undefined) break;
 		lookahead += 1;
 	}
-	const token: HighlightToken | undefined = raw[lookahead];
-	return token?.text === ":";
+	return raw[lookahead]?.text === ":";
 }
 
 function getRaw(json: string): ReadonlyArray<HighlightToken> {

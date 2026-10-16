@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { isNode } from "@small-rules/oxlint-utilities";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
@@ -100,12 +100,12 @@ function requireParameter(
 }
 
 describe("getFunctionParameterTypeAnnotation", () => {
-	it.each([
+	it.for([
 		["identifier", "function f(value: string): void {}", "TSStringKeyword"],
 		["rest element", "function f(...values: string[]): void {}", "TSArrayType"],
 		["assignment pattern", 'function f(value: string = "default"): void {}', "TSStringKeyword"],
 		["destructured object", "function f({ value }: { value: string }): void {}", "TSTypeLiteral"],
-	])("extracts the annotation from a %s parameter", (_name, code, expectedType) => {
+	] as const)("extracts the annotation from a %s parameter", ([, code, expectedType], { expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
@@ -114,11 +114,11 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe(expectedType);
 	});
 
-	it.each([
+	it.for([
 		["unannotated identifier", "function f(value): void {}"],
 		["unannotated rest element", "function f(...values): void {}"],
 		["unannotated assignment pattern", 'function f(value = "default"): void {}'],
-	])("returns undefined for an %s", (_name, code) => {
+	] as const)("returns undefined for an %s", ([, code], { expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
@@ -127,7 +127,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)).toBeUndefined();
 	});
 
-	it("extracts the annotation through a parameter property wrapper", () => {
+	it("extracts the annotation through a parameter property wrapper", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("class C { constructor(public value: string) {} }");
@@ -136,7 +136,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 
-	it("extracts the annotation from an arrow function parameter", () => {
+	it("extracts the annotation from an arrow function parameter", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("const f = (value: string) => {};");
@@ -145,7 +145,7 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
 	});
 
-	it("extracts the annotation from a function type parameter", () => {
+	it("extracts the annotation from a function type parameter", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("type F = (value: string) => void;");
@@ -156,14 +156,14 @@ describe("getFunctionParameterTypeAnnotation", () => {
 });
 
 describe("getFunctionParameterBindingName", () => {
-	it.each([
+	it.for([
 		["simple parameter", "function f(value: string): void {}", "value"],
 		["default-value parameter", 'function f(value: string = "default"): void {}', "value"],
 		["destructured parameter", "function f({ value }: { value: string }): void {}", "{ value }"],
 		["unannotated destructured parameter", "function f({ value }): void {}", "{ value }"],
 		["default-value destructured parameter", "function f({ value }: { value: string } = {}): void {}", "{ value }"],
 		["rest parameter", "function f(...values: string[]): void {}", "values"],
-	])("returns the binding name for a %s", (_name, code, expected) => {
+	] as const)("returns the binding name for a %s", ([, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode(code);
@@ -172,7 +172,7 @@ describe("getFunctionParameterBindingName", () => {
 		expect(getFunctionParameterBindingName(parameter, source)).toBe(expected);
 	});
 
-	it("returns the parameter property binding name", () => {
+	it("returns the parameter property binding name", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("class C { constructor(public value: string) {} }");
@@ -183,7 +183,7 @@ describe("getFunctionParameterBindingName", () => {
 });
 
 describe("containsUnknownType", () => {
-	it.each([
+	it.for([
 		["bare unknown", "let _v: unknown;", "TSUnknownKeyword", true],
 		["union with unknown", "let _v: string | unknown;", "TSUnionType", true],
 		["parenthesized unknown", "let _v: (unknown);", "TSParenthesizedType", true],
@@ -191,7 +191,7 @@ describe("containsUnknownType", () => {
 		["string only", "let _v: string;", "TSStringKeyword", false],
 		["union without unknown", "let _v: string | number;", "TSUnionType", false],
 		["parenthesized non-unknown", "let _v: (string);", "TSParenthesizedType", false],
-	])("detects unknown in %s", (_name, code, expectedRootType, expected) => {
+	] as const)("detects unknown in %s", ([, code, expectedRootType, expected], { expect }) => {
 		expect.assertions(2);
 
 		const type = findFirstTypeAnnotation(code);

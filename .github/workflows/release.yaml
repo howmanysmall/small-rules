@@ -214,3 +214,4 @@ jobs:
         name: Dry-run summary
         run: |
           echo "Dry run: skipped release notes, publish, and GitHub release creation."
+    timeout-minutes: 15

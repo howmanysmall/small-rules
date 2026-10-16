@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 
@@ -13,7 +13,7 @@ import { FIXABLE_CASES } from "./support/fixable-cases";
 const MINIMUM_TRIGGER_RATIO = 0.5;
 
 describe("fixable rules", () => {
-	it("should cover every rule that declares meta.fixable", () => {
+	it("should cover every rule that declares meta.fixable", ({ expect }) => {
 		// Catches a new fixable rule shipping without a settling property.
 		expect.assertions(1);
 
@@ -29,9 +29,9 @@ describe("fixable rules", () => {
 		expect(covered.toSorted(compareText)).toStrictEqual(fixableRules.toSorted(compareText));
 	});
 
-	it.each(FIXABLE_CASES)(
+	it.for(FIXABLE_CASES)(
 		"should settle $rule fixes into valid code within the pass limit",
-		({ createCase, program, rule }) => {
+		({ createCase, program, rule }, { expect }) => {
 			// Catches fixes that undo each other, re-trigger forever, report a
 			// fix that changes nothing, or leave code that no longer compiles.
 			expect.hasAssertions();

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import {
 	isArrayOfNumbers,
@@ -27,14 +27,14 @@ import {
 } from "./index.ts";
 
 describe("primitive validators", () => {
-	it("isBoolean accepts booleans and rejects strings", () => {
+	it("isBoolean accepts booleans and rejects strings", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isBoolean.allows(true)).toBe(true);
 		expect(isBoolean.allows("true")).toBe(false);
 	});
 
-	it("isTrue accepts true and rejects everything else", () => {
+	it("isTrue accepts true and rejects everything else", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isTrue.allows(true)).toBe(true);
@@ -42,7 +42,7 @@ describe("primitive validators", () => {
 		expect(isTrue.allows("true")).toBe(false);
 	});
 
-	it("isFalse accepts false and rejects everything else", () => {
+	it("isFalse accepts false and rejects everything else", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isFalse.allows(false)).toBe(true);
@@ -50,21 +50,21 @@ describe("primitive validators", () => {
 		expect(isFalse.allows("false")).toBe(false);
 	});
 
-	it("isNumber accepts numbers and rejects strings", () => {
+	it("isNumber accepts numbers and rejects strings", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isNumber.allows(1)).toBe(true);
 		expect(isNumber.allows("1")).toBe(false);
 	});
 
-	it("isString accepts strings and rejects numbers", () => {
+	it("isString accepts strings and rejects numbers", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isString.allows("hi")).toBe(true);
 		expect(isString.allows(1)).toBe(false);
 	});
 
-	it("isNonEmptyString accepts non-empty strings and rejects empty strings", () => {
+	it("isNonEmptyString accepts non-empty strings and rejects empty strings", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isNonEmptyString.allows("hi")).toBe(true);
@@ -72,21 +72,21 @@ describe("primitive validators", () => {
 		expect(isNonEmptyString.allows(undefined)).toBe(false);
 	});
 
-	it("isUndefined accepts undefined and rejects null", () => {
+	it("isUndefined accepts undefined and rejects null", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isUndefined.allows(undefined)).toBe(true);
 		expect(isUndefined.allows(null)).toBe(false);
 	});
 
-	it("isNull accepts null and rejects undefined", () => {
+	it("isNull accepts null and rejects undefined", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isNull.allows(null)).toBe(true);
 		expect(isNull.allows(undefined)).toBe(false);
 	});
 
-	it("isUnknown accepts any value", () => {
+	it("isUnknown accepts any value", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isUnknown.allows(1)).toBe(true);
@@ -96,7 +96,7 @@ describe("primitive validators", () => {
 });
 
 describe("optional and nullable validators", () => {
-	it("isMaybeString accepts a string or undefined", () => {
+	it("isMaybeString accepts a string or undefined", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isMaybeString.allows("a")).toBe(true);
@@ -104,7 +104,7 @@ describe("optional and nullable validators", () => {
 		expect(isMaybeString.allows(null)).toBe(false);
 	});
 
-	it("isNullableString accepts a string or null", () => {
+	it("isNullableString accepts a string or null", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isNullableString.allows("a")).toBe(true);
@@ -112,21 +112,23 @@ describe("optional and nullable validators", () => {
 		expect(isNullableString.allows(undefined)).toBe(false);
 	});
 
-	it("isMaybeNumber accepts a number or undefined", () => {
+	it("isMaybeNumber accepts a number or undefined", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isMaybeNumber.allows(1)).toBe(true);
 		expect(isMaybeNumber.allows(undefined)).toBe(true);
 	});
 
-	it("isMaybeNull accepts null or undefined", () => {
+	it("isMaybeNull accepts null or undefined", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isMaybeNull.allows(null)).toBe(true);
 		expect(isMaybeNull.allows(undefined)).toBe(true);
 	});
 
-	it("isMaybeReadonlyDictionaryOfStrings accepts accepts string records and rejects non-string records or undefined", () => {
+	it("isMaybeReadonlyDictionaryOfStrings accepts accepts string records and rejects non-string records or undefined", ({
+		expect,
+	}) => {
 		expect.assertions(4);
 
 		expect(isMaybeReadonlyDictionaryOfStrings.allows({ a: "b" })).toBe(true);
@@ -137,35 +139,35 @@ describe("optional and nullable validators", () => {
 });
 
 describe("array validators", () => {
-	it("isArrayOfStrings accepts string arrays and rejects number arrays", () => {
+	it("isArrayOfStrings accepts string arrays and rejects number arrays", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isArrayOfStrings.allows(["a"])).toBe(true);
 		expect(isArrayOfStrings.allows([1])).toBe(false);
 	});
 
-	it("isReadonlyArrayOfStrings accepts string arrays and rejects number arrays", () => {
+	it("isReadonlyArrayOfStrings accepts string arrays and rejects number arrays", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isReadonlyArrayOfStrings.allows(["a"])).toBe(true);
 		expect(isReadonlyArrayOfStrings.allows([1])).toBe(false);
 	});
 
-	it("isArrayOfNumbers accepts number arrays and rejects string arrays", () => {
+	it("isArrayOfNumbers accepts number arrays and rejects string arrays", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isArrayOfNumbers.allows([1])).toBe(true);
 		expect(isArrayOfNumbers.allows(["a"])).toBe(false);
 	});
 
-	it("isReadonlyArrayOfNumbers accepts number arrays and rejects string arrays", () => {
+	it("isReadonlyArrayOfNumbers accepts number arrays and rejects string arrays", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isReadonlyArrayOfNumbers.allows([1])).toBe(true);
 		expect(isReadonlyArrayOfNumbers.allows(["a"])).toBe(false);
 	});
 
-	it("isMaybeReadonlyArrayOfStrings accepts a string array or undefined", () => {
+	it("isMaybeReadonlyArrayOfStrings accepts a string array or undefined", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isMaybeReadonlyArrayOfStrings.allows(["a"])).toBe(true);
@@ -175,26 +177,26 @@ describe("array validators", () => {
 });
 
 describe("dictionary validators", () => {
-	it("isDictionaryOfUnknowns accepts any record", () => {
+	it("isDictionaryOfUnknowns accepts any record", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(isDictionaryOfUnknowns.allows({ a: 1 })).toBe(true);
 	});
 
-	it("isReadonlyDictionaryOfUnknowns accepts any record", () => {
+	it("isReadonlyDictionaryOfUnknowns accepts any record", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(isReadonlyDictionaryOfUnknowns.allows({ a: 1 })).toBe(true);
 	});
 
-	it("isDictionaryOfStrings accepts string records and rejects non-string records", () => {
+	it("isDictionaryOfStrings accepts string records and rejects non-string records", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isDictionaryOfStrings.allows({ a: "b" })).toBe(true);
 		expect(isDictionaryOfStrings.allows({ a: 1 })).toBe(false);
 	});
 
-	it("isReadonlyDictionaryOfStrings accepts string records and rejects non-string records", () => {
+	it("isReadonlyDictionaryOfStrings accepts string records and rejects non-string records", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isReadonlyDictionaryOfStrings.allows({ a: "b" })).toBe(true);

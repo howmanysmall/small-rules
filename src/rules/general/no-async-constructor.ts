@@ -93,7 +93,7 @@ function isNonIifeFunction(node: ESTree.Node): boolean {
 }
 
 function isInsideSkippedFunction(node: ESTree.Node, constructorBody: ESTree.BlockStatement): boolean {
-	let current: ESTree.Node = node;
+	let current = node;
 
 	while (current !== constructorBody) {
 		const { parent } = current;

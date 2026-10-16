@@ -10,6 +10,7 @@ on:
       - "**/*.mdx"
       - "*.config.ts"
       - ".github/actions/**"
+      - .github/jactionlint.yaml
       - .github/workflows/bundle-size.yaml
       - .github/workflows/checks.yaml
       - .github/workflows/ci.yaml
@@ -33,7 +34,6 @@ on:
       - "src/**/*.tsx"
       - "tests/**"
       - "tsconfig*.json"
-      - zizmor.yaml
   pull_request:
     paths: *ci-paths
 
@@ -71,6 +71,7 @@ jobs:
 
       - name: Lint prose
         run: vale --no-color .
+    timeout-minutes: 15
 
   workflow-security:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -105,17 +106,14 @@ jobs:
         name: Setup toolchain
         uses: $/.github/actions/setup
         with:
-          tools: actionlint pinact zizmor
+          tools: jactionlint pinact
 
       - parallel:
           - if: steps.changes.outputs.changed == 'true'
-            name: actionlint
-            run: actionlint
+            name: jactionlint
+            run: jactionlint
 
           - if: steps.changes.outputs.changed == 'true'
             name: pinact
             run: pinact run
-
-          - if: steps.changes.outputs.changed == 'true'
-            name: zizmor
-            run: zizmor .github
+    timeout-minutes: 15

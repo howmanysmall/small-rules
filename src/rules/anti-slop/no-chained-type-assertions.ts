@@ -68,7 +68,7 @@ function isForbiddenAssertionChain(node: TypeAssertionExpression, allowedTargets
 
 const noChainedTypeAssertions = createRule("no-chained-type-assertions", "anti-slop", {
 	createOnce(context): VisitorWithHooks {
-		let allowedTargets: ReadonlyArray<string> = EMPTY_TARGETS;
+		let allowedTargets = EMPTY_TARGETS;
 
 		function checkTypeAssertion(node: TypeAssertionExpression): void {
 			if (!isOutermostAssertionInChain(node) || !isForbiddenAssertionChain(node, allowedTargets)) return;

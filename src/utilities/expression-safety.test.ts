@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { createRuleTester } from "@small-rules/rule-harness";
+import { fromPartial } from "@total-typescript/shoehorn";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
@@ -38,12 +39,11 @@ const tester = createRuleTester({ language: "js", sourceType: "module" });
 const templateExpressionCode = `check(\`${String.fromCharCode(36)}{value}\`);`;
 
 describe("isExpressionSideEffectSafe", () => {
-	it("should treat private identifier property keys as safe parser keys", () => {
+	it("should treat private identifier property keys as safe parser keys", ({ expect }) => {
 		expect.assertions(1);
 
 		// Arrange
-		// SAFETY: PrivateIdentifier object keys are not constructible in source.
-		const expression = {
+		const expression: ESTree.Expression = fromPartial({
 			properties: [
 				{
 					key: { name: "value", type: "PrivateIdentifier" },
@@ -55,8 +55,7 @@ describe("isExpressionSideEffectSafe", () => {
 				},
 			],
 			type: "ObjectExpression",
-			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Parser types include this object-key union member, but source syntax cannot build it.
-		} as ESTree.Expression;
+		});
 
 		// Act
 		const result = isExpressionSideEffectSafe(expression);

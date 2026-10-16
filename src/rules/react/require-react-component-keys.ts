@@ -138,7 +138,7 @@ function skipWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 }
 
 function getEnclosingFunctionLike(node: ESTree.Node): CallbackFunction | undefined {
-	let current: ESTree.Node | undefined = getParent(node);
+	let current = getParent(node);
 
 	while (current !== undefined) {
 		if (isAnyFunction(current)) return current;
@@ -189,8 +189,8 @@ function getCallbackUsageFromCallExpression(
 }
 
 function findEnclosingCallExpression(node: ESTree.Node): ESTree.CallExpression | undefined {
-	let current: ESTree.Node = node;
-	let parent: ESTree.Node | undefined = getParent(node);
+	let current = node;
+	let parent = getParent(node);
 
 	while (parent !== undefined) {
 		if (isCallExpression(parent)) {
@@ -299,7 +299,7 @@ function skipExpressionContainer(parent?: ESTree.Node): ESTree.Node | undefined 
 }
 
 function isFunctionReturnStatement(parent: ESTree.ReturnStatement): boolean {
-	let currentNode: ESTree.Node | undefined = skipWrappers(getParent(parent));
+	let currentNode = skipWrappers(getParent(parent));
 
 	while (currentNode !== undefined && CONTROL_FLOW_TYPES.has(currentNode.type)) {
 		currentNode = skipWrappers(getParent(currentNode));
@@ -326,7 +326,7 @@ function isIgnoredCallExpression(
 	node: ESTree.JSXElement | ESTree.JSXFragment,
 	ignoredCallExpressions: ReadonlySet<string>,
 ): boolean {
-	let parent: ESTree.Node | undefined = getParent(node);
+	let parent = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (parent === undefined) return false;
 
@@ -361,7 +361,7 @@ function isChildrenAttributeName(attributeName: string): boolean {
 }
 
 function isJsxPropertyValue(node: ESTree.JSXElement | ESTree.JSXFragment): boolean {
-	let parent: ESTree.Node | undefined = getParent(node);
+	let parent = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (parent === undefined) return false;
 
@@ -403,7 +403,7 @@ function isAssignedJSXValue(node: ESTree.JSXElement | ESTree.JSXFragment): boole
 }
 
 function isJsxChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapperType: NodeType): boolean {
-	let current: ESTree.Node | undefined = getParent(node);
+	let current = getParent(node);
 	/* v8 ignore next -- @preserve visited JSX nodes have parent links in parser-produced ASTs. */
 	if (current === undefined) return false;
 

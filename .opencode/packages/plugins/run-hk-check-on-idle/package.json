@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
-		"effect": "catalog:opencode2",
+		"effect": "catalog:runtime",
 		"tinyexec": "catalog:scripts"
 	},
 	"devDependencies": {

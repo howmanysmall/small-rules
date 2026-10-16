@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 
 import {
 	createRuleNewness,
@@ -71,7 +71,7 @@ function createManifestFilteredRunner(): GitRunner {
 }
 
 describe("parseAddCommits", () => {
-	it("maps each rule to its first add commit", () => {
+	it("maps each rule to its first add commit", ({ expect }) => {
 		expect.assertions(4);
 
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
@@ -82,7 +82,7 @@ describe("parseAddCommits", () => {
 		expect(adds.get("no-initialize-state")).toBe("cccc3333");
 	});
 
-	it("keeps the first occurrence when a rule appears in multiple commits", () => {
+	it("keeps the first occurrence when a rule appears in multiple commits", ({ expect }) => {
 		expect.assertions(1);
 
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
@@ -90,7 +90,7 @@ describe("parseAddCommits", () => {
 		expect(adds.get("no-chain-state-updates")).toBe("aaaa1111");
 	});
 
-	it("ignores deeply nested paths and non-`.ts` files", () => {
+	it("ignores deeply nested paths and non-`.ts` files", ({ expect }) => {
 		expect.assertions(2);
 
 		const adds = parseAddCommits(ADD_LOG_FIXTURE);
@@ -101,7 +101,7 @@ describe("parseAddCommits", () => {
 });
 
 describe("parseLastModCommits", () => {
-	it("maps each rule to its most recent touching commit", () => {
+	it("maps each rule to its most recent touching commit", ({ expect }) => {
 		expect.assertions(4);
 
 		const lastMods = parseLastModuleCommits(LAST_MOD_LOG_FIXTURE);
@@ -112,7 +112,7 @@ describe("parseLastModCommits", () => {
 		expect(lastMods.get("no-initialize-state")).toBe("cccc3333");
 	});
 
-	it("ignores deeply nested paths", () => {
+	it("ignores deeply nested paths", ({ expect }) => {
 		expect.assertions(2);
 
 		const lastMods = parseLastModuleCommits(LAST_MOD_LOG_FIXTURE);
@@ -123,7 +123,7 @@ describe("parseLastModCommits", () => {
 });
 
 describe("resolveNewness", () => {
-	it("marks rules new only when added in the latest release or unreleased", () => {
+	it("marks rules new only when added in the latest release or unreleased", ({ expect }) => {
 		expect.assertions(3);
 
 		const newness = resolveNewness(
@@ -160,7 +160,7 @@ describe("resolveNewness", () => {
 		});
 	});
 
-	it("marks old rules updated when last modified in the latest release", () => {
+	it("marks old rules updated when last modified in the latest release", ({ expect }) => {
 		expect.assertions(1);
 
 		const newness = resolveNewness(
@@ -177,7 +177,7 @@ describe("resolveNewness", () => {
 		});
 	});
 
-	it("marks old rules updated when modifications are unreleased", () => {
+	it("marks old rules updated when modifications are unreleased", ({ expect }) => {
 		expect.assertions(1);
 
 		const newness = resolveNewness(
@@ -194,7 +194,7 @@ describe("resolveNewness", () => {
 		});
 	});
 
-	it("prefers new over updated when a latest rule was also modified", () => {
+	it("prefers new over updated when a latest rule was also modified", ({ expect }) => {
 		expect.assertions(1);
 
 		const newness = resolveNewness(
@@ -211,7 +211,7 @@ describe("resolveNewness", () => {
 		});
 	});
 
-	it("falls back to the add release when no last-mod entry exists", () => {
+	it("falls back to the add release when no last-mod entry exists", ({ expect }) => {
 		expect.assertions(1);
 
 		const newness = resolveNewness(new Map([["lonely-rule", "v1.1.0"]]), new Map(), "v2.14.0");
@@ -226,7 +226,7 @@ describe("resolveNewness", () => {
 });
 
 describe("createRuleNewness", () => {
-	it("classifies rules against the latest release", () => {
+	it("classifies rules against the latest release", ({ expect }) => {
 		expect.assertions(4);
 
 		const newness = createRuleNewness(createFakeRunner(RESPONSES));
@@ -257,7 +257,7 @@ describe("createRuleNewness", () => {
 		});
 	});
 
-	it("runs one tag lookup per distinct add or last-mod commit", () => {
+	it("runs one tag lookup per distinct add or last-mod commit", ({ expect }) => {
 		expect.assertions(1);
 
 		const calls = new Array<ReadonlyArray<string>>();
@@ -271,13 +271,13 @@ describe("createRuleNewness", () => {
 		expect(containsCalls).toHaveLength(5);
 	});
 
-	it("returns an empty map when no release tags exist", () => {
+	it("returns an empty map when no release tags exist", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(createRuleNewness(() => "")).toStrictEqual(new Map());
 	});
 
-	it("drops rules absent from the manifest", () => {
+	it("drops rules absent from the manifest", ({ expect }) => {
 		expect.assertions(1);
 
 		const newness = createRuleNewness(createManifestFilteredRunner());
@@ -287,7 +287,7 @@ describe("createRuleNewness", () => {
 });
 
 describe("getRuleNewnessWith", () => {
-	it("returns an empty map and warns when git is unavailable", () => {
+	it("returns an empty map and warns when git is unavailable", ({ expect }) => {
 		expect.assertions(2);
 
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {

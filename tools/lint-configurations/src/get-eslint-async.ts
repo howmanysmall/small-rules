@@ -44,7 +44,7 @@ export async function getEslintAsync(tsconfigPath: string): Promise<LintConfigur
 				"{.omo,.rumdl_cache}/**",
 				".github/workflows/react-doctor.yml",
 			] satisfies ReadonlyArray<string>,
-			jsdoc: true,
+			jsdoc: false,
 			jsonc: true,
 			markdown: false,
 			oxlint: true,

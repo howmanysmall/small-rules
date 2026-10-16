@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { js, ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/general/directive-require-description";
@@ -98,7 +98,7 @@ describe("directive-require-description", () => {
 		};
 	}
 
-	it("should ignore line comments without string values", () => {
+	it("should ignore line comments without string values", ({ expect }) => {
 		expect.assertions(1);
 
 		const lineComment = createLineComment();

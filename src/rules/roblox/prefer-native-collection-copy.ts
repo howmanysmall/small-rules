@@ -56,7 +56,7 @@ function getEmptyCollectionDeclaration(
 }
 
 function getSingleLoopCall(loop: ESTree.ForOfStatement): ESTree.CallExpression | undefined {
-	let statement: ESTree.Statement = loop.body;
+	let statement = loop.body;
 	if (isBlockStatement(statement)) {
 		if (statement.body.length !== 1) return undefined;
 		const [onlyStatement] = statement.body;

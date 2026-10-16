@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { resolveRelativeImport } from "$oxc-utilities/resolve-import";
 
 describe("resolveRelativeImport", () => {
-	it("should not resolve package import specifiers", () => {
+	it("should not resolve package import specifiers", ({ expect }) => {
 		expect.assertions(1);
 
 		// Arrange

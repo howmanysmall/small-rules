@@ -3,7 +3,7 @@ import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import { gunzipSync } from "node:zlib";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it, onTestFinished } from "vitest";
 import { type } from "arktype";
 import { parseYAML } from "confbox";
 import { $ } from "zx";
@@ -82,6 +82,7 @@ function readPackageManifest(archivePath: string): string {
 
 async function packManifestAsync(): Promise<string> {
 	const destination = mkdtempSync(nodePath.join(tmpdir(), "small-rules-pack-"));
+	// oxlint-disable-next-line flawless/prefer-vitest-local-context -- no lol
 	onTestFinished(async () => rm(destination, { force: true, recursive: true }));
 
 	await $`pnpm pack --pack-destination ${destination}`;
@@ -107,7 +108,7 @@ async function getWorkspacePackageNamesAsync(): Promise<ReadonlySet<string>> {
 
 describe("release workflow", () => {
 	// Catches two tag pushes racing into a double or cancelled publish.
-	it("serializes all releases through one never-cancelling concurrency group", () => {
+	it("serializes all releases through one never-cancelling concurrency group", ({ expect }) => {
 		expect.assertions(2);
 
 		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
@@ -117,7 +118,7 @@ describe("release workflow", () => {
 	});
 
 	// Catches npm publish, which drops provenance and leaks catalog: refs.
-	it("publishes with provenance through pnpm", () => {
+	it("publishes with provenance through pnpm", ({ expect }) => {
 		expect.assertions(2);
 
 		const workflow = isWorkflow.assert(parseYAML(RELEASE_YAML));
@@ -130,14 +131,14 @@ describe("release workflow", () => {
 	});
 
 	// A tag commit is validated on main; re-running checks doubles the bill.
-	it("does not rerun CI checks for a tag already validated on main", () => {
+	it("does not rerun CI checks for a tag already validated on main", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(RELEASE_YAML).not.toContain("uses: ./.github/workflows/checks.yaml");
 	});
 
 	// Catches publishing a commit that CI never validated.
-	it("waits for the matching main-branch CI run before publishing", () => {
+	it("waits for the matching main-branch CI run before publishing", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(RELEASE_YAML).toContain('gh run list --workflow ci.yaml --commit "$GITHUB_SHA"');
@@ -146,7 +147,7 @@ describe("release workflow", () => {
 
 	// Ordering is the contract: notes must land on main before the tag
 	// publishes, or the documentation deployment from main misses them.
-	it("commits release notes to main before publishing the tag", () => {
+	it("commits release notes to main before publishing the tag", ({ expect }) => {
 		expect.assertions(3);
 
 		const worktreeIndex = RELEASE_YAML.indexOf("git worktree add");
@@ -158,7 +159,7 @@ describe("release workflow", () => {
 	});
 
 	// Catches a dry run mutating the repository, which CI cannot surface.
-	it("keeps dry runs read-only", () => {
+	it("keeps dry runs read-only", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(RELEASE_YAML).toContain("env.DRY_RUN != 'true'");
@@ -167,7 +168,7 @@ describe("release workflow", () => {
 
 	// A stray prepublish script or Build step would double-build or ship
 	// stale output.
-	it("uses prepublishOnly as the single real-release build", () => {
+	it("uses prepublishOnly as the single real-release build", ({ expect }) => {
 		expect.assertions(3);
 
 		const manifest = isPackageScripts.assert(JSON.parse(PACKAGE_JSON));
@@ -177,7 +178,7 @@ describe("release workflow", () => {
 		expect(RELEASE_YAML).not.toContain("name: Build");
 	});
 
-	it("resolves catalog dependencies to registry-compatible versions", async () => {
+	it("resolves catalog dependencies to registry-compatible versions", async ({ expect }) => {
 		expect.assertions(1);
 
 		await expect(packManifestAsync()).resolves.not.toContain("catalog:");
@@ -185,7 +186,7 @@ describe("release workflow", () => {
 
 	// Catches v3.3.0: a workspace package in dependencies packs as 0.0.0 and
 	// 404s for every consumer, because workspace packages are never published.
-	it("depends at runtime only on packages published to the registry", async () => {
+	it("depends at runtime only on packages published to the registry", async ({ expect }) => {
 		expect.assertions(1);
 
 		const [manifest, workspacePackages] = await Promise.all([packManifestAsync(), getWorkspacePackageNamesAsync()]);

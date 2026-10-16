@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import nodePath from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { extractRuleExamples } from "$utilities/extract-rule-examples";
 
@@ -28,7 +28,7 @@ function getFixtureExamples(fixtureName: string): ReadonlyArray<RuleExample> | u
 }
 
 describe("extractRuleExamples", () => {
-	it("extracts every supported static expression and orders examples by kind then ID", () => {
+	it("extracts every supported static expression and orders examples by kind then ID", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getFixtureExamples("static-values.fixture.ts")).toStrictEqual([
@@ -76,7 +76,7 @@ describe("extractRuleExamples", () => {
 		]);
 	});
 
-	it("ignores unmarked cases even when they contain unsupported expressions", () => {
+	it("ignores unmarked cases even when they contain unsupported expressions", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getFixtureExamples("unmarked-unsupported.fixture.ts")).toStrictEqual([
@@ -90,7 +90,7 @@ describe("extractRuleExamples", () => {
 		]);
 	});
 
-	it("rejects duplicate example IDs within a rule", () => {
+	it("rejects duplicate example IDs within a rule", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("duplicate-id.fixture.ts")).toThrow(
@@ -98,7 +98,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects interpolated template literals in marked cases", () => {
+	it("rejects interpolated template literals in marked cases", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("interpolated-template.fixture.ts")).toThrow(
@@ -106,7 +106,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects identifier references in marked cases", () => {
+	it("rejects identifier references in marked cases", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("identifier-reference.fixture.ts")).toThrow(
@@ -114,7 +114,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects spreads in marked cases", () => {
+	it("rejects spreads in marked cases", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("spread.fixture.ts")).toThrow(
@@ -122,7 +122,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects function calls other than supported join calls", () => {
+	it("rejects function calls other than supported join calls", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("call.fixture.ts")).toThrow(
@@ -130,7 +130,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects computed keys in marked cases", () => {
+	it("rejects computed keys in marked cases", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("computed-key.fixture.ts")).toThrow(
@@ -138,7 +138,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects documentation markers without static id and title strings", () => {
+	it("rejects documentation markers without static id and title strings", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("invalid-marker.fixture.ts")).toThrow(
@@ -146,7 +146,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects marked focused cases", () => {
+	it("rejects marked focused cases", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("only.fixture.ts")).toThrow(
@@ -154,7 +154,7 @@ describe("extractRuleExamples", () => {
 		);
 	});
 
-	it("rejects marked skipped cases", () => {
+	it("rejects marked skipped cases", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => extractFixture("skip.fixture.ts")).toThrow(

@@ -77,6 +77,7 @@ jobs:
 
           - name: Build
             run: node --run build -- --minify && test -f dist/index.js
+    timeout-minutes: 15
 
   documentation:
     name: Documentation
@@ -128,6 +129,7 @@ jobs:
       - name: Test documentation in Chromium
         run: node --run test:browser
         working-directory: documentation
+    timeout-minutes: 15
 
   test:
     name: Test
@@ -154,3 +156,4 @@ jobs:
 
           - name: Run fuzz regressions
             run: node --run test:fuzz
+    timeout-minutes: 15

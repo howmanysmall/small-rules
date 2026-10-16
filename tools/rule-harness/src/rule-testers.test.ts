@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { defineRule } from "oxlint-plugin-utilities";
 
 import { js, ts, tsx } from "./rule-testers";
@@ -297,7 +297,7 @@ describe("rule-testers fixes and suggestions", () => {
 });
 
 describe("rule-testers configuration validation", () => {
-	it("should reject legacy parser configuration", () => {
+	it("should reject legacy parser configuration", ({ expect }) => {
 		expect.assertions(1);
 
 		const legacyLanguageOptionsKey = ["language", "Options"].join("");
@@ -316,7 +316,7 @@ describe("rule-testers configuration validation", () => {
 		}).toThrow("Legacy parser configuration is not supported");
 	});
 
-	it("should reject non-JSON options", () => {
+	it("should reject non-JSON options", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => {

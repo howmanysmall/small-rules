@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { createRuleTester } from "@small-rules/rule-harness";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -82,7 +82,7 @@ describe("getHookName utility", () => {
 });
 
 describe("isSetterIdentifier behavior", () => {
-	it("matches setter pattern setX where X is uppercase", () => {
+	it("matches setter pattern setX where X is uppercase", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(isSetterIdentifier("setState")).toBe(true);
@@ -91,7 +91,7 @@ describe("isSetterIdentifier behavior", () => {
 		expect(isSetterIdentifier("setA")).toBe(true);
 	}, 1_000);
 
-	it("rejects lowercase after set", () => {
+	it("rejects lowercase after set", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isSetterIdentifier("setstate")).toBe(false);
@@ -99,14 +99,14 @@ describe("isSetterIdentifier behavior", () => {
 		expect(isSetterIdentifier("setup")).toBe(false);
 	}, 1_000);
 
-	it("rejects names not starting with set", () => {
+	it("rejects names not starting with set", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isSetterIdentifier("state")).toBe(false);
 		expect(isSetterIdentifier("resetState")).toBe(false);
 	}, 1_000);
 
-	it("rejects empty and short strings", () => {
+	it("rejects empty and short strings", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isSetterIdentifier("")).toBe(false);

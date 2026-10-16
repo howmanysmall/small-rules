@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 
 import { createJudgmentCache } from "$script-utilities/rule-relations/cache";
 import { judgmentPromptVersion, judgmentThresholds } from "$script-utilities/rule-relations/constants";
@@ -95,7 +95,7 @@ function createFakeReasonWriter(reason: (from: RuleName, to: RuleName) => string
 }
 
 describe("judgeRulePairs", () => {
-	it("judges each unordered pair once and can repeat offline from cache", async () => {
+	it("judges each unordered pair once and can repeat offline from cache", async ({ expect, onTestFinished }) => {
 		expect.assertions(5);
 
 		const calls = new Array<string>();
@@ -142,7 +142,7 @@ describe("judgeRulePairs", () => {
 });
 
 describe("regenerateRelations", () => {
-	it("writes fresh relations with reasons and evidence", async () => {
+	it("writes fresh relations with reasons and evidence", async ({ expect }) => {
 		expect.assertions(6);
 
 		const calls = new Array<string>();
@@ -193,7 +193,7 @@ describe("regenerateRelations", () => {
 		expect(progress.at(-1)).toStrictEqual({ cached: 0, completed: 2, phase: "reasons", total: 2 });
 	});
 
-	it("keeps untouched relations and drops re-judged ones", async () => {
+	it("keeps untouched relations and drops re-judged ones", async ({ expect }) => {
 		expect.assertions(1);
 
 		const calls = new Array<string>();
@@ -229,7 +229,7 @@ describe("regenerateRelations", () => {
 		expect(result.edges.map((edge) => edge.reason)).toStrictEqual(["Retained."]);
 	});
 
-	it("surfaces near-threshold reviews and rejects ungrounded reasons", async () => {
+	it("surfaces near-threshold reviews and rejects ungrounded reasons", async ({ expect }) => {
 		expect.assertions(4);
 
 		const nearThresholdJudgments = new Map([
@@ -284,7 +284,7 @@ describe("regenerateRelations", () => {
 });
 
 describe("createAllRulePairs", () => {
-	it("creates each unordered pair exactly once", () => {
+	it("creates each unordered pair exactly once", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(createAllRulePairs(["no-warn", "no-error", "no-print", "no-error"])).toStrictEqual([
@@ -296,7 +296,7 @@ describe("createAllRulePairs", () => {
 });
 
 describe("readGeneratedEdges", () => {
-	it("reads relation identities and reasons from a document", () => {
+	it("reads relation identities and reasons from a document", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		const directory = mkdtempSync(nodePath.join(tmpdir(), "rule-relations-edges-"));
@@ -315,7 +315,7 @@ describe("readGeneratedEdges", () => {
 		]);
 	});
 
-	it("rejects documents with malformed edges", () => {
+	it("rejects documents with malformed edges", ({ expect, onTestFinished }) => {
 		expect.assertions(1);
 
 		const directory = mkdtempSync(nodePath.join(tmpdir(), "rule-relations-edges-"));
@@ -330,7 +330,7 @@ describe("readGeneratedEdges", () => {
 });
 
 describe("compareRelationBaseline", () => {
-	it("explains what changed from the previous generated relation file", () => {
+	it("explains what changed from the previous generated relation file", ({ expect }) => {
 		expect.assertions(1);
 
 		const comparison = compareRelationBaseline({

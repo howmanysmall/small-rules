@@ -148,7 +148,7 @@ function formatOpenerList(openers: ReadonlyArray<string>): string {
 function findLabeledStatementBody(label: ESTree.Node, startingNode?: ESTree.Node): ESTree.Statement | undefined {
 	/* v8 ignore next -- @preserve ESTree break/continue labels are parser-produced identifiers. */
 	if (!isIdentifier(label)) return undefined;
-	let current: ESTree.Node | undefined = startingNode;
+	let current = startingNode;
 
 	while (current) {
 		if (isLabeledStatement(current) && current.label.name === label.name) return current.body;

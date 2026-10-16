@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/english/prevent-abbreviations";
@@ -935,7 +935,7 @@ describe("prevent-abbreviations", () => {
 	});
 
 	describe("replacement utilities", () => {
-		it("normalizes disabled and malformed replacement overrides", () => {
+		it("normalizes disabled and malformed replacement overrides", ({ expect }) => {
 			expect.assertions(5);
 
 			const options = prepareOptions({
@@ -954,7 +954,7 @@ describe("prevent-abbreviations", () => {
 			expect(isDiscouragedReplacementName("missing", options)).toBe(false);
 		});
 
-		it("supports shorthand fallbacks, ignored shorthand matches, and property access allow lists", () => {
+		it("supports shorthand fallbacks, ignored shorthand matches, and property access allow lists", ({ expect }) => {
 			expect.assertions(9);
 
 			const options = prepareOptions({
@@ -986,7 +986,7 @@ describe("prevent-abbreviations", () => {
 			expect(isPropertyAccessAllowed("Title", textReplacement, new Set(["Txt"]))).toBe(true);
 		});
 
-		it("formats replacement suggestions without omitted counts when all samples are shown", () => {
+		it("formats replacement suggestions without omitted counts when all samples are shown", ({ expect }) => {
 			expect.assertions(9);
 
 			const options = prepareOptions({
@@ -1019,7 +1019,7 @@ describe("prevent-abbreviations", () => {
 			expect(getNameReplacements("testName", options)).toStrictEqual({ total: 0 });
 		});
 
-		it("accepts RegExp instances in ignore from oxlint.config.ts", () => {
+		it("accepts RegExp instances in ignore from oxlint.config.ts", ({ expect }) => {
 			expect.assertions(6);
 
 			const options = prepareOptions({
@@ -1036,7 +1036,9 @@ describe("prevent-abbreviations", () => {
 			expect(getNameReplacements("ignoredErr", options)).toStrictEqual({ total: 0 });
 		});
 
-		it("returns consistent results across repeated lookups and separately prepared configurations", () => {
+		it("returns consistent results across repeated lookups and separately prepared configurations", ({
+			expect,
+		}) => {
 			expect.assertions(4);
 
 			// Catches a cached lookup returning a different answer than a fresh

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { RuleIndex } from "$components/rule-index";
 import { createRuleIndexCategories } from "$components/rule-index-data";
@@ -19,7 +19,7 @@ function getShowingRulesLabel(count: number): string {
 }
 
 describe("rule-index", () => {
-	it("renders the complete catalog with accessible filter controls", () => {
+	it("renders the complete catalog with accessible filter controls", ({ expect }) => {
 		expect.assertions(5);
 
 		render(<RuleIndex categories={catalogCategories} mode="catalog" />);
@@ -36,7 +36,7 @@ describe("rule-index", () => {
 		expect(screen.getAllByRole("link")).toHaveLength(catalogRuleCount);
 	});
 
-	it("filters rules by search text", async () => {
+	it("filters rules by search text", async ({ expect }) => {
 		expect.assertions(3);
 
 		const user = userEvent.setup();
@@ -51,7 +51,7 @@ describe("rule-index", () => {
 		expect(screen.queryByRole("link", { name: banReactFcPattern })).toBeNull();
 	});
 
-	it("filters rules by category", async () => {
+	it("filters rules by category", async ({ expect }) => {
 		expect.assertions(3);
 
 		const user = userEvent.setup();
@@ -68,7 +68,7 @@ describe("rule-index", () => {
 		expect(screen.queryByRole("link", { name: noPrintPattern })).toBeNull();
 	});
 
-	it("shows the empty state when no rules match", async () => {
+	it("shows the empty state when no rules match", async ({ expect }) => {
 		expect.assertions(3);
 
 		const user = userEvent.setup();
@@ -81,7 +81,7 @@ describe("rule-index", () => {
 		expect(screen.queryAllByRole("link")).toHaveLength(0);
 	});
 
-	it("resets search and category filters together", async () => {
+	it("resets search and category filters together", async ({ expect }) => {
 		expect.assertions(3);
 
 		const user = userEvent.setup();
@@ -100,7 +100,7 @@ describe("rule-index", () => {
 		);
 	});
 
-	it("renders a category listing without catalog filters", () => {
+	it("renders a category listing without catalog filters", ({ expect }) => {
 		expect.assertions(4);
 
 		const robloxCategory = catalogCategories.filter((category) => category.key === "roblox");
@@ -115,7 +115,7 @@ describe("rule-index", () => {
 		expect(document.querySelector(".rule-index-card-category")).toBeNull();
 	});
 
-	it("shows the category pill only in the full catalog", () => {
+	it("shows the category pill only in the full catalog", ({ expect }) => {
 		expect.assertions(1);
 
 		render(<RuleIndex categories={catalogCategories} mode="catalog" />);
@@ -125,7 +125,7 @@ describe("rule-index", () => {
 });
 
 describe("rule-index freshness", () => {
-	it("marks index entries as new with their release tag", () => {
+	it("marks index entries as new with their release tag", ({ expect }) => {
 		expect.assertions(2);
 
 		const categories = createRuleIndexCategories(
@@ -138,7 +138,7 @@ describe("rule-index freshness", () => {
 		expect(noPrint?.addedIn).toBe("v3.0.2");
 	});
 
-	it("marks index entries as updated with their release tag", () => {
+	it("marks index entries as updated with their release tag", ({ expect }) => {
 		expect.assertions(2);
 
 		const categories = createRuleIndexCategories(
@@ -151,7 +151,7 @@ describe("rule-index freshness", () => {
 		expect(noPrint?.updatedIn).toBe("v3.0.2");
 	});
 
-	it("prefers new over updated for index entries", () => {
+	it("prefers new over updated for index entries", ({ expect }) => {
 		expect.assertions(2);
 
 		const categories = createRuleIndexCategories(
@@ -164,7 +164,7 @@ describe("rule-index freshness", () => {
 		expect(noPrint?.isUpdated).toBeUndefined();
 	});
 
-	it("renders new and updated pills with release tooltips", () => {
+	it("renders new and updated pills with release tooltips", ({ expect }) => {
 		expect.assertions(3);
 
 		const categories = createRuleIndexCategories(
@@ -185,7 +185,7 @@ describe("rule-index freshness", () => {
 		expect(updatedPill.textContent).toBe("Updated");
 	});
 
-	it("shows the release tag for updates shipped in a release", () => {
+	it("shows the release tag for updates shipped in a release", ({ expect }) => {
 		expect.assertions(1);
 
 		const categories = createRuleIndexCategories(
@@ -200,7 +200,7 @@ describe("rule-index freshness", () => {
 		).toBe("Updated in v3.0.2");
 	});
 
-	it("shows unreleased wording for new rules not yet in a release", () => {
+	it("shows unreleased wording for new rules not yet in a release", ({ expect }) => {
 		expect.assertions(1);
 
 		const categories = createRuleIndexCategories(
