@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { startsWithVerb } from "$oxc-utilities/english-utilities";
 
@@ -25,7 +25,7 @@ describe("startsWithVerb", () => {
 		expect(startsWithVerb("errorHandler", {})).toStrictEqual([true, "error"]);
 	});
 
-	it.each([
+	it.for([
 		["amLoading", "am"],
 		["areEqual", "are"],
 		["beVisible", "be"],
@@ -51,19 +51,19 @@ describe("startsWithVerb", () => {
 		["wereChanged", "were"],
 		["willUnmount", "will"],
 		["wouldOverflow", "would"],
-	])("should accept the auxiliary verb prefix in %s", (name, prefix) => {
+	] as const)("should accept the auxiliary verb prefix in %s", ([name, prefix], { expect }) => {
 		expect.assertions(1);
 
 		expect(startsWithVerb(name, {})).toStrictEqual([true, prefix]);
 	});
 
-	it.each([
+	it.for([
 		["throwsError", "throws"],
 		["emitsChange", "emits"],
 		["matchesPattern", "matches"],
 		["appliesPatch", "applies"],
 		["goesAway", "goes"],
-	])("should accept the third-person singular verb prefix in %s", (name, prefix) => {
+	] as const)("should accept the third-person singular verb prefix in %s", ([name, prefix], { expect }) => {
 		expect.assertions(1);
 
 		expect(startsWithVerb(name, {})).toStrictEqual([true, prefix]);
@@ -89,19 +89,22 @@ describe("startsWithVerb", () => {
 		expect(startsWithVerb("foosBar", { extraAllowList: ["foo"] })).toStrictEqual([true, "foos"]);
 	});
 
-	it.each(["amount", "route", "state", "total"])("should reject the noun-first word %s", (name) => {
-		expect.assertions(1);
+	it.for(["amount", "route", "state", "total"] as const)(
+		"should reject the noun-first word %s",
+		(name, { expect }) => {
+			expect.assertions(1);
 
-		expect(startsWithVerb(name, {})).toStrictEqual([false, name]);
-	});
+			expect(startsWithVerb(name, {})).toStrictEqual([false, name]);
+		},
+	);
 
-	it.each(["await", "throw"])("should accept the dictionary verb %s", (name) => {
+	it.for(["await", "throw"] as const)("should accept the dictionary verb %s", (name, { expect }) => {
 		expect.assertions(1);
 
 		expect(startsWithVerb(name, {})).toStrictEqual([true, name]);
 	});
 
-	it.each([
+	it.for([
 		"cleanup",
 		"decrement",
 		"dequeue",
@@ -113,7 +116,7 @@ describe("startsWithVerb", () => {
 		"unmount",
 		"upsert",
 		"yield",
-	])("should accept the programming verb %s", (name) => {
+	] as const)("should accept the programming verb %s", (name, { expect }) => {
 		expect.assertions(1);
 
 		expect(startsWithVerb(name, {})).toStrictEqual([true, name]);

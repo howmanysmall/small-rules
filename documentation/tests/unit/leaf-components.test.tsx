@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { Badge } from "$components/badge";
 import { CategoryCard } from "$components/category-card";
@@ -11,14 +11,14 @@ import { PageHeader } from "$components/page-header";
 const reactHeadingName = /React/u;
 
 describe("badge", () => {
-	it.each([
+	it.for([
 		["error", "Error", "This rule reports problems and fails the lint run."],
 		["new", "New", "This rule was added in the most recent release."],
 		["updated", "Updated", "This rule was updated in the most recent release."],
 		["suggestion", "Suggestion", "This rule reports suggestions and does not fail the lint run."],
 		["fixable", "Auto-fixable", "This rule includes an automatic code fix."],
 		["roblox", "Roblox", "This rule is specific to Roblox / Luau patterns."],
-	] as const)("renders the %s rule metadata", (variant, label, title) => {
+	] as const)("renders the %s rule metadata", ([variant, label, title], { expect }) => {
 		expect.assertions(2);
 
 		const { container } = render(<Badge variant={variant} />);
@@ -75,10 +75,10 @@ describe("overprint", () => {
 		expect(numeral.dataset.value).toBe("129");
 	});
 
-	it.each([
+	it.for([
 		[129, false],
 		[130, true],
-	] as const)("sets %i in the sans face only when it has a zero", (value, isSans) => {
+	] as const)("sets %i in the sans face only when it has a zero", ([value, isSans], { expect }) => {
 		expect.assertions(1);
 
 		const { container } = render(<Overprint value={value} />);

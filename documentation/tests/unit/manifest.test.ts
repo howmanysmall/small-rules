@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { ruleManifest } from "$data/rule-manifest";
 import smallRules from "$small-rules";
@@ -31,13 +31,11 @@ describe("rule manifest integrity", () => {
 		expect(new Set(keys).size).toBe(keys.length);
 	});
 
-	const allCategoriesForEach = ruleManifest.categories.map((category) => [
-		category.key,
-		category.description,
-		category.label,
-	]);
+	const allCategoriesForEach = ruleManifest.categories.map(
+		(category) => [category.key, category.description, category.label] as const,
+	);
 
-	it.each(allCategoriesForEach)("keeps category %s unique", (key, description, label) => {
+	it.for(allCategoriesForEach)("keeps category %s unique", ([key, description, label], { expect }) => {
 		expect.assertions(2);
 
 		expect(description.trim(), `${key} description`).not.toBe("");

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { isNode } from "@small-rules/oxlint-utilities";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
@@ -55,7 +55,7 @@ function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
 }
 
 describe("classifyUnsafeDictionary", () => {
-	it.each([
+	it.for([
 		[
 			"caller and callee parameters with the same name",
 			"type Inner<T> = T; type Outer<T> = Record<string, Inner<T>>; let value: Outer<unknown>;",
@@ -81,7 +81,7 @@ describe("classifyUnsafeDictionary", () => {
 			"type Outer<Readonly> = Record<string, Readonly>; let value: Outer<unknown>;",
 			"unknown",
 		],
-	])("resolves unsafe values through $1", (_name, code, expected) => {
+	] as const)("resolves unsafe values through $1", ([_name, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -90,7 +90,7 @@ describe("classifyUnsafeDictionary", () => {
 		expect(classifyUnsafeDictionary(target, fixture.environment)?.unsafeValue).toBe(expected);
 	});
 
-	it.each([
+	it.for([
 		[
 			"an unrelated alias",
 			"type T = Command; type Inner = Record<string, T>; type Outer<T> = Inner; let value: Outer<unknown>;",
@@ -103,7 +103,7 @@ describe("classifyUnsafeDictionary", () => {
 			"a nested mapped binder",
 			"interface Source { value: string } type Outer<T> = { [T in keyof Source]: T }; let value: Outer<unknown>;",
 		],
-	])("keeps $1 conservative and terminating", (_name, code) => {
+	] as const)("keeps $1 conservative and terminating", ([_name, code], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -112,7 +112,7 @@ describe("classifyUnsafeDictionary", () => {
 		expect(classifyUnsafeDictionary(target, fixture.environment)).toBeUndefined();
 	});
 
-	it.each([
+	it.for([
 		[
 			"merged empty interfaces",
 			"interface Empty {} interface Empty {} let value: Record<string, Empty>;",
@@ -134,7 +134,7 @@ describe("classifyUnsafeDictionary", () => {
 			undefined,
 		],
 		["a class competitor", "interface Empty {} class Empty {} let value: Record<string, Empty>;", undefined],
-	])("classifies $1 through visible declarations", (_name, code, expected) => {
+	] as const)("classifies $1 through visible declarations", ([_name, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -194,7 +194,7 @@ describe("classifyUnsafeDictionary", () => {
 		).toBeUndefined();
 	});
 
-	it.each([
+	it.for([
 		["record values", "type A = Record<string, unknown>;", "unknown"],
 		["any index values", "type A = { [key: string]: any };", "any"],
 		["object mapped values", "type A = { [K in PropertyKey]: object };", "object"],
@@ -209,7 +209,7 @@ describe("classifyUnsafeDictionary", () => {
 		["unions containing empty aliases", "interface Empty {} type A = Record<string, string | Empty>;", "union"],
 		["generic substitution", "type Index<T> = Record<string, T>; type A = Index<unknown>;", "unknown"],
 		["defaulted generic parameters", "type Index<T = unknown> = Record<string, T>; type A = Index;", "unknown"],
-	])("reports $1 as $2", (_name, code, unsafeValue) => {
+	] as const)("reports $1 as $2", ([_name, code, unsafeValue], { expect }) => {
 		expect.assertions(2);
 
 		const fixture = setup(code);
@@ -219,7 +219,7 @@ describe("classifyUnsafeDictionary", () => {
 		expect(classified?.unsafeValue).toBe(unsafeValue);
 	});
 
-	it.each([
+	it.for([
 		["concrete dictionary value", "type Commands = Record<string, Command>;"],
 		[
 			"value intersected with evidence",
@@ -235,7 +235,7 @@ describe("classifyUnsafeDictionary", () => {
 			"interface Owner { readonly id: string } interface Child extends Owner {} type A = Record<string, Child>;",
 		],
 		["indirect Record alias", "type Safe = Index<Command>; type Index<T> = Record<string, T>;"],
-	])("keeps %s safe", (_, code) => {
+	] as const)("keeps %s safe", ([, code], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -243,14 +243,17 @@ describe("classifyUnsafeDictionary", () => {
 		expect(checkReportedInConcrete(fixture.source, fixture.environment)).toBe(false);
 	});
 
-	it.each(["Pick", "Omit"] as const)("propagates unsafe values through %s of an unsafe dictionary", (wrapper) => {
-		expect.assertions(1);
+	it.for(["Pick", "Omit"] as const)(
+		"propagates unsafe values through %s of an unsafe dictionary",
+		(wrapper, { expect }) => {
+			expect.assertions(1);
 
-		const fixture = setup(`type Source = Record<string, unknown>; type A = ${wrapper}<Source, never>;`);
-		const pickReference = getNthTypeReference(fixture.source, 1);
+			const fixture = setup(`type Source = Record<string, unknown>; type A = ${wrapper}<Source, never>;`);
+			const pickReference = getNthTypeReference(fixture.source, 1);
 
-		expect(classifyUnsafeDictionary(pickReference, fixture.environment)).toBeDefined();
-	});
+			expect(classifyUnsafeDictionary(pickReference, fixture.environment)).toBeDefined();
+		},
+	);
 
 	// Catches a recursive alias hanging or silently exempting an
 	// unknown-valued dictionary. Completion proves termination.
@@ -492,7 +495,7 @@ function clearIndexTypeAnnotations(literal: ESTree.TSTypeLiteral): ESTree.TSType
 }
 
 describe("classifyWideningTarget", () => {
-	it.each([
+	it.for([
 		[
 			"a transparent generic key alias",
 			"type Key<Value> = Value; type Index<T> = Record<Key<T>, Command>; let value: Index<string>;",
@@ -514,7 +517,7 @@ describe("classifyWideningTarget", () => {
 			"generic container",
 		],
 		["keyof any", "type Index<T> = Record<keyof any, T>; let value: Index<Command>;", "generic container"],
-	])("classifies $1 as broad", (_name, code, expected) => {
+	] as const)("classifies $1 as broad", ([, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -523,12 +526,12 @@ describe("classifyWideningTarget", () => {
 		expect(classifyWideningTarget(target, fixture.environment)?.kind).toBe(expected);
 	});
 
-	it.each([
+	it.for([
 		["any", "let value: Record<any, Command>;"],
 		["never", "let value: Record<never, Command>;"],
 		["an enum", "enum Key { Start } let value: Record<Key, Command>;"],
 		["a unique symbol", "declare const key: unique symbol; let value: Record<typeof key, Command>;"],
-	])("keeps %s Record keys finite or conservative", (_name, code) => {
+	] as const)("keeps %s Record keys finite or conservative", ([, code], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -538,13 +541,13 @@ describe("classifyWideningTarget", () => {
 		).toBeUndefined();
 	});
 
-	it.each([
+	it.for([
 		["a missing key", "const value: Record = {};", "open dictionary"],
 		["a string key", "const value: Record<string, Command> = {};", "open dictionary"],
 		["PropertyKey", "const value: Record<PropertyKey, Command> = {};", "open dictionary"],
 		["a mixed broad union", "const value: Record<string | 'start', Command> = {};", "open dictionary"],
 		["a literal union", "const value: Record<'start' | 'stop', Command> = {};", undefined],
-	])("classifies Record with %s from its key domain", (_name, code, expected) => {
+	] as const)("classifies Record with %s from its key domain", ([, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -554,7 +557,7 @@ describe("classifyWideningTarget", () => {
 		);
 	});
 
-	it.each([
+	it.for([
 		["an alias to string", "type Key = string; const value: Record<Key, Command> = {};", "open dictionary"],
 		[
 			"a chained alias to string",
@@ -572,7 +575,7 @@ describe("classifyWideningTarget", () => {
 			"type Key = string; type Key = 'start'; const value: Record<Key, Command> = {};",
 			undefined,
 		],
-	])("classifies Record through %s", (_name, code, expected) => {
+	] as const)("classifies Record through %s", ([, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -582,7 +585,7 @@ describe("classifyWideningTarget", () => {
 		);
 	});
 
-	it.each([
+	it.for([
 		[
 			"a finite generic Record key",
 			"type Index<Key, Value> = Record<Key, Value>; const value: Index<'start', Command> = {};",
@@ -598,7 +601,7 @@ describe("classifyWideningTarget", () => {
 			"type Index<Value> = Record<'start', Value>; const value: Index<Command> = {};",
 			undefined,
 		],
-	])("classifies generic alias with %s", (_name, code, expected) => {
+	] as const)("classifies generic alias with %s", ([, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -644,14 +647,14 @@ describe("classifyWideningTarget", () => {
 		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)).toBeUndefined();
 	});
 
-	it.each([
+	it.for([
 		["unknown annotations", "const value: unknown = {};", "unknown"],
 		["object annotations", "const value: object = {};", "object"],
 		["populated anonymous literals", 'const value: { readonly id: string } = { id: "one" };', "anonymous object"],
 		["index-signature literals", "const value: { [key: string]: number } = {};", "open dictionary"],
 		["mapped types", "const value: { [K in string]: number } = {};", "open dictionary"],
 		["transparent record wrappers", "const value: Readonly<Record<string, number>> = {};", "open dictionary"],
-	])("classifies $1 as $2", (_name, code, kind) => {
+	] as const)("classifies $1 as $2", ([, code, kind], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -754,7 +757,7 @@ describe("classifyWideningTarget", () => {
 		).toStrictEqual({ kind: "generic container" });
 	});
 
-	it.each([
+	it.for([
 		["const value: readonly string[] = [];", undefined],
 		["declare namespace NS { export type Value = string } const value: NS.Value = input;", undefined],
 		['type A = "literal"; const value: A = "literal";', undefined],
@@ -770,15 +773,18 @@ describe("classifyWideningTarget", () => {
 			undefined,
 		],
 		["const value: Index = {}; type Index<T> = Record<string, T>;", undefined],
-	])("handles transparent, qualified, and alias-backed widening target %s", (code, expected) => {
-		expect.assertions(1);
+	] as const)(
+		"handles transparent, qualified, and alias-backed widening target %s",
+		([code, expected], { expect }) => {
+			expect.assertions(1);
 
-		const fixture = setup(code);
+			const fixture = setup(code);
 
-		expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
-			expected,
-		);
-	});
+			expect(classifyWideningTarget(getFirstAnnotationTarget(fixture.source), fixture.environment)?.kind).toBe(
+				expected,
+			);
+		},
+	);
 
 	it("does not classify dictionaries when a generic alias lacks its required argument", ({ expect }) => {
 		expect.assertions(1);
@@ -788,7 +794,7 @@ describe("classifyWideningTarget", () => {
 		expect(classifyUnsafeDictionary(getFirstAnnotationTarget(fixture.source), fixture.environment)).toBeUndefined();
 	});
 
-	it.each([
+	it.for([
 		[
 			"number mapped keys",
 			"type Counts = { [K in number]: Command }; const counts: Counts = {};",
@@ -821,7 +827,7 @@ describe("classifyWideningTarget", () => {
 			"generic container",
 		],
 		["recursive alias targets", "type Cycle2 = Cycle2; const value: Cycle2 = {};", undefined],
-	])("widening: $1", (_name, code, expected) => {
+	] as const)("widening: $1", ([, code, expected], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);
@@ -830,7 +836,7 @@ describe("classifyWideningTarget", () => {
 		expect(target?.kind).toStrictEqual(expected);
 	});
 
-	it.each([
+	it.for([
 		["unapplied self-defaults are safe", "type Loop2<T = T> = Record<string, T>; type A2 = Loop2;", false],
 		[
 			"recursive unions cannot be proven unsafe",
@@ -841,7 +847,7 @@ describe("classifyWideningTarget", () => {
 		["bare utility values", "type A5 = Record<string, Partial>;", false],
 		["pick without arguments", "type A6 = Pick;", false],
 		["mapped types without annotations", "type A7 = { [K in string] };", false],
-	])("dictionary safety: $1", (_name, code, expectUnsafe) => {
+	] as const)("dictionary safety: $1", ([, code, expectUnsafe], { expect }) => {
 		expect.assertions(1);
 
 		const fixture = setup(code);

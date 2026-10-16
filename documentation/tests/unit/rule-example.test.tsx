@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 
 import { RuleExample } from "$components/rule-example";
 
@@ -16,10 +16,10 @@ function restoreClipboardAndTimers(): void {
 }
 
 describe("rule-example", () => {
-	it.each([
+	it.for([
 		["pass", "Allowed"],
 		["fail", "Flagged"],
-	] as const)("renders the default %s state", (type, title) => {
+	] as const)("renders the default %s state", ([type, title], { expect }) => {
 		expect.assertions(2);
 
 		const { container } = render(
