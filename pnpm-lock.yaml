@@ -755,9 +755,6 @@ importers:
       fast-check:
         specifier: catalog:test
         version: 4.10.2
-      jest-extended:
-        specifier: catalog:test
-        version: 7.0.0(@typescript/typescript6@6.0.2)
       jiti:
         specifier: catalog:tooling
         version: 2.7.0
@@ -767,9 +764,6 @@ importers:
       oxlint:
         specifier: catalog:lint
         version: 1.88.0(oxlint-tsgolint@7.0.2004)
-      oxlint-plugin-react-doctor:
-        specifier: catalog:lint
-        version: 0.9.18
       oxlint-tsgolint:
         specifier: catalog:lint
         version: 7.0.2004
@@ -803,9 +797,6 @@ importers:
       vitiate:
         specifier: catalog:test
         version: 0.3.1(@typescript/typescript6@6.0.2)(vite@8.2.2(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@5.0.5)
-      yuku-ast:
-        specifier: catalog:tooling
-        version: 0.19.0
       zx:
         specifier: catalog:scripts
         version: 8.8.5

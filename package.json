@@ -155,11 +155,9 @@
 		"eslint-plugin-unused-imports": "catalog:lint",
 		"fallow": "catalog:lint",
 		"fast-check": "catalog:test",
-		"jest-extended": "catalog:test",
 		"jiti": "catalog:tooling",
 		"oxfmt": "catalog:lint",
 		"oxlint": "catalog:lint",
-		"oxlint-plugin-react-doctor": "catalog:lint",
 		"oxlint-tsgolint": "catalog:lint",
 		"pncat": "catalog:tooling",
 		"publint": "catalog:build",
@@ -171,7 +169,6 @@
 		"typescript": "catalog:tooling",
 		"vitest": "catalog:test",
 		"vitiate": "catalog:test",
-		"yuku-ast": "catalog:tooling",
 		"zx": "catalog:scripts"
 	},
 	"peerDependencies": {

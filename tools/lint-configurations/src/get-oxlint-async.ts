@@ -13,10 +13,14 @@ import type { OxlintConfig, OxlintRules } from "@isentinel/eslint-config/oxlint"
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
 const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
 const SCRIPT_FILES = `scripts/${GLOB_SRC}`;
-// Resolved here: this package depends on it, the root does not.
+// Resolved here: this package depends on them, the root does not.
 const LOCAL_RULES_PLUGIN = {
 	name: "local",
 	specifier: fileURLToPath(import.meta.resolve("@small-rules/local-rules")),
+};
+const REACT_DOCTOR_PLUGIN = {
+	name: "react-doctor",
+	specifier: fileURLToPath(import.meta.resolve("oxlint-plugin-react-doctor")),
 };
 
 interface ConfigurationOptions {
@@ -559,7 +563,7 @@ export async function getOxlintAsync({
 		{
 			name: "small-rules/react-doctor",
 			files: [GLOB_SRC],
-			jsPlugins: [{ name: "react-doctor", specifier: "oxlint-plugin-react-doctor" }],
+			jsPlugins: [REACT_DOCTOR_PLUGIN],
 			rules: {
 				...reactDoctorRules,
 				// STOP DUPLICATING NATIVE RULES!!!
