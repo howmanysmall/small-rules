@@ -46,7 +46,7 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 			Property(node): void {
 				if (node.kind !== "init" || !isCallbackFunction(node.value)) return;
 				const nameNode = getMemberNameNode(node.key, node.computed);
-				if (nameNode === undefined || isExternallyConstrainedProperty(node)) return;
+				if (nameNode === undefined || isExternallyConstrainedProperty(node, context.sourceCode)) return;
 				reportIfNotVerb(nameNode);
 			},
 			PropertyDefinition(node): void {

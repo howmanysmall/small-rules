@@ -67,6 +67,17 @@ describe("require-async-suffix", () => {
 };`,
 				errors: missingAsyncSuffixErrors,
 			},
+			{
+				code: `type ServerConfiguration = {
+	getAll(): Promise<string>;
+};
+const configuration: ServerConfiguration = {
+	async getAll(): Promise<string> {
+		return "value";
+	},
+};`,
+				errors: missingAsyncSuffixErrors,
+			},
 		],
 		valid: [
 			{
@@ -169,6 +180,12 @@ describe("require-async-suffix", () => {
 		return "value";
 	};
 }`,
+			`import type { ServerConfiguration } from "server";
+const configuration: ServerConfiguration = {
+	async getAll(): Promise<string> {
+		return "value";
+	},
+};`,
 		],
 	});
 });

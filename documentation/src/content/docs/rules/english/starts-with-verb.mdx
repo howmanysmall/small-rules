@@ -13,8 +13,9 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			It leaves names with no lowercase prefix alone, such as `UserProfile` components. It also backs off where
 			you don't get to pick the name: `override` members, getters and setters, constructors, computed keys, and
-			methods on an object passed straight into a call, `new`, or `satisfies`. Add your own words with
-			`allowList`, and exclude words with `denyList`.
+			keys of an object whose shape comes from elsewhere. That covers objects passed straight into a call or
+			`new`, checked with `satisfies`, or annotated with an imported type. Add your own words with `allowList`,
+			and exclude words with `denyList`.
 		</p>
 	</Fragment>
 </RulePage>

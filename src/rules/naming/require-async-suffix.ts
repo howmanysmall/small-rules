@@ -26,7 +26,7 @@ const requireAsyncSuffix = createRule("require-async-suffix", "naming", {
 			},
 			Property(node): void {
 				if (!node.method || !isFunctionExpression(node.value) || !node.value.async) return;
-				if (!isIdentifier(node.key) || isExternallyConstrainedProperty(node)) return;
+				if (!isIdentifier(node.key) || isExternallyConstrainedProperty(node, context.sourceCode)) return;
 				reportIfNotSkipped(node.key);
 			},
 			PropertyDefinition(node): void {
