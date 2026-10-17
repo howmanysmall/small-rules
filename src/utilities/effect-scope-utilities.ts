@@ -246,7 +246,7 @@ function ascend(
 }
 
 function computeCallExpression(reference: Reference): ESTree.CallExpression | undefined {
-	let current: ESTree.Node = reference.identifier.parent;
+	let current = reference.identifier.parent;
 	while (true) {
 		if (isCallExpression(current)) {
 			let node: ESTree.Node = reference.identifier;
@@ -311,6 +311,7 @@ function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefin
 function isAliasRef(candidateReference: Reference): boolean {
 	let node: ESTree.Node = candidateReference.identifier;
 	for (;;) {
+		// eslint-disable-next-line flawless/no-redundant-type-annotation -- incorrect.
 		const parent: ESTree.Node | null = node.parent;
 		/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
 		if (parent === null) return false;

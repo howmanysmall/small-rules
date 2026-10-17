@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { walk } from "yuku-ast";
 import { parse } from "yuku-parser";
 
@@ -105,7 +105,7 @@ function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 }
 
 describe("documented rule examples", () => {
-	it("extracts at least one fail and one pass example for each non-exempt rule", () => {
+	it("extracts at least one fail and one pass example for each non-exempt rule", ({ expect }) => {
 		expect.assertions(1);
 
 		const violations = getRuleExampleCoverage()
@@ -115,7 +115,7 @@ describe("documented rule examples", () => {
 		expect(violations).toStrictEqual([]);
 	});
 
-	it("rejects blank example exemptions", () => {
+	it("rejects blank example exemptions", ({ expect }) => {
 		expect.assertions(1);
 
 		const blankExemptions = getRuleExampleCoverage()
@@ -125,7 +125,7 @@ describe("documented rule examples", () => {
 		expect(blankExemptions).toStrictEqual([]);
 	});
 
-	it("keeps multi-statement documented examples on multiple lines", () => {
+	it("keeps multi-statement documented examples on multiple lines", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getCrampedDocumentedExampleLabels()).toStrictEqual([]);

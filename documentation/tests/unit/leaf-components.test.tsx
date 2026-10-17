@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { Badge } from "$components/badge";
 import { CategoryCard } from "$components/category-card";
@@ -11,14 +11,14 @@ import { PageHeader } from "$components/page-header";
 const reactHeadingName = /React/u;
 
 describe("badge", () => {
-	it.each([
+	it.for([
 		["error", "Error", "This rule reports problems and fails the lint run."],
 		["new", "New", "This rule was added in the most recent release."],
 		["updated", "Updated", "This rule was updated in the most recent release."],
 		["suggestion", "Suggestion", "This rule reports suggestions and does not fail the lint run."],
 		["fixable", "Auto-fixable", "This rule includes an automatic code fix."],
 		["roblox", "Roblox", "This rule is specific to Roblox / Luau patterns."],
-	] as const)("renders the %s rule metadata", (variant, label, title) => {
+	] as const)("renders the %s rule metadata", ([variant, label, title], { expect }) => {
 		expect.assertions(2);
 
 		const { container } = render(<Badge variant={variant} />);
@@ -29,7 +29,7 @@ describe("badge", () => {
 });
 
 describe("category-card", () => {
-	it("links to the category and exposes its summary", () => {
+	it("links to the category and exposes its summary", ({ expect }) => {
 		expect.assertions(4);
 
 		render(
@@ -53,7 +53,7 @@ describe("category-card", () => {
 });
 
 describe("feature-card", () => {
-	it("renders a feature as a titled description", () => {
+	it("renders a feature as a titled description", ({ expect }) => {
 		expect.assertions(2);
 
 		render(<FeatureCard description="Runs directly in Oxlint." title="Oxlint native" />);
@@ -64,7 +64,7 @@ describe("feature-card", () => {
 });
 
 describe("overprint", () => {
-	it("prints the numeral once for readers and mirrors it for the riso halo", () => {
+	it("prints the numeral once for readers and mirrors it for the riso halo", ({ expect }) => {
 		expect.assertions(2);
 
 		render(<Overprint value={129} />);
@@ -75,10 +75,10 @@ describe("overprint", () => {
 		expect(numeral.dataset.value).toBe("129");
 	});
 
-	it.each([
+	it.for([
 		[129, false],
 		[130, true],
-	] as const)("sets %i in the sans face only when it has a zero", (value, isSans) => {
+	] as const)("sets %i in the sans face only when it has a zero", ([value, isSans], { expect }) => {
 		expect.assertions(1);
 
 		const { container } = render(<Overprint value={value} />);
@@ -88,7 +88,7 @@ describe("overprint", () => {
 });
 
 describe("hero-splash", () => {
-	it("presents the documentation entry points and configuration preview", () => {
+	it("presents the documentation entry points and configuration preview", ({ expect }) => {
 		expect.assertions(6);
 
 		render(<HeroSplash subtitle="Focused rules for strict projects." title="Small rules, big impact." />);
@@ -109,7 +109,7 @@ describe("hero-splash", () => {
 		expect(screen.getByLabelText("Code preview").textContent).toContain('"small-rules/no-print": "error"');
 	});
 
-	it("accepts a custom kicker and omits an absent subtitle", () => {
+	it("accepts a custom kicker and omits an absent subtitle", ({ expect }) => {
 		expect.assertions(2);
 
 		const { container } = render(<HeroSplash kicker="Custom docs" subtitle="" title="Small rules" />);
@@ -120,7 +120,7 @@ describe("hero-splash", () => {
 });
 
 describe("page-header", () => {
-	it("renders optional context with the page title", () => {
+	it("renders optional context with the page title", ({ expect }) => {
 		expect.assertions(3);
 
 		render(<PageHeader kicker="Rule index" subtitle="Browse every rule." title="Rules" />);
@@ -130,7 +130,7 @@ describe("page-header", () => {
 		expect(screen.getByText("Browse every rule.").textContent).toBe("Browse every rule.");
 	});
 
-	it("omits empty optional context", () => {
+	it("omits empty optional context", ({ expect }) => {
 		expect.assertions(3);
 
 		const { container } = render(<PageHeader kicker="" subtitle="" title="Rules" />);

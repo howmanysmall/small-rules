@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { describe, it } from "vitest";
 
 import { parseGeneratedRelations } from "$data/rule-relations";
 import {
@@ -91,7 +91,7 @@ const secondEdgeFixture = {
 const modelsFixture = { decisions: "~typesafe/jev-latest", reasons: "anthropic/claude-sonnet-5" };
 
 describe("stableStringify", () => {
-	it("is independent of object key order", () => {
+	it("is independent of object key order", ({ expect }) => {
 		expect.assertions(2);
 
 		const reorderedNested = recordFromEntries([
@@ -111,7 +111,7 @@ describe("stableStringify", () => {
 		expect(createCacheKey({ a: 1, b: 2 })).toBe(createCacheKey(reorderedPair));
 	});
 
-	it("distinguishes different values", () => {
+	it("distinguishes different values", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(createCacheKey({ a: 1 })).not.toBe(createCacheKey({ a: 2 }));
@@ -120,7 +120,7 @@ describe("stableStringify", () => {
 });
 
 describe("file caches", () => {
-	it("round-trips judgment and reason values", () => {
+	it("round-trips judgment and reason values", ({ expect, onTestFinished }) => {
 		expect.assertions(4);
 
 		const directory = mkdtempSync(nodePath.join(tmpdir(), "rule-relations-cache-"));
@@ -139,7 +139,7 @@ describe("file caches", () => {
 		expect(reasonCache.get("missing")).toBeUndefined();
 	});
 
-	it("treats corrupt cache files as misses", () => {
+	it("treats corrupt cache files as misses", ({ expect, onTestFinished }) => {
 		expect.assertions(2);
 
 		const directory = mkdtempSync(nodePath.join(tmpdir(), "rule-relations-cache-"));
@@ -155,7 +155,7 @@ describe("file caches", () => {
 });
 
 describe("createReasonMessages", () => {
-	it("asks for one sentence grounded in both rule cards", () => {
+	it("asks for one sentence grounded in both rule cards", ({ expect }) => {
 		expect.assertions(4);
 
 		const messages = createReasonMessages({
@@ -174,7 +174,7 @@ describe("createReasonMessages", () => {
 describe("validateReason", () => {
 	const allNames = ["directive-disable-enable-pair", "directive-no-use", "no-error", "no-print", "no-warn"];
 
-	it("accepts a grounded one-liner", () => {
+	it("accepts a grounded one-liner", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(
@@ -186,7 +186,7 @@ describe("validateReason", () => {
 		).toStrictEqual([]);
 	});
 
-	it("rejects third-rule mentions, empty text, newlines, and overlong text", () => {
+	it("rejects third-rule mentions, empty text, newlines, and overlong text", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(validateReason({ allNames, reason: "See no-error for failures.", relation: relatedDraft })).toHaveLength(
@@ -197,7 +197,7 @@ describe("validateReason", () => {
 		expect(validateReason({ allNames, reason: "x".repeat(161), relation: relatedDraft })).toHaveLength(1);
 	});
 
-	it("allows naming both endpoints of a directed relation", () => {
+	it("allows naming both endpoints of a directed relation", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(
@@ -211,7 +211,7 @@ describe("validateReason", () => {
 });
 
 describe("createRelationDocument", () => {
-	it("sorts edges deterministically regardless of input order", () => {
+	it("sorts edges deterministically regardless of input order", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(
@@ -221,7 +221,7 @@ describe("createRelationDocument", () => {
 		);
 	});
 
-	it("emits edges the documentation parser accepts", () => {
+	it("emits edges the documentation parser accepts", ({ expect }) => {
 		expect.assertions(2);
 
 		const document = createRelationDocument({ edges: [firstEdgeFixture], models: modelsFixture });
@@ -232,7 +232,7 @@ describe("createRelationDocument", () => {
 });
 
 describe("renderRelationDocument", () => {
-	it("serializes the document with a trailing newline", () => {
+	it("serializes the document with a trailing newline", ({ expect }) => {
 		expect.assertions(2);
 
 		const output = renderRelationDocument({
@@ -246,7 +246,7 @@ describe("renderRelationDocument", () => {
 });
 
 describe("checkRelationsDocument", () => {
-	it("accepts a well-formed document", () => {
+	it("accepts a well-formed document", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(
@@ -259,7 +259,7 @@ describe("checkRelationsDocument", () => {
 		).toStrictEqual([]);
 	});
 
-	it("reports unparseable edges, conflicting pins, and cap violations", () => {
+	it("reports unparseable edges, conflicting pins, and cap violations", ({ expect }) => {
 		expect.assertions(3);
 
 		const broken = checkRelationsDocument({
@@ -289,7 +289,7 @@ describe("checkRelationsDocument", () => {
 		expect(overCap).toHaveLength(1);
 	});
 
-	it("reports pins that their own denylist would suppress", () => {
+	it("reports pins that their own denylist would suppress", ({ expect }) => {
 		expect.assertions(1);
 
 		const problems = checkRelationsDocument({

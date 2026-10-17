@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 
 import { RuleOptionsTable } from "$components/rule-options-table";
 
@@ -31,7 +31,7 @@ const complexOption = {
 } satisfies ObjectOption;
 
 describe("rule-options-table", () => {
-	it("renders inline and expandable option metadata", async () => {
+	it("renders inline and expandable option metadata", async ({ expect }) => {
 		expect.assertions(9);
 
 		const user = userEvent.setup();
@@ -55,7 +55,7 @@ describe("rule-options-table", () => {
 		expect(detail?.hidden).toBe(false);
 	});
 
-	it("copies a complex default and announces success", async () => {
+	it("copies a complex default and announces success", async ({ expect }) => {
 		expect.assertions(3);
 
 		const user = userEvent.setup();

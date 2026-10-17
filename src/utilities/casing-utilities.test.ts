@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
@@ -11,19 +11,19 @@ const camelCaseWordsArbitrary = fc.array(fc.stringMatching(/^[a-z]{2,}$/u), { mi
 const alphanumericNameArbitrary = fc.stringMatching(/^[A-Za-z][A-Za-z0-9]*$/u);
 
 describe("toPascalCase", () => {
-	it("should return an empty string for blank input", () => {
+	it("should return an empty string for blank input", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(toPascalCase(" ".repeat(3))).toBe("");
 	});
 
-	it("should split camel and acronym boundaries", () => {
+	it("should split camel and acronym boundaries", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(toPascalCase("httpRequestURLParser")).toBe("HttpRequestUrlParser");
 	});
 
-	it("should ignore empty internal separators", () => {
+	it("should ignore empty internal separators", ({ expect }) => {
 		expect.assertions(1);
 
 		// oxlint-disable-next-line unicorn/prefer-code-point -- slop rule
@@ -33,14 +33,14 @@ describe("toPascalCase", () => {
 		expect(toPascalCase(value)).toBe("AlreadySplit");
 	});
 
-	it("should return an empty string when separators contain no words", () => {
+	it("should return an empty string when separators contain no words", ({ expect }) => {
 		expect.assertions(1);
 
 		// oxlint-disable-next-line unicorn/prefer-code-point -- slop rule
 		expect(toPascalCase(String.fromCharCode(0).repeat(2))).toBe("");
 	});
 
-	it("should join a one-letter word with the next one when they would read as an acronym", () => {
+	it("should join a one-letter word with the next one when they would read as an acronym", ({ expect }) => {
 		// Catches output that toPascalCase itself would rewrite, so it never
 		// counts as PascalCase. Shrunk from the idempotence property.
 		expect.assertions(2);
@@ -49,7 +49,7 @@ describe("toPascalCase", () => {
 		expect(toPascalCase("Aa")).toBe("Aa");
 	});
 
-	it("should separate words that start with digits", () => {
+	it("should separate words that start with digits", ({ expect }) => {
 		expect.assertions(1);
 
 		// oxlint-disable-next-line unicorn/prefer-code-point -- slop rule
@@ -61,7 +61,7 @@ describe("toPascalCase", () => {
 });
 
 describe("toPascalCase properties", () => {
-	it("should capitalize each word of a camelCase name", () => {
+	it("should capitalize each word of a camelCase name", ({ expect }) => {
 		// Catches a word boundary being missed or invented inside camelCase.
 		expect.hasAssertions();
 
@@ -85,7 +85,7 @@ describe("toPascalCase properties", () => {
 		expect(report).toBeUndefined();
 	});
 
-	it("should only change letter case for alphanumeric names", () => {
+	it("should only change letter case for alphanumeric names", ({ expect }) => {
 		// Catches characters being dropped, duplicated, or reordered.
 		expect.hasAssertions();
 
@@ -106,7 +106,7 @@ describe("toPascalCase properties", () => {
 		expect(report).toBeUndefined();
 	});
 
-	it("should leave its own output unchanged", () => {
+	it("should leave its own output unchanged", ({ expect }) => {
 		// Catches output that toPascalCase would rewrite again, which the
 		// `part === toPascalCase(part)` PascalCase check would then reject.
 		expect.hasAssertions();

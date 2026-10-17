@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { createRelationUsageTracker, formatRelationRunSummary } from "$script-utilities/rule-relations/usage";
 
 describe("relation generation usage", () => {
-	it("reports API usage, cache reuse, cost, and elapsed time", () => {
+	it("reports API usage, cache reuse, cost, and elapsed time", ({ expect }) => {
 		expect.assertions(1);
 
 		const tracker = createRelationUsageTracker();

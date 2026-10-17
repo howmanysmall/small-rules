@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import {
 	computeDisabledArea,
@@ -45,7 +45,7 @@ function getSourceCodeWithComments(comments: Array<Comment>): SourceCode {
 }
 
 describe("getOptionalStringArrayProperty", () => {
-	it("should return a string array property copy", () => {
+	it("should return a string array property copy", ({ expect }) => {
 		expect.assertions(1);
 
 		const result = getOptionalStringArrayProperty({ ignore: ["eslint-disable", "oxlint-enable"] }, "ignore");
@@ -53,7 +53,7 @@ describe("getOptionalStringArrayProperty", () => {
 		expect(result).toStrictEqual(["eslint-disable", "oxlint-enable"]);
 	});
 
-	it("should reject missing, non-array, and mixed array properties", () => {
+	it("should reject missing, non-array, and mixed array properties", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(getOptionalStringArrayProperty(undefined, "ignore")).toBeUndefined();
@@ -64,7 +64,7 @@ describe("getOptionalStringArrayProperty", () => {
 });
 
 describe("isDisableDirectiveKind", () => {
-	it("should distinguish disable directives from enable directives", () => {
+	it("should distinguish disable directives from enable directives", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isDisableDirectiveKind("oxlint-disable")).toBe(true);
@@ -73,7 +73,7 @@ describe("isDisableDirectiveKind", () => {
 });
 
 describe("parseDirectiveComment", () => {
-	it("should parse directive kind, value, and description", () => {
+	it("should parse directive kind, value, and description", ({ expect }) => {
 		expect.assertions(1);
 
 		const result = parseDirectiveComment(getComment("oxlint-disable no-console -- intentional debug log"));
@@ -85,7 +85,7 @@ describe("parseDirectiveComment", () => {
 		});
 	});
 
-	it("should parse directives without values and preserve descriptions", () => {
+	it("should parse directives without values and preserve descriptions", ({ expect }) => {
 		expect.assertions(1);
 
 		const result = parseDirectiveComment(getComment("eslint-enable -- restore defaults"));
@@ -97,7 +97,7 @@ describe("parseDirectiveComment", () => {
 		});
 	});
 
-	it("should ignore unsupported directive text and invalid line comments", () => {
+	it("should ignore unsupported directive text and invalid line comments", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(parseDirectiveComment(getComment("istanbul ignore next"))).toBeUndefined();
@@ -110,7 +110,7 @@ describe("parseDirectiveComment", () => {
 		expect(parseDirectiveComment(tsComment)).toBeUndefined();
 	});
 
-	it("should ignore comments without string values", () => {
+	it("should ignore comments without string values", ({ expect }) => {
 		expect.assertions(2);
 
 		const directive = getComment("oxlint-disable no-console");
@@ -120,7 +120,7 @@ describe("parseDirectiveComment", () => {
 		expect(toRuleIdLocation(directive, "no-console")).toStrictEqual(directive.loc);
 	});
 
-	it("should parse non-disable directive kinds", () => {
+	it("should parse non-disable directive kinds", ({ expect }) => {
 		expect.assertions(1);
 
 		const result = parseDirectiveComment(getComment("eslint-env node -- test runtime"));
@@ -134,7 +134,7 @@ describe("parseDirectiveComment", () => {
 });
 
 describe("directive locations", () => {
-	it("should compare locations by line and column", () => {
+	it("should compare locations by line and column", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(lte(getLineColumn(1, 10), getLineColumn(2, 0))).toBe(true);
@@ -142,7 +142,7 @@ describe("directive locations", () => {
 		expect(lte(getLineColumn(2, 4), getLineColumn(2, 3))).toBe(false);
 	});
 
-	it("should force a comment location to the start of its line", () => {
+	it("should force a comment location to the start of its line", ({ expect }) => {
 		expect.assertions(1);
 
 		const location = {
@@ -156,7 +156,7 @@ describe("directive locations", () => {
 		});
 	});
 
-	it("should locate rule identifiers on the first directive line", () => {
+	it("should locate rule identifiers on the first directive line", ({ expect }) => {
 		expect.assertions(1);
 
 		const directive = getComment("oxlint-disable no-console, no-alert", {
@@ -169,7 +169,7 @@ describe("directive locations", () => {
 		});
 	});
 
-	it("should locate rule identifiers on later directive lines", () => {
+	it("should locate rule identifiers on later directive lines", ({ expect }) => {
 		expect.assertions(1);
 
 		const directive = getComment("oxlint-disable no-console,\n no-alert", {
@@ -182,7 +182,7 @@ describe("directive locations", () => {
 		});
 	});
 
-	it("should fall back to full comment locations when rule ids are absent", () => {
+	it("should fall back to full comment locations when rule ids are absent", ({ expect }) => {
 		expect.assertions(2);
 
 		const directive = getComment("oxlint-disable no-console");
@@ -197,7 +197,7 @@ describe("directive locations", () => {
 		});
 	});
 
-	it("should locate rule identifiers that contain regexp syntax", () => {
+	it("should locate rule identifiers that contain regexp syntax", ({ expect }) => {
 		expect.assertions(1);
 
 		const directive = getComment("oxlint-disable @scope/rule-name, react-hooks/exhaustive-deps", {
@@ -212,7 +212,7 @@ describe("directive locations", () => {
 });
 
 describe("computeDisabledArea", () => {
-	it("should track block disable and enable ranges", () => {
+	it("should track block disable and enable ranges", ({ expect }) => {
 		expect.assertions(1);
 
 		const disable = getComment("oxlint-disable no-console", {
@@ -233,7 +233,7 @@ describe("computeDisabledArea", () => {
 		]);
 	});
 
-	it("should track disable-line and disable-next-line ranges", () => {
+	it("should track disable-line and disable-next-line ranges", ({ expect }) => {
 		expect.assertions(1);
 
 		const disableLine = getComment("oxlint-disable-line no-console", {
@@ -263,7 +263,7 @@ describe("computeDisabledArea", () => {
 		]);
 	});
 
-	it("should record duplicate whole-file disables and rule-specific disables", () => {
+	it("should record duplicate whole-file disables and rule-specific disables", ({ expect }) => {
 		expect.assertions(1);
 
 		const first = getComment("oxlint-disable", { loc: { end: getLineColumn(1, 18), start: getLineColumn(1, 0) } });
@@ -282,7 +282,7 @@ describe("computeDisabledArea", () => {
 		]);
 	});
 
-	it("should record duplicate whole-file eslint disables", () => {
+	it("should record duplicate whole-file eslint disables", ({ expect }) => {
 		expect.assertions(1);
 
 		const first = getComment("eslint-disable", { loc: { end: getLineColumn(1, 16), start: getLineColumn(1, 0) } });
@@ -293,7 +293,7 @@ describe("computeDisabledArea", () => {
 		).toStrictEqual([{ comment: second, ruleId: undefined }]);
 	});
 
-	it("should record unused enable directives", () => {
+	it("should record unused enable directives", ({ expect }) => {
 		expect.assertions(1);
 
 		const wholeEnable = getComment("oxlint-enable", {
@@ -311,7 +311,7 @@ describe("computeDisabledArea", () => {
 		]);
 	});
 
-	it("should count related disable directives for aggregating enables", () => {
+	it("should count related disable directives for aggregating enables", ({ expect }) => {
 		expect.assertions(1);
 
 		const firstDisable = getComment("oxlint-disable no-console", {
@@ -331,7 +331,7 @@ describe("computeDisabledArea", () => {
 		).toBe(2);
 	});
 
-	it("should support eslint line and next-line directives", () => {
+	it("should support eslint line and next-line directives", ({ expect }) => {
 		expect.assertions(2);
 
 		const disableLine = getComment("eslint-disable-line no-console", {
@@ -364,7 +364,7 @@ describe("computeDisabledArea", () => {
 		expect(result.numberOfRelatedDisableDirectives.size).toBe(2);
 	});
 
-	it("should close matching eslint block directives and ignore mismatched enables", () => {
+	it("should close matching eslint block directives and ignore mismatched enables", ({ expect }) => {
 		expect.assertions(2);
 
 		const disableAll = getComment("eslint-disable", {
@@ -401,7 +401,7 @@ describe("computeDisabledArea", () => {
 		]);
 	});
 
-	it("should ignore directive comments that do not disable or enable rules", () => {
+	it("should ignore directive comments that do not disable or enable rules", ({ expect }) => {
 		expect.assertions(1);
 
 		const unsupported = getComment("istanbul ignore next", {

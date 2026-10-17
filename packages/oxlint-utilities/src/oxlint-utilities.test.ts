@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
 
@@ -195,7 +195,7 @@ function findNodes(source: HarnessSourceCode, type: ESTree.Node["type"]): Readon
 }
 
 describe("ast node guards", () => {
-	it.each(GUARD_CASES)("recognizes only $name", ({ acceptedTypes, code, guard, rejectedType }) => {
+	it.for(GUARD_CASES)("recognizes only $name", ({ acceptedTypes, code, guard, rejectedType }, { expect }) => {
 		expect.assertions(2);
 
 		const source = parseCode(code);
@@ -204,7 +204,7 @@ describe("ast node guards", () => {
 		expect(guard(findNode(source, rejectedType))).toBe(false);
 	});
 
-	it("distinguishes namespace declarations from global declarations", () => {
+	it("distinguishes namespace declarations from global declarations", ({ expect }) => {
 		expect.assertions(2);
 
 		const source = parseCode("namespace Values {} export {}; declare global {}");
@@ -216,7 +216,7 @@ describe("ast node guards", () => {
 });
 
 describe("isTsTypeAssertion", () => {
-	it("should recognize TypeScript type assertion nodes", () => {
+	it("should recognize TypeScript type assertion nodes", ({ expect }) => {
 		expect.assertions(1);
 
 		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
@@ -225,7 +225,7 @@ describe("isTsTypeAssertion", () => {
 		expect(isTsTypeAssertion(node)).toBe(true);
 	});
 
-	it("does not treat as-expressions as angle-bracket type assertions", () => {
+	it("does not treat as-expressions as angle-bracket type assertions", ({ expect }) => {
 		expect.assertions(1);
 
 		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
@@ -236,7 +236,7 @@ describe("isTsTypeAssertion", () => {
 });
 
 describe("getTypeAnnotationFromBinding", () => {
-	it("returns the annotation of an annotated binding and nothing for a bare one", () => {
+	it("returns the annotation of an annotated binding and nothing for a bare one", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode('const annotated: string = "";\nconst bare = 1;');
@@ -250,7 +250,7 @@ describe("getTypeAnnotationFromBinding", () => {
 });
 
 describe("isUnbracedControlBody", () => {
-	it("is true only for a statement that is itself a control-flow body", () => {
+	it("is true only for a statement that is itself a control-flow body", ({ expect }) => {
 		expect.assertions(2);
 
 		const source = parseCode("if (ready) run();\nif (ready) { stop(); }");
@@ -262,7 +262,7 @@ describe("isUnbracedControlBody", () => {
 });
 
 describe("isConstAssertion", () => {
-	it("is true only for an `as const` assertion", () => {
+	it("is true only for an `as const` assertion", ({ expect }) => {
 		expect.assertions(1);
 
 		const source = parseCode("value as const;\nvalue as string;\nvalue as Values.Const;\nvalue as Constant;");

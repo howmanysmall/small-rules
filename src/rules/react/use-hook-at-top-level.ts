@@ -74,7 +74,7 @@ function isHookCall(node: ESTree.CallExpression): boolean {
 }
 
 function isInFinallyBlock(node: ESTree.Node): boolean {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	const maxDepth = 20;
 	let inFinallyBlock = false;
 

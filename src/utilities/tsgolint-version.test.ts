@@ -1,5 +1,5 @@
 import nodePath from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import {
 	checkAssertionSyntaxDiagnosticRange,
@@ -16,7 +16,7 @@ function getFixtureDirectory(name: string): string {
 }
 
 describe("getTsgolintVersionFromSettings", () => {
-	it("should read the plugin tsgolint version from settings", () => {
+	it("should read the plugin tsgolint version from settings", ({ expect }) => {
 		expect.assertions(1);
 
 		const version = getTsgoLintVersionFromSettings({ "small-rules": { tsgolintVersion: "7.0.2002" } });
@@ -24,7 +24,7 @@ describe("getTsgolintVersionFromSettings", () => {
 		expect(version).toBe("7.0.2002");
 	});
 
-	it("should ignore missing plugin version settings", () => {
+	it("should ignore missing plugin version settings", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(getTsgoLintVersionFromSettings({})).toBeUndefined();
@@ -33,7 +33,7 @@ describe("getTsgolintVersionFromSettings", () => {
 });
 
 describe("isLintSettings", () => {
-	it("should reject settings that are not a small-rules version object", () => {
+	it("should reject settings that are not a small-rules version object", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(isLintSettings.allows(undefined)).toBe(false);
@@ -43,7 +43,7 @@ describe("isLintSettings", () => {
 });
 
 describe("usesAssertionSyntaxDiagnosticRange", () => {
-	it("should treat 7.0.2002 as the first release that reports on assertion syntax", () => {
+	it("should treat 7.0.2002 as the first release that reports on assertion syntax", ({ expect }) => {
 		expect.assertions(9);
 
 		expect(checkAssertionSyntaxDiagnosticRange(undefined)).toBe(false);
@@ -59,7 +59,7 @@ describe("usesAssertionSyntaxDiagnosticRange", () => {
 });
 
 describe("inferTsgolintVersion", () => {
-	it("should prefer the installed package, then the workspace catalog, then the manifest", () => {
+	it("should prefer the installed package, then the workspace catalog, then the manifest", ({ expect }) => {
 		expect.assertions(6);
 
 		expect(determineTsgoLintVersion(getFixtureDirectory("installed-2002"))).toBe("7.0.2002");
@@ -70,7 +70,7 @@ describe("inferTsgolintVersion", () => {
 		expect(determineTsgoLintVersion(getFixtureDirectory("caret"))).toBe("7.0.2002");
 	});
 
-	it("should ignore unusable manifests and missing tsgolint metadata", () => {
+	it("should ignore unusable manifests and missing tsgolint metadata", ({ expect }) => {
 		expect.assertions(15);
 
 		expect(determineTsgoLintVersion(getFixtureDirectory("invalid-json"))).toBeUndefined();
@@ -90,7 +90,7 @@ describe("inferTsgolintVersion", () => {
 		expect(determineTsgoLintVersion(nodePath.parse(import.meta.dirname).root)).toBeUndefined();
 	});
 
-	it("should reuse the cached version for a project root", () => {
+	it("should reuse the cached version for a project root", ({ expect }) => {
 		expect.assertions(1);
 
 		const first = determineTsgoLintVersion(getFixtureDirectory("v2002"));
@@ -101,7 +101,7 @@ describe("inferTsgolintVersion", () => {
 });
 
 describe("resolveTsgolintVersion", () => {
-	it("should let settings override inferred package versions", () => {
+	it("should let settings override inferred package versions", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(

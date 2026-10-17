@@ -14,10 +14,7 @@ on:
         default: main
         type: string
 
-permissions:
-  contents: read
-  id-token: write
-  pages: write
+permissions: {}
 
 concurrency:
   group: pages
@@ -25,6 +22,10 @@ concurrency:
 
 jobs:
   deploy:
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
     runs-on: ubuntu-latest
     environment: github-pages
     steps:
@@ -55,3 +56,4 @@ jobs:
 
       - name: Deploy documentation
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+    timeout-minutes: 15

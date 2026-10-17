@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { judgmentThresholds } from "$script-utilities/rule-relations/constants";
 import { createPairJudgmentQuestions, interpretJudgmentAnswers } from "$script-utilities/rule-relations/questions";
@@ -31,7 +31,7 @@ function createScoredRelation(from: RuleName, to: RuleName, strength: number): S
 }
 
 describe("createPairJudgmentQuestions", () => {
-	it("supplies evidence to an overall assessment and both directions in the same request", () => {
+	it("supplies evidence to an overall assessment and both directions in the same request", ({ expect }) => {
 		expect.assertions(5);
 
 		const questions = createPairJudgmentQuestions([noWarnCard, noErrorCard]);
@@ -45,7 +45,7 @@ describe("createPairJudgmentQuestions", () => {
 });
 
 describe("interpretJudgmentAnswers", () => {
-	it("maps answers back to per-candidate judgment scores", () => {
+	it("maps answers back to per-candidate judgment scores", ({ expect }) => {
 		expect.assertions(2);
 
 		const answers = {
@@ -70,7 +70,7 @@ describe("interpretJudgmentAnswers", () => {
 		);
 	});
 
-	it("throws when an answer is missing", () => {
+	it("throws when an answer is missing", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(() => interpretJudgmentAnswers({}, [noWarnCard])).toThrow(TypeError);
@@ -81,7 +81,7 @@ describe("resolvePairRelation", () => {
 	const left = "no-print";
 	const right = "no-warn";
 
-	it("accepts a single high directed score as a directed relation", () => {
+	it("accepts a single high directed score as a directed relation", ({ expect }) => {
 		expect.assertions(2);
 
 		const supersedes = resolvePairRelation({
@@ -109,7 +109,7 @@ describe("resolvePairRelation", () => {
 		});
 	});
 
-	it("routes conflicting directed scores to review", () => {
+	it("routes conflicting directed scores to review", ({ expect }) => {
 		expect.assertions(1);
 
 		const resolution = resolvePairRelation({
@@ -122,7 +122,7 @@ describe("resolvePairRelation", () => {
 		expect(resolution).toMatchObject({ type: "review" });
 	});
 
-	it("routes same-direction kind conflicts to review", () => {
+	it("routes same-direction kind conflicts to review", ({ expect }) => {
 		expect.assertions(1);
 
 		const resolution = resolvePairRelation({
@@ -135,7 +135,7 @@ describe("resolvePairRelation", () => {
 		expect(resolution).toMatchObject({ type: "review" });
 	});
 
-	it("falls back to undirected kinds by score priority", () => {
+	it("falls back to undirected kinds by score priority", ({ expect }) => {
 		expect.assertions(3);
 
 		const overlaps = resolvePairRelation({
@@ -174,7 +174,7 @@ describe("resolvePairRelation", () => {
 		});
 	});
 
-	it("reviews near-threshold pairs and ignores weak ones", () => {
+	it("reviews near-threshold pairs and ignores weak ones", ({ expect }) => {
 		expect.assertions(2);
 
 		const nearThreshold = resolvePairRelation({
@@ -200,7 +200,7 @@ describe("resolvePairRelation", () => {
 });
 
 describe("applyRelationCap", () => {
-	it("keeps the strongest relations up to the per-rule cap", () => {
+	it("keeps the strongest relations up to the per-rule cap", ({ expect }) => {
 		expect.assertions(1);
 
 		const relations = [
@@ -213,7 +213,7 @@ describe("applyRelationCap", () => {
 		expect(capped.map((scored) => scored.relation.to)).toStrictEqual(["no-warn", "no-error"]);
 	});
 
-	it("counts both endpoints against the cap", () => {
+	it("counts both endpoints against the cap", ({ expect }) => {
 		expect.assertions(1);
 
 		const relations = [
@@ -226,7 +226,7 @@ describe("applyRelationCap", () => {
 		expect(capped).toStrictEqual([relations[0]]);
 	});
 
-	it("breaks strength ties deterministically by endpoints", () => {
+	it("breaks strength ties deterministically by endpoints", ({ expect }) => {
 		expect.assertions(1);
 
 		const relations = [

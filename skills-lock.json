@@ -151,6 +151,12 @@
       "skillPath": ".agents/skills/migrate-pullhook-install/SKILL.md",
       "computedHash": "5671dbda6e9d162d1a2d1daa5c061b3ab48bb95ee0852ee9701379c86d8b9dbe"
     },
+    "migrate-to-shoehorn": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/misc/migrate-to-shoehorn/SKILL.md",
+      "computedHash": "6397731ced114f3657aa88b55ed13d1344a56d77ca449c568e3200c21740fa99"
+    },
     "mobile-native": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

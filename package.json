@@ -120,6 +120,7 @@
 		"@stryker-mutator/core": "catalog:test",
 		"@stryker-mutator/vitest-runner": "catalog:test",
 		"@stylistic/eslint-plugin": "catalog:lint",
+		"@total-typescript/shoehorn": "catalog:test",
 		"@total-typescript/ts-reset": "catalog:types",
 		"@types/bun": "catalog:types",
 		"@types/node": "catalog:types",
@@ -154,11 +155,9 @@
 		"eslint-plugin-unused-imports": "catalog:lint",
 		"fallow": "catalog:lint",
 		"fast-check": "catalog:test",
-		"jest-extended": "catalog:test",
 		"jiti": "catalog:tooling",
 		"oxfmt": "catalog:lint",
 		"oxlint": "catalog:lint",
-		"oxlint-plugin-react-doctor": "catalog:lint",
 		"oxlint-tsgolint": "catalog:lint",
 		"pncat": "catalog:tooling",
 		"publint": "catalog:build",
@@ -170,13 +169,12 @@
 		"typescript": "catalog:tooling",
 		"vitest": "catalog:test",
 		"vitiate": "catalog:test",
-		"yuku-ast": "catalog:tooling",
 		"zx": "catalog:scripts"
 	},
 	"peerDependencies": {
 		"typescript": ">=5 <8"
 	},
-	"packageManager": "pnpm@12.10.1",
+	"packageManager": "pnpm@12.14.0",
 	"engines": {
 		"node": ">=22.12.0"
 	},

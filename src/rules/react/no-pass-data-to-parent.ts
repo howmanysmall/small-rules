@@ -15,7 +15,7 @@ import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effe
 type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
 
 function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boolean {
-	return function isUseHook(node: ESTree.Node): boolean {
+	return function isUseHook(node): boolean {
 		/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
 		if (!isIdentifier(node) && !isMemberExpression(node)) return false;
 		return (

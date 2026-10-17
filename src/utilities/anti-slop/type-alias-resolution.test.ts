@@ -1,3 +1,5 @@
+// oxlint-disable flawless/prefer-vitest-local-context -- unresolvable afaik
+
 import { describe, expect, it } from "vitest";
 import { isNode } from "@small-rules/oxlint-utilities";
 import { traverseAst } from "@small-rules/rule-harness/ast";

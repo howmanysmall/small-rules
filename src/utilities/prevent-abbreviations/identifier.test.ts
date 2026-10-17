@@ -1,5 +1,5 @@
 import { compileFunction } from "node:vm";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 
 import {
@@ -57,7 +57,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ expected: true, label: "emoji 0xFE70", value: 0xfe_70 },
 			{ expected: true, label: "emoji 0xFF66", value: 0xff_66 },
 		])("$label", ({ expected, value }) => {
-			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
+			it(`should return ${expected} for 0x${value.toString(16)}`, ({ expect }) => {
 				expect.assertions(1);
 
 				expect(isIdentifierStartCodePoint(value)).toBe(expected);
@@ -78,7 +78,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ expected: false, label: "CJK compatibility forms 0xFF5B", value: 0xff_5b },
 			{ expected: false, label: "CJK compatibility forms 0xFFDD", value: 0xff_dd },
 		])("$label", ({ expected, value }) => {
-			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
+			it(`should return ${expected} for 0x${value.toString(16)}`, ({ expect }) => {
 				expect.assertions(1);
 
 				expect(isIdentifierStartCodePoint(value)).toBe(expected);
@@ -95,7 +95,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ expected: true, label: "spacing combining 0x2030", value: 0x20_30 },
 			{ expected: true, label: "letter A", value: getAsciiCodePoint("A") },
 		])("$label", ({ expected, value }) => {
-			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
+			it(`should return ${expected} for 0x${value.toString(16)}`, ({ expect }) => {
 				expect.assertions(1);
 
 				expect(isIdentifierPartCodePoint(value)).toBe(expected);
@@ -106,7 +106,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ expected: false, label: "ASCII exclamation mark", value: getAsciiCodePoint("!") },
 			{ expected: false, label: "plain space", value: getAsciiCodePoint(" ") },
 		])("$label", ({ expected, value }) => {
-			it(`should return ${expected} for 0x${value.toString(16)}`, () => {
+			it(`should return ${expected} for 0x${value.toString(16)}`, ({ expect }) => {
 				expect.assertions(1);
 
 				expect(isIdentifierPartCodePoint(value)).toBe(expected);
@@ -120,7 +120,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ name: "value9", label: "with trailing digit" },
 			{ name: "πValue", label: "Greek letter" },
 		])("accepts $label", ({ name }) => {
-			it(`should return true for "${name}"`, () => {
+			it(`should return true for "${name}"`, ({ expect }) => {
 				expect.assertions(1);
 
 				expect(isValidIdentifier(name)).toBe(true);
@@ -133,7 +133,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 			{ name: "9value", label: "starts with digit" },
 			{ name: "value name", label: "contains whitespace" },
 		])("rejects $label", ({ name }) => {
-			it(`should return false for "${name}"`, () => {
+			it(`should return false for "${name}"`, ({ expect }) => {
 				expect.assertions(1);
 
 				expect(isValidIdentifier(name)).toBe(false);
@@ -143,7 +143,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 });
 
 describe("isValidIdentifier strict-mode names", () => {
-	it("should reject names that strict module code cannot declare", () => {
+	it("should reject names that strict module code cannot declare", ({ expect }) => {
 		// Catches the fixer renaming a variable to `arguments`. Shrunk from the
 		// property below.
 		expect.assertions(3);
@@ -155,7 +155,7 @@ describe("isValidIdentifier strict-mode names", () => {
 });
 
 describe("isValidIdentifier properties", () => {
-	it("should only accept names that strict module code can declare", () => {
+	it("should only accept names that strict module code can declare", ({ expect }) => {
 		// Catches the abbreviation fixer renaming a variable to a name, such
 		// as `arguments`, that a module then refuses to compile.
 		expect.hasAssertions();

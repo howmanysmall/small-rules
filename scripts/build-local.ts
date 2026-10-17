@@ -161,7 +161,7 @@ const command = createBaseCommand(
 		const { logger, logs } = createCapturingLogger();
 
 		const inlineConfiguration = {
-			checks: { pluginTimings: false },
+			checks: { bundlerTimings: false },
 			customLogger: logger,
 			// Read by tsdown.config.ts, which copies dist/index.js into plugins/.
 			includeLocal: true,

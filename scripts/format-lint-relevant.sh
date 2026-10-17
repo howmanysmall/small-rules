@@ -8,9 +8,8 @@ ecmaFiles=()
 shellFiles=()
 tomlFiles=()
 markdownFiles=()
-actionlintFiles=()
+jactionlintFiles=()
 pinactFiles=()
-zizmorFiles=()
 wasWorkspaceChanged=false
 
 isShellFile() {
@@ -54,12 +53,11 @@ while IFS= read -r -d '' record; do
 			markdownFiles+=("${path}")
 			;;
 		.github/workflows/*.yml | .github/workflows/*.yaml | .github/actions/*/action.yml | .github/actions/*/action.yaml)
-			actionlintFiles+=("${path}")
+			jactionlintFiles+=("${path}")
 			pinactFiles+=("${path}")
-			zizmorFiles+=("${path}")
 			;;
 		.github/dependabot.yml)
-			zizmorFiles+=("${path}")
+			jactionlintFiles+=("${path}")
 			;;
 		package.json | pnpm-workspace.yaml)
 			wasWorkspaceChanged=true
@@ -98,13 +96,12 @@ if [[ ${#markdownFiles[@]} -gt 0 ]]; then
 	rumdl fmt "${markdownFiles[@]}"
 fi
 
-if [[ ${#actionlintFiles[@]} -gt 0 ]]; then
-	actionlint "${actionlintFiles[@]}"
-	pinact run "${pinactFiles[@]}"
+if [[ ${#jactionlintFiles[@]} -gt 0 ]]; then
+	jactionlint --fix "${jactionlintFiles[@]}"
 fi
 
-if [[ ${#zizmorFiles[@]} -gt 0 ]]; then
-	zizmor --fix --offline "${zizmorFiles[@]}"
+if [[ ${#pinactFiles[@]} -gt 0 ]]; then
+	pinact run "${pinactFiles[@]}"
 fi
 
 if [[ "${wasWorkspaceChanged}" == true ]]; then

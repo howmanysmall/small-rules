@@ -54,7 +54,7 @@ function parseOptions(rawOptions: RuleOptions): EffectFunctionOptions {
 	}
 
 	/* v8 ignore next -- @preserve rule schema restricts environment to known values when provided. */
-	const environment: Environment = isEnvironment(rawOptions.environment) ? rawOptions.environment : ROBLOX_TS;
+	const environment = isEnvironment(rawOptions.environment) ? rawOptions.environment : ROBLOX_TS;
 
 	const rawHooks = rawOptions.hooks;
 	/* v8 ignore next -- @preserve array check branches are both exercised; V8 branch tracking miscounts one. */

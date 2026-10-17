@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import {
 	isMaybeBoolean,
 	isMaybeReadonlyArrayOfStrings,
@@ -221,7 +221,7 @@ function checkoutAudit(): CheckoutAudit {
 	const candidates = new Array<AuditCandidate>();
 	let total = 0;
 
-	const collect: Collect = function collect(workflow: string, job: string, steps?: Steps): void {
+	const collect: Collect = function collect(workflow, job, steps?: Steps): void {
 		if (steps === undefined) return;
 		for (const step of steps) {
 			if (step.uses?.startsWith("actions/checkout") !== true) continue;
@@ -282,7 +282,7 @@ describe("documentation validation workflow", () => {
 	// Bug: a docs-only change merges without running docs checks.
 	// Oracle: the documentation/ directory exists here,
 	// so CI must select it.
-	it("triggers validation for documentation changes", () => {
+	it("triggers validation for documentation changes", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(getCiPushPaths()).toContain("documentation/**");
@@ -295,7 +295,7 @@ describe("documentation deployment workflow", () => {
 	// or before the package publishes.
 	// Oracle: releases ship as v*.*.* tags; the deploy job
 	// must wait for publish and require a tag ref.
-	it("releases docs only for version tags, after publish succeeds", () => {
+	it("releases docs only for version tags, after publish succeeds", ({ expect }) => {
 		expect.assertions(4);
 
 		expect(getReleaseTags()).toContain("v*.*.*");
@@ -306,7 +306,7 @@ describe("documentation deployment workflow", () => {
 
 	// Bug: an ordinary CI run redeploys the public site.
 	// The missing call is its only trace.
-	it("is never called by ordinary CI", () => {
+	it("is never called by ordinary CI", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getCiJobsCallingDocs()).toStrictEqual([]);
@@ -315,7 +315,7 @@ describe("documentation deployment workflow", () => {
 	// Bug: docs deploy from a pull request push instead of through the release.
 	// Oracle: workflow_call is the release handoff; push and
 	// pull_request are untrusted for a deploy target.
-	it("is callable for releases, not for pull requests", () => {
+	it("is callable for releases, not for pull requests", ({ expect }) => {
 		expect.assertions(3);
 
 		const triggers = getDocsTriggers();
@@ -329,7 +329,7 @@ describe("documentation deployment workflow", () => {
 	// or loses access it needs.
 	// Oracle: Pages deployment needs exactly contents read,
 	// plus pages write and id-token write.
-	it("deploys to GitHub Pages with only the permissions Pages requires", () => {
+	it("deploys to GitHub Pages with only the permissions Pages requires", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getDeployEffectivePermissions()).toStrictEqual({
@@ -342,7 +342,7 @@ describe("documentation deployment workflow", () => {
 	// Bug: a checkout step persists credentials into every following step.
 	// Oracle: hygiene requires persist-credentials: false
 	// on every checkout.
-	it("never persists checkout credentials", () => {
+	it("never persists checkout credentials", ({ expect }) => {
 		expect.assertions(2);
 
 		const audit = checkoutAudit();
@@ -354,7 +354,7 @@ describe("documentation deployment workflow", () => {
 	// Bug: a validation workflow gains write credentials
 	// and becomes a confused deputy.
 	// Oracle: least privilege; only the Pages deploy job may hold write scopes.
-	it("grants validation workflows no write access", () => {
+	it("grants validation workflows no write access", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(writeViolations()).toStrictEqual([]);

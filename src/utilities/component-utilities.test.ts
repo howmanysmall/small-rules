@@ -1,34 +1,31 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 import { getJSXAttributeName, isSimpleExpression } from "$oxc-utilities/component-utilities";
 
 import type { ESTree } from "oxlint-plugin-utilities";
 
 function getNamespacedAttributeFixture(): ESTree.JSXAttribute {
-	// SAFETY: Utility tests build minimal AST nodes for parser-shape branches.
-	return {
+	return fromPartial({
 		name: {
 			name: { name: "key", type: "JSXIdentifier" },
 			namespace: { name: "rbxts", type: "JSXIdentifier" },
 			type: "JSXNamespacedName",
 		},
 		type: "JSXAttribute",
-		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
-	} as ESTree.JSXAttribute;
+	});
 }
 
 function getParenthesizedExpressionFixture(): ESTree.ParenthesizedExpression {
-	// SAFETY: Utility tests build minimal AST nodes for parser-shape branches.
-	return {
+	return fromPartial({
 		expression: { name: "value", type: "Identifier" },
 		type: "ParenthesizedExpression",
-		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Utility tests build minimal AST nodes for parser-shape branches.
-	} as ESTree.ParenthesizedExpression;
+	});
 }
 
 describe("component utilities", () => {
 	describe("getJSXAttributeName", () => {
-		it("should return the local name for namespaced JSX attributes", () => {
+		it("should return the local name for namespaced JSX attributes", ({ expect }) => {
 			expect.assertions(1);
 
 			// Arrange
@@ -43,7 +40,7 @@ describe("component utilities", () => {
 	});
 
 	describe("isSimpleExpression", () => {
-		it("should unwrap parenthesized expressions", () => {
+		it("should unwrap parenthesized expressions", ({ expect }) => {
 			expect.assertions(1);
 
 			// Arrange

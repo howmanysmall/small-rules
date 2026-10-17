@@ -63,7 +63,7 @@ export function containsUnknownType(type: ESTree.TSType): boolean {
  * @returns The annotation, or `undefined` if the parameter is unannotated.
  */
 export function getFunctionParameterTypeAnnotation(parameter: FunctionParameter): ESTree.TSTypeAnnotation | undefined {
-	let current: ESTree.ParamPattern = parameter;
+	let current = parameter;
 	while (isTsParameterProperty(current) || isRestElement(current)) {
 		if (isTsParameterProperty(current)) {
 			current = current.parameter;
@@ -89,7 +89,7 @@ export function getFunctionParameterTypeAnnotation(parameter: FunctionParameter)
  * @returns The parameter's displayed binding, e.g. `value` or `{ value }`.
  */
 export function getFunctionParameterBindingName(parameter: FunctionParameter, sourceCode: SourceCodeWithText): string {
-	let current: ESTree.ParamPattern = parameter;
+	let current = parameter;
 	while (true) {
 		if (isTsParameterProperty(current)) {
 			current = current.parameter;

@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { appendRulePageSections, findRuleNameByPath, getRulePageSections } from "$data/rule-page-sections";
 
 describe("getRulePageSections", () => {
-	it("lists every section a rule page renders, in page order", () => {
+	it("lists every section a rule page renders, in page order", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getRulePageSections("no-print", { hasRationale: true }).map((section) => section.text)).toStrictEqual([
@@ -15,7 +15,7 @@ describe("getRulePageSections", () => {
 		]);
 	});
 
-	it("leaves out the rationale when the page does not write one", () => {
+	it("leaves out the rationale when the page does not write one", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(getRulePageSections("no-print", { hasRationale: false }).map((section) => section.slug)).not.toContain(
@@ -23,7 +23,7 @@ describe("getRulePageSections", () => {
 		);
 	});
 
-	it("leaves out related rules when the rule has none", () => {
+	it("leaves out related rules when the rule has none", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(
@@ -33,13 +33,13 @@ describe("getRulePageSections", () => {
 });
 
 describe("findRuleNameByPath", () => {
-	it("finds the rule a docs entry documents", () => {
+	it("finds the rule a docs entry documents", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(findRuleNameByPath("rules/roblox/no-print")).toBe("no-print");
 	});
 
-	it("returns undefined for pages that are not rule pages", () => {
+	it("returns undefined for pages that are not rule pages", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(findRuleNameByPath("quick-start")).toBeUndefined();
@@ -47,7 +47,7 @@ describe("findRuleNameByPath", () => {
 });
 
 describe("appendRulePageSections", () => {
-	it("adds the sections after the overview as top-level entries", () => {
+	it("adds the sections after the overview as top-level entries", ({ expect }) => {
 		expect.assertions(1);
 
 		const items = appendRulePageSections(
@@ -61,7 +61,7 @@ describe("appendRulePageSections", () => {
 		]);
 	});
 
-	it("does not repeat a section the page already lists", () => {
+	it("does not repeat a section the page already lists", ({ expect }) => {
 		expect.assertions(1);
 
 		const items = appendRulePageSections(

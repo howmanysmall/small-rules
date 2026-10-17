@@ -175,7 +175,7 @@ function getAnnotationTarget(
 }
 
 function getEnclosingFunction(node: ESTree.Node): FunctionExpression | undefined {
-	let current: ESTree.Node | null = node.parent;
+	let current = node.parent;
 	while (current !== null && !isProgram(current)) {
 		if (isAnyFunction(current)) return current;
 		current = current.parent;

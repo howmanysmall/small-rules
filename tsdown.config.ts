@@ -32,6 +32,14 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 	const includeLocal =
 		("includeLocal" in inlineConfiguration && inlineConfiguration.includeLocal === true) ||
 		extraArguments.includes("--include-local");
+	// Rolldown keeps legal (`@preserve`), annotation (`@__PURE__`) and JSDoc
+	// comments in its output, so minified builds turn comments off. Every
+	// coverage directive in this repository is tagged `@preserve`, and those
+	// only mean something next to the sources they annotate. The attribution
+	// banner rides on `postBanner`, which comment handling never touches, so
+	// nothing that belongs in the bundle is lost.
+	const { minify } = inlineConfiguration;
+	const minifying = minify !== undefined && minify !== false && minify !== "dce-only";
 
 	const userConfiguration: UserConfig = {
 		attw: {
@@ -56,7 +64,7 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 		fixedExtension: false,
 		format: ["esm"],
 		outDir: "dist",
-		outputOptions: { postBanner: VENDORED_NOTICE },
+		outputOptions: { comments: !minifying, postBanner: VENDORED_NOTICE },
 		platform: "node",
 		publint: {
 			enabled: true,

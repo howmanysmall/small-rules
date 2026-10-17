@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { createReleaseHistory, getReleaseContentEntry } from "$data/release-history";
 
 describe("documentation release history", () => {
 	// Catches an empty release list rendering a blank page instead of an
 	// explanation that points at the GitHub releases page.
-	it("renders an explanatory empty state pointing at GitHub releases when no releases exist", () => {
+	it("renders an explanatory empty state pointing at GitHub releases when no releases exist", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(createReleaseHistory([])).toStrictEqual({
@@ -18,7 +18,7 @@ describe("documentation release history", () => {
 		});
 	});
 
-	it("sorts populated release entries by semantic version", () => {
+	it("sorts populated release entries by semantic version", ({ expect }) => {
 		expect.assertions(1);
 
 		const history = createReleaseHistory([
@@ -37,7 +37,7 @@ describe("documentation release history", () => {
 		});
 	});
 
-	it("uses the release filename when Astro normalizes the collection id", () => {
+	it("uses the release filename when Astro normalizes the collection id", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(

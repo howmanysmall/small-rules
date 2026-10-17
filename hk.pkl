@@ -1,9 +1,9 @@
 // hk configuration - https://hk.jdx.dev/
-amends "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.6.0/hk@2.6.0#/Config.pkl"
 
-import "package://github.com/jdx/hk/releases/download/v2.4.0/hk@2.4.0#/Builtins.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.6.0/hk@2.6.0#/Builtins.pkl"
 
-min_hk_version = "2.4.0"
+min_hk_version = "2.6.0"
 jobs = 2
 fail_fast = true
 
@@ -37,6 +37,7 @@ local ASTRO_FILES = List("**/*.astro")
 local MARKDOWN_FILES = List("**/*.{md,markdown,mdx}")
 local WORKFLOW_FILES = List(".github/workflows/**/*.{yml,yaml}")
 local ACTION_FILES = WORKFLOW_FILES + List(".github/actions/**/action.{yml,yaml}")
+local JACTIONLINT_SARIF = List("jactionlint", "--online", "--format", "sarif", "{{files}}")
 local GENERATED_DATA =
   List(
     "**/*-lock.{json,yaml}",
@@ -147,28 +148,29 @@ local fileChecks = new Mapping<String, Step> {
       }
     }
   }
-  ["actionlint"] = (Builtins.actionlint) {
-    glob = WORKFLOW_FILES
-    check = new CommandSpec {
-      command = new Command {
-        argv = List("actionlint", "{{files}}")
-      }
-      effect = "read"
-    }
-  }
-  // zizmor and pinact read a GitHub token for their online checks, which only
-  // a shell can fetch.
-  ["zizmor"] = (Builtins.zizmor) {
+  ["jactionlint"] = (Builtins.jactionlint) {
     glob = ACTION_FILES + List(".github/dependabot.yml")
-    check = new CommandSpec {
-      command = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress {{files}}"
-      effect = "read"
+    batch = false
+    diagnostic_format = "sarif"
+    check = (Builtins.jactionlint.check) {
+      command = new Command {
+        argv = JACTIONLINT_SARIF
+      }
+    }
+    check_diff = (Builtins.jactionlint.check) {
+      command = new Command {
+        argv = List("hk", "util", "sarif-diff", "--") + JACTIONLINT_SARIF
+      }
     }
     fix = new CommandSpec {
-      command = "GH_TOKEN=\"$(gh auth token)\" zizmor --no-progress --fix {{files}}"
+      command = new Command {
+        argv = List("jactionlint", "--online", "--fix", "{{files}}")
+      }
       effect = "write"
     }
   }
+  // pinact reads a GitHub token for its online checks, which only a shell can
+  // fetch.
   ["pinact"] {
     glob = ACTION_FILES
     check = new CommandSpec {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { createNodeTypeCatalog } from "./node-type-catalog";
 
@@ -36,7 +36,7 @@ const UTILITIES = {
 };
 
 describe("createNodeTypeCatalog", () => {
-	it("maps each node type to the exported constant holding it", () => {
+	it("maps each node type to the exported constant holding it", ({ expect }) => {
 		expect.assertions(4);
 
 		const catalog = createNodeTypeCatalog(Object.entries(UTILITIES));
@@ -47,7 +47,7 @@ describe("createNodeTypeCatalog", () => {
 		expect(catalog.getNodeTypeOfConstant("COUNT")).toBeUndefined();
 	});
 
-	it("keeps only guards whose answer depends on the node type alone and matches exactly one type", () => {
+	it("keeps only guards whose answer depends on the node type alone and matches exactly one type", ({ expect }) => {
 		expect.assertions(1);
 
 		const catalog = createNodeTypeCatalog(Object.entries(UTILITIES));
@@ -69,7 +69,7 @@ describe("createNodeTypeCatalog", () => {
 		});
 	});
 
-	it("knows which functions are guards", () => {
+	it("knows which functions are guards", ({ expect }) => {
 		expect.assertions(3);
 
 		const catalog = createNodeTypeCatalog(Object.entries(UTILITIES));
@@ -79,7 +79,7 @@ describe("createNodeTypeCatalog", () => {
 		expect(catalog.isGuardName("getName")).toBe(false);
 	});
 
-	it("knows which guards accept a missing node", () => {
+	it("knows which guards accept a missing node", ({ expect }) => {
 		expect.assertions(2);
 
 		const catalog = createNodeTypeCatalog(Object.entries(UTILITIES));

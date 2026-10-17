@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
 import { ruleManifest } from "$data/rule-manifest";
 import { createRuleRedirects, ruleRedirects } from "$data/rule-redirects";
@@ -23,7 +23,7 @@ const fixtureManifest = {
 } satisfies RuleManifest;
 
 describe("createRuleRedirects", () => {
-	it("redirects every previous category path to the current rule path", () => {
+	it("redirects every previous category path to the current rule path", ({ expect }) => {
 		expect.assertions(1);
 
 		expect(createRuleRedirects(fixtureManifest, "/small-rules")).toStrictEqual({
@@ -32,7 +32,7 @@ describe("createRuleRedirects", () => {
 		});
 	});
 
-	it("creates no redirects for rules that never moved", () => {
+	it("creates no redirects for rules that never moved", ({ expect }) => {
 		expect.assertions(1);
 
 		const unmovedManifest = {
@@ -46,7 +46,7 @@ describe("createRuleRedirects", () => {
 });
 
 describe("ruleRedirects", () => {
-	it("keeps the old naming links for rules moved to the English category", () => {
+	it("keeps the old naming links for rules moved to the English category", ({ expect }) => {
 		expect.assertions(3);
 
 		expect(ruleRedirects["/rules/naming/consistent-compound-words"]).toBe(
@@ -60,7 +60,7 @@ describe("ruleRedirects", () => {
 		);
 	});
 
-	it("never redirects away from a page that still exists", () => {
+	it("never redirects away from a page that still exists", ({ expect }) => {
 		expect.assertions(1);
 
 		const currentPaths = ruleManifest.categories.flatMap((category) =>

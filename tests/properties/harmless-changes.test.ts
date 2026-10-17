@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 
@@ -41,7 +41,7 @@ const STRUCTURAL_RULES = new Set<string>([
 const STRUCTURAL_CASES = FIXABLE_CASES.filter(({ rule }) => STRUCTURAL_RULES.has(rule));
 
 describe("harmless changes", () => {
-	it("should cover every listed structural rule", () => {
+	it("should cover every listed structural rule", ({ expect }) => {
 		// Catches a listed rule silently dropping out of these properties.
 		expect.assertions(1);
 
@@ -55,9 +55,9 @@ describe("harmless changes", () => {
 		expect(covered.toSorted(compareText)).toStrictEqual(listed.toSorted(compareText));
 	});
 
-	it.each(STRUCTURAL_CASES)(
+	it.for(STRUCTURAL_CASES)(
 		"should report the same $rule messages when comments or blank lines separate statements",
-		({ createCase, program, rule }) => {
+		({ createCase, program, rule }, { expect }) => {
 			// Catches detection that breaks when a comment or blank line sits
 			// between the statements it inspects.
 			expect.hasAssertions();
@@ -89,9 +89,9 @@ describe("harmless changes", () => {
 		},
 	);
 
-	it.each(STRUCTURAL_CASES)(
+	it.for(STRUCTURAL_CASES)(
 		"should report the same $rule messages when generated identifiers are renamed",
-		({ createCase, program, rule }) => {
+		({ createCase, program, rule }, { expect }) => {
 			// Catches detection that depends on what a user happened to name
 			// their variables, parameters, or types.
 			expect.hasAssertions();
