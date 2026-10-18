@@ -13,6 +13,7 @@ export const isNonEmptyString = type("string > 0");
 
 export const isNumber = type("number");
 export const isInteger = type("number % 1");
+export const isMaybeInteger = isInteger.or(isUndefined);
 
 export const isMaybeString = isString.or(isUndefined);
 export const isNullableString = isString.or(isNull);
