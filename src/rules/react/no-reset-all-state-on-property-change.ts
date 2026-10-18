@@ -116,7 +116,7 @@ function isUndefined(node?: ESTree.Node): boolean {
 
 function countUseStates(
 	analysis: ReactEffectAnalysis,
-	componentNode: ESTree.ArrowFunctionExpression | ESTree.Function | ESTree.VariableDeclarator | undefined,
+	componentNode?: ESTree.ArrowFunctionExpression | ESTree.Function | ESTree.VariableDeclarator,
 ): number {
 	let currentNode = componentNode;
 

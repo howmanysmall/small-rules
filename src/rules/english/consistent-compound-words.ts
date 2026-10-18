@@ -127,7 +127,7 @@ function parseReplacements(raw: RawOptions["replacements"] | undefined, extendDe
 	return merged;
 }
 
-function parseOptions(rawOptions: RawOptions | undefined): RuleOptions {
+function parseOptions(rawOptions?: RawOptions): RuleOptions {
 	const options = Predicate.isObject(rawOptions) ? rawOptions : {};
 	const extendDefaultReplacements = options.extendDefaultReplacements !== false;
 	const replacements = parseReplacements(options.replacements, extendDefaultReplacements);

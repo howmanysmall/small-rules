@@ -103,7 +103,7 @@ function getArrayProducingReceiver(call: ESTree.CallExpression): ESTree.Expressi
  * @param variable - The binding an identifier resolved to, if any.
  * @returns Whether the binding is an array, or the alias initializer next.
  */
-function getBindingArrayEvidence(variable: undefined | Variable): boolean | ESTree.Expression {
+function getBindingArrayEvidence(variable?: Variable): boolean | ESTree.Expression {
 	if (variable === undefined || visitedVariables.has(variable) || hasUninitializedWrite(variable)) return false;
 	visitedVariables.add(variable);
 

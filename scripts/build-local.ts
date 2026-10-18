@@ -104,7 +104,6 @@ function createCapturingLogger(): CapturingLogger {
 		},
 		info: () => undefined,
 		level: "info",
-		// oxlint-disable-next-line small-rules/starts-with-verb -- tsdown's Logger interface.
 		success: (...values) => {
 			logs.successes.push(stringify(values));
 		},

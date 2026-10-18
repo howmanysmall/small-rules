@@ -9,7 +9,7 @@ const DEFAULT_PROPERTY_RUNS = 100;
 // biome-ignore lint/style/noProcessEnv: the deep-tests workflow sets the run count.
 export const PROPERTY_RUNS = parsePropertyRuns(env.PROPERTY_RUNS);
 
-function parsePropertyRuns(value: string | undefined): number {
+function parsePropertyRuns(value?: string): number {
 	const runs = Number(value);
 	return Number.isInteger(runs) && runs > 0 ? runs : DEFAULT_PROPERTY_RUNS;
 }

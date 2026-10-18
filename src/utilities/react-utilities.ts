@@ -44,7 +44,7 @@ export function getReactSources(environment: Environment): ReadonlySet<string> {
 	return ROBLOX_TS_REACT_SOURCES;
 }
 
-export function getReactSourcesFromOptions(value: ReactOptions | undefined): ReadonlySet<string> {
+export function getReactSourcesFromOptions(value?: ReactOptions): ReadonlySet<string> {
 	return getReactSources(getEnvironment(value));
 }
 
@@ -74,7 +74,7 @@ export function forEachReactNamedImport(
 	}
 }
 
-export function getEnvironment(value: ReactOptions | undefined): Environment {
+export function getEnvironment(value?: ReactOptions): Environment {
 	if (!Predicate.isObject(value) || value.environment !== STANDARD) return ROBLOX_TS;
 	return STANDARD;
 }

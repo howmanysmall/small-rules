@@ -60,7 +60,7 @@ function getTypeName(typeNode: ESTree.Node, allowQualified: boolean): string | u
 	return undefined;
 }
 
-function getReferencedTypeName(typeNode: ESTree.Node | null | undefined, allowQualified = true): string | undefined {
+function getReferencedTypeName(typeNode?: ESTree.Node | null, allowQualified = true): string | undefined {
 	if (typeNode === null || typeNode === undefined) return undefined;
 
 	let referencedType = typeNode;

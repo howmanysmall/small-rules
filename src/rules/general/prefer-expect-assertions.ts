@@ -213,7 +213,7 @@ function validateAssertionCall(
 	}
 }
 
-function isAssertionGuardCall(call: ESTree.CallExpression | undefined): call is ESTree.CallExpression {
+function isAssertionGuardCall(call?: ESTree.CallExpression): call is ESTree.CallExpression {
 	return call !== undefined && (isExpectAssertionsCall(call) || isExpectHasAssertionsCall(call));
 }
 

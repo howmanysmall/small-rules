@@ -62,15 +62,11 @@ function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, 
 	}
 }
 
-function combineValues(
-	operator: ESTree.BinaryOperator,
-	left: number | undefined,
-	right: number | undefined,
-): number | undefined {
+function combineValues(operator: ESTree.BinaryOperator, left?: number, right?: number): number | undefined {
 	return left === undefined || right === undefined ? undefined : evaluateBinaryOperation(operator, left, right);
 }
 
-function negateValue(value: number | undefined): number | undefined {
+function negateValue(value?: number): number | undefined {
 	return value === undefined ? undefined : -value;
 }
 

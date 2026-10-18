@@ -93,26 +93,6 @@ describe("prefer-optional-parameter", () => {
 				errors: [{ messageId: "preferOptionalParameter" }],
 			},
 			{
-				code: "function getOpeningTurns({ id }: ScenarioOptions | undefined): void {}",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
-				code: "const getOpeningTurns = ({ id }: ScenarioOptions | undefined) => id;",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
-				code: "const getOpeningTurns = function ({ id }: ScenarioOptions | undefined) { return id; };",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
-				code: "function getOpeningTurns([first]: ReadonlyArray<string> | undefined): void {}",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
 				code: "interface Api { get({ id }: ScenarioOptions | undefined): void; }",
 				output: "interface Api { get({ id }?: ScenarioOptions): void; }",
 				errors: [{ messageId: "preferOptionalParameter" }],
@@ -128,27 +108,7 @@ describe("prefer-optional-parameter", () => {
 				errors: [{ messageId: "preferOptionalParameter" }],
 			},
 			{
-				code: "function getOpeningTurns(scenario: ScenarioId | undefined, count: number): void {}",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
 				code: "function getOpeningTurns(scenario: ScenarioId /* keep */ | undefined): void {}",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
-				code: "class Turns { set scenario(value: ScenarioId | undefined) {} }",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
-				code: "interface Turns { set scenario(value: ScenarioId | undefined); }",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-			{
-				code: "const turns = { set scenario(value: ScenarioId | undefined) {} };",
 				output: null,
 				errors: [{ messageId: "preferOptionalParameter" }],
 			},
@@ -162,11 +122,24 @@ describe("prefer-optional-parameter", () => {
 				output: "const getOpeningTurns = function (scenario?: ScenarioId) {};",
 				errors: [{ messageId: "preferOptionalParameter" }],
 			},
+		],
+		valid: [
 			{
-				code: "function getOpeningTurns(scenario: ScenarioId | undefined, count): void {}",
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
+				code: "function getOpeningTurns(scenario?: ScenarioId): ReadonlyArray<ShownTurn> {}",
+				documentation: { id: "pass", title: "Optional parameter syntax" },
 			},
+			"function getOptionalStringArrayProperty(value: null | undefined | UnknownRecord, propertyName: string): void {}",
+			"function getOpeningTurns({ id }: ScenarioOptions | undefined): void {}",
+			"const getOpeningTurns = ({ id }: ScenarioOptions | undefined) => id;",
+			"const getOpeningTurns = function ({ id }: ScenarioOptions | undefined) { return id; };",
+			"function getOpeningTurns([first]: ReadonlyArray<string> | undefined): void {}",
+			"function getOpeningTurns(scenario: ScenarioId | undefined, count: number): void {}",
+			"function getOpeningTurns(scenario: ScenarioId | undefined, count): void {}",
+			"class Turns { set scenario(value: ScenarioId | undefined) {} }",
+			"declare class Turns { set scenario(value: ScenarioId | undefined); }",
+			"abstract class Turns { abstract set scenario(value: ScenarioId | undefined); }",
+			"interface Turns { set scenario(value: ScenarioId | undefined); }",
+			"const turns = { set scenario(value: ScenarioId | undefined) {} };",
 			{
 				code: [
 					"function getOpeningTurns(",
@@ -174,14 +147,6 @@ describe("prefer-optional-parameter", () => {
 					"\tfallback: ScenarioId,",
 					"): void {}",
 				].join("\n"),
-				output: null,
-				errors: [{ messageId: "preferOptionalParameter" }],
-			},
-		],
-		valid: [
-			{
-				code: "function getOpeningTurns(scenario?: ScenarioId): ReadonlyArray<ShownTurn> {}",
-				documentation: { id: "pass", title: "Optional parameter syntax" },
 			},
 			"function getOpeningTurns(scenario?: ScenarioId | undefined): void {}",
 			"function getOpeningTurns(scenario: ScenarioId): void {}",

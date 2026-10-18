@@ -8,15 +8,16 @@ import RulePage from "$components/rule-page.astro";
 	<Fragment slot="rationale">
 		<p>
 			`scenario?: ScenarioId` and `scenario: ScenarioId | undefined` accept the same values. The first one names
-			the intent: the caller may omit the argument. The second one only allows undefined. It leaves the caller
-			guessing whether to omit the argument or pass undefined.
+			the intent: the caller may omit the argument. The second one still requires an argument, so `undefined`
+			becomes a value the callee has to handle. It leaves the caller guessing whether the parameter is meant to be
+			optional or whether `undefined` carries meaning.
 		</p>
 		<p>
-			A default value and a rest parameter are already optional. The rule leaves them alone. The fix applies only
-			where TypeScript allows the question mark. An optional parameter can't come before a required one. An
-			accessor setter can't be optional at all. In those positions the rule reports the union. It doesn't rewrite
-			it. A destructuring parameter can only be optional in a declaration signature, not in a function with a
-			body.
+			A default value and a rest parameter are already optional. The rule leaves them alone. It also leaves a
+			parameter alone where TypeScript forbids the question mark: an optional parameter can't come before a
+			required one, an accessor setter can't be optional at all, and a destructuring parameter can only be
+			optional in a declaration signature, not in a function with a body. In those positions the union is the only
+			valid way to accept `undefined`, so there is nothing to report.
 		</p>
 	</Fragment>
 </RulePage>
