@@ -7,6 +7,7 @@ import {
 	isDictionaryOfStrings,
 	isDictionaryOfUnknowns,
 	isFalse,
+	isMaybeInteger,
 	isMaybeNull,
 	isMaybeNumber,
 	isMaybeReadonlyArrayOfStrings,
@@ -117,6 +118,15 @@ describe("optional and nullable validators", () => {
 
 		expect(isMaybeNumber.allows(1)).toBe(true);
 		expect(isMaybeNumber.allows(undefined)).toBe(true);
+	});
+
+	it("isMaybeInteger accepts an integer or undefined", ({ expect }) => {
+		expect.assertions(4);
+
+		expect(isMaybeInteger.allows(1)).toBe(true);
+		expect(isMaybeInteger.allows("")).toBe(true);
+		expect(isMaybeInteger.allows(1.5)).toBe(false);
+		expect(isMaybeInteger.allows(undefined)).toBe(true);
 	});
 
 	it("isMaybeNull accepts null or undefined", ({ expect }) => {
