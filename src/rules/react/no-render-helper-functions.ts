@@ -1,5 +1,5 @@
 import {
-	CHAIN_EXPRESSION,
+	getTypeAnnotationFromBinding,
 	isArrayExpression,
 	isArrowFunctionExpression,
 	isCallExpression,
@@ -16,16 +16,10 @@ import {
 	isTsTypeReference,
 	isVariableDeclarator,
 	JSX_ELEMENT,
-	PARENTHESIZED_EXPRESSION,
-	TS_AS_EXPRESSION,
-	TS_INSTANTIATION_EXPRESSION,
-	TS_NON_NULL_EXPRESSION,
-	TS_SATISFIES_EXPRESSION,
-	TS_TYPE_ASSERTION,
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
+import { ascendPastExpressionWrappers, EXPRESSION_WRAPPER_TYPES } from "$oxc-utilities/expression-wrapper-ancestors";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
@@ -33,16 +27,6 @@ import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 const REACT_NODE_TYPE_NAMES = new Set([JSX_ELEMENT, "ReactElement", "ReactNode"]);
-const WRAPPER_PARENT_TYPES = new Set([
-	CHAIN_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
-	TS_AS_EXPRESSION,
-	TS_INSTANTIATION_EXPRESSION,
-	TS_NON_NULL_EXPRESSION,
-	TS_SATISFIES_EXPRESSION,
-	TS_TYPE_ASSERTION,
-]);
-
 const HOOK_PATTERN = /^use[A-Z]/u;
 
 type WrapperParent =
@@ -110,23 +94,16 @@ function getBindingIdentifierName(binding: ESTree.BindingPattern): string | unde
 	return isIdentifier(binding) ? binding.name : undefined;
 }
 
-function ascendPastWrappers(node?: ESTree.Node): ESTree.Node | undefined {
-	let current = node;
-	/* v8 ignore next -- @preserve wrapper parents are optional parser shapes; direct references do not require them. */
-	while (current !== undefined && WRAPPER_PARENT_TYPES.has(current.type)) current = current.parent ?? undefined;
-	return current;
-}
-
 function isPropertyValueReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
-	const parent = ascendPastWrappers(node.parent ?? undefined);
+	const parent = ascendPastExpressionWrappers(node.parent ?? undefined);
 	/* v8 ignore next -- @preserve scope references always have parents in parser-produced ASTs. */
 	return isProperty(parent) && unwrapReferenceValue(parent.value) === node;
 }
 
 function isJsxAttributeValueReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
-	const parent = ascendPastWrappers(node.parent ?? undefined);
+	const parent = ascendPastExpressionWrappers(node.parent ?? undefined);
 	return (
 		isJsxExpressionContainer(parent) &&
 		isJsxAttribute(parent.parent) &&
@@ -136,7 +113,7 @@ function isJsxAttributeValueReference(node: ESTree.Node): boolean {
 
 function isCallArgumentReference(node: ESTree.Node): boolean {
 	/* v8 ignore next -- @preserve scope reference identifiers always have parents in parser-produced ASTs. */
-	const parent = ascendPastWrappers(node.parent ?? undefined);
+	const parent = ascendPastExpressionWrappers(node.parent ?? undefined);
 	if (!isCallExpression(parent)) return false;
 
 	return parent.arguments.some((argument) => unwrapReferenceValue(argument) === node);
@@ -151,7 +128,7 @@ function unwrapReferenceValue(node: ESTree.Node): ESTree.Node {
 }
 
 function isWrapperParent(node: ESTree.Node): node is WrapperParent {
-	return WRAPPER_PARENT_TYPES.has(node.type);
+	return EXPRESSION_WRAPPER_TYPES.has(node.type);
 }
 
 function getDeclaredFunctionVariable(sourceCode: SourceCode, node: CallbackFunction): undefined | Variable {

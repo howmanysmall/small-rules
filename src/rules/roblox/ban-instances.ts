@@ -11,6 +11,7 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getJsxAttributeName } from "$oxc-utilities/jsx-attribute-name";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray, isStringRecord } from "$oxc-utilities/type-utilities";
@@ -46,10 +47,6 @@ const EMPTY_OPTIONS: NormalizedOptions = {
 };
 
 type RuleOptions = NonNullable<InferContextFromRule<typeof banInstances>["options"][0]>;
-
-function getJsxAttributeName(name: ESTree.JSXAttributeName): string | undefined {
-	return isJsxIdentifier(name) ? name.name : name.name.name;
-}
 
 function normalizeClassBans(rawBans: RuleOptions["bannedInstances"]): Map<string, BannedClassEntry> {
 	const bannedClasses = new Map<string, BannedClassEntry>();
@@ -145,8 +142,6 @@ function reportJsxBannedAttributes(
 		if (!isJsxAttribute(attribute)) continue;
 
 		const propertyName = getJsxAttributeName(attribute.name);
-		/* v8 ignore next -- @preserve JSXAttribute names are JSXIdentifier names in this visitor branch. */
-		if (propertyName === undefined) continue;
 
 		const propertyEntry = bannedPropertiesForClass.get(propertyName.toLowerCase());
 		if (propertyEntry !== undefined) reportBannedProperty(attribute, className, propertyEntry);

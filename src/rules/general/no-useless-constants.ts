@@ -2,9 +2,7 @@ import {
 	ARRAY_EXPRESSION,
 	BINARY_EXPRESSION,
 	CALL_EXPRESSION,
-	CHAIN_EXPRESSION,
 	CONDITIONAL_EXPRESSION,
-	IDENTIFIER,
 	isAnyLiteral,
 	isBindingIdentifier,
 	isBlockStatement,
@@ -24,21 +22,15 @@ import {
 	MEMBER_EXPRESSION,
 	NEW_EXPRESSION,
 	OBJECT_EXPRESSION,
-	PARENTHESIZED_EXPRESSION,
 	SEQUENCE_EXPRESSION,
 	SPREAD_ELEMENT,
 	TEMPLATE_LITERAL,
-	TS_AS_EXPRESSION,
-	TS_INSTANTIATION_EXPRESSION,
-	TS_NON_NULL_EXPRESSION,
-	TS_SATISFIES_EXPRESSION,
-	TS_TYPE_ASSERTION,
 	UNARY_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
 import { getDeclarationRemovalRange, hasAttachedComments } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { stripParenthesis } from "$oxc-utilities/oxc-utilities";
+import { getRootIdentifier, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, Fix, Reference, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -119,37 +111,6 @@ function isStatementContainer(node: ESTree.Node): node is ESTree.BlockStatement 
 	return isProgram(node) || isBlockStatement(node);
 }
 
-function getCallRootIdentifierName(node: ESTree.Node): string | undefined {
-	let current = node;
-	while (true) {
-		/* v8 ignore next 10 -- @preserve CallExpression/NewExpression callees do not expose TS wrapper nodes after parser normalization. */
-		switch (current.type) {
-			case CHAIN_EXPRESSION:
-			case PARENTHESIZED_EXPRESSION:
-			case TS_AS_EXPRESSION:
-			case TS_INSTANTIATION_EXPRESSION:
-			case TS_NON_NULL_EXPRESSION:
-			case TS_SATISFIES_EXPRESSION:
-			case TS_TYPE_ASSERTION: {
-				current = current.expression;
-				break;
-			}
-
-			case IDENTIFIER:
-				return current.name;
-
-			case MEMBER_EXPRESSION: {
-				current = current.object;
-				break;
-			}
-
-			default:
-				/* v8 ignore next -- @preserve only handled expression nodes can appear as relocatable static call roots. */
-				return undefined;
-		}
-	}
-}
-
 function appendRelocatableArrayElements(node: ESTree.ArrayExpression, worklist: Array<ESTree.Node>): boolean {
 	for (const element of node.elements) {
 		if (element === null) return false;
@@ -163,7 +124,7 @@ function appendRelocatableCallChildren(
 	staticGlobalFactories: ReadonlySet<string>,
 	worklist: Array<ESTree.Node>,
 ): boolean {
-	const rootName = getCallRootIdentifierName(node.callee);
+	const rootName = getRootIdentifier(node.callee)?.name;
 	/* v8 ignore next -- @preserve static-expression filtering rejects calls without an identifier or member root before relocation checks. */
 	if (rootName === undefined || !staticGlobalFactories.has(rootName)) return false;
 
@@ -247,12 +208,7 @@ function appendRelocatableChildren(
 
 function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: ReadonlySet<string>): boolean {
 	const worklist: Array<ESTree.Node> = [node];
-	let index = 0;
-	while (index < worklist.length) {
-		const current = worklist[index];
-		/* v8 ignore next -- @preserve the index is bounded by the worklist length. */
-		if (current === undefined) return false;
-		index += 1;
+	for (const current of worklist) {
 		if (!appendRelocatableChildren(current, staticGlobalFactories, worklist)) return false;
 	}
 	return true;

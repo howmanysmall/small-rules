@@ -18,6 +18,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { areEquivalentMemberExpressions } from "$oxc-utilities/member-expression-equivalence";
 import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { ENVIRONMENT_SCHEMA, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 
@@ -42,8 +43,18 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 		case LITERAL:
 			return isAnyLiteral(right) && left.value === right.value && left.raw === right.raw;
 
-		case MEMBER_EXPRESSION:
-			return isMemberExpression(right) && areEquivalentMembers(left, right, sourceCode);
+		case MEMBER_EXPRESSION: {
+			return (
+				isMemberExpression(right) &&
+				areEquivalentMemberExpressions(
+					left,
+					right,
+					sourceCode,
+					areEquivalentTargets,
+					areEquivalentComputedProperties,
+				)
+			);
+		}
 
 		case SUPER:
 			return isSuper(right);
@@ -56,36 +67,12 @@ function areEquivalentTargets(left: ESTree.Expression, right: ESTree.Expression,
 	}
 }
 
-function areEquivalentMembers(
-	left: ESTree.MemberExpression,
-	right: ESTree.MemberExpression,
-	sourceCode: SourceCode,
-): boolean {
-	if (left.computed !== right.computed || left.optional !== right.optional) return false;
-	if (!areEquivalentTargets(left.object, right.object, sourceCode)) return false;
-
-	return left.computed
-		? areEquivalentComputedProperties(left.property, right.property, sourceCode)
-		: areEquivalentStaticProperties(left.property, right.property);
-}
-
 function areEquivalentComputedProperties(
 	left: ESTree.Expression | ESTree.PrivateIdentifier,
 	right: ESTree.Expression | ESTree.PrivateIdentifier,
 	sourceCode: SourceCode,
 ): boolean {
 	return isExpressionNode(left) && isExpressionNode(right) && areEquivalentTargets(left, right, sourceCode);
-}
-
-function areEquivalentStaticProperties(
-	left: ESTree.Expression | ESTree.PrivateIdentifier,
-	right: ESTree.Expression | ESTree.PrivateIdentifier,
-): boolean {
-	const leftIsPrivate = isPrivateIdentifier(left);
-	const rightIsPrivate = isPrivateIdentifier(right);
-	if (leftIsPrivate || rightIsPrivate) return leftIsPrivate && rightIsPrivate && left.name === right.name;
-
-	return isIdentifier(right) && isIdentifierNamed(left, right.name);
 }
 
 function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean): boolean {

@@ -1,41 +1,15 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import { getSynchronousStateSetterCalls } from "$oxc-utilities/react-effect-call-sites";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
-import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+import type { Reference, Visitor } from "oxlint-plugin-utilities";
 
-import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
+import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-type RuleContext = InferContextFromRule<typeof noChainStateUpdates>;
-
-function reportChainStateUpdatesEffect(
-	context: RuleContext,
-	analysis: ReactEffectAnalysis,
-	effect: ReactEffect,
-	isSomeDependenciesState: boolean,
-): void {
-	for (const reference of effect.functionReferences) {
-		if (!analysis.scope.isSynchronousWithin(reference.identifier, effect.functionNode)) continue;
-		if (!analysis.isStateCall(reference)) continue;
-		const callExpression = analysis.scope.getCallExpression(reference);
-		if (callExpression === undefined) continue;
-
-		// Avoid overlap with no-derived-state
-		const isSomeArgumentsState = analysis.scope
-			.getArgumentUpstreamReferences(reference)
-			.some((upstreamReference) => analysis.isState(upstreamReference));
-
-		if (!isSomeDependenciesState || isSomeArgumentsState) continue;
-
-		const stateName = analysis.getStateName(reference);
-		if (stateName === undefined) continue;
-
-		context.report({
-			data: { state: stateName },
-			messageId: "avoidChainingStateUpdates",
-			node: callExpression,
-		});
-	}
+function isNoArgumentState(analysis: ReactEffectAnalysis, argumentReferences: ReadonlyArray<Reference>): boolean {
+	// Avoid overlap with no-derived-state
+	return !argumentReferences.some(analysis.isState);
 }
 
 const noChainStateUpdates = createRule("no-chain-state-updates", "react", {
@@ -52,8 +26,15 @@ const noChainStateUpdates = createRule("no-chain-state-updates", "react", {
 					const isSomeDependenciesState = effect.dependencyReferences
 						.flatMap(analysis.scope.getUpstreamReferences)
 						.some(analysis.isState);
+					if (!isSomeDependenciesState) continue;
 
-					reportChainStateUpdatesEffect(context, analysis, effect, isSomeDependenciesState);
+					for (const stateSetterCall of getSynchronousStateSetterCalls(analysis, effect, isNoArgumentState)) {
+						context.report({
+							data: { state: stateSetterCall.stateName },
+							messageId: "avoidChainingStateUpdates",
+							node: stateSetterCall.callExpression,
+						});
+					}
 				}
 			},
 		} satisfies Visitor;

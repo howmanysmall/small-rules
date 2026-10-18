@@ -1,4 +1,5 @@
 import {
+	getTypeAnnotationFromBinding,
 	isAnyLiteral,
 	isIdentifier,
 	isObjectExpression,
@@ -8,7 +9,6 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
 

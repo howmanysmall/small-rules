@@ -1,35 +1,16 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis, isSynchronousStateCall } from "$oxc-utilities/react-effect-utilities";
+import { getSynchronousStateSetterCalls } from "$oxc-utilities/react-effect-call-sites";
+import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
-import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+import type { Reference, Visitor } from "oxlint-plugin-utilities";
 
-import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
+import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-type RuleContext = InferContextFromRule<typeof noDerivedState>;
-
-function reportDerivedStateEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
-	for (const reference of effect.functionReferences) {
-		if (!isSynchronousStateCall(analysis, effect, reference)) continue;
-
-		const callExpression = analysis.scope.getCallExpression(reference);
-		if (callExpression === undefined) continue;
-
-		const stateName = analysis.getStateName(reference);
-		if (stateName === undefined) continue;
-
-		const argumentsUpstreamReferences = analysis.scope.getArgumentUpstreamReferences(reference);
-		const isSomeArgumentsInternal = argumentsUpstreamReferences.some(
-			(upstreamReference) => analysis.isState(upstreamReference) || analysis.isProp(upstreamReference),
-		);
-		if (!isSomeArgumentsInternal) continue;
-
-		context.report({
-			data: { state: stateName },
-			messageId: "avoidDerivedState",
-			node: callExpression,
-		});
-	}
+function isSomeArgumentInternal(analysis: ReactEffectAnalysis, argumentReferences: ReadonlyArray<Reference>): boolean {
+	return argumentReferences.some(
+		(upstreamReference) => analysis.isState(upstreamReference) || analysis.isProp(upstreamReference),
+	);
 }
 
 const noDerivedState = createRule("no-derived-state", "react", {
@@ -42,7 +23,14 @@ const noDerivedState = createRule("no-derived-state", "react", {
 				for (const effect of analysis.effects) {
 					if (effect.cleanup !== undefined || effect.dependencyReferences === undefined) continue;
 
-					reportDerivedStateEffect(context, analysis, effect);
+					const calls = getSynchronousStateSetterCalls(analysis, effect, isSomeArgumentInternal);
+					for (const { callExpression, stateName } of calls) {
+						context.report({
+							data: { state: stateName },
+							messageId: "avoidDerivedState",
+							node: callExpression,
+						});
+					}
 				}
 			},
 		} satisfies Visitor;

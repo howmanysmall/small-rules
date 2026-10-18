@@ -14,8 +14,6 @@ import {
 	isSpreadElement,
 	isSwitchCase,
 	isUnaryExpression,
-	isVariableDeclaration,
-	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
@@ -23,6 +21,7 @@ import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { walkAst } from "$oxc-utilities/react-hook-utilities";
+import { getConstInitializer } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -106,18 +105,9 @@ function isDivisionInexact(node: ESTree.BinaryExpression): boolean {
 	return Math.abs(numerator) % oddDenominator !== 0;
 }
 
-function getConstInitializer(variable: Variable): ESTree.Expression | undefined {
+function getFirstConstInitializer(variable: Variable): ESTree.Expression | undefined {
 	const [definition] = variable.defs;
-	if (
-		definition?.type !== "Variable" ||
-		!isVariableDeclarator(definition.node) ||
-		definition.node.init === null ||
-		!isVariableDeclaration(definition.parent) ||
-		definition.parent.kind !== "const"
-	) {
-		return undefined;
-	}
-	return definition.node.init;
+	return definition?.type === "Variable" ? getConstInitializer(definition) : undefined;
 }
 
 function isBinaryFloating(
@@ -156,7 +146,7 @@ function resolveFloatingExpressionRoot(
 		const variable = variables.get(current);
 		if (variable === undefined || visited.has(variable)) return undefined;
 
-		const initializer = getConstInitializer(variable);
+		const initializer = getFirstConstInitializer(variable);
 		if (initializer === undefined) return undefined;
 
 		visited.add(variable);
@@ -246,16 +236,22 @@ function getFunctionAssertionOperands(
 	return getCallPairArguments(node);
 }
 
+function getMatchedMethodCallee(
+	node: ESTree.CallExpression,
+	methods: ReadonlySet<string>,
+): ESTree.MemberExpression | undefined {
+	if (!isMemberExpression(node.callee)) return undefined;
+	const method = getMemberPropertyName(node.callee);
+	return method !== undefined && methods.has(method) ? node.callee : undefined;
+}
+
 function getAssertMethodOperands(
 	node: ESTree.CallExpression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (!isMemberExpression(node.callee)) return undefined;
-	const method = getMemberPropertyName(node.callee);
-	if (method === undefined) return undefined;
-	if (!EXACT_ASSERTION_METHODS.has(method)) return undefined;
-	if (!isIdentifier(node.callee.object)) return undefined;
-	if (imports.get(node.callee.object.name) !== "assert") return undefined;
+	const callee = getMatchedMethodCallee(node, EXACT_ASSERTION_METHODS);
+	if (callee === undefined || !isIdentifier(callee.object)) return undefined;
+	if (imports.get(callee.object.name) !== "assert") return undefined;
 	return getCallPairArguments(node);
 }
 
@@ -287,11 +283,10 @@ function getExpectAssertionOperands(
 	node: ESTree.CallExpression,
 	imports: ReadonlyMap<string, ImportedAssertionKind>,
 ): readonly [ESTree.Expression, ESTree.Expression] | undefined {
-	if (!isMemberExpression(node.callee)) return undefined;
-	const method = getMemberPropertyName(node.callee);
-	if (method === undefined || !EXACT_EXPECT_MATCHERS.has(method)) return undefined;
+	const callee = getMatchedMethodCallee(node, EXACT_EXPECT_MATCHERS);
+	if (callee === undefined) return undefined;
 
-	const receiver = unwrapNotReceiver(node.callee.object);
+	const receiver = unwrapNotReceiver(callee.object);
 	return isExpectCallReceiver(receiver, imports) ? getExpectPairArguments(receiver, node) : undefined;
 }
 

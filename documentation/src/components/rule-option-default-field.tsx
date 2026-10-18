@@ -4,13 +4,9 @@ import type { ReactNode } from "react";
 
 import type { ObjectOption } from "$data/rule-options";
 
-interface RuleOptionDefaultFieldProperties {
-	copyLabel: string;
-	copyStatus?: "copied" | "failed" | undefined;
-	detailId: string;
-	isExpanded: boolean;
-	onCopy: () => void;
-	onToggle: () => void;
+import type { RuleOptionDefaultControls } from "./rule-option-default-actions";
+
+interface RuleOptionDefaultFieldProperties extends RuleOptionDefaultControls {
 	option: ObjectOption;
 }
 

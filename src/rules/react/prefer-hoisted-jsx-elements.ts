@@ -39,7 +39,7 @@ import {
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
-import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+import type { Definition, ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 import type { Environment } from "$oxc-utilities/react-utilities";
 import type { StaticExpressionOptions } from "$oxc-utilities/static-expression-utilities";
@@ -74,17 +74,18 @@ function getJavaScriptXmlElementRootName(name: ESTree.JSXElementName): string | 
 	return isJsxIdentifier(current) ? current.name : undefined;
 }
 
+function isStableComponentDefinition(definition: Definition): boolean {
+	return (
+		definition.type === "FunctionName" ||
+		definition.type === "ClassName" ||
+		getConstInitializer(definition) !== undefined
+	);
+}
+
 function isStableModuleComponentName(context: Context, node: ESTree.JSXElement, name: string): boolean {
 	const variable = getVariableByName(context.sourceCode.getScope(node), name);
 	if (variable === undefined || !isModuleLevelScope(variable.scope)) return false;
-	if (isImportBinding(variable)) return true;
-
-	for (const definition of variable.defs) {
-		if (definition.type === "FunctionName" || definition.type === "ClassName") return true;
-		if (getConstInitializer(definition) !== undefined) return true;
-	}
-
-	return false;
+	return isImportBinding(variable) || variable.defs.some(isStableComponentDefinition);
 }
 
 function isImportedJavaScriptXmlNamespace(context: Context, node: ESTree.JSXElement, name: string): boolean {

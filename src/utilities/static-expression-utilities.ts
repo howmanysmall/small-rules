@@ -151,26 +151,7 @@ export function getConstInitializer(definition: Definition): ESTree.Expression |
 	return node.init ?? undefined;
 }
 
-export function getModuleConstInitializer(
-	sourceCode: SourceCode,
-	identifier: ESTree.IdentifierReference,
-): ESTree.Expression | undefined {
-	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
-	if (variable === undefined || !isModuleLevelScope(variable.scope)) return undefined;
-
-	for (const definition of variable.defs) {
-		const initializer = getConstInitializer(definition);
-		if (initializer !== undefined) return initializer;
-	}
-
-	return undefined;
-}
-
-function getConstInitializerForIdentifier(
-	sourceCode: SourceCode,
-	identifier: ESTree.IdentifierReference,
-): ESTree.Expression | undefined {
-	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
+function getFirstConstInitializer(variable: ScopeVariable | undefined): ESTree.Expression | undefined {
 	if (variable === undefined) return undefined;
 
 	for (const definition of variable.defs) {
@@ -181,21 +162,51 @@ function getConstInitializerForIdentifier(
 	return undefined;
 }
 
+function getIdentifierVariable(
+	sourceCode: SourceCode,
+	identifier: ESTree.IdentifierReference,
+): ScopeVariable | undefined {
+	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
+}
+
+export function getModuleConstInitializer(
+	sourceCode: SourceCode,
+	identifier: ESTree.IdentifierReference,
+): ESTree.Expression | undefined {
+	const variable = getIdentifierVariable(sourceCode, identifier);
+	return variable !== undefined && isModuleLevelScope(variable.scope)
+		? getFirstConstInitializer(variable)
+		: undefined;
+}
+
+/**
+ * Adds the unwrapped expression to `seen`.
+ *
+ * @param expression - Expression to unwrap and record.
+ * @param seen - Expressions already on the current path.
+ * @returns The unwrapped expression, or undefined when it was already in `seen`.
+ */
+function enterUnseenExpression(expression: ESTree.Expression, seen: Set<ESTree.Node>): ESTree.Expression | undefined {
+	const unwrapped = stripExpressionWrappers(expression);
+	if (seen.has(unwrapped)) return undefined;
+	seen.add(unwrapped);
+	return unwrapped;
+}
+
 export function isExplicitUndefinedExpression(
 	sourceCode: SourceCode,
 	expression: ESTree.Expression,
 	seen: Set<ESTree.Node>,
 ): boolean {
-	const unwrapped = stripExpressionWrappers(expression);
-	if (seen.has(unwrapped)) return false;
-	seen.add(unwrapped);
+	const unwrapped = enterUnseenExpression(expression, seen);
+	if (unwrapped === undefined) return false;
 
 	if (isIdentifierNamed(unwrapped, "undefined") || (isUnaryExpression(unwrapped) && unwrapped.operator === "void")) {
 		return true;
 	}
 	if (!isIdentifier(unwrapped)) return false;
 
-	const initializer = getConstInitializerForIdentifier(sourceCode, unwrapped);
+	const initializer = getFirstConstInitializer(getIdentifierVariable(sourceCode, unwrapped));
 	return initializer === undefined ? false : isExplicitUndefinedExpression(sourceCode, initializer, seen);
 }
 
@@ -281,11 +292,10 @@ export function isStaticExpression(
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	const unwrapped = stripExpressionWrappers(expression);
 	// `seen` holds the expressions on the current path only, so a constant
 	// that refers back to itself is rejected while one used twice is not.
-	if (seen.has(unwrapped)) return false;
-	seen.add(unwrapped);
+	const unwrapped = enterUnseenExpression(expression, seen);
+	if (unwrapped === undefined) return false;
 	const result = classifyStaticExpression(sourceCode, unwrapped, seen, options);
 	seen.delete(unwrapped);
 	return result;
@@ -362,7 +372,7 @@ function isStaticIdentifier(
 	seen: Set<ESTree.Node>,
 	options: StaticExpressionOptions,
 ): boolean {
-	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
+	const variable = getIdentifierVariable(sourceCode, identifier);
 	if (variable === undefined) return options.staticGlobalFactories.has(identifier.name);
 	if (!isModuleLevelScope(variable.scope)) return false;
 	if (isImportBinding(variable)) return true;

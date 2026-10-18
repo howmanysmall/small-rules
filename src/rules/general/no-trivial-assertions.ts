@@ -14,8 +14,6 @@ import {
 	isSpreadElement,
 	isTransparentExpression,
 	isUnaryExpression,
-	isVariableDeclaration,
-	isVariableDeclarator,
 	NEW_EXPRESSION,
 	OBJECT_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
@@ -24,6 +22,7 @@ import { Predicate } from "effect";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
+import { getConstInitializer } from "$oxc-utilities/static-expression-utilities";
 
 import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -119,16 +118,8 @@ function resolveIdentifierConstant(
 	const scope = sourceCode.getScope(expression);
 	const variable = getVariableByName(scope, expression.name);
 	const [definition] = variable?.defs ?? [];
-	if (
-		definition?.type !== "Variable" ||
-		!isVariableDeclarator(definition.node) ||
-		definition.node.init === null ||
-		!isVariableDeclaration(definition.parent) ||
-		definition.parent.kind !== "const"
-	) {
-		return undefined;
-	}
-	return resolveConstantPrimitive(sourceCode, definition.node.init, seen);
+	const initializer = definition === undefined ? undefined : getConstInitializer(definition);
+	return initializer === undefined ? undefined : resolveConstantPrimitive(sourceCode, initializer, seen);
 }
 
 function resolveConstantPrimitive(

@@ -4,13 +4,14 @@ import {
 	isCallbackFunction,
 	isCallExpression,
 	isIdentifier,
+	isKeyOfNode,
 	isMemberExpression,
 	isNode,
 	isSpreadElement,
 	isStringLiteral,
 } from "@small-rules/oxlint-utilities";
 
-import { isKeyOfNode, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
@@ -35,20 +36,28 @@ export function getEffectCallback(callExpression: ESTree.CallExpression): Callba
 	return isCallbackFunction(callback) ? callback : undefined;
 }
 
-export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
+function walkWorklist(
+	node: ESTree.Node,
+	callback: (child: ESTree.Node) => void,
+	pushChildren: (current: ESTree.Node, worklist: Array<ESTree.Node>) => void,
+): void {
 	const worklist = [node];
 	for (const current of worklist) {
 		callback(current);
-		pushChildNodes(current, worklist);
+		pushChildren(current, worklist);
 	}
 }
 
+export function walkAst(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
+	walkWorklist(node, callback, pushChildNodes);
+}
+
 export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) => void): void {
-	const worklist = [node];
-	for (const current of worklist) {
-		callback(current);
-		for (const child of Object.values(current)) pushSlopValue(child, current, worklist);
-	}
+	walkWorklist(node, callback, pushSlopChildren);
+}
+
+function pushSlopChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
+	for (const child of Object.values(node)) pushSlopValue(child, node, worklist);
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {

@@ -328,6 +328,26 @@ function getNearestTypeBindings(
 }
 
 /**
+ * Finds the nearest bindings for a type name unless a type parameter
+ * shadows it.
+ *
+ * @param name - Type binding name to resolve.
+ * @param use - AST node at the lexical use site.
+ * @param environment - Program type environment containing the use site.
+ * @returns The nearest bindings, or undefined when a lexical type parameter
+ *   of that name shadows them.
+ */
+function getUnshadowedTypeBindings(
+	name: string,
+	use: ESTree.Node,
+	environment: TypeAliasEnvironment,
+): ReadonlyArray<TypeBinding> | undefined {
+	return getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)
+		? undefined
+		: getNearestTypeBindings(name, use, environment);
+}
+
+/**
  * Collects lexical type aliases and competing type bindings in a program.
  *
  * @param program - Program whose immutable type environment is required.
@@ -369,10 +389,8 @@ export function getVisibleTypeAlias(
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ESTree.TSTypeAliasDeclaration | undefined {
-	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
-
-	const bindings = getNearestTypeBindings(name, use, environment);
-	return bindings.length === 1 ? bindings[0]?.alias : undefined;
+	const bindings = getUnshadowedTypeBindings(name, use, environment);
+	return bindings?.length === 1 ? bindings[0]?.alias : undefined;
 }
 
 /**
@@ -388,10 +406,8 @@ export function getVisibleInterfaceDeclarations(
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined {
-	if (getLexicalTypeParameterNames(use, environment.visitorKeys).has(name)) return undefined;
-
-	const bindings = getNearestTypeBindings(name, use, environment);
-	if (bindings.length === 0) return undefined;
+	const bindings = getUnshadowedTypeBindings(name, use, environment);
+	if (bindings === undefined || bindings.length === 0) return undefined;
 
 	const declarations = new Array<ESTree.TSInterfaceDeclaration>();
 	for (const binding of bindings) {

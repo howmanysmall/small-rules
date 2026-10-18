@@ -9,7 +9,6 @@ import {
 	isIdentifierNamed,
 	isMemberExpression,
 	isMethodDefinitionRaw,
-	isNode,
 	isObjectExpression,
 	isProperty,
 	isStringLiteral,
@@ -21,6 +20,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 import { String as EffectString, Predicate } from "effect";
 
+import { appendVisitorChildren } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import { pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
@@ -288,22 +288,6 @@ function reportExternalReferences(context: Context, node: FunctionNode, reason: 
 	}
 }
 
-function pushChildNodes(sourceCode: SourceCode, node: ESTree.Node, worklist: Array<ESTree.Node>): void {
-	/* v8 ignore next -- every visited ESTree type has visitor keys in the parser tables. @preserve */
-	const keys = sourceCode.visitorKeys[node.type] ?? [];
-	for (const key of keys) {
-		/* v8 ignore next -- parser-produced ESTree nodes are always records. @preserve */
-		if (!Predicate.isObject(node)) break;
-		const value = node[key];
-		if (Array.isArray(value)) {
-			/* v8 ignore next -- visitor-key arrays only contain nodes or null holes already filtered. @preserve */
-			for (const item of value) if (isNode(item)) worklist.push(item);
-		} else if (isNode(value)) {
-			worklist.push(value);
-		}
-	}
-}
-
 function pushClassBoundaryChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	/* v8 ignore next -- only invoked for ClassDeclaration/ClassExpression nodes. @preserve */
 	if (!isClass(node)) return;
@@ -333,7 +317,7 @@ function reportThisAndSuper(context: Context, root: FunctionNode, reason: string
 			context.report({ data: { reason }, messageId: "super", node });
 			continue;
 		}
-		pushChildNodes(context.sourceCode, node, worklist);
+		appendVisitorChildren(node, context.sourceCode.visitorKeys, worklist);
 	}
 }
 

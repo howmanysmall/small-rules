@@ -87,17 +87,11 @@ function escapeRegExp(value: string): string {
 }
 
 function upperFirst(value: string): string {
-	const first = value.at(0);
-	/* v8 ignore next -- replacement keys are non-empty identifiers in practice. @preserve */
-	if (first === undefined) return value;
-	return `${first.toUpperCase()}${value.slice(1)}`;
+	return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
 
 function lowerFirst(value: string): string {
-	const first = value.at(0);
-	/* v8 ignore next -- replacement keys are non-empty identifiers in practice. @preserve */
-	if (first === undefined) return value;
-	return `${first.toLowerCase()}${value.slice(1)}`;
+	return `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
 }
 
 function isUpperCase(value: string): boolean {

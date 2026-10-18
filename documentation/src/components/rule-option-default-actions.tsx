@@ -2,14 +2,17 @@ import { RuleOptionIcon } from "./rule-option-icon";
 
 import type { ReactNode } from "react";
 
-interface RuleOptionDefaultActionsProperties {
-	name: string;
+export interface RuleOptionDefaultControls {
 	copyLabel: string;
 	copyStatus?: "copied" | "failed" | undefined;
 	detailId: string;
 	isExpanded: boolean;
 	onCopy: () => void;
 	onToggle: () => void;
+}
+
+interface RuleOptionDefaultActionsProperties extends RuleOptionDefaultControls {
+	name: string;
 	summary: string;
 }
 

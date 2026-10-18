@@ -16,6 +16,7 @@ import {
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getSingleDefinition } from "$oxc-utilities/single-variable-definition";
 
 import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
 
@@ -48,10 +49,7 @@ function callReturnValueIsUsed(callExpression: ESTree.CallExpression): boolean {
 }
 
 function getFunctionFromVariable(variable: Variable): FunctionLike | undefined {
-	if (variable.defs.length !== 1) return undefined;
-
-	const [definition] = variable.defs;
-	/* v8 ignore next -- length === 1 guarantees a definition entry. @preserve */
+	const definition = getSingleDefinition(variable);
 	if (definition === undefined) return undefined;
 
 	if (definition.type === "FunctionName" && isAnyFunction(definition.node)) return definition.node;

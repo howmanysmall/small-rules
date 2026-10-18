@@ -1,11 +1,8 @@
 import { isIdentifier, isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	describeEffectOwner,
-	getReactEffectAnalysis,
-	getReportableEffectCall,
-} from "$oxc-utilities/react-effect-utilities";
+import { getParentCallbackCalls } from "$oxc-utilities/react-effect-call-sites";
+import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
@@ -28,8 +25,11 @@ function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boole
 
 const isUseState = createIsUseHook("useState");
 const isUseRef = createIsUseHook("useRef");
+const NO_REFERENCES: ReadonlyArray<Reference> = [];
 
 function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): ReadonlyArray<Reference> {
+	if (analysis.isRefCall(reference)) return NO_REFERENCES;
+
 	const dataArguments = new Array<Reference>();
 	for (const upstreamReference of analysis.scope.getArgumentUpstreamReferences(reference)) {
 		// Leaves only because our "is data" check is essentially "is not all
@@ -50,22 +50,9 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 }
 
 function reportPassDataEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
-	for (const reference of effect.functionReferences) {
-		const callExpression = getReportableEffectCall(analysis, effect, reference, (candidate) => {
-			return analysis.isPropCall(candidate) && !analysis.isRefCall(candidate);
-		});
-		if (callExpression === undefined) continue;
-
-		const dataArguments = getDataArguments(analysis, reference);
-		if (dataArguments.length === 0) continue;
-
-		const owner = describeEffectOwner(analysis, effect);
-
+	for (const { callExpression, names, owner } of getParentCallbackCalls(analysis, effect, getDataArguments)) {
 		context.report({
-			data: {
-				name: owner.displayName,
-				data: dataArguments.map((dataReference) => `"${dataReference.identifier.name}"`).join(" and "),
-			},
+			data: { name: owner.displayName, data: names },
 			messageId: owner.isInCustomHook ? "avoidPassingDataToParentInHook" : "avoidPassingDataToParentInComponent",
 			node: callExpression,
 		});

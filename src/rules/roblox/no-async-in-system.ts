@@ -23,15 +23,15 @@ import {
 	isTsTypeReference,
 	isTsUndefinedKeyword,
 	isTsUnionType,
-	isVariableDeclaration,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { classHasYieldingMember } from "$oxc-generated/roblox-yielding-members";
-import { forEachNode, getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
+import { forEachNode, getReferencedVariable, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { getSingleConstInitializer, getSingleDefinition } from "$oxc-utilities/single-variable-definition";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -161,13 +161,6 @@ function getCalleePath(callee: ESTree.Expression): ReadonlyArray<string> | undef
 	return chain === undefined ? undefined : [chain.root.name, ...chain.path];
 }
 
-function getIdentifierVariable(
-	sourceCode: SourceCode,
-	identifier: ESTree.IdentifierReference,
-): ScopeVariable | undefined {
-	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
-}
-
 interface CallbackParameterConfiguration {
 	readonly callbackArgumentIndex: number;
 	readonly className: string;
@@ -199,7 +192,7 @@ function tryRecordConfiguredCallback(
 	const parameter = callback.params[configuration.parameterIndex];
 	if (!isIdentifier(parameter)) return;
 
-	const variable = getIdentifierVariable(sourceCode, parameter);
+	const variable = getReferencedVariable(sourceCode, parameter);
 	/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
 	if (variable !== undefined) types.set(variable, configuration.className);
 }
@@ -216,7 +209,7 @@ function processConfiguredCall(
 	const chain = getMemberChain(node.callee);
 	if (chain === undefined) return;
 
-	const rootVariable = getIdentifierVariable(sourceCode, chain.root);
+	const rootVariable = getReferencedVariable(sourceCode, chain.root);
 	const binding = rootVariable === undefined ? undefined : imports.get(rootVariable);
 	if (binding === undefined) return;
 
@@ -328,28 +321,14 @@ function getConstInitializer(
 	identifier: ESTree.IdentifierReference,
 	sourceCode: SourceCode,
 ): ESTree.Expression | undefined {
-	const variable = getIdentifierVariable(sourceCode, identifier);
-	if (variable?.defs.length !== 1) return undefined;
-
-	const [definition] = variable.defs;
-	if (!isVariableDeclarator(definition?.node)) return undefined;
-
-	const declaration = definition.node.parent;
-	/* v8 ignore next -- @preserve variable declarator definitions always have variable declaration parents. */
-	if (!isVariableDeclaration(declaration) || declaration.kind !== "const") return undefined;
-	/* v8 ignore next -- @preserve a referenced variable declarator definition always has an initializer. */
-	return definition.node.init ?? undefined;
+	return getSingleConstInitializer(getReferencedVariable(sourceCode, identifier));
 }
 
 function getReferencedFunction(
 	identifier: ESTree.IdentifierReference,
 	sourceCode: SourceCode,
 ): CallbackFunction | undefined {
-	const variable = getIdentifierVariable(sourceCode, identifier);
-	if (variable?.defs.length !== 1) return undefined;
-
-	const [definition] = variable.defs;
-	/* v8 ignore next -- @preserve guarded by length check above */
+	const definition = getSingleDefinition(getReferencedVariable(sourceCode, identifier));
 	if (definition === undefined) return undefined;
 	if (isAnyFunction(definition.node)) return definition.node;
 
@@ -393,7 +372,7 @@ function getIdentifierClass(
 	types: ReadonlyMap<ScopeVariable, string>,
 	visited: Set<ESTree.Expression>,
 ): string | undefined {
-	const variable = getIdentifierVariable(sourceCode, identifier);
+	const variable = getReferencedVariable(sourceCode, identifier);
 	if (variable !== undefined) {
 		const annotatedType = types.get(variable);
 		if (annotatedType !== undefined) return annotatedType;

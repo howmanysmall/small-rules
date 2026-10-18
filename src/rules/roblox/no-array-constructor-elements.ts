@@ -30,6 +30,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
+import { getSingleIdentifierDeclarator } from "$oxc-utilities/single-identifier-declarator";
 
 import type { BindingName, FixReturn } from "@small-rules/oxlint-utilities";
 import type { Diagnostic, ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -406,10 +407,8 @@ function getPushCollapseCandidate(
 	const statement = statements[index];
 	if (statement === undefined || !isVariableDeclaration(statement)) return undefined;
 	if (statement.kind !== "const" && statement.kind !== "let") return undefined;
-	if (statement.declarations.length !== 1) return undefined;
-
-	const [declarator] = statement.declarations;
-	if (declarator === undefined || !isIdentifier(declarator.id)) return undefined;
+	const declarator = getSingleIdentifierDeclarator(statement);
+	if (declarator === undefined) return undefined;
 	if (declarator.init === null || !isNewExpression(declarator.init)) return undefined;
 	if (!isGlobalArrayConstructor(sourceCode, declarator.init)) return undefined;
 	if (declarator.init.arguments.length > 0) return undefined;

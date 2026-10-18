@@ -1,4 +1,5 @@
 import {
+	getTypeAnnotationFromBinding,
 	hasName,
 	isCallExpression,
 	isIdentifier,
@@ -17,7 +18,6 @@ import {
 	isExternalType,
 	resolveRootObjectIdentifier,
 } from "$oxc-utilities/ast-utilities";
-import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 import { isObjectPropertyKey } from "$oxc-utilities/prevent-abbreviations/scope";
 
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";

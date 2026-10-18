@@ -90,11 +90,16 @@ function isShorthandExportLocal(node: ESTree.BindingIdentifier | ESTree.Identifi
 	return hasSameRange(parent.local, parent.exported);
 }
 
-export function isShorthandPropertyValue(identifier: BroadIdentifier): boolean {
+function getPropertyParent(identifier: BroadIdentifier): ESTree.ObjectProperty | undefined {
 	/* v8 ignore next -- parser-produced identifiers in this rule always expose a name. @preserve */
-	if (!hasName(identifier)) return false;
+	if (!hasName(identifier)) return undefined;
 	const { parent } = identifier;
-	return isProperty(parent) && parent.shorthand && parent.value === identifier;
+	return isProperty(parent) ? parent : undefined;
+}
+
+export function isShorthandPropertyValue(identifier: BroadIdentifier): boolean {
+	const property = getPropertyParent(identifier);
+	return property?.value === identifier && property.shorthand;
 }
 
 function isShorthandPropertyAssignmentPatternLeft(identifier: BroadIdentifier): boolean {
@@ -198,15 +203,12 @@ export function shouldReportIdentifierAsProperty(identifier: BroadIdentifier): b
 }
 
 export function isObjectPropertyKey(identifier: BroadIdentifier): boolean {
-	/* v8 ignore next -- property replacement callers pass named parser identifiers. @preserve */
-	if (!hasName(identifier)) return false;
-	const { parent } = identifier;
+	const property = getPropertyParent(identifier);
 	return (
-		isProperty(parent) &&
-		parent.key === identifier &&
-		!parent.computed &&
-		!parent.shorthand &&
-		(isObjectExpression(parent.parent) || isObjectPattern(parent.parent))
+		property?.key === identifier &&
+		!property.computed &&
+		!property.shorthand &&
+		(isObjectExpression(property.parent) || isObjectPattern(property.parent))
 	);
 }
 

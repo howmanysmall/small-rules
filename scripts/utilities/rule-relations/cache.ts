@@ -27,15 +27,13 @@ export function createCacheKey(value: unknown): string {
 	return createHash("sha256").update(toStringStable(value)).digest("hex");
 }
 
-export interface JudgmentCache {
-	readonly get: (key: string) => PairJudgments | undefined;
-	readonly set: (key: string, value: PairJudgments) => void;
+interface ValidatedCache<TValue> {
+	readonly get: (key: string) => TValue | undefined;
+	readonly set: (key: string, value: TValue) => void;
 }
 
-export interface ReasonCache {
-	readonly get: (key: string) => string | undefined;
-	readonly set: (key: string, value: string) => void;
-}
+export type JudgmentCache = ValidatedCache<PairJudgments>;
+export type ReasonCache = ValidatedCache<string>;
 
 interface JsonFileStore {
 	// oxlint-disable-next-line small-rules/no-unknown-returns -- literally "unknown" in the sense it is not known
@@ -63,12 +61,15 @@ function createJsonFileStore(directory: string): JsonFileStore {
 	return { get: load, set: save };
 }
 
-export function createJudgmentCache(directory: string): JudgmentCache {
+function createValidatedCache<TValue>(
+	directory: string,
+	isValue: (value: unknown) => value is TValue,
+): ValidatedCache<TValue> {
 	const store = createJsonFileStore(directory);
 	return {
-		get: (key): PairJudgments | undefined => {
+		get: (key): TValue | undefined => {
 			const value = store.get(key);
-			return isPairJudgments.allows(value) ? value : undefined;
+			return isValue(value) ? value : undefined;
 		},
 		set: (key, value): void => {
 			store.set(key, value);
@@ -76,15 +77,10 @@ export function createJudgmentCache(directory: string): JudgmentCache {
 	};
 }
 
+export function createJudgmentCache(directory: string): JudgmentCache {
+	return createValidatedCache(directory, (value) => isPairJudgments.allows(value));
+}
+
 export function createReasonCache(directory: string): ReasonCache {
-	const store = createJsonFileStore(directory);
-	return {
-		get: (key): string | undefined => {
-			const value = store.get(key);
-			return Predicate.isString(value) ? value : undefined;
-		},
-		set: (key, value): void => {
-			store.set(key, value);
-		},
-	};
+	return createValidatedCache(directory, Predicate.isString);
 }

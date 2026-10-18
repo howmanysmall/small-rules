@@ -1,22 +1,18 @@
 #!/usr/bin/env nub
 
-import { argv } from "node:process";
 import { ValidationError } from "@cliffy/command";
-import { consola } from "consola";
 
 import { textDecoder } from "$script-constants/reused-classes";
-import { createBaseCommand } from "$script-functions/create-base-command";
-import { getScriptName } from "$script-functions/get-script-name";
+import { createScriptCommand, parseScriptArgumentsAsync } from "$script-functions/create-script-command";
+import { writeGeneratedFileAsync } from "$script-functions/write-generated-file";
 import { parseClasses, renderCatalog } from "$script-utilities/roblox-yielding-members";
 
-const name = getScriptName(true);
-const log = consola.withTag(name);
-
-const command = createBaseCommand(
-	name,
+const { command, log } = createScriptCommand(
 	"1.0.1",
 	"Generates the Roblox yielding-member catalog used by the no-async-in-system rule.",
-)
+);
+
+command
 	.env("GITHUB_TOKEN=<value:string>", "The GitHub token environment variable.", { required: false })
 	.env("GITHUB_PAT=<value:string>", "Alternative GitHub token environment variable.", { required: false })
 	.env("GITHUB_PERSONAL_ACCESS_TOKEN=<value:string>", "Alternative GitHub token environment variable.", {
@@ -45,11 +41,7 @@ const command = createBaseCommand(
 
 		const json = JSON.parse(textDecoder.decode(bytes));
 		const generated = renderCatalog(parseClasses(json));
-		const { mkdir, writeFile } = await import("node:fs/promises");
-		const { dirname } = await import("@std/path");
-		await mkdir(dirname(output), { recursive: true });
-		await writeFile(output, generated, "utf8");
-		log.success(`Wrote ${generated.length} bytes to ${output}`);
+		await writeGeneratedFileAsync(output, generated, log);
 	});
 
-await command.parse(argv.slice(2));
+await parseScriptArgumentsAsync(command);

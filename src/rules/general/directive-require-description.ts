@@ -3,6 +3,7 @@ import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	createDirectiveKindsSchema,
 	getOptionalStringArrayProperty,
 	isDisableOrEnableDirectiveKind,
 	parseDirectiveComment,
@@ -95,12 +96,7 @@ const directiveRequireDescription = createRule("directive-require-description", 
 			{
 				additionalProperties: false,
 				properties: {
-					ignore: {
-						description: "Directive kinds that do not require a description.",
-						items: { type: "string" as const },
-						type: "array" as const,
-						uniqueItems: true,
-					},
+					ignore: createDirectiveKindsSchema("Directive kinds that do not require a description."),
 				},
 				type: "object" as const,
 			},

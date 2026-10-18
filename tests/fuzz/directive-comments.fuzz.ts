@@ -4,6 +4,8 @@ import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 
 import { parseDirectiveComment, toRuleIdLocation } from "$oxc-utilities/directive-comments";
 
+import { consumeHex } from "./support/consume-hex";
+
 import type { Comment } from "oxlint-plugin-utilities";
 
 const DIRECTIVE_KINDS: ReadonlyArray<string> = [
@@ -25,10 +27,6 @@ const DIRECTIVE_KINDS: ReadonlyArray<string> = [
 ];
 
 const DIRECTIVE_WHITESPACE: ReadonlyArray<string> = [" ", "  ", "\t", "\t "];
-
-function convertBytesToHex(bytes: Uint8Array): string {
-	return Buffer.from(bytes).toString("hex");
-}
 
 function createComment(value: string, startLine = 1, startColumn = 0): Comment {
 	const lines = value.split("\n");
@@ -54,8 +52,8 @@ fuzz(
 	(data): void => {
 		const provider = new FuzzedDataProvider(data);
 		const kind = provider.pickValue(DIRECTIVE_KINDS);
-		const value = `rule-${convertBytesToHex(provider.consumeBytes(24))}`;
-		const description = `reason-${convertBytesToHex(provider.consumeBytes(24))}`;
+		const value = `rule-${consumeHex(provider, 24)}`;
+		const description = `reason-${consumeHex(provider, 24)}`;
 		const whitespace = provider.pickValue(DIRECTIVE_WHITESPACE);
 		const comment = createComment(`${whitespace}${kind}${whitespace}${value} -- ${description}${whitespace}`);
 
@@ -89,8 +87,8 @@ fuzz(
 	"locates generated rule identifiers exactly",
 	(data): void => {
 		const provider = new FuzzedDataProvider(data);
-		const ruleId = `scope/rule-${convertBytesToHex(provider.consumeBytes(24))}`;
-		const otherRuleId = `other-${convertBytesToHex(provider.consumeBytes(24))}`;
+		const ruleId = `scope/rule-${consumeHex(provider, 24)}`;
+		const otherRuleId = `other-${consumeHex(provider, 24)}`;
 		const startLine = provider.consumeIntegralInRange(1, 10_000);
 		const startColumn = provider.consumeIntegralInRange(0, 200);
 		const laterLine = provider.consumeBoolean();

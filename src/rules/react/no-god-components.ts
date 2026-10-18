@@ -8,6 +8,7 @@ import {
 	isAssignmentPattern,
 	isCallbackFunction,
 	isCallExpression,
+	isComponentName,
 	isExportDefaultDeclaration,
 	isFunctionDeclarationRaw,
 	isFunctionExpression,
@@ -23,7 +24,6 @@ import {
 
 import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName, walkAst } from "$oxc-utilities/react-hook-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -32,36 +32,23 @@ const FUNCTION_BOUNDARY_TYPES = new Set<string>([ARROW_FUNCTION_EXPRESSION, FUNC
 
 const MAX_DESTRUCTURED_PROPERTIES_OPTION = "maxDestructuredProps";
 
-function getComponentNameFromFunction(node: ESTree.Node): string | undefined {
-	if (isFunctionDeclarationRaw(node) && node.id !== null && isComponentName(node.id.name)) return node.id.name;
+function getComponentIdentifierName(node: ESTree.Node | null): string | undefined {
+	return isIdentifier(node) && isComponentName(node.name) ? node.name : undefined;
+}
 
-	if (isCallbackFunction(node)) {
-		const { parent } = node;
-		if (isVariableDeclarator(parent) && isIdentifier(parent.id) && isComponentName(parent.id.name)) {
-			return parent.id.name;
-		}
+function getComponentNameFromFunction(node: ESTree.ArrowFunctionExpression | ESTree.Function): string | undefined {
+	if (isFunctionDeclarationRaw(node)) return getComponentIdentifierName(node.id);
 
-		if (isProperty(parent) && isIdentifier(parent.key) && isComponentName(parent.key.name)) {
-			return parent.key.name;
-		}
-
-		if (isMethodDefinition(parent) && isIdentifier(parent.key) && isComponentName(parent.key.name)) {
-			return parent.key.name;
-		}
-	}
-
+	const { parent } = node;
+	if (isVariableDeclarator(parent)) return getComponentIdentifierName(parent.id);
+	if (isProperty(parent) || isMethodDefinition(parent)) return getComponentIdentifierName(parent.key);
 	return undefined;
 }
 
 function getComponentNameFromCallParent(callExpression: ESTree.CallExpression): string | undefined {
 	const { parent } = callExpression;
-	if (isVariableDeclarator(parent) && isIdentifier(parent.id) && isComponentName(parent.id.name)) {
-		return parent.id.name;
-	}
-
-	if (isAssignmentExpression(parent) && isIdentifier(parent.left) && isComponentName(parent.left.name)) {
-		return parent.left.name;
-	}
+	if (isVariableDeclarator(parent)) return getComponentIdentifierName(parent.id);
+	if (isAssignmentExpression(parent)) return getComponentIdentifierName(parent.left);
 
 	let nameFromExportDefault: string | undefined;
 	if (isExportDefaultDeclaration(parent) && callExpression.arguments.length > 0) {
@@ -298,7 +285,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 			reportBodyAnalysis(node, name, analysis);
 		}
 
-		function checkFunctionIfNamed(node: ESTree.Node): void {
+		function checkFunctionIfNamed(node: ESTree.ArrowFunctionExpression | ESTree.Function): void {
 			const name = getComponentNameFromFunction(node);
 			if (name === undefined || name.length === 0) return;
 			checkComponent(node, name);

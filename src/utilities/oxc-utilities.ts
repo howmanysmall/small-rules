@@ -11,7 +11,6 @@ import {
 	isStringLiteral,
 	isThisExpression,
 	isTsParenthesizedType,
-	isTsTypeAnnotationUnknown,
 	isTsTypeReference,
 	PARENTHESIZED_EXPRESSION,
 	TS_AS_EXPRESSION,
@@ -23,23 +22,6 @@ import {
 
 import type { TypeAssertionExpression } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
-
-const COMPONENT_NAME_PATTERN = /^[A-Z]/v;
-
-export type KeyOfNode = "end" | "loc" | "parent" | "range" | "start" | "type";
-const KEY_OF_NODE = new Set<KeyOfNode>(["end", "loc", "parent", "range", "start", "type"]);
-
-export function isKeyOfNode(key: string): key is KeyOfNode {
-	return KEY_OF_NODE.has(key);
-}
-
-export function isComponentName(name: string): boolean {
-	return COMPONENT_NAME_PATTERN.test(name);
-}
-
-export function getTypeAnnotationFromBinding(binding: ESTree.BindingPattern): ESTree.TSTypeAnnotation | undefined {
-	return isTsTypeAnnotationUnknown(binding.typeAnnotation) ? binding.typeAnnotation : undefined;
-}
 
 export function getNamespacedCallNames(
 	callee: ESTree.Expression,
@@ -119,6 +101,12 @@ export function stripExpressionWrappers(expression: ESTree.Expression): ESTree.E
 				return current;
 		}
 	}
+}
+
+export function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
+	let current = stripExpressionWrappers(expression);
+	while (isMemberExpression(current)) current = stripExpressionWrappers(current.object);
+	return isIdentifier(current) ? current : undefined;
 }
 
 export function stripParenthesis(expression: ESTree.Expression): ESTree.Expression {

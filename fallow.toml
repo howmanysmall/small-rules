@@ -98,8 +98,11 @@ mode = "mild"
 # Small AST helpers are the usual copy-paste here; 50/5 hid every one of them.
 minLines = 4
 minTokens = 28
-# Ratchet: just above the current baseline, so duplication cannot grow.
-threshold = 2.1
+# Any clone outside ignoredClones fails `fallow dupes` (0 would mean no limit).
+threshold = 0.001
+# Reviewed and kept: the createRule overloads cannot share generics, and
+# tools/local-rules must not import test support code.
+ignoredClones = ["dup:6c139609:2", "dup:7750b83f:2"]
 ignoreDefaults = true
 ignore = [
 	"documentation/src/styles/custom.css",

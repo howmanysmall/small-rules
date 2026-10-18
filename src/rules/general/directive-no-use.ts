@@ -1,5 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
 import {
+	createDirectiveKindsSchema,
 	getOptionalStringArrayProperty,
 	parseDirectiveComment,
 	toForceLocation,
@@ -35,12 +36,7 @@ const directiveNoUse = createRule("directive-no-use", "general", {
 			{
 				additionalProperties: false,
 				properties: {
-					allow: {
-						description: "Directive kinds that are still allowed in block comments.",
-						items: { type: "string" as const },
-						type: "array" as const,
-						uniqueItems: true,
-					},
+					allow: createDirectiveKindsSchema("Directive kinds that are still allowed in block comments."),
 				},
 				type: "object" as const,
 			},

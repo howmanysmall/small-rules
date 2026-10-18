@@ -14,14 +14,16 @@ import { isNumber } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
-type ConcreteUDim2Arguments = readonly [ESTree.Expression, ESTree.Expression, ESTree.Expression, ESTree.Expression];
+interface AnalyzedExpression {
+	readonly text: string;
+	readonly value: number | undefined;
+}
 
 interface ArgumentsCollection {
-	readonly nodes: ConcreteUDim2Arguments;
-	readonly offsetXText: string;
-	readonly offsetYText: string;
-	readonly scaleXText: string;
-	readonly scaleYText: string;
+	readonly offsetX: AnalyzedExpression;
+	readonly offsetY: AnalyzedExpression;
+	readonly scaleX: AnalyzedExpression;
+	readonly scaleY: AnalyzedExpression;
 }
 
 function isAllowedBinaryOperator(operator: ESTree.BinaryOperator): boolean {
@@ -35,37 +37,6 @@ function isValidBinaryExpression(node: ESTree.Node): node is ESTree.BinaryExpres
 		!isPrivateIdentifier(node.left) &&
 		!isPrivateIdentifier(node.right)
 	);
-}
-
-function reconstructText(node: ESTree.Expression): string | undefined {
-	switch (node.type) {
-		case BINARY_EXPRESSION: {
-			if (!isValidBinaryExpression(node)) return undefined;
-
-			const { left, right } = node;
-			const leftText = reconstructText(left);
-			const rightText = reconstructText(right);
-			if (leftText === undefined || rightText === undefined) return undefined;
-
-			return `${leftText} ${node.operator} ${rightText}`;
-		}
-
-		case IDENTIFIER:
-			return node.name;
-
-		case LITERAL:
-			return isNumber(node.value) ? String(node.value) : undefined;
-
-		case UNARY_EXPRESSION: {
-			const argumentText = reconstructText(node.argument);
-			if (argumentText === undefined) return undefined;
-			if (node.operator !== "+" && node.operator !== "-") return undefined;
-			return `${node.operator}${argumentText}`;
-		}
-
-		default:
-			return undefined;
-	}
 }
 
 function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, right: number): number | undefined {
@@ -91,38 +62,50 @@ function evaluateBinaryOperation(operator: ESTree.BinaryOperator, left: number, 
 	}
 }
 
-function evaluateExpression(node: ESTree.Expression): number | undefined {
+function combineValues(
+	operator: ESTree.BinaryOperator,
+	left: number | undefined,
+	right: number | undefined,
+): number | undefined {
+	return left === undefined || right === undefined ? undefined : evaluateBinaryOperation(operator, left, right);
+}
+
+function negateValue(value: number | undefined): number | undefined {
+	return value === undefined ? undefined : -value;
+}
+
+function analyzeExpression(node: ESTree.Expression): AnalyzedExpression | undefined {
 	switch (node.type) {
 		case BINARY_EXPRESSION: {
-			/* v8 ignore start -- @preserve collectArguments rejects unsupported binary operators before evaluation. */
 			if (!isValidBinaryExpression(node)) return undefined;
-			/* v8 ignore stop -- @preserve */
 
-			const { left, right } = node;
-			const leftValue = evaluateExpression(left);
-			const rightValue = evaluateExpression(right);
-			if (leftValue === undefined || rightValue === undefined) return undefined;
+			const left = analyzeExpression(node.left);
+			const right = analyzeExpression(node.right);
+			if (left === undefined || right === undefined) return undefined;
 
-			return evaluateBinaryOperation(node.operator, leftValue, rightValue);
+			return {
+				text: `${left.text} ${node.operator} ${right.text}`,
+				value: combineValues(node.operator, left.value, right.value),
+			};
 		}
 
 		case IDENTIFIER:
-			return undefined;
+			return { text: node.name, value: undefined };
 
 		case LITERAL:
-			return Number(node.value);
+			return isNumber(node.value) ? { text: String(node.value), value: node.value } : undefined;
 
 		case UNARY_EXPRESSION: {
-			const argumentValue = evaluateExpression(node.argument);
-			if (argumentValue === undefined) return undefined;
-			if (node.operator === "+") return argumentValue;
-			/* v8 ignore next -- @preserve reconstructText admits only plus and minus unary expressions before evaluation. */
-			if (node.operator === "-") return -argumentValue;
-			/* v8 ignore next -- @preserve reconstructText rejects unsupported unary operators before evaluation. */
-			return undefined;
+			const argument = analyzeExpression(node.argument);
+			if (argument === undefined) return undefined;
+			if (node.operator !== "+" && node.operator !== "-") return undefined;
+
+			return {
+				text: `${node.operator}${argument.text}`,
+				value: node.operator === "-" ? negateValue(argument.value) : argument.value,
+			};
 		}
 
-		/* v8 ignore next -- @preserve collectArguments admits only expression types handled above. */
 		default:
 			return undefined;
 	}
@@ -147,27 +130,16 @@ function collectArguments(
 		return undefined;
 	}
 
-	const scaleXText = reconstructText(scaleXNode);
-	const offsetXText = reconstructText(offsetXNode);
-	const scaleYText = reconstructText(scaleYNode);
-	const offsetYText = reconstructText(offsetYNode);
+	const scaleX = analyzeExpression(scaleXNode);
+	const offsetX = analyzeExpression(offsetXNode);
+	const scaleY = analyzeExpression(scaleYNode);
+	const offsetY = analyzeExpression(offsetYNode);
 
-	if (
-		scaleXText === undefined ||
-		offsetXText === undefined ||
-		scaleYText === undefined ||
-		offsetYText === undefined
-	) {
+	if (scaleX === undefined || offsetX === undefined || scaleY === undefined || offsetY === undefined) {
 		return undefined;
 	}
 
-	return {
-		nodes: [scaleXNode, offsetXNode, scaleYNode, offsetYNode],
-		offsetXText,
-		offsetYText,
-		scaleXText,
-		scaleYText,
-	};
+	return { offsetX, offsetY, scaleX, scaleY };
 }
 
 const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
@@ -179,22 +151,16 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 				const collected = collectArguments(node.arguments);
 				if (collected === undefined) return;
 
-				const [scaleXNode, offsetXNode, scaleYNode, offsetYNode] = collected.nodes;
+				const { offsetX, offsetY, scaleX, scaleY } = collected;
+				const isZeroOffset = offsetX.value === 0 && offsetY.value === 0;
+				const isZeroScale = scaleX.value === 0 && scaleY.value === 0;
 
-				const scaleX = evaluateExpression(scaleXNode);
-				const offsetX = evaluateExpression(offsetXNode);
-				const scaleY = evaluateExpression(scaleYNode);
-				const offsetY = evaluateExpression(offsetYNode);
+				if (isZeroScale && isZeroOffset) return;
 
-				if (scaleX === 0 && offsetX === 0 && scaleY === 0 && offsetY === 0) return;
-
-				if (offsetX === 0 && offsetY === 0) {
+				if (isZeroOffset) {
 					context.report({
 						fix(fixer) {
-							return fixer.replaceText(
-								node,
-								`UDim2.fromScale(${collected.scaleXText}, ${collected.scaleYText})`,
-							);
+							return fixer.replaceText(node, `UDim2.fromScale(${scaleX.text}, ${scaleY.text})`);
 						},
 						messageId: "preferFromScale",
 						node,
@@ -202,13 +168,10 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 					return;
 				}
 
-				if (scaleX === 0 && scaleY === 0) {
+				if (isZeroScale) {
 					context.report({
 						fix(fixer) {
-							return fixer.replaceText(
-								node,
-								`UDim2.fromOffset(${collected.offsetXText}, ${collected.offsetYText})`,
-							);
+							return fixer.replaceText(node, `UDim2.fromOffset(${offsetX.text}, ${offsetY.text})`);
 						},
 						messageId: "preferFromOffset",
 						node,

@@ -1,4 +1,5 @@
 import {
+	getTypeAnnotationFromBinding,
 	hasName,
 	isArrayExpression,
 	isCallExpression,
@@ -23,8 +24,6 @@ import {
 	isTypeAssertionExpression,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
-
-import { getTypeAnnotationFromBinding } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, Scope, SourceCode, Variable } from "oxlint-plugin-utilities";
 
