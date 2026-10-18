@@ -2,6 +2,7 @@
 
 import { readFile } from "node:fs/promises";
 import { argv } from "node:process";
+import { EnumType } from "@cliffy/command";
 import { OpenRouter } from "@openrouter/sdk";
 import { isMaybeBoolean, isMaybeInteger, isMaybeString, isUndefined } from "@small-rules/arktype-utilities";
 import { existsAsync } from "@small-rules/fs-utilities";
@@ -19,11 +20,19 @@ const scriptName = getScriptName(true);
 const log = consola.withTag(scriptName);
 let openrouter: OpenRouter | undefined;
 
-async function getNextFileNameAsync(): Promise<string> {
-	let version = 2;
+enum Release {
+	Maintenance = "maintenance",
+	Major = "major",
+	Minor = "minor",
+	MinorLarge = "minor-large",
+	Patch = "patch",
+}
+
+async function getNextFileNameAsync(release: Release): Promise<string> {
+	let version = 1;
 
 	while (true) {
-		const fileName = `haiku-v${version}.md`;
+		const fileName = `haiku-${release}-v${version}.md`;
 
 		// oxlint-disable-next-line no-await-in-loop -- sequential.
 		const exists = await existsAsync(fileName);
@@ -217,14 +226,41 @@ async function writePrettyOutputAsync(stderr: string, outputFile: string): Promi
 	log.success(`Dry run complete: ${outputFile} (total ${formatUsd(cost.total)})`);
 }
 
-const command = createBaseCommand(scriptName, "1.0.1", "Test release notes script")
+function getArgumentsForRelease(release: Release): readonly [string, string] {
+	switch (release) {
+		case Release.Maintenance:
+			return ["v3.2.0", "v3.1.0"];
+
+		case Release.Major:
+			return ["v3.0.0", "v2.19.1"];
+
+		case Release.Minor:
+			return ["v3.4.0", "v3.3.3"];
+
+		case Release.MinorLarge:
+			return ["v3.3.0", "v3.2.0"];
+
+		case Release.Patch:
+			return ["v3.3.3", "v3.3.2"];
+
+		default:
+			throw new Error(`Unknown release type: ${String(release satisfies never)}`);
+	}
+}
+
+const command = createBaseCommand(scriptName, "1.1.0", "Test release notes script")
+	.type(
+		"release-type",
+		new EnumType([Release.Maintenance, Release.Major, Release.Minor, Release.MinorLarge, Release.Patch] as const),
+	)
 	.env("OPENROUTER_API_KEY=<value:string>", "The OpenRouter API key to use for the request.")
-	.action(async ({ openrouterApiKey }) => {
+	.option("--release <value:release-type>", "The type of release to generate notes for.", { default: Release.Minor })
+	.action(async ({ openrouterApiKey, release }) => {
 		openrouter = new OpenRouter({
 			apiKey: openrouterApiKey,
 		});
 
-		const nextFileName = await getNextFileNameAsync();
+		const nextFileName = await getNextFileNameAsync(release);
 		log.start(`Dry-run release notes → ${nextFileName}`);
 		const { stderr } = await exec(
 			"mise",
@@ -238,8 +274,7 @@ const command = createBaseCommand(scriptName, "1.0.1", "Test release notes scrip
 				"communique.toml",
 				"--output",
 				nextFileName,
-				"v3.5.0",
-				"v3.4.0",
+				...getArgumentsForRelease(release),
 			],
 			{
 				nodeOptions: {
