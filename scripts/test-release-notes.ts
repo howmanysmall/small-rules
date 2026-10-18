@@ -20,6 +20,8 @@ const scriptName = getScriptName(true);
 const log = consola.withTag(scriptName);
 let openrouter: OpenRouter | undefined;
 
+const TOML_FILE = "communique.toml";
+
 enum Release {
 	Maintenance = "maintenance",
 	Major = "major",
@@ -65,7 +67,7 @@ const isCommuniqueConfiguration = type({
 type CommuniqueConfiguration = typeof isCommuniqueConfiguration.infer;
 
 async function getCommuniqueAsync(): Promise<CommuniqueConfiguration> {
-	const contents = await readFile("communique.toml", "utf8");
+	const contents = await readFile(TOML_FILE, "utf8");
 	return isCommuniqueConfiguration.assert(Bun.TOML.parse(contents));
 }
 
@@ -248,6 +250,40 @@ function getArgumentsForRelease(release: Release): readonly [string, string] {
 	}
 }
 
+async function getExecutionAsync(nextFileName: string, release: Release): Promise<[string, ReadonlyArray<string>]> {
+	const exists = await existsAsync("communique-fixed");
+	if (exists) {
+		return [
+			"./communique-fixed",
+			[
+				"generate",
+				"--dry-run",
+				"--config",
+				TOML_FILE,
+				"--output",
+				nextFileName,
+				...getArgumentsForRelease(release),
+			],
+		];
+	}
+
+	return [
+		"mise",
+		[
+			"x",
+			"--",
+			"communique",
+			"generate",
+			"--dry-run",
+			"--config",
+			TOML_FILE,
+			"--output",
+			nextFileName,
+			...getArgumentsForRelease(release),
+		],
+	];
+}
+
 const command = createBaseCommand(scriptName, "1.1.0", "Test release notes script")
 	.type(
 		"release-type",
@@ -262,28 +298,14 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 		});
 
 		const nextFileName = await getNextFileNameAsync(release);
+		const [name, parameters] = await getExecutionAsync(nextFileName, release);
 		log.start(`Dry-run release notes → ${nextFileName}`);
-		const result = exec(
-			"mise",
-			[
-				"x",
-				"--",
-				"communique",
-				"generate",
-				"--dry-run",
-				"--config",
-				"communique.toml",
-				"--output",
-				nextFileName,
-				...getArgumentsForRelease(release),
-			],
-			{
-				nodeOptions: {
-					env: { OPENAI_API_KEY: openrouterApiKey },
-					shell: true,
-				},
+		const result = exec(name, parameters, {
+			nodeOptions: {
+				env: { OPENAI_API_KEY: openrouterApiKey },
+				shell: true,
 			},
-		);
+		});
 
 		let output = "";
 		for await (const line of result) {
