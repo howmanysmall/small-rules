@@ -5,7 +5,9 @@ import { argv } from "node:process";
 import { OpenRouter } from "@openrouter/sdk";
 import { isMaybeBoolean, isMaybeInteger, isMaybeString, isUndefined } from "@small-rules/arktype-utilities";
 import { existsAsync } from "@small-rules/fs-utilities";
+import { bold, cyan, dim, green } from "ansis";
 import { regex, type } from "arktype";
+import { consola } from "consola";
 import { exec } from "tinyexec";
 
 import { createBaseCommand } from "$script-functions/create-base-command";
@@ -14,6 +16,7 @@ import { getScriptName } from "$script-functions/get-script-name";
 import type { PricingOverride, PublicPricing, UtcDay } from "@openrouter/sdk/models";
 
 const scriptName = getScriptName(true);
+const log = consola.withTag(scriptName);
 let openrouter: OpenRouter | undefined;
 
 async function getNextFileNameAsync(): Promise<string> {
@@ -123,6 +126,7 @@ function getEffectiveRates(publicPricing: PublicPricing, inputTokens: number, at
 	if (publicPricing.overrides !== undefined) {
 		for (const override of publicPricing.overrides) {
 			if (!doesOverrideApply(override, inputTokens, at)) continue;
+
 			if (override.completion !== undefined) completion = getUsdPerToken(override.completion);
 			if (override.prompt !== undefined) prompt = getUsdPerToken(override.prompt);
 		}
@@ -171,26 +175,49 @@ async function getCostAsync(inputTokens: number, outputTokens: number): Promise<
 	return getCostForTokens(data.pricing, inputTokens, outputTokens);
 }
 
-async function writePrettyOutputAsync(stderr: string): Promise<void> {
+const TOKEN_COUNTS = new Intl.NumberFormat("en-US");
+
+function formatUsd(amount: number): string {
+	return `$${amount.toFixed(6)}`;
+}
+
+function renderCostReport(inputTokens: number, outputTokens: number, cost: Cost): string {
+	const inputTokensText = `${TOKEN_COUNTS.format(inputTokens)} tokens`;
+	const outputTokensText = `${TOKEN_COUNTS.format(outputTokens)} tokens`;
+	const tokensWidth = Math.max(inputTokensText.length, outputTokensText.length);
+
+	const inputCostText = formatUsd(cost.input);
+	const outputCostText = formatUsd(cost.output);
+	const totalCostText = formatUsd(cost.total);
+	const costWidth = Math.max(inputCostText.length, outputCostText.length, totalCostText.length);
+
+	return [
+		`${dim("Input".padEnd(6))}  ${cyan(inputTokensText.padStart(tokensWidth))}  ${green(inputCostText.padStart(costWidth))}`,
+		`${dim("Output")}  ${cyan(outputTokensText.padStart(tokensWidth))}  ${green(outputCostText.padStart(costWidth))}`,
+		`${bold("Total".padEnd(6))}  ${" ".repeat(tokensWidth)}  ${bold(green(totalCostText.padStart(costWidth)))}`,
+	].join("\n");
+}
+
+async function writePrettyOutputAsync(stderr: string, outputFile: string): Promise<void> {
 	if (!openrouter) {
 		throw new Error("OpenRouter is not initialized somehow?");
 	}
 
 	const groups = TOKENS_REGEXP.exec(stderr)?.groups;
 	if (!groups) {
-		console.log(stderr);
+		log.fail("No token counts found in communique output.");
+		if (stderr.trim().length > 0) log.log(stderr.trim());
 		return;
 	}
 
 	const inputTokens = Number(groups.input);
 	const outputTokens = Number(groups.output);
-	const { input, output, total } = await getCostAsync(inputTokens, outputTokens);
-	console.log(`Input cost: $${input.toFixed(6)}`);
-	console.log(`Output cost: $${output.toFixed(6)}`);
-	console.log(`Total cost: $${total.toFixed(6)}`);
+	const cost = await getCostAsync(inputTokens, outputTokens);
+	log.box(renderCostReport(inputTokens, outputTokens, cost));
+	log.success(`Dry run complete: ${outputFile} (total ${formatUsd(cost.total)})`);
 }
 
-const command = createBaseCommand(scriptName, "1.0.0", "Test release notes script")
+const command = createBaseCommand(scriptName, "1.0.1", "Test release notes script")
 	.env("OPENROUTER_API_KEY=<value:string>", "The OpenRouter API key to use for the request.")
 	.action(async ({ openrouterApiKey }) => {
 		openrouter = new OpenRouter({
@@ -198,6 +225,7 @@ const command = createBaseCommand(scriptName, "1.0.0", "Test release notes scrip
 		});
 
 		const nextFileName = await getNextFileNameAsync();
+		log.start(`Dry-run release notes → ${nextFileName}`);
 		const { stderr } = await exec(
 			"mise",
 			[
@@ -220,7 +248,7 @@ const command = createBaseCommand(scriptName, "1.0.0", "Test release notes scrip
 				},
 			},
 		);
-		await writePrettyOutputAsync(stderr);
+		await writePrettyOutputAsync(stderr, nextFileName);
 	});
 
 await command.parse(argv.slice(2));
