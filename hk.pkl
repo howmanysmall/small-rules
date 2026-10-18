@@ -349,7 +349,18 @@ hooks {
       ["duplicates"] {
         check = new CommandSpec {
           command = new Command {
-            argv = List("fallow", "dupes")
+            // Fails on any clone group missing from the shrink-only baseline.
+            // Prune it with `fallow baselines prune` after removing a clone.
+            argv =
+              List(
+                "fallow",
+                "dupes",
+                "--baseline",
+                "fallow-baselines/dupes.json",
+                "--fail-on-issues",
+                "--fail-on-stale-baseline",
+                "--fail-on-baseline-growth",
+              )
           }
           effect = "write"
         }
