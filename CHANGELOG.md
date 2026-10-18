@@ -46,6 +46,14 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.5.0] - 2026-10-18
+
+## Added
+- Add `prefer-optional-parameter` to report `undefined` in parameter unions and offer an optional-parameter fix [#93](https://github.com/howmanysmall/small-rules/pull/93).
+
+## Fixed
+- Stop `starts-with-verb` and `require-async-suffix` from reporting names dictated by externally imported types [#92](https://github.com/howmanysmall/small-rules/pull/92).
+
 ## [3.4.0] - 2026-10-15
 
 ## Added
