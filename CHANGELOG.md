@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.6.0] - 2026-10-18
+
+## Changed
+- **prefer-optional-parameter**: The rule no longer reports `undefined` unions on destructured parameters with a body, parameters followed by a required parameter, or accessor setters, including in `declare` and `abstract` classes. - by @howmanysmall in [#95](https://github.com/howmanysmall/small-rules/pull/95)
+
 ## [3.5.0] - 2026-10-18
 
 ## Added
