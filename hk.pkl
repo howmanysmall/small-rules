@@ -347,6 +347,11 @@ hooks {
         }
       }
       ["duplicates"] {
+        // Duplication can only grow when source or fallow config changes. The
+        // glob also skips pushes with no new commits, such as a release tag
+        // pushed after its commit: there origin/main is HEAD, and
+        // --fail-on-baseline-growth refuses to run without a base to compare.
+        glob = ECMA_FILES + ASTRO_FILES + List("fallow.toml", "fallow-baselines/dupes.json")
         check = new CommandSpec {
           command = new Command {
             // Fails on any clone group missing from the shrink-only baseline.
