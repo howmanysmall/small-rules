@@ -342,6 +342,54 @@ const noUselessEmptyStringComparison = defineFixableCase({
 	}),
 });
 
+const trailingOptionalParameterArbitrary = fc.constantFrom("default", "none", "optional", "rest");
+
+type TrailingParameter = "default" | "none" | "optional" | "rest";
+
+function renderTrailingParameter(trailing: TrailingParameter, id: number): string {
+	switch (trailing) {
+		case "default": {
+			return `, limit${id} = 1`;
+		}
+		case "optional": {
+			return `, limit${id}?: number`;
+		}
+		case "rest": {
+			return `, ...rest${id}: number[]`;
+		}
+		default: {
+			return "";
+		}
+	}
+}
+
+const preferOptionalParameter = defineFixableCase({
+	language: "ts",
+	render: ({ name, form, trailing, type, undefinedFirst }, id) => {
+		const annotation = undefinedFirst ? `undefined | ${type}` : `${type} | undefined`;
+		const parameter = `${name}${id}: ${annotation}${renderTrailingParameter(trailing, id)}`;
+		switch (form) {
+			case "arrow": {
+				return { statements: [`const get${capitalize(name)}${id} = (${parameter}) => undefined;`] };
+			}
+			case "method": {
+				return { statements: [`class Turns${id} { get${capitalize(name)}(${parameter}): void {} }`] };
+			}
+			default: {
+				return { statements: [`function get${capitalize(name)}${id}(${parameter}): void {}`] };
+			}
+		}
+	},
+	rule: "prefer-optional-parameter",
+	trigger: fc.record({
+		name: identifierArbitrary,
+		form: fc.constantFrom("arrow", "function", "method"),
+		trailing: trailingOptionalParameterArbitrary,
+		type: typeArbitraries.type,
+		undefinedFirst: fc.boolean(),
+	}),
+});
+
 export const GENERAL_FIXABLE_CASES: ReadonlyArray<FixableCase> = [
 	arrayTypeGeneric,
 	noIdentityMap,
@@ -350,6 +398,7 @@ export const GENERAL_FIXABLE_CASES: ReadonlyArray<FixableCase> = [
 	noUselessConstants,
 	noUselessEmptyStringComparison,
 	preferExpectAssertions,
+	preferOptionalParameter,
 	preventAbbreviations,
 	requireSwitchCaseBraces,
 	requireThrowErrorCapture,
