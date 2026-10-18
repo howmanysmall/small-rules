@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { readFile } from "node:fs/promises";
-import { argv } from "node:process";
+import process, { argv } from "node:process";
 import { EnumType } from "@cliffy/command";
 import { isMaybeBoolean, isMaybeInteger, isMaybeString, isUndefined } from "@small-rules/arktype-utilities";
 import { existsAsync } from "@small-rules/fs-utilities";
@@ -207,15 +207,15 @@ function renderCostReport(inputTokens: number, outputTokens: number, cost: Cost)
 	].join("\n");
 }
 
-async function writePrettyOutputAsync(stderr: string, outputFile: string): Promise<void> {
+async function writePrettyOutputAsync(output: string, outputFile: string): Promise<void> {
 	if (!openrouter) {
 		throw new Error("OpenRouter is not initialized somehow?");
 	}
 
-	const groups = TOKENS_REGEXP.exec(stderr)?.groups;
+	const groups = TOKENS_REGEXP.exec(output)?.groups;
 	if (!groups) {
 		log.fail("No token counts found in communique output.");
-		if (stderr.trim().length > 0) log.log(stderr.trim());
+		if (output.trim().length > 0) log.log(output.trim());
 		return;
 	}
 
@@ -263,7 +263,7 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 
 		const nextFileName = await getNextFileNameAsync(release);
 		log.start(`Dry-run release notes → ${nextFileName}`);
-		const { stderr } = await exec(
+		const result = exec(
 			"mise",
 			[
 				"x",
@@ -284,7 +284,15 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 				},
 			},
 		);
-		await writePrettyOutputAsync(stderr, nextFileName);
+
+		let output = "";
+		for await (const line of result) {
+			const trueLine = `${line}\n`;
+			output += trueLine;
+			process.stderr.write(trueLine);
+		}
+
+		await writePrettyOutputAsync(output, nextFileName);
 	});
 
 await command.parse(argv.slice(2));
