@@ -10,7 +10,6 @@ import {
 	isProperty,
 	isRestElement,
 	isTsParameterProperty,
-	isTsParenthesizedType,
 	isTsUndefinedKeyword,
 	isTsUnionType,
 	TS_METHOD_SIGNATURE,
@@ -19,12 +18,12 @@ import {
 import {
 	getFunctionParameterBindingName,
 	getFunctionParameterTypeAnnotation,
+	unwrapFunctionParameter,
 } from "$oxc-utilities/anti-slop/function-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
+import { stripParenthesizedType } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-type ParameterBinding = Exclude<ESTree.ParamPattern, ESTree.TSParameterProperty>;
 
 type ParameterOwner =
 	| ESTree.ArrowFunctionExpression
@@ -40,19 +39,13 @@ interface UndefinedUnion {
 	readonly retainedTypes: ReadonlyArray<ESTree.TSType>;
 }
 
-function unwrapParameter(parameter: ESTree.ParamPattern): ParameterBinding {
-	return isTsParameterProperty(parameter) ? parameter.parameter : parameter;
-}
-
-function unwrapParenthesizedType(type: ESTree.TSType): ESTree.TSType {
-	let current = type;
-	while (isTsParenthesizedType(current)) current = current.typeAnnotation;
-	return current;
+function isDefaultOrRestParameter(parameter: ESTree.ParamPattern): boolean {
+	const binding = isTsParameterProperty(parameter) ? parameter.parameter : parameter;
+	return isAssignmentPattern(binding) || isRestElement(binding);
 }
 
 function isOptionalParameter(parameter: ESTree.ParamPattern, sourceCode: SourceCode): boolean {
-	const unwrapped = unwrapParameter(parameter);
-	if (isAssignmentPattern(unwrapped) || isRestElement(unwrapped)) return true;
+	if (isDefaultOrRestParameter(parameter)) return true;
 
 	const annotation = getFunctionParameterTypeAnnotation(parameter);
 	return annotation !== undefined && sourceCode.getTokenBefore(annotation)?.value === "?";
@@ -85,29 +78,28 @@ function isImplementationSignature(owner: ParameterOwner): boolean {
 }
 
 function canUseOptionalBinding(parameter: ESTree.ParamPattern, owner: ParameterOwner): boolean {
-	const unwrapped = unwrapParameter(parameter);
-	if (!isObjectPattern(unwrapped) && !isArrayPattern(unwrapped)) return true;
+	const binding = unwrapFunctionParameter(parameter);
+	if (!isObjectPattern(binding) && !isArrayPattern(binding)) return true;
 	return !isImplementationSignature(owner);
 }
 
 function isThisParameter(parameter: ESTree.ParamPattern): boolean {
-	return isIdentifierNamed(unwrapParameter(parameter), "this");
+	return isIdentifierNamed(unwrapFunctionParameter(parameter), "this");
 }
 
 function getOptionalParameterAnnotation(parameter: ESTree.ParamPattern): ESTree.TSTypeAnnotation | undefined {
-	const unwrapped = unwrapParameter(parameter);
-	if (isAssignmentPattern(unwrapped) || isRestElement(unwrapped)) return undefined;
+	if (isDefaultOrRestParameter(parameter)) return undefined;
 	return getFunctionParameterTypeAnnotation(parameter);
 }
 
 function splitUndefinedUnion(annotation: ESTree.TSTypeAnnotation): undefined | UndefinedUnion {
-	const union = unwrapParenthesizedType(annotation.typeAnnotation);
+	const union = stripParenthesizedType(annotation.typeAnnotation);
 	if (!isTsUnionType(union)) return undefined;
 
 	const retainedTypes = new Array<ESTree.TSType>();
 	let hasUndefined = false;
 	for (const member of union.types) {
-		if (isTsUndefinedKeyword(unwrapParenthesizedType(member))) {
+		if (isTsUndefinedKeyword(stripParenthesizedType(member))) {
 			hasUndefined = true;
 			continue;
 		}

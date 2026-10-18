@@ -25,10 +25,40 @@ import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 export type FunctionParameter = ESTree.ParamPattern;
 
 /**
+ * A parameter binding with its property, rest, and default wrappers removed.
+ */
+export type FunctionParameterBinding = ESTree.ArrayPattern | ESTree.BindingIdentifier | ESTree.ObjectPattern;
+
+/**
  * The subset of `SourceCode` the harness's parsed fixtures can satisfy
  * without a cast.
  */
 type SourceCodeWithText = Pick<SourceCode, "getText">;
+
+/**
+ * Remove the wrappers that hide a function parameter's binding.
+ *
+ * @param parameter - A function parameter.
+ * @returns The parameter's binding pattern.
+ */
+export function unwrapFunctionParameter(parameter: FunctionParameter): FunctionParameterBinding {
+	let current: FunctionParameter = parameter;
+	while (true) {
+		if (isTsParameterProperty(current)) {
+			current = current.parameter;
+			continue;
+		}
+		if (isAssignmentPattern(current)) {
+			current = current.left;
+			continue;
+		}
+		if (isRestElement(current)) {
+			current = current.argument;
+			continue;
+		}
+		return current;
+	}
+}
 
 /**
  * Return whether a type is or contains TypeScript's absorbing unknown type.
@@ -89,29 +119,15 @@ export function getFunctionParameterTypeAnnotation(parameter: FunctionParameter)
  * @returns The parameter's displayed binding, e.g. `value` or `{ value }`.
  */
 export function getFunctionParameterBindingName(parameter: FunctionParameter, sourceCode: SourceCodeWithText): string {
-	let current = parameter;
-	while (true) {
-		if (isTsParameterProperty(current)) {
-			current = current.parameter;
-			continue;
-		}
-		if (isAssignmentPattern(current)) {
-			current = current.left;
-			continue;
-		}
-		if (isRestElement(current)) {
-			current = current.argument;
-			continue;
-		}
-		if (isBindingIdentifier(current)) return current.name;
+	const binding = unwrapFunctionParameter(parameter);
+	if (isBindingIdentifier(binding)) return binding.name;
 
-		const sourceText = sourceCode.getText(current);
-		const annotation = getFunctionParameterTypeAnnotation(current);
-		if (!isTsTypeAnnotation(annotation)) return sourceText;
+	const sourceText = sourceCode.getText(binding);
+	const annotation = getFunctionParameterTypeAnnotation(binding);
+	if (!isTsTypeAnnotation(annotation)) return sourceText;
 
-		// Yuku parameter nodes span their type annotation, so trimming the
-		// annotation's range length off the end always yields the displayed
-		// name; a second `getText` call would be redundant.
-		return sourceText.slice(0, sourceText.length - (annotation.range[1] - annotation.range[0])).trimEnd();
-	}
+	// Yuku parameter nodes span their type annotation, so trimming the
+	// annotation's range length off the end always yields the displayed
+	// name; a second `getText` call would be redundant.
+	return sourceText.slice(0, sourceText.length - (annotation.range[1] - annotation.range[0])).trimEnd();
 }

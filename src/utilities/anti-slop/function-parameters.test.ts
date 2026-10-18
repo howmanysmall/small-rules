@@ -7,6 +7,7 @@ import {
 	containsUnknownType,
 	getFunctionParameterBindingName,
 	getFunctionParameterTypeAnnotation,
+	unwrapFunctionParameter,
 } from "$oxc-utilities/anti-slop/function-parameters";
 
 import type { HarnessNode, HarnessSourceCode } from "@small-rules/rule-harness/types";
@@ -152,6 +153,31 @@ describe("getFunctionParameterTypeAnnotation", () => {
 		const parameter = requireParameter(findFirstTSFunctionType(source), 0);
 
 		expect(getFunctionParameterTypeAnnotation(parameter)?.typeAnnotation.type).toBe("TSStringKeyword");
+	});
+});
+
+describe("unwrapFunctionParameter", () => {
+	it.for([
+		["identifier", "function f(value: string): void {}", "Identifier"],
+		["default-value", 'function f(value: string = "default"): void {}', "Identifier"],
+		["rest", "function f(...values: string[]): void {}", "Identifier"],
+		["destructured", "function f({ value }: { value: string }): void {}", "ObjectPattern"],
+	] as const)("unwraps a %s parameter", ([, code, expectedType], { expect }) => {
+		expect.assertions(1);
+
+		const source = parseCode(code);
+		const parameter = requireParameter(findFirstFunction(source), 0);
+
+		expect(unwrapFunctionParameter(parameter).type).toBe(expectedType);
+	});
+
+	it("unwraps a parameter property", ({ expect }) => {
+		expect.assertions(1);
+
+		const source = parseCode("class C { constructor(public value: string) {} }");
+		const parameter = findFirstParameterProperty(source);
+
+		expect(unwrapFunctionParameter(parameter).type).toBe("Identifier");
 	});
 });
 
