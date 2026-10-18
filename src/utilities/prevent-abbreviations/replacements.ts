@@ -43,7 +43,7 @@ interface Message {
 const replacementNamesByConfiguration = new WeakMap<Map<string, boolean>, ReplacementNames>();
 const preparedOptionsByConfiguration = new WeakMap<object, PreparedOptions>();
 
-function isRawOptions(value: RawOptions | undefined): value is RawOptions {
+function isRawOptions(value?: RawOptions): value is RawOptions {
 	return Predicate.isObject(value);
 }
 
@@ -72,7 +72,7 @@ const CHARACTER_TYPE_UPPERCASE = 1;
 const CHARACTER_TYPE_DIGIT = 2;
 const CHARACTER_TYPE_OTHER = 3;
 
-function getCharacterType(characterCode: number | undefined): number {
+function getCharacterType(characterCode?: number): number {
 	if (characterCode === undefined) return CHARACTER_TYPE_OTHER;
 	if (characterCode >= 97 && characterCode <= 122) return CHARACTER_TYPE_LOWERCASE;
 	if (characterCode >= 65 && characterCode <= 90) return CHARACTER_TYPE_UPPERCASE;
@@ -263,7 +263,7 @@ function normalizeBooleanOption(value: RawOptionValue, defaultValue: boolean): b
 	return Predicate.isBoolean(value) ? value : defaultValue;
 }
 
-function normalizeAllowList(options: RawOptions | undefined): Map<string, boolean> {
+function normalizeAllowList(options?: RawOptions): Map<string, boolean> {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const configuredAllowList = normalizeBooleanRecord(normalizedOptions?.allowList);
 	const extendDefaultAllowList = normalizeBooleanOption(normalizedOptions?.extendDefaultAllowList, true);
@@ -300,7 +300,7 @@ function normalizeReplacementOverrides(
 	return overrides;
 }
 
-function normalizeReplacements(options: RawOptions | undefined): Map<string, Map<string, boolean>> {
+function normalizeReplacements(options?: RawOptions): Map<string, Map<string, boolean>> {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const extendDefaultReplacements = normalizeBooleanOption(normalizedOptions?.extendDefaultReplacements, true);
 	const configuredReplacements = normalizeReplacementOverrides(normalizedOptions?.replacements);
@@ -326,7 +326,7 @@ function normalizeReplacements(options: RawOptions | undefined): Map<string, Map
 	return new Map(mergedReplacements);
 }
 
-function normalizeIgnorePatterns(options: RawOptions | undefined): ReadonlyArray<RegExp> {
+function normalizeIgnorePatterns(options?: RawOptions): ReadonlyArray<RegExp> {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const ignorePatterns = new Array<RegExp | string>();
 
@@ -341,7 +341,7 @@ function normalizeIgnorePatterns(options: RawOptions | undefined): ReadonlyArray
 	return ignorePatterns.map((pattern) => (pattern instanceof RegExp ? pattern : new RegExp(pattern, "u")));
 }
 
-function normalizeAllowPropertyAccess(options: RawOptions | undefined): ReadonlySet<string> {
+function normalizeAllowPropertyAccess(options?: RawOptions): ReadonlySet<string> {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const allowPropertyAccess = new Set<string>(DEFAULT_ALLOW_PROPERTY_ACCESS);
 	if (!isStringArray(normalizedOptions?.allowPropertyAccess)) return allowPropertyAccess;
@@ -350,7 +350,7 @@ function normalizeAllowPropertyAccess(options: RawOptions | undefined): Readonly
 	return allowPropertyAccess;
 }
 
-function normalizeShorthandConfiguration(options: RawOptions | undefined): ShorthandConfig {
+function normalizeShorthandConfiguration(options?: RawOptions): ShorthandConfig {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const exactMatchers = new Map<string, string>();
 	const ignoreExact = new Set<string>();
@@ -383,7 +383,7 @@ function normalizeShorthandConfiguration(options: RawOptions | undefined): Short
 	};
 }
 
-function createPreparedOptions(options: RawOptions | undefined): PreparedOptions {
+function createPreparedOptions(options?: RawOptions): PreparedOptions {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	return {
 		allowList: normalizeAllowList(normalizedOptions),
@@ -416,7 +416,7 @@ function clonePreparedOptions(options: PreparedOptions): PreparedOptions {
 	};
 }
 
-export function prepareOptions(options: RawOptions | undefined): PreparedOptions {
+export function prepareOptions(options?: RawOptions): PreparedOptions {
 	if (!isRawOptions(options)) return createPreparedOptions(undefined);
 
 	const cachedOptions = preparedOptionsByConfiguration.get(options);

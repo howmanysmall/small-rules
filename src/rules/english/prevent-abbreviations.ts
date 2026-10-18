@@ -333,7 +333,7 @@ function reportPropertyIdentifier(
 
 function getFixablePropertyReplacement(
 	node: ESTree.IdentifierName,
-	samples: ReadonlyArray<string> | undefined,
+	samples?: ReadonlyArray<string>,
 ): string | undefined {
 	if (samples?.length !== 1 || !isObjectPropertyKey(node)) return undefined;
 

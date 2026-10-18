@@ -18,11 +18,11 @@ interface SidebarBadgeItem {
 	readonly slug: string;
 }
 
-function getNewBadge(freshness: RuleNewness | undefined): SidebarBadge | undefined {
+function getNewBadge(freshness?: RuleNewness): SidebarBadge | undefined {
 	return freshness?.isNew === true ? { text: "New", variant: "note" } : undefined;
 }
 
-function getUpdatedBadge(freshness: RuleNewness | undefined): SidebarBadge | undefined {
+function getUpdatedBadge(freshness?: RuleNewness): SidebarBadge | undefined {
 	return freshness?.isUpdated === true ? { text: "Updated", variant: "tip" } : undefined;
 }
 

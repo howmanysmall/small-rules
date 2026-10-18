@@ -106,7 +106,7 @@ const noRecursive = createRule("no-recursive", "general", {
 		const classStack = new Array<string | undefined>();
 		const classMethods = new Map<string, Set<string>>();
 
-		function pushFunction(name: string | undefined): void {
+		function pushFunction(name?: string): void {
 			functionStack.push(name);
 		}
 

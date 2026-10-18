@@ -117,7 +117,7 @@ function isRawComment(value: unknown): value is RawComment {
 	);
 }
 
-function shouldSkip(character: string | undefined): boolean {
+function shouldSkip(character?: string): boolean {
 	return character === undefined || WHITESPACE.test(character);
 }
 

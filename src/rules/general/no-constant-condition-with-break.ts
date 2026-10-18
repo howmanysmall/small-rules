@@ -86,7 +86,7 @@ function toConstantBoolean(value: boolean): ConstantBooleanResult {
 	return { constant: true, value };
 }
 
-function normalizeLoopExitCalls(options: NoConstantConditionWithBreakOptions | undefined): ReadonlySet<string> {
+function normalizeLoopExitCalls(options?: NoConstantConditionWithBreakOptions): ReadonlySet<string> {
 	const loopExitCalls = new Set<string>();
 	if (!options?.loopExitCalls) return loopExitCalls;
 

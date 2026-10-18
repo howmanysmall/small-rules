@@ -140,7 +140,7 @@ function hasContextualArrayAnnotation(node: ESTree.NewExpression, sourceCode: So
 	return false;
 }
 
-function isReadonlyArrayAnnotation(typeAnnotation: ESTree.TSTypeAnnotation | undefined): boolean {
+function isReadonlyArrayAnnotation(typeAnnotation?: ESTree.TSTypeAnnotation): boolean {
 	if (typeAnnotation === undefined) return false;
 	const { typeAnnotation: annotationType } = typeAnnotation;
 	if (!isTsTypeReference(annotationType) || !isIdentifier(annotationType.typeName)) return false;

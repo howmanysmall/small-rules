@@ -80,7 +80,7 @@ export interface ReactEffect {
 export interface ReactEffectAnalysis {
 	readonly effects: ReadonlyArray<ReactEffect>;
 	findEnclosingReactNode: (node: ESTree.Node) => ReactOwner | undefined;
-	getComponentName: (node: ReactOwner | undefined) => string | undefined;
+	getComponentName: (node?: ReactOwner) => string | undefined;
 	getStateName: (reference: Reference) => string | undefined;
 	getUseStateDeclaration: (reference: Reference) => ESTree.VariableDeclarator | undefined;
 	isConstant: (reference: Reference) => boolean;
@@ -155,7 +155,7 @@ function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environme
 			/* v8 ignore next -- findEnclosingReactNode is only reached via this facade for root nodes within the analyzed program. @preserve */
 			return findEnclosingReactNode(state, node);
 		},
-		getComponentName(node: ReactOwner | undefined): string | undefined {
+		getComponentName(node?: ReactOwner): string | undefined {
 			return getComponentName(node);
 		},
 		getStateName(reference: Reference): string | undefined {
@@ -545,7 +545,7 @@ function findEnclosingReactNode(state: ReactEffectAnalysisState, node?: ESTree.N
 	return parent === null ? undefined : findEnclosingReactNode(state, parent);
 }
 
-function getComponentName(node: ReactOwner | undefined): string | undefined {
+function getComponentName(node?: ReactOwner): string | undefined {
 	/* v8 ignore next 2 -- rules only call getComponentName with a resolved owner; the undefined guard is unreachable. @preserve */
 	if (node === undefined) return undefined;
 	/* v8 ignore next 2 -- findEnclosingReactNode only yields FunctionDeclaration or VariableDeclarator owners. @preserve */

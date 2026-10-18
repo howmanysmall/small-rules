@@ -151,7 +151,7 @@ export function getConstInitializer(definition: Definition): ESTree.Expression |
 	return node.init ?? undefined;
 }
 
-function getFirstConstInitializer(variable: ScopeVariable | undefined): ESTree.Expression | undefined {
+function getFirstConstInitializer(variable?: ScopeVariable): ESTree.Expression | undefined {
 	if (variable === undefined) return undefined;
 
 	for (const definition of variable.defs) {

@@ -163,7 +163,7 @@ function buildLoopContext(loop: ESTree.ForOfStatement): LoopContext | undefined 
 	};
 }
 
-function hasArgumentNamed(call: ESTree.CallExpression, name: string | undefined): boolean {
+function hasArgumentNamed(call: ESTree.CallExpression, name?: string): boolean {
 	if (name === undefined) return false;
 	const [argument] = call.arguments;
 	return argument !== undefined && !isSpreadElement(argument) && getIdentifierName(argument) === name;

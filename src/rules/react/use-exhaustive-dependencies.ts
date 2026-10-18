@@ -713,7 +713,7 @@ function returnName({ name }: { readonly name: string }): string {
 	return name;
 }
 
-function isUnstableValue(node: ESTree.Node | undefined): boolean {
+function isUnstableValue(node?: ESTree.Node): boolean {
 	return node ? UNSTABLE_VALUES.has(node.type) : false;
 }
 
@@ -1080,7 +1080,7 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 			node: ESTree.CallExpression,
 			closureFunction: CallbackFunction,
 			closureArgument: ESTree.Node,
-			dependenciesArgument: ESTree.Node | undefined,
+			dependenciesArgument?: ESTree.Node,
 		): void {
 			if (dependenciesArgument === undefined && resolvedOptions.reportMissingDependenciesArray) {
 				const captures = collectNonSelfCaptures(closureFunction, node);

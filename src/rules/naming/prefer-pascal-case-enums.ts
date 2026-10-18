@@ -20,7 +20,7 @@ function isAsciiAlphanumeric(value: string): boolean {
 	return isAsciiDigit(value) || isAsciiLowercase(value) || isAsciiUppercase(value);
 }
 
-function isWordBoundary(previous: string, current: string, next: string | undefined): boolean {
+function isWordBoundary(previous: string, current: string, next?: string): boolean {
 	if (isAsciiDigit(previous) !== isAsciiDigit(current)) return true;
 	if (isAsciiLowercase(previous) && isAsciiUppercase(current)) return true;
 	return isAsciiUppercase(previous) && isAsciiUppercase(current) && next !== undefined && isAsciiLowercase(next);

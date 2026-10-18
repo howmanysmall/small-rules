@@ -29,7 +29,7 @@ export const fixer: Fixer = {
 	},
 };
 
-export function applyFixes(text: string, fixResult: Fix | ReadonlyArray<Fix> | undefined): string | undefined {
+export function applyFixes(text: string, fixResult?: Fix | ReadonlyArray<Fix>): string | undefined {
 	if (fixResult === undefined) return undefined;
 	const fixes = collectFixes(fixResult);
 	const sorted = fixes.toSorted((left, right) => left.range[0] - right.range[0] || left.range[1] - right.range[1]);

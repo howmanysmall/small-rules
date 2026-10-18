@@ -37,7 +37,7 @@ export function createRuleIndexCategories(
 	}));
 }
 
-function createRuleIndexRule(rule: RuleFactCategory["rules"][number], newness: RuleNewness | undefined): Rule {
+function createRuleIndexRule(rule: RuleFactCategory["rules"][number], newness?: RuleNewness): Rule {
 	const newRule: Writable<Rule> = {
 		name: rule.name,
 		category: rule.category,
@@ -53,11 +53,11 @@ function createRuleIndexRule(rule: RuleFactCategory["rules"][number], newness: R
 	return newRule;
 }
 
-function addFixability(rule: Writable<Rule>, fixability: string | undefined): void {
+function addFixability(rule: Writable<Rule>, fixability?: string): void {
 	if (fixability !== undefined) rule.fixability = fixability;
 }
 
-function addFreshness(rule: Writable<Rule>, newness: RuleNewness | undefined): void {
+function addFreshness(rule: Writable<Rule>, newness?: RuleNewness): void {
 	if (newness?.isNew === true) {
 		rule.addedIn = newness.addedIn;
 		rule.isNew = true;

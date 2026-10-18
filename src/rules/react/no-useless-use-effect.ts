@@ -260,7 +260,7 @@ function getFunctionName(node: CallbackFunction): string | undefined {
 	return undefined;
 }
 
-function isCustomHookName(name: string | undefined): boolean {
+function isCustomHookName(name?: string): boolean {
 	return isNonEmptyString(name) && name.startsWith("use");
 }
 

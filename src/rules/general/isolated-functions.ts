@@ -59,7 +59,7 @@ const NESTED_FUNCTION_CUTOFF_TYPES = new Set([FUNCTION_DECLARATION, "FunctionExp
 const CLASS_TYPES = new Set([CLASS_DECLARATION, "ClassExpression"]);
 const LEADING_JSDOC_STAR_PATTERN = /(?:\*\s*)*/u;
 
-function parseGlobalMode(value: GlobalModeOption | undefined): GlobalMode | undefined {
+function parseGlobalMode(value?: GlobalModeOption): GlobalMode | undefined {
 	if (value === true || value === "writable" || value === "writeable") return "writable";
 	if (value === false || value === "off") return "off";
 	if (value === "readonly" || value === "readable") return "readonly";

@@ -22,7 +22,7 @@ import { stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-ut
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
-function isNumberTypeAnnotation(typeAnnotation: ESTree.TSType | ESTree.TSTypeAnnotation | undefined): boolean {
+function isNumberTypeAnnotation(typeAnnotation?: ESTree.TSType | ESTree.TSTypeAnnotation): boolean {
 	/* v8 ignore next -- @preserve callers use undefined to mean no type annotation. */
 	if (typeAnnotation === undefined) return false;
 

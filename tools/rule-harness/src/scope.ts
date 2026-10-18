@@ -353,7 +353,7 @@ function defineImplicitVariable(scope: HarnessScope, name: string): void {
 	scope.set.set(name, variable);
 }
 
-function registerDeclaredVariable(state: ScopeState, node: HarnessNode, variable: HarnessVariable | undefined): void {
+function registerDeclaredVariable(state: ScopeState, node: HarnessNode, variable?: HarnessVariable): void {
 	if (variable === undefined) return;
 	const existing = state.declaredVariables.get(node);
 	if (existing === undefined) {
@@ -441,7 +441,7 @@ function resolveReferences(scope: HarnessScope): void {
 	for (const child of scope.childScopes) resolveReferences(child);
 }
 
-function getVariableByName(scope: HarnessScope, name: string | undefined): HarnessVariable | undefined {
+function getVariableByName(scope: HarnessScope, name?: string): HarnessVariable | undefined {
 	if (name === undefined) return undefined;
 	let current: HarnessScope | null = scope;
 	while (current !== null) {
@@ -515,7 +515,7 @@ function isParameterIdentifier(node: HarnessNode, parent: HarnessNode): boolean 
 	return false;
 }
 
-function isInPattern(target: HarnessNode, pattern: HarnessNode | undefined): boolean {
+function isInPattern(target: HarnessNode, pattern?: HarnessNode): boolean {
 	if (pattern === undefined) return false;
 	if (target === pattern) return true;
 	return getNodeChildren(pattern).some((child) => isInPattern(target, child));

@@ -167,12 +167,12 @@ function assertAutofixOutput(
 	expect(fixedOutput).toBe(testCase.output);
 }
 
-function applyFixesToProvider(provider: FixProvider | undefined, sourceCode: string | undefined): string | undefined {
+function applyFixesToProvider(provider?: FixProvider, sourceCode?: string): string | undefined {
 	if (sourceCode === undefined) return undefined;
 	return applyFixes(sourceCode, runFixProvider(provider));
 }
 
-function runFixProvider(provider: FixProvider | undefined): ReturnType<FixProvider> {
+function runFixProvider(provider?: FixProvider): ReturnType<FixProvider> {
 	if (provider === undefined) return undefined;
 	return provider(fixer);
 }

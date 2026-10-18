@@ -5,10 +5,11 @@ import {
 	isFunctionDeclaration,
 	isFunctionExpression,
 	isIdentifierNamed,
-	isMethodDefinitionRaw,
+	isMethodDefinition,
 	isObjectPattern,
 	isProperty,
 	isRestElement,
+	isTsEmptyBodyFunctionExpression,
 	isTsParameterProperty,
 	isTsUndefinedKeyword,
 	isTsUnionType,
@@ -65,10 +66,10 @@ function canFollowOptionalParameter(
 
 function isAccessorSetter(owner: ParameterOwner): boolean {
 	if (owner.type === TS_METHOD_SIGNATURE) return owner.kind === "set";
-	if (!isFunctionExpression(owner)) return false;
+	if (!isFunctionExpression(owner) && !isTsEmptyBodyFunctionExpression(owner)) return false;
 
 	const { parent } = owner;
-	if (isMethodDefinitionRaw(parent)) return parent.kind === "set";
+	if (isMethodDefinition(parent)) return parent.kind === "set";
 	return isProperty(parent) && parent.kind === "set";
 }
 
@@ -127,13 +128,15 @@ const preferOptionalParameter = createRule("prefer-optional-parameter", "naming"
 			const undefinedUnion = splitUndefinedUnion(annotation);
 			if (undefinedUnion === undefined) return;
 
-			const data = { parameter: getFunctionParameterBindingName(parameter, sourceCode) };
 			const isOptionalPositionAllowed =
 				!isSetter &&
 				canUseOptionalBinding(parameter, owner) &&
 				canFollowOptionalParameter(owner.params, index, sourceCode);
+			if (!isOptionalPositionAllowed) return;
+
+			const data = { parameter: getFunctionParameterBindingName(parameter, sourceCode) };
 			const hasComments = sourceCode.getCommentsInside(annotation.typeAnnotation).length > 0;
-			if (!isOptionalPositionAllowed || hasComments) {
+			if (hasComments) {
 				context.report({ data, messageId: "preferOptionalParameter", node: annotation });
 				return;
 			}

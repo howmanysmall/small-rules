@@ -708,9 +708,7 @@ describe("visibleInterfaceDeclarations", () => {
 	});
 });
 
-function getInterfacePropertyNames(
-	declarations: ReadonlyArray<ESTree.TSInterfaceDeclaration> | undefined,
-): Array<string> {
+function getInterfacePropertyNames(declarations?: ReadonlyArray<ESTree.TSInterfaceDeclaration>): Array<string> {
 	const names = new Array<string>();
 	const visibleDeclarations = declarations ?? [];
 	for (const declaration of visibleDeclarations) {

@@ -97,7 +97,7 @@ function normalizePropertyBans(
 	return bannedClasses;
 }
 
-function normalizeOptions(rawOptions: RuleOptions | undefined): NormalizedOptions {
+function normalizeOptions(rawOptions?: RuleOptions): NormalizedOptions {
 	if (!Predicate.isObject(rawOptions)) return EMPTY_OPTIONS;
 
 	const { bannedInstances, bannedProperties } = rawOptions;

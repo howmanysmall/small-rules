@@ -154,7 +154,7 @@ function isExternalModuleSpecifier(specifier: string): boolean {
 	return !NON_PACKAGE_IMPORT_PATTERN.test(specifier);
 }
 
-export function isExternalPackageImport(definition: Definition | undefined): boolean {
+export function isExternalPackageImport(definition?: Definition): boolean {
 	if (definition?.type !== "ImportBinding") return false;
 
 	const { parent } = definition;
