@@ -42,7 +42,7 @@ async function getNextFileNameAsync(release: Release): Promise<string> {
 }
 
 // oxlint-disable-next-line unicorn/prefer-string-raw -- no lol
-const TOKENS_REGEXP = regex("Tokens: (?<input>\\d+) input \\+ (?<output>\\d+)", "gu");
+const TOKENS_REGEXP = regex("Tokens: (?<input>\\d+) input \\+ (?<output>\\d+)", "u");
 
 const isCommuniqueDefaults = type({
 	"+": "reject",
@@ -289,7 +289,7 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 		for await (const line of result) {
 			const trueLine = `${line}\n`;
 			output += trueLine;
-			process.stderr.write(trueLine);
+			if (!TOKENS_REGEXP.test(line)) process.stderr.write(trueLine);
 		}
 
 		await writePrettyOutputAsync(output, nextFileName);
