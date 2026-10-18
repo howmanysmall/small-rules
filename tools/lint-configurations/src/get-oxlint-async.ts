@@ -386,6 +386,7 @@ export async function getOxlintAsync({
 				"small-rules/prefer-modding-inspect": "off",
 				"small-rules/prefer-module-scope-constants": "off",
 				"small-rules/prefer-native-collection-copy": "off",
+				"small-rules/prefer-optional-parameter": "error",
 				"small-rules/prefer-padding-components": "off",
 				"small-rules/prefer-pascal-case-enums": "error",
 				"small-rules/prefer-sequence-overloads": "off",
