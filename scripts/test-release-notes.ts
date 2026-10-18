@@ -3,7 +3,6 @@
 import { readFile } from "node:fs/promises";
 import { argv } from "node:process";
 import { EnumType } from "@cliffy/command";
-import { OpenRouter } from "@openrouter/sdk";
 import { isMaybeBoolean, isMaybeInteger, isMaybeString, isUndefined } from "@small-rules/arktype-utilities";
 import { existsAsync } from "@small-rules/fs-utilities";
 import { bold, cyan, dim, green } from "ansis";
@@ -14,6 +13,7 @@ import { exec } from "tinyexec";
 import { createBaseCommand } from "$script-functions/create-base-command";
 import { getScriptName } from "$script-functions/get-script-name";
 
+import type { OpenRouter } from "@openrouter/sdk";
 import type { PricingOverride, PublicPricing, UtcDay } from "@openrouter/sdk/models";
 
 const scriptName = getScriptName(true);
@@ -256,6 +256,7 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 	.env("OPENROUTER_API_KEY=<value:string>", "The OpenRouter API key to use for the request.")
 	.option("--release <value:release-type>", "The type of release to generate notes for.", { default: Release.Minor })
 	.action(async ({ openrouterApiKey, release }) => {
+		const { OpenRouter } = await import("@openrouter/sdk");
 		openrouter = new OpenRouter({
 			apiKey: openrouterApiKey,
 		});
