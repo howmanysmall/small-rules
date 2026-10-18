@@ -135,8 +135,8 @@ they previously suppressed that no longer fire.
 """
 
 [defaults]
-model = "~openai/gpt-luna-latest"
-max_tokens = 16384
+model = "anthropic/claude-haiku-5.5"
+max_tokens = 65536
 repo = "howmanysmall/small-rules"
 provider = "openai"
 base_url = "https://openrouter.ai/api/v1"
