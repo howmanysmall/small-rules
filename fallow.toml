@@ -92,10 +92,14 @@ botPatterns = ["*\\[bot\\]*", "dependabot*", "renovate*", "github-actions*", "sv
 emailMode = "handle"
 
 [duplicates]
+# Mild keeps identifiers, so a renamed copy still matches on its body. Semantic
+# blinds every identifier and floods a 28-token window with false matches.
 mode = "mild"
-minLines = 5
-minTokens = 50
-threshold = 0.5
+# Small AST helpers are the usual copy-paste here; 50/5 hid every one of them.
+minLines = 4
+minTokens = 28
+# Ratchet: just above the current baseline, so duplication cannot grow.
+threshold = 2.1
 ignoreDefaults = true
 ignore = [
 	"documentation/src/styles/custom.css",
@@ -107,3 +111,4 @@ ignore = [
 
 [audit]
 gate = "new-only"
+dupesBaseline = "fallow-baselines/dupes.json"
