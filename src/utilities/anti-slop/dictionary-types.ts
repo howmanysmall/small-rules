@@ -88,6 +88,27 @@ function isBuiltIn(name: string, use: ESTree.TSTypeReference, environment: TypeE
 	return BUILT_INS.has(name) && !hasVisibleTypeBinding(name, use, environment.typeAliases);
 }
 
+function isTransparentWrapper(name: string, use: ESTree.TSTypeReference, environment: TypeEnvironment): boolean {
+	return TRANSPARENT_WRAPPERS.has(name) && isBuiltIn(name, use, environment);
+}
+
+function getFirstTypeArgumentResolution(
+	resolution: TypeResolution,
+	type: ESTree.TSTypeReference,
+): TypeResolution | undefined {
+	const argument = type.typeArguments?.params[0];
+	return argument === undefined ? undefined : continueTypeResolution(resolution, argument);
+}
+
+function getTransparentWrappedResolution(
+	resolution: TypeResolution,
+	type: ESTree.TSTypeReference,
+	name: string,
+	environment: TypeEnvironment,
+): TypeResolution | undefined {
+	return isTransparentWrapper(name, type, environment) ? getFirstTypeArgumentResolution(resolution, type) : undefined;
+}
+
 function unwrapTransparentResolution(resolution: TypeResolution): TypeResolution {
 	let current = resolution;
 	while (
@@ -160,12 +181,8 @@ function getUnsafeReferenceValue(
 	if (name === undefined) return undefined;
 	const resolved = resolveTypeReference(resolution, environment.typeAliases);
 	if (resolved !== undefined) return getUnsafeDirectValue(resolved, environment);
-	if (TRANSPARENT_WRAPPERS.has(name) && isBuiltIn(name, type, environment)) {
-		const wrapped = type.typeArguments?.params[0];
-		return wrapped === undefined
-			? undefined
-			: getUnsafeDirectValue(continueTypeResolution(resolution, wrapped), environment);
-	}
+	const wrapped = getTransparentWrappedResolution(resolution, type, name, environment);
+	if (wrapped !== undefined) return getUnsafeDirectValue(wrapped, environment);
 	const declarations = getVisibleInterfaceDeclarations(name, type, environment.typeAliases);
 	return declarations !== undefined && isEffectivelyEmptyInterface(declarations) ? "empty-object" : undefined;
 }
@@ -207,21 +224,16 @@ function getDictionaryValueTypesFromBuiltInReference(
 	name: string,
 	environment: TypeEnvironment,
 ): ReadonlyArray<TypeResolution> | undefined {
-	if (TRANSPARENT_WRAPPERS.has(name) && isBuiltIn(name, type, environment)) {
-		const wrapped = type.typeArguments?.params[0];
-		return wrapped === undefined
-			? []
-			: getDictionaryValueTypes(continueTypeResolution(resolution, wrapped), environment);
+	if (
+		isTransparentWrapper(name, type, environment) ||
+		((name === "Pick" || name === "Omit") && isBuiltIn(name, type, environment))
+	) {
+		const source = getFirstTypeArgumentResolution(resolution, type);
+		return source === undefined ? [] : getDictionaryValueTypes(source, environment);
 	}
 	if (name === "Record" && isBuiltIn(name, type, environment)) {
 		const value = type.typeArguments?.params[1];
 		return value === undefined ? [] : [continueTypeResolution(resolution, value)];
-	}
-	if ((name === "Pick" || name === "Omit") && isBuiltIn(name, type, environment)) {
-		const source = type.typeArguments?.params[0];
-		return source === undefined
-			? []
-			: getDictionaryValueTypes(continueTypeResolution(resolution, source), environment);
 	}
 	return undefined;
 }
@@ -359,17 +371,8 @@ function classifyWideningReferenceResolution(
 		const target = classifyWideningResolution(resolved, environment, true, false);
 		return getGenericAliasTarget(alias, target, genericContainerAllowed);
 	}
-	if (TRANSPARENT_WRAPPERS.has(name) && isBuiltIn(name, type, environment)) {
-		const wrapped = type.typeArguments?.params[0];
-		return wrapped === undefined
-			? undefined
-			: classifyWideningResolution(
-					continueTypeResolution(resolution, wrapped),
-					environment,
-					named,
-					genericContainerAllowed,
-				);
-	}
+	const wrapped = getTransparentWrappedResolution(resolution, type, name, environment);
+	if (wrapped !== undefined) return classifyWideningResolution(wrapped, environment, named, genericContainerAllowed);
 	if (name === "Record" && isBuiltIn(name, type, environment)) {
 		return hasBroadRecordKey(resolution, type, environment) ? { kind: OPEN_DICTIONARY } : undefined;
 	}

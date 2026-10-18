@@ -231,15 +231,21 @@ function hasConfiguredLoopExit(expression: ESTree.Expression, loopExitCalls: Rea
 	return false;
 }
 
-function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
+function stripSequenceWrappers(expression: ESTree.Expression): ESTree.Expression {
 	let unwrapped = stripExpressionWrappers(expression);
 
 	while (isSequenceExpression(unwrapped)) {
 		const lastExpression = unwrapped.expressions.at(-1);
 		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
-		if (!lastExpression) return NON_CONSTANT_VALUE;
+		if (!lastExpression) return unwrapped;
 		unwrapped = stripExpressionWrappers(lastExpression);
 	}
+
+	return unwrapped;
+}
+
+function getConstantValue(expression: ESTree.Expression): ConstantValueResult {
+	const unwrapped = stripSequenceWrappers(expression);
 
 	switch (unwrapped.type) {
 		case ARRAY_EXPRESSION:
@@ -316,14 +322,7 @@ function getUnaryConstantValue(expression: ESTree.UnaryExpression): ConstantValu
 }
 
 function getConstantBoolean(expression: ESTree.Expression): ConstantBooleanResult {
-	let unwrapped = stripExpressionWrappers(expression);
-
-	while (isSequenceExpression(unwrapped)) {
-		const lastExpression = unwrapped.expressions.at(-1);
-		/* v8 ignore next -- @preserve parsers do not produce empty sequence expressions. */
-		if (!lastExpression) return NON_CONSTANT_BOOLEAN;
-		unwrapped = stripExpressionWrappers(lastExpression);
-	}
+	const unwrapped = stripSequenceWrappers(expression);
 
 	if (isConditionalExpression(unwrapped)) return getConditionalConstantBoolean(unwrapped);
 	if (isLogicalExpression(unwrapped)) return getLogicalConstantBoolean(unwrapped);
@@ -404,13 +403,18 @@ function hasConfiguredLoopExitInInit(
 ): boolean {
 	if (!initialization) return false;
 
-	if (isVariableDeclaration(initialization)) {
-		return initialization.declarations.some((declaration) =>
-			declaration.init ? hasConfiguredLoopExit(declaration.init, loopExitCalls) : false,
-		);
-	}
-
+	if (isVariableDeclaration(initialization)) return hasConfiguredLoopExitInDeclaration(initialization, loopExitCalls);
 	return hasConfiguredLoopExit(initialization, loopExitCalls);
+}
+
+function hasConfiguredLoopExitInDeclaration(
+	declaration: ESTree.VariableDeclaration,
+	loopExitCalls: ReadonlySet<string>,
+): boolean {
+	for (const declarator of declaration.declarations) {
+		if (declarator.init !== null && hasConfiguredLoopExit(declarator.init, loopExitCalls)) return true;
+	}
+	return false;
 }
 
 function hasConfiguredLoopExitInHeader(loopNode: LoopNode, loopExitCalls: ReadonlySet<string>): boolean {
@@ -482,11 +486,8 @@ function hasLoopExit(statement: ESTree.Statement, loopNode: LoopNode, loopExitCa
 		case TRY_STATEMENT:
 			return hasLoopExitInTryStatement(currentStatement, loopNode, loopExitCalls);
 
-		case VARIABLE_DECLARATION: {
-			return currentStatement.declarations.some((declaration) =>
-				declaration.init ? hasConfiguredLoopExit(declaration.init, loopExitCalls) : false,
-			);
-		}
+		case VARIABLE_DECLARATION:
+			return hasConfiguredLoopExitInDeclaration(currentStatement, loopExitCalls);
 
 		case WITH_STATEMENT:
 			return hasLoopExitInWithStatement(currentStatement, loopNode, loopExitCalls);

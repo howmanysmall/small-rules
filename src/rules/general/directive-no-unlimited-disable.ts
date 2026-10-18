@@ -1,20 +1,15 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isDisableDirectiveKind, parseDirectiveComment, toForceLocation } from "$oxc-utilities/directive-comments";
+import { getDirectiveComments, isDisableDirectiveKind, toForceLocation } from "$oxc-utilities/directive-comments";
 import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/constants";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
 const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable", "general", {
 	create(context): Visitor {
-		for (const comment of context.sourceCode.getAllComments()) {
-			const directive = parseDirectiveComment(comment);
-			if (directive === undefined) continue;
-
-			const { kind } = directive;
-			if (!isDisableDirectiveKind(kind)) continue;
+		for (const directive of getDirectiveComments(context.sourceCode, isDisableDirectiveKind)) {
 			if (directive.value === undefined || directive.value.length === 0) {
 				context.report({
-					data: { kind },
+					data: { kind: directive.kind },
 					loc: toForceLocation(directive.comment.loc),
 					messageId: "unexpected",
 				});

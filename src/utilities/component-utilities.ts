@@ -99,10 +99,7 @@ function pushSimpleExpressionChildren(node: ESTree.Node, nodes: Array<ESTree.Nod
 
 export function isSimpleExpression(node: ESTree.Node): boolean {
 	const nodes = [node];
-	while (nodes.length > 0) {
-		const current = nodes.pop();
-		/* v8 ignore next -- the loop guard ensures pop never returns undefined. @preserve */
-		if (current === undefined) break;
+	for (let current = nodes.pop(); current !== undefined; current = nodes.pop()) {
 		if (!pushSimpleExpressionChildren(current, nodes)) return false;
 	}
 	return true;

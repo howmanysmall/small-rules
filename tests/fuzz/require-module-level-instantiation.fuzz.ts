@@ -5,15 +5,13 @@ import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 
 import rule from "$oxc-rules/roblox/require-module-level-instantiation";
 
+import { consumeHex } from "./support/consume-hex";
+
 import type { NormalizedValidCase } from "@small-rules/rule-harness/types";
 
 const IMPORT_STYLES: ReadonlyArray<"default" | "named" | "renamed"> = ["default", "named", "renamed"];
 const NESTED_SCOPES: ReadonlyArray<"arrow" | "function" | "method"> = ["arrow", "function", "method"];
 const execute = createRuleExecutor("require-module-level-instantiation", rule);
-
-function convertBytesToHex(bytes: Uint8Array): string {
-	return Buffer.from(bytes).toString("hex");
-}
 
 function createCase(code: string, options: ReadonlyArray<unknown>): NormalizedValidCase {
 	return {
@@ -51,9 +49,9 @@ fuzz(
 		const importStyle = provider.pickValue(IMPORT_STYLES);
 		const nested = provider.consumeBoolean();
 		const tracked = provider.consumeBoolean();
-		const className = `Tracked${convertBytesToHex(provider.consumeBytes(12))}`;
-		const localName = importStyle === "named" ? className : `Local${convertBytesToHex(provider.consumeBytes(12))}`;
-		const importSource = `@fuzz/source-${convertBytesToHex(provider.consumeBytes(16))}`;
+		const className = `Tracked${consumeHex(provider, 12)}`;
+		const localName = importStyle === "named" ? className : `Local${consumeHex(provider, 12)}`;
+		const importSource = `@fuzz/source-${consumeHex(provider, 16)}`;
 		const configuredSource = tracked ? importSource : `${importSource}-untracked`;
 		const configuredClassName = importStyle === "default" ? localName : className;
 		const importDeclaration = createImportDeclaration(importStyle, className, localName, importSource);

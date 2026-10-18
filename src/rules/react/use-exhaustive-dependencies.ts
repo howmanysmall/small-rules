@@ -234,18 +234,11 @@ function queueIdentifierChildren(current: ESTree.Node, nodes: Array<ESTree.Node>
 
 function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 	const names = new Array<string>();
-	const nodes = [node];
+	const worklist = [node];
 
-	while (nodes.length > 0) {
-		const current = nodes.pop();
-		/* v8 ignore next -- @preserve loop condition guarantees a queued node. */
-		if (current === undefined) continue;
-
-		if (isIdentifier(current)) {
-			names.push(current.name);
-			continue;
-		}
-		queueIdentifierChildren(current, nodes);
+	for (const current of worklist) {
+		if (isIdentifier(current)) names.push(current.name);
+		else queueIdentifierChildren(current, worklist);
 	}
 
 	return names;
@@ -321,12 +314,11 @@ function isStableBindingPattern(node: ESTree.Node, patternType: "ArrayPattern" |
 }
 
 function isStableArrayIndex(
-	stableResult: StableResult | undefined,
+	stableResult: ReadonlySet<number | string>,
 	node: ESTree.Node,
 	identifierName: string,
 ): boolean {
-	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ArrayPattern")) return false;
+	if (!isStableBindingPattern(node, "ArrayPattern")) return false;
 
 	const { elements } = node.id;
 	let index = 0;
@@ -341,12 +333,11 @@ function isStableArrayIndex(
 }
 
 function isStableObjectProperty(
-	stableResult: StableResult | undefined,
+	stableResult: ReadonlySet<number | string>,
 	node: ESTree.Node,
 	identifierName: string,
 ): boolean {
-	if (stableResult === undefined) return false;
-	if (!(stableResult instanceof Set) || !isStableBindingPattern(node, "ObjectPattern")) return false;
+	if (!isStableBindingPattern(node, "ObjectPattern")) return false;
 
 	for (const property of node.id.properties) {
 		if (!isProperty(property)) continue;
@@ -373,29 +364,29 @@ function isStableHookValue(
 	if (hookName === undefined) return false;
 
 	const stableResult = stableHooks.get(hookName);
+	if (!(stableResult instanceof Set)) return stableResult === true;
 	return (
-		stableResult === true ||
 		isStableArrayIndex(stableResult, node, identifierName) ||
 		isStableObjectProperty(stableResult, node, identifierName)
 	);
 }
 
-function isReactJoinBindingsCall(init: ESTree.Expression | null): boolean {
-	if (!isCallExpression(init)) return false;
+function getMethodCallCallee(init: ESTree.Expression | null): ESTree.MemberExpression | undefined {
+	return isCallExpression(init) && isMemberExpression(init.callee) ? init.callee : undefined;
+}
 
-	const { callee } = init;
+function isReactJoinBindingsCall(init: ESTree.Expression | null): boolean {
+	const callee = getMethodCallCallee(init);
 	return (
-		isMemberExpression(callee) &&
+		callee !== undefined &&
 		isIdentifierNamed(callee.object, "React") &&
 		isIdentifierNamed(callee.property, "joinBindings")
 	);
 }
 
 function isMapMethodCall(init: ESTree.Expression | null): boolean {
-	if (!isCallExpression(init)) return false;
-
-	const { callee } = init;
-	return isMemberExpression(callee) && isIdentifierNamed(callee.property, "map");
+	const callee = getMethodCallCallee(init);
+	return callee !== undefined && isIdentifierNamed(callee.property, "map");
 }
 
 function isLiteralInitializer(init: ESTree.Expression | null): boolean {

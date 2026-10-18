@@ -20,9 +20,10 @@ import {
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { resolvesToModuleBinding } from "$oxc-utilities/module-binding-resolution";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
-import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
+import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -45,20 +46,6 @@ function isModuleScopeConst(variable: ScopeVariable): boolean {
 	return false;
 }
 
-function resolvesToConstantIdentifier(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): boolean {
-	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
-	if (variable === undefined) return false;
-
-	return isImportBinding(variable) || isModuleScopeConst(variable);
-}
-
-function resolvesToModuleScopeBinding(sourceCode: SourceCode, identifier: ESTree.IdentifierReference): boolean {
-	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
-	if (variable === undefined) return false;
-
-	return isImportBinding(variable) || isModuleLevelScope(variable.scope);
-}
-
 function isConstantMemberExpression(sourceCode: SourceCode, memberExpression: ESTree.MemberExpression): boolean {
 	let current: ESTree.Expression = memberExpression;
 
@@ -67,7 +54,7 @@ function isConstantMemberExpression(sourceCode: SourceCode, memberExpression: ES
 		current = stripExpressionWrappers(current.object);
 	}
 
-	return isIdentifier(current) && resolvesToModuleScopeBinding(sourceCode, current);
+	return isIdentifier(current) && resolvesToModuleBinding(sourceCode, current);
 }
 
 function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
@@ -75,7 +62,7 @@ function isConstantDispatchValue(sourceCode: SourceCode, expression: ESTree.Expr
 
 	switch (unwrapped.type) {
 		case IDENTIFIER:
-			return resolvesToConstantIdentifier(sourceCode, unwrapped);
+			return resolvesToModuleBinding(sourceCode, unwrapped, isModuleScopeConst);
 
 		case LITERAL:
 			return true;

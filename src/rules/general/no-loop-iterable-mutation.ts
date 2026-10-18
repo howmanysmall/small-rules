@@ -9,7 +9,6 @@ import {
 	isIdentifier,
 	isIdentifierNamed,
 	isMemberExpression,
-	isNode,
 	isSpreadElement,
 	isVariableDeclaration,
 	PARENTHESIZED_EXPRESSION,
@@ -19,11 +18,12 @@ import {
 	TS_TYPE_ASSERTION,
 } from "@small-rules/oxlint-utilities";
 
+import { appendVisitorChildren } from "$oxc-utilities/anti-slop/lexical-type-parameters";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { NodeType } from "@small-rules/oxlint-utilities";
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const ALL_MUTATION_METHODS = new Set([
 	"add",
@@ -169,17 +169,11 @@ function hasArgumentNamed(call: ESTree.CallExpression, name: string | undefined)
 	return argument !== undefined && !isSpreadElement(argument) && getIdentifierName(argument) === name;
 }
 
-function pushChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
-	for (const [key, value] of Object.entries(node)) {
-		if (key === "parent" || key === "range" || key === "loc") continue;
-		if (Array.isArray(value)) {
-			/* v8 ignore next -- AST child arrays only contain nodes or null pattern holes. @preserve */
-			for (const item of value) if (isNode(item)) worklist.push(item);
-		} else if (isNode(value)) worklist.push(value);
-	}
-}
-
-function collectMutationCalls(body: ESTree.Node, iterableName: string): Array<MutationCall> {
+function collectMutationCalls(
+	body: ESTree.Node,
+	iterableName: string,
+	visitorKeys: SourceCode["visitorKeys"],
+): Array<MutationCall> {
 	const mutations = new Array<MutationCall>();
 	const worklist: Array<ESTree.Node> = [body];
 	for (const current of worklist) {
@@ -191,7 +185,7 @@ function collectMutationCalls(body: ESTree.Node, iterableName: string): Array<Mu
 				mutations.push({ call: current, method, property: current.callee.property });
 			}
 		}
-		pushChildren(current, worklist);
+		appendVisitorChildren(current, visitorKeys, worklist);
 	}
 	return mutations;
 }
@@ -227,7 +221,11 @@ const noLoopIterableMutation = createRule("no-loop-iterable-mutation", "general"
 				const loopContext = buildLoopContext(node);
 				if (loopContext === undefined) return;
 
-				const mutations = collectMutationCalls(node.body, loopContext.iterableName);
+				const mutations = collectMutationCalls(
+					node.body,
+					loopContext.iterableName,
+					context.sourceCode.visitorKeys,
+				);
 				for (const mutation of mutations) {
 					if (isAllowedMutation(mutation, loopContext, mutations)) continue;
 					context.report({

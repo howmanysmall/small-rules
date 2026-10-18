@@ -103,6 +103,12 @@ function getJudgmentCacheKey(options: JudgmentCacheKeyOptions): string {
 	return createCacheKey(options);
 }
 
+function getRuleCard(cards: ReadonlyMap<RuleName, RuleCard>, name: RuleName): RuleCard {
+	const card = cards.get(name);
+	if (card === undefined) throw new Error(`Missing rule card for "${name}".`);
+	return card;
+}
+
 function orderPair(pair: UnorderedRulePair): UnorderedRulePair {
 	return pair.left < pair.right ? pair : { left: pair.right, right: pair.left };
 }
@@ -149,16 +155,8 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 
 		seenPairs.add(judgmentKey);
 
-		const sourceCard = options.cards.get(source);
-		if (sourceCard === undefined) {
-			throw new Error(`Missing rule card for "${source}".`);
-		}
-
-		const candidate = options.cards.get(candidateName);
-		if (candidate === undefined) {
-			throw new Error(`Missing rule card for "${candidateName}".`);
-		}
-
+		const sourceCard = getRuleCard(options.cards, source);
+		const candidate = getRuleCard(options.cards, candidateName);
 		const cacheKey = getJudgmentCacheKey({
 			candidate,
 			decisionModel: options.decisionModel,
@@ -190,11 +188,7 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 
 	const requests = [...pendingBySource].flatMap(([sourceName, candidates]) =>
 		chunkValues(candidates, options.batchSize).map(async (candidatesChunk) => {
-			const source = options.cards.get(sourceName);
-			if (source === undefined) {
-				throw new Error(`Missing rule card for "${sourceName}".`);
-			}
-
+			const source = getRuleCard(options.cards, sourceName);
 			const answers = await options.transport.decide({
 				model: options.decisionModel,
 				questions: createPairJudgmentQuestions(candidatesChunk),
@@ -203,11 +197,7 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 
 			const interpreted = interpretJudgmentAnswers(answers, candidatesChunk);
 			for (const [candidateName, pairJudgments] of interpreted) {
-				const candidate = options.cards.get(candidateName);
-				if (candidate === undefined) {
-					throw new Error(`Missing rule card for "${candidateName}".`);
-				}
-
+				const candidate = getRuleCard(options.cards, candidateName);
 				judgments.set(getPairKey(sourceName, candidateName), pairJudgments);
 				options.cache?.set(
 					getJudgmentCacheKey({

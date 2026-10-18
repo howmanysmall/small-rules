@@ -69,14 +69,7 @@ function isSimpleLiteral(node: ESTree.Expression | undefined): boolean {
 	if (node === undefined) return false;
 
 	const worklist: Array<ESTree.Expression> = [node];
-	let index = 0;
-	while (index < worklist.length) {
-		const current = worklist[index];
-		/* v8 ignore next -- @preserve the index is bounded by the worklist length. */
-		if (current === undefined) return false;
-		index += 1;
-		if (!appendSimpleLiteralChildren(current, worklist)) return false;
-	}
+	for (const current of worklist) if (!appendSimpleLiteralChildren(current, worklist)) return false;
 
 	return true;
 }

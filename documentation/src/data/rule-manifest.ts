@@ -130,6 +130,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "array-type-generic" },
 				{ name: "ban-types" },
 				{ name: "no-spec-file-extension" },
+				{ name: "prefer-optional-parameter" },
 				{ name: "prefer-pascal-case-enums" },
 				{ name: "require-async-suffix" },
 			],

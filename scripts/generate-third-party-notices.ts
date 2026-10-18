@@ -1,21 +1,17 @@
 #!/usr/bin/env nub
 
-import { readFile, writeFile } from "node:fs/promises";
-import { argv } from "node:process";
-import { consola } from "consola";
+import { readFile } from "node:fs/promises";
 
-import { createBaseCommand } from "$script-functions/create-base-command";
-import { getScriptName } from "$script-functions/get-script-name";
+import { createScriptCommand, parseScriptArgumentsAsync } from "$script-functions/create-script-command";
+import { writeGeneratedFileAsync } from "$script-functions/write-generated-file";
 import { renderNoticesMarkdown } from "$script-utilities/vendored-notices";
 
-const name = getScriptName(true);
-const log = consola.withTag(name);
-
-const command = createBaseCommand(
-	name,
+const { command, log } = createScriptCommand(
 	"1.0.1",
 	"Generates THIRD-PARTY-NOTICES.md from the vendored-component catalog.",
-)
+);
+
+command
 	.option("-o, --output <output-path:string>", "Generated Markdown output path.", {
 		default: "THIRD-PARTY-NOTICES.md",
 	})
@@ -35,8 +31,7 @@ const command = createBaseCommand(
 			);
 		}
 
-		await writeFile(output, generated, "utf8");
-		log.success(`Wrote ${generated.length} bytes to ${output}`);
+		await writeGeneratedFileAsync(output, generated, log);
 	});
 
-await command.parse(argv.slice(2));
+await parseScriptArgumentsAsync(command);

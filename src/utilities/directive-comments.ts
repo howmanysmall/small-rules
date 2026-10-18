@@ -54,6 +54,13 @@ export interface DirectiveComment {
 	readonly value?: string | undefined;
 }
 
+export interface DirectiveKindsSchema {
+	readonly description: string;
+	readonly items: { readonly type: "string" };
+	readonly type: "array";
+	readonly uniqueItems: true;
+}
+
 interface ColumnLine {
 	readonly column: number;
 	readonly line: number;
@@ -131,6 +138,40 @@ export function parseDirectiveComment(comment: Comment): DirectiveComment | unde
 		description: parsed.description,
 		kind: parsed.kind,
 		value: parsed.value,
+	};
+}
+
+/**
+ * Parses every directive comment in a file whose kind passes a filter.
+ *
+ * @param sourceCode - Source whose comments are scanned.
+ * @param isKind - Predicate deciding which directive kinds to keep.
+ * @returns The matching directives in source order.
+ */
+export function getDirectiveComments(
+	sourceCode: SourceCode,
+	isKind: (kind: string) => boolean,
+): ReadonlyArray<DirectiveComment> {
+	const directives = new Array<DirectiveComment>();
+	for (const comment of sourceCode.getAllComments()) {
+		const directive = parseDirectiveComment(comment);
+		if (directive !== undefined && isKind(directive.kind)) directives.push(directive);
+	}
+	return directives;
+}
+
+/**
+ * Builds the option schema for a list of directive kinds.
+ *
+ * @param description - Description of what the listed kinds mean.
+ * @returns A JSON schema for a unique array of directive kind strings.
+ */
+export function createDirectiveKindsSchema(description: string): DirectiveKindsSchema {
+	return {
+		description,
+		items: { type: "string" as const },
+		type: "array" as const,
+		uniqueItems: true,
 	};
 }
 
@@ -256,13 +297,8 @@ export function computeDisabledArea(sourceCode: SourceCode): DisabledAreaCollect
 		unusedEnableDirectives: [],
 	};
 
-	for (const comment of sourceCode.getAllComments()) {
-		const directive = parseDirectiveComment(comment);
-		if (directive === undefined) continue;
-
-		const { kind } = directive;
-		if (!isDisableOrEnableDirectiveKind(kind)) continue;
-
+	for (const directive of getDirectiveComments(sourceCode, isDisableOrEnableDirectiveKind)) {
+		const { comment, kind } = directive;
 		const { start } = comment.loc;
 
 		const ruleIds =
@@ -375,9 +411,8 @@ function closeMatchingAreas(
 	relatedDisableDirectives: Set<Comment>,
 ): boolean {
 	let used = false;
-	for (let index = areas.length - 1; index >= 0; index -= 1) {
-		const area = areas[index];
-		if (area === undefined || !isOpenMatchingArea(area, kind, ruleId)) continue;
+	for (const area of areas) {
+		if (!isOpenMatchingArea(area, kind, ruleId)) continue;
 
 		relatedDisableDirectives.add(area.comment);
 		area.end = location;

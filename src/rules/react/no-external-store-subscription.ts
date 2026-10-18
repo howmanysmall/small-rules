@@ -1,4 +1,5 @@
 import { createRule } from "$oxc-utilities/create-rule";
+import { getStateSetterCall } from "$oxc-utilities/react-effect-call-sites";
 import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
@@ -74,16 +75,13 @@ function reportSharedCleanupSetters(
 		});
 		if (!sharesCleanupVariable) continue;
 
-		const callExpression = analysis.scope.getCallExpression(reference);
-		if (callExpression === undefined) continue;
-
-		const stateName = analysis.getStateName(reference);
-		if (stateName === undefined) continue;
+		const stateSetterCall = getStateSetterCall(analysis, reference);
+		if (stateSetterCall === undefined) continue;
 
 		context.report({
-			data: { state: stateName },
+			data: { state: stateSetterCall.stateName },
 			messageId: "avoidExternalStoreSubscription",
-			node: callExpression,
+			node: stateSetterCall.callExpression,
 		});
 	}
 }

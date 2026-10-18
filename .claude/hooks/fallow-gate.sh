@@ -148,6 +148,15 @@ if [ "$VERDICT" = "fail" ]; then
 	exit 2
 fi
 
+# Audit caps clone groups at warn, so a fresh copy of an existing helper never
+# fails the verdict. Block introduced duplication here instead.
+DUPLICATION_INTRODUCED="$(jq -r '.attribution.duplication_introduced // 0' < "$TMP_JSON" 2> /dev/null || echo 0)"
+if [ "$DUPLICATION_INTRODUCED" != "0" ]; then
+	echo "fallow-gate: blocked: $DUPLICATION_INTRODUCED new clone group(s); reuse the existing code instead of copying it." >&2
+	jq '.duplication' < "$TMP_JSON" >&2
+	exit 2
+fi
+
 if [ "$STATUS" -eq 2 ] || [ "$IS_ERROR" = "true" ]; then
 	MSG="$(jq -r '.message // empty' < "$TMP_JSON" 2> /dev/null || true)"
 	if [ -n "$MSG" ]; then

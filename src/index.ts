@@ -60,6 +60,7 @@ import requireUnicodeRegex from "$oxc-rules/general/require-unicode-regex";
 import arrayTypeGeneric from "$oxc-rules/naming/array-type-generic";
 import banTypes from "$oxc-rules/naming/ban-types";
 import noSpecFileExtension from "$oxc-rules/naming/no-spec-file-extension";
+import preferOptionalParameter from "$oxc-rules/naming/prefer-optional-parameter";
 import preferPascalCaseEnums from "$oxc-rules/naming/prefer-pascal-case-enums";
 import requireAsyncSuffix from "$oxc-rules/naming/require-async-suffix";
 import banReactFc from "$oxc-rules/react/ban-react-fc";
@@ -243,6 +244,7 @@ const smallRules = definePlugin({
 		"prefer-modding-inspect": preferModdingInspect,
 		"prefer-module-scope-constants": preferModuleScopeConstants,
 		"prefer-native-collection-copy": preferNativeCollectionCopy,
+		"prefer-optional-parameter": preferOptionalParameter,
 		"prefer-padding-components": preferPaddingComponents,
 		"prefer-pascal-case-enums": preferPascalCaseEnums,
 		"prefer-sequence-overloads": preferSequenceOverloads,

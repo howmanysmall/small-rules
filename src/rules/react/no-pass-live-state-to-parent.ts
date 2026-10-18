@@ -1,9 +1,6 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	describeEffectOwner,
-	getReactEffectAnalysis,
-	getReportableEffectCall,
-} from "$oxc-utilities/react-effect-utilities";
+import { getParentCallbackCalls } from "$oxc-utilities/react-effect-call-sites";
+import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
 
 import type { InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
@@ -12,27 +9,14 @@ import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effe
 
 type RuleContext = InferContextFromRule<typeof noPassLiveStateToParent>;
 
-function getStateNames(stateReferences: ReadonlyArray<Reference>): string {
-	return stateReferences.map((stateReference) => `"${stateReference.identifier.name}"`).join(" and ");
+function getStateArguments(analysis: ReactEffectAnalysis, reference: Reference): ReadonlyArray<Reference> {
+	return analysis.scope.getArgumentUpstreamReferences(reference).filter(analysis.isState);
 }
 
 function reportPassLiveStateEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
-	for (const reference of effect.functionReferences) {
-		const callExpression = getReportableEffectCall(analysis, effect, reference, (candidate) => {
-			return analysis.isPropCall(candidate);
-		});
-		if (callExpression === undefined) continue;
-
-		const stateReferences = analysis.scope.getArgumentUpstreamReferences(reference).filter(analysis.isState);
-		if (stateReferences.length === 0) continue;
-
-		const owner = describeEffectOwner(analysis, effect);
-
+	for (const { callExpression, names, owner } of getParentCallbackCalls(analysis, effect, getStateArguments)) {
 		context.report({
-			data: {
-				name: owner.displayName,
-				state: getStateNames(stateReferences),
-			},
+			data: { name: owner.displayName, state: names },
 			messageId: owner.isInCustomHook
 				? "avoidPassingLiveStateToParentInHook"
 				: "avoidPassingLiveStateToParentInComponent",

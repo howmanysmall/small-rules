@@ -77,6 +77,7 @@ describe("no-floating-point-equality", () => {
 			},
 		],
 		valid: [
+			"function matches(value: number, limit: number) { return value === limit; }",
 			{
 				code: "if (attempts === 3) retry();",
 				documentation: { id: "pass", title: "Exact integer comparison" },

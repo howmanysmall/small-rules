@@ -5,6 +5,7 @@ import { consola } from "consola";
 
 import { createBaseCommand } from "$script-functions/create-base-command";
 import { getScriptName } from "$script-functions/get-script-name";
+import { writeGeneratedFileAsync } from "$script-functions/write-generated-file";
 import { compactDefaultProperties } from "$script-utilities/compact-default-properties";
 
 const name = getScriptName(true);
@@ -517,11 +518,7 @@ const command = createBaseCommand(
 			};
 
 			const json = JSON.stringify(compactDefaultProperties(outputData), undefined, pretty ? 2 : undefined);
-			const { mkdir, writeFile } = await import("node:fs/promises");
-			const { dirname } = await import("@std/path");
-			await mkdir(dirname(output), { recursive: true });
-			await writeFile(output, json, "utf8");
-			log.success(`Wrote ${json.length} bytes to ${output}`);
+			await writeGeneratedFileAsync(output, json, log);
 		},
 	);
 

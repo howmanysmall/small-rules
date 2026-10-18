@@ -21,7 +21,7 @@ import {
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { getRootIdentifier, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
 	forEachReactNamedImport,
@@ -69,12 +69,6 @@ function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: Rea
 	}
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
 	return isIdentifier(callee.property) ? callee.property.name : undefined;
-}
-
-function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
-	let current = stripExpressionWrappers(expression);
-	while (isMemberExpression(current)) current = stripExpressionWrappers(current.object);
-	return isIdentifier(current) ? current : undefined;
 }
 
 function isUnmemoizedInline(node: ESTree.Node): boolean {

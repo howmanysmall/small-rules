@@ -1,17 +1,8 @@
 import nodePath from "node:path";
-import {
-	isIdentifier,
-	isIdentifierNamed,
-	isImportDeclaration,
-	isImportNamespaceSpecifier,
-	isImportSpecifier,
-	isJsxElement,
-	isJsxFragment,
-	isMemberExpression,
-} from "@small-rules/oxlint-utilities";
+import { isJsxElement, isJsxFragment } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { isImportedCallee } from "$oxc-utilities/import-binding-provenance";
 import {
 	addLocalComponentImportIdentifiers,
 	createLocalComponentDiscoverer,
@@ -19,9 +10,7 @@ import {
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 
-import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
-
-import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const PORTAL_COMPONENT = {
 	componentName: "Portal",
@@ -31,64 +20,8 @@ const PORTAL_COMPONENT = {
 const PORTAL_SOURCES = new Set(["@rbxts/react-roblox", "react-dom"]);
 const JSX_EXTENSIONS = new Set([".jsx", ".tsx"]);
 
-function isImportBindingDefinition(definition: Definition): boolean {
-	return definition.type === "ImportBinding";
-}
-
-function getImportDeclarationParent(node: ESTree.Node): ESTree.ImportDeclaration | undefined {
-	/* v8 ignore start -- @preserve import specifier parents are ImportDeclaration nodes in parser output. */
-	return isImportDeclaration(node.parent) ? node.parent : undefined;
-	/* v8 ignore stop -- @preserve */
-}
-
-function isCreatePortalImport(variable?: ScopeVariable): boolean {
-	if (variable === undefined) return false;
-
-	for (const definition of variable.defs) {
-		if (!isImportBindingDefinition(definition) || !isImportSpecifier(definition.node)) continue;
-
-		const importDeclaration = getImportDeclarationParent(definition.node);
-		if (importDeclaration === undefined || !PORTAL_SOURCES.has(importDeclaration.source.value)) continue;
-
-		const { imported } = definition.node;
-		/* v8 ignore next -- @preserve createPortal imports are represented as identifier import specifiers by the parser. */
-		if (isIdentifierNamed(imported, "createPortal")) return true;
-	}
-
-	return false;
-}
-
-function isPortalNamespaceImport(variable?: ScopeVariable): boolean {
-	if (variable === undefined) return false;
-
-	for (const definition of variable.defs) {
-		if (!isImportBindingDefinition(definition) || !isImportNamespaceSpecifier(definition.node)) continue;
-
-		const importDeclaration = getImportDeclarationParent(definition.node);
-		/* v8 ignore start -- @preserve namespace import specifier parents are ImportDeclaration nodes in parser output. */
-		if (importDeclaration === undefined) continue;
-		/* v8 ignore stop -- @preserve */
-		if (PORTAL_SOURCES.has(importDeclaration.source.value)) return true;
-	}
-
-	return false;
-}
-
 function isPortalFactoryCall(sourceCode: SourceCode, { callee }: ESTree.CallExpression): boolean {
-	if (isIdentifier(callee)) {
-		return isCreatePortalImport(getVariableByName(sourceCode.getScope(callee), callee.name));
-	}
-
-	if (
-		!isMemberExpression(callee) ||
-		callee.computed ||
-		!isIdentifierNamed(callee.property, "createPortal") ||
-		!isIdentifier(callee.object)
-	) {
-		return false;
-	}
-
-	return isPortalNamespaceImport(getVariableByName(sourceCode.getScope(callee.object), callee.object.name));
+	return isImportedCallee(sourceCode, callee, PORTAL_SOURCES, "createPortal");
 }
 
 function renderPortalChild(argument: ESTree.Node, sourceCode: SourceCode): string {

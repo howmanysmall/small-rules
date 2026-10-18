@@ -1,5 +1,6 @@
 import {
 	isAnyFunction,
+	isComponentName,
 	isFunctionDeclaration,
 	isIdentifier,
 	isIdentifierNamed,
@@ -13,7 +14,6 @@ import {
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentName } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";

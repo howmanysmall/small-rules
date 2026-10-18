@@ -1,9 +1,9 @@
-import { isCallbackFunction, isFunctionDeclaration, isNode, isVariableDeclarator } from "@small-rules/oxlint-utilities";
+import { isFunctionDeclaration, isNode } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
+import { getComponentAssignment } from "$oxc-utilities/component-assignment-function";
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -30,16 +30,14 @@ function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | u
 }
 
 function getComponentAssignmentDetails(node: ESTree.Node): ComponentDetails | undefined {
-	if (!isVariableDeclarator(node) || !isComponentAssignment(node) || node.init === null) return undefined;
-	/* v8 ignore next -- component assignments require identifier declarators. @preserve */
-	if (!("name" in node.id) || !Predicate.isString(node.id.name)) return undefined;
-	/* v8 ignore next -- component assignments require function initializers. @preserve */
-	if (!isCallbackFunction(node.init)) return undefined;
-	/* v8 ignore next -- function initializers have parser-produced node bodies. @preserve */
-	if (!isNode(node.init.body)) return undefined;
+	const assignment = getComponentAssignment(node);
+	if (assignment === undefined) return undefined;
 
-	const { name } = node.id;
-	return { name, body: node.init.body, nameNode: node.id };
+	const { id, init } = assignment;
+	/* v8 ignore next -- function initializers have parser-produced node bodies. @preserve */
+	if (!isNode(init.body)) return undefined;
+
+	return { name: id.name, body: init.body, nameNode: id };
 }
 
 const noGiantComponent = createRule("no-giant-component", "react", {

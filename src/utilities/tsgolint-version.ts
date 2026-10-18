@@ -33,13 +33,11 @@ const isPackageManifest = type({
 	"dependencies?": isMaybeReadonlyDictionaryOfStrings,
 	"devDependencies?": isMaybeReadonlyDictionaryOfStrings,
 }).readonly();
-type PackageManifest = typeof isPackageManifest.infer;
 
 const isInstalledManifest = type({
 	"+": "ignore",
 	"version?": isMaybeString,
 }).readonly();
-type InstalledManifest = typeof isInstalledManifest.infer;
 
 const inferredVersionCache = new Map<string, string | undefined>();
 
@@ -99,7 +97,8 @@ function isProjectRoot(directory: string): boolean {
 }
 
 function getVersionFromInstalledPackage(root: string): string | undefined {
-	return readInstalledManifest(nodePath.join(root, "node_modules", TSGOLINT_PACKAGE, PACKAGE_MANIFEST))?.version;
+	return readManifest(nodePath.join(root, "node_modules", TSGOLINT_PACKAGE, PACKAGE_MANIFEST), isInstalledManifest)
+		?.version;
 }
 
 function getVersionFromWorkspaceCatalog(root: string): string | undefined {
@@ -113,7 +112,7 @@ function getVersionFromWorkspaceCatalog(root: string): string | undefined {
 }
 
 function getVersionFromPackageManifest(root: string): string | undefined {
-	const manifest = readPackageManifest(nodePath.join(root, PACKAGE_MANIFEST));
+	const manifest = readManifest(nodePath.join(root, PACKAGE_MANIFEST), isPackageManifest);
 	if (manifest === undefined) return undefined;
 
 	return getConcreteSpecifier(manifest.devDependencies) ?? getConcreteSpecifier(manifest.dependencies);
@@ -128,25 +127,17 @@ function getConcreteSpecifier(section: MaybeReadonlyDictionaryOfStrings): string
 	return specifier.replace(CARET_OR_TILDE, "");
 }
 
-function readPackageManifest(filePath: string): PackageManifest | undefined {
-	const text = readText(filePath);
-	if (text === undefined) return undefined;
-
-	try {
-		const parsed = JSON.parse(text);
-		return isPackageManifest.allows(parsed) ? parsed : undefined;
-	} catch {
-		return undefined;
-	}
+interface ManifestValidator<TManifest> {
+	readonly allows: (data: unknown) => data is TManifest;
 }
 
-function readInstalledManifest(filePath: string): InstalledManifest | undefined {
+function readManifest<TManifest>(filePath: string, validator: ManifestValidator<TManifest>): TManifest | undefined {
 	const text = readText(filePath);
 	if (text === undefined) return undefined;
 
 	try {
 		const parsed = JSON.parse(text);
-		return isInstalledManifest.allows(parsed) ? parsed : undefined;
+		return validator.allows(parsed) ? parsed : undefined;
 	} catch {
 		return undefined;
 	}

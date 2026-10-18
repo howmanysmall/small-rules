@@ -10,10 +10,6 @@ import {
 	isFunctionDeclarationRaw,
 	isIdentifier,
 	isIdentifierNamed,
-	isImportDeclaration,
-	isImportDefaultSpecifier,
-	isImportNamespaceSpecifier,
-	isImportSpecifier,
 	isMemberExpression,
 	isNode,
 	isObjectExpression,
@@ -50,7 +46,12 @@ import {
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-import { isReactImportedCall, STANDARD } from "$oxc-utilities/react-utilities";
+import {
+	isReactImportedCall,
+	isReactNamedImport,
+	isReactNamespaceImport as isReactNamespaceImportVariable,
+	STANDARD,
+} from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
 
@@ -391,56 +392,12 @@ function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.N
 	}
 	return undefined;
 }
-function isReactNamedImportVariable(
-	variable: undefined | Variable,
-	importedName: string,
-	reactSources: ReadonlySet<string>,
-): boolean {
-	if (variable === undefined) return false;
-	for (const definition of variable.defs) {
-		if (matchesNamedImport(definition, importedName, reactSources)) return true;
-	}
-	return false;
-}
-
-function matchesNamedImport(
-	definition: Variable["defs"][number],
-	importedName: string,
-	reactSources: ReadonlySet<string>,
-): boolean {
-	if (definition.type !== "ImportBinding") return false;
-	/* v8 ignore start -- @preserve ImportBinding definitions are always parented by an ImportDeclaration. */
-	const importDeclaration = definition.node.parent;
-	if (!isImportDeclaration(importDeclaration)) return false;
-	if (!reactSources.has(importDeclaration.source.value)) return false;
-	if (!isImportSpecifier(definition.node)) return false;
-	/* v8 ignore stop */
-	const { imported } = definition.node;
-	if (isIdentifierNamed(imported, importedName)) return true;
-	/* v8 ignore next -- string-literal import specifiers are a parser edge case not produced by the yuku parser. @preserve */
-	if (isAnyLiteral(imported) && imported.value === importedName) return true;
-	return false;
-}
-
-function isReactNamespaceImportVariable(variable: undefined | Variable, reactSources: ReadonlySet<string>): boolean {
-	/* v8 ignore start -- @preserve callers pass resolved variables from parser-valid import bindings. */
-	if (variable === undefined) return false;
-	for (const definition of variable.defs) {
-		if (definition.type !== "ImportBinding") continue;
-
-		const importDeclaration = definition.node.parent;
-		if (!isImportDeclaration(importDeclaration) || !reactSources.has(importDeclaration.source.value)) continue;
-		if (isImportDefaultSpecifier(definition.node) || isImportNamespaceSpecifier(definition.node)) return true;
-	}
-	return false;
-	/* v8 ignore stop */
-}
 function isBindingImportedCall(state: ReactEffectAnalysisState, node: ESTree.Node, importedName: string): boolean {
 	/* v8 ignore next -- callers only pass identifier-shaped callees to isBindingImportedCall. @preserve */
 	if (!isIdentifier(node)) return false;
 	/* v8 ignore next -- isBindingImportedCall is only reached for identifiers that the caller already matched by name, so a bare identifier without a scope variable is unreachable here. @preserve */
 	const variable = getVariableByName(state, node);
-	return isReactNamedImportVariable(variable, importedName, state.reactSources);
+	return isReactNamedImport(variable, importedName, state.reactSources);
 }
 
 function isReactNamespaceImport(state: ReactEffectAnalysisState, identifier: ESTree.IdentifierReference): boolean {
@@ -448,18 +405,17 @@ function isReactNamespaceImport(state: ReactEffectAnalysisState, identifier: EST
 	return isReactNamespaceImportVariable(variable, state.reactSources);
 }
 
-function isState(state: ReactEffectAnalysisState, reference: Reference): boolean {
+function isStateElementAt(state: ReactEffectAnalysisState, reference: Reference, index: 0 | 1): boolean {
 	const elements = getStateElements(state, reference);
-	if (elements === undefined) return false;
-	const [stateElement] = elements;
-	return isIdentifierNamed(stateElement, reference.identifier.name);
+	return elements !== undefined && isIdentifierNamed(elements[index], reference.identifier.name);
+}
+
+function isState(state: ReactEffectAnalysisState, reference: Reference): boolean {
+	return isStateElementAt(state, reference, 0);
 }
 
 function isStateSetter(state: ReactEffectAnalysisState, reference: Reference): boolean {
-	const elements = getStateElements(state, reference);
-	if (elements === undefined) return false;
-	const [, setterElement] = elements;
-	return isIdentifierNamed(setterElement, reference.identifier.name);
+	return isStateElementAt(state, reference, 1);
 }
 
 function getStateElements(

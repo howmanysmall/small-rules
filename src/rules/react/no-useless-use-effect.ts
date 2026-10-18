@@ -479,6 +479,40 @@ function getStatementsFromConsequent(consequent: ESTree.Statement): ReadonlyArra
 	return [consequent];
 }
 
+/**
+ * Matches a statement pair where exactly one statement resets a flag that
+ * `isFlagTest` recognizes in `test`, and the other is a side-effect call.
+ *
+ * @param pair - The two statements, in source order.
+ * @param test - The condition guarding the pair.
+ * @param isFlagTest - Whether `test` checks the named flag.
+ * @param stateSetterToValue - Maps state setters to their state values.
+ * @param stateSetterIdentifiers - The state setter names.
+ * @returns The flag name, or `undefined` when the pair does not match.
+ */
+function matchFlagResetPair(
+	[first, second]: readonly [ESTree.Statement, ESTree.Statement],
+	test: ESTree.Expression,
+	isFlagTest: (test: ESTree.Expression, flagName: string) => boolean,
+	stateSetterToValue: ReadonlyMap<string, string>,
+	stateSetterIdentifiers: ReadonlySet<string>,
+): string | undefined {
+	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
+	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
+	let flagName: string;
+	let sideEffectStatement: ESTree.Statement;
+	if (firstFlag !== undefined && secondFlag === undefined) {
+		flagName = firstFlag;
+		sideEffectStatement = second;
+	} else if (firstFlag === undefined && secondFlag !== undefined) {
+		flagName = secondFlag;
+		sideEffectStatement = first;
+	} else return undefined;
+
+	if (!isFlagTest(test, flagName)) return undefined;
+	return getSideEffectCall(sideEffectStatement, stateSetterIdentifiers) === undefined ? undefined : flagName;
+}
+
 function matchGuardedEventFlagPattern(
 	statements: ReadonlyArray<ESTree.Statement>,
 	stateSetterToValue: ReadonlyMap<string, string>,
@@ -489,18 +523,15 @@ function matchGuardedEventFlagPattern(
 	/* v8 ignore next -- @preserve all tests pass IfStatements without an alternate branch. */
 	if (guard.alternate !== null) return undefined;
 
-	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
-	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
-	const guardReturns = isReturnWithoutArgument(guard.consequent);
-	if (firstFlag !== undefined && secondFlag === undefined) {
-		if (!guardReturns || !isNegativeFlagTest(guard.test, firstFlag)) return undefined;
-		return getSideEffectCall(second, stateSetterIdentifiers) === undefined ? undefined : firstFlag;
-	}
+	if (!isReturnWithoutArgument(guard.consequent)) return undefined;
 
-	if (secondFlag === undefined || firstFlag !== undefined) return undefined;
-	if (!guardReturns || !isNegativeFlagTest(guard.test, secondFlag)) return undefined;
-	/* v8 ignore next -- no-side-effect guarded flag exits are covered as non-event-flag valid behavior. @preserve */
-	return getSideEffectCall(first, stateSetterIdentifiers) === undefined ? undefined : secondFlag;
+	return matchFlagResetPair(
+		[first, second],
+		guard.test,
+		isNegativeFlagTest,
+		stateSetterToValue,
+		stateSetterIdentifiers,
+	);
 }
 
 function matchPositiveEventFlagPattern(
@@ -514,18 +545,13 @@ function matchPositiveEventFlagPattern(
 	const [first, second] = consequentStatements;
 	if (first === undefined || second === undefined || consequentStatements.length !== 2) return undefined;
 
-	const firstFlag = getResetFlagNameFromStatement(first, stateSetterToValue);
-	const secondFlag = getResetFlagNameFromStatement(second, stateSetterToValue);
-	if (firstFlag !== undefined && secondFlag === undefined) {
-		if (!isIdentifierNamed(statement.test, firstFlag)) return undefined;
-		/* v8 ignore next -- no-side-effect positive flag exits are covered as non-event-flag valid behavior. @preserve */
-		return getSideEffectCall(second, stateSetterIdentifiers) === undefined ? undefined : firstFlag;
-	}
-
-	if (secondFlag === undefined || firstFlag !== undefined) return undefined;
-	if (!isIdentifierNamed(statement.test, secondFlag)) return undefined;
-	/* v8 ignore next -- no-side-effect positive flag exits are covered as non-event-flag valid behavior. @preserve */
-	return getSideEffectCall(first, stateSetterIdentifiers) === undefined ? undefined : secondFlag;
+	return matchFlagResetPair(
+		[first, second],
+		statement.test,
+		isIdentifierNamed,
+		stateSetterToValue,
+		stateSetterIdentifiers,
+	);
 }
 
 function matchEventFlagPattern(
@@ -642,20 +668,7 @@ function pushExpressionSearchChildren(current: ExpressionSearchNode, stack: Arra
 }
 
 function containsIdentifier(node: ESTree.Expression): boolean {
-	const stack: Array<ExpressionSearchNode> = [node];
-	const visited = new Set<ESTree.Node>();
-
-	while (stack.length > 0) {
-		const current = stack.pop();
-		/* v8 ignore next -- stack length is checked before pop. @preserve */
-		if (current === undefined || visited.has(current)) continue;
-		visited.add(current);
-
-		if (isIdentifier(current)) return true;
-		pushExpressionSearchChildren(current, stack);
-	}
-
-	return false;
+	return collectIdentifiers(node).size > 0;
 }
 
 function countMatchingCalls(
@@ -851,30 +864,38 @@ function isAllowedPropertyCallbackCall(
 	return memberNames !== undefined && propertyCallbackIdentifiers.has(memberNames.objectName);
 }
 
-function hasNonSetterSideEffect(
+function hasNestedCallMatching(
 	statements: ReadonlyArray<ESTree.Statement>,
-	stateSetterIdentifiers: ReadonlySet<string>,
-	propertyCallbackIdentifiers: ReadonlySet<string>,
+	matches: (callExpression: ESTree.CallExpression) => boolean,
 ): boolean {
-	for (const statement of statements) {
+	const worklist = [...statements];
+	for (const statement of worklist) {
 		if (isIfStatement(statement)) {
-			const innerStatements = getStatementsFromConsequent(statement.consequent);
-			if (hasNonSetterSideEffect(innerStatements, stateSetterIdentifiers, propertyCallbackIdentifiers)) {
-				return true;
+			for (const innerStatement of getStatementsFromConsequent(statement.consequent)) {
+				// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
+				worklist.push(innerStatement);
 			}
 			continue;
 		}
 
 		const callExpression = getCallExpressionFromStatement(statement);
-		if (callExpression === undefined) continue;
-
-		if (isStateSetterCall(callExpression, stateSetterIdentifiers)) continue;
-		if (isAllowedPropertyCallbackCall(callExpression, propertyCallbackIdentifiers)) continue;
-
-		return true;
+		if (callExpression !== undefined && matches(callExpression)) return true;
 	}
 
 	return false;
+}
+
+function hasNonSetterSideEffect(
+	statements: ReadonlyArray<ESTree.Statement>,
+	stateSetterIdentifiers: ReadonlySet<string>,
+	propertyCallbackIdentifiers: ReadonlySet<string>,
+): boolean {
+	return hasNestedCallMatching(
+		statements,
+		(callExpression) =>
+			!isStateSetterCall(callExpression, stateSetterIdentifiers) &&
+			!isAllowedPropertyCallbackCall(callExpression, propertyCallbackIdentifiers),
+	);
 }
 
 function hasOnlySetterCallsWithArgument(
@@ -963,20 +984,9 @@ function hasRefPassedToParent(
 	referenceIdentifiers: ReadonlySet<string>,
 	propertyCallbackIdentifiers: ReadonlySet<string>,
 ): boolean {
-	for (const statement of statements) {
-		if (isIfStatement(statement)) {
-			const innerStatements = getStatementsFromConsequent(statement.consequent);
-			if (hasRefPassedToParent(innerStatements, referenceIdentifiers, propertyCallbackIdentifiers)) return true;
-			continue;
-		}
-
-		const callExpression = getCallExpressionFromStatement(statement);
-		if (callExpression === undefined) continue;
-
-		if (passesRefCurrentToCallback(callExpression, referenceIdentifiers, propertyCallbackIdentifiers)) return true;
-	}
-
-	return false;
+	return hasNestedCallMatching(statements, (callExpression) =>
+		passesRefCurrentToCallback(callExpression, referenceIdentifiers, propertyCallbackIdentifiers),
+	);
 }
 
 function collectIdentifiers(node: ESTree.Node): Set<string> {
@@ -996,7 +1006,7 @@ function collectIdentifiers(node: ESTree.Node): Set<string> {
 			continue;
 		}
 
-		if (isExpressionSearchNode(current)) pushExpressionSearchChildren(current, stack);
+		pushExpressionSearchChildren(current, stack);
 	}
 
 	return identifiers;
@@ -1007,23 +1017,52 @@ function getAlternateStatements(statement: ESTree.IfStatement): ReadonlyArray<ES
 	return isBlockStatement(statement.alternate) ? statement.alternate.body : [statement.alternate];
 }
 
-function hasPropertyDependencyInCondition(
+function hasConditionIdentifier(
 	statement: ESTree.IfStatement,
-	stateValueIdentifiers: ReadonlySet<string>,
-	dependencyIdentifiers: ReadonlySet<string>,
+	included: ReadonlySet<string>,
+	excluded?: ReadonlySet<string>,
 ): boolean {
-	const conditionIdentifiers = collectIdentifiers(statement.test);
-	return [...conditionIdentifiers].some((id) => dependencyIdentifiers.has(id) && !stateValueIdentifiers.has(id));
+	for (const name of collectIdentifiers(statement.test)) {
+		if (included.has(name) && excluded?.has(name) !== true) return true;
+	}
+	return false;
 }
 
-function hasSetterCallStatement(
+/**
+ * Walks `if` statements and their `else` chains for a branch whose condition
+ * reads an identifier from `included` (and not from `excluded`) and whose
+ * consequent holds a statement matching `isConsequentMatch`.
+ *
+ * @param statements - The statements to search.
+ * @param included - Identifiers the condition must read.
+ * @param excluded - Identifiers that do not count toward `included`.
+ * @param isConsequentMatch - Matches a statement in the branch body.
+ * @returns Whether such a branch exists.
+ */
+function hasIfBranchMatching(
 	statements: ReadonlyArray<ESTree.Statement>,
-	stateSetterIdentifiers: ReadonlySet<string>,
+	included: ReadonlySet<string>,
+	excluded: ReadonlySet<string> | undefined,
+	isConsequentMatch: (statement: ESTree.Statement) => boolean,
 ): boolean {
-	return statements.some((statement) => {
-		const call = getCallExpressionFromStatement(statement);
-		return call !== undefined && isStateSetterCall(call, stateSetterIdentifiers);
-	});
+	const worklist = [...statements];
+	for (const statement of worklist) {
+		if (!isIfStatement(statement)) continue;
+
+		if (
+			hasConditionIdentifier(statement, included, excluded) &&
+			getStatementsFromConsequent(statement.consequent).some(isConsequentMatch)
+		) {
+			return true;
+		}
+
+		for (const alternateStatement of getAlternateStatements(statement)) {
+			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
+			worklist.push(alternateStatement);
+		}
+	}
+
+	return false;
 }
 
 function hasConditionalSetterBasedOnProperty(
@@ -1032,29 +1071,10 @@ function hasConditionalSetterBasedOnProperty(
 	stateValueIdentifiers: ReadonlySet<string>,
 	dependencyIdentifiers: ReadonlySet<string>,
 ): boolean {
-	for (const statement of statements) {
-		if (!isIfStatement(statement)) continue;
-
-		if (
-			hasPropertyDependencyInCondition(statement, stateValueIdentifiers, dependencyIdentifiers) &&
-			hasSetterCallStatement(getStatementsFromConsequent(statement.consequent), stateSetterIdentifiers)
-		) {
-			return true;
-		}
-
-		if (
-			hasConditionalSetterBasedOnProperty(
-				getAlternateStatements(statement),
-				stateSetterIdentifiers,
-				stateValueIdentifiers,
-				dependencyIdentifiers,
-			)
-		) {
-			return true;
-		}
-	}
-
-	return false;
+	return hasIfBranchMatching(statements, dependencyIdentifiers, stateValueIdentifiers, (statement) => {
+		const call = getCallExpressionFromStatement(statement);
+		return call !== undefined && isStateSetterCall(call, stateSetterIdentifiers);
+	});
 }
 
 const EVENT_SIDE_EFFECT_PREFIXES = new Set([
@@ -1092,37 +1112,14 @@ function isEventSideEffectCall(statement: ESTree.Statement, stateSetterIdentifie
 	return hasEventPrefix(call.callee.property.name);
 }
 
-function hasStateInCondition(statement: ESTree.IfStatement, stateValueIdentifiers: ReadonlySet<string>): boolean {
-	const conditionIdentifiers = collectIdentifiers(statement.test);
-	return [...conditionIdentifiers].some((id) => stateValueIdentifiers.has(id));
-}
-
 function hasEventSpecificLogic(
 	statements: ReadonlyArray<ESTree.Statement>,
 	stateSetterIdentifiers: ReadonlySet<string>,
 	stateValueIdentifiers: ReadonlySet<string>,
 ): boolean {
-	for (const statement of statements) {
-		if (!isIfStatement(statement)) continue;
-
-		if (
-			hasStateInCondition(statement, stateValueIdentifiers) &&
-			getStatementsFromConsequent(statement.consequent).some((stmt) =>
-				isEventSideEffectCall(stmt, stateSetterIdentifiers),
-			)
-		) {
-			return true;
-		}
-
-		if (
-			statement.alternate !== null &&
-			hasEventSpecificLogic(getAlternateStatements(statement), stateSetterIdentifiers, stateValueIdentifiers)
-		) {
-			return true;
-		}
-	}
-
-	return false;
+	return hasIfBranchMatching(statements, stateValueIdentifiers, undefined, (statement) =>
+		isEventSideEffectCall(statement, stateSetterIdentifiers),
+	);
 }
 
 function areDependenciesIdentical(ids1: ReadonlySet<string>, ids2: ReadonlySet<string>): boolean {

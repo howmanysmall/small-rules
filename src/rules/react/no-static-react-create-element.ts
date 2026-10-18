@@ -1,6 +1,7 @@
 import {
 	isCallbackFunction,
 	isClassExpression,
+	isComponentName,
 	isIdentifier,
 	isMemberExpression,
 	isSpreadElement,
@@ -10,10 +11,11 @@ import {
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, isComponentName } from "$oxc-utilities/oxc-utilities";
+import { getMemberPropertyName } from "$oxc-utilities/oxc-utilities";
 import {
 	ENVIRONMENT_SCHEMA,
 	getReactSourcesFromOptions,
+	isReactImportedCall,
 	isReactNamedImport,
 	isReactNamespaceImport,
 } from "$oxc-utilities/react-utilities";
@@ -22,25 +24,7 @@ import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expre
 import type { Definition, ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
 const REACT_FRAGMENT = "Fragment";
-
-function isReactCreateElementCall(
-	sourceCode: SourceCode,
-	{ callee }: ESTree.CallExpression,
-	reactSources: ReadonlySet<string>,
-): boolean {
-	if (isIdentifier(callee)) {
-		const variable = getVariableByName(sourceCode.getScope(callee), callee.name);
-		return isReactNamedImport(variable, "createElement", reactSources);
-	}
-
-	if (!isMemberExpression(callee) || callee.computed || getMemberPropertyName(callee) !== "createElement") {
-		return false;
-	}
-	if (!isIdentifier(callee.object)) return false;
-
-	const variable = getVariableByName(sourceCode.getScope(callee.object), callee.object.name);
-	return isReactNamespaceImport(variable, reactSources);
-}
+const CREATE_ELEMENT_NAMES = new Set(["createElement"]);
 
 function isClassOrFunctionName(definition: Definition): boolean {
 	return definition.type === "FunctionName" || definition.type === "ClassName";
@@ -141,7 +125,7 @@ const noStaticReactCreateElement = createRule("no-static-react-create-element", 
 
 		return {
 			CallExpression(node): void {
-				if (!isReactCreateElementCall(sourceCode, node, reactSources)) return;
+				if (!isReactImportedCall(sourceCode, node, CREATE_ELEMENT_NAMES, reactSources)) return;
 
 				const [elementArgument] = node.arguments;
 				if (elementArgument === undefined) return;

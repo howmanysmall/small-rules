@@ -27,6 +27,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { areEquivalentMemberExpressions } from "$oxc-utilities/member-expression-equivalence";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -117,7 +118,14 @@ function areEquivalentExpression(left: ESTree.Expression, right: ESTree.Expressi
 
 		case MEMBER_EXPRESSION: {
 			return (
-				isMemberExpression(normalizedRight) && areEquivalentMember(normalizedLeft, normalizedRight, sourceCode)
+				isMemberExpression(normalizedRight) &&
+				areEquivalentMemberExpressions(
+					normalizedLeft,
+					normalizedRight,
+					sourceCode,
+					areEquivalentExpressionOrSuper,
+					areEquivalentOperand,
+				)
 			);
 		}
 
@@ -175,23 +183,6 @@ function areEquivalentLogical(
 		areEquivalentExpression(left.left, right.left, sourceCode) &&
 		areEquivalentExpression(left.right, right.right, sourceCode)
 	);
-}
-
-function areEquivalentMember(
-	left: ESTree.MemberExpression,
-	right: ESTree.MemberExpression,
-	sourceCode: SourceCode,
-): boolean {
-	if (left.computed !== right.computed || left.optional !== right.optional) return false;
-	if (!areEquivalentExpressionOrSuper(left.object, right.object, sourceCode)) return false;
-	return left.computed
-		? areEquivalentOperand(left.property, right.property, sourceCode)
-		: areEquivalentStaticMemberProperty(left.property, right.property);
-}
-
-function areEquivalentStaticMemberProperty(left: BinaryOperand, right: BinaryOperand): boolean {
-	if (isIdentifier(left) && isIdentifier(right)) return left.name === right.name;
-	return isPrivateIdentifier(left) && isPrivateIdentifier(right) && left.name === right.name;
 }
 
 function getNegatedExpression(expression: ESTree.Expression): ESTree.Expression | undefined {

@@ -20,6 +20,7 @@ import {
 	STOP_NODE_TRAVERSAL,
 } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getSingleIdentifierDeclarator } from "$oxc-utilities/single-identifier-declarator";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -38,14 +39,9 @@ function getEmptyCollectionDeclaration(
 	statement: ProgramStatement,
 	sourceCode: SourceCode,
 ): EmptyCollectionDeclaration | undefined {
-	if (!isVariableDeclaration(statement) || statement.declarations.length !== 1) return undefined;
-	const [declarator] = statement.declarations;
-	if (
-		declarator === undefined ||
-		!isIdentifier(declarator.id) ||
-		!isNewExpression(declarator.init) ||
-		declarator.init.arguments.length > 0
-	) {
+	if (!isVariableDeclaration(statement)) return undefined;
+	const declarator = getSingleIdentifierDeclarator(statement);
+	if (declarator === undefined || !isNewExpression(declarator.init) || declarator.init.arguments.length > 0) {
 		return undefined;
 	}
 

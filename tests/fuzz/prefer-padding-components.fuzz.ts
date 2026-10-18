@@ -6,6 +6,8 @@ import { FuzzedDataProvider } from "@vitiate/fuzzed-data-provider";
 
 import rule from "$oxc-rules/react/prefer-padding-components";
 
+import { consumeHex } from "./support/consume-hex";
+
 import type { NormalizedValidCase } from "@small-rules/rule-harness/types";
 
 const PADDING_MODES: ReadonlyArray<"directional" | "equal" | "unequal"> = ["directional", "equal", "unequal"];
@@ -27,12 +29,8 @@ const FILENAME = nodePath.join(
 );
 const execute = createRuleExecutor("prefer-padding-components", rule);
 
-function convertBytesToHex(bytes: Uint8Array): string {
-	return Buffer.from(bytes).toString("hex");
-}
-
 function createExpression(provider: FuzzedDataProvider, prefix: string): string {
-	let expression = `${prefix}${convertBytesToHex(provider.consumeBytes(12))}`;
+	let expression = `${prefix}${consumeHex(provider, 12)}`;
 	const depth = provider.consumeIntegralInRange(0, 6);
 
 	for (let index = 0; index < depth; index += 1) {

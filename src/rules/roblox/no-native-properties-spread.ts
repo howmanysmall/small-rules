@@ -2,7 +2,6 @@ import {
 	isIdentifier,
 	isJsxEmptyExpression,
 	isJsxExpressionContainer,
-	isJsxIdentifier,
 	isMemberExpression,
 	isObjectExpression,
 	isSpreadElement,
@@ -11,8 +10,10 @@ import {
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getJsxAttributeName } from "$oxc-utilities/jsx-attribute-name";
+import { resolvesToModuleBinding } from "$oxc-utilities/module-binding-resolution";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
-import { isImportBinding, isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
+import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -28,10 +29,6 @@ type SpreadReportTarget =
 			readonly messageId: "noNativePropertiesSpread";
 			readonly propertyName: string;
 	  };
-
-function getJsxAttributeName(name: ESTree.JSXAttributeName): string | undefined {
-	return isJsxIdentifier(name) ? name.name : name.name.name;
-}
 
 function isNativePropertiesPropertyName(name: string): boolean {
 	return name === "nativeProperties" || name.endsWith(NATIVE_PROPERTIES_SUFFIX);
@@ -64,10 +61,7 @@ function shouldReportSpreadArgument(sourceCode: SourceCode, argument: ESTree.Exp
 	const rootIdentifier = getRootIdentifier(unwrappedArgument);
 	if (rootIdentifier === undefined) return false;
 
-	const variable = getVariableByName(sourceCode.getScope(rootIdentifier), rootIdentifier.name);
-	if (variable === undefined) return false;
-
-	return isImportBinding(variable) || isModuleLevelScope(variable.scope);
+	return resolvesToModuleBinding(sourceCode, rootIdentifier);
 }
 
 function resolveObjectExpression(
@@ -116,7 +110,7 @@ const noNativePropertiesSpread = createRule("no-native-properties-spread", "robl
 		return {
 			JSXAttribute(node): void {
 				const propertyName = getJsxAttributeName(node.name);
-				if (propertyName === undefined || !isNativePropertiesPropertyName(propertyName)) return;
+				if (!isNativePropertiesPropertyName(propertyName)) return;
 
 				const { value } = node;
 				if (!isJsxExpressionContainer(value)) return;

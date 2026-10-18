@@ -8,7 +8,9 @@ Before any `git commit` or `git push`, run `fallow audit --format json --quiet -
 
 The audit gates on `new-only`: only findings introduced by the current changeset affect the verdict. Inherited findings on touched files are reported under `attribution` with `introduced: false` and do not block.
 
-In Claude Code, `.claude/hooks/fallow-gate.sh` runs this audit on every `git commit` and `git push` and blocks a `fail` verdict; the hk pre-push hook runs `mise run fallow:audit-hk` as well. Any other agent runs the command itself.
+In Claude Code, `.claude/hooks/fallow-gate.sh` runs this audit on every `git commit` and `git push` and blocks a `fail` verdict or any introduced clone group (audit caps duplication at `warn`). The hk pre-push hook runs `mise run fallow:audit-hk` as well. Any other agent runs the command itself and treats `attribution.duplication_introduced > 0` as a block.
+
+Duplication is gated against `fallow-baselines/dupes.json`: a clone group missing from it fails pre-push. The baseline is shrink-only. After removing a clone, run `fallow baselines prune`, and never re-save the baseline to admit a new clone. Reuse the existing helper instead.
 
 ## Task Map
 

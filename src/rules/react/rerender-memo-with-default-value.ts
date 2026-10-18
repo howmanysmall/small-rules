@@ -1,18 +1,16 @@
 import {
 	isArrayExpression,
 	isAssignmentPattern,
-	isCallbackFunction,
 	isEmptyObjectExpression,
 	isFunctionDeclaration,
 	isNode,
 	isObjectPattern,
 	isProperty,
-	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
+import { getComponentAssignment } from "$oxc-utilities/component-assignment-function";
 import { isComponentDeclaration } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isComponentAssignment } from "$oxc-utilities/lint-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -68,11 +66,8 @@ function getComponentDeclarationParameters(node: ESTree.Node): ReadonlyArray<EST
 	return [...node.params];
 }
 function getComponentAssignmentParameters(node: ESTree.Node): ReadonlyArray<ESTree.ParamPattern> | undefined {
-	/* v8 ignore next -- @preserve isComponentAssignment already proves a function initializer. */
-	if (!isVariableDeclarator(node) || !isComponentAssignment(node) || node.init === null) return undefined;
-	/* v8 ignore next -- @preserve isComponentAssignment already proves a function initializer. */
-	if (!isCallbackFunction(node.init)) return undefined;
-	return [...node.init.params];
+	const assignment = getComponentAssignment(node);
+	return assignment === undefined ? undefined : [...assignment.init.params];
 }
 
 const rerenderMemoWithDefaultValue = createRule("rerender-memo-with-default-value", "react", {

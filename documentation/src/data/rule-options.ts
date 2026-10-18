@@ -150,6 +150,20 @@ const objectPlaceholders = new Map<string, JsonValue>([
 	["classes", { Log: "@rbxts/rbxts-sleitnick-log" }],
 ]);
 
+function createSchemaDefaultsValue(ruleName: RuleName): JsonValue {
+	const schema = getRuleSchema(ruleName);
+	const optionSchema = isJsonArray(schema) ? schema[0] : schema;
+	if (!isSchemaRecord(optionSchema) || !isSchemaRecord(optionSchema.properties)) return {};
+
+	const defaults: Record<string, JsonValue> = {};
+	for (const [propertyName, propertySchema] of Object.entries(optionSchema.properties)) {
+		if (isSchemaRecord(propertySchema) && propertySchema.default !== undefined) {
+			defaults[propertyName] = propertySchema.default;
+		}
+	}
+	return defaults;
+}
+
 function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 	switch (ruleName) {
 		case "no-discarded-rejection": {
@@ -196,31 +210,7 @@ function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 		}
 
 		case "require-react-component-keys": {
-			return [
-				"error",
-				{
-					allowRootKeys: false,
-					ignoreCallExpressions: [
-						"ReactTree.mount",
-						"CreateReactStory",
-						"createReactStory",
-						"createPlatformStory",
-					],
-					iterationMethods: [
-						"map",
-						"filter",
-						"forEach",
-						"flatMap",
-						"reduce",
-						"reduceRight",
-						"some",
-						"every",
-						"find",
-						"findIndex",
-					],
-					memoizationHooks: ["useCallback", "useMemo"],
-				},
-			];
+			return ["error", createSchemaDefaultsValue(ruleName)];
 		}
 
 		case "use-exhaustive-dependencies": {

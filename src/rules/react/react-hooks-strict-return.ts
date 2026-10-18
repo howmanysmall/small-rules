@@ -142,35 +142,27 @@ function shouldAllowIdentifierReturn(sourceCode: SourceCode, node: ESTree.Node &
 	return hasObjectInitializer(variable);
 }
 
-function getArrayInitializer(
-	node: ESTree.VariableDeclarator,
-): undefined | { init: ESTree.ArrayExpression; name: string } {
+interface NamedArrayInitializer {
+	readonly name: string;
+	readonly init: ESTree.ArrayExpression;
+}
+
+function getArrayInitializer(node: ESTree.VariableDeclarator): NamedArrayInitializer | undefined {
 	const name = getVariableDeclaratorName(node);
 	if (name === undefined || !isArrayExpression(node.init)) return undefined;
 	return { name, init: node.init };
 }
 
 function pushArrayInitializer(
-	node: ESTree.VariableDeclarator,
+	{ name, init }: NamedArrayInitializer,
 	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
 ): void {
-	const initializer = getArrayInitializer(node);
-	if (initializer === undefined) return;
-
-	const { name, init } = initializer;
 	const initializers = arrayInitializersByName.get(name) ?? new Array<ESTree.ArrayExpression>();
 	initializers.push(init);
 	arrayInitializersByName.set(name, initializers);
 }
 
-function popArrayInitializer(
-	node: ESTree.VariableDeclarator,
-	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
-): void {
-	const initializer = getArrayInitializer(node);
-	if (initializer === undefined) return;
-
-	const { name } = initializer;
+function popArrayInitializer(name: string, arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>): void {
 	const initializers = arrayInitializersByName.get(name);
 	/* v8 ignore next -- exit visitors mirror enter visitors that created the initializer stack. @preserve */
 	if (initializers === undefined || initializers.length === 0) return;
@@ -245,10 +237,12 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 			"FunctionExpression:exit": exitNamedHook,
 			ReturnStatement: checkReturnStatement,
 			VariableDeclarator(node): void {
-				pushArrayInitializer(node, arrayInitializersByName);
+				const initializer = getArrayInitializer(node);
+				if (initializer !== undefined) pushArrayInitializer(initializer, arrayInitializersByName);
 			},
 			"VariableDeclarator:exit"(node): void {
-				popArrayInitializer(node, arrayInitializersByName);
+				const initializer = getArrayInitializer(node);
+				if (initializer !== undefined) popArrayInitializer(initializer.name, arrayInitializersByName);
 			},
 		};
 	},
