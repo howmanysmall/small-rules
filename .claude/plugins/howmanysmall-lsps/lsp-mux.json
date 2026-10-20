@@ -16,7 +16,7 @@
 		},
 		{
 			"args": ["--lsp", "--stdio"],
-			"command": "tsgo",
+			"command": "tsrs",
 			"extensions": [".ts", ".tsx"],
 			"name": "typescript",
 			"rootMarkers": ["tsconfig.json", "jsconfig.json"]

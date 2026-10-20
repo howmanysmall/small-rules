@@ -24,7 +24,7 @@ Ambient declarations only: a module augmentation for `oxlint-plugin-utilities` a
 
 The `$oxc-*` and `$test/*` path aliases are defined in the `paths` block of `tsconfig.base.json`.
 
-`tsconfig.json` is a solution file over `tsconfig.lib.json`, `tsconfig.test.json`, and `tsconfig.node.json`. Project references are derived from each `package.json`, and a missing one is silent: `tsgo --build` resolves the import through the root `node_modules` and skips the project. `nr references:check` catches it and `nr references:sync` repairs it.
+`tsconfig.json` is a solution file over `tsconfig.lib.json`, `tsconfig.test.json`, and `tsconfig.node.json`. Project references are derived from each `package.json`, and a missing one is silent: `tsrs --build` resolves the import through the root `node_modules` and skips the project. `nr references:check` catches it and `nr references:sync` repairs it.
 
 ## Tests
 
@@ -32,5 +32,5 @@ A test sits beside the file it covers as `<name>.test.ts`: `src/rules/<category>
 
 ## Quality Thresholds
 
-- `vitest.config.ts` - 100% v8 coverage threshold; type checking through `tsgo`
+- `vitest.config.ts` - 100% v8 coverage threshold; type checking through `tsrs`
 - `stryker.config.mjs` - mutates `src/` except `.d.ts` files, `src/types/`, generated code, and `index.ts`; breaks below 70%

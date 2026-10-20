@@ -16,7 +16,7 @@ A change is done when all three pass on every file you touched:
 |------|---------|
 | Lint (oxlint via `isentinel-lint`, then Biome) | `nr lint:agent [files...]` |
 | Unit tests with coverage | `nr test:agent` |
-| Type check (`tsgo`) | `nr type-check:agent` |
+| Type check (`tsrs`) | `nr type-check:agent` |
 
 Use the `:agent` variants; they emit compact output. `nr format` (Biome, then oxfmt) fixes a formatting failure. Run one test file with `nr test:agent -- src/rules/roblox/no-print.test.ts`, or a name pattern with `nr test:agent -t "no-print"`.
 

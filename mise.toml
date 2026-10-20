@@ -193,5 +193,5 @@ description = "Run the Vitest unit test suite once without sharding."
 run = "node --run test"
 
 [tasks.type-check]
-description = "Run TypeScript type checking with tsgo without emitting files."
+description = "Run TypeScript type checking with tsrs without emitting files."
 run = "node --run type-check"

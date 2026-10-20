@@ -100,7 +100,7 @@ local fileChecks = new Mapping<String, Step> {
     exclude = GENERATED_DATA
   }
   // tsconfig project references are derived from each package.json, and a
-  // missing one is silent: tsgo --build still resolves the import through
+  // missing one is silent: tsrs --build still resolves the import through
   // the root node_modules and skips the project.
   ["tsconfig-references"] {
     glob = List("**/package.json", "**/tsconfig*.json")

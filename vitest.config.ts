@@ -59,7 +59,7 @@ const testConfiguration = mergeConfig(
 						name: "types",
 						benchmark: { exclude: ["**/*"] },
 						typecheck: {
-							checker: "tsgo",
+							checker: "tsrs",
 							enabled: true,
 							include: ["{scripts,src,tests}/**/*.test.ts", "{scripts,src,tests}/**/*.test-d.ts"],
 							only: true,

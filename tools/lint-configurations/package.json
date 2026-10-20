@@ -24,9 +24,9 @@
 		"@small-rules/local-rules": "workspace:*",
 		"@small-rules/vite-configuration": "workspace:*",
 		"@types/node": "catalog:types",
-		"@typescript/native-preview": "catalog:tooling",
 		"eslint-plugin-sonarjs": "catalog:lint",
 		"oxlint": "catalog:lint",
+		"tsrs": "catalog:tooling",
 		"vitest": "catalog:test"
 	}
 }

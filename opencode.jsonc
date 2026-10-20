@@ -205,7 +205,7 @@
 			"extensions": [".toml"],
 		},
 		"typescript": {
-			"command": ["node", "--run", "tsgo", "--", "--lsp", "--stdio"],
+			"command": ["node", "--run", "tsrs", "--", "--lsp", "--stdio"],
 			"extensions": [".ts", ".tsx"],
 		},
 	},

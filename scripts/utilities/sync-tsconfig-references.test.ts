@@ -6,7 +6,7 @@ import { describe, it } from "vitest";
 import { findStaleReferencesAsync, syncTsconfigReferencesAsync } from "$script-utilities/sync-tsconfig-references";
 
 // Bugs these tests guard: the solution `tsconfig.json` silently missing a
-// workspace project (a stale `tsgo --build` graph), package tsconfigs declaring
+// workspace project (a stale `tsrs --build` graph), package tsconfigs declaring
 // project references the compiler rejects (TS6306 — workspace packages do not
 // emit declarations), and sync reformatting or dropping keys it did not intend
 // to touch. Every expected string is hand-written from the repository's own
@@ -154,7 +154,7 @@ async function createWorkspaceAsync(options: FixtureOptions = {}): Promise<strin
 	await writeAsync(rootDirectory, "packages/beta/tsconfig.json", PACKAGE_TSCONFIG);
 	// A directory with a tsconfig but no manifest is not a workspace project.
 	await writeAsync(rootDirectory, "packages/not-a-project/tsconfig.json", PACKAGE_TSCONFIG);
-	// Workspace packages that are not part of the `tsgo --build` solution.
+	// Workspace packages that are not part of the `tsrs --build` solution.
 	await writeAsync(rootDirectory, "documentation/package.json", getManifestFor("@small-rules/documentation"));
 	await writeAsync(rootDirectory, "documentation/tsconfig.json", PACKAGE_TSCONFIG);
 	await writeAsync(rootDirectory, "scripts/package.json", getManifestFor("@small-rules/scripts"));
@@ -196,7 +196,7 @@ describe("sync-tsconfig-references", () => {
 			]);
 		});
 
-		it("reports a package tsconfig whose references tsgo cannot build", async ({ expect, onTestFinished }) => {
+		it("reports a package tsconfig whose references tsrs cannot build", async ({ expect, onTestFinished }) => {
 			expect.assertions(1);
 
 			const rootDirectory = await createWorkspaceAsync({ illegalPackageReferences: true });
@@ -249,7 +249,7 @@ describe("sync-tsconfig-references", () => {
 			);
 		});
 
-		it("removes package references tsgo cannot build without disturbing other keys", async ({
+		it("removes package references tsrs cannot build without disturbing other keys", async ({
 			expect,
 			onTestFinished,
 		}) => {

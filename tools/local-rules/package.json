@@ -12,7 +12,7 @@
 	"scripts": {
 		"test": "vitest run",
 		"test:agent": "nr test --reporter agent",
-		"type-check": "tsgo --build"
+		"type-check": "tsrs --build"
 	},
 	"dependencies": {
 		"@small-rules/oxlint-utilities": "workspace:*",

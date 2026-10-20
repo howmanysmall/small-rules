@@ -16,6 +16,7 @@ minimumReleaseAgeExclude:
   - "@opencode/*"
   - "@oxfmt/*"
   - "@oxlint/*"
+  - "@tsrs/*"
   - "@yuku-core/*"
   - "@yuku-parser/*"
   - astro
@@ -26,6 +27,7 @@ minimumReleaseAgeExclude:
   - oxlint-plugin-utilities
   - rehype-expressive-code
   - skills
+  - tsrs
   - yuku-core
   - yuku-parser
 
@@ -41,8 +43,10 @@ trustLockfile: true
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
+  - "@tsrs/*"
   - fastq@1.20.2
   - skills
+  - tsrs
 
 trustPolicyIgnoreAfter: 10080
 lockfile: true
@@ -88,6 +92,7 @@ overrides:
 patchedDependencies:
   "@isentinel/eslint-config@6.1.0": patches/@isentinel__eslint-config@6.1.0.patch
   "@stryker-mutator/vitest-runner@10.0.0": patches/@stryker-mutator__vitest-runner@10.0.0.patch
+  tsrs@0.18.0-ts7.1.0-dev.20260929: patches/tsrs@0.18.0-ts7.1.0-dev.20260929.patch
 
 catalogs:
   benchmark:
@@ -207,12 +212,12 @@ catalogs:
   tooling:
     "@isentinel/hooks": 1.7.0
     "@mdx-js/language-server": 0.6.4
-    "@typescript/native-preview": 7.0.0-dev.20260707.2
     bumpp: 12.3.0
     jiti: 2.7.0
     pncat: 0.13.4
     sfw: 2.0.6
     skills: 1.7.2
+    tsrs: 0.18.0-ts7.1.0-dev.20260929
     typescript: npm:@typescript/typescript6@^6.0.2
     yuku-ast: 0.19.0
   types:
@@ -246,6 +251,12 @@ packageExtensions:
         optional: true
       typescript:
         optional: true
+  # The patched getExePath falls back to TypeScript's own compiler on Windows
+  # when the @tsrs platform binary is missing.
+  tsrs@0.18.0-ts7.1.0-dev.20260929:
+    optionalDependencies:
+      "@typescript/typescript-win32-arm64": 7.1.0-dev.20260930.4
+      "@typescript/typescript-win32-x64": 7.1.0-dev.20260930.4
 
 peerDependencyRules:
   allowedVersions:
