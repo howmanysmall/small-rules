@@ -59,6 +59,9 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 			generator: "tsgo",
 			incremental: true,
 			resolver: "oxc",
+			tsgo: {
+				path: nodePath.join(import.meta.dirname, "node_modules", ".bin", "tsrs"),
+			},
 		},
 		entry: "./src/index.ts",
 		fixedExtension: false,

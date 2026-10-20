@@ -19,7 +19,7 @@
 	"scripts": {
 		"test": "vitest run",
 		"test:agent": "nr test --reporter agent",
-		"type-check": "tsgo --build"
+		"type-check": "tsrs --build"
 	},
 	"dependencies": {
 		"arktype": "catalog:runtime",

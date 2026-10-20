@@ -5,7 +5,7 @@ import { configs as astroConfigs } from "eslint-plugin-astro";
 import { baseIgnores, projectType } from "./constants";
 
 const BANNED_DEPENDENCIES = {
-	allowed: ["@typescript/native-preview"] satisfies ReadonlyArray<string>,
+	allowed: [] satisfies ReadonlyArray<string>,
 	modules: [] satisfies ReadonlyArray<string>,
 	presets: ["microutilities", "native", "preferred"] satisfies ReadonlyArray<string>,
 };

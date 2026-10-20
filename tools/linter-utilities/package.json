@@ -10,7 +10,7 @@
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"type-check": "tsgo --noEmit",
+		"type-check": "tsrs --noEmit",
 		"type-check:agent": "node --run type-check -- --pretty false"
 	},
 	"dependencies": {
@@ -23,6 +23,6 @@
 	},
 	"devDependencies": {
 		"@types/node": "catalog:types",
-		"@typescript/native-preview": "catalog:tooling"
+		"tsrs": "catalog:tooling"
 	}
 }

@@ -11,7 +11,7 @@ import { type } from "arktype";
 
 import type { DictionaryOfUnknowns } from "@small-rules/arktype-utilities";
 
-// `tsgo --build` requires every referenced project to have `composite: true`
+// `tsrs --build` requires every referenced project to have `composite: true`
 // and to emit declarations. Workspace packages here compile through the root
 // `tsconfig.lib.json` instead, so only the solution `tsconfig.json` may
 // declare references; any reference found in a package tsconfig is rejected
@@ -23,7 +23,7 @@ const TSCONFIG_JSON = "tsconfig.json";
 const PROJECT_PARENTS = ["packages"] as const;
 
 /**
- * Workspace packages outside the project parents that `tsgo --build` covers.
+ * Workspace packages outside the project parents that `tsrs --build` covers.
  */
 const STANDALONE_PROJECTS = ["tools/release-notes"] as const;
 
