@@ -16,7 +16,6 @@ const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
 const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
 const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
 const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
-const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies NodeType;
 const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
 const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 
@@ -99,6 +98,7 @@ export const TS_SATISFIES_EXPRESSION = "TSSatisfiesExpression" as const satisfie
 export const TS_STRING_KEYWORD = "TSStringKeyword" as const satisfies NodeType;
 export const TS_SYMBOL_KEYWORD = "TSSymbolKeyword" as const satisfies NodeType;
 export const TS_TUPLE_TYPE = "TSTupleType" as const satisfies NodeType;
+export const TS_TYPE_ALIAS_DECLARATION = "TSTypeAliasDeclaration" as const satisfies NodeType;
 export const TS_TYPE_ASSERTION = "TSTypeAssertion" as const satisfies NodeType;
 export const TS_TYPE_LITERAL = "TSTypeLiteral" as const satisfies NodeType;
 export const TS_TYPE_OPERATOR = "TSTypeOperator" as const satisfies NodeType;

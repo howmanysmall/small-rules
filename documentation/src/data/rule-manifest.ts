@@ -167,6 +167,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-unknown-type-aliases" },
 				{ name: "no-unsafe-dictionary-type" },
 				{ name: "no-widen-then-assert" },
+				{ name: "require-readable-spacing" },
 				{ name: "require-safety-comment-for-type-assertion" },
 			],
 		},

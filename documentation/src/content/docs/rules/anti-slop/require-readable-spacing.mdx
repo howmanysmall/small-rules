@@ -1,0 +1,20 @@
+---
+title: "Require Readable Spacing"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="require-readable-spacing">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>, which builds it on
+			<a href="https://eslint.style/rules/padding-line-between-statements">padding-line-between-statements</a>
+			from ESLint Stylistic. Generated code often packs imports, declarations, and control flow into one block of
+			text. This rule requires a blank line after imports and between top-level statements. It also requires one
+			around functions, classes, interfaces, types, and bindings that span lines. Control flow gets one before it,
+			and a statement that ends in a block gets one after it. Runs of one-line bindings stay grouped, and so do
+			imports and overloads. A binding with its own comment starts a new group. The fix adds blank lines and never
+			removes them.
+		</p>
+	</Fragment>
+</RulePage>
