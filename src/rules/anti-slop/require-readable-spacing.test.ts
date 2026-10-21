@@ -3,6 +3,58 @@ import { ts } from "@small-rules/rule-harness/rule-testers";
 
 import rule from "$oxc-rules/anti-slop/require-readable-spacing";
 
+const BUILT_IN_OFF = {
+	afterBlocks: false,
+	afterImports: false,
+	aroundDeclarations: false,
+	aroundMultilineBindings: false,
+	beforeControlFlow: false,
+	betweenTopLevelStatements: false,
+} as const;
+
+interface KindCase {
+	readonly kind: string;
+	readonly matching: string;
+	readonly other?: string;
+}
+
+// Statements that start with `module:` sit at module scope; the rest sit in a
+// function body. Each pair is followed by `go();`.
+const KIND_CASES: ReadonlyArray<KindCase> = [
+	{ kind: "*", matching: "go();" },
+	{ kind: "binding", matching: "const a = 1;", other: "go();" },
+	{ kind: "block-like", matching: "if (a) { go(); }", other: "if (a) go();" },
+	{ kind: "class", matching: "module:export class A {}", other: "go();" },
+	{ kind: "control-flow", matching: "while (a) go();", other: "go();" },
+	{ kind: "declaration", matching: "function g() {}", other: "go();" },
+	{ kind: "enum", matching: "enum E {}", other: "go();" },
+	{ kind: "export", matching: "module:export { a };", other: "module:go();" },
+	{ kind: "expression", matching: "go();", other: "const a = 1;" },
+	{ kind: "function", matching: "module:export default function g() {}", other: "module:export { a };" },
+	{ kind: "if", matching: "if (a) go();", other: "go();" },
+	{ kind: "import", matching: "module:import a from 'a';", other: "module:go();" },
+	{ kind: "interface", matching: "interface I {}", other: "go();" },
+	{ kind: "loop", matching: "for (;;) go();", other: "if (a) go();" },
+	{ kind: "multiline", matching: "go(\n);", other: "go();" },
+	{ kind: "multiline-binding", matching: "const a = {\n};", other: "const a = 1;" },
+	{ kind: "overload", matching: "module:export function g(): void;", other: "module:go();" },
+	{ kind: "return", matching: "return;", other: "go();" },
+	{ kind: "single-line", matching: "go();", other: "go(\n);" },
+	{ kind: "single-line-binding", matching: "const a = 1;", other: "const a = {\n};" },
+	{ kind: "single-line-if", matching: "if (a) go();", other: "if (a) {\ngo();\n}" },
+	{ kind: "switch", matching: "switch (a) {}", other: "go();" },
+	{ kind: "throw", matching: "throw a;", other: "go();" },
+	{ kind: "top-level", matching: "module:go();", other: "go();" },
+	{ kind: "try", matching: "try {} catch {}", other: "go();" },
+	{ kind: "type", matching: "type T = 1;", other: "go();" },
+];
+
+function wrap(statement: string, gap: string): string {
+	if (statement.startsWith("module:")) return `${statement.slice("module:".length)}${gap}go();`;
+
+	return `function f() {\n${statement}${gap}go();\n}`;
+}
+
 describe("require-readable-spacing", () => {
 	ts.run("require-readable-spacing", rule, {
 		invalid: [
@@ -428,6 +480,94 @@ go();
 			{
 				code: "const a = /a/v;\nconst b = new B(undefined, {\nx: 1,\n});\nconst c = 2;",
 				options: [{ allowMultilineBindingRuns: true }],
+			},
+		],
+	});
+
+	ts.run("require-readable-spacing overrides", rule, {
+		invalid: [
+			...KIND_CASES.map(({ kind, matching }) => ({
+				code: wrap(matching, "\n"),
+				errors: [{ messageId: "expectedBlankLine" }],
+				options: [{ ...BUILT_IN_OFF, overrides: [{ blankLine: "always", next: "*", previous: kind }] }],
+				output: wrap(matching, "\n\n"),
+			})),
+			{
+				code: "const a = 1;\nconst b = 2;",
+				output: "const a = 1;\n\nconst b = 2;",
+				options: [{ overrides: [{ blankLine: "always", next: "binding", previous: "binding" }] }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\ngo();\nstop();\n}",
+				output: "function f() {\ngo();\n\nstop();\n}",
+				options: [
+					{
+						overrides: [
+							{ blankLine: "always", next: ["return", "expression"], previous: ["if", "expression"] },
+						],
+					},
+				],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nconst a = 1;\nconst b = 2;\n}",
+				output: "function f() {\nconst a = 1;\n\nconst b = 2;\n}",
+				options: [
+					{
+						overrides: [{ blankLine: "always", next: "binding", previous: "binding", usesPrevious: false }],
+					},
+				],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nconst a = 1;\nreturn b;\n}",
+				output: "function f() {\nconst a = 1;\n\nreturn b;\n}",
+				options: [
+					{ overrides: [{ blankLine: "any", next: "return", previous: "binding", usesPrevious: true }] },
+				],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+		],
+		valid: [
+			...KIND_CASES.flatMap(({ kind, other }) =>
+				other === undefined
+					? []
+					: [
+							{
+								code: wrap(other, "\n"),
+								options: [
+									{
+										...BUILT_IN_OFF,
+										overrides: [{ blankLine: "always", next: "*", previous: kind }],
+									},
+								],
+							},
+						],
+			),
+			{
+				code: "const SPACE_REGEXP = /\\s/u;\nexport function detect(value: string) {\nreturn SPACE_REGEXP.test(value);\n}",
+				options: [{ overrides: [{ blankLine: "any", next: "function", previous: "single-line-binding" }] }],
+			},
+			{
+				code: "function f() {\nconst a = 1;\nconst b = 2;\n}",
+				options: [{ overrides: [{ blankLine: "always", next: "*", previous: ["if", "expression"] }] }],
+			},
+			{
+				code: "function f() {\nif (a) go();\nreturn 1;\n}",
+				options: [
+					{
+						overrides: [
+							{ blankLine: "any", next: ["return", "expression"], previous: ["if", "expression"] },
+						],
+					},
+				],
+			},
+			{
+				code: "function f() {\nconst a = 1;\nreturn a;\n}",
+				options: [
+					{ overrides: [{ blankLine: "any", next: "return", previous: "binding", usesPrevious: true }] },
+				],
 			},
 		],
 	});

@@ -7,17 +7,23 @@
 // listed highest priority first. The class, interface, type, and binding tests
 // match by node type, so `abstract`, `declare`, and decorated forms count too.
 // Each group of policy entries became an option. The defaults match upstream,
-// and opt-in `allow*` exceptions relax it.
+// opt-in `allow*` exceptions relax it, and `overrides` entries built from named
+// statement kinds take priority over everything built in. Declarations match
+// through `export` and `export default`.
 
 import {
 	CLASS_DECLARATION,
 	DO_WHILE_STATEMENT,
+	EXPORT_ALL_DECLARATION,
+	EXPORT_DEFAULT_DECLARATION,
+	EXPORT_NAMED_DECLARATION,
 	FOR_IN_STATEMENT,
 	FOR_OF_STATEMENT,
 	FOR_STATEMENT,
 	FUNCTION_DECLARATION,
 	IF_STATEMENT,
 	isAssignmentExpression,
+	isExportDefaultDeclaration,
 	isExportNamedDeclaration,
 	isExpressionStatement,
 	isIdentifier,
@@ -25,7 +31,9 @@ import {
 	isImportDeclaration,
 	isProgram,
 	isReturnStatement,
+	isSwitchStatement,
 	isThrowStatement,
+	isTryStatement,
 	isTsDeclareFunction,
 	isUpdateExpression,
 	isVariableDeclaration,
@@ -33,10 +41,13 @@ import {
 	SWITCH_STATEMENT,
 	TRY_STATEMENT,
 	TS_DECLARE_FUNCTION,
+	TS_ENUM_DECLARATION,
+	TS_EXPORT_ASSIGNMENT,
 	TS_INTERFACE_DECLARATION,
 	TS_TYPE_ALIAS_DECLARATION,
 	WHILE_STATEMENT,
 } from "@small-rules/oxlint-utilities";
+import { Predicate } from "effect";
 
 import {
 	createPaddingLineVisitor,
@@ -48,7 +59,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { PaddingRequirement } from "$oxc-utilities/anti-slop/padding-line-between-statements";
+import type { PaddingRequirement, StatementTest } from "$oxc-utilities/anti-slop/padding-line-between-statements";
 
 const CONTROL_FLOW_TYPES = new Set<string>([
 	DO_WHILE_STATEMENT,
@@ -67,6 +78,13 @@ const DECLARATION_TYPES = new Set<string>([
 	TS_INTERFACE_DECLARATION,
 	TS_TYPE_ALIAS_DECLARATION,
 ]);
+const LOOP_TYPES = new Set<string>([
+	DO_WHILE_STATEMENT,
+	FOR_IN_STATEMENT,
+	FOR_OF_STATEMENT,
+	FOR_STATEMENT,
+	WHILE_STATEMENT,
+]);
 const OVERLOAD_TYPES = new Set<string>([FUNCTION_DECLARATION, TS_DECLARE_FUNCTION]);
 
 function isSingleLine(node: ESTree.Node): boolean {
@@ -74,7 +92,7 @@ function isSingleLine(node: ESTree.Node): boolean {
 }
 
 function getExportedDeclaration(node: ESTree.Node): ESTree.Node | null {
-	return isExportNamedDeclaration(node) ? node.declaration : node;
+	return isExportNamedDeclaration(node) || isExportDefaultDeclaration(node) ? node.declaration : node;
 }
 
 function isAnyStatement(): boolean {
@@ -91,10 +109,6 @@ function isDeclarationStatement(node: ESTree.Node): boolean {
 
 function isControlFlowStatement(node: ESTree.Node): boolean {
 	return CONTROL_FLOW_TYPES.has(node.type);
-}
-
-function isMultilineBinding(node: ESTree.Node): boolean {
-	return isVariableDeclaration(node) && !isSingleLine(node);
 }
 
 /**
@@ -125,6 +139,10 @@ function hasLeadingComment(node: ESTree.Node, sourceCode: SourceCode): boolean {
 
 function isBinding(node: ESTree.Node): boolean {
 	return isVariableDeclaration(getExportedDeclaration(node));
+}
+
+function isMultilineBinding(node: ESTree.Node): boolean {
+	return isBinding(node) && !isSingleLine(node);
 }
 
 function isUndocumentedBinding(node: ESTree.Node, sourceCode: SourceCode): boolean {
@@ -198,6 +216,127 @@ function isSingleLineIf(node: ESTree.Node): boolean {
 
 function isSingleLineGuardContinuation(node: ESTree.Node): boolean {
 	return (isIfStatement(node) || isReturnStatement(node) || isThrowStatement(node)) && isSingleLine(node);
+}
+
+function isMultiline(node: ESTree.Node): boolean {
+	return !isSingleLine(node);
+}
+
+function matchesType(types: ReadonlySet<string>): StatementTest {
+	return (node) => types.has(node.type);
+}
+
+function matchesExported(types: ReadonlySet<string>): StatementTest {
+	return (node) => {
+		const declaration = getExportedDeclaration(node);
+		return declaration !== null && types.has(declaration.type);
+	};
+}
+
+const STATEMENT_KIND_NAMES = [
+	"*",
+	"binding",
+	"block-like",
+	"class",
+	"control-flow",
+	"declaration",
+	"enum",
+	"export",
+	"expression",
+	"function",
+	"if",
+	"import",
+	"interface",
+	"loop",
+	"multiline",
+	"multiline-binding",
+	"overload",
+	"return",
+	"single-line",
+	"single-line-binding",
+	"single-line-if",
+	"switch",
+	"throw",
+	"top-level",
+	"try",
+	"type",
+] as const;
+
+type StatementKind = (typeof STATEMENT_KIND_NAMES)[number];
+
+type StatementKinds = ReadonlyArray<StatementKind> | StatementKind;
+
+const NO_OVERRIDES: ReadonlyArray<PaddingOverride> = [];
+
+// Declarations match through `export` and `export default`.
+const STATEMENT_KINDS: Readonly<Record<StatementKind, StatementTest>> = {
+	"*": isAnyStatement,
+	binding: isBinding,
+	"block-like": isBlockLikeStatement,
+	class: matchesExported(new Set([CLASS_DECLARATION])),
+	"control-flow": isControlFlowStatement,
+	declaration: matchesExported(DECLARATION_TYPES),
+	enum: matchesExported(new Set([TS_ENUM_DECLARATION])),
+	export: matchesType(
+		new Set([EXPORT_ALL_DECLARATION, EXPORT_DEFAULT_DECLARATION, EXPORT_NAMED_DECLARATION, TS_EXPORT_ASSIGNMENT]),
+	),
+	expression: isExpressionStatement,
+	function: matchesExported(new Set([FUNCTION_DECLARATION])),
+	if: isIfStatement,
+	import: isImportDeclaration,
+	interface: matchesExported(new Set([TS_INTERFACE_DECLARATION])),
+	loop: matchesType(LOOP_TYPES),
+	multiline: isMultiline,
+	"multiline-binding": isMultilineBinding,
+	overload: isOverloadSignature,
+	return: isReturnStatement,
+	"single-line": isSingleLine,
+	"single-line-binding": isSingleLineBinding,
+	"single-line-if": isSingleLineIf,
+	switch: isSwitchStatement,
+	throw: isThrowStatement,
+	"top-level": isTopLevelStatement,
+	try: isTryStatement,
+	type: matchesExported(new Set([TS_TYPE_ALIAS_DECLARATION])),
+};
+
+const STATEMENT_KIND_TESTS = new Map<string, StatementTest>(Object.entries(STATEMENT_KINDS));
+
+function getStatementTest(kind: StatementKind): StatementTest {
+	const matches = STATEMENT_KIND_TESTS.get(kind);
+	/* v8 ignore next -- @preserve the schema only allows known statement kinds. */
+	if (matches === undefined) throw new RangeError(`Unknown statement kind: ${kind}`);
+
+	return matches;
+}
+
+/** A padding entry written in the rule options. */
+interface PaddingOverride {
+	readonly blankLine: "always" | "any";
+	readonly next: StatementKinds;
+	readonly previous: StatementKinds;
+	readonly usesPrevious?: boolean;
+}
+
+function toStatementTest(kinds: StatementKinds): StatementTest {
+	if (Predicate.isString(kinds)) return getStatementTest(kinds);
+
+	const tests = kinds.map(getStatementTest);
+	return (node, sourceCode) => {
+		for (const matches of tests) if (matches(node, sourceCode)) return true;
+
+		return false;
+	};
+}
+
+function toRequirement({ blankLine, next, previous, usesPrevious }: PaddingOverride): PaddingRequirement {
+	const requirement: PaddingRequirement = {
+		blankLine,
+		next: toStatementTest(next),
+		previous: toStatementTest(previous),
+	};
+
+	return usesPrevious === true ? { ...requirement, pair: readsNameAbove } : requirement;
 }
 
 interface ReadableSpacingOptions {
@@ -289,8 +428,11 @@ const POLICY_ENTRIES: ReadonlyArray<PolicyEntry> = [
 	},
 ];
 
-function createPolicy(options: ReadableSpacingOptions): ReadonlyArray<PaddingRequirement> {
-	const policy = new Array<PaddingRequirement>();
+function createPolicy(
+	options: ReadableSpacingOptions,
+	overrides: ReadonlyArray<PaddingOverride>,
+): ReadonlyArray<PaddingRequirement> {
+	const policy = overrides.map(toRequirement);
 	for (const { option, requirement } of POLICY_ENTRIES) {
 		if (option === undefined || options[option]) policy.push(requirement);
 	}
@@ -298,10 +440,20 @@ function createPolicy(options: ReadableSpacingOptions): ReadonlyArray<PaddingReq
 	return policy;
 }
 
+const STATEMENT_KINDS_SCHEMA = {
+	anyOf: [
+		{ enum: STATEMENT_KIND_NAMES, type: "string" },
+		{ items: { enum: STATEMENT_KIND_NAMES, type: "string" }, minItems: 1, type: "array" },
+	],
+} as const;
+
 const requireReadableSpacing = createRule("require-readable-spacing", "anti-slop", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
-		return createPaddingLineVisitor(context, createPolicy({ ...DEFAULT_OPTIONS, ...rawOptions }));
+		return createPaddingLineVisitor(
+			context,
+			createPolicy({ ...DEFAULT_OPTIONS, ...rawOptions }, rawOptions?.overrides ?? NO_OVERRIDES),
+		);
 	},
 	meta: {
 		docs: {
@@ -312,7 +464,7 @@ const requireReadableSpacing = createRule("require-readable-spacing", "anti-slop
 		schema: [
 			{
 				additionalProperties: false,
-				default: { ...DEFAULT_OPTIONS },
+				default: { ...DEFAULT_OPTIONS, overrides: [] },
 				properties: {
 					afterBlocks: {
 						default: true,
@@ -360,6 +512,39 @@ const requireReadableSpacing = createRule("require-readable-spacing", "anti-slop
 						default: true,
 						description: "Require blank lines between top-level statements",
 						type: "boolean",
+					},
+					overrides: {
+						default: [],
+						description:
+							"Padding entries checked before the built-in ones, highest priority first. The first entry that matches a pair of statements decides it",
+						items: {
+							additionalProperties: false,
+							properties: {
+								blankLine: {
+									description:
+										"`always` requires a blank line between the statements; `any` accepts either spacing",
+									enum: ["always", "any"],
+									type: "string",
+								},
+								next: {
+									...STATEMENT_KINDS_SCHEMA,
+									description: "The kind or kinds of the second statement",
+								},
+								previous: {
+									...STATEMENT_KINDS_SCHEMA,
+									description: "The kind or kinds of the first statement",
+								},
+								usesPrevious: {
+									default: false,
+									description:
+										"Match only when the second statement reads a name that the first one declares or assigns",
+									type: "boolean",
+								},
+							},
+							required: ["blankLine", "next", "previous"],
+							type: "object",
+						},
+						type: "array",
 					},
 				},
 				type: "object",
