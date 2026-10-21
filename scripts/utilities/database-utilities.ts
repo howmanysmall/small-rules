@@ -78,6 +78,7 @@ enum DatabaseScriptability {
 	ReadWrite = "ReadWrite",
 	Write = "Write",
 }
+
 const isDatabaseScriptability = type.enumerated(...Object.values(DatabaseScriptability));
 
 enum DatabasePropertyTag {
@@ -89,6 +90,7 @@ enum DatabasePropertyTag {
 	ReadOnly = "ReadOnly",
 	WriteOnly = "WriteOnly",
 }
+
 const isDatabasePropertyTag = type.enumerated(...Object.values(DatabasePropertyTag));
 
 export async function downloadDatabaseAsync(octokit: Octokit, existingFilePath?: string): Promise<Uint8Array> {
@@ -129,6 +131,7 @@ const isDatabaseProperty = type({
 	scriptability: isDatabaseScriptability,
 	tags: isDatabasePropertyTag.array().readonly(),
 }).readonly();
+
 type DatabaseProperty = typeof isDatabaseProperty.infer;
 
 const isDatabaseClass = type({
@@ -138,6 +141,7 @@ const isDatabaseClass = type({
 	properties: type.Record(isString, isDatabaseProperty).readonly(),
 	superclass: isNullableString,
 }).readonly();
+
 type DatabaseClass = typeof isDatabaseClass.infer;
 
 const isRawPropertyTuple = type([
@@ -207,6 +211,7 @@ function buildEnumLookup(rawEnums: unknown): EnumLookup {
 		for (const [name, value] of Object.entries(items)) if (Predicate.isNumber(value)) reverse.set(value, name);
 		lookup.set(enumType, reverse);
 	}
+
 	return lookup;
 }
 
@@ -347,8 +352,10 @@ function resolveDefaults(
 				}
 			}
 		}
+
 		entries.push([propertyName, innerValue]);
 	}
+
 	return Object.fromEntries(entries);
 }
 
@@ -357,6 +364,7 @@ function buildPropertyMap(propertyDefaults: PropertyDefaults): Record<string, Da
 	for (const [key, [dataType, name, scriptability, tags]] of Object.entries(propertyDefaults)) {
 		entries.push([key, isDatabaseProperty.assert({ name, dataType, scriptability, tags })]);
 	}
+
 	return Object.fromEntries(entries);
 }
 
@@ -449,6 +457,7 @@ function makeCanonicalValue(dataType: string, value: unknown): CanonicalValue | 
 
 	if (dataType === "Bool") return { type: "bool", value: Boolean(value) };
 	if (dataType === "String") return { type: "string", value: String(value) };
+
 	if (COMMA_SEPARATED_TYPES.has(dataType)) {
 		if (isRawArray(value)) {
 			return {
@@ -460,6 +469,7 @@ function makeCanonicalValue(dataType: string, value: unknown): CanonicalValue | 
 					),
 			};
 		}
+
 		return { type: dataType, value: parseComponents(String(value)) };
 	}
 
@@ -472,12 +482,14 @@ function makeCanonicalValue(dataType: string, value: unknown): CanonicalValue | 
 				value: asString.slice(dataType.length + 1),
 			};
 		}
+
 		return {
 			enumType: dataType.slice(5),
 			type: "Enum",
 			value: "",
 		};
 	}
+
 	return undefined;
 }
 

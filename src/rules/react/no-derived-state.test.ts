@@ -2010,6 +2010,7 @@ function generateAliasChain(): string {
 	for (let index = 0; index < 2048; index += 1) {
 		links.push(`const a${index} = a${index + 1};`);
 	}
+
 	return `
 import { useEffect, useState } from "@rbxts/react";
 

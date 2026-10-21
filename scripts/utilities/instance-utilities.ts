@@ -24,6 +24,7 @@ function isAllLowerCase(value: string): boolean {
 		const code = value.codePointAt(index);
 		if (code !== undefined && code >= 65 && code <= 90) return false;
 	}
+
 	return value.length > 0;
 }
 
@@ -92,6 +93,7 @@ async function readAllFilesAsync(paths: ReadonlyArray<string>): Promise<Readonly
 			}
 		}),
 	);
+
 	return results.filter((result): result is FileWithSource => result !== undefined);
 }
 
