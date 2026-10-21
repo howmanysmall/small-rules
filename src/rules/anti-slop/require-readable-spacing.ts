@@ -173,10 +173,17 @@ function isReadWithin(variable: undefined | Variable, [start, end]: ESTree.Node[
 	return false;
 }
 
+function readsAnyWithin(variables: ReadonlyArray<Variable>, range: ESTree.Node["range"]): boolean {
+	for (const variable of variables) if (isReadWithin(variable, range)) return true;
+
+	return false;
+}
+
 /**
  * Checks whether a statement reads a name that the statement before it
- * declares or assigns, as in `const ready = check();` then `if (ready)`, or
- * `index = next(index);` then `if (index === -1)`.
+ * declares or assigns, as in `const ready = check();` then `if (ready)`,
+ * `index = next(index);` then `if (index === -1)`, or `enum Kind {}` then
+ * `const kinds = Object.values(Kind);`.
  *
  * @param previous - The statement before `next`.
  * @param next - The statement that may read the name.
@@ -184,20 +191,23 @@ function isReadWithin(variable: undefined | Variable, [start, end]: ESTree.Node[
  * @returns `true` when `next` references a variable that `previous` writes.
  */
 function readsNameAbove(previous: ESTree.Node, next: ESTree.Node, sourceCode: SourceCode): boolean {
-	if (isVariableDeclaration(previous)) {
-		for (const declarator of previous.declarations) {
-			for (const variable of sourceCode.getDeclaredVariables(declarator)) {
-				if (isReadWithin(variable, next.range)) return true;
-			}
-		}
-
-		return false;
+	const target = getAssignedTarget(previous);
+	if (isIdentifier(target)) {
+		return isReadWithin(getVariableByName(sourceCode.getScope(target), target.name), next.range);
 	}
 
-	const target = getAssignedTarget(previous);
-	return (
-		isIdentifier(target) && isReadWithin(getVariableByName(sourceCode.getScope(target), target.name), next.range)
-	);
+	const declaration = getExportedDeclaration(previous);
+	if (declaration === null) return false;
+
+	if (!isVariableDeclaration(declaration)) {
+		return readsAnyWithin(sourceCode.getDeclaredVariables(declaration), next.range);
+	}
+
+	for (const declarator of declaration.declarations) {
+		if (readsAnyWithin(sourceCode.getDeclaredVariables(declarator), next.range)) return true;
+	}
+
+	return false;
 }
 
 function isOverloadSignature(node: ESTree.Node): boolean {

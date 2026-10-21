@@ -528,6 +528,18 @@ go();
 				],
 				errors: [{ messageId: "expectedBlankLine" }],
 			},
+			{
+				code: 'enum Kind { A = "A" }\nconst count = 1;',
+				output: 'enum Kind { A = "A" }\n\nconst count = 1;',
+				options: [{ overrides: [{ blankLine: "any", next: "binding", previous: "enum", usesPrevious: true }] }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "export { a };\nfoo(a);",
+				output: "export { a };\n\nfoo(a);",
+				options: [{ overrides: [{ blankLine: "any", next: "*", previous: "export", usesPrevious: true }] }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
 		],
 		valid: [
 			...KIND_CASES.flatMap(({ kind, other }) =>
@@ -568,6 +580,18 @@ go();
 				options: [
 					{ overrides: [{ blankLine: "any", next: "return", previous: "binding", usesPrevious: true }] },
 				],
+			},
+			{
+				code: 'enum Kind {\nA = "A",\n}\nconst kinds = Object.values(Kind);',
+				options: [{ overrides: [{ blankLine: "any", next: "binding", previous: "enum", usesPrevious: true }] }],
+			},
+			{
+				code: 'export enum Kind { A = "A" }\nexport const kinds = Object.values(Kind);',
+				options: [{ overrides: [{ blankLine: "any", next: "binding", previous: "enum", usesPrevious: true }] }],
+			},
+			{
+				code: "import a from 'a';\nfoo(a);",
+				options: [{ overrides: [{ blankLine: "any", next: "*", previous: "import", usesPrevious: true }] }],
 			},
 		],
 	});
