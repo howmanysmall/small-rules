@@ -12,6 +12,7 @@
 // containers instead of tracking scopes per `:statement` visit. Tokens and
 // comments come from getTokenBefore, getTokenAfter, and getCommentsBefore, and
 // the owner of a closing brace is found by walking the statement's tail.
+// An entry can also test the previous and next statements together.
 // oxlint-enable comment-length/limit-single-line-comments
 
 import {
@@ -37,6 +38,7 @@ import type {
 	Fix,
 	Fixer,
 	Location,
+	RuleOptions,
 	SourceCode,
 	Token,
 	Visitor,
@@ -45,11 +47,16 @@ import type {
 /** Whether a statement belongs to one side of a padding requirement. */
 export type StatementTest = (node: ESTree.Node, sourceCode: SourceCode) => boolean;
 
+/** Whether two adjacent statements together belong to a padding requirement. */
+export type StatementPairTest = (previous: ESTree.Node, next: ESTree.Node, sourceCode: SourceCode) => boolean;
+
 /** One padding requirement between a previous and a next statement. */
 export interface PaddingRequirement {
 	/** `always` requires a blank line; `any` accepts either spacing. */
 	readonly blankLine: "always" | "any";
 	readonly next: StatementTest;
+	/** Narrows the entry to pairs that also pass this test. */
+	readonly pair?: StatementPairTest;
 	readonly previous: StatementTest;
 }
 
@@ -88,6 +95,7 @@ function skipWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	while (current !== undefined && (isParenthesizedExpression(current) || isChainExpression(current))) {
 		current = current.expression;
 	}
+
 	return current;
 }
 
@@ -107,6 +115,7 @@ function isIifeStatement(node: ESTree.Node): boolean {
 
 	let callee = skipWrappers(expression.callee);
 	while (callee !== undefined && isSequenceExpression(callee)) callee = skipWrappers(callee.expressions.at(-1));
+
 	return isCallbackFunction(callee);
 }
 
@@ -116,6 +125,7 @@ function getLastChild(node: ESTree.Node, visitorKeys: SourceCode["visitorKeys"])
 
 	let lastChild: ESTree.Node | undefined;
 	for (const child of children) if (lastChild === undefined || child.range[1] > lastChild.range[1]) lastChild = child;
+
 	return lastChild;
 }
 
@@ -137,6 +147,7 @@ function findTailBlock(
 		if (isBlockStatement(current) || isSwitchStatement(current)) return current;
 		current = getLastChild(current, visitorKeys);
 	}
+
 	return undefined;
 }
 
@@ -168,6 +179,7 @@ export function isBlockLikeStatement(node: ESTree.Node, sourceCode: SourceCode):
 function unwrapLabels(node: ESTree.Node): ESTree.Node {
 	let statement = node;
 	while (isLabeledStatement(statement)) statement = statement.body;
+
 	return statement;
 }
 
@@ -207,6 +219,7 @@ function hasPaddingLine({ end, items }: StatementGap, next: ESTree.Node): boolea
 		if (item.loc.start.line - line >= 2) return true;
 		({ line } = item.loc.end);
 	}
+
 	return next.loc.start.line - line >= 2;
 }
 
@@ -227,8 +240,10 @@ function insertPaddingLine(fixer: Fixer, { end, items }: StatementGap, next: EST
 			following = item;
 			break;
 		}
+
 		anchor = item;
 	}
+
 	return fixer.insertTextAfter(anchor, isOnSameLine(anchor, following) ? "\n\n" : "\n");
 }
 
@@ -246,6 +261,7 @@ function getReportLocation(node: ESTree.Node, text: string): Location {
 	const lineStart = node.range[0] - start.column;
 	let [lineEnd] = node.range;
 	while (!LINE_TERMINATORS.has(text.charAt(lineEnd))) lineEnd += 1;
+
 	return { end: { column: lineEnd - lineStart, line: start.line }, start };
 }
 
@@ -254,22 +270,31 @@ function getReportLocation(node: ESTree.Node, text: string): Location {
  * first matching requirement in `policy`, fixing each report by inserting a
  * blank line. Pairs that match no requirement are left alone.
  *
+ * @template Options - The options type of the calling rule.
  * @param context - The rule context; its rule must declare
  *   {@linkcode PADDING_LINE_MESSAGES}.
  * @param policy - The padding requirements, highest priority first.
  * @returns Handlers for each node type that holds a list of statements.
  */
-export function createPaddingLineVisitor(context: Context, policy: ReadonlyArray<PaddingRequirement>): Visitor {
+export function createPaddingLineVisitor<Options extends RuleOptions>(
+	context: Context<Options>,
+	policy: ReadonlyArray<PaddingRequirement>,
+): Visitor {
 	const { sourceCode } = context;
 
 	function requiresPaddingLine(previous: ESTree.Node, next: ESTree.Node): boolean {
 		const previousStatement = unwrapLabels(previous);
 		const nextStatement = unwrapLabels(next);
 		for (const requirement of policy) {
-			if (requirement.previous(previousStatement, sourceCode) && requirement.next(nextStatement, sourceCode)) {
+			if (
+				requirement.previous(previousStatement, sourceCode) &&
+				requirement.next(nextStatement, sourceCode) &&
+				(requirement.pair === undefined || requirement.pair(previousStatement, nextStatement, sourceCode))
+			) {
 				return requirement.blankLine === "always";
 			}
 		}
+
 		return false;
 	}
 

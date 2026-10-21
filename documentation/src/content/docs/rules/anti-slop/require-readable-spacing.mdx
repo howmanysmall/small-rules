@@ -16,5 +16,51 @@ import RulePage from "$components/rule-page.astro";
 			imports and overloads. A binding with its own comment starts a new group. The fix adds blank lines and never
 			removes them.
 		</p>
+		<p>
+			With no options, the rule follows anti-slop. Each requirement has its own switch, so you can turn off the
+			ones that don't fit your style:
+		</p>
+		<ul>
+			<li>`afterImports`: a blank line after the import group.</li>
+			<li>`betweenTopLevelStatements`: blank lines between top-level statements.</li>
+			<li>`aroundDeclarations`: blank lines around functions, classes, interfaces, and types.</li>
+			<li>`aroundMultilineBindings`: blank lines around `const`, `let`, and `var` that span lines.</li>
+			<li>`beforeControlFlow`: a blank line before `if`, loops, `switch`, `try`, and `return`.</li>
+			<li>`afterBlocks`: a blank line after a statement that ends in a block, such as an `if` or a function.</li>
+		</ul>
+		<p>
+			Two top-level functions sit together only with `betweenTopLevelStatements`, `aroundDeclarations`, and
+			`afterBlocks` all off, since each of them asks for the line.
+		</p>
+		<p>The `allow` options, off by default, keep related statements together:</p>
+		<ul>
+			<li>
+				`allowAttachedUses`: a statement may follow a one-line statement with no blank line when it reads a name
+				that statement declares or assigns, as in `const ready = await check(path);` followed by
+				`if (ready) {`. It also covers `let result = "";` before the loop that builds `result`, and
+				`index = next(index);` before `if (index === -1) return;`.
+			</li>
+			<li>
+				`allowGuardClauseRuns`: one-line `if` statements stay grouped, and so does a one-line `return` or
+				`throw` right after one. A multi-line `if` still needs a blank line after it.
+			</li>
+			<li>
+				`allowMultilineBindingRuns`: consecutive bindings stay grouped even when one of them spans lines. A
+				binding with its own comment still starts a new group.
+			</li>
+		</ul>
+		<p>This port differs from anti-slop in a few ways:</p>
+		<ul>
+			<li>Every requirement can be turned off, and the `allow` options don't exist upstream.</li>
+			<li>
+				It matches functions, classes, interfaces, types, and bindings by node type, so `abstract`, `declare`,
+				and decorated forms count too.
+			</li>
+			<li>It checks `export = value` like any other statement. Upstream skips it.</li>
+			<li>
+				It keeps only the parts of ESLint Stylistic's engine that this rule uses. The rule never removes blank
+				lines.
+			</li>
+		</ul>
 	</Fragment>
 </RulePage>

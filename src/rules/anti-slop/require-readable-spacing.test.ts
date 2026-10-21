@@ -295,4 +295,140 @@ go();
 			"export function f(): void;\n\nexport { f };",
 		],
 	});
+
+	ts.run("require-readable-spacing options", rule, {
+		invalid: [
+			{
+				code: "import { a } from 'a';\nconst b = a;",
+				output: "import { a } from 'a';\n\nconst b = a;",
+				options: [{ afterImports: false }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function a() {}\nfunction b() {}",
+				output: "function a() {}\n\nfunction b() {}",
+				options: [{ betweenTopLevelStatements: false }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nx = 1;\nreturn x;\n}",
+				output: "function f() {\nx = 1;\n\nreturn x;\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f(x) {\nx.y = 1;\nreturn x;\n}",
+				output: "function f(x) {\nx.y = 1;\n\nreturn x;\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f(x) {\ngo(x);\nreturn x;\n}",
+				output: "function f(x) {\ngo(x);\n\nreturn x;\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f(a) {\nif (a) go();\nreturn a;\n}",
+				output: "function f(a) {\nif (a) go();\n\nreturn a;\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nconst a = 1;\nif (b) go();\nuse(a);\n}",
+				output: "function f() {\nconst a = 1;\n\nif (b) go();\nuse(a);\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nconst a = {\n};\nreturn a;\n}",
+				output: "function f() {\nconst a = {\n};\n\nreturn a;\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nconst a = 1;\nfunction g() { return a; }\n}",
+				output: "function f() {\nconst a = 1;\n\nfunction g() { return a; }\n}",
+				options: [{ allowAttachedUses: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nif (a) {\nreturn;\n}\nif (b) return;\n}",
+				output: "function f() {\nif (a) {\nreturn;\n}\n\nif (b) return;\n}",
+				options: [{ allowGuardClauseRuns: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\nif (a) return;\nfor (;;) go();\n}",
+				output: "function f() {\nif (a) return;\n\nfor (;;) go();\n}",
+				options: [{ allowGuardClauseRuns: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "function f() {\ngo();\nif (a) return;\n}",
+				output: "function f() {\ngo();\n\nif (a) return;\n}",
+				options: [{ allowGuardClauseRuns: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+			{
+				code: "const a = 1;\n/** B docs. */\nconst b = new B({\nx: 1,\n});",
+				output: "const a = 1;\n\n/** B docs. */\nconst b = new B({\nx: 1,\n});",
+				options: [{ allowMultilineBindingRuns: true }],
+				errors: [{ messageId: "expectedBlankLine" }],
+			},
+		],
+		valid: [
+			{
+				code: "import { a } from 'a';\nconst b = a;",
+				options: [{ afterImports: false, betweenTopLevelStatements: false }],
+			},
+			{ code: "foo();\nbar();", options: [{ betweenTopLevelStatements: false }] },
+			{
+				code: "function a() {}\nfunction b() {}",
+				options: [{ afterBlocks: false, aroundDeclarations: false, betweenTopLevelStatements: false }],
+			},
+			{ code: "function f() {\ngo();\nfunction g() {}\n}", options: [{ aroundDeclarations: false }] },
+			{
+				code: "function f() {\nconst a = 1;\nconst b = {\n};\ngo();\n}",
+				options: [{ aroundMultilineBindings: false }],
+			},
+			{ code: "function f() {\ngo();\nwhile (ok) go();\n}", options: [{ beforeControlFlow: false }] },
+			{ code: "function f() {\nif (ok) { go(); }\nstop();\n}", options: [{ afterBlocks: false }] },
+			{
+				code: [
+					"async function f(path) {",
+					"\tconst exists = await check(path);",
+					"\tif (exists) {",
+					"\t\tconst items = await scan(path);",
+					"\t\treturn new Set(items);",
+					"\t}",
+					"",
+					'\tlet result = "";',
+					"\tfor (const item of items) result += item;",
+					'\tconst { Client } = await import("client");',
+					"\tconst client = new Client({",
+					"\t\tresult,",
+					"\t});",
+					"",
+					"\treturn client;",
+					"}",
+				].join("\n"),
+				options: [{ allowAttachedUses: true }],
+			},
+			{ code: "function f() {\nlet a = 0;\na = next();\nreturn a;\n}", options: [{ allowAttachedUses: true }] },
+			{ code: "function f() {\nlet a = 0;\na++;\nreturn a;\n}", options: [{ allowAttachedUses: true }] },
+			{
+				code: "function f() {\nif (a) return 1;\nif (b) return 2;\nreturn 3;\n}",
+				options: [{ allowGuardClauseRuns: true }],
+			},
+			{
+				code: "function f() {\nif (a) return;\nthrow new Error();\n}",
+				options: [{ allowGuardClauseRuns: true }],
+			},
+			{
+				code: "const a = /a/v;\nconst b = new B(undefined, {\nx: 1,\n});\nconst c = 2;",
+				options: [{ allowMultilineBindingRuns: true }],
+			},
+		],
+	});
 });
