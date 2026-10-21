@@ -438,7 +438,10 @@ export async function getOxlintAsync({
 						allowAttachedUses: true,
 						allowGuardClauseRuns: true,
 						allowMultilineBindingRuns: true,
-						overrides: [{ blankLine: "any", next: "return", previous: "expression" }],
+						overrides: [
+							{ blankLine: "any", next: "return", previous: "expression" },
+							{ blankLine: "any", next: "binding", previous: "enum", usesPrevious: true },
+						],
 					},
 				],
 				"small-rules/require-safety-comment-for-type-assertion": "error",
