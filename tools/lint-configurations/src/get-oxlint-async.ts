@@ -428,6 +428,7 @@ export async function getOxlintAsync({
 				"small-rules/require-paired-calls": "error",
 				"small-rules/require-react-component-keys": "off",
 				"small-rules/require-react-display-names": ["error", { environment: "standard" }],
+				"small-rules/require-readable-spacing": "error",
 				"small-rules/require-safety-comment-for-type-assertion": "error",
 				"small-rules/require-switch-case-braces": [
 					"error",
