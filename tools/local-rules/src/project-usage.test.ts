@@ -59,11 +59,13 @@ function createProject(files: Readonly<Record<string, string>>, onTestFinished: 
 	onTestFinished(() => {
 		rmSync(directory, { force: true, recursive: true });
 	});
+
 	for (const [relativePath, contents] of Object.entries(files)) {
 		const filePath = nodePath.join(directory, relativePath);
 		mkdirSync(nodePath.dirname(filePath), { recursive: true });
 		writeFileSync(filePath, contents);
 	}
+
 	return directory;
 }
 

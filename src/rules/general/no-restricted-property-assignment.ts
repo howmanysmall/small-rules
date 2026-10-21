@@ -23,17 +23,22 @@ const isRuleOptions = type({
 }).readonly();
 
 type Context = InferContextFromRule<typeof noRestrictedPropertyAssignment>;
+
 type Matcher = (value: string) => boolean;
+
 type Restriction = typeof isRestriction.infer;
+
 interface CompiledMatcher {
 	readonly hasMagic: boolean;
 	readonly matches: Matcher;
 }
+
 interface CompiledRestriction {
 	readonly matchesObject: Matcher;
 	readonly matchesProperty: Matcher;
 	readonly message: Restriction["message"];
 }
+
 type EffectiveOptions = Simplify<
 	Except<typeof isRuleOptions.infer, "allowFiles" | "restrictions"> & {
 		readonly checkComputed: boolean;
@@ -143,6 +148,7 @@ const noRestrictedPropertyAssignment = createRule("no-restricted-property-assign
 				if (!restriction.matchesObject(objectName)) continue;
 				if (restriction.matchesProperty(property)) return restriction;
 			}
+
 			return undefined;
 		}
 

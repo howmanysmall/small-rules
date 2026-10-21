@@ -102,5 +102,6 @@ export function isSimpleExpression(node: ESTree.Node): boolean {
 	for (let current = nodes.pop(); current !== undefined; current = nodes.pop()) {
 		if (!pushSimpleExpressionChildren(current, nodes)) return false;
 	}
+
 	return true;
 }

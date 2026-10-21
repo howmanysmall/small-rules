@@ -86,6 +86,7 @@ function isSafeMemberAccess(node: ESTree.Expression, allowLiteralRoot: boolean):
 
 		case MEMBER_EXPRESSION: {
 			if (node.optional || !isSafeMemberAccess(node.object, false)) return false;
+
 			if (node.computed) {
 				/* v8 ignore next -- @preserve computed member properties are expressions in parser output. */
 				return isExpressionNode(node.property) ? isSafeMemberAccess(node.property, true) : false;

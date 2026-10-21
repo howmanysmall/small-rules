@@ -43,6 +43,7 @@ const isPairConfiguration = type({
 	"requireSync?": isBoolean.or(isUndefined),
 	"yieldingFunctions?": isReadonlyArrayOfStrings.or(isUndefined),
 }).readonly();
+
 type PairConfiguration = typeof isPairConfiguration.infer;
 
 interface RequirePairedCallsOptions {
@@ -86,8 +87,10 @@ function isOpenerInAllBranches(
 				break;
 			}
 		}
+
 		if (!found) return false;
 	}
+
 	return true;
 }
 
@@ -134,6 +137,7 @@ function getAllOpeners(config: PairConfiguration): Array<string> {
 		let size = 1;
 		for (const alternative of config.openerAlternatives) openers[size++] = alternative;
 	}
+
 	return openers;
 }
 
@@ -200,6 +204,7 @@ function cloneEntry(value: OpenerStackEntry): OpenerStackEntry {
 function isNewBranchOpener(entry: OpenerStackEntry, originalStack: ReadonlyArray<OpenerStackEntry>): boolean {
 	return originalStack.every(({ index }) => index !== entry.index);
 }
+
 function isBreakOrContinueStatement(node: ESTree.Node): node is ESTree.BreakStatement | ESTree.ContinueStatement {
 	return isBreakStatement(node) || isContinueStatement(node);
 }
@@ -247,10 +252,12 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		if (options.allowConditionalClosers !== undefined) {
 			resolvedOptions.allowConditionalClosers = options.allowConditionalClosers;
 		}
+
 		/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */
 		if (options.allowMultipleOpeners !== undefined) {
 			resolvedOptions.allowMultipleOpeners = options.allowMultipleOpeners;
 		}
+
 		/* v8 ignore next -- @preserve options are normalized with a concrete max depth default before resolution. */
 		if (options.maxNestingDepth !== undefined) {
 			resolvedOptions.maxNestingDepth = options.maxNestingDepth;
@@ -342,6 +349,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 					const methodName = pattern.slice(2);
 					return functionName.endsWith(`.${methodName}`);
 				}
+
 				return functionName === pattern;
 			});
 		}
@@ -366,6 +374,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function restoreOpenerStack(entries: ReadonlyArray<OpenerStackEntry>): void {
 			openerStack.length = 0;
+
 			for (const entry of entries) openerStack.push({ ...entry });
 		}
 
@@ -419,6 +428,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			/* v8 ignore else -- @preserve function exits are paired with function enters that push a parent stack. */
 			if (parentStack) {
 				openerStack.length = 0;
+
 				for (const entry of parentStack) openerStack.push(entry);
 			} else openerStack.length = 0;
 
@@ -448,6 +458,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			branches: Array<Array<OpenerStackEntry>>,
 		): void {
 			openerStack.length = 0;
+
 			for (const opener of originalStack) {
 				if (!isOpenerInAllBranches(opener, branches)) continue;
 				openerStack.push(opener);
@@ -468,6 +479,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			branches: Array<Array<OpenerStackEntry>>,
 		): void {
 			reportNewOpenersInBranches(originalStack, branches);
+
 			if (node.alternate === null) restoreOpenerStack(originalStack);
 			else retainCommonOpeners(originalStack, branches);
 		}
@@ -636,6 +648,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 					);
 
 					openerStack.length = 0;
+
 					for (const entry of commonOpeners) openerStack.push(entry);
 				} else restoreOpenerStack(originalStack);
 			}
@@ -854,6 +867,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		function onAsyncYield(node: ESTree.Node): void {
 			/* v8 ignore if -- @preserve this handler is only registered for await/yield/for-of visitor keys. */
 			if (!isAwaitExpression(node) && !isYieldExpression(node) && !isForOfStatement(node)) return;
+
 			for (const { config, opener } of openerStack) {
 				if (config.requireSync !== true) continue;
 

@@ -41,6 +41,7 @@ export function normalizeCases(cases: RuleTestCases, defaults: RuleRunnerDefault
 	let size = 0;
 
 	for (const validCase of cases.valid) normalized[size++] = normalizeValidCase(validCase, defaults);
+
 	for (const invalidCase of cases.invalid) normalized[size++] = normalizeInvalidCase(invalidCase, defaults);
 
 	return normalized;
@@ -73,6 +74,7 @@ export function parseCase(testCase: NormalizedCase): HarnessSourceCode {
 			Object.assign(node, { range: [node.start, node.end] });
 		},
 	});
+
 	for (const comment of parseResult.comments) {
 		Object.assign(comment, { range: [comment.start, comment.end] });
 	}
@@ -93,6 +95,7 @@ function normalizeInvalidCase(input: InvalidRuleCase, defaults: RuleRunnerDefaul
 		errors: normalizeErrors(input.errors),
 		kind: "invalid",
 	};
+
 	if ("output" in input) return { ...normalized, output: input.output };
 	return normalized;
 }
@@ -115,6 +118,7 @@ function normalizeBaseCase(input: BaseRuleCase, defaults: RuleRunnerDefaults): N
 		settings,
 		sourceType,
 	};
+
 	if (input.only !== undefined) normalized.only = input.only;
 	if (input.skip !== undefined) normalized.skip = input.skip;
 	return normalized;
@@ -123,9 +127,11 @@ function normalizeBaseCase(input: BaseRuleCase, defaults: RuleRunnerDefaults): N
 function rejectLegacyLanguageOptions(input: BaseRuleCase): void {
 	const legacyOptions = getObjectProperty(input, LEGACY_LANGUAGE_OPTIONS_KEY);
 	if (legacyOptions === undefined) return;
+
 	if (LEGACY_PARSER_KEY in legacyOptions) {
 		throw new HarnessError("Legacy parser configuration is not supported by the Oxc-native rule tester.");
 	}
+
 	throw new HarnessError(
 		"Legacy language options are not supported. Use top-level language and sourceType test fields.",
 	);

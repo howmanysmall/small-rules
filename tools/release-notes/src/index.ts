@@ -60,6 +60,7 @@ export function compareReleaseTagsDescending(left: string, right: string): numbe
 		compareNumbers(Number(rightGroups.major), Number(leftGroups.major)) ||
 		compareNumbers(Number(rightGroups.minor), Number(leftGroups.minor)) ||
 		compareNumbers(Number(rightGroups.patch), Number(leftGroups.patch));
+
 	if (byVersion !== 0) return byVersion;
 
 	const leftPrerelease = leftGroups.prerelease;

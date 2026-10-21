@@ -17,6 +17,7 @@ import type { UnknownRecord } from "type-fest";
 interface JsonObject {
 	[key: string]: JsonValue;
 }
+
 type JsonValue = Array<JsonValue> | boolean | JsonObject | number | string;
 
 const SOURCE_FILE = nodePath.join(import.meta.dirname, "..", "fixtures", "fuzz-target.tsx");
@@ -203,6 +204,7 @@ function resolveAlternative(schema: HarnessValue, provider: FuzzedDataProvider):
 		if (alternatives === undefined || alternatives.length === 0) return resolvedSchema;
 		resolvedSchema = provider.pickValue(alternatives);
 	}
+
 	return resolvedSchema;
 }
 
@@ -215,6 +217,7 @@ function createSchemaArray(schema: UnknownRecord, provider: FuzzedDataProvider, 
 	for (let index = 0; index < length; index += 1) {
 		result.push(createSchemaValue(items, provider, `${salt}${index}`));
 	}
+
 	return result;
 }
 
@@ -261,6 +264,7 @@ function getNonnegativeInteger(value: HarnessValue, key: string): number | undef
 function toJsonValue(value: HarnessValue): JsonValue | undefined {
 	if (Predicate.isBoolean(value) || Predicate.isString(value)) return value;
 	if (Predicate.isNumber(value)) return Number.isFinite(value) ? value : undefined;
+
 	if (Array.isArray(value)) {
 		const result = new Array<JsonValue>();
 		for (const item of value) {
@@ -268,8 +272,10 @@ function toJsonValue(value: HarnessValue): JsonValue | undefined {
 			if (jsonValue === undefined) return undefined;
 			result.push(jsonValue);
 		}
+
 		return result;
 	}
+
 	if (!Predicate.isObject(value)) return undefined;
 
 	const result: JsonObject = {};
@@ -278,6 +284,7 @@ function toJsonValue(value: HarnessValue): JsonValue | undefined {
 		if (jsonValue === undefined) return undefined;
 		result[key] = jsonValue;
 	}
+
 	return result;
 }
 
@@ -294,8 +301,10 @@ function validateExecution(
 
 function validateDiagnostic(diagnostic: RuntimeDiagnostic, testCase: NormalizedValidCase): void {
 	assert.ok(diagnostic.message.length > 0, "reported diagnostics must have a message");
+
 	if (diagnostic.node !== undefined) validateRange(diagnostic.node.range, testCase.code.length);
 	validateFixProvider(diagnostic.fix, testCase);
+
 	for (const suggestion of diagnostic.suggestions) validateFixProvider(suggestion.fix, testCase);
 }
 
@@ -309,6 +318,7 @@ function validateFixProvider(provider: RuntimeDiagnostic["fix"] | undefined, tes
 
 	const output = applyFixes(testCase.code, fixResult);
 	assert.notEqual(output, undefined, "a returned fix must produce output");
+
 	if (output === undefined) return;
 	parseCase({ ...testCase, code: output });
 }

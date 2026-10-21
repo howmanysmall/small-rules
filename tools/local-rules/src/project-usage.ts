@@ -46,6 +46,7 @@ export function countInlineNodeTypes(source: string, filename: string): Map<stri
 
 	const counts = new Map<string, number>();
 	for (const { value } of literals) counts.set(value, (counts.get(value) ?? 0) + 1);
+
 	return counts;
 }
 
@@ -58,6 +59,7 @@ function scanProject(directories: ReadonlyArray<string>, scannedAt: number): Pro
 			const filePath = nodePath.resolve(directory, relativePath);
 			const counts = countInlineNodeTypes(readFileSync(filePath, "utf8"), filePath);
 			countsByFile.set(filePath, counts);
+
 			for (const [nodeType, count] of counts) totals.set(nodeType, (totals.get(nodeType) ?? 0) + count);
 		}
 	}

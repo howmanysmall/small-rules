@@ -187,6 +187,7 @@ const GLOBAL_BUILTINS = new Set([
 function unwrapDependencyExpression(node: ESTree.Node): ESTree.Node {
 	let current = node;
 	while (isTransparentDependencyExpression(current)) current = current.expression;
+
 	return current;
 }
 
@@ -205,6 +206,7 @@ function getMemberExpressionDepth(node: ESTree.Node): number {
 function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 	let current = unwrapDependencyExpression(node);
 	while (isMemberExpression(current)) current = unwrapDependencyExpression(current.object);
+
 	return isIdentifier(current) ? current : undefined;
 }
 
@@ -217,18 +219,22 @@ function queueIdentifierChildren(current: ESTree.Node, nodes: Array<ESTree.Node>
 		nodes.push(current.object);
 		return;
 	}
+
 	if (isTransparentDependencyExpression(current)) {
 		nodes.push(current.expression);
 		return;
 	}
+
 	if (isBinaryOrLogicalExpression(current)) {
 		nodes.push(current.right, current.left);
 		return;
 	}
+
 	if (isUnaryExpression(current)) {
 		nodes.push(current.argument);
 		return;
 	}
+
 	if (isConditionalExpression(current)) nodes.push(current.alternate, current.consequent, current.test);
 }
 
@@ -285,6 +291,7 @@ function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string
 			current = unwrapped;
 			continue;
 		}
+
 		if (!isMemberExpression(current)) break;
 		members.push(current);
 		current = current.object;
@@ -365,6 +372,7 @@ function isStableHookValue(
 
 	const stableResult = stableHooks.get(hookName);
 	if (!(stableResult instanceof Set)) return stableResult === true;
+
 	return (
 		isStableArrayIndex(stableResult, node, identifierName) ||
 		isStableObjectProperty(stableResult, node, identifierName)
@@ -497,6 +505,7 @@ function isInTypePosition(identifier: ESTree.Node): boolean {
 			current = current.parent ?? undefined;
 			continue;
 		}
+
 		if (current.type.startsWith("TS")) return true;
 		if (IS_CEASE_BOUNDARY.has(current.type)) return false;
 		/* v8 ignore next -- @preserve parser-provided parent chains continue until a declaration or TypeScript boundary. */
@@ -530,6 +539,7 @@ function isDeclaredInComponentBody(variable: VariableLike, closureNode: ESTree.N
 					/* v8 ignore next -- @preserve definition parent chains continue until the containing component function. */
 					definitionNode = definitionNode.parent ?? undefined;
 				}
+
 				return definitionNode === functionParent;
 			});
 		}
@@ -553,6 +563,7 @@ function resolveFunctionReference(identifier: ESTree.Node, scope: Scope): ESTree
 			variable = currentVariable;
 			break;
 		}
+
 		currentScope = currentScope.upper;
 	}
 
@@ -561,6 +572,7 @@ function resolveFunctionReference(identifier: ESTree.Node, scope: Scope): ESTree
 	for (const definition of variable.defs) {
 		const definitionNode = definition.node;
 		if (isFunctionDeclarationRaw(definitionNode)) return definitionNode;
+
 		if (isVariableDeclarator(definitionNode) && definitionNode.init && isCallbackFunction(definitionNode.init)) {
 			return definitionNode.init;
 		}
@@ -587,6 +599,7 @@ function isDefinitionInsideNode(definition: VariableDefinitionLike, node: ESTree
 		if (definitionNode === node) return true;
 		definitionNode = definitionNode.parent ?? undefined;
 	}
+
 	return false;
 }
 
@@ -628,6 +641,7 @@ function visitChildNodes(current: ESTree.Node, sourceCode: SourceCode, visit: (n
 
 function visitMemberExpressionChildren(current: ESTree.MemberExpression, visit: (node: ESTree.Node) => void): void {
 	visit(current.object);
+
 	if (current.computed) visit(current.property);
 }
 
@@ -727,6 +741,7 @@ function isSelfReferenceCapture(capture: CaptureInfo, { parent }: ESTree.CallExp
 function isNumericArray(array: ReadonlyArray<unknown>): array is Array<number> {
 	return array.length > 0 && Predicate.isNumber(array[0]);
 }
+
 function isStringArray(array: ReadonlyArray<unknown>): array is Array<string> {
 	return array.length > 0 && Predicate.isString(array[0]);
 }
@@ -760,6 +775,7 @@ function reportUnnecessaryDependency(
 		if (name === dependency.name) continue;
 		newDependencies[size++] = name;
 	}
+
 	const dependenciesString = `[${newDependencies.join(", ")}]`;
 
 	context.report({
@@ -782,6 +798,7 @@ function reportUnnecessaryDependency(
 }
 
 type RuleContext = InferContextFromRule<typeof useExhaustiveDependencies>;
+
 function isCallbackFunctionNode(node?: ESTree.Node): node is CallbackFunction {
 	return node !== undefined && isAnyFunction(node);
 }
@@ -899,11 +916,14 @@ function collectMissingCaptures(
 	for (const capture of getRequiredCaptures(captures, stableHooks)) {
 		/* v8 ignore next -- @preserve required captures are collected from identifier-rooted expressions. */
 		if (getRootIdentifierName(capture.node) === undefined) continue;
+
 		if (dependencies.some((dependency) => coversCapture(dependency, capture, resolveExpressionDependencies))) {
 			continue;
 		}
+
 		missingCaptures.push(capture);
 	}
+
 	return missingCaptures;
 }
 
@@ -989,6 +1009,7 @@ function reportUnstableDependencies(
 					node: dependency.node,
 				});
 			}
+
 			break;
 		}
 	}
@@ -1114,6 +1135,7 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 				stableHooks,
 				resolvedOptions.resolveExpressionDependencies,
 			);
+
 			reportMissingCaptures(context, dependenciesArray, dependencies, missingCaptures);
 			reportUnstableDependencies(context, captures, dependencies, stableHooks);
 		}

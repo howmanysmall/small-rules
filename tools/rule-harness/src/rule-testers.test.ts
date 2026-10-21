@@ -72,6 +72,7 @@ const scopeRule = defineRule({
 				if (variable?.defs[0]?.type === "ImportBinding") {
 					context.report({ data: { name: node.name }, messageId: "importBinding", node });
 				}
+
 				if (variable?.scope.type === "module" && variable.defs[0]?.type === "Variable") {
 					context.report({ data: { name: node.name }, messageId: "moduleBinding", node });
 				}

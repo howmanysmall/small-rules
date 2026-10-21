@@ -7,6 +7,7 @@ type TestSourceType = "commonjs" | "module" | "script" | "unambiguous";
 export type TestLanguage = "dts" | "js" | "jsx" | "ts" | "tsx";
 
 const isRange = type(["number", "number"]);
+
 export type Range = typeof isRange.infer;
 
 export interface Position {
@@ -214,6 +215,7 @@ export const isFix = type({
 	range: isRange,
 	text: "string",
 }).readonly();
+
 export type Fix = typeof isFix.infer;
 
 export interface Fixer {

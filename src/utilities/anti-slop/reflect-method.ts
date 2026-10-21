@@ -28,6 +28,7 @@ export function isGlobalReflectMethodCall(
 ): boolean {
 	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
 	if (!isGlobalReflect(sourceCode, callee.object)) return false;
+
 	return callee.computed
 		? isAnyLiteral(callee.property) && callee.property.value === methodName
 		: isIdentifierNamed(callee.property, methodName);

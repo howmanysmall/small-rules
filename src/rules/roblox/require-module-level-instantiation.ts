@@ -32,6 +32,7 @@ function normalizeOptions(options: Options): ReadonlyMap<string, string> {
 		/* v8 ignore stop -- @preserve */
 		result.set(key, value);
 	}
+
 	return result;
 }
 

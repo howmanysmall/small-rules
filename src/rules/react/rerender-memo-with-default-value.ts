@@ -15,6 +15,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type Context = InferContextFromRule<typeof rerenderMemoWithDefaultValue>;
+
 type ObjectPatternProperty = ESTree.ObjectPattern["properties"][number];
 
 function reportEmptyDefaultValue(context: Context, defaultValue: ESTree.Node): void {
@@ -37,6 +38,7 @@ function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTr
 	for (const parameter of parameters) {
 		if (isAssignmentPattern(parameter) && isObjectPattern(parameter.left)) {
 			checkObjectPatternDefaults(context, parameter.left);
+
 			/* v8 ignore next -- @preserve assignment pattern defaults are parser expression nodes. */
 			if (isNode(parameter.right)) reportEmptyDefaultValue(context, parameter.right);
 			continue;
@@ -65,6 +67,7 @@ function getComponentDeclarationParameters(node: ESTree.Node): ReadonlyArray<EST
 	if (!isFunctionDeclaration(node) || !isComponentDeclaration(node)) return undefined;
 	return [...node.params];
 }
+
 function getComponentAssignmentParameters(node: ESTree.Node): ReadonlyArray<ESTree.ParamPattern> | undefined {
 	const assignment = getComponentAssignment(node);
 	return assignment === undefined ? undefined : [...assignment.init.params];

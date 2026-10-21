@@ -201,6 +201,7 @@ function collectReachableFunctions(
 	while (queueIndex < queue.length) {
 		const current = queue[queueIndex];
 		queueIndex += 1;
+
 		/* v8 ignore next -- @preserve queueIndex is bounded by queue.length. */
 		if (current === undefined || current.depth >= maxHelperTraceDepth) continue;
 
@@ -241,6 +242,7 @@ function collectRootFunctionIds(
 			functionInfosByNode,
 			variableResolutionCache,
 		);
+
 		for (const id of resolvedFunctionIds) rootFunctionIds.add(id);
 	}
 
@@ -345,6 +347,7 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 
 			"Program:exit"(): void {
 				populateCallGraph(context.sourceCode, functionInfosById, functionInfosByNode, variableResolutionCache);
+
 				const rootFunctionIds = collectRootFunctionIds(
 					context.sourceCode,
 					useMemoInlineCallbacks,

@@ -64,6 +64,7 @@ const isCommuniqueConfiguration = type({
 	"defaults?": isCommuniqueDefaults.or(isUndefined),
 	"system_extra?": isMaybeString,
 }).readonly();
+
 type CommuniqueConfiguration = typeof isCommuniqueConfiguration.infer;
 
 async function getCommuniqueAsync(): Promise<CommuniqueConfiguration> {
@@ -89,6 +90,7 @@ function getUsdPerToken(price: string): number {
 	if (!TOKEN_REGEXP.test(price)) {
 		throw new Error(`Invalid token price: ${price}`);
 	}
+
 	return Number(price);
 }
 
@@ -96,6 +98,7 @@ function requireTokenCount(tokens: number, label: string): number {
 	if (!Number.isSafeInteger(tokens) || tokens < 0) {
 		throw new Error(`${label} token count must be a non-negative integer`);
 	}
+
 	return tokens;
 }
 
@@ -104,6 +107,7 @@ function getUtcWeekday(at: Date): UtcDay {
 	if (day === undefined) {
 		throw new Error(`Invalid UTC weekday: ${at.getUTCDay()}`);
 	}
+
 	return day;
 }
 
@@ -217,6 +221,7 @@ async function writePrettyOutputAsync(output: string, outputFile: string): Promi
 	const groups = TOKENS_REGEXP.exec(output)?.groups;
 	if (!groups) {
 		log.fail("No token counts found in communique output.");
+
 		if (output.trim().length > 0) log.log(output.trim());
 		return;
 	}
@@ -300,6 +305,7 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 		const nextFileName = await getNextFileNameAsync(release);
 		const [name, parameters] = await getExecutionAsync(nextFileName, release);
 		log.start(`Dry-run release notes → ${nextFileName}`);
+
 		const result = exec(name, parameters, {
 			nodeOptions: {
 				env: { OPENAI_API_KEY: openrouterApiKey },
@@ -311,6 +317,7 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 		for await (const line of result) {
 			const trueLine = `${line}\n`;
 			output += trueLine;
+
 			if (!TOKENS_REGEXP.test(line)) process.stderr.write(trueLine);
 		}
 

@@ -249,6 +249,7 @@ export function getRuleNewnessWith(run: GitRunner): ReadonlyMap<string, RuleNewn
 			cachedNewness = new Map();
 		}
 	}
+
 	return cachedNewness;
 }
 

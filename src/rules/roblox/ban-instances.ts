@@ -55,6 +55,7 @@ function normalizeClassBans(rawBans: RuleOptions["bannedInstances"]): Map<string
 		for (const className of rawBans) {
 			bannedClasses.set(className.toLowerCase(), { message: "", originalName: className });
 		}
+
 		return bannedClasses;
 	}
 
@@ -218,6 +219,7 @@ const banInstances = createRule("ban-instances", "roblox", {
 
 			const trackedVariable = trackedVariables.get(variable);
 			if (trackedVariable === undefined) return undefined;
+
 			return trackedVariable.functionScope === getEnclosingFunctionScope(referenceScope)
 				? trackedVariable
 				: undefined;

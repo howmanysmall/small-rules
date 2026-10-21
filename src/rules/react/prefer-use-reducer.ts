@@ -7,6 +7,7 @@ import { isUppercaseName } from "$oxc-utilities/string-utilities";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 const RELATED_USE_STATE_THRESHOLD = 5;
+
 type Context = InferContextFromRule<typeof preferUseReducer>;
 
 function reportExcessiveUseState(context: Context, node: ESTree.Node, componentName: string): void {
@@ -15,6 +16,7 @@ function reportExcessiveUseState(context: Context, node: ESTree.Node, componentN
 	let useStateCount = 0;
 	for (const statement of node.body) {
 		if (!isVariableDeclaration(statement)) continue;
+
 		for (const declarator of statement.declarations) {
 			if (isHookCall(declarator.init, "useState")) useStateCount += 1;
 		}
@@ -38,6 +40,7 @@ const preferUseReducer = createRule("prefer-use-reducer", "react", {
 			},
 			VariableDeclarator(node) {
 				if (!isComponentAssignment(node) || !node.init) return;
+
 				/* v8 ignore next -- @preserve component assignments matched here have function bodies and identifier names. */
 				if ("body" in node.init && node.init.body && "name" in node.id) {
 					reportExcessiveUseState(context, node.init.body, node.id.name);

@@ -43,6 +43,7 @@ function isKey(raw: ReadonlyArray<HighlightToken>, index: number): boolean {
 		if (current === undefined || current.className !== undefined) break;
 		lookahead += 1;
 	}
+
 	return raw[lookahead]?.text === ":";
 }
 

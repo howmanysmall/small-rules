@@ -84,9 +84,11 @@ function shouldSplitIdentifier(previousType: number, currentType: number, nextTy
 	if (previousType === CHARACTER_TYPE_OTHER || currentType === CHARACTER_TYPE_OTHER) {
 		return previousType !== currentType;
 	}
+
 	if (previousType === CHARACTER_TYPE_DIGIT || currentType === CHARACTER_TYPE_DIGIT) {
 		return previousType !== currentType;
 	}
+
 	return (
 		(previousType === CHARACTER_TYPE_LOWERCASE && currentType === CHARACTER_TYPE_UPPERCASE) ||
 		(previousType === CHARACTER_TYPE_UPPERCASE &&
@@ -109,6 +111,7 @@ function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
 			words.push(identifier.slice(wordStart, index));
 			wordStart = index;
 		}
+
 		previousType = currentType;
 	}
 
@@ -139,6 +142,7 @@ function buildReplacementPatterns(replacement: string): ReadonlyArray<RegExp> {
 	for (let index = 1; index <= count; index += 1) {
 		patterns[index - 1] = new RegExp(`\\$${index}`, "gu");
 	}
+
 	return patterns;
 }
 
@@ -294,6 +298,7 @@ function normalizeReplacementOverrides(
 		for (const [replacementName, enabled] of Object.entries(override)) {
 			if (Predicate.isBoolean(enabled)) normalizedOverride[replacementName] = enabled;
 		}
+
 		overrides.set(name, normalizedOverride);
 	}
 
@@ -347,6 +352,7 @@ function normalizeAllowPropertyAccess(options?: RawOptions): ReadonlySet<string>
 	if (!isStringArray(normalizedOptions?.allowPropertyAccess)) return allowPropertyAccess;
 
 	for (const name of normalizedOptions.allowPropertyAccess) allowPropertyAccess.add(name);
+
 	return allowPropertyAccess;
 }
 
@@ -532,6 +538,7 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 	const shorthandReplacement = getShorthandReplacement(name, options.shorthandConfiguration);
 	if (shorthandReplacement !== undefined) {
 		if (isShorthandIgnored(name, options.shorthandConfiguration)) return { total: 0 };
+
 		return {
 			samples: [shorthandReplacement.replaced],
 			total: 1,
@@ -593,6 +600,7 @@ function getReplacementSamples(
 			/* v8 ignore next -- sample indexes are generated modulo the entry list length. @preserve */
 			if (entry !== undefined) combination.unshift(entry);
 		}
+
 		return combination;
 	});
 

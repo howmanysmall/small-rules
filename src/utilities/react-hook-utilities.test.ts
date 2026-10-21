@@ -30,6 +30,7 @@ const hookNameMessages = {
 	useMemo: "useMemo",
 	useState: "useState",
 } as const;
+
 function isHookNameMessage(messageId: string): messageId is keyof typeof hookNameMessages {
 	return messageId in hookNameMessages;
 }
@@ -169,6 +170,7 @@ const countMessages = {
 	"2": "2",
 	"3": "3",
 } as const;
+
 function isCountMessage(messageId: string): messageId is keyof typeof countMessages {
 	return messageId in countMessages;
 }
@@ -217,6 +219,7 @@ describe("countSetStateCalls behavior", () => {
 });
 
 const walkerMessages = { "2": "2", "4": "4", identifier: "identifier" } as const;
+
 function isWalkerMessage(messageId: string): messageId is keyof typeof walkerMessages {
 	return messageId in walkerMessages;
 }
@@ -238,6 +241,7 @@ describe("walkAst utility", () => {
 					walkAst(node, (child): void => {
 						types.add(child.type);
 					});
+
 					if (types.has("Identifier")) context.report({ messageId: "identifier", node });
 				},
 			} satisfies Visitor;
@@ -278,6 +282,7 @@ describe("walkAstSlop utility", () => {
 					walkAstSlop(node, (child): void => {
 						types.add(child.type);
 					});
+
 					if (types.has("Identifier")) context.report({ messageId: "identifier", node });
 				},
 			} satisfies Visitor;
@@ -378,6 +383,7 @@ describe("classifyDependencies utility", () => {
 						{},
 						isStaticArray,
 					);
+
 					if (kind === DependenciesKind.MissingOrOmitted) context.report({ messageId: "missing", node });
 					if (kind === DependenciesKind.EmptyArray) context.report({ messageId: "empty", node });
 					if (kind === DependenciesKind.StaticArray) context.report({ messageId: "static", node });
@@ -438,6 +444,7 @@ describe("classifyDependencies utility", () => {
 							{},
 							() => false,
 						);
+
 						if (kind === DependenciesKind.DynamicOrUnknown) context.report({ messageId: "spread", node });
 					},
 				} satisfies Visitor;

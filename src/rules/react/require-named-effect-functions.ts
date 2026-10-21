@@ -112,6 +112,7 @@ function resolveFunctionFromVariable(variable: ScopeVariable): ResolvedFunction 
 		}
 
 		if (!isVariableDeclarator(node) || node.init === null) continue;
+
 		if (isArrowFunctionExpression(node.init)) {
 			return {
 				isAsync: node.init.async,
@@ -199,6 +200,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				if (isCallbackHookResult(context.sourceCode, identifier)) {
 					reportHookIssue(hookName, node, "identifierReferencesCallback");
 				}
+
 				return;
 			}
 
@@ -208,6 +210,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				if (isCallbackHookResult(context.sourceCode, identifier)) {
 					reportHookIssue(hookName, node, "identifierReferencesCallback");
 				}
+
 				return;
 			}
 
@@ -219,8 +222,10 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				if (!isAsyncAllowed(hookName)) {
 					reportHookIssue(hookName, node, "identifierReferencesAsyncArrow");
 				}
+
 				return;
 			}
+
 			reportHookIssue(hookName, node, "identifierReferencesArrow");
 		}
 
@@ -236,8 +241,10 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				if (!isAsyncAllowed(hookName)) {
 					reportHookIssue(hookName, node, "identifierReferencesAsyncFunction");
 				}
+
 				return;
 			}
+
 			if (!isRobloxTsMode && inlineFunctionDeclarations) {
 				reportDeclarationReference(hookName, node, identifier, declaration, variable);
 			}
@@ -325,6 +332,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				if (isArrowFunctionExpression(firstArgument)) {
 					if (firstArgument.async) reportHookIssue(hookName, node, "asyncArrowFunction");
 					else reportHookIssue(hookName, node, "arrowFunction");
+
 					return;
 				}
 

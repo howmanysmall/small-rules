@@ -71,6 +71,7 @@ function normalizeAdditionalStaticFactories(rawOptions: Context["options"][0]): 
 function getJavaScriptXmlElementRootName(name: ESTree.JSXElementName): string | undefined {
 	let current = name;
 	while (isJsxMemberExpression(current)) current = current.object;
+
 	return isJsxIdentifier(current) ? current.name : undefined;
 }
 
@@ -112,12 +113,14 @@ function isHoistableJavaScriptXmlElementName(
 	const isMemberName = isJsxMemberExpression(name);
 	if (additionalComponents.has(rootName)) {
 		if (variable === undefined) return !isMemberName;
+
 		return isMemberName
 			? isImportedJavaScriptXmlNamespace(context, node, rootName)
 			: isStableModuleComponentName(context, node, rootName);
 	}
 
 	if (environment !== STANDARD) return false;
+
 	return isMemberName
 		? isImportedJavaScriptXmlNamespace(context, node, rootName)
 		: isStableModuleComponentName(context, node, rootName);
@@ -178,6 +181,7 @@ function isStaticJavaScriptXmlChild(
 	environment: Environment,
 ): boolean {
 	if (isJsxText(child)) return environment === STANDARD || child.value.trim().length === 0;
+
 	if (isJsxElement(child) || isJsxFragment(child)) {
 		return isStaticJavaScriptXmlNode(
 			context,
@@ -188,8 +192,10 @@ function isStaticJavaScriptXmlChild(
 			environment,
 		);
 	}
+
 	if (!isJsxExpressionContainer(child)) return false;
 	if (isJsxEmptyExpression(child.expression)) return true;
+
 	if (isJsxElement(child.expression) || isJsxFragment(child.expression)) {
 		return isStaticJavaScriptXmlNode(
 			context,
@@ -278,6 +284,7 @@ function hasStaticJavaScriptXmlAncestor(
 		) {
 			return true;
 		}
+
 		({ parent } = parent);
 	}
 
@@ -336,6 +343,7 @@ function isAssignedToModuleConst(context: Context, node: JavaScriptXmlNode): boo
 	if (!isVariableDeclarator(parent) || !isIdentifier(parent.id) || parent.init !== current) {
 		return false;
 	}
+
 	/* v8 ignore next -- @preserve VariableDeclarator nodes are parented by VariableDeclaration nodes. */
 	if (!isVariableDeclaration(parent.parent)) return false;
 	if (parent.parent.kind !== "const") return false;
@@ -372,7 +380,9 @@ const preferHoistedJsxElements = createRule("prefer-hoisted-jsx-elements", "reac
 			) {
 				return;
 			}
+
 			if (isAssignedToModuleConst(context, node)) return;
+
 			if (hasStaticJavaScriptXmlAncestor(context, node, additionalComponents, staticOptions, environment)) {
 				return;
 			}
@@ -415,6 +425,7 @@ const preferHoistedJsxElements = createRule("prefer-hoisted-jsx-elements", "reac
 		type: "suggestion",
 	},
 });
+
 type Context = InferContextFromRule<typeof preferHoistedJsxElements>;
 
 export default preferHoistedJsxElements;

@@ -198,6 +198,7 @@ function addNestedTypeAnnotationScores(
 			ceiling,
 		);
 	}
+
 	return score;
 }
 
@@ -227,6 +228,7 @@ function addTypeUnionScores(
 				ceiling,
 			);
 		}
+
 		return addScore(currentScore, multiplier * (types.length + offset), config, ceiling);
 	}
 
@@ -289,6 +291,7 @@ function scoreConditionalType(
 		config,
 		ceiling,
 	);
+
 	score = addScore(
 		addScore(
 			score,
@@ -313,6 +316,7 @@ function addFunctionParameterScore(
 	const { typeAnnotation } = parameter;
 	/* v8 ignore next -- @preserve parser-produced function type params either omit annotations or use TSTypeAnnotation. */
 	if (!isTsTypeAnnotation(typeAnnotation)) return current;
+
 	return addScore(
 		current,
 		calculateStructuralComplexity(
@@ -334,6 +338,7 @@ function addFunctionReturnScore(current: number, node: ESTree.Node, scoring: Str
 	const { returnType } = node;
 	/* v8 ignore next -- @preserve type-checkable function and method signatures carry return annotations here. */
 	if (!isTsTypeAnnotation(returnType)) return current;
+
 	return addScore(
 		current,
 		calculateStructuralComplexity(
@@ -396,6 +401,7 @@ function scoreMappedType(
 		scoring.depthMultiplierCache,
 		scoring.ceiling,
 	);
+
 	if (typeAnnotation !== null) {
 		score = addStructuralScore(
 			score,
@@ -407,6 +413,7 @@ function scoreMappedType(
 			scoring.ceiling,
 		);
 	}
+
 	return score;
 }
 
@@ -428,6 +435,7 @@ function scoreTupleType({ elementTypes }: ESTree.TSTupleType, scoring: Structura
 			scoring.ceiling,
 		);
 	}
+
 	return addScore(score, 1.5 * elementTypes.length, scoring.config, scoring.ceiling);
 }
 
@@ -459,6 +467,7 @@ function scoreTypeReference({ typeArguments }: ESTree.TSTypeReference, scoring: 
 			2,
 		);
 	}
+
 	return score;
 }
 
@@ -621,6 +630,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 					depthMultiplierCache,
 					complexityCeiling,
 				);
+
 				/* v8 ignore else -- @preserve top-level depth scoring keeps interface checks below threshold today. */
 				if (complexity < configuration.interfacePenalty) return;
 
@@ -634,6 +644,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 					hasIanitorReference = true;
 					ianitorStaticVariables.add(variableName);
 				}
+
 				if (hasIanitorStaticType(node.typeAnnotation)) return;
 
 				const complexity = calculateStructuralComplexity(
@@ -644,6 +655,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 					depthMultiplierCache,
 					complexityCeiling,
 				);
+
 				/* v8 ignore else -- @preserve top-level depth scoring keeps type alias checks below threshold today. */
 				if (complexity < configuration.baseThreshold) return;
 
@@ -656,6 +668,7 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 				if (!isCallExpression(init) || !isIanitorValidator(init)) return;
 
 				hasIanitorReference = true;
+
 				// oxlint-disable-next-line typescript/no-unnecessary-condition -- causes tests to fail.
 				if (isIdentifier(id) && id.typeAnnotation !== undefined && id.typeAnnotation !== null) return;
 

@@ -22,13 +22,16 @@ const noUnknownTypeAliases = createRule("no-unknown-type-aliases", "anti-slop", 
 		function doesTypeResolveToUnknown(type: ESTree.TSType): boolean {
 			return getResolvedTypeMatches(type, environment, (resolved, enqueue) => {
 				if (isTsUnknownKeyword(resolved)) return true;
+
 				if (isTsParenthesizedType(resolved)) {
 					enqueue(resolved.typeAnnotation);
 					return false;
 				}
+
 				if (isTsUnionType(resolved)) {
 					for (const member of resolved.types) enqueue(member);
 				}
+
 				return false;
 			});
 		}

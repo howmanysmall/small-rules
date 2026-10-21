@@ -59,6 +59,7 @@ const preferModdingInspect = createRule("prefer-modding-inspect", "roblox", {
 			VariableDeclarator(node): void {
 				if (!isIdentifier(node.id)) return;
 				const idName = node.id.name;
+
 				if (!isTrueObjectExpression(node.init)) return;
 
 				const enumType = getRecordEnumTypeParameter(node);

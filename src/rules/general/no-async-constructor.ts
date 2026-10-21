@@ -65,6 +65,7 @@ function getThisAsyncMethodName(
 	if (!isMemberExpression(callee) || !isThisExpression(callee.object) || !isIdentifier(callee.property)) {
 		return undefined;
 	}
+
 	return asyncMethods.has(callee.property.name) ? callee.property.name : undefined;
 }
 
@@ -82,6 +83,7 @@ function getLocalVariableAssignment(node: ESTree.Node): string | undefined {
 
 function isNonIifeFunction(node: ESTree.Node): boolean {
 	if (!isCallbackFunction(node)) return false;
+
 	if (
 		isParenthesizedExpression(node.parent) &&
 		isCallExpression(node.parent.parent) &&
@@ -89,6 +91,7 @@ function isNonIifeFunction(node: ESTree.Node): boolean {
 	) {
 		return false;
 	}
+
 	return !isCallExpression(node.parent) || node.parent.callee !== node;
 }
 

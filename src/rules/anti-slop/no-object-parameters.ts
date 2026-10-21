@@ -32,6 +32,7 @@ type ParameterOwner =
 	| ESTree.TSConstructSignatureDeclaration
 	| ESTree.TSFunctionType
 	| ESTree.TSMethodSignature;
+
 const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 	createOnce(context): Visitor {
 		let environment: TypeAliasEnvironment;
@@ -39,13 +40,16 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 		function doesTypeResolveToObject(type: ESTree.TSType): boolean {
 			return getResolvedTypeMatches(type, environment, (resolved, enqueue) => {
 				if (isTsObjectKeyword(resolved)) return true;
+
 				if (isTsParenthesizedType(resolved)) {
 					enqueue(resolved.typeAnnotation);
 					return false;
 				}
+
 				if (isTsUnionType(resolved)) {
 					for (const member of resolved.types) enqueue(member);
 				}
+
 				return false;
 			});
 		}
@@ -56,6 +60,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 				if (!isTsTypeAnnotation(annotation) || !doesTypeResolveToObject(annotation.typeAnnotation)) {
 					continue;
 				}
+
 				context.report({
 					data: {
 						parameter: getFunctionParameterBindingName(parameter, context.sourceCode),

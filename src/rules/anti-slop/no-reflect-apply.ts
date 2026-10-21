@@ -18,6 +18,7 @@ const noReflectApply = createRule("no-reflect-apply", "anti-slop", {
 				const { callee } = node;
 				/* v8 ignore next -- Oxc's parser does not produce V8 intrinsic call expressions. @preserve */
 				if (isSuper(callee) || isV8IntrinsicExpression(callee)) return;
+
 				if (isGlobalReflectMethodCall(context.sourceCode, callee, "apply")) {
 					context.report({ messageId: "reflectApply", node });
 				}

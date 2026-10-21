@@ -26,6 +26,7 @@ function isInsideTypeGuard(node: ESTree.Node): boolean {
 		if (isAnyFunction(current)) return isTsTypePredicate(current.returnType?.typeAnnotation);
 		current = current.parent;
 	}
+
 	return false;
 }
 

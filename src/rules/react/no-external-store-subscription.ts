@@ -58,6 +58,7 @@ function collectCleanupVariables(
 			cleanupVariables.add(resolved);
 		}
 	}
+
 	return cleanupVariables;
 }
 
@@ -73,6 +74,7 @@ function reportSharedCleanupSetters(
 			// oxlint-disable-next-line typescript/no-unnecessary-condition -- harness exposes unresolved refs as undefined despite the declared type.
 			return resolved !== null && resolved !== undefined && cleanupVariables.has(resolved);
 		});
+
 		if (!sharesCleanupVariable) continue;
 
 		const stateSetterCall = getStateSetterCall(analysis, reference);

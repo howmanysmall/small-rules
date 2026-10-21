@@ -1,6 +1,7 @@
 import { Predicate } from "effect";
 
 type PrimitiveJsonValue = boolean | null | number | string;
+
 type JsonValue = PrimitiveJsonValue | ReadonlyArray<JsonValue> | { readonly [key: string]: JsonValue };
 
 type JsonRecord = Readonly<Record<string, JsonValue>>;
@@ -23,6 +24,7 @@ export function isJsonValue(value: unknown): value is JsonValue {
 
 	if (Array.isArray(value)) {
 		for (const subValue of value) if (!isJsonValue(subValue)) return false;
+
 		return true;
 	}
 
@@ -31,6 +33,7 @@ export function isJsonValue(value: unknown): value is JsonValue {
 	for (const subValue of Object.values(value)) {
 		if (!isJsonValue(subValue)) return false;
 	}
+
 	return true;
 }
 
@@ -66,6 +69,7 @@ function renderArrayItem(item: JsonValue, depth: number, padding: string): strin
 
 function renderArray(values: ReadonlyArray<JsonValue>, depth: number): string {
 	if (values.length === 0) return "[]";
+
 	if (values.every(isJsonPrimitive)) {
 		const inline = `[${renderInlineItems(values)}]`;
 		if (inline.length <= INLINE_ARRAY_LIMIT) return inline;

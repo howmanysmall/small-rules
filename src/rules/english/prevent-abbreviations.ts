@@ -147,10 +147,12 @@ function computeSafeSamples(
 	for (const name of samples) {
 		const safeName = getAvailableVariableName(name, scopes, isSafeNameForVariable);
 		if (safeName === undefined) continue;
+
 		if (safeName !== name && isDiscouragedReplacementName(name, options)) {
 			droppedDiscouraged += 1;
 			continue;
 		}
+
 		/* v8 ignore else -- generated safe names are non-empty valid identifiers. @preserve */
 		if (safeName.length > 0) safeSamples[safeSamplesSize++] = safeName;
 	}
@@ -171,9 +173,11 @@ function tryReportFix(
 		if (!scopeToNamesGeneratedByFixer.has(scope)) {
 			scopeToNamesGeneratedByFixer.set(scope, new Set());
 		}
+
 		const generatedNames = scopeToNamesGeneratedByFixer.get(scope);
 		generatedNames?.add(replacement);
 	}
+
 	report({
 		...message,
 		fix(fixer: Fixer): Array<Fix> {
@@ -203,6 +207,7 @@ function checkVariable(
 		specialCaseReplacement === undefined
 			? getNameReplacements(variable.name, options)
 			: { samples: [specialCaseReplacement], total: 1 };
+
 	if (variableReplacements.total === 0 || !variableReplacements.samples) return;
 
 	const { references } = variable;
@@ -254,12 +259,14 @@ function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (v
 			variableChecker(variable);
 			return;
 		}
+
 		const definitionName = definition.name;
 		/* v8 ignore next -- parser class-name definitions expose identifier names. @preserve */
 		if (!isIdentifier(definitionName)) {
 			variableChecker(variable);
 			return;
 		}
+
 		variableChecker(variable);
 	}
 }
@@ -299,6 +306,7 @@ function checkShorthandIdentifier(
 	if (shorthandReplacement === undefined || (!propertyLike && !propertyAccess)) return false;
 	if (isShorthandIgnored(node.name, options.shorthandConfiguration)) return true;
 	if (!options.checkShorthandProperties) return true;
+
 	if (propertyAccess && isPropertyAccessAllowed(node.name, shorthandReplacement, options.allowPropertyAccess)) {
 		return true;
 	}

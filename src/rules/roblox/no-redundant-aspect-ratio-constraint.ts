@@ -120,6 +120,7 @@ function hasScaledFalseAttribute(node: ESTree.JSXElement): boolean {
 
 function isRedundantAspectRatioChild(node: ESTree.JSXChild): boolean {
 	if (isJsxElement(node)) return getJSXElementName(node) === REDUNDANT_ELEMENT_NAME;
+
 	if (isJsxExpressionContainer(node) && isIdentifier(node.expression)) {
 		return node.expression.name === REDUNDANT_CONSTANT_NAME;
 	}

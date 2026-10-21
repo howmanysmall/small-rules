@@ -10,15 +10,19 @@ import type { Visitor } from "oxlint-plugin-utilities";
 function getPathSegmentsFromSource(source: string): ReadonlyArray<string> {
 	return source.split("/").filter((part) => !part.startsWith("."));
 }
+
 function countParentTraversals(pathDiff: string): number {
 	return pathDiff.split("/").filter((part) => part === "..").length;
 }
+
 function hasAnotherComponentInPath(pathParts: ReadonlyArray<string>): boolean {
 	return pathParts.some((part) => part === toPascalCase(part) && !part.includes("."));
 }
+
 function isIndexFile(filePath: string): boolean {
 	return nodePath.basename(filePath, nodePath.extname(filePath)) === "index";
 }
+
 function isValidFixtureImport(pathParts: ReadonlyArray<string>): boolean {
 	if (!pathParts.includes("fixtures")) return false;
 

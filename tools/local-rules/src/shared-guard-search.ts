@@ -49,6 +49,7 @@ function getWindowRange(window: ReadonlyArray<ESTree.Expression>, search: ChainS
 		start = Math.min(start, range[0]);
 		end = Math.max(end, range[1]);
 	}
+
 	return [start, end];
 }
 
@@ -64,6 +65,7 @@ function findGuardAt(search: ChainSearch, start: number): FoundGuard | undefined
 		if (match === undefined || getEnclosingFunctionName(top) === guard.name) continue;
 		return { guard, match, range: getWindowRange(window, search) };
 	}
+
 	return undefined;
 }
 
@@ -83,6 +85,7 @@ export function findSharedGuards(
 ): ReadonlyArray<FoundGuard> {
 	const terms = new Array<ESTree.Expression>();
 	flattenChain(top, top.operator, terms);
+
 	const context: GuardMatchContext = {
 		getConstantValue: index.getConstantValue,
 		getFunction: index.getFunction,
@@ -98,9 +101,11 @@ export function findSharedGuards(
 			start += 1;
 			continue;
 		}
+
 		found.push(guard);
 		start += getGuardTerms(guard.guard).length;
 	}
+
 	return found;
 }
 
@@ -115,5 +120,6 @@ export function getChainTop({ parent }: ESTree.Node): ESTree.LogicalExpression |
 
 	let top = parent;
 	while (isLogicalExpression(top.parent) && top.parent.operator === top.operator) top = top.parent;
+
 	return top;
 }

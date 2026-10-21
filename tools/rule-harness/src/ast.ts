@@ -20,6 +20,7 @@ const CHILD_FIELD_SELECTOR_PATTERN = /^(?<parentType>\w+)\s*>\s*\.(?<field>\w+)$
 export function decorateAst(program: HarnessValue, locationIndex: LocationIndex): HarnessNode {
 	if (!isParsedNode(program)) throw new HarnessError("Yuku parser returned an invalid Program node.");
 	attachNodeMetadata(program, null, locationIndex);
+
 	if (!isHarnessNode(program)) throw new HarnessError("Yuku parser Program node could not be decorated.");
 	return program;
 }
@@ -73,6 +74,7 @@ function attachNodeMetadata(node: UnknownRecord, parent: HarnessNode | null, loc
 			for (const item of child) {
 				if (isParsedNode(item)) attachNodeMetadata(item, node, locationIndex);
 			}
+
 			continue;
 		}
 
@@ -107,6 +109,7 @@ interface VisitorEntries {
 }
 
 type VisitorCallback = (node: HarnessNode) => void;
+
 type NodePredicate = (node: HarnessNode) => boolean;
 
 interface VisitorEntry {
@@ -125,6 +128,7 @@ function createVisitorEntries(visitor: HarnessValue): VisitorEntries {
 			addVisitor(entries.exit, key.slice(0, -exitSuffix.length), value);
 			continue;
 		}
+
 		addVisitor(entries.enter, key, value);
 	}
 
@@ -139,6 +143,7 @@ function addVisitor(map: Map<string, Array<VisitorEntry>>, selector: string, vis
 		map.set(parsed.nodeType, [entry]);
 		return;
 	}
+
 	visitors.push(entry);
 }
 
@@ -150,7 +155,9 @@ function traverseNode(node: HarnessNode, entries: VisitorEntries): void {
 	for (const visitor of getVisitors(entries.enter, node.type)) {
 		if (visitor.matches(node)) visitor.callback(node);
 	}
+
 	for (const child of getNodeChildren(node)) traverseNode(child, entries);
+
 	for (const visitor of getVisitors(entries.exit, node.type)) {
 		if (visitor.matches(node)) visitor.callback(node);
 	}
@@ -233,5 +240,6 @@ function readPath(node: HarnessNode, path: string): HarnessValue {
 		if (!Predicate.isObject(current)) return undefined;
 		current = current[key];
 	}
+
 	return current;
 }

@@ -27,12 +27,14 @@ function getContextualType(objectExpression: ESTree.ObjectExpression): ESTree.TS
 	if (isVariableDeclarator(parent) && parent.init === objectExpression) {
 		return getTypeAnnotationFromBinding(parent.id)?.typeAnnotation;
 	}
+
 	if (
 		(isTsAsExpression(parent) || isTsSatisfiesExpression(parent) || isTsTypeAssertion(parent)) &&
 		parent.expression === objectExpression
 	) {
 		return parent.typeAnnotation;
 	}
+
 	return undefined;
 }
 

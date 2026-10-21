@@ -193,6 +193,7 @@ function isDefinitelyNarrowerRecordType(type: ESTree.TSType): boolean {
 		const [inner] = unwrapped.typeArguments?.params ?? [];
 		return inner !== undefined && isDefinitelyNarrowerRecordType(inner);
 	}
+
 	if (getTypeReferenceName(unwrapped) !== "Record") return false;
 
 	const parameters = unwrapped.typeArguments?.params ?? [];
@@ -206,6 +207,7 @@ function getFunctionBoundary(node: ESTree.Node): ESTree.Node | undefined {
 		if (FUNCTION_BOUNDARY_TYPES.has(current.type)) return current;
 		current = current.parent;
 	}
+
 	return undefined;
 }
 
@@ -213,6 +215,7 @@ function variableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator 
 	for (const definition of variable.defs) {
 		if (definition.type === "Variable" && isVariableDeclarator(definition.node)) return definition.node;
 	}
+
 	return undefined;
 }
 
@@ -268,6 +271,7 @@ function getKnownInitializer(variable: ScopeVariable, boundary?: ESTree.Node): E
 	) {
 		return undefined;
 	}
+
 	return declarator.init;
 }
 
@@ -292,6 +296,7 @@ function getKnownValueEvidence(
 		const annotatedIdentifier = variable.identifiers.find(
 			(identifier) => identifier.typeAnnotation !== null && identifier.typeAnnotation !== undefined,
 		);
+
 		if (annotatedIdentifier !== undefined) return getKnownAnnotationEvidence(annotatedIdentifier, boundary);
 
 		const initializer = getKnownInitializer(variable, boundary);

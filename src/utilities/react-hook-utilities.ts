@@ -92,6 +92,7 @@ function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, sta
 function pushSlopValue(value: PropertyDescriptor["value"], parent: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	if (Array.isArray(value)) {
 		for (const item of value) pushSlopValue(item, parent, worklist);
+
 		return;
 	}
 
@@ -130,12 +131,14 @@ export const enum DependenciesKind {
 	StaticArray = 2,
 	DynamicOrUnknown = 3,
 }
+
 export type IsStaticArrayExpression<TOptions extends object> = (
 	sourceCode: SourceCode,
 	arrayExpression: ESTree.ArrayExpression,
 	seen: Set<ESTree.Node>,
 	options: TOptions,
 ) => boolean;
+
 export function classifyDependencies<TOptions extends object>(
 	sourceCode: SourceCode,
 	argument: ESTree.Argument | undefined,

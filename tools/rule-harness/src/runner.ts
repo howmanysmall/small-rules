@@ -42,22 +42,27 @@ function runRuleTests(
 
 function registerCase(testCase: NormalizedCase, execute: (testCase: NormalizedCase) => RuleExecutionResult): void {
 	const name = createCaseName(testCase);
+
 	function run(): void {
 		const result = execute(testCase);
 		if (testCase.kind === "valid") {
 			assertValidCase(result.diagnostics, testCase.code);
 			return;
 		}
+
 		assertInvalidCase(result.diagnostics, toInvalidCase(testCase), result.sourceCode);
 	}
+
 	if (testCase.only === true) {
 		it[ONLY_TEST_KEY](name, run);
 		return;
 	}
+
 	if (testCase.skip === true) {
 		it[SKIP_TEST_KEY](name, run);
 		return;
 	}
+
 	// biome-ignore lint/nursery/useValidTestTitle: it is a string lol
 	it(name, run);
 }

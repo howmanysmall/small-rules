@@ -1,6 +1,7 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
+
 export type RuleCategoryKey = "anti-slop" | "english" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
 
 export interface RuleManifestEntry {

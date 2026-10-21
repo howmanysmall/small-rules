@@ -60,6 +60,7 @@ function getSingleLoopCall(loop: ESTree.ForOfStatement): ESTree.CallExpression |
 		if (onlyStatement === undefined) return undefined;
 		statement = onlyStatement;
 	}
+
 	if (!isExpressionStatement(statement) || !isCallExpression(statement.expression)) return undefined;
 	return statement.expression;
 }
@@ -77,6 +78,7 @@ function containsIdentifier(node: ESTree.Node, name: string): boolean {
 function isMapCopyCall(call: ESTree.CallExpression, loopDeclarator: ESTree.VariableDeclarator): boolean {
 	/* v8 ignore next -- the caller only passes statically named member calls. @preserve */
 	if (!isMemberExpression(call.callee) || !isIdentifierNamed(call.callee.property, "set")) return false;
+
 	if (call.arguments.length !== 2 || !isArrayPattern(loopDeclarator.id) || loopDeclarator.id.elements.length !== 2) {
 		return false;
 	}
@@ -162,6 +164,7 @@ const preferNativeCollectionCopy = createRule("prefer-native-collection-copy", "
 					!hasShadowedBinding(sourceCode, declaration.declaration, "table") &&
 					!hasAttachedComments(sourceCode, declaration.declaration) &&
 					!hasAttachedComments(sourceCode, loop);
+
 				if (fixable) {
 					context.report({
 						fix: (fixer) => {

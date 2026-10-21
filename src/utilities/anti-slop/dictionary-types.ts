@@ -63,12 +63,14 @@ export interface TypeEnvironment {
 }
 
 type UnsafeValueKind = "any" | "empty-object" | "object" | "union" | "unknown";
+
 export interface UnsafeDictionary {
 	readonly kind: "unsafe-dictionary";
 	readonly unsafeValue: UnsafeValueKind;
 }
 
 type WideningTargetKind = "anonymous object" | "generic container" | "object" | "open dictionary" | "unknown";
+
 export interface WideningTarget {
 	readonly kind: WideningTargetKind;
 }
@@ -117,6 +119,7 @@ function unwrapTransparentResolution(resolution: TypeResolution): TypeResolution
 	) {
 		current = continueTypeResolution(current, current.type.typeAnnotation);
 	}
+
 	return current;
 }
 
@@ -153,6 +156,7 @@ function getUnsafeUnionValue(
 	for (const member of type.types) {
 		if (getUnsafeDirectValue(continueTypeResolution(resolution, member), environment) !== undefined) return "union";
 	}
+
 	return undefined;
 }
 
@@ -166,9 +170,11 @@ function getUnsafeIntersectionValue(
 	for (const member of type.types) {
 		const unsafe = getUnsafeDirectValue(continueTypeResolution(resolution, member), environment);
 		if (unsafe === "any") return "any";
+
 		if (unsafe === undefined) allUnsafe = false;
 		else firstUnsafe ??= unsafe;
 	}
+
 	return allUnsafe ? firstUnsafe : undefined;
 }
 
@@ -195,6 +201,7 @@ function getUnsafeDirectValue(resolution: TypeResolution, environment: TypeEnvir
 	if (isTsTypeLiteral(unwrapped.type) && isEffectivelyEmptyTypeLiteral(unwrapped.type)) return "empty-object";
 	if (isTsUnionType(unwrapped.type)) return getUnsafeUnionValue(unwrapped, unwrapped.type, environment);
 	if (isTsIntersectionType(unwrapped.type)) return getUnsafeIntersectionValue(unwrapped, unwrapped.type, environment);
+
 	return isTsTypeReference(unwrapped.type)
 		? getUnsafeReferenceValue(unwrapped, unwrapped.type, environment)
 		: undefined;
@@ -215,6 +222,7 @@ function getDictionaryValueTypesFromLiteral(
 		if (valueType === undefined) continue;
 		valueTypes.push(continueTypeResolution(resolution, valueType));
 	}
+
 	return valueTypes;
 }
 
@@ -231,10 +239,12 @@ function getDictionaryValueTypesFromBuiltInReference(
 		const source = getFirstTypeArgumentResolution(resolution, type);
 		return source === undefined ? [] : getDictionaryValueTypes(source, environment);
 	}
+
 	if (name === "Record" && isBuiltIn(name, type, environment)) {
 		const value = type.typeArguments?.params[1];
 		return value === undefined ? [] : [continueTypeResolution(resolution, value)];
 	}
+
 	return undefined;
 }
 
@@ -258,11 +268,13 @@ function getDictionaryValueTypes(
 ): ReadonlyArray<TypeResolution> {
 	const unwrapped = unwrapTransparentResolution(resolution);
 	if (isTsTypeLiteral(unwrapped.type)) return getDictionaryValueTypesFromLiteral(unwrapped, unwrapped.type);
+
 	if (isTsMappedType(unwrapped.type)) {
 		return unwrapped.type.typeAnnotation === null
 			? []
 			: [continueTypeResolution(unwrapped, unwrapped.type.typeAnnotation)];
 	}
+
 	return isTsTypeReference(unwrapped.type)
 		? getDictionaryValueTypesFromReference(unwrapped, unwrapped.type, environment)
 		: [];
@@ -285,6 +297,7 @@ export function classifyUnsafeDictionary(
 		const unsafeValue = getUnsafeDirectValue(valueType, environment);
 		if (unsafeValue !== undefined) return { kind: "unsafe-dictionary", unsafeValue };
 	}
+
 	return undefined;
 }
 
@@ -307,13 +320,16 @@ function isBroadMappedKey(resolution: TypeResolution, environment: TypeEnvironme
 	for (const frame of pending) {
 		const unwrapped = unwrapTransparentResolution(frame);
 		if (isDirectBroadMappedKey(unwrapped.type)) return true;
+
 		if (isTsUnionType(unwrapped.type)) {
 			for (const member of unwrapped.type.types) {
 				// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
 				pending.push(continueTypeResolution(unwrapped, member));
 			}
+
 			continue;
 		}
+
 		if (!isTsTypeReference(unwrapped.type)) continue;
 		const resolved = resolveTypeReference(unwrapped, environment.typeAliases);
 		if (resolved !== undefined) {
@@ -321,9 +337,11 @@ function isBroadMappedKey(resolution: TypeResolution, environment: TypeEnvironme
 			pending.push(resolved);
 			continue;
 		}
+
 		const name = getTypeReferenceName(unwrapped.type);
 		if (name === "PropertyKey" && isBuiltIn(name, unwrapped.type, environment)) return true;
 	}
+
 	return false;
 }
 
@@ -334,15 +352,18 @@ function classifyNonReferenceWidening(
 ): undefined | WideningTarget {
 	if (isTsUnknownKeyword(resolution.type)) return { kind: "unknown" };
 	if (isTsObjectKeyword(resolution.type)) return { kind: "object" };
+
 	if (isTsTypeLiteral(resolution.type)) {
 		if (resolution.type.members.some(isTsIndexSignature)) return { kind: OPEN_DICTIONARY };
 		return !named && resolution.type.members.length > 0 ? { kind: "anonymous object" } : undefined;
 	}
+
 	if (isTsMappedType(resolution.type)) {
 		return !named || isBroadMappedKey(continueTypeResolution(resolution, resolution.type.constraint), environment)
 			? { kind: OPEN_DICTIONARY }
 			: undefined;
 	}
+
 	return undefined;
 }
 
@@ -371,11 +392,14 @@ function classifyWideningReferenceResolution(
 		const target = classifyWideningResolution(resolved, environment, true, false);
 		return getGenericAliasTarget(alias, target, genericContainerAllowed);
 	}
+
 	const wrapped = getTransparentWrappedResolution(resolution, type, name, environment);
 	if (wrapped !== undefined) return classifyWideningResolution(wrapped, environment, named, genericContainerAllowed);
+
 	if (name === "Record" && isBuiltIn(name, type, environment)) {
 		return hasBroadRecordKey(resolution, type, environment) ? { kind: OPEN_DICTIONARY } : undefined;
 	}
+
 	return undefined;
 }
 
@@ -405,7 +429,9 @@ export function isKnownEvidenceExpression(expression: ESTree.Expression): boolea
 	) {
 		current = current.expression;
 	}
+
 	if (isObjectExpression(current)) return true;
+
 	return (
 		isArrayExpression(current) ||
 		isArrowFunctionExpression(current) ||

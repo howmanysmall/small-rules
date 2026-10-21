@@ -41,6 +41,7 @@ function toGenericArrayType(typeNode: ESTree.TSType, sourceCode: SourceCode): st
 		for (let index = arrayTypeNames.length - 1; index >= 0; index -= 1) {
 			typeText = `${arrayTypeNames[index]}<${typeText}>`;
 		}
+
 		return typeText;
 	}
 }

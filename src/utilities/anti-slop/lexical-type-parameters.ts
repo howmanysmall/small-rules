@@ -17,7 +17,9 @@ function appendChildNodes(value: unknown, pending: Array<ESTree.Node>): void {
 		pending.push(value);
 		return;
 	}
+
 	if (!Array.isArray(value)) return;
+
 	for (const child of value) {
 		/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
 		if (isNode(child)) pending.push(child);
@@ -38,6 +40,7 @@ export function appendVisitorChildren(
 ): void {
 	const keys = visitorKeys[node.type];
 	if (keys === undefined) return;
+
 	for (const key of keys) {
 		// oxlint-disable-next-line small-rules/no-reflect-get -- visitor keys are dynamic parser metadata.
 		appendChildNodes(Reflect.get(node, key), pending);
@@ -99,5 +102,6 @@ export function getLexicalTypeParameterNames(
 		descendant = current;
 		current = current.parent;
 	}
+
 	return names;
 }

@@ -62,6 +62,7 @@ export function collectCaseNodeTypes(
 	literals: Array<ESTree.StringLiteral>,
 ): void {
 	if (!producesNodeType(discriminant)) return;
+
 	for (const { test } of cases) {
 		const literal = getNodeTypeLiteral(test);
 		if (literal !== undefined) literals.push(literal);
@@ -86,6 +87,7 @@ export function collectArrayNodeTypes(
 			literals.length = start;
 			return;
 		}
+
 		literals.push(literal);
 	}
 }

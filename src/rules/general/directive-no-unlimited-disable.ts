@@ -15,6 +15,7 @@ const directiveNoUnlimitedDisable = createRule("directive-no-unlimited-disable",
 				});
 			}
 		}
+
 		return {};
 	},
 	meta: {

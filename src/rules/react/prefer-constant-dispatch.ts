@@ -136,6 +136,7 @@ function getDeclarationInsertionFix(
 			lastImport = statement;
 			continue;
 		}
+
 		break;
 	}
 

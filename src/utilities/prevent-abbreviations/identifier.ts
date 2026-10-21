@@ -20,6 +20,7 @@ function isNonAsciiUpperIdentifierStart(codePoint: number): boolean {
 	if (codePoint <= 0xfaff) return codePoint >= 0xf900;
 	if (codePoint <= 0xfdff) return codePoint >= 0xfc00;
 	if (codePoint <= 0xfeff) return codePoint >= 0xfe70;
+
 	if (codePoint <= 0xff5a) {
 		return (codePoint >= 0xff21 && codePoint <= 0xff3a) || codePoint >= 0xff41;
 	}

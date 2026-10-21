@@ -28,6 +28,7 @@ function normalizeBannedTypes(rawOptions: RuleOptions): ReadonlyMap<string, Bann
 		for (const typeName of configuredBannedTypes) {
 			bannedTypes.set(typeName.toLowerCase(), { originalName: typeName, replacementName: undefined });
 		}
+
 		return bannedTypes;
 	}
 

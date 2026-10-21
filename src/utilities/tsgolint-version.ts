@@ -26,6 +26,7 @@ export const isLintSettings = type({
 	"+": "ignore",
 	"small-rules?": isPluginSettings.or(isUndefined),
 }).readonly();
+
 export type LintSettings = typeof isLintSettings.infer;
 
 const isPackageManifest = type({
@@ -56,6 +57,7 @@ export function determineTsgoLintVersion(fromDirectory: string): string | undefi
 		getVersionFromInstalledPackage(root) ??
 		getVersionFromWorkspaceCatalog(root) ??
 		getVersionFromPackageManifest(root);
+
 	inferredVersionCache.set(root, version);
 	return version;
 }

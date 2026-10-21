@@ -32,6 +32,7 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 	const includeLocal =
 		("includeLocal" in inlineConfiguration && inlineConfiguration.includeLocal === true) ||
 		extraArguments.includes("--include-local");
+
 	// Rolldown keeps legal (`@preserve`), annotation (`@__PURE__`) and JSDoc
 	// comments in its output, so minified builds turn comments off. Every
 	// coverage directive in this repository is tagged `@preserve`, and those
@@ -96,6 +97,7 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 
 				await mkdir("plugins", { recursive: true });
 				await cp(nodePath.join(jsChunk.outDir, jsChunk.fileName), "plugins/small-rules.js", { force: true });
+
 				try {
 					await cp(nodePath.join(jsChunk.outDir, `${jsChunk.fileName}.map`), "plugins/small-rules.js.map", {
 						force: true,

@@ -34,9 +34,11 @@ type RuleOptions = InferContextFromRule<typeof noUselessUseMemo>["options"][0];
 
 function getDependencyMode(value: RuleOptions): DependencyMode {
 	if (!Predicate.isObject(value) || !Predicate.isString(value.dependencyMode)) return DependencyMode.NonUpdating;
+
 	if (value.dependencyMode === DependencyMode.EmptyOrOmitted || value.dependencyMode === DependencyMode.Aggressive) {
 		return value.dependencyMode;
 	}
+
 	return DependencyMode.NonUpdating;
 }
 
@@ -130,6 +132,7 @@ const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 					staticOptions,
 					isStaticArrayExpression,
 				);
+
 				if (!areDependenciesNonUpdating(dependencies, options)) return;
 
 				context.report({

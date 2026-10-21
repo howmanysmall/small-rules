@@ -77,6 +77,7 @@ function collectAllScopes(root: Scope): Array<Scope> {
 		/* v8 ignore next -- @preserve non-empty traversal stack always yields a scope from pop. */
 		if (current === undefined) break;
 		if (current.type !== "global") scopes[size++] = current;
+
 		for (const childScope of current.childScopes) stack.push(childScope);
 	}
 
@@ -104,6 +105,7 @@ function isObjectLikeInitializer(
 
 	const candidateText = sourceCode.getText(initializer.callee);
 	for (const pattern of patterns) if (pattern.test(candidateText)) return true;
+
 	return false;
 }
 
@@ -116,6 +118,7 @@ function appendRelocatableArrayElements(node: ESTree.ArrayExpression, worklist: 
 		if (element === null) return false;
 		worklist.push(element);
 	}
+
 	return true;
 }
 
@@ -129,7 +132,9 @@ function appendRelocatableCallChildren(
 	if (rootName === undefined || !staticGlobalFactories.has(rootName)) return false;
 
 	worklist.push(node.callee);
+
 	for (const parameter of node.arguments) worklist.push(parameter);
+
 	return true;
 }
 
@@ -140,6 +145,7 @@ function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, workli
 		if (property.computed) worklist.push(property.key);
 		worklist.push(property.value);
 	}
+
 	return true;
 }
 
@@ -180,6 +186,7 @@ function appendRelocatableChildren(
 
 		case MEMBER_EXPRESSION: {
 			worklist.push(node.object);
+
 			if (node.computed) worklist.push(node.property);
 			return true;
 		}
@@ -193,6 +200,7 @@ function appendRelocatableChildren(
 
 		case TEMPLATE_LITERAL: {
 			for (const expression of node.expressions) worklist.push(expression);
+
 			return true;
 		}
 
@@ -211,6 +219,7 @@ function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: Reado
 	for (const current of worklist) {
 		if (!appendRelocatableChildren(current, staticGlobalFactories, worklist)) return false;
 	}
+
 	return true;
 }
 
@@ -285,6 +294,7 @@ function getSingleDeclaration(parent: ESTree.Node | null): ESTree.VariableDeclar
 	if (isExportNamedDeclaration(parent.parent)) return undefined;
 	return parent;
 }
+
 function getSingleConstDeclarator(scopeVariable: Variable): SingleConstDeclarator | undefined {
 	if (!SCREAMING_SNAKE_CASE.test(scopeVariable.name)) return undefined;
 
@@ -299,6 +309,7 @@ function getSingleConstDeclarator(scopeVariable: Variable): SingleConstDeclarato
 
 	return { declarationNode, declaratorId: parts.id, initializer: parts.init };
 }
+
 function getEnclosingConstDeclaration(identifier: ESTree.BindingIdentifier): ESTree.VariableDeclaration | undefined {
 	const enclosingDeclarator = findEnclosingConstDeclarator(identifier);
 	if (enclosingDeclarator === undefined) return undefined;
@@ -350,6 +361,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) {
 				return undefined;
 			}
+
 			return readOnlyReference.identifier;
 		}
 

@@ -84,6 +84,7 @@ function stringify(values: ReadonlyArray<unknown>): string {
 function getMaxWidth(texts: ReadonlyArray<string>): number {
 	let width = 0;
 	for (const text of texts) width = Math.max(width, stringWidth(text));
+
 	return width;
 }
 
@@ -93,6 +94,7 @@ function padVisible(text: string, width: number): string {
 
 function createCapturingLogger(): CapturingLogger {
 	const logs: CapturedLogs = { errors: [], successes: [], warnings: [] };
+
 	function warn(...values: ReadonlyArray<unknown>): void {
 		logs.warnings.push(stringify(values));
 	}
@@ -200,6 +202,7 @@ const command = createBaseCommand(
 		];
 
 		console.log(boxen(lines.join("\n"), { borderColor: "cyan", padding: { left: 1, right: 1 } }));
+
 		for (const warning of logs.warnings) console.warn(`${yellow("⚠")} ${warning}`);
 	});
 

@@ -136,6 +136,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 							node: property,
 						});
 					}
+
 					return;
 				}
 

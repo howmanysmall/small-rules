@@ -19,6 +19,7 @@ import type { Definition, ESTree, SourceCode, Variable } from "oxlint-plugin-uti
 
 export const ROBLOX_TS = "roblox-ts" as const;
 export const STANDARD = "standard" as const;
+
 export type Environment = typeof ROBLOX_TS | typeof STANDARD;
 
 export interface ReactOptions {

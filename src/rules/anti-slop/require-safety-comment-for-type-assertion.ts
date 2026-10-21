@@ -87,13 +87,16 @@ function getParsedUnsafeAssertionDisable(comment: SourceCodeComment): DirectiveC
 	) {
 		return undefined;
 	}
+
 	return parsed;
 }
 
 function valueHasUnsafeAssertionRule(value?: string): boolean {
 	/* v8 ignore next -- parseDirectiveComment always includes a value string. @preserve */
 	if (value === undefined) return false;
+
 	for (const ruleId of value.split(COMMA_REGEXP)) if (ruleId === UNSAFE_ASSERTION_RULE_ID) return true;
+
 	return false;
 }
 
@@ -123,6 +126,7 @@ function hasCommentBeforeAncestors(
 	let current: ESTree.Node = node;
 	while (true) {
 		if (hasJustifyingCommentBefore(sourceCode, current, isJustifying)) return true;
+
 		if (COMMENT_OWNER_KINDS.has(current.type) && !isUnbracedControlBody(current)) {
 			return (
 				isExportNamedDeclaration(current.parent) &&
@@ -130,6 +134,7 @@ function hasCommentBeforeAncestors(
 				hasJustifyingCommentBefore(sourceCode, current.parent, isJustifying)
 			);
 		}
+
 		if (isProgram(current.parent)) return false;
 		current = current.parent;
 	}
@@ -147,6 +152,7 @@ function hasDisableCoveringAssertionLine(
 		if (!assertionSyntaxRange && parsed.kind !== OXLINT_DISABLE_NEXT_LINE) continue;
 		if (disableKindCoversLine(parsed.kind, comment, line)) return true;
 	}
+
 	return false;
 }
 
@@ -172,6 +178,7 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 			if (isConstAssertion(node) || hasSafetyComment(context.sourceCode, node, pattern, assertionSyntaxRange)) {
 				return;
 			}
+
 			context.report({ data: { marker: markers[0] }, messageId: "missingSafetyComment", node });
 		}
 

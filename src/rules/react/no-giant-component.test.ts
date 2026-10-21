@@ -8,6 +8,7 @@ function buildComponentBody(innerLineCount: number): string {
 	for (let index = 0; index < innerLineCount; index += 1) {
 		lines[index] = `  call${index}();`;
 	}
+
 	return lines.join("\n");
 }
 

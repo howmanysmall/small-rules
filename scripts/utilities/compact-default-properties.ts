@@ -8,6 +8,7 @@ const isCanonicalPropertyValue = isBoolean
 	.or(isReadonlyArrayOfNumbers)
 	.or(isString)
 	.or(type([isInfinite, isInfinite]).readonly());
+
 type CanonicalPropertyValue = typeof isCanonicalPropertyValue.infer;
 
 const isCanonicalDefaultProperty = type({
@@ -15,6 +16,7 @@ const isCanonicalDefaultProperty = type({
 	type: isString,
 	value: isCanonicalPropertyValue,
 }).readonly();
+
 type CanonicalDefaultProperty = typeof isCanonicalDefaultProperty.infer;
 
 const isCanonicalDefaultProperties = type({
@@ -41,10 +43,12 @@ const valueTypeIndexes: ReadonlyMap<string, number> = new Map(
 function encodeValue(value: CanonicalDefaultProperty): EncodedDefaultValue {
 	const valueTypeIndex = valueTypeIndexes.get(value.type);
 	if (valueTypeIndex === undefined) throw new TypeError(`Unknown canonical default property type: ${value.type}`);
+
 	if (value.type === "Enum") {
 		if (value.enumType === undefined) throw new TypeError("Invalid canonical enum default property value.");
 		return [valueTypeIndex, value.enumType, value.value];
 	}
+
 	return [valueTypeIndex, value.value];
 }
 
@@ -62,6 +66,7 @@ export function compactDefaultProperties(value: unknown): CompactDefaultProperti
 			encodedBySerialized.set(serialized, encoded);
 		}
 	}
+
 	const sortedValues = [...encodedBySerialized].toSorted(([left], [right]) => {
 		if (left === right) return 0;
 		return left < right ? -1 : 1;
@@ -84,6 +89,7 @@ export function compactDefaultProperties(value: unknown): CompactDefaultProperti
 			entries[size++] = propertyIndex;
 			entries[size++] = valueIndex;
 		}
+
 		classes[className] = entries;
 	}
 

@@ -33,6 +33,7 @@ function isFrameworkImport(variable: Variable): boolean {
 		const importedName = isBindingIdentifier(definition.node.imported)
 			? definition.node.imported.name
 			: definition.node.imported.value;
+
 		return (
 			(definition.parent.source.value === "vitest" && importedName === "vi") ||
 			(definition.parent.source.value === "@jest/globals" && importedName === "jest")
@@ -45,9 +46,11 @@ function isTestFrameworkObject(
 	expression: ESTree.Expression,
 ): expression is ESTree.IdentifierReference {
 	if (!isBindingIdentifier(expression)) return false;
+
 	if ((expression.name === "vi" || expression.name === "jest") && sourceCode.isGlobalReference(expression)) {
 		return true;
 	}
+
 	const variable = getReferencedVariable(sourceCode, expression);
 	return variable === undefined
 		? expression.name === "vi" || expression.name === "jest"
@@ -57,9 +60,11 @@ function isTestFrameworkObject(
 function isModuleMockCall(sourceCode: SourceCode, callee: ESTree.Expression): boolean {
 	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
 	if (!isTestFrameworkObject(sourceCode, callee.object)) return false;
+
 	if (callee.computed) {
 		return isStringLiteral(callee.property) && MODULE_MOCK_METHODS.has(callee.property.value);
 	}
+
 	return isBindingIdentifier(callee.property) && MODULE_MOCK_METHODS.has(callee.property.name);
 }
 

@@ -27,5 +27,6 @@ export function getComponentAssignment(node: ESTree.Node): ComponentAssignment |
 	) {
 		return undefined;
 	}
+
 	return { id: node.id, init: node.init };
 }

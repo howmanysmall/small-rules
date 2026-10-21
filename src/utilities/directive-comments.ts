@@ -157,6 +157,7 @@ export function getDirectiveComments(
 		const directive = parseDirectiveComment(comment);
 		if (directive !== undefined && isKind(directive.kind)) directives.push(directive);
 	}
+
 	return directives;
 }
 
@@ -285,6 +286,7 @@ export function toRuleIdLocation(comment: Comment, ruleId?: string): Location {
 
 const REGEXP_REGEXP = /[|\\{}()[\]^$+*?.]/gu;
 const ESCAPE_FOR_REGEXP = String.raw`\$&`;
+
 function escapeStringRegexp(string: string): string {
 	return string.replaceAll(REGEXP_REGEXP, ESCAPE_FOR_REGEXP);
 }
@@ -352,6 +354,7 @@ function disable(
 				ruleId: undefined,
 			});
 		}
+
 		collection.areas.push({
 			comment,
 			end: undefined,
@@ -369,6 +372,7 @@ function disable(
 				ruleId,
 			});
 		}
+
 		collection.areas.push({
 			comment,
 			end: undefined,
@@ -454,5 +458,6 @@ function getArea(
 		}
 		/* v8 ignore stop -- @preserve */
 	}
+
 	return undefined;
 }

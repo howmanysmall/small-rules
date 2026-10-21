@@ -55,6 +55,7 @@ function transfersControl(node: ESTree.Node): boolean {
 		if (last === undefined) return false;
 		current = last;
 	}
+
 	return (
 		isBreakStatement(current) ||
 		isContinueStatement(current) ||
@@ -69,6 +70,7 @@ function getExecutionRoot(node: ESTree.Node): ESTree.Node {
 		if (isAnyFunction(current)) return current;
 		current = current.parent;
 	}
+
 	return current;
 }
 
@@ -81,11 +83,13 @@ function getConditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Br
 				control: parent,
 			};
 		}
+
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	} else if (isConditionalExpression(parent)) {
 		if (parent.consequent === current) return { arm: "then", complete: true, control: parent };
 		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
 	}
+
 	return undefined;
 }
 
@@ -103,15 +107,18 @@ function getImplicitElseSteps(current: ESTree.Node, parent: ESTree.Node): Readon
 			steps.push({ arm: "else", complete: true, control: sibling });
 		}
 	}
+
 	return steps;
 }
 
 function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
 	const conditionalStep = getConditionalBranchStep(current, parent);
 	if (conditionalStep !== undefined) return conditionalStep;
+
 	if (isLogicalExpression(parent) && parent.right === current) {
 		return { arm: "right", complete: false, control: parent };
 	}
+
 	if (isLoopNode(parent) && parent.body === current) return { arm: "body", complete: false, control: parent };
 
 	if (isSwitchCase(current) && isSwitchStatement(parent)) {
@@ -122,6 +129,7 @@ function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | und
 		if (parent.block === current) return { arm: "try", complete: false, control: parent };
 		if (parent.handler === current) return { arm: "catch", complete: false, control: parent };
 	}
+
 	return undefined;
 }
 
@@ -131,9 +139,11 @@ function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchS
 	while (current !== root && current.parent !== null) {
 		const step = branchStep(current, current.parent);
 		if (step !== undefined) path.push(step);
+
 		for (const elseStep of getImplicitElseSteps(current, current.parent)) path.push(elseStep);
 		current = current.parent;
 	}
+
 	return path;
 }
 
@@ -146,6 +156,7 @@ function arePathsCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArra
 		const rightArm = branchArm(right, step.control);
 		if (rightArm !== undefined && rightArm !== step.arm) return false;
 	}
+
 	return true;
 }
 
@@ -170,6 +181,7 @@ function mergePaths(
 		if (differingControl !== undefined) return undefined;
 		differingControl = step.control;
 	}
+
 	if (differingControl === undefined || branchArm(right, differingControl) === undefined) return undefined;
 	return left.filter((step) => step.control !== differingControl);
 }
@@ -190,6 +202,7 @@ function findFirstMergeablePair(coveredPaths: Array<ReadonlyArray<BranchStep>>):
 			return { leftIndex, merged, rightIndex };
 		}
 	}
+
 	return undefined;
 }
 
@@ -243,8 +256,10 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 		else if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) {
 			break;
 		}
+
 		current = current.parent;
 	}
+
 	return loops;
 }
 
@@ -254,9 +269,11 @@ function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): bool
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- giga coal
 	while (current !== null) {
 		for (const loop of writeLoops) if (loop === current) return true;
+
 		if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) break;
 		current = current.parent;
 	}
+
 	return false;
 }
 
@@ -278,6 +295,7 @@ function checkObservation(
 		if (usage.node.range[0] < write.node.range[0] && isReadAcrossLoop(usage, write, root)) return true;
 		return undefined;
 	}
+
 	if (getExecutionRoot(usage.node) !== root) return undefined;
 
 	const referencePath = branchPath(usage.node, root);
@@ -300,6 +318,7 @@ function valueIsObserved(write: VariableUsage, usages: ReadonlyArray<VariableUsa
 		if (result === true) return true;
 		if (result === false) return false;
 	}
+
 	return false;
 }
 
@@ -316,6 +335,7 @@ function isBasicInitializer(node: ESTree.Expression): boolean {
 			node.value === 1
 		);
 	}
+
 	if (isBindingIdentifier(node)) return node.name === "undefined";
 	if (isArrayExpression(node)) return node.elements.length === 0;
 	if (isObjectExpression(node)) return node.properties.length === 0;
@@ -329,6 +349,7 @@ function hasRestInDestructuring(node: ESTree.Node): boolean {
 		if (isObjectPattern(current.parent) && current.parent.properties.some(isRestElement)) return true;
 		current = current.parent;
 	}
+
 	return false;
 }
 
@@ -345,6 +366,7 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 			const handlers = [parent.handler?.body, parent.finalizer].filter(
 				(node): node is ESTree.BlockStatement => node !== null && node !== undefined,
 			);
+
 			if (
 				handlers.some((handler) =>
 					variable.references.some(
@@ -355,8 +377,10 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 				return true;
 			}
 		}
+
 		current = parent;
 	}
+
 	return false;
 }
 
@@ -380,6 +404,7 @@ function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
 function isCaptured(variable: Variable): boolean {
 	const roots = new Set(variable.references.map((reference) => getExecutionRoot(reference.identifier)));
 	for (const definition of variable.defs) roots.add(getExecutionRoot(definition.name));
+
 	return variable.references.some((reference) => reference.isRead()) && roots.size > 1;
 }
 
@@ -391,6 +416,7 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 		node: reference.identifier,
 		writeExpression: reference.writeExpr ?? undefined,
 	}));
+
 	for (const definition of variable.defs) {
 		if (
 			definition.type !== "Variable" ||
@@ -400,6 +426,7 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 		) {
 			continue;
 		}
+
 		usages.push({
 			init: true,
 			isRead: false,
@@ -408,6 +435,7 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 			writeExpression: definition.node.init,
 		});
 	}
+
 	return usages.toSorted((left, right) => left.node.range[0] - right.node.range[0]);
 }
 

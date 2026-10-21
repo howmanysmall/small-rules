@@ -13,6 +13,7 @@ import { MESSAGE_ID_SUGGESTION } from "$oxc-utilities/prevent-abbreviations/cons
 import type { Comment, Visitor } from "oxlint-plugin-utilities";
 
 const DESCRIPTION_SEPARATOR = /\s-{2,}\s/u;
+
 // oxlint-disable-next-line unicorn/prefer-string-raw -- arktype
 const OXLINT_LINE_DIRECTIVE = regex("^(?<kind>oxlint-disable|oxlint-enable)(?:\\s|$)", "u");
 

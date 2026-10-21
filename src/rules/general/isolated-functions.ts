@@ -29,10 +29,13 @@ import { isStringArray } from "$oxc-utilities/type-utilities";
 import type { ESTree, InferContextFromRule, Reference, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type GlobalMode = "off" | "readonly" | "writable";
+
 type FunctionNode = ESTree.ArrowFunctionExpression | ESTree.Function;
+
 type GlobalModeOption = "off" | "readable" | "readonly" | "writable" | "writeable" | boolean;
 
 type Context = InferContextFromRule<typeof isolatedFunctions>;
+
 type RawOptions = Context["options"][0];
 
 interface RuleOptions {
@@ -136,6 +139,7 @@ function getExecuteScriptPropertyReason(node: ESTree.Node): string | undefined {
 	) {
 		return undefined;
 	}
+
 	const objectExpression = property.parent;
 	/* v8 ignore next -- Property parents in this path are ObjectExpression nodes. @preserve */
 	if (!isObjectExpression(objectExpression)) return undefined;
@@ -150,6 +154,7 @@ function isCallArgument(call: ESTree.CallExpression, node: ESTree.Node): boolean
 	for (const argument of call.arguments) {
 		if (argument === node) return true;
 	}
+
 	/* v8 ignore next -- IIFE callees are ParenthesizedExpression parents, not bare CallExpression callees. @preserve */
 	return false;
 }
@@ -202,6 +207,7 @@ function getCommentReason(
 			return `follows comment ${JSON.stringify(comment)}`;
 		}
 	}
+
 	return undefined;
 }
 
@@ -228,6 +234,7 @@ function isScopeInside(inner: Scope, outer: Scope): boolean {
 		if (current === outer) return true;
 		current = current.upper;
 	}
+
 	return false;
 }
 
@@ -241,10 +248,12 @@ function collectExternalReferences(functionScope: Scope): Array<Reference> {
 	const scopes = [functionScope];
 	for (const scope of scopes) {
 		pushChildScopes(scopes, scope);
+
 		for (const reference of scope.references) {
 			if (isExternalReference(functionScope, reference)) external.push(reference);
 		}
 	}
+
 	return external;
 }
 
@@ -261,6 +270,7 @@ function getAllowedGlobalMode(
 		if (reference.resolved !== null && !sourceCode.isGlobalReference(identifier)) return undefined;
 		return override;
 	}
+
 	if (!sourceCode.isGlobalReference(identifier)) return undefined;
 	return "readonly";
 }
@@ -292,6 +302,7 @@ function pushClassBoundaryChildren(node: ESTree.Node, worklist: Array<ESTree.Nod
 	/* v8 ignore next -- only invoked for ClassDeclaration/ClassExpression nodes. @preserve */
 	if (!isClass(node)) return;
 	if (node.superClass !== null) worklist.push(node.superClass);
+
 	for (const element of node.body.body) {
 		if ("computed" in element && element.computed) worklist.push(element.key);
 	}
@@ -309,14 +320,17 @@ function reportThisAndSuper(context: Context, root: FunctionNode, reason: string
 	const worklist: Array<ESTree.Node> = [root];
 	for (const node of worklist) {
 		if (shouldSkipNestedNode(node, root, worklist)) continue;
+
 		if (isThisExpression(node)) {
 			context.report({ data: { reason }, messageId: "thisExpression", node });
 			continue;
 		}
+
 		if (isSuper(node)) {
 			context.report({ data: { reason }, messageId: "super", node });
 			continue;
 		}
+
 		appendVisitorChildren(node, context.sourceCode.visitorKeys, worklist);
 	}
 }

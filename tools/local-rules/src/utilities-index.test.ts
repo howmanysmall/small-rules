@@ -134,11 +134,13 @@ function createDirectory(
 	onTestFinished(() => {
 		rmSync(directory, { force: true, recursive: true });
 	});
+
 	for (const [relativePath, contents] of Object.entries(files)) {
 		const filePath = nodePath.join(directory, relativePath);
 		mkdirSync(nodePath.dirname(filePath), { recursive: true });
 		writeFileSync(filePath, contents);
 	}
+
 	return directory;
 }
 

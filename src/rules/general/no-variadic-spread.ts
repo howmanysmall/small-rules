@@ -36,6 +36,7 @@ const noVariadicSpread = createRule("no-variadic-spread", "general", {
 					if (!isSpreadElement(argument) || isArrayExpression(stripExpressionWrappers(argument.argument))) {
 						continue;
 					}
+
 					context.report({ data: { method }, messageId: "noVariadicSpread", node: argument });
 				}
 			},

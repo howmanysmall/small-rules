@@ -42,6 +42,7 @@ import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 interface Options {
 	readonly eventsImportPaths?: ReadonlyArray<string>;
 }
+
 const enum TaintKind {
 	None = 0x00,
 	Container = 0x01,
@@ -91,6 +92,7 @@ function unwrapNode(node: ESTree.Node): ESTree.Node {
 		}
 	}
 }
+
 function getRootIdentifierName(node: ESTree.Node): string | undefined {
 	let current = node;
 

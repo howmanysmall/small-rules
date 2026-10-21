@@ -85,6 +85,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 				refs = computeArgumentUpstreamReferences(state, reference);
 				argumentUpstreamReferences.set(reference, refs);
 			}
+
 			return refs;
 		},
 		getCallExpression(reference: Reference): ESTree.CallExpression | undefined {
@@ -112,6 +113,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 				chain = computeSynchronousCallChain(state, reference);
 				synchronousCallChains.set(reference, chain);
 			}
+
 			return chain;
 		},
 		getUpstreamReferences(reference: Reference): ReadonlyArray<Reference> {
@@ -120,6 +122,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 				refs = computeUpstreamReferences(state, reference);
 				upstreamReferences.set(reference, refs);
 			}
+
 			return refs;
 		},
 		isSynchronousWithin,
@@ -133,6 +136,7 @@ function getTraversal(state: EffectScopeAnalysisState, root: ESTree.Node): Trave
 		traverse(state, root, traversal);
 		state.traversalByRoot.set(root, traversal);
 	}
+
 	return traversal;
 }
 
@@ -142,10 +146,12 @@ function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: Tr
 		const node = worklist.pop();
 		/* v8 ignore next -- the loop guard ensures pop never returns undefined. @preserve */
 		if (node === undefined) break;
+
 		if (isIdentifierReference(node)) {
 			const reference = getReference(state, node);
 			if (reference !== undefined) result.references.push(reference);
 		}
+
 		recordDescendantNode(node, root, result);
 		pushChildren(state, node, worklist, all);
 	}
@@ -153,6 +159,7 @@ function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: Tr
 
 function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: TraversalResult): void {
 	if (node === root) return;
+
 	if (isCallExpression(node)) result.callExpressions.push(node);
 	else if (isIfStatement(node)) result.ifStatements.push(node);
 }
@@ -160,6 +167,7 @@ function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: Trav
 function indexReferences(state: EffectScopeAnalysisState): void {
 	const result: TraversalResult = { callExpressions: [], ifStatements: [], references: [] };
 	traverse(state, state.sourceCode.ast, result, true);
+
 	for (const reference of result.references) {
 		/* v8 ignore next -- traverse only collects identifier-shaped references. @preserve */
 		if (isIdentifierReference(reference.identifier)) {
@@ -181,6 +189,7 @@ function pushChildValue(value: PropertyDescriptor["value"], worklist: Array<ESTr
 			const item = value[index];
 			if (isNode(item)) worklist.push(item);
 		}
+
 		return;
 	}
 
@@ -230,6 +239,7 @@ function ascend(
 
 	const shouldContinue = visit(reference);
 	visited.add(reference);
+
 	if (shouldContinue === false) return;
 
 	const definitions = reference.resolved?.defs ?? [];
@@ -251,12 +261,14 @@ function computeCallExpression(reference: Reference): ESTree.CallExpression | un
 		if (isCallExpression(current)) {
 			let node: ESTree.Node = reference.identifier;
 			while (isMemberExpression(node.parent)) node = node.parent;
+
 			/* v8 ignore next -- refs in member chains always resolve to the call's callee (probed across the rule corpus). @preserve */
 			if (current.callee === node) return current;
 		} else if (isMemberExpression(current)) {
 			current = current.parent;
 			continue;
 		}
+
 		return undefined;
 	}
 }
@@ -269,14 +281,17 @@ function computeArgumentUpstreamReferences(
 	for (const upRef of computeUpstreamReferences(state, reference)) {
 		const callExpression = computeCallExpression(upRef);
 		if (callExpression === undefined) continue;
+
 		for (const argument of callExpression.arguments) {
 			/* v8 ignore next -- call arguments are always expression nodes, never null pattern holes. @preserve */
 			if (!isNode(argument)) continue;
+
 			for (const argumentRef of getTraversal(state, argument).references) {
 				for (const deeperRef of computeUpstreamReferences(state, argumentRef)) refs.push(deeperRef);
 			}
 		}
 	}
+
 	return refs;
 }
 
@@ -296,6 +311,7 @@ function isSynchronousWithin(node: ESTree.Node, within: ESTree.Node): boolean {
 		if (parent === null) return false;
 		current = parent;
 	}
+
 	return true;
 }
 
@@ -305,6 +321,7 @@ function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefin
 		if (FUNCTION_NODE_TYPES.has(current.type)) return current;
 		current = current.parent;
 	}
+
 	return undefined;
 }
 
@@ -316,10 +333,12 @@ function isAliasRef(candidateReference: Reference): boolean {
 		/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
 		if (parent === null) return false;
 		if (isVariableDeclarator(parent) && parent.init === node) return true;
+
 		if (CONTAINER_PARENT_TYPES.has(parent.type)) {
 			node = parent;
 			continue;
 		}
+
 		return false;
 	}
 }
@@ -351,12 +370,14 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 
 function getDefinitionValueNode(definition: Definition): ESTree.Node | undefined {
 	if ("init" in definition.node) return definition.node.init ?? undefined;
+
 	/* v8 ignore next 2 -- every surviving definition is a VariableDeclarator (init) or FunctionDeclaration (body); the else is unreachable. @preserve */
 	if ("body" in definition.node) {
 		const { body } = definition.node;
 		/* v8 ignore next -- FunctionDeclaration bodies are always BlockStatement nodes. @preserve */
 		return isNode(body) ? body : undefined;
 	}
+
 	/* v8 ignore next -- ascend filters ImportBinding/Parameter and every surviving definition has init or body. @preserve */
 	return undefined;
 }

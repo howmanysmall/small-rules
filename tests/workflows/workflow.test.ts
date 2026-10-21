@@ -23,6 +23,7 @@ const isSteps = type({
 	}).or(isUndefined),
 	"working-directory?": isMaybeString,
 }).array();
+
 type Steps = typeof isSteps.infer;
 
 const isCiJob = type({
@@ -101,6 +102,7 @@ const checks = isChecks.assert(parseYAML(checksRaw));
 const release = isRelease.assert(parseYAML(releaseRaw));
 
 type Docs = typeof isDocs.infer;
+
 type Permissions = typeof isReadonlyDictionaryOfStrings.infer;
 
 interface DocsTriggers {
@@ -130,6 +132,7 @@ function loadDocs(): Docs {
 	if (!existsSync(DOCS_WORKFLOW_PATH)) {
 		throw new TypeError(`Docs workflow not found at ${DOCS_WORKFLOW_PATH}`);
 	}
+
 	const docsRaw = readFileSync(DOCS_WORKFLOW_PATH, "utf8");
 	return isDocs.assert(parseYAML(docsRaw));
 }
@@ -195,6 +198,7 @@ function getLeaking(candidates: ReadonlyArray<AuditCandidate>): ReadonlyArray<Ch
 	const leaking = new Array<CheckoutFinding>();
 	let size = 0;
 	for (const { persist, ...candidate } of candidates) if (persist !== false) leaking[size++] = candidate;
+
 	return leaking;
 }
 
@@ -202,15 +206,20 @@ type Collect = (workflow: string, job: string, steps?: Steps) => void;
 
 function collectCiJobs(collect: Collect): void {
 	if (ci.jobs === undefined) return;
+
 	for (const [job, definition] of Object.entries(ci.jobs)) collect("ci", job, definition.steps);
 }
+
 function collectChecksJobs(collect: Collect): void {
 	if (checks.jobs === undefined) return;
+
 	for (const [job, definition] of Object.entries(checks.jobs)) collect("checks", job, definition.steps);
 }
+
 function collectDocsJobs(collect: Collect): void {
 	const docs = loadDocs();
 	if (docs.jobs === undefined) return;
+
 	for (const [job, definition] of Object.entries(docs.jobs)) {
 		if (definition === undefined) continue;
 		collect("docs", job, definition.steps);
@@ -223,6 +232,7 @@ function checkoutAudit(): CheckoutAudit {
 
 	const collect: Collect = function collect(workflow, job, steps?: Steps): void {
 		if (steps === undefined) return;
+
 		for (const step of steps) {
 			if (step.uses?.startsWith("actions/checkout") !== true) continue;
 			candidates[total++] = {
@@ -275,6 +285,7 @@ function writeViolations(): ReadonlyArray<WriteViolation> {
 		if (definition === undefined) continue;
 		collect("docs", job, getEffectivePermissions(docs.permissions, definition.permissions));
 	}
+
 	return violations;
 }
 

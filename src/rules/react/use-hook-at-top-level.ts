@@ -89,8 +89,10 @@ function isInFinallyBlock(node: ESTree.Node): boolean {
 					inFinallyBlock = true;
 					break;
 				}
+
 				checkNode = checkNode.parent;
 			}
+
 			break;
 		}
 
@@ -280,6 +282,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 		function enterConditional(): void {
 			updateContext({ inConditional: true });
 		}
+
 		function exitConditional(): void {
 			updateContext({ inConditional: false });
 		}
@@ -287,6 +290,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 		function exitLoop(): void {
 			updateContext({ inLoop: false });
 		}
+
 		function enterLoop(): void {
 			updateContext({ inLoop: true });
 		}
@@ -341,6 +345,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 					if (!isImportSpecifier(specifier)) continue;
 					/* v8 ignore next -- @preserve ImportSpecifier imported names are identifiers for supported parser input. */
 					if (!isIdentifier(specifier.imported)) continue;
+
 					if (isReactHookName(specifier.imported.name)) {
 						importSourceMap.set(specifier.local.name, source);
 					}

@@ -86,6 +86,7 @@ export function RuleExample({ title, type, children }: Readonly<PropsWithChildre
 			const timeout = setTimeout(function clearCopiedState(): void {
 				setCopied(false);
 			}, 1_500);
+
 			return function clearResetTimer(): void {
 				clearTimeout(timeout);
 			};

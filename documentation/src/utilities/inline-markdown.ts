@@ -73,6 +73,7 @@ function collectSegments(
 			segments[size++] = current;
 		}
 	}
+
 	return segments;
 }
 

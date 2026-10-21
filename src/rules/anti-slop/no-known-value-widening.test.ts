@@ -6,6 +6,7 @@ import rule from "$oxc-rules/anti-slop/no-known-value-widening";
 const widening = { messageId: "widening" };
 
 const prelude = "type Command = () => void;\nconst startCommand = () => {};";
+
 function prependPrelude(code: string): string {
 	return `${prelude}\n${code}`;
 }

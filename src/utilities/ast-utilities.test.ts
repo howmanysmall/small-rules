@@ -15,14 +15,18 @@ const traversalRule = defineRule({
 				let callCount = 0;
 				forEachNode(node, (current) => {
 					if (current.type === "FunctionDeclaration") return false;
+
 					if (current.type === "CallExpression") {
 						if (current.callee.type === "Identifier" && current.callee.name === "stop") {
 							return STOP_NODE_TRAVERSAL;
 						}
+
 						callCount += 1;
 					}
+
 					return true;
 				});
+
 				if (callCount === 1) context.report({ messageId: "callCount", node });
 				else if (callCount === 0) context.report({ messageId: "stopped", node });
 			},

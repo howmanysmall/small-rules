@@ -22,11 +22,13 @@ const IMPLICIT_GLOBAL_NAMES: ReadonlyArray<string> = ["Error"];
 export function buildScopeManager(program: HarnessNode): ScopeManager {
 	const rootScope = createScope(program.sourceType === "script" ? "global" : "module", null, program);
 	for (const name of IMPLICIT_GLOBAL_NAMES) defineImplicitVariable(rootScope, name);
+
 	const state: ScopeState = {
 		declaredVariables: new WeakMap(),
 		nodeToScope: new WeakMap(),
 		rootScope,
 	};
+
 	visitNode(program, rootScope, state);
 	resolveReferences(rootScope);
 	return {
@@ -53,6 +55,7 @@ function createScope(type: string, upper: HarnessScope | null, block: HarnessNod
 		upper,
 		variables: [],
 	};
+
 	if (upper !== null) upper.childScopes.push(scope);
 	return scope;
 }
@@ -150,6 +153,7 @@ function visitChildren(node: HarnessNode, scope: HarnessScope, state: ScopeState
 function shouldReuseParentFunctionScope(node: HarnessNode): boolean {
 	const { parent } = node;
 	if (parent === null || parent === undefined) return false;
+
 	return (
 		(parent.type === "FunctionDeclaration" ||
 			parent.type === "FunctionExpression" ||
@@ -182,6 +186,7 @@ function defineFunctionDeclaration(node: HarnessNode, scope: HarnessScope, state
 			parent: node.parent ?? null,
 			type: "FunctionName",
 		});
+
 		registerDeclaredVariable(state, node, variable);
 	}
 
@@ -194,12 +199,14 @@ function createDefineType(type: string): DefineType {
 	return function defineType(node, scope, state): void {
 		const id = getNodeProperty(node, "id");
 		if (id === undefined || !Predicate.isString(id.name)) return;
+
 		const variable = defineVariable(scope, id.name, id, {
 			name: id,
 			node,
 			parent: node.parent ?? null,
 			type,
 		});
+
 		registerDeclaredVariable(state, node, variable);
 	};
 }
@@ -272,12 +279,14 @@ function definePattern(
 			for (const element of getNodeArrayProperty(pattern, "elements")) {
 				definePattern(element, scope, type, definitionNode, state);
 			}
+
 			return;
 		}
 
 		case "AssignmentPattern": {
 			const left = getNodeProperty(pattern, "left");
 			const right = getNodeProperty(pattern, "right");
+
 			if (left !== undefined) definePattern(left, scope, type, definitionNode, state);
 			if (right !== undefined) visitNode(right, scope, state);
 			return;
@@ -285,12 +294,14 @@ function definePattern(
 
 		case "Identifier": {
 			if (!Predicate.isString(pattern.name)) return;
+
 			const variable = defineVariable(scope, pattern.name, pattern, {
 				name: pattern,
 				node: definitionNode,
 				parent: definitionNode.parent ?? null,
 				type,
 			});
+
 			registerDeclaredVariable(state, definitionNode, variable);
 			return;
 		}
@@ -308,6 +319,7 @@ function definePattern(
 					if (argument !== undefined) definePattern(argument, scope, type, definitionNode, state);
 					continue;
 				}
+
 				const value = getNodeProperty(property, "value");
 				if (value !== undefined) definePattern(value, scope, type, definitionNode, state);
 			}
@@ -335,6 +347,7 @@ function defineVariable(
 		references: [],
 		scope,
 	};
+
 	scope.variables.push(variable);
 	scope.set.set(name, variable);
 	return variable;
@@ -342,6 +355,7 @@ function defineVariable(
 
 function defineImplicitVariable(scope: HarnessScope, name: string): void {
 	if (scope.set.has(name)) return;
+
 	const variable: HarnessVariable = {
 		name,
 		defs: [],
@@ -349,6 +363,7 @@ function defineImplicitVariable(scope: HarnessScope, name: string): void {
 		references: [],
 		scope,
 	};
+
 	scope.variables.push(variable);
 	scope.set.set(name, variable);
 }
@@ -360,6 +375,7 @@ function registerDeclaredVariable(state: ScopeState, node: HarnessNode, variable
 		state.declaredVariables.set(node, [variable]);
 		return;
 	}
+
 	if (!existing.includes(variable)) existing.push(variable);
 }
 
@@ -373,6 +389,7 @@ function getVariableScope(scope: HarnessScope): HarnessScope {
 	) {
 		current = current.upper;
 	}
+
 	return current;
 }
 
@@ -396,6 +413,7 @@ function addReference(node: HarnessNode, scope: HarnessScope, mode: ReferenceMod
 			return mode === "write";
 		},
 	};
+
 	scope.references.push(reference);
 }
 
@@ -406,6 +424,7 @@ function readModeForIdentifier(node: HarnessNode): ReferenceMode {
 	if (parent?.type === "AssignmentExpression" && parent.left === node) {
 		return parent.operator === "=" ? "write" : "readwrite";
 	}
+
 	const patternAssignment = findPatternAssignment(node);
 	if (patternAssignment !== undefined) return patternAssignment.operator === "=" ? "write" : "readwrite";
 	if (parent?.type === "UpdateExpression" && parent.argument === node) return "readwrite";
@@ -423,6 +442,7 @@ function findPatternAssignment(node: HarnessNode): HarnessNode | undefined {
 	) {
 		current = current.parent;
 	}
+
 	const { parent } = current;
 	return parent?.type === "AssignmentExpression" && parent.left === current ? parent : undefined;
 }
@@ -434,6 +454,7 @@ function resolveReferences(scope: HarnessScope): void {
 			scope.through.push(reference);
 			continue;
 		}
+
 		reference.resolved = variable;
 		variable.references.push(reference);
 	}
@@ -449,6 +470,7 @@ function getVariableByName(scope: HarnessScope, name?: string): HarnessVariable 
 		if (variable !== undefined) return variable;
 		current = current.upper;
 	}
+
 	return undefined;
 }
 
@@ -462,6 +484,7 @@ function isReferenceIdentifier(node: HarnessNode): boolean {
 
 	if (isBindingIdentifier(node, parent)) return false;
 	if (parent.type === "MemberExpression" && parent.property === node && parent.computed !== true) return false;
+
 	if (
 		parent.type === "Property" &&
 		parent.key === node &&
@@ -470,13 +493,16 @@ function isReferenceIdentifier(node: HarnessNode): boolean {
 	) {
 		return false;
 	}
+
 	if (parent.type === "MethodDefinition" && parent.key === node && parent.computed !== true) return false;
 	if (parent.type === "PropertyDefinition" && parent.key === node && parent.computed !== true) return false;
 	if (parent.type === "TSPropertySignature" && parent.key === node && parent.computed !== true) return false;
 	if (parent.type === "TSEnumMember" && parent.id === node) return false;
+
 	if (parent.type === "BreakStatement" || parent.type === "ContinueStatement" || parent.type === "LabeledStatement") {
 		return false;
 	}
+
 	if (parent.type === "ImportSpecifier" && parent.imported === node) return false;
 	if (parent.type === "ExportSpecifier" && parent.exported === node) return false;
 
@@ -486,9 +512,11 @@ function isReferenceIdentifier(node: HarnessNode): boolean {
 function isBindingIdentifier(node: HarnessNode, parent: HarnessNode): boolean {
 	if (parent.type === "VariableDeclarator" && isInPattern(node, getNodeProperty(parent, "id"))) return true;
 	if (isFunctionLike(parent) && isParameterIdentifier(node, parent)) return true;
+
 	if ((parent.type === "FunctionDeclaration" || parent.type === "FunctionExpression") && parent.id === node) {
 		return true;
 	}
+
 	if ((parent.type === "ClassDeclaration" || parent.type === "ClassExpression") && parent.id === node) return true;
 	if (parent.type === "ImportDefaultSpecifier" && parent.local === node) return true;
 	if (parent.type === "ImportNamespaceSpecifier" && parent.local === node) return true;
@@ -512,6 +540,7 @@ function isParameterIdentifier(node: HarnessNode, parent: HarnessNode): boolean 
 	for (const parameter of getNodeArrayProperty(parent, "params")) {
 		if (isInPattern(node, parameter)) return true;
 	}
+
 	return false;
 }
 

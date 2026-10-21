@@ -12,13 +12,16 @@ export function toStringStable(value: unknown): string {
 	if (Array.isArray(value)) {
 		return `[${value.map((entry) => toStringStable(entry)).join(",")}]`;
 	}
+
 	if (Predicate.isObjectKeyword(value)) {
 		const entries = Object.entries(value).toSorted(([left], [right]) => compareStrings(left, right));
 		const stringBuilder = entries.map(
 			([key, entryValue]) => `${JSON.stringify(key)}:${toStringStable(entryValue)}`,
 		);
+
 		return `{${stringBuilder.join(",")}}`;
 	}
+
 	return JSON.stringify(value);
 }
 
@@ -33,6 +36,7 @@ interface ValidatedCache<TValue> {
 }
 
 export type JudgmentCache = ValidatedCache<PairJudgments>;
+
 export type ReasonCache = ValidatedCache<string>;
 
 interface JsonFileStore {

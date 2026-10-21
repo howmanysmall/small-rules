@@ -2,7 +2,9 @@ import type { Definition, ESTree, Reference, Scope } from "oxlint-plugin-utiliti
 import type { UnknownRecord } from "type-fest";
 
 export type MessageIds = "replace" | "suggestion";
+
 export type ImportCheckOption = "internal" | boolean;
+
 export type RawOptionValue = UnknownRecord[keyof UnknownRecord];
 
 export interface RawOptions {
@@ -70,6 +72,7 @@ export interface NameReplacements {
 }
 
 type NamedIdentifier = ESTree.BindingIdentifier | ESTree.IdentifierName | ESTree.IdentifierReference;
+
 export type BroadIdentifier =
 	| ESTree.LabelIdentifier
 	| ESTree.TSIndexSignatureName

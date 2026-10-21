@@ -3,6 +3,7 @@ import { isIdentifier, isPrivateIdentifier } from "@small-rules/oxlint-utilities
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
 type MemberObject = ESTree.MemberExpression["object"];
+
 type MemberProperty = ESTree.Expression | ESTree.PrivateIdentifier;
 
 export type MemberPartComparer<Part> = (left: Part, right: Part, sourceCode: SourceCode) => boolean;

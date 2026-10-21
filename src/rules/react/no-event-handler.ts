@@ -23,6 +23,7 @@ function reportEventHandlerEffect(context: RuleContext, analysis: ReactEffectAna
 					node: ifTestReference.identifier,
 				});
 			}
+
 			if (upstreamReferences.some((reference) => analysis.isProp(reference))) {
 				context.report({
 					data: { name },

@@ -22,6 +22,7 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 			if (getCalleeName(node.callee) === name) found = node;
 		},
 	});
+
 	if (found === undefined) throw new Error(`Call expression "${name}" not found.`);
 	return found;
 }

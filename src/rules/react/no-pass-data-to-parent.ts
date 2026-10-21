@@ -15,6 +15,7 @@ function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boole
 	return function isUseHook(node): boolean {
 		/* v8 ignore start -- @preserve data-flow leaves are plain identifiers; non-identifier shapes never reach these checks. */
 		if (!isIdentifier(node) && !isMemberExpression(node)) return false;
+
 		return (
 			isIdentifierNamed(node, hookName) ||
 			(isIdentifierNamed(node.object, "React") && isIdentifierNamed(node.property, hookName))
@@ -46,6 +47,7 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 		if (analysis.isRefCurrent(upstreamReference)) continue;
 		if (!analysis.isConstant(upstreamReference)) dataArguments.push(upstreamReference);
 	}
+
 	return dataArguments;
 }
 

@@ -48,14 +48,17 @@ export function unwrapFunctionParameter(parameter: FunctionParameter): FunctionP
 			current = current.parameter;
 			continue;
 		}
+
 		if (isAssignmentPattern(current)) {
 			current = current.left;
 			continue;
 		}
+
 		if (isRestElement(current)) {
 			current = current.argument;
 			continue;
 		}
+
 		return current;
 	}
 }
@@ -71,16 +74,19 @@ export function containsUnknownType(type: ESTree.TSType): boolean {
 	const pending: Array<ESTree.TSType> = [type];
 	for (const current of pending) {
 		if (isTsUnknownKeyword(current)) return true;
+
 		if (isTsParenthesizedType(current)) {
 			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
 			pending.push(current.typeAnnotation);
 			continue;
 		}
+
 		if (isTsUnionType(current)) {
 			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
 			for (const member of current.types) pending.push(member);
 		}
 	}
+
 	return false;
 }
 

@@ -36,6 +36,7 @@ export function getVariableByName(scope: null | Scope, name: string): undefined 
 		if (variable !== undefined) return variable;
 		currentScope = currentScope.upper;
 	}
+
 	return undefined;
 }
 
@@ -60,10 +61,12 @@ export const STOP_NODE_TRAVERSAL = Symbol("STOP_NODE_TRAVERSAL");
 function pushNodeChildren(node: ESTree.Node, workList: Array<ESTree.Node>): void {
 	for (const [key, value] of Object.entries(node)) {
 		if (AST_NODE_KEYS_TO_SKIP.has(key)) continue;
+
 		if (Array.isArray(value)) {
 			for (const child of value) if (isNode(child)) workList.push(child);
 			continue;
 		}
+
 		if (isNode(value)) workList.push(value);
 	}
 }
@@ -85,6 +88,7 @@ export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable
 	const scopes = [sourceCode.getScope(sourceCode.ast)];
 	for (const scope of scopes) {
 		pushChildScopes(scopes, scope);
+
 		for (const variable of scope.variables) callback(variable);
 	}
 }
@@ -112,6 +116,7 @@ export function getDeclarationRemovalRange(
 			start -= 1;
 			continue;
 		}
+
 		break;
 	}
 
@@ -123,6 +128,7 @@ export function getDeclarationRemovalRange(
 			end += 1;
 			continue;
 		}
+
 		break;
 	}
 
@@ -167,6 +173,7 @@ export function isExternalPackageImport(definition?: Definition): boolean {
 function getRootTypeName(typeName: ESTree.TSTypeName): ESTree.IdentifierReference | undefined {
 	let current = typeName;
 	while (isTsQualifiedName(current)) current = current.left;
+
 	/* v8 ignore next -- @preserve TSTypeReference cannot use a this expression as its type name in parsed source. */
 	return isIdentifier(current) ? current : undefined;
 }
@@ -184,6 +191,7 @@ function isExternalTypeNode(
 	while (isTsIndexedAccessType(current)) current = current.objectType;
 
 	if (isTsImportType(current)) return isExternalModuleSpecifier(current.source.value);
+
 	if (isTsTypeReference(current)) {
 		const rootTypeName = getRootTypeName(current.typeName);
 		/* v8 ignore next -- @preserve parsed TSTypeReference names always resolve to an identifier root. */
@@ -197,6 +205,7 @@ function isExternalTypeNode(
 			visitedDeclarations,
 		);
 	}
+
 	if (isTsUnionType(current) || isTsIntersectionType(current)) {
 		return current.types.some((member) => isExternalTypeNode(member, sourceCode, visitedDeclarations));
 	}
@@ -225,6 +234,7 @@ function isExternalNamedType(
 		visitedDeclarations.add(declaration);
 		return isExternalTypeNode(declaration.typeAnnotation, sourceCode, visitedDeclarations);
 	}
+
 	if (isTsInterfaceDeclaration(declaration)) {
 		return declaration.extends.some((heritage) =>
 			isExternalInterfaceHeritage(heritage, sourceCode, visitedDeclarations),
@@ -256,27 +266,33 @@ export function resolveRootObjectIdentifier(node: ESTree.Node): ESTree.Node | un
 	let current = node;
 	while (true) {
 		if (isIdentifier(current)) return current;
+
 		if (isMemberExpression(current)) {
 			current = current.object;
 			continue;
 		}
+
 		if (isTsQualifiedName(current)) {
 			current = current.left;
 			continue;
 		}
+
 		return undefined;
 	}
 }
 
 function isExternalRoot(outer: ESTree.Node, current: ESTree.Node, sourceCode: SourceCode): boolean | undefined {
 	if (isTsSatisfiesExpression(outer)) return true;
+
 	if (isCallExpression(outer) || isNewExpression(outer)) {
 		return outer.arguments.some((argument) => argument === current);
 	}
+
 	if (isVariableDeclarator(outer) && outer.init === current) {
 		const annotation = getTypeAnnotationFromBinding(outer.id)?.typeAnnotation;
 		return annotation !== undefined && isExternalType(annotation, sourceCode);
 	}
+
 	if (
 		isTypeAssertionExpression(outer) &&
 		outer.expression === current &&
@@ -284,6 +300,7 @@ function isExternalRoot(outer: ESTree.Node, current: ESTree.Node, sourceCode: So
 	) {
 		return true;
 	}
+
 	return undefined;
 }
 
@@ -292,6 +309,7 @@ function getClimbTarget(outer: ESTree.Node, current: ESTree.Node): ESTree.Node |
 		if (outer.value !== current) return undefined;
 		return outer.parent;
 	}
+
 	if (isArrayExpression(outer) || isSpreadElement(outer)) return outer;
 	if (isTypeAssertionExpression(outer) && outer.expression === current) return outer;
 	return undefined;

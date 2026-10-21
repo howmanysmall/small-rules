@@ -32,6 +32,7 @@ export function isPrimarilyVerb(response: unknown, word: string): boolean {
 	for (const tag of hit.tags) {
 		if (Predicate.isString(tag) && PARTS_OF_SPEECH.has(tag)) return tag === "v";
 	}
+
 	return false;
 }
 

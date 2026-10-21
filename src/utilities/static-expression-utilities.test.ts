@@ -749,6 +749,7 @@ function classifyCheckedExpression(
 		settings: {},
 		sourceType: "module",
 	});
+
 	return diagnostics.map(({ messageId }) => messageId);
 }
 

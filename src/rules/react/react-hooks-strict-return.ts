@@ -168,6 +168,7 @@ function popArrayInitializer(name: string, arrayInitializersByName: Map<string, 
 	if (initializers === undefined || initializers.length === 0) return;
 
 	initializers.pop();
+
 	/* v8 ignore next -- each tracked name has one initializer in parser enter/exit order. @preserve */
 	if (initializers.length === 0) arrayInitializersByName.delete(name);
 }

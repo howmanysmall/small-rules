@@ -29,9 +29,11 @@ export function isExpressionSideEffectSafe(expression: ESTree.Expression): boole
 	if (isBindingIdentifier(unwrapped) || isThisExpression(unwrapped)) return true;
 
 	if (isMemberExpression(unwrapped)) return isMemberSideEffectSafe(unwrapped);
+
 	if (isUnaryExpression(unwrapped)) {
 		return unwrapped.operator !== "delete" && isExpressionSideEffectSafe(unwrapped.argument);
 	}
+
 	if (isBinaryExpression(unwrapped) || isLogicalExpression(unwrapped)) return arePairExpressionsSafe(unwrapped);
 	if (isConditionalExpression(unwrapped)) return isConditionalSideEffectSafe(unwrapped);
 	if (isTemplateLiteral(unwrapped)) return areExpressionsSafe(unwrapped.expressions);
@@ -81,5 +83,6 @@ function isObjectSideEffectSafe(expression: ESTree.ObjectExpression): boolean {
 
 function areExpressionsSafe(expressions: ReadonlyArray<ESTree.Expression>): boolean {
 	for (const expression of expressions) if (!isExpressionSideEffectSafe(expression)) return false;
+
 	return true;
 }

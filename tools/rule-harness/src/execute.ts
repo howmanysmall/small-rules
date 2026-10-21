@@ -107,6 +107,7 @@ function createMutableContext(ruleName: string): MutableHarnessContext {
 		settings: {},
 		sourceCode: unset,
 	};
+
 	return context;
 }
 

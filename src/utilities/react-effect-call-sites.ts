@@ -72,6 +72,7 @@ export function getSynchronousStateSetterCalls(
 			calls[size++] = stateSetterCall;
 		}
 	}
+
 	return calls;
 }
 
@@ -102,6 +103,7 @@ export function getParentCallbackCalls(
 		owner ??= describeEffectOwner(analysis, effect);
 		calls[size++] = { callExpression, names: joinQuotedReferenceNames(passedReferences), owner };
 	}
+
 	return calls;
 }
 

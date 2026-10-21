@@ -40,6 +40,7 @@ function getStaticMethodCall(expression: ESTree.Expression): StaticMethodCall | 
 	if (!isCallExpression(expression) || !isMemberExpression(expression.callee) || expression.callee.computed) {
 		return undefined;
 	}
+
 	/* v8 ignore next -- a non-computed ESTree member property is an identifier. @preserve */
 	if (!isIdentifier(expression.callee.property)) return undefined;
 	return { call: expression, method: expression.callee.property.name, object: expression.callee.object };
@@ -127,6 +128,7 @@ function collectBindings(
 		retainedArguments.push(argument);
 		retainedElements.push(binding);
 	}
+
 	return { movedArguments, retainedArguments, retainedElements };
 }
 

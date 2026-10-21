@@ -22,6 +22,7 @@ function isResolvedInScope(name: string, scope: Scope): boolean {
 		if (currentScope.set.has(name)) return true;
 		currentScope = currentScope.upper;
 	}
+
 	return false;
 }
 
@@ -119,6 +120,7 @@ const noRecursive = createRule("no-recursive", "general", {
 				const name = functionStack[index];
 				if (name !== undefined) return name;
 			}
+
 			return undefined;
 		}
 
@@ -131,6 +133,7 @@ const noRecursive = createRule("no-recursive", "general", {
 				/* v8 ignore next -- class stack entries are parser-managed and only named classes can resolve this-method cycles. @preserve */
 				if (classStack[index] !== undefined) return classStack[index];
 			}
+
 			return undefined;
 		}
 

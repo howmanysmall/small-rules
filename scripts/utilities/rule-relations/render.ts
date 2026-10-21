@@ -30,6 +30,7 @@ export const isRelationEvidence = type({
 	right: isRuleNameArkType,
 	strength: isNumber,
 }).readonly();
+
 export type RelationEvidence = typeof isRelationEvidence.infer;
 
 export const isGeneratedEdge = type({
@@ -39,6 +40,7 @@ export const isGeneratedEdge = type({
 	reason: isString,
 	to: isRuleNameArkType,
 }).readonly();
+
 export type GeneratedEdge = typeof isGeneratedEdge.infer;
 
 export interface RelationModels {
@@ -56,6 +58,7 @@ interface DocumentOptions {
 	readonly edges: ReadonlyArray<GeneratedEdge>;
 	readonly models: RelationModels;
 }
+
 export function createRelationDocument(options: DocumentOptions): RelationDocument {
 	const edges = options.edges.toSorted(
 		(left, right) =>

@@ -27,6 +27,7 @@ const enum InlinePropertyType {
 function getOpeningElementName(node: ESTree.JSXOpeningElement): string | undefined {
 	return isJsxIdentifier(node.name) ? node.name.name : undefined;
 }
+
 function getInlinePropertyType(node: ESTree.Expression): InlinePropertyType | undefined {
 	switch (node.type) {
 		case ARRAY_EXPRESSION:

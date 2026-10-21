@@ -33,6 +33,7 @@ import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type JSXRenderable = ESTree.JSXElement | ESTree.JSXFragment;
+
 type BinaryOperand = ESTree.Expression | ESTree.PrivateIdentifier;
 
 interface BranchCandidate {
@@ -234,6 +235,7 @@ function getComplementMatch(
 	const operatorsComplement =
 		(firstComparison.operator === "===" && secondComparison.operator === "!==") ||
 		(firstComparison.operator === "!==" && secondComparison.operator === "===");
+
 	if (!operatorsComplement) return undefined;
 
 	const directMatch =

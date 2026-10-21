@@ -21,6 +21,7 @@ import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } fro
 import type { UnknownRecord } from "type-fest";
 
 type QueryType = "get" | "has";
+
 type Context = InferContextFromRule<typeof preferSingleWorldQueryInJecs>;
 
 interface WorldQueryCall {
@@ -299,6 +300,7 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 					) {
 						flushGetBuffer();
 					}
+
 					currentGetBuffer.push(getCall);
 
 					flushHasBuffer();

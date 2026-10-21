@@ -77,6 +77,7 @@ const SOURCE_EXTENSION = /\.tsx?$/v;
 function stripTypeAssertions(expression: ESTree.Expression): ESTree.Expression {
 	let current = expression;
 	while (isTsAsExpression(current) || isTsSatisfiesExpression(current)) current = current.expression;
+
 	return current;
 }
 
@@ -94,6 +95,7 @@ function collectConstants(
 		if (!isStringLiteral(value)) continue;
 
 		valuesByName.set(id.name, value.value);
+
 		// Node type constants belong to `prefer-node-type-constant`.
 		if (isNodeTypeName(value.value)) continue;
 
@@ -149,12 +151,14 @@ function indexDeclaration(
 		collectConstants(declaration, specifier, collections);
 		return;
 	}
+
 	if (!isFunctionDeclarationRaw(declaration)) return;
 
 	const sharedFunction = getSharedFunction(declaration, specifier);
 	if (sharedFunction === undefined) return;
 
 	collections.functions.set(sharedFunction.name, sharedFunction);
+
 	if (isSharedGuard(sharedFunction)) collections.guards.push(sharedFunction);
 }
 
@@ -197,6 +201,7 @@ function readModules(locations: ReadonlyArray<UtilitiesLocation>): Array<Utiliti
 			modules.push({ filename, source, specifier });
 		}
 	}
+
 	return modules;
 }
 
@@ -221,6 +226,7 @@ export function createUtilitiesIndexLoader({
 			index = indexUtilities(readModules(locations));
 			indexedAt = time;
 		}
+
 		return index;
 	};
 }

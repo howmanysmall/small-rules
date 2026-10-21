@@ -16,6 +16,7 @@ function isFocusedRun(cliArguments: ReadonlyArray<string>): boolean {
 		if (argument.startsWith("-")) {
 			return NARROWING_FLAGS.has(argument.split("=", 1)[0] ?? argument);
 		}
+
 		return TEST_ROOTS.some((root) => argument.startsWith(root)) || TEST_FILE_ARGUMENT.test(argument);
 	});
 }

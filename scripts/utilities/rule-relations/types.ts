@@ -46,6 +46,7 @@ export const isJudgmentDimension = type.enumerated(...allJudgmentDimensions);
 export const judgmentDimensions = defineJudgmentDimensions(allJudgmentDimensions);
 
 const isProbability = type("0 <= number <= 1");
+
 // Three values rounded to hundredths allow 3 × 0.005 rounding error.
 const isAssessmentProbabilities = type({
 	"0": isProbability,
@@ -61,6 +62,7 @@ export const isScoreAnswer = type({
 	score: "0 <= number <= 2",
 	type: "'score'",
 }).readonly();
+
 export type ScoreAnswer = typeof isScoreAnswer.infer;
 
 export const isPairJudgments = type({
@@ -72,6 +74,7 @@ export const isPairJudgments = type({
 	[JudgmentDimension.ForwardReplaces]: isProbability,
 	[JudgmentDimension.ForwardRequires]: isProbability,
 }).readonly();
+
 export type PairJudgments = typeof isPairJudgments.infer;
 
 export interface JudgmentThresholds {
@@ -98,7 +101,9 @@ export const isNoulAnswer = type({
 	noul: isProbability,
 	type: "'noul'",
 }).readonly();
+
 export type NoulAnswer = typeof isNoulAnswer.infer;
+
 export type DecisionAnswer = NoulAnswer | ScoreAnswer;
 
 interface DecideOptions {

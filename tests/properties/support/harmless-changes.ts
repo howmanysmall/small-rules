@@ -33,6 +33,7 @@ export function separateLines(code: string, separators: ReadonlyArray<string>): 
 		const separator = separators[(index - 1) % separators.length] ?? "";
 		output += `\n${separator}\n${lines[index] ?? ""}`;
 	}
+
 	return output;
 }
 
@@ -61,5 +62,6 @@ export function renameGeneratedIdentifiers(testCase: NormalizedValidCase, suffix
 		const range: Range = [end, end];
 		return { range, text: suffix };
 	});
+
 	return applyFixes(testCase.code, insertions) ?? testCase.code;
 }

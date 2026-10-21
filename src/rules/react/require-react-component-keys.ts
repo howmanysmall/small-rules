@@ -174,6 +174,7 @@ function findEnclosingCallExpression(node: ESTree.Node): ESTree.CallExpression |
 			for (const argument of parent.arguments) {
 				if (argument === current || (isSpreadElement(argument) && argument.argument === current)) return parent;
 			}
+
 			return undefined;
 		}
 
@@ -248,6 +249,7 @@ function getFunctionCallbackUsage(
 
 	for (const reference of variable.references) {
 		mergeCallbackUsage(usage, getCallbackUsageFromReference(reference, iterationMethods, memoizationHooks));
+
 		if (usage.iteration && usage.memoization) return usage;
 	}
 
@@ -267,6 +269,7 @@ function getTopLevelReturnParent(node: ESTree.JSXElement | ESTree.JSXFragment): 
 	while (parent !== undefined && SHOULD_ASCEND_TYPES.has(parent.type)) {
 		parent = ascendPastExpressionWrappers(getParent(parent));
 	}
+
 	return skipExpressionContainer(parent);
 }
 
@@ -393,6 +396,7 @@ function isLogicalJsxChild(node: ESTree.JSXElement | ESTree.JSXFragment): boolea
 
 function shouldSkipFragment(node: ESTree.JSXElement | ESTree.JSXFragment, callbackUsage: CallbackUsage): boolean {
 	if (!isJsxFragment(node)) return false;
+
 	return (
 		isLogicalJsxChild(node) ||
 		(callbackUsage.memoization && !callbackUsage.iteration && isTopLevelFunctionReturn(node))

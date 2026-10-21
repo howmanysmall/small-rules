@@ -27,6 +27,7 @@ function collectJsDocumentIdentifiers(comments: ReadonlyArray<Comment>): Set<str
 		collectJsDocLinkIdentifiers(comment.value, identifiers);
 		collectJsDocTypeIdentifiers(comment.value, identifiers);
 	}
+
 	return identifiers;
 }
 
@@ -108,6 +109,7 @@ const noUnusedImports = createRule("no-unused-imports", "general", {
 		return {
 			ImportDeclaration(node): void {
 				scopeReference ??= node;
+
 				for (const specifier of node.specifiers) {
 					/* v8 ignore next -- @preserve ImportDeclaration.specifiers contains only import specifier nodes. */
 					if (!isAnyImportSpecifier(specifier)) continue;

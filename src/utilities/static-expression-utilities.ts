@@ -131,6 +131,7 @@ export function isImportBinding(scopeVariable: ScopeVariable): boolean {
 	for (const definition of scopeVariable.defs) {
 		if (definition.type === "ImportBinding") return true;
 	}
+
 	return false;
 }
 
@@ -204,6 +205,7 @@ export function isExplicitUndefinedExpression(
 	if (isIdentifierNamed(unwrapped, "undefined") || (isUnaryExpression(unwrapped) && unwrapped.operator === "void")) {
 		return true;
 	}
+
 	if (!isIdentifier(unwrapped)) return false;
 
 	const initializer = getFirstConstInitializer(getIdentifierVariable(sourceCode, unwrapped));
@@ -224,6 +226,7 @@ function isStaticMemberProperty(
 function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
 	let unwrapped = stripExpressionWrappers(callee);
 	while (isMemberExpression(unwrapped)) unwrapped = stripExpressionWrappers(unwrapped.object);
+
 	return isIdentifier(unwrapped) ? unwrapped.name : undefined;
 }
 
@@ -240,9 +243,11 @@ function isStaticCallCallee(
 
 	const unwrapped = stripExpressionWrappers(callee);
 	if (isIdentifier(unwrapped)) return isStaticIdentifier(sourceCode, unwrapped, seen, options);
+
 	if (!isMemberExpression(unwrapped) || !isStaticExpression(sourceCode, unwrapped.object, seen, options)) {
 		return false;
 	}
+
 	if (unwrapped.computed) return isStaticExpression(sourceCode, unwrapped.property, seen, options);
 	return isIdentifier(unwrapped.property);
 }
@@ -315,6 +320,7 @@ function classifyStaticExpression(
 		case LOGICAL_EXPRESSION: {
 			/* v8 ignore next -- @preserve Parser-produced binary and logical left operands are expressions. */
 			if (!isExpression(unwrapped.left)) return false;
+
 			return (
 				isStaticExpression(sourceCode, unwrapped.left, seen, options) &&
 				isStaticExpression(sourceCode, unwrapped.right, seen, options)
@@ -428,6 +434,7 @@ export function isStaticObjectExpression(
 			return false;
 		}
 	}
+
 	return true;
 }
 
@@ -441,5 +448,6 @@ export function isStaticArrayExpression(
 		if (element === null) return false;
 		if (isSpreadElement(element) || !isStaticExpression(sourceCode, element, seen, options)) return false;
 	}
+
 	return true;
 }

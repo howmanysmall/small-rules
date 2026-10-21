@@ -32,6 +32,7 @@ function wrapInProviders(child: string, providers: ReadonlyArray<readonly [strin
 	for (const [name, value] of providers.toReversed()) {
 		element = `<${name}Context.Provider value={${value}}>${element}</${name}Context.Provider>`;
 	}
+
 	return element;
 }
 
@@ -75,6 +76,7 @@ const preferPaddingComponents = defineFixableCase({
 			const value = side === "PaddingBottom" || side === "PaddingTop" ? vertical : horizontal;
 			return ` ${side}={${value}}`;
 		});
+
 		return {
 			module: [
 				'import { EqualPadding } from "../ui/equal-padding";',
@@ -146,6 +148,7 @@ function renderComponent(component: string, hook: string, states: ReadonlyArray<
 	const dependencies = new Array<string>();
 	for (const { name, inDependencies, read } of states) {
 		declarations.push(`const [${name}, set${capitalize(name)}] = useState(${JSON.stringify(name)});`);
+
 		if (read) reads.push(name);
 		if (inDependencies) dependencies.push(name);
 	}

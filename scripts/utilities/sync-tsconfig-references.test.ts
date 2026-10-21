@@ -220,6 +220,7 @@ describe("sync-tsconfig-references", () => {
 				illegalPackageReferences: true,
 				omitBetaFromSolution: true,
 			});
+
 			onTestFinished(async () => rm(rootDirectory, { force: true, recursive: true }));
 			const solutionPath = nodePath.join(rootDirectory, TSCONFIG_JSON);
 			const alphaPath = nodePath.join(rootDirectory, "packages/alpha/tsconfig.json");

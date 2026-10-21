@@ -89,6 +89,7 @@ function isSafelyFixableProviderChain(chain: ReadonlyArray<ESTree.JSXElement>): 
 			index += 1;
 			continue;
 		}
+
 		if (!hasOnlySafeWrapperChildren(provider, nextProvider)) return false;
 		index += 1;
 	}
@@ -129,6 +130,7 @@ function getContextStackReplacement(
 		innermostProvider.openingElement.range[1],
 		innermostProvider.closingElement.range[0],
 	);
+
 	return `<${componentName} providers={[${providers.join(", ")}]}>${children}</${componentName}>`;
 }
 
@@ -136,6 +138,7 @@ const preferContextStack = createRule("prefer-context-stack", "react", {
 	create(context): Visitor {
 		const { filename, sourceCode } = context;
 		const discoverContextStack = createLocalComponentDiscoverer(filename, CONTEXT_STACK_COMPONENT);
+
 		/* v8 ignore next -- @preserve rule harness/runtime filenames are present; empty filename is a defensive host guard. */
 		const isContextStackDefinitionFile =
 			filename.length > 0 && inspectLocalComponentFile(filename, CONTEXT_STACK_COMPONENT).matches;

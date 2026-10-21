@@ -25,7 +25,9 @@ const relationKindNames = new Set<string>([...directedRelationKinds, ...undirect
 const directedKindNames = new Set<string>(directedRelationKinds);
 
 export type DirectedRuleRelationKind = (typeof directedRelationKinds)[number];
+
 type UndirectedRuleRelationKind = (typeof undirectedRelationKinds)[number];
+
 export type RuleRelationKind = DirectedRuleRelationKind | UndirectedRuleRelationKind;
 
 export interface RuleRelation {
@@ -72,12 +74,15 @@ function parseGeneratedRelation(edge: GeneratedRelation): RuleRelation {
 	if (!isRuleName(edge.from)) {
 		throw new Error(`Unknown rule name "${edge.from}".`);
 	}
+
 	if (!isRuleName(edge.to)) {
 		throw new Error(`Unknown rule name "${edge.to}".`);
 	}
+
 	if (edge.from === edge.to) {
 		throw new Error(`Self-relation for ${edge.from}.`);
 	}
+
 	if (!isRuleRelationKind(edge.kind)) {
 		throw new Error(`Unknown relation kind "${edge.kind}" for ${edge.from} → ${edge.to}.`);
 	}
@@ -101,6 +106,7 @@ export function parseGeneratedRelations(edges: ReadonlyArray<GeneratedRelation>)
 		if (seenPairs.has(pairKey)) {
 			throw new Error(`Duplicate relation for ${pairKey.replace(":", " ↔ ")}.`);
 		}
+
 		seenPairs.add(pairKey);
 		relations.push(relation);
 	}

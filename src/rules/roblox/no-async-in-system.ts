@@ -37,6 +37,7 @@ import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const DEFAULT_SYSTEM_TYPE_NAMES = ["PlanckSystem", "System", "SystemFunction", "SystemReturn", "SystemTableLike"];
+
 type ScopeVariable = ReturnType<SourceCode["getDeclaredVariables"]>[number];
 
 interface ImportBinding {
@@ -76,8 +77,10 @@ function getReferencedTypeName(typeNode?: ESTree.Node | null, allowQualified = t
 
 			referencedTypeName = unionTypeName;
 		}
+
 		return referencedTypeName;
 	}
+
 	if (!isTsTypeReference(referencedType)) return undefined;
 	return getTypeName(referencedType.typeName, allowQualified);
 }
@@ -103,6 +106,7 @@ function addSystemPropertyFunction(
 ): void {
 	for (const property of object.properties) {
 		if (getPropertyName(property) !== "system" || !isProperty(property)) continue;
+
 		if (isAnyFunction(property.value)) systemFunctions.add(property.value);
 		else if (isIdentifier(property.value)) {
 			const systemFunction = namedFunctions.get(property.value.name);
@@ -134,6 +138,7 @@ function collectImportBindings(
 			if (variable !== undefined) bindings.set(variable, { imported, source: statement.source.value });
 		}
 	}
+
 	return bindings;
 }
 
@@ -147,6 +152,7 @@ function getMemberChain(expression: ESTree.Expression): MemberChain | undefined 
 		path.unshift(propertyName);
 		current = stripExpressionWrappers(current.object);
 	}
+
 	return isIdentifier(current) ? { path, root: current } : undefined;
 }
 
@@ -291,6 +297,7 @@ function collectAnnotatedTypes(
 			recordVariableDeclaratorType(node, sourceCode, declaredTypeNames, types);
 			return;
 		}
+
 		if (!isAnyFunction(node)) return;
 		recordFunctionParameterTypes(node, sourceCode, declaredTypeNames, types);
 	});
@@ -301,8 +308,10 @@ function collectDeclaredTypeNames(program: ESTree.Program): ReadonlySet<string> 
 	forEachNode(program, (node) => {
 		if (isImportDeclaration(node)) {
 			for (const specifier of node.specifiers) names.add(specifier.local.name);
+
 			return false;
 		}
+
 		if (
 			(isTsInterfaceDeclaration(node) ||
 				isTsTypeAliasDeclaration(node) ||
@@ -312,6 +321,7 @@ function collectDeclaredTypeNames(program: ESTree.Program): ReadonlySet<string> 
 		) {
 			names.add(node.id.name);
 		}
+
 		return true;
 	});
 	return names;
@@ -352,6 +362,7 @@ function getExpressionClass(
 ): string | undefined {
 	const current = stripExpressionWrappers(expression);
 	if (isIdentifier(current)) return getIdentifierClass(current, sourceCode, imports, types, visited);
+
 	if (
 		!isCallExpression(current) ||
 		!isMemberExpression(current.callee) ||
@@ -361,6 +372,7 @@ function getExpressionClass(
 	) {
 		return undefined;
 	}
+
 	const [serviceName] = current.arguments;
 	return isStringLiteral(serviceName) ? serviceName.value : undefined;
 }
@@ -413,6 +425,7 @@ function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: Sour
 		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
 		return returnedFunctions;
 	}
+
 	forEachNode(systemFunction.body, (node) => {
 		if (isAnyFunction(node)) return false;
 		if (!isReturnStatement(node) || node.argument === null) return true;
@@ -444,6 +457,7 @@ function getSynchronousCallbacks(
 			if (callback !== undefined) callbacks.add(callback);
 		}
 	}
+
 	return callbacks;
 }
 
@@ -458,6 +472,7 @@ function reportYieldingCalls(
 	if (systemFunction.async) return;
 
 	const visitedFunctions = new Set<CallbackFunction>();
+
 	function inspectActiveFunction(activeFunction: CallbackFunction): void {
 		if (activeFunction.async || activeFunction.body === null || visitedFunctions.has(activeFunction)) return;
 		visitedFunctions.add(activeFunction);
@@ -466,9 +481,11 @@ function reportYieldingCalls(
 			if (!isCallExpression(node)) return true;
 
 			if (isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
+
 			for (const callback of getSynchronousCallbacks(node, sourceCode, synchronousCallbacks)) {
 				inspectActiveFunction(callback);
 			}
+
 			return true;
 		});
 	}
@@ -494,6 +511,7 @@ function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDi
 	if (!isIdentifier(node.id)) return;
 	if (!isRecognizedType(node.id.typeAnnotation, state.systemTypeNames)) return;
 	if (node.init === null) return;
+
 	if (isAnyFunction(node.init)) state.systemFunctions.add(node.init);
 	else if (isObjectExpression(node.init)) state.typedSystemObjects.push(node.init);
 }
@@ -510,10 +528,12 @@ function classifySystemNode(node: ESTree.Node, state: SystemDiscoveryState): voi
 		recordSystemFunction(node, state);
 		return;
 	}
+
 	if (isVariableDeclarator(node)) {
 		recordSystemDeclarator(node, state);
 		return;
 	}
+
 	recordSystemSatisfies(node, state);
 }
 
@@ -552,6 +572,7 @@ const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 				for (const object of typedSystemObjects) {
 					addSystemPropertyFunction(object, namedFunctions, systemFunctions);
 				}
+
 				for (const systemFunction of systemFunctions) {
 					reportYieldingCalls(
 						systemFunction,

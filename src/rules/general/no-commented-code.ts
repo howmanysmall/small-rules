@@ -22,7 +22,9 @@ import { createJavaScriptDetectors } from "$oxc-utilities/recognizers/javascript
 import type { Comment, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 const EXCLUDED_STATEMENTS = new Set([BREAK_STATEMENT, CONTINUE_STATEMENT, LABELED_STATEMENT]);
+
 type ParseLanguage = "js" | "jsx" | "tsx";
+
 const LANG_BY_EXTENSION = new Map<string, ParseLanguage>([
 	[".jsx", "jsx"],
 	[".tsx", "tsx"],
@@ -80,6 +82,7 @@ function groupComments(comments: ReadonlyArray<Comment>, sourceCode: SourceCode)
 				currentLineComments = [];
 				size = 0;
 			}
+
 			groups[groupsSize++] = createCommentGroup([comment]);
 		} else if (size === 0) currentLineComments[size++] = comment;
 		else {
@@ -100,6 +103,7 @@ function groupComments(comments: ReadonlyArray<Comment>, sourceCode: SourceCode)
 
 const OPENING_BRACE = /\{/gu;
 const CLOSING_BRACE = /\}/gu;
+
 function injectMissingBraces(value: string): string {
 	const openCount = (value.match(OPENING_BRACE) ?? []).length;
 	const closeCount = (value.match(CLOSING_BRACE) ?? []).length;
@@ -136,6 +140,7 @@ function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.
 	let size = 0;
 	/* v8 ignore next -- @preserve parser program bodies contain parsed statement records. */
 	for (const item of body) if (isParsedStatement(item)) result[size++] = item;
+
 	return result;
 }
 
@@ -167,7 +172,9 @@ function isExclusion(statements: ReadonlyArray<ESTree.Statement>, codeText: stri
 }
 
 const ALLOWED_PARSE_ERROR_PATTERNS = [/'return' statement is only valid inside a function/u] as const;
+
 type Errors = ReadonlyArray<{ readonly message: string }>;
+
 function hasOnlyAllowedErrors(errors: Errors): boolean {
 	for (const error of errors) {
 		let hasMatch = false;
@@ -177,8 +184,10 @@ function hasOnlyAllowedErrors(errors: Errors): boolean {
 				break;
 			}
 		}
+
 		if (!hasMatch) return false;
 	}
+
 	return true;
 }
 
@@ -225,6 +234,7 @@ function containsCode(value: string, filename: string): boolean {
 function countLines(value: string): number {
 	let count = 1;
 	for (const character of value) if (character === "\n") count += 1;
+
 	return count;
 }
 

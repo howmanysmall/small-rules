@@ -24,7 +24,9 @@ export interface GuardMatch {
 }
 
 type GetText = (node: ESTree.Node) => string;
+
 type Leaf = bigint | boolean | number | string | symbol | undefined;
+
 type FieldValue = ESTree.Node | Leaf | ReadonlyArray<ESTree.Node | undefined>;
 
 export interface GuardMatchContext {
@@ -79,6 +81,7 @@ function bind(name: string, candidate: ESTree.Node, state: MatchState): boolean 
 		state.bindings.set(name, candidate);
 		return true;
 	}
+
 	return state.getText(bound) === state.getText(candidate);
 }
 
@@ -103,6 +106,7 @@ function readFields(node: ESTree.Node): ReadonlyMap<string, FieldValue> {
 	const entries: ReadonlyArray<readonly [string, unknown]> = Object.entries(node);
 	for (const [key, value] of entries) {
 		if (IGNORED_KEYS.has(key)) continue;
+
 		if (isNode(value)) {
 			fields.set(key, value);
 		} else if (isNodeList(value)) {
@@ -116,6 +120,7 @@ function readFields(node: ESTree.Node): ReadonlyMap<string, FieldValue> {
 			fields.set(key, Symbol(key));
 		}
 	}
+
 	return fields;
 }
 
@@ -130,6 +135,7 @@ function matchValues(pattern: FieldValue, candidate: FieldValue, state: MatchSta
 			pattern.every((item, index) => matchValues(item, candidate.at(index), state))
 		);
 	}
+
 	if (isNode(pattern) && isNode(candidate)) return matchNodes(pattern, candidate, state);
 	return pattern === candidate;
 }
@@ -232,9 +238,11 @@ function matchNodes(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchSt
 	const patternValue = getStringValue(aligned.pattern, aligned.state);
 	if (patternValue !== undefined && patternValue === getStringValue(aligned.candidate, aligned.state)) return true;
 	if (aligned.pattern.type !== aligned.candidate.type) return false;
+
 	if (isMemberExpression(aligned.pattern) && !aligned.pattern.computed && isMemberExpression(aligned.candidate)) {
 		return matchMembers(aligned.pattern, aligned.candidate, aligned.state);
 	}
+
 	return matchFields(aligned.pattern, aligned.candidate, aligned.state);
 }
 
@@ -243,6 +251,7 @@ function matchFields(pattern: ESTree.Node, candidate: ESTree.Node, state: MatchS
 	for (const [key, value] of readFields(pattern)) {
 		if (!matchValues(value, candidateFields.get(key), state)) return false;
 	}
+
 	return true;
 }
 
@@ -272,6 +281,7 @@ function matchNegatedTerm(pattern: ESTree.Expression, candidate: ESTree.Expressi
 	if (isUnaryExpression(candidate) && candidate.operator === "!") {
 		return matchPositiveTerm(pattern, candidate.argument, state);
 	}
+
 	return (
 		isBinaryExpression(pattern) &&
 		isBinaryExpression(candidate) &&
@@ -304,8 +314,10 @@ function attempt(state: MatchState, match: () => boolean): boolean {
 	const matched = match();
 	if (!matched) {
 		state.bindings.clear();
+
 		for (const [name, node] of saved) state.bindings.set(name, node);
 	}
+
 	return matched;
 }
 
@@ -330,6 +342,7 @@ function matchInlined(pattern: ESTree.Expression, term: ESTree.Expression, state
 		if (argument === undefined || isSpreadElement(argument)) return false;
 		substitutions.set(parameter, argument);
 	}
+
 	return matchNodes(pattern, inlined.body, { ...state, inlined: true, substitutions });
 }
 
@@ -346,6 +359,7 @@ export function flattenChain(node: ESTree.Expression, operator: string, terms: A
 		flattenChain(node.right, operator, terms);
 		return;
 	}
+
 	terms.push(node);
 }
 
@@ -422,8 +436,10 @@ function matchTermsInAnyOrder(
 				matchTerm(pattern, candidate, negated, state) &&
 				matchTermsInAnyOrder(remainingPatterns, remainingCandidates, negated, state),
 		);
+
 		if (paired) return true;
 	}
+
 	return false;
 }
 
@@ -459,6 +475,7 @@ export function matchGuard(
 	const matched = isMovable
 		? matchTermsInAnyOrder(patterns, candidates, negated, state)
 		: matchTermsInOrder(patterns, candidates, negated, state);
+
 	if (!matched) return undefined;
 
 	const matchedArguments = new Array<ESTree.Node>();
@@ -467,5 +484,6 @@ export function matchGuard(
 		if (bound === undefined) return undefined;
 		matchedArguments.push(bound);
 	}
+
 	return { arguments: matchedArguments, negated };
 }

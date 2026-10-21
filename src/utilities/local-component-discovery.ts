@@ -72,6 +72,7 @@ const projectRootCache = new Map<string, string | undefined>();
 
 const REGEXP_REGEXP = /[.*+?^${}()|[\]\\]/gu;
 const AND = String.raw`\$&`;
+
 function escapeRegExp(value: string): string {
 	return value.replaceAll(REGEXP_REGEXP, AND);
 }
@@ -91,11 +92,13 @@ function getCachedRegex(pattern: string, flags: string): RegExp {
 	if (cached !== undefined) return cached;
 
 	const regex = new RegExp(pattern, ensureUnicodeFlag(flags));
+
 	if (regexCache.size >= MAX_REGEX_CACHE_SIZE) {
 		const firstKey = regexCache.keys().next().value;
 		/* v8 ignore next -- @preserve a nonempty cache always yields a first insertion key. */
 		if (firstKey !== undefined) regexCache.delete(firstKey);
 	}
+
 	regexCache.set(cacheKey, regex);
 	return regex;
 }
@@ -118,6 +121,7 @@ function getImportStyle(text: string, componentName: string): "default" | "named
 	const hasNamedExport =
 		getCachedRegex(`\\bexport\\s+(?:const|function|class)\\s+${escapedName}\\b`, "u").test(text) ||
 		getCachedRegex(`\\bexport\\s*\\{[^}]*\\b${escapedName}\\b[^}]*\\}`, "u").test(text);
+
 	if (hasNamedExport) return "named";
 
 	return DEFAULT_EXPORT_PATTERN.test(text) && getCachedRegex(`\\b${escapedName}\\b`, "u").test(text)
@@ -283,6 +287,7 @@ function isIgnoredComponentPath(filePath: string): boolean {
 		/* v8 ignore next -- @preserve discovered component paths come from files under a project root. */
 		projectRoot === undefined ? filePath : nodePath.relative(projectRoot, filePath),
 	);
+
 	for (const segment of normalizedPath.split("/")) {
 		if (IGNORED_DIRECTORIES.has(segment.toLowerCase())) return true;
 	}
@@ -372,6 +377,7 @@ function discoverLocalComponent(sourceFile: string, definition: LocalComponentDe
 	const matches = [...candidatePaths].filter(
 		(candidatePath) => inspectLocalComponentFile(candidatePath, definition).matches,
 	);
+
 	if (matches.length !== 1) return { found: false };
 
 	const [path] = matches;

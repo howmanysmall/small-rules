@@ -25,9 +25,11 @@ const DEFAULT_BINDING_PATTERNS: ReadonlyArray<string> = ["binding"];
 
 function getParameterName(parameterPattern: ESTree.ParamPattern): string | undefined {
 	if (isIdentifier(parameterPattern)) return parameterPattern.name;
+
 	if (isAssignmentPattern(parameterPattern) && isIdentifier(parameterPattern.left)) {
 		return parameterPattern.left.name;
 	}
+
 	return undefined;
 }
 
@@ -98,6 +100,7 @@ function isBindingInitialization(variable: ScopeVariable): boolean {
 			return true;
 		}
 	}
+
 	return false;
 }
 
