@@ -1,7 +1,8 @@
 import { FOR_STATEMENT, isExpressionStatement } from "@small-rules/oxlint-utilities";
 
+import { isAutofixAllowed } from "$oxc-utilities/autofix-option";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
+import { reportWithReplacement } from "$oxc-utilities/replacement-report";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
@@ -12,8 +13,7 @@ function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 
 const noIncrementDecrement = createRule("no-increment-decrement", "general", {
 	create(context): Visitor {
-		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
+		const allowAutofix = isAutofixAllowed(context.options[0]);
 		const { sourceCode } = context;
 
 		return {
@@ -33,13 +33,7 @@ const noIncrementDecrement = createRule("no-increment-decrement", "general", {
 
 				const replacement = node.operator === "++" ? `${argumentText} += 1` : `${argumentText} -= 1`;
 
-				context.report({
-					fix(fixer) {
-						return fixer.replaceText(node, replacement);
-					},
-					messageId,
-					node,
-				});
+				reportWithReplacement(context, messageId, node, replacement);
 			},
 		} satisfies Visitor;
 	},

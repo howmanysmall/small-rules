@@ -16,6 +16,7 @@ import {
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { createFunctionStackVisitor } from "$oxc-utilities/function-stack-visitor";
 import { getSingleDefinition } from "$oxc-utilities/single-variable-definition";
 
 import type { ESTree, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -72,24 +73,16 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 		const functionsWithReturnValue = new Set<FunctionLike>();
 		const functionStack = new Array<FunctionLike>();
 
-		function enterFunction(node: FunctionLike): void {
-			functionStack.push(node);
-
-			if (node.async || node.generator) {
+		function enterFunction(node: FunctionLike): FunctionLike {
+			if (node.async || node.generator || (isArrowFunctionExpression(node) && node.expression)) {
 				functionsWithReturnValue.add(node);
-				return;
 			}
 
-			if (isArrowFunctionExpression(node) && node.expression) functionsWithReturnValue.add(node);
-		}
-
-		function exitFunction(): void {
-			functionStack.pop();
+			return node;
 		}
 
 		return {
-			ArrowFunctionExpression: enterFunction,
-			"ArrowFunctionExpression:exit": exitFunction,
+			...createFunctionStackVisitor(functionStack, enterFunction),
 			CallExpression(node): void {
 				if (!callReturnValueIsUsed(node) || !isBindingIdentifier(node.callee)) return;
 
@@ -101,10 +94,6 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				const functionNode = getFunctionFromVariable(resolved);
 				if (functionNode !== undefined) callExpressionsToCheck.set(node.callee, functionNode);
 			},
-			FunctionDeclaration: enterFunction,
-			"FunctionDeclaration:exit": exitFunction,
-			FunctionExpression: enterFunction,
-			"FunctionExpression:exit": exitFunction,
 			"Program:exit"(): void {
 				for (const [callee, functionNode] of callExpressionsToCheck) {
 					if (functionsWithReturnValue.has(functionNode)) continue;

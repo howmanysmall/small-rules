@@ -9,6 +9,7 @@ import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { createFunctionStackVisitor } from "$oxc-utilities/function-stack-visitor";
 import { isUseMemoCall, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSources, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
@@ -294,17 +295,12 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			functionInfo.callIdentifiers.push(identifier);
 		}
 
-		function enterFunction(node: CallbackFunction): void {
-			functionStack.push(getOrCreateFunctionInfo(node).id);
-		}
-
-		function exitFunction(): void {
-			functionStack.pop();
+		function enterFunction(node: CallbackFunction): number {
+			return getOrCreateFunctionInfo(node).id;
 		}
 
 		return {
-			ArrowFunctionExpression: enterFunction,
-			"ArrowFunctionExpression:exit": exitFunction,
+			...createFunctionStackVisitor(functionStack, enterFunction),
 
 			CallExpression(node): void {
 				if (isIdentifier(node.callee)) recordFunctionCall(node.callee);
@@ -320,12 +316,6 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 
 				if (isCallbackFunction(callback)) useMemoInlineCallbacks.push(callback);
 			},
-
-			FunctionDeclaration: enterFunction,
-			"FunctionDeclaration:exit": exitFunction,
-
-			FunctionExpression: enterFunction,
-			"FunctionExpression:exit": exitFunction,
 
 			ImportDeclaration(node): void {
 				trackUseMemoImports(node, reactSources, memoIdentifiers, reactNamespaces);

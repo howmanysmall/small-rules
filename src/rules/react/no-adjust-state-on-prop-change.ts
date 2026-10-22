@@ -1,15 +1,14 @@
 // oxlint-disable small-rules/prevent-abbreviations -- the `props` data key is
 // a published contract.
-import { createRule } from "$oxc-utilities/create-rule";
 import { getSynchronousStateSetterCalls, joinQuotedReferenceNames } from "$oxc-utilities/react-effect-call-sites";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
+import type { Reference } from "oxlint-plugin-utilities";
 
+import type { ReactEffectRuleContext } from "$oxc-utilities/react-effect-rule";
 import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-type RuleContext = InferContextFromRule<typeof noAdjustStateOnPropertyChange>;
+type RuleContext = ReactEffectRuleContext<"avoidAdjustingStateWhenAPropChanges">;
 
 function getPropertyReferences(analysis: ReactEffectAnalysis, effect: ReactEffect): ReadonlyArray<Reference> {
 	const propertyReferences = new Array<Reference>();
@@ -46,41 +45,19 @@ function reportAdjustStateEffect(
 	}
 }
 
-const noAdjustStateOnPropertyChange = createRule("no-adjust-state-on-prop-change", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
+const noAdjustStateOnPropertyChange = createReactEffectRule("no-adjust-state-on-prop-change", {
+	checkEffect(context, analysis, effect): void {
+		if (effect.dependencyReferences === undefined) return;
 
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.dependencyReferences === undefined) continue;
+		const propertyReferences = getPropertyReferences(analysis, effect);
+		if (propertyReferences.length === 0) return;
 
-					const propertyReferences = getPropertyReferences(analysis, effect);
-					if (propertyReferences.length === 0) continue;
-
-					reportAdjustStateEffect(context, analysis, effect, propertyReferences);
-				}
-			},
-		} satisfies Visitor;
+		reportAdjustStateEffect(context, analysis, effect, propertyReferences);
 	},
-	meta: {
-		docs: {
-			description: "Disallow adjusting state in an effect when a prop changes.",
-			recommended: true,
-		},
-		messages: {
-			avoidAdjustingStateWhenAPropChanges:
-				'Avoid adjusting state when a prop changes. Instead, adjust "{{state}}" directly during render when {{props}} changes, or refactor your state to avoid this need entirely.',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: { environment: ENVIRONMENT_SCHEMA },
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow adjusting state in an effect when a prop changes.",
+	messages: {
+		avoidAdjustingStateWhenAPropChanges:
+			'Avoid adjusting state when a prop changes. Instead, adjust "{{state}}" directly during render when {{props}} changes, or refactor your state to avoid this need entirely.',
 	},
 });
 

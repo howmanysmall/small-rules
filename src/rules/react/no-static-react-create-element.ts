@@ -121,8 +121,8 @@ function isStaticElementArgument(
 
 const noStaticReactCreateElement = createRule("no-static-react-create-element", "react", {
 	create(context): Visitor {
-		const reactSources = getReactSourcesFromOptions(context.options[0]);
 		const { sourceCode } = context;
+		const reactSources = getReactSourcesFromOptions(context.options[0]);
 
 		return {
 			CallExpression(node): void {

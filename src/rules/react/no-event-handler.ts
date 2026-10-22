@@ -1,77 +1,40 @@
-import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
+const noEventHandler = createReactEffectRule("no-event-handler", {
+	checkEffect(context, analysis, effect): void {
+		for (const ifStatement of analysis.scope.getDescendantIfStatements(effect.functionNode)) {
+			if (ifStatement.alternate !== null) continue;
 
-import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
+			for (const ifTestReference of analysis.scope.getDownstreamReferences(ifStatement.test)) {
+				const upstreamReferences = analysis.scope.getUpstreamReferences(ifTestReference);
+				const { name } = ifTestReference.identifier;
 
-type RuleContext = InferContextFromRule<typeof noEventHandler>;
+				if (upstreamReferences.some((reference) => analysis.isState(reference))) {
+					context.report({
+						data: { name },
+						messageId: "avoidEventHandler",
+						node: ifTestReference.identifier,
+					});
+				}
 
-function reportEventHandlerEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
-	for (const ifStatement of analysis.scope.getDescendantIfStatements(effect.functionNode)) {
-		if (ifStatement.alternate !== null) continue;
-
-		for (const ifTestReference of analysis.scope.getDownstreamReferences(ifStatement.test)) {
-			const upstreamReferences = analysis.scope.getUpstreamReferences(ifTestReference);
-			const { name } = ifTestReference.identifier;
-
-			if (upstreamReferences.some((reference) => analysis.isState(reference))) {
-				context.report({
-					data: { name },
-					messageId: "avoidEventHandler",
-					node: ifTestReference.identifier,
-				});
-			}
-
-			if (upstreamReferences.some((reference) => analysis.isProp(reference))) {
-				context.report({
-					data: { name },
-					messageId: "avoidPropHandler",
-					node: ifTestReference.identifier,
-				});
+				if (upstreamReferences.some((reference) => analysis.isProp(reference))) {
+					context.report({
+						data: { name },
+						messageId: "avoidPropHandler",
+						node: ifTestReference.identifier,
+					});
+				}
 			}
 		}
-	}
-}
-
-const noEventHandler = createRule("no-event-handler", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
-
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.cleanup !== undefined) continue;
-
-					reportEventHandlerEffect(context, analysis, effect);
-				}
-			},
-		} satisfies Visitor;
 	},
-	meta: {
-		docs: {
-			description: "Disallow using state and an effect as an event handler.",
-			recommended: true,
-		},
-		messages: {
-			avoidEventHandler:
-				'Avoid using state and effects as an event handler. Instead, call the code that uses "{{name}}" directly when the event occurs.',
-			avoidPropHandler:
-				'Avoid using props and effects as an event handler. Instead, move the code that uses "{{name}}" to the parent component.',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: {
-					environment: ENVIRONMENT_SCHEMA,
-				},
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow using state and an effect as an event handler.",
+	messages: {
+		avoidEventHandler:
+			'Avoid using state and effects as an event handler. Instead, call the code that uses "{{name}}" directly when the event occurs.',
+		avoidPropHandler:
+			'Avoid using props and effects as an event handler. Instead, move the code that uses "{{name}}" to the parent component.',
 	},
+	skipEffectsWithCleanup: true,
 });
 
 export default noEventHandler;

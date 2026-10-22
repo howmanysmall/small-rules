@@ -3,7 +3,6 @@ import {
 	isCallbackFunction,
 	isIdentifier,
 	isIdentifierNamed,
-	isMemberExpression,
 	isNumericLiteral,
 	isReturnStatement,
 	isSpreadElement,
@@ -13,6 +12,7 @@ import {
 import { isNativePromiseExpression } from "$oxc-utilities/api-provenance";
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getStaticMemberCallee } from "$oxc-utilities/member-callee";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -52,14 +52,12 @@ function isDiscardingHandler(sourceCode: SourceCode, handler: ESTree.Expression)
 
 const noDiscardedRejection = createRule("no-discarded-rejection", "general", {
 	create(context): Visitor {
-		const { sourceCode } = context;
 		return {
 			CallExpression(node): void {
-				const { callee } = node;
-				if (!isMemberExpression(callee) || callee.computed || !isIdentifierNamed(callee.property, "catch")) {
-					return;
-				}
+				const callee = getStaticMemberCallee(node);
+				if (callee === undefined || !isIdentifierNamed(callee.property, "catch")) return;
 
+				const { sourceCode } = context;
 				if (!isNativePromiseExpression(sourceCode, callee.object)) return;
 				const [handler] = node.arguments;
 				if (handler === undefined || isSpreadElement(handler) || !isDiscardingHandler(sourceCode, handler)) {

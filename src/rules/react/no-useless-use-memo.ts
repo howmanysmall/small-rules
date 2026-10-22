@@ -2,9 +2,8 @@ import { isBlockStatement, isReturnStatement } from "@small-rules/oxlint-utiliti
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
 import { classifyDependencies, DependenciesKind, getEffectCallback } from "$oxc-utilities/react-hook-utilities";
-import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
+import { isStandaloneUseMemo } from "$oxc-utilities/react-memo-utilities";
 import { ENVIRONMENT_SCHEMA, getEnvironment, getReactSources } from "$oxc-utilities/react-utilities";
 import {
 	DEFAULT_STATIC_GLOBAL_FACTORIES,
@@ -12,6 +11,7 @@ import {
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
+import { createUseMemoCallTracker } from "$oxc-utilities/use-memo-call-tracker";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -105,17 +105,12 @@ const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
 		const staticOptions = toStaticExpressionOptions(options);
-		const reactSources = getReactSources(options.environment);
-		const memoIdentifiers = new Set<string>();
-		const reactNamespaces = new Set<string>();
+		const useMemoCalls = createUseMemoCallTracker(getReactSources(options.environment));
 
 		return {
+			...useMemoCalls.visitor,
 			CallExpression(node): void {
-				if (
-					!isUseMemoCall(node, memoIdentifiers, reactNamespaces) ||
-					isStandaloneUseMemo(node) ||
-					node.arguments.length === 0
-				) {
+				if (node.arguments.length === 0 || !useMemoCalls.isUseMemoCall(node) || isStandaloneUseMemo(node)) {
 					return;
 				}
 
@@ -139,9 +134,6 @@ const noUselessUseMemo = createRule("no-useless-use-memo", "react", {
 					messageId: "uselessUseMemo",
 					node,
 				});
-			},
-			ImportDeclaration(node): void {
-				trackUseMemoImports(node, reactSources, memoIdentifiers, reactNamespaces);
 			},
 		} satisfies Visitor;
 	},

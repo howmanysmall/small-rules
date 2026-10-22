@@ -1,15 +1,11 @@
 import { isIdentifier, isIdentifierNamed, isMemberExpression } from "@small-rules/oxlint-utilities";
 
-import { createRule } from "$oxc-utilities/create-rule";
 import { getParentCallbackCalls } from "$oxc-utilities/react-effect-call-sites";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { ESTree, InferContextFromRule, Reference, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Reference } from "oxlint-plugin-utilities";
 
-import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-
-type RuleContext = InferContextFromRule<typeof noPassDataToParent>;
+import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
 function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boolean {
 	return function isUseHook(node): boolean {
@@ -51,53 +47,26 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 	return dataArguments;
 }
 
-function reportPassDataEffect(context: RuleContext, analysis: ReactEffectAnalysis, effect: ReactEffect): void {
-	for (const { callExpression, names, owner } of getParentCallbackCalls(analysis, effect, getDataArguments)) {
-		context.report({
-			data: { name: owner.displayName, data: names },
-			messageId: owner.isInCustomHook ? "avoidPassingDataToParentInHook" : "avoidPassingDataToParentInComponent",
-			node: callExpression,
-		});
-	}
-}
-
-const noPassDataToParent = createRule("no-pass-data-to-parent", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
-
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.cleanup !== undefined) continue;
-
-					reportPassDataEffect(context, analysis, effect);
-				}
-			},
-		} satisfies Visitor;
+const noPassDataToParent = createReactEffectRule("no-pass-data-to-parent", {
+	checkEffect(context, analysis, effect): void {
+		for (const { callExpression, names, owner } of getParentCallbackCalls(analysis, effect, getDataArguments)) {
+			context.report({
+				data: { name: owner.displayName, data: names },
+				messageId: owner.isInCustomHook
+					? "avoidPassingDataToParentInHook"
+					: "avoidPassingDataToParentInComponent",
+				node: callExpression,
+			});
+		}
 	},
-	meta: {
-		docs: {
-			description: "Disallow passing data to parents in an effect.",
-			recommended: true,
-		},
-		messages: {
-			avoidPassingDataToParentInComponent:
-				'Avoid passing data to parents in an effect. Instead, fetch "{{data}}" in the parent and pass it down to {{name}} as a prop.',
-			avoidPassingDataToParentInHook:
-				'Avoid passing data to parents in an effect. Instead, return "{{data}}" from {{name}}.',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: {
-					environment: ENVIRONMENT_SCHEMA,
-				},
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow passing data to parents in an effect.",
+	messages: {
+		avoidPassingDataToParentInComponent:
+			'Avoid passing data to parents in an effect. Instead, fetch "{{data}}" in the parent and pass it down to {{name}} as a prop.',
+		avoidPassingDataToParentInHook:
+			'Avoid passing data to parents in an effect. Instead, return "{{data}}" from {{name}}.',
 	},
+	skipEffectsWithCleanup: true,
 });
 
 export default noPassDataToParent;

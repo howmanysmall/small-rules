@@ -5,8 +5,8 @@ import type { Visitor } from "oxlint-plugin-utilities";
 
 const directiveNoDuplicateDisable = createRule("directive-no-duplicate-disable", "general", {
 	create(context): Visitor {
-		const disabledArea = computeDisabledArea(context.sourceCode);
-		for (const item of disabledArea.duplicateDisableDirectives) {
+		const { duplicateDisableDirectives } = computeDisabledArea(context.sourceCode);
+		for (const item of duplicateDisableDirectives) {
 			context.report({
 				data: { ruleId: item.ruleId ?? "" },
 				loc: toRuleIdLocation(item.comment, item.ruleId),

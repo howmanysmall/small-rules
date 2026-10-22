@@ -1,13 +1,12 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import { getStateSetterCall } from "$oxc-utilities/react-effect-call-sites";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { ESTree, InferContextFromRule, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Reference, Variable } from "oxlint-plugin-utilities";
 
+import type { ReactEffectRuleContext } from "$oxc-utilities/react-effect-rule";
 import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-type RuleContext = InferContextFromRule<typeof noExternalStoreSubscription>;
+type RuleContext = ReactEffectRuleContext<"avoidExternalStoreSubscription">;
 
 function getBodySetters({ isStateCall, scope }: ReactEffectAnalysis, effect: ReactEffect): ReadonlyArray<Reference> {
 	return effect.functionReferences.filter((reference) => {
@@ -88,49 +87,27 @@ function reportSharedCleanupSetters(
 	}
 }
 
-const noExternalStoreSubscription = createRule("no-external-store-subscription", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
+const noExternalStoreSubscription = createReactEffectRule("no-external-store-subscription", {
+	checkEffect(context, analysis, effect): void {
+		if (effect.cleanup === undefined) return;
+		// `getEffectCleanup` filters out bare `return;` (argument
+		// === null), so a cleanup ReturnStatement always carries an
+		// argument here.
+		/* v8 ignore next -- bare returns never reach this check. @preserve */
+		if (effect.cleanup.argument === null) return;
 
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.cleanup === undefined) continue;
-					// `getEffectCleanup` filters out bare `return;` (argument
-					// === null), so a cleanup ReturnStatement always carries an
-					// argument here.
-					/* v8 ignore next -- bare returns never reach this check. @preserve */
-					if (effect.cleanup.argument === null) continue;
+		const bodySetters = getBodySetters(analysis, effect);
+		if (bodySetters.length === 0) return;
 
-					const bodySetters = getBodySetters(analysis, effect);
-					if (bodySetters.length === 0) continue;
+		const cleanupReferences = collectCleanupReferences(analysis, effect.cleanup.argument);
+		const cleanupVariables = collectCleanupVariables(analysis, cleanupReferences);
 
-					const cleanupReferences = collectCleanupReferences(analysis, effect.cleanup.argument);
-					const cleanupVariables = collectCleanupVariables(analysis, cleanupReferences);
-
-					reportSharedCleanupSetters(context, analysis, bodySetters, cleanupVariables);
-				}
-			},
-		} satisfies Visitor;
+		reportSharedCleanupSetters(context, analysis, bodySetters, cleanupVariables);
 	},
-	meta: {
-		docs: {
-			description: "Disallow subscribing to an external store in an effect.",
-			recommended: true,
-		},
-		messages: {
-			avoidExternalStoreSubscription:
-				'Avoid using an effect to subscribe to an external store. Instead, use "useSyncExternalStore" to manage "{{state}}".',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: { environment: ENVIRONMENT_SCHEMA },
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow subscribing to an external store in an effect.",
+	messages: {
+		avoidExternalStoreSubscription:
+			'Avoid using an effect to subscribe to an external store. Instead, use "useSyncExternalStore" to manage "{{state}}".',
 	},
 });
 

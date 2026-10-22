@@ -9,6 +9,7 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
+import { reportWithReplacement } from "$oxc-utilities/replacement-report";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -72,19 +73,7 @@ const preferLocalPortalComponent = createRule("prefer-local-portal-component", "
 						? getPortalReplacement(portalIdentifier, node, sourceCode)
 						: undefined;
 
-				if (replacement !== undefined) {
-					context.report({
-						fix: (fixer) => fixer.replaceText(node, replacement),
-						messageId: "preferPortalComponent",
-						node,
-					});
-					return;
-				}
-
-				context.report({
-					messageId: "preferPortalComponent",
-					node,
-				});
+				reportWithReplacement(context, "preferPortalComponent", node, replacement);
 			},
 
 			ImportDeclaration(node): void {

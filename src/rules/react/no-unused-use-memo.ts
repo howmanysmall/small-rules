@@ -1,27 +1,23 @@
 import { createRule } from "$oxc-utilities/create-rule";
-import { isUseMemoCall } from "$oxc-utilities/oxc-utilities";
-import { isStandaloneUseMemo, trackUseMemoImports } from "$oxc-utilities/react-memo-utilities";
+import { isStandaloneUseMemo } from "$oxc-utilities/react-memo-utilities";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions } from "$oxc-utilities/react-utilities";
+import { createUseMemoCallTracker } from "$oxc-utilities/use-memo-call-tracker";
 
 import type { Visitor } from "oxlint-plugin-utilities";
 
 const noUnusedUseMemo = createRule("no-unused-use-memo", "react", {
 	create(context): Visitor {
-		const memoIdentifiers = new Set<string>();
-		const reactNamespaces = new Set<string>();
-		const reactSources = getReactSourcesFromOptions(context.options[0]);
+		const useMemoCalls = createUseMemoCallTracker(getReactSourcesFromOptions(context.options[0]));
 
 		return {
+			...useMemoCalls.visitor,
 			CallExpression(node): void {
-				if (!isUseMemoCall(node, memoIdentifiers, reactNamespaces) || !isStandaloneUseMemo(node)) return;
+				if (!useMemoCalls.isUseMemoCall(node) || !isStandaloneUseMemo(node)) return;
 
 				context.report({
 					messageId: "unusedUseMemo",
 					node,
 				});
-			},
-			ImportDeclaration(node): void {
-				trackUseMemoImports(node, reactSources, memoIdentifiers, reactNamespaces);
 			},
 		} satisfies Visitor;
 	},

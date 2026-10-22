@@ -22,6 +22,7 @@ import {
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { reportWithReplacement } from "$oxc-utilities/replacement-report";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";
@@ -259,19 +260,12 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 			attributes: PaddingAttributes,
 			node: ESTree.JSXElement,
 		): void {
-			const replacement = getReplacement(componentIdentifiers, messageId, attributes);
-			if (replacement !== undefined) {
-				context.report({
-					fix(fixer) {
-						return fixer.replaceText(node, replacement);
-					},
-					messageId,
-					node,
-				});
-				return;
-			}
-
-			context.report({ messageId, node });
+			reportWithReplacement(
+				context,
+				messageId,
+				node,
+				getReplacement(componentIdentifiers, messageId, attributes),
+			);
 		}
 
 		return {

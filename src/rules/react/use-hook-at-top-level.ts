@@ -15,6 +15,7 @@ import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
+import { mergeIntoStackTop } from "$oxc-utilities/stack-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -183,9 +184,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 		}
 
 		function updateContext(updates: Partial<ControlFlowContext>): void {
-			const current = getCurrentContext();
-			if (current === undefined) return;
-			contextStack[contextStack.length - 1] = { ...current, ...updates };
+			mergeIntoStackTop(contextStack, updates);
 		}
 
 		function shouldIgnoreHook(hookName: string, node: ESTree.CallExpression): boolean {

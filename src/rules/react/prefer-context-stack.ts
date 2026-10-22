@@ -14,6 +14,7 @@ import {
 	inspectLocalComponentFile,
 	inspectRelativeLocalComponentImport,
 } from "$oxc-utilities/local-component-discovery";
+import { reportWithReplacement } from "$oxc-utilities/replacement-report";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -173,19 +174,7 @@ const preferContextStack = createRule("prefer-context-stack", "react", {
 						? getContextStackReplacement(contextStackIdentifier, providerChain, sourceCode)
 						: undefined;
 
-				if (replacement !== undefined) {
-					context.report({
-						fix: (fixer) => fixer.replaceText(node, replacement),
-						messageId: "preferContextStack",
-						node,
-					});
-					return;
-				}
-
-				context.report({
-					messageId: "preferContextStack",
-					node,
-				});
+				reportWithReplacement(context, "preferContextStack", node, replacement);
 			},
 		} satisfies Visitor;
 	},

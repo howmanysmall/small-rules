@@ -151,11 +151,10 @@ function reportJsxBannedAttributes(
 
 const banInstances = createRule("ban-instances", "roblox", {
 	create(context): Visitor {
-		const options = normalizeOptions(context.options[0]);
-		if (options.bannedClasses.size === 0 && options.bannedProperties.size === 0) return {} satisfies Visitor;
+		const { bannedClasses, bannedProperties } = normalizeOptions(context.options[0]);
+		if (bannedClasses.size === 0 && bannedProperties.size === 0) return {} satisfies Visitor;
 
 		const { sourceCode } = context;
-		const { bannedClasses, bannedProperties } = options;
 		const trackedVariables = new Map<ScopeVariable, TrackedVariable>();
 
 		function reportBannedClass(node: ESTree.Node, entry: BannedClassEntry): void {
