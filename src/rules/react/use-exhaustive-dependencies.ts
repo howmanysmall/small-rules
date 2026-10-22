@@ -49,7 +49,16 @@ import {
 } from "$oxc-utilities/react-hook-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
-import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
+import type {
+	ESTree,
+	Fix,
+	Fixer,
+	InferContextFromRule,
+	Scope,
+	SourceCode,
+	Variable,
+	Visitor,
+} from "oxlint-plugin-utilities";
 
 const UNSTABLE_VALUES = new Set<string>([
 	ARRAY_EXPRESSION,
@@ -779,19 +788,19 @@ function reportUnnecessaryDependency(
 
 	const dependenciesString = `[${newDependencies.join(", ")}]`;
 
+	function fix(fixer: Fixer): Fix {
+		return fixer.replaceText(dependenciesArray, dependenciesString);
+	}
+
 	context.report({
 		data: { name: dependency.name },
-		fix(fixer): Fix {
-			return fixer.replaceText(dependenciesArray, dependenciesString);
-		},
+		fix,
 		messageId: "unnecessaryDependency",
 		node: dependency.node,
 		suggest: [
 			{
 				data: { name: dependency.name },
-				fix(fixer): Fix {
-					return fixer.replaceText(dependenciesArray, dependenciesString);
-				},
+				fix,
 				messageId: "removeDependencySuggestion",
 			},
 		],
@@ -944,20 +953,20 @@ function reportMissingCaptures(
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
 	const firstMissing = missingCaptures.at(0);
 
+	function fix(fixer: Fixer): Fix {
+		return fixer.replaceText(dependenciesArray, newDependenciesString);
+	}
+
 	if (firstMissing !== undefined && missingCaptures.length === 1) {
 		context.report({
 			data: { name: firstMissing.usagePath },
-			fix(fixer): Fix {
-				return fixer.replaceText(dependenciesArray, newDependenciesString);
-			},
+			fix,
 			messageId: "missingDependency",
 			node: reportNode,
 			suggest: [
 				{
 					data: { name: firstMissing.usagePath },
-					fix(fixer): Fix {
-						return fixer.replaceText(dependenciesArray, newDependenciesString);
-					},
+					fix,
 					messageId: "addDependencySuggestion",
 				},
 			],
@@ -967,16 +976,12 @@ function reportMissingCaptures(
 
 	context.report({
 		data: { names: missingPaths.join(", ") },
-		fix(fixer): Fix {
-			return fixer.replaceText(dependenciesArray, newDependenciesString);
-		},
+		fix,
 		messageId: "missingDependencies",
 		node: reportNode,
 		suggest: [
 			{
-				fix(fixer): Fix {
-					return fixer.replaceText(dependenciesArray, newDependenciesString);
-				},
+				fix,
 				messageId: "addMissingDependenciesSuggestion",
 			},
 		],
