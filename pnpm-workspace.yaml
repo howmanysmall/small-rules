@@ -271,6 +271,8 @@ fetchRetryMintimeout: 1000
 fetchTimeout: 60000
 
 permissions:
+  arktype:
+    skills: true
   fallow:
     skills: true
 
