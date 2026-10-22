@@ -76,6 +76,7 @@ describe("getLexicalTypeParameterNames", () => {
 		const conditional = findConditionalType(source);
 		const names = getLexicalTypeParameterNames(conditional.trueType, source.visitorKeys);
 
+		// biome-ignore lint/suspicious/useArraySortCompare: no.
 		expect([...names].toSorted()).toStrictEqual(["Item", "Value"]);
 	});
 
@@ -86,6 +87,7 @@ describe("getLexicalTypeParameterNames", () => {
 		const annotation = findMappedTypeAnnotation(source);
 		const names = getLexicalTypeParameterNames(annotation, source.visitorKeys);
 
+		// biome-ignore lint/suspicious/useArraySortCompare: no.
 		expect([...names].toSorted()).toStrictEqual(["Key", "Target"]);
 	});
 });

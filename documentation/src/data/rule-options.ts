@@ -78,7 +78,7 @@ function summarizeComplexDefault(name: string, value: ComplexJsonValue): string 
 	if (!Array.isArray(value)) return `${Object.keys(value).length} fields`;
 	if (value.length === 1) return "1 item";
 
-	const itemLabel = name.endsWith("s") ? name.replace(CAMEL_CASE_REGEXP, "$<lowercase> $<uppercase>") : "items";
+	const itemLabel = name.endsWith("s") ? name.replaceAll(CAMEL_CASE_REGEXP, "$<lowercase> $<uppercase>") : "items";
 	return `${value.length} ${itemLabel.toLowerCase()}`;
 }
 

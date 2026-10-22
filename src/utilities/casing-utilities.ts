@@ -9,8 +9,8 @@ export function toPascalCase(value: string): string {
 	if (trimmed.length === 0) return "";
 
 	const marked = trimmed
-		.replace(SPLIT_LOWER_TO_UPPER, SPLIT_REPLACE_VALUE)
-		.replace(SPLIT_UPPER_TO_UPPER, SPLIT_REPLACE_VALUE);
+		.replaceAll(SPLIT_LOWER_TO_UPPER, SPLIT_REPLACE_VALUE)
+		.replaceAll(SPLIT_UPPER_TO_UPPER, SPLIT_REPLACE_VALUE);
 
 	let start = 0;
 	let { length } = marked;

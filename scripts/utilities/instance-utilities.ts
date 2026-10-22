@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 import { fdir } from "fdir";
 import { walk } from "yuku-ast";
@@ -119,5 +120,5 @@ export async function scanDirectoryAsync(directory: string, scanType: ScanType):
 		});
 	}
 
-	return [...instances].toSorted();
+	return [...instances].toSorted(compareWithLocale);
 }

@@ -38,6 +38,7 @@ import {
 	TS_TYPE_ASSERTION,
 	VARIABLE_DECLARATOR,
 } from "@small-rules/oxlint-utilities";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
@@ -821,7 +822,9 @@ function reportMissingDependenciesArray(
 	if (requiredCaptures.length === 0) return;
 
 	const missingNames = [...new Set(requiredCaptures.map(returnName))].join(", ");
-	const uniqueDependencies = [...new Set(requiredCaptures.map(({ usagePath }) => usagePath))].toSorted();
+	const uniqueDependencies = [...new Set(requiredCaptures.map(({ usagePath }) => usagePath))].toSorted(
+		compareWithLocale,
+	);
 	const dependenciesString = `[${uniqueDependencies.join(", ")}]`;
 
 	context.report({
@@ -937,7 +940,7 @@ function reportMissingCaptures(
 
 	const dependencyNames = dependencies.map(({ name }) => name);
 	const missingPaths = missingCaptures.map(({ usagePath }) => usagePath);
-	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted().join(", ")}]`;
+	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted(compareWithLocale).join(", ")}]`;
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
 	const firstMissing = missingCaptures.at(0);
 

@@ -180,7 +180,7 @@ site-search kbd {
 
 nav.sidebar,
 #starlight__sidebar {
-	/* biome-ignore lint/nursery/useBaseline: opt-out only; browsers without scroll anchoring already behave this way */
+	/* biome-ignore lint/suspicious/useBaseline: opt-out only; browsers without scroll anchoring already behave this way */
 	overflow-anchor: none;
 }
 
@@ -206,7 +206,7 @@ nav.sidebar a {
 	color: var(--ink-2);
 	hyphens: manual;
 	word-break: normal;
-	/* biome-ignore lint/nursery/useBaseline: die firefox */
+	/* biome-ignore lint/suspicious/useBaseline: die firefox */
 	text-wrap: pretty;
 	overflow-wrap: break-word;
 	border-radius: 0;
@@ -1397,7 +1397,7 @@ main .page-title-row > h1 {
 	font-size: 0.875rem;
 	line-height: 1.55;
 	color: var(--ink-2);
-	/* biome-ignore lint/nursery/useBaseline: die firefox */
+	/* biome-ignore lint/suspicious/useBaseline: die firefox */
 	text-wrap: pretty;
 }
 

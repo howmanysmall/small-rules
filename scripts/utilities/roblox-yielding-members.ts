@@ -1,4 +1,5 @@
 // oxlint-disable small-rules/no-unknown-parameters -- is literally unknown
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 
 import type { JsonObject, JsonValue } from "type-fest";
@@ -64,7 +65,10 @@ export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxC
 		if (classDefinition === undefined) return [];
 
 		const inherited = collectMembers(classDefinition.superclass);
-		const members = [...new Set([...inherited, ...(directMembers.get(className) ?? [])])].toSorted();
+		const members = [...new Set([...inherited, ...(directMembers.get(className) ?? [])])].toSorted(
+			compareWithLocale,
+		);
+
 		cache.set(className, members);
 		return members;
 	}
@@ -101,12 +105,12 @@ function getSharedMemberGroups(memberGroupCounts: ReadonlyMap<string, number>): 
 		sharedMemberGroups[size++] = memberGroup;
 	}
 
-	return sharedMemberGroups.toSorted((left, right) => left.localeCompare(right));
+	return sharedMemberGroups.toSorted(compareWithLocale);
 }
 
 export function renderCatalog(classes: ReadonlyMap<string, RobloxClass>): string {
 	const catalog = createYieldingMemberCatalog(classes);
-	const classNames = [...catalog.classes].toSorted();
+	const classNames = [...catalog.classes].toSorted(compareWithLocale);
 	const yieldingMembers = [...catalog.yieldingMembers].toSorted(
 		([left], [right]) => classNames.indexOf(left) - classNames.indexOf(right),
 	);

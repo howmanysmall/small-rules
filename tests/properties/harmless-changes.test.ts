@@ -1,6 +1,7 @@
 import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 
 import smallRules from "$small-rules";
 import { PROPERTY_RUNS } from "$test/property-runs";
@@ -52,7 +53,7 @@ describe("harmless changes", () => {
 		const covered = STRUCTURAL_CASES.map(({ rule }) => rule);
 
 		// Assert
-		expect(covered.toSorted(compareText)).toStrictEqual(listed.toSorted(compareText));
+		expect(covered.toSorted(compareWithLocale)).toStrictEqual(listed.toSorted(compareWithLocale));
 	});
 
 	it.for(STRUCTURAL_CASES)(
@@ -124,12 +125,6 @@ describe("harmless changes", () => {
 	);
 });
 
-// Helpers
-
-function compareText(left: string, right: string): number {
-	return left.localeCompare(right);
-}
-
 function getMessageIds({ diagnostics }: RuleExecutionResult): ReadonlyArray<string> {
-	return diagnostics.map(({ messageId }) => messageId ?? "").toSorted(compareText);
+	return diagnostics.map(({ messageId }) => messageId ?? "").toSorted(compareWithLocale);
 }

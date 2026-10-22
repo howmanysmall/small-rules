@@ -1,4 +1,5 @@
 import { isBoolean, isMaybeString, isNumber, isReadonlyArrayOfNumbers, isString } from "@small-rules/arktype-utilities";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { type } from "arktype";
 
 const isInfinite = type("'inf' | '-inf'");
@@ -57,7 +58,9 @@ export function compactDefaultProperties(value: unknown): CompactDefaultProperti
 	const defaultProperties = isCanonicalDefaultProperties(value);
 	if (defaultProperties instanceof type.errors) throw new TypeError(defaultProperties.summary);
 
-	const propertyNames = [...new Set(Object.values(defaultProperties.classes).flatMap(Object.keys))].toSorted();
+	const propertyNames = [...new Set(Object.values(defaultProperties.classes).flatMap(Object.keys))].toSorted(
+		compareWithLocale,
+	);
 	const encodedBySerialized = new Map<string, EncodedDefaultValue>();
 	for (const properties of Object.values(defaultProperties.classes)) {
 		for (const property of Object.values(properties)) {
