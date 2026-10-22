@@ -1,0 +1,11 @@
+import { describe } from "vitest";
+import { ts } from "@small-rules/rule-harness/rule-testers";
+
+import rule from "$oxc-rules/{{category}}/{{name}}";
+
+describe("{{name}}", () => {
+	ts.run("{{name}}", rule, {
+		invalid: [],
+		valid: [],
+	});
+});

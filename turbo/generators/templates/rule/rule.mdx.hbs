@@ -1,0 +1,11 @@
+---
+title: {{{json title}}}
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="{{name}}">
+	<Fragment slot="rationale">
+		<p>{{description}}</p>
+	</Fragment>
+</RulePage>

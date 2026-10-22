@@ -12,6 +12,12 @@ One rule per file. Every rule is built with `createRule(name, category, rule)` f
 
 `createBannedGlobalCallRule({ name, alternative, category, message, messageId, ruleName })` from `src/utilities/banned-global-call-rule.ts` builds the simple global-call bans such as `no-print` and `no-warn`.
 
+`turbo gen rule` scaffolds a rule: the source, its test, and its docs page, registered in `src/index.ts` and `documentation/src/data/rule-manifest.ts`. `turbo gen package` and `turbo gen opencode-plugin` scaffold the other workspaces. The generators live in `turbo/generators/`.
+
+## Tasks - `turbo.json`
+
+Turborepo runs and caches `build`, `type-check`, `test`, `lint`, and the docs tasks across every workspace. The root package's tasks are root tasks (`//#build`), so their `inputs` exclude what each one never reads; `documentation/turbo.json` adds root `src/`, which the docs import through a path alias. Every task reruns when the root manifest, the lockfile, or an internal package the root depends on changes. `turbo run <task> --force` skips the cache.
+
 ## Utilities - `src/utilities/`
 
 ESTree node guards (`isCallExpression`, `isIdentifierNamed`, `isStringLiteral`, ...) come from the workspace package `@small-rules/oxlint-utilities` in `packages/oxlint-utilities`. `src/utilities/` holds the rule-specific helpers, and its directory listing is the index. Three files carry conventions: `create-rule.ts` (the rule factory), `banned-global-call-rule.ts` (global-call bans), and `oxc-utilities.ts` (repo-specific node predicates built on the shared guards).

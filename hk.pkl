@@ -24,6 +24,7 @@ exclude =
     ".mise",
     ".repos",
     ".stryker-tmp",
+    ".turbo",
     ".vitiate",
     ".agents/skills",
     "do-not-sync-ever",
@@ -59,7 +60,7 @@ local fileChecks = new Mapping<String, Step> {
     exclusive = true
     check = new CommandSpec {
       command = new Command {
-        argv = List("node", "--run", "type-check")
+        argv = List("turbo", "run", "type-check", "--output-logs=errors-only")
       }
       effect = "write"
     }
@@ -376,7 +377,7 @@ hooks {
         env { ["CI"] = "1" }
         check = new CommandSpec {
           command = new Command {
-            argv = List("node", "--run", "test")
+            argv = List("turbo", "run", "test", "--output-logs=errors-only")
           }
           effect = "write"
         }
@@ -387,7 +388,7 @@ hooks {
         env { ["CI"] = "1" }
         check = new CommandSpec {
           command = new Command {
-            argv = List("node", "--run", "build")
+            argv = List("turbo", "run", "build", "--filter=//", "--output-logs=errors-only")
           }
           effect = "write"
         }

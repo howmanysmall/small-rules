@@ -59,6 +59,7 @@ packages:
   - packages/*
   - scripts
   - tools/*
+  - turbo/generators
 
 overrides:
   "@isentinel/eslint-config>@e18e/eslint-plugin": catalog:lint
@@ -176,7 +177,6 @@ catalogs:
     "@octokit/rest": 22.0.1
     "@openrouter/sdk": 1.5.0
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
-    "@std/path": npm:@jsr/std__path@1.1.6
     ansis: 4.4.0
     boxen: 9.0.0
     consola: 3.4.2
@@ -212,6 +212,7 @@ catalogs:
   tooling:
     "@isentinel/hooks": 1.7.0
     "@mdx-js/language-server": 0.6.4
+    "@turbo/gen": 2.11.10
     bumpp: 12.3.0
     jiti: 2.7.0
     pncat: 0.13.4
@@ -271,6 +272,8 @@ fetchRetryMintimeout: 1000
 fetchTimeout: 60000
 
 permissions:
+  arktype:
+    skills: true
   fallow:
     skills: true
 

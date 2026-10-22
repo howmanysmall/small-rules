@@ -8,6 +8,7 @@ on:
       - "**/*.markdown"
       - "**/*.md"
       - "**/*.mdx"
+      - "**/turbo.json"
       - "*.config.ts"
       - ".github/actions/**"
       - .github/jactionlint.yaml
@@ -34,6 +35,7 @@ on:
       - "src/**/*.tsx"
       - "tests/**"
       - "tsconfig*.json"
+      - "turbo/**"
   pull_request:
     paths: *ci-paths
 
