@@ -39,14 +39,17 @@ function createExpression(provider: FuzzedDataProvider, prefix: string): string 
 				expression = `[${expression}]`;
 				break;
 			}
+
 			case "object": {
 				expression = `({ value: ${expression} })`;
 				break;
 			}
+
 			case "parentheses": {
 				expression = `(${expression})`;
 				break;
 			}
+
 			case "property": {
 				expression = `({ nested: [${expression}] }).nested`;
 				break;
@@ -91,6 +94,7 @@ fuzz(
 		} else if (mode === "directional") {
 			paddingRight = second;
 		}
+
 		const code = `import { DirectionalPadding } from "../ui/directional-padding";
 import EqualPadding from "../ui/equal-padding";
 

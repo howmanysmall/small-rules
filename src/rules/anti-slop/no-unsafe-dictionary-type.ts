@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-unsafe-dictionary-type.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/rules/no-unsafe-dictionary-type.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -31,6 +31,7 @@ import type { TypeEnvironment, UnsafeDictionary } from "$oxc-utilities/anti-slop
 
 function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironment): boolean {
 	if (!isTsTypeReference(type) || (type.typeArguments?.params.length ?? 0) > 0) return false;
+
 	if (
 		!isBindingIdentifier(type.typeName) ||
 		getVisibleTypeAlias(type.typeName.name, type, environment.typeAliases) === undefined
@@ -43,6 +44,7 @@ function isPlainAliasConsumerUse(type: ESTree.TSType, environment: TypeEnvironme
 		if (isTsTypeAliasDeclaration(parent)) return false;
 		({ parent } = parent);
 	}
+
 	return true;
 }
 
@@ -54,6 +56,7 @@ function isInsideTypeParameterConstraint(node: ESTree.TSType): boolean {
 		child = parent;
 		({ parent } = child);
 	}
+
 	return false;
 }
 
@@ -73,9 +76,11 @@ function getReportableUnsafeDictionary(
 		if (isTsMappedType(parent) || isTsTypeLiteral(parent) || isTsTypeReference(parent)) {
 			ancestorClassified = classifyUnsafeDictionary(parent, environment);
 		}
+
 		if (ancestorClassified !== undefined) return undefined;
 		({ parent } = parent);
 	}
+
 	return unsafe;
 }
 

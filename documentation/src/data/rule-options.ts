@@ -10,7 +10,9 @@ export type { RuleName } from "./rule-manifest";
 type JsonValue = boolean | null | number | ReadonlyArray<JsonValue> | string | { readonly [key: string]: JsonValue };
 
 type SchemaRecord = Readonly<Record<string, JsonValue>>;
+
 type SchemaInput = JsonValue | undefined;
+
 type ComplexJsonValue = Readonly<Record<string, JsonValue>> | ReadonlyArray<JsonValue>;
 
 interface ComplexDefaultValueDocumentation {
@@ -161,6 +163,7 @@ function createSchemaDefaultsValue(ruleName: RuleName): JsonValue {
 			defaults[propertyName] = propertySchema.default;
 		}
 	}
+
 	return defaults;
 }
 
@@ -169,6 +172,7 @@ function getRuleConfigOverride(ruleName: RuleName): JsonValue | undefined {
 		case "no-discarded-rejection": {
 			return "warn";
 		}
+
 		case "prevent-abbreviations": {
 			return "error";
 		}
@@ -246,6 +250,7 @@ function getObjectSchemaType(schema: SchemaRecord): string {
 			const propertyType = isSchemaRecord(propertySchema) ? getSchemaType(propertySchema) : "unknown";
 			return `${propertyName}${optional}: ${propertyType}`;
 		});
+
 		return `{ ${properties.join("; ")} }`;
 	}
 
@@ -260,12 +265,15 @@ function getSchemaType(schema: SchemaRecord): string {
 	if (schema.const !== undefined) {
 		return JSON.stringify(schema.const);
 	}
+
 	if (isJsonArray(schema.enum)) {
 		return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
 	}
+
 	if (isJsonArray(schema.oneOf)) {
 		return schema.oneOf.map((entry) => (isSchemaRecord(entry) ? getSchemaType(entry) : "unknown")).join(" | ");
 	}
+
 	if (isJsonArray(schema.anyOf)) {
 		return schema.anyOf.map((entry) => (isSchemaRecord(entry) ? getSchemaType(entry) : "unknown")).join(" | ");
 	}
@@ -275,11 +283,14 @@ function getSchemaType(schema: SchemaRecord): string {
 		if (isJsonArray(schema.items)) {
 			return `[${schema.items.map((item) => (isSchemaRecord(item) ? getSchemaType(item) : "unknown")).join(", ")}]`;
 		}
+
 		return `Array<${isSchemaRecord(schema.items) ? getSchemaType(schema.items) : "unknown"}>`;
 	}
+
 	if (typeNames.includes("object")) {
 		return getObjectSchemaType(schema);
 	}
+
 	if (typeNames.length > 0) {
 		return joinTypes(typeNames);
 	}
@@ -298,10 +309,12 @@ function createStringPlaceholder(hint?: string): string {
 
 function getExplicitPlaceholder(schema: SchemaRecord, hint?: string): JsonValue | undefined {
 	if (isJsonValue(schema.default)) return schema.default;
+
 	if (isJsonArray(schema.enum) && schema.enum.length > 0) {
 		const [firstEnumValue] = schema.enum;
 		if (isJsonValue(firstEnumValue)) return firstEnumValue;
 	}
+
 	if (isJsonArray(schema.anyOf)) {
 		const matchingSchema = schema.anyOf.find(
 			(entry) =>
@@ -311,8 +324,10 @@ function getExplicitPlaceholder(schema: SchemaRecord, hint?: string): JsonValue 
 				hint !== undefined &&
 				objectPlaceholders.has(hint),
 		);
+
 		return createPlaceholder(matchingSchema ?? schema.anyOf[0], hint);
 	}
+
 	if (isJsonArray(schema.oneOf)) {
 		const [firstSchema] = schema.oneOf;
 		return createPlaceholder(firstSchema, hint);
@@ -336,6 +351,7 @@ function createObjectPlaceholder(schema: SchemaRecord, hint?: string): JsonValue
 	for (const [propertyName, propertySchema] of Object.entries(schema.properties)) {
 		placeholder[propertyName] = createPlaceholder(propertySchema, propertyName);
 	}
+
 	return placeholder;
 }
 
@@ -350,6 +366,7 @@ function createPlaceholder(schema: SchemaInput, hint?: string): JsonValue {
 	}
 
 	if (typeNames.includes("boolean")) return false;
+
 	if (typeNames.includes("integer") || typeNames.includes("number")) {
 		return createNumberPlaceholder(schema);
 	}
@@ -417,6 +434,7 @@ function createConfiguration(ruleName: RuleName, schema: SchemaInput): string {
 
 function getSchemaSummary(schema: SchemaInput): string {
 	if (schema === undefined) return "This rule does not accept options.";
+
 	if (isJsonArray(schema)) {
 		if (schema.length === 0) return "This rule does not accept options.";
 		return "This rule accepts one options object after the severity.";

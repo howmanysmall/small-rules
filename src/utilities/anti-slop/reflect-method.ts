@@ -1,4 +1,4 @@
-// Vendored from src/shared/reflect-method.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/shared/reflect-method.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -28,6 +28,7 @@ export function isGlobalReflectMethodCall(
 ): boolean {
 	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
 	if (!isGlobalReflect(sourceCode, callee.object)) return false;
+
 	return callee.computed
 		? isAnyLiteral(callee.property) && callee.property.value === methodName
 		: isIdentifierNamed(callee.property, methodName);

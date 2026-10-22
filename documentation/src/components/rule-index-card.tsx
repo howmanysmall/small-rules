@@ -56,6 +56,7 @@ function getRuleTraits(rule: RuleIndexRule): ReadonlyArray<RuleTrait> {
 	const traits = [getRuleTypeTrait(rule.type)];
 	const freshness = getRuleFreshnessTrait(rule);
 	const fixability = getRuleFixabilityTrait(rule);
+
 	if (freshness !== undefined) traits.push(freshness);
 	if (fixability !== undefined) traits.push(fixability);
 	return traits;

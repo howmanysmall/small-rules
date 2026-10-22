@@ -21,6 +21,7 @@ function getPropertyReferences(analysis: ReactEffectAnalysis, effect: ReactEffec
 			if (analysis.isProp(upstreamReference)) propertyReferences[size++] = upstreamReference;
 		}
 	}
+
 	return propertyReferences;
 }
 

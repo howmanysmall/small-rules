@@ -58,6 +58,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			const now = performance.now();
 			const shouldLog =
 				activePhase !== update.phase || update.completed === update.total || now - lastProgressAt >= 5_000;
+
 			if (!shouldLog) return;
 
 			activePhase = update.phase;
@@ -96,6 +97,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 						if (!("choices" in response)) {
 							throw new TypeError("OpenRouter unexpectedly returned a stream.");
 						}
+
 						return response;
 					},
 					usageTracker.record,
@@ -112,6 +114,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				maxRelationsPerRule,
 				pins: relationPins,
 			});
+
 			if (problems.length > 0) {
 				throw new Error(problems.join("\n"));
 			}
@@ -147,13 +150,16 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			log.info(
 				`manual checks: ${qualityEvaluation.matchedPairCount}/${qualityEvaluation.checkedPairCount} agree (${qualityEvaluation.positiveLabelCount} pins, ${qualityEvaluation.negativeLabelCount} denials)`,
 			);
+
 			for (const disagreement of qualityEvaluation.disagreements) {
 				const actual =
 					disagreement.actual.type === "relation"
 						? `${disagreement.actual.relation.from} ${disagreement.actual.relation.kind} ${disagreement.actual.relation.to}`
 						: disagreement.actual.type;
+
 				log.warn(`override disagreement: ${disagreement.pair.from} ↔ ${disagreement.pair.to}; Jev: ${actual}`);
 			}
+
 			log.info(
 				`changes since previous run: ${changesSincePreviousRun.unchangedRelationCount} unchanged, ${changesSincePreviousRun.added.length} added, ${changesSincePreviousRun.removed.length} removed, ${changesSincePreviousRun.changed.length} changed`,
 			);
@@ -163,6 +169,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				progress,
 				usage: usageTracker.getTotals(),
 			});
+
 			for (const line of summary) log.info(line);
 		}
 	});

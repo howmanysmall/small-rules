@@ -40,6 +40,7 @@ interface OrientedComparison {
 }
 
 type ComparableBinaryExpression = ESTree.BinaryExpression & { readonly left: ESTree.Expression };
+
 type ImportedAssertionKind = "assert" | "expect" | "function";
 
 function isExactDecimal(raw: string): boolean {
@@ -58,6 +59,7 @@ function isExactDecimal(raw: string): boolean {
 		numerator /= 5n;
 		denominator /= 5n;
 	}
+
 	return denominator % 5n !== 0n;
 }
 
@@ -100,8 +102,10 @@ function isDivisionInexact(node: ESTree.BinaryExpression): boolean {
 	) {
 		return false;
 	}
+
 	let oddDenominator = Math.abs(denominator);
 	while (oddDenominator % 2 === 0) oddDenominator /= 2;
+
 	return Math.abs(numerator) % oddDenominator !== 0;
 }
 
@@ -117,6 +121,7 @@ function isBinaryFloating(
 ): boolean {
 	const value = getConstantNumericValue(node);
 	if (value !== undefined && Number.isSafeInteger(value)) return false;
+
 	if (node.operator === "/") {
 		return (
 			isDivisionInexact(node) ||
@@ -124,6 +129,7 @@ function isBinaryFloating(
 			isFloatingExpression(node.right, variables, visited)
 		);
 	}
+
 	return (
 		ARITHMETIC_OPERATORS.has(node.operator) &&
 		(isFloatingExpression(node.left, variables, visited) || isFloatingExpression(node.right, variables, visited))
@@ -142,6 +148,7 @@ function resolveFloatingExpressionRoot(
 			current = unwrapped;
 			continue;
 		}
+
 		if (!isIdentifier(current)) return current;
 		const variable = variables.get(current);
 		if (variable === undefined || visited.has(variable)) return undefined;
@@ -161,6 +168,7 @@ function isFloatingExpression(
 ): boolean {
 	const current = resolveFloatingExpressionRoot(node, variables, visited);
 	if (current === undefined) return false;
+
 	if (isNumericLiteral(current)) {
 		const raw = String(current.raw);
 		return (raw.includes(".") || EXPONENT_PATTERN.test(raw)) && !isExactDecimal(raw);
@@ -172,6 +180,7 @@ function isFloatingExpression(
 			isFloatingExpression(current.argument, variables, visited)
 		);
 	}
+
 	return isBinaryExpression(current) && isComparableBinary(current) && isBinaryFloating(current, variables, visited);
 }
 
@@ -198,6 +207,7 @@ function collectImportedSpecifier(
 	}
 
 	if (!ASSERT_MODULES.has(source)) return;
+
 	if (isImportDefaultSpecifier(specifier) || isImportNamespaceSpecifier(specifier)) assertions.set(name, "assert");
 	else if (EXACT_ASSERTION_METHODS.has(getImportedName(specifier))) assertions.set(name, "function");
 }
@@ -210,6 +220,7 @@ function collectImportedAssertions(program: ESTree.Program): Map<string, Importe
 		const { value } = statement.source;
 		for (const specifier of statement.specifiers) collectImportedSpecifier(assertions, value, specifier);
 	}
+
 	return assertions;
 }
 
@@ -369,6 +380,7 @@ function getIndirectComparisonOperands(
 			}
 		}
 	}
+
 	return undefined;
 }
 
@@ -431,9 +443,11 @@ const noFloatingPointEquality = createRule("no-floating-point-equality", "genera
 			Program(program): void {
 				const variables = collectVariables(context.sourceCode);
 				const imports = collectImportedAssertions(program);
+
 				function isFloating(node: ESTree.Expression): boolean {
 					return isFloatingExpression(node, variables, new Set());
 				}
+
 				walkAst(program, (node): void => {
 					if (shouldReportFloatNode(node, context.sourceCode, imports, isFloating)) {
 						context.report({ messageId: "exactFloatComparison", node });

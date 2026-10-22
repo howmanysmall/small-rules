@@ -16,6 +16,7 @@ export function toPascalCase(value: string): string {
 	let { length } = marked;
 
 	while (marked.charCodeAt(start) === 0) start += 1;
+
 	if (start === length) return "";
 
 	while (marked.charCodeAt(length - 1) === 0) length -= 1;
@@ -26,6 +27,7 @@ export function toPascalCase(value: string): string {
 
 	for (let index = start; index <= length; index += 1) {
 		if (index !== length && marked.charCodeAt(index) !== 0) continue;
+
 		if (index > wordStart) {
 			const word = marked.slice(wordStart, index);
 			// A one-letter word followed by one that does not go on with a letter
@@ -34,6 +36,7 @@ export function toPascalCase(value: string): string {
 			result += formatWord(word, result.length > 0, joinsAcronym);
 			previousWordLength = joinsAcronym ? previousWordLength + word.length : word.length;
 		}
+
 		wordStart = index + 1;
 	}
 

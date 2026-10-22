@@ -13,11 +13,13 @@ import type { OxlintConfig, OxlintRules } from "@isentinel/eslint-config/oxlint"
 const CONFIGURATION_FILES = `**/*.config.${GLOB_SRC_EXT}`;
 const FIXTURES_FILES = `tests/fixtures/${GLOB_SRC}`;
 const SCRIPT_FILES = `scripts/${GLOB_SRC}`;
+
 // Resolved here: this package depends on them, the root does not.
 const LOCAL_RULES_PLUGIN = {
 	name: "local",
 	specifier: fileURLToPath(import.meta.resolve("@small-rules/local-rules")),
 };
+
 const REACT_DOCTOR_PLUGIN = {
 	name: "react-doctor",
 	specifier: fileURLToPath(import.meta.resolve("oxlint-plugin-react-doctor")),
@@ -31,6 +33,7 @@ interface ConfigurationOptions {
 
 async function getOxfmtOptionsAsync(): Promise<OxfmtOptions> {
 	const { getOxfmtConfigurationAsync } = await import("@howmanysmall/linter-utilities/configuration");
+
 	return getOxfmtConfigurationAsync();
 }
 
@@ -58,6 +61,7 @@ export async function getOxlintAsync({
 			if (key.includes("nextjs-") || key.includes("preact-") || key.includes("jsx-no-new-")) {
 				return [key, "off" as const];
 			}
+
 			return [key, value];
 		}),
 	);
@@ -428,6 +432,18 @@ export async function getOxlintAsync({
 				"small-rules/require-paired-calls": "error",
 				"small-rules/require-react-component-keys": "off",
 				"small-rules/require-react-display-names": ["error", { environment: "standard" }],
+				"small-rules/require-readable-spacing": [
+					"error",
+					{
+						allowAttachedUses: true,
+						allowGuardClauseRuns: true,
+						allowMultilineBindingRuns: true,
+						overrides: [
+							{ blankLine: "any", next: "return", previous: "expression" },
+							{ blankLine: "any", next: "binding", previous: "enum", usesPrevious: true },
+						],
+					},
+				],
 				"small-rules/require-safety-comment-for-type-assertion": "error",
 				"small-rules/require-switch-case-braces": [
 					"error",

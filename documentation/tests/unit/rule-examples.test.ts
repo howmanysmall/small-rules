@@ -101,6 +101,7 @@ function getCrampedDocumentedExampleLabels(): ReadonlyArray<string> {
 			}
 		}
 	}
+
 	return labels.toSorted((left, right) => collator.compare(left, right));
 }
 

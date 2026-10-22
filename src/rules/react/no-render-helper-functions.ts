@@ -158,6 +158,7 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 		if (reference.isWrite()) continue;
 
 		hasReadReference = true;
+
 		if (
 			!isPropertyValueReference(reference.identifier) &&
 			!isJsxAttributeValueReference(reference.identifier) &&

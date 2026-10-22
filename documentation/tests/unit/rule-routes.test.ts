@@ -32,6 +32,7 @@ function getExpectedRulePagePaths(): ReadonlyMap<string, string> {
 			paths.set(nodePath.join(docsContentDirectory, `${getRulePath(category, entry.name)}.mdx`), entry.name);
 		}
 	}
+
 	return paths;
 }
 

@@ -58,6 +58,7 @@ function getEnclosingFunctionName(node: ESTree.Node): string | undefined {
 
 function getAssignedName({ parent }: ESTree.Node): string | undefined {
 	if (isVariableDeclarator(parent) && isIdentifier(parent.id)) return parent.id.name;
+
 	if (isPropertyDefinitionRaw(parent) || isMethodDefinitionRaw(parent)) {
 		if (isPrivateIdentifier(parent.key)) return `#${parent.key.name}`;
 		/* v8 ignore next -- @preserve class and object member keys are identifiers after private keys are handled. */
@@ -113,6 +114,7 @@ function getUniqueVariableName(
 	}
 
 	if (!names.has(base)) return base;
+
 	for (let index = 2; index < 100; index += 1) {
 		const candidate = `${base}${index}`;
 		/* v8 ignore next -- @preserve generated names below error99 are enough for lint fixes. */
@@ -236,6 +238,7 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 					reservedNames = new Set();
 					namesReservedByFixes.set(scope, reservedNames);
 				}
+
 				const variableName = getUniqueVariableName(scope, node, "error", reservedNames);
 				if (declaresInScope) reservedNames.add(variableName);
 

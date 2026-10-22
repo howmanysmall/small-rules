@@ -15,7 +15,7 @@ This file is distributed in the published npm package. The same notices are embe
 ## 1. `anti-slop`
 
 - **Source:** <https://github.com/dmmulroy/anti-slop>
-- **Vendored commit:** `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b`
+- **Vendored commit:** `13909c9e07590f5a85d93c62712259fe14a883f7`
 - **Copyright:** Copyright (c) 2026 Dillon Mulroy
 - **License:** MIT
 
@@ -38,6 +38,7 @@ Vendored into `src/rules/anti-slop/`, adapted rather than verbatim:
 | `no-unknown-type-aliases.ts` | `src/rules/no-unknown-type-aliases.ts` |
 | `no-unsafe-dictionary-type.ts` | `src/rules/no-unsafe-dictionary-type.ts` |
 | `no-widen-then-assert.ts` | `src/rules/no-widen-then-assert.ts` |
+| `require-readable-spacing.ts` | `src/rules/require-readable-spacing.ts` |
 | `require-safety-comment-for-type-assertion.ts` | `src/rules/require-safety-comment-for-type-assertion.ts` |
 
 ```text
@@ -69,7 +70,7 @@ SOFTWARE.
 ## 2. `anti-slop shared helpers`
 
 - **Source:** <https://github.com/dmmulroy/anti-slop>
-- **Vendored commit:** `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b`
+- **Vendored commit:** `13909c9e07590f5a85d93c62712259fe14a883f7`
 - **Copyright:** Copyright (c) 2026 Dillon Mulroy
 - **License:** MIT
 
@@ -80,6 +81,7 @@ Vendored into `src/utilities/anti-slop/`, adapted rather than verbatim:
 | `dictionary-types.ts` | `src/shared/dictionary-types.ts` |
 | `function-parameters.ts` | `src/shared/function-parameters.ts` |
 | `lexical-type-parameters.ts` | `src/shared/lexical-type-parameters.ts` |
+| `padding-line-between-statements.ts` | `src/vendor/eslint-stylistic/padding-line-between-statements.ts` |
 | `reflect-method.ts` | `src/shared/reflect-method.ts` |
 | `type-alias-resolution.ts` | `src/shared/type-alias-resolution.ts` |
 
@@ -109,7 +111,48 @@ SOFTWARE.
 
 ---
 
-## 3. `eslint-plugin-roblox-ts`
+## 3. `ESLint Stylistic`
+
+- **Source:** <https://github.com/eslint-stylistic/eslint-stylistic>
+- **Vendored commit:** `435c3ea0fd26a5fef9042c4b36b6e165fbbf8d08`
+- **Copyright:** Copyright OpenJS Foundation and other contributors, <www.openjsf.org>
+  Copyright (c) 2023-PRESENT ESLint Stylistic contributors
+- **License:** MIT
+
+Vendored into `src/utilities/anti-slop/`, adapted rather than verbatim:
+
+| This project | Upstream |
+| --- | --- |
+| `padding-line-between-statements.ts` | `packages/eslint-plugin/rules/padding-line-between-statements/padding-line-between-statements.ts` |
+
+```text
+MIT License
+
+Copyright OpenJS Foundation and other contributors, <www.openjsf.org>
+Copyright (c) 2023-PRESENT ESLint Stylistic contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## 4. `eslint-plugin-roblox-ts`
 
 - **Source:** <https://github.com/roblox-ts/eslint-plugin-roblox-ts>
 - **Vendored commit:** `e1581d4f3d83a3d05b015a0a216507c3a20016de`

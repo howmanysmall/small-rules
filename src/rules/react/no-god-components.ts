@@ -71,6 +71,7 @@ function countDestructuredProperties(node: ESTree.Node): number | undefined {
 
 	let pattern: ESTree.ObjectPattern | undefined;
 	if (isObjectPattern(firstParameter)) pattern = firstParameter;
+
 	if (isAssignmentPattern(firstParameter) && isObjectPattern(firstParameter.left)) {
 		pattern = firstParameter.left;
 	}
@@ -79,6 +80,7 @@ function countDestructuredProperties(node: ESTree.Node): number | undefined {
 
 	let count = 0;
 	for (const property of pattern.properties) if (isProperty(property)) count += 1;
+
 	return count;
 }
 
@@ -216,6 +218,7 @@ const noGodComponents = createRule("no-god-components", "react", {
 				});
 				return;
 			}
+
 			if (options.enforceTargetLines && lines > options.targetLines) {
 				context.report({
 					data: {

@@ -336,6 +336,7 @@ function requireFirstOfType(types: ReadonlyArray<ESTree.TSType>, nodeType: strin
 	for (const candidate of types) {
 		if (candidate.type === nodeType) return candidate;
 	}
+
 	throw new Error(`Node of type "${nodeType}" not found.`);
 }
 
@@ -353,6 +354,7 @@ function findIdentifierReference(source: HarnessSourceCode, name: string): ESTre
 			}
 		},
 	});
+
 	if (found === undefined) throw new Error(`Reference "${name}" not found.`);
 	return found;
 }
@@ -470,6 +472,7 @@ function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
 			if (isNode(node) && node.type === "TSTypeAnnotation") found ??= node.typeAnnotation;
 		},
 	});
+
 	if (found === undefined) throw new Error("Type annotation not found.");
 	return found;
 }
@@ -481,6 +484,7 @@ function getFirstTypeLiteral(source: HarnessSourceCode): ESTree.TSTypeLiteral {
 			if (isNode(node) && node.type === "TSTypeLiteral") found ??= node;
 		},
 	});
+
 	if (found === undefined) throw new Error("Type literal not found.");
 	return found;
 }
@@ -491,6 +495,7 @@ function clearIndexTypeAnnotations(literal: ESTree.TSTypeLiteral): ESTree.TSType
 			Reflect.set(member, "typeAnnotation", null);
 		}
 	}
+
 	return literal;
 }
 

@@ -76,7 +76,9 @@ function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): Run
 		message,
 		suggestions,
 	};
+
 	if (fix !== undefined) normalized.fix = fix;
+
 	if (loc !== undefined) {
 		normalized.column = loc.start.column + 1;
 		normalized.endColumn = loc.end.column + 1;
@@ -84,6 +86,7 @@ function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): Run
 		normalized.line = loc.start.line;
 		normalized.loc = loc;
 	}
+
 	if (messageId !== undefined) normalized.messageId = messageId;
 	if (node !== undefined) normalized.node = node;
 	return normalized;
@@ -111,6 +114,7 @@ function normalizeSuggestions(diagnostic: UnknownRecord, meta: UnknownRecord): A
 		if (messageId !== undefined) normalizedSuggestion.messageId = messageId;
 		normalized[size++] = normalizedSuggestion;
 	}
+
 	return normalized;
 }
 
@@ -136,6 +140,7 @@ function assertSuggestions(
 	}
 
 	expect(actual.suggestions).toHaveLength(expected.length);
+
 	// oxlint-disable-next-line unicorn-js/no-for-loop -- lol.
 	for (let index = 0; index < expected.length; index += 1) {
 		// eslint-disable-next-line flawless/no-redundant-type-annotation -- incorrect.
@@ -146,6 +151,7 @@ function assertSuggestions(
 		if (expectedSuggestion.desc !== undefined) equal(actualSuggestion.desc, expectedSuggestion.desc);
 		if (expectedSuggestion.message !== undefined) equal(actualSuggestion.desc, expectedSuggestion.message);
 		if (expectedSuggestion.data !== undefined) deepEqual(actualSuggestion.data, expectedSuggestion.data);
+
 		if (expectedSuggestion.output !== undefined) {
 			equal(applyFixesToProvider(actualSuggestion.fix, sourceText), expectedSuggestion.output);
 		}
@@ -164,6 +170,7 @@ function assertAutofixOutput(
 		equal(fixedOutput, undefined);
 		return;
 	}
+
 	expect(fixedOutput).toBe(testCase.output);
 }
 
@@ -182,12 +189,15 @@ function collectFixes(diagnostics: ReadonlyArray<RuntimeDiagnostic>): Array<Fix>
 	for (const diagnostic of diagnostics) {
 		const fixResult = runFixProvider(diagnostic.fix);
 		if (fixResult === undefined) continue;
+
 		if (Array.isArray(fixResult)) {
 			for (const fix of fixResult) if (isFix(fix)) fixes.push(fix);
 			continue;
 		}
+
 		if (isFix(fixResult)) fixes.push(fixResult);
 	}
+
 	return fixes;
 }
 
@@ -244,6 +254,7 @@ function getLocationProperty(diagnostic: UnknownRecord): SourceLocation | undefi
 	) {
 		return undefined;
 	}
+
 	return {
 		end: { column: end.column, line: end.line },
 		start: { column: start.column, line: start.line },

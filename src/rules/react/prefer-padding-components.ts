@@ -51,6 +51,7 @@ interface PaddingAttributes {
 }
 
 type StructuralValue = ESTree.Expression | JsonValue | undefined;
+
 type StructuralRecord = JsonObject;
 
 function isStructuralRecord(value: StructuralValue): value is StructuralRecord {
@@ -82,6 +83,7 @@ function areArraysStructurallyEqual(
 
 	let index = 0;
 	for (const value of left) if (!areStructurallyEqual(value, right[index++])) return false;
+
 	return true;
 }
 
@@ -202,6 +204,7 @@ function getPaddingMessageId(paddingAttributes: PaddingAttributes): MessageId | 
 
 	const allEqual =
 		areStructurallyEqual(top, bottom) && areStructurallyEqual(top, left) && areStructurallyEqual(top, right);
+
 	if (allEqual) return "preferEqualPadding";
 
 	const horizontalEqual = areStructurallyEqual(top, bottom);
@@ -214,11 +217,13 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 		const { filename } = context;
 		const discoverDirectionalPadding = createLocalComponentDiscoverer(filename, DIRECTIONAL_PADDING_COMPONENT);
 		const discoverEqualPadding = createLocalComponentDiscoverer(filename, EQUAL_PADDING_COMPONENT);
+
 		/* v8 ignore start -- @preserve rule execution supplies a filename before local component discovery. */
 		const isDirectionalPaddingDefinitionFile =
 			filename.length > 0 && inspectLocalComponentFile(filename, DIRECTIONAL_PADDING_COMPONENT).matches;
 		const isEqualPaddingDefinitionFile =
 			filename.length > 0 && inspectLocalComponentFile(filename, EQUAL_PADDING_COMPONENT).matches;
+
 		/* v8 ignore stop -- @preserve */
 		const directionalPaddingIdentifiers = new Set<string>();
 		const equalPaddingIdentifiers = new Set<string>();

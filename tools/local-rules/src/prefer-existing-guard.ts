@@ -29,6 +29,7 @@ function isSideEffectFree(node: ESTree.Node): boolean {
 		if (current.computed && !isAnyLiteral(current.property)) return false;
 		current = current.object;
 	}
+
 	return isIdentifier(current) || isThisExpression(current) || isAnyLiteral(current);
 }
 
@@ -40,6 +41,7 @@ export function createPreferExistingGuardRule(
 			const index = getIndex();
 			const ownSpecifier = index.getSpecifierOf(context.filename);
 			const { sourceCode } = context;
+
 			function getText(node: ESTree.Node): string {
 				return sourceCode.getText(node);
 			}
@@ -71,6 +73,7 @@ export function createPreferExistingGuardRule(
 				LogicalExpression(node): void {
 					// Search each chain once, from its top.
 					if (isLogicalExpression(node.parent) && node.parent.operator === node.operator) return;
+
 					for (const found of findSharedGuards(index, node, sourceCode)) reportGuard(node, found);
 				},
 			} satisfies Visitor;

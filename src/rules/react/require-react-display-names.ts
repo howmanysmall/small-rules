@@ -49,6 +49,7 @@ function isCreateContextCall(
 	reactNamespaces: ReadonlySet<string>,
 ): boolean {
 	if (isIdentifier(node.callee)) return createContextIdentifiers.has(node.callee.name);
+
 	if (
 		!isMemberExpression(node.callee) ||
 		!isIdentifierNamed(node.callee.property, "createContext") ||
@@ -56,6 +57,7 @@ function isCreateContextCall(
 	) {
 		return false;
 	}
+
 	return reactNamespaces.has(node.callee.object.name);
 }
 
@@ -80,7 +82,9 @@ function hasExportReference(sourceCode: SourceCode, node: ESTree.VariableDeclara
 	for (const variable of sourceCode.getDeclaredVariables(node)) {
 		/* v8 ignore next -- @preserve declared variables for an identifier declarator match the declarator name. */
 		if (variable.name !== variableName) continue;
+
 		for (const { identifier } of variable.references) if (isNodeInExport(identifier)) return true;
+
 		return false;
 	}
 
@@ -185,6 +189,7 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 			"Program:exit"(): void {
 				for (const [variableName, trackedVariable] of trackedVariables) {
 					if (trackedVariable.hasDisplayName) continue;
+
 					if (
 						!isExportedTrackedVariable(
 							context.sourceCode,

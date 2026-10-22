@@ -60,6 +60,7 @@ export function createComments(
 			value: comment.value,
 		};
 	}
+
 	return comments;
 }
 
@@ -109,6 +110,7 @@ interface RawComment {
 function isRawComment(value: unknown): value is RawComment {
 	if (typeof value !== "object" || value === null) return false;
 	if (!("type" in value) || !("value" in value) || !("start" in value) || !("end" in value)) return false;
+
 	return (
 		(value.type === "Block" || value.type === "Line") &&
 		typeof value.value === "string" &&
@@ -148,9 +150,11 @@ function readStringEnd(text: string, start: number, quote: string): number {
 			index += 2;
 			continue;
 		}
+
 		if (character === quote) return index + 1;
 		index += 1;
 	}
+
 	return index;
 }
 
@@ -162,9 +166,11 @@ function readTemplateEnd(text: string, start: number): number {
 			index += 2;
 			continue;
 		}
+
 		if (character === "`") return index + 1;
 		index += 1;
 	}
+
 	return index;
 }
 
@@ -175,6 +181,7 @@ function readNumberEnd(text: string, start: number): number {
 		if (character === undefined || !NUMBER_PART.test(character)) break;
 		index += 1;
 	}
+
 	return index;
 }
 
@@ -185,6 +192,7 @@ function readIdentifierEnd(text: string, start: number): number {
 		if (character === undefined || !IDENTIFIER_PART.test(character)) break;
 		index += 1;
 	}
+
 	return index;
 }
 

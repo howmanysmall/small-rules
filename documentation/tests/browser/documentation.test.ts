@@ -182,5 +182,6 @@ playwrightIt("keeps build-only code out of browser assets", async ({ page }) => 
 	const scriptSources = await page
 		.locator("script[src]")
 		.evaluateAll((scripts) => scripts.map((script) => script.getAttribute("src")));
+
 	playwrightExpect(scriptSources.every((source) => source?.startsWith(builtScriptPrefix) === true)).toBe(true);
 });

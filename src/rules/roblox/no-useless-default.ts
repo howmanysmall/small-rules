@@ -32,6 +32,7 @@ import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
 import type { JsonArray, JsonObject, JsonValue } from "type-fest";
 
 const isCanonicalNumericComponent = type("'-inf' | 'inf' | number");
+
 type CanonicalNumericComponent = typeof isCanonicalNumericComponent.infer;
 
 const isCanonicalValue = type({
@@ -144,6 +145,7 @@ function decodeCanonicalValue(encodedValue: ReadonlyArray<unknown>): CanonicalVa
 		valueType === "Enum"
 			? { enumType: encodedValue[1], type: valueType, value: encodedValue[2] }
 			: { type: valueType, value: encodedValue[1] };
+
 	/* v8 ignore next -- @preserve generated compact values originate from validated canonical values. */
 	return isCanonicalValue.allows(candidate) ? candidate : undefined;
 }
@@ -180,8 +182,10 @@ function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<st
 			/* v8 ignore next -- @preserve generated indexes and values are validated during generation. */
 			if (propertyName !== undefined && value !== undefined) properties[propertyName] = value;
 		}
+
 		lookups.set(className, createDefaultPropertyLookupEntries(properties));
 	}
+
 	return lookups;
 }
 
@@ -264,12 +268,14 @@ function containsIdentifierReference(
 		for (const element of value) {
 			if (containsIdentifierReference(element, identifierName, visitedValues)) return true;
 		}
+
 		return false;
 	}
 
 	if (!isIdentifierSearchObject(value) || visitedValues.has(value)) return false;
 
 	visitedValues.add(value);
+
 	// oxlint-disable-next-line local/prefer-existing-guard -- cannot do this here unfortunately. Types make it complex.
 	if (value.type === IDENTIFIER && value.name === identifierName) return true;
 
@@ -601,8 +607,11 @@ type IsDefaultValues = {
 		canonicalValue: GetCanonicalValue<TType>,
 	) => boolean;
 };
+
 type CanonicalValue2d = GetCanonicalValue<"UDim" | "Vector2">;
+
 type CanonicalValue3d = GetCanonicalValue<"Color3" | "Vector3">;
+
 type CanonicalValue4d = GetCanonicalValue<"Rect" | "UDim2">;
 
 const IS_DEFAULT_VALUES = {
@@ -800,12 +809,14 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 		): ((fixer: Fixer) => Fix) | undefined {
 			const previousToken = sourceCode.getTokenBefore(statementNode);
 			const nextToken = sourceCode.getTokenAfter(statementNode);
+
 			if (hasCommentsAroundNode(statementNode)) return undefined;
 
 			/* v8 ignore next 3 -- @preserve SourceCode reports adjacent comments through getCommentsBefore/After before this defensive token-between check. */
 			if (previousToken !== null && sourceCode.commentsExistBetween(previousToken, statementNode)) {
 				return undefined;
 			}
+
 			/* v8 ignore next -- @preserve SourceCode reports adjacent comments through getCommentsAfter before this defensive token-between check. */
 			if (nextToken !== null && sourceCode.commentsExistBetween(statementNode, nextToken)) return undefined;
 

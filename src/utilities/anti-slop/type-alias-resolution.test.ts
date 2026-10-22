@@ -60,6 +60,7 @@ function findNthTypeReference(source: HarnessSourceCode, name: string, index: nu
 	if (reference === undefined) {
 		throw new Error(`Type reference "${name}" at index ${index} not found.`);
 	}
+
 	return reference;
 }
 
@@ -72,9 +73,11 @@ function findQualifiedTypeReference(source: HarnessSourceCode): ESTree.TSTypeRef
 			}
 		},
 	});
+
 	if (found === undefined) {
 		throw new Error("Qualified type reference not found.");
 	}
+
 	return found;
 }
 
@@ -84,26 +87,33 @@ function getAnnotationType(alias?: ESTree.TSTypeAliasDeclaration): string | unde
 
 const matchesUnknown: ResolvedTypeMatcher = function matchesUnknown(resolved, enqueue) {
 	if (resolved.type === "TSUnknownKeyword") return true;
+
 	if (resolved.type === "TSParenthesizedType") {
 		enqueue(resolved.typeAnnotation);
 		return false;
 	}
+
 	if (resolved.type === "TSUnionType") {
 		for (const member of resolved.types) enqueue(member);
+
 		return false;
 	}
+
 	if (resolved.type === "TSFunctionType") {
 		enqueue(resolved.returnType.typeAnnotation);
 		return false;
 	}
+
 	if (resolved.type === "TSMappedType") {
 		if (resolved.typeAnnotation !== null) enqueue(resolved.typeAnnotation);
 		return false;
 	}
+
 	if (resolved.type === "TSConditionalType") {
 		enqueue(resolved.trueType);
 		return false;
 	}
+
 	return false;
 };
 
@@ -717,6 +727,7 @@ function getInterfacePropertyNames(declarations?: ReadonlyArray<ESTree.TSInterfa
 			if (member.type === "TSPropertySignature" && member.key.type === "Identifier") names.push(member.key.name);
 		}
 	}
+
 	return names;
 }
 

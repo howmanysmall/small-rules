@@ -1,4 +1,4 @@
-// Vendored from src/shared/type-alias-resolution.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/shared/type-alias-resolution.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -123,6 +123,7 @@ function getEnclosingTypeScope(node: ESTree.Node, program: ESTree.Program): ESTr
 		if (isTypeScope(current)) return current;
 		current = current.parent;
 	}
+
 	return program;
 }
 
@@ -133,6 +134,7 @@ function createNamespaceScopeKey(programFallback: boolean): NamespaceScopeKey {
 function getModuleBindingName(module: ESTree.TSModuleDeclaration): string | undefined {
 	let current: ESTree.Node = module.id;
 	while (isTsQualifiedName(current)) current = current.left;
+
 	return isIdentifier(current) ? current.name : undefined;
 }
 
@@ -143,6 +145,7 @@ function getNamespaceNameParts(module: ESTree.TSModuleDeclaration): ReadonlyArra
 		reversed.push(current.right.name);
 		current = current.left;
 	}
+
 	if (!isIdentifier(current)) return undefined;
 	reversed.push(current.name);
 	return reversed.toReversed();
@@ -200,6 +203,7 @@ function registerNamespaceScope(
 	if (module.declare || (isTsModuleBlock(lexicalScope) && scopes.ambientBlocks.has(lexicalScope))) {
 		scopes.ambientBlocks.add(body);
 	}
+
 	if (names === undefined) return;
 
 	let scope = getNamespaceScopeBase(module, lexicalScope, scopes);
@@ -221,6 +225,7 @@ function getBindingScope(
 	if ((parent !== null && isExportNamedDeclaration(parent)) || scopes.ambientBlocks.has(lexicalScope)) {
 		return namespaceScope;
 	}
+
 	return lexicalScope;
 }
 
@@ -269,6 +274,7 @@ function collectTypeBindings(
 	const pending: Array<ESTree.Node> = [program];
 	for (const node of pending) {
 		const lexicalScope = getEnclosingTypeScope(node, program);
+
 		if (isTsGlobalDeclaration(node)) registerGlobalScope(node, scopes);
 		if (isTsModuleDeclaration(node)) registerNamespaceScope(node, lexicalScope, scopes);
 
@@ -278,8 +284,10 @@ function collectTypeBindings(
 			const scope = isClassExpression(node) ? node : getBindingScope(node, lexicalScope, scopes);
 			bindings.push({ name: declared.name, alias: declared.alias, interface: declared.interface, scope });
 			bindingsByName.set(declared.name, bindings);
+
 			if (declared.alias !== undefined) aliases.push(declared.alias);
 		}
+
 		appendVisitorChildren(node, visitorKeys, pending);
 	}
 }
@@ -300,6 +308,7 @@ function getScopeDistance(scope: TypeBindingScope, node: ESTree.Node): number | 
 		current = current.parent;
 		distance += 1;
 	}
+
 	return undefined;
 }
 
@@ -462,6 +471,7 @@ function getAliasSubstitutions(
 			type: argument,
 		});
 	}
+
 	return { owner: alias, parameters: next };
 }
 
@@ -559,6 +569,7 @@ export function getResolvedTypeMatches(
 			pending.push(resolved);
 			continue;
 		}
+
 		if (
 			matcher(resolution.type, function enqueue(child) {
 				pending.push(continueTypeResolution(resolution, child));
@@ -567,5 +578,6 @@ export function getResolvedTypeMatches(
 			return true;
 		}
 	}
+
 	return false;
 }

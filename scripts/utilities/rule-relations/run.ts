@@ -89,6 +89,7 @@ function chunkValues<TValue>(values: ReadonlyArray<TValue>, size: number): Reado
 	for (let index = 0; index < values.length; index += size) {
 		chunks[length++] = values.slice(index, index + size);
 	}
+
 	return chunks;
 }
 
@@ -183,6 +184,7 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 		const pair = orderPair(entry);
 		registerPair(pair.left, pair.right);
 	}
+
 	const total = seenPairs.size;
 	options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 
@@ -214,6 +216,7 @@ export async function judgeRulePairsAsync(options: JudgeOptions): Promise<Readon
 			options.onProgress?.({ cached: cachedCount, completed, phase: "judgments", total });
 		}),
 	);
+
 	await Promise.all(requests);
 
 	return judgments;
@@ -224,6 +227,7 @@ interface ResolveOptions {
 	readonly pairs: ReadonlyArray<UnorderedRulePair>;
 	readonly thresholds: JudgmentThresholds;
 }
+
 export function resolveJudgedPairs(options: ResolveOptions): ResolutionResult {
 	const resolutions = new Map<string, RelationResolution>();
 	const reviews = new Array<ReviewFinding>();
@@ -241,6 +245,7 @@ export function resolveJudgedPairs(options: ResolveOptions): ResolutionResult {
 			right: pair.right,
 			thresholds: options.thresholds,
 		});
+
 		resolutions.set(getPairKey(pair.left, pair.right), resolution);
 
 		if (resolution.type === "review") {
@@ -265,6 +270,7 @@ interface WriteOptions {
 	readonly right: RuleCard;
 	readonly writer: ReasonWriter;
 }
+
 interface WrittenReason {
 	readonly cached: boolean;
 	readonly reason: string;
@@ -289,6 +295,7 @@ async function writeRelationReasonAsync(options: WriteOptions): Promise<WrittenR
 		relation: options.relation,
 		right: options.right,
 	});
+
 	options.cache?.set(cacheKey, reason);
 	return { cached: false, reason };
 }
@@ -369,6 +376,7 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 			relation: resolution.relation,
 			strength: resolution.strength,
 		} satisfies FreshRelation;
+
 		freshByPair.set(getPairKey(fresh.relation.from, fresh.relation.to), fresh);
 		scored.push({ relation: fresh.relation, strength: fresh.strength });
 	}
@@ -395,10 +403,12 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 	let completedReasons = 0;
 	const totalReasons = freshRelations.length;
 	options.onProgress?.({ cached: cachedReasons, completed: completedReasons, phase: "reasons", total: totalReasons });
+
 	const outcomes = await Promise.all(
 		freshRelations.map(async (fresh) => {
 			const outcome = await createReasonOutcomeAsync(fresh, options);
 			completedReasons += 1;
+
 			if (outcome.cached) cachedReasons += 1;
 			options.onProgress?.({
 				cached: cachedReasons,
@@ -451,7 +461,9 @@ export function readGeneratedEdges(relativePath: string): ReadonlyArray<Generate
 		if (result instanceof type.errors) {
 			throw new TypeError(`Invalid relation edge in "${relativePath}" - ${result.summary}`);
 		}
+
 		edges.push(result);
 	}
+
 	return edges;
 }

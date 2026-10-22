@@ -143,6 +143,7 @@ function countUseStates(
 					return false;
 				}
 			} else if (callee.name !== "useState") return false;
+
 			return true;
 		}).length;
 	}

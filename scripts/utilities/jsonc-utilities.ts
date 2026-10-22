@@ -11,6 +11,7 @@ function detectIndentation(content: string): string {
 		const match = INDENTATION_REGEXP.exec(line);
 		if (match) return match.groups.whitespace;
 	}
+
 	return "\t";
 }
 

@@ -11,6 +11,7 @@ import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 const HOOK_NAME_PATTERN = /^use[A-Z]/v;
 
 type RuleOptions = InferContextFromRule<typeof preferDirectHookImports>["options"][0];
+
 interface NormalizedOptions {
 	readonly allowedHooks: ReadonlySet<string>;
 }

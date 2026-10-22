@@ -27,6 +27,7 @@ const MATCHING_INSPECTION: LocalComponentInspection = { importStyle: "default", 
 const NON_MATCHING_INSPECTION: LocalComponentInspection = { importStyle: undefined, matches: false };
 
 const MESSAGES = { found: "found identifier" };
+
 // Windows ignores POSIX directory modes, and root reads a `0o000` directory
 // anyway, so the unreadable-directory case cannot be staged there.
 const CANNOT_REVOKE_DIRECTORY_ACCESS = nodeProcess.platform === "win32" || nodeProcess.getuid?.() === 0;
@@ -38,6 +39,7 @@ function createCollectorRule(inspection: LocalComponentInspection): CreateRule<r
 				ImportDeclaration(node): void {
 					const identifiers = new Set<string>();
 					addLocalComponentImportIdentifiers(node, inspection, COMPONENT_NAME, identifiers);
+
 					if (identifiers.size > 0) context.report({ messageId: "found", node });
 				},
 			} satisfies Visitor;
@@ -96,6 +98,7 @@ describe("addLocalComponentImportIdentifiers accumulation", () => {
 						COMPONENT_NAME,
 						accumulatedIdentifiers,
 					);
+
 					if (accumulatedIdentifiers.has("ExistingComponent") && accumulatedIdentifiers.has("NewButton")) {
 						context.report({ messageId: "accumulated", node });
 					}
@@ -210,6 +213,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -254,6 +258,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.json": '{ "Button": true }\n',
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -285,6 +290,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 			"tests/button.tsx": "export default function Button() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -316,6 +322,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "const Button = () => null;\nexport { somethingElse };\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -347,6 +354,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/card.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -378,6 +386,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "export default function Link() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -409,6 +418,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.d.ts": "export default function Button(): null;\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -440,6 +450,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "export function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -471,6 +482,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "export default function Button() { return <frame />; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -519,6 +531,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -540,6 +553,7 @@ describe("inspectRelativeLocalComponentImport", () => {
 				{ componentName: `Missing${index}`, fileNames: ["button"] },
 			);
 		}
+
 		const inspection = inspectRelativeLocalComponentImport(
 			// @ts-expect-error -- Minimal ESTree shape for the public utility
 			// contract
@@ -565,6 +579,7 @@ describe("discoverLocalComponent", () => {
 			nodePath.join(directory, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
+
 		onTestFinished(async () => rm(directory, { force: true, recursive: true }));
 
 		// Assert
@@ -579,6 +594,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -607,6 +623,7 @@ describe("discoverLocalComponent", () => {
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 			"tests/button.tsx": "export default function Button() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -632,6 +649,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -654,6 +672,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.d.ts": "export default function Button(): null;\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -676,6 +695,7 @@ describe("discoverLocalComponent", () => {
 			"src/components/button/index.tsx": "export default function Button() { return null; }\n",
 			"src/screens/example.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -704,6 +724,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -728,6 +749,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -750,6 +772,7 @@ describe("discoverLocalComponent", () => {
 			"src/button.tsx": "export default function Button() { return null; }\n",
 			"src/screen.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});
@@ -802,6 +825,7 @@ describe("discoverLocalComponent", () => {
 			"src/fallback/button.tsx": "export default function Button() { return null; }\n",
 			"src/screens/example.tsx": "export function Screen() { return null; }\n",
 		});
+
 		onTestFinished(() => {
 			cleanupProjectFixture(project);
 		});

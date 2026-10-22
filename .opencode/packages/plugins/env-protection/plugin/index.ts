@@ -17,6 +17,7 @@ const environmentProtection = Plugin.define({
 				if (isFilePathInput.allows(input) && input.filePath.includes(".env")) {
 					return Effect.fail(new Tool.Error({ message: "Do not read .env files" }));
 				}
+
 				return Effect.void;
 			});
 		});

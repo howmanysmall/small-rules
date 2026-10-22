@@ -36,6 +36,7 @@ export function getRulePageSections(rule: RuleName, options: RulePageSectionOpti
 	if (Object.keys(getRuleFacts(rule).messages ?? {}).length > 0) sections.push(diagnosticsSection);
 
 	sections.push(configurationSection, examplesSection);
+
 	if (getRelatedRules(rule).length > 0) sections.push(relatedRulesSection);
 	return sections;
 }
@@ -62,5 +63,6 @@ export function appendRulePageSections(
 		if (listed.has(section.slug)) continue;
 		merged.push({ children: [], depth: 2, slug: section.slug, text: section.text });
 	}
+
 	return merged;
 }

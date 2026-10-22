@@ -70,6 +70,7 @@ export function createSourceCode(
 				const token = tokens[index];
 				if (token !== undefined && token.range[1] <= node.range[0]) return token;
 			}
+
 			return null;
 		},
 		isGlobalReference(node): boolean {
@@ -81,6 +82,7 @@ export function createSourceCode(
 				if (current.set.has(name)) return false;
 				current = current.upper;
 			}
+
 			return true;
 		},
 		scopeManager,
@@ -97,6 +99,7 @@ function getScope(scopeManager: ScopeManager, node: HarnessNode): HarnessScope {
 		if (scope !== undefined) return scope;
 		current = current.parent;
 	}
+
 	return scopeManager.globalScope;
 }
 
@@ -112,9 +115,11 @@ function getCommentsBefore(
 	const tokenAfterComments = new Map<HarnessComment, HarnessToken | null>();
 	return comments.filter((comment) => {
 		if (comment.range[1] > node.range[0]) return false;
+
 		if (!tokenAfterComments.has(comment)) {
 			tokenAfterComments.set(comment, tokens.find((token) => token.range[0] >= comment.range[1]) ?? null);
 		}
+
 		const nextToken = tokenAfterComments.get(comment) ?? null;
 		return nextToken === null || nextToken.range[0] >= node.range[0];
 	});
@@ -128,9 +133,11 @@ function getCommentsAfter(
 	const tokenBeforeComments = new Map<HarnessComment, HarnessToken | null>();
 	return comments.filter((comment) => {
 		if (comment.range[0] < node.range[1]) return false;
+
 		if (!tokenBeforeComments.has(comment)) {
 			tokenBeforeComments.set(comment, getPreviousToken(tokens, comment) ?? null);
 		}
+
 		const previousToken = tokenBeforeComments.get(comment) ?? null;
 		return previousToken === null || previousToken.range[1] <= node.range[1];
 	});
@@ -141,6 +148,7 @@ function getPreviousToken(tokens: ReadonlyArray<HarnessToken>, node: RangeLike):
 		const token = tokens[index];
 		if (token !== undefined && token.range[1] <= node.range[0]) return token;
 	}
+
 	return undefined;
 }
 

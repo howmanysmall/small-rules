@@ -107,6 +107,7 @@ const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox"
 				const replacement =
 					getDirectArgumentReplacement(context, node, sequenceName) ??
 					getKeypointArrayReplacement(context, node, sequenceName, keypointName);
+
 				if (replacement === undefined) return;
 
 				context.report({

@@ -135,7 +135,7 @@ export interface VendoredComponent {
 	readonly name: string;
 	/** Upstream commit the files were taken from. */
 	readonly commit: string;
-	/** Upstream copyright line, verbatim. */
+	/** Upstream copyright notice, verbatim, one line per holder. */
 	readonly copyright: string;
 	/**
 	 * Directory the files live in, repository-relative, with a trailing slash.
@@ -161,7 +161,7 @@ const NOTICES_URL = "https://github.com/howmanysmall/small-rules/blob/main/THIRD
 export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 	{
 		name: "anti-slop",
-		commit: "c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b",
+		commit: "13909c9e07590f5a85d93c62712259fe14a883f7",
 		copyright: "Copyright (c) 2026 Dillon Mulroy",
 		directory: "src/rules/anti-slop/",
 		files: [
@@ -183,6 +183,7 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 			{ local: "no-unknown-type-aliases.ts", upstream: "src/rules/no-unknown-type-aliases.ts" },
 			{ local: "no-unsafe-dictionary-type.ts", upstream: "src/rules/no-unsafe-dictionary-type.ts" },
 			{ local: "no-widen-then-assert.ts", upstream: "src/rules/no-widen-then-assert.ts" },
+			{ local: "require-readable-spacing.ts", upstream: "src/rules/require-readable-spacing.ts" },
 			{
 				local: "require-safety-comment-for-type-assertion.ts",
 				upstream: "src/rules/require-safety-comment-for-type-assertion.ts",
@@ -194,18 +195,41 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 	},
 	{
 		name: "anti-slop shared helpers",
-		commit: "c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b",
+		commit: "13909c9e07590f5a85d93c62712259fe14a883f7",
 		copyright: "Copyright (c) 2026 Dillon Mulroy",
 		directory: "src/utilities/anti-slop/",
 		files: [
 			{ local: "dictionary-types.ts", upstream: "src/shared/dictionary-types.ts" },
 			{ local: "function-parameters.ts", upstream: "src/shared/function-parameters.ts" },
 			{ local: "lexical-type-parameters.ts", upstream: "src/shared/lexical-type-parameters.ts" },
+			{
+				local: "padding-line-between-statements.ts",
+				upstream: "src/vendor/eslint-stylistic/padding-line-between-statements.ts",
+			},
 			{ local: "reflect-method.ts", upstream: "src/shared/reflect-method.ts" },
 			{ local: "type-alias-resolution.ts", upstream: "src/shared/type-alias-resolution.ts" },
 		],
 		license: "MIT",
 		source: "https://github.com/dmmulroy/anti-slop",
+		verbatim: false,
+	},
+	{
+		name: "ESLint Stylistic",
+		commit: "435c3ea0fd26a5fef9042c4b36b6e165fbbf8d08",
+		copyright: [
+			"Copyright OpenJS Foundation and other contributors, <www.openjsf.org>",
+			"Copyright (c) 2023-PRESENT ESLint Stylistic contributors",
+		].join("\n"),
+		directory: "src/utilities/anti-slop/",
+		files: [
+			{
+				local: "padding-line-between-statements.ts",
+				upstream:
+					"packages/eslint-plugin/rules/padding-line-between-statements/padding-line-between-statements.ts",
+			},
+		],
+		license: "MIT",
+		source: "https://github.com/eslint-stylistic/eslint-stylistic",
 		verbatim: false,
 	},
 	{
@@ -249,7 +273,7 @@ export function renderNoticesMarkdown(): string {
 
 - **Source:** <${component.source}>
 - **Vendored commit:** \`${component.commit}\`
-- **Copyright:** ${component.copyright}
+- **Copyright:** ${component.copyright.split("\n").join("\n  ")}
 - **License:** ${component.license}
 
 Vendored into \`${component.directory}\`, ${provenance}:

@@ -26,6 +26,7 @@ function appendSimpleArrayElements(node: ESTree.ArrayExpression, worklist: Array
 		if (isSpreadElement(element)) return false;
 		worklist.push(element);
 	}
+
 	return true;
 }
 
@@ -34,6 +35,7 @@ function appendSimpleObjectProperties(node: ESTree.ObjectExpression, worklist: A
 		if (isSpreadElement(property) || property.computed) return false;
 		worklist.push(property.value);
 	}
+
 	return true;
 }
 
@@ -80,6 +82,7 @@ function isStaticMemberExpression(node: ESTree.MemberExpression): boolean {
 		if (current.computed && !isLiteral(current.property)) return false;
 		current = current.object;
 	}
+
 	return true;
 }
 

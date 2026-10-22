@@ -43,6 +43,7 @@ function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): bool
 			hasReference = true;
 			return STOP_NODE_TRAVERSAL;
 		}
+
 		return true;
 	});
 	return hasReference;

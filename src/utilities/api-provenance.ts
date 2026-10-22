@@ -59,6 +59,7 @@ function getNativeCollectionKindAtDepth(
 		if (isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Set")) return "Set";
 		return undefined;
 	}
+
 	if (!isIdentifier(unwrapped)) return undefined;
 
 	const initializer = getSingleConstInitializer(getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name));
@@ -97,6 +98,7 @@ function isNativePromiseExpressionAtDepth(
 	if (isGlobalNativeConstructor(sourceCode, callee.object, "Promise")) {
 		return PROMISE_FACTORY_METHODS.has(callee.property.name);
 	}
+
 	return (
 		PROMISE_CHAIN_METHODS.has(callee.property.name) &&
 		isNativePromiseExpressionAtDepth(sourceCode, callee.object, depth + 1)

@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-widen-then-assert.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/rules/no-widen-then-assert.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -193,6 +193,7 @@ function isDefinitelyNarrowerRecordType(type: ESTree.TSType): boolean {
 		const [inner] = unwrapped.typeArguments?.params ?? [];
 		return inner !== undefined && isDefinitelyNarrowerRecordType(inner);
 	}
+
 	if (getTypeReferenceName(unwrapped) !== "Record") return false;
 
 	const parameters = unwrapped.typeArguments?.params ?? [];
@@ -206,6 +207,7 @@ function getFunctionBoundary(node: ESTree.Node): ESTree.Node | undefined {
 		if (FUNCTION_BOUNDARY_TYPES.has(current.type)) return current;
 		current = current.parent;
 	}
+
 	return undefined;
 }
 
@@ -213,6 +215,7 @@ function variableDeclarator(variable: ScopeVariable): ESTree.VariableDeclarator 
 	for (const definition of variable.defs) {
 		if (definition.type === "Variable" && isVariableDeclarator(definition.node)) return definition.node;
 	}
+
 	return undefined;
 }
 
@@ -268,6 +271,7 @@ function getKnownInitializer(variable: ScopeVariable, boundary?: ESTree.Node): E
 	) {
 		return undefined;
 	}
+
 	return declarator.init;
 }
 
@@ -292,6 +296,7 @@ function getKnownValueEvidence(
 		const annotatedIdentifier = variable.identifiers.find(
 			(identifier) => identifier.typeAnnotation !== null && identifier.typeAnnotation !== undefined,
 		);
+
 		if (annotatedIdentifier !== undefined) return getKnownAnnotationEvidence(annotatedIdentifier, boundary);
 
 		const initializer = getKnownInitializer(variable, boundary);

@@ -96,6 +96,7 @@ function registerGuard(name: string, guard: ProbedFunction, registry: GuardRegis
 	if (nodeType === undefined) return;
 
 	registry.guardNames.add(name);
+
 	if (acceptsMissingNode(guard)) registry.nullSafeGuards.add(name);
 	const guards = registry.guardsByNodeType.get(nodeType);
 	if (guards === undefined) registry.guardsByNodeType.set(nodeType, [name]);

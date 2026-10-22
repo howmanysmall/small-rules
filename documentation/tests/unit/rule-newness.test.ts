@@ -62,6 +62,7 @@ function createRecordingRunner(calls: Array<ReadonlyArray<string>>): GitRunner {
 		return RESPONSES.get(parameters.join(" ")) ?? "";
 	};
 }
+
 function createManifestFilteredRunner(): GitRunner {
 	return (parameters) => {
 		if (parameters[0] === "tag" && parameters[1] === "--list") return "v2.14.0\n";

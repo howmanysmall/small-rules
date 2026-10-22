@@ -36,6 +36,7 @@ function collectNumericComponents(parameters: ReadonlyArray<ESTree.Node>): Numer
 
 		const mapped = mapComponentToRgbRange(parameter.value);
 		components[size++] = mapped;
+
 		if (mapped !== 0) allZero = false;
 	}
 

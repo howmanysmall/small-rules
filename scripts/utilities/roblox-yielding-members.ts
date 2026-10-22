@@ -38,6 +38,7 @@ export function parseClasses(value: unknown): ReadonlyMap<string, RobloxClass> {
 		const classDefinition = parseClass(classValue);
 		if (classDefinition !== undefined) classes.set(classDefinition.name, classDefinition);
 	}
+
 	return classes;
 }
 
@@ -49,10 +50,12 @@ export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxC
 			if (!isYieldingFunction(member)) continue;
 			members.push(member.Name);
 		}
+
 		directMembers.set(className, members);
 	}
 
 	const cache = new Map<string, ReadonlyArray<string>>();
+
 	function collectMembers(className: string): ReadonlyArray<string> {
 		const cached = cache.get(className);
 		if (cached !== undefined) return cached;
@@ -82,6 +85,7 @@ export function hasYieldingMemberInCatalog(
 	memberName: string,
 ): boolean {
 	if (!catalog.classes.has(className)) return false;
+
 	return (
 		catalog.instanceMembers.includes(memberName) ||
 		catalog.yieldingMembers.get(className)?.includes(memberName) === true
@@ -124,6 +128,7 @@ export function renderCatalog(classes: ReadonlyMap<string, RobloxClass>): string
 				sharedIndex === undefined
 					? JSON.stringify(memberGroup)
 					: `ROBLOX_YIELDING_MEMBER_GROUPS[${sharedIndex}]`;
+
 			return `[${classIndex},${value}]`;
 		})
 		.join(",");

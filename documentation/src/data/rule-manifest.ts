@@ -1,6 +1,7 @@
 import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
+
 export type RuleCategoryKey = "anti-slop" | "english" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
 
 export interface RuleManifestEntry {
@@ -167,6 +168,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-unknown-type-aliases" },
 				{ name: "no-unsafe-dictionary-type" },
 				{ name: "no-widen-then-assert" },
+				{ name: "require-readable-spacing" },
 				{ name: "require-safety-comment-for-type-assertion" },
 			],
 		},

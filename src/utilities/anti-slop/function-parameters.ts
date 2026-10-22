@@ -1,4 +1,4 @@
-// Vendored from src/shared/function-parameters.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/shared/function-parameters.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -48,14 +48,17 @@ export function unwrapFunctionParameter(parameter: FunctionParameter): FunctionP
 			current = current.parameter;
 			continue;
 		}
+
 		if (isAssignmentPattern(current)) {
 			current = current.left;
 			continue;
 		}
+
 		if (isRestElement(current)) {
 			current = current.argument;
 			continue;
 		}
+
 		return current;
 	}
 }
@@ -71,16 +74,19 @@ export function containsUnknownType(type: ESTree.TSType): boolean {
 	const pending: Array<ESTree.TSType> = [type];
 	for (const current of pending) {
 		if (isTsUnknownKeyword(current)) return true;
+
 		if (isTsParenthesizedType(current)) {
 			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
 			pending.push(current.typeAnnotation);
 			continue;
 		}
+
 		if (isTsUnionType(current)) {
 			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
 			for (const member of current.types) pending.push(member);
 		}
 	}
+
 	return false;
 }
 

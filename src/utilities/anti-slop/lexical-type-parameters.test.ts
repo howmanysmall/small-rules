@@ -29,11 +29,13 @@ function findConditionalType(source: HarnessSourceCode): ESTree.TSConditionalTyp
 			}
 		},
 	});
+
 	if (found === undefined) {
 		const error = new Error('Node of type "TSConditionalType" not found.');
 		Error.captureStackTrace(error, findConditionalType);
 		throw error;
 	}
+
 	return found;
 }
 
@@ -46,11 +48,13 @@ function findMappedTypeAnnotation(source: HarnessSourceCode): ESTree.TSType {
 			}
 		},
 	});
+
 	if (found === undefined) {
 		const error = new Error("TSMappedType annotation not found.");
 		Error.captureStackTrace(error, findMappedTypeAnnotation);
 		throw error;
 	}
+
 	return found;
 }
 

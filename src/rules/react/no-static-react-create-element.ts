@@ -29,6 +29,7 @@ const CREATE_ELEMENT_NAMES = new Set(["createElement"]);
 function isClassOrFunctionName(definition: Definition): boolean {
 	return definition.type === "FunctionName" || definition.type === "ClassName";
 }
+
 function isVariable(definition: Definition, node: Definition["node"]): node is ESTree.VariableDeclarator {
 	return definition.type === "Variable" && isVariableDeclarator(node);
 }

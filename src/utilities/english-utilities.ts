@@ -160,8 +160,11 @@ interface StartsWithVerbOptions {
 type StartsWithTuple = readonly [doesStartWith: boolean, prefix: string];
 
 const BASE_ALLOW = new Set<string>(DICTIONARY_VERBS);
+
 for (const verb of AUXILIARY_VERBS) BASE_ALLOW.add(verb);
+
 for (const verb of PROGRAMMING_VERBS) BASE_ALLOW.add(verb);
+
 for (const verb of ALLOW_LIST) BASE_ALLOW.add(verb);
 
 const BASE_DENY = new Set<string>(["file", "string"] satisfies ReadonlyArray<string>);
@@ -180,6 +183,7 @@ function getLowercasePrefix(functionName: string): string {
 		if (unicode === undefined || (unicode >= CHAR_CODE_A && unicode <= CHAR_CODE_Z)) break;
 		index += 1;
 	}
+
 	return (index === length ? functionName : functionName.slice(0, index)).trim();
 }
 
@@ -196,14 +200,17 @@ function getThirdPersonBase(word: string, extraAllowList: ReadonlyArray<string>)
 		const base = `${word.slice(0, -3)}y`;
 		if (isAllowed(base, extraAllowList)) return base;
 	}
+
 	if (word.endsWith("es")) {
 		const base = word.slice(0, -2);
 		if (isAllowed(base, extraAllowList)) return base;
 	}
+
 	if (word.endsWith("s")) {
 		const base = word.slice(0, -1);
 		if (isAllowed(base, extraAllowList)) return base;
 	}
+
 	return undefined;
 }
 

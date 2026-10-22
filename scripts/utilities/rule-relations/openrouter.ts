@@ -43,7 +43,9 @@ interface ReasonApiRequest extends SendChatCompletionRequestRequest {
 }
 
 type CreateDecisionAsync = (request: CreateApiAlphaDecisionsRequest) => Promise<DecisionApiResponse>;
+
 type SendChatAsync = (request: ReasonApiRequest) => Promise<ReasonApiResponse>;
+
 type OnUsage = (usage: RelationUsage) => void;
 
 const isDecisionAnswersResponse = type({

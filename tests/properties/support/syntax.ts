@@ -232,6 +232,7 @@ function wrapInFrame(frame: Frame, body: string): string {
 export function wrapInFrames(frames: ReadonlyArray<Frame>, body: string): string {
 	let code = body;
 	for (const frame of frames.toReversed()) code = wrapInFrame(frame, code);
+
 	return code;
 }
 

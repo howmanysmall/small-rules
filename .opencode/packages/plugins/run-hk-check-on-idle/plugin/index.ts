@@ -23,6 +23,7 @@ const runHkCheck = Effect.fn("runHkCheck")(
 		);
 
 		if (result === undefined) return;
+
 		if (result.exitCode !== 0) {
 			yield* Effect.logError(`[${id}] hk check failed (exit ${result.exitCode ?? "unknown"}).`);
 		}

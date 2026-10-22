@@ -112,6 +112,7 @@ export function getReactEffectAnalysis(sourceCode: SourceCode, environment: Envi
 		analyses = new Map();
 		analysesByProgram.set(ast, analyses);
 	}
+
 	const existing = analyses.get(environment);
 	/* v8 ignore next -- tests never analyze the same Program+environment twice; the cache is a per-rule-run optimization. @preserve */
 	if (existing !== undefined) return existing;
@@ -258,16 +259,19 @@ function getEffectCleanup(functionNode: EffectFunctionNode): ESTree.ReturnStatem
 		const statement = body[index];
 		if (isReturnStatement(statement) && statement.argument !== null) return statement;
 	}
+
 	return undefined;
 }
 
 function getDefinitionValueNode(node: ESTree.Node): ESTree.Node | undefined {
 	/* v8 ignore start -- @preserve definitions from the parser are always VariableDeclarators (init) or FunctionDeclarations (body); the fallback arms are unreachable. */
 	if ("init" in node) return node.init ?? undefined;
+
 	if ("body" in node) {
 		const { body } = node;
 		return isNode(body) ? body : undefined;
 	}
+
 	return undefined;
 	/* v8 ignore stop */
 }
@@ -281,6 +285,7 @@ function isFunctionalComponent(node: ESTree.Node): boolean {
 	const isFunctionalComponentDeclaration =
 		isFunctionDeclarationRaw(node) ||
 		(isVariableDeclarator(node) && (isArrowFunctionExpression(node.init) || isCallExpression(node.init)));
+
 	if (!isFunctionalComponentDeclaration || !isIdentifier(node.id)) return false;
 	return isUppercaseStart(node.id.name);
 }
@@ -312,6 +317,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 				) {
 					return false;
 				}
+
 				return isIdentifier(parent.callee) && !KNOWN_PURE_HOCS.has(parent.callee.name);
 			}) ?? false
 		);
@@ -330,6 +336,7 @@ function isCustomHook(node: ESTree.Node): node is ReactOwner {
 	) {
 		return false;
 	}
+
 	const { name } = node.id;
 	const third = name.charAt(3);
 	return name.startsWith("use") && name.length > 3 && third === third.toUpperCase();
@@ -365,10 +372,12 @@ function isUseRef(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 function isUseEffect(state: ReactEffectAnalysisState, node: ESTree.Node): boolean {
 	/* v8 ignore next -- isUseEffect is only called with CallExpression nodes from the program call index. @preserve */
 	if (!isCallExpression(node)) return false;
+
 	if (isIdentifier(node.callee)) {
 		if (node.callee.name === EFFECT_HOOK_NAME) return true;
 		return isBindingImportedCall(state, node.callee, EFFECT_HOOK_NAME);
 	}
+
 	return isMemberExpression(node.callee) && isReactMemberCall(state, node.callee, EFFECT_HOOK_NAME);
 }
 
@@ -390,8 +399,10 @@ function getVariableByName(state: ReactEffectAnalysisState, identifier: ESTree.N
 		if (variable !== undefined) return variable;
 		current = current.upper;
 	}
+
 	return undefined;
 }
+
 function isBindingImportedCall(state: ReactEffectAnalysisState, node: ESTree.Node, importedName: string): boolean {
 	/* v8 ignore next -- callers only pass identifier-shaped callees to isBindingImportedCall. @preserve */
 	if (!isIdentifier(node)) return false;
@@ -425,6 +436,7 @@ function getStateElements(
 	const definition = reference.resolved?.defs.find((candidate) =>
 		isUseStateVariableDefinition(state, candidate.node),
 	);
+
 	if (!isVariableDeclarator(definition?.node) || !isArrayPattern(definition.node.id)) return undefined;
 	const { elements } = definition.node.id;
 	return elements.length !== 1 && elements.length !== 2 ? undefined : elements;
@@ -526,6 +538,7 @@ function getUseStateDeclaration(
 		if (parent === null) return undefined;
 		result = parent;
 	}
+
 	return result;
 }
 

@@ -69,12 +69,14 @@ const NO_NAME = new Set<NodeType>([
 	TS_SATISFIES_EXPRESSION,
 	TS_TYPE_ASSERTION,
 ]);
+
 type NoName =
 	| ESTree.ParenthesizedExpression
 	| ESTree.TSAsExpression
 	| ESTree.TSNonNullExpression
 	| ESTree.TSSatisfiesExpression
 	| ESTree.TSTypeAssertion;
+
 function isNoName(node: ESTree.Node): node is NoName {
 	return NO_NAME.has(node.type);
 }
@@ -86,6 +88,7 @@ function getIdentifierName(node?: ESTree.Node | null): string | undefined {
 		if (!isNoName(current)) return undefined;
 		current = current.expression;
 	}
+
 	return undefined;
 }
 
@@ -101,6 +104,7 @@ function getLoopBinding(loop: ESTree.ForOfStatement): ESTree.Node | undefined {
 		/* v8 ignore next -- const for-of always has a declarator. @preserve */
 		return declarator?.id;
 	}
+
 	/* v8 ignore next -- only called after const VariableDeclaration binding checks. @preserve */
 	return loop.left;
 }
@@ -178,6 +182,7 @@ function collectMutationCalls(
 	const worklist: Array<ESTree.Node> = [body];
 	for (const current of worklist) {
 		if (SKIPPED_NODE_TYPES.has(current.type)) continue;
+
 		if (isCallExpression(current) && isMemberExpression(current.callee)) {
 			const method = getMemberPropertyName(current.callee);
 			const object = stripExpressionWrappers(current.callee.object);
@@ -185,8 +190,10 @@ function collectMutationCalls(
 				mutations.push({ call: current, method, property: current.callee.property });
 			}
 		}
+
 		appendVisitorChildren(current, visitorKeys, worklist);
 	}
+
 	return mutations;
 }
 
@@ -207,6 +214,7 @@ function isAllowedMutation(
 				other.method === "delete" &&
 				hasArgumentNamed(other.call, loopContext.deleteArgumentName),
 		);
+
 		return !hasEarlierDelete;
 	}
 
@@ -226,6 +234,7 @@ const noLoopIterableMutation = createRule("no-loop-iterable-mutation", "general"
 					loopContext.iterableName,
 					context.sourceCode.visitorKeys,
 				);
+
 				for (const mutation of mutations) {
 					if (isAllowedMutation(mutation, loopContext, mutations)) continue;
 					context.report({

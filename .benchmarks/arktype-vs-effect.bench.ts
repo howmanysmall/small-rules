@@ -77,6 +77,7 @@ for (let index = 0; index < length; index += 1) {
 			anyData[index] = (): void => {
 				// do nothing
 			};
+
 			break;
 		}
 	}

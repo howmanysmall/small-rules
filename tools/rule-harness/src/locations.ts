@@ -10,6 +10,7 @@ export function createLocationIndex(text: string): LocationIndex {
 	for (let index = 0; index < text.length; index += 1) {
 		if (text.startsWith("\n", index)) lineStarts.push(index + 1);
 	}
+
 	return { lineStarts, text };
 }
 

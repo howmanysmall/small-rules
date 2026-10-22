@@ -25,6 +25,7 @@ type StaticValue =
 	| ReadonlyArray<StaticValue>
 	| string
 	| { readonly [key: string]: StaticValue };
+
 type StaticObject = Record<string, StaticValue>;
 
 interface DocumentationMetadata {
@@ -99,12 +100,14 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 
 			const idOffsets = idOffsetsByRuleName.get(invocation.ruleName) ?? new Map<string, number>();
 			idOffsetsByRuleName.set(invocation.ruleName, idOffsets);
+
 			const examples = extractInvocationExamples(
 				invocation.cases,
 				invocation.language,
 				extractionContext,
 				idOffsets,
 			);
+
 			if (examples.length === 0) return;
 
 			const existingExamples = examplesByRuleName.get(invocation.ruleName);
@@ -173,6 +176,7 @@ function extractInvocationExamples(
 			examples.push(example);
 		}
 	}
+
 	return examples;
 }
 
@@ -183,6 +187,7 @@ function getCaseArrays(cases: ObjectExpression, context: ExtractionContext): Arr
 		if (field.property.value.type !== "ArrayExpression") continue;
 		caseArrays.push({ cases: field.property.value, kind: field.key });
 	}
+
 	return caseArrays;
 }
 
@@ -195,6 +200,7 @@ function validateFields(extractionContext: ExtractionContext, objectFields: Read
 				`unknown field "${field.key}" in documented case.`,
 			);
 		}
+
 		if (field.key === "only" || field.key === "skip") {
 			throw new ExtractionError(
 				extractionContext,
@@ -228,6 +234,7 @@ function extractCaseExample(
 		language: runnerLanguage,
 		title: documentation.title,
 	};
+
 	for (const field of fields) {
 		if (field.key === "documentation" || field.key === "code") continue;
 		const value = evaluateStatic(field.property.value, extractionContext);
@@ -239,9 +246,11 @@ function extractCaseExample(
 					`${field.key} must evaluate to a string.`,
 				);
 			}
+
 			Object.assign(example, { [field.key]: value });
 		} else Object.assign(example, { [field.key]: value });
 	}
+
 	return example;
 }
 
@@ -249,9 +258,11 @@ function evaluateDocumentation(value: Expression, extractionContext: ExtractionC
 	if (value.type !== "ObjectExpression") {
 		throw new ExtractionError(extractionContext, value.start, "documentation must be an object with id and title.");
 	}
+
 	const fields = getObjectFields(value, extractionContext);
 	const id = evaluateRequiredString(fields, "id", extractionContext, "documentation.");
 	const title = evaluateRequiredString(fields, "title", extractionContext, "documentation.");
+
 	for (const field of fields) {
 		if (field.key !== "id" && field.key !== "title") {
 			throw new ExtractionError(
@@ -261,6 +272,7 @@ function evaluateDocumentation(value: Expression, extractionContext: ExtractionC
 			);
 		}
 	}
+
 	return { id, title };
 }
 
@@ -276,6 +288,7 @@ function evaluateRequiredString(
 	if (!Predicate.isString(value)) {
 		throw new ExtractionError(context, field.property.value.start, `${prefix}${name} must evaluate to a string.`);
 	}
+
 	return value;
 }
 
@@ -286,9 +299,11 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 		if (property.type === "SpreadElement") {
 			throw new ExtractionError(context, property.start, "spread properties are not supported.");
 		}
+
 		if (property.computed) {
 			throw new ExtractionError(context, property.start, "computed object keys are not supported.");
 		}
+
 		if (property.kind !== "init" || property.method) {
 			throw new ExtractionError(
 				context,
@@ -296,8 +311,10 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 				"object methods, getters, and setters are not supported.",
 			);
 		}
+
 		fields[size++] = { key: getStaticKey(property.key, context), property };
 	}
+
 	return fields;
 }
 
@@ -309,6 +326,7 @@ function findField(object: ObjectExpression, name: string): ObjectField | undefi
 		if (property.key.type === "Identifier" && property.key.name === name) return { key: name, property };
 		if (isStringLiteral(property.key) && property.key.value === name) return { key: name, property };
 	}
+
 	return undefined;
 }
 
@@ -329,17 +347,21 @@ function getStaticKey(key: PropertyKey, context: ExtractionContext): string {
 function evaluateStatic(node: Expression, context: ExtractionContext): StaticValue {
 	if (isStaticLiteral(node)) return node.value;
 	if (node.type === "TemplateLiteral") return evaluateTemplate(node, context);
+
 	if (node.type === "TaggedTemplateExpression" && isStringRawTag(node.tag)) {
 		return evaluateTemplate(node.quasi, context);
 	}
+
 	if (node.type === "ArrayExpression") return evaluateArray(node, context);
 	if (node.type === "ObjectExpression") return evaluateObject(node, context);
 	if (node.type === "CallExpression" && isStringJoin(node)) return evaluateStringJoin(node, context);
+
 	if (node.type === "Identifier") {
 		throw new ExtractionError(context, node.start, "identifier references are not supported.");
 	} else if (node.type === "CallExpression") {
 		throw new ExtractionError(context, node.start, "function calls are not supported.");
 	}
+
 	throw new ExtractionError(context, node.start, `${node.type} values are not supported.`);
 }
 
@@ -367,6 +389,7 @@ function evaluateTemplate(template: TemplateLiteral, extractionContext: Extracti
 			"interpolated template literals are not supported.",
 		);
 	}
+
 	return template.quasis.map((quasi) => quasi.value.cooked).join("");
 }
 
@@ -388,11 +411,14 @@ function evaluateArray(array: ArrayExpression, extractionContext: ExtractionCont
 		if (element === null) {
 			throw new ExtractionError(extractionContext, array.start, "array holes are not supported.");
 		}
+
 		if (element.type === "SpreadElement") {
 			throw new ExtractionError(extractionContext, element.start, "array spreads are not supported.");
 		}
+
 		values[size++] = evaluateStatic(element, extractionContext);
 	}
+
 	return values;
 }
 
@@ -423,6 +449,7 @@ function evaluateStringJoin(node: CallExpression, extractionContext: ExtractionC
 	if (node.callee.type !== "MemberExpression" || node.callee.object.type !== "ArrayExpression") {
 		throw new ExtractionError(extractionContext, node.start, "function calls are not supported.");
 	}
+
 	const values = evaluateArray(node.callee.object, extractionContext);
 	if (values.some((value) => !Predicate.isString(value))) {
 		throw new ExtractionError(
@@ -431,6 +458,7 @@ function evaluateStringJoin(node: CallExpression, extractionContext: ExtractionC
 			"join arrays must contain only strings.",
 		);
 	}
+
 	// oxlint-disable-next-line typescript/no-base-to-string -- i hate.
 	return values.join("\n");
 }

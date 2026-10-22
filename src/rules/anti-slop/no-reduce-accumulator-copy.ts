@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-reduce-accumulator-copy.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/rules/no-reduce-accumulator-copy.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -71,6 +71,7 @@ function getConstAliasInitializer(variable: Variable): ESTree.Expression | undef
 			return initializer;
 		}
 	}
+
 	return undefined;
 }
 
@@ -79,6 +80,7 @@ function getVariableAnnotation(variable: Variable): ESTree.TSType | undefined {
 		const annotation = identifier.typeAnnotation?.typeAnnotation;
 		if (annotation !== undefined) return annotation;
 	}
+
 	return undefined;
 }
 
@@ -87,6 +89,7 @@ function isArrayAnnotation(type: ESTree.TSType): boolean {
 	while (isTsTypeOperator(current) && current.operator === "readonly") {
 		current = stripParenthesizedType(current.typeAnnotation);
 	}
+
 	if (isTsArrayType(current) || isTsTupleType(current)) return true;
 	return isTsTypeReference(current) && isIdentifier(current.typeName) && ARRAY_TYPE_NAMES.has(current.typeName.name);
 }
@@ -124,11 +127,13 @@ function isKnownArrayExpression(sourceCode: SourceCode, expression: ESTree.Expre
 	visitedVariables.clear();
 	let evidence = getArrayEvidence(sourceCode, expression);
 	while (!Predicate.isBoolean(evidence)) evidence = getArrayEvidence(sourceCode, evidence);
+
 	return evidence;
 }
 
 function declaresBinding(variable: Variable, binding: ESTree.BindingIdentifier): boolean {
 	for (const identifier of variable.identifiers) if (identifier.start === binding.start) return true;
+
 	return false;
 }
 
@@ -179,6 +184,7 @@ function createReducerFrame(
 
 	const hasArrayInitialValue =
 		initialValue !== undefined && isNotSpread(initialValue) && isKnownArrayExpression(sourceCode, initialValue);
+
 	return [callback, { accumulator: binding, hasArrayInitialValue }];
 }
 
@@ -191,10 +197,12 @@ function copiesIntoFreshObject(
 	if (target === undefined || !isNotSpread(target) || !isObjectExpression(stripExpressionWrappers(target))) {
 		return false;
 	}
+
 	for (let index = 1; index < node.arguments.length; index += 1) {
 		const source = node.arguments[index];
 		if (source !== undefined && referencesAccumulator(sourceCode, source, accumulator)) return true;
 	}
+
 	return false;
 }
 
@@ -208,10 +216,12 @@ function isAccumulatorCopy(
 	if (name === "assign" && isGlobalNamed(sourceCode, member.object, "Object")) {
 		return copiesIntoFreshObject(sourceCode, node, frame.accumulator);
 	}
+
 	if (name === "from" && isGlobalNamed(sourceCode, member.object, "Array")) {
 		const [source] = node.arguments;
 		return source !== undefined && referencesAccumulator(sourceCode, source, frame.accumulator);
 	}
+
 	return (
 		frame.hasArrayInitialValue &&
 		ARRAY_COPY_METHODS.has(name) &&

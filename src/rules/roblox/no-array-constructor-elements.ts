@@ -161,6 +161,7 @@ function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolea
 	}
 
 	if (isTemplateLiteral(unwrapped)) return unwrapped.expressions.length === 0;
+
 	if (isUnaryExpression(unwrapped)) {
 		/* v8 ignore next -- @preserve unary expressions are prefix in parser output for supported source forms. */
 		return unwrapped.operator === "void" || (unwrapped.operator === "typeof" && !unwrapped.prefix);
@@ -176,6 +177,7 @@ function getPushCallForIdentifier(
 	const unwrapped = stripExpressionWrappers(expression);
 	if (!isCallExpression(unwrapped) || unwrapped.optional) return undefined;
 	if (!isMemberExpression(unwrapped.callee) || unwrapped.callee.optional) return undefined;
+
 	if (!isIdentifierNamed(unwrapped.callee.object, identifierName)) {
 		return undefined;
 	}
@@ -276,6 +278,7 @@ function reportEmptyArrayConstructor(
 
 	const hasTypeArguments =
 		node.typeArguments !== undefined && node.typeArguments !== null && node.typeArguments.params.length > 0;
+
 	if (hasTypeArguments || hasContextualArrayAnnotation(node, context.sourceCode)) return;
 
 	context.report({
@@ -292,6 +295,7 @@ function reportMultiArgumentArrayConstructor(
 	const [firstArgument] = node.arguments;
 	/* v8 ignore next -- @preserve caller routes here only when arguments.length > 1. */
 	if (firstArgument === undefined) return;
+
 	if (
 		!isSpreadElement(firstArgument) &&
 		options.environment === ROBLOX_TS &&

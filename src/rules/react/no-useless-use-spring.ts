@@ -138,6 +138,7 @@ const noUselessUseSpring = createRule("no-useless-use-spring", "react", {
 					normalized,
 					isStaticArrayExpression,
 				);
+
 				if (!areDependenciesNonUpdating(dependenciesKind, normalized)) return;
 
 				context.report({

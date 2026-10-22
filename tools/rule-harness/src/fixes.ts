@@ -44,6 +44,7 @@ export function applyFixes(text: string, fixResult?: Fix | ReadonlyArray<Fix>): 
 		output += replacementText;
 		position = end;
 	}
+
 	output += text.slice(position);
 	return output;
 }
@@ -54,8 +55,10 @@ function collectFixes(fixResult: Fix | ReadonlyArray<Fix>): Array<Fix> {
 		for (const fix of fixResult) {
 			if (isFix.allows(fix)) fixes.push(fix);
 		}
+
 		return fixes;
 	}
+
 	if (isFix.allows(fixResult)) fixes.push(fixResult);
 	return fixes;
 }

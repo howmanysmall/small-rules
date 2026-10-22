@@ -70,6 +70,7 @@ function findDeclaration(sourceFile: SourceFile, typeName: string): Declaration 
 			return statement;
 		}
 	}
+
 	return undefined;
 }
 
@@ -87,6 +88,7 @@ function createExpandedTypeNode(
 		const node = checker.typeToTypeNode(member, declaration, TYPE_FORMAT_FLAGS);
 		if (node !== undefined) members.push(node);
 	}
+
 	return factory.createUnionTypeNode(members);
 }
 

@@ -17,9 +17,11 @@ function isIanitorMethodCall({ callee }: ESTree.CallExpression): boolean {
 const noIanitorInFunctionBody = createRule("no-ianitor-in-function-body", "roblox", {
 	create(context): Visitor {
 		let functionDepth = 0;
+
 		function increment(): void {
 			functionDepth += 1;
 		}
+
 		function decrement(): void {
 			functionDepth -= 1;
 		}

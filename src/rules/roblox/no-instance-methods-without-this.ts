@@ -6,6 +6,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type Options = InferContextFromRule<typeof noInstanceMethodsWithoutThis>["options"][0];
+
 type NormalizedOptions = NonNullable<Options>;
 
 const DEFAULT_OPTIONS: NormalizedOptions = {
@@ -39,6 +40,7 @@ function containsThisInChildren(currentNode: ESTree.Node, visited: WeakSet<ESTre
 			for (const item of child) if (isNode(item) && traverseForThis(item, visited)) return true;
 			continue;
 		}
+
 		if (isNode(child) && traverseForThis(child, visited)) return true;
 	}
 
@@ -49,6 +51,7 @@ function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>
 	if (visited.has(currentNode)) return false;
 
 	visited.add(currentNode);
+
 	if (isThisExpression(currentNode) || isSuper(currentNode)) return true;
 	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
 	if (!Predicate.isObject(currentNode)) return false;

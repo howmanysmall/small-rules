@@ -31,14 +31,17 @@ const command = createBaseCommand(
 		const verbs = [...programming];
 
 		let next = 0;
+
 		async function drainQueueAsync(): Promise<void> {
 			while (next < candidates.length) {
 				const word = candidates[next];
 				next += 1;
+
 				// oxlint-disable-next-line no-await-in-loop -- each worker drains the shared queue one request at a time
 				if (word !== undefined && (await isDatamuseVerbAsync(word))) verbs.push(word);
 			}
 		}
+
 		await Promise.all(Array.from({ length: concurrency }, drainQueueAsync));
 
 		const generated = renderDictionaryVerbs(verbs);

@@ -1,0 +1,96 @@
+---
+title: "Require Readable Spacing"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="require-readable-spacing">
+	<Fragment slot="rationale">
+		<p>
+			Ported from <a href="https://github.com/dmmulroy/anti-slop">dmmulroy/anti-slop</a>, which builds it on
+			<a href="https://eslint.style/rules/padding-line-between-statements">padding-line-between-statements</a>
+			from ESLint Stylistic. Generated code often packs imports, declarations, and control flow into one block of
+			text. This rule requires a blank line after imports and between top-level statements. It also requires one
+			around functions, classes, interfaces, types, and bindings that span lines. Control flow gets one before it,
+			and a statement that ends in a block gets one after it. Runs of one-line bindings stay grouped, and so do
+			imports and overloads. A binding with its own comment starts a new group. The fix adds blank lines and never
+			removes them.
+		</p>
+		<p>
+			With no options, the rule follows anti-slop. Spacing is a matter of taste, so every part of that policy can
+			change. Each requirement has its own switch:
+		</p>
+		<ul>
+			<li>`afterImports`: a blank line after the import group.</li>
+			<li>`betweenTopLevelStatements`: blank lines between top-level statements.</li>
+			<li>`aroundDeclarations`: blank lines around functions, classes, interfaces, and types.</li>
+			<li>`aroundMultilineBindings`: blank lines around `const`, `let`, and `var` that span lines.</li>
+			<li>`beforeControlFlow`: a blank line before `if`, loops, `switch`, `try`, and `return`.</li>
+			<li>`afterBlocks`: a blank line after a statement that ends in a block, such as an `if` or a function.</li>
+		</ul>
+		<p>The `allow` switches, off by default, keep related statements together:</p>
+		<ul>
+			<li>
+				`allowAttachedUses`: below module scope, a statement may follow a one-line statement with no blank line
+				when it reads a name that statement declares or assigns. That covers `const ready = await check(path);`
+				followed by `if (ready) {`, `let result = "";` before the loop that builds `result`, and
+				`index = next(index);` before `if (index === -1) return;`.
+			</li>
+			<li>
+				`allowGuardClauseRuns`: one-line `if` statements stay grouped, and so does a one-line `return` or
+				`throw` right after one. A multi-line `if` still needs a blank line after it.
+			</li>
+			<li>
+				`allowMultilineBindingRuns`: consecutive bindings stay grouped even when one of them spans lines. A
+				binding with its own comment still starts a new group.
+			</li>
+		</ul>
+		<p>
+			For anything the switches don't cover, `overrides` takes entries shaped like ESLint Stylistic's:
+			`{ blankLine, previous, next }`. The rule checks them in order, before anything built in, and the first
+			entry that matches a pair of adjacent statements decides it. `blankLine: "always"` requires a blank line and
+			`blankLine: "any"` accepts either spacing. `previous` and `next` each take one statement kind or a list of
+			them. Add `usesPrevious: true` to match only when the second statement reads a name the first one declares
+			or assigns. For example, this keeps a one-line binding next to the function below it:
+			`{ blankLine: "any", previous: "single-line-binding", next: "function" }`. Turn every requirement switch off
+			and `overrides` becomes a policy of your own.
+		</p>
+		<p>The statement kinds are:</p>
+		<ul>
+			<li>`*`: any statement.</li>
+			<li>
+				`binding`, `single-line-binding`, `multiline-binding`: `const`, `let`, `var`, and `using`
+				declarations.
+			</li>
+			<li>
+				`declaration`, `function`, `class`, `interface`, `type`, `enum`, `overload`: declarations, where
+				`overload` is a function signature with no body.
+			</li>
+			<li>`import`, `export`, and `top-level`, which excludes imports.</li>
+			<li>`expression`: a call, an assignment, or another expression on its own.</li>
+			<li>
+				`control-flow`, `if`, `single-line-if`, `loop`, `switch`, `try`, `return`, `throw`: control flow, where
+				`control-flow` covers `if`, loops, `switch`, `try`, and `return`.
+			</li>
+			<li>`block-like`: a statement that ends in a block, such as an `if`, a function, or `const f = () => {};`.</li>
+			<li>`single-line`, `multiline`: any statement, by whether it fits on one line.</li>
+		</ul>
+		<p>
+			Declaration and binding kinds match through `export` and `export default`, so `function` matches
+			`export function detect() {}` too.
+		</p>
+		<p>This port differs from anti-slop in a few ways:</p>
+		<ul>
+			<li>All the options are local, since upstream has none.</li>
+			<li>
+				It matches functions, classes, interfaces, types, and bindings by node type, so `abstract`, `declare`,
+				and decorated forms count too. Exported bindings count as bindings, including multi-line ones.
+			</li>
+			<li>It checks `export = value` like any other statement. Upstream skips it.</li>
+			<li>
+				It keeps only the parts of ESLint Stylistic's engine that this rule uses. The rule never removes blank
+				lines.
+			</li>
+		</ul>
+	</Fragment>
+</RulePage>

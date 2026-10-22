@@ -26,6 +26,7 @@ const noChainStateUpdates = createRule("no-chain-state-updates", "react", {
 					const isSomeDependenciesState = effect.dependencyReferences
 						.flatMap(analysis.scope.getUpstreamReferences)
 						.some(analysis.isState);
+
 					if (!isSomeDependenciesState) continue;
 
 					for (const stateSetterCall of getSynchronousStateSetterCalls(analysis, effect, isNoArgumentState)) {

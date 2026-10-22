@@ -187,6 +187,7 @@ function addExpressionChildrenToPending(expression: ESTree.Expression, pending: 
 
 		case MEMBER_EXPRESSION: {
 			pending.push(expression.object);
+
 			if (expression.computed) pending.push(expression.property);
 			break;
 		}
@@ -199,6 +200,7 @@ function addExpressionChildrenToPending(expression: ESTree.Expression, pending: 
 
 		case TAGGED_TEMPLATE_EXPRESSION: {
 			pending.push(expression.tag);
+
 			for (const quasi of expression.quasi.expressions) pending.push(quasi);
 			break;
 		}
@@ -414,6 +416,7 @@ function hasConfiguredLoopExitInDeclaration(
 	for (const declarator of declaration.declarations) {
 		if (declarator.init !== null && hasConfiguredLoopExit(declarator.init, loopExitCalls)) return true;
 	}
+
 	return false;
 }
 

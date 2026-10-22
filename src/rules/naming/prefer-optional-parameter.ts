@@ -61,6 +61,7 @@ function canFollowOptionalParameter(
 		const parameter = parameters[nextIndex];
 		if (parameter === undefined || !isOptionalParameter(parameter, sourceCode)) return false;
 	}
+
 	return true;
 }
 
@@ -104,6 +105,7 @@ function splitUndefinedUnion(annotation: ESTree.TSTypeAnnotation): undefined | U
 			hasUndefined = true;
 			continue;
 		}
+
 		retainedTypes.push(member);
 	}
 
@@ -132,6 +134,7 @@ const preferOptionalParameter = createRule("prefer-optional-parameter", "naming"
 				!isSetter &&
 				canUseOptionalBinding(parameter, owner) &&
 				canFollowOptionalParameter(owner.params, index, sourceCode);
+
 			if (!isOptionalPositionAllowed) return;
 
 			const data = { parameter: getFunctionParameterBindingName(parameter, sourceCode) };

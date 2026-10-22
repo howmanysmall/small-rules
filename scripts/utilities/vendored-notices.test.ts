@@ -16,7 +16,7 @@ const BANNER_TEXT = BANNER.split("\n")
 	.join("\n");
 
 const componentsMissingAttribution = VENDORED_COMPONENTS.filter(
-	({ copyright, source }) => !BANNER.includes(copyright) || !BANNER.includes(source),
+	({ copyright, source }) => !BANNER_TEXT.includes(copyright) || !BANNER_TEXT.includes(source),
 );
 
 const componentsMissingPermission = VENDORED_COMPONENTS.filter(

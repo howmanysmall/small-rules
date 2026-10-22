@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-known-value-widening.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/rules/no-known-value-widening.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -135,6 +135,7 @@ function getVariableTypeAnnotation(
 	const [definition] = variable.defs;
 	/* v8 ignore next -- A one-element definitions array has a first item. @preserve */
 	if (definition === undefined) return undefined;
+
 	if (
 		definition.type === "Variable" &&
 		isVariableDeclarator(definition.node) &&
@@ -142,6 +143,7 @@ function getVariableTypeAnnotation(
 	) {
 		return definition.node.id.typeAnnotation ?? undefined;
 	}
+
 	if (definition.type !== "Parameter") return undefined;
 	/* v8 ignore next -- Parameter definitions own function-like nodes. @preserve */
 	if (!isFunctionLike(definition.node)) return undefined;
@@ -151,6 +153,7 @@ function getVariableTypeAnnotation(
 			return getFunctionParameterTypeAnnotation(parameter);
 		}
 	}
+
 	return undefined;
 }
 
@@ -163,6 +166,7 @@ function unwrapCallArgumentExpression(expression: ESTree.Expression): ESTree.Exp
 	while (isParenthesizedExpression(current) || isTsNonNullExpression(current) || isTsSatisfiesExpression(current)) {
 		current = current.expression;
 	}
+
 	return current;
 }
 
@@ -180,6 +184,7 @@ function getEnclosingFunction(node: ESTree.Node): FunctionExpression | undefined
 		if (isAnyFunction(current)) return current;
 		current = current.parent;
 	}
+
 	/* v8 ignore next -- top-level returns only occur in script sources this suite does not exercise. @preserve */
 	return undefined;
 }
@@ -222,6 +227,7 @@ function hasParentAssertion(node: ESTree.Node): boolean {
 		current = parent;
 		({ parent } = current);
 	}
+
 	return parent !== null && isTypeAssertionExpression(parent) && parent.expression === current;
 }
 
@@ -236,6 +242,7 @@ function unwrapExpressionParentheses(expression: ESTree.Expression): ESTree.Expr
 	) {
 		current = current.expression;
 	}
+
 	return current;
 }
 

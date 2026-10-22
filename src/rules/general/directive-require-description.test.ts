@@ -107,6 +107,7 @@ describe("directive-require-description", () => {
 		const stub = {
 			getAllComments: (): Array<Comment> => [lineComment],
 		} satisfies Pick<SourceCode, "getAllComments">;
+
 		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Test stub only provides getAllComments from SourceCode.
 		const stubSourceCode = stub as SourceCode;
 		const stubContext = {
@@ -116,6 +117,7 @@ describe("directive-require-description", () => {
 			},
 			sourceCode: stubSourceCode,
 		};
+
 		// oxlint-disable-next-line typescript/no-unsafe-type-assertion, small-rules/no-chained-type-assertions -- Test stub only provides options, report, and sourceCode from Context.
 		const context = stubContext as unknown as Parameters<typeof rule.create>[0];
 

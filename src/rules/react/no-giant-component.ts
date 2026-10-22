@@ -18,6 +18,7 @@ interface ComponentDetails {
 	readonly body: ESTree.Node;
 	readonly nameNode: ESTree.Node;
 }
+
 function getComponentDeclarationDetails(node: ESTree.Node): ComponentDetails | undefined {
 	if (!isFunctionDeclaration(node) || !isComponentDeclaration(node) || node.id === null || node.body === null) {
 		return undefined;

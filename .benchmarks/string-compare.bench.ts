@@ -15,6 +15,7 @@ for (let index = 0; index < length; index += 1) {
 		strings[index] = "";
 		continue;
 	}
+
 	const sentence = faker.word.words(nextInteger(1, 20));
 	strings[index] = sentence;
 }

@@ -156,6 +156,7 @@ const noUnusedImports = defineFixableCase({
 			defaultName,
 			bindings.map(({ name }) => name),
 		);
+
 		if (defaultName !== undefined) bindings.push({ name: defaultName, used: defaultImport?.used === true });
 
 		return {
@@ -237,6 +238,7 @@ const requireSwitchCaseBraces = defineFixableCase({
 			const statements = breaks ? `${body}\nbreak;` : body;
 			return braced ? `${label} {\n${statements}\n}` : `${label}\n${statements}`;
 		});
+
 		return { statements: [`switch (${discriminant}) {\n${clauses.join("\n")}\n}`] };
 	},
 	rule: "require-switch-case-braces",
@@ -273,6 +275,7 @@ const requireThrowErrorCapture = defineFixableCase({
 		const body = [...preexisting.map((local) => `const ${local} = ${JSON.stringify(local)};`), ...throws].join(
 			"\n",
 		);
+
 		switch (form) {
 			case "arrow":
 				return { statements: [`const ${name}${id} = () => {\n${body}\n};`] };
@@ -351,12 +354,15 @@ function renderTrailingParameter(trailing: TrailingParameter, id: number): strin
 		case "default": {
 			return `, limit${id} = 1`;
 		}
+
 		case "optional": {
 			return `, limit${id}?: number`;
 		}
+
 		case "rest": {
 			return `, ...rest${id}: number[]`;
 		}
+
 		default: {
 			return "";
 		}
@@ -372,9 +378,11 @@ const preferOptionalParameter = defineFixableCase({
 			case "arrow": {
 				return { statements: [`const get${capitalize(name)}${id} = (${parameter}) => undefined;`] };
 			}
+
 			case "method": {
 				return { statements: [`class Turns${id} { get${capitalize(name)}(${parameter}): void {} }`] };
 			}
+
 			default: {
 				return { statements: [`function get${capitalize(name)}${id}(${parameter}): void {}`] };
 			}

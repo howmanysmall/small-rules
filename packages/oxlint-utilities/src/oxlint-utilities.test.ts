@@ -176,11 +176,13 @@ function findNode(source: HarnessSourceCode, type: ESTree.Node["type"]): ESTree.
 			if (isNode(node) && node.type === type) found ??= node;
 		},
 	});
+
 	if (found === undefined) {
 		const error = new Error(`Node of type "${type}" not found.`);
 		Error.captureStackTrace(error, findNode);
 		throw error;
 	}
+
 	return found;
 }
 

@@ -18,12 +18,15 @@ export const enum Casing {
 function toUpperCaseSlow(value: string): string {
 	return value.toLocaleUpperCase();
 }
+
 function toLowerCaseSlow(value: string): string {
 	return value.toLocaleLowerCase();
 }
+
 function toUpperCaseFast(value: string): string {
 	return value.toUpperCase();
 }
+
 function toLowerCaseFast(value: string): string {
 	return value.toLowerCase();
 }
@@ -34,6 +37,7 @@ let localeModeEnabled = false;
 
 export function setLocaleMode(enabled: boolean): void {
 	localeModeEnabled = enabled;
+
 	if (enabled) {
 		toUpperCaseLocale = toUpperCaseSlow;
 		toLowerCaseLocale = toLowerCaseSlow;
@@ -144,6 +148,7 @@ function matchesStringAt(value: string, index: number, expected: string): number
 	if (expected.length === 1) {
 		return value.charCodeAt(index) === expected.charCodeAt(0) ? index + 1 : -1;
 	}
+
 	return value.startsWith(expected, index) ? index + expected.length : -1;
 }
 
@@ -179,6 +184,7 @@ function matchTransformedCharacter(
 		if (capitalizeNext && isAsciiLetterCode(code)) {
 			return matchUpperCharacter(value, sourceIndex, code, outputIndex);
 		}
+
 		return matchLowerCharacter(value, sourceIndex, code, outputIndex);
 	}
 
@@ -193,6 +199,7 @@ function matchTransformedCharacter(
 	if (capitalizeNext && isAsciiLowerCode(code)) {
 		return matchUpperCharacter(value, sourceIndex, code, outputIndex);
 	}
+
 	return value.charCodeAt(outputIndex) === code ? outputIndex + 1 : -1;
 }
 
@@ -288,6 +295,7 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 			} else {
 				outputIndex = value.charCodeAt(outputIndex) === code ? outputIndex + 1 : -1;
 			}
+
 			if (outputIndex === -1) return false;
 
 			hasLineOutput = false;
@@ -311,6 +319,7 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 				outputIndex = matchesStringAt(value, outputIndex, delimiter);
 				if (outputIndex === -1) return false;
 			}
+
 			capitalizeNext = true;
 		}
 
@@ -329,12 +338,15 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 export function toSpaceCase(value: string): string {
 	return transformCasing(value, TransformMode.Space, " ");
 }
+
 export function toLowerCase(value: string): string {
 	return transformCasing(value, TransformMode.Lower, " ");
 }
+
 export function toUpperCase(value: string): string {
 	return transformCasing(value, TransformMode.Upper, " ");
 }
+
 export function toPathCase(value: string): string {
 	return transformCasing(value, TransformMode.DelimitedLower, "/");
 }
@@ -370,33 +382,43 @@ export function toKebabCase(value: string): string {
 export function isCamelCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.Camel, "");
 }
+
 export function isConstantCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.DelimitedUpper, "_");
 }
+
 export function isDotCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.DelimitedLower, ".");
 }
+
 export function isKebabCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.DelimitedLower, "-");
 }
+
 export function isLowerCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.Lower, " ");
 }
+
 export function isPascalCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.Pascal, "");
 }
+
 export function isPathCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.DelimitedLower, "/");
 }
+
 export function isSnakeCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.DelimitedLower, "_");
 }
+
 export function isTitleCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.Title, " ");
 }
+
 export function isUnknown(_: string): boolean {
 	return true;
 }
+
 export function isUpperCase(value: string): boolean {
 	return matchesCasing(value, TransformMode.Upper, " ");
 }
@@ -447,6 +469,7 @@ const graphemeSegmenter = new Intl.Segmenter(undefined, {
 interface SegmentData {
 	readonly segment: string;
 }
+
 function getSegment({ segment }: SegmentData): string {
 	return segment;
 }
@@ -492,6 +515,7 @@ export function copy(previousString: string, nextString: string): string {
 }
 
 const SPACE_REGEXP = /\s/u;
+
 export function detect(value: string): Casing {
 	if (value.length > 0) {
 		if (SPACE_REGEXP.test(value)) {

@@ -111,19 +111,23 @@ function buildReplacementRegExp(replacements: ReadonlyMap<string, string>): RegE
 		lowerFirstForms.push(escapeRegExp(discouragedName));
 		upperFirstForms.push(escapeRegExp(upperFirst(discouragedName)));
 	}
+
 	return new RegExp(`(?:^(?:${lowerFirstForms.join("|")})|(?:${upperFirstForms.join("|")}))${BOUNDARY}`, "gu");
 }
 
 function parseReplacements(raw: RawOptions["replacements"] | undefined, extendDefault: boolean): Map<string, string> {
 	const merged = new Map(extendDefault ? DEFAULT_REPLACEMENTS_MAP : undefined);
 	if (!Predicate.isObject(raw)) return merged;
+
 	for (const [key, value] of Object.entries(raw)) {
 		if (value === false) {
 			merged.delete(key);
 			continue;
 		}
+
 		if (isNonEmptyString(value)) merged.set(key, value);
 	}
+
 	return merged;
 }
 
@@ -135,6 +139,7 @@ function parseOptions(rawOptions?: RawOptions): RuleOptions {
 	if (Predicate.isObject(options.allowList)) {
 		for (const key of Object.keys(options.allowList)) allowList.add(key);
 	}
+
 	return {
 		allowList,
 		checkProperties: options.checkProperties === true,
@@ -172,6 +177,7 @@ function shouldReportPropertyIdentifier(node: ESTree.Node): boolean {
 	const { parent } = node;
 	/* v8 ignore next -- Identifier visitors always have parents in parser ASTs. @preserve */
 	if (parent === null) return false;
+
 	return (
 		(isProperty(parent) && parent.key === node && !parent.computed) ||
 		(isPropertyDefinitionRaw(parent) && parent.key === node && !parent.computed) ||
@@ -203,6 +209,7 @@ const consistentCompoundWords = createRule("consistent-compound-words", "english
 				) {
 					return;
 				}
+
 				reportName(node, node.name);
 			},
 			"Program:exit"(): void {
@@ -218,6 +225,7 @@ const consistentCompoundWords = createRule("consistent-compound-words", "english
 					) {
 						return;
 					}
+
 					reportName(definition.name, variable.name);
 				});
 			},

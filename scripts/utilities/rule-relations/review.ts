@@ -77,6 +77,7 @@ function evaluateOverrides(options: ReviewOptions): QualityEvaluation {
 	for (const pair of options.denylist) {
 		expectations.set(getPairKey(pair.from, pair.to), { expected: "unrelated", pair });
 	}
+
 	for (const pin of options.pins) {
 		const expected = { from: pin.from, kind: pin.kind, to: pin.to };
 		expectations.set(getPairKey(pin.from, pin.to), { expected, pair: { from: pin.from, to: pin.to } });
@@ -143,6 +144,7 @@ export function createRelationReviewReport(options: ReviewOptions): RelationRevi
 		if (resolution.type !== "relation") continue;
 
 		acceptedCount += 1;
+
 		if (!publishedPairs.has(key) && !reviewPairs.has(key)) {
 			capped.push({
 				judgments: result.judgments.get(key),

@@ -72,11 +72,13 @@ async function findProjectsAsync(rootDirectory: string): Promise<ReadonlyArray<s
 		const children = await readdir(nodePath.join(rootDirectory, parent), { withFileTypes: true });
 		for (const child of children) if (child.isDirectory()) candidates[size++] = `${parent}/${child.name}`;
 	}
+
 	for (const standalone of STANDALONE_PROJECTS) candidates[size++] = standalone;
 
 	const projects = await Promise.all(
 		candidates.toSorted(compareUsingLocale).map(async (directory) => readProjectAsync(rootDirectory, directory)),
 	);
+
 	return projects.filter((project) => project !== undefined);
 }
 
@@ -98,6 +100,7 @@ async function writeReferencesAsync(filePath: string, referencePaths: ReadonlyAr
 	if ("extends" in tsconfig) ordered.extends = tsconfig.extends;
 	if ("compilerOptions" in tsconfig) ordered.compilerOptions = tsconfig.compilerOptions;
 	if (references.length > 0) ordered.references = references;
+
 	for (const [key, value] of Object.entries(tsconfig)) {
 		// `references` is owned by this script; an empty expected list must
 		// remove the key instead of leaking the stale one back through.
@@ -150,6 +153,7 @@ export async function findStaleReferencesAsync(rootDirectory: string): Promise<R
 		if (isSameReferences(actualReferences, expectedReferences)) continue;
 		staleReferences[size++] = { actualReferences, expectedReferences, path };
 	}
+
 	return staleReferences;
 }
 
@@ -159,5 +163,6 @@ export async function syncTsconfigReferencesAsync(rootDirectory: string): Promis
 		// oxlint-disable-next-line no-await-in-loop -- sequential writes keep the report ordered
 		await writeReferencesAsync(nodePath.join(rootDirectory, path), expectedReferences);
 	}
+
 	return staleReferences;
 }

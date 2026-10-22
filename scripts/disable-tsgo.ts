@@ -33,6 +33,7 @@ const isSettingsJson = type({
 	content: isString,
 	filePath: isString,
 }).readonly();
+
 type SettingsJson = typeof isSettingsJson.infer;
 
 async function getSettingsJsonAsync(filePath: string): Promise<SettingsJson | undefined> {
@@ -46,6 +47,7 @@ async function getSettingsJsonAsync(filePath: string): Promise<SettingsJson | un
 		return undefined;
 	}
 }
+
 async function getSettingsJsonsAsync(settingsPaths: ReadonlyArray<string>): Promise<ReadonlyArray<SettingsJson>> {
 	const results = await Promise.all(settingsPaths.map(getSettingsJsonAsync));
 	return results.filter((value): value is SettingsJson => value !== undefined);
@@ -109,6 +111,7 @@ function* getLcsDiff(oldLines: ReadonlyArray<string>, newLines: ReadonlyArray<st
 }
 
 const CTX = 3;
+
 function expandChangeRegion(operations: ReadonlyArray<DiffOperation>, startIndex: number): number {
 	let rawEnd = startIndex;
 	let pendingEqual = 0;
@@ -165,6 +168,7 @@ function countLines(operations: ReadonlyArray<DiffOperation>, upTo: number): Lin
 		if (operation.operation === Operation.Equal || operation.operation === Operation.Delete) oldNumber += 1;
 		if (operation.operation === Operation.Equal || operation.operation === Operation.Add) newNumber += 1;
 	}
+
 	return { newNumber, oldNumber } satisfies Lines;
 }
 
@@ -188,6 +192,7 @@ function formatDiff(filePath: string, oldContent: string, newContent: string): s
 		for (let offset = start; offset < end; offset += 1) {
 			const operation = operations[offset];
 			if (operation === undefined) continue;
+
 			if (operation.operation === Operation.Equal) {
 				hunkLines.push(` ${operation.line}`);
 				oldCount += 1;
@@ -202,6 +207,7 @@ function formatDiff(filePath: string, oldContent: string, newContent: string): s
 		}
 
 		out.push(dim(`@@ -${regionOldStart},${oldCount} +${regionNewStart},${newCount} @@`));
+
 		for (const line of hunkLines) out.push(line);
 	}
 

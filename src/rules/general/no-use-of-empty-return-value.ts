@@ -34,6 +34,7 @@ function isValueUsedByParent(parent: ESTree.Node, child: ESTree.Node): boolean {
 
 	if (isLogicalExpression(currentParent)) return currentParent.left === currentChild;
 	if (isConditionalExpression(currentParent)) return currentParent.test === currentChild;
+
 	return (
 		!isExpressionStatement(currentParent) &&
 		!isArrowFunctionExpression(currentParent) &&
@@ -53,6 +54,7 @@ function getFunctionFromVariable(variable: Variable): FunctionLike | undefined {
 	if (definition === undefined) return undefined;
 
 	if (definition.type === "FunctionName" && isAnyFunction(definition.node)) return definition.node;
+
 	if (
 		definition.type === "Variable" &&
 		isVariableDeclarator(definition.node) &&
@@ -60,6 +62,7 @@ function getFunctionFromVariable(variable: Variable): FunctionLike | undefined {
 	) {
 		return definition.node.init;
 	}
+
 	return undefined;
 }
 
@@ -71,10 +74,12 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 
 		function enterFunction(node: FunctionLike): void {
 			functionStack.push(node);
+
 			if (node.async || node.generator) {
 				functionsWithReturnValue.add(node);
 				return;
 			}
+
 			if (isArrowFunctionExpression(node) && node.expression) functionsWithReturnValue.add(node);
 		}
 

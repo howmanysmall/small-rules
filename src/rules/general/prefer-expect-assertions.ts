@@ -20,6 +20,7 @@ import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, Fix, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
 type RuleContext = InferContextFromRule<typeof preferExpectAssertions>;
+
 type RawRuleOptions = RuleContext["options"][0];
 
 interface RuleOptions {
@@ -86,6 +87,7 @@ function shouldCheckTest(
 	hasExpectInLoop: boolean,
 ): boolean {
 	if (deterministic + indeterminate === 0) return false;
+
 	return (
 		!hasEnabledFilter(options) ||
 		(options.onlyFunctionsWithAsyncKeyword && callback.async) ||
@@ -133,6 +135,7 @@ function reportMissingAssertions(
 						if (firstStatement !== undefined) {
 							return fixer.insertTextBefore(firstStatement, "expect.hasAssertions();\n");
 						}
+
 						/* v8 ignore next -- positive indeterminate assertion count requires a non-empty block @preserve */
 						return fixer.insertTextAfterRange(
 							[body.range[0], body.range[0] + 1],
@@ -157,6 +160,7 @@ function reportMissingAssertions(
 					if (firstStatement !== undefined) {
 						return fixer.insertTextBefore(firstStatement, `expect.assertions(${count});\n`);
 					}
+
 					/* v8 ignore next -- positive deterministic assertion count requires a non-empty block @preserve */
 					return fixer.insertTextAfterRange(
 						[body.range[0], body.range[0] + 1],
@@ -182,11 +186,13 @@ function validateAssertionCall(
 				node: assertionCall,
 			});
 		}
+
 		return;
 	}
 
 	/* v8 ignore next -- @preserve caller validates only assertion guard calls here. */
 	if (!isExpectAssertionsCall(assertionCall)) return;
+
 	if (assertionCall.arguments.length !== 1) {
 		context.report({
 			messageId: "assertionsRequiresOneArgument",
@@ -260,6 +266,7 @@ function handleAssertionGuard(
 	hasIndeterminate: boolean,
 ): void {
 	validateAssertionCall(context, assertionCall, deterministic, hasIndeterminate);
+
 	if (!shouldPreferAssertionsCount(assertionCall, hasIndeterminate, deterministic)) return;
 	reportPreferAssertionsCount(context, callback, assertionCall, deterministic);
 }
@@ -282,6 +289,7 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 
 				const { deterministic, hasExpectInCallback, hasExpectInLoop, hasIndeterminate, indeterminate } =
 					countExpectCalls(body, getAdditionalExpectCallNames(options));
+
 				if (
 					!shouldCheckTest(
 						callback,

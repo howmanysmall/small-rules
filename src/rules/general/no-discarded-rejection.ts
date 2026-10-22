@@ -59,11 +59,13 @@ const noDiscardedRejection = createRule("no-discarded-rejection", "general", {
 				if (!isMemberExpression(callee) || callee.computed || !isIdentifierNamed(callee.property, "catch")) {
 					return;
 				}
+
 				if (!isNativePromiseExpression(sourceCode, callee.object)) return;
 				const [handler] = node.arguments;
 				if (handler === undefined || isSpreadElement(handler) || !isDiscardingHandler(sourceCode, handler)) {
 					return;
 				}
+
 				context.report({ messageId: "noDiscardedRejection", node: handler });
 			},
 		} satisfies Visitor;

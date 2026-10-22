@@ -43,6 +43,7 @@ export function createRelationUsageTracker(): RelationUsageTracker {
 			totals.inputTokens += usage.inputTokens ?? 0;
 			totals.outputTokens += usage.outputTokens ?? 0;
 			totals.totalTokens += usage.totalTokens ?? 0;
+
 			if (usage.cost !== undefined) {
 				totals.cost += usage.cost;
 				totals.costReports += 1;

@@ -15,6 +15,7 @@ import noUnknownReturns from "$oxc-rules/anti-slop/no-unknown-returns";
 import noUnknownTypeAliases from "$oxc-rules/anti-slop/no-unknown-type-aliases";
 import noUnsafeDictionaryType from "$oxc-rules/anti-slop/no-unsafe-dictionary-type";
 import noWidenThenAssert from "$oxc-rules/anti-slop/no-widen-then-assert";
+import requireReadableSpacing from "$oxc-rules/anti-slop/require-readable-spacing";
 import requireSafetyCommentForTypeAssertion from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
 import consistentCompoundWords from "$oxc-rules/english/consistent-compound-words";
 import preferSingularEnums from "$oxc-rules/english/prefer-singular-enums";
@@ -261,6 +262,7 @@ const smallRules = definePlugin({
 		"require-paired-calls": requirePairedCalls,
 		"require-react-component-keys": requireReactComponentKeys,
 		"require-react-display-names": requireReactDisplayNames,
+		"require-readable-spacing": requireReadableSpacing,
 		"require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertion,
 		"require-switch-case-braces": requireSwitchCaseBraces,
 		"require-throw-error-capture": requireThrowErrorCapture,
@@ -274,4 +276,5 @@ const smallRules = definePlugin({
 });
 
 export { DependencyMode } from "$oxc-rules/react/no-useless-use-memo";
+
 export default smallRules;

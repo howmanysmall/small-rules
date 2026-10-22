@@ -35,6 +35,7 @@ import type { Definition, ESTree, Scope, Variable, Visitor } from "oxlint-plugin
 import type { UnknownRecord } from "type-fest";
 
 type Mode = "aggressive" | "definite" | "moderate";
+
 const enum Stability {
 	Memoized = 1,
 	Unknown = 2,
@@ -67,6 +68,7 @@ function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: Rea
 	if (callee.computed || !isIdentifier(callee.object) || !reactNamespaces.has(callee.object.name)) {
 		return undefined;
 	}
+
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
 	return isIdentifier(callee.property) ? callee.property.name : undefined;
 }
@@ -143,8 +145,10 @@ function registerConfiguredEffectHooks(rawOptions: UnknownRecord, effectHooks: M
 	for (const hook of rawOptions.hooks) {
 		/* v8 ignore next -- @preserve rule schema rejects hook entries without string names. */
 		if (!Predicate.isObject(hook) || !("name" in hook) || !Predicate.isString(hook.name)) continue;
+
 		const dependenciesIndex =
 			"dependenciesIndex" in hook && Predicate.isNumber(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
+
 		effectHooks.set(hook.name, dependenciesIndex);
 	}
 }
@@ -198,18 +202,22 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 					cachedVariables.set(identifier.name, found);
 					return found;
 				}
+
 				scope = scope.upper;
 			}
+
 			cachedVariables.set(identifier.name, undefined);
 			return undefined;
 		}
 
 		function isMemoHookCall({ callee }: ESTree.CallExpression): boolean {
 			if (isIdentifier(callee)) return memoHookIdentifiers.has(callee.name);
+
 			if (isMemberExpression(callee)) {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				return hookName !== undefined && MEMO_HOOKS.has(hookName);
 			}
+
 			return false;
 		}
 
@@ -307,6 +315,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 
 		function handleDependencyElement(element: ESTree.ArrayExpressionElement): void {
 			if (element === null) return;
+
 			if (isSpreadElement(element)) {
 				if (mode === "definite") return;
 				reportUnmemoizedDependency(sourceCode.getText(element.argument), element.argument);
@@ -331,10 +340,12 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 
 		function getDependenciesIndex({ callee }: ESTree.CallExpression): number | undefined {
 			if (isIdentifier(callee)) return effectHookIdentifiers.get(callee.name);
+
 			if (isMemberExpression(callee)) {
 				const hookName = getMemberHookName(callee, reactNamespaces);
 				return hookName === undefined ? undefined : effectHookNameToIndex.get(hookName);
 			}
+
 			return undefined;
 		}
 
@@ -355,6 +366,7 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 						/* v8 ignore next -- @preserve guarded by has(importedName), so the fallback is defensive. */
 						effectHookIdentifiers.set(localName, fallbackIndex ?? 1);
 					}
+
 					if (MEMO_HOOKS.has(importedName)) memoHookIdentifiers.add(localName);
 					if (STABLE_HOOKS.has(importedName)) stableHookIdentifiers.set(localName, importedName);
 				});

@@ -67,6 +67,7 @@ fuzz(
 		const expectedCount = nested && tracked ? 1 : 0;
 
 		expect(result.diagnostics).toHaveLength(expectedCount);
+
 		if (expectedCount === 0) return;
 
 		expect(result.diagnostics[0]).toMatchObject({

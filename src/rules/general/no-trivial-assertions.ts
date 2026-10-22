@@ -28,6 +28,7 @@ import type { NodeType } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type ConstantPrimitive = bigint | boolean | null | number | string | undefined;
+
 type PredicateKind = "defined" | "falsy" | "null" | "truthy" | "undefined";
 
 interface ResolvedConstant {
@@ -76,9 +77,11 @@ function isFreshReferenceExpression(node: ESTree.Node): boolean {
 function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {
 	if (!isAnyLiteral(node)) return undefined;
 	if (node.value === null) return { value: null };
+
 	if (Predicate.isString(node.value) || Predicate.isNumber(node.value) || Predicate.isBoolean(node.value)) {
 		return { value: node.value };
 	}
+
 	if (Predicate.isBigInt(node.value)) return { value: node.value };
 	/* v8 ignore next -- remaining Literal values are non-primitive (e.g. regex already handled as fresh). @preserve */
 	return undefined;
@@ -87,6 +90,7 @@ function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {
 function unwrapNode(node: ESTree.Node): ESTree.Node {
 	let current = node;
 	while (isTransparentExpression(current)) current = current.expression;
+
 	return current;
 }
 
@@ -96,10 +100,12 @@ function resolveUnaryConstant(
 	seen: Set<ESTree.Node>,
 ): ResolvedConstant | undefined {
 	if (expression.operator === "void") return { value: undefined };
+
 	if (expression.operator === "typeof") {
 		const argument = resolveConstantPrimitive(sourceCode, expression.argument, seen);
 		return argument === undefined ? undefined : { value: getConstantTypeName(argument.value) };
 	}
+
 	const argument = resolveConstantPrimitive(sourceCode, expression.argument, seen);
 	if (argument === undefined) return undefined;
 	if (expression.operator === "!") return { value: isFalsyConstant(argument.value) };
@@ -162,6 +168,7 @@ function getExpectReceiver(node: ESTree.CallExpression): ESTree.CallExpression |
 	if (isMemberExpression(receiver) && getMemberPropertyName(receiver) === "not") {
 		receiver = receiver.object;
 	}
+
 	if (!isCallExpression(receiver) || !isIdentifierNamed(receiver.callee, "expect")) return undefined;
 	return receiver;
 }
@@ -191,6 +198,7 @@ function reportPredicateAssertion(
 		context.report({ messageId: "issue", node: actual });
 		return;
 	}
+
 	if (isFreshReferenceExpression(actual) && holdsForFreshReference(predicate) !== negated) {
 		context.report({ messageId: "freshPredicate", node: actual });
 	}
@@ -268,6 +276,7 @@ function reportTrivialAssert(context: Context, node: ESTree.CallExpression): voi
 		if (constant !== undefined && Boolean(constant.value) === expectsTruthy) {
 			context.report({ messageId: "issue", node: left });
 		}
+
 		return;
 	}
 
@@ -296,6 +305,7 @@ const noTrivialAssertions = createRule("no-trivial-assertions", "general", {
 					reportTrivialExpect(context, node);
 					return;
 				}
+
 				reportTrivialAssert(context, node);
 			},
 		};

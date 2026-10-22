@@ -14,5 +14,6 @@ export function getEnclosingFunctionName(node: ESTree.Node): string | undefined 
 		if (isFunctionDeclarationRaw(current)) return current.id?.name;
 		if (isCallbackFunction(current)) return undefined;
 	}
+
 	return undefined;
 }

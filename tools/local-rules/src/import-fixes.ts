@@ -21,6 +21,7 @@ function findVariable(sourceCode: SourceCode, node: ESTree.Node, name: string): 
 		const variable = scope.set.get(name);
 		if (variable !== undefined) return variable;
 	}
+
 	return undefined;
 }
 
@@ -55,6 +56,7 @@ function planInsertion(program: ESTree.Program, { name, specifier }: ImportTarge
 	for (const statement of program.body) {
 		if (!isImportDeclaration(statement)) continue;
 		lastImport = statement;
+
 		if (statement.source.value !== specifier || statement.importKind === "type") continue;
 
 		const lastSpecifier = statement.specifiers.at(-1);
@@ -67,6 +69,7 @@ function planInsertion(program: ESTree.Program, { name, specifier }: ImportTarge
 	if (lastImport === undefined) {
 		return { position: program.range[0], text: `${declaration}\n` };
 	}
+
 	return { position: lastImport.range[1], text: `\n${declaration}` };
 }
 
@@ -95,6 +98,7 @@ export function createImportingFix(
 	if (variable !== undefined) {
 		const isAvailable =
 			importsTarget(variable, target) || (isDefiningModule && !variable.defs.some(isImportDefinition));
+
 		return isAvailable ? (fixer): Fix => fixer.replaceTextRange([range[0], range[1]], replacement) : noFix;
 	}
 

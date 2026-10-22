@@ -85,6 +85,7 @@ export function getRuleFacts(ruleName: RuleName): RuleFacts {
 
 export function findRuleFactsByPath(path: string): RuleFacts | undefined {
 	for (const facts of ruleFacts.values()) if (facts.path === path) return facts;
+
 	return undefined;
 }
 

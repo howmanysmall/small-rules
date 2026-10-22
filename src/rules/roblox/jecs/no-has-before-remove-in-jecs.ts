@@ -56,6 +56,7 @@ function callsHaveMatchingArguments(sourceCode: SourceCode, { hasCall, removeCal
 		if (isSpreadElement(hasArgument) || isSpreadElement(removeArgument)) return false;
 		if (!doExpressionsMatch(sourceCode, hasArgument, removeArgument)) return false;
 	}
+
 	return true;
 }
 
@@ -73,12 +74,14 @@ function getRemovalGuard(sourceCode: SourceCode, node: ESTree.IfStatement): Remo
 	const removeMember = removeCall.callee;
 	/* v8 ignore next -- getMethodCall only returns statically named member calls. @preserve */
 	if (!isMemberExpression(hasMember) || !isMemberExpression(removeMember)) return undefined;
+
 	if (
 		!doExpressionsMatch(sourceCode, hasMember.object, removeMember.object) ||
 		!isJecsWorldExpression(sourceCode, hasMember.object)
 	) {
 		return undefined;
 	}
+
 	const guard = { hasCall, removeCall };
 	return callsHaveMatchingArguments(sourceCode, guard) ? guard : undefined;
 }

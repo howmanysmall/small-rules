@@ -23,6 +23,7 @@ const directiveDisableEnablePair = createRule("directive-disable-enable-pair", "
 				messageId: area.ruleId === undefined ? "missingPair" : "missingRulePair",
 			});
 		}
+
 		return {};
 	},
 	meta: {

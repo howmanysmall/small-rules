@@ -50,9 +50,11 @@ export function runFixLoop(execute: RuleExecutor, testCase: NormalizedValidCase)
 
 		const next = applyFixes(output, fixes) ?? output;
 		if (next === output) return { output, passes, status: "stalled" };
+
 		if (!isValidProgram({ ...testCase, code: next })) {
 			return { output: next, passes: passes + 1, status: "invalid" };
 		}
+
 		output = next;
 	}
 
@@ -75,6 +77,7 @@ export function isValidProgram(testCase: NormalizedValidCase): boolean {
 	} catch {
 		return false;
 	}
+
 	return !hasRedeclaration(sourceCode.scopeManager.globalScope);
 }
 
@@ -84,8 +87,10 @@ function hasRedeclaration(globalScope: HarnessScope): boolean {
 		for (const variable of scope.variables) {
 			if (variable.defs.length > 1 && !variable.defs.every(isFunctionScopedDefinition)) return true;
 		}
+
 		for (const child of scope.childScopes) pending.push(child);
 	}
+
 	return false;
 }
 
@@ -101,6 +106,7 @@ function collectDiagnosticFixes(diagnostics: ReadonlyArray<RuntimeDiagnostic>, t
 		const fix = mergeFixes(isFix.allows(result) ? [result] : result, text);
 		if (fix !== undefined) merged.push(fix);
 	}
+
 	return merged;
 }
 

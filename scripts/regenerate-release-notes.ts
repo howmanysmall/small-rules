@@ -24,6 +24,7 @@ import type { CommuniqueDefaults } from "@small-rules/release-notes";
 const RELEASES_DIRECTORY = "documentation/src/content/releases";
 
 type Target = "documentation" | "github";
+
 type Outcome = "changed" | "failed" | "unchanged";
 
 interface Context {
@@ -92,6 +93,7 @@ async function resolveCredentialsAsync(apiKey?: string, githubToken?: string): P
 	if (!(await succeedsAsync("communique", ["--version"]))) {
 		fail("communique is not on PATH. Run `mise install` first.");
 	}
+
 	if (!isPresent(apiKey)) fail("Set COMMUNIQUE_OPENROUTER_API_KEY (or OPENAI_API_KEY).");
 
 	const resolvedGitHubToken = await resolveGitHubTokenAsync(githubToken);
@@ -148,6 +150,7 @@ async function selectTargetsAsync(documentation: boolean, github: boolean, yes: 
 			required: true,
 		}),
 	);
+
 	return new Set(selected);
 }
 
@@ -155,6 +158,7 @@ async function findMissingTagsAsync(tags: ReadonlyArray<string>): Promise<Readon
 	const results = await Promise.all(
 		tags.map(async (tag) => succeedsAsync("git", ["rev-parse", "--quiet", "--verify", `refs/tags/${tag}`])),
 	);
+
 	return tags.filter((_, index) => results[index] !== true);
 }
 
@@ -168,6 +172,7 @@ async function ensureTagsFetchedAsync(tags: ReadonlyArray<string>, yes: boolean)
 
 	const fetching = spinner();
 	fetching.start("Fetching tags");
+
 	if (!(await succeedsAsync("git", ["fetch", "--tags", "--force", "origin"]))) {
 		fetching.error("git fetch --tags failed");
 		exit(1);
@@ -255,6 +260,7 @@ async function regenerateAsync(context: Context, tag: string, label: string): Pr
 			throwOnError: false,
 		},
 	);
+
 	if (result.exitCode !== 0) {
 		progress.error(`${prefix} ${red("communique failed")}`);
 		const details = (result.stderr || result.stdout).trim();
@@ -290,6 +296,7 @@ function showPlan({ dryRun, model, modelOverridden, tags, targets }: Plan): void
 		`${dim("releases")}  ${bold(String(tags.length))} ${dim(range)}`,
 		`${dim("targets")}   ${Array.from(targets, (target) => TARGET_LABELS[target]).join(", ")}`,
 	];
+
 	if (dryRun) lines.push(yellow("dry run: nothing will be written"));
 	note(lines.join("\n"), "Regeneration plan");
 }
@@ -364,6 +371,7 @@ const command = createBaseCommand(
 
 		const shouldContinue =
 			yes || exitIfCancelled(await confirm({ message: `Regenerate ${tags.length} release note(s)?` }));
+
 		if (!shouldContinue) {
 			cancel("Nothing was changed.");
 			return;

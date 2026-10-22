@@ -190,6 +190,7 @@ export function createPreferNodeTypeConstantRule({
 
 				const negation = node.operator.startsWith("!") ? "!" : "";
 				const objectText = getReadObjectText(sourceCode, suggestion.member);
+
 				function replaceWith(guard: string): string {
 					return `${negation}${guard}(${objectText})`;
 				}
@@ -245,7 +246,9 @@ export function createPreferNodeTypeConstantRule({
 					found.length = 0;
 					collectComparedNodeTypes(node, found);
 					record();
+
 					if (!isCoveredBySharedGuard(node) && !reportGuard(node)) return;
+
 					for (const literal of found) replacedByGuard.add(literal);
 				},
 				"Program:exit"(): void {

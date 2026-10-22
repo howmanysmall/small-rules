@@ -1,4 +1,4 @@
-// Vendored from src/rules/no-runtime-typeof.ts@c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b by Dillon Mulroy.
+// Vendored from src/rules/no-runtime-typeof.ts@13909c9e07590f5a85d93c62712259fe14a883f7 by Dillon Mulroy.
 // Source: https://github.com/dmmulroy/anti-slop
 // SPDX-License-Identifier: MIT
 //
@@ -26,6 +26,7 @@ function isInsideTypeGuard(node: ESTree.Node): boolean {
 		if (isAnyFunction(current)) return isTsTypePredicate(current.returnType?.typeAnnotation);
 		current = current.parent;
 	}
+
 	return false;
 }
 
