@@ -92,7 +92,8 @@ const isSvelteConfiguration = type({
 
 const isSvelteUserConfiguration = isBoolean.or(isSvelteConfiguration);
 const isTrailingCommaConfiguration = type("'all' | 'es5' | 'none'");
-const formatConfigurationProperties = {
+const isFormatConfiguration = type({
+	"+": "reject",
 	"arrowParens?": isArrowParensConfiguration,
 	"bracketSameLine?": isBoolean,
 	"bracketSpacing?": isBoolean,
@@ -118,11 +119,6 @@ const formatConfigurationProperties = {
 	"trailingComma?": isTrailingCommaConfiguration,
 	"useTabs?": isBoolean,
 	"vueIndentScriptAndStyle?": isBoolean,
-} as const;
-
-const isFormatConfiguration = type({
-	"+": "reject",
-	...formatConfigurationProperties,
 }).readonly();
 
 const isOxfmtOverrideConfiguration = type({
@@ -134,7 +130,31 @@ const isOxfmtOverrideConfiguration = type({
 
 export const isOxfmtConfiguration = type({
 	"+": "delete",
-	...formatConfigurationProperties,
+	"arrowParens?": isArrowParensConfiguration,
+	"bracketSameLine?": isBoolean,
+	"bracketSpacing?": isBoolean,
+	"embeddedLanguageFormatting?": isEmbeddedLanguageFormattingConfiguration,
+	"endOfLine?": isEndOfLineConfiguration,
+	"experimentalOperatorPosition?": isOperatorPositionConfiguration,
+	"htmlWhitespaceSensitivity?": isHtmlWhitespaceSensitivityConfiguration,
 	"ignorePatterns?": isReadonlyArrayOfStrings,
+	"insertFinalNewline?": isBoolean,
+	"jsdoc?": isJsdocUserConfiguration,
+	"jsxSingleQuote?": isBoolean,
+	"objectWrap?": isObjectWrapConfiguration,
 	"overrides?": isOxfmtOverrideConfiguration.array().readonly(),
+	"printWidth?": isInteger,
+	"proseWrap?": isProseWrapConfiguration,
+	"quoteProps?": isQuotePropertiesConfiguration,
+	"semi?": isBoolean,
+	"singleAttributePerLine?": isBoolean,
+	"singleQuote?": isBoolean,
+	"sortImports?": isSortImportsUserConfiguration,
+	"sortPackageJson?": isSortPackageJsonUserConfiguration,
+	"sortTailwindcss?": isSortTailwindcssUserConfiguration,
+	"svelte?": isSvelteUserConfiguration,
+	"tabWidth?": isInteger,
+	"trailingComma?": isTrailingCommaConfiguration,
+	"useTabs?": isBoolean,
+	"vueIndentScriptAndStyle?": isBoolean,
 }).readonly();
