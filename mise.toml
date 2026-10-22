@@ -120,7 +120,7 @@ git commit --signoff --message "${usage_message?}"
 
 [tasks.dead-code]
 description = "Detect unused files, exports, types, and dependencies with fallow."
-run = "node --run fallow:dead-code"
+run = "fallow dead-code"
 
 [tasks.deploy-docs]
 alias = "dd"

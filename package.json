@@ -87,6 +87,7 @@
 		"test:istanbul": "nr test:agent --coverage.provider=istanbul --coverage.reporter=json --coverage.reportsDirectory=.cache/istanbul",
 		"test:mutation": "stryker run",
 		"tsrs": "tsrs",
+		"turbo": "turbo",
 		"type-check": "tsrs --build",
 		"type-check:agent": "node --run type-check -- --pretty false",
 		"preversion": "if test -n \"$(git status --porcelain)\"; then echo 'Release requires a clean worktree.' >&2; exit 1; fi"
@@ -166,6 +167,7 @@
 		"skills": "catalog:tooling",
 		"tsdown": "catalog:build",
 		"tsrs": "catalog:tooling",
+		"turbo": "catalog:tooling",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tooling",
 		"vitest": "catalog:test",
