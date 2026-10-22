@@ -8,6 +8,8 @@
 - **Documentation** - docs type-check, build, React unit tests, and Chromium browser tests
 - **Test** - Vitest plus the stored fuzz regression corpus
 
+Type-check, build, tests, and the docs jobs run through `turbo run`. Each job restores its own `.turbo/cache` with `actions/cache`, and `--affected` limits a run to tasks whose inputs changed since `TURBO_SCM_BASE` (the pull request's base, or the commit before a push). `nr check` runs the cached lint, type-check, test, and build locally.
+
 `mise run check` runs the same validation locally (lint, type-check, dead-code, duplicates, build, test); `mise run ci` installs dependencies first and adds the documentation job.
 
 ## Deep Tests

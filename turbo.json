@@ -1,0 +1,36 @@
+{
+	"$schema": "./node_modules/turbo/schema.json",
+	"futureFlags": {
+		"affectedUsingTaskInputs": true,
+		"githubActionsRemoteBaseRefFallback": true
+	},
+	"globalPassThroughEnv": ["CI", "FORCE_COLOR", "GITHUB_ACTIONS", "NO_COLOR", "NODE_OPTIONS"],
+	"noUpdateNotifier": true,
+	"tasks": {
+		"//#build": {
+			"inputs": ["$TURBO_DEFAULT$", "!.github/**", "!documentation/**", "!tests/**"],
+			"outputs": ["dist/**"]
+		},
+		"//#lint": {
+			"passThroughEnv": ["GOMAXPROCS", "LINT_MAX_WORKERS", "RAYON_NUM_THREADS"]
+		},
+		"//#test": {
+			"env": ["PROPERTY_RUNS"],
+			"passThroughEnv": ["VITIATE_*"]
+		},
+		"//#type-check": {
+			"inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!**/*.mdx", "!.github/**"]
+		},
+		"build": {
+			"outputs": ["dist/**"]
+		},
+		"check": {},
+		"test": {},
+		"test:browser": {
+			"dependsOn": ["build"],
+			"passThroughEnv": ["PLAYWRIGHT_*"]
+		},
+		"test:unit": {},
+		"type-check": {}
+	}
+}

@@ -1,0 +1,13 @@
+import { Plugin } from "@opencode/plugin/effect";
+import { Effect } from "effect";
+
+import type { Scope } from "effect";
+
+const {{camelCase name}} = Plugin.define({
+	id: "{{name}}",
+	effect(): Effect.Effect<void, never, Scope.Scope> {
+		return Effect.void;
+	},
+});
+
+export default {{camelCase name}};

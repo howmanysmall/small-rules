@@ -8,6 +8,7 @@
 	"htmlWhitespaceSensitivity": "css",
 	"ignorePatterns": [
 		"**/*-lock.json",
+		"**/*.hbs",
 		"**/*.js",
 		"**/*.{md,toml,js,yaml,yml,toml}",
 		"**/.opencode/goals",

@@ -1,0 +1,17 @@
+{
+	"$schema": "../node_modules/turbo/schema.json",
+	"extends": ["//"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["check"],
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/src/**", "$TURBO_ROOT$/tsconfig.base.json"]
+		},
+		"check": {
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/src/**", "$TURBO_ROOT$/tsconfig.base.json"]
+		},
+		"test:unit": {
+			"dependsOn": ["build"],
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/src/**", "$TURBO_ROOT$/tsconfig.base.json"]
+		}
+	}
+}
