@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.7.0] - 2026-10-22
+
+## Added
+- New `require-readable-spacing` rule that requires blank lines between statements, with per-requirement switches, `allow*` relaxations, and an `overrides` option. [#99](https://github.com/howmanysmall/small-rules/pull/99)
+
 ## [3.6.1] - 2026-10-20
 
 ## Changed
