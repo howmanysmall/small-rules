@@ -10,6 +10,7 @@
 		"@small-rules/arktype-utilities": "workspace:*",
 		"@small-rules/fs-utilities": "workspace:*",
 		"@small-rules/release-notes": "workspace:*",
+		"@small-rules/string-utilities": "workspace:*",
 		"@std/msgpack": "catalog:scripts",
 		"@std/path": "catalog:scripts",
 		"ansis": "catalog:scripts",

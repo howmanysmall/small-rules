@@ -35,6 +35,7 @@
 	"devDependencies": {
 		"@astrojs/check": "catalog:frontend",
 		"@playwright/test": "catalog:test",
+		"@small-rules/string-utilities": "workspace:*",
 		"@small-rules/vite-configuration": "workspace:*",
 		"@testing-library/react": "catalog:test",
 		"@testing-library/user-event": "catalog:test",
