@@ -1,9 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import nodePath from "node:path";
 import { cwd } from "node:process";
-import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { type } from "arktype";
 import { exec } from "tinyexec";
+
+import { insertSorted } from "./src/insert-sorted";
 
 import type { PlopTypes } from "@turbo/gen";
 
@@ -95,39 +96,6 @@ function createRunAction(command: string, commandArguments: ReadonlyArray<string
 }
 
 const installAction = createRunAction("pnpm", ["install"]);
-
-/**
- * Inserts `line` into the run of lines matching `pattern`, keeping the run in
- * the order `compareWithLocale` gives, which is the order the lint enforces.
- *
- * @param lines - The file's lines, edited in place.
- * @param range - The first and last index the run may span.
- * @param pattern - Matches a line of the run and captures its sort key.
- * @param line - The line to insert.
- */
-function insertSorted(
-	lines: Array<string>,
-	range: readonly [start: number, end: number],
-	pattern: RegExp,
-	line: string,
-): void {
-	const [start, end] = range;
-	const key = pattern.exec(line)?.groups?.key ?? line;
-	let insertAt = -1;
-	let lastMatch = -1;
-
-	for (let index = start; index <= end; index += 1) {
-		const existingKey = pattern.exec(lines[index] ?? "")?.groups?.key;
-		if (existingKey === undefined) continue;
-
-		lastMatch = index;
-
-		if (insertAt === -1 && compareWithLocale(existingKey, key) > 0) insertAt = index;
-	}
-
-	if (lastMatch === -1) throw new Error(`Found no line matching ${pattern.source}.`);
-	lines.splice(insertAt === -1 ? lastMatch + 1 : insertAt, 0, line);
-}
 
 function findLine(lines: ReadonlyArray<string>, predicate: (line: string) => boolean, from = 0): number {
 	const index = lines.findIndex((line, lineIndex) => lineIndex >= from && predicate(line));

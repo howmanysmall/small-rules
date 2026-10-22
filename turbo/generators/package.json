@@ -4,6 +4,8 @@
 	"description": "Turborepo generators for rules, workspace packages, and OpenCode plugins.",
 	"type": "module",
 	"scripts": {
+		"test": "vitest run",
+		"test:agent": "nr test --reporter agent",
 		"type-check": "tsrs --noEmit",
 		"type-check:agent": "node --run type-check -- --pretty false"
 	},
@@ -13,8 +15,10 @@
 		"tinyexec": "catalog:scripts"
 	},
 	"devDependencies": {
+		"@small-rules/vite-configuration": "workspace:*",
 		"@turbo/gen": "catalog:tooling",
 		"@types/node": "catalog:types",
-		"tsrs": "catalog:tooling"
+		"tsrs": "catalog:tooling",
+		"vitest": "catalog:test"
 	}
 }
