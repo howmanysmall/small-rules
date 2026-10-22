@@ -13,8 +13,8 @@ const NODE_FS_EXTRA = [
 	},
 ];
 
-describe("no-real-temp-dir", () => {
-	ts.run("no-real-temp-dir", rule, {
+describe("no-real-temporary-directory", () => {
+	ts.run("no-real-temporary-directory", rule, {
 		invalid: [
 			{
 				code: [

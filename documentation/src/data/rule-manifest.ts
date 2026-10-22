@@ -180,7 +180,7 @@ export const ruleManifest = defineRuleManifest({
 			label: "General Logic & Style",
 			rules: [
 				{ name: "curly" },
-				{ name: "no-real-temp-dir" },
+				{ name: "no-real-temporary-directory" },
 				{ name: "no-recursive" },
 				{ name: "directive-disable-enable-pair" },
 				{ name: "directive-no-aggregating-enable" },

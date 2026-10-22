@@ -12,7 +12,7 @@ const DEFAULT_FUNCTIONS: ReadonlyArray<ModuleFunctions> = [
 ];
 const DEFAULT_MODULES = createApiTrees(DEFAULT_FUNCTIONS);
 
-const noRealTemporaryDirectory = createRule("no-real-temp-dir", "general", {
+const noRealTemporaryDirectory = createRule("no-real-temporary-directory", "general", {
 	create(context): Visitor {
 		const [options] = context.options;
 		const additionalFunctions = options?.additionalFunctions ?? [];
