@@ -243,19 +243,18 @@ function extractCaseExample(
 	for (const field of fields) {
 		if (field.key === "documentation" || field.key === "code") continue;
 		const value = evaluateStatic(field.property.value, extractionContext);
-		if (field.key === "filename" || field.key === "language" || field.key === "sourceType") {
-			if (!Predicate.isString(value)) {
-				throw new ExtractionError(
-					extractionContext,
-					field.property.value.start,
-					`${field.key} must evaluate to a string.`,
-				);
-			}
-
-			Object.assign(example, { [field.key]: value });
-		} else {
-			Object.assign(example, { [field.key]: value });
+		if (
+			(field.key === "filename" || field.key === "language" || field.key === "sourceType") &&
+			!Predicate.isString(value)
+		) {
+			throw new ExtractionError(
+				extractionContext,
+				field.property.value.start,
+				`${field.key} must evaluate to a string.`,
+			);
 		}
+
+		Object.assign(example, { [field.key]: value });
 	}
 
 	return example;
