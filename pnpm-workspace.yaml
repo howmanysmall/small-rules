@@ -177,7 +177,6 @@ catalogs:
     "@octokit/rest": 22.0.1
     "@openrouter/sdk": 1.5.0
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
-    "@std/path": npm:@jsr/std__path@1.1.6
     ansis: 4.4.0
     boxen: 9.0.0
     consola: 3.4.2

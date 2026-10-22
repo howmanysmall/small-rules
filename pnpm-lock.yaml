@@ -388,9 +388,6 @@ catalogs:
     '@std/msgpack':
       specifier: npm:@jsr/std__msgpack@1.0.3
       version: 1.0.3
-    '@std/path':
-      specifier: npm:@jsr/std__path@1.1.6
-      version: 1.1.6
     ansis:
       specifier: 4.4.0
       version: 4.4.0
@@ -1051,9 +1048,6 @@ importers:
       '@std/msgpack':
         specifier: catalog:scripts
         version: '@jsr/std__msgpack@1.0.3'
-      '@std/path':
-        specifier: catalog:scripts
-        version: '@jsr/std__path@1.1.6'
       ansis:
         specifier: catalog:scripts
         version: 4.4.0
@@ -20620,7 +20614,6 @@ time:
   '@isentinel/hooks@1.7.0': '2026-10-06T16:13:06.841Z'
   '@jsr/cliffy__command@1.3.1': '2026-09-18T20:43:56.527Z'
   '@jsr/std__msgpack@1.0.3': '2025-01-31T08:14:09.999Z'
-  '@jsr/std__path@1.1.6': '2026-06-30T10:24:29.944Z'
   '@mdx-js/language-server@0.6.4': '2026-08-28T13:19:56.433Z'
   '@mitata/counters@0.0.8': '2025-01-09T11:02:22.407Z'
   '@octokit/rest@22.0.1': '2025-10-31T20:59:36.519Z'
