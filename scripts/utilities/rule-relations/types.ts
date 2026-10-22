@@ -42,7 +42,6 @@ const allJudgmentDimensions = [
 	JudgmentDimension.ForwardRequires,
 	JudgmentDimension.BackwardRequires,
 ];
-export const isJudgmentDimension = type.enumerated(...allJudgmentDimensions);
 
 export const judgmentDimensions = defineJudgmentDimensions(allJudgmentDimensions);
 
