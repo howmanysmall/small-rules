@@ -32,6 +32,20 @@ function isValidFixtureImport(pathParts: ReadonlyArray<string>): boolean {
 	return !hasAnotherComponentInPath(partsBeforeFixture);
 }
 
+function isReachingIntoComponent(pathDifference: string, maxDepth: number): boolean {
+	const pathParts = getPathSegmentsFromSource(pathDifference);
+	if (isIndexFile(pathDifference) || isValidFixtureImport(pathParts)) return false;
+
+	const includesComponents = pathParts.includes("components");
+	if (includesComponents && pathParts.length > maxDepth + 1) return true;
+
+	return (
+		(includesComponents || countParentTraversals(pathDifference) > 1) &&
+		hasAnotherComponentInPath(pathParts) &&
+		pathParts.length > maxDepth
+	);
+}
+
 const strictComponentBoundaries = createRule("strict-component-boundaries", "react", {
 	create(context): Visitor {
 		// oxlint-disable-next-line typescript/no-unnecessary-condition -- false flag.
@@ -53,29 +67,7 @@ const strictComponentBoundaries = createRule("strict-component-boundaries", "rea
 				if (!resolved.found) return;
 
 				const pathDifference = nodePath.relative(filename, resolved.path).replaceAll("\\", "/");
-				const pathParts = getPathSegmentsFromSource(pathDifference);
-				const traversals = countParentTraversals(pathDifference);
-
-				if (
-					(traversals > 1 || pathParts.includes("components")) &&
-					hasAnotherComponentInPath(pathParts) &&
-					pathParts.length > maxDepth &&
-					!isIndexFile(pathDifference) &&
-					!isValidFixtureImport(pathParts)
-				) {
-					context.report({
-						messageId: "noReachingIntoComponent",
-						node,
-					});
-					return;
-				}
-
-				if (
-					pathParts.includes("components") &&
-					pathParts.length > maxDepth + 1 &&
-					!isIndexFile(pathDifference) &&
-					!isValidFixtureImport(pathParts)
-				) {
+				if (isReachingIntoComponent(pathDifference, maxDepth)) {
 					context.report({
 						messageId: "noReachingIntoComponent",
 						node,

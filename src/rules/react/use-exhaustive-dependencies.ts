@@ -38,6 +38,7 @@ import {
 	TS_TYPE_ASSERTION,
 	VARIABLE_DECLARATOR,
 } from "@small-rules/oxlint-utilities";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
@@ -48,7 +49,16 @@ import {
 } from "$oxc-utilities/react-hook-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
-import type { ESTree, Fix, InferContextFromRule, Scope, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
+import type {
+	ESTree,
+	Fix,
+	Fixer,
+	InferContextFromRule,
+	Scope,
+	SourceCode,
+	Variable,
+	Visitor,
+} from "oxlint-plugin-utilities";
 
 const UNSTABLE_VALUES = new Set<string>([
 	ARRAY_EXPRESSION,
@@ -778,19 +788,19 @@ function reportUnnecessaryDependency(
 
 	const dependenciesString = `[${newDependencies.join(", ")}]`;
 
+	function fix(fixer: Fixer): Fix {
+		return fixer.replaceText(dependenciesArray, dependenciesString);
+	}
+
 	context.report({
 		data: { name: dependency.name },
-		fix(fixer): Fix {
-			return fixer.replaceText(dependenciesArray, dependenciesString);
-		},
+		fix,
 		messageId: "unnecessaryDependency",
 		node: dependency.node,
 		suggest: [
 			{
 				data: { name: dependency.name },
-				fix(fixer): Fix {
-					return fixer.replaceText(dependenciesArray, dependenciesString);
-				},
+				fix,
 				messageId: "removeDependencySuggestion",
 			},
 		],
@@ -821,7 +831,9 @@ function reportMissingDependenciesArray(
 	if (requiredCaptures.length === 0) return;
 
 	const missingNames = [...new Set(requiredCaptures.map(returnName))].join(", ");
-	const uniqueDependencies = [...new Set(requiredCaptures.map(({ usagePath }) => usagePath))].toSorted();
+	const uniqueDependencies = [...new Set(requiredCaptures.map(({ usagePath }) => usagePath))].toSorted(
+		compareWithLocale,
+	);
 	const dependenciesString = `[${uniqueDependencies.join(", ")}]`;
 
 	context.report({
@@ -937,24 +949,24 @@ function reportMissingCaptures(
 
 	const dependencyNames = dependencies.map(({ name }) => name);
 	const missingPaths = missingCaptures.map(({ usagePath }) => usagePath);
-	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted().join(", ")}]`;
+	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted(compareWithLocale).join(", ")}]`;
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
 	const firstMissing = missingCaptures.at(0);
+
+	function fix(fixer: Fixer): Fix {
+		return fixer.replaceText(dependenciesArray, newDependenciesString);
+	}
 
 	if (firstMissing !== undefined && missingCaptures.length === 1) {
 		context.report({
 			data: { name: firstMissing.usagePath },
-			fix(fixer): Fix {
-				return fixer.replaceText(dependenciesArray, newDependenciesString);
-			},
+			fix,
 			messageId: "missingDependency",
 			node: reportNode,
 			suggest: [
 				{
 					data: { name: firstMissing.usagePath },
-					fix(fixer): Fix {
-						return fixer.replaceText(dependenciesArray, newDependenciesString);
-					},
+					fix,
 					messageId: "addDependencySuggestion",
 				},
 			],
@@ -964,16 +976,12 @@ function reportMissingCaptures(
 
 	context.report({
 		data: { names: missingPaths.join(", ") },
-		fix(fixer): Fix {
-			return fixer.replaceText(dependenciesArray, newDependenciesString);
-		},
+		fix,
 		messageId: "missingDependencies",
 		node: reportNode,
 		suggest: [
 			{
-				fix(fixer): Fix {
-					return fixer.replaceText(dependenciesArray, newDependenciesString);
-				},
+				fix,
 				messageId: "addMissingDependenciesSuggestion",
 			},
 		],

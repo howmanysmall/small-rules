@@ -1,6 +1,7 @@
 import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 
 import smallRules from "$small-rules";
 import { PROPERTY_RUNS } from "$test/property-runs";
@@ -26,7 +27,7 @@ describe("fixable rules", () => {
 		const covered = FIXABLE_CASES.map(({ rule }) => rule);
 
 		// Assert
-		expect(covered.toSorted(compareText)).toStrictEqual(fixableRules.toSorted(compareText));
+		expect(covered.toSorted(compareWithLocale)).toStrictEqual(fixableRules.toSorted(compareWithLocale));
 	});
 
 	it.for(FIXABLE_CASES)(
@@ -61,9 +62,3 @@ describe("fixable rules", () => {
 		},
 	);
 });
-
-// Helpers
-
-function compareText(left: string, right: string): number {
-	return left.localeCompare(right);
-}

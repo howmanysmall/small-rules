@@ -1,4 +1,5 @@
 import { isReadonlyArrayOfUnknowns } from "@small-rules/arktype-utilities";
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { type } from "arktype";
 
 import { createCacheKey } from "./cache";
@@ -115,7 +116,7 @@ function orderPair(pair: UnorderedRulePair): UnorderedRulePair {
 }
 
 export function createAllRulePairs(names: ReadonlyArray<RuleName>): ReadonlyArray<UnorderedRulePair> {
-	const ordered = [...new Set(names)].toSorted();
+	const ordered = [...new Set(names)].toSorted(compareWithLocale);
 
 	const pairs = new Array<UnorderedRulePair>();
 	let length = 0;

@@ -86,29 +86,24 @@ function getEnumMemberName(node: ESTree.TSEnumMember): string | undefined {
 
 const preferPascalCaseEnums = createRule("prefer-pascal-case-enums", "naming", {
 	createOnce(context): Visitor {
+		function reportIfNotPascalCase(identifier: string, node: ESTree.Node): void {
+			const pascalCase = toPascalCase(identifier);
+			if (pascalCase === undefined || pascalCase === identifier) return;
+
+			context.report({
+				data: { identifier },
+				messageId: "notPascalCase",
+				node,
+			});
+		}
+
 		return {
 			TSEnumDeclaration(node): void {
-				const identifier = node.id.name;
-				const pascalCase = toPascalCase(identifier);
-				if (pascalCase === undefined || pascalCase === identifier) return;
-
-				context.report({
-					data: { identifier },
-					messageId: "notPascalCase",
-					node: node.id,
-				});
+				reportIfNotPascalCase(node.id.name, node.id);
 			},
 			TSEnumMember(node): void {
 				const identifier = getEnumMemberName(node);
-				if (identifier === undefined) return;
-				const pascalCase = toPascalCase(identifier);
-				if (pascalCase === undefined || pascalCase === identifier) return;
-
-				context.report({
-					data: { identifier },
-					messageId: "notPascalCase",
-					node: node.id,
-				});
+				if (identifier !== undefined) reportIfNotPascalCase(identifier, node.id);
 			},
 		} satisfies Visitor;
 	},

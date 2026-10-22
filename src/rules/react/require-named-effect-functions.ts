@@ -195,18 +195,9 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			const scope = context.sourceCode.getScope(identifier);
 			const variable = getVariableByName(scope, identifier.name);
 
-			if (variable === undefined) {
-				/* v8 ignore next -- @preserve isCallbackHookResult performs the same variable lookup and cannot be true here. */
-				if (isCallbackHookResult(context.sourceCode, identifier)) {
-					reportHookIssue(hookName, node, "identifierReferencesCallback");
-				}
+			const resolved = variable === undefined ? undefined : resolveFunctionFromVariable(variable);
 
-				return;
-			}
-
-			const resolved = resolveFunctionFromVariable(variable);
-
-			if (resolved === undefined) {
+			if (variable === undefined || resolved === undefined) {
 				if (isCallbackHookResult(context.sourceCode, identifier)) {
 					reportHookIssue(hookName, node, "identifierReferencesCallback");
 				}

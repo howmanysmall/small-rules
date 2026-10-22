@@ -204,33 +204,26 @@ const noGodComponents = createRule("no-god-components", "react", {
 			return ignoreSet.has(name) || checked.has(node);
 		}
 
-		function reportLineLength(node: ESTree.Node, name: string, lines: number): void {
-			if (lines > options.maxLines) {
-				context.report({
-					data: {
-						name,
-						lines: String(lines),
-						max: String(options.maxLines),
-						target: String(options.targetLines),
-					},
-					messageId: "exceedsMaxLines",
-					node,
-				});
-				return;
-			}
+		function getLineLengthMessageId(lines: number): "exceedsMaxLines" | "exceedsTargetLines" | undefined {
+			if (lines > options.maxLines) return "exceedsMaxLines";
+			if (options.enforceTargetLines && lines > options.targetLines) return "exceedsTargetLines";
+			return undefined;
+		}
 
-			if (options.enforceTargetLines && lines > options.targetLines) {
-				context.report({
-					data: {
-						name,
-						lines: String(lines),
-						max: String(options.maxLines),
-						target: String(options.targetLines),
-					},
-					messageId: "exceedsTargetLines",
-					node,
-				});
-			}
+		function reportLineLength(node: ESTree.Node, name: string, lines: number): void {
+			const messageId = getLineLengthMessageId(lines);
+			if (messageId === undefined) return;
+
+			context.report({
+				data: {
+					name,
+					lines: String(lines),
+					max: String(options.maxLines),
+					target: String(options.targetLines),
+				},
+				messageId,
+				node,
+			});
 		}
 
 		function reportDestructuredProperties(node: ESTree.Node, name: string): void {

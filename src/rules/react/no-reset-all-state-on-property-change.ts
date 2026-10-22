@@ -7,65 +7,40 @@ import {
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
-import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { ESTree, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 
 import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-const noResetAllStateOnPropertyChange = createRule("no-reset-all-state-on-property-change", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
-		const { sourceCode } = context;
+const noResetAllStateOnPropertyChange = createReactEffectRule("no-reset-all-state-on-property-change", {
+	checkEffect(context, analysis, effect): void {
+		if (effect.dependencyReferences === undefined) return;
+		// Skip custom hooks because they can't receive `key` like
+		// components can.
+		const containingNode = analysis.findEnclosingReactNode(effect.node);
+		if (containingNode !== undefined && analysis.isCustomHook(containingNode)) return;
 
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.dependencyReferences === undefined) continue;
-					// Skip custom hooks because they can't receive `key` like
-					// components can.
-					const containingNode = analysis.findEnclosingReactNode(effect.node);
-					if (containingNode !== undefined && analysis.isCustomHook(containingNode)) continue;
+		const propertyUsedToResetAllState = findPropertyUsedToResetAllState(
+			context.sourceCode,
+			analysis,
+			effect.functionReferences,
+			effect.dependencyReferences,
+			effect.node,
+		);
 
-					const propertyUsedToResetAllState = findPropertyUsedToResetAllState(
-						sourceCode,
-						analysis,
-						effect.functionReferences,
-						effect.dependencyReferences,
-						effect.node,
-					);
-
-					if (propertyUsedToResetAllState !== undefined) {
-						context.report({
-							data: { prop: propertyUsedToResetAllState.identifier.name },
-							messageId: "avoidResettingAllStateWhenAPropChanges",
-							node: effect.node,
-						});
-					}
-				}
-			},
-		} satisfies Visitor;
+		if (propertyUsedToResetAllState !== undefined) {
+			context.report({
+				data: { prop: propertyUsedToResetAllState.identifier.name },
+				messageId: "avoidResettingAllStateWhenAPropChanges",
+				node: effect.node,
+			});
+		}
 	},
-	meta: {
-		docs: {
-			description: "Disallow resetting all state in an effect when a prop changes.",
-			recommended: true,
-		},
-		messages: {
-			avoidResettingAllStateWhenAPropChanges:
-				'Avoid resetting all state when a prop changes. Instead, if "{{prop}}" is a key, pass it as "key" so React will reset the component\'s state.',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: { environment: ENVIRONMENT_SCHEMA },
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow resetting all state in an effect when a prop changes.",
+	messages: {
+		avoidResettingAllStateWhenAPropChanges:
+			'Avoid resetting all state when a prop changes. Instead, if "{{prop}}" is a key, pass it as "key" so React will reset the component\'s state.',
 	},
 });
 

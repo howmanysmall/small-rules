@@ -73,7 +73,7 @@ function reportNumericColor3(
 
 const noColor3Constructor = createRule("no-color3-constructor", "roblox", {
 	create(context): Visitor {
-		const options = normalizeOptions(context.options[0]);
+		const { reportUnknownComponents } = normalizeOptions(context.options[0]);
 
 		return {
 			NewExpression(node): void {
@@ -84,7 +84,7 @@ const noColor3Constructor = createRule("no-color3-constructor", "roblox", {
 
 				const collected = collectNumericComponents(parameters);
 				if (!collected) {
-					reportUnknownColor3(parameters, options.reportUnknownComponents, (messageId) => {
+					reportUnknownColor3(parameters, reportUnknownComponents, (messageId) => {
 						context.report({ messageId, node });
 					});
 					return;

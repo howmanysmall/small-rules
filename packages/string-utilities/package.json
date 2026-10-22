@@ -1,0 +1,19 @@
+{
+	"name": "@small-rules/string-utilities",
+	"version": "0.0.0",
+	"private": true,
+	"sideEffects": false,
+	"type": "module",
+	"exports": {
+		"./compare-with-locale": "./src/compare-with-locale.ts",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"test:agent": "nr test --reporter agent"
+	},
+	"devDependencies": {
+		"@small-rules/vite-configuration": "workspace:*",
+		"vitest": "catalog:test"
+	}
+}

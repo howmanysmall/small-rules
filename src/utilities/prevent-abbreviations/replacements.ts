@@ -1,3 +1,4 @@
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 
 import { chooseWithEvilTernary } from "$oxc-utilities/evil-ternary-utilities";
@@ -159,8 +160,8 @@ function buildReplacementNames(replacement: ReadonlyMap<string, boolean>): Repla
 	}
 
 	return {
-		lowerFirst: lowerFirstReplacements.toSorted((left, right) => left.localeCompare(right)),
-		upperFirst: upperFirstReplacements.toSorted((left, right) => left.localeCompare(right)),
+		lowerFirst: lowerFirstReplacements.toSorted(compareWithLocale),
+		upperFirst: upperFirstReplacements.toSorted(compareWithLocale),
 	};
 }
 

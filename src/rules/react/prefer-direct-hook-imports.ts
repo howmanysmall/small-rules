@@ -1,8 +1,9 @@
-import { isIdentifier, isMemberExpression } from "@small-rules/oxlint-utilities";
+import { isIdentifier } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getStaticMemberCallee } from "$oxc-utilities/member-callee";
 import { ENVIRONMENT_SCHEMA, getReactSourcesFromOptions, isReactNamespaceImport } from "$oxc-utilities/react-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
@@ -29,8 +30,8 @@ const preferDirectHookImports = createRule("prefer-direct-hook-imports", "react"
 
 		return {
 			CallExpression(node): void {
-				const { callee } = node;
-				if (!isMemberExpression(callee) || callee.computed) return;
+				const callee = getStaticMemberCallee(node);
+				if (callee === undefined) return;
 				if (!isIdentifier(callee.object) || !isIdentifier(callee.property)) return;
 
 				const propertyName = callee.property.name;

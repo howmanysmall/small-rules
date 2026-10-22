@@ -1,25 +1,17 @@
-import {
-	isCallExpression,
-	isIdentifierNamed,
-	isMemberExpression,
-	isNewExpression,
-} from "@small-rules/oxlint-utilities";
+import { isCallExpression, isIdentifierNamed, isNewExpression } from "@small-rules/oxlint-utilities";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { getMethodCallee } from "$oxc-utilities/member-callee";
+import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isTableCreateBase(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	const unwrapped = stripExpressionWrappers(expression);
-	if (!isCallExpression(unwrapped) || unwrapped.optional) return false;
-
-	const callee = stripExpressionWrappers(unwrapped.callee);
-	if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "create") {
-		return false;
-	}
+	const callee = isCallExpression(unwrapped) ? getMethodCallee(unwrapped, "create") : undefined;
+	if (callee === undefined) return false;
 
 	const target = stripExpressionWrappers(callee.object);
 	if (!isIdentifierNamed(target, "table")) return false;
@@ -38,12 +30,8 @@ const noTableCreateMap = createRule("no-table-create-map", "roblox", {
 	create(context): Visitor {
 		return {
 			CallExpression(node): void {
-				if (node.optional) return;
-
-				const callee = stripExpressionWrappers(node.callee);
-				if (!isMemberExpression(callee) || callee.optional || getMemberPropertyName(callee) !== "map") {
-					return;
-				}
+				const callee = getMethodCallee(node, "map");
+				if (callee === undefined) return;
 
 				const base = stripExpressionWrappers(callee.object);
 				if (!isTableCreateBase(context.sourceCode, base) && !isArrayConstructorBase(context.sourceCode, base)) {

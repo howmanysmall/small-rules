@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -137,7 +137,7 @@
 			"semicolons": "always",
 			"trailingCommas": "all"
 		},
-		"globals": ["Bun"],
+		"globals": [],
 		"linter": { "enabled": true }
 	},
 
@@ -175,32 +175,45 @@
 						"maxAllowedComplexity": 15
 					}
 				},
+				"noExcessiveNestedCallbacks": {
+					// temporarily disabled
+					"level": "off",
+					"options": { "max": 5 }
+				},
 				"noExcessiveNestedTestSuites": "error",
+				"noExcessiveSelectorClasses": "error",
 				"noForEach": "error",
 				"noImplicitCoercions": "error",
 				"noRedundantDefaultExport": "error",
+				"noUnnecessaryTemplateExpression": "error",
 				"noUselessCatchBinding": "error",
 				"noUselessReturn": "error",
 				"noUselessStringConcat": "error",
 				"noUselessSwitchCase": "off",
 				"preset": "none",
 				"useArrayFind": "error",
+				"useArraySome": "error",
 				"useArrowFunction": "off",
 				"useDateNow": "error",
 				"useFlatMap": "error",
 				"useLiteralKeys": "error",
+				"useMathMinMax": "error",
 				"useMaxParams": {
 					"level": "off",
 					"options": { "max": 7 }
 				},
 				"useOptionalChain": "error",
+				"useRegexpTest": "error",
 				"useSimpleNumberKeys": "error",
 				"useSimplifiedLogicExpression": "off",
 				"useWhile": "error"
 			},
 
 			"correctness": {
+				"noComponentHookFactories": "error",
+				"noDuplicateFieldDefinitionNames": "error",
 				"noGlobalDirnameFilename": "error",
+				"noJsxNamespace": "error",
 				"noNodejsModules": "off",
 				"noUndeclaredDependencies": {
 					"level": "error",
@@ -215,6 +228,9 @@
 				"noUnusedInstantiation": "error",
 				"noUnusedPrivateClassMembers": "error",
 				"noUnusedVariables": "error",
+				"noVueImportCompilerMacros": "error",
+				"noVueRefAsOperand": "error",
+				"noVueVOnNumberValues": "error",
 				"preset": "recommended",
 				"useImportExtensions": "off",
 				"useInlineScriptId": "error",
@@ -226,38 +242,18 @@
 				"noAstroSetHtmlDirective": "error",
 				"noBaseToString": "off",
 				"noBunModules": "error",
-				"noComponentHookFactories": "error",
-				"noConditionalExpect": "off",
-				"noDrizzleDeleteWithoutWhere": "error",
-				"noDrizzleUpdateWithoutWhere": "error",
-				"noDuplicateFieldDefinitionNames": "error",
-				"noDuplicateSelectors": "error",
-				"noEmptyObjectKeys": "error",
-				"noExcessiveNestedCallbacks": {
-					// temporarily disabled
-					"level": "off",
-					"options": { "max": 5 }
-				},
-				"noExcessiveSelectorClasses": "error",
 				"noExtendNative": "error",
 				"noFloatingPromises": "error",
-				"noIdenticalTestTitle": "error",
 				"noImpliedEval": "error",
-				"noInlineStyles": "error",
 				"noInvalidFileInputAccept": "error",
 				"noInvalidPropertyInitValue": "error",
 				"noJsRestrictedProperties": "error",
 				"noJsonUnsafeValues": "error",
-				"noJsxLeakedDollar": "error",
-				"noJsxNamespace": "error",
-				"noLoopFunc": "error",
 				"noMisleadingReturnType": "off",
 				"noMisusedPromises": "error",
 				"noNegationInEqualityCheck": "error",
 				"noNonScalableViewport": "error",
 				"noObsoleteTags": "error",
-
-				"noReactStringRefs": "error",
 				"noRestrictedDependencies": "error",
 				"noReturnInFinally": "error",
 				"noSvelteAtDebugTags": "error",
@@ -266,37 +262,22 @@
 				"noSvelteUnnecessaryStateWrap": "error",
 				"noTailwindArbitraryValue": "error",
 				"noThisOutsideOfClass": "error",
-				"noTopLevelLiterals": "error",
 				// does not play nicely with Astro
 				"noUndeclaredClasses": "off",
 				// what is this lol
 				"noUndeclaredCustomProperties": "off",
 				"noUnmodifiedLoopCondition": "error",
-				"noUnnecessaryTemplateExpression": "error",
 				"noUnsafeIframeSandbox": "error",
 				"noUnsafePlusOperands": "error",
 				"noUnsafeTypeAssertion": "off",
-				"noUntrustedLicenses": "error",
 				// does NOT work with mdx
 				"noUnusedClasses": "off",
 				"noUselessTypeConversion": "off",
 				"noVueDeprecatedScopedSlots": "error",
-				"noVueImportCompilerMacros": "error",
-				"noVueRefAsOperand": "error",
 				"noVueUndeclaredDirectives": "error",
-				"noVueVOnNumberValues": "error",
 				"noXorAsExponentiation": "error",
-				"preset": "recommended",
-				"useArraySome": "error",
 				"useAstroClientOnlyDirectiveValue": "error",
 				"useAwaitThenable": "error",
-				"useBaseline": {
-					"level": "error",
-					"options": {
-						"allowSelectors": ["selection", "marker"],
-						"available": "newly"
-					}
-				},
 				"useBetterDomTraversing": "error",
 				"useConsistentFunctionStyle": {
 					"level": "error",
@@ -306,24 +287,16 @@
 					}
 				},
 				"useConsistentObjectKeys": "error",
-				"useConsistentTestIt": "error",
 				"useControlLabel": "error",
 				"useDisposables": "error",
-				"useDomNodeTextContent": "error",
-				"useDomQuerySelector": "error",
 				"useExhaustiveSwitchCases": "error",
-				"useExpect": "off",
 				"useExplicitReturnType": "error",
 				"useExplicitType": "off",
 				"useFlatMathMinMax": "error",
-				"useIframeSandbox": "error",
-				"useImportsFirst": "off",
 				"useIncludes": "error",
 				// i do not know what this is
 				"useLayeredStyles": "off",
-				"useMathMinMax": "error",
 				"useModernMathApis": "error",
-				"useNamedCaptureGroup": "error",
 				"useNamedLayer": "error",
 				"useNullishCoalescing": "error",
 				"useReactCompiler": {
@@ -333,19 +306,11 @@
 					}
 				},
 				"useReactNamingConvention": "error",
-				"useReduceTypeParameter": "error",
 				"useRegexpExec": "error",
-				"useRegexpTest": "error",
-				"useScopedStyles": "error",
-				"useSortedClasses": "error",
 				"useStringStartsEndsWith": "error",
 				"useTailwindShorthandClasses": "error",
-				"useTestHooksInOrder": "error",
-				"useTestHooksOnTop": "error",
-				"useThisInClassMethods": "error",
-				"useUnicodeRegex": "error",
-				"useValidTestTitle": "error",
-				"useVarsOnTop": "error"
+				"useTailwindSortedClasses": "error",
+				"useValidTestTitle": "error"
 			},
 
 			"performance": {
@@ -355,6 +320,7 @@
 				"noJsxPropsBind": "off",
 				"noSyncScripts": "error",
 				"preset": "recommended",
+				"useDomNodeTextContent": "error",
 				"useSolidForComponent": "off",
 				"useTopLevelRegex": "error"
 			},
@@ -362,7 +328,8 @@
 			"security": {
 				"noDangerouslySetInnerHtml": "off",
 				"noScriptUrl": "error",
-				"preset": "recommended"
+				"preset": "recommended",
+				"useIframeSandbox": "error"
 			},
 
 			"style": {
@@ -386,6 +353,7 @@
 				"noHeadElement": "error",
 				"noImplicitBoolean": "error",
 				"noInferrableTypes": "error",
+				"noInlineStyles": "error",
 				"noJsxLiterals": "error",
 				"noMagicNumbers": "off",
 				"noMultiAssign": "error",
@@ -410,18 +378,21 @@
 						}
 					}
 				},
+				"noTopLevelLiterals": "error",
 				"preset": "recommended",
 				"useArrayLiterals": "off",
 				"useBlockStatements": "off",
 				"useConsistentEnumValueType": "error",
 				"useConsistentMemberAccessibility": "off",
 				"useConsistentMethodSignatures": "off",
+				"useConsistentTestIt": "error",
 				"useConst": {
 					"fix": "safe",
 					"level": "error"
 				},
 				"useDefaultParameterLast": "error",
 				"useDestructuring": "off",
+				"useDomQuerySelector": "error",
 				"useErrorCause": "error",
 				"useFilenamingConvention": {
 					"level": "error",
@@ -431,23 +402,41 @@
 					}
 				},
 				"useGlobalThis": "error",
-				"useSpreadOverApply": "error"
+				"useImportsFirst": "off",
+				"useNamedCaptureGroup": "error",
+				"useReduceTypeParameter": "error",
+				"useSpreadOverApply": "error",
+				"useTestHooksInOrder": "error",
+				"useTestHooksOnTop": "error",
+				"useThisInClassMethods": "error",
+				"useUnicodeRegex": "error",
+				"useVarsOnTop": "error"
 			},
 
 			"suspicious": {
 				"noAlert": "error",
 				"noApproximativeNumericConstant": "error",
 				"noArrayIndexKey": "error",
+				"noConditionalExpect": "off",
 				"noConfusingVoidType": "off",
 				"noConstEnum": "off",
 				"noControlCharactersInRegex": "off",
+				"noDrizzleDeleteWithoutWhere": "error",
+				"noDrizzleUpdateWithoutWhere": "error",
 				"noDuplicateEnumValues": "error",
+				"noDuplicateSelectors": "error",
 				"noEmptyBlockStatements": "error",
+				"noEmptyObjectKeys": "error",
 				"noEqualsToNull": "error",
 				"noForIn": "error",
+				"noIdenticalTestTitle": "error",
+				"noJsxLeakedDollar": "error",
+				"noLoopFunc": "error",
 				"noNestedPromises": "error",
 				"noParametersOnlyUsedInRecursion": "error",
 				"noProto": "error",
+
+				"noReactStringRefs": "error",
 				"noReturnAssign": "error",
 				"noShadow": {
 					"level": "off",
@@ -459,9 +448,26 @@
 				"noTemplateCurlyInString": "off",
 				"noUndeclaredEnvVars": "error",
 				"noUnnecessaryConditions": "off",
+				"noUntrustedLicenses": "error",
 				"preset": "recommended",
-				"useArraySortCompare": "error"
+				"useArraySortCompare": "error",
+				"useBaseline": {
+					"level": "error",
+					"options": {
+						"allowSelectors": ["selection", "marker"],
+						"available": "newly"
+					}
+				},
+				"useExpect": "off",
+				"useScopedStyles": "error"
 			}
+		}
+	},
+
+	"markdown": {
+		"analyzeEmbeds": false,
+		"formatter": {
+			"enabled": false
 		}
 	},
 
@@ -626,6 +632,9 @@
 
 		{
 			"includes": ["scripts/**/*.{ts,tsx}"],
+			"javascript": {
+				"globals": ["Bun"]
+			},
 			"linter": {
 				"rules": {
 					"nursery": {
@@ -655,18 +664,25 @@
 			"includes": ["documentation/tests/browser/**/*.test.ts"],
 			"linter": {
 				"rules": {
-					"nursery": {
+					"complexity": {
+						"noPlaywrightUselessAwait": "error"
+					},
+					"correctness": {
+						"noPlaywrightMissingAwait": "error",
+						"usePlaywrightValidDescribeCallback": "error"
+					},
+					"nursery": {},
+					"style": {
 						"noPlaywrightElementHandle": "error",
 						"noPlaywrightEval": "error",
+						"noPlaywrightWaitForSelector": "error"
+					},
+					"suspicious": {
 						"noPlaywrightForceOption": "error",
-						"noPlaywrightMissingAwait": "error",
 						"noPlaywrightNetworkidle": "error",
 						"noPlaywrightPagePause": "error",
-						"noPlaywrightUselessAwait": "error",
 						"noPlaywrightWaitForNavigation": "error",
-						"noPlaywrightWaitForSelector": "error",
-						"noPlaywrightWaitForTimeout": "error",
-						"usePlaywrightValidDescribeCallback": "error"
+						"noPlaywrightWaitForTimeout": "error"
 					}
 				}
 			}
@@ -722,5 +738,12 @@
 		"defaultBranch": "main",
 		"enabled": true,
 		"useIgnoreFile": true
+	},
+
+	"yaml": {
+		"formatter": {
+			"bracketSpacing": false,
+			"indentWidth": 2
+		}
 	}
 }

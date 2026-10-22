@@ -9,6 +9,8 @@
  * complementarity, overlap, or conceptual-dependency edges belong here.
  */
 
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
+
 import generatedRelations from "./generated/rule-relations.json";
 import { ruleManifest } from "./rule-manifest";
 import { relationDenylist, relationPins } from "./rule-relations.overrides";
@@ -67,7 +69,7 @@ export function isRuleName(value: string): value is RuleName {
 }
 
 function getPairKey(from: string, to: string): string {
-	return [from, to].toSorted().join(":");
+	return [from, to].toSorted(compareWithLocale).join(":");
 }
 
 function parseGeneratedRelation(edge: GeneratedRelation): RuleRelation {

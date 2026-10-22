@@ -1,3 +1,4 @@
+import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { type } from "arktype";
 
 import type { RuleName } from "$data/rule-manifest";
@@ -41,7 +42,6 @@ const allJudgmentDimensions = [
 	JudgmentDimension.ForwardRequires,
 	JudgmentDimension.BackwardRequires,
 ];
-export const isJudgmentDimension = type.enumerated(...allJudgmentDimensions);
 
 export const judgmentDimensions = defineJudgmentDimensions(allJudgmentDimensions);
 
@@ -168,7 +168,7 @@ export type RelationResolution =
 	| { readonly type: "none" };
 
 export function getPairKey(from: string, to: string): string {
-	return [from, to].toSorted().join(":");
+	return [from, to].toSorted(compareWithLocale).join(":");
 }
 
 export function compareStrings(left: string, right: string): number {

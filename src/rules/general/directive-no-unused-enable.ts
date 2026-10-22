@@ -6,9 +6,9 @@ import type { Visitor } from "oxlint-plugin-utilities";
 
 const directiveNoUnusedEnable = createRule("directive-no-unused-enable", "general", {
 	create(context): Visitor {
-		const disabledArea = computeDisabledArea(context.sourceCode);
+		const { unusedEnableDirectives } = computeDisabledArea(context.sourceCode);
 
-		for (const item of disabledArea.unusedEnableDirectives) {
+		for (const item of unusedEnableDirectives) {
 			context.report({
 				data: {
 					kind: "eslint-enable",

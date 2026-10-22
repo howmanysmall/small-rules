@@ -1,9 +1,7 @@
-import { createRule } from "$oxc-utilities/create-rule";
 import { getSynchronousStateSetterCalls } from "$oxc-utilities/react-effect-call-sites";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { Reference, Visitor } from "oxlint-plugin-utilities";
+import type { Reference } from "oxlint-plugin-utilities";
 
 import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
@@ -12,52 +10,30 @@ function isNoArgumentState(analysis: ReactEffectAnalysis, argumentReferences: Re
 	return !argumentReferences.some(analysis.isState);
 }
 
-const noChainStateUpdates = createRule("no-chain-state-updates", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
+const noChainStateUpdates = createReactEffectRule("no-chain-state-updates", {
+	checkEffect(context, analysis, effect): void {
+		if (effect.dependencyReferences === undefined) return;
 
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.cleanup !== undefined) continue;
-					if (effect.dependencyReferences === undefined) continue;
+		const isSomeDependenciesState = effect.dependencyReferences
+			.flatMap(analysis.scope.getUpstreamReferences)
+			.some(analysis.isState);
 
-					const isSomeDependenciesState = effect.dependencyReferences
-						.flatMap(analysis.scope.getUpstreamReferences)
-						.some(analysis.isState);
+		if (!isSomeDependenciesState) return;
 
-					if (!isSomeDependenciesState) continue;
-
-					for (const stateSetterCall of getSynchronousStateSetterCalls(analysis, effect, isNoArgumentState)) {
-						context.report({
-							data: { state: stateSetterCall.stateName },
-							messageId: "avoidChainingStateUpdates",
-							node: stateSetterCall.callExpression,
-						});
-					}
-				}
-			},
-		} satisfies Visitor;
+		for (const stateSetterCall of getSynchronousStateSetterCalls(analysis, effect, isNoArgumentState)) {
+			context.report({
+				data: { state: stateSetterCall.stateName },
+				messageId: "avoidChainingStateUpdates",
+				node: stateSetterCall.callExpression,
+			});
+		}
 	},
-	meta: {
-		docs: {
-			description: "Disallow chaining state changes in an effect.",
-			recommended: true,
-		},
-		messages: {
-			avoidChainingStateUpdates:
-				'Avoid chaining state changes. When possible, update "{{state}}" along with other relevant state simultaneously.',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: { environment: ENVIRONMENT_SCHEMA },
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow chaining state changes in an effect.",
+	messages: {
+		avoidChainingStateUpdates:
+			'Avoid chaining state changes. When possible, update "{{state}}" along with other relevant state simultaneously.',
 	},
+	skipEffectsWithCleanup: true,
 });
 
 export default noChainStateUpdates;

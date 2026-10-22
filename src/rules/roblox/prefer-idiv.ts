@@ -2,19 +2,14 @@ import {
 	isAnyLiteral,
 	isBinaryExpression,
 	isIdentifierNamed,
-	isMemberExpression,
 	isNumericLiteral,
 	isSpreadElement,
 } from "@small-rules/oxlint-utilities";
 
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import {
-	getMemberPropertyName,
-	getReceiverText,
-	stripExpressionWrappers,
-	stripParenthesis,
-} from "$oxc-utilities/oxc-utilities";
+import { getMethodCallee } from "$oxc-utilities/member-callee";
+import { getReceiverText, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -33,10 +28,6 @@ function getReciprocalDivisor(expression: ESTree.Expression): number | undefined
 	return Number.isInteger(divisor) ? divisor : undefined;
 }
 
-function isMathFloorCallee(callee: ESTree.Expression): callee is ESTree.MemberExpression {
-	return isMemberExpression(callee) && !callee.optional && getMemberPropertyName(callee) === "floor";
-}
-
 function isUnshadowedMathReference(sourceCode: SourceCode, object: ESTree.Expression): boolean {
 	return isIdentifierNamed(object, "math") && !hasShadowedBinding(sourceCode, object, "math");
 }
@@ -50,12 +41,15 @@ function getSingleCallArgument(node: ESTree.CallExpression): ESTree.Expression |
 	return argument;
 }
 
-interface IdivTarget {
+interface IntegerDivisionTarget {
 	readonly divisorText: string;
 	readonly receiver: ESTree.Expression;
 }
 
-function getSlashIdivTarget(sourceCode: SourceCode, expression: ESTree.BinaryExpression): IdivTarget | undefined {
+function getSlashIntegerDivisionTarget(
+	sourceCode: SourceCode,
+	expression: ESTree.BinaryExpression,
+): IntegerDivisionTarget | undefined {
 	if (expression.operator !== "/") return undefined;
 
 	return {
@@ -64,7 +58,7 @@ function getSlashIdivTarget(sourceCode: SourceCode, expression: ESTree.BinaryExp
 	};
 }
 
-function getStarIdivTarget(expression: ESTree.BinaryExpression): IdivTarget | undefined {
+function getStarIntegerDivisionTarget(expression: ESTree.BinaryExpression): IntegerDivisionTarget | undefined {
 	if (expression.operator !== "*") return undefined;
 
 	const rightDivisor = getReciprocalDivisor(expression.right);
@@ -78,18 +72,19 @@ function getStarIdivTarget(expression: ESTree.BinaryExpression): IdivTarget | un
 	return { divisorText: String(leftDivisor), receiver: expression.right };
 }
 
-function getIntegerDivisionTarget(sourceCode: SourceCode, expression: ESTree.BinaryExpression): IdivTarget | undefined {
-	return getSlashIdivTarget(sourceCode, expression) ?? getStarIdivTarget(expression);
+function getIntegerDivisionTarget(
+	sourceCode: SourceCode,
+	expression: ESTree.BinaryExpression,
+): IntegerDivisionTarget | undefined {
+	return getSlashIntegerDivisionTarget(sourceCode, expression) ?? getStarIntegerDivisionTarget(expression);
 }
 
 const preferIdiv = createRule("prefer-idiv", "roblox", {
 	createOnce(context): Visitor {
 		return {
 			CallExpression(node): void {
-				if (node.optional) return;
-
-				const callee = stripExpressionWrappers(node.callee);
-				if (!isMathFloorCallee(callee)) return;
+				const callee = getMethodCallee(node, "floor");
+				if (callee === undefined) return;
 
 				const object = stripExpressionWrappers(callee.object);
 				if (!isUnshadowedMathReference(context.sourceCode, object)) return;

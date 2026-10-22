@@ -11,6 +11,9 @@
 			"path": "./packages/oxlint-utilities"
 		},
 		{
+			"path": "./packages/string-utilities"
+		},
+		{
 			"path": "./tools/release-notes"
 		},
 		{

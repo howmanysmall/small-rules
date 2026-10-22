@@ -17,9 +17,9 @@ import {
 	THIS_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
+import { isAutofixAllowed } from "$oxc-utilities/autofix-option";
 import { createRule } from "$oxc-utilities/create-rule";
 import { areEquivalentMemberExpressions } from "$oxc-utilities/member-expression-equivalence";
-import { isAllowAutofixOption } from "$oxc-utilities/option-utilities";
 import { ENVIRONMENT_SCHEMA, ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -145,7 +145,7 @@ function getAppendTarget(
 const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 	create(context): Visitor {
 		const [options] = context.options;
-		const allowAutofix = isAllowAutofixOption(options) && options.allowAutofix;
+		const allowAutofix = isAutofixAllowed(options);
 		const environment = options?.environment === STANDARD ? STANDARD : ROBLOX_TS;
 		const { sourceCode } = context;
 

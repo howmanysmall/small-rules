@@ -1,12 +1,9 @@
-import { createRule } from "$oxc-utilities/create-rule";
-import { getReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
-import { ENVIRONMENT_SCHEMA, getEnvironment } from "$oxc-utilities/react-utilities";
+import { createReactEffectRule } from "$oxc-utilities/react-effect-rule";
 
-import type { InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
-
+import type { ReactEffectRuleContext } from "$oxc-utilities/react-effect-rule";
 import type { ReactEffect, ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-type RuleContext = InferContextFromRule<typeof noInitializeState>;
+type RuleContext = ReactEffectRuleContext<"avoidInitializingState">;
 
 function reportInitializeStateEffect(
 	context: RuleContext,
@@ -36,41 +33,19 @@ function reportInitializeStateEffect(
 	}
 }
 
-const noInitializeState = createRule("no-initialize-state", "react", {
-	create(context): Visitor {
-		const environment = getEnvironment(context.options[0]);
-		const analysis = getReactEffectAnalysis(context.sourceCode, environment);
+const noInitializeState = createReactEffectRule("no-initialize-state", {
+	checkEffect(context, analysis, effect): void {
+		if (effect.dependencyReferences === undefined) return;
 
-		return {
-			Program(): void {
-				for (const effect of analysis.effects) {
-					if (effect.dependencyReferences === undefined) continue;
+		const isEffectRunOnlyOnMount = effect.dependencyReferences.every(analysis.isStateSetter);
+		if (!isEffectRunOnlyOnMount) return;
 
-					const isEffectRunOnlyOnMount = effect.dependencyReferences.every(analysis.isStateSetter);
-					if (!isEffectRunOnlyOnMount) continue;
-
-					reportInitializeStateEffect(context, analysis, effect);
-				}
-			},
-		} satisfies Visitor;
+		reportInitializeStateEffect(context, analysis, effect);
 	},
-	meta: {
-		docs: {
-			description: "Disallow initializing state in an effect.",
-			recommended: true,
-		},
-		messages: {
-			avoidInitializingState:
-				'Avoid initializing state in an effect. Instead, initialize "{{state}}"\'s "useState()" with "{{arguments}}". For SSR hydration, prefer "useSyncExternalStore".',
-		},
-		schema: [
-			{
-				additionalProperties: false,
-				properties: { environment: ENVIRONMENT_SCHEMA },
-				type: "object",
-			},
-		],
-		type: "suggestion",
+	description: "Disallow initializing state in an effect.",
+	messages: {
+		avoidInitializingState:
+			'Avoid initializing state in an effect. Instead, initialize "{{state}}"\'s "useState()" with "{{arguments}}". For SSR hydration, prefer "useSyncExternalStore".',
 	},
 });
 

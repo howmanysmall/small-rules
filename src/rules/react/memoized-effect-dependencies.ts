@@ -73,6 +73,13 @@ function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: Rea
 	return isIdentifier(callee.property) ? callee.property.name : undefined;
 }
 
+function getCalleeMemberHookName(
+	callee: ESTree.CallExpression["callee"],
+	reactNamespaces: ReadonlySet<string>,
+): string | undefined {
+	return isMemberExpression(callee) ? getMemberHookName(callee, reactNamespaces) : undefined;
+}
+
 function isUnmemoizedInline(node: ESTree.Node): boolean {
 	return UNMEMOIZED_INLINE_TYPES.has(node.type);
 }
@@ -155,8 +162,7 @@ function registerConfiguredEffectHooks(rawOptions: UnknownRecord, effectHooks: M
 
 const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "react", {
 	create(context): Visitor {
-		const [rawOptions] = context.options;
-		const options = Predicate.isObject(rawOptions) ? rawOptions : {};
+		const options = Predicate.isObject(context.options[0]) ? context.options[0] : {};
 		const mode = "mode" in options && isMode(options.mode) ? options.mode : "definite";
 		const environment =
 			"environment" in options && isEnvironment(options.environment) ? options.environment : ROBLOX_TS;
@@ -213,12 +219,8 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		function isMemoHookCall({ callee }: ESTree.CallExpression): boolean {
 			if (isIdentifier(callee)) return memoHookIdentifiers.has(callee.name);
 
-			if (isMemberExpression(callee)) {
-				const hookName = getMemberHookName(callee, reactNamespaces);
-				return hookName !== undefined && MEMO_HOOKS.has(hookName);
-			}
-
-			return false;
+			const hookName = getCalleeMemberHookName(callee, reactNamespaces);
+			return hookName !== undefined && MEMO_HOOKS.has(hookName);
 		}
 
 		function getStableIdentifierKind(name: string): StableKind | undefined {
@@ -341,12 +343,8 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 		function getDependenciesIndex({ callee }: ESTree.CallExpression): number | undefined {
 			if (isIdentifier(callee)) return effectHookIdentifiers.get(callee.name);
 
-			if (isMemberExpression(callee)) {
-				const hookName = getMemberHookName(callee, reactNamespaces);
-				return hookName === undefined ? undefined : effectHookNameToIndex.get(hookName);
-			}
-
-			return undefined;
+			const hookName = getCalleeMemberHookName(callee, reactNamespaces);
+			return hookName === undefined ? undefined : effectHookNameToIndex.get(hookName);
 		}
 
 		return {
@@ -361,11 +359,8 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			},
 			ImportDeclaration(node): void {
 				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
-					if (effectHookNameToIndex.has(importedName)) {
-						const fallbackIndex = effectHookNameToIndex.get(importedName);
-						/* v8 ignore next -- @preserve guarded by has(importedName), so the fallback is defensive. */
-						effectHookIdentifiers.set(localName, fallbackIndex ?? 1);
-					}
+					const dependenciesIndex = effectHookNameToIndex.get(importedName);
+					if (dependenciesIndex !== undefined) effectHookIdentifiers.set(localName, dependenciesIndex);
 
 					if (MEMO_HOOKS.has(importedName)) memoHookIdentifiers.add(localName);
 					if (STABLE_HOOKS.has(importedName)) stableHookIdentifiers.set(localName, importedName);

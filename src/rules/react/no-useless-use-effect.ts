@@ -18,7 +18,6 @@ import {
 	isAnyLiteral,
 	isArrayExpression,
 	isArrayPattern,
-	isArrowFunctionExpression,
 	isAssignmentPattern,
 	isBlockStatement,
 	isCallbackFunction,
@@ -1162,16 +1161,6 @@ function getFunctionBody(node: CallbackFunction): ESTree.BlockStatement | undefi
 	return isBlockStatement(node.body) ? node.body : undefined;
 }
 
-function isBlockBodyArrow(
-	node: ESTree.ArrowFunctionExpression,
-): node is ESTree.ArrowFunctionExpression & { body: ESTree.BlockStatement } {
-	return isBlockStatement(node.body);
-}
-
-function isBlockBodyFunction(node: ESTree.Function): node is ESTree.Function & { body: ESTree.FunctionBody } {
-	return node.body !== null;
-}
-
 const KNOWN_EXTERNAL_PATTERNS = new Set([
 	"addEventListener",
 	"addListener",
@@ -1650,26 +1639,11 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			}
 		}
 
-		function analyzeNamedEffectCallback(node: ESTree.CallExpression, callbackName: string): void {
-			const namedFunction = namedFunctions.get(callbackName);
-			if (namedFunction === undefined || namedFunction.async) return;
+		function analyzeEffectCallback(node: ESTree.CallExpression, callback?: CallbackFunction): void {
+			if (callback === undefined || callback.async) return;
 
-			const body = getFunctionBody(namedFunction);
+			const body = getFunctionBody(callback);
 			if (body !== undefined) analyzeEffect(node, body.body.filter(isNotEmptyStatement), body);
-		}
-
-		function analyzeInlineEffectCallback(node: ESTree.CallExpression, callback: CallbackFunction): void {
-			if (callback.async) return;
-
-			if (isArrowFunctionExpression(callback)) {
-				if (!isBlockBodyArrow(callback)) return;
-				analyzeEffect(node, callback.body.body.filter(isNotEmptyStatement), callback.body);
-				return;
-			}
-
-			/* v8 ignore next -- parser-produced function callbacks have block bodies. @preserve */
-			if (!isBlockBodyFunction(callback)) return;
-			analyzeEffect(node, callback.body.body.filter(isNotEmptyStatement), callback.body);
 		}
 
 		return {
@@ -1682,11 +1656,11 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				if (callback === undefined) return;
 
 				if (isIdentifier(callback)) {
-					analyzeNamedEffectCallback(node, callback.name);
+					analyzeEffectCallback(node, namedFunctions.get(callback.name));
 					return;
 				}
 
-				if (isAnyFunction(callback)) analyzeInlineEffectCallback(node, callback);
+				if (isAnyFunction(callback)) analyzeEffectCallback(node, callback);
 			},
 			FunctionDeclaration: enterFunction,
 			"FunctionDeclaration:exit": exitFunction,
