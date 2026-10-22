@@ -21,6 +21,7 @@ import consistentCompoundWords from "$oxc-rules/english/consistent-compound-word
 import preferSingularEnums from "$oxc-rules/english/prefer-singular-enums";
 import preventAbbreviations from "$oxc-rules/english/prevent-abbreviations";
 import startsWithVerb from "$oxc-rules/english/starts-with-verb";
+import curly from "$oxc-rules/general/curly";
 import directiveDisableEnablePair from "$oxc-rules/general/directive-disable-enable-pair";
 import directiveNoAggregatingEnable from "$oxc-rules/general/directive-no-aggregating-enable";
 import directiveNoDuplicateDisable from "$oxc-rules/general/directive-no-duplicate-disable";
@@ -41,8 +42,11 @@ import noFloatingPointEquality from "$oxc-rules/general/no-floating-point-equali
 import noIdentityMap from "$oxc-rules/general/no-identity-map";
 import noIncrementDecrement from "$oxc-rules/general/no-increment-decrement";
 import noLoopIterableMutation from "$oxc-rules/general/no-loop-iterable-mutation";
+import noRealTemporaryDirectory from "$oxc-rules/general/no-real-temporary-directory";
 import noRecursive from "$oxc-rules/general/no-recursive";
 import noRestrictedPropertyAssignment from "$oxc-rules/general/no-restricted-property-assignment";
+import noRuntimeInTypeFiles from "$oxc-rules/general/no-runtime-in-type-files";
+import noTestTimeout from "$oxc-rules/general/no-test-timeout";
 import noTrivialAssertions from "$oxc-rules/general/no-trivial-assertions";
 import noUnusedImports from "$oxc-rules/general/no-unused-imports";
 import noUseOfEmptyReturnValue from "$oxc-rules/general/no-use-of-empty-return-value";
@@ -76,6 +80,7 @@ import noGiantComponent from "$oxc-rules/react/no-giant-component";
 import noGodComponents from "$oxc-rules/react/no-god-components";
 import noInitializeState from "$oxc-rules/react/no-initialize-state";
 import noInlinePropertyOnMemoComponent from "$oxc-rules/react/no-inline-property-on-memo-component";
+import noJsxSpreadChild from "$oxc-rules/react/no-jsx-spread-child";
 import noNewInstanceInUseMemo from "$oxc-rules/react/no-new-instance-in-use-memo";
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
@@ -101,6 +106,7 @@ import reactHooksStrictReturn from "$oxc-rules/react/react-hooks-strict-return";
 import requireNamedEffectFunctions from "$oxc-rules/react/require-named-effect-functions";
 import requireReactComponentKeys from "$oxc-rules/react/require-react-component-keys";
 import requireReactDisplayNames from "$oxc-rules/react/require-react-display-names";
+import requireTsxForHooks from "$oxc-rules/react/require-tsx-for-hooks";
 import rerenderMemoWithDefaultValue from "$oxc-rules/react/rerender-memo-with-default-value";
 import strictComponentBoundaries from "$oxc-rules/react/strict-component-boundaries";
 import useExhaustiveDependencies from "$oxc-rules/react/use-exhaustive-dependencies";
@@ -143,6 +149,7 @@ const smallRules = definePlugin({
 		"ban-react-fc": banReactFc,
 		"ban-types": banTypes,
 		"consistent-compound-words": consistentCompoundWords,
+		curly,
 		"directive-disable-enable-pair": directiveDisableEnablePair,
 		"directive-no-aggregating-enable": directiveNoAggregatingEnable,
 		"directive-no-duplicate-disable": directiveNoDuplicateDisable,
@@ -186,6 +193,7 @@ const smallRules = definePlugin({
 		"no-initialize-state": noInitializeState,
 		"no-inline-property-on-memo-component": noInlinePropertyOnMemoComponent,
 		"no-instance-methods-without-this": noInstanceMethodsWithoutThis,
+		"no-jsx-spread-child": noJsxSpreadChild,
 		"no-known-value-widening": noKnownValueWidening,
 		"no-loop-iterable-mutation": noLoopIterableMutation,
 		"no-module-mocking": noModuleMocking,
@@ -195,6 +203,7 @@ const smallRules = definePlugin({
 		"no-pass-data-to-parent": noPassDataToParent,
 		"no-pass-live-state-to-parent": noPassLiveStateToParent,
 		"no-print": noPrint,
+		"no-real-temp-dir": noRealTemporaryDirectory,
 		"no-recursive": noRecursive,
 		"no-reduce-accumulator-copy": noReduceAccumulatorCopy,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
@@ -203,12 +212,14 @@ const smallRules = definePlugin({
 		"no-render-helper-functions": noRenderHelperFunctions,
 		"no-reset-all-state-on-prop-change": noResetAllStateOnPropChange,
 		"no-restricted-property-assignment": noRestrictedPropertyAssignment,
+		"no-runtime-in-type-files": noRuntimeInTypeFiles,
 		"no-runtime-typeof": noRuntimeTypeof,
 		"no-shape-in-symbol-names": noStructuralTermInSymbolNames,
 		"no-spec-file-extension": noSpecFileExtension,
 		"no-static-react-create-element": noStaticReactCreateElement,
 		"no-table-create-map": noTableCreateMap,
 		"no-task-wait": noTaskWait,
+		"no-test-timeout": noTestTimeout,
 		"no-trivial-assertions": noTrivialAssertions,
 		"no-underscore-react-props": noUnderscoreReactProperties,
 		"no-unknown-parameters": noUnknownParameters,
@@ -266,6 +277,7 @@ const smallRules = definePlugin({
 		"require-safety-comment-for-type-assertion": requireSafetyCommentForTypeAssertion,
 		"require-switch-case-braces": requireSwitchCaseBraces,
 		"require-throw-error-capture": requireThrowErrorCapture,
+		"require-tsx-for-hooks": requireTsxForHooks,
 		"require-unicode-regex": requireUnicodeRegex,
 		"rerender-memo-with-default-value": rerenderMemoWithDefaultValue,
 		"starts-with-verb": startsWithVerb,

@@ -398,8 +398,40 @@ const preferOptionalParameter = defineFixableCase({
 	}),
 });
 
+const curlyBodyArbitrary = fc.record({
+	call: identifierArbitrary.map((name) => `${name}();`),
+	form: fc.constantFrom("braced-jump", "do", "else", "empty", "expression", "for-of", "while", "wrapped-jump"),
+	jump: fc.constantFrom("break;", "continue;", "return;", "return 1;"),
+	test: expressionArbitrary,
+});
+
+// Each trigger sits in a loop inside a function, so every jump is legal.
+const curly = defineFixableCase({
+	frames: fc
+		.tuple(fc.array(frameArbitrary, { size: "-1" }), scopeFrameArbitrary)
+		.map(([outer, scope]) => outer.toSpliced(outer.length, 0, scope)),
+	language: "ts",
+	render: ({ call, form, jump, test }, id) => {
+		const bodies = {
+			"braced-jump": `if (${test}) {\n${jump}\n}`,
+			do: `do ${call} while (${test});`,
+			else: `if (${test}) ${jump} else ${call}`,
+			empty: `if (${test});`,
+			expression: `if (${test}) ${call}`,
+			"for-of": `for (const item${id} of ${test}) ${call}`,
+			while: `while (${test}) ${call}`,
+			"wrapped-jump": `if (${test})\n${jump}`,
+		};
+
+		return { statements: [`for (const entry${id} of entries) {\n${bodies[form]}\n}`] };
+	},
+	rule: "curly",
+	trigger: curlyBodyArbitrary,
+});
+
 export const GENERAL_FIXABLE_CASES: ReadonlyArray<FixableCase> = [
 	arrayTypeGeneric,
+	curly,
 	noIdentityMap,
 	noIncrementDecrement,
 	noUnusedImports,

@@ -1,0 +1,17 @@
+---
+title: "Require TSX for Hooks"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="require-tsx-for-hooks">
+	<Fragment slot="rationale">
+		<p>
+			Many projects use the `.tsx` extension to mark React code. Their React lint rules run on `.tsx` files only,
+			and the React Compiler often reads the same marker. A hook in a `.ts` file loses both without a warning.
+			This rule reports a hook declared in a `.ts` file. A hook is a function whose name is `use` and then a
+			capital letter or a digit, as the React Compiler defines it. Declaration files, `declare` signatures,
+			re-exports, and aliases of an imported hook pass.
+		</p>
+	</Fragment>
+</RulePage>
