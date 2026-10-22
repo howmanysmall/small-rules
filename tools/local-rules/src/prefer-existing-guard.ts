@@ -74,7 +74,9 @@ export function createPreferExistingGuardRule(
 					// Search each chain once, from its top.
 					if (isLogicalExpression(node.parent) && node.parent.operator === node.operator) return;
 
-					for (const found of findSharedGuards(index, node, sourceCode)) reportGuard(node, found);
+					for (const found of findSharedGuards(index, node, sourceCode)) {
+						reportGuard(node, found);
+					}
 				},
 			} satisfies Visitor;
 		},

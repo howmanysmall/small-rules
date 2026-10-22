@@ -83,7 +83,9 @@ function hasExportReference(sourceCode: SourceCode, node: ESTree.VariableDeclara
 		/* v8 ignore next -- @preserve declared variables for an identifier declarator match the declarator name. */
 		if (variable.name !== variableName) continue;
 
-		for (const { identifier } of variable.references) if (isNodeInExport(identifier)) return true;
+		for (const { identifier } of variable.references) {
+			if (isNodeInExport(identifier)) return true;
+		}
 
 		return false;
 	}
@@ -160,13 +162,13 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 					return;
 				}
 
-				if (isIdentifier(node.declaration)) defaultExportedNames.add(node.declaration.name);
+				if (isIdentifier(node.declaration)) {
+					defaultExportedNames.add(node.declaration.name);
+				}
 			},
 			ExportNamedDeclaration(node): void {
 				for (const specifier of node.specifiers) {
-					if (!isIdentifierNamed(specifier.exported, "default") || !isIdentifier(specifier.local)) {
-						continue;
-					}
+					if (!isIdentifierNamed(specifier.exported, "default") || !isIdentifier(specifier.local)) continue;
 
 					defaultExportedNames.add(specifier.local.name);
 				}
@@ -178,8 +180,12 @@ const requireReactDisplayNames = createRule("require-react-display-names", "reac
 					const { name } = specifier.local;
 					if (isImportSpecifier(specifier)) {
 						const importedName = getImportedName(specifier);
-						if (importedName === "memo") memoIdentifiers.add(name);
-						else if (importedName === "createContext") createContextIdentifiers.add(name);
+						if (importedName === "memo") {
+							memoIdentifiers.add(name);
+						} else if (importedName === "createContext") {
+							createContextIdentifiers.add(name);
+						}
+
 						continue;
 					}
 

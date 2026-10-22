@@ -33,15 +33,21 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 				extraDenyList = options?.denyList ?? EMPTY_LIST;
 			},
 			FunctionDeclaration(node): void {
-				if (node.id !== null) reportIfNotVerb(node.id);
+				if (node.id !== null) {
+					reportIfNotVerb(node.id);
+				}
 			},
 			FunctionExpression(node): void {
-				if (node.id !== null) reportIfNotVerb(node.id);
+				if (node.id !== null) {
+					reportIfNotVerb(node.id);
+				}
 			},
 			MethodDefinition(node): void {
 				if (node.kind !== "method" || node.override === true) return;
 				const nameNode = getMemberNameNode(node.key, node.computed);
-				if (nameNode !== undefined) reportIfNotVerb(nameNode);
+				if (nameNode !== undefined) {
+					reportIfNotVerb(nameNode);
+				}
 			},
 			Property(node): void {
 				if (node.kind !== "init" || !isCallbackFunction(node.value)) return;
@@ -52,10 +58,14 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 			PropertyDefinition(node): void {
 				if (!isCallbackFunction(node.value) || node.override === true) return;
 				const nameNode = getMemberNameNode(node.key, node.computed);
-				if (nameNode !== undefined) reportIfNotVerb(nameNode);
+				if (nameNode !== undefined) {
+					reportIfNotVerb(nameNode);
+				}
 			},
 			VariableDeclarator(node): void {
-				if (isIdentifier(node.id) && isCallbackFunction(node.init)) reportIfNotVerb(node.id);
+				if (isIdentifier(node.id) && isCallbackFunction(node.init)) {
+					reportIfNotVerb(node.id);
+				}
 			},
 		};
 	},

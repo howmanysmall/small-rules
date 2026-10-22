@@ -100,7 +100,9 @@ function isTypeOnlyStatement(statement: Statement): boolean {
 const noRuntimeInTypeFiles = createRule("no-runtime-in-type-files", "general", {
 	create(context): Visitor {
 		const [options] = context.options;
-		if (!isTypeFile(context.filename, options?.files ?? DEFAULT_FILES)) return {};
+		if (!isTypeFile(context.filename, options?.files ?? DEFAULT_FILES)) {
+			return {};
+		}
 
 		return {
 			Program({ body }): void {

@@ -161,11 +161,17 @@ type StartsWithTuple = readonly [doesStartWith: boolean, prefix: string];
 
 const BASE_ALLOW = new Set<string>(DICTIONARY_VERBS);
 
-for (const verb of AUXILIARY_VERBS) BASE_ALLOW.add(verb);
+for (const verb of AUXILIARY_VERBS) {
+	BASE_ALLOW.add(verb);
+}
 
-for (const verb of PROGRAMMING_VERBS) BASE_ALLOW.add(verb);
+for (const verb of PROGRAMMING_VERBS) {
+	BASE_ALLOW.add(verb);
+}
 
-for (const verb of ALLOW_LIST) BASE_ALLOW.add(verb);
+for (const verb of ALLOW_LIST) {
+	BASE_ALLOW.add(verb);
+}
 
 const BASE_DENY = new Set<string>(["file", "string"] satisfies ReadonlyArray<string>);
 
@@ -221,8 +227,13 @@ export function startsWithVerb(
 	const prefix = getLowercasePrefix(functionName);
 	if (prefix.length === 0) return NO_PREFIX;
 
-	if (isDenied(prefix, extraDenyList)) return [false, prefix];
-	if (isAllowed(prefix, extraAllowList)) return [true, prefix];
+	if (isDenied(prefix, extraDenyList)) {
+		return [false, prefix];
+	}
+
+	if (isAllowed(prefix, extraAllowList)) {
+		return [true, prefix];
+	}
 
 	const base = getThirdPersonBase(prefix, extraAllowList);
 	return [base !== undefined && !isDenied(base, extraDenyList), prefix];

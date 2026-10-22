@@ -38,7 +38,10 @@ const configurationHost: ParseConfigFileHost = {
 
 function parseConfiguration(filePath: string): ParsedCommandLine {
 	const parsed = typescript.getParsedCommandLineOfConfigFile(filePath, undefined, configurationHost);
-	if (parsed === undefined) throw new Error(`Could not parse "${filePath}".`);
+	if (parsed === undefined) {
+		throw new Error(`Could not parse "${filePath}".`);
+	}
+
 	return parsed;
 }
 
@@ -79,14 +82,14 @@ function createExpandedTypeNode(
 	declaration: TypeAliasDeclaration,
 	checker: TypeChecker,
 ): TypeNode | undefined {
-	if (!type.isUnion()) {
-		return checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS);
-	}
+	if (!type.isUnion()) return checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS);
 
 	const members = new Array<TypeNode>();
 	for (const member of type.types) {
 		const node = checker.typeToTypeNode(member, declaration, TYPE_FORMAT_FLAGS);
-		if (node !== undefined) members.push(node);
+		if (node !== undefined) {
+			members.push(node);
+		}
 	}
 
 	return factory.createUnionTypeNode(members);
@@ -116,10 +119,14 @@ function writeType(filePath: string, typeName: string, shallow: boolean): string
 		rootNames: fileNames.includes(absolutePath) ? fileNames : [absolutePath],
 	});
 	const sourceFile = program.getSourceFile(absolutePath);
-	if (sourceFile === undefined) throw new Error(`Could not load "${filePath}".`);
+	if (sourceFile === undefined) {
+		throw new Error(`Could not load "${filePath}".`);
+	}
 
 	const declaration = findDeclaration(sourceFile, typeName);
-	if (declaration === undefined) throw new Error(`Could not find a type named "${typeName}" in "${filePath}".`);
+	if (declaration === undefined) {
+		throw new Error(`Could not find a type named "${typeName}" in "${filePath}".`);
+	}
 
 	if (typescript.isTypeAliasDeclaration(declaration)) {
 		const printer = typescript.createPrinter({ removeComments: true });

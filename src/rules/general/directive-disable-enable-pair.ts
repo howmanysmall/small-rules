@@ -11,7 +11,9 @@ const directiveDisableEnablePair = createRule("directive-disable-enable-pair", "
 		const disabledArea = computeDisabledArea(context.sourceCode);
 		const [firstToken] = context.sourceCode.ast.tokens;
 
-		if (allowWholeFile && firstToken === undefined) return {};
+		if (allowWholeFile && firstToken === undefined) {
+			return {};
+		}
 
 		for (const area of disabledArea.areas) {
 			if (area.end !== undefined) continue;

@@ -18,7 +18,10 @@ interface NormalizedOptions {
 }
 
 function normalizeOptions(raw: RuleOptions): NormalizedOptions {
-	if (!Predicate.isObject(raw)) return { allowedHooks: new Set() };
+	if (!Predicate.isObject(raw)) {
+		return { allowedHooks: new Set() };
+	}
+
 	return { allowedHooks: new Set(isStringArray(raw.allowedHooks) ? raw.allowedHooks : []) };
 }
 

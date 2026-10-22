@@ -249,10 +249,16 @@ export function createPreferNodeTypeConstantRule({
 
 					if (!isCoveredBySharedGuard(node) && !reportGuard(node)) return;
 
-					for (const literal of found) replacedByGuard.add(literal);
+					for (const literal of found) {
+						replacedByGuard.add(literal);
+					}
 				},
 				"Program:exit"(): void {
-					for (const literal of literals) if (!replacedByGuard.has(literal)) reportLiteral(literal);
+					for (const literal of literals) {
+						if (!replacedByGuard.has(literal)) {
+							reportLiteral(literal);
+						}
+					}
 				},
 				SwitchStatement(node): void {
 					found.length = 0;

@@ -76,20 +76,28 @@ function isFreshReferenceExpression(node: ESTree.Node): boolean {
 
 function constantFromLiteral(node: ESTree.Node): ResolvedConstant | undefined {
 	if (!isAnyLiteral(node)) return undefined;
-	if (node.value === null) return { value: null };
+
+	if (node.value === null) {
+		return { value: null };
+	}
 
 	if (Predicate.isString(node.value) || Predicate.isNumber(node.value) || Predicate.isBoolean(node.value)) {
 		return { value: node.value };
 	}
 
-	if (Predicate.isBigInt(node.value)) return { value: node.value };
+	if (Predicate.isBigInt(node.value)) {
+		return { value: node.value };
+	}
+
 	/* v8 ignore next -- remaining Literal values are non-primitive (e.g. regex already handled as fresh). @preserve */
 	return undefined;
 }
 
 function unwrapNode(node: ESTree.Node): ESTree.Node {
 	let current = node;
-	while (isTransparentExpression(current)) current = current.expression;
+	while (isTransparentExpression(current)) {
+		current = current.expression;
+	}
 
 	return current;
 }
@@ -99,7 +107,9 @@ function resolveUnaryConstant(
 	expression: ESTree.UnaryExpression,
 	seen: Set<ESTree.Node>,
 ): ResolvedConstant | undefined {
-	if (expression.operator === "void") return { value: undefined };
+	if (expression.operator === "void") {
+		return { value: undefined };
+	}
 
 	if (expression.operator === "typeof") {
 		const argument = resolveConstantPrimitive(sourceCode, expression.argument, seen);
@@ -108,10 +118,21 @@ function resolveUnaryConstant(
 
 	const argument = resolveConstantPrimitive(sourceCode, expression.argument, seen);
 	if (argument === undefined) return undefined;
-	if (expression.operator === "!") return { value: isFalsyConstant(argument.value) };
+
+	if (expression.operator === "!") {
+		return { value: isFalsyConstant(argument.value) };
+	}
+
 	if (!Predicate.isNumber(argument.value)) return undefined;
-	if (expression.operator === "+") return { value: argument.value };
-	if (expression.operator === "-") return { value: -argument.value };
+
+	if (expression.operator === "+") {
+		return { value: argument.value };
+	}
+
+	if (expression.operator === "-") {
+		return { value: -argument.value };
+	}
+
 	return undefined;
 }
 
@@ -120,7 +141,10 @@ function resolveIdentifierConstant(
 	expression: ESTree.Node & { readonly name: string },
 	seen: Set<ESTree.Node>,
 ): ResolvedConstant | undefined {
-	if (expression.name === "undefined") return { value: undefined };
+	if (expression.name === "undefined") {
+		return { value: undefined };
+	}
+
 	const scope = sourceCode.getScope(expression);
 	const variable = getVariableByName(scope, expression.name);
 	const [definition] = variable?.defs ?? [];
@@ -226,7 +250,9 @@ function reportComparisonAssertion(
 	if (actualConstant === undefined || expectedConstant === undefined) return;
 
 	const equal = constantsEqual(strict, actualConstant.value, expectedConstant.value);
-	if (equal !== negated) context.report({ messageId: "issue", node: actual });
+	if (equal !== negated) {
+		context.report({ messageId: "issue", node: actual });
+	}
 }
 
 function reportTrivialExpect(context: Context, node: ESTree.CallExpression): void {

@@ -170,7 +170,9 @@ function popArrayInitializer(name: string, arrayInitializersByName: Map<string, 
 	initializers.pop();
 
 	/* v8 ignore next -- each tracked name has one initializer in parser enter/exit order. @preserve */
-	if (initializers.length === 0) arrayInitializersByName.delete(name);
+	if (initializers.length === 0) {
+		arrayInitializersByName.delete(name);
+	}
 }
 
 const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", {
@@ -180,19 +182,27 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		let hookDepth = 0;
 
 		function enterNamedHook(node: ESTree.Function): void {
-			if (isHookFunction(node)) hookDepth += 1;
+			if (isHookFunction(node)) {
+				hookDepth += 1;
+			}
 		}
 
 		function exitNamedHook(node: ESTree.Function): void {
-			if (isHookFunction(node)) hookDepth -= 1;
+			if (isHookFunction(node)) {
+				hookDepth -= 1;
+			}
 		}
 
 		function enterArrowHook(node: ESTree.ArrowFunctionExpression): void {
-			if (isHookArrowFunction(node)) hookDepth += 1;
+			if (isHookArrowFunction(node)) {
+				hookDepth += 1;
+			}
 		}
 
 		function exitArrowHook(node: ESTree.ArrowFunctionExpression): void {
-			if (isHookArrowFunction(node)) hookDepth -= 1;
+			if (isHookArrowFunction(node)) {
+				hookDepth -= 1;
+			}
 		}
 
 		function reportTooManyReturnValues(node: ESTree.ReturnStatement): void {
@@ -205,7 +215,9 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 
 		function reportIfTooManyElements(node: ESTree.ReturnStatement, array: ESTree.ArrayExpression): void {
 			const count = countReturnElements(array, sourceCode, arrayInitializersByName);
-			if (count > MAX_RETURN_ELEMENTS) reportTooManyReturnValues(node);
+			if (count > MAX_RETURN_ELEMENTS) {
+				reportTooManyReturnValues(node);
+			}
 		}
 
 		function checkIdentifierReturn(
@@ -215,7 +227,9 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 			if (shouldAllowIdentifierReturn(sourceCode, identifier)) return;
 
 			const initializer = getResolvedArrayInitializer(sourceCode, node, identifier.name, arrayInitializersByName);
-			if (initializer !== undefined) reportIfTooManyElements(node, initializer);
+			if (initializer !== undefined) {
+				reportIfTooManyElements(node, initializer);
+			}
 		}
 
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
@@ -226,7 +240,9 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 				return;
 			}
 
-			if (isArrayExpression(node.argument)) reportIfTooManyElements(node, node.argument);
+			if (isArrayExpression(node.argument)) {
+				reportIfTooManyElements(node, node.argument);
+			}
 		}
 
 		return {
@@ -239,11 +255,15 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 			ReturnStatement: checkReturnStatement,
 			VariableDeclarator(node): void {
 				const initializer = getArrayInitializer(node);
-				if (initializer !== undefined) pushArrayInitializer(initializer, arrayInitializersByName);
+				if (initializer !== undefined) {
+					pushArrayInitializer(initializer, arrayInitializersByName);
+				}
 			},
 			"VariableDeclarator:exit"(node): void {
 				const initializer = getArrayInitializer(node);
-				if (initializer !== undefined) popArrayInitializer(initializer.name, arrayInitializersByName);
+				if (initializer !== undefined) {
+					popArrayInitializer(initializer.name, arrayInitializersByName);
+				}
 			},
 		};
 	},

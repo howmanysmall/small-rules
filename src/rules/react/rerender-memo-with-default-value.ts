@@ -40,7 +40,10 @@ function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTr
 			checkObjectPatternDefaults(context, parameter.left);
 
 			/* v8 ignore next -- @preserve assignment pattern defaults are parser expression nodes. */
-			if (isNode(parameter.right)) reportEmptyDefaultValue(context, parameter.right);
+			if (isNode(parameter.right)) {
+				reportEmptyDefaultValue(context, parameter.right);
+			}
+
 			continue;
 		}
 
@@ -52,7 +55,9 @@ function checkParameterDefaults(context: Context, parameters: ReadonlyArray<ESTr
 function checkObjectPatternDefaults(context: Context, pattern: ESTree.ObjectPattern): void {
 	for (const property of pattern.properties) {
 		const defaultValue = getPropertyDefaultValue(property);
-		if (defaultValue !== undefined) reportEmptyDefaultValue(context, defaultValue);
+		if (defaultValue !== undefined) {
+			reportEmptyDefaultValue(context, defaultValue);
+		}
 	}
 }
 
@@ -78,11 +83,15 @@ const rerenderMemoWithDefaultValue = createRule("rerender-memo-with-default-valu
 		return {
 			FunctionDeclaration(node): void {
 				const parameters = getComponentDeclarationParameters(node);
-				if (parameters !== undefined) checkParameterDefaults(context, parameters);
+				if (parameters !== undefined) {
+					checkParameterDefaults(context, parameters);
+				}
 			},
 			VariableDeclarator(node): void {
 				const parameters = getComponentAssignmentParameters(node);
-				if (parameters !== undefined) checkParameterDefaults(context, parameters);
+				if (parameters !== undefined) {
+					checkParameterDefaults(context, parameters);
+				}
 			},
 		} satisfies Visitor;
 	},

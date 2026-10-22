@@ -63,7 +63,9 @@ export function createContainsDetector(probability: number, patterns: ReadonlyAr
 
 				pattern.pattern.lastIndex = 0;
 				const matches = compressed.match(pattern.pattern);
-				if (matches) total += matches.length;
+				if (matches) {
+					total += matches.length;
+				}
 			}
 
 			return total;

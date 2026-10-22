@@ -57,7 +57,10 @@ function splitIntoWords(value: string): ReadonlyArray<string> | undefined {
 		runStart = undefined;
 	}
 
-	if (runStart !== undefined) pushSplitRun(words, value.slice(runStart));
+	if (runStart !== undefined) {
+		pushSplitRun(words, value.slice(runStart));
+	}
+
 	return words;
 }
 
@@ -103,7 +106,9 @@ const preferPascalCaseEnums = createRule("prefer-pascal-case-enums", "naming", {
 			},
 			TSEnumMember(node): void {
 				const identifier = getEnumMemberName(node);
-				if (identifier !== undefined) reportIfNotPascalCase(identifier, node.id);
+				if (identifier !== undefined) {
+					reportIfNotPascalCase(identifier, node.id);
+				}
 			},
 		} satisfies Visitor;
 	},

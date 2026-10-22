@@ -13,7 +13,10 @@ const log = consola.withTag(name);
 
 async function isDatamuseVerbAsync(word: string): Promise<boolean> {
 	const response = await fetch(`https://api.datamuse.com/words?sp=${word}&qe=sp&md=p&max=1`);
-	if (!response.ok) throw new Error(`Datamuse request for "${word}" failed: ${response.statusText}`);
+	if (!response.ok) {
+		throw new Error(`Datamuse request for "${word}" failed: ${response.statusText}`);
+	}
+
 	return isPrimarilyVerb(await response.json(), word);
 }
 
@@ -38,7 +41,9 @@ const command = createBaseCommand(
 				next += 1;
 
 				// oxlint-disable-next-line no-await-in-loop -- each worker drains the shared queue one request at a time
-				if (word !== undefined && (await isDatamuseVerbAsync(word))) verbs.push(word);
+				if (word !== undefined && (await isDatamuseVerbAsync(word))) {
+					verbs.push(word);
+				}
 			}
 		}
 

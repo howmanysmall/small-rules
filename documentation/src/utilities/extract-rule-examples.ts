@@ -111,8 +111,13 @@ export function extractRuleExamples(sourceText: string, relativePath: string): R
 			if (examples.length === 0) return;
 
 			const existingExamples = examplesByRuleName.get(invocation.ruleName);
-			if (existingExamples === undefined) examplesByRuleName.set(invocation.ruleName, examples);
-			else for (const example of examples) existingExamples.push(example);
+			if (existingExamples === undefined) {
+				examplesByRuleName.set(invocation.ruleName, examples);
+			} else {
+				for (const example of examples) {
+					existingExamples.push(example);
+				}
+			}
 		},
 	});
 
@@ -248,7 +253,9 @@ function extractCaseExample(
 			}
 
 			Object.assign(example, { [field.key]: value });
-		} else Object.assign(example, { [field.key]: value });
+		} else {
+			Object.assign(example, { [field.key]: value });
+		}
 	}
 
 	return example;
@@ -283,7 +290,10 @@ function evaluateRequiredString(
 	prefix = "",
 ): string {
 	const field = fields.find((candidate) => candidate.key === name);
-	if (field === undefined) throw new ExtractionError(context, 0, `${prefix}${name} is required.`);
+	if (field === undefined) {
+		throw new ExtractionError(context, 0, `${prefix}${name} is required.`);
+	}
+
 	const value = evaluateStatic(field.property.value, context);
 	if (!Predicate.isString(value)) {
 		throw new ExtractionError(context, field.property.value.start, `${prefix}${name} must evaluate to a string.`);
@@ -323,8 +333,14 @@ function getObjectFields(object: ObjectExpression, context: ExtractionContext): 
 function findField(object: ObjectExpression, name: string): ObjectField | undefined {
 	for (const property of object.properties) {
 		if (property.type !== "Property" || property.computed || property.kind !== "init" || property.method) continue;
-		if (property.key.type === "Identifier" && property.key.name === name) return { key: name, property };
-		if (isStringLiteral(property.key) && property.key.value === name) return { key: name, property };
+
+		if (property.key.type === "Identifier" && property.key.name === name) {
+			return { key: name, property };
+		}
+
+		if (isStringLiteral(property.key) && property.key.value === name) {
+			return { key: name, property };
+		}
 	}
 
 	return undefined;

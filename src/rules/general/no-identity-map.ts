@@ -26,9 +26,7 @@ const DEFAULT_BINDING_PATTERNS: ReadonlyArray<string> = ["binding"];
 function getParameterName(parameterPattern: ESTree.ParamPattern): string | undefined {
 	if (isIdentifier(parameterPattern)) return parameterPattern.name;
 
-	if (isAssignmentPattern(parameterPattern) && isIdentifier(parameterPattern.left)) {
-		return parameterPattern.left.name;
-	}
+	if (isAssignmentPattern(parameterPattern) && isIdentifier(parameterPattern.left)) return parameterPattern.left.name;
 
 	return undefined;
 }
@@ -37,9 +35,7 @@ function isBlockReturningIdentity({ body }: ESTree.FunctionBody, parameterName: 
 	if (body.length !== 1) return false;
 
 	const [statement] = body;
-	if (!isReturnStatement(statement) || !isIdentifier(statement.argument)) {
-		return false;
-	}
+	if (!isReturnStatement(statement) || !isIdentifier(statement.argument)) return false;
 
 	return statement.argument.name === parameterName;
 }
@@ -111,7 +107,9 @@ function isLikelyBinding(
 ): boolean {
 	if (isIdentifier(object)) {
 		const lowerName = object.name.toLowerCase();
-		for (const pattern of patterns) if (lowerName.includes(pattern.toLowerCase())) return true;
+		for (const pattern of patterns) {
+			if (lowerName.includes(pattern.toLowerCase())) return true;
+		}
 
 		const variable = getVariableByName(sourceCode.getScope(object), object.name);
 		if (variable !== undefined && isBindingInitialization(variable)) return true;
@@ -139,9 +137,7 @@ function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | unde
 	}
 
 	const [argument] = node.arguments;
-	if (argument === undefined || isSpreadElement(argument) || !isIdentityCallback(argument)) {
-		return undefined;
-	}
+	if (argument === undefined || isSpreadElement(argument) || !isIdentityCallback(argument)) return undefined;
 
 	return callee;
 }

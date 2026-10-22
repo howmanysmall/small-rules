@@ -360,7 +360,9 @@ function scoreFunctionType(
 ): number {
 	const { params: parameters } = node;
 	let score = 2;
-	for (const parameter of parameters) score = addFunctionParameterScore(score, parameter, scoring);
+	for (const parameter of parameters) {
+		score = addFunctionParameterScore(score, parameter, scoring);
+	}
 
 	return addFunctionReturnScore(score, node, scoring);
 }
@@ -586,7 +588,9 @@ const enforceIanitorCheckType = createRule("enforce-ianitor-check-type", "roblox
 
 		return {
 			Identifier(node): void {
-				if (node.name === "Ianitor") hasIanitorReference = true;
+				if (node.name === "Ianitor") {
+					hasIanitorReference = true;
+				}
 			},
 
 			"Program:exit"(): void {

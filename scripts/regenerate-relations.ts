@@ -170,7 +170,9 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				usage: usageTracker.getTotals(),
 			});
 
-			for (const line of summary) log.info(line);
+			for (const line of summary) {
+				log.info(line);
+			}
 		}
 	});
 

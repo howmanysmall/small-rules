@@ -94,10 +94,14 @@ async function resolveCredentialsAsync(apiKey?: string, githubToken?: string): P
 		fail("communique is not on PATH. Run `mise install` first.");
 	}
 
-	if (!isPresent(apiKey)) fail("Set COMMUNIQUE_OPENROUTER_API_KEY (or OPENAI_API_KEY).");
+	if (!isPresent(apiKey)) {
+		fail("Set COMMUNIQUE_OPENROUTER_API_KEY (or OPENAI_API_KEY).");
+	}
 
 	const resolvedGitHubToken = await resolveGitHubTokenAsync(githubToken);
-	if (resolvedGitHubToken === undefined) fail("Set GITHUB_TOKEN or log in with `gh auth login`.");
+	if (resolvedGitHubToken === undefined) {
+		fail("Set GITHUB_TOKEN or log in with `gh auth login`.");
+	}
 
 	return { apiKey, githubToken: resolvedGitHubToken };
 }
@@ -105,7 +109,10 @@ async function resolveCredentialsAsync(apiKey?: string, githubToken?: string): P
 function createTagOptions(available: ReadonlyArray<string>): Array<Option<string>> {
 	const options = available.map((tag): Option<string> => ({ label: tag, value: tag }));
 	const [latest] = options;
-	if (latest !== undefined) latest.hint = "latest";
+	if (latest !== undefined) {
+		latest.hint = "latest";
+	}
+
 	return options;
 }
 
@@ -116,7 +123,10 @@ async function selectTagsAsync(
 ): Promise<ReadonlyArray<string>> {
 	if (requested !== undefined) {
 		const unknown = requested.filter((tag) => !available.includes(tag));
-		if (unknown.length > 0) fail(`No committed release notes for ${unknown.join(", ")}.`);
+		if (unknown.length > 0) {
+			fail(`No committed release notes for ${unknown.join(", ")}.`);
+		}
+
 		return available.filter((tag) => requested.includes(tag));
 	}
 
@@ -135,8 +145,14 @@ async function selectTagsAsync(
 
 async function selectTargetsAsync(documentation: boolean, github: boolean, yes: boolean): Promise<ReadonlySet<Target>> {
 	const initialValues = new Array<Target>();
-	if (documentation) initialValues.push("documentation");
-	if (github) initialValues.push("github");
+	if (documentation) {
+		initialValues.push("documentation");
+	}
+
+	if (github) {
+		initialValues.push("github");
+	}
+
 	if (yes || initialValues.length < 2) return new Set(initialValues);
 
 	const selected = exitIfCancelled(
@@ -168,7 +184,9 @@ async function ensureTagsFetchedAsync(tags: ReadonlyArray<string>, yes: boolean)
 
 	log.warn(`${missing.length} tag(s) are missing locally: ${dim(missing.join(", "))}`);
 	const shouldFetch = yes || exitIfCancelled(await confirm({ message: "Run `git fetch --tags` now?" }));
-	if (!shouldFetch) fail("communique needs every selected tag locally.");
+	if (!shouldFetch) {
+		fail("communique needs every selected tag locally.");
+	}
 
 	const fetching = spinner();
 	fetching.start("Fetching tags");
@@ -205,9 +223,14 @@ interface SaveResult {
 async function saveDocumentationAsync(context: Context, tag: string, notes: string): Promise<SaveResult> {
 	const documentPath = nodePath.join(context.rootDirectory, RELEASES_DIRECTORY, `${tag}.md`);
 	const previous = await readOptionalFileAsync(documentPath);
-	if (previous === notes) return { changed: false, previous };
+	if (previous === notes) {
+		return { changed: false, previous };
+	}
 
-	if (!context.dryRun) await writeFile(documentPath, notes);
+	if (!context.dryRun) {
+		await writeFile(documentPath, notes);
+	}
+
 	return { changed: true, previous };
 }
 
@@ -220,7 +243,9 @@ async function saveGitHubReleaseAsync(
 	const { owner, repository } = context.defaults;
 	const { data } = await octokit.rest.repos.getReleaseByTag({ owner, repo: repository, tag });
 	const previous = data.body ?? undefined;
-	if (previous === notes) return { changed: false, previous };
+	if (previous === notes) {
+		return { changed: false, previous };
+	}
 
 	if (!context.dryRun) {
 		await octokit.rest.repos.updateRelease({ body: notes, owner, release_id: data.id, repo: repository });
@@ -240,8 +265,13 @@ async function saveGitHubReleaseAsync(
  */
 async function saveAsync(context: Context, tag: string, notes: string): Promise<SaveResult> {
 	const results = new Array<SaveResult>();
-	if (context.targets.has("documentation")) results.push(await saveDocumentationAsync(context, tag, notes));
-	if (context.octokit !== undefined) results.push(await saveGitHubReleaseAsync(context.octokit, context, tag, notes));
+	if (context.targets.has("documentation")) {
+		results.push(await saveDocumentationAsync(context, tag, notes));
+	}
+
+	if (context.octokit !== undefined) {
+		results.push(await saveGitHubReleaseAsync(context.octokit, context, tag, notes));
+	}
 
 	return results.find(({ changed }) => changed) ?? { changed: false, previous: undefined };
 }
@@ -264,7 +294,10 @@ async function regenerateAsync(context: Context, tag: string, label: string): Pr
 	if (result.exitCode !== 0) {
 		progress.error(`${prefix} ${red("communique failed")}`);
 		const details = (result.stderr || result.stdout).trim();
-		if (details.length > 0) log.message(dim(details));
+		if (details.length > 0) {
+			log.message(dim(details));
+		}
+
 		return "failed";
 	}
 
@@ -297,7 +330,10 @@ function showPlan({ dryRun, model, modelOverridden, tags, targets }: Plan): void
 		`${dim("targets")}   ${Array.from(targets, (target) => TARGET_LABELS[target]).join(", ")}`,
 	];
 
-	if (dryRun) lines.push(yellow("dry run: nothing will be written"));
+	if (dryRun) {
+		lines.push(yellow("dry run: nothing will be written"));
+	}
+
 	note(lines.join("\n"), "Regeneration plan");
 }
 
@@ -316,7 +352,9 @@ async function regenerateAllAsync(context: Context, tags: ReadonlyArray<string>)
 function showSummary(counts: Record<Outcome, number>, dryRun: boolean, targets: ReadonlySet<Target>): void {
 	const changedLabel = dryRun ? "would change" : "updated";
 	const parts = [green(`${counts.changed} ${changedLabel}`), dim(`${counts.unchanged} unchanged`)];
-	if (counts.failed > 0) parts.push(red(`${counts.failed} failed`));
+	if (counts.failed > 0) {
+		parts.push(red(`${counts.failed} failed`));
+	}
 
 	const shouldReview = !dryRun && counts.changed > 0 && targets.has("documentation");
 	const reviewHint = shouldReview ? dim(`\nReview with \`git diff ${RELEASES_DIRECTORY}\`.`) : "";
@@ -358,7 +396,9 @@ const command = createBaseCommand(
 		);
 
 		const available = await listReleaseTagsAsync(nodePath.join(rootDirectory, RELEASES_DIRECTORY));
-		if (available.length === 0) fail(`No release notes found in ${RELEASES_DIRECTORY}.`);
+		if (available.length === 0) {
+			fail(`No release notes found in ${RELEASES_DIRECTORY}.`);
+		}
 
 		const tags = await selectTagsAsync(available, requestedTags, yes);
 		const targets = await selectTargetsAsync(documentation, github, yes);
@@ -397,7 +437,9 @@ const command = createBaseCommand(
 			await rm(temporaryDirectory, { force: true, recursive: true });
 		}
 
-		if (counts.failed > 0) exit(1);
+		if (counts.failed > 0) {
+			exit(1);
+		}
 	});
 
 await command.parse();

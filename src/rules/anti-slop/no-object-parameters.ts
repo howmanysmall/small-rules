@@ -47,7 +47,9 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 				}
 
 				if (isTsUnionType(resolved)) {
-					for (const member of resolved.types) enqueue(member);
+					for (const member of resolved.types) {
+						enqueue(member);
+					}
 				}
 
 				return false;
@@ -57,9 +59,7 @@ const noObjectParameters = createRule("no-object-parameters", "anti-slop", {
 		function checkParameters(node: ParameterOwner): void {
 			for (const parameter of node.params) {
 				const annotation = getFunctionParameterTypeAnnotation(parameter);
-				if (!isTsTypeAnnotation(annotation) || !doesTypeResolveToObject(annotation.typeAnnotation)) {
-					continue;
-				}
+				if (!isTsTypeAnnotation(annotation) || !doesTypeResolveToObject(annotation.typeAnnotation)) continue;
 
 				context.report({
 					data: {

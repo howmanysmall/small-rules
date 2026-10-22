@@ -86,7 +86,9 @@ export function createApiTrees(entries: ReadonlyArray<ModuleFunctions>): Readonl
 			trees.set(key, tree);
 		}
 
-		for (const path of functions) addFunction(tree, path);
+		for (const path of functions) {
+			addFunction(tree, path);
+		}
 	}
 
 	return trees;
@@ -159,7 +161,9 @@ export function createModuleCallVisitor(
 		}
 
 		const { parent } = current;
-		if (isCallExpression(parent) && parent.callee === current) onCall(parent);
+		if (isCallExpression(parent) && parent.callee === current) {
+			onCall(parent);
+		}
 	}
 
 	/**
@@ -175,7 +179,9 @@ export function createModuleCallVisitor(
 			if (variable.name !== name) continue;
 
 			for (const reference of variable.references) {
-				if (reference.isRead()) reportUse(reference.identifier, binding);
+				if (reference.isRead()) {
+					reportUse(reference.identifier, binding);
+				}
 			}
 		}
 	}
@@ -184,7 +190,10 @@ export function createModuleCallVisitor(
 		property: ESTree.ObjectPattern["properties"][number],
 		binding: ApiTree,
 	): PatternBinding | undefined {
-		if (isRestElement(property)) return { binding, pattern: property.argument };
+		if (isRestElement(property)) {
+			return { binding, pattern: property.argument };
+		}
+
 		if (property.computed) return undefined;
 
 		const key = getKeyName(property.key);
@@ -199,15 +208,20 @@ export function createModuleCallVisitor(
 	): void {
 		for (const property of pattern.properties) {
 			const next = getPropertyBinding(property, binding);
-			if (next !== undefined) worklist.push(next);
+			if (next !== undefined) {
+				worklist.push(next);
+			}
 		}
 	}
 
 	function bindPattern(declarator: ESTree.VariableDeclarator, binding: Binding): void {
 		const worklist: Array<PatternBinding> = [{ binding, pattern: declarator.id }];
 		for (const { binding: current, pattern } of worklist) {
-			if (isIdentifier(pattern)) reportReferences(declarator, pattern.name, current);
-			else if (current !== true && isObjectPattern(pattern)) appendPropertyBindings(pattern, current, worklist);
+			if (isIdentifier(pattern)) {
+				reportReferences(declarator, pattern.name, current);
+			} else if (current !== true && isObjectPattern(pattern)) {
+				appendPropertyBindings(pattern, current, worklist);
+			}
 		}
 	}
 
@@ -222,22 +236,30 @@ export function createModuleCallVisitor(
 
 			const { imported } = specifier;
 			const binding = descend(tree, isIdentifier(imported) ? imported.name : imported.value);
-			if (binding !== undefined) reportReferences(declaration, specifier.local.name, binding);
+			if (binding !== undefined) {
+				reportReferences(declaration, specifier.local.name, binding);
+			}
 		}
 	}
 
 	return {
 		ImportDeclaration(node): void {
 			const tree = node.importKind === "type" ? undefined : getModuleTree(node.source);
-			if (tree !== undefined) bindImport(node, tree);
+			if (tree !== undefined) {
+				bindImport(node, tree);
+			}
 		},
 		MemberExpression(node): void {
 			const tree = getRequiredTree(node.object);
-			if (tree !== undefined) reportUse(node.object, tree);
+			if (tree !== undefined) {
+				reportUse(node.object, tree);
+			}
 		},
 		VariableDeclarator(node): void {
 			const tree = node.init === null ? undefined : getRequiredTree(node.init);
-			if (tree !== undefined) bindPattern(node, tree);
+			if (tree !== undefined) {
+				bindPattern(node, tree);
+			}
 		},
 	} satisfies Visitor;
 }

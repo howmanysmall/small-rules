@@ -27,7 +27,9 @@ function isNumberTypeAnnotation(typeAnnotation?: ESTree.TSType | ESTree.TSTypeAn
 	if (typeAnnotation === undefined) return false;
 
 	let current = typeAnnotation;
-	while (isTsTypeAnnotation(current)) current = current.typeAnnotation;
+	while (isTsTypeAnnotation(current)) {
+		current = current.typeAnnotation;
+	}
 
 	return isTsNumberKeyword(current) || (isTsTypeReference(current) && isIdentifierNamed(current.typeName, "Number"));
 }
@@ -70,7 +72,9 @@ function isKnownNonNumberIdentifier(sourceCode: SourceCode, identifier: ESTree.I
 	const variable = getVariableByName(sourceCode.getScope(identifier), identifier.name);
 	if (variable === undefined) return false;
 
-	for (const definition of variable.defs) if (isKnownNonNumberDefinition(definition)) return true;
+	for (const definition of variable.defs) {
+		if (isKnownNonNumberDefinition(definition)) return true;
+	}
 
 	return false;
 }

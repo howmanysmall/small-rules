@@ -18,7 +18,9 @@ function reportExcessiveUseState(context: Context, node: ESTree.Node, componentN
 		if (!isVariableDeclaration(statement)) continue;
 
 		for (const declarator of statement.declarations) {
-			if (isHookCall(declarator.init, "useState")) useStateCount += 1;
+			if (isHookCall(declarator.init, "useState")) {
+				useStateCount += 1;
+			}
 		}
 	}
 
@@ -35,8 +37,11 @@ const preferUseReducer = createRule("prefer-use-reducer", "react", {
 		return {
 			FunctionDeclaration(node) {
 				if (node.id === null || !isUppercaseName(node.id.name)) return;
+
 				/* v8 ignore next -- @preserve function declarations with component names have parser block bodies. */
-				if ("body" in node && node.body) reportExcessiveUseState(context, node.body, node.id.name);
+				if ("body" in node && node.body) {
+					reportExcessiveUseState(context, node.body, node.id.name);
+				}
 			},
 			VariableDeclarator(node) {
 				if (!isComponentAssignment(node) || !node.init) return;

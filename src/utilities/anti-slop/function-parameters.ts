@@ -83,7 +83,9 @@ export function containsUnknownType(type: ESTree.TSType): boolean {
 
 		if (isTsUnionType(current)) {
 			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
-			for (const member of current.types) pending.push(member);
+			for (const member of current.types) {
+				pending.push(member);
+			}
 		}
 	}
 

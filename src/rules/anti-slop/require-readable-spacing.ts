@@ -66,7 +66,9 @@ const OVERLOAD_TYPES = new Set<string>([FUNCTION_DECLARATION, TS_DECLARE_FUNCTIO
  */
 function hasLeadingComment(node: ESTree.Node, sourceCode: SourceCode): boolean {
 	const previousLine = sourceCode.getTokenBefore(node)?.loc.end.line;
-	for (const comment of sourceCode.getCommentsBefore(node)) if (comment.loc.start.line !== previousLine) return true;
+	for (const comment of sourceCode.getCommentsBefore(node)) {
+		if (comment.loc.start.line !== previousLine) return true;
+	}
 
 	return false;
 }
@@ -100,7 +102,9 @@ function isReadWithin(variable: undefined | Variable, [start, end]: ESTree.Node[
 }
 
 function readsAnyWithin(variables: ReadonlyArray<Variable>, range: ESTree.Node["range"]): boolean {
-	for (const variable of variables) if (isReadWithin(variable, range)) return true;
+	for (const variable of variables) {
+		if (isReadWithin(variable, range)) return true;
+	}
 
 	return false;
 }
@@ -260,7 +264,9 @@ function createPolicy(
 ): ReadonlyArray<PaddingRequirement> {
 	const policy = overrides.map(toRequirement);
 	for (const { option, requirement } of POLICY_ENTRIES) {
-		if (option === undefined || options[option]) policy.push(requirement);
+		if (option === undefined || options[option]) {
+			policy.push(requirement);
+		}
 	}
 
 	return policy;

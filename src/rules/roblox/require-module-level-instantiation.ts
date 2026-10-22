@@ -105,7 +105,9 @@ const requireModuleLevelInstantiation = createRule("require-module-level-instant
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const trackedClasses = normalizeOptions(context.options[0]);
-		if (trackedClasses.size === 0) return {} satisfies Visitor;
+		if (trackedClasses.size === 0) {
+			return {} satisfies Visitor;
+		}
 
 		const localBindings = new Map<string, string>();
 

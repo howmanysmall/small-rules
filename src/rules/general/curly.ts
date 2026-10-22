@@ -59,7 +59,9 @@ const DEFAULT_OPTIONS = {
 
 function returnsLiteral(statement: ESTree.ReturnStatement): boolean {
 	let value = statement.argument;
-	while (isTsAsExpression(value) || isTsSatisfiesExpression(value)) value = value.expression;
+	while (isTsAsExpression(value) || isTsSatisfiesExpression(value)) {
+		value = value.expression;
+	}
 
 	return isArrayExpression(value) || isObjectExpression(value);
 }
@@ -109,14 +111,18 @@ const curly = createRule("curly", "general", {
 		function getIndent(offset: number): string {
 			const start = getLineStart(offset);
 			let end = start;
-			while (text[end] === "\t" || text[end] === " ") end += 1;
+			while (text[end] === "\t" || text[end] === " ") {
+				end += 1;
+			}
 
 			return text.slice(start, end);
 		}
 
 		function getWidth(start: number, end: number): number {
 			let width = 0;
-			for (const character of text.slice(start, end)) width += character === "\t" ? tabWidth : 1;
+			for (const character of text.slice(start, end)) {
+				width += character === "\t" ? tabWidth : 1;
+			}
 
 			return width;
 		}
@@ -224,7 +230,9 @@ const curly = createRule("curly", "general", {
 			indentFrom: number,
 			nextStart?: number,
 		): void {
-			if (!isBlockStatement(body)) wrap(body, "elseChain", getHeaderEnd(body, header), indentFrom, nextStart);
+			if (!isBlockStatement(body)) {
+				wrap(body, "elseChain", getHeaderEnd(body, header), indentFrom, nextStart);
+			}
 		}
 
 		function checkElseChain(node: ESTree.IfStatement, alternate: ESTree.Statement): void {
@@ -232,7 +240,9 @@ const curly = createRule("curly", "general", {
 			checkBranch(node.consequent, ")", node.range[0], elseStart);
 
 			// An `else if` is checked as its own `if`.
-			if (!isIfStatement(alternate)) checkBranch(alternate, "else", elseStart);
+			if (!isIfStatement(alternate)) {
+				checkBranch(alternate, "else", elseStart);
+			}
 		}
 
 		function checkLoop(node: Loop): void {
@@ -257,7 +267,9 @@ const curly = createRule("curly", "general", {
 
 				if (isIfStatement(parent) && parent.alternate === node) {
 					checkBranch(node.consequent, ")", node.range[0]);
-				} else checkLoneIf(node);
+				} else {
+					checkLoneIf(node);
+				}
 			},
 			WhileStatement: checkLoop,
 		} satisfies Visitor;

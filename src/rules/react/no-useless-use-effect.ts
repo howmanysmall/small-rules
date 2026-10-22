@@ -278,8 +278,12 @@ function pushStatementBody(statement: ESTree.Statement, stack: Array<ESTree.Node
 	/* v8 ignore else -- callers pass only body-bearing statement kinds. @preserve */
 	if ("body" in statement && isNode(statement.body)) {
 		if (isBlockStatement(statement.body)) {
-			for (const subStatement of statement.body.body) stack.push(subStatement);
-		} else stack.push(statement.body);
+			for (const subStatement of statement.body.body) {
+				stack.push(subStatement);
+			}
+		} else {
+			stack.push(statement.body);
+		}
 	}
 }
 
@@ -307,20 +311,28 @@ function isBodyStatement(node: ESTree.Node): node is BodyStatement {
 }
 
 function onTryStatement(current: ESTree.TryStatement, stack: Array<ESTree.Node>): void {
-	for (const statement of current.block.body) stack.push(statement);
+	for (const statement of current.block.body) {
+		stack.push(statement);
+	}
 
 	if (current.handler !== null) {
-		for (const statement of current.handler.body.body) stack.push(statement);
+		for (const statement of current.handler.body.body) {
+			stack.push(statement);
+		}
 	}
 
 	if (current.finalizer !== null) {
-		for (const statement of current.finalizer.body) stack.push(statement);
+		for (const statement of current.finalizer.body) {
+			stack.push(statement);
+		}
 	}
 }
 
 function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node>): void {
 	if (isBlockStatement(current)) {
-		for (const statement of current.body) stack.push(statement);
+		for (const statement of current.body) {
+			stack.push(statement);
+		}
 
 		return;
 	}
@@ -328,7 +340,10 @@ function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node
 	if (isIfStatement(current)) {
 		stack.push(current.consequent);
 
-		if (current.alternate !== null) stack.push(current.alternate);
+		if (current.alternate !== null) {
+			stack.push(current.alternate);
+		}
+
 		return;
 	}
 
@@ -339,14 +354,18 @@ function pushReturnSearchChildren(current: ESTree.Node, stack: Array<ESTree.Node
 
 	if (isSwitchStatement(current)) {
 		for (const switchCase of current.cases) {
-			for (const statement of switchCase.consequent) stack.push(statement);
+			for (const statement of switchCase.consequent) {
+				stack.push(statement);
+			}
 		}
 
 		return;
 	}
 
 	/* v8 ignore next -- try-body cleanup traversal is covered; V8 leaves a synthetic alternate branch here. @preserve */
-	if (isTryStatement(current)) onTryStatement(current, stack);
+	if (isTryStatement(current)) {
+		onTryStatement(current, stack);
+	}
 }
 
 function hasReturnWithArgument(body: ESTree.BlockStatement): boolean {
@@ -518,7 +537,9 @@ function matchFlagResetPair(
 	} else if (firstFlag === undefined && secondFlag !== undefined) {
 		flagName = secondFlag;
 		sideEffectStatement = first;
-	} else return undefined;
+	} else {
+		return undefined;
+	}
 
 	if (!isFlagTest(test, flagName)) return undefined;
 	return getSideEffectCall(sideEffectStatement, stateSetterIdentifiers) === undefined ? undefined : flagName;
@@ -608,24 +629,36 @@ function isExpressionSearchNode(node: ESTree.Node): node is ExpressionSearchNode
 
 function pushArrayExpressionChildren(current: ESTree.ArrayExpression, stack: Array<ExpressionSearchNode>): void {
 	for (const element of current.elements) {
-		if (element !== null && !isSpreadElement(element)) stack.push(element);
+		if (element !== null && !isSpreadElement(element)) {
+			stack.push(element);
+		}
 	}
 }
 
 function pushCallExpressionChildren(current: ESTree.CallExpression, stack: Array<ExpressionSearchNode>): void {
 	stack.push(current.callee);
 
-	for (const argument of current.arguments) if (!isSpreadElement(argument)) stack.push(argument);
+	for (const argument of current.arguments) {
+		if (!isSpreadElement(argument)) {
+			stack.push(argument);
+		}
+	}
 }
 
 function pushMemberExpressionChildren(current: ESTree.MemberExpression, stack: Array<ExpressionSearchNode>): void {
 	stack.push(current.object);
 
-	if (!current.computed) stack.push(current.property);
+	if (!current.computed) {
+		stack.push(current.property);
+	}
 }
 
 function pushObjectExpressionChildren(current: ESTree.ObjectExpression, stack: Array<ExpressionSearchNode>): void {
-	for (const property of current.properties) if (isProperty(property)) stack.push(property.value);
+	for (const property of current.properties) {
+		if (isProperty(property)) {
+			stack.push(property.value);
+		}
+	}
 }
 
 function pushExpressionSearchChildren(current: ExpressionSearchNode, stack: Array<ExpressionSearchNode>): void {
@@ -667,7 +700,10 @@ function pushExpressionSearchChildren(current: ExpressionSearchNode, stack: Arra
 		}
 
 		case TEMPLATE_LITERAL: {
-			for (const expression of current.expressions) stack.push(expression);
+			for (const expression of current.expressions) {
+				stack.push(expression);
+			}
+
 			break;
 		}
 
@@ -734,7 +770,9 @@ function countPropertyCallbackCalls(
 }
 
 function hasPrefix(value: string, prefixes: ReadonlySet<string>): boolean {
-	for (const prefix of prefixes) if (value.startsWith(prefix)) return true;
+	for (const prefix of prefixes) {
+		if (value.startsWith(prefix)) return true;
+	}
 
 	return false;
 }
@@ -773,7 +811,9 @@ function buildFunctionContext(
 		if (propertyName === undefined || !hasPrefix(propertyName, propertyCallbackPrefixes)) continue;
 
 		const valueIdentifier = getBindingPropertyValueIdentifier(property);
-		if (valueIdentifier !== undefined) context.propertyCallbackIdentifiers.add(valueIdentifier.name);
+		if (valueIdentifier !== undefined) {
+			context.propertyCallbackIdentifiers.add(valueIdentifier.name);
+		}
 	}
 
 	return context;
@@ -802,7 +842,9 @@ function hasDependencyIdentifier(callExpression: ESTree.CallExpression, name: st
 	const [, dependencyArgument] = callExpression.arguments;
 	if (!isArrayExpression(dependencyArgument)) return false;
 
-	for (const element of dependencyArgument.elements) if (isIdentifierNamed(element, name)) return true;
+	for (const element of dependencyArgument.elements) {
+		if (isIdentifierNamed(element, name)) return true;
+	}
 
 	return false;
 }
@@ -812,7 +854,11 @@ function getDependencyIdentifiers(callExpression: ESTree.CallExpression): Set<st
 	const [, dependencyArgument] = callExpression.arguments;
 	if (!isArrayExpression(dependencyArgument)) return identifiers;
 
-	for (const element of dependencyArgument.elements) if (isIdentifier(element)) identifiers.add(element.name);
+	for (const element of dependencyArgument.elements) {
+		if (isIdentifier(element)) {
+			identifiers.add(element.name);
+		}
+	}
 
 	return identifiers;
 }
@@ -855,7 +901,10 @@ function collectSetterCalls(
 	for (const statement of statements) {
 		if (isIfStatement(statement)) {
 			const innerStatements = getStatementsFromConsequent(statement.consequent);
-			for (const setter of collectSetterCalls(innerStatements, stateSetterIdentifiers)) setters.add(setter);
+			for (const setter of collectSetterCalls(innerStatements, stateSetterIdentifiers)) {
+				setters.add(setter);
+			}
+
 			continue;
 		}
 
@@ -1032,7 +1081,10 @@ function collectIdentifiers(node: ESTree.Node): Set<string> {
 }
 
 function getAlternateStatements(statement: ESTree.IfStatement): ReadonlyArray<ESTree.Statement> {
-	if (statement.alternate === null) return [];
+	if (statement.alternate === null) {
+		return [];
+	}
+
 	return isBlockStatement(statement.alternate) ? statement.alternate.body : [statement.alternate];
 }
 
@@ -1117,7 +1169,9 @@ const EVENT_SIDE_EFFECT_PREFIXES = new Set([
 
 function hasEventPrefix(name: string): boolean {
 	const lowerName = name.toLowerCase();
-	for (const prefix of EVENT_SIDE_EFFECT_PREFIXES) if (lowerName.startsWith(prefix)) return true;
+	for (const prefix of EVENT_SIDE_EFFECT_PREFIXES) {
+		if (lowerName.startsWith(prefix)) return true;
+	}
 
 	return false;
 }
@@ -1128,9 +1182,7 @@ function isEventSideEffectCall(statement: ESTree.Statement, stateSetterIdentifie
 
 	if (isIdentifier(call.callee)) return hasEventPrefix(call.callee.name);
 
-	if (!isMemberExpression(call.callee) || call.callee.computed || !isIdentifier(call.callee.property)) {
-		return false;
-	}
+	if (!isMemberExpression(call.callee) || call.callee.computed || !isIdentifier(call.callee.property)) return false;
 
 	return hasEventPrefix(call.callee.property.name);
 }
@@ -1148,7 +1200,9 @@ function hasEventSpecificLogic(
 function areDependenciesIdentical(ids1: ReadonlySet<string>, ids2: ReadonlySet<string>): boolean {
 	if (ids1.size !== ids2.size) return false;
 
-	for (const id of ids1) if (!ids2.has(id)) return false;
+	for (const id of ids1) {
+		if (!ids2.has(id)) return false;
+	}
 
 	return true;
 }
@@ -1238,7 +1292,9 @@ const CALLER_NAME_PREFIXES = [
 ] as const;
 
 function hasCallerNamePrefix(name: string): boolean {
-	for (const prefix of CALLER_NAME_PREFIXES) if (name.startsWith(prefix)) return true;
+	for (const prefix of CALLER_NAME_PREFIXES) {
+		if (name.startsWith(prefix)) return true;
+	}
 
 	return false;
 }
@@ -1256,7 +1312,9 @@ function isConsoleSideEffect(callee: ESTree.MemberExpression): boolean {
 }
 
 function hasMemberSideEffectMethod(method: string): boolean {
-	for (const prefix of MEMBER_METHOD_PREFIXES) if (method.startsWith(prefix)) return true;
+	for (const prefix of MEMBER_METHOD_PREFIXES) {
+		if (method.startsWith(prefix)) return true;
+	}
 
 	return MEMBER_METHOD_EXACT.has(method);
 }
@@ -1369,7 +1427,10 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 
 		function recordNamedFunction(node: ESTree.VariableDeclarator): void {
 			if (!isIdentifier(node.id) || node.init === null) return;
-			if (isCallbackFunction(node.init)) namedFunctions.set(node.id.name, node.init);
+
+			if (isCallbackFunction(node.init)) {
+				namedFunctions.set(node.id.name, node.init);
+			}
 		}
 
 		function enterFunction(node: CallbackFunction): void {
@@ -1544,7 +1605,9 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				statements,
 			});
 
-			if (messageId !== undefined) context.report({ messageId, node });
+			if (messageId !== undefined) {
+				context.report({ messageId, node });
+			}
 		}
 
 		function analyzeEffectChains(): void {
@@ -1618,13 +1681,18 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 		function getDuplicateEffectIndices(index: number, reported: ReadonlySet<number>): ReadonlyArray<number> {
 			const effect = componentEffects[index];
 			/* v8 ignore next -- index is produced by iterating componentEffects.entries(). @preserve */
-			if (!isValidEffectInfo(effect)) return [];
+			if (!isValidEffectInfo(effect)) {
+				return [];
+			}
 
 			const duplicates = [index];
 			for (let jndex = index + 1; jndex < componentEffects.length; jndex += 1) {
 				const candidate = componentEffects[jndex];
 				if (reported.has(jndex) || !isValidCandidate(effect, candidate)) continue;
-				if (areDependenciesIdentical(effect.depIdentifiers, candidate.depIdentifiers)) duplicates.push(jndex);
+
+				if (areDependenciesIdentical(effect.depIdentifiers, candidate.depIdentifiers)) {
+					duplicates.push(jndex);
+				}
 			}
 
 			return duplicates;
@@ -1635,7 +1703,9 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 				reported.add(jndex);
 				const effect = componentEffects[jndex];
 				/* v8 ignore next -- duplicate indices are collected from existing effects. @preserve */
-				if (effect !== undefined) context.report({ messageId: "duplicateDeps", node: effect.node });
+				if (effect !== undefined) {
+					context.report({ messageId: "duplicateDeps", node: effect.node });
+				}
 			}
 		}
 
@@ -1643,7 +1713,9 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			if (callback === undefined || callback.async) return;
 
 			const body = getFunctionBody(callback);
-			if (body !== undefined) analyzeEffect(node, body.body.filter(isNotEmptyStatement), body);
+			if (body !== undefined) {
+				analyzeEffect(node, body.body.filter(isNotEmptyStatement), body);
+			}
 		}
 
 		return {
@@ -1660,7 +1732,9 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 					return;
 				}
 
-				if (isAnyFunction(callback)) analyzeEffectCallback(node, callback);
+				if (isAnyFunction(callback)) {
+					analyzeEffectCallback(node, callback);
+				}
 			},
 			FunctionDeclaration: enterFunction,
 			"FunctionDeclaration:exit": exitFunction,
@@ -1668,9 +1742,17 @@ const noUselessUseEffect = createRule("no-useless-use-effect", "react", {
 			"FunctionExpression:exit": exitFunction,
 			ImportDeclaration(node): void {
 				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
-					if (options.hooks.has(importedName)) effectIdentifiers.add(localName);
-					if (options.stateHooks.has(importedName)) stateHookIdentifiers.add(localName);
-					if (options.refHooks.has(importedName)) refHookIdentifiers.add(localName);
+					if (options.hooks.has(importedName)) {
+						effectIdentifiers.add(localName);
+					}
+
+					if (options.stateHooks.has(importedName)) {
+						stateHookIdentifiers.add(localName);
+					}
+
+					if (options.refHooks.has(importedName)) {
+						refHookIdentifiers.add(localName);
+					}
 				});
 			},
 			"Program:exit"(): void {

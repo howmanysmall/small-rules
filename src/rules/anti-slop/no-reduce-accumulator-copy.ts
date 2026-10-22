@@ -126,13 +126,17 @@ function getArrayEvidence(sourceCode: SourceCode, expression: ESTree.Expression)
 function isKnownArrayExpression(sourceCode: SourceCode, expression: ESTree.Expression): boolean {
 	visitedVariables.clear();
 	let evidence = getArrayEvidence(sourceCode, expression);
-	while (!Predicate.isBoolean(evidence)) evidence = getArrayEvidence(sourceCode, evidence);
+	while (!Predicate.isBoolean(evidence)) {
+		evidence = getArrayEvidence(sourceCode, evidence);
+	}
 
 	return evidence;
 }
 
 function declaresBinding(variable: Variable, binding: ESTree.BindingIdentifier): boolean {
-	for (const identifier of variable.identifiers) if (identifier.start === binding.start) return true;
+	for (const identifier of variable.identifiers) {
+		if (identifier.start === binding.start) return true;
+	}
 
 	return false;
 }
@@ -257,7 +261,10 @@ const noReduceAccumulatorCopy = createRule("no-reduce-accumulator-copy", "anti-s
 
 				if (REDUCE_METHODS.has(name)) {
 					const reducer = createReducerFrame(context.sourceCode, node);
-					if (reducer !== undefined) reducerFrames.set(reducer[0], reducer[1]);
+					if (reducer !== undefined) {
+						reducerFrames.set(reducer[0], reducer[1]);
+					}
+
 					return;
 				}
 

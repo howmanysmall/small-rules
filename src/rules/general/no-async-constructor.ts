@@ -151,11 +151,18 @@ function findConstructorViolations(
 
 		if (!isCallExpression(child)) return;
 
-		if (isPromiseChainCall(child)) violations[size++] = { messageId: "promiseChainInConstructor", node: child };
-		if (isAsyncIife(child)) violations[size++] = { messageId: "asyncIifeInConstructor", node: child };
+		if (isPromiseChainCall(child)) {
+			violations[size++] = { messageId: "promiseChainInConstructor", node: child };
+		}
+
+		if (isAsyncIife(child)) {
+			violations[size++] = { messageId: "asyncIifeInConstructor", node: child };
+		}
 
 		const asyncViolation = getAsyncMethodViolation(child, asyncMethods);
-		if (asyncViolation !== undefined) violations[size++] = asyncViolation;
+		if (asyncViolation !== undefined) {
+			violations[size++] = asyncViolation;
+		}
 	}
 
 	walkAstSlop(constructorBody, handleChild);
@@ -187,7 +194,9 @@ const noAsyncConstructor = createRule("no-async-constructor", "general", {
 				const constructorBody = node.value.body;
 				const violations = findConstructorViolations(constructorBody, asyncMethods);
 
-				for (const violation of violations) reportViolation(violation);
+				for (const violation of violations) {
+					reportViolation(violation);
+				}
 			},
 		} satisfies Visitor;
 	},

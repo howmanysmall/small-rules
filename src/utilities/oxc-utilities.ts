@@ -77,7 +77,9 @@ export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): b
 
 export function stripParenthesizedType(type: ESTree.TSType): ESTree.TSType {
 	let current = type;
-	while (isTsParenthesizedType(current)) current = current.typeAnnotation;
+	while (isTsParenthesizedType(current)) {
+		current = current.typeAnnotation;
+	}
 
 	return current;
 }
@@ -106,14 +108,18 @@ export function stripExpressionWrappers(expression: ESTree.Expression): ESTree.E
 
 export function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
 	let current = stripExpressionWrappers(expression);
-	while (isMemberExpression(current)) current = stripExpressionWrappers(current.object);
+	while (isMemberExpression(current)) {
+		current = stripExpressionWrappers(current.object);
+	}
 
 	return isIdentifier(current) ? current : undefined;
 }
 
 export function stripParenthesis(expression: ESTree.Expression): ESTree.Expression {
 	let current = expression;
-	while (isParenthesizedExpression(current)) current = current.expression;
+	while (isParenthesizedExpression(current)) {
+		current = current.expression;
+	}
 
 	return current;
 }

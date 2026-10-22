@@ -35,7 +35,10 @@ function findFirstFunction(source: HarnessSourceCode): ESTree.Function {
 		},
 	});
 
-	if (found === undefined) throw new Error("FunctionDeclaration not found.");
+	if (found === undefined) {
+		throw new Error("FunctionDeclaration not found.");
+	}
+
 	return found;
 }
 
@@ -49,7 +52,10 @@ function findFirstArrow(source: HarnessSourceCode): ESTree.ArrowFunctionExpressi
 		},
 	});
 
-	if (found === undefined) throw new Error("ArrowFunctionExpression not found.");
+	if (found === undefined) {
+		throw new Error("ArrowFunctionExpression not found.");
+	}
+
 	return found;
 }
 
@@ -63,7 +69,10 @@ function findFirstTSFunctionType(source: HarnessSourceCode): ESTree.TSFunctionTy
 		},
 	});
 
-	if (found === undefined) throw new Error("TSFunctionType not found.");
+	if (found === undefined) {
+		throw new Error("TSFunctionType not found.");
+	}
+
 	return found;
 }
 
@@ -77,7 +86,10 @@ function findFirstParameterProperty(source: HarnessSourceCode): ESTree.TSParamet
 		},
 	});
 
-	if (found === undefined) throw new Error("TSParameterProperty not found.");
+	if (found === undefined) {
+		throw new Error("TSParameterProperty not found.");
+	}
+
 	return found;
 }
 
@@ -92,7 +104,10 @@ function findFirstTypeAnnotation(code: string): ESTree.TSType {
 		},
 	});
 
-	if (found === undefined) throw new Error("TSTypeAnnotation not found.");
+	if (found === undefined) {
+		throw new Error("TSTypeAnnotation not found.");
+	}
+
 	return found.typeAnnotation;
 }
 
@@ -101,7 +116,10 @@ function requireParameter(
 	index: number,
 ): ESTree.ParamPattern {
 	const parameter = owner.params[index];
-	if (parameter === undefined) throw new Error(`Expected parameter at index ${index}.`);
+	if (parameter === undefined) {
+		throw new Error(`Expected parameter at index ${index}.`);
+	}
+
 	return parameter;
 }
 

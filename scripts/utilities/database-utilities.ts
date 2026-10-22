@@ -208,7 +208,12 @@ function buildEnumLookup(rawEnums: unknown): EnumLookup {
 		if (!Predicate.isObject(items)) continue;
 
 		const reverse = new Map<number, string>();
-		for (const [name, value] of Object.entries(items)) if (Predicate.isNumber(value)) reverse.set(value, name);
+		for (const [name, value] of Object.entries(items)) {
+			if (Predicate.isNumber(value)) {
+				reverse.set(value, name);
+			}
+		}
+
 		lookup.set(enumType, reverse);
 	}
 
@@ -305,7 +310,9 @@ function mergeSuperclassImplementation(
 		// 1. Merge properties
 		for (const [key, rawTuple] of Object.entries(properties)) {
 			const normalized = normalizeProperty(rawTuple);
-			if (normalized !== undefined) propertyDefs[key] = normalized;
+			if (normalized !== undefined) {
+				propertyDefs[key] = normalized;
+			}
 		}
 
 		// 2. Merge defaults (subclasses override superclasses, or keep original
@@ -406,7 +413,9 @@ function parseComponents(value: string): ReadonlyArray<number | string> {
 		const toNumber = Number(trimmed);
 		if (!Number.isNaN(toNumber) && toNumber !== Number.POSITIVE_INFINITY && toNumber !== Number.NEGATIVE_INFINITY) {
 			components[size++] = toNumber;
-		} else components[size++] = trimmed;
+		} else {
+			components[size++] = trimmed;
+		}
 	}
 
 	return components;
@@ -414,16 +423,27 @@ function parseComponents(value: string): ReadonlyArray<number | string> {
 
 function normalizeNumberValue(value: unknown): CanonicalValue | undefined {
 	if (Predicate.isNumber(value)) {
-		if (value === Number.POSITIVE_INFINITY) return { type: "number", value: "inf" };
-		if (value === Number.NEGATIVE_INFINITY) return { type: "number", value: "-inf" };
+		if (value === Number.POSITIVE_INFINITY) {
+			return { type: "number", value: "inf" };
+		}
+
+		if (value === Number.NEGATIVE_INFINITY) {
+			return { type: "number", value: "-inf" };
+		}
+
 		return { type: "number", value };
 	}
 
 	const asString = String(value);
-	if (asString === "inf" || asString === "-inf") return { type: "number", value: asString };
+	if (asString === "inf" || asString === "-inf") {
+		return { type: "number", value: asString };
+	}
 
 	const asNumber = Number(asString);
-	if (!Number.isNaN(asNumber)) return { type: "number", value: asNumber };
+	if (!Number.isNaN(asNumber)) {
+		return { type: "number", value: asNumber };
+	}
+
 	return undefined;
 }
 
@@ -455,8 +475,13 @@ function isRawArray(value: unknown): value is ReadonlyArray<unknown> {
 function makeCanonicalValue(dataType: string, value: unknown): CanonicalValue | undefined {
 	if (NUMBER_DATA_TYPES.has(dataType)) return normalizeNumberValue(value);
 
-	if (dataType === "Bool") return { type: "bool", value: Boolean(value) };
-	if (dataType === "String") return { type: "string", value: String(value) };
+	if (dataType === "Bool") {
+		return { type: "bool", value: Boolean(value) };
+	}
+
+	if (dataType === "String") {
+		return { type: "string", value: String(value) };
+	}
 
 	if (COMMA_SEPARATED_TYPES.has(dataType)) {
 		if (isRawArray(value)) {
@@ -529,7 +554,9 @@ function extractClassDefaults(
 			continue;
 		}
 
-		if (!quiet) log.info(`Skipping ${className}.${propertyName} (${dataType}) - no canonical value mapping`);
+		if (!quiet) {
+			log.info(`Skipping ${className}.${propertyName} (${dataType}) - no canonical value mapping`);
+		}
 	}
 
 	return hasDefaults ? classEntry : undefined;
@@ -545,7 +572,9 @@ export function extractDefaults(
 	for (const [className, databaseClass] of classes) {
 		if (filterSet !== undefined && !filterSet.has(className.toLowerCase())) continue;
 		const classEntry = extractClassDefaults(className, databaseClass, quiet);
-		if (classEntry !== undefined) entries.push([className, classEntry]);
+		if (classEntry !== undefined) {
+			entries.push([className, classEntry]);
+		}
 	}
 
 	return createClassDefaults(entries);

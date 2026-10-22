@@ -25,7 +25,10 @@ export function checkRelationsDocument(options: CheckOptions): ReadonlyArray<str
 	const seenPinPairs = new Set<string>();
 	for (const pin of options.pins) {
 		const pairKey = getPairKey(pin.from, pin.to);
-		if (seenPinPairs.has(pairKey)) problems[size++] = `Duplicate pin for ${pin.from} ↔ ${pin.to}.`;
+		if (seenPinPairs.has(pairKey)) {
+			problems[size++] = `Duplicate pin for ${pin.from} ↔ ${pin.to}.`;
+		}
+
 		seenPinPairs.add(pairKey);
 	}
 

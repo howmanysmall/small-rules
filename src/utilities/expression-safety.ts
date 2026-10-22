@@ -82,7 +82,9 @@ function isObjectSideEffectSafe(expression: ESTree.ObjectExpression): boolean {
 }
 
 function areExpressionsSafe(expressions: ReadonlyArray<ESTree.Expression>): boolean {
-	for (const expression of expressions) if (!isExpressionSideEffectSafe(expression)) return false;
+	for (const expression of expressions) {
+		if (!isExpressionSideEffectSafe(expression)) return false;
+	}
 
 	return true;
 }

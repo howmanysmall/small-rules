@@ -76,7 +76,9 @@ const SOURCE_EXTENSION = /\.tsx?$/v;
 
 function stripTypeAssertions(expression: ESTree.Expression): ESTree.Expression {
 	let current = expression;
-	while (isTsAsExpression(current) || isTsSatisfiesExpression(current)) current = current.expression;
+	while (isTsAsExpression(current) || isTsSatisfiesExpression(current)) {
+		current = current.expression;
+	}
 
 	return current;
 }
@@ -101,8 +103,11 @@ function collectConstants(
 
 		const constant = { name: id.name, specifier };
 		const existing = constants.get(value.value);
-		if (existing === undefined) constants.set(value.value, [constant]);
-		else existing.push(constant);
+		if (existing === undefined) {
+			constants.set(value.value, [constant]);
+		} else {
+			existing.push(constant);
+		}
 	}
 }
 
@@ -159,7 +164,9 @@ function indexDeclaration(
 
 	collections.functions.set(sharedFunction.name, sharedFunction);
 
-	if (isSharedGuard(sharedFunction)) collections.guards.push(sharedFunction);
+	if (isSharedGuard(sharedFunction)) {
+		collections.guards.push(sharedFunction);
+	}
 }
 
 export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesIndex {
@@ -172,7 +179,10 @@ export function indexUtilities(modules: Iterable<UtilitiesModule>): UtilitiesInd
 
 	const specifiersByFile = new Map<string, string>();
 	for (const { filename, source, specifier } of modules) {
-		if (filename !== undefined) specifiersByFile.set(nodePath.resolve(filename), specifier);
+		if (filename !== undefined) {
+			specifiersByFile.set(nodePath.resolve(filename), specifier);
+		}
+
 		const { program } = parse(source, { lang: "ts", preserveParens: false, sourceType: "module" });
 		for (const statement of program.body) {
 			if (isOfType(statement, "ExportNamedDeclaration")) {

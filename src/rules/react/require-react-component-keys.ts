@@ -375,7 +375,10 @@ function isJsxChildWrappedBy(node: ESTree.JSXElement | ESTree.JSXFragment, wrapp
 	let foundWrapper = false;
 	while (current !== undefined && (current.type === wrapperType || EXPRESSION_WRAPPER_TYPES.has(current.type))) {
 		/* v8 ignore else -- @preserve current parser output keeps wrapped JSX operands attached directly to the wrapper here. */
-		if (current.type === wrapperType) foundWrapper = true;
+		if (current.type === wrapperType) {
+			foundWrapper = true;
+		}
+
 		current = getParent(current);
 	}
 

@@ -32,7 +32,9 @@ export function insertSorted(
 	});
 
 	const last = run.at(-1);
-	if (last === undefined) throw new Error(`Found no line matching ${pattern.source}.`);
+	if (last === undefined) {
+		throw new Error(`Found no line matching ${pattern.source}.`);
+	}
 
 	const next = run.find((entry) => compareWithLocale(entry.key, key) > 0);
 	lines.splice(next?.index ?? last.index + 1, 0, line);

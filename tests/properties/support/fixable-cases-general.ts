@@ -123,7 +123,10 @@ const importedNameArbitrary = fc.record({ name: identifierArbitrary, used: fc.bo
 
 function renderImportClause(defaultName: string | undefined, namedImports: ReadonlyArray<string>): string {
 	const clauses = defaultName === undefined ? [] : [defaultName];
-	if (namedImports.length > 0) clauses.push(`{ ${namedImports.join(", ")} }`);
+	if (namedImports.length > 0) {
+		clauses.push(`{ ${namedImports.join(", ")} }`);
+	}
+
 	return clauses.join(", ");
 }
 
@@ -157,7 +160,9 @@ const noUnusedImports = defineFixableCase({
 			bindings.map(({ name }) => name),
 		);
 
-		if (defaultName !== undefined) bindings.push({ name: defaultName, used: defaultImport?.used === true });
+		if (defaultName !== undefined) {
+			bindings.push({ name: defaultName, used: defaultImport?.used === true });
+		}
 
 		return {
 			module: [`${typeOnly ? "import type" : "import"} ${clause} from "./${source}${id}";`],

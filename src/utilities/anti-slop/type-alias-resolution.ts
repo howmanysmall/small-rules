@@ -133,7 +133,9 @@ function createNamespaceScopeKey(programFallback: boolean): NamespaceScopeKey {
 
 function getModuleBindingName(module: ESTree.TSModuleDeclaration): string | undefined {
 	let current: ESTree.Node = module.id;
-	while (isTsQualifiedName(current)) current = current.left;
+	while (isTsQualifiedName(current)) {
+		current = current.left;
+	}
 
 	return isIdentifier(current) ? current.name : undefined;
 }
@@ -177,9 +179,7 @@ function getNamespaceScopeBase(
 	if (!isTsModuleBlock(lexicalScope)) return scopes.root;
 
 	const parent = scopes.byBlock.get(lexicalScope);
-	if (parent === undefined) {
-		return getPrivateNamespaceRoot(lexicalScope, scopes);
-	}
+	if (parent === undefined) return getPrivateNamespaceRoot(lexicalScope, scopes);
 
 	if (isExportNamedDeclaration(module.parent) || scopes.ambientBlocks.has(lexicalScope)) return parent;
 	return getPrivateNamespaceRoot(lexicalScope, scopes);
@@ -207,7 +207,10 @@ function registerNamespaceScope(
 	if (names === undefined) return;
 
 	let scope = getNamespaceScopeBase(module, lexicalScope, scopes);
-	for (const name of names) scope = getChildNamespaceScope(scope, name);
+	for (const name of names) {
+		scope = getChildNamespaceScope(scope, name);
+	}
+
 	scope.blocks.add(body);
 	scopes.byBlock.set(body, scope);
 }
@@ -275,8 +278,13 @@ function collectTypeBindings(
 	for (const node of pending) {
 		const lexicalScope = getEnclosingTypeScope(node, program);
 
-		if (isTsGlobalDeclaration(node)) registerGlobalScope(node, scopes);
-		if (isTsModuleDeclaration(node)) registerNamespaceScope(node, lexicalScope, scopes);
+		if (isTsGlobalDeclaration(node)) {
+			registerGlobalScope(node, scopes);
+		}
+
+		if (isTsModuleDeclaration(node)) {
+			registerNamespaceScope(node, lexicalScope, scopes);
+		}
 
 		const declared = getDeclaredTypeBinding(node);
 		if (declared !== undefined) {
@@ -285,7 +293,9 @@ function collectTypeBindings(
 			bindings.push({ name: declared.name, alias: declared.alias, interface: declared.interface, scope });
 			bindingsByName.set(declared.name, bindings);
 
-			if (declared.alias !== undefined) aliases.push(declared.alias);
+			if (declared.alias !== undefined) {
+				aliases.push(declared.alias);
+			}
 		}
 
 		appendVisitorChildren(node, visitorKeys, pending);
@@ -303,7 +313,9 @@ function getScopeDistance(scope: TypeBindingScope, node: ESTree.Node): number | 
 		if (isNamespaceScopeKey(scope)) {
 			if (isTsModuleBlock(current) && scope.blocks.has(current)) return distance;
 			if (scope.programFallback && isProgram(current)) return distance + 1;
-		} else if (current === scope) return distance;
+		} else if (current === scope) {
+			return distance;
+		}
 
 		current = current.parent;
 		distance += 1;
@@ -540,7 +552,9 @@ export function resolveTypeReference(
 
 	const resolving = new Set<ESTree.TSTypeAliasDeclaration>([alias]);
 	const previouslyResolving = resolution[resolutionContext].resolving;
-	for (const resolvingAlias of previouslyResolving) resolving.add(resolvingAlias);
+	for (const resolvingAlias of previouslyResolving) {
+		resolving.add(resolvingAlias);
+	}
 
 	const substitutions = getAliasSubstitutions(alias, resolution.type, resolution, resolving);
 	if (substitutions === undefined) return undefined;

@@ -315,7 +315,9 @@ function attempt(state: MatchState, match: () => boolean): boolean {
 	if (!matched) {
 		state.bindings.clear();
 
-		for (const [name, node] of saved) state.bindings.set(name, node);
+		for (const [name, node] of saved) {
+			state.bindings.set(name, node);
+		}
 	}
 
 	return matched;

@@ -25,7 +25,9 @@ const sourceTypeRule = defineRule({
 	create(context) {
 		return {
 			Program(node): void {
-				if (node.sourceType === "script") context.report({ messageId: "script", node });
+				if (node.sourceType === "script") {
+					context.report({ messageId: "script", node });
+				}
 			},
 		};
 	},
@@ -40,7 +42,9 @@ const createOnceRule = defineRule({
 		let programs = 0;
 		return {
 			after(): void {
-				if (programs === 2) context.report({ messageId: "afterSecondCase", node: context.sourceCode.ast });
+				if (programs === 2) {
+					context.report({ messageId: "afterSecondCase", node: context.sourceCode.ast });
+				}
 			},
 			before(): void {
 				programs += 1;

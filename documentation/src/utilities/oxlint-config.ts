@@ -23,7 +23,9 @@ export function isJsonValue(value: unknown): value is JsonValue {
 	if (isPrimitiveJsonValue(value)) return true;
 
 	if (Array.isArray(value)) {
-		for (const subValue of value) if (!isJsonValue(subValue)) return false;
+		for (const subValue of value) {
+			if (!isJsonValue(subValue)) return false;
+		}
 
 		return true;
 	}

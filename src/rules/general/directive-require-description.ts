@@ -82,7 +82,9 @@ const directiveRequireDescription = createRule("directive-require-description", 
 			handleLineDirective(comment);
 		}
 
-		for (const comment of context.sourceCode.getAllComments()) checkComment(comment);
+		for (const comment of context.sourceCode.getAllComments()) {
+			checkComment(comment);
+		}
 
 		return {};
 	},

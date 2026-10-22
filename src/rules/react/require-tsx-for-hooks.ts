@@ -16,7 +16,9 @@ function isPlainTypeScriptFile(filename: string): boolean {
 
 const requireTsxForHooks = createRule("require-tsx-for-hooks", "react", {
 	create(context): Visitor {
-		if (!isPlainTypeScriptFile(context.filename)) return {};
+		if (!isPlainTypeScriptFile(context.filename)) {
+			return {};
+		}
 
 		function reportHook(node: ESTree.BindingIdentifier): void {
 			context.report({ data: { name: node.name }, messageId: "requireTsxForHooks", node });
@@ -24,10 +26,14 @@ const requireTsxForHooks = createRule("require-tsx-for-hooks", "react", {
 
 		return {
 			FunctionDeclaration({ id }): void {
-				if (id !== null && HOOK_NAME.test(id.name)) reportHook(id);
+				if (id !== null && HOOK_NAME.test(id.name)) {
+					reportHook(id);
+				}
 			},
 			VariableDeclarator({ id, init }): void {
-				if (isIdentifier(id) && HOOK_NAME.test(id.name) && isCallbackFunction(init)) reportHook(id);
+				if (isIdentifier(id) && HOOK_NAME.test(id.name) && isCallbackFunction(init)) {
+					reportHook(id);
+				}
 			},
 		} satisfies Visitor;
 	},

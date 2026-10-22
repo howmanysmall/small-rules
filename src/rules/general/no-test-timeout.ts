@@ -34,9 +34,13 @@ function isNamedMember(node: ESTree.Node): node is NamedMember {
  */
 function getCurriedReceiver(node: ESTree.Expression): ESTree.Expression | undefined {
 	let table: ESTree.Expression;
-	if (isCallExpression(node)) table = node.callee;
-	else if (node.type === TAGGED_TEMPLATE_EXPRESSION) table = node.tag;
-	else return undefined;
+	if (isCallExpression(node)) {
+		table = node.callee;
+	} else if (node.type === TAGGED_TEMPLATE_EXPRESSION) {
+		table = node.tag;
+	} else {
+		return undefined;
+	}
 
 	return isNamedMember(table) && CURRIED_FUNCTIONS.has(table.property.name) ? table.object : undefined;
 }
@@ -72,7 +76,9 @@ const noTestTimeout = createRule("no-test-timeout", "general", {
 
 		function isTestCallee(callee: ESTree.Expression): boolean {
 			let current = getCurriedReceiver(callee) ?? callee;
-			while (isNamedMember(current) && MODIFIERS.has(current.property.name)) current = current.object;
+			while (isNamedMember(current) && MODIFIERS.has(current.property.name)) {
+				current = current.object;
+			}
 
 			return isIdentifier(current) && testFunctions.has(current.name);
 		}
@@ -82,7 +88,9 @@ const noTestTimeout = createRule("no-test-timeout", "general", {
 				if (!isTestCallee(node.callee)) return;
 
 				const timeout = findTimeout(node.arguments);
-				if (timeout !== undefined) context.report({ messageId: "noTestTimeout", node: timeout });
+				if (timeout !== undefined) {
+					context.report({ messageId: "noTestTimeout", node: timeout });
+				}
 			},
 		} satisfies Visitor;
 	},

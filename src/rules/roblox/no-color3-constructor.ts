@@ -37,7 +37,9 @@ function collectNumericComponents(parameters: ReadonlyArray<ESTree.Node>): Numer
 		const mapped = mapComponentToRgbRange(parameter.value);
 		components[size++] = mapped;
 
-		if (mapped !== 0) allZero = false;
+		if (mapped !== 0) {
+			allZero = false;
+		}
 	}
 
 	return [allZero, components];
@@ -68,7 +70,9 @@ function reportNumericColor3(
 		return;
 	}
 
-	if (!collected[0]) reportWithFix("onlyZeroArgs", `Color3.fromRGB(${collected[1].join(", ")})`);
+	if (!collected[0]) {
+		reportWithFix("onlyZeroArgs", `Color3.fromRGB(${collected[1].join(", ")})`);
+	}
 }
 
 const noColor3Constructor = createRule("no-color3-constructor", "roblox", {

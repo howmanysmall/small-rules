@@ -296,16 +296,23 @@ function validateExecution(
 	result: ReturnType<ReturnType<typeof createRuleExecutor>>,
 	testCase: NormalizedValidCase,
 ): void {
-	for (const diagnostic of result.diagnostics) validateDiagnostic(diagnostic, testCase);
+	for (const diagnostic of result.diagnostics) {
+		validateDiagnostic(diagnostic, testCase);
+	}
 }
 
 function validateDiagnostic(diagnostic: RuntimeDiagnostic, testCase: NormalizedValidCase): void {
 	assert.ok(diagnostic.message.length > 0, "reported diagnostics must have a message");
 
-	if (diagnostic.node !== undefined) validateRange(diagnostic.node.range, testCase.code.length);
+	if (diagnostic.node !== undefined) {
+		validateRange(diagnostic.node.range, testCase.code.length);
+	}
+
 	validateFixProvider(diagnostic.fix, testCase);
 
-	for (const suggestion of diagnostic.suggestions) validateFixProvider(suggestion.fix, testCase);
+	for (const suggestion of diagnostic.suggestions) {
+		validateFixProvider(suggestion.fix, testCase);
+	}
 }
 
 function validateFixProvider(provider: RuntimeDiagnostic["fix"] | undefined, testCase: NormalizedValidCase): void {
@@ -313,8 +320,13 @@ function validateFixProvider(provider: RuntimeDiagnostic["fix"] | undefined, tes
 	const fixResult = provider(fixer);
 	if (fixResult === undefined) return;
 
-	if (isFix(fixResult)) validateRange(fixResult.range, testCase.code.length);
-	else for (const fix of fixResult) validateRange(fix.range, testCase.code.length);
+	if (isFix(fixResult)) {
+		validateRange(fixResult.range, testCase.code.length);
+	} else {
+		for (const fix of fixResult) {
+			validateRange(fix.range, testCase.code.length);
+		}
+	}
 
 	const output = applyFixes(testCase.code, fixResult);
 	assert.notEqual(output, undefined, "a returned fix must produce output");

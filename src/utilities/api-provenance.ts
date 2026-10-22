@@ -80,9 +80,7 @@ function isNativePromiseExpressionAtDepth(
 ): boolean {
 	if (depth >= MAX_ALIAS_DEPTH) return false;
 	const unwrapped = stripExpressionWrappers(expression);
-	if (isNewExpression(unwrapped)) {
-		return isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Promise");
-	}
+	if (isNewExpression(unwrapped)) return isGlobalNativeConstructor(sourceCode, unwrapped.callee, "Promise");
 
 	if (isIdentifier(unwrapped)) {
 		const variable = getVariableByName(sourceCode.getScope(unwrapped), unwrapped.name);

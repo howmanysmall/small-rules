@@ -107,7 +107,10 @@ function getJudgmentCacheKey(options: JudgmentCacheKeyOptions): string {
 
 function getRuleCard(cards: ReadonlyMap<RuleName, RuleCard>, name: RuleName): RuleCard {
 	const card = cards.get(name);
-	if (card === undefined) throw new Error(`Missing rule card for "${name}".`);
+	if (card === undefined) {
+		throw new Error(`Missing rule card for "${name}".`);
+	}
+
 	return card;
 }
 
@@ -126,7 +129,9 @@ export function createAllRulePairs(names: ReadonlyArray<RuleName>): ReadonlyArra
 
 		for (let rightIndex = leftIndex + 1; rightIndex < ordered.length; rightIndex += 1) {
 			const right = ordered[rightIndex];
-			if (right !== undefined) pairs[length++] = { left, right };
+			if (right !== undefined) {
+				pairs[length++] = { left, right };
+			}
 		}
 	}
 
@@ -339,8 +344,12 @@ function selectCappedRelations(
 		const retained = retainedByPair.get(pairKey);
 		if (retained === undefined) {
 			const fresh = freshByPair.get(pairKey);
-			if (fresh !== undefined) freshRelations.push(fresh);
-		} else edges.push(retained);
+			if (fresh !== undefined) {
+				freshRelations.push(fresh);
+			}
+		} else {
+			edges.push(retained);
+		}
 	}
 
 	return { edges, freshRelations };
@@ -410,7 +419,10 @@ export async function regenerateRelationsAsync(options: RegenerateOptions): Prom
 			const outcome = await createReasonOutcomeAsync(fresh, options);
 			completedReasons += 1;
 
-			if (outcome.cached) cachedReasons += 1;
+			if (outcome.cached) {
+				cachedReasons += 1;
+			}
+
 			options.onProgress?.({
 				cached: cachedReasons,
 				completed: completedReasons,

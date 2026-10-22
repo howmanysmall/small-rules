@@ -18,10 +18,16 @@ const ATTRIBUTE_SELECTOR_PATTERN = /\[(?<path>[\w.]+)=(?<quote>["'])(?<value>.*?
 const CHILD_FIELD_SELECTOR_PATTERN = /^(?<parentType>\w+)\s*>\s*\.(?<field>\w+)$/u;
 
 export function decorateAst(program: HarnessValue, locationIndex: LocationIndex): HarnessNode {
-	if (!isParsedNode(program)) throw new HarnessError("Yuku parser returned an invalid Program node.");
+	if (!isParsedNode(program)) {
+		throw new HarnessError("Yuku parser returned an invalid Program node.");
+	}
+
 	attachNodeMetadata(program, null, locationIndex);
 
-	if (!isHarnessNode(program)) throw new HarnessError("Yuku parser Program node could not be decorated.");
+	if (!isHarnessNode(program)) {
+		throw new HarnessError("Yuku parser Program node could not be decorated.");
+	}
+
 	return program;
 }
 
@@ -43,11 +49,18 @@ export function getNodeChildren(node: HarnessNode): Array<HarnessNode> {
 	for (const key of keys) {
 		const child = node[key];
 		if (Array.isArray(child)) {
-			for (const item of child) if (isHarnessNode(item)) children[size++] = item;
+			for (const item of child) {
+				if (isHarnessNode(item)) {
+					children[size++] = item;
+				}
+			}
+
 			continue;
 		}
 
-		if (isHarnessNode(child)) children[size++] = child;
+		if (isHarnessNode(child)) {
+			children[size++] = child;
+		}
 	}
 
 	return children.toSorted(compareNodeRanges);
@@ -72,13 +85,17 @@ function attachNodeMetadata(node: UnknownRecord, parent: HarnessNode | null, loc
 		const child = node[key];
 		if (Array.isArray(child)) {
 			for (const item of child) {
-				if (isParsedNode(item)) attachNodeMetadata(item, node, locationIndex);
+				if (isParsedNode(item)) {
+					attachNodeMetadata(item, node, locationIndex);
+				}
 			}
 
 			continue;
 		}
 
-		if (isParsedNode(child)) attachNodeMetadata(child, node, locationIndex);
+		if (isParsedNode(child)) {
+			attachNodeMetadata(child, node, locationIndex);
+		}
 	}
 }
 
@@ -153,13 +170,19 @@ function isVisitorCallback(value: HarnessValue): value is VisitorCallback {
 
 function traverseNode(node: HarnessNode, entries: VisitorEntries): void {
 	for (const visitor of getVisitors(entries.enter, node.type)) {
-		if (visitor.matches(node)) visitor.callback(node);
+		if (visitor.matches(node)) {
+			visitor.callback(node);
+		}
 	}
 
-	for (const child of getNodeChildren(node)) traverseNode(child, entries);
+	for (const child of getNodeChildren(node)) {
+		traverseNode(child, entries);
+	}
 
 	for (const visitor of getVisitors(entries.exit, node.type)) {
-		if (visitor.matches(node)) visitor.callback(node);
+		if (visitor.matches(node)) {
+			visitor.callback(node);
+		}
 	}
 }
 
@@ -180,7 +203,9 @@ function parseSelector(selector: string): ParsedSelector {
 	if (statementSelector !== undefined) return statementSelector;
 
 	const bracketIndex = selector.indexOf("[");
-	if (bracketIndex === -1) return { matches: () => true, nodeType: selector };
+	if (bracketIndex === -1) {
+		return { matches: () => true, nodeType: selector };
+	}
 
 	const nodeType = selector.slice(0, bracketIndex);
 	const conditions = new Array<NodePredicate>();

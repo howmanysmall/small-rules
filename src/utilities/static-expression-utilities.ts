@@ -225,7 +225,9 @@ function isStaticMemberProperty(
 
 function getStaticFactoryRootName(callee: ESTree.Expression): string | undefined {
 	let unwrapped = stripExpressionWrappers(callee);
-	while (isMemberExpression(unwrapped)) unwrapped = stripExpressionWrappers(unwrapped.object);
+	while (isMemberExpression(unwrapped)) {
+		unwrapped = stripExpressionWrappers(unwrapped.object);
+	}
 
 	return isIdentifier(unwrapped) ? unwrapped.name : undefined;
 }

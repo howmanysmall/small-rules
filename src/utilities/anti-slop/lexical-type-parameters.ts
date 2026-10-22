@@ -22,7 +22,9 @@ function appendChildNodes(value: unknown, pending: Array<ESTree.Node>): void {
 
 	for (const child of value) {
 		/* v8 ignore next -- the istanbul conversion emits an empty implicit-else arm for this branch. @preserve */
-		if (isNode(child)) pending.push(child);
+		if (isNode(child)) {
+			pending.push(child);
+		}
 	}
 }
 
@@ -55,7 +57,11 @@ function collectInferTypeParameterNames(
 	const pending: Array<ESTree.Node> = [node];
 	for (const current of pending) {
 		if (isTsConditionalType(current)) continue;
-		if (isTsInferType(current)) names.add(current.typeParameter.name.name);
+
+		if (isTsInferType(current)) {
+			names.add(current.typeParameter.name.name);
+		}
+
 		appendVisitorChildren(current, visitorKeys, pending);
 	}
 }

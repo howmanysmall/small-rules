@@ -84,8 +84,9 @@ function groupComments(comments: ReadonlyArray<Comment>, sourceCode: SourceCode)
 			}
 
 			groups[groupsSize++] = createCommentGroup([comment]);
-		} else if (size === 0) currentLineComments[size++] = comment;
-		else {
+		} else if (size === 0) {
+			currentLineComments[size++] = comment;
+		} else {
 			const lastComment = currentLineComments.at(-1);
 			if (lastComment && areAdjacentLineComments(lastComment, comment, sourceCode)) {
 				currentLineComments[size++] = comment;
@@ -97,7 +98,10 @@ function groupComments(comments: ReadonlyArray<Comment>, sourceCode: SourceCode)
 		}
 	}
 
-	if (size > 0) groups[groupsSize] = createCommentGroup(currentLineComments);
+	if (size > 0) {
+		groups[groupsSize] = createCommentGroup(currentLineComments);
+	}
+
 	return groups;
 }
 
@@ -139,7 +143,11 @@ function toParsedStatements(body: ReadonlyArray<unknown>): ReadonlyArray<ESTree.
 	const result = new Array<ESTree.Statement>();
 	let size = 0;
 	/* v8 ignore next -- @preserve parser program bodies contain parsed statement records. */
-	for (const item of body) if (isParsedStatement(item)) result[size++] = item;
+	for (const item of body) {
+		if (isParsedStatement(item)) {
+			result[size++] = item;
+		}
+	}
 
 	return result;
 }
@@ -233,7 +241,11 @@ function containsCode(value: string, filename: string): boolean {
 
 function countLines(value: string): number {
 	let count = 1;
-	for (const character of value) if (character === "\n") count += 1;
+	for (const character of value) {
+		if (character === "\n") {
+			count += 1;
+		}
+	}
 
 	return count;
 }

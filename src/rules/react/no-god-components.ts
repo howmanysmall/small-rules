@@ -70,7 +70,9 @@ function countDestructuredProperties(node: ESTree.Node): number | undefined {
 	if (!firstParameter) return undefined;
 
 	let pattern: ESTree.ObjectPattern | undefined;
-	if (isObjectPattern(firstParameter)) pattern = firstParameter;
+	if (isObjectPattern(firstParameter)) {
+		pattern = firstParameter;
+	}
 
 	if (isAssignmentPattern(firstParameter) && isObjectPattern(firstParameter.left)) {
 		pattern = firstParameter.left;
@@ -79,7 +81,11 @@ function countDestructuredProperties(node: ESTree.Node): number | undefined {
 	if (!pattern) return undefined;
 
 	let count = 0;
-	for (const property of pattern.properties) if (isProperty(property)) count += 1;
+	for (const property of pattern.properties) {
+		if (isProperty(property)) {
+			count += 1;
+		}
+	}
 
 	return count;
 }
@@ -114,10 +120,14 @@ function isReportableNullLiteral(current: ESTree.Node): boolean {
 
 function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>): BodyAnalysis {
 	/* v8 ignore next -- callers only analyze function-like component nodes. @preserve */
-	if (!isAnyFunction(node)) return { maxJsxDepth: 0, nullLiterals: [], stateHookCount: 0 };
+	if (!isAnyFunction(node)) {
+		return { maxJsxDepth: 0, nullLiterals: [], stateHookCount: 0 };
+	}
 
 	/* v8 ignore next 3 -- @preserve implemented function nodes in this visitor have parser bodies. */
-	if (node.body === null) return { maxJsxDepth: 0, nullLiterals: [], stateHookCount: 0 };
+	if (node.body === null) {
+		return { maxJsxDepth: 0, nullLiterals: [], stateHookCount: 0 };
+	}
 
 	let maxJsxDepth = 0;
 	let stateHookCount = 0;
@@ -130,13 +140,20 @@ function analyzeComponentBody(node: ESTree.Node, stateHooks: ReadonlySet<string>
 		if (isJsxNode(current)) {
 			currentJsxDepth += 1;
 			/* v8 ignore next -- @preserve first JSX node in a component always raises the maximum depth. */
-			if (currentJsxDepth > maxJsxDepth) maxJsxDepth = currentJsxDepth;
+			if (currentJsxDepth > maxJsxDepth) {
+				maxJsxDepth = currentJsxDepth;
+			}
+
 			return;
 		}
 
-		if (isCountedStateHook(current, stateHooks)) stateHookCount += 1;
+		if (isCountedStateHook(current, stateHooks)) {
+			stateHookCount += 1;
+		}
 
-		if (isReportableNullLiteral(current)) nullLiterals.push(current);
+		if (isReportableNullLiteral(current)) {
+			nullLiterals.push(current);
+		}
 	});
 
 	return { maxJsxDepth, nullLiterals, stateHookCount };
@@ -303,11 +320,15 @@ const noGodComponents = createRule("no-god-components", "react", {
 			},
 			FunctionDeclaration(node): void {
 				/* v8 ignore next -- this handler is only registered for FunctionDeclaration nodes. @preserve */
-				if (isFunctionDeclarationRaw(node)) checkFunctionIfNamed(node);
+				if (isFunctionDeclarationRaw(node)) {
+					checkFunctionIfNamed(node);
+				}
 			},
 			FunctionExpression(node): void {
 				/* v8 ignore next -- this handler is only registered for FunctionExpression nodes. @preserve */
-				if (isFunctionExpression(node)) checkFunctionIfNamed(node);
+				if (isFunctionExpression(node)) {
+					checkFunctionIfNamed(node);
+				}
 			},
 		} satisfies Visitor;
 	},

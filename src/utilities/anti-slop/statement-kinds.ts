@@ -217,7 +217,9 @@ const STATEMENT_KIND_TESTS = new Map<string, StatementTest>(Object.entries(STATE
 function getStatementTest(kind: StatementKind): StatementTest {
 	const matches = STATEMENT_KIND_TESTS.get(kind);
 	/* v8 ignore next -- @preserve the schema only allows known statement kinds. */
-	if (matches === undefined) throw new RangeError(`Unknown statement kind: ${kind}`);
+	if (matches === undefined) {
+		throw new RangeError(`Unknown statement kind: ${kind}`);
+	}
 
 	return matches;
 }
@@ -233,7 +235,9 @@ export function toStatementTest(kinds: StatementKinds): StatementTest {
 
 	const tests = kinds.map(getStatementTest);
 	return (node, sourceCode) => {
-		for (const matches of tests) if (matches(node, sourceCode)) return true;
+		for (const matches of tests) {
+			if (matches(node, sourceCode)) return true;
+		}
 
 		return false;
 	};

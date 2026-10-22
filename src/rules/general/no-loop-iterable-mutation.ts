@@ -115,7 +115,9 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 
 function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
 	const node = stripExpressionWrappers(right);
-	if (isIdentifier(node)) return { name: node.name, method: "direct" };
+	if (isIdentifier(node)) {
+		return { name: node.name, method: "direct" };
+	}
 
 	if (!isCallExpression(node) || !isMemberExpression(node.callee) || node.arguments.length > 0) return undefined;
 	if (node.callee.optional || !isIdentifier(node.callee.object)) return undefined;

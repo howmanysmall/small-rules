@@ -74,7 +74,9 @@ function hasJsxReturn(node: CallbackFunction): boolean {
 		if (foundJsx || !isReturnStatement(child)) return;
 
 		const { argument } = child;
-		if (argument !== null && (isJsxElement(argument) || isJsxFragment(argument))) foundJsx = true;
+		if (argument !== null && (isJsxElement(argument) || isJsxFragment(argument))) {
+			foundJsx = true;
+		}
 	});
 
 	return foundJsx;
@@ -122,7 +124,9 @@ function isCallArgumentReference(node: ESTree.Node): boolean {
 function unwrapReferenceValue(node: ESTree.Node): ESTree.Node {
 	let current = node;
 
-	while (isWrapperParent(current)) current = current.expression;
+	while (isWrapperParent(current)) {
+		current = current.expression;
+	}
 
 	return current;
 }
@@ -227,18 +231,25 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 				return;
 			}
 
-			if (isReturnStatement(parent)) checkReturnStatementExit(node);
+			if (isReturnStatement(parent)) {
+				checkReturnStatementExit(node);
+			}
 		}
 
 		return {
 			ArrowFunctionExpression(node): void {
 				const functionName = getVariableDeclaratorFunctionName(node);
-				if (functionName !== undefined && isUppercaseName(functionName)) componentDepth += 1;
+				if (functionName !== undefined && isUppercaseName(functionName)) {
+					componentDepth += 1;
+				}
 			},
 			"ArrowFunctionExpression:exit": checkVariableFunctionExit,
 			FunctionDeclaration({ id }): void {
 				if (id === null) return;
-				if (isUppercaseName(id.name)) componentDepth += 1;
+
+				if (isUppercaseName(id.name)) {
+					componentDepth += 1;
+				}
 			},
 			"FunctionDeclaration:exit"(node): void {
 				if (node.id === null) return;
@@ -256,11 +267,15 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 				const returnTypeAnnotation = getReturnTypeAnnotation(node);
 				const hasReturnType = isReactNodeTypeAnnotation(returnTypeAnnotation);
 
-				if (hasReturnType || hasJsxReturn(node)) reportRenderHelper(node, functionName);
+				if (hasReturnType || hasJsxReturn(node)) {
+					reportRenderHelper(node, functionName);
+				}
 			},
 			FunctionExpression(node): void {
 				const functionName = getVariableDeclaratorFunctionName(node);
-				if (functionName !== undefined && isUppercaseName(functionName)) componentDepth += 1;
+				if (functionName !== undefined && isUppercaseName(functionName)) {
+					componentDepth += 1;
+				}
 			},
 			"FunctionExpression:exit": checkVariableFunctionExit,
 		};

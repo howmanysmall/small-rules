@@ -65,7 +65,9 @@ function getReferencedTypeName(typeNode?: ESTree.Node | null, allowQualified = t
 	if (typeNode === null || typeNode === undefined) return undefined;
 
 	let referencedType = typeNode;
-	while (isTsTypeAnnotation(referencedType)) referencedType = referencedType.typeAnnotation;
+	while (isTsTypeAnnotation(referencedType)) {
+		referencedType = referencedType.typeAnnotation;
+	}
 
 	if (isTsUnionType(referencedType)) {
 		let referencedTypeName: string | undefined;
@@ -107,10 +109,13 @@ function addSystemPropertyFunction(
 	for (const property of object.properties) {
 		if (getPropertyName(property) !== "system" || !isProperty(property)) continue;
 
-		if (isAnyFunction(property.value)) systemFunctions.add(property.value);
-		else if (isIdentifier(property.value)) {
+		if (isAnyFunction(property.value)) {
+			systemFunctions.add(property.value);
+		} else if (isIdentifier(property.value)) {
 			const systemFunction = namedFunctions.get(property.value.name);
-			if (systemFunction !== undefined) systemFunctions.add(systemFunction);
+			if (systemFunction !== undefined) {
+				systemFunctions.add(systemFunction);
+			}
 		}
 	}
 }
@@ -135,7 +140,9 @@ function collectImportBindings(
 
 			const variable = variables.find((candidate) => candidate.name === specifier.local.name);
 			/* v8 ignore else -- @preserve each import specifier declares its local binding. */
-			if (variable !== undefined) bindings.set(variable, { imported, source: statement.source.value });
+			if (variable !== undefined) {
+				bindings.set(variable, { imported, source: statement.source.value });
+			}
 		}
 	}
 
@@ -161,7 +168,10 @@ function arePathsEqual(left: ReadonlyArray<string>, right: ReadonlyArray<string>
 }
 
 function getCalleePath(callee: ESTree.Expression): ReadonlyArray<string> | undefined {
-	if (isIdentifier(callee)) return [callee.name];
+	if (isIdentifier(callee)) {
+		return [callee.name];
+	}
+
 	if (!isMemberExpression(callee)) return undefined;
 	const chain = getMemberChain(callee);
 	return chain === undefined ? undefined : [chain.root.name, ...chain.path];
@@ -200,7 +210,9 @@ function tryRecordConfiguredCallback(
 
 	const variable = getReferencedVariable(sourceCode, parameter);
 	/* v8 ignore else -- @preserve function parameter identifiers always resolve to their declared variable. */
-	if (variable !== undefined) types.set(variable, configuration.className);
+	if (variable !== undefined) {
+		types.set(variable, configuration.className);
+	}
 }
 
 function processConfiguredCall(
@@ -253,7 +265,9 @@ function recordVariableDeclaratorType(
 
 	const variable = sourceCode.getDeclaredVariables(node).find((candidate) => candidate.name === name);
 	/* v8 ignore else -- @preserve identifier variable declarations always expose their declared variable. */
-	if (variable !== undefined) types.set(variable, className);
+	if (variable !== undefined) {
+		types.set(variable, className);
+	}
 }
 
 function recordSingleParameterType(
@@ -270,7 +284,9 @@ function recordSingleParameterType(
 
 	const variable = variables.get(name);
 	/* v8 ignore else -- @preserve identifier parameters always appear in their function's declared variables. */
-	if (variable !== undefined) types.set(variable, className);
+	if (variable !== undefined) {
+		types.set(variable, className);
+	}
 }
 
 function recordFunctionParameterTypes(
@@ -307,7 +323,9 @@ function collectDeclaredTypeNames(program: ESTree.Program): ReadonlySet<string> 
 	const names = new Set<string>();
 	forEachNode(program, (node) => {
 		if (isImportDeclaration(node)) {
-			for (const specifier of node.specifiers) names.add(specifier.local.name);
+			for (const specifier of node.specifiers) {
+				names.add(specifier.local.name);
+			}
 
 			return false;
 		}
@@ -422,7 +440,10 @@ function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: Sour
 
 	if (!isBlockStatement(systemFunction.body)) {
 		const returnedFunction = getReferencedCallback(systemFunction.body, sourceCode);
-		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
+		if (returnedFunction !== undefined) {
+			returnedFunctions.add(returnedFunction);
+		}
+
 		return returnedFunctions;
 	}
 
@@ -431,7 +452,10 @@ function getReturnedFunctions(systemFunction: CallbackFunction, sourceCode: Sour
 		if (!isReturnStatement(node) || node.argument === null) return true;
 
 		const returnedFunction = getReferencedCallback(node.argument, sourceCode);
-		if (returnedFunction !== undefined) returnedFunctions.add(returnedFunction);
+		if (returnedFunction !== undefined) {
+			returnedFunctions.add(returnedFunction);
+		}
+
 		return false;
 	});
 	return returnedFunctions;
@@ -454,7 +478,9 @@ function getSynchronousCallbacks(
 			if (argument === undefined || isSpreadElement(argument)) continue;
 
 			const callback = getReferencedCallback(argument, sourceCode);
-			if (callback !== undefined) callbacks.add(callback);
+			if (callback !== undefined) {
+				callbacks.add(callback);
+			}
 		}
 	}
 
@@ -480,7 +506,9 @@ function reportYieldingCalls(
 			if (node !== activeFunction && isAnyFunction(node)) return false;
 			if (!isCallExpression(node)) return true;
 
-			if (isRobloxYieldingCall(node, sourceCode, imports, types)) report(node);
+			if (isRobloxYieldingCall(node, sourceCode, imports, types)) {
+				report(node);
+			}
 
 			for (const callback of getSynchronousCallbacks(node, sourceCode, synchronousCallbacks)) {
 				inspectActiveFunction(callback);
@@ -492,7 +520,9 @@ function reportYieldingCalls(
 
 	const returnedFunctions = getReturnedFunctions(systemFunction, sourceCode);
 	const activeFunctions = returnedFunctions.size === 0 ? [systemFunction] : returnedFunctions;
-	for (const activeFunction of activeFunctions) inspectActiveFunction(activeFunction);
+	for (const activeFunction of activeFunctions) {
+		inspectActiveFunction(activeFunction);
+	}
 }
 
 interface SystemDiscoveryState {
@@ -503,8 +533,13 @@ interface SystemDiscoveryState {
 }
 
 function recordSystemFunction(node: CallbackFunction, state: SystemDiscoveryState): void {
-	if (node.id !== null) state.namedFunctions.set(node.id.name, node);
-	if (isRecognizedType(node.returnType, state.systemTypeNames)) state.systemFunctions.add(node);
+	if (node.id !== null) {
+		state.namedFunctions.set(node.id.name, node);
+	}
+
+	if (isRecognizedType(node.returnType, state.systemTypeNames)) {
+		state.systemFunctions.add(node);
+	}
 }
 
 function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDiscoveryState): void {
@@ -512,8 +547,11 @@ function recordSystemDeclarator(node: ESTree.VariableDeclarator, state: SystemDi
 	if (!isRecognizedType(node.id.typeAnnotation, state.systemTypeNames)) return;
 	if (node.init === null) return;
 
-	if (isAnyFunction(node.init)) state.systemFunctions.add(node.init);
-	else if (isObjectExpression(node.init)) state.typedSystemObjects.push(node.init);
+	if (isAnyFunction(node.init)) {
+		state.systemFunctions.add(node.init);
+	} else if (isObjectExpression(node.init)) {
+		state.typedSystemObjects.push(node.init);
+	}
 }
 
 function recordSystemSatisfies(node: ESTree.Node, state: SystemDiscoveryState): void {

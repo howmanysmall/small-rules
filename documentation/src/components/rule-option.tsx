@@ -53,8 +53,11 @@ export function RuleOption({ highlightedType, option }: Readonly<RuleOptionPrope
 	}
 
 	let copyLabel: string = labels.copy;
-	if (copyStatus === "copied") copyLabel = labels.copied;
-	else if (copyStatus === "failed") copyLabel = labels.copyFailed;
+	if (copyStatus === "copied") {
+		copyLabel = labels.copied;
+	} else if (copyStatus === "failed") {
+		copyLabel = labels.copyFailed;
+	}
 
 	return (
 		<div className="rule-option">

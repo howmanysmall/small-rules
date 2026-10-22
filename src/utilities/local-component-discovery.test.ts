@@ -40,7 +40,9 @@ function createCollectorRule(inspection: LocalComponentInspection): CreateRule<r
 					const identifiers = new Set<string>();
 					addLocalComponentImportIdentifiers(node, inspection, COMPONENT_NAME, identifiers);
 
-					if (identifiers.size > 0) context.report({ messageId: "found", node });
+					if (identifiers.size > 0) {
+						context.report({ messageId: "found", node });
+					}
 				},
 			} satisfies Visitor;
 		},

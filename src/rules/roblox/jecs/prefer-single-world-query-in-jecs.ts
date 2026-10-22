@@ -273,12 +273,18 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 		let currentHasBuffer = new Array<WorldQueryCall>();
 
 		function flushGetBuffer(): void {
-			if (currentGetBuffer.length >= 2) processGetCalls(currentGetBuffer, context);
+			if (currentGetBuffer.length >= 2) {
+				processGetCalls(currentGetBuffer, context);
+			}
+
 			currentGetBuffer = [];
 		}
 
 		function flushHasBuffer(): void {
-			if (currentHasBuffer.length >= 2) processHasCalls(currentHasBuffer, context);
+			if (currentHasBuffer.length >= 2) {
+				processHasCalls(currentHasBuffer, context);
+			}
+
 			currentHasBuffer = [];
 		}
 
@@ -310,7 +316,10 @@ const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-je
 				const hasCall = extractWorldQueryCall(node, "has");
 				if (hasCall !== undefined) {
 					const lastCall = currentHasBuffer.at(-1);
-					if (lastCall !== undefined && !areCallsConsecutive(lastCall, hasCall, sourceCode)) flushHasBuffer();
+					if (lastCall !== undefined && !areCallsConsecutive(lastCall, hasCall, sourceCode)) {
+						flushHasBuffer();
+					}
+
 					currentHasBuffer.push(hasCall);
 
 					flushGetBuffer();

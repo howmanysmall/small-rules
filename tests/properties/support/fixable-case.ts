@@ -100,7 +100,9 @@ function renderProgram<Value>(
 
 	for (const [id, { after, before, frames, value }] of placements.entries()) {
 		const { module = [], statements = [] } = render(value, id);
-		for (const line of module) moduleLines.add(line);
+		for (const line of module) {
+			moduleLines.add(line);
+		}
 
 		if (statements.length === 0) continue;
 		bodies.push(wrapInFrames(frames, [...before, ...statements, ...after].join("\n")));

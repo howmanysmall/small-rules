@@ -94,7 +94,9 @@ const matchesUnknown: ResolvedTypeMatcher = function matchesUnknown(resolved, en
 	}
 
 	if (resolved.type === "TSUnionType") {
-		for (const member of resolved.types) enqueue(member);
+		for (const member of resolved.types) {
+			enqueue(member);
+		}
 
 		return false;
 	}
@@ -105,7 +107,10 @@ const matchesUnknown: ResolvedTypeMatcher = function matchesUnknown(resolved, en
 	}
 
 	if (resolved.type === "TSMappedType") {
-		if (resolved.typeAnnotation !== null) enqueue(resolved.typeAnnotation);
+		if (resolved.typeAnnotation !== null) {
+			enqueue(resolved.typeAnnotation);
+		}
+
 		return false;
 	}
 
@@ -724,7 +729,9 @@ function getInterfacePropertyNames(declarations?: ReadonlyArray<ESTree.TSInterfa
 	for (const declaration of visibleDeclarations) {
 		const { body } = declaration.body;
 		for (const member of body) {
-			if (member.type === "TSPropertySignature" && member.key.type === "Identifier") names.push(member.key.name);
+			if (member.type === "TSPropertySignature" && member.key.type === "Identifier") {
+				names.push(member.key.name);
+			}
 		}
 	}
 
