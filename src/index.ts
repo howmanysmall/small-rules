@@ -203,7 +203,7 @@ const smallRules = definePlugin({
 		"no-pass-data-to-parent": noPassDataToParent,
 		"no-pass-live-state-to-parent": noPassLiveStateToParent,
 		"no-print": noPrint,
-		"no-real-temp-dir": noRealTemporaryDirectory,
+		"no-real-temporary-directory": noRealTemporaryDirectory,
 		"no-recursive": noRecursive,
 		"no-reduce-accumulator-copy": noReduceAccumulatorCopy,
 		"no-redundant-aspect-ratio-constraint": noRedundantAspectRatioConstraint,
