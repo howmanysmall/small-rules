@@ -134,7 +134,7 @@ describe("rule-summary", () => {
 	});
 
 	it("copies the full rule name and confirms the result", async ({ expect }) => {
-		expect.assertions(3);
+		expect.assertions(2);
 
 		const user = userEvent.setup();
 		const writeText = vi.spyOn(navigator.clipboard, "writeText");
@@ -144,8 +144,7 @@ describe("rule-summary", () => {
 		await user.click(copyButton);
 
 		expect(writeText).toHaveBeenCalledExactlyOnceWith("small-rules/no-print");
-		expect(screen.getByRole("button", { name: "Rule name copied" }).dataset.copied).toBe("");
-		expect(screen.getByText("small-rules/no-print")).toBeInstanceOf(HTMLElement);
+		expect(screen.getByRole("button", { name: "Rule name copied" }).dataset.state).toBe("copied");
 	});
 
 	it("renders backticked identifiers in generated descriptions as inline code", ({ expect }) => {

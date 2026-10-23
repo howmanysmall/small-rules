@@ -716,11 +716,15 @@ main .page-title-row > h1 {
 	font-weight: 500;
 	line-height: 1.2;
 	vertical-align: middle;
-	color: var(--badge-color, var(--ink-2));
 	white-space: nowrap;
+	border-radius: 0;
+}
+
+.badge,
+.rule-index-card li {
+	color: var(--badge-color, var(--ink-2));
 	background: color-mix(in srgb, var(--badge-color, var(--ink-2)) 8%, transparent);
 	border: 1px solid color-mix(in srgb, var(--badge-color, var(--ink-2)) 35%, var(--rule));
-	border-radius: 0;
 }
 
 .badge svg {
@@ -743,10 +747,6 @@ main .page-title-row > h1 {
 .badge--new,
 .rule-index-card-trait-new {
 	--badge-color: var(--syntax-number);
-}
-
-.badge--roblox {
-	--badge-color: var(--ink-2);
 }
 
 .badge--suggestion,
@@ -809,12 +809,12 @@ main .page-title-row > h1 {
 }
 
 .rule-summary-copy:hover:not(:disabled),
-.rule-summary-copy[data-copied] {
+.rule-summary-copy[data-state="copied"] {
 	color: var(--ink);
 	border-color: var(--rule);
 }
 
-.rule-summary-copy[data-failed] {
+.rule-summary-copy[data-state="failed"] {
 	color: var(--vermilion);
 }
 
@@ -1545,9 +1545,6 @@ the traits row uses gap for spacing instead. */
 	font-size: 0.75rem;
 	font-weight: 500;
 	line-height: 1.4;
-	color: var(--badge-color, var(--ink-2));
-	background: color-mix(in srgb, var(--badge-color, var(--ink-2)) 8%, transparent);
-	border: 1px solid color-mix(in srgb, var(--badge-color, var(--ink-2)) 35%, var(--rule));
 }
 
 .rule-index-empty {

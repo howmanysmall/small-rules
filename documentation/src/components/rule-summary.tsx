@@ -75,8 +75,7 @@ export function RuleSummary({
 					aria-label={copyLabel}
 					aria-live="polite"
 					className="rule-summary-copy"
-					data-copied={copyStatus === "copied" ? "" : undefined}
-					data-failed={copyStatus === "failed" ? "" : undefined}
+					data-state={copyStatus}
 					disabled={!isReady}
 					type="button"
 					onClick={handleCopyRuleName}
