@@ -1,12 +1,14 @@
 import { expect as playwrightExpect, test as playwrightIt } from "@playwright/test";
 
 import { ruleManifest } from "$data/rule-manifest";
+import { getRuleNewness } from "$data/rule-newness";
 
 import type { Page } from "@playwright/test";
 
 const allRulesPath = "rules/";
 const baseUrl = "http://127.0.0.1:4321/small-rules/";
 const complexOptionsRulePath = "rules/react/no-useless-use-memo/";
+const inlineCodeRulePath = "rules/roblox/no-ianitor-success-access/";
 const rulePath = "rules/roblox/no-print/";
 const builtScriptPrefix = "/small-rules/_astro/";
 
@@ -67,11 +69,33 @@ playwrightIt("renders the custom rule documentation sections", async ({ page }) 
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
 });
 
+playwrightIt("visually distinguishes inline code from surrounding prose", async ({ page }) => {
+	await page.goto(`${baseUrl}${inlineCodeRulePath}`);
+
+	const code = page.locator(".rule-summary-text code").first();
+	await playwrightExpect(code).toHaveText(".success");
+	await playwrightExpect(code).toHaveCSS("font-family", /IBM Plex Mono/u);
+	await playwrightExpect(code).toHaveCSS("border-top-width", "1px");
+	await playwrightExpect(code).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+});
+
 playwrightIt("distinguishes rule badges with tinted colors in both themes", async ({ page }) => {
 	await page.goto(`${baseUrl}${rulePath}`);
 
 	await expectBadgeColorsAsync(page, "light");
 	await expectBadgeColorsAsync(page, "dark");
+});
+
+playwrightIt("renders sidebar badges with the rule page badge component", async ({ page }) => {
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	const sidebar = page.locator(".sidebar-content");
+	const freshRuleCount = [...getRuleNewness().values()].filter(
+		(freshness) => freshness.isNew || freshness.isUpdated,
+	).length;
+
+	await playwrightExpect(sidebar.locator(".sl-badge")).toHaveCount(0);
+	await playwrightExpect(sidebar.locator(".badge.badge--new, .badge.badge--updated")).toHaveCount(freshRuleCount);
 });
 
 playwrightIt("copies the full rule name", async ({ page }) => {

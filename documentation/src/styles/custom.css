@@ -233,18 +233,16 @@ nav.sidebar .top-level li:not(:has(summary)) > details {
 	padding-left: 0.5rem;
 }
 
-.sidebar-content .sl-badge {
-	padding: 0.1em 0.45em;
-	font-family: var(--font-sans);
+.sidebar-content .badge {
+	gap: 0.25rem;
+	padding: 0.1em 0.375em;
+	margin-inline-start: 0.375rem;
 	font-size: 0.75rem;
-	font-weight: 500;
-	line-height: 1.4;
-	color: var(--ink-2);
-	text-transform: none;
-	letter-spacing: 0;
-	background: transparent;
-	border: 1px solid var(--rule);
-	border-radius: 0;
+}
+
+.sidebar-content .badge svg {
+	width: 0.75rem;
+	height: 0.75rem;
 }
 
 .sidebar-content :not(pre) > code {

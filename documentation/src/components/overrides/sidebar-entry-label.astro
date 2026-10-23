@@ -1,6 +1,7 @@
 ---
+import { Badge } from "$components/badge";
+import { isBadgeVariant } from "$components/badge-variants";
 import InlineMarkdownText from "$components/inline-markdown-text.astro";
-import { Badge } from "@astrojs/starlight/components";
 
 import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
@@ -13,9 +14,10 @@ interface Props {
 }
 
 const { badge, label, large } = Astro.props;
+const badgeVariant = badge?.class;
 ---
 
 <span class:list={{ large }}>
 	<InlineMarkdownText text={label} />
 </span>
-{badge && <Badge class={badge.class} text={badge.text} variant={badge.variant} />}
+{isBadgeVariant(badgeVariant) && <Badge variant={badgeVariant} />}

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type BadgeVariant = "error" | "fixable" | "new" | "roblox" | "suggestion" | "updated";
+import type { BadgeVariant } from "./badge-variants";
 
 interface BadgeProperties {
 	variant: BadgeVariant;

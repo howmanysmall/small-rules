@@ -8,9 +8,13 @@ import type { RuleNewness } from "./rule-newness";
 
 const newness = getRuleNewness();
 
+/**
+ * Starlight's sidebar badge config. `class` carries the `Badge` variant that
+ * `sidebar-entry-label.astro` renders; `text` is only Starlight's fallback.
+ */
 interface SidebarBadge {
+	readonly class: "new" | "updated";
 	readonly text: "New" | "Updated";
-	readonly variant: "note" | "tip";
 }
 
 interface SidebarBadgeItem {
@@ -19,11 +23,11 @@ interface SidebarBadgeItem {
 }
 
 function getNewBadge(freshness?: RuleNewness): SidebarBadge | undefined {
-	return freshness?.isNew === true ? { text: "New", variant: "note" } : undefined;
+	return freshness?.isNew === true ? { class: "new", text: "New" } : undefined;
 }
 
 function getUpdatedBadge(freshness?: RuleNewness): SidebarBadge | undefined {
-	return freshness?.isUpdated === true ? { text: "Updated", variant: "tip" } : undefined;
+	return freshness?.isUpdated === true ? { class: "updated", text: "Updated" } : undefined;
 }
 
 function createRuleSidebarItem(category: RuleCategoryManifest, entry: RuleManifestEntry): SidebarBadgeItem | string {
