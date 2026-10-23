@@ -93,12 +93,25 @@ const badgeDefinitions = {
 	},
 } satisfies Readonly<Record<BadgeVariant, BadgeDefinition>>;
 
+/**
+ * The only badges that take a hue. Error washes in the flag color (`--data-1`);
+ * Auto-fixable draws a focus hairline (`--focus`). Every other badge is ink.
+ */
+const badgeTreatments: Readonly<Partial<Record<BadgeVariant, "line" | "wash">>> = {
+	error: "wash",
+	fixable: "line",
+};
+
 export function Badge({ compact = false, variant }: Readonly<BadgeProperties>): ReactNode {
 	const { icon, label, title } = badgeDefinitions[variant];
+	const treatment = badgeTreatments[variant];
 	const labelContent = compact ? <span className="sr-only">{label}</span> : label;
+	const classNames = ["badge", `badge--${variant}`];
+	if (treatment !== undefined) classNames.push(`badge--${treatment}`);
+	if (compact) classNames.push("badge--compact");
 
 	return (
-		<span className={compact ? `badge badge--${variant} badge--compact` : `badge badge--${variant}`} title={title}>
+		<span className={classNames.join(" ")} title={title}>
 			<svg
 				aria-hidden="true"
 				fill="none"

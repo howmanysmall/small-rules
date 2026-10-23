@@ -704,7 +704,7 @@ main .page-title-row > h1 {
 	flex-wrap: wrap;
 	gap: 0.5rem;
 	align-items: center;
-	margin: 0.75rem 0 1rem;
+	margin: 0.75rem 0 1.25rem;
 }
 
 .badge {
@@ -723,48 +723,49 @@ main .page-title-row > h1 {
 
 .badge,
 .rule-index-card li {
-	color: var(--badge-color, var(--ink-2));
-	background: color-mix(in srgb, var(--badge-color, var(--ink-2)) 8%, transparent);
-	border: 1px solid color-mix(in srgb, var(--badge-color, var(--ink-2)) 35%, var(--rule));
+	color: var(--ink-2);
+	background: transparent;
+	border: 1px solid var(--rule);
 }
 
 .badge svg {
 	flex-shrink: 0;
 	width: 0.875rem;
 	height: 0.875rem;
-	color: inherit;
+	color: var(--ink-3);
 }
 
-.badge--error,
+/* Only two badges take a hue: Error washes in the flag color, and Auto-fixable
+draws a focus hairline. Every other badge stays ink. */
+.badge--wash,
 .rule-index-card-trait-problem {
-	--badge-color: var(--vermilion);
+	--badge-color: var(--data-1);
+	background: color-mix(in srgb, var(--badge-color) 8%, transparent);
 }
 
-.badge--fixable,
+.badge--line,
 .rule-index-card-trait-fixable {
-	--badge-color: var(--spruce);
+	--badge-color: var(--focus);
 }
 
-.badge--new,
-.rule-index-card-trait-new {
-	--badge-color: var(--syntax-number);
+.badge--wash,
+.badge--line,
+.rule-index-card-trait-problem,
+.rule-index-card-trait-fixable {
+	color: var(--badge-color);
+	border-color: color-mix(in srgb, var(--badge-color) 35%, var(--rule));
 }
 
-.badge--suggestion,
-.rule-index-card-trait-suggestion {
-	--badge-color: var(--violet);
-}
-
-.badge--updated,
-.rule-index-card-trait-updated {
-	--badge-color: var(--syntax-function);
+.badge--wash svg,
+.badge--line svg {
+	color: inherit;
 }
 
 .rule-summary {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
-	margin: 1rem 0 1.5rem;
+	gap: 1.75rem;
+	margin: 1.25rem 0 1.5rem;
 }
 
 .rule-summary-id-row {
@@ -829,6 +830,8 @@ main .page-title-row > h1 {
 }
 
 .rule-summary-text p {
+	/* About 72 characters of Newsreader per line. */
+	max-width: 29.75em;
 	margin: 0;
 	font-family: var(--font-serif);
 	font-size: 1.1875rem;

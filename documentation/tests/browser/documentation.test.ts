@@ -12,21 +12,61 @@ const inlineCodeRulePath = "rules/roblox/no-ianitor-success-access/";
 const rulePath = "rules/roblox/no-print/";
 const builtScriptPrefix = "/small-rules/_astro/";
 
-async function expectBadgeColorsAsync(page: Page, theme: "dark" | "light"): Promise<void> {
+const errorFixableRulePath = "rules/naming/prefer-optional-parameter/";
+const transparent = "rgba(0, 0, 0, 0)";
+
+interface BadgeStyle {
+	readonly background: string;
+	readonly color: string;
+	readonly kind: "error" | "fixable" | "ink";
+}
+
+interface RuleBadgeColors {
+	readonly badges: ReadonlyArray<BadgeStyle>;
+	readonly flag: string;
+	readonly focus: string;
+	readonly ink: string;
+}
+
+async function getRuleBadgeColorsAsync(page: Page, theme: "dark" | "light"): Promise<RuleBadgeColors> {
 	await page.evaluate((value) => {
 		document.documentElement.dataset.theme = value;
 	}, theme);
 
-	const styles = await page.locator(".rule-badges .badge").evaluateAll((badges) =>
-		badges.map((badge) => {
+	return page.evaluate(() => {
+		function resolveColor(token: string): string {
+			const probe = document.createElement("span");
+			probe.style.color = `var(${token})`;
+			document.body.append(probe);
+			const { color } = getComputedStyle(probe);
+			probe.remove();
+			return color;
+		}
+
+		function getKind(badge: Element): BadgeStyle["kind"] {
+			if (badge.classList.contains("badge--error")) return "error";
+			return badge.classList.contains("badge--fixable") ? "fixable" : "ink";
+		}
+
+		const badges = Array.from(document.querySelectorAll(".rule-badges .badge"), (badge) => {
 			const style = getComputedStyle(badge);
-			return { background: style.backgroundColor, color: style.color };
-		}),
-	);
+			return { background: style.backgroundColor, color: style.color, kind: getKind(badge) };
+		});
 
-	playwrightExpect(new Set(styles.map((style) => style.color)).size).toBe(styles.length);
+		return { badges, flag: resolveColor("--data-1"), focus: resolveColor("--focus"), ink: resolveColor("--ink-2") };
+	});
+}
 
-	for (const style of styles) playwrightExpect(style.background).not.toBe("rgba(0, 0, 0, 0)");
+function expectBadgeColorBudget({ badges, flag, focus, ink }: RuleBadgeColors): void {
+	for (const badge of badges) {
+		if (badge.kind === "error") {
+			playwrightExpect(badge.color).toBe(flag);
+			playwrightExpect(badge.background).not.toBe(transparent);
+		} else {
+			playwrightExpect(badge.color).toBe(badge.kind === "fixable" ? focus : ink);
+			playwrightExpect(badge.background).toBe(transparent);
+		}
+	}
 }
 
 playwrightIt("renders the custom homepage sections", async ({ page }) => {
@@ -79,11 +119,51 @@ playwrightIt("visually distinguishes inline code from surrounding prose", async 
 	await playwrightExpect(code).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
 });
 
-playwrightIt("distinguishes rule badges with tinted colors in both themes", async ({ page }) => {
+playwrightIt("colors only the Error and Auto-fixable badges in both themes", async ({ page }) => {
+	await page.goto(`${baseUrl}${errorFixableRulePath}`);
+
+	const light = await getRuleBadgeColorsAsync(page, "light");
+	const dark = await getRuleBadgeColorsAsync(page, "dark");
+
+	playwrightExpect(light.badges.map((badge) => badge.kind)).toEqual(
+		playwrightExpect.arrayContaining(["error", "fixable"]),
+	);
+	expectBadgeColorBudget(light);
+	expectBadgeColorBudget(dark);
+
 	await page.goto(`${baseUrl}${rulePath}`);
 
-	await expectBadgeColorsAsync(page, "light");
-	await expectBadgeColorsAsync(page, "dark");
+	const roblox = await getRuleBadgeColorsAsync(page, "dark");
+
+	playwrightExpect(roblox.badges.map((badge) => badge.kind)).toContain("ink");
+	expectBadgeColorBudget(roblox);
+});
+
+playwrightIt("wraps the rule description at about 72 characters", async ({ page }) => {
+	await page.setViewportSize({ height: 900, width: 1600 });
+	await page.goto(`${baseUrl}${errorFixableRulePath}`);
+
+	const firstLineLength = await page.locator(".rule-summary-text p").evaluate((paragraph) => {
+		const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+		const range = document.createRange();
+		let firstTop: number | undefined;
+		let count = 0;
+
+		for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+			for (let index = 0; index < (node.textContent?.length ?? 0); index += 1) {
+				range.setStart(node, index);
+				range.setEnd(node, index + 1);
+				const top = Math.round(range.getBoundingClientRect().top);
+				firstTop ??= top;
+				if (top > firstTop) return count;
+				count += 1;
+			}
+		}
+
+		return count;
+	});
+
+	playwrightExpect(firstLineLength).toBeLessThanOrEqual(75);
 });
 
 playwrightIt("renders sidebar badges with the rule page badge component", async ({ page }) => {
