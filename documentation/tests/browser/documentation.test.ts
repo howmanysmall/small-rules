@@ -2,11 +2,30 @@ import { expect as playwrightExpect, test as playwrightIt } from "@playwright/te
 
 import { ruleManifest } from "$data/rule-manifest";
 
+import type { Page } from "@playwright/test";
+
 const allRulesPath = "rules/";
 const baseUrl = "http://127.0.0.1:4321/small-rules/";
 const complexOptionsRulePath = "rules/react/no-useless-use-memo/";
 const rulePath = "rules/roblox/no-print/";
 const builtScriptPrefix = "/small-rules/_astro/";
+
+async function expectBadgeColorsAsync(page: Page, theme: "dark" | "light"): Promise<void> {
+	await page.evaluate((value) => {
+		document.documentElement.dataset.theme = value;
+	}, theme);
+
+	const styles = await page.locator(".rule-badges .badge").evaluateAll((badges) =>
+		badges.map((badge) => {
+			const style = getComputedStyle(badge);
+			return { background: style.backgroundColor, color: style.color };
+		}),
+	);
+
+	playwrightExpect(new Set(styles.map((style) => style.color)).size).toBe(styles.length);
+
+	for (const style of styles) playwrightExpect(style.background).not.toBe("rgba(0, 0, 0, 0)");
+}
 
 playwrightIt("renders the custom homepage sections", async ({ page }) => {
 	await page.goto(baseUrl);
@@ -25,6 +44,19 @@ playwrightIt("renders the custom homepage sections", async ({ page }) => {
 	);
 });
 
+playwrightIt("shows an icon for every package manager tab", async ({ page }) => {
+	await page.goto(`${baseUrl}quick-start/`);
+
+	const tabs = page.locator(".package-manager-tabs [role='tab']");
+	await playwrightExpect(tabs).toHaveCount(16);
+	const tabList = await tabs.all();
+	const maskImages = await Promise.all(
+		tabList.map(async (tab) => tab.evaluate((element) => getComputedStyle(element, "::before").maskImage)),
+	);
+
+	for (const maskImage of maskImages) playwrightExpect(maskImage).not.toBe("none");
+});
+
 playwrightIt("renders the custom rule documentation sections", async ({ page }) => {
 	await page.goto(`${baseUrl}${rulePath}`);
 
@@ -33,6 +65,25 @@ playwrightIt("renders the custom rule documentation sections", async ({ page }) 
 	await playwrightExpect(page.locator(".rule-diagnostic")).not.toHaveCount(0);
 	await playwrightExpect(page.locator("[data-rule-example]")).toHaveCount(2);
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
+});
+
+playwrightIt("distinguishes rule badges with tinted colors in both themes", async ({ page }) => {
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	await expectBadgeColorsAsync(page, "light");
+	await expectBadgeColorsAsync(page, "dark");
+});
+
+playwrightIt("copies the full rule name", async ({ page }) => {
+	await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	const copyButton = page.locator(".rule-summary-copy");
+	await playwrightExpect(copyButton).toHaveAccessibleName("Copy rule name");
+	await copyButton.click();
+
+	await playwrightExpect(copyButton).toHaveAccessibleName("Rule name copied");
+	playwrightExpect(await page.evaluate(async () => navigator.clipboard.readText())).toBe("small-rules/no-print");
 });
 
 playwrightIt("copies a rule example", async ({ page }) => {

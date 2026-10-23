@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, it } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, it, vi } from "vitest";
 
 import { RelatedRules } from "$components/related-rules";
 import { RelationReason } from "$components/relation-reason";
@@ -126,17 +127,47 @@ describe("rule-summary", () => {
 	it("renders the rule id and generated description by default", ({ expect }) => {
 		expect.assertions(2);
 
-		render(<RuleSummary rule="no-print" />);
+		render(<RuleSummary description="Use Log instead of print()." rule="no-print" />);
 
 		expect(screen.getByText("small-rules/no-print")).toBeInstanceOf(HTMLElement);
 		expect(screen.getByText("Use Log instead of print().")).toBeInstanceOf(HTMLElement);
+	});
+
+	it("copies the full rule name and confirms the result", async ({ expect }) => {
+		expect.assertions(3);
+
+		const user = userEvent.setup();
+		const writeText = vi.spyOn(navigator.clipboard, "writeText");
+		render(<RuleSummary description="Use Log instead of print()." rule="no-print" />);
+
+		const copyButton = screen.getByRole("button", { name: "Copy rule name" });
+		await user.click(copyButton);
+
+		expect(writeText).toHaveBeenCalledExactlyOnceWith("small-rules/no-print");
+		expect(screen.getByRole("button", { name: "Rule name copied" }).dataset.copied).toBe("");
+		expect(screen.getByText("small-rules/no-print")).toBeInstanceOf(HTMLElement);
+	});
+
+	it("renders backticked identifiers in generated descriptions as inline code", ({ expect }) => {
+		expect.assertions(3);
+
+		const { container } = render(
+			<RuleSummary
+				description="Disallow duplicate `oxlint-disable` or `eslint-disable` comments."
+				rule="directive-no-duplicate-disable"
+			/>,
+		);
+
+		expect(container.textContent).not.toContain("`");
+		expect(screen.getByText("oxlint-disable", { selector: "code" })).toBeInstanceOf(HTMLElement);
+		expect(screen.getByText("eslint-disable", { selector: "code" })).toBeInstanceOf(HTMLElement);
 	});
 
 	it("composes custom summary content when provided", ({ expect }) => {
 		expect.assertions(2);
 
 		render(
-			<RuleSummary rule="no-print">
+			<RuleSummary description="Use Log instead of print()." rule="no-print">
 				<p>{"Project-specific guidance."}</p>
 			</RuleSummary>,
 		);
