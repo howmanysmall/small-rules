@@ -131,9 +131,12 @@ jobs:
 
       # Only the browser tests need Chromium, so install it while the Astro
       # steps run. They stay sequential because they share `.astro/` and `dist/`.
+      # The Ubuntu image has the shared libraries; --with-deps only adds an
+      # unbounded APT path for optional packages such as fonts.
       - id: install-chromium
         name: Install Chromium
-        run: pnpm --filter @small-rules/documentation exec playwright install --with-deps chromium
+        run: pnpm --filter @small-rules/documentation exec playwright install chromium
+        timeout-minutes: 5
         background: true
 
       # turbo.json orders check, build, and test:unit, which share `.astro/`.
