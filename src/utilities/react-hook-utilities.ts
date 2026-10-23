@@ -57,7 +57,9 @@ export function walkAstSlop(node: ESTree.Node, callback: (child: ESTree.Node) =>
 }
 
 function pushSlopChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
-	for (const child of Object.values(node)) pushSlopValue(child, node, worklist);
+	for (const child of Object.values(node)) {
+		pushSlopValue(child, node, worklist);
+	}
 }
 
 function pushChildNodes(node: ESTree.Node, stack: Array<ESTree.Node>): void {
@@ -76,7 +78,9 @@ function pushChildValue(value: PropertyDescriptor["value"], parent: ESTree.Node,
 	}
 
 	/* v8 ignore next -- @preserve parser object children that are not arrays are AST nodes here. */
-	if (isNode(value)) stack.push(value);
+	if (isNode(value)) {
+		stack.push(value);
+	}
 }
 
 function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, stack: Array<ESTree.Node>): void {
@@ -84,14 +88,19 @@ function pushChildArray(values: ReadonlyArray<unknown>, parent: ESTree.Node, sta
 		const value = values[index];
 		/* v8 ignore next -- @preserve AST child arrays produced by the parser do not contain parent links. */
 		if (value === parent.parent) continue;
+
 		/* v8 ignore next -- @preserve parser child arrays traversed here contain AST nodes. */
-		if (isNode(value)) stack.push(value);
+		if (isNode(value)) {
+			stack.push(value);
+		}
 	}
 }
 
 function pushSlopValue(value: PropertyDescriptor["value"], parent: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	if (Array.isArray(value)) {
-		for (const item of value) pushSlopValue(item, parent, worklist);
+		for (const item of value) {
+			pushSlopValue(item, parent, worklist);
+		}
 
 		return;
 	}
@@ -119,7 +128,10 @@ export function countSetStateCalls(node: ESTree.Node): number {
 
 	walkAst(node, (child) => {
 		if (!isCallExpression(child) || !isIdentifier(child.callee)) return;
-		if (isSetterIdentifier(child.callee.name)) count += 1;
+
+		if (isSetterIdentifier(child.callee.name)) {
+			count += 1;
+		}
 	});
 
 	return count;

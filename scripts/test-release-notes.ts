@@ -142,8 +142,13 @@ function getEffectiveRates(publicPricing: PublicPricing, inputTokens: number, at
 		for (const override of publicPricing.overrides) {
 			if (!doesOverrideApply(override, inputTokens, at)) continue;
 
-			if (override.completion !== undefined) completion = getUsdPerToken(override.completion);
-			if (override.prompt !== undefined) prompt = getUsdPerToken(override.prompt);
+			if (override.completion !== undefined) {
+				completion = getUsdPerToken(override.completion);
+			}
+
+			if (override.prompt !== undefined) {
+				prompt = getUsdPerToken(override.prompt);
+			}
 		}
 	}
 
@@ -222,7 +227,10 @@ async function writePrettyOutputAsync(output: string, outputFile: string): Promi
 	if (!groups) {
 		log.fail("No token counts found in communique output.");
 
-		if (output.trim().length > 0) log.log(output.trim());
+		if (output.trim().length > 0) {
+			log.log(output.trim());
+		}
+
 		return;
 	}
 
@@ -318,7 +326,9 @@ const command = createBaseCommand(scriptName, "1.1.0", "Test release notes scrip
 			const trueLine = `${line}\n`;
 			output += trueLine;
 
-			if (!TOKENS_REGEXP.test(line)) process.stderr.write(trueLine);
+			if (!TOKENS_REGEXP.test(line)) {
+				process.stderr.write(trueLine);
+			}
 		}
 
 		await writePrettyOutputAsync(output, nextFileName);

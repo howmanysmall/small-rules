@@ -103,13 +103,18 @@ function getUniqueVariableName(
 	reservedNames: ReadonlySet<string>,
 ): string {
 	const names = new Set(reservedNames);
-	for (const variable of scope.variables) names.add(variable.name);
+	for (const variable of scope.variables) {
+		names.add(variable.name);
+	}
 
 	// Catch clause parameters may not appear in scope.variables, so walk
 	// ancestors
 	let current = node.parent;
 	while (current !== null) {
-		if (isCatchClause(current) && isIdentifier(current.param)) names.add(current.param.name);
+		if (isCatchClause(current) && isIdentifier(current.param)) {
+			names.add(current.param.name);
+		}
+
 		current = current.parent;
 	}
 
@@ -240,7 +245,9 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				}
 
 				const variableName = getUniqueVariableName(scope, node, "error", reservedNames);
-				if (declaresInScope) reservedNames.add(variableName);
+				if (declaresInScope) {
+					reservedNames.add(variableName);
+				}
 
 				context.report({
 					fix(fixer): Fix {

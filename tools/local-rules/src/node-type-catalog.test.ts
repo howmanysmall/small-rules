@@ -27,7 +27,10 @@ const UTILITIES = {
 	isNotEmptyStatement: (node: ProbeNode): boolean => node.type !== "EmptyStatement",
 	isStaticCall: (node: ProbeNode): boolean => node.type === "CallExpression" && node.optional === undefined,
 	isThrowing: (node: ProbeNode): boolean => {
-		if (node.type === "Program") throw new Error("probe");
+		if (node.type === "Program") {
+			throw new Error("probe");
+		}
+
 		return node.type === "ThisExpression";
 	},
 	isTsModuleDeclaration: (node: ProbeNode): boolean =>

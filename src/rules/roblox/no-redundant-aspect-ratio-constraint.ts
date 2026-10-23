@@ -38,7 +38,10 @@ function hasAspectRatioConstraintInSubtree(node: ESTree.Node): boolean {
 	let found = false;
 	walkAst(node, (child) => {
 		if (found) return;
-		if (isJsxElement(child) && getJSXElementName(child) === REDUNDANT_ELEMENT_NAME) found = true;
+
+		if (isJsxElement(child) && getJSXElementName(child) === REDUNDANT_ELEMENT_NAME) {
+			found = true;
+		}
 	});
 	return found;
 }
@@ -181,9 +184,7 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 			ArrowFunctionExpression(node): void {
 				const name = getFunctionComponentName(node);
 				const body = getArrowExpressionBody(node);
-				if (name === undefined || body === undefined || (!isJsxElement(body) && !isJsxFragment(body))) {
-					return;
-				}
+				if (name === undefined || body === undefined || (!isJsxElement(body) && !isJsxFragment(body))) return;
 
 				if (!hasAspectRatioConstraintInSubtree(body)) return;
 				protectedComponents.add(name);
@@ -197,7 +198,9 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 				if (!isReturnStatement(statement) || statement.argument === null) return;
 
 				const hasConstraint = hasAspectRatioConstraintInSubtree(statement.argument);
-				if (hasConstraint) protectedComponents.add(name);
+				if (hasConstraint) {
+					protectedComponents.add(name);
+				}
 			},
 
 			ImportDeclaration(node): void {
@@ -210,7 +213,9 @@ const noRedundantAspectRatioConstraint = createRule("no-redundant-aspect-ratio-c
 
 			"Program:exit"(): void {
 				let moduleScope: Scope | undefined;
-				if (scopeReference !== undefined) moduleScope = sourceCode.getScope(scopeReference);
+				if (scopeReference !== undefined) {
+					moduleScope = sourceCode.getScope(scopeReference);
+				}
 
 				for (const usage of jsxUsages) {
 					if (!isReportableUsageElement(usage, protectedComponents, moduleScope, filename)) continue;

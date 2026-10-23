@@ -96,10 +96,14 @@ for (const data of anyData) {
 summary(() => {
 	barplot(() => {
 		bench("ArkType .allows", () => {
-			for (const data of anyData) do_not_optimize(isRecord.allows(data));
+			for (const data of anyData) {
+				do_not_optimize(isRecord.allows(data));
+			}
 		});
 		bench("Effect", () => {
-			for (const data of anyData) do_not_optimize(Predicate.isObject(data));
+			for (const data of anyData) {
+				do_not_optimize(Predicate.isObject(data));
+			}
 		});
 	});
 });

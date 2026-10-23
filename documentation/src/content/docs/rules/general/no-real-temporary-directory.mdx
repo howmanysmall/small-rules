@@ -1,0 +1,26 @@
+---
+title: "No Real `tmpdir`"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-real-temporary-directory">
+	<Fragment slot="rationale">
+		<p>
+			A unit test that writes to a real temp directory runs slower and leaves files behind when it fails. Two tests
+			running in parallel can also collide there. The rule reports calls to `tmpdir` from `os`, and to `mkdtemp` or
+			`mkdtempSync` from `fs`, `fs.promises`, or `fs/promises`, with or without `node:`. Pass an in-memory file
+			system such as memfs through a parameter instead. A test that needs a real directory belongs in an
+			integration test, so enable this rule for unit test files only.
+		</p>
+		<p>
+			Scope analysis follows the binding through named, aliased, namespace, and default imports, `require()`,
+			`await import()`, and object destructuring. A local function or a memfs method with the same name passes.
+		</p>
+		<p>
+			`additionalFunctions` adds other functions that make a real temp directory, grouped by module. Write a
+			function inside a namespace as a dotted path. For example,
+			`{ source: "tmp", functions: ["dirSync", "promises.dir"] }` covers the `tmp` package.
+		</p>
+	</Fragment>
+</RulePage>

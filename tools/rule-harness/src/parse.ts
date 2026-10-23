@@ -40,9 +40,13 @@ export function normalizeCases(cases: RuleTestCases, defaults: RuleRunnerDefault
 	const normalized = new Array<NormalizedCase>();
 	let size = 0;
 
-	for (const validCase of cases.valid) normalized[size++] = normalizeValidCase(validCase, defaults);
+	for (const validCase of cases.valid) {
+		normalized[size++] = normalizeValidCase(validCase, defaults);
+	}
 
-	for (const invalidCase of cases.invalid) normalized[size++] = normalizeInvalidCase(invalidCase, defaults);
+	for (const invalidCase of cases.invalid) {
+		normalized[size++] = normalizeInvalidCase(invalidCase, defaults);
+	}
 
 	return normalized;
 }
@@ -96,7 +100,10 @@ function normalizeInvalidCase(input: InvalidRuleCase, defaults: RuleRunnerDefaul
 		kind: "invalid",
 	};
 
-	if ("output" in input) return { ...normalized, output: input.output };
+	if ("output" in input) {
+		return { ...normalized, output: input.output };
+	}
+
 	return normalized;
 }
 
@@ -119,8 +126,14 @@ function normalizeBaseCase(input: BaseRuleCase, defaults: RuleRunnerDefaults): N
 		sourceType,
 	};
 
-	if (input.only !== undefined) normalized.only = input.only;
-	if (input.skip !== undefined) normalized.skip = input.skip;
+	if (input.only !== undefined) {
+		normalized.only = input.only;
+	}
+
+	if (input.skip !== undefined) {
+		normalized.skip = input.skip;
+	}
+
 	return normalized;
 }
 

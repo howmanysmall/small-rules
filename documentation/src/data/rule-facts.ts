@@ -84,7 +84,9 @@ export function getRuleFacts(ruleName: RuleName): RuleFacts {
 }
 
 export function findRuleFactsByPath(path: string): RuleFacts | undefined {
-	for (const facts of ruleFacts.values()) if (facts.path === path) return facts;
+	for (const facts of ruleFacts.values()) {
+		if (facts.path === path) return facts;
+	}
 
 	return undefined;
 }
@@ -143,9 +145,17 @@ function deriveRuleFactCounts(): RuleFactCounts {
 		const hasAutomaticFix = facts.fixable !== undefined;
 		const hasSuggestions = facts.hasSuggestions === true;
 
-		if (hasAutomaticFix) autofixableRules += 1;
-		if (hasSuggestions) suggestionRules += 1;
-		if (hasAutomaticFix || hasSuggestions) fixableRules += 1;
+		if (hasAutomaticFix) {
+			autofixableRules += 1;
+		}
+
+		if (hasSuggestions) {
+			suggestionRules += 1;
+		}
+
+		if (hasAutomaticFix || hasSuggestions) {
+			fixableRules += 1;
+		}
 	}
 
 	return {

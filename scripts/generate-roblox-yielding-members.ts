@@ -33,7 +33,10 @@ command
 				`https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/${branch}/API-Dump.json`,
 			);
 
-			if (!response.ok) throw new ValidationError(`Failed to download Roblox API dump: ${response.statusText}`);
+			if (!response.ok) {
+				throw new ValidationError(`Failed to download Roblox API dump: ${response.statusText}`);
+			}
+
 			bytes = new Uint8Array(await response.arrayBuffer());
 		} else {
 			const { readFile } = await import("node:fs/promises");

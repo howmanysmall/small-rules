@@ -38,9 +38,15 @@ function objectHasFromAndTo(objectExpression: ESTree.ObjectExpression): boolean 
 	for (const property of objectExpression.properties) {
 		if (!isProperty(property) || property.computed || !isIdentifier(property.key)) continue;
 
-		if (property.key.name === "from") hasFrom = true;
+		if (property.key.name === "from") {
+			hasFrom = true;
+		}
+
 		// oxlint-disable-next-line unicorn-js/prefer-else-if -- what?
-		if (property.key.name === "to") hasTo = true;
+		if (property.key.name === "to") {
+			hasTo = true;
+		}
+
 		if (hasFrom && hasTo) return true;
 	}
 

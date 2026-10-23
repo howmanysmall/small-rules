@@ -83,7 +83,9 @@ function areArraysStructurallyEqual(
 	if (left.length !== right.length) return false;
 
 	let index = 0;
-	for (const value of left) if (!areStructurallyEqual(value, right[index++])) return false;
+	for (const value of left) {
+		if (!areStructurallyEqual(value, right[index++])) return false;
+	}
 
 	return true;
 }

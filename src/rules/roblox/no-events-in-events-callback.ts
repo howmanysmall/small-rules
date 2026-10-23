@@ -65,7 +65,9 @@ function normalizeImportPaths(options?: Options): ReadonlySet<string> {
 
 	/* v8 ignore next -- @preserve rule schema rejects non-string import paths. */
 	for (const importPath of options.eventsImportPaths) {
-		if (isNonEmptyString(importPath)) normalized.add(importPath);
+		if (isNonEmptyString(importPath)) {
+			normalized.add(importPath);
+		}
 	}
 
 	return normalized;
@@ -160,7 +162,9 @@ function appendArrayPatternElementsInReverse(
 	while (index > 0) {
 		index -= 1;
 		const element = elements[index];
-		if (element) patterns.push(element);
+		if (element) {
+			patterns.push(element);
+		}
 	}
 }
 
@@ -199,7 +203,10 @@ function markPatternValues(pattern: ESTree.Node, state: CallbackState): boolean 
 			}
 
 			case IDENTIFIER: {
-				if (markAsPlayerValue(current.name, state)) changed = true;
+				if (markAsPlayerValue(current.name, state)) {
+					changed = true;
+				}
+
 				break;
 			}
 
@@ -361,13 +368,18 @@ function trackEventsSpecifier(
 ): void {
 	const { name } = specifier.local;
 	if (isImportDefaultSpecifier(specifier)) {
-		if (name === "Events") trackedEventsIdentifiers.add(name);
+		if (name === "Events") {
+			trackedEventsIdentifiers.add(name);
+		}
+
 		return;
 	}
 
 	if (!isImportSpecifier(specifier)) return;
 
-	if (isEventsImportedSpecifier(specifier)) trackedEventsIdentifiers.add(name);
+	if (isEventsImportedSpecifier(specifier)) {
+		trackedEventsIdentifiers.add(name);
+	}
 }
 
 const noEventsInEventsCallback = createRule("no-events-in-events-callback", "roblox", {
@@ -431,7 +443,9 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 					};
 
 					const [playerParameter] = callback.params;
-					if (playerParameter) seedPlayerValueFromParameter(playerParameter, callbackState);
+					if (playerParameter) {
+						seedPlayerValueFromParameter(playerParameter, callbackState);
+					}
 
 					callbackStateByFunction.set(callback, callbackState);
 				}
@@ -463,7 +477,9 @@ const noEventsInEventsCallback = createRule("no-events-in-events-callback", "rob
 				const importSource = node.source.value;
 				if (!allowedImportPaths.has(importSource)) return;
 
-				for (const specifier of node.specifiers) trackEventsSpecifier(specifier, trackedEventsIdentifiers);
+				for (const specifier of node.specifiers) {
+					trackEventsSpecifier(specifier, trackedEventsIdentifiers);
+				}
 			},
 
 			VariableDeclarator(node): void {

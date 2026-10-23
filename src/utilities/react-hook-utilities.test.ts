@@ -41,8 +41,11 @@ describe("getHookName utility", () => {
 			return {
 				CallExpression(node): void {
 					const name = getHookName(node);
-					if (name !== undefined && isHookNameMessage(name)) context.report({ messageId: name, node });
-					else context.report({ messageId: "none", node });
+					if (name !== undefined && isHookNameMessage(name)) {
+						context.report({ messageId: name, node });
+					} else {
+						context.report({ messageId: "none", node });
+					}
 				},
 			} satisfies Visitor;
 		},
@@ -90,7 +93,7 @@ describe("isSetterIdentifier behavior", () => {
 		expect(isSetterIdentifier("setCount")).toBe(true);
 		expect(isSetterIdentifier("setIsVisible")).toBe(true);
 		expect(isSetterIdentifier("setA")).toBe(true);
-	}, 1_000);
+	});
 
 	it("rejects lowercase after set", ({ expect }) => {
 		expect.assertions(3);
@@ -98,21 +101,21 @@ describe("isSetterIdentifier behavior", () => {
 		expect(isSetterIdentifier("setstate")).toBe(false);
 		expect(isSetterIdentifier("setter")).toBe(false);
 		expect(isSetterIdentifier("setup")).toBe(false);
-	}, 1_000);
+	});
 
 	it("rejects names not starting with set", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isSetterIdentifier("state")).toBe(false);
 		expect(isSetterIdentifier("resetState")).toBe(false);
-	}, 1_000);
+	});
 
 	it("rejects empty and short strings", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isSetterIdentifier("")).toBe(false);
 		expect(isSetterIdentifier("s")).toBe(false);
-	}, 1_000);
+	});
 });
 
 describe("getEffectCallback utility", () => {
@@ -182,7 +185,9 @@ describe("countSetStateCalls behavior", () => {
 				ArrowFunctionExpression(node): void {
 					const count = countSetStateCalls(node);
 					const key = String(count);
-					if (isCountMessage(key)) context.report({ messageId: key, node });
+					if (isCountMessage(key)) {
+						context.report({ messageId: key, node });
+					}
 				},
 			} satisfies Visitor;
 		},
@@ -234,7 +239,9 @@ describe("walkAst utility", () => {
 						types.push(child.type);
 					});
 					const key = String(types.length);
-					if (isWalkerMessage(key)) context.report({ messageId: key, node });
+					if (isWalkerMessage(key)) {
+						context.report({ messageId: key, node });
+					}
 				},
 				FunctionDeclaration(node): void {
 					const types = new Set<string>();
@@ -242,7 +249,9 @@ describe("walkAst utility", () => {
 						types.add(child.type);
 					});
 
-					if (types.has("Identifier")) context.report({ messageId: "identifier", node });
+					if (types.has("Identifier")) {
+						context.report({ messageId: "identifier", node });
+					}
 				},
 			} satisfies Visitor;
 		},
@@ -283,7 +292,9 @@ describe("walkAstSlop utility", () => {
 						types.add(child.type);
 					});
 
-					if (types.has("Identifier")) context.report({ messageId: "identifier", node });
+					if (types.has("Identifier")) {
+						context.report({ messageId: "identifier", node });
+					}
 				},
 			} satisfies Visitor;
 		},
@@ -384,10 +395,21 @@ describe("classifyDependencies utility", () => {
 						isStaticArray,
 					);
 
-					if (kind === DependenciesKind.MissingOrOmitted) context.report({ messageId: "missing", node });
-					if (kind === DependenciesKind.EmptyArray) context.report({ messageId: "empty", node });
-					if (kind === DependenciesKind.StaticArray) context.report({ messageId: "static", node });
-					if (kind === DependenciesKind.DynamicOrUnknown) context.report({ messageId: "spread", node });
+					if (kind === DependenciesKind.MissingOrOmitted) {
+						context.report({ messageId: "missing", node });
+					}
+
+					if (kind === DependenciesKind.EmptyArray) {
+						context.report({ messageId: "empty", node });
+					}
+
+					if (kind === DependenciesKind.StaticArray) {
+						context.report({ messageId: "static", node });
+					}
+
+					if (kind === DependenciesKind.DynamicOrUnknown) {
+						context.report({ messageId: "spread", node });
+					}
 				},
 			} satisfies Visitor;
 		},
@@ -445,7 +467,9 @@ describe("classifyDependencies utility", () => {
 							() => false,
 						);
 
-						if (kind === DependenciesKind.DynamicOrUnknown) context.report({ messageId: "spread", node });
+						if (kind === DependenciesKind.DynamicOrUnknown) {
+							context.report({ messageId: "spread", node });
+						}
 					},
 				} satisfies Visitor;
 			},

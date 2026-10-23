@@ -264,7 +264,9 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			functionNameStack.push(currentFunctionName);
 
 			const functionName = getFunctionName(node);
-			if (functionName !== undefined) currentFunctionName = functionName;
+			if (functionName !== undefined) {
+				currentFunctionName = functionName;
+			}
 
 			if (current?.isComponentOrHook === true) {
 				pushContext(makeContext({ functionDepth: depth, inNestedFunction: true }, depth));
@@ -274,7 +276,10 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 		}
 
 		function handleFunctionExit(): void {
-			if (getCurrentContext() !== undefined) popContext();
+			if (getCurrentContext() !== undefined) {
+				popContext();
+			}
+
 			currentFunctionName = functionNameStack.pop();
 		}
 
@@ -334,9 +339,7 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 
 			ImportDeclaration(node): void {
 				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
-				if (config.importSources === undefined || Object.keys(config.importSources).length === 0) {
-					return;
-				}
+				if (config.importSources === undefined || Object.keys(config.importSources).length === 0) return;
 				/* v8 ignore stop -- @preserve */
 
 				const source = node.source.value;

@@ -36,19 +36,29 @@ function collectTypes(source: HarnessSourceCode): Array<ESTree.TSType> {
 	const collected = new Array<ESTree.TSType>();
 	traverseAst(source.ast, {
 		TSIntersectionType(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSIntersectionType") collected.push(node);
+			if (isNode(node) && node.type === "TSIntersectionType") {
+				collected.push(node);
+			}
 		},
 		TSMappedType(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSMappedType") collected.push(node);
+			if (isNode(node) && node.type === "TSMappedType") {
+				collected.push(node);
+			}
 		},
 		TSTypeLiteral(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSTypeLiteral") collected.push(node);
+			if (isNode(node) && node.type === "TSTypeLiteral") {
+				collected.push(node);
+			}
 		},
 		TSTypeReference(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSTypeReference") collected.push(node);
+			if (isNode(node) && node.type === "TSTypeReference") {
+				collected.push(node);
+			}
 		},
 		TSUnknownKeyword(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSUnknownKeyword") collected.push(node);
+			if (isNode(node) && node.type === "TSUnknownKeyword") {
+				collected.push(node);
+			}
 		},
 	});
 	return collected;
@@ -355,7 +365,10 @@ function findIdentifierReference(source: HarnessSourceCode, name: string): ESTre
 		},
 	});
 
-	if (found === undefined) throw new Error(`Reference "${name}" not found.`);
+	if (found === undefined) {
+		throw new Error(`Reference "${name}" not found.`);
+	}
+
 	return found;
 }
 
@@ -363,11 +376,16 @@ function getNthTypeReference(source: HarnessSourceCode, index: number): ESTree.T
 	const references = new Array<ESTree.TSTypeReference>();
 	traverseAst(source.ast, {
 		TSTypeReference(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSTypeReference") references.push(node);
+			if (isNode(node) && node.type === "TSTypeReference") {
+				references.push(node);
+			}
 		},
 	});
 	const reference = references[index];
-	if (reference === undefined) throw new Error(`Type reference at index ${index} not found.`);
+	if (reference === undefined) {
+		throw new Error(`Type reference at index ${index} not found.`);
+	}
+
 	return reference;
 }
 
@@ -469,11 +487,16 @@ function getFirstAnnotationTarget(source: HarnessSourceCode): ESTree.TSType {
 	let found: ESTree.TSType | undefined;
 	traverseAst(source.ast, {
 		TSTypeAnnotation(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSTypeAnnotation") found ??= node.typeAnnotation;
+			if (isNode(node) && node.type === "TSTypeAnnotation") {
+				found ??= node.typeAnnotation;
+			}
 		},
 	});
 
-	if (found === undefined) throw new Error("Type annotation not found.");
+	if (found === undefined) {
+		throw new Error("Type annotation not found.");
+	}
+
 	return found;
 }
 
@@ -481,11 +504,16 @@ function getFirstTypeLiteral(source: HarnessSourceCode): ESTree.TSTypeLiteral {
 	let found: ESTree.TSTypeLiteral | undefined;
 	traverseAst(source.ast, {
 		TSTypeLiteral(node: HarnessNode) {
-			if (isNode(node) && node.type === "TSTypeLiteral") found ??= node;
+			if (isNode(node) && node.type === "TSTypeLiteral") {
+				found ??= node;
+			}
 		},
 	});
 
-	if (found === undefined) throw new Error("Type literal not found.");
+	if (found === undefined) {
+		throw new Error("Type literal not found.");
+	}
+
 	return found;
 }
 

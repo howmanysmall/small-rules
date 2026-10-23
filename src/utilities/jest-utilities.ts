@@ -136,8 +136,13 @@ export function countExpectCalls(
 		if (!isCallExpression(child) || !isExpectCall(child, additionalAssertionFunctions)) return;
 
 		const expectContext = getExpectContext(child.parent, body);
-		if (expectContext.hasLoop) hasExpectInLoop = true;
-		if (expectContext.hasCallback) hasExpectInCallback = true;
+		if (expectContext.hasLoop) {
+			hasExpectInLoop = true;
+		}
+
+		if (expectContext.hasCallback) {
+			hasExpectInCallback = true;
+		}
 
 		if (expectContext.hasIndeterminate) {
 			hasIndeterminate = true;

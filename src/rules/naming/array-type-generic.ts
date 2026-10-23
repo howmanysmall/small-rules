@@ -70,11 +70,16 @@ const arrayTypeGeneric = createRule("array-type-generic", "naming", {
 
 		return {
 			TSArrayType(node): void {
-				if (isTopLevelArrayType(node)) reportArrayType(node);
+				if (isTopLevelArrayType(node)) {
+					reportArrayType(node);
+				}
 			},
 			TSTypeOperator(node): void {
 				if (node.operator !== "readonly" || !isTsArrayType(node.typeAnnotation)) return;
-				if (isTopLevelArrayType(node)) reportArrayType(node);
+
+				if (isTopLevelArrayType(node)) {
+					reportArrayType(node);
+				}
 			},
 		} satisfies Visitor;
 	},

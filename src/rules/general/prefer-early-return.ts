@@ -48,12 +48,16 @@ const preferEarlyReturn = createRule("prefer-early-return", "general", {
 
 		function onFunction(node: ESTree.Function): void {
 			/* v8 ignore next -- @preserve implemented function declarations have parser bodies. */
-			if (node.body !== null) checkFunctionBody(node.body);
+			if (node.body !== null) {
+				checkFunctionBody(node.body);
+			}
 		}
 
 		return {
 			ArrowFunctionExpression(node): void {
-				if (isBlockStatement(node.body)) checkFunctionBody(node.body);
+				if (isBlockStatement(node.body)) {
+					checkFunctionBody(node.body);
+				}
 			},
 			FunctionDeclaration: onFunction,
 			FunctionExpression: onFunction,

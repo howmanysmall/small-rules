@@ -70,7 +70,9 @@ function normalizeAdditionalStaticFactories(rawOptions: Context["options"][0]): 
 
 function getJavaScriptXmlElementRootName(name: ESTree.JSXElementName): string | undefined {
 	let current = name;
-	while (isJsxMemberExpression(current)) current = current.object;
+	while (isJsxMemberExpression(current)) {
+		current = current.object;
+	}
 
 	return isJsxIdentifier(current) ? current.name : undefined;
 }
@@ -146,9 +148,7 @@ function isStaticAttributeValue(
 	/* v8 ignore next -- @preserve parser JSX attributes have non-empty expression containers here. */
 	if (!isJsxExpressionContainer(value) || isJsxEmptyExpression(value.expression)) return false;
 
-	if (isExplicitUndefinedExpression(context.sourceCode, value.expression, new Set())) {
-		return environment === STANDARD;
-	}
+	if (isExplicitUndefinedExpression(context.sourceCode, value.expression, new Set())) return environment === STANDARD;
 
 	return isStaticExpression(context.sourceCode, value.expression, seen, staticOptions);
 }
@@ -340,9 +340,7 @@ function isAssignedToModuleConst(context: Context, node: JavaScriptXmlNode): boo
 		parent = nextParent;
 	}
 
-	if (!isVariableDeclarator(parent) || !isIdentifier(parent.id) || parent.init !== current) {
-		return false;
-	}
+	if (!isVariableDeclarator(parent) || !isIdentifier(parent.id) || parent.init !== current) return false;
 
 	/* v8 ignore next -- @preserve VariableDeclarator nodes are parented by VariableDeclaration nodes. */
 	if (!isVariableDeclaration(parent.parent)) return false;
@@ -383,9 +381,7 @@ const preferHoistedJsxElements = createRule("prefer-hoisted-jsx-elements", "reac
 
 			if (isAssignedToModuleConst(context, node)) return;
 
-			if (hasStaticJavaScriptXmlAncestor(context, node, additionalComponents, staticOptions, environment)) {
-				return;
-			}
+			if (hasStaticJavaScriptXmlAncestor(context, node, additionalComponents, staticOptions, environment)) return;
 
 			reportHoistableJavaScriptXmlNode(context, node);
 		}

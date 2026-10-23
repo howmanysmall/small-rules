@@ -84,10 +84,17 @@ function getConditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Br
 			};
 		}
 
-		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
+		if (parent.alternate === current) {
+			return { arm: "else", complete: true, control: parent };
+		}
 	} else if (isConditionalExpression(parent)) {
-		if (parent.consequent === current) return { arm: "then", complete: true, control: parent };
-		if (parent.alternate === current) return { arm: "else", complete: true, control: parent };
+		if (parent.consequent === current) {
+			return { arm: "then", complete: true, control: parent };
+		}
+
+		if (parent.alternate === current) {
+			return { arm: "else", complete: true, control: parent };
+		}
 	}
 
 	return undefined;
@@ -95,11 +102,15 @@ function getConditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): Br
 
 function getImplicitElseSteps(current: ESTree.Node, parent: ESTree.Node): ReadonlyArray<BranchStep> {
 	const blockStatement = isBlockStatement(parent);
-	if (!blockStatement && !isSwitchCase(parent)) return [];
+	if (!blockStatement && !isSwitchCase(parent)) {
+		return [];
+	}
 
 	const siblings: ReadonlyArray<ESTree.Node> = blockStatement ? parent.body : parent.consequent;
 	const index = siblings.indexOf(current);
-	if (index <= 0) return [];
+	if (index <= 0) {
+		return [];
+	}
 
 	const steps = new Array<BranchStep>();
 	for (const sibling of siblings.slice(0, index)) {
@@ -119,15 +130,22 @@ function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | und
 		return { arm: "right", complete: false, control: parent };
 	}
 
-	if (isLoopNode(parent) && parent.body === current) return { arm: "body", complete: false, control: parent };
+	if (isLoopNode(parent) && parent.body === current) {
+		return { arm: "body", complete: false, control: parent };
+	}
 
 	if (isSwitchCase(current) && isSwitchStatement(parent)) {
 		return { arm: `case:${current.range[0]}`, complete: false, control: parent };
 	}
 
 	if (isTryStatement(parent)) {
-		if (parent.block === current) return { arm: "try", complete: false, control: parent };
-		if (parent.handler === current) return { arm: "catch", complete: false, control: parent };
+		if (parent.block === current) {
+			return { arm: "try", complete: false, control: parent };
+		}
+
+		if (parent.handler === current) {
+			return { arm: "catch", complete: false, control: parent };
+		}
 	}
 
 	return undefined;
@@ -138,9 +156,14 @@ function branchPath(node: ESTree.Node, root: ESTree.Node): ReadonlyArray<BranchS
 	let current = node;
 	while (current !== root && current.parent !== null) {
 		const step = branchStep(current, current.parent);
-		if (step !== undefined) path.push(step);
+		if (step !== undefined) {
+			path.push(step);
+		}
 
-		for (const elseStep of getImplicitElseSteps(current, current.parent)) path.push(elseStep);
+		for (const elseStep of getImplicitElseSteps(current, current.parent)) {
+			path.push(elseStep);
+		}
+
 		current = current.parent;
 	}
 
@@ -252,8 +275,9 @@ function collectLoopAncestors(node: ESTree.Node): ReadonlyArray<ESTree.Node> {
 	const loops = new Array<ESTree.Node>();
 	let current = node.parent;
 	while (current !== null) {
-		if (isLoopNode(current)) loops.push(current);
-		else if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) {
+		if (isLoopNode(current)) {
+			loops.push(current);
+		} else if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) {
 			break;
 		}
 
@@ -268,7 +292,9 @@ function hasCommonLoopAncestor(write: VariableUsage, usage: VariableUsage): bool
 	let current: ESTree.Node | null = usage.node.parent;
 	// oxlint-disable-next-line typescript/no-unnecessary-condition -- giga coal
 	while (current !== null) {
-		for (const loop of writeLoops) if (loop === current) return true;
+		for (const loop of writeLoops) {
+			if (loop === current) return true;
+		}
 
 		if (isProgram(current) || isAnyFunction(current) || isFunctionExpression(current)) break;
 		current = current.parent;
@@ -403,7 +429,9 @@ function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
 
 function isCaptured(variable: Variable): boolean {
 	const roots = new Set(variable.references.map((reference) => getExecutionRoot(reference.identifier)));
-	for (const definition of variable.defs) roots.add(getExecutionRoot(definition.name));
+	for (const definition of variable.defs) {
+		roots.add(getExecutionRoot(definition.name));
+	}
 
 	return variable.references.some((reference) => reference.isRead()) && roots.size > 1;
 }

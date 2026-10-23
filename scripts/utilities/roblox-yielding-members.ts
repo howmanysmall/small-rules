@@ -32,12 +32,16 @@ function isYieldingFunction(value: unknown): value is JsonObject & { readonly Na
 }
 
 export function parseClasses(value: unknown): ReadonlyMap<string, RobloxClass> {
-	if (!isRecord(value) || !Array.isArray(value.Classes)) throw new TypeError("Roblox API dump has no Classes array.");
+	if (!isRecord(value) || !Array.isArray(value.Classes)) {
+		throw new TypeError("Roblox API dump has no Classes array.");
+	}
 
 	const classes = new Map<string, RobloxClass>();
 	for (const classValue of value.Classes) {
 		const classDefinition = parseClass(classValue);
-		if (classDefinition !== undefined) classes.set(classDefinition.name, classDefinition);
+		if (classDefinition !== undefined) {
+			classes.set(classDefinition.name, classDefinition);
+		}
 	}
 
 	return classes;
@@ -62,7 +66,9 @@ export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxC
 		if (cached !== undefined) return cached;
 
 		const classDefinition = classes.get(className);
-		if (classDefinition === undefined) return [];
+		if (classDefinition === undefined) {
+			return [];
+		}
 
 		const inherited = collectMembers(classDefinition.superclass);
 		const members = [...new Set([...inherited, ...(directMembers.get(className) ?? [])])].toSorted(
@@ -77,7 +83,9 @@ export function createYieldingMemberCatalog(classes: ReadonlyMap<string, RobloxC
 	const yieldingMembers = new Map<string, ReadonlyArray<string>>();
 	for (const className of classes.keys()) {
 		const members = collectMembers(className).filter((member) => !instanceMembers.includes(member));
-		if (members.length > 0) yieldingMembers.set(className, members);
+		if (members.length > 0) {
+			yieldingMembers.set(className, members);
+		}
 	}
 
 	return { classes: new Set(classes.keys()), instanceMembers, yieldingMembers };

@@ -111,11 +111,15 @@ export async function scanDirectoryAsync(directory: string, scanType: ScanType):
 			CallExpression(node: CallExpression): void {
 				if (!isCreateElementCall(node.callee)) return;
 				const tag = getFirstStringArgument(node.arguments);
-				if (tag !== undefined && isAllLowerCase(tag)) instances.add(tag);
+				if (tag !== undefined && isAllLowerCase(tag)) {
+					instances.add(tag);
+				}
 			},
 			JSXOpeningElement(node: JSXOpeningElement): void {
 				const name = resolveJsxElementName(node.name);
-				if (isAllLowerCase(name)) instances.add(name);
+				if (isAllLowerCase(name)) {
+					instances.add(name);
+				}
 			},
 		});
 	}

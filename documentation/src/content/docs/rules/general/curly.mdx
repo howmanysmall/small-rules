@@ -1,0 +1,33 @@
+---
+title: "Curly"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="curly">
+	<Fragment slot="rationale">
+		<p>
+			Core `curly` lets each body pick its own brace style, so one file mixes `if (done) return;`, the same guard
+			wrapped onto two lines, and the same guard in braces. This rule gives each body one style. When an `if` has
+			no `else` and its body is one `return`, `break`, or `continue`, the body goes on the same line without
+			braces, as long as that line fits. Braces there are an error. Every other `if` body takes braces, including
+			a `throw` and an object or array `return`. Every branch of an `if` with an `else` takes them, and so does
+			every loop body. Turn core `curly` off when you turn this one on.
+		</p>
+		<p>
+			A guard that would pass `printWidth` on one line keeps its braces. That width check stops the rule and the
+			formatter from undoing each other. Set `printWidth` and `tabWidth` to the formatter's values. The defaults,
+			120 and 4, match this repository's oxfmt configuration.
+		</p>
+		<p>
+			`oneLineBodies` picks the statements that go on one line after an `if` without an `else`. It takes the
+			statement kinds that `require-readable-spacing` uses, such as `throw` or `expression`, plus `break` and
+			`continue`. A declaration keeps its braces whatever the option says, since `if (ready) const value = 1;`
+			doesn't parse. Set `allowLiteralReturns` to put an object or array `return` on one line too.
+		</p>
+		<p>
+			The fix adds or removes braces. It leaves the code alone when a comment comes between the condition and the
+			body, since moving the braces would drop the comment.
+		</p>
+	</Fragment>
+</RulePage>

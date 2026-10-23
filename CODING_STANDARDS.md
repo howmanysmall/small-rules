@@ -26,7 +26,7 @@ Before editing anything under `src/rules/` or `src/utilities/`, read [`docs/hot-
 
 ## Test Conventions
 
-A test sits next to the file it covers: a rule's test is `src/rules/<category>/<rule>.test.ts`, and a script's is beside it in `scripts/`. Import a runner (`js`, `jsx`, `ts`, or `tsx`) from `@small-rules/rule-harness/rule-testers`; options and settings are plain JSON.
+A test sits next to the file it covers: a rule's test is `src/rules/<category>/<rule>.test.ts`, and a script's is beside it in `scripts/`. Import a runner (`js`, `jsx`, `ts`, or `tsx`) from `@small-rules/rule-harness/rule-testers`; options and settings are plain JSON. A test that needs a real temporary directory or a long timeout is an integration test: name it `*.integration.test.ts` so the unit-test rules stay out of its way.
 
 ```ts
 import { describe } from "vitest";

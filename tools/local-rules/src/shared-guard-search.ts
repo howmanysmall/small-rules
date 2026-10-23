@@ -119,7 +119,9 @@ export function getChainTop({ parent }: ESTree.Node): ESTree.LogicalExpression |
 	if (!isLogicalExpression(parent)) return undefined;
 
 	let top = parent;
-	while (isLogicalExpression(top.parent) && top.parent.operator === top.operator) top = top.parent;
+	while (isLogicalExpression(top.parent) && top.parent.operator === top.operator) {
+		top = top.parent;
+	}
 
 	return top;
 }

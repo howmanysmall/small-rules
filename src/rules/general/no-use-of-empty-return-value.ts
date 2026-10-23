@@ -92,7 +92,9 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				if (resolved === undefined) return;
 
 				const functionNode = getFunctionFromVariable(resolved);
-				if (functionNode !== undefined) callExpressionsToCheck.set(node.callee, functionNode);
+				if (functionNode !== undefined) {
+					callExpressionsToCheck.set(node.callee, functionNode);
+				}
 			},
 			"Program:exit"(): void {
 				for (const [callee, functionNode] of callExpressionsToCheck) {
@@ -108,7 +110,9 @@ const noUseOfEmptyReturnValue = createRule("no-use-of-empty-return-value", "gene
 				if (node.argument === null) return;
 				const current = functionStack.at(-1);
 				/* v8 ignore next -- ReturnStatement only appears inside function scopes. @preserve */
-				if (current !== undefined) functionsWithReturnValue.add(current);
+				if (current !== undefined) {
+					functionsWithReturnValue.add(current);
+				}
 			},
 		};
 	},

@@ -81,9 +81,7 @@ function areEquivalentArgument(left: ESTree.Argument, right: ESTree.Argument, so
 function areEquivalentOperand(left: BinaryOperand, right: BinaryOperand, sourceCode: SourceCode): boolean {
 	const isLeftPrivate = isPrivateIdentifier(left);
 	const isRightPrivate = isPrivateIdentifier(right);
-	if (isLeftPrivate || isRightPrivate) {
-		return isLeftPrivate && isRightPrivate && left.name === right.name;
-	}
+	if (isLeftPrivate || isRightPrivate) return isLeftPrivate && isRightPrivate && left.name === right.name;
 
 	return areEquivalentExpression(left, right, sourceCode);
 }
@@ -331,7 +329,9 @@ const preferTernaryConditionalRendering = createRule("prefer-ternary-conditional
 				if (firstBranch === undefined) continue;
 
 				const secondBranch = getNextBranchCandidate(children, index + 1);
-				if (secondBranch !== undefined) reportComplementaryBranches(firstBranch, secondBranch);
+				if (secondBranch !== undefined) {
+					reportComplementaryBranches(firstBranch, secondBranch);
+				}
 			}
 		}
 

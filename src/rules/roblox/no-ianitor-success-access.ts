@@ -63,8 +63,11 @@ function isDestructuringSuccessOnly(objectPattern: ESTree.ObjectPattern): boolea
 		if (!isProperty(property) || !isIdentifier(property.key)) continue;
 		const { name } = property.key;
 		if (name === "error" || name === "value") return false;
+
 		/* v8 ignore next -- @preserve success-only object patterns reach this path from parser Property keys. */
-		if (name === "success") hasSuccess = true;
+		if (name === "success") {
+			hasSuccess = true;
+		}
 	}
 
 	return hasSuccess;
@@ -102,7 +105,9 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 
 		function markResultFullyUsed(name: string): void {
 			const result = ianitorResultVariables.get(name);
-			if (result !== undefined) result.referencedFully = true;
+			if (result !== undefined) {
+				result.referencedFully = true;
+			}
 		}
 
 		function reportSuccessOnlyDestructuring(objectPattern: ESTree.ObjectPattern): void {
@@ -121,7 +126,9 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 				for (const argument of node.arguments) {
 					if (!isIdentifier(argument)) continue;
 					const result = ianitorResultVariables.get(argument.name);
-					if (result !== undefined) result.referencedFully = true;
+					if (result !== undefined) {
+						result.referencedFully = true;
+					}
 				}
 			},
 
@@ -143,7 +150,9 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 				/* v8 ignore next -- @preserve non-call member objects are only tracked when they are identifiers. */
 				if (isIdentifier(unwrapped)) {
 					const result = ianitorResultVariables.get(unwrapped.name);
-					if (result !== undefined) result.properties.add(property.name);
+					if (result !== undefined) {
+						result.properties.add(property.name);
+					}
 				}
 			},
 

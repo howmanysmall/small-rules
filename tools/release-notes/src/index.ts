@@ -82,7 +82,9 @@ export async function listReleaseTagsAsync(directory: string): Promise<ReadonlyA
 	const fileNames = await readdir(directory);
 	for (const fileName of fileNames) {
 		const tag = getReleaseTag(fileName);
-		if (tag !== undefined) tags.push(tag);
+		if (tag !== undefined) {
+			tags.push(tag);
+		}
 	}
 
 	return tags.toSorted(compareReleaseTagsDescending);
@@ -97,7 +99,9 @@ export async function listReleaseTagsAsync(directory: string): Promise<ReadonlyA
  */
 export function readCommuniqueDefaults(source: string): CommuniqueDefaults {
 	const configuration = isCommuniqueConfiguration(parse(source));
-	if (configuration instanceof type.errors) throw new TypeError(`communique.toml: ${configuration.summary}`);
+	if (configuration instanceof type.errors) {
+		throw new TypeError(`communique.toml: ${configuration.summary}`);
+	}
 
 	const { model, repo } = configuration.defaults;
 	const separator = repo.indexOf("/");
@@ -124,17 +128,24 @@ export function getReleaseTitle(markdown: string): string | undefined {
  */
 export function countChangedLines(before: string, after: string): LineChanges {
 	const remaining = new Map<string, number>();
-	for (const line of before.split(LINE_BREAK_REGEXP)) remaining.set(line, (remaining.get(line) ?? 0) + 1);
+	for (const line of before.split(LINE_BREAK_REGEXP)) {
+		remaining.set(line, (remaining.get(line) ?? 0) + 1);
+	}
 
 	let added = 0;
 	for (const line of after.split(LINE_BREAK_REGEXP)) {
 		const count = remaining.get(line) ?? 0;
-		if (count === 0) added += 1;
-		else remaining.set(line, count - 1);
+		if (count === 0) {
+			added += 1;
+		} else {
+			remaining.set(line, count - 1);
+		}
 	}
 
 	let removed = 0;
-	for (const count of remaining.values()) removed += count;
+	for (const count of remaining.values()) {
+		removed += count;
+	}
 
 	return { added, removed };
 }

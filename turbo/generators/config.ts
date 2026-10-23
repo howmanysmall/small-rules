@@ -79,7 +79,10 @@ function createEnsureAvailableAction(targets: TargetPaths): PlopTypes.CustomActi
 	return function ensureAvailable(answers) {
 		const validAnswers = isAnswers.assert(answers);
 		const result = checkName(validAnswers, targets);
-		if (result !== true) throw new Error(result);
+		if (result !== true) {
+			throw new Error(result);
+		}
+
 		return `${validAnswers.name} is available`;
 	};
 }
@@ -99,7 +102,10 @@ const installAction = createRunAction("pnpm", ["install"]);
 
 function findLine(lines: ReadonlyArray<string>, predicate: (line: string) => boolean, from = 0): number {
 	const index = lines.findIndex((line, lineIndex) => lineIndex >= from && predicate(line));
-	if (index === -1) throw new Error("Found no line to anchor the insertion.");
+	if (index === -1) {
+		throw new Error("Found no line to anchor the insertion.");
+	}
+
 	return index;
 }
 
@@ -111,7 +117,10 @@ function editLines(path: string, edit: (lines: Array<string>) => void): void {
 
 const registerRuleAction: PlopTypes.CustomActionFunction = function registerRuleAction(answers, _config, plop) {
 	const { name, category } = isAnswers.assert(answers);
-	if (category === undefined) throw new Error("A rule needs a category.");
+	if (category === undefined) {
+		throw new Error("A rule needs a category.");
+	}
+
 	const identifier = plop.renderString("{{camelCase name}}", { name });
 
 	editLines(PLUGIN_INDEX_PATH, (lines) => {

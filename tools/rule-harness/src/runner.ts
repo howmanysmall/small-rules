@@ -36,7 +36,9 @@ function runRuleTests(
 
 	// biome-ignore lint/nursery/useValidTestTitle: it is a string lol
 	describe(ruleName, () => {
-		for (const testCase of normalizedCases) registerCase(testCase, execute);
+		for (const testCase of normalizedCases) {
+			registerCase(testCase, execute);
+		}
 	});
 }
 

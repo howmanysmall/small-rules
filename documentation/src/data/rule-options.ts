@@ -53,7 +53,9 @@ function isJsonArray(value: SchemaInput): value is ReadonlyArray<JsonValue> {
 
 function getRuleSchema(ruleName: RuleName): SchemaInput {
 	const { meta } = smallRules.rules[ruleName];
-	if (meta === undefined) throw new Error(`Rule "${ruleName}" is missing metadata.`);
+	if (meta === undefined) {
+		throw new Error(`Rule "${ruleName}" is missing metadata.`);
+	}
 
 	return isJsonValue(meta.schema) ? meta.schema : undefined;
 }
@@ -101,10 +103,20 @@ function formatDefaultValue(name: string, schema: SchemaRecord): DefaultValueDoc
 }
 
 function getSchemaTypeNames(schema: SchemaRecord): ReadonlyArray<string> {
-	if (Predicate.isString(schema.type)) return [schema.type];
+	if (Predicate.isString(schema.type)) {
+		return [schema.type];
+	}
+
 	if (isJsonArray(schema.type)) return schema.type.filter(Predicate.isString);
-	if (schema.items !== undefined) return ["array"];
-	if (schema.properties !== undefined || schema.additionalProperties !== undefined) return ["object"];
+
+	if (schema.items !== undefined) {
+		return ["array"];
+	}
+
+	if (schema.properties !== undefined || schema.additionalProperties !== undefined) {
+		return ["object"];
+	}
+
 	return [];
 }
 
@@ -155,7 +167,9 @@ const objectPlaceholders = new Map<string, JsonValue>([
 function createSchemaDefaultsValue(ruleName: RuleName): JsonValue {
 	const schema = getRuleSchema(ruleName);
 	const optionSchema = isJsonArray(schema) ? schema[0] : schema;
-	if (!isSchemaRecord(optionSchema) || !isSchemaRecord(optionSchema.properties)) return {};
+	if (!isSchemaRecord(optionSchema) || !isSchemaRecord(optionSchema.properties)) {
+		return {};
+	}
 
 	const defaults: Record<string, JsonValue> = {};
 	for (const [propertyName, propertySchema] of Object.entries(optionSchema.properties)) {
@@ -262,13 +276,9 @@ function getObjectSchemaType(schema: SchemaRecord): string {
 }
 
 function getSchemaType(schema: SchemaRecord): string {
-	if (schema.const !== undefined) {
-		return JSON.stringify(schema.const);
-	}
+	if (schema.const !== undefined) return JSON.stringify(schema.const);
 
-	if (isJsonArray(schema.enum)) {
-		return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
-	}
+	if (isJsonArray(schema.enum)) return schema.enum.map((entry) => JSON.stringify(entry)).join(" | ");
 
 	if (isJsonArray(schema.oneOf)) {
 		return schema.oneOf.map((entry) => (isSchemaRecord(entry) ? getSchemaType(entry) : "unknown")).join(" | ");
@@ -287,13 +297,9 @@ function getSchemaType(schema: SchemaRecord): string {
 		return `Array<${isSchemaRecord(schema.items) ? getSchemaType(schema.items) : "unknown"}>`;
 	}
 
-	if (typeNames.includes("object")) {
-		return getObjectSchemaType(schema);
-	}
+	if (typeNames.includes("object")) return getObjectSchemaType(schema);
 
-	if (typeNames.length > 0) {
-		return joinTypes(typeNames);
-	}
+	if (typeNames.length > 0) return joinTypes(typeNames);
 
 	return "unknown";
 }
@@ -345,7 +351,10 @@ function createNumberPlaceholder(schema: SchemaRecord): number {
 function createObjectPlaceholder(schema: SchemaRecord, hint?: string): JsonValue {
 	const knownPlaceholder = hint === undefined ? undefined : objectPlaceholders.get(hint);
 	if (knownPlaceholder !== undefined) return knownPlaceholder;
-	if (!isSchemaRecord(schema.properties)) return {};
+
+	if (!isSchemaRecord(schema.properties)) {
+		return {};
+	}
 
 	const placeholder: Record<string, JsonValue> = {};
 	for (const [propertyName, propertySchema] of Object.entries(schema.properties)) {
@@ -356,34 +365,31 @@ function createObjectPlaceholder(schema: SchemaRecord, hint?: string): JsonValue
 }
 
 function createPlaceholder(schema: SchemaInput, hint?: string): JsonValue {
-	if (!isSchemaRecord(schema)) return {};
+	if (!isSchemaRecord(schema)) {
+		return {};
+	}
+
 	const explicitPlaceholder = getExplicitPlaceholder(schema, hint);
 	if (explicitPlaceholder !== undefined) return explicitPlaceholder;
 
 	const typeNames = getSchemaTypeNames(schema);
-	if (typeNames.includes("array")) {
-		return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
-	}
+	if (typeNames.includes("array")) return schema.items === undefined ? [] : [createPlaceholder(schema.items, hint)];
 
 	if (typeNames.includes("boolean")) return false;
 
-	if (typeNames.includes("integer") || typeNames.includes("number")) {
-		return createNumberPlaceholder(schema);
-	}
+	if (typeNames.includes("integer") || typeNames.includes("number")) return createNumberPlaceholder(schema);
 
-	if (typeNames.includes("object")) {
-		return createObjectPlaceholder(schema, hint);
-	}
+	if (typeNames.includes("object")) return createObjectPlaceholder(schema, hint);
 
-	if (typeNames.includes("string")) {
-		return createStringPlaceholder(hint);
-	}
+	if (typeNames.includes("string")) return createStringPlaceholder(hint);
 
 	return {};
 }
 
 function createObjectOptions(schema: SchemaRecord): ReadonlyArray<ObjectOption> {
-	if (!isSchemaRecord(schema.properties)) return [];
+	if (!isSchemaRecord(schema.properties)) {
+		return [];
+	}
 
 	const required = new Set(isJsonArray(schema.required) ? schema.required.filter(Predicate.isString) : []);
 

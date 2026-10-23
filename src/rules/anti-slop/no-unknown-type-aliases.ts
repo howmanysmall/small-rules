@@ -29,7 +29,9 @@ const noUnknownTypeAliases = createRule("no-unknown-type-aliases", "anti-slop", 
 				}
 
 				if (isTsUnionType(resolved)) {
-					for (const member of resolved.types) enqueue(member);
+					for (const member of resolved.types) {
+						enqueue(member);
+					}
 				}
 
 				return false;

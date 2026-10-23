@@ -213,7 +213,9 @@ export function createRuleNewness(run: GitRunner): ReadonlyMap<string, RuleNewne
 	);
 
 	for (const ruleName of newness.keys()) {
-		if (!manifestRules.has(ruleName)) newness.delete(ruleName);
+		if (!manifestRules.has(ruleName)) {
+			newness.delete(ruleName);
+		}
 	}
 
 	return newness;

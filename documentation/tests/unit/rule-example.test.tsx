@@ -12,8 +12,11 @@ const printExample = 'print("hello")';
 function restoreClipboardAndTimers(): void {
 	vi.useRealTimers();
 
-	if (clipboardDescriptor === undefined) Reflect.deleteProperty(navigator, "clipboard");
-	else Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
+	if (clipboardDescriptor === undefined) {
+		Reflect.deleteProperty(navigator, "clipboard");
+	} else {
+		Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
+	}
 }
 
 describe("rule-example", () => {

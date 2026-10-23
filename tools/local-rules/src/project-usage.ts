@@ -38,14 +38,20 @@ export function countInlineNodeTypes(source: string, filename: string): Map<stri
 	const literals = new Array<ESTree.StringLiteral>();
 	walk(program, {
 		enter(node) {
-			if (isOfType(node, BINARY_EXPRESSION)) collectComparedNodeTypes(node, literals);
-			else if (isOfType(node, SWITCH_STATEMENT)) collectCaseNodeTypes(node, literals);
-			else if (isOfType(node, ARRAY_EXPRESSION)) collectArrayNodeTypes(node, literals);
+			if (isOfType(node, BINARY_EXPRESSION)) {
+				collectComparedNodeTypes(node, literals);
+			} else if (isOfType(node, SWITCH_STATEMENT)) {
+				collectCaseNodeTypes(node, literals);
+			} else if (isOfType(node, ARRAY_EXPRESSION)) {
+				collectArrayNodeTypes(node, literals);
+			}
 		},
 	});
 
 	const counts = new Map<string, number>();
-	for (const { value } of literals) counts.set(value, (counts.get(value) ?? 0) + 1);
+	for (const { value } of literals) {
+		counts.set(value, (counts.get(value) ?? 0) + 1);
+	}
 
 	return counts;
 }
@@ -60,7 +66,9 @@ function scanProject(directories: ReadonlyArray<string>, scannedAt: number): Pro
 			const counts = countInlineNodeTypes(readFileSync(filePath, "utf8"), filePath);
 			countsByFile.set(filePath, counts);
 
-			for (const [nodeType, count] of counts) totals.set(nodeType, (totals.get(nodeType) ?? 0) + count);
+			for (const [nodeType, count] of counts) {
+				totals.set(nodeType, (totals.get(nodeType) ?? 0) + count);
+			}
 		}
 	}
 
@@ -76,7 +84,9 @@ export function createProjectUsageCounter({
 
 	return (nodeType, filename, liveCounts) => {
 		const time = now();
-		if (scan === undefined || time - scan.scannedAt >= maxAgeMilliseconds) scan = scanProject(directories, time);
+		if (scan === undefined || time - scan.scannedAt >= maxAgeMilliseconds) {
+			scan = scanProject(directories, time);
+		}
 
 		const savedCount = scan.countsByFile.get(nodePath.resolve(filename))?.get(nodeType) ?? 0;
 		return (scan.totals.get(nodeType) ?? 0) - savedCount + (liveCounts.get(nodeType) ?? 0);

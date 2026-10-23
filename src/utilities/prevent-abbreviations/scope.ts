@@ -43,7 +43,9 @@ export function getScopes(scope: Scope): Array<Scope> {
 	let size = 1;
 	for (const child of scope.childScopes) {
 		const childScopes = getScopes(child);
-		for (const childScope of childScopes) result[size++] = childScope;
+		for (const childScope of childScopes) {
+			result[size++] = childScope;
+		}
 	}
 
 	return result;
@@ -64,16 +66,22 @@ export function getAvailableVariableName(
 		if (!isValidIdentifier(candidate)) return undefined;
 	}
 
-	while (!isSafeName(candidate, scopes) || !isSafe(candidate, scopes)) candidate += "_";
+	while (!isSafeName(candidate, scopes) || !isSafe(candidate, scopes)) {
+		candidate += "_";
+	}
 
 	return candidate;
 }
 
 function getVariableIdentifiers(variable: VariableLike): ReadonlyArray<BroadIdentifier> {
 	const identifiers = new Set<BroadIdentifier>();
-	for (const identifier of variable.identifiers) identifiers.add(identifier);
+	for (const identifier of variable.identifiers) {
+		identifiers.add(identifier);
+	}
 
-	for (const { identifier } of variable.references) identifiers.add(identifier);
+	for (const { identifier } of variable.references) {
+		identifiers.add(identifier);
+	}
 
 	return [...identifiers];
 }
@@ -184,7 +192,9 @@ export function renameVariable(variable: VariableLike, replacement: string, fixe
 	for (const identifier of getVariableIdentifiers(variable)) {
 		const fix = replaceReferenceIdentifier(identifier, replacement, fixer);
 		/* v8 ignore next -- collected variable identifiers are named, so replacements produce fixes. @preserve */
-		if (fix !== undefined) fixes[size++] = fix;
+		if (fix !== undefined) {
+			fixes[size++] = fix;
+		}
 	}
 
 	return fixes;

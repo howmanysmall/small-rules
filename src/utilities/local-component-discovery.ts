@@ -96,7 +96,9 @@ function getCachedRegex(pattern: string, flags: string): RegExp {
 	if (regexCache.size >= MAX_REGEX_CACHE_SIZE) {
 		const firstKey = regexCache.keys().next().value;
 		/* v8 ignore next -- @preserve a nonempty cache always yields a first insertion key. */
-		if (firstKey !== undefined) regexCache.delete(firstKey);
+		if (firstKey !== undefined) {
+			regexCache.delete(firstKey);
+		}
 	}
 
 	regexCache.set(cacheKey, regex);
@@ -243,8 +245,11 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 	function addComponentFile(entry: Dirent, fullPath: string): void {
 		const baseName = nodePath.basename(entry.name, nodePath.extname(entry.name)).toLowerCase();
 		const existing = index.get(baseName);
-		if (existing === undefined) index.set(baseName, [fullPath]);
-		else existing.push(fullPath);
+		if (existing === undefined) {
+			index.set(baseName, [fullPath]);
+		} else {
+			existing.push(fullPath);
+		}
 	}
 
 	function visit(directory: string, inheritedLayers: ReadonlyArray<GitignoreLayer>): void {
@@ -258,15 +263,20 @@ function indexProjectFiles(rootDirectory: string): ReadonlyMap<string, ReadonlyA
 			const fullPath = getEntryFullPathIfVisible(entry, directory, layers, isDirectory);
 			if (fullPath === undefined) continue;
 
-			if (isDirectory) visit(fullPath, layers);
-			else addComponentFile(entry, fullPath);
+			if (isDirectory) {
+				visit(fullPath, layers);
+			} else {
+				addComponentFile(entry, fullPath);
+			}
 		}
 	}
 
 	visit(rootDirectory, []);
 
 	const readonlyIndex = new Map<string, ReadonlyArray<string>>();
-	for (const [key, value] of index) readonlyIndex.set(key, value);
+	for (const [key, value] of index) {
+		readonlyIndex.set(key, value);
+	}
 
 	fileIndexCache.set(rootDirectory, readonlyIndex);
 	return readonlyIndex;
@@ -277,7 +287,10 @@ function toImportSource(sourceFile: string, targetFile: string): string {
 		.replace(SOURCE_EXTENSION_PATTERN, "")
 		.replace(INDEX_SUFFIX_PATTERN, "");
 
-	if (!importSource.startsWith(".")) importSource = `./${importSource}`;
+	if (!importSource.startsWith(".")) {
+		importSource = `./${importSource}`;
+	}
+
 	return importSource;
 }
 
@@ -299,7 +312,9 @@ export function inspectLocalComponentFile(
 	filePath: string,
 	definition: LocalComponentDefinition,
 ): LocalComponentInspection {
-	if (isIgnoredComponentPath(filePath)) return { importStyle: undefined, matches: false };
+	if (isIgnoredComponentPath(filePath)) {
+		return { importStyle: undefined, matches: false };
+	}
 
 	const extension = nodePath.extname(filePath);
 	if (!COMPONENT_EXTENSIONS.has(extension) || filePath.endsWith(".d.ts")) {
@@ -308,7 +323,9 @@ export function inspectLocalComponentFile(
 
 	const baseName = nodePath.basename(filePath, extension).toLowerCase();
 	const fileNames = definition.fileNames.map(EffectString.toLowerCase);
-	if (!fileNames.includes(baseName)) return { importStyle: undefined, matches: false };
+	if (!fileNames.includes(baseName)) {
+		return { importStyle: undefined, matches: false };
+	}
 
 	const text = getFileText(filePath);
 	if (!getCachedRegex(`\\b${escapeRegExp(definition.componentName)}\\b`, "u").test(text)) {
@@ -320,7 +337,9 @@ export function inspectLocalComponentFile(
 	}
 
 	const importStyle = getImportStyle(text, definition.componentName);
-	if (importStyle === undefined) return { importStyle: undefined, matches: false };
+	if (importStyle === undefined) {
+		return { importStyle: undefined, matches: false };
+	}
 
 	return { importStyle, matches: true };
 }
@@ -336,7 +355,9 @@ export function inspectRelativeLocalComponentImport(
 	}
 
 	const resolved = resolveRelativeImport(importSource, filename);
-	if (!resolved.found) return { importStyle: undefined, matches: false };
+	if (!resolved.found) {
+		return { importStyle: undefined, matches: false };
+	}
 
 	return inspectLocalComponentFile(resolved.path, definition);
 }
@@ -359,30 +380,40 @@ export function addLocalComponentImportIdentifiers(
 
 		const { imported } = specifier;
 		const importedName = isIdentifier(imported) ? imported.name : imported.value;
-		if (importedName === componentName) identifiers.add(specifier.local.name);
+		if (importedName === componentName) {
+			identifiers.add(specifier.local.name);
+		}
 	}
 }
 
 function discoverLocalComponent(sourceFile: string, definition: LocalComponentDefinition): LocalComponentDiscovery {
 	const projectRoot = getProjectRootFromDirectory(nodePath.dirname(sourceFile));
-	if (projectRoot === undefined) return { found: false };
+	if (projectRoot === undefined) {
+		return { found: false };
+	}
 
 	const projectFiles = indexProjectFiles(projectRoot);
 	const candidatePaths = new Set<string>();
 	for (const fileName of definition.fileNames) {
 		const files = projectFiles.get(fileName.toLowerCase()) ?? [];
-		for (const candidatePath of files) candidatePaths.add(candidatePath);
+		for (const candidatePath of files) {
+			candidatePaths.add(candidatePath);
+		}
 	}
 
 	const matches = [...candidatePaths].filter(
 		(candidatePath) => inspectLocalComponentFile(candidatePath, definition).matches,
 	);
 
-	if (matches.length !== 1) return { found: false };
+	if (matches.length !== 1) {
+		return { found: false };
+	}
 
 	const [path] = matches;
 	/* v8 ignore next -- @preserve The length check above guarantees one destructured path. */
-	if (path === undefined) return { found: false };
+	if (path === undefined) {
+		return { found: false };
+	}
 
 	const inspection = inspectLocalComponentFile(path, definition);
 	return {

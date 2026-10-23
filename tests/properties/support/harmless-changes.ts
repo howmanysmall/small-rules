@@ -54,7 +54,9 @@ export function renameGeneratedIdentifiers(testCase: NormalizedValidCase, suffix
 	const endings = new Set<number>();
 	traverseAst(parseCase(testCase).ast, {
 		Identifier(node: HarnessNode): void {
-			if (Predicate.isString(node.name) && isGeneratedIdentifier(node.name)) endings.add(node.range[1]);
+			if (Predicate.isString(node.name) && isGeneratedIdentifier(node.name)) {
+				endings.add(node.range[1]);
+			}
 		},
 	});
 

@@ -45,7 +45,9 @@ function isImportedObjectPropertyAccess(node: ESTree.IdentifierName, sourceCode:
 	/* v8 ignore else -- callers limit this to member or TS-qualified property access. @preserve */
 	if (isMemberExpression(parent) && parent.property === node && !parent.computed) {
 		objectNode = parent.object;
-	} else if (isTsQualifiedName(parent) && parent.right === node) objectNode = parent.left;
+	} else if (isTsQualifiedName(parent) && parent.right === node) {
+		objectNode = parent.left;
+	}
 
 	if (objectNode === undefined) return false;
 

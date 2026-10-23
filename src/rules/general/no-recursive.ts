@@ -37,7 +37,9 @@ function markCycleParticipants(path: Array<string>, neighbor: string, inCycle: S
 	for (let index = cycleStart; index < path.length; index += 1) {
 		const cycleNode = path[index];
 		/* v8 ignore next -- cycleStart is found from an existing path entry. @preserve */
-		if (cycleNode !== undefined) inCycle.add(cycleNode);
+		if (cycleNode !== undefined) {
+			inCycle.add(cycleNode);
+		}
 	}
 }
 
@@ -45,14 +47,18 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 	const color = new Map<string, Color>();
 	const inCycle = new Set<string>();
 
-	for (const name of callGraph.keys()) color.set(name, Color.White);
+	for (const name of callGraph.keys()) {
+		color.set(name, Color.White);
+	}
 
 	function visitNeighbor(neighbor: string, path: Array<string>): void {
 		const neighborColor = color.get(neighbor);
 		if (neighborColor === Color.Gray) {
 			markCycleParticipants(path, neighbor, inCycle);
 			/* v8 ignore start -- idk man @preserve */
-		} else if (neighborColor === Color.White) searchDepthFirst(neighbor, path);
+		} else if (neighborColor === Color.White) {
+			searchDepthFirst(neighbor, path);
+		}
 		/* v8 ignore stop -- idk man @preserve */
 	}
 
@@ -62,13 +68,19 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 
 		/* v8 ignore next -- registered call graph nodes always have an adjacency set. @preserve */
 		const graph = callGraph.get(node) ?? [];
-		for (const neighbor of graph) visitNeighbor(neighbor, path);
+		for (const neighbor of graph) {
+			visitNeighbor(neighbor, path);
+		}
 
 		path.pop();
 		color.set(node, Color.Black);
 	}
 
-	for (const name of callGraph.keys()) if (color.get(name) === Color.White) searchDepthFirst(name, []);
+	for (const name of callGraph.keys()) {
+		if (color.get(name) === Color.White) {
+			searchDepthFirst(name, []);
+		}
+	}
 
 	return inCycle;
 }
@@ -90,9 +102,15 @@ interface ResolvedCallee {
 
 function resolveCallee(node: ESTree.CallExpression): ResolvedCallee | undefined {
 	const direct = getDirectCalleeName(node.callee);
-	if (direct !== undefined) return { calleeName: direct, isThisMethodCall: false };
+	if (direct !== undefined) {
+		return { calleeName: direct, isThisMethodCall: false };
+	}
+
 	const method = getThisMethodCalleeName(node.callee);
-	if (method !== undefined) return { calleeName: method, isThisMethodCall: true };
+	if (method !== undefined) {
+		return { calleeName: method, isThisMethodCall: true };
+	}
+
 	return undefined;
 }
 
@@ -125,7 +143,9 @@ const noRecursive = createRule("no-recursive", "general", {
 		}
 
 		function registerFunction(name: string): void {
-			if (!callGraph.has(name)) callGraph.set(name, new Set());
+			if (!callGraph.has(name)) {
+				callGraph.set(name, new Set());
+			}
 		}
 
 		function findEnclosingClassName(): string | undefined {
@@ -176,7 +196,10 @@ const noRecursive = createRule("no-recursive", "general", {
 			ClassDeclaration(node): void {
 				const className = node.id?.name;
 				/* v8 ignore next -- duplicate class declaration names share the existing tracked method set. @preserve */
-				if (className !== undefined && !classMethods.has(className)) classMethods.set(className, new Set());
+				if (className !== undefined && !classMethods.has(className)) {
+					classMethods.set(className, new Set());
+				}
+
 				classStack.push(className);
 			},
 			"ClassDeclaration:exit"(): void {
@@ -186,15 +209,24 @@ const noRecursive = createRule("no-recursive", "general", {
 			FunctionDeclaration(node): void {
 				const name = node.id?.name;
 				/* v8 ignore next -- FunctionDeclaration visitors have non-empty identifiers in supported parser output. @preserve */
-				if (name !== undefined && name.length > 0) registerFunction(name);
+				if (name !== undefined && name.length > 0) {
+					registerFunction(name);
+				}
+
 				pushFunction(name);
 			},
 			"FunctionDeclaration:exit": popFunction,
 			FunctionExpression(node): void {
-				if (node.id) registerFunction(node.id.name);
+				if (node.id) {
+					registerFunction(node.id.name);
+				}
+
 				const { parent } = node;
-				if (isMethodDefinition(parent) && isBindingIdentifier(parent.key)) pushFunction(parent.key.name);
-				else pushFunction(undefined);
+				if (isMethodDefinition(parent) && isBindingIdentifier(parent.key)) {
+					pushFunction(parent.key.name);
+				} else {
+					pushFunction(undefined);
+				}
 			},
 			"FunctionExpression:exit": popFunction,
 

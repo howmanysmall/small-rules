@@ -180,7 +180,9 @@ function createClassDefaultPropertyLookups(): ReadonlyMap<string, ReadonlyMap<st
 			/* v8 ignore next -- @preserve generated indexes always reference existing dictionary entries. */
 			const value = encodedValue === undefined ? undefined : decodeCanonicalValue(encodedValue);
 			/* v8 ignore next -- @preserve generated indexes and values are validated during generation. */
-			if (propertyName !== undefined && value !== undefined) properties[propertyName] = value;
+			if (propertyName !== undefined && value !== undefined) {
+				properties[propertyName] = value;
+			}
 		}
 
 		lookups.set(className, createDefaultPropertyLookupEntries(properties));
@@ -473,7 +475,10 @@ function extractVector3Value(node: ESTree.Expression): readonly [x: number, y: n
 
 function extractUDimValue(node: ESTree.Expression): readonly [scale: number, offset: number] | undefined {
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "UDim")) return undefined;
-	if (node.arguments.length === 0) return [0, 0];
+
+	if (node.arguments.length === 0) {
+		return [0, 0];
+	}
 
 	return extractNumberPair(node.arguments);
 }
@@ -489,9 +494,7 @@ function extractNumberQuadruple(
 	const second = extractNumberValue(secondNode);
 	const third = extractNumberValue(thirdNode);
 	const fourth = extractNumberValue(fourthNode);
-	if (first === undefined || second === undefined || third === undefined || fourth === undefined) {
-		return undefined;
-	}
+	if (first === undefined || second === undefined || third === undefined || fourth === undefined) return undefined;
 
 	return [first, second, third, fourth];
 }
@@ -505,13 +508,22 @@ function extractUDim2Value(
 		if (path === undefined || components === undefined) return undefined;
 
 		const [first, second] = components;
-		if (path.length === 2 && path[0] === "UDim2" && path[1] === "fromOffset") return [0, first, 0, second];
-		if (path.length === 2 && path[0] === "UDim2" && path[1] === "fromScale") return [first, 0, second, 0];
+		if (path.length === 2 && path[0] === "UDim2" && path[1] === "fromOffset") {
+			return [0, first, 0, second];
+		}
+
+		if (path.length === 2 && path[0] === "UDim2" && path[1] === "fromScale") {
+			return [first, 0, second, 0];
+		}
+
 		return undefined;
 	}
 
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "UDim2")) return undefined;
-	if (node.arguments.length === 0) return [0, 0, 0, 0];
+
+	if (node.arguments.length === 0) {
+		return [0, 0, 0, 0];
+	}
 
 	return extractNumberQuadruple(node.arguments);
 }
@@ -520,7 +532,10 @@ function extractRectValue(
 	node: ESTree.Expression,
 ): readonly [minimumX: number, minimumY: number, maximumX: number, maximumY: number] | undefined {
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "Rect")) return undefined;
-	if (node.arguments.length === 0) return [0, 0, 0, 0];
+
+	if (node.arguments.length === 0) {
+		return [0, 0, 0, 0];
+	}
 
 	return extractNumberQuadruple(node.arguments);
 }
@@ -553,7 +568,10 @@ function extractColor3Value(node: ESTree.Expression): readonly [red: number, gre
 	}
 
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "Color3")) return undefined;
-	if (node.arguments.length === 0) return [0, 0, 0];
+
+	if (node.arguments.length === 0) {
+		return [0, 0, 0];
+	}
 
 	const components = extractTriple(node.arguments);
 	if (components === undefined) return undefined;
@@ -580,7 +598,10 @@ function extractCFrameValue(
 	  ]
 	| undefined {
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "CFrame")) return undefined;
-	if (node.arguments.length === 0) return [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1];
+
+	if (node.arguments.length === 0) {
+		return [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1];
+	}
 
 	const position = extractNumberTriple(node.arguments);
 	if (position === undefined) return undefined;
@@ -785,9 +806,7 @@ function getUselessPropertyMatch(attribute: ESTree.JSXAttribute, className: stri
 	if (propertyName === undefined || isIgnoredPropertyName(propertyName)) return undefined;
 
 	const propertyMatch = getPropertyMatch(className, propertyName);
-	if (propertyMatch === undefined || !isUselessDefaultAttribute(attribute, propertyMatch)) {
-		return undefined;
-	}
+	if (propertyMatch === undefined || !isUselessDefaultAttribute(attribute, propertyMatch)) return undefined;
 
 	return propertyMatch;
 }
@@ -897,7 +916,9 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 
 		function inspectStatementNodes(statementNodes: ReadonlyArray<ESTree.Node>): void {
 			const trackedInstances = new Map<string, TrackedInstance>();
-			for (const statementNode of statementNodes) inspectStatementNode(statementNode, trackedInstances);
+			for (const statementNode of statementNodes) {
+				inspectStatementNode(statementNode, trackedInstances);
+			}
 		}
 
 		function inspectStatementNode(
@@ -914,7 +935,9 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 				return;
 			}
 
-			if (isVariableDeclaration(statementNode)) trackConstInstances(statementNode, trackedInstances);
+			if (isVariableDeclaration(statementNode)) {
+				trackConstInstances(statementNode, trackedInstances);
+			}
 		}
 
 		function inspectExpressionStatement(
@@ -929,7 +952,9 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 				return;
 			}
 
-			if (isCallExpression(expression)) clearTrackedInstancesForCallExpression(expression, trackedInstances);
+			if (isCallExpression(expression)) {
+				clearTrackedInstancesForCallExpression(expression, trackedInstances);
+			}
 		}
 
 		function reportUselessJsxAttribute(

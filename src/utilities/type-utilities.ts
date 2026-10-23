@@ -7,7 +7,9 @@ export function isNonEmptyString(value: unknown): value is string {
 export function isStringArray(object: unknown): object is ReadonlyArray<string> {
 	if (!Array.isArray(object)) return false;
 
-	for (const item of object) if (!Predicate.isString(item)) return false;
+	for (const item of object) {
+		if (!Predicate.isString(item)) return false;
+	}
 
 	return true;
 }
@@ -15,7 +17,9 @@ export function isStringArray(object: unknown): object is ReadonlyArray<string> 
 export function isStringRecord(object: unknown): object is Record<string, string> {
 	if (!Predicate.isObject(object)) return false;
 
-	for (const entry of Object.values(object)) if (!Predicate.isString(entry)) return false;
+	for (const entry of Object.values(object)) {
+		if (!Predicate.isString(entry)) return false;
+	}
 
 	return true;
 }

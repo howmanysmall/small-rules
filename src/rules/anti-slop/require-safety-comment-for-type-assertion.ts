@@ -95,7 +95,9 @@ function valueHasUnsafeAssertionRule(value?: string): boolean {
 	/* v8 ignore next -- parseDirectiveComment always includes a value string. @preserve */
 	if (value === undefined) return false;
 
-	for (const ruleId of value.split(COMMA_REGEXP)) if (ruleId === UNSAFE_ASSERTION_RULE_ID) return true;
+	for (const ruleId of value.split(COMMA_REGEXP)) {
+		if (ruleId === UNSAFE_ASSERTION_RULE_ID) return true;
+	}
 
 	return false;
 }

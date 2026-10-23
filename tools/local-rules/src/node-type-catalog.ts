@@ -97,10 +97,16 @@ function registerGuard(name: string, guard: ProbedFunction, registry: GuardRegis
 
 	registry.guardNames.add(name);
 
-	if (acceptsMissingNode(guard)) registry.nullSafeGuards.add(name);
+	if (acceptsMissingNode(guard)) {
+		registry.nullSafeGuards.add(name);
+	}
+
 	const guards = registry.guardsByNodeType.get(nodeType);
-	if (guards === undefined) registry.guardsByNodeType.set(nodeType, [name]);
-	else guards.push(name);
+	if (guards === undefined) {
+		registry.guardsByNodeType.set(nodeType, [name]);
+	} else {
+		guards.push(name);
+	}
 }
 
 function acceptsMissingNode(guard: ProbedFunction): boolean {
@@ -131,10 +137,14 @@ export function createNodeTypeCatalog(moduleExports: Iterable<ModuleExport>): No
 			continue;
 		}
 
-		if (isProbedFunction(value) && GUARD_NAME.test(name)) registerGuard(name, value, registry);
+		if (isProbedFunction(value) && GUARD_NAME.test(name)) {
+			registerGuard(name, value, registry);
+		}
 	}
 
-	for (const [nodeType, guards] of guardsByNodeType) guards.sort(compareGuards(nodeType));
+	for (const [nodeType, guards] of guardsByNodeType) {
+		guards.sort(compareGuards(nodeType));
+	}
 
 	return {
 		getConstant: (nodeType) => constantByNodeType.get(nodeType),

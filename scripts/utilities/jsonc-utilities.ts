@@ -34,8 +34,11 @@ function isInlineArrayNode(updatedContent: string, parentPath: ReadonlyArray<num
 }
 
 function formatInsertionEdit(edit: { content: string; length: number }, indent: string, inlineSpace: boolean): void {
-	if (edit.content.startsWith(",")) edit.content = `,${indent}${edit.content.slice(1)}`;
-	else if (!inlineSpace && edit.content.length > 0) edit.content = `${indent}${edit.content}`;
+	if (edit.content.startsWith(",")) {
+		edit.content = `,${indent}${edit.content.slice(1)}`;
+	} else if (!inlineSpace && edit.content.length > 0) {
+		edit.content = `${indent}${edit.content}`;
+	}
 
 	edit.content = edit.content.replaceAll(MISSING_SPACE_AFTER_COLON_REGEXP, '": ');
 }

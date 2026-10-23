@@ -182,7 +182,9 @@ const preferNativeCollectionCopy = createRule("prefer-native-collection-copy", "
 						messageId: "preferNativeCollectionCopy",
 						node: loop,
 					});
-				} else context.report({ messageId: "preferNativeCollectionCopy", node: loop });
+				} else {
+					context.report({ messageId: "preferNativeCollectionCopy", node: loop });
+				}
 			}
 		}
 

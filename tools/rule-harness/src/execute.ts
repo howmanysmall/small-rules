@@ -73,7 +73,9 @@ function executeWithExistingVisitor(
 
 	try {
 		const shouldRun = runHook(visitor, "before");
-		if (shouldRun !== false) runVisitor(visitor, sourceCode);
+		if (shouldRun !== false) {
+			runVisitor(visitor, sourceCode);
+		}
 	} finally {
 		runHook(visitor, "after");
 	}

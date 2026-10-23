@@ -51,7 +51,9 @@ function enqueueWrappedType(resolved: ESTree.TSType, enqueue: (child: ESTree.TST
 	}
 
 	if (isTsUnionType(resolved)) {
-		for (const member of resolved.types) enqueue(member);
+		for (const member of resolved.types) {
+			enqueue(member);
+		}
 
 		return true;
 	}
@@ -72,7 +74,9 @@ function enqueuePromiseValue(
 	enqueue: (child: ESTree.TSType) => void,
 ): void {
 	const value = resolved.typeArguments?.params[0];
-	if (value !== undefined) enqueue(value);
+	if (value !== undefined) {
+		enqueue(value);
+	}
 }
 
 const noUnknownReturns = createRule("no-unknown-returns", "anti-slop", {

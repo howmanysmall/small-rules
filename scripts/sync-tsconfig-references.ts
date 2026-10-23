@@ -46,7 +46,10 @@ const command = createBaseCommand(
 			return;
 		}
 
-		for (const { path } of staleReferences) log.success(`updated ${path}`);
+		for (const { path } of staleReferences) {
+			log.success(`updated ${path}`);
+		}
+
 		log.success(`synced ${staleReferences.length} tsconfig file(s)`);
 	});
 

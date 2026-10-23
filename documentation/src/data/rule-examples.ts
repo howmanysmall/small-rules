@@ -25,7 +25,9 @@ for (const testFileRelativePath of testFileRelativePaths) {
 		const examples = examplesByRuleName.get(extraction.ruleName) ?? new Array<RuleExample>();
 		examplesByRuleName.set(extraction.ruleName, examples);
 
-		for (const example of extraction.examples) examples.push(example);
+		for (const example of extraction.examples) {
+			examples.push(example);
+		}
 	}
 }
 

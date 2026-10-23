@@ -6,7 +6,9 @@ const onlyTypeImports = createRule("only-type-imports", "general", {
 	create(context): Visitor {
 		return {
 			ImportDeclaration(node): void {
-				if (node.importKind !== "type") context.report({ messageId: "onlyTypeImports", node });
+				if (node.importKind !== "type") {
+					context.report({ messageId: "onlyTypeImports", node });
+				}
 			},
 		} satisfies Visitor;
 	},

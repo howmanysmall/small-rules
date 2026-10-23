@@ -27,7 +27,9 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 
 		return {
 			ArrayPattern(node) {
-				if (checks.spreadDestructuring) reportRestElements(context, node.elements);
+				if (checks.spreadDestructuring) {
+					reportRestElements(context, node.elements);
+				}
 			},
 			before(): void {
 				const [rawOptions] = context.options;
@@ -45,10 +47,14 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 				}
 			},
 			LabeledStatement(node) {
-				if (checks.labels) context.report({ messageId: "label", node });
+				if (checks.labels) {
+					context.report({ messageId: "label", node });
+				}
 			},
 			Literal(node) {
-				if (checks.regexLiterals && "regex" in node) context.report({ messageId: "regexLiteral", node });
+				if (checks.regexLiterals && "regex" in node) {
+					context.report({ messageId: "regexLiteral", node });
+				}
 			},
 			MemberExpression(node) {
 				if (checks.prototype && !node.computed && isIdentifierNamed(node.property, "prototype")) {
@@ -56,7 +62,9 @@ const noUnsupportedSyntax = createRule("no-unsupported-syntax", "roblox", {
 				}
 			},
 			ObjectPattern(node) {
-				if (checks.spreadDestructuring) reportRestElements(context, node.properties);
+				if (checks.spreadDestructuring) {
+					reportRestElements(context, node.properties);
+				}
 			},
 		} satisfies VisitorWithHooks;
 	},
