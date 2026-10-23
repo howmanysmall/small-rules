@@ -109,14 +109,21 @@ playwrightIt("renders the custom rule documentation sections", async ({ page }) 
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
 });
 
-playwrightIt("visually distinguishes inline code from surrounding prose", async ({ page }) => {
+playwrightIt("renders backticked description text as inline code", async ({ page }) => {
 	await page.goto(`${baseUrl}${inlineCodeRulePath}`);
 
-	const code = page.locator(".rule-summary-text code").first();
-	await playwrightExpect(code).toHaveText(".success");
-	await playwrightExpect(code).toHaveCSS("font-family", /IBM Plex Mono/u);
-	await playwrightExpect(code).toHaveCSS("border-top-width", "1px");
-	await playwrightExpect(code).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+	const summary = page.locator(".rule-summary-text");
+	await playwrightExpect(summary).not.toContainText("`");
+	await playwrightExpect(summary.locator("code").first()).toHaveText(".success");
+});
+
+playwrightIt("renders backticked pagination labels as inline code", async ({ page }) => {
+	await page.goto(`${baseUrl}rules/react/`);
+
+	const nextPage = page.locator(".pagination-links [rel='next']");
+	await playwrightExpect(nextPage).toContainText("Ban React.FC");
+	await playwrightExpect(nextPage).not.toContainText("`");
+	await playwrightExpect(nextPage.locator("code")).toHaveText("React.FC");
 });
 
 playwrightIt("colors only the Error and Auto-fixable badges in both themes", async ({ page }) => {
