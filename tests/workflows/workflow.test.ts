@@ -1,5 +1,8 @@
-import { existsSync, readFileSync } from "node:fs";
-import { describe, it } from "vitest";
+import { spawnSync } from "node:child_process";
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import nodePath from "node:path";
+import { describe, it, onTestFinished } from "vitest";
 import {
 	isMaybeBoolean,
 	isMaybeReadonlyArrayOfStrings,
@@ -298,6 +301,36 @@ describe("documentation validation workflow", () => {
 
 		expect(getCiPushPaths()).toContain("documentation/**");
 		expect(getCiPullRequestPaths()).toContain("documentation/**");
+	});
+});
+
+describe("documentation browser workflow", () => {
+	// Bug: browser setup stalls in system-package installation before tests run.
+	// Oracle: with system-package installation unavailable, browser-only setup
+	// must still complete successfully on the GitHub Ubuntu image.
+	it("completes browser setup without installing system packages", ({ expect }) => {
+		expect.assertions(2);
+
+		const command = checks.jobs?.documentation?.steps?.find((step) => step.name === "Install Chromium")?.run;
+		if (command === undefined) throw new TypeError("Chromium install command is missing");
+
+		const directory = mkdtempSync(nodePath.join(tmpdir(), "small-rules-chromium-"));
+		onTestFinished(() => rmSync(directory, { force: true, recursive: true }));
+		const executable = nodePath.join(directory, "pnpm");
+		writeFileSync(
+			executable,
+			'#!/bin/sh\nfor argument in "$@"; do\n\tif [ "$argument" = "--with-deps" ]; then\n\t\texit 1\n\tfi\ndone\nexit 0\n',
+		);
+		chmodSync(executable, 0o755);
+
+		const result = spawnSync(command, {
+			env: { ...process.env, PATH: `${directory}:${process.env.PATH ?? ""}` },
+			shell: "/bin/sh",
+			timeout: 1_000,
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.status).toBe(0);
 	});
 });
 
