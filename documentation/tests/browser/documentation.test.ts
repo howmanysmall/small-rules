@@ -95,7 +95,9 @@ playwrightIt("renders sidebar badges with the rule page badge component", async 
 	).length;
 
 	await playwrightExpect(sidebar.locator(".sl-badge")).toHaveCount(0);
-	await playwrightExpect(sidebar.locator(".badge.badge--new, .badge.badge--updated")).toHaveCount(freshRuleCount);
+	await playwrightExpect(sidebar.locator(".badge.badge--compact:is(.badge--new, .badge--updated)")).toHaveCount(
+		freshRuleCount,
+	);
 });
 
 playwrightIt("copies the full rule name", async ({ page }) => {

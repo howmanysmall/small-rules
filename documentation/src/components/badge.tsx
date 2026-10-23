@@ -3,6 +3,11 @@ import type { ReactNode } from "react";
 import type { BadgeVariant } from "./badge-variants";
 
 interface BadgeProperties {
+	/**
+	 * Shows only the icon; the label stays as the tooltip and screen-reader
+	 * text.
+	 */
+	compact?: boolean | undefined;
 	variant: BadgeVariant;
 }
 
@@ -88,11 +93,12 @@ const badgeDefinitions = {
 	},
 } satisfies Readonly<Record<BadgeVariant, BadgeDefinition>>;
 
-export function Badge({ variant }: Readonly<BadgeProperties>): ReactNode {
+export function Badge({ compact = false, variant }: Readonly<BadgeProperties>): ReactNode {
 	const { icon, label, title } = badgeDefinitions[variant];
+	const labelContent = compact ? <span className="sr-only">{label}</span> : label;
 
 	return (
-		<span className={`badge badge--${variant}`} title={title}>
+		<span className={compact ? `badge badge--${variant} badge--compact` : `badge badge--${variant}`} title={title}>
 			<svg
 				aria-hidden="true"
 				fill="none"
@@ -104,7 +110,7 @@ export function Badge({ variant }: Readonly<BadgeProperties>): ReactNode {
 			>
 				{icon}
 			</svg>
-			{label}
+			{labelContent}
 		</span>
 	);
 }
