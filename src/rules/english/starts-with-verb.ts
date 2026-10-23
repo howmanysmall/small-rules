@@ -26,6 +26,13 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 			context.report({ data: { name: node.name, prefix }, messageId: "notVerb", node });
 		}
 
+		function reportIfNamedMemberNotVerb(key: ESTree.Node, computed: boolean): void {
+			const nameNode = getMemberNameNode(key, computed);
+			if (nameNode !== undefined) {
+				reportIfNotVerb(nameNode);
+			}
+		}
+
 		return {
 			before(): void {
 				const [options] = context.options;
@@ -44,10 +51,7 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 			},
 			MethodDefinition(node): void {
 				if (node.kind !== "method" || node.override === true) return;
-				const nameNode = getMemberNameNode(node.key, node.computed);
-				if (nameNode !== undefined) {
-					reportIfNotVerb(nameNode);
-				}
+				reportIfNamedMemberNotVerb(node.key, node.computed);
 			},
 			Property(node): void {
 				if (node.kind !== "init" || !isCallbackFunction(node.value)) return;
@@ -57,10 +61,7 @@ const startsWithVerb = createRule("starts-with-verb", "english", {
 			},
 			PropertyDefinition(node): void {
 				if (!isCallbackFunction(node.value) || node.override === true) return;
-				const nameNode = getMemberNameNode(node.key, node.computed);
-				if (nameNode !== undefined) {
-					reportIfNotVerb(nameNode);
-				}
+				reportIfNamedMemberNotVerb(node.key, node.computed);
 			},
 			VariableDeclarator(node): void {
 				if (isIdentifier(node.id) && isCallbackFunction(node.init)) {

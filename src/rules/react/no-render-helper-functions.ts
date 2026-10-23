@@ -236,13 +236,15 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 			}
 		}
 
+		function checkVariableFunctionEnter(node: CallbackFunction): void {
+			const functionName = getVariableDeclaratorFunctionName(node);
+			if (functionName !== undefined && isUppercaseName(functionName)) {
+				componentDepth += 1;
+			}
+		}
+
 		return {
-			ArrowFunctionExpression(node): void {
-				const functionName = getVariableDeclaratorFunctionName(node);
-				if (functionName !== undefined && isUppercaseName(functionName)) {
-					componentDepth += 1;
-				}
-			},
+			ArrowFunctionExpression: checkVariableFunctionEnter,
 			"ArrowFunctionExpression:exit": checkVariableFunctionExit,
 			FunctionDeclaration({ id }): void {
 				if (id === null) return;
@@ -271,12 +273,7 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 					reportRenderHelper(node, functionName);
 				}
 			},
-			FunctionExpression(node): void {
-				const functionName = getVariableDeclaratorFunctionName(node);
-				if (functionName !== undefined && isUppercaseName(functionName)) {
-					componentDepth += 1;
-				}
-			},
+			FunctionExpression: checkVariableFunctionEnter,
 			"FunctionExpression:exit": checkVariableFunctionExit,
 		};
 	},

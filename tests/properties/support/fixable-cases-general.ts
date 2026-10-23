@@ -56,10 +56,12 @@ const declaredNameArbitrary = fc.tuple(
 	expressionArbitrary,
 );
 
+const scopeFrames = fc
+	.tuple(fc.array(frameArbitrary, { size: "-1" }), scopeFrameArbitrary)
+	.map(([outer, scope]) => outer.toSpliced(outer.length, 0, scope));
+
 const preventAbbreviations = defineFixableCase({
-	frames: fc
-		.tuple(fc.array(frameArbitrary, { size: "-1" }), scopeFrameArbitrary)
-		.map(([outer, scope]) => outer.toSpliced(outer.length, 0, scope)),
+	frames: scopeFrames,
 	language: "ts",
 	render: (declarations) => ({
 		statements: declarations.flatMap(([name, value]) => [`let ${name} = ${value};`, `${name} = ${name};`]),
@@ -412,9 +414,7 @@ const curlyBodyArbitrary = fc.record({
 
 // Each trigger sits in a loop inside a function, so every jump is legal.
 const curly = defineFixableCase({
-	frames: fc
-		.tuple(fc.array(frameArbitrary, { size: "-1" }), scopeFrameArbitrary)
-		.map(([outer, scope]) => outer.toSpliced(outer.length, 0, scope)),
+	frames: scopeFrames,
 	language: "ts",
 	render: ({ call, form, jump, test }, id) => {
 		const bodies = {
