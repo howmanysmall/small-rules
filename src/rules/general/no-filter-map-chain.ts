@@ -27,7 +27,7 @@ const noFilterMapChain = createRule("no-filter-map-chain", "general", {
 	},
 	meta: {
 		docs: {
-			description: "Disallow map(...) directly after filter(...).",
+			description: "Disallow `Array.prototype.map(...)` directly after `Array.prototype.filter(...)`.",
 		},
 		messages: {
 			avoidFilterMapChain:

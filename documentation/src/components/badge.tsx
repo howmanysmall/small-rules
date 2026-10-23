@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
 
-type BadgeVariant = "error" | "fixable" | "new" | "roblox" | "suggestion" | "updated";
+import type { BadgeVariant } from "./badge-variants";
 
 interface BadgeProperties {
+	/**
+	 * Shows only the icon; the label stays as the tooltip and screen-reader
+	 * text.
+	 */
+	compact?: boolean | undefined;
 	variant: BadgeVariant;
 }
 
@@ -88,11 +93,25 @@ const badgeDefinitions = {
 	},
 } satisfies Readonly<Record<BadgeVariant, BadgeDefinition>>;
 
-export function Badge({ variant }: Readonly<BadgeProperties>): ReactNode {
+/**
+ * The only badges that take a hue. Error washes in the flag color (`--data-1`);
+ * Auto-fixable draws a focus hairline (`--focus`). Every other badge is ink.
+ */
+const badgeTreatments: Readonly<Partial<Record<BadgeVariant, "line" | "wash">>> = {
+	error: "wash",
+	fixable: "line",
+};
+
+export function Badge({ compact = false, variant }: Readonly<BadgeProperties>): ReactNode {
 	const { icon, label, title } = badgeDefinitions[variant];
+	const treatment = badgeTreatments[variant];
+	const labelContent = compact ? <span className="sr-only">{label}</span> : label;
+	const classNames = ["badge", `badge--${variant}`];
+	if (treatment !== undefined) classNames.push(`badge--${treatment}`);
+	if (compact) classNames.push("badge--compact");
 
 	return (
-		<span className={`badge badge--${variant}`} title={title}>
+		<span className={classNames.join(" ")} title={title}>
 			<svg
 				aria-hidden="true"
 				fill="none"
@@ -104,7 +123,7 @@ export function Badge({ variant }: Readonly<BadgeProperties>): ReactNode {
 			>
 				{icon}
 			</svg>
-			{label}
+			{labelContent}
 		</span>
 	);
 }

@@ -190,7 +190,8 @@ const noIdentityMap = createRule("no-identity-map", "general", {
 	},
 	meta: {
 		docs: {
-			description: "Disallow pointless identity `.map()` calls that return the parameter unchanged",
+			description:
+				"Disallow pointless identity `Array.prototype.map()` calls that return the parameter unchanged",
 		},
 		fixable: "code",
 		messages: {

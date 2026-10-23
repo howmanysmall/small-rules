@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 
+import { InlineMarkdownNodes } from "./inline-markdown-nodes";
 import { RuleOptionDefaultDetail } from "./rule-option-default-detail";
 import { RuleOptionDefaultField } from "./rule-option-default-field";
 import { RuleOptionTypeField } from "./rule-option-type-field";
@@ -65,7 +66,9 @@ export function RuleOption({ highlightedType, option }: Readonly<RuleOptionPrope
 				<code className="rule-option__name">{option.name}</code>
 				<span className="rule-option__requirement">{option.required ? labels.required : labels.optional}</span>
 			</div>
-			<p className="rule-option__description">{option.description ?? labels.descriptionFallback}</p>
+			<p className="rule-option__description">
+				<InlineMarkdownNodes text={option.description ?? labels.descriptionFallback} />
+			</p>
 			<dl className="rule-option__metadata">
 				<RuleOptionTypeField highlightedType={highlightedType} type={option.type} />
 				<RuleOptionDefaultField

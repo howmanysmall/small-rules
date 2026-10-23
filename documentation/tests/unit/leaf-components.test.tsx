@@ -26,6 +26,17 @@ describe("badge", () => {
 		expect(screen.getByText(label).getAttribute("title")).toBe(title);
 		expect(container.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
 	});
+
+	it("renders a compact badge as its icon with a hidden label", ({ expect }) => {
+		expect.assertions(3);
+
+		const { container } = render(<Badge compact={true} variant="updated" />);
+		const badge = container.querySelector(".badge");
+
+		expect(badge?.classList.contains("badge--compact")).toBe(true);
+		expect(badge?.getAttribute("title")).toBe("This rule was updated in the most recent release.");
+		expect(screen.getByText("Updated").classList.contains("sr-only")).toBe(true);
+	});
 });
 
 describe("category-card", () => {

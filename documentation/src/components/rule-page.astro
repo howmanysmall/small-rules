@@ -35,7 +35,7 @@ const sections = new Set(
 	{facts.category.startsWith("roblox") && <Badge variant="roblox" />}
 </div>
 
-<RuleSummary rule={rule} />
+<RuleSummary client:visible description={facts.description} rule={rule} />
 
 {sections.has("rationale") && (
 	<section aria-labelledby="rationale">

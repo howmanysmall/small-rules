@@ -75,6 +75,7 @@ export default defineConfig({
 			starlight({
 				components: {
 					PageTitle: "./src/components/overrides/page-title.astro",
+					Pagination: "./src/components/overrides/pagination.astro",
 					Sidebar: "./src/components/overrides/sidebar.astro",
 				},
 				customCss: [

@@ -28,6 +28,7 @@
 		"react-dom": "catalog:frontend",
 		"sharp": "catalog:frontend",
 		"shiki": "catalog:frontend",
+		"simple-icons": "catalog:frontend",
 		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",
 		"yuku-parser": "catalog:runtime"

@@ -38,7 +38,7 @@ const requireUnicodeRegex = createRule("require-unicode-regex", "general", {
 	},
 	meta: {
 		docs: {
-			description: "Require the 'u' or 'v' unicode flag on calls named regex().",
+			description: "Require the 'u' or 'v' unicode flag on calls named `regex()`.",
 		},
 		messages: {
 			requireUnicodeFlag:
