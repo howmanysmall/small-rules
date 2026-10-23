@@ -93,7 +93,7 @@ describe("isSetterIdentifier behavior", () => {
 		expect(isSetterIdentifier("setCount")).toBe(true);
 		expect(isSetterIdentifier("setIsVisible")).toBe(true);
 		expect(isSetterIdentifier("setA")).toBe(true);
-	}, 1_000);
+	});
 
 	it("rejects lowercase after set", ({ expect }) => {
 		expect.assertions(3);
@@ -101,21 +101,21 @@ describe("isSetterIdentifier behavior", () => {
 		expect(isSetterIdentifier("setstate")).toBe(false);
 		expect(isSetterIdentifier("setter")).toBe(false);
 		expect(isSetterIdentifier("setup")).toBe(false);
-	}, 1_000);
+	});
 
 	it("rejects names not starting with set", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isSetterIdentifier("state")).toBe(false);
 		expect(isSetterIdentifier("resetState")).toBe(false);
-	}, 1_000);
+	});
 
 	it("rejects empty and short strings", ({ expect }) => {
 		expect.assertions(2);
 
 		expect(isSetterIdentifier("")).toBe(false);
 		expect(isSetterIdentifier("s")).toBe(false);
-	}, 1_000);
+	});
 });
 
 describe("getEffectCallback utility", () => {

@@ -729,6 +729,16 @@ export async function getOxlintAsync({
 			},
 		},
 		{
+			name: "small-rules/integration-tests",
+			// Integration tests may need real temporary directories and longer
+			// timeouts; both rules are unit-test rules.
+			files: ["**/*.integration.test.ts"],
+			rules: {
+				"small-rules/no-real-temporary-directory": "off",
+				"small-rules/no-test-timeout": "off",
+			},
+		},
+		{
 			name: "small-rules/allow-top-level-await",
 			files: ["documentation/**/*.astro", SCRIPT_FILES, CONFIGURATION_FILES],
 			rules: { "node/no-top-level-await": "off" },
