@@ -107,8 +107,14 @@ export function Badge({ compact = false, variant }: Readonly<BadgeProperties>): 
 	const treatment = badgeTreatments[variant];
 	const labelContent = compact ? <span className="sr-only">{label}</span> : label;
 	const classNames = ["badge", `badge--${variant}`];
-	if (treatment !== undefined) classNames.push(`badge--${treatment}`);
-	if (compact) classNames.push("badge--compact");
+
+	if (treatment !== undefined) {
+		classNames.push(`badge--${treatment}`);
+	}
+
+	if (compact) {
+		classNames.push("badge--compact");
+	}
 
 	return (
 		<span className={classNames.join(" ")} title={title}>

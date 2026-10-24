@@ -96,7 +96,9 @@ playwrightIt("shows an icon for every package manager tab", async ({ page }) => 
 		tabList.map(async (tab) => tab.evaluate((element) => getComputedStyle(element, "::before").maskImage)),
 	);
 
-	for (const maskImage of maskImages) playwrightExpect(maskImage).not.toBe("none");
+	for (const maskImage of maskImages) {
+		playwrightExpect(maskImage).not.toBe("none");
+	}
 });
 
 playwrightIt("renders the custom rule documentation sections", async ({ page }) => {

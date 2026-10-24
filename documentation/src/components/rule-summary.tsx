@@ -64,8 +64,11 @@ export function RuleSummary({
 	}
 
 	let copyLabel = "Copy rule name";
-	if (copyStatus === "copied") copyLabel = "Rule name copied";
-	else if (copyStatus === "failed") copyLabel = "Copy failed";
+	if (copyStatus === "copied") {
+		copyLabel = "Rule name copied";
+	} else if (copyStatus === "failed") {
+		copyLabel = "Copy failed";
+	}
 
 	return (
 		<div className="rule-summary">
