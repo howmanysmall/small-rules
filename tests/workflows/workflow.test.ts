@@ -1,4 +1,7 @@
-import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import nodePath from "node:path";
 import { describe, it } from "vitest";
 import {
 	isMaybeBoolean,
@@ -289,6 +292,43 @@ function writeViolations(): ReadonlyArray<WriteViolation> {
 	return violations;
 }
 
+function git(repository: string, ...arguments_: ReadonlyArray<string>): string {
+	return execFileSync("git", arguments_, { cwd: repository, encoding: "utf8" }).trim();
+}
+
+function collectChangedFiles(command: string): Buffer {
+	const repository = mkdtempSync(nodePath.join(tmpdir(), "small-rules-changed-files-"));
+	try {
+		git(repository, "init", "--initial-branch=main");
+		git(repository, "config", "user.name", "CI Test");
+		git(repository, "config", "user.email", "ci@example.com");
+		git(repository, "config", "commit.gpgsign", "false");
+		writeFileSync(nodePath.join(repository, "example.txt"), "base\n");
+		git(repository, "add", "example.txt");
+		git(repository, "commit", "-m", "base");
+
+		git(repository, "checkout", "-b", "feature");
+		writeFileSync(nodePath.join(repository, "docs.txt"), "pull request\n");
+		git(repository, "add", "docs.txt");
+		git(repository, "commit", "-m", "pull request");
+		const head = git(repository, "rev-parse", "HEAD");
+
+		git(repository, "checkout", "main");
+		git(repository, "mv", "example.txt", "renamed.txt");
+		git(repository, "commit", "-m", "advance base");
+		const base = git(repository, "rev-parse", "HEAD");
+
+		execFileSync("bash", ["--noprofile", "--norc", "-e", "-c", command], {
+			cwd: repository,
+			env: { BASE_SHA: base, HEAD_SHA: head, PATH: "/usr/bin:/bin", RUNNER_TEMP: repository },
+		});
+
+		return readFileSync(nodePath.join(repository, "changed-files"));
+	} finally {
+		rmSync(repository, { force: true, recursive: true });
+	}
+}
+
 describe("documentation validation workflow", () => {
 	// Bug: a docs-only change merges without running docs checks.
 	// Oracle: the documentation/ directory exists here,
@@ -298,6 +338,20 @@ describe("documentation validation workflow", () => {
 
 		expect(getCiPushPaths()).toContain("documentation/**");
 		expect(getCiPullRequestPaths()).toContain("documentation/**");
+	});
+});
+
+describe("changed file collection", () => {
+	// Bug: an advancing base makes validation lint files absent from the merge.
+	// Oracle: a PR that only changes docs.txt must select exactly docs.txt.
+	it("selects only pull request changes after the base branch advances", ({ expect }) => {
+		expect.assertions(1);
+
+		const command = isString.assert(
+			checks.jobs?.check?.steps?.find((step) => step.name === "Collect changed files")?.run,
+		);
+
+		expect(collectChangedFiles(command)).toStrictEqual(Buffer.from("docs.txt\0"));
 	});
 });
 
