@@ -1,5 +1,7 @@
 import { siteBasePath } from "$utilities/site-base-path";
 
+import { InlineMarkdownNodes } from "./inline-markdown-nodes";
+
 import type { ReactNode } from "react";
 
 import type { RuleIndexCategory } from "./rule-index-data";
@@ -81,7 +83,9 @@ export function RuleIndexCard({ rule, showCategory }: Readonly<RuleIndexCardProp
 				{showCategory === true && <span className="rule-index-card-category">{rule.categoryLabel}</span>}
 			</div>
 			<code>{rule.name}</code>
-			<p>{rule.description}</p>
+			<p>
+				<InlineMarkdownNodes text={rule.description} />
+			</p>
 			<ul aria-label="Rule characteristics">
 				{getRuleTraits(rule).map((trait) => (
 					<li key={trait.className} className={trait.className} title={trait.title}>

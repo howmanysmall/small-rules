@@ -1,12 +1,73 @@
 import { expect as playwrightExpect, test as playwrightIt } from "@playwright/test";
 
 import { ruleManifest } from "$data/rule-manifest";
+import { getRuleNewness } from "$data/rule-newness";
+
+import type { Page } from "@playwright/test";
 
 const allRulesPath = "rules/";
 const baseUrl = "http://127.0.0.1:4321/small-rules/";
 const complexOptionsRulePath = "rules/react/no-useless-use-memo/";
+const inlineCodeRulePath = "rules/roblox/no-ianitor-success-access/";
 const rulePath = "rules/roblox/no-print/";
 const builtScriptPrefix = "/small-rules/_astro/";
+
+const errorFixableRulePath = "rules/naming/prefer-optional-parameter/";
+const transparent = "rgba(0, 0, 0, 0)";
+
+interface BadgeStyle {
+	readonly background: string;
+	readonly color: string;
+	readonly kind: "error" | "fixable" | "ink";
+}
+
+interface RuleBadgeColors {
+	readonly badges: ReadonlyArray<BadgeStyle>;
+	readonly flag: string;
+	readonly focus: string;
+	readonly ink: string;
+}
+
+async function getRuleBadgeColorsAsync(page: Page, theme: "dark" | "light"): Promise<RuleBadgeColors> {
+	await page.evaluate((value) => {
+		document.documentElement.dataset.theme = value;
+	}, theme);
+
+	return page.evaluate(() => {
+		function resolveColor(token: string): string {
+			const probe = document.createElement("span");
+			probe.style.color = `var(${token})`;
+			document.body.append(probe);
+			const { color } = getComputedStyle(probe);
+			probe.remove();
+			return color;
+		}
+
+		function getKind(badge: Element): BadgeStyle["kind"] {
+			if (badge.classList.contains("badge--error")) return "error";
+			return badge.classList.contains("badge--fixable") ? "fixable" : "ink";
+		}
+
+		const badges = Array.from(document.querySelectorAll(".rule-badges .badge"), (badge) => {
+			const style = getComputedStyle(badge);
+			return { background: style.backgroundColor, color: style.color, kind: getKind(badge) };
+		});
+
+		return { badges, flag: resolveColor("--data-1"), focus: resolveColor("--focus"), ink: resolveColor("--ink-2") };
+	});
+}
+
+function expectBadgeColorBudget({ badges, flag, focus, ink }: RuleBadgeColors): void {
+	for (const badge of badges) {
+		if (badge.kind === "error") {
+			playwrightExpect(badge.color).toBe(flag);
+			playwrightExpect(badge.background).not.toBe(transparent);
+		} else {
+			playwrightExpect(badge.color).toBe(badge.kind === "fixable" ? focus : ink);
+			playwrightExpect(badge.background).toBe(transparent);
+		}
+	}
+}
 
 playwrightIt("renders the custom homepage sections", async ({ page }) => {
 	await page.goto(baseUrl);
@@ -25,6 +86,21 @@ playwrightIt("renders the custom homepage sections", async ({ page }) => {
 	);
 });
 
+playwrightIt("shows an icon for every package manager tab", async ({ page }) => {
+	await page.goto(`${baseUrl}quick-start/`);
+
+	const tabs = page.locator(".package-manager-tabs [role='tab']");
+	await playwrightExpect(tabs).toHaveCount(16);
+	const tabList = await tabs.all();
+	const maskImages = await Promise.all(
+		tabList.map(async (tab) => tab.evaluate((element) => getComputedStyle(element, "::before").maskImage)),
+	);
+
+	for (const maskImage of maskImages) {
+		playwrightExpect(maskImage).not.toBe("none");
+	}
+});
+
 playwrightIt("renders the custom rule documentation sections", async ({ page }) => {
 	await page.goto(`${baseUrl}${rulePath}`);
 
@@ -33,6 +109,96 @@ playwrightIt("renders the custom rule documentation sections", async ({ page }) 
 	await playwrightExpect(page.locator(".rule-diagnostic")).not.toHaveCount(0);
 	await playwrightExpect(page.locator("[data-rule-example]")).toHaveCount(2);
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
+});
+
+playwrightIt("renders backticked description text as inline code", async ({ page }) => {
+	await page.goto(`${baseUrl}${inlineCodeRulePath}`);
+
+	const summary = page.locator(".rule-summary-text");
+	await playwrightExpect(summary).not.toContainText("`");
+	await playwrightExpect(summary.locator("code").first()).toHaveText(".success");
+});
+
+playwrightIt("renders backticked pagination labels as inline code", async ({ page }) => {
+	await page.goto(`${baseUrl}rules/react/`);
+
+	const nextPage = page.locator(".pagination-links [rel='next']");
+	await playwrightExpect(nextPage).toContainText("Ban React.FC");
+	await playwrightExpect(nextPage).not.toContainText("`");
+	await playwrightExpect(nextPage.locator("code")).toHaveText("React.FC");
+});
+
+playwrightIt("colors only the Error and Auto-fixable badges in both themes", async ({ page }) => {
+	await page.goto(`${baseUrl}${errorFixableRulePath}`);
+
+	const light = await getRuleBadgeColorsAsync(page, "light");
+	const dark = await getRuleBadgeColorsAsync(page, "dark");
+
+	playwrightExpect(light.badges.map((badge) => badge.kind)).toEqual(
+		playwrightExpect.arrayContaining(["error", "fixable"]),
+	);
+	expectBadgeColorBudget(light);
+	expectBadgeColorBudget(dark);
+
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	const roblox = await getRuleBadgeColorsAsync(page, "dark");
+
+	playwrightExpect(roblox.badges.map((badge) => badge.kind)).toContain("ink");
+	expectBadgeColorBudget(roblox);
+});
+
+playwrightIt("wraps the rule description at about 72 characters", async ({ page }) => {
+	await page.setViewportSize({ height: 900, width: 1600 });
+	await page.goto(`${baseUrl}${errorFixableRulePath}`);
+
+	const firstLineLength = await page.locator(".rule-summary-text p").evaluate((paragraph) => {
+		const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+		const range = document.createRange();
+		let firstTop: number | undefined;
+		let count = 0;
+
+		for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+			for (let index = 0; index < (node.textContent?.length ?? 0); index += 1) {
+				range.setStart(node, index);
+				range.setEnd(node, index + 1);
+				const top = Math.round(range.getBoundingClientRect().top);
+				firstTop ??= top;
+				if (top > firstTop) return count;
+				count += 1;
+			}
+		}
+
+		return count;
+	});
+
+	playwrightExpect(firstLineLength).toBeLessThanOrEqual(75);
+});
+
+playwrightIt("renders sidebar badges with the rule page badge component", async ({ page }) => {
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	const sidebar = page.locator(".sidebar-content");
+	const freshRuleCount = [...getRuleNewness().values()].filter(
+		(freshness) => freshness.isNew || freshness.isUpdated,
+	).length;
+
+	await playwrightExpect(sidebar.locator(".sl-badge")).toHaveCount(0);
+	await playwrightExpect(sidebar.locator(".badge.badge--compact:is(.badge--new, .badge--updated)")).toHaveCount(
+		freshRuleCount,
+	);
+});
+
+playwrightIt("copies the full rule name", async ({ page }) => {
+	await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
+	await page.goto(`${baseUrl}${rulePath}`);
+
+	const copyButton = page.locator(".rule-summary-copy");
+	await playwrightExpect(copyButton).toHaveAccessibleName("Copy rule name");
+	await copyButton.click();
+
+	await playwrightExpect(copyButton).toHaveAccessibleName("Rule name copied");
+	playwrightExpect(await page.evaluate(async () => navigator.clipboard.readText())).toBe("small-rules/no-print");
 });
 
 playwrightIt("copies a rule example", async ({ page }) => {

@@ -1,5 +1,12 @@
 import nodePath from "node:path";
 import { cwd } from "node:process";
+import {
+	isMaybeBoolean,
+	isMaybeReadonlyArrayOfStrings,
+	isMaybeString,
+	isReadonlyArrayOfStrings,
+	isString,
+} from "@small-rules/arktype-utilities";
 import { isIdentifier, isMemberExpression } from "@small-rules/oxlint-utilities";
 import { type } from "arktype";
 import { minimatch, Minimatch } from "minimatch";
@@ -12,13 +19,13 @@ import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilit
 import type { Except, Simplify } from "type-fest";
 
 const isRestriction = type({
-	"message?": "string | undefined",
-	object: "string",
-	properties: type("string[]").readonly(),
+	"message?": isMaybeString,
+	object: isString,
+	properties: isReadonlyArrayOfStrings,
 }).readonly();
 const isRuleOptions = type({
-	"allowFiles?": type("string[]").readonly().or("undefined"),
-	"checkComputed?": "boolean | undefined",
+	"allowFiles?": isMaybeReadonlyArrayOfStrings,
+	"checkComputed?": isMaybeBoolean,
 	restrictions: isRestriction.array().readonly(),
 }).readonly();
 

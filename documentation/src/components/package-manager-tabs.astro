@@ -1,5 +1,6 @@
 ---
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { siBun, siDeno, siNpm, siPnpm, siVite, siYarn } from "simple-icons";
 
 type Preset = "install" | "run";
 
@@ -10,21 +11,74 @@ interface Props {
 const { preset = "install" } = Astro.props;
 
 const managers = [
-	{ install: "aube add --save-dev @pobammer-ts/small-rules oxlint", label: "aube", run: "aube run lint" },
-	{ install: "npm install --save-dev @pobammer-ts/small-rules oxlint", label: "npm", run: "npm run lint" },
-	{ install: "pnpm add --save-dev @pobammer-ts/small-rules oxlint", label: "pnpm", run: "pnpm run lint" },
-	{ install: "yarn add --dev @pobammer-ts/small-rules oxlint", label: "yarn", run: "yarn run lint" },
-	{ install: "bun add --dev @pobammer-ts/small-rules oxlint", label: "bun", run: "bun run lint" },
-	{ install: "deno add npm:@pobammer-ts/small-rules npm:oxlint", label: "deno", run: "deno task lint" },
-	{ install: "vp add --dev @pobammer-ts/small-rules oxlint", label: "vp", run: "vp run lint" },
-	{ install: "ni -D @pobammer-ts/small-rules oxlint", label: "ni", run: "nr lint" },
+	{
+		icon: "M1.25 14V4.65H3.8V6.05C4.62 4.99 5.73 4.45 7.14 4.45C9.57 4.45 10.89 5.99 10.89 8.69V14H8.25V9.13C8.25 7.57 7.68 6.84 6.48 6.84C4.91 6.84 3.94 8.03 3.94 10.08V14H1.25ZM12.2 4.65H14.8V14H12.2V4.65ZM13.5 3.45C14.3009 3.45 14.95 2.80082 14.95 2C14.95 1.19919 14.3009 0.550003 13.5 0.550003C12.6992 0.550003 12.05 1.19919 12.05 2C12.05 2.80082 12.6992 3.45 13.5 3.45Z",
+		install: "ni -D @pobammer-ts/small-rules oxlint",
+		label: "ni",
+		run: "nr lint",
+		viewBox: "0 0 16 16",
+	},
+	{
+		icon: siPnpm.path,
+		install: "pnpm add --save-dev @pobammer-ts/small-rules oxlint",
+		label: "pnpm",
+		run: "pnpm run lint",
+	},
+	{
+		icon: "M3 18h18v2H3V18Zm3-2a6 6 0 0 1 12 0h-2a4 4 0 0 0-8 0H6Z",
+		install: "aube add --save-dev @pobammer-ts/small-rules oxlint",
+		label: "aube",
+		run: "aube run lint",
+	},
+	{
+		icon: siVite.path,
+		install: "vp add --dev @pobammer-ts/small-rules oxlint",
+		label: "vp",
+		run: "vp run lint",
+	},
+	{
+		icon: siDeno.path,
+		install: "deno add npm:@pobammer-ts/small-rules npm:oxlint",
+		label: "deno",
+		run: "deno task lint",
+	},
+	{
+		icon: siBun.path,
+		install: "bun add --dev @pobammer-ts/small-rules oxlint",
+		label: "bun",
+		run: "bun run lint",
+	},
+	{
+		icon: siYarn.path,
+		install: "yarn add --dev @pobammer-ts/small-rules oxlint",
+		label: "yarn",
+		run: "yarn run lint",
+	},
+	{
+		icon: siNpm.path,
+		install: "npm install --save-dev @pobammer-ts/small-rules oxlint",
+		label: "npm",
+		run: "npm run lint",
+	},
 ];
+
+function createIconDataUrl(path: string, viewBox = "0 0 24 24"): string {
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}"><path d="${path}"/></svg>`;
+	return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+const iconVariables = managers
+	.map(({ icon, label, viewBox }) => `--package-manager-${label}:${createIconDataUrl(icon, viewBox)}`)
+	.join(";");
 ---
 
-<Tabs syncKey="package-manager">
-	{managers.map(({ install, label, run }) => (
-		<TabItem label={label}>
-			<Code code={preset === "install" ? install : run} lang="bash" />
-		</TabItem>
-	))}
-</Tabs>
+<!-- biome-ignore lint/style/noInlineStyles: Package logos are generated as build-time data URLs. -->
+<div class="package-manager-tabs" style={iconVariables}>
+	<Tabs syncKey="package-manager">
+		{managers.map(({ install, label, run }) => (
+			<TabItem label={label}>
+				<Code code={preset === "install" ? install : run} lang="bash" />
+			</TabItem>
+		))}
+	</Tabs>
+</div>

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it } from "vitest";
 
@@ -12,6 +12,7 @@ const englishRuleCount = catalogCategories.find((category) => category.key === "
 const robloxRuleCount = catalogCategories.find((category) => category.key === "roblox")?.rules.length ?? 0;
 const noPrintPattern = /No Print/u;
 const banReactFcPattern = /Ban React Fc/u;
+const directiveNoDuplicateDisablePattern = /Directive No Duplicate Disable/u;
 const preventAbbreviationsPattern = /Prevent Abbreviations/u;
 
 function getShowingRulesLabel(count: number): string {
@@ -121,6 +122,18 @@ describe("rule-index", () => {
 		render(<RuleIndex categories={catalogCategories} mode="catalog" />);
 
 		expect(document.querySelectorAll(".rule-index-card-category").length).toBeGreaterThan(0);
+	});
+
+	it("renders backticked identifiers in rule descriptions as inline code", ({ expect }) => {
+		expect.assertions(3);
+
+		render(<RuleIndex categories={catalogCategories} mode="catalog" />);
+
+		const card = screen.getByRole("link", { name: directiveNoDuplicateDisablePattern });
+
+		expect(card.textContent).not.toContain("`");
+		expect(within(card).getByText("oxlint-disable", { selector: "code" })).toBeInstanceOf(HTMLElement);
+		expect(within(card).getByText("eslint-disable", { selector: "code" })).toBeInstanceOf(HTMLElement);
 	});
 });
 

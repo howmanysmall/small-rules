@@ -55,6 +55,16 @@ describe("rule-options-table", () => {
 		expect(detail?.hidden).toBe(false);
 	});
 
+	it("renders backticked identifiers in option descriptions as inline code", ({ expect }) => {
+		expect.assertions(2);
+
+		const option = { ...inlineOption, description: "Controls `oxlint-disable` behavior." };
+		const { container } = render(<RuleOptionsTable options={[option]} />);
+
+		expect(container.textContent).not.toContain("`");
+		expect(screen.getByText("oxlint-disable", { selector: "code" })).toBeInstanceOf(HTMLElement);
+	});
+
 	it("copies a complex default and announces success", async ({ expect }) => {
 		expect.assertions(3);
 

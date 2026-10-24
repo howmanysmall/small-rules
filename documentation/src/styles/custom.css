@@ -233,18 +233,19 @@ nav.sidebar .top-level li:not(:has(summary)) > details {
 	padding-left: 0.5rem;
 }
 
-.sidebar-content .sl-badge {
-	padding: 0.1em 0.45em;
-	font-family: var(--font-sans);
-	font-size: 0.75rem;
-	font-weight: 500;
-	line-height: 1.4;
-	color: var(--ink-2);
-	text-transform: none;
-	letter-spacing: 0;
-	background: transparent;
-	border: 1px solid var(--rule);
-	border-radius: 0;
+nav.sidebar a:has(> .badge--compact) {
+	display: flex;
+	gap: 0.625rem;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.badge.badge--compact {
+	flex-shrink: 0;
+	padding: 0;
+	margin-top: 0.125rem;
+	background: none;
+	border: none;
 }
 
 .sidebar-content :not(pre) > code {
@@ -479,6 +480,49 @@ starlight-tabs [role="tab"][aria-selected="true"] {
 	border-bottom-color: var(--ink);
 }
 
+.package-manager-tabs [role="tab"]::before {
+	flex-shrink: 0;
+	width: 1rem;
+	height: 1rem;
+	content: "";
+	background-color: currentColor;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: contain;
+}
+
+.package-manager-tabs .tab:nth-child(1) [role="tab"]::before {
+	mask-image: var(--package-manager-ni);
+}
+
+.package-manager-tabs .tab:nth-child(2) [role="tab"]::before {
+	mask-image: var(--package-manager-pnpm);
+}
+
+.package-manager-tabs .tab:nth-child(3) [role="tab"]::before {
+	mask-image: var(--package-manager-aube);
+}
+
+.package-manager-tabs .tab:nth-child(4) [role="tab"]::before {
+	mask-image: var(--package-manager-vp);
+}
+
+.package-manager-tabs .tab:nth-child(5) [role="tab"]::before {
+	mask-image: var(--package-manager-deno);
+}
+
+.package-manager-tabs .tab:nth-child(6) [role="tab"]::before {
+	mask-image: var(--package-manager-bun);
+}
+
+.package-manager-tabs .tab:nth-child(7) [role="tab"]::before {
+	mask-image: var(--package-manager-yarn);
+}
+
+.package-manager-tabs .tab:nth-child(8) [role="tab"]::before {
+	mask-image: var(--package-manager-npm);
+}
+
 .oxlint-config-tabs [role="tab"]::before {
 	flex-shrink: 0;
 	width: 1rem;
@@ -572,7 +616,8 @@ starlight-tabs [role="tab"][aria-selected="true"] {
 	.contextual-menu__button,
 	.rule-index-reset,
 	.RuleExample-copy,
-	.rule-option__copy
+	.rule-option__copy,
+	.rule-summary-copy
 ):active {
 	transform: scale(0.97);
 }
@@ -659,7 +704,7 @@ main .page-title-row > h1 {
 	flex-wrap: wrap;
 	gap: 0.5rem;
 	align-items: center;
-	margin: 0.75rem 0 1rem;
+	margin: 0.75rem 0 1.25rem;
 }
 
 .badge {
@@ -672,11 +717,15 @@ main .page-title-row > h1 {
 	font-weight: 500;
 	line-height: 1.2;
 	vertical-align: middle;
-	color: var(--ink-2);
 	white-space: nowrap;
+	border-radius: 0;
+}
+
+.badge,
+.rule-index-card li {
+	color: var(--ink-2);
 	background: transparent;
 	border: 1px solid var(--rule);
-	border-radius: 0;
 }
 
 .badge svg {
@@ -686,24 +735,103 @@ main .page-title-row > h1 {
 	color: var(--ink-3);
 }
 
+/* Only two badges take a hue: Error washes in the flag color, and Auto-fixable
+draws a focus hairline. Every other badge stays ink. */
+.badge--wash,
+.rule-index-card-trait-problem {
+	--badge-color: var(--data-1);
+	background: color-mix(in srgb, var(--badge-color) 8%, transparent);
+}
+
+.badge--line,
+.rule-index-card-trait-fixable {
+	--badge-color: var(--focus);
+}
+
+.badge--wash,
+.badge--line,
+.rule-index-card-trait-problem,
+.rule-index-card-trait-fixable {
+	color: var(--badge-color);
+	border-color: color-mix(in srgb, var(--badge-color) 35%, var(--rule));
+}
+
+.badge--wash svg,
+.badge--line svg {
+	color: inherit;
+}
+
 .rule-summary {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
-	margin: 1rem 0 1.5rem;
+	gap: 1.75rem;
+	margin: 1.25rem 0 1.5rem;
+}
+
+.rule-summary-id-row {
+	display: flex;
+	gap: 0.375rem;
+	align-items: center;
+	align-self: flex-start;
+	max-width: 100%;
 }
 
 .rule-summary-id {
-	align-self: flex-start;
 	padding: 0;
 	font-family: var(--font-mono);
 	font-size: 0.75rem;
 	color: var(--ink-3);
+	overflow-wrap: anywhere;
 	background: transparent;
 	border: 0;
 }
 
+.rule-summary-copy {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	padding: 0;
+	color: var(--ink-3);
+	cursor: pointer;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 0;
+	transition:
+		color var(--hover-duration) ease,
+		border-color var(--hover-duration) ease,
+		transform var(--press-duration) var(--ease-out);
+}
+
+.rule-summary-copy:disabled {
+	cursor: default;
+	opacity: 0.45;
+}
+
+.rule-summary-copy:hover:not(:disabled),
+.rule-summary-copy[data-state="copied"] {
+	color: var(--ink);
+	border-color: var(--rule);
+}
+
+.rule-summary-copy[data-state="failed"] {
+	color: var(--vermilion);
+}
+
+.rule-summary-copy svg {
+	width: 0.875rem;
+	height: 0.875rem;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
 .rule-summary-text p {
+	/* About 72 characters of Newsreader per line. */
+	max-width: 29.75em;
 	margin: 0;
 	font-family: var(--font-serif);
 	font-size: 1.1875rem;
@@ -1380,7 +1508,7 @@ main .page-title-row > h1 {
 	white-space: nowrap;
 }
 
-.rule-index-card code {
+.rule-index-card > code {
 	align-self: flex-start;
 	padding: 0;
 	font-family: var(--font-mono);
@@ -1421,8 +1549,6 @@ the traits row uses gap for spacing instead. */
 	font-size: 0.75rem;
 	font-weight: 500;
 	line-height: 1.4;
-	color: var(--ink-2);
-	border: 1px solid var(--rule);
 }
 
 .rule-index-empty {
