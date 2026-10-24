@@ -63,10 +63,14 @@ function normalizePath(value: string): string {
 
 function createFileCandidates(filename: string): ReadonlyArray<string> {
 	const normalizedFilename = normalizePath(filename);
-	if (!nodePath.isAbsolute(filename)) return [normalizedFilename];
+	if (!nodePath.isAbsolute(filename)) {
+		return [normalizedFilename];
+	}
 
 	const relativeFilename = normalizePath(nodePath.relative(cwd(), filename));
-	if (relativeFilename.length === 0 || relativeFilename.startsWith("..")) return [normalizedFilename];
+	if (relativeFilename.length === 0 || relativeFilename.startsWith("..")) {
+		return [normalizedFilename];
+	}
 
 	return [normalizedFilename, relativeFilename];
 }
@@ -87,8 +91,11 @@ function createPropertyMatcher(patterns: ReadonlyArray<string>): Matcher {
 
 	for (const pattern of patterns) {
 		const matcher = compileMatcher(pattern, NAME_MATCH_OPTIONS);
-		if (matcher.hasMagic) globMatchers[size++] = matcher.matches;
-		else literalPatterns.add(pattern);
+		if (matcher.hasMagic) {
+			globMatchers[size++] = matcher.matches;
+		} else {
+			literalPatterns.add(pattern);
+		}
 	}
 
 	return (property) => literalPatterns.has(property) || globMatchers.some((matcher) => matcher(property));
@@ -104,7 +111,9 @@ function compileRestriction(restriction: Restriction): CompiledRestriction {
 
 function getEffectiveOptions(context: Context): EffectiveOptions {
 	const [options] = context.options;
-	if (!isRuleOptions.allows(options)) return { checkComputed: true, isAllowedFile: false, restrictions: [] };
+	if (!isRuleOptions.allows(options)) {
+		return { checkComputed: true, isAllowedFile: false, restrictions: [] };
+	}
 
 	const { allowFiles, checkComputed, restrictions } = options;
 	const fileCandidates = createFileCandidates(context.filename);

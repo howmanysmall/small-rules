@@ -19,11 +19,17 @@ function findCall(source: HarnessSourceCode, name: string): HarnessNode {
 	traverseAst(source.ast, {
 		CallExpression(node: HarnessNode) {
 			if (found !== undefined) return;
-			if (getCalleeName(node.callee) === name) found = node;
+
+			if (getCalleeName(node.callee) === name) {
+				found = node;
+			}
 		},
 	});
 
-	if (found === undefined) throw new Error(`Call expression "${name}" not found.`);
+	if (found === undefined) {
+		throw new Error(`Call expression "${name}" not found.`);
+	}
+
 	return found;
 }
 

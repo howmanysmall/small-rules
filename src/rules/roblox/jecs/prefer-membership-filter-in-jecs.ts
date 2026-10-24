@@ -60,7 +60,11 @@ function getDirectQueryChain(sourceCode: SourceCode, expression: ESTree.Expressi
 		}
 
 		if (matched.method !== "with" && matched.method !== "without") return undefined;
-		if (matched.method === "with") withCall ??= matched.call;
+
+		if (matched.method === "with") {
+			withCall ??= matched.call;
+		}
+
 		current = matched.object;
 	}
 }
@@ -81,7 +85,9 @@ function getBindingVariables(
 
 		const variable = getVariableByName(scope, element.name);
 		/* v8 ignore next -- each identifier in the loop binding declares a scoped variable. @preserve */
-		if (variable !== undefined) variables.set(element.name, variable);
+		if (variable !== undefined) {
+			variables.set(element.name, variable);
+		}
 	}
 
 	return variables;
@@ -174,15 +180,18 @@ function createFixes(candidate: MembershipCandidate, { getText }: SourceCode, fi
 
 	const movedText = getArgumentText(getText, candidate.movedArguments);
 	const { chain } = candidate;
-	if (chain.withCall === undefined) fixes[2] = fixer.insertTextAfter(chain.queryCall, `.with(${movedText})`);
-	else {
+	if (chain.withCall === undefined) {
+		fixes[2] = fixer.insertTextAfter(chain.queryCall, `.with(${movedText})`);
+	} else {
 		const [firstWithArgument] = chain.withCall.arguments;
 		if (firstWithArgument === undefined) {
 			fixes[2] = fixer.replaceTextRange(
 				[chain.withCall.callee.range[1], chain.withCall.range[1]],
 				`(${movedText})`,
 			);
-		} else fixes[2] = fixer.insertTextBefore(firstWithArgument, `${movedText}, `);
+		} else {
+			fixes[2] = fixer.insertTextBefore(firstWithArgument, `${movedText}, `);
+		}
 	}
 
 	return fixes;
@@ -202,7 +211,9 @@ const preferMembershipFilterInJecs = createRule("prefer-membership-filter-in-jec
 						messageId: "preferMembershipFilter",
 						node: candidate.chain.queryCall,
 					});
-				} else context.report({ messageId: "preferMembershipFilter", node: candidate.chain.queryCall });
+				} else {
+					context.report({ messageId: "preferMembershipFilter", node: candidate.chain.queryCall });
+				}
 			},
 		} satisfies Visitor;
 	},

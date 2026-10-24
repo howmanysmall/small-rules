@@ -41,7 +41,10 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 
 		/* v8 ignore next -- data leaves resolve to plain identifiers; `ref.current` / constant leaf shapes are covered by the isProp/isUseRef guards above. @preserve */
 		if (analysis.isRefCurrent(upstreamReference)) continue;
-		if (!analysis.isConstant(upstreamReference)) dataArguments.push(upstreamReference);
+
+		if (!analysis.isConstant(upstreamReference)) {
+			dataArguments.push(upstreamReference);
+		}
 	}
 
 	return dataArguments;

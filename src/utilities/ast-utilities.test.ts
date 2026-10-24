@@ -27,8 +27,11 @@ const traversalRule = defineRule({
 					return true;
 				});
 
-				if (callCount === 1) context.report({ messageId: "callCount", node });
-				else if (callCount === 0) context.report({ messageId: "stopped", node });
+				if (callCount === 1) {
+					context.report({ messageId: "callCount", node });
+				} else if (callCount === 0) {
+					context.report({ messageId: "stopped", node });
+				}
 			},
 		} satisfies Visitor;
 	},

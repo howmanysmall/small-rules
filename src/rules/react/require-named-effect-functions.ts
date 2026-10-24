@@ -64,9 +64,16 @@ function parseOptions(rawOptions: RuleOptions): EffectFunctionOptions {
 
 	const hooks = new Array<HookConfig>();
 	/* v8 ignore next -- @preserve rule schema validates every hook entry before create() runs. */
-	for (const rawHook of rawHooks) if (isHookConfiguration(rawHook)) hooks.push(rawHook);
+	for (const rawHook of rawHooks) {
+		if (isHookConfiguration(rawHook)) {
+			hooks.push(rawHook);
+		}
+	}
 
-	if (hooks.length === 0) return { environment, hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
+	if (hooks.length === 0) {
+		return { environment, hooks: DEFAULT_HOOKS, inlineFunctionDeclarations, sloptor };
+	}
+
 	return { environment, hooks, inlineFunctionDeclarations, sloptor };
 }
 
@@ -266,8 +273,11 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			node: ESTree.CallExpression,
 			functionExpression: ESTree.Function,
 		): void {
-			if (functionExpression.id === null) reportHookIssue(hookName, node, "anonymousFunction");
-			else if (isRobloxTsMode) reportHookIssue(hookName, node, "functionExpression");
+			if (functionExpression.id === null) {
+				reportHookIssue(hookName, node, "anonymousFunction");
+			} else if (isRobloxTsMode) {
+				reportHookIssue(hookName, node, "functionExpression");
+			}
 		}
 
 		function reportDeclarationReference(
@@ -300,11 +310,15 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 		): void {
 			const functionHasId = functionExpression.id !== null;
 
-			if (functionHasId && functionExpression.async) reportHookIssue(hookName, node, "asyncFunctionExpression");
-			else if (functionHasId && isRobloxTsMode) reportHookIssue(hookName, node, "functionExpression");
-			else if (!functionHasId && functionExpression.async) {
+			if (functionHasId && functionExpression.async) {
+				reportHookIssue(hookName, node, "asyncFunctionExpression");
+			} else if (functionHasId && isRobloxTsMode) {
+				reportHookIssue(hookName, node, "functionExpression");
+			} else if (!functionHasId && functionExpression.async) {
 				reportHookIssue(hookName, node, "asyncAnonymousFunction");
-			} else if (!functionHasId) reportHookIssue(hookName, node, "anonymousFunction");
+			} else if (!functionHasId) {
+				reportHookIssue(hookName, node, "anonymousFunction");
+			}
 		}
 
 		return {
@@ -321,13 +335,18 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 				}
 
 				if (isArrowFunctionExpression(firstArgument)) {
-					if (firstArgument.async) reportHookIssue(hookName, node, "asyncArrowFunction");
-					else reportHookIssue(hookName, node, "arrowFunction");
+					if (firstArgument.async) {
+						reportHookIssue(hookName, node, "asyncArrowFunction");
+					} else {
+						reportHookIssue(hookName, node, "arrowFunction");
+					}
 
 					return;
 				}
 
-				if (isFunctionExpression(firstArgument)) reportInlineFunctionExpression(hookName, node, firstArgument);
+				if (isFunctionExpression(firstArgument)) {
+					reportInlineFunctionExpression(hookName, node, firstArgument);
+				}
 			},
 		} satisfies Visitor;
 	},

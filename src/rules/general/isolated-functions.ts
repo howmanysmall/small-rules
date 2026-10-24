@@ -88,7 +88,9 @@ function parseOptions(rawOptions: RawOptions): RuleOptions {
 	if (Predicate.isObject(rawOptions.overrideGlobals)) {
 		for (const [name, value] of Object.entries(rawOptions.overrideGlobals)) {
 			const mode = parseGlobalMode(value);
-			if (mode !== undefined) overrideGlobals.set(name, mode);
+			if (mode !== undefined) {
+				overrideGlobals.set(name, mode);
+			}
 		}
 	}
 
@@ -250,7 +252,9 @@ function collectExternalReferences(functionScope: Scope): Array<Reference> {
 		pushChildScopes(scopes, scope);
 
 		for (const reference of scope.references) {
-			if (isExternalReference(functionScope, reference)) external.push(reference);
+			if (isExternalReference(functionScope, reference)) {
+				external.push(reference);
+			}
 		}
 	}
 
@@ -301,10 +305,15 @@ function reportExternalReferences(context: Context, node: FunctionNode, reason: 
 function pushClassBoundaryChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
 	/* v8 ignore next -- only invoked for ClassDeclaration/ClassExpression nodes. @preserve */
 	if (!isClass(node)) return;
-	if (node.superClass !== null) worklist.push(node.superClass);
+
+	if (node.superClass !== null) {
+		worklist.push(node.superClass);
+	}
 
 	for (const element of node.body.body) {
-		if ("computed" in element && element.computed) worklist.push(element.key);
+		if ("computed" in element && element.computed) {
+			worklist.push(element.key);
+		}
 	}
 }
 

@@ -109,7 +109,9 @@ const noHasBeforeRemoveInJecs = createRule("no-has-before-remove-in-jecs", "robl
 						messageId: "removeWithoutHas",
 						node,
 					});
-				} else context.report({ messageId: "removeWithoutHas", node });
+				} else {
+					context.report({ messageId: "removeWithoutHas", node });
+				}
 			},
 		} satisfies Visitor;
 	},

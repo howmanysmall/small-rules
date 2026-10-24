@@ -15,11 +15,15 @@ export function toPascalCase(value: string): string {
 	let start = 0;
 	let { length } = marked;
 
-	while (marked.charCodeAt(start) === 0) start += 1;
+	while (marked.charCodeAt(start) === 0) {
+		start += 1;
+	}
 
 	if (start === length) return "";
 
-	while (marked.charCodeAt(length - 1) === 0) length -= 1;
+	while (marked.charCodeAt(length - 1) === 0) {
+		length -= 1;
+	}
 
 	let result = "";
 	let wordStart = start;

@@ -90,9 +90,7 @@ function getSingleDeclarator(statements: ReadonlyArray<ProgramStatement>, index:
 
 	const [declarator] = declaration.declarations;
 	/* v8 ignore next -- guarded by declarations.length === 1; undefined is a parser invariant. @preserve */
-	if (declarator === undefined || !isVariableDeclarator(declarator) || declarator.init === null) {
-		return undefined;
-	}
+	if (declarator === undefined || !isVariableDeclarator(declarator) || declarator.init === null) return undefined;
 
 	return { declaration, declarator };
 }
@@ -229,7 +227,10 @@ function computeRemoveStart(sourceCode: SourceCode, candidate: Candidate): numbe
 			continue;
 		}
 
-		if (previousCharacter === "\n") removeStart -= 1;
+		if (previousCharacter === "\n") {
+			removeStart -= 1;
+		}
+
 		break;
 	}
 
@@ -243,7 +244,9 @@ function createFix(
 ): Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> {
 	const { init } = declarator;
 	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
-	if (init === null) return [];
+	if (init === null) {
+		return [];
+	}
 
 	const literalText = `[${assignments.map((assignment) => assignment.valueText).join(", ")}]`;
 	const fixes: Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> = [

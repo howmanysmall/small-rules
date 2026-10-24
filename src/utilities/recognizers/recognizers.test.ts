@@ -14,7 +14,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["for("]);
 
 			expect(detector.scan("for(let i=0;i<n;i++)")).toBe(1);
-		}, 5000);
+		});
 
 		it("is case-sensitive for string patterns", ({ expect }) => {
 			expect.assertions(2);
@@ -23,7 +23,7 @@ describe("createContainsDetector utility", () => {
 
 			expect(detector.scan("import 'x'")).toBe(1);
 			expect(detector.scan("Import 'x'")).toBe(0);
-		}, 5000);
+		});
 
 		it("finds multiple occurrences of the same pattern", ({ expect }) => {
 			expect.assertions(1);
@@ -31,7 +31,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["this."]);
 
 			expect(detector.scan("this.x = this.y")).toBe(2);
-		}, 5000);
+		});
 
 		it("finds across multiple patterns", ({ expect }) => {
 			expect.assertions(1);
@@ -39,7 +39,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["for(", "if("]);
 
 			expect(detector.scan("for(let i=0;i<n;i++){if(x)break}")).toBe(2);
-		}, 5000);
+		});
 
 		it("returns 0 when no pattern matches", ({ expect }) => {
 			expect.assertions(1);
@@ -47,7 +47,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["for("]);
 
 			expect(detector.scan("const x = 1")).toBe(0);
-		}, 5000);
+		});
 
 		it("treats an empty pattern as matching nothing", ({ expect }) => {
 			expect.assertions(1);
@@ -56,7 +56,7 @@ describe("createContainsDetector utility", () => {
 
 			// Empty patterns must not hang the scan or inflate counts.
 			expect(detector.scan("foo")).toBe(0);
-		}, 5000);
+		});
 	});
 
 	describe("regex patterns", () => {
@@ -67,7 +67,7 @@ describe("createContainsDetector utility", () => {
 
 			expect(detector.scan("return 42")).toBe(0);
 			expect(detector.scan("return(42)")).toBe(1);
-		}, 5000);
+		});
 
 		it("counts multiple regex matches in compressed text", ({ expect }) => {
 			expect.assertions(1);
@@ -75,7 +75,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, [/\bconst\b/gu]);
 
 			expect(detector.scan("const a = 1; const b = 2")).toBe(0);
-		}, 5000);
+		});
 
 		it("matches regex patterns without word boundaries in compressed text", ({ expect }) => {
 			expect.assertions(1);
@@ -83,7 +83,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, [/return/u]);
 
 			expect(detector.scan("return 42")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("whitespace compression", () => {
@@ -93,7 +93,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["for("]);
 
 			expect(detector.scan("for  (  let i=0;i<n;i++)")).toBe(1);
-		}, 5000);
+		});
 
 		it("compresses whitespace before matching", ({ expect }) => {
 			expect.assertions(1);
@@ -101,7 +101,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["if("]);
 
 			expect(detector.scan("  if  (  x  )  ")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("regex special characters in string patterns", () => {
@@ -112,7 +112,7 @@ describe("createContainsDetector utility", () => {
 
 			expect(detector.scan("this.x")).toBe(1);
 			expect(detector.scan("thisX")).toBe(0);
-		}, 5000);
+		});
 
 		it("escapes parentheses in string patterns literally", ({ expect }) => {
 			expect.assertions(1);
@@ -120,7 +120,7 @@ describe("createContainsDetector utility", () => {
 			const detector = createContainsDetector(0.5, ["require("]);
 
 			expect(detector.scan("require('fs')")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("lastIndex safety", () => {
@@ -132,7 +132,7 @@ describe("createContainsDetector utility", () => {
 			expect(detector.scan("const x = 1")).toBe(1);
 			expect(detector.scan("let y = 2")).toBe(0);
 			expect(detector.scan("const z = 3")).toBe(1);
-		}, 5000);
+		});
 
 		it("does not leak state across repeated scan calls", ({ expect }) => {
 			expect.assertions(1);
@@ -141,7 +141,7 @@ describe("createContainsDetector utility", () => {
 			const results = Array.from({ length: 10 }, () => detector.scan("var x = 1"));
 
 			expect(results).toStrictEqual(Array.from({ length: 10 }).fill(1));
-		}, 5000);
+		});
 	});
 });
 
@@ -153,7 +153,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("const x = 1;")).toBe(1);
-		}, 5000);
+		});
 
 		it("detects line ending with closing brace", ({ expect }) => {
 			expect.assertions(2);
@@ -162,7 +162,7 @@ describe("createEndWithDetector utility", () => {
 
 			expect(detector.scan("function foo() {")).toBe(1);
 			expect(detector.scan("}")).toBe(1);
-		}, 5000);
+		});
 
 		it("returns 0 when line does not end with target", ({ expect }) => {
 			expect.assertions(1);
@@ -170,7 +170,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("const x = 1")).toBe(0);
-		}, 5000);
+		});
 	});
 
 	describe("whitespace handling", () => {
@@ -180,7 +180,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("const x = 1;   ")).toBe(1);
-		}, 5000);
+		});
 
 		it("skips trailing tabs", ({ expect }) => {
 			expect.assertions(1);
@@ -188,7 +188,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("const x = 1;\t\t")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("comment marker handling", () => {
@@ -198,7 +198,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("const x = 1; */")).toBe(1);
-		}, 5000);
+		});
 
 		it("skips trailing asterisk", ({ expect }) => {
 			expect.assertions(1);
@@ -206,7 +206,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("const x = 1; *")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("empty and edge cases", () => {
@@ -216,7 +216,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan("")).toBe(0);
-		}, 5000);
+		});
 
 		it("returns 0 for whitespace-only string", ({ expect }) => {
 			expect.assertions(1);
@@ -224,7 +224,7 @@ describe("createEndWithDetector utility", () => {
 			const detector = createEndWithDetector(0.95, [";"]);
 
 			expect(detector.scan(" ".repeat(3))).toBe(0);
-		}, 5000);
+		});
 	});
 
 	describe("multiple endings", () => {
@@ -237,7 +237,7 @@ describe("createEndWithDetector utility", () => {
 			expect(detector.scan("if (true) {")).toBe(1);
 			expect(detector.scan("}")).toBe(1);
 			expect(detector.scan("x = 1")).toBe(0);
-		}, 5000);
+		});
 	});
 });
 
@@ -250,7 +250,7 @@ describe("createKeywordsDetector utility", () => {
 
 			expect(detector.scan("const x = 1")).toBe(1);
 			expect(detector.scan("const x = 1; let y = 2")).toBe(2);
-		}, 5000);
+		});
 
 		it("returns 0 when no keyword matches", ({ expect }) => {
 			expect.assertions(1);
@@ -258,7 +258,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.3, ["const"]);
 
 			expect(detector.scan("let x = 1")).toBe(0);
-		}, 5000);
+		});
 	});
 
 	describe("word boundary splitting", () => {
@@ -268,7 +268,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.3, ["return"]);
 
 			expect(detector.scan("return 42")).toBe(1);
-		}, 5000);
+		});
 
 		it("splits on parentheses", ({ expect }) => {
 			expect.assertions(1);
@@ -276,7 +276,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.3, ["if"]);
 
 			expect(detector.scan("if(x)")).toBe(1);
-		}, 5000);
+		});
 
 		it("splits on braces", ({ expect }) => {
 			expect.assertions(1);
@@ -284,7 +284,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.3, ["else"]);
 
 			expect(detector.scan("else{x}")).toBe(1);
-		}, 5000);
+		});
 
 		it("splits on tabs", ({ expect }) => {
 			expect.assertions(1);
@@ -292,7 +292,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.3, ["const"]);
 
 			expect(detector.scan("const\tx = 1")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("multi-word lines", () => {
@@ -302,7 +302,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.3, ["return"]);
 
 			expect(detector.scan("return return")).toBe(2);
-		}, 5000);
+		});
 
 		it("does not match partial keywords embedded in other tokens", ({ expect }) => {
 			expect.assertions(1);
@@ -310,7 +310,7 @@ describe("createKeywordsDetector utility", () => {
 			const detector = createKeywordsDetector(0.7, ["++"]);
 
 			expect(detector.scan("x++ || y++")).toBe(0);
-		}, 5000);
+		});
 	});
 });
 
@@ -322,7 +322,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("const myVariable = 1")).toBe(1);
-		}, 5000);
+		});
 
 		it("detects camelCase at different positions", ({ expect }) => {
 			expect.assertions(2);
@@ -331,7 +331,7 @@ describe("createCamelCaseDetector utility", () => {
 
 			expect(detector.scan("myVariable")).toBe(1);
 			expect(detector.scan("const fooBarBaz")).toBe(1);
-		}, 5000);
+		});
 
 		it("returns 0 for all-lowercase", ({ expect }) => {
 			expect.assertions(1);
@@ -339,7 +339,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("const myvariable = 1")).toBe(0);
-		}, 5000);
+		});
 
 		it("returns 0 for all-uppercase with no lowercase prefix", ({ expect }) => {
 			expect.assertions(1);
@@ -347,7 +347,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("CONST")).toBe(0);
-		}, 5000);
+		});
 
 		it("detects space-to-uppercase transition as camelCase-like", ({ expect }) => {
 			expect.assertions(1);
@@ -355,7 +355,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("CONST MYVARIABLE")).toBe(1);
-		}, 5000);
+		});
 	});
 
 	describe("edge cases", () => {
@@ -365,7 +365,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("")).toBe(0);
-		}, 5000);
+		});
 
 		it("returns 0 for single character", ({ expect }) => {
 			expect.assertions(1);
@@ -373,7 +373,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("a")).toBe(0);
-		}, 5000);
+		});
 
 		it("returns 0 for two lowercase characters", ({ expect }) => {
 			expect.assertions(1);
@@ -381,7 +381,7 @@ describe("createCamelCaseDetector utility", () => {
 			const detector = createCamelCaseDetector(0.5);
 
 			expect(detector.scan("ab")).toBe(0);
-		}, 5000);
+		});
 	});
 });
 
@@ -392,7 +392,7 @@ describe("recognize (detector probability)", () => {
 		const detector = createKeywordsDetector(0.5, ["xyz"]);
 
 		expect(recognize(detector, "hello world")).toBe(0);
-	}, 5000);
+	});
 
 	it("returns probability for single match", ({ expect }) => {
 		expect.assertions(1);
@@ -400,7 +400,7 @@ describe("recognize (detector probability)", () => {
 		const detector = createKeywordsDetector(0.5, ["const"]);
 
 		expect(recognize(detector, "const x = 1")).toBeCloseTo(0.5, 10);
-	}, 5000);
+	});
 
 	it("increases probability for multiple matches", ({ expect }) => {
 		expect.assertions(2);
@@ -410,7 +410,7 @@ describe("recognize (detector probability)", () => {
 
 		expect(probability).toBeGreaterThan(0.5);
 		expect(probability).toBeLessThan(1);
-	}, 5000);
+	});
 
 	it("compounds the documented probability for repeated matches", ({ expect }) => {
 		expect.assertions(1);
@@ -420,5 +420,5 @@ describe("recognize (detector probability)", () => {
 		// 1 - (1 - 0.3)^3 from the Detector doc contract, written out as a
 		// literal.
 		expect(recognize(detector, "return return return")).toBeCloseTo(0.657, 10);
-	}, 5000);
+	});
 });

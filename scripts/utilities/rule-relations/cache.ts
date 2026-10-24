@@ -9,9 +9,7 @@ import type { PairJudgments } from "./types";
 
 // oxlint-disable-next-line small-rules/no-unknown-parameters -- literally "unknown" in the sense it is not known
 export function toStringStable(value: unknown): string {
-	if (Array.isArray(value)) {
-		return `[${value.map((entry) => toStringStable(entry)).join(",")}]`;
-	}
+	if (Array.isArray(value)) return `[${value.map((entry) => toStringStable(entry)).join(",")}]`;
 
 	if (Predicate.isObjectKeyword(value)) {
 		const entries = Object.entries(value).toSorted(([left], [right]) => compareStrings(left, right));

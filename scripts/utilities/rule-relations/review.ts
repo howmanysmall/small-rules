@@ -96,11 +96,15 @@ function evaluateOverrides(options: ReviewOptions): QualityEvaluation {
 			continue;
 		}
 
-		if (expectation.expected === "unrelated") negativeLabelCount += 1;
-		else positiveLabelCount += 1;
+		if (expectation.expected === "unrelated") {
+			negativeLabelCount += 1;
+		} else {
+			positiveLabelCount += 1;
+		}
 
-		if (matchesExpectation(actual, expectation.expected)) matchedPairCount += 1;
-		else {
+		if (matchesExpectation(actual, expectation.expected)) {
+			matchedPairCount += 1;
+		} else {
 			disagreements.push({ ...expectation, actual, judgments: options.result.judgments.get(key) });
 		}
 	}
@@ -140,7 +144,10 @@ export function createRelationReviewReport(options: ReviewOptions): RelationRevi
 	let acceptedCount = 0;
 	const orderedResolutions = [...result.resolutions].toSorted(([left], [right]) => compareStrings(left, right));
 	for (const [key, resolution] of orderedResolutions) {
-		if (resolution.type === "none") rejectedCount += 1;
+		if (resolution.type === "none") {
+			rejectedCount += 1;
+		}
+
 		if (resolution.type !== "relation") continue;
 
 		acceptedCount += 1;

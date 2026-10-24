@@ -271,6 +271,7 @@ export async function getOxlintAsync({
 						replacements: {},
 					},
 				],
+				"small-rules/curly": "error",
 				"small-rules/directive-disable-enable-pair": "error",
 				"small-rules/directive-no-aggregating-enable": "error",
 				"small-rules/directive-no-duplicate-disable": "error",
@@ -336,6 +337,7 @@ export async function getOxlintAsync({
 				"small-rules/no-initialize-state": ["error", { environment: "standard" }],
 				"small-rules/no-inline-property-on-memo-component": "error",
 				"small-rules/no-instance-methods-without-this": "off",
+				"small-rules/no-jsx-spread-child": "error",
 				"small-rules/no-known-value-widening": "error",
 				"small-rules/no-module-mocking": "error",
 				"small-rules/no-native-properties-spread": "off",
@@ -457,6 +459,7 @@ export async function getOxlintAsync({
 						allow: [{ name: "ValidationError", from: "package", package: "@cliffy/command" }],
 					},
 				],
+				"small-rules/require-tsx-for-hooks": "off",
 				"small-rules/require-unicode-regex": "error",
 				"small-rules/rerender-memo-with-default-value": "error",
 				"small-rules/starts-with-verb": [
@@ -664,6 +667,8 @@ export async function getOxlintAsync({
 				"max-lines-per-function": "off",
 				"no-console": "error",
 				"small-rules/no-filter-map-chain": "off",
+				"small-rules/no-real-temporary-directory": "error",
+				"small-rules/no-test-timeout": "error",
 				"small-rules/prefer-expect-assertions": [
 					"error",
 					{
@@ -721,6 +726,16 @@ export async function getOxlintAsync({
 				"vitest/valid-expect": "error",
 				"vitest/valid-title": "error",
 				"vitest/warn-todo": "error",
+			},
+		},
+		{
+			name: "small-rules/integration-tests",
+			// Integration tests may need real temporary directories and longer
+			// timeouts; both rules are unit-test rules.
+			files: ["**/*.integration.test.ts"],
+			rules: {
+				"small-rules/no-real-temporary-directory": "off",
+				"small-rules/no-test-timeout": "off",
 			},
 		},
 		{

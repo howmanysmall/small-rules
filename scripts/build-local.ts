@@ -83,7 +83,9 @@ function stringify(values: ReadonlyArray<unknown>): string {
 
 function getMaxWidth(texts: ReadonlyArray<string>): number {
 	let width = 0;
-	for (const text of texts) width = Math.max(width, stringWidth(text));
+	for (const text of texts) {
+		width = Math.max(width, stringWidth(text));
+	}
 
 	return width;
 }
@@ -203,7 +205,9 @@ const command = createBaseCommand(
 
 		console.log(boxen(lines.join("\n"), { borderColor: "cyan", padding: { left: 1, right: 1 } }));
 
-		for (const warning of logs.warnings) console.warn(`${yellow("⚠")} ${warning}`);
+		for (const warning of logs.warnings) {
+			console.warn(`${yellow("⚠")} ${warning}`);
+		}
 	});
 
 await command.parse();

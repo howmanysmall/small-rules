@@ -30,15 +30,11 @@ function replaceMarkdownLinks(value: string): string {
 	let cursor = 0;
 	while (cursor < value.length) {
 		const labelStart = value.indexOf("[", cursor);
-		if (labelStart === -1) {
-			return result + value.slice(cursor);
-		}
+		if (labelStart === -1) return result + value.slice(cursor);
 
 		const labelEnd = value.indexOf("](", labelStart + 1);
 		const linkEnd = labelEnd === -1 ? -1 : value.indexOf(")", labelEnd + 2);
-		if (labelEnd === -1 || linkEnd === -1) {
-			return result + value.slice(cursor);
-		}
+		if (labelEnd === -1 || linkEnd === -1) return result + value.slice(cursor);
 
 		result += value.slice(cursor, labelStart) + value.slice(labelStart + 1, labelEnd);
 		cursor = linkEnd + 1;
@@ -52,14 +48,10 @@ function stripDelimitedSections(value: string, opening: string, closing: string)
 	let cursor = 0;
 	while (cursor < value.length) {
 		const sectionStart = value.indexOf(opening, cursor);
-		if (sectionStart === -1) {
-			return result + value.slice(cursor);
-		}
+		if (sectionStart === -1) return result + value.slice(cursor);
 
 		const sectionEnd = value.indexOf(closing, sectionStart + opening.length);
-		if (sectionEnd === -1) {
-			return result + value.slice(cursor);
-		}
+		if (sectionEnd === -1) return result + value.slice(cursor);
 
 		result += `${value.slice(cursor, sectionStart)} `;
 		cursor = sectionEnd + closing.length;
@@ -72,7 +64,9 @@ function extractSharedUtilities(sourceText: string): ReadonlyArray<string> {
 	const utilities = new Set<string>();
 	for (const match of sourceText.matchAll(oxcUtilitiesPattern)) {
 		const specifier = match.groups?.utility;
-		if (specifier !== undefined) utilities.add(specifier);
+		if (specifier !== undefined) {
+			utilities.add(specifier);
+		}
 	}
 
 	return [...utilities].toSorted(compareStrings);

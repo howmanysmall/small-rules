@@ -23,7 +23,9 @@ const startsWithVerb = importedStartsWithVerb;
 it("startsWithVerb", async ({ bench }) => {
 	await bench.compare(
 		bench("default options", () => {
-			for (const functionName of FUNCTION_NAMES) startsWithVerb(functionName, {});
+			for (const functionName of FUNCTION_NAMES) {
+				startsWithVerb(functionName, {});
+			}
 		}),
 		bench("extra allow and deny lists", () => {
 			for (const functionName of FUNCTION_NAMES) {

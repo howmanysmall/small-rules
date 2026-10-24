@@ -92,7 +92,9 @@ function isNamingKey(node: ESTree.StringLiteral, parent: ESTree.Node): boolean {
  */
 function isConstantDefinition(node: ESTree.StringLiteral, name: string): boolean {
 	let current = node.parent;
-	while (isTsAsExpression(current) || isTsSatisfiesExpression(current)) current = current.parent;
+	while (isTsAsExpression(current) || isTsSatisfiesExpression(current)) {
+		current = current.parent;
+	}
 
 	return isVariableDeclarator(current) && isIdentifierNamed(current.id, name);
 }

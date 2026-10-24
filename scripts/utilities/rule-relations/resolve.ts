@@ -17,7 +17,10 @@ interface ResolveOptions {
 }
 
 export function resolvePairRelation({ judgments, left, right, thresholds }: ResolveOptions): RelationResolution {
-	if (judgments.assessment.probabilities["0"] >= thresholds.accept) return { type: "none" };
+	if (judgments.assessment.probabilities["0"] >= thresholds.accept) {
+		return { type: "none" };
+	}
+
 	const strength = judgments.assessment.probabilities["2"];
 	if (strength < thresholds.accept) {
 		return { concern: "relationship needs review", strength, type: "review" };

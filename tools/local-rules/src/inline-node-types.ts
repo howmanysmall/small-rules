@@ -51,10 +51,14 @@ export function collectComparedNodeTypes(
 	if (!isEqualityOperator(operator)) return;
 
 	const leftLiteral = getNodeTypeLiteral(left);
-	if (leftLiteral !== undefined && producesNodeType(right)) literals.push(leftLiteral);
+	if (leftLiteral !== undefined && producesNodeType(right)) {
+		literals.push(leftLiteral);
+	}
 
 	const rightLiteral = getNodeTypeLiteral(right);
-	if (rightLiteral !== undefined && producesNodeType(left)) literals.push(rightLiteral);
+	if (rightLiteral !== undefined && producesNodeType(left)) {
+		literals.push(rightLiteral);
+	}
 }
 
 export function collectCaseNodeTypes(
@@ -65,7 +69,9 @@ export function collectCaseNodeTypes(
 
 	for (const { test } of cases) {
 		const literal = getNodeTypeLiteral(test);
-		if (literal !== undefined) literals.push(literal);
+		if (literal !== undefined) {
+			literals.push(literal);
+		}
 	}
 }
 

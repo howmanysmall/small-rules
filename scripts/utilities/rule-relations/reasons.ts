@@ -44,8 +44,13 @@ export function validateReason({ allNames, reason, relation }: ReasonOptions): R
 	const problems = new Array<string>();
 	let size = 0;
 
-	if (reason.trim().length === 0) problems[size++] = "Reason is empty.";
-	if (reason.includes("\n")) problems[size++] = "Reason contains a newline.";
+	if (reason.trim().length === 0) {
+		problems[size++] = "Reason is empty.";
+	}
+
+	if (reason.includes("\n")) {
+		problems[size++] = "Reason contains a newline.";
+	}
 
 	if (reason.length > maxReasonLength) {
 		problems[size++] = `Reason exceeds ${maxReasonLength} characters (${reason.length}).`;
@@ -53,7 +58,10 @@ export function validateReason({ allNames, reason, relation }: ReasonOptions): R
 
 	for (const name of allNames) {
 		if (name === relation.from || name === relation.to) continue;
-		if (reason.includes(name)) problems[size++] = `Reason mentions unrelated rule "${name}".`;
+
+		if (reason.includes(name)) {
+			problems[size++] = `Reason mentions unrelated rule "${name}".`;
+		}
 	}
 
 	return problems;

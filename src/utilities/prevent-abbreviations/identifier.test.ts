@@ -61,7 +61,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 				expect.assertions(1);
 
 				expect(isIdentifierStartCodePoint(value)).toBe(expected);
-			}, 10000);
+			});
 		});
 
 		describe.each([
@@ -82,7 +82,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 				expect.assertions(1);
 
 				expect(isIdentifierStartCodePoint(value)).toBe(expected);
-			}, 10000);
+			});
 		});
 	});
 
@@ -99,7 +99,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 				expect.assertions(1);
 
 				expect(isIdentifierPartCodePoint(value)).toBe(expected);
-			}, 10000);
+			});
 		});
 
 		describe.each([
@@ -110,7 +110,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 				expect.assertions(1);
 
 				expect(isIdentifierPartCodePoint(value)).toBe(expected);
-			}, 10000);
+			});
 		});
 	});
 
@@ -124,7 +124,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 				expect.assertions(1);
 
 				expect(isValidIdentifier(name)).toBe(true);
-			}, 10000);
+			});
 		});
 
 		describe.each([
@@ -137,7 +137,7 @@ describe("prevent-abbreviations identifier utilities", () => {
 				expect.assertions(1);
 
 				expect(isValidIdentifier(name)).toBe(false);
-			}, 10000);
+			});
 		});
 	});
 });

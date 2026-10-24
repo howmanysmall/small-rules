@@ -54,7 +54,9 @@ function createRuleIndexRule(rule: RuleFactCategory["rules"][number], newness?: 
 }
 
 function addFixability(rule: Writable<Rule>, fixability?: string): void {
-	if (fixability !== undefined) rule.fixability = fixability;
+	if (fixability !== undefined) {
+		rule.fixability = fixability;
+	}
 }
 
 function addFreshness(rule: Writable<Rule>, newness?: RuleNewness): void {

@@ -567,7 +567,7 @@ describe("dEFAULT_STATIC_GLOBAL_FACTORIES Array", () => {
 		expect(DEFAULT_STATIC_GLOBAL_FACTORIES).toContain("TweenInfo");
 		expect(DEFAULT_STATIC_GLOBAL_FACTORIES).toContain("Vector3");
 		expect(DEFAULT_STATIC_GLOBAL_FACTORIES).toContain("Enum");
-	}, 100);
+	});
 });
 
 // Every program declares these bindings, so generated leaves can refer to

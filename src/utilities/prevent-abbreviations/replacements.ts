@@ -99,7 +99,9 @@ function shouldSplitIdentifier(previousType: number, currentType: number, nextTy
 }
 
 function splitIdentifierIntoWords(identifier: string): ReadonlyArray<string> {
-	if (identifier.length < 2) return [identifier];
+	if (identifier.length < 2) {
+		return [identifier];
+	}
 
 	const words = new Array<string>();
 	let wordStart = 0;
@@ -129,7 +131,9 @@ function countCaptureGroups(replacement: string): number {
 	let maxGroup = 0;
 	for (const dollarReference of dollarReferences) {
 		const groupNumber = Math.trunc(Number(dollarReference.slice(1)));
-		if (groupNumber > maxGroup) maxGroup = groupNumber;
+		if (groupNumber > maxGroup) {
+			maxGroup = groupNumber;
+		}
 	}
 
 	return maxGroup;
@@ -137,7 +141,9 @@ function countCaptureGroups(replacement: string): number {
 
 function buildReplacementPatterns(replacement: string): ReadonlyArray<RegExp> {
 	const count = countCaptureGroups(replacement);
-	if (count === 0) return [];
+	if (count === 0) {
+		return [];
+	}
 
 	const patterns = Array.from<RegExp>({ length: count });
 	for (let index = 1; index <= count; index += 1) {
@@ -259,7 +265,11 @@ function normalizeBooleanRecord(value: RawOptions["allowList"]): Record<string, 
 	if (!Predicate.isObject(value)) return undefined;
 
 	const normalizedValue: Record<string, boolean> = {};
-	for (const [key, entry] of Object.entries(value)) if (Predicate.isBoolean(entry)) normalizedValue[key] = entry;
+	for (const [key, entry] of Object.entries(value)) {
+		if (Predicate.isBoolean(entry)) {
+			normalizedValue[key] = entry;
+		}
+	}
 
 	return normalizedValue;
 }
@@ -297,7 +307,9 @@ function normalizeReplacementOverrides(
 
 		const normalizedOverride: Record<string, boolean> = {};
 		for (const [replacementName, enabled] of Object.entries(override)) {
-			if (Predicate.isBoolean(enabled)) normalizedOverride[replacementName] = enabled;
+			if (Predicate.isBoolean(enabled)) {
+				normalizedOverride[replacementName] = enabled;
+			}
 		}
 
 		overrides.set(name, normalizedOverride);
@@ -336,11 +348,15 @@ function normalizeIgnorePatterns(options?: RawOptions): ReadonlyArray<RegExp> {
 	const normalizedOptions = isRawOptions(options) ? options : undefined;
 	const ignorePatterns = new Array<RegExp | string>();
 
-	for (const pattern of DEFAULT_IGNORE) ignorePatterns.push(pattern);
+	for (const pattern of DEFAULT_IGNORE) {
+		ignorePatterns.push(pattern);
+	}
 
 	if (Array.isArray(normalizedOptions?.ignore)) {
 		for (const pattern of normalizedOptions.ignore) {
-			if (Predicate.isString(pattern) || pattern instanceof RegExp) ignorePatterns.push(pattern);
+			if (Predicate.isString(pattern) || pattern instanceof RegExp) {
+				ignorePatterns.push(pattern);
+			}
 		}
 	}
 
@@ -352,7 +368,9 @@ function normalizeAllowPropertyAccess(options?: RawOptions): ReadonlySet<string>
 	const allowPropertyAccess = new Set<string>(DEFAULT_ALLOW_PROPERTY_ACCESS);
 	if (!isStringArray(normalizedOptions?.allowPropertyAccess)) return allowPropertyAccess;
 
-	for (const name of normalizedOptions.allowPropertyAccess) allowPropertyAccess.add(name);
+	for (const name of normalizedOptions.allowPropertyAccess) {
+		allowPropertyAccess.add(name);
+	}
 
 	return allowPropertyAccess;
 }
@@ -368,15 +386,21 @@ function normalizeShorthandConfiguration(options?: RawOptions): ShorthandConfig 
 
 	for (const [key, value] of Object.entries(mergedShorthands)) {
 		const result = createMatcher(key, value);
-		if (result.type === "exact") exactMatchers.set(result.original, result.replacement);
-		else matchers.push(result.matcher);
+		if (result.type === "exact") {
+			exactMatchers.set(result.original, result.replacement);
+		} else {
+			matchers.push(result.matcher);
+		}
 	}
 
 	if (isStringArray(normalizedOptions?.ignoreShorthands)) {
 		for (const pattern of normalizedOptions.ignoreShorthands) {
 			const result = createMatcher(pattern, "");
-			if (result.type === "exact") ignoreExact.add(result.original);
-			else ignoreMatchers.push(result.matcher);
+			if (result.type === "exact") {
+				ignoreExact.add(result.original);
+			} else {
+				ignoreMatchers.push(result.matcher);
+			}
 		}
 	}
 
@@ -435,18 +459,24 @@ export function prepareOptions(options?: RawOptions): PreparedOptions {
 }
 
 function getWordReplacements(word: string, options: PreparedOptions): ReadonlyArray<string> {
-	if (isUpperCase(word) || options.allowList.get(word) === true) return [];
+	if (isUpperCase(word) || options.allowList.get(word) === true) {
+		return [];
+	}
 
 	const replacement =
 		options.replacements.get(lowerFirst(word)) ??
 		options.replacements.get(word) ??
 		options.replacements.get(upperFirst(word));
 
-	if (replacement === undefined) return [];
+	if (replacement === undefined) {
+		return [];
+	}
 
 	const replacementNames = replacementNamesByConfiguration.get(replacement);
 	/* v8 ignore next -- normalized replacement maps are registered in replacementNamesByConfiguration. @preserve */
-	if (replacementNames === undefined) return [];
+	if (replacementNames === undefined) {
+		return [];
+	}
 
 	return isUpperFirst(word) ? replacementNames.upperFirst : replacementNames.lowerFirst;
 }
@@ -464,7 +494,9 @@ export function getShorthandReplacement(
 
 	for (const word of words) {
 		const match = matchWord(word, configuration);
-		if (match !== undefined) matches.push(match);
+		if (match !== undefined) {
+			matches.push(match);
+		}
 	}
 
 	if (matches.length === 0) {
@@ -538,7 +570,9 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 
 	const shorthandReplacement = getShorthandReplacement(name, options.shorthandConfiguration);
 	if (shorthandReplacement !== undefined) {
-		if (isShorthandIgnored(name, options.shorthandConfiguration)) return { total: 0 };
+		if (isShorthandIgnored(name, options.shorthandConfiguration)) {
+			return { total: 0 };
+		}
 
 		return {
 			samples: [shorthandReplacement.replaced],
@@ -546,7 +580,9 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 		};
 	}
 
-	if (isUpperCase(name)) return { total: 0 };
+	if (isUpperCase(name)) {
+		return { total: 0 };
+	}
 
 	const exactReplacements = getWordReplacements(name, options);
 	if (exactReplacements.length > 0) {
@@ -572,7 +608,9 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 		combinations[size++] = [word];
 	}
 
-	if (!hasReplacements) return { total: 0 };
+	if (!hasReplacements) {
+		return { total: 0 };
+	}
 
 	const total = combinations.reduce((count, entries) => count * entries.length, 1);
 	const samples = getReplacementSamples(combinations, total, limit);
@@ -599,7 +637,9 @@ function getReplacementSamples(
 			indexRemaining = (indexRemaining - index) / entries.length;
 			const entry = entries[index];
 			/* v8 ignore next -- sample indexes are generated modulo the entry list length. @preserve */
-			if (entry !== undefined) combination.unshift(entry);
+			if (entry !== undefined) {
+				combination.unshift(entry);
+			}
 		}
 
 		return combination;
@@ -609,7 +649,9 @@ function getReplacementSamples(
 		for (let index = parts.length - 1; index > 0; index -= 1) {
 			/* v8 ignore next -- index is bounded by the current sample part length. @preserve */
 			const word = parts[index] ?? "";
-			if (IS_ALPHABETIC.test(word) && parts[index - 1]?.endsWith(word) === true) parts.splice(index, 1);
+			if (IS_ALPHABETIC.test(word) && parts[index - 1]?.endsWith(word) === true) {
+				parts.splice(index, 1);
+			}
 		}
 	}
 

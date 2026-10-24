@@ -76,9 +76,14 @@ function collectAllScopes(root: Scope): Array<Scope> {
 		const current = stack.pop();
 		/* v8 ignore next -- @preserve non-empty traversal stack always yields a scope from pop. */
 		if (current === undefined) break;
-		if (current.type !== "global") scopes[size++] = current;
 
-		for (const childScope of current.childScopes) stack.push(childScope);
+		if (current.type !== "global") {
+			scopes[size++] = current;
+		}
+
+		for (const childScope of current.childScopes) {
+			stack.push(childScope);
+		}
 	}
 
 	return scopes;
@@ -104,7 +109,9 @@ function isObjectLikeInitializer(
 	if (!isCallExpression(initializer) && !isNewExpression(initializer)) return false;
 
 	const candidateText = sourceCode.getText(initializer.callee);
-	for (const pattern of patterns) if (pattern.test(candidateText)) return true;
+	for (const pattern of patterns) {
+		if (pattern.test(candidateText)) return true;
+	}
 
 	return false;
 }
@@ -133,7 +140,9 @@ function appendRelocatableCallChildren(
 
 	worklist.push(node.callee);
 
-	for (const parameter of node.arguments) worklist.push(parameter);
+	for (const parameter of node.arguments) {
+		worklist.push(parameter);
+	}
 
 	return true;
 }
@@ -142,7 +151,11 @@ function appendRelocatableObjectProperties(node: ESTree.ObjectExpression, workli
 	for (const property of node.properties) {
 		/* v8 ignore next -- @preserve spread object properties are rejected by static-expression analysis before relocation checks. */
 		if (!isProperty(property)) return false;
-		if (property.computed) worklist.push(property.key);
+
+		if (property.computed) {
+			worklist.push(property.key);
+		}
+
 		worklist.push(property.value);
 	}
 
@@ -187,7 +200,10 @@ function appendRelocatableChildren(
 		case MEMBER_EXPRESSION: {
 			worklist.push(node.object);
 
-			if (node.computed) worklist.push(node.property);
+			if (node.computed) {
+				worklist.push(node.property);
+			}
+
 			return true;
 		}
 
@@ -199,7 +215,9 @@ function appendRelocatableChildren(
 			return false;
 
 		case TEMPLATE_LITERAL: {
-			for (const expression of node.expressions) worklist.push(expression);
+			for (const expression of node.expressions) {
+				worklist.push(expression);
+			}
 
 			return true;
 		}
@@ -358,9 +376,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 
 		function getSingleUseIdentifier(scope: Scope, scopeVariable: Variable): ESTree.BindingIdentifier | undefined {
 			const readOnlyReference = getSingleReadOnlyReference(scope, scopeVariable);
-			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) {
-				return undefined;
-			}
+			if (readOnlyReference === undefined || !isBindingIdentifier(readOnlyReference.identifier)) return undefined;
 
 			return readOnlyReference.identifier;
 		}
@@ -461,7 +477,9 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				const programScope = sourceCode.getScope(programNode);
 				const allScopes = collectAllScopes(programScope);
 
-				for (const scope of allScopes) inspectScope(scope);
+				for (const scope of allScopes) {
+					inspectScope(scope);
+				}
 			},
 		} satisfies Visitor;
 	},

@@ -171,8 +171,11 @@ function getUnsafeIntersectionValue(
 		const unsafe = getUnsafeDirectValue(continueTypeResolution(resolution, member), environment);
 		if (unsafe === "any") return "any";
 
-		if (unsafe === undefined) allUnsafe = false;
-		else firstUnsafe ??= unsafe;
+		if (unsafe === undefined) {
+			allUnsafe = false;
+		} else {
+			firstUnsafe ??= unsafe;
+		}
 	}
 
 	return allUnsafe ? firstUnsafe : undefined;
@@ -254,7 +257,10 @@ function getDictionaryValueTypesFromReference(
 	environment: TypeEnvironment,
 ): ReadonlyArray<TypeResolution> {
 	const name = getTypeReferenceName(type);
-	if (name === undefined) return [];
+	if (name === undefined) {
+		return [];
+	}
+
 	const resolved = resolveTypeReference(resolution, environment.typeAliases);
 	if (resolved !== undefined) return getDictionaryValueTypes(resolved, environment);
 	const builtInResult = getDictionaryValueTypesFromBuiltInReference(resolution, type, name, environment);
@@ -295,7 +301,9 @@ export function classifyUnsafeDictionary(
 	const valueTypes = getDictionaryValueTypes(createTypeResolution(type), environment);
 	for (const valueType of valueTypes) {
 		const unsafeValue = getUnsafeDirectValue(valueType, environment);
-		if (unsafeValue !== undefined) return { kind: "unsafe-dictionary", unsafeValue };
+		if (unsafeValue !== undefined) {
+			return { kind: "unsafe-dictionary", unsafeValue };
+		}
 	}
 
 	return undefined;
@@ -350,11 +358,19 @@ function classifyNonReferenceWidening(
 	environment: TypeEnvironment,
 	named: boolean,
 ): undefined | WideningTarget {
-	if (isTsUnknownKeyword(resolution.type)) return { kind: "unknown" };
-	if (isTsObjectKeyword(resolution.type)) return { kind: "object" };
+	if (isTsUnknownKeyword(resolution.type)) {
+		return { kind: "unknown" };
+	}
+
+	if (isTsObjectKeyword(resolution.type)) {
+		return { kind: "object" };
+	}
 
 	if (isTsTypeLiteral(resolution.type)) {
-		if (resolution.type.members.some(isTsIndexSignature)) return { kind: OPEN_DICTIONARY };
+		if (resolution.type.members.some(isTsIndexSignature)) {
+			return { kind: OPEN_DICTIONARY };
+		}
+
 		return !named && resolution.type.members.length > 0 ? { kind: "anonymous object" } : undefined;
 	}
 

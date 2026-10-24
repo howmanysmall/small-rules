@@ -173,7 +173,9 @@ function findNode(source: HarnessSourceCode, type: ESTree.Node["type"]): ESTree.
 	let found: ESTree.Node | undefined;
 	traverseAst(source.ast, {
 		"*"(node: HarnessNode) {
-			if (isNode(node) && node.type === type) found ??= node;
+			if (isNode(node) && node.type === type) {
+				found ??= node;
+			}
 		},
 	});
 
@@ -190,7 +192,9 @@ function findNodes(source: HarnessSourceCode, type: ESTree.Node["type"]): Readon
 	const found = new Array<ESTree.Node>();
 	traverseAst(source.ast, {
 		"*"(node: HarnessNode) {
-			if (isNode(node) && node.type === type) found.push(node);
+			if (isNode(node) && node.type === type) {
+				found.push(node);
+			}
 		},
 	});
 	return found;

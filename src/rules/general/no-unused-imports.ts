@@ -37,7 +37,9 @@ function collectJsDocLinkIdentifiers(value: string, identifiers: Set<string>): v
 			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
 			const identifier = match.groups?.identifier;
 			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
-			if (identifier !== undefined) identifiers.add(identifier);
+			if (identifier !== undefined) {
+				identifiers.add(identifier);
+			}
 		}
 	}
 }
@@ -53,7 +55,9 @@ function collectJsDocTypeIdentifiers(value: string, identifiers: Set<string>): v
 			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
 			const identifier = annotationMatch.groups?.identifier;
 			/* v8 ignore next -- @preserve regex always defines the identifier capture group for matches. */
-			if (identifier !== undefined) identifiers.add(identifier);
+			if (identifier !== undefined) {
+				identifiers.add(identifier);
+			}
 		}
 	}
 }
@@ -80,15 +84,11 @@ function removeImportSpecifier(
 		}
 	}
 
-	if (nextToken?.value === ",") {
-		return fixer.removeRange([specifierNode.range[0], nextToken.range[1]]);
-	}
+	if (nextToken?.value === ",") return fixer.removeRange([specifierNode.range[0], nextToken.range[1]]);
 
 	const previousToken = sourceCode.getTokenBefore(specifierNode);
 	/* v8 ignore next -- @preserve trailing specifiers have a comma token before them. */
-	if (previousToken?.value === ",") {
-		return fixer.removeRange([previousToken.range[0], specifierNode.range[1]]);
-	}
+	if (previousToken?.value === ",") return fixer.removeRange([previousToken.range[0], specifierNode.range[1]]);
 
 	/* v8 ignore next -- parser token fallback after all comma forms are handled @preserve */
 	return fixer.remove(specifierNode);

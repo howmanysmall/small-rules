@@ -37,7 +37,10 @@ function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOpt
 function containsThisInChildren(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
 	for (const child of Object.values(currentNode)) {
 		if (Array.isArray(child)) {
-			for (const item of child) if (isNode(item) && traverseForThis(item, visited)) return true;
+			for (const item of child) {
+				if (isNode(item) && traverseForThis(item, visited)) return true;
+			}
+
 			continue;
 		}
 

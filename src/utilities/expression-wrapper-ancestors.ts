@@ -31,7 +31,9 @@ export const EXPRESSION_WRAPPER_TYPES: ReadonlySet<string> = new Set([
 export function ascendPastExpressionWrappers(node?: ESTree.Node): ESTree.Node | undefined {
 	let current = node;
 	/* v8 ignore next -- @preserve wrapper parents are optional parser shapes; parser-produced wrappers always have parents. */
-	while (current !== undefined && EXPRESSION_WRAPPER_TYPES.has(current.type)) current = current.parent ?? undefined;
+	while (current !== undefined && EXPRESSION_WRAPPER_TYPES.has(current.type)) {
+		current = current.parent ?? undefined;
+	}
 
 	return current;
 }

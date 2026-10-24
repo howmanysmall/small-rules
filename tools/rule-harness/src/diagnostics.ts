@@ -61,7 +61,9 @@ export function assertInvalidCase(
 }
 
 function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): RuntimeDiagnostic {
-	if (!Predicate.isObject(diagnostic)) throw new HarnessError("context.report() received a non-object diagnostic.");
+	if (!Predicate.isObject(diagnostic)) {
+		throw new HarnessError("context.report() received a non-object diagnostic.");
+	}
 
 	const messageId = getStringProperty(diagnostic, "messageId");
 	const data = getDiagnosticData(diagnostic);
@@ -77,7 +79,9 @@ function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): Run
 		suggestions,
 	};
 
-	if (fix !== undefined) normalized.fix = fix;
+	if (fix !== undefined) {
+		normalized.fix = fix;
+	}
 
 	if (loc !== undefined) {
 		normalized.column = loc.start.column + 1;
@@ -87,14 +91,22 @@ function normalizeDiagnostic(diagnostic: HarnessValue, meta: UnknownRecord): Run
 		normalized.loc = loc;
 	}
 
-	if (messageId !== undefined) normalized.messageId = messageId;
-	if (node !== undefined) normalized.node = node;
+	if (messageId !== undefined) {
+		normalized.messageId = messageId;
+	}
+
+	if (node !== undefined) {
+		normalized.node = node;
+	}
+
 	return normalized;
 }
 
 function normalizeSuggestions(diagnostic: UnknownRecord, meta: UnknownRecord): Array<RuntimeSuggestion> {
 	const suggestions = getArrayProperty(diagnostic, "suggest");
-	if (suggestions === undefined) return [];
+	if (suggestions === undefined) {
+		return [];
+	}
 
 	const normalized = new Array<RuntimeSuggestion>();
 	let size = 0;
@@ -110,8 +122,14 @@ function normalizeSuggestions(diagnostic: UnknownRecord, meta: UnknownRecord): A
 				renderMessage(meta, messageId, data),
 		};
 		const fix = getFixProvider(suggestion, "fix");
-		if (fix !== undefined) normalizedSuggestion.fix = fix;
-		if (messageId !== undefined) normalizedSuggestion.messageId = messageId;
+		if (fix !== undefined) {
+			normalizedSuggestion.fix = fix;
+		}
+
+		if (messageId !== undefined) {
+			normalizedSuggestion.messageId = messageId;
+		}
+
 		normalized[size++] = normalizedSuggestion;
 	}
 
@@ -119,14 +137,37 @@ function normalizeSuggestions(diagnostic: UnknownRecord, meta: UnknownRecord): A
 }
 
 function assertDiagnostic(actual: RuntimeDiagnostic, expected: RuleTestError, sourceCode: HarnessSourceCode): void {
-	if (expected.messageId !== undefined) equal(actual.messageId, expected.messageId);
-	if (expected.message !== undefined) equal(actual.message, expected.message);
-	if (expected.data !== undefined) deepEqual(actual.data, expected.data);
-	if (expected.line !== undefined) equal(actual.line, expected.line);
-	if (expected.column !== undefined) equal(actual.column, expected.column);
-	if (expected.endLine !== undefined) equal(actual.endLine, expected.endLine);
-	if (expected.endColumn !== undefined) equal(actual.endColumn, expected.endColumn);
-	if (expected.suggestions !== undefined) assertSuggestions(actual, expected.suggestions, sourceCode.text);
+	if (expected.messageId !== undefined) {
+		equal(actual.messageId, expected.messageId);
+	}
+
+	if (expected.message !== undefined) {
+		equal(actual.message, expected.message);
+	}
+
+	if (expected.data !== undefined) {
+		deepEqual(actual.data, expected.data);
+	}
+
+	if (expected.line !== undefined) {
+		equal(actual.line, expected.line);
+	}
+
+	if (expected.column !== undefined) {
+		equal(actual.column, expected.column);
+	}
+
+	if (expected.endLine !== undefined) {
+		equal(actual.endLine, expected.endLine);
+	}
+
+	if (expected.endColumn !== undefined) {
+		equal(actual.endColumn, expected.endColumn);
+	}
+
+	if (expected.suggestions !== undefined) {
+		assertSuggestions(actual, expected.suggestions, sourceCode.text);
+	}
 }
 
 function assertSuggestions(
@@ -147,10 +188,22 @@ function assertSuggestions(
 		const expectedSuggestion: RuleTestSuggestion | undefined = expected[index];
 		const actualSuggestion = actual.suggestions[index];
 		if (expectedSuggestion === undefined || actualSuggestion === undefined) continue;
-		if (expectedSuggestion.messageId !== undefined) equal(actualSuggestion.messageId, expectedSuggestion.messageId);
-		if (expectedSuggestion.desc !== undefined) equal(actualSuggestion.desc, expectedSuggestion.desc);
-		if (expectedSuggestion.message !== undefined) equal(actualSuggestion.desc, expectedSuggestion.message);
-		if (expectedSuggestion.data !== undefined) deepEqual(actualSuggestion.data, expectedSuggestion.data);
+
+		if (expectedSuggestion.messageId !== undefined) {
+			equal(actualSuggestion.messageId, expectedSuggestion.messageId);
+		}
+
+		if (expectedSuggestion.desc !== undefined) {
+			equal(actualSuggestion.desc, expectedSuggestion.desc);
+		}
+
+		if (expectedSuggestion.message !== undefined) {
+			equal(actualSuggestion.desc, expectedSuggestion.message);
+		}
+
+		if (expectedSuggestion.data !== undefined) {
+			deepEqual(actualSuggestion.data, expectedSuggestion.data);
+		}
 
 		if (expectedSuggestion.output !== undefined) {
 			equal(applyFixesToProvider(actualSuggestion.fix, sourceText), expectedSuggestion.output);
@@ -191,11 +244,18 @@ function collectFixes(diagnostics: ReadonlyArray<RuntimeDiagnostic>): Array<Fix>
 		if (fixResult === undefined) continue;
 
 		if (Array.isArray(fixResult)) {
-			for (const fix of fixResult) if (isFix(fix)) fixes.push(fix);
+			for (const fix of fixResult) {
+				if (isFix(fix)) {
+					fixes.push(fix);
+				}
+			}
+
 			continue;
 		}
 
-		if (isFix(fixResult)) fixes.push(fixResult);
+		if (isFix(fixResult)) {
+			fixes.push(fixResult);
+		}
 	}
 
 	return fixes;

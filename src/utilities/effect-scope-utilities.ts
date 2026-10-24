@@ -149,7 +149,9 @@ function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: Tr
 
 		if (isIdentifierReference(node)) {
 			const reference = getReference(state, node);
-			if (reference !== undefined) result.references.push(reference);
+			if (reference !== undefined) {
+				result.references.push(reference);
+			}
 		}
 
 		recordDescendantNode(node, root, result);
@@ -160,8 +162,11 @@ function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: Tr
 function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: TraversalResult): void {
 	if (node === root) return;
 
-	if (isCallExpression(node)) result.callExpressions.push(node);
-	else if (isIfStatement(node)) result.ifStatements.push(node);
+	if (isCallExpression(node)) {
+		result.callExpressions.push(node);
+	} else if (isIfStatement(node)) {
+		result.ifStatements.push(node);
+	}
 }
 
 function indexReferences(state: EffectScopeAnalysisState): void {
@@ -187,13 +192,17 @@ function pushChildValue(value: PropertyDescriptor["value"], worklist: Array<ESTr
 	if (Array.isArray(value)) {
 		for (let index = value.length - 1; index >= 0; index -= 1) {
 			const item = value[index];
-			if (isNode(item)) worklist.push(item);
+			if (isNode(item)) {
+				worklist.push(item);
+			}
 		}
 
 		return;
 	}
 
-	if (isNode(value)) worklist.push(value);
+	if (isNode(value)) {
+		worklist.push(value);
+	}
 }
 
 function pushChildren(
@@ -260,7 +269,9 @@ function computeCallExpression(reference: Reference): ESTree.CallExpression | un
 	while (true) {
 		if (isCallExpression(current)) {
 			let node: ESTree.Node = reference.identifier;
-			while (isMemberExpression(node.parent)) node = node.parent;
+			while (isMemberExpression(node.parent)) {
+				node = node.parent;
+			}
 
 			/* v8 ignore next -- refs in member chains always resolve to the call's callee (probed across the rule corpus). @preserve */
 			if (current.callee === node) return current;
@@ -287,7 +298,9 @@ function computeArgumentUpstreamReferences(
 			if (!isNode(argument)) continue;
 
 			for (const argumentRef of getTraversal(state, argument).references) {
-				for (const deeperRef of computeUpstreamReferences(state, argumentRef)) refs.push(deeperRef);
+				for (const deeperRef of computeUpstreamReferences(state, argumentRef)) {
+					refs.push(deeperRef);
+				}
 			}
 		}
 	}
@@ -358,8 +371,11 @@ function computeSynchronousCallChain(state: EffectScopeAnalysisState, reference:
 				isSynchronousWithin(callExpr, enclosingFunction)
 			) {
 				callExpressionRefs.push(upRef);
-			} else if (isAliasRef(upRef)) callExpressionRefs.push(upRef);
-			else return false;
+			} else if (isAliasRef(upRef)) {
+				callExpressionRefs.push(upRef);
+			} else {
+				return false;
+			}
 
 			return undefined;
 		},

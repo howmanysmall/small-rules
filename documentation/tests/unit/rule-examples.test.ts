@@ -84,7 +84,9 @@ function isCrampedDocumentedExample(code: string, language: ExampleParseLanguage
 	let cramped = false;
 	walk(program, {
 		enter(node) {
-			if (isMultiStatementContainer(node)) cramped = true;
+			if (isMultiStatementContainer(node)) {
+				cramped = true;
+			}
 		},
 	});
 	return cramped;

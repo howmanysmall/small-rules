@@ -119,15 +119,23 @@ function getValidClosers(config: PairConfiguration): Array<string> {
 	let size = 0;
 
 	if (isStringArray(config.closer)) {
-		for (const closer of config.closer) result[size++] = closer;
+		for (const closer of config.closer) {
+			result[size++] = closer;
+		}
 	} else {
 		/* v8 ignore start -- @preserve validated pair configs only allow string closers after the array branch fails. */
 		// oxlint-disable-next-line eslint/no-lonely-if -- V8 ignore must wrap only this defensive validated-shape branch.
-		if (Predicate.isString(config.closer)) result[size++] = config.closer;
+		if (Predicate.isString(config.closer)) {
+			result[size++] = config.closer;
+		}
 		/* v8 ignore stop -- @preserve */
 	}
 
-	if (config.alternatives) for (const alternative of config.alternatives) result[size++] = alternative;
+	if (config.alternatives) {
+		for (const alternative of config.alternatives) {
+			result[size++] = alternative;
+		}
+	}
 
 	return result;
 }
@@ -136,7 +144,9 @@ function getAllOpeners(config: PairConfiguration): Array<string> {
 	const openers = [config.opener];
 	if (config.openerAlternatives) {
 		let size = 1;
-		for (const alternative of config.openerAlternatives) openers[size++] = alternative;
+		for (const alternative of config.openerAlternatives) {
+			openers[size++] = alternative;
+		}
 	}
 
 	return openers;
@@ -288,7 +298,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 				if (!allOpeners.includes(opener)) continue;
 
 				const validClosers = getValidClosers(pair);
-				for (const closer of validClosers) if (!closers.includes(closer)) closers[size++] = closer;
+				for (const closer of validClosers) {
+					if (!closers.includes(closer)) {
+						closers[size++] = closer;
+					}
+				}
 			}
 
 			openerToClosersCache.set(opener, closers);
@@ -369,7 +383,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		function restoreOpenerStack(entries: ReadonlyArray<OpenerStackEntry>): void {
 			openerStack.length = 0;
 
-			for (const entry of entries) openerStack.push({ ...entry });
+			for (const entry of entries) {
+				openerStack.push({ ...entry });
+			}
 		}
 
 		function recordBranchSnapshot(node: ESTree.Node): void {
@@ -415,7 +431,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onFunctionExit(): void {
 			if (openerStack.length > 0) {
-				for (const entry of openerStack) reportUnpairedEntry(entry, "function exit");
+				for (const entry of openerStack) {
+					reportUnpairedEntry(entry, "function exit");
+				}
 			}
 
 			const parentStack = functionStacks.pop();
@@ -423,8 +441,12 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			if (parentStack) {
 				openerStack.length = 0;
 
-				for (const entry of parentStack) openerStack.push(entry);
-			} else openerStack.length = 0;
+				for (const entry of parentStack) {
+					openerStack.push(entry);
+				}
+			} else {
+				openerStack.length = 0;
+			}
 
 			popContext();
 		}
@@ -442,7 +464,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			for (const branchStack of branches) {
 				for (const entry of branchStack) {
-					if (isNewBranchOpener(entry, originalStack)) reportUnpairedEntry(entry, "conditional branch");
+					if (isNewBranchOpener(entry, originalStack)) {
+						reportUnpairedEntry(entry, "conditional branch");
+					}
 				}
 			}
 		}
@@ -474,8 +498,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			reportNewOpenersInBranches(originalStack, branches);
 
-			if (node.alternate === null) restoreOpenerStack(originalStack);
-			else retainCommonOpeners(originalStack, branches);
+			if (node.alternate === null) {
+				restoreOpenerStack(originalStack);
+			} else {
+				retainCommonOpeners(originalStack, branches);
+			}
 		}
 
 		function settleBranches<TStatement extends ESTree.Node>(
@@ -490,7 +517,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const branches = branchStacks.get(node);
 
 			/* v8 ignore else -- @preserve branching exits are paired with enter snapshots and branch snapshots. */
-			if (originalStack && branches && branches.length > 0) merge(originalStack, branches, node);
+			if (originalStack && branches && branches.length > 0) {
+				merge(originalStack, branches, node);
+			}
 
 			stackSnapshots.delete(node);
 			branchStacks.delete(node);
@@ -501,7 +530,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 			const originalStack = stackSnapshots.get(statement);
 			/* v8 ignore next -- @preserve branch exits are paired with their statement's enter snapshot. */
-			if (originalStack) restoreOpenerStack(originalStack);
+			if (originalStack) {
+				restoreOpenerStack(originalStack);
+			}
 		}
 
 		function onIfStatementExit(node: ESTree.Node): void {
@@ -513,12 +544,16 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onIfConsequentExit({ parent }: ESTree.Node): void {
 			/* v8 ignore else -- @preserve consequent exit selector only runs for IfStatement consequents. */
-			if (isIfStatement(parent)) recordBranchAndRestore(parent);
+			if (isIfStatement(parent)) {
+				recordBranchAndRestore(parent);
+			}
 		}
 
 		function onIfAlternateExit({ parent }: ESTree.Node): void {
 			/* v8 ignore else -- @preserve alternate exit selector only runs for IfStatement alternates. */
-			if (isIfStatement(parent)) recordBranchSnapshot(parent);
+			if (isIfStatement(parent)) {
+				recordBranchSnapshot(parent);
+			}
 		}
 
 		function onTryStatementEnter(node: ESTree.Node): void {
@@ -550,7 +585,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const { parent } = node;
 
 			/* v8 ignore else -- @preserve try branch exit selectors only run for TryStatement children. */
-			if (isTryStatement(parent)) recordBranchAndRestore(parent);
+			if (isTryStatement(parent)) {
+				recordBranchAndRestore(parent);
+			}
 
 			popContext();
 		}
@@ -585,8 +622,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			const hasDefault = node.cases.some((caseNode) => caseNode.test === null);
 
-			if (hasDefault && branches.length === node.cases.length) retainCommonOpeners(originalStack, branches);
-			else restoreOpenerStack(originalStack);
+			if (hasDefault && branches.length === node.cases.length) {
+				retainCommonOpeners(originalStack, branches);
+			} else {
+				restoreOpenerStack(originalStack);
+			}
 		}
 
 		function onSwitchStatementExit(node: ESTree.Node): void {
@@ -602,7 +642,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const { parent } = node;
 
 			/* v8 ignore else -- @preserve switch case exit selector only runs for SwitchStatement cases. */
-			if (isSwitchStatement(parent)) recordBranchAndRestore(parent);
+			if (isSwitchStatement(parent)) {
+				recordBranchAndRestore(parent);
+			}
 		}
 
 		function onLoopEnter(node: ESTree.Node): void {
@@ -614,7 +656,10 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 		function onLoopExit(): void {
 			/* v8 ignore else -- @preserve loop exits are paired with loop enters that push the loop stack. */
-			if (loopStack.length > 0) loopStack.pop();
+			if (loopStack.length > 0) {
+				loopStack.pop();
+			}
+
 			popContext();
 		}
 
@@ -669,7 +714,9 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const targetLoop = resolveBreakContinueTarget(node);
 			if (targetLoop === undefined) return;
 
-			for (const entry of openerStack) reportBreakContinueEntry(entry, node, targetLoop);
+			for (const entry of openerStack) {
+				reportBreakContinueEntry(entry, node, targetLoop);
+			}
 		}
 
 		function handleOpener(node: ESTree.CallExpression, opener: string, pairConfiguration: PairConfiguration): void {
@@ -850,7 +897,10 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			ForInStatement: onLoopEnter,
 			"ForInStatement:exit": onLoopExit,
 			ForOfStatement: (node): void => {
-				if (node.await) onAsyncYield(node);
+				if (node.await) {
+					onAsyncYield(node);
+				}
+
 				onLoopEnter(node);
 			},
 			"ForOfStatement:exit": onLoopExit,

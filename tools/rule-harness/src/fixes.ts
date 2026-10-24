@@ -53,13 +53,18 @@ function collectFixes(fixResult: Fix | ReadonlyArray<Fix>): Array<Fix> {
 	const fixes = new Array<Fix>();
 	if (Array.isArray(fixResult)) {
 		for (const fix of fixResult) {
-			if (isFix.allows(fix)) fixes.push(fix);
+			if (isFix.allows(fix)) {
+				fixes.push(fix);
+			}
 		}
 
 		return fixes;
 	}
 
-	if (isFix.allows(fixResult)) fixes.push(fixResult);
+	if (isFix.allows(fixResult)) {
+		fixes.push(fixResult);
+	}
+
 	return fixes;
 }
 

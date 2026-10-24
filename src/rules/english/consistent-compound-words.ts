@@ -125,7 +125,9 @@ function parseReplacements(raw: RawOptions["replacements"] | undefined, extendDe
 			continue;
 		}
 
-		if (isNonEmptyString(value)) merged.set(key, value);
+		if (isNonEmptyString(value)) {
+			merged.set(key, value);
+		}
 	}
 
 	return merged;
@@ -137,7 +139,9 @@ function parseOptions(rawOptions?: RawOptions): RuleOptions {
 	const replacements = parseReplacements(options.replacements, extendDefaultReplacements);
 	const allowList = new Set<string>();
 	if (Predicate.isObject(options.allowList)) {
-		for (const key of Object.keys(options.allowList)) allowList.add(key);
+		for (const key of Object.keys(options.allowList)) {
+			allowList.add(key);
+		}
 	}
 
 	return {

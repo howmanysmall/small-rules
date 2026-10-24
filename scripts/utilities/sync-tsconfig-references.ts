@@ -70,10 +70,16 @@ async function findProjectsAsync(rootDirectory: string): Promise<ReadonlyArray<s
 	for (const parent of PROJECT_PARENTS) {
 		// oxlint-disable-next-line no-await-in-loop -- parents are read in declaration order
 		const children = await readdir(nodePath.join(rootDirectory, parent), { withFileTypes: true });
-		for (const child of children) if (child.isDirectory()) candidates[size++] = `${parent}/${child.name}`;
+		for (const child of children) {
+			if (child.isDirectory()) {
+				candidates[size++] = `${parent}/${child.name}`;
+			}
+		}
 	}
 
-	for (const standalone of STANDALONE_PROJECTS) candidates[size++] = standalone;
+	for (const standalone of STANDALONE_PROJECTS) {
+		candidates[size++] = standalone;
+	}
 
 	const projects = await Promise.all(
 		candidates.toSorted(compareUsingLocale).map(async (directory) => readProjectAsync(rootDirectory, directory)),
@@ -84,7 +90,9 @@ async function findProjectsAsync(rootDirectory: string): Promise<ReadonlyArray<s
 
 async function readReferencesAsync(filePath: string): Promise<ReadonlyArray<string>> {
 	const parsed = JSON.parse(await readFile(filePath, "utf8"));
-	if (!isTsConfig.allows(parsed)) return [];
+	if (!isTsConfig.allows(parsed)) {
+		return [];
+	}
 
 	const { references = [] } = isTsConfig.assert(parsed);
 	return references.map((reference) => reference.path ?? "").toSorted(compareUsingLocale);
@@ -97,9 +105,17 @@ async function writeReferencesAsync(filePath: string, referencePaths: ReadonlyAr
 	const tsconfig = isReadonlyDictionaryOfUnknowns.assert(parsed);
 
 	const ordered: DictionaryOfUnknowns = {};
-	if ("extends" in tsconfig) ordered.extends = tsconfig.extends;
-	if ("compilerOptions" in tsconfig) ordered.compilerOptions = tsconfig.compilerOptions;
-	if (references.length > 0) ordered.references = references;
+	if ("extends" in tsconfig) {
+		ordered.extends = tsconfig.extends;
+	}
+
+	if ("compilerOptions" in tsconfig) {
+		ordered.compilerOptions = tsconfig.compilerOptions;
+	}
+
+	if (references.length > 0) {
+		ordered.references = references;
+	}
 
 	for (const [key, value] of Object.entries(tsconfig)) {
 		// `references` is owned by this script; an empty expected list must

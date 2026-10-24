@@ -83,6 +83,7 @@ Vendored into `src/utilities/anti-slop/`, adapted rather than verbatim:
 | `lexical-type-parameters.ts` | `src/shared/lexical-type-parameters.ts` |
 | `padding-line-between-statements.ts` | `src/vendor/eslint-stylistic/padding-line-between-statements.ts` |
 | `reflect-method.ts` | `src/shared/reflect-method.ts` |
+| `statement-kinds.ts` | `src/rules/require-readable-spacing.ts` |
 | `type-alias-resolution.ts` | `src/shared/type-alias-resolution.ts` |
 
 ```text

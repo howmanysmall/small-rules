@@ -1,0 +1,21 @@
+---
+title: "No Runtime in Type Files"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-runtime-in-type-files">
+	<Fragment slot="rationale">
+		<p>
+			Some projects exempt type files from their test rules by filename. That's only safe while the files hold
+			nothing that runs. Runtime code added there escapes its tests. This rule reports each top-level statement in
+			a matching file that stays in the output. That covers values, functions, classes, enums, namespaces, bare
+			imports, and imports or exports of values. Type imports and exports pass, and so do interfaces, type
+			aliases, function signatures, and `declare` forms.
+		</p>
+		<p>
+			`files` holds the glob patterns for those files, matched against the full path. The default,
+			`**/packages/*/src/lib/**/*-types.ts`, covers `*-types.ts` modules under a package's `src/lib`.
+		</p>
+	</Fragment>
+</RulePage>

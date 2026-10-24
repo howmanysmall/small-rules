@@ -43,10 +43,15 @@ const valueTypeIndexes: ReadonlyMap<string, number> = new Map(
 
 function encodeValue(value: CanonicalDefaultProperty): EncodedDefaultValue {
 	const valueTypeIndex = valueTypeIndexes.get(value.type);
-	if (valueTypeIndex === undefined) throw new TypeError(`Unknown canonical default property type: ${value.type}`);
+	if (valueTypeIndex === undefined) {
+		throw new TypeError(`Unknown canonical default property type: ${value.type}`);
+	}
 
 	if (value.type === "Enum") {
-		if (value.enumType === undefined) throw new TypeError("Invalid canonical enum default property value.");
+		if (value.enumType === undefined) {
+			throw new TypeError("Invalid canonical enum default property value.");
+		}
+
 		return [valueTypeIndex, value.enumType, value.value];
 	}
 
@@ -56,7 +61,9 @@ function encodeValue(value: CanonicalDefaultProperty): EncodedDefaultValue {
 // oxlint-disable-next-line small-rules/no-unknown-parameters -- Validates extracted reflection values before encoding the catalog.
 export function compactDefaultProperties(value: unknown): CompactDefaultProperties {
 	const defaultProperties = isCanonicalDefaultProperties(value);
-	if (defaultProperties instanceof type.errors) throw new TypeError(defaultProperties.summary);
+	if (defaultProperties instanceof type.errors) {
+		throw new TypeError(defaultProperties.summary);
+	}
 
 	const propertyNames = [...new Set(Object.values(defaultProperties.classes).flatMap(Object.keys))].toSorted(
 		compareWithLocale,
@@ -84,10 +91,14 @@ export function compactDefaultProperties(value: unknown): CompactDefaultProperti
 		let size = 0;
 		for (const [propertyName, property] of Object.entries(properties)) {
 			const propertyIndex = propertyIndexes.get(propertyName);
-			if (propertyIndex === undefined) throw new Error("Failed to index default property.");
+			if (propertyIndex === undefined) {
+				throw new Error("Failed to index default property.");
+			}
 
 			const valueIndex = valueIndexes.get(JSON.stringify(encodeValue(property)));
-			if (valueIndex === undefined) throw new Error("Failed to index default value.");
+			if (valueIndex === undefined) {
+				throw new Error("Failed to index default value.");
+			}
 
 			entries[size++] = propertyIndex;
 			entries[size++] = valueIndex;

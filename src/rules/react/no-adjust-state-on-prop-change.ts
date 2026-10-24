@@ -17,7 +17,9 @@ function getPropertyReferences(analysis: ReactEffectAnalysis, effect: ReactEffec
 	const dependencyReferences = effect.dependencyReferences ?? [];
 	for (const reference of dependencyReferences) {
 		for (const upstreamReference of analysis.scope.getUpstreamReferences(reference)) {
-			if (analysis.isProp(upstreamReference)) propertyReferences[size++] = upstreamReference;
+			if (analysis.isProp(upstreamReference)) {
+				propertyReferences[size++] = upstreamReference;
+			}
 		}
 	}
 

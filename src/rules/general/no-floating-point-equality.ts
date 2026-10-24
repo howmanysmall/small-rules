@@ -104,7 +104,9 @@ function isDivisionInexact(node: ESTree.BinaryExpression): boolean {
 	}
 
 	let oddDenominator = Math.abs(denominator);
-	while (oddDenominator % 2 === 0) oddDenominator /= 2;
+	while (oddDenominator % 2 === 0) {
+		oddDenominator /= 2;
+	}
 
 	return Math.abs(numerator) % oddDenominator !== 0;
 }
@@ -187,7 +189,9 @@ function isFloatingExpression(
 function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {
 	const variables = new Map<ESTree.Node, Variable>();
 	forEachScopeVariable(sourceCode, (variable): void => {
-		for (const reference of variable.references) variables.set(reference.identifier, variable);
+		for (const reference of variable.references) {
+			variables.set(reference.identifier, variable);
+		}
 	});
 	return variables;
 }
@@ -208,8 +212,11 @@ function collectImportedSpecifier(
 
 	if (!ASSERT_MODULES.has(source)) return;
 
-	if (isImportDefaultSpecifier(specifier) || isImportNamespaceSpecifier(specifier)) assertions.set(name, "assert");
-	else if (EXACT_ASSERTION_METHODS.has(getImportedName(specifier))) assertions.set(name, "function");
+	if (isImportDefaultSpecifier(specifier) || isImportNamespaceSpecifier(specifier)) {
+		assertions.set(name, "assert");
+	} else if (EXACT_ASSERTION_METHODS.has(getImportedName(specifier))) {
+		assertions.set(name, "function");
+	}
 }
 
 function collectImportedAssertions(program: ESTree.Program): Map<string, ImportedAssertionKind> {
@@ -218,7 +225,9 @@ function collectImportedAssertions(program: ESTree.Program): Map<string, Importe
 		if (!isImportDeclaration(statement)) continue;
 
 		const { value } = statement.source;
-		for (const specifier of statement.specifiers) collectImportedSpecifier(assertions, value, specifier);
+		for (const specifier of statement.specifiers) {
+			collectImportedSpecifier(assertions, value, specifier);
+		}
 	}
 
 	return assertions;

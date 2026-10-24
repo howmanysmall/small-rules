@@ -145,17 +145,13 @@ function appendTransformedCharacter(
 }
 
 function matchesStringAt(value: string, index: number, expected: string): number {
-	if (expected.length === 1) {
-		return value.charCodeAt(index) === expected.charCodeAt(0) ? index + 1 : -1;
-	}
+	if (expected.length === 1) return value.charCodeAt(index) === expected.charCodeAt(0) ? index + 1 : -1;
 
 	return value.startsWith(expected, index) ? index + expected.length : -1;
 }
 
 function matchLowerCharacter(value: string, sourceIndex: number, code: number, outputIndex: number): number {
-	if (isAsciiUpperCode(code)) {
-		return -1;
-	}
+	if (isAsciiUpperCode(code)) return -1;
 
 	const sourceCharacter = value.charAt(sourceIndex);
 	if (localeModeEnabled || code > 127) return matchesStringAt(value, outputIndex, toLowerCaseLocale(sourceCharacter));
@@ -163,9 +159,7 @@ function matchLowerCharacter(value: string, sourceIndex: number, code: number, o
 }
 
 function matchUpperCharacter(value: string, sourceIndex: number, code: number, outputIndex: number): number {
-	if (isAsciiLowerCode(code)) {
-		return -1;
-	}
+	if (isAsciiLowerCode(code)) return -1;
 
 	const sourceCharacter = value.charAt(sourceIndex);
 	if (localeModeEnabled || code > 127) return matchesStringAt(value, outputIndex, toUpperCaseLocale(sourceCharacter));
@@ -196,9 +190,7 @@ function matchTransformedCharacter(
 		return matchUpperCharacter(value, sourceIndex, code, outputIndex);
 	}
 
-	if (capitalizeNext && isAsciiLowerCode(code)) {
-		return matchUpperCharacter(value, sourceIndex, code, outputIndex);
-	}
+	if (capitalizeNext && isAsciiLowerCode(code)) return matchUpperCharacter(value, sourceIndex, code, outputIndex);
 
 	return value.charCodeAt(outputIndex) === code ? outputIndex + 1 : -1;
 }
@@ -242,7 +234,9 @@ function transformCasing(value: string, mode: TransformMode, delimiter: string):
 			if (lineBreakLength === 2) {
 				result += "\r\n";
 				index += 1;
-			} else result += value[index];
+			} else {
+				result += value[index];
+			}
 
 			hasLineOutput = false;
 			pendingDelimiter = false;
@@ -252,7 +246,10 @@ function transformCasing(value: string, mode: TransformMode, delimiter: string):
 		}
 
 		if (isSeparatorCode(code) || isWhitespaceCode(code)) {
-			if (hasLineOutput) pendingDelimiter = true;
+			if (hasLineOutput) {
+				pendingDelimiter = true;
+			}
+
 			previousCode = SPACE;
 			continue;
 		}
@@ -263,7 +260,10 @@ function transformCasing(value: string, mode: TransformMode, delimiter: string):
 			hasLineOutput && !pendingDelimiter && hasCamelCaseBoundary(previousCode, code, value.charCodeAt(index + 1));
 
 		if (hasLineOutput && (pendingDelimiter || hasCamelBoundary)) {
-			if (doesModeEmitDelimiter(mode)) result += delimiter;
+			if (doesModeEmitDelimiter(mode)) {
+				result += delimiter;
+			}
+
 			capitalizeNext = true;
 		}
 
@@ -306,7 +306,10 @@ function matchesCasing(value: string, mode: MatchingTransformMode, delimiter: st
 		}
 
 		if (isSeparatorCode(code) || isWhitespaceCode(code)) {
-			if (hasLineOutput) pendingDelimiter = true;
+			if (hasLineOutput) {
+				pendingDelimiter = true;
+			}
+
 			previousCode = SPACE;
 			continue;
 		}
@@ -485,7 +488,9 @@ function copyGraphemes(previousString: string, nextString: string): string {
 
 	for (const [index, previousCharacter] of previousCharacters.entries()) {
 		const nextCharacter = nextCharacters[index];
-		if (nextCharacter === undefined) throw new TypeError("Unexpected undefined character");
+		if (nextCharacter === undefined) {
+			throw new TypeError("Unexpected undefined character");
+		}
 
 		const toCase = isLowerCase(previousCharacter) ? toLowerCase : toUpperCase;
 		nextCharacters[index] = toCase(nextCharacter);
@@ -528,7 +533,9 @@ export function detect(value: string): Casing {
 				if (isConstantCase(value)) return Casing.ConstantCase;
 			} else if (value.includes(".")) {
 				if (isDotCase(value)) return Casing.DotCase;
-			} else if (value.includes("/") && isPathCase(value)) return Casing.PathCase;
+			} else if (value.includes("/") && isPathCase(value)) {
+				return Casing.PathCase;
+			}
 
 			const [first] = value;
 			if (first !== undefined && isUpperCase(first)) {

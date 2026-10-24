@@ -196,7 +196,9 @@ const GLOBAL_BUILTINS = new Set([
 
 function unwrapDependencyExpression(node: ESTree.Node): ESTree.Node {
 	let current = node;
-	while (isTransparentDependencyExpression(current)) current = current.expression;
+	while (isTransparentDependencyExpression(current)) {
+		current = current.expression;
+	}
 
 	return current;
 }
@@ -215,7 +217,9 @@ function getMemberExpressionDepth(node: ESTree.Node): number {
 
 function getRootIdentifier(node: ESTree.Node): ESTree.Node | undefined {
 	let current = unwrapDependencyExpression(node);
-	while (isMemberExpression(current)) current = unwrapDependencyExpression(current.object);
+	while (isMemberExpression(current)) {
+		current = unwrapDependencyExpression(current.object);
+	}
 
 	return isIdentifier(current) ? current : undefined;
 }
@@ -245,7 +249,9 @@ function queueIdentifierChildren(current: ESTree.Node, nodes: Array<ESTree.Node>
 		return;
 	}
 
-	if (isConditionalExpression(current)) nodes.push(current.alternate, current.consequent, current.test);
+	if (isConditionalExpression(current)) {
+		nodes.push(current.alternate, current.consequent, current.test);
+	}
 }
 
 function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
@@ -253,8 +259,11 @@ function collectIdentifierNames(node: ESTree.Node): ReadonlyArray<string> {
 	const worklist = [node];
 
 	for (const current of worklist) {
-		if (isIdentifier(current)) names.push(current.name);
-		else queueIdentifierChildren(current, worklist);
+		if (isIdentifier(current)) {
+			names.push(current.name);
+		} else {
+			queueIdentifierChildren(current, worklist);
+		}
 	}
 
 	return names;
@@ -476,9 +485,7 @@ function findTopmostMemberExpression(node: ESTree.Node, parent?: ESTree.Node): E
 		const isNonNullParent = isTsNonNullExpression(currentParent);
 
 		/* v8 ignore next -- @preserve captured member chains stop at member, chain, or non-null parents before this guard. */
-		if (!isMemberParent && !isChainParent && !isNonNullParent) {
-			break;
-		}
+		if (!isMemberParent && !isChainParent && !isNonNullParent) break;
 
 		current = currentParent;
 		/* v8 ignore next -- @preserve captured member-chain parents are linked until traversal stops at a non-chain parent. */
@@ -644,19 +651,30 @@ function visitChildNodes(current: ESTree.Node, sourceCode: SourceCode, visit: (n
 		const value = current[key];
 		if (Array.isArray(value)) {
 			/* v8 ignore next -- @preserve visitor-key arrays contain parser nodes when present. */
-			for (const item of value) if (isNode(item)) visit(item);
-		} else if (isNode(value)) visit(value);
+			for (const item of value) {
+				if (isNode(item)) {
+					visit(item);
+				}
+			}
+		} else if (isNode(value)) {
+			visit(value);
+		}
 	}
 }
 
 function visitMemberExpressionChildren(current: ESTree.MemberExpression, visit: (node: ESTree.Node) => void): void {
 	visit(current.object);
 
-	if (current.computed) visit(current.property);
+	if (current.computed) {
+		visit(current.property);
+	}
 }
 
 function visitPropertyChildren(current: ESTree.ObjectProperty, visit: (node: ESTree.Node) => void): void {
-	if (current.computed) visit(current.key);
+	if (current.computed) {
+		visit(current.key);
+	}
+
 	visit(current.value);
 }
 
@@ -683,7 +701,9 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 	}
 
 	function visit(current: ESTree.Node): void {
-		if (isIdentifier(current)) visitIdentifier(current);
+		if (isIdentifier(current)) {
+			visitIdentifier(current);
+		}
 
 		if (isTransparentExpressionNode(current)) {
 			visit(current.expression);
@@ -885,7 +905,10 @@ function reportUnnecessaryDependencies(
 	for (const dependency of dependencies) {
 		const matchingCapture = getMatchingCapture(captures, dependency);
 		if (matchingCapture === undefined) {
-			if (reportUnnecessary) reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
+			if (reportUnnecessary) {
+				reportUnnecessaryDependency(context, dependencies, dependency, dependenciesArray);
+			}
+
 			continue;
 		}
 

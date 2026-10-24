@@ -9,118 +9,52 @@
 // Each group of policy entries became an option. The defaults match upstream,
 // opt-in `allow*` exceptions relax it, and `overrides` entries built from named
 // statement kinds take priority over everything built in. Declarations match
-// through `export` and `export default`.
+// through `export` and `export default`. The statement kinds now live in
+// `$oxc-utilities/anti-slop/statement-kinds`, which other rules share.
 
 import {
-	CLASS_DECLARATION,
-	DO_WHILE_STATEMENT,
-	EXPORT_ALL_DECLARATION,
-	EXPORT_DEFAULT_DECLARATION,
-	EXPORT_NAMED_DECLARATION,
-	FOR_IN_STATEMENT,
-	FOR_OF_STATEMENT,
-	FOR_STATEMENT,
 	FUNCTION_DECLARATION,
-	IF_STATEMENT,
 	isAssignmentExpression,
-	isExportDefaultDeclaration,
-	isExportNamedDeclaration,
 	isExpressionStatement,
 	isIdentifier,
 	isIfStatement,
 	isImportDeclaration,
-	isProgram,
 	isReturnStatement,
-	isSwitchStatement,
 	isThrowStatement,
-	isTryStatement,
-	isTsDeclareFunction,
 	isUpdateExpression,
 	isVariableDeclaration,
-	RETURN_STATEMENT,
-	SWITCH_STATEMENT,
-	TRY_STATEMENT,
 	TS_DECLARE_FUNCTION,
-	TS_ENUM_DECLARATION,
-	TS_EXPORT_ASSIGNMENT,
-	TS_INTERFACE_DECLARATION,
-	TS_TYPE_ALIAS_DECLARATION,
-	WHILE_STATEMENT,
 } from "@small-rules/oxlint-utilities";
-import { Predicate } from "effect";
 
 import {
 	createPaddingLineVisitor,
 	isBlockLikeStatement,
 	PADDING_LINE_MESSAGES,
 } from "$oxc-utilities/anti-slop/padding-line-between-statements";
+import {
+	getExportedDeclaration,
+	isAnyStatement,
+	isBinding,
+	isControlFlowStatement,
+	isDeclarationStatement,
+	isMultilineBinding,
+	isOverloadSignature,
+	isSingleLine,
+	isSingleLineBinding,
+	isSingleLineIf,
+	isTopLevelStatement,
+	STATEMENT_KINDS_SCHEMA,
+	toStatementTest,
+} from "$oxc-utilities/anti-slop/statement-kinds";
 import { getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
 
-import type { PaddingRequirement, StatementTest } from "$oxc-utilities/anti-slop/padding-line-between-statements";
+import type { PaddingRequirement } from "$oxc-utilities/anti-slop/padding-line-between-statements";
+import type { StatementKinds } from "$oxc-utilities/anti-slop/statement-kinds";
 
-const CONTROL_FLOW_TYPES = new Set<string>([
-	DO_WHILE_STATEMENT,
-	FOR_IN_STATEMENT,
-	FOR_OF_STATEMENT,
-	FOR_STATEMENT,
-	IF_STATEMENT,
-	RETURN_STATEMENT,
-	SWITCH_STATEMENT,
-	TRY_STATEMENT,
-	WHILE_STATEMENT,
-]);
-const DECLARATION_TYPES = new Set<string>([
-	CLASS_DECLARATION,
-	FUNCTION_DECLARATION,
-	TS_INTERFACE_DECLARATION,
-	TS_TYPE_ALIAS_DECLARATION,
-]);
-const LOOP_TYPES = new Set<string>([
-	DO_WHILE_STATEMENT,
-	FOR_IN_STATEMENT,
-	FOR_OF_STATEMENT,
-	FOR_STATEMENT,
-	WHILE_STATEMENT,
-]);
 const OVERLOAD_TYPES = new Set<string>([FUNCTION_DECLARATION, TS_DECLARE_FUNCTION]);
-
-function isSingleLine(node: ESTree.Node): boolean {
-	return node.loc.start.line === node.loc.end.line;
-}
-
-function getExportedDeclaration(node: ESTree.Node): ESTree.Node | null {
-	return isExportNamedDeclaration(node) || isExportDefaultDeclaration(node) ? node.declaration : node;
-}
-
-function isAnyStatement(): boolean {
-	return true;
-}
-
-function isTopLevelStatement(node: ESTree.Node): boolean {
-	return isProgram(node.parent) && !isImportDeclaration(node);
-}
-
-function isDeclarationStatement(node: ESTree.Node): boolean {
-	return DECLARATION_TYPES.has(node.type);
-}
-
-function isControlFlowStatement(node: ESTree.Node): boolean {
-	return CONTROL_FLOW_TYPES.has(node.type);
-}
-
-/**
- * Checks for a `const`, `let`, `var`, or `using` declaration, optionally
- * exported, written on one line.
- *
- * @param node - The statement to check.
- * @returns `true` for a single-line binding.
- */
-function isSingleLineBinding(node: ESTree.Node): boolean {
-	return isVariableDeclaration(getExportedDeclaration(node)) && isSingleLine(node);
-}
 
 /**
  * Checks whether a comment sits above a statement. A comment that trails the
@@ -132,17 +66,11 @@ function isSingleLineBinding(node: ESTree.Node): boolean {
  */
 function hasLeadingComment(node: ESTree.Node, sourceCode: SourceCode): boolean {
 	const previousLine = sourceCode.getTokenBefore(node)?.loc.end.line;
-	for (const comment of sourceCode.getCommentsBefore(node)) if (comment.loc.start.line !== previousLine) return true;
+	for (const comment of sourceCode.getCommentsBefore(node)) {
+		if (comment.loc.start.line !== previousLine) return true;
+	}
 
 	return false;
-}
-
-function isBinding(node: ESTree.Node): boolean {
-	return isVariableDeclaration(getExportedDeclaration(node));
-}
-
-function isMultilineBinding(node: ESTree.Node): boolean {
-	return isBinding(node) && !isSingleLine(node);
 }
 
 function isUndocumentedBinding(node: ESTree.Node, sourceCode: SourceCode): boolean {
@@ -174,7 +102,9 @@ function isReadWithin(variable: undefined | Variable, [start, end]: ESTree.Node[
 }
 
 function readsAnyWithin(variables: ReadonlyArray<Variable>, range: ESTree.Node["range"]): boolean {
-	for (const variable of variables) if (isReadWithin(variable, range)) return true;
+	for (const variable of variables) {
+		if (isReadWithin(variable, range)) return true;
+	}
 
 	return false;
 }
@@ -210,115 +140,16 @@ function readsNameAbove(previous: ESTree.Node, next: ESTree.Node, sourceCode: So
 	return false;
 }
 
-function isOverloadSignature(node: ESTree.Node): boolean {
-	const declaration = getExportedDeclaration(node);
-	return declaration !== null && isTsDeclareFunction(declaration);
-}
-
 function isOverloadOrImplementation(node: ESTree.Node): boolean {
 	const declaration = getExportedDeclaration(node);
 	return declaration !== null && OVERLOAD_TYPES.has(declaration.type);
-}
-
-function isSingleLineIf(node: ESTree.Node): boolean {
-	return isIfStatement(node) && isSingleLine(node);
 }
 
 function isSingleLineGuardContinuation(node: ESTree.Node): boolean {
 	return (isIfStatement(node) || isReturnStatement(node) || isThrowStatement(node)) && isSingleLine(node);
 }
 
-function isMultiline(node: ESTree.Node): boolean {
-	return !isSingleLine(node);
-}
-
-function matchesType(types: ReadonlySet<string>): StatementTest {
-	return (node) => types.has(node.type);
-}
-
-function matchesExported(types: ReadonlySet<string>): StatementTest {
-	return (node) => {
-		const declaration = getExportedDeclaration(node);
-		return declaration !== null && types.has(declaration.type);
-	};
-}
-
-const STATEMENT_KIND_NAMES = [
-	"*",
-	"binding",
-	"block-like",
-	"class",
-	"control-flow",
-	"declaration",
-	"enum",
-	"export",
-	"expression",
-	"function",
-	"if",
-	"import",
-	"interface",
-	"loop",
-	"multiline",
-	"multiline-binding",
-	"overload",
-	"return",
-	"single-line",
-	"single-line-binding",
-	"single-line-if",
-	"switch",
-	"throw",
-	"top-level",
-	"try",
-	"type",
-] as const;
-
-type StatementKind = (typeof STATEMENT_KIND_NAMES)[number];
-
-type StatementKinds = ReadonlyArray<StatementKind> | StatementKind;
-
 const NO_OVERRIDES: ReadonlyArray<PaddingOverride> = [];
-
-// Declarations match through `export` and `export default`.
-const STATEMENT_KINDS: Readonly<Record<StatementKind, StatementTest>> = {
-	"*": isAnyStatement,
-	binding: isBinding,
-	"block-like": isBlockLikeStatement,
-	class: matchesExported(new Set([CLASS_DECLARATION])),
-	"control-flow": isControlFlowStatement,
-	declaration: matchesExported(DECLARATION_TYPES),
-	enum: matchesExported(new Set([TS_ENUM_DECLARATION])),
-	export: matchesType(
-		new Set([EXPORT_ALL_DECLARATION, EXPORT_DEFAULT_DECLARATION, EXPORT_NAMED_DECLARATION, TS_EXPORT_ASSIGNMENT]),
-	),
-	expression: isExpressionStatement,
-	function: matchesExported(new Set([FUNCTION_DECLARATION])),
-	if: isIfStatement,
-	import: isImportDeclaration,
-	interface: matchesExported(new Set([TS_INTERFACE_DECLARATION])),
-	loop: matchesType(LOOP_TYPES),
-	multiline: isMultiline,
-	"multiline-binding": isMultilineBinding,
-	overload: isOverloadSignature,
-	return: isReturnStatement,
-	"single-line": isSingleLine,
-	"single-line-binding": isSingleLineBinding,
-	"single-line-if": isSingleLineIf,
-	switch: isSwitchStatement,
-	throw: isThrowStatement,
-	"top-level": isTopLevelStatement,
-	try: isTryStatement,
-	type: matchesExported(new Set([TS_TYPE_ALIAS_DECLARATION])),
-};
-
-const STATEMENT_KIND_TESTS = new Map<string, StatementTest>(Object.entries(STATEMENT_KINDS));
-
-function getStatementTest(kind: StatementKind): StatementTest {
-	const matches = STATEMENT_KIND_TESTS.get(kind);
-	/* v8 ignore next -- @preserve the schema only allows known statement kinds. */
-	if (matches === undefined) throw new RangeError(`Unknown statement kind: ${kind}`);
-
-	return matches;
-}
 
 /** A padding entry written in the rule options. */
 interface PaddingOverride {
@@ -326,17 +157,6 @@ interface PaddingOverride {
 	readonly next: StatementKinds;
 	readonly previous: StatementKinds;
 	readonly usesPrevious?: boolean;
-}
-
-function toStatementTest(kinds: StatementKinds): StatementTest {
-	if (Predicate.isString(kinds)) return getStatementTest(kinds);
-
-	const tests = kinds.map(getStatementTest);
-	return (node, sourceCode) => {
-		for (const matches of tests) if (matches(node, sourceCode)) return true;
-
-		return false;
-	};
 }
 
 function toRequirement({ blankLine, next, previous, usesPrevious }: PaddingOverride): PaddingRequirement {
@@ -444,18 +264,13 @@ function createPolicy(
 ): ReadonlyArray<PaddingRequirement> {
 	const policy = overrides.map(toRequirement);
 	for (const { option, requirement } of POLICY_ENTRIES) {
-		if (option === undefined || options[option]) policy.push(requirement);
+		if (option === undefined || options[option]) {
+			policy.push(requirement);
+		}
 	}
 
 	return policy;
 }
-
-const STATEMENT_KINDS_SCHEMA = {
-	anyOf: [
-		{ enum: STATEMENT_KIND_NAMES, type: "string" },
-		{ items: { enum: STATEMENT_KIND_NAMES, type: "string" }, minItems: 1, type: "array" },
-	],
-} as const;
 
 const requireReadableSpacing = createRule("require-readable-spacing", "anti-slop", {
 	create(context): Visitor {

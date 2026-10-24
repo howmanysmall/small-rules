@@ -132,7 +132,9 @@ export function mergeRelations(
 		if (pin !== undefined) {
 			relations.push(pin);
 			placedPairs.add(pairKey);
-		} else if (!deniedPairs.has(pairKey)) relations.push(relation);
+		} else if (!deniedPairs.has(pairKey)) {
+			relations.push(relation);
+		}
 	}
 
 	for (const pin of pins) {

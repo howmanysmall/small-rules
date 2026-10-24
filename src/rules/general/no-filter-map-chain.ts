@@ -16,9 +16,7 @@ const noFilterMapChain = createRule("no-filter-map-chain", "general", {
 				if (!isCallExpression(filterCall)) return;
 
 				const filterCallee = stripExpressionWrappers(filterCall.callee);
-				if (!isMemberExpression(filterCallee) || getMemberPropertyName(filterCallee) !== "filter") {
-					return;
-				}
+				if (!isMemberExpression(filterCallee) || getMemberPropertyName(filterCallee) !== "filter") return;
 
 				context.report({
 					messageId: "avoidFilterMapChain",

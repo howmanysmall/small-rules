@@ -16,7 +16,7 @@ const STATIC_BLOCK = "StaticBlock" as const satisfies NodeType;
 const TS_GLOBAL_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
 const TS_IMPORT_EQUALS_DECLARATION = "TSImportEqualsDeclaration" as const satisfies NodeType;
 const TS_MODULE_BLOCK = "TSModuleBlock" as const satisfies NodeType;
-const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
+export const TS_MODULE_DECLARATION = "TSModuleDeclaration" as const satisfies NodeType;
 const TS_TYPE_ANNOTATION = "TSTypeAnnotation" as const satisfies NodeType;
 const TS_TYPE_PARAMETER = "TSTypeParameter" as const satisfies NodeType;
 
@@ -38,6 +38,7 @@ export const CLASS_DECLARATION = "ClassDeclaration" as const satisfies NodeType;
 export const CLASS_EXPRESSION = "ClassExpression" as const satisfies NodeType;
 export const CONDITIONAL_EXPRESSION = "ConditionalExpression" as const satisfies NodeType;
 export const DO_WHILE_STATEMENT = "DoWhileStatement" as const satisfies NodeType;
+export const EMPTY_STATEMENT = "EmptyStatement" as const satisfies NodeType;
 export const EXPORT_ALL_DECLARATION = "ExportAllDeclaration" as const satisfies NodeType;
 export const EXPORT_DEFAULT_DECLARATION = "ExportDefaultDeclaration" as const satisfies NodeType;
 export const EXPORT_NAMED_DECLARATION = "ExportNamedDeclaration" as const satisfies NodeType;
@@ -300,8 +301,8 @@ export function isProperty(node?: ESTree.Node | null): node is ESTree.ObjectProp
 	return node?.type === PROPERTY;
 }
 
-export function isMemberExpression(node: ESTree.Node): node is ESTree.MemberExpression {
-	return node.type === MEMBER_EXPRESSION;
+export function isMemberExpression(node?: ESTree.Node | null): node is ESTree.MemberExpression {
+	return node?.type === MEMBER_EXPRESSION;
 }
 
 export function isAssignmentExpression(node?: ESTree.Node | null): node is ESTree.AssignmentExpression {
@@ -603,8 +604,8 @@ export function isTsAsExpression(node?: ESTree.Node | null): node is ESTree.TSAs
 	return node?.type === TS_AS_EXPRESSION;
 }
 
-export function isTsSatisfiesExpression(node: ESTree.Node): node is ESTree.TSSatisfiesExpression {
-	return node.type === TS_SATISFIES_EXPRESSION;
+export function isTsSatisfiesExpression(node?: ESTree.Node | null): node is ESTree.TSSatisfiesExpression {
+	return node?.type === TS_SATISFIES_EXPRESSION;
 }
 
 export function isTsNonNullExpression(node: ESTree.Node): node is ESTree.TSNonNullExpression {
@@ -775,7 +776,7 @@ export function isEmptyObjectExpression(node: ESTree.Node): boolean {
 export function isNotEmptyStatement(
 	statement: ESTree.Statement,
 ): statement is Exclude<ESTree.Statement, ESTree.EmptyStatement> {
-	return statement.type !== "EmptyStatement";
+	return statement.type !== EMPTY_STATEMENT;
 }
 
 export type AnyImportSpecifier =

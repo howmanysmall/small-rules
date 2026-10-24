@@ -19,7 +19,11 @@ export function createKeywordsDetector(probability: number, keywords: ReadonlyAr
 			const words = line.split(WORD_SPLIT_REGEX);
 			let count = 0;
 
-			for (const word of words) if (keywordsSet.has(word)) count += 1;
+			for (const word of words) {
+				if (keywordsSet.has(word)) {
+					count += 1;
+				}
+			}
 
 			return count;
 		},

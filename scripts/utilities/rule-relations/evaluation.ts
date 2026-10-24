@@ -46,10 +46,14 @@ export function compareRelationBaseline(options: CompareOptions): RelationBaseli
 		const current = currentByPair.get(pairKey);
 		const previous = previousByPair.get(pairKey);
 		if (current === undefined) {
-			if (previous !== undefined) removed.push(toIdentity(previous));
-		} else if (previous === undefined) added.push(toIdentity(current));
-		else if (isSameRelation(current, previous)) unchangedRelationCount += 1;
-		else {
+			if (previous !== undefined) {
+				removed.push(toIdentity(previous));
+			}
+		} else if (previous === undefined) {
+			added.push(toIdentity(current));
+		} else if (isSameRelation(current, previous)) {
+			unchangedRelationCount += 1;
+		} else {
 			changed.push({ current: toIdentity(current), previous: toIdentity(previous) });
 		}
 	}

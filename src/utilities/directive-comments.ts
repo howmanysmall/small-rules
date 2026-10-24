@@ -155,7 +155,9 @@ export function getDirectiveComments(
 	const directives = new Array<DirectiveComment>();
 	for (const comment of sourceCode.getAllComments()) {
 		const directive = parseDirectiveComment(comment);
-		if (directive !== undefined && isKind(directive.kind)) directives.push(directive);
+		if (directive !== undefined && isKind(directive.kind)) {
+			directives.push(directive);
+		}
 	}
 
 	return directives;
@@ -394,14 +396,19 @@ function enable(
 
 	if (ruleIds === undefined) {
 		const used = closeMatchingAreas(collection.areas, location, kind, undefined, relatedDisableDirectives);
-		if (!used) addUnusedEnableDirective(collection, comment, undefined);
+		if (!used) {
+			addUnusedEnableDirective(collection, comment, undefined);
+		}
+
 		collection.numberOfRelatedDisableDirectives.set(comment, relatedDisableDirectives.size);
 		return;
 	}
 
 	for (const ruleId of ruleIds) {
 		const used = closeMatchingAreas(collection.areas, location, kind, ruleId, relatedDisableDirectives);
-		if (!used) addUnusedEnableDirective(collection, comment, ruleId);
+		if (!used) {
+			addUnusedEnableDirective(collection, comment, ruleId);
+		}
 	}
 
 	collection.numberOfRelatedDisableDirectives.set(comment, relatedDisableDirectives.size);

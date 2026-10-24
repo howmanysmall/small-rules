@@ -68,7 +68,9 @@ export function tokenizeJson(json: string): Array<HighlightToken> {
 	for (const token of raw) {
 		if (token.className === "json-string" && isKey(raw, raw.indexOf(token))) {
 			result[size++] = { className: "json-key", text: token.text };
-		} else result[size++] = token;
+		} else {
+			result[size++] = token;
+		}
 	}
 
 	return result;

@@ -120,9 +120,13 @@ function expandChangeRegion(operations: ReadonlyArray<DiffOperation>, startIndex
 		const operation = operations[rawEnd];
 		if (operation === undefined) break;
 
-		if (operation.operation !== Operation.Equal) pendingEqual = 0;
-		else if (pendingEqual >= CTX) break;
-		else pendingEqual += 1;
+		if (operation.operation !== Operation.Equal) {
+			pendingEqual = 0;
+		} else if (pendingEqual >= CTX) {
+			break;
+		} else {
+			pendingEqual += 1;
+		}
 
 		rawEnd += 1;
 	}
@@ -146,8 +150,11 @@ function collectRegions(
 		const rawEnd = Math.min(expandChangeRegion(operations, scanIndex) + CTX, operations.length);
 
 		const lastRegion = regions.at(-1);
-		if (lastRegion !== undefined && rawStart <= lastRegion.end) lastRegion.end = rawEnd;
-		else regions.push({ end: rawEnd, start: rawStart });
+		if (lastRegion !== undefined && rawStart <= lastRegion.end) {
+			lastRegion.end = rawEnd;
+		} else {
+			regions.push({ end: rawEnd, start: rawStart });
+		}
 
 		scanIndex = rawEnd;
 	}
@@ -165,8 +172,14 @@ function countLines(operations: ReadonlyArray<DiffOperation>, upTo: number): Lin
 	let newNumber = 1;
 	for (const [index, operation] of operations.entries()) {
 		if (index >= upTo) break;
-		if (operation.operation === Operation.Equal || operation.operation === Operation.Delete) oldNumber += 1;
-		if (operation.operation === Operation.Equal || operation.operation === Operation.Add) newNumber += 1;
+
+		if (operation.operation === Operation.Equal || operation.operation === Operation.Delete) {
+			oldNumber += 1;
+		}
+
+		if (operation.operation === Operation.Equal || operation.operation === Operation.Add) {
+			newNumber += 1;
+		}
 	}
 
 	return { newNumber, oldNumber } satisfies Lines;
@@ -208,7 +221,9 @@ function formatDiff(filePath: string, oldContent: string, newContent: string): s
 
 		out.push(dim(`@@ -${regionOldStart},${oldCount} +${regionNewStart},${newCount} @@`));
 
-		for (const line of hunkLines) out.push(line);
+		for (const line of hunkLines) {
+			out.push(line);
+		}
 	}
 
 	return out.join("\n");
@@ -229,20 +244,27 @@ function insertVtsls(languageServers: Array<string>): void {
 	if (ellipsisIndex === languageServers.length - 1) {
 		languageServers.pop();
 		languageServers.push("vtsls", "...");
-	} else languageServers.push("vtsls");
+	} else {
+		languageServers.push("vtsls");
+	}
 }
 
 function flipAndAddVtsls(languageServers: ReadonlyArray<string>): Array<string> {
 	const addVtsls = needsVtsls(languageServers);
 	const result = languageServers.map(flip);
-	if (addVtsls && !result.includes("vtsls")) insertVtsls(result);
+	if (addVtsls && !result.includes("vtsls")) {
+		insertVtsls(result);
+	}
+
 	return result;
 }
 
 function disableTsgoInSettings(content: string): string {
 	return editJsonc(content, isZedSettingsJson.assert, (zedSettings) =>
 		create(zedSettings, (draft) => {
-			if (draft.language_servers !== undefined) draft.language_servers = flipAndAddVtsls(draft.language_servers);
+			if (draft.language_servers !== undefined) {
+				draft.language_servers = flipAndAddVtsls(draft.language_servers);
+			}
 
 			const { languages } = draft;
 			if (languages) {
@@ -271,7 +293,9 @@ function processSettingsFile(
 		const label = relativePath.startsWith("..") ? filePath : relativePath;
 		console.log(formatDiff(label, content, updatedContents));
 		console.log();
-	} else writes.push(write(filePath, updatedContents));
+	} else {
+		writes.push(write(filePath, updatedContents));
+	}
 
 	return true;
 }
@@ -294,7 +318,9 @@ function printSummary(changedCount: number, scannedCount: number, dryRun: boolea
 		console.log(`${dim("───")} ${bold("Summary")} ${dim("───")}`);
 		console.log(`${yellow(changedCount)} ${changedCount === 1 ? "file would" : "files would"} be modified`);
 		console.log(`${dim("No files were actually written")} ${yellow("(--dry-run)")}`);
-	} else console.log(`${green("✓")} ${bold(changedCount)} ${changedCount === 1 ? "file" : "files"} modified`);
+	} else {
+		console.log(`${green("✓")} ${bold(changedCount)} ${changedCount === 1 ? "file" : "files"} modified`);
+	}
 }
 
 const command = new Command()
@@ -317,17 +343,23 @@ const command = new Command()
 			return;
 		}
 
-		if (dryRun) printDryRunHeader(scanRoot, settingsJsons.length);
+		if (dryRun) {
+			printDryRunHeader(scanRoot, settingsJsons.length);
+		}
 
 		const writes: Array<Promise<unknown>> = [];
 		let changedCount = 0;
 
 		for (const settings of settingsJsons) {
 			const changed = processSettingsFile(settings, scanRoot, dryRun, writes);
-			if (changed) changedCount += 1;
+			if (changed) {
+				changedCount += 1;
+			}
 		}
 
-		if (!dryRun) await Promise.all(writes);
+		if (!dryRun) {
+			await Promise.all(writes);
+		}
 
 		printSummary(changedCount, settingsJsons.length, dryRun);
 	});

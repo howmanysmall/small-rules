@@ -110,11 +110,16 @@ function isIifeStatement(node: ESTree.Node): boolean {
 	if (!isExpressionStatement(node)) return false;
 
 	let expression = skipWrappers(node.expression);
-	if (isUnaryExpression(expression)) expression = skipWrappers(expression.argument);
+	if (isUnaryExpression(expression)) {
+		expression = skipWrappers(expression.argument);
+	}
+
 	if (!isCallExpression(expression)) return false;
 
 	let callee = skipWrappers(expression.callee);
-	while (callee !== undefined && isSequenceExpression(callee)) callee = skipWrappers(callee.expressions.at(-1));
+	while (callee !== undefined && isSequenceExpression(callee)) {
+		callee = skipWrappers(callee.expressions.at(-1));
+	}
 
 	return isCallbackFunction(callee);
 }
@@ -124,7 +129,11 @@ function getLastChild(node: ESTree.Node, visitorKeys: SourceCode["visitorKeys"])
 	appendVisitorChildren(node, visitorKeys, children);
 
 	let lastChild: ESTree.Node | undefined;
-	for (const child of children) if (lastChild === undefined || child.range[1] > lastChild.range[1]) lastChild = child;
+	for (const child of children) {
+		if (lastChild === undefined || child.range[1] > lastChild.range[1]) {
+			lastChild = child;
+		}
+	}
 
 	return lastChild;
 }
@@ -178,7 +187,9 @@ export function isBlockLikeStatement(node: ESTree.Node, sourceCode: SourceCode):
 
 function unwrapLabels(node: ESTree.Node): ESTree.Node {
 	let statement = node;
-	while (isLabeledStatement(statement)) statement = statement.body;
+	while (isLabeledStatement(statement)) {
+		statement = statement.body;
+	}
 
 	return statement;
 }
@@ -260,7 +271,9 @@ function getReportLocation(node: ESTree.Node, text: string): Location {
 
 	const lineStart = node.range[0] - start.column;
 	let [lineEnd] = node.range;
-	while (!LINE_TERMINATORS.has(text.charAt(lineEnd))) lineEnd += 1;
+	while (!LINE_TERMINATORS.has(text.charAt(lineEnd))) {
+		lineEnd += 1;
+	}
 
 	return { end: { column: lineEnd - lineStart, line: start.line }, start };
 }
@@ -301,7 +314,10 @@ export function createPaddingLineVisitor<Options extends RuleOptions>(
 	function verifyStatements(statements: ReadonlyArray<ESTree.Node>): void {
 		let previous: ESTree.Node | undefined;
 		for (const next of statements) {
-			if (previous !== undefined && requiresPaddingLine(previous, next)) verifyPaddingLine(previous, next);
+			if (previous !== undefined && requiresPaddingLine(previous, next)) {
+				verifyPaddingLine(previous, next);
+			}
+
 			previous = next;
 		}
 	}

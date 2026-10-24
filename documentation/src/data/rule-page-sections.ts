@@ -32,12 +32,20 @@ const relatedRulesSection: RulePageSection = { slug: "related-rules", text: "Rel
  */
 export function getRulePageSections(rule: RuleName, options: RulePageSectionOptions): ReadonlyArray<RulePageSection> {
 	const sections = new Array<RulePageSection>();
-	if (options.hasRationale) sections.push(rationaleSection);
-	if (Object.keys(getRuleFacts(rule).messages ?? {}).length > 0) sections.push(diagnosticsSection);
+	if (options.hasRationale) {
+		sections.push(rationaleSection);
+	}
+
+	if (Object.keys(getRuleFacts(rule).messages ?? {}).length > 0) {
+		sections.push(diagnosticsSection);
+	}
 
 	sections.push(configurationSection, examplesSection);
 
-	if (getRelatedRules(rule).length > 0) sections.push(relatedRulesSection);
+	if (getRelatedRules(rule).length > 0) {
+		sections.push(relatedRulesSection);
+	}
+
 	return sections;
 }
 

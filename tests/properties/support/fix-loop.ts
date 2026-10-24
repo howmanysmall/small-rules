@@ -45,11 +45,18 @@ export function runFixLoop(execute: RuleExecutor, testCase: NormalizedValidCase)
 	let output = testCase.code;
 	for (let passes = 0; passes <= MAXIMUM_FIX_PASSES; passes += 1) {
 		const fixes = collectDiagnosticFixes(execute({ ...testCase, code: output }).diagnostics, output);
-		if (fixes.length === 0) return { output, passes, status: "settled" };
-		if (passes === MAXIMUM_FIX_PASSES) return { output, passes, status: "unsettled" };
+		if (fixes.length === 0) {
+			return { output, passes, status: "settled" };
+		}
+
+		if (passes === MAXIMUM_FIX_PASSES) {
+			return { output, passes, status: "unsettled" };
+		}
 
 		const next = applyFixes(output, fixes) ?? output;
-		if (next === output) return { output, passes, status: "stalled" };
+		if (next === output) {
+			return { output, passes, status: "stalled" };
+		}
 
 		if (!isValidProgram({ ...testCase, code: next })) {
 			return { output: next, passes: passes + 1, status: "invalid" };
@@ -88,7 +95,9 @@ function hasRedeclaration(globalScope: HarnessScope): boolean {
 			if (variable.defs.length > 1 && !variable.defs.every(isFunctionScopedDefinition)) return true;
 		}
 
-		for (const child of scope.childScopes) pending.push(child);
+		for (const child of scope.childScopes) {
+			pending.push(child);
+		}
 	}
 
 	return false;
@@ -104,7 +113,9 @@ function collectDiagnosticFixes(diagnostics: ReadonlyArray<RuntimeDiagnostic>, t
 		const result = diagnostic.fix?.(fixer);
 		if (result === undefined) continue;
 		const fix = mergeFixes(isFix.allows(result) ? [result] : result, text);
-		if (fix !== undefined) merged.push(fix);
+		if (fix !== undefined) {
+			merged.push(fix);
+		}
 	}
 
 	return merged;

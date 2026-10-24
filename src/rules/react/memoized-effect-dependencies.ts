@@ -65,9 +65,7 @@ function isMode(value: unknown): value is Mode {
 }
 
 function getMemberHookName(callee: ESTree.MemberExpression, reactNamespaces: ReadonlySet<string>): string | undefined {
-	if (callee.computed || !isIdentifier(callee.object) || !reactNamespaces.has(callee.object.name)) {
-		return undefined;
-	}
+	if (callee.computed || !isIdentifier(callee.object) || !reactNamespaces.has(callee.object.name)) return undefined;
 
 	/* v8 ignore next -- @preserve non-computed hook member properties are identifiers in parser output. */
 	return isIdentifier(callee.property) ? callee.property.name : undefined;
@@ -285,7 +283,10 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			for (const definition of variable.defs) {
 				const stability = getDefinitionStability(definition, variable.name);
 				if (stability === Stability.Unmemoized) return Stability.Unmemoized;
-				if (stability === Stability.Memoized) sawMemoized = true;
+
+				if (stability === Stability.Memoized) {
+					sawMemoized = true;
+				}
 			}
 
 			return sawMemoized ? Stability.Memoized : Stability.Unknown;
@@ -355,15 +356,24 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 				const dependenciesArgument = node.arguments[dependenciesIndex];
 				if (!isArrayExpression(dependenciesArgument)) return;
 
-				for (const element of dependenciesArgument.elements) handleDependencyElement(element);
+				for (const element of dependenciesArgument.elements) {
+					handleDependencyElement(element);
+				}
 			},
 			ImportDeclaration(node): void {
 				forEachReactNamedImport(node, reactSources, reactNamespaces, (importedName, localName) => {
 					const dependenciesIndex = effectHookNameToIndex.get(importedName);
-					if (dependenciesIndex !== undefined) effectHookIdentifiers.set(localName, dependenciesIndex);
+					if (dependenciesIndex !== undefined) {
+						effectHookIdentifiers.set(localName, dependenciesIndex);
+					}
 
-					if (MEMO_HOOKS.has(importedName)) memoHookIdentifiers.add(localName);
-					if (STABLE_HOOKS.has(importedName)) stableHookIdentifiers.set(localName, importedName);
+					if (MEMO_HOOKS.has(importedName)) {
+						memoHookIdentifiers.add(localName);
+					}
+
+					if (STABLE_HOOKS.has(importedName)) {
+						stableHookIdentifiers.set(localName, importedName);
+					}
 				});
 			},
 		} satisfies Visitor;

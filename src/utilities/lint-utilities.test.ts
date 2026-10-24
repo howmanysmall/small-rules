@@ -19,7 +19,9 @@ describe("lint utilities", () => {
 
 			return {
 				CallExpression(node): void {
-					if (isHookCall(node, hooks)) context.report({ messageId: "hook", node });
+					if (isHookCall(node, hooks)) {
+						context.report({ messageId: "hook", node });
+					}
 				},
 			} satisfies Visitor;
 		},

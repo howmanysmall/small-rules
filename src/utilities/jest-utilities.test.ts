@@ -102,7 +102,9 @@ describe("jest utilities", () => {
 						return;
 					}
 
-					if (count.deterministic > 0) context.report({ messageId: "deterministic", node });
+					if (count.deterministic > 0) {
+						context.report({ messageId: "deterministic", node });
+					}
 				},
 			} satisfies Visitor;
 		},

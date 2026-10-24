@@ -104,7 +104,9 @@ function reportHoistableObjectProperties(context: Context, objectExpression: EST
 		/* v8 ignore next -- @preserve spread props are dynamic and already make the containing object non-static. */
 		if (!isProperty(property)) continue;
 		const value = stripExpressionWrappers(property.value);
-		if (isObjectExpression(value)) reportHoistableObjectProperties(context, value);
+		if (isObjectExpression(value)) {
+			reportHoistableObjectProperties(context, value);
+		}
 	}
 }
 

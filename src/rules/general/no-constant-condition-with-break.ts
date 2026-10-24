@@ -92,7 +92,9 @@ function normalizeLoopExitCalls(options?: NoConstantConditionWithBreakOptions): 
 
 	for (const loopExitCall of options.loopExitCalls) {
 		/* v8 ignore next -- @preserve rule schema rejects empty or non-string loopExitCalls entries. */
-		if (isNonEmptyString(loopExitCall)) loopExitCalls.add(loopExitCall);
+		if (isNonEmptyString(loopExitCall)) {
+			loopExitCalls.add(loopExitCall);
+		}
 	}
 
 	return loopExitCalls;
@@ -125,7 +127,9 @@ function isConfiguredLoopExitCall(callExpression: ESTree.CallExpression, loopExi
 
 function addArrayElementsToPending(expression: ESTree.ArrayExpression, pending: Array<ESTree.Expression>): void {
 	for (const element of expression.elements) {
-		if (element !== null) pending.push(isSpreadElement(element) ? element.argument : element);
+		if (element !== null) {
+			pending.push(isSpreadElement(element) ? element.argument : element);
+		}
 	}
 }
 
@@ -133,14 +137,19 @@ function addCallArgumentsToPending(
 	parameters: ReadonlyArray<ESTree.Expression | ESTree.SpreadElement>,
 	pending: Array<ESTree.Expression>,
 ): void {
-	for (const argument of parameters) pending.push(isSpreadElement(argument) ? argument.argument : argument);
+	for (const argument of parameters) {
+		pending.push(isSpreadElement(argument) ? argument.argument : argument);
+	}
 }
 
 function onBinaryExpression(
 	expression: ESTree.BinaryExpression | ESTree.PrivateInExpression,
 	pending: Array<ESTree.Expression>,
 ): void {
-	if (!isPrivateIdentifier(expression.left)) pending.push(expression.left);
+	if (!isPrivateIdentifier(expression.left)) {
+		pending.push(expression.left);
+	}
+
 	pending.push(expression.right);
 }
 
@@ -188,25 +197,37 @@ function addExpressionChildrenToPending(expression: ESTree.Expression, pending: 
 		case MEMBER_EXPRESSION: {
 			pending.push(expression.object);
 
-			if (expression.computed) pending.push(expression.property);
+			if (expression.computed) {
+				pending.push(expression.property);
+			}
+
 			break;
 		}
 
 		case SEQUENCE_EXPRESSION:
 		case TEMPLATE_LITERAL: {
-			for (const subExpression of expression.expressions) pending.push(subExpression);
+			for (const subExpression of expression.expressions) {
+				pending.push(subExpression);
+			}
+
 			break;
 		}
 
 		case TAGGED_TEMPLATE_EXPRESSION: {
 			pending.push(expression.tag);
 
-			for (const quasi of expression.quasi.expressions) pending.push(quasi);
+			for (const quasi of expression.quasi.expressions) {
+				pending.push(quasi);
+			}
+
 			break;
 		}
 
 		case YIELD_EXPRESSION: {
-			if (expression.argument) pending.push(expression.argument);
+			if (expression.argument) {
+				pending.push(expression.argument);
+			}
+
 			break;
 		}
 
@@ -450,7 +471,9 @@ function hasConfiguredLoopExitInHeader(loopNode: LoopNode, loopExitCalls: Readon
 
 function hasLoopExit(statement: ESTree.Statement, loopNode: LoopNode, loopExitCalls: ReadonlySet<string>): boolean {
 	let currentStatement = statement;
-	while (isLabeledStatement(currentStatement)) currentStatement = currentStatement.body;
+	while (isLabeledStatement(currentStatement)) {
+		currentStatement = currentStatement.body;
+	}
 
 	switch (currentStatement.type) {
 		case BLOCK_STATEMENT: {
@@ -607,7 +630,9 @@ const noConstantConditionWithBreak = createRule("no-constant-condition-with-brea
 				reportLoopIfConstant(node, node.test);
 			},
 			ForStatement(node): void {
-				if (node.test) reportLoopIfConstant(node, node.test);
+				if (node.test) {
+					reportLoopIfConstant(node, node.test);
+				}
 			},
 			IfStatement(node): void {
 				reportConstantCondition(node.test);

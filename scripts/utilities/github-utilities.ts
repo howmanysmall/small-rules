@@ -18,14 +18,22 @@ export async function downloadGitHubFileAsync(
 		repo: repository,
 	});
 
-	if (Array.isArray(data)) throw new TypeError(`"${path}" is a directory, not a file`);
-	if (data.type !== "file") throw new TypeError(`Unexpected content type "${data.type}" for "${path}"`);
+	if (Array.isArray(data)) {
+		throw new TypeError(`"${path}" is a directory, not a file`);
+	}
+
+	if (data.type !== "file") {
+		throw new TypeError(`Unexpected content type "${data.type}" for "${path}"`);
+	}
 
 	const raw = atob(data.content);
 	const bytes = new Uint8Array(raw.length);
 	for (let index = 0; index < raw.length; index += 1) {
 		const byte = raw.codePointAt(index);
-		if (byte === undefined) throw new Error(`Failed to decode character at position ${index} in "${path}"`);
+		if (byte === undefined) {
+			throw new Error(`Failed to decode character at position ${index} in "${path}"`);
+		}
+
 		bytes[index] = byte;
 	}
 

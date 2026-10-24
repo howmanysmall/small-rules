@@ -1,0 +1,16 @@
+---
+title: "No JSX Spread Child"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-jsx-spread-child">
+	<Fragment slot="rationale">
+		<p>
+			A spread between JSX tags, such as `<List>{...items}</List>`, parses as a `JSXSpreadChild`. The React
+			Compiler can't emit one back into a `JSXExpressionContainer`, so the whole component throws out of codegen
+			and memoizes nothing. `{items}` renders the same tree, because React flattens an array child. A spread on an
+			attribute, such as `{...properties}` in an opening tag, is fine.
+		</p>
+	</Fragment>
+</RulePage>

@@ -26,7 +26,7 @@ describe("small-rules plugin", () => {
 			const smallRules = await import("$small-rules");
 
 			expect(smallRules.default.meta?.name).toBe("small-rules");
-		}, 30_000);
+		});
 
 		it("registers at least one rule", async ({ expect }) => {
 			expect.assertions(1);
@@ -34,7 +34,7 @@ describe("small-rules plugin", () => {
 			const smallRules = await import("$small-rules");
 
 			expect(Object.keys(smallRules.default.rules).length).toBeGreaterThan(0);
-		}, 30_000);
+		});
 
 		// Catches a rule registered under a name users cannot configure.
 		it("registers every rule under a kebab-case name users can configure", async ({ expect }) => {
@@ -43,7 +43,7 @@ describe("small-rules plugin", () => {
 			const smallRules = await import("$small-rules");
 
 			expect(getUnconfigurableRuleNames(smallRules.default.rules)).toStrictEqual([]);
-		}, 30_000);
+		});
 
 		// Catches a rule bypassing createRule and shipping without a docs URL.
 		it("advertises a docs URL on the documented docs site for every rule", async ({ expect }) => {
@@ -52,6 +52,6 @@ describe("small-rules plugin", () => {
 			const smallRules = await import("$small-rules");
 
 			expect(getRulesWithoutDocsUrl(smallRules.default.rules)).toStrictEqual([]);
-		}, 30_000);
+		});
 	});
 });

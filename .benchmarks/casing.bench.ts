@@ -23,10 +23,14 @@ for (let index = 0; index < length; index += 1) {
 summary(() => {
 	barplot(() => {
 		bench("[scripts] casing-utilities", () => {
-			for (const value of strings) do_not_optimize(toPascalCaseScript(value));
+			for (const value of strings) {
+				do_not_optimize(toPascalCaseScript(value));
+			}
 		});
 		bench("[src] casing-utilities", () => {
-			for (const value of strings) do_not_optimize(toPascalCaseOxc(value));
+			for (const value of strings) {
+				do_not_optimize(toPascalCaseOxc(value));
+			}
 		});
 	});
 });

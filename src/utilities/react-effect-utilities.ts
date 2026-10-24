@@ -599,7 +599,10 @@ export function describeEffectOwner(analysis: ReactEffectAnalysis, effect: React
 	const fallback = isInCustomHook ? "this custom hook" : "this component";
 	const name = analysis.getComponentName(containingNode);
 	/* v8 ignore next 3 -- findEnclosingReactNode never yields a name-less ReactOwner: functional components/HOCs/custom hooks all carry an identifier. @preserve */
-	if (name !== undefined && name.length > 0) return { containingNode, displayName: `"${name}"`, isInCustomHook };
+	if (name !== undefined && name.length > 0) {
+		return { containingNode, displayName: `"${name}"`, isInCustomHook };
+	}
+
 	/* v8 ignore next -- findEnclosingReactNode never yields a name-less ReactOwner. @preserve */
 	return { containingNode, displayName: fallback, isInCustomHook };
 }

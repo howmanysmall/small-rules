@@ -178,9 +178,7 @@ function getPushCallForIdentifier(
 	if (!isCallExpression(unwrapped) || unwrapped.optional) return undefined;
 	if (!isMemberExpression(unwrapped.callee) || unwrapped.callee.optional) return undefined;
 
-	if (!isIdentifierNamed(unwrapped.callee.object, identifierName)) {
-		return undefined;
-	}
+	if (!isIdentifierNamed(unwrapped.callee.object, identifierName)) return undefined;
 
 	return getMemberPropertyName(unwrapped.callee) === "push" ? unwrapped : undefined;
 }
@@ -223,12 +221,16 @@ function createCollapseFixes(
 	arrayLiteralText: string,
 ): Array<Fix> {
 	/* v8 ignore next -- @preserve caller only builds fixes after a new Array initializer and at least one push. */
-	if (declarator.init === null || pushStatements.length === 0) return [];
+	if (declarator.init === null || pushStatements.length === 0) {
+		return [];
+	}
 
 	const [firstPushStatement] = pushStatements;
 	const lastPushStatement = pushStatements.at(-1);
 	/* v8 ignore next -- @preserve destructuring mirrors the guarded non-empty pushStatements invariant. */
-	if (firstPushStatement === undefined || lastPushStatement === undefined) return [];
+	if (firstPushStatement === undefined || lastPushStatement === undefined) {
+		return [];
+	}
 
 	let [collapseStart] = firstPushStatement.range;
 	while (collapseStart > 0) {
@@ -239,7 +241,10 @@ function createCollapseFixes(
 		}
 
 		/* v8 ignore next -- @preserve whitespace trimming fallback depends on exact parser ranges. */
-		if (previousCharacter === "\n") collapseStart -= 1;
+		if (previousCharacter === "\n") {
+			collapseStart -= 1;
+		}
+
 		break;
 	}
 
@@ -477,7 +482,10 @@ function appendPushArguments(
 			continue;
 		}
 
-		if (!isExpressionSideEffectSafe(argument)) hasUnsafeArgument = true;
+		if (!isExpressionSideEffectSafe(argument)) {
+			hasUnsafeArgument = true;
+		}
+
 		argumentParts.push(sourceCode.getText(argument));
 	}
 

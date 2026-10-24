@@ -7,5 +7,7 @@
  */
 export function mergeIntoStackTop<TEntry extends object>(stack: Array<TEntry>, updates: Partial<TEntry>): void {
 	const top = stack.at(-1);
-	if (top !== undefined) stack[stack.length - 1] = { ...top, ...updates };
+	if (top !== undefined) {
+		stack[stack.length - 1] = { ...top, ...updates };
+	}
 }

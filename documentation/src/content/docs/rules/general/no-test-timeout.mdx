@@ -1,0 +1,22 @@
+---
+title: "No Test Timeout"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-test-timeout">
+	<Fragment slot="rationale">
+		<p>
+			A slow unit test is a design problem, and a longer timeout hides it. Mock or inject the file system,
+			network, subprocesses, and timers, or remove the dependency. The rule reports a timeout argument after a
+			`test`, `it`, or `describe` callback, and a `timeout` key in a Vitest options object. It follows chains such
+			as `.only`, `.skip`, `.concurrent`, `.each`, `.for`, and `.skipIf`. Enable it for unit test files only;
+			integration and end-to-end tests may need the time.
+		</p>
+		<p>
+			A config-level `testTimeout`, hook timeouts, and `waitFor` options pass. So does `it(name, run, TIMEOUT)`,
+			which reads the same as `test(name, options, run)`. `additionalTestFunctions` adds the names of your own
+			test or suite functions.
+		</p>
+	</Fragment>
+</RulePage>

@@ -52,7 +52,9 @@ export function hasUninitializedWrite(variable: Variable): boolean {
 }
 
 export function pushChildScopes(scopes: Array<Scope>, scope: Scope): void {
-	for (const child of scope.childScopes) scopes.push(child);
+	for (const child of scope.childScopes) {
+		scopes.push(child);
+	}
 }
 
 const AST_NODE_KEYS_TO_SKIP = new Set(["comments", "loc", "parent", "range", "tokens"]);
@@ -63,11 +65,18 @@ function pushNodeChildren(node: ESTree.Node, workList: Array<ESTree.Node>): void
 		if (AST_NODE_KEYS_TO_SKIP.has(key)) continue;
 
 		if (Array.isArray(value)) {
-			for (const child of value) if (isNode(child)) workList.push(child);
+			for (const child of value) {
+				if (isNode(child)) {
+					workList.push(child);
+				}
+			}
+
 			continue;
 		}
 
-		if (isNode(value)) workList.push(value);
+		if (isNode(value)) {
+			workList.push(value);
+		}
 	}
 }
 
@@ -89,7 +98,9 @@ export function forEachScopeVariable(sourceCode: SourceCode, callback: (variable
 	for (const scope of scopes) {
 		pushChildScopes(scopes, scope);
 
-		for (const variable of scope.variables) callback(variable);
+		for (const variable of scope.variables) {
+			callback(variable);
+		}
 	}
 }
 
@@ -172,7 +183,9 @@ export function isExternalPackageImport(definition?: Definition): boolean {
 
 function getRootTypeName(typeName: ESTree.TSTypeName): ESTree.IdentifierReference | undefined {
 	let current = typeName;
-	while (isTsQualifiedName(current)) current = current.left;
+	while (isTsQualifiedName(current)) {
+		current = current.left;
+	}
 
 	/* v8 ignore next -- @preserve TSTypeReference cannot use a this expression as its type name in parsed source. */
 	return isIdentifier(current) ? current : undefined;
@@ -188,7 +201,9 @@ function isExternalTypeNode(
 	visitedDeclarations: Set<object>,
 ): boolean {
 	let current = typeAnnotation;
-	while (isTsIndexedAccessType(current)) current = current.objectType;
+	while (isTsIndexedAccessType(current)) {
+		current = current.objectType;
+	}
 
 	if (isTsImportType(current)) return isExternalModuleSpecifier(current.source.value);
 

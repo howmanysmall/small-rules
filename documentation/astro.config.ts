@@ -47,10 +47,14 @@ function removeTrailingWildcard(path: string): string {
 
 function getAliases(): Record<string, string> {
 	const tsconfig = getTsconfig(fromRepositoryRoot("."), "tsconfig.base.json");
-	if (tsconfig === null) throw new Error("Could not load tsconfig.base.json.");
+	if (tsconfig === null) {
+		throw new Error("Could not load tsconfig.base.json.");
+	}
 
 	const paths = tsconfig.config.compilerOptions?.paths;
-	if (paths === undefined) return {};
+	if (paths === undefined) {
+		return {};
+	}
 
 	return Object.fromEntries(
 		Object.entries(paths).map(([pattern, targets]) => {

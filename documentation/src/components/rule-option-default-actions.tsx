@@ -29,7 +29,9 @@ export function RuleOptionDefaultActions({
 	summary,
 }: Readonly<RuleOptionDefaultActionsProperties>): ReactNode {
 	let copyStatusText = "";
-	if (copyStatus !== undefined) copyStatusText = copyLabel;
+	if (copyStatus !== undefined) {
+		copyStatusText = copyLabel;
+	}
 
 	return (
 		<div className="rule-option__default-actions">

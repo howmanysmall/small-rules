@@ -154,7 +154,9 @@ function computeSafeSamples(
 		}
 
 		/* v8 ignore else -- generated safe names are non-empty valid identifiers. @preserve */
-		if (safeName.length > 0) safeSamples[safeSamplesSize++] = safeName;
+		if (safeName.length > 0) {
+			safeSamples[safeSamplesSize++] = safeName;
+		}
 	}
 
 	return { droppedDiscouraged, safeSamples };
@@ -273,7 +275,9 @@ function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (v
 
 function checkScope(scope: Scope, variableChecker: (variable: VariableLike) => void): void {
 	for (const scopeItem of getScopes(scope)) {
-		for (const variable of scopeItem.variables) checkPossiblyWeirdClassVariable(variable, variableChecker);
+		for (const variable of scopeItem.variables) {
+			checkPossiblyWeirdClassVariable(variable, variableChecker);
+		}
 	}
 }
 

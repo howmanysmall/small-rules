@@ -145,14 +145,18 @@ function reportJsxBannedAttributes(
 		const propertyName = getJsxAttributeName(attribute.name);
 
 		const propertyEntry = bannedPropertiesForClass.get(propertyName.toLowerCase());
-		if (propertyEntry !== undefined) reportBannedProperty(attribute, className, propertyEntry);
+		if (propertyEntry !== undefined) {
+			reportBannedProperty(attribute, className, propertyEntry);
+		}
 	}
 }
 
 const banInstances = createRule("ban-instances", "roblox", {
 	create(context): Visitor {
 		const { bannedClasses, bannedProperties } = normalizeOptions(context.options[0]);
-		if (bannedClasses.size === 0 && bannedProperties.size === 0) return {} satisfies Visitor;
+		if (bannedClasses.size === 0 && bannedProperties.size === 0) {
+			return {} satisfies Visitor;
+		}
 
 		const { sourceCode } = context;
 		const trackedVariables = new Map<ScopeVariable, TrackedVariable>();
@@ -251,7 +255,9 @@ const banInstances = createRule("ban-instances", "roblox", {
 				const { name } = node.name;
 				const classNameKey = name.toLowerCase();
 				const entry = bannedClasses.get(classNameKey);
-				if (entry !== undefined) reportBannedClass(node, entry);
+				if (entry !== undefined) {
+					reportBannedClass(node, entry);
+				}
 
 				const bannedPropertiesForClass = bannedProperties.get(classNameKey);
 				if (bannedPropertiesForClass === undefined) return;
@@ -263,7 +269,9 @@ const banInstances = createRule("ban-instances", "roblox", {
 				if (className === undefined) return;
 
 				const entry = bannedClasses.get(className.toLowerCase());
-				if (entry !== undefined) reportBannedClass(node, entry);
+				if (entry !== undefined) {
+					reportBannedClass(node, entry);
+				}
 			},
 			VariableDeclarator(node): void {
 				recordTrackedVariable(node);

@@ -108,7 +108,9 @@ function resolveVariableToFunctionIds(
 
 	for (const definition of variable.defs) {
 		const resolved = resolveDefinitionToFunctionIds(definition, sourceCode, functionInfosByNode, cache, visited);
-		for (const id of resolved) functionIds.add(id);
+		for (const id of resolved) {
+			functionIds.add(id);
+		}
 	}
 
 	visited.delete(variable);
@@ -183,7 +185,9 @@ function populateCallGraph(
 				variableResolutionCache,
 			);
 
-			for (const id of resolvedFunctionIds) functionInfo.callees.add(id);
+			for (const id of resolvedFunctionIds) {
+				functionInfo.callees.add(id);
+			}
 		}
 	}
 }
@@ -195,7 +199,9 @@ function collectReachableFunctions(
 ): ReadonlySet<number> {
 	const visited = new Set<number>(rootFunctionIds);
 	const queue = new Array<TraversalState>();
-	for (const functionId of rootFunctionIds) queue.push({ depth: 0, functionId });
+	for (const functionId of rootFunctionIds) {
+		queue.push({ depth: 0, functionId });
+	}
 
 	let queueIndex = 0;
 
@@ -233,7 +239,9 @@ function collectRootFunctionIds(
 	for (const callback of useMemoInlineCallbacks) {
 		const functionId = functionInfosByNode.get(callback)?.id;
 		/* v8 ignore next -- @preserve inline callbacks are registered in functionInfosByNode before collection. */
-		if (functionId !== undefined) rootFunctionIds.add(functionId);
+		if (functionId !== undefined) {
+			rootFunctionIds.add(functionId);
+		}
 	}
 
 	for (const callbackIdentifier of useMemoCallbackIdentifiers) {
@@ -244,7 +252,9 @@ function collectRootFunctionIds(
 			variableResolutionCache,
 		);
 
-		for (const id of resolvedFunctionIds) rootFunctionIds.add(id);
+		for (const id of resolvedFunctionIds) {
+			rootFunctionIds.add(id);
+		}
 	}
 
 	return rootFunctionIds;
@@ -253,7 +263,9 @@ function collectRootFunctionIds(
 const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react", {
 	create(context): Visitor {
 		const options = normalizeOptions(context.options[0]);
-		if (options.constructors.size === 0) return {};
+		if (options.constructors.size === 0) {
+			return {};
+		}
 
 		const reactSources = getReactSources(options.environment);
 		const memoIdentifiers = new Set<string>();
@@ -303,7 +315,10 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 			...createFunctionStackVisitor(functionStack, enterFunction),
 
 			CallExpression(node): void {
-				if (isIdentifier(node.callee)) recordFunctionCall(node.callee);
+				if (isIdentifier(node.callee)) {
+					recordFunctionCall(node.callee);
+				}
+
 				if (!isUseMemoCall(node, memoIdentifiers, reactNamespaces)) return;
 
 				const [callback] = node.arguments;
@@ -314,7 +329,9 @@ const noNewInstanceInUseMemo = createRule("no-new-instance-in-use-memo", "react"
 					return;
 				}
 
-				if (isCallbackFunction(callback)) useMemoInlineCallbacks.push(callback);
+				if (isCallbackFunction(callback)) {
+					useMemoInlineCallbacks.push(callback);
+				}
 			},
 
 			ImportDeclaration(node): void {

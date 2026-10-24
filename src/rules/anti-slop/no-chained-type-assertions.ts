@@ -56,7 +56,10 @@ function isForbiddenAssertionChain(node: TypeAssertionExpression, allowedTargets
 		assertionCount += 1;
 		hasNonConstAssertion ||= !isConstAssertion(current);
 
-		if (assertionCount === 2) innerType = current.typeAnnotation;
+		if (assertionCount === 2) {
+			innerType = current.typeAnnotation;
+		}
+
 		current = stripParenthesis(current.expression);
 	}
 

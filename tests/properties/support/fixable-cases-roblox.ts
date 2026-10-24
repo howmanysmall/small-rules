@@ -53,7 +53,9 @@ const preferMembershipFilterInJecs = defineFixableCase({
 		);
 		const uses = [`entity${id}`];
 		for (const { binding, component } of components) {
-			if (binding === "used") uses.push(`${component.toLowerCase()}${id}`);
+			if (binding === "used") {
+				uses.push(`${component.toLowerCase()}${id}`);
+			}
 		}
 
 		const query = `world${id}.query(${components.map(({ component }) => component).join(", ")})`;

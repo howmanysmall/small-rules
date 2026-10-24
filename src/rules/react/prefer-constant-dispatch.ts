@@ -194,7 +194,9 @@ const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 			},
 			VariableDeclarator(node): void {
 				const dispatchVariable = getTrackedDispatchVariable(sourceCode, node);
-				if (dispatchVariable !== undefined) trackedDispatchVariables.add(dispatchVariable);
+				if (dispatchVariable !== undefined) {
+					trackedDispatchVariables.add(dispatchVariable);
+				}
 			},
 		} satisfies Visitor;
 	},

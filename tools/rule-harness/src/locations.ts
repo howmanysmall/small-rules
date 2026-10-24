@@ -8,7 +8,9 @@ export interface LocationIndex {
 export function createLocationIndex(text: string): LocationIndex {
 	const lineStarts = [0];
 	for (let index = 0; index < text.length; index += 1) {
-		if (text.startsWith("\n", index)) lineStarts.push(index + 1);
+		if (text.startsWith("\n", index)) {
+			lineStarts.push(index + 1);
+		}
 	}
 
 	return { lineStarts, text };

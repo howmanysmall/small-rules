@@ -166,7 +166,10 @@ function getReleaseTags(): ReadonlyArray<string> {
 
 function getDeployNeeds(): ReadonlyArray<string> {
 	const needs = release.jobs?.["deploy-documentation"]?.needs;
-	if (needs === undefined) return [];
+	if (needs === undefined) {
+		return [];
+	}
+
 	return Predicate.isString(needs) ? [needs] : needs;
 }
 
@@ -200,7 +203,11 @@ interface AuditCandidate extends CheckoutFinding {
 function getLeaking(candidates: ReadonlyArray<AuditCandidate>): ReadonlyArray<CheckoutFinding> {
 	const leaking = new Array<CheckoutFinding>();
 	let size = 0;
-	for (const { persist, ...candidate } of candidates) if (persist !== false) leaking[size++] = candidate;
+	for (const { persist, ...candidate } of candidates) {
+		if (persist !== false) {
+			leaking[size++] = candidate;
+		}
+	}
 
 	return leaking;
 }
@@ -210,13 +217,17 @@ type Collect = (workflow: string, job: string, steps?: Steps) => void;
 function collectCiJobs(collect: Collect): void {
 	if (ci.jobs === undefined) return;
 
-	for (const [job, definition] of Object.entries(ci.jobs)) collect("ci", job, definition.steps);
+	for (const [job, definition] of Object.entries(ci.jobs)) {
+		collect("ci", job, definition.steps);
+	}
 }
 
 function collectChecksJobs(collect: Collect): void {
 	if (checks.jobs === undefined) return;
 
-	for (const [job, definition] of Object.entries(checks.jobs)) collect("checks", job, definition.steps);
+	for (const [job, definition] of Object.entries(checks.jobs)) {
+		collect("checks", job, definition.steps);
+	}
 }
 
 function collectDocsJobs(collect: Collect): void {
@@ -252,7 +263,9 @@ function checkoutAudit(): CheckoutAudit {
 	collectDocsJobs(collect);
 
 	const publish = release.jobs?.publish;
-	if (publish !== undefined) collect("release", "publish", publish.steps);
+	if (publish !== undefined) {
+		collect("release", "publish", publish.steps);
+	}
 
 	return {
 		leaking: getLeaking(candidates),
@@ -269,7 +282,9 @@ function writeViolations(): ReadonlyArray<WriteViolation> {
 	function collect(workflow: string, job: string, effective: Permissions): void {
 		const allowed = workflow === "docs" && job === "deploy" ? ALLOWED_FOR_DEPLOY : new Set<string>();
 		const scopes = writeScopes(effective).filter((scope) => !allowed.has(scope));
-		if (scopes.length > 0) violations.push({ job, scopes, workflow });
+		if (scopes.length > 0) {
+			violations.push({ job, scopes, workflow });
+		}
 	}
 
 	const ciJobs = Object.entries(ci.jobs ?? {});

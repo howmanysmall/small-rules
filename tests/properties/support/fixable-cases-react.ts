@@ -149,8 +149,13 @@ function renderComponent(component: string, hook: string, states: ReadonlyArray<
 	for (const { name, inDependencies, read } of states) {
 		declarations.push(`const [${name}, set${capitalize(name)}] = useState(${JSON.stringify(name)});`);
 
-		if (read) reads.push(name);
-		if (inDependencies) dependencies.push(name);
+		if (read) {
+			reads.push(name);
+		}
+
+		if (inDependencies) {
+			dependencies.push(name);
+		}
 	}
 
 	return [

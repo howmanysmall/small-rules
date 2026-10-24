@@ -61,9 +61,7 @@ function isModuleMockCall(sourceCode: SourceCode, callee: ESTree.Expression): bo
 	if (!("property" in callee) || !("object" in callee) || !("computed" in callee)) return false;
 	if (!isTestFrameworkObject(sourceCode, callee.object)) return false;
 
-	if (callee.computed) {
-		return isStringLiteral(callee.property) && MODULE_MOCK_METHODS.has(callee.property.value);
-	}
+	if (callee.computed) return isStringLiteral(callee.property) && MODULE_MOCK_METHODS.has(callee.property.value);
 
 	return isBindingIdentifier(callee.property) && MODULE_MOCK_METHODS.has(callee.property.name);
 }
@@ -75,7 +73,10 @@ const noModuleMocking = createRule("no-module-mocking", "anti-slop", {
 				const { callee } = node;
 				/* v8 ignore next -- Oxc's parser does not produce V8 intrinsic call expressions. @preserve */
 				if (isSuper(callee) || isV8IntrinsicExpression(callee)) return;
-				if (isModuleMockCall(context.sourceCode, callee)) context.report({ messageId: "moduleMock", node });
+
+				if (isModuleMockCall(context.sourceCode, callee)) {
+					context.report({ messageId: "moduleMock", node });
+				}
 			},
 		};
 	},

@@ -85,7 +85,9 @@ function tokenizeIdentifier(identifier: string): ReadonlyArray<string> {
 		const matches = part.match(TOKEN_PATTERN);
 		if (matches === null) continue;
 
-		for (const match of matches) tokens[size++] = match;
+		for (const match of matches) {
+			tokens[size++] = match;
+		}
 	}
 
 	return tokens;

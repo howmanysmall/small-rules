@@ -83,8 +83,11 @@ function createFakeTransport(desired: ReadonlyMap<string, PairJudgments>, calls:
 					throw new Error(`Unexpected question "${questionId}".`);
 				}
 
-				if (question.type === "score") answers[questionId] = judgments.assessment;
-				else if (dimension !== undefined) answers[questionId] = { noul: judgments[dimension], type: "noul" };
+				if (question.type === "score") {
+					answers[questionId] = judgments.assessment;
+				} else if (dimension !== undefined) {
+					answers[questionId] = { noul: judgments[dimension], type: "noul" };
+				}
 			}
 
 			return answers;

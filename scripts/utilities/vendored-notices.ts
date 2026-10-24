@@ -207,6 +207,7 @@ export const VENDORED_COMPONENTS: ReadonlyArray<VendoredComponent> = [
 				upstream: "src/vendor/eslint-stylistic/padding-line-between-statements.ts",
 			},
 			{ local: "reflect-method.ts", upstream: "src/shared/reflect-method.ts" },
+			{ local: "statement-kinds.ts", upstream: "src/rules/require-readable-spacing.ts" },
 			{ local: "type-alias-resolution.ts", upstream: "src/shared/type-alias-resolution.ts" },
 		],
 		license: "MIT",
