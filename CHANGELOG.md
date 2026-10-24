@@ -46,6 +46,12 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.8.0] - 2026-10-24
+
+## Added
+- New rules: `curly`, `no-jsx-spread-child`, `no-real-temporary-directory`, `no-runtime-in-type-files`, `no-test-timeout`, and `require-tsx-for-hooks` ([#102](https://github.com/howmanysmall/small-rules/pull/102)).
+- `require-readable-spacing` accepts `break` and `continue` as `overrides` statement kinds ([#102](https://github.com/howmanysmall/small-rules/pull/102)).
+
 ## [3.7.0] - 2026-10-22
 
 ## Added
