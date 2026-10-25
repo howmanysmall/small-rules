@@ -4,6 +4,7 @@ import type { PropsWithChildren, MouseEvent as ReactMouseEvent, ReactNode } from
 
 const PASS_STATUS_ICON = (
 	<svg
+		aria-hidden="true"
 		fill="none"
 		height="12"
 		stroke="currentColor"
@@ -19,6 +20,7 @@ const PASS_STATUS_ICON = (
 
 const FAIL_STATUS_ICON = (
 	<svg
+		aria-hidden="true"
 		fill="none"
 		height="12"
 		stroke="currentColor"

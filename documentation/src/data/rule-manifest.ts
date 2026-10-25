@@ -41,6 +41,7 @@ export const ruleManifest = defineRuleManifest({
 				{ name: "no-event-handler" },
 				{ name: "no-adjust-state-on-prop-change" },
 				{ name: "no-jsx-spread-child" },
+				{ name: "no-nested-hook-calls" },
 				{ name: "no-reset-all-state-on-prop-change" },
 				{ name: "no-pass-live-state-to-parent" },
 				{ name: "no-pass-data-to-parent" },

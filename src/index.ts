@@ -81,6 +81,7 @@ import noGodComponents from "$oxc-rules/react/no-god-components";
 import noInitializeState from "$oxc-rules/react/no-initialize-state";
 import noInlinePropertyOnMemoComponent from "$oxc-rules/react/no-inline-property-on-memo-component";
 import noJsxSpreadChild from "$oxc-rules/react/no-jsx-spread-child";
+import noNestedHookCalls from "$oxc-rules/react/no-nested-hook-calls";
 import noNewInstanceInUseMemo from "$oxc-rules/react/no-new-instance-in-use-memo";
 import noPassDataToParent from "$oxc-rules/react/no-pass-data-to-parent";
 import noPassLiveStateToParent from "$oxc-rules/react/no-pass-live-state-to-parent";
@@ -198,6 +199,7 @@ const smallRules = definePlugin({
 		"no-loop-iterable-mutation": noLoopIterableMutation,
 		"no-module-mocking": noModuleMocking,
 		"no-native-properties-spread": noNativePropertiesSpread,
+		"no-nested-hook-calls": noNestedHookCalls,
 		"no-new-instance-in-use-memo": noNewInstanceInUseMemo,
 		"no-object-parameters": noObjectParameters,
 		"no-pass-data-to-parent": noPassDataToParent,
