@@ -160,12 +160,15 @@
 		"domains": {
 			"project": "all",
 			"react": "all",
+			"turborepo": "all",
 			"types": "all"
 		},
 		"enabled": true,
 		"includes": ["**", "!**/{dist,do-not-sync-ever,garbage,node_modules}/**"],
 		"rules": {
-			"a11y": { "preset": "none" },
+			"a11y": {
+				"preset": "recommended"
+			},
 
 			"complexity": {
 				"noDivRegex": "error",
@@ -545,6 +548,18 @@
 					"style": {
 						"noProcessEnv": "off"
 					}
+				}
+			}
+		},
+
+		{
+			"includes": ["documentation/**"],
+			"linter": {
+				"domains": {
+					"astro": "all",
+					"playwright": "all",
+					"react": "all",
+					"tailwind": "all"
 				}
 			}
 		},
