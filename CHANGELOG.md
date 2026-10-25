@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.9.0] - 2026-10-25
+
+## Added
+- **no-nested-hook-calls**: New React rule that reports a hook call nested inside another hook call's arguments, such as `useAttribute(useCharacter(), "Health")`. Assign the inner result to a `const` first. [#105](https://github.com/howmanysmall/small-rules/pull/105)
+
 ## [3.8.0] - 2026-10-24
 
 ## Added
