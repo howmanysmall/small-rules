@@ -232,9 +232,6 @@
 				"noUnusedInstantiation": "error",
 				"noUnusedPrivateClassMembers": "error",
 				"noUnusedVariables": "error",
-				"noVueImportCompilerMacros": "error",
-				"noVueRefAsOperand": "error",
-				"noVueVOnNumberValues": "error",
 				"preset": "recommended",
 				"useImportExtensions": "off",
 				"useInlineScriptId": "error",
@@ -243,28 +240,39 @@
 			},
 
 			"nursery": {
+				"noAccidentalBitwiseOperators": "error",
+				"noArgumentsCallerOrCallee": "error",
+				"noAstroConflictingSetDirectives": "error",
 				"noAstroSetHtmlDirective": "error",
 				"noBaseToString": "off",
 				"noBunModules": "error",
+				"noDoubleComparison": "error",
+				"noDuplicateMapKeys": "error",
 				"noExtendNative": "error",
 				"noFloatingPromises": "error",
 				"noImpliedEval": "error",
 				"noInvalidFileInputAccept": "error",
 				"noInvalidPropertyInitValue": "error",
+				"noInvalidThis": "error",
 				"noJsRestrictedProperties": "error",
 				"noJsonUnsafeValues": "error",
+				"noMeaninglessVoidOperator": "error",
 				"noMisleadingReturnType": "off",
+				"noMisplacedListElements": "error",
 				"noMisusedPromises": "error",
 				"noNegationInEqualityCheck": "error",
+				"noNestedSwitch": "error",
+				"noNestedTemplateLiterals": "error",
 				"noNonScalableViewport": "error",
+				"noObjectConstructor": "error",
 				"noObsoleteTags": "error",
+				"noOctal": "error",
+				"noProcessExit": "error",
+				"noPromiseExecutorReturn": "error",
+				"noReactObjectTypeAsDefaultProp": "error",
 				"noRestrictedDependencies": "error",
 				"noReturnInFinally": "error",
-				"noSvelteAtDebugTags": "error",
-				"noSvelteAtHtmlTags": "error",
-				"noSvelteLegacyConst": "error",
-				"noSvelteUnnecessaryStateWrap": "error",
-				"noTailwindArbitraryValue": "error",
+				"noSelfImport": "error",
 				"noThisOutsideOfClass": "error",
 				// does not play nicely with Astro
 				"noUndeclaredClasses": "off",
@@ -276,13 +284,16 @@
 				"noUnsafeTypeAssertion": "off",
 				// does NOT work with mdx
 				"noUnusedClasses": "off",
+				"noUselessAssignment": "error",
+				"noUselessCall": "error",
+				"noUselessDateGetTime": "error",
 				"noUselessTypeConversion": "off",
-				"noVueDeprecatedScopedSlots": "error",
-				"noVueUndeclaredDirectives": "error",
 				"noXorAsExponentiation": "error",
+				"noZeroFractions": "error",
 				"useAstroClientOnlyDirectiveValue": "error",
 				"useAwaitThenable": "error",
 				"useBetterDomTraversing": "error",
+				"useBigintLiterals": "error",
 				"useConsistentFunctionStyle": {
 					"level": "error",
 					"options": {
@@ -290,6 +301,8 @@
 						"style": "declaration"
 					}
 				},
+				"useConsistentHeadingLevel": "error",
+				"useConsistentJsonFileRead": "error",
 				"useConsistentObjectKeys": "error",
 				"useControlLabel": "error",
 				"useDisposables": "error",
@@ -300,9 +313,12 @@
 				"useIncludes": "error",
 				// i do not know what this is
 				"useLayeredStyles": "off",
+				"useMatchingFunctionName": "error",
 				"useModernMathApis": "error",
+				"useNamedFunction": "error",
 				"useNamedLayer": "error",
 				"useNullishCoalescing": "error",
+				"usePromiseRejectErrors": "error",
 				"useReactCompiler": {
 					"level": "error",
 					"options": {
@@ -311,9 +327,9 @@
 				},
 				"useReactNamingConvention": "error",
 				"useRegexpExec": "error",
+				"useSimplifiedBooleanReturn": "error",
 				"useStringStartsEndsWith": "error",
-				"useTailwindShorthandClasses": "error",
-				"useTailwindSortedClasses": "error",
+				"useUnaryMinus": "error",
 				"useValidTestTitle": "error"
 			},
 
@@ -425,8 +441,6 @@
 				"noConfusingVoidType": "off",
 				"noConstEnum": "off",
 				"noControlCharactersInRegex": "off",
-				"noDrizzleDeleteWithoutWhere": "error",
-				"noDrizzleUpdateWithoutWhere": "error",
 				"noDuplicateEnumValues": "error",
 				"noDuplicateSelectors": "error",
 				"noEmptyBlockStatements": "error",
@@ -501,25 +515,6 @@
 			}
 		},
 
-		// JSON Files
-		{
-			"includes": [],
-			"json": {
-				"formatter": {
-					"enabled": true,
-					"indentStyle": "tab",
-					"indentWidth": 4,
-					"lineWidth": 120,
-					"trailingCommas": "none"
-				},
-				"linter": { "enabled": true },
-				"parser": {
-					"allowComments": false,
-					"allowTrailingCommas": false
-				}
-			}
-		},
-
 		{
 			"includes": ["**/*.test.ts"],
 			"linter": {
@@ -564,26 +559,9 @@
 			"linter": {
 				"domains": {
 					"astro": "all",
-					"playwright": "all",
-					"react": "all",
-					"tailwind": "all"
+					"playwright": "all"
 				}
 			}
-		},
-
-		{
-			"assist": {
-				"actions": {
-					"source": {
-						"useSortedAttributes": "off"
-					}
-				}
-			},
-			"includes": [
-				"documentation/src/components/badge.astro",
-				"documentation/src/components/icon.astro",
-				"documentation/src/components/rule-example.astro"
-			]
 		},
 
 		{
@@ -605,17 +583,6 @@
 					}
 				}
 			}
-		},
-
-		{
-			"assist": {
-				"actions": {
-					"source": {
-						"useSortedAttributes": "off"
-					}
-				}
-			},
-			"includes": ["documentation/src/components/rule-page.astro"]
 		},
 
 		{
@@ -683,34 +650,6 @@
 		},
 
 		{
-			"includes": ["documentation/tests/browser/**/*.test.ts"],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"noPlaywrightUselessAwait": "error"
-					},
-					"correctness": {
-						"noPlaywrightMissingAwait": "error",
-						"usePlaywrightValidDescribeCallback": "error"
-					},
-					"nursery": {},
-					"style": {
-						"noPlaywrightElementHandle": "error",
-						"noPlaywrightEval": "error",
-						"noPlaywrightWaitForSelector": "error"
-					},
-					"suspicious": {
-						"noPlaywrightForceOption": "error",
-						"noPlaywrightNetworkidle": "error",
-						"noPlaywrightPagePause": "error",
-						"noPlaywrightWaitForNavigation": "error",
-						"noPlaywrightWaitForTimeout": "error"
-					}
-				}
-			}
-		},
-
-		{
 			"assist": {
 				"actions": {
 					"source": {
@@ -726,18 +665,6 @@
 				"enabled": true
 			},
 			"includes": ["**/*.{jsonc,json}", "!**/package.json", "!**/tsconfig*.json", "!src/default-properties.json"]
-		},
-
-		{
-			"includes": ["**/*.svg"],
-			"linter": {
-				"rules": {
-					"nursery": {
-						"noUnusedClasses": "off",
-						"useLayeredStyles": "off"
-					}
-				}
-			}
 		}
 
 		// package.json exception
