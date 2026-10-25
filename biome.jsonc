@@ -160,6 +160,7 @@
 		"domains": {
 			"project": "all",
 			"react": "all",
+			"test": "all",
 			"turborepo": "all",
 			"types": "all"
 		},
