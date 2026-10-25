@@ -449,7 +449,13 @@
 					}
 				},
 				"noTemplateCurlyInString": "off",
-				"noUndeclaredEnvVars": "error",
+				"noUndeclaredEnvVars": {
+					"level": "error",
+					"options": {
+						// Astro/Vite built-ins on import.meta.env, not process env vars
+						"allowedEnvVars": ["BASE_URL", "DEV", "MODE", "PROD", "SITE", "SSR"]
+					}
+				},
 				"noUnnecessaryConditions": "off",
 				"noUntrustedLicenses": "error",
 				"preset": "recommended",

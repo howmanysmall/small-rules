@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+	<title>Oxlint TypeScript config</title>
 	<rect width="16" height="16" rx="3.5" fill="#0060FF" />
 	<g transform="translate(2.4 2.64) scale(0.2333)">
 		<path

@@ -27,7 +27,7 @@ const sections = new Set(
 );
 ---
 
-<div class="rule-badges" aria-label="Rule characteristics">
+<div class="rule-badges">
 	{showNew && <Badge variant="new" />}
 	{showUpdated && <Badge variant="updated" />}
 	<Badge variant={facts.type === "problem" ? "error" : "suggestion"} />
