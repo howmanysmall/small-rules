@@ -1,0 +1,24 @@
+---
+title: "No Nested Hook Calls"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-nested-hook-calls">
+	<Fragment slot="rationale">
+		<p>
+			A hook call nested inside another hook call hides a value that never gets a name. Take
+			`useAttribute(useCharacter(), "Health")`. To see what the outer hook receives, the reader has to run the
+			inner call in their head. The line also grows long enough to wrap.
+		</p>
+		<p>
+			Assign the inner result to a `const` first. The variable gives the value a name and keeps each hook call on
+			its own line. Later code can reuse it too.
+		</p>
+		<p>
+			The rule only checks the expression of a hook call: its arguments and its callee. A hook called inside a
+			function passed to another hook, such as a component handed to an overlay hook, belongs to
+			`use-hook-at-top-level`.
+		</p>
+	</Fragment>
+</RulePage>
