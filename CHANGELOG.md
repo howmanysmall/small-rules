@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.10.0] - 2026-10-29
+
+## Added
+- **no-inline-signature-types**: New naming rule that reports object type literals in parameter and return type annotations and asks for a named interface. Options: `functions`, `position`, and `returnTypes`. [#106](https://github.com/howmanysmall/small-rules/pull/106)
+
 ## [3.9.0] - 2026-10-25
 
 ## Added
