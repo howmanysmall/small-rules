@@ -86,11 +86,12 @@ overrides:
   "@vitiate/core>@swc/core": 1.15.41
   vite: ^8
 
-# Vitest 5 matches `testNamePattern` against `task.fullTestName`, which joins suite names with
-# " > ". The runner builds its per-mutant filter by joining them with " ", so the regex matches
-# nothing for any test inside a `describe` and every mutant runs zero tests and is reported
-# "Survived". Drop this once upstream supports Vitest 5.
-patchedDependencies: {}
+# @isentinel/eslint-config: keep oxfmt off component files and apply option rules to them.
+# tsrs: fall back to TypeScript's own compiler on Windows when the @tsrs platform binary is
+# missing (there is no @tsrs/win32-arm64).
+patchedDependencies:
+  "@isentinel/eslint-config@6.2.0": patches/@isentinel__eslint-config@6.2.0.patch
+  tsrs@0.20.1-ts7.1.0-beta: patches/tsrs@0.20.1-ts7.1.0-beta.patch
 
 catalogs:
   benchmark:
@@ -240,9 +241,9 @@ allowBuilds:
   sharp: true
 
 packageExtensions:
-  "@stryker-mutator/core@10.0.0":
+  "@stryker-mutator/core@10.1.1":
     dependencies:
-      "@stryker-mutator/vitest-runner": 10.0.0
+      "@stryker-mutator/vitest-runner": 10.1.1
       typescript: 5.9.3
   astro@7.4.0:
     peerDependencies:
@@ -255,10 +256,10 @@ packageExtensions:
         optional: true
   # The patched getExePath falls back to TypeScript's own compiler on Windows
   # when the @tsrs platform binary is missing.
-  tsrs@0.18.0-ts7.1.0-dev.20260929:
+  tsrs@0.20.1-ts7.1.0-beta:
     optionalDependencies:
-      "@typescript/typescript-win32-arm64": 7.1.0-dev.20260930.4
-      "@typescript/typescript-win32-x64": 7.1.0-dev.20260930.4
+      "@typescript/typescript-win32-arm64": 7.1.0-beta
+      "@typescript/typescript-win32-x64": 7.1.0-beta
 
 peerDependencyRules:
   allowedVersions:

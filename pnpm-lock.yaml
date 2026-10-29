@@ -570,7 +570,11 @@ overrides:
   '@vitiate/core>@swc/core': 1.15.41
   vite: ^8
 
-packageExtensionsChecksum: sha256-urU4ehWBsxBCJImKq28BZq764njd9lOzLXM6dMGhnCo=
+packageExtensionsChecksum: sha256-RFU79NiKThdCLLC/87Z+Kx+C9PNsYhzysRr2GjsCSe0=
+
+patchedDependencies:
+  '@isentinel/eslint-config@6.2.0': 2804ae65c1e1728555abca8df8ee78fa14f2dd28a84fc24b1b4d4f82031f5a67
+  tsrs@0.20.1-ts7.1.0-beta: d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137
 
 importers:
 
@@ -624,7 +628,7 @@ importers:
         version: link:tools/lint-configurations
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.2.0(d11f15ab2b18bdbce10e83c9bc04b2d9)
+        version: 6.2.0(patch_hash=2804ae65c1e1728555abca8df8ee78fa14f2dd28a84fc24b1b4d4f82031f5a67)(d11f15ab2b18bdbce10e83c9bc04b2d9)
       '@isentinel/hooks':
         specifier: catalog:tooling
         version: 1.7.0(@typescript/typescript6@6.0.2)(jiti@2.7.0)(supports-color@10.2.2)
@@ -651,10 +655,10 @@ importers:
         version: 10.1.1
       '@stryker-mutator/core':
         specifier: catalog:test
-        version: 10.1.1(@types/node@26.6.6)
+        version: 10.1.1(@types/node@26.6.6)(vitest@5.0.5)
       '@stryker-mutator/vitest-runner':
         specifier: catalog:test
-        version: 10.1.1(@stryker-mutator/core@10.1.1(@types/node@26.6.6))(vitest@5.0.5)
+        version: 10.1.1(@stryker-mutator/core@10.1.1(@types/node@26.6.6)(vitest@5.0.5))(vitest@5.0.5)
       '@stylistic/eslint-plugin':
         specifier: catalog:lint
         version: 5.10.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))
@@ -756,7 +760,7 @@ importers:
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))
       fallow:
         specifier: catalog:lint
-        version: 3.37.0(tsrs@0.20.1-ts7.1.0-beta)
+        version: 3.37.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137))
       fast-check:
         specifier: catalog:test
         version: 4.10.2
@@ -792,7 +796,7 @@ importers:
         version: 0.23.3(@arethetypeswrong/core@0.18.5)(@typescript/typescript6@6.0.2)(@volar/typescript@2.4.28(@typescript/typescript6@6.0.2))(oxc-resolver@11.24.2)(publint@0.3.25)
       tsrs:
         specifier: catalog:tooling
-        version: 0.20.1-ts7.1.0-beta
+        version: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
       turbo:
         specifier: catalog:tooling
         version: 2.11.10
@@ -1124,7 +1128,7 @@ importers:
         version: link:../linter-utilities
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.2.0(d11f15ab2b18bdbce10e83c9bc04b2d9)
+        version: 6.2.0(patch_hash=2804ae65c1e1728555abca8df8ee78fa14f2dd28a84fc24b1b4d4f82031f5a67)(d11f15ab2b18bdbce10e83c9bc04b2d9)
       eslint-plugin-astro:
         specifier: catalog:lint
         version: 3.2.1(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)
@@ -1149,7 +1153,7 @@ importers:
         version: 1.90.0(oxlint-tsgolint@7.0.2005)
       tsrs:
         specifier: catalog:tooling
-        version: 0.20.1-ts7.1.0-beta
+        version: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
       vitest:
         specifier: catalog:test
         version: 5.0.5(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-istanbul@5.0.5)(@vitest/coverage-v8@5.0.5)(jsdom@29.1.1)(vite@8.2.2(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
@@ -1158,7 +1162,7 @@ importers:
     dependencies:
       '@isentinel/eslint-config':
         specifier: catalog:lint
-        version: 6.2.0(d11f15ab2b18bdbce10e83c9bc04b2d9)
+        version: 6.2.0(patch_hash=2804ae65c1e1728555abca8df8ee78fa14f2dd28a84fc24b1b4d4f82031f5a67)(d11f15ab2b18bdbce10e83c9bc04b2d9)
       '@small-rules/arktype-utilities':
         specifier: workspace:*
         version: link:../../packages/arktype-utilities
@@ -1180,7 +1184,7 @@ importers:
         version: 26.6.6
       tsrs:
         specifier: catalog:tooling
-        version: 0.20.1-ts7.1.0-beta
+        version: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
 
   tools/local-rules:
     dependencies:
@@ -1283,7 +1287,7 @@ importers:
         version: 26.6.6
       tsrs:
         specifier: catalog:tooling
-        version: 0.20.1-ts7.1.0-beta
+        version: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
 
   turbo/generators:
     dependencies:
@@ -1308,7 +1312,7 @@ importers:
         version: 26.6.6
       tsrs:
         specifier: catalog:tooling
-        version: 0.20.1-ts7.1.0-beta
+        version: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
       vitest:
         specifier: catalog:test
         version: 5.0.5(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-istanbul@5.0.5)(@vitest/coverage-v8@5.0.5)(jsdom@29.1.1)(vite@8.2.2(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -6056,8 +6060,20 @@ packages:
     cpu: [arm64]
     os: [win32]
 
+  '@typescript/typescript-win32-arm64@7.1.0-beta':
+    resolution: {integrity: sha512-lJbo71IEOfL7ZZIZnArRaOLqjn9BAfoSzyUQn0aSjfSpDZL4ru0afUsdBfo6PQEjD6ssdmi0n/RwaPADX6bsvQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [win32]
+
   '@typescript/typescript-win32-x64@7.0.2':
     resolution: {integrity: sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [win32]
+
+  '@typescript/typescript-win32-x64@7.1.0-beta':
+    resolution: {integrity: sha512-UKcHvbybY2tDTvFW2b1vwiAvDlIRooo69lh8CXWVhOQejcvpM5+IgbiFW9EIwR5Wi5X/v+BdN7gdWbigBuJ3rw==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [win32]
@@ -12907,7 +12923,7 @@ snapshots:
 
   '@isentinel/dict-roblox@1.0.22': {}
 
-  '@isentinel/eslint-config@6.2.0(d11f15ab2b18bdbce10e83c9bc04b2d9)':
+  '@isentinel/eslint-config@6.2.0(patch_hash=2804ae65c1e1728555abca8df8ee78fa14f2dd28a84fc24b1b4d4f82031f5a67)(d11f15ab2b18bdbce10e83c9bc04b2d9)':
     dependencies:
       '@antfu/install-pkg': 2.0.1
       '@clack/prompts': 1.7.0
@@ -14520,12 +14536,13 @@ snapshots:
       tslib: 2.8.1
       typed-inject: 5.0.0
 
-  '@stryker-mutator/core@10.1.1(@types/node@26.6.6)':
+  '@stryker-mutator/core@10.1.1(@types/node@26.6.6)(vitest@5.0.5)':
     dependencies:
       '@inquirer/prompts': 8.7.0(@types/node@26.6.6)
       '@stryker-mutator/api': 10.1.1
       '@stryker-mutator/instrumenter': 10.1.1
       '@stryker-mutator/util': 10.1.1
+      '@stryker-mutator/vitest-runner': 10.1.1(@stryker-mutator/core@10.1.1(@types/node@26.6.6)(vitest@5.0.5))(vitest@5.0.5)
       ajv: 8.20.0
       chalk: 5.6.2
       commander: 14.0.3
@@ -14548,8 +14565,10 @@ snapshots:
       tslib: 2.8.1
       typed-inject: 5.0.0
       typed-rest-client: 2.3.1
+      typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/node'
+      - vitest
 
   '@stryker-mutator/instrumenter@10.1.1':
     dependencies:
@@ -14570,10 +14589,10 @@ snapshots:
 
   '@stryker-mutator/util@10.1.1': {}
 
-  '@stryker-mutator/vitest-runner@10.1.1(@stryker-mutator/core@10.1.1(@types/node@26.6.6))(vitest@5.0.5)':
+  '@stryker-mutator/vitest-runner@10.1.1(@stryker-mutator/core@10.1.1(@types/node@26.6.6)(vitest@5.0.5))(vitest@5.0.5)':
     dependencies:
       '@stryker-mutator/api': 10.1.1
-      '@stryker-mutator/core': 10.1.1(@types/node@26.6.6)
+      '@stryker-mutator/core': 10.1.1(@types/node@26.6.6)(vitest@5.0.5)
       '@stryker-mutator/util': 10.1.1
       semver: 7.8.5
       tslib: 2.8.1
@@ -15363,7 +15382,13 @@ snapshots:
   '@typescript/typescript-win32-arm64@7.0.2':
     optional: true
 
+  '@typescript/typescript-win32-arm64@7.1.0-beta':
+    optional: true
+
   '@typescript/typescript-win32-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-x64@7.1.0-beta':
     optional: true
 
   '@typescript/typescript6@6.0.2':
@@ -17153,14 +17178,14 @@ snapshots:
 
   extend@3.0.2: {}
 
-  fallow-type-aware@3.37.0(tsrs@0.20.1-ts7.1.0-beta):
+  fallow-type-aware@3.37.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)):
     dependencies:
       typescript: 7.0.2
     optionalDependencies:
-      tsrs: 0.20.1-ts7.1.0-beta
+      tsrs: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
     optional: true
 
-  fallow@3.37.0(tsrs@0.20.1-ts7.1.0-beta):
+  fallow@3.37.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)):
     dependencies:
       detect-libc: 2.1.2
     optionalDependencies:
@@ -17172,7 +17197,7 @@ snapshots:
       '@fallow-cli/linux-x64-musl': 3.37.0
       '@fallow-cli/win32-arm64-msvc': 3.37.0
       '@fallow-cli/win32-x64-msvc': 3.37.0
-      fallow-type-aware: 3.37.0(tsrs@0.20.1-ts7.1.0-beta)
+      fallow-type-aware: 3.37.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137))
     transitivePeerDependencies:
       - tsrs
 
@@ -20089,7 +20114,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsrs@0.20.1-ts7.1.0-beta:
+  tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137):
     optionalDependencies:
       '@tsrs/darwin-arm64': 0.20.1-ts7.1.0-beta
       '@tsrs/darwin-x64': 0.20.1-ts7.1.0-beta
@@ -20098,6 +20123,8 @@ snapshots:
       '@tsrs/linux-x64-gnu': 0.20.1-ts7.1.0-beta
       '@tsrs/linux-x64-musl': 0.20.1-ts7.1.0-beta
       '@tsrs/win32-x64': 0.20.1-ts7.1.0-beta
+      '@typescript/typescript-win32-arm64': 7.1.0-beta
+      '@typescript/typescript-win32-x64': 7.1.0-beta
 
   tuf-js@4.1.0(supports-color@10.2.2):
     dependencies:

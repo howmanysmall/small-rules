@@ -93,7 +93,7 @@
 	"js/ts.preferences.autoImportFileExcludePatterns": [],
 	"js/ts.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?os$"],
 	"js/ts.suggest.autoImports": true,
-	"js/ts.tsdk.path": "node_modules\\tsrs",
+	"js/ts.tsdk.path": "node_modules\\tsrs\\tsdk",
 	"js/ts.updateImportsOnFileMove.enabled": "always",
 
 	"json.schemaDownload.trustedDomains": {
