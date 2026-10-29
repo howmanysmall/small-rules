@@ -133,7 +133,7 @@ export const ruleManifest = defineRuleManifest({
 			rules: [
 				{ name: "array-type-generic" },
 				{ name: "ban-types" },
-				{ name: "no-inline-parameter-types" },
+				{ name: "no-inline-signature-types" },
 				{ name: "no-spec-file-extension" },
 				{ name: "prefer-optional-parameter" },
 				{ name: "prefer-pascal-case-enums" },

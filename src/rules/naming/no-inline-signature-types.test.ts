@@ -1,13 +1,14 @@
 import { describe } from "vitest";
 import { ts, tsx } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/naming/no-inline-parameter-types";
+import rule from "$oxc-rules/naming/no-inline-signature-types";
 
 const inlineParameterType = { messageId: "inlineParameterType" } as const;
+const inlineReturnType = { messageId: "inlineReturnType" } as const;
 const componentsOnly = { functions: "components" } as const;
 
-describe("no-inline-parameter-types", () => {
-	tsx.run("no-inline-parameter-types", rule, {
+describe("no-inline-signature-types", () => {
+	tsx.run("no-inline-signature-types", rule, {
 		invalid: [
 			{
 				code: [
@@ -79,7 +80,7 @@ describe("no-inline-parameter-types", () => {
 		],
 	});
 
-	ts.run("no-inline-parameter-types", rule, {
+	ts.run("no-inline-signature-types", rule, {
 		invalid: [
 			{
 				code: "function formatLabel(options: { label: string }): string { return options.label; }",
@@ -183,6 +184,54 @@ describe("no-inline-parameter-types", () => {
 				options: [{ position: "bare" }],
 				errors: [inlineParameterType],
 			},
+			{
+				code: "function createLabel(): { label: string } { return { label: '' }; }",
+				errors: [inlineReturnType],
+			},
+			{
+				code: "const createLabel = (): Readonly<{ label: string }> => ({ label: '' });",
+				errors: [inlineReturnType],
+			},
+			{
+				code: [
+					"function isLabelReference(",
+					"\tnode: Node,",
+					"\tscope: Scope,",
+					"): node is Reference & { name: Identifier } {",
+					"\treturn hasLabel(node, scope);",
+					"}",
+				].join("\n"),
+				errors: [inlineReturnType],
+			},
+			{
+				code: "function assertLabel(value: unknown): asserts value is { label: string } {}",
+				errors: [inlineReturnType],
+			},
+			{
+				code: "class Labels { isLabel(): this is { label: string } { return true; } }",
+				errors: [inlineReturnType],
+			},
+			{
+				code: "interface LabelFactory { create(): { label: string }; }",
+				errors: [inlineReturnType],
+			},
+			{
+				code: "function formatLabel(callback: () => { label: string }) {}",
+				errors: [inlineReturnType],
+			},
+			{
+				code: "function formatLabel(create: new () => { label: string }) {}",
+				errors: [inlineReturnType],
+			},
+			{
+				code: "function mergeLabel(options: { label: string }): { label: string } { return options; }",
+				errors: [inlineParameterType, inlineReturnType],
+			},
+			{
+				code: "function Badge(properties: BadgeProperties): { label: string } { return properties; }",
+				options: [componentsOnly],
+				errors: [inlineReturnType],
+			},
 		],
 		valid: [
 			"function formatLabel(options: LabelOptions) {}",
@@ -193,8 +242,18 @@ describe("no-inline-parameter-types", () => {
 			"function formatLabel(options: typeof defaults) {}",
 			"function formatLabel(options: LabelOptions['label']) {}",
 			"function formatLabel(callback: (options: LabelOptions) => void) {}",
-			"function formatLabel(callback: () => { label: string }) {}",
-			"function formatLabel(create: new () => { label: string }) {}",
+			"function createLabel(): Label { return label; }",
+			"function isLabel(value: unknown): value is Label { return true; }",
+			"function assertLabel(value: unknown): asserts value {}",
+			{ code: "function createLabel(): { label: string } { return label; }", options: [{ returnTypes: false }] },
+			{
+				code: "function isLabel(value: unknown): value is { label: string } { return true; }",
+				options: [{ returnTypes: false }],
+			},
+			{
+				code: "function createLabel(): Readonly<{ label: string }> { return label; }",
+				options: [{ position: "bare" }],
+			},
 			"function formatLabel(...entries: Array<LabelOptions>) {}",
 			"function formatLabel(options: Map<string, number>) {}",
 			"function formatLabel(options: Readonly) {}",

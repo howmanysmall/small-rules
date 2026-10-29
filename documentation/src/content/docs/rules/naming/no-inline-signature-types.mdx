@@ -1,21 +1,25 @@
 ---
-title: "No Inline Parameter Types"
+title: "No Inline Signature Types"
 ---
 
 import RulePage from "$components/rule-page.astro";
 
-<RulePage rule="no-inline-parameter-types">
+<RulePage rule="no-inline-signature-types">
 	<Fragment slot="rationale">
 		<p>
-			An object type written inline in a parameter has no name. Callers can't import it, editors show its full
-			shape on every hover, and the next function that takes those properties copies them. A named interface gives
-			the type one home and one name, such as `BadgeProperties` for the props of `Badge`.
+			An object type written inline in a parameter or a return type has no name. Callers can't import it. Editors
+			list every property on every hover. The next function that needs the same properties copies them. A named
+			interface gives the type one home and one name, such as `BadgeProperties` for the props of `Badge`.
 		</p>
 		<p>
-			Set `functions` to `components` to check only `PascalCase` function components and the functions passed to
-			`memo` or `forwardRef`. Set `position` to `bare` to report only an annotation that's the object type itself,
-			or to `wrapped` to also report one inside a generic such as `Readonly`. The default, `anywhere`, also
-			reports object types inside unions, intersections, arrays, and tuples.
+			Return types include type predicates. The rule reports `node is Reference & { name: Identifier }`
+			like any other return type. Set `returnTypes` to `false` to check only parameters.
+		</p>
+		<p>
+			Set `functions` to `components` to check only `PascalCase` function components. Those include the functions
+			passed to `memo` or `forwardRef`. Set `position` to `bare` to report only an annotation that's the object
+			type itself. Set it to `wrapped` to also report one inside a generic such as `Readonly`. The default,
+			`anywhere`, also looks inside unions, intersections, arrays, and tuples.
 		</p>
 	</Fragment>
 </RulePage>
