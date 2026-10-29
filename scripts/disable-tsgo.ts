@@ -331,7 +331,7 @@ const command = new Command()
 	.argument("<scan-from:string>", "Where to start your scan from.", {
 		default: cwd(),
 	})
-	.action(async (options: { readonly dryRun: unknown }, scanFrom: string) => {
+	.action(async (options, scanFrom) => {
 		const dryRun = options.dryRun === true;
 		const scanRoot = nodePath.resolve(scanFrom);
 

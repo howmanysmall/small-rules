@@ -111,10 +111,11 @@ function findFirstTypeAnnotation(code: string): ESTree.TSType {
 	return found.typeAnnotation;
 }
 
-function requireParameter(
-	owner: { readonly params: ReadonlyArray<ESTree.ParamPattern> },
-	index: number,
-): ESTree.ParamPattern {
+interface HasParameters {
+	readonly params: ReadonlyArray<ESTree.ParamPattern>;
+}
+
+function requireParameter(owner: HasParameters, index: number): ESTree.ParamPattern {
 	const parameter = owner.params[index];
 	if (parameter === undefined) {
 		throw new Error(`Expected parameter at index ${index}.`);

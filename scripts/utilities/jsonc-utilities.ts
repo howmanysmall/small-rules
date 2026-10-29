@@ -33,7 +33,12 @@ function isInlineArrayNode(updatedContent: string, parentPath: ReadonlyArray<num
 	}
 }
 
-function formatInsertionEdit(edit: { content: string; length: number }, indent: string, inlineSpace: boolean): void {
+interface Edit {
+	content: string;
+	length: number;
+}
+
+function formatInsertionEdit(edit: Edit, indent: string, inlineSpace: boolean): void {
 	if (edit.content.startsWith(",")) {
 		edit.content = `,${indent}${edit.content.slice(1)}`;
 	} else if (!inlineSpace && edit.content.length > 0) {

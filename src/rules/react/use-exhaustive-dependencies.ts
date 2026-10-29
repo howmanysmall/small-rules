@@ -753,7 +753,11 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 	return dependencies;
 }
 
-function returnName({ name }: { readonly name: string }): string {
+interface HasName {
+	readonly name: string;
+}
+
+function returnName({ name }: HasName): string {
 	return name;
 }
 

@@ -40,7 +40,11 @@ function isBlockReturningIdentity({ body }: ESTree.FunctionBody, parameterName: 
 	return statement.argument.name === parameterName;
 }
 
-function getSingleParameterName(callback: { readonly params: ReadonlyArray<ESTree.ParamPattern> }): string | undefined {
+interface HasParameters {
+	readonly params: ReadonlyArray<ESTree.ParamPattern>;
+}
+
+function getSingleParameterName(callback: HasParameters): string | undefined {
 	if (callback.params.length !== 1) return undefined;
 
 	const [parameter] = callback.params;

@@ -132,12 +132,14 @@ export interface ScoredRelation {
 	readonly strength: number;
 }
 
+interface WriterOptions {
+	readonly left: RuleCard;
+	readonly relation: RelationDraft;
+	readonly right: RuleCard;
+}
+
 export interface ReasonWriter {
-	readonly writeReason: (options: {
-		readonly left: RuleCard;
-		readonly relation: RelationDraft;
-		readonly right: RuleCard;
-	}) => Promise<string>;
+	readonly writeReason: (options: WriterOptions) => Promise<string>;
 }
 
 export interface RelationProgress {

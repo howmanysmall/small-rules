@@ -138,7 +138,7 @@ function resolveUnaryConstant(
 
 function resolveIdentifierConstant(
 	sourceCode: SourceCode,
-	expression: ESTree.Node & { readonly name: string },
+	expression: ESTree.IdentifierName,
 	seen: Set<ESTree.Node>,
 ): ResolvedConstant | undefined {
 	if (expression.name === "undefined") {

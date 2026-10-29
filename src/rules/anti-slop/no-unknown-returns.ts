@@ -61,18 +61,19 @@ function enqueueWrappedType(resolved: ESTree.TSType, enqueue: (child: ESTree.TST
 	return false;
 }
 
+interface TypeNameReference extends ESTree.TSTypeReference {
+	typeName: ESTree.BindingIdentifier;
+}
+
 function isUnshadowedPromiseReference(
 	type: ESTree.TSType,
 	environment: TypeAliasEnvironment,
-): type is ESTree.TSTypeReference & { typeName: ESTree.BindingIdentifier } {
+): type is TypeNameReference {
 	if (!isIdentifierTypeReference(type) || !isPromiseLikeName(type.typeName.name)) return false;
 	return !hasVisibleTypeBinding(type.typeName.name, type, environment);
 }
 
-function enqueuePromiseValue(
-	resolved: ESTree.TSTypeReference & { typeName: ESTree.BindingIdentifier },
-	enqueue: (child: ESTree.TSType) => void,
-): void {
+function enqueuePromiseValue(resolved: TypeNameReference, enqueue: (child: ESTree.TSType) => void): void {
 	const value = resolved.typeArguments?.params[0];
 	if (value !== undefined) {
 		enqueue(value);

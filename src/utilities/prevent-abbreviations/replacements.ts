@@ -36,7 +36,7 @@ interface ReplacementNames {
 	readonly upperFirst: ReadonlyArray<string>;
 }
 
-interface Message {
+export interface Message {
 	readonly data: Record<string, string>;
 	readonly messageId: MessageIds;
 }
