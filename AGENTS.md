@@ -1,4 +1,4 @@
-`@pobammer-ts/small-rules` is an Oxlint-native lint plugin: general TypeScript rules plus Roblox-specific ones. Scripts run with `nr <script>`, mise tasks with `mise run <task>`, and cached workspace tasks with `turbo run <task>`; `package.json`, `mise.toml`, and `turbo.json` are the index of commands.
+`@pobammer-ts/small-rules` is an Oxlint-native lint plugin: general TypeScript rules plus Roblox-specific ones. This repository uses **Turborepo**: every task runs through the command index — cached workspace tasks with `turbo run <task>`, scripts with `nr <script>`, and mise tasks with `mise run <task>`; `package.json`, `mise.toml`, and `turbo.json` are the index of commands. **Never invoke underlying binaries directly** (e.g. `npx vitest`, `bun`, `node`) for project tasks — always use the turbo/nr/mise wrapper.
 
 ## Workflow
 
