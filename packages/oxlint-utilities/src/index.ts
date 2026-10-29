@@ -96,11 +96,14 @@ export const TS_INTERFACE_DECLARATION = "TSInterfaceDeclaration" as const satisf
 export const TS_INTERSECTION_TYPE = "TSIntersectionType" as const satisfies NodeType;
 export const TS_MAPPED_TYPE = "TSMappedType" as const satisfies NodeType;
 export const TS_METHOD_SIGNATURE = "TSMethodSignature" as const satisfies NodeType;
+export const TS_NAMED_TUPLE_MEMBER = "TSNamedTupleMember" as const satisfies NodeType;
 export const TS_NEVER_KEYWORD = "TSNeverKeyword" as const satisfies NodeType;
 export const TS_NON_NULL_EXPRESSION = "TSNonNullExpression" as const satisfies NodeType;
 export const TS_NULL_KEYWORD = "TSNullKeyword" as const satisfies NodeType;
 export const TS_NUMBER_KEYWORD = "TSNumberKeyword" as const satisfies NodeType;
 export const TS_OBJECT_KEYWORD = "TSObjectKeyword" as const satisfies NodeType;
+export const TS_OPTIONAL_TYPE = "TSOptionalType" as const satisfies NodeType;
+export const TS_REST_TYPE = "TSRestType" as const satisfies NodeType;
 export const TS_SATISFIES_EXPRESSION = "TSSatisfiesExpression" as const satisfies NodeType;
 export const TS_STRING_KEYWORD = "TSStringKeyword" as const satisfies NodeType;
 export const TS_SYMBOL_KEYWORD = "TSSymbolKeyword" as const satisfies NodeType;
@@ -156,7 +159,7 @@ export function isTsConditionalType(node: ESTree.Node): node is ESTree.TSConditi
 }
 
 export function isTsRestType(node: ESTree.Node): node is ESTree.TSRestType {
-	return node.type === "TSRestType";
+	return node.type === TS_REST_TYPE;
 }
 
 export function isTsTupleType(node: ESTree.Node): node is ESTree.TSTupleType {
@@ -376,7 +379,7 @@ export function isTsParenthesizedType(node: ESTree.Node): node is ESTree.TSParen
 }
 
 export function isTsOptionalType(node: ESTree.Node): node is ESTree.TSOptionalType {
-	return node.type === "TSOptionalType";
+	return node.type === TS_OPTIONAL_TYPE;
 }
 
 export function isTsIntersectionType(node: ESTree.Node): node is ESTree.TSIntersectionType {

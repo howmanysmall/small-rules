@@ -1,0 +1,21 @@
+---
+title: "No Inline Parameter Types"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-inline-parameter-types">
+	<Fragment slot="rationale">
+		<p>
+			An object type written inline in a parameter has no name. Callers can't import it, editors show its full
+			shape on every hover, and the next function that takes those properties copies them. A named interface gives
+			the type one home and one name, such as `BadgeProperties` for the props of `Badge`.
+		</p>
+		<p>
+			Set `functions` to `components` to check only `PascalCase` function components and the functions passed to
+			`memo` or `forwardRef`. Set `position` to `bare` to report only an annotation that's the object type itself,
+			or to `wrapped` to also report one inside a generic such as `Readonly`. The default, `anywhere`, also
+			reports object types inside unions, intersections, arrays, and tuples.
+		</p>
+	</Fragment>
+</RulePage>

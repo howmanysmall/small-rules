@@ -64,6 +64,7 @@ import requireThrowErrorCapture from "$oxc-rules/general/require-throw-error-cap
 import requireUnicodeRegex from "$oxc-rules/general/require-unicode-regex";
 import arrayTypeGeneric from "$oxc-rules/naming/array-type-generic";
 import banTypes from "$oxc-rules/naming/ban-types";
+import noInlineParameterTypes from "$oxc-rules/naming/no-inline-parameter-types";
 import noSpecFileExtension from "$oxc-rules/naming/no-spec-file-extension";
 import preferOptionalParameter from "$oxc-rules/naming/prefer-optional-parameter";
 import preferPascalCaseEnums from "$oxc-rules/naming/prefer-pascal-case-enums";
@@ -192,6 +193,7 @@ const smallRules = definePlugin({
 		"no-identity-map": noIdentityMap,
 		"no-increment-decrement": noIncrementDecrement,
 		"no-initialize-state": noInitializeState,
+		"no-inline-parameter-types": noInlineParameterTypes,
 		"no-inline-property-on-memo-component": noInlinePropertyOnMemoComponent,
 		"no-instance-methods-without-this": noInstanceMethodsWithoutThis,
 		"no-jsx-spread-child": noJsxSpreadChild,
