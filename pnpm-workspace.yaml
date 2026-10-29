@@ -168,7 +168,7 @@ catalogs:
     # eslint-disable-next-line pnpm/yaml-no-duplicate-catalog-item -- different versions.
     effect: 4.0.7
     ignore: 7.0.14
-    minimatch: 10.2.6
+    minimatch: 11.0.3
     oxc-resolver: 11.24.2
     oxlint-plugin-utilities: 1.1.0
     yuku-parser: 0.19.0

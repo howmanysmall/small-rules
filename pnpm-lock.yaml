@@ -367,8 +367,8 @@ catalogs:
       specifier: 7.0.14
       version: 7.0.14
     minimatch:
-      specifier: 10.2.6
-      version: 10.2.6
+      specifier: 11.0.3
+      version: 11.0.3
     oxc-resolver:
       specifier: 11.24.2
       version: 11.24.2
@@ -591,7 +591,7 @@ importers:
         version: 7.0.14
       minimatch:
         specifier: catalog:runtime
-        version: 10.2.6
+        version: 11.0.3
       oxc-resolver:
         specifier: catalog:runtime
         version: 11.24.2
@@ -3423,6 +3423,9 @@ packages:
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
+
+  '@isaacs/nonrecursive-glob-match@1.0.3':
+    resolution: {integrity: sha512-SI7kyKHq4XXDRozw+r9GlRZkia1ZkFrpLW98r2IC2Bpr8YkFGE3fvjzmxCG0x78A++69HmDNrDvSMYBZmHGpKA==}
 
   '@isaacs/string-locale-compare@1.1.0':
     resolution: {integrity: sha512-SQ7Kzhh9+D+ZW9MA0zkYv3VXhIDNx+LzM6EJ+/65I3QY+enU6Itte7E5XX7EWrqLW2FN4n06GWzBnPoC3th2aQ==}
@@ -6585,6 +6588,10 @@ packages:
   brace-expansion@2.1.4:
     resolution: {integrity: sha512-hGfVzPxthbf3+2yjg/RBs60cB0FhqBS/zvdV/4wn4/BmN0bNMMHPc4V/BbFieqf1TKAGGAHnY4eSjajCl0f2Xg==}
 
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
+    engines: {node: 20 || >=22}
+
   brace-expansion@5.0.9:
     resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
@@ -8730,6 +8737,10 @@ packages:
 
   minimatch@10.2.6:
     resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
+    engines: {node: 18 || 20 || >=22}
+
+  minimatch@11.0.3:
+    resolution: {integrity: sha512-iny/40PEGkNJQ5/Pv6z3nm6FbRAby32GeZRjCUJk2WnNDbgPSTcdI+DDvLqsgBdD4cD5sMtMheqPPnehCCa8Nw==}
     engines: {node: 18 || 20 || >=22}
 
   minimatch@9.0.9:
@@ -12917,6 +12928,8 @@ snapshots:
     dependencies:
       minipass: 7.1.3
 
+  '@isaacs/nonrecursive-glob-match@1.0.3': {}
+
   '@isaacs/string-locale-compare@1.1.0': {}
 
   '@isentinel/dict-rbxts@1.0.29': {}
@@ -15966,6 +15979,10 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
+  brace-expansion@5.0.12:
+    dependencies:
+      balanced-match: 4.0.4
+
   brace-expansion@5.0.9:
     dependencies:
       balanced-match: 4.0.4
@@ -18612,6 +18629,11 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.9
 
+  minimatch@11.0.3:
+    dependencies:
+      '@isaacs/nonrecursive-glob-match': 1.0.3
+      brace-expansion: 5.0.12
+
   minimatch@9.0.9:
     dependencies:
       brace-expansion: 2.1.4
@@ -20888,7 +20910,7 @@ time:
   jsdom@29.1.1: '2026-04-30T08:52:48.353Z'
   jsonc-parser@3.3.1: '2024-06-24T21:12:45.445Z'
   just-diff@6.0.2: '2023-03-26T00:59:36.579Z'
-  minimatch@10.2.6: '2026-07-27T19:00:09.469Z'
+  minimatch@11.0.3: '2026-10-28T20:00:34.713Z'
   mitata@1.0.34: '2025-02-04T01:36:33.564Z'
   mutative@2.0.1: '2026-10-27T01:09:07.235Z'
   oxc-resolver@11.24.2: '2026-07-12T16:30:52.655Z'
