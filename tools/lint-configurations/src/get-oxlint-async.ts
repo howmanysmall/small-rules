@@ -335,6 +335,7 @@ export async function getOxlintAsync({
 				"small-rules/no-identity-map": "error",
 				"small-rules/no-increment-decrement": ["error", { allowAutofix: true }],
 				"small-rules/no-initialize-state": ["error", { environment: "standard" }],
+				"small-rules/no-inline-parameter-types": "error",
 				"small-rules/no-inline-property-on-memo-component": "error",
 				"small-rules/no-instance-methods-without-this": "off",
 				"small-rules/no-jsx-spread-child": "error",
