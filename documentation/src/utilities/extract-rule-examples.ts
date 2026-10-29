@@ -380,7 +380,11 @@ function evaluateStatic(node: Expression, context: ExtractionContext): StaticVal
 	throw new ExtractionError(context, node.start, `${node.type} values are not supported.`);
 }
 
-function isStaticLiteral(node: Expression): node is Literal & { readonly value: boolean | null | number | string } {
+type StaticLiteral = Literal & {
+	readonly value: boolean | null | number | string;
+};
+
+function isStaticLiteral(node: Expression): node is StaticLiteral {
 	return (
 		node.type === "Literal" &&
 		(typeof node.value === "boolean" ||
@@ -392,7 +396,9 @@ function isStaticLiteral(node: Expression): node is Literal & { readonly value: 
 	);
 }
 
-function isStringLiteral(node?: Node): node is Literal & { readonly value: string } {
+type StringLiteral = Literal & { readonly value: string };
+
+function isStringLiteral(node?: Node): node is StringLiteral {
 	return node?.type === "Literal" && typeof node.value === "string";
 }
 

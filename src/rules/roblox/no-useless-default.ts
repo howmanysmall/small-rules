@@ -609,7 +609,12 @@ function extractCFrameValue(
 	return [x, y, z, 1, 0, 0, 0, 1, 0, 0, 0, 1];
 }
 
-function extractEnumValue(node: ESTree.Expression): undefined | { readonly enumType: string; readonly value: string } {
+interface ExtractedEnumValue {
+	readonly enumType: string;
+	readonly value: string;
+}
+
+function extractEnumValue(node: ESTree.Expression): ExtractedEnumValue | undefined {
 	const path = getMemberPath(node);
 	if (path?.length !== 3 || path[0] !== "Enum") return undefined;
 

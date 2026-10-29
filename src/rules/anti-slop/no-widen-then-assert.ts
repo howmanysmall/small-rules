@@ -307,10 +307,11 @@ function getKnownValueEvidence(
 	}
 }
 
-function getWidenedBinding(
-	sourceCode: SourceCode,
-	variable: ScopeVariable,
-): (Except<WidenedBinding, "boundary"> & { boundary: ESTree.Node | undefined }) | undefined {
+interface ProperWidenedBinding extends Except<WidenedBinding, "boundary"> {
+	boundary: ESTree.Node | undefined;
+}
+
+function getWidenedBinding(sourceCode: SourceCode, variable: ScopeVariable): ProperWidenedBinding | undefined {
 	const declarator = variableDeclarator(variable);
 	if (declarator === undefined) return undefined;
 	const bindingId: Parameter = declarator.id;

@@ -26,7 +26,11 @@ function parseClass(value: unknown): RobloxClass | undefined {
 	return { name: value.Name, members: value.Members, superclass: value.Superclass };
 }
 
-function isYieldingFunction(value: unknown): value is JsonObject & { readonly Name: string } {
+interface NamedJsonObject extends JsonObject {
+	readonly Name: string;
+}
+
+function isYieldingFunction(value: unknown): value is NamedJsonObject {
 	if (!isRecord(value) || value.MemberType !== "Function" || !Predicate.isString(value.Name)) return false;
 	return Array.isArray(value.Tags) && value.Tags.some((tag) => tag === "Yields" || tag === "CanYield");
 }

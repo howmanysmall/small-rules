@@ -34,9 +34,11 @@ type FunctionWithReturnType =
 	| ESTree.TSFunctionType
 	| ESTree.TSMethodSignature;
 
-function isIdentifierTypeReference(
-	type: ESTree.TSType,
-): type is ESTree.TSTypeReference & { typeName: ESTree.BindingIdentifier } {
+interface IdentifierTypeReference extends ESTree.TSTypeReference {
+	typeName: ESTree.BindingIdentifier;
+}
+
+function isIdentifierTypeReference(type: ESTree.TSType): type is IdentifierTypeReference {
 	return isTsTypeReference(type) && isBindingIdentifier(type.typeName);
 }
 
@@ -61,19 +63,15 @@ function enqueueWrappedType(resolved: ESTree.TSType, enqueue: (child: ESTree.TST
 	return false;
 }
 
-interface TypeNameReference extends ESTree.TSTypeReference {
-	typeName: ESTree.BindingIdentifier;
-}
-
 function isUnshadowedPromiseReference(
 	type: ESTree.TSType,
 	environment: TypeAliasEnvironment,
-): type is TypeNameReference {
+): type is IdentifierTypeReference {
 	if (!isIdentifierTypeReference(type) || !isPromiseLikeName(type.typeName.name)) return false;
 	return !hasVisibleTypeBinding(type.typeName.name, type, environment);
 }
 
-function enqueuePromiseValue(resolved: TypeNameReference, enqueue: (child: ESTree.TSType) => void): void {
+function enqueuePromiseValue(resolved: IdentifierTypeReference, enqueue: (child: ESTree.TSType) => void): void {
 	const value = resolved.typeArguments?.params[0];
 	if (value !== undefined) {
 		enqueue(value);

@@ -92,9 +92,11 @@ function isConstructor(node: ESTree.ClassElement): node is ESTree.MethodDefiniti
 	return isMethodDefinition(node) && node.kind === "constructor" && isIdentifierNamed(node.key, "constructor");
 }
 
-function isConstructorLiteralAssignment(statement: ESTree.Statement): statement is ESTree.ExpressionStatement & {
+interface ConstructorLiteralAssignment extends ESTree.ExpressionStatement {
 	readonly expression: ESTree.AssignmentExpression;
-} {
+}
+
+function isConstructorLiteralAssignment(statement: ESTree.Statement): statement is ConstructorLiteralAssignment {
 	if (!isExpressionStatement(statement)) return false;
 
 	const { expression } = statement;

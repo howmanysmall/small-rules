@@ -352,9 +352,11 @@ export function isTsNeverKeyword(node: ESTree.Node): node is ESTree.TSNeverKeywo
 	return node.type === TS_NEVER_KEYWORD;
 }
 
-export function isAccessorProperty(
-	node: ESTree.Node,
-): node is ESTree.AccessorProperty & { type: typeof ACCESSOR_PROPERTY } {
+interface AccessorProperty extends ESTree.AccessorProperty {
+	readonly type: typeof ACCESSOR_PROPERTY;
+}
+
+export function isAccessorProperty(node: ESTree.Node): node is AccessorProperty {
 	return node.type === ACCESSOR_PROPERTY;
 }
 
@@ -482,7 +484,11 @@ export function isNamedGlobalCall(node: ESTree.CallExpression | ESTree.NewExpres
 	return isIdentifierNamed(node.callee, name);
 }
 
-export function isClassExpression(node: ESTree.Node): node is ESTree.Class & { type: typeof CLASS_EXPRESSION } {
+interface ClassExpression extends ESTree.Class {
+	readonly type: typeof CLASS_EXPRESSION;
+}
+
+export function isClassExpression(node: ESTree.Node): node is ClassExpression {
 	return node.type === CLASS_EXPRESSION;
 }
 
@@ -494,7 +500,11 @@ export function isClass(node: ESTree.Node): node is ESTree.Class {
 	return node.type === "ClassDeclaration" || isClassExpression(node);
 }
 
-export function isClassDeclaration(node: ESTree.Node): node is ESTree.Class & { type: typeof CLASS_DECLARATION } {
+interface ClassDeclaration extends ESTree.Class {
+	readonly type: typeof CLASS_DECLARATION;
+}
+
+export function isClassDeclaration(node: ESTree.Node): node is ClassDeclaration {
 	return node.type === CLASS_DECLARATION;
 }
 
@@ -526,7 +536,11 @@ export function isFunctionDeclaration(node?: ESTree.Node | null): node is ESTree
 	return isFunctionDeclarationRaw(node) || isFunctionExpression(node);
 }
 
-export function isTsDeclareFunction(node: ESTree.Node): node is ESTree.Function & { type: "TSDeclareFunction" } {
+interface TsDeclareFunction extends ESTree.Function {
+	readonly type: "TSDeclareFunction";
+}
+
+export function isTsDeclareFunction(node: ESTree.Node): node is TsDeclareFunction {
 	return node.type === TS_DECLARE_FUNCTION;
 }
 

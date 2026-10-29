@@ -68,6 +68,12 @@ const UNSTABLE_VALUES = new Set<string>([
 	OBJECT_EXPRESSION,
 ]);
 
+interface HookInvocationInformation {
+	readonly closureArgument: ESTree.Node;
+	readonly closureFunction: CallbackFunction;
+	readonly hookConfig: HookConfig;
+}
+
 interface HookEntry {
 	readonly name: string;
 	readonly closureIndex?: number;
@@ -327,14 +333,15 @@ function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string
 	return path;
 }
 
-function isStableBindingPattern(
-	node: ESTree.Node,
-	patternType: "ArrayPattern",
-): node is ESTree.VariableDeclarator & { readonly id: ESTree.ArrayPattern };
+interface StableBindingPattern<TType extends "Array" | "Object"> extends ESTree.VariableDeclarator {
+	readonly id: TType extends "Array" ? ESTree.ArrayPattern : ESTree.ObjectPattern;
+}
+
+function isStableBindingPattern(node: ESTree.Node, patternType: "ArrayPattern"): node is StableBindingPattern<"Array">;
 function isStableBindingPattern(
 	node: ESTree.Node,
 	patternType: "ObjectPattern",
-): node is ESTree.VariableDeclarator & { readonly id: ESTree.ObjectPattern };
+): node is StableBindingPattern<"Object">;
 function isStableBindingPattern(node: ESTree.Node, patternType: "ArrayPattern" | "ObjectPattern"): boolean {
 	return isVariableDeclarator(node) && node.id.type === patternType;
 }
@@ -1101,13 +1108,7 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 			return isCallbackFunctionNode(resolved) ? resolved : undefined;
 		}
 
-		function resolveHookInvocation(node: ESTree.CallExpression):
-			| undefined
-			| {
-					readonly closureArgument: ESTree.Node;
-					readonly closureFunction: CallbackFunction;
-					readonly hookConfig: HookConfig;
-			  } {
+		function resolveHookInvocation(node: ESTree.CallExpression): HookInvocationInformation | undefined {
 			const hookName = getHookName(node);
 			if (hookName === undefined || hookName.length === 0) return undefined;
 

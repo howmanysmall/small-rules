@@ -17,6 +17,8 @@ export function listBundledSources(directory: string): ReadonlyArray<string> {
 	return relativePaths.filter((relativePath) => BUNDLED_SOURCE.test(relativePath));
 }
 
+type YukuNodeWithType<TType extends ESTree.Node["type"]> = Extract<ESTree.Node, { type: TType }> & YukuNode;
+
 /**
  * Yuku and Oxlint share the ESTree shape, so a yuku node of a given type is
  * also the Oxlint node of that type.
@@ -29,6 +31,6 @@ export function listBundledSources(directory: string): ReadonlyArray<string> {
 export function isOfType<TType extends ESTree.Node["type"]>(
 	node: YukuNode,
 	type: TType,
-): node is Extract<ESTree.Node, { type: TType }> & YukuNode {
+): node is YukuNodeWithType<TType> {
 	return node.type === type;
 }

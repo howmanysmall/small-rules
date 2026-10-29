@@ -134,9 +134,12 @@ function expandChangeRegion(operations: ReadonlyArray<DiffOperation>, startIndex
 	return rawEnd;
 }
 
-function collectRegions(
-	operations: ReadonlyArray<DiffOperation>,
-): ReadonlyArray<{ readonly end: number; readonly start: number }> {
+interface Region {
+	readonly end: number;
+	readonly start: number;
+}
+
+function collectRegions(operations: ReadonlyArray<DiffOperation>): ReadonlyArray<Region> {
 	const regions = new Array<{ end: number; start: number }>();
 	let scanIndex = 0;
 

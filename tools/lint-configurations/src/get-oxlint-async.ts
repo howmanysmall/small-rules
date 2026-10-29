@@ -814,9 +814,12 @@ export async function getOxlintAsync({
 			rules: reactTestRules,
 		},
 		{
-			name: "small-rules/allow-unambiguous-import",
+			name: "small-rules/definitions-need-not-apply",
 			files: [GLOB_DTS],
-			rules: { "import/unambiguous": "off" },
+			rules: {
+				"import/unambiguous": "off",
+				// "small-rules/no-inline-signature-types": "off",
+			},
 		},
 		{
 			name: "small-rules/react",

@@ -126,13 +126,13 @@ function getEffectiveOptions(context: Context): EffectiveOptions {
 	return { checkComputed: checkComputed ?? true, isAllowedFile, restrictions: restrictions.map(compileRestriction) };
 }
 
+type ReportableMember = ESTree.MemberExpression & { readonly object: ESTree.IdentifierName };
+
 const noRestrictedPropertyAssignment = createRule("no-restricted-property-assignment", "general", {
 	create(context): Visitor {
 		const { checkComputed, isAllowedFile, restrictions } = getEffectiveOptions(context);
 
-		function isReportableMember(
-			node: ESTree.Node,
-		): node is ESTree.MemberExpression & { readonly object: ESTree.IdentifierName } {
+		function isReportableMember(node: ESTree.Node): node is ReportableMember {
 			if (isAllowedFile || !isMemberExpression(node)) return false;
 			if (!checkComputed && node.computed) return false;
 			return isIdentifier(node.object);
