@@ -1,9 +1,8 @@
-export default function ContextStack({
-	providers,
-	children,
-}: {
-	readonly children?: unknown;
+interface Properties {
 	readonly providers: ReadonlyArray<unknown>;
-}): ReadonlyArray<unknown> {
+	readonly children?: unknown;
+}
+
+export default function ContextStack({ providers, children }: Properties): ReadonlyArray<unknown> {
 	return [providers, children];
 }

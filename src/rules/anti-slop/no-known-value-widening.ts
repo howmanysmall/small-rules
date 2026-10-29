@@ -86,10 +86,14 @@ function isUnvisitedVariable(
 	return variable !== undefined && !visited.has(variable);
 }
 
+interface StableInitializer extends ESTree.VariableDeclarator {
+	init: ESTree.Expression;
+}
+
 function hasStableInitializer(
 	variable: ScopeVariable,
 	declarator?: ESTree.VariableDeclarator,
-): declarator is ESTree.VariableDeclarator & { init: ESTree.Expression } {
+): declarator is StableInitializer {
 	if (declarator === undefined) return false;
 	return declarator.init !== null && isStableConstVariable(variable, declarator);
 }

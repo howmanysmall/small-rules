@@ -1,9 +1,8 @@
-export function DirectionalPadding({
-	horizontal,
-	vertical,
-}: {
+interface Properties {
 	readonly horizontal?: unknown;
 	readonly vertical?: unknown;
-}): ReadonlyArray<unknown> {
+}
+
+export function DirectionalPadding({ horizontal, vertical }: Properties): ReadonlyArray<unknown> {
 	return [horizontal, vertical];
 }

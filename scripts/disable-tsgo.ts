@@ -134,9 +134,12 @@ function expandChangeRegion(operations: ReadonlyArray<DiffOperation>, startIndex
 	return rawEnd;
 }
 
-function collectRegions(
-	operations: ReadonlyArray<DiffOperation>,
-): ReadonlyArray<{ readonly end: number; readonly start: number }> {
+interface Region {
+	readonly end: number;
+	readonly start: number;
+}
+
+function collectRegions(operations: ReadonlyArray<DiffOperation>): ReadonlyArray<Region> {
 	const regions = new Array<{ end: number; start: number }>();
 	let scanIndex = 0;
 
@@ -331,7 +334,7 @@ const command = new Command()
 	.argument("<scan-from:string>", "Where to start your scan from.", {
 		default: cwd(),
 	})
-	.action(async (options: { readonly dryRun: unknown }, scanFrom: string) => {
+	.action(async (options, scanFrom) => {
 		const dryRun = options.dryRun === true;
 		const scanRoot = nodePath.resolve(scanFrom);
 

@@ -220,10 +220,7 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 			}
 		}
 
-		function checkIdentifierReturn(
-			node: ESTree.ReturnStatement,
-			identifier: ESTree.Node & { readonly name: string },
-		): void {
+		function checkIdentifierReturn(node: ESTree.ReturnStatement, identifier: ESTree.IdentifierName): void {
 			if (shouldAllowIdentifierReturn(sourceCode, identifier)) return;
 
 			const initializer = getResolvedArrayInitializer(sourceCode, node, identifier.name, arrayInitializersByName);

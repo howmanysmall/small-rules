@@ -1,3 +1,7 @@
-export function EqualPadding({ padding }: { readonly padding?: unknown }): unknown {
+interface Properties {
+	readonly padding?: unknown;
+}
+
+export function EqualPadding({ padding }: Properties): unknown {
 	return padding;
 }

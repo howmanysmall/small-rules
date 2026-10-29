@@ -1,3 +1,4 @@
+// oxlint-disable small-rules/no-inline-signature-types -- don't care; don't want to.
 import { describe, it } from "vitest";
 import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";

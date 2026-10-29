@@ -113,7 +113,12 @@ function isConstantLoopBinding(loop: ESTree.ForOfStatement): boolean {
 	return isVariableDeclaration(loop.left) && loop.left.kind === "const";
 }
 
-function getLiveIterable(right: ESTree.Expression): undefined | { method: string; name: string } {
+interface LiveIterable {
+	readonly name: string;
+	readonly method: string;
+}
+
+function getLiveIterable(right: ESTree.Expression): LiveIterable | undefined {
 	const node = stripExpressionWrappers(right);
 	if (isIdentifier(node)) {
 		return { name: node.name, method: "direct" };

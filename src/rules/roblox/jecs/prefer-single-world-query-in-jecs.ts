@@ -102,7 +102,11 @@ const VALID_PARENT_TYPES = new Set<NodeType>([
 	WHILE_STATEMENT,
 ]);
 
-function isNodeWithParent(value: InspectableNode): value is { readonly parent: InspectableNode } {
+type NodeWithParent = InspectableNode & {
+	readonly parent: InspectableNode;
+};
+
+function isNodeWithParent(value: InspectableNode): value is NodeWithParent {
 	return Predicate.isObject(value) && "parent" in value;
 }
 

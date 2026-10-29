@@ -23,9 +23,12 @@ import {
 import type { TypeAssertionExpression } from "@small-rules/oxlint-utilities";
 import type { ESTree, SourceCode } from "oxlint-plugin-utilities";
 
-export function getNamespacedCallNames(
-	callee: ESTree.Expression,
-): undefined | { readonly objectName: string; readonly propertyName: string } {
+interface NamedspacedCallNames {
+	readonly objectName: string;
+	readonly propertyName: string;
+}
+
+export function getNamespacedCallNames(callee: ESTree.Expression): NamedspacedCallNames | undefined {
 	if (
 		!isMemberExpression(callee) ||
 		callee.computed ||

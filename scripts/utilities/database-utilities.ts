@@ -220,7 +220,9 @@ function buildEnumLookup(rawEnums: unknown): EnumLookup {
 	return lookup;
 }
 
-function isDataTypeObject(value: unknown): value is { readonly Enum: string } | { readonly Value: string } {
+type DataTypeObject = { readonly Enum: string } | { readonly Value: string };
+
+function isDataTypeObject(value: unknown): value is DataTypeObject {
 	return Predicate.isObject(value) && ("Enum" in value || "Value" in value);
 }
 

@@ -178,9 +178,13 @@ export function createDirectiveKindsSchema(description: string): DirectiveKindsS
 	};
 }
 
-function parseDirectiveText(
-	textToParse: string,
-): Readonly<{ description: string | undefined; kind: string; value: string }> | undefined {
+interface ParsedDirectiveText {
+	readonly description: string | undefined;
+	readonly kind: string;
+	readonly value: string;
+}
+
+function parseDirectiveText(textToParse: string): ParsedDirectiveText | undefined {
 	const { description, text } = divideDirectiveComment(textToParse);
 	const valueStart = text.search(DIRECTIVE_VALUE_SEPARATOR);
 	const directiveText = valueStart === -1 ? text : text.slice(0, valueStart);

@@ -60,6 +60,7 @@ import type {
 	Visitor,
 } from "oxlint-plugin-utilities";
 
+import type { Message } from "$oxc-utilities/prevent-abbreviations/replacements";
 import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
 
 function createIsSafeGeneratedName(scopeToNamesGeneratedByFixer: WeakMap<Scope, Set<string>>): IsSafe {
@@ -164,7 +165,7 @@ function computeSafeSamples(
 
 function tryReportFix(
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
-	message: { data: Record<string, string>; messageId: MessageIds },
+	message: Message,
 	variable: VariableLike,
 	replacement: string,
 	scopes: ReadonlyArray<Scope>,

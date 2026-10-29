@@ -336,6 +336,7 @@ export async function getOxlintAsync({
 				"small-rules/no-increment-decrement": ["error", { allowAutofix: true }],
 				"small-rules/no-initialize-state": ["error", { environment: "standard" }],
 				"small-rules/no-inline-property-on-memo-component": "error",
+				"small-rules/no-inline-signature-types": "error",
 				"small-rules/no-instance-methods-without-this": "off",
 				"small-rules/no-jsx-spread-child": "error",
 				"small-rules/no-known-value-widening": "error",
@@ -813,9 +814,12 @@ export async function getOxlintAsync({
 			rules: reactTestRules,
 		},
 		{
-			name: "small-rules/allow-unambiguous-import",
+			name: "small-rules/definitions-need-not-apply",
 			files: [GLOB_DTS],
-			rules: { "import/unambiguous": "off" },
+			rules: {
+				"import/unambiguous": "off",
+				// "small-rules/no-inline-signature-types": "off",
+			},
 		},
 		{
 			name: "small-rules/react",
