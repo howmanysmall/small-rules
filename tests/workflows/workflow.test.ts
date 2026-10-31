@@ -270,14 +270,21 @@ function checkoutAudit(): CheckoutAudit {
 	};
 }
 
-// Only the Pages deploy job may hold write scopes.
-const ALLOWED_FOR_DEPLOY = new Set(["id-token", "pages"]);
+// Only the Pages deploy job may hold write scopes. The coverage job mints an
+// OIDC token for Codecov, which grants no write access to the repository, and
+// it runs no pull request code.
+const ALLOWED_WRITE_SCOPES: ReadonlyMap<string, ReadonlySet<string>> = new Map([
+	["ci/coverage", new Set(["id-token"])],
+	["docs/deploy", new Set(["id-token", "pages"])],
+]);
+
+const NO_WRITE_SCOPES: ReadonlySet<string> = new Set();
 
 function writeViolations(): ReadonlyArray<WriteViolation> {
 	const violations = new Array<WriteViolation>();
 
 	function collect(workflow: string, job: string, effective: Permissions): void {
-		const allowed = workflow === "docs" && job === "deploy" ? ALLOWED_FOR_DEPLOY : new Set<string>();
+		const allowed = ALLOWED_WRITE_SCOPES.get(`${workflow}/${job}`) ?? NO_WRITE_SCOPES;
 		const scopes = writeScopes(effective).filter((scope) => !allowed.has(scope));
 		if (scopes.length > 0) {
 			violations.push({ job, scopes, workflow });
@@ -379,7 +386,8 @@ describe("documentation deployment workflow", () => {
 
 	// Bug: a validation workflow gains write credentials
 	// and becomes a confused deputy.
-	// Oracle: least privilege; only the Pages deploy job may hold write scopes.
+	// Oracle: least privilege; only the Pages deploy job may hold write scopes,
+	// plus the OIDC token the coverage job sends to Codecov.
 	it("grants validation workflows no write access", ({ expect }) => {
 		expect.assertions(1);
 

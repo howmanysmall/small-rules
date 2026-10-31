@@ -16,6 +16,7 @@
 		},
 		"//#test": {
 			"env": ["PROPERTY_RUNS"],
+			"outputs": ["coverage/**"],
 			"passThroughEnv": ["VITIATE_*"]
 		},
 		"//#type-check": {
