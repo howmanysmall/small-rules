@@ -181,4 +181,15 @@ jobs:
 
           - name: Run fuzz regressions
             run: node --run test:fuzz
+
+      # A skipped `--affected` run writes no coverage, so there may be nothing to upload.
+      - name: Upload coverage
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          if-no-files-found: ignore
+          name: coverage
+          path: |
+            coverage/coverage-final.json
+            coverage/coverage-summary.json
+          retention-days: 7
     timeout-minutes: 15
