@@ -24,6 +24,7 @@
 		"mutative": "catalog:scripts",
 		"pretty-bytes": "catalog:scripts",
 		"pretty-ms": "catalog:scripts",
+		"spdx-expression-parse": "catalog:scripts",
 		"tinyexec": "catalog:scripts",
 		"type-fest": "catalog:types",
 		"typescript": "catalog:tooling",
@@ -33,6 +34,7 @@
 	},
 	"devDependencies": {
 		"@total-typescript/ts-reset": "catalog:types",
+		"@types/spdx-expression-parse": "catalog:types",
 		"tsdown": "catalog:build",
 		"vitest": "catalog:test"
 	}
