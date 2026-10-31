@@ -20,6 +20,15 @@ Type-check, build, tests, and the docs jobs run through `turbo run`. Each job re
 - Real fuzzing with `nr test:fuzz:run` (10 seconds with vitiate). `nr test:fuzz` replays the stored corpus and runs in every CI Test job.
 - Mutation testing with `nr test:mutation` (Stryker; thresholds in `stryker.config.mjs`).
 
+## Dependency Checks
+
+`.github/workflows/dependencies.yaml` runs when a manifest, the lockfile, or the license policy changes, and weekly for advisories published since:
+
+- **Audit** - `pnpm audit --prod` fails at moderate, and `pnpm audit` over everything fails at high. To ignore an advisory, add its GHSA ID under `audit.ignore` in `pnpm-workspace.yaml`, with a comment saying why it can't be fixed.
+- **Licenses** - `node --run licenses:check` judges the plugin's and the documentation site's production dependencies against the strict shipped list, and everything else against a looser workspace list. A package in both tiers gets the stricter one. Both lists live in `scripts/constants/license-policy.ts`.
+
+A license exception goes in the same file. It names the package and the exact license string it covers, and its `reason` says why that package is acceptable. The check fails when an exception stops covering any installed package, so delete the ones a dependency change made redundant. hk runs the license check whenever a `package.json`, the lockfile, or the policy changes.
+
 ## Release Flow
 
 1. `mise run release` runs the local `check` task, then `nr release` (`bumpp` bumps the version, commits, tags, and pushes). Run it from an up-to-date `main`.
