@@ -23,6 +23,9 @@ coverage
 # duplication and analysis reports
 /report/
 
+# link checker cache
+.lycheecache
+
 # logs
 logs
 _.log

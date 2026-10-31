@@ -22,6 +22,7 @@ direnv = "latest"
 git-cliff = "latest"
 hk = { version = "2.9.0", workflow = "release.yml" }
 jactionlint = "latest"
+lychee = "latest"
 ni = "latest"
 node = "24"
 pinact = "latest"

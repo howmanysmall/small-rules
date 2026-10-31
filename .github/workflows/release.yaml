@@ -131,7 +131,7 @@ jobs:
 
       - if: ${{ env.DRY_RUN == 'true' }}
         name: Dry-run package build
-        run: node --run build -- --minify
+        run: tsdown --minify
 
       - if: ${{ env.DRY_RUN != 'true' }}
         name: Generate release notes
