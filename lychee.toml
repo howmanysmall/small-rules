@@ -1,0 +1,45 @@
+# Link checker - https://lychee.cli.rs/
+# Run with `mise run links`.
+
+scheme = ["https", "http", "file"]
+
+# Root-relative links such as `/small-rules/rules/...` only resolve against the
+# built site, and the Astro build already checks them. This gives lychee a root
+# to resolve them against so the `exclude` list can drop them.
+root_dir = "documentation/src/content"
+
+cache = true
+max_cache_age = "1d"
+
+timeout = 30
+max_retries = 3
+retry_wait_time = 5
+
+# 429 means the host is rate limiting, not that the link is dead.
+accept = ["200..=204", "429"]
+
+exclude = [
+	"^https?://localhost",
+	'^https?://127\.0\.0\.1',
+	'^https?://example\.(com|org)',
+	# npm answers every non-browser client with 403.
+	'^https://www\.npmjs\.com/',
+	# Root-relative site links, e.g. `/small-rules/configuration/`, resolve under
+	# `root_dir` and never exist there.
+	"/documentation/src/content/small-rules/",
+	# JSX template literals such as {`/small-rules/${category.path}/`}.
+	"%7B",
+]
+
+exclude_path = [
+	".agents/skills",
+	"do-not-sync-ever",
+	"node_modules",
+	"documentation/dist",
+	"documentation/coverage",
+	"documentation/test-results",
+	"coverage",
+	"dist",
+]
+
+no_progress = true

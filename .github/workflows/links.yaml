@@ -1,0 +1,46 @@
+name: Links
+
+# Link rot is not caused by a commit, so this runs on a schedule and never
+# gates a PR or a push.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: links-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: Check links
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+        with:
+          tools: lychee
+
+      - name: Restore lychee cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: ${{ runner.os }}-lychee-${{ github.run_id }}
+          path: .lycheecache
+          restore-keys: |
+            ${{ runner.os }}-lychee-
+
+      - name: Check links
+        run: mise run links
+        env:
+          # Authenticated requests avoid GitHub's rate limit on repository links.
+          GITHUB_TOKEN: ${{ github.token }}
+    timeout-minutes: 15
