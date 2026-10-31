@@ -162,6 +162,7 @@
 		"oxfmt": "catalog:lint",
 		"oxlint": "catalog:lint",
 		"oxlint-tsgolint": "catalog:lint",
+		"pkg-pr-new": "catalog:tooling",
 		"pncat": "catalog:tooling",
 		"publint": "catalog:build",
 		"react-doctor": "catalog:lint",

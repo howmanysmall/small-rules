@@ -217,6 +217,7 @@ catalogs:
     "@turbo/gen": 2.11.10
     bumpp: 12.3.0
     jiti: 2.7.0
+    pkg-pr-new: 0.0.93
     pncat: 0.13.4
     sfw: 2.0.6
     skills: 1.7.4
