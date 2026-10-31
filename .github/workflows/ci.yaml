@@ -21,6 +21,7 @@ on:
       - ".ox*trc.json"
       - .vale.ini
       - biome.jsonc
+      - codecov.yaml
       - "documentation/**"
       - hk.pkl
       - mise.lock
@@ -50,6 +51,42 @@ jobs:
     permissions:
       contents: read
     uses: $/.github/workflows/checks.yaml
+
+  # Separate from `checks` so `id-token: write` never reaches a job that runs pull request code.
+  coverage:
+    name: Coverage
+    permissions:
+      contents: read
+      id-token: write
+    needs: checks
+    # Fork pull requests cannot mint an OIDC token for Codecov, so skip them rather than go red.
+    if: >-
+      needs.checks.result == 'success' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Missing when `--affected` skipped every test.
+      - name: Download coverage
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage
+          path: coverage
+        continue-on-error: true
+
+      - if: hashFiles('coverage/coverage-final.json') != ''
+        name: Upload to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          fail_ci_if_error: ${{ github.event_name == 'push' }}
+          files: coverage/coverage-final.json
+          flags: unit
+          use_oidc: true
+    timeout-minutes: 15
 
   vale:
     name: Vale

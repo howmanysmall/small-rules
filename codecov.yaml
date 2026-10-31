@@ -1,0 +1,21 @@
+codecov:
+  require_ci_to_pass: true
+
+# Vitest already fails the build below 100%, so Codecov only reports.
+coverage:
+  status:
+    patch:
+      default:
+        informational: true
+    project:
+      default:
+        informational: true
+
+# `--affected` can skip the tests, so keep the last upload instead of showing a drop.
+flag_management:
+  default_rules:
+    carryforward: true
+
+comment:
+  layout: "condensed_header, diff"
+  require_changes: true

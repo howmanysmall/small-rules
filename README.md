@@ -9,6 +9,7 @@
 [![package size](https://img.shields.io/npm/unpacked-size/@pobammer-ts/small-rules?label=package%20size)](https://www.npmjs.com/package/@pobammer-ts/small-rules)
 [![Rules](https://img.shields.io/badge/rules-109-blueviolet)](https://docs.howmanysmall.com/small-rules/rules/)
 [![CI](https://github.com/howmanysmall/small-rules/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/howmanysmall/small-rules/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/howmanysmall/small-rules/graph/badge.svg)](https://codecov.io/gh/howmanysmall/small-rules)
 [![Bundle Size](https://github.com/howmanysmall/small-rules/actions/workflows/bundle-size.yaml/badge.svg?event=pull_request)](https://github.com/howmanysmall/small-rules/actions/workflows/bundle-size.yaml)
 [![License](https://img.shields.io/npm/l/@pobammer-ts/small-rules?color=blue)](https://github.com/howmanysmall/small-rules/blob/main/LICENSE)
 

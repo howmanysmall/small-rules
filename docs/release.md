@@ -12,6 +12,15 @@ Type-check, build, tests, and the docs jobs run through `turbo run`. Each job re
 
 `mise run check` runs the same validation locally (lint, type-check, dead-code, duplicates, build, test); `mise run ci` installs dependencies first and adds the documentation job.
 
+## Coverage
+
+Vitest enforces 100% coverage and fails the Test job below it, so Codecov only reports. The Test job uploads `coverage/coverage-final.json` and `coverage-summary.json` as a `coverage` artifact. A separate `coverage` job in `ci.yaml` downloads it and sends it to Codecov with OIDC (`use_oidc`), so there is no upload token to rotate.
+
+- `id-token: write` sits on that job alone, because the Test job runs pull request code.
+- Pull requests from forks skip the job: they cannot mint an OIDC token. A failed upload fails CI only on pushes to main.
+- `--affected` can skip every test, which leaves no artifact. The job then uploads nothing, and the `unit` flag carries forward the last report (`codecov.yaml`).
+- `//#test` declares `coverage/**` as a Turborepo output, so a cache hit restores the report instead of leaving `coverage/` empty.
+
 ## Deep Tests
 
 `.github/workflows/deep-tests.yaml` runs weekly and on demand, because each suite is too slow for every pull request:
