@@ -57,7 +57,7 @@ jobs:
             run: |
               mapfile -d '' changed_files < "$RUNNER_TEMP/changed-files"
               if ((${#changed_files[@]} > 0)); then
-                node --run biome -- ci --no-errors-on-unmatched "${changed_files[@]}"
+                biome ci --no-errors-on-unmatched "${changed_files[@]}"
               fi
 
           # isentinel-lint already runs oxfmt on everything else; .mdx is the only
@@ -70,7 +70,7 @@ jobs:
                 [[ $file == *.mdx ]] && mdx_files+=("$file")
               done
               if ((${#mdx_files[@]} > 0)); then
-                node --run oxfmt -- --no-error-on-unmatched-pattern --check "${mdx_files[@]}"
+                oxfmt --no-error-on-unmatched-pattern --check "${mdx_files[@]}"
               fi
 
           - name: Lint
@@ -84,10 +84,10 @@ jobs:
             run: pnpm exec turbo run type-check --affected
 
           - name: Dead code
-            run: node --run fallow:dead-code
+            run: fallow dead-code
 
           - name: Duplication
-            run: node --run fallow:dupes
+            run: fallow dupes
 
           # No `--affected`: the step checks `dist/`, which a skipped task never
           # writes, while a cache hit restores it.

@@ -151,10 +151,6 @@ run = "node --run fallow:health"
 description = "Install dependencies from the pnpm lockfile. Use before local CI or release checks."
 run = "ni"
 
-[tasks.links]
-description = "Check external links in Markdown and MDX files with lychee."
-run = "lychee --config lychee.toml './**/*.md' './**/*.mdx'"
-
 [tasks.lint]
 description = "Run the project lint pipeline: Oxlint plus Biome checks via the package script."
 run = "node --run lint"

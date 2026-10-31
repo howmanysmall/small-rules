@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-lychee-
 
       - name: Check links
-        run: mise run links
+        run: lychee --config lychee.toml './**/*.md' './**/*.mdx'
         env:
           # Authenticated requests avoid GitHub's rate limit on repository links.
           GITHUB_TOKEN: ${{ github.token }}

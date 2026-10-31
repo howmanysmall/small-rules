@@ -75,7 +75,7 @@ jobs:
             ${{ runner.os }}-stryker-incremental-
 
       - name: Run mutation tests
-        run: node --run test:mutation
+        run: stryker run
 
       - if: always()
         name: Upload mutation report
@@ -108,7 +108,7 @@ jobs:
       # shrunk counterexample of any failure.
       - name: Run property tests
         run: >-
-          node --run test --
+          vitest run
           --project small-rules
           --testTimeout 1800000
           --reporter github-actions --reporter dot
