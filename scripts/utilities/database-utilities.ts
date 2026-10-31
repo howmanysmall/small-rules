@@ -69,6 +69,7 @@ enum RobloxDataType {
 	Vector3 = "Vector3",
 	Vector3int16 = "Vector3int16",
 }
+// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- coal
 const isRobloxDataType = type.enumerated(...Object.values(RobloxDataType));
 
 enum DatabaseScriptability {
@@ -79,6 +80,7 @@ enum DatabaseScriptability {
 	Write = "Write",
 }
 
+// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- coal
 const isDatabaseScriptability = type.enumerated(...Object.values(DatabaseScriptability));
 
 enum DatabasePropertyTag {
@@ -91,6 +93,7 @@ enum DatabasePropertyTag {
 	WriteOnly = "WriteOnly",
 }
 
+// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- coal
 const isDatabasePropertyTag = type.enumerated(...Object.values(DatabasePropertyTag));
 
 export async function downloadDatabaseAsync(octokit: Octokit, existingFilePath?: string): Promise<Uint8Array> {

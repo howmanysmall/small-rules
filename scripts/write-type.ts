@@ -82,10 +82,12 @@ function createExpandedTypeNode(
 	declaration: TypeAliasDeclaration,
 	checker: TypeChecker,
 ): TypeNode | undefined {
+	// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- this is wrong
 	if (!type.isUnion()) return checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS);
 
 	const members = new Array<TypeNode>();
 	for (const member of type.types) {
+		// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- this is wrong
 		const node = checker.typeToTypeNode(member, declaration, TYPE_FORMAT_FLAGS);
 		if (node !== undefined) {
 			members.push(node);
@@ -105,7 +107,8 @@ function writeTypeAlias(
 	const type = checker.getTypeAtLocation(declaration.name);
 	const typeNode =
 		(shallow
-			? checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS)
+			? // oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- this is wrong
+				checker.typeToTypeNode(type, declaration, TYPE_FORMAT_FLAGS)
 			: createExpandedTypeNode(type, declaration, checker)) ?? declaration.type;
 	const alias = factory.createTypeAliasDeclaration(undefined, declaration.name, declaration.typeParameters, typeNode);
 	return printer.printNode(EmitHint.Unspecified, alias, sourceFile).replace(TRAILING_SEMICOLON_REGEXP, "");
