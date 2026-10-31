@@ -1,0 +1,60 @@
+name: Preview
+
+on:
+  pull_request:
+    paths:
+      - "*.config.ts"
+      - .github/actions/**
+      - .github/workflows/preview.yaml
+      - THIRD-PARTY-NOTICES.md
+      - mise.lock
+      - mise.toml
+      - package.json
+      - "packages/**"
+      - "patches/**"
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - "scripts/**"
+      - "src/**/*.json"
+      - "src/**/*.ts"
+      - "src/**/*.tsx"
+      - "tsconfig*.json"
+
+permissions: {}
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish preview
+    permissions:
+      contents: read
+    # A fork would publish under this repository's pkg.pr.new URLs.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+        with:
+          tools: node pnpm
+
+      - name: Install dependencies
+        uses: $/.github/actions/install
+
+      - name: Build
+        run: pnpm exec turbo run build --filter=// -- --minify && test -f dist/index.js
+
+      # `--pnpm` packs with `pnpm pack`, which rewrites `catalog:` specifiers.
+      - name: Publish preview
+        run: pnpm exec pkg-pr-new publish --pnpm --no-template --packageManager=pnpm,npm
+    timeout-minutes: 10

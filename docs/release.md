@@ -29,6 +29,16 @@ Type-check, build, tests, and the docs jobs run through `turbo run`. Each job re
 
 A license exception goes in the same file. It names the package and the exact license string it covers, and its `reason` says why that package is acceptable. The check fails when an exception stops covering any installed package, so delete the ones a dependency change made redundant. hk runs the license check whenever a `package.json`, the lockfile, or the policy changes.
 
+## Previews
+
+`.github/workflows/preview.yaml` publishes every same-repository pull request to [pkg.pr.new](https://pkg.pr.new/~/howmanysmall/small-rules) with the minified build, using `pnpm pack` so `catalog:` specifiers resolve. The pkg-pr-new GitHub App posts the install command as a comment on the pull request and updates it on each push. To try a preview, install the URL from that comment:
+
+```sh
+pnpm add https://pkg.pr.new/howmanysmall/small-rules/@pobammer-ts/small-rules@<pull-request-number>
+```
+
+Forks get no preview, because it would publish under this repository's URLs. The workflow also needs the [pkg-pr-new GitHub App](https://github.com/apps/pkg-pr-new) installed on the repository; without it, `publish` fails.
+
 ## Release Flow
 
 1. `mise run release` runs the local `check` task, then `nr release` (`bumpp` bumps the version, commits, tags, and pushes). Run it from an up-to-date `main`.
