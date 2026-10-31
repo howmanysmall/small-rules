@@ -118,6 +118,15 @@ local fileChecks = new Mapping<String, Step> {
       effect = "write"
     }
   }
+  ["licenses"] {
+    glob = List("pnpm-lock.yaml", "**/package.json", "scripts/constants/license-policy.ts")
+    check = new CommandSpec {
+      command = new Command {
+        argv = List("node", "--run", "licenses:check")
+      }
+      effect = "read"
+    }
+  }
   ["sherif"] = (Builtins.sherif) {
     check = new CommandSpec {
       command = new Command {
