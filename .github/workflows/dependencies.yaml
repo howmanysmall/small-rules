@@ -1,0 +1,77 @@
+name: Dependencies
+
+# Advisories land without a commit, so the schedule catches the ones published
+# after the lockfile last changed.
+on:
+  push:
+    branches:
+      - main
+    paths: &dependency-paths
+      - "**/package.json"
+      - .github/workflows/dependencies.yaml
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - scripts/check-licenses.ts
+      - scripts/constants/license-policy.ts
+      - scripts/utilities/licenses.ts
+  pull_request:
+    paths: *dependency-paths
+  schedule:
+    # Wednesdays at 06:00 UTC.
+    - cron: "0 6 * * 3"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: dependencies-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+        with:
+          tools: node pnpm
+
+      # `pnpm audit` reads the lockfile, so nothing needs installing. Ignored
+      # advisories live under `audit.ignore` in pnpm-workspace.yaml.
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level moderate
+
+      - name: Audit all dependencies
+        run: pnpm audit --audit-level high
+    timeout-minutes: 15
+
+  licenses:
+    name: Licenses
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup toolchain
+        uses: $/.github/actions/setup
+
+      # `pnpm licenses list` reads each package's manifest from the store,
+      # which only an install fills.
+      - name: Install dependencies
+        uses: $/.github/actions/install
+
+      - name: Check licenses
+        run: node --run licenses:check
+    timeout-minutes: 15
