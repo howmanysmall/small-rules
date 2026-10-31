@@ -267,6 +267,13 @@ peerDependencyRules:
     "@emnapi/runtime": ">=1.0.0"
     "@typescript-eslint/*>typescript": ">=6.0.0 <7.0.0"
 
+audit:
+  ignore:
+    # minimatch@10 globparts amplification. eslint@10 pins minimatch ^10 and
+    # the fix is only in 11.x; eslint runs on this repo's own globs, never on
+    # untrusted patterns.
+    - GHSA-g3hv-75wg-m249
+
 fetchRetries: 5
 fetchRetryMaxtimeout: 30000
 fetchRetryMintimeout: 1000
