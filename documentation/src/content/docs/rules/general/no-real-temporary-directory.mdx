@@ -7,7 +7,7 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-real-temporary-directory">
 	<Fragment slot="rationale">
 		<p>
-			A unit test that writes to a real temp directory runs slower and leaves files behind when it fails. Two tests
+			A unit test that writes to a real temp directory runs slower and leaves files behind when it fails. Tests
 			running in parallel can also collide there. The rule reports calls to `tmpdir` from `os`, and to `mkdtemp` or
 			`mkdtempSync` from `fs`, `fs.promises`, or `fs/promises`, with or without `node:`. Pass an in-memory file
 			system such as memfs through a parameter instead. A test that needs a real directory belongs in an

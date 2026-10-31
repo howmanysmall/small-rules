@@ -7,7 +7,7 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-runtime-in-type-files">
 	<Fragment slot="rationale">
 		<p>
-			Some projects exempt type files from their test rules by filename. That's only safe while the files hold
+			Some projects exempt type files from their test rules by filename. That's only safe while the files contain
 			nothing that runs. Runtime code added there escapes its tests. This rule reports each top-level statement in
 			a matching file that stays in the output. That covers values, functions, classes, enums, namespaces, bare
 			imports, and imports or exports of values. Type imports and exports pass, and so do interfaces, type

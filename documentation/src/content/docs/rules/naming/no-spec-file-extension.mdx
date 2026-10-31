@@ -7,9 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-spec-file-extension">
 	<Fragment slot="rationale">
 		<p>
-			Pick one suffix for test files and every tool only needs one pattern: the test runner's include glob, the
-			editor's file nesting, the coverage excludes. Having both `.spec` and `.test` also means someone has to
-			decide which one each new file gets. The pick here is `.test`.
+			Pick one suffix for test files and every tool only needs one pattern, whether that's the test runner's
+			include glob, the editor's file nesting, or the coverage excludes. Having both `.spec` and `.test` also
+			means someone has to decide which one each new file gets. The pick here is `.test`.
 		</p>
 		<p>It only looks at the file name, and only flags `.spec.ts` and `.spec.tsx`.</p>
 	</Fragment>

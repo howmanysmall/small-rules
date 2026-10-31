@@ -7,8 +7,8 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-print">
 	<Fragment slot="rationale">
 		<p>
-			Unnecessary output logging is a bad habit. `print()` is a raw Luau function with no log levels, no
-			timestamps, and no filtering. Once it's in production you can't turn it off or route it anywhere useful.
+			Unnecessary output logging is a bad habit. `print()` is a raw Luau function that writes every message to the
+			output. Once it's in production you can't turn it off or route it anywhere useful.
 		</p>
 		<p>
 			Use <a href="https://npmx.dev/package/@rbxts/rbxts-sleitnick-log">Log</a> instead. It gives you levels,
