@@ -10,6 +10,7 @@
 [![Rules](https://img.shields.io/badge/rules-109-blueviolet)](https://docs.howmanysmall.com/small-rules/rules/)
 [![CI](https://github.com/howmanysmall/small-rules/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/howmanysmall/small-rules/actions/workflows/ci.yaml)
 [![Bundle Size](https://github.com/howmanysmall/small-rules/actions/workflows/bundle-size.yaml/badge.svg?event=pull_request)](https://github.com/howmanysmall/small-rules/actions/workflows/bundle-size.yaml)
+[![pkg.pr.new](https://pkg.pr.new/badge/howmanysmall/small-rules)](https://pkg.pr.new/~/howmanysmall/small-rules)
 [![License](https://img.shields.io/npm/l/@pobammer-ts/small-rules?color=blue)](https://github.com/howmanysmall/small-rules/blob/main/LICENSE)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%E2%80%938.0-3178c6?logo=typescript)](https://www.typescriptlang.org/)
