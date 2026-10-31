@@ -4,7 +4,7 @@
 	"type": "module",
 	"dependencies": {
 		"@opencode/schema": "catalog:opencode2",
-		"effect": "catalog:runtime"
+		"effect": "catalog:opencode2"
 	},
 	"devDependencies": {
 		"@opencode/plugin": "catalog:opencode2"

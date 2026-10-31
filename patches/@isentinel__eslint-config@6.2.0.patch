@@ -1,0 +1,22 @@
+diff --git a/dist/oxlint.mjs b/dist/oxlint.mjs
+index 21537f1..d16d934 100644
+--- a/dist/oxlint.mjs
++++ b/dist/oxlint.mjs
+@@ -8226,7 +8226,7 @@ function oxlintOxfmt(options) {
+ 		specifier: resolveJsPluginSpecifier("eslint-plugin-oxfmt")
+ 	};
+ 	const jsFiles = oxfmtFiles?.flat() ?? [...FORMATTED_FILES.javascript];
+-	const tsFiles = oxfmtFiles?.flat() ?? [...FORMATTED_FILES.typescript, ...componentExtensions.map((extension) => `**/*.${extension}`)];
++	const tsFiles = oxfmtFiles?.flat() ?? [...FORMATTED_FILES.typescript];
+ 	function createFragments(name, files) {
+ 		return [{
+ 			name,
+@@ -10037,7 +10037,7 @@ function isentinel(factoryOptions, ...userConfigs) {
+ 	if (Object.keys(rules).length > 0) {
+ 		const optionsFragments = createOxlintConfigs({
+ 			name: "isentinel/options-rules",
+-			files: [GLOB_SRC],
++			files: [GLOB_SRC, ...componentExtensions.map((extension) => `**/*.${extension}`)],
+ 			keepUnmappedOff: true,
+ 			rules
+ 		});

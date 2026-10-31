@@ -94,7 +94,7 @@ const badgeDefinitions = {
 } satisfies Readonly<Record<BadgeVariant, BadgeDefinition>>;
 
 /**
- * The only badges that take a hue. Error washes in the flag color (`--data-1`);
+ * The only badges that take a hue. Error washes in the flag color (`--data-1`).
  * Auto-fixable draws a focus hairline (`--focus`). Every other badge is ink.
  */
 const badgeTreatments: Readonly<Partial<Record<BadgeVariant, "line" | "wash">>> = {

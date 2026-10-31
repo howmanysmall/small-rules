@@ -9,8 +9,8 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			`scenario?: ScenarioId` and `scenario: ScenarioId | undefined` accept the same values. The first one lets
 			the caller omit the argument. The second one still requires an argument, so the callee must handle
-			`undefined`. The caller cannot tell whether the parameter is optional or whether `undefined` is a real
-			value.
+			`undefined`. The caller cannot tell whether the parameter is optional or whether `undefined` is a legitimate
+			argument.
 		</p>
 		<p>
 			A default value and a rest parameter are already optional. The rule leaves them alone. It also leaves a

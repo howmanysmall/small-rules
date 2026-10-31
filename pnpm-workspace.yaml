@@ -86,14 +86,12 @@ overrides:
   "@vitiate/core>@swc/core": 1.15.41
   vite: ^8
 
-# Vitest 5 matches `testNamePattern` against `task.fullTestName`, which joins suite names with
-# " > ". The runner builds its per-mutant filter by joining them with " ", so the regex matches
-# nothing for any test inside a `describe` and every mutant runs zero tests and is reported
-# "Survived". Drop this once upstream supports Vitest 5.
+# @isentinel/eslint-config: keep oxfmt off component files and apply option rules to them.
+# tsrs: fall back to TypeScript's own compiler on Windows when the @tsrs platform binary is
+# missing (there is no @tsrs/win32-arm64).
 patchedDependencies:
-  "@isentinel/eslint-config@6.1.0": patches/@isentinel__eslint-config@6.1.0.patch
-  "@stryker-mutator/vitest-runner@10.0.0": patches/@stryker-mutator__vitest-runner@10.0.0.patch
-  tsrs@0.18.0-ts7.1.0-dev.20260929: patches/tsrs@0.18.0-ts7.1.0-dev.20260929.patch
+  "@isentinel/eslint-config@6.2.0": patches/@isentinel__eslint-config@6.2.0.patch
+  tsrs@0.20.1-ts7.1.0-beta: patches/tsrs@0.20.1-ts7.1.0-beta.patch
 
 catalogs:
   benchmark:
@@ -104,71 +102,73 @@ catalogs:
     "@arethetypeswrong/core": 0.18.5
     get-tsconfig: 4.14.3
     publint: 0.3.25
-    tsdown: 0.23.1
+    tsdown: 0.23.4
   commitlint:
     "@commitlint/cli": 21.2.4
     "@commitlint/config-conventional": 21.2.4
     "@commitlint/types": 21.2.3
   dev:
-    confbox: 0.3.1
+    confbox: 0.3.2
     empathic: 2.1.0
   frontend:
     "@astrojs/check": 0.9.12
-    "@astrojs/markdown-satteri": 0.4.5
-    "@astrojs/mdx": 8.1.1
-    "@astrojs/react": 7.1.1
-    "@astrojs/starlight": 0.42.6
+    "@astrojs/markdown-satteri": 0.4.6
+    "@astrojs/mdx": 8.1.2
+    "@astrojs/react": 7.1.2
+    "@astrojs/starlight": 0.42.8
     "@fontsource-variable/ibm-plex-sans": 5.3.0
     "@fontsource-variable/newsreader": 5.3.0
     "@fontsource/ibm-plex-mono": 5.3.0
-    astro: 7.4.2
-    oxc-transform-react: 0.155.0
+    astro: 7.4.4
+    oxc-transform-react: 0.156.0
     react: 19.3.1
     react-dom: 19.3.1
     sharp: 0.35.5
     shiki: 4.5.0
-    simple-icons: 16.35.0
+    simple-icons: 16.36.0
   lint:
-    "@biomejs/biome": 2.6.2
+    "@biomejs/biome": 2.6.4
     "@e18e/eslint-plugin": 0.8.1
-    "@isentinel/eslint-config": 6.1.0
+    "@isentinel/eslint-config": 6.2.0
     "@stylistic/eslint-plugin": 5.10.0
-    "@vitest/eslint-plugin": 1.6.27
-    eslint: 10.13.0
-    eslint-plugin-antfu: 3.2.3
+    "@vitest/eslint-plugin": 1.6.28
+    eslint: 10.14.0
+    eslint-plugin-antfu: 3.3.1
     eslint-plugin-astro: 3.2.1
     eslint-plugin-better-max-params: 1.0.0
     eslint-plugin-comment-length: 2.3.1
-    eslint-plugin-de-morgan: 2.2.1
+    eslint-plugin-de-morgan: 2.3.0
     eslint-plugin-eslint-plugin: 7.6.2
     eslint-plugin-flawless: 1.14.1
     eslint-plugin-jest-extended: 3.0.1
-    eslint-plugin-jsdoc: 65.4.0
+    eslint-plugin-jsdoc: 65.4.2
     eslint-plugin-n: 18.5.0
-    eslint-plugin-oxfmt: 0.29.0
+    eslint-plugin-oxfmt: 0.30.0
     eslint-plugin-perfectionist: 5.13.0
     eslint-plugin-pnpm: 1.9.1
-    eslint-plugin-react-jsx: 5.28.4
-    eslint-plugin-react-naming-convention: 5.28.4
-    eslint-plugin-react-x: 5.28.4
+    eslint-plugin-react-jsx: 5.28.8
+    eslint-plugin-react-naming-convention: 5.28.8
+    eslint-plugin-react-x: 5.28.8
     eslint-plugin-roblox-ts: 1.4.1
     eslint-plugin-sonarjs: 4.2.2
-    eslint-plugin-unicorn: 78.0.0
+    eslint-plugin-unicorn: 79.0.0
     eslint-plugin-unused-imports: 4.4.1
-    fallow: 3.34.1
-    oxfmt: 0.74.0
-    oxlint: 1.89.0
+    fallow: 3.38.0
+    oxfmt: 0.75.0
+    oxlint: 1.90.0
     oxlint-plugin-react-doctor: 0.9.18
-    oxlint-tsgolint: 7.0.2004
+    oxlint-tsgolint: 7.0.2005
     react-doctor: 0.9.18
   opencode2:
-    "@opencode/plugin": 2.1.3
-    "@opencode/schema": 2.1.3
+    "@opencode/plugin": 2.2.5
+    "@opencode/schema": 2.2.5
+    effect: 4.0.6
   runtime:
     arktype: 2.2.9
-    effect: 4.0.1
-    ignore: 7.0.13
-    minimatch: 10.2.6
+    # eslint-disable-next-line pnpm/yaml-no-duplicate-catalog-item -- different versions.
+    effect: 4.1.0
+    ignore: 7.0.14
+    minimatch: 11.0.3
     oxc-resolver: 11.24.2
     oxlint-plugin-utilities: 1.1.0
     yuku-parser: 0.19.0
@@ -176,7 +176,7 @@ catalogs:
     "@clack/prompts": 1.8.1
     "@cliffy/command": npm:@jsr/cliffy__command@1.3.1
     "@octokit/rest": 22.0.1
-    "@openrouter/sdk": 1.5.0
+    "@openrouter/sdk": 1.5.30
     "@std/msgpack": npm:@jsr/std__msgpack@1.0.3
     ansis: 4.4.0
     boxen: 9.0.0
@@ -185,7 +185,7 @@ catalogs:
     fdir: 6.5.0
     jsonc-parser: 3.3.1
     just-diff: 6.0.2
-    mutative: 2.0.0
+    mutative: 2.0.1
     pretty-bytes: 7.2.0
     pretty-ms: 10.0.0
     smol-toml: 1.9.1
@@ -195,9 +195,9 @@ catalogs:
   test:
     "@fast-check/vitest": 0.5.0
     "@playwright/test": 1.64.1
-    "@stryker-mutator/api": 10.0.0
-    "@stryker-mutator/core": 10.0.0
-    "@stryker-mutator/vitest-runner": 10.0.0
+    "@stryker-mutator/api": 10.1.1
+    "@stryker-mutator/core": 10.1.1
+    "@stryker-mutator/vitest-runner": 10.1.1
     "@testing-library/react": 16.3.3
     "@testing-library/user-event": 14.6.8
     "@total-typescript/shoehorn": 0.1.2
@@ -219,14 +219,14 @@ catalogs:
     pncat: 0.13.4
     sfw: 2.0.6
     skills: 1.7.4
-    tsrs: 0.18.0-ts7.1.0-dev.20260929
+    tsrs: 0.20.1-ts7.1.0-beta
     turbo: 2.11.10
     typescript: npm:@typescript/typescript6@^6.0.2
     yuku-ast: 0.19.0
   types:
     "@total-typescript/ts-reset": 0.6.1
-    "@types/bun": 1.4.3
-    "@types/node": ^26.6.5
+    "@types/bun": 1.4.4
+    "@types/node": ^26.6.6
     "@types/react": 19.3.0
     "@types/react-dom": 19.3.0
     type-fest: 5.10.0
@@ -241,9 +241,9 @@ allowBuilds:
   sharp: true
 
 packageExtensions:
-  "@stryker-mutator/core@10.0.0":
+  "@stryker-mutator/core@10.1.1":
     dependencies:
-      "@stryker-mutator/vitest-runner": 10.0.0
+      "@stryker-mutator/vitest-runner": 10.1.1
       typescript: 5.9.3
   astro@7.4.0:
     peerDependencies:
@@ -256,10 +256,10 @@ packageExtensions:
         optional: true
   # The patched getExePath falls back to TypeScript's own compiler on Windows
   # when the @tsrs platform binary is missing.
-  tsrs@0.18.0-ts7.1.0-dev.20260929:
+  tsrs@0.20.1-ts7.1.0-beta:
     optionalDependencies:
-      "@typescript/typescript-win32-arm64": 7.1.0-dev.20260930.4
-      "@typescript/typescript-win32-x64": 7.1.0-dev.20260930.4
+      "@typescript/typescript-win32-arm64": 7.1.0-beta
+      "@typescript/typescript-win32-x64": 7.1.0-beta
 
 peerDependencyRules:
   allowedVersions:
