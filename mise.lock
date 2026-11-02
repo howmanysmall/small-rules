@@ -977,6 +977,66 @@ checksum = "sha256:8a4e35ab0b331c85d73567b12f2a444df187f483e5079ceffa6bda1faa2e7
 url = "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.zip"
 url_api = "https://api.github.com/repos/koalaman/shellcheck/releases/assets/279056944"
 
+[[tools.shellharden]]
+version = "4.3.2"
+backend = "aqua:anordal/shellharden"
+specifiers = ["latest"]
+
+[tools.shellharden."platforms.linux-arm64"]
+checksum = "sha256:ba7e480234c0acd0493b21446e19db430afc522c7f22553f3c11d839d997ec04"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459691215"
+
+[tools.shellharden."platforms.linux-arm64-musl"]
+checksum = "sha256:299a1922ab716e23f960024aca1cdacaf485d3d932b6d65033deb6ea3606fe26"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459691178"
+
+[tools.shellharden."platforms.linux-x64"]
+checksum = "sha256:e81e97bc6bccff59b826d3b39328ab19b26721a236440f740ba71754531c7286"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690751"
+
+[tools.shellharden."platforms.linux-x64-baseline"]
+checksum = "sha256:e81e97bc6bccff59b826d3b39328ab19b26721a236440f740ba71754531c7286"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690751"
+
+[tools.shellharden."platforms.linux-x64-musl"]
+checksum = "sha256:270527e7cb76f39d980914d93b235ff056bfda22bb85de53469c7f2d42bf3751"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459691208"
+
+[tools.shellharden."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:270527e7cb76f39d980914d93b235ff056bfda22bb85de53469c7f2d42bf3751"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459691208"
+
+[tools.shellharden."platforms.macos-arm64"]
+checksum = "sha256:4279643d791619f7ce4a3fbdedb0cefd51916cd5d64b2956cb1e69df744678ec"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690669"
+
+[tools.shellharden."platforms.macos-x64"]
+checksum = "sha256:6996f9d05fcc4fccfba3aac068552d38b2b08c99e51e5e15c3f8beab207e4baf"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690672"
+
+[tools.shellharden."platforms.macos-x64-baseline"]
+checksum = "sha256:6996f9d05fcc4fccfba3aac068552d38b2b08c99e51e5e15c3f8beab207e4baf"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690672"
+
+[tools.shellharden."platforms.windows-x64"]
+checksum = "sha256:cf08b4d13b1a3b34046d83ea8cf13b4fcf8a99b103a83d74283921c9c45a2e9f"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690908"
+
+[tools.shellharden."platforms.windows-x64-baseline"]
+checksum = "sha256:cf08b4d13b1a3b34046d83ea8cf13b4fcf8a99b103a83d74283921c9c45a2e9f"
+url = "https://github.com/anordal/shellharden/releases/download/v4.3.2/shellharden-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/anordal/shellharden/releases/assets/459690908"
+
 [[tools.shfmt]]
 version = "3.14.1"
 backend = "aqua:mvdan/sh"

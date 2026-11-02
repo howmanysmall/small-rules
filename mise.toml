@@ -33,6 +33,7 @@ shellcheck = "latest"
 shfmt = "latest"
 tombi = "latest"
 vale = "latest"
+shellharden = "latest"
 
 [tasks]
 backtickify = '''
