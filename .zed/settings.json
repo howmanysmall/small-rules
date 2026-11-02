@@ -269,11 +269,12 @@
 			"hard_tabs": true,
 			"language_servers": [
 				"!deno",
-				"!knip",
-				"!vtsls",
 				"!effect-tsgo",
 				"!graphql",
+				"!knip",
+				"!sloptor",
 				"!typescript-language-server",
+				"!vtsls",
 				"..."
 			],
 			"prettier": { "allowed": false },
@@ -290,11 +291,12 @@
 			"hard_tabs": true,
 			"language_servers": [
 				"!deno",
-				"!knip",
-				"!vtsls",
 				"!effect-tsgo",
 				"!graphql",
+				"!knip",
+				"!sloptor",
 				"!typescript-language-server",
+				"!vtsls",
 				"..."
 			],
 			"prettier": { "allowed": false },

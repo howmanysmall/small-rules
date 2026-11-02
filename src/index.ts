@@ -17,6 +17,8 @@ import noUnsafeDictionaryType from "$oxc-rules/anti-slop/no-unsafe-dictionary-ty
 import noWidenThenAssert from "$oxc-rules/anti-slop/no-widen-then-assert";
 import requireReadableSpacing from "$oxc-rules/anti-slop/require-readable-spacing";
 import requireSafetyCommentForTypeAssertion from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
+import noCliffyActionWrapper from "$oxc-rules/cliffy/no-cliffy-action-wrapper";
+import noMultipleCliffyCommands from "$oxc-rules/cliffy/no-multiple-cliffy-commands";
 import consistentCompoundWords from "$oxc-rules/english/consistent-compound-words";
 import preferSingularEnums from "$oxc-rules/english/prefer-singular-enums";
 import preventAbbreviations from "$oxc-rules/english/prevent-abbreviations";
@@ -172,6 +174,7 @@ const smallRules = definePlugin({
 		"no-cascading-set-state": noCascadingSetState,
 		"no-chain-state-updates": noChainStateUpdates,
 		"no-chained-type-assertions": noChainedTypeAssertions,
+		"no-cliffy-action-wrapper": noCliffyActionWrapper,
 		"no-color3-constructor": noColor3Constructor,
 		"no-commented-code": noCommentedCode,
 		"no-conditional-empty-object-spread": noConditionalEmptyObjectSpread,
@@ -200,6 +203,7 @@ const smallRules = definePlugin({
 		"no-known-value-widening": noKnownValueWidening,
 		"no-loop-iterable-mutation": noLoopIterableMutation,
 		"no-module-mocking": noModuleMocking,
+		"no-multiple-cliffy-commands": noMultipleCliffyCommands,
 		"no-native-properties-spread": noNativePropertiesSpread,
 		"no-nested-hook-calls": noNestedHookCalls,
 		"no-new-instance-in-use-memo": noNewInstanceInUseMemo,

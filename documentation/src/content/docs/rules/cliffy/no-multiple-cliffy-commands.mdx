@@ -1,0 +1,47 @@
+---
+title: "No Multiple Cliffy Commands"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-multiple-cliffy-commands">
+	<Fragment slot="rationale">
+		<p>
+			One command per file, please. When `list`, `get`, and their parent share a file, its imports load for all three
+			even if you only ran `--help`, and the file only ever grows. Cliffy can already load a subcommand on demand with
+			`.command("list", async () => ...)`, but that only helps if the subcommand is in another file.
+		</p>
+		<p>
+			The first command in a file is fine, and every one after it gets reported. These count as a command:
+		</p>
+		<ul>
+			<li>
+				`new Command()`, where `Command` comes from `@cliffy/command` or its `jsr:` or `npm:` forms, including through an alias or a namespace import.
+			</li>
+			<li>
+				A call to a function named in `factories`.
+			</li>
+			<li>
+				`.command("name")` and `.command("name", "description")`, which define a subcommand right there, even though there's no second `new Command()` to see.
+			</li>
+			<li>
+				A class that extends Cliffy's `Command`.
+			</li>
+		</ul>
+		<p>
+			`factories` defaults to `["createBaseCommand"]` and replaces that default when you set it. Factories match by
+			name, because a project can import its factory from anywhere. If you set the option, include
+			`createBaseCommand` yourself if you still use it.
+		</p>
+		<p>
+			Registering a command from elsewhere passes, so `.command("list", listCommand)` and
+			`.command("help", new HelpCommand())` are both fine. The second argument is why: anything that isn't a string
+			means the command wasn't defined here. That also makes the rule miss a description held in a variable, such as
+			`.command("list", description)`, which is a fair trade.
+		</p>
+		<p>
+			A file that declares a factory and also calls it counts twice. Test files that build more than one command get
+			reported too, so add an override for them if you need one.
+		</p>
+	</Fragment>
+</RulePage>

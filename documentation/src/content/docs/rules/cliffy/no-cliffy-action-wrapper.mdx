@@ -1,0 +1,52 @@
+---
+title: "No Cliffy Action Wrapper"
+---
+
+import RulePage from "$components/rule-page.astro";
+
+<RulePage rule="no-cliffy-action-wrapper">
+	<Fragment slot="rationale">
+		<p>
+			A handler like `.action(async (flags, search) => { await runListAsync(search, flags); })` does nothing. It also
+			costs you more than the three lines it takes up, because Cliffy infers the option and argument types only inside
+			the handler. Move the work out and you end up hand-writing a `ListFlags` interface that restates your `.option`
+			calls, and now the two can drift apart. Put the implementation in the handler and all of that goes away.
+		</p>
+		<p>
+			The rule reports a handler whose whole body is one call to a named function, where every argument comes from the
+			handler's own parameters. That covers reordering, rest parameters, destructuring, rebuilding an object or array
+			from them, and reading properties off them. An `await`, `return`, or `void` in front of the call doesn't
+			change that, and the target can be local or imported.
+		</p>
+		<p>
+			These all pass on purpose.
+		</p>
+		<ul>
+			<li>
+				**Lazy loading:** `const { load } = await import("./load"); await load(flags);` is two statements, and it's doing a real job.
+			</li>
+			<li>
+				**A bare reference:** `.action(run)` has no wrapper to remove. It still needs a hand-written flags type, but that's a different complaint.
+			</li>
+			<li>
+				**Method calls:** `.action((options) => console.log(options))` and `.action(function () { this.showHelp(); })` are the whole command.
+			</li>
+			<li>
+				**Added values:** `.action((flags) => run(flags, "list"))` and `.action(() => exit(0))` pass something the handler didn't receive, so the function is probably shared for a reason.
+			</li>
+			<li>
+				**Globals and parameters:** this file has no function body to move into the handler.
+			</li>
+		</ul>
+		<p>
+			Only commands the rule can recognize count, so it checks `.action` on a chain that starts from `new Command()`
+			from `@cliffy/command`, from a function named in `factories`, or from a `const` holding either. A command that
+			arrives as a function parameter or an import isn't checked. `factories` defaults to `["createBaseCommand"]` and
+			replaces that default when you set it.
+		</p>
+		<p>
+			There's no autofix. Inlining a function means renaming its parameters to match the handler and dealing with early
+			returns. That's better done by hand than by a fixer that gets it subtly wrong.
+		</p>
+	</Fragment>
+</RulePage>
