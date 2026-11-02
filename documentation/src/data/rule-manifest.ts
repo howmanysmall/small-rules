@@ -182,6 +182,8 @@ export const ruleManifest = defineRuleManifest({
 			label: "General Logic & Style",
 			rules: [
 				{ name: "curly" },
+				{ name: "no-cliffy-action-wrapper" },
+				{ name: "no-multiple-cliffy-commands" },
 				{ name: "no-real-temporary-directory" },
 				{ name: "no-recursive" },
 				{ name: "directive-disable-enable-pair" },
