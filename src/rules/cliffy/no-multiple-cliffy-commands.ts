@@ -1,16 +1,12 @@
 import { isStringLiteral, isTemplateLiteral } from "@small-rules/oxlint-utilities";
 
-import {
-	COMMAND_FACTORIES_PROPERTY,
-	createCommandMatcher,
-	DEFAULT_COMMAND_FACTORIES,
-} from "$oxc-utilities/cliffy-command";
+import { COMMAND_MATCHER_SCHEMA, createCommandMatcher } from "$oxc-utilities/cliffy-command-matcher";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMethodCallee } from "$oxc-utilities/member-callee";
 
 import type { ESTree, VisitorWithHooks } from "oxlint-plugin-utilities";
 
-import type { CommandMatcher } from "$oxc-utilities/cliffy-command";
+import type { CommandMatcher } from "$oxc-utilities/cliffy-command-matcher";
 
 /**
  * Finds Cliffy's fluent form, `.command("name")` or
@@ -60,10 +56,7 @@ const noMultipleCliffyCommands = createRule("no-multiple-cliffy-commands", "clif
 		return {
 			before(): void {
 				firstCommandLine = undefined;
-				matcher = createCommandMatcher(
-					context.sourceCode,
-					context.options[0]?.factories ?? DEFAULT_COMMAND_FACTORIES,
-				);
+				matcher = createCommandMatcher(context.sourceCode, context.options[0]?.factories);
 			},
 			"CallExpression:exit"(node): void {
 				if (matcher.isConstruction(node)) {
@@ -93,14 +86,7 @@ const noMultipleCliffyCommands = createRule("no-multiple-cliffy-commands", "clif
 			multipleCommands:
 				"This file already defines a Cliffy command on line {{line}}. Move this one to its own file, and have the parent load it with `.command(name, async () => ...)`.",
 		},
-		schema: [
-			{
-				additionalProperties: false,
-				default: { factories: DEFAULT_COMMAND_FACTORIES },
-				properties: { factories: COMMAND_FACTORIES_PROPERTY },
-				type: "object",
-			},
-		],
+		schema: COMMAND_MATCHER_SCHEMA,
 		type: "suggestion",
 	},
 });

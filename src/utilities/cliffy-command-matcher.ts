@@ -6,7 +6,7 @@ import {
 	isNewExpression,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getReferencedVariable } from "$oxc-utilities/ast-utilities";
 import { isImportedCallee } from "$oxc-utilities/import-binding-provenance";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { getSingleConstInitializer } from "$oxc-utilities/single-variable-definition";
@@ -29,15 +29,25 @@ export interface CommandMatcher {
 	readonly isConstruction: (expression: ESTree.Expression) => boolean;
 }
 
-export const DEFAULT_COMMAND_FACTORIES: ReadonlyArray<string> = ["createBaseCommand"];
+const DEFAULT_COMMAND_FACTORIES: ReadonlyArray<string> = ["createBaseCommand"];
 
-export const COMMAND_FACTORIES_PROPERTY = {
-	default: DEFAULT_COMMAND_FACTORIES,
-	description:
-		"Names of functions that return a new Cliffy command. A call counts by name wherever the function is imported from.",
-	items: { type: "string" },
-	type: "array",
-} as const;
+/** The `meta.schema` of every rule that uses a `CommandMatcher`. */
+export const COMMAND_MATCHER_SCHEMA = [
+	{
+		additionalProperties: false,
+		default: { factories: DEFAULT_COMMAND_FACTORIES },
+		properties: {
+			factories: {
+				default: DEFAULT_COMMAND_FACTORIES,
+				description:
+					"Names of functions that return a new Cliffy command. A call counts by name wherever the function is imported from.",
+				items: { type: "string" },
+				type: "array",
+			},
+		},
+		type: "object",
+	},
+] as const;
 
 // Covers a bare specifier, Deno's `jsr:` form, and JSR's npm mirror, any of
 // them pinned to a version.
@@ -60,10 +70,14 @@ function getCliffySources({ ast }: SourceCode): ReadonlySet<string> {
  * Builds the matcher for one file.
  *
  * @param sourceCode - Resolves imports and `const` bindings.
- * @param factoryNames - Functions that return a new command.
+ * @param factoryNames - Functions that return a new command, from the rule's
+ *   `factories` option.
  * @returns A matcher that's only valid for this file.
  */
-export function createCommandMatcher(sourceCode: SourceCode, factoryNames: ReadonlyArray<string>): CommandMatcher {
+export function createCommandMatcher(
+	sourceCode: SourceCode,
+	factoryNames: ReadonlyArray<string> = DEFAULT_COMMAND_FACTORIES,
+): CommandMatcher {
 	const factories: ReadonlySet<string> = new Set(factoryNames);
 	const sources = getCliffySources(sourceCode);
 
@@ -87,10 +101,7 @@ export function createCommandMatcher(sourceCode: SourceCode, factoryNames: Reado
 
 			if (aliasHops === MAX_ALIAS_HOPS || !isIdentifier(current)) return false;
 
-			const initializer = getSingleConstInitializer(
-				getVariableByName(sourceCode.getScope(current), current.name),
-			);
-
+			const initializer = getSingleConstInitializer(getReferencedVariable(sourceCode, current));
 			if (initializer === undefined) return false;
 
 			current = stripExpressionWrappers(initializer);

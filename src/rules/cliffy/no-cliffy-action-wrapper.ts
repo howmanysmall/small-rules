@@ -13,12 +13,8 @@ import {
 	isUnaryExpression,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
-import {
-	COMMAND_FACTORIES_PROPERTY,
-	createCommandMatcher,
-	DEFAULT_COMMAND_FACTORIES,
-} from "$oxc-utilities/cliffy-command";
+import { getReferencedVariable } from "$oxc-utilities/ast-utilities";
+import { COMMAND_MATCHER_SCHEMA, createCommandMatcher } from "$oxc-utilities/cliffy-command-matcher";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMethodCallee } from "$oxc-utilities/member-callee";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -26,7 +22,7 @@ import { getSingleDefinition } from "$oxc-utilities/single-variable-definition";
 
 import type { ESTree, SourceCode, VisitorWithHooks } from "oxlint-plugin-utilities";
 
-import type { CommandMatcher } from "$oxc-utilities/cliffy-command";
+import type { CommandMatcher } from "$oxc-utilities/cliffy-command-matcher";
 
 type ForwardedValue = ESTree.Expression | ESTree.SpreadElement;
 
@@ -93,7 +89,7 @@ function appendForwardedParts(expression: ESTree.Expression, worklist: Array<For
 }
 
 function isParameterOf(sourceCode: SourceCode, identifier: ESTree.IdentifierReference, handler: Handler): boolean {
-	const definition = getSingleDefinition(getVariableByName(sourceCode.getScope(identifier), identifier.name));
+	const definition = getSingleDefinition(getReferencedVariable(sourceCode, identifier));
 	return definition?.type === "Parameter" && definition.node === handler;
 }
 
@@ -137,10 +133,7 @@ const noCliffyActionWrapper = createRule("no-cliffy-action-wrapper", "cliffy", {
 			if (call === undefined || call.optional || !isIdentifier(call.callee)) return undefined;
 
 			const { sourceCode } = context;
-			const definition = getSingleDefinition(
-				getVariableByName(sourceCode.getScope(call.callee), call.callee.name),
-			);
-
+			const definition = getSingleDefinition(getReferencedVariable(sourceCode, call.callee));
 			if (definition === undefined || definition.type === "Parameter") return undefined;
 
 			return forwardsOnlyParameters(sourceCode, call, handler) ? call.callee.name : undefined;
@@ -148,10 +141,7 @@ const noCliffyActionWrapper = createRule("no-cliffy-action-wrapper", "cliffy", {
 
 		return {
 			before(): void {
-				matcher = createCommandMatcher(
-					context.sourceCode,
-					context.options[0]?.factories ?? DEFAULT_COMMAND_FACTORIES,
-				);
+				matcher = createCommandMatcher(context.sourceCode, context.options[0]?.factories);
 			},
 			CallExpression(node): void {
 				const callee = getMethodCallee(node, "action");
@@ -175,14 +165,7 @@ const noCliffyActionWrapper = createRule("no-cliffy-action-wrapper", "cliffy", {
 			actionWrapper:
 				"This handler only forwards to `{{name}}`. Put the implementation in the handler, where Cliffy already infers the option and argument types.",
 		},
-		schema: [
-			{
-				additionalProperties: false,
-				default: { factories: DEFAULT_COMMAND_FACTORIES },
-				properties: { factories: COMMAND_FACTORIES_PROPERTY },
-				type: "object",
-			},
-		],
+		schema: COMMAND_MATCHER_SCHEMA,
 		type: "suggestion",
 	},
 });
