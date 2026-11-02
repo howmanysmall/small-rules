@@ -65,6 +65,7 @@ local fileChecks = new Mapping<String, Step> {
       effect = "write"
     }
   }
+  ["lychee"] = Builtins.lychee
   ["isentinel-lint"] {
     glob =
       ECMA_FILES
@@ -140,6 +141,7 @@ local fileChecks = new Mapping<String, Step> {
     batch = false
     exclude = List(".claude/hooks/fallow-gate.sh")
   }
+  ["shellharden"] = Builtins.shellharden
   ["shfmt"] = (Builtins.shfmt) {
     batch = false
     check_diff = (Builtins.shfmt.check_diff) {
