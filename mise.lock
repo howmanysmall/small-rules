@@ -123,53 +123,53 @@ checksum = "sha256:0f20ce6674d4f2dbcc8c5d59fdf99f7ba45f8c3b367e0f5781cbfa30a1c78
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-windows-x64-baseline.zip"
 
 [[tools.communique]]
-version = "1.7.0"
+version = "1.8.0"
 backend = "packslip:github.com/jdx/communique"
 specifiers = ["latest"]
 
 [tools.communique."platforms.linux-arm64"]
-checksum = "sha256:cf0d39cdda3c91d1d8b80ed8ccd2d5124850e4989b29202165d88223f713403b"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-aarch64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:365f67f2bb21f31966d265ad42516fb14e423411e36fadab8f99002046a6310e"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-aarch64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.linux-arm64-musl"]
-checksum = "sha256:c8eb52db52a482f229308ac791aae9e22d070b14978ea606d40c3955aef0852d"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:0fc5cc37af55f9acd205f8d4b54a118a36315e5fc809c775aa7b3bae70071abd"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-aarch64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.linux-x64"]
-checksum = "sha256:b89db2a79f67b7ba0229f4448dee28ba5336f4716bc04048592d8d33c4dc817c"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:a600a3a26ef66e5695e1ac7bf57b3d30fdf6d075dc8349d054711a605a311199"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.linux-x64-baseline"]
-checksum = "sha256:b89db2a79f67b7ba0229f4448dee28ba5336f4716bc04048592d8d33c4dc817c"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:a600a3a26ef66e5695e1ac7bf57b3d30fdf6d075dc8349d054711a605a311199"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.linux-x64-musl"]
-checksum = "sha256:4b0a9ac46eb52e6ce14776c5424e30a09eb5b781674ba8128b5604e4009385dd"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:50131e6cd61be26c7b34154bab1da26c53146064d0dd18ba20ee936451369526"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-x86_64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:4b0a9ac46eb52e6ce14776c5424e30a09eb5b781674ba8128b5604e4009385dd"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:50131e6cd61be26c7b34154bab1da26c53146064d0dd18ba20ee936451369526"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-x86_64-unknown-linux-musl.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.macos-arm64"]
-checksum = "sha256:c9ccb7521fa3c6839e5ac48c9b1add5a501b153552274a3cccaa8848d4647a9b"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:e22c3a05649241fa0e7ffd27d32a436ecde19a23e09f39ff00686ea8d71a5f9b"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.windows-x64"]
-checksum = "sha256:85e92a547b53089da469a32b9c66bbb18335803ca495b0904738a3e21b286909"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:1f51b5c434fb65fa5c16826322bdcc25f980083b90eaf24051d12beff9524b58"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-x86_64-pc-windows-msvc.zip"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [tools.communique."platforms.windows-x64-baseline"]
-checksum = "sha256:85e92a547b53089da469a32b9c66bbb18335803ca495b0904738a3e21b286909"
-url = "https://github.com/jdx/communique/releases/download/v1.7.0/communique-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:1f51b5c434fb65fa5c16826322bdcc25f980083b90eaf24051d12beff9524b58"
+url = "https://github.com/jdx/communique/releases/download/v1.8.0/communique-x86_64-pc-windows-msvc.zip"
 signer = "sigstore-oidc:https://github.com/jdx/communique/.github/workflows/release.yml"
 
 [[tools.direnv]]
@@ -453,74 +453,74 @@ url = "https://github.com/jdx/hk/releases/download/v2.10.0/hk-x86_64-pc-windows-
 signer = "sigstore-oidc:https://github.com/jdx/hk/.github/workflows/release.yml"
 
 [[tools.jactionlint]]
-version = "2.3.0"
+version = "2.4.0"
 backend = "github:jdx/jactionlint"
 specifiers = ["latest"]
 
 [tools.jactionlint."platforms.linux-arm64"]
-checksum = "sha256:deea7744e5769e1e5cc8c9898a838f80a941ec68476d9f2814a61474d5652dac"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210370"
+checksum = "sha256:42413391c248f99ff4550d6c866ee717d5ea4ca2b966d9d54ad1503af955e22f"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130101"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.linux-arm64-musl"]
-checksum = "sha256:deea7744e5769e1e5cc8c9898a838f80a941ec68476d9f2814a61474d5652dac"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210370"
+checksum = "sha256:42413391c248f99ff4550d6c866ee717d5ea4ca2b966d9d54ad1503af955e22f"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130101"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.linux-x64"]
-checksum = "sha256:907e6f6a59e181879f7e6936e19ee2eca1cbc51de134fb85460cfa8d65a71f28"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210498"
+checksum = "sha256:26ddba81db28fffc51163175c070ee1a9d1150260de4b5232f01d9b749f32d8e"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130108"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.linux-x64-baseline"]
-checksum = "sha256:907e6f6a59e181879f7e6936e19ee2eca1cbc51de134fb85460cfa8d65a71f28"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210498"
+checksum = "sha256:26ddba81db28fffc51163175c070ee1a9d1150260de4b5232f01d9b749f32d8e"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130108"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.linux-x64-musl"]
-checksum = "sha256:907e6f6a59e181879f7e6936e19ee2eca1cbc51de134fb85460cfa8d65a71f28"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210498"
+checksum = "sha256:26ddba81db28fffc51163175c070ee1a9d1150260de4b5232f01d9b749f32d8e"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130108"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:907e6f6a59e181879f7e6936e19ee2eca1cbc51de134fb85460cfa8d65a71f28"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210498"
+checksum = "sha256:26ddba81db28fffc51163175c070ee1a9d1150260de4b5232f01d9b749f32d8e"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130108"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.macos-arm64"]
-checksum = "sha256:f96afa36578b21290203ae8df4fa7ac3bf5aba08ed288df28cb0530af7ca6e55"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210452"
+checksum = "sha256:349a13dbffdd25376898a256d195806afda08ba97ccc6378cbf2dd11a77ef8e7"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130202"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.macos-x64"]
-checksum = "sha256:a61006b669ec0ab1266c73e3561eecf839537eb6e8b3b6be766a55ba17fcbe42"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_darwin_amd64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210428"
+checksum = "sha256:4c21fce834f8267b65a65b32a527aaa2ec1c321c8f066d44b42d7f038835aa90"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130179"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.macos-x64-baseline"]
-checksum = "sha256:a61006b669ec0ab1266c73e3561eecf839537eb6e8b3b6be766a55ba17fcbe42"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_darwin_amd64.tar.gz"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210428"
+checksum = "sha256:4c21fce834f8267b65a65b32a527aaa2ec1c321c8f066d44b42d7f038835aa90"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130179"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.windows-x64"]
-checksum = "sha256:9864d1045bd37fddb2df33bf4d6b45de205c0ce133c52a225928b7ede7d7f3eb"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_windows_amd64.zip"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210534"
+checksum = "sha256:4e0c7b428a4faa35bb3b86af6fa65a0ac9797edcd4c64e4f7e16ca886437e172"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130261"
 provenance = "github-attestations"
 
 [tools.jactionlint."platforms.windows-x64-baseline"]
-checksum = "sha256:9864d1045bd37fddb2df33bf4d6b45de205c0ce133c52a225928b7ede7d7f3eb"
-url = "https://github.com/jdx/jactionlint/releases/download/v2.3.0/jactionlint_2.3.0_windows_amd64.zip"
-url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/662210534"
+checksum = "sha256:4e0c7b428a4faa35bb3b86af6fa65a0ac9797edcd4c64e4f7e16ca886437e172"
+url = "https://github.com/jdx/jactionlint/releases/download/v2.4.0/jactionlint_2.4.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/jdx/jactionlint/releases/assets/688130261"
 provenance = "github-attestations"
 
 [[tools.lychee]]
@@ -1038,132 +1038,132 @@ url = "https://github.com/mvdan/sh/releases/download/v3.14.1/shfmt_v3.14.1_windo
 url_api = "https://api.github.com/repos/mvdan/sh/releases/assets/547320827"
 
 [[tools.tombi]]
-version = "1.9.7"
+version = "1.9.8"
 backend = "aqua:tombi-toml/tombi"
 specifiers = ["latest"]
 
 [tools.tombi."platforms.linux-arm64"]
-checksum = "sha256:45c14f2aadc1f8122735dd55961b383ea554979d0ba0f3ee3f3c44cd3a5aaeae"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771516"
+checksum = "sha256:696d6b934fd0c4fa002ae905dc72a551d54677d9caa7b272adee3ea27e056307"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947510"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-arm64-musl"]
-checksum = "sha256:45c14f2aadc1f8122735dd55961b383ea554979d0ba0f3ee3f3c44cd3a5aaeae"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771516"
+checksum = "sha256:696d6b934fd0c4fa002ae905dc72a551d54677d9caa7b272adee3ea27e056307"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947510"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-x64"]
-checksum = "sha256:4bab30c956cc2defa5966f78e199c4c0a57e9795964142fdd6c007596519787e"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771559"
+checksum = "sha256:cf51b0f134e5b488212bb062538e0381a163a4f7db2330c58e3cf613637b3118"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947565"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-x64-baseline"]
-checksum = "sha256:4bab30c956cc2defa5966f78e199c4c0a57e9795964142fdd6c007596519787e"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771559"
+checksum = "sha256:cf51b0f134e5b488212bb062538e0381a163a4f7db2330c58e3cf613637b3118"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947565"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-x64-musl"]
-checksum = "sha256:4bab30c956cc2defa5966f78e199c4c0a57e9795964142fdd6c007596519787e"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771559"
+checksum = "sha256:cf51b0f134e5b488212bb062538e0381a163a4f7db2330c58e3cf613637b3118"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947565"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:4bab30c956cc2defa5966f78e199c4c0a57e9795964142fdd6c007596519787e"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771559"
+checksum = "sha256:cf51b0f134e5b488212bb062538e0381a163a4f7db2330c58e3cf613637b3118"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947565"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.macos-arm64"]
-checksum = "sha256:bfda372442e224febf416a18cdc8099b1188cc1bc70260d1daa4d7ddafc45fa1"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771517"
+checksum = "sha256:7d07cad962ad3de96113b92f40fbb59617a9214f263027c14a66fd08b61289ec"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947506"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.macos-x64"]
-checksum = "sha256:d5f547152d1746957146c54cc2bc05c2c38bcb91506a372e17a9fe2925ed6d84"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771511"
+checksum = "sha256:627ad53b286a48aa379a9d59648506266e5640df7b9936a416d972d4efb823df"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947509"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.macos-x64-baseline"]
-checksum = "sha256:d5f547152d1746957146c54cc2bc05c2c38bcb91506a372e17a9fe2925ed6d84"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771511"
+checksum = "sha256:627ad53b286a48aa379a9d59648506266e5640df7b9936a416d972d4efb823df"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947509"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.windows-x64"]
-checksum = "sha256:6cd38ddb14c3cecde86becbad22a3e8e4e73aa53c98197e78e68f742096e3585"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771552"
+checksum = "sha256:df4be8cac00b00c5b0d421723fc25c959539a355a1407ac6ec97c9d30669c622"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947563"
 provenance = "github-attestations"
 
 [tools.tombi."platforms.windows-x64-baseline"]
-checksum = "sha256:6cd38ddb14c3cecde86becbad22a3e8e4e73aa53c98197e78e68f742096e3585"
-url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.7/tombi-cli-1.9.7-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/683771552"
+checksum = "sha256:df4be8cac00b00c5b0d421723fc25c959539a355a1407ac6ec97c9d30669c622"
+url = "https://github.com/tombi-toml/tombi/releases/download/v1.9.8/tombi-cli-1.9.8-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/tombi-toml/tombi/releases/assets/688947563"
 provenance = "github-attestations"
 
 [[tools.vale]]
-version = "3.25.1"
+version = "3.26.0"
 backend = "aqua:vale-cli/vale"
 specifiers = ["latest"]
 
 [tools.vale."platforms.linux-arm64"]
-checksum = "sha256:2a69755b68118c612c455fc0c5ea1b9438519aa1c852e3fb303b3ad97141bbb0"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037026"
+checksum = "sha256:3154179f4611140c9af54a8b3bc6a90bc02b73fe6c1f635369604dde0490406d"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681932"
 
 [tools.vale."platforms.linux-arm64-musl"]
-checksum = "sha256:2a69755b68118c612c455fc0c5ea1b9438519aa1c852e3fb303b3ad97141bbb0"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037026"
+checksum = "sha256:3154179f4611140c9af54a8b3bc6a90bc02b73fe6c1f635369604dde0490406d"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681932"
 
 [tools.vale."platforms.linux-x64"]
-checksum = "sha256:4bf5c5176b682b1da0830f471584d3494f1c2e27ee3029e1ad6f6661d4962182"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Linux_64-bit.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037022"
+checksum = "sha256:22aa69a556558e4a9dfc63c17030777383d8d3c48dcdfad655fa98e839d666ed"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Linux_64-bit.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681930"
 
 [tools.vale."platforms.linux-x64-baseline"]
-checksum = "sha256:4bf5c5176b682b1da0830f471584d3494f1c2e27ee3029e1ad6f6661d4962182"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Linux_64-bit.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037022"
+checksum = "sha256:22aa69a556558e4a9dfc63c17030777383d8d3c48dcdfad655fa98e839d666ed"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Linux_64-bit.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681930"
 
 [tools.vale."platforms.linux-x64-musl"]
-checksum = "sha256:4bf5c5176b682b1da0830f471584d3494f1c2e27ee3029e1ad6f6661d4962182"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Linux_64-bit.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037022"
+checksum = "sha256:22aa69a556558e4a9dfc63c17030777383d8d3c48dcdfad655fa98e839d666ed"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Linux_64-bit.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681930"
 
 [tools.vale."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:4bf5c5176b682b1da0830f471584d3494f1c2e27ee3029e1ad6f6661d4962182"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Linux_64-bit.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037022"
+checksum = "sha256:22aa69a556558e4a9dfc63c17030777383d8d3c48dcdfad655fa98e839d666ed"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Linux_64-bit.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681930"
 
 [tools.vale."platforms.macos-arm64"]
-checksum = "sha256:fbcaa68d9b9e229b9c8dc918f209e93572ce943039700b7e04a423ff12f684cd"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_macOS_arm64.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037030"
+checksum = "sha256:a6c3370f53bad93086c6b85f3163676e44e08049d69743afdcc13f3aab5b7482"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_macOS_arm64.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695682018"
 
 [tools.vale."platforms.macos-x64"]
-checksum = "sha256:e27097e84a812d45546de8d6a4ffa75538cab39c96f79b153b601240f8cefaf9"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_macOS_64-bit.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037025"
+checksum = "sha256:df42b317be6ece6a6a70d06b952deec581d047046eb93ea4632f58da56a86ff9"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_macOS_64-bit.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681994"
 
 [tools.vale."platforms.macos-x64-baseline"]
-checksum = "sha256:e27097e84a812d45546de8d6a4ffa75538cab39c96f79b153b601240f8cefaf9"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_macOS_64-bit.tar.gz"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037025"
+checksum = "sha256:df42b317be6ece6a6a70d06b952deec581d047046eb93ea4632f58da56a86ff9"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_macOS_64-bit.tar.gz"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681994"
 
 [tools.vale."platforms.windows-x64"]
-checksum = "sha256:5f4b5cefee5d0f7ee0621d7cc035886515888fd732c4e8add36d3c922f2adc68"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Windows_64-bit.zip"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037103"
+checksum = "sha256:c42f4b413aa29b6b36fa4e3ac0c18322588a54ac860db4c84b8255997f7d1ec2"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Windows_64-bit.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681931"
 
 [tools.vale."platforms.windows-x64-baseline"]
-checksum = "sha256:5f4b5cefee5d0f7ee0621d7cc035886515888fd732c4e8add36d3c922f2adc68"
-url = "https://github.com/vale-cli/vale/releases/download/v3.25.1/vale_3.25.1_Windows_64-bit.zip"
-url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/667037103"
+checksum = "sha256:c42f4b413aa29b6b36fa4e3ac0c18322588a54ac860db4c84b8255997f7d1ec2"
+url = "https://github.com/vale-cli/vale/releases/download/v3.26.0/vale_3.26.0_Windows_64-bit.zip"
+url_api = "https://api.github.com/repos/vale-cli/vale/releases/assets/695681931"
