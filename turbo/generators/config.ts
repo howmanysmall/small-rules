@@ -4,6 +4,7 @@ import { cwd } from "node:process";
 import { type } from "arktype";
 import { exec } from "tinyexec";
 
+import { expandInlineRules } from "./src/expand-inline-rules";
 import { insertSorted } from "./src/insert-sorted";
 
 import type { PlopTypes } from "@turbo/gen";
@@ -139,6 +140,7 @@ const registerRuleAction: PlopTypes.CustomActionFunction = function registerRule
 
 	editLines(MANIFEST_PATH, (lines) => {
 		const keyLine = findLine(lines, (line) => line === `\t\t\tkey: "${category}",`);
+		expandInlineRules(lines, keyLine);
 		const start = findLine(lines, (line) => line === "\t\t\trules: [", keyLine);
 		const end = findLine(lines, (line) => line === "\t\t\t],", start);
 		insertSorted(lines, [start, end], MANIFEST_ENTRY_REGEXP, `\t\t\t\t{ name: "${name}" },`);

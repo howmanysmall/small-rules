@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 import { ts } from "@small-rules/rule-harness/rule-testers";
 
-import rule from "$oxc-rules/general/no-multiple-cliffy-commands";
+import rule from "$oxc-rules/cliffy/no-multiple-cliffy-commands";
 
 const IMPORT_COMMAND = 'import { Command } from "@cliffy/command";';
 

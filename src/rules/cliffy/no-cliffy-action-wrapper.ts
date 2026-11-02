@@ -121,7 +121,7 @@ function forwardsOnlyParameters(sourceCode: SourceCode, call: ESTree.CallExpress
 	return true;
 }
 
-const noCliffyActionWrapper = createRule("no-cliffy-action-wrapper", "general", {
+const noCliffyActionWrapper = createRule("no-cliffy-action-wrapper", "cliffy", {
 	createOnce(context): VisitorWithHooks {
 		let matcher: CommandMatcher;
 

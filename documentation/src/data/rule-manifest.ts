@@ -2,7 +2,15 @@ import type smallRules from "$small-rules";
 
 export type RuleName = keyof typeof smallRules.rules;
 
-export type RuleCategoryKey = "anti-slop" | "english" | "general" | "naming" | "react" | "roblox" | "roblox/jecs";
+export type RuleCategoryKey =
+	| "anti-slop"
+	| "cliffy"
+	| "english"
+	| "general"
+	| "naming"
+	| "react"
+	| "roblox"
+	| "roblox/jecs";
 
 export interface RuleManifestEntry {
 	readonly name: RuleName;
@@ -177,13 +185,17 @@ export const ruleManifest = defineRuleManifest({
 			],
 		},
 		{
+			key: "cliffy",
+			description: "Rules for how Cliffy command-line tools are laid out and written.",
+			label: "Cliffy Rules",
+			rules: [{ name: "no-cliffy-action-wrapper" }, { name: "no-multiple-cliffy-commands" }],
+		},
+		{
 			key: "general",
 			description: "Rules for code quality, control flow, and common pitfalls.",
 			label: "General Logic & Style",
 			rules: [
 				{ name: "curly" },
-				{ name: "no-cliffy-action-wrapper" },
-				{ name: "no-multiple-cliffy-commands" },
 				{ name: "no-real-temporary-directory" },
 				{ name: "no-recursive" },
 				{ name: "directive-disable-enable-pair" },

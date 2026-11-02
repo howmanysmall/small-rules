@@ -31,7 +31,7 @@ function getInlineSubcommand(node: ESTree.CallExpression, matcher: CommandMatche
 	return matcher.isCommand(callee.object) ? callee.property : undefined;
 }
 
-const noMultipleCliffyCommands = createRule("no-multiple-cliffy-commands", "general", {
+const noMultipleCliffyCommands = createRule("no-multiple-cliffy-commands", "cliffy", {
 	createOnce(context): VisitorWithHooks {
 		let matcher: CommandMatcher;
 		let firstCommandLine: number | undefined;

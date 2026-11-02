@@ -17,6 +17,8 @@ import noUnsafeDictionaryType from "$oxc-rules/anti-slop/no-unsafe-dictionary-ty
 import noWidenThenAssert from "$oxc-rules/anti-slop/no-widen-then-assert";
 import requireReadableSpacing from "$oxc-rules/anti-slop/require-readable-spacing";
 import requireSafetyCommentForTypeAssertion from "$oxc-rules/anti-slop/require-safety-comment-for-type-assertion";
+import noCliffyActionWrapper from "$oxc-rules/cliffy/no-cliffy-action-wrapper";
+import noMultipleCliffyCommands from "$oxc-rules/cliffy/no-multiple-cliffy-commands";
 import consistentCompoundWords from "$oxc-rules/english/consistent-compound-words";
 import preferSingularEnums from "$oxc-rules/english/prefer-singular-enums";
 import preventAbbreviations from "$oxc-rules/english/prevent-abbreviations";
@@ -32,7 +34,6 @@ import directiveNoUse from "$oxc-rules/general/directive-no-use";
 import directiveRequireDescription from "$oxc-rules/general/directive-require-description";
 import isolatedFunctions from "$oxc-rules/general/isolated-functions";
 import noAsyncConstructor from "$oxc-rules/general/no-async-constructor";
-import noCliffyActionWrapper from "$oxc-rules/general/no-cliffy-action-wrapper";
 import noCommentedCode from "$oxc-rules/general/no-commented-code";
 import noConstantConditionWithBreak from "$oxc-rules/general/no-constant-condition-with-break";
 import noDeadStore from "$oxc-rules/general/no-dead-store";
@@ -43,7 +44,6 @@ import noFloatingPointEquality from "$oxc-rules/general/no-floating-point-equali
 import noIdentityMap from "$oxc-rules/general/no-identity-map";
 import noIncrementDecrement from "$oxc-rules/general/no-increment-decrement";
 import noLoopIterableMutation from "$oxc-rules/general/no-loop-iterable-mutation";
-import noMultipleCliffyCommands from "$oxc-rules/general/no-multiple-cliffy-commands";
 import noRealTemporaryDirectory from "$oxc-rules/general/no-real-temporary-directory";
 import noRecursive from "$oxc-rules/general/no-recursive";
 import noRestrictedPropertyAssignment from "$oxc-rules/general/no-restricted-property-assignment";
