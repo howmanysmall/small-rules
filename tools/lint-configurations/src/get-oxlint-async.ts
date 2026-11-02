@@ -310,6 +310,7 @@ export async function getOxlintAsync({
 				"small-rules/no-cascading-set-state": "error",
 				"small-rules/no-chain-state-updates": "error",
 				"small-rules/no-chained-type-assertions": "error",
+				"small-rules/no-cliffy-action-wrapper": "error",
 				"small-rules/no-color3-constructor": "off",
 				"small-rules/no-conditional-empty-object-spread": "error",
 				"small-rules/no-constant-condition-with-break": [
@@ -341,7 +342,9 @@ export async function getOxlintAsync({
 				"small-rules/no-jsx-spread-child": "error",
 				"small-rules/no-known-value-widening": "error",
 				"small-rules/no-module-mocking": "error",
+				"small-rules/no-multiple-cliffy-commands": "error",
 				"small-rules/no-native-properties-spread": "off",
+				"small-rules/no-nested-hook-calls": "warn",
 				"small-rules/no-new-instance-in-use-memo": "off",
 				"small-rules/no-object-parameters": "error",
 				"small-rules/no-pass-data-to-parent": ["error", { environment: "standard" }],
