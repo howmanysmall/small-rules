@@ -5,3 +5,8 @@ export const isFilePathInput = type({
 	"+": "ignore",
 	filePath: isString,
 }).readonly();
+
+export const isCommandInput = type({
+	"+": "ignore",
+	command: isString,
+}).readonly();
