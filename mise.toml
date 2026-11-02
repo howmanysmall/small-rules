@@ -30,10 +30,10 @@ pkl = "latest"
 pnpm = "12.17.0"
 rumdl = "latest"
 shellcheck = "latest"
+shellharden = "latest"
 shfmt = "latest"
 tombi = "latest"
 vale = "latest"
-shellharden = "latest"
 
 [tasks]
 backtickify = '''
