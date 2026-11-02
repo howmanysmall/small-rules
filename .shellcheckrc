@@ -1,0 +1,13 @@
+# ShellCheck configuration - https://www.shellcheck.net/wiki/Ignore
+# Editors read this file too, so they report the same findings as hk.
+
+enable=avoid-negated-conditions
+enable=avoid-nullary-conditions
+enable=check-unassigned-uppercase
+enable=deprecate-which
+enable=quote-safe-variables
+enable=require-double-brackets
+enable=useless-use-of-cat
+
+# require-variable-braces stays off: shellharden rewrites "${x}" to "$x", so
+# the two tools would never agree.
