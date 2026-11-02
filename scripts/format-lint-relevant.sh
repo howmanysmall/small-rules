@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+repositoryRoot="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+cd "$repositoryRoot"
 
 ecmaFiles=()
 shellFiles=()
@@ -20,7 +21,7 @@ isShellFile() {
 	esac
 
 	IFS= read -r firstLine < "$1" || true
-	case "${firstLine}" in
+	case "$firstLine" in
 		'#!'*'/bash'* | '#!'*'/sh'* | '#!'*'/zsh'* | '#!'*'/ksh'* | '#!'*'/dash'*)
 			return 0
 			;;
@@ -30,44 +31,48 @@ isShellFile() {
 	esac
 }
 
+statusFile="$(mktemp)"
+trap 'rm -f "$statusFile"' EXIT
+git status --porcelain=v1 -z --untracked-files=all > "$statusFile"
+
 while IFS= read -r -d '' record; do
 	status="${record:0:2}"
 	path="${record:3}"
 
-	case "${status}" in
+	case "$status" in
 		*R* | *C*)
 			IFS= read -r -d ''
 			;;
 	esac
 
-	[[ -z "${path}" || ! -f "${path}" ]] && continue
+	[[ -z "$path" || ! -f "$path" ]] && continue
 
-	case "${path}" in
+	case "$path" in
 		*.js | *.jsx | *.ts | *.tsx | *.mjs | *.cjs | *.mts | *.cts | *.astro)
-			ecmaFiles+=("${path}")
+			ecmaFiles+=("$path")
 			;;
 		*.toml)
-			tomlFiles+=("${path}")
+			tomlFiles+=("$path")
 			;;
 		*.md | *.markdown | *.mdx)
-			markdownFiles+=("${path}")
+			markdownFiles+=("$path")
 			;;
 		.github/workflows/*.yml | .github/workflows/*.yaml | .github/actions/*/action.yml | .github/actions/*/action.yaml)
-			jactionlintFiles+=("${path}")
-			pinactFiles+=("${path}")
+			jactionlintFiles+=("$path")
+			pinactFiles+=("$path")
 			;;
 		.github/dependabot.yml)
-			jactionlintFiles+=("${path}")
+			jactionlintFiles+=("$path")
 			;;
 		package.json | pnpm-workspace.yaml)
 			wasWorkspaceChanged=true
 			;;
 	esac
 
-	if isShellFile "${path}"; then
-		shellFiles+=("${path}")
+	if isShellFile "$path"; then
+		shellFiles+=("$path")
 	fi
-done < <(git status --porcelain=v1 -z --untracked-files=all)
+done < "$statusFile"
 
 if [[ ${#ecmaFiles[@]} -gt 0 ]]; then
 	node --run format -- "${ecmaFiles[@]}"
@@ -82,10 +87,10 @@ fi
 
 if [[ ${#tomlFiles[@]} -gt 0 ]]; then
 	for tomlFile in "${tomlFiles[@]}"; do
-		if [[ "${tomlFile}" == .codex/config.toml ]]; then
-			tombi format --check "${tomlFile}"
+		if [[ "$tomlFile" == .codex/config.toml ]]; then
+			tombi format --check "$tomlFile"
 		else
-			tombi format "${tomlFile}"
+			tombi format "$tomlFile"
 		fi
 	done
 	tombi lint "${tomlFiles[@]}"
@@ -104,6 +109,6 @@ if [[ ${#pinactFiles[@]} -gt 0 ]]; then
 	pinact run "${pinactFiles[@]}"
 fi
 
-if [[ "${wasWorkspaceChanged}" == true ]]; then
+if [[ "$wasWorkspaceChanged" == true ]]; then
 	sherif --fix --no-install
 fi

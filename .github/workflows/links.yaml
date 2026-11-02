@@ -1,7 +1,7 @@
 name: Links
 
-# Link rot is not caused by a commit, so this runs on a schedule and never
-# gates a PR or a push.
+# Link rot is not caused by a commit, so this sweeps every link on a schedule
+# and never gates a PR. hk's pre-push hook checks links in changed files.
 on:
   schedule:
     - cron: "17 6 * * 1"

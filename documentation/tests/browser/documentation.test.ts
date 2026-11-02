@@ -325,17 +325,22 @@ playwrightIt("shows copy controls on a touch viewport", async ({ browser }) => {
 });
 
 playwrightIt("keeps build-only code out of browser assets", async ({ page }) => {
-	const scriptBodies: Array<Promise<string>> = [];
-	page.on("response", (response) => {
-		if (response.request().resourceType() === "script") {
-			scriptBodies.push(response.text());
-		}
-	});
-
 	await page.goto(`${baseUrl}${rulePath}`);
 	await playwrightExpect(page.getByRole("button", { name: "Copy example" })).toHaveCount(2);
-	const resolvedScriptBodies = await Promise.all(scriptBodies);
-	const browserCode = resolvedScriptBodies.join("\n");
+
+	const scriptSources = await page
+		.locator("script[src]")
+		.evaluateAll((scripts) => scripts.map((script) => script.getAttribute("src")));
+
+	playwrightExpect(scriptSources.every((source) => source?.startsWith(builtScriptPrefix) === true)).toBe(true);
+
+	const scriptBodies = await Promise.all(
+		scriptSources.map(async (source) => {
+			const response = await page.request.get(new URL(source ?? "", page.url()).href);
+			return response.text();
+		}),
+	);
+	const browserCode = scriptBodies.join("\n");
 	for (const forbiddenText of [
 		"yuku-parser",
 		"vitest",
@@ -344,10 +349,4 @@ playwrightIt("keeps build-only code out of browser assets", async ({ page }) => 
 	]) {
 		playwrightExpect(browserCode).not.toContain(forbiddenText);
 	}
-
-	const scriptSources = await page
-		.locator("script[src]")
-		.evaluateAll((scripts) => scripts.map((script) => script.getAttribute("src")));
-
-	playwrightExpect(scriptSources.every((source) => source?.startsWith(builtScriptPrefix) === true)).toBe(true);
 });

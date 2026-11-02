@@ -329,8 +329,8 @@ catalogs:
       specifier: 4.4.1
       version: 4.4.1
     fallow:
-      specifier: 3.38.0
-      version: 3.38.0
+      specifier: 3.38.1
+      version: 3.38.1
     oxfmt:
       specifier: 0.75.0
       version: 0.75.0
@@ -389,8 +389,8 @@ catalogs:
       specifier: 22.0.1
       version: 22.0.1
     '@openrouter/sdk':
-      specifier: 1.5.30
-      version: 1.5.30
+      specifier: 1.5.33
+      version: 1.5.33
     '@std/msgpack':
       specifier: npm:@jsr/std__msgpack@1.0.3
       version: 1.0.3
@@ -769,7 +769,7 @@ importers:
         version: 4.4.1(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(@typescript/typescript6@6.0.2)(eslint@10.14.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(@typescript/typescript6@6.0.2)(eslint@10.14.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2))(eslint@10.14.0(jiti@2.7.0)(supports-color@10.2.2))
       fallow:
         specifier: catalog:lint
-        version: 3.38.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137))
+        version: 3.38.1(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137))
       fast-check:
         specifier: catalog:test
         version: 4.10.2
@@ -1065,7 +1065,7 @@ importers:
         version: 22.0.1
       '@openrouter/sdk':
         specifier: catalog:scripts
-        version: 1.5.30
+        version: 1.5.33
       '@small-rules/arktype-utilities':
         specifier: workspace:*
         version: link:../packages/arktype-utilities
@@ -2936,43 +2936,43 @@ packages:
     resolution: {integrity: sha512-3RQHgEtvL1Frl/d1cSreo7qhJ3Gk1OdNUai/CtZ8G+wYeRQnJih3s9xJ9/kgYekPQRdwgh0HXRPqMlzWGwivIQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
-  '@fallow-cli/darwin-arm64@3.38.0':
-    resolution: {integrity: sha512-QQNMCji7BQfzHWr2fxL6yZZkJBqtIyknMVT4O3Xe7BnH7juJBeCM2NA9lV/1GScmLzyJhLkfp+d5lXItJrHJeg==}
+  '@fallow-cli/darwin-arm64@3.38.1':
+    resolution: {integrity: sha512-LI19NwHctGuEzF7xZkuE0AJfKfIlnd2UXEsKWKcSiu3CBH7etpfP+TMUxjRJCvEaj46uqZkTf4Zbv8rVdHxuTA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@fallow-cli/darwin-x64@3.38.0':
-    resolution: {integrity: sha512-qFuGMmKZ6847smc+zxVGFUc2HJuzidniIubxvWWh6gmiJTRFICAHg0LOEr/rQQR0tYvyp7SKLeHYsmVE/TYUxA==}
+  '@fallow-cli/darwin-x64@3.38.1':
+    resolution: {integrity: sha512-dNIBw86shIMYCsFGOiR8HsB1haKx7kUQ6VI9+lZ8jm1MHJX9ByCYgE2Us5HB34iQ8L9f1BfGufKk9NrvEy8MOA==}
     cpu: [x64]
     os: [darwin]
 
-  '@fallow-cli/linux-arm64-gnu@3.38.0':
-    resolution: {integrity: sha512-idTxJFSFkWQnUemUSLhDWPn036K49Cb78BF7j7+1A0Fu1LCnCbnXZcHh3OMThLaJjXWsCvjTsTQiX2hcjY8Osg==}
+  '@fallow-cli/linux-arm64-gnu@3.38.1':
+    resolution: {integrity: sha512-MLQZmQRpYHktDmfC4+n53dLZgqcqBJZA5tMxvhJMk+WI/k28WRvFCliNN4a2BlbpMxL3ZRgVl6kNROkGi1ME8Q==}
     cpu: [arm64]
     os: [linux]
 
-  '@fallow-cli/linux-arm64-musl@3.38.0':
-    resolution: {integrity: sha512-gHLrbYPZkAyO7FXYR10ukbhceC6dwLX3CQGX5wcqh36YWQYfyNbcBHPzizjEJ5YD+XSancHDIesTFhcHCA4rnQ==}
+  '@fallow-cli/linux-arm64-musl@3.38.1':
+    resolution: {integrity: sha512-XDhYqWzDUgpl1dAtTmYw/nMgtt9oDOiUQfP5n3tUU1ZN/IAzExkZN9qEvSsZfPV8GBN0fgPVn4CtL0Jjs53hVA==}
     cpu: [arm64]
     os: [linux]
 
-  '@fallow-cli/linux-x64-gnu@3.38.0':
-    resolution: {integrity: sha512-lTV5FU6ciyAPRLcxjW6cr7F846YaML/GUfGmz1fbWPhOyy7JahxZilh0NOpo8nK57bFZPB809MV3wYakTp777w==}
+  '@fallow-cli/linux-x64-gnu@3.38.1':
+    resolution: {integrity: sha512-2rUvPu4NvENMMtgCPiuTxPSl9+p7GhEhBzDtcmnGPC/KkpFGprJyKFAfeqlmVbfrQlkkUvSA6od19HQpgks0gg==}
     cpu: [x64]
     os: [linux]
 
-  '@fallow-cli/linux-x64-musl@3.38.0':
-    resolution: {integrity: sha512-sj7rHnAN73JmJOBOsEPjFsJus9rUauaih8cE28rqSRtRdml7+L/wmyjibMn7X51M15lQ4n7coQ+QoEuke7JMVQ==}
+  '@fallow-cli/linux-x64-musl@3.38.1':
+    resolution: {integrity: sha512-4/oloMdWcduZmtpS+4gXa9WN6dxCnLPw+qT8otO5OXhw4rrHbTeX43XH8jiiTNxQ42MXIJ/G+ocm76UEjgWHXw==}
     cpu: [x64]
     os: [linux]
 
-  '@fallow-cli/win32-arm64-msvc@3.38.0':
-    resolution: {integrity: sha512-2C9ItwyT97ocqBlGuPbWS2iIDS0+KRhm0kP5rYJuVLJUJViW3nAKLWJTgC7SPuV/oSJjeXPvgdq56bkpy+0GRQ==}
+  '@fallow-cli/win32-arm64-msvc@3.38.1':
+    resolution: {integrity: sha512-TMHP+tslDTh+ANvSLaTimK2s5rSNhaibCCj69BUMRleKgbmWS+ncjji0UjjSaiETx/fJ2LJdOWT9r+CBJAfypA==}
     cpu: [arm64]
     os: [win32]
 
-  '@fallow-cli/win32-x64-msvc@3.38.0':
-    resolution: {integrity: sha512-/gjuzuxtbcVEc8/rddxfY9hWMsCtPRMrn6kv7b/zQxq4Vdr4SdIi8LAaQFDNgdCBkEFSrSztaevESWqB2Boebg==}
+  '@fallow-cli/win32-x64-msvc@3.38.1':
+    resolution: {integrity: sha512-27HnShKI58XPYMLUIwMstf2DDhOGQAorSIJk1kZy0HRrB3RBhTfee3Mh9nHKi7GCFjPp4XjQ2YtdTyifX0jHfg==}
     cpu: [x64]
     os: [win32]
 
@@ -3814,8 +3814,8 @@ packages:
   '@opencode/util@2.2.5':
     resolution: {integrity: sha512-RqbJ2EwxOs6oQMH1P4Yenkejit0oiAyxBTPXhzx4n6j4SOV0+Duz6lhftlJkAjTbq7Rw2b0Mzx4duOJUdw6s5A==}
 
-  '@openrouter/sdk@1.5.30':
-    resolution: {integrity: sha512-rxHCF1VMhyaQX0EIJ92G9dawk4zQwOq4uG94X2otHvPYi13hwlYOB8l+c0AVtoVsuZc4UINW8loqLcCdVD24QA==}
+  '@openrouter/sdk@1.5.33':
+    resolution: {integrity: sha512-hbg4q/tZHOnggBk7Sjkel6COExpbe1+2p4Mt2YyvAloDXtNNaFkMab0SgVfoBdTgzweBlrJJ4jUHwHt5rFiadA==}
 
   '@opentelemetry/api-logs@0.219.0':
     resolution: {integrity: sha512-FFx7YnaYJlIjqWW/AG/yAZ0L/NEY724PipXXXQLdtZPbLwBGbUMTGL1i/esI56TWfTUXxhLfpgrnWJCG8aUJyg==}
@@ -7674,8 +7674,8 @@ packages:
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
 
-  fallow-type-aware@3.38.0:
-    resolution: {integrity: sha512-Hwsm7it4VHAOKNya/gHgAB/4IJOstIMBt+3QgQYlej5jlxpfv+7Z7gcNu/3YmPgxfPDJtkEZ8BhHlo3o3mzNPQ==}
+  fallow-type-aware@3.38.1:
+    resolution: {integrity: sha512-fn8Ap3IkHRhQ6ZaF/aQG2edtW3MvDz7AGLPrru72gqsZl/aqvNsJ/C1kFWIu0KA6kTDwgZBNNGfbgqlfGY/Jng==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
@@ -7684,8 +7684,8 @@ packages:
       tsrs:
         optional: true
 
-  fallow@3.38.0:
-    resolution: {integrity: sha512-7bPRDOle89CR1qvm3Usp/KVtSthVYXPvnEk0znOl1eTmo/mMCjuZ/F4WuW6dVgzBH6saHvli+X37p17oQrxeXQ==}
+  fallow@3.38.1:
+    resolution: {integrity: sha512-prbdSGu/n17OfkeXs+12jwnYf5jmSm2RGDmWfjjvN/7HZZ58TlTKIjyjD8Sl5WRr1V1GBYwFhOts53MdBlbhHw==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -12551,28 +12551,28 @@ snapshots:
 
   '@faker-js/faker@10.6.0': {}
 
-  '@fallow-cli/darwin-arm64@3.38.0':
+  '@fallow-cli/darwin-arm64@3.38.1':
     optional: true
 
-  '@fallow-cli/darwin-x64@3.38.0':
+  '@fallow-cli/darwin-x64@3.38.1':
     optional: true
 
-  '@fallow-cli/linux-arm64-gnu@3.38.0':
+  '@fallow-cli/linux-arm64-gnu@3.38.1':
     optional: true
 
-  '@fallow-cli/linux-arm64-musl@3.38.0':
+  '@fallow-cli/linux-arm64-musl@3.38.1':
     optional: true
 
-  '@fallow-cli/linux-x64-gnu@3.38.0':
+  '@fallow-cli/linux-x64-gnu@3.38.1':
     optional: true
 
-  '@fallow-cli/linux-x64-musl@3.38.0':
+  '@fallow-cli/linux-x64-musl@3.38.1':
     optional: true
 
-  '@fallow-cli/win32-arm64-msvc@3.38.0':
+  '@fallow-cli/win32-arm64-msvc@3.38.1':
     optional: true
 
-  '@fallow-cli/win32-x64-msvc@3.38.0':
+  '@fallow-cli/win32-x64-msvc@3.38.1':
     optional: true
 
   '@fast-check/vitest@0.5.0(vitest@5.0.5)':
@@ -13569,7 +13569,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@openrouter/sdk@1.5.30':
+  '@openrouter/sdk@1.5.33':
     dependencies:
       zod: 4.6.7
 
@@ -17234,26 +17234,26 @@ snapshots:
 
   extend@3.0.2: {}
 
-  fallow-type-aware@3.38.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)):
+  fallow-type-aware@3.38.1(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)):
     dependencies:
       typescript: 7.0.2
     optionalDependencies:
       tsrs: 0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)
     optional: true
 
-  fallow@3.38.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)):
+  fallow@3.38.1(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137)):
     dependencies:
       detect-libc: 2.1.2
     optionalDependencies:
-      '@fallow-cli/darwin-arm64': 3.38.0
-      '@fallow-cli/darwin-x64': 3.38.0
-      '@fallow-cli/linux-arm64-gnu': 3.38.0
-      '@fallow-cli/linux-arm64-musl': 3.38.0
-      '@fallow-cli/linux-x64-gnu': 3.38.0
-      '@fallow-cli/linux-x64-musl': 3.38.0
-      '@fallow-cli/win32-arm64-msvc': 3.38.0
-      '@fallow-cli/win32-x64-msvc': 3.38.0
-      fallow-type-aware: 3.38.0(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137))
+      '@fallow-cli/darwin-arm64': 3.38.1
+      '@fallow-cli/darwin-x64': 3.38.1
+      '@fallow-cli/linux-arm64-gnu': 3.38.1
+      '@fallow-cli/linux-arm64-musl': 3.38.1
+      '@fallow-cli/linux-x64-gnu': 3.38.1
+      '@fallow-cli/linux-x64-musl': 3.38.1
+      '@fallow-cli/win32-arm64-msvc': 3.38.1
+      '@fallow-cli/win32-x64-msvc': 3.38.1
+      fallow-type-aware: 3.38.1(tsrs@0.20.1-ts7.1.0-beta(patch_hash=d871b7b9d5d2e10fc8279846a1de7ac2a5364604bcbec93089c07336f6953137))
     transitivePeerDependencies:
       - tsrs
 
@@ -20894,7 +20894,7 @@ time:
   '@octokit/rest@22.0.1': '2025-10-31T20:59:36.519Z'
   '@opencode/plugin@2.2.5': '2026-10-30T23:12:40.093Z'
   '@opencode/schema@2.2.5': '2026-10-30T23:14:12.672Z'
-  '@openrouter/sdk@1.5.30': '2026-10-30T17:19:44.829Z'
+  '@openrouter/sdk@1.5.33': '2026-10-31T04:57:59.542Z'
   '@playwright/test@1.64.1': '2026-10-14T11:58:13.696Z'
   '@stryker-mutator/api@10.1.1': '2026-10-23T19:18:09.456Z'
   '@stryker-mutator/core@10.1.1': '2026-10-23T19:18:22.458Z'
@@ -20947,7 +20947,7 @@ time:
   eslint-plugin-unicorn@79.0.0: '2026-10-23T16:39:15.451Z'
   eslint-plugin-unused-imports@4.4.1: '2026-02-09T09:00:08.682Z'
   eslint@10.14.0: '2026-10-30T14:12:27.179Z'
-  fallow@3.38.0: '2026-10-30T19:19:16.093Z'
+  fallow@3.38.1: '2026-10-31T11:00:06.046Z'
   fast-check@4.10.2: '2026-09-19T19:34:54.991Z'
   fast-string-width@3.0.2: '2025-09-30T10:31:05.462Z'
   fdir@6.5.0: '2025-08-14T16:56:03.948Z'
