@@ -46,6 +46,12 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.11.0] - 2026-11-02
+
+## Added
+- `no-cliffy-action-wrapper`: reports a Cliffy `.action` handler whose only statement passes its parameters to a named function. ([#113](https://github.com/howmanysmall/small-rules/pull/113))
+- `no-multiple-cliffy-commands`: reports each Cliffy command after the first in a file. ([#113](https://github.com/howmanysmall/small-rules/pull/113))
+
 ## [3.10.0] - 2026-10-29
 
 ## Added
