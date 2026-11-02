@@ -1,0 +1,15 @@
+{
+	"name": "@opencode-plugins/python-edit-block",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@opencode/schema": "catalog:opencode2",
+		"effect": "catalog:opencode2"
+	},
+	"devDependencies": {
+		"@opencode/plugin": "catalog:opencode2"
+	},
+	"peerDependencies": {
+		"@opencode/plugin": "catalog:opencode2"
+	}
+}

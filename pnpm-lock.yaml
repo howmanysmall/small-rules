@@ -869,6 +869,19 @@ importers:
         specifier: catalog:opencode2
         version: 2.2.5(@opentelemetry/semantic-conventions@1.43.0)(redis@6.2.1(@opentelemetry/api@1.9.0))(supports-color@10.2.2)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
+  .opencode/packages/plugins/python-edit-block:
+    dependencies:
+      '@opencode/schema':
+        specifier: catalog:opencode2
+        version: 2.2.5
+      effect:
+        specifier: catalog:opencode2
+        version: 4.0.6
+    devDependencies:
+      '@opencode/plugin':
+        specifier: catalog:opencode2
+        version: 2.2.5(@opentelemetry/semantic-conventions@1.43.0)(redis@6.2.1(@opentelemetry/api@1.9.1))(supports-color@10.2.2)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
   .opencode/packages/plugins/run-hk-check-on-idle:
     dependencies:
       effect:
