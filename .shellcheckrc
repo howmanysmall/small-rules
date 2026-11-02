@@ -3,11 +3,17 @@
 
 enable=avoid-negated-conditions
 enable=avoid-nullary-conditions
+enable=check-extra-masked-returns
 enable=check-unassigned-uppercase
 enable=deprecate-which
 enable=quote-safe-variables
 enable=require-double-brackets
 enable=useless-use-of-cat
 
-# require-variable-braces stays off: shellharden rewrites "${x}" to "$x", so
-# the two tools would never agree.
+# Off on purpose:
+# - require-variable-braces: shellharden rewrites "${x}" to "$x", so the two
+#   tools would never agree.
+# - add-default-case: a `case` that filters falls through when nothing matches,
+#   and `*) ;;` says nothing more.
+# - check-set-e-suppressed: flags every predicate function called from `if`,
+#   which is where a predicate belongs.

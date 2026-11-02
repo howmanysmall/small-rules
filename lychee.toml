@@ -1,5 +1,5 @@
 # Link checker - https://lychee.cli.rs/
-# Run with `mise run links`.
+# hk checks the links in changed files; the Links workflow sweeps all of them.
 
 scheme = ["https", "http", "file"]
 

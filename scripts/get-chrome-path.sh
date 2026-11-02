@@ -10,8 +10,8 @@ function get-first-executable-in-path() {
 	local candidate
 
 	for candidate in "$@"; do
-		if command -v "${candidate}" > /dev/null 2>&1; then
-			command -v "${candidate}"
+		if command -v "$candidate" > /dev/null 2>&1; then
+			command -v "$candidate"
 			return 0
 		fi
 	done
@@ -23,8 +23,8 @@ function get-first-existing-file() {
 	local candidate
 
 	for candidate in "$@"; do
-		if [[ -n "${candidate}" && -x "${candidate}" ]]; then
-			printf '%s\n' "${candidate}"
+		if [[ -n "$candidate" && -x "$candidate" ]]; then
+			printf '%s\n' "$candidate"
 			return 0
 		fi
 	done
@@ -80,7 +80,7 @@ function resolve-windows-chrome() {
 		'%LocalAppData%\Google\Chrome SxS\Application\chrome.exe'; do
 		if commandOutput="$(cmd.exe /c "if exist \"${candidate}\" (echo ${candidate}) else exit /b 1" 2> /dev/null)"; then
 			commandOutput="${commandOutput%$'\r'}"
-			printf '%s\n' "${commandOutput}"
+			printf '%s\n' "$commandOutput"
 			return 0
 		fi
 	done
@@ -94,30 +94,30 @@ function resolve-chrome-path() {
 	local platform
 
 	for override in "${CHROME_PATH:-}" "${GOOGLE_CHROME_PATH:-}" "${CHROME_BIN:-}"; do
-		if [[ -n "${override:-}" && -x "${override}" ]]; then
-			printf '%s\n' "${override}"
+		if [[ -n "${override:-}" && -x "$override" ]]; then
+			printf '%s\n' "$override"
 			return 0
 		fi
 	done
 
 	platform="$(uname -s 2> /dev/null || printf '%s' "${OS:-}")"
 
-	case "${platform}" in
+	case "$platform" in
 		Darwin)
 			if path="$(resolve-macos-chrome)"; then
-				printf '%s\n' "${path}"
+				printf '%s\n' "$path"
 				return 0
 			fi
 			;;
 		Linux)
 			if path="$(resolve-linux-chrome)"; then
-				printf '%s\n' "${path}"
+				printf '%s\n' "$path"
 				return 0
 			fi
 			;;
 		MINGW* | MSYS* | CYGWIN* | Windows_NT)
 			if path="$(resolve-windows-chrome)"; then
-				printf '%s\n' "${path}"
+				printf '%s\n' "$path"
 				return 0
 			fi
 			;;
@@ -135,7 +135,7 @@ function resolve-chrome-path() {
 		chromium \
 		chromium-browser \
 		chrome)"; then
-		printf '%s\n' "${path}"
+		printf '%s\n' "$path"
 		return 0
 	fi
 
@@ -150,11 +150,11 @@ chromePath="$(resolve-chrome-path)" || {
 
 case "${1:---serve}" in
 	--print-path)
-		printf '%s\n' "${chromePath}"
+		printf '%s\n' "$chromePath"
 		;;
 	--serve | --launch)
 		shift || true
-		exec nlx chrome-devtools-mcp@latest --no-usage-statistics --executablePath "${chromePath}" "$@"
+		exec nlx chrome-devtools-mcp@latest --no-usage-statistics --executablePath "$chromePath" "$@"
 		;;
 	*)
 		error "Usage: $0 [--print-path|--serve]"

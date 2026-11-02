@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+repository_root="$(git rev-parse --show-toplevel 2> /dev/null || pwd)"
+cd "$repository_root"
 
 # betterleaks does not auto-discover .betterleaks.toml, so the config path is
 # passed explicitly. Without it the scan runs on the built-in ruleset only and
@@ -32,11 +33,11 @@ while read -r local_ref local_sha remote_ref remote_sha extra; do
 		range=${local_commit}
 	fi
 
-	if betterleaks git --config "${betterleaks_config}" --redact --no-banner --log-opts="${range}"; then
+	if betterleaks git --config "$betterleaks_config" --redact --no-banner --log-opts="$range"; then
 		continue
 	else
 		status=$?
 	fi
 done
 
-exit "${status}"
+exit "$status"
