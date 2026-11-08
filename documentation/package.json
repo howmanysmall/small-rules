@@ -43,7 +43,6 @@
 		"@total-typescript/ts-reset": "catalog:types",
 		"@types/react": "catalog:types",
 		"@types/react-dom": "catalog:types",
-		"get-tsconfig": "catalog:build",
 		"jsdom": "catalog:test",
 		"oxc-transform-react": "catalog:frontend",
 		"typescript": "catalog:tooling",

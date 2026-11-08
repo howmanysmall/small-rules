@@ -96,7 +96,6 @@ catalogs:
     mitata: 1.0.34
   build:
     "@arethetypeswrong/core": 0.18.5
-    get-tsconfig: 4.14.3
     publint: 0.3.25
     tsdown: 0.23.7
   commitlint:

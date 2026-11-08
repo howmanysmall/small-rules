@@ -177,9 +177,6 @@ catalogs:
     '@arethetypeswrong/core':
       specifier: 0.18.5
       version: 0.18.5
-    get-tsconfig:
-      specifier: 4.14.3
-      version: 4.14.3
     publint:
       specifier: 0.3.25
       version: 0.3.25
@@ -978,9 +975,6 @@ importers:
       '@types/react-dom':
         specifier: catalog:types
         version: 19.3.0(@types/react@19.3.0)
-      get-tsconfig:
-        specifier: catalog:build
-        version: 4.14.3
       jsdom:
         specifier: catalog:test
         version: 31.0.0
@@ -20618,7 +20612,6 @@ time:
   fast-check@4.10.2: '2026-09-19T19:34:54.991Z'
   fast-string-width@3.0.2: '2025-09-30T10:31:05.462Z'
   fdir@6.5.0: '2025-08-14T16:56:03.948Z'
-  get-tsconfig@4.14.3: '2026-08-17T12:23:09.262Z'
   ignore@7.0.14: '2026-10-23T23:24:50.714Z'
   jest-extended@7.0.0: '2025-11-05T19:15:00.324Z'
   jiti@2.7.0: '2026-05-05T21:02:47.918Z'
