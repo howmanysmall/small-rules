@@ -30,11 +30,7 @@ export interface RuleManifest {
 	readonly categories: ReadonlyArray<RuleCategoryManifest>;
 }
 
-function defineRuleManifest<const TManifest extends RuleManifest>(manifest: TManifest): TManifest {
-	return manifest;
-}
-
-export const ruleManifest = defineRuleManifest({
+export const ruleManifest: RuleManifest = {
 	categories: [
 		{
 			key: "react",
@@ -239,7 +235,7 @@ export const ruleManifest = defineRuleManifest({
 			],
 		},
 	],
-});
+};
 
 export function formatRuleTitle(name: RuleName): string {
 	return name
