@@ -22,10 +22,10 @@ import RulePage from "$components/rule-page.astro";
 			`package.json`.
 		</p>
 		<p>
-			A described disable of `typescript/no-unsafe-enum-assignment` counts too, since a cast to an enum type trips it.
-			To count other rules, list their IDs in the `suppressionRules` option. The option replaces the default list
-			(`typescript/no-unsafe-type-assertion` and `typescript/no-unsafe-enum-assignment`), so repeat the ones you
-			still want.
+			A described disable of `typescript/no-unsafe-enum-assignment` counts too, since that rule also flags a cast
+			to an enum type. To count other rules, list their IDs in the `suppressionRules` option. The option replaces
+			the default list (`typescript/no-unsafe-type-assertion` and `typescript/no-unsafe-enum-assignment`), so
+			repeat the ones you still want.
 		</p>
 	</Fragment>
 </RulePage>
