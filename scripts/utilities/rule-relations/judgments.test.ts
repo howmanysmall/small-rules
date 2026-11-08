@@ -6,7 +6,7 @@ import { applyRelationCap, resolvePairRelation } from "$script-utilities/rule-re
 
 import { createJudgments } from "./fixtures";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 import type { DecisionAnswer, RuleCard, ScoredRelation } from "$script-utilities/rule-relations/types";
 
 function createCardFixture(name: RuleName, title: string): RuleCard {

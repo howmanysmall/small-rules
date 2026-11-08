@@ -2,7 +2,16 @@
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
 		"tsBuildInfoFile": "../node_modules/.tsbuildinfo-benchmarks",
+		"paths": {
+			"$oxc-utilities/*": ["../src/utilities/*"],
+			"$script-utilities/*": ["../scripts/utilities/*"]
+		},
 		"types": ["bun", "node"]
 	},
+	"references": [
+		{
+			"path": "../src"
+		}
+	],
 	"include": ["**/*.bench.ts"]
 }

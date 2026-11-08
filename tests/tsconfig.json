@@ -1,0 +1,21 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "../node_modules/.cache/tsbuild/tests.tsbuildinfo",
+		"jsx": "react-jsx",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"paths": {
+			"$oxc-rules/*": ["../src/rules/*"],
+			"$oxc-utilities/*": ["../src/utilities/*"],
+			"$small-rules": ["../src/index.ts"]
+		},
+		"types": ["node"]
+	},
+	"references": [
+		{
+			"path": "../src"
+		}
+	],
+	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": ["**/node_modules/**"]
+}

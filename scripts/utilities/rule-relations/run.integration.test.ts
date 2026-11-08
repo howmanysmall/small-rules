@@ -16,7 +16,7 @@ import { getPairKey, judgmentDimensions } from "$script-utilities/rule-relations
 
 import { createJudgments } from "./fixtures";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 import type {
 	DecisionAnswer,
 	DecisionTransport,

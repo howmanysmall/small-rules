@@ -1,6 +1,6 @@
 import { describe, it } from "vitest";
 
-import { ruleManifest } from "$data/rule-manifest";
+import { ruleManifest } from "$documentation/data/rule-manifest";
 import { buildRuleCards } from "$script-utilities/rule-relations/rule-cards";
 
 describe("buildRuleCards", () => {

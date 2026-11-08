@@ -1,9 +1,9 @@
 import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { type } from "arktype";
 
-import type { RuleName } from "$data/rule-manifest";
-import type { RuleRelationKind } from "$data/rule-relations";
-import type { RuleExample } from "$utilities/extract-rule-examples";
+import type { RuleName } from "$documentation/data/rule-manifest";
+import type { RuleRelationKind } from "$documentation/data/rule-relations";
+import type { RuleExample } from "$documentation/utilities/extract-rule-examples";
 
 export type RuleCardExample = Pick<
 	RuleExample,

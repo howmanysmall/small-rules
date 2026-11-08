@@ -1,10 +1,10 @@
 import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
+import { PROPERTY_RUNS } from "@small-rules/rule-harness";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 
 import smallRules from "$small-rules";
-import { PROPERTY_RUNS } from "$test/property-runs";
 
 import { isValidProgram, runFixLoop } from "./support/fix-loop";
 import { FIXABLE_CASES } from "./support/fixable-cases";

@@ -1,8 +1,8 @@
-import { mergeRelations, parseGeneratedRelations } from "$data/rule-relations";
+import { mergeRelations, parseGeneratedRelations } from "$documentation/data/rule-relations";
 
 import { getPairKey } from "./types";
 
-import type { GeneratedRelation, RuleRelation, RuleRelationPair } from "$data/rule-relations";
+import type { GeneratedRelation, RuleRelation, RuleRelationPair } from "$documentation/data/rule-relations";
 
 interface CheckOptions {
 	readonly denylist: ReadonlyArray<RuleRelationPair>;

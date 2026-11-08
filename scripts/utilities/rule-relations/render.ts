@@ -1,12 +1,12 @@
 import { isNumber, isString, isUndefined } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
-import { isRuleName } from "$data/rule-relations";
+import { isRuleName } from "$documentation/data/rule-relations";
 
 import { relationGeneratorPath } from "./constants";
 import { compareStrings, isPairJudgments } from "./types";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 
 const isLegacyJudgments = type({ duplicates: isNumber, exists: isNumber, replaces: isNumber, requires: isNumber });
 const isLegacyEvidence = type({

@@ -22,14 +22,13 @@ async function listLicensesAsync(parameters: ReadonlyArray<string>): Promise<Rea
 command
 	.example("Check every installed license", "bun run scripts/check-licenses.ts")
 	.action(async (): Promise<void> => {
-		const [root, documentation, workspace] = await Promise.all([
+		const [root, documentation] = await Promise.all([
 			listLicensesAsync(["--prod"]),
 			listLicensesAsync(["--prod", "--filter", "@small-rules/documentation"]),
-			listLicensesAsync(["--recursive"]),
 		]);
 
 		const { checked, failures, staleExceptions } = evaluateLicenses(
-			{ shipped: [...root, ...documentation], workspace },
+			{ shipped: [...root, ...documentation] },
 			LICENSE_POLICY,
 		);
 

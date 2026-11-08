@@ -7,7 +7,7 @@ import { argv } from "node:process";
 import { OpenRouter } from "@openrouter/sdk";
 import { consola } from "consola";
 
-import { relationDenylist, relationPins } from "$data/rule-relations.overrides";
+import { relationDenylist, relationPins } from "$documentation/data/rule-relations.overrides";
 import { createBaseCommand } from "$script-functions/create-base-command";
 import { getScriptName } from "$script-functions/get-script-name";
 import { createJudgmentCache, createReasonCache } from "$script-utilities/rule-relations/cache";

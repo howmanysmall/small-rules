@@ -30,7 +30,7 @@ export interface RuleManifest {
 	readonly categories: ReadonlyArray<RuleCategoryManifest>;
 }
 
-function defineRuleManifest<const TManifest extends RuleManifest>(manifest: TManifest): TManifest {
+function defineRuleManifest(manifest: RuleManifest): RuleManifest {
 	return manifest;
 }
 

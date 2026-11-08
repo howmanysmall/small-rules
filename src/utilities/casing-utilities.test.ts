@@ -1,8 +1,8 @@
 import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
+import { PROPERTY_RUNS } from "@small-rules/rule-harness";
 
 import { toPascalCase } from "$oxc-utilities/casing-utilities";
-import { PROPERTY_RUNS } from "$test/property-runs";
 
 // Lowercase words of two or more letters: a one-letter word next to another
 // capital reads as part of an acronym, which camelCase cannot express.

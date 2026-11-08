@@ -1,0 +1,20 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"composite": true,
+		"tsBuildInfoFile": "../node_modules/.cache/tsbuild/src.tsbuildinfo",
+		"jsx": "react-jsx",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"paths": {
+			"$oxc-generated/*": ["./generated/*"],
+			"$oxc-rules/*": ["./rules/*"],
+			"$oxc-utilities/*": ["./utilities/*"],
+			"$small-rules": ["./index.ts"]
+		},
+		"types": ["node"],
+		"emitDeclarationOnly": true,
+		"noEmit": false,
+		"outDir": "../node_modules/.cache/tsbuild/src"
+	},
+	"include": ["**/*.ts", "**/*.json"]
+}

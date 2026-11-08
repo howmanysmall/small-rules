@@ -57,12 +57,10 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 				}
 			: { alwaysBundle: ALWAYS_BUNDLE },
 		dts: {
-			generator: "tsgo",
-			incremental: true,
+			generator: "tsrs",
 			resolver: "oxc",
-			tsgo: {
-				path: nodePath.join(import.meta.dirname, "node_modules", ".bin", "tsrs"),
-			},
+			// The plugin lives in the pnpm store, where `tsrs` does not resolve.
+			tsrs: { moduleUrl: import.meta.resolve("tsrs") },
 		},
 		entry: "./src/index.ts",
 		fixedExtension: false,
@@ -79,7 +77,7 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 			propertyReadSideEffects: false,
 			unknownGlobalSideEffects: false,
 		},
-		tsconfig: "tsconfig.lib.json",
+		tsconfig: "src/tsconfig.build.json",
 	};
 
 	if (includeLocal) {

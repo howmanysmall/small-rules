@@ -1,1 +1,6 @@
-pnpm-*
+# pnpm
+/arktype
+/fallow-setup
+/pnpm-fallow-fallow
+/pnpm-tsdown-tsdown
+# pnpm end

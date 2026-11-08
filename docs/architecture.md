@@ -16,7 +16,7 @@ One rule per file. Every rule is built with `createRule(name, category, rule)` f
 
 ## Tasks - `turbo.json`
 
-Turborepo runs and caches `build`, `type-check`, `test`, `lint`, and the docs tasks across every workspace. The root package's tasks are root tasks (`//#build`), so their `inputs` exclude what each one never reads; `documentation/turbo.json` adds root `src/`, which the docs import through a path alias. Every task reruns when the root manifest, the lockfile, or an internal package the root depends on changes. `turbo run <task> --force` skips the cache.
+Turborepo runs and caches `build`, `type-check`, `test`, `lint`, and the docs tasks across every workspace. The root package's tasks are root tasks (`//#build`), so their `inputs` exclude what each one never reads; `documentation/turbo.json` adds root `src/`, which the docs import through `$small-rules`. Every task reruns when the root manifest, the lockfile, or an internal package the root depends on changes. `turbo run <task> --force` skips the cache.
 
 ## Utilities - `src/utilities/`
 
@@ -28,9 +28,18 @@ Ambient declarations only: a module augmentation for `oxlint-plugin-utilities` a
 
 ## TypeScript Layout
 
-The `$oxc-*` and `$test/*` path aliases are defined in the `paths` block of `tsconfig.base.json`.
+`tsconfig.base.json` holds compiler options only. Each project declares the path aliases it uses in its own `tsconfig.json`, and an alias into another project names that project and goes through a project reference:
 
-`tsconfig.json` is a solution file over `tsconfig.lib.json`, `tsconfig.test.json`, and `tsconfig.node.json`. Project references are derived from each `package.json`, and a missing one is silent: `tsrs --build` resolves the import through the root `node_modules` and skips the project. `nr references:check` catches it and `nr references:sync` repairs it.
+| Project | Aliases | References |
+|---|---|---|
+| `src/` | `$oxc-generated/*`, `$oxc-rules/*`, `$oxc-utilities/*`, `$small-rules` | |
+| `tests/` | `$oxc-rules/*`, `$oxc-utilities/*`, `$small-rules` | `src` |
+| `scripts/` | `$script-*/*`, `$documentation/*`, `$oxc-generated/*`, `$small-rules` | `src` |
+| `documentation/` | `$classes/*`, `$components/*`, `$data/*`, `$utilities/*`, `$small-rules` | `src` |
+
+`src/tsconfig.json` is the only composite project; `src/tsconfig.build.json` narrows it to shipped files for `tsdown`. Vite and Bun resolve the same aliases from the nearest `tsconfig.json` (`resolve.tsconfigPaths`).
+
+`tsconfig.json` is a solution file over `src/`, `tests/`, `scripts/`, `tsconfig.node.json` (root config files), and the workspace packages. Project references are derived from each `package.json`, and a missing one is silent: `tsrs --build` resolves the import through the root `node_modules` and skips the project. `nr references:check` catches it and `nr references:sync` repairs it.
 
 ## Tests
 

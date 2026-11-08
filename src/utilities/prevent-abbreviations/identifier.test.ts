@@ -1,13 +1,13 @@
 import { compileFunction } from "node:vm";
 import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
+import { PROPERTY_RUNS } from "@small-rules/rule-harness";
 
 import {
 	isIdentifierPartCodePoint,
 	isIdentifierStartCodePoint,
 	isValidIdentifier,
 } from "$oxc-utilities/prevent-abbreviations/identifier";
-import { PROPERTY_RUNS } from "$test/property-runs";
 
 // Random identifier-shaped names, plus the words strict module code reserves
 // for itself so the property meets them often.

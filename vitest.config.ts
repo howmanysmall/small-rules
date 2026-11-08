@@ -60,9 +60,11 @@ const testConfiguration = mergeConfig(
 						typecheck: {
 							checker: "tsrs",
 							enabled: true,
-							include: ["{scripts,src,tests}/**/*.test.ts", "{scripts,src,tests}/**/*.test-d.ts"],
+							// scripts/ and tests/ reference src, which needs
+							// `tsrs --build`; `type-check` covers them.
+							include: ["src/**/*.test.ts", "src/**/*.test-d.ts"],
 							only: true,
-							tsconfig: "./tsconfig.test.json",
+							tsconfig: "./src/tsconfig.json",
 						},
 					},
 				},

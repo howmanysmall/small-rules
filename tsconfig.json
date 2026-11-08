@@ -1,5 +1,4 @@
 {
-	"extends": "./tsconfig.base.json",
 	"references": [
 		{
 			"path": "./packages/arktype-utilities"
@@ -14,16 +13,19 @@
 			"path": "./packages/string-utilities"
 		},
 		{
+			"path": "./scripts"
+		},
+		{
+			"path": "./src"
+		},
+		{
+			"path": "./tests"
+		},
+		{
 			"path": "./tools/release-notes"
 		},
 		{
-			"path": "./tsconfig.lib.json"
-		},
-		{
 			"path": "./tsconfig.node.json"
-		},
-		{
-			"path": "./tsconfig.test.json"
 		}
 	],
 	"files": [],

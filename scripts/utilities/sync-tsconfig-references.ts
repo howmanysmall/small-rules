@@ -12,10 +12,10 @@ import { type } from "arktype";
 import type { DictionaryOfUnknowns } from "@small-rules/arktype-utilities";
 
 // `tsrs --build` requires every referenced project to have `composite: true`
-// and to emit declarations. Workspace packages here compile through the root
-// `tsconfig.lib.json` instead, so only the solution `tsconfig.json` may
-// declare references; any reference found in a package tsconfig is rejected
-// by the compiler (TS6306) and removed on sync.
+// and to emit declarations. Workspace packages here do neither, so only the
+// solution `tsconfig.json` may declare references to them; any reference found
+// in a package tsconfig is rejected by the compiler (TS6306) and removed on
+// sync.
 
 const TSCONFIG_JSON = "tsconfig.json";
 
@@ -28,10 +28,10 @@ const PROJECT_PARENTS = ["packages"] as const;
 const STANDALONE_PROJECTS = ["tools/release-notes"] as const;
 
 /**
- * Root configurations the solution references in addition to workspace
- * projects.
+ * Projects of the root package the solution references in addition to
+ * workspace projects.
  */
-const ROOT_CONFIGURATION_FILES = ["tsconfig.lib.json", "tsconfig.node.json", "tsconfig.test.json"] as const;
+const ROOT_PROJECTS = ["scripts", "src", "tests", "tsconfig.node.json"] as const;
 
 const isManifest = type({
 	name: isNonEmptyString,
@@ -140,7 +140,7 @@ async function collectConfigurationFilesAsync(rootDirectory: string): Promise<Re
 			path: nodePath.join(directory, TSCONFIG_JSON),
 		})),
 		{
-			expectedReferences: [...projects, ...ROOT_CONFIGURATION_FILES]
+			expectedReferences: [...projects, ...ROOT_PROJECTS]
 				.map((directory) => `./${directory}`)
 				.toSorted(compareUsingLocale),
 			path: TSCONFIG_JSON,
