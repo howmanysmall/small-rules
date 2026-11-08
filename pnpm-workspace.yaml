@@ -86,12 +86,7 @@ overrides:
   "@vitiate/core>@swc/core": 1.15.41
   vite: ^8
 
-# @isentinel/eslint-config: keep oxfmt off component files and apply option rules to them.
-# tsrs: fall back to TypeScript's own compiler on Windows when the @tsrs platform binary is
-# missing (there is no @tsrs/win32-arm64).
-patchedDependencies:
-  "@isentinel/eslint-config@6.2.0": patches/@isentinel__eslint-config@6.2.0.patch
-  tsrs@0.20.1-ts7.1.0-beta: patches/tsrs@0.20.1-ts7.1.0-beta.patch
+patchedDependencies: {}
 
 catalogs:
   benchmark:
