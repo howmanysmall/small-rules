@@ -10,7 +10,7 @@ import { readRepositoryFile } from "./repository";
 import { applyRelationCap, resolvePairRelation } from "./resolve";
 import { getPairKey } from "./types";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 
 import type { JudgmentCache, ReasonCache } from "./cache";
 import type { GeneratedEdge, RelationEvidence } from "./render";

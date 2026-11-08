@@ -7,7 +7,7 @@ import { getPairKey } from "$script-utilities/rule-relations/types";
 
 import { createJudgments } from "./fixtures";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 import type { RegenerationResult } from "$script-utilities/rule-relations/run";
 import type { PairJudgments, RelationResolution, RuleCard } from "$script-utilities/rule-relations/types";
 

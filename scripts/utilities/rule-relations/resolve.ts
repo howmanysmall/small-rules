@@ -1,6 +1,6 @@
 import { compareStrings } from "./types";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 
 import type { JudgmentThresholds, PairJudgments, RelationDraft, RelationResolution, ScoredRelation } from "./types";
 

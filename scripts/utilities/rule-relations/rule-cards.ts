@@ -1,11 +1,11 @@
-import { ruleExamples } from "$data/rule-examples";
-import { formatRuleTitle, ruleManifest } from "$data/rule-manifest";
+import { ruleExamples } from "$documentation/data/rule-examples";
+import { formatRuleTitle, ruleManifest } from "$documentation/data/rule-manifest";
 import smallRules from "$small-rules";
 
 import { readRepositoryFile } from "./repository";
 import { compareStrings } from "./types";
 
-import type { RuleCategoryKey, RuleName } from "$data/rule-manifest";
+import type { RuleCategoryKey, RuleName } from "$documentation/data/rule-manifest";
 
 import type { RuleCard, RuleCardExample } from "./types";
 

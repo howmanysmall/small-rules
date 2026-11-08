@@ -14,6 +14,8 @@ import type {
 	RuleTestRunner,
 } from "./types";
 
+export { PROPERTY_RUNS } from "./property-runs";
+
 const ONLY_TEST_KEY = "only";
 const SKIP_TEST_KEY = "skip";
 

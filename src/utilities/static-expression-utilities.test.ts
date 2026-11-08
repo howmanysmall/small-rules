@@ -1,6 +1,6 @@
 import { describe, it } from "vitest";
 import { fc } from "@fast-check/vitest";
-import { createRuleTester } from "@small-rules/rule-harness";
+import { createRuleTester, PROPERTY_RUNS } from "@small-rules/rule-harness";
 import { createRuleExecutor } from "@small-rules/rule-harness/execute";
 import { defineRule } from "oxlint-plugin-utilities";
 
@@ -10,7 +10,6 @@ import {
 	isExplicitUndefinedExpression,
 	isStaticExpression,
 } from "$oxc-utilities/static-expression-utilities";
-import { PROPERTY_RUNS } from "$test/property-runs";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 

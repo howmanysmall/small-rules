@@ -79,7 +79,7 @@ const configuration = defineConfig((inlineConfiguration): Arrayable<UserConfig> 
 			propertyReadSideEffects: false,
 			unknownGlobalSideEffects: false,
 		},
-		tsconfig: "tsconfig.lib.json",
+		tsconfig: "src/tsconfig.build.json",
 	};
 
 	if (includeLocal) {

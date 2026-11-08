@@ -1,10 +1,8 @@
-import { fileURLToPath } from "node:url";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import { Predicate } from "effect";
-import { getTsconfig } from "get-tsconfig";
 
 import { ruleRedirects, SITE_BASE } from "./src/data/rule-redirects";
 import { ruleSidebarGroups } from "./src/data/rule-sidebar";
@@ -12,10 +10,6 @@ import createContextualMenuIntegration from "./src/integrations/contextual-menu"
 import { syntaxDarkTheme, syntaxLightTheme } from "./src/utilities/syntax-themes";
 
 import type { AstroIntegration } from "astro";
-
-function fromRepositoryRoot(path: string): string {
-	return fileURLToPath(new URL(`../${path}`, import.meta.url));
-}
 
 function ensureAstroIntegration<Integration extends AstroIntegration>(
 	integration: Integration,
@@ -39,33 +33,6 @@ function ensureAstroIntegration<Integration extends AstroIntegration>(
 	}
 
 	return { name, hooks };
-}
-
-function removeTrailingWildcard(path: string): string {
-	return path.endsWith("/*") ? path.slice(0, -2) : path;
-}
-
-function getAliases(): Record<string, string> {
-	const tsconfig = getTsconfig(fromRepositoryRoot("."), "tsconfig.base.json");
-	if (tsconfig === null) {
-		throw new Error("Could not load tsconfig.base.json.");
-	}
-
-	const paths = tsconfig.config.compilerOptions?.paths;
-	if (paths === undefined) {
-		return {};
-	}
-
-	return Object.fromEntries(
-		Object.entries(paths).map(([pattern, targets]) => {
-			const [target] = targets;
-			if (target === undefined) {
-				throw new Error(`Expected a path target for "${pattern}".`);
-			}
-
-			return [removeTrailingWildcard(pattern), fromRepositoryRoot(removeTrailingWildcard(target))];
-		}),
-	);
 }
 
 export default defineConfig({
@@ -146,7 +113,7 @@ export default defineConfig({
 			transformer: "lightningcss",
 		},
 		resolve: {
-			alias: getAliases(),
+			tsconfigPaths: true,
 		},
 	},
 });

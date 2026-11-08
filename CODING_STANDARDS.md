@@ -44,7 +44,7 @@ describe("no-print", () => {
 
 Documented examples (`documentation: { id, title }` on a case) render verbatim on the docs site. Write a multi-statement snippet as an array joined with `"\n"`; `documentation/tests/unit/rule-examples.test.ts` fails on a single-line multi-statement example.
 
-A new fixable rule needs a program generator in `tests/properties/support/fixable-cases-*.ts`; `tests/properties/fixes-settle.test.ts` fails until it has one. Property tests take their run count from `PROPERTY_RUNS` in `tests/property-runs.ts` so the weekly deep run can raise it.
+A new fixable rule needs a program generator in `tests/properties/support/fixable-cases-*.ts`; `tests/properties/fixes-settle.test.ts` fails until it has one. Property tests take their run count from `PROPERTY_RUNS` in `@small-rules/rule-harness` so the weekly deep run can raise it.
 
 ## Beyond the Rule
 

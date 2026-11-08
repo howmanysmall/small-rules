@@ -4,14 +4,29 @@
 	"tasks": {
 		"build": {
 			"dependsOn": ["check"],
-			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/src/**", "$TURBO_ROOT$/tsconfig.base.json"]
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"$TURBO_ROOT$/src/**",
+				"$TURBO_ROOT$/tsconfig.base.json",
+				"$TURBO_ROOT$/src/tsconfig.json"
+			]
 		},
 		"check": {
-			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/src/**", "$TURBO_ROOT$/tsconfig.base.json"]
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"$TURBO_ROOT$/src/**",
+				"$TURBO_ROOT$/tsconfig.base.json",
+				"$TURBO_ROOT$/src/tsconfig.json"
+			]
 		},
 		"test:unit": {
 			"dependsOn": ["build"],
-			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/src/**", "$TURBO_ROOT$/tsconfig.base.json"]
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"$TURBO_ROOT$/src/**",
+				"$TURBO_ROOT$/tsconfig.base.json",
+				"$TURBO_ROOT$/src/tsconfig.json"
+			]
 		}
 	}
 }

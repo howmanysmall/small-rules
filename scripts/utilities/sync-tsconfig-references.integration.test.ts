@@ -52,25 +52,25 @@ const ROOT_CONFIGURATION = `{
 }`;
 
 const SOLUTION_SYNCED = `{
-	"extends": "./tsconfig.base.json",
 	"references": [
 		{ "path": "./packages/alpha" },
 		{ "path": "./packages/beta" },
-		{ "path": "./tsconfig.lib.json" },
-		{ "path": "./tsconfig.node.json" },
-		{ "path": "./tsconfig.test.json" }
+		{ "path": "./scripts" },
+		{ "path": "./src" },
+		{ "path": "./tests" },
+		{ "path": "./tsconfig.node.json" }
 	],
 	"files": [],
 	"include": []
 }`;
 
 const SOLUTION_MISSING_BETA = `{
-	"extends": "./tsconfig.base.json",
 	"references": [
 		{ "path": "./packages/alpha" },
-		{ "path": "./tsconfig.lib.json" },
-		{ "path": "./tsconfig.node.json" },
-		{ "path": "./tsconfig.test.json" }
+		{ "path": "./scripts" },
+		{ "path": "./src" },
+		{ "path": "./tests" },
+		{ "path": "./tsconfig.node.json" }
 	],
 	"files": [],
 	"include": []
@@ -79,7 +79,6 @@ const SOLUTION_MISSING_BETA = `{
 // `JSON.stringify(value, undefined, "\t")` spreads every reference object
 // across three lines, unlike the repository's collapsed oxfmt style.
 const SOLUTION_AFTER_SYNC = `{
-	"extends": "./tsconfig.base.json",
 	"references": [
 		{
 			"path": "./packages/alpha"
@@ -88,13 +87,16 @@ const SOLUTION_AFTER_SYNC = `{
 			"path": "./packages/beta"
 		},
 		{
-			"path": "./tsconfig.lib.json"
+			"path": "./scripts"
+		},
+		{
+			"path": "./src"
+		},
+		{
+			"path": "./tests"
 		},
 		{
 			"path": "./tsconfig.node.json"
-		},
-		{
-			"path": "./tsconfig.test.json"
 		}
 	],
 	"files": [],
@@ -104,17 +106,13 @@ const SOLUTION_AFTER_SYNC = `{
 const EXPECTED_SOLUTION_REFERENCES = [
 	"./packages/alpha",
 	"./packages/beta",
-	"./tsconfig.lib.json",
+	"./scripts",
+	"./src",
+	"./tests",
 	"./tsconfig.node.json",
-	"./tsconfig.test.json",
 ];
 
-const SOLUTION_REFERENCES_WITHOUT_BETA = [
-	"./packages/alpha",
-	"./tsconfig.lib.json",
-	"./tsconfig.node.json",
-	"./tsconfig.test.json",
-];
+const SOLUTION_REFERENCES_WITHOUT_BETA = ["./packages/alpha", "./scripts", "./src", "./tests", "./tsconfig.node.json"];
 
 interface FixtureOptions {
 	readonly illegalPackageReferences?: boolean;
@@ -141,9 +139,10 @@ async function createWorkspaceAsync(options: FixtureOptions = {}): Promise<strin
 		TSCONFIG_JSON,
 		options.omitBetaFromSolution === true ? SOLUTION_MISSING_BETA : SOLUTION_SYNCED,
 	);
-	await writeAsync(rootDirectory, "tsconfig.lib.json", ROOT_CONFIGURATION);
+	await writeAsync(rootDirectory, "scripts/tsconfig.json", ROOT_CONFIGURATION);
+	await writeAsync(rootDirectory, "src/tsconfig.json", ROOT_CONFIGURATION);
+	await writeAsync(rootDirectory, "tests/tsconfig.json", ROOT_CONFIGURATION);
 	await writeAsync(rootDirectory, "tsconfig.node.json", ROOT_CONFIGURATION);
-	await writeAsync(rootDirectory, "tsconfig.test.json", ROOT_CONFIGURATION);
 	await writeAsync(rootDirectory, "packages/alpha/package.json", getManifestFor("@small-rules/alpha"));
 	await writeAsync(
 		rootDirectory,

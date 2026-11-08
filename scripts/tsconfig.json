@@ -1,0 +1,23 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "../node_modules/.cache/tsbuild/scripts.tsbuildinfo",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"paths": {
+			"$script-classes/*": ["./classes/*"],
+			"$script-constants/*": ["./constants/*"],
+			"$script-functions/*": ["./functions/*"],
+			"$script-utilities/*": ["./utilities/*"],
+			"$documentation/*": ["../documentation/src/*"],
+			"$oxc-generated/*": ["../src/generated/*"],
+			"$small-rules": ["../src/index.ts"]
+		},
+		"types": ["bun", "node"]
+	},
+	"references": [
+		{
+			"path": "../src"
+		}
+	],
+	"include": ["**/*.ts"]
+}

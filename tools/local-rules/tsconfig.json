@@ -1,8 +1,9 @@
 {
-	"extends": "../../tsconfig.node.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"lib": ["ESNext"]
+		"lib": ["ESNext"],
+		"types": ["bun", "node"]
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["vitest.config.ts", "src/**/*.ts"],
 	"exclude": ["node_modules"]
 }

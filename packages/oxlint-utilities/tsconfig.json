@@ -1,9 +1,9 @@
 {
-	"extends": "../../tsconfig.node.json",
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"types": ["node"]
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["vitest.config.ts", "src/**/*.ts"],
 	"exclude": ["dist", "node_modules"]
 }

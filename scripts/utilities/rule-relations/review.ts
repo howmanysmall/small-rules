@@ -1,10 +1,10 @@
-import { isDirectedKind } from "$data/rule-relations";
+import { isDirectedKind } from "$documentation/data/rule-relations";
 
 import { compareRelationBaseline } from "./evaluation";
 import { compareStrings, getPairKey } from "./types";
 
-import type { RuleName } from "$data/rule-manifest";
-import type { RuleRelation, RuleRelationPair } from "$data/rule-relations";
+import type { RuleName } from "$documentation/data/rule-manifest";
+import type { RuleRelation, RuleRelationPair } from "$documentation/data/rule-relations";
 
 import type { RelationBaselineComparison, RelationIdentity } from "./evaluation";
 import type { GeneratedEdge } from "./render";

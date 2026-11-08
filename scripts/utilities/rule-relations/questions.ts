@@ -1,6 +1,6 @@
 import { JudgmentDimension, judgmentDimensions } from "./types";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 
 import type { DecisionAnswer, DecisionQuestion, NoulQuestion, PairJudgments, RuleCard, ScoreAnswer } from "./types";
 

@@ -5,7 +5,7 @@ import {
 	createOpenRouterReasonWriter,
 } from "$script-utilities/rule-relations/openrouter";
 
-import type { RuleName } from "$data/rule-manifest";
+import type { RuleName } from "$documentation/data/rule-manifest";
 import type { RelationUsage, RuleCard } from "$script-utilities/rule-relations/types";
 
 const noPrintCard: RuleCard = {

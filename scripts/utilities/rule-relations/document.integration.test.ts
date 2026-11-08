@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import { describe, it } from "vitest";
 
-import { parseGeneratedRelations } from "$data/rule-relations";
+import { parseGeneratedRelations } from "$documentation/data/rule-relations";
 import {
 	createCacheKey,
 	createJudgmentCache,
@@ -16,7 +16,7 @@ import { checkRelationsDocument } from "$script-utilities/rule-relations/validat
 
 import { createJudgments } from "./fixtures";
 
-import type { RuleRelation } from "$data/rule-relations";
+import type { RuleRelation } from "$documentation/data/rule-relations";
 import type { RuleCard } from "$script-utilities/rule-relations/types";
 
 const cacheKeyPattern = /^[0-9a-f]{64}$/u;
