@@ -6,6 +6,8 @@
 // aliases. Adopted configurable markers and non-empty justification text.
 // Local departure: a described Oxlint directive that disables
 // `typescript/no-unsafe-type-assertion` still counts as justification.
+// Local departure: `suppressionRules` lets a described disable of other rules
+// (for example `typescript/no-unsafe-enum-assignment`) count as justification.
 // Local departure: an unbraced control-flow body may take its justification
 // from the leading comment of the enclosing statement.
 // Local departure: oxlint-tsgolint 7.0.2002 reports on assertion syntax, so a
@@ -54,7 +56,10 @@ const COMMENT_OWNER_KINDS = new Set([
 
 const DEFAULT_SAFETY_MARKERS = ["SAFETY"] as const satisfies readonly [string, ...Array<string>];
 const MARKER_ESCAPE = /[.*+?^${}()|[\]\\]/gu;
-const UNSAFE_ASSERTION_RULE_ID = "typescript/no-unsafe-type-assertion";
+const DEFAULT_SUPPRESSION_RULES = [
+	"typescript/no-unsafe-type-assertion",
+	"typescript/no-unsafe-enum-assignment",
+] as const;
 const OXLINT_DISABLE = "oxlint-disable";
 const OXLINT_DISABLE_LINE = "oxlint-disable-line";
 const OXLINT_DISABLE_NEXT_LINE = "oxlint-disable-next-line";
@@ -70,12 +75,19 @@ function getConfiguredSafetyMarkers(markers?: ReadonlyArray<string>): readonly [
 	return [first, ...rest];
 }
 
+function getConfiguredSuppressionRules(rules?: ReadonlyArray<string>): ReadonlySet<string> {
+	return new Set(rules ?? DEFAULT_SUPPRESSION_RULES);
+}
+
 function getMarkerPattern(markers: ReadonlyArray<string>): RegExp {
 	const alternation = markers.map((marker) => marker.replaceAll(MARKER_ESCAPE, String.raw`\$&`)).join("|");
 	return new RegExp(String.raw`(?:^|[^\p{L}\p{N}_])(?:${alternation})\s*:\s*\S`, "u");
 }
 
-function getParsedUnsafeAssertionDisable(comment: SourceCodeComment): DirectiveComment | undefined {
+function getParsedUnsafeAssertionDisable(
+	comment: SourceCodeComment,
+	suppressionRules: ReadonlySet<string>,
+): DirectiveComment | undefined {
 	const parsed = parseDirectiveComment(comment);
 
 	if (
@@ -83,7 +95,7 @@ function getParsedUnsafeAssertionDisable(comment: SourceCodeComment): DirectiveC
 		(parsed.kind !== OXLINT_DISABLE &&
 			parsed.kind !== OXLINT_DISABLE_LINE &&
 			parsed.kind !== OXLINT_DISABLE_NEXT_LINE) ||
-		!valueHasUnsafeAssertionRule(parsed.value)
+		!valueHasSuppressionRule(parsed.value, suppressionRules)
 	) {
 		return undefined;
 	}
@@ -91,19 +103,19 @@ function getParsedUnsafeAssertionDisable(comment: SourceCodeComment): DirectiveC
 	return parsed;
 }
 
-function valueHasUnsafeAssertionRule(value?: string): boolean {
+function valueHasSuppressionRule(value: string | undefined, suppressionRules: ReadonlySet<string>): boolean {
 	/* v8 ignore next -- parseDirectiveComment always includes a value string. @preserve */
 	if (value === undefined) return false;
 
 	for (const ruleId of value.split(COMMA_REGEXP)) {
-		if (ruleId === UNSAFE_ASSERTION_RULE_ID) return true;
+		if (suppressionRules.has(ruleId)) return true;
 	}
 
 	return false;
 }
 
-function isUnsafeAssertionDisabled(comment: SourceCodeComment): boolean {
-	return getParsedUnsafeAssertionDisable(comment) !== undefined;
+function isUnsafeAssertionDisabled(comment: SourceCodeComment, suppressionRules: ReadonlySet<string>): boolean {
+	return getParsedUnsafeAssertionDisable(comment, suppressionRules) !== undefined;
 }
 
 function disableKindCoversLine(kind: string, comment: SourceCodeComment, line: number): boolean {
@@ -146,10 +158,11 @@ function hasDisableCoveringAssertionLine(
 	sourceCode: SourceCode,
 	node: TypeAssertion,
 	assertionSyntaxRange: boolean,
+	suppressionRules: ReadonlySet<string>,
 ): boolean {
 	const { line } = node.typeAnnotation.loc.start;
 	for (const comment of sourceCode.getAllComments()) {
-		const parsed = getParsedUnsafeAssertionDisable(comment);
+		const parsed = getParsedUnsafeAssertionDisable(comment, suppressionRules);
 		if (parsed === undefined) continue;
 		if (!assertionSyntaxRange && parsed.kind !== OXLINT_DISABLE_NEXT_LINE) continue;
 		if (disableKindCoversLine(parsed.kind, comment, line)) return true;
@@ -163,11 +176,15 @@ function hasSafetyComment(
 	node: TypeAssertion,
 	pattern: RegExp,
 	assertionSyntaxRange: boolean,
+	suppressionRules: ReadonlySet<string>,
 ): boolean {
 	if (hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value))) return true;
-	if (hasDisableCoveringAssertionLine(sourceCode, node, assertionSyntaxRange)) return true;
+	if (hasDisableCoveringAssertionLine(sourceCode, node, assertionSyntaxRange, suppressionRules)) return true;
 	if (assertionSyntaxRange) return false;
-	return hasCommentBeforeAncestors(sourceCode, node, isUnsafeAssertionDisabled);
+
+	return hasCommentBeforeAncestors(sourceCode, node, (comment) =>
+		isUnsafeAssertionDisabled(comment, suppressionRules),
+	);
 }
 
 const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-for-type-assertion", "anti-slop", {
@@ -175,9 +192,13 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 		let markers: readonly [string, ...Array<string>] = DEFAULT_SAFETY_MARKERS;
 		let pattern = getMarkerPattern(markers);
 		let assertionSyntaxRange = false;
+		let suppressionRules = getConfiguredSuppressionRules();
 
 		function checkAssertion(node: TypeAssertion): void {
-			if (isConstAssertion(node) || hasSafetyComment(context.sourceCode, node, pattern, assertionSyntaxRange)) {
+			if (
+				isConstAssertion(node) ||
+				hasSafetyComment(context.sourceCode, node, pattern, assertionSyntaxRange, suppressionRules)
+			) {
 				return;
 			}
 
@@ -188,6 +209,7 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 			before(): void {
 				markers = getConfiguredSafetyMarkers(context.options.at(0)?.markers);
 				pattern = getMarkerPattern(markers);
+				suppressionRules = getConfiguredSuppressionRules(context.options.at(0)?.suppressionRules);
 				const settings = isLintSettings.allows(context.settings) ? context.settings : undefined;
 				assertionSyntaxRange = checkAssertionSyntaxDiagnosticRange(
 					resolveTsgoLintVersion(settings, nodePath.dirname(context.filename)),
@@ -198,15 +220,15 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 		};
 	},
 	meta: {
-		defaultOptions: [{ markers: ["SAFETY"] }],
+		defaultOptions: [{ markers: ["SAFETY"], suppressionRules: DEFAULT_SUPPRESSION_RULES }],
 		docs: {
 			description:
-				"Require a nearby safety-marker comment (or a described Oxlint suppression of typescript/no-unsafe-type-assertion) for every TypeScript type assertion except const assertions.",
+				"Require a nearby safety-marker comment (or a described Oxlint suppression of typescript/no-unsafe-type-assertion or another configured rule) for every TypeScript type assertion except const assertions.",
 			recommended: true,
 		},
 		messages: {
 			missingSafetyComment:
-				"This type assertion has no `{{marker}}:` justification. State the checked invariant immediately before the assertion or its containing statement, or add a described `oxlint-disable-next-line` / `oxlint-disable-line typescript/no-unsafe-type-assertion` directive that covers the assertion.",
+				"This type assertion has no `{{marker}}:` justification. State the checked invariant immediately before the assertion or its containing statement, or add a described `oxlint-disable-next-line` / `oxlint-disable-line` directive for a rule listed in `suppressionRules` (default `typescript/no-unsafe-type-assertion`) that covers the assertion.",
 		},
 		schema: [
 			{
@@ -218,6 +240,14 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 							"Comment markers that introduce a justification, written as `MARKER:` followed by non-whitespace text.",
 						items: { minLength: 1, type: "string" },
 						minItems: 1,
+						type: "array",
+						uniqueItems: true,
+					},
+					suppressionRules: {
+						default: DEFAULT_SUPPRESSION_RULES,
+						description:
+							"Rule IDs whose described `oxlint-disable` directive counts as justification for a type assertion. Replaces the default list.",
+						items: { minLength: 1, type: "string" },
 						type: "array",
 						uniqueItems: true,
 					},

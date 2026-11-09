@@ -173,6 +173,51 @@ describe("require-safety-comment-for-type-assertion", () => {
 		],
 	});
 
+	ts.run("require-safety-comment-for-type-assertion custom suppression rules", rule, {
+		invalid: [
+			{
+				code: "// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Replaced default.\nconst category = value as Category;",
+				options: [{ suppressionRules: ["typescript/no-unsafe-enum-assignment"] }],
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// oxlint-disable-next-line typescript/no-unsafe-enum-assignment\nconst category = value as Category;",
+				options: [{ suppressionRules: ["typescript/no-unsafe-enum-assignment"] }],
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Disabled by empty list.\nconst category = value as Category;",
+				options: [{ suppressionRules: [] }],
+				errors: [missingSafetyComment],
+			},
+		],
+		valid: [
+			{
+				code: "// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- slop\nconst category = diagnostic.category as DiagnosticCategory;",
+			},
+			{
+				code: "// oxlint-disable-next-line typescript/no-unsafe-enum-assignment -- Enum value checked upstream.\nconst category = value as Category;",
+				options: [{ suppressionRules: ["typescript/no-unsafe-enum-assignment"] }],
+			},
+			{
+				code: "// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Still listed.\nconst category = value as Category;",
+				options: [
+					{
+						suppressionRules: [
+							"typescript/no-unsafe-type-assertion",
+							"typescript/no-unsafe-enum-assignment",
+						],
+					},
+				],
+			},
+			{
+				code: "const category = value as Category; // oxlint-disable-line typescript/no-unsafe-enum-assignment -- Enum value checked upstream.",
+				options: [{ suppressionRules: ["typescript/no-unsafe-enum-assignment"] }],
+				settings: tsgolint2002,
+			},
+		],
+	});
+
 	ts.run("require-safety-comment-for-type-assertion custom markers", rule, {
 		invalid: [
 			{
