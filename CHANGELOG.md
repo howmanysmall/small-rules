@@ -46,6 +46,11 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.12.0] - 2026-11-09
+
+## Changed
+- **require-safety-comment-for-type-assertion**: Accepts a described `oxlint-disable-next-line` for `typescript/no-unsafe-enum-assignment` as justification for a type assertion. New `suppressionRules` option sets which rule IDs count and replaces the default pair. Previously only `typescript/no-unsafe-type-assertion` counted. [#117](https://github.com/howmanysmall/small-rules/pull/117)
+
 ## [3.11.0] - 2026-11-02
 
 ## Added
