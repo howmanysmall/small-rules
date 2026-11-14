@@ -683,6 +683,17 @@ describe("prevent-abbreviations", () => {
 				options: [{ checkProperties: true }],
 				errors: [{ messageId: "replace" }],
 			},
+			// A name declared twice is one variable with two definitions; it
+			// is reported once
+			{
+				code: "var err = first(); var err = second();",
+				errors: [
+					{
+						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
+						messageId: "replace",
+					},
+				],
+			},
 		],
 		valid: [
 			// CONSTANTS (all caps) should be ignored
@@ -1061,6 +1072,38 @@ describe("prevent-abbreviations", () => {
 			expect(getNameReplacements("res", secondOptions)).toStrictEqual({
 				samples: ["resource", "response", "result"],
 				total: 3,
+			});
+		});
+
+		it("shares remembered lookups between files that use one configuration", ({ expect }) => {
+			expect.assertions(2);
+
+			// A configuration answers for every file it lints, so the second
+			// file must reuse the first file's lookups instead of redoing them.
+			const configuration = { replacements: { res: { response: true } } };
+			const firstFileOptions = prepareOptions(configuration);
+			const remembered = getNameReplacements("res", firstFileOptions);
+
+			expect(prepareOptions(configuration)).toBe(firstFileOptions);
+			expect(getNameReplacements("res", prepareOptions(configuration))).toBe(remembered);
+		});
+
+		it("bounds how many lookups one configuration remembers", ({ expect }) => {
+			expect.assertions(3);
+
+			// A long-lived lint process sees an unbounded stream of names;
+			// forgetting them must never change an answer.
+			const options = prepareOptions({ shorthands: { Props: "Properties" } });
+			const nameCount = 40_000;
+			for (let index = 0; index < nameCount; index += 1) {
+				getNameReplacements(`value${index}Props`, options);
+			}
+
+			expect(options.nameReplacements.size).toBeLessThan(nameCount);
+			expect(options.shorthandConfiguration.replacementsByIdentifier.size).toBeLessThan(nameCount);
+			expect(getNameReplacements("value0Props", options)).toStrictEqual({
+				samples: ["value0Properties"],
+				total: 1,
 			});
 		});
 	});

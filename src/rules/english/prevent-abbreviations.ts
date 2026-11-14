@@ -48,17 +48,7 @@ import {
 	shouldReportIdentifierAsProperty,
 } from "$oxc-utilities/prevent-abbreviations/scope";
 
-import type {
-	Definition,
-	Diagnostic,
-	ESTree,
-	Fix,
-	Fixer,
-	Scope,
-	SourceCode,
-	Variable,
-	Visitor,
-} from "oxlint-plugin-utilities";
+import type { Definition, Diagnostic, ESTree, Fix, Fixer, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { Message } from "$oxc-utilities/prevent-abbreviations/replacements";
 import type { IsSafe, MessageIds, PreparedOptions, VariableLike } from "$oxc-utilities/prevent-abbreviations/types";
@@ -78,19 +68,6 @@ function isShorthandPropertyAccess(node: ESTree.IdentifierName): boolean {
 		(isMemberExpression(parent) && parent.property === node && !parent.computed) ||
 		(isTsQualifiedName(parent) && parent.right === node)
 	);
-}
-
-function reportShorthandReplacement(
-	node: ESTree.IdentifierName,
-	replacement: string,
-	isPropertyLike: boolean,
-	report: (diagnostic: Diagnostic<MessageIds>) => void,
-): void {
-	report({
-		/* v8 ignore next -- shorthand reports are only emitted for property-like identifiers today. @preserve */
-		...getMessage(node.name, { samples: [replacement], total: 1 }, isPropertyLike ? "property" : "variable"),
-		node,
-	});
 }
 
 function shouldSkipVariable(
@@ -192,14 +169,12 @@ function tryReportFix(
 
 function checkVariable(
 	variable: VariableLike,
+	definition: Definition,
 	options: PreparedOptions,
 	scopeToNamesGeneratedByFixer: WeakMap<Scope, Set<string>>,
 	isSafeGeneratedName: IsSafe,
 	report: (diagnostic: Diagnostic<MessageIds>) => void,
 ): void {
-	const [definition] = variable.defs;
-	if (definition === undefined) return;
-
 	const definitionName = definition.name;
 	/* v8 ignore next -- parser variable definitions in this rule expose identifier names. @preserve */
 	if (!isIdentifier(definitionName)) return;
@@ -249,35 +224,18 @@ function checkVariable(
 	report({ ...message, node: definitionName });
 }
 
-function checkPossiblyWeirdClassVariable(variable: Variable, variableChecker: (variable: VariableLike) => void): void {
-	if (!isClassVariable(variable)) {
-		variableChecker(variable);
-		return;
-	}
-
-	if (variable.scope.type === "class") {
-		const [definition] = variable.defs;
-		/* v8 ignore next -- class variables classified by isClassVariable have exactly one definition. @preserve */
-		if (definition === undefined) {
-			variableChecker(variable);
-			return;
-		}
-
-		const definitionName = definition.name;
-		/* v8 ignore next -- parser class-name definitions expose identifier names. @preserve */
-		if (!isIdentifier(definitionName)) {
-			variableChecker(variable);
-			return;
-		}
-
-		variableChecker(variable);
-	}
-}
-
-function checkScope(scope: Scope, variableChecker: (variable: VariableLike) => void): void {
+function checkScope(scope: Scope, variableChecker: (variable: VariableLike, definition: Definition) => void): void {
 	for (const scopeItem of getScopes(scope)) {
 		for (const variable of scopeItem.variables) {
-			checkPossiblyWeirdClassVariable(variable, variableChecker);
+			const [definition] = variable.defs;
+			// A configured global has no definition to rename, and every
+			// file carries hundreds of them.
+			if (definition === undefined) continue;
+			// A class declares its name in the enclosing scope and in its
+			// own; only the inner one is checked.
+			if (isClassVariable(variable) && variable.scope.type !== "class") continue;
+
+			variableChecker(variable, definition);
 		}
 	}
 }
@@ -292,56 +250,56 @@ function checkPropertyIdentifier(
 	const propertyAccess = isShorthandPropertyAccess(node);
 	if (!propertyLike && !propertyAccess) return;
 
-	if (isExternallyControlledProperty(node, sourceCode)) return;
+	// Ownership resolves scopes and types, so it runs only for a name that
+	// would be reported.
+	const diagnostic = getPropertyDiagnostic(node, propertyLike, propertyAccess, options);
+	if (diagnostic === undefined || isExternallyControlledProperty(node, sourceCode)) return;
 
-	if (checkShorthandIdentifier(node, propertyLike, propertyAccess, options, report)) return;
-	if (!propertyLike || !options.checkProperties) return;
-
-	reportPropertyIdentifier(node, options, report);
+	report(diagnostic);
 }
 
-function checkShorthandIdentifier(
+function getPropertyDiagnostic(
 	node: ESTree.IdentifierName,
 	propertyLike: boolean,
 	propertyAccess: boolean,
 	options: PreparedOptions,
-	report: (diagnostic: Diagnostic<MessageIds>) => void,
-): boolean {
+): Diagnostic<MessageIds> | undefined {
 	const shorthandReplacement = getShorthandReplacement(node.name, options.shorthandConfiguration);
-	if (shorthandReplacement === undefined || (!propertyLike && !propertyAccess)) return false;
-	if (isShorthandIgnored(node.name, options.shorthandConfiguration)) return true;
-	if (!options.checkShorthandProperties) return true;
-
-	if (propertyAccess && isPropertyAccessAllowed(node.name, shorthandReplacement, options.allowPropertyAccess)) {
-		return true;
+	if (shorthandReplacement === undefined) {
+		return propertyLike && options.checkProperties ? getPropertyNameDiagnostic(node, options) : undefined;
 	}
 
-	reportShorthandReplacement(node, shorthandReplacement.replaced, true, report);
-	return true;
+	if (
+		isShorthandIgnored(node.name, options.shorthandConfiguration) ||
+		!options.checkShorthandProperties ||
+		(propertyAccess && isPropertyAccessAllowed(node.name, shorthandReplacement, options.allowPropertyAccess))
+	) {
+		return undefined;
+	}
+
+	return { ...getMessage(node.name, { samples: [shorthandReplacement.replaced], total: 1 }, "property"), node };
 }
 
-function reportPropertyIdentifier(
+function getPropertyNameDiagnostic(
 	node: ESTree.IdentifierName,
 	options: PreparedOptions,
-	report: (diagnostic: Diagnostic<MessageIds>) => void,
-): void {
+): Diagnostic<MessageIds> | undefined {
 	const replacements = getNameReplacements(node.name, options);
-	if (replacements.total === 0) return;
+	if (replacements.total === 0) return undefined;
 
 	const message = getMessage(node.name, replacements, "property");
 	const fixableReplacement = getFixablePropertyReplacement(node, replacements.samples);
-	if (fixableReplacement !== undefined) {
-		report({
-			...message,
-			fix(fixer: Fixer): Fix {
-				return fixer.replaceText(node, fixableReplacement);
-			},
-			node,
-		});
-		return;
+	if (fixableReplacement === undefined) {
+		return { ...message, node };
 	}
 
-	report({ ...message, node });
+	return {
+		...message,
+		fix(fixer: Fixer): Fix {
+			return fixer.replaceText(node, fixableReplacement);
+		},
+		node,
+	};
 }
 
 function getFixablePropertyReplacement(
@@ -372,8 +330,15 @@ const preventAbbreviations = createRule("prevent-abbreviations", "english", {
 		const isSafeGeneratedName = createIsSafeGeneratedName(scopeToNamesGeneratedByFixer);
 		const { sourceCode } = context;
 
-		function variableChecker(variable: VariableLike): void {
-			checkVariable(variable, options, scopeToNamesGeneratedByFixer, isSafeGeneratedName, context.report);
+		function variableChecker(variable: VariableLike, definition: Definition): void {
+			checkVariable(
+				variable,
+				definition,
+				options,
+				scopeToNamesGeneratedByFixer,
+				isSafeGeneratedName,
+				context.report,
+			);
 		}
 
 		return {

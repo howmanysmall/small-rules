@@ -47,6 +47,33 @@ export function getReferencedVariable(
 	return getVariableByName(sourceCode.getScope(identifier), identifier.name);
 }
 
+/**
+ * Resolves an identifier to the variable the scope manager bound it to.
+ *
+ * Unlike {@linkcode getReferencedVariable}, which matches by name, this reads
+ * the identifier's own reference, so a type-only binding never shadows the
+ * value binding the identifier uses.
+ *
+ * @param sourceCode - The source code that owns the identifier.
+ * @param identifier - An identifier in reference position.
+ * @returns The resolved variable, or `undefined` for an unresolved reference
+ *   or an identifier that is not a reference.
+ */
+export function getResolvedVariable(sourceCode: SourceCode, identifier: ESTree.Node): undefined | Variable {
+	// The scope manager can record a reference on an outer scope of the one
+	// the node sits in.
+	let scope: null | Scope = sourceCode.getScope(identifier);
+	while (scope !== null) {
+		for (const reference of scope.references) {
+			if (reference.identifier === identifier) return reference.resolved ?? undefined;
+		}
+
+		scope = scope.upper;
+	}
+
+	return undefined;
+}
+
 export function hasUninitializedWrite(variable: Variable): boolean {
 	return variable.references.some((reference) => reference.isWrite() && !reference.init);
 }
