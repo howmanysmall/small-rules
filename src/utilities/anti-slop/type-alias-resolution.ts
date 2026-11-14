@@ -90,10 +90,10 @@ interface NamespaceScopes {
 	readonly root: NamespaceScopeKey;
 }
 
-/** Immutable lexical type-binding facts collected for one program. */
+/** Lexical type-binding facts for one program, collected on first lookup. */
 export interface TypeAliasEnvironment {
-	readonly aliases: ReadonlyArray<ESTree.TSTypeAliasDeclaration>;
-	readonly bindingsByName: ReadonlyMap<string, ReadonlyArray<TypeBinding>>;
+	/** Every binding declared under a name, in any scope of the program. */
+	readonly getBindings: (name: string) => ReadonlyArray<TypeBinding>;
 	readonly visitorKeys: SourceCode["visitorKeys"];
 }
 
@@ -265,7 +265,6 @@ function collectTypeBindings(
 	program: ESTree.Program,
 	visitorKeys: SourceCode["visitorKeys"],
 	bindingsByName: Map<string, Array<TypeBinding>>,
-	aliases: Array<ESTree.TSTypeAliasDeclaration>,
 ): void {
 	const scopes: NamespaceScopes = {
 		ambientBlocks: new WeakSet(),
@@ -276,26 +275,25 @@ function collectTypeBindings(
 	};
 	const pending: Array<ESTree.Node> = [program];
 	for (const node of pending) {
-		const lexicalScope = getEnclosingTypeScope(node, program);
-
 		if (isTsGlobalDeclaration(node)) {
 			registerGlobalScope(node, scopes);
 		}
 
+		// The enclosing scope costs a parent climb, so only the few declaring
+		// nodes ask for it.
 		if (isTsModuleDeclaration(node)) {
-			registerNamespaceScope(node, lexicalScope, scopes);
+			registerNamespaceScope(node, getEnclosingTypeScope(node, program), scopes);
 		}
 
 		const declared = getDeclaredTypeBinding(node);
 		if (declared !== undefined) {
 			const bindings = bindingsByName.get(declared.name) ?? [];
-			const scope = isClassExpression(node) ? node : getBindingScope(node, lexicalScope, scopes);
+			const scope = isClassExpression(node)
+				? node
+				: getBindingScope(node, getEnclosingTypeScope(node, program), scopes);
+
 			bindings.push({ name: declared.name, alias: declared.alias, interface: declared.interface, scope });
 			bindingsByName.set(declared.name, bindings);
-
-			if (declared.alias !== undefined) {
-				aliases.push(declared.alias);
-			}
 		}
 
 		appendVisitorChildren(node, visitorKeys, pending);
@@ -329,7 +327,7 @@ function getNearestTypeBindings(
 	use: ESTree.Node,
 	environment: TypeAliasEnvironment,
 ): ReadonlyArray<TypeBinding> {
-	const candidates = environment.bindingsByName.get(name) ?? [];
+	const candidates = environment.getBindings(name);
 	let nearestDistance = Number.POSITIVE_INFINITY;
 	let nearest = new Array<TypeBinding>();
 	for (const candidate of candidates) {
@@ -369,9 +367,11 @@ function getUnshadowedTypeBindings(
 }
 
 /**
- * Collects lexical type aliases and competing type bindings in a program.
+ * Creates the type environment of a program. Its lexical type aliases and
+ * competing type bindings are collected by the first lookup, so a program
+ * that never resolves a type name is never walked.
  *
- * @param program - Program whose immutable type environment is required.
+ * @param program - Program whose type environment is required.
  * @param visitorKeys - Parser visitor keys used to discover descendants.
  * @returns The cached environment for the program.
  */
@@ -389,10 +389,19 @@ export function createTypeAliasEnvironment(
 	if (cached !== undefined) return cached;
 
 	const bindingsByName = new Map<string, Array<TypeBinding>>();
-	const aliases = new Array<ESTree.TSTypeAliasDeclaration>();
-	collectTypeBindings(program, visitorKeys, bindingsByName, aliases);
+	let isCollected = false;
+	const environment: TypeAliasEnvironment = {
+		getBindings(name): ReadonlyArray<TypeBinding> {
+			if (!isCollected) {
+				collectTypeBindings(program, visitorKeys, bindingsByName);
+				isCollected = true;
+			}
 
-	const environment = { aliases, bindingsByName, visitorKeys };
+			return bindingsByName.get(name) ?? [];
+		},
+		visitorKeys,
+	};
+
 	environmentsByVisitorKeys.set(visitorKeys, environment);
 	return environment;
 }

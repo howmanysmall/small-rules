@@ -29,6 +29,18 @@ function test() {
 				errors: [{ messageId: "unpairedCloser" }],
 			},
 
+			// An escaped identifier spells the opener without its name
+			// appearing in the source text.
+			{
+				code: String.raw`
+function test() {
+    debug.profile\u0062egin("task");
+    doWork();
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+
 			// Missing closer on early return
 			{
 				code: `
@@ -1056,6 +1068,20 @@ function test(items) {
 			},
 		],
 		valid: [
+			// Calls without a nameable callee sit between a balanced pair
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    this.doWork();
+    registry.workers.flush();
+    handlers[0]();
+    createTask()();
+    debug.profileend();
+}
+`,
+			},
+
 			// Basic pairing - valid
 			{
 				code: `

@@ -10,6 +10,7 @@ import {
 	isFunctionDeclarationRaw,
 	isIdentifier,
 	isIdentifierNamed,
+	isImportDeclaration,
 	isMemberExpression,
 	isNode,
 	isObjectExpression,
@@ -47,10 +48,11 @@ import {
 // SOFTWARE.
 //
 import {
+	getReactSources,
+	isReactImport,
 	isReactImportedCall,
 	isReactNamedImport,
 	isReactNamespaceImport as isReactNamespaceImportVariable,
-	STANDARD,
 } from "$oxc-utilities/react-utilities";
 
 import { getEffectScopeAnalysis } from "./effect-scope-utilities";
@@ -62,6 +64,7 @@ import type { Environment } from "./react-utilities";
 
 const KNOWN_PURE_HOCS = new Set(["forwardRef", "memo"]);
 const EFFECT_HOOK_NAME = "useEffect";
+const EFFECT_HOOK_NAMES: ReadonlySet<string> = new Set([EFFECT_HOOK_NAME]);
 const USE_STATE_HOOK_NAME = "useState";
 const USE_REF_HOOK_NAME = "useRef";
 
@@ -133,25 +136,15 @@ export function isSynchronousStateCall(
 }
 
 function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environment): ReactEffectAnalysis {
-	const scope = getEffectScopeAnalysis(sourceCode);
-	const reactSources = getReactSourcesForEnvironment(environment);
 	const state: ReactEffectAnalysisState = {
 		environment,
-		reactSources,
-		scope,
+		reactSources: getReactSources(environment),
+		scope: getEffectScopeAnalysis(sourceCode),
 		sourceCode,
 	};
 
-	const effects = new Array<ReactEffect>();
-	for (const node of scope.callExpressions) {
-		if (!isEffectCall(state, node)) continue;
-		const effect = createEffect(state, node);
-		if (effect === undefined) continue;
-		effects.push(effect);
-	}
-
 	return {
-		effects,
+		effects: collectEffects(state),
 		findEnclosingReactNode(node: ESTree.Node): ReactOwner | undefined {
 			/* v8 ignore next -- findEnclosingReactNode is only reached via this facade for root nodes within the analyzed program. @preserve */
 			return findEnclosingReactNode(state, node);
@@ -192,19 +185,65 @@ function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environme
 		isStateSetter(reference: Reference): boolean {
 			return isStateSetter(state, reference);
 		},
-		scope,
+		scope: state.scope,
 	};
 }
 
-function getReactSourcesForEnvironment(environment: Environment): ReadonlySet<string> {
-	// Same set as `react-utilities.getReactSources`.
-	if (environment === STANDARD) return new Set(["react", "react-dom"]);
-	return new Set(["@rbxts/react", "@rbxts/roact"]);
+function collectEffects(state: ReactEffectAnalysisState): Array<ReactEffect> {
+	const effects = new Array<ReactEffect>();
+	for (const node of getReactImportCalls(state)) {
+		if (!isEffectCall(state, node)) continue;
+		const effect = createEffect(state, node);
+		if (effect === undefined) continue;
+		effects.push(effect);
+	}
+
+	return effects;
+}
+
+/**
+ * Collects the calls whose callee is a React import or a member of one, in
+ * source order.
+ *
+ * An effect is such a call by definition, so the references of the React
+ * import bindings replace a whole-program walk: a file that never imports
+ * React costs one pass over its top-level statements.
+ *
+ * @param state - The effect analysis state for the current file.
+ * @returns The calls made through React import bindings.
+ */
+function getReactImportCalls(state: ReactEffectAnalysisState): Array<ESTree.CallExpression> {
+	const calls = new Array<ESTree.CallExpression>();
+	for (const statement of state.sourceCode.ast.body) {
+		if (!isImportDeclaration(statement) || !isReactImport(statement, state.reactSources)) continue;
+
+		for (const variable of state.sourceCode.getDeclaredVariables(statement)) {
+			for (const reference of variable.references) {
+				const call = getCalledExpression(reference.identifier);
+				if (call !== undefined) {
+					calls.push(call);
+				}
+			}
+		}
+	}
+
+	return calls.toSorted(compareRangeStarts);
+}
+
+function compareRangeStarts(left: ESTree.Node, right: ESTree.Node): number {
+	return left.range[0] - right.range[0];
+}
+
+function getCalledExpression(identifier: ESTree.Node): ESTree.CallExpression | undefined {
+	const { parent } = identifier;
+	const callee = isMemberExpression(parent) && parent.object === identifier ? parent : identifier;
+	const call = callee.parent;
+	return isCallExpression(call) && call.callee === callee ? call : undefined;
 }
 
 function isEffectCall(state: ReactEffectAnalysisState, node: ESTree.CallExpression): boolean {
 	if (!isUseEffect(state, node)) return false;
-	return isReactImportedCall(state.sourceCode, node, new Set([EFFECT_HOOK_NAME]), state.reactSources);
+	return isReactImportedCall(state.sourceCode, node, EFFECT_HOOK_NAMES, state.reactSources);
 }
 
 function createEffect(state: ReactEffectAnalysisState, node: ESTree.CallExpression): ReactEffect | undefined {

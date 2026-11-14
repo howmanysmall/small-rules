@@ -43,6 +43,34 @@ export interface Message {
 
 const replacementNamesByConfiguration = new WeakMap<Map<string, boolean>, ReplacementNames>();
 const preparedOptionsByConfiguration = new WeakMap<object, PreparedOptions>();
+let defaultPreparedOptions: PreparedOptions | undefined;
+
+const REPLACEMENT_SAMPLE_LIMIT = 3;
+
+/**
+ * Lookups one memo keeps before it starts over, which bounds the memory of a
+ * long-lived lint process.
+ */
+const MEMO_LIMIT = 16_384;
+
+/**
+ * Remembers a lookup that depends only on the name and the configuration,
+ * which makes the answer valid for every file the configuration lints.
+ *
+ * @template TValue - The answer type of the memo.
+ * @param memo - The memo of one prepared configuration.
+ * @param name - The looked-up name.
+ * @param value - The computed answer.
+ * @returns The answer, for chaining.
+ */
+function remember<TValue>(memo: Map<string, TValue>, name: string, value: TValue): TValue {
+	if (memo.size >= MEMO_LIMIT) {
+		memo.clear();
+	}
+
+	memo.set(name, value);
+	return value;
+}
 
 function isRawOptions(value?: RawOptions): value is RawOptions {
 	return Predicate.isObject(value);
@@ -435,27 +463,26 @@ function createPreparedOptions(options?: RawOptions): PreparedOptions {
 	};
 }
 
-function clonePreparedOptions(options: PreparedOptions): PreparedOptions {
-	return {
-		...options,
-		nameReplacements: new Map<string, NameReplacements>(),
-		shorthandConfiguration: {
-			...options.shorthandConfiguration,
-			ignoredIdentifiers: new Map<string, boolean>(),
-			replacementsByIdentifier: new Map<string, false | ShorthandReplacement>(),
-		},
-	};
-}
-
+/**
+ * Normalizes a rule configuration once and returns the same prepared options
+ * for every file that uses it, memos included.
+ *
+ * @param options - The raw rule options of the file being linted.
+ * @returns The prepared options shared by every file with these options.
+ */
 export function prepareOptions(options?: RawOptions): PreparedOptions {
-	if (!isRawOptions(options)) return createPreparedOptions(undefined);
+	if (!isRawOptions(options)) {
+		defaultPreparedOptions ??= createPreparedOptions(undefined);
+		return defaultPreparedOptions;
+	}
 
-	const cachedOptions = preparedOptionsByConfiguration.get(options);
-	if (cachedOptions !== undefined) return clonePreparedOptions(cachedOptions);
+	let preparedOptions = preparedOptionsByConfiguration.get(options);
+	if (preparedOptions === undefined) {
+		preparedOptions = createPreparedOptions(options);
+		preparedOptionsByConfiguration.set(options, preparedOptions);
+	}
 
-	const preparedOptions = createPreparedOptions(options);
-	preparedOptionsByConfiguration.set(options, preparedOptions);
-	return clonePreparedOptions(preparedOptions);
+	return preparedOptions;
 }
 
 function getWordReplacements(word: string, options: PreparedOptions): ReadonlyArray<string> {
@@ -500,7 +527,7 @@ export function getShorthandReplacement(
 	}
 
 	if (matches.length === 0) {
-		configuration.replacementsByIdentifier.set(identifier, false);
+		remember(configuration.replacementsByIdentifier, identifier, false);
 		return undefined;
 	}
 
@@ -518,7 +545,7 @@ export function getShorthandReplacement(
 	}
 
 	const replacement = { matches, replaced };
-	configuration.replacementsByIdentifier.set(identifier, replacement);
+	remember(configuration.replacementsByIdentifier, identifier, replacement);
 	return replacement;
 }
 
@@ -535,8 +562,7 @@ export function isShorthandIgnored(identifier: string, configuration: ShorthandC
 			replacement.matches.every((match) => isWordIgnored(match.matchedWord, configuration));
 	}
 
-	configuration.ignoredIdentifiers.set(identifier, ignored);
-	return ignored;
+	return remember(configuration.ignoredIdentifiers, identifier, ignored);
 }
 
 export function isPropertyAccessAllowed(
@@ -553,17 +579,14 @@ export function isPropertyAccessAllowed(
 	return replacement.matches.length > 0;
 }
 
-export function getNameReplacements(name: string, options: PreparedOptions, limit = 3): NameReplacements {
-	const cacheKey = `${limit}\0${name}`;
-	const cachedReplacements = options.nameReplacements.get(cacheKey);
-	if (cachedReplacements !== undefined) return cachedReplacements;
-
-	const replacements = computeNameReplacements(name, options, limit);
-	options.nameReplacements.set(cacheKey, replacements);
-	return replacements;
+export function getNameReplacements(name: string, options: PreparedOptions): NameReplacements {
+	return (
+		options.nameReplacements.get(name) ??
+		remember(options.nameReplacements, name, computeNameReplacements(name, options))
+	);
 }
 
-function computeNameReplacements(name: string, options: PreparedOptions, limit: number): NameReplacements {
+function computeNameReplacements(name: string, options: PreparedOptions): NameReplacements {
 	if (options.allowList.get(name) === true || options.ignore.some((pattern) => pattern.test(name))) {
 		return { total: 0 };
 	}
@@ -587,7 +610,7 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 	const exactReplacements = getWordReplacements(name, options);
 	if (exactReplacements.length > 0) {
 		return {
-			samples: exactReplacements.slice(0, limit),
+			samples: exactReplacements.slice(0, REPLACEMENT_SAMPLE_LIMIT),
 			total: exactReplacements.length,
 		};
 	}
@@ -613,7 +636,7 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 	}
 
 	const total = combinations.reduce((count, entries) => count * entries.length, 1);
-	const samples = getReplacementSamples(combinations, total, limit);
+	const samples = getReplacementSamples(combinations, total);
 
 	return {
 		samples: samples.map((parts) => parts.join("")),
@@ -624,9 +647,8 @@ function computeNameReplacements(name: string, options: PreparedOptions, limit: 
 function getReplacementSamples(
 	combinations: ReadonlyArray<ReadonlyArray<string>>,
 	total: number,
-	limit: number,
 ): Array<Array<string>> {
-	const sampleCount = Math.min(total, limit);
+	const sampleCount = Math.min(total, REPLACEMENT_SAMPLE_LIMIT);
 	const samples = Array.from({ length: sampleCount }, (_, sampleIndex) => {
 		let indexRemaining = sampleIndex;
 		const combination = new Array<string>();

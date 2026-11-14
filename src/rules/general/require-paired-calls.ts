@@ -152,6 +152,37 @@ function getAllOpeners(config: PairConfiguration): Array<string> {
 	return openers;
 }
 
+function getLastNameSegment(callName: string): string {
+	return callName.slice(callName.lastIndexOf(".") + 1);
+}
+
+/**
+ * Checks whether the source text can contain a call to a configured opener
+ * or closer. Every report needs one, so a file that cannot is skipped whole.
+ *
+ * A call is named by its identifiers, and an identifier is spelled out in
+ * the source text unless it uses a unicode escape.
+ *
+ * @param sourceText - The text of the file being linted.
+ * @param pairs - The configured opener and closer pairs.
+ * @returns Whether the file needs the paired-call analysis.
+ */
+function canCallPairedFunction(sourceText: string, pairs: ReadonlyArray<PairConfiguration>): boolean {
+	if (sourceText.includes(String.raw`\u`)) return true;
+
+	for (const pair of pairs) {
+		for (const opener of getAllOpeners(pair)) {
+			if (sourceText.includes(getLastNameSegment(opener))) return true;
+		}
+
+		for (const closer of getValidClosers(pair)) {
+			if (sourceText.includes(getLastNameSegment(closer))) return true;
+		}
+	}
+
+	return false;
+}
+
 function formatOpenerList(openers: ReadonlyArray<string>): string {
 	/* v8 ignore next -- @preserve opener labels are only built from configured pairs with required closers. */
 	if (openers.length === 0) return "configured opener";
@@ -257,6 +288,10 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 						},
 					]
 				: options.pairs;
+
+		if (!canCallPairedFunction(context.sourceCode.text, pairs)) {
+			return {};
+		}
 
 		const resolvedOptions: Writable<RequirePairedCallsOptions> = { pairs };
 		/* v8 ignore next -- @preserve options are normalized with concrete boolean defaults before resolution. */

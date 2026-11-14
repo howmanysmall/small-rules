@@ -20,6 +20,12 @@ describe("no-dead-store", () => {
 				errors: [{ messageId: "deadStore" }],
 			},
 			{
+				// A block at the top level runs with the module, not inside a
+				// function.
+				code: "{ let attempt = first(); attempt = second(); publish(attempt); }",
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
 				code: "function finish() { let phase; phase = begin(); publish(phase); phase = complete(); }",
 				errors: [{ messageId: "deadStore" }],
 			},

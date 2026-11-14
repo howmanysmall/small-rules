@@ -131,7 +131,7 @@ function doesReferenceResolveToUnknown(code: string, name: string, index = 0): b
 describe("visibleTypeAlias", () => {
 	// Catches a module alias being unavailable at a lexical use site.
 	// The expected declaration follows TypeScript's module type namespace.
-	it("collects known module and nested aliases in the public field", () => {
+	it("collects known module and nested aliases under their names", () => {
 		expect.assertions(3);
 
 		const source = parseCode(
@@ -146,17 +146,12 @@ describe("visibleTypeAlias", () => {
 		const use = findTypeReference(source, "Payload");
 		const alias = getVisibleTypeAlias("Payload", use, environment);
 
-		expect(environment.aliases.map((candidate) => candidate.id.name).toSorted()).toStrictEqual([
-			"Duplicate",
-			"Duplicate",
+		expect(environment.getBindings("Payload").map((candidate) => candidate.alias?.id.name)).toStrictEqual([
 			"Payload",
 		]);
 		expect(
-			environment.aliases
-				.filter((candidate) => candidate.id.name === "Duplicate")
-				.map((candidate) => candidate.typeAnnotation.type)
-				.toSorted(),
-		).toStrictEqual(["TSNumberKeyword", "TSStringKeyword"]);
+			new Set(environment.getBindings("Duplicate").map((candidate) => getAnnotationType(candidate.alias))),
+		).toStrictEqual(new Set(["TSNumberKeyword", "TSStringKeyword"]));
 		expect(getAnnotationType(alias)).toBe("TSUnknownKeyword");
 	});
 
@@ -1026,8 +1021,8 @@ describe("createTypeAliasEnvironment", () => {
 		const complete = createTypeAliasEnvironment(program, source.visitorKeys);
 
 		expect(empty).not.toBe(complete);
-		expect(empty.aliases).toStrictEqual([]);
-		expect(complete.aliases.map((alias) => alias.id.name)).toStrictEqual(["Value"]);
+		expect(empty.getBindings("Value")).toStrictEqual([]);
+		expect(complete.getBindings("Value").map((binding) => binding.alias?.id.name)).toStrictEqual(["Value"]);
 		expect(createTypeAliasEnvironment(program, emptyVisitorKeys)).toBe(empty);
 	});
 
@@ -1040,7 +1035,7 @@ describe("createTypeAliasEnvironment", () => {
 		const secondEnvironment = createTypeAliasEnvironment(getProgram(second), second.visitorKeys);
 
 		expect(firstEnvironment).not.toBe(secondEnvironment);
-		expect(firstEnvironment.aliases.map((alias) => alias.id.name)).toStrictEqual(["First"]);
-		expect(secondEnvironment.aliases.map((alias) => alias.id.name)).toStrictEqual(["Second"]);
+		expect(firstEnvironment.getBindings("First").map((binding) => binding.alias?.id.name)).toStrictEqual(["First"]);
+		expect(secondEnvironment.getBindings("First")).toStrictEqual([]);
 	});
 });

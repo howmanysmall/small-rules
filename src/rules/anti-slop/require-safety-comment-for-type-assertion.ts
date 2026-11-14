@@ -171,12 +171,18 @@ function hasDisableCoveringAssertionLine(
 	return false;
 }
 
+/** The options and tsgolint behavior a file's assertions are judged against. */
+interface AssertionPolicy {
+	readonly assertionSyntaxRange: boolean;
+	readonly markers: readonly [string, ...Array<string>];
+	readonly pattern: RegExp;
+	readonly suppressionRules: ReadonlySet<string>;
+}
+
 function hasSafetyComment(
 	sourceCode: SourceCode,
 	node: TypeAssertion,
-	pattern: RegExp,
-	assertionSyntaxRange: boolean,
-	suppressionRules: ReadonlySet<string>,
+	{ assertionSyntaxRange, pattern, suppressionRules }: AssertionPolicy,
 ): boolean {
 	if (hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value))) return true;
 	if (hasDisableCoveringAssertionLine(sourceCode, node, assertionSyntaxRange, suppressionRules)) return true;
@@ -189,31 +195,38 @@ function hasSafetyComment(
 
 const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-for-type-assertion", "anti-slop", {
 	createOnce(context): VisitorWithHooks {
-		let markers: readonly [string, ...Array<string>] = DEFAULT_SAFETY_MARKERS;
-		let pattern = getMarkerPattern(markers);
-		let assertionSyntaxRange = false;
-		let suppressionRules = getConfiguredSuppressionRules();
+		// Resolved by a file's first assertion that needs a justification:
+		// it compiles the marker pattern and may read the tsgolint version
+		// from disk.
+		let policy: AssertionPolicy | undefined;
+
+		function resolvePolicy(): AssertionPolicy {
+			const options = context.options.at(0);
+			const markers = getConfiguredSafetyMarkers(options?.markers);
+			const settings = isLintSettings.allows(context.settings) ? context.settings : undefined;
+
+			return {
+				assertionSyntaxRange: checkAssertionSyntaxDiagnosticRange(
+					resolveTsgoLintVersion(settings, nodePath.dirname(context.filename)),
+				),
+				markers,
+				pattern: getMarkerPattern(markers),
+				suppressionRules: getConfiguredSuppressionRules(options?.suppressionRules),
+			};
+		}
 
 		function checkAssertion(node: TypeAssertion): void {
-			if (
-				isConstAssertion(node) ||
-				hasSafetyComment(context.sourceCode, node, pattern, assertionSyntaxRange, suppressionRules)
-			) {
-				return;
-			}
+			if (isConstAssertion(node)) return;
 
-			context.report({ data: { marker: markers[0] }, messageId: "missingSafetyComment", node });
+			policy ??= resolvePolicy();
+			if (hasSafetyComment(context.sourceCode, node, policy)) return;
+
+			context.report({ data: { marker: policy.markers[0] }, messageId: "missingSafetyComment", node });
 		}
 
 		return {
 			before(): void {
-				markers = getConfiguredSafetyMarkers(context.options.at(0)?.markers);
-				pattern = getMarkerPattern(markers);
-				suppressionRules = getConfiguredSuppressionRules(context.options.at(0)?.suppressionRules);
-				const settings = isLintSettings.allows(context.settings) ? context.settings : undefined;
-				assertionSyntaxRange = checkAssertionSyntaxDiagnosticRange(
-					resolveTsgoLintVersion(settings, nodePath.dirname(context.filename)),
-				);
+				policy = undefined;
 			},
 			TSAsExpression: checkAssertion,
 			TSTypeAssertion: checkAssertion,

@@ -7,20 +7,17 @@ import {
 	isImportDefaultSpecifier,
 	isImportNamespaceSpecifier,
 	isImportSpecifier,
-	isLogicalExpression,
 	isMemberExpression,
 	isNumericLiteral,
 	isPrivateIdentifier,
 	isSpreadElement,
-	isSwitchCase,
 	isUnaryExpression,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { getResolvedVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
-import { walkAst } from "$oxc-utilities/react-hook-utilities";
 import { getConstInitializer } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, SourceCode, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -116,31 +113,27 @@ function getFirstConstInitializer(variable: Variable): ESTree.Expression | undef
 	return definition?.type === "Variable" ? getConstInitializer(definition) : undefined;
 }
 
-function isBinaryFloating(
-	node: ESTree.BinaryExpression,
-	variables: ReadonlyMap<ESTree.Node, Variable>,
-	visited: Set<Variable>,
-): boolean {
+function isBinaryFloating(node: ESTree.BinaryExpression, sourceCode: SourceCode, visited: Set<Variable>): boolean {
 	const value = getConstantNumericValue(node);
 	if (value !== undefined && Number.isSafeInteger(value)) return false;
 
 	if (node.operator === "/") {
 		return (
 			isDivisionInexact(node) ||
-			isFloatingExpression(node.left, variables, visited) ||
-			isFloatingExpression(node.right, variables, visited)
+			isFloatingExpression(node.left, sourceCode, visited) ||
+			isFloatingExpression(node.right, sourceCode, visited)
 		);
 	}
 
 	return (
 		ARITHMETIC_OPERATORS.has(node.operator) &&
-		(isFloatingExpression(node.left, variables, visited) || isFloatingExpression(node.right, variables, visited))
+		(isFloatingExpression(node.left, sourceCode, visited) || isFloatingExpression(node.right, sourceCode, visited))
 	);
 }
 
 function resolveFloatingExpressionRoot(
 	node: ESTree.Expression,
-	variables: ReadonlyMap<ESTree.Node, Variable>,
+	sourceCode: SourceCode,
 	visited: Set<Variable>,
 ): ESTree.Expression | undefined {
 	let current = node;
@@ -152,7 +145,7 @@ function resolveFloatingExpressionRoot(
 		}
 
 		if (!isIdentifier(current)) return current;
-		const variable = variables.get(current);
+		const variable = getResolvedVariable(sourceCode, current);
 		if (variable === undefined || visited.has(variable)) return undefined;
 
 		const initializer = getFirstConstInitializer(variable);
@@ -163,12 +156,8 @@ function resolveFloatingExpressionRoot(
 	}
 }
 
-function isFloatingExpression(
-	node: ESTree.Expression,
-	variables: ReadonlyMap<ESTree.Node, Variable>,
-	visited: Set<Variable>,
-): boolean {
-	const current = resolveFloatingExpressionRoot(node, variables, visited);
+function isFloatingExpression(node: ESTree.Expression, sourceCode: SourceCode, visited: Set<Variable>): boolean {
+	const current = resolveFloatingExpressionRoot(node, sourceCode, visited);
 	if (current === undefined) return false;
 
 	if (isNumericLiteral(current)) {
@@ -179,21 +168,11 @@ function isFloatingExpression(
 	if (isUnaryExpression(current)) {
 		return (
 			(current.operator === "+" || current.operator === "-") &&
-			isFloatingExpression(current.argument, variables, visited)
+			isFloatingExpression(current.argument, sourceCode, visited)
 		);
 	}
 
-	return isBinaryExpression(current) && isComparableBinary(current) && isBinaryFloating(current, variables, visited);
-}
-
-function collectVariables(sourceCode: SourceCode): Map<ESTree.Node, Variable> {
-	const variables = new Map<ESTree.Node, Variable>();
-	forEachScopeVariable(sourceCode, (variable): void => {
-		for (const reference of variable.references) {
-			variables.set(reference.identifier, variable);
-		}
-	});
-	return variables;
+	return isBinaryExpression(current) && isComparableBinary(current) && isBinaryFloating(current, sourceCode, visited);
 }
 
 function getImportedName(specifier: ESTree.ImportSpecifier): string {
@@ -340,7 +319,7 @@ const WHITESPACE = /\s+/gu;
 function areNodesEquivalent(left: ESTree.Node, right: ESTree.Node, sourceCode: SourceCode): boolean {
 	return (
 		left.type === right.type &&
-		sourceCode.getText(left).replaceAll(WHITESPACE, "") === sourceCode.getText(right).replaceAll(/\s+/gu, "")
+		sourceCode.getText(left).replaceAll(WHITESPACE, "") === sourceCode.getText(right).replaceAll(WHITESPACE, "")
 	);
 }
 
@@ -401,67 +380,48 @@ function isFloatingPair(
 	return isFloating(operands[0]) || isFloating(operands[1]);
 }
 
-function isFloatingEquality(node: ESTree.Node, isFloating: (expression: ESTree.Expression) => boolean): boolean {
-	if (!isBinaryExpression(node) || !EQUALITY_OPERATORS.has(node.operator)) return false;
+function isFloatingEquality(
+	node: ESTree.BinaryExpression,
+	isFloating: (expression: ESTree.Expression) => boolean,
+): boolean {
+	if (!EQUALITY_OPERATORS.has(node.operator)) return false;
 	/* v8 ignore next -- @preserve private-identifier operands only occur with `in`, which the operator check above rejects. */
 	if (!isComparableBinary(node)) return false;
 	return isFloating(node.left) || isFloating(node.right);
 }
 
-function isFloatingIndirectComparison(
-	node: ESTree.Node,
-	sourceCode: SourceCode,
-	isFloating: (expression: ESTree.Expression) => boolean,
-): boolean {
-	if (!isLogicalExpression(node)) return false;
-	return isFloatingPair(getIndirectComparisonOperands(node, sourceCode), isFloating);
-}
-
-function isFloatingSwitchTest(node: ESTree.Node, isFloating: (expression: ESTree.Expression) => boolean): boolean {
-	if (!isSwitchCase(node)) return false;
-	if (node.test === null) return false;
-	return isFloating(node.test);
-}
-
-function isFloatingAssertion(
-	node: ESTree.Node,
-	imports: ReadonlyMap<string, ImportedAssertionKind>,
-	isFloating: (expression: ESTree.Expression) => boolean,
-): boolean {
-	if (!isCallExpression(node)) return false;
-	return isFloatingPair(getAssertionOperands(node, imports), isFloating);
-}
-
-function shouldReportFloatNode(
-	node: ESTree.Node,
-	sourceCode: SourceCode,
-	imports: ReadonlyMap<string, ImportedAssertionKind>,
-	isFloating: (expression: ESTree.Expression) => boolean,
-): boolean {
-	return (
-		isFloatingEquality(node, isFloating) ||
-		isFloatingIndirectComparison(node, sourceCode, isFloating) ||
-		isFloatingSwitchTest(node, isFloating) ||
-		isFloatingAssertion(node, imports, isFloating)
-	);
-}
+const NO_IMPORTED_ASSERTIONS: ReadonlyMap<string, ImportedAssertionKind> = new Map();
 
 const noFloatingPointEquality = createRule("no-floating-point-equality", "general", {
 	create(context): Visitor {
+		const { sourceCode } = context;
+		let imports = NO_IMPORTED_ASSERTIONS;
+
+		function isFloating(node: ESTree.Expression): boolean {
+			return isFloatingExpression(node, sourceCode, new Set());
+		}
+
+		function reportIf(isExactFloatComparison: boolean, node: ESTree.Node): void {
+			if (isExactFloatComparison) {
+				context.report({ messageId: "exactFloatComparison", node });
+			}
+		}
+
 		return {
+			BinaryExpression(node): void {
+				reportIf(isFloatingEquality(node, isFloating), node);
+			},
+			CallExpression(node): void {
+				reportIf(isFloatingPair(getAssertionOperands(node, imports), isFloating), node);
+			},
+			LogicalExpression(node): void {
+				reportIf(isFloatingPair(getIndirectComparisonOperands(node, sourceCode), isFloating), node);
+			},
 			Program(program): void {
-				const variables = collectVariables(context.sourceCode);
-				const imports = collectImportedAssertions(program);
-
-				function isFloating(node: ESTree.Expression): boolean {
-					return isFloatingExpression(node, variables, new Set());
-				}
-
-				walkAst(program, (node): void => {
-					if (shouldReportFloatNode(node, context.sourceCode, imports, isFloating)) {
-						context.report({ messageId: "exactFloatComparison", node });
-					}
-				});
+				imports = collectImportedAssertions(program);
+			},
+			SwitchCase(node): void {
+				reportIf(node.test !== null && isFloating(node.test), node);
 			},
 		};
 	},

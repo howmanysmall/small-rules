@@ -20,7 +20,6 @@ import {
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { ascendPastExpressionWrappers, EXPRESSION_WRAPPER_TYPES } from "$oxc-utilities/expression-wrapper-ancestors";
-import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 import { isUppercaseName } from "$oxc-utilities/string-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
@@ -62,24 +61,8 @@ function getReturnTypeAnnotation({ returnType }: CallbackFunction): ESTree.TSTyp
 	return returnType?.typeAnnotation ?? undefined;
 }
 
-function hasJsxReturn(node: CallbackFunction): boolean {
-	if (isArrowFunctionExpression(node) && (isJsxElement(node.body) || isJsxFragment(node.body))) return true;
-
-	/* v8 ignore next -- @preserve declared function overloads have no runtime body and are not visited as callbacks. */
-	if (node.body === null) return false;
-
-	let foundJsx = false;
-
-	walkAstSlop(node.body, (child) => {
-		if (foundJsx || !isReturnStatement(child)) return;
-
-		const { argument } = child;
-		if (argument !== null && (isJsxElement(argument) || isJsxFragment(argument))) {
-			foundJsx = true;
-		}
-	});
-
-	return foundJsx;
+function isJsx(node: ESTree.Node | null): boolean {
+	return isJsxElement(node) || (node !== null && isJsxFragment(node));
 }
 
 function isInlineCallback({ parent }: CallbackFunction): boolean {
@@ -178,6 +161,19 @@ function isCallbackReferenceFunction(node: CallbackFunction, sourceCode: SourceC
 const noRenderHelperFunctions = createRule("no-render-helper-functions", "react", {
 	create(context): Visitor {
 		let componentDepth = 0;
+		// Where the last `return <jsx />` started. Nodes are visited in source
+		// order, so when a function exits, that return sits inside the function's
+		// body exactly when the body holds one, at any depth.
+		let lastJsxReturnStart = -1;
+
+		function hasJsxReturn(node: CallbackFunction): boolean {
+			if (isArrowFunctionExpression(node) && isJsx(node.body)) return true;
+
+			/* v8 ignore next -- @preserve declared function overloads have no runtime body and are not visited as callbacks. */
+			if (node.body === null) return false;
+
+			return lastJsxReturnStart >= node.body.range[0];
+		}
 
 		function reportRenderHelper(node: ESTree.Node, functionName: string): void {
 			context.report({
@@ -275,6 +271,11 @@ const noRenderHelperFunctions = createRule("no-render-helper-functions", "react"
 			},
 			FunctionExpression: checkVariableFunctionEnter,
 			"FunctionExpression:exit": checkVariableFunctionExit,
+			ReturnStatement({ argument, range }): void {
+				if (isJsx(argument)) {
+					[lastJsxReturnStart] = range;
+				}
+			},
 		};
 	},
 	meta: {

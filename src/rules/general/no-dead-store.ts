@@ -27,7 +27,7 @@ import {
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
-import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
+import { pushChildScopes } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Reference, Variable, Visitor } from "oxlint-plugin-utilities";
@@ -411,7 +411,7 @@ function isTryWriteReadByHandler(usage: VariableUsage, variable: Variable): bool
 }
 
 function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
-	if (!usage.isWrite || isProgram(variable.scope.block) || variable.name.startsWith("_")) return false;
+	if (!usage.isWrite) return false;
 
 	const { parent } = usage.node;
 	if (
@@ -428,12 +428,16 @@ function shouldCheck(usage: VariableUsage, variable: Variable): boolean {
 }
 
 function isCaptured(variable: Variable): boolean {
-	const roots = new Set(variable.references.map((reference) => getExecutionRoot(reference.identifier)));
-	for (const definition of variable.defs) {
-		roots.add(getExecutionRoot(definition.name));
+	if (variable.references.every((reference) => !reference.isRead())) return false;
+
+	let root: ESTree.Node | undefined;
+	for (const reference of variable.references) {
+		const referenceRoot = getExecutionRoot(reference.identifier);
+		root ??= referenceRoot;
+		if (referenceRoot !== root) return true;
 	}
 
-	return variable.references.some((reference) => reference.isRead()) && roots.size > 1;
+	return variable.defs.some((definition) => getExecutionRoot(definition.name) !== root);
 }
 
 function getVariableUsages(variable: Variable): Array<VariableUsage> {
@@ -469,21 +473,39 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 
 const noDeadStore = createRule("no-dead-store", "general", {
 	create(context): Visitor {
-		return {
-			Program(): void {
-				forEachScopeVariable(context.sourceCode, (variable): void => {
-					if (isCaptured(variable)) return;
+		function checkVariable(variable: Variable): void {
+			if (variable.name.startsWith("_")) return;
 
-					const usages = getVariableUsages(variable);
-					for (const usage of usages) {
-						if (!shouldCheck(usage, variable) || valueIsObserved(usage, usages)) continue;
-						context.report({
-							data: { name: variable.name },
-							messageId: "deadStore",
-							node: usage.node,
-						});
-					}
+			const usages = getVariableUsages(variable);
+			const writes = usages.filter((usage) => shouldCheck(usage, variable));
+			// Capture analysis climbs from every reference, so it runs only
+			// when a write could be reported.
+			if (writes.length === 0 || isCaptured(variable)) return;
+
+			for (const write of writes) {
+				if (valueIsObserved(write, usages)) continue;
+				context.report({
+					data: { name: variable.name },
+					messageId: "deadStore",
+					node: write.node,
 				});
+			}
+		}
+
+		return {
+			Program(program): void {
+				const scopes = [context.sourceCode.getScope(program)];
+				for (const scope of scopes) {
+					pushChildScopes(scopes, scope);
+
+					// A module or global binding outlives the code that writes
+					// it, and the global scope lists every configured global.
+					if (isProgram(scope.block)) continue;
+
+					for (const variable of scope.variables) {
+						checkVariable(variable);
+					}
+				}
 			},
 		};
 	},

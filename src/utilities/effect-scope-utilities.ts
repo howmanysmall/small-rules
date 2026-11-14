@@ -22,7 +22,6 @@ const CONTAINER_PARENT_TYPES = new Set([ARRAY_EXPRESSION, OBJECT_EXPRESSION, PRO
 const FUNCTION_NODE_TYPES = new Set([ARROW_FUNCTION_EXPRESSION, FUNCTION_DECLARATION, FUNCTION_EXPRESSION]);
 
 export interface EffectScopeAnalysis {
-	readonly callExpressions: ReadonlyArray<ESTree.CallExpression>;
 	getArgumentUpstreamReferences: (reference: Reference) => ReadonlyArray<Reference>;
 	getCallExpression: (reference: Reference) => ESTree.CallExpression | undefined;
 	getDescendantCallExpressions: (node: ESTree.Node) => ReadonlyArray<ESTree.CallExpression>;
@@ -41,7 +40,8 @@ interface TraversalResult {
 }
 
 interface EffectScopeAnalysisState {
-	readonly referenceByIdentifier: Map<ESTree.IdentifierReference, Reference>;
+	/** Traversable child keys per node type; call `arguments` are excluded. */
+	readonly childKeysByType: Map<string, ReadonlySet<string>>;
 	readonly sourceCode: SourceCode;
 	readonly traversalByRoot: WeakMap<ESTree.Node, TraversalResult>;
 }
@@ -61,23 +61,17 @@ export function getEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnaly
 
 function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 	const state: EffectScopeAnalysisState = {
-		referenceByIdentifier: new Map(),
+		childKeysByType: new Map(),
 		sourceCode,
 		traversalByRoot: new WeakMap(),
 	};
 
-	indexReferences(state);
-
-	const callExpressions = new Array<ESTree.CallExpression>();
 	const upstreamReferences = new WeakMap<Reference, ReadonlyArray<Reference>>();
 	const argumentUpstreamReferences = new WeakMap<Reference, ReadonlyArray<Reference>>();
 	const synchronousCallChains = new WeakMap<Reference, ReadonlyArray<Reference>>();
 	const callExpressionByReference = new WeakMap<Reference, ESTree.CallExpression | undefined>();
 
-	collectProgramCallExpressions(state, callExpressions);
-
 	return {
-		callExpressions,
 		getArgumentUpstreamReferences(reference: Reference): ReadonlyArray<Reference> {
 			let refs = argumentUpstreamReferences.get(reference);
 			/* v8 ignore next -- the cache hit path is exercised by repeat lookups that rules never perform. @preserve */
@@ -105,7 +99,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 			return getTraversal(state, node).references;
 		},
 		getReference(identifier: ESTree.IdentifierReference): Reference | undefined {
-			return state.referenceByIdentifier.get(identifier);
+			return getReference(state, identifier);
 		},
 		getSynchronousCallChain(reference: Reference): ReadonlyArray<Reference> {
 			let chain = synchronousCallChains.get(reference);
@@ -140,7 +134,7 @@ function getTraversal(state: EffectScopeAnalysisState, root: ESTree.Node): Trave
 	return traversal;
 }
 
-function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: TraversalResult, all = false): void {
+function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: TraversalResult): void {
 	const worklist: Array<ESTree.Node> = [root];
 	while (worklist.length > 0) {
 		const node = worklist.pop();
@@ -155,7 +149,7 @@ function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: Tr
 		}
 
 		recordDescendantNode(node, root, result);
-		pushChildren(state, node, worklist, all);
+		pushChildren(state, node, worklist);
 	}
 }
 
@@ -167,25 +161,6 @@ function recordDescendantNode(node: ESTree.Node, root: ESTree.Node, result: Trav
 	} else if (isIfStatement(node)) {
 		result.ifStatements.push(node);
 	}
-}
-
-function indexReferences(state: EffectScopeAnalysisState): void {
-	const result: TraversalResult = { callExpressions: [], ifStatements: [], references: [] };
-	traverse(state, state.sourceCode.ast, result, true);
-
-	for (const reference of result.references) {
-		/* v8 ignore next -- traverse only collects identifier-shaped references. @preserve */
-		if (isIdentifierReference(reference.identifier)) {
-			state.referenceByIdentifier.set(reference.identifier, reference);
-		}
-	}
-}
-
-function collectProgramCallExpressions(
-	state: EffectScopeAnalysisState,
-	callExpressions: Array<ESTree.CallExpression>,
-): void {
-	traverse(state, state.sourceCode.ast, { callExpressions, ifStatements: [], references: [] }, true);
 }
 
 function pushChildValue(value: PropertyDescriptor["value"], worklist: Array<ESTree.Node>): void {
@@ -205,16 +180,26 @@ function pushChildValue(value: PropertyDescriptor["value"], worklist: Array<ESTr
 	}
 }
 
-function pushChildren(
-	state: EffectScopeAnalysisState,
-	node: ESTree.Node,
-	worklist: Array<ESTree.Node>,
-	includeArguments: boolean,
-): void {
-	const childKeys = new Set(state.sourceCode.visitorKeys[node.type]);
+function getChildKeys(state: EffectScopeAnalysisState, nodeType: string): ReadonlySet<string> {
+	let childKeys = state.childKeysByType.get(nodeType);
+	if (childKeys === undefined) {
+		const keys = new Set(state.sourceCode.visitorKeys[nodeType]);
+		// A call's arguments run when the callee decides, so they are not
+		// downstream of the node.
+		keys.delete("arguments");
+		childKeys = keys;
+		state.childKeysByType.set(nodeType, childKeys);
+	}
+
+	return childKeys;
+}
+
+function pushChildren(state: EffectScopeAnalysisState, node: ESTree.Node, worklist: Array<ESTree.Node>): void {
+	const childKeys = getChildKeys(state, node.type);
 	for (const [key, value] of Object.entries(node)) {
-		if (!childKeys.has(key) || (key === "arguments" && !includeArguments)) continue;
-		pushChildValue(value, worklist);
+		if (childKeys.has(key)) {
+			pushChildValue(value, worklist);
+		}
 	}
 }
 

@@ -30,6 +30,12 @@ describe("directive-disable-enable-pair", () => {
 				options: [{ allowWholeFile: true }],
 			},
 			{
+				// A file of comments has no first token, so its unclosed
+				// directive covers the whole file.
+				code: "/* oxlint-disable no-console */",
+				options: [{ allowWholeFile: true }],
+			},
+			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;",
 				options: [{ allowWholeFile: true }],
 			},

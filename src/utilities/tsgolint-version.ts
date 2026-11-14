@@ -50,8 +50,9 @@ export function determineTsgoLintVersion(fromDirectory: string): string | undefi
 	const root = getProjectRoot(fromDirectory);
 	if (root === undefined) return undefined;
 
-	const cached = inferredVersionCache.get(root);
-	if (cached !== undefined) return cached;
+	// A root without a tsgolint version is cached too, so its manifests are
+	// read once.
+	if (inferredVersionCache.has(root)) return inferredVersionCache.get(root);
 
 	const version =
 		getVersionFromInstalledPackage(root) ??

@@ -8,16 +8,20 @@ const directiveDisableEnablePair = createRule("directive-disable-enable-pair", "
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowWholeFile = options?.allowWholeFile === true;
-		const disabledArea = computeDisabledArea(context.sourceCode);
-		const [firstToken] = context.sourceCode.ast.tokens;
+		const openAreas = computeDisabledArea(context.sourceCode).areas.filter((area) => area.end === undefined);
+		if (openAreas.length === 0) {
+			return {};
+		}
 
+		// Reading the token list materializes every token of the file, so
+		// only an unclosed directive that may cover the whole file pays for it.
+		const [firstToken] = allowWholeFile ? context.sourceCode.ast.tokens : [];
 		if (allowWholeFile && firstToken === undefined) {
 			return {};
 		}
 
-		for (const area of disabledArea.areas) {
-			if (area.end !== undefined) continue;
-			if (allowWholeFile && firstToken !== undefined && lte(area.start, firstToken.loc.start)) continue;
+		for (const area of openAreas) {
+			if (firstToken !== undefined && lte(area.start, firstToken.loc.start)) continue;
 
 			context.report({
 				data: { ruleId: area.ruleId ?? "" },
