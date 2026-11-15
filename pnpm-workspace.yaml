@@ -91,7 +91,7 @@ overrides:
   vite: ^8
 
 patchedDependencies:
-  "@isentinel/eslint-config@6.3.0": patches/@isentinel__eslint-config@6.3.0.patch
+  "@isentinel/eslint-config@6.5.2": patches/@isentinel__eslint-config@6.5.2.patch
 
 catalogs:
   benchmark:
@@ -128,7 +128,7 @@ catalogs:
   lint:
     "@biomejs/biome": 2.6.6
     "@e18e/eslint-plugin": 0.8.1
-    "@isentinel/eslint-config": 6.3.0
+    "@isentinel/eslint-config": 6.5.2
     "@stylistic/eslint-plugin": 5.10.0
     "@vitest/eslint-plugin": 1.6.28
     eslint: 10.14.0
