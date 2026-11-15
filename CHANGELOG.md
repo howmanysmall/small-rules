@@ -46,6 +46,14 @@ All notable changes to `@pobammer-ts/small-rules` are documented here.
 - Add oxlint configuration file
 - **oxlint:** Enable array constructor lint rules
 
+## [3.12.1] - 2026-11-15
+
+## Fixed
+- **require-paired-calls**: Reports an unpaired opener written with a unicode escape, such as `debug.profile\u0062egin("task");`. Previously it went unreported. ([#118](https://github.com/howmanysmall/small-rules/pull/118))
+
+## Changed
+- **no-dead-store**: Reports a value overwritten before it is read in a module-level block, such as the initializer in `{ let attempt = first(); attempt = second(); publish(attempt); }`. Previously these block scopes were skipped. ([#118](https://github.com/howmanysmall/small-rules/pull/118))
+
 ## [3.12.0] - 2026-11-09
 
 ## Changed
