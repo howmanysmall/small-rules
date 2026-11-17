@@ -1,4 +1,4 @@
-// oxlint-disable unicorn/prefer-code-point sonar/cognitive-complexity -- This file intentionally uses UTF-16 ASCII primitives in hot paths.
+// oxlint-disable unicorn/prefer-code-point flawless/cognitive-complexity -- This file intentionally uses UTF-16 ASCII primitives in hot paths.
 // biome-ignore-all lint/complexity/useMaxParams: cattle
 
 export const enum Casing {
