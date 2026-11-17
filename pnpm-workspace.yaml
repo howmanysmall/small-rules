@@ -129,7 +129,7 @@ catalogs:
     "@biomejs/biome": 2.6.8
     "@e18e/eslint-plugin": 0.8.1
     "@isentinel/eslint-config": 7.0.0
-    "@stylistic/eslint-plugin": 6.0.0
+    "@stylistic/eslint-plugin": 6.0.1
     "@vitest/eslint-plugin": 1.6.28
     eslint: 10.15.0
     eslint-plugin-antfu: 3.3.1
@@ -140,17 +140,17 @@ catalogs:
     eslint-plugin-eslint-plugin: 7.6.2
     eslint-plugin-flawless: 1.17.0
     eslint-plugin-jest-extended: 3.0.1
-    eslint-plugin-jsdoc: 65.4.7
+    eslint-plugin-jsdoc: 65.4.8
     eslint-plugin-n: 18.5.0
     eslint-plugin-oxfmt: 0.33.0
-    eslint-plugin-perfectionist: 5.13.0
+    eslint-plugin-perfectionist: 5.14.0
     eslint-plugin-pnpm: 1.9.1
-    eslint-plugin-react-jsx: 5.30.2
-    eslint-plugin-react-naming-convention: 5.30.2
-    eslint-plugin-react-x: 5.30.2
+    eslint-plugin-react-jsx: 5.30.3
+    eslint-plugin-react-naming-convention: 5.30.3
+    eslint-plugin-react-x: 5.30.3
     eslint-plugin-roblox-ts: 1.4.1
     eslint-plugin-sonarjs: 4.2.2
-    eslint-plugin-unicorn: 79.0.0
+    eslint-plugin-unicorn: 80.0.0
     eslint-plugin-unused-imports: 4.4.1
     fallow: 3.43.1
     oxfmt: 0.79.0
@@ -199,7 +199,7 @@ catalogs:
     "@stryker-mutator/core": 10.1.1
     "@stryker-mutator/vitest-runner": 10.1.1
     "@testing-library/react": 16.3.3
-    "@testing-library/user-event": 14.6.10
+    "@testing-library/user-event": 14.6.12
     "@total-typescript/shoehorn": 0.1.2
     "@vitest/coverage-istanbul": 5.1.0
     "@vitest/coverage-v8": 5.1.0
