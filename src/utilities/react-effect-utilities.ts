@@ -572,7 +572,6 @@ function getUseStateDeclaration(
 	/* v8 ignore stop */
 	let result: ESTree.Node = upstreamIdentifier;
 	while (!isVariableDeclarator(result)) {
-		 
 		const parent: ESTree.Node | null = result.parent;
 		if (parent === null) return undefined;
 		result = parent;

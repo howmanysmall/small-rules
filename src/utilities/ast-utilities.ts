@@ -375,7 +375,6 @@ export function isExternallyConstrainedProperty({ parent }: ESTree.Node, sourceC
 
 	let current: ESTree.Node = parent;
 	while (true) {
-		 
 		const outer: ESTree.Node | null = current.parent;
 		/* v8 ignore next -- climbable Object/Array/Property chains always terminate in a call, satisfies, or non-climbable wrapper before the parent chain ends. @preserve */
 		if (outer === null) return false;
