@@ -1,7 +1,7 @@
 // biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: These
 // dispatchers mirror eslint-scope, where the branch count is the node-type
 // table rather than a sign of tangled control flow.
-// oxlint-disable sonar/cognitive-complexity unicorn/no-null -- Scope
+// oxlint-disable flawless/cognitive-complexity unicorn/no-null -- Scope
 // construction is a compact AST dispatcher that mirrors eslint-scope null
 // sentinels.
 import { Predicate } from "effect";
