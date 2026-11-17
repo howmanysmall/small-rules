@@ -155,7 +155,7 @@ const noInlineSignatureTypes = createRule("no-inline-signature-types", "naming",
 		 *   return type.
 		 */
 		function checkAnnotation(root: TypeNode, parameter?: FunctionParameter): void {
-			const pending: Array<TypeNode> = [root];
+			const pending = [root];
 			for (const current of pending) {
 				if (!isTsTypeLiteral(current)) {
 					enqueueNestedTypes(current, position, pending);

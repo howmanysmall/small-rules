@@ -249,9 +249,7 @@ function createFix(
 	}
 
 	const literalText = `[${assignments.map((assignment) => assignment.valueText).join(", ")}]`;
-	const fixes: Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> = [
-		fixer.replaceText(init, literalText),
-	];
+	const fixes = [fixer.replaceText(init, literalText)];
 
 	const [, declarationEnd] = declaration.range;
 	const [firstAssignmentStart] = firstAssignmentStatement.range;

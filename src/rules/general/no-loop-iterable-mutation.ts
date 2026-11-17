@@ -186,7 +186,7 @@ function collectMutationCalls(
 	visitorKeys: SourceCode["visitorKeys"],
 ): Array<MutationCall> {
 	const mutations = new Array<MutationCall>();
-	const worklist: Array<ESTree.Node> = [body];
+	const worklist = [body];
 	for (const current of worklist) {
 		if (SKIPPED_NODE_TYPES.has(current.type)) continue;
 

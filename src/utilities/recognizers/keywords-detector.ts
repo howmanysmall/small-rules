@@ -15,7 +15,7 @@ export function createKeywordsDetector(probability: number, keywords: ReadonlyAr
 
 	return {
 		probability,
-		scan(line: string): number {
+		scan(line): number {
 			const words = line.split(WORD_SPLIT_REGEX);
 			let count = 0;
 

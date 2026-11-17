@@ -233,7 +233,7 @@ function appendRelocatableChildren(
 }
 
 function hasOnlyRelocatableCalls(node: ESTree.Node, staticGlobalFactories: ReadonlySet<string>): boolean {
-	const worklist: Array<ESTree.Node> = [node];
+	const worklist = [node];
 	for (const current of worklist) {
 		if (!appendRelocatableChildren(current, staticGlobalFactories, worklist)) return false;
 	}

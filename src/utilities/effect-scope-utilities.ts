@@ -72,7 +72,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 	const callExpressionByReference = new WeakMap<Reference, ESTree.CallExpression | undefined>();
 
 	return {
-		getArgumentUpstreamReferences(reference: Reference): ReadonlyArray<Reference> {
+		getArgumentUpstreamReferences(reference): ReadonlyArray<Reference> {
 			let refs = argumentUpstreamReferences.get(reference);
 			/* v8 ignore next -- the cache hit path is exercised by repeat lookups that rules never perform. @preserve */
 			if (refs === undefined) {
@@ -82,26 +82,26 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 
 			return refs;
 		},
-		getCallExpression(reference: Reference): ESTree.CallExpression | undefined {
+		getCallExpression(reference): ESTree.CallExpression | undefined {
 			/* v8 ignore next -- callers resolve each reference's call expression at most once per rule run. @preserve */
 			if (callExpressionByReference.has(reference)) return callExpressionByReference.get(reference);
 			const callExpression = computeCallExpression(reference);
 			callExpressionByReference.set(reference, callExpression);
 			return callExpression;
 		},
-		getDescendantCallExpressions(node: ESTree.Node): ReadonlyArray<ESTree.CallExpression> {
+		getDescendantCallExpressions(node): ReadonlyArray<ESTree.CallExpression> {
 			return getTraversal(state, node).callExpressions;
 		},
-		getDescendantIfStatements(node: ESTree.Node): ReadonlyArray<ESTree.IfStatement> {
+		getDescendantIfStatements(node): ReadonlyArray<ESTree.IfStatement> {
 			return getTraversal(state, node).ifStatements;
 		},
-		getDownstreamReferences(node: ESTree.Node): ReadonlyArray<Reference> {
+		getDownstreamReferences(node): ReadonlyArray<Reference> {
 			return getTraversal(state, node).references;
 		},
-		getReference(identifier: ESTree.IdentifierReference): Reference | undefined {
+		getReference(identifier): Reference | undefined {
 			return getReference(state, identifier);
 		},
-		getSynchronousCallChain(reference: Reference): ReadonlyArray<Reference> {
+		getSynchronousCallChain(reference): ReadonlyArray<Reference> {
 			let chain = synchronousCallChains.get(reference);
 			if (chain === undefined) {
 				chain = computeSynchronousCallChain(state, reference);
@@ -110,7 +110,7 @@ function buildEffectScopeAnalysis(sourceCode: SourceCode): EffectScopeAnalysis {
 
 			return chain;
 		},
-		getUpstreamReferences(reference: Reference): ReadonlyArray<Reference> {
+		getUpstreamReferences(reference): ReadonlyArray<Reference> {
 			let refs = upstreamReferences.get(reference);
 			if (refs === undefined) {
 				refs = computeUpstreamReferences(state, reference);
@@ -135,7 +135,7 @@ function getTraversal(state: EffectScopeAnalysisState, root: ESTree.Node): Trave
 }
 
 function traverse(state: EffectScopeAnalysisState, root: ESTree.Node, result: TraversalResult): void {
-	const worklist: Array<ESTree.Node> = [root];
+	const worklist = [root];
 	while (worklist.length > 0) {
 		const node = worklist.pop();
 		/* v8 ignore next -- the loop guard ensures pop never returns undefined. @preserve */
@@ -326,7 +326,7 @@ function findEnclosingFunction(node?: ESTree.Node | null): ESTree.Node | undefin
 function isAliasRef(candidateReference: Reference): boolean {
 	let node: ESTree.Node = candidateReference.identifier;
 	for (;;) {
-		// eslint-disable-next-line flawless/no-redundant-type-annotation -- incorrect.
+		 
 		const parent: ESTree.Node | null = node.parent;
 		/* v8 ignore next -- AST identifier parents are always non-null at runtime. @preserve */
 		if (parent === null) return false;

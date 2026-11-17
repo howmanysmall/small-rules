@@ -111,7 +111,7 @@ export function forEachNode(
 	root: ESTree.Node,
 	visit: (node: ESTree.Node) => boolean | typeof STOP_NODE_TRAVERSAL | undefined | void,
 ): void {
-	const workList: Array<ESTree.Node> = [root];
+	const workList = [root];
 	for (const current of workList) {
 		const result = visit(current);
 		if (result === STOP_NODE_TRAVERSAL) break;
@@ -375,7 +375,7 @@ export function isExternallyConstrainedProperty({ parent }: ESTree.Node, sourceC
 
 	let current: ESTree.Node = parent;
 	while (true) {
-		// eslint-disable-next-line flawless/no-redundant-type-annotation -- fact check: false.
+		 
 		const outer: ESTree.Node | null = current.parent;
 		/* v8 ignore next -- climbable Object/Array/Property chains always terminate in a call, satisfies, or non-climbable wrapper before the parent chain ends. @preserve */
 		if (outer === null) return false;

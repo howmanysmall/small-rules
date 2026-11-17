@@ -324,7 +324,7 @@ function isDirectBroadMappedKey(type: ESTree.TSType): boolean {
 }
 
 function isBroadMappedKey(resolution: TypeResolution, environment: TypeEnvironment): boolean {
-	const pending: Array<TypeResolution> = [resolution];
+	const pending = [resolution];
 	for (const frame of pending) {
 		const unwrapped = unwrapTransparentResolution(frame);
 		if (isDirectBroadMappedKey(unwrapped.type)) return true;

@@ -15,7 +15,7 @@ export function createEndWithDetector(probability: number, endings: ReadonlyArra
 
 	return {
 		probability,
-		scan(line: string): number {
+		scan(line): number {
 			for (let index = line.length - 1; index >= 0; index -= 1) {
 				const character = line.charAt(index);
 				if (endingsSet.has(character)) return 1;
