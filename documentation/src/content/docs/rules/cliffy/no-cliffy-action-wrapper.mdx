@@ -41,8 +41,8 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			Only commands the rule can recognize count, so it checks `.action` on a chain that starts from `new Command()`
 			from `@cliffy/command`, from a function named in `factories`, or from a `const` holding either. A command that
-			arrives as a function parameter or an import isn't checked. `factories` defaults to `["createBaseCommand"]` and
-			replaces that default when you set it.
+			arrives as a function parameter or an import isn't checked. Setting `factories` overwrites the default
+			`["createBaseCommand"]`.
 		</p>
 		<p>
 			There's no autofix. Inlining a function means renaming its parameters to match the handler and dealing with early
