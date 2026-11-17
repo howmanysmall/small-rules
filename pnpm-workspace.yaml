@@ -271,6 +271,11 @@ peerDependencyRules:
 
 audit:
   ignore:
+    # picomatch <=4.0.7 extglob ReDoS. No patched release exists yet; every path
+    # is docs/lint/test tooling (astro, vite, vitest, cspell) matching this
+    # repo's own globs, and the published plugin does not depend on it.
+    # Drop this once picomatch ships a fix.
+    - GHSA-fc5q-39xc-vjpf
     # minimatch@10 globparts amplification. eslint@10 pins minimatch ^10 and
     # the fix is only in 11.x; eslint runs on this repo's own globs, never on
     # untrusted patterns.
