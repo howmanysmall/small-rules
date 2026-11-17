@@ -1,5 +1,4 @@
 entry = [
-	"src/index.ts",
 	"src/reset.d.ts",
 	"*.config.ts",
 	"scripts/*.ts",
@@ -12,36 +11,26 @@ entry = [
 ]
 ignorePatterns = ["tests/fixtures/**", "plugins/**", "src/generated/**", ".benchmarks/**", ".opencode/**", ".claude/**"]
 ignoreDependencies = [
-	"@arethetypeswrong/core",
 	"@astrojs/markdown-satteri",
 	"@e18e/eslint-plugin",
 	"@fontsource-variable/ibm-plex-sans",
 	"@fontsource-variable/newsreader",
 	"@fontsource/ibm-plex-mono",
 	"@isentinel/hooks",
-	"@small-rules/local-rules",
 	"@stylistic/eslint-plugin",
-	"@total-typescript/ts-reset",
 	"eslint-plugin-antfu",
 	"eslint-plugin-better-max-params",
 	"eslint-plugin-comment-length",
 	"eslint-plugin-de-morgan",
-	"eslint-plugin-eslint-plugin",
 	"eslint-plugin-flawless",
-	"eslint-plugin-jest-extended",
 	"eslint-plugin-jsdoc",
-	"eslint-plugin-n",
 	"eslint-plugin-oxfmt",
 	"eslint-plugin-perfectionist",
 	"eslint-plugin-pnpm",
-	"eslint-plugin-react-jsx",
-	"eslint-plugin-react-naming-convention",
-	"eslint-plugin-react-x",
 	"eslint-plugin-roblox-ts",
 	"eslint-plugin-sonarjs",
 	"eslint-plugin-unicorn",
 	"eslint-plugin-unused-imports",
-	"oxc-transform-react",
 	"sharp"
 ]
 ignoreExportsUsedInFile = true
@@ -100,9 +89,7 @@ minLines = 4
 minTokens = 28
 # Any clone outside ignoredClones fails `fallow dupes` (0 would mean no limit).
 threshold = 0.001
-# Reviewed and kept: the createRule overloads cannot share generics, and
-# tools/local-rules must not import test support code.
-ignoredClones = ["dup:6c139609:2", "dup:7750b83f:2"]
+ignoredClones = ["dup:c668d6b6:2"]
 ignoreDefaults = true
 ignore = [
 	"documentation/src/styles/custom.css",

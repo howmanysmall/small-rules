@@ -431,6 +431,7 @@ function extractVectorComponents<TValue extends ReadonlyArray<number>>(
 	}
 
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, className)) return undefined;
+
 	if (node.arguments.length === 0) return zeroValue;
 
 	return extractor(node.arguments);
@@ -519,7 +520,14 @@ function extractUDim2Value(
 		return undefined;
 	}
 
-	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "UDim2")) return undefined;
+	return extractNewQuadruple(node, "UDim2");
+}
+
+function extractNewQuadruple(
+	node: ESTree.Expression,
+	className: string,
+): readonly [first: number, second: number, third: number, fourth: number] | undefined {
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, className)) return undefined;
 
 	if (node.arguments.length === 0) {
 		return [0, 0, 0, 0];
@@ -531,13 +539,7 @@ function extractUDim2Value(
 function extractRectValue(
 	node: ESTree.Expression,
 ): readonly [minimumX: number, minimumY: number, maximumX: number, maximumY: number] | undefined {
-	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "Rect")) return undefined;
-
-	if (node.arguments.length === 0) {
-		return [0, 0, 0, 0];
-	}
-
-	return extractNumberQuadruple(node.arguments);
+	return extractNewQuadruple(node, "Rect");
 }
 
 function extractRGBFromComponents(
