@@ -9,10 +9,9 @@ import OxlintConfigTabs from "$components/oxlint-config-tabs.astro";
 	<Fragment slot="rationale">
 		<p>
 			This is a port from the official
-			[roblox-ts lint plugin](https://github.com/roblox-ts/eslint-plugin-roblox-ts). It bans you
-			from writing TypeScript that roblox-ts can't turn into Luau, like `globalThis`, labeled
-			statements, `.prototype`, regular expression literals, and rest elements in destructuring
-			patterns all get flagged on by default.
+			[roblox-ts lint plugin](https://github.com/roblox-ts/eslint-plugin-roblox-ts). It bans
+			TypeScript that roblox-ts can't turn into Luau. `globalThis`, labeled statements, `.prototype`,
+			regular expression literals, and rest elements in destructuring patterns all get flagged on by default.
 		</p>
 		<p>
 			Every check is individually configurable, though, because not every Roblox-side compiler shares the same

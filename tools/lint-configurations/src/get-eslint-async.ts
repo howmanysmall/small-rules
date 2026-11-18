@@ -53,7 +53,6 @@ export async function getEslintAsync(tsconfigPath: string): Promise<LintConfigur
 			roblox: false,
 			rules: {
 				"sonar/no-redundant-optional": "off",
-				"ts/prefer-destructuring": "off",
 				"unicorn/no-non-function-verb-prefix": "off",
 			},
 			spellCheck: false,

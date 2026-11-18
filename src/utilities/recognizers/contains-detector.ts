@@ -51,7 +51,7 @@ export function createContainsDetector(probability: number, patterns: ReadonlyAr
 
 	return {
 		probability,
-		scan(line: string): number {
+		scan(line): number {
 			const compressed = line.replaceAll(WHITESPACE_GLOBAL_REGEX, "");
 			let total = 0;
 

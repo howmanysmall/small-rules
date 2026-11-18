@@ -584,7 +584,7 @@ export function getResolvedTypeMatches(
 	environment: TypeAliasEnvironment,
 	matcher: ResolvedTypeMatcher,
 ): boolean {
-	const pending: Array<TypeResolution> = [createTypeResolution(type)];
+	const pending = [createTypeResolution(type)];
 	for (const resolution of pending) {
 		const resolved = resolveTypeReference(resolution, environment);
 		if (resolved !== undefined) {

@@ -126,9 +126,11 @@ function mergeFixes(fixes: ReadonlyArray<Fix>, text: string): Fix | undefined {
 
 	let start = Number.POSITIVE_INFINITY;
 	let end = Number.NEGATIVE_INFINITY;
-	for (const { range } of fixes) {
-		start = Math.min(start, range[0]);
-		end = Math.max(end, range[1]);
+	for (const {
+		range: [from, to],
+	} of fixes) {
+		start = Math.min(start, from);
+		end = Math.max(end, to);
 	}
 
 	const local = fixes.map(({ range, text: replacement }): Fix => {

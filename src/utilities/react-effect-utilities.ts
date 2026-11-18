@@ -145,44 +145,44 @@ function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environme
 
 	return {
 		effects: collectEffects(state),
-		findEnclosingReactNode(node: ESTree.Node): ReactOwner | undefined {
+		findEnclosingReactNode(node): ReactOwner | undefined {
 			/* v8 ignore next -- findEnclosingReactNode is only reached via this facade for root nodes within the analyzed program. @preserve */
 			return findEnclosingReactNode(state, node);
 		},
 		getComponentName(node?: ReactOwner): string | undefined {
 			return getComponentName(node);
 		},
-		getStateName(reference: Reference): string | undefined {
+		getStateName(reference): string | undefined {
 			return getStateName(state, reference);
 		},
-		getUseStateDeclaration(reference: Reference): ESTree.VariableDeclarator | undefined {
+		getUseStateDeclaration(reference): ESTree.VariableDeclarator | undefined {
 			return getUseStateDeclaration(state, reference);
 		},
-		isConstant(reference: Reference): boolean {
+		isConstant(reference): boolean {
 			return isConstant(reference);
 		},
-		isCustomHook(node: ESTree.Node): node is ReactOwner {
+		isCustomHook(node): node is ReactOwner {
 			return isCustomHook(node);
 		},
-		isProp(reference: Reference): boolean {
+		isProp(reference): boolean {
 			return isProperty(state, reference);
 		},
-		isPropCall(reference: Reference): boolean {
+		isPropCall(reference): boolean {
 			return isPropertyCall(state, reference);
 		},
-		isRefCall(reference: Reference): boolean {
+		isRefCall(reference): boolean {
 			return isRefCall(state, reference);
 		},
-		isRefCurrent(reference: Reference): boolean {
+		isRefCurrent(reference): boolean {
 			return isRefCurrent(reference);
 		},
-		isState(reference: Reference): boolean {
+		isState(reference): boolean {
 			return isState(state, reference);
 		},
-		isStateCall(reference: Reference): boolean {
+		isStateCall(reference): boolean {
 			return isStateCall(state, reference);
 		},
-		isStateSetter(reference: Reference): boolean {
+		isStateSetter(reference): boolean {
 			return isStateSetter(state, reference);
 		},
 		scope: state.scope,
@@ -572,7 +572,6 @@ function getUseStateDeclaration(
 	/* v8 ignore stop */
 	let result: ESTree.Node = upstreamIdentifier;
 	while (!isVariableDeclarator(result)) {
-		// eslint-disable-next-line flawless/no-redundant-type-annotation -- fact check: false.
 		const parent: ESTree.Node | null = result.parent;
 		if (parent === null) return undefined;
 		result = parent;

@@ -10,15 +10,15 @@ interface RuleCategoryPageProperties {
 	category: RuleCategoryKey;
 }
 
-export function RuleCategoryPage({ category: categoryKey }: Readonly<RuleCategoryPageProperties>): ReactNode {
-	const category = getRuleFactCategory(categoryKey);
-	const categories = createRuleIndexCategories([category]);
+export function RuleCategoryPage({ category }: Readonly<RuleCategoryPageProperties>): ReactNode {
+	const factCategory = getRuleFactCategory(category);
+	const categories = createRuleIndexCategories([factCategory]);
 
 	return (
 		<>
 			<p className="rule-category-summary">
-				{category.description} {"Browse all "}
-				{category.count} {category.count === 1 ? "rule" : "rules"}
+				{factCategory.description} {"Browse all "}
+				{factCategory.count} {factCategory.count === 1 ? "rule" : "rules"}
 				{" in this category."}
 			</p>
 			<RuleIndex categories={categories} mode="category" />

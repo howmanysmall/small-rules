@@ -10,8 +10,8 @@ import RulePage from "$components/rule-page.astro";
 			A slow unit test is a design problem, and a longer timeout hides it. Mock or inject the file system,
 			network, subprocesses, and timers, or remove the dependency. The rule reports a timeout argument after a
 			`test`, `it`, or `describe` callback, and a `timeout` key in a Vitest options object. It follows chains such
-			as `.only`, `.skip`, `.concurrent`, `.each`, `.for`, and `.skipIf`. Enable it for unit test files only;
-			integration and end-to-end tests may need the time.
+			as `.only`, `.skip`, `.concurrent`, `.each`, `.for`, and `.skipIf`. Enable it for unit test files only.
+			Integration and end-to-end tests may need the time.
 		</p>
 		<p>
 			A config-level `testTimeout`, hook timeouts, and `waitFor` options pass. So does `it(name, run, TIMEOUT)`,

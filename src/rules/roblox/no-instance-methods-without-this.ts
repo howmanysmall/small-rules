@@ -75,7 +75,7 @@ const noInstanceMethodsWithoutThis = createRule("no-instance-methods-without-thi
 		const options = normalizeOptions(context.options[0]);
 
 		return {
-			MethodDefinition(node: ESTree.MethodDefinition): void {
+			MethodDefinition(node): void {
 				if (!shouldCheckMethod(node, options) || methodUsesThis(node)) return;
 
 				context.report({

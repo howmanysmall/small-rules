@@ -283,7 +283,7 @@ function getKnownValueEvidence(
 ): KnownValueEvidence | undefined {
 	let currentExpression = expression;
 	const seenVariables = new Set(visitedVariables);
-	for (;;) {
+	while (true) {
 		const directEvidence = getDirectKnownValueEvidence(currentExpression);
 		if (directEvidence !== undefined) return directEvidence;
 

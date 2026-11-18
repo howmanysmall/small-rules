@@ -7,9 +7,9 @@ import RulePage from "$components/rule-page.astro";
 <RulePage rule="no-useless-default">
 	<Fragment slot="rationale">
 		<p>
-			Default parameters that just assign the value the type already defaults to (like `undefined` for an optional
-			field) are just noise. They don't change how the function behaves. They just make the signature longer.
+			Default parameters that just assign the value the type already defaults to, like `undefined` for an optional
+			field, are just noise. They don't change how the function behaves, they only make the signature longer. If
+			the default doesn't provide a real fallback, take it out of the signature.
 		</p>
-		<p>If the default doesn't provide a real fallback, take it out of the signature.</p>
 	</Fragment>
 </RulePage>

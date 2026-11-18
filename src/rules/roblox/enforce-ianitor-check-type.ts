@@ -306,21 +306,11 @@ function scoreConditionalType(
 	return score;
 }
 
-function addFunctionParameterScore(
-	current: number,
-	parameter: ESTree.Node,
-	scoring: StructuralScoringArguments,
-): number {
-	/* v8 ignore next -- @preserve type-checkable function type parameters carry type annotations in this suite. */
-	if (!("typeAnnotation" in parameter)) return current;
-	const { typeAnnotation } = parameter;
-	/* v8 ignore next -- @preserve parser-produced function type params either omit annotations or use TSTypeAnnotation. */
-	if (!isTsTypeAnnotation(typeAnnotation)) return current;
-
+function addAnnotationScore(current: number, annotation: ESTree.Node, scoring: StructuralScoringArguments): number {
 	return addScore(
 		current,
 		calculateStructuralComplexity(
-			typeAnnotation.typeAnnotation,
+			annotation,
 			scoring.nextDepth,
 			scoring.config,
 			scoring.cache,
@@ -332,6 +322,20 @@ function addFunctionParameterScore(
 	);
 }
 
+function addFunctionParameterScore(
+	current: number,
+	parameter: ESTree.Node,
+	scoring: StructuralScoringArguments,
+): number {
+	/* v8 ignore next -- @preserve type-checkable function type parameters carry type annotations in this suite. */
+	if (!("typeAnnotation" in parameter)) return current;
+	const { typeAnnotation } = parameter;
+	/* v8 ignore next -- @preserve parser-produced function type params either omit annotations or use TSTypeAnnotation. */
+	if (!isTsTypeAnnotation(typeAnnotation)) return current;
+
+	return addAnnotationScore(current, typeAnnotation.typeAnnotation, scoring);
+}
+
 function addFunctionReturnScore(current: number, node: ESTree.Node, scoring: StructuralScoringArguments): number {
 	/* v8 ignore next -- @preserve parser-produced function and method type nodes expose returnType. */
 	if (!("returnType" in node)) return current;
@@ -339,19 +343,7 @@ function addFunctionReturnScore(current: number, node: ESTree.Node, scoring: Str
 	/* v8 ignore next -- @preserve type-checkable function and method signatures carry return annotations here. */
 	if (!isTsTypeAnnotation(returnType)) return current;
 
-	return addScore(
-		current,
-		calculateStructuralComplexity(
-			returnType.typeAnnotation,
-			scoring.nextDepth,
-			scoring.config,
-			scoring.cache,
-			scoring.depthMultiplierCache,
-			scoring.ceiling,
-		),
-		scoring.config,
-		scoring.ceiling,
-	);
+	return addAnnotationScore(current, returnType.typeAnnotation, scoring);
 }
 
 function scoreFunctionType(

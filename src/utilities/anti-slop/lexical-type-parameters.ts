@@ -54,7 +54,7 @@ function collectInferTypeParameterNames(
 	visitorKeys: SourceCode["visitorKeys"],
 	names: Set<string>,
 ): void {
-	const pending: Array<ESTree.Node> = [node];
+	const pending = [node];
 	for (const current of pending) {
 		if (isTsConditionalType(current)) continue;
 

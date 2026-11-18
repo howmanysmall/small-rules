@@ -71,7 +71,7 @@ export function unwrapFunctionParameter(parameter: FunctionParameter): FunctionP
  *   contains it.
  */
 export function containsUnknownType(type: ESTree.TSType): boolean {
-	const pending: Array<ESTree.TSType> = [type];
+	const pending = [type];
 	for (const current of pending) {
 		if (isTsUnknownKeyword(current)) return true;
 

@@ -290,7 +290,7 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			context.report({
 				data: { hook: hookName },
 				fix(fixer): Array<Fix> {
-					const fixes: Array<Fix> = [fixer.replaceText(identifier, context.sourceCode.getText(declaration))];
+					const fixes = [fixer.replaceText(identifier, context.sourceCode.getText(declaration))];
 
 					if (isDeclarationRemovable(context.sourceCode, variable, declaration)) {
 						fixes.push(fixer.removeRange(getDeclarationRemovalRange(context.sourceCode.text, declaration)));

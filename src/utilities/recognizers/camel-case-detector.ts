@@ -10,7 +10,7 @@ import type { Detector } from "./detector";
 export function createCamelCaseDetector(probability: number): Detector {
 	return {
 		probability,
-		scan(line: string): number {
+		scan(line): number {
 			for (let index = 0; index < line.length - 1; index += 1) {
 				const current = line.charAt(index);
 				const next = line.charAt(index + 1);

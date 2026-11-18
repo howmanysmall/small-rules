@@ -30,8 +30,8 @@ import RulePage from "$components/rule-page.astro";
 		</ul>
 		<p>
 			`factories` defaults to `["createBaseCommand"]` and replaces that default when you set it. Factories match by
-			name, because a project can import its factory from anywhere. If you set the option, include
-			`createBaseCommand` yourself if you still use it.
+			name, because a project can import its factory from anywhere. When setting the option, also add
+			`createBaseCommand` if you still use it.
 		</p>
 		<p>
 			Registering a command from elsewhere passes, so `.command("list", listCommand)` and

@@ -111,7 +111,7 @@ function hasKnownEvidence(
 ): boolean {
 	const visitedVariables = new Set<ScopeVariable>();
 	let currentExpression = expression;
-	for (;;) {
+	while (true) {
 		if (isKnownEvidenceExpression(currentExpression)) return true;
 		if (!isIdentifierReference(currentExpression)) return false;
 

@@ -431,6 +431,7 @@ function extractVectorComponents<TValue extends ReadonlyArray<number>>(
 	}
 
 	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, className)) return undefined;
+
 	if (node.arguments.length === 0) return zeroValue;
 
 	return extractor(node.arguments);
@@ -519,7 +520,14 @@ function extractUDim2Value(
 		return undefined;
 	}
 
-	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "UDim2")) return undefined;
+	return extractNewQuadruple(node, "UDim2");
+}
+
+function extractNewQuadruple(
+	node: ESTree.Expression,
+	className: string,
+): readonly [first: number, second: number, third: number, fourth: number] | undefined {
+	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, className)) return undefined;
 
 	if (node.arguments.length === 0) {
 		return [0, 0, 0, 0];
@@ -531,13 +539,7 @@ function extractUDim2Value(
 function extractRectValue(
 	node: ESTree.Expression,
 ): readonly [minimumX: number, minimumY: number, maximumX: number, maximumY: number] | undefined {
-	if (!isNewExpression(node) || !isIdentifierNamed(node.callee, "Rect")) return undefined;
-
-	if (node.arguments.length === 0) {
-		return [0, 0, 0, 0];
-	}
-
-	return extractNumberQuadruple(node.arguments);
+	return extractNewQuadruple(node, "Rect");
 }
 
 function extractRGBFromComponents(
@@ -641,14 +643,14 @@ type CanonicalValue3d = GetCanonicalValue<"Color3" | "Vector3">;
 type CanonicalValue4d = GetCanonicalValue<"Rect" | "UDim2">;
 
 const IS_DEFAULT_VALUES = {
-	bool(node: ESTree.Expression, canonicalValue: CanonicalValue): boolean {
+	bool(node, canonicalValue: CanonicalValue): boolean {
 		return isBooleanLiteral(node) && node.value === canonicalValue.value;
 	},
-	CFrame(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"CFrame">): boolean {
+	CFrame(node, canonicalValue: GetCanonicalValue<"CFrame">): boolean {
 		const actual = extractCFrameValue(node);
 		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
 	},
-	Color3(node: ESTree.Expression, canonicalValue: CanonicalValue3d): boolean {
+	Color3(node, canonicalValue: CanonicalValue3d): boolean {
 		const actual = extractColor3Value(node);
 		return (
 			actual !== undefined &&
@@ -657,36 +659,36 @@ const IS_DEFAULT_VALUES = {
 			actual[2] === canonicalValue.value[2]
 		);
 	},
-	Enum(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"Enum">): boolean {
+	Enum(node, canonicalValue: GetCanonicalValue<"Enum">): boolean {
 		const actual = extractEnumValue(node);
 		return (
 			actual !== undefined && actual.enumType === canonicalValue.enumType && actual.value === canonicalValue.value
 		);
 	},
-	number(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"number">): boolean {
+	number(node, canonicalValue: GetCanonicalValue<"number">): boolean {
 		const actual = extractNumberValue(node);
 		return actual !== undefined && matchesComponentValue(canonicalValue.value, actual);
 	},
-	Rect(node: ESTree.Expression, canonicalValue: CanonicalValue4d): boolean {
+	Rect(node, canonicalValue: CanonicalValue4d): boolean {
 		const actual = extractRectValue(node);
 		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
 	},
-	string(node: ESTree.Expression, canonicalValue: GetCanonicalValue<"string">): boolean {
+	string(node, canonicalValue: GetCanonicalValue<"string">): boolean {
 		return isStringLiteral(node) && node.value === canonicalValue.value;
 	},
-	UDim(node: ESTree.Expression, canonicalValue: CanonicalValue2d): boolean {
+	UDim(node, canonicalValue: CanonicalValue2d): boolean {
 		const actual = extractUDimValue(node);
 		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
 	},
-	UDim2(node: ESTree.Expression, canonicalValue: CanonicalValue4d): boolean {
+	UDim2(node, canonicalValue: CanonicalValue4d): boolean {
 		const actual = extractUDim2Value(node);
 		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
 	},
-	Vector2(node: ESTree.Expression, canonicalValue: CanonicalValue2d): boolean {
+	Vector2(node, canonicalValue: CanonicalValue2d): boolean {
 		const actual = extractVector2Value(node);
 		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
 	},
-	Vector3(node: ESTree.Expression, canonicalValue: CanonicalValue3d): boolean {
+	Vector3(node, canonicalValue: CanonicalValue3d): boolean {
 		const actual = extractVector3Value(node);
 		return actual !== undefined && matchesTuple(canonicalValue.value, actual);
 	},
