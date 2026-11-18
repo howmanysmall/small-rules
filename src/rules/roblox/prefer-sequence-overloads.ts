@@ -6,14 +6,13 @@ import {
 	isNamedGlobalCall,
 	isNewExpression,
 	isNumericLiteral,
-	isSequenceExpression,
 	isSpreadElement,
 } from "@small-rules/oxlint-utilities";
 
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
-import { stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
+import { getListElementText, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { Context, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -94,21 +93,6 @@ function isReplayable(expression: ESTree.Expression, sourceCode: SourceCode): bo
 	return true;
 }
 
-/**
- * Reads an argument's source text so that it can be placed in a new argument
- * list. A comma expression keeps its parentheses, which real Oxlint drops
- * from the node's text.
- *
- * @param expression - The value that becomes an argument of the new call.
- * @param sourceCode - The source code that owns the expression.
- * @returns The text to print in an argument list.
- */
-function getArgumentText(expression: ESTree.Expression, sourceCode: SourceCode): string {
-	const unwrapped = stripParenthesis(expression);
-	const text = sourceCode.getText(unwrapped);
-	return isSequenceExpression(unwrapped) ? `(${text})` : text;
-}
-
 interface SequenceReplacement {
 	readonly messageId: "preferSingleOverload" | "preferTwoPointOverload";
 	/** The fixed code; `undefined` when a fix would change behavior. */
@@ -137,8 +121,8 @@ function getDirectArgumentReplacement(
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (secondArgument === undefined || isSpreadElement(secondArgument)) return undefined;
 
-	const firstText = getArgumentText(firstArgument, context.sourceCode);
-	const secondText = getArgumentText(secondArgument, context.sourceCode);
+	const firstText = getListElementText(context.sourceCode, stripParenthesis(firstArgument));
+	const secondText = getListElementText(context.sourceCode, stripParenthesis(secondArgument));
 	if (firstText !== secondText) return undefined;
 
 	return {
@@ -169,8 +153,8 @@ function getKeypointArrayReplacement(
 	const secondValue = getKeypointValue(secondElement, keypointName, 1);
 	if (firstValue === undefined || secondValue === undefined) return undefined;
 
-	const firstText = getArgumentText(firstValue, context.sourceCode);
-	const secondText = getArgumentText(secondValue, context.sourceCode);
+	const firstText = getListElementText(context.sourceCode, stripParenthesis(firstValue));
+	const secondText = getListElementText(context.sourceCode, stripParenthesis(secondValue));
 	if (firstText === secondText) {
 		return {
 			messageId: "preferSingleOverload",

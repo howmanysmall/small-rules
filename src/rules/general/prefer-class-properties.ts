@@ -15,6 +15,7 @@ import {
 	OBJECT_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
+import { pushMemberExpressionChildren } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -39,22 +40,31 @@ function appendSimpleObjectProperties(node: ESTree.ObjectExpression, worklist: A
 	return true;
 }
 
+function appendSimpleCallChildren(node: ESTree.CallExpression, worklist: Array<ESTree.Expression>): boolean {
+	if (!isMemberExpression(node.callee)) return false;
+	worklist.push(node.callee);
+
+	for (const argument of node.arguments) {
+		worklist.push(isSpreadElement(argument) ? argument.argument : argument);
+	}
+
+	return true;
+}
+
 function appendSimpleLiteralChildren(node: ESTree.Expression, worklist: Array<ESTree.Expression>): boolean {
 	switch (node.type) {
 		case ARRAY_EXPRESSION:
 			return appendSimpleArrayElements(node, worklist);
 
-		case CALL_EXPRESSION: {
-			if (!isMemberExpression(node.callee)) return false;
-			worklist.push(node.callee.object);
-			return true;
-		}
+		case CALL_EXPRESSION:
+			return appendSimpleCallChildren(node, worklist);
 
 		case LITERAL:
 			return true;
 
+		// A computed key is part of the value, so it must be a literal too.
 		case MEMBER_EXPRESSION: {
-			worklist.push(node.object);
+			pushMemberExpressionChildren(node, worklist);
 			return true;
 		}
 
@@ -100,7 +110,8 @@ function isConstructorLiteralAssignment(statement: ESTree.Statement): statement 
 	if (!isExpressionStatement(statement)) return false;
 
 	const { expression } = statement;
-	if (!isAssignmentExpression(expression)) return false;
+	// `+=` and its kind read the old value, so only a plain `=` qualifies.
+	if (!isAssignmentExpression(expression) || expression.operator !== "=") return false;
 
 	const { left } = expression;
 	if (!isMemberExpression(left) || !isThisExpression(left.object)) return false;

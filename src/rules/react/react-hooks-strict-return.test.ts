@@ -47,6 +47,32 @@ describe("react-hooks-strict-return", () => {
 				code: "function useFoo() { const a = [1, 2]; const b = [...a]; const c = [...b, 3]; return c; }",
 				errors,
 			},
+
+			// Returns inside blocks of the hook itself still belong to the hook
+			{ code: "function useFoo(flag) { if (flag) { return [1, 2, 3]; } return [1]; }", errors },
+			{ code: "function useFoo(list) { for (const item of list) { return [item, 1, 2]; } return [1]; }", errors },
+			{ code: "function useFoo() { try { return [1, 2, 3]; } catch { return [1]; } }", errors },
+
+			// A named function expression that is a hook
+			{ code: "const foo = function useFoo() { return [1, 2, 3]; };", errors },
+
+			// A nested callback does not hide the hook's own return
+			{ code: "function useItems() { items.forEach((item) => { return [item]; }); return [1, 2, 3]; }", errors },
+
+			// A hook declared inside another hook is checked on its own
+			{ code: "function useOuter() { function useInner() { return [1, 2, 3]; } return useInner; }", errors },
+			{
+				code: "const useOuter = () => { const useInner = () => { return [1, 2, 3]; }; return useInner; };",
+				errors,
+			},
+			{
+				code: "function useOuter() { const make = () => { function useInner() { return [1, 2, 3]; } return useInner; }; return make; }",
+				errors,
+			},
+			{
+				code: "function useOuter() { function useInner() { return [1, 2, 3]; } return [4, 5, 6]; }",
+				errors: [{ messageId: "tooManyReturnValues" }, { messageId: "tooManyReturnValues" }],
+			},
 		],
 		valid: [
 			// 1 or 2 element arrays are fine
@@ -103,6 +129,22 @@ describe("react-hooks-strict-return", () => {
 			// A self-referencing spread initializer terminates
 			{ code: "function useLoop() { const a = [...a]; return a; }" },
 			{ code: "function useLoop() { const a = [...b]; const b = [...a]; return a; }" },
+
+			// A return inside a nested callback is not the hook's return
+			{
+				code: [
+					"function useItems() {",
+					"\tconst sorted = useMemo(() => { return [a, b, c, d, e]; }, []);",
+					"\titems.forEach((item) => { return [item, 1, 2, 3, 4]; });",
+					"\treturn sorted;",
+					"}",
+				].join("\n"),
+			},
+			{ code: "function useFoo() { return () => { return [1, 2, 3]; }; }" },
+			{ code: "function useFoo() { function helper() { return [1, 2, 3]; } return helper; }" },
+			{ code: "const useFoo = () => { const run = function () { return [1, 2, 3]; }; return run; };" },
+			{ code: "function useFoo() { const run = () => { const bar = [1, 2, 3]; return bar; }; return run; }" },
+			{ code: "function useOuter() { function inner() { return [1, 2, 3]; } return [inner, 1]; }" },
 		],
 	});
 });

@@ -21,7 +21,7 @@ import {
 import { getReferencedVariable, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolvesToModuleBinding } from "$oxc-utilities/module-binding-resolution";
-import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { getRootExpression, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
@@ -122,16 +122,6 @@ function getProgram(node: ESTree.Node): ESTree.Program | undefined {
 	return undefined;
 }
 
-function getReferencedRoot(expression: ESTree.Expression): ESTree.Expression {
-	let current = stripExpressionWrappers(expression);
-
-	while (isMemberExpression(current)) {
-		current = stripExpressionWrappers(current.object);
-	}
-
-	return current;
-}
-
 /**
  * Collects where each module binding that the action object reads is declared.
  *
@@ -145,7 +135,7 @@ function getReferencedDefinitionStarts(sourceCode: SourceCode, actionObject: EST
 	const properties = actionObject.properties.filter(isProperty);
 
 	for (const property of properties) {
-		const root = getReferencedRoot(property.value);
+		const root = getRootExpression(property.value);
 		const variable = isIdentifier(root) ? getReferencedVariable(sourceCode, root) : undefined;
 
 		if (variable !== undefined) {

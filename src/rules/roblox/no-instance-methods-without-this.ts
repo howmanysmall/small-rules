@@ -5,12 +5,12 @@ import {
 	isIdentifier,
 	isKeyOfNode,
 	isMethodDefinition,
-	isNode,
 	isPropertyDefinition,
 	isSuper,
 	isThisExpression,
 } from "@small-rules/oxlint-utilities";
 
+import { forEachNodeValue } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
@@ -44,23 +44,10 @@ function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOpt
 	return true;
 }
 
-function pushChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
+function visitChildren(node: ESTree.Node, visit: (child: ESTree.Node) => void): void {
 	for (const [key, value] of Object.entries(node)) {
 		if (isKeyOfNode(key)) continue;
-
-		if (Array.isArray(value)) {
-			for (const item of value) {
-				if (isNode(item)) {
-					worklist.push(item);
-				}
-			}
-
-			continue;
-		}
-
-		if (isNode(value)) {
-			worklist.push(value);
-		}
+		forEachNodeValue(value, visit);
 	}
 }
 
@@ -86,6 +73,10 @@ function pushClassHeader(node: ESTree.Class, worklist: Array<ESTree.Node>): void
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
 	const worklist: Array<ESTree.Node> = [value];
 
+	function enqueue(child: ESTree.Node): void {
+		worklist.push(child);
+	}
+
 	for (const current of worklist) {
 		if (isThisExpression(current) || isSuper(current)) return true;
 
@@ -96,7 +87,7 @@ function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
 			continue;
 		}
 
-		pushChildren(current, worklist);
+		visitChildren(current, enqueue);
 	}
 
 	return false;

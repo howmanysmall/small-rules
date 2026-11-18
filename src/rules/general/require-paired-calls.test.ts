@@ -1160,6 +1160,69 @@ function test() {
 				],
 				errors: [{ messageId: "robloxYieldViolation" }],
 			},
+
+			// Switch cases that stay separate branches keep their reports
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+            doWork();
+        case 2:
+            debug.profileend();
+            break;
+        default:
+            debug.profileend();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+            debug.profileend();
+            break;
+        default:
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+        case 2:
+            doWork();
+            break;
+        default:
+            debug.profileend();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+        case 2:
+            debug.profileend();
+            break;
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
 		],
 		valid: [
 			// Calls without a nameable callee sit between a balanced pair
@@ -1516,6 +1579,37 @@ function test(val) {
         default:
             debug.profilebegin("default");
             doWork();
+            debug.profileend();
+    }
+}
+`,
+			},
+
+			// Grouped case labels run on into the next case, so they are not
+			// branches of their own
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+        case 2:
+            debug.profileend();
+            break;
+        default:
+            debug.profileend();
+    }
+}
+`,
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        default:
+        case 1:
+        case 2:
             debug.profileend();
     }
 }

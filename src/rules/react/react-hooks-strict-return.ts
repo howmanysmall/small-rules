@@ -201,30 +201,21 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const arrayInitializersByName = new Map<string, Array<ESTree.ArrayExpression>>();
-		let hookDepth = 0;
+		// One entry per function entered, true when that function is a hook.
+		// A return belongs to the innermost function, so only the last
+		// entry decides whether a return is checked.
+		const functionIsHookStack = new Array<boolean>();
 
-		function enterNamedHook(node: ESTree.Function): void {
-			if (isHookFunction(node)) {
-				hookDepth += 1;
-			}
+		function enterNamedFunction(node: ESTree.Function): void {
+			functionIsHookStack.push(isHookFunction(node));
 		}
 
-		function exitNamedHook(node: ESTree.Function): void {
-			if (isHookFunction(node)) {
-				hookDepth -= 1;
-			}
+		function enterArrowFunction(node: ESTree.ArrowFunctionExpression): void {
+			functionIsHookStack.push(isHookArrowFunction(node));
 		}
 
-		function enterArrowHook(node: ESTree.ArrowFunctionExpression): void {
-			if (isHookArrowFunction(node)) {
-				hookDepth += 1;
-			}
-		}
-
-		function exitArrowHook(node: ESTree.ArrowFunctionExpression): void {
-			if (isHookArrowFunction(node)) {
-				hookDepth -= 1;
-			}
+		function exitFunction(): void {
+			functionIsHookStack.pop();
 		}
 
 		function reportTooManyReturnValues(node: ESTree.ReturnStatement): void {
@@ -252,7 +243,8 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		}
 
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
-			if (hookDepth === 0 || node.argument === null || isObjectExpression(node.argument)) return;
+			if (functionIsHookStack.at(-1) !== true) return;
+			if (node.argument === null || isObjectExpression(node.argument)) return;
 
 			if (isIdentifier(node.argument)) {
 				checkIdentifierReturn(node, node.argument);
@@ -265,12 +257,12 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		}
 
 		return {
-			ArrowFunctionExpression: enterArrowHook,
-			"ArrowFunctionExpression:exit": exitArrowHook,
-			FunctionDeclaration: enterNamedHook,
-			"FunctionDeclaration:exit": exitNamedHook,
-			FunctionExpression: enterNamedHook,
-			"FunctionExpression:exit": exitNamedHook,
+			ArrowFunctionExpression: enterArrowFunction,
+			"ArrowFunctionExpression:exit": exitFunction,
+			FunctionDeclaration: enterNamedFunction,
+			"FunctionDeclaration:exit": exitFunction,
+			FunctionExpression: enterNamedFunction,
+			"FunctionExpression:exit": exitFunction,
 			ReturnStatement: checkReturnStatement,
 			VariableDeclarator(node): void {
 				const initializer = getArrayInitializer(node);

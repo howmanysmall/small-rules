@@ -1,9 +1,11 @@
 import {
 	getTypeAnnotationFromBinding,
 	hasName,
+	isAnyFunction,
 	isArrayExpression,
 	isCallExpression,
 	isIdentifier,
+	isIdentifierNamed,
 	isImportDeclaration,
 	isMemberExpression,
 	isNewExpression,
@@ -117,6 +119,74 @@ export function forEachNode(
 		if (result === STOP_NODE_TRAVERSAL) break;
 		if (result === false) continue;
 		pushNodeChildren(current, workList);
+	}
+}
+
+/**
+ * Whether a node reads an identifier before any nested function could run. A
+ * nested function only reads it later, so the walk does not enter one.
+ *
+ * @param root - The node to search.
+ * @param identifierName - The name to look for.
+ * @param skippedNode - A descendant whose subtree the search ignores.
+ * @returns Whether the identifier is read immediately.
+ */
+export function hasEagerIdentifierReference(
+	root: ESTree.Node,
+	identifierName: string,
+	skippedNode?: ESTree.Node,
+): boolean {
+	let hasReference = false;
+
+	forEachNode(root, (current) => {
+		if (current === skippedNode || isAnyFunction(current)) return false;
+
+		if (isIdentifierNamed(current, identifierName)) {
+			hasReference = true;
+			return STOP_NODE_TRAVERSAL;
+		}
+
+		return true;
+	});
+
+	return hasReference;
+}
+
+/**
+ * Appends the operands of a member expression: its object, and its property
+ * only when the property is computed.
+ *
+ * @param node - The member expression to read.
+ * @param worklist - The worklist that receives the operands.
+ */
+export function pushMemberExpressionChildren(node: ESTree.MemberExpression, worklist: Array<ESTree.Node>): void {
+	worklist.push(node.object);
+
+	if (node.computed) {
+		worklist.push(node.property);
+	}
+}
+
+/**
+ * Passes a child value of a node to a callback: each node of an array, or the
+ * node itself. Anything that is not a node is ignored.
+ *
+ * @param value - A property value read from a node.
+ * @param visit - Called with every node in the value.
+ */
+export function forEachNodeValue(value: PropertyDescriptor["value"], visit: (node: ESTree.Node) => void): void {
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			if (isNode(item)) {
+				visit(item);
+			}
+		}
+
+		return;
+	}
+
+	if (isNode(value)) {
+		visit(value);
 	}
 }
 

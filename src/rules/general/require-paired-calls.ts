@@ -313,6 +313,35 @@ function isBreakOrContinueStatement(node: ESTree.Node): node is ESTree.BreakStat
 	return isBreakStatement(node) || isContinueStatement(node);
 }
 
+/**
+ * Whether a switch case has no statements and runs on into the next case, as
+ * in the grouped labels of `case 1: case 2:`. The last case has no next case.
+ *
+ * @param node - The case to check.
+ * @param parent - The switch that holds the case.
+ * @returns `true` when the case shares the body of the case after it.
+ */
+function isGroupedCaseLabel(node: ESTree.SwitchCase, parent: ESTree.SwitchStatement): boolean {
+	return node.consequent.length === 0 && parent.cases.at(-1) !== node;
+}
+
+/**
+ * Counts the cases of a switch that are a branch of their own.
+ *
+ * @param node - The switch statement.
+ * @returns The number of cases that are not grouped labels.
+ */
+function countSwitchBranches(node: ESTree.SwitchStatement): number {
+	let count = 0;
+	for (const caseNode of node.cases) {
+		if (!isGroupedCaseLabel(caseNode, node)) {
+			count += 1;
+		}
+	}
+
+	return count;
+}
+
 const messages = {
 	asyncViolation: "Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)",
 	conditionalOpener: "Conditional opener '{{opener}}' at {{location}} may not have matching closer on all paths",
@@ -615,14 +644,17 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			branchStacks.delete(node);
 		}
 
-		function recordBranchAndRestore(statement: ESTree.Node): void {
-			recordBranchSnapshot(statement);
-
+		function restoreSnapshot(statement: ESTree.Node): void {
 			const originalStack = stackSnapshots.get(statement);
 			/* v8 ignore next -- @preserve branch exits are paired with their statement's enter snapshot. */
 			if (originalStack) {
 				restoreOpenerStack(originalStack);
 			}
+		}
+
+		function recordBranchAndRestore(statement: ESTree.Node): void {
+			recordBranchSnapshot(statement);
+			restoreSnapshot(statement);
 		}
 
 		function onIfStatementExit(node: ESTree.Node): void {
@@ -712,7 +744,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			const hasDefault = node.cases.some((caseNode) => caseNode.test === null);
 
-			if (hasDefault && branches.length === node.cases.length) {
+			if (hasDefault && branches.length === countSwitchBranches(node)) {
 				retainCommonOpeners(originalStack, branches);
 			} else {
 				restoreOpenerStack(originalStack);
@@ -733,7 +765,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 			/* v8 ignore else -- @preserve switch case exit selector only runs for SwitchStatement cases. */
 			if (isSwitchStatement(parent)) {
-				recordBranchAndRestore(parent);
+				if (isGroupedCaseLabel(node, parent)) {
+					restoreSnapshot(parent);
+				} else {
+					recordBranchAndRestore(parent);
+				}
 			}
 		}
 

@@ -19,8 +19,8 @@ import { Predicate } from "effect";
 import { forEachNode, getVariableByName, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { NodeType } from "@small-rules/oxlint-utilities";
-import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { FixReturn, NodeType } from "@small-rules/oxlint-utilities";
+import type { ESTree, Fixer, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
 
 type QueryType = "get" | "has";
@@ -261,6 +261,31 @@ function isMergeUnsafe(calls: ReadonlyArray<WorldQueryCall>): boolean {
 	return calls.some(({ componentNode, entityNode }) => isStringLiteral(componentNode) || isStringLiteral(entityNode));
 }
 
+interface MergedQueryReport {
+	/**
+	 * Builds the fix; `undefined` when the merge would be wrong to write.
+	 */
+	readonly createFix: ((fixer: Fixer) => FixReturn) | undefined;
+	readonly fixedCode: string;
+	readonly messageId: "preferSingleGet" | "preferSingleHas";
+	readonly node: ESTree.CallExpression;
+}
+
+/**
+ * Reports a group of queries that one merged call can replace.
+ *
+ * @param context - The rule context.
+ * @param report - The merged code, the report target, and the optional fix.
+ */
+function reportMergedQuery(context: Context, { createFix, fixedCode, messageId, node }: MergedQueryReport): void {
+	if (createFix === undefined) {
+		context.report({ data: { fixedCode }, messageId, node });
+		return;
+	}
+
+	context.report({ data: { fixedCode }, fix: createFix, messageId, node });
+}
+
 function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context): void {
 	/* v8 ignore next -- @preserve callers only flush get groups with at least two calls. */
 	if (calls.length < 2) return;
@@ -286,20 +311,11 @@ function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	const componentArguments = componentTexts.join(", ");
 	const fixedCode = `const ${destructuring} = ${worldText}.get(${entityText}, ${componentArguments});`;
 
-	// The merged call runs before any of the group's variables exist.
-	if (isMergeUnsafe(calls)) {
-		context.report({ data: { fixedCode }, messageId: "preferSingleGet", node: firstCall.node });
-		return;
-	}
+	const createFix = isMergeUnsafe(calls)
+		? undefined
+		: (fixer: Fixer): FixReturn => fixer.replaceTextRange(getDeclarationsRange(calls), fixedCode);
 
-	context.report({
-		data: { fixedCode },
-		fix(fixer) {
-			return fixer.replaceTextRange(getDeclarationsRange(calls), fixedCode);
-		},
-		messageId: "preferSingleGet",
-		node: firstCall.node,
-	});
+	reportMergedQuery(context, { createFix, fixedCode, messageId: "preferSingleGet", node: firstCall.node });
 }
 
 function getDeclarationsRange(calls: ReadonlyArray<WorldQueryCall>): ESTree.Node["range"] {
@@ -412,19 +428,15 @@ function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	const declarationsRange = getDeclarationsRange(calls);
 	const chain = isMergeUnsafe(calls) ? undefined : findReplaceableChain(calls, declarationsRange[1], sourceCode);
 
-	if (chain === undefined) {
-		context.report({ data: { fixedCode }, messageId: "preferSingleHas", node: firstCall.node });
-		return;
-	}
+	const createFix =
+		chain === undefined
+			? undefined
+			: (fixer: Fixer): FixReturn => [
+					fixer.replaceTextRange(declarationsRange, fixedCode),
+					fixer.replaceText(chain, MERGED_HAS_NAME),
+				];
 
-	context.report({
-		data: { fixedCode },
-		fix(fixer) {
-			return [fixer.replaceTextRange(declarationsRange, fixedCode), fixer.replaceText(chain, MERGED_HAS_NAME)];
-		},
-		messageId: "preferSingleHas",
-		node: firstCall.node,
-	});
+	reportMergedQuery(context, { createFix, fixedCode, messageId: "preferSingleHas", node: firstCall.node });
 }
 
 const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-jecs", "roblox/jecs", {

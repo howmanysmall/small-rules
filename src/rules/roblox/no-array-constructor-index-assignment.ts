@@ -1,5 +1,4 @@
 import {
-	isAnyFunction,
 	isAssignmentExpression,
 	isBindingIdentifier,
 	isExpressionStatement,
@@ -7,14 +6,14 @@ import {
 	isMemberExpression,
 	isNewExpression,
 	isNumericLiteral,
-	isSequenceExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
-import { forEachNode, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
+import { forEachNode, hasEagerIdentifierReference, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getListElementText } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -42,29 +41,6 @@ interface Candidate {
 function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
 	let hasReference = false;
 	forEachNode(node, (current) => {
-		if (isIdentifierNamed(current, arrayIdentifierName)) {
-			hasReference = true;
-			return STOP_NODE_TRAVERSAL;
-		}
-
-		return true;
-	});
-	return hasReference;
-}
-
-/**
- * A nested function only reads the array later, so it is not a read in the
- * initializer.
- *
- * @param node - The assigned value.
- * @param arrayIdentifierName - The name of the array being filled.
- * @returns Whether the value reads the array immediately.
- */
-function hasEagerArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
-	let hasReference = false;
-	forEachNode(node, (current) => {
-		if (isAnyFunction(current)) return false;
-
 		if (isIdentifierNamed(current, arrayIdentifierName)) {
 			hasReference = true;
 			return STOP_NODE_TRAVERSAL;
@@ -169,19 +145,6 @@ function collectNextAssignment(
 	return true;
 }
 
-/**
- * Oxlint's getText drops the parentheses of a sequence, which would split it
- * into several elements.
- *
- * @param sourceCode - The source code to read from.
- * @param expression - The assigned value.
- * @returns The text, wrapped in parentheses when it is a sequence.
- */
-function getValueText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	const text = sourceCode.getText(expression);
-	return isSequenceExpression(expression) ? `(${text})` : text;
-}
-
 function getCandidate(
 	sourceCode: SourceCode,
 	statements: ReadonlyArray<ProgramStatement>,
@@ -208,14 +171,14 @@ function getCandidate(
 	return {
 		assignments: foundAssignments.map((found) => ({
 			statement: found.statement,
-			valueText: getValueText(sourceCode, found.expression.right),
+			valueText: getListElementText(sourceCode, found.expression.right),
 		})),
 		declaration,
 		declarator,
 		firstAssignmentStatement: firstFound.statement,
 		lastAssignmentStatement: lastFound.statement,
 		readsArray: foundAssignments.some((found) =>
-			hasEagerArrayReference(found.expression.right, arrayIdentifierName),
+			hasEagerIdentifierReference(found.expression.right, arrayIdentifierName),
 		),
 	};
 }

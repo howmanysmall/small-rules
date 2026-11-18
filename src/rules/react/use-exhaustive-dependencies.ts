@@ -17,7 +17,6 @@ import {
 	isIdentifierNamed,
 	isLogicalExpression,
 	isMemberExpression,
-	isNode,
 	isParenthesizedExpression,
 	isProgram,
 	isProperty,
@@ -40,6 +39,7 @@ import {
 import { compareWithLocale } from "@small-rules/string-utilities/compare-with-locale";
 import { Predicate } from "effect";
 
+import { forEachNodeValue } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	getBindingPropertyKeyName,
@@ -708,17 +708,7 @@ function visitChildNodes(current: ESTree.Node, sourceCode: SourceCode, visit: (n
 	for (const key of keys) {
 		/* v8 ignore next -- @preserve traversal only visits parser node records. */
 		if (!Predicate.isObject(current)) break;
-		const value = current[key];
-		if (Array.isArray(value)) {
-			/* v8 ignore next -- @preserve visitor-key arrays contain parser nodes when present. */
-			for (const item of value) {
-				if (isNode(item)) {
-					visit(item);
-				}
-			}
-		} else if (isNode(value)) {
-			visit(value);
-		}
+		forEachNodeValue(current[key], visit);
 	}
 }
 

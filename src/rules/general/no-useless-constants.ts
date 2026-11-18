@@ -37,6 +37,7 @@ import {
 	forEachNode,
 	getDeclarationRemovalRange,
 	hasAttachedComments,
+	pushMemberExpressionChildren,
 	STOP_NODE_TRAVERSAL,
 } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
@@ -208,12 +209,7 @@ function appendRelocatableChildren(
 		}
 
 		case MEMBER_EXPRESSION: {
-			worklist.push(node.object);
-
-			if (node.computed) {
-				worklist.push(node.property);
-			}
-
+			pushMemberExpressionChildren(node, worklist);
 			return true;
 		}
 

@@ -6,6 +6,16 @@ import noRecursive from "$oxc-rules/general/no-recursive";
 describe("no-recursive", () => {
 	js.run("no-recursive", noRecursive, {
 		invalid: [
+			// A local function that shares a name with an import elsewhere is
+			// still recursion when it calls itself
+			{
+				code: "function walk(node) { return node ? walk(node.next) : undefined; }",
+				errors: [{ messageId: "noRecursive" }],
+			},
+			{
+				code: "const descend = function descend(depth) { return depth > 0 ? descend(depth - 1) : 0; };",
+				errors: [{ messageId: "noRecursive" }],
+			},
 			// Direct recursion — factorial
 			{
 				code: [
@@ -103,11 +113,95 @@ describe("no-recursive", () => {
 				].join("\n"),
 				errors: [{ messageId: "noRecursive" }],
 			},
+
+			// A method keeps its report when another class has a method of the
+			// same name
+			{
+				code: "class First { run() { this.run(); } } class Second { run() {} }",
+				errors: [{ messageId: "noRecursive" }],
+			},
+			{
+				code: "class First { run() { this.run(); } } class Second { run() { this.run(); } }",
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
+			// A method and a plain function of the same name stay one function
+			{
+				code: "function run() {} class Runner { run() { run(); } }",
+				errors: [{ messageId: "noRecursive" }],
+			},
+			{
+				code: "const run = make(); class Runner { run() { run(); } }",
+				errors: [{ messageId: "noRecursive" }],
+			},
+			// A `this` call and a bare call can close a cycle together
+			{
+				code: "class Looper { step() { const again = () => this.step(); again(); } }",
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
+			// A subclass method shares its node with the ancestor method it
+			// overrides, so `super` calls close a cycle across the classes
+			{
+				code: [
+					"class Parent {",
+					"  update() {}",
+					"  render() { this.update(); }",
+					"}",
+					"class Child extends Parent {",
+					"  render() { super.render(); }",
+					"  update() { this.render(); }",
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
+			{
+				code: [
+					"class Grand {",
+					"  update() {}",
+					"  render() { this.update(); }",
+					"}",
+					"class Middle extends Grand {}",
+					"class Leaf extends Middle {",
+					"  render() { super.render(); }",
+					"  update() { this.render(); }",
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
+			// A class that extends itself in a cycle still ends the search
+			{
+				code: [
+					"class First extends Second { run() { this.run(); } }",
+					"class Second extends First { run() {} }",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }],
+			},
 		],
 		valid: [
+			// A bare call to an import or a parameter of the same name does
+			// not call the method it sits in
+			'import { log } from "./logger"; export class Logger { log(message) { log(message); } }',
+			"class Runner { run(run) { run(); } }",
 			"class Walker { first() { this.second(); } second() {} }",
 			"class Walker { run() { this.missing(); } }",
+			// Same-named methods of different classes are different functions
+			[
+				"export class Parent {",
+				"  update() {}",
+				"  render() { this.update(); }",
+				"}",
+				"export class Child {",
+				"  render() {}",
+				"  update() { this.render(); }",
+				"}",
+			].join("\n"),
+			"class First { run() { this.helper(); } helper() {} } class Second { helper() { this.run(); } run() {} }",
 			"export default class { first() { this.second(); } second() { this.first(); } }",
+			// Siblings of a base that is not declared here stay apart
+			[
+				'import { Base } from "./base";',
+				"class First extends Base { run() { this.helper(); } helper() {} }",
+				"class Second extends Base { helper() { this.run(); } run() {} }",
+			].join("\n"),
 			// Non-recursive function
 			{
 				code: "function foo() { return 1; }",

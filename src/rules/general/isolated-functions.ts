@@ -363,7 +363,8 @@ function reportIsolatedFunction(
 
 const isolatedFunctions = createRule("isolated-functions", "general", {
 	create(context): Visitor {
-		const options = parseOptions(context.options[0]);
+		const [rawOptions] = context.options;
+		const options = parseOptions(rawOptions);
 		const checked = new WeakSet<ESTree.Node>();
 
 		function checkFunctionNode(node: ESTree.Node): void {

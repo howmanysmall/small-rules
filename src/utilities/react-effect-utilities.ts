@@ -95,6 +95,14 @@ export interface ReactEffectAnalysis {
 	isState: (reference: Reference) => boolean;
 	isStateCall: (reference: Reference) => boolean;
 	isStateSetter: (reference: Reference) => boolean;
+	/**
+	 * Tells whether a node names the `useState` hook: the bare identifier, a
+	 * renamed React import, or the `React` object of a `React.useState` call.
+	 *
+	 * @param node - The node to test, usually a reference identifier.
+	 * @returns True when the node names `useState`.
+	 */
+	isUseStateHook: (node: ESTree.Node) => boolean;
 	readonly scope: EffectScopeAnalysis;
 }
 
@@ -184,6 +192,9 @@ function buildReactEffectAnalysis(sourceCode: SourceCode, environment: Environme
 		},
 		isStateSetter(reference): boolean {
 			return isStateSetter(state, reference);
+		},
+		isUseStateHook(node): boolean {
+			return isUseState(state, node);
 		},
 		scope: state.scope,
 	};

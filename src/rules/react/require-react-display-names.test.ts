@@ -230,6 +230,79 @@ export default React.memo(Comp);
 `,
 				errors: [{ messageId: "directMemoExport" }],
 			},
+
+			// A memo used in an exported function and also exported by specifier
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export function Outer() {
+    return <Inner />;
+}
+
+export { Inner };
+`,
+				errors: [{ messageId: "missingMemoDisplayName" }],
+			},
+
+			// A memo used in an exported function and also exported as default
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export function Outer() {
+    return <Inner />;
+}
+
+export default Inner;
+`,
+				errors: [{ messageId: "missingMemoDisplayName" }],
+			},
+
+			// A memo exported through an aliasing declaration
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export const Alias = Inner;
+`,
+				errors: [{ messageId: "missingMemoDisplayName" }],
+			},
+
+			// A context exported through an aliasing declaration
+			{
+				code: `
+import { createContext } from "@rbxts/react";
+
+const Ctx = createContext<number>(0);
+
+export const Alias = Ctx;
+`,
+				errors: [{ messageId: "missingContextDisplayName" }],
+			},
+
+			// A context used inside an exported function and also exported by
+			// specifier
+			{
+				code: `
+import { createContext, useContext } from "@rbxts/react";
+
+const Ctx = createContext<number>(0);
+
+export function useValue() {
+    return useContext(Ctx);
+}
+
+export { Ctx };
+`,
+				errors: [{ messageId: "missingContextDisplayName" }],
+			},
 		],
 		valid: [
 			// Memo with displayName - proper pattern
@@ -586,6 +659,93 @@ const MemoComp = memo(Comp);
 Namespace.MemoComp.displayName = "MemoComp";
 MemoComp.displayName = "MemoComp";
 export default MemoComp;
+`,
+			},
+
+			// A private memo used only inside an exported function body
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export function Outer() {
+    return <Inner />;
+}
+`,
+			},
+
+			// A private memo used inside an exported default function
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export default function Outer() {
+    return <Inner />;
+}
+`,
+			},
+
+			// A private memo used inside an exported arrow function
+			{
+				code: `
+import { memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export const Outer = () => <Inner />;
+`,
+			},
+
+			// A private memo passed to a call inside an exported function body
+			{
+				code: `
+import { createElement, memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export function Outer() {
+    return createElement(Inner);
+}
+`,
+			},
+
+			// A private memo passed to a call inside an exported arrow function
+			{
+				code: `
+import { createElement, memo } from "@rbxts/react";
+
+const Inner = memo(() => null);
+
+export const Outer = () => createElement(Inner);
+`,
+			},
+
+			// A private context used inside an exported hook body
+			{
+				code: `
+import { createContext, useContext } from "@rbxts/react";
+
+const Ctx = createContext<number>(0);
+
+export function useValue() {
+    return useContext(Ctx);
+}
+`,
+			},
+
+			// A private context used inside a callback of an exported function
+			{
+				code: `
+import { createContext, useContext } from "@rbxts/react";
+
+const Ctx = createContext<number>(0);
+
+export function useValues(items: Array<number>) {
+    return items.map(() => useContext(Ctx));
+}
 `,
 			},
 		],
