@@ -19,7 +19,7 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { walkAstSlop } from "$oxc-utilities/react-hook-utilities";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type MessageId =
 	| "asyncIifeInConstructor"
@@ -75,10 +75,23 @@ function isAssignedToThisProperty(node: ESTree.Node): boolean {
 	return isMemberExpression(parent.left) && isThisExpression(parent.left.object);
 }
 
-function getLocalVariableAssignment(node: ESTree.Node): string | undefined {
+/**
+ * Names the local variable a promise is stored in when nothing reads it.
+ *
+ * @param sourceCode - The source code that holds the scope information.
+ * @param node - The async method call.
+ * @returns The variable name, or `undefined` when the call is not stored in
+ *   a plain variable or the variable is read later.
+ */
+function getUnreadLocalVariableName(sourceCode: SourceCode, node: ESTree.Node): string | undefined {
 	const { parent } = node;
-	if (!isVariableDeclarator(parent) || parent.init !== node) return undefined;
-	return isIdentifier(parent.id) ? parent.id.name : undefined;
+	if (!isVariableDeclarator(parent) || parent.init !== node || !isIdentifier(parent.id)) return undefined;
+
+	const isRead = sourceCode
+		.getDeclaredVariables(parent)
+		.some((variable) => variable.references.some((reference) => reference.isRead()));
+
+	return isRead ? undefined : parent.id.name;
 }
 
 function isNonIifeFunction(node: ESTree.Node): boolean {
@@ -110,6 +123,7 @@ function isInsideSkippedFunction(node: ESTree.Node, constructorBody: ESTree.Bloc
 }
 
 function getAsyncMethodViolation(
+	sourceCode: SourceCode,
 	node: ESTree.CallExpression,
 	asyncMethods: ReadonlySet<string>,
 ): ConstructorViolation | undefined {
@@ -124,7 +138,7 @@ function getAsyncMethodViolation(
 		};
 	}
 
-	const variableName = getLocalVariableAssignment(node);
+	const variableName = getUnreadLocalVariableName(sourceCode, node);
 	if (variableName === undefined) return undefined;
 
 	return {
@@ -135,6 +149,7 @@ function getAsyncMethodViolation(
 }
 
 function findConstructorViolations(
+	sourceCode: SourceCode,
 	constructorBody: ESTree.BlockStatement,
 	asyncMethods: ReadonlySet<string>,
 ): ReadonlyArray<ConstructorViolation> {
@@ -159,7 +174,7 @@ function findConstructorViolations(
 			violations[size++] = { messageId: "asyncIifeInConstructor", node: child };
 		}
 
-		const asyncViolation = getAsyncMethodViolation(child, asyncMethods);
+		const asyncViolation = getAsyncMethodViolation(sourceCode, child, asyncMethods);
 		if (asyncViolation !== undefined) {
 			violations[size++] = asyncViolation;
 		}
@@ -192,7 +207,7 @@ const noAsyncConstructor = createRule("no-async-constructor", "general", {
 
 				const asyncMethods = getAsyncMethodNames(node.parent);
 				const constructorBody = node.value.body;
-				const violations = findConstructorViolations(constructorBody, asyncMethods);
+				const violations = findConstructorViolations(context.sourceCode, constructorBody, asyncMethods);
 
 				for (const violation of violations) {
 					reportViolation(violation);

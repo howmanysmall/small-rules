@@ -92,8 +92,19 @@ function isHookCall(node: ESTree.CallExpression): boolean {
 	return hookName !== undefined && isReactHookName(hookName);
 }
 
-function isConditional(node: ESTree.Node): boolean {
-	return isConditionalExpression(node) || isIfStatement(node) || isLogicalExpression(node) || isSwitchStatement(node);
+/**
+ * Whether `child` is a part of `parent` that only runs sometimes. Like React's
+ * own rule, the test of an `if` or a ternary, the left side of a logical
+ * expression, and the discriminant of a `switch` always run.
+ *
+ * @param child - The node the hook call is inside.
+ * @param parent - The parent of `child`.
+ * @returns `true` when `child` is a branch of `parent`.
+ */
+function isConditionalBranch(child: ESTree.Node, parent: ESTree.Node): boolean {
+	if (isLogicalExpression(parent)) return child === parent.right;
+	if (isConditionalExpression(parent) || isIfStatement(parent)) return child !== parent.test;
+	return isSwitchStatement(parent) && child !== parent.discriminant;
 }
 
 function isFinalizerWithinReach(tryStatement: ESTree.TryStatement, child: ESTree.Node, depth: number): boolean {
@@ -126,7 +137,7 @@ function getControlFlow(node: ESTree.CallExpression): ControlFlowMessageId | typ
 		}
 
 		inLoop ||= isLoopNode(parent);
-		inConditional ||= isConditional(parent);
+		inConditional ||= isConditionalBranch(child, parent);
 		child = parent;
 		({ parent } = parent);
 		depth += 1;

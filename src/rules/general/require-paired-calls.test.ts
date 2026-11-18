@@ -18,6 +18,57 @@ function test() {
 				documentation: { id: "fail", title: "Unpaired opener lacks closer" },
 			},
 
+			// A finally that does not close the opener does not excuse a return
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        return compute();
+    } finally {
+        cleanup();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
+			},
+			// A closer that only sits in a callback does not run in the finally
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        return compute();
+    } finally {
+        defer(() => debug.profileend());
+    }
+}
+`,
+				errors: [
+					{ messageId: "unpairedOpener" },
+					{ messageId: "unpairedOpener" },
+					{ messageId: "unpairedCloser" },
+				],
+			},
+			// A return in the finally itself gets no help from that finally
+			{
+				code: `
+function test(flag) {
+    debug.profilebegin("task");
+    try {
+        doWork();
+    } finally {
+        try {
+            return flag;
+        } finally {
+            cleanup();
+        }
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+
 			// Unpaired closer (no opener)
 			{
 				code: `
@@ -1181,6 +1232,34 @@ function test() {
     try {
         riskyOperation();
     } finally {
+        debug.profileend();
+    }
+}
+`,
+			},
+			// An early exit inside the try is closed by the finally too
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        return compute();
+    } finally {
+        debug.profileend();
+    }
+}
+`,
+			},
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        riskyOperation();
+    } catch (problem) {
+        throw wrap(problem);
+    } finally {
+        getReporter()();
         debug.profileend();
     }
 }

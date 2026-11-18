@@ -63,8 +63,51 @@ describe("no-recursive", () => {
 				code: "const factorial = function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); };",
 				errors: [{ messageId: "noRecursive" }],
 			},
+			// Mutual recursion through `this` where the callee is declared later
+			{
+				code: ["class Walker {", "  first() { this.second(); }", "  second() { this.first(); }", "}"].join(
+					"\n",
+				),
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
+			{
+				code: [
+					"class Walker {",
+					"  first() { this.second(); }",
+					"  second() { this.third(); }",
+					"  third() { this.first(); }",
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
+			// Existing reports stay when a later method is called but not part of
+			// a cycle
+			{
+				code: "class Counter { first() { this.first(); this.second(); } second() {} }",
+				errors: [{ messageId: "noRecursive" }],
+			},
+			{
+				code: [
+					"class Counter {",
+					"  first() { this.first(); }",
+					"  second() { this.first(); this.third(); }",
+					"  third() {}",
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }],
+			},
+			{
+				code: [
+					"function loop() { loop(); }",
+					"class Counter { run() { this.helper(); loop(); } helper() {} }",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }],
+			},
 		],
 		valid: [
+			"class Walker { first() { this.second(); } second() {} }",
+			"class Walker { run() { this.missing(); } }",
+			"export default class { first() { this.second(); } second() { this.first(); } }",
 			// Non-recursive function
 			{
 				code: "function foo() { return 1; }",

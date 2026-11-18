@@ -530,6 +530,32 @@ const Component = function() {
 };
 `,
 
+			// As in React's own rule, the left side of a logical expression and
+			// the test of a ternary, an if or a switch always run
+			`
+function Component() {
+    const theme = useContext(ThemeContext) ?? "light";
+    return theme;
+}
+`,
+			`
+function Component() {
+    const label = useMemo(() => true, []) ? "a" : "b";
+    return label;
+}
+`,
+			`
+function Component() {
+    if (useFlag()) {
+        doThing();
+    }
+    switch (useMode()) {
+        case "first":
+            doThing();
+    }
+}
+`,
+
 			// A hook after a loop and a try statement is at the top level again
 			`
 function Component({ items }) {

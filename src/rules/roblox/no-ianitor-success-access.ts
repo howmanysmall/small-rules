@@ -8,7 +8,7 @@ import {
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getReferencedVariable, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
@@ -96,17 +96,44 @@ function isStoredCheckResult(init: ESTree.CallExpression, ianitorCheckVariables:
 	return isIdentifier(callee) && ianitorCheckVariables.has(callee.name);
 }
 
+function isSuccessOnlyResult({ properties, referencedFully }: ResultVariable): boolean {
+	return !referencedFully && properties.has("success") && !properties.has("error") && !properties.has("value");
+}
+
 const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox", {
 	create(context): Visitor {
 		const { sourceCode } = context;
 
 		const ianitorCheckVariables = new Set<string>();
 		const ianitorResultVariables = new Map<string, ResultVariable>();
+		// Tracked per declared variable too, so a name reused in another
+		// scope keeps its own state instead of replacing the first one.
+		const scopeResultVariables = new Map<ScopeVariable, ResultVariable>();
 
-		function markResultFullyUsed(name: string): void {
-			const result = ianitorResultVariables.get(name);
-			if (result !== undefined) {
-				result.referencedFully = true;
+		function getScopeResult(identifier: ESTree.IdentifierReference): ResultVariable | undefined {
+			const variable = getReferencedVariable(sourceCode, identifier);
+			return variable === undefined ? undefined : scopeResultVariables.get(variable);
+		}
+
+		function recordScopeResults(declarator: ESTree.VariableDeclarator, firstSuccessNode: ESTree.Node): void {
+			for (const variable of sourceCode.getDeclaredVariables(declarator)) {
+				scopeResultVariables.set(variable, {
+					firstSuccessNode,
+					properties: new Set(),
+					referencedFully: false,
+				});
+			}
+		}
+
+		function markResultFullyUsed(identifier: ESTree.IdentifierReference): void {
+			const named = ianitorResultVariables.get(identifier.name);
+			if (named !== undefined) {
+				named.referencedFully = true;
+			}
+
+			const scoped = getScopeResult(identifier);
+			if (scoped !== undefined) {
+				scoped.referencedFully = true;
 			}
 		}
 
@@ -125,10 +152,7 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 			CallExpression(node): void {
 				for (const argument of node.arguments) {
 					if (!isIdentifier(argument)) continue;
-					const result = ianitorResultVariables.get(argument.name);
-					if (result !== undefined) {
-						result.referencedFully = true;
-					}
+					markResultFullyUsed(argument);
 				}
 			},
 
@@ -153,31 +177,40 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 					if (result !== undefined) {
 						result.properties.add(property.name);
 					}
+
+					getScopeResult(unwrapped)?.properties.add(property.name);
 				}
 			},
 
 			"Program:exit"(): void {
-				for (const [, { firstSuccessNode, properties, referencedFully }] of ianitorResultVariables) {
-					if (
-						!referencedFully &&
-						properties.has("success") &&
-						!properties.has("error") &&
-						!properties.has("value")
-					) {
-						context.report({
-							messageId: "preferCreateGuard",
-							node: firstSuccessNode,
-						});
-					}
+				const reported = new Set<ESTree.Node>();
+				for (const result of ianitorResultVariables.values()) {
+					if (!isSuccessOnlyResult(result)) continue;
+
+					reported.add(result.firstSuccessNode);
+					context.report({
+						messageId: "preferCreateGuard",
+						node: result.firstSuccessNode,
+					});
+				}
+
+				for (const result of scopeResultVariables.values()) {
+					if (reported.has(result.firstSuccessNode) || !isSuccessOnlyResult(result)) continue;
+
+					context.report({
+						messageId: "preferCreateGuard",
+						node: result.firstSuccessNode,
+					});
 				}
 			},
 
 			ReturnStatement({ argument }): void {
 				if (!isIdentifier(argument)) return;
-				markResultFullyUsed(argument.name);
+				markResultFullyUsed(argument);
 			},
 
-			VariableDeclarator({ id, init }): void {
+			VariableDeclarator(node): void {
+				const { id, init } = node;
 				if (init === null) return;
 
 				const unwrappedInit = stripExpressionWrappers(init);
@@ -198,6 +231,8 @@ const noIanitorSuccessAccess = createRule("no-ianitor-success-access", "roblox",
 						properties: new Set(),
 						referencedFully: false,
 					});
+
+					recordScopeResults(node, id);
 				}
 			},
 		} satisfies Visitor;

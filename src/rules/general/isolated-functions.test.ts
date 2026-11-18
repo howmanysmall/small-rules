@@ -382,6 +382,18 @@ describe("isolated-functions", () => {
 				"  return b;",
 				"});",
 			].join("\n"),
+			// The head of a qualified type name is a type position too.
+			[
+				'import type * as NS from "./types";',
+				"export const a = makeSynchronous((value: NS.Item): number => value.size);",
+			].join("\n"),
+			[
+				"const outer = 1;",
+				"makeSynchronous(() => {",
+				"  const fixed: typeof outer.toFixed = (digits) => String(digits);",
+				"  return fixed;",
+				"});",
+			].join("\n"),
 		],
 	});
 });

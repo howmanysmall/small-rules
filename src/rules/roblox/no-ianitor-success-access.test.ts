@@ -117,8 +117,118 @@ function run() {
 `,
 				errors: [{ messageId: "preferCreateGuard" }],
 			},
+			// Same variable name in two functions, one uses it as a whole
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+function first(value: unknown) {
+	const result = validator(value);
+	return result.success;
+}
+function second(value: unknown) {
+	const result = validator(value);
+	log(result);
+	return result.success;
+}
+`,
+				errors: [{ messageId: "preferCreateGuard" }],
+			},
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+function first(value: unknown) {
+	const result = validator(value);
+	return result.success;
+}
+function second(value: unknown) {
+	const result = validator(value);
+	return result;
+}
+`,
+				errors: [{ messageId: "preferCreateGuard" }],
+			},
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+function first(value: unknown) {
+	const result = validator(value);
+	return result.success;
+}
+function second(value: unknown) {
+	const result = validator(value);
+	return result.success;
+}
+`,
+				errors: [{ messageId: "preferCreateGuard" }, { messageId: "preferCreateGuard" }],
+			},
+			// Reports made before stay when one name is declared twice
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+function first(value: unknown) {
+	const result = validator(value);
+	log(result);
+	return result.value;
+}
+function second(value: unknown) {
+	const result = validator(value);
+	return result.success;
+}
+`,
+				errors: [{ messageId: "preferCreateGuard" }],
+			},
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+const result = validator("a");
+function read(result: { success: boolean }) {
+	return result.success;
+}
+`,
+				errors: [{ messageId: "preferCreateGuard" }],
+			},
+			{
+				code: `
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+function run(value: unknown) {
+	const result = validator(value);
+	const read = () => result.success;
+	return read();
+}
+`,
+				errors: [{ messageId: "preferCreateGuard" }],
+			},
 		],
 		valid: [
+			`
+import { Ianitor } from "@packages/ianitor";
+const ids = { a: "a" } as const;
+const validator = Ianitor.keyOf(ids);
+function first(value: unknown) {
+	const result = validator(value);
+	log(result);
+	return result.success;
+}
+function second(value: unknown) {
+	const result = validator(value);
+	return result;
+}
+`,
+			`
+missing.success;
+`,
 			// Ianitor check stored, no .success access
 			{
 				code: `

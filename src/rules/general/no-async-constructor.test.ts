@@ -107,6 +107,20 @@ class BadOrphaned {
 				errors: [{ messageId: "orphanedPromise" }],
 			},
 
+			// A stored promise that is only overwritten is still orphaned
+			{
+				code: `
+class BadReassigned {
+    constructor() {
+        let pending = this.load();
+        pending = undefined;
+    }
+    async load() {}
+}
+`,
+				errors: [{ messageId: "orphanedPromise" }],
+			},
+
 			// Multiple unhandled calls
 			{
 				code: `
@@ -195,6 +209,16 @@ class BadMultipleOrphaned {
 			},
 		],
 		valid: [
+			// A stored promise that is read afterwards is consumed
+			`
+class Store {
+    constructor() {
+        const pending = this.load();
+        this.ready = pending;
+    }
+    async load() {}
+}
+`,
 			// Static factory pattern
 			{
 				code: `

@@ -33,6 +33,10 @@ describe("no-warn", () => {
 			},
 		],
 		valid: [
+			// A local binding of the same name is not the global.
+			'import { warn } from "./log"; warn("message");',
+			"function run(warn) { warn('message'); }",
+			"function warn(message) { return message; } warn('message');",
 			{
 				code: "Log.warn('Hello');",
 				documentation: { id: "pass", title: "logger warn call" },

@@ -25,6 +25,7 @@ import { type } from "arktype";
 import { Predicate } from "effect";
 import { Minimatch } from "minimatch";
 
+import { forEachNode } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { mergeIntoStackTop } from "$oxc-utilities/stack-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
@@ -134,6 +135,45 @@ function getCallName({ callee }: ESTree.CallExpression): string | undefined {
 	}
 
 	return undefined;
+}
+
+function addCallNames(block: ESTree.BlockStatement, names: Set<string>): void {
+	forEachNode(block, (node) => {
+		// A call inside a callback does not run with the block.
+		if (isAnyFunction(node)) return false;
+
+		const name = isCallExpression(node) ? getCallName(node) : undefined;
+		if (name !== undefined) {
+			names.add(name);
+		}
+
+		return true;
+	});
+}
+
+/**
+ * Names every call made directly in a `finally` block that still runs when
+ * this statement leaves its `try`. A `finally` the statement is itself inside
+ * has already started, so it does not count.
+ *
+ * @param statementNode - The `return` or `throw` statement.
+ * @returns The called names, as `name` or `object.property`.
+ */
+function collectFinalizerCallNames(statementNode: ESTree.Node): ReadonlySet<string> {
+	const names = new Set<string>();
+	let child = statementNode;
+	let { parent } = statementNode;
+
+	while (parent !== null && !isAnyFunction(parent)) {
+		if (isTryStatement(parent) && parent.finalizer !== null && child !== parent.finalizer) {
+			addCallNames(parent.finalizer, names);
+		}
+
+		child = parent;
+		({ parent } = parent);
+	}
+
+	return names;
 }
 
 function getValidClosers(config: PairConfiguration): Array<string> {
@@ -719,7 +759,12 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const currentContext = getCurrentContext();
 			if (currentContext.inFinally || openerStack.length === 0) return;
 
+			const finalizerCallNames = collectFinalizerCallNames(statementNode);
+
 			for (const { config, node, opener } of openerStack) {
+				// A `finally` around this exit still runs and closes the opener.
+				if (getValidClosers(config).some((name) => finalizerCallNames.has(name))) continue;
+
 				const closer = getCloserLabel(config);
 
 				const statementType = isReturnStatement(statementNode) ? "return" : "throw";

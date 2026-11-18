@@ -20,6 +20,58 @@ describe("no-dead-store", () => {
 				errors: [{ messageId: "deadStore" }],
 			},
 			{
+				// A `break` ends the case, so the next case never reads it.
+				code: [
+					"function describeKind(kind: number): string {",
+					"  let label = String(kind);",
+					"  switch (kind) {",
+					"    case 1:",
+					'      label = "one";',
+					"      break;",
+					"    case 2:",
+					"      return label;",
+					"  }",
+					'  return "other";',
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
+				// A case in between that ends in a jump stops the fall-through.
+				code: [
+					"function describeKind(kind: number): string {",
+					"  let label = String(kind);",
+					"  switch (kind) {",
+					"    case 1:",
+					'      label = "one";',
+					"    case 2: {",
+					'      return "two";',
+					"    }",
+					"    case 3:",
+					"      return label;",
+					"  }",
+					'  return "other";',
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
+				// Control never flows from a later case back to an earlier one.
+				code: [
+					"function describeKind(kind: number): string {",
+					"  let label = String(kind);",
+					"  switch (kind) {",
+					"    case 1:",
+					"      return label;",
+					"    case 2:",
+					'      label = "two";',
+					"  }",
+					'  return "other";',
+					"}",
+				].join("\n"),
+				errors: [{ messageId: "deadStore" }],
+			},
+			{
 				// A block at the top level runs with the module, not inside a
 				// function.
 				code: "{ let attempt = first(); attempt = second(); publish(attempt); }",
@@ -75,6 +127,36 @@ describe("no-dead-store", () => {
 			},
 		],
 		valid: [
+			// A case that does not end in a jump falls through, so the next
+			// case reads what it wrote.
+			[
+				"function describeKind(kind: number): string {",
+				"  let label = String(kind);",
+				"  switch (kind) {",
+				"    case 1:",
+				'      label = "one";',
+				"    // falls through",
+				"    case 2:",
+				"      return label;",
+				"    default:",
+				'      return "other";',
+				"  }",
+				"}",
+			].join("\n"),
+			[
+				"function describeKind(kind: number): string {",
+				"  let label = String(kind);",
+				"  switch (kind) {",
+				"    case 1:",
+				'      label = "one";',
+				"    case 2:",
+				"    case 3:",
+				'      label += "!";',
+				"      return label;",
+				"  }",
+				'  return "other";',
+				"}",
+			].join("\n"),
 			{
 				code: `function render(verbose: boolean) {
   const label = makeLabel();

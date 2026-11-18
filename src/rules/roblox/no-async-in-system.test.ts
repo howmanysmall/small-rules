@@ -170,8 +170,45 @@ describe("no-async-in-system", () => {
 				],
 				errors: [{ messageId: "noAsyncInSystem" }],
 			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				const run = () => { Players.GetFriendsAsync(userId); };
+				const descriptor = { system: run } satisfies System<Context>;`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				let run = function () { Players.GetFriendsAsync(userId); };
+				const descriptor: System<Context> = { system: run };`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				const run = () => () => Players.GetFriendsAsync(userId);
+				const descriptor = { system: run } satisfies System<Context>;`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				function run() { Players.GetFriendsAsync(userId); }
+				const descriptor: System<Context> = { system: run };`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
+			{
+				code: `import { Players } from "@rbxts/services";
+				function build() {
+					function run() { Players.GetFriendsAsync(userId); }
+					return run;
+				}
+				const run = () => updateWorld();
+				const descriptor = { system: run } satisfies System<Context>;`,
+				errors: [{ messageId: "noAsyncInSystem" }],
+			},
 		],
 		valid: [
+			`import { Players } from "@rbxts/services";
+				const run = async () => Players.GetFriendsAsync(userId);
+				const descriptor = { system: run } satisfies System<Context>;`,
 			{
 				code: `import { Players } from "@rbxts/services";
 			const system: SystemFunction = () => {

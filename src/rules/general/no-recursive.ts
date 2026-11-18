@@ -85,6 +85,29 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 	return inCycle;
 }
 
+/**
+ * Copies a call graph and adds the edges of the deferred `this` calls.
+ *
+ * @param callGraph - The call graph built while visiting.
+ * @param deferredCallSites - `this` calls resolved when their class closed.
+ * @returns A new call graph that holds both kinds of edges.
+ */
+function addDeferredEdges(
+	callGraph: ReadonlyMap<string, ReadonlySet<string>>,
+	deferredCallSites: ReadonlyArray<CallSite>,
+): Map<string, Set<string>> {
+	const merged = new Map<string, Set<string>>();
+	for (const [name, callees] of callGraph) {
+		merged.set(name, new Set(callees));
+	}
+
+	for (const { callee, caller } of deferredCallSites) {
+		merged.get(caller)?.add(callee);
+	}
+
+	return merged;
+}
+
 function getDirectCalleeName(callee: ESTree.Expression): string | undefined {
 	return isBindingIdentifier(callee) ? callee.name : undefined;
 }
@@ -124,6 +147,9 @@ const noRecursive = createRule("no-recursive", "general", {
 
 		const classStack = new Array<string | undefined>();
 		const classMethods = new Map<string, Set<string>>();
+		// `this.x()` calls whose method was not declared yet, keyed by class.
+		const pendingThisCalls = new Map<string, Array<CallSite>>();
+		const deferredCallSites = new Array<CallSite>();
 
 		function pushFunction(name?: string): void {
 			functionStack.push(name);
@@ -176,6 +202,43 @@ const noRecursive = createRule("no-recursive", "general", {
 			callSites.push({ callee: calleeName, caller, node });
 		}
 
+		/**
+		 * Holds back a `this` call until its class has been fully visited.
+		 *
+		 * @param caller - The enclosing function name.
+		 * @param calleeName - The called method name.
+		 * @param node - The call expression.
+		 */
+		function deferThisCall(caller: string, calleeName: string, node: ESTree.CallExpression): void {
+			const className = findEnclosingClassName();
+			if (className === undefined) return;
+
+			const callSite = { callee: calleeName, caller, node };
+			const pending = pendingThisCalls.get(className);
+			if (pending === undefined) {
+				pendingThisCalls.set(className, [callSite]);
+			} else {
+				pending.push(callSite);
+			}
+		}
+
+		/** Resolves the held `this` calls of the class that is closing. */
+		function resolveDeferredThisCalls(): void {
+			const className = classStack.at(-1);
+			if (className === undefined) return;
+
+			const pending = pendingThisCalls.get(className);
+			if (pending === undefined) return;
+
+			pendingThisCalls.delete(className);
+
+			for (const callSite of pending) {
+				if (isLocalThisMethod(callSite.callee)) {
+					deferredCallSites.push(callSite);
+				}
+			}
+		}
+
 		return {
 			ArrowFunctionExpression(): void {
 				pushFunction(undefined);
@@ -189,7 +252,14 @@ const noRecursive = createRule("no-recursive", "general", {
 				if (resolved === undefined) return;
 
 				const { calleeName, isThisMethodCall } = resolved;
-				if (!isLocalCallee(calleeName, isThisMethodCall, node)) return;
+				if (!isLocalCallee(calleeName, isThisMethodCall, node)) {
+					if (isThisMethodCall) {
+						deferThisCall(caller, calleeName, node);
+					}
+
+					return;
+				}
+
 				recordLocalCall(caller, calleeName, node);
 			},
 
@@ -203,6 +273,7 @@ const noRecursive = createRule("no-recursive", "general", {
 				classStack.push(className);
 			},
 			"ClassDeclaration:exit"(): void {
+				resolveDeferredThisCalls();
 				classStack.pop();
 			},
 
@@ -241,15 +312,27 @@ const noRecursive = createRule("no-recursive", "general", {
 
 			"Program:exit"(): void {
 				const inCycle = findCycleParticipants(callGraph);
-				if (inCycle.size === 0) return;
+				// The search marks one cycle per back edge, so extra edges can
+				// change what it marks. Keep every node the first graph marks.
+				const participants =
+					deferredCallSites.length === 0
+						? inCycle
+						: new Set([
+								...inCycle,
+								...findCycleParticipants(addDeferredEdges(callGraph, deferredCallSites)),
+							]);
 
-				for (const callSite of callSites) {
-					/* v8 ignore next -- call sites are recorded only from graph edges between registered participants. @preserve */
-					if (inCycle.has(callSite.caller) && inCycle.has(callSite.callee)) {
-						context.report({
-							messageId: "noRecursive",
-							node: callSite.node,
-						});
+				if (participants.size === 0) return;
+
+				for (const sites of [callSites, deferredCallSites]) {
+					for (const callSite of sites) {
+						/* v8 ignore next -- call sites are recorded only from graph edges between registered participants. @preserve */
+						if (participants.has(callSite.caller) && participants.has(callSite.callee)) {
+							context.report({
+								messageId: "noRecursive",
+								node: callSite.node,
+							});
+						}
 					}
 				}
 			},
