@@ -48,7 +48,7 @@ describe("prefer-pascal-case-enums", () => {
 			},
 			// String literal member (not starting with digit)
 			{
-				code: "enum Example {'foo' = 'bar', '1024x1024' = '1024x1024', Oldest}",
+				code: "enum Example {'foo' = 'bar', '1024x1024' = '1024x1024', Oldest = 'oldest'}",
 				errors: [errorWithName("foo")],
 			},
 			{

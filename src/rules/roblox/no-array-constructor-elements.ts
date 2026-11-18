@@ -14,6 +14,7 @@ import {
 	isObjectExpression,
 	isObjectPattern,
 	isPropertyDefinition,
+	isSequenceExpression,
 	isSpreadElement,
 	isTemplateLiteral,
 	isTsAsExpression,
@@ -197,17 +198,31 @@ function containsLaterPushCall(
 	return false;
 }
 
+/**
+ * Reads an argument's text for use as one array element. Oxlint drops
+ * parentheses from the AST, so a comma expression needs its own back or it
+ * would split into several elements.
+ *
+ * @param sourceCode - The source code to read from.
+ * @param expression - The argument to print.
+ * @returns The text, wrapped in parentheses when it is a comma expression.
+ */
+function getElementText(sourceCode: SourceCode, expression: ESTree.Expression): string {
+	const text = sourceCode.getText(expression);
+	return isSequenceExpression(expression) ? `(${text})` : text;
+}
+
 function buildArrayLiteralFromArguments(argumentsList: ReadonlyArray<ESTree.Argument>, sourceCode: SourceCode): string {
 	const parts = new Array<string>();
 	let size = 0;
 
 	for (const argument of argumentsList) {
 		if (isSpreadElement(argument)) {
-			parts[size++] = `...${sourceCode.getText(argument.argument)}`;
+			parts[size++] = `...${getElementText(sourceCode, argument.argument)}`;
 			continue;
 		}
 
-		parts[size++] = sourceCode.getText(argument);
+		parts[size++] = getElementText(sourceCode, argument);
 	}
 
 	return `[${parts.join(", ")}]`;
@@ -348,16 +363,16 @@ function reportSingleArgumentArrayConstructor(
 	if (firstArgument === undefined) return;
 
 	if (isSpreadElement(firstArgument)) {
-		reportSpreadArrayConstructor(context, node, sourceCode.getText(firstArgument.argument));
+		reportSpreadArrayConstructor(context, node, getElementText(sourceCode, firstArgument.argument));
 		return;
 	}
 
 	if (!isDefinitelyNonNumericExpression(firstArgument)) {
-		reportLengthArrayConstructor(context, node, options, sourceCode.getText(firstArgument));
+		reportLengthArrayConstructor(context, node, options, getElementText(sourceCode, firstArgument));
 		return;
 	}
 
-	const singleElementLiteral = `[${sourceCode.getText(firstArgument)}]`;
+	const singleElementLiteral = `[${getElementText(sourceCode, firstArgument)}]`;
 	context.report({
 		fix(fixer) {
 			return fixer.replaceText(node, singleElementLiteral);
@@ -478,7 +493,7 @@ function appendPushArguments(
 	for (const argument of pushCall.arguments) {
 		if (isSpreadElement(argument)) {
 			hasUnsafeArgument = true;
-			argumentParts.push(`...${sourceCode.getText(argument.argument)}`);
+			argumentParts.push(`...${getElementText(sourceCode, argument.argument)}`);
 			continue;
 		}
 
@@ -486,7 +501,7 @@ function appendPushArguments(
 			hasUnsafeArgument = true;
 		}
 
-		argumentParts.push(sourceCode.getText(argument));
+		argumentParts.push(getElementText(sourceCode, argument));
 	}
 
 	return hasUnsafeArgument;

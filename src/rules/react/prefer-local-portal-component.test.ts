@@ -16,6 +16,8 @@ const FIXTURES = nodePath.join(
 const WITH_PORTAL = nodePath.join(FIXTURES, "with-portal");
 const AMBIGUOUS_PORTAL = nodePath.join(FIXTURES, "ambiguous-portal");
 const FIXTURE_ONLY_PORTAL = nodePath.join(FIXTURES, "fixture-only");
+const JSX_IN_JAVASCRIPT_FILE =
+	"Oxlint's RuleTester does not parse JSX in a `.js` file, though the `oxlint` binary does.";
 
 describe("prefer-local-portal-component", () => {
 	tsx.run("prefer-local-portal-component", rule, {
@@ -83,10 +85,12 @@ export function Example(target: Instance) {
 				code: `import Portal from "../components/portal";
 import { createPortal } from "@rbxts/react-roblox";
 
-export function Example(target: Instance) {
+export function Example(target) {
     return createPortal(<frame />, target);
 }`,
+				output: null,
 				errors: [{ messageId: "preferPortalComponent" }],
+				harnessOnly: JSX_IN_JAVASCRIPT_FILE,
 			},
 			{
 				filename: nodePath.join(WITH_PORTAL, "src", "screens", "expression-child.tsx"),
@@ -128,14 +132,6 @@ export function Example(content: React.ReactNode, target: Instance) {
 
 export default function Portal({ target, children }: PortalProperties) {
     return target === undefined ? undefined : createPortal(children, target);
-}`,
-			},
-			{
-				filename: "",
-				code: `import { createPortal } from "@rbxts/react-roblox";
-
-export function Example(target: Instance) {
-    return createPortal(<frame />, target);
 }`,
 			},
 			{

@@ -153,12 +153,9 @@ describe("no-render-helper-functions", () => {
 				code: "function create() { return () => { return <div />; }; }",
 				errors: [{ messageId: "noRenderHelper" }],
 			},
-			{
-				code: "function create() { return function helper() { return 42; }; }",
-				errors: [],
-			},
 		],
 		valid: [
+			"function create() { return function helper() { return 42; }; }",
 			{
 				code: "function Component() { return <frame />; }",
 				documentation: { id: "pass", title: "Named component function" },

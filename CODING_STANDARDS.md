@@ -42,6 +42,10 @@ describe("no-print", () => {
 });
 ```
 
+Every case runs twice. The first run is in the harness. The second goes through Oxlint's own `RuleTester` (`oxlint/plugins-dev`), which shares the parser, scope analysis, and fix application of the `oxlint` binary, and it shows up as `<rule> (oxlint parity)`. A case that passes in the harness and fails there usually means the rule gives a different result in production: fix the rule or the case.
+
+The `RuleTester` is close to the binary and is not the binary. It knows only the ECMAScript built-ins, so a case that reads another global declares it: `globals: { console: "readonly" }`. It does not parse JSX in a `.js` file, which the binary does. `harnessOnly: "<reason>"` on a case skips its second run and is for a `RuleTester` limit of that kind. The reason states the limit, and a new case does not get one to hide a failure. A documented case carries neither field, because the docs extractor rejects them.
+
 Documented examples (`documentation: { id, title }` on a case) render verbatim on the docs site. Write a multi-statement snippet as an array joined with `"\n"`; `documentation/tests/unit/rule-examples.test.ts` fails on a single-line multi-statement example.
 
 A new fixable rule needs a program generator in `tests/properties/support/fixable-cases-*.ts`; `tests/properties/fixes-settle.test.ts` fails until it has one. Property tests take their run count from `PROPERTY_RUNS` in `@small-rules/rule-harness` so the weekly deep run can raise it.

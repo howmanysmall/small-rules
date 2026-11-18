@@ -62,11 +62,10 @@ const NESTED_FUNCTION_CUTOFF_TYPES = new Set([FUNCTION_DECLARATION, "FunctionExp
 const CLASS_TYPES = new Set([CLASS_DECLARATION, "ClassExpression"]);
 const LEADING_JSDOC_STAR_PATTERN = /(?:\*\s*)*/u;
 
-function parseGlobalMode(value?: GlobalModeOption): GlobalMode | undefined {
+function parseGlobalMode(value: GlobalModeOption): GlobalMode {
 	if (value === true || value === "writable" || value === "writeable") return "writable";
 	if (value === false || value === "off") return "off";
-	if (value === "readonly" || value === "readable") return "readonly";
-	return undefined;
+	return "readonly";
 }
 
 function parseOptions(rawOptions: RawOptions): RuleOptions {
@@ -87,10 +86,7 @@ function parseOptions(rawOptions: RawOptions): RuleOptions {
 	const overrideGlobals = new Map<string, GlobalMode>();
 	if (Predicate.isObject(rawOptions.overrideGlobals)) {
 		for (const [name, value] of Object.entries(rawOptions.overrideGlobals)) {
-			const mode = parseGlobalMode(value);
-			if (mode !== undefined) {
-				overrideGlobals.set(name, mode);
-			}
+			overrideGlobals.set(name, parseGlobalMode(value));
 		}
 	}
 
@@ -421,7 +417,7 @@ const isolatedFunctions = createRule("isolated-functions", "general", {
 						additionalProperties: {
 							anyOf: [
 								{ type: "boolean" },
-								{ enum: ["off", "readonly", "writable", "writeable"], type: "string" },
+								{ enum: ["off", "readable", "readonly", "writable", "writeable"], type: "string" },
 							],
 						},
 						description: "Override which global variables are allowed inside isolated scopes.",

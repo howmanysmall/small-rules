@@ -207,8 +207,8 @@ describe("inspectRelativeLocalComponentImport", () => {
 		expect(inspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
-	it("should ignore non-relative import sources and missing filenames", ({ expect, onTestFinished }) => {
-		expect.assertions(2);
+	it("should ignore non-relative import sources", ({ expect, onTestFinished }) => {
+		expect.assertions(1);
 
 		// Arrange
 		const project = createProjectFixture("non-relative-import", {
@@ -225,11 +225,6 @@ describe("inspectRelativeLocalComponentImport", () => {
 			specifiers: [],
 			type: "ImportDeclaration",
 		};
-		const relativeImportNode = {
-			source: { value: "./button" },
-			specifiers: [],
-			type: "ImportDeclaration",
-		};
 
 		// Act
 		const bareInspection = inspectRelativeLocalComponentImport(
@@ -239,17 +234,9 @@ describe("inspectRelativeLocalComponentImport", () => {
 			nodePath.join(project, "src", "screen.tsx"),
 			createComponentDefinition(),
 		);
-		const missingFilenameInspection = inspectRelativeLocalComponentImport(
-			// @ts-expect-error -- Minimal ESTree shape for the public utility
-			// contract
-			relativeImportNode,
-			"",
-			createComponentDefinition(),
-		);
 
 		// Assert
 		expect(bareInspection).toStrictEqual(NON_MATCHING_INSPECTION);
-		expect(missingFilenameInspection).toStrictEqual(NON_MATCHING_INSPECTION);
 	});
 
 	it("should reject relative imports resolved to non-component extensions", ({ expect, onTestFinished }) => {

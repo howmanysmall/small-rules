@@ -59,8 +59,10 @@ describe("no-use-of-empty-return-value", () => {
 			"const value = unknown();",
 			"function clear() {}\nconst value = (clear(), 1);",
 			"const a = 1, b = 2;\nfunction clear() {}\nconst value = clear && clear;",
-			"const value = unknown();",
-			"function clear() {}\nfunction clear() {}\nconst value = clear();",
+			{
+				code: "function clear() {}\nfunction clear() {}\nconst value = clear();",
+				sourceType: "script",
+			},
 			"const clear = 1;\nconst value = clear();",
 			"import { clear } from 'mod';\nconst value = clear();",
 			"const { clear } = object;\nconst value = clear();",

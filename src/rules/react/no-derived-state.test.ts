@@ -406,30 +406,6 @@ export function Form(): React.Element {
 	const [lastName, setLastName] = useState("The Rock");
 	const [fullName, setFullName] = useState("");
 
-	useEffect(() => {
-		function computeName(): string {
-			return \`\${firstName} \${lastName}\`;
-		}
-
-		setFullName(computeName());
-	}, [firstName, lastName]);
-
-	return <textlabel Text={fullName} />;
-}
-`,
-				errors: [{ data: { state: "fullName" }, messageId: "avoidDerivedState" }],
-			},
-			{
-				code: `
-import React, { useEffect, useState } from "@rbxts/react";
-
-export function Form(): React.Element {
-	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only derives the full name.
-	const [firstName, setFirstName] = useState("Dwayne");
-	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only derives the full name.
-	const [lastName, setLastName] = useState("The Rock");
-	const [fullName, setFullName] = useState("");
-
 	function computeName(): string {
 		return \`\${firstName} \${lastName}\`;
 	}

@@ -687,6 +687,7 @@ describe("prevent-abbreviations", () => {
 			// is reported once
 			{
 				code: "var err = first(); var err = second();",
+				output: "var error = first(); var error = second();",
 				errors: [
 					{
 						data: { discouragedName: "err", nameTypeText: "variable", replacement: "error" },
@@ -740,6 +741,7 @@ describe("prevent-abbreviations", () => {
 			},
 			{
 				code: "const arguments = [1, 2, 3];",
+				sourceType: "script",
 			},
 			{
 				code: "const parameters = [1, 2, 3];",

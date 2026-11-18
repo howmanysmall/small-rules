@@ -8,6 +8,8 @@ const FIXTURES = nodePath.join(import.meta.dirname, "..", "..", "..", "tests", "
 const WITH_COMPONENTS = nodePath.join(FIXTURES, "with-components");
 const WITHOUT_COMPONENTS = nodePath.join(FIXTURES, "without-components");
 const FIXTURE_ONLY_COMPONENTS = nodePath.join(FIXTURES, "fixture-only");
+const JSX_IN_JAVASCRIPT_FILE =
+	"Oxlint's RuleTester does not parse JSX in a `.js` file, though the `oxlint` binary does.";
 
 describe("prefer-padding-components", () => {
 	tsx.run("prefer-padding-components", rule, {
@@ -76,10 +78,12 @@ export function Example(padding: UDim) {
 				filename: nodePath.join(WITH_COMPONENTS, "src", "screens", "directional-report-only.js"),
 				code: `import { DirectionalPadding } from "../ui/directional-padding";
 
-export function Example(horizontal: UDim, vertical: UDim) {
+export function Example(horizontal, vertical) {
     return <uipadding PaddingBottom={horizontal} PaddingLeft={vertical} PaddingRight={vertical} PaddingTop={horizontal} />;
 }`,
+				output: null,
 				errors: [{ messageId: "preferDirectionalPadding" }],
+				harnessOnly: JSX_IN_JAVASCRIPT_FILE,
 			},
 			{
 				filename: nodePath.join(WITH_COMPONENTS, "src", "screens", "directional-literals.tsx"),
@@ -194,7 +198,7 @@ export function DirectionalPadding({ padding }: { padding: UDim }) {
 }`,
 			},
 			{
-				filename: "",
+				filename: "tests/fixtures/prefer-padding-components/without-components/src/screens/example.tsx",
 				code: `import { EqualPadding } from "../ui/equal-padding";
 
 export function Example(padding: UDim) {

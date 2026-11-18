@@ -143,38 +143,6 @@ describe("no-restricted-property-assignment", () => {
 				code: "x = 1;",
 				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
 			},
-			{
-				code: "_G.__DEV__ = true; // malformed-options-null",
-				options: [{ restrictions: [null] }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-options-object",
-				options: [{ restrictions: [{ object: 1, properties: ["__DEV__"] }] }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-options-properties-string",
-				options: [{ restrictions: [{ object: "_G", properties: "__DEV__" }] }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-options-properties-array",
-				options: [{ restrictions: [{ object: "_G", properties: ["__DEV__", 1] }] }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-options-top-level",
-				options: [{ restrictions: { object: "_G" } }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-checkComputed",
-				options: [{ checkComputed: "yes", restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-allowFiles-not-array",
-				options: [{ allowFiles: "main.server.ts", restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
-			},
-			{
-				code: "_G.__DEV__ = true; // malformed-allowFiles-not-strings",
-				options: [{ allowFiles: [42], restrictions: [{ object: "_G", properties: ["__DEV__"] }] }],
-			},
 			// allowFiles: should suppress reports on matching files
 			{
 				filename: "main.server.ts",

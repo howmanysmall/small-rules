@@ -45,12 +45,16 @@ export interface HarnessToken {
 export interface HarnessReference {
 	from: HarnessScope;
 	identifier: HarnessNode;
+	/** Whether this write is a declaration's own initializer. */
+	init: boolean;
 	isRead: () => boolean;
 	isReadOnly: () => boolean;
 	isReadWrite: () => boolean;
 	isWrite: () => boolean;
 	isWriteOnly: () => boolean;
 	resolved?: HarnessVariable;
+	/** The value a write stores, or `null` for a read or an update. */
+	writeExpr: HarnessNode | null;
 }
 
 export interface HarnessDefinition {
@@ -116,6 +120,8 @@ export interface RuleTestRunner {
 
 export interface RuleRunnerDefaults {
 	language?: TestLanguage;
+	/** Set to `false` to skip the second run through Oxlint's `RuleTester`. */
+	oxlintParity?: boolean;
 	sourceType?: TestSourceType;
 }
 
@@ -133,6 +139,19 @@ export interface BaseRuleCase {
 	code: string;
 	readonly documentation?: RuleCaseDocumentation;
 	filename?: string;
+	/**
+	 * Names an Oxlint config would declare through `globals` or `env`, such as
+	 * `console`. Oxlint knows only the ECMAScript built-ins without them. The
+	 * harness treats every undeclared name as a global, so only the Oxlint
+	 * run reads this.
+	 */
+	globals?: Readonly<Record<string, "readonly" | "writable">>;
+	/**
+	 * Why this case cannot run under Oxlint's own `RuleTester`. A case with a
+	 * reason runs in the harness only, so the reason is a debt: say what
+	 * differs.
+	 */
+	harnessOnly?: string;
 	language?: TestLanguage;
 	only?: boolean;
 	options?: ReadonlyArray<unknown>;
