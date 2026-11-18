@@ -24,6 +24,7 @@
 	"dependencies": {
 		"arktype": "catalog:runtime",
 		"effect": "catalog:runtime",
+		"oxlint": "catalog:lint",
 		"oxlint-plugin-utilities": "catalog:runtime",
 		"type-fest": "catalog:types",
 		"yuku-ast": "catalog:tooling",
