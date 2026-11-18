@@ -221,13 +221,11 @@ const preferPaddingComponents = createRule("prefer-padding-components", "react",
 		const discoverDirectionalPadding = createLocalComponentDiscoverer(filename, DIRECTIONAL_PADDING_COMPONENT);
 		const discoverEqualPadding = createLocalComponentDiscoverer(filename, EQUAL_PADDING_COMPONENT);
 
-		/* v8 ignore start -- @preserve rule execution supplies a filename before local component discovery. */
-		const isDirectionalPaddingDefinitionFile =
-			filename.length > 0 && inspectLocalComponentFile(filename, DIRECTIONAL_PADDING_COMPONENT).matches;
-		const isEqualPaddingDefinitionFile =
-			filename.length > 0 && inspectLocalComponentFile(filename, EQUAL_PADDING_COMPONENT).matches;
-
-		/* v8 ignore stop -- @preserve */
+		const isDirectionalPaddingDefinitionFile = inspectLocalComponentFile(
+			filename,
+			DIRECTIONAL_PADDING_COMPONENT,
+		).matches;
+		const isEqualPaddingDefinitionFile = inspectLocalComponentFile(filename, EQUAL_PADDING_COMPONENT).matches;
 		const directionalPaddingIdentifiers = new Set<string>();
 		const equalPaddingIdentifiers = new Set<string>();
 

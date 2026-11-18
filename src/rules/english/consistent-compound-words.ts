@@ -8,7 +8,6 @@ import { Predicate } from "effect";
 
 import { forEachScopeVariable } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
-import { isNonEmptyString } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
@@ -125,9 +124,7 @@ function parseReplacements(raw: RawOptions["replacements"] | undefined, extendDe
 			continue;
 		}
 
-		if (isNonEmptyString(value)) {
-			merged.set(key, value);
-		}
+		merged.set(key, value);
 	}
 
 	return merged;

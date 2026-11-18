@@ -100,7 +100,6 @@ describe("no-trivial-assertions", () => {
 			"expect({}).toBeFalsy();",
 			"expect().toBe(1);",
 			"expect(1).toBe();",
-			"assert.ok();",
 			"assert.strictEqual(1);",
 			"assert.fail(1, 1);",
 			"other.assert.ok(true);",

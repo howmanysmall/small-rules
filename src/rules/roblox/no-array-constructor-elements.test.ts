@@ -70,6 +70,43 @@ describe("no-array-constructor-elements", () => {
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
 			{
+				code: "const value = new Array(256, (first, second));",
+				output: "const value = [256, (first, second)];",
+				options: [{ environment: "standard" }],
+				errors: [{ messageId: "avoidConstructorEnumeration" }],
+			},
+			{
+				code: "const value = new Array(...(first, second));",
+				output: null,
+				errors: [
+					{
+						messageId: "avoidSingleArgumentConstructor",
+						suggestions: [
+							{
+								messageId: "suggestArrayLiteral",
+								output: "const value = [...(first, second)];",
+							},
+						],
+					},
+				],
+			},
+			{
+				code: "const value = new Array((first, size));",
+				output: null,
+				options: [{ environment: "standard" }],
+				errors: [
+					{
+						messageId: "avoidLengthConstructorInStandard",
+						suggestions: [
+							{
+								messageId: "suggestArrayFromLength",
+								output: "const value = Array.from({ length: (first, size) });",
+							},
+						],
+					},
+				],
+			},
+			{
 				code: "const value = new Array(...items);",
 				output: null,
 				errors: [

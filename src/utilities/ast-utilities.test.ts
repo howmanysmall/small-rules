@@ -83,10 +83,13 @@ describe("getResolvedVariable", () => {
 	js.run("get-resolved-variable", resolutionRule, {
 		invalid: [
 			{
-				// The declared name is a binding, not a reference; the use
-				// resolves to it.
+				// A declaration with an initializer writes its own name, so
+				// the declared name and the later use both resolve.
 				code: "const value = 1; value;",
-				errors: [{ messageId: "unresolved" }, { data: { definitions: "1" }, messageId: "resolved" }],
+				errors: [
+					{ data: { definitions: "1" }, messageId: "resolved" },
+					{ data: { definitions: "1" }, messageId: "resolved" },
+				],
 			},
 			{
 				// A reference no binding declares stays unresolved.
@@ -94,12 +97,12 @@ describe("getResolvedVariable", () => {
 				errors: [{ messageId: "unresolved" }],
 			},
 			{
-				// A binding inside a function climbs every enclosing scope
-				// before giving up.
+				// A function's own name is a binding and not a reference, so
+				// the lookup climbs every enclosing scope before giving up.
 				code: "function outer() { const inner = 1; return inner; }",
 				errors: [
 					{ messageId: "unresolved" },
-					{ messageId: "unresolved" },
+					{ data: { definitions: "1" }, messageId: "resolved" },
 					{ data: { definitions: "1" }, messageId: "resolved" },
 				],
 			},

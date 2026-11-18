@@ -48,7 +48,6 @@ describe("no-unknown-parameters", () => {
 				code: "export function isNode(value: unknown): value is ESTree.Node {}",
 				documentation: { id: "pass", title: "type-guard boundary parameter" },
 			},
-			"export function isNode(value: unknown): value is ESTree.Node {}",
 			"declare function assertNode(value: unknown): asserts value is ESTree.Node;",
 			'const isText = (value: unknown): value is string => typeof value === "string";',
 			"type Guard = (value: unknown) => value is Element;",

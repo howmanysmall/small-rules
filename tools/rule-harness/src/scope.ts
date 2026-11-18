@@ -117,7 +117,7 @@ function visitNode(node: HarnessNode, scope: HarnessScope, state: ScopeState): v
 
 		case "Identifier": {
 			if (isReferenceIdentifier(node)) {
-				addReference(node, scope, readModeForIdentifier(node));
+				addReference(node, scope, readModeForIdentifier(node), getAssignedExpression(node));
 			}
 
 			return;
@@ -280,9 +280,69 @@ function visitVariableDeclarationChildren(node: HarnessNode, scope: HarnessScope
 	for (const declarator of getNodeArrayProperty(node, "declarations")) {
 		state.nodeToScope.set(declarator, scope);
 		const init = getNodeProperty(declarator, "init");
-		if (init !== undefined) {
-			visitNode(init, scope, state);
+		if (init === undefined) continue;
+
+		const id = getNodeProperty(declarator, "id");
+		if (id !== undefined) {
+			addInitializingWrites(id, scope, init);
 		}
+
+		visitNode(init, scope, state);
+	}
+}
+
+/**
+ * A declarator with an initializer writes each name it binds. Oxlint and
+ * eslint-scope record that write as a reference with `init` set, so rules that
+ * read `reference.init` or count writes see it.
+ */
+function addInitializingWrites(pattern: HarnessNode, scope: HarnessScope, initializer: HarnessNode): void {
+	const pending = [pattern];
+	for (const current of pending) {
+		switch (current.type) {
+			case "ArrayPattern": {
+				for (const element of getNodeArrayProperty(current, "elements")) {
+					appendPattern(pending, element);
+				}
+
+				break;
+			}
+
+			case "AssignmentPattern": {
+				appendPattern(pending, getNodeProperty(current, "left"));
+				break;
+			}
+
+			case "Identifier": {
+				addReference(current, scope, "write", initializer, true);
+				break;
+			}
+
+			case "ObjectPattern": {
+				for (const property of getNodeArrayProperty(current, "properties")) {
+					appendPattern(
+						pending,
+						property.type === "RestElement" ? property : getNodeProperty(property, "value"),
+					);
+				}
+
+				break;
+			}
+
+			case "RestElement": {
+				appendPattern(pending, getNodeProperty(current, "argument"));
+				break;
+			}
+
+			// No default
+		}
+	}
+}
+
+/** Appends to an ADR-0001 worklist while its loop is running. */
+function appendPattern(pending: Array<HarnessNode>, pattern?: HarnessNode): void {
+	if (pattern !== undefined) {
+		pending.push(pattern);
 	}
 }
 
@@ -428,10 +488,17 @@ function getVariableScope(scope: HarnessScope): HarnessScope {
 	return current;
 }
 
-function addReference(node: HarnessNode, scope: HarnessScope, mode: ReferenceMode): void {
+function addReference(
+	node: HarnessNode,
+	scope: HarnessScope,
+	mode: ReferenceMode,
+	writeExpression?: HarnessNode,
+	isInitialization = false,
+): void {
 	const reference: HarnessReference = {
 		from: scope,
 		identifier: node,
+		init: isInitialization,
 		isRead(): boolean {
 			return mode !== "write";
 		},
@@ -447,9 +514,25 @@ function addReference(node: HarnessNode, scope: HarnessScope, mode: ReferenceMod
 		isWriteOnly(): boolean {
 			return mode === "write";
 		},
+		writeExpr: writeExpression ?? null,
 	};
 
 	scope.references.push(reference);
+}
+
+/**
+ * Finds the value an assignment stores through this identifier, which Oxlint
+ * exposes as `reference.writeExpr`. An update such as `count++` has none.
+ *
+ * @param node - The identifier being referenced.
+ * @returns The assignment's right side, or `undefined` for a read or an update.
+ */
+function getAssignedExpression(node: HarnessNode): HarnessNode | undefined {
+	const { parent } = node;
+	const assignment =
+		parent?.type === "AssignmentExpression" && parent.left === node ? parent : findPatternAssignment(node);
+
+	return assignment === undefined ? undefined : getNodeProperty(assignment, "right");
 }
 
 type ReferenceMode = "read" | "readwrite" | "write";

@@ -147,11 +147,19 @@ describe("prefer-shared-string-constant in value positions", () => {
 		invalid: [
 			{
 				code: 'const options = { [kind]: "standard", 1: "roblox-ts" };',
+				output: [
+					'import { STANDARD } from "$oxc-utilities/react-utilities";',
+					'const options = { [kind]: STANDARD, 1: "roblox-ts" };',
+				].join("\n"),
 				options: [{ ignoredProperties: ["type"] }],
 				errors: [{ messageId: "useConstant" }, ROBLOX_TS_ERROR],
 			},
 			{
 				code: 'const lookup = { ["standard"]: 1 };',
+				output: [
+					'import { STANDARD } from "$oxc-utilities/react-utilities";',
+					"const lookup = { [STANDARD]: 1 };",
+				].join("\n"),
 				errors: [{ messageId: "useConstant" }],
 			},
 			{
@@ -170,23 +178,42 @@ describe("prefer-shared-string-constant in value positions", () => {
 			},
 			{
 				code: 'const options = { environment: "roblox-ts", type: "standard" };',
+				output: [
+					'import { ROBLOX_TS } from "$oxc-utilities/react-utilities";',
+					'const options = { environment: ROBLOX_TS, type: "standard" };',
+				].join("\n"),
 				errors: [ROBLOX_TS_ERROR, { messageId: "useConstant" }],
 			},
 			{
 				code: 'const options = { environment: "roblox-ts", type: "standard" };',
+				output: [
+					'import { ROBLOX_TS } from "$oxc-utilities/react-utilities";',
+					'const options = { environment: ROBLOX_TS, type: "standard" };',
+				].join("\n"),
 				options: [{ ignoredProperties: ["type"] }],
 				errors: [ROBLOX_TS_ERROR],
 			},
 			{
 				code: 'function getEnvironment(environment = "roblox-ts") { return useEnvironment("standard"); }',
+				output: [
+					'import { ROBLOX_TS } from "$oxc-utilities/react-utilities";',
+					'function getEnvironment(environment = ROBLOX_TS) { return useEnvironment("standard"); }',
+				].join("\n"),
 				errors: [ROBLOX_TS_ERROR, { messageId: "useConstant" }],
 			},
 			{
 				code: 'const MODE = "roblox-ts";',
+				output: ['import { ROBLOX_TS } from "$oxc-utilities/react-utilities";', "const MODE = ROBLOX_TS;"].join(
+					"\n",
+				),
 				errors: [ROBLOX_TS_ERROR],
 			},
 			{
 				code: 'if (options.environment > "roblox-ts") {}',
+				output: [
+					'import { ROBLOX_TS } from "$oxc-utilities/react-utilities";',
+					"if (options.environment > ROBLOX_TS) {}",
+				].join("\n"),
 				errors: [ROBLOX_TS_ERROR],
 			},
 		],
@@ -199,6 +226,10 @@ describe("prefer-shared-string-constant with the repository utilities", () => {
 		invalid: [
 			{
 				code: 'if (options.environment === "roblox-ts") {}',
+				output: [
+					'import { ROBLOX_TS } from "$oxc-utilities/react-utilities";',
+					"if (options.environment === ROBLOX_TS) {}",
+				].join("\n"),
 				errors: [{ messageId: "useConstant" }],
 			},
 		],

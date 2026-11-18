@@ -24,7 +24,7 @@ import {
 import { createRule } from "$oxc-utilities/create-rule";
 import { stripParenthesizedType } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, Range, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 type ParameterOwner =
 	| ESTree.ArrowFunctionExpression
@@ -36,8 +36,31 @@ type ParameterOwner =
 	| ESTree.TSMethodSignature;
 
 interface UndefinedUnion {
-	readonly annotationType: ESTree.TSType;
 	readonly retainedTypes: ReadonlyArray<ESTree.TSType>;
+	readonly union: ESTree.TSType;
+}
+
+/**
+ * Widens a type's range over the parentheses that wrap it. Oxlint drops
+ * parenthesized types from the AST, so a node's own range stops short of them.
+ *
+ * @param node - The type to measure.
+ * @param sourceCode - The source code that holds the tokens around it.
+ * @returns The range from the outermost `(` to the matching `)`.
+ */
+function getRangeWithParentheses(node: ESTree.TSType, sourceCode: SourceCode): Range {
+	let [start, end] = node.range;
+	let before = sourceCode.getTokenBefore(node);
+	let after = sourceCode.getTokenAfter(node);
+
+	while (before?.value === "(" && after?.value === ")") {
+		[start] = before.range;
+		[, end] = after.range;
+		before = sourceCode.getTokenBefore(before);
+		after = sourceCode.getTokenAfter(after);
+	}
+
+	return [start, end];
 }
 
 function isDefaultOrRestParameter(parameter: ESTree.ParamPattern): boolean {
@@ -110,7 +133,7 @@ function splitUndefinedUnion(annotation: ESTree.TSTypeAnnotation): undefined | U
 	}
 
 	if (!hasUndefined || retainedTypes.length === 0) return undefined;
-	return { annotationType: annotation.typeAnnotation, retainedTypes };
+	return { retainedTypes, union };
 }
 
 const preferOptionalParameter = createRule("prefer-optional-parameter", "naming", {
@@ -138,20 +161,27 @@ const preferOptionalParameter = createRule("prefer-optional-parameter", "naming"
 			if (!isOptionalPositionAllowed) return;
 
 			const data = { parameter: getFunctionParameterBindingName(parameter, sourceCode) };
-			const hasComments = sourceCode.getCommentsInside(annotation.typeAnnotation).length > 0;
+			const [start, end] = getRangeWithParentheses(undefinedUnion.union, sourceCode);
+			const hasComments = sourceCode
+				.getAllComments()
+				.some((comment) => comment.range[0] >= start && comment.range[1] <= end);
+
 			if (hasComments) {
 				context.report({ data, messageId: "preferOptionalParameter", node: annotation });
 				return;
 			}
 
-			const replacement = undefinedUnion.retainedTypes.map((member) => sourceCode.getText(member)).join(" | ");
 			context.report({
 				data,
 				fix(fixer) {
-					return [
-						fixer.insertTextBefore(annotation, "?"),
-						fixer.replaceText(undefinedUnion.annotationType, replacement),
-					];
+					const replacement = undefinedUnion.retainedTypes
+						.map((member) => {
+							const [memberStart, memberEnd] = getRangeWithParentheses(member, sourceCode);
+							return sourceCode.text.slice(memberStart, memberEnd);
+						})
+						.join(" | ");
+
+					return [fixer.insertTextBefore(annotation, "?"), fixer.replaceTextRange([start, end], replacement)];
 				},
 				messageId: "preferOptionalParameter",
 				node: annotation,

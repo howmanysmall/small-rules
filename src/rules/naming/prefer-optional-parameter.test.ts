@@ -108,6 +108,16 @@ describe("prefer-optional-parameter", () => {
 				errors: [{ messageId: "preferOptionalParameter" }],
 			},
 			{
+				code: "function subscribe(callback: (() => void) | string | undefined): void {}",
+				output: "function subscribe(callback?: (() => void) | string): void {}",
+				errors: [{ messageId: "preferOptionalParameter" }],
+			},
+			{
+				code: "function getOpeningTurns(scenario: ( /* keep */ ScenarioId | undefined)): void {}",
+				output: null,
+				errors: [{ messageId: "preferOptionalParameter" }],
+			},
+			{
 				code: "function getOpeningTurns(scenario: ScenarioId /* keep */ | undefined): void {}",
 				output: null,
 				errors: [{ messageId: "preferOptionalParameter" }],

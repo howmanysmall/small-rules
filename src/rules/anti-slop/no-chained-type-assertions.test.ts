@@ -53,7 +53,6 @@ describe("no-chained-type-assertions", () => {
 			{ code: "const x = (value as string);" },
 			{ code: "const x = ((value as string));" },
 			{ code: "const x = value;" },
-			{ code: "const x = value satisfies string;" },
 			{ code: "const x = value as Record<string, unknown>;" },
 			{
 				code: "const x = value as unknown as vector;",

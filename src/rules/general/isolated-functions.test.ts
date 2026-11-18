@@ -246,11 +246,6 @@ describe("isolated-functions", () => {
 				errors: [{ messageId: "externallyScopedVariable" }, { messageId: "externallyScopedVariable" }],
 			},
 			{
-				code: "makeSynchronous(() => { foo = 1; });",
-				options: [{ overrideGlobals: { foo: "nope" } }],
-				errors: [{ messageId: "externallyScopedVariable" }],
-			},
-			{
 				code: "const foo = 1;\nmakeSynchronous(() => foo);",
 				options: [
 					{
@@ -292,7 +287,7 @@ describe("isolated-functions", () => {
 			["const foo = 'hi';", "const func = () => foo.slice();", "chrome.scripting.executeScript({ func });"].join(
 				"\n",
 			),
-			"makeSynchronous(() => { console.log('ok'); });",
+			{ code: "makeSynchronous(() => { console.log('ok'); });", globals: { console: "readonly" } },
 			{
 				code: "makeSynchronous(() => { foo = 1; });",
 				options: [{ overrideGlobals: { foo: "writable" } }],

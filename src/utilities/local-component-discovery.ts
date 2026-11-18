@@ -350,7 +350,7 @@ export function inspectRelativeLocalComponentImport(
 	definition: LocalComponentDefinition,
 ): LocalComponentInspection {
 	const importSource = node.source.value;
-	if (!Predicate.isString(importSource) || !importSource.startsWith(".") || filename.length === 0) {
+	if (!Predicate.isString(importSource) || !importSource.startsWith(".")) {
 		return { importStyle: undefined, matches: false };
 	}
 
@@ -430,7 +430,7 @@ export function createLocalComponentDiscoverer(
 ): () => LocalComponentDiscovery {
 	let discovery: LocalComponentDiscovery | undefined;
 	return function discover(): LocalComponentDiscovery {
-		discovery ??= sourceFile.length === 0 ? { found: false } : discoverLocalComponent(sourceFile, definition);
+		discovery ??= discoverLocalComponent(sourceFile, definition);
 		return discovery;
 	};
 }

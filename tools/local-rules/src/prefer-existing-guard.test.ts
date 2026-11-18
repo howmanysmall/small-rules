@@ -254,6 +254,10 @@ describe("prefer-existing-guard with the repository utilities", () => {
 		invalid: [
 			{
 				code: "if (!isAnyLiteral(node) || !Predicate.isString(node.value)) throw new Error();",
+				output: [
+					'import { isStringLiteral } from "@small-rules/oxlint-utilities";',
+					"if (!isStringLiteral(node)) throw new Error();",
+				].join("\n"),
 				errors: [{ messageId: "useGuard" }],
 			},
 		],

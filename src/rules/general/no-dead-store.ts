@@ -449,25 +449,6 @@ function getVariableUsages(variable: Variable): Array<VariableUsage> {
 		writeExpression: reference.writeExpr ?? undefined,
 	}));
 
-	for (const definition of variable.defs) {
-		if (
-			definition.type !== "Variable" ||
-			!isVariableDeclarator(definition.node) ||
-			definition.node.init === null ||
-			usages.some((usage) => usage.node.range[0] === definition.name.range[0])
-		) {
-			continue;
-		}
-
-		usages.push({
-			init: true,
-			isRead: false,
-			isWrite: true,
-			node: definition.name,
-			writeExpression: definition.node.init,
-		});
-	}
-
 	return usages.toSorted((left, right) => left.node.range[0] - right.node.range[0]);
 }
 

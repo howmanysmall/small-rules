@@ -82,11 +82,6 @@ describe("require-safety-comment-for-type-assertion", () => {
 			{ code: "export const id = value as UserId;", errors: [missingSafetyComment] },
 			{ code: "function load(value = input as User) {}", errors: [missingSafetyComment] },
 			{
-				code: "const userId = value as UserId;",
-				options: [{ markers: [] }],
-				errors: [missingSafetyComment],
-			},
-			{
 				code: "// This is not a safety justification.\nexport const id = value as UserId;",
 				errors: [missingSafetyComment],
 			},

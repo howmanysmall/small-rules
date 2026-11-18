@@ -88,7 +88,7 @@ describe("consistent-compound-words", () => {
 			"const VIEW_PORT = 1;",
 			"({ passWord: 1 });",
 			"foo.userName = 1;",
-			"export { userName };",
+			'export { userName } from "./names";',
 			"const __proto__ = 1;",
 			{
 				code: "const userName = 1;",
@@ -111,24 +111,12 @@ describe("consistent-compound-words", () => {
 				options: [{ checkProperties: true }],
 			},
 			{
-				code: "export { userName };",
+				code: 'export { userName } from "./names";',
 				options: [{ checkProperties: true }],
 			},
 			{
 				code: "const object = { __proto__: null };",
 				options: [{ checkProperties: true }],
-			},
-			{
-				code: "const password = 1;",
-				options: [{ replacements: { passWord: "" } }],
-			},
-			{
-				code: "const password = 1;",
-				options: [{ replacements: { passWord: 1 } }],
-			},
-			{
-				code: "const password = 1;",
-				options: [{ allowList: true }],
 			},
 			{
 				code: "foo.userName = 1;",

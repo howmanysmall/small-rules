@@ -2,6 +2,7 @@ import { describe, it } from "vitest";
 
 import { assertInvalidCase, assertValidCase } from "./diagnostics";
 import { createRuleExecutor } from "./execute";
+import { runOxlintParity } from "./oxlint-parity";
 import { normalizeCases } from "./parse";
 
 import type { HarnessValue } from "./object";
@@ -42,6 +43,8 @@ function runRuleTests(
 			registerCase(testCase, execute);
 		}
 	});
+
+	runOxlintParity(ruleName, rule, cases, defaults);
 }
 
 function registerCase(testCase: NormalizedCase, execute: (testCase: NormalizedCase) => RuleExecutionResult): void {

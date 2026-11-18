@@ -226,7 +226,9 @@ describe("rule-testers documentation metadata", () => {
 });
 
 describe("rule-testers createOnce", () => {
-	const tester = createRuleTester({ language: "js" });
+	// The rule counts cases through one shared instance, which is how this
+	// harness runs `createOnce` rules and not how Oxlint's RuleTester does.
+	const tester = createRuleTester({ language: "js", oxlintParity: false });
 
 	tester.run("create-once-hooks", createOnceRule, {
 		invalid: [{ code: "const value = 1;", errors: [{ messageId: "afterSecondCase" }] }],
