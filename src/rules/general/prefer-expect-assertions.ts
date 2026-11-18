@@ -11,6 +11,7 @@ import { Predicate } from "effect";
 import { createRule } from "$oxc-utilities/create-rule";
 import {
 	countExpectCalls,
+	hasShortCircuitedExpectCall,
 	isExpectAssertionsCall,
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
@@ -241,13 +242,25 @@ function reportPreferAssertionsCount(
 	callback: CallbackFunction,
 	assertionCall: ESTree.CallExpression,
 	deterministic: number,
+	expectCallNames: ReadonlyArray<string>,
 ): void {
 	/* v8 ignore next -- @preserve first assertion calls are already known to be inside a block body. */
 	const blockBody = getCallbackBlockBody(callback);
 	/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
 	const [firstStatement] = blockBody?.body ?? [];
 	/* v8 ignore next -- @preserve first assertion calls are already known to have a first statement. */
-	if (firstStatement === undefined) return;
+	if (blockBody === undefined || firstStatement === undefined) return;
+
+	// An expect behind a short-circuit may not run, so its count is no safe fix.
+	if (hasShortCircuitedExpectCall(blockBody, expectCallNames)) {
+		context.report({
+			data: { count: String(deterministic) },
+			messageId: "preferAssertionsCount",
+			node: assertionCall,
+		});
+		return;
+	}
+
 	context.report({
 		data: { count: String(deterministic) },
 		fix(fixer): Fix {
@@ -264,16 +277,18 @@ function handleAssertionGuard(
 	assertionCall: ESTree.CallExpression,
 	deterministic: number,
 	hasIndeterminate: boolean,
+	expectCallNames: ReadonlyArray<string>,
 ): void {
 	validateAssertionCall(context, assertionCall, deterministic, hasIndeterminate);
 
 	if (!shouldPreferAssertionsCount(assertionCall, hasIndeterminate, deterministic)) return;
-	reportPreferAssertionsCount(context, callback, assertionCall, deterministic);
+	reportPreferAssertionsCount(context, callback, assertionCall, deterministic, expectCallNames);
 }
 
 const preferExpectAssertions = createRule("prefer-expect-assertions", "general", {
 	create(context): Visitor {
 		const options = parseOptions(context.options[0]);
+		const expectCallNames = getAdditionalExpectCallNames(options);
 
 		return {
 			CallExpression(node): void {
@@ -288,7 +303,7 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 				if (body === undefined) return;
 
 				const { deterministic, hasExpectInCallback, hasExpectInLoop, hasIndeterminate, indeterminate } =
-					countExpectCalls(body, getAdditionalExpectCallNames(options));
+					countExpectCalls(body, expectCallNames);
 
 				if (
 					!shouldCheckTest(
@@ -305,7 +320,14 @@ const preferExpectAssertions = createRule("prefer-expect-assertions", "general",
 
 				const assertionCall = getFirstStatementCall(callback);
 				if (isAssertionGuardCall(assertionCall)) {
-					handleAssertionGuard(context, callback, assertionCall, deterministic, hasIndeterminate);
+					handleAssertionGuard(
+						context,
+						callback,
+						assertionCall,
+						deterministic,
+						hasIndeterminate,
+						expectCallNames,
+					);
 					return;
 				}
 

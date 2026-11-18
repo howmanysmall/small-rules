@@ -488,6 +488,90 @@ describe("no-useless-default imperative detection", () => {
 					},
 				],
 			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); register(other); c.MinSize = new Vector2();',
+				output: 'const c = new Instance("UISizeConstraint"); register(other);',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				code: 'const c = new Instance("UISizeConstraint"); let alias; alias = other; c.MinSize = new Vector2();',
+				output: 'const c = new Instance("UISizeConstraint"); let alias; alias = other;',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				code: 'function b() { const part = new Instance("Part"); part.Name = "Thing"; part.Anchored = false; return part; }',
+				output: 'function b() { const part = new Instance("Part"); part.Name = "Thing"; return part; }',
+				errors: [
+					{
+						data: { className: "Part", propertyName: "Anchored" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				code: 'function c() { const part = new Instance("Part"); print("hello"); part.Anchored = false; return part; }',
+				output: 'function c() { const part = new Instance("Part"); print("hello"); return part; }',
+				errors: [
+					{
+						data: { className: "Part", propertyName: "Anchored" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				// Reported as before, but the fix is withheld: removing it
+				// would leave the label with the "Label" default.
+				code: 'function makeLabel() { const label = new Instance("TextLabel"); label.Text = ""; return label; }',
+				output: null,
+				errors: [
+					{
+						data: { className: "TextLabel", propertyName: "Text" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				code: 'function makeCorner() { const corner = new Instance("UICorner"); corner.CornerRadius = new UDim(0, 0); return corner; }',
+				output: null,
+				errors: [
+					{
+						data: { className: "UICorner", propertyName: "CornerRadius" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				// A bare return does not stop tracking.
+				code: 'function d() { const c = new Instance("UISizeConstraint"); return; c.MinSize = new Vector2(); }',
+				output: 'function d() { const c = new Instance("UISizeConstraint"); return; }',
+				errors: [
+					{
+						data: { className: "UISizeConstraint", propertyName: "MinSize" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
+			{
+				// `new Instance` makes "Label", not the JSX default.
+				code: 'function makeLabel() { const label = new Instance("TextLabel"); label.Text = "Label"; return label; }',
+				output: 'function makeLabel() { const label = new Instance("TextLabel"); return label; }',
+				errors: [
+					{
+						data: { className: "TextLabel", propertyName: "Text" },
+						messageId: "uselessDefault",
+					},
+				],
+			},
 		],
 		valid: [
 			{ code: 'const frame = new Instance("Frame"); frame.Name = "Container";' },
@@ -498,16 +582,12 @@ describe("no-useless-default imperative detection", () => {
 			{ code: 'const c = new Instance("UISizeConstraint"); register(other, c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register([c]); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register(...args, c); c.MinSize = new Vector2();' },
-			{ code: 'const c = new Instance("UISizeConstraint"); register(other); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); register(factory(c)); c.MinSize = new Vector2();' },
 			{
 				code: 'const a = new Instance("UISizeConstraint"); const b = new Instance("UISizeConstraint"); register(b); b.MinSize = new Vector2();',
 			},
 			{ code: 'const c = new Instance("UISizeConstraint"); cache.values.push(c); c.MinSize = new Vector2();' },
 			{ code: 'const c = new Instance("UISizeConstraint"); let alias; alias = c; c.MinSize = new Vector2();' },
-			{
-				code: 'const c = new Instance("UISizeConstraint"); let alias; alias = other; c.MinSize = new Vector2();',
-			},
 			{
 				code: 'const a = new Instance("UISizeConstraint"); const b = new Instance("UISizeConstraint"); let alias; alias = b; b.MinSize = new Vector2();',
 			},

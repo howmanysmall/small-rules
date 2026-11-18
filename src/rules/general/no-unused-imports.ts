@@ -130,6 +130,14 @@ const noUnusedImports = createRule("no-unused-imports", "general", {
 					if (variable !== undefined && variable.references.length > 0) continue;
 					if (checkJsDoc && jsdocIdentifiers.has(identifierName)) continue;
 
+					// The import lives in a scope this lookup does not see, such
+					// as a `declare module` block, so it may be in use: keep the
+					// report and do not delete it.
+					if (variable === undefined) {
+						context.report({ data: { identifierName }, messageId: "unusedImport", node: specifierNode });
+						continue;
+					}
+
 					context.report({
 						data: { identifierName },
 						fix(fixer) {

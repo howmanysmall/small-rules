@@ -27,6 +27,29 @@ describe("prefer-modding-inspect", () => {
 				output: "export const x = Modding.inspect<Record<MyEnum, true>>();",
 				errors: [{ messageId: "preferModdingInspect" }],
 			},
+			{
+				// `Modding.inspect` cannot list the keys of `string`, so the fix
+				// would lose them: the report stays and the fix is withheld.
+				code: "const allowedCommands: Record<string, true> = { kick: true, ban: true };",
+				output: null,
+				errors: [{ data: { enumType: "string" }, messageId: "preferModdingInspect" }],
+			},
+			{
+				code: "const slots: Record<number, true> = { 1: true, 2: true };",
+				output: null,
+				errors: [{ data: { enumType: "number" }, messageId: "preferModdingInspect" }],
+			},
+			{
+				code: "const tags: Record<symbol, true> = {};",
+				output: null,
+				errors: [{ data: { enumType: "symbol" }, messageId: "preferModdingInspect" }],
+			},
+			{
+				// The fix would delete the comment, so it is withheld.
+				code: "const x: Record<MyEnum, true> = {\n\ta: true, // red\n\tb: true,\n};",
+				output: null,
+				errors: [{ messageId: "preferModdingInspect" }],
+			},
 		],
 		valid: [
 			{

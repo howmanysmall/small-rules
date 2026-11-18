@@ -124,6 +124,38 @@ export function Example(content: React.ReactNode, target: Instance) {
 }`,
 				errors: [{ messageId: "preferPortalComponent" }],
 			},
+			{
+				filename: nodePath.join(WITH_PORTAL, "src", "screens", "default-roblox.tsx"),
+				code: `import ReactRoblox from "@rbxts/react-roblox";
+import Portal from "../components/portal";
+
+export function Overlay({ target }: { target: Instance }) {
+    return ReactRoblox.createPortal(<frame />, target);
+}`,
+				output: `import ReactRoblox from "@rbxts/react-roblox";
+import Portal from "../components/portal";
+
+export function Overlay({ target }: { target: Instance }) {
+    return <Portal target={target}><frame /></Portal>;
+}`,
+				errors: [{ messageId: "preferPortalComponent" }],
+			},
+			{
+				filename: nodePath.join(WITH_PORTAL, "src", "screens", "default-standard.tsx"),
+				code: `import ReactDOM from "react-dom";
+import Portal from "../components/portal";
+
+export function Example(container: HTMLElement) {
+    return ReactDOM.createPortal(<div />, container);
+}`,
+				output: `import ReactDOM from "react-dom";
+import Portal from "../components/portal";
+
+export function Example(container: HTMLElement) {
+    return <Portal target={container}><div /></Portal>;
+}`,
+				errors: [{ messageId: "preferPortalComponent" }],
+			},
 		],
 		valid: [
 			{
@@ -209,6 +241,22 @@ export function Example(target: Instance) {
 
 export function Example(target: Instance) {
     return createPortal(<frame />, target);
+}`,
+			},
+			{
+				filename: nodePath.join(WITH_PORTAL, "src", "screens", "default-local.tsx"),
+				code: `import ReactDOM from "./react-dom";
+
+export function Example(container: HTMLElement) {
+    return ReactDOM.createPortal(<div />, container);
+}`,
+			},
+			{
+				filename: nodePath.join(WITH_PORTAL, "src", "screens", "default-other-member.tsx"),
+				code: `import ReactDOM from "react-dom";
+
+export function Example(container: HTMLElement) {
+    return ReactDOM.flushSync(<div />, container);
 }`,
 			},
 			{

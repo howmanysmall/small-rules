@@ -95,8 +95,9 @@ const curly = createRule("curly", "general", {
 		 */
 		function getHeaderEnd(body: ESTree.Node, token: HeaderToken): number {
 			const [comment] = sourceCode.getCommentsBefore(body);
-			const searchFrom = comment === undefined ? body.range[0] : comment.range[0];
-			return text.lastIndexOf(token, searchFrom) + token.length;
+			const bodyStart = comment === undefined ? body.range[0] : comment.range[0];
+			// Start before the body, or `do done()` finds the `do` inside `done`.
+			return text.lastIndexOf(token, bodyStart - 1) + token.length;
 		}
 
 		function getLineStart(offset: number): number {

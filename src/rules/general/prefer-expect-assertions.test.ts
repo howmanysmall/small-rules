@@ -221,6 +221,23 @@ describe("prefer-expect-assertions", () => {
 				output: "test('works', () => { expect.assertions(1); try { expect(value).toBe(1); } finally { restore(); } });",
 				errors: [{ messageId: "preferAssertionsCount" }],
 			},
+
+			// An expect behind a short-circuit may not run: no fix
+			{
+				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); enabled && expect(value).toBeGreaterThan(0); });",
+				output: null,
+				errors: [{ messageId: "preferAssertionsCount" }],
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); enabled || expect(value).toBeGreaterThan(0); });",
+				output: null,
+				errors: [{ messageId: "preferAssertionsCount" }],
+			},
+			{
+				code: "test('works', () => { expect.hasAssertions(); expect(value).toBe(1); helper?.(expect(value).toBeGreaterThan(0)); });",
+				output: null,
+				errors: [{ messageId: "preferAssertionsCount" }],
+			},
 		],
 		valid: [
 			{

@@ -13,7 +13,9 @@ import RulePage from "$components/rule-page.astro";
 		<p>
 			What it does catch: `new Array(a, b, c)` (element enumeration — just write `[a, b, c]`), a bare `new
 			Array()` with no generic type, and the "declare an empty array then `.push()` a bunch right after" pattern,
-			which it rewrites as one literal. Auto-fixes when the values are side-effect free.
+			which it rewrites as one literal. Auto-fixes when the values are side-effect free. If later code uses the array,
+			the generic moves to the variable (`const items: Array<T> = [...]`) so it keeps its type. A push
+			that reads the array itself still reports, but with no fix.
 		</p>
 		<p>
 			In `standard` mode it also bans `new Array(n)` length constructors, but in roblox-ts that's allowed. Flip

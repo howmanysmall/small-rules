@@ -1,34 +1,46 @@
 import {
 	isAnyFunction,
+	isCallExpression,
 	isComponentName,
+	isConditionalExpression,
 	isFunctionDeclaration,
 	isIdentifier,
 	isIdentifierNamed,
+	isIfStatement,
 	isImportSpecifier,
+	isLogicalExpression,
+	isLoopNode,
 	isMemberExpression,
 	isMethodDefinition,
 	isProperty,
+	isSwitchStatement,
 	isTryStatement,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
+import { isReactComponentHigherOrderCall } from "$oxc-utilities/component-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
-import { mergeIntoStackTop } from "$oxc-utilities/stack-utilities";
 
 import type { CallbackFunction } from "@small-rules/oxlint-utilities";
 import type { ESTree, InferContextFromRule, Visitor } from "oxlint-plugin-utilities";
 
-interface ControlFlowContext {
-	readonly afterEarlyReturn: boolean;
-	readonly functionDepth: number;
-	readonly inConditional: boolean;
-	readonly inLoop: boolean;
-	readonly inNestedFunction: boolean;
-	readonly inTryBlock: boolean;
-	readonly isComponentOrHook: boolean;
-}
+/**
+ * What a function is to the hooks inside it. `component` covers components
+ * and custom hooks, `nested` is any function inside one, and `other` is a
+ * function hooks are not checked in.
+ */
+type FunctionKind = "component" | "nested" | "other";
+
+type ControlFlowMessageId = "conditionalHook" | "loopHook" | "tryBlockHook";
+
+type MessageId = "afterEarlyReturn" | "nestedFunction" | "recursiveHookCall" | ControlFlowMessageId;
+
+const IN_FINALLY_BLOCK = "finally";
+
+// How many ancestors up a `finally` block is still recognized.
+const FINALLY_SEARCH_DEPTH = 20;
 
 interface UseHookAtTopLevelOptions {
 	readonly ignoreHooks?: ReadonlyArray<string>;
@@ -66,7 +78,13 @@ function isComponentOrHook(node: CallbackFunction): boolean {
 		return isComponentName(parent.key.name) || isReactHookName(parent.key.name);
 	}
 
-	return false;
+	return isCallExpression(parent) && isReactComponentHigherOrderCall(parent);
+}
+
+function getFunctionKind(node: CallbackFunction, parentKind?: FunctionKind): FunctionKind {
+	if (parentKind === "component") return "nested";
+	if (isComponentOrHook(node)) return "component";
+	return parentKind === "nested" ? "nested" : "other";
 }
 
 function isHookCall(node: ESTree.CallExpression): boolean {
@@ -74,51 +92,54 @@ function isHookCall(node: ESTree.CallExpression): boolean {
 	return hookName !== undefined && isReactHookName(hookName);
 }
 
-function isInFinallyBlock(node: ESTree.Node): boolean {
-	let current = node.parent;
-	const maxDepth = 20;
-	let inFinallyBlock = false;
+function isConditional(node: ESTree.Node): boolean {
+	return isConditionalExpression(node) || isIfStatement(node) || isLogicalExpression(node) || isSwitchStatement(node);
+}
 
-	// oxlint-disable-next-line unicorn-js/prefer-simple-condition-first -- no?
-	for (let depth = 0; depth < maxDepth && current !== null; depth += 1) {
-		if (isAnyFunction(current)) break;
+function isFinalizerWithinReach(tryStatement: ESTree.TryStatement, child: ESTree.Node, depth: number): boolean {
+	return depth < FINALLY_SEARCH_DEPTH && child === tryStatement.finalizer;
+}
 
-		if (isTryStatement(current)) {
-			let checkNode: ESTree.Node | null = node;
-			while (checkNode !== null && checkNode !== current) {
-				if (checkNode === current.finalizer) {
-					inFinallyBlock = true;
-					break;
-				}
+/**
+ * Classifies where a hook call sits inside its own function by climbing to
+ * that function once. A conditional outranks a loop, which outranks a `try`.
+ *
+ * @param node - The hook call.
+ * @returns The message for the control flow the call is under,
+ *   `IN_FINALLY_BLOCK` when the nearest `try` holds it in its `finally`, or
+ *   `undefined` when it runs on every call of the function.
+ */
+function getControlFlow(node: ESTree.CallExpression): ControlFlowMessageId | typeof IN_FINALLY_BLOCK | undefined {
+	let child: ESTree.Node = node;
+	let parent: ESTree.Node | null = node.parent;
+	let inConditional = false;
+	let inLoop = false;
+	let inTryStatement = false;
 
-				checkNode = checkNode.parent;
-			}
+	let depth = 0;
 
-			break;
+	while (parent !== null && !isAnyFunction(parent)) {
+		if (isTryStatement(parent)) {
+			// Only the nearest `try` decides whether this is a `finally`.
+			if (!inTryStatement && isFinalizerWithinReach(parent, child, depth)) return IN_FINALLY_BLOCK;
+			inTryStatement = true;
 		}
 
-		current = current.parent;
+		inLoop ||= isLoopNode(parent);
+		inConditional ||= isConditional(parent);
+		child = parent;
+		({ parent } = parent);
+		depth += 1;
 	}
 
-	return inFinallyBlock;
+	if (inConditional) return "conditionalHook";
+	if (inLoop) return "loopHook";
+	return inTryStatement ? "tryBlockHook" : undefined;
 }
 
 function isRecursiveCall(node: ESTree.CallExpression, functionName?: string): boolean {
 	if (functionName === undefined) return false;
 	return isIdentifierNamed(node.callee, functionName);
-}
-
-function makeContext(overrides: Partial<ControlFlowContext>, depth: number): ControlFlowContext {
-	return {
-		afterEarlyReturn: false,
-		functionDepth: depth,
-		inConditional: false,
-		inLoop: false,
-		inNestedFunction: false,
-		inTryBlock: false,
-		isComponentOrHook: false,
-		...overrides,
-	};
 }
 
 function getFunctionName(node: CallbackFunction): string | undefined {
@@ -166,26 +187,13 @@ function getActiveHookName(node: ESTree.CallExpression): string | undefined {
 const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 	create(context): Visitor {
 		const config = getOptions(context.options[0]);
-		const contextStack = new Array<ControlFlowContext>();
+		// One entry per enclosing function, innermost last. The two stacks
+		// stay the same length: every function pushes and pops both.
+		const functionKinds = new Array<FunctionKind>();
+		const hasReturned = new Array<boolean>();
 		const functionNameStack = new Array<string | undefined>();
 		let currentFunctionName: string | undefined;
 		const importSourceMap = new Map<string, string>();
-
-		function getCurrentContext(): ControlFlowContext | undefined {
-			return contextStack.length > 0 ? contextStack.at(-1) : undefined;
-		}
-
-		function pushContext(newContext: ControlFlowContext): void {
-			contextStack.push(newContext);
-		}
-
-		function popContext(): void {
-			contextStack.pop();
-		}
-
-		function updateContext(updates: Partial<ControlFlowContext>): void {
-			mergeIntoStackTop(contextStack, updates);
-		}
 
 		function shouldIgnoreHook(hookName: string, node: ESTree.CallExpression): boolean {
 			const { ignoreHooks, importSources, onlyHooks } = config;
@@ -196,71 +204,18 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 			return shouldIgnoreHookImportSource(hookName, node, importSources, importSourceMap);
 		}
 
-		function isActiveHookContext(
-			current: ControlFlowContext | undefined,
+		function getHookViolation(
 			node: ESTree.CallExpression,
-		): current is ControlFlowContext {
-			if (current === undefined) return false;
-			/* v8 ignore next -- @preserve pushed contexts always set isComponentOrHook or inNestedFunction. */
-			if (!current.isComponentOrHook && !current.inNestedFunction) return false;
-			if (isInFinallyBlock(node)) return false;
-			return true;
-		}
-
-		function reportHookViolation(node: ESTree.CallExpression, current: ControlFlowContext): void {
-			if (isRecursiveCall(node, currentFunctionName)) {
-				context.report({
-					messageId: "recursiveHookCall",
-					node,
-				});
-				return;
-			}
-
-			if (current.inNestedFunction) {
-				context.report({
-					messageId: "nestedFunction",
-					node,
-				});
-				return;
-			}
-
-			if (current.inConditional) {
-				context.report({
-					messageId: "conditionalHook",
-					node,
-				});
-				return;
-			}
-
-			if (current.inLoop) {
-				context.report({
-					messageId: "loopHook",
-					node,
-				});
-				return;
-			}
-
-			if (current.inTryBlock) {
-				context.report({
-					messageId: "tryBlockHook",
-					node,
-				});
-				return;
-			}
-
-			if (current.afterEarlyReturn) {
-				context.report({
-					messageId: "afterEarlyReturn",
-					node,
-				});
-			}
+			kind: FunctionKind,
+			controlFlow?: ControlFlowMessageId,
+		): MessageId | undefined {
+			if (isRecursiveCall(node, currentFunctionName)) return "recursiveHookCall";
+			if (kind === "nested") return "nestedFunction";
+			if (controlFlow !== undefined) return controlFlow;
+			return hasReturned.at(-1) === true ? "afterEarlyReturn" : undefined;
 		}
 
 		function handleFunctionEnter(node: CallbackFunction): void {
-			const current = getCurrentContext();
-			const depth = current === undefined ? 0 : current.functionDepth + 1;
-			const isComponentOrHookFlag = isComponentOrHook(node);
-
 			functionNameStack.push(currentFunctionName);
 
 			const functionName = getFunctionName(node);
@@ -268,35 +223,14 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				currentFunctionName = functionName;
 			}
 
-			if (current?.isComponentOrHook === true) {
-				pushContext(makeContext({ functionDepth: depth, inNestedFunction: true }, depth));
-			} else if (isComponentOrHookFlag) {
-				pushContext(makeContext({ functionDepth: depth, isComponentOrHook: true }, depth));
-			}
+			functionKinds.push(getFunctionKind(node, functionKinds.at(-1)));
+			hasReturned.push(false);
 		}
 
 		function handleFunctionExit(): void {
-			if (getCurrentContext() !== undefined) {
-				popContext();
-			}
-
+			functionKinds.pop();
+			hasReturned.pop();
 			currentFunctionName = functionNameStack.pop();
-		}
-
-		function enterConditional(): void {
-			updateContext({ inConditional: true });
-		}
-
-		function exitConditional(): void {
-			updateContext({ inConditional: false });
-		}
-
-		function exitLoop(): void {
-			updateContext({ inLoop: false });
-		}
-
-		function enterLoop(): void {
-			updateContext({ inLoop: true });
 		}
 
 		return {
@@ -307,35 +241,23 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				if (hookName === undefined) return;
 				if (shouldIgnoreHook(hookName, node)) return;
 
-				const current = getCurrentContext();
-				if (!isActiveHookContext(current, node)) return;
+				const kind = functionKinds.at(-1);
+				if (kind === undefined || kind === "other") return;
 
-				reportHookViolation(node, current);
+				const controlFlow = getControlFlow(node);
+				if (controlFlow === IN_FINALLY_BLOCK) return;
+
+				const messageId = getHookViolation(node, kind, controlFlow);
+				if (messageId !== undefined) {
+					context.report({ messageId, node });
+				}
 			},
-
-			ConditionalExpression: enterConditional,
-			"ConditionalExpression:exit": exitConditional,
-
-			DoWhileStatement: enterLoop,
-			"DoWhileStatement:exit": exitLoop,
-
-			ForInStatement: enterLoop,
-			"ForInStatement:exit": exitLoop,
-
-			ForOfStatement: enterLoop,
-			"ForOfStatement:exit": exitLoop,
-
-			ForStatement: enterLoop,
-			"ForStatement:exit": exitLoop,
 
 			FunctionDeclaration: handleFunctionEnter,
 			"FunctionDeclaration:exit": handleFunctionExit,
 
 			FunctionExpression: handleFunctionEnter,
 			"FunctionExpression:exit": handleFunctionExit,
-
-			IfStatement: enterConditional,
-			"IfStatement:exit": exitConditional,
 
 			ImportDeclaration(node): void {
 				/* v8 ignore start -- @preserve no import-source filtering is a no-op fast path. */
@@ -354,25 +276,11 @@ const useHookAtTopLevel = createRule("use-hook-at-top-level", "react", {
 				}
 			},
 
-			LogicalExpression: enterConditional,
-			"LogicalExpression:exit": exitConditional,
-
 			"ReturnStatement:exit"(): void {
-				updateContext({ afterEarlyReturn: true });
+				// Marks the innermost function only; `fill` leaves an empty
+				// stack alone.
+				hasReturned.fill(true, -1);
 			},
-
-			SwitchStatement: enterConditional,
-			"SwitchStatement:exit": exitConditional,
-
-			TryStatement(): void {
-				updateContext({ inTryBlock: true });
-			},
-			"TryStatement:exit"(): void {
-				updateContext({ inTryBlock: false });
-			},
-
-			WhileStatement: enterLoop,
-			"WhileStatement:exit": exitLoop,
 		};
 	},
 	meta: {

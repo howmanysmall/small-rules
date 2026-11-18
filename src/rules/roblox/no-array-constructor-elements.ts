@@ -27,6 +27,7 @@ import {
 import { Predicate } from "effect";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
+import { forEachNode, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -46,19 +47,23 @@ interface NoArrayConstructorElementsOptions {
 type ProgramStatement = ESTree.ModuleDeclaration | ESTree.Statement;
 
 interface PushCollapseCandidate {
+	readonly annotationText: string | undefined;
 	readonly arrayIdentifierName: string;
 	readonly declarator: ESTree.VariableDeclarator;
 	readonly hasUnsafeArgument: boolean;
 	readonly literalText: string;
 	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+	readonly readsArray: boolean;
 	readonly statement: ESTree.VariableDeclaration;
 }
 
 interface PushScanResult {
 	readonly argumentParts: ReadonlyArray<string>;
 	readonly hasUnsafeArgument: boolean;
+	readonly lastPushEnd: number;
 	readonly nextIndex: number;
 	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+	readonly readsArray: boolean;
 }
 
 type NoArrayConstructorElementsMessageId =
@@ -231,9 +236,7 @@ function buildArrayLiteralFromArguments(argumentsList: ReadonlyArray<ESTree.Argu
 function createCollapseFixes(
 	fixer: Fixer,
 	sourceCode: SourceCode,
-	declarator: ESTree.VariableDeclarator,
-	pushStatements: ReadonlyArray<ESTree.ExpressionStatement>,
-	arrayLiteralText: string,
+	{ annotationText, declarator, literalText: arrayLiteralText, pushStatements }: PushCollapseCandidate,
 ): Array<Fix> {
 	/* v8 ignore next -- @preserve caller only builds fixes after a new Array initializer and at least one push. */
 	if (declarator.init === null || pushStatements.length === 0) {
@@ -263,10 +266,17 @@ function createCollapseFixes(
 		break;
 	}
 
-	return [
+	const fixes = [
 		fixer.replaceText(declarator.init, arrayLiteralText),
 		fixer.removeRange([collapseStart, lastPushStatement.range[1]]),
 	];
+
+	// Later uses would see the literal's inferred type instead of the generic.
+	if (annotationText !== undefined) {
+		fixes.push(fixer.insertTextAfter(declarator.id, annotationText));
+	}
+
+	return fixes;
 }
 
 function reportArrayConstructor(
@@ -423,6 +433,42 @@ function reportLengthArrayConstructor(
 	});
 }
 
+function isReferencedAfter(sourceCode: SourceCode, declarator: ESTree.VariableDeclarator, position: number): boolean {
+	for (const variable of sourceCode.getDeclaredVariables(declarator)) {
+		for (const reference of variable.references) {
+			if (reference.identifier.range[0] >= position) return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a push reads the array while the literal is still being built, which
+ * would be a read of a variable that does not exist yet. A nested function
+ * only reads it later.
+ *
+ * @param pushCall - The push call to inspect.
+ * @param arrayIdentifierName - The name of the array being built.
+ * @returns Whether an argument reads the array immediately.
+ */
+function hasEagerArrayReference(pushCall: ESTree.CallExpression, arrayIdentifierName: string): boolean {
+	let hasReference = false;
+
+	forEachNode(pushCall, (current) => {
+		if (current === pushCall.callee || isAnyFunction(current)) return false;
+
+		if (isIdentifierNamed(current, arrayIdentifierName)) {
+			hasReference = true;
+			return STOP_NODE_TRAVERSAL;
+		}
+
+		return true;
+	});
+
+	return hasReference;
+}
+
 function getPushCollapseCandidate(
 	sourceCode: SourceCode,
 	statements: ReadonlyArray<ProgramStatement>,
@@ -443,12 +489,21 @@ function getPushCollapseCandidate(
 	if (scan.pushStatements.length === 0) return undefined;
 	if (containsLaterPushCall(statements, scan.nextIndex, arrayIdentifierName)) return undefined;
 
+	const { typeArguments } = declarator.init;
+	const hasGeneric = typeArguments !== undefined && typeArguments !== null;
+	const needsAnnotation =
+		hasGeneric &&
+		getBindingTypeAnnotation(declarator.id) === undefined &&
+		isReferencedAfter(sourceCode, declarator, scan.lastPushEnd);
+
 	return {
+		annotationText: needsAnnotation ? `: Array${sourceCode.getText(typeArguments)}` : undefined,
 		arrayIdentifierName,
 		declarator,
 		hasUnsafeArgument: scan.hasUnsafeArgument,
 		literalText: `[${scan.argumentParts.join(", ")}]`,
 		pushStatements: scan.pushStatements,
+		readsArray: scan.readsArray,
 		statement,
 	};
 }
@@ -462,6 +517,8 @@ function scanPushStatements(
 	const pushStatements = new Array<ESTree.ExpressionStatement>();
 	const argumentParts = new Array<string>();
 	let hasUnsafeArgument = false;
+	let lastPushEnd = 0;
+	let readsArray = false;
 	let scanIndex = startIndex;
 
 	while (scanIndex < statements.length) {
@@ -473,14 +530,18 @@ function scanPushStatements(
 
 		pushStatements.push(nextStatement);
 		hasUnsafeArgument = appendPushArguments(sourceCode, pushCall, argumentParts) || hasUnsafeArgument;
+		readsArray = hasEagerArrayReference(pushCall, arrayIdentifierName) || readsArray;
+		[, lastPushEnd] = nextStatement.range;
 		scanIndex += 1;
 	}
 
 	return {
 		argumentParts,
 		hasUnsafeArgument,
+		lastPushEnd,
 		nextIndex: scanIndex,
 		pushStatements,
+		readsArray,
 	};
 }
 
@@ -518,16 +579,20 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 				const candidate = getPushCollapseCandidate(sourceCode, statements, index);
 				if (candidate === undefined) continue;
 
+				// A push that reads the array would read it before the literal
+				// exists, so there is no safe rewrite to offer.
+				if (candidate.readsArray) {
+					context.report({
+						messageId: "collapseArrayPushInitialization",
+						node: candidate.statement,
+					});
+					continue;
+				}
+
 				if (!candidate.hasUnsafeArgument) {
 					context.report({
 						fix(fixer) {
-							return createCollapseFixes(
-								fixer,
-								sourceCode,
-								candidate.declarator,
-								candidate.pushStatements,
-								candidate.literalText,
-							);
+							return createCollapseFixes(fixer, sourceCode, candidate);
 						},
 						messageId: "collapseArrayPushInitialization",
 						node: candidate.statement,
@@ -541,13 +606,7 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 					suggest: [
 						{
 							fix(fixer): FixReturn {
-								return createCollapseFixes(
-									fixer,
-									sourceCode,
-									candidate.declarator,
-									candidate.pushStatements,
-									candidate.literalText,
-								);
+								return createCollapseFixes(fixer, sourceCode, candidate);
 							},
 							messageId: "suggestCollapseArrayPushInitialization",
 						},

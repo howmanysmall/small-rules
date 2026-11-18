@@ -368,8 +368,7 @@ function isFunctionalHOC(state: ReactEffectAnalysisState, node: ESTree.Node): bo
 
 function isCustomHook(node: ESTree.Node): node is ReactOwner {
 	if (
-		(!isFunctionDeclarationRaw(node) &&
-			(!isVariableDeclarator(node) || node.init === null || isCallbackFunction(node.init))) ||
+		(!isFunctionDeclarationRaw(node) && (!isVariableDeclarator(node) || node.init === null)) ||
 		/* v8 ignore next -- function/variable declarations from the parser always carry identifier ids. @preserve */
 		!isIdentifier(node.id)
 	) {

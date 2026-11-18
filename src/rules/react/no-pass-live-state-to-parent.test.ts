@@ -267,6 +267,26 @@ export function useCustomHook(onChanged: (text: string | undefined) => void): vo
 				],
 			},
 			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+export const useArrowHook = (onChanged: (text: string | undefined) => void): void => {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads the state value.
+	const [text, setText] = useState<string | undefined>();
+
+	useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
+};
+`,
+				errors: [
+					{
+						data: { name: '"useArrowHook"', state: '"text"' },
+						messageId: "avoidPassingLiveStateToParentInHook",
+					},
+				],
+			},
+			{
 				// A memo-wrapped arrow reports the component's declared name.
 				code: `
 import React, { memo, useEffect, useState } from "@rbxts/react";

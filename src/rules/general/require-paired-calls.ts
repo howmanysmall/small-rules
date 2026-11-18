@@ -23,12 +23,14 @@ import {
 } from "@small-rules/oxlint-utilities";
 import { type } from "arktype";
 import { Predicate } from "effect";
+import { Minimatch } from "minimatch";
 
 import { createRule } from "$oxc-utilities/create-rule";
 import { mergeIntoStackTop } from "$oxc-utilities/stack-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { LoopNode } from "@small-rules/oxlint-utilities";
+import type { MinimatchOptions } from "minimatch";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
 
@@ -75,6 +77,26 @@ interface ControlFlowContext {
 }
 
 const DEFAULT_ROBLOX_YIELDING_FUNCTIONS = ["task.wait", "wait", "*.WaitForChild", "*.*Async"] as const;
+
+// Call names are plain `object.method` text, so only `*` carries meaning.
+const YIELDING_PATTERN_OPTIONS: MinimatchOptions = {
+	dot: true,
+	nobrace: true,
+	nocomment: true,
+	noext: true,
+	nonegate: true,
+};
+const yieldingPatternMatchers = new Map<string, Minimatch>();
+
+function matchesYieldingPattern(callName: string, pattern: string): boolean {
+	let matcher = yieldingPatternMatchers.get(pattern);
+	if (matcher === undefined) {
+		matcher = new Minimatch(pattern, YIELDING_PATTERN_OPTIONS);
+		yieldingPatternMatchers.set(pattern, matcher);
+	}
+
+	return matcher.match(callName);
+}
 
 function isOpenerInAllBranches(
 	opener: OpenerStackEntry,
@@ -387,14 +409,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			if (config.platform !== "roblox") return false;
 
 			const yieldingFunctions = config.yieldingFunctions ?? DEFAULT_ROBLOX_YIELDING_FUNCTIONS;
-			return yieldingFunctions.some((pattern) => {
-				if (pattern.startsWith("*.")) {
-					const methodName = pattern.slice(2);
-					return functionName.endsWith(`.${methodName}`);
-				}
-
-				return functionName === pattern;
-			});
+			return yieldingFunctions.some((pattern) => matchesYieldingPattern(functionName, pattern));
 		}
 
 		function getCloserLabel(config: PairConfiguration): string {

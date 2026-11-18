@@ -115,6 +115,86 @@ class MyClass {
 `,
 				errors: [{ messageId: "noInstanceMethodWithoutThis" }, { messageId: "noInstanceMethodWithoutThis" }],
 			},
+			// Another method using this must not hide this method
+			// (this was a valid case that pinned the bug)
+			{
+				code: `
+class MyClass {
+    private notify(): void {}
+
+    private process(): void {
+        this.notify();
+    }
+}
+`,
+				errors: [{ data: { methodName: "notify" }, messageId: "noInstanceMethodWithoutThis" }],
+			},
+			{
+				code: `
+export class Counter {
+    private count = 0;
+
+    increment() {
+        this.count += 1;
+    }
+
+    describe() {
+        return "counter";
+    }
+}
+`,
+				errors: [{ data: { methodName: "describe" }, messageId: "noInstanceMethodWithoutThis" }],
+			},
+			// This inside a nested non-arrow function belongs to that function
+			{
+				code: `
+class MyClass {
+    private run(items: Array<number>): void {
+        items.forEach(function (this: unknown) {
+            console.log(this);
+        });
+    }
+}
+`,
+				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
+			},
+			{
+				code: `
+class MyClass {
+    private run(): void {
+        function inner(this: unknown) {
+            console.log(this);
+        }
+        inner();
+    }
+}
+`,
+				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
+			},
+			// This inside a nested class body belongs to that class
+			{
+				code: `
+class MyClass {
+    private run(): unknown {
+        return class {
+            value = this;
+        };
+    }
+}
+`,
+				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
+			},
+			// Array holes are not nodes and are skipped while searching for this
+			{
+				code: `
+class MyClass {
+    private run(): Array<number | undefined> {
+        return [, 1];
+    }
+}
+`,
+				errors: [{ messageId: "noInstanceMethodWithoutThis" }],
+			},
 			// Overload signatures are skipped, but the implementation is still
 			// flagged
 			{
@@ -154,24 +234,58 @@ class MyClass {
 }
 `,
 			},
-			// Methods using this.method()
-			{
-				code: `
-class MyClass {
-    private notify(): void {}
-
-    private process(): void {
-        this.notify();
-    }
-}
-`,
-			},
 			// Methods using super
 			{
 				code: `
 class MyClass extends BaseClass {
     protected override process(): void {
         super.process();
+    }
+}
+`,
+			},
+			// This in a default parameter belongs to the method
+			{
+				code: `
+class MyClass {
+    private value = 0;
+
+    private read(fallback = this.value): number {
+        return fallback;
+    }
+}
+`,
+			},
+			// This in a nested class header or computed key belongs to the method
+			{
+				code: `
+class MyClass {
+    private run(): unknown {
+        return class extends this.Base {};
+    }
+}
+`,
+			},
+			{
+				code: `
+class MyClass {
+    private run(): unknown {
+        return class {
+            [this.key] = 1;
+        };
+    }
+}
+`,
+			},
+			{
+				code: `
+class MyClass {
+    private run(): unknown {
+        return class {
+            static [this.key]() {
+                return 1;
+            }
+        };
     }
 }
 `,

@@ -1,4 +1,4 @@
-import { isIdentifier, isTsQualifiedName } from "@small-rules/oxlint-utilities";
+import { isIdentifier, isMemberExpression, isTsQualifiedName } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
 import { createRule } from "$oxc-utilities/create-rule";
@@ -50,38 +50,62 @@ function getReferencedTypeName(typeNameNode: ESTree.TSTypeName): string | undefi
 	return undefined;
 }
 
+/**
+ * Names the type a heritage clause extends or implements.
+ *
+ * @param expression - The clause's expression, an identifier or member access.
+ * @returns The referenced name, or undefined for `this`.
+ */
+function getHeritageTypeName(expression: ESTree.Expression): string | undefined {
+	if (isIdentifier(expression)) return expression.name;
+	return isMemberExpression(expression) && !expression.computed ? expression.property.name : undefined;
+}
+
 const banTypes = createRule("ban-types", "naming", {
 	create(context): Visitor {
 		const [rawOptions] = context.options;
 
 		const bannedTypes = normalizeBannedTypes(rawOptions);
 
+		function reportBannedType(referencedTypeName: string, node: ESTree.Node): void {
+			const bannedTypeEntry = bannedTypes.get(referencedTypeName.toLowerCase());
+			if (bannedTypeEntry === undefined) return;
+
+			if (bannedTypeEntry.replacementName !== undefined && bannedTypeEntry.replacementName.length > 0) {
+				context.report({
+					data: {
+						replacementName: bannedTypeEntry.replacementName,
+						typeName: bannedTypeEntry.originalName,
+					},
+					messageId: "bannedTypeWithReplacement",
+					node,
+				});
+				return;
+			}
+
+			context.report({
+				data: { typeName: bannedTypeEntry.originalName },
+				messageId: "bannedType",
+				node,
+			});
+		}
+
+		function checkHeritage(node: ESTree.TSClassImplements | ESTree.TSInterfaceHeritage): void {
+			const heritageTypeName = getHeritageTypeName(node.expression);
+			if (heritageTypeName === undefined) return;
+
+			reportBannedType(heritageTypeName, node.expression);
+		}
+
 		return {
+			TSClassImplements: checkHeritage,
+			TSInterfaceHeritage: checkHeritage,
 			TSTypeReference(node): void {
 				const referencedTypeName = getReferencedTypeName(node.typeName);
 				/* v8 ignore next -- parser-produced TSTypeReference nodes always have a supported typeName. @preserve */
 				if (referencedTypeName === undefined) return;
 
-				const bannedTypeEntry = bannedTypes.get(referencedTypeName.toLowerCase());
-				if (bannedTypeEntry === undefined) return;
-
-				if (bannedTypeEntry.replacementName !== undefined && bannedTypeEntry.replacementName.length > 0) {
-					context.report({
-						data: {
-							replacementName: bannedTypeEntry.replacementName,
-							typeName: bannedTypeEntry.originalName,
-						},
-						messageId: "bannedTypeWithReplacement",
-						node: node.typeName,
-					});
-					return;
-				}
-
-				context.report({
-					data: { typeName: bannedTypeEntry.originalName },
-					messageId: "bannedType",
-					node: node.typeName,
-				});
+				reportBannedType(referencedTypeName, node.typeName);
 			},
 		} satisfies Visitor;
 	},

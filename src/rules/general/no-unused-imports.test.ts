@@ -6,6 +6,21 @@ import rule from "$oxc-rules/general/no-unused-imports";
 describe("no-unused-imports", () => {
 	ts.run("no-unused-imports", rule, {
 		invalid: [
+			// An import the lookup cannot find (it lives in another scope, such
+			// as a `declare module` block) is still reported, but it may be in
+			// use there, so the fix does not delete it.
+			{
+				code: [
+					'import { Top } from "./top";',
+					"export { Top };",
+					'declare module "./augmented" {',
+					'\timport { Shared } from "./shared";',
+					"\texport { Shared };",
+					"}",
+				].join("\n"),
+				output: null,
+				errors: [{ data: { identifierName: "Shared" }, messageId: "unusedImport" }],
+			},
 			{
 				code: "import UnusedDefault from './module';",
 				output: "",

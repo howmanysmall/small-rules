@@ -12,8 +12,14 @@ import RulePage from "$components/rule-page.astro";
 			list instead of one coherent request.
 		</p>
 		<p>
-			This rule finds consecutive queries on the same world and entity and collapses them into one call. It
-			auto-fixes, so you don't have to hand-merge anything. I'd turn this on anywhere you use Jecs.
+			This rule finds consecutive queries on the same world and entity and collapses them into one call. I'd turn
+			this on anywhere you use Jecs.
+		</p>
+		<p>
+			`get` queries auto-fix into one destructuring, unless a component reads an earlier result, like
+			`pair(Relation, target)`. `has` queries auto-fix only when nothing reads the flags except one `&&` chain,
+			and that chain becomes the merged `hasAll`. In every other case the rule reports and leaves the merge to
+			you.
 		</p>
 	</Fragment>
 </RulePage>

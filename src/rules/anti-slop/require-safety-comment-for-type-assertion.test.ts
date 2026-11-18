@@ -241,4 +241,117 @@ describe("require-safety-comment-for-type-assertion", () => {
 			},
 		],
 	});
+
+	ts.run("require-safety-comment-for-type-assertion block disable range", rule, {
+		invalid: [
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion -- legacy block below */",
+					"const legacy = raw as Foo;",
+					"/* oxlint-enable typescript/no-unsafe-type-assertion */",
+					"",
+					"export function later(): Foo {",
+					"	return raw as Foo;",
+					"}",
+				].join("\n"),
+				errors: [{ line: 6, messageId: "missingSafetyComment" }],
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion -- legacy block below */",
+					"const legacy = raw as Foo;",
+					"/* oxlint-enable */",
+					"const later = raw as Foo;",
+				].join("\n"),
+				errors: [{ line: 4, messageId: "missingSafetyComment" }],
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion -- first block */",
+					"/* oxlint-enable typescript/no-unsafe-type-assertion */",
+					"/* oxlint-disable no-console -- unrelated block */",
+					"const later = raw as Foo;",
+				].join("\n"),
+				errors: [{ line: 4, messageId: "missingSafetyComment" }],
+				settings: tsgolint2002,
+			},
+		],
+		valid: [
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion -- legacy block below */",
+					"/* oxlint-enable no-console */",
+					"const legacy = raw as Foo;",
+				].join("\n"),
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion, typescript/no-unsafe-enum-assignment -- legacy */",
+					"/* oxlint-enable typescript/no-unsafe-type-assertion */",
+					"const legacy = raw as Foo;",
+				].join("\n"),
+				settings: tsgolint2002,
+			},
+			{
+				code: [
+					"/* oxlint-disable typescript/no-unsafe-type-assertion -- legacy block below */",
+					"const legacy = raw as Foo;",
+					"/* oxlint-enable typescript/no-unsafe-type-assertion */",
+				].join("\n"),
+				settings: tsgolint2002,
+			},
+		],
+	});
+
+	ts.run("require-safety-comment-for-type-assertion comment ownership", rule, {
+		invalid: [
+			{
+				code: "const first = raw as Foo; // SAFETY: raw was validated above\nconst second = other as Foo;",
+				errors: [missingSafetyComment, missingSafetyComment],
+			},
+			{
+				code: "const first = 1; // SAFETY: first is fine\nexport const second = other as Foo;",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "class Widget {\n\tfirst = 1; /* SAFETY: first is fine */\n\tsecond = other as Foo;\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// SAFETY: only the lookup below is checked\nfunction lookup(value: unknown): void {\n\tif (value as boolean) {\n\t\tconsole.log(1);\n\t}\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// SAFETY: this class is fine\nclass Widget {\n\trun(input: unknown): void {\n\t\tfor (const item of input as Array<number>) {}\n\t}\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// SAFETY: this class is fine\nclass Widget {\n\trun(input = other as number): void {}\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// SAFETY: this class is fine\nclass Widget {\n\tstatic {\n\t\twhile (other as boolean) {}\n\t}\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// SAFETY: this namespace is fine\nnamespace Scope {\n\twhile (other as boolean) {}\n}",
+				errors: [missingSafetyComment],
+			},
+			{
+				code: "// SAFETY: this switch is fine\nswitch (kind) {\n\tcase 1:\n\t\twhile (other as boolean) {}\n}",
+				errors: [missingSafetyComment],
+			},
+		],
+		valid: [
+			"const first = 1;\n// SAFETY: second is checked\nconst second = other as Foo;",
+			"const first = 1; /* SAFETY: second is checked */ const second = other as Foo;",
+			"const first = 1;\n// SAFETY: second is checked\nexport const second = other as Foo;",
+			"// SAFETY: the condition is checked\nif (value as boolean) {}",
+			"// SAFETY: the key is checked\nswitch (kind) {\n\tcase other as Foo:\n\t\tbreak;\n}",
+			"// SAFETY: the parameter default is checked\nfunction lookup(value = other as Foo): void {}",
+		],
+	});
 });

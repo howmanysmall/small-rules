@@ -1,4 +1,5 @@
 import {
+	isAnyFunction,
 	isAssignmentExpression,
 	isBindingIdentifier,
 	isExpressionStatement,
@@ -6,6 +7,7 @@ import {
 	isMemberExpression,
 	isNewExpression,
 	isNumericLiteral,
+	isSequenceExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
@@ -34,11 +36,35 @@ interface Candidate {
 	readonly declarator: ESTree.VariableDeclarator;
 	readonly firstAssignmentStatement: ESTree.ExpressionStatement;
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
+	readonly readsArray: boolean;
 }
 
 function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
 	let hasReference = false;
 	forEachNode(node, (current) => {
+		if (isIdentifierNamed(current, arrayIdentifierName)) {
+			hasReference = true;
+			return STOP_NODE_TRAVERSAL;
+		}
+
+		return true;
+	});
+	return hasReference;
+}
+
+/**
+ * A nested function only reads the array later, so it is not a read in the
+ * initializer.
+ *
+ * @param node - The assigned value.
+ * @param arrayIdentifierName - The name of the array being filled.
+ * @returns Whether the value reads the array immediately.
+ */
+function hasEagerArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
+	let hasReference = false;
+	forEachNode(node, (current) => {
+		if (isAnyFunction(current)) return false;
+
 		if (isIdentifierNamed(current, arrayIdentifierName)) {
 			hasReference = true;
 			return STOP_NODE_TRAVERSAL;
@@ -115,7 +141,9 @@ function collectSequentialAssignments(
 			continue;
 		}
 
-		if (hasArrayReference(statement, arrayIdentifierName)) break;
+		// The fix deletes everything between the first and last assignment, so
+		// the run of assignments must be contiguous.
+		if (foundAssignments.length > 0 || hasArrayReference(statement, arrayIdentifierName)) break;
 
 		scanIndex += 1;
 	}
@@ -139,6 +167,19 @@ function collectNextAssignment(
 
 	foundAssignments.push(assignment);
 	return true;
+}
+
+/**
+ * Oxlint's getText drops the parentheses of a sequence, which would split it
+ * into several elements.
+ *
+ * @param sourceCode - The source code to read from.
+ * @param expression - The assigned value.
+ * @returns The text, wrapped in parentheses when it is a sequence.
+ */
+function getValueText(sourceCode: SourceCode, expression: ESTree.Expression): string {
+	const text = sourceCode.getText(expression);
+	return isSequenceExpression(expression) ? `(${text})` : text;
 }
 
 function getCandidate(
@@ -167,12 +208,15 @@ function getCandidate(
 	return {
 		assignments: foundAssignments.map((found) => ({
 			statement: found.statement,
-			valueText: sourceCode.getText(found.expression.right),
+			valueText: getValueText(sourceCode, found.expression.right),
 		})),
 		declaration,
 		declarator,
 		firstAssignmentStatement: firstFound.statement,
 		lastAssignmentStatement: lastFound.statement,
+		readsArray: foundAssignments.some((found) =>
+			hasEagerArrayReference(found.expression.right, arrayIdentifierName),
+		),
 	};
 }
 
@@ -240,8 +284,9 @@ function computeRemoveStart(sourceCode: SourceCode, candidate: Candidate): numbe
 function createFix(
 	fixer: Fixer,
 	sourceCode: SourceCode,
-	{ assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement }: Candidate,
+	candidate: Candidate,
 ): Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> {
+	const { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement } = candidate;
 	const { init } = declarator;
 	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
 	if (init === null) {
@@ -257,11 +302,9 @@ function createFix(
 
 	const textBetween = sourceCode.text.slice(declarationEnd, firstAssignmentStart);
 	if (textBetween.trim().length > 0) {
-		const candidate = { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement };
 		return [createMovedDeclarationFix(fixer, sourceCode, candidate, literalText, textBetween)];
 	}
 
-	const candidate = { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement };
 	const removeStart = computeRemoveStart(sourceCode, candidate);
 
 	fixes.push(fixer.removeRange([removeStart, lastAssignmentEnd]));
@@ -282,13 +325,19 @@ const noArrayConstructorIndexAssignment = createRule("no-array-constructor-index
 					continue;
 				}
 
-				context.report({
-					fix(fixer) {
-						return createFix(fixer, sourceCode, candidate);
-					},
-					messageId: "preferArrayLiteral",
-					node: candidate.declaration,
-				});
+				// A value that reads the array would read it before the literal
+				// exists, so there is no safe rewrite to offer.
+				if (candidate.readsArray) {
+					context.report({ messageId: "preferArrayLiteral", node: candidate.declaration });
+				} else {
+					context.report({
+						fix(fixer) {
+							return createFix(fixer, sourceCode, candidate);
+						},
+						messageId: "preferArrayLiteral",
+						node: candidate.declaration,
+					});
+				}
 
 				index = statements.indexOf(candidate.lastAssignmentStatement) + 1;
 			}

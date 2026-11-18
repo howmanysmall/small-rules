@@ -111,6 +111,34 @@ describe("no-useless-empty-string-comparison", () => {
 				options: [{ allowAutofix: true }],
 				errors: [{ messageId: "useLengthComparison" }],
 			},
+
+			// An optional chain would flip the nullish result, so no rewrite
+			{
+				code: "if (a?.b !== '') flag = true;",
+				errors: [{ messageId: "useLengthComparison", suggestions: [] }],
+			},
+			{
+				code: "if ('' === (a?.b)) flag = true;",
+				errors: [{ messageId: "useLengthComparison", suggestions: [] }],
+			},
+			{
+				code: "if (a?.b !== '') flag = true;",
+				output: null,
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "useLengthComparison" }],
+			},
+
+			// A rewrite would drop the comment inside the comparison
+			{
+				code: "if (value /* why */ === '') flag = true;",
+				errors: [{ messageId: "useLengthComparison", suggestions: [] }],
+			},
+			{
+				code: "if (value /* why */ === '') flag = true;",
+				output: null,
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "useLengthComparison" }],
+			},
 		],
 		valid: [
 			{

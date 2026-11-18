@@ -40,6 +40,7 @@ import {
 	isClassVariable,
 	isDefaultOrNamespaceImportName,
 	isObjectPropertyKey,
+	isRenameCaptureFree,
 	isShorthandImportLocal,
 	isShorthandPropertyValue,
 	renameVariable,
@@ -156,6 +157,13 @@ function tryReportFix(
 
 		const generatedNames = scopeToNamesGeneratedByFixer.get(scope);
 		generatedNames?.add(replacement);
+	}
+
+	// The name is still reported; a rename that other names would capture
+	// is left to the author.
+	if (!isRenameCaptureFree(variable, replacement)) {
+		report({ ...message, node: definitionName });
+		return;
 	}
 
 	report({

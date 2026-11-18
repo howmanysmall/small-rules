@@ -1,8 +1,18 @@
 import nodePath from "node:path";
-import { isJsxElement, isJsxFragment } from "@small-rules/oxlint-utilities";
+import {
+	isIdentifierNamed,
+	isImportDefaultSpecifier,
+	isJsxElement,
+	isJsxFragment,
+	isMemberExpression,
+} from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { isImportedCallee } from "$oxc-utilities/import-binding-provenance";
+import {
+	getStaticMemberObjectVariable,
+	hasImportDefinitionFrom,
+	isImportedCallee,
+} from "$oxc-utilities/import-binding-provenance";
 import {
 	addLocalComponentImportIdentifiers,
 	createLocalComponentDiscoverer,
@@ -22,7 +32,17 @@ const PORTAL_SOURCES = new Set(["@rbxts/react-roblox", "react-dom"]);
 const JSX_EXTENSIONS = new Set([".jsx", ".tsx"]);
 
 function isPortalFactoryCall(sourceCode: SourceCode, { callee }: ESTree.CallExpression): boolean {
-	return isImportedCallee(sourceCode, callee, PORTAL_SOURCES, "createPortal");
+	if (isImportedCallee(sourceCode, callee, PORTAL_SOURCES, "createPortal")) return true;
+
+	// `import ReactRoblox from "..."; ReactRoblox.createPortal(...)` reaches the
+	// same export as a namespace import does.
+	if (!isMemberExpression(callee) || !isIdentifierNamed(callee.property, "createPortal")) return false;
+
+	return hasImportDefinitionFrom(
+		getStaticMemberObjectVariable(sourceCode, callee),
+		PORTAL_SOURCES,
+		isImportDefaultSpecifier,
+	);
 }
 
 function renderPortalChild(argument: ESTree.Node, sourceCode: SourceCode): string {

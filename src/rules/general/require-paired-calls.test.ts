@@ -1066,6 +1066,49 @@ function test(items) {
 `,
 				errors: [{ messageId: "unpairedOpener" }],
 			},
+
+			// The default yielding patterns match Roblox *Async methods
+			{
+				code: `
+function load() {
+    debug.profilebegin("load");
+    const value = store.GetAsync("key");
+    debug.profileend();
+    return value;
+}
+`,
+				errors: [
+					{
+						data: { closer: "debug.profileend", yieldingFunction: "store.GetAsync" },
+						messageId: "robloxYieldViolation",
+					},
+				],
+			},
+
+			// Wildcards inside a yielding pattern match only the names they cover
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    part.Fetch();
+    debug.profileend();
+}
+`,
+				options: [
+					{
+						pairs: [
+							{
+								closer: "debug.profileend",
+								opener: "debug.profilebegin",
+								platform: "roblox",
+								requireSync: true,
+								yieldingFunctions: ["*.Fet*"],
+							},
+						],
+					},
+				],
+				errors: [{ messageId: "robloxYieldViolation" }],
+			},
 		],
 		valid: [
 			// Calls without a nameable callee sit between a balanced pair

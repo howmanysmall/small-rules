@@ -237,6 +237,93 @@ const array = ["a", "b"];
 				errors: [{ messageId: "collapseArrayPushInitialization" }],
 			},
 			{
+				code: `
+const items = new Array<"a" | "b">();
+items.push("a");
+if (flag) items.push("b");
+`,
+				output: `
+const items: Array<"a" | "b"> = ["a"];
+if (flag) items.push("b");
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+let items = new Array<number | undefined>();
+items.push(1);
+consume(items);
+`,
+				output: `
+let items: Array<number | undefined> = [1];
+consume(items);
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items: Array<number> = new Array<number>();
+items.push(1);
+consume(items);
+`,
+				output: `
+const items: Array<number> = [1];
+consume(items);
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array();
+items.push(1);
+consume(items);
+`,
+				output: `
+const items = [1];
+consume(items);
+`,
+				options: [{ requireExplicitGenericOnNewArray: false }],
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			// A push that reads the array still reports, with no fix to offer
+			{
+				code: `
+const items = new Array<number>();
+items.push(1);
+items.push(items.length);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<Array<string>>();
+items.push(items);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<() => number>();
+items.push(() => items.length);
+`,
+				output: null,
+				errors: [
+					{
+						messageId: "collapseArrayPushInitialization",
+						suggestions: [
+							{
+								messageId: "suggestCollapseArrayPushInitialization",
+								output: `
+const items = [() => items.length];
+`,
+							},
+						],
+					},
+				],
+			},
+			{
 				code: "const { values }: { values: string } = new Array();",
 				output: null,
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],

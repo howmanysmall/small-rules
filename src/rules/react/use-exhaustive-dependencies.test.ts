@@ -2608,4 +2608,315 @@ function Component({ count }) {
 		],
 		valid: [],
 	});
+
+	jsx.run("use-exhaustive-dependencies - review fixes", rule, {
+		invalid: [
+			// Later member paths on the same root are still captures
+			{
+				code: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+    }, [obj.a]);
+}
+`,
+				output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+    }, [obj.a, obj.b]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'obj.b' to dependencies array",
+								output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+    }, [obj.a, obj.b]);
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			// A dependency on a sibling path does not cover the captured path
+			{
+				code: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.b);
+    }, [obj.a]);
+}
+`,
+				output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.b);
+    }, []);
+}
+`,
+				errors: [
+					{
+						messageId: "unnecessaryDependency",
+						suggestions: [
+							{
+								desc: "Remove 'obj.a' from dependencies array",
+								output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.b);
+    }, []);
+}
+`,
+							},
+						],
+					},
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'obj.b' to dependencies array",
+								output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.b);
+    }, [obj.a, obj.b]);
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			// A missing array lists every captured path
+			{
+				code: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+        console.log(obj.a);
+    });
+}
+`,
+				output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+        console.log(obj.a);
+    }, [obj.a, obj.b]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependenciesArray",
+						suggestions: [
+							{
+								desc: "Add dependencies array: [obj.a, obj.b]",
+								output: `
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+        console.log(obj.a);
+    }, [obj.a, obj.b]);
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			// Removing a dependency keeps spread elements
+			{
+				code: `
+function Component({ a, b, rest }) {
+    const v = useMemo(() => a * rest.length, [...rest, a, b]);
+    return v;
+}
+`,
+				output: `
+function Component({ a, b, rest }) {
+    const v = useMemo(() => a * rest.length, [...rest, a]);
+    return v;
+}
+`,
+				errors: [
+					{
+						messageId: "unnecessaryDependency",
+						suggestions: [
+							{
+								desc: "Remove 'b' from dependencies array",
+								output: `
+function Component({ a, b, rest }) {
+    const v = useMemo(() => a * rest.length, [...rest, a]);
+    return v;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			// Adding a dependency keeps spread elements
+			{
+				code: `
+function Component({ a, b, rest }) {
+    const v = useMemo(() => a * b * rest.length, [...rest, a]);
+    return v;
+}
+`,
+				output: `
+function Component({ a, b, rest }) {
+    const v = useMemo(() => a * b * rest.length, [...rest, a, b]);
+    return v;
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'b' to dependencies array",
+								output: `
+function Component({ a, b, rest }) {
+    const v = useMemo(() => a * b * rest.length, [...rest, a, b]);
+    return v;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			// Function expression closures are analyzed
+			{
+				code: `
+function Component({ a }) {
+    useEffect(function () {
+        console.log(a);
+    }, []);
+}
+`,
+				output: `
+function Component({ a }) {
+    useEffect(function () {
+        console.log(a);
+    }, [a]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'a' to dependencies array",
+								output: `
+function Component({ a }) {
+    useEffect(function () {
+        console.log(a);
+    }, [a]);
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			// Template literals with interpolation are not literals
+			{
+				code: `
+function Component({ name }) {
+    const label = \`Hello \${name}\`;
+    useEffect(() => {
+        console.log(label);
+    }, []);
+}
+`,
+				output: `
+function Component({ name }) {
+    const label = \`Hello \${name}\`;
+    useEffect(() => {
+        console.log(label);
+    }, [label]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'label' to dependencies array",
+								output: `
+function Component({ name }) {
+    const label = \`Hello \${name}\`;
+    useEffect(() => {
+        console.log(label);
+    }, [label]);
+}
+`,
+							},
+						],
+					},
+				],
+			},
+		],
+		valid: [
+			`
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+    }, [obj.a, obj.b]);
+}
+`,
+			`
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj.a);
+        console.log(obj.b);
+        console.log(obj);
+    }, [obj]);
+}
+`,
+			`
+function Component({ obj }) {
+    useEffect(() => {
+        console.log(obj?.a);
+        console.log(obj.a.c);
+    }, [obj?.a]);
+}
+`,
+			`
+function Component({ a, rest }) {
+    useMemo(() => a * rest.length, [...rest, a]);
+}
+`,
+			`
+function Component({ a }) {
+    useEffect(function () {
+        console.log(a);
+    }, [a]);
+}
+`,
+			`
+function Component() {
+    const label = \`Hello\`;
+    useEffect(() => {
+        console.log(label);
+    }, []);
+}
+`,
+		],
+	});
 });

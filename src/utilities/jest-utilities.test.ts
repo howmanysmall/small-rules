@@ -5,6 +5,7 @@ import { defineRule } from "oxlint-plugin-utilities";
 import {
 	countExpectCalls,
 	getTestCallback,
+	hasShortCircuitedExpectCall,
 	isExpectAssertionsCall,
 	isExpectHasAssertionsCall,
 	isTestCaseCall,
@@ -132,6 +133,46 @@ describe("jest utilities", () => {
 				},
 			],
 			valid: ["function run() { assert.notAnAssertion(); }"],
+		});
+	});
+
+	const shortCircuitRule = defineRule({
+		create(context): Visitor {
+			return {
+				FunctionDeclaration(node): void {
+					if (node.body === null) return;
+
+					if (hasShortCircuitedExpectCall(node.body, ["assert"])) {
+						context.report({ messageId: "short-circuited", node });
+					}
+				},
+			} satisfies Visitor;
+		},
+		meta: { messages: { "short-circuited": "short-circuited" }, schema: [], type: "problem" },
+	});
+
+	describe("short-circuited expect detection", () => {
+		tester.run("jest-utilities-short-circuit", shortCircuitRule, {
+			invalid: [
+				{
+					code: "function run() { enabled && expect(value).toBe(true); }",
+					errors: [{ messageId: "short-circuited" }],
+				},
+				{
+					code: "function run() { fallback ?? assert(value); }",
+					errors: [{ messageId: "short-circuited" }],
+				},
+				{
+					code: "function run() { helper?.(expect(value).toBe(true)); }",
+					errors: [{ messageId: "short-circuited" }],
+				},
+			],
+			valid: [
+				"function run() { expect(value).toBe(true); }",
+				"function run() { if (enabled) expect(value).toBe(true); }",
+				"function run() { enabled && check(); expect(value).toBe(true); }",
+				"function run() { enabled && notExpect(value); }",
+			],
 		});
 	});
 });

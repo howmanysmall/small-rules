@@ -41,6 +41,12 @@ describe("react-hooks-strict-return", () => {
 			{ code: "function useFoo() { useEffect(() => {}); return [1, 2, 3, 4]; }", errors },
 			{ code: "function useFoo() { useSomeOtherHook(); return [1, 2, 3, 4]; }", errors },
 			{ code: "function useFoo() { useSomeOtherHook(); useEffect(() => {}); return [1, 2, 3, 4]; }", errors },
+
+			// Spread through a chain of array initializers
+			{
+				code: "function useFoo() { const a = [1, 2]; const b = [...a]; const c = [...b, 3]; return c; }",
+				errors,
+			},
 		],
 		valid: [
 			// 1 or 2 element arrays are fine
@@ -93,6 +99,10 @@ describe("react-hooks-strict-return", () => {
 			// Anonymous default export
 			{ code: "export default function() { return; }" },
 			{ code: "const useFoo = ({ value }) => [1, 2, 3];" },
+
+			// A self-referencing spread initializer terminates
+			{ code: "function useLoop() { const a = [...a]; return a; }" },
+			{ code: "function useLoop() { const a = [...b]; const b = [...a]; return a; }" },
 		],
 	});
 });

@@ -6,6 +6,25 @@ import rule from "$oxc-rules/roblox/jecs/prefer-single-world-query-in-jecs";
 describe("prefer-single-world-query-in-jecs", () => {
 	ts.run("prefer-single-world-query-in-jecs", rule, {
 		invalid: [
+			// A string key is never a Jecs entity or component, so merging
+			// would change what the call does: reported, fix withheld.
+			{
+				code: `
+const host = config.get("server", "host");
+const port = config.get("server", "port");
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
+			{
+				code: `
+const hasRead = flags.has(user, "read");
+const hasWrite = flags.has(user, "write");
+if (hasRead && hasWrite) {}
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
 			// Basic get case: two world.get calls on same world and entity
 			{
 				code: `
@@ -104,7 +123,7 @@ if (hasA && hasB) { doSomething(); }
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
-if (hasA && hasB) { doSomething(); }
+if (hasAll) { doSomething(); }
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -115,11 +134,7 @@ const hasB = world.has(entity, ComponentB);
 hasA = false;
 if (hasA && hasB) { doSomething(); }
 `,
-				output: `
-const hasAll = world.has(entity, ComponentA, ComponentB);
-hasA = false;
-if (hasA && hasB) { doSomething(); }
-`,
+				output: null,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
 			// Three has() calls in &&
@@ -132,7 +147,7 @@ if (hasA && hasB && hasC) { doSomething(); }
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB, ComponentC);
-if (hasA && hasB && hasC) { doSomething(); }
+if (hasAll) { doSomething(); }
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -145,7 +160,7 @@ while (hasA && hasB) { doSomething(); }
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
-while (hasA && hasB) { doSomething(); }
+while (hasAll) { doSomething(); }
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -158,7 +173,7 @@ const result = hasA && hasB ? "yes" : "no";
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
-const result = hasA && hasB ? "yes" : "no";
+const result = hasAll ? "yes" : "no";
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -171,7 +186,7 @@ for (; hasA && hasB;) { doSomething(); }
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
-for (; hasA && hasB;) { doSomething(); }
+for (; hasAll;) { doSomething(); }
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -184,7 +199,7 @@ do { doSomething(); } while (hasA && hasB);
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
-do { doSomething(); } while (hasA && hasB);
+do { doSomething(); } while (hasAll);
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -197,7 +212,7 @@ if ((hasA && hasB) === true) { doSomething(); }
 `,
 				output: `
 const hasAll = world.has(entity, ComponentA, ComponentB);
-if ((hasA && hasB) === true) { doSomething(); }
+if ((hasAll) === true) { doSomething(); }
 `,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
@@ -214,9 +229,94 @@ if (hasC) { doSomethingElse(); }
 				output: `
 const hasAll = world.has(entityA, ComponentA, ComponentB);
 const hasC = world.has(entityB, ComponentC);
-if (hasA && hasB) { doSomething(); }
+if (hasAll) { doSomething(); }
 if (hasC) { doSomethingElse(); }
 `,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
+			// Reports without a fix when a component reads an earlier result
+			// (the merged call runs before any variable exists)
+			{
+				code: `
+const first = world.get(entity, First);
+const target = world.get(entity, Target);
+const data = world.get(entity, pair(Relation, target));
+const other = world.get(entity, Other);
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
+			// A nested function only reads the result later
+			{
+				code: `
+const first = world.get(entity, First);
+const second = world.get(entity, () => first);
+`,
+				output: `
+const [first, second] = world.get(entity, First, () => first);
+`,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
+			// Reports without a fix while a merged flag is still read elsewhere
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+if (hasA && hasB) { doSomething(); }
+if (hasA) { doSomethingElse(); }
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+const copy = hasA;
+if (hasA && hasB) { doSomething(); }
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
+			// Reports without a fix when the chain holds other operands
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+if (hasA && hasB && ready) { doSomething(); }
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
+			// Reports without a fix when the chain precedes the declarations
+			{
+				code: `
+function check() { return hasA && hasB; }
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
+			// Reports without a fix when the merged name is already taken
+			{
+				code: `
+const hasAll = compute();
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, ComponentB);
+if (hasA && hasB) { doSomething(hasAll); }
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleHas" }],
+			},
+			// Reports without a fix when a component reads an earlier flag
+			{
+				code: `
+const hasA = world.has(entity, ComponentA);
+const hasB = world.has(entity, pair(Relation, hasA));
+if (hasA && hasB) { doSomething(); }
+`,
+				output: null,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
 		],

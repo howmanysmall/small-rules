@@ -22,8 +22,22 @@ describe("directive-no-restricted-disable", () => {
 				options: ["no-console"],
 				errors: [{ messageId: "disallow" }],
 			},
+			{
+				code: "/* eslint-disable no-console, */\nconsole.log(1);",
+				options: ["no-console"],
+				errors: [{ messageId: "disallow" }],
+			},
+			{
+				code: "console.log(1); // eslint-disable-line no-*,",
+				options: ["no-*"],
+				errors: [{ messageId: "disallow" }],
+			},
 		],
 		valid: [
+			{
+				code: "/* eslint-disable no-alert, */\nalert(1);",
+				options: ["no-console"],
+			},
 			{
 				code: "/* oxlint-disable no-console */\nconst x = 1;\n/* oxlint-enable no-console */",
 			},

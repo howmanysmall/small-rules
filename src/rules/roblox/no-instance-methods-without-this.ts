@@ -1,5 +1,15 @@
-import { isFunctionExpression, isIdentifier, isNode, isSuper, isThisExpression } from "@small-rules/oxlint-utilities";
-import { Predicate } from "effect";
+import {
+	isClass,
+	isFunctionDeclaration,
+	isFunctionExpression,
+	isIdentifier,
+	isKeyOfNode,
+	isMethodDefinition,
+	isNode,
+	isPropertyDefinition,
+	isSuper,
+	isThisExpression,
+} from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -34,36 +44,62 @@ function shouldCheckMethod(node: ESTree.MethodDefinition, options: NormalizedOpt
 	return true;
 }
 
-function containsThisInChildren(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
-	for (const child of Object.values(currentNode)) {
-		if (Array.isArray(child)) {
-			for (const item of child) {
-				if (isNode(item) && traverseForThis(item, visited)) return true;
+function pushChildren(node: ESTree.Node, worklist: Array<ESTree.Node>): void {
+	for (const [key, value] of Object.entries(node)) {
+		if (isKeyOfNode(key)) continue;
+
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				if (isNode(item)) {
+					worklist.push(item);
+				}
 			}
 
 			continue;
 		}
 
-		if (isNode(child) && traverseForThis(child, visited)) return true;
+		if (isNode(value)) {
+			worklist.push(value);
+		}
 	}
-
-	return false;
 }
 
-function traverseForThis(currentNode: ESTree.Node, visited: WeakSet<ESTree.Node>): boolean {
-	if (visited.has(currentNode)) return false;
+/**
+ * A nested class body has its own `this`, but its heritage clause and computed
+ * keys are evaluated with the method's.
+ *
+ * @param node - The nested class.
+ * @param worklist - The worklist that receives the nodes using the method's `this`.
+ */
+function pushClassHeader(node: ESTree.Class, worklist: Array<ESTree.Node>): void {
+	if (node.superClass !== null) {
+		worklist.push(node.superClass);
+	}
 
-	visited.add(currentNode);
-
-	if (isThisExpression(currentNode) || isSuper(currentNode)) return true;
-	/* v8 ignore next -- @preserve traversal only recurses into parser nodes. */
-	if (!Predicate.isObject(currentNode)) return false;
-
-	return containsThisInChildren(currentNode, visited);
+	for (const member of node.body.body) {
+		if ((isMethodDefinition(member) || isPropertyDefinition(member)) && member.computed) {
+			worklist.push(member.key);
+		}
+	}
 }
 
 function methodUsesThis({ value }: ESTree.MethodDefinition): boolean {
-	return traverseForThis(value, new WeakSet());
+	const worklist: Array<ESTree.Node> = [value];
+
+	for (const current of worklist) {
+		if (isThisExpression(current) || isSuper(current)) return true;
+
+		if (current !== value && isFunctionDeclaration(current)) continue;
+
+		if (isClass(current)) {
+			pushClassHeader(current, worklist);
+			continue;
+		}
+
+		pushChildren(current, worklist);
+	}
+
+	return false;
 }
 
 function getMethodName(node: ESTree.MethodDefinition): string {

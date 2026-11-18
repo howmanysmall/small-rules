@@ -39,7 +39,7 @@ export function Example(horizontal: UDim, vertical: UDim) {
 				output: `import { DirectionalPadding as AxisPadding } from "../ui/directional-padding";
 
 export function Example(horizontal: UDim, vertical: UDim) {
-    return <AxisPadding horizontal={horizontal} vertical={vertical} />;
+    return <AxisPadding horizontal={vertical} vertical={horizontal} />;
 }`,
 				errors: [{ messageId: "preferDirectionalPadding" }],
 			},
@@ -95,7 +95,7 @@ export function Example(horizontal: UDim, vertical: UDim) {
 				output: `import { DirectionalPadding } from "../ui/directional-padding";
 
 export function Example(horizontal: UDim, vertical: UDim) {
-    return <DirectionalPadding horizontal={horizontal} vertical="wide" />;
+    return <DirectionalPadding horizontal="wide" vertical={horizontal} />;
 }`,
 				errors: [{ messageId: "preferDirectionalPadding" }],
 			},
@@ -165,7 +165,7 @@ export default function EqualPadding({ horizontal, vertical }: { horizontal: UDi
 				output: `import { DirectionalPadding } from "./directional-padding";
 
 export default function EqualPadding({ horizontal, vertical }: { horizontal: UDim; vertical: UDim }) {
-    return <DirectionalPadding horizontal={vertical} vertical={horizontal} />;
+    return <DirectionalPadding horizontal={horizontal} vertical={vertical} />;
 }`,
 				errors: [{ messageId: "preferDirectionalPadding" }],
 			},
@@ -182,6 +182,28 @@ export function DirectionalPadding({ padding }: { padding: UDim }) {
     return <EqualPadding padding={padding} />;
 }`,
 				errors: [{ messageId: "preferEqualPadding" }],
+			},
+			{
+				filename: nodePath.join(WITH_COMPONENTS, "src", "screens", "card.tsx"),
+				code: `import { DirectionalPadding } from "../ui/directional-padding";
+
+export function Card() {
+    return (
+        <frame>
+            <uipadding PaddingBottom={new UDim(0, 4)} PaddingLeft={new UDim(0, 16)} PaddingRight={new UDim(0, 16)} PaddingTop={new UDim(0, 4)} />
+        </frame>
+    );
+}`,
+				output: `import { DirectionalPadding } from "../ui/directional-padding";
+
+export function Card() {
+    return (
+        <frame>
+            <DirectionalPadding horizontal={new UDim(0, 16)} vertical={new UDim(0, 4)} />
+        </frame>
+    );
+}`,
+				errors: [{ messageId: "preferDirectionalPadding" }],
 			},
 		],
 		valid: [

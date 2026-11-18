@@ -129,4 +129,35 @@ type PickedUser = Pick<User, "name">;
 			},
 		],
 	});
+
+	ts.run("ban-types heritage clauses", rule, {
+		invalid: [
+			{
+				code: 'interface Base {\n\ta: string;\n\tb: number;\n}\nexport interface Narrow extends Omit<Base, "b"> {}',
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
+			},
+			{
+				code: 'interface Base {\n\ta: string;\n\tb: number;\n}\nexport class Impl implements Omit<Base, "b"> {\n\tpublic a = "";\n}',
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
+			},
+			{
+				code: 'interface Base {\n\ta: string;\n}\nexport interface Narrow extends Utility.Omit<Base, "a"> {}',
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
+			},
+			{
+				code: 'interface Base {\n\ta: string;\n}\nexport class Impl implements Utility.Omit<Base, "a"> {}',
+				errors: [{ messageId: "bannedTypeWithReplacement" }],
+			},
+			{
+				code: "export interface Frozen extends Readonly<Base> {}",
+				options: [{ bannedTypes: ["Readonly"] }],
+				errors: [{ messageId: "bannedType" }],
+			},
+		],
+		valid: [
+			'interface Base {\n\ta: string;\n}\nexport interface Narrow extends Pick<Base, "a"> {}',
+			'interface Base {\n\ta: string;\n}\nexport class Impl implements Pick<Base, "a"> {}',
+			"export class Impl implements this {}",
+		],
+	});
 });

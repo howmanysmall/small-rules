@@ -63,6 +63,12 @@ describe("no-array-size-assignment", () => {
 				errors: [{ messageId: "usePush" }],
 			},
 			{
+				code: "arr[arr.size()] = (1, 2);",
+				output: "arr.push((1, 2));",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "usePush" }],
+			},
+			{
 				code: "getArray()[getArray().size()] = value;",
 				output: null,
 				options: [{ allowAutofix: true }],

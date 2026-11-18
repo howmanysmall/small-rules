@@ -1110,6 +1110,67 @@ describe("prevent-abbreviations", () => {
 		});
 	});
 
+	ts.run("prevent-abbreviations fix safety", rule, {
+		invalid: [
+			{
+				code: 'const msg: string = "a";\nconsole.log(msg);',
+				output: 'const message: string = "a";\nconsole.log(message);',
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "function run(opts?: { verbose: boolean }): boolean {\n\treturn opts?.verbose ?? false;\n}\nrun();",
+				output: "function run(options?: { verbose: boolean }): boolean {\n\treturn options?.verbose ?? false;\n}\nrun();",
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "function run(arr: Array<number>): void {}",
+				output: "function run(array: Array<number>): void {}",
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "class Btn {\n\tclick(): void {}\n}\nconst instance = new Btn();\ninstance.click();",
+				output: "class Button {\n\tclick(): void {}\n}\nconst instance = new Button();\ninstance.click();",
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "class Btn {\n\tstatic create() {\n\t\treturn new Btn();\n\t}\n}\nconst instance = Btn.create();",
+				output: "class Button {\n\tstatic create() {\n\t\treturn new Button();\n\t}\n}\nconst instance = Button.create();",
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "const Handler = class Btn {};",
+				output: "const Handler = class Button {};",
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "class Btn {}\nfunction make(): unknown {\n\tconst Button = 1;\n\treturn [new Btn(), Button];\n}",
+				output: null,
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "export enum Err {\n\tMissing,\n}",
+				output: null,
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "export interface Btn {\n\tlabel: string;\n}",
+				output: null,
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: "function handle(evt: unknown): void {\n\tconsole.log(evt, event);\n}\nhandle(1);",
+				output: null,
+				errors: [{ messageId: "replace" }],
+			},
+			{
+				code: 'const msg = "a";\nconsole.log(msg);\nfunction report(): string {\n\treturn message;\n}\nreport();',
+				output: null,
+				errors: [{ messageId: "replace" }],
+			},
+		],
+		valid: [],
+	});
+
 	tsx.run("prevent-abbreviations JSX", rule, {
 		invalid: [
 			{

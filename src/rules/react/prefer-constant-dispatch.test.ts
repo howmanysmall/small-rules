@@ -196,6 +196,232 @@ function Component() {
 `,
 				errors: preferConstantDispatchError,
 			},
+			{
+				// The constant lands after the module binding the action reads.
+				code: `
+import { useReducer } from "react";
+import { Workspace } from "@rbxts/services";
+
+const INCREMENT = "increment";
+
+export function Counter() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch({ type: INCREMENT });
+    dispatch({ type: "camera", camera: Workspace.CurrentCamera });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+import { useReducer } from "react";
+import { Workspace } from "@rbxts/services";
+
+const INCREMENT = "increment";
+
+const PREFER_CONSTANT_ACTION_0 = { type: INCREMENT };
+
+export function Counter() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+    dispatch({ type: "camera", camera: Workspace.CurrentCamera });
+
+    return state;
+}
+`,
+							},
+						],
+					},
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_1`",
+								output: `
+import { useReducer } from "react";
+import { Workspace } from "@rbxts/services";
+
+const PREFER_CONSTANT_ACTION_1 = { type: "camera", camera: Workspace.CurrentCamera };
+
+const INCREMENT = "increment";
+
+export function Counter() {
+    const [state, dispatch] = useReducer(reducer, 0);
+
+    dispatch({ type: INCREMENT });
+    dispatch(PREFER_CONSTANT_ACTION_1);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				// A binding declared after the component still comes first.
+				code: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: INCREMENT });
+
+    return state;
+}
+
+const INCREMENT = "increment";
+
+export default Component;
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+
+    return state;
+}
+
+const INCREMENT = "increment";
+
+const PREFER_CONSTANT_ACTION_0 = { type: INCREMENT };
+
+export default Component;
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				// An enum member root is declared by the enum statement.
+				code: `
+enum Kind {
+    Open = "open",
+}
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch({ type: (Kind.Open as const) });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_0`",
+								output: `
+enum Kind {
+    Open = "open",
+}
+
+const PREFER_CONSTANT_ACTION_0 = { type: (Kind.Open as const) };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				// Applying one suggestion and linting again picks a fresh name.
+				code: `
+const PREFER_CONSTANT_ACTION_0 = { type: "OPEN" };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+    dispatch({ type: "CLOSE" });
+
+    return state;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_1`",
+								output: `
+const PREFER_CONSTANT_ACTION_1 = { type: "CLOSE" };
+
+const PREFER_CONSTANT_ACTION_0 = { type: "OPEN" };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    dispatch(PREFER_CONSTANT_ACTION_0);
+    dispatch(PREFER_CONSTANT_ACTION_1);
+
+    return state;
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				// A local binding of the same name would capture the replacement.
+				code: `
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const PREFER_CONSTANT_ACTION_0 = state;
+
+    dispatch({ type: "CLOSE" });
+
+    return PREFER_CONSTANT_ACTION_0;
+}
+`,
+				errors: [
+					{
+						messageId: "preferConstantDispatch",
+						suggestions: [
+							{
+								desc: "Extract to module constant `PREFER_CONSTANT_ACTION_1`",
+								output: `
+const PREFER_CONSTANT_ACTION_1 = { type: "CLOSE" };
+
+function Component() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const PREFER_CONSTANT_ACTION_0 = state;
+
+    dispatch(PREFER_CONSTANT_ACTION_1);
+
+    return PREFER_CONSTANT_ACTION_0;
+}
+`,
+							},
+						],
+					},
+				],
+			},
 		],
 		valid: [
 			{

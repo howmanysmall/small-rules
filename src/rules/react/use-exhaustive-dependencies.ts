@@ -6,7 +6,6 @@ import {
 	isAnyFunction,
 	isAnyLiteral,
 	isArrayExpression,
-	isArrowFunctionExpression,
 	isBinaryExpression,
 	isCallbackFunction,
 	isCallExpression,
@@ -108,7 +107,9 @@ interface VariableLike {
 interface DependencyInfo {
 	readonly name: string;
 	readonly depth: number;
+	readonly isSpread: boolean;
 	readonly node: ESTree.Node;
+	readonly segments: ReadonlyArray<string>;
 }
 
 interface CaptureInfo {
@@ -116,6 +117,7 @@ interface CaptureInfo {
 	readonly depth: number;
 	readonly forceDependency: boolean;
 	readonly node: ESTree.Node;
+	readonly segments: ReadonlyArray<string>;
 	readonly usagePath: string;
 	readonly variable: undefined | VariableLike;
 }
@@ -306,7 +308,13 @@ function appendMemberSegment(path: string, member: ESTree.MemberExpression, sour
 	return `${path}${member.optional ? "?." : "."}${propertyName}`;
 }
 
-function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
+interface MemberChain {
+	readonly base: ESTree.Node;
+	/** Members from the outermost access to the innermost. */
+	readonly members: ReadonlyArray<ESTree.MemberExpression>;
+}
+
+function unwrapMemberChain(node: ESTree.Node): MemberChain {
 	const members = new Array<ESTree.MemberExpression>();
 	let current = node;
 
@@ -322,7 +330,13 @@ function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string
 		current = current.object;
 	}
 
-	let path = getBaseDependencyPath(current, sourceCode);
+	return { base: current, members };
+}
+
+function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string {
+	const { base, members } = unwrapMemberChain(node);
+
+	let path = getBaseDependencyPath(base, sourceCode);
 	for (let index = members.length - 1; index >= 0; index -= 1) {
 		const member = members[index];
 		/* v8 ignore next -- @preserve index is bounded by members.length. */
@@ -331,6 +345,40 @@ function toSafeDependencyPath(node: ESTree.Node, sourceCode: SourceCode): string
 	}
 
 	return path;
+}
+
+/**
+ * Splits a dependency path into its root and member segments, ignoring
+ * optional chaining so `a?.b` and `a.b` compare equal.
+ *
+ * @param node - The captured or declared dependency expression.
+ * @param sourceCode - The source code used to read computed keys.
+ * @returns The root name followed by one entry per member access.
+ */
+function getPathSegments(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArray<string> {
+	const { base, members } = unwrapMemberChain(node);
+
+	const segments = [getBaseDependencyPath(base, sourceCode)];
+	for (const member of members.toReversed()) {
+		const property = sourceCode.getText(member.property);
+		segments.push(member.computed ? `[${property}]` : property);
+	}
+
+	return segments;
+}
+
+function isPathPrefix(prefix: ReadonlyArray<string>, path: ReadonlyArray<string>): boolean {
+	if (prefix.length > path.length) return false;
+
+	for (const [index, segment] of prefix.entries()) {
+		if (segment !== path[index]) return false;
+	}
+
+	return true;
+}
+
+function arePathsRelated(first: ReadonlyArray<string>, second: ReadonlyArray<string>): boolean {
+	return isPathPrefix(first, second) || isPathPrefix(second, first);
 }
 
 interface StableBindingPattern<TType extends "Array" | "Object"> extends ESTree.VariableDeclarator {
@@ -424,7 +472,11 @@ function isMapMethodCall(init: ESTree.Expression | null): boolean {
 }
 
 function isLiteralInitializer(init: ESTree.Expression | null): boolean {
-	return isAnyLiteral(init) || isTemplateLiteral(init) || (isUnaryExpression(init) && isAnyLiteral(init.argument));
+	return (
+		isAnyLiteral(init) ||
+		(isTemplateLiteral(init) && init.expressions.length === 0) ||
+		(isUnaryExpression(init) && isAnyLiteral(init.argument))
+	);
 }
 
 function isModuleLevelVariable(variable: VariableLike, node: ESTree.Node): boolean {
@@ -644,6 +696,7 @@ function getCaptureInfo(
 		depth: getMemberExpressionDepth(depthNode),
 		forceDependency: isComputedPropertyIdentifier(current),
 		node: depthNode,
+		segments: getPathSegments(depthNode, sourceCode),
 		usagePath: toSafeDependencyPath(depthNode, sourceCode),
 		variable,
 	};
@@ -687,14 +740,13 @@ function visitPropertyChildren(current: ESTree.ObjectProperty, visit: (node: EST
 
 function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArray<CaptureInfo> {
 	const captures = new Array<CaptureInfo>();
-	const captureSet = new Set<string>();
 
 	function visitIdentifier(current: ESTree.Node): void {
 		/* v8 ignore next -- @preserve visitIdentifier is only called after checking the node is an Identifier. */
 		if (!isIdentifier(current)) return;
 
 		const { name } = current;
-		if (captureSet.has(name) || GLOBAL_BUILTINS.has(name) || isInTypePosition(current)) return;
+		if (GLOBAL_BUILTINS.has(name) || isInTypePosition(current)) return;
 
 		const variable = resolveVariableInScope(name, sourceCode.getScope(current));
 		if (!shouldCaptureVariable(variable, node)) return;
@@ -703,8 +755,10 @@ function collectCaptures(node: ESTree.Node, sourceCode: SourceCode): ReadonlyArr
 
 		if (!isDeclaredInComponentBody(variable, node)) return;
 
-		captureSet.add(name);
-		captures.push(getCaptureInfo(current, name, variable, sourceCode));
+		const capture = getCaptureInfo(current, name, variable, sourceCode);
+		if (captures.some((existing) => arePathsRelated(existing.segments, capture.segments))) return;
+
+		captures.push(capture);
 	}
 
 	function visit(current: ESTree.Node): void {
@@ -746,6 +800,7 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 		if (!element) continue;
 
 		const actualNode = isSpreadElement(element) ? element.argument : element;
+		const isSpread = actualNode !== element;
 
 		const name = toSafeDependencyPath(actualNode, sourceCode);
 		const depth = getMemberExpressionDepth(actualNode);
@@ -753,7 +808,9 @@ function parseDependencies(node: ESTree.ArrayExpression, sourceCode: SourceCode)
 		dependencies.push({
 			name,
 			depth,
+			isSpread,
 			node: actualNode,
+			segments: getPathSegments(actualNode, sourceCode),
 		});
 	}
 
@@ -766,6 +823,10 @@ interface HasName {
 
 function returnName({ name }: HasName): string {
 	return name;
+}
+
+function getDependencyText({ name, isSpread }: DependencyInfo): string {
+	return isSpread ? `...${name}` : name;
 }
 
 function isUnstableValue(node?: ESTree.Node): boolean {
@@ -812,9 +873,9 @@ function reportUnnecessaryDependency(
 ): void {
 	const newDependencies = new Array<string>();
 	let size = 0;
-	for (const { name } of dependencies) {
-		if (name === dependency.name) continue;
-		newDependencies[size++] = name;
+	for (const kept of dependencies) {
+		if (kept.name === dependency.name) continue;
+		newDependencies[size++] = getDependencyText(kept);
 	}
 
 	const dependenciesString = `[${newDependencies.join(", ")}]`;
@@ -892,12 +953,9 @@ function getRootIdentifierName(node: ESTree.Node): string | undefined {
 }
 
 function getMatchingCapture(captures: ReadonlyArray<CaptureInfo>, dependency: DependencyInfo): CaptureInfo | undefined {
-	const dependencyName = getRootIdentifierName(dependency.node);
-	if (dependencyName === undefined) return undefined;
+	if (getRootIdentifierName(dependency.node) === undefined) return undefined;
 
-	// At most one capture can match: collectCaptures dedupes by identifier name,
-	// and a capture's node always roots at that same identifier.
-	return captures.find((capture) => getRootIdentifierName(capture.node) === dependencyName);
+	return captures.find((capture) => arePathsRelated(capture.segments, dependency.segments));
 }
 
 function isStableDependency(capture: CaptureInfo, stableHooks: Map<string, StableResult>): boolean {
@@ -941,7 +999,7 @@ function coversCapture(
 ): boolean {
 	const dependencyRootIdentifier = getRootIdentifier(dependency.node);
 	if (isIdentifier(dependencyRootIdentifier) && dependency.depth <= capture.depth) {
-		return dependencyRootIdentifier.name === getRootIdentifierName(capture.node);
+		return isPathPrefix(dependency.segments, capture.segments);
 	}
 
 	/* v8 ignore next -- @preserve resolveExpressionDependencies=false is covered by expression dependencies; non-expression dependencies return above. */
@@ -981,7 +1039,7 @@ function reportMissingCaptures(
 ): void {
 	if (missingCaptures.length === 0) return;
 
-	const dependencyNames = dependencies.map(({ name }) => name);
+	const dependencyNames = dependencies.map(getDependencyText);
 	const missingPaths = missingCaptures.map(({ usagePath }) => usagePath);
 	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted(compareWithLocale).join(", ")}]`;
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
@@ -1099,10 +1157,8 @@ const useExhaustiveDependencies = createRule("use-exhaustive-dependencies", "rea
 			closureArgument: ESTree.Node,
 			callExpression: ESTree.CallExpression,
 		): CallbackFunction | undefined {
-			if (isArrowFunctionExpression(closureArgument)) return closureArgument;
-
-			const canResolveClosure = isAnyFunction(closureArgument) || isIdentifier(closureArgument);
-			if (!canResolveClosure) return undefined;
+			if (isCallbackFunction(closureArgument)) return closureArgument;
+			if (!isIdentifier(closureArgument)) return undefined;
 
 			const resolved = resolveFunctionReference(closureArgument, getScope(callExpression));
 			return isCallbackFunctionNode(resolved) ? resolved : undefined;

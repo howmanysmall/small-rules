@@ -7,14 +7,17 @@ import {
 	isClassBody,
 	isIdentifier,
 	isImportDeclaration,
+	isMemberExpression,
 	isMethodDefinitionRaw,
 	isNewExpression,
 	isPrivateIdentifier,
+	isProperty,
 	isPropertyDefinitionRaw,
 	isVariableDeclarator,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
+import { forEachNode } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { ESTree, Fix, Scope, SourceCode, Visitor } from "oxlint-plugin-utilities";
@@ -68,21 +71,33 @@ function getAssignedName({ parent }: ESTree.Node): string | undefined {
 	return undefined;
 }
 
-function isClassMethodContext(node: ESTree.Node): boolean {
+type ClassMember = ESTree.MethodDefinition | ESTree.PropertyDefinition;
+
+/**
+ * Finds the class member whose function holds the node.
+ *
+ * @param node - A node inside the function.
+ * @returns The method or property that the nearest function is the value of,
+ *   or `undefined` when that function is not a class member.
+ */
+function getEnclosingClassMember(node: ESTree.Node): ClassMember | undefined {
 	let current = node.parent;
 	while (current !== null) {
 		switch (current.type) {
-			case ARROW_FUNCTION_EXPRESSION:
-				return isPropertyDefinitionRaw(current.parent) && isClassBody(current.parent.parent);
+			case ARROW_FUNCTION_EXPRESSION: {
+				return isPropertyDefinitionRaw(current.parent) && isClassBody(current.parent.parent)
+					? current.parent
+					: undefined;
+			}
 
 			case FUNCTION_DECLARATION:
-				return false;
+				return undefined;
 
 			case FUNCTION_EXPRESSION: {
-				return (
-					(isMethodDefinitionRaw(current.parent) || isPropertyDefinitionRaw(current.parent)) &&
-					isClassBody(current.parent.parent)
-				);
+				const { parent } = current;
+				return (isMethodDefinitionRaw(parent) || isPropertyDefinitionRaw(parent)) && isClassBody(parent.parent)
+					? parent
+					: undefined;
 			}
 
 			default:
@@ -93,7 +108,36 @@ function isClassMethodContext(node: ESTree.Node): boolean {
 	}
 
 	/* v8 ignore next -- @preserve class-method checks always terminate at a parsed function ancestor. */
-	return false;
+	return undefined;
+}
+
+function isAccessor(member?: ClassMember): boolean {
+	return isMethodDefinitionRaw(member) && (member.kind === "get" || member.kind === "set");
+}
+
+function isPropertyName(node: ESTree.Node): boolean {
+	const { parent } = node;
+	if (isMemberExpression(parent)) return parent.property === node && !parent.computed;
+	return isProperty(parent) && parent.key === node && !parent.computed && !parent.shorthand;
+}
+
+/**
+ * Lists the names the thrown expression reads. The new `const` would shadow
+ * them before the expression runs.
+ *
+ * @param argument - The `new Error(...)` expression that is thrown.
+ * @returns The names of the identifiers in the expression that are not a
+ *   property name.
+ */
+function getReadNames(argument: ESTree.Node): Array<string> {
+	const names = new Array<string>();
+	forEachNode(argument, (node) => {
+		if (isIdentifier(node) && !isPropertyName(node)) {
+			names.push(node.name);
+		}
+	});
+
+	return names;
 }
 
 function getUniqueVariableName(
@@ -213,6 +257,39 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 		const allowList = context.options[0]?.allow ?? [];
 		const namesReservedByFixes = new WeakMap<Scope, Set<string>>();
 
+		function getReservedNames(scope: Scope): Set<string> {
+			let reservedNames = namesReservedByFixes.get(scope);
+			if (reservedNames === undefined) {
+				reservedNames = new Set();
+				namesReservedByFixes.set(scope, reservedNames);
+			}
+
+			return reservedNames;
+		}
+
+		function pickVariableName(
+			node: ESTree.ThrowStatement,
+			argument: ESTree.NewExpression,
+			capturedFunctionName?: string,
+		): string {
+			// A throw directly in a block declares its variable there, so
+			// other throws fixed in the same pass must pick another name.
+			const scope = sourceCode.getScope(node);
+			const reservedNames = getReservedNames(scope);
+			const readNames = getReadNames(argument);
+			if (capturedFunctionName !== undefined) {
+				readNames.push(capturedFunctionName);
+			}
+
+			const takenNames = new Set([...reservedNames, ...readNames]);
+			const variableName = getUniqueVariableName(scope, node, "error", takenNames);
+			if (isBlockStatement(node.parent)) {
+				reservedNames.add(variableName);
+			}
+
+			return variableName;
+		}
+
 		// oxlint-disable typescript/no-unnecessary-condition -- so dumb
 		/* v8 ignore next -- @preserve the rule harness and Oxlint provide a physical filename for rule execution. */
 		const physicalFilename = context.physicalFilename ?? "<input>";
@@ -231,23 +308,16 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				const functionName = getEnclosingFunctionName(node);
 				if (functionName === undefined) return;
 
-				const isMethod = isClassMethodContext(node);
-				const capturedName = isMethod ? `this.${functionName}` : functionName;
-
-				// A throw directly in a block declares its variable there, so
-				// other throws fixed in the same pass must pick another name.
-				const declaresInScope = isBlockStatement(node.parent);
-				const scope = sourceCode.getScope(node);
-				let reservedNames = namesReservedByFixes.get(scope);
-				if (reservedNames === undefined) {
-					reservedNames = new Set();
-					namesReservedByFixes.set(scope, reservedNames);
+				// Naming a getter or setter in the call would invoke it, and
+				// there is no other name for it.
+				const member = getEnclosingClassMember(node);
+				if (isAccessor(member)) {
+					context.report({ messageId: "missingCaptureStackTrace", node });
+					return;
 				}
 
-				const variableName = getUniqueVariableName(scope, node, "error", reservedNames);
-				if (declaresInScope) {
-					reservedNames.add(variableName);
-				}
+				const capturedName = member === undefined ? functionName : `this.${functionName}`;
+				const variableName = pickVariableName(node, argument, member === undefined ? functionName : undefined);
 
 				context.report({
 					fix(fixer): Fix {

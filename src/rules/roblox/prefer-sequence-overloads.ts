@@ -1,15 +1,21 @@
 import {
 	isArrayExpression,
+	isCallExpression,
 	isIdentifier,
+	isMemberExpression,
 	isNamedGlobalCall,
 	isNewExpression,
 	isNumericLiteral,
+	isSequenceExpression,
 	isSpreadElement,
 } from "@small-rules/oxlint-utilities";
 
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
+import { stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
-import type { Context, ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { Context, ESTree, Fix, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isNumericLiteralValue(node: ESTree.Node, value: number): node is ESTree.NumericLiteral {
 	return isNumericLiteral(node) && node.value === value;
@@ -33,9 +39,89 @@ function getKeypointValue(node: ESTree.Expression, keypointName: string, time: n
 	return isNumericLiteralValue(timeArgument, time) ? valueArgument : undefined;
 }
 
+const PURE_DATATYPES = new Set(["CFrame", "Color3", "NumberRange", "Rect", "UDim", "UDim2", "Vector2", "Vector3"]);
+
+function getDatatypeReference(call: ESTree.CallExpression | ESTree.NewExpression): ESTree.Expression | undefined {
+	if (isNewExpression(call)) return call.callee;
+	return isMemberExpression(call.callee) && !call.callee.computed ? call.callee.object : undefined;
+}
+
+function appendCallArguments(
+	call: ESTree.CallExpression | ESTree.NewExpression,
+	worklist: Array<ESTree.Expression>,
+): boolean {
+	for (const argument of call.arguments) {
+		if (isSpreadElement(argument)) return false;
+		worklist.push(argument);
+	}
+
+	return true;
+}
+
+/**
+ * Tells whether evaluating an expression twice gives the same value as
+ * evaluating it once and using the value twice.
+ *
+ * Roblox datatype constructors and their static factories are pure, so
+ * `Color3.fromRGB(1, 2, 3)` counts. Any other call, such as `math.random()`,
+ * does not.
+ *
+ * @param expression - The expression that would be evaluated once.
+ * @param sourceCode - The source code that owns the expression.
+ * @returns `true` when sharing one evaluation cannot change behavior.
+ */
+function isReplayable(expression: ESTree.Expression, sourceCode: SourceCode): boolean {
+	const worklist = [expression];
+	for (const current of worklist) {
+		const unwrapped = stripExpressionWrappers(current);
+		if (!isCallExpression(unwrapped) && !isNewExpression(unwrapped)) {
+			if (!isExpressionSideEffectSafe(unwrapped)) return false;
+			continue;
+		}
+
+		const datatype = getDatatypeReference(unwrapped);
+		if (
+			!isIdentifier(datatype) ||
+			!PURE_DATATYPES.has(datatype.name) ||
+			hasShadowedBinding(sourceCode, datatype, datatype.name)
+		) {
+			return false;
+		}
+
+		if (!appendCallArguments(unwrapped, worklist)) return false;
+	}
+
+	return true;
+}
+
+/**
+ * Reads an argument's source text so that it can be placed in a new argument
+ * list. A comma expression keeps its parentheses, which real Oxlint drops
+ * from the node's text.
+ *
+ * @param expression - The value that becomes an argument of the new call.
+ * @param sourceCode - The source code that owns the expression.
+ * @returns The text to print in an argument list.
+ */
+function getArgumentText(expression: ESTree.Expression, sourceCode: SourceCode): string {
+	const unwrapped = stripParenthesis(expression);
+	const text = sourceCode.getText(unwrapped);
+	return isSequenceExpression(unwrapped) ? `(${text})` : text;
+}
+
 interface SequenceReplacement {
 	readonly messageId: "preferSingleOverload" | "preferTwoPointOverload";
-	readonly replacement: string;
+	/** The fixed code; `undefined` when a fix would change behavior. */
+	readonly replacement: string | undefined;
+}
+
+function getSingleReplacement(
+	sequenceName: string,
+	value: ESTree.Expression,
+	text: string,
+	sourceCode: SourceCode,
+): string | undefined {
+	return isReplayable(value, sourceCode) ? `new ${sequenceName}(${text})` : undefined;
 }
 
 function getDirectArgumentReplacement(
@@ -51,13 +137,13 @@ function getDirectArgumentReplacement(
 	/* v8 ignore next -- @preserve length was checked above; this only guards malformed AST tuples. */
 	if (secondArgument === undefined || isSpreadElement(secondArgument)) return undefined;
 
-	const firstText = context.sourceCode.getText(firstArgument);
-	const secondText = context.sourceCode.getText(secondArgument);
+	const firstText = getArgumentText(firstArgument, context.sourceCode);
+	const secondText = getArgumentText(secondArgument, context.sourceCode);
 	if (firstText !== secondText) return undefined;
 
 	return {
 		messageId: "preferSingleOverload",
-		replacement: `new ${sequenceName}(${firstText})`,
+		replacement: getSingleReplacement(sequenceName, firstArgument, firstText, context.sourceCode),
 	};
 }
 
@@ -83,14 +169,18 @@ function getKeypointArrayReplacement(
 	const secondValue = getKeypointValue(secondElement, keypointName, 1);
 	if (firstValue === undefined || secondValue === undefined) return undefined;
 
-	const firstText = context.sourceCode.getText(firstValue);
-	const secondText = context.sourceCode.getText(secondValue);
+	const firstText = getArgumentText(firstValue, context.sourceCode);
+	const secondText = getArgumentText(secondValue, context.sourceCode);
+	if (firstText === secondText) {
+		return {
+			messageId: "preferSingleOverload",
+			replacement: getSingleReplacement(sequenceName, firstValue, firstText, context.sourceCode),
+		};
+	}
+
 	return {
-		messageId: firstText === secondText ? "preferSingleOverload" : "preferTwoPointOverload",
-		replacement:
-			firstText === secondText
-				? `new ${sequenceName}(${firstText})`
-				: `new ${sequenceName}(${firstText}, ${secondText})`,
+		messageId: "preferTwoPointOverload",
+		replacement: `new ${sequenceName}(${firstText}, ${secondText})`,
 	};
 }
 
@@ -111,7 +201,11 @@ const preferSequenceOverloads = createRule("prefer-sequence-overloads", "roblox"
 				if (replacement === undefined) return;
 
 				context.report({
-					fix: (fixer) => fixer.replaceText(node, replacement.replacement),
+					fix(fixer): Fix | undefined {
+						return replacement.replacement === undefined
+							? undefined
+							: fixer.replaceText(node, replacement.replacement);
+					},
 					messageId: replacement.messageId,
 					node,
 				});

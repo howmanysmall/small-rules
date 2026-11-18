@@ -4,12 +4,14 @@ import { traverseAst } from "@small-rules/rule-harness/ast";
 import { parseCase } from "@small-rules/rule-harness/parse";
 
 import {
+	getStatementList,
 	getTypeAnnotationFromBinding,
 	isAccessorProperty,
 	isClassDeclaration,
 	isClassExpression,
 	isConstAssertion,
 	isFunctionLike,
+	isIdentifierNamed,
 	isNode,
 	isStaticBlock,
 	isTsAsExpression,
@@ -201,6 +203,21 @@ function findNodes(source: HarnessSourceCode, type: ESTree.Node["type"]): Readon
 	return found;
 }
 
+function findIdentifier(source: HarnessSourceCode, name: string): ESTree.Node {
+	const found = findNodes(source, "Identifier").find((node) => isIdentifierNamed(node, name));
+	if (found === undefined) {
+		const error = new Error(`Identifier "${name}" not found.`);
+		Error.captureStackTrace(error, findIdentifier);
+		throw error;
+	}
+
+	return found;
+}
+
+function isListed(node: ESTree.Node): boolean | undefined {
+	return getStatementList(node)?.includes(node);
+}
+
 describe("ast node guards", () => {
 	it.for(GUARD_CASES)("recognizes only $name", ({ acceptedTypes, code, guard, rejectedType }, { expect }) => {
 		expect.assertions(2);
@@ -265,6 +282,31 @@ describe("isUnbracedControlBody", () => {
 
 		expect(statements.map(isUnbracedControlBody)).toStrictEqual([true, false]);
 		expect(isUnbracedControlBody(findNode(source, "Program"))).toBe(false);
+	});
+});
+
+describe("getStatementList", () => {
+	it("lists the statements a node sits among, and nothing for other parents", ({ expect }) => {
+		expect.assertions(7);
+
+		const source = parseCode(
+			[
+				"first();",
+				"{ second(); }",
+				"class Host { member = 1; static { third(); } }",
+				"namespace Scope { fourth(); }",
+				"switch (kind) { case other: fifth(); }",
+			].join("\n"),
+		);
+		const caseTest = findIdentifier(source, "other");
+
+		expect(findNodes(source, "ExpressionStatement").map(isListed)).toStrictEqual([true, true, true, true, true]);
+		expect(isListed(findNode(source, "PropertyDefinition"))).toBe(true);
+		expect(getStatementList(caseTest)).toHaveLength(1);
+		expect(isListed(caseTest)).toBe(false);
+		expect(isListed(findNode(source, "SwitchCase"))).toBeUndefined();
+		expect(isListed(findNode(source, "ClassBody"))).toBeUndefined();
+		expect(isListed(findNode(source, "Program"))).toBeUndefined();
 	});
 });
 
