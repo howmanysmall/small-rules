@@ -335,7 +335,7 @@ async function attemptReasonAsync(options: WriteOptions): Promise<ReasonAttempt>
 	const { left, relation, right, writer } = options;
 	let attempt = checkReason(options, await writer.writeReason({ left, relation, right }));
 	for (let count = 1; count < options.maxAttempts && attempt.problems.length > 0; count += 1) {
-		// Sequential on purpose: each retry corrects the attempt before it.
+		// oxlint-disable-next-line no-await-in-loop -- retries are sequential
 		const reason = await writer.writeReason({ left, previous: attempt, relation, right });
 		attempt = checkReason(options, reason);
 	}

@@ -523,6 +523,7 @@ async function regenerateOnePairAsync(
 	reasonWriter: ReasonWriter,
 	reasonCache?: ReasonCache,
 ): Promise<RegenerationResult> {
+	const judgments = new Map([[getPairKey("no-print", "no-warn"), createJudgments()]]);
 	return regenerateRelationsAsync({
 		allNames: ["no-error", "no-print", "no-warn"],
 		batchSize: 10,
@@ -539,10 +540,7 @@ async function regenerateOnePairAsync(
 		reasonPromptVersion: 1,
 		reasonWriter,
 		thresholds: judgmentThresholds,
-		transport: createFakeTransport(
-			new Map([[getPairKey("no-print", "no-warn"), createJudgments()]]),
-			new Array<string>(),
-		),
+		transport: createFakeTransport(judgments, new Array<string>()),
 	});
 }
 

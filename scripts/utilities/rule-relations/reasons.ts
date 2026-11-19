@@ -55,6 +55,7 @@ export function createReasonMessages({ left, previous, relation, right }: Create
 	if (previous === undefined) {
 		return [{ content, role: "user" }];
 	}
+
 	return [{ content: `${content}\n${createRetryInstructions(previous)}`, role: "user" }];
 }
 

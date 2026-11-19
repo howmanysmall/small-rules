@@ -320,7 +320,7 @@ describe("openRouter relation adapters", () => {
 
 		let prompt = "";
 		const writer = createOpenRouterReasonWriter("test-reason-model", async (request) => {
-			prompt = request.chatRequest.messages.map((message) => message.content).join("\n");
+			prompt = JSON.stringify(request.chatRequest.messages);
 			return { choices: [{ message: { content: "Shorter." } }] };
 		});
 
