@@ -984,6 +984,34 @@
 			"evidence": {
 				"judgments": {
 					"assessment": {
+						"confidence": 0.3729685465566589,
+						"probabilities": {
+							"0": 0.13934032298740912,
+							"1": 0.13934032298740912,
+							"2": 0.7213193540251817
+						},
+						"score": 1.5819790310377724,
+						"type": "score"
+					},
+					"backwardReplaces": 0.13249882276789962,
+					"backwardRequires": 0.14367564220080295,
+					"duplicates": 0.18904027271339366,
+					"forwardReplaces": 0.18904025897738855,
+					"forwardRequires": 0.211596279737173
+				},
+				"left": "prefer-hoisted-jsx-elements",
+				"right": "prefer-hoisted-jsx-object-properties",
+				"strength": 0.7213193540251817
+			},
+			"from": "prefer-hoisted-jsx-elements",
+			"kind": "related",
+			"reason": "`prefer-hoisted-jsx-elements` pairs with `prefer-hoisted-jsx-object-properties` to hoist static JSX elements and object props to module constants.",
+			"to": "prefer-hoisted-jsx-object-properties"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
 						"confidence": 0,
 						"probabilities": {
 							"0": 0.26557680442077436,
