@@ -1,9 +1,12 @@
 import { describe, it } from "vitest";
 
-import { judgmentThresholds } from "$script-utilities/rule-relations/constants";
 import { resolvePairRelation } from "$script-utilities/rule-relations/resolve";
 
 import { createJudgments } from "./fixtures";
+
+// Fixed so the boundary cases below test the gate's logic, not the tuning
+// of the production thresholds, which change with the decision model.
+const judgmentThresholds = { accept: 0.8, review: 0.55 };
 
 describe("relationship publication gate", () => {
 	it.for([

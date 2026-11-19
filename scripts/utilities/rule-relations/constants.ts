@@ -6,7 +6,11 @@ export const decisionModel = "liquid/d1.2-ultra";
 export const generatedRelationDocumentPath = "documentation/src/data/generated/rule-relations.json";
 export const judgmentBatchSize = 10;
 export const judgmentPromptVersion = 2;
-export const judgmentThresholds = { accept: 0.8, review: 0.55 } satisfies JudgmentThresholds;
+
+// Tuned for `decisionModel`: liquid/d1.2-ultra scores related pairs at
+// 0.65 to 0.83, where Jev scored them above 0.8. Retune when the model changes.
+export const judgmentThresholds = { accept: 0.65, review: 0.55 } satisfies JudgmentThresholds;
+
 export const maxReasonLength = 160;
 export const maxRelationsPerRule = 8;
 export const reasonModel = "meta/muse-ember";
