@@ -108,6 +108,30 @@ describe("starts-with-verb", () => {
 				code: ["const configuration: { viteFinal(): void } = {", "\tviteFinal(): void {},", "};"].join("\n"),
 				errors: notVerbErrors,
 			},
+			// A leading sigil is not part of the first word, so the message
+			// names the real prefix.
+			{
+				code: "function _userProfile(): number { return 1; }",
+				errors: [{ data: { name: "_userProfile", prefix: "user" }, messageId: "notVerb" }],
+			},
+			{
+				code: "const $nodeFactory = (): number => 1;",
+				errors: [{ data: { name: "$nodeFactory", prefix: "node" }, messageId: "notVerb" }],
+			},
+			// A name made only of sigils, or a sigil before a capital, keeps
+			// the sigil as its prefix.
+			{
+				code: "function _(): void {}",
+				errors: [{ data: { name: "_", prefix: "_" }, messageId: "notVerb" }],
+			},
+			{
+				code: "function $(): void {}",
+				errors: [{ data: { name: "$", prefix: "$" }, messageId: "notVerb" }],
+			},
+			{
+				code: "function _Value(): void {}",
+				errors: [{ data: { name: "_Value", prefix: "_" }, messageId: "notVerb" }],
+			},
 		],
 		valid: [
 			{
@@ -250,6 +274,11 @@ describe("starts-with-verb", () => {
 				code: "function userName(): string { return ''; }",
 				options: [{ allowList: ["user"] }],
 			},
+			"function _getValue(): number { return 1; }",
+			"const _loadConfig = (): void => {};",
+			"function $createNode(): void {}",
+			"function __getValue(): number { return 1; }",
+			"function getValue_(): number { return 1; }",
 		],
 	});
 });

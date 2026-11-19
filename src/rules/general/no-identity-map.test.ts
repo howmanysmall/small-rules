@@ -216,6 +216,31 @@ joined;
 				output: "const store = 1; store",
 				errors: [{ messageId: "identityArrayMap" }],
 			},
+			// A default parameter counts as identity unless the option says
+			// otherwise.
+			{
+				code: "scores.map((score = 0) => score)",
+				output: "scores",
+				errors: [{ messageId: "identityArrayMap" }],
+			},
+			{
+				code: "scores.map((score = 0) => score)",
+				output: "scores",
+				options: [{ ignoreDefaultParameters: false }],
+				errors: [{ messageId: "identityArrayMap" }],
+			},
+			{
+				code: "scores.map((score) => score)",
+				output: "scores",
+				options: [{ ignoreDefaultParameters: true }],
+				errors: [{ messageId: "identityArrayMap" }],
+			},
+			{
+				code: "scores.map(function (score) { return score; })",
+				output: "scores",
+				options: [{ ignoreDefaultParameters: true }],
+				errors: [{ messageId: "identityArrayMap" }],
+			},
 		],
 		valid: [
 			{ code: "binding.map(v => v + 1)", documentation: { id: "pass", title: "Transforming map callback" } },
@@ -271,6 +296,23 @@ joined;
 			"array.map(...callbacks)",
 			"items.map(identity)",
 			"items.map((value = 0) => value + 1)",
+			// The default replaces undefined items, so the map is not identity.
+			{
+				code: "scores.map((score = 0) => score)",
+				options: [{ ignoreDefaultParameters: true }],
+			},
+			{
+				code: "scores.map((score = 0) => { return score; })",
+				options: [{ ignoreDefaultParameters: true }],
+			},
+			{
+				code: "scores.map(function (score = 0) { return score; })",
+				options: [{ ignoreDefaultParameters: true }],
+			},
+			{
+				code: "scoreBinding.map((score = 0) => score)",
+				options: [{ ignoreDefaultParameters: true }],
+			},
 		],
 	});
 });

@@ -180,17 +180,61 @@ const NO_PREFIX: StartsWithTuple = [true, ""];
 
 const CHAR_CODE_A = 65;
 const CHAR_CODE_Z = 90;
+const CHAR_CODE_DOLLAR = 36;
+const CHAR_CODE_UNDERSCORE = 95;
 
-function getLowercasePrefix(functionName: string): string {
+/**
+ * Counts the `_` and `$` characters that open a name.
+ *
+ * @param functionName - The name to read.
+ * @returns How many sigil characters the name starts with.
+ */
+function countLeadingSigils(functionName: string): number {
 	const { length } = functionName;
 	let index = 0;
+	while (index < length) {
+		const unicode = functionName.codePointAt(index);
+		if (unicode !== CHAR_CODE_DOLLAR && unicode !== CHAR_CODE_UNDERSCORE) break;
+		index += 1;
+	}
+
+	return index;
+}
+
+/**
+ * Reads the lowercase run of a name that starts at `start`.
+ *
+ * @param functionName - The name to read.
+ * @param start - Where the run begins.
+ * @returns The run, trimmed of whitespace.
+ */
+function readLowercaseRun(functionName: string, start: number): string {
+	const { length } = functionName;
+	let index = start;
 	while (index < length) {
 		const unicode = functionName.codePointAt(index);
 		if (unicode === undefined || (unicode >= CHAR_CODE_A && unicode <= CHAR_CODE_Z)) break;
 		index += 1;
 	}
 
-	return (index === length ? functionName : functionName.slice(0, index)).trim();
+	return functionName.slice(start, index).trim();
+}
+
+/**
+ * Reads the first word of a name. Leading `_` and `$` are skipped unless
+ * nothing lowercase follows them.
+ *
+ * @param functionName - The name to read.
+ * @returns The first word in lowercase form.
+ */
+function getLowercasePrefix(functionName: string): string {
+	const sigilCount = countLeadingSigils(functionName);
+	if (sigilCount > 0) {
+		const prefix = readLowercaseRun(functionName, sigilCount);
+		if (prefix.length > 0) return prefix;
+	}
+
+	return readLowercaseRun(functionName, 0);
 }
 
 function isAllowed(word: string, extraAllowList: ReadonlyArray<string>): boolean {
