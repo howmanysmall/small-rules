@@ -4,6 +4,90 @@
 			"evidence": {
 				"judgments": {
 					"assessment": {
+						"confidence": 0.5126684111071999,
+						"probabilities": {
+							"0": 0.07126673633752574,
+							"1": 0.18235425325348192,
+							"2": 0.7463790104089923
+						},
+						"score": 1.6751122740714666,
+						"type": "score"
+					},
+					"backwardReplaces": 0.06153656330354939,
+					"backwardRequires": 0.4299986975156595,
+					"duplicates": 0.13799222576323306,
+					"forwardReplaces": 0.1324988227678996,
+					"forwardRequires": 0.25342090804029876
+				},
+				"left": "directive-disable-enable-pair",
+				"right": "directive-no-unused-enable",
+				"strength": 0.7463790104089923
+			},
+			"from": "directive-disable-enable-pair",
+			"kind": "related",
+			"reason": "`directive-disable-enable-pair` requires enables for disables, while `directive-no-unused-enable` bans unused enables, together ensuring balanced pairs.",
+			"to": "directive-no-unused-enable"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.4634390423387281,
+						"probabilities": {
+							"0": 0.10956627169970273,
+							"1": 0.13857476170810906,
+							"2": 0.7518589665921882
+						},
+						"score": 1.6422926948924854,
+						"type": "score"
+					},
+					"backwardReplaces": 0.029996186376823213,
+					"backwardRequires": 0.17505587115722457,
+					"duplicates": 0.06430595244194943,
+					"forwardReplaces": 0.06153656330354939,
+					"forwardRequires": 0.12206753932311859
+				},
+				"left": "no-array-constructor-elements",
+				"right": "no-array-constructor-index-assignment",
+				"strength": 0.7518589665921882
+			},
+			"from": "no-array-constructor-elements",
+			"kind": "related",
+			"reason": "`no-array-constructor-elements` complements `no-array-constructor-index-assignment` by handling push while it handles index assignments, favoring literals.",
+			"to": "no-array-constructor-index-assignment"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.45037594106440804,
+						"probabilities": {
+							"0": 0.12773555610279957,
+							"1": 0.11094492708479546,
+							"2": 0.761319516812405
+						},
+						"score": 1.6335839607096054,
+						"type": "score"
+					},
+					"backwardReplaces": 0.21953913354421895,
+					"backwardRequires": 0.21953911819204439,
+					"duplicates": 0.05887891734096728,
+					"forwardReplaces": 0.04928975951595884,
+					"forwardRequires": 0.1819436070468536
+				},
+				"left": "no-nested-hook-calls",
+				"right": "use-hook-at-top-level",
+				"strength": 0.761319516812405
+			},
+			"from": "no-nested-hook-calls",
+			"kind": "related",
+			"reason": "`no-nested-hook-calls` complements `use-hook-at-top-level`: it bans hooks in another hook's arguments, while that rule covers hooks in nested functions.",
+			"to": "use-hook-at-top-level"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
 						"confidence": 0.6206490102647616,
 						"probabilities": {
 							"0": 0.07886588614003291,
@@ -27,6 +111,34 @@
 			"kind": "related",
 			"reason": "no-object-parameters pairs with no-unknown-parameters to ban broad object and unknown parameters, requiring named owner types parsed at the boundary.",
 			"to": "no-unknown-parameters"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.1785588591481989,
+						"probabilities": {
+							"0": 0.23246228020940904,
+							"1": 0.08270286681571604,
+							"2": 0.6848348529748749
+						},
+						"score": 1.4523725727654657,
+						"type": "score"
+					},
+					"backwardReplaces": 0.05153826485599711,
+					"backwardRequires": 0.29058480990699737,
+					"duplicates": 0.053883529227025634,
+					"forwardReplaces": 0.049289767913298824,
+					"forwardRequires": 0.2115962647898467
+				},
+				"left": "no-object-parameters",
+				"right": "no-unknown-returns",
+				"strength": 0.6848348529748749
+			},
+			"from": "no-object-parameters",
+			"kind": "related",
+			"reason": "`no-object-parameters` complements `no-unknown-returns`: both require named, parsed boundary types rather than broad `object` parameters or `unknown` returns.",
+			"to": "no-unknown-returns"
 		},
 		{
 			"evidence": {
@@ -111,6 +223,174 @@
 			"kind": "related",
 			"reason": "`no-unknown-parameters` complements `no-unknown-returns` by banning `unknown` inputs, while the latter bans `unknown` outputs, forcing boundary decoding.",
 			"to": "no-unknown-returns"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.560861376461863,
+						"probabilities": {
+							"0": 0.027414618163983814,
+							"1": 0.2379298460307904,
+							"2": 0.7346555358052257
+						},
+						"score": 1.7072409176412418,
+						"type": "score"
+					},
+					"backwardReplaces": 0.8109597410226115,
+					"backwardRequires": 0.33078402611999136,
+					"duplicates": 0.9792052044216885,
+					"forwardReplaces": 0.03763898140873953,
+					"forwardRequires": 0.24463647776076894
+				},
+				"left": "no-adjust-state-on-prop-change",
+				"right": "no-useless-use-effect",
+				"strength": 0.7346555358052257
+			},
+			"from": "no-useless-use-effect",
+			"kind": "supersedes",
+			"reason": "`no-useless-use-effect` supersedes `no-adjust-state-on-prop-change` because it covers prop-change state adjustments and more, making the latter redundant.",
+			"to": "no-adjust-state-on-prop-change"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.57726019939103,
+						"probabilities": {
+							"0": 0.039269798651402434,
+							"1": 0.2032869364365084,
+							"2": 0.7574432649120892
+						},
+						"score": 1.718173466260687,
+						"type": "score"
+					},
+					"backwardReplaces": 0.7723059644912634,
+					"backwardRequires": 0.4185247102847434,
+					"duplicates": 0.975013951004082,
+					"forwardReplaces": 0.04713447466367218,
+					"forwardRequires": 0.1890402589773885
+				},
+				"left": "no-derived-state",
+				"right": "no-useless-use-effect",
+				"strength": 0.7574432649120892
+			},
+			"from": "no-useless-use-effect",
+			"kind": "supersedes",
+			"reason": "`no-useless-use-effect` supersedes `no-derived-state`, so enable only the former to cover derived state in effects and other useless effects.",
+			"to": "no-derived-state"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3751562069086356,
+						"probabilities": {
+							"0": 0.06836720367834331,
+							"1": 0.2798281213708896,
+							"2": 0.6518046749507671
+						},
+						"score": 1.5834374712724237,
+						"type": "score"
+					},
+					"backwardReplaces": 0.6587357080992224,
+					"backwardRequires": 0.34126431204306995,
+					"duplicates": 0.9328089553248502,
+					"forwardReplaces": 0.053883531510927715,
+					"forwardRequires": 0.211596279737173
+				},
+				"left": "no-external-store-subscription",
+				"right": "no-useless-use-effect",
+				"strength": 0.6518046749507671
+			},
+			"from": "no-useless-use-effect",
+			"kind": "supersedes",
+			"reason": "`no-useless-use-effect` supersedes `no-external-store-subscription`, already covering external-store subscriptions in effects, so it can replace it.",
+			"to": "no-external-store-subscription"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.5080966376013638,
+						"probabilities": {
+							"0": 0.042663212533354276,
+							"1": 0.24260914986571555,
+							"2": 0.71472763760093
+						},
+						"score": 1.6720644250675756,
+						"type": "score"
+					},
+					"backwardReplaces": 0.7639397495140783,
+					"backwardRequires": 0.25342090804029876,
+					"duplicates": 0.9640261282019339,
+					"forwardReplaces": 0.04713447868784975,
+					"forwardRequires": 0.20386573132718658
+				},
+				"left": "no-initialize-state",
+				"right": "no-useless-use-effect",
+				"strength": 0.71472763760093
+			},
+			"from": "no-useless-use-effect",
+			"kind": "supersedes",
+			"reason": "`no-useless-use-effect` supersedes `no-initialize-state`, so you can omit the latter when the former is enabled to cover state initialization in effects.",
+			"to": "no-initialize-state"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3966947190324861,
+						"probabilities": {
+							"0": 0.05991892384723809,
+							"1": 0.28236567295053305,
+							"2": 0.6577154032022289
+						},
+						"score": 1.5977964793549908,
+						"type": "score"
+					},
+					"backwardReplaces": 0.7961342686728134,
+					"backwardRequires": 0.3846728660328656,
+					"duplicates": 0.9461164593534629,
+					"forwardReplaces": 0.04506896975810452,
+					"forwardRequires": 0.34126431204306995
+				},
+				"left": "no-reset-all-state-on-prop-change",
+				"right": "no-useless-use-effect",
+				"strength": 0.6577154032022289
+			},
+			"from": "no-useless-use-effect",
+			"kind": "supersedes",
+			"reason": "`no-useless-use-effect` supersedes `no-reset-all-state-on-prop-change` because it flags reset effects and suggests a `key` prop, making it redundant.",
+			"to": "no-reset-all-state-on-prop-change"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3729685465566589,
+						"probabilities": {
+							"0": 0.13934032298740912,
+							"1": 0.13934032298740912,
+							"2": 0.7213193540251817
+						},
+						"score": 1.5819790310377724,
+						"type": "score"
+					},
+					"backwardReplaces": 0.13249882276789962,
+					"backwardRequires": 0.14367564220080295,
+					"duplicates": 0.18904027271339366,
+					"forwardReplaces": 0.18904025897738855,
+					"forwardRequires": 0.211596279737173
+				},
+				"left": "prefer-hoisted-jsx-elements",
+				"right": "prefer-hoisted-jsx-object-properties",
+				"strength": 0.7213193540251817
+			},
+			"from": "prefer-hoisted-jsx-elements",
+			"kind": "related",
+			"reason": "Use prefer-hoisted-jsx-elements for static JSX elements and prefer-hoisted-jsx-object-properties for static object props, hoisting to module-level constants.",
+			"to": "prefer-hoisted-jsx-object-properties"
 		}
 	],
 	"generator": "scripts/regenerate-relations.ts",
