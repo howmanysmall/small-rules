@@ -132,6 +132,7 @@ export interface RuleTestCases {
 
 export interface RuleCaseDocumentation {
 	readonly id: string;
+	readonly preserveFormatting?: boolean;
 	readonly title: string;
 }
 

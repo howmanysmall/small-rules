@@ -30,6 +30,7 @@ type StaticObject = Record<string, StaticValue>;
 
 interface DocumentationMetadata {
 	readonly id: string;
+	readonly preserveFormatting?: boolean | undefined;
 	readonly title: string;
 }
 
@@ -42,6 +43,7 @@ export interface RuleExample {
 	readonly language?: string | undefined;
 	readonly options?: StaticValue | undefined;
 	readonly output?: StaticValue | undefined;
+	readonly preserveFormatting?: boolean | undefined;
 	readonly settings?: StaticValue | undefined;
 	readonly sourceType?: string | undefined;
 	readonly suggestions?: StaticValue | undefined;
@@ -240,6 +242,10 @@ function extractCaseExample(
 		title: documentation.title,
 	};
 
+	if (documentation.preserveFormatting === true) {
+		Object.assign(example, { preserveFormatting: true });
+	}
+
 	for (const field of fields) {
 		if (field.key === "documentation" || field.key === "code") continue;
 		const value = evaluateStatic(field.property.value, extractionContext);
@@ -260,26 +266,60 @@ function extractCaseExample(
 	return example;
 }
 
+const DOCUMENTATION_FIELD_NAMES = new Set(["id", "preserveFormatting", "title"]);
+const DOCUMENTATION_FIELD_PREFIX = "documentation.";
+
 function evaluateDocumentation(value: Expression, extractionContext: ExtractionContext): DocumentationMetadata {
 	if (value.type !== "ObjectExpression") {
 		throw new ExtractionError(extractionContext, value.start, "documentation must be an object with id and title.");
 	}
 
 	const fields = getObjectFields(value, extractionContext);
-	const id = evaluateRequiredString(fields, "id", extractionContext, "documentation.");
-	const title = evaluateRequiredString(fields, "title", extractionContext, "documentation.");
+	const id = evaluateRequiredString(fields, "id", extractionContext, DOCUMENTATION_FIELD_PREFIX);
+	const title = evaluateRequiredString(fields, "title", extractionContext, DOCUMENTATION_FIELD_PREFIX);
+	const preserveFormatting = evaluateOptionalField(
+		fields,
+		"preserveFormatting",
+		Predicate.isBoolean,
+		"boolean",
+		extractionContext,
+		DOCUMENTATION_FIELD_PREFIX,
+	);
 
 	for (const field of fields) {
-		if (field.key !== "id" && field.key !== "title") {
+		if (!DOCUMENTATION_FIELD_NAMES.has(field.key)) {
 			throw new ExtractionError(
 				extractionContext,
 				field.property.start,
-				"documentation only supports id and title.",
+				"documentation only supports id, preserveFormatting, and title.",
 			);
 		}
 	}
 
-	return { id, title };
+	return { id, preserveFormatting, title };
+}
+
+function evaluateOptionalField<Value extends StaticValue>(
+	fields: ReadonlyArray<ObjectField>,
+	name: string,
+	guard: (value: StaticValue) => value is Value,
+	expectedType: string,
+	context: ExtractionContext,
+	prefix = "",
+): undefined | Value {
+	const field = fields.find((candidate) => candidate.key === name);
+	if (field === undefined) return undefined;
+
+	const value = evaluateStatic(field.property.value, context);
+	if (!guard(value)) {
+		throw new ExtractionError(
+			context,
+			field.property.value.start,
+			`${prefix}${name} must evaluate to a ${expectedType}.`,
+		);
+	}
+
+	return value;
 }
 
 function evaluateRequiredString(
@@ -288,14 +328,9 @@ function evaluateRequiredString(
 	context: ExtractionContext,
 	prefix = "",
 ): string {
-	const field = fields.find((candidate) => candidate.key === name);
-	if (field === undefined) {
+	const value = evaluateOptionalField(fields, name, Predicate.isString, "string", context, prefix);
+	if (value === undefined) {
 		throw new ExtractionError(context, 0, `${prefix}${name} is required.`);
-	}
-
-	const value = evaluateStatic(field.property.value, context);
-	if (!Predicate.isString(value)) {
-		throw new ExtractionError(context, field.property.value.start, `${prefix}${name} must evaluate to a string.`);
 	}
 
 	return value;

@@ -24,6 +24,7 @@
 		"arktype": "catalog:runtime",
 		"astro": "catalog:frontend",
 		"effect": "catalog:runtime",
+		"oxfmt": "catalog:lint",
 		"react": "catalog:frontend",
 		"react-dom": "catalog:frontend",
 		"sharp": "catalog:frontend",
@@ -45,6 +46,7 @@
 		"@types/react-dom": "catalog:types",
 		"jsdom": "catalog:test",
 		"oxc-transform-react": "catalog:frontend",
+		"oxlint": "catalog:lint",
 		"typescript": "catalog:tooling",
 		"vitest": "catalog:test"
 	}

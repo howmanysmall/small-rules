@@ -934,6 +934,9 @@ importers:
       effect:
         specifier: catalog:runtime
         version: 4.1.4
+      oxfmt:
+        specifier: catalog:lint
+        version: 0.79.0(@astrojs/compiler-rs@0.5.3)
       react:
         specifier: catalog:frontend
         version: 19.3.1
@@ -992,6 +995,9 @@ importers:
       oxc-transform-react:
         specifier: catalog:frontend
         version: 0.158.0
+      oxlint:
+        specifier: catalog:lint
+        version: 1.94.0(oxlint-tsgolint@7.0.2007)
       typescript:
         specifier: catalog:tooling
         version: '@typescript/typescript6@6.0.2'
