@@ -60,6 +60,28 @@ describe("prefer-membership-filter-in-jecs", () => {
 				output: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual] of gameWorld.query(Visual).with(Transform)) use(entity, visual);',
 				errors: [{ messageId: "preferMembershipFilter" }],
 			},
+			// Reports without a fix when the fix would delete a comment
+			{
+				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual] of gameWorld.query(Visual, /* tag only */ Transform)) use(entity, visual);',
+				output: null,
+				errors: [{ messageId: "preferMembershipFilter" }],
+			},
+			{
+				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual] of gameWorld.query(Visual /* value */, Transform)) use(entity, visual);',
+				output: null,
+				errors: [{ messageId: "preferMembershipFilter" }],
+			},
+			// Comments outside the replaced arguments survive the fix
+			{
+				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual] of gameWorld.query(/* first */ Visual, Transform /* last */)) use(entity, visual);',
+				output: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\nfor (const [entity, visual] of gameWorld.query(/* first */ Visual /* last */).with(Transform)) use(entity, visual);',
+				errors: [{ messageId: "preferMembershipFilter" }],
+			},
+			{
+				code: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\n// render visible things\nfor (const [entity, visual] of gameWorld.query(Visual, Transform)) use(entity, visual); // done',
+				output: 'import { world } from "@rbxts/jecs";\nconst gameWorld = world();\n// render visible things\nfor (const [entity, visual] of gameWorld.query(Visual).with(Transform)) use(entity, visual); // done',
+				errors: [{ messageId: "preferMembershipFilter" }],
+			},
 		],
 		valid: [
 			{

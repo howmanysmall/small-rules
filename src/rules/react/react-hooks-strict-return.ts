@@ -93,43 +93,65 @@ function getResolvedArrayInitializer(
 	return getLatestArrayInitializer(arrayInitializersByName, name);
 }
 
-function countSpreadElement(
+function getSpreadTarget(
 	node: ESTree.SpreadElement,
 	sourceCode: SourceCode,
-	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
-): number {
+	arrayInitializersByName: ReadonlyMap<string, Array<ESTree.ArrayExpression>>,
+): ESTree.ArrayExpression | undefined {
 	if (isIdentifier(node.argument)) {
-		const initializer = getResolvedArrayInitializer(sourceCode, node, node.argument.name, arrayInitializersByName);
-		if (initializer === undefined) return 1;
-		return countReturnElements(initializer, sourceCode, arrayInitializersByName);
+		return getResolvedArrayInitializer(sourceCode, node, node.argument.name, arrayInitializersByName);
 	}
 
-	if (isArrayExpression(node.argument)) {
-		return countReturnElements(node.argument, sourceCode, arrayInitializersByName);
-	}
-
-	return 1;
+	return isArrayExpression(node.argument) ? node.argument : undefined;
 }
 
+interface SpreadEntry {
+	readonly array: ESTree.ArrayExpression;
+	readonly parent: SpreadEntry | undefined;
+}
+
+function isBeingExpanded(entry: SpreadEntry, array: ESTree.ArrayExpression): boolean {
+	for (let current: SpreadEntry | undefined = entry; current !== undefined; current = current.parent) {
+		if (current.array === array) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Counts the values an array expression produces, expanding spreads of array
+ * initializers. A spread that points back at an array still being expanded
+ * counts as one value, so a self-referencing initializer terminates.
+ *
+ * @param node - The returned array expression.
+ * @param sourceCode - The source code used to resolve spread identifiers.
+ * @param arrayInitializersByName - Array initializers seen so far, by name.
+ * @returns The number of values the array produces.
+ */
 function countReturnElements(
 	node: ESTree.ArrayExpression,
 	sourceCode: SourceCode,
-	arrayInitializersByName: Map<string, Array<ESTree.ArrayExpression>>,
+	arrayInitializersByName: ReadonlyMap<string, Array<ESTree.ArrayExpression>>,
 ): number {
+	const entries: Array<SpreadEntry> = [{ array: node, parent: undefined }];
 	let count = 0;
 
-	for (const element of node.elements) {
-		if (element === null) {
-			count += 1;
-			continue;
-		}
+	for (const entry of entries) {
+		for (const element of entry.array.elements) {
+			if (element === null || !isSpreadElement(element)) {
+				count += 1;
+				continue;
+			}
 
-		if (isSpreadElement(element)) {
-			count += countSpreadElement(element, sourceCode, arrayInitializersByName);
-			continue;
-		}
+			const target = getSpreadTarget(element, sourceCode, arrayInitializersByName);
+			if (target === undefined || isBeingExpanded(entry, target)) {
+				count += 1;
+				continue;
+			}
 
-		count += 1;
+			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
+			entries.push({ array: target, parent: entry });
+		}
 	}
 
 	return count;
@@ -179,30 +201,21 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 	create(context): Visitor {
 		const { sourceCode } = context;
 		const arrayInitializersByName = new Map<string, Array<ESTree.ArrayExpression>>();
-		let hookDepth = 0;
+		// One entry per function entered, true when that function is a hook.
+		// A return belongs to the innermost function, so only the last
+		// entry decides whether a return is checked.
+		const functionIsHookStack = new Array<boolean>();
 
-		function enterNamedHook(node: ESTree.Function): void {
-			if (isHookFunction(node)) {
-				hookDepth += 1;
-			}
+		function enterNamedFunction(node: ESTree.Function): void {
+			functionIsHookStack.push(isHookFunction(node));
 		}
 
-		function exitNamedHook(node: ESTree.Function): void {
-			if (isHookFunction(node)) {
-				hookDepth -= 1;
-			}
+		function enterArrowFunction(node: ESTree.ArrowFunctionExpression): void {
+			functionIsHookStack.push(isHookArrowFunction(node));
 		}
 
-		function enterArrowHook(node: ESTree.ArrowFunctionExpression): void {
-			if (isHookArrowFunction(node)) {
-				hookDepth += 1;
-			}
-		}
-
-		function exitArrowHook(node: ESTree.ArrowFunctionExpression): void {
-			if (isHookArrowFunction(node)) {
-				hookDepth -= 1;
-			}
+		function exitFunction(): void {
+			functionIsHookStack.pop();
 		}
 
 		function reportTooManyReturnValues(node: ESTree.ReturnStatement): void {
@@ -230,7 +243,8 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		}
 
 		function checkReturnStatement(node: ESTree.ReturnStatement): void {
-			if (hookDepth === 0 || node.argument === null || isObjectExpression(node.argument)) return;
+			if (functionIsHookStack.at(-1) !== true) return;
+			if (node.argument === null || isObjectExpression(node.argument)) return;
 
 			if (isIdentifier(node.argument)) {
 				checkIdentifierReturn(node, node.argument);
@@ -243,12 +257,12 @@ const reactHooksStrictReturn = createRule("react-hooks-strict-return", "react", 
 		}
 
 		return {
-			ArrowFunctionExpression: enterArrowHook,
-			"ArrowFunctionExpression:exit": exitArrowHook,
-			FunctionDeclaration: enterNamedHook,
-			"FunctionDeclaration:exit": exitNamedHook,
-			FunctionExpression: enterNamedHook,
-			"FunctionExpression:exit": exitNamedHook,
+			ArrowFunctionExpression: enterArrowFunction,
+			"ArrowFunctionExpression:exit": exitFunction,
+			FunctionDeclaration: enterNamedFunction,
+			"FunctionDeclaration:exit": exitFunction,
+			FunctionExpression: enterNamedFunction,
+			"FunctionExpression:exit": exitFunction,
 			ReturnStatement: checkReturnStatement,
 			VariableDeclarator(node): void {
 				const initializer = getArrayInitializer(node);

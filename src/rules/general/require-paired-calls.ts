@@ -23,12 +23,15 @@ import {
 } from "@small-rules/oxlint-utilities";
 import { type } from "arktype";
 import { Predicate } from "effect";
+import { Minimatch } from "minimatch";
 
+import { forEachNode } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { mergeIntoStackTop } from "$oxc-utilities/stack-utilities";
 import { isStringArray } from "$oxc-utilities/type-utilities";
 
 import type { LoopNode } from "@small-rules/oxlint-utilities";
+import type { MinimatchOptions } from "minimatch";
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 import type { Writable } from "type-fest";
 
@@ -76,6 +79,26 @@ interface ControlFlowContext {
 
 const DEFAULT_ROBLOX_YIELDING_FUNCTIONS = ["task.wait", "wait", "*.WaitForChild", "*.*Async"] as const;
 
+// Call names are plain `object.method` text, so only `*` carries meaning.
+const YIELDING_PATTERN_OPTIONS: MinimatchOptions = {
+	dot: true,
+	nobrace: true,
+	nocomment: true,
+	noext: true,
+	nonegate: true,
+};
+const yieldingPatternMatchers = new Map<string, Minimatch>();
+
+function matchesYieldingPattern(callName: string, pattern: string): boolean {
+	let matcher = yieldingPatternMatchers.get(pattern);
+	if (matcher === undefined) {
+		matcher = new Minimatch(pattern, YIELDING_PATTERN_OPTIONS);
+		yieldingPatternMatchers.set(pattern, matcher);
+	}
+
+	return matcher.match(callName);
+}
+
 function isOpenerInAllBranches(
 	opener: OpenerStackEntry,
 	branches: ReadonlyArray<ReadonlyArray<OpenerStackEntry>>,
@@ -112,6 +135,45 @@ function getCallName({ callee }: ESTree.CallExpression): string | undefined {
 	}
 
 	return undefined;
+}
+
+function addCallNames(block: ESTree.BlockStatement, names: Set<string>): void {
+	forEachNode(block, (node) => {
+		// A call inside a callback does not run with the block.
+		if (isAnyFunction(node)) return false;
+
+		const name = isCallExpression(node) ? getCallName(node) : undefined;
+		if (name !== undefined) {
+			names.add(name);
+		}
+
+		return true;
+	});
+}
+
+/**
+ * Names every call made directly in a `finally` block that still runs when
+ * this statement leaves its `try`. A `finally` the statement is itself inside
+ * has already started, so it does not count.
+ *
+ * @param statementNode - The `return` or `throw` statement.
+ * @returns The called names, as `name` or `object.property`.
+ */
+function collectFinalizerCallNames(statementNode: ESTree.Node): ReadonlySet<string> {
+	const names = new Set<string>();
+	let child = statementNode;
+	let { parent } = statementNode;
+
+	while (parent !== null && !isAnyFunction(parent)) {
+		if (isTryStatement(parent) && parent.finalizer !== null && child !== parent.finalizer) {
+			addCallNames(parent.finalizer, names);
+		}
+
+		child = parent;
+		({ parent } = parent);
+	}
+
+	return names;
 }
 
 function getValidClosers(config: PairConfiguration): Array<string> {
@@ -251,6 +313,35 @@ function isBreakOrContinueStatement(node: ESTree.Node): node is ESTree.BreakStat
 	return isBreakStatement(node) || isContinueStatement(node);
 }
 
+/**
+ * Whether a switch case has no statements and runs on into the next case, as
+ * in the grouped labels of `case 1: case 2:`. The last case has no next case.
+ *
+ * @param node - The case to check.
+ * @param parent - The switch that holds the case.
+ * @returns `true` when the case shares the body of the case after it.
+ */
+function isGroupedCaseLabel(node: ESTree.SwitchCase, parent: ESTree.SwitchStatement): boolean {
+	return node.consequent.length === 0 && parent.cases.at(-1) !== node;
+}
+
+/**
+ * Counts the cases of a switch that are a branch of their own.
+ *
+ * @param node - The switch statement.
+ * @returns The number of cases that are not grouped labels.
+ */
+function countSwitchBranches(node: ESTree.SwitchStatement): number {
+	let count = 0;
+	for (const caseNode of node.cases) {
+		if (!isGroupedCaseLabel(caseNode, node)) {
+			count += 1;
+		}
+	}
+
+	return count;
+}
+
 const messages = {
 	asyncViolation: "Cannot use {{asyncType}} between '{{opener}}' and '{{closer}}' (requireSync: true)",
 	conditionalOpener: "Conditional opener '{{opener}}' at {{location}} may not have matching closer on all paths",
@@ -387,14 +478,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			if (config.platform !== "roblox") return false;
 
 			const yieldingFunctions = config.yieldingFunctions ?? DEFAULT_ROBLOX_YIELDING_FUNCTIONS;
-			return yieldingFunctions.some((pattern) => {
-				if (pattern.startsWith("*.")) {
-					const methodName = pattern.slice(2);
-					return functionName.endsWith(`.${methodName}`);
-				}
-
-				return functionName === pattern;
-			});
+			return yieldingFunctions.some((pattern) => matchesYieldingPattern(functionName, pattern));
 		}
 
 		function getCloserLabel(config: PairConfiguration): string {
@@ -560,14 +644,17 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			branchStacks.delete(node);
 		}
 
-		function recordBranchAndRestore(statement: ESTree.Node): void {
-			recordBranchSnapshot(statement);
-
+		function restoreSnapshot(statement: ESTree.Node): void {
 			const originalStack = stackSnapshots.get(statement);
 			/* v8 ignore next -- @preserve branch exits are paired with their statement's enter snapshot. */
 			if (originalStack) {
 				restoreOpenerStack(originalStack);
 			}
+		}
+
+		function recordBranchAndRestore(statement: ESTree.Node): void {
+			recordBranchSnapshot(statement);
+			restoreSnapshot(statement);
 		}
 
 		function onIfStatementExit(node: ESTree.Node): void {
@@ -657,7 +744,7 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 		): void {
 			const hasDefault = node.cases.some((caseNode) => caseNode.test === null);
 
-			if (hasDefault && branches.length === node.cases.length) {
+			if (hasDefault && branches.length === countSwitchBranches(node)) {
 				retainCommonOpeners(originalStack, branches);
 			} else {
 				restoreOpenerStack(originalStack);
@@ -678,7 +765,11 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 
 			/* v8 ignore else -- @preserve switch case exit selector only runs for SwitchStatement cases. */
 			if (isSwitchStatement(parent)) {
-				recordBranchAndRestore(parent);
+				if (isGroupedCaseLabel(node, parent)) {
+					restoreSnapshot(parent);
+				} else {
+					recordBranchAndRestore(parent);
+				}
 			}
 		}
 
@@ -704,7 +795,12 @@ const requirePairedCalls = createRule("require-paired-calls", "general", {
 			const currentContext = getCurrentContext();
 			if (currentContext.inFinally || openerStack.length === 0) return;
 
+			const finalizerCallNames = collectFinalizerCallNames(statementNode);
+
 			for (const { config, node, opener } of openerStack) {
+				// A `finally` around this exit still runs and closes the opener.
+				if (getValidClosers(config).some((name) => finalizerCallNames.has(name))) continue;
+
 				const closer = getCloserLabel(config);
 
 				const statementType = isReturnStatement(statementNode) ? "return" : "throw";

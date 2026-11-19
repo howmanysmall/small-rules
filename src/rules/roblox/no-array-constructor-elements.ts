@@ -14,7 +14,6 @@ import {
 	isObjectExpression,
 	isObjectPattern,
 	isPropertyDefinition,
-	isSequenceExpression,
 	isSpreadElement,
 	isTemplateLiteral,
 	isTsAsExpression,
@@ -27,9 +26,10 @@ import {
 import { Predicate } from "effect";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
+import { hasCommentInRange, hasEagerIdentifierReference } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
-import { getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { getListElementText, getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { ROBLOX_TS, STANDARD } from "$oxc-utilities/react-utilities";
 import { getSingleIdentifierDeclarator } from "$oxc-utilities/single-identifier-declarator";
 
@@ -46,19 +46,25 @@ interface NoArrayConstructorElementsOptions {
 type ProgramStatement = ESTree.ModuleDeclaration | ESTree.Statement;
 
 interface PushCollapseCandidate {
+	readonly annotationText: string | undefined;
 	readonly arrayIdentifierName: string;
 	readonly declarator: ESTree.VariableDeclarator;
+	readonly hasRemovedComment: boolean;
 	readonly hasUnsafeArgument: boolean;
 	readonly literalText: string;
 	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+	readonly readsArray: boolean;
 	readonly statement: ESTree.VariableDeclaration;
 }
 
 interface PushScanResult {
 	readonly argumentParts: ReadonlyArray<string>;
+	readonly firstPushStart: number;
 	readonly hasUnsafeArgument: boolean;
+	readonly lastPushEnd: number;
 	readonly nextIndex: number;
 	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
+	readonly readsArray: boolean;
 }
 
 type NoArrayConstructorElementsMessageId =
@@ -163,10 +169,7 @@ function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolea
 
 	if (isTemplateLiteral(unwrapped)) return unwrapped.expressions.length === 0;
 
-	if (isUnaryExpression(unwrapped)) {
-		/* v8 ignore next -- @preserve unary expressions are prefix in parser output for supported source forms. */
-		return unwrapped.operator === "void" || (unwrapped.operator === "typeof" && !unwrapped.prefix);
-	}
+	if (isUnaryExpression(unwrapped)) return unwrapped.operator === "void" || unwrapped.operator === "typeof";
 
 	return false;
 }
@@ -198,31 +201,17 @@ function containsLaterPushCall(
 	return false;
 }
 
-/**
- * Reads an argument's text for use as one array element. Oxlint drops
- * parentheses from the AST, so a comma expression needs its own back or it
- * would split into several elements.
- *
- * @param sourceCode - The source code to read from.
- * @param expression - The argument to print.
- * @returns The text, wrapped in parentheses when it is a comma expression.
- */
-function getElementText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	const text = sourceCode.getText(expression);
-	return isSequenceExpression(expression) ? `(${text})` : text;
-}
-
 function buildArrayLiteralFromArguments(argumentsList: ReadonlyArray<ESTree.Argument>, sourceCode: SourceCode): string {
 	const parts = new Array<string>();
 	let size = 0;
 
 	for (const argument of argumentsList) {
 		if (isSpreadElement(argument)) {
-			parts[size++] = `...${getElementText(sourceCode, argument.argument)}`;
+			parts[size++] = `...${getListElementText(sourceCode, argument.argument)}`;
 			continue;
 		}
 
-		parts[size++] = getElementText(sourceCode, argument);
+		parts[size++] = getListElementText(sourceCode, argument);
 	}
 
 	return `[${parts.join(", ")}]`;
@@ -231,9 +220,7 @@ function buildArrayLiteralFromArguments(argumentsList: ReadonlyArray<ESTree.Argu
 function createCollapseFixes(
 	fixer: Fixer,
 	sourceCode: SourceCode,
-	declarator: ESTree.VariableDeclarator,
-	pushStatements: ReadonlyArray<ESTree.ExpressionStatement>,
-	arrayLiteralText: string,
+	{ annotationText, declarator, literalText: arrayLiteralText, pushStatements }: PushCollapseCandidate,
 ): Array<Fix> {
 	/* v8 ignore next -- @preserve caller only builds fixes after a new Array initializer and at least one push. */
 	if (declarator.init === null || pushStatements.length === 0) {
@@ -263,10 +250,17 @@ function createCollapseFixes(
 		break;
 	}
 
-	return [
+	const fixes = [
 		fixer.replaceText(declarator.init, arrayLiteralText),
 		fixer.removeRange([collapseStart, lastPushStatement.range[1]]),
 	];
+
+	// Later uses would see the literal's inferred type instead of the generic.
+	if (annotationText !== undefined) {
+		fixes.push(fixer.insertTextAfter(declarator.id, annotationText));
+	}
+
+	return fixes;
 }
 
 function reportArrayConstructor(
@@ -363,16 +357,16 @@ function reportSingleArgumentArrayConstructor(
 	if (firstArgument === undefined) return;
 
 	if (isSpreadElement(firstArgument)) {
-		reportSpreadArrayConstructor(context, node, getElementText(sourceCode, firstArgument.argument));
+		reportSpreadArrayConstructor(context, node, getListElementText(sourceCode, firstArgument.argument));
 		return;
 	}
 
 	if (!isDefinitelyNonNumericExpression(firstArgument)) {
-		reportLengthArrayConstructor(context, node, options, getElementText(sourceCode, firstArgument));
+		reportLengthArrayConstructor(context, node, options, getListElementText(sourceCode, firstArgument));
 		return;
 	}
 
-	const singleElementLiteral = `[${getElementText(sourceCode, firstArgument)}]`;
+	const singleElementLiteral = `[${getListElementText(sourceCode, firstArgument)}]`;
 	context.report({
 		fix(fixer) {
 			return fixer.replaceText(node, singleElementLiteral);
@@ -423,6 +417,36 @@ function reportLengthArrayConstructor(
 	});
 }
 
+function isReferencedAfter(sourceCode: SourceCode, declarator: ESTree.VariableDeclarator, position: number): boolean {
+	for (const variable of sourceCode.getDeclaredVariables(declarator)) {
+		for (const reference of variable.references) {
+			if (reference.identifier.range[0] >= position) return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether the collapse fix would delete a comment. The fix replaces the
+ * initializer and removes everything from the first push to the last.
+ *
+ * @param sourceCode - The source code that owns the comments.
+ * @param initializer - The `new Array()` expression the fix replaces.
+ * @param firstPushStart - Where the first push statement starts.
+ * @param lastPushEnd - Where the last push statement ends.
+ * @returns Whether a comment sits in the text the fix rewrites.
+ */
+function hasCommentInCollapse(
+	sourceCode: SourceCode,
+	initializer: ESTree.NewExpression,
+	firstPushStart: number,
+	lastPushEnd: number,
+): boolean {
+	if (sourceCode.getCommentsInside(initializer).length > 0) return true;
+	return hasCommentInRange(sourceCode, firstPushStart, lastPushEnd);
+}
+
 function getPushCollapseCandidate(
 	sourceCode: SourceCode,
 	statements: ReadonlyArray<ProgramStatement>,
@@ -443,12 +467,22 @@ function getPushCollapseCandidate(
 	if (scan.pushStatements.length === 0) return undefined;
 	if (containsLaterPushCall(statements, scan.nextIndex, arrayIdentifierName)) return undefined;
 
+	const { typeArguments } = declarator.init;
+	const hasGeneric = typeArguments !== undefined && typeArguments !== null;
+	const needsAnnotation =
+		hasGeneric &&
+		getBindingTypeAnnotation(declarator.id) === undefined &&
+		isReferencedAfter(sourceCode, declarator, scan.lastPushEnd);
+
 	return {
+		annotationText: needsAnnotation ? `: Array${sourceCode.getText(typeArguments)}` : undefined,
 		arrayIdentifierName,
 		declarator,
+		hasRemovedComment: hasCommentInCollapse(sourceCode, declarator.init, scan.firstPushStart, scan.lastPushEnd),
 		hasUnsafeArgument: scan.hasUnsafeArgument,
 		literalText: `[${scan.argumentParts.join(", ")}]`,
 		pushStatements: scan.pushStatements,
+		readsArray: scan.readsArray,
 		statement,
 	};
 }
@@ -461,7 +495,10 @@ function scanPushStatements(
 ): PushScanResult {
 	const pushStatements = new Array<ESTree.ExpressionStatement>();
 	const argumentParts = new Array<string>();
+	let firstPushStart = 0;
 	let hasUnsafeArgument = false;
+	let lastPushEnd = 0;
+	let readsArray = false;
 	let scanIndex = startIndex;
 
 	while (scanIndex < statements.length) {
@@ -471,16 +508,27 @@ function scanPushStatements(
 		const pushCall = getPushCallForIdentifier(nextStatement.expression, arrayIdentifierName);
 		if (pushCall === undefined || pushCall.arguments.length === 0) break;
 
+		if (pushStatements.length === 0) {
+			[firstPushStart] = nextStatement.range;
+		}
+
 		pushStatements.push(nextStatement);
 		hasUnsafeArgument = appendPushArguments(sourceCode, pushCall, argumentParts) || hasUnsafeArgument;
+		// A push that reads the array reads it before the literal exists. The
+		// callee is the push itself, so it is skipped.
+		readsArray = hasEagerIdentifierReference(pushCall, arrayIdentifierName, pushCall.callee) || readsArray;
+		[, lastPushEnd] = nextStatement.range;
 		scanIndex += 1;
 	}
 
 	return {
 		argumentParts,
+		firstPushStart,
 		hasUnsafeArgument,
+		lastPushEnd,
 		nextIndex: scanIndex,
 		pushStatements,
+		readsArray,
 	};
 }
 
@@ -493,7 +541,7 @@ function appendPushArguments(
 	for (const argument of pushCall.arguments) {
 		if (isSpreadElement(argument)) {
 			hasUnsafeArgument = true;
-			argumentParts.push(`...${getElementText(sourceCode, argument.argument)}`);
+			argumentParts.push(`...${getListElementText(sourceCode, argument.argument)}`);
 			continue;
 		}
 
@@ -501,7 +549,7 @@ function appendPushArguments(
 			hasUnsafeArgument = true;
 		}
 
-		argumentParts.push(getElementText(sourceCode, argument));
+		argumentParts.push(getListElementText(sourceCode, argument));
 	}
 
 	return hasUnsafeArgument;
@@ -518,16 +566,21 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 				const candidate = getPushCollapseCandidate(sourceCode, statements, index);
 				if (candidate === undefined) continue;
 
+				// A push that reads the array would read it before the literal
+				// exists, so there is no safe rewrite to offer. A rewrite would
+				// also delete any comment in the code it removes.
+				if (candidate.readsArray || candidate.hasRemovedComment) {
+					context.report({
+						messageId: "collapseArrayPushInitialization",
+						node: candidate.statement,
+					});
+					continue;
+				}
+
 				if (!candidate.hasUnsafeArgument) {
 					context.report({
 						fix(fixer) {
-							return createCollapseFixes(
-								fixer,
-								sourceCode,
-								candidate.declarator,
-								candidate.pushStatements,
-								candidate.literalText,
-							);
+							return createCollapseFixes(fixer, sourceCode, candidate);
 						},
 						messageId: "collapseArrayPushInitialization",
 						node: candidate.statement,
@@ -541,13 +594,7 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 					suggest: [
 						{
 							fix(fixer): FixReturn {
-								return createCollapseFixes(
-									fixer,
-									sourceCode,
-									candidate.declarator,
-									candidate.pushStatements,
-									candidate.literalText,
-								);
+								return createCollapseFixes(fixer, sourceCode, candidate);
 							},
 							messageId: "suggestCollapseArrayPushInitialization",
 						},

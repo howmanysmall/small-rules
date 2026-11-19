@@ -3,21 +3,24 @@ import {
 	DO_WHILE_STATEMENT,
 	FOR_STATEMENT,
 	IF_STATEMENT,
+	isAnyFunction,
 	isCallExpression,
 	isIdentifier,
+	isLogicalExpression,
 	isMemberExpression,
 	isNode,
 	isSpreadElement,
+	isStringLiteral,
 	LOGICAL_EXPRESSION,
 	WHILE_STATEMENT,
 } from "@small-rules/oxlint-utilities";
 import { Predicate } from "effect";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { forEachNode, getVariableByName, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
-import type { NodeType } from "@small-rules/oxlint-utilities";
-import type { ESTree, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { FixReturn, NodeType } from "@small-rules/oxlint-utilities";
+import type { ESTree, Fixer, InferContextFromRule, Reference, SourceCode, Visitor } from "oxlint-plugin-utilities";
 import type { UnknownRecord } from "type-fest";
 
 type QueryType = "get" | "has";
@@ -177,6 +180,8 @@ function areAllVariablesUsedInAndExpressions(calls: ReadonlyArray<WorldQueryCall
 // Jecs `world.get` accepts at most four components.
 const MAXIMUM_GET_COMPONENTS = 4;
 
+const MERGED_HAS_NAME = "hasAll";
+
 const ONLY_WHITESPACE_SEMICOLON = /^[\s;]*$/u;
 
 function areCallsConsecutive(
@@ -199,6 +204,86 @@ function areCallsConsecutive(
 	const [currentStart] = currentCall.variableDeclaration.range;
 	const textBetween = sourceCode.text.slice(previousEnd, currentStart);
 	return ONLY_WHITESPACE_SEMICOLON.test(textBetween);
+}
+
+function hasBufferedVariable(buffer: ReadonlyArray<WorldQueryCall>, name: string): boolean {
+	for (const { variableName } of buffer) {
+		if (variableName === name) return true;
+	}
+
+	return false;
+}
+
+/**
+ * A merged call runs before any of the group's variables exist, so a component
+ * that reads one of them cannot be merged.
+ *
+ * @param call - The query to inspect.
+ * @param buffer - The queries in the group.
+ * @returns Whether the component reads a variable declared by the group.
+ */
+function readsBufferedVariable(call: WorldQueryCall, buffer: ReadonlyArray<WorldQueryCall>): boolean {
+	let readsVariable = false;
+
+	forEachNode(call.componentNode, (current) => {
+		// A nested function only reads the variable later, after it exists.
+		if (isAnyFunction(current)) return false;
+
+		if (isIdentifier(current) && hasBufferedVariable(buffer, current.name)) {
+			readsVariable = true;
+			return STOP_NODE_TRAVERSAL;
+		}
+
+		return true;
+	});
+
+	return readsVariable;
+}
+
+function readsGroupVariable(calls: ReadonlyArray<WorldQueryCall>): boolean {
+	for (const call of calls) {
+		if (readsBufferedVariable(call, calls)) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Whether a merged call would be wrong to write. It runs before the group's
+ * variables exist, and a string key marks a receiver that is not a Jecs
+ * world, where the extra arguments mean something else.
+ *
+ * @param calls - The group of calls the report covers.
+ * @returns `true` when the report must carry no fix.
+ */
+function isMergeUnsafe(calls: ReadonlyArray<WorldQueryCall>): boolean {
+	if (readsGroupVariable(calls)) return true;
+	return calls.some(({ componentNode, entityNode }) => isStringLiteral(componentNode) || isStringLiteral(entityNode));
+}
+
+interface MergedQueryReport {
+	/**
+	 * Builds the fix; `undefined` when the merge would be wrong to write.
+	 */
+	readonly createFix: ((fixer: Fixer) => FixReturn) | undefined;
+	readonly fixedCode: string;
+	readonly messageId: "preferSingleGet" | "preferSingleHas";
+	readonly node: ESTree.CallExpression;
+}
+
+/**
+ * Reports a group of queries that one merged call can replace.
+ *
+ * @param context - The rule context.
+ * @param report - The merged code, the report target, and the optional fix.
+ */
+function reportMergedQuery(context: Context, { createFix, fixedCode, messageId, node }: MergedQueryReport): void {
+	if (createFix === undefined) {
+		context.report({ data: { fixedCode }, messageId, node });
+		return;
+	}
+
+	context.report({ data: { fixedCode }, fix: createFix, messageId, node });
 }
 
 function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context): void {
@@ -226,30 +311,107 @@ function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	const componentArguments = componentTexts.join(", ");
 	const fixedCode = `const ${destructuring} = ${worldText}.get(${entityText}, ${componentArguments});`;
 
-	reportCombinedQuery(calls, context, fixedCode, "preferSingleGet", firstCall);
+	// The merged declaration has no place for the declarators' annotations.
+	const dropsAnnotation = calls.some(({ variableDeclarator }) =>
+		Predicate.isNotNullish(variableDeclarator.id.typeAnnotation),
+	);
+	const createFix =
+		dropsAnnotation || isMergeUnsafe(calls)
+			? undefined
+			: (fixer: Fixer): FixReturn => fixer.replaceTextRange(getDeclarationsRange(calls), fixedCode);
+
+	reportMergedQuery(context, { createFix, fixedCode, messageId: "preferSingleGet", node: firstCall.node });
 }
 
-function reportCombinedQuery(
-	calls: ReadonlyArray<WorldQueryCall>,
-	context: Context,
-	fixedCode: string,
-	messageId: "preferSingleGet" | "preferSingleHas",
-	firstCall: WorldQueryCall,
-): void {
-	const firstDeclaration = calls.at(0)?.variableDeclaration;
-	const lastDeclaration = calls.at(-1)?.variableDeclaration;
-	/* v8 ignore next -- @preserve callers only report non-empty query groups. */
-	if (firstDeclaration === undefined || lastDeclaration === undefined) return;
-	context.report({
-		data: { fixedCode },
-		fix(fixer) {
-			const [rangeStart] = firstDeclaration.range;
-			const [, rangeEnd] = lastDeclaration.range;
-			return fixer.replaceTextRange([rangeStart, rangeEnd], fixedCode);
-		},
-		messageId,
-		node: firstCall.node,
+function getDeclarationsRange(calls: ReadonlyArray<WorldQueryCall>): ESTree.Node["range"] {
+	let start = Number.POSITIVE_INFINITY;
+	let end = Number.NEGATIVE_INFINITY;
+
+	for (const { variableDeclaration } of calls) {
+		const [declarationStart, declarationEnd] = variableDeclaration.range;
+		start = Math.min(start, declarationStart);
+		end = Math.max(end, declarationEnd);
+	}
+
+	return [start, end];
+}
+
+function isAndExpression(node?: ESTree.Node | null): node is ESTree.LogicalExpression {
+	return isLogicalExpression(node) && node.operator === "&&";
+}
+
+function getAndChainRoot(node: ESTree.Node): ESTree.Node {
+	let current = node;
+	while (isAndExpression(current.parent)) {
+		current = current.parent;
+	}
+
+	return current;
+}
+
+function hasExactLeaves(root: ESTree.LogicalExpression, leaves: ReadonlySet<ESTree.Node>): boolean {
+	let leafCount = 0;
+	let matchedCount = 0;
+
+	forEachNode(root, (current) => {
+		if (isAndExpression(current)) return true;
+
+		leafCount += 1;
+
+		if (leaves.has(current)) {
+			matchedCount += 1;
+		}
+
+		return false;
 	});
+
+	return leafCount === leaves.size && matchedCount === leaves.size;
+}
+
+function collectReads(
+	variableDeclarator: ESTree.VariableDeclarator,
+	sourceCode: SourceCode,
+	reads: Set<ESTree.Node>,
+): boolean {
+	for (const variable of sourceCode.getDeclaredVariables(variableDeclarator)) {
+		for (const reference of variable.references) {
+			if (reference.identifier === variableDeclarator.id) continue;
+			if (reference.isWrite()) return false;
+
+			reads.add(reference.identifier);
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Finds the `&&` chain that reads every merged variable and nothing else, so
+ * the whole chain can be replaced by the merged variable.
+ *
+ * @param calls - The `has` queries being merged.
+ * @param declarationsEnd - Where the merged declaration ends.
+ * @param sourceCode - The source code that owns the scope analysis.
+ * @returns The chain, or undefined when a variable is written, read anywhere
+ *   else, read next to an unrelated operand, or the merged name is unusable.
+ */
+function findReplaceableChain(
+	calls: ReadonlyArray<WorldQueryCall>,
+	declarationsEnd: number,
+	sourceCode: SourceCode,
+): ESTree.LogicalExpression | undefined {
+	const reads = new Set<ESTree.Node>();
+	for (const { variableDeclarator } of calls) {
+		if (!collectReads(variableDeclarator, sourceCode, reads)) return undefined;
+	}
+
+	let root: ESTree.Node | undefined;
+	for (const read of reads) {
+		root = getAndChainRoot(read);
+	}
+
+	if (!isAndExpression(root) || root.range[0] < declarationsEnd || !hasExactLeaves(root, reads)) return undefined;
+	return getVariableByName(sourceCode.getScope(root), MERGED_HAS_NAME) === undefined ? root : undefined;
 }
 
 function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context): void {
@@ -266,8 +428,20 @@ function processHasCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	const worldText = sourceCode.getText(firstCall.worldNode);
 	const entityText = sourceCode.getText(firstCall.entityNode);
 	const componentArguments = calls.map((call) => sourceCode.getText(call.componentNode)).join(", ");
-	const fixedCode = `const hasAll = ${worldText}.has(${entityText}, ${componentArguments});`;
-	reportCombinedQuery(calls, context, fixedCode, "preferSingleHas", firstCall);
+	const fixedCode = `const ${MERGED_HAS_NAME} = ${worldText}.has(${entityText}, ${componentArguments});`;
+
+	const declarationsRange = getDeclarationsRange(calls);
+	const chain = isMergeUnsafe(calls) ? undefined : findReplaceableChain(calls, declarationsRange[1], sourceCode);
+
+	const createFix =
+		chain === undefined
+			? undefined
+			: (fixer: Fixer): FixReturn => [
+					fixer.replaceTextRange(declarationsRange, fixedCode),
+					fixer.replaceText(chain, MERGED_HAS_NAME),
+				];
+
+	reportMergedQuery(context, { createFix, fixedCode, messageId: "preferSingleHas", node: firstCall.node });
 }
 
 const preferSingleWorldQueryInJecs = createRule("prefer-single-world-query-in-jecs", "roblox/jecs", {

@@ -33,6 +33,10 @@ describe("no-print", () => {
 			},
 		],
 		valid: [
+			// A local binding of the same name is not the global.
+			'import { print } from "./log"; print("message");',
+			"function run(print) { print('message'); }",
+			"function print(message) { return message; } print('message');",
 			{
 				code: "Log.info('Hello');",
 				documentation: { id: "pass", title: "logger info call" },

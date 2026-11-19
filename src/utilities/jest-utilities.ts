@@ -1,10 +1,12 @@
 import {
 	isAnyFunction,
 	isCallExpression,
+	isChainExpression,
 	isConditionalExpression,
 	isIdentifier,
 	isIdentifierNamed,
 	isIfStatement,
+	isLogicalExpression,
 	isLoopNode,
 	isMemberExpression,
 	isSwitchCase,
@@ -160,4 +162,36 @@ export function countExpectCalls(
 		hasIndeterminate,
 		indeterminate,
 	};
+}
+
+function isShortCircuited(call: ESTree.CallExpression, root: ESTree.Node): boolean {
+	let current: ESTree.Node | null = call.parent;
+	while (current !== null && !isSameNode(current, root)) {
+		if (isLogicalExpression(current) || isChainExpression(current)) return true;
+		current = current.parent;
+	}
+
+	return false;
+}
+
+/**
+ * Checks whether an expect call under `body` sits behind `&&`, `||`, `??` or
+ * an optional chain. `countExpectCalls` still counts such a call as certain,
+ * but it may be skipped at runtime.
+ *
+ * @param body - The test callback body to search.
+ * @param additionalAssertionFunctions - Extra call names counted as expect.
+ * @returns Whether any expect call may be skipped by a short-circuit.
+ */
+export function hasShortCircuitedExpectCall(
+	body: ESTree.Node,
+	additionalAssertionFunctions: ReadonlyArray<string> = [],
+): boolean {
+	let found = false;
+	walkAst(body, (child): void => {
+		if (found || !isCallExpression(child) || !isExpectCall(child, additionalAssertionFunctions)) return;
+		found = isShortCircuited(child, body);
+	});
+
+	return found;
 }

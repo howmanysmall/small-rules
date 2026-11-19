@@ -10,6 +10,71 @@ describe("no-pass-data-to-parent", () => {
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
+declare function fetchCount(): number;
+
+export function Counter({ onCount }: { onCount: (count: number) => void }): React.Element {
+	const count = fetchCount();
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+
+	return <textlabel Text={tostring(count)} />;
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid passing data to parents in an effect. Instead, fetch "fetchCount" in the parent and pass it down to "Counter" as a prop.',
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+declare function fetchCount(): number;
+
+export function useCounter({ onCount }: { onCount: (count: number) => void }): void {
+	const count = fetchCount();
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid passing data to parents in an effect. Instead, return "fetchCount" from "useCounter".',
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+declare function fetchCount(): number;
+
+export function useTally({ onCount }: { onCount: (count: number) => void }): void {
+	const count = fetchCount();
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+}
+`,
+				errors: [
+					{
+						data: { name: '"useTally"', data: '"fetchCount"' },
+						messageId: "avoidPassingDataToParentInHook",
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect } from "@rbxts/react";
+
 declare function useSomeAPI(): string;
 
 export function Child({ onFetched }: { onFetched: (data: string) => void }): React.Element {
@@ -197,6 +262,74 @@ export const Child = memo(({ onFetched }: { onFetched: (data: string) => void })
 				errors: [
 					{
 						data: { name: '"Child"', data: '"useSomeAPI"' },
+						messageId: "avoidPassingDataToParentInComponent",
+					},
+				],
+			},
+			{
+				// A renamed import of another hook is still data.
+				code: `
+import React, { useEffect, useReducer as useLocal } from "@rbxts/react";
+
+export function Child({ onChanged }: { onChanged: (value: number) => void }): React.Element {
+	const [value] = useLocal((previous: number) => previous + 1, 0);
+
+	useEffect(() => {
+		onChanged(value);
+	}, [onChanged, value]);
+
+	return <textlabel Text={value} />;
+}
+`,
+				errors: [
+					{
+						data: { name: '"Child"', data: '"useLocal"' },
+						messageId: "avoidPassingDataToParentInComponent",
+					},
+				],
+			},
+			{
+				// A member call of another hook is still data.
+				code: `
+import React, { useEffect } from "@rbxts/react";
+
+export function Child({ onChanged }: { onChanged: (value: number) => void }): React.Element {
+	const [value] = React.useReducer((previous: number) => previous + 1, 0);
+
+	useEffect(() => {
+		onChanged(value);
+	}, [onChanged, value]);
+
+	return <textlabel Text={value} />;
+}
+`,
+				errors: [
+					{
+						data: { name: '"Child"', data: '"React"' },
+						messageId: "avoidPassingDataToParentInComponent",
+					},
+				],
+			},
+			{
+				// A `useState` renamed from a package that is not React is still
+				// data.
+				code: `
+import React, { useEffect } from "@rbxts/react";
+import { useState as useLocal } from "some-other-package";
+
+export function Child({ onChanged }: { onChanged: (value: number) => void }): React.Element {
+	const [value] = useLocal(0);
+
+	useEffect(() => {
+		onChanged(value);
+	}, [onChanged, value]);
+
+	return <textlabel Text={value} />;
+}
+`,
+				errors: [
+					{
+						data: { name: '"Child"', data: '"useLocal"' },
 						messageId: "avoidPassingDataToParentInComponent",
 					},
 				],
@@ -669,6 +802,97 @@ export function Child({
 	return <textlabel Text="Hello World" />;
 }
 `,
+			},
+			{
+				// State from `React.useState` is state, not fetched data.
+				code: `
+import React, { useEffect } from "@rbxts/react";
+
+export function Child({ onChanged }: { onChanged: (text: string) => void }): React.Element {
+	const [text, setText] = React.useState("");
+
+	useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
+
+	return (
+		<input
+			type="text"
+			value={text}
+			onChange={(event: { readonly target: { readonly value: string } }) => setText(event.target.value)}
+		/>
+	);
+}
+`,
+			},
+			{
+				// State from a renamed `useState` import is state, not fetched
+				// data.
+				code: `
+import React, { useEffect, useState as useLocal } from "@rbxts/react";
+
+export function Child({ onChanged }: { onChanged: (text: string) => void }): React.Element {
+	const [text, setText] = useLocal("");
+
+	useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
+
+	return (
+		<input
+			type="text"
+			value={text}
+			onChange={(event: { readonly target: { readonly value: string } }) => setText(event.target.value)}
+		/>
+	);
+}
+`,
+			},
+			{
+				// State from a namespace import's `useState` is state, not
+				// fetched data.
+				code: `
+import * as ReactNamespace from "@rbxts/react";
+
+export function Child({ onChanged }: { onChanged: (text: string) => void }): ReactNamespace.Element {
+	const [text, setText] = ReactNamespace.useState("");
+
+	ReactNamespace.useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
+
+	return (
+		<input
+			type="text"
+			value={text}
+			onChange={(event: { readonly target: { readonly value: string } }) => setText(event.target.value)}
+		/>
+	);
+}
+`,
+			},
+			{
+				// State from `React.useState` in the standard environment.
+				code: `
+import React from "react";
+
+export function Child({ onChanged }: { onChanged: (text: string) => void }): React.ReactElement {
+	const [text, setText] = React.useState("");
+
+	React.useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
+
+	return (
+		<input
+			type="text"
+			value={text}
+			onChange={(event: { readonly target: { readonly value: string } }) => setText(event.target.value)}
+		/>
+	);
+}
+`,
+				options: [{ environment: "standard" }],
 			},
 		],
 	});

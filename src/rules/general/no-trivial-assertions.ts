@@ -69,6 +69,7 @@ const PREDICATE_MATCHERS = new Map<string, PredicateKind>([
 
 const ASSERT_STRICT_METHODS = new Set(["deepStrictEqual", "notDeepStrictEqual", "notStrictEqual", "strictEqual"]);
 const ASSERT_LOOSE_METHODS = new Set(["deepEqual", "equal", "notDeepEqual", "notEqual"]);
+const ASSERT_DEEP_STRICT_METHODS = new Set(["deepStrictEqual", "notDeepStrictEqual"]);
 
 function isFreshReferenceExpression(node: ESTree.Node): boolean {
 	return (isAnyLiteral(node) && "regex" in node) || FRESH_REFERENCE_TYPES.has(node.type);
@@ -311,6 +312,11 @@ function reportTrivialAssert(context: Context, node: ESTree.CallExpression): voi
 
 	const isStrict = ASSERT_STRICT_METHODS.has(method);
 	if (!isStrict && !ASSERT_LOOSE_METHODS.has(method)) return;
+
+	// A deep comparison looks at contents, so a fresh value on one side is an
+	// ordinary expectation and not an identity check that can never pass.
+	const isOneSideFresh = isFreshReferenceExpression(left) !== isFreshReferenceExpression(right);
+	if (isOneSideFresh && ASSERT_DEEP_STRICT_METHODS.has(method)) return;
 
 	const negated = method.startsWith("not");
 	reportComparisonAssertion(

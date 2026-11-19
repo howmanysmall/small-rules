@@ -10,6 +10,87 @@ describe("no-pass-live-state-to-parent", () => {
 				code: `
 import React, { useEffect, useState } from "@rbxts/react";
 
+export function Counter({ onCount }: { onCount: (count: number) => void }): React.Element {
+	const [count] = useState(0);
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+
+	return <textlabel Text={tostring(count)} />;
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid passing live state to parents in an effect. Instead, lift "count" to the parent and pass it down to "Counter" as a prop.',
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+export function useCounter({ onCount }: { onCount: (count: number) => void }): void {
+	const [count] = useState(0);
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid passing live state to parents in an effect. Instead, return "count" from "useCounter".',
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect, useState } from "@rbxts/react";
+
+export function Counter({ onChange }: { onChange: (count: number, total: number) => void }): React.Element {
+	const [count] = useState(0);
+	const [total] = useState(0);
+
+	useEffect(() => {
+		onChange(count, total);
+	}, [onChange, count, total]);
+
+	return <textlabel Text={tostring(count)} />;
+}
+`,
+				errors: [
+					{
+						data: { name: '"Counter"', state: '"count" and "total"' },
+						messageId: "avoidPassingLiveStateToParentInComponent",
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+export function useTally({ onCount }: { onCount: (count: number) => void }): void {
+	const [count] = useState(0);
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+}
+`,
+				errors: [
+					{
+						data: { name: '"useTally"', state: '"count"' },
+						messageId: "avoidPassingLiveStateToParentInHook",
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect, useState } from "@rbxts/react";
+
 export function Child({ onTextChanged }: { onTextChanged: (text: string | undefined) => void }): React.Element {
 	const [text, setText] = useState<string | undefined>();
 
@@ -262,6 +343,26 @@ export function useCustomHook(onChanged: (text: string | undefined) => void): vo
 				errors: [
 					{
 						data: { name: '"useCustomHook"', state: '"text"' },
+						messageId: "avoidPassingLiveStateToParentInHook",
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+export const useArrowHook = (onChanged: (text: string | undefined) => void): void => {
+	// oxlint-disable-next-line no-unused-vars, sonar/no-unused-vars, small-rules/no-dead-store -- The setter stays unused; the sample only reads the state value.
+	const [text, setText] = useState<string | undefined>();
+
+	useEffect(() => {
+		onChanged(text);
+	}, [onChanged, text]);
+};
+`,
+				errors: [
+					{
+						data: { name: '"useArrowHook"', state: '"text"' },
 						messageId: "avoidPassingLiveStateToParentInHook",
 					},
 				],

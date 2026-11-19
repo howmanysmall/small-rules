@@ -653,6 +653,104 @@ useEffect(handleEffect, []);
 					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
 					errors: [{ messageId: "identifierReferencesAsyncFunction" }],
 				},
+				// A name the call site shadows would bind to another variable
+				// once inlined, so the report stays without a fix
+				{
+					code: `
+const value = 1;
+function logValue() {
+    console.log(value);
+}
+
+export function App() {
+    const value = 2;
+    useEffect(logValue, []);
+    return value;
+}
+`,
+					output: null,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+				},
+				// A name read inside a nested function is a free reference too
+				{
+					code: `
+const value = 1;
+function logValue() {
+    return () => console.log(value);
+}
+
+export function App() {
+    const value = 2;
+    useEffect(logValue, []);
+    return value;
+}
+`,
+					output: null,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+				},
+				// A parameter that shadows the name is a capture too
+				{
+					code: `
+const value = 1;
+function logValue() {
+    console.log(value);
+}
+
+export function App(value) {
+    useEffect(logValue, []);
+    return value;
+}
+`,
+					output: null,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+				},
+				// A name the call site does not shadow is still inlined
+				{
+					code: `
+const value = 1;
+function logValue() {
+    console.log(value);
+}
+
+export function App() {
+    useEffect(logValue, []);
+    return value;
+}
+`,
+					output: `
+const value = 1;
+export function App() {
+    useEffect(function logValue() {
+    console.log(value);
+}, []);
+    return value;
+}
+`,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+				},
+				// A recursive reference keeps its own name once inlined
+				{
+					code: `
+function tick() {
+    tick();
+}
+useEffect(tick, []);
+`,
+					output: `
+function tick() {
+    tick();
+}
+useEffect(function tick() {
+    tick();
+}, []);
+`,
+					options: [{ environment: "standard", inlineFunctionDeclarations: true }],
+					errors: [{ messageId: "identifierReferencesFunctionDeclaration" }],
+				},
 			],
 			valid: [
 				// Standard mode without the opt-in keeps declaration references

@@ -19,6 +19,9 @@ import {
 	isProperty,
 	isPropertyDefinition,
 	isStringLiteral,
+	isTsEnumDeclaration,
+	isTsInterfaceDeclaration,
+	isTsModuleDeclaration,
 	isTsPropertySignature,
 	isTsTypeAliasDeclaration,
 	isVariableDeclaration,
@@ -73,17 +76,62 @@ export function getAvailableVariableName(
 	return candidate;
 }
 
+/**
+ * A class declares its name in the enclosing scope and again in its own
+ * scope. The inner variable sees only references inside the class body.
+ *
+ * @param variable - A variable that may be a class's inner name.
+ * @returns The outer variable that shares the class's name node, if any.
+ */
+function getOuterClassVariable(variable: VariableLike): undefined | Variable {
+	const [definition] = variable.defs;
+	if (definition?.type !== "ClassName") return undefined;
+
+	const outer = getVariableByName(variable.scope.upper, variable.name);
+	return outer?.defs[0]?.name === definition.name ? outer : undefined;
+}
+
+function getRenamedVariables(variable: VariableLike): ReadonlyArray<VariableLike> {
+	const outer = getOuterClassVariable(variable);
+	return outer === undefined ? [variable] : [variable, outer];
+}
+
 function getVariableIdentifiers(variable: VariableLike): ReadonlyArray<BroadIdentifier> {
 	const identifiers = new Set<BroadIdentifier>();
-	for (const identifier of variable.identifiers) {
-		identifiers.add(identifier);
-	}
+	for (const { identifiers: declared, references } of getRenamedVariables(variable)) {
+		for (const identifier of declared) {
+			identifiers.add(identifier);
+		}
 
-	for (const { identifier } of variable.references) {
-		identifiers.add(identifier);
+		for (const { identifier } of references) {
+			identifiers.add(identifier);
+		}
 	}
 
 	return [...identifiers];
+}
+
+/**
+ * Tells whether renaming a variable keeps every name in its reach bound as
+ * before. A free reference to the new name would be captured by the variable,
+ * and a reference from a scope that already declares the new name would be
+ * captured by that declaration.
+ *
+ * @param variable - The variable the fix renames.
+ * @param replacement - The name the fix writes.
+ * @returns Whether the rename changes what no other name refers to.
+ */
+export function isRenameCaptureFree(variable: VariableLike, replacement: string): boolean {
+	return getRenamedVariables(variable).every(
+		({ references, scope }) =>
+			getScopes(scope).every((inner) =>
+				inner.through.every(({ identifier }) => identifier.name !== replacement),
+			) &&
+			isSafeName(
+				replacement,
+				references.map((reference) => reference.from),
+			),
+	);
 }
 
 function hasSameRange(node1: NodeRange, node2: NodeRange): boolean {
@@ -158,7 +206,11 @@ function isExportedIdentifier(identifier: BroadIdentifier): boolean {
 	if (isClass(parent) && parent.id === identifier) return isExportNamedDeclaration(parent.parent);
 	if (isTsTypeAliasDeclaration(parent) && parent.id === identifier) return isExportNamedDeclaration(parent.parent);
 
-	return false;
+	return (
+		(isTsEnumDeclaration(parent) || isTsInterfaceDeclaration(parent) || isTsModuleDeclaration(parent)) &&
+		parent.id === identifier &&
+		isExportNamedDeclaration(parent.parent)
+	);
 }
 
 export function shouldFix(variable: VariableLike): boolean {
@@ -183,7 +235,10 @@ function replaceReferenceIdentifier(identifier: BroadIdentifier, replacement: st
 		return fixer.replaceText(identifier, `${replacement} as ${identifier.name}`);
 	}
 
-	return fixer.replaceText(identifier, replacement);
+	// A binding's range runs on through its `?` and `: Type`; only the name
+	// is renamed.
+	const [start] = identifier.range;
+	return fixer.replaceTextRange([start, start + identifier.name.length], replacement);
 }
 
 export function renameVariable(variable: VariableLike, replacement: string, fixer: Fixer): Array<Fix> {

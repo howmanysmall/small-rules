@@ -18,16 +18,18 @@ import {
 	UNARY_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
-import { getVariableByName } from "$oxc-utilities/ast-utilities";
+import { getReferencedVariable, getVariableByName } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { resolvesToModuleBinding } from "$oxc-utilities/module-binding-resolution";
-import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
+import { getRootExpression, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 import { getHookName } from "$oxc-utilities/react-hook-utilities";
 import { isModuleLevelScope } from "$oxc-utilities/static-expression-utilities";
 
 import type { ESTree, Fix, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
+
+const CONSTANT_NAME_PREFIX = "PREFER_CONSTANT_ACTION_";
 
 function isModuleScopeConst(variable: ScopeVariable): boolean {
 	if (!isModuleLevelScope(variable.scope)) return false;
@@ -120,6 +122,66 @@ function getProgram(node: ESTree.Node): ESTree.Program | undefined {
 	return undefined;
 }
 
+/**
+ * Collects where each module binding that the action object reads is declared.
+ *
+ * @param sourceCode - The source code of the current file.
+ * @param actionObject - A reportable action object.
+ * @returns The start offset of every definition node of those bindings.
+ */
+function getReferencedDefinitionStarts(sourceCode: SourceCode, actionObject: ESTree.ObjectExpression): Array<number> {
+	const starts = new Array<number>();
+
+	const properties = actionObject.properties.filter(isProperty);
+
+	for (const property of properties) {
+		const root = getRootExpression(property.value);
+		const variable = isIdentifier(root) ? getReferencedVariable(sourceCode, root) : undefined;
+
+		if (variable !== undefined) {
+			for (const definition of variable.defs) {
+				starts.push(definition.node.range[0]);
+			}
+		}
+	}
+
+	return starts;
+}
+
+/**
+ * Finds the last top-level statement the new constant has to follow: the
+ * leading imports and every statement declaring a binding the object reads.
+ *
+ * @param program - The program that owns the action object.
+ * @param definitionStarts - Start offsets of the referenced definitions.
+ * @returns The statement to insert after, or `undefined` when none applies.
+ */
+function getInsertionAnchor(
+	program: ESTree.Program,
+	definitionStarts: ReadonlyArray<number>,
+): ESTree.Program["body"][number] | undefined {
+	let anchor: ESTree.Program["body"][number] | undefined;
+	let inLeadingImports = true;
+
+	for (const statement of program.body) {
+		inLeadingImports &&= isImportDeclaration(statement);
+		if (inLeadingImports) {
+			anchor = statement;
+			continue;
+		}
+
+		const [start, end] = statement.range;
+		for (const definitionStart of definitionStarts) {
+			if (definitionStart >= start && definitionStart < end) {
+				anchor = statement;
+				break;
+			}
+		}
+	}
+
+	return anchor;
+}
+
 function getDeclarationInsertionFix(
 	fixer: Fixer,
 	sourceCode: SourceCode,
@@ -130,17 +192,8 @@ function getDeclarationInsertionFix(
 	const declarationText = `const ${constantName} = ${sourceCode.getText(actionObject)};`;
 	const { body } = program;
 
-	let lastImport: ESTree.ImportDeclaration | undefined;
-	for (const statement of body) {
-		if (isImportDeclaration(statement)) {
-			lastImport = statement;
-			continue;
-		}
-
-		break;
-	}
-
-	if (lastImport !== undefined) return fixer.insertTextAfter(lastImport, `\n\n${declarationText}`);
+	const anchor = getInsertionAnchor(program, getReferencedDefinitionStarts(sourceCode, actionObject));
+	if (anchor !== undefined) return fixer.insertTextAfter(anchor, `\n\n${declarationText}`);
 
 	const [firstStatement] = body;
 	/* v8 ignore next -- dispatch calls require an existing statement, so the Program body is non-empty. @preserve */
@@ -148,6 +201,27 @@ function getDeclarationInsertionFix(
 
 	/* v8 ignore next -- dispatch calls require an existing statement, so the Program body is non-empty. @preserve */
 	return fixer.insertTextAfterRange([program.range[0], program.range[1]], declarationText);
+}
+
+/**
+ * Finds the first constant index, from `startIndex` on, whose name no binding
+ * visible from `node` already uses, so a second suggestion never redeclares
+ * or is captured by an existing name.
+ *
+ * @param sourceCode - The source code of the current file.
+ * @param node - The action object the constant replaces.
+ * @param startIndex - The first index to try.
+ * @returns An index whose constant name is unbound.
+ */
+function getUnboundConstantIndex(sourceCode: SourceCode, node: ESTree.Node, startIndex: number): number {
+	const scope = sourceCode.getScope(node);
+	let index = startIndex;
+
+	while (getVariableByName(scope, `${CONSTANT_NAME_PREFIX}${index}`) !== undefined) {
+		index += 1;
+	}
+
+	return index;
 }
 
 const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
@@ -173,8 +247,9 @@ const preferConstantDispatch = createRule("prefer-constant-dispatch", "react", {
 				/* v8 ignore next -- action objects are visited only after parser parent links are established. @preserve */
 				if (program === undefined) return;
 
-				const constantName = `PREFER_CONSTANT_ACTION_${suggestionCount}`;
-				suggestionCount += 1;
+				const constantIndex = getUnboundConstantIndex(sourceCode, actionObject, suggestionCount);
+				const constantName = `${CONSTANT_NAME_PREFIX}${constantIndex}`;
+				suggestionCount = constantIndex + 1;
 
 				context.report({
 					messageId: "preferConstantDispatch",

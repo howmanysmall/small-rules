@@ -20,10 +20,14 @@ import {
 	judgmentThresholds,
 	maxRelationsPerRule,
 	reasonPromptVersion,
+	requestConcurrency,
+	reviewReportPath,
 } from "$script-utilities/rule-relations/constants";
 import {
+	createOpenRouterClientOptions,
 	createOpenRouterDecisionTransport,
 	createOpenRouterReasonWriter,
+	createOpenRouterRequestOptions,
 } from "$script-utilities/rule-relations/openrouter";
 import { renderRelationDocument } from "$script-utilities/rule-relations/render";
 import { repositoryRoot } from "$script-utilities/rule-relations/repository";
@@ -38,7 +42,6 @@ import type { RelationProgress } from "$script-utilities/rule-relations/types";
 
 const name = getScriptName(true);
 const log = consola.withTag(name);
-const reviewReportPath = "documentation/src/data/generated/rule-relations.review.json";
 const cacheRoot = nodePath.join(repositoryRoot, ".cache/rule-relations");
 
 const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation site\'s "related rules" data.')
@@ -46,7 +49,18 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 	.option("--reason-model <reasonModel:string>", "The OpenRouter model used to write relation reasons.", {
 		default: defaultReasonModel,
 	})
-	.action(async ({ openrouterApiKey, reasonModel }): Promise<void> => {
+	.option("--concurrency <concurrency:integer>", "The most OpenRouter requests in flight at once.", {
+		default: requestConcurrency,
+	})
+	.option("--review-output <reviewOutput:string>", "Path to write the relation review report.", {
+		default: reviewReportPath,
+	})
+	.option("--no-review", "Skip writing the relation review report.")
+	.action(async ({ concurrency, openrouterApiKey, reasonModel, review, reviewOutput }): Promise<void> => {
+		if (concurrency < 1) {
+			throw new RangeError(`--concurrency must be at least 1, got ${concurrency}.`);
+		}
+
 		const startedAt = performance.now();
 		const usageTracker = createRelationUsageTracker();
 		const progress: Partial<Record<RelationProgress["phase"], RelationProgress>> = {};
@@ -68,7 +82,8 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			);
 		}
 
-		const openrouter = new OpenRouter({ apiKey: openrouterApiKey });
+		const openrouter = new OpenRouter(createOpenRouterClientOptions(openrouterApiKey));
+		const requestOptions = createOpenRouterRequestOptions();
 		const cards = buildRuleCards();
 		const ruleNames = [...cards.keys()].toSorted(compareStrings);
 		const pairs = createAllRulePairs(ruleNames);
@@ -80,6 +95,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				allNames: ruleNames,
 				batchSize: judgmentBatchSize,
 				cards,
+				concurrency,
 				decisionModel,
 				existingEdges,
 				judgmentCache: createJudgmentCache(nodePath.join(cacheRoot, "judgments")),
@@ -93,7 +109,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				reasonWriter: createOpenRouterReasonWriter(
 					reasonModel,
 					async (request) => {
-						const response = await openrouter.chat.send(request);
+						const response = await openrouter.chat.send(request, requestOptions);
 						if (!("choices" in response)) {
 							throw new TypeError("OpenRouter unexpectedly returned a stream.");
 						}
@@ -104,7 +120,7 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				),
 				thresholds: judgmentThresholds,
 				transport: createOpenRouterDecisionTransport(async (request) => {
-					return openrouter.alpha.decisions.create(request);
+					return openrouter.alpha.decisions.create(request, requestOptions);
 				}, usageTracker.record),
 			});
 
@@ -120,7 +136,6 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			}
 
 			const report = createRelationReviewReport({
-				cards,
 				denylist: relationDenylist,
 				pins: relationPins,
 				previous: existingEdges,
@@ -137,15 +152,24 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				}),
 				"utf8",
 			);
-			writeFileSync(
-				nodePath.join(repositoryRoot, reviewReportPath),
-				`${JSON.stringify({ ...report, judgmentPromptVersion, models: { decisions: decisionModel, reasons: reasonModel }, thresholds: judgmentThresholds }, undefined, "\t")}\n`,
-				"utf8",
-			);
 
-			log.success(`wrote ${result.edges.length} relations and ${result.reviews.length} review findings`);
+			log.success(`wrote ${result.edges.length} relations to ${generatedRelationDocumentPath}`);
+
+			if (review) {
+				const resolvedReviewReportPath = nodePath.resolve(repositoryRoot, reviewOutput);
+				mkdirSync(nodePath.dirname(resolvedReviewReportPath), { recursive: true });
+				writeFileSync(
+					resolvedReviewReportPath,
+					`${JSON.stringify({ ...report, judgmentPromptVersion, models: { decisions: decisionModel, reasons: reasonModel }, thresholds: judgmentThresholds }, undefined, "\t")}\n`,
+					"utf8",
+				);
+				log.info(
+					`wrote review report to ${reviewOutput} (${modelJudgments.needsReview.length} actionable, ${modelJudgments.omittedLowSignalReviewCount} low-signal omitted)`,
+				);
+			}
+
 			log.info(
-				`Jev verdicts: ${modelJudgments.acceptedCount} accepted, ${modelJudgments.rejectedCount} rejected, ${modelJudgments.needsReview.length} need review; ${modelJudgments.capped.length} accepted links omitted by the cap`,
+				`model verdicts: ${modelJudgments.acceptedCount} accepted, ${modelJudgments.rejectedCount} rejected, ${modelJudgments.needsReviewCount} need review; ${modelJudgments.capped.length} accepted links omitted by the cap`,
 			);
 			log.info(
 				`manual checks: ${qualityEvaluation.matchedPairCount}/${qualityEvaluation.checkedPairCount} agree (${qualityEvaluation.positiveLabelCount} pins, ${qualityEvaluation.negativeLabelCount} denials)`,

@@ -1,6 +1,5 @@
 import { isBoolean, isString } from "@small-rules/arktype-utilities";
 import {
-	IDENTIFIER,
 	isAnyLiteral,
 	isAssignmentExpression,
 	isBooleanLiteral,
@@ -25,11 +24,11 @@ import { type } from "arktype";
 import { Predicate } from "effect";
 
 import defaultProperties from "$oxc-generated/default-properties.json";
+import { forEachNode, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Fixer, Visitor } from "oxlint-plugin-utilities";
-import type { JsonArray, JsonObject, JsonValue } from "type-fest";
 
 const isCanonicalNumericComponent = type("'-inf' | 'inf' | number");
 
@@ -223,16 +222,30 @@ function getJsxAttributeExpression({ value }: ESTree.JSXAttribute): ESTree.Expre
 	return value.expression;
 }
 
-function getPropertyMatch(className: string, propertyName: string): DefaultPropertyMatch | undefined {
-	const lowercasePropertyName = propertyName.toLowerCase();
+/**
+ * Looks up the default of a property on an instance made by `new Instance`.
+ *
+ * @param className - The Roblox class name.
+ * @param propertyName - The property name, in any casing.
+ * @returns The default value, or `undefined` when none is known.
+ */
+function getInstancePropertyMatch(className: string, propertyName: string): DefaultPropertyMatch | undefined {
+	return classDefaultPropertyLookups.get(className)?.get(propertyName.toLowerCase());
+}
 
-	const intrinsicJsxOverride = intrinsicJsxDefaultOverrides.get(className)?.get(lowercasePropertyName);
-	if (intrinsicJsxOverride !== undefined) return intrinsicJsxOverride;
-
-	const classDefaults = classDefaultPropertyLookups.get(className);
-	if (classDefaults === undefined) return undefined;
-
-	return classDefaults.get(lowercasePropertyName);
+/**
+ * Looks up the default of a property on a JSX intrinsic element.
+ *
+ * React Roblox sets some defaults of its own, so they take priority over the
+ * class defaults that `new Instance` uses.
+ *
+ * @param className - The Roblox class name.
+ * @param propertyName - The property name, in any casing.
+ * @returns The default value, or `undefined` when none is known.
+ */
+function getJsxPropertyMatch(className: string, propertyName: string): DefaultPropertyMatch | undefined {
+	const intrinsicJsxOverride = intrinsicJsxDefaultOverrides.get(className)?.get(propertyName.toLowerCase());
+	return intrinsicJsxOverride ?? getInstancePropertyMatch(className, propertyName);
 }
 
 function isIgnoredPropertyName(propertyName: string): boolean {
@@ -251,41 +264,23 @@ function getTrackedInstanceClassName(node: ESTree.Expression): string | undefine
 	return firstArgument.value;
 }
 
-type IdentifierSearchValue = ESTree.Node | JsonValue | undefined;
+/**
+ * Tells whether an identifier with the given name appears inside a node.
+ *
+ * @param root - The node to search, including itself.
+ * @param identifierName - The identifier name to look for.
+ * @returns `true` when the node contains the identifier.
+ */
+function containsIdentifierReference(root: ESTree.Node, identifierName: string): boolean {
+	let found = false;
+	forEachNode(root, (node) => {
+		if (!isIdentifierNamed(node, identifierName)) return true;
 
-function isIdentifierSearchArray(value: IdentifierSearchValue): value is JsonArray {
-	return Array.isArray(value);
-}
+		found = true;
+		return STOP_NODE_TRAVERSAL;
+	});
 
-function isIdentifierSearchObject(value: IdentifierSearchValue): value is JsonObject {
-	return Predicate.isObject(value);
-}
-
-function containsIdentifierReference(
-	value: IdentifierSearchValue,
-	identifierName: string,
-	visitedValues: WeakSet<object> = new WeakSet<object>(),
-): boolean {
-	if (isIdentifierSearchArray(value)) {
-		for (const element of value) {
-			if (containsIdentifierReference(element, identifierName, visitedValues)) return true;
-		}
-
-		return false;
-	}
-
-	if (!isIdentifierSearchObject(value) || visitedValues.has(value)) return false;
-
-	visitedValues.add(value);
-
-	// oxlint-disable-next-line local/prefer-existing-guard -- cannot do this here unfortunately. Types make it complex.
-	if (value.type === IDENTIFIER && value.name === identifierName) return true;
-
-	for (const nestedValue of Object.values(value)) {
-		if (containsIdentifierReference(nestedValue, identifierName, visitedValues)) return true;
-	}
-
-	return false;
+	return found;
 }
 
 function getMemberPath(node: ESTree.Expression): ReadonlyArray<string> | undefined {
@@ -757,7 +752,6 @@ function clearTrackedInstancesForCallExpression(
 	for (const [identifierName] of trackedInstances) {
 		for (const argument of callExpression.arguments) {
 			if (isSpreadElement(argument)) continue;
-			/* v8 ignore next -- @preserve call-expression escape checks are only needed for arguments that reference tracked instances. */
 			if (!containsIdentifierReference(argument, identifierName)) continue;
 
 			trackedInstances.delete(identifierName);
@@ -773,21 +767,7 @@ function clearTrackedInstancesForEscapeAssignment(
 	if (!isIdentifier(assignmentExpression.left) && !isMemberExpression(assignmentExpression.left)) return;
 
 	for (const [identifierName] of trackedInstances) {
-		/* v8 ignore next -- @preserve escape assignments only clear tracked instances when the right-hand side references them. */
 		if (!containsIdentifierReference(assignmentExpression.right, identifierName)) continue;
-		trackedInstances.delete(identifierName);
-	}
-}
-
-function clearTrackedInstancesForReturnStatement(
-	returnStatement: ESTree.ReturnStatement,
-	trackedInstances: Map<string, TrackedInstance>,
-): void {
-	if (returnStatement.argument === null) return;
-
-	for (const [identifierName] of trackedInstances) {
-		/* v8 ignore next -- @preserve return statements only clear tracked instances when returning the tracked value. */
-		if (!containsIdentifierReference(returnStatement.argument, identifierName)) continue;
 		trackedInstances.delete(identifierName);
 	}
 }
@@ -812,10 +792,33 @@ function getUselessPropertyMatch(attribute: ESTree.JSXAttribute, className: stri
 	const propertyName = getJsxAttributeName(attribute.name);
 	if (propertyName === undefined || isIgnoredPropertyName(propertyName)) return undefined;
 
-	const propertyMatch = getPropertyMatch(className, propertyName);
+	const propertyMatch = getJsxPropertyMatch(className, propertyName);
 	if (propertyMatch === undefined || !isUselessDefaultAttribute(attribute, propertyMatch)) return undefined;
 
 	return propertyMatch;
+}
+
+interface AssignedDefaultMatch {
+	/** Whether removing the assignment leaves the instance unchanged. */
+	readonly isInstanceDefault: boolean;
+	readonly propertyName: string;
+}
+
+function getAssignedDefaultMatch(
+	className: string,
+	propertyName: string,
+	right: ESTree.Expression,
+): AssignedDefaultMatch | undefined {
+	const instanceMatch = getInstancePropertyMatch(className, propertyName);
+	if (instanceMatch !== undefined && isDefaultValue(right, instanceMatch.value)) {
+		return { isInstanceDefault: true, propertyName: instanceMatch.propertyName };
+	}
+
+	// A value that only matches the JSX default is still reported, but
+	// removing it would change what `new Instance` creates.
+	const jsxMatch = getJsxPropertyMatch(className, propertyName);
+	if (jsxMatch === undefined || !isDefaultValue(right, jsxMatch.value)) return undefined;
+	return { isInstanceDefault: false, propertyName: jsxMatch.propertyName };
 }
 
 const noUselessDefault = createRule("no-useless-default", "roblox", {
@@ -900,25 +903,18 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			const propertyName = assignmentExpression.left.property.name;
 			if (isIgnoredPropertyName(propertyName)) return;
 
-			const propertyMatch = getPropertyMatch(trackedInstance.className, propertyName);
-			if (propertyMatch === undefined || !isDefaultValue(assignmentExpression.right, propertyMatch.value)) return;
+			const { className } = trackedInstance;
+			const match = getAssignedDefaultMatch(className, propertyName, assignmentExpression.right);
+			if (match === undefined) return;
 
-			const fix = createExpressionStatementRemovalFix(statementNode);
+			const data = { className, propertyName: match.propertyName };
+			const fix = match.isInstanceDefault ? createExpressionStatementRemovalFix(statementNode) : undefined;
 			if (fix === undefined) {
-				context.report({
-					data: { className: trackedInstance.className, propertyName: propertyMatch.propertyName },
-					messageId: "uselessDefault",
-					node: assignmentExpression.left,
-				});
+				context.report({ data, messageId: "uselessDefault", node: assignmentExpression.left });
 				return;
 			}
 
-			context.report({
-				data: { className: trackedInstance.className, propertyName: propertyMatch.propertyName },
-				fix,
-				messageId: "uselessDefault",
-				node: assignmentExpression.left,
-			});
+			context.report({ data, fix, messageId: "uselessDefault", node: assignmentExpression.left });
 		}
 
 		function inspectStatementNodes(statementNodes: ReadonlyArray<ESTree.Node>): void {
@@ -938,7 +934,11 @@ const noUselessDefault = createRule("no-useless-default", "roblox", {
 			}
 
 			if (isReturnStatement(statementNode)) {
-				clearTrackedInstancesForReturnStatement(statementNode, trackedInstances);
+				// A returned value ends tracking; what follows it is unreachable.
+				if (statementNode.argument !== null) {
+					trackedInstances.clear();
+				}
+
 				return;
 			}
 

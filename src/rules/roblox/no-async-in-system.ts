@@ -105,6 +105,7 @@ function addSystemPropertyFunction(
 	object: ESTree.ObjectExpression,
 	namedFunctions: ReadonlyMap<string, CallbackFunction>,
 	systemFunctions: Set<CallbackFunction>,
+	sourceCode: SourceCode,
 ): void {
 	for (const property of object.properties) {
 		if (getPropertyName(property) !== "system" || !isProperty(property)) continue;
@@ -112,7 +113,11 @@ function addSystemPropertyFunction(
 		if (isAnyFunction(property.value)) {
 			systemFunctions.add(property.value);
 		} else if (isIdentifier(property.value)) {
-			const systemFunction = namedFunctions.get(property.value.name);
+			// The name lookup only knows function declarations and named
+			// expressions, so a `const` arrow resolves through its scope.
+			const systemFunction =
+				namedFunctions.get(property.value.name) ?? getReferencedFunction(property.value, sourceCode);
+
 			if (systemFunction !== undefined) {
 				systemFunctions.add(systemFunction);
 			}
@@ -608,7 +613,7 @@ const noAsyncInSystem = createRule("no-async-in-system", "roblox", {
 				});
 
 				for (const object of typedSystemObjects) {
-					addSystemPropertyFunction(object, namedFunctions, systemFunctions);
+					addSystemPropertyFunction(object, namedFunctions, systemFunctions, context.sourceCode);
 				}
 
 				for (const systemFunction of systemFunctions) {

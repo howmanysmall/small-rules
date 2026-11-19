@@ -2,6 +2,7 @@ import {
 	isCallExpression,
 	isExportDefaultDeclaration,
 	isExportNamedDeclaration,
+	isFunctionLike,
 	isIdentifier,
 	isIdentifierNamed,
 	isImportSpecifier,
@@ -66,6 +67,9 @@ function isNodeInExport(node: ESTree.Node): boolean {
 
 	while (current !== null) {
 		if (isExportNamedDeclaration(current) || isExportDefaultDeclaration(current)) return true;
+		// A reference inside a function body uses the value; it does not
+		// export it.
+		if (isFunctionLike(current)) return false;
 		current = current.parent;
 	}
 

@@ -77,6 +77,66 @@ describe("no-array-constructor-index-assignment", () => {
 				output: "const values = [1];\r",
 				errors: [{ messageId: "preferArrayLiteral" }],
 			},
+			{
+				code: "declare function g(): void;\nconst a = new Array<number>();\na[0] = 1;\ng();\na[1] = 2;\nexport default a;",
+				output: "declare function g(): void;\nconst a = [1];\ng();\na[1] = 2;\nexport default a;",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const values = new Array<number>();\nvalues[0] = (1, 2);",
+				output: "const values = [(1, 2)];",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const values = new Array<number>();\nvalues[0] = values.length;",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const values = new Array<() => number>();\nvalues[0] = () => values.length;",
+				output: "const values = [() => values.length];",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>();\na[0] = 1;\na[1] = a[0] + 1;\nexport default a;",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>();\na[0] = 1; // one\na[1] = 2; // two\nexport = a;",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>();\na[0] = /* one */ 1;",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array</* element */ number>();\na[0] = 1;",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>();\nconst b = compute();\na[0] = b; // one\na[1] = 2;",
+				output: null,
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>();\na[0] = 1;\na[1] = 2; // two\nexport = a;",
+				output: "const a = [1, 2]; // two\nexport = a;",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>();\n// note\nconst b = compute();\na[0] = b;",
+				output: "// note\nconst b = compute();\nconst a = [b];",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
+			{
+				code: "const a = new Array<number>(); // list\na[0] = 1;\na[1] = 2;",
+				output: " // list\nconst a = [1, 2];",
+				errors: [{ messageId: "preferArrayLiteral" }],
+			},
 		],
 		valid: [
 			{

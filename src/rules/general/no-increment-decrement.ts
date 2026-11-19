@@ -1,14 +1,35 @@
-import { FOR_STATEMENT, isExpressionStatement } from "@small-rules/oxlint-utilities";
+import {
+	FOR_STATEMENT,
+	isExpressionStatement,
+	isTsSatisfiesExpression,
+	isTypeAssertionExpression,
+} from "@small-rules/oxlint-utilities";
 
 import { isAutofixAllowed } from "$oxc-utilities/autofix-option";
 import { createRule } from "$oxc-utilities/create-rule";
 import { reportWithReplacement } from "$oxc-utilities/replacement-report";
 
-import type { ESTree, Visitor } from "oxlint-plugin-utilities";
+import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
 function isStandaloneUpdateExpression(node: ESTree.UpdateExpression): boolean {
 	const { parent } = node;
 	return isExpressionStatement(parent) || (parent.type === FOR_STATEMENT && parent.update === node);
+}
+
+const OPERATOR_LENGTH = "++".length;
+
+function getOperandText(sourceCode: SourceCode, node: ESTree.UpdateExpression): string {
+	const { argument } = node;
+	if (!isTypeAssertionExpression(argument) && !isTsSatisfiesExpression(argument)) return sourceCode.getText(argument);
+
+	// The argument node omits the parentheses of `(a as T)`, and `a as T += 1`
+	// does not parse, so slice around the operator.
+	const [start, end] = node.range;
+	const text = node.prefix
+		? sourceCode.text.slice(start + OPERATOR_LENGTH, end)
+		: sourceCode.text.slice(start, end - OPERATOR_LENGTH);
+
+	return text.trim();
 }
 
 const noIncrementDecrement = createRule("no-increment-decrement", "general", {
@@ -20,7 +41,7 @@ const noIncrementDecrement = createRule("no-increment-decrement", "general", {
 			UpdateExpression(node): void {
 				if (!isStandaloneUpdateExpression(node)) return;
 
-				const argumentText = sourceCode.getText(node.argument);
+				const argumentText = getOperandText(sourceCode, node);
 				const messageId = node.operator === "++" ? "noIncrement" : "noDecrement";
 
 				if (!allowAutofix) {

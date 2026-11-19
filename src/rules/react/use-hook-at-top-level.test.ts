@@ -49,6 +49,160 @@ function Component() {
 				errors: [{ messageId: "conditionalHook" }],
 			},
 
+			// A doubly nested callback must not end the component's tracking
+			{
+				code: `
+function Component({ flag }) {
+    useEffect(() => {
+        const id = setTimeout(() => {}, 0);
+        return () => clearTimeout(id);
+    }, []);
+    if (flag) {
+        useState(0);
+    }
+    return null;
+}
+`,
+				errors: [{ messageId: "conditionalHook" }],
+			},
+			{
+				code: `
+function Component({ flag, items }) {
+    const handler = () => {
+        items.forEach(() => {});
+    };
+    if (flag) {
+        useState(0);
+    }
+    return handler;
+}
+`,
+				errors: [{ messageId: "conditionalHook" }],
+			},
+
+			// A hook two functions deep is still in a nested function
+			{
+				code: `
+function Component() {
+    useEffect(() => {
+        setTimeout(() => {
+            useState(0);
+        }, 0);
+    }, []);
+}
+`,
+				errors: [{ messageId: "nestedFunction" }],
+			},
+
+			// A nested conditional must not clear the outer one
+			{
+				code: `
+function Component({ flag, other }) {
+    if (flag) {
+        const value = other ? 1 : 2;
+        useState(value);
+    }
+    return null;
+}
+`,
+				errors: [{ messageId: "conditionalHook" }],
+			},
+
+			// A nested loop must not clear the outer one
+			{
+				code: `
+function Component({ rows }) {
+    for (const row of rows) {
+        for (const cell of row) {
+            cell.touch();
+        }
+        useState(row);
+    }
+}
+`,
+				errors: [{ messageId: "loopHook" }],
+			},
+
+			// A nested try must not clear the outer one
+			{
+				code: `
+function Component() {
+    try {
+        try {
+            first();
+        } catch {}
+        useState(0);
+    } catch {}
+}
+`,
+				errors: [{ messageId: "tryBlockHook" }],
+			},
+
+			// A `finally` more than 20 ancestors up is not recognized
+			{
+				code: `
+function Component() {
+    try {
+        something();
+    } finally {
+        {{{{{{{{{{{{{{{{{{{{ useEffect(() => {}); }}}}}}}}}}}}}}}}}}}}
+    }
+}
+`,
+				errors: [{ messageId: "tryBlockHook" }],
+			},
+
+			// Anonymous components passed to memo and forwardRef
+			{
+				code: `
+const MemoArrow = memo(({ flag }) => {
+    if (flag) {
+        useState(0);
+    }
+    return null;
+});
+`,
+				errors: [{ messageId: "conditionalHook" }],
+			},
+			{
+				code: `
+const WithRef = React.forwardRef((props, ref) => {
+    if (props.flag) {
+        useEffect(() => {}, [ref]);
+    }
+    return null;
+});
+`,
+				errors: [{ messageId: "conditionalHook" }],
+			},
+			{
+				code: `
+export default memo(function ({ flag }) {
+    for (const item of flag) {
+        useState(item);
+    }
+    return null;
+});
+`,
+				errors: [{ messageId: "loopHook" }],
+			},
+
+			// The hook's own name is restored after a nested declaration exits
+			{
+				code: `
+function useCountdown(remaining) {
+    function format(value) {
+        return value;
+    }
+    if (remaining > 0) {
+        return useCountdown(remaining - 1);
+    }
+    return format(remaining);
+}
+`,
+				errors: [{ messageId: "recursiveHookCall" }],
+			},
+
 			// Conditional execution - switch statement
 			{
 				code: `
@@ -374,6 +528,70 @@ const Component = () => {
 const Component = function() {
     useState(0);
 };
+`,
+
+			// As in React's own rule, the left side of a logical expression and
+			// the test of a ternary, an if or a switch always run
+			`
+function Component() {
+    const theme = useContext(ThemeContext) ?? "light";
+    return theme;
+}
+`,
+			`
+function Component() {
+    const label = useMemo(() => true, []) ? "a" : "b";
+    return label;
+}
+`,
+			`
+function Component() {
+    if (useFlag()) {
+        doThing();
+    }
+    switch (useMode()) {
+        case "first":
+            doThing();
+    }
+}
+`,
+
+			// A hook after a loop and a try statement is at the top level again
+			`
+function Component({ items }) {
+    let total = 0;
+    for (const item of items) {
+        total += item;
+    }
+    try {
+        total += 1;
+    } catch {
+        total = 0;
+    }
+    const [state] = useState(total);
+    return state;
+}
+`,
+
+			// A return inside a doubly nested callback is not an early return
+			`
+function Component({ items }) {
+    const handler = () => {
+        items.forEach(() => {
+            return 1;
+        });
+    };
+    useState(0);
+    return handler;
+}
+`,
+
+			// memo and forwardRef components with top-level hooks
+			`
+const MemoArrow = memo(() => {
+    useState(0);
+    return null;
+});
 `,
 
 			// Finally block (always executes)

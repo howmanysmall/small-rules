@@ -20,7 +20,6 @@ function createIsUseHook(hookName: `use${string}`): (node: ESTree.Node) => boole
 	};
 }
 
-const isUseState = createIsUseHook("useState");
 const isUseRef = createIsUseHook("useRef");
 const NO_REFERENCES: ReadonlyArray<Reference> = [];
 
@@ -37,7 +36,7 @@ function getDataArguments(analysis: ReactEffectAnalysis, reference: Reference): 
 		// Ideally would use isState and isRef, not the hooks.
 		// But because it goes to leaves. Must be some other way?
 		const { identifier } = upstreamReference;
-		if (isUseState(identifier) || analysis.isProp(upstreamReference) || isUseRef(identifier)) continue;
+		if (analysis.isUseStateHook(identifier) || analysis.isProp(upstreamReference) || isUseRef(identifier)) continue;
 
 		/* v8 ignore next -- data leaves resolve to plain identifiers; `ref.current` / constant leaf shapes are covered by the isProp/isUseRef guards above. @preserve */
 		if (analysis.isRefCurrent(upstreamReference)) continue;
@@ -65,9 +64,9 @@ const noPassDataToParent = createReactEffectRule("no-pass-data-to-parent", {
 	description: "Disallow passing data to parents in an effect.",
 	messages: {
 		avoidPassingDataToParentInComponent:
-			'Avoid passing data to parents in an effect. Instead, fetch "{{data}}" in the parent and pass it down to {{name}} as a prop.',
+			"Avoid passing data to parents in an effect. Instead, fetch {{data}} in the parent and pass it down to {{name}} as a prop.",
 		avoidPassingDataToParentInHook:
-			'Avoid passing data to parents in an effect. Instead, return "{{data}}" from {{name}}.',
+			"Avoid passing data to parents in an effect. Instead, return {{data}} from {{name}}.",
 	},
 	skipEffectsWithCleanup: true,
 });

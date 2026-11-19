@@ -10,12 +10,13 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { stripParenthesis } from "$oxc-utilities/oxc-utilities";
 import { isNumber } from "$oxc-utilities/type-utilities";
 
 import type { ESTree, Visitor } from "oxlint-plugin-utilities";
 
 interface AnalyzedExpression {
-	readonly text: string;
+	readonly node: ESTree.Expression;
 	readonly value: number | undefined;
 }
 
@@ -70,35 +71,41 @@ function negateValue(value?: number): number | undefined {
 	return value === undefined ? undefined : -value;
 }
 
+/**
+ * Checks that an argument is simple arithmetic and folds its numeric value.
+ *
+ * @param node - The argument expression.
+ * @returns The argument without wrapping parentheses and its value when it is
+ *   a known number, or `undefined` when the argument is not simple arithmetic.
+ */
 function analyzeExpression(node: ESTree.Expression): AnalyzedExpression | undefined {
-	switch (node.type) {
-		case BINARY_EXPRESSION: {
-			if (!isValidBinaryExpression(node)) return undefined;
+	const expression = stripParenthesis(node);
 
-			const left = analyzeExpression(node.left);
-			const right = analyzeExpression(node.right);
+	switch (expression.type) {
+		case BINARY_EXPRESSION: {
+			if (!isValidBinaryExpression(expression)) return undefined;
+
+			const left = analyzeExpression(expression.left);
+			const right = analyzeExpression(expression.right);
 			if (left === undefined || right === undefined) return undefined;
 
-			return {
-				text: `${left.text} ${node.operator} ${right.text}`,
-				value: combineValues(node.operator, left.value, right.value),
-			};
+			return { node: expression, value: combineValues(expression.operator, left.value, right.value) };
 		}
 
 		case IDENTIFIER:
-			return { text: node.name, value: undefined };
+			return { node: expression, value: undefined };
 
 		case LITERAL:
-			return isNumber(node.value) ? { text: String(node.value), value: node.value } : undefined;
+			return isNumber(expression.value) ? { node: expression, value: expression.value } : undefined;
 
 		case UNARY_EXPRESSION: {
-			const argument = analyzeExpression(node.argument);
+			const argument = analyzeExpression(expression.argument);
 			if (argument === undefined) return undefined;
-			if (node.operator !== "+" && node.operator !== "-") return undefined;
+			if (expression.operator !== "+" && expression.operator !== "-") return undefined;
 
 			return {
-				text: `${node.operator}${argument.text}`,
-				value: node.operator === "-" ? negateValue(argument.value) : argument.value,
+				node: expression,
+				value: expression.operator === "-" ? negateValue(argument.value) : argument.value,
 			};
 		}
 
@@ -140,6 +147,8 @@ function collectArguments(
 
 const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 	create(context): Visitor {
+		const { sourceCode } = context;
+
 		return {
 			NewExpression(node): void {
 				if (!isNamedGlobalCall(node, "UDim2")) return;
@@ -156,7 +165,9 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 				if (isZeroOffset) {
 					context.report({
 						fix(fixer) {
-							return fixer.replaceText(node, `UDim2.fromScale(${scaleX.text}, ${scaleY.text})`);
+							const scaleXText = sourceCode.getText(scaleX.node);
+							const scaleYText = sourceCode.getText(scaleY.node);
+							return fixer.replaceText(node, `UDim2.fromScale(${scaleXText}, ${scaleYText})`);
 						},
 						messageId: "preferFromScale",
 						node,
@@ -167,7 +178,9 @@ const preferUDim2Shorthand = createRule("prefer-udim2-shorthand", "roblox", {
 				if (isZeroScale) {
 					context.report({
 						fix(fixer) {
-							return fixer.replaceText(node, `UDim2.fromOffset(${offsetX.text}, ${offsetY.text})`);
+							const offsetXText = sourceCode.getText(offsetX.node);
+							const offsetYText = sourceCode.getText(offsetY.node);
+							return fixer.replaceText(node, `UDim2.fromOffset(${offsetXText}, ${offsetYText})`);
 						},
 						messageId: "preferFromOffset",
 						node,

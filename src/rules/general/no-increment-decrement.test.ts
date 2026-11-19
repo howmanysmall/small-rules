@@ -59,6 +59,36 @@ describe("no-increment-decrement", () => {
 				code: "size++;",
 				errors: [{ messageId: "noIncrement" }],
 			},
+			// The fix keeps the parentheses of a wrapped operand, since
+			// `count as number += 1` does not parse.
+			{
+				code: "let count = 0;\n(count as number)++;",
+				output: "let count = 0;\n(count as number) += 1;",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "noIncrement" }],
+				language: "ts",
+			},
+			{
+				code: "let count = 0;\n(<number>count)--;",
+				output: "let count = 0;\n(<number>count) -= 1;",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "noDecrement" }],
+				language: "ts",
+			},
+			{
+				code: "let count = 0;\n(count satisfies number)++;",
+				output: "let count = 0;\n(count satisfies number) += 1;",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "noIncrement" }],
+				language: "ts",
+			},
+			{
+				code: "let count = 0;\n--(count as number);",
+				output: "let count = 0;\n(count as number) -= 1;",
+				options: [{ allowAutofix: true }],
+				errors: [{ messageId: "noDecrement" }],
+				language: "ts",
+			},
 		],
 		valid: [
 			"array[size++] = value;",

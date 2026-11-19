@@ -1,9 +1,15 @@
+import { HTTPClient } from "@openrouter/sdk";
+import { isAbortError, isTimeoutError } from "@openrouter/sdk/lib/http";
+import { ConnectionError } from "@openrouter/sdk/models/errors";
 import { isString } from "@small-rules/arktype-utilities";
 import { type } from "arktype";
 
+import { requestRetryBackoff, requestRetryCodes } from "./constants";
 import { createReasonMessages } from "./reasons";
 import { isNoulAnswer, isScoreAnswer } from "./types";
 
+import type { SDKOptions } from "@openrouter/sdk";
+import type { RequestOptions } from "@openrouter/sdk/lib/sdks";
 import type { DecisionsRequest } from "@openrouter/sdk/models";
 import type {
 	CreateApiAlphaDecisionsRequest,
@@ -79,6 +85,46 @@ function toDecisionQuestion(question: DecisionQuestion): DecisionsRequest["quest
 
 function toDecisionQuestions(questions: Readonly<Record<string, DecisionQuestion>>): DecisionsRequest["questions"] {
 	return Object.fromEntries(Object.entries(questions).map(([key, question]) => [key, toDecisionQuestion(question)]));
+}
+
+export function createOpenRouterClientOptions(apiKey: string): SDKOptions {
+	return {
+		apiKey,
+		httpClient: new HTTPClient({ fetcher: fetchWithConnectionErrorsAsync }),
+		retryConfig: { backoff: { ...requestRetryBackoff }, retryConnectionErrors: true, strategy: "backoff" },
+	};
+}
+
+/**
+ * Calls the global `fetch`. `fetch` rejects only on a network failure, an
+ * abort, or a timeout, so any other rejection (such as Bun's EPROTO TLS
+ * error, which the SDK does not recognize) becomes a `ConnectionError` that
+ * the SDK retries. The original error stays as its `cause`.
+ *
+ * @param request - The request the SDK built.
+ * @returns The response.
+ * @rejects {ConnectionError} When the network request fails.
+ */
+async function fetchWithConnectionErrorsAsync(request: RequestInfo | URL): Promise<Response> {
+	try {
+		return await fetch(request);
+	} catch (error) {
+		if (isAbortError(error) || isTimeoutError(error)) {
+			throw error;
+		}
+
+		throw new ConnectionError("Network request failed", { cause: error });
+	}
+}
+
+/**
+ * Builds the per-call options that make the SDK retry rate limits (429) and
+ * server errors (5xx); its default retries only 5xx.
+ *
+ * @returns The options to pass as the second argument of an SDK call.
+ */
+export function createOpenRouterRequestOptions(): RequestOptions {
+	return { retryCodes: [...requestRetryCodes] };
 }
 
 export function createOpenRouterDecisionTransport(

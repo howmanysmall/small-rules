@@ -169,6 +169,42 @@ function isDeclarationRemovable(
 	return !hasAttachedComments(sourceCode, declaration);
 }
 
+/**
+ * Whether inlining `declaration` at `callSite` would bind one of the names it
+ * reads to a different variable. Names the function does not declare itself
+ * resolve from its declaration site today, but from the call site once the
+ * text is copied there.
+ *
+ * @param sourceCode - The source code of the current file.
+ * @param declaration - The function declaration that would be inlined.
+ * @param callSite - The hook call that receives the declaration.
+ * @returns Whether a free name resolves differently at the call site.
+ */
+function capturesDifferentBinding(
+	sourceCode: SourceCode,
+	declaration: ESTree.Function,
+	callSite: ESTree.CallExpression,
+): boolean {
+	const callScope = sourceCode.getScope(callSite);
+	const functionScopes = [sourceCode.getScope(declaration)];
+
+	for (const scope of functionScopes) {
+		for (const childScope of scope.childScopes) {
+			// oxlint-disable-next-line small-rules/no-loop-iterable-mutation -- ADR-0001 append-only worklist.
+			functionScopes.push(childScope);
+		}
+
+		for (const reference of scope.references) {
+			const { name } = reference.identifier;
+			const variable = getVariableByName(scope, name);
+			if (variable !== undefined && functionScopes.includes(variable.scope)) continue;
+			if (variable !== getVariableByName(callScope, name)) return true;
+		}
+	}
+
+	return false;
+}
+
 const requireNamedEffectFunctions = createRule("require-named-effect-functions", "react", {
 	create(context): Visitor {
 		const { environment, hooks, inlineFunctionDeclarations, sloptor } = parseOptions(context.options[0]);
@@ -287,6 +323,15 @@ const requireNamedEffectFunctions = createRule("require-named-effect-functions",
 			declaration: ESTree.Function,
 			variable: ScopeVariable,
 		): void {
+			if (capturesDifferentBinding(context.sourceCode, declaration, node)) {
+				context.report({
+					data: { hook: hookName },
+					messageId: "identifierReferencesFunctionDeclaration",
+					node,
+				});
+				return;
+			}
+
 			context.report({
 				data: { hook: hookName },
 				fix(fixer): Array<Fix> {

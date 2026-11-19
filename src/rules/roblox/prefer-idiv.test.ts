@@ -154,6 +154,39 @@ describe("prefer-idiv", () => {
 				output: "a.idiv(b / c);",
 				errors: [{ messageId: "useIdiv" }],
 			},
+			// A comma divisor keeps its parentheses so it stays one argument
+			{
+				code: "math.floor(a / (b, c));",
+				output: "a.idiv((b, c));",
+				errors: [{ messageId: "useIdiv" }],
+			},
+			{
+				code: "math.floor(a / ((b, c)));",
+				output: "a.idiv((b, c));",
+				errors: [{ messageId: "useIdiv" }],
+			},
+			{
+				code: "math.floor((a, b) / c);",
+				output: "(a, b).idiv(c);",
+				errors: [{ messageId: "useIdiv" }],
+			},
+			// Reports without a fix when the fix would delete a comment
+			{
+				code: "math.floor(x /* half */ / 2);",
+				output: null,
+				errors: [{ messageId: "useIdiv" }],
+			},
+			{
+				code: "math.floor(value * /* half */ 0.5);",
+				output: null,
+				errors: [{ messageId: "useIdiv" }],
+			},
+			// Comments outside the call survive the fix
+			{
+				code: "/* half */ math.floor(x / 2); // rounded down",
+				output: "/* half */ x.idiv(2); // rounded down",
+				errors: [{ messageId: "useIdiv" }],
+			},
 		],
 		valid: [
 			// Already using idiv

@@ -237,6 +237,93 @@ const array = ["a", "b"];
 				errors: [{ messageId: "collapseArrayPushInitialization" }],
 			},
 			{
+				code: `
+const items = new Array<"a" | "b">();
+items.push("a");
+if (flag) items.push("b");
+`,
+				output: `
+const items: Array<"a" | "b"> = ["a"];
+if (flag) items.push("b");
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+let items = new Array<number | undefined>();
+items.push(1);
+consume(items);
+`,
+				output: `
+let items: Array<number | undefined> = [1];
+consume(items);
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items: Array<number> = new Array<number>();
+items.push(1);
+consume(items);
+`,
+				output: `
+const items: Array<number> = [1];
+consume(items);
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array();
+items.push(1);
+consume(items);
+`,
+				output: `
+const items = [1];
+consume(items);
+`,
+				options: [{ requireExplicitGenericOnNewArray: false }],
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			// A push that reads the array still reports, with no fix to offer
+			{
+				code: `
+const items = new Array<number>();
+items.push(1);
+items.push(items.length);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<Array<string>>();
+items.push(items);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<() => number>();
+items.push(() => items.length);
+`,
+				output: null,
+				errors: [
+					{
+						messageId: "collapseArrayPushInitialization",
+						suggestions: [
+							{
+								messageId: "suggestCollapseArrayPushInitialization",
+								output: `
+const items = [() => items.length];
+`,
+							},
+						],
+					},
+				],
+			},
+			{
 				code: "const { values }: { values: string } = new Array();",
 				output: null,
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
@@ -270,6 +357,92 @@ const array = ["a", "b"];
 				code: "const value: Collections.Array<string> = new Array();",
 				output: null,
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
+			},
+			{
+				code: "const value = new Array(typeof x);",
+				output: "const value = [typeof x];",
+				options: [{ environment: "standard" }],
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
+			},
+			{
+				code: "const value = new Array(typeof x);",
+				output: "const value = [typeof x];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
+			},
+			{
+				code: "const value = new Array(-size);",
+				output: null,
+				options: [{ environment: "standard" }],
+				errors: [
+					{
+						messageId: "avoidLengthConstructorInStandard",
+						suggestions: [
+							{
+								messageId: "suggestArrayFromLength",
+								output: "const value = Array.from({ length: -size });",
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(1); // first
+// keep me
+items.push(2);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(1 /* one */);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(getValue()); // first
+items.push(2);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization", suggestions: [] }],
+			},
+			{
+				code: `
+const items = new Array</* element */ number>();
+items.push(1);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>(); // list
+items.push(1);
+items.push(2);
+// after
+`,
+				output: `
+const items = [1, 2]; // list
+// after
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(1);
+items.push(2); // two
+`,
+				output: `
+const items = [1, 2]; // two
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
 			},
 		],
 		valid: [

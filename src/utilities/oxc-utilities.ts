@@ -8,6 +8,7 @@ import {
 	isMemberExpression,
 	isNewExpression,
 	isParenthesizedExpression,
+	isSequenceExpression,
 	isStringLiteral,
 	isThisExpression,
 	isTsParenthesizedType,
@@ -109,13 +110,39 @@ export function stripExpressionWrappers(expression: ESTree.Expression): ESTree.E
 	}
 }
 
-export function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
+/**
+ * Walks to the start of a member chain, looking through expression wrappers
+ * at every step.
+ *
+ * @param expression - The expression whose chain to follow.
+ * @returns The expression the chain starts from.
+ */
+export function getRootExpression(expression: ESTree.Expression): ESTree.Expression {
 	let current = stripExpressionWrappers(expression);
 	while (isMemberExpression(current)) {
 		current = stripExpressionWrappers(current.object);
 	}
 
-	return isIdentifier(current) ? current : undefined;
+	return current;
+}
+
+export function getRootIdentifier(expression: ESTree.Expression): ESTree.IdentifierReference | undefined {
+	const root = getRootExpression(expression);
+	return isIdentifier(root) ? root : undefined;
+}
+
+/**
+ * Reads an expression's source text so that it can sit in a list of values. A
+ * comma expression keeps its parentheses, which real Oxlint drops from the
+ * node's text and which would otherwise split it into several values.
+ *
+ * @param sourceCode - The source code that owns the expression.
+ * @param expression - The value to print.
+ * @returns The text, wrapped in parentheses when it is a comma expression.
+ */
+export function getListElementText(sourceCode: SourceCode, expression: ESTree.Expression): string {
+	const text = sourceCode.getText(expression);
+	return isSequenceExpression(expression) ? `(${text})` : text;
 }
 
 export function stripParenthesis(expression: ESTree.Expression): ESTree.Expression {

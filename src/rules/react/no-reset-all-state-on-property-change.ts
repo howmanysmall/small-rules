@@ -13,7 +13,7 @@ import type { ESTree, Reference, SourceCode } from "oxlint-plugin-utilities";
 
 import type { ReactEffectAnalysis } from "$oxc-utilities/react-effect-utilities";
 
-const noResetAllStateOnPropertyChange = createReactEffectRule("no-reset-all-state-on-property-change", {
+const noResetAllStateOnPropertyChange = createReactEffectRule("no-reset-all-state-on-prop-change", {
 	checkEffect(context, analysis, effect): void {
 		if (effect.dependencyReferences === undefined) return;
 		// Skip custom hooks because they can't receive `key` like

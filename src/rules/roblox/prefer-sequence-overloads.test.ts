@@ -53,6 +53,65 @@ describe("prefer-sequence-overloads", () => {
 				output: "const constant = new NumberSequence(42);",
 				errors: [{ messageId: "preferSingleOverload" }],
 			},
+			{
+				code:
+					"const random = new NumberSequence([\n" +
+					"    new NumberSequenceKeypoint(0, math.random()),\n" +
+					"    new NumberSequenceKeypoint(1, math.random()),\n" +
+					"]);",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new NumberSequence(math.random(), math.random());",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new ColorSequence(next(), next());",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new NumberSequence(math.floor(x), math.floor(x));",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new NumberSequence(index++, index++);",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new ColorSequence(new Color3(math.random()), new Color3(math.random()));",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "new ColorSequence(Color3.fromRGB(...channels), Color3.fromRGB(...channels));",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: 'new ColorSequence(Color3["fromRGB"](1, 2, 3), Color3["fromRGB"](1, 2, 3));',
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "function make(Color3) { return new ColorSequence(Color3.fromRGB(1, 2, 3), Color3.fromRGB(1, 2, 3)); }",
+				output: null,
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
+			{
+				code: "const grouped = new NumberSequence([new NumberSequenceKeypoint(0, (a, b)), new NumberSequenceKeypoint(1, c)]);",
+				output: "const grouped = new NumberSequence((a, b), c);",
+				errors: [{ messageId: "preferTwoPointOverload" }],
+			},
+			{
+				code: "const same = new ColorSequence(new Color3(1, 0, 0), new Color3(1, 0, 0));",
+				output: "const same = new ColorSequence(new Color3(1, 0, 0));",
+				errors: [{ messageId: "preferSingleOverload" }],
+			},
 		],
 		valid: [
 			// Non-endpoint keypoints should be untouched.

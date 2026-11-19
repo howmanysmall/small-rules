@@ -275,6 +275,206 @@ describe("require-throw-error-capture", () => {
 				].join("\n"),
 				errors: [error],
 			},
+			// A parameter that the thrown expression reads must stay visible
+			{
+				code: [
+					"export function parse(error: string) {",
+					"\tif (error.length > 0) {",
+					"\t\tthrow new Error(error);",
+					"\t}",
+					"}",
+				].join("\n"),
+				output: [
+					"export function parse(error: string) {",
+					"\tif (error.length > 0) {",
+					"\t\tconst error2 = new Error(error);",
+					"Error.captureStackTrace(error2, parse);",
+					"throw error2;",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			// The function's own name goes into `captureStackTrace`
+			{
+				code: [
+					"export function error(message: string) {",
+					"\tif (message) {",
+					"\t\tthrow new Error(message);",
+					"\t}",
+					"}",
+				].join("\n"),
+				output: [
+					"export function error(message: string) {",
+					"\tif (message) {",
+					"\t\tconst error2 = new Error(message);",
+					"Error.captureStackTrace(error2, error);",
+					"throw error2;",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			{
+				code: ["const handler = function error() {", "\tthrow new Error('bad');", "};"].join("\n"),
+				output: [
+					"const handler = function error() {",
+					"\tconst error2 = new Error('bad');",
+					"Error.captureStackTrace(error2, error);",
+					"throw error2;",
+					"};",
+				].join("\n"),
+				errors: [error],
+			},
+			// A binding of the same scope, which a read in the argument could use
+			{
+				code: ["function parse() {", "\tconst error = 1;", "\tthrow new Error(String(error));", "}"].join("\n"),
+				output: [
+					"function parse() {",
+					"\tconst error = 1;",
+					"\tconst error2 = new Error(String(error));",
+					"Error.captureStackTrace(error2, parse);",
+					"throw error2;",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			// A property name is not a read of the variable
+			{
+				code: [
+					"function foo(res: Response) {",
+					"\tif (res) {",
+					"\t\tthrow new Error(res.error, { cause: res });",
+					"\t}",
+					"}",
+				].join("\n"),
+				output: [
+					"function foo(res: Response) {",
+					"\tif (res) {",
+					"\t\tconst error = new Error(res.error, { cause: res });",
+					"Error.captureStackTrace(error, foo);",
+					"throw error;",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			// A computed member, a computed key and a shorthand key are reads
+			{
+				code: [
+					"function foo(res: Response, error: string) {",
+					"\tif (res) {",
+					"\t\tthrow new Error(res[error]);",
+					"\t}",
+					"}",
+				].join("\n"),
+				output: [
+					"function foo(res: Response, error: string) {",
+					"\tif (res) {",
+					"\t\tconst error2 = new Error(res[error]);",
+					"Error.captureStackTrace(error2, foo);",
+					"throw error2;",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			{
+				code: [
+					"function foo(res: Response, error: string) {",
+					"\tif (res) {",
+					"\t\tthrow new Error('x', { cause: { [error]: res } });",
+					"\t}",
+					"}",
+				].join("\n"),
+				output: [
+					"function foo(res: Response, error: string) {",
+					"\tif (res) {",
+					"\t\tconst error2 = new Error('x', { cause: { [error]: res } });",
+					"Error.captureStackTrace(error2, foo);",
+					"throw error2;",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			{
+				code: [
+					"function foo(res: Response, error: string) {",
+					"\tif (res) {",
+					"\t\tthrow new Error('x', { cause: { error } });",
+					"\t}",
+					"}",
+				].join("\n"),
+				output: [
+					"function foo(res: Response, error: string) {",
+					"\tif (res) {",
+					"\t\tconst error2 = new Error('x', { cause: { error } });",
+					"Error.captureStackTrace(error2, foo);",
+					"throw error2;",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			// A getter or a setter cannot name itself without calling itself
+			{
+				code: [
+					"export class Box {",
+					"\tget value(): number {",
+					'\t\tthrow new Error("empty");',
+					"\t}",
+					"}",
+				].join("\n"),
+				output: null,
+				errors: [error],
+			},
+			{
+				code: [
+					"export class Box {",
+					"\tset value(next: number) {",
+					'\t\tthrow new Error("read only");',
+					"\t}",
+					"}",
+				].join("\n"),
+				output: null,
+				errors: [error],
+			},
+			// Rebuilding the statement would drop a comment inside it
+			{
+				code: [
+					"export function check(value: number) {",
+					'\tif (value) throw /* keep */ new Error("x");',
+					"}",
+				].join("\n"),
+				output: null,
+				errors: [error],
+			},
+			{
+				code: ["export function check(value: number) {", '\tthrow new Error("x"); // keep', "}"].join("\n"),
+				output: [
+					"export function check(value: number) {",
+					'\tconst error = new Error("x");',
+					"Error.captureStackTrace(error, check);",
+					"throw error; // keep",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			{
+				code: ["export function check(value: number) {", "\t// keep", '\tthrow new Error("x");', "}"].join(
+					"\n",
+				),
+				output: [
+					"export function check(value: number) {",
+					"\t// keep",
+					'\tconst error = new Error("x");',
+					"Error.captureStackTrace(error, check);",
+					"throw error;",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
 			// Package-aware specifier does not match a different import source
 			{
 				code: [

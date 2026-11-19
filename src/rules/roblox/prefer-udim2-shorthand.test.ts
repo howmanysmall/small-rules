@@ -133,6 +133,38 @@ describe("prefer-udim2-shorthand", () => {
 				output: "UDim2.fromScale(x * 2, 2 / z);",
 				errors: [{ messageId: "preferFromScale" }],
 			},
+
+			// Parentheses and unary signs are copied from the source
+			{
+				code: "new UDim2((a + b) * 2, 0, 1, 0);",
+				output: "UDim2.fromScale((a + b) * 2, 1);",
+				errors: [{ messageId: "preferFromScale" }],
+			},
+			{
+				code: "new UDim2(0, -(a + b), 0, 0);",
+				output: "UDim2.fromOffset(-(a + b), 0);",
+				errors: [{ messageId: "preferFromOffset" }],
+			},
+			{
+				code: "new UDim2(1 - (a - b), 0, 1, 0);",
+				output: "UDim2.fromScale(1 - (a - b), 1);",
+				errors: [{ messageId: "preferFromScale" }],
+			},
+			{
+				code: "new UDim2(0, - -a, 0, 0);",
+				output: "UDim2.fromOffset(- -a, 0);",
+				errors: [{ messageId: "preferFromOffset" }],
+			},
+			{
+				code: "new UDim2((x), (0), (y), 0);",
+				output: "UDim2.fromScale(x, y);",
+				errors: [{ messageId: "preferFromScale" }],
+			},
+			{
+				code: "new UDim2(0x10, 0, 1e21, 0);",
+				output: "UDim2.fromScale(0x10, 1e21);",
+				errors: [{ messageId: "preferFromScale" }],
+			},
 		],
 		valid: [
 			// Mixed values - not simplifiable

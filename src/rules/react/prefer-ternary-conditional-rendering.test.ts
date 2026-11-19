@@ -152,6 +152,50 @@ function Component({ flag }) {
 				output: null,
 				errors: [{ messageId: "preferTernaryConditionalRendering" }],
 			},
+			// A same-line gap is a rendered text node, so the fix would drop it.
+			{
+				code: "export const a = (isOn) => <p>{isOn && <b>on</b>} {!isOn && <i>off</i>}</p>;",
+				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			{
+				code: "export const a = (isOn) => <p>{isOn && <b>on</b>}\t  {!isOn && <i>off</i>}</p>;",
+				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			{
+				code: "export const a = (isOn) => <>{isOn && <b>on</b>} {!isOn && <i>off</i>}</>;",
+				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			// A gap with a line break is trimmed by JSX, so the fix is safe.
+			{
+				code: "export const a = (isOn) => <p>{isOn && <b>on</b>}\r\n  {!isOn && <i>off</i>}</p>;",
+				output: "export const a = (isOn) => <p>{isOn ? <b>on</b> : <i>off</i>}</p>;",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			// The fix keeps only some of the text, so other comments are lost.
+			{
+				code: "export const a = (isOn) => <p>{isOn && <b>on</b>}{!isOn /* hidden */ && <i>off</i>}</p>;",
+				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			{
+				code: "export const a = (isOn) => <p>{/* shown */ isOn && <b>on</b>}{!isOn && <i>off</i>}</p>;",
+				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			{
+				code: "export const a = (isOn) => <p>{isOn && <b>on</b>}{!isOn && <i>off</i> /* tail */}</p>;",
+				output: null,
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
+			// A comment inside a branch travels with the branch text.
+			{
+				code: "export const a = (isOn) => <p>{isOn && <b /* on */>on</b>}{!isOn && <i /* off */>off</i>}</p>;",
+				output: "export const a = (isOn) => <p>{isOn ? <b /* on */>on</b> : <i /* off */>off</i>}</p>;",
+				errors: [{ messageId: "preferTernaryConditionalRendering" }],
+			},
 		],
 		valid: [
 			{

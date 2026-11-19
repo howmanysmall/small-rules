@@ -61,10 +61,19 @@ describe("no-trivial-assertions", () => {
 			{ code: "assert.notDeepStrictEqual(1, 2);", errors: [{ messageId: "issue" }] },
 			{ code: "assert.notDeepEqual(1, 2);", errors: [{ messageId: "issue" }] },
 			{ code: "assert.deepStrictEqual(1, 1);", errors: [{ messageId: "issue" }] },
+			// Pins: these keep their report when deep comparisons with one
+			// fresh side stop being treated as identity checks
+			{ code: "assert.strictEqual(load(), []);", errors: [{ messageId: "freshIdentity" }] },
+			{ code: "assert.deepStrictEqual({}, {});", errors: [{ messageId: "freshIdentity" }] },
+			{ code: "assert.notDeepStrictEqual([], []);", errors: [{ messageId: "freshIdentity" }] },
 			{ code: "assert.notStrictEqual({}, 1);", errors: [{ messageId: "freshIdentity" }] },
 			{ code: "expect(null).toBe(null);", errors: [{ messageId: "issue" }] },
 		],
 		valid: [
+			// A deep comparison looks at contents, so a fresh value on one
+			// side is an ordinary expectation
+			"assert.deepStrictEqual(load(), []);",
+			"assert.notDeepStrictEqual({ ready: true }, load());",
 			{
 				code: "expect(result).toBe(true);",
 				documentation: { id: "pass", title: "Non-constant assertion" },
@@ -131,6 +140,10 @@ describe("no-trivial-assertions", () => {
 			},
 		],
 		valid: [
+			// A deep comparison looks at contents, so a fresh value on one
+			// side is an ordinary expectation
+			"assert.deepStrictEqual(load(), []);",
+			"assert.notDeepStrictEqual({ ready: true }, load());",
 			"const result = compute();\nexpect(result).toBe(true);",
 			"expect((value as number)).toBe(1);",
 			"expect(value!).toBe(1);",

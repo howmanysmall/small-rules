@@ -49,6 +49,10 @@ describe("prefer-singular-enums", () => {
 
 			// Snake case / screaming snake case
 			{ code: "enum USER_STATUSES {}", errors: [errorWithName("USER_STATUSES")] },
+
+			// An all-caps word or a lowercase-s acronym is still a plural
+			{ code: "enum USERS {}", errors: [errorWithName("USERS")] },
+			{ code: "enum UserIDs {}", errors: [errorWithName("UserIDs")] },
 		],
 		valid: [
 			{ code: "enum _ {Value}" },
@@ -70,6 +74,13 @@ describe("prefer-singular-enums", () => {
 			{ code: "enum Class {}" },
 			{ code: "enum Series {}" },
 			{ code: "enum Species {}" },
+
+			// An acronym or all-caps word that ends in S names one thing
+			{ code: "enum OS {}" },
+			{ code: "enum TargetOS {}" },
+			{ code: "enum GPS {}" },
+			{ code: "enum STATUS {}" },
+			{ code: "enum ACCESS {}" },
 		],
 	});
 });

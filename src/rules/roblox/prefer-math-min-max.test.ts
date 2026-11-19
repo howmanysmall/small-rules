@@ -77,6 +77,28 @@ describe("prefer-math-min-max", () => {
 				output: "function clamp(height) { return math.min(height, 50); }",
 				errors: [{ messageId: "preferMathMethod" }],
 			},
+			// Reports without a fix when the fix would delete a comment
+			{
+				code: "height > 50 /* cap */ ? height : 50;",
+				output: null,
+				errors: [{ messageId: "preferMathMethod" }],
+			},
+			{
+				code: "height > 50 ? 50 : /* fallback */ height;",
+				output: null,
+				errors: [{ messageId: "preferMathMethod" }],
+			},
+			// Comments outside the ternary survive the fix
+			{
+				code: "const capped = /* cap */ height > 50 ? 50 : height; // clamp",
+				output: "const capped = /* cap */ math.min(height, 50); // clamp",
+				errors: [{ messageId: "preferMathMethod" }],
+			},
+			{
+				code: "const capped = (height > 50 ? 50 : height /* raw */);",
+				output: "const capped = (math.min(height, 50) /* raw */);",
+				errors: [{ messageId: "preferMathMethod" }],
+			},
 		],
 		valid: [
 			{

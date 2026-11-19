@@ -78,6 +78,28 @@ describe("prefer-class-properties", () => {
 				errors: assignErrors,
 			},
 			{ code: "class Foo { constructor() { this['foo'] = 123; } }", options: ["always"], errors: assignErrors },
+
+			// Literal-only arguments, spreads and keys are still literals
+			{
+				code: "class Foo { constructor() { this.foo = 'a'.concat('b', 1); } }",
+				options: ["always"],
+				errors: assignErrors,
+			},
+			{
+				code: "class Foo { constructor() { this.foo = [].concat(...[1, 2]); } }",
+				options: ["always"],
+				errors: assignErrors,
+			},
+			{
+				code: "class Foo { constructor() { this.foo = [10, 20][1]; } }",
+				options: ["always"],
+				errors: assignErrors,
+			},
+			{
+				code: "class Foo { constructor() { this.foo = 'abc'['length']; } }",
+				options: ["always"],
+				errors: assignErrors,
+			},
 		],
 		valid: [
 			// 'always' mode - class properties are fine
@@ -88,6 +110,18 @@ describe("prefer-class-properties", () => {
 			},
 			{ code: "class Foo { foo = bar(); }", options: ["always"] },
 			{ code: "class Foo { foo = 123; }", options: ["always"] },
+
+			// A compound assignment reads the old value, so it is not a
+			// literal that could move to a property declaration
+			{ code: "class Foo { count = 0; constructor() { this.count += 1; } }", options: ["always"] },
+			{ code: 'class Foo { name; constructor() { this.name ??= "none"; } }', options: ["always"] },
+
+			// A value that depends on an argument or a key is not known at class
+			// definition time
+			{ code: "class Foo { constructor(extra) { this.list = [].concat(extra); } }", options: ["always"] },
+			{ code: "class Foo { constructor(index) { this.pick = [10, 20][index]; } }", options: ["always"] },
+			{ code: "class Foo { constructor(name) { this.text = 'abc'[name](); } }", options: ["always"] },
+			{ code: "class Foo { constructor(extra) { this.list = [].concat(...extra); } }", options: ["always"] },
 
 			// 'never' mode - static properties are still allowed
 			{ code: 'class Foo { static foo = "bar"; }', options: ["never"] },

@@ -1,3 +1,4 @@
+import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 
 import type { CreateRule, ESTree, Visitor } from "oxlint-plugin-utilities";
@@ -18,8 +19,14 @@ export function createBannedGlobalCallRule<const TMessageId extends string>(
 
 	return createRule(options.ruleName, options.category, {
 		create(context): Visitor {
+			const { sourceCode } = context;
+
 			return {
 				[selector](node: ESTree.CallExpression): void {
+					// An import, parameter or local function of the same name
+					// is not the global.
+					if (hasShadowedBinding(sourceCode, node, options.name)) return;
+
 					context.report({
 						messageId: options.messageId,
 						node,

@@ -212,4 +212,57 @@ function Form() {
 			},
 		],
 	});
+
+	// isUseStateHook recognizes every spelling of the hook: a member call on
+	// `React`, a namespace import, and a renamed named import.
+	tsx.run("no-pass-data-to-parent", noPassDataToParent, {
+		invalid: [],
+		valid: [
+			{
+				code: `
+import React, { useEffect } from "@rbxts/react";
+
+const Child = ({ onChanged }) => {
+  const [text] = React.useState("");
+
+  useEffect(() => {
+    onChanged(text);
+  }, [onChanged, text]);
+
+  return null;
+};
+`,
+			},
+			{
+				code: `
+import * as ReactNamespace from "@rbxts/react";
+
+const Child = ({ onChanged }) => {
+  const [text] = ReactNamespace.useState("");
+
+  ReactNamespace.useEffect(() => {
+    onChanged(text);
+  }, [onChanged, text]);
+
+  return null;
+};
+`,
+			},
+			{
+				code: `
+import { useEffect, useState as useLocal } from "@rbxts/react";
+
+const Child = ({ onChanged }) => {
+  const [text] = useLocal("");
+
+  useEffect(() => {
+    onChanged(text);
+  }, [onChanged, text]);
+
+  return null;
+};
+`,
+			},
+		],
+	});
 });

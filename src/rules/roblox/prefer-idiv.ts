@@ -9,7 +9,12 @@ import {
 import { hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getMethodCallee } from "$oxc-utilities/member-callee";
-import { getReceiverText, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
+import {
+	getListElementText,
+	getReceiverText,
+	stripExpressionWrappers,
+	stripParenthesis,
+} from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -53,7 +58,7 @@ function getSlashIntegerDivisionTarget(
 	if (expression.operator !== "/") return undefined;
 
 	return {
-		divisorText: sourceCode.getText(stripParenthesis(expression.right)),
+		divisorText: getListElementText(sourceCode, stripParenthesis(expression.right)),
 		receiver: expression.left,
 	};
 }
@@ -97,6 +102,12 @@ const preferIdiv = createRule("prefer-idiv", "roblox", {
 
 				const target = getIntegerDivisionTarget(context.sourceCode, expression);
 				if (target === undefined) return;
+
+				// Replacing the whole call would delete any comment inside it.
+				if (context.sourceCode.getCommentsInside(node).length > 0) {
+					context.report({ messageId: "useIdiv", node });
+					return;
+				}
 
 				context.report({
 					fix: (fixer) =>

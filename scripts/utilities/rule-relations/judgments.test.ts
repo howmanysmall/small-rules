@@ -177,13 +177,15 @@ describe("resolvePairRelation", () => {
 	it("reviews near-threshold pairs and ignores weak ones", ({ expect }) => {
 		expect.assertions(2);
 
+		// Fixed so the 0.6 fixture stays below the relatedness gate.
+		const thresholds = { accept: 0.8, relatedness: 0.8, review: 0.55 };
 		const nearThreshold = resolvePairRelation({
 			judgments: createJudgments({
 				assessment: { probabilities: { "0": 0.1, "1": 0.3, "2": 0.6 }, score: 1.5, type: "score" },
 			}),
 			left,
 			right,
-			thresholds: judgmentThresholds,
+			thresholds,
 		});
 		const weak = resolvePairRelation({
 			judgments: createJudgments({
@@ -191,7 +193,7 @@ describe("resolvePairRelation", () => {
 			}),
 			left,
 			right,
-			thresholds: judgmentThresholds,
+			thresholds,
 		});
 
 		expect(nearThreshold).toMatchObject({ strength: 0.6, type: "review" });

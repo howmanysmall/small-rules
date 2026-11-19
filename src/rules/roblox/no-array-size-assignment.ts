@@ -9,6 +9,7 @@ import {
 	isIdentifierNamed,
 	isMemberExpression,
 	isPrivateIdentifier,
+	isSequenceExpression,
 	isSuper,
 	isThisExpression,
 	LITERAL,
@@ -167,7 +168,11 @@ const noArraySizeAssignment = createRule("no-array-size-assignment", "roblox", {
 				}
 
 				const targetText = sourceCode.getText(target.object);
-				const rightText = sourceCode.getText(node.right);
+
+				// getText drops sequence parens, which would split the argument.
+				const rightText = isSequenceExpression(node.right)
+					? `(${sourceCode.getText(node.right)})`
+					: sourceCode.getText(node.right);
 
 				context.report({
 					fix(fixer) {

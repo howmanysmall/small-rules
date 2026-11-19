@@ -30,7 +30,9 @@ import { createRule } from "$oxc-utilities/create-rule";
 import { areEquivalentMemberExpressions } from "$oxc-utilities/member-expression-equivalence";
 import { stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
 
-import type { ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+import type { Comment, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
+
+const LINE_BREAK_PATTERN = /[\n\r]/u;
 
 type JSXRenderable = ESTree.JSXElement | ESTree.JSXFragment;
 
@@ -286,6 +288,37 @@ function getNextBranchCandidate(
 	return child === undefined ? undefined : getBranchCandidate(child);
 }
 
+function isWithin(inner: Comment | ESTree.Node, outer: ESTree.Node): boolean {
+	return inner.range[0] >= outer.range[0] && inner.range[1] <= outer.range[1];
+}
+
+/**
+ * Whether the fix would delete something the ternary does not carry over.
+ * The fix replaces everything from the first container to the second, but
+ * keeps only the first condition and both branches. That drops a rendered
+ * text node between the containers (JSX trims a gap with a line break but
+ * renders any other whitespace) and any comment outside the kept nodes.
+ *
+ * @param sourceCode - The source code of the current file.
+ * @param firstBranch - The `&&` branch that supplies the ternary condition.
+ * @param secondBranch - The complementary `&&` branch.
+ * @returns Whether applying the fix would lose text.
+ */
+function isFixLossy(sourceCode: SourceCode, firstBranch: BranchCandidate, secondBranch: BranchCandidate): boolean {
+	const gap = sourceCode.text.slice(firstBranch.node.range[1], secondBranch.node.range[0]);
+	if (gap.length > 0 && !LINE_BREAK_PATTERN.test(gap)) return true;
+
+	for (const comment of sourceCode.getCommentsInside(firstBranch.node)) {
+		if (!isWithin(comment, firstBranch.condition) && !isWithin(comment, firstBranch.renderBranch)) return true;
+	}
+
+	for (const comment of sourceCode.getCommentsInside(secondBranch.node)) {
+		if (!isWithin(comment, secondBranch.renderBranch)) return true;
+	}
+
+	return false;
+}
+
 const preferTernaryConditionalRendering = createRule("prefer-ternary-conditional-rendering", "react", {
 	create(context): Visitor {
 		const { sourceCode } = context;
@@ -294,7 +327,7 @@ const preferTernaryConditionalRendering = createRule("prefer-ternary-conditional
 			const complement = getComplementMatch(firstBranch.condition, secondBranch.condition, sourceCode);
 			if (complement === undefined) return;
 
-			if (complement.isFixSafe) {
+			if (complement.isFixSafe && !isFixLossy(sourceCode, firstBranch, secondBranch)) {
 				context.report({
 					fix(fixer) {
 						const firstConditionText = sourceCode.getText(firstBranch.condition);

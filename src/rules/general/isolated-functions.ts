@@ -14,6 +14,7 @@ import {
 	isStringLiteral,
 	isSuper,
 	isThisExpression,
+	isTsQualifiedName,
 	isTsTypeQuery,
 	isTsTypeReference,
 	PROPERTY,
@@ -223,7 +224,13 @@ function getReasonForIsolatedFunction(
 }
 
 function isTypePositionIdentifier({ parent }: ESTree.Node): boolean {
-	return parent !== null && (isTsTypeReference(parent) || isTsTypeQuery(parent));
+	// The head of `NS.Item` or `typeof outer.size` sits under qualified names.
+	let current = parent;
+	while (current !== null && isTsQualifiedName(current)) {
+		current = current.parent;
+	}
+
+	return current !== null && (isTsTypeReference(current) || isTsTypeQuery(current));
 }
 
 function isScopeInside(inner: Scope, outer: Scope): boolean {
@@ -356,7 +363,8 @@ function reportIsolatedFunction(
 
 const isolatedFunctions = createRule("isolated-functions", "general", {
 	create(context): Visitor {
-		const options = parseOptions(context.options[0]);
+		const [rawOptions] = context.options;
+		const options = parseOptions(rawOptions);
 		const checked = new WeakSet<ESTree.Node>();
 
 		function checkFunctionNode(node: ESTree.Node): void {

@@ -70,7 +70,11 @@ const PROGRAMMING_PLURALS = new Set<string>([
 ]);
 
 const TOKEN_PATTERN = /[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+/gu;
-const ACRONYM_PLURAL_PATTERN = /^[A-Z]{2,}[sS]?$/u;
+const ACRONYM_PLURAL_PATTERN = /^[A-Z]{2,}s$/u;
+
+// An all-caps token of up to three letters is an acronym, and one that ends
+// in S (OS, GPS) names one thing.
+const SHORT_ACRONYM_PATTERN = /^[A-Z]{2,3}$/u;
 
 interface AlphaToken {
 	readonly lowercased: string;
@@ -106,15 +110,13 @@ function getLastAlphaToken(tokens: ReadonlyArray<string>): AlphaToken | undefine
 	return undefined;
 }
 
-const S_ENDING_REGEXP = /[sS]$/u;
 const E_ENDING_REGEXP = /(?:ches|shes|xes|zes)$/u;
 
 function isPluralWord(word: string, original: string): boolean {
 	if (IRREGULAR_PLURALS.has(word) || PROGRAMMING_PLURALS.has(word)) return true;
-	if (SINGULAR_EXCEPTIONS.has(word)) return false;
+	if (SINGULAR_EXCEPTIONS.has(word) || SHORT_ACRONYM_PATTERN.test(original)) return false;
 
 	return (
-		(ACRONYM_PLURAL_PATTERN.test(original) && S_ENDING_REGEXP.test(original)) ||
 		word.endsWith("ies") ||
 		word.endsWith("ves") ||
 		E_ENDING_REGEXP.test(word) ||
@@ -123,7 +125,7 @@ function isPluralWord(word: string, original: string): boolean {
 }
 
 function isPlural(identifier: string): boolean {
-	if (ACRONYM_PLURAL_PATTERN.test(identifier) && S_ENDING_REGEXP.test(identifier)) return true;
+	if (ACRONYM_PLURAL_PATTERN.test(identifier)) return true;
 
 	const lastToken = getLastAlphaToken(tokenizeIdentifier(identifier));
 	return lastToken !== undefined && isPluralWord(lastToken.lowercased, lastToken.original);

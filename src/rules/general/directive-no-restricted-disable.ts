@@ -20,7 +20,8 @@ const directiveNoRestrictedDisable = createRule("directive-no-restricted-disable
 		}
 
 		for (const area of disabledArea.areas) {
-			if (area.ruleId === undefined || restrictedRuleMatcher.ignores(area.ruleId)) {
+			// A stray comma leaves an empty rule id, which `ignore` throws on.
+			if (area.ruleId === undefined || (area.ruleId.length > 0 && restrictedRuleMatcher.ignores(area.ruleId))) {
 				context.report({
 					data: { ruleId: area.ruleId ?? String(restrictedRules) },
 					loc: toRuleIdLocation(area.comment, area.ruleId),

@@ -123,3 +123,5 @@ hk.local.pkl
 .agents/skills/retro
 .agents/skills/migrate-to-shoehorn
 .playwright-mcp/
+.agents/skills/prune-tests
+.agents/skills/untangle-codebase

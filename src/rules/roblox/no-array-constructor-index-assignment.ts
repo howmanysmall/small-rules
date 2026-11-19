@@ -11,8 +11,14 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
-import { forEachNode, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
+import {
+	forEachNode,
+	hasCommentInRange,
+	hasEagerIdentifierReference,
+	STOP_NODE_TRAVERSAL,
+} from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
+import { getListElementText } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fixer, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -33,7 +39,9 @@ interface Candidate {
 	readonly declaration: ESTree.VariableDeclaration;
 	readonly declarator: ESTree.VariableDeclarator;
 	readonly firstAssignmentStatement: ESTree.ExpressionStatement;
+	readonly hasRemovedComment: boolean;
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
+	readonly readsArray: boolean;
 }
 
 function hasArrayReference(node: ESTree.Node, arrayIdentifierName: string): boolean {
@@ -115,7 +123,9 @@ function collectSequentialAssignments(
 			continue;
 		}
 
-		if (hasArrayReference(statement, arrayIdentifierName)) break;
+		// The fix deletes everything between the first and last assignment, so
+		// the run of assignments must be contiguous.
+		if (foundAssignments.length > 0 || hasArrayReference(statement, arrayIdentifierName)) break;
 
 		scanIndex += 1;
 	}
@@ -167,12 +177,19 @@ function getCandidate(
 	return {
 		assignments: foundAssignments.map((found) => ({
 			statement: found.statement,
-			valueText: sourceCode.getText(found.expression.right),
+			valueText: getListElementText(sourceCode, found.expression.right),
 		})),
 		declaration,
 		declarator,
 		firstAssignmentStatement: firstFound.statement,
+		// The fix replaces the initializer and deletes the assignments.
+		hasRemovedComment:
+			sourceCode.getCommentsInside(declarator.init).length > 0 ||
+			hasCommentInRange(sourceCode, firstFound.statement.range[0], lastFound.statement.range[1]),
 		lastAssignmentStatement: lastFound.statement,
+		readsArray: foundAssignments.some((found) =>
+			hasEagerIdentifierReference(found.expression.right, arrayIdentifierName),
+		),
 	};
 }
 
@@ -240,8 +257,9 @@ function computeRemoveStart(sourceCode: SourceCode, candidate: Candidate): numbe
 function createFix(
 	fixer: Fixer,
 	sourceCode: SourceCode,
-	{ assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement }: Candidate,
+	candidate: Candidate,
 ): Array<ReturnType<Fixer["removeRange"] | Fixer["replaceText"]>> {
+	const { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement } = candidate;
 	const { init } = declarator;
 	/* v8 ignore next -- candidates are only created from declarators with an initializer. @preserve */
 	if (init === null) {
@@ -257,11 +275,9 @@ function createFix(
 
 	const textBetween = sourceCode.text.slice(declarationEnd, firstAssignmentStart);
 	if (textBetween.trim().length > 0) {
-		const candidate = { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement };
 		return [createMovedDeclarationFix(fixer, sourceCode, candidate, literalText, textBetween)];
 	}
 
-	const candidate = { assignments, declaration, declarator, firstAssignmentStatement, lastAssignmentStatement };
 	const removeStart = computeRemoveStart(sourceCode, candidate);
 
 	fixes.push(fixer.removeRange([removeStart, lastAssignmentEnd]));
@@ -282,13 +298,20 @@ const noArrayConstructorIndexAssignment = createRule("no-array-constructor-index
 					continue;
 				}
 
-				context.report({
-					fix(fixer) {
-						return createFix(fixer, sourceCode, candidate);
-					},
-					messageId: "preferArrayLiteral",
-					node: candidate.declaration,
-				});
+				// A value that reads the array would read it before the literal
+				// exists, so there is no safe rewrite to offer. A rewrite would
+				// also delete any comment in the code it removes.
+				if (candidate.readsArray || candidate.hasRemovedComment) {
+					context.report({ messageId: "preferArrayLiteral", node: candidate.declaration });
+				} else {
+					context.report({
+						fix(fixer) {
+							return createFix(fixer, sourceCode, candidate);
+						},
+						messageId: "preferArrayLiteral",
+						node: candidate.declaration,
+					});
+				}
 
 				index = statements.indexOf(candidate.lastAssignmentStatement) + 1;
 			}

@@ -23,6 +23,15 @@ describe("directive-disable-enable-pair", () => {
 				code: "/* oxlint-disable */\nconst x = 1;",
 				errors: [{ messageId: "missingPair" }],
 			},
+			// A trailing comma names no extra rule
+			{
+				code: "/* eslint-disable no-console, */\nconst x = 1;",
+				errors: [{ data: { ruleId: "no-console" }, messageId: "missingRulePair" }],
+			},
+			{
+				code: "/* eslint-disable */\nconst x = 1;",
+				errors: [{ messageId: "missingPair" }],
+			},
 		],
 		valid: [
 			{
@@ -52,6 +61,13 @@ describe("directive-disable-enable-pair", () => {
 			},
 			{
 				code: "const x = 1;\n// oxlint-disable-line no-console",
+			},
+			// A trailing comma names no extra rule to enable
+			{
+				code: "/* eslint-disable no-console, */\nconst x = 1;\n/* eslint-enable no-console */",
+			},
+			{
+				code: "/* eslint-disable */\nconst x = 1;\n/* eslint-enable */",
 			},
 			{
 				code: "const x = 1;\n// oxlint-disable-next-line no-console\nconst y = 2;",

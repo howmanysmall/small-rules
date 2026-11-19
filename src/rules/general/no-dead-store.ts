@@ -74,6 +74,40 @@ function getExecutionRoot(node: ESTree.Node): ESTree.Node {
 	return current;
 }
 
+function getCaseArm(switchCase: ESTree.SwitchCase): string {
+	return `case:${switchCase.range[0]}`;
+}
+
+function endsCase(switchCase: ESTree.SwitchCase): boolean {
+	const last = switchCase.consequent.at(-1);
+	return last !== undefined && transfersControl(last);
+}
+
+/**
+ * Checks whether one case runs on into a later one. A case that does not end
+ * in a jump falls through to the next.
+ *
+ * @param control - The switch holding both cases.
+ * @param fromArm - The arm of the case that runs first.
+ * @param toArm - The arm of the case that may run after it.
+ * @returns `true` when control can flow from the first case to the second.
+ */
+function fallsThroughTo(control: ESTree.SwitchStatement, fromArm: string, toArm: string): boolean {
+	let flowing = false;
+	for (const switchCase of control.cases) {
+		const arm = getCaseArm(switchCase);
+		if (arm === fromArm) {
+			flowing = true;
+		} else if (flowing && arm === toArm) {
+			return true;
+		}
+
+		flowing &&= !endsCase(switchCase);
+	}
+
+	return false;
+}
+
 function getConditionalBranchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | undefined {
 	if (isIfStatement(parent)) {
 		if (parent.consequent === current) {
@@ -135,7 +169,7 @@ function branchStep(current: ESTree.Node, parent: ESTree.Node): BranchStep | und
 	}
 
 	if (isSwitchCase(current) && isSwitchStatement(parent)) {
-		return { arm: `case:${current.range[0]}`, complete: false, control: parent };
+		return { arm: getCaseArm(current), complete: false, control: parent };
 	}
 
 	if (isTryStatement(parent)) {
@@ -174,10 +208,19 @@ function branchArm(path: ReadonlyArray<BranchStep>, control: ESTree.Node): strin
 	return path.find((step) => step.control === control)?.arm;
 }
 
-function arePathsCompatible(left: ReadonlyArray<BranchStep>, right: ReadonlyArray<BranchStep>): boolean {
+function isReachableArm(step: BranchStep, rightArm: string, allowFallthrough: boolean): boolean {
+	if (rightArm === step.arm) return true;
+	return allowFallthrough && isSwitchStatement(step.control) && fallsThroughTo(step.control, step.arm, rightArm);
+}
+
+function arePathsCompatible(
+	left: ReadonlyArray<BranchStep>,
+	right: ReadonlyArray<BranchStep>,
+	allowFallthrough = false,
+): boolean {
 	for (const step of left) {
 		const rightArm = branchArm(right, step.control);
-		if (rightArm !== undefined && rightArm !== step.arm) return false;
+		if (rightArm !== undefined && !isReachableArm(step, rightArm, allowFallthrough)) return false;
 	}
 
 	return true;
@@ -331,6 +374,9 @@ function checkObservation(
 		return undefined;
 	}
 
+	// A write only reaches a later case's read when the cases fall through. A
+	// later write is not an overwrite on that path: the case may be skipped.
+	if (observesPreviousValue(usage, usages) && arePathsCompatible(currentPath, referencePath, true)) return true;
 	return isReadAcrossLoop(usage, write, root) ? true : undefined;
 }
 

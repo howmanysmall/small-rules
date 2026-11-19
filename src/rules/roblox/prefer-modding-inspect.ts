@@ -5,10 +5,14 @@ import {
 	isObjectExpression,
 	isProperty,
 	isTsLiteralType,
+	isTsNumberKeyword,
+	isTsStringKeyword,
+	isTsSymbolKeyword,
 	isTsTypeReference,
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
+import { stripParenthesizedType } from "$oxc-utilities/oxc-utilities";
 
 import type { ESTree, Fix, Visitor } from "oxlint-plugin-utilities";
 
@@ -40,6 +44,18 @@ function getRecordEnumTypeParameter(node: ESTree.VariableDeclarator): ESTree.TST
 	return enumType;
 }
 
+/**
+ * Whether the key type has no finite list of members. `Modding.inspect` cannot
+ * enumerate one, so rewriting the object would lose its hand-written keys.
+ *
+ * @param keyType - The first type argument of the `Record`.
+ * @returns `true` for `string`, `number`, and `symbol`.
+ */
+function isOpenKeyType(keyType: ESTree.TSType): boolean {
+	const unwrapped = stripParenthesizedType(keyType);
+	return isTsStringKeyword(unwrapped) || isTsNumberKeyword(unwrapped) || isTsSymbolKeyword(unwrapped);
+}
+
 function isTrueObjectExpression(node?: ESTree.Expression | null): boolean {
 	if (!isObjectExpression(node)) return false;
 
@@ -66,10 +82,13 @@ const preferModdingInspect = createRule("prefer-modding-inspect", "roblox", {
 				if (enumType === undefined) return;
 
 				const enumTypeText = sourceCode.getText(enumType);
+				const isFixWithheld = sourceCode.getCommentsInside(node).length > 0 || isOpenKeyType(enumType);
 
 				context.report({
 					data: { enumType: enumTypeText },
-					fix(fixer): Fix {
+					fix(fixer): Fix | undefined {
+						if (isFixWithheld) return undefined;
+
 						return fixer.replaceTextRange(
 							[node.range[0], node.range[1]],
 							`${idName} = Modding.inspect<Record<${enumTypeText}, true>>()`,

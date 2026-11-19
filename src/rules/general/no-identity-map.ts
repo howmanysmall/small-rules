@@ -23,10 +23,12 @@ import type { ScopeVariable } from "$oxc-utilities/ast-utilities";
 
 const DEFAULT_BINDING_PATTERNS: ReadonlyArray<string> = ["binding"];
 
-function getParameterName(parameterPattern: ESTree.ParamPattern): string | undefined {
+function getParameterName(parameterPattern: ESTree.ParamPattern, ignoreDefaultParameters: boolean): string | undefined {
 	if (isIdentifier(parameterPattern)) return parameterPattern.name;
 
-	if (isAssignmentPattern(parameterPattern) && isIdentifier(parameterPattern.left)) return parameterPattern.left.name;
+	if (!ignoreDefaultParameters && isAssignmentPattern(parameterPattern) && isIdentifier(parameterPattern.left)) {
+		return parameterPattern.left.name;
+	}
 
 	return undefined;
 }
@@ -44,17 +46,17 @@ interface HasParameters {
 	readonly params: ReadonlyArray<ESTree.ParamPattern>;
 }
 
-function getSingleParameterName(callback: HasParameters): string | undefined {
+function getSingleParameterName(callback: HasParameters, ignoreDefaultParameters: boolean): string | undefined {
 	if (callback.params.length !== 1) return undefined;
 
 	const [parameter] = callback.params;
 	/* v8 ignore next -- params length check guarantees a dense first parameter slot in parser output. @preserve */
-	return parameter === undefined ? undefined : getParameterName(parameter);
+	return parameter === undefined ? undefined : getParameterName(parameter, ignoreDefaultParameters);
 }
 
-function isIdentityCallback(callback: ESTree.Expression): boolean {
+function isIdentityCallback(callback: ESTree.Expression, ignoreDefaultParameters: boolean): boolean {
 	if (isArrowFunctionExpression(callback)) {
-		const name = getSingleParameterName(callback);
+		const name = getSingleParameterName(callback, ignoreDefaultParameters);
 		if (name === undefined) return false;
 
 		const { body } = callback;
@@ -71,7 +73,7 @@ function isIdentityCallback(callback: ESTree.Expression): boolean {
 	}
 
 	if (isFunctionExpression(callback)) {
-		const name = getSingleParameterName(callback);
+		const name = getSingleParameterName(callback, ignoreDefaultParameters);
 		if (name === undefined || callback.body === null) return false;
 		return isBlockReturningIdentity(callback.body, name);
 	}
@@ -126,7 +128,10 @@ function isLikelyBinding(
 	);
 }
 
-function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | undefined {
+function getIdentityMapCallee(
+	node: ESTree.Node,
+	ignoreDefaultParameters: boolean,
+): ESTree.MemberExpression | undefined {
 	if (!isCallExpression(node)) return undefined;
 
 	const { callee } = node;
@@ -141,14 +146,20 @@ function getIdentityMapCallee(node: ESTree.Node): ESTree.MemberExpression | unde
 	}
 
 	const [argument] = node.arguments;
-	if (argument === undefined || isSpreadElement(argument) || !isIdentityCallback(argument)) return undefined;
+	if (argument === undefined || isSpreadElement(argument) || !isIdentityCallback(argument, ignoreDefaultParameters)) {
+		return undefined;
+	}
 
 	return callee;
 }
 
-function isReceiverOfIdentityMap(node: ESTree.CallExpression): boolean {
+function isReceiverOfIdentityMap(node: ESTree.CallExpression, ignoreDefaultParameters: boolean): boolean {
 	const { parent } = node;
-	return isMemberExpression(parent) && parent.object === node && getIdentityMapCallee(parent.parent) === parent;
+	return (
+		isMemberExpression(parent) &&
+		parent.object === node &&
+		getIdentityMapCallee(parent.parent, ignoreDefaultParameters) === parent
+	);
 }
 
 const noIdentityMap = createRule("no-identity-map", "general", {
@@ -156,10 +167,11 @@ const noIdentityMap = createRule("no-identity-map", "general", {
 		const { sourceCode } = context;
 		const [options] = context.options;
 		const bindingPatterns = options?.bindingPatterns ?? DEFAULT_BINDING_PATTERNS;
+		const ignoreDefaultParameters = options?.ignoreDefaultParameters ?? false;
 
 		return {
 			CallExpression(node): void {
-				const callee = getIdentityMapCallee(node);
+				const callee = getIdentityMapCallee(node, ignoreDefaultParameters);
 				if (callee === undefined) return;
 
 				const messageId = isLikelyBinding(sourceCode, callee, bindingPatterns)
@@ -168,16 +180,16 @@ const noIdentityMap = createRule("no-identity-map", "general", {
 
 				// The outermost identity map of a chain fixes the whole chain, so
 				// it settles in one pass instead of one pass per call.
-				if (isReceiverOfIdentityMap(node)) {
+				if (isReceiverOfIdentityMap(node, ignoreDefaultParameters)) {
 					context.report({ messageId, node });
 					return;
 				}
 
 				let receiver = callee.object;
 				for (
-					let inner = getIdentityMapCallee(receiver);
+					let inner = getIdentityMapCallee(receiver, ignoreDefaultParameters);
 					inner !== undefined;
-					inner = getIdentityMapCallee(receiver)
+					inner = getIdentityMapCallee(receiver, ignoreDefaultParameters)
 				) {
 					receiver = inner.object;
 				}
@@ -212,6 +224,12 @@ const noIdentityMap = createRule("no-identity-map", "general", {
 						description: "Variable name patterns to recognize as Bindings (case insensitive)",
 						items: { type: "string" },
 						type: "array",
+					},
+					ignoreDefaultParameters: {
+						default: false,
+						description:
+							"Treat a callback whose parameter has a default value as not identity, since the default replaces undefined items",
+						type: "boolean",
 					},
 				},
 				type: "object",

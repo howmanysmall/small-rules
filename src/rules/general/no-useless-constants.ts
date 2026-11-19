@@ -4,15 +4,20 @@ import {
 	CALL_EXPRESSION,
 	CONDITIONAL_EXPRESSION,
 	isAnyLiteral,
+	isArrayExpression,
 	isBindingIdentifier,
 	isBlockStatement,
 	isCallbackFunction,
 	isCallExpression,
 	isClassExpression,
 	isExportNamedDeclaration,
+	isIdentifier,
+	isMemberExpression,
 	isNewExpression,
+	isNumericLiteral,
 	isProgram,
 	isProperty,
+	isTemplateLiteral,
 	isTransparentExpression,
 	isVariableDeclaration,
 	isVariableDeclarator,
@@ -28,7 +33,13 @@ import {
 	UNARY_EXPRESSION,
 } from "@small-rules/oxlint-utilities";
 
-import { getDeclarationRemovalRange, hasAttachedComments } from "$oxc-utilities/ast-utilities";
+import {
+	forEachNode,
+	getDeclarationRemovalRange,
+	hasAttachedComments,
+	pushMemberExpressionChildren,
+	STOP_NODE_TRAVERSAL,
+} from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getRootIdentifier, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 import { DEFAULT_STATIC_GLOBAL_FACTORIES, isStaticExpression } from "$oxc-utilities/static-expression-utilities";
@@ -53,8 +64,8 @@ const OBJECT_CONSTRUCTOR_PATTERNS: ReadonlyArray<string> = [
 interface FixableConstant {
 	readonly name: string;
 	readonly declarationNode: ESTree.VariableDeclaration;
-	readonly initializerText: string;
 	readonly referenceIdentifier: ESTree.BindingIdentifier;
+	readonly replacementText: string;
 	readonly reportNode: ESTree.BindingIdentifier;
 }
 
@@ -198,12 +209,7 @@ function appendRelocatableChildren(
 		}
 
 		case MEMBER_EXPRESSION: {
-			worklist.push(node.object);
-
-			if (node.computed) {
-				worklist.push(node.property);
-			}
-
+			pushMemberExpressionChildren(node, worklist);
 			return true;
 		}
 
@@ -251,8 +257,102 @@ function isAutoInlineSafeInitializer(sourceCode: SourceCode, node: ESTree.Expres
 	);
 }
 
-function getInlineInitializerText(sourceCode: SourceCode, initializer: ESTree.Expression): string {
-	return sourceCode.getText(stripParenthesis(initializer));
+function containsRange(outer: ESTree.Node, inner: ESTree.Node): boolean {
+	return outer.range[0] <= inner.range[0] && inner.range[1] <= outer.range[1];
+}
+
+/**
+ * Whether the initializer can move to the reference without reading a value
+ * that a call before the reference would have changed. Moving it runs it after
+ * everything that comes before the reference in the declaration.
+ *
+ * @param declaration - The declaration that holds the reference.
+ * @param reference - The identifier that would be replaced.
+ * @returns Whether no call is evaluated before the reference.
+ */
+function isInlineOrderPreserved(declaration: ESTree.VariableDeclaration, reference: ESTree.BindingIdentifier): boolean {
+	let isPreserved = true;
+	forEachNode(declaration, (node) => {
+		if (node.range[0] >= reference.range[1]) return false;
+
+		if (node.range[1] <= reference.range[0] && (isCallExpression(node) || isNewExpression(node))) {
+			isPreserved = false;
+			return STOP_NODE_TRAVERSAL;
+		}
+
+		return undefined;
+	});
+
+	return isPreserved;
+}
+
+/**
+ * Whether any expression may stand where the reference is, so the inlined
+ * text needs no parentheses.
+ *
+ * @param reference - The identifier that would be replaced.
+ * @returns Whether the reference is a declarator initializer, property, array
+ *   element or call argument.
+ */
+function isUnrestrictedSlot(reference: ESTree.BindingIdentifier): boolean {
+	const { parent } = reference;
+	if (isVariableDeclarator(parent) || isProperty(parent) || isArrayExpression(parent)) return true;
+	return (isCallExpression(parent) || isNewExpression(parent)) && parent.callee !== reference;
+}
+
+function isCallee(reference: ESTree.BindingIdentifier): boolean {
+	const { parent } = reference;
+	return (isCallExpression(parent) || isNewExpression(parent)) && parent.callee === reference;
+}
+
+function needsParentheses(initializer: ESTree.Expression, reference: ESTree.BindingIdentifier): boolean {
+	if (isUnrestrictedSlot(reference) || isIdentifier(initializer) || isTemplateLiteral(initializer)) return false;
+	if (isMemberExpression(initializer) || isCallExpression(initializer)) return isCallee(reference);
+
+	if (isNumericLiteral(initializer)) {
+		const { parent } = reference;
+		return isMemberExpression(parent) && parent.object === reference;
+	}
+
+	return !isAnyLiteral(initializer);
+}
+
+/**
+ * Builds the text that replaces the reference: the initializer, wrapped in
+ * parentheses when its neighbors could bind to part of it, and spelled
+ * `name: value` when the reference is a shorthand property.
+ *
+ * @param sourceCode - Gives the text of the initializer.
+ * @param initializer - The expression the constant is set to.
+ * @param reference - The identifier that would be replaced.
+ * @returns The text to write over the reference.
+ */
+function getReplacementText(
+	sourceCode: SourceCode,
+	initializer: ESTree.Expression,
+	reference: ESTree.BindingIdentifier,
+): string {
+	const expression = stripParenthesis(initializer);
+	const text = sourceCode.getText(expression);
+
+	const { parent } = reference;
+	if (isProperty(parent) && parent.shorthand) return `${reference.name}: ${text}`;
+	return needsParentheses(expression, reference) ? `(${text})` : text;
+}
+
+/**
+ * Whether inlining the constant rewrites text that another constant's fix
+ * also rewrites. Fixes of one report must not overlap, so such a constant is
+ * left out of the fix and inlined on a later pass.
+ *
+ * @param constant - The constant to check.
+ * @param constants - Every fixable constant of the scope.
+ * @returns Whether another constant's reference sits inside this declaration.
+ */
+function hasOverlappingFix(constant: FixableConstant, constants: ReadonlyArray<FixableConstant>): boolean {
+	return constants.some(
+		(other) => other !== constant && containsRange(constant.declarationNode, other.referenceIdentifier),
+	);
 }
 
 function areAdjacentStatements(first: ESTree.VariableDeclaration, second: ESTree.VariableDeclaration): boolean {
@@ -410,18 +510,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				const candidate = getUselessConstantCandidate(scope, scopeVariable);
 				if (candidate === undefined) continue;
 
-				const isAdjacent = areAdjacentStatements(candidate.declarationNode, candidate.enclosingDeclaration);
-				const isSafeStaticInitializer = isAutoInlineSafeInitializer(sourceCode, candidate.initializer);
-				const hasSafeInlineSyntax = hasOnlyRelocatableCalls(
-					candidate.initializer,
-					STATIC_OPTIONS.staticGlobalFactories,
-				);
-				const canFix =
-					(isAdjacent || isSafeStaticInitializer) &&
-					hasSafeInlineSyntax &&
-					!hasAttachedComments(sourceCode, candidate.declarationNode);
-
-				if (!canFix) {
+				if (!canAutoFix(candidate)) {
 					context.report({
 						data: { name: candidate.name },
 						messageId: "uselessConstantNoFix",
@@ -433,13 +522,48 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 				fixableConstants.push({
 					name: candidate.name,
 					declarationNode: candidate.declarationNode,
-					initializerText: getInlineInitializerText(sourceCode, candidate.initializer),
 					referenceIdentifier: candidate.referenceIdentifier,
+					replacementText: getReplacementText(
+						sourceCode,
+						candidate.initializer,
+						candidate.referenceIdentifier,
+					),
 					reportNode: candidate.reportNode,
 				});
 			}
 
-			reportFixableConstants(fixableConstants);
+			const independentConstants = new Array<FixableConstant>();
+			for (const constant of fixableConstants) {
+				if (hasOverlappingFix(constant, fixableConstants)) {
+					// Its fix waits for the next pass, after the other one lands.
+					context.report({
+						data: { name: constant.name },
+						messageId: "uselessConstant",
+						node: constant.reportNode,
+					});
+				} else {
+					independentConstants.push(constant);
+				}
+			}
+
+			reportFixableConstants(independentConstants);
+		}
+
+		function canAutoFix(candidate: UselessConstantCandidate): boolean {
+			const { enclosingDeclaration, initializer, referenceIdentifier } = candidate;
+			if (
+				!hasOnlyRelocatableCalls(initializer, STATIC_OPTIONS.staticGlobalFactories) ||
+				hasAttachedComments(sourceCode, candidate.declarationNode)
+			) {
+				return false;
+			}
+
+			if (isAutoInlineSafeInitializer(sourceCode, initializer)) return true;
+
+			return (
+				areAdjacentStatements(candidate.declarationNode, enclosingDeclaration) &&
+				isInlineOrderPreserved(enclosingDeclaration, referenceIdentifier)
+			);
 		}
 
 		function reportFixableConstants(fixableConstants: ReadonlyArray<FixableConstant>): void {
@@ -456,7 +580,7 @@ const noUselessConstants = createRule("no-useless-constants", "general", {
 					let size = 0;
 
 					for (const constant of fixableConstants) {
-						fixes[size++] = fixer.replaceText(constant.referenceIdentifier, constant.initializerText);
+						fixes[size++] = fixer.replaceText(constant.referenceIdentifier, constant.replacementText);
 					}
 
 					for (const constant of fixableConstants) {

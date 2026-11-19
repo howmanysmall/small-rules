@@ -18,6 +18,57 @@ function test() {
 				documentation: { id: "fail", title: "Unpaired opener lacks closer" },
 			},
 
+			// A finally that does not close the opener does not excuse a return
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        return compute();
+    } finally {
+        cleanup();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }, { messageId: "unpairedOpener" }],
+			},
+			// A closer that only sits in a callback does not run in the finally
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        return compute();
+    } finally {
+        defer(() => debug.profileend());
+    }
+}
+`,
+				errors: [
+					{ messageId: "unpairedOpener" },
+					{ messageId: "unpairedOpener" },
+					{ messageId: "unpairedCloser" },
+				],
+			},
+			// A return in the finally itself gets no help from that finally
+			{
+				code: `
+function test(flag) {
+    debug.profilebegin("task");
+    try {
+        doWork();
+    } finally {
+        try {
+            return flag;
+        } finally {
+            cleanup();
+        }
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+
 			// Unpaired closer (no opener)
 			{
 				code: `
@@ -1066,6 +1117,112 @@ function test(items) {
 `,
 				errors: [{ messageId: "unpairedOpener" }],
 			},
+
+			// The default yielding patterns match Roblox *Async methods
+			{
+				code: `
+function load() {
+    debug.profilebegin("load");
+    const value = store.GetAsync("key");
+    debug.profileend();
+    return value;
+}
+`,
+				errors: [
+					{
+						data: { closer: "debug.profileend", yieldingFunction: "store.GetAsync" },
+						messageId: "robloxYieldViolation",
+					},
+				],
+			},
+
+			// Wildcards inside a yielding pattern match only the names they cover
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    part.Fetch();
+    debug.profileend();
+}
+`,
+				options: [
+					{
+						pairs: [
+							{
+								closer: "debug.profileend",
+								opener: "debug.profilebegin",
+								platform: "roblox",
+								requireSync: true,
+								yieldingFunctions: ["*.Fet*"],
+							},
+						],
+					},
+				],
+				errors: [{ messageId: "robloxYieldViolation" }],
+			},
+
+			// Switch cases that stay separate branches keep their reports
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+            doWork();
+        case 2:
+            debug.profileend();
+            break;
+        default:
+            debug.profileend();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+            debug.profileend();
+            break;
+        default:
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+        case 2:
+            doWork();
+            break;
+        default:
+            debug.profileend();
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+        case 2:
+            debug.profileend();
+            break;
+    }
+}
+`,
+				errors: [{ messageId: "unpairedOpener" }],
+			},
 		],
 		valid: [
 			// Calls without a nameable callee sit between a balanced pair
@@ -1138,6 +1295,34 @@ function test() {
     try {
         riskyOperation();
     } finally {
+        debug.profileend();
+    }
+}
+`,
+			},
+			// An early exit inside the try is closed by the finally too
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        return compute();
+    } finally {
+        debug.profileend();
+    }
+}
+`,
+			},
+			{
+				code: `
+function test() {
+    debug.profilebegin("task");
+    try {
+        riskyOperation();
+    } catch (problem) {
+        throw wrap(problem);
+    } finally {
+        getReporter()();
         debug.profileend();
     }
 }
@@ -1394,6 +1579,37 @@ function test(val) {
         default:
             debug.profilebegin("default");
             doWork();
+            debug.profileend();
+    }
+}
+`,
+			},
+
+			// Grouped case labels run on into the next case, so they are not
+			// branches of their own
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        case 1:
+        case 2:
+            debug.profileend();
+            break;
+        default:
+            debug.profileend();
+    }
+}
+`,
+			},
+			{
+				code: `
+function test(kind) {
+    debug.profilebegin("task");
+    switch (kind) {
+        default:
+        case 1:
+        case 2:
             debug.profileend();
     }
 }

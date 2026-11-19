@@ -20,6 +20,47 @@ describe("no-shape-in-symbol-names", () => {
 			{ code: "class X { #shapeCache = 1; }", errors: [{ messageId: "forbiddenSymbolName" }] },
 			{ code: "const view = <Shape />;", errors: [{ messageId: "forbiddenSymbolName" }] },
 			{ code: "interface SHAPEModel { id: string }", errors: [{ messageId: "forbiddenSymbolName" }] },
+			{
+				code: 'import { shapeOf } from "lib";',
+				errors: [{ column: 10, line: 1, messageId: "forbiddenSymbolName" }],
+			},
+			{
+				code: "const shapeCount = 1; export { shapeCount };",
+				errors: [
+					{ column: 7, line: 1, messageId: "forbiddenSymbolName" },
+					{ column: 32, line: 1, messageId: "forbiddenSymbolName" },
+				],
+			},
+			{
+				code: "declare function load(): { shape: number }; const { shape } = load();",
+				errors: [
+					{ column: 28, line: 1, messageId: "forbiddenSymbolName" },
+					{ column: 53, line: 1, messageId: "forbiddenSymbolName" },
+				],
+			},
+			{
+				code: "const shape = 1; const owner = { shape };",
+				errors: [
+					{ column: 7, line: 1, messageId: "forbiddenSymbolName" },
+					{ column: 34, line: 1, messageId: "forbiddenSymbolName" },
+				],
+			},
+			{
+				code: 'import { Shape as Outline } from "lib";',
+				errors: [{ column: 10, line: 1, messageId: "forbiddenSymbolName" }],
+			},
+			{
+				code: "const view = <part Shape={1} />;",
+				errors: [{ column: 20, line: 1, messageId: "forbiddenSymbolName" }],
+			},
+			{
+				code: "const shape = 1; const owner = { shape: shape };",
+				errors: [
+					{ column: 7, line: 1, messageId: "forbiddenSymbolName" },
+					{ column: 34, line: 1, messageId: "forbiddenSymbolName" },
+					{ column: 41, line: 1, messageId: "forbiddenSymbolName" },
+				],
+			},
 		],
 		valid: [
 			{

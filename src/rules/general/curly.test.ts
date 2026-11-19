@@ -238,6 +238,33 @@ describe("curly", () => {
 				documentation: { id: "fail-else", title: "Unbraced branches of an if with an else" },
 			},
 			{
+				code: ["function spin(tick) {", "\tlet done = false;", "\tdo done = tick(); while (!done);", "}"].join(
+					"\n",
+				),
+				output: [
+					"function spin(tick) {",
+					"\tlet done = false;",
+					"\tdo {",
+					"\t\tdone = tick();",
+					"\t} while (!done);",
+					"}",
+				].join("\n"),
+				errors: [LOOP_BODY],
+			},
+			{
+				code: ["function pick(a, first, elseFn) {", "\tif (a) first();", "\telse elseFn();", "}"].join("\n"),
+				output: [
+					"function pick(a, first, elseFn) {",
+					"\tif (a) {",
+					"\t\tfirst();",
+					"\t} else {",
+					"\t\telseFn();",
+					"\t}",
+					"}",
+				].join("\n"),
+				errors: [ELSE_CHAIN, ELSE_CHAIN],
+			},
+			{
 				code: [
 					"function chain(a, b) {",
 					"\tif (a) return 1;",

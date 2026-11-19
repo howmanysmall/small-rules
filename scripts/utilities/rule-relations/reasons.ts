@@ -1,6 +1,6 @@
 import { maxReasonLength } from "./constants";
 
-import type { RelationDraft, RuleCard } from "./types";
+import type { ReasonAttempt, RelationDraft, RuleCard } from "./types";
 
 export interface ReasonMessage {
 	readonly content: string;
@@ -9,11 +9,31 @@ export interface ReasonMessage {
 
 interface CreateOptions {
 	readonly left: RuleCard;
+	readonly previous?: ReasonAttempt | undefined;
 	readonly relation: RelationDraft;
 	readonly right: RuleCard;
 }
 
-export function createReasonMessages({ left, relation, right }: CreateOptions): ReadonlyArray<ReasonMessage> {
+function createRetryInstructions(previous: ReasonAttempt): string {
+	const lines = [
+		"",
+		"Your previous sentence was rejected:",
+		JSON.stringify(previous.reason),
+		"Problems:",
+		...previous.problems.map((problem) => `- ${problem}`),
+	];
+
+	if (previous.reason.length > maxReasonLength) {
+		lines.push(
+			`It was ${previous.reason.length} characters; the limit is ${maxReasonLength}, so the new sentence must be shorter.`,
+		);
+	}
+
+	lines.push("Write a corrected sentence that fixes every problem above.");
+	return lines.join("\n");
+}
+
+export function createReasonMessages({ left, previous, relation, right }: CreateOptions): ReadonlyArray<ReasonMessage> {
 	const content = [
 		"You write one-sentence relation descriptions for a lint-rule documentation site.",
 		"",
@@ -27,11 +47,16 @@ export function createReasonMessages({ left, relation, right }: CreateOptions): 
 		"",
 		`Write exactly ONE sentence (at most ${maxReasonLength} characters) that explains the practical relationship between the two rules for someone configuring them.`,
 		`Name only these two rules (\`${relation.from}\`, \`${relation.to}\`); never mention any other rule.`,
+		"Write both rule names in backticks, like `rule-name`.",
 		"For directed kinds, write the sentence from the first rule's perspective.",
 		"Do not use newlines.",
 	].join("\n");
 
-	return [{ content, role: "user" }];
+	if (previous === undefined) {
+		return [{ content, role: "user" }];
+	}
+
+	return [{ content: `${content}\n${createRetryInstructions(previous)}`, role: "user" }];
 }
 
 interface ReasonOptions {

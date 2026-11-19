@@ -464,4 +464,210 @@ describe("no-useless-constants", () => {
 			],
 		});
 	});
+
+	describe("inlined text keeps its meaning", () => {
+		ts.run("wraps an initializer that an operator could split", rule, {
+			invalid: [
+				{
+					code: "const A = 1 + 2;\nexport const b = A * 3;",
+					output: "export const b = (1 + 2) * 3;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = -1;\nexport const b = A ** 2;",
+					output: "export const b = (-1) ** 2;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = true ? 1 : 2;\nexport const b = A + 3;",
+					output: "export const b = (true ? 1 : 2) + 3;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: 'const A = "x" as const;\nexport const b = A + 1;',
+					output: 'export const b = ("x" as const) + 1;',
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1;\nexport const b = A.toFixed(2);",
+					output: "export const b = (1).toFixed(2);",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1 + 2;\nexport const b = new A();",
+					output: "export const b = new (1 + 2)();",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1 + 2;\nexport const b = A();",
+					output: "export const b = (1 + 2)();",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = Color3.fromRGB(1, 2, 3);\nexport const b = new A();",
+					output: "export const b = new (Color3.fromRGB(1, 2, 3))();",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = Vector2.yAxis;\nexport const b = A();",
+					output: "export const b = (Vector2.yAxis)();",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("does not wrap an initializer that binds on its own", rule, {
+			invalid: [
+				{
+					code: 'const A = "x";\nexport const b = A + "y";',
+					output: 'export const b = "x" + "y";',
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1;\nexport const b = A + 2;",
+					output: "export const b = 1 + 2;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = `x`;\nexport const b = A + 'y';",
+					output: "export const b = `x` + 'y';",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = Color3.fromRGB(1, 2, 3);\nexport const b = A.R + 1;",
+					output: "export const b = Color3.fromRGB(1, 2, 3).R + 1;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = Vector2.yAxis;\nexport const b = A.X + 1;",
+					output: "export const b = Vector2.yAxis.X + 1;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = other;\nconst b = A + 1;\nexport default b;",
+					output: "const b = other + 1;\nexport default b;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("does not wrap where any expression is allowed", rule, {
+			invalid: [
+				{
+					code: "const A = 1 + 2;\nexport const b = A;",
+					output: "export const b = 1 + 2;",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1 + 2;\nexport const b = [A];",
+					output: "export const b = [1 + 2];",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1 + 2;\nexport const b = f(A);",
+					output: "export const b = f(1 + 2);",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1 + 2;\nexport const b = new Box(A);",
+					output: "export const b = new Box(1 + 2);",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("expands a shorthand property", rule, {
+			invalid: [
+				{
+					code: "const A = 1;\nexport const o = { A };",
+					output: "export const o = { A: 1 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: "const A = 1 + 2;\nexport const o = { A };",
+					output: "export const o = { A: 1 + 2 };",
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+	});
+
+	describe("fixes that touch the same text", () => {
+		ts.run("inlines one link of a chain per pass", rule, {
+			invalid: [
+				{
+					code: "const A = 1;\nconst B = A + 1;\nexport const c = B;",
+					output: "const B = 1 + 1;\nexport const c = B;",
+					errors: [{ messageId: "uselessConstant" }, { messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("bundles constants whose declarations stay apart", rule, {
+			invalid: [
+				{
+					code: "const A = 1;\nconst B = 2;\nconst C = A + 1;\nexport const d = [B, C];",
+					output: "const C = 1 + 1;\nexport const d = [2, C];",
+					errors: [{ messageId: "uselessConstants" }, { messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+	});
+
+	describe("evaluation order", () => {
+		const PRELUDE = "declare const obj: { x: number };\ndeclare function mutate(o: unknown): number;\n";
+
+		ts.run("keeps a read in front of a later side effect", rule, {
+			invalid: [
+				{
+					code: `${PRELUDE}function f() {\n  const VALUE = obj.x;\n  const total = mutate(obj) + VALUE;\n  return total;\n}`,
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: `${PRELUDE}function f() {\n  const VALUE = obj.x;\n  const first = mutate(obj), total = VALUE;\n  return [first, total];\n}`,
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: `${PRELUDE}function f(items: Array<number>) {\n  const VALUE = obj.x;\n  const total = [items.push(1), VALUE];\n  return total;\n}`,
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+				{
+					code: `${PRELUDE}function f() {\n  const VALUE = obj.x;\n  const total = [new Box(obj), VALUE];\n  return total;\n}`,
+					output: null,
+					errors: [{ messageId: "uselessConstantNoFix" }],
+				},
+			],
+			valid: [],
+		});
+
+		ts.run("inlines a read that nothing can disturb", rule, {
+			invalid: [
+				{
+					code: `${PRELUDE}function f() {\n  mutate(obj);\n  const VALUE = obj.x;\n  const total = VALUE + mutate(obj);\n  return total;\n}`,
+					output: `${PRELUDE}function f() {\n  mutate(obj);\n  const total = obj.x + mutate(obj);\n  return total;\n}`,
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: `${PRELUDE}function f(flag: boolean) {\n  const VALUE = obj.x;\n  const total = flag ? VALUE : 0;\n  return total;\n}`,
+					output: `${PRELUDE}function f(flag: boolean) {\n  const total = flag ? obj.x : 0;\n  return total;\n}`,
+					errors: [{ messageId: "uselessConstant" }],
+				},
+				{
+					code: `${PRELUDE}function f(flag: boolean) {\n  const VALUE = obj.x;\n  const total = [!flag, VALUE];\n  return total;\n}`,
+					output: `${PRELUDE}function f(flag: boolean) {\n  const total = [!flag, obj.x];\n  return total;\n}`,
+					errors: [{ messageId: "uselessConstant" }],
+				},
+			],
+			valid: [],
+		});
+	});
 });

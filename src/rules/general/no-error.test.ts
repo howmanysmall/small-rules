@@ -33,6 +33,10 @@ describe("no-error", () => {
 			},
 		],
 		valid: [
+			// A local binding of the same name is not the global.
+			'import { error } from "./log"; error("message");',
+			"function run(error) { error('message'); }",
+			"function error(message) { return message; } error('message');",
 			"Log.error('Hello');",
 			{ code: "throw new Error('test');", documentation: { id: "pass", title: "Throw a new error" } },
 			"console.error('test');",

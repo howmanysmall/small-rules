@@ -778,6 +778,33 @@ export function isUnbracedControlBody(node: ESTree.Node): boolean {
 	return node.parent !== null && UNBRACED_BODY_PARENT_TYPES.has(node.parent.type);
 }
 
+/**
+ * The statements, class members, or case bodies that a node's parent holds.
+ *
+ * @param node - Node whose parent may hold a list of statements.
+ * @returns The parent's list (which contains `node` unless it is a `case`
+ * test), or undefined when the parent holds no such list.
+ */
+export function getStatementList({ parent }: ESTree.Node): ReadonlyArray<ESTree.Node> | undefined {
+	switch (parent?.type) {
+		case "BlockStatement":
+		case "ClassBody":
+		case "Program":
+		case "StaticBlock":
+		case "TSModuleBlock": {
+			return parent.body;
+		}
+
+		case "SwitchCase": {
+			return parent.consequent;
+		}
+
+		default: {
+			return undefined;
+		}
+	}
+}
+
 export function isConstAssertion({ typeAnnotation }: TypeAssertionExpression): boolean {
 	return (
 		isTsTypeReference(typeAnnotation) &&

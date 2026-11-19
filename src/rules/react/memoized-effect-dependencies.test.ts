@@ -341,8 +341,50 @@ function Component() {
 					options: [{ hooks: [{ name: "useCustomEffect" }] }],
 					errors: [{ messageId: "unmemoizedDependency" }],
 				},
+				{
+					code: `
+import { useEffect } from "@rbxts/react";
+import { useAsyncEffect } from "@rbxts/pretty-react-hooks";
+
+export function Panel() {
+    const options = { size: 1 };
+    useAsyncEffect(async () => {}, [options]);
+    useEffect(() => {}, [options]);
+    return undefined;
+}
+`,
+					options: [{ hooks: [{ name: "useAsyncEffect" }] }],
+					errors: [
+						{ data: { name: "options" }, messageId: "unmemoizedDependency" },
+						{ data: { name: "options" }, messageId: "unmemoizedDependency" },
+					],
+				},
+				{
+					code: `
+import { useLocalEffect } from "./hooks";
+
+export function Panel() {
+    const options = { size: 1 };
+    useLocalEffect([options], () => {});
+    return undefined;
+}
+`,
+					options: [{ hooks: [{ name: "useLocalEffect", dependenciesIndex: 0 }] }],
+					errors: [{ data: { name: "options" }, messageId: "unmemoizedDependency" }],
+				},
 			],
 			valid: [
+				{
+					code: `
+import { useAsyncEffect } from "@rbxts/pretty-react-hooks";
+
+export function Panel() {
+    const options = { size: 1 };
+    useAsyncEffect(async () => {}, [options]);
+    return undefined;
+}
+`,
+				},
 				{
 					code: `
 import { useCustomEffect, useMemo } from "@rbxts/react";

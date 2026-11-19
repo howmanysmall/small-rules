@@ -4,314 +4,1042 @@
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.73,
+						"confidence": 0,
 						"probabilities": {
-							"0": 0.03,
-							"1": 0.12,
-							"2": 0.85
+							"0": 0.2047357282757934,
+							"1": 0.2713953145823944,
+							"2": 0.5238689571418121
 						},
-						"score": 1.82,
+						"score": 1.3191332288660187,
 						"type": "score"
 					},
-					"backwardReplaces": 0.1,
-					"backwardRequires": 0.82,
-					"duplicates": 0.52,
-					"forwardReplaces": 0.39,
-					"forwardRequires": 0.34
+					"backwardReplaces": 0.053883538362634556,
+					"backwardRequires": 0.2360602181698338,
+					"duplicates": 0.25342090804029876,
+					"forwardReplaces": 0.06153655295481141,
+					"forwardRequires": 0.06719105309883669
 				},
 				"left": "directive-disable-enable-pair",
-				"right": "directive-no-aggregating-enable",
-				"strength": 0.85
+				"right": "directive-no-duplicate-disable",
+				"strength": 0.5238689571418121
 			},
-			"from": "directive-no-aggregating-enable",
-			"kind": "depends-on",
-			"reason": "`directive-no-aggregating-enable` depends on `directive-disable-enable-pair`: each disable needs its own enable comment, not one aggregated enable.",
-			"to": "directive-disable-enable-pair"
+			"from": "directive-disable-enable-pair",
+			"kind": "related",
+			"reason": "`directive-disable-enable-pair` complements `directive-no-duplicate-disable` by ensuring each disable is closed, while the latter prevents redundant disables.",
+			"to": "directive-no-duplicate-disable"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.72,
+						"confidence": 0.2002658656698495,
 						"probabilities": {
-							"0": 0.05,
-							"1": 0.09,
-							"2": 0.86
+							"0": 0.14190308183445066,
+							"1": 0.24934992588453234,
+							"2": 0.608746992281017
 						},
-						"score": 1.81,
+						"score": 1.4668439104465665,
 						"type": "score"
 					},
-					"backwardReplaces": 0.07,
-					"backwardRequires": 0.39,
-					"duplicates": 0.17,
-					"forwardReplaces": 0.1,
-					"forwardRequires": 0.3
+					"backwardReplaces": 0.04308989268288393,
+					"backwardRequires": 0.28099701465415927,
+					"duplicates": 0.25342090804029876,
+					"forwardReplaces": 0.037638989522511025,
+					"forwardRequires": 0.20386571678474355
 				},
-				"left": "directive-no-duplicate-disable",
-				"right": "directive-no-unused-enable",
-				"strength": 0.86
+				"left": "directive-disable-enable-pair",
+				"right": "directive-no-unlimited-disable",
+				"strength": 0.608746992281017
 			},
-			"from": "directive-no-duplicate-disable",
+			"from": "directive-disable-enable-pair",
 			"kind": "related",
-			"reason": "`directive-no-duplicate-disable` flags redundant disables, while `directive-no-unused-enable` flags enables matching no disable, keeping directive pairs tidy.",
+			"reason": "`directive-disable-enable-pair` requires a matching enable, while `directive-no-unlimited-disable` requires named rules for that disable.",
+			"to": "directive-no-unlimited-disable"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.5126684111071999,
+						"probabilities": {
+							"0": 0.07126673633752574,
+							"1": 0.18235425325348192,
+							"2": 0.7463790104089923
+						},
+						"score": 1.6751122740714666,
+						"type": "score"
+					},
+					"backwardReplaces": 0.06153656330354939,
+					"backwardRequires": 0.4299986975156595,
+					"duplicates": 0.13799222576323306,
+					"forwardReplaces": 0.1324988227678996,
+					"forwardRequires": 0.25342090804029876
+				},
+				"left": "directive-disable-enable-pair",
+				"right": "directive-no-unused-enable",
+				"strength": 0.7463790104089923
+			},
+			"from": "directive-disable-enable-pair",
+			"kind": "related",
+			"reason": "`directive-disable-enable-pair` requires every disable to have an enable, while `directive-no-unused-enable` ensures that enable is actually needed.",
 			"to": "directive-no-unused-enable"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.87,
+						"confidence": 0,
 						"probabilities": {
-							"0": 0.01,
-							"1": 0.07,
-							"2": 0.92
+							"0": 0.30287430480012445,
+							"1": 0.18934241713676553,
+							"2": 0.5077832780631101
 						},
-						"score": 1.92,
+						"score": 1.2049089732629856,
 						"type": "score"
 					},
-					"backwardReplaces": 0.18,
-					"backwardRequires": 0.5,
-					"duplicates": 0.8,
-					"forwardReplaces": 0.2,
-					"forwardRequires": 0.44
+					"backwardReplaces": 0.11712195427258891,
+					"backwardRequires": 0.24463646120367746,
+					"duplicates": 0.04308989268288393,
+					"forwardReplaces": 0.01651361388449618,
+					"forwardRequires": 0.27160441573234284
+				},
+				"left": "directive-no-aggregating-enable",
+				"right": "directive-no-unlimited-disable",
+				"strength": 0.5077832780631101
+			},
+			"from": "directive-no-aggregating-enable",
+			"kind": "related",
+			"reason": "`directive-no-aggregating-enable` works alongside `directive-no-unlimited-disable` so every disable names its rules and is re-enabled separately.",
+			"to": "directive-no-unlimited-disable"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.1970814782626047,
+						"probabilities": {
+							"0": 0.11126582138357669,
+							"1": 0.3127473717244435,
+							"2": 0.5759868068919799
+						},
+						"score": 1.4647209855084034,
+						"type": "score"
+					},
+					"backwardReplaces": 0.6263844177829369,
+					"backwardRequires": 0.24463646120367746,
+					"duplicates": 0.8876488837402042,
+					"forwardReplaces": 0.1963472691863825,
+					"forwardRequires": 0.26241120757278064
+				},
+				"left": "directive-no-restricted-disable",
+				"right": "directive-no-use",
+				"strength": 0.5759868068919799
+			},
+			"from": "directive-no-restricted-disable",
+			"kind": "overlaps",
+			"reason": "`directive-no-restricted-disable` overlaps `directive-no-use` on block disable comments, but only bans configured rules whereas the other bans all directives.",
+			"to": "directive-no-use"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.20616316310529126,
+						"probabilities": {
+							"0": 0.1346531485287043,
+							"1": 0.25991826087239717,
+							"2": 0.6054285905988985
+						},
+						"score": 1.4707754420701942,
+						"type": "score"
+					},
+					"backwardReplaces": 0.1618994483335234,
+					"backwardRequires": 0.0990454789573305,
+					"duplicates": 0.929804116957109,
+					"forwardReplaces": 0.6896734984674865,
+					"forwardRequires": 0.10775088701065141
 				},
 				"left": "no-adjust-state-on-prop-change",
-				"right": "no-derived-state",
-				"strength": 0.92
+				"right": "no-reset-all-state-on-prop-change",
+				"strength": 0.6054285905988985
 			},
 			"from": "no-adjust-state-on-prop-change",
 			"kind": "overlaps",
-			"reason": "`no-adjust-state-on-prop-change` overlaps `no-derived-state`: an effect that sets state from a prop is derived state too, so both can flag the same code.",
+			"reason": "`no-adjust-state-on-prop-change` overlaps `no-reset-all-state-on-prop-change` when an effect resets all state on a prop change, so both may flag it.",
+			"to": "no-reset-all-state-on-prop-change"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.4634390423387281,
+						"probabilities": {
+							"0": 0.10956627169970273,
+							"1": 0.13857476170810906,
+							"2": 0.7518589665921882
+						},
+						"score": 1.6422926948924854,
+						"type": "score"
+					},
+					"backwardReplaces": 0.029996186376823213,
+					"backwardRequires": 0.17505587115722457,
+					"duplicates": 0.06430595244194943,
+					"forwardReplaces": 0.06153656330354939,
+					"forwardRequires": 0.12206753932311859
+				},
+				"left": "no-array-constructor-elements",
+				"right": "no-array-constructor-index-assignment",
+				"strength": 0.7518589665921882
+			},
+			"from": "no-array-constructor-elements",
+			"kind": "related",
+			"reason": "`no-array-constructor-elements` complements `no-array-constructor-index-assignment` by covering element/push forms, so enable both to enforce array literals.",
+			"to": "no-array-constructor-index-assignment"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.208357271262125,
+						"probabilities": {
+							"0": 0.10670468202838375,
+							"1": 0.3143524551018158,
+							"2": 0.5789428628698005
+						},
+						"score": 1.4722381808414167,
+						"type": "score"
+					},
+					"backwardReplaces": 0.1750558582180063,
+					"backwardRequires": 0.28099699655163135,
+					"duplicates": 0.3846728660328656,
+					"forwardReplaces": 0.08716088584539904,
+					"forwardRequires": 0.5
+				},
+				"left": "no-cascading-set-state",
+				"right": "prefer-use-reducer",
+				"strength": 0.5789428628698005
+			},
+			"from": "no-cascading-set-state",
+			"kind": "related",
+			"reason": "`no-cascading-set-state` complements `prefer-use-reducer`: the former flags cascading effect updates, the latter flags many useState calls, so enable both.",
+			"to": "prefer-use-reducer"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3029754626559714,
+						"probabilities": {
+							"0": 0.12095765821785914,
+							"1": 0.22276770846030075,
+							"2": 0.6562746333218401
+						},
+						"score": 1.535316975103981,
+						"type": "score"
+					},
+					"backwardReplaces": 0.4648261597391116,
+					"backwardRequires": 0.39585058843580684,
+					"duplicates": 0.8381005577452831,
+					"forwardReplaces": 0.37361558221706304,
+					"forwardRequires": 0.5814752897152565
+				},
+				"left": "no-chain-state-updates",
+				"right": "no-derived-state",
+				"strength": 0.6562746333218401
+			},
+			"from": "no-chain-state-updates",
+			"kind": "overlaps",
+			"reason": "`no-chain-state-updates` overlaps `no-derived-state` when an effect sets state derived from its dependencies, so both flag the same chained derivation.",
 			"to": "no-derived-state"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.62,
+						"confidence": 0.22968296081437622,
 						"probabilities": {
-							"0": 0.06,
-							"1": 0.13,
-							"2": 0.81
+							"0": 0.06008312815483869,
+							"1": 0.39337843648073845,
+							"2": 0.5465384353644228
 						},
-						"score": 1.75,
+						"score": 1.486455307209584,
 						"type": "score"
 					},
-					"backwardReplaces": 0.06,
-					"backwardRequires": 0.29,
-					"duplicates": 0.52,
-					"forwardReplaces": 0.08,
-					"forwardRequires": 0.22
+					"backwardReplaces": 0.5,
+					"backwardRequires": 0.3204690137673468,
+					"duplicates": 0.8779324654779525,
+					"forwardReplaces": 0.018110859633017624,
+					"forwardRequires": 0.28099701465415927
 				},
-				"left": "no-adjust-state-on-prop-change",
-				"right": "no-initialize-state",
-				"strength": 0.81
-			},
-			"from": "no-adjust-state-on-prop-change",
-			"kind": "related",
-			"reason": "`no-adjust-state-on-prop-change` and `no-initialize-state` are siblings: both flag state writes in effects, one triggered by prop changes, the other by mount.",
-			"to": "no-initialize-state"
-		},
-		{
-			"evidence": {
-				"judgments": {
-					"assessment": {
-						"confidence": 0.7,
-						"probabilities": {
-							"0": 0.01,
-							"1": 0.19,
-							"2": 0.8
-						},
-						"score": 1.8,
-						"type": "score"
-					},
-					"backwardReplaces": 0.34,
-					"backwardRequires": 0.47,
-					"duplicates": 0.82,
-					"forwardReplaces": 0.07,
-					"forwardRequires": 0.39
-				},
-				"left": "no-event-handler",
+				"left": "no-chain-state-updates",
 				"right": "no-useless-use-effect",
-				"strength": 0.8
+				"strength": 0.5465384353644228
 			},
-			"from": "no-event-handler",
+			"from": "no-chain-state-updates",
 			"kind": "overlaps",
-			"reason": "`no-event-handler` overlaps with `no-useless-use-effect`, which also flags event logic routed through state, so one effect may be reported by both rules.",
+			"reason": "`no-chain-state-updates` overlaps `no-useless-use-effect` on effects setting state from other state, so both may report the same chained update.",
 			"to": "no-useless-use-effect"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.79,
+						"confidence": 0.57726019939103,
 						"probabilities": {
-							"0": 0.01,
-							"1": 0.12,
-							"2": 0.87
+							"0": 0.039269798651402434,
+							"1": 0.2032869364365084,
+							"2": 0.7574432649120892
 						},
-						"score": 1.86,
+						"score": 1.718173466260687,
 						"type": "score"
 					},
-					"backwardReplaces": 0.39,
-					"backwardRequires": 0.52,
-					"duplicates": 0.84,
-					"forwardReplaces": 0.07,
-					"forwardRequires": 0.42
+					"backwardReplaces": 0.7723059644912634,
+					"backwardRequires": 0.4185247102847434,
+					"duplicates": 0.975013951004082,
+					"forwardReplaces": 0.04713447466367218,
+					"forwardRequires": 0.1890402589773885
+				},
+				"left": "no-derived-state",
+				"right": "no-useless-use-effect",
+				"strength": 0.7574432649120892
+			},
+			"from": "no-derived-state",
+			"kind": "overlaps",
+			"reason": "`no-derived-state` overlaps with `no-useless-use-effect` on derived state set in effects, so enabling both may duplicate reports for that pattern.",
+			"to": "no-useless-use-effect"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3751562069086356,
+						"probabilities": {
+							"0": 0.06836720367834331,
+							"1": 0.2798281213708896,
+							"2": 0.6518046749507671
+						},
+						"score": 1.5834374712724237,
+						"type": "score"
+					},
+					"backwardReplaces": 0.6587357080992224,
+					"backwardRequires": 0.34126431204306995,
+					"duplicates": 0.9328089553248502,
+					"forwardReplaces": 0.053883531510927715,
+					"forwardRequires": 0.211596279737173
 				},
 				"left": "no-external-store-subscription",
 				"right": "no-useless-use-effect",
-				"strength": 0.87
+				"strength": 0.6518046749507671
 			},
 			"from": "no-external-store-subscription",
 			"kind": "overlaps",
-			"reason": "`no-external-store-subscription` overlaps `no-useless-use-effect`, whose `reportExternalStore` check flags the same pattern, risking duplicate reports.",
+			"reason": "`no-external-store-subscription` overlaps with `no-useless-use-effect` on external-store sync, so enabling both may duplicate reports.",
 			"to": "no-useless-use-effect"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.68,
+						"confidence": 0.33636706987451626,
 						"probabilities": {
-							"0": 0.06,
-							"1": 0.1,
-							"2": 0.84
+							"0": 0.0726113121442348,
+							"1": 0.29719932912851954,
+							"2": 0.6301893587272457
 						},
-						"score": 1.79,
+						"score": 1.557578046583011,
 						"type": "score"
 					},
-					"backwardReplaces": 0.26,
-					"backwardRequires": 0.51,
-					"duplicates": 0.44,
-					"forwardReplaces": 0.13,
-					"forwardRequires": 0.39
+					"backwardReplaces": 0.7465790750075386,
+					"backwardRequires": 0.31032648235601856,
+					"duplicates": 0.9384634470451886,
+					"forwardReplaces": 0.05887893347695553,
+					"forwardRequires": 0.23606021816983375
 				},
-				"left": "no-object-parameters",
-				"right": "no-unknown-parameters",
-				"strength": 0.84
+				"left": "no-giant-component",
+				"right": "no-god-components",
+				"strength": 0.6301893587272457
 			},
-			"from": "no-object-parameters",
+			"from": "no-giant-component",
+			"kind": "overlaps",
+			"reason": "`no-giant-component` overlaps `no-god-components` on component line count, so enabling both can duplicate size reports for very large components.",
+			"to": "no-god-components"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.1962484629074085,
+						"probabilities": {
+							"0": 0.09357948568958388,
+							"1": 0.3486753866825599,
+							"2": 0.5577451276278562
+						},
+						"score": 1.4641656419382723,
+						"type": "score"
+					},
+					"backwardReplaces": 0.07332453114279942,
+					"backwardRequires": 0.2716043980063341,
+					"duplicates": 0.9234188643258747,
+					"forwardReplaces": 0.6041494115641931,
+					"forwardRequires": 0.34126431204306995
+				},
+				"left": "no-god-components",
+				"right": "prefer-use-reducer",
+				"strength": 0.5577451276278562
+			},
+			"from": "no-god-components",
+			"kind": "overlaps",
+			"reason": "`no-god-components` and `prefer-use-reducer` overlap on many state hooks, so using useReducer for related state can satisfy both limits.",
+			"to": "prefer-use-reducer"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0,
+						"probabilities": {
+							"0": 0.19940476830840587,
+							"1": 0.2903669280013449,
+							"2": 0.5102283036902492
+						},
+						"score": 1.3108235353818434,
+						"type": "score"
+					},
+					"backwardReplaces": 0.09493178548215973,
+					"backwardRequires": 0.16189944225471684,
+					"duplicates": 0.21953914122030657,
+					"forwardReplaces": 0.0871608787164962,
+					"forwardRequires": 0.18904027271339366
+				},
+				"left": "no-ianitor-in-function-body",
+				"right": "no-ianitor-success-access",
+				"strength": 0.5102283036902492
+			},
+			"from": "no-ianitor-in-function-body",
 			"kind": "related",
-			"reason": "`no-object-parameters` complements `no-unknown-parameters`: together they ban `object` and `unknown` parameters, requiring named types parsed at boundaries.",
+			"reason": "`no-ianitor-in-function-body` pairs with `no-ianitor-success-access`: hoisting avoids recreating validators, but only the latter removes success allocation.",
+			"to": "no-ianitor-success-access"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.5080966376013638,
+						"probabilities": {
+							"0": 0.042663212533354276,
+							"1": 0.24260914986571555,
+							"2": 0.71472763760093
+						},
+						"score": 1.6720644250675756,
+						"type": "score"
+					},
+					"backwardReplaces": 0.7639397495140783,
+					"backwardRequires": 0.25342090804029876,
+					"duplicates": 0.9640261282019339,
+					"forwardReplaces": 0.04713447868784975,
+					"forwardRequires": 0.20386573132718658
+				},
+				"left": "no-initialize-state",
+				"right": "no-useless-use-effect",
+				"strength": 0.71472763760093
+			},
+			"from": "no-initialize-state",
+			"kind": "overlaps",
+			"reason": "`no-initialize-state` overlaps with `no-useless-use-effect` since both flag effects initializing state after mount, so enabling both is redundant.",
+			"to": "no-useless-use-effect"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.11625714012789101,
+						"probabilities": {
+							"0": 0.21111879018942187,
+							"1": 0.16692432620256228,
+							"2": 0.6219568836080158
+						},
+						"score": 1.410838093418594,
+						"type": "score"
+					},
+					"backwardReplaces": 0.04308988529392335,
+					"backwardRequires": 0.09904547495959223,
+					"duplicates": 0.027379967523603756,
+					"forwardReplaces": 0.05632918210572161,
+					"forwardRequires": 0.12719184113696155
+				},
+				"left": "no-inline-property-on-memo-component",
+				"right": "rerender-memo-with-default-value",
+				"strength": 0.6219568836080158
+			},
+			"from": "no-inline-property-on-memo-component",
+			"kind": "related",
+			"reason": "Use `no-inline-property-on-memo-component` with `rerender-memo-with-default-value` to stop inline props and defaults creating references causing re-renders.",
+			"to": "rerender-memo-with-default-value"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0,
+						"probabilities": {
+							"0": 0.2151437979817991,
+							"1": 0.2596179022123765,
+							"2": 0.5252382998058243
+						},
+						"score": 1.310094501824025,
+						"type": "score"
+					},
+					"backwardReplaces": 0.23606023432787737,
+					"backwardRequires": 0.3626887948076105,
+					"duplicates": 0.5468383445972871,
+					"forwardReplaces": 0.26241120757278064,
+					"forwardRequires": 0.3204690137673468
+				},
+				"left": "no-known-value-widening",
+				"right": "no-unknown-parameters",
+				"strength": 0.5252382998058243
+			},
+			"from": "no-known-value-widening",
+			"kind": "related",
+			"reason": "`no-known-value-widening` complements `no-unknown-parameters` by also blocking `unknown` annotations on known values, not just function parameters.",
 			"to": "no-unknown-parameters"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.86,
+						"confidence": 0.28162389502402396,
 						"probabilities": {
-							"0": 0.01,
-							"1": 0.08,
-							"2": 0.91
+							"0": 0.1050543852099097,
+							"1": 0.2688086328974979,
+							"2": 0.6261369818925925
 						},
-						"score": 1.91,
+						"score": 1.5210825966826829,
 						"type": "score"
 					},
-					"backwardReplaces": 0.45,
-					"backwardRequires": 0.5,
-					"duplicates": 0.86,
-					"forwardReplaces": 0.09,
-					"forwardRequires": 0.42
+					"backwardReplaces": 0.053883538362634556,
+					"backwardRequires": 0.2534209249924613,
+					"duplicates": 0.8036527237444197,
+					"forwardReplaces": 0.3846728660328656,
+					"forwardRequires": 0.3103265207090091
 				},
-				"left": "no-pass-live-state-to-parent",
-				"right": "no-useless-use-effect",
-				"strength": 0.91
+				"left": "no-known-value-widening",
+				"right": "no-unsafe-dictionary-type",
+				"strength": 0.6261369818925925
 			},
-			"from": "no-pass-live-state-to-parent",
+			"from": "no-known-value-widening",
 			"kind": "overlaps",
-			"reason": "`no-pass-live-state-to-parent` overlaps `no-useless-use-effect`'s `reportNotifyParent` check, so enabling both can double-report parent-notification effects.",
+			"reason": "`no-known-value-widening` overlaps `no-unsafe-dictionary-type` when a known value widens into a dictionary with an unknown, any, or object value type.",
+			"to": "no-unsafe-dictionary-type"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.18476482802325678,
+						"probabilities": {
+							"0": 0.09203601930782321,
+							"1": 0.35941807603551573,
+							"2": 0.5485459046566611
+						},
+						"score": 1.4565098853488379,
+						"type": "score"
+					},
+					"backwardReplaces": 0.10331708273853217,
+					"backwardRequires": 0.4648261151609385,
+					"duplicates": 0.8675011669332454,
+					"forwardReplaces": 0.6373112051923896,
+					"forwardRequires": 0.4071381813575826
+				},
+				"left": "no-known-value-widening",
+				"right": "no-widen-then-assert",
+				"strength": 0.5485459046566611
+			},
+			"from": "no-known-value-widening",
+			"kind": "overlaps",
+			"reason": "`no-known-value-widening` overlaps with `no-widen-then-assert` on widening known values, so this broader rule alone covers the shared widening cases.",
+			"to": "no-widen-then-assert"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.45037594106440804,
+						"probabilities": {
+							"0": 0.12773555610279957,
+							"1": 0.11094492708479546,
+							"2": 0.761319516812405
+						},
+						"score": 1.6335839607096054,
+						"type": "score"
+					},
+					"backwardReplaces": 0.21953913354421895,
+					"backwardRequires": 0.21953911819204439,
+					"duplicates": 0.05887891734096728,
+					"forwardReplaces": 0.04928975951595884,
+					"forwardRequires": 0.1819436070468536
+				},
+				"left": "no-nested-hook-calls",
+				"right": "use-hook-at-top-level",
+				"strength": 0.761319516812405
+			},
+			"from": "no-nested-hook-calls",
+			"kind": "related",
+			"reason": "`no-nested-hook-calls` complements `use-hook-at-top-level` by covering direct nesting in hook arguments, while the latter covers hooks in nested functions.",
+			"to": "use-hook-at-top-level"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.6206490102647616,
+						"probabilities": {
+							"0": 0.07886588614003291,
+							"1": 0.09516888754342642,
+							"2": 0.8259652263165406
+						},
+						"score": 1.7470993401765076,
+						"type": "score"
+					},
+					"backwardReplaces": 0.06430595042021955,
+					"backwardRequires": 0.31032648235601856,
+					"duplicates": 0.08349504826860832,
+					"forwardReplaces": 0.056329191631288605,
+					"forwardRequires": 0.21953913354421895
+				},
+				"left": "no-object-parameters",
+				"right": "no-unknown-parameters",
+				"strength": 0.8259652263165406
+			},
+			"from": "no-object-parameters",
+			"kind": "related",
+			"reason": "`no-object-parameters` complements `no-unknown-parameters` by banning object parameters, so together they require named owner types parsed at the boundary.",
+			"to": "no-unknown-parameters"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.1785588591481989,
+						"probabilities": {
+							"0": 0.23246228020940904,
+							"1": 0.08270286681571604,
+							"2": 0.6848348529748749
+						},
+						"score": 1.4523725727654657,
+						"type": "score"
+					},
+					"backwardReplaces": 0.05153826485599711,
+					"backwardRequires": 0.29058480990699737,
+					"duplicates": 0.053883529227025634,
+					"forwardReplaces": 0.049289767913298824,
+					"forwardRequires": 0.2115962647898467
+				},
+				"left": "no-object-parameters",
+				"right": "no-unknown-returns",
+				"strength": 0.6848348529748749
+			},
+			"from": "no-object-parameters",
+			"kind": "related",
+			"reason": "`no-object-parameters` complements `no-unknown-returns` by enforcing named types for inputs, while the latter does the same for outputs at the boundary.",
+			"to": "no-unknown-returns"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.8616775528702892,
+						"probabilities": {
+							"0": 0.019696368416745658,
+							"1": 0.05282222791964918,
+							"2": 0.9274814036636052
+						},
+						"score": 1.9077850352468595,
+						"type": "score"
+					},
+					"backwardReplaces": 0.18904025897738855,
+					"backwardRequires": 0.23606023432787737,
+					"duplicates": 0.26241120757278064,
+					"forwardReplaces": 0.3846728660328656,
+					"forwardRequires": 0.19634727625558035
+				},
+				"left": "no-pass-data-to-parent",
+				"right": "no-pass-live-state-to-parent",
+				"strength": 0.9274814036636052
+			},
+			"from": "no-pass-data-to-parent",
+			"kind": "related",
+			"reason": "`no-pass-data-to-parent` complements `no-pass-live-state-to-parent` by handling non-state data, while that rule handles the child's state via an effect.",
+			"to": "no-pass-live-state-to-parent"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.07879057876365314,
+						"probabilities": {
+							"0": 0.11728711692347112,
+							"1": 0.37956538031062237,
+							"2": 0.5031475027659065
+						},
+						"score": 1.3858603858424354,
+						"type": "score"
+					},
+					"backwardReplaces": 0.189040265845391,
+					"backwardRequires": 0.20386574586963038,
+					"duplicates": 0.8180563796171064,
+					"forwardReplaces": 0.02737996394450067,
+					"forwardRequires": 0.2716044157323428
+				},
+				"left": "no-pass-data-to-parent",
+				"right": "no-useless-use-effect",
+				"strength": 0.5031475027659065
+			},
+			"from": "no-pass-data-to-parent",
+			"kind": "overlaps",
+			"reason": "`no-pass-data-to-parent` overlaps with `no-useless-use-effect` when an effect passes fetched data to a parent callback, so both rules can flag the same effect.",
 			"to": "no-useless-use-effect"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.83,
+						"confidence": 0.7841917914153459,
 						"probabilities": {
-							"0": 0.04,
-							"1": 0.04,
-							"2": 0.92
+							"0": 0.057136114684980095,
+							"1": 0.029599909686475873,
+							"2": 0.913263975628544
 						},
-						"score": 1.89,
+						"score": 1.8561278609435639,
 						"type": "score"
 					},
-					"backwardReplaces": 0.06,
-					"backwardRequires": 0.3,
-					"duplicates": 0.15,
-					"forwardReplaces": 0.1,
-					"forwardRequires": 0.23
+					"backwardReplaces": 0.07332453723092797,
+					"backwardRequires": 0.1683751878188362,
+					"duplicates": 0.01729413331738021,
+					"forwardReplaces": 0.03597386946759325,
+					"forwardRequires": 0.13799222576323314
 				},
-				"left": "no-reflect-apply",
-				"right": "no-reflect-get",
-				"strength": 0.92
+				"left": "no-print",
+				"right": "no-warn",
+				"strength": 0.913263975628544
 			},
-			"from": "no-reflect-apply",
+			"from": "no-print",
 			"kind": "related",
-			"reason": "Enable no-reflect-get alongside no-reflect-apply: it bans Reflect.get for property reads just as this rule bans Reflect.apply for function calls.",
-			"to": "no-reflect-get"
+			"reason": "`no-print` is related to `no-warn` because both replace raw output globals with structured Log calls, so configure both together for consistent logging.",
+			"to": "no-warn"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.59,
+						"confidence": 0,
 						"probabilities": {
-							"0": 0.07,
-							"1": 0.13,
-							"2": 0.8
+							"0": 0.2976403629103457,
+							"1": 0.15419543155446888,
+							"2": 0.5481642055351854
 						},
-						"score": 1.73,
+						"score": 1.2505238426248397,
 						"type": "score"
 					},
-					"backwardReplaces": 0.09,
-					"backwardRequires": 0.52,
-					"duplicates": 0.41,
-					"forwardReplaces": 0.15,
-					"forwardRequires": 0.3
+					"backwardReplaces": 0.035973871021241895,
+					"backwardRequires": 0.2446364612036774,
+					"duplicates": 0.014374124397384721,
+					"forwardReplaces": 0.019859480477744315,
+					"forwardRequires": 0.14367564220080295
+				},
+				"left": "no-real-temporary-directory",
+				"right": "no-test-timeout",
+				"strength": 0.5481642055351854
+			},
+			"from": "no-real-temporary-directory",
+			"kind": "related",
+			"reason": "`no-real-temporary-directory` and `no-test-timeout` both keep unit tests fast and isolated, so enable both for unit test files only.",
+			"to": "no-test-timeout"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3966947190324861,
+						"probabilities": {
+							"0": 0.05991892384723809,
+							"1": 0.28236567295053305,
+							"2": 0.6577154032022289
+						},
+						"score": 1.5977964793549908,
+						"type": "score"
+					},
+					"backwardReplaces": 0.7961342686728134,
+					"backwardRequires": 0.3846728660328656,
+					"duplicates": 0.9461164593534629,
+					"forwardReplaces": 0.04506896975810452,
+					"forwardRequires": 0.34126431204306995
+				},
+				"left": "no-reset-all-state-on-prop-change",
+				"right": "no-useless-use-effect",
+				"strength": 0.6577154032022289
+			},
+			"from": "no-reset-all-state-on-prop-change",
+			"kind": "overlaps",
+			"reason": "`no-reset-all-state-on-prop-change` overlaps `no-useless-use-effect` on effects resetting state when props change, both suggesting `key` remounting.",
+			"to": "no-useless-use-effect"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.7052395399878819,
+						"probabilities": {
+							"0": 0.0764888773812602,
+							"1": 0.04352921857889161,
+							"2": 0.8799819040398481
+						},
+						"score": 1.8034930266585878,
+						"type": "score"
+					},
+					"backwardReplaces": 0.015055070053329258,
+					"backwardRequires": 0.26241119023060766,
+					"duplicates": 0.1123510983885263,
+					"forwardReplaces": 0.028659114097719075,
+					"forwardRequires": 0.22769403550873654
+				},
+				"left": "no-unknown-parameters",
+				"right": "no-unknown-returns",
+				"strength": 0.8799819040398481
+			},
+			"from": "no-unknown-parameters",
+			"kind": "related",
+			"reason": "`no-unknown-parameters` pairs with `no-unknown-returns` to keep `unknown` out of function signatures, forcing decoding at I/O boundaries for input and output.",
+			"to": "no-unknown-returns"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0,
+						"probabilities": {
+							"0": 0.26323882242235,
+							"1": 0.22863651163839852,
+							"2": 0.5081246659392515
+						},
+						"score": 1.2448858435169017,
+						"type": "score"
+					},
+					"backwardReplaces": 0.053883531510927715,
+					"backwardRequires": 0.26241120757278064,
+					"duplicates": 0.11235110732416076,
+					"forwardReplaces": 0.04713447667576094,
+					"forwardRequires": 0.2809969965516314
+				},
+				"left": "no-unknown-parameters",
+				"right": "no-unknown-type-aliases",
+				"strength": 0.5081246659392515
+			},
+			"from": "no-unknown-parameters",
+			"kind": "related",
+			"reason": "`no-unknown-parameters` pairs with `no-unknown-type-aliases` to block `unknown` in parameters and aliases, keeping it only at I/O boundaries.",
+			"to": "no-unknown-type-aliases"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.13476865464281096,
+						"probabilities": {
+							"0": 0.1892396826727168,
+							"1": 0.19834153155935905,
+							"2": 0.6124187857679242
+						},
+						"score": 1.4231791030952075,
+						"type": "score"
+					},
+					"backwardReplaces": 0.08716090723211065,
+					"backwardRequires": 0.2905848283775647,
+					"duplicates": 0.09097169587089973,
+					"forwardReplaces": 0.05887893471818559,
+					"forwardRequires": 0.407138202984875
 				},
 				"left": "no-unknown-returns",
-				"right": "no-widen-then-assert",
-				"strength": 0.8
+				"right": "no-unknown-type-aliases",
+				"strength": 0.6124187857679242
 			},
 			"from": "no-unknown-returns",
 			"kind": "related",
-			"reason": "`no-unknown-returns` complements `no-widen-then-assert`: together they keep types precise, banning unknown returns and local widen-then-assert round trips.",
-			"to": "no-widen-then-assert"
+			"reason": "`no-unknown-returns` pairs with `no-unknown-type-aliases` to stop unknown leaking via returns or renamed aliases, keeping it explicit until parsed.",
+			"to": "no-unknown-type-aliases"
 		},
 		{
 			"evidence": {
 				"judgments": {
 					"assessment": {
-						"confidence": 0.67,
+						"confidence": 0,
 						"probabilities": {
-							"0": 0.05,
-							"1": 0.13,
-							"2": 0.82
+							"0": 0.26874890707975374,
+							"1": 0.21249046658382503,
+							"2": 0.5187606263364212
 						},
-						"score": 1.78,
+						"score": 1.2500117192566673,
 						"type": "score"
 					},
-					"backwardReplaces": 0.13,
-					"backwardRequires": 0.52,
-					"duplicates": 0.45,
-					"forwardReplaces": 0.18,
-					"forwardRequires": 0.29
+					"backwardReplaces": 0.07019587427083954,
+					"backwardRequires": 0.24463646120367746,
+					"duplicates": 0.12719184113696155,
+					"forwardReplaces": 0.03597387723583709,
+					"forwardRequires": 0.1963472903939766
 				},
-				"left": "no-unknown-type-aliases",
-				"right": "no-widen-then-assert",
-				"strength": 0.82
+				"left": "no-unknown-returns",
+				"right": "no-unsafe-dictionary-type",
+				"strength": 0.5187606263364212
 			},
-			"from": "no-unknown-type-aliases",
+			"from": "no-unknown-returns",
 			"kind": "related",
-			"reason": "`no-unknown-type-aliases` keeps `unknown` explicit at boundaries and pairs with `no-widen-then-assert`, which stops widening known locals then asserting back.",
-			"to": "no-widen-then-assert"
+			"reason": "Use `no-unknown-returns` alongside `no-unsafe-dictionary-type` to require domain types instead of unknown for function returns and dictionary values.",
+			"to": "no-unsafe-dictionary-type"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.0821017064480637,
+						"probabilities": {
+							"0": 0.17353843681546094,
+							"1": 0.26485532207036905,
+							"2": 0.5616062411141701
+						},
+						"score": 1.3880678042987094,
+						"type": "score"
+					},
+					"backwardReplaces": 0.08716088940985063,
+					"backwardRequires": 0.23606023432787737,
+					"duplicates": 0.22769405126480605,
+					"forwardReplaces": 0.039378013443371995,
+					"forwardRequires": 0.1618994240182981
+				},
+				"left": "no-unused-use-memo",
+				"right": "no-useless-use-memo",
+				"strength": 0.5616062411141701
+			},
+			"from": "no-unused-use-memo",
+			"kind": "related",
+			"reason": "`no-unused-use-memo` flags discarded useMemo results, complementing `no-useless-use-memo`, which flags static values, so enable both for full coverage.",
+			"to": "no-useless-use-memo"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3020796785742843,
+						"probabilities": {
+							"0": 0.06265846678652376,
+							"1": 0.3399632807107629,
+							"2": 0.5973782525027133
+						},
+						"score": 1.5347197857161894,
+						"type": "score"
+					},
+					"backwardReplaces": 0.34126431204306995,
+					"backwardRequires": 0.25342089108813676,
+					"duplicates": 0.9200300926787232,
+					"forwardReplaces": 0.13799220977634724,
+					"forwardRequires": 0.2115962647898467
+				},
+				"left": "no-use-memo-simple-expression",
+				"right": "no-useless-use-memo",
+				"strength": 0.5973782525027133
+			},
+			"from": "no-use-memo-simple-expression",
+			"kind": "overlaps",
+			"reason": "`no-use-memo-simple-expression` overlaps with `no-useless-use-memo` on trivial static values like `useMemo(() => 1, [])`, so both may duplicate warnings.",
+			"to": "no-useless-use-memo"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.560861376461863,
+						"probabilities": {
+							"0": 0.027414618163983814,
+							"1": 0.2379298460307904,
+							"2": 0.7346555358052257
+						},
+						"score": 1.7072409176412418,
+						"type": "score"
+					},
+					"backwardReplaces": 0.8109597410226115,
+					"backwardRequires": 0.33078402611999136,
+					"duplicates": 0.9792052044216885,
+					"forwardReplaces": 0.03763898140873953,
+					"forwardRequires": 0.24463647776076894
+				},
+				"left": "no-adjust-state-on-prop-change",
+				"right": "no-useless-use-effect",
+				"strength": 0.7346555358052257
+			},
+			"from": "no-useless-use-effect",
+			"kind": "supersedes",
+			"reason": "`no-useless-use-effect` supersedes `no-adjust-state-on-prop-change` because it reports adjusting state when a prop changes, making it redundant.",
+			"to": "no-adjust-state-on-prop-change"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0.3729685465566589,
+						"probabilities": {
+							"0": 0.13934032298740912,
+							"1": 0.13934032298740912,
+							"2": 0.7213193540251817
+						},
+						"score": 1.5819790310377724,
+						"type": "score"
+					},
+					"backwardReplaces": 0.13249882276789962,
+					"backwardRequires": 0.14367564220080295,
+					"duplicates": 0.18904027271339366,
+					"forwardReplaces": 0.18904025897738855,
+					"forwardRequires": 0.211596279737173
+				},
+				"left": "prefer-hoisted-jsx-elements",
+				"right": "prefer-hoisted-jsx-object-properties",
+				"strength": 0.7213193540251817
+			},
+			"from": "prefer-hoisted-jsx-elements",
+			"kind": "related",
+			"reason": "`prefer-hoisted-jsx-elements` pairs with `prefer-hoisted-jsx-object-properties` to hoist static JSX elements and object props to module constants.",
+			"to": "prefer-hoisted-jsx-object-properties"
+		},
+		{
+			"evidence": {
+				"judgments": {
+					"assessment": {
+						"confidence": 0,
+						"probabilities": {
+							"0": 0.26557680442077436,
+							"1": 0.14420198368733478,
+							"2": 0.5902212118918909
+						},
+						"score": 1.3246444074711166,
+						"type": "score"
+					},
+					"backwardReplaces": 0.028659120333363184,
+					"backwardRequires": 0.09904547495959228,
+					"duplicates": 0.2716044157323428,
+					"forwardReplaces": 0.022796533636847346,
+					"forwardRequires": 0.10331707443777229
+				},
+				"left": "prefer-pascal-case-enums",
+				"right": "prefer-singular-enums",
+				"strength": 0.5902212118918909
+			},
+			"from": "prefer-pascal-case-enums",
+			"kind": "related",
+			"reason": "`prefer-pascal-case-enums` handles casing while `prefer-singular-enums` handles number, so together they fully specify enum naming style.",
+			"to": "prefer-singular-enums"
 		}
 	],
 	"generator": "scripts/regenerate-relations.ts",
 	"models": {
-		"decisions": "~typesafe/jev-latest",
-		"reasons": "z-ai/glm-5.3-flash"
+		"decisions": "liquid/d1.2-ultra",
+		"reasons": "meta/muse-ember"
 	}
 }

@@ -195,7 +195,7 @@ function getPaddingReplacement(
 	/* v8 ignore next -- directional reports require a comparable left value that can be printed. @preserve */
 	if (leftValue === undefined) return undefined;
 
-	return `<${componentName} horizontal=${topValue} vertical=${leftValue} />`;
+	return `<${componentName} horizontal=${leftValue} vertical=${topValue} />`;
 }
 
 function getPaddingMessageId(paddingAttributes: PaddingAttributes): MessageId | undefined {

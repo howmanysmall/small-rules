@@ -59,6 +59,12 @@ function isTopLevelArrayType({ parent }: ESTree.TSType): boolean {
 const arrayTypeGeneric = createRule("array-type-generic", "naming", {
 	createOnce(context): Visitor {
 		function reportArrayType(node: ESTree.TSArrayType | ESTree.TSTypeOperator): void {
+			// The rebuilt type would drop comments inside the brackets.
+			if (context.sourceCode.getCommentsInside(node).length > 0) {
+				context.report({ messageId: "useGenericArrayType", node });
+				return;
+			}
+
 			context.report({
 				fix(fixer) {
 					return fixer.replaceText(node, toGenericArrayType(node, context.sourceCode));

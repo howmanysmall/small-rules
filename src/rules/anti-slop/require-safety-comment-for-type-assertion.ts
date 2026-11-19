@@ -19,6 +19,7 @@
 import nodePath from "node:path";
 import {
 	EXPRESSION_STATEMENT,
+	getStatementList,
 	isExportNamedDeclaration,
 	isIdentifierNamed,
 	isProgram,
@@ -31,7 +32,7 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
-import { parseDirectiveComment } from "$oxc-utilities/directive-comments";
+import { computeDisabledArea, lte, parseDirectiveComment } from "$oxc-utilities/directive-comments";
 import {
 	checkAssertionSyntaxDiagnosticRange,
 	isLintSettings,
@@ -40,11 +41,18 @@ import {
 
 import type { ESTree, SourceCode, VisitorWithHooks } from "oxlint-plugin-utilities";
 
-import type { DirectiveComment } from "$oxc-utilities/directive-comments";
+import type { DirectiveComment, DisabledAreaCollection } from "$oxc-utilities/directive-comments";
 
 type TypeAssertion = ESTree.TSAsExpression | ESTree.TSTypeAssertion;
 
 type SourceCodeComment = ESTree.Comment;
+
+type DisabledAreas = DisabledAreaCollection["areas"];
+
+interface SourcePosition {
+	readonly column: number;
+	readonly line: number;
+}
 
 const COMMENT_OWNER_KINDS = new Set([
 	EXPRESSION_STATEMENT,
@@ -124,12 +132,62 @@ function disableKindCoversLine(kind: string, comment: SourceCodeComment, line: n
 	return comment.loc.end.line <= line;
 }
 
+/**
+ * Tells whether a block disable is still open where the assertion starts.
+ *
+ * @param areas - The file's disabled areas, closed by `oxlint-enable`.
+ * @param comment - The `oxlint-disable` block comment.
+ * @param suppressionRules - Rule IDs whose disable counts as justification.
+ * @param position - Where the assertion's type annotation starts.
+ * @returns Whether a counted rule of the comment is still disabled there.
+ */
+function isBlockDisableOpenAt(
+	areas: DisabledAreas,
+	comment: SourceCodeComment,
+	suppressionRules: ReadonlySet<string>,
+	position: SourcePosition,
+): boolean {
+	for (const area of areas) {
+		if (area.comment !== comment || !suppressionRules.has(String(area.ruleId))) continue;
+		if (area.end === undefined || lte(position, area.end)) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Tells whether a comment trails the statement before `owner` on its last line.
+ * Such a comment belongs to that statement, not to `owner`.
+ *
+ * @param comment - A comment found before `owner`.
+ * @param owner - The statement the comment may be mistaken for a lead of.
+ * @returns Whether the comment ends the previous statement's line.
+ */
+function isTrailingCommentOfPreviousStatement(comment: SourceCodeComment, owner: ESTree.Node): boolean {
+	const statements = getStatementList(owner);
+	if (statements === undefined) return false;
+
+	const previous = statements[statements.indexOf(owner) - 1];
+	return (
+		previous !== undefined &&
+		comment.range[0] >= previous.range[1] &&
+		comment.loc.start.line === previous.loc.end.line &&
+		comment.loc.end.line < owner.loc.start.line
+	);
+}
+
 function hasJustifyingCommentBefore(
 	sourceCode: SourceCode,
 	owner: ESTree.Node,
 	isJustifying: (comment: SourceCodeComment) => boolean,
 ): boolean {
-	return sourceCode.getCommentsBefore(owner).some(isJustifying);
+	return sourceCode
+		.getCommentsBefore(owner)
+		.some((comment) => isJustifying(comment) && !isTrailingCommentOfPreviousStatement(comment, owner));
+}
+
+function isInStatementList(node: ESTree.Node): boolean {
+	return getStatementList(node)?.includes(node) === true;
 }
 
 function hasCommentBeforeAncestors(
@@ -150,6 +208,10 @@ function hasCommentBeforeAncestors(
 		}
 
 		if (isProgram(current.parent)) return false;
+
+		// A comment above a statement or class member justifies the assertions
+		// written directly in it, not those nested in a block it contains.
+		if (isInStatementList(current)) return false;
 		current = current.parent;
 	}
 }
@@ -157,15 +219,16 @@ function hasCommentBeforeAncestors(
 function hasDisableCoveringAssertionLine(
 	sourceCode: SourceCode,
 	node: TypeAssertion,
-	assertionSyntaxRange: boolean,
-	suppressionRules: ReadonlySet<string>,
+	{ assertionSyntaxRange, disabledAreas, suppressionRules }: AssertionPolicy,
 ): boolean {
-	const { line } = node.typeAnnotation.loc.start;
+	const position = node.typeAnnotation.loc.start;
 	for (const comment of sourceCode.getAllComments()) {
 		const parsed = getParsedUnsafeAssertionDisable(comment, suppressionRules);
 		if (parsed === undefined) continue;
 		if (!assertionSyntaxRange && parsed.kind !== OXLINT_DISABLE_NEXT_LINE) continue;
-		if (disableKindCoversLine(parsed.kind, comment, line)) return true;
+		if (!disableKindCoversLine(parsed.kind, comment, position.line)) continue;
+		if (parsed.kind !== OXLINT_DISABLE) return true;
+		if (isBlockDisableOpenAt(disabledAreas, comment, suppressionRules, position)) return true;
 	}
 
 	return false;
@@ -174,18 +237,16 @@ function hasDisableCoveringAssertionLine(
 /** The options and tsgolint behavior a file's assertions are judged against. */
 interface AssertionPolicy {
 	readonly assertionSyntaxRange: boolean;
+	readonly disabledAreas: DisabledAreas;
 	readonly markers: readonly [string, ...Array<string>];
 	readonly pattern: RegExp;
 	readonly suppressionRules: ReadonlySet<string>;
 }
 
-function hasSafetyComment(
-	sourceCode: SourceCode,
-	node: TypeAssertion,
-	{ assertionSyntaxRange, pattern, suppressionRules }: AssertionPolicy,
-): boolean {
+function hasSafetyComment(sourceCode: SourceCode, node: TypeAssertion, policy: AssertionPolicy): boolean {
+	const { assertionSyntaxRange, pattern, suppressionRules } = policy;
 	if (hasCommentBeforeAncestors(sourceCode, node, (comment) => pattern.test(comment.value))) return true;
-	if (hasDisableCoveringAssertionLine(sourceCode, node, assertionSyntaxRange, suppressionRules)) return true;
+	if (hasDisableCoveringAssertionLine(sourceCode, node, policy)) return true;
 	if (assertionSyntaxRange) return false;
 
 	return hasCommentBeforeAncestors(sourceCode, node, (comment) =>
@@ -205,10 +266,14 @@ const requireSafetyCommentForTypeAssertion = createRule("require-safety-comment-
 			const markers = getConfiguredSafetyMarkers(options?.markers);
 			const settings = isLintSettings.allows(context.settings) ? context.settings : undefined;
 
+			const assertionSyntaxRange = checkAssertionSyntaxDiagnosticRange(
+				resolveTsgoLintVersion(settings, nodePath.dirname(context.filename)),
+			);
+
 			return {
-				assertionSyntaxRange: checkAssertionSyntaxDiagnosticRange(
-					resolveTsgoLintVersion(settings, nodePath.dirname(context.filename)),
-				),
+				assertionSyntaxRange,
+				// Only the assertion-syntax range reads block disable areas.
+				disabledAreas: assertionSyntaxRange ? computeDisabledArea(context.sourceCode).areas : [],
 				markers,
 				pattern: getMarkerPattern(markers),
 				suppressionRules: getConfiguredSuppressionRules(options?.suppressionRules),

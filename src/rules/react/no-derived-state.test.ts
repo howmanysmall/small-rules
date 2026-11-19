@@ -979,6 +979,22 @@ export function Form(): React.Element {
 				options: [{ environment: "standard" }],
 				errors: [{ data: { state: "fullName" }, messageId: "avoidDerivedState" }],
 			},
+			{
+				code: `
+import { useEffect, useState } from "@rbxts/react";
+
+export const useArrowHook = (value: number) => {
+	const [doubled, setDoubled] = useState(0);
+
+	useEffect(() => {
+		setDoubled(value * 2);
+	}, [value]);
+
+	return doubled;
+};
+`,
+				errors: [{ data: { state: "doubled" }, messageId: "avoidDerivedState" }],
+			},
 		],
 
 		valid: [

@@ -3,16 +3,14 @@ import { isDirectedKind } from "$documentation/data/rule-relations";
 import { compareRelationBaseline } from "./evaluation";
 import { compareStrings, getPairKey } from "./types";
 
-import type { RuleName } from "$documentation/data/rule-manifest";
 import type { RuleRelation, RuleRelationPair } from "$documentation/data/rule-relations";
 
 import type { RelationBaselineComparison, RelationIdentity } from "./evaluation";
 import type { GeneratedEdge } from "./render";
 import type { RegenerationResult } from "./run";
-import type { PairJudgments, RelationResolution, ReviewFinding, RuleCard, ScoredRelation } from "./types";
+import type { PairJudgments, RelationResolution, ReviewFinding, ScoredRelation } from "./types";
 
 interface ReviewOptions {
-	readonly cards: ReadonlyMap<RuleName, RuleCard>;
 	readonly denylist: ReadonlyArray<RuleRelationPair>;
 	readonly pins: ReadonlyArray<RuleRelation>;
 	readonly previous: ReadonlyArray<GeneratedEdge>;
@@ -55,12 +53,13 @@ interface RelationReviewReport {
 		readonly capped: ReadonlyArray<CappedRelation>;
 		readonly evaluatedPairCount: number;
 		readonly needsReview: ReadonlyArray<ReportFinding>;
+		readonly needsReviewCount: number;
+		readonly omittedLowSignalReviewCount: number;
 		readonly published: ReadonlyArray<GeneratedEdge>;
 		readonly rejectedCount: number;
 	};
 	readonly qualityEvaluation: QualityEvaluation;
-	readonly ruleCards: ReadonlyArray<RuleCard>;
-	readonly schemaVersion: 2;
+	readonly schemaVersion: 3;
 }
 
 function matchesExpectation(actual: RelationResolution, expected: ReviewedExpectation["expected"]): boolean {
@@ -123,6 +122,14 @@ function evaluateOverrides(options: ReviewOptions): QualityEvaluation {
 	};
 }
 
+function isActionableReviewFinding(finding: ReportFinding): boolean {
+	if (finding.concern !== "relationship needs review") return true;
+	if (finding.judgments === undefined) return true;
+
+	const { probabilities } = finding.judgments.assessment;
+	return probabilities["1"] >= probabilities["0"] || probabilities["2"] >= probabilities["0"];
+}
+
 export function createRelationReviewReport(options: ReviewOptions): RelationReviewReport {
 	const { result } = options;
 	const published = result.edges
@@ -130,15 +137,20 @@ export function createRelationReviewReport(options: ReviewOptions): RelationRevi
 		.toSorted((left, right) => compareStrings(getPairKey(left.from, left.to), getPairKey(right.from, right.to)));
 	const publishedPairs = new Set(published.map((edge) => getPairKey(edge.from, edge.to)));
 
-	const needsReview = result.reviews
-		.map((finding) => ({ ...finding, judgments: result.judgments.get(getPairKey(finding.left, finding.right)) }))
+	const allReviewFindings = result.reviews.map((finding) => ({
+		...finding,
+		judgments: result.judgments.get(getPairKey(finding.left, finding.right)),
+	}));
+	const reviewPairs = new Set(allReviewFindings.map((finding) => getPairKey(finding.left, finding.right)));
+	const needsReview = allReviewFindings
+		.filter((finding) => isActionableReviewFinding(finding))
 		.toSorted(
 			(left, right) =>
 				right.strength - left.strength ||
 				compareStrings(getPairKey(left.left, left.right), getPairKey(right.left, right.right)),
 		);
+	const omittedLowSignalReviewCount = allReviewFindings.length - needsReview.length;
 
-	const reviewPairs = new Set(needsReview.map((finding) => getPairKey(finding.left, finding.right)));
 	const capped = new Array<CappedRelation>();
 	let rejectedCount = 0;
 	let acceptedCount = 0;
@@ -168,11 +180,12 @@ export function createRelationReviewReport(options: ReviewOptions): RelationRevi
 			capped,
 			evaluatedPairCount: result.resolutions.size,
 			needsReview,
+			needsReviewCount: allReviewFindings.length,
+			omittedLowSignalReviewCount,
 			published,
 			rejectedCount,
 		},
 		qualityEvaluation: evaluateOverrides(options),
-		ruleCards: [...options.cards.values()].toSorted((left, right) => compareStrings(left.name, right.name)),
-		schemaVersion: 2,
+		schemaVersion: 3,
 	};
 }

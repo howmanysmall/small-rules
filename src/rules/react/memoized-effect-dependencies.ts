@@ -144,7 +144,11 @@ function shouldForceUnmemoized(mode: Mode, result: Stability): boolean {
 	return mode === "aggressive" && result !== Stability.Memoized;
 }
 
-function registerConfiguredEffectHooks(rawOptions: UnknownRecord, effectHooks: Map<string, number>): void {
+function registerConfiguredEffectHooks(
+	rawOptions: UnknownRecord,
+	effectHooks: Map<string, number>,
+	effectHookIdentifiers: Map<string, number>,
+): void {
 	if (!("hooks" in rawOptions) || !Array.isArray(rawOptions.hooks)) return;
 
 	for (const hook of rawOptions.hooks) {
@@ -155,6 +159,8 @@ function registerConfiguredEffectHooks(rawOptions: UnknownRecord, effectHooks: M
 			"dependenciesIndex" in hook && Predicate.isNumber(hook.dependenciesIndex) ? hook.dependenciesIndex : 1;
 
 		effectHooks.set(hook.name, dependenciesIndex);
+		// A configured hook is matched by name wherever it is imported from.
+		effectHookIdentifiers.set(hook.name, dependenciesIndex);
 	}
 }
 
@@ -166,11 +172,11 @@ const memoizedEffectDependencies = createRule("memoized-effect-dependencies", "r
 			"environment" in options && isEnvironment(options.environment) ? options.environment : ROBLOX_TS;
 
 		const effectHookNameToIndex = new Map(DEFAULT_EFFECT_HOOKS);
-		registerConfiguredEffectHooks(options, effectHookNameToIndex);
+		const effectHookIdentifiers = new Map<string, number>();
+		registerConfiguredEffectHooks(options, effectHookNameToIndex, effectHookIdentifiers);
 
 		const reactSources = getReactSources(environment);
 		const reactNamespaces = new Set<string>();
-		const effectHookIdentifiers = new Map<string, number>();
 		const memoHookIdentifiers = new Set<string>();
 		const stableHookIdentifiers = new Map<string, string>();
 		const identifierScopeCache = new WeakMap<ESTree.IdentifierReference, Scope>();

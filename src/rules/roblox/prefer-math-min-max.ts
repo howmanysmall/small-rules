@@ -6,7 +6,6 @@ import {
 	isIdentifier,
 	isIdentifierNamed,
 	isPrivateIdentifier,
-	isSequenceExpression,
 	isTsNumberKeyword,
 	isTsTypeAnnotation,
 	isTsTypeReference,
@@ -18,7 +17,7 @@ import { Predicate } from "effect";
 import { getVariableByName, hasShadowedBinding } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
-import { stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
+import { getListElementText, stripExpressionWrappers, stripParenthesis } from "$oxc-utilities/oxc-utilities";
 
 import type { Definition, ESTree, SourceCode, Visitor } from "oxlint-plugin-utilities";
 
@@ -93,12 +92,6 @@ function isKnownNonNumberExpression(sourceCode: SourceCode, expression: ESTree.E
 
 function getComparableText(sourceCode: SourceCode, expression: ESTree.Expression): string {
 	return sourceCode.getText(stripExpressionWrappers(expression));
-}
-
-function getMathArgumentText(sourceCode: SourceCode, expression: ESTree.Expression): string {
-	const unwrapped = stripParenthesis(expression);
-	const text = sourceCode.getText(unwrapped);
-	return isSequenceExpression(unwrapped) ? `(${text})` : text;
 }
 
 type MathMethod = "max" | "min";
@@ -191,8 +184,14 @@ const preferMathMinMax = createRule("prefer-math-min-max", "roblox", {
 				const { left, right } = node.test;
 				/* v8 ignore next -- @preserve getPreferredMathMethod already rejected non-expression operands. */
 				if (!isExpressionOperand(left) || !isExpressionOperand(right)) return;
-				const leftText = getMathArgumentText(sourceCode, left);
-				const rightText = getMathArgumentText(sourceCode, right);
+				const leftText = getListElementText(sourceCode, stripParenthesis(left));
+				const rightText = getListElementText(sourceCode, stripParenthesis(right));
+
+				// Replacing the whole ternary would delete any comment inside it.
+				if (sourceCode.getCommentsInside(node).length > 0) {
+					context.report({ messageId: "preferMathMethod", node });
+					return;
+				}
 
 				context.report({
 					fix(fixer) {
