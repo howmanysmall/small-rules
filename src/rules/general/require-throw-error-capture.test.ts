@@ -440,6 +440,41 @@ describe("require-throw-error-capture", () => {
 				output: null,
 				errors: [error],
 			},
+			// Rebuilding the statement would drop a comment inside it
+			{
+				code: [
+					"export function check(value: number) {",
+					'\tif (value) throw /* keep */ new Error("x");',
+					"}",
+				].join("\n"),
+				output: null,
+				errors: [error],
+			},
+			{
+				code: ["export function check(value: number) {", '\tthrow new Error("x"); // keep', "}"].join("\n"),
+				output: [
+					"export function check(value: number) {",
+					'\tconst error = new Error("x");',
+					"Error.captureStackTrace(error, check);",
+					"throw error; // keep",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
+			{
+				code: ["export function check(value: number) {", "\t// keep", '\tthrow new Error("x");', "}"].join(
+					"\n",
+				),
+				output: [
+					"export function check(value: number) {",
+					"\t// keep",
+					'\tconst error = new Error("x");',
+					"Error.captureStackTrace(error, check);",
+					"throw error;",
+					"}",
+				].join("\n"),
+				errors: [error],
+			},
 			// Package-aware specifier does not match a different import source
 			{
 				code: [

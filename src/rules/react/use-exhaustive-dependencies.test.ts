@@ -6,6 +6,113 @@ import rule from "$oxc-rules/react/use-exhaustive-dependencies";
 describe("use-exhaustive-dependencies", () => {
 	jsx.run("use-exhaustive-dependencies", rule, {
 		invalid: [
+			// A comment inside the dependency array withholds the fix
+			{
+				code: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a, b);
+    }, [
+        a, // re-run when a changes
+    ]);
+}
+`,
+				output: null,
+				errors: [{ messageId: "missingDependency", suggestions: [] }],
+			},
+			{
+				code: `
+function Component({ a, b, c }) {
+    useEffect(() => {
+        print(a, b, c);
+    }, [a /* first */]);
+}
+`,
+				output: null,
+				errors: [{ messageId: "missingDependencies", suggestions: [] }],
+			},
+			{
+				code: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a);
+    }, [
+        a, // re-run when a changes
+        b, // and when b changes
+    ]);
+}
+`,
+				output: null,
+				errors: [{ messageId: "unnecessaryDependency", suggestions: [] }],
+			},
+			{
+				code: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a);
+    }, [a, b] /* outside */);
+}
+`,
+				output: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a);
+    }, [a] /* outside */);
+}
+`,
+				errors: [
+					{
+						messageId: "unnecessaryDependency",
+						suggestions: [
+							{
+								desc: "Remove 'b' from dependencies array",
+								output: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a);
+    }, [a] /* outside */);
+}
+`,
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a, b);
+    }, [
+        a,
+    ]);
+}
+`,
+				output: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a, b);
+    }, [a, b]);
+}
+`,
+				errors: [
+					{
+						messageId: "missingDependency",
+						suggestions: [
+							{
+								desc: "Add 'b' to dependencies array",
+								output: `
+function Component({ a, b }) {
+    useEffect(() => {
+        print(a, b);
+    }, [a, b]);
+}
+`,
+							},
+						],
+					},
+				],
+			},
 			// Missing dependency
 			{
 				code: `

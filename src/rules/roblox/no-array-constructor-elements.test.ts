@@ -358,6 +358,92 @@ const items = [() => items.length];
 				output: null,
 				errors: [{ messageId: "requireExplicitGenericOnNewArray" }],
 			},
+			{
+				code: "const value = new Array(typeof x);",
+				output: "const value = [typeof x];",
+				options: [{ environment: "standard" }],
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
+			},
+			{
+				code: "const value = new Array(typeof x);",
+				output: "const value = [typeof x];",
+				errors: [{ messageId: "avoidSingleArgumentConstructor" }],
+			},
+			{
+				code: "const value = new Array(-size);",
+				output: null,
+				options: [{ environment: "standard" }],
+				errors: [
+					{
+						messageId: "avoidLengthConstructorInStandard",
+						suggestions: [
+							{
+								messageId: "suggestArrayFromLength",
+								output: "const value = Array.from({ length: -size });",
+							},
+						],
+					},
+				],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(1); // first
+// keep me
+items.push(2);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(1 /* one */);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(getValue()); // first
+items.push(2);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization", suggestions: [] }],
+			},
+			{
+				code: `
+const items = new Array</* element */ number>();
+items.push(1);
+`,
+				output: null,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>(); // list
+items.push(1);
+items.push(2);
+// after
+`,
+				output: `
+const items = [1, 2]; // list
+// after
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
+			{
+				code: `
+const items = new Array<number>();
+items.push(1);
+items.push(2); // two
+`,
+				output: `
+const items = [1, 2]; // two
+`,
+				errors: [{ messageId: "collapseArrayPushInitialization" }],
+			},
 		],
 		valid: [
 			"const value = new Set();",

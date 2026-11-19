@@ -32,6 +32,61 @@ describe("no-has-before-remove-in-jecs", () => {
 				output: null,
 				errors: [{ messageId: "removeWithoutHas" }],
 			},
+			// Reports without a fix when the fix would delete a comment
+			{
+				code: [
+					'import { world } from "@rbxts/jecs";',
+					"const gameWorld = world();",
+					"if (gameWorld.has(entity, Component)) {",
+					"\t// clear the stale value so it restarts",
+					"\tgameWorld.remove(entity, Component);",
+					"}",
+				].join("\n"),
+				output: null,
+				errors: [{ messageId: "removeWithoutHas" }],
+			},
+			{
+				code: [
+					'import { world } from "@rbxts/jecs";',
+					"const gameWorld = world();",
+					"if (gameWorld.has(entity, /* tag */ Component)) gameWorld.remove(entity, Component);",
+				].join("\n"),
+				output: null,
+				errors: [{ messageId: "removeWithoutHas" }],
+			},
+			// Comments outside the if statement survive the fix
+			{
+				code: [
+					'import { world } from "@rbxts/jecs";',
+					"const gameWorld = world();",
+					"// clear the stale value",
+					"if (gameWorld.has(entity, Component)) gameWorld.remove(entity, Component); // done",
+				].join("\n"),
+				output: [
+					'import { world } from "@rbxts/jecs";',
+					"const gameWorld = world();",
+					"// clear the stale value",
+					"gameWorld.remove(entity, Component); // done",
+				].join("\n"),
+				errors: [{ messageId: "removeWithoutHas" }],
+			},
+			{
+				code: [
+					'import { world } from "@rbxts/jecs";',
+					"const gameWorld = world();",
+					"if (gameWorld.has(entity, Component)) {",
+					"\tgameWorld.remove(entity, Component);",
+					"}",
+					"/* after */",
+				].join("\n"),
+				output: [
+					'import { world } from "@rbxts/jecs";',
+					"const gameWorld = world();",
+					"gameWorld.remove(entity, Component);",
+					"/* after */",
+				].join("\n"),
+				errors: [{ messageId: "removeWithoutHas" }],
+			},
 		],
 		valid: [
 			{

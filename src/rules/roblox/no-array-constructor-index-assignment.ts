@@ -11,7 +11,12 @@ import {
 } from "@small-rules/oxlint-utilities";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
-import { forEachNode, hasEagerIdentifierReference, STOP_NODE_TRAVERSAL } from "$oxc-utilities/ast-utilities";
+import {
+	forEachNode,
+	hasCommentInRange,
+	hasEagerIdentifierReference,
+	STOP_NODE_TRAVERSAL,
+} from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { getListElementText } from "$oxc-utilities/oxc-utilities";
 
@@ -34,6 +39,7 @@ interface Candidate {
 	readonly declaration: ESTree.VariableDeclaration;
 	readonly declarator: ESTree.VariableDeclarator;
 	readonly firstAssignmentStatement: ESTree.ExpressionStatement;
+	readonly hasRemovedComment: boolean;
 	readonly lastAssignmentStatement: ESTree.ExpressionStatement;
 	readonly readsArray: boolean;
 }
@@ -176,6 +182,10 @@ function getCandidate(
 		declaration,
 		declarator,
 		firstAssignmentStatement: firstFound.statement,
+		// The fix replaces the initializer and deletes the assignments.
+		hasRemovedComment:
+			sourceCode.getCommentsInside(declarator.init).length > 0 ||
+			hasCommentInRange(sourceCode, firstFound.statement.range[0], lastFound.statement.range[1]),
 		lastAssignmentStatement: lastFound.statement,
 		readsArray: foundAssignments.some((found) =>
 			hasEagerIdentifierReference(found.expression.right, arrayIdentifierName),
@@ -289,8 +299,9 @@ const noArrayConstructorIndexAssignment = createRule("no-array-constructor-index
 				}
 
 				// A value that reads the array would read it before the literal
-				// exists, so there is no safe rewrite to offer.
-				if (candidate.readsArray) {
+				// exists, so there is no safe rewrite to offer. A rewrite would
+				// also delete any comment in the code it removes.
+				if (candidate.readsArray || candidate.hasRemovedComment) {
 					context.report({ messageId: "preferArrayLiteral", node: candidate.declaration });
 				} else {
 					context.report({

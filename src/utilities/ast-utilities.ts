@@ -243,6 +243,23 @@ export function getDeclarationRemovalRange(
 	return [start, end];
 }
 
+/**
+ * Whether a comment lies wholly inside a source range.
+ *
+ * @param sourceCode - The source code that owns the comments.
+ * @param start - The range start offset.
+ * @param end - The range end offset.
+ * @returns Whether some comment starts at or after start and ends by end.
+ */
+export function hasCommentInRange(sourceCode: SourceCode, start: number, end: number): boolean {
+	for (const comment of sourceCode.getAllComments()) {
+		const [commentStart, commentEnd] = comment.range;
+		if (commentStart >= start && commentEnd <= end) return true;
+	}
+
+	return false;
+}
+
 export function hasAttachedComments(sourceCode: SourceCode, node: ESTree.Node): boolean {
 	if (sourceCode.getCommentsInside(node).length > 0) return true;
 

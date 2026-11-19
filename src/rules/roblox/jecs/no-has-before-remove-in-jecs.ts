@@ -103,7 +103,8 @@ const noHasBeforeRemoveInJecs = createRule("no-has-before-remove-in-jecs", "robl
 				const guard = getRemovalGuard(sourceCode, node);
 				if (guard === undefined) return;
 
-				if (isSafeToFix(guard)) {
+				// Replacing the whole statement would delete any comment in it.
+				if (isSafeToFix(guard) && sourceCode.getCommentsInside(node).length === 0) {
 					context.report({
 						fix: (fixer) => fixer.replaceText(node, `${sourceCode.getText(guard.removeCall)};`),
 						messageId: "removeWithoutHas",

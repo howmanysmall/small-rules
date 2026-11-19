@@ -11,6 +11,69 @@ describe("no-adjust-state-on-prop-change", () => {
 import React, { useEffect, useState } from "@rbxts/react";
 
 export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState(0);
+
+	useEffect(() => {
+		setSelection(0);
+	}, [items, items.size()]);
+
+	return <textlabel Text={tostring(selection)} />;
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid adjusting state when a prop changes. Instead, adjust "selection" directly during render when "items" changes, or refactor your state to avoid this need entirely.',
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect, useState } from "@rbxts/react";
+
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
+	const [selection, setSelection] = useState(0);
+
+	useEffect(() => {
+		setSelection(0);
+	}, [items]);
+
+	return <textlabel Text={tostring(selection)} />;
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid adjusting state when a prop changes. Instead, adjust "selection" directly during render when "items" changes, or refactor your state to avoid this need entirely.',
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect, useState } from "@rbxts/react";
+
+export function List({ items, user }: { items: ReadonlyArray<string>; user: string }): React.Element {
+	const [selection, setSelection] = useState(0);
+
+	useEffect(() => {
+		setSelection(0);
+	}, [items, user]);
+
+	return <textlabel Text={tostring(selection)} />;
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid adjusting state when a prop changes. Instead, adjust "selection" directly during render when "items" and "user" changes, or refactor your state to avoid this need entirely.',
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect, useState } from "@rbxts/react";
+
+export function List({ items }: { items: ReadonlyArray<string> }): React.Element {
 	const [selection, setSelection] = useState<string | undefined>();
 
 	useEffect(() => {

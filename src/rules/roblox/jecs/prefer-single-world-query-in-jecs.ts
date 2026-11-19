@@ -311,9 +311,14 @@ function processGetCalls(calls: ReadonlyArray<WorldQueryCall>, context: Context)
 	const componentArguments = componentTexts.join(", ");
 	const fixedCode = `const ${destructuring} = ${worldText}.get(${entityText}, ${componentArguments});`;
 
-	const createFix = isMergeUnsafe(calls)
-		? undefined
-		: (fixer: Fixer): FixReturn => fixer.replaceTextRange(getDeclarationsRange(calls), fixedCode);
+	// The merged declaration has no place for the declarators' annotations.
+	const dropsAnnotation = calls.some(({ variableDeclarator }) =>
+		Predicate.isNotNullish(variableDeclarator.id.typeAnnotation),
+	);
+	const createFix =
+		dropsAnnotation || isMergeUnsafe(calls)
+			? undefined
+			: (fixer: Fixer): FixReturn => fixer.replaceTextRange(getDeclarationsRange(calls), fixedCode);
 
 	reportMergedQuery(context, { createFix, fixedCode, messageId: "preferSingleGet", node: firstCall.node });
 }

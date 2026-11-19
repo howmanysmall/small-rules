@@ -7,6 +7,26 @@ describe("array-type-generic", () => {
 	tsx.run("array-type-generic", rule, {
 		invalid: [
 			{
+				code: "type Commented = string /* c */ [];",
+				output: null,
+				errors: [{ messageId: "useGenericArrayType" }],
+			},
+			{
+				code: "type Held = readonly (string /* c */)[];",
+				output: null,
+				errors: [{ messageId: "useGenericArrayType" }],
+			},
+			{
+				code: "type Outside = /* c */ string[];",
+				output: "type Outside = /* c */ Array<string>;",
+				errors: [{ messageId: "useGenericArrayType" }],
+			},
+			{
+				code: "type Trailing = string[] /* c */;",
+				output: "type Trailing = Array<string> /* c */;",
+				errors: [{ messageId: "useGenericArrayType" }],
+			},
+			{
 				code: "type A = string[];",
 				output: "type A = Array<string>;",
 				errors: [{ messageId: "useGenericArrayType" }],

@@ -64,9 +64,9 @@ const noPassDataToParent = createReactEffectRule("no-pass-data-to-parent", {
 	description: "Disallow passing data to parents in an effect.",
 	messages: {
 		avoidPassingDataToParentInComponent:
-			'Avoid passing data to parents in an effect. Instead, fetch "{{data}}" in the parent and pass it down to {{name}} as a prop.',
+			"Avoid passing data to parents in an effect. Instead, fetch {{data}} in the parent and pass it down to {{name}} as a prop.",
 		avoidPassingDataToParentInHook:
-			'Avoid passing data to parents in an effect. Instead, return "{{data}}" from {{name}}.',
+			"Avoid passing data to parents in an effect. Instead, return {{data}} from {{name}}.",
 	},
 	skipEffectsWithCleanup: true,
 });

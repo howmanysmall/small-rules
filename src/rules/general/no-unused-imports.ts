@@ -1,6 +1,6 @@
 // oxlint-disable small-rules/prevent-abbreviations -- `jsdoc` is valid.
 
-import { isAnyImportSpecifier } from "@small-rules/oxlint-utilities";
+import { isAnyImportSpecifier, isProgram } from "@small-rules/oxlint-utilities";
 
 import { createRule } from "$oxc-utilities/create-rule";
 
@@ -60,6 +60,19 @@ function collectJsDocTypeIdentifiers(value: string, identifiers: Set<string>): v
 			}
 		}
 	}
+}
+
+/**
+ * Whether an unused import can be deleted. An import the module scope does
+ * not see, such as one in a `declare module` block, may still be in use, and
+ * the lookup may resolve an import that sits in such a block wrongly.
+ *
+ * @param parent - The import declaration that holds the specifier.
+ * @param isInModuleScope - Whether the module scope declares the import.
+ * @returns Whether deleting the import is safe.
+ */
+function isRemovalSafe(parent: ESTree.ImportDeclaration, isInModuleScope: boolean): boolean {
+	return isInModuleScope && isProgram(parent.parent);
 }
 
 function removeImportSpecifier(
@@ -130,10 +143,8 @@ const noUnusedImports = createRule("no-unused-imports", "general", {
 					if (variable !== undefined && variable.references.length > 0) continue;
 					if (checkJsDoc && jsdocIdentifiers.has(identifierName)) continue;
 
-					// The import lives in a scope this lookup does not see, such
-					// as a `declare module` block, so it may be in use: keep the
-					// report and do not delete it.
-					if (variable === undefined) {
+					// Keep the report, but do not delete the import.
+					if (!isRemovalSafe(parent, variable !== undefined)) {
 						context.report({ data: { identifierName }, messageId: "unusedImport", node: specifierNode });
 						continue;
 					}

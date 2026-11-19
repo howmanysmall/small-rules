@@ -108,11 +108,17 @@ export function getParentCallbackCalls(
 }
 
 /**
- * Formats reference names for a report message, as `"a" and "b"`.
+ * Formats reference names for a report message, as `"a" and "b"`. A name
+ * that several references share appears once.
  *
  * @param references - The references to name.
- * @returns The quoted names joined with `and`.
+ * @returns The distinct quoted names joined with `and`.
  */
 export function joinQuotedReferenceNames(references: ReadonlyArray<Reference>): string {
-	return references.map((reference) => `"${reference.identifier.name}"`).join(" and ");
+	const names = new Set<string>();
+	for (const reference of references) {
+		names.add(`"${reference.identifier.name}"`);
+	}
+
+	return [...names].join(" and ");
 }

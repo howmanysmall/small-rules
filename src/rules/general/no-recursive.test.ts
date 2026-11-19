@@ -49,6 +49,24 @@ describe("no-recursive", () => {
 				].join("\n"),
 				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }, { messageId: "noRecursive" }],
 			},
+			// A cycle through 5,001 functions is searched without a deep stack
+			{
+				code: Array.from(
+					{ length: 5001 },
+					(_, index) => `function f${index}() { f${(index + 1) % 5001}(); }`,
+				).join("\n"),
+				errors: Array.from({ length: 5001 }, () => ({ messageId: "noRecursive" })),
+			},
+			// Only the functions on the cycle are marked, not the tail
+			{
+				code: [
+					"function a() { b(); }",
+					"function b() { c(); a(); }",
+					"function c() { d(); }",
+					"function d() {}",
+				].join("\n"),
+				errors: [{ messageId: "noRecursive" }, { messageId: "noRecursive" }],
+			},
 			// Async function recursion
 			{
 				code: "async function fetchData(url) { if (url == null) return null; return fetchData(url); }",
@@ -231,6 +249,11 @@ describe("no-recursive", () => {
 			// Anonymous class expressions should not be treated as local
 			// this-recursion
 			'const Greeter = class { sayHi() { return this.sayHiOutside(); } sayHiOutside() { return "hi"; } };',
+			// A chain of 5,000 calls is searched without a deep stack
+			[
+				...Array.from({ length: 5000 }, (_, index) => `function f${index}() { f${index + 1}(); }`),
+				"function f5000() {}",
+			].join("\n"),
 		],
 	});
 });

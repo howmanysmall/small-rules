@@ -319,8 +319,42 @@ if (hasA && hasB) { doSomething(); }
 				output: null,
 				errors: [{ messageId: "preferSingleHas" }],
 			},
+			// Reports without a fix when the merged get would drop annotations
+			{
+				code: `
+const position: Vector3 | undefined = world.get(entity, Position);
+const velocity: Vector3 | undefined = world.get(entity, Velocity);
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
+			{
+				code: `
+const position = world.get(entity, Position);
+const velocity: Vector3 | undefined = world.get(entity, Velocity);
+`,
+				output: null,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
+			// An annotated get outside the group leaves the group's fix alone
+			{
+				code: `
+const owner: Entity = world.get(other, Owner);
+const position = world.get(entity, Position);
+const velocity = world.get(entity, Velocity);
+`,
+				output: `
+const owner: Entity = world.get(other, Owner);
+const [position, velocity] = world.get(entity, Position, Velocity);
+`,
+				errors: [{ messageId: "preferSingleGet" }],
+			},
 		],
 		valid: [
+			// A single annotated get has nothing to merge
+			{
+				code: "const position: Vector3 | undefined = world.get(entity, Position);",
+			},
 			// Single world.get call (nothing to optimize)
 			{
 				code: "const componentA = world.get(entity, ComponentA);",

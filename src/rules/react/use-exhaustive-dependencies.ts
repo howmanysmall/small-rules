@@ -870,6 +870,12 @@ function reportUnnecessaryDependency(
 
 	const dependenciesString = `[${newDependencies.join(", ")}]`;
 
+	// Rewriting the array would delete its comments.
+	if (context.sourceCode.getCommentsInside(dependenciesArray).length > 0) {
+		context.report({ data: { name: dependency.name }, messageId: "unnecessaryDependency", node: dependency.node });
+		return;
+	}
+
 	function fix(fixer: Fixer): Fix {
 		return fixer.replaceText(dependenciesArray, dependenciesString);
 	}
@@ -1034,8 +1040,11 @@ function reportMissingCaptures(
 	const newDependenciesString = `[${[...dependencyNames, ...missingPaths].toSorted(compareWithLocale).join(", ")}]`;
 	const reportNode = dependencies.at(-1)?.node ?? dependenciesArray;
 	const firstMissing = missingCaptures.at(0);
+	// Rewriting the array would delete its comments.
+	const isFixWithheld = context.sourceCode.getCommentsInside(dependenciesArray).length > 0;
 
-	function fix(fixer: Fixer): Fix {
+	function fix(fixer: Fixer): Fix | undefined {
+		if (isFixWithheld) return undefined;
 		return fixer.replaceText(dependenciesArray, newDependenciesString);
 	}
 
@@ -1045,13 +1054,15 @@ function reportMissingCaptures(
 			fix,
 			messageId: "missingDependency",
 			node: reportNode,
-			suggest: [
-				{
-					data: { name: firstMissing.usagePath },
-					fix,
-					messageId: "addDependencySuggestion",
-				},
-			],
+			suggest: isFixWithheld
+				? []
+				: [
+						{
+							data: { name: firstMissing.usagePath },
+							fix,
+							messageId: "addDependencySuggestion",
+						},
+					],
 		});
 		return;
 	}
@@ -1061,12 +1072,14 @@ function reportMissingCaptures(
 		fix,
 		messageId: "missingDependencies",
 		node: reportNode,
-		suggest: [
-			{
-				fix,
-				messageId: "addMissingDependenciesSuggestion",
-			},
-		],
+		suggest: isFixWithheld
+			? []
+			: [
+					{
+						fix,
+						messageId: "addMissingDependenciesSuggestion",
+					},
+				],
 	});
 }
 

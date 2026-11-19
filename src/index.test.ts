@@ -53,5 +53,15 @@ describe("small-rules plugin", () => {
 
 			expect(getRulesWithoutDocsUrl(smallRules.default.rules)).toStrictEqual([]);
 		});
+
+		// Catches a rule whose docs URL names a page other than its own.
+		it("links no-reset-all-state-on-prop-change to its own docs page", async ({ expect }) => {
+			expect.assertions(1);
+
+			const smallRules = await import("$small-rules");
+			const rule = smallRules.default.rules["no-reset-all-state-on-prop-change"];
+
+			expect(rule.meta?.docs?.url).toMatch(/\/react\/no-reset-all-state-on-prop-change\/$/u);
+		});
 	});
 });

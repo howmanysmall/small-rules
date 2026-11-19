@@ -10,6 +10,71 @@ describe("no-pass-data-to-parent", () => {
 				code: `
 import React, { useEffect } from "@rbxts/react";
 
+declare function fetchCount(): number;
+
+export function Counter({ onCount }: { onCount: (count: number) => void }): React.Element {
+	const count = fetchCount();
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+
+	return <textlabel Text={tostring(count)} />;
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid passing data to parents in an effect. Instead, fetch "fetchCount" in the parent and pass it down to "Counter" as a prop.',
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+declare function fetchCount(): number;
+
+export function useCounter({ onCount }: { onCount: (count: number) => void }): void {
+	const count = fetchCount();
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+}
+`,
+				errors: [
+					{
+						message:
+							'Avoid passing data to parents in an effect. Instead, return "fetchCount" from "useCounter".',
+					},
+				],
+			},
+			{
+				code: `
+import { useEffect } from "@rbxts/react";
+
+declare function fetchCount(): number;
+
+export function useTally({ onCount }: { onCount: (count: number) => void }): void {
+	const count = fetchCount();
+
+	useEffect(() => {
+		onCount(count);
+	}, [onCount, count]);
+}
+`,
+				errors: [
+					{
+						data: { name: '"useTally"', data: '"fetchCount"' },
+						messageId: "avoidPassingDataToParentInHook",
+					},
+				],
+			},
+			{
+				code: `
+import React, { useEffect } from "@rbxts/react";
+
 declare function useSomeAPI(): string;
 
 export function Child({ onFetched }: { onFetched: (data: string) => void }): React.Element {

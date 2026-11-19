@@ -21,6 +21,27 @@ describe("no-unused-imports", () => {
 				output: null,
 				errors: [{ data: { identifierName: "Shared" }, messageId: "unusedImport" }],
 			},
+			// With a `declare module` block first, a top-level import the
+			// lookup cannot find is reported without a fix.
+			{
+				code: [
+					'declare module "./augmented" {',
+					'\timport { Inner } from "./inner";',
+					"\texport { Inner };",
+					"}",
+					'import { Outer } from "./outer";',
+					"export const other: Outer = 1 as Outer;",
+				].join("\n"),
+				output: null,
+				errors: [{ data: { identifierName: "Outer" }, messageId: "unusedImport" }],
+			},
+			// An unused import inside a `declare module` block is reported,
+			// but the fix does not delete it.
+			{
+				code: ['declare module "./augmented" {', '\timport { Inner } from "./inner";', "}"].join("\n"),
+				output: null,
+				errors: [{ data: { identifierName: "Inner" }, messageId: "unusedImport" }],
+			},
 			{
 				code: "import UnusedDefault from './module';",
 				output: "",

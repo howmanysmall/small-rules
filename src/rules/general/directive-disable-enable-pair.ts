@@ -8,7 +8,12 @@ const directiveDisableEnablePair = createRule("directive-disable-enable-pair", "
 	create(context): Visitor {
 		const [options] = context.options;
 		const allowWholeFile = options?.allowWholeFile === true;
-		const openAreas = computeDisabledArea(context.sourceCode).areas.filter((area) => area.end === undefined);
+
+		// A trailing comma in the rule list leaves an empty id, which is no rule.
+		const openAreas = computeDisabledArea(context.sourceCode).areas.filter(
+			(area) => area.end === undefined && area.ruleId?.length !== 0,
+		);
+
 		if (openAreas.length === 0) {
 			return {};
 		}

@@ -26,7 +26,7 @@ import {
 import { Predicate } from "effect";
 
 import { isGlobalArrayConstructor } from "$oxc-utilities/api-provenance";
-import { hasEagerIdentifierReference } from "$oxc-utilities/ast-utilities";
+import { hasCommentInRange, hasEagerIdentifierReference } from "$oxc-utilities/ast-utilities";
 import { createRule } from "$oxc-utilities/create-rule";
 import { isExpressionSideEffectSafe } from "$oxc-utilities/expression-safety";
 import { getListElementText, getMemberPropertyName, stripExpressionWrappers } from "$oxc-utilities/oxc-utilities";
@@ -49,6 +49,7 @@ interface PushCollapseCandidate {
 	readonly annotationText: string | undefined;
 	readonly arrayIdentifierName: string;
 	readonly declarator: ESTree.VariableDeclarator;
+	readonly hasRemovedComment: boolean;
 	readonly hasUnsafeArgument: boolean;
 	readonly literalText: string;
 	readonly pushStatements: ReadonlyArray<ESTree.ExpressionStatement>;
@@ -58,6 +59,7 @@ interface PushCollapseCandidate {
 
 interface PushScanResult {
 	readonly argumentParts: ReadonlyArray<string>;
+	readonly firstPushStart: number;
 	readonly hasUnsafeArgument: boolean;
 	readonly lastPushEnd: number;
 	readonly nextIndex: number;
@@ -167,10 +169,7 @@ function isDefinitelyNonNumericExpression(expression: ESTree.Expression): boolea
 
 	if (isTemplateLiteral(unwrapped)) return unwrapped.expressions.length === 0;
 
-	if (isUnaryExpression(unwrapped)) {
-		/* v8 ignore next -- @preserve unary expressions are prefix in parser output for supported source forms. */
-		return unwrapped.operator === "void" || (unwrapped.operator === "typeof" && !unwrapped.prefix);
-	}
+	if (isUnaryExpression(unwrapped)) return unwrapped.operator === "void" || unwrapped.operator === "typeof";
 
 	return false;
 }
@@ -428,6 +427,26 @@ function isReferencedAfter(sourceCode: SourceCode, declarator: ESTree.VariableDe
 	return false;
 }
 
+/**
+ * Whether the collapse fix would delete a comment. The fix replaces the
+ * initializer and removes everything from the first push to the last.
+ *
+ * @param sourceCode - The source code that owns the comments.
+ * @param initializer - The `new Array()` expression the fix replaces.
+ * @param firstPushStart - Where the first push statement starts.
+ * @param lastPushEnd - Where the last push statement ends.
+ * @returns Whether a comment sits in the text the fix rewrites.
+ */
+function hasCommentInCollapse(
+	sourceCode: SourceCode,
+	initializer: ESTree.NewExpression,
+	firstPushStart: number,
+	lastPushEnd: number,
+): boolean {
+	if (sourceCode.getCommentsInside(initializer).length > 0) return true;
+	return hasCommentInRange(sourceCode, firstPushStart, lastPushEnd);
+}
+
 function getPushCollapseCandidate(
 	sourceCode: SourceCode,
 	statements: ReadonlyArray<ProgramStatement>,
@@ -459,6 +478,7 @@ function getPushCollapseCandidate(
 		annotationText: needsAnnotation ? `: Array${sourceCode.getText(typeArguments)}` : undefined,
 		arrayIdentifierName,
 		declarator,
+		hasRemovedComment: hasCommentInCollapse(sourceCode, declarator.init, scan.firstPushStart, scan.lastPushEnd),
 		hasUnsafeArgument: scan.hasUnsafeArgument,
 		literalText: `[${scan.argumentParts.join(", ")}]`,
 		pushStatements: scan.pushStatements,
@@ -475,6 +495,7 @@ function scanPushStatements(
 ): PushScanResult {
 	const pushStatements = new Array<ESTree.ExpressionStatement>();
 	const argumentParts = new Array<string>();
+	let firstPushStart = 0;
 	let hasUnsafeArgument = false;
 	let lastPushEnd = 0;
 	let readsArray = false;
@@ -487,6 +508,10 @@ function scanPushStatements(
 		const pushCall = getPushCallForIdentifier(nextStatement.expression, arrayIdentifierName);
 		if (pushCall === undefined || pushCall.arguments.length === 0) break;
 
+		if (pushStatements.length === 0) {
+			[firstPushStart] = nextStatement.range;
+		}
+
 		pushStatements.push(nextStatement);
 		hasUnsafeArgument = appendPushArguments(sourceCode, pushCall, argumentParts) || hasUnsafeArgument;
 		// A push that reads the array reads it before the literal exists. The
@@ -498,6 +523,7 @@ function scanPushStatements(
 
 	return {
 		argumentParts,
+		firstPushStart,
 		hasUnsafeArgument,
 		lastPushEnd,
 		nextIndex: scanIndex,
@@ -541,8 +567,9 @@ const noArrayConstructorElements = createRule("no-array-constructor-elements", "
 				if (candidate === undefined) continue;
 
 				// A push that reads the array would read it before the literal
-				// exists, so there is no safe rewrite to offer.
-				if (candidate.readsArray) {
+				// exists, so there is no safe rewrite to offer. A rewrite would
+				// also delete any comment in the code it removes.
+				if (candidate.readsArray || candidate.hasRemovedComment) {
 					context.report({
 						messageId: "collapseArrayPushInitialization",
 						node: candidate.statement,

@@ -205,7 +205,14 @@ const preferMembershipFilterInJecs = createRule("prefer-membership-filter-in-jec
 				const candidate = getCandidate(sourceCode, node);
 				if (candidate === undefined) return;
 
-				if (candidate.movedArguments.every(isSafeToMove)) {
+				const [argumentsStart] = candidate.firstQueryArgument.range;
+				const [, argumentsEnd] = candidate.lastQueryArgument.range;
+				// Rewriting the arguments would delete comments among them.
+				const hasArgumentComment = sourceCode
+					.getCommentsInside(candidate.chain.queryCall)
+					.some(({ range }) => range[0] > argumentsStart && range[1] < argumentsEnd);
+
+				if (!hasArgumentComment && candidate.movedArguments.every(isSafeToMove)) {
 					context.report({
 						fix: (fixer) => createFixes(candidate, sourceCode, fixer),
 						messageId: "preferMembershipFilter",

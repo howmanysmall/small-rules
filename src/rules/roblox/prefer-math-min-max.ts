@@ -187,6 +187,12 @@ const preferMathMinMax = createRule("prefer-math-min-max", "roblox", {
 				const leftText = getListElementText(sourceCode, stripParenthesis(left));
 				const rightText = getListElementText(sourceCode, stripParenthesis(right));
 
+				// Replacing the whole ternary would delete any comment inside it.
+				if (sourceCode.getCommentsInside(node).length > 0) {
+					context.report({ messageId: "preferMathMethod", node });
+					return;
+				}
+
 				context.report({
 					fix(fixer) {
 						return fixer.replaceText(node, `math.${method}(${leftText}, ${rightText})`);

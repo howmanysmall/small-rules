@@ -115,6 +115,20 @@ function isAccessor(member?: ClassMember): boolean {
 	return isMethodDefinitionRaw(member) && (member.kind === "get" || member.kind === "set");
 }
 
+/**
+ * Whether the throw is reported without a fix. Naming a getter or setter in
+ * the call would invoke it, and there is no other name for it. Rebuilding the
+ * statement would drop a comment inside it.
+ *
+ * @param sourceCode - The source code that owns the comments.
+ * @param node - The throw statement.
+ * @param member - The class member the throw sits in, if any.
+ * @returns Whether the fix is withheld.
+ */
+function isFixWithheld(sourceCode: SourceCode, node: ESTree.ThrowStatement, member?: ClassMember): boolean {
+	return isAccessor(member) || sourceCode.getCommentsInside(node).length > 0;
+}
+
 function isPropertyName(node: ESTree.Node): boolean {
 	const { parent } = node;
 	if (isMemberExpression(parent)) return parent.property === node && !parent.computed;
@@ -308,10 +322,8 @@ const requireThrowErrorCapture = createRule("require-throw-error-capture", "gene
 				const functionName = getEnclosingFunctionName(node);
 				if (functionName === undefined) return;
 
-				// Naming a getter or setter in the call would invoke it, and
-				// there is no other name for it.
 				const member = getEnclosingClassMember(node);
-				if (isAccessor(member)) {
+				if (isFixWithheld(sourceCode, node, member)) {
 					context.report({ messageId: "missingCaptureStackTrace", node });
 					return;
 				}

@@ -57,6 +57,12 @@ function markCycleParticipants(path: Array<string>, neighbor: string, inCycle: S
 	}
 }
 
+/** A function on the search path, with the callees still to visit. */
+interface SearchFrame {
+	readonly name: string;
+	readonly callees: Iterator<string>;
+}
+
 function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet<string> {
 	const color = new Map<string, Color>();
 	const inCycle = new Set<string>();
@@ -65,34 +71,45 @@ function findCycleParticipants(callGraph: Map<string, Set<string>>): ReadonlySet
 		color.set(name, Color.White);
 	}
 
-	function visitNeighbor(neighbor: string, path: Array<string>): void {
-		const neighborColor = color.get(neighbor);
-		if (neighborColor === Color.Gray) {
-			markCycleParticipants(path, neighbor, inCycle);
-			/* v8 ignore start -- idk man @preserve */
-		} else if (neighborColor === Color.White) {
-			searchDepthFirst(neighbor, path);
-		}
-		/* v8 ignore stop -- idk man @preserve */
-	}
-
-	function searchDepthFirst(node: string, path: Array<string>): void {
-		color.set(node, Color.Gray);
-		path.push(node);
+	/**
+	 * Marks a function as on the search path and opens its callees.
+	 *
+	 * @param name - The function the search enters.
+	 * @param path - The functions on the search path.
+	 * @returns The frame that visits the callees of the function.
+	 */
+	function enterFunction(name: string, path: Array<string>): SearchFrame {
+		color.set(name, Color.Gray);
+		path.push(name);
 
 		/* v8 ignore next -- registered call graph nodes always have an adjacency set. @preserve */
-		const graph = callGraph.get(node) ?? [];
-		for (const neighbor of graph) {
-			visitNeighbor(neighbor, path);
-		}
-
-		path.pop();
-		color.set(node, Color.Black);
+		const graph = callGraph.get(name) ?? [];
+		return { name, callees: graph[Symbol.iterator]() };
 	}
 
 	for (const name of callGraph.keys()) {
-		if (color.get(name) === Color.White) {
-			searchDepthFirst(name, []);
+		if (color.get(name) !== Color.White) continue;
+
+		const path = new Array<string>();
+		const frames = new Array<SearchFrame>();
+		let frame: SearchFrame | undefined = enterFunction(name, path);
+		while (frame !== undefined) {
+			const step = frame.callees.next();
+			if (step.done === true) {
+				path.pop();
+				color.set(frame.name, Color.Black);
+				frame = frames.pop();
+				continue;
+			}
+
+			const neighbor = step.value;
+			const neighborColor = color.get(neighbor);
+			if (neighborColor === Color.Gray) {
+				markCycleParticipants(path, neighbor, inCycle);
+			} else if (neighborColor === Color.White) {
+				frames.push(frame);
+				frame = enterFunction(neighbor, path);
+			}
 		}
 	}
 

@@ -44,12 +44,25 @@ function isExternalMemberPropertyIdentifier(node: IdentifierNode): boolean {
 
 const noShapeInSymbolNames = createRule("no-shape-in-symbol-names", "anti-slop", {
 	createOnce(context): Visitor {
+		// Shorthand properties and unrenamed specifiers hold two identifiers
+		// at one span, visited one after the other; report the span once.
+		let lastReportedStart = -1;
+		let lastReportedEnd = -1;
+
 		function reportForbiddenSymbolName(node: IdentifierNode): void {
 			if (isExternalMemberPropertyIdentifier(node) || !containsForbiddenSymbolName(node.name)) return;
+			if (node.start === lastReportedStart && node.end === lastReportedEnd) return;
+
+			lastReportedStart = node.start;
+			lastReportedEnd = node.end;
 			context.report({ data: { name: node.name }, messageId: "forbiddenSymbolName", node });
 		}
 
 		return {
+			before(): void {
+				lastReportedStart = -1;
+				lastReportedEnd = -1;
+			},
 			Identifier: reportForbiddenSymbolName,
 			JSXIdentifier: reportForbiddenSymbolName,
 			PrivateIdentifier: reportForbiddenSymbolName,
