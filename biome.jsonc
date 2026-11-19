@@ -49,8 +49,7 @@
 			"!**/.opencode/goals",
 			"!src/generated/dictionary-verbs.ts",
 			"!.mise"
-		],
-		"maxSize": 3145728
+		]
 	},
 
 	"formatter": {
