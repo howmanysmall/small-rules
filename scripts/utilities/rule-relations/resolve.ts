@@ -17,12 +17,12 @@ interface ResolveOptions {
 }
 
 export function resolvePairRelation({ judgments, left, right, thresholds }: ResolveOptions): RelationResolution {
-	if (judgments.assessment.probabilities["0"] >= thresholds.accept) {
+	if (judgments.assessment.probabilities["0"] >= thresholds.relatedness) {
 		return { type: "none" };
 	}
 
 	const strength = judgments.assessment.probabilities["2"];
-	if (strength < thresholds.accept) {
+	if (strength < thresholds.relatedness) {
 		return { concern: "relationship needs review", strength, type: "review" };
 	}
 
@@ -43,12 +43,12 @@ export function resolvePairRelation({ judgments, left, right, thresholds }: Reso
 		return { relation: directed.relation, strength, type: "relation" };
 	}
 
-	if (directedCandidates.some((candidate) => candidate.score >= thresholds.review)) {
-		return { concern: "uncertain relation kind or direction", strength, type: "review" };
-	}
-
 	if (judgments.duplicates >= thresholds.accept) {
 		return { relation: { from: left, kind: "overlaps", to: right }, strength, type: "relation" };
+	}
+
+	if (directedCandidates.some((candidate) => candidate.score >= thresholds.review)) {
+		return { concern: "uncertain relation kind or direction", strength, type: "review" };
 	}
 
 	if (judgments.duplicates >= thresholds.review) {

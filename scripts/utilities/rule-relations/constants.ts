@@ -7,14 +7,16 @@ export const generatedRelationDocumentPath = "documentation/src/data/generated/r
 export const judgmentBatchSize = 10;
 export const judgmentPromptVersion = 2;
 
-// Tuned for `decisionModel`: liquid/d1.2-ultra scores related pairs at
-// 0.65 to 0.83, where Jev scored them above 0.8. Retune when the model changes.
-export const judgmentThresholds = { accept: 0.65, review: 0.55 } satisfies JudgmentThresholds;
+// `relatedness` is tuned for `decisionModel`: 0.5 means the model rates
+// "publish" as more likely than not, and liquid/d1.2-ultra puts real
+// relationships at 0.5 to 0.93. Re-check it when `decisionModel` changes.
+export const judgmentThresholds = { accept: 0.8, relatedness: 0.5, review: 0.55 } satisfies JudgmentThresholds;
 
+export const maxReasonAttempts = 3;
 export const maxReasonLength = 160;
 export const maxRelationsPerRule = 8;
 export const reasonModel = "meta/muse-ember";
-export const reasonPromptVersion = 1;
+export const reasonPromptVersion = 2;
 export const relationGeneratorPath = "scripts/regenerate-relations.ts";
 export const requestConcurrency = 4;
 
@@ -28,3 +30,4 @@ export const requestRetryBackoff = {
 
 // The SDK default is ["5XX"], which leaves 429 unretried.
 export const requestRetryCodes: ReadonlyArray<string> = ["429", "5XX"];
+export const reviewReportPath = "reports/rule-relations.review.json";

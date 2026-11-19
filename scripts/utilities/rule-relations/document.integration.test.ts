@@ -169,6 +169,37 @@ describe("createReasonMessages", () => {
 		expect(messages[0]?.content).toContain("no-print");
 		expect(messages[0]?.content).toContain("no-warn");
 	});
+
+	it("asks for both rule names in backticks", ({ expect }) => {
+		expect.assertions(1);
+
+		const [message] = createReasonMessages({
+			left: cardFixtures["no-print"],
+			relation: relatedDraft,
+			right: cardFixtures["no-warn"],
+		});
+
+		expect(message?.content).toContain("Write both rule names in backticks");
+	});
+
+	it("quotes a rejected sentence and its problems on a retry", ({ expect }) => {
+		expect.assertions(4);
+
+		const base = { left: cardFixtures["no-print"], relation: relatedDraft, right: cardFixtures["no-warn"] };
+		const [first] = createReasonMessages(base);
+		const [retry] = createReasonMessages({
+			...base,
+			previous: {
+				problems: ["Reason exceeds 160 characters (190).", 'Reason mentions unrelated rule "no-error".'],
+				reason: "An overlong sentence.",
+			},
+		});
+
+		expect(retry?.content.startsWith(`${first?.content}\n`)).toBe(true);
+		expect(retry?.content).toContain('"An overlong sentence."');
+		expect(retry?.content).toContain("Reason exceeds 160 characters (190).");
+		expect(retry?.content).toContain('Reason mentions unrelated rule "no-error".');
+	});
 });
 
 describe("validateReason", () => {

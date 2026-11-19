@@ -314,4 +314,26 @@ describe("openRouter relation adapters", () => {
 			{ cost: 0.003, inputTokens: 40, outputTokens: 8, phase: "reasons", totalTokens: 48 },
 		]);
 	});
+
+	it("sends a rejected attempt back to the reason model", async ({ expect }) => {
+		expect.assertions(1);
+
+		let prompt = "";
+		const writer = createOpenRouterReasonWriter("test-reason-model", async (request) => {
+			prompt = request.chatRequest.messages.map((message) => message.content).join("\n");
+			return { choices: [{ message: { content: "Shorter." } }] };
+		});
+		await writer.writeReason({
+			left: noPrintCard,
+			previous: { problems: ["Reason is empty."], reason: "" },
+			relation: {
+				from: "no-print" satisfies RuleName,
+				kind: "related",
+				to: "no-warn" satisfies RuleName,
+			},
+			right: noWarnCard,
+		});
+
+		expect(prompt).toContain("Reason is empty.");
+	});
 });

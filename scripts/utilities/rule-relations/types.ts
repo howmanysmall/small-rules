@@ -79,6 +79,7 @@ export type PairJudgments = typeof isPairJudgments.infer;
 
 export interface JudgmentThresholds {
 	readonly accept: number;
+	readonly relatedness: number;
 	readonly review: number;
 }
 
@@ -132,8 +133,14 @@ export interface ScoredRelation {
 	readonly strength: number;
 }
 
+export interface ReasonAttempt {
+	readonly problems: ReadonlyArray<string>;
+	readonly reason: string;
+}
+
 interface WriterOptions {
 	readonly left: RuleCard;
+	readonly previous?: ReasonAttempt | undefined;
 	readonly relation: RelationDraft;
 	readonly right: RuleCard;
 }

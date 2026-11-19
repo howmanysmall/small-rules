@@ -8,6 +8,8 @@ import { createJudgmentCache } from "$script-utilities/rule-relations/cache";
 import {
 	judgmentPromptVersion,
 	judgmentThresholds,
+	maxReasonAttempts,
+	maxReasonLength,
 	requestConcurrency,
 } from "$script-utilities/rule-relations/constants";
 import { compareRelationBaseline } from "$script-utilities/rule-relations/evaluation";
@@ -22,11 +24,14 @@ import { getPairKey, judgmentDimensions } from "$script-utilities/rule-relations
 import { createJudgments } from "./fixtures";
 
 import type { RuleName } from "$documentation/data/rule-manifest";
+import type { ReasonCache } from "$script-utilities/rule-relations/cache";
+import type { RegenerationResult } from "$script-utilities/rule-relations/run";
 import type {
 	DecisionAnswer,
 	DecisionQuestion,
 	DecisionTransport,
 	PairJudgments,
+	ReasonAttempt,
 	ReasonWriter,
 	RelationProgress,
 	RuleCard,
@@ -377,6 +382,8 @@ describe("regenerateRelations", () => {
 	it("surfaces near-threshold reviews and rejects ungrounded reasons", async ({ expect }) => {
 		expect.assertions(4);
 
+		// Fixed so the 0.6 fixture stays below the relatedness gate.
+		const thresholds = { accept: 0.8, relatedness: 0.8, review: 0.55 };
 		const nearThresholdJudgments = new Map([
 			[
 				getPairKey("no-print", "no-warn"),
@@ -401,7 +408,7 @@ describe("regenerateRelations", () => {
 			reasonModel: "test-reason-model",
 			reasonPromptVersion: 1,
 			reasonWriter: createFakeReasonWriter((from, to) => `Both ${from} and ${to} matter.`),
-			thresholds: judgmentThresholds,
+			thresholds,
 			transport: createFakeTransport(nearThresholdJudgments, new Array<string>()),
 		});
 		const rejected = await regenerateRelationsAsync({
@@ -419,7 +426,7 @@ describe("regenerateRelations", () => {
 			reasonModel: "test-reason-model",
 			reasonPromptVersion: 1,
 			reasonWriter: createFakeReasonWriter(() => "See no-error for details."),
-			thresholds: judgmentThresholds,
+			thresholds,
 			transport: createFakeTransport(rejectedJudgments, new Array<string>()),
 		});
 
@@ -490,6 +497,124 @@ describe("regenerateRelations", () => {
 
 		await expect(run).rejects.toBe(failure);
 		expect(saved).toContain("Both no-error and no-print matter.");
+	});
+});
+
+interface ScriptedReasonWriter {
+	readonly received: ReadonlyArray<ReasonAttempt | undefined>;
+	readonly writer: ReasonWriter;
+}
+
+function createScriptedReasonWriter(reasons: ReadonlyArray<string>): ScriptedReasonWriter {
+	const received = new Array<ReasonAttempt | undefined>();
+	return {
+		received,
+		writer: {
+			writeReason: async ({ previous }): Promise<string> => {
+				const reason = reasons[Math.min(received.length, reasons.length - 1)] ?? "";
+				received.push(previous);
+				return reason;
+			},
+		},
+	};
+}
+
+async function regenerateOnePairAsync(
+	reasonWriter: ReasonWriter,
+	reasonCache: ReasonCache | undefined,
+): Promise<RegenerationResult> {
+	return regenerateRelationsAsync({
+		allNames: ["no-error", "no-print", "no-warn"],
+		batchSize: 10,
+		cards: cardFixtures,
+		concurrency: requestConcurrency,
+		decisionModel: "test-model",
+		existingEdges: [],
+		judgmentCache: undefined,
+		judgmentPromptVersion,
+		maxRelationsPerRule: 8,
+		pairs: [{ left: "no-print", right: "no-warn" }],
+		reasonCache,
+		reasonModel: "test-reason-model",
+		reasonPromptVersion: 1,
+		reasonWriter,
+		thresholds: judgmentThresholds,
+		transport: createFakeTransport(
+			new Map([[getPairKey("no-print", "no-warn"), createJudgments()]]),
+			new Array<string>(),
+		),
+	});
+}
+
+describe("reason retries", () => {
+	const tooLong = "a".repeat(maxReasonLength + 1);
+	const lengthProblem = `Reason exceeds ${maxReasonLength} characters (${maxReasonLength + 1}).`;
+	const valid = "Both no-print and no-warn matter.";
+
+	it("retries a rejected sentence and tells the writer what was wrong", async ({ expect }) => {
+		expect.assertions(3);
+
+		const scripted = createScriptedReasonWriter([tooLong, valid]);
+		const result = await regenerateOnePairAsync(scripted.writer, undefined);
+
+		expect(result.edges.map((edge) => edge.reason)).toStrictEqual([valid]);
+		expect(result.reviews).toHaveLength(0);
+		expect(scripted.received).toStrictEqual([undefined, { problems: [lengthProblem], reason: tooLong }]);
+	});
+
+	it("sends the relation to review after the last attempt", async ({ expect }) => {
+		expect.assertions(3);
+
+		const scripted = createScriptedReasonWriter(["See no-error for details."]);
+		const result = await regenerateOnePairAsync(scripted.writer, undefined);
+
+		expect(scripted.received).toHaveLength(maxReasonAttempts);
+		expect(result.edges).toHaveLength(0);
+		expect(result.reviews[0]?.concern).toContain('Reason mentions unrelated rule "no-error".');
+	});
+
+	it("asks once when the first sentence is valid", async ({ expect }) => {
+		expect.assertions(1);
+
+		const scripted = createScriptedReasonWriter([valid]);
+		await regenerateOnePairAsync(scripted.writer, undefined);
+
+		expect(scripted.received).toStrictEqual([undefined]);
+	});
+
+	it("caches only a sentence that passed validation", async ({ expect }) => {
+		expect.assertions(2);
+
+		const rejectedSaves = new Array<string>();
+		await regenerateOnePairAsync(createScriptedReasonWriter([tooLong]).writer, {
+			get: () => undefined,
+			set: (_key, value) => {
+				rejectedSaves.push(value);
+			},
+		});
+		const retriedSaves = new Array<string>();
+		await regenerateOnePairAsync(createScriptedReasonWriter([tooLong, valid]).writer, {
+			get: () => undefined,
+			set: (_key, value) => {
+				retriedSaves.push(value);
+			},
+		});
+
+		expect(rejectedSaves).toStrictEqual([]);
+		expect(retriedSaves).toStrictEqual([valid]);
+	});
+
+	it("does not serve a cached sentence that fails validation", async ({ expect }) => {
+		expect.assertions(2);
+
+		const scripted = createScriptedReasonWriter([valid]);
+		const result = await regenerateOnePairAsync(scripted.writer, {
+			get: () => tooLong,
+			set: () => undefined,
+		});
+
+		expect(result.edges.map((edge) => edge.reason)).toStrictEqual([valid]);
+		expect(scripted.received).toStrictEqual([undefined]);
 	});
 });
 

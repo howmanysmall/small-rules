@@ -21,6 +21,7 @@ import {
 	maxRelationsPerRule,
 	reasonPromptVersion,
 	requestConcurrency,
+	reviewReportPath,
 } from "$script-utilities/rule-relations/constants";
 import {
 	createOpenRouterClientOptions,
@@ -41,7 +42,6 @@ import type { RelationProgress } from "$script-utilities/rule-relations/types";
 
 const name = getScriptName(true);
 const log = consola.withTag(name);
-const reviewReportPath = "documentation/src/data/generated/rule-relations.review.json";
 const cacheRoot = nodePath.join(repositoryRoot, ".cache/rule-relations");
 
 const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation site\'s "related rules" data.')
@@ -52,7 +52,11 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 	.option("--concurrency <concurrency:integer>", "The most OpenRouter requests in flight at once.", {
 		default: requestConcurrency,
 	})
-	.action(async ({ concurrency, openrouterApiKey, reasonModel }): Promise<void> => {
+	.option("--review-output <reviewOutput:string>", "Path to write the relation review report.", {
+		default: reviewReportPath,
+	})
+	.option("--no-review", "Skip writing the relation review report.")
+	.action(async ({ concurrency, openrouterApiKey, reasonModel, review, reviewOutput }): Promise<void> => {
 		if (concurrency < 1) {
 			throw new RangeError(`--concurrency must be at least 1, got ${concurrency}.`);
 		}
@@ -132,7 +136,6 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 			}
 
 			const report = createRelationReviewReport({
-				cards,
 				denylist: relationDenylist,
 				pins: relationPins,
 				previous: existingEdges,
@@ -149,15 +152,24 @@ const command = createBaseCommand(name, "1.0.0", 'Regenerates the documentation 
 				}),
 				"utf8",
 			);
-			writeFileSync(
-				nodePath.join(repositoryRoot, reviewReportPath),
-				`${JSON.stringify({ ...report, judgmentPromptVersion, models: { decisions: decisionModel, reasons: reasonModel }, thresholds: judgmentThresholds }, undefined, "\t")}\n`,
-				"utf8",
-			);
 
-			log.success(`wrote ${result.edges.length} relations and ${result.reviews.length} review findings`);
+			log.success(`wrote ${result.edges.length} relations to ${generatedRelationDocumentPath}`);
+
+			if (review) {
+				const resolvedReviewReportPath = nodePath.resolve(repositoryRoot, reviewOutput);
+				mkdirSync(nodePath.dirname(resolvedReviewReportPath), { recursive: true });
+				writeFileSync(
+					resolvedReviewReportPath,
+					`${JSON.stringify({ ...report, judgmentPromptVersion, models: { decisions: decisionModel, reasons: reasonModel }, thresholds: judgmentThresholds }, undefined, "\t")}\n`,
+					"utf8",
+				);
+				log.info(
+					`wrote review report to ${reviewOutput} (${modelJudgments.needsReview.length} actionable, ${modelJudgments.omittedLowSignalReviewCount} low-signal omitted)`,
+				);
+			}
+
 			log.info(
-				`Jev verdicts: ${modelJudgments.acceptedCount} accepted, ${modelJudgments.rejectedCount} rejected, ${modelJudgments.needsReview.length} need review; ${modelJudgments.capped.length} accepted links omitted by the cap`,
+				`model verdicts: ${modelJudgments.acceptedCount} accepted, ${modelJudgments.rejectedCount} rejected, ${modelJudgments.needsReviewCount} need review; ${modelJudgments.capped.length} accepted links omitted by the cap`,
 			);
 			log.info(
 				`manual checks: ${qualityEvaluation.matchedPairCount}/${qualityEvaluation.checkedPairCount} agree (${qualityEvaluation.positiveLabelCount} pins, ${qualityEvaluation.negativeLabelCount} denials)`,
